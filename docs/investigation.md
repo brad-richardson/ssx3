@@ -5,11 +5,13 @@ user's Odin through emulation. Donor: Garibaldi, selected by the user.
 
 This records the initial extraction phase. The subsequent
 [rebuild experiment](rebuild-experiment.md) adds a verified compression control,
-one bounded terrain edit, and two test ISOs. Runtime testing is still pending.
+one bounded terrain edit, and two test ISOs. The control now reaches gameplay
+and loads the target terrain coefficients at Green Station; see that log for
+current runtime evidence. Findings and next steps below describe the earlier phase.
 
 ## Inputs and provenance
 
-The source images remain unchanged at `/Volumes/share-1/brad/games/`.
+The source images remain unchanged, now under `/Volumes/share-1/brad/games/ps2/`.
 
 | Input | Size (bytes) | Executable | Executable SHA-1 |
 | --- | ---: | --- | --- |
@@ -156,8 +158,8 @@ archive bounds, resource boundaries, and a known planar patch.
    transforms, joins, materials, collision, and reset behavior. Start inside an
    existing SSX 3 location; a new menu entry or mountain connection comes later.
 
-PCSX2 is not installed in `/Applications` on this machine. A working emulator
-installation/path and controller/playtest setup will be needed at gate 2; extraction
-and format work can continue without it. Odin testing follows desktop validation.
+At the end of the extraction phase PCSX2 was not installed. PCSX2 v2.8.2 and the
+local BIOS are now available, and the later rebuild log records desktop tests.
+Odin testing follows desktop validation.
 
 No native-engine work, full-level conversion, or gameplay changes have been made.

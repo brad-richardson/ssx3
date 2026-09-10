@@ -6,8 +6,9 @@ if terrain, collision, and streaming can be rebuilt reliably.
 
 This repository contains inspection tools and a **bounded rebuild experiment**.
 Two test ISOs have been built: an unchanged-content compression control and one
-small SSX 3 terrain bump. Neither has been tested in an emulator yet; Garibaldi
-has not yet been imported into the game.
+small SSX 3 terrain bump. Both cold-boot and reach gameplay in PCSX2, and their
+target terrain coefficients are verified in game memory. The edit's visible shape
+and collision remain unvalidated. Garibaldi has not yet been imported.
 
 ## Current results
 
@@ -20,11 +21,16 @@ has not yet been imported into the game.
 - Built a second version with a 100-game-unit bump in one A-hub terrain patch.
 - Both complete test ISOs pass readback hashes; all bytes outside the selected
   32 KiB block and every ISO directory entry are unchanged.
+- Original, control, and bump images cold-boot and reach gameplay in an isolated
+  PCSX2 profile on the share. Control and bump load the target patch at Green
+  Station; their in-memory coefficients differ by exactly the four planned floats.
 
 See [the investigation log](docs/investigation.md) for evidence, format findings,
 limitations, upstream provenance, and the next implementation steps.
 See [the rebuild experiment](docs/rebuild-experiment.md) for test image paths,
 the exact edit, validation results, and emulator test instructions.
+The [runtime comparison](docs/runtime-validation.json) records state hashes,
+memory offsets, and the four verified coefficient changes.
 
 ## Storage
 
@@ -32,8 +38,9 @@ Code, tests, and small reports live here. Large files live on the network share:
 
 ```text
 /Volumes/share-1/brad/games/
-  SSX 3 (USA).iso                  # original, read-only input
-  SSX Tricky (USA).iso             # original, read-only input
+  ps2/
+    SSX 3 (USA).iso                # original, read-only input
+    SSX Tricky (USA).iso           # original, read-only input
   ssx3-workbench/
     source/ssx3/BAM.BIG            # exact archive extracted from SSX 3
     source/tricky/GARI.BIG         # exact archive extracted from Tricky
@@ -51,6 +58,7 @@ Code, tests, and small reports live here. Large files live on the network share:
         SSX3-bump.iso
         experiment.json
         image.json
+    emulator/test-002/             # isolated PCSX2 profile and launchers
 ```
 
 `local/` and `third_party/` are ignored by Git. No game assets, executables, ISOs,
@@ -65,8 +73,8 @@ for these inspections.
 Inventory the discs and relevant archive directories without copying whole ISOs:
 
 ```sh
-python3 tools/inspect_disc.py '/Volumes/share-1/brad/games/SSX 3 (USA).iso' --archive DATA/WORLDS/BAM.BIG --output local/reports/ssx3-disc.json
-python3 tools/inspect_disc.py '/Volumes/share-1/brad/games/SSX Tricky (USA).iso' --archive DATA/MODELS/GARI.BIG --output local/reports/tricky-disc.json
+python3 tools/inspect_disc.py '/Volumes/share-1/brad/games/ps2/SSX 3 (USA).iso' --archive DATA/WORLDS/BAM.BIG --output local/reports/ssx3-disc.json
+python3 tools/inspect_disc.py '/Volumes/share-1/brad/games/ps2/SSX Tricky (USA).iso' --archive DATA/MODELS/GARI.BIG --output local/reports/tricky-disc.json
 ```
 
 Reproduce reports from the staged archives (read-only):
