@@ -157,6 +157,12 @@ start and finish, reset points, AI paths for opponents (`gari.aip`), course
 name in PHM/PSM and the transport map. Replace an existing SSX 3 race so menus
 and progression need no new entries.
 
+Status (2026-09-10): memory budget verified (scale-002: 1,439 imported
+patches load and ride, see docs/peaks-and-locations.md); the level selector
+is two fixed tables in the executable, so course names can be swapped without
+UI work. The "all of Tricky on one mountain" idea maps onto replacing the 17
+events, not a sixth peak. Non-terrain content still open.
+
 Gate: a race on Garibaldi with medals awarded, no soft locks, on desktop PCSX2.
 
 ### M6. Generic patcher

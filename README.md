@@ -54,6 +54,7 @@ after the spawn, just before the Race/Slope Style banner tent.
 | `builds/hdr-003/SSX3-words.iso` | the same patch renders dark and untextured (foreign texture ids) |
 | `builds/hdr-006/SSX3-words.iso` | the board sinks into deep snow on that patch (material word) |
 | `builds/gari-003/iso/SSX3-relocated.iso` | **Garibaldi terrain in SSX 3**: big banked walls overlaid on the hub line right after the lodge |
+| `builds/scale-002/iso/SSX3-relocated.iso` | 1,439 Garibaldi patches in the hub (memory-budget test); huge walls, easy to get stuck in |
 | `builds/control-005/iso/SSX3-relocated.iso` | should look exactly like the original: our block layout, our archive |
 | `builds/control-006/SSX3-relocated.iso` | should look exactly like the original: archive appended to a bigger image |
 

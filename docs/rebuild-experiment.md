@@ -547,3 +547,18 @@ visible or measurable effect in these tests. Evidence under `evidence/hdr-00N/`.
 
 The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.
+
+## scale-001 and scale-002: memory-budget test (roadmap M5)
+
+The gari-003 pipeline with wider corridors: 658 patches (centre Z −70,000 to
+−19,000, lateral 15,000) and 1,439 patches (Z −120,000 to −19,000, lateral
+30,000), both appended to hub A's group 2 (29 and 35 blocks; decoded 1.63 MB
+and 1.97 MB against 1.34 MB originally) and imaged with `--append`. Both
+cold-boot, reach Peak 3 gameplay, transport to Green Station, and ride the
+line at 59 fps; scale-001 reached both waypoints on hub terrain (its section
+mostly lies below the hub), scale-002's rider crossed onto imported geometry
+17 times and was eventually trapped in a bowl near x −73,500 without a reset.
+Evidence under `evidence/scale-001/` and `evidence/scale-002/`. A race
+location totals about 11 MB decoded over 9 groups, so a full Garibaldi
+(3,885 patches, about 1.7 MB) is not memory-limited. Findings on the level
+selector and per-peak tables are in docs/peaks-and-locations.md.
