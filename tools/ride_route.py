@@ -46,6 +46,7 @@ if not sign:
 cmd('quit'); kd.wait()
 # 3. autopilot (single PINE client: close ours first); it captures on approach and pauses at the end
 p.close()
-cmd_line = [sys.executable, str(ROOT / 'tools' / 'ride_autopilot.py'), log_path, '75', '--wps=' + sys.argv[3],
+cmd_line = [sys.executable, str(ROOT / 'tools' / 'ride_autopilot.py'), log_path, os.environ.get('RIDE_SECONDS', '75'), '--wps=' + sys.argv[3],
+            '--overrun', os.environ.get('OVERRUN', '1.5'),
             '--sign', str(sign), '--no-resume', '--radius', '500', '--capture-dir', out_dir] + (['--capture-at=' + os.environ['CAPTURE_AT']] if os.environ.get('CAPTURE_AT') else [])
 print(subprocess.run(cmd_line, capture_output=True, text=True).stdout, flush=True)

@@ -58,9 +58,10 @@ try:
             if wi >= len(wps): status = 'reached'; reached_t = time.time(); wi = len(wps) - 1
             tx, ty = wps[wi]
         if reached_t and time.time() - reached_t > a.overrun: break
-        if reached_t:  # coast: no steering after the last waypoint
-            log.write(json.dumps(entry) + '\n'); log.flush(); time.sleep(0.08); continue
         entry = dict(t=round(t, 2), x=round(x, 1), y=round(y, 1), z=round(z, 1), wp=wi, dist=round(dist, 1))
+        if reached_t:  # coast: no steering after the last waypoint
+            hold(None); entry['coast'] = True
+            log.write(json.dumps(entry) + '\n'); log.flush(); time.sleep(0.08); continue
         old = [h for h in hist if t - h[0] >= 0.2]
         if old:
             _, ox, oy, _ = old[-1]

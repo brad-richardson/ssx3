@@ -388,8 +388,25 @@ command forms. On the three worst blocks:
 | 512, no skip | 31,984–32,052 | 10 s |
 
 The default (128 candidates, skip) beats EA's compressor by about 1.2% on these
-blocks. `tools/recompress_stream.py` re-encodes the whole stream in place with
-escalating search levels; its output is control-002 (see below once tested).
+blocks. Skip mode below a 64-byte match length loses to the greedy encoder on
+word-repetitive data, so the default skip threshold is 64.
+
+### control-002: every block re-encoded in place
+
+`tools/recompress_stream.py` re-encodes all 3,328 blocks at their original
+boundaries with escalating search levels. Every block fits: 3,229 at the default
+level, 88 with 256 candidates, 10 with 512, 1 with 1,024 (that block lands on
+exactly 32,760 bytes). Total compressed payload 104,466,997 bytes against EA's
+105,497,086 (1.0% smaller; mean saving 310 bytes per block). Decoded groups are
+byte-identical to the baseline; the archive keeps its size and every non-stream
+byte. Archive SHA-256
+b0e1b193c037c80213774f281b9ec27f4e6586fccf04b9a8060276064e52ed9f.
+
+Runtime: the control-002 image cold-boots into Peak 3 gameplay (hub `E`),
+transports to Green Station (hub `A`), and rides through `patch_A_hub_1024` with
+the rider within 2.7 game units of the original surface
+(`evidence/control-002/`). Both hubs stream entirely from re-encoded blocks.
+A race location has not yet been ridden on this image.
 
 The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.
