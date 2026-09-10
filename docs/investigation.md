@@ -151,7 +151,7 @@ play yet; the roadmap's M3 tests them one at a time.
 | 12 | u32, 15 values such as 0x29, 0x800029, 0xE001A9 | Surface flags (low bits) and type (high bits) |
 | 16, 20 | f32 in 1/128 steps, 0.008–0.977 | Lightmap atlas U, V offset |
 | 24, 28 | f32 in {1/64, 3/64, 7/64, 15/64, …} | Lightmap atlas cell size |
-| 32–63 | four (u, v) float pairs, usually (0,1),(1,1),(0,0),(1,0) or tiled ranges like −4..5 | Corner texture coordinates; ranges encode tiling |
+| 32–63 | four (u, v) float pairs, usually (0,1),(1,1),(0,0),(1,0) or tiled ranges like −4..5 | Corner texture coordinates; ranges encode tiling. Scaling ×4 and ×24 on one hub patch showed no visible change (inconclusive, featureless snow texture) |
 | 76 + 16i | w component of every coefficient vector | Always 1.0 |
 | 320–331 | f32 ×4 | Bounding sphere centre and radius (radius 143–16,430) |
 | 336 | u32, unique per patch, (n << 8) | 1 pattern | Patch ordinal/handle |

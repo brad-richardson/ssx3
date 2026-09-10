@@ -91,6 +91,25 @@ def bump_patch(payload, height, axis=2):
                               bounds_validation_tolerance_game_units=tolerance)
 
 
+def uv_tile_patch(payload, factor):
+    """Scale the four corner texture coordinates (payload 32..63) about their minimum."""
+    if not math.isfinite(factor) or factor <= 0 or factor == 1:
+        raise ValueError('Expected a positive tiling factor other than 1')
+    if len(payload) != 432:
+        raise ValueError('Expected a 432-byte SSX 3 terrain patch')
+    uvs = [struct.unpack_from('<2f', payload, 32 + 8 * i) for i in range(4)]
+    u0, v0 = min(u for u, _ in uvs), min(v for _, v in uvs)
+    edited = bytearray(payload)
+    changes = []
+    for i, (u, v) in enumerate(uvs):
+        nu, nv = u0 + (u - u0) * factor, v0 + (v - v0) * factor
+        struct.pack_into('<2f', edited, 32 + 8 * i, nu, nv)
+        changes.append(dict(offset=32 + 8 * i, before=[u, v], after=[nu, nv]))
+    if edited[:32] != payload[:32] or edited[64:] != payload[64:]:
+        raise ValueError('UV edit touched bytes outside 32..63')
+    return bytes(edited), dict(kind='uv_tile', factor=factor, float_changes=changes)
+
+
 def patch_name(archive, members, track, rid):
     phm = file_region(archive, members, 'data/worlds/bam.phm')
     psm = file_region(archive, members, 'data/worlds/bam.psm')
@@ -106,7 +125,7 @@ def patch_name(archive, members, track, rid):
     raise ValueError('Patch name not found')
 
 
-def rebuild(original, world_report, group_index, track, rid, height=None):
+def rebuild(original, world_report, group_index, track, rid, height=None, uv_tile=None):
     if sha(original) != world_report['archive_sha256']:
         raise ValueError('Source archive differs from inspected baseline')
     archive = Region(io.BytesIO(original), 0, len(original))
@@ -132,7 +151,14 @@ def rebuild(original, world_report, group_index, track, rid, height=None):
     if len(selected) != 1:
         raise ValueError('Expected exactly one selected terrain resource')
     index, entry, old_payload = selected[0]
-    new_payload, geometry = bump_patch(old_payload, height) if height is not None else (old_payload, None)
+    if height is not None and uv_tile is not None:
+        raise ValueError('Choose one edit per build')
+    if height is not None:
+        new_payload, geometry = bump_patch(old_payload, height)
+    elif uv_tile is not None:
+        new_payload, geometry = uv_tile_patch(old_payload, uv_tile)
+    else:
+        new_payload, geometry = old_payload, None
     records[index] = (entry, new_payload)
     changed_raw = serialize_resources(records)
     start, end = entry['offset']+8, entry['offset']+8+entry['size']
@@ -171,7 +197,7 @@ def rebuild(original, world_report, group_index, track, rid, height=None):
         cursor = offset+block['size']
     if rebuilt[cursor:] != original[cursor:]:
         raise ValueError('Archive suffix changed')
-    details = dict(mode='bump' if height is not None else 'control', group=group_index,
+    details = dict(mode='bump' if height is not None else 'uv' if uv_tile is not None else 'control', group=group_index,
                    locations=group['locations'], track=track, rid=rid,
                    patch_name=patch_name(archive,members,track,rid), geometry=geometry,
                    source_archive_sha256=sha(original), rebuilt_archive_sha256=sha(rebuilt),
@@ -191,11 +217,12 @@ def main():
     ap.add_argument('--track', type=int, default=1)
     ap.add_argument('--rid', type=int, default=76)
     ap.add_argument('--height', type=float, help='Omit for control; otherwise centre displacement in +Z game units')
+    ap.add_argument('--uv-tile', type=float, help='Scale the corner texture coordinates by this factor instead of bumping')
     args = ap.parse_args()
     if args.output.exists():
         ap.error('Output directory already exists; choose a new build directory')
     data, details, before, after = rebuild(args.archive.read_bytes(), json.loads(args.world_report.read_text()),
-                                          args.group,args.track,args.rid,args.height)
+                                          args.group,args.track,args.rid,args.height,args.uv_tile)
     # Only create outputs after in-memory checks have passed.
     args.output.mkdir(parents=True, exist_ok=False)
     archive_path = args.output / 'BAM.BIG'

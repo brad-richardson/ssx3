@@ -408,5 +408,19 @@ the rider within 2.7 game units of the original surface
 (`evidence/control-002/`). Both hubs stream entirely from re-encoded blocks.
 A race location has not yet been ridden on this image.
 
+## First patch-field experiment (roadmap M3): corner UVs
+
+`build_world_experiment.py --uv-tile N` scales the four (u, v) float pairs at
+payload offsets 32–63 about their minimum. On `patch_A_hub_1024` (original
+corners (0,0), (0,1), (1,0), (1,1)) builds uv-001 (×4, ISO SHA-256
+46006ed286a3eaace2690515f1bae0e0e08726903721b09fe7778cdfd6308516) and uv-002
+(×24, ISO SHA-256 4fc63ce73f30f1408394cef421aaeee43656392ddd5c47a4022b9b686deb9938)
+both cold-boot and ride normally, and the rider stays on the original surface.
+Window captures at the same spots show **no visible texture change** at either
+factor (`evidence/uv-001/`, `evidence/uv-002/`). This does not settle whether
+the fields are texture coordinates: the hub snow texture has no feature large
+enough to reveal tiling once minified. The next M3 test is the selector word at
+offset 8, swapped to a value used by visually distinct patches.
+
 The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.
