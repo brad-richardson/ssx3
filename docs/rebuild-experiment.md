@@ -347,6 +347,49 @@ python3 tools/patch_crossing.py OUT_DIR/ride.jsonl '/Volumes/share-1/brad/games/
 for the spawn, hands over to the autopilot, captures the window within 3,000 units of
 `CAPTURE_AT`, and pauses afterwards.
 
-The next gates are described in [the investigation log](investigation.md): the
-Garibaldi import will need resource assignment, collision for non-patch objects,
-joins, and potentially streaming/index rebuilding beyond these fixed-size edits.
+## Growable rebuild groundwork (roadmap M2)
+
+### control-003: world archive relocated into disc padding
+
+`DATA/WORLDS/BAM.BIG` is followed immediately by `MUSIC.BIG`, so it cannot grow in
+place. The disc carries two 256 MiB padding files. `tools/relocate_archive.py`
+streams the original image into a new one, writes the archive bytes at `PAD0.000`'s
+extent (offset 274,524,160, LBA 134,045) and rewrites only the archive's directory
+record (at image offset 569,440) with the new extent and length in both byte
+orders. The old archive bytes and `PAD0.000`'s own record are untouched, so the
+padding entry now overlaps the archive.
+
+| Property | control-003 |
+| --- | ---: |
+| Archive | original `BAM.BIG`, unchanged, 113,078,400 bytes |
+| ISO SHA-256 | 4d08ca7a7d0641666155f1fe9646bfac5eee371ef9680c9a79387f6f458a5aea |
+| Changed ranges | directory record (33 bytes) and 113,078,400 bytes inside `PAD0.000` |
+
+Result: cold boot, Conquer the Mountain, transport to Green Station, and a ride
+through `patch_A_hub_1024` with the rider on the original surface within 2.5
+game units (`evidence/control-003/`). The game therefore reads the world archive
+through the ISO9660 directory, and a rebuilt archive of up to 256 MiB can be
+placed without moving any other file or changing the image size.
+
+### Encoder capacity
+
+Re-encoding all 3,328 blocks in place with the greedy encoder leaves 697 blocks
+over capacity (up to 753 bytes over; total output 0.18% larger than EA's). EA's
+packer fills blocks to within 14 bytes of capacity at the median, so any
+in-place rebuild needs an encoder at least as good as EA's on every block.
+`tools/refpack_optimal.py` parses optimally by dynamic programming over the 10FB
+command forms. On the three worst blocks:
+
+| Match candidates per position | Output bytes (EA: 32,750–32,753; capacity 32,760) | Time per block |
+| ---: | ---: | ---: |
+| 32, skip inside long matches | 32,779–32,894 | 0.7 s |
+| 128, skip | 32,359–32,445 | 1.7 s |
+| 128, no skip | 32,266–32,326 | 4 s |
+| 512, no skip | 31,984–32,052 | 10 s |
+
+The default (128 candidates, skip) beats EA's compressor by about 1.2% on these
+blocks. `tools/recompress_stream.py` re-encodes the whole stream in place with
+escalating search levels; its output is control-002 (see below once tested).
+
+The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
+with regenerated SDB offsets, then a grown group, before any Garibaldi import.
