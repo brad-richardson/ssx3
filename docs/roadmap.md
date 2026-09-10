@@ -96,9 +96,11 @@ Steps and gates:
    written into `PAD0.000`'s space with a rewritten directory entry cold-boots,
    streams Green Station, and rides normally. The game reads the archive through
    the file system, not a hard-coded LBA.
-3. **Re-laid-out stream control.** Rebuild SSB with our own block boundaries and
-   regenerated SDB offsets, same content. Gate: play in every location class
-   (hub, race, connector). The memory-size field is decoded: bytes of kinds
+3. **Re-laid-out stream control.** Done as control-005: our own block
+   boundaries (3,343 blocks), regenerated SDB offsets, relocated archive;
+   plays hub E, hub A, and connector A_ASS1. A race location is still to be
+   ridden. (control-004 hung because the BIGF writer altered member names;
+   fixed.) The memory-size field is decoded: bytes of kinds
    0–12 including headers (see the investigation log), so a same-content
    re-layout only rewrites each group's stream offset.
 4. **Grown group.** Duplicate every patch of one connector group with a small
@@ -115,9 +117,12 @@ natural line with `patch_crossing.py` and captures. Also: move a patch outside
 its stored bounds to learn what the bounds and spatial boxes gate (culling,
 collision, both), and delete a patch to learn how holes behave.
 
-First probes (corner UVs ×4/×24, material word 0x90000→0x9000A on a hub snow
-patch) showed no visible change; use whole-header transplants from visually
-distinct patches and bisect, rather than single-word guesses.
+Bisection so far: id words 336/340/416 bind textures/lightmaps (foreign values
+render dark); material word 8 selects the surface response (0x90003 sinks the
+rider like deep snow); location word, flags, lightmap rectangle, and corner UVs
+showed nothing on a hub snow patch. Still needed: a texture swap that renders
+(use id words from a patch in the *same* location with a different look), and
+the meaning of the flags word on jumps, rails, and walls.
 
 Gate: a table of every patch field with an observed effect or a "no visible
 effect within tested range" entry, and a texture swap that renders.

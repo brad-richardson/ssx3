@@ -14,8 +14,20 @@ from relayout_stream import BLOCK, CAPACITY, pack_group, write_bigf  # noqa: E40
 class RelayoutTests(unittest.TestCase):
     def test_bigf_round_trip(self):
         members = [('data/worlds/bam.sdb', b'S' * 100), ('data/worlds/bam.ssb', b'B' * 5000), ('data/worlds/serial.txt', b'x' * 128)]
-        archive, offsets = write_bigf(members)
+        # template: a hand-built BIGF with the same member names, a version trailer, 2048-aligned members
+        table = b''.join(struct.pack('>II', 0, 0) + p.encode() + b'\0' for p, _ in members) + b'L231\0'
+        header = b'BIGF' + struct.pack('<I', 0) + struct.pack('>II', len(members), 16 + len(table)) + table
+        template = bytearray(header + bytes(2048 - len(header)))
+        pos, off = 16, 2048
+        for p, d in members:
+            struct.pack_into('>II', template, pos, off, len(d)); pos += 8 + len(p) + 1
+            template += d + bytes((-len(d)) % 2048); off += (len(d) + 2047) // 2048 * 2048
+        template = bytes(template)
+        archive, offsets = write_bigf(members, template)
         self.assertEqual(struct.unpack_from('<I', archive, 4)[0], len(archive))
+        self.assertEqual(archive[:16 + len(table)][16 + len(table) - 5:], b'L231\0')
+        # unchanged members reproduce the template except for the unpadded tail and the size word
+        self.assertEqual(archive[8:2048], template[8:2048])
         kind, parsed = big_members(Region(io.BytesIO(archive), 0, len(archive)))
         self.assertEqual(kind, 'BIGF')
         self.assertEqual([m['path'] for m in parsed], [p for p, _ in members])

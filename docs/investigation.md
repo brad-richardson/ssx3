@@ -84,13 +84,15 @@ The 68-byte stream-group records decode as follows (verified on all 159 groups,
 | 2 | u16 | Group index |
 | 4 | u32 | SSB byte offset of the group's first block |
 | 8 | u32 | Bytes of resources with kind 0–12, payload plus 8-byte header (exact for every group; kinds 13–22 excluded) |
-| 12 | u16 × 13 | Resource count per kind 0–12 |
-| 4–11 (u16 view 2–5) | u16 | Unknown: 0 or 32768; a rising index; a value that looks hashed; a small count. Preserve. |
-| 28 | u32 | Unknown, multiples of 65,536 (likely a memory budget). Preserve. |
+| 12–39 | u16 × 14 | Resource count per kind 0–13 (the earlier "unknown" halves were these counts and the offset word) |
+| 40–67 | | Zero |
 
-A same-content re-layout of the stream therefore only changes offset 4. Adding
-resources changes offsets 0, 8, and the per-kind counts; the unknown words are
-kept as-is until an experiment shows they matter.
+A same-content re-layout of the stream therefore only changes offset 4
+(demonstrated by control-005). Adding resources changes offsets 0, 8, and the
+per-kind counts. The 88-byte location records hold the same per-kind counts for
+kinds 0–23 after their four index words; neither table stores anything else
+about stream layout. Archive member names must be preserved exactly (forward
+slashes, `L231` trailer): a rewritten directory with backslashes hung loading.
 
 Do not use the upstream `FindLocationChunk` implementation uncritically for this
 disc. For example, `ARA1` occupies groups 25–33; the stored value 33 is its last
@@ -145,20 +147,20 @@ play yet; the roadmap's M3 tests them one at a time.
 
 | Offset | Observation | Hypothesis |
 | ---: | --- | --- |
-| 0 | u32, 43 distinct values; each value's count equals one location's patch count | Per-location identifier (or a pointer patched at load); must be set per destination on import |
+| 0 | u32, 43 distinct values; each value's count equals one location's patch count | Per-location identifier; swapping it alone had no visible effect (hdr-002) |
 | 4 | u32, constant 0x4045B7 | Record type/version tag |
-| 8 | u32, 56 values of the form 0x9xxxx / 0xBxxxx with small low bits | Material/texture selector plus flags |
-| 12 | u32, 15 values such as 0x29, 0x800029, 0xE001A9 | Surface flags (low bits) and type (high bits) |
-| 16, 20 | f32 in 1/128 steps, 0.008–0.977 | Lightmap atlas U, V offset |
+| 8 | u32, 56 values of the form 0x9xxxx / 0xBxxxx with small low bits | Surface type: 0x90003 makes the rider sink 19–35 units (deep snow); 0x9000A no change (hdr-006, mat-001) |
+| 12 | u32, 15 values such as 0x29, 0x800029, 0xE001A9 | Flags; 0x980029→0x800029 showed no effect (hdr-005) |
+| 16, 20 | f32 in 1/128 steps, 0.008–0.977 | Lightmap atlas U, V offset; another patch's rectangle showed no visible change (hdr-004) |
 | 24, 28 | f32 in {1/64, 3/64, 7/64, 15/64, …} | Lightmap atlas cell size |
 | 32–63 | four (u, v) float pairs, usually (0,1),(1,1),(0,0),(1,0) or tiled ranges like −4..5 | Corner texture coordinates; ranges encode tiling. Scaling ×4 and ×24 on one hub patch showed no visible change (inconclusive, featureless snow texture) |
 | 76 + 16i | w component of every coefficient vector | Always 1.0 |
 | 320–331 | f32 ×4 | Bounding sphere centre and radius (radius 143–16,430) |
-| 336 | u32, unique per patch, (n << 8) | 1 pattern | Patch ordinal/handle |
-| 340 | u32, 110 distinct values such as 0x842A00 | Texture or lightmap page reference |
+| 336 | u32, unique per patch, (n << 8) | 1 pattern | Patch ordinal/handle; with 340 and 416 binds texture/lightmap resources: foreign values render the area dark and untextured (hdr-003) |
+| 340 | u32, 110 distinct values such as 0x842A00 | Texture or lightmap page reference (see 336) |
 | 344–367 | f32 ×6 | Axis-aligned bounds min/max |
 | 368–415 | f32 ×12 | Four corner positions |
-| 416 | u32, 4,547 distinct, low 16 bits small (0x000C, 0x00E3) | Packed index pair, possibly lightmap page + slot |
+| 416 | u32, 4,547 distinct, low 16 bits small (0x000C, 0x00E3) | Packed index pair, possibly lightmap page + slot (see 336) |
 | 420 | u32, 0xFFFFFFFF for 87%, else 0xFFFFnnnn | Neighbour/link index, −1 when absent |
 | 424 | u32, constant 0xFFFFFFFF | Unused link |
 | 428 | u32, constant 0x11483C | Tag or pointer placeholder |

@@ -40,7 +40,7 @@ def build_images(iso_path, experiment_dirs):
         world_hash = digest(world,'sha256')
         for directory in experiment_dirs:
             info = json.loads((directory/'experiment.json').read_text())
-            if info['mode'] not in ('control','bump','recompress','uv','words') or info['source_archive_sha256'] != world_hash:
+            if info['mode'] not in ('control','bump','recompress','uv','words','header') or info['source_archive_sha256'] != world_hash:
                 raise ValueError('Experiment does not match source ISO world archive')
             archive = directory/'BAM.BIG'
             if archive.stat().st_size != world.size or stream_sha(archive) != info['rebuilt_archive_sha256']:

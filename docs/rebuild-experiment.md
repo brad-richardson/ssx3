@@ -428,5 +428,54 @@ whole non-geometry header and tail (offsets 0–63 and 320–343, 416–431) fro
 visually distinct patch (rock, ice, or a jump face) onto this one; if the
 appearance changes, bisect the transplanted fields.
 
+### control-004 and control-005: the stream re-laid out at our own block boundaries
+
+`tools/relayout_stream.py` decodes every group, re-chunks it into 32 KiB blocks at
+boundaries chosen by a greedy probe (largest prefix whose greedy encoding fits
+32,664 bytes), encodes each block optimally, writes each group's new stream offset
+into its SDB record, and rebuilds the BIGF archive. Same content: 3,343 blocks
+instead of 3,328; stream 109,543,424 bytes; archive 113,569,920 bytes, so the
+image is built with `relocate_archive.py` into `PAD0.000`.
+
+The first image, control-004, **hung at 43% on the first world load** (Peak 3).
+Cause: the BIGF writer, not the stream. It wrote member names with backslashes,
+dropped the `L231` version trailer after the directory, and padded the last
+member; the engine evidently matches archive member names exactly. The writer
+now patches the original header in place and reproduces the source archive byte
+for byte when given unchanged members (checked). control-005 is the same stream
+rewrapped that way (archive SHA-256
+6c20d934782b0738971432da439483ae56a74e1bccbba943327c7bed3bda6ef9, ISO SHA-256
+2c74e35681e56549a20004d7a718fd53b1abcebafc6803b9e6302e747729614f).
+
+control-005 cold-boots into Peak 3 (hub `E`), transports to Green Station (hub
+`A`), rides `patch_A_hub_1024` on the original surface (within 2.3 game units),
+and coasts into the connector `A_ASS1` (`evidence/control-005/`). Three
+locations of two classes stream from blocks laid out entirely by our tools with
+regenerated offsets. A race location has not yet been ridden on this image.
+
+## Patch header bisection (roadmap M3)
+
+hdr-001 transplanted the whole non-geometry header, id words, and tail (offsets
+0–63, 336–343, 416–431) from a Peak 3 patch (group 117, track 36, RID 0) onto
+`patch_A_hub_1024`. It rides, but the patch area renders as dark untextured
+polygons and the rider sits 19–31 units *below* the original surface. Seven
+single-range builds attribute those effects:
+
+| Build | Words changed | Collision (rider minus original surface) | Rendering |
+| --- | --- | ---: | --- |
+| hdr-002 | 0 (per-location word) | within ±4 | unchanged |
+| hdr-003 | 336, 340, 416 (id words) | within ±3 | **dark untextured area**, like hdr-001 |
+| hdr-004 | 16–31 (lightmap rectangle) | within ±3 | no visible change |
+| hdr-005 | 12 (flags) 0x980029→0x800029 | within ±3 | no visible change |
+| hdr-006 | 8 (material) 0x90000→0x90003 | **−19 mean, −35 min: rider sinks** | board visibly buried; snow otherwise the same |
+| hdr-007 | 32–63 (corner UVs) | within ±2 | no visible change |
+| hdr-008 | 0 + 336 + 340 + 416 | within ±2 | dark untextured area |
+
+So: the id words at 336/340/416 bind the patch to its texture/lightmap
+resources and must stay consistent with the destination location; the material
+word at 8 selects the surface response (0x90003 behaves as deep snow); the
+per-location word, flags word, lightmap rectangle, and corner UVs produced no
+visible or measurable effect in these tests. Evidence under `evidence/hdr-00N/`.
+
 The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.

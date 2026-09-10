@@ -125,6 +125,36 @@ def set_words_patch(payload, assignments):
     return bytes(edited), dict(kind='set_words', changes=changes)
 
 
+HEADER_RANGES = ((0, 64), (336, 344), (416, 432))
+
+
+def transplant_header_patch(payload, donor):
+    """Copy the non-geometry header, id words, and tail from a donor patch payload."""
+    if len(payload) != 432 or len(donor) != 432:
+        raise ValueError('Expected 432-byte SSX 3 terrain patches')
+    edited = bytearray(payload)
+    for start, end in HEADER_RANGES:
+        edited[start:end] = donor[start:end]
+    if edited[64:336] != payload[64:336] or edited[344:416] != payload[344:416]:
+        raise ValueError('Transplant touched geometry bytes')
+    changes = [dict(offset=o, before=struct.unpack_from('<I', payload, o)[0], after=struct.unpack_from('<I', donor, o)[0])
+               for start, end in HEADER_RANGES for o in range(start, end, 4)
+               if payload[o:o + 4] != donor[o:o + 4]]
+    return bytes(edited), dict(kind='transplant_header', ranges=HEADER_RANGES, changes=changes)
+
+
+def load_patch(archive_bytes, world_report, group_index, track, rid):
+    archive = Region(io.BytesIO(archive_bytes), 0, len(archive_bytes))
+    _, members = big_members(archive)
+    ssb = file_region(archive, members, 'data/worlds/bam.ssb')
+    group = world_report['groups'][group_index]
+    raw = b''.join(refpack(ssb.read(b['offset'], b['size'])[8:])[0] for b in group['blocks'])
+    found = [p for e, p in resource_records(raw) if e['kind'] == 1 and e['track'] == track and e['rid'] == rid]
+    if len(found) != 1:
+        raise ValueError('Expected exactly one donor patch')
+    return found[0]
+
+
 def patch_name(archive, members, track, rid):
     phm = file_region(archive, members, 'data/worlds/bam.phm')
     psm = file_region(archive, members, 'data/worlds/bam.psm')
@@ -140,7 +170,7 @@ def patch_name(archive, members, track, rid):
     raise ValueError('Patch name not found')
 
 
-def rebuild(original, world_report, group_index, track, rid, height=None, uv_tile=None, set_words=None):
+def rebuild(original, world_report, group_index, track, rid, height=None, uv_tile=None, set_words=None, donor=None):
     if sha(original) != world_report['archive_sha256']:
         raise ValueError('Source archive differs from inspected baseline')
     archive = Region(io.BytesIO(original), 0, len(original))
@@ -166,9 +196,11 @@ def rebuild(original, world_report, group_index, track, rid, height=None, uv_til
     if len(selected) != 1:
         raise ValueError('Expected exactly one selected terrain resource')
     index, entry, old_payload = selected[0]
-    if sum(x is not None for x in (height, uv_tile, set_words)) > 1:
+    if sum(x is not None for x in (height, uv_tile, set_words, donor)) > 1:
         raise ValueError('Choose one edit per build')
-    if height is not None:
+    if donor is not None:
+        new_payload, geometry = transplant_header_patch(old_payload, donor)
+    elif height is not None:
         new_payload, geometry = bump_patch(old_payload, height)
     elif uv_tile is not None:
         new_payload, geometry = uv_tile_patch(old_payload, uv_tile)
@@ -214,7 +246,7 @@ def rebuild(original, world_report, group_index, track, rid, height=None, uv_til
         cursor = offset+block['size']
     if rebuilt[cursor:] != original[cursor:]:
         raise ValueError('Archive suffix changed')
-    details = dict(mode='bump' if height is not None else 'uv' if uv_tile is not None else 'words' if set_words is not None else 'control', group=group_index,
+    details = dict(mode='bump' if height is not None else 'uv' if uv_tile is not None else 'words' if set_words is not None else 'header' if donor is not None else 'control', group=group_index,
                    locations=group['locations'], track=track, rid=rid,
                    patch_name=patch_name(archive,members,track,rid), geometry=geometry,
                    source_archive_sha256=sha(original), rebuilt_archive_sha256=sha(rebuilt),
@@ -236,12 +268,19 @@ def main():
     ap.add_argument('--height', type=float, help='Omit for control; otherwise centre displacement in +Z game units')
     ap.add_argument('--uv-tile', type=float, help='Scale the corner texture coordinates by this factor instead of bumping')
     ap.add_argument('--set', action='append', metavar='OFFSET=HEX', help='Set a u32 payload word (repeatable), e.g. --set 8=0x9000a')
+    ap.add_argument('--copy-header-from', metavar='GROUP:TRACK:RID', help='Transplant header/id/tail words from this donor patch')
     args = ap.parse_args()
     if args.output.exists():
         ap.error('Output directory already exists; choose a new build directory')
     set_words = [(int(o, 0), int(v, 0)) for o, v in (item.split('=') for item in args.set)] if args.set else None
-    data, details, before, after = rebuild(args.archive.read_bytes(), json.loads(args.world_report.read_text()),
-                                          args.group,args.track,args.rid,args.height,args.uv_tile,set_words)
+    archive_bytes, report = args.archive.read_bytes(), json.loads(args.world_report.read_text())
+    donor = None
+    if args.copy_header_from:
+        g, t, rid = (int(x) for x in args.copy_header_from.split(':'))
+        donor = load_patch(archive_bytes, report, g, t, rid)
+    data, details, before, after = rebuild(archive_bytes, report, args.group,args.track,args.rid,args.height,args.uv_tile,set_words,donor)
+    if donor is not None:
+        details['donor'] = args.copy_header_from
     # Only create outputs after in-memory checks have passed.
     args.output.mkdir(parents=True, exist_ok=False)
     archive_path = args.output / 'BAM.BIG'

@@ -69,22 +69,39 @@ def pack_group(job):
     return index, b''.join(blocks), len(blocks)
 
 
-def write_bigf(members):
-    """members: list of (path, bytes) in order. Returns archive bytes with 2048-aligned members."""
-    table = b''.join(struct.pack('>II', 0, len(data)) + path.replace('/', '\\').encode('ascii') + b'\0' for path, data in members)
-    header_len = 16 + len(table)
-    offsets, cursor = [], (header_len + ALIGN - 1) // ALIGN * ALIGN
+def bigf_entries(header):
+    """Yield (position of the offset field, name) for each entry of a BIGF header."""
+    count, end = struct.unpack_from('>II', header, 8)
+    pos = 16
+    for _ in range(count):
+        zero = header.index(0, pos + 8)
+        yield pos, header[pos + 8:zero].decode('ascii')
+        pos = zero + 1
+
+
+def write_bigf(members, template):
+    """Rebuild a BIGF archive from (path, bytes) members, patching the template archive's
+    header/table verbatim (names, trailer, and directory padding are copied) so that an
+    unchanged member set reproduces the original byte for byte. Members are 2048-aligned;
+    the last member is not padded, matching the original."""
+    kind, entries = big_members(Region(io.BytesIO(template), 0, len(template)))
+    if kind != 'BIGF' or [e['path'] for e in entries] != [p for p, _ in members]:
+        raise ValueError('Template archive members do not match')
+    first = min(e['offset'] for e in entries)
+    header = bytearray(template[:first])
+    offsets, cursor = [], first
     for path, data in members:
         offsets.append(cursor)
         cursor += (len(data) + ALIGN - 1) // ALIGN * ALIGN
-    total = cursor
-    out = bytearray(b'BIGF' + struct.pack('<I', total) + struct.pack('>II', len(members), header_len))
+    total = offsets[-1] + len(members[-1][1])
+    struct.pack_into('<I', header, 4, total)
+    for (pos, name), (path, data), offset in zip(bigf_entries(header), members, offsets):
+        if name.replace('\\', '/') != path:
+            raise ValueError('Template entry order differs')
+        struct.pack_into('>II', header, pos, offset, len(data))
+    out = bytearray(header)
     for (path, data), offset in zip(members, offsets):
-        out += struct.pack('>II', offset, len(data)) + path.replace('/', '\\').encode('ascii') + b'\0'
-    out += bytes(offsets[0] - len(out))
-    for (path, data), offset in zip(members, offsets):
-        assert len(out) == offset
-        out += data + bytes((-len(data)) % ALIGN)
+        out += bytes(offset - len(out)) + data
     return bytes(out), offsets
 
 
@@ -140,12 +157,14 @@ def main():
             new_members.append((m['path'], bytes(sdb_bytes)))
         else:
             new_members.append((m['path'], region.read(m['offset'], m['size'])))
-    archive, offsets = write_bigf(new_members)
+    archive, offsets = write_bigf(new_members, original)
     # Independent verification with the world inspector: same groups, same SDB agreement.
     check = probe_ssx3(Region(io.BytesIO(archive), 0, len(archive)))
     if [g['sha256'] for g in check['groups']] != [g['sha256'] for g in report['groups']]:
         raise ValueError('Rebuilt archive decodes to different group content')
-    if check['resource_counts'] != report['resource_counts'] or check['patch_sizes'] != report['patch_sizes']:
+    def keyed(d):  # JSON reports carry string keys; the inspector returns ints
+        return {str(k): v for k, v in d.items()}
+    if keyed(check['resource_counts']) != keyed(report['resource_counts']) or keyed(check['patch_sizes']) != keyed(report['patch_sizes']):
         raise ValueError('Rebuilt archive resource inventory differs')
     details = dict(mode='relayout', source_archive_sha256=sha(original), rebuilt_archive_sha256=sha(archive),
                    source_archive_bytes=len(original), rebuilt_archive_bytes=len(archive),
