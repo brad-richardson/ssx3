@@ -4,8 +4,10 @@ The first donor course is **Garibaldi from SSX Tricky (PS2)**. The goal is a sho
 rideable section inside the original SSX 3 engine, followed by a complete course
 if terrain, collision, and streaming can be rebuilt reliably.
 
-This repository currently contains **inspection and extraction tools**. It does
-not yet build a playable mod or modify an ISO.
+This repository contains inspection tools and a **bounded rebuild experiment**.
+Two test ISOs have been built: an unchanged-content compression control and one
+small SSX 3 terrain bump. Neither has been tested in an emulator yet; Garibaldi
+has not yet been imported into the game.
 
 ## Current results
 
@@ -14,9 +16,15 @@ not yet build a playable mod or modify an ISO.
 - SSX 3's complete world archive decodes: 159 groups, 30,644 terrain patches.
 - Garibaldi's terrain decodes: 3,885 patches; an untextured OBJ preview is staged.
 - Staged archives are byte-identical to independent extraction from the ISOs.
+- Recompressed one terrain-containing SSB block without changing decoded data.
+- Built a second version with a 100-game-unit bump in one A-hub terrain patch.
+- Both complete test ISOs pass readback hashes; all bytes outside the selected
+  32 KiB block and every ISO directory entry are unchanged.
 
 See [the investigation log](docs/investigation.md) for evidence, format findings,
 limitations, upstream provenance, and the next implementation steps.
+See [the rebuild experiment](docs/rebuild-experiment.md) for test image paths,
+the exact edit, validation results, and emulator test instructions.
 
 ## Storage
 
@@ -32,6 +40,17 @@ Code, tests, and small reports live here. Large files live on the network share:
     extracted/garibaldi/
       gari.pbd                    # decompressed terrain/scene container
       garibaldi-terrain.obj        # terrain preview, original coordinates
+    builds/
+      control-001/                 # unchanged-content recompression control
+        BAM.BIG
+        SSX3-control.iso
+        experiment.json
+        image.json
+      bump-001/                    # one original SSX 3 patch has a centre bump
+        BAM.BIG
+        SSX3-bump.iso
+        experiment.json
+        image.json
 ```
 
 `local/` and `third_party/` are ignored by Git. No game assets, executables, ISOs,
@@ -65,6 +84,8 @@ Tricky preview, pass `probe_worlds.py tricky ... --assets NEW_DIRECTORY`.
 Preview output files must not already exist. Reports may be regenerated in place.
 `--hash-iso` optionally hashes a whole disc, which reads several GB over the share;
 full-disc hashing was not needed for this initial investigation.
+The image-building stage subsequently computed the SSX 3 full-disc SHA-256;
+it is recorded in each build's `image.json`.
 
 The OBJ has no textures, props, or validated collision. It samples each bicubic
 patch on a 5×5 vertex grid and retains original game axes and units. It is suitable

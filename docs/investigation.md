@@ -3,6 +3,10 @@
 Date: 2026-09-10. Target: original SSX 3 PS2 gameplay, ultimately playable on the
 user's Odin through emulation. Donor: Garibaldi, selected by the user.
 
+This records the initial extraction phase. The subsequent
+[rebuild experiment](rebuild-experiment.md) adds a verified compression control,
+one bounded terrain edit, and two test ISOs. Runtime testing is still pending.
+
 ## Inputs and provenance
 
 The source images remain unchanged at `/Volumes/share-1/brad/games/`.
