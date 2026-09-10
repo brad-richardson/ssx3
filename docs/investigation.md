@@ -5,9 +5,10 @@ user's Odin through emulation. Donor: Garibaldi, selected by the user.
 
 This records the initial extraction phase. The subsequent
 [rebuild experiment](rebuild-experiment.md) adds a verified compression control,
-one bounded terrain edit, and two test ISOs. The control now reaches gameplay
-and loads the target terrain coefficients at Green Station; see that log for
-current runtime evidence. Findings and next steps below describe the earlier phase.
+two bounded terrain edits, and three test ISOs. The second edit is ridden in game:
+the rider's ground contact and the rendered snow follow the edited patch
+coefficients. See that log for current runtime evidence. Findings and next steps
+below describe the earlier phase.
 
 ## Inputs and provenance
 
@@ -151,9 +152,11 @@ archive bounds, resource boundaries, and a known planar patch.
 1. **Preserving rebuild:** reconstruct an unchanged small SSX 3 stream group and
    archive, retaining unknown fields, IDs, ordering, compression block boundaries,
    and untouched bytes. Decode the result and compare before any game test.
-2. **Original-terrain edit:** select an accessible SSX 3 patch, change it modestly,
-   update dependent bounds/index data, and test appearance and rider collision.
-   Determine which fields govern surface behavior and whether type-12 data matters.
+2. **Original-terrain edit:** done for one hub patch (bump-002): appearance and
+   rider ground contact follow the coefficients with bounds/index data untouched.
+   Still open: which fields govern surface behavior (friction, sound), whether
+   type-12 data matters for walls, rails, and resets, and edits that must enlarge
+   stored bounds.
 3. **Garibaldi sample:** import a short contiguous terrain section with suitable
    transforms, joins, materials, collision, and reset behavior. Start inside an
    existing SSX 3 location; a new menu entry or mountain connection comes later.

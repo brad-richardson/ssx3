@@ -1,4 +1,5 @@
 {
+  "note": "Top-level control/bump entries compare control-001 with bump-001 (patch_A_hub_1237, memory only). bump_002 records the ridden and rendered edit of patch_A_hub_1024.",
   "date": "2026-09-10",
   "emulator": "PCSX2 v2.8.2",
   "renderer": "Metal",
@@ -73,5 +74,58 @@
   "control_coefficients_absent_in_bump": true,
   "visual_deformation_verified": false,
   "rider_collision_verified": false,
-  "garibaldi_imported": false
+  "garibaldi_imported": false,
+  "bump_002": {
+    "archive": "/Volumes/share-1/brad/games/ssx3-workbench/builds/bump-002/BAM.BIG",
+    "archive_sha256": "c14e8007724957bcc4acc3f0d681785bdb250bed0a46091ee70defc48467faf9",
+    "iso_sha256": "0907b8694addc81b5a30c2dff1900d4e23253ebb9e53a5a7d4605cc8f46885d1",
+    "patch": "patch_A_hub_1024",
+    "group": 2,
+    "track": 1,
+    "rid": 213,
+    "height_game_units": 75.0,
+    "centre_before": [
+      -89775.08032226562,
+      40014.690185546875,
+      -217132.28979492188
+    ],
+    "centre_after": [
+      -89775.08032226562,
+      40014.690185546875,
+      -217057.28979492188
+    ],
+    "cold_boot": true,
+    "emulator_states_loaded": false,
+    "live_memory": {
+      "method": "PINE read of 32 MiB EE memory at Green Station",
+      "edited_coefficients_offset": 16086256,
+      "bounds_and_corners_offset": 16086536
+    },
+    "rider_position_ee_offset": "0x5409c0",
+    "crossing": {
+      "bump_002_log": "emulator/test-002/evidence/bump-002/bump-002-ride.jsonl",
+      "bump_002_log_sha256": "4e94568cd9a32aa235462683dfc7aa2cf3ebb6317a46ae3515a369524473656f",
+      "control_001_log": "emulator/test-002/evidence/bump-002/control-001-ride.jsonl",
+      "control_001_log_sha256": "0da118f4bd4ef5ed11eec9853d74fcd6b91e8d15f8d7b0d580fa9145db0d7236",
+      "samples_inside_patch": {
+        "bump_002": 11,
+        "control_001": 10
+      },
+      "max_rider_above_original_surface": {
+        "bump_002": 72.9,
+        "control_001": 2.3
+      },
+      "max_abs_rider_minus_edited_surface": {
+        "bump_002": 4.0
+      },
+      "max_abs_rider_minus_original_surface": {
+        "control_001": 2.6
+      }
+    },
+    "visual_deformation_verified": true,
+    "rider_collision_verified": true,
+    "type_12_collision_resources_changed": false,
+    "interpretation": "Ground contact and rendering follow the patch coefficients for this hub patch; other collision paths remain untested."
+  },
+  "bump_001_patch_reached_in_play": false
 }

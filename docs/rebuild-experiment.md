@@ -1,8 +1,8 @@
 # First bounded rebuild experiment
 
-Date: 2026-09-10. Status: **file-level validation passed; control and bump reach
-gameplay and load their expected terrain coefficients; visual/collision checks pending**.
-This changes an original SSX 3 patch. It is not the Garibaldi import.
+Date: 2026-09-10. Status: **rider collision and rendering follow an edited terrain
+patch (bump-002); bump-001's patch was never reached in play**. These builds change
+original SSX 3 patches. They are not the Garibaldi import.
 
 ## Artifacts
 
@@ -11,14 +11,15 @@ Root: `/Volumes/share-1/brad/games/ssx3-workbench/builds/`
 | Build | Image | Purpose |
 | --- | --- | --- |
 | control-001 | control-001/SSX3-control.iso | Exercise our compressor with identical decoded game data |
-| bump-001 | bump-001/SSX3-bump.iso | Test whether changing terrain coefficients affects visible/ridden terrain |
+| bump-001 | bump-001/SSX3-bump.iso | First terrain edit (`patch_A_hub_1237`); verified in memory only |
+| bump-002 | bump-002/SSX3-bump.iso | Terrain edit on the Green Station line (`patch_A_hub_1024`); ridden and rendered |
 
 Each directory also contains its rebuilt `BAM.BIG`, `experiment.json`, `image.json`,
 and `patch-before.obj` / `patch-after.obj`. The small OBJ files sample the selected
 patch at 17×17 vertices, in original game coordinates, without textures or normals.
 
 Each image is 3,005,415,424 bytes. Together with rebuilt archives, these experiments
-use approximately 5.8 GiB on the network share. Source ISOs and archives remain
+use approximately 8.7 GiB on the network share. Source ISOs and archives remain
 unchanged. Runtime tests use copied cards and a separate emulator configuration;
 the original BIOS files and both original memory cards still match their setup hashes.
 
@@ -77,8 +78,8 @@ deltaZ(u,v) = 1600 * u * (1-u) * v * (1-v)
 It reaches 100 game units at the centre and zero along every patch edge. Do not
 assume a metres conversion until calibrated against gameplay. Only four float32
 coefficients change; the exact offsets and old/new values are in `experiment.json`.
-The stored Z-axis edit is verified mathematically and in memory; its orientation
-relative to gameplay still needs visual confirmation.
+The stored Z axis is up (see the second edit below), so this is a raised bump.
+It is verified mathematically and in memory but was never reached in play.
 
 | Point | X | Y | Z |
 | --- | ---: | ---: | ---: |
@@ -95,7 +96,8 @@ All edge samples have exactly zero displacement for this edit. All four corner
 vectors, UVs, materials, sphere/bounds, resource headers, and unknown fields remain
 unchanged. Separately stored collision resources remain unchanged deliberately:
 the experiment is intended to determine whether the rider follows the edited
-patch directly or requires additional collision updates. This has not been proven.
+patch directly or requires additional collision updates. bump-002 below answers
+this for a hub patch: the rider follows the edited coefficients.
 
 ## Validation results
 
@@ -235,6 +237,116 @@ python3 tools/build_world_experiment.py '/Volumes/share-1/brad/games/ssx3-workbe
 python3 tools/build_test_images.py '/Volumes/share-1/brad/games/ps2/SSX 3 (USA).iso' '/Volumes/share-1/brad/games/ssx3-workbench/builds/control-002' '/Volumes/share-1/brad/games/ssx3-workbench/builds/bump-002'
 ```
 
-The next gate is runtime validation of the control and bump. A Garibaldi import
-will need more work on resource assignment, collision, joins, and potentially
-streaming/index rebuilding beyond this deliberately fixed-size edit.
+## Second edit: bump-002, ridden and rendered
+
+`patch_A_hub_1237` sits at the far downhill edge of the Green Station hub. Two
+autopilot attempts (below) reached within 7,000 game units of it along the hub's
+natural line, but the terrain west of `(-98800, 42500)` funnels the rider north
+into the connector and a turn toward the patch stalls. So a second edit was placed
+on a patch the rider crosses on every free ride from the Green Station spawn.
+
+Green Station transport, when arriving from Peak 3, spawns the rider at about
+`(-66300, 33600, -212800)` at the top (east, high Z) of hub `A`; the rider then
+descends west along the hub. One earlier transport in the same session spawned at
+`(-99557, 43664)` instead; both spawns are handled by the route tool. +Z is up:
+race groups descend from hub `E` (Z about +508,000) through `C`, `D`, `A` to `B`
+(Z about -450,000), so the "bump" edits raise the surface.
+
+| Property | bump-002 |
+| --- | ---: |
+| Patch | `patch_A_hub_1024`, group 2, track 1, RID 213 |
+| Height | 75 game units (100 escaped this sloped patch's stored bounds) |
+| Centre before | (-89775.0803, 40014.6902, -217132.2898) |
+| Centre after | (-89775.0803, 40014.6902, -217057.2898) |
+| Changed floats | payload offsets 152, 168, 216, 232 |
+| Block | SSB offset 1,114,112; BAM.BIG offset 1,150,976; ISO offset 1,773,225,984 |
+| Compressed payload | 32,748 original, 32,588 rebuilt |
+| BAM.BIG SHA-256 | c14e8007724957bcc4acc3f0d681785bdb250bed0a46091ee70defc48467faf9 |
+| ISO SHA-256 | 0907b8694addc81b5a30c2dff1900d4e23253ebb9e53a5a7d4605cc8f46885d1 |
+
+Natural-line patches that also accept a bump: RID 270 (`patch_A_hub_1025`) at 75,
+RIDs 199 and 152 (`1022`, `1021`) at 50. RIDs 29, 66, 27 and 11 reject every height
+tried down to 25 because their control hulls already touch their stored bounds.
+
+### Collision result
+
+`tools/ride_route.py` transported to Green Station in a cold-booted bump-002 session,
+steered through the patch centre using live positions read over PINE, and logged the
+rider at 10 Hz. `tools/patch_crossing.py` then compared the rider's Z with the
+original and edited surfaces at the nearest (u, v) of the patch. The same procedure was
+repeated in a cold-booted control-001 session on the same line.
+
+| Sample (u, v) | control-001: rider minus original surface | bump-002: rider minus original surface | Edited minus original surface at that point |
+| --- | ---: | ---: | ---: |
+| entry (0.7, 0.05) | -0.9 | 1.8 | 5 |
+| (0.6, 0.3) | -0.1 | 49.4 | 50 |
+| centre (0.5, 0.5) | -2.1 | 72.9 | 73 |
+| (0.4, 0.8) | -2.6 | 47.2 | 51 |
+| exit (0.4, 0.97) | 0.9 | 8.1 | 5 |
+
+Across 11 samples inside the patch the bump-002 rider sits above the original surface
+by the edited delta within 4 game units; the control rider stays within 3 units of
+the original surface. Rider height is the tracked position at EE offset `0x5409c0`,
+which sits on the surface on unedited patches. The separately stored type-12
+collision resources were not changed, so for this patch the rider's ground contact
+follows the patch coefficients directly. Whether type-12 data matters elsewhere
+(walls, rails, resets) is still unknown.
+
+### Rendering result
+
+Window captures at the patch centre show a rounded crest under the rider in bump-002
+and a flat trail in control-001 at the same spot:
+`emulator/test-002/evidence/bump-002/control-vs-bump-002-centre.png` (control left,
+bump right). The crest is modest on screen, consistent with a 75-unit rise on a
+patch roughly 1,600 units across.
+
+### Memory
+
+A live PINE read of bump-002's EE memory at Green Station finds the edited 256-byte
+coefficient array at offset 16,086,256 and the unchanged bounds/corners at 16,086,536
+(`evidence/bump-002/live-memory.json`). Full logs and captures:
+
+```text
+emulator/test-002/evidence/bump-002/
+  bump-002-ride.jsonl / control-001-ride.jsonl      # 10 Hz rider positions
+  bump-002-crossing.txt / control-001-crossing.txt  # patch_crossing.py output
+  bump-002-approach-0[3-8].png, control-001-approach-0[3-7].png
+  control-vs-bump-002-centre.png, live-memory.json
+```
+
+## Driving the emulator
+
+PINE is enabled in the test-002 profile (`EnablePINE = true`, default slot 28011,
+socket `$TMPDIR/pcsx2.sock`). `tools/pine.py` reads EE memory in 32,000-read batches;
+a full 32 MiB dump takes about half a second. **Connect one PINE client at a time.**
+Twice, a second client connecting while another was mid-request was followed by PCSX2
+exiting without a log entry or crash report. Killing one PCSX2 instance also removes
+the socket file of any other instance, so quit through AppleScript and wait for the
+process to disappear before launching another.
+
+Keyboard input goes through small Swift helpers built by `tools/macos/build.sh`
+(`press_keys` taps, `keyd` holds keys from stdin, `window_id` plus `capture.sh` grab
+the PCSX2 window). Menu cursors default to the current peak, so the transport key
+sequence differs from Peak 3 (Peak 3 → Down Down → Peak 1) and from Peak 1 (Peak 1
+already selected). Riding back into a lodge opens the transport menu by itself.
+
+`tools/ride_autopilot.py` steers with pulsed D-pad presses proportional to the heading
+error (Left turns counter-clockwise in XY; a sign test right after spawn is unreliable
+because input is ignored for the first moments). It reaches waypoints on the natural
+downhill line with a few degrees of error but cannot climb or cross terrain that
+channels the rider elsewhere. Build the helpers, then, from a paused Peak 3 session:
+
+```sh
+sh tools/macos/build.sh
+python3 tools/pine.py                                    # status, serial, title
+SIGN=1 CAPTURE_AT=-89775,40015 python3 tools/ride_route.py OUT_DIR OUT_DIR/ride.jsonl '-89775,40015;-93000,40400'
+python3 tools/patch_crossing.py OUT_DIR/ride.jsonl '/Volumes/share-1/brad/games/ssx3-workbench/builds/bump-002'
+```
+
+`ride_route.py` expects the Green Station selection to have just been made; it waits
+for the spawn, hands over to the autopilot, captures the window within 3,000 units of
+`CAPTURE_AT`, and pauses afterwards.
+
+The next gates are described in [the investigation log](investigation.md): the
+Garibaldi import will need resource assignment, collision for non-patch objects,
+joins, and potentially streaming/index rebuilding beyond these fixed-size edits.

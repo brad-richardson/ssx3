@@ -4,11 +4,12 @@ The first donor course is **Garibaldi from SSX Tricky (PS2)**. The goal is a sho
 rideable section inside the original SSX 3 engine, followed by a complete course
 if terrain, collision, and streaming can be rebuilt reliably.
 
-This repository contains inspection tools and a **bounded rebuild experiment**.
-Two test ISOs have been built: an unchanged-content compression control and one
-small SSX 3 terrain bump. Both cold-boot and reach gameplay in PCSX2, and their
-target terrain coefficients are verified in game memory. The edit's visible shape
-and collision remain unvalidated. Garibaldi has not yet been imported.
+This repository contains inspection tools, a **bounded rebuild experiment**, and
+emulator-driving tools. Three test ISOs have been built: an unchanged-content
+compression control and two single-patch SSX 3 terrain bumps. All cold-boot and
+reach gameplay in PCSX2. For the second bump, the rider's ground contact and the
+rendered snow follow the edited coefficients, measured against the control on the
+same line. Garibaldi has not yet been imported.
 
 ## Current results
 
@@ -24,6 +25,12 @@ and collision remain unvalidated. Garibaldi has not yet been imported.
 - Original, control, and bump images cold-boot and reach gameplay in an isolated
   PCSX2 profile on the share. Control and bump load the target patch at Green
   Station; their in-memory coefficients differ by exactly the four planned floats.
+- A second bump (75 units, `patch_A_hub_1024`) lies on the Green Station free-ride
+  line. Riding through it, the rider sits up to 73 units above the original surface,
+  matching the edited surface within 4 units; on the control the rider stays within
+  3 units of the original. A visible crest appears at the same spot.
+- Live PCSX2 memory reads (PINE) and a position-feedback autopilot drive these tests;
+  the rider position lives at EE offset `0x5409c0` in this game version.
 
 See [the investigation log](docs/investigation.md) for evidence, format findings,
 limitations, upstream provenance, and the next implementation steps.
@@ -58,7 +65,8 @@ Code, tests, and small reports live here. Large files live on the network share:
         SSX3-bump.iso
         experiment.json
         image.json
-    emulator/test-002/             # isolated PCSX2 profile and launchers
+      bump-002/                    # bump on the Green Station line, ridden and rendered
+    emulator/test-002/             # isolated PCSX2 profile, launchers, evidence/
 ```
 
 `local/` and `third_party/` are ignored by Git. No game assets, executables, ISOs,
@@ -66,9 +74,11 @@ or generated meshes belong in commits. The upstream clone is only about 3.3 MiB.
 
 ## Running the tools
 
-Python 3.10+ and the standard library suffice. The independent verification tool
-also uses macOS's `bsdtar`. No .NET runtime, game SDK, or additional BIOS is needed
-for these inspections.
+Python 3.10+ and the standard library suffice for the inspection and build tools.
+The independent verification tool also uses macOS's `bsdtar`. The emulator-driving
+tools need PCSX2 with PINE enabled, `swiftc` for the small input helpers
+(`sh tools/macos/build.sh`), and the screen-recording permission for window capture.
+No .NET runtime, game SDK, or additional BIOS is needed.
 
 Inventory the discs and relevant archive directories without copying whole ISOs:
 
