@@ -43,6 +43,8 @@ def synthetic_iso():
     pvd[40:72] = b'TEST'.ljust(32)
     struct.pack_into('<H', pvd, 128, SECTOR)
     struct.pack_into('>H', pvd, 130, SECTOR)
+    struct.pack_into('<I', pvd, 80, sectors)
+    struct.pack_into('>I', pvd, 84, sectors)
     root_rec = record('\0', 18, SECTOR, True)
     pvd[156:156 + len(root_rec)] = root_rec
     image[16 * SECTOR:17 * SECTOR] = pvd
@@ -96,6 +98,27 @@ class RelocateTests(unittest.TestCase):
             self.assertTrue(all(20 * SECTOR <= i < 20 * SECTOR + len(archive) or 18 * SECTOR <= i < 19 * SECTOR for i in changed))
             self.assertEqual(image[22 * SECTOR:23 * SECTOR], result[22 * SECTOR:23 * SECTOR])
             self.assertTrue((out / 'image.json').exists())
+
+    def test_build_appends_and_grows_volume(self):
+        image = synthetic_iso()
+        archive = bytes(range(100, 200)) * 50  # 5000 bytes, needs 3 sectors
+        with tempfile.TemporaryDirectory() as tmp:
+            iso, arc, out = Path(tmp) / 'test.iso', Path(tmp) / 'WORLD.BIG', Path(tmp) / 'out'
+            iso.write_bytes(image)
+            arc.write_bytes(archive)
+            build(iso, arc, out, 'WORLD.BIG', 'PAD0.000', append=True)
+            result = (out / 'SSX3-relocated.iso').read_bytes()
+            self.assertEqual(len(result), len(image) + 3 * SECTOR)
+            self.assertEqual(result[:16 * SECTOR], image[:16 * SECTOR])
+            self.assertEqual(result[len(image):len(image) + len(archive)], archive)
+            self.assertEqual(struct.unpack_from('<I', result, 16 * SECTOR + 80)[0], len(result) // SECTOR)
+            self.assertEqual(struct.unpack_from('>I', result, 16 * SECTOR + 84)[0], len(result) // SECTOR)
+            with (out / 'SSX3-relocated.iso').open('rb') as f:
+                _, files = iso_files(Region(f, 0, len(result)))
+            by_path = {f['path']: f for f in files}
+            self.assertEqual(by_path['WORLD.BIG'], dict(path='WORLD.BIG', offset=len(image), size=len(archive)))
+            self.assertEqual(by_path['PAD0.000']['offset'], 20 * SECTOR)
+            self.assertEqual(image[20 * SECTOR:23 * SECTOR], result[20 * SECTOR:23 * SECTOR])
 
     def test_build_refuses_oversized_archive(self):
         image = synthetic_iso()

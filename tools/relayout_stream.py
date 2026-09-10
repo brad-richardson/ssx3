@@ -105,6 +105,51 @@ def write_bigf(members, template):
     return bytes(out), offsets
 
 
+def assemble_archive(original, report, group_raw, sdb_bytes, jobs=6, max_decoded=81920, margin=96, reuse_original_blocks=False):
+    """Assemble a new archive from decoded group bytes.
+
+    group_raw: {group index: decoded bytes}. With reuse_original_blocks, groups whose bytes
+    equal the baseline keep EA's original blocks verbatim; only changed groups are re-chunked.
+    sdb_bytes: SDB member bytes (already edited for any count changes); group offsets are
+    regenerated here. Returns (archive bytes, per-group layout list, stream length).
+    """
+    region = Region(io.BytesIO(original), 0, len(original))
+    _, members = big_members(region)
+    ssb = file_region(region, members, 'data/worlds/bam.ssb')
+    todo, packed = [], {}
+    for g in report['groups']:
+        raw = group_raw[g['index']]
+        if reuse_original_blocks and hashlib.sha256(raw).hexdigest() == g['sha256']:
+            data = b''.join(ssb.read(b['offset'], b['size']) for b in g['blocks'])
+            packed[g['index']] = (data, len(g['blocks']))
+        else:
+            todo.append((g['index'], raw, max_decoded, margin))
+    if todo:
+        with Pool(min(jobs, len(todo))) as pool:
+            for i, data, n in pool.imap_unordered(pack_group, todo, chunksize=1):
+                packed[i] = (data, n)
+    sdb_bytes = bytearray(sdb_bytes)
+    location_count, node_count, group_count = struct.unpack_from('<III', sdb_bytes, 8)
+    table = (80 + location_count * 88 + 15) // 16 * 16 + node_count * 96
+    stream, layout = bytearray(), []
+    for g in report['groups']:
+        data, n = packed[g['index']]
+        struct.pack_into('<I', sdb_bytes, table + g['index'] * 68 + 4, len(stream))
+        layout.append(dict(index=g['index'], old_offset=g['offset'], new_offset=len(stream), old_blocks=len(g['blocks']), new_blocks=n,
+                           decoded_size=len(group_raw[g['index']]), sha256=hashlib.sha256(group_raw[g['index']]).hexdigest()))
+        stream += data
+    new_members = []
+    for m in members:
+        if m['path'] == 'data/worlds/bam.ssb':
+            new_members.append((m['path'], bytes(stream)))
+        elif m['path'] == 'data/worlds/bam.sdb':
+            new_members.append((m['path'], bytes(sdb_bytes)))
+        else:
+            new_members.append((m['path'], region.read(m['offset'], m['size'])))
+    archive, _ = write_bigf(new_members, original)
+    return archive, layout, len(stream)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('archive', type=Path)

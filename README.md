@@ -39,6 +39,27 @@ the exact edit, validation results, and emulator test instructions.
 The [runtime comparison](docs/runtime-validation.json) records state hashes,
 memory offsets, and the four verified coefficient changes.
 
+## Try it yourself
+
+Every test image on the share is a complete, verified ISO that boots in any
+PCSX2 (2.x). Pick one, cold-boot it, choose Conquer the Mountain with the Mac
+save, pause, Transport → Peak 1 → Freeride → Green Station, and ride the main
+line down the hub. The edited patch (`patch_A_hub_1024`) is about 20 seconds
+after the spawn, just before the Race/Slope Style banner tent.
+
+| Image | What to look for |
+| --- | --- |
+| `builds/bump-002/SSX3-bump.iso` | a rounded 75-unit crest on the trail that the board rides over |
+| `builds/grown-001/iso/SSX3-relocated.iso` | a raised strip of five copied patches; the rider rides on it |
+| `builds/hdr-003/SSX3-words.iso` | the same patch renders dark and untextured (foreign texture ids) |
+| `builds/hdr-006/SSX3-words.iso` | the board sinks into deep snow on that patch (material word) |
+| `builds/control-005/iso/SSX3-relocated.iso` | should look exactly like the original: our block layout, our archive |
+| `builds/control-006/SSX3-relocated.iso` | should look exactly like the original: archive appended to a bigger image |
+
+The test-002 profile under `emulator/` has double-clickable launchers for each
+image; they use an isolated PCSX2 profile and copied memory cards, so your own
+settings and saves are untouched.
+
 ## Storage
 
 Code, tests, and small reports live here. Large files live on the network share:
@@ -104,7 +125,9 @@ python3 tools/build_world_experiment.py SRC/BAM.BIG --height 75 --rid 213 --outp
 python3 tools/build_test_images.py 'PS2/SSX 3 (USA).iso' BUILDS/bump-00N                            # same-size archive into a new ISO
 python3 tools/recompress_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 8                # every block re-encoded in place
 python3 tools/relayout_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 8                  # new block boundaries, new SDB offsets
-python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/control-00N/BAM.BIG --output BUILDS/control-00N-iso  # any-size archive into PAD0.000
+python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso            # archive into PAD0.000 (same image size)
+python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso --append   # archive appended, image grows
+python3 tools/grow_group.py SRC/BAM.BIG --group 2 --rids 152,199,29,213,270 --dz 60 --output BUILDS/grown-00N   # add patch copies to a group
 ```
 
 Emulator tools (macOS, PCSX2 with PINE enabled in the test profile):

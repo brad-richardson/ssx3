@@ -103,10 +103,14 @@ Steps and gates:
    fixed.) The memory-size field is decoded: bytes of kinds
    0–12 including headers (see the investigation log), so a same-content
    re-layout only rewrites each group's stream offset.
-4. **Grown group.** Duplicate every patch of one connector group with a small
-   offset (twice the patches, larger group). Gate: both copies render and
-   collide. This exposes whether spatial records or per-group budgets cap group
-   size.
+4. **Grown group.** Done as grown-001: five raised patch copies appended to
+   hub A's group with updated SDB and location counts; they render and the
+   rider rides on them. Whether large additions hit a per-location memory
+   budget is still untested (add hundreds of patches next, then thousands).
+
+Image size is not a constraint: `relocate_archive.py --append` grows the ISO
+(control-006 plays); the padding-file mode remains as an option that keeps the
+image size unchanged.
 
 ### M3. Patch record semantics
 

@@ -453,6 +453,35 @@ and coasts into the connector `A_ASS1` (`evidence/control-005/`). Three
 locations of two classes stream from blocks laid out entirely by our tools with
 regenerated offsets. A race location has not yet been ridden on this image.
 
+### control-006: archive appended to a grown image
+
+`relocate_archive.py --append` writes the archive after the image's last sector,
+grows the primary volume descriptor's volume size (both byte orders), and points
+the directory record at the new extent. control-006 is the unchanged archive
+appended this way: image 3,118,495,744 bytes, ISO SHA-256
+f7b37863143ba364da8798db12f2f1c4d5f5b5735eead9ffde3ca8355c9ef71c. It cold-boots
+and rides Green Station on the original surface (`evidence/control-006/`). The
+256 MiB padding ceiling is therefore not a limit; images can simply grow.
+
+### grown-001: a group with more resources than the disc's
+
+`tools/grow_group.py` appends raised copies of five natural-line patches (RIDs
+152, 199, 29, 213, 270, `patch_A_hub_1021`–`1025`) to group 2: each copy is the
+original shifted +60 game units in Z with a fresh RID (291–295) and its handle
+word set to `rid << 8 | track`; texture-binding words are copied unchanged. The
+SDB group record's total count (1,209 → 1,214), memory-size field (+2,200 bytes)
+and kind-1 count, and the location record's kind-1 count, are updated; only
+group 2 is re-chunked, other groups keep EA's blocks, and offsets are
+regenerated. Archive SHA-256
+6183278487197186efc5bfa63c401f21eb92369cd55a23f11613c894c813c58c; appended-mode
+ISO SHA-256 66e0f64115900a767a5461e1d32ce578635ea28ab8b698c77951023f3eac0e25.
+
+Result: the copies render as a raised strip along the trail and the rider rides
+on them, 57.5–60.9 game units above the original surface across the whole of
+`patch_A_hub_1024`'s copy (`evidence/grown-001/`). New RIDs without entries in
+the PHM/PSM name tables load fine. This completes roadmap M2: groups can grow,
+streams can be re-laid out, archives can be any size.
+
 ## Patch header bisection (roadmap M3)
 
 hdr-001 transplanted the whole non-geometry header, id words, and tail (offsets
