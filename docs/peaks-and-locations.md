@@ -86,6 +86,9 @@ Two routes, in order of cost.
   sits at the run's start, keep the location's other resource kinds).
 - Names: overwrite the display and short names in the event table. Two
   strings per event, at most 31 and 15 characters. The SDB code stays.
+  Done: `tools/patch_executable.py`, verified in name-001 (the menu shows
+  "Garibaldi"). The event descriptions under the list come from the
+  `LOCH`/`LOCT` locale tables and still need decoding.
 - Scripts, start, finish, AI paths, textures, props: still the M5 list; the
   event keeps its script and mode (race, slopestyle, ...), so a race slot
   should receive a race course.

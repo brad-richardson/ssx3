@@ -161,7 +161,8 @@ Status (2026-09-10): memory budget verified (scale-002: 1,439 imported
 patches load and ride, see docs/peaks-and-locations.md); the level selector
 is two fixed tables in the executable, so course names can be swapped without
 UI work. The "all of Tricky on one mountain" idea maps onto replacing the 17
-events, not a sixth peak. Non-terrain content still open.
+events, not a sixth peak. name-001 shows "Garibaldi" in the transport menu
+(tools/patch_executable.py). Non-terrain content still open.
 
 Gate: a race on Garibaldi with medals awarded, no soft locks, on desktop PCSX2.
 

@@ -562,3 +562,21 @@ Evidence under `evidence/scale-001/` and `evidence/scale-002/`. A race
 location totals about 11 MB decoded over 9 groups, so a full Garibaldi
 (3,885 patches, about 1.7 MB) is not memory-limited. Findings on the level
 selector and per-peak tables are in docs/peaks-and-locations.md.
+
+## name-001: a Tricky name in the level selector (roadmap M5)
+
+`tools/patch_executable.py` finds the executable through the ISO9660
+directory, verifies the 24-record event table (docs/peaks-and-locations.md),
+and streams a new image with only the name fields changed. name-001 is the
+scale-002 image with event ARA1 renamed `Garibaldi` / `Gari` and station A
+renamed `Tricky Base Station` / `Tricky Base` (image SHA-256
+9cb63d6b5063243607591a74520c1301f8355e6fee54a677af671240ed6162d9).
+
+Result (`evidence/name-001/`): the game boots, and the Peak 1 freeride
+transport list shows **Garibaldi** in Snow Jam's place with the race route
+highlighted on the map; selecting it opens the normal "Transport to this
+area now?" dialog. The description paragraph under the list still reads
+"Snow Jam is an exciting BEGINNER track", so the descriptions live in the
+`LOCH`/`LOCT` locale tables (`DATA/LOCALE/*.LOC`), not in the executable;
+they are the next string to decode. Green Station's list entry uses the short
+name field, so both fields matter.
