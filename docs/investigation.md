@@ -75,6 +75,23 @@ exactly one location for every group, and the corresponding 68-byte group-index
 records match every observed resource count. Treat spatial-record semantics beyond
 these bounds as provisional. The 96-byte spatial records are not yet rebuilt.
 
+The 68-byte stream-group records decode as follows (verified on all 159 groups,
+2026-09-10 afternoon):
+
+| Offset | Type | Meaning |
+| ---: | --- | --- |
+| 0 | u16 | Resource count, all kinds |
+| 2 | u16 | Group index |
+| 4 | u32 | SSB byte offset of the group's first block |
+| 8 | u32 | Bytes of resources with kind 0–12, payload plus 8-byte header (exact for every group; kinds 13–22 excluded) |
+| 12 | u16 × 13 | Resource count per kind 0–12 |
+| 4–11 (u16 view 2–5) | u16 | Unknown: 0 or 32768; a rising index; a value that looks hashed; a small count. Preserve. |
+| 28 | u32 | Unknown, multiples of 65,536 (likely a memory budget). Preserve. |
+
+A same-content re-layout of the stream therefore only changes offset 4. Adding
+resources changes offsets 0, 8, and the per-kind counts; the unknown words are
+kept as-is until an experiment shows they matter.
+
 Do not use the upstream `FindLocationChunk` implementation uncritically for this
 disc. For example, `ARA1` occupies groups 25–33; the stored value 33 is its last
 group, not its first. In-game course-name mappings have not yet been verified.
@@ -119,6 +136,36 @@ corners to within **0.008 game units**. Using the upstream labels as-is produced
 large discrepancies for 30,641 patches, so this is a substantive correction.
 Identical coefficient math does **not** imply that entire records or surface,
 material, lightmap, resource-ID, or visibility fields can be copied directly.
+
+## SSX 3 patch record survey (M3 groundwork)
+
+A field survey over all 30,644 patches (2026-09-10 afternoon) gives these
+hypotheses for the bytes outside the coefficient array. None is verified in
+play yet; the roadmap's M3 tests them one at a time.
+
+| Offset | Observation | Hypothesis |
+| ---: | --- | --- |
+| 0 | u32, 43 distinct values; each value's count equals one location's patch count | Per-location identifier (or a pointer patched at load); must be set per destination on import |
+| 4 | u32, constant 0x4045B7 | Record type/version tag |
+| 8 | u32, 56 values of the form 0x9xxxx / 0xBxxxx with small low bits | Material/texture selector plus flags |
+| 12 | u32, 15 values such as 0x29, 0x800029, 0xE001A9 | Surface flags (low bits) and type (high bits) |
+| 16, 20 | f32 in 1/128 steps, 0.008–0.977 | Lightmap atlas U, V offset |
+| 24, 28 | f32 in {1/64, 3/64, 7/64, 15/64, …} | Lightmap atlas cell size |
+| 32–63 | four (u, v) float pairs, usually (0,1),(1,1),(0,0),(1,0) or tiled ranges like −4..5 | Corner texture coordinates; ranges encode tiling |
+| 76 + 16i | w component of every coefficient vector | Always 1.0 |
+| 320–331 | f32 ×4 | Bounding sphere centre and radius (radius 143–16,430) |
+| 336 | u32, unique per patch, (n << 8) | 1 pattern | Patch ordinal/handle |
+| 340 | u32, 110 distinct values such as 0x842A00 | Texture or lightmap page reference |
+| 344–367 | f32 ×6 | Axis-aligned bounds min/max |
+| 368–415 | f32 ×12 | Four corner positions |
+| 416 | u32, 4,547 distinct, low 16 bits small (0x000C, 0x00E3) | Packed index pair, possibly lightmap page + slot |
+| 420 | u32, 0xFFFFFFFF for 87%, else 0xFFFFnnnn | Neighbour/link index, −1 when absent |
+| 424 | u32, constant 0xFFFFFFFF | Unused link |
+| 428 | u32, constant 0x11483C | Tag or pointer placeholder |
+
+The runtime modifies payload offsets 0, 4, 8, 416 and 420 after loading (seen in
+the state comparisons), consistent with pointers or handles being resolved in
+place.
 
 ## Tooling status and limitations
 

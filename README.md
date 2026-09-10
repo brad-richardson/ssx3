@@ -96,6 +96,27 @@ python3 tools/verify_inputs.py --staging '/Volumes/share-1/brad/games/ssx3-workb
 python3 -m unittest discover -s tests -v
 ```
 
+Rebuild and image tools (all refuse to overwrite existing outputs and verify their
+own output by readback):
+
+```sh
+python3 tools/build_world_experiment.py SRC/BAM.BIG --height 75 --rid 213 --output BUILDS/bump-00N   # one-patch edit
+python3 tools/build_test_images.py 'PS2/SSX 3 (USA).iso' BUILDS/bump-00N                            # same-size archive into a new ISO
+python3 tools/recompress_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 8                # every block re-encoded in place
+python3 tools/relayout_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 8                  # new block boundaries, new SDB offsets
+python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/control-00N/BAM.BIG --output BUILDS/control-00N-iso  # any-size archive into PAD0.000
+```
+
+Emulator tools (macOS, PCSX2 with PINE enabled in the test profile):
+
+```sh
+sh tools/macos/build.sh                                   # compiles keyd, press_keys, window_id into local/bin
+python3 tools/pine.py                                     # emulator status, serial, title
+SIGN=1 CAPTURE_AT=-89775,40015 sh tools/macos/green_station_ride.sh LAUNCHER OUT_DIR '-89775,40015;-93000,40400'
+python3 tools/patch_crossing.py OUT_DIR/ride.jsonl BUILDS/bump-002   # rider height versus original and edited surfaces
+python3 tools/ride_locations.py OUT_DIR/ride.jsonl                  # which locations a ride passed through
+```
+
 `inspect_disc.py --extract PATH --output FILE` extracts one file as stored,
 optionally from `--archive`; it refuses to overwrite an existing file. For a new
 Tricky preview, pass `probe_worlds.py tricky ... --assets NEW_DIRECTORY`.

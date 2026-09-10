@@ -98,8 +98,9 @@ Steps and gates:
    the file system, not a hard-coded LBA.
 3. **Re-laid-out stream control.** Rebuild SSB with our own block boundaries and
    regenerated SDB offsets, same content. Gate: play in every location class
-   (hub, race, connector). Requires decoding the memory-size field; correlate it
-   against per-kind byte totals across all 159 groups.
+   (hub, race, connector). The memory-size field is decoded: bytes of kinds
+   0–12 including headers (see the investigation log), so a same-content
+   re-layout only rewrites each group's stream offset.
 4. **Grown group.** Duplicate every patch of one connector group with a small
    offset (twice the patches, larger group). Gate: both copies render and
    collide. This exposes whether spatial records or per-group budgets cap group
