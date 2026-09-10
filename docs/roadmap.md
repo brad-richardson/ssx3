@@ -143,6 +143,11 @@ curves so there is no seam or drop.
 Gate: ride from the SSX 3 spawn through Garibaldi geometry and back out onto
 SSX 3 terrain without a reset. This is the first "Garibaldi in SSX 3" moment.
 
+Status: **met by gari-003** (92 Garibaldi patches overlaid on the Green Station
+line; the rider rides two imported stretches and returns to hub terrain, no
+reset). Open: interleaving surfaces trap the rider late in the section, flat
+lighting from a shared lightmap rectangle, and the Tricky/SSX 3 unit ratio.
+
 ### M5. Full Garibaldi course
 
 All 3,885 patches into a run location, using M2 for size. Then the non-terrain

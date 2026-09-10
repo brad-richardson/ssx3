@@ -53,6 +53,7 @@ after the spawn, just before the Race/Slope Style banner tent.
 | `builds/grown-001/iso/SSX3-relocated.iso` | a raised strip of five copied patches; the rider rides on it |
 | `builds/hdr-003/SSX3-words.iso` | the same patch renders dark and untextured (foreign texture ids) |
 | `builds/hdr-006/SSX3-words.iso` | the board sinks into deep snow on that patch (material word) |
+| `builds/gari-003/iso/SSX3-relocated.iso` | **Garibaldi terrain in SSX 3**: big banked walls overlaid on the hub line right after the lodge |
 | `builds/control-005/iso/SSX3-relocated.iso` | should look exactly like the original: our block layout, our archive |
 | `builds/control-006/SSX3-relocated.iso` | should look exactly like the original: archive appended to a bigger image |
 
@@ -128,6 +129,7 @@ python3 tools/relayout_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 
 python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso            # archive into PAD0.000 (same image size)
 python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso --append   # archive appended, image grows
 python3 tools/grow_group.py SRC/BAM.BIG --group 2 --rids 152,199,29,213,270 --dz 60 --output BUILDS/grown-00N   # add patch copies to a group
+python3 tools/import_terrain.py SRC/BAM.BIG --line RIDE.jsonl --z-range=-24000,-19000 --lateral 3500 --output BUILDS/gari-00N  # Garibaldi section into hub A
 ```
 
 Emulator tools (macOS, PCSX2 with PINE enabled in the test profile):

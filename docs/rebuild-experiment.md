@@ -482,6 +482,45 @@ on them, 57.5–60.9 game units above the original surface across the whole of
 the PHM/PSM name tables load fine. This completes roadmap M2: groups can grow,
 streams can be re-laid out, archives can be any size.
 
+## gari-003: Garibaldi terrain in the Green Station hub (roadmap M4)
+
+`tools/import_terrain.py` takes a corridor of Garibaldi patches (centre Z between
+−24,000 and −19,000 in Tricky space, within 3,500 units of the section's own
+centreline: 92 patches), rotates the section so its downhill direction matches
+the hub's natural line (from the control-002 ride log, x −73,000 to −88,000),
+searches pitch (±40°) and height so the entry stretch (first 4,000 units) clears
+the line by 30 units with the smallest hump, and converts every patch into an
+SSX 3 record built on `patch_A_hub_1024`: coefficients rotated exactly (bicubic
+patches are affine-invariant), sphere and bounds recomputed, corners in SSX 3
+order, texture-binding words copied from the template, handle set to
+`rid << 8 | track`, RIDs 291–382. The records are appended to group 2 (24 blocks)
+with the SDB and location counts updated; the image is built with `--append`.
+
+| Property | gari-003 |
+| --- | ---: |
+| Tricky patches | 92 (about 4,500 units across each, twice the hub's) |
+| Fit | pitch +10°, entry clearance +30 to −142 units over 4,000 units |
+| Section samples above / below hub terrain | 1,912 / 388 |
+| ISO SHA-256 | a6ab34af670f7fed9a575b5affb1ab8402dcdd13d235b0a35d42b365761edde4 |
+
+Result (`evidence/gari-003/`): from the Green Station spawn the rider crosses
+onto the imported surface at x ≈ −73,400 (five consecutive samples on it, 40–58
+units above the hub surface and within 25 of the imported one), drops back onto
+hub terrain where the section dips under it, rides a second imported stretch at
+x ≈ −79,300, grinds an SSX 3 rail from an imported bank, and never resets. The
+imported banks render with the hub's snow texture. Two limitations are visible:
+lighting is flat and banded because every imported patch carries the template's
+lightmap rectangle, and the run ends slowly in a trough where imported and hub
+surfaces interleave (speed 13 mph). The M4 gate, riding from the SSX 3 spawn
+through Garibaldi geometry and back onto SSX 3 terrain without a reset, is met.
+
+Units: Tricky's course is steep (35° average) and its patches are about twice
+the hub's, so the section had to be pitched flatter; whether Tricky and SSX 3
+share a length unit is still unknown. Next: keep the whole section above the
+hub (raise it, ramp the entry) so surfaces do not interleave, give imported
+patches lightmap rectangles from nearby hub patches, and replace a run section
+rather than overlaying a hub.
+
 ## Patch header bisection (roadmap M3)
 
 hdr-001 transplanted the whole non-geometry header, id words, and tail (offsets

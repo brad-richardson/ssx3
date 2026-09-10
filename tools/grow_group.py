@@ -43,6 +43,32 @@ def shifted_patch(payload, dz):
     return bytes(out)
 
 
+def add_resources_to_sdb(sdb, report, group, existing_count, added):
+    """Update the SDB group record (total count, memory size for kinds 0-12, per-kind counts)
+    and the owning location record (per-kind counts) for resources appended to a group.
+    added: list of (entry dict with kind/size, payload). Returns (old count, old memsize, owner)."""
+    location_count, node_count, group_count = struct.unpack_from('<III', sdb, 8)
+    table = (80 + location_count * 88 + 15) // 16 * 16 + node_count * 96
+    rec = table + group * 68
+    count, index = struct.unpack_from('<HH', sdb, rec)
+    if index != group or count != existing_count:
+        raise ValueError('SDB group record does not match the decoded group')
+    struct.pack_into('<H', sdb, rec, count + len(added))
+    memsize = struct.unpack_from('<I', sdb, rec + 8)[0]
+    struct.pack_into('<I', sdb, rec + 8, memsize + sum(len(p) + 8 for e, p in added if e['kind'] <= 12))
+    owners = [i for i, loc in enumerate(report['locations']) if group in loc['observed_groups']]
+    if len(owners) != 1:
+        raise ValueError('Expected one owning location')
+    for kind in {e['kind'] for e, _ in added}:
+        n = sum(1 for e, _ in added if e['kind'] == kind)
+        if kind <= 13:
+            slot = rec + 12 + 2 * kind
+            struct.pack_into('<H', sdb, slot, struct.unpack_from('<H', sdb, slot)[0] + n)
+        loc_slot = 80 + owners[0] * 88 + 32 + 2 * kind
+        struct.pack_into('<H', sdb, loc_slot, struct.unpack_from('<H', sdb, loc_slot)[0] + n)
+    return count, memsize, owners[0]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('archive', type=Path)
@@ -88,35 +114,17 @@ def main():
         next_rid += 1
     new_raw = serialize_resources(records + copies)
     group_raw[args.group] = new_raw
-    # SDB group record: total count, memory size (kinds 0-12 with headers), per-kind counts.
-    location_count, node_count, group_count = struct.unpack_from('<III', sdb, 8)
-    table = (80 + location_count * 88 + 15) // 16 * 16 + node_count * 96
-    rec = table + args.group * 68
-    count, index = struct.unpack_from('<HH', sdb, rec)
-    if index != args.group or count != len(records):
-        raise ValueError('SDB group record does not match the decoded group')
-    struct.pack_into('<H', sdb, rec, count + len(copies))
-    memsize = struct.unpack_from('<I', sdb, rec + 8)[0]
-    struct.pack_into('<I', sdb, rec + 8, memsize + sum(len(p) + 8 for _, p in copies))
-    kind_count = struct.unpack_from('<H', sdb, rec + 12 + 2 * KIND_PATCH)[0]
-    struct.pack_into('<H', sdb, rec + 12 + 2 * KIND_PATCH, kind_count + len(copies))
-    # Location record: per-kind counts for kinds 0-23 after the four index words.
-    owners = [i for i, loc in enumerate(report['locations']) if args.group in loc['observed_groups']]
-    if len(owners) != 1:
-        raise ValueError('Expected one owning location')
-    loc_rec = 80 + owners[0] * 88 + 16 + 16 + 2 * KIND_PATCH
-    loc_count = struct.unpack_from('<H', sdb, loc_rec)[0]
-    struct.pack_into('<H', sdb, loc_rec, loc_count + len(copies))
+    count, memsize, owner = add_resources_to_sdb(sdb, report, args.group, len(records), copies)
     archive, layout, stream_len = assemble_archive(original, report, group_raw, bytes(sdb), jobs=args.jobs, reuse_original_blocks=True)
     check = probe_ssx3(Region(io.BytesIO(archive), 0, len(archive)))  # verifies SDB counts against the stream
     expect = dict(report['resource_counts']); expect[str(KIND_PATCH)] = expect.get(str(KIND_PATCH), 0) + len(copies)
     if {str(k): v for k, v in check['resource_counts'].items()} != expect:
         raise ValueError('Rebuilt archive resource inventory differs from plan')
     details = dict(mode='grow', group=args.group, track=args.track, dz=args.dz, copied_rids=[e['rid'] for e, _ in selected],
-                   new_rids=[e['rid'] for e, _ in copies], location=report['locations'][owners[0]]['name'],
+                   new_rids=[e['rid'] for e, _ in copies], location=report['locations'][owner]['name'],
                    source_archive_sha256=hashlib.sha256(original).hexdigest(), rebuilt_archive_sha256=hashlib.sha256(archive).hexdigest(),
                    rebuilt_archive_bytes=len(archive), stream_bytes=stream_len, group_layout=[l for l in layout if l['index'] == args.group],
-                   sdb_group_count=count + len(copies), sdb_group_memsize=memsize + sum(len(p) + 8 for _, p in copies),
+                   sdb_group_count=count + len(copies), sdb_group_memsize=memsize + sum(len(p) + 8 for _, p in copies), owner_location=report['locations'][owner]['name'],
                    max_patch_corner_error=check['max_patch_corner_error_game_units'], emulator_tested=False)
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / 'BAM.BIG').write_bytes(archive)
