@@ -419,8 +419,14 @@ both cold-boot and ride normally, and the rider stays on the original surface.
 Window captures at the same spots show **no visible texture change** at either
 factor (`evidence/uv-001/`, `evidence/uv-002/`). This does not settle whether
 the fields are texture coordinates: the hub snow texture has no feature large
-enough to reveal tiling once minified. The next M3 test is the selector word at
-offset 8, swapped to a value used by visually distinct patches.
+enough to reveal tiling once minified. A second probe, mat-001
+(`--set 8=0x9000a`, the value of the hub's one unusual patch near the lodge; ISO
+SHA-256 0bf3c1e699a362f3b64c6b0d154a81fc252a189d0690010c4a0788d792ca80a0), also
+rides normally with no visible change (`evidence/mat-001/`). Single-word probes on
+a plain snow patch are therefore a weak method. The next M3 step transplants the
+whole non-geometry header and tail (offsets 0–63 and 320–343, 416–431) from a
+visually distinct patch (rock, ice, or a jump face) onto this one; if the
+appearance changes, bisect the transplanted fields.
 
 The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.

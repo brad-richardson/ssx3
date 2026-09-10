@@ -115,6 +115,10 @@ natural line with `patch_crossing.py` and captures. Also: move a patch outside
 its stored bounds to learn what the bounds and spatial boxes gate (culling,
 collision, both), and delete a patch to learn how holes behave.
 
+First probes (corner UVs ×4/×24, material word 0x90000→0x9000A on a hub snow
+patch) showed no visible change; use whole-header transplants from visually
+distinct patches and bisect, rather than single-word guesses.
+
 Gate: a table of every patch field with an observed effect or a "no visible
 effect within tested range" entry, and a texture swap that renders.
 

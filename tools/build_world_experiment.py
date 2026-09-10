@@ -110,6 +110,21 @@ def uv_tile_patch(payload, factor):
     return bytes(edited), dict(kind='uv_tile', factor=factor, float_changes=changes)
 
 
+def set_words_patch(payload, assignments):
+    """Replace u32 words at given payload offsets (outside the 64..320 coefficient array)."""
+    if len(payload) != 432:
+        raise ValueError('Expected a 432-byte SSX 3 terrain patch')
+    edited = bytearray(payload)
+    changes = []
+    for offset, value in assignments:
+        if offset % 4 or offset < 0 or offset + 4 > 432 or 64 <= offset < 320:
+            raise ValueError('Word edits must be 4-byte aligned and outside the coefficient array')
+        old = struct.unpack_from('<I', payload, offset)[0]
+        struct.pack_into('<I', edited, offset, value)
+        changes.append(dict(offset=offset, before=old, after=value, before_hex=hex(old), after_hex=hex(value)))
+    return bytes(edited), dict(kind='set_words', changes=changes)
+
+
 def patch_name(archive, members, track, rid):
     phm = file_region(archive, members, 'data/worlds/bam.phm')
     psm = file_region(archive, members, 'data/worlds/bam.psm')
@@ -125,7 +140,7 @@ def patch_name(archive, members, track, rid):
     raise ValueError('Patch name not found')
 
 
-def rebuild(original, world_report, group_index, track, rid, height=None, uv_tile=None):
+def rebuild(original, world_report, group_index, track, rid, height=None, uv_tile=None, set_words=None):
     if sha(original) != world_report['archive_sha256']:
         raise ValueError('Source archive differs from inspected baseline')
     archive = Region(io.BytesIO(original), 0, len(original))
@@ -151,12 +166,14 @@ def rebuild(original, world_report, group_index, track, rid, height=None, uv_til
     if len(selected) != 1:
         raise ValueError('Expected exactly one selected terrain resource')
     index, entry, old_payload = selected[0]
-    if height is not None and uv_tile is not None:
+    if sum(x is not None for x in (height, uv_tile, set_words)) > 1:
         raise ValueError('Choose one edit per build')
     if height is not None:
         new_payload, geometry = bump_patch(old_payload, height)
     elif uv_tile is not None:
         new_payload, geometry = uv_tile_patch(old_payload, uv_tile)
+    elif set_words is not None:
+        new_payload, geometry = set_words_patch(old_payload, set_words)
     else:
         new_payload, geometry = old_payload, None
     records[index] = (entry, new_payload)
@@ -197,7 +214,7 @@ def rebuild(original, world_report, group_index, track, rid, height=None, uv_til
         cursor = offset+block['size']
     if rebuilt[cursor:] != original[cursor:]:
         raise ValueError('Archive suffix changed')
-    details = dict(mode='bump' if height is not None else 'uv' if uv_tile is not None else 'control', group=group_index,
+    details = dict(mode='bump' if height is not None else 'uv' if uv_tile is not None else 'words' if set_words is not None else 'control', group=group_index,
                    locations=group['locations'], track=track, rid=rid,
                    patch_name=patch_name(archive,members,track,rid), geometry=geometry,
                    source_archive_sha256=sha(original), rebuilt_archive_sha256=sha(rebuilt),
@@ -218,11 +235,13 @@ def main():
     ap.add_argument('--rid', type=int, default=76)
     ap.add_argument('--height', type=float, help='Omit for control; otherwise centre displacement in +Z game units')
     ap.add_argument('--uv-tile', type=float, help='Scale the corner texture coordinates by this factor instead of bumping')
+    ap.add_argument('--set', action='append', metavar='OFFSET=HEX', help='Set a u32 payload word (repeatable), e.g. --set 8=0x9000a')
     args = ap.parse_args()
     if args.output.exists():
         ap.error('Output directory already exists; choose a new build directory')
+    set_words = [(int(o, 0), int(v, 0)) for o, v in (item.split('=') for item in args.set)] if args.set else None
     data, details, before, after = rebuild(args.archive.read_bytes(), json.loads(args.world_report.read_text()),
-                                          args.group,args.track,args.rid,args.height,args.uv_tile)
+                                          args.group,args.track,args.rid,args.height,args.uv_tile,set_words)
     # Only create outputs after in-memory checks have passed.
     args.output.mkdir(parents=True, exist_ok=False)
     archive_path = args.output / 'BAM.BIG'
