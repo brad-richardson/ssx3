@@ -4,17 +4,18 @@
 Layout (decoded 2026-09-11 from data/ui/fe_1.gsh):
   header  : 'SHPG', u32 LE total size, u32 BE entry count, 4-byte group tag
   entries : count x (4-byte name, u32 BE offset), from byte 16
-  image   : u8 type (0x19 = 8-bit indexed), u24 BE size (header + pixels),
-            u16 BE width, u16 BE height, 4 bytes zero, u32 LE header length
-            (32), pixels; then a palette chunk: u8 type (0x32), u24 BE size,
-            u16 BE entries, u16 BE 1, 4 zero, u32 LE 0, 256 x u16 BE RGB5A3.
-The pixel swizzle is implemented in `untile`/`retile`; see PIXEL_LAYOUT.
+  image   : u8 type (0x19 = 8-bit indexed), u24 BE size (16-byte header +
+            pixels + 16 bytes slack), u16 BE width, u16 BE height, 4 bytes
+            zero, u32 LE 0x20; pixels start at +16 in the GameCube CI8 layout
+            (8x4 tiles, row-major); then a palette chunk: u8 type (0x32),
+            u24 BE size, u16 BE entries, u16 BE 1, 8 bytes, 256 x u16 BE RGB5A3.
+Verified 2026-09-11 against Dolphin texture dumps of the running game.
 """
 import argparse
 from pathlib import Path
 import struct
 
-PIXEL_LAYOUT = 'tiles8x4'  # updated once verified against a runtime texture dump
+PIXEL_HEADER = 16
 
 
 def entries(data):
@@ -35,10 +36,10 @@ def image(data, offset):
     kind = data[offset]
     size = int.from_bytes(data[offset + 1:offset + 4], 'big')
     width, height = struct.unpack_from('>HH', data, offset + 4)
-    header = struct.unpack_from('<I', data, offset + 12)[0]
-    if kind != 0x19 or header != 32 or size != header + width * height:
+    if kind != 0x19 or size != 32 + width * height:
         raise ValueError(f'Unsupported image record at {offset:#x}: type {kind:#x}')
-    pixels = data[offset + header:offset + size]
+    header = PIXEL_HEADER
+    pixels = data[offset + header:offset + header + width * height]
     pal_at = offset + size
     pal_kind = data[pal_at]
     pal_size = int.from_bytes(data[pal_at + 1:pal_at + 4], 'big')
