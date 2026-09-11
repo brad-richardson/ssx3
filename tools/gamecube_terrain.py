@@ -98,6 +98,8 @@ def main():
     ap.add_argument('--yaw', type=float, default=0.0)
     ap.add_argument('--scale', type=float, default=1.0)
     ap.add_argument('--drop-kind', type=int, action='append', default=[])
+    ap.add_argument('--limit', type=int, help='Use only the first N donor patches (memory experiments)')
+    ap.add_argument('--roundtrip', action='store_true', help='Control build: rewrite the group unchanged')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
     args = ap.parse_args()
@@ -109,8 +111,13 @@ def main():
     records = world.records(group)
     matrix, translation = placement(args.source_anchor, args.target_anchor, args.yaw, args.scale)
     patches = load_tricky_gc(args.nbd)
+    if args.limit:
+        patches = patches[:args.limit]
     before = list(records)
-    new_records, added = replace_patches(records, args.template_rid, patches, matrix, translation)
+    if args.roundtrip:
+        new_records, added = list(records), [(e, p) for e, p in records if e['kind'] == 1]
+    else:
+        new_records, added = replace_patches(records, args.template_rid, patches, matrix, translation)
     removed = {}
     if args.drop_kind:
         kept = []
@@ -139,7 +146,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / 'BAM.BIG').write_bytes(archive)
     pts = [patch_point(c, u, v) for _, c in [(None, [struct.unpack_from('>4f', p, 64 + 16 * j)[:3] for j in range(16)]) for _, p in added] for u, v in ((0, 0), (1, 1))]
-    experiment = dict(mode='gamecube-replace-terrain', location=args.location, group=group,
+    experiment = dict(mode='gamecube-roundtrip' if args.roundtrip else 'gamecube-replace-terrain', limit=args.limit, location=args.location, group=group,
                       track=added[0][0]['track'], old_patch_count=sum(1 for e, _ in before if e['kind'] == 1),
                       patch_count=len(added), template_rid=args.template_rid,
                       source_anchor=args.source_anchor, target_anchor=args.target_anchor,
