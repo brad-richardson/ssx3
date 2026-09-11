@@ -1,0 +1,212 @@
+{
+  "date": "2026-09-10",
+  "stage": "macOS stock-course native smoke test",
+  "disc_id": "GXBE69",
+  "dol_sha256": "b92162d6c616be3ce46b4eb61d5ddbb49891bc387ea7ddb2fea5792842fa29ce",
+  "host_architecture": "arm64",
+  "graphics_backend": "Metal",
+  "cpu_fallback": "interpreter",
+  "cpu_gpu_dual_core": false,
+  "dsp": "HLE, EnableJIT=False; audio backend initialized but listening quality not assessed",
+  "observed": [
+    "Native module ABI accepted",
+    "Startup video and menus rendered",
+    "Pipe controller navigated menus",
+    "Zoe character rendered and animated",
+    "Snow Jam race loaded with terrain, scenery, textures, HUD, and opponents",
+    "Race progressed to at least 13%; snapshot at 29 seconds shows 37 MPH and a 250-point popup",
+    "Steering and jump inputs sent during gameplay; detailed response/physics parity not measured",
+    "Pause menu opened; Restart returned to the starting briefing",
+    "All four bounded runs exited cleanly"
+  ],
+  "not_yet_verified": [
+    "Complete race and sustained multi-course stability",
+    "Riding after restart countdown",
+    "Save and reload",
+    "Physics parity against stock GameCube execution",
+    "Audio quality and synchronization",
+    "Physical controller and touch controls",
+    "iOS/Android builds and physical-device performance",
+    "No executable-code generation in every runtime helper (including vertex loaders)",
+    "Garibaldi assets or standalone course adapter in the native runtime"
+  ],
+  "gameplay_sample_window": {
+    "run_receipt": "local/reports/native-runs/20260910-232657.json",
+    "sample_indices": [
+      130,
+      135,
+      140,
+      145,
+      150,
+      155
+    ],
+    "note": "Short window after initial race countdown and before pause; sample indices are not exact wall time.",
+    "fps_min": 59.924,
+    "fps_max": 59.948,
+    "speed_min": 0.99946,
+    "speed_max": 0.999982,
+    "samples": [
+      {
+        "sample": 130,
+        "fps": 59.941,
+        "vps": 59.933,
+        "speed": 0.999473
+      },
+      {
+        "sample": 135,
+        "fps": 59.924,
+        "vps": 59.924,
+        "speed": 0.99946
+      },
+      {
+        "sample": 140,
+        "fps": 59.934,
+        "vps": 59.94,
+        "speed": 0.999982
+      },
+      {
+        "sample": 145,
+        "fps": 59.937,
+        "vps": 59.941,
+        "speed": 0.999892
+      },
+      {
+        "sample": 150,
+        "fps": 59.948,
+        "vps": 59.956,
+        "speed": 0.999638
+      },
+      {
+        "sample": 155,
+        "fps": 59.935,
+        "vps": 59.928,
+        "speed": 0.999701
+      }
+    ]
+  },
+  "counter_units": "Native counts block dispatches; fallback counts interpreter instructions; hook_fb counts helper instructions. Their ratio is not native coverage.",
+  "runs": [
+    {
+      "receipt": "local/reports/native-runs/20260910-231841.json",
+      "elapsed_seconds": 30.32266545802122,
+      "runner_sha256": "8f5fecfcfc1d149ddea17c7f4c86744704c51ce362d4962dfd76d3968b90d706",
+      "module_sha256": "ca06dba7726f57547efe2508f9a2ebe437ad249568a30da9e127f51bdd37e547",
+      "exit_code": 0,
+      "cpu_fallback_mode": "interpreter",
+      "fallback_jit_runs": 0,
+      "counters": {
+        "native": 18340808,
+        "fallback": 271340,
+        "native_exc": 8088,
+        "hook_fb": 4395481,
+        "smc_failed": 0,
+        "verifications": 146,
+        "reverify_events": 33,
+        "bursts": 226995,
+        "cycles": 2792438551
+      }
+    },
+    {
+      "receipt": "local/reports/native-runs/20260910-231933.json",
+      "elapsed_seconds": 91.9368522920413,
+      "runner_sha256": "8f5fecfcfc1d149ddea17c7f4c86744704c51ce362d4962dfd76d3968b90d706",
+      "module_sha256": "ca06dba7726f57547efe2508f9a2ebe437ad249568a30da9e127f51bdd37e547",
+      "exit_code": 0,
+      "cpu_fallback_mode": "interpreter",
+      "fallback_jit_runs": 0,
+      "counters": {
+        "native": 446030987,
+        "fallback": 4792510,
+        "native_exc": 147221,
+        "hook_fb": 112953137,
+        "smc_failed": 0,
+        "verifications": 201,
+        "reverify_events": 83,
+        "bursts": 3145499,
+        "cycles": 38106089821
+      }
+    },
+    {
+      "receipt": "local/reports/native-runs/20260910-232221.json",
+      "elapsed_seconds": 242.3663785000099,
+      "runner_sha256": "4d390c12c6d90ce4c277aa972d461de70c53a2462259afb75e2c3427836aaf5d",
+      "module_sha256": "ca06dba7726f57547efe2508f9a2ebe437ad249568a30da9e127f51bdd37e547",
+      "exit_code": 0,
+      "cpu_fallback_mode": "interpreter",
+      "fallback_jit_runs": 0,
+      "counters": {
+        "native": 956802553,
+        "fallback": 74661570,
+        "native_exc": 9086220,
+        "hook_fb": 239570410,
+        "smc_failed": 0,
+        "verifications": 312,
+        "reverify_events": 140,
+        "bursts": 21275308,
+        "cycles": 111225670184
+      }
+    },
+    {
+      "receipt": "local/reports/native-runs/20260910-232657.json",
+      "elapsed_seconds": 301.96779295802116,
+      "runner_sha256": "4d390c12c6d90ce4c277aa972d461de70c53a2462259afb75e2c3427836aaf5d",
+      "module_sha256": "ca06dba7726f57547efe2508f9a2ebe437ad249568a30da9e127f51bdd37e547",
+      "exit_code": 0,
+      "cpu_fallback_mode": "interpreter",
+      "fallback_jit_runs": 0,
+      "counters": {
+        "native": 1816606476,
+        "fallback": 98814243,
+        "native_exc": 11391312,
+        "hook_fb": 304827723,
+        "smc_failed": 0,
+        "verifications": 489,
+        "reverify_events": 319,
+        "bursts": 30782533,
+        "cycles": 140061015702
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "purpose": "title",
+      "path": "local/native/profiles/course-nojit/ScreenShots/GXBE69/GXBE69_2026-09-10_23-23-18.png",
+      "sha256": "ca8832374051337bb28b9a59a311ed547a6bec1fec47e2ef4eef7c49c464f71f"
+    },
+    {
+      "purpose": "character",
+      "path": "local/native/profiles/course-nojit/ScreenShots/GXBE69/GXBE69_2026-09-10_23-24-22.png",
+      "sha256": "8d80ab7c4450e6f3591602afb378020ce43d89b3a9cba3fffba995cc3d716da5"
+    },
+    {
+      "purpose": "course_start",
+      "path": "local/native/profiles/course-nojit/ScreenShots/GXBE69/GXBE69_2026-09-10_23-29-13.png",
+      "sha256": "ce57d0a7c44338086f848ca3c7c6f7add0d71091d0631052491eb1d5b0943f3b"
+    },
+    {
+      "purpose": "course_ride",
+      "path": "local/native/profiles/course-nojit/ScreenShots/GXBE69/GXBE69_2026-09-10_23-29-44.png",
+      "sha256": "72226db9564a645689bf03845fa8785af25fe0ff75dfa7ff30e834361ae4491c"
+    },
+    {
+      "purpose": "pause",
+      "path": "local/native/profiles/course-nojit/ScreenShots/GXBE69/GXBE69_2026-09-10_23-30-16.png",
+      "sha256": "a03d551b0fb622316fd281f0d262b7f5f42039d59714da710883b0243b100414"
+    },
+    {
+      "purpose": "restart_briefing",
+      "path": "local/native/profiles/course-nojit/ScreenShots/GXBE69/GXBE69_2026-09-10_23-31-51.png",
+      "sha256": "732c08cb9b643d4e4feaceee4de69860fd5af350d1e5fd4da3f5e72f5a2a4cd8"
+    }
+  ],
+  "tests": {
+    "command": "python3 -m unittest tests/test_native_gamecube.py tests/test_gamecube_research.py",
+    "passed": 10
+  },
+  "research": {
+    "report": "local/reports/gamecube/ssx3-research-seeds.json",
+    "anchors": 40,
+    "gdb_loader_static_address": "0x8024C0FC",
+    "next_runtime_targets": "Sampled fallback addresses cluster in the low-memory 0x00000C00 system-call vector; identify and measure this path before optimizing."
+  }
+}

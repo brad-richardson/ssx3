@@ -1,0 +1,49 @@
+diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
+index 981e098..8d03ab6 100644
+--- a/src/runtime/dolphin_runtime.cpp
++++ b/src/runtime/dolphin_runtime.cpp
+@@ -31,6 +31,7 @@
+ #include <cmath>
+ #include <cstddef>
+ #include <cstdio>
++#include <cstdlib>
+ #include <fmt/format.h>
+ #include <mutex>
+ #include <thread>
+@@ -302,7 +303,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+   }
+   Config::SetBase(Config::MAIN_AUDIO_BACKEND, impl->config.audio.backend);
+   Config::SetBase(Config::MAIN_INPUT_BACKGROUND_INPUT,
+-                  impl->config.input.background_input);
++                  impl->config.input.background_input ||
++                      std::getenv("SSX3_BACKGROUND_INPUT") != nullptr);
+ 
+   auto &jit = Core::System::GetInstance().GetJitInterface();
+   StaticRecompModuleSource recomp_source;
+@@ -384,12 +386,24 @@ RuntimeRunResult Runtime::Run() {
+   }
+   m_impl->booted = true;
+   std::jthread title_thread;
+-  if (!m_impl->config.headless && m_impl->config.show_fps_in_title) {
+-    title_thread = std::jthread([](std::stop_token stop_token) {
++  const bool collect_metrics = std::getenv("SSX3_RUNTIME_METRICS") != nullptr;
++  const bool capture_screenshots = !m_impl->config.headless &&
++                                  std::getenv("SSX3_SCREENSHOTS") != nullptr;
++  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics) {
++    title_thread = std::jthread([collect_metrics, capture_screenshots](std::stop_token stop_token) {
++      unsigned seconds = 0;
+       while (!stop_token.stop_requested()) {
+         Host_UpdateTitle({});
++        if (collect_metrics && seconds % 5 == 0) {
++          const auto& metrics = Core::System::GetInstance().GetPerfMetrics();
++          std::fprintf(stderr, "[ssx3-metrics] sample=%u fps=%.3f vps=%.3f speed=%.6f\n",
++                       seconds, metrics.GetFPS(), metrics.GetVPS(), metrics.GetSpeed());
++        }
++        if (capture_screenshots && seconds && seconds % 15 == 0)
++          Core::SaveScreenShot();
+         for (int i = 0; i < 10 && !stop_token.stop_requested(); ++i)
+           std::this_thread::sleep_for(std::chrono::milliseconds(100));
++        ++seconds;
+       }
+     });
+   }

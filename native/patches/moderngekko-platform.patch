@@ -1,0 +1,339 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -104,8 +104,10 @@
+     set(USE_UPNP OFF CACHE BOOL "" FORCE)
+     set(ENCODE_FRAMEDUMPS OFF CACHE BOOL "" FORCE)
+     set(ENABLE_LLVM OFF CACHE BOOL "" FORCE)
+-    # Cubeb is Dolphin's only audio backend on macOS
+-    if(APPLE OR WIN32)
++    # Cubeb is Dolphin's only audio backend on macOS; its audiounit backend
++    # uses macOS-only CoreAudio APIs, so Apple mobile builds (SunPad provides its own
++    # AVAudioEngine backend) keep cubeb off.
++    if((APPLE AND NOT (CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS")) OR WIN32)
+         set(ENABLE_CUBEB ON CACHE BOOL "" FORCE)
+     else()
+         set(ENABLE_CUBEB OFF CACHE BOOL "" FORCE)
+@@ -245,7 +247,15 @@
+             vendor/dolphin/Source/Core/DolphinNoGUI/PlatformWin32.cpp)
+         target_link_libraries(moderngekko PRIVATE dwmapi)
+     endif()
+-    if(APPLE)
++    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS")
++        # SunPad's CAMetalLayer platform for Apple mobile targets (no macOS windowing APIs)
++        target_sources(moderngekko PRIVATE
++            vendor/dolphin/Source/Core/DolphinNoGUI/PlatformIOS.mm)
++        set_source_files_properties(
++            vendor/dolphin/Source/Core/DolphinNoGUI/PlatformIOS.mm
++            PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
++        target_compile_definitions(moderngekko PRIVATE MODERNGEKKO_HAVE_IOS=1)
++    elseif(APPLE)
+         # Dolphin's windowed backend for macOS
+         target_sources(moderngekko PRIVATE
+             vendor/dolphin/Source/Core/DolphinNoGUI/PlatformMacos.mm)
+diff --git a/include/moderngekko/runtime.hpp b/include/moderngekko/runtime.hpp
+--- a/include/moderngekko/runtime.hpp
++++ b/include/moderngekko/runtime.hpp
+@@ -65,6 +65,8 @@
+   bool fullscreen = false;
+   bool allow_interpreter = false;
+   bool show_fps_in_title = true;
++  // CAMetalLayer owned by the embedding iOS application.
++  void* render_surface = nullptr;
+   std::optional<std::string> window_title;
+ };
+ 
+diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
+--- a/src/runtime/dolphin_runtime.cpp
++++ b/src/runtime/dolphin_runtime.cpp
+@@ -3,6 +3,7 @@
+ #include "AudioCommon/AudioCommon.h"
+ #include "Common/Config/Config.h"
+ #include "Common/HookableEvent.h"
++#include "Common/MemoryUtil.h"
+ #include "Core/Boot/Boot.h"
+ #include "Core/Boot/BootManager.h"
+ #include "Core/Config/GraphicsSettings.h"
+@@ -24,6 +25,10 @@
+ #include "moderngekko/mod_loader.hpp"
+ #include "moderngekko/module_loader.hpp"
+ 
++#ifdef MODERNGEKKO_HAVE_IOS
++extern "C" void ModernGekkoSetIOSRenderSurface(void* surface);
++#endif
++
+ #include <algorithm>
+ #include <array>
+ #include <atomic>
+@@ -31,6 +36,7 @@
+ #include <cmath>
+ #include <cstddef>
+ #include <cstdio>
++#include <cstdlib>
+ #include <fmt/format.h>
+ #include <mutex>
+ #include <thread>
+@@ -244,6 +250,10 @@
+ 
+   if (impl->config.headless)
+     impl->platform = Platform::CreateHeadlessPlatform();
++#ifdef MODERNGEKKO_HAVE_IOS
++  else
++    impl->platform = Platform::CreateIOSPlatform();
++#endif
+ #ifdef _WIN32
+   else
+     impl->platform = Platform::CreateWin32Platform();
+@@ -267,12 +277,21 @@
+                          "the requested Dolphin host platform is unavailable"}};
+   }
+ 
++#ifdef MODERNGEKKO_HAVE_IOS
++  ModernGekkoSetIOSRenderSurface(impl->config.render_surface);
++#endif
+   const WindowSystemInfo wsi = impl->platform->GetWindowSystemInfo();
+   UICommon::InitControllers(wsi);
+   impl->controllers_initialized = true;
+   impl->platform->SetTitle(impl->title);
+ 
+   Config::SetBase(Config::MAIN_CPU_CORE, PowerPC::CPUCore::StaticRecomp);
++  if (Common::IsRuntimeCodeGenerationDisabled()) {
++    Config::SetBase(Config::MAIN_LARGE_ENTRY_POINTS_MAP, false);
++    Config::SetBase(Config::MAIN_DSP_JIT, false);
++    Config::SetBase(Config::GFX_VERTEX_LOADER_TYPE, VertexLoaderType::Software);
++    std::fprintf(stderr, "[ssx3-nojit] executable allocation guard enabled; software vertex loader; DSP JIT disabled\n");
++  }
+   if (!impl->config.graphics.backend.empty())
+     Config::SetBase(Config::MAIN_GFX_BACKEND, impl->config.graphics.backend);
+   else if (impl->config.headless)
+@@ -292,6 +311,9 @@
+              !std::ranges::contains(audio_backends,
+                                     impl->config.audio.backend)) {
+     constexpr std::array preferred_backends = {
++#ifdef MODERNGEKKO_HAVE_IOS
++        BACKEND_COREAUDIO,
++#endif
+         BACKEND_CUBEB, BACKEND_PULSEAUDIO, BACKEND_ALSA};
+     const auto preferred =
+         std::ranges::find_if(preferred_backends, [&](const char *backend) {
+@@ -302,7 +324,8 @@
+   }
+   Config::SetBase(Config::MAIN_AUDIO_BACKEND, impl->config.audio.backend);
+   Config::SetBase(Config::MAIN_INPUT_BACKGROUND_INPUT,
+-                  impl->config.input.background_input);
++                  impl->config.input.background_input ||
++                      std::getenv("SSX3_BACKGROUND_INPUT") != nullptr);
+ 
+   auto &jit = Core::System::GetInstance().GetJitInterface();
+   StaticRecompModuleSource recomp_source;
+@@ -383,18 +406,31 @@
+                          "Dolphin could not boot sys/main.dol"}};
+   }
+   m_impl->booted = true;
+-  std::jthread title_thread;
+-  if (!m_impl->config.headless && m_impl->config.show_fps_in_title) {
+-    title_thread = std::jthread([](std::stop_token stop_token) {
+-      while (!stop_token.stop_requested()) {
++  std::thread title_thread;
++  std::atomic<bool> stop_title{false};
++  const bool collect_metrics = std::getenv("SSX3_RUNTIME_METRICS") != nullptr;
++  const bool capture_screenshots = !m_impl->config.headless &&
++                                  std::getenv("SSX3_SCREENSHOTS") != nullptr;
++  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics) {
++    title_thread = std::thread([collect_metrics, capture_screenshots, &stop_title] {
++      unsigned seconds = 0;
++      while (!stop_title.load()) {
+         Host_UpdateTitle({});
+-        for (int i = 0; i < 10 && !stop_token.stop_requested(); ++i)
++        if (collect_metrics && seconds % 5 == 0) {
++          const auto& metrics = Core::System::GetInstance().GetPerfMetrics();
++          std::fprintf(stderr, "[ssx3-metrics] sample=%u fps=%.3f vps=%.3f speed=%.6f\n",
++                       seconds, metrics.GetFPS(), metrics.GetVPS(), metrics.GetSpeed());
++        }
++        if (capture_screenshots && seconds && seconds % 15 == 0)
++          Core::SaveScreenShot();
++        for (int i = 0; i < 10 && !stop_title.load(); ++i)
+           std::this_thread::sleep_for(std::chrono::milliseconds(100));
++        ++seconds;
+       }
+     });
+   }
+   m_impl->platform->MainLoop();
+-  title_thread.request_stop();
++  stop_title = true;
+   if (title_thread.joinable())
+     title_thread.join();
+   m_impl->platform->SaveWindowGeometry();
+diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
+--- a/src/runtime/game.cpp
++++ b/src/runtime/game.cpp
+@@ -8,6 +8,12 @@
+ #include <iomanip>
+ #include <sstream>
+ #include <vector>
++#include <cstring>
++#include <limits>
++
++#if defined(__APPLE__) && !defined(MODERNGEKKO_PORTABLE_SHA256)
++#include <CommonCrypto/CommonDigest.h>
++#endif
+ 
+ namespace moderngekko
+ {
+@@ -32,29 +38,87 @@
+          (std::uint32_t{p[2]} << 8) | p[3];
+ }
+ 
+-std::string Sha256(std::vector<std::uint8_t> data)
+-{
+-  const std::uint64_t bit_size = static_cast<std::uint64_t>(data.size()) * 8;
+-  data.push_back(0x80);
+-  while ((data.size() % 64) != 56)
+-    data.push_back(0);
+-  for (int shift = 56; shift >= 0; shift -= 8)
+-    data.push_back(static_cast<std::uint8_t>(bit_size >> shift));
+-
+-  std::array<std::uint32_t, 8> h = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+-                                     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+-  for (std::size_t offset = 0; offset < data.size(); offset += 64)
++// Incremental hashing avoids retaining and then growing whole asset archives.
++// Apple platforms use the system implementation; the portable path has the
++// same streaming contract for other hosts.
++class Sha256State
++{
++public:
++  Sha256State()
++  {
++#if defined(__APPLE__) && !defined(MODERNGEKKO_PORTABLE_SHA256)
++    CC_SHA256_Init(&m_context);
++#endif
++  }
++
++  void Update(const std::uint8_t* data, std::size_t size)
++  {
++#if defined(__APPLE__) && !defined(MODERNGEKKO_PORTABLE_SHA256)
++    while (size)
++    {
++      const auto count = static_cast<CC_LONG>(std::min<std::size_t>(size, std::numeric_limits<CC_LONG>::max()));
++      CC_SHA256_Update(&m_context, data, count);
++      data += count;
++      size -= count;
++    }
++#else
++    m_size += size;
++    while (size)
++    {
++      const auto count = std::min(size, m_buffer.size() - m_used);
++      std::memcpy(m_buffer.data() + m_used, data, count);
++      m_used += count;
++      data += count;
++      size -= count;
++      if (m_used == m_buffer.size())
++      {
++        Transform(m_buffer.data());
++        m_used = 0;
++      }
++    }
++#endif
++  }
++
++  std::string Finish()
++  {
++    std::array<std::uint8_t, 32> digest{};
++#if defined(__APPLE__) && !defined(MODERNGEKKO_PORTABLE_SHA256)
++    CC_SHA256_Final(digest.data(), &m_context);
++#else
++    const std::uint64_t bits = m_size * 8;
++    std::array<std::uint8_t, 128> padding{};
++    padding[0] = 0x80;
++    const auto length = m_used < 56 ? 56 - m_used : 120 - m_used;
++    for (int i = 0; i < 8; ++i)
++      padding[length + i] = static_cast<std::uint8_t>(bits >> (56 - 8*i));
++    Update(padding.data(), length + 8);
++    for (std::size_t i = 0; i < m_hash.size(); ++i)
++      for (int byte = 0; byte < 4; ++byte)
++        digest[4*i + byte] = static_cast<std::uint8_t>(m_hash[i] >> (24 - 8*byte));
++#endif
++    std::ostringstream out;
++    out << std::hex << std::setfill('0');
++    for (const auto byte : digest)
++      out << std::setw(2) << static_cast<unsigned int>(byte);
++    return out.str();
++  }
++
++private:
++#if defined(__APPLE__) && !defined(MODERNGEKKO_PORTABLE_SHA256)
++  CC_SHA256_CTX m_context{};
++#else
++  void Transform(const std::uint8_t* data)
+   {
+     std::array<std::uint32_t, 64> w{};
+     for (std::size_t i = 0; i < 16; ++i)
+-      w[i] = ReadBE32(data.data() + offset + i * 4);
++      w[i] = ReadBE32(data + i * 4);
+     for (std::size_t i = 16; i < 64; ++i)
+     {
+       const auto s0 = std::rotr(w[i - 15], 7) ^ std::rotr(w[i - 15], 18) ^ (w[i - 15] >> 3);
+       const auto s1 = std::rotr(w[i - 2], 17) ^ std::rotr(w[i - 2], 19) ^ (w[i - 2] >> 10);
+       w[i] = w[i - 16] + s0 + w[i - 7] + s1;
+     }
+-    auto [a, b, c, d, e, f, g, hh] = h;
++    auto [a, b, c, d, e, f, g, hh] = m_hash;
+     for (std::size_t i = 0; i < 64; ++i)
+     {
+       const auto s1 = std::rotr(e, 6) ^ std::rotr(e, 11) ^ std::rotr(e, 25);
+@@ -64,14 +128,22 @@
+       const auto maj = (a & b) ^ (a & c) ^ (b & c);
+       hh = g; g = f; f = e; e = d + t1; d = c; c = b; b = a; a = t1 + s0 + maj;
+     }
+-    h[0] += a; h[1] += b; h[2] += c; h[3] += d;
+-    h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
+-  }
+-  std::ostringstream out;
+-  out << std::hex << std::setfill('0');
+-  for (const auto word : h)
+-    out << std::setw(8) << word;
+-  return out.str();
++    m_hash[0] += a; m_hash[1] += b; m_hash[2] += c; m_hash[3] += d;
++    m_hash[4] += e; m_hash[5] += f; m_hash[6] += g; m_hash[7] += hh;
++  }
++  std::array<std::uint32_t, 8> m_hash = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
++                                       0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
++  std::array<std::uint8_t, 64> m_buffer{};
++  std::size_t m_used = 0;
++  std::uint64_t m_size = 0;
++#endif
++};
++
++std::string Sha256(const std::vector<std::uint8_t>& data)
++{
++  Sha256State state;
++  state.Update(data.data(), data.size());
++  return state.Finish();
+ }
+ 
+ std::optional<std::vector<std::uint8_t>> ReadFile(const std::filesystem::path& path)
+@@ -92,10 +164,19 @@
+ 
+ std::optional<std::string> HashFileSha256(const std::filesystem::path& path)
+ {
+-  auto bytes = ReadFile(path);
+-  if (!bytes)
+-    return std::nullopt;
+-  return Sha256(std::move(*bytes));
++  std::ifstream file(path, std::ios::binary);
++  if (!file)
++    return std::nullopt;
++  Sha256State state;
++  std::array<std::uint8_t, 65536> buffer{};
++  while (file)
++  {
++    file.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
++    state.Update(buffer.data(), static_cast<std::size_t>(file.gcount()));
++  }
++  if (!file.eof() || file.bad())
++    return std::nullopt;
++  return state.Finish();
+ }
+ 
+ std::optional<std::string> HashDirectorySha256(const std::filesystem::path& root)

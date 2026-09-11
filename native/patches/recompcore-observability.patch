@@ -1,0 +1,103 @@
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp
+index e3581cc..0305a0d 100644
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp
+@@ -185,11 +185,17 @@ void StaticRecompCore::Init()
+   m_lockstep_verifier = std::make_unique<StaticRecompLockstep::StaticRecompLockstepVerifier>(*this);
+   m_lockstep_verifier->Init();
+ 
++  const char* no_jit = std::getenv("STATICRECOMP_NO_JIT");
++  if (!(no_jit && std::string_view(no_jit) == "1"))
++  {
+ #ifdef _M_ARM_64
+-  m_fallback_jit = std::make_unique<JitArm64>(m_system);
++    m_fallback_jit = std::make_unique<JitArm64>(m_system);
+ #elif defined(_M_X86_64)
+-  m_fallback_jit = std::make_unique<Jit64>(m_system);
++    m_fallback_jit = std::make_unique<Jit64>(m_system);
+ #endif
++  }
++  std::fprintf(stderr, "[staticrecomp] fallback mode: %s\n",
++               m_fallback_jit ? "jit" : "interpreter");
+   if (m_fallback_jit)
+   {
+     m_fallback_jit->SetStaticRecompFallback(true);
+@@ -201,6 +207,9 @@ void StaticRecompCore::Init()
+ void StaticRecompCore::Shutdown()
+ {
+   g_static_recomp_core = nullptr;
++  std::fprintf(stderr,
++               "[staticrecomp] fallback_jit_runs=%llu\n",
++               static_cast<unsigned long long>(m_fallback_jit_runs));
+   std::fprintf(stderr,
+                "[staticrecomp] shutdown: native=%llu fallback=%llu native_exc=%llu hook_fb=%llu "
+                "smc_failed=%u verifications=%llu reverify_events=%llu bursts=%llu cycles=%llu\n",
+@@ -219,6 +228,16 @@ void StaticRecompCore::Shutdown()
+                  dispatch_samples[i].first,
+                  static_cast<unsigned long long>(dispatch_samples[i].second));
+   }
++  std::vector<std::pair<u32, u64>> fallback_samples(m_fallback_samples.begin(),
++                                                    m_fallback_samples.end());
++  std::sort(fallback_samples.begin(), fallback_samples.end(),
++            [](const auto& left, const auto& right) { return left.second > right.second; });
++  for (std::size_t i = 0; i < std::min<std::size_t>(fallback_samples.size(), 16); ++i)
++  {
++    std::fprintf(stderr, "[staticrecomp] fallback-site pc=%08x samples=%llu\n",
++                 fallback_samples[i].first,
++                 static_cast<unsigned long long>(fallback_samples[i].second));
++  }
+   NOTICE_LOG_FMT(POWERPC,
+                  "StaticRecomp: shutdown. native_dispatches={} fallback_steps={} "
+                  "native_exceptions={} hook_fallback_instructions={} smc_failed_chunks={} "
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
+index 44d027b..5880de9 100644
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
+@@ -160,10 +160,12 @@ private:
+ 
+   u64 m_native_dispatches = 0;
+   u64 m_fallback_steps = 0;
++  u64 m_fallback_jit_runs = 0;
+   u64 m_native_exceptions = 0;
+   u64 m_hook_fallback_instructions = 0;
+   u64 m_timebase_cycle_remainder = 0;
+   std::unordered_map<u32, u64> m_dispatch_samples;
++  std::unordered_map<u32, u64> m_fallback_samples;
+   u64 m_bursts = 0;          // SyncIn..SyncOut native runs (diagnostic)
+   u64 m_charged_cycles = 0;  // cycles flushed from module charges (diagnostic)
+ 
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
+index 71a21c5..105d67a 100644
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
+@@ -93,6 +93,7 @@ void StaticRecompCore::Run()
+ 
+   if (!m_module_active && m_fallback_jit && !m_guest.host_call)
+   {
++    ++m_fallback_jit_runs;
+     m_fallback_jit->Run();
+     return;
+   }
+@@ -222,17 +223,22 @@ void StaticRecompCore::Run()
+         // interrupts are delivered at slice start, as in Interpreter::Run.
+         if (m_module_active && IsForcedFallbackAddress(ppc.pc))
+         {
++          if (m_collect_dispatch_samples && (m_fallback_steps & 4095u) == 0)
++            ++m_fallback_samples[ppc.pc];
+           ppc.downcount -= interpreter.SingleStepInner();
+           ++m_fallback_steps;
+         }
+         else if (m_fallback_jit)
+         {
++          ++m_fallback_jit_runs;
+           m_fallback_jit->Run();
+         }
+         else
+         {
+           do
+           {
++            if (m_collect_dispatch_samples && (m_fallback_steps & 4095u) == 0)
++              ++m_fallback_samples[ppc.pc];
+             ppc.downcount -= interpreter.SingleStepInner();
+             ++m_fallback_steps;
+           } while (!(m_module_active && DispatchableAt(ppc.pc)) &&

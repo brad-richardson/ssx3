@@ -1,0 +1,280 @@
+#!/usr/bin/env python3
+"""Pinned macOS SSX 3 AOT prototype. Game bytes and builds stay under local/.
+
+bootstrap fetches sources; configure/build compile the runtime; module translates
+the verified DOL; run launches with CPU JIT fallback disabled by default.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import time
+
+ROOT = Path(__file__).resolve().parents[1]
+PINS = json.loads((ROOT / "native/dependencies.json").read_text())
+SOURCE = ROOT / "third_party/ModernGekko"
+CORE = SOURCE / "vendor/dolphin"
+BUILD = ROOT / "local/native/runtime-build"
+MODULE = ROOT / "local/native/ssx3-module"
+DEFAULT_GAME = Path("/Volumes/share-1/brad/games/ssx3-workbench/native/GXBE69")
+
+
+def sha256(path):
+    with Path(path).open("rb") as file:
+        return hashlib.file_digest(file, "sha256").hexdigest()
+
+
+def run(command, **kwargs):
+    print("+", " ".join(map(str, command)), flush=True)
+    return subprocess.run(list(map(str, command)), check=True, **kwargs)
+
+
+def revision(path):
+    return subprocess.check_output(["git", "-C", str(path), "rev-parse", "HEAD"], text=True).strip()
+
+
+def check_pins():
+    for path, expected in ((SOURCE, PINS["moderngekko"]["revision"]),
+                           (CORE, PINS["recompcore_revision"]),
+                           (CORE / "DolRecomp", PINS["dolrecomp_revision"])):
+        actual = revision(path)
+        if actual != expected:
+            raise RuntimeError(f"{path}: expected {expected}, found {actual}")
+
+
+def check_patches():
+    for checkout, filename in ((CORE, "recompcore-platform.patch"), (SOURCE, "moderngekko-platform.patch")):
+        run(["git", "-C", checkout, "apply", "--reverse", "--check", ROOT / "native/patches" / filename])
+
+
+def bootstrap(args):
+    if not SOURCE.exists():
+        SOURCE.mkdir(parents=True)
+        run(["git", "init", SOURCE])
+        run(["git", "-C", SOURCE, "remote", "add", "origin", PINS["moderngekko"]["url"]])
+        run(["git", "-C", SOURCE, "fetch", "--depth", "1", "origin", PINS["moderngekko"]["revision"]])
+        run(["git", "-C", SOURCE, "checkout", "--detach", "FETCH_HEAD"])
+    if revision(SOURCE) != PINS["moderngekko"]["revision"]:
+        raise RuntimeError("Existing ModernGekko checkout has a different revision; refusing to replace it")
+    run(["git", "-C", SOURCE, "submodule", "update", "--init", "--depth", "1", "vendor/dolphin"])
+    run(["git", "-C", CORE, "submodule", "update", "--init", "--depth", "1", "--jobs", args.jobs,
+         *PINS["core_submodules"]])
+    run(["git", "-C", CORE / "Externals/cubeb/cubeb", "submodule", "update", "--init", "--recursive", "--depth", "1"])
+    check_pins()
+    for checkout, filename in ((CORE, "recompcore-platform.patch"), (SOURCE, "moderngekko-platform.patch")):
+        patch = ROOT / "native/patches" / filename
+        already = subprocess.run(["git", "-C", str(checkout), "apply", "--reverse", "--check", str(patch)],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        if not already:
+            run(["git", "-C", checkout, "apply", "--check", patch])
+            run(["git", "-C", checkout, "apply", patch])
+
+
+def ninja():
+    path = ROOT / "local/tooling/ninja"
+    if path.is_file():
+        return path
+    found = shutil.which("ninja")
+    if not found:
+        raise RuntimeError("Install Ninja or place the verified macOS binary at local/tooling/ninja (see native/dependencies.json)")
+    return Path(found)
+
+
+def configure(args):
+    check_pins()
+    check_patches()
+    run(["cmake", "-S", SOURCE, "-B", BUILD, "-G", "Ninja",
+         f"-DCMAKE_MAKE_PROGRAM={ninja()}", "-DCMAKE_C_COMPILER=/usr/bin/clang",
+         "-DCMAKE_CXX_COMPILER=/usr/bin/clang++", "-DCMAKE_AR=/usr/bin/ar", "-DCMAKE_RANLIB=/usr/bin/ranlib",
+         "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0", "-DBUILD_TESTING=OFF",
+         "-DDOLRECOMP_ENABLE_LLVM=OFF", "-DENABLE_VULKAN=OFF", "-DUSE_BUNDLED_MOLTENVK=OFF",
+         "-DMODERNGEKKO_GAMECUBE_CONTROLLERS=ON", f"-DMODERNGEKKO_REQUIRED_DISC_ID={PINS['disc_id']}",
+         f"-DMODERNGEKKO_REQUIRED_DOL_SHA256={PINS['dol_sha256']}",
+         "-DMODERNGEKKO_DEFAULT_WINDOW_TITLE=SSX 3 Native Prototype"])
+
+
+def build(args):
+    check_pins()
+    check_patches()
+    run(["cmake", "--build", BUILD, "--target", "moderngekko-run", "moderngekko-port",
+         "moderngekko-module-info", "-j", args.jobs])
+
+
+def executable(name):
+    matches = [p for p in BUILD.rglob(name) if p.is_file() and os.access(p, os.X_OK)]
+    if not matches:
+        raise RuntimeError(f"Build the runtime first: missing {name}")
+    return min(matches, key=lambda p: len(p.parts))
+
+
+def module(args):
+    check_pins()
+    dol = args.dol.resolve()
+    if sha256(dol) != PINS["dol_sha256"]:
+        raise RuntimeError("DOL hash differs from verified GXBE69 revision 0")
+    generator = executable("dolrecomp")
+    generated = MODULE / "codegen/generated"
+    receipt = MODULE / "generation.json"
+    identity = {"dol_sha256": PINS["dol_sha256"], "dolrecomp_revision": PINS["dolrecomp_revision"],
+                "generator_sha256": sha256(generator), "backend": "c"}
+    if not receipt.exists() or json.loads(receipt.read_text()) != identity:
+        if generated.exists():
+            raise RuntimeError("Existing generated output has a different or incomplete identity; use a fresh module directory")
+        MODULE.mkdir(parents=True, exist_ok=True)
+        run([generator, f"-j{args.jobs}", "--backend=c", "--cpu", "gekko", "--gamecube", dol, MODULE / "codegen"])
+        shutil.copy2(dol, generated / "main.dol")
+        receipt.write_text(json.dumps(identity, indent=2) + "\n")
+    run(["cmake", "-S", CORE / "module-template", "-B", MODULE / "build", "-G", "Ninja",
+         f"-DCMAKE_MAKE_PROGRAM={ninja()}", "-DCMAKE_C_COMPILER=/usr/bin/clang",
+         "-DCMAKE_AR=/usr/bin/ar", "-DCMAKE_RANLIB=/usr/bin/ranlib", "-DCMAKE_BUILD_TYPE=Release",
+         "-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0", f"-DGAME_ID={PINS['disc_id']}",
+         f"-DGENERATED_DIR={generated}", f"-DGXRUNTIME_DIR={CORE / 'GXRuntime'}",
+         f"-DCHASSIS_ABI_DIR={CORE / 'Source/Core/Core/PowerPC/StaticRecomp'}",
+         f"-DRECOMPCORE_MODULE_OPT_LEVEL={args.opt_level}"])
+    run(["cmake", "--build", MODULE / "build", "-j", args.jobs])
+    library = MODULE / "build/gGXBE69_recomp.dylib"
+    metadata = {**identity, "dependencies": PINS, "module_sha256": sha256(library),
+                "opt_level": args.opt_level, "cpu_jit_required": "not established by compilation"}
+    (MODULE / "manifest.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    run([executable("moderngekko-module-info"), library])
+
+
+def runtime_evidence(text):
+    counters = re.search(r"\[staticrecomp\] shutdown: ([^\n]+)", text)
+    jit = re.search(r"\[staticrecomp\] fallback_jit_runs=(\d+)", text)
+    mode = re.search(r"\[staticrecomp\] fallback mode: (\w+)", text)
+    return {
+        "module_loaded": "[staticrecomp] module loaded:" in text,
+        "cpu_fallback_mode": mode[1] if mode else None,
+        "fallback_jit_runs": int(jit[1]) if jit else None,
+        "shutdown_counters": {k: int(v) for k, v in re.findall(r"(\w+)=(\d+)", counters[1])} if counters else None,
+        "performance_samples": [dict(sample=int(sample), fps=float(fps), vps=float(vps), speed=float(speed))
+                                for sample, fps, vps, speed in re.findall(
+                                    r"\[ssx3-metrics\] sample=(\d+) fps=([\d.]+) vps=([\d.]+) speed=([\d.]+)", text)],
+        "sites": [dict(kind=kind, pc="0x" + pc, samples=int(count)) for kind, pc, count in re.findall(
+            r"\[staticrecomp\] (dispatch|fallback)-site pc=([0-9a-f]+) samples=(\d+)", text)],
+    }
+
+
+def launch(args):
+    check_pins()
+    check_patches()
+    if args.seconds is not None and args.seconds <= 0:
+        raise RuntimeError("--seconds must be positive")
+    game = args.game.resolve()
+    if sha256(game / "sys/main.dol") != PINS["dol_sha256"]:
+        raise RuntimeError("Extracted game's DOL hash is incorrect")
+    profile = ROOT / "local/native/profiles" / args.profile
+    if profile.parent != ROOT / "local/native/profiles" or args.profile in (".", ".."):
+        raise RuntimeError("--profile must be a single directory name")
+    profile.mkdir(parents=True, exist_ok=True)
+    config_dir = profile / "Config"
+    config_dir.mkdir(exist_ok=True)
+    config = config_dir / "Dolphin.ini"
+    if not config.exists():
+        config.write_text("[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\n[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
+    if args.pipe_controller:
+        pipes = profile / "Pipes"
+        pipes.mkdir(exist_ok=True)
+        pipe = pipes / "ssx3"
+        if not pipe.exists():
+            os.mkfifo(pipe)
+        import stat
+        if not stat.S_ISFIFO(pipe.stat().st_mode):
+            raise RuntimeError(f"{pipe} must be a named pipe")
+        pad = config_dir / "GCPadNew.ini"
+        mapping = "[GCPad1]\nDevice = Pipe/0/ssx3\nOptions/Always Connected = True\n"
+        for label, button in (("A", "A"), ("B", "B"), ("X", "X"), ("Y", "Y"), ("Z", "Z"), ("Start", "START")):
+            mapping += f"Buttons/{label} = `Button {button}`\n"
+        for group, prefix in (("Main Stick", "MAIN"), ("C-Stick", "C")):
+            for direction, axis in (("Up", "Y +"), ("Down", "Y -"), ("Left", "X -"), ("Right", "X +")):
+                mapping += f"{group}/{direction} = `Axis {prefix} {axis}`\n"
+        for direction in ("Up", "Down", "Left", "Right"):
+            mapping += f"D-Pad/{direction} = `Button D_{direction.upper()}`\n"
+        for trigger in ("L", "R"):
+            mapping += f"Triggers/{trigger} = `Button {trigger}`\nTriggers/{trigger}-Analog = `Axis {trigger} +`\n"
+        if pad.exists() and "Device = Pipe/0/ssx3" not in pad.read_text():
+            raise RuntimeError("Use a fresh --profile for pipe input; preserving the existing controller mapping")
+        if not pad.exists():
+            pad.write_text(mapping)
+    reports = ROOT / "local/reports/native-runs"
+    reports.mkdir(parents=True, exist_ok=True)
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    log_path = reports / f"{stamp}.log"
+    env = os.environ.copy()
+    env.update(SSX3_NO_EXECUTABLE_MEMORY="0" if args.jit_fallback else "1",
+               STATICRECOMP_NO_JIT="0" if args.jit_fallback else "1",
+               STATICRECOMP_DISPATCH_SAMPLES="1",
+               SSX3_RUNTIME_METRICS="1",
+               STATICRECOMP_TRACE_FILE=str(reports / f"{stamp}-dispatch.csv"))
+    if not args.headless:
+        env["SSX3_SCREENSHOTS"] = "1"
+    if args.pipe_controller:
+        env["SSX3_BACKGROUND_INPUT"] = "1"
+    command = [str(executable("moderngekko-run")), "--game", str(game), "--module",
+               str(MODULE / "build/gGXBE69_recomp.dylib"), "--user-dir", str(profile),
+               "--no-mods", "--graphics", "Null" if args.headless else "Metal"]
+    if args.headless:
+        command += ["--headless", "--audio", "Null"]
+    print(f"Log: {log_path}", flush=True)
+    runner_sha256 = sha256(command[0])
+    module_sha256 = sha256(MODULE / "build/gGXBE69_recomp.dylib")
+    started = time.monotonic()
+    with log_path.open("w") as log:
+        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env)
+        try:
+            code = process.wait(timeout=args.seconds)
+        except (subprocess.TimeoutExpired, KeyboardInterrupt):
+            process.terminate()
+            try:
+                code = process.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                code = process.wait()
+    result = {"command": command, "exit_code": code, "seconds": time.monotonic() - started,
+              "requested_cpu_jit_fallback": args.jit_fallback, "log": str(log_path),
+              "profile": str(profile), "runner_sha256": runner_sha256,
+              "module_sha256": module_sha256,
+              "evidence": runtime_evidence(log_path.read_text(errors="replace"))}
+    (reports / f"{stamp}.json").write_text(json.dumps(result, indent=2) + "\n")
+    print(json.dumps(result, indent=2))
+    if code:
+        raise RuntimeError(f"Runtime exited {code}; inspect {log_path}")
+    if not result["evidence"]["module_loaded"] or not result["evidence"]["shutdown_counters"]:
+        raise RuntimeError(f"Run lacks module/shutdown evidence; inspect {log_path}")
+    if not args.jit_fallback and (result["evidence"]["cpu_fallback_mode"] != "interpreter" or
+                                  result["evidence"]["fallback_jit_runs"] != 0):
+        raise RuntimeError("Runtime did not verify the requested CPU interpreter fallback mode")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("bootstrap", "configure", "build", "module", "run"))
+    parser.add_argument("--jobs", type=int, default=4)
+    parser.add_argument("--dol", type=Path, default=ROOT / "local/source/gamecube/ssx3/sys/main.dol")
+    parser.add_argument("--opt-level", choices=("0", "1", "2", "3"), default="2")
+    parser.add_argument("--game", type=Path, default=DEFAULT_GAME)
+    parser.add_argument("--profile", default="stock")
+    parser.add_argument("--seconds", type=float)
+    parser.add_argument("--headless", action="store_true")
+    parser.add_argument("--jit-fallback", action="store_true", help="Desktop diagnostic only; default is interpreter fallback")
+    parser.add_argument("--pipe-controller", action="store_true", help="Map a test pad to PROFILE/Pipes/ssx3")
+    args = parser.parse_args()
+    if args.jobs < 1:
+        parser.error("--jobs must be positive")
+    try:
+        {"bootstrap": bootstrap, "configure": configure, "build": build,
+         "module": module, "run": launch}[args.command](args)
+    except (RuntimeError, OSError, subprocess.CalledProcessError) as error:
+        parser.exit(1, f"error: {error}\n")
+
+
+if __name__ == "__main__":
+    main()
