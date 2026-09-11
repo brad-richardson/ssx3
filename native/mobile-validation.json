@@ -1,0 +1,179 @@
+{
+  "date": "2026-09-11",
+  "stage": "iOS development build and guarded desktop gameplay",
+  "disc_id": "GXBE69",
+  "dol_sha256": "b92162d6c616be3ce46b4eb61d5ddbb49891bc387ea7ddb2fea5792842fa29ce",
+  "mac_guarded_runs": [
+    {
+      "receipt": "local/reports/native-runs/20260910-235740.json",
+      "seconds": 242.2760512920213,
+      "exit_code": 0,
+      "runner_sha256": "a1acbcaa546fc19a547ecb91dfac9c93920f76f9e2549b8c7311907a46c941e5",
+      "module_sha256": "ca06dba7726f57547efe2508f9a2ebe437ad249568a30da9e127f51bdd37e547",
+      "allocator_guard_reported": true,
+      "forbidden_allocation_reported": false,
+      "cpu_fallback_mode": "interpreter",
+      "fallback_jit_runs": 0,
+      "shutdown_counters": {
+        "native": 1048575797,
+        "fallback": 92332421,
+        "native_exc": 11606048,
+        "hook_fb": 243330006,
+        "smc_failed": 0,
+        "verifications": 269,
+        "reverify_events": 137,
+        "bursts": 24630679,
+        "cycles": 111197651098
+      }
+    },
+    {
+      "receipt": "local/reports/native-runs/20260911-000453.json",
+      "seconds": 287.06781966699054,
+      "exit_code": 0,
+      "runner_sha256": "a1acbcaa546fc19a547ecb91dfac9c93920f76f9e2549b8c7311907a46c941e5",
+      "module_sha256": "ca06dba7726f57547efe2508f9a2ebe437ad249568a30da9e127f51bdd37e547",
+      "allocator_guard_reported": true,
+      "forbidden_allocation_reported": false,
+      "cpu_fallback_mode": "interpreter",
+      "fallback_jit_runs": 0,
+      "shutdown_counters": {
+        "native": 1381244361,
+        "fallback": 91190419,
+        "native_exc": 10719434,
+        "hook_fb": 250353158,
+        "smc_failed": 0,
+        "verifications": 469,
+        "reverify_events": 302,
+        "bursts": 26846848,
+        "cycles": 113717425746
+      }
+    }
+  ],
+  "mac_limitations": [
+    "Runs include startup, menus, loads, and pause.",
+    "Snow Jam gameplay observed during the second run; concurrent iOS builds prevent clean performance comparison.",
+    "Restart confirmation reached; accepting the corrected confirmation sequence still needs verification.",
+    "Desktop runner predates the additional audio diagnostic; runner hash identifies the tested executable."
+  ],
+  "ios_device": {
+    "model": "iPhone 16 Pro Max",
+    "os": "26.6.1",
+    "build_receipt": "local/native/ios-device/build-receipt.json",
+    "unsigned_executable_sha256": "e88798e7617be1a61b08af9f2538dc040b1083e4c20b2b56e910da52ed7dc8d7",
+    "signed_executable_sha256": "9ef19b0fabf37d20914bbdb4badc21fe8c94381ea967f90bbd0403962ee1f236",
+    "module_archive_sha256": "55229a0262c16617a80ffa4573d054487bc946db97062d5b81a7a1d1654aa66a",
+    "patch_sha256": {
+      "recompcore-platform.patch": "bfed2d3fa253dec7ef4d5083ead56f7ddb5dcca5091c00324eccce81b3f06142",
+      "moderngekko-platform.patch": "9a26451f6a8c2ebea30199fb4c2e46ad89860c9c0ae1377699bcc41a54d81ebf"
+    },
+    "installation_receipt": "local/reports/mobile/20260911-003631-044243-device.json",
+    "installed": true,
+    "full_game_data_installed": true,
+    "gameplay_verified": true,
+    "performance_measured": true,
+    "pending": "Sustained 10-15 minute soak on the phone, audio/save checks. Stick build installed 2026-09-11 08:24 EDT, awaiting user feedback.",
+    "game_data_receipts": [
+      "local/reports/mobile/20260911-081130-412637-device.json",
+      "local/reports/mobile/20260911-081132-463842-device.json"
+    ],
+    "launch_fix": "mobile_gamecube.py now passes '--' before app flags; devicectl had parsed -ssxAutoTest as its -t timeout option.",
+    "smoke_run": {
+      "report": "local/reports/mobile/20260911-082357/Reports/1789129189",
+      "sequence": "native/ios/snow-jam-smoke.json",
+      "duration_seconds": 240,
+      "app_stopped_cleanly": true,
+      "fallback_jit_runs": 0,
+      "forbidden_allocation_reported": false,
+      "shutdown_counters": {
+        "native": 1430503888,
+        "fallback": 70374414,
+        "native_exc": 7506057,
+        "hook_fb": 254438769,
+        "smc_failed": 0,
+        "verifications": 479,
+        "reverify_events": 312,
+        "bursts": 22396850,
+        "cycles": 115282601487
+      },
+      "window_150_235": {
+        "fps_median": 59.99,
+        "fps_min": 49.44,
+        "speed_median": 1.001,
+        "speed_min": 0.942,
+        "frame_p95_ms_worst": 19.82,
+        "frame_p99_ms_worst": 27.13,
+        "audio_dma_empty_dequeues_delta": 4,
+        "max_footprint_bytes": 464487584,
+        "max_thermal_state": 0
+      },
+      "captures_confirm_gameplay": [
+        "ScreenShots/GXBE69/GXBE69_2026-09-11_08-22-51.png (riding)",
+        "ScreenShots/GXBE69/GXBE69_2026-09-11_08-23-21.png (briefing after restart)"
+      ],
+      "notes": [
+        "A hand launch at 08:15:45 ran 10 s at 60 FPS and was terminated by the automated relaunch; the automated run at 08:16 was backgrounded by the user at 15 s and is not a failure.",
+        "User confirmed the app works after a close and relaunch."
+      ]
+    },
+    "controls": "Analog stick replaced the arrow buttons on 2026-09-11; verified in the simulator via simulator_touch drags (SET MAIN ramps to 0.98 and re-centers on release)."
+  },
+  "ios_simulator": {
+    "build_in_progress": false,
+    "execution_verified": true,
+    "simulator_os": "26.5",
+    "device_type": "iPhone",
+    "report": "local/reports/mobile/20260911-081115",
+    "sequence": "native/ios/snow-jam-soak.json",
+    "duration_seconds": 899.7,
+    "app_stopped_cleanly": true,
+    "cpu_fallback_mode": "interpreter",
+    "fallback_jit_runs": 0,
+    "allocator_guard_reported": true,
+    "forbidden_allocation_reported": false,
+    "shutdown_counters": {
+      "native": 5610738726,
+      "fallback": 231241811,
+      "native_exc": 26013606,
+      "hook_fb": 916273786,
+      "smc_failed": 0,
+      "verifications": 543,
+      "reverify_events": 376,
+      "bursts": 85423630,
+      "cycles": 432215409325
+    },
+    "gameplay_window_190_320": {
+      "fps_median": 59.94,
+      "fps_min": 45.38,
+      "speed_median": 0.9998,
+      "speed_min": 0.9994,
+      "frame_p95_ms_worst": 16.99,
+      "frame_p99_ms_worst": 22.65,
+      "audio_dma_empty_dequeues_delta": 3
+    },
+    "window_150_900": {
+      "fps_median": 59.94,
+      "fps_min": 20.84,
+      "speed_median": 0.9998,
+      "speed_min": 0.9268,
+      "frame_p95_ms_worst": 18.44,
+      "frame_p99_ms_worst": 24.68,
+      "audio_dma_empty_dequeues_delta": 4,
+      "max_footprint_bytes": 369134160
+    },
+    "captures_confirm_gameplay": [
+      "ScreenShots/GXBE69/GXBE69_2026-09-11_00-56-27.png",
+      "ScreenShots/GXBE69/GXBE69_2026-09-11_01-06-58.png"
+    ],
+    "lifecycle": "Background/resume during a separate run: paused, released the held touch, resumed after 6.7 s.",
+    "limitations": [
+      "Simulator measurements are Mac host measurements, not phone performance.",
+      "The sequence repeats Restart every 120 s; fps minima coincide with restarts/loads, not sustained riding.",
+      "Interpreter fallback samples concentrate at the 0x0C00 system-call and 0x0500 external-interrupt vectors."
+    ]
+  },
+  "tests": {
+    "command": "python3 -m unittest tests.test_native_hash tests.test_mobile_report tests.test_native_replay tests.test_native_gamecube tests.test_gamecube_research",
+    "passed": 18
+  },
+  "controls": "Two virtual analog sticks (main bottom-left, C-stick inside the face-button diamond) plus A/B/X/Y, L/R, Z, Start. Verified 2026-09-11 in the simulator via simulator_touch drags: SET MAIN and SET C ramp to full deflection and re-center on release; Z press/release delivered. Installed on the iPhone at 08:38 EDT. 2026-09-11 later: GameCube Controller Settings screen captured (Default and Pro presets, local/native/profiles/controls/cap-03.png, cap-04.png); GrabMap.h translates PS2 shoulder grabs to L/R/Z; GameController physical-pad path added (compiles, untested with a real pad); D-pad and C-stick added to the pipe mapping. Simulator boot + overlay input re-verified; installed on the iPhone 08:57 EDT."
+}
