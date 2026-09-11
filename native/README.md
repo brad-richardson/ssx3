@@ -138,6 +138,9 @@ The iOS simulator completed a 15-minute Snow Jam ride/restart soak at a median
 60 FPS and full simulation speed with zero JIT fallback (see
 `mobile-validation.json`); that is host performance, not phone performance.
 
+Garibaldi rides in this engine as of 2026-09-11 (`docs/gamecube-world.md`,
+build gc-gari-005): swap `files/data/worlds/bam.big` in any game root.
+
 Next: complete iOS stock ride/reset/save and sustained physical-device tests,
 then trace the low-memory fallback paths to guide measured optimizations.
 Standalone Garibaldi follows with its art, scenery, rails, collision, and event

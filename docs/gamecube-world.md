@@ -90,3 +90,22 @@ lives only in texture group 31 (PS2: lightmap 144 in group 32).
   byte (magic 0x69696969, 129 AI paths, 8 track paths, 14 start records), so
   `course_route.make_reset_aip` applies unchanged; `--relocate-race-starts`
   moves the gates onto the donor opening.
+- `gc-gari-005` (004 plus donor reset paths, freeride start and race gates
+  relocated to the donor opening, race track path = donor race line) is the
+  **first rideable GameCube Garibaldi**: Single Event race starts on the
+  imported opening, rides at 60 FPS (70 MPH, 40% progress at 40 s), restarts
+  to a six-rider countdown, zero invalid accesses. Recipe:
+
+  ```sh
+  python3 tools/gamecube_terrain.py local/source/gamecube/ssx3/BAM.BIG \
+    --nbd local/source/gamecube/tricky/gari.nbd --location ARA1 --template-rid 1673 \
+    --source-anchor=-1214.8,-195.5,-768.547891 --target-anchor=-118613.68,15753.8,-228880.14 \
+    --yaw 73 --scale .55 --drop-kind 3 --drop-kind 12 --clear-instance-references \
+    --clear-script-bindings --disable-course-scripts --pin-texture-group 31 \
+    --reset-aip local/source/gamecube/tricky/gari.aip --relocate-freeride-start \
+    --relocate-race-starts --output local/builds/gc-gari-005
+  ```
+
+  Known gaps: opponents still follow Snow Jam's AI lines, the progress meter
+  starts at 28% because the donor race line begins after the gate, Snow Jam
+  kind-2 scenery remains, and the terrain uses the fallback snow material.
