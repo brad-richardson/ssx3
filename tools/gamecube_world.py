@@ -125,10 +125,20 @@ class World:
     def records(self, index):
         return list(resource_records(self.group_bytes(index), self.byteorder))
 
+    def group_end(self, index):
+        """Walk block headers (no decoding) to the end of a group's CEND block."""
+        pos = self.index['groups'][index]['stream_offset']
+        while pos < len(self.stream):
+            tag, size = struct.unpack_from('<4sI', self.stream, pos)
+            if tag not in (b'CBXS', b'CEND') or size < 13 or pos + size > len(self.stream):
+                raise ValueError(f'Unsupported stream block at {pos}: {tag!r}, {size}')
+            pos += size
+            if tag == b'CEND':
+                return pos
+        raise ValueError('Stream ended without CEND')
+
     def original_group_blocks(self, index):
-        g = self.index['groups'][index]
-        _, end, _ = read_group(self.stream, g['stream_offset'])
-        return self.stream[g['stream_offset']:end]
+        return self.stream[self.index['groups'][index]['stream_offset']:self.group_end(index)]
 
 
 def update_group_index(gdb_bytes, index, records, byteorder='big'):

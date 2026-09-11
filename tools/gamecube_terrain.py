@@ -130,7 +130,7 @@ def main():
     if [p for e, p in got if e['kind'] == 1] != [p for e, p in added]:
         raise RuntimeError('Readback terrain payloads differ')
     for g in world.index['groups']:
-        if g['index'] != group and check.group_bytes(g['index']) != world.group_bytes(g['index']):
+        if g['index'] != group and check.original_group_blocks(g['index']) != world.original_group_blocks(g['index']):
             raise RuntimeError(f'Group {g["index"]} changed unexpectedly')
     g = check.index['groups'][group]
     if g['count'] != len(new_records):
