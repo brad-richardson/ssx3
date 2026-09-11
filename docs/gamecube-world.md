@@ -56,9 +56,26 @@ coefficient vectors on both platforms, so the PS2 placement transform applies
 directly: source anchor (-1214.8, -195.5, -768.55), target
 (-118613.68, 15753.8, -228880.14), yaw 73°, scale 0.55.
 
-## Not yet decoded on GameCube
+## Other records (ported in `tools/gamecube_cleanup.py`)
 
-Kind 13 object tables, kind 16 scripts, kind 18 NIS tables, and the spatial
-texture tree, which the PS2 cleanup steps edit (`replace_terrain.py`). Their
-GameCube byte order and any layout changes need the same diff treatment
-before those steps are ported.
+Kind 13 object tables (16-byte header, first byte 1 instead of 0, count at
+12, 24-byte rows with the instance id at row +12), kind 18 NIS tables (72
+bytes) and kind 16 scripts (same offsets: program index at 56, definition
+base at 64, kind-3 binding table at 68, definitions at 76, spline table at
+84) keep the PS2 layout with big-endian words. Instance ids are
+`track << 24 | rid`. The 4-byte script header bytes `00 10 00 00` are byte
+identical on both discs. LUN programs are big-endian with magic 0x4E554C and
+the same 20/36/36 empty-return shape. Spatial (texture-tree) records are the
+same 96 bytes with big-endian floats, child indices at 80/84 and the leaf
+group at 88. Template patch 1673 binds texture 13 and lightmap 109, which
+lives only in texture group 31 (PS2: lightmap 144 in group 32).
+
+## Runtime findings
+
+- `gc-ctrl-001` (round trip of the stock group through the writer) rides
+  Snow Jam at 60 FPS with zero invalid accesses: the writer is sound.
+- `gc-gari-001` (3,885 patches, nothing removed, 8,856 resources) stalls at
+  about 40% on the loading screen with null-pointer accesses at `0x8024D314`
+  (an allocator free-list pop without a null check), the same record-pool
+  exhaustion the PS2 showed at 8,847 resources. Dropping the 3,052 kind-3
+  props is the fix on both platforms.
