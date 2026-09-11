@@ -5,12 +5,14 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] Xbox prompt glyphs: swap the frontend button icon textures so in-game
-      prompts read A/B/X/Y in Xbox positions; relabel the touch overlay to match.
+- [ ] Xbox prompt glyphs: the icons live in the `art_` image of `data/ui/
+      fe_1.gsh`, `ov_1.gsh` and `gl_1.gsh` (SHPG containers, 8-bit indexed,
+      `tools/gamecube_shape.py`). Swap the B and X icons; the pixel swizzle is
+      being confirmed against a runtime texture dump.
 - [ ] Control mapping doc: one table of action → GameCube input → Xbox pad →
       touch control, kept in `native/ios/README.md`.
-- [ ] Odin: test `SSX3-gc-gari-005.iso` (on the share) in Dolphin for Android;
-      the disc builder is done, the handheld run is not.
+- [ ] Odin: test `SSX3-gc-gari-005.iso` (on the share, 1.36 GiB) in Dolphin for
+      Android; the disc builder is done, the handheld run is not.
 - [ ] 120 Hz spike: finish the color-only measurement on `spike/120hz`, then
       decide between MetalFX with depth-reprojected motion vectors and the
       color-only path.
