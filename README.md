@@ -1,15 +1,26 @@
 # SSX 3 course-port investigation
 
-The first donor course is **Garibaldi from SSX Tricky (PS2)**. The goal is a short,
-rideable section inside the original SSX 3 engine, followed by a complete course
-if terrain, collision, and streaming can be rebuilt reliably.
+The first donor course is **Garibaldi from SSX Tricky**. The intended experience
+is standalone Tricky courses with SSX 3's handling. The working prototype uses
+the PS2 games; a GameCube AOT runtime now provides the native-port foundation.
 
-This repository contains inspection tools, a **bounded rebuild experiment**, and
-emulator-driving tools. Three test ISOs have been built: an unchanged-content
-compression control and two single-patch SSX 3 terrain bumps. All cold-boot and
-reach gameplay in PCSX2. For the second bump, the rider's ground contact and the
-rendered snow follow the edited coefficients, measured against the control on the
-same line. Garibaldi has not yet been imported.
+The [GameCube feasibility audit](docs/gamecube-feasibility.md) compares the newly
+supplied discs, verifies reusable Garibaldi terrain/path data, and records an
+SSX 3 code-generation probe. The [native prototype](native/README.md) now builds
+and runs stock GameCube SSX 3's Snow Jam on the Mac with Metal graphics and CPU
+JIT fallback disabled. A short ride and return to the starting briefing through
+Restart are recorded; full-course, save/reload, and mobile acceptance remain.
+The [iOS development app](native/ios/README.md) builds with a statically linked
+game module, Metal graphics, and touch controls for menu navigation and riding.
+Physical-device game-data setup and performance acceptance remain in progress.
+
+This repository contains inspection, world-rebuild and emulator-driving tools.
+A Garibaldi terrain section has been imported and ridden in the Green Station
+hub. Growable archives and executable menu renames also work in PCSX2. The
+current experiment replaces Snow Jam's entire terrain set with Garibaldi,
+keeps its fallback snow material visible, and rides the complete main route
+with working resets. Old prop collision and gameplay scripts are disabled.
+A finished Garibaldi race remains in progress.
 
 ## Current results
 
@@ -36,13 +47,40 @@ See [the investigation log](docs/investigation.md) for evidence, format findings
 limitations, upstream provenance, and the next implementation steps.
 See [the rebuild experiment](docs/rebuild-experiment.md) for test image paths,
 the exact edit, validation results, and emulator test instructions.
+See [the full-course experiment](docs/full-course-experiment.md) for the resumed
+Snow Jam replacement, its placement, reproducible commands and remaining limits.
 The [runtime comparison](docs/runtime-validation.json) records state hashes,
 memory offsets, and the four verified coefficient changes.
 
 ## Try it yourself
 
-Every test image on the share is a complete, verified ISO that boots in any
-PCSX2 (2.x). Pick one, cold-boot it, choose Conquer the Mountain with the Mac
+The latest tested prototype is **run-gari-010**, copied and hash-verified at
+`/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-010/`.
+On the Mac, double-click its `launch.command` to boot with the isolated shared
+test-002 profile. Choose Conquer the Mountain, the saved Mac character, then
+Transport → Peak 1 → Freeride → Garibaldi. This build restores Garibaldi's
+original start and opening right turn, which build 009's approach bypassed.
+The main descent and five reset checks pass with no logged TLB memory faults.
+The fallback snow texture/lightmap still has
+repeating bands; original Garibaldi art and race setup remain unfinished.
+
+For the **Odin 3**, copy `iso/SSX3-relocated.iso` from that build to the handheld
+and open it in your Android PS2 emulator (likely NetherSX2). Cold-boot the ISO;
+do not resume an older save state. See the [Odin test guide](docs/odin-testing.md),
+also included as `ODIN-TESTING.md` in the shared build. The user has confirmed
+that build 009 loads and rides on Odin 3 and recognizes the layout. The missing
+textures and scenery make it harder to read. Build 010 still needs handheld
+feedback; the measured runtime evidence is from Mac PCSX2 2.8.2.
+
+The launcher at `local/builds/run-gari-010/` uses
+`local/emulator/course-cleanup/profile` and a symlink to the shared ISO, so the
+share must be mounted. Local test ISO copies and disposable caches were removed
+to recover disk space; build archives, recipes, and runtime evidence remain.
+Older shared builds are retained separately, with build 009's opening-coverage
+correction in its notes.
+
+For the earlier hub experiments listed below, cold-boot an image in PCSX2
+(2.x), choose Conquer the Mountain with the Mac
 save, pause, Transport → Peak 1 → Freeride → Green Station, and ride the main
 line down the hub. The edited patch (`patch_A_hub_1024`) is about 20 seconds
 after the spawn, just before the Race/Slope Style banner tent.
@@ -65,7 +103,8 @@ settings and saves are untouched.
 
 ## Storage
 
-Code, tests, and small reports live here. Large files live on the network share:
+Code, tests, and small reports live here. Large inputs and archived builds live
+on the network share; current test builds and evidence use ignored `local/`:
 
 ```text
 /Volumes/share-1/brad/games/
@@ -90,6 +129,15 @@ Code, tests, and small reports live here. Large files live on the network share:
         experiment.json
         image.json
       bump-002/                    # bump on the Green Station line, ridden and rendered
+      run-gari-002/                # earlier full-course prototype
+      run-gari-009/                # terrain/resets fixed; original opening bypassed
+      run-gari-010/                # original opening, main descent and resets tested
+        iso/SSX3-relocated.iso
+        launch.command
+        ODIN-TESTING.md            # Odin 3 test steps and known limitations
+        evidence/                 # saved measurements, screenshots and test log
+        launch-logs/              # logs from subsequent launches
+        transfer.json             # verified copy hashes and original paths
     emulator/test-002/             # isolated PCSX2 profile, launchers, evidence/
 ```
 
@@ -132,6 +180,8 @@ python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --outpu
 python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso --append   # archive appended, image grows
 python3 tools/grow_group.py SRC/BAM.BIG --group 2 --rids 152,199,29,213,270 --dz 60 --output BUILDS/grown-00N   # add patch copies to a group
 python3 tools/patch_executable.py IN.iso --output OUT.iso --rename 'ARA1=Garibaldi:Gari'   # rename a level-selector entry
+python3 tools/patch_locale.py IN.iso --find 'Snow Jam'                                    # inspect UTF-16 locale descriptions
+python3 tools/build_course_image.py IN.iso BUILDS/x/BAM.BIG --output BUILDS/x/iso          # world + Garibaldi name + description
 python3 tools/import_terrain.py SRC/BAM.BIG --line RIDE.jsonl --z-range=-24000,-19000 --lateral 3500 --output BUILDS/gari-00N  # Garibaldi section into hub A
 ```
 

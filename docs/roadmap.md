@@ -4,6 +4,15 @@ Date: 2026-09-10. This plans the work after the first ridden terrain edit. Each
 milestone has a gate that must be demonstrated in a cold-booted PCSX2 session
 before the next one starts. Dates are deliberately absent; the gates are the plan.
 
+Later direction: standalone Tricky courses with SSX 3 handling, with native
+iOS/Android support under investigation. See the
+[GameCube feasibility audit](gamecube-feasibility.md) for the current native
+options and gates. As of 2026-09-11 stock GameCube SSX 3 runs Snow Jam through
+the native runtime on the Mac and in the iOS simulator with CPU JIT disabled
+(see `native/README.md` and `native/mobile-validation.json`); the signed iPhone
+app and its game data are installed and the first on-device run awaits an
+unlock. The milestones below describe the existing PS2 work.
+
 ## Where we are
 
 - Formats decoded: SSX 3 BIGF/SSB/SDB/PHM/PSM, Tricky C0FB/PBD, RefPack 10FB.
@@ -86,12 +95,9 @@ Facts that shape this:
 
 Steps and gates:
 
-1. **Full in-place recompress control.** (Encoder done: the optimal parser fits
-   the worst blocks with room to spare; control-002 build and ride pending.)
-   Re-encode all 3,328 blocks with our encoder at the original boundaries. Gate: a byte-verified image cold-boots and
-   plays through at least three locations. If blocks exceed capacity, first
-   improve the encoder (optimal parsing over the 10FB command set) rather than
-   moving boundaries.
+1. **Full in-place recompress control.** Done as control-002: all 3,328
+   blocks re-encoded at the original boundaries; the byte-verified image
+   cold-boots and rides. The optimal parser fits the original block capacity.
 2. **Relocated archive control.** Done as control-003: unchanged `BAM.BIG`
    written into `PAD0.000`'s space with a rewritten directory entry cold-boots,
    streams Green Station, and rides normally. The game reads the archive through
@@ -105,8 +111,9 @@ Steps and gates:
    re-layout only rewrites each group's stream offset.
 4. **Grown group.** Done as grown-001: five raised patch copies appended to
    hub A's group with updated SDB and location counts; they render and the
-   rider rides on them. Whether large additions hit a per-location memory
-   budget is still untested (add hundreds of patches next, then thousands).
+   rider rides on them. Later scale-001 and scale-002 load 658 and 1,439
+   added Garibaldi patches. These establish tested sizes, not an unlimited
+   per-location memory budget.
 
 Image size is not a constraint: `relocate_archive.py --append` grows the ISO
 (control-006 plays); the padding-file mode remains as an option that keeps the
@@ -162,7 +169,20 @@ patches load and ride, see docs/peaks-and-locations.md); the level selector
 is two fixed tables in the executable, so course names can be swapped without
 UI work. The "all of Tricky on one mountain" idea maps onto replacing the 17
 events, not a sixth peak. name-001 shows "Garibaldi" in the transport menu
-(tools/patch_executable.py). Non-terrain content still open.
+(tools/patch_executable.py). The resumed run-gari-001 experiment builds all
+3,885 patches into ARA1 and patches the locale description too (see the
+[experiment record](full-course-experiment.md)). Non-terrain content is still open.
+run-gari-001 stalls loading with all original props; run-gari-002 removes
+old prop instances, loads all 3,885 patches and rides the entry. The follow-up
+run-gari-009 removes old object collision, disables destination gameplay scripts,
+keeps the fallback lightmap resident and converts reset paths while preserving
+transport indices. It completes the main route with resets at 25%, 50%, 75%
+and near the endpoint, without logged TLB faults. Original Garibaldi art, race
+rules, opponents, finish/medals and the mountain exit remain unfinished.
+User feedback revealed that build 009's spawn bypasses the original opening.
+Build 010 restores that start and right-hand bend, tests from donor race point
+zero, and completes the main descent plus five reset checks without logged
+TLB faults. The terrain itself is byte-identical to 009.
 
 Gate: a race on Garibaldi with medals awarded, no soft locks, on desktop PCSX2.
 
@@ -177,8 +197,15 @@ Gate: a second course imports with configuration only, no code changes.
 
 ### M7. Odin and release
 
-Run the M5 image on the Odin's PCSX2 build; measure frame time in the imported
-course against the original; fix streaming hitches (block sizes, group order).
+Test run-gari-010 early on the user's Odin 3 with its Android PS2 emulator
+(likely NetherSX2; installed version unconfirmed). See the
+[handheld test guide](odin-testing.md). The ISO is portable; the Mac launcher
+and automation tools are platform-specific. The user has confirmed that build
+009 loads and rides on the Odin and recognizes its layout. Build 010, full
+handheld route/reset coverage and performance measurement remain open.
+
+After M5, repeat on the Odin: measure frame time in the imported course
+against the original and fix streaming hitches (block sizes, group order).
 Public release: GPL-3.0, no game data, reproducible verification hashes.
 
 ## Risks and unknowns
@@ -186,16 +213,30 @@ Public release: GPL-3.0, no game data, reproducible verification hashes.
 - The memory-size field and per-group limits in the engine may cap group size
   below a full course; a course may have to be split across groups with
   streaming boundaries that follow the original design.
-- Textures and lightmaps are entirely unexplored; Tricky and SSX 3 texture
-  formats may differ in swizzling and palette layout.
-- Tricky's collision, rails, and AI paths have no examined SSX 3 counterparts.
+- SSX 3 fallback texture/lightmap bindings and residency are tested; importing
+  Tricky's original materials still requires checking swizzling, palettes and UVs.
+- Terrain contact and converted reset paths work on the main route. Donor
+  object collision, rails and opponent behaviour still need conversion. One
+  SSX 3 path-search routine has a verified 200-entry scratch-array limit.
 - Emulator-only validation cannot rule out behaviour that differs on hardware,
   but the Odin target is also an emulator, so this risk is acceptable.
 
 ## Immediate next steps
 
-1. M2 step 1: measure the full in-place recompress; improve the encoder if
-   needed; build and ride control-002.
-2. M2 step 2: relocated-archive control-003.
-3. Start the `ssxport` package with `iso.py`, `refpack.py`, and the existing
-   tests, moving one script at a time.
+The old M2 work list was stale: control-002, control-003, control-005,
+control-006 and grown-001 have already demonstrated recompression, relocation,
+stream re-layout, image growth and added resources. M4 is also met by gari-003.
+
+The resumed work is [run-gari-001](full-course-experiment.md): full Garibaldi
+terrain replaces Snow Jam's 1,913 patches with 3,885, and both the event name
+and locale description are patched. A playable race still requires these gates:
+
+1. Gather user feedback on run-gari-010's restored opening, main descent and
+   resets on the Odin 3; test alternate routes and refine the transition/exit.
+2. Prioritize Garibaldi's materials, lighting and recognizable scenery: the
+   Odin feedback shows these are needed to read the course. The current fallback
+   streams correctly but repeats one lightmap rectangle. Replace remaining
+   old rails, particles, camera triggers and course-map artwork.
+3. Build opponents, race starts, finish and event rules. Old destination
+   gameplay programs are disabled for freeride, so complete a race with medals
+   before beginning M6's generic patcher.

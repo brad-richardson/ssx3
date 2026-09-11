@@ -63,7 +63,8 @@ def rewritten_record(rec, extent_lba, length):
     return bytes(out)
 
 
-def build(iso_path, archive_path, output_dir, archive_name, pad_name, append=False):
+def build(iso_path, archive_path, output_dir, archive_name, pad_name, append=False, file_replacements=None):
+    """Relocate the archive, optionally applying same-size file edits in the same copy."""
     size = iso_path.stat().st_size
     archive = archive_path.read_bytes()
     output_dir.mkdir(parents=True, exist_ok=False)
@@ -101,6 +102,19 @@ def build(iso_path, archive_path, output_dir, archive_name, pad_name, append=Fal
             new_rec = rewritten_record(rec, pad['offset'] // 2048, len(archive))
             replacements = [(rec_offset, new_rec), (pad['offset'], archive)]
             new_size = size
+        edited_files = []
+        for path, data in (file_replacements or {}).items():
+            item = by_path[path]
+            if path == archive_name or len(data) != item['size']:
+                raise ValueError('Additional file edits must preserve size and exclude the relocated archive')
+            start, end = item['offset'], item['offset'] + item['size']
+            if any(start < at + len(payload) and at < end for at, payload in replacements):
+                raise ValueError('Additional file edit overlaps another image edit')
+            old_data = disc.read(start, item['size'])
+            replacements.append((start, data))
+            edited_files.append(dict(path=path, offset=start, size=len(data),
+                                     before_sha256=hashlib.sha256(old_data).hexdigest(),
+                                     after_sha256=hashlib.sha256(data).hexdigest()))
         digest, source_digest = hashlib.sha256(), hashlib.sha256()
         offset, last = 0, time.monotonic()
         source.seek(0)
@@ -131,6 +145,8 @@ def build(iso_path, archive_path, output_dir, archive_name, pad_name, append=Fal
                   relocated_file=archive_name, new_offset=pad['offset'], new_extent_lba=pad['offset'] // 2048,
                   old_offset=old['offset'], old_size=old['size'], overlapping_padding_file=None if append else pad_name,
                   directory_record_offset=rec_offset, full_readback_verified=True, emulator_tested=False)
+    if edited_files:
+        report['edited_files'] = edited_files
     manifest.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2))
 

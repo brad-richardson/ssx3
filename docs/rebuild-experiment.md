@@ -580,3 +580,26 @@ area now?" dialog. The description paragraph under the list still reads
 `LOCH`/`LOCT` locale tables (`DATA/LOCALE/*.LOC`), not in the executable;
 they are the next string to decode. Green Station's list entry uses the short
 name field, so both fields matter.
+
+## Resumed full-course work
+
+The description format is now decoded: `CMNAMER.LOC` entry 549, UTF-16LE
+inside `LOCL`, with its hash in `LOCT`. The replacement description renders
+correctly in the emulator. See [locale tables](locale-tables.md).
+
+`run-gari-001` replaces all of ARA1's terrain with the complete 3,885-patch
+Garibaldi course. The archive and image pass byte verification; all imported
+coefficient arrays are found in emulator memory. Transport nevertheless stalls
+before spawn with null accesses in record-pool routines. This corrects the
+earlier inference above that the smaller hub tests ruled out memory limits.
+`run-gari-002` removes the 3,052 old prop instances, resolves the loading
+stall and rides the entry, with measured contact on 42 imported patches.
+That build still has removed-object lookup faults and old collision/scripts.
+The cleanup is implemented in `run-gari-009`: old prop instances and object
+collision are removed, destination gameplay scripts are disabled, the fallback
+texture/lightmap group spans the full course, and Garibaldi reset paths replace
+eligible original slots. The main descent and four reset checks pass without
+logged TLB faults. Original art and race setup are still incomplete.
+Build commands, runtime results and remaining limits are maintained in the
+[full-course experiment record](full-course-experiment.md) and its
+[validation manifest](full-course-validation.json).

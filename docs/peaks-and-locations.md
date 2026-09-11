@@ -27,11 +27,13 @@ the file table in `local/reports/ssx3-disc.json`; nothing on the share changed.
    and numbered scripts `00000000.big` onwards, not keyed by location name.
    Event scripting (start, finish, medals) most likely lives there.
 7. `MUSIC.INF` is a text file mapping songs to pathfinder data, not locations.
-8. `.LOC` files are `LOCH`/`LOCT` tables with no course names in plain ASCII.
-9. Memory is not the limit for a whole course: adding 1,439 Garibaldi patches
-   (633 KB decoded) to the hub's terrain group loads and rides (scale-002).
-   A race location totals about 11 MB decoded across 9 groups; a full
-   Garibaldi is about 1.7 MB of patch records.
+8. `.LOC` files contain `LOCH`/`LOCT`/`LOCL` tables with UTF-16LE strings.
+   Snow Jam's transport description is `CMNAMER.LOC` entry 549. It can be
+   replaced within its existing slot; see [locale tables](locale-tables.md).
+9. Adding 1,439 Garibaldi patches (633 KB decoded) to the hub's terrain
+   group loads and rides (scale-002). This is a tested lower bound, not proof
+   that a full race replacement fits: run-gari-001 stalls after loading the
+   complete 3,885-patch replacement. See [the full-course experiments](full-course-experiment.md).
 10. Recommendation: a "Tricky mountain" is best built by **replacing the 17
     existing events** (names, terrain, and later scripts) rather than adding a
     sixth peak. Tricky has 10 courses; SSX 3 has 5 race, 3 slopestyle, 3 big
@@ -87,8 +89,8 @@ Two routes, in order of cost.
 - Names: overwrite the display and short names in the event table. Two
   strings per event, at most 31 and 15 characters. The SDB code stays.
   Done: `tools/patch_executable.py`, verified in name-001 (the menu shows
-  "Garibaldi"). The event descriptions under the list come from the
-  `LOCH`/`LOCT` locale tables and still need decoding.
+  "Garibaldi"). The event description is also decoded and changed through
+  `CMNAMER.LOC` entry 549; see [locale tables](locale-tables.md).
 - Scripts, start, finish, AI paths, textures, props: still the M5 list; the
   event keeps its script and mode (race, slopestyle, ...), so a race slot
   should receive a race course.

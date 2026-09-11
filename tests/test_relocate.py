@@ -130,6 +130,25 @@ class RelocateTests(unittest.TestCase):
                 build(iso, arc, out, 'WORLD.BIG', 'PAD0.000')
             self.assertFalse((out / 'SSX3-relocated.iso').exists())
 
+    def test_same_size_file_edit_during_append(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            iso, arc, out = Path(tmp) / 'test.iso', Path(tmp) / 'WORLD.BIG', Path(tmp) / 'out'
+            source = synthetic_iso()
+            iso.write_bytes(source)
+            arc.write_bytes(b'new world')
+            build(iso, arc, out, 'WORLD.BIG', 'PAD0.000', append=True,
+                  file_replacements={'OTHER.TXT': b'world'})
+            result = (out / 'SSX3-relocated.iso').read_bytes()
+            self.assertEqual(result[23 * SECTOR:23 * SECTOR + 5], b'world')
+            self.assertEqual(result[23 * SECTOR + 5:len(source)], source[23 * SECTOR + 5:])
+            self.assertEqual(iso.read_bytes(), source)
+            with self.assertRaises(ValueError):
+                build(iso, arc, Path(tmp) / 'bad', 'WORLD.BIG', 'PAD0.000', append=True,
+                      file_replacements={'OTHER.TXT': b'too long'})
+            with self.assertRaises(ValueError):
+                build(iso, arc, Path(tmp) / 'overlap', 'WORLD.BIG', 'PAD0.000',
+                      file_replacements={'PAD0.000': bytes(2 * SECTOR)})
+
 
 if __name__ == '__main__':
     unittest.main()
