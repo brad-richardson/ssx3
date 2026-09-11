@@ -16,6 +16,7 @@ from pathlib import Path
 import struct
 
 from gamecube_world import World, assemble, sha256
+from gamecube_cleanup import clear_removed_instance_references, clear_script_bindings, disable_course_scripts
 from import_terrain import transform_coefficients, surface_samples, UV_CORNERS
 from probe_worlds import patch_point
 from replace_terrain import placement
@@ -99,6 +100,9 @@ def main():
     ap.add_argument('--scale', type=float, default=1.0)
     ap.add_argument('--drop-kind', type=int, action='append', default=[])
     ap.add_argument('--limit', type=int, help='Use only the first N donor patches (memory experiments)')
+    ap.add_argument('--clear-instance-references', action='store_true')
+    ap.add_argument('--clear-script-bindings', action='store_true')
+    ap.add_argument('--disable-course-scripts', action='store_true')
     ap.add_argument('--roundtrip', action='store_true', help='Control build: rewrite the group unchanged')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
@@ -118,15 +122,23 @@ def main():
         new_records, added = list(records), [(e, p) for e, p in records if e['kind'] == 1]
     else:
         new_records, added = replace_patches(records, args.template_rid, patches, matrix, translation)
-    removed = {}
+    removed, removed_records = {}, []
     if args.drop_kind:
         kept = []
         for e, p in new_records:
             if e['kind'] in args.drop_kind:
                 removed[e['kind']] = removed.get(e['kind'], 0) + 1
+                removed_records.append((e, p))
             else:
                 kept.append((e, p))
         new_records = kept
+    cleanup = {}
+    if args.clear_instance_references:
+        new_records, cleanup['cleared_instance_references'] = clear_removed_instance_references(new_records, removed_records)
+    if args.clear_script_bindings:
+        new_records, cleanup['script_bindings'] = clear_script_bindings(new_records, removed_records)
+    if args.disable_course_scripts:
+        new_records, cleanup['disabled_programs'] = disable_course_scripts(new_records)
     archive, layout = assemble(world, {group: new_records}, jobs=args.jobs)
 
     # Readback verification.
@@ -152,12 +164,12 @@ def main():
                       source_anchor=args.source_anchor, target_anchor=args.target_anchor,
                       yaw_degrees=args.yaw, scale=args.scale, matrix=matrix, translation=translation,
                       bounds=[[min(p[k] for p in pts) for k in range(3)], [max(p[k] for p in pts) for k in range(3)]],
-                      removed_resource_counts=removed, source_archive_sha256=sha256(original),
+                      removed_resource_counts=removed, cleanup={k: len(v) for k, v in cleanup.items()}, cleanup_detail=cleanup, source_archive_sha256=sha256(original),
                       donor_nbd_sha256=sha256(args.nbd.read_bytes()), output_sha256=sha256(archive),
                       group_index=dict(count=g['count'], memsize=g['memsize'], kind_counts=g['kind_counts']),
                       layout=[l for l in layout if l['replaced']])
     (args.output / 'experiment.json').write_text(json.dumps(experiment, indent=2) + '\n')
-    print(json.dumps({k: v for k, v in experiment.items() if k not in ('matrix', 'translation', 'layout')}, indent=2))
+    print(json.dumps({k: v for k, v in experiment.items() if k not in ('matrix', 'translation', 'layout', 'cleanup_detail')}, indent=2))
 
 
 if __name__ == '__main__':
