@@ -9,8 +9,8 @@ the build or commit that closed them.
       prompts read A/B/X/Y in Xbox positions; relabel the touch overlay to match.
 - [ ] Control mapping doc: one table of action → GameCube input → Xbox pad →
       touch control, kept in `native/ios/README.md`.
-- [ ] Odin: package the patched GameCube disc as an image Dolphin for Android
-      can load (the archive grew 460 KB, so the FST needs rebuilding).
+- [ ] Odin: test `SSX3-gc-gari-005.iso` (on the share) in Dolphin for Android;
+      the disc builder is done, the handheld run is not.
 - [ ] 120 Hz spike: finish the color-only measurement on `spike/120hz`, then
       decide between MetalFX with depth-reprojected motion vectors and the
       color-only path.
@@ -44,6 +44,10 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-11 `tools/build_gc_iso.py` rebuilds a GameCube ISO; stock FST
+      reproduced byte for byte.
+- [x] 2026-09-11 Touch overlay relabelled to Xbox positions (A bottom, B right,
+      X left, Y top, LB/RB).
 - [x] 2026-09-11 gc-gari-005: first rideable GameCube Garibaldi (race start,
       ride, restart, zero invalid accesses).
 - [x] 2026-09-11 Two-stick touch overlay; right stick drives the D-pad for spins.

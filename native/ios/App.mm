@@ -183,9 +183,16 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _status.backgroundColor = [UIColor colorWithWhite:0 alpha:0.6];
   _status.numberOfLines = 2;
   [self.view addSubview:_status];
-  for (NSString* name in @[@"A", @"B", @"X", @"Y", @"L", @"R", @"Z", @"Start"]) {
+  // Labels follow Xbox positions; each maps to the GameCube input at that
+  // position (bottom A=jump, right B=hand plant (GC X), left X=boost (GC B),
+  // top Y=reset). accessibilityLabel/identifier carry the GameCube name.
+  NSArray* labels = @[@"A", @"B", @"X", @"Y", @"LB", @"RB", @"Z", @"Start"];
+  NSArray* gcNames = @[@"A", @"X", @"B", @"Y", @"L", @"R", @"Z", @"Start"];
+  for (NSUInteger i = 0; i < labels.count; ++i) {
+    NSString* name = gcNames[i];
     UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button setTitle:name forState:UIControlStateNormal];
+    [button setTitle:labels[i] forState:UIControlStateNormal];
+    button.accessibilityIdentifier = name;
     button.accessibilityLabel = [@"SSX " stringByAppendingString:name];
     button.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     button.layer.cornerRadius = 22;
@@ -240,7 +247,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   layer.drawableSize = CGSizeMake(bounds.size.width * layer.contentsScale, bounds.size.height * layer.contentsScale);
   const CGFloat left = safe.left + 12, right = bounds.size.width - safe.right - 174;
   const CGFloat top = MAX(safe.top, 8), bottom = bounds.size.height - safe.bottom - 166;
-  const CGPoint positions[] = {{right+112,bottom+56},{right+56,bottom+112},{right+56,bottom},{right,bottom+56},
+  const CGPoint positions[] = {{right+56,bottom+112},{right+112,bottom+56},{right,bottom+56},{right+56,bottom},
     {left,top+36},{right+112,top+36},{right+40,top+36},{bounds.size.width/2-36,bounds.size.height-safe.bottom-54}};
   for (NSUInteger i=0; i<_controls.count; ++i)
     _controls[i].frame = CGRectMake(positions[i].x, positions[i].y, i==7?72:52, 48);
@@ -278,13 +285,13 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (commands.length) [self send:commands];
 }
 - (void)down:(UIButton*)button {
-  NSString* name = button.currentTitle;
+  NSString* name = button.accessibilityIdentifier;
   [_pressed addObject:name];
   button.alpha = 0.5;
   [self send:[NSString stringWithFormat:@"PRESS %@\n",[name uppercaseString]]];
 }
 - (void)up:(UIButton*)button {
-  NSString* name = button.currentTitle;
+  NSString* name = button.accessibilityIdentifier;
   [_pressed removeObject:name]; button.alpha = _overlayAlpha;
   [self send:[NSString stringWithFormat:@"RELEASE %@\n",[name uppercaseString]]];
 }
@@ -310,13 +317,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     __weak SSXViewController* weakSelf = self;
     pad.valueChangedHandler = ^(GCExtendedGamepad* gamepad, GCControllerElement* element) { [weakSelf applyPad:gamepad]; };
   }
-  _overlayAlpha = attached ? 0.25 : 1;
-  for (UIButton* button in _controls) button.alpha = _overlayAlpha;
-  _stick.alpha = _cStick.alpha = _overlayAlpha;
-  if (!attached) [self releaseControls];
+  // Dim only after a pad actually sends input (see applyPad); the simulator
+  // and some hosts list controllers that are never used.
+  if (!attached) { _overlayAlpha = 1; [self releaseControls]; _stick.alpha = _cStick.alpha = 1; }
   fprintf(stderr, "[ssx-pad] physical controllers=%lu\n", (unsigned long)GCController.controllers.count);
 }
 - (void)applyPad:(GCExtendedGamepad*)g {
+  if (_overlayAlpha == 1) {
+    _overlayAlpha = 0.25;
+    for (UIButton* button in _controls) button.alpha = _overlayAlpha;
+    _stick.alpha = _cStick.alpha = _overlayAlpha;
+  }
   NSMutableSet<NSString*>* wanted = [NSMutableSet set];
   if (g.buttonA.pressed) [wanted addObject:@"A"];
   if (g.buttonX.pressed) [wanted addObject:@"B"];
