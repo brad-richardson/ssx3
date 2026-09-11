@@ -245,3 +245,30 @@ approach 2 has been tried.
 - `tools/native_gamecube.py`: `check_stacked_patches` so `configure`/`run` accept the stacked
   patch.
 - No screenshots yet: none were produced because the runtime was not built.
+
+## First measurement (2026-09-11, Mac, 60 Hz display, 1556x966 window)
+
+Two 250 s runs with the Snow Jam smoke sequence; statistics windows after
+the first 120 s (menus and load excluded). Logs: `local/reports/native-runs/
+20260911-113258.log` (stats) and `20260911-113715.log` (framegen).
+
+| Measure | `SSX3_FRAMEGEN=stats` | `SSX3_FRAMEGEN=1` |
+| --- | ---: | ---: |
+| Emulated game FPS / speed | 59.4 / 0.99 | **4.9 / 0.36** |
+| Presented frames per second | 58.9 | 8.1 (437 real + 494 synthesized) |
+| GPU time per synthesized frame | n/a | 10.4 ms avg, 16.7 ms max |
+| Submit-to-present latency, real frames | 46.3 ms avg | 204.9 ms avg, 1049.9 max |
+| Scene-cut fallbacks | n/a | 0 |
+| Frame dumps written | n/a | none (dump threshold of 1200 frames not reached) |
+
+Conclusion: the prototype as built is not usable. The synthesized frame's GPU
+cost alone (10 ms at native resolution) would leave no room for two presents
+per 16.7 ms game frame, and something in the pipeline blocks the emulation
+thread hard enough to cut the game to a third of its speed, most likely a
+CPU-side wait on the interpolation command buffer or the delayed present.
+Before any quality judgement: make the pass fully asynchronous (no waits on
+the CPU thread; present the synthesized frame from a completion handler),
+cut the motion search to one coarse level with 16x16 blocks, and re-measure.
+If GPU cost stays above about 4 ms, the color-only approach is out on the
+phone and the remaining option is MetalFX with depth-reprojected motion
+vectors (approach 2), which does its estimation in hardware.
