@@ -127,6 +127,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   SSXStickView* _cStick;
   NSMutableSet<NSString*>* _pressed;
   NSSet<NSString*>* _padButtons;      // GameCube buttons currently asserted by a physical controller
+  NSSet<NSString*>* _touchDpad;       // D-pad directions asserted by the right touch stick
   double _padMain[2], _padC[2];       // last stick values sent from a physical controller (-1..1)
   CGFloat _overlayAlpha;
   NSTimer* _timer;
@@ -166,6 +167,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _controls = [NSMutableArray array];
   _pressed = [NSMutableSet set];
   _padButtons = [NSSet set];
+  _touchDpad = [NSSet set];
   _overlayAlpha = 1;
   self.view.backgroundColor = UIColor.blackColor;
   _surface = [[SSXMetalView alloc] init];
@@ -202,11 +204,12 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [weakSelf send:[NSString stringWithFormat:@"SET MAIN %.2f %.2f\n", 0.5 + x * 0.5, 0.5 + y * 0.5]];
   };
   [self.view addSubview:_stick];
+  // The game's input map (data/config/input.map) spins and flips from the
+  // D-pad only; the main stick turns, crouches and brakes. The right pad
+  // therefore drives the D-pad so tricks are reachable on touch.
   _cStick = [[SSXStickView alloc] initWithFrame:CGRectZero];
-  _cStick.accessibilityLabel = @"SSX C Stick";
-  _cStick.onChange = ^(double x, double y) {
-    [weakSelf send:[NSString stringWithFormat:@"SET C %.2f %.2f\n", 0.5 + x * 0.5, 0.5 + y * 0.5]];
-  };
+  _cStick.accessibilityLabel = @"SSX Spin Stick";
+  _cStick.onChange = ^(double x, double y) { [weakSelf sendDpadX:x y:y]; };
   [self.view addSubview:_cStick];
   _stop = [UIButton buttonWithType:UIButtonTypeSystem];
   [_stop setTitle:@"Stop" forState:UIControlStateNormal];
@@ -258,6 +261,22 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSData* json = [NSJSONSerialization dataWithJSONObject:row options:0 error:nil];
   [_inputFile writeData:json]; [_inputFile writeData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
 }
++ (NSSet<NSString*>*)dpadForX:(double)x y:(double)y {
+  NSMutableSet* set = [NSMutableSet set];
+  if (x >= 0.5) [set addObject:@"D_RIGHT"];
+  if (x <= -0.5) [set addObject:@"D_LEFT"];
+  if (y >= 0.5) [set addObject:@"D_UP"];
+  if (y <= -0.5) [set addObject:@"D_DOWN"];
+  return set;
+}
+- (void)sendDpadX:(double)x y:(double)y {
+  NSSet<NSString*>* wanted = [SSXViewController dpadForX:x y:y];
+  NSMutableString* commands = [NSMutableString string];
+  for (NSString* d in _touchDpad) if (![wanted containsObject:d]) [commands appendFormat:@"RELEASE %@\n", d];
+  for (NSString* d in wanted) if (![_touchDpad containsObject:d]) [commands appendFormat:@"PRESS %@\n", d];
+  _touchDpad = wanted;
+  if (commands.length) [self send:commands];
+}
 - (void)down:(UIButton*)button {
   NSString* name = button.currentTitle;
   [_pressed addObject:name];
@@ -272,10 +291,11 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (void)releaseControls {
   [_pressed removeAllObjects];
   _padButtons = [NSSet set];
+  _touchDpad = [NSSet set];
   _padMain[0] = _padMain[1] = _padC[0] = _padC[1] = 0;
   for (UIButton* button in _controls) button.alpha = _overlayAlpha;
   [_stick reset]; [_cStick reset];
-  [self send:@"SET MAIN 0.5 0.5\nSET C 0.5 0.5\nRELEASE A\nRELEASE B\nRELEASE X\nRELEASE Y\nRELEASE Z\nRELEASE L\nRELEASE R\nRELEASE START\n"];
+  [self send:@"SET MAIN 0.5 0.5\nSET C 0.5 0.5\nRELEASE A\nRELEASE B\nRELEASE X\nRELEASE Y\nRELEASE Z\nRELEASE L\nRELEASE R\nRELEASE START\nRELEASE D_UP\nRELEASE D_DOWN\nRELEASE D_LEFT\nRELEASE D_RIGHT\n"];
 }
 // Physical controllers use PS2 positions: cross/A jump, square/X boost+tweak,
 // circle/B hand plant, triangle/Y reset, Options (Select) reset, Menu start.
@@ -307,6 +327,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (g.dpad.down.pressed) [wanted addObject:@"D_DOWN"];
   if (g.dpad.left.pressed) [wanted addObject:@"D_LEFT"];
   if (g.dpad.right.pressed) [wanted addObject:@"D_RIGHT"];
+  // PS2 feel: the left stick both turns (main stick) and spins/flips (D-pad).
+  [wanted unionSet:[SSXViewController dpadForX:g.leftThumbstick.xAxis.value y:g.leftThumbstick.yAxis.value]];
   const uint8_t ps2 = (g.leftShoulder.pressed ? ssx::PS2_L1 : 0) | (g.leftTrigger.pressed ? ssx::PS2_L2 : 0) |
                       (g.rightShoulder.pressed ? ssx::PS2_R1 : 0) | (g.rightTrigger.pressed ? ssx::PS2_R2 : 0);
   const uint8_t gc = ssx::GrabToGameCube(ps2);

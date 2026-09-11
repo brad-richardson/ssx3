@@ -1,9 +1,10 @@
 # iOS development milestone
 
 This app embeds the GXBE69 revision 0 AOT module as a static archive and uses
-the Dolphin-derived Metal/runtime implementation. It includes two virtual analog
-sticks (main and C; drag anywhere on a pad and it re-centers on release),
-A/B/X/Y, L/R, Z, and Start. No physical controller is required for basic play.
+the Dolphin-derived Metal/runtime implementation. It includes two virtual sticks
+(left: main stick for turning, crouching and braking; right: the D-pad, which
+is what the game reads for spins and flips), A/B/X/Y, L/R, Z, and Start.
+The C-stick (board press) has no touch control yet. No physical controller is required for basic play.
 Stop shuts the runtime down; relaunch the app to start another session.
 
 The generated game code, assets, signing profiles, and build products are
@@ -76,7 +77,8 @@ verified tables are in `GrabMap.h`; `tests/test_native_grab_map.py` checks them.
 A physical controller (GameController framework, so DualSense, Xbox, Backbone,
 and MFi pads) uses PS2 positions: cross/A jump, square/X boost and tweak,
 circle/B hand plant, triangle/Y reset, Options reset, Menu start, left stick
-main, right stick C, D-pad D-pad. L1/L2/R1/R2 form the PS2 grab mask
+main and also the D-pad (PS2 feel: one stick turns and spins), right stick
+C-stick, D-pad D-pad. L1/L2/R1/R2 form the PS2 grab mask
 (Method/Mute/Stalefish/Indy) and are translated to the GameCube combo with the
 same name: Nosegrab and Tailgrab and Shifty match exactly; the eight PS2 grabs
 with no GameCube input (Melancholy, Swiss Cheese, Stiffy, Lein, Stalemasky,
