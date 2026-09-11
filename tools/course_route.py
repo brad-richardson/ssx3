@@ -119,7 +119,7 @@ def ssx3_paths(data):
     return sections[0], sections[1], data[tail:], starts
 
 
-def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start=False):
+def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start=False, relocate_race_starts=False):
     """Convert donor AI and track paths for experimental SSX 3 freeride resets.
 
     Path layouts match SSX-Library's WorldAIP.cs. Existing indexed paths and
@@ -195,6 +195,60 @@ def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start
                           ai_path=entry_ai, track_path=entry_track,
                           before_position=start[2:5], position=position,
                           direction=direction)
+    race_edit = None
+    if relocate_race_starts:
+        # Race gates are the start records with a zero second flag (types 0-5 on
+        # Snow Jam). Keep their lateral spacing along the original start line,
+        # re-express it across the donor opening's direction, and give their
+        # shared track path the donor race line so progress and resets follow it.
+        donor_index = struct.unpack_from('<I', data, 24)[0]
+        if not struct.unpack_from('<I', data, 20)[0] or donor_index >= len(donor_ai):
+            raise ValueError('Donor has no usable start path')
+        donor = donor_ai[donor_index]
+        if len(donor['points']) < 2:
+            raise ValueError('Donor start path needs a direction')
+        races = race_paths(data)
+        if not races:
+            raise ValueError('Donor has no race path')
+        gates = [(i, s) for i, s in enumerate(starts) if s[1] == 0]
+        if not gates or len({s[-1] for _, s in gates}) != 1:
+            raise ValueError('Expected race gates sharing one track path')
+        position, following = [apply(matrix, translation, p) for p in donor['points'][:2]]
+        delta = [following[k] - position[k] for k in range(3)]
+        length = math.hypot(*delta)
+        if not math.isfinite(length) or length == 0:
+            raise ValueError('Donor start direction is zero or nonfinite')
+        direction = [v / length for v in delta]
+        lateral = [-direction[1], direction[0], 0]
+        norm = math.hypot(*lateral[:2]) or 1
+        lateral = [v / norm for v in lateral]
+        old_dir = gates[0][1][5:8]
+        old_lateral = [-old_dir[1], old_dir[0], 0]
+        old_norm = math.hypot(*old_lateral[:2]) or 1
+        old_lateral = [v / old_norm for v in old_lateral]
+        centre = [sum(s[2 + k] for _, s in gates) / len(gates) for k in range(3)]
+        tail = bytearray(tail)
+        moved = []
+        for index, s in gates:
+            offset = sum((s[2 + k] - centre[k]) * old_lateral[k] for k in range(3)) * scale
+            new_position = [position[k] + lateral[k] * offset for k in range(3)]
+            at = len(tail) - 40 * len(starts) + 40 * index + 8
+            struct.pack_into('<6f', tail, at, *new_position, *direction)
+            moved.append(dict(start_record=index, kind=s[0], before_position=s[2:5], position=new_position, lateral_offset=offset))
+        track_index = gates[0][1][-1]
+        track_header = struct.unpack_from('<3I', old_tracks[track_index])
+        race_points = [apply(matrix, translation, p) for p in races[0]['points']]
+        blob = bytearray(struct.pack('<9f', *race_points[0],
+                                     *[min(q[k] for q in race_points) for k in range(3)],
+                                     *[max(q[k] for q in race_points) for k in range(3)]))
+        for a, b in zip(race_points, race_points[1:]):
+            d = [b[k] - a[k] for k in range(3)]
+            seg = math.hypot(*d[:2]) or math.dist(a, b) or 1
+            blob.extend(struct.pack('<4f', *(v / seg for v in d), seg))
+        old_tracks[track_index] = struct.pack('<3If2I', *track_header, races[0]['distance_to_finish'] * scale,
+                                              len(race_points) - 1, 0) + bytes(blob)
+        race_edit = dict(gates=moved, direction=direction, track_path=track_index,
+                         track_points=len(race_points), donor_start_path=donor_index)
     out = bytearray(struct.pack('<2I', 0x69696969, len(old_ai)))
     disabled = 0
     for i, path in enumerate(old_ai):
@@ -216,7 +270,7 @@ def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start
                             donor_path_events=0, ai_path_count=len(old_ai), track_path_count=len(old_tracks),
                             replaced_path_indices=sorted(replacements),
                             disabled_original_reset_paths=disabled, retained_entry_paths=sorted(entry_paths),
-                            start_table_entries=len(starts), freeride_start=start_edit,
+                            start_table_entries=len(starts), freeride_start=start_edit, race_starts=race_edit,
                             source_sha256=hashlib.sha256(data).hexdigest())
 
 

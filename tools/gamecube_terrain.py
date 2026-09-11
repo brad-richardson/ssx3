@@ -20,6 +20,7 @@ from gamecube_cleanup import clear_removed_instance_references, clear_script_bin
 from import_terrain import transform_coefficients, surface_samples, UV_CORNERS
 from probe_worlds import patch_point
 from replace_terrain import placement
+from course_route import make_reset_aip
 
 TRICKY_STRIDE, TRICKY_COEFF = 448, 80
 GC_PATCH_SIZE = 430
@@ -104,6 +105,9 @@ def main():
     ap.add_argument('--clear-script-bindings', action='store_true')
     ap.add_argument('--disable-course-scripts', action='store_true')
     ap.add_argument('--pin-texture-group', type=int, help='Keep one texture/lightmap group resident across the location')
+    ap.add_argument('--reset-aip', type=Path, help='Donor Tricky AIP: convert reset paths into the kind-14 resource')
+    ap.add_argument('--relocate-freeride-start', action='store_true')
+    ap.add_argument('--relocate-race-starts', action='store_true')
     ap.add_argument('--roundtrip', action='store_true', help='Control build: rewrite the group unchanged')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
@@ -140,6 +144,17 @@ def main():
         new_records, cleanup['script_bindings'] = clear_script_bindings(new_records, removed_records)
     if args.disable_course_scripts:
         new_records, cleanup['disabled_programs'] = disable_course_scripts(new_records)
+    if args.reset_aip:
+        # The path resource keeps the PS2 little-endian file format on GameCube.
+        candidates = [(e, p) for e, p in new_records if e['kind'] == 14 and p]
+        if len(candidates) != 1 or candidates[0][0]['rid'] != 0:
+            raise ValueError('Expected one populated kind-14 path resource with ID zero')
+        reset_data, cleanup['reset_paths'] = make_reset_aip(
+            args.reset_aip.read_bytes(), matrix, translation, args.scale, candidates[0][1],
+            relocate_start=args.relocate_freeride_start, relocate_race_starts=args.relocate_race_starts)
+        cleanup['reset_paths'] = [cleanup['reset_paths']]
+        new_records = [(dict(e, size=len(reset_data)), reset_data) if e['kind'] == 14 and e['rid'] == 0 else (e, p)
+                       for e, p in new_records]
     pinned = None
     if args.pin_texture_group is not None:
         pts = [patch_point([struct.unpack_from('>4f', p, 64 + 16 * j)[:3] for j in range(16)], u, v)

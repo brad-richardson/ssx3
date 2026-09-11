@@ -60,6 +60,20 @@ class RouteTests(unittest.TestCase):
         oversized += struct.pack('<I', 1) + race + tail
         with self.assertRaisesRegex(ValueError, '200-entry'):
             make_reset_aip(donor, [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [0, 0, 0], 1, oversized)
+        gate_a = struct.pack('<2I6f2I', 0, 0, 0, 0, 0, 1, 0, 0, 0, 0)
+        gate_b = struct.pack('<2I6f2I', 1, 0, 0, 4, 0, 1, 0, 0, 0, 0)   # 4 units to the left of gate_a
+        raced = original[:-len(tail)] + struct.pack('<2I', 0, 4) + start + other_start + gate_a + gate_b
+        moved, report = make_reset_aip(donor, [[0, -2, 0], [2, 0, 0], [0, 0, 2]], [100, 200, 300], 2, raced,
+                                       relocate_race_starts=True)
+        _, moved_tracks, _, moved_starts = ssx3_paths(moved)
+        self.assertEqual(moved_starts[0], ssx3_paths(raced)[3][0])   # freeride start untouched
+        centre = [(moved_starts[2][2 + k] + moved_starts[3][2 + k]) / 2 for k in range(3)]
+        self.assertEqual([round(v, 6) for v in centre], [60, 220, 360])
+        self.assertAlmostEqual(moved_starts[2][6], 2 ** -.5, places=6)
+        spacing = ((moved_starts[2][2] - moved_starts[3][2]) ** 2 + (moved_starts[2][3] - moved_starts[3][3]) ** 2) ** .5
+        self.assertAlmostEqual(spacing, 8, places=5)   # 4 units scaled by 2, across the new direction
+        self.assertEqual(struct.unpack_from('<3f', moved_tracks[0], 24), (60, 220, 360))
+        self.assertEqual(report['race_starts']['track_path'], 0)
         for bad in (original[:-1], original + b'\0', original[:20]):
             with self.assertRaises(ValueError):
                 ssx3_paths(bad)
