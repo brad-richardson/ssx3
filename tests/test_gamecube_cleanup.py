@@ -19,10 +19,10 @@ class CleanupTests(unittest.TestCase):
 
     def test_kind13_rows_and_kind18_slots_are_blanked(self):
         removed = [(entry(3, 5), b''), (entry(3, 9), b'')]
-        rows = [(0x08000005, 40), (0x08000007, 48), (0x08000009, 56)]
+        rows = [(0x08000005, 88), (0x08000007, 96), (0x08000009, 104)]  # data offsets past the 88-byte table
         table = bytearray(b'\x01' + b'\xcc' * 11 + struct.pack('>I', len(rows)))
         for oid, off in rows:
-            table += struct.pack('>IIIIII', 1, 2, 3, oid, off + 24, 0)
+            table += struct.pack('>IIIIII', 1, 2, 3, oid, off, 0)
         table += bytes(64)
         nis = struct.pack('>18I', 0x08000009, 0x08000001, *([0xffffffff] * 16))
         out, changes = clear_removed_instance_references(
