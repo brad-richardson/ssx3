@@ -127,3 +127,53 @@ def disable_course_scripts(records):
                 changes.append(dict(kind=16, track=e['track'], rid=e['rid'], program=index, offset=start, bytes=stop - start))
         out.append((e, bytes(data)))
     return out, changes
+
+
+def pin_texture_group(gdb, location, texture_group, bounds):
+    """Replace one location's texture-streaming tree with a single leaf (GameCube big-endian port)."""
+    from gamecube_world import parse_gdb, LOCATION_RECORD, SPATIAL_RECORD
+    parsed = parse_gdb(gdb, 'big')
+    owner = next(l for l in parsed['locations'] if l['name'] == location)
+    if not owner['group_start'] <= texture_group < owner['last_group']:
+        raise ValueError('Texture group must belong to the target location')
+    kinds = parsed['groups'][texture_group]['kind_counts']
+    if not kinds or set(kinds) - {9, 10}:
+        raise ValueError('Pinned group must contain only textures and lightmaps')
+    start, count = owner['spatial_start'], owner['spatial_count']
+    if count < 1:
+        raise ValueError('Location has no spatial tree')
+    end, delta = start + count, count - 1
+    nloc, nodes, _ = struct.unpack_from('>III', gdb, 8)
+    base = parsed['spatial_base']
+    prefix = bytearray(gdb[:base])
+    struct.pack_into('>I', prefix, 12, nodes - delta)
+    for loc in parsed['locations']:
+        offset = 80 + loc['index'] * LOCATION_RECORD
+        if loc['name'] == location:
+            struct.pack_into('>I', prefix, offset + 16, 1)
+        elif loc['spatial_start'] >= end:
+            struct.pack_into('>I', prefix, offset + 28, loc['spatial_start'] - delta)
+        elif start <= loc['spatial_start'] < end:
+            raise ValueError('Overlapping location spatial trees')
+    old = struct.unpack_from('>8f', gdb, base + start * SPATIAL_RECORD)
+    low = [min(old[k], bounds[0][k] - 1000) for k in range(3)]
+    high = [max(old[k + 4], bounds[1][k] + 1000) for k in range(3)]
+    leaf = struct.pack('>20f4i', *low, 1, *high, 1, *([0] * 12), -1, -1, texture_group, 0)
+    chunks = []
+    for i in range(nodes):
+        if i == start:
+            chunks.append(leaf)
+        elif start < i < end:
+            continue
+        else:
+            raw = bytearray(gdb[base + i * SPATIAL_RECORD:base + (i + 1) * SPATIAL_RECORD])
+            for offset in (80, 84):
+                child = struct.unpack_from('>i', raw, offset)[0]
+                if start <= child < end:
+                    raise ValueError('Another tree references the replaced location')
+                if child >= end:
+                    struct.pack_into('>i', raw, offset, child - delta)
+            chunks.append(bytes(raw))
+    result = bytes(prefix) + b''.join(chunks) + gdb[base + nodes * SPATIAL_RECORD:]
+    parse_gdb(result, 'big')
+    return result, dict(group=texture_group, old_nodes=count, new_nodes=1, bounds=[low, high])

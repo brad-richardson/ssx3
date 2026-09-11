@@ -16,7 +16,7 @@ from pathlib import Path
 import struct
 
 from gamecube_world import World, assemble, sha256
-from gamecube_cleanup import clear_removed_instance_references, clear_script_bindings, disable_course_scripts
+from gamecube_cleanup import clear_removed_instance_references, clear_script_bindings, disable_course_scripts, pin_texture_group
 from import_terrain import transform_coefficients, surface_samples, UV_CORNERS
 from probe_worlds import patch_point
 from replace_terrain import placement
@@ -103,6 +103,7 @@ def main():
     ap.add_argument('--clear-instance-references', action='store_true')
     ap.add_argument('--clear-script-bindings', action='store_true')
     ap.add_argument('--disable-course-scripts', action='store_true')
+    ap.add_argument('--pin-texture-group', type=int, help='Keep one texture/lightmap group resident across the location')
     ap.add_argument('--roundtrip', action='store_true', help='Control build: rewrite the group unchanged')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
@@ -139,6 +140,14 @@ def main():
         new_records, cleanup['script_bindings'] = clear_script_bindings(new_records, removed_records)
     if args.disable_course_scripts:
         new_records, cleanup['disabled_programs'] = disable_course_scripts(new_records)
+    pinned = None
+    if args.pin_texture_group is not None:
+        pts = [patch_point([struct.unpack_from('>4f', p, 64 + 16 * j)[:3] for j in range(16)], u, v)
+               for _, p in added for u, v in ((0, 0), (1, 1))]
+        bounds = [[min(p[k] for p in pts) for k in range(3)], [max(p[k] for p in pts) for k in range(3)]]
+        world.gdb_bytes, pinned = pin_texture_group(world.gdb_bytes, args.location, args.pin_texture_group, bounds)
+        world.index = __import__('gamecube_world').parse_gdb(world.gdb_bytes, 'big')
+        cleanup['pinned_texture_group'] = [pinned]
     archive, layout = assemble(world, {group: new_records}, jobs=args.jobs)
 
     # Readback verification.
