@@ -5,10 +5,10 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] Xbox prompt glyphs: the icons live in the `art_` image of `data/ui/
-      fe_1.gsh`, `ov_1.gsh` and `gl_1.gsh` (SHPG containers, 8-bit indexed,
-      `tools/gamecube_shape.py`). Swap the B and X icons; the pixel swizzle is
-      being confirmed against a runtime texture dump.
+- [ ] Xbox prompt glyphs: repainted by `tools/patch_ui_glyphs.py` (blue X,
+      red B, yellow Y in the GameCube B/X/Y slots of the `art_` sheet in
+      fe_1/ov_1/gl_1.gsh); installed on the phone, in the gc-gari-005 disc
+      root and ISO. Still to confirm on the in-game menu capture.
 - [ ] Control mapping doc: one table of action → GameCube input → Xbox pad →
       touch control, kept in `native/ios/README.md`.
 - [ ] Odin: test `SSX3-gc-gari-005.iso` (on the share, 1.36 GiB) in Dolphin for
