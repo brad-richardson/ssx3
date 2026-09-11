@@ -1,0 +1,1055 @@
+diff --git a/Source/Core/VideoBackends/Metal/CMakeLists.txt b/Source/Core/VideoBackends/Metal/CMakeLists.txt
+index db633a0..b0bf537 100644
+--- a/Source/Core/VideoBackends/Metal/CMakeLists.txt
++++ b/Source/Core/VideoBackends/Metal/CMakeLists.txt
+@@ -4,6 +4,8 @@ add_library(videometal
+   MTLBoundingBox.h
+   MTLGfx.mm
+   MTLGfx.h
++  MTLFrameGen.mm
++  MTLFrameGen.h
+   MTLMain.mm
+   MTLObjectCache.h
+   MTLObjectCache.mm
+diff --git a/Source/Core/VideoBackends/Metal/MTLFrameGen.h b/Source/Core/VideoBackends/Metal/MTLFrameGen.h
+new file mode 100644
+index 0000000..dfd7943
+--- /dev/null
++++ b/Source/Core/VideoBackends/Metal/MTLFrameGen.h
+@@ -0,0 +1,125 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++// SSX 3 120 Hz spike: color-only frame interpolation in the Metal presentation path.
++//
++// Enabled with SSX3_FRAMEGEN=1. The game renders each 60 Hz frame into an offscreen
++// texture instead of the CAMetalLayer drawable. At present time a compute pipeline
++// estimates block motion between the previous and the current frame (bilateral,
++// hierarchical block matching on a luma pyramid), synthesizes the frame half-way between
++// them, and presents the synthesized frame followed by the real frame. The real frame is
++// therefore delayed by half a game frame plus the interpolation GPU time.
++//
++// Environment:
++//   SSX3_FRAMEGEN=1            enable interpolation (2 presents per game frame)
++//   SSX3_FRAMEGEN=stats        stock presentation, only collect presentation statistics
++//   SSX3_FRAMEGEN_ONLY=1       present only the synthesized frames (60 Hz visual check)
++//   SSX3_FRAMEGEN_DUMP=DIR     write prev/cur/interp raw BGRA triplets into DIR
++//   SSX3_FRAMEGEN_DUMP_EVERY=N dump every N-th game frame (default 600)
++//   SSX3_FRAMEGEN_DUMP_FROM=N  first game frame eligible for a dump (default 1200)
++
++#pragma once
++
++#include <Metal/Metal.h>
++#include <QuartzCore/QuartzCore.h>
++
++#include <array>
++#include <memory>
++#include <atomic>
++#include <mutex>
++#include <string>
++#include <vector>
++
++#include "Common/CommonTypes.h"
++#include "VideoBackends/Metal/MRCHelpers.h"
++
++namespace Metal
++{
++class FrameGen
++{
++public:
++  enum class Mode
++  {
++    Off,
++    StatsOnly,
++    Interpolate,
++  };
++
++  static Mode ModeFromEnvironment();
++
++  FrameGen(Mode mode);
++  ~FrameGen();
++
++  Mode GetMode() const { return m_mode; }
++  bool Interpolating() const { return m_mode == Mode::Interpolate && m_ready; }
++
++  // (Re)creates the offscreen frame history for a surface of this size/format.
++  void Resize(u32 width, u32 height, MTLPixelFormat format);
++
++  // Offscreen render target for the game frame that is about to be rendered.
++  id<MTLTexture> CurrentTarget();
++
++  // Interpolate between the previous target and the current one, then present both.
++  // Called after the game's own command buffer has been committed.
++  void Present(CAMetalLayer* layer);
++
++  // Stats-only mode: record when a stock drawable is presented.
++  void TrackStockDrawable(id<CAMetalDrawable> drawable);
++
++private:
++  struct Level
++  {
++    u32 width = 0, height = 0;
++    u32 blocks_x = 0, blocks_y = 0;
++    std::array<MRCOwned<id<MTLTexture>>, 2> luma;  // per history slot
++    MRCOwned<id<MTLTexture>> motion;
++  };
++
++  bool BuildPipelines();
++  void ReportStats();
++  void OnPresented(id<CAMetalDrawable> drawable, bool real_frame, double submit_time);
++  void WriteDump(u64 frame, const char* tag, id<MTLBuffer> buffer);
++
++  // Completion/presentation handlers may outlive this object; they check the backref.
++  struct Backref
++  {
++    std::mutex mutex;
++    FrameGen* owner = nullptr;
++  };
++  std::shared_ptr<Backref> m_backref;
++  MRCOwned<id<MTLCommandBuffer>> m_last_cmdbuf;
++
++  Mode m_mode;
++  bool m_ready = false;
++  bool m_present_only_interpolated = false;
++  std::string m_dump_dir;
++  u64 m_dump_every = 600;
++  u64 m_dump_from = 1200;
++
++  u32 m_width = 0, m_height = 0;
++  MTLPixelFormat m_format = MTLPixelFormatBGRA8Unorm;
++  std::array<MRCOwned<id<MTLTexture>>, 2> m_history;
++  MRCOwned<id<MTLTexture>> m_interp;
++  MRCOwned<id<MTLTexture>> m_motion_smoothed;
++  std::vector<Level> m_levels;
++  u32 m_slot = 0;
++  u64 m_frame = 0;  // game frames rendered into the history
++
++  MRCOwned<id<MTLComputePipelineState>> m_luma;
++  MRCOwned<id<MTLComputePipelineState>> m_down;
++  MRCOwned<id<MTLComputePipelineState>> m_match;
++  MRCOwned<id<MTLComputePipelineState>> m_smooth;
++  MRCOwned<id<MTLComputePipelineState>> m_warp;
++
++  // Statistics (accessed from the emulation thread and Metal completion threads).
++  std::mutex m_stats_mutex;
++  double m_gpu_seconds_sum = 0, m_gpu_seconds_max = 0;
++  u64 m_gpu_samples = 0;
++  u64 m_presented_interp = 0, m_presented_real = 0, m_presented_total = 0;
++  double m_first_presented_time = 0, m_last_presented_time = 0;
++  double m_real_latency_sum = 0, m_real_latency_max = 0;
++  u64 m_real_latency_samples = 0;
++  double m_interp_latency_sum = 0;
++  u64 m_interp_latency_samples = 0;
++  u64 m_interval_short = 0, m_interval_long = 0;  // presented intervals <=12 ms / >12 ms
++  double m_last_report_time = 0;
++};
++}  // namespace Metal
+diff --git a/Source/Core/VideoBackends/Metal/MTLFrameGen.mm b/Source/Core/VideoBackends/Metal/MTLFrameGen.mm
+new file mode 100644
+index 0000000..a10f7d8
+--- /dev/null
++++ b/Source/Core/VideoBackends/Metal/MTLFrameGen.mm
+@@ -0,0 +1,589 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++// SSX 3 120 Hz spike: color-only frame interpolation. See MTLFrameGen.h.
++
++#include "VideoBackends/Metal/MTLFrameGen.h"
++
++#include <algorithm>
++#include <cmath>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++
++#include "Common/Logging/Log.h"
++#include "VideoBackends/Metal/MTLObjectCache.h"
++
++namespace
++{
++constexpr u32 kBlock = 8;
++
++// Motion estimation is bilateral: for a block centred on p in the synthesized frame we look
++// for the displacement v that minimises SAD(prev(p - v/2), cur(p + v/2)). This avoids holes
++// and double coverage that forward/backward warping would need to resolve.
++const char* const kShaderSource = R"MSL(
++#include <metal_stdlib>
++using namespace metal;
++
++constant int BLOCK = 8;
++
++struct MatchParams {
++  uint2 blocks;      // motion field size at this level
++  int radius;        // local search radius (pixels at this level)
++  int has_parent;    // 1 if a coarser motion field is available
++  float lambda;      // penalty per pixel of deviation from the parent vector
++  float pad;
++};
++
++constexpr sampler lin(coord::pixel, filter::linear, address::clamp_to_edge);
++constexpr sampler near(coord::pixel, filter::nearest, address::clamp_to_edge);
++
++kernel void fg_luma(texture2d<float, access::read> src [[texture(0)]],
++                    texture2d<float, access::write> dst [[texture(1)]],
++                    uint2 gid [[thread_position_in_grid]]) {
++  if (gid.x >= dst.get_width() || gid.y >= dst.get_height()) return;
++  float4 c = src.read(gid);
++  dst.write(float4(dot(c.rgb, float3(0.299, 0.587, 0.114)), 0, 0, 0), gid);
++}
++
++kernel void fg_down(texture2d<float, access::sample> src [[texture(0)]],
++                    texture2d<float, access::write> dst [[texture(1)]],
++                    uint2 gid [[thread_position_in_grid]]) {
++  if (gid.x >= dst.get_width() || gid.y >= dst.get_height()) return;
++  // Sample at the centre of the 2x2 source footprint: linear filtering does the box average.
++  float2 p = float2(gid) * 2.0 + 1.0;
++  dst.write(float4(src.sample(lin, p).r, 0, 0, 0), gid);
++}
++
++static float block_cost(texture2d<float, access::sample> prev,
++                        texture2d<float, access::sample> cur,
++                        float2 origin, float2 v) {
++  float sum = 0.0;
++  float2 half_v = v * 0.5;
++  for (int y = 0; y < BLOCK; ++y) {
++    for (int x = 0; x < BLOCK; ++x) {
++      float2 p = origin + float2(x, y) + 0.5;
++      sum += abs(prev.sample(lin, p - half_v).r - cur.sample(lin, p + half_v).r);
++    }
++  }
++  return sum;
++}
++
++kernel void fg_match(texture2d<float, access::sample> prev [[texture(0)]],
++                     texture2d<float, access::sample> cur [[texture(1)]],
++                     texture2d<float, access::sample> parent [[texture(2)]],
++                     texture2d<float, access::write> motion [[texture(3)]],
++                     constant MatchParams& params [[buffer(0)]],
++                     uint2 gid [[thread_position_in_grid]]) {
++  if (gid.x >= params.blocks.x || gid.y >= params.blocks.y) return;
++  float2 origin = float2(gid) * float(BLOCK);
++  float2 best = float2(0.0);
++  float2 anchor = float2(0.0);
++  float best_cost = block_cost(prev, cur, origin, best);
++  if (params.has_parent) {
++    // Candidates: the parent block and its four neighbours, scaled to this level.
++    float2 pc = (float2(gid) + 0.5) * 0.5;
++    anchor = parent.sample(near, pc).xy * 2.0;
++    float2 offsets[5] = {float2(0, 0), float2(-1, 0), float2(1, 0), float2(0, -1), float2(0, 1)};
++    for (int i = 0; i < 5; ++i) {
++      float2 v = parent.sample(near, pc + offsets[i]).xy * 2.0;
++      float c = block_cost(prev, cur, origin, v) + params.lambda * length(v - anchor);
++      if (c < best_cost) { best_cost = c; best = v; }
++    }
++  }
++  float2 centre = best;
++  for (int dy = -params.radius; dy <= params.radius; ++dy) {
++    for (int dx = -params.radius; dx <= params.radius; ++dx) {
++      if (dx == 0 && dy == 0) continue;
++      float2 v = centre + float2(dx, dy);
++      float c = block_cost(prev, cur, origin, v) + params.lambda * length(v - anchor);
++      if (c < best_cost) { best_cost = c; best = v; }
++    }
++  }
++  motion.write(float4(best, best_cost, 0), gid);
++}
++
++// Vector-median style smoothing: every block re-evaluates its neighbours' vectors and keeps
++// the cheapest, with a mild preference for staying near the neighbourhood mean.
++kernel void fg_smooth(texture2d<float, access::sample> prev [[texture(0)]],
++                      texture2d<float, access::sample> cur [[texture(1)]],
++                      texture2d<float, access::sample> motion_in [[texture(2)]],
++                      texture2d<float, access::write> motion_out [[texture(3)]],
++                      constant MatchParams& params [[buffer(0)]],
++                      uint2 gid [[thread_position_in_grid]]) {
++  if (gid.x >= params.blocks.x || gid.y >= params.blocks.y) return;
++  float2 origin = float2(gid) * float(BLOCK);
++  float2 c = float2(gid) + 0.5;
++  float2 cands[9];
++  float2 mean = float2(0.0);
++  int n = 0;
++  for (int dy = -1; dy <= 1; ++dy)
++    for (int dx = -1; dx <= 1; ++dx) {
++      float2 v = motion_in.sample(near, c + float2(dx, dy)).xy;
++      cands[n++] = v;
++      mean += v;
++    }
++  mean /= 9.0;
++  float2 best = cands[4];
++  float best_cost = block_cost(prev, cur, origin, best) + params.lambda * length(best - mean);
++  for (int i = 0; i < 9; ++i) {
++    if (i == 4) continue;
++    float cost = block_cost(prev, cur, origin, cands[i]) + params.lambda * length(cands[i] - mean);
++    if (cost < best_cost) { best_cost = cost; best = cands[i]; }
++  }
++  motion_out.write(float4(best, best_cost, 0), gid);
++}
++
++// Synthesize the half-way frame. Each pixel considers the four nearest block vectors and
++// uses the one whose motion-compensated pair agrees best at that pixel, which keeps sharp
++// motion boundaries instead of bilinearly smearing the vector field across them.
++kernel void fg_warp(texture2d<float, access::sample> prev [[texture(0)]],
++                    texture2d<float, access::sample> cur [[texture(1)]],
++                    texture2d<float, access::sample> motion [[texture(2)]],
++                    texture2d<float, access::write> out [[texture(3)]],
++                    uint2 gid [[thread_position_in_grid]]) {
++  if (gid.x >= out.get_width() || gid.y >= out.get_height()) return;
++  float2 p = float2(gid) + 0.5;
++  float2 m = p / float(BLOCK);          // block field coordinates (texel centre = block centre)
++  float2 base = floor(m - 0.5) + 0.5;   // nearest lower block centre
++  float2 best_v = motion.sample(lin, m).xy;
++  float4 a = prev.sample(lin, p - best_v * 0.5);
++  float4 b = cur.sample(lin, p + best_v * 0.5);
++  float best_err = dot(abs(a.rgb - b.rgb), float3(1.0)) * 0.9;  // slight bilinear preference
++  float4 best_a = a, best_b = b;
++  for (int i = 0; i < 4; ++i) {
++    float2 v = motion.sample(near, base + float2(i & 1, i >> 1)).xy;
++    float4 ca = prev.sample(lin, p - v * 0.5);
++    float4 cb = cur.sample(lin, p + v * 0.5);
++    float err = dot(abs(ca.rgb - cb.rgb), float3(1.0));
++    if (err < best_err) { best_err = err; best_a = ca; best_b = cb; }
++  }
++  float4 result = (best_a + best_b) * 0.5;
++  result.a = 1.0;
++  out.write(result, gid);
++}
++)MSL";
++
++struct MatchParams
++{
++  u32 blocks_x, blocks_y;
++  int radius;
++  int has_parent;
++  float lambda;
++  float pad;
++};
++
++double NowSeconds()
++{
++  return CACurrentMediaTime();
++}
++
++MRCOwned<id<MTLTexture>> MakeTexture(u32 width, u32 height, MTLPixelFormat format,
++                                     MTLTextureUsage usage, const char* label)
++{
++  MTLTextureDescriptor* desc =
++      [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format
++                                                         width:width
++                                                        height:height
++                                                     mipmapped:NO];
++  [desc setUsage:usage];
++  [desc setStorageMode:MTLStorageModePrivate];
++  MRCOwned<id<MTLTexture>> texture = MRCTransfer([Metal::g_device newTextureWithDescriptor:desc]);
++  [texture setLabel:[NSString stringWithUTF8String:label]];
++  return texture;
++}
++
++void Dispatch2D(id<MTLComputeCommandEncoder> encoder, id<MTLComputePipelineState> pipeline,
++                u32 width, u32 height)
++{
++  const NSUInteger tw = std::min<NSUInteger>(16, [pipeline threadExecutionWidth]);
++  const NSUInteger th = std::min<NSUInteger>(16, [pipeline maxTotalThreadsPerThreadgroup] / tw);
++  [encoder setComputePipelineState:pipeline];
++  [encoder dispatchThreadgroups:MTLSizeMake((width + tw - 1) / tw, (height + th - 1) / th, 1)
++          threadsPerThreadgroup:MTLSizeMake(tw, th, 1)];
++}
++}  // namespace
++
++Metal::FrameGen::Mode Metal::FrameGen::ModeFromEnvironment()
++{
++  const char* value = std::getenv("SSX3_FRAMEGEN");
++  if (!value || !*value || !std::strcmp(value, "0"))
++    return Mode::Off;
++  if (!std::strcmp(value, "stats"))
++    return Mode::StatsOnly;
++  return Mode::Interpolate;
++}
++
++Metal::FrameGen::FrameGen(Mode mode) : m_backref(std::make_shared<Backref>()), m_mode(mode)
++{
++  m_backref->owner = this;
++  if (const char* only = std::getenv("SSX3_FRAMEGEN_ONLY"))
++    m_present_only_interpolated = *only && std::strcmp(only, "0") != 0;
++  if (const char* dir = std::getenv("SSX3_FRAMEGEN_DUMP"))
++    m_dump_dir = dir;
++  if (const char* every = std::getenv("SSX3_FRAMEGEN_DUMP_EVERY"))
++    m_dump_every = std::max<u64>(1, std::strtoull(every, nullptr, 10));
++  if (const char* from = std::getenv("SSX3_FRAMEGEN_DUMP_FROM"))
++    m_dump_from = std::strtoull(from, nullptr, 10);
++  if (m_mode == Mode::Interpolate)
++    m_ready = BuildPipelines();
++  std::fprintf(stderr, "[ssx3-framegen] mode=%s ready=%d only_interpolated=%d dump=%s\n",
++               m_mode == Mode::Interpolate ? "interpolate" : "stats", m_ready ? 1 : 0,
++               m_present_only_interpolated ? 1 : 0, m_dump_dir.empty() ? "-" : m_dump_dir.c_str());
++  m_last_report_time = NowSeconds();
++}
++
++Metal::FrameGen::~FrameGen()
++{
++  if (m_last_cmdbuf)
++    [m_last_cmdbuf waitUntilCompleted];
++  ReportStats();
++  std::lock_guard<std::mutex> guard(m_backref->mutex);
++  m_backref->owner = nullptr;
++}
++
++bool Metal::FrameGen::BuildPipelines()
++{
++  @autoreleasepool
++  {
++    NSError* error = nullptr;
++    MTLCompileOptions* options = [[[MTLCompileOptions alloc] init] autorelease];
++    id<MTLLibrary> library =
++        [[g_device newLibraryWithSource:[NSString stringWithUTF8String:kShaderSource]
++                                options:options
++                                  error:&error] autorelease];
++    if (!library)
++    {
++      std::fprintf(stderr, "[ssx3-framegen] shader compilation failed: %s\n",
++                   error ? [[error localizedDescription] UTF8String] : "unknown");
++      return false;
++    }
++    auto make = [&](const char* name) -> MRCOwned<id<MTLComputePipelineState>> {
++      id<MTLFunction> function =
++          [[library newFunctionWithName:[NSString stringWithUTF8String:name]] autorelease];
++      NSError* pipeline_error = nullptr;
++      id<MTLComputePipelineState> state =
++          [g_device newComputePipelineStateWithFunction:function error:&pipeline_error];
++      if (!state)
++        std::fprintf(stderr, "[ssx3-framegen] pipeline %s failed: %s\n", name,
++                     pipeline_error ? [[pipeline_error localizedDescription] UTF8String] : "?");
++      return MRCTransfer(state);
++    };
++    m_luma = make("fg_luma");
++    m_down = make("fg_down");
++    m_match = make("fg_match");
++    m_smooth = make("fg_smooth");
++    m_warp = make("fg_warp");
++    return m_luma && m_down && m_match && m_smooth && m_warp;
++  }
++}
++
++void Metal::FrameGen::Resize(u32 width, u32 height, MTLPixelFormat format)
++{
++  if (m_mode != Mode::Interpolate || !m_ready)
++    return;
++  if (width == m_width && height == m_height && format == m_format && m_history[0])
++    return;
++  @autoreleasepool
++  {
++    m_width = width;
++    m_height = height;
++    m_format = format;
++    m_frame = 0;
++    m_slot = 0;
++    for (u32 i = 0; i < 2; ++i)
++      m_history[i] = MakeTexture(width, height, format,
++                                 MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead,
++                                 "FrameGen history");
++    m_interp = MakeTexture(width, height, format,
++                           MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead,
++                           "FrameGen interpolated");
++    m_levels.clear();
++    u32 w = width, h = height;
++    for (u32 level = 0; level < 4; ++level)
++    {
++      Level l;
++      l.width = w;
++      l.height = h;
++      l.blocks_x = (w + kBlock - 1) / kBlock;
++      l.blocks_y = (h + kBlock - 1) / kBlock;
++      for (u32 i = 0; i < 2; ++i)
++        l.luma[i] = MakeTexture(w, h, MTLPixelFormatR8Unorm,
++                                MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead,
++                                "FrameGen luma");
++      l.motion = MakeTexture(l.blocks_x, l.blocks_y, MTLPixelFormatRGBA16Float,
++                             MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead,
++                             "FrameGen motion");
++      m_levels.push_back(std::move(l));
++      w = std::max<u32>(1, (w + 1) / 2);
++      h = std::max<u32>(1, (h + 1) / 2);
++    }
++    m_motion_smoothed = MakeTexture(m_levels[0].blocks_x, m_levels[0].blocks_y,
++                                    MTLPixelFormatRGBA16Float,
++                                    MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead,
++                                    "FrameGen motion smoothed");
++    std::fprintf(stderr, "[ssx3-framegen] surface %ux%u, %zu pyramid levels, %ux%u blocks\n",
++                 width, height, m_levels.size(), m_levels[0].blocks_x, m_levels[0].blocks_y);
++  }
++}
++
++id<MTLTexture> Metal::FrameGen::CurrentTarget()
++{
++  return m_history[m_slot];
++}
++
++void Metal::FrameGen::TrackStockDrawable(id<CAMetalDrawable> drawable)
++{
++  if (m_mode == Mode::Off || !drawable)
++    return;
++  const double submit = NowSeconds();
++  std::shared_ptr<Backref> backref = m_backref;
++  [drawable addPresentedHandler:^(id<MTLDrawable> presented) {
++    std::lock_guard<std::mutex> guard(backref->mutex);
++    if (backref->owner)
++      backref->owner->OnPresented(static_cast<id<CAMetalDrawable>>(presented), true, submit);
++  }];
++  if (++m_frame % 300 == 0)
++    ReportStats();
++}
++
++void Metal::FrameGen::OnPresented(id<CAMetalDrawable> drawable, bool real_frame,
++                                  double submit_time)
++{
++  const double presented = [drawable presentedTime];
++  std::lock_guard<std::mutex> guard(m_stats_mutex);
++  if (presented <= 0.0)
++    return;  // never reached the screen
++  if (m_last_presented_time > 0.0)
++  {
++    const double interval = presented - m_last_presented_time;
++    if (interval <= 0.012)
++      ++m_interval_short;
++    else
++      ++m_interval_long;
++  }
++  else
++  {
++    m_first_presented_time = presented;
++  }
++  m_last_presented_time = std::max(m_last_presented_time, presented);
++  ++m_presented_total;
++  const double latency = presented - submit_time;
++  if (real_frame)
++  {
++    ++m_presented_real;
++    m_real_latency_sum += latency;
++    m_real_latency_max = std::max(m_real_latency_max, latency);
++    ++m_real_latency_samples;
++  }
++  else
++  {
++    ++m_presented_interp;
++    m_interp_latency_sum += latency;
++    ++m_interp_latency_samples;
++  }
++}
++
++void Metal::FrameGen::ReportStats()
++{
++  std::lock_guard<std::mutex> guard(m_stats_mutex);
++  const double now = NowSeconds();
++  const double window = now - m_last_report_time;
++  const double presented_window =
++      m_last_presented_time > m_first_presented_time ? m_last_presented_time - m_first_presented_time : 0.0;
++  std::fprintf(stderr,
++               "[ssx3-framegen] frames=%llu window_s=%.1f gpu_ms avg=%.3f max=%.3f samples=%llu "
++               "presented total=%llu real=%llu interp=%llu rate=%.1f/s intervals<=12ms=%llu "
++               ">12ms=%llu latency_ms real_avg=%.2f real_max=%.2f interp_avg=%.2f\n",
++               static_cast<unsigned long long>(m_frame), window,
++               m_gpu_samples ? 1000.0 * m_gpu_seconds_sum / m_gpu_samples : 0.0,
++               1000.0 * m_gpu_seconds_max, static_cast<unsigned long long>(m_gpu_samples),
++               static_cast<unsigned long long>(m_presented_total),
++               static_cast<unsigned long long>(m_presented_real),
++               static_cast<unsigned long long>(m_presented_interp),
++               presented_window > 0 ? (m_presented_total - 1) / presented_window : 0.0,
++               static_cast<unsigned long long>(m_interval_short),
++               static_cast<unsigned long long>(m_interval_long),
++               m_real_latency_samples ? 1000.0 * m_real_latency_sum / m_real_latency_samples : 0.0,
++               1000.0 * m_real_latency_max,
++               m_interp_latency_samples ? 1000.0 * m_interp_latency_sum / m_interp_latency_samples :
++                                          0.0);
++  m_gpu_seconds_sum = m_gpu_seconds_max = 0;
++  m_gpu_samples = 0;
++  m_presented_total = m_presented_real = m_presented_interp = 0;
++  m_first_presented_time = m_last_presented_time = 0;
++  m_real_latency_sum = m_real_latency_max = 0;
++  m_real_latency_samples = 0;
++  m_interp_latency_sum = 0;
++  m_interp_latency_samples = 0;
++  m_interval_short = m_interval_long = 0;
++  m_last_report_time = now;
++}
++
++void Metal::FrameGen::WriteDump(u64 frame, const char* tag, id<MTLBuffer> buffer)
++{
++  char path[1024];
++  std::snprintf(path, sizeof(path), "%s/frame-%06llu-%s.bgra", m_dump_dir.c_str(),
++                static_cast<unsigned long long>(frame), tag);
++  FILE* file = std::fopen(path, "wb");
++  if (!file)
++    return;
++  const u32 header[2] = {m_width, m_height};
++  std::fwrite(header, sizeof(header), 1, file);
++  std::fwrite([buffer contents], 1, [buffer length], file);
++  std::fclose(file);
++}
++
++void Metal::FrameGen::Present(CAMetalLayer* layer)
++{
++  @autoreleasepool
++  {
++    const u32 cur = m_slot;
++    const u32 prev = cur ^ 1;
++    const u64 frame = m_frame++;
++    m_slot = prev;  // next game frame renders into the other slot
++    const bool have_prev = frame > 0;
++    const double submit = NowSeconds();
++
++    id<MTLCommandBuffer> cmdbuf = [g_queue commandBuffer];
++    [cmdbuf setLabel:@"FrameGen"];
++
++    if (have_prev)
++    {
++      id<MTLComputeCommandEncoder> compute = [cmdbuf computeCommandEncoder];
++      [compute setLabel:@"FrameGen compute"];
++      // Luma pyramid for the current frame (the previous frame's pyramid is kept).
++      [compute setTexture:m_history[cur] atIndex:0];
++      [compute setTexture:m_levels[0].luma[cur] atIndex:1];
++      Dispatch2D(compute, m_luma, m_levels[0].width, m_levels[0].height);
++      for (size_t level = 1; level < m_levels.size(); ++level)
++      {
++        [compute setTexture:m_levels[level - 1].luma[cur] atIndex:0];
++        [compute setTexture:m_levels[level].luma[cur] atIndex:1];
++        Dispatch2D(compute, m_down, m_levels[level].width, m_levels[level].height);
++      }
++      // Coarse-to-fine bilateral block matching.
++      for (size_t i = m_levels.size(); i-- > 0;)
++      {
++        const Level& level = m_levels[i];
++        const bool coarsest = i + 1 == m_levels.size();
++        MatchParams params{level.blocks_x, level.blocks_y, coarsest ? 6 : 1, coarsest ? 0 : 1,
++                           coarsest ? 0.0f : 0.15f, 0.0f};
++        [compute setTexture:level.luma[prev] atIndex:0];
++        [compute setTexture:level.luma[cur] atIndex:1];
++        [compute setTexture:coarsest ? level.motion : m_levels[i + 1].motion atIndex:2];
++        [compute setTexture:level.motion atIndex:3];
++        [compute setBytes:&params length:sizeof(params) atIndex:0];
++        Dispatch2D(compute, m_match, level.blocks_x, level.blocks_y);
++      }
++      {
++        const Level& level = m_levels[0];
++        MatchParams params{level.blocks_x, level.blocks_y, 0, 1, 0.3f, 0.0f};
++        [compute setTexture:level.luma[prev] atIndex:0];
++        [compute setTexture:level.luma[cur] atIndex:1];
++        [compute setTexture:level.motion atIndex:2];
++        [compute setTexture:m_motion_smoothed atIndex:3];
++        [compute setBytes:&params length:sizeof(params) atIndex:0];
++        Dispatch2D(compute, m_smooth, level.blocks_x, level.blocks_y);
++      }
++      [compute setTexture:m_history[prev] atIndex:0];
++      [compute setTexture:m_history[cur] atIndex:1];
++      [compute setTexture:m_motion_smoothed atIndex:2];
++      [compute setTexture:m_interp atIndex:3];
++      Dispatch2D(compute, m_warp, m_width, m_height);
++      [compute endEncoding];
++    }
++
++    const bool dump = have_prev && !m_dump_dir.empty() && frame >= m_dump_from &&
++                      (frame - m_dump_from) % m_dump_every == 0;
++    std::vector<MRCOwned<id<MTLBuffer>>> dump_buffers;
++    if (dump)
++    {
++      id<MTLBlitCommandEncoder> blit = [cmdbuf blitCommandEncoder];
++      id<MTLTexture> sources[3] = {m_history[prev], m_history[cur], m_interp};
++      for (id<MTLTexture> source : sources)
++      {
++        const NSUInteger bytes_per_row = m_width * 4;
++        MRCOwned<id<MTLBuffer>> buffer = MRCTransfer(
++            [g_device newBufferWithLength:bytes_per_row * m_height
++                                  options:MTLResourceStorageModeShared]);
++        [blit copyFromTexture:source
++                     sourceSlice:0
++                     sourceLevel:0
++                    sourceOrigin:MTLOriginMake(0, 0, 0)
++                      sourceSize:MTLSizeMake(m_width, m_height, 1)
++                        toBuffer:buffer
++               destinationOffset:0
++          destinationBytesPerRow:bytes_per_row
++        destinationBytesPerImage:bytes_per_row * m_height];
++        dump_buffers.push_back(std::move(buffer));
++      }
++      [blit endEncoding];
++    }
++
++    // Present: synthesized frame first, then the real frame (unless only synthesized
++    // frames are wanted, e.g. for artifact inspection on a 60 Hz display).
++    const bool present_interp = have_prev;
++    const bool present_real = !(m_present_only_interpolated && have_prev);
++    id<MTLTexture> outputs[2] = {m_interp, m_history[cur]};
++    const bool wanted[2] = {present_interp, present_real};
++    for (int i = 0; i < 2; ++i)
++    {
++      if (!wanted[i])
++        continue;
++      id<CAMetalDrawable> drawable = [layer nextDrawable];
++      if (!drawable)
++        continue;
++      id<MTLBlitCommandEncoder> blit = [cmdbuf blitCommandEncoder];
++      [blit copyFromTexture:outputs[i] toTexture:[drawable texture]];
++      [blit endEncoding];
++      const bool real_frame = i == 1;
++      std::shared_ptr<Backref> backref = m_backref;
++      [drawable addPresentedHandler:^(id<MTLDrawable> presented) {
++        std::lock_guard<std::mutex> guard(backref->mutex);
++        if (backref->owner)
++          backref->owner->OnPresented(static_cast<id<CAMetalDrawable>>(presented), real_frame,
++                                      submit);
++      }];
++      if (real_frame && present_interp)
++      {
++        // Keep the synthesized frame on screen for one 120 Hz refresh.
++        [cmdbuf addScheduledHandler:^(id<MTLCommandBuffer>) {
++          [drawable presentAfterMinimumDuration:1.0 / 120.0];
++        }];
++      }
++      else
++      {
++        [cmdbuf addScheduledHandler:^(id<MTLCommandBuffer>) { [drawable present]; }];
++      }
++    }
++
++    std::shared_ptr<Backref> backref = m_backref;
++    [cmdbuf addCompletedHandler:^(id<MTLCommandBuffer> buf) {
++      std::lock_guard<std::mutex> guard(backref->mutex);
++      FrameGen* owner = backref->owner;
++      if (!owner)
++        return;
++      if (have_prev)
++      {
++        const double gpu = [buf GPUEndTime] - [buf GPUStartTime];
++        std::lock_guard<std::mutex> stats_guard(owner->m_stats_mutex);
++        owner->m_gpu_seconds_sum += gpu;
++        owner->m_gpu_seconds_max = std::max(owner->m_gpu_seconds_max, gpu);
++        ++owner->m_gpu_samples;
++      }
++      if (dump)
++      {
++        owner->WriteDump(frame, "prev", dump_buffers[0]);
++        owner->WriteDump(frame, "cur", dump_buffers[1]);
++        owner->WriteDump(frame, "interp", dump_buffers[2]);
++      }
++      if ([buf status] == MTLCommandBufferStatusError)
++        std::fprintf(stderr, "[ssx3-framegen] command buffer failed: %s\n",
++                     [[[buf error] localizedDescription] UTF8String]);
++    }];
++    [cmdbuf commit];
++    m_last_cmdbuf = MRCRetain(cmdbuf);
++
++    if (m_frame % 300 == 0)
++      ReportStats();
++  }
++}
+diff --git a/Source/Core/VideoBackends/Metal/MTLGfx.h b/Source/Core/VideoBackends/Metal/MTLGfx.h
+index fc9fca0..737cdfc 100644
+--- a/Source/Core/VideoBackends/Metal/MTLGfx.h
++++ b/Source/Core/VideoBackends/Metal/MTLGfx.h
+@@ -13,6 +13,7 @@
+ namespace Metal
+ {
+ class Framebuffer;
++class FrameGen;
+ class Texture;
+ 
+ class Gfx final : public ::AbstractGfx
+@@ -79,6 +80,7 @@ private:
+   MRCOwned<id<CAMetalDrawable>> m_drawable;
+   std::unique_ptr<Texture> m_bb_texture;
+   std::unique_ptr<Framebuffer> m_backbuffer;
++  std::unique_ptr<FrameGen> m_framegen;  // SSX3_FRAMEGEN spike
+   u32 m_texture_counter = 0;
+   u32 m_staging_texture_counter = 0;
+   std::array<u32, 4> m_shader_counter = {};
+diff --git a/Source/Core/VideoBackends/Metal/MTLGfx.mm b/Source/Core/VideoBackends/Metal/MTLGfx.mm
+index abdd622..767930e 100644
+--- a/Source/Core/VideoBackends/Metal/MTLGfx.mm
++++ b/Source/Core/VideoBackends/Metal/MTLGfx.mm
+@@ -4,6 +4,7 @@
+ #include "VideoBackends/Metal/MTLGfx.h"
+ 
+ #include "VideoBackends/Metal/MTLBoundingBox.h"
++#include "VideoBackends/Metal/MTLFrameGen.h"
+ #include "VideoBackends/Metal/MTLObjectCache.h"
+ #include "VideoBackends/Metal/MTLPipeline.h"
+ #include "VideoBackends/Metal/MTLStateTracker.h"
+@@ -25,11 +26,22 @@
+   [m_layer setDisplaySyncEnabled:g_ActiveConfig.bVSyncActive];
+ #endif
+ 
++  if (const FrameGen::Mode mode = FrameGen::ModeFromEnvironment(); mode != FrameGen::Mode::Off && m_layer)
++  {
++    m_framegen = std::make_unique<FrameGen>(mode);
++    if (m_framegen->Interpolating())
++      [m_layer setFramebufferOnly:NO];  // synthesized frames are blitted into the drawable
++  }
++
+   SetupSurface();
+   g_state_tracker->FlushEncoders();
+ }
+ 
+-Metal::Gfx::~Gfx() = default;
++Metal::Gfx::~Gfx()
++{
++  if (m_framegen)
++    g_state_tracker->WaitForFlushedEncoders();
++}
+ 
+ bool Metal::Gfx::IsHeadless() const
+ {
+@@ -459,6 +471,12 @@ static MTLTextureType FromAbstract(AbstractTextureType type, bool multisample)
+   {
+     CheckForSurfaceChange();
+     CheckForSurfaceResize();
++    if (m_framegen && m_framegen->Interpolating())
++    {
++      m_backbuffer->UpdateBackbufferTexture(m_framegen->CurrentTarget());
++      SetAndClearFramebuffer(m_backbuffer.get(), clear_color);
++      return true;
++    }
+     m_drawable = MRCRetain([m_layer nextDrawable]);
+     m_backbuffer->UpdateBackbufferTexture([m_drawable texture]);
+     SetAndClearFramebuffer(m_backbuffer.get(), clear_color);
+@@ -471,8 +489,17 @@ static MTLTextureType FromAbstract(AbstractTextureType type, bool multisample)
+   @autoreleasepool
+   {
+     g_state_tracker->EndRenderPass();
++    if (m_framegen && m_framegen->Interpolating())
++    {
++      m_backbuffer->UpdateBackbufferTexture(nullptr);
++      g_state_tracker->FlushEncoders();
++      m_framegen->Present(m_layer);
++      return;
++    }
+     if (m_drawable)
+     {
++      if (m_framegen)
++        m_framegen->TrackStockDrawable(m_drawable);
+       // PresentDrawable refuses to allow Dolphin to present faster than the display's refresh rate
+       // when windowed (or fullscreen with vsync enabled, but that's more understandable).
+       // On the other hand, it helps Xcode's GPU captures start and stop on frame boundaries
+@@ -517,6 +544,8 @@ TextureConfig cfg(info.width, info.height, 1, 1, 1, info.format, AbstractTexture
+   m_bb_texture = std::make_unique<Texture>(nullptr, cfg);
+   m_backbuffer = std::make_unique<Framebuffer>(
+       m_bb_texture.get(), nullptr, std::vector<AbstractTexture*>{}, info.width, info.height, 1, 1);
++  if (m_framegen)
++    m_framegen->Resize(info.width, info.height, [m_layer pixelFormat]);
+ 
+   if (g_presenter)
+     g_presenter->SetBackbuffer(info);
+diff --git a/Source/Core/VideoCommon/CMakeLists.txt b/Source/Core/VideoCommon/CMakeLists.txt
+index 69a0968..3de3d94 100644
+--- a/Source/Core/VideoCommon/CMakeLists.txt
++++ b/Source/Core/VideoCommon/CMakeLists.txt
+@@ -146,6 +146,8 @@ add_library(videocommon
+   PostProcessing.h
+   Present.cpp
+   Present.h
++  CameraTrace.cpp
++  CameraTrace.h
+   RenderState.cpp
+   RenderState.h
+   Resources/CustomResourceManager.cpp
+diff --git a/Source/Core/VideoCommon/CameraTrace.cpp b/Source/Core/VideoCommon/CameraTrace.cpp
+new file mode 100644
+index 0000000..e67ddc0
+--- /dev/null
++++ b/Source/Core/VideoCommon/CameraTrace.cpp
+@@ -0,0 +1,126 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++// SSX 3 120 Hz spike: per-frame camera/projection trace. See CameraTrace.h.
++
++#include "VideoCommon/CameraTrace.h"
++
++#include <cmath>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <map>
++
++namespace CameraTrace
++{
++namespace
++{
++struct MatrixStats
++{
++  u32 flushes = 0;
++  u64 indices = 0;
++  std::array<float, 12> matrix{};
++};
++
++struct FrameStats
++{
++  u32 perspective_flushes = 0, ortho_flushes = 0;
++  u64 perspective_indices = 0, ortho_indices = 0;
++  std::map<std::array<float, 6>, u64> projections;  // raw projection -> indices drawn with it
++  std::map<u32, MatrixStats> matrices;               // posMatrices index -> stats
++};
++
++FrameStats s_frame;
++u64 s_frame_number = 0;
++u64 s_every = 300;
++int s_enabled = -1;
++}  // namespace
++
++bool Enabled()
++{
++  if (s_enabled < 0)
++  {
++    const char* value = std::getenv("SSX3_CAMERA_TRACE");
++    s_enabled = value && *value && std::strcmp(value, "0") != 0;
++    if (const char* every = std::getenv("SSX3_CAMERA_TRACE_EVERY"))
++      s_every = std::strtoull(every, nullptr, 10);
++    if (s_every == 0)
++      s_every = 300;
++  }
++  return s_enabled == 1;
++}
++
++void OnFlush(bool perspective, const std::array<float, 6>& raw_projection, u32 pos_matrix_index,
++             const float* pos_matrix, u32 index_count, u32 vertex_count)
++{
++  if (!Enabled())
++    return;
++  if (perspective)
++  {
++    ++s_frame.perspective_flushes;
++    s_frame.perspective_indices += index_count;
++    s_frame.projections[raw_projection] += index_count;
++    MatrixStats& stats = s_frame.matrices[pos_matrix_index];
++    ++stats.flushes;
++    stats.indices += index_count;
++    std::memcpy(stats.matrix.data(), pos_matrix, sizeof(stats.matrix));
++  }
++  else
++  {
++    ++s_frame.ortho_flushes;
++    s_frame.ortho_indices += index_count;
++  }
++  (void)vertex_count;
++}
++
++void OnPresent()
++{
++  if (!Enabled())
++    return;
++  const u64 frame = s_frame_number++;
++  if (frame % s_every == 0)
++  {
++    std::fprintf(stderr,
++                 "[ssx3-camera] frame=%llu perspective flushes=%u indices=%llu ortho flushes=%u "
++                 "indices=%llu distinct_perspective_projections=%zu\n",
++                 static_cast<unsigned long long>(frame), s_frame.perspective_flushes,
++                 static_cast<unsigned long long>(s_frame.perspective_indices),
++                 s_frame.ortho_flushes, static_cast<unsigned long long>(s_frame.ortho_indices),
++                 s_frame.projections.size());
++    for (const auto& [raw, indices] : s_frame.projections)
++    {
++      // GX perspective: raw[0]/raw[2] are the x/y focal scales, raw[4] = far/(near-far),
++      // raw[5] = near*far/(near-far). Hence near = raw[5]/raw[4], far = raw[4]*near/(raw[4]+1).
++      const float near_plane = raw[4] != 0.0f ? raw[5] / raw[4] : 0.0f;
++      const float far_plane = raw[4] != -1.0f ? raw[4] * near_plane / (raw[4] + 1.0f) : 0.0f;
++      const float fov_y = raw[2] != 0.0f ? 2.0f * std::atan(1.0f / raw[2]) * 57.29578f : 0.0f;
++      const float aspect = raw[0] != 0.0f ? raw[2] / raw[0] : 0.0f;
++      std::fprintf(stderr,
++                   "[ssx3-camera]   projection raw=[%g %g %g %g %g %g] indices=%llu near=%g far=%g "
++                   "fov_y_deg=%g aspect=%g\n",
++                   raw[0], raw[1], raw[2], raw[3], raw[4], raw[5],
++                   static_cast<unsigned long long>(indices), near_plane, far_plane, fov_y, aspect);
++    }
++    // The three position matrices that transformed the most indices this frame.
++    for (int rank = 0; rank < 3; ++rank)
++    {
++      const std::map<u32, MatrixStats>::iterator best = [&] {
++        auto it = s_frame.matrices.end();
++        for (auto cur = s_frame.matrices.begin(); cur != s_frame.matrices.end(); ++cur)
++          if (it == s_frame.matrices.end() || cur->second.indices > it->second.indices)
++            it = cur;
++        return it;
++      }();
++      if (best == s_frame.matrices.end())
++        break;
++      const auto& m = best->second.matrix;
++      std::fprintf(stderr,
++                   "[ssx3-camera]   posmatrix index=%u flushes=%u indices=%llu "
++                   "rows=[%g %g %g %g | %g %g %g %g | %g %g %g %g]\n",
++                   best->first, best->second.flushes,
++                   static_cast<unsigned long long>(best->second.indices), m[0], m[1], m[2], m[3],
++                   m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11]);
++      s_frame.matrices.erase(best);
++    }
++  }
++  s_frame = FrameStats{};
++}
++}  // namespace CameraTrace
+diff --git a/Source/Core/VideoCommon/CameraTrace.h b/Source/Core/VideoCommon/CameraTrace.h
+new file mode 100644
+index 0000000..db8dea9
+--- /dev/null
++++ b/Source/Core/VideoCommon/CameraTrace.h
+@@ -0,0 +1,24 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++// SSX 3 120 Hz spike: per-frame camera/projection trace (SSX3_CAMERA_TRACE=1).
++//
++// Records, per presented frame, the perspective projections seen by VertexManagerBase::Flush
++// and the position matrix (GX posMatrices index) that transformed the most indices. This is
++// the input a depth-reprojection or MetalFX frame interpolator would need: near/far planes,
++// vertical field of view, and a dominant view matrix. Output goes to stderr every
++// SSX3_CAMERA_TRACE_EVERY frames (default 300).
++
++#pragma once
++
++#include <array>
++
++#include "Common/CommonTypes.h"
++
++namespace CameraTrace
++{
++bool Enabled();
++// Called from VertexManagerBase::Flush for triangle draws.
++void OnFlush(bool perspective, const std::array<float, 6>& raw_projection, u32 pos_matrix_index,
++             const float* pos_matrix, u32 index_count, u32 vertex_count);
++// Called once per presented frame (Presenter::Present).
++void OnPresent();
++}  // namespace CameraTrace
+diff --git a/Source/Core/VideoCommon/Present.cpp b/Source/Core/VideoCommon/Present.cpp
+index 7c62730..ada8e21 100644
+--- a/Source/Core/VideoCommon/Present.cpp
++++ b/Source/Core/VideoCommon/Present.cpp
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "VideoCommon/Present.h"
++#include "VideoCommon/CameraTrace.h"
+ 
+ #include "Common/ChunkFile.h"
+ #include "Core/Config/GraphicsSettings.h"
+@@ -902,6 +903,7 @@ void Presenter::RenderXFBToScreen(const MathUtil::Rectangle<int>& target_rc,
+ void Presenter::Present(PresentInfo* present_info)
+ {
+   m_present_count++;
++  CameraTrace::OnPresent();
+ 
+   if (g_gfx->IsHeadless() || (!m_onscreen_ui && !m_xfb_entry))
+     return;
+diff --git a/Source/Core/VideoCommon/VertexManagerBase.cpp b/Source/Core/VideoCommon/VertexManagerBase.cpp
+index 2bc6d58..74d4ea5 100644
+--- a/Source/Core/VideoCommon/VertexManagerBase.cpp
++++ b/Source/Core/VideoCommon/VertexManagerBase.cpp
+@@ -22,6 +22,7 @@
+ #include "VideoCommon/AbstractGfx.h"
+ #include "VideoCommon/BPMemory.h"
+ #include "VideoCommon/BoundingBox.h"
++#include "VideoCommon/CameraTrace.h"
+ #include "VideoCommon/DataReader.h"
+ #include "VideoCommon/FramebufferManager.h"
+ #include "VideoCommon/GeometryShaderManager.h"
+@@ -519,6 +520,12 @@ void VertexManagerBase::Flush()
+         is_perspective ? m_flush_statistics.perspective : m_flush_statistics.orthographic;
+ 
+     const auto& projection = xfmem.projection.rawProjection;
++    if (CameraTrace::Enabled())
++    {
++      const u32 pos_index = g_main_cp_state.matrix_index_a.PosNormalMtxIdx;
++      CameraTrace::OnFlush(is_perspective, projection, pos_index, &xfmem.posMatrices[pos_index * 4],
++                           m_index_generator.GetIndexLen(), m_index_generator.GetNumVerts());
++    }
+     // TODO: Potentially the viewport size could be used as weight for the flush count average.
+     // This way a small minimap would have less effect than a fullscreen projection.
+     const auto& viewport = xfmem.viewport;

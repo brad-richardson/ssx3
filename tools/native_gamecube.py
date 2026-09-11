@@ -51,7 +51,31 @@ def check_pins():
 
 def check_patches():
     for checkout, filename in ((CORE, "recompcore-platform.patch"), (SOURCE, "moderngekko-platform.patch")):
-        run(["git", "-C", checkout, "apply", "--reverse", "--check", ROOT / "native/patches" / filename])
+        stacked = [ROOT / "native/patches" / filename]
+        if checkout == CORE and (ROOT / "native/patches/spike-120hz.patch").exists():
+            stacked.append(ROOT / "native/patches/spike-120hz.patch")
+        if len(stacked) == 1:
+            run(["git", "-C", checkout, "apply", "--reverse", "--check", stacked[0]])
+        else:
+            check_stacked_patches(checkout, stacked)
+
+
+def check_stacked_patches(checkout, patches):
+    """Verify the checkout equals its pinned revision plus the patches applied in order.
+
+    Later patches are diffs against the earlier ones, so a plain reverse check of the first
+    patch fails. Reverse-apply them in order in a temporary index and compare with HEAD.
+    """
+    import tempfile
+    paths = sorted({match for patch in patches
+                    for match in re.findall(r"^diff --git a/(\S+) b/", patch.read_text(), re.M)})
+    with tempfile.TemporaryDirectory() as temp:
+        env = dict(os.environ, GIT_INDEX_FILE=str(Path(temp) / "index"))
+        run(["git", "-C", checkout, "read-tree", "HEAD"], env=env)
+        run(["git", "-C", checkout, "add", "-A", "--", *paths], env=env)
+        for patch in reversed(patches):
+            run(["git", "-C", checkout, "apply", "--cached", "--reverse", patch], env=env)
+        run(["git", "-C", checkout, "diff-index", "--cached", "--quiet", "HEAD"], env=env)
 
 
 def bootstrap(args):
