@@ -5,11 +5,7 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] Xbox prompt glyphs: repainted by `tools/patch_ui_glyphs.py` (blue X,
-      red B, yellow Y in the GameCube B/X/Y slots of the `art_` sheet in
-      fe_1/ov_1/gl_1.gsh); installed on the phone, in the gc-gari-005 disc
-      root and ISO. Still to confirm on the in-game menu capture.
-- [ ] Control mapping doc: one table of action → GameCube input → Xbox pad →
+- [ ] Control mapping doc (partly done in `native/ios/README.md` Controls): one table of action → GameCube input → Xbox pad →
       touch control, kept in `native/ios/README.md`.
 - [ ] Odin: test `SSX3-gc-gari-005.iso` (on the share, 1.36 GiB) in Dolphin for
       Android; the disc builder is done, the handheld run is not.
@@ -45,6 +41,10 @@ the build or commit that closed them.
       translate or hook if phone timings need it.
 
 ## Done
+
+- [x] 2026-09-11 Xbox prompt glyphs: `tools/patch_ui_glyphs.py` repaints the
+      B/X/Y icons in the three UI sheets; in-game menu shows green A and blue X.
+      Installed on the phone, in the gc-gari-005 disc root and the shared ISO.
 
 - [x] 2026-09-11 `tools/build_gc_iso.py` rebuilds a GameCube ISO; stock FST
       reproduced byte for byte.

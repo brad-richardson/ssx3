@@ -58,8 +58,10 @@ The GameCube build's own Controller Settings screen (captured 2026-09-11 in the
 native Mac build) defines two presets. Default: main stick and D-pad turn,
 crouch/brake, spin/flip; A jump; B boost/tweak; X hand plant; Y reset; Z grab
 board; L and R grab/block/punch; C-stick board press; Start pause. Pro swaps Z
-to reset, Y to hand plant, and X to grab board. The overlay keeps the GameCube
-letters because the game's prompts show them.
+to reset, Y to hand plant, and X to grab board. The touch overlay and the game's prompt icons both use Xbox letters at Xbox
+positions: `tools/patch_ui_glyphs.py` repaints the GameCube B/X/Y icons in
+`data/ui/{fe_1,ov_1,gl_1}.gsh` as a blue X, red B and yellow Y, so a prompt for
+boost reads X (left) and hand plant reads B (right).
 
 GameCube grabs come from three inputs, PS2 grabs from four shoulders. The
 verified tables are in `GrabMap.h`; `tests/test_native_grab_map.py` checks them.
