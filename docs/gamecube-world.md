@@ -79,3 +79,14 @@ lives only in texture group 31 (PS2: lightmap 144 in group 32).
   (an allocator free-list pop without a null check), the same record-pool
   exhaustion the PS2 showed at 8,847 resources. Dropping the 3,052 kind-3
   props is the fix on both platforms.
+- `gc-gari-003` (props dropped, no other cleanup) reaches the race at 60 FPS
+  with 42,131 dangling-reference accesses, like PS2 build 002.
+- `gc-gari-004` (props and collision dropped, references cleared, bindings
+  and programs disabled, texture group 31 pinned) runs with **zero** invalid
+  accesses. The rider still falls: Single Event uses the six race-gate start
+  records (types 0-5, second flag 0) at the Snow Jam gate, about 2,500 units
+  from the nearest imported patch, not the freeride start the PS2 build used.
+- The kind-14 path resource is the PS2 little-endian AIP format byte for
+  byte (magic 0x69696969, 129 AI paths, 8 track paths, 14 start records), so
+  `course_route.make_reset_aip` applies unchanged; `--relocate-race-starts`
+  moves the gates onto the donor opening.
