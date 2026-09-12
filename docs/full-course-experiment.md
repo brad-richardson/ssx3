@@ -109,7 +109,7 @@ image is an experimental freeride prototype, not a finished race.
 
 Reproduce with the same replacement command below plus `--drop-kind 3` and
 fresh `run-gari-002` output paths. The tested build is on the share at
-`/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-002/`.
+`/Volumes/share/brad/games/ssx3-workbench/builds/run-gari-002/`.
 Its `launch.command` uses the existing isolated test-002 profile. Saved test
 evidence is in its `evidence/` directory; subsequent launches write to
 `launch-logs/pcsx2-latest.log` so the original test log is preserved.
@@ -249,7 +249,7 @@ height residual of **−0.469**, around `(-223510, 154671, -375052)`.
 The tested build and launcher are in `local/builds/run-gari-009/`; evidence
 is in `local/evidence/run-gari-009/`. Its launcher uses the isolated local
 course-cleanup profile. The same tested ISO, archive and evidence are published
-at `/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-009/`. All **39
+at `/Volumes/share/brad/games/ssx3-workbench/builds/run-gari-009/`. All **39
 files (3,335,114,256 bytes)** have verified readback hashes in `transfer.json`;
 the ISO matches the hash above. The share does not support server-side cloning,
 so the ISO was streamed from the tested local copy. Its shared Mac launcher
@@ -346,7 +346,7 @@ ranges and the source hash. The documented streamed relocation command yields
 the same bytes.
 
 The tested build is published at
-`/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-010/`: **53 files,
+`/Volumes/share/brad/games/ssx3-workbench/builds/run-gari-010/`: **53 files,
 3,396,988,198 bytes**, with every readback hash recorded in `transfer.json`.
 The copied ISO matches the SHA-256 above. The shared Mac launcher uses the
 existing isolated test-002 profile; the Odin needs only the ISO. Build 009
@@ -363,15 +363,15 @@ These commands reproduce the original local build:
 
 ```sh
 python3 tools/replace_terrain.py \
-  '/Volumes/share-1/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' \
-  --pbd '/Volumes/share-1/brad/games/ssx3-workbench/extracted/garibaldi/gari.pbd' \
+  '/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' \
+  --pbd '/Volumes/share/brad/games/ssx3-workbench/extracted/garibaldi/gari.pbd' \
   --cache local/world-cache --location ARA1 --template-rid 1673 \
   --source-anchor=-1214.8,-195.5,-768.547891 \
   --target-anchor=-118613.68,15753.8,-228880.14 \
   --yaw 73 --scale .55 --output local/builds/run-gari-001
 
 python3 tools/build_course_image.py \
-  '/Volumes/share-1/brad/games/ps2/SSX 3 (USA).iso' \
+  '/Volumes/share/brad/games/ps2/SSX 3 (USA).iso' \
   local/builds/run-gari-001/BAM.BIG --output local/builds/run-gari-001/iso
 ```
 

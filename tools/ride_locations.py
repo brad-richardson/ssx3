@@ -19,7 +19,7 @@ CELL = 4000
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('log', type=Path)
-    ap.add_argument('--archive', type=Path, default=Path('/Volumes/share-1/brad/games/ssx3-workbench/source/ssx3/BAM.BIG'))
+    ap.add_argument('--archive', type=Path, default=Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG'))
     ap.add_argument('--world-report', type=Path, default=ROOT / 'local/reports/ssx3-world.json')
     ap.add_argument('--max-distance', type=float, default=2500)
     a = ap.parse_args()

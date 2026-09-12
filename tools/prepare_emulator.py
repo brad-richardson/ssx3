@@ -18,9 +18,9 @@ def main():
                         "Library/Application Support/PCSX2")
     parser.add_argument("--bios-dir", type=Path, default=Path.home() / "Downloads/PS2_BIOS")
     parser.add_argument("--app", type=Path, default=Path("/Applications/PCSX2-v2.8.2.app"))
-    parser.add_argument("--games", type=Path, default=Path("/Volumes/share-1/brad/games/ps2"))
+    parser.add_argument("--games", type=Path, default=Path("/Volumes/share/brad/games/ps2"))
     parser.add_argument("--builds", type=Path, default=Path(
-        "/Volumes/share-1/brad/games/ssx3-workbench/builds"))
+        "/Volumes/share/brad/games/ssx3-workbench/builds"))
     args = parser.parse_args()
     binary = args.app / "Contents/MacOS/PCSX2"
     config = configparser.ConfigParser(interpolation=None, strict=False)

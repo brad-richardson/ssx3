@@ -20,7 +20,7 @@ maintainability later; it is not a prerequisite for testing this route.
 
 ## Supplied images
 
-Both images remain on `/Volumes/share-1/brad/games/gamecube/`. Inspection used
+Both images remain on `/Volumes/share/brad/games/gamecube/`. Inspection used
 decomp-toolkit 1.8.4, commit `a0c455e46cab58e1d2e0885623f85089ff0499db`, reading
 RVZ directly. No full ISO copies were created.
 

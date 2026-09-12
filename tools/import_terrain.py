@@ -101,7 +101,7 @@ def make_record(template, coeffs):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('archive', type=Path)
-    ap.add_argument('--pbd', type=Path, default=Path('/Volumes/share-1/brad/games/ssx3-workbench/extracted/garibaldi/gari.pbd'))
+    ap.add_argument('--pbd', type=Path, default=Path('/Volumes/share/brad/games/ssx3-workbench/extracted/garibaldi/gari.pbd'))
     ap.add_argument('--world-report', type=Path, default=Path('local/reports/ssx3-world.json'))
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--group', type=int, default=2)

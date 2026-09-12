@@ -39,13 +39,13 @@ builds, leaving the large unused platform dependencies out.
 
 The DOL defaults to `local/source/gamecube/ssx3/sys/main.dol`. Both compilation
 and launch verify its SHA-256 against GXBE69 revision 0. The extracted disc root
-defaults to `/Volumes/share-1/brad/games/ssx3-workbench/native/GXBE69`; override
+defaults to `/Volumes/share/brad/games/ssx3-workbench/native/GXBE69`; override
 with `run --game PATH`. The original RVZ remains unchanged. Extraction was:
 
 ```sh
 local/tooling/dtk disc extract \
-  '/Volumes/share-1/brad/games/gamecube/SSX 3 (USA).rvz' \
-  '/Volumes/share-1/brad/games/ssx3-workbench/native/GXBE69'
+  '/Volumes/share/brad/games/gamecube/SSX 3 (USA).rvz' \
+  '/Volumes/share/brad/games/ssx3-workbench/native/GXBE69'
 ```
 
 Keep dependencies in ignored `third_party/`, game files and generated code in

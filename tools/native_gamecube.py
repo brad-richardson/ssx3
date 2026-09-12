@@ -23,7 +23,7 @@ SOURCE = ROOT / "third_party/ModernGekko"
 CORE = SOURCE / "vendor/dolphin"
 BUILD = ROOT / "local/native/runtime-build"
 MODULE = ROOT / "local/native/ssx3-module"
-DEFAULT_GAME = Path("/Volumes/share-1/brad/games/ssx3-workbench/native/GXBE69")
+DEFAULT_GAME = Path("/Volumes/share/brad/games/ssx3-workbench/native/GXBE69")
 
 
 def sha256(path):

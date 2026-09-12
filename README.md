@@ -57,7 +57,7 @@ memory offsets, and the four verified coefficient changes.
 ## Try it yourself
 
 The latest tested prototype is **run-gari-010**, copied and hash-verified at
-`/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-010/`.
+`/Volumes/share/brad/games/ssx3-workbench/builds/run-gari-010/`.
 On the Mac, double-click its `launch.command` to boot with the isolated shared
 test-002 profile. Choose Conquer the Mountain, the saved Mac character, then
 Transport → Peak 1 → Freeride → Garibaldi. This build restores Garibaldi's
@@ -109,7 +109,7 @@ Code, tests, and small reports live here. Large inputs and archived builds live
 on the network share; current test builds and evidence use ignored `local/`:
 
 ```text
-/Volumes/share-1/brad/games/
+/Volumes/share/brad/games/
   ps2/
     SSX 3 (USA).iso                # original, read-only input
     SSX Tricky (USA).iso           # original, read-only input
@@ -157,16 +157,16 @@ No .NET runtime, game SDK, or additional BIOS is needed.
 Inventory the discs and relevant archive directories without copying whole ISOs:
 
 ```sh
-python3 tools/inspect_disc.py '/Volumes/share-1/brad/games/ps2/SSX 3 (USA).iso' --archive DATA/WORLDS/BAM.BIG --output local/reports/ssx3-disc.json
-python3 tools/inspect_disc.py '/Volumes/share-1/brad/games/ps2/SSX Tricky (USA).iso' --archive DATA/MODELS/GARI.BIG --output local/reports/tricky-disc.json
+python3 tools/inspect_disc.py '/Volumes/share/brad/games/ps2/SSX 3 (USA).iso' --archive DATA/WORLDS/BAM.BIG --output local/reports/ssx3-disc.json
+python3 tools/inspect_disc.py '/Volumes/share/brad/games/ps2/SSX Tricky (USA).iso' --archive DATA/MODELS/GARI.BIG --output local/reports/tricky-disc.json
 ```
 
 Reproduce reports from the staged archives (read-only):
 
 ```sh
-python3 tools/probe_worlds.py ssx3 '/Volumes/share-1/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --report local/reports/ssx3-world.json
-python3 tools/probe_worlds.py tricky '/Volumes/share-1/brad/games/ssx3-workbench/source/tricky/GARI.BIG' --report local/reports/garibaldi.json
-python3 tools/verify_inputs.py --staging '/Volumes/share-1/brad/games/ssx3-workbench'
+python3 tools/probe_worlds.py ssx3 '/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --report local/reports/ssx3-world.json
+python3 tools/probe_worlds.py tricky '/Volumes/share/brad/games/ssx3-workbench/source/tricky/GARI.BIG' --report local/reports/garibaldi.json
+python3 tools/verify_inputs.py --staging '/Volumes/share/brad/games/ssx3-workbench'
 python3 -m unittest discover -s tests -v
 ```
 

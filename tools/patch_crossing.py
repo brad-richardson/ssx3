@@ -15,7 +15,7 @@ from build_world_experiment import coefficients
 log, build = sys.argv[1], Path(sys.argv[2])
 exp = json.loads((build / 'experiment.json').read_text())
 report = json.load(open(ROOT / 'local' / 'reports' / 'ssx3-world.json'))
-src = Path('/Volumes/share-1/brad/games/ssx3-workbench/source/ssx3/BAM.BIG')
+src = Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG')
 with src.open('rb') as f:
     a = Region(f, 0, src.stat().st_size); _, ms = big_members(a); ssb = file_region(a, ms, 'data/worlds/bam.ssb')
     raw = b''.join(refpack(ssb.read(b['offset'], b['size'])[8:])[0] for b in report['groups'][exp['group']]['blocks'])

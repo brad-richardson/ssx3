@@ -12,7 +12,7 @@ below describe the earlier phase.
 
 ## Inputs and provenance
 
-The source images remain unchanged, now under `/Volumes/share-1/brad/games/ps2/`.
+The source images remain unchanged, now under `/Volumes/share/brad/games/ps2/`.
 
 | Input | Size (bytes) | Executable | Executable SHA-1 |
 | --- | ---: | --- | --- |
@@ -112,7 +112,7 @@ Instances have only been counted, not exported or semantically validated.
 
 The untextured preview is:
 
-`/Volumes/share-1/brad/games/ssx3-workbench/extracted/garibaldi/garibaldi-terrain.obj`
+`/Volumes/share/brad/games/ssx3-workbench/extracted/garibaldi/garibaldi-terrain.obj`
 
 The patch evaluator agrees with Garibaldi's stored corners to within **0.028 game
 units** over every patch. This supports the geometry decoding; it does not validate

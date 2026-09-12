@@ -6,7 +6,7 @@ original SSX 3 patches. They are not the Garibaldi import.
 
 ## Artifacts
 
-Root: `/Volumes/share-1/brad/games/ssx3-workbench/builds/`
+Root: `/Volumes/share/brad/games/ssx3-workbench/builds/`
 
 | Build | Image | Purpose |
 | --- | --- | --- |
@@ -140,12 +140,12 @@ comparison against an external disc-preservation database.
 
 PCSX2 v2.8.2 is now installed at `/Applications/PCSX2-v2.8.2.app`. Its
 local BIOS is present under `~/Downloads/PS2_BIOS`. The original source ISOs
-have moved to `/Volumes/share-1/brad/games/ps2/`; workbench paths are unchanged.
+have moved to `/Volumes/share/brad/games/ps2/`; workbench paths are unchanged.
 
 An isolated test profile and double-clickable launchers are staged at:
 
 ```text
-/Volumes/share-1/brad/games/ssx3-workbench/emulator/test-002/
+/Volumes/share/brad/games/ssx3-workbench/emulator/test-002/
   launch-original.command
   launch-control.command
   launch-bump.command
@@ -218,7 +218,7 @@ over ten seconds, so pause promptly after transport when sampling the hub.
 Prepare another isolated macOS emulator profile (exit PCSX2 before copying cards):
 
 ```sh
-python3 tools/prepare_emulator.py --output '/Volumes/share-1/brad/games/ssx3-workbench/emulator/test-003'
+python3 tools/prepare_emulator.py --output '/Volumes/share/brad/games/ssx3-workbench/emulator/test-003'
 ```
 
 `tools/inspect_state_patch.py STATE ARCHIVE --world-report REPORT` searches the
@@ -232,9 +232,9 @@ and stream their own data, rather than loading a state that contains another bui
 Use new build directories; the commands refuse to overwrite existing artifacts.
 
 ```sh
-python3 tools/build_world_experiment.py '/Volumes/share-1/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --output '/Volumes/share-1/brad/games/ssx3-workbench/builds/control-002'
-python3 tools/build_world_experiment.py '/Volumes/share-1/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --height 100 --output '/Volumes/share-1/brad/games/ssx3-workbench/builds/bump-002'
-python3 tools/build_test_images.py '/Volumes/share-1/brad/games/ps2/SSX 3 (USA).iso' '/Volumes/share-1/brad/games/ssx3-workbench/builds/control-002' '/Volumes/share-1/brad/games/ssx3-workbench/builds/bump-002'
+python3 tools/build_world_experiment.py '/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --output '/Volumes/share/brad/games/ssx3-workbench/builds/control-002'
+python3 tools/build_world_experiment.py '/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --height 100 --output '/Volumes/share/brad/games/ssx3-workbench/builds/bump-002'
+python3 tools/build_test_images.py '/Volumes/share/brad/games/ps2/SSX 3 (USA).iso' '/Volumes/share/brad/games/ssx3-workbench/builds/control-002' '/Volumes/share/brad/games/ssx3-workbench/builds/bump-002'
 ```
 
 ## Second edit: bump-002, ridden and rendered
@@ -340,7 +340,7 @@ channels the rider elsewhere. Build the helpers, then, from a paused Peak 3 sess
 sh tools/macos/build.sh
 python3 tools/pine.py                                    # status, serial, title
 SIGN=1 CAPTURE_AT=-89775,40015 python3 tools/ride_route.py OUT_DIR OUT_DIR/ride.jsonl '-89775,40015;-93000,40400'
-python3 tools/patch_crossing.py OUT_DIR/ride.jsonl '/Volumes/share-1/brad/games/ssx3-workbench/builds/bump-002'
+python3 tools/patch_crossing.py OUT_DIR/ride.jsonl '/Volumes/share/brad/games/ssx3-workbench/builds/bump-002'
 ```
 
 `ride_route.py` expects the Green Station selection to have just been made; it waits
