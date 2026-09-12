@@ -165,6 +165,22 @@ def provision(args):
         copy_to(args, game / directory, "Documents/Game/" + directory, timeout=1800)
 
 
+def world(args):
+    """Copy one world archive (a built BAM.BIG) over the app's files/data/worlds/bam.big."""
+    if not args.world or not args.world.is_file():
+        raise RuntimeError("--world must name a built BAM.BIG")
+    if args.world.read_bytes()[:4] != b"BIGF":
+        raise RuntimeError("Not a BIGF archive")
+    if args.simulator:
+        destination = simulator_documents(args) / "Game/files/data/worlds/bam.big"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(args.world, destination)
+        print(f"World copied to the simulator container: {destination}")
+        return
+    copy_to(args, args.world, "Documents/Game/files/data/worlds/bam.big", timeout=900)
+    print(f"World copied to the device container: {args.world} ({args.world.stat().st_size} bytes)")
+
+
 def launch(args):
     flags = []
     if args.sequence:
@@ -204,12 +220,13 @@ def collect(args):
 def main():
     global WORK, APP
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("configure", "build", "sign", "install", "provision", "launch", "collect"))
+    parser.add_argument("command", choices=("configure", "build", "sign", "install", "provision", "world", "launch", "collect"))
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--simulator", action="store_true", help="Use the iOS Simulator SDK and simctl")
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
     parser.add_argument("--game", type=Path, default=native.DEFAULT_GAME)
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
+    parser.add_argument("--world", type=Path, help="Built BAM.BIG for the world command")
     args = parser.parse_args()
     if args.simulator:
         if args.command == "sign":

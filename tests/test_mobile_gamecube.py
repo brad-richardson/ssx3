@@ -25,5 +25,20 @@ class DeviceLaunch(unittest.TestCase):
         self.assertNotIn("--", command[:bundle])
 
 
+class WorldPush(unittest.TestCase):
+    def test_world_copies_one_bigf_archive_into_the_container(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            world = Path(tmp) / "BAM.BIG"
+            world.write_bytes(b"BIGF" + bytes(12))
+            args = argparse.Namespace(device="PHONE", simulator=False, world=world)
+            calls = []
+            with mock.patch.object(mobile_gamecube, "copy_to", side_effect=lambda a, s, d, timeout=0: calls.append((s, d))):
+                mobile_gamecube.world(args)
+            self.assertEqual(calls, [(world, "Documents/Game/files/data/worlds/bam.big")])
+            world.write_bytes(b"nope")
+            with self.assertRaises(RuntimeError):
+                mobile_gamecube.world(args)
+
+
 if __name__ == "__main__":
     unittest.main()

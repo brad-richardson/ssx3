@@ -8,9 +8,11 @@ the build or commit that closed them.
 - [ ] Control mapping doc (partly done in `native/ios/README.md` Controls): one table of action → GameCube input → Xbox pad →
       touch control, kept in `native/ios/README.md`.
 - [ ] Odin: test the GameCube Garibaldi in Dolphin for Android; the disc
-      builder is done, the handheld run is not. `SSX3-gc-gari-005.iso` is on the
-      share; `local/builds/gc-gari-009/SSX3-gc-gari-009.iso` (own textures,
-      full race line) still needs copying there.
+      builder is done, the handheld run is not. `gc-gari-009` (own textures,
+      full race line) is on the share under `ssx3-workbench/builds/`.
+- [ ] Odin: pair it with adb once (wireless debugging or USB) so
+      `tools/deploy_odin.py` can push future ISOs straight to Dolphin's game
+      folder; confirm which folder Dolphin scans on the device.
 - [ ] 120 Hz spike: finish the color-only measurement on `spike/120hz`, then
       decide between MetalFX with depth-reprojected motion vectors and the
       color-only path.

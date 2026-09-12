@@ -24,6 +24,15 @@ python3 tools/mobile_gamecube.py provision --device 'YOUR PAIRED IPHONE'
 python3 tools/mobile_gamecube.py launch --device 'YOUR PAIRED IPHONE'
 ```
 
+A new course build only changes the world archive, so after the first
+provisioning push just that file (about 100 MB, a few seconds over USB or
+Wi-Fi; it works while the phone is locked):
+
+```sh
+python3 tools/mobile_gamecube.py world --device 'YOUR PAIRED IPHONE' \
+  --world local/builds/gc-gari-009/BAM.BIG
+```
+
 Signing selects an existing, unexpired Apple Development identity/profile that
 matches this app and the selected device. It does not change another app's
 identity or request JIT entitlements. If no matching profile exists, Xcode

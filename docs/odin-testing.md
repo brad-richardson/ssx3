@@ -11,6 +11,29 @@ still needs a handheld test; full-route coverage and performance have not
 been measured there. NetherSX2 is the likely installed app; its version is
 unconfirmed.
 
+## GameCube build in Dolphin (current path)
+
+The GameCube builds (`gc-gari-NNN`, latest **gc-gari-009**: Garibaldi with its
+own textures, lightmaps, race line and opponents) are full GameCube disc
+images for Dolphin for Android, which runs them with its JIT. The image is
+`ssx3-workbench/builds/gc-gari-009/SSX3-gc-gari-009.iso` on the share
+(1,459,978,240 bytes, SHA-256 in `sha256.txt` next to it). Copy it to the
+Odin, add its folder to Dolphin's game list, and start Single Event -> Race
+-> Peak 1 Snow Jam: that event now loads Garibaldi. No save state is needed.
+
+For later builds, pair the Odin with adb once (Developer options -> Wireless
+debugging -> Pair device with pairing code, then `adb pair` and `adb connect`
+on the Mac, or USB debugging) and push straight from the repository:
+
+```sh
+python3 tools/deploy_odin.py local/builds/gc-gari-009/SSX3-gc-gari-009.iso \
+  --destination /sdcard/Games/GameCube
+```
+
+The tool verifies the size and MD5 on the device; point `--destination` at
+whatever folder Dolphin scans. The PS2 steps below are for the earlier
+`run-gari` builds and NetherSX2.
+
 ## Put the build on the handheld
 
 1. Copy this file from the games share to the Odin's internal storage or SD card:
