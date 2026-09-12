@@ -7,6 +7,9 @@ vectors at 64 (big-endian floats, w = 1), bounding sphere at 320, four corner
 positions at 336, bounds min/max at 384, ordinal (track << 24 | rid) at 408,
 page reference at 412, packed index at 416, links at 420/424, two zero bytes.
 Decoded by diffing the same Snow Jam patch on both discs (2026-09-11).
+With --textures/--lightmaps the donor course's own sheets are appended to the
+pinned texture group and each imported patch is bound to them (see
+gamecube_textures.py).
 """
 import argparse
 import hashlib
@@ -21,6 +24,7 @@ from import_terrain import transform_coefficients, surface_samples, UV_CORNERS
 from probe_worlds import patch_point
 from replace_terrain import placement
 from course_route import make_reset_aip
+from gamecube_textures import shape_images, tricky_bindings, import_course_textures
 
 TRICKY_STRIDE, TRICKY_COEFF = 448, 80
 GC_PATCH_SIZE = 430
@@ -105,6 +109,8 @@ def main():
     ap.add_argument('--clear-script-bindings', action='store_true')
     ap.add_argument('--disable-course-scripts', action='store_true')
     ap.add_argument('--pin-texture-group', type=int, help='Keep one texture/lightmap group resident across the location')
+    ap.add_argument('--textures', type=Path, help='Donor course .gsh: import its textures into the pinned group and bind the patches')
+    ap.add_argument('--lightmaps', type=Path, help='Donor course _L.gsh lightmap sheets (with --textures)')
     ap.add_argument('--reset-aip', type=Path, help='Donor Tricky AIP: convert reset paths into the kind-14 resource')
     ap.add_argument('--relocate-freeride-start', action='store_true')
     ap.add_argument('--relocate-race-starts', action='store_true')
@@ -163,7 +169,19 @@ def main():
         world.gdb_bytes, pinned = pin_texture_group(world.gdb_bytes, args.location, args.pin_texture_group, bounds)
         world.index = __import__('gamecube_world').parse_gdb(world.gdb_bytes, 'big')
         cleanup['pinned_texture_group'] = [pinned]
-    archive, layout = assemble(world, {group: new_records}, jobs=args.jobs)
+    replaced, textures = {group: new_records}, None
+    if args.textures or args.lightmaps:
+        if not (args.textures and args.lightmaps and args.pin_texture_group is not None):
+            raise ValueError('--textures needs --lightmaps and --pin-texture-group')
+        bindings = tricky_bindings(args.nbd.read_bytes())[:len(added)]
+        texture_groups, rebound, textures = import_course_textures(
+            world, args.location, args.pin_texture_group, added, bindings,
+            shape_images(args.textures.read_bytes()), shape_images(args.lightmaps.read_bytes()))
+        by_rid = {e['rid']: p for e, p in rebound}
+        new_records = [(e, by_rid[e['rid']]) if e['kind'] == 1 else (e, p) for e, p in new_records]
+        added = rebound
+        replaced = {**texture_groups, group: new_records}
+    archive, layout = assemble(world, replaced, jobs=args.jobs)
 
     # Readback verification.
     check = World(archive, 'big')
@@ -173,11 +191,21 @@ def main():
     if [p for e, p in got if e['kind'] == 1] != [p for e, p in added]:
         raise RuntimeError('Readback terrain payloads differ')
     for g in world.index['groups']:
-        if g['index'] != group and check.original_group_blocks(g['index']) != world.original_group_blocks(g['index']):
+        if g['index'] not in replaced and check.original_group_blocks(g['index']) != world.original_group_blocks(g['index']):
             raise RuntimeError(f'Group {g["index"]} changed unexpectedly')
     g = check.index['groups'][group]
     if g['count'] != len(new_records):
         raise RuntimeError('Group index count mismatch after rebuild')
+    if textures:
+        key = lambda records: [((e['kind'], e['track'], e['rid']), p) for e, p in records]
+        for tg_index, tg_records in replaced.items():
+            if tg_index == group:
+                continue
+            tg = check.index['groups'][tg_index]
+            if tg['count'] != len(tg_records) or key(check.records(tg_index)) != key(tg_records):
+                raise RuntimeError(f'Readback texture group {tg_index} differs')
+        tg = check.index['groups'][args.pin_texture_group]
+        textures['group_index'] = dict(count=tg['count'], memsize=tg['memsize'], kind_counts=tg['kind_counts'])
 
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / 'BAM.BIG').write_bytes(archive)
@@ -191,9 +219,13 @@ def main():
                       removed_resource_counts=removed, cleanup={k: len(v) for k, v in cleanup.items()}, cleanup_detail=cleanup, source_archive_sha256=sha256(original),
                       donor_nbd_sha256=sha256(args.nbd.read_bytes()), output_sha256=sha256(archive),
                       group_index=dict(count=g['count'], memsize=g['memsize'], kind_counts=g['kind_counts']),
+                      textures=textures, donor_textures_sha256=sha256(args.textures.read_bytes()) if args.textures else None,
+                      donor_lightmaps_sha256=sha256(args.lightmaps.read_bytes()) if args.lightmaps else None,
                       layout=[l for l in layout if l['replaced']])
     (args.output / 'experiment.json').write_text(json.dumps(experiment, indent=2) + '\n')
-    print(json.dumps({k: v for k, v in experiment.items() if k not in ('matrix', 'translation', 'layout', 'cleanup_detail')}, indent=2))
+    print(json.dumps({k: v for k, v in experiment.items() if k not in ('matrix', 'translation', 'layout', 'cleanup_detail', 'textures')}, indent=2))
+    if textures:
+        print(json.dumps({k: v for k, v in textures.items() if k not in ('textures', 'lightmaps')}, indent=2))
 
 
 if __name__ == '__main__':

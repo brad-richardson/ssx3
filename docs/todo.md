@@ -7,16 +7,16 @@ the build or commit that closed them.
 
 - [ ] Control mapping doc (partly done in `native/ios/README.md` Controls): one table of action → GameCube input → Xbox pad →
       touch control, kept in `native/ios/README.md`.
-- [ ] Odin: test `SSX3-gc-gari-005.iso` (on the share, 1.36 GiB) in Dolphin for
-      Android; the disc builder is done, the handheld run is not.
+- [ ] Odin: test the GameCube Garibaldi in Dolphin for Android; the disc
+      builder is done, the handheld run is not. `SSX3-gc-gari-005.iso` is on the
+      share; `local/builds/gc-gari-008/SSX3-gc-gari-008.iso` (own textures)
+      still needs copying there.
 - [ ] 120 Hz spike: finish the color-only measurement on `spike/120hz`, then
       decide between MetalFX with depth-reprojected motion vectors and the
       color-only path.
 
 ## Garibaldi in the GameCube engine
 
-- [ ] Import Garibaldi's own textures and lightmaps from GameCube Tricky
-      (`.gsh` SHPG) in place of the pinned fallback snow material.
 - [ ] Scenery, rails and object collision from the donor.
 - [ ] Opponents: give AI slots 0-5 the donor race lines instead of Snow Jam's.
 - [ ] Progress meter starts at 28%: align the race track path origin with the
@@ -42,6 +42,12 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-11 gc-gari-008: Garibaldi's own textures and lightmaps from the
+      GameCube Tricky `.gsh` sheets (`tools/gamecube_textures.py`); the race
+      rides in Garibaldi art with zero invalid accesses. Rids are reclaimed
+      from Snow Jam because other texture groups stay resident and rids
+      above about 800 do not resolve. Lightmap orientation verified offline
+      (`tools/lightmap_orientation.py`): both engines use the same cell mapping.
 - [x] 2026-09-11 Xbox prompt glyphs: `tools/patch_ui_glyphs.py` repaints the
       B/X/Y icons in the three UI sheets; in-game menu shows green A and blue X.
       Installed on the phone, in the gc-gari-005 disc root and the shared ISO.

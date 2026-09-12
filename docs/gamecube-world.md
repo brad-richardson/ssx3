@@ -70,6 +70,45 @@ same 96 bytes with big-endian floats, child indices at 80/84 and the leaf
 group at 88. Template patch 1673 binds texture 13 and lightmap 109, which
 lives only in texture group 31 (PS2: lightmap 144 in group 32).
 
+## Textures and lightmaps (kinds 9 and 10, `tools/gamecube_textures.py`)
+
+Each record is one image: a 32-byte header, then the pixel levels, then for
+CI8 a 32-byte palette chunk header (`32 000000 00ff 0001 00ff 0000 1000 0000
+00000020`, padded) and 256 × u16 RGB5A3. Header: u8 type = `0x10 | GX format`
+(0x19 CI8, 0x1e CMPR are the only ones in the stock world; the Tricky sheets
+also use 0x14 RGB565 and 0x15 RGB5A3), u24 size (32 + pixel bytes for CI8,
+0 otherwise), u16 width, u16 height, u32 0, then bytes `30 00 nn 00` with
+`nn` = mip levels − 1, u32 0x20, 12 zero bytes. Pixels are in native GX
+tiling (CMPR 8×8 tiles of four 4×4 DXT1 blocks, big-endian colours; 16-bit
+in 4×4 tiles; CI8 in 8×4 tiles). Surveyed over all 4,571 records: kind 10
+always has one level, kind 9 one to four. Kind 9 rids repeat across
+locations (rid 11 is in most), kind 10 rids are unique world-wide (0-661).
+
+A terrain patch binds its images through word 416 = `texture rid << 16 |
+lightmap rid` (patch 1673: texture 13, lightmap 109) and word 412 =
+`0x80000 | texture group index` (Snow Jam's ten values are groups 26-35).
+Words 16-31 are the patch's rectangle in the lightmap sheet (u, v, w, h)
+with a half-texel inset (a 16 px cell of a 128 px sheet is stored as
+16.5/128, 15/128); words 32-63 are the four corner UV pairs in corner order.
+
+GameCube Tricky course sheets (`gari.gsh` textures, `gari_L.gsh`
+lightmaps) are SHPG containers whose entries are the same image records with
+a 16-byte header. `gari.nbd` patches bind them directly: i16 at 428 is the
+texture index into `gari.gsh` (the material table is not involved; the same
+words on the PS2 `gari.pbd` agree), i16 at 430 is the lightmap sheet index,
+the vec4 at 0 is the lightmap cell (u, v, 1/16, 1/16: 8 px cells of a 128 px
+sheet) and the four vec4s at 16 are corner UVs, v in [−1, 0] where SSX 3 uses
+[0, 1] for the same corner order. Garibaldi's terrain uses 52 of the 121
+textures (26 snow variants, plus stripe, ramp and sign textures) and all 16
+lightmaps, 947 KB in total. `--textures/--lightmaps` on the terrain replacer
+appends them to the pinned group and rewrites the binding words. Their rids
+are reclaimed from Snow Jam: build 006 showed rids reused from the location's
+other texture groups still resolve to the stock art (those groups stay
+resident despite the pinned tree), and build 007 showed fresh rids stop
+resolving somewhere between 796 and 819 (texture 19 at rid 795 drew, the
+stripe textures at 819-820 drew flat grey), so the stock records carrying the
+reclaimed rids are dropped from every group of the location.
+
 ## Runtime findings
 
 - `gc-ctrl-001` (round trip of the stock group through the writer) rides
@@ -109,3 +148,24 @@ lives only in texture group 31 (PS2: lightmap 144 in group 32).
   Known gaps: opponents still follow Snow Jam's AI lines, the progress meter
   starts at 28% because the donor race line begins after the gate, Snow Jam
   kind-2 scenery remains, and the terrain uses the fallback snow material.
+
+- `gc-gari-006` (005 plus Garibaldi's 52 terrain textures and 16 lightmaps
+  imported with `--textures/--lightmaps`, rids reused from the location's
+  other texture groups) renders the course in its own art at 60 FPS with
+  zero invalid accesses, but some patches drew Snow Jam textures (tree
+  canopy, rock): the reused rids resolved to the stock records, so those
+  groups are still resident despite the single-leaf tree.
+- `gc-gari-007` (fresh rids 788-839 and 662-677) drew the patches whose
+  texture rid was 795 or below and left the stripe patches (rids 819-820)
+  flat grey, the foreign-id symptom from the PS2 hdr-003 probe.
+- `gc-gari-008` (rids reclaimed from Snow Jam: the stock textures and
+  lightmaps carrying them are dropped from groups 26-30 and 32-35, 191
+  records) rides the race with Garibaldi's snow, ice and striped half-pipe
+  walls, zero invalid accesses, 60 FPS. Group 31 holds 140 records, 1.6 MB.
+  Lightmap orientation verified offline with `tools/lightmap_orientation.py`:
+  fitting sheet brightness against the patch normal under all eight cell
+  orientations picks the identity mapping for both Snow Jam (R² 0.287, next
+  best 0.223) and Tricky Garibaldi (0.612, next 0.515), so the cell is copied
+  unchanged and the darker ice sections around 25% are Tricky's own lighting.
+  Recipe: the 005 command plus
+  `--textures local/source/gamecube/tricky/gari.gsh --lightmaps local/source/gamecube/tricky/gari_L.gsh`.
