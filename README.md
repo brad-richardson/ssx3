@@ -8,8 +8,8 @@ The [GameCube feasibility audit](docs/gamecube-feasibility.md) compares the newl
 supplied discs, verifies reusable Garibaldi terrain/path data, and records an
 SSX 3 code-generation probe. The [native prototype](native/README.md) now builds
 and runs stock GameCube SSX 3's Snow Jam on the Mac with Metal graphics and CPU
-JIT fallback disabled. Build gc-gari-008 rides Garibaldi in the GameCube engine
-with the course's own textures and lightmaps (see the
+JIT fallback disabled. Build gc-gari-009 races Garibaldi in the GameCube engine
+with the course's own textures, lightmaps, race line and opponents (see the
 [GameCube world notes](docs/gamecube-world.md)). A short ride and return to the starting briefing through
 Restart are recorded; full-course, save/reload, and mobile acceptance remain.
 The [iOS development app](native/ios/README.md) builds with a statically linked

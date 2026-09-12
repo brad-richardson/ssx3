@@ -109,6 +109,39 @@ resolving somewhere between 796 and 819 (texture 19 at rid 795 drew, the
 stripe textures at 819-820 drew flat grey), so the stock records carrying the
 reclaimed rids are dropped from every group of the location.
 
+## Race course: track chain, gates, and the kind-21 race line (`tools/race_course.py`)
+
+The kind-14 path resource keeps the PS2 little-endian AIP layout. Snow Jam's
+race is the track-path chain 3 → 4 → 5 → 6 → 7, linked by coincident
+endpoints; a track's distance word is the 2D distance from its origin to the
+finish, the finish is the type-0 event on track 7 (at 19,362 along it) and
+the two checkpoints are type-18 events (value 0, 1) on tracks 4 and 5. The
+six start records with a zero second flag are the race gates; each names the
+AI path its rider follows (Snow Jam: gates 0-5 → AI paths 2, 0, 1, 3, 4, 5,
+short lines that hand over to later paths by proximity).
+
+Kind 21 (rid 0, 6,536 bytes on Snow Jam) is the flattened race line the
+progress meter reads: header (node count 325, stride 20, 2, payload size),
+then per node the cumulative 2D distance of the *previous* node, the 2D
+normal (−dy, dx) of the outgoing segment, and x, y, over the chained track
+vertices with each following track's first vertex dropped, a last node at
+the finish point that copies the previous normal, and a trailer (total, 0, 0,
+u32 2, total). Node 0 carries the total instead of 0. `race_line_table`
+regenerates the stock record from the stock tracks to within 0.1 units.
+Builds 005-008 only replaced track 3's geometry and distance (253,411 after
+scaling) while this table kept Snow Jam's 353,496 total, which is exactly
+the 28% the meter showed at the gate (1 − 253,411 / 353,496).
+
+`--race-course` on the terrain replacer chains the donor race paths (0 → 5 by
+coincident endpoints, 1,000-unit tolerance) over the gate track chain, folding
+surplus donor segments into the last track, recomputes every distance word
+in the 2D convention, places the finish at the donor's first type-9 event on
+the last segment and the checkpoints at its first two type-11 events, pairs
+the six gates with the donor's six start paths by lateral order (each gate
+sits on its path's origin and its rider follows that path), and regenerates
+kind 21 from the new chain (Garibaldi: 348 nodes, 253,695 units to the
+finish).
+
 ## Runtime findings
 
 - `gc-ctrl-001` (round trip of the stock group through the writer) rides
@@ -169,3 +202,8 @@ reclaimed rids are dropped from every group of the location.
   unchanged and the darker ice sections around 25% are Tricky's own lighting.
   Recipe: the 005 command plus
   `--textures local/source/gamecube/tricky/gari.gsh --lightmaps local/source/gamecube/tricky/gari_L.gsh`.
+- `gc-gari-009` (008 plus `--race-course`): the progress meter starts near
+  0% and reads 10% at 0:23 and 54% at 1:23; the five opponents ride the
+  imported course on the donor start paths and show on the meter; zero
+  invalid accesses, 60 FPS. Recipe: the 008 command with `--race-course` in
+  place of `--relocate-race-starts`.

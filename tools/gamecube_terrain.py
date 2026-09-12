@@ -114,6 +114,7 @@ def main():
     ap.add_argument('--reset-aip', type=Path, help='Donor Tricky AIP: convert reset paths into the kind-14 resource')
     ap.add_argument('--relocate-freeride-start', action='store_true')
     ap.add_argument('--relocate-race-starts', action='store_true')
+    ap.add_argument('--race-course', action='store_true', help='Donor race line on the whole gate track chain, gate riders on the donor start paths, regenerated kind-21 table')
     ap.add_argument('--roundtrip', action='store_true', help='Control build: rewrite the group unchanged')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
@@ -155,12 +156,21 @@ def main():
         candidates = [(e, p) for e, p in new_records if e['kind'] == 14 and p]
         if len(candidates) != 1 or candidates[0][0]['rid'] != 0:
             raise ValueError('Expected one populated kind-14 path resource with ID zero')
+        race = {} if args.race_course else None
         reset_data, cleanup['reset_paths'] = make_reset_aip(
             args.reset_aip.read_bytes(), matrix, translation, args.scale, candidates[0][1],
-            relocate_start=args.relocate_freeride_start, relocate_race_starts=args.relocate_race_starts)
+            relocate_start=args.relocate_freeride_start, relocate_race_starts=args.relocate_race_starts,
+            race_course=race)
         cleanup['reset_paths'] = [cleanup['reset_paths']]
         new_records = [(dict(e, size=len(reset_data)), reset_data) if e['kind'] == 14 and e['rid'] == 0 else (e, p)
                        for e, p in new_records]
+        if race:
+            tables = [(e, p) for e, p in new_records if e['kind'] == 21]
+            if len(tables) != 1 or tables[0][0]['rid'] != 0:
+                raise ValueError('Expected one kind-21 race-line table with ID zero')
+            new_records = [(dict(e, size=len(race['table'])), race['table']) if e['kind'] == 21 else (e, p)
+                           for e, p in new_records]
+            cleanup['race_line_table'] = [dict(bytes=len(race['table']), replaced_bytes=tables[0][0]['size'])]
     pinned = None
     if args.pin_texture_group is not None:
         pts = [patch_point([struct.unpack_from('>4f', p, 64 + 16 * j)[:3] for j in range(16)], u, v)

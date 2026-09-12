@@ -9,8 +9,8 @@ the build or commit that closed them.
       touch control, kept in `native/ios/README.md`.
 - [ ] Odin: test the GameCube Garibaldi in Dolphin for Android; the disc
       builder is done, the handheld run is not. `SSX3-gc-gari-005.iso` is on the
-      share; `local/builds/gc-gari-008/SSX3-gc-gari-008.iso` (own textures)
-      still needs copying there.
+      share; `local/builds/gc-gari-009/SSX3-gc-gari-009.iso` (own textures,
+      full race line) still needs copying there.
 - [ ] 120 Hz spike: finish the color-only measurement on `spike/120hz`, then
       decide between MetalFX with depth-reprojected motion vectors and the
       color-only path.
@@ -18,9 +18,6 @@ the build or commit that closed them.
 ## Garibaldi in the GameCube engine
 
 - [ ] Scenery, rails and object collision from the donor.
-- [ ] Opponents: give AI slots 0-5 the donor race lines instead of Snow Jam's.
-- [ ] Progress meter starts at 28%: align the race track path origin with the
-      relocated gate.
 - [ ] Remove Snow Jam kind-2 scenery that now floats over the imported course.
 - [ ] Course name and description in the GameCube frontend (DOL/locale edit).
 
@@ -42,6 +39,10 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-11 gc-gari-009: full donor race line on the track chain, gates
+      and opponents on Tricky's six start paths, regenerated kind-21 race-line
+      table (`tools/race_course.py`); the meter starts near 0% and opponents
+      ride the course.
 - [x] 2026-09-11 gc-gari-008: Garibaldi's own textures and lightmaps from the
       GameCube Tricky `.gsh` sheets (`tools/gamecube_textures.py`); the race
       rides in Garibaldi art with zero invalid accesses. Rids are reclaimed

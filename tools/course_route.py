@@ -13,6 +13,7 @@ from pathlib import Path
 import struct
 
 from import_terrain import apply
+from race_course import convert_race_course, path_geometry
 
 
 def race_paths(data):
@@ -119,7 +120,8 @@ def ssx3_paths(data):
     return sections[0], sections[1], data[tail:], starts
 
 
-def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start=False, relocate_race_starts=False):
+def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start=False, relocate_race_starts=False,
+                   race_course=None):
     """Convert donor AI and track paths for experimental SSX 3 freeride resets.
 
     Path layouts match SSX-Library's WorldAIP.cs. Existing indexed paths and
@@ -133,15 +135,7 @@ def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start
     ai = [path for path in donor_ai if path['fields'][6]]
 
     def geometry(points):
-        points = [apply(matrix, translation, p) for p in points]
-        low = [min(p[k] for p in points) for k in range(3)]
-        high = [max(p[k] for p in points) for k in range(3)]
-        blob = bytearray(struct.pack('<9f', *points[0], *low, *high))
-        for a, b in zip(points, points[1:]):
-            delta = [b[k] - a[k] for k in range(3)]
-            length = math.hypot(*delta[:2]) or math.dist(a, b) or 1
-            blob.extend(struct.pack('<4f', *(v / length for v in delta), length))
-        return blob
+        return path_geometry([apply(matrix, translation, p) for p in points])
 
     old_ai, old_tracks, tail, starts = ssx3_paths(original)
     # SLUS-20772 0x26afb8 stores per-path distances in an 800-byte stack
@@ -196,7 +190,17 @@ def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start
                           before_position=start[2:5], position=position,
                           direction=direction)
     race_edit = None
-    if relocate_race_starts:
+    if race_course is not None:
+        start_count = struct.unpack_from('<I', data, 20)[0]
+        start_list = [struct.unpack_from('<I', data, 24 + 4 * i)[0] for i in range(start_count)]
+        if any(i >= len(donor_ai) for i in start_list):
+            raise ValueError('Donor start list references an absent path')
+        old_tracks, tail, assignments, race_course['table'], race_edit = convert_race_course(
+            race_paths(data), donor_ai, start_list, lambda p: apply(matrix, translation, p), scale,
+            old_tracks, starts, tail)
+        for slot, donor_index in assignments.items():
+            replacements[slot] = donor_ai[donor_index]
+    elif relocate_race_starts:
         # Race gates are the start records with a zero second flag (types 0-5 on
         # Snow Jam). Keep their lateral spacing along the original start line,
         # re-express it across the donor opening's direction, and give their
