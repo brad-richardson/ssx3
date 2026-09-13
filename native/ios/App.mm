@@ -30,9 +30,11 @@
 #include "AudioCommon/Mixer.h"
 #include "Core/Core.h"
 #include "Core/Boot/Boot.h"
+#include "Core/Config/MainSettings.h"
 #include "Core/State.h"
 #include "Core/System.h"
 #include "VideoCommon/PerformanceMetrics.h"
+#include "VideoCommon/Present.h"
 #include "VideoCommon/VideoEvents.h"
 #include "VideoCommon/Statistics.h"
 
@@ -154,6 +156,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   UILabel* _status;
   UIButton* _menuButton;
   UIAlertController* _sessionMenu;
+  UIAlertAction* _outputAction;
+  CGFloat _outputScale;
+  BOOL _simulatorNullAudio;
   SSXSessionStore* _sessionStore;
   NSDictionary* _sessionIdentity;
   NSString* _courseBuildDescription;
@@ -197,6 +202,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _trialCancellationLogged;
   double _lastCapture;
   double _duration;
+  double _scheduledTrialAt;
   NSArray<NSDictionary*>* _sequence;
   NSUInteger _eventIndex;
   BOOL _pausedForSystem;
@@ -204,6 +210,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (void)systemActive:(BOOL)active;
 - (void)logSessionEvent:(NSString*)event details:(NSDictionary*)details;
+- (NSDictionary*)outputDetails;
+- (BOOL)canChangeOutputScale;
+- (BOOL)applyOutputScale:(CGFloat)scale;
 @end
 
 @implementation SSXViewController
@@ -219,6 +228,19 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _padButtons = [NSSet set];
   _touchDpad = [NSSet set];
   _overlayAlpha = 1;
+  _outputScale = 1;
+  // A launch-only diagnostic option: normal launches always use full output.
+  NSArray<NSString*>* launchArgs=NSProcessInfo.processInfo.arguments;
+  _simulatorNullAudio=NO;
+#if TARGET_OS_SIMULATOR
+  // Graphics-only escape hatch for Simulator RemoteIO RPC failures. This
+  // branch does not exist on the phone and requires an automated session.
+  _simulatorNullAudio=[launchArgs containsObject:@"-ssxAutoTest"] &&
+      [launchArgs containsObject:@"-ssxNullAudio"];
+#endif
+  NSUInteger scaleArg=[launchArgs indexOfObject:@"-ssxOutputScale"];
+  if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
+      [launchArgs[scaleArg+1] isEqualToString:@"half"]) _outputScale=.5;
   self.view.backgroundColor = UIColor.blackColor;
   _surface = [[SSXMetalView alloc] init];
   CAMetalLayer* layer = (CAMetalLayer*)_surface.layer;
@@ -294,8 +316,11 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   const UIEdgeInsets safe = self.view.safeAreaInsets;
   _surface.frame = bounds;
   CAMetalLayer* layer = (CAMetalLayer*)_surface.layer;
-  layer.contentsScale = self.view.window.screen.scale;
-  layer.drawableSize = CGSizeMake(bounds.size.width * layer.contentsScale, bounds.size.height * layer.contentsScale);
+  // Only the Metal game surface changes resolution. UIKit controls and text
+  // retain the screen's normal content scale.
+  layer.contentsScale = self.view.window.screen.scale * _outputScale;
+  layer.drawableSize = CGSizeMake((NSUInteger)(bounds.size.width * layer.contentsScale),
+                                 (NSUInteger)(bounds.size.height * layer.contentsScale));
   const CGFloat left = safe.left + 12, right = bounds.size.width - safe.right - 174;
   const CGFloat top = MAX(safe.top, 8), bottom = bounds.size.height - safe.bottom - 166;
   const CGPoint positions[] = {{right+56,bottom+112},{right+112,bottom+56},{right,bottom+56},{right+56,bottom},
@@ -451,8 +476,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [[NSFileManager defaultManager] createFileAtPath:[_report stringByAppendingPathComponent:name] contents:nil attributes:nil];
   _metricsFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"metrics.jsonl"]];
   _inputFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"input.jsonl"]];
+  const char* audioBackend=_simulatorNullAudio ? BACKEND_NULLSOUND : BACKEND_COREAUDIO;
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
-    @"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = CoreAudio\n[Interface]\nConfirmStop = False\n");
+    [NSString stringWithFormat:@"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",audioBackend]);
   WriteText([config stringByAppendingPathComponent:@"GFX.ini"],
     // AspectRatio 1 forces 16:9 output. The game's own Options > Widescreen setting
     // must be on so the 3D scene is rendered anamorphic; Auto detection is not
@@ -469,17 +495,22 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (mkfifo(fifo.fileSystemRepresentation,0600) != 0 && errno != EEXIST) {
     _status.text = @"Could not create controller pipe"; _starting=false; return;
   }
-  NSError* audioError;
-  [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryPlayback error:&audioError];
-  [AVAudioSession.sharedInstance setPreferredIOBufferDuration:0.01 error:&audioError];
-  [AVAudioSession.sharedInstance setActive:YES error:&audioError];
-  if (audioError) fprintf(stderr,"[ssx-audio] %s\n",audioError.description.UTF8String);
+  if (!_simulatorNullAudio) {
+    NSError* audioError=nil;
+    [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryPlayback error:&audioError];
+    [AVAudioSession.sharedInstance setPreferredIOBufferDuration:0.01 error:&audioError];
+    [AVAudioSession.sharedInstance setActive:YES error:&audioError];
+    if (audioError) fprintf(stderr,"[ssx-audio] %s\n",audioError.description.UTF8String);
+  } else {
+    fprintf(stderr,"[ssx-test] Simulator Null audio: graphics diagnostic only\n");
+  }
   UIApplication.sharedApplication.idleTimerDisabled = YES;
   setenv("STATICRECOMP_NO_JIT","1",1);
   setenv("SSX3_NO_EXECUTABLE_MEMORY","1",1);
   setenv("STATICRECOMP_DISPATCH_SAMPLES","1",1);
   Common::Log::SetEmbedderLogCallback(RuntimeLog,nullptr);
   NSArray* args = NSProcessInfo.processInfo.arguments;
+  _scheduledTrialAt=-1;
   if ([args containsObject:@"-ssxAutoTest"]) {
     NSString* sequencePath = [Documents() stringByAppendingPathComponent:@"test-sequence.json"];
     NSData* data = [NSData dataWithContentsOfFile:sequencePath];
@@ -487,18 +518,28 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     _sequence = test[@"events"] ?: @[];
     _duration = [test[@"duration"] doubleValue];
     fprintf(stderr,"[ssx-test] events=%lu duration=%.1f\n",(unsigned long)_sequence.count,_duration);
+    NSUInteger trialArg=[args indexOfObject:@"-ssxSmoothingAt"];
+    if (trialArg != NSNotFound && trialArg+1 < args.count) {
+      NSScanner* scanner=[NSScanner scannerWithString:args[trialArg+1]];
+      double requested=0;
+      if ([scanner scanDouble:&requested] && scanner.isAtEnd && std::isfinite(requested) &&
+          requested>=0 && requested<=_duration-40) _scheduledTrialAt=requested;
+    }
   }
   const auto* descriptor = staticrecomp_get_module();
-  NSDictionary* metadata = @{@"disc":@"GXBE69", @"moduleABI":@(descriptor->abi_version),
+  NSMutableDictionary* metadata = [@{@"disc":@"GXBE69", @"moduleABI":@(descriptor->abi_version),
     @"os":UIDevice.currentDevice.systemVersion, @"device":UIDevice.currentDevice.model,
     @"simulator":@(TARGET_OS_SIMULATOR), @"metalDevice":((CAMetalLayer*)_surface.layer).device.name ?: @"unknown",
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
     @"renderScale":@1, @"cpuThread":@NO, @"automated":@(_sequence!=nil),
+    @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
+    @"scheduledSmoothingAt":_scheduledTrialAt>=0 ? @(_scheduledTrialAt) : NSNull.null,
     @"reportSchema":@2, @"appBuild":@SSX_SESSION_BUILD_ID,
     @"builtAt":ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"])[@"built_at"] ?: @"unknown",
     @"host_seconds":@(CACurrentMediaTime()), @"unix_seconds":@(NSDate.date.timeIntervalSince1970),
     @"presentationTrace":@"Metal drawable presentedTime; final command buffer GPU timing",
-    @"presentationTimestampsSupported":@(!TARGET_OS_SIMULATOR)};
+    @"presentationTimestampsSupported":@(!TARGET_OS_SIMULATOR)} mutableCopy];
+  [metadata addEntriesFromDictionary:[self outputDetails]];
   [[NSJSONSerialization dataWithJSONObject:metadata options:NSJSONWritingPrettyPrinted error:nil]
     writeToFile:[_report stringByAppendingPathComponent:@"launch.json"] atomically:YES];
   std::thread([self,game,user,descriptor] {
@@ -510,7 +551,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
       options.module = moderngekko::ModuleSource::AttachedDescriptor(descriptor);
       options.graphics.backend = "Metal";
       options.graphics.internal_resolution_scale = 1;
-      options.audio.backend = "CoreAudio";
+      options.audio.backend = self->_simulatorNullAudio ? BACKEND_NULLSOUND : BACKEND_COREAUDIO;
       options.input.background_input = true;
       options.show_fps_in_title = false;
       options.render_surface = (__bridge void*)self->_surface.layer;
@@ -643,6 +684,18 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   while (_eventIndex<_sequence.count && [_sequence[_eventIndex][@"at"] doubleValue]<=elapsed) {
     [self send:_sequence[_eventIndex][@"commands"]]; ++_eventIndex;
   }
+  if (_scheduledTrialAt>=0 && elapsed>=_scheduledTrialAt) {
+    const double requested=_scheduledTrialAt;
+    _scheduledTrialAt=-1;
+    const auto trial=NativeTrial::status.load();
+    if (trial != NativeTrial::Status::Waiting && trial != NativeTrial::Status::Running) {
+      _trialCancellationLogged=NO;
+      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"scheduledAt":@(requested)}];
+      NativeTrial::Request();
+    } else {
+      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"reason":@"A trial is already pending or running."}];
+    }
+  }
   if (elapsed-_lastMetric>=1) {
     _lastMetric=elapsed;
     std::vector<double> frames;
@@ -654,7 +707,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     task_info(mach_task_self(),TASK_VM_INFO,(task_info_t)&vm,&count);
     const auto& perf=Core::System::GetInstance().GetPerfMetrics();
     const double maxSpeed=perf.GetMaxSpeed();
-    NSDictionary* row=@{@"seconds":@(elapsed),@"fps":@(perf.GetFPS()),@"vps":@(perf.GetVPS()),
+    NSMutableDictionary* row=[@{@"seconds":@(elapsed),@"fps":@(perf.GetFPS()),@"vps":@(perf.GetVPS()),
       @"speed":@(perf.GetSpeed()),@"frameIntervalP50ms":@(quantile(.5)),@"frameIntervalP95ms":@(quantile(.95)),
       @"frameIntervalP99ms":@(quantile(.99)),@"frames":@(frames.size()),@"footprintBytes":@(vm.phys_footprint),
       @"thermalState":@(NSProcessInfo.processInfo.thermalState),@"eventIndex":@(_eventIndex),
@@ -669,7 +722,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
         @"efbPeeks":@(workload.efb_peeks), @"efbPokes":@(workload.efb_pokes),
         @"vertexShadersCreated":@(workload.vertex_shaders), @"pixelShadersCreated":@(workload.pixel_shaders),
         @"texturesCreated":@(workload.textures_created), @"texturesUploaded":@(workload.textures_uploaded),
-        @"texturesAlive":@(workload.textures_alive)}};
+        @"texturesAlive":@(workload.textures_alive)}} mutableCopy];
+    [row addEntriesFromDictionary:[self outputDetails]];
     [_metricsFile writeData:[NSJSONSerialization dataWithJSONObject:row options:0 error:nil]];
     [_metricsFile writeData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
     _status.text=[NSString stringWithFormat:@"SSX 3 · %.1f FPS · %.0f%% speed · %.0f MB",perf.GetFPS(),perf.GetSpeed()*100,vm.phys_footprint/1048576.0];
@@ -704,6 +758,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [weakSelf resumeSession];
   }];
   trial.enabled = _running && !_pendingCheckpoint;
+  _outputAction = [UIAlertAction actionWithTitle:(_outputScale == 1 ? @"Use half-size output" : @"Use full-size output")
+      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    const CGFloat scale = self->_outputScale == 1 ? .5 : 1;
+    [self logSessionEvent:@"output_resolution_requested" details:@{@"requestedOutputScale":@(scale)}];
+    const BOOL applied=[self applyOutputScale:scale];
+    [self resumeSession];
+    if (!applied) self->_status.text=@"Output size unchanged. Try again from Menu.";
+  }];
+  _outputAction.enabled = [self canChangeOutputScale];
   UIAlertAction* reset = [UIAlertAction actionWithTitle:@"Full Reset" style:UIAlertActionStyleDestructive handler:^(UIAlertAction*) {
     SSXViewController* self = weakSelf;
     [self->_sessionStore discardCheckpoint];
@@ -716,14 +781,16 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }];
   // The save takes a brief moment; finish it before allowing a new runtime.
   reset.enabled = !_pendingCheckpoint;
-  [_sessionMenu addAction:resume]; [_sessionMenu addAction:trial]; [_sessionMenu addAction:reset];
+  [_sessionMenu addAction:resume]; [_sessionMenu addAction:trial];
+  [_sessionMenu addAction:_outputAction]; [_sessionMenu addAction:reset];
   _sessionMenu.preferredAction = resume;
   [self presentViewController:_sessionMenu animated:YES completion:nil];
 }
 - (void)resumeSession {
   _sessionMenu = nil;
+  _outputAction = nil;
   NSError* error = nil;
-  const BOOL activated = [AVAudioSession.sharedInstance setActive:YES error:&error];
+  const BOOL activated = _simulatorNullAudio || [AVAudioSession.sharedInstance setActive:YES error:&error];
   _pauseState.RequestResume(UIApplication.sharedApplication.applicationState == UIApplicationStateActive, activated);
   if (!activated) fprintf(stderr,"[ssx-lifecycle] audio reactivation failed: %s\n",error.description.UTF8String);
   if (!_running && !_starting) [self startGame];
@@ -749,8 +816,46 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSString* identifier = [@SSX_SESSION_BUILD_ID substringToIndex:8];
   NSString* trial = NativeTrial::limited.load() ? @"Smoothing trial ended: extra frames couldn’t keep up. Normal rendering restored." :
       @"Smoothing is experimental and may add visual delay. A trial starts while riding and returns to normal within 35 seconds.";
-  return [NSString stringWithFormat:@"%@\n\n%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, trial, version,
+  CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+  NSString* output=[NSString stringWithFormat:@"Render output: %@ (%.0f × %.0f)",
+      _outputScale == 1 ? @"Full" : @"Half", layer.drawableSize.width, layer.drawableSize.height];
+  return [NSString stringWithFormat:@"%@\n\n%@\n%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, trial, output, version,
       identifier, BuildDate(build[@"built_at"]), _courseBuildDescription ?: @"Course not loaded"];
+}
+- (NSDictionary*)outputDetails {
+  CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+  return @{@"outputScale":@(_outputScale), @"screenScale":@(self.view.window.screen.scale),
+    @"outputWidth":@((NSUInteger)(layer.bounds.size.width * layer.contentsScale)),
+    @"outputHeight":@((NSUInteger)(layer.bounds.size.height * layer.contentsScale)),
+    @"drawableWidth":@(layer.drawableSize.width), @"drawableHeight":@(layer.drawableSize.height)};
+}
+- (BOOL)canChangeOutputScale {
+  const auto trial=NativeTrial::status.load();
+  return _running && !_starting && !_stopRequested && _pausedForSystem && _pauseState.WantsPause() &&
+      Core::GetState(Core::System::GetInstance()) == Core::State::Paused && !_pendingCheckpoint &&
+      trial != NativeTrial::Status::Waiting && trial != NativeTrial::Status::Running;
+}
+- (BOOL)applyOutputScale:(CGFloat)scale {
+  // GetState(Paused) becomes true before the CPU/FIFO have actually stopped.
+  // Synchronize using Dolphin's guard after the injected draw and checkpoint
+  // capture have drained. The renderer rebuilds its backbuffer on its next
+  // BindBackbuffer; UIKit never calls renderer methods that create GPU objects.
+  std::lock_guard lock(_runtimeMutex);
+  if (!_runtime || ![self canChangeOutputScale] || (scale != 1 && scale != .5)) {
+    [self logSessionEvent:@"output_resolution_rejected" details:@{@"requestedOutputScale":@(scale)}];
+    return NO;
+  }
+  {
+    Core::CPUThreadGuard guard(Core::System::GetInstance());
+    CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+    _outputScale=scale;
+    layer.contentsScale=self.view.window.screen.scale * scale;
+    layer.drawableSize=CGSizeMake((NSUInteger)(layer.bounds.size.width * layer.contentsScale),
+                                 (NSUInteger)(layer.bounds.size.height * layer.contentsScale));
+    if (g_presenter) g_presenter->ResizeSurface();
+  }
+  [self logSessionEvent:@"output_resolution_applied" details:@{}];
+  return YES;
 }
 - (void)savePausedSession {
   if (_sequence || !_sessionIdentity || !_running || _stopRequested) return;
@@ -805,6 +910,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _sessionMenu.message = [self menuMessage:(saved ? @"Your paused session is saved. Resume here next time." :
       @"Paused. Couldn’t save for next time; you can still resume now.")];
   for (UIAlertAction* action in _sessionMenu.actions) action.enabled = YES;
+  _outputAction.enabled = [self canChangeOutputScale];
   [self endSaveBackgroundTask];
   // A second pause during compression must not leave the earlier position saved.
   if (_checkpointAgain) {
@@ -881,8 +987,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     _pausedForSystem = NO;
     [self logSessionEvent:@"pause_accounted" details:@{@"pause_seconds":@(pauseDuration)}];
   }
+  _outputAction.enabled = [self canChangeOutputScale];
 }
 - (void)audioEvent:(NSNotification*)event {
+  if (_simulatorNullAudio) return;
   const BOOL interrupted = [event.userInfo[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue] == AVAudioSessionInterruptionTypeBegan;
   // Audio notifications may arrive away from the main queue. Keep all pause
   // intent and UIKit state serialized with application lifecycle callbacks.
@@ -894,6 +1002,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (void)logSessionEvent:(NSString*)event details:(NSDictionary*)details {
   NSMutableDictionary* row=[details mutableCopy];
+  [row addEntriesFromDictionary:[self outputDetails]];
   row[@"active"]=@(_pauseState.active); row[@"menu"]=@(_pauseState.menu);
   row[@"audioInterrupted"]=@(_pauseState.audio_interrupted);
   row[@"applicationState"]=@(UIApplication.sharedApplication.applicationState);

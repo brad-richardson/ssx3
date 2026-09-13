@@ -64,6 +64,7 @@ add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm SessionDiagnostics
 set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStore.h SessionPause.h
   SessionDiagnostics.h SessionDiagnostics.mm ../../tools/ios_diagnostic_sources.py
   ../diagnostics/native_callback_trace.h ../diagnostics/native_render_schedule.h
+  ../diagnostics/callback_timing.h
   ../diagnostics/native_pose_interpolation.h ../diagnostics/pose_history.h
   ../diagnostics/render_deadline.h ../diagnostics/trial_control.h ../patches/recompcore-platform.patch
   ../patches/moderngekko-platform.patch ../dependencies.json)

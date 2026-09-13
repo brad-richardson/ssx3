@@ -10,6 +10,7 @@ import datetime as dt
 import fnmatch
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import plistlib
@@ -203,13 +204,30 @@ def world(args):
 
 def launch(args):
     flags = []
+    null_audio = getattr(args, "simulator_null_audio", False)
+    if null_audio and not args.simulator:
+        raise ValueError("--simulator-null-audio requires --simulator")
+    sequence = validate_sequence(json.loads(args.sequence.read_text())) if args.sequence else None
+    if null_audio and sequence is None:
+        raise ValueError("--simulator-null-audio requires a bounded --sequence")
+    smoothing_at = getattr(args, "smoothing_at", None)
+    if smoothing_at is not None:
+        if sequence is None:
+            raise ValueError("--smoothing-at requires a bounded --sequence")
+        if not math.isfinite(smoothing_at) or not 0 <= smoothing_at <= sequence["duration"]-40:
+            raise ValueError("--smoothing-at must be nonnegative and leave 40 seconds before test end")
     if args.sequence:
-        validate_sequence(json.loads(args.sequence.read_text()))
         if args.simulator:
             shutil.copy2(args.sequence, simulator_documents(args) / "test-sequence.json")
         else:
             copy_to(args, args.sequence, "Documents/test-sequence.json")
         flags = ["-ssxAutoTest"]
+    if getattr(args, "output_scale", None):
+        flags.extend(["-ssxOutputScale", args.output_scale])
+    if smoothing_at is not None:
+        flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
+    if null_audio:
+        flags.append("-ssxNullAudio")
     if args.simulator:
         command(["xcrun", "simctl", "launch", "--terminate-running-process", args.device, BUNDLE, *flags])
         return
@@ -246,8 +264,20 @@ def main():
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
     parser.add_argument("--game", type=Path, default=native.DEFAULT_GAME)
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
+    parser.add_argument("--output-scale", choices=("full", "half"),
+                        help="Launch-only drawable scale; normal launches use full output")
+    parser.add_argument("--smoothing-at", type=float,
+                        help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
+    parser.add_argument("--simulator-null-audio", action="store_true",
+                        help="Graphics-only Simulator diagnostic; requires launch, --simulator, and bounded --sequence")
     parser.add_argument("--world", type=Path, help="Built BAM.BIG for the world command")
     args = parser.parse_args()
+    if args.output_scale and args.command != "launch":
+        parser.error("--output-scale applies only to launch")
+    if args.smoothing_at is not None and args.command != "launch":
+        parser.error("--smoothing-at applies only to launch")
+    if args.simulator_null_audio and (args.command != "launch" or not args.simulator or not args.sequence):
+        parser.error("--simulator-null-audio requires launch, --simulator, and a bounded --sequence")
     if args.simulator:
         if args.command == "sign":
             parser.error("Simulator installation does not use the iPhone development identity")

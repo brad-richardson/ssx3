@@ -10,6 +10,7 @@
 // 40 restored draws. Screenshot names mark requests, not exact display IDs.
 #pragma once
 #include "Core/Core.h"
+#include "callback_timing.h"
 #include <array>
 #include <chrono>
 #include <cstdio>
@@ -66,7 +67,7 @@ template<size_t N>static std::string Diff(const std::array<unsigned char,N>&a,co
  return s+"]";
 }
 static u64 Hash(const unsigned char* p,size_t n){u64 h=14695981039346656037ull;for(size_t i=0;i<n;++i){h^=p[i];h*=1099511628211ull;}return h;}
-struct Active {bool pending=false,repeated=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0;Snapshot before;};
+struct Active {bool pending=false,repeated=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0,cpu_start=-1;Snapshot before;};
 static Active update,render;
 static unsigned repeats=0;
 static u32 offset_matrix=0;
@@ -103,12 +104,16 @@ static bool SkipEnabled(){
 static bool CameraEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAMERA_OFFSET")!=nullptr;return on;}
 static bool CaptureEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAPTURE")!=nullptr;return on;}
 static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
+ const double wall_end=Now();
+ const double cpu_ms=RenderResearch::CPUMilliseconds(a.cpu_start,RenderResearch::ThreadCPUSeconds());
+ char cpu_text[48]="null";
+ if(cpu_ms>=0)std::snprintf(cpu_text,sizeof(cpu_text),"%.6f",cpu_ms);
  FILE* file=Output();
  if(!file)return;
  const auto body=Diff(a.before.body,b.body),app=Diff(a.before.application,b.application),camera=Diff(a.before.camera,b.camera);
  const bool moved=std::memcmp(a.before.body.data()+240,b.body.data()+240,12)!=0;
- std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s}\n",
- kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,Now(),(Now()-a.wall)*1000,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str());
+ std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s}\n",
+ kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str());
  std::fflush(file);
 }
 static inline void Step(CPUState& c){
@@ -161,7 +166,7 @@ static inline void Step(CPUState& c){
    render.repeated=true;++repeats;
    view_matrix_calls=frame_end_calls=elapsed_calls=queue_calls=gate_calls=gate_ready=0;
    retries=skipped_elapsed=skipped_queue=camera_offsets=camera_restores=0;queue_before=Word(c,c.gpr[13]-20556);
-   render.before=b;render.tb=c.timebase;render.wall=Now();
+   render.before=b;render.tb=c.timebase;render.wall=Now();render.cpu_start=RenderResearch::ThreadCPUSeconds();
    c.gpr[3]=render.app;c.pc=render.entry;c.lr=render.ret;return;
   }
   if(render.repeated)c.gpr[3]=render.first_result;
@@ -172,7 +177,7 @@ static inline void Step(CPUState& c){
   if(a.pending){std::fprintf(stderr,"[native-probe] unexpected recursive callback\n");return;}
   if(c.pc==0x8010a4c8)view_matrix_calls=frame_end_calls=elapsed_calls=queue_calls=gate_calls=gate_ready=0;
   if(c.pc==0x8010a4c8){retries=skipped_elapsed=skipped_queue=camera_offsets=camera_restores=0;queue_before=Word(c,c.gpr[13]-20556);}
-  a.pending=true;a.repeated=false;a.entry=c.pc;a.ret=c.lr;a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.before=Capture(c,a.app);
+  a.pending=true;a.repeated=false;a.entry=c.pc;a.ret=c.lr;a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.cpu_start=RenderResearch::ThreadCPUSeconds();a.before=Capture(c,a.app);
  }
 }
 }

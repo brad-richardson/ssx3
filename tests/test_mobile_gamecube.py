@@ -9,10 +9,66 @@ from tools import mobile_gamecube
 
 
 class DeviceLaunch(unittest.TestCase):
+    def test_null_audio_rejects_phone_unbounded_and_other_operations_before_device_changes(self):
+        for simulator, sequence in ((False, Path("native/ios/snow-jam-smoke.json")), (True, None)):
+            with self.subTest(simulator=simulator, sequence=sequence), \
+                    mock.patch.object(mobile_gamecube, "copy_to") as copy, \
+                    mock.patch.object(mobile_gamecube, "simulator_documents") as documents, \
+                    mock.patch.object(mobile_gamecube, "command") as command:
+                with self.assertRaises(ValueError):
+                    mobile_gamecube.launch(argparse.Namespace(device="DEVICE", simulator=simulator,
+                        sequence=sequence, simulator_null_audio=True))
+                copy.assert_not_called()
+                documents.assert_not_called()
+                command.assert_not_called()
+        with mock.patch("sys.argv", ["mobile_gamecube.py", "collect", "--simulator", "--device", "SIM",
+                "--sequence", "native/ios/snow-jam-smoke.json", "--simulator-null-audio"]), \
+                mock.patch.object(mobile_gamecube, "collect") as collect, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            with self.assertRaises(SystemExit) as stopped:
+                mobile_gamecube.main()
+            self.assertEqual(stopped.exception.code, 2)
+            collect.assert_not_called()
+            command.assert_not_called()
+
+    def test_null_audio_requires_valid_sequence_and_forwards_simulator_flag(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(mobile_gamecube, "simulator_documents", return_value=Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "copy_to") as phone_copy, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            sequence=Path(tmp)/"sequence.json"
+            sequence.write_text(json.dumps(dict(duration=0, events=[])))
+            args=argparse.Namespace(device="SIM", simulator=True, sequence=sequence,
+                simulator_null_audio=True, output_scale="half", smoothing_at=155)
+            with self.assertRaises(ValueError):
+                mobile_gamecube.launch(args)
+            self.assertFalse((Path(tmp)/"test-sequence.json").exists())
+            command.assert_not_called()
+            sequence.write_text(json.dumps(dict(duration=200, events=[])))
+            mobile_gamecube.launch(args)
+            argv=command.call_args.args[0]
+            self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:],
+                ["-ssxAutoTest", "-ssxOutputScale", "half", "-ssxSmoothingAt", "155", "-ssxNullAudio"])
+            self.assertEqual((Path(tmp)/"test-sequence.json").read_bytes(),sequence.read_bytes())
+            phone_copy.assert_not_called()
+
+    def test_scheduled_trial_requires_bounded_sequence_before_device_changes(self):
+        for sequence, at in ((None, 10), (Path("native/ios/snow-jam-smoke.json"), float('nan')),
+                             (Path("native/ios/snow-jam-smoke.json"), -1),
+                             (Path("native/ios/snow-jam-smoke.json"), 201)):
+            with self.subTest(sequence=sequence, at=at), \
+                    mock.patch.object(mobile_gamecube, "copy_to") as copy, \
+                    mock.patch.object(mobile_gamecube, "command") as command:
+                with self.assertRaises(ValueError):
+                    mobile_gamecube.launch(argparse.Namespace(device="PHONE", simulator=False,
+                                                             sequence=sequence, smoothing_at=at))
+                copy.assert_not_called()
+                command.assert_not_called()
+
     def test_app_flags_follow_argument_separator(self):
         # devicectl parsed "-ssxAutoTest" as its own "-t" option until "--" was added.
         args = argparse.Namespace(device="PHONE", simulator=False,
-                                  sequence=Path("native/ios/snow-jam-smoke.json"))
+                                  sequence=Path("native/ios/snow-jam-smoke.json"), smoothing_at=155.0)
         calls = []
         with tempfile.TemporaryDirectory() as tmp, \
                 mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
@@ -22,8 +78,28 @@ class DeviceLaunch(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         command = calls[0]
         bundle = command.index(mobile_gamecube.BUNDLE)
-        self.assertEqual(command[bundle + 1:], ["--", "-ssxAutoTest"])
+        self.assertEqual(command[bundle + 1:], ["--", "-ssxAutoTest", "-ssxSmoothingAt", "155.0"])
         self.assertNotIn("--", command[:bundle])
+
+    def test_resolution_option_reaches_app_with_and_without_sequence(self):
+        for simulator in (False, True):
+            for scale in ("full", "half"):
+                for sequence in (None, Path("native/ios/snow-jam-smoke.json")):
+                    with self.subTest(simulator=simulator, scale=scale, sequence=sequence), \
+                            tempfile.TemporaryDirectory() as tmp, \
+                            mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                            mock.patch.object(mobile_gamecube, "simulator_documents", return_value=Path(tmp)), \
+                            mock.patch.object(mobile_gamecube, "copy_to"), \
+                            mock.patch.object(mobile_gamecube, "command") as command:
+                        args = argparse.Namespace(device="DEVICE", simulator=simulator,
+                                                  sequence=sequence, output_scale=scale)
+                        mobile_gamecube.launch(args)
+                        argv = command.call_args.args[0]
+                        flags = ([] if simulator else ["--"])
+                        if sequence:
+                            flags.append("-ssxAutoTest")
+                        flags.extend(["-ssxOutputScale", scale])
+                        self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:], flags)
 
 
 class WorldPush(unittest.TestCase):

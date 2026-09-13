@@ -1,14 +1,148 @@
 # Host-side frame replay — September 13, 2026
 
-Follow-up to the [pose interpolation prototype](120hz-native-interpolation.md).
-The implementation review supersedes the initial acceptance claims below:
-this prototype is isolated research and is not enabled in the phone app.
-It still applies memory updates before their recorded FIFO positions, overwrites
-live guest RAM without restoring it, restores starting registers only once for
-the replay sequence, and may trigger guest-visible completion effects. Its
-reference capture is one frame early. Exact-frame fidelity, memory/event
-isolation and per-replay state restoration are required before phone replay.
-See the [review follow-up](120hz-review-followup.md) for the current gate.
+Host replay remains isolated research and is **not enabled on the phone**.
+The current milestone captures an original frame and audits command/resource
+ordering in private memory. Replay rendering is deliberately blocked: the
+normal Dolphin decoder has guest-visible and persistent GPU side effects.
+The older camera-offset prototype below is historical evidence, not an
+accepted implementation.
+
+## Current correctness milestone
+
+`native/diagnostics/native_frame_replay.h` now records one FIFO frame without
+injecting guest draws or running the scheduler. It requires single-core mode,
+immediate XFB, and no simultaneous scheduler/repeat experiment. Recording's
+first XFB boundary arms capture; the second ends the captured frame. The
+reference screenshot request now runs in that second XFB's `before_present`
+event, with the recorded frame and presentation IDs in the trace. The capture
+prerequisite also requires the flushed PNG artifact. Its exact encoder frame
+identity is still unverified: FrameDumper consumes screenshot names on its
+worker thread, so an earlier pending readback could consume a newer request.
+
+The old loop that overwrote live RAM and executed `RunFifo<false>` is removed.
+The audit instead uses Dolphin's command-size decoder with private callbacks:
+
+- Memory updates are validated, then applied at their recorded FIFO positions.
+  Equal-position and overlapping writes preserve recorder order. Invalid ranges,
+  backward positions, incomplete commands and non-inlined display lists fail.
+- RAM starts at zero, matching FifoRecorder's initial shadow banks; CP/BP/XF/TMEM
+  start from the capture before each of three independent passes. Canonical CP
+  writes are applied locally without CPState's analytics/runtime callbacks.
+- Indexed XF data is read only from the private banks. Primitives are counted
+  and sized; vertex loading, texture interpretation, TMEM transfers, EFB copies,
+  GPU execution and presentation are **not** emulated by this audit.
+- Whole allocated RAM/EXRAM banks are compared before and after auditing.
+  GameCube's configured MEM2 size does not imply allocated EXRAM: null banks
+  have audit size zero. This check supports the private audit's narrow claim;
+  it does not prove renderer/event/cache isolation.
+
+`tools/gamecube_replay_check.py` requires ordered schema-2 events, a bounded
+FIFO v6 artifact, the same recorded/reference frame IDs, three agreeing audit
+passes, a complete PNG, and the explicit renderer block. `--capture-only`
+can pass this request/artifact prerequisite; it does not verify the encoder's
+frame identity. The default command always exits nonzero until
+renderer isolation and same-frame replay evidence exist. Optional candidate
+PNGs are decoded to canonical RGBA for exact pixel comparison; even identical
+pixels do not establish safe replay or same-frame candidate provenance.
+
+The asset-independent regressions cover future/overlapping writes, invalid
+ranges and positions, unavailable EXRAM, reset between passes, missing or
+early reference evidence, stale or partial audits, malformed PNGs and the
+requirement that identical screenshots cannot pass renderer acceptance.
+
+### Evidence from this pass
+
+An isolated offline audit of the first real capture
+(`local/research/120hz/replay-correctness-offline/`) decoded 647,799 FIFO bytes
+and 6,404 memory updates in each of three passes. Each pass found 20,159
+commands, 5,942 primitives, 2,086 indexed XF loads, 13 EFB copies (one XFB),
+two token commands and 19 TMEM load/sync commands. All indexed resource digests
+agreed. Malformed display-list, unknown-command, CP and XF inputs were rejected
+by the actual pinned audit callback.
+
+The first live run exposed an audit bug: the whole-bank check used the
+configured EXRAM size with GameCube's null EXRAM pointer. The corrected code
+uses allocation presence, and a compiled regression covers that case. The
+failed run is preserved as evidence and is not accepted as a completed capture
+or continuation check; its screenshot request had not flushed before the crash.
+
+The corrected final run (`replay-correctness-player6`, profile `replayaudit2`)
+passed the 180-second course and runtime checks. At host second 140 it captured
+390,334 FIFO bytes and 3,003 memory updates, bound the reference request to
+frame **6868 / present 13737**, and flushed the complete 640×491 PNG. Visual
+inspection shows riding at 34 mph. All three audits agreed on 9,774 commands,
+2,874 primitives and 2,268 indexed XF loads; the full allocated RAM check
+passed. This frame contains two PE tokens, seven EFB copies (one XFB), and
+21 TMEM load/sync commands.
+
+Normal guest execution continued to shutdown with zero GPU-command errors,
+invalid accesses, unknown instructions, SMC failures or JIT fallback runs.
+Host speed was below real time before capture and during continuation while
+other builds were active; this is a correctness run, not performance evidence.
+
+Evidence: `local/research/120hz/replay-correctness-acceptance-v2.json` explicitly
+reports `capture_gate_passed: true`, `replay_accepted: false`; the completion
+receipt is `replay-correctness-delivery.json` in the same folder. The reference
+PNG SHA-256 is `1009caf0f5d3c19bfaf771d9e383176111746df7ccc9dfa5605a834e5de581aa`.
+Six asset-independent regressions pass, in addition to the offline actual
+pinned-decoder checks and live capture/continuation check.
+
+### Running the bounded capture
+
+Use fresh output and profile names. The captured FIFO is written beside the
+JSONL trace as `EVENTS.jsonl.fifo`. Do not enable `SSX_NATIVE_SCHEDULE`.
+
+```sh
+python3 tools/gamecube_native_trace.py build --scheduler --replay \
+  --game local/game/gc-gari-027 --output local/research/120hz/replay-capture-player
+SSX_NATIVE_REPLAY=1 \
+SSX_NATIVE_PROBE="$PWD/local/research/120hz/replay-capture-events.jsonl" \
+python3 tools/gamecube_schedule_check.py \
+  --player-dir local/research/120hz/replay-capture-player \
+  --immediate-xfb --resolution 640x528 --game local/game/gc-gari-027 \
+  --profile replay-capture --output local/research/120hz/replay-capture-run --seconds 180
+python3 tools/gamecube_replay_check.py --capture-only \
+  --events local/research/120hz/replay-capture-events.jsonl \
+  --reference local/native/profiles/replay-capture/ScreenShots/GXBE69/native-replay-reference.png
+```
+
+## Next runtime boundary: isolate rendering before enabling replay
+
+The following inventory comes from the pinned Dolphin source, especially
+`VideoCommon/OpcodeDecoding.cpp`, `BPStructs.cpp`, `TextureCacheBase.cpp`,
+`XFStructs.cpp`, `VertexLoaderManager.cpp`, `Present.cpp` and
+`Core/HW/PixelEngine.cpp`. It is a starting inventory, not proof of an exhaustive
+side-effect audit.
+
+| Current path | Persistent/guest-visible effect | Required replay boundary |
+| --- | --- | --- |
+| BP token/draw-done | PE state and scheduled CoreTiming completion/interrupt events; also flushes deferred EFB copies | A replay execution policy must suppress PE/timing signals while retaining necessary replay-local GPU flushes. Suppression only at the scheduler is too late. |
+| EFB texture/XFB copies | Writes/defers writes into guest RAM, creates and mutates texture-cache entries, may reuse earlier EFB content | Route all copy destinations and deferred completion to owned replay memory/cache resources; preserve initial color/depth contents or prove their complete reconstruction. |
+| XFB copy and presenter | `after_frame` listeners, cache aging, statistics, recorder callbacks, immediate presenter counters and VI state | Separate replay frame/present events and resources from the live event bus. Ordinary game/VI/recorder completion must not advance. |
+| Vertex/indexed-XF/texture/TLUT reads | Uses MemoryManager pointers and cached vertex-array/texture addresses | An explicit replay memory provider must cover every indirect read. Reject any path that resolves to live RAM, including cached pointers. |
+| BP/CP/XF/TMEM, shaders, batches, bbox, queries | Mutates global registers, dirty flags, pending batches, bounding-box/query state and EFB/cache contents | Replay-owned render context, or a fully audited save/restore transaction covering all of these domains, not only a register prelude. |
+
+First add an isolated FrameDumper observer that carries `frame_number` through
+`DumpCurrentFrame` to the PNG encoder and records the successfully saved image's
+frame ID. The no-FFmpeg build currently discards FrameState in `FetchState`.
+That observer can close reference-image provenance without changing the phone
+or the vendor checkout; a missing/mismatched encoder ID must reject fidelity.
+
+The smallest safe **replay fidelity** experiment is a separate process/runtime that
+loads the captured FIFO and renders to its own resources, then compares the
+result with the exact original PNG. Its PE/RAM/cache effects cannot escape
+into the paused game. That can establish image fidelity before designing a
+shared-runtime replay context for the phone; its timing is not a phone speedup.
+
+A shared-runtime spike should start with an explicit `ReplayContext` carrying
+a memory provider and execution/event policy, then instrument the inventory
+above with unexpected-access/event counters that fail closed. Restore the
+captured initial render state before **each** candidate replay. Gate progress
+on original-frame equality, unchanged guest/event state and clean normal-frame
+continuation; only then add two-frame camera/rider transforms and measure
+render cost separately from drawable/display throttling.
+
+## Historical motivation and prototype (not current acceptance)
 
 The phone trial without guards measured the guest re-entry mechanism directly:
 an extra draw costs a median 11.3 ms of wall time against 11.5 ms for a real
@@ -109,10 +243,8 @@ per offset replay, unmodified replays byte-identical, offset replay different),
 then the game continued at speed 1.001 with zero GPU command errors, zero
 invalid accesses and a passing course check.
 
-Established: a guest frame can be captured and re-rendered on the host with
-no guest execution, deterministically, with a reversible camera change. Next,
-in order: restore-then-continue validation on the phone, HUD and backdrop
-exclusion, a real camera delta from two consecutive frames instead of a
-translation, then interpolation of the rider palettes using the ownership
-mapping from the pose prototype, then cost measurement without display
-throttling.
+These historical captures demonstrated repeatable images and reversible camera
+movement in one scene. They did not establish equality to the exact original
+frame or isolation of RAM, completion events, FIFO/XFB and persistent GPU state.
+The current correctness gates above supersede the earlier plan to try this
+prototype on the phone.

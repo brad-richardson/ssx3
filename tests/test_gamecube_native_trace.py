@@ -45,6 +45,8 @@ class NativeTraceTests(unittest.TestCase):
                     native_trace.build(args)
             generated = (args.output/'Core_Run.cpp').read_text()
             self.assertTrue((args.output/'trial_test_driver.h').is_file())
+            self.assertEqual((args.output/'callback_timing.h').read_bytes(),
+                             (root/'native/diagnostics/callback_timing.h').read_bytes())
             self.assertIn('#define SSX_NATIVE_TRIAL_TEST 1', generated)
             self.assertIn('NativeTrialTest::Step(m_guest)', generated)
 

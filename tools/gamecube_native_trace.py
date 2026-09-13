@@ -57,6 +57,9 @@ def build(args):
     # Snapshot the authored header too, so later edits cannot change a receipt.
     header_copy = out / HEADER.name
     header_copy.write_bytes(HEADER.read_bytes())
+    timing = ROOT / 'native/diagnostics/callback_timing.h'
+    (out / timing.name).write_bytes(timing.read_bytes())
+    receipt['callback_timing_sha256'] = sha(timing)
     extra_includes = ''
     if getattr(args, 'app_trial_check', False):
         source = '#define SSX_NATIVE_TRIAL_APP 1\n' + source
@@ -87,6 +90,10 @@ def build(args):
                 extra_includes += f'#include "{out / driver.name}"\n'
                 probe_namespace = 'NativeTrialTest'
         if getattr(args, 'replay', False):
+            helper = ROOT / 'native/diagnostics/replay_plan.h'
+            (out / helper.name).write_bytes(helper.read_bytes())
+            receipt['scheduler_headers'][helper.name] = sha(helper)
+            receipt['replay_mode'] = 'capture-private-audit-only'
             path = ROOT / 'native/diagnostics/native_frame_replay.h'
             (out / path.name).write_bytes(path.read_bytes())
             receipt['scheduler_headers'][path.name] = sha(path)
@@ -221,7 +228,7 @@ def main():
     p.add_argument('--scheduler', action='store_true',
                    help='Include the opt-in, bounded independent render-schedule experiment')
     p.add_argument('--replay', action='store_true',
-                   help='Include the host-side frame replay experiment (requires --scheduler)')
+                   help='Capture and privately audit a FIFO frame; rendering is blocked (requires --scheduler)')
     p.add_argument('--interpolation', action='store_true',
                    help='Include the bounded native transform interpolation prototype (requires --scheduler)')
     p.add_argument('--app-trial-check', action='store_true',

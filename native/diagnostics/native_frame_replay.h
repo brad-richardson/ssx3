@@ -1,145 +1,253 @@
-// Host-side frame replay experiment (milestone 1). Records one guest frame's
-// GP command stream with Dolphin's FifoRecorder, then re-runs that stream
-// through the video pipeline once per idle-seam visit, 120 times: 40 as
-// recorded, 40 with +500 added to every position matrix's first translation
-// component as it is loaded into XF memory, 40 as recorded again. No guest
-// code runs for a replay; the guest is paused at its idle seam meanwhile.
-// Screenshots are requested at the seam before a replay so the next present
-// is that replay's XFB copy (immediate XFB). Requires NativeSchedule.
+// Host replay correctness prerequisite. Capture one original frame, then
+// decode its FIFO against private memory and register state. RunFifo<false>
+// is intentionally unavailable here: it mutates live PE/timing/RAM/GPU state.
+// No replay rendering or camera transform is enabled by this diagnostic.
 #pragma once
+#include "replay_plan.h"
 #include "Core/FifoPlayer/FifoDataFile.h"
 #include "Core/FifoPlayer/FifoRecorder.h"
-#include "VideoCommon/DataReader.h"
 #include "VideoCommon/OpcodeDecoding.h"
 #include "VideoCommon/XFMemory.h"
 #include "VideoCommon/BPMemory.h"
 #include "VideoCommon/CPMemory.h"
 #include "VideoCommon/TextureDecoder.h"
+#include "VideoCommon/VideoEvents.h"
+#include "VideoCommon/VideoConfig.h"
+#include <array>
 #include <cstring>
 #include <vector>
+
 namespace NativeReplay {
 using namespace NativeProbe;
-static bool Enabled(){static const bool on=std::getenv("SSX_NATIVE_REPLAY")!=nullptr;return on;}
-enum class Phase{Idle,Recording,Replaying,Done};
-static Phase phase=Phase::Idle;
-static unsigned replays=0,transformed=0,memory_updates=0;
-static float offset=0;
-static std::vector<u8> PreludeFrom(const u32* bp,const u32* cp,const u32* xf,const u32* regs);
-static std::vector<u8> frame;
-static u32 fifo_start=0,fifo_end=0;
-static double record_wall=0;
-static void Transform(u16 address,u32 count){
- if(offset==0)return;
- float* words=reinterpret_cast<float*>(&xfmem);
- for(u32 a=address;a+12<=u32(address)+count&&a+12<=u32(XFMEM_POSMATRICES_END);a+=12){words[a+3]+=offset;++transformed;}
+enum class Phase { Idle, Recording, Done };
+static Phase phase = Phase::Idle;
+static double record_wall = 0;
+static unsigned frame_boundaries = 0;
+static bool reference_requested = false;
+static u64 reference_frame = 0, reference_present = 0;
+static Common::EventHook frame_hook, present_hook;
+static bool Enabled() {
+  static const bool on = [] {
+    const char* value = std::getenv("SSX_NATIVE_REPLAY");
+    return value && std::strcmp(value, "1") == 0;
+  }();
+  return on;
 }
-// Command bytes that restore the recorded initial BP/CP/XF state, mirroring
-// FifoPlayer::LoadRegisters (same register exclusions), so draw command sizes
-// and matrices decode as they did when the frame was recorded.
-static void Put8(std::vector<u8>& v,u32 x){v.push_back(u8(x));}
-static void Put32(std::vector<u8>& v,u32 x){v.push_back(u8(x>>24));v.push_back(u8(x>>16));v.push_back(u8(x>>8));v.push_back(u8(x));}
-static std::vector<u8> Prelude(FifoDataFile* file){
- return PreludeFrom(file->GetBPMem(),file->GetCPMem(),file->GetXFMem(),file->GetXFRegs());
+static void Event(const char* action, const char* reason = "") {
+  std::fprintf(Output(), "{\"event\":\"replay\",\"schema\":2,\"action\":\"%s\","
+      "\"wall\":%.6f,\"reason\":\"%s\",\"frame_boundaries\":%u,"
+      "\"reference_frame\":%llu,\"reference_present\":%llu,\"render_execution\":false}\n",
+      action, Now(), reason, frame_boundaries, (unsigned long long)reference_frame,
+      (unsigned long long)reference_present);
+  std::fflush(Output());
 }
-static std::vector<u8> PreludeFrom(const u32* bp,const u32* cp,const u32* xf,const u32* regs){
- std::vector<u8> v;
- for(u32 i=0;i<FifoDataFile::BP_MEM_SIZE;++i){
-  switch(i){case BPMEM_SETDRAWDONE:case BPMEM_PE_TOKEN_ID:case BPMEM_PE_TOKEN_INT_ID:case BPMEM_TRIGGER_EFB_COPY:
-   case BPMEM_LOADTLUT1:case BPMEM_PRELOAD_MODE:case BPMEM_PERF1:continue;default:break;}
-  Put8(v,0x61);Put32(v,((i<<24)&0xff000000u)|(bp[i]&0x00ffffffu));
- }
- auto cpreg=[&](u32 r){Put8(v,0x08);Put8(v,r);Put32(v,cp[r]);};
- cpreg(MATINDEX_A);cpreg(MATINDEX_B);cpreg(VCD_LO);cpreg(VCD_HI);
- for(u32 i=0;i<CP_NUM_VAT_REG;++i){cpreg(CP_VAT_REG_A+i);cpreg(CP_VAT_REG_B+i);cpreg(CP_VAT_REG_C+i);}
- for(u32 i=0;i<CP_NUM_ARRAYS;++i){cpreg(ARRAY_BASE+i);cpreg(ARRAY_STRIDE+i);}
- for(u32 i=0;i<FifoDataFile::XF_MEM_SIZE;i+=16){Put8(v,0x10);Put32(v,0x000f0000u|(i&0xffffu));for(u32 k=0;k<16;++k)Put32(v,xf[i+k]);}
- for(u32 i=0;i<FifoDataFile::XF_REGS_SIZE;++i){
-  const u32 address=i+0x1000;
-  if(address==XFMEM_UNKNOWN_1007||(address>=XFMEM_UNKNOWN_GROUP_1_START&&address<=XFMEM_UNKNOWN_GROUP_1_END)||
-     (address>=XFMEM_UNKNOWN_GROUP_2_START&&address<=XFMEM_UNKNOWN_GROUP_2_END)||
-     (address>=XFMEM_UNKNOWN_GROUP_3_START&&address<=XFMEM_UNKNOWN_GROUP_3_END))continue;
-  Put8(v,0x10);Put32(v,(address&0x0fffu)|0x1000u);Put32(v,regs[i]);
- }
- return v;
-}
-static void ApplyMemory(Core::System& system,FifoDataFile* file){
- auto& memory=system.GetMemory();
- std::memcpy(s_tex_mem.data(),file->GetTexMem(),FifoDataFile::TEX_MEM_SIZE);
- for(const auto& update:file->GetFrame(0).memoryUpdates){
-  u8* mem=(update.address&0x10000000u)?&memory.GetEXRAM()[update.address&memory.GetExRamMask()]:&memory.GetRAM()[update.address&memory.GetRamMask()];
-  std::memcpy(mem,update.data.data(),update.data.size());
- }
-}
-// Snapshot of the live video registers, restored after the sequence so the
-// game's own command stream keeps decoding with the state it expects.
-struct LiveState{std::vector<u32> bp,cp,xf;std::vector<u8> tmem;};
-static LiveState SaveLive(){
- LiveState l;l.bp.assign(reinterpret_cast<const u32*>(&bpmem),reinterpret_cast<const u32*>(&bpmem)+FifoDataFile::BP_MEM_SIZE);
- l.cp.assign(256,0);g_main_cp_state.FillCPMemoryArray(l.cp.data());
- l.xf.assign(reinterpret_cast<const u32*>(&xfmem),reinterpret_cast<const u32*>(&xfmem)+FifoDataFile::XF_MEM_SIZE+FifoDataFile::XF_REGS_SIZE);
- l.tmem.assign(s_tex_mem.begin(),s_tex_mem.end());return l;
-}
-static std::vector<u8> PreludeFrom(const u32* bp,const u32* cp,const u32* xf,const u32* regs);
-static void RestoreLive(const LiveState& l){
- std::memcpy(s_tex_mem.data(),l.tmem.data(),l.tmem.size());
- std::vector<u8> v=PreludeFrom(l.bp.data(),l.cp.data(),l.xf.data(),l.xf.data()+FifoDataFile::XF_MEM_SIZE);
- u32 cycles=0;OpcodeDecoder::RunFifo<false>(DataReader(v.data(),v.data()+v.size()),&cycles);
-}
-static void Run(std::vector<u8>& bytes){u32 cycles=0;OpcodeDecoder::RunFifo<false>(DataReader(bytes.data(),bytes.data()+bytes.size()),&cycles);}
-static void Event(const char* action,double ms=0){
- std::fprintf(Output(),"{\"event\":\"replay\",\"action\":\"%s\",\"wall\":%.6f,\"replay\":%u,\"offset\":%.1f,\"bytes\":%zu,\"memory_updates\":%u,\"fifo_start\":%u,\"fifo_end\":%u,\"transformed\":%u,\"ms\":%.3f}\n",
-  action,Now(),replays,offset,frame.size(),memory_updates,fifo_start,fifo_end,transformed,ms);
- std::fflush(Output());
-}
-static inline void Step(CPUState& c){
- NativeSchedule::Step(c);
- if(!Enabled()||!Output())return;
- if(c.pc!=0x801cad24||c.lr!=0x801cd724||render.pending||update.pending)return;
- if(!ExperimentalWindow()||phase==Phase::Done)return;
- auto& system=Core::System::GetInstance();
- auto& recorder=system.GetFifoRecorder();
- if(phase==Phase::Idle){
-  // The next present is the frame rendered after the coming retrace, which is
-  // also the first frame the recorder captures.
-  Core::SaveScreenShot("native-replay-original");
-  recorder.StartRecording(1,[]{});record_wall=Now();
-  phase=Phase::Recording;Event("record_start");return;
- }
- if(phase==Phase::Recording){
-  // The recorder appends the frame when the following frame's first data
-  // arrives, after it has already stopped recording.
-  FifoDataFile* file=recorder.GetRecordedFile();
-  const bool ready=!recorder.IsRecording()&&file&&file->GetFrameCount()>=1;
-  if(!ready){
-   if(Now()-record_wall>2.0){Event("record_failed");phase=Phase::Done;}
-   return;
+
+// The template decoder only computes command lengths and calls these methods.
+// These callbacks never call Dolphin's hardware/video execution callbacks.
+class Audit final : public OpcodeDecoder::Callback {
+public:
+  Audit(FifoDataFile& file, ReplayResearch::ShadowMemory& shadow)
+      : cp(file.GetCPMem()), memory(shadow), address_mask(file.GetIsWii() ? 0x1fffffffu : 0x03ffffffu) {
+    std::copy_n(file.GetBPMem(), bp.size(), bp.begin());
+    std::copy_n(file.GetCPMem(), cp_words.size(), cp_words.begin());
+    std::copy_n(file.GetXFMem(), FifoDataFile::XF_MEM_SIZE, xf.begin());
+    std::copy_n(file.GetXFRegs(), FifoDataFile::XF_REGS_SIZE,
+                xf.begin() + FifoDataFile::XF_MEM_SIZE);
+    tmem.assign(file.GetTexMem(), file.GetTexMem() + FifoDataFile::TEX_MEM_SIZE);
   }
-  const FifoFrameInfo& info=file->GetFrame(0);
-  frame=info.fifoData;memory_updates=unsigned(info.memoryUpdates.size());
-  fifo_start=info.fifoStart;fifo_end=info.fifoEnd;
-  Event("recorded");phase=Phase::Replaying;return;
- }
- // One seam visit performs the whole sequence with the guest paused, so RAM
- // and video state cannot drift between replays: restore the recorded memory
- // and registers once, then replay 120 times.
- FifoDataFile* file=recorder.GetRecordedFile();
- const LiveState live=SaveLive();
- ApplyMemory(system,file);
- std::vector<u8> prelude=Prelude(file);
- Run(prelude);
- Event("restored",double(prelude.size()));
- for(replays=0;replays<120;++replays){
-  const unsigned n=replays;
-  offset=(n>=40&&n<80)?500.f:0.f;
-  if(n==20||n==60||n==100)Core::SaveScreenShot("native-replay-"+std::to_string(n));
-  transformed=0;
-  XFReplay::g_transform=&Transform;
-  const double start=Now();
-  Run(frame);
-  XFReplay::g_transform=nullptr;
-  Event("replay",(Now()-start)*1000);
- }
- RestoreLive(live);
- phase=Phase::Done;Event("done");
+  void OnXF(u16 address, u8 count, const u8* data) override {
+    if (size_t(address) + count > xf.size()) { valid = false; return; }
+    for (unsigned i = 0; i < count; ++i) xf[address + i] = Common::swap32(data + 4 * i);
+    ++xf_loads;
+  }
+  void OnCP(u8 command, u32 value) override {
+    // CPState::LoadCPReg also reports analytics quirks for unsupported/aliased
+    // registers. Accept only canonical state writes and construct local state.
+    if (command == 0x20 && value == 0) return;
+    const auto range = [&](u32 begin, u32 count) { return command >= begin && command < begin + count; };
+    if (command != MATINDEX_A && command != MATINDEX_B && command != VCD_LO && command != VCD_HI &&
+        !range(CP_VAT_REG_A, CP_NUM_VAT_REG) && !range(CP_VAT_REG_B, CP_NUM_VAT_REG) &&
+        !range(CP_VAT_REG_C, CP_NUM_VAT_REG) && !range(ARRAY_BASE, CP_NUM_ARRAYS) &&
+        !range(ARRAY_STRIDE, CP_NUM_ARRAYS)) { valid = false; return; }
+    cp_words[command] = range(ARRAY_BASE, CP_NUM_ARRAYS) ? value & address_mask :
+        range(ARRAY_STRIDE, CP_NUM_ARRAYS) ? value & 0xff : value;
+    const CPState fresh(cp_words.data());
+    static_assert(std::is_trivially_copyable_v<CPState>);
+    std::memcpy(&cp, &fresh, sizeof(cp));
+  }
+  void OnBP(u8 command, u32 value) override {
+    const u32 mask = bp[BPMEM_BP_MASK];
+    bp[command] = (bp[command] & ~mask) | (value & mask);
+    if (command != BPMEM_BP_MASK) bp[BPMEM_BP_MASK] = 0xffffff;
+    switch (command) {
+    case BPMEM_SETDRAWDONE: ++draw_done; break;
+    case BPMEM_PE_TOKEN_ID: case BPMEM_PE_TOKEN_INT_ID: ++tokens; break;
+    case BPMEM_TRIGGER_EFB_COPY:
+      ++efb_copies;
+      if (bp[command] & (1u << 14)) ++xfb_copies;
+      break;
+    case BPMEM_LOADTLUT1: case BPMEM_PRELOAD_MODE: ++tmem_loads; break;
+    case BPMEM_CLEARBBOX1: case BPMEM_CLEARBBOX2: ++bbox_writes; break;
+    default: break;
+    }
+  }
+  void OnIndexedLoad(CPArray array, u32 index, u16 address, u8 size) override {
+    // Match the pinned decoder's u32 address arithmetic, then reject any
+    // resulting range outside the private bank before reading it.
+    const u32 source = cp.array_bases[array] + cp.array_strides[array] * index;
+    const u8* data = memory.Resolve(source, size_t(size) * sizeof(u32));
+    if (!data) { valid = false; return; }
+    OnXF(address, size, data);
+    indexed_bytes_hash ^= Hash(data, size_t(size) * sizeof(u32));
+    indexed_bytes_hash *= 1099511628211ull;
+    ++indexed_loads;
+  }
+  void OnPrimitiveCommand(OpcodeDecoder::Primitive, u8, u32, u16, const u8*) override {
+    ++primitives;
+  }
+  void OnDisplayList(u32, u32) override {
+    // FifoRecorder inlines display lists. Never fall back to live guest RAM.
+    valid = false;
+  }
+  void OnNop(u32) override {}
+  void OnUnknown(u8 opcode, const u8*) override {
+    if (opcode != u8(OpcodeDecoder::Opcode::GX_CMD_INVL_VC) &&
+        opcode != u8(OpcodeDecoder::Opcode::GX_CMD_UNKNOWN_METRICS)) valid = false;
+  }
+  void OnCommand(const u8*, u32) override { ++commands; }
+  CPState& GetCPState() override { return cp; }
+  bool Decode(const std::vector<u8>& fifo, size_t start, size_t end) {
+    while (start < end && valid) {
+      // RunCommand asserts on malformed XF headers. Reject those before the
+      // pinned decoder sees them, rather than crashing an audit process.
+      if (fifo[start] == u8(OpcodeDecoder::Opcode::GX_LOAD_XF_REG) && end - start >= 5 &&
+          (Common::swap32(fifo.data() + start + 1) >> 16) >= 16) return false;
+      const u32 size = OpcodeDecoder::RunCommand(fifo.data() + start, u32(end - start), *this);
+      if (!size) return false;
+      start += size;
+    }
+    return valid && start == end;
+  }
+  CPState cp;
+  ReplayResearch::ShadowMemory& memory;
+  const u32 address_mask;
+  std::array<u32, FifoDataFile::BP_MEM_SIZE> bp{};
+  std::array<u32, FifoDataFile::CP_MEM_SIZE> cp_words{};
+  std::array<u32, FifoDataFile::XF_MEM_SIZE + FifoDataFile::XF_REGS_SIZE> xf{};
+  std::vector<u8> tmem;
+  u64 indexed_bytes_hash = 14695981039346656037ull;
+  unsigned commands = 0, primitives = 0, xf_loads = 0, indexed_loads = 0;
+  unsigned draw_done = 0, tokens = 0, efb_copies = 0, xfb_copies = 0, tmem_loads = 0, bbox_writes = 0;
+  bool valid = true;
+};
+
+static void Analyze(FifoDataFile& file, Core::System& system) {
+  const auto& frame = file.GetFrame(0);
+  auto& live_memory = system.GetMemory();
+  // GameCube still reports the configured MEM2 size, but has no allocated
+  // EXRAM. Use allocation presence for audit banks and whole-bank checks.
+  const size_t ram_size = ReplayResearch::AllocatedBankSize(live_memory.GetRAM(), live_memory.GetRamSize());
+  const size_t exram_size = ReplayResearch::AllocatedBankSize(live_memory.GetEXRAM(), live_memory.GetExRamSize());
+  std::vector<ReplayResearch::MemoryUpdate> updates;
+  for (const auto& update : frame.memoryUpdates)
+    updates.push_back({update.fifoPosition, update.address, update.data});
+  // Zero matches the recorder's initial shadow memory, not a claim that EFB
+  // copy destinations can be reproduced without executing the missing copies.
+  ReplayResearch::ShadowMemory memory(ram_size, live_memory.GetRamMask(),
+                                      exram_size, live_memory.GetExRamMask());
+  const auto before_ram = Hash(live_memory.GetRAM(), ram_size);
+  const auto before_exram = Hash(live_memory.GetEXRAM(), exram_size);
+  for (unsigned pass = 0; pass < 3; ++pass) {
+    memory.Reset();
+    Audit audit(file, memory); // Fresh CP/BP/XF/TMEM before every audit pass.
+    std::string error;
+    const bool ok = ReplayResearch::DecodeOrdered(frame.fifoData.size(), updates, memory,
+        [&](size_t start, size_t end) { return audit.Decode(frame.fifoData, start, end); }, error);
+    std::fprintf(Output(), "{\"event\":\"replay\",\"schema\":2,\"action\":\"audit\","
+        "\"wall\":%.6f,\"pass\":%u,\"ok\":%s,\"reason\":\"%s\",\"commands\":%u,"
+        "\"primitives\":%u,\"indexed_loads\":%u,\"indexed_bytes_hash\":\"%016llx\","
+        "\"draw_done\":%u,\"tokens\":%u,\"efb_copies\":%u,\"xfb_copies\":%u,"
+        "\"tmem_loads\":%u,\"bbox_writes\":%u,\"initial_state_reset\":true,"
+        "\"private_memory\":true,\"render_execution\":false}\n",
+        Now(), pass, ok ? "true" : "false", error.c_str(), audit.commands, audit.primitives,
+        audit.indexed_loads, (unsigned long long)audit.indexed_bytes_hash, audit.draw_done,
+        audit.tokens, audit.efb_copies, audit.xfb_copies, audit.tmem_loads, audit.bbox_writes);
+    if (!ok) { std::fflush(Output()); return; }
+  }
+  const bool ram_equal = before_ram == Hash(live_memory.GetRAM(), ram_size) &&
+      before_exram == Hash(live_memory.GetEXRAM(), exram_size);
+  Event(ram_equal ? "audit_complete" : "audit_failed", ram_equal ? "" : "live_ram_changed");
+  // Even a successful audit does not execute vertices/textures/EFB copies and
+  // cannot establish original-frame pixel equivalence or GPU state isolation.
 }
+
+static inline void Step(CPUState& c) {
+  RefreshNow(c);
+  if (!Enabled() || !Output() || phase == Phase::Done) return;
+  if (c.pc != 0x801cad24 || c.lr != 0x801cd724) return;
+  auto& system = Core::System::GetInstance();
+  auto& recorder = system.GetFifoRecorder();
+  if (phase == Phase::Idle) {
+    if (!ExperimentalWindow()) return;
+    // These restrictions make capture identity and the read-only audit's
+    // thread ownership explicit. No scheduler or guest-render injection runs.
+    if (system.IsDualCoreMode() || !g_ActiveConfig.bImmediateXFB || recorder.IsRecording() ||
+        NativeSchedule::ScheduleEnabled() || DoubleEnabled() || WaitEnabled() || SweepEnabled()) {
+      Event("blocked", "requires_single_core_immediate_xfb_without_other_experiments");
+      phase = Phase::Done;
+      return;
+    }
+    recorder.StartRecording(1, [] {});
+    record_wall = Now();
+    phase = Phase::Recording;
+    // The first boundary arms recording, and the second ends the recorded
+    // frame. Register after the recorder so IsRecording() is already updated.
+    frame_hook = system.GetVideoEvents().after_frame_event.Register([](Core::System&) {
+      if (phase == Phase::Recording) ++frame_boundaries;
+    });
+    present_hook = system.GetVideoEvents().before_present_event.Register([](PresentInfo& info) {
+      if (phase != Phase::Recording || reference_requested || frame_boundaries != 2 ||
+          info.reason != PresentInfo::PresentReason::Immediate ||
+          Core::System::GetInstance().GetFifoRecorder().IsRecording()) return;
+      reference_frame = info.frame_count;
+      reference_present = info.present_count;
+      Core::SaveScreenShot("native-replay-reference");
+      reference_requested = true;
+      Event("reference_requested");
+    });
+    Event("record_start");
+    return;
+  }
+  FifoDataFile* file = recorder.GetRecordedFile();
+  if (!recorder.IsRecording() && file && file->GetFrameCount() == 1) {
+    frame_hook.reset();
+    present_hook.reset();
+    const auto& frame = file->GetFrame(0);
+    std::fprintf(Output(), "{\"event\":\"replay\",\"schema\":2,\"action\":\"recorded\","
+        "\"wall\":%.6f,\"bytes\":%zu,\"memory_updates\":%zu,\"fifo_start\":%u,"
+        "\"fifo_end\":%u,\"frame_boundaries\":%u,\"reference_frame\":%llu,"
+        "\"reference_present\":%llu,\"render_execution\":false}\n", Now(), frame.fifoData.size(),
+        frame.memoryUpdates.size(), frame.fifoStart, frame.fifoEnd, frame_boundaries,
+        (unsigned long long)reference_frame, (unsigned long long)reference_present);
+    const char* trace_path = std::getenv("SSX_NATIVE_PROBE");
+    const std::string capture_path = std::string(trace_path) + ".fifo";
+    FILE* reservation = std::fopen(capture_path.c_str(), "wx");
+    if (reservation) std::fclose(reservation);
+    const bool saved = reservation && file->Save(capture_path);
+    if (saved) Event("capture_saved");
+    if (!saved || !reference_requested || frame_boundaries != 2) {
+      Event("blocked", saved ? "missing_same_frame_reference" : "capture_save_failed");
+    } else {
+      Analyze(*file, system);
+      Event("blocked", "renderer_isolation_and_pixel_fidelity_unimplemented");
+    }
+    phase = Phase::Done;
+  } else if (Now() - record_wall > 2.0) {
+    recorder.StopRecording();
+    frame_hook.reset();
+    present_hook.reset();
+    Event("blocked", "record_timeout");
+    phase = Phase::Done;
+  }
 }
+} // namespace NativeReplay

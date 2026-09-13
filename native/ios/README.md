@@ -28,8 +28,59 @@ The menu also offers an opt-in native smoothing trial, lasting up to 35 seconds.
 It can end early if extra rendering cannot keep up, and always drains an injected
 draw before pausing/saving. Ordinary rendering remains the default. This is a
 geometry-interpolation experiment with a visual-delay tradeoff, not a verified
-120 fps or latency improvement. See the [prototype findings](../../docs/research/120hz-native-interpolation.md)
+latency improvement. Device reports have shown short stretches of actual
+120 Hz presentation; sustaining that pacing remains experimental.
+See the [prototype findings](../../docs/research/120hz-native-interpolation.md)
 for performance limits, ownership rules and reproduction.
+
+The pause menu also offers **Use half-size output** / **Use full-size output**
+for a reversible output-resolution comparison. Selecting it resumes play at
+the selected size; open the menu again to start a smoothing trial. The menu
+shows the current size. Full is the launch default, and the selection survives
+Full Reset during that app launch. On the iPhone 16 Pro Max, full is 2868 × 1320
+and half is 1434 × 660. Both keep the GameCube internal resolution at 1×
+(640 × 528); touch controls and UIKit text keep their normal screen resolution.
+Half reduces the final drawable's pixel count to one quarter. Its effect on
+presentation cost, sustained smoothing and image quality must be measured.
+The action is unavailable while the smoothing draw drains or a checkpoint is
+being written. A Dolphin CPU/FIFO guard synchronizes the layer-scale change;
+the Metal renderer rebuilds its backbuffer after resuming.
+
+For a phone comparison, alternate Full / Half / Full on the same riding
+section, including ordinary riding before each smoothing trial. Keep the
+same controller input, course, camera, and device conditions as closely as
+possible. Menu transitions, saves and resize startup do not count as steady
+gameplay. The smoothing deadline and speed fallback apply at both resolutions.
+
+For reproducible launches, `mobile_gamecube.py launch --output-scale half`
+(with the usual device options) selects half output for that process. It can
+be combined with `--sequence`; `--output-scale full` is the explicit baseline.
+This option does not persist a preference, so a normal app launch starts full.
+With a bounded `--sequence`, `--smoothing-at 155` requests one trial at that
+active test time, using the same riding-state checks, 35-second cap and speed
+fallback as the menu. The test must leave at least 40 seconds after the request;
+the option is rejected before copying inputs otherwise. It never restarts an
+already pending/running trial. Automated sessions skip player checkpoints.
+Retain the sequence and compare actual riding state and presentations: equal
+wall-timed inputs alone do not establish identical game trajectories.
+
+If Simulator RemoteIO aborts in `AURemoteIO::Start` with an audio-service RPC
+timeout, a bounded graphics check can use `--simulator-null-audio`:
+
+```sh
+python3 tools/mobile_gamecube.py launch --simulator --device SIMULATOR_UUID \
+  --sequence native/ios/snow-jam-smoke.json --output-scale half \
+  --smoothing-at 155 --simulator-null-audio
+```
+
+This option requires `launch`, `--simulator`, and a valid bounded `--sequence`;
+invalid combinations are rejected before device or container changes. The app
+honors its `-ssxNullAudio` flag only in a Simulator build with `-ssxAutoTest`.
+It selects Dolphin's `No Audio Output` backend and skips AVAudioSession setup,
+activation and interruption handling for that diagnostic. Normal Simulator
+launches and all phone builds continue using CoreAudio. `launch.json` records
+`audioEnabled: false` and `audioBackend: "No Audio Output"` for the diagnostic;
+it cannot establish audio health or real iPhone presentation performance.
 
 Snapshots live in `Documents/Resume`, with a checksum and an atomically replaced
 manifest. Incomplete snapshots leave the previous checkpoint intact; changed
@@ -90,6 +141,13 @@ Diagnostic report schema 2 adds a build identity and shared `host_seconds`
 clock (the same uptime clock used by Metal and native trial schedule events).
 The existing `seconds` field still excludes app pauses. Use host time when
 comparing a smoothing cutoff, audio starvation, lifecycle events and presentation.
+Launch metadata, metrics and lifecycle events also record `outputScale`
+(1 or 0.5), `screenScale`, requested `outputWidth`/`outputHeight` and the
+layer's actual `drawableWidth`/`drawableHeight`. `output_resolution_requested`
+and `output_resolution_applied` mark the menu change. The latter means the
+synchronized resize was queued; confirm actual submitted dimensions in
+`present.csv` after resuming before classifying the new window. Internal EFB
+dimensions remain in the existing metrics fields.
 
 - `present.csv` records drawable acquire duration, submission ID, presentation
   callback time and the drawable's actual `presentedTime`, plus start/end/error
