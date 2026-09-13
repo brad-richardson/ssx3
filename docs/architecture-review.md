@@ -104,8 +104,10 @@ environment ownership and frame-by-frame visibility checks remain priorities.
    roughly 4.9 game FPS at 0.36× speed versus the approximately 59.4 FPS
    baseline, with substantial submission-to-presentation delay. Those are
    measurements of that implementation, not proof that interpolation is
-   impossible. First remove synchronous waits and instrument GPU/presentation
-   time. Then compare a lower-cost path with depth/camera-assisted vectors and
+   impossible. The September 13 source check finds the explicit wait in teardown,
+   not the frame loop; instrument drawable acquisition, GPU and presentation
+   scheduling before attributing the stall. See the
+   [follow-up timing analysis](research/120hz-analysis.md). Then compare a lower-cost path with depth/camera-assisted vectors and
    HUD exclusion. Preserve the game's 60 Hz simulation. Promote the feature
    only after an actual ride shows lower latency and acceptable artifacts on
    the phone, with a reliable 60 Hz fallback.
