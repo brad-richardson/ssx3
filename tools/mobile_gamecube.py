@@ -204,6 +204,9 @@ def world(args):
 
 def launch(args):
     flags = []
+    internal_scale = getattr(args, "internal_scale", None)
+    if internal_scale is not None and (type(internal_scale) is not int or internal_scale not in (1, 2)):
+        raise ValueError("--internal-scale must be 1 or 2")
     null_audio = getattr(args, "simulator_null_audio", False)
     if null_audio and not args.simulator:
         raise ValueError("--simulator-null-audio requires --simulator")
@@ -224,6 +227,8 @@ def launch(args):
         flags = ["-ssxAutoTest"]
     if getattr(args, "output_scale", None):
         flags.extend(["-ssxOutputScale", args.output_scale])
+    if internal_scale is not None:
+        flags.extend(["-ssxInternalScale", str(internal_scale)])
     if smoothing_at is not None:
         flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
     if null_audio:
@@ -266,6 +271,8 @@ def main():
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
     parser.add_argument("--output-scale", choices=("full", "half"),
                         help="Launch-only drawable scale; normal launches use full output")
+    parser.add_argument("--internal-scale", type=int, choices=(1, 2),
+                        help="Launch-only GameCube internal detail; normal launches use 1x independently of output scale")
     parser.add_argument("--smoothing-at", type=float,
                         help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
     parser.add_argument("--simulator-null-audio", action="store_true",
@@ -274,6 +281,8 @@ def main():
     args = parser.parse_args()
     if args.output_scale and args.command != "launch":
         parser.error("--output-scale applies only to launch")
+    if args.internal_scale is not None and args.command != "launch":
+        parser.error("--internal-scale applies only to launch")
     if args.smoothing_at is not None and args.command != "launch":
         parser.error("--smoothing-at applies only to launch")
     if args.simulator_null_audio and (args.command != "launch" or not args.simulator or not args.sequence):

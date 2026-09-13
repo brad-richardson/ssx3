@@ -38,13 +38,41 @@ for a reversible output-resolution comparison. Selecting it resumes play at
 the selected size; open the menu again to start a smoothing trial. The menu
 shows the current size. Full is the launch default, and the selection survives
 Full Reset during that app launch. On the iPhone 16 Pro Max, full is 2868 × 1320
-and half is 1434 × 660. Both keep the GameCube internal resolution at 1×
-(640 × 528); touch controls and UIKit text keep their normal screen resolution.
+and half is 1434 × 660. This control leaves the independently selected internal
+detail unchanged; touch controls and UIKit text keep their normal screen resolution.
 Half reduces the final drawable's pixel count to one quarter. Its effect on
 presentation cost, sustained smoothing and image quality must be measured.
 The action is unavailable while the smoothing draw drains or a checkpoint is
 being written. A Dolphin CPU/FIFO guard synchronizes the layer-scale change;
 the Metal renderer rebuilds its backbuffer after resuming.
+
+**Use 2× internal detail** / **Use 1× internal detail** changes the GameCube
+rendering resolution independently of Full/Half output. The launch default is
+1× (640 × 528, 337,920 pixels); 2× is 1280 × 1056 (1,351,680 pixels), four times
+the pixels. Selecting either resumes play. The choice lasts for the app process
+and survives Full Reset; an ordinary relaunch returns to 1×. The same paused,
+checkpoint-complete, smoothing-drained gate applies. The app changes Dolphin's
+configuration under its CPU/FIFO guard; the renderer recreates the EFB and
+updates viewport/scissor state at its next frame config check after resuming.
+The pinned savestate loader supports restoring differently sized EFB images by
+resampling into the current framebuffer; phone checkpoint/relaunch behavior
+across a detail change still needs device validation.
+
+2× can improve geometry edges and scene detail but increases GPU rasterization,
+memory bandwidth, and framebuffer memory use. It does not reduce guest CPU
+work or establish sustained 120 Hz performance. Half output does not cancel
+the cost of a 2× internal framebuffer. Keep internal detail at 1× for the
+existing Full/Half pacing comparison; the analyzer's baseline policy remains
+640 × 528. Compare internal detail separately and exclude resize/startup frames.
+
+Launch metadata's `renderScale` records the selected initial integer. Launch,
+metrics, and lifecycle rows also record `requestedInternalScale`; `efbWidth`,
+`efbHeight`, and `efbSampleHostSeconds` describe the latest actual framebuffer
+sample taken on the renderer thread (null before its first frame). The
+`internal_resolution_requested`, `internal_resolution_configured`, and
+`internal_resolution_rejected` events use the usual monotonic `host_seconds`
+clock. A request/rejection includes `targetInternalScale`. Configured means the
+setting was changed: the sampled EFB size may remain old until rendering resumes.
 
 For a phone comparison, alternate Full / Half / Full on the same riding
 section, including ordinary riding before each smoothing trial. Keep the
@@ -56,6 +84,10 @@ For reproducible launches, `mobile_gamecube.py launch --output-scale half`
 (with the usual device options) selects half output for that process. It can
 be combined with `--sequence`; `--output-scale full` is the explicit baseline.
 This option does not persist a preference, so a normal app launch starts full.
+`--internal-scale 2` opts into 2× internal detail for a launch, or use
+`--internal-scale 1` for the explicit baseline. It accepts only `1` or `2`, is
+launch-only, and can be combined with either output scale and with `--sequence`.
+Invalid values or use on another command are rejected before device changes.
 With a bounded `--sequence`, `--smoothing-at 155` requests one trial at that
 active test time, using the same riding-state checks, 35-second cap and speed
 fallback as the menu. The test must leave at least 40 seconds after the request;

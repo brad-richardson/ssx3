@@ -9,6 +9,64 @@ from tools import mobile_gamecube
 
 
 class DeviceLaunch(unittest.TestCase):
+    def test_internal_scale_rejects_invalid_values_before_device_changes(self):
+        for simulator in (False, True):
+            for scale in (0, 3, 1.5, "2", True):
+                with self.subTest(simulator=simulator, scale=scale), \
+                        mock.patch.object(mobile_gamecube, "copy_to") as copy, \
+                        mock.patch.object(mobile_gamecube, "simulator_documents") as documents, \
+                        mock.patch.object(mobile_gamecube, "command") as command:
+                    with self.assertRaisesRegex(ValueError, "internal-scale"):
+                        mobile_gamecube.launch(argparse.Namespace(device="DEVICE", simulator=simulator,
+                            sequence=Path("native/ios/snow-jam-smoke.json"), internal_scale=scale))
+                    copy.assert_not_called()
+                    documents.assert_not_called()
+                    command.assert_not_called()
+
+    def test_internal_scale_parser_rejects_nonlaunch_and_invalid_choices(self):
+        for operation, scale in (("collect", "2"), ("install", "1"), ("launch", "0"),
+                                 ("launch", "3"), ("launch", "1.5")):
+            with self.subTest(operation=operation, scale=scale), \
+                    mock.patch("sys.argv", ["mobile_gamecube.py", operation, "--device", "PHONE",
+                                           "--internal-scale", scale]), \
+                    mock.patch.object(mobile_gamecube, operation) as perform:
+                with self.assertRaises(SystemExit) as stopped:
+                    mobile_gamecube.main()
+                self.assertEqual(stopped.exception.code, 2)
+                perform.assert_not_called()
+
+    def test_internal_scale_parser_forwards_integer_and_leaves_default_unspecified(self):
+        for scale in (None, 1, 2):
+            argv=["mobile_gamecube.py", "launch", "--device", "PHONE"]
+            if scale is not None:
+                argv.extend(["--internal-scale", str(scale)])
+            with self.subTest(scale=scale), mock.patch("sys.argv", argv), \
+                    mock.patch.object(mobile_gamecube, "launch") as launch:
+                mobile_gamecube.main()
+                self.assertEqual(launch.call_args.args[0].internal_scale, scale)
+
+    def test_internal_scale_reaches_app_independently_of_output_and_automation(self):
+        for simulator in (False, True):
+            for scale in (1, 2):
+                for output in (None, "half"):
+                    for sequence in (None, Path("native/ios/snow-jam-smoke.json")):
+                        with self.subTest(simulator=simulator, scale=scale, output=output, sequence=sequence), \
+                                tempfile.TemporaryDirectory() as tmp, \
+                                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                                mock.patch.object(mobile_gamecube, "simulator_documents", return_value=Path(tmp)), \
+                                mock.patch.object(mobile_gamecube, "copy_to"), \
+                                mock.patch.object(mobile_gamecube, "command") as command:
+                            mobile_gamecube.launch(argparse.Namespace(device="DEVICE", simulator=simulator,
+                                sequence=sequence, output_scale=output, internal_scale=scale))
+                            argv=command.call_args.args[0]
+                            flags=[] if simulator else ["--"]
+                            if sequence:
+                                flags.append("-ssxAutoTest")
+                            if output:
+                                flags.extend(["-ssxOutputScale", output])
+                            flags.extend(["-ssxInternalScale", str(scale)])
+                            self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:], flags)
+
     def test_null_audio_rejects_phone_unbounded_and_other_operations_before_device_changes(self):
         for simulator, sequence in ((False, Path("native/ios/snow-jam-smoke.json")), (True, None)):
             with self.subTest(simulator=simulator, sequence=sequence), \
