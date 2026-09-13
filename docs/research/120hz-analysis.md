@@ -198,3 +198,43 @@ Evidence: `local/research/120hz/baseline-{1,2}/`,
 `baseline-2-present.csv`, `baseline-summary.json` and
 `present-player/build.json`. The timing observer is exploratory; counters and
 callback identities must be revalidated against any different executable.
+
+## Android portability decision
+
+MetalFX is one optional Apple backend. Keep the frame-input contract and game
+instrumentation shared: previous/current color, depth, motion with explicit
+coordinate conventions, UI coverage/composition, simulation timestamps and
+history-reset reasons. Native GPU resource handles and synchronization stay
+inside each graphics backend. Camera cuts, respawns, resize and missing history
+must use the same fallback rules on both platforms.
+
+For Android, start with the existing Vulkan renderer and a native app/runtime
+baseline. The Android shell is still backlog work; the current Odin workflow
+uses Dolphin. A patched course archive cannot add frame generation to stock
+Dolphin. We would need our Android runtime or a renderer-modified Dolphin build.
+
+Use two independently measured parts:
+
+1. **Presentation:** request a supported high refresh rate and pace actual
+   submitted images. Android's [Swappy library](https://developer.android.com/games/sdk/frame-pacing)
+   supports Vulkan presentation timestamps and synchronization. It schedules
+   frames; it does not synthesize intermediate images. Android also documents
+   [explicit refresh-rate requests](https://developer.android.com/games/optimize/display-refresh-rate-change)
+   for games above the default rate. Measure the selected mode and actual
+   display intervals rather than assuming a 120 Hz request is honored.
+2. **Interpolation:** first benchmark depth/motion-assisted Vulkan compute at
+   bounded resolution using the same captured sequences as the Apple backend.
+   This would be an implementation experiment, not a verified Android equivalent
+   of MetalFX. If motion-boundary quality is inadequate, evaluate a pretrained
+   model before considering training. [MNN](https://github.com/alibaba/MNN)
+   documents Android plus Vulkan/OpenCL GPU inference; model operators,
+   texture interop, CPU fallbacks, latency and sustained device performance
+   still need validation. No Android interpolation backend is selected as
+   production-ready by this analysis.
+
+If equal iOS/Android feature availability is required, benchmark the portable
+Vulkan candidate early alongside the MetalFX trial. An iPhone-only success
+cannot establish Android feasibility. Share input capture, motion/depth
+reconstruction and correctness tests; allow platform-specific interpolation
+implementations and performance settings. Use native-rate presentation when
+the device cannot sustain the interpolation budget.
