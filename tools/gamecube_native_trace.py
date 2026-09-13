@@ -12,6 +12,14 @@ timing helpers on extras; SSX_NATIVE_CAMERA_OFFSET offsets a copied graphics
 matrix; SSX_NATIVE_FROZEN_VIEW_SWEEP holds one state for normal/offset/restored
 phases; SSX_NATIVE_CAPTURE requests screenshots. These are research controls,
 not a high-refresh implementation. See docs/research/120hz-render-seam.md.
+
+With build --scheduler, SSX_NATIVE_SCHEDULE enables the independent deadline
+experiment during host seconds 140–175. It requires SKIP_BOOKKEEPING and no
+DOUBLE/WAIT/SWEEP flags. SSX_NATIVE_COMPLETION_RELEASE uses the
+original single guest XFB with uncapped host immediate copies before enabling
+the game's graphics-completion mode. Use
+gamecube_schedule_check.py and gamecube_schedule_trace.py for this experiment;
+see docs/research/120hz-independent-schedule.md for ownership limits.
 """
 import argparse
 import collections
@@ -49,8 +57,18 @@ def build(args):
     # Snapshot the authored header too, so later edits cannot change a receipt.
     header_copy = out / HEADER.name
     header_copy.write_bytes(HEADER.read_bytes())
-    source = source.replace(includes, f'#include "{header_copy}"\n' + includes)
-    source = source.replace(dispatch, '          NativeProbe::Step(m_guest);\n' + dispatch)
+    extra_includes = ''
+    probe_namespace = 'NativeProbe'
+    if getattr(args, 'scheduler', False):
+        receipt['scheduler_headers'] = {}
+        for name in ('render_deadline.h', 'native_render_schedule.h'):
+            path = ROOT / 'native/diagnostics' / name
+            (out / name).write_bytes(path.read_bytes())
+            receipt['scheduler_headers'][name] = sha(path)
+        extra_includes = f'#include "{out / "native_render_schedule.h"}"\n'
+        probe_namespace = 'NativeSchedule'
+    source = source.replace(includes, f'#include "{header_copy}"\n' + extra_includes + includes)
+    source = source.replace(dispatch, f'          {probe_namespace}::Step(m_guest);\n' + dispatch)
     copy = out / 'Core_Run.cpp'
     copy.write_text(source)
     commands = subprocess.check_output(
@@ -67,6 +85,12 @@ def build(args):
     link = link[2:link.index('&&', 2)]
     link[link.index('-o') + 1] = str(out / 'player')
     link.insert(link.index('libmoderngekko.a'), str(out / 'probe.o'))
+    if getattr(args, 'presentation_object', None):
+        obj = args.presentation_object.resolve()
+        if not obj.is_relative_to(ROOT / 'local') or not obj.is_file():
+            raise ValueError('Use a locally built presentation observer object under local/')
+        receipt['presentation_object_sha256'] = sha(obj)
+        link.insert(link.index('libmoderngekko.a'), str(obj))
     run(link)
     if sha(production) != receipt['production_runner_sha256']:
         raise RuntimeError('Production runner changed during diagnostic build')
@@ -169,6 +193,10 @@ def main():
     p = sub.add_parser('build')
     p.add_argument('--game', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--scheduler', action='store_true',
+                   help='Include the opt-in, bounded independent render-schedule experiment')
+    p.add_argument('--presentation-object', type=Path,
+                   help='Link an isolated MTLGfx.o built by gamecube_present_trace.py')
     p = sub.add_parser('summarize')
     p.add_argument('trace', type=Path)
     p.add_argument('--after', type=float, default=140)

@@ -68,9 +68,11 @@ static FILE* Output(){
  return file;
 }
 static bool DoubleEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_RENDER");return p&&std::strcmp(p,"1")==0;}();return value;}
-static bool WaitEnabled(){return std::getenv("SSX_NATIVE_WAIT_REPEAT")!=nullptr;}
-static bool SweepEnabled(){return std::getenv("SSX_NATIVE_FROZEN_VIEW_SWEEP")!=nullptr;}
-static bool SkipEnabled(){return std::getenv("SSX_NATIVE_SKIP_BOOKKEEPING")!=nullptr;}
+static bool WaitEnabled(){static const bool on=std::getenv("SSX_NATIVE_WAIT_REPEAT")!=nullptr;return on;}
+static bool SweepEnabled(){static const bool on=std::getenv("SSX_NATIVE_FROZEN_VIEW_SWEEP")!=nullptr;return on;}
+static bool SkipEnabled(){static const bool on=std::getenv("SSX_NATIVE_SKIP_BOOKKEEPING")!=nullptr;return on;}
+static bool CameraEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAMERA_OFFSET")!=nullptr;return on;}
+static bool CaptureEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAPTURE")!=nullptr;return on;}
 static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  FILE* file=Output();
  if(!file)return;
@@ -91,7 +93,7 @@ static inline void Step(CPUState& c){
    std::fprintf(stderr,"\n");
   }
   queue_after=Word(c,c.gpr[13]-20556);
-  if(render.repeated&&std::getenv("SSX_NATIVE_CAMERA_OFFSET")&&(!SweepEnabled()||(repeats>40&&repeats<=80))&&c.pc==0x8010a6a8){
+  if(render.repeated&&CameraEnabled()&&(!SweepEnabled()||(repeats>40&&repeats<=80))&&c.pc==0x8010a6a8){
    const u32 ptr=Word(c,c.gpr[3]+6132);
    if(!Valid(c,ptr,64)||offset_matrix){std::fprintf(stderr,"[native-probe] invalid matrix override\n");std::abort();}
    offset_matrix=ptr;std::memcpy(saved_matrix.data(),c.ram+ptr-0x80000000u,64);
@@ -99,7 +101,7 @@ static inline void Step(CPUState& c){
    auto* bytes=c.ram+ptr+48-0x80000000u;for(unsigned i=0;i<4;++i)bytes[i]=bits>>(24-i*8);
    ++camera_offsets;
   }
-  if(std::getenv("SSX_NATIVE_CAPTURE")&&c.pc==0x8021a5fc&&c.lr==0x8010abf0&&render.repeated&&repeats%20==0){
+  if(CaptureEnabled()&&c.pc==0x8021a5fc&&c.lr==0x8010abf0&&render.repeated&&repeats%20==0){
    Core::SaveScreenShot("native-seam-request-repeat-"+std::to_string(repeats));
   }
   if(render.repeated&&SkipEnabled()&&c.pc==0x8015c5a0&&c.lr==0x8010ac24){++skipped_elapsed;c.pc=c.lr;return;}

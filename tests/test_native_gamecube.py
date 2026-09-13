@@ -8,8 +8,17 @@ from tools.native_gamecube import runtime_evidence, verify_runtime_execution, ve
 class RuntimeEvidence(unittest.TestCase):
     def test_known_faults_stop_without_confusing_watcher_startup_messages(self):
         self.assertIsNone(runtime_fault(b'Unable to resolve read address 803da1f8 PC 958'))
-        for line in [b'Invalid write to 0x81800000', b'Unknown Pointer 0x80001', b'GFX FIFO: Unknown Opcode']:
+        for line in [b'Invalid write to 0x81800000', b'Unknown Pointer 0x80001', b'GFX FIFO: Unknown Opcode',
+                     b'[staticrecomp] unknown guest instruction pc=0x00000400',
+                     b'IntCPU: Unknown instruction 01fe01fe']:
             self.assertIsNotNone(runtime_fault(line))
+
+    def test_unknown_instruction_fails_even_with_shutdown_counters(self):
+        evidence = runtime_evidence('[staticrecomp] module loaded: game\n'
+                                    '[staticrecomp] unknown guest instruction pc=0x400\n'
+                                    '[staticrecomp] shutdown: native=400 smc_failed=0\n')
+        with self.assertRaisesRegex(RuntimeError, 'unknown guest instructions'):
+            verify_runtime_execution(evidence)
 
     def test_fault_across_log_read_boundary_kills_owned_diagnostic(self):
         class Process:

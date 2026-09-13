@@ -157,6 +157,8 @@ def runtime_evidence(text):
         "invalid_memory_accesses": len(re.findall(
             r"\bInvalid (?:read from|write to)\b|\bUnknown Pointer 0x[0-9a-fA-F]+", text)),
         "gpu_command_errors": text.count('GFX FIFO: Unknown Opcode'),
+        "unknown_guest_instructions": len(re.findall(
+            r'unknown guest instruction|IntCPU: Unknown instruction', text)),
         "shutdown_counters": {k: int(v) for k, v in re.findall(r"(\w+)=(\d+)", counters[1])} if counters else None,
         "performance_samples": [dict(sample=int(sample), fps=float(fps), vps=float(vps), speed=float(speed))
                                 for sample, fps, vps, speed in re.findall(
@@ -168,7 +170,7 @@ def runtime_evidence(text):
 
 def runtime_fault(chunk):
     """Errors that invalidate a local diagnostic immediately, before log floods."""
-    match = re.search(rb'Invalid (?:read from|write to)|Unknown Pointer 0x[0-9a-fA-F]+|GFX FIFO: Unknown Opcode', chunk)
+    match = re.search(rb'Invalid (?:read from|write to)|Unknown Pointer 0x[0-9a-fA-F]+|GFX FIFO: Unknown Opcode|unknown guest instruction|IntCPU: Unknown instruction', chunk)
     return match[0].decode('ascii') if match else None
 
 
@@ -204,6 +206,8 @@ def verify_runtime_execution(evidence):
         raise RuntimeError('Run contains code verification failures or invalid memory accesses')
     if evidence.get('gpu_command_errors', 0):
         raise RuntimeError('Run contains malformed GPU commands')
+    if evidence.get('unknown_guest_instructions', 0):
+        raise RuntimeError('Run contains unknown guest instructions')
 
 
 def verify_rendered_frames(rendering, seconds):

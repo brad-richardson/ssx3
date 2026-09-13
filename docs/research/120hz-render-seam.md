@@ -3,6 +3,8 @@
 September 13, 2026. Follow-up to the [first native investigation](120hz-native-path.md).
 The installed phone build remains unchanged.
 
+Follow-up: [independent rendering deadlines and framebuffer ownership](120hz-independent-schedule.md).
+
 **A repeatable native drawing boundary now works in an isolated experiment.**
 The corrected test completes 120 original/extra-render pairs, retaining the
 graphics queue limit and omitting two duplicate timing helpers. Watched gameplay
