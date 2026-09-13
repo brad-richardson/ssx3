@@ -4,6 +4,11 @@ The [imported handoff](ssx3-120hz-handoff-2026-09-13.md) is preserved verbatim
 from Downloads. Its external claims are a research snapshot, not results from
 this repository. No timing changes have been deployed to the phone.
 
+**Update after native experiments:** prioritize targeted recovery of the native
+render-state boundary. [The native-path report](120hz-native-path.md) records
+the callback probes, repeated-render experiment, graphics-readiness failure
+and next steps. This supersedes the earlier MetalFX-first ordering.
+
 ## Initial local findings
 
 - The local GXBE69 executable matches both this project's SHA256 pin and the
@@ -86,61 +91,50 @@ The buffered reader (`0x801D14C4`) fills records and advances a 30-entry ring;
 controller input, not proof of a physics substep. A counter's name in the
 experimental observer is a working label, not a recovered game symbol.
 
-The update and render candidates are both substantial routines with mutable
-state and many calls. Their separation is encouraging, but it does not prove
-that the render candidate is safe to invoke twice. No render-side-effect audit
-or timestep-normalization experiment has been performed yet.
+The update and render callbacks are both substantial routines with mutable
+state and many calls. The subsequent [native experiments](120hz-native-path.md)
+observe scoped state changes and actually repeat the render callback. Most
+repeat calls fail its graphics-readiness gate. No timestep-normalization
+experiment or complete render-side-effect audit has been performed yet.
 
 ## Feasibility recommendation
 
-**First implementation candidate: preserve the original game updates and test
-GPU frame interpolation on iPhone, with a strict frame-pacing budget and a
-native-rate fallback.** Prefer MetalFX as the first Apple backend if the target
-GPU reports support. It avoids writing an optical-flow model or fully retaining
-the game's scene. It still requires validated depth, motion and UI separation;
-this is a promising experiment, not an established drop-in feature.
+**Prioritize the native render-state path**, following the handoff and the
+preference for accurate geometry and lower latency. Preserve the original
+updates while recovering the graphics frame protocol and separating scene
+rendering from elapsed-time bookkeeping. Then prove a second camera view and
+measure its cost. The [native report](120hz-native-path.md) gives the evidence,
+limitations and ordered experiments; it does not claim a working 120 Hz mode.
 
-The installed iPhoneOS 26.5 SDK exposes `MTLFXFrameInterpolatorDescriptor`,
+True higher-rate game updates remain a separate, later experiment. The live
+game-update and view-update targets now give concrete timestep leads, but no
+single dt controls every collision, trick, animation or smoothing operation.
+History-based render-state interpolation also adds delay: native rasterization
+alone is not proof of lower input latency. Measure sampling and display time.
+
+If retaining sufficient state or drawing twice is too expensive, test image
+interpolation as a fallback. MetalFX is an optional Apple comparison backend:
+the installed iPhoneOS 26.5 SDK exposes `MTLFXFrameInterpolatorDescriptor`,
 `supportsDevice:`, previous/current color, depth, motion and separate UI inputs.
-Apple describes those requirements and the need for explicit frame pacing in
+Apple describes those requirements and explicit pacing in
 [its frame-interpolation session](https://developer.apple.com/videos/play/wwdc2025/211/).
-The app currently supports older iOS versions too, so runtime availability and
-GPU capability checks must keep ordinary presentation working.
+Runtime availability and GPU capability checks must preserve ordinary rendering
+on older supported devices. This is not an established drop-in feature.
 
-Use the renderer's EFB depth access as a starting point. GX position matrices
-may already combine object and camera transforms, and some vertices carry
-matrix indices; a single assumed camera matrix will not cover rider animation.
-Depth clears, projection changes, transparent snow and thin rail geometry must
-be checked in actual captures. Orthographic projection alone is not a reliable
-HUD classifier. UIKit touch controls are already outside the game image, but
-the game's speed/score/boost HUD is inside it.
+For either interpolation path, do not assume one camera matrix captures rider
+animation, or that orthographic projection reliably isolates the HUD. GX
+matrices may combine object and camera transforms; vertices can carry matrix
+indices. Replaying a captured command list cannot recover omitted visibility
+or a complete world snapshot. UIKit controls are separate from the image,
+while the game's score/speed/boost HUD is inside it.
 
-Rank the other paths as follows:
-
-1. **Render-state interpolation:** best long-term control over geometry and
-   visual quality, but higher engineering cost now. There is no verified
-   immutable scene snapshot or GameCube replay seam. Replaying FIFO commands
-   is not equivalent to re-rendering scene state from a new camera, and doing
-   two full draws repeats CPU vertex work in this no-JIT renderer.
-2. **True 120 Hz game updates:** now has specific scheduler/callback leads,
-   but carries the largest gameplay-validation burden. The original callback
-   rate does not identify every physics substep, timer or animation update.
-   A universal change from 60 to 120 is not justified by this investigation.
-3. **Custom learned interpolation:** defer. First establish whether a standard
-   backend and correctly formed motion/depth inputs work. There is not yet
-   valid 60→120 training ground truth or a mobile inference budget.
-
-Before implementing interpolation, run a presentation-only cadence probe on
-the phone: measure drawable waits, GPU work, real displayed timestamps and
-missed deadlines, with bounded buffering. Duplicated frames are acceptable as
-a scheduling control, but must never count as a 120-fps visual success. Then
-add one midpoint from two frames at bounded resolution, separate the HUD, and
-inspect cuts, rails, rider tricks and snow spray. Keep input and simulation
-untouched. Any budget miss returns to the real frame without building a queue.
-
-The Mac's 60 Hz display can validate overhead and scheduling failure modes;
-it cannot establish sustained 120 Hz presentation on the iPhone. No phone
-installation or high-refresh acceptance claim is part of this analysis.
+Before accepting any mobile 120 Hz mode, measure actual display intervals,
+missed deadlines, bounded buffering and sustained GPU cost on the phone.
+Duplicated frames are only a scheduling control. Inspect cuts, rails, tricks,
+snow spray, crashes and streaming transitions; fall back to native rate on a
+budget miss. The Mac's 60 Hz display can expose overhead but cannot establish
+sustained iPhone or Android high-refresh presentation. Custom learned models
+remain deferred until simpler approaches have valid inputs and benchmarks.
 
 ## Measured unchanged baseline
 
@@ -201,8 +195,13 @@ callback identities must be revalidated against any different executable.
 
 ## Android portability decision
 
-MetalFX is one optional Apple backend. Keep the frame-input contract and game
-instrumentation shared: previous/current color, depth, motion with explicit
+For the preferred native path, share state capture, transform interpolation,
+visibility rules and discontinuity handling between platforms; keep GPU resource
+ownership and presentation in Metal/Vulkan adapters. The native Android shell
+and rendering budget still need implementation and validation.
+
+If image interpolation becomes necessary, MetalFX is one optional Apple backend.
+Keep the frame-input contract and game instrumentation shared: previous/current color, depth, motion with explicit
 coordinate conventions, UI coverage/composition, simulation timestamps and
 history-reset reasons. Native GPU resource handles and synchronization stay
 inside each graphics backend. Camera cuts, respawns, resize and missing history
