@@ -154,6 +154,9 @@ def runtime_evidence(text):
         "module_loaded": "[staticrecomp] module loaded:" in text,
         "cpu_fallback_mode": mode[1] if mode else None,
         "fallback_jit_runs": int(jit[1]) if jit else None,
+        "invalid_memory_accesses": len(re.findall(
+            r"\bInvalid (?:read from|write to)\b|\bUnknown Pointer 0x[0-9a-fA-F]+", text)),
+        "gpu_command_errors": text.count('GFX FIFO: Unknown Opcode'),
         "shutdown_counters": {k: int(v) for k, v in re.findall(r"(\w+)=(\d+)", counters[1])} if counters else None,
         "performance_samples": [dict(sample=int(sample), fps=float(fps), vps=float(vps), speed=float(speed))
                                 for sample, fps, vps, speed in re.findall(
@@ -161,6 +164,53 @@ def runtime_evidence(text):
         "sites": [dict(kind=kind, pc="0x" + pc, samples=int(count)) for kind, pc, count in re.findall(
             r"\[staticrecomp\] (dispatch|fallback)-site pc=([0-9a-f]+) samples=(\d+)", text)],
     }
+
+
+def runtime_fault(chunk):
+    """Errors that invalidate a local diagnostic immediately, before log floods."""
+    match = re.search(rb'Invalid (?:read from|write to)|Unknown Pointer 0x[0-9a-fA-F]+|GFX FIFO: Unknown Opcode', chunk)
+    return match[0].decode('ascii') if match else None
+
+
+def wait_for_runtime(process, log_path, seconds):
+    deadline = time.monotonic()+seconds if seconds is not None else float('inf')
+    carry = b''
+    with log_path.open('rb') as stream:
+        while process.poll() is None:
+            chunk = stream.read(1024*1024)
+            fault = runtime_fault(carry+chunk)
+            if log_path.stat().st_size > 32*1024*1024:
+                fault = fault or 'Diagnostic log exceeded 32 MiB'
+            if fault:
+                # A corrupt runtime can remain inside a copy loop during a
+                # graceful shutdown. Stop this owned diagnostic immediately.
+                process.kill()
+                return process.wait(), fault
+            carry = (carry+chunk)[-128:]
+            if time.monotonic() >= deadline:
+                raise subprocess.TimeoutExpired(process.args, seconds)
+            time.sleep(.05)
+    return process.returncode, None
+
+
+def verify_runtime_execution(evidence):
+    """Basic execution gate; gameplay still requires course-state/capture checks."""
+    counters = evidence['shutdown_counters']
+    if not evidence['module_loaded'] or not counters:
+        raise RuntimeError('Run lacks module/shutdown evidence')
+    if counters.get('native', 0) <= 0:
+        raise RuntimeError('Run never executed the native game module')
+    if counters.get('smc_failed', 0) or evidence.get('invalid_memory_accesses', 0):
+        raise RuntimeError('Run contains code verification failures or invalid memory accesses')
+    if evidence.get('gpu_command_errors', 0):
+        raise RuntimeError('Run contains malformed GPU commands')
+
+
+def verify_rendered_frames(rendering, seconds):
+    """Long visual runs must keep producing captures, not cached FPS values."""
+    if seconds >= 60 and (rendering['last_screenshot_age_seconds'] is None or
+                          rendering['last_screenshot_age_seconds'] > 60):
+        raise RuntimeError('Visual run stopped producing screenshots; cached FPS is not gameplay evidence')
 
 
 def launch(args):
@@ -226,11 +276,15 @@ def launch(args):
     print(f"Log: {log_path}", flush=True)
     runner_sha256 = sha256(command[0])
     module_sha256 = sha256(MODULE / "build/gGXBE69_recomp.dylib")
+    world_archive = game / 'files/data/worlds/bam.big'
+    world_sha256 = sha256(world_archive) if world_archive.is_file() else None
+    started_wall = time.time()
     started = time.monotonic()
     with log_path.open("w") as log:
         process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env)
+        stopped_on_fault = None
         try:
-            code = process.wait(timeout=args.seconds)
+            code, stopped_on_fault = wait_for_runtime(process, log_path, args.seconds)
         except (subprocess.TimeoutExpired, KeyboardInterrupt):
             process.terminate()
             try:
@@ -239,16 +293,24 @@ def launch(args):
                 process.kill()
                 code = process.wait()
     result = {"command": command, "exit_code": code, "seconds": time.monotonic() - started,
+              "stopped_on_fault": stopped_on_fault,
               "requested_cpu_jit_fallback": args.jit_fallback, "log": str(log_path),
               "profile": str(profile), "runner_sha256": runner_sha256,
               "module_sha256": module_sha256,
+              "world_archive_sha256": world_sha256,
               "evidence": runtime_evidence(log_path.read_text(errors="replace"))}
+    if not args.headless:
+        captures = [p.stat().st_mtime for p in (profile / 'ScreenShots').rglob('*.png')
+                    if p.stat().st_mtime >= started_wall]
+        result['rendering'] = dict(screenshot_count=len(captures),
+                                   last_screenshot_age_seconds=time.time()-max(captures) if captures else None)
     (reports / f"{stamp}.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
     if code:
         raise RuntimeError(f"Runtime exited {code}; inspect {log_path}")
-    if not result["evidence"]["module_loaded"] or not result["evidence"]["shutdown_counters"]:
-        raise RuntimeError(f"Run lacks module/shutdown evidence; inspect {log_path}")
+    verify_runtime_execution(result['evidence'])
+    if not args.headless:
+        verify_rendered_frames(result['rendering'], result['seconds'])
     if not args.jit_fallback and (result["evidence"]["cpu_fallback_mode"] != "interpreter" or
                                   result["evidence"]["fallback_jit_runs"] != 0):
         raise RuntimeError("Runtime did not verify the requested CPU interpreter fallback mode")

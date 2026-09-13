@@ -18,24 +18,24 @@ import math
 from pathlib import Path
 import struct
 
-from gamecube_world import World, assemble, sha256
+from gamecube_world import World, assemble, sha256, validate_global_images
 from gamecube_cleanup import clear_removed_instance_references, clear_script_bindings, disable_course_scripts, pin_texture_group
-from import_terrain import transform_coefficients, surface_samples, UV_CORNERS
+from import_terrain import transform_coefficients, UV_CORNERS
+from patch_geometry import surface_bounds, outward_float32
 from probe_worlds import patch_point
 from replace_terrain import placement
 from course_route import make_reset_aip
+from gamecube_reset_paths import compile_reset_paths
 from gamecube_textures import shape_images, tricky_bindings, import_course_textures
+from gamecube_materials import LIGHTMAP_PROFILE, PROFILES
+from gamecube_surfaces import RESET_PROFILE, PROFILES as SURFACE_PROFILES, source_patches, transfer_surfaces
 
 TRICKY_STRIDE, TRICKY_COEFF = 448, 80
 GC_PATCH_SIZE = 430
 
 
 def load_tricky_gc(nbd):
-    raw = Path(nbd).read_bytes()
-    count = struct.unpack_from('>I', raw, 8)[0]
-    offset = struct.unpack_from('>I', raw, 68)[0]
-    return [[list(struct.unpack_from('>4f', raw, offset + TRICKY_STRIDE * i + TRICKY_COEFF + j * 16)[:3])
-             for j in range(16)] for i in range(count)]
+    return [[list(c) for c in coeffs] for coeffs, _ in source_patches(Path(nbd).read_bytes())]
 
 
 def make_record(template, coeffs, rid, track):
@@ -44,11 +44,13 @@ def make_record(template, coeffs, rid, track):
     payload = bytearray(template)
     for j in range(16):
         struct.pack_into('>4f', payload, 64 + 16 * j, *coeffs[j], 1.0)
-    pts = surface_samples(coeffs, 8)
-    lo = [min(p[k] for p in pts) for k in range(3)]
-    hi = [max(p[k] for p in pts) for k in range(3)]
-    centre = [(lo[k] + hi[k]) / 2 for k in range(3)]
-    struct.pack_into('>4f', payload, 320, *centre, math.dist(lo, hi) / 2)
+    # Bound the coefficients the engine actually reads. Transform rounding can
+    # move a cancellation-heavy endpoint outside bounds made from doubles.
+    coeffs = [struct.unpack_from('>4f', payload, 64 + 16 * j)[:3] for j in range(16)]
+    lo, hi = surface_bounds(coeffs)
+    centre = struct.unpack('>3f', struct.pack('>3f', *[(lo[k] + hi[k]) / 2 for k in range(3)]))
+    radius = math.sqrt(sum(max(abs(lo[k] - centre[k]), abs(hi[k] - centre[k])) ** 2 for k in range(3)))
+    struct.pack_into('>4f', payload, 320, *centre, outward_float32(radius, True))
     for k, (u, v) in enumerate(UV_CORNERS):
         struct.pack_into('>3f', payload, 336 + 12 * k, *patch_point(coeffs, u, v))
     struct.pack_into('>3f', payload, 384, *lo)
@@ -81,9 +83,19 @@ def replace_patches(records, template_rid, patches, matrix, translation):
             if not inserted:
                 out.extend(added)
                 inserted = True
-        else:
+        elif e['kind'] != 11:
+            # Host occluders describe the hills that have just been replaced.
+            # Keeping them makes visible donor terrain disappear behind empty air.
             out.append((e, p))
     return out, added
+
+
+def terrain_bounds(records):
+    """Aggregate the full patch bounds, not just two diagonal surface corners."""
+    if not records:
+        raise ValueError('No terrain to bound')
+    return [[min(struct.unpack_from('>3f', p, 384)[k] for _, p in records) for k in range(3)],
+            [max(struct.unpack_from('>3f', p, 396)[k] for _, p in records) for k in range(3)]]
 
 
 def vector(value):
@@ -111,6 +123,10 @@ def main():
     ap.add_argument('--pin-texture-group', type=int, help='Keep one texture/lightmap group resident across the location')
     ap.add_argument('--textures', type=Path, help='Donor course .gsh: import its textures into the pinned group and bind the patches')
     ap.add_argument('--lightmaps', type=Path, help='Donor course _L.gsh lightmap sheets (with --textures)')
+    ap.add_argument('--material-profile', choices=PROFILES, default=LIGHTMAP_PROFILE,
+                    help='Verified engine lighting transfer; raw is an uncorrected comparison control')
+    ap.add_argument('--surface-profile', choices=SURFACE_PROFILES, default=RESET_PROFILE,
+                    help='Restore authored reset terrain; template retains the unconverted control behavior')
     ap.add_argument('--reset-aip', type=Path, help='Donor Tricky AIP: convert reset paths into the kind-14 resource')
     ap.add_argument('--relocate-freeride-start', action='store_true')
     ap.add_argument('--relocate-race-starts', action='store_true')
@@ -119,6 +135,10 @@ def main():
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
     args = ap.parse_args()
+    if args.output.exists():
+        ap.error('Output directory already exists; choose a new build name')
+    if not args.roundtrip and args.surface_profile == RESET_PROFILE and not args.reset_aip:
+        ap.error('Reset surfaces require --reset-aip to compile safe recovery paths; use --surface-profile template for a geometry-only control')
 
     original = args.archive.read_bytes()
     world = World(original, 'big')
@@ -134,7 +154,13 @@ def main():
         new_records, added = list(records), [(e, p) for e, p in records if e['kind'] == 1]
     else:
         new_records, added = replace_patches(records, args.template_rid, patches, matrix, translation)
-    removed, removed_records = {}, []
+    surfaces = None
+    if not args.roundtrip:
+        new_records, surfaces = transfer_surfaces(new_records, args.nbd.read_bytes(), matrix, translation,
+                                                  profile=args.surface_profile, limit=args.limit)
+        added = [(e, p) for e, p in new_records if e['kind'] == 1]
+    removed_records = [(e, p) for e, p in before if e['kind'] == 11 and not args.roundtrip]
+    removed = {11: len(removed_records)} if removed_records else {}
     if args.drop_kind:
         kept = []
         for e, p in new_records:
@@ -161,6 +187,10 @@ def main():
             args.reset_aip.read_bytes(), matrix, translation, args.scale, candidates[0][1],
             relocate_start=args.relocate_freeride_start, relocate_race_starts=args.relocate_race_starts,
             race_course=race)
+        if args.surface_profile == RESET_PROFILE:
+            reset_data, safe_reset_paths = compile_reset_paths(
+                reset_data, args.reset_aip.read_bytes(), new_records, matrix, translation, args.scale)
+            cleanup['safe_reset_paths'] = [safe_reset_paths]
         cleanup['reset_paths'] = [cleanup['reset_paths']]
         new_records = [(dict(e, size=len(reset_data)), reset_data) if e['kind'] == 14 and e['rid'] == 0 else (e, p)
                        for e, p in new_records]
@@ -173,9 +203,7 @@ def main():
             cleanup['race_line_table'] = [dict(bytes=len(race['table']), replaced_bytes=tables[0][0]['size'])]
     pinned = None
     if args.pin_texture_group is not None:
-        pts = [patch_point([struct.unpack_from('>4f', p, 64 + 16 * j)[:3] for j in range(16)], u, v)
-               for _, p in added for u, v in ((0, 0), (1, 1))]
-        bounds = [[min(p[k] for p in pts) for k in range(3)], [max(p[k] for p in pts) for k in range(3)]]
+        bounds = terrain_bounds(added)
         world.gdb_bytes, pinned = pin_texture_group(world.gdb_bytes, args.location, args.pin_texture_group, bounds)
         world.index = __import__('gamecube_world').parse_gdb(world.gdb_bytes, 'big')
         cleanup['pinned_texture_group'] = [pinned]
@@ -186,7 +214,8 @@ def main():
         bindings = tricky_bindings(args.nbd.read_bytes())[:len(added)]
         texture_groups, rebound, textures = import_course_textures(
             world, args.location, args.pin_texture_group, added, bindings,
-            shape_images(args.textures.read_bytes()), shape_images(args.lightmaps.read_bytes()))
+            shape_images(args.textures.read_bytes()), shape_images(args.lightmaps.read_bytes()),
+            material_profile=args.material_profile)
         by_rid = {e['rid']: p for e, p in rebound}
         new_records = [(e, by_rid[e['rid']]) if e['kind'] == 1 else (e, p) for e, p in new_records]
         added = rebound
@@ -207,6 +236,7 @@ def main():
     if g['count'] != len(new_records):
         raise RuntimeError('Group index count mismatch after rebuild')
     if textures:
+        textures['verified_global_images'] = validate_global_images(check)
         key = lambda records: [((e['kind'], e['track'], e['rid']), p) for e, p in records]
         for tg_index, tg_records in replaced.items():
             if tg_index == group:
@@ -219,17 +249,17 @@ def main():
 
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / 'BAM.BIG').write_bytes(archive)
-    pts = [patch_point(c, u, v) for _, c in [(None, [struct.unpack_from('>4f', p, 64 + 16 * j)[:3] for j in range(16)]) for _, p in added] for u, v in ((0, 0), (1, 1))]
     experiment = dict(mode='gamecube-roundtrip' if args.roundtrip else 'gamecube-replace-terrain', limit=args.limit, location=args.location, group=group,
                       track=added[0][0]['track'], old_patch_count=sum(1 for e, _ in before if e['kind'] == 1),
                       patch_count=len(added), template_rid=args.template_rid,
                       source_anchor=args.source_anchor, target_anchor=args.target_anchor,
                       yaw_degrees=args.yaw, scale=args.scale, matrix=matrix, translation=translation,
-                      bounds=[[min(p[k] for p in pts) for k in range(3)], [max(p[k] for p in pts) for k in range(3)]],
+                      bounds=terrain_bounds(added),
+                      global_kind_counts=check.index['global_kind_counts'],
                       removed_resource_counts=removed, cleanup={k: len(v) for k, v in cleanup.items()}, cleanup_detail=cleanup, source_archive_sha256=sha256(original),
                       donor_nbd_sha256=sha256(args.nbd.read_bytes()), output_sha256=sha256(archive),
                       group_index=dict(count=g['count'], memsize=g['memsize'], kind_counts=g['kind_counts']),
-                      textures=textures, donor_textures_sha256=sha256(args.textures.read_bytes()) if args.textures else None,
+                      surfaces=surfaces, textures=textures, donor_textures_sha256=sha256(args.textures.read_bytes()) if args.textures else None,
                       donor_lightmaps_sha256=sha256(args.lightmaps.read_bytes()) if args.lightmaps else None,
                       layout=[l for l in layout if l['replaced']])
     (args.output / 'experiment.json').write_text(json.dumps(experiment, indent=2) + '\n')

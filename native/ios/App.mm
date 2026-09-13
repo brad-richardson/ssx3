@@ -17,11 +17,17 @@
 #include <vector>
 #include <algorithm>
 #include "moderngekko/runtime.hpp"
+#include "moderngekko/game.hpp"
 #include "GrabMap.h"
+#import "SessionStore.h"
+#include "SessionPause.h"
+#include "dolphin_runtime_internal.hpp"
 #include "Common/HookableEvent.h"
 #include "Common/Logging/Log.h"
 #include "AudioCommon/Mixer.h"
 #include "Core/Core.h"
+#include "Core/Boot/Boot.h"
+#include "Core/State.h"
 #include "Core/System.h"
 #include "VideoCommon/PerformanceMetrics.h"
 #include "VideoCommon/VideoEvents.h"
@@ -34,6 +40,21 @@ static NSString* Documents() {
 }
 static void WriteText(NSString* path, NSString* text) {
   [text writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];
+}
+static NSDictionary* ReadBuildInfo(NSString* path) {
+  if (!path) return @{};
+  NSData* data = [NSData dataWithContentsOfFile:path];
+  id value = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
+  return [value isKindOfClass:NSDictionary.class] ? value : @{};
+}
+static NSString* BuildDate(id value) {
+  if (![value isKindOfClass:NSString.class]) return @"Date unavailable";
+  NSDate* date = [[NSISO8601DateFormatter new] dateFromString:value];
+  if (!date) return @"Date unavailable";
+  NSDateFormatter* formatter = [NSDateFormatter new];
+  formatter.dateStyle = NSDateFormatterMediumStyle;
+  formatter.timeStyle = NSDateFormatterShortStyle;
+  return [formatter stringFromDate:date];
 }
 static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* text, void*) {
   // Preserve warnings/errors in the runtime log, with a bound per message.
@@ -121,7 +142,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 @interface SSXViewController : UIViewController {
   SSXMetalView* _surface;
   UILabel* _status;
-  UIButton* _stop;
+  UIButton* _menuButton;
+  UIAlertController* _sessionMenu;
+  SSXSessionStore* _sessionStore;
+  NSDictionary* _sessionIdentity;
+  NSString* _courseBuildDescription;
+  NSString* _pendingCheckpoint;
+  BOOL _checkpointAgain;
+  double _checkpointDeadline;
+  UIBackgroundTaskIdentifier _saveBackgroundTask;
+  SSXSessionPause _pauseState;
+  BOOL _restartRequested;
   NSMutableArray<UIButton*>* _controls;
   SSXStickView* _stick;
   SSXStickView* _cStick;
@@ -151,8 +182,6 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   double _duration;
   NSArray<NSDictionary*>* _sequence;
   NSUInteger _eventIndex;
-  BOOL _active;
-  BOOL _audioInterrupted;
   BOOL _pausedForSystem;
   int _pipe;
 }
@@ -163,7 +192,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (void)viewDidLoad {
   [super viewDidLoad];
   _pipe = -1;
-  _active = YES;
+  _pauseState.active = YES;
+  _saveBackgroundTask = UIBackgroundTaskInvalid;
+  _sessionStore = [[SSXSessionStore alloc] initWithDirectory:
+      [Documents() stringByAppendingPathComponent:@"Resume"]];
   _controls = [NSMutableArray array];
   _pressed = [NSMutableSet set];
   _padButtons = [NSSet set];
@@ -218,11 +250,12 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _cStick.accessibilityLabel = @"SSX Spin Stick";
   _cStick.onChange = ^(double x, double y) { [weakSelf sendDpadX:x y:y]; };
   [self.view addSubview:_cStick];
-  _stop = [UIButton buttonWithType:UIButtonTypeSystem];
-  [_stop setTitle:@"Stop" forState:UIControlStateNormal];
-  _stop.accessibilityLabel = @"SSX Stop";
-  [_stop addTarget:self action:@selector(stopGame) forControlEvents:UIControlEventTouchUpInside];
-  [self.view addSubview:_stop];
+  _menuButton = [UIButton buttonWithType:UIButtonTypeSystem];
+  [_menuButton setTitle:@"Menu" forState:UIControlStateNormal];
+  _menuButton.accessibilityLabel = @"SSX Menu";
+  _menuButton.enabled = NO;
+  [_menuButton addTarget:self action:@selector(showSessionMenu) forControlEvents:UIControlEventTouchUpInside];
+  [self.view addSubview:_menuButton];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioEvent:)
       name:AVAudioSessionInterruptionNotification object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllersChanged:)
@@ -255,7 +288,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   // C-stick sits just inside the face-button diamond, smaller so a thumb can reach both.
   _cStick.frame = CGRectMake(right-140, bottom+40, 120, 120);
   _status.frame = CGRectMake(left, top, bounds.size.width-safe.left-safe.right-85, 32);
-  _stop.frame = CGRectMake(bounds.size.width-safe.right-70, top, 60, 32);
+  _menuButton.frame = CGRectMake(bounds.size.width-safe.right-70, top, 60, 32);
 }
 - (BOOL)prefersStatusBarHidden { return YES; }
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations { return UIInterfaceOrientationMaskLandscape; }
@@ -285,6 +318,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (commands.length) [self send:commands];
 }
 - (void)down:(UIButton*)button {
+  if (_pauseState.WantsPause()) return;
   NSString* name = button.accessibilityIdentifier;
   [_pressed addObject:name];
   button.alpha = 0.5;
@@ -323,6 +357,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   fprintf(stderr, "[ssx-pad] physical controllers=%lu\n", (unsigned long)GCController.controllers.count);
 }
 - (void)applyPad:(GCExtendedGamepad*)g {
+  if (_pauseState.WantsPause()) return;
   if (_overlayAlpha == 1) {
     _overlayAlpha = 0.25;
     for (UIButton* button in _controls) button.alpha = _overlayAlpha;
@@ -363,6 +398,14 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (commands.length) [self send:commands];
 }
 - (void)startGame {
+  _menuButton.enabled = NO;
+  _pauseState.NewSession();
+  _restartRequested = NO;
+  _pausedForSystem = NO;
+  _startTime = _lastMetric = _lastCapture = _duration = 0;
+  _eventIndex = 0;
+  _sequence = nil;
+  _status.text = @"Starting SSX 3…";
   NSString* game = [Documents() stringByAppendingPathComponent:@"Game"];
   if (![[NSFileManager defaultManager] fileExistsAtPath:[game stringByAppendingPathComponent:@"sys/main.dol"]] ||
       ![[NSFileManager defaultManager] fileExistsAtPath:[game stringByAppendingPathComponent:@"files/opening.bnr"]]) {
@@ -375,7 +418,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSString* user = [Documents() stringByAppendingPathComponent:@"User"];
   NSString* config = [user stringByAppendingPathComponent:@"Config"];
   NSString* pipes = [user stringByAppendingPathComponent:@"Pipes"];
-  NSString* stamp = [NSString stringWithFormat:@"%.0f",NSDate.date.timeIntervalSince1970];
+  NSString* stamp = [NSString stringWithFormat:@"%.3f",NSDate.date.timeIntervalSince1970];
   _report = [[Documents() stringByAppendingPathComponent:@"Reports"] stringByAppendingPathComponent:stamp];
   for (NSString* path in @[config,pipes,_report])
     [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
@@ -442,9 +485,43 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
         fprintf(stderr,"[ssx-app] create failed: %s\n",created.error->message.c_str());
         NSString* error = @(created.error->message.c_str());
         self->_starting=false;
-        dispatch_async(dispatch_get_main_queue(), ^{ self->_status.text=error; });
+        dispatch_async(dispatch_get_main_queue(), ^{ self->_status.text=error; self->_menuButton.enabled=YES; });
         return;
       }
+      const auto& inspected = created.runtime->GetGameMetadata();
+      // Snapshot the loaded course identity. Reading the sidecar on each menu
+      // opening would mislabel an old in-memory race after an asset-only push.
+      NSDictionary* courseBuild = ReadBuildInfo([Documents() stringByAppendingPathComponent:@"course-build.json"]);
+      const auto worldHash = moderngekko::HashFileSha256(
+          [game stringByAppendingPathComponent:@"files/data/worlds/bam.big"].fileSystemRepresentation);
+      NSString* courseDescription = @"Course build unavailable";
+      if (worldHash) {
+        NSString* hash = @(worldHash->c_str());
+        if ([courseBuild[@"archive_sha256"] isEqual:hash] &&
+            [courseBuild[@"build"] isKindOfClass:NSString.class]) {
+          courseDescription = [NSString stringWithFormat:@"Course %@\nBuilt %@",
+              courseBuild[@"build"], BuildDate(courseBuild[@"built_at"])];
+        } else {
+          courseDescription = [NSString stringWithFormat:@"Course %@", [hash substringToIndex:8]];
+        }
+      }
+      NSDictionary* identity = @{@"disc":@(inspected.disc_id.c_str()),
+        @"dol":@(inspected.dol_sha256.c_str()), @"assets":@(inspected.assets_sha256.c_str()),
+        @"appBuild":@SSX_SESSION_BUILD_ID, @"moduleABI":@(descriptor->abi_version)};
+      NSString* resumeReason = nil;
+      NSString* checkpoint = self->_sequence ? nil : [self->_sessionStore checkpointForIdentity:identity reason:&resumeReason];
+      if (checkpoint) {
+        moderngekko::detail::SetBootSessionData(std::make_unique<BootSessionData>(
+            std::string(checkpoint.fileSystemRepresentation), DeleteSavestateAfterBoot::No));
+        fprintf(stderr,"[ssx-session] restoring %s\n",checkpoint.lastPathComponent.UTF8String);
+      }
+      fprintf(stderr,"[ssx-startup] runtime_create_seconds=%.3f resume=%d\n",
+              CACurrentMediaTime()-self->_launchTime,checkpoint!=nil);
+      dispatch_async(dispatch_get_main_queue(), ^{
+        self->_sessionIdentity = identity;
+        self->_courseBuildDescription = courseDescription;
+        self->_status.text = checkpoint ? @"Resuming your last session…" : (resumeReason ?: @"Starting SSX 3…");
+      });
       {
         std::lock_guard lock(self->_runtimeMutex);
         self->_runtime = created.runtime.get();
@@ -465,31 +542,42 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
         std::lock_guard lock(self->_runtimeMutex);
         self->_runtime=nullptr;
       }
+      // Destroy the singleton runtime before a queued Full Reset can create another.
+      created.runtime.reset();
       fprintf(stderr,"[ssx-app] stopped error=%d\n",bool(result.error));
       dispatch_async(dispatch_get_main_queue(), ^{
         [self releaseControls];
         if (self->_pipe>=0) { close(self->_pipe); self->_pipe=-1; }
-        self->_status.text = result.error ? @"Runtime stopped with an error; see Reports." : @"Stopped. Relaunch to ride again.";
+        self->_status.text = result.error ? @"Runtime stopped with an error; see Reports." : @"Session stopped.";
+        self->_menuButton.enabled = YES;
         UIApplication.sharedApplication.idleTimerDisabled=NO;
         [self->_metricsFile synchronizeFile]; [self->_inputFile synchronizeFile];
+        [self->_metricsFile closeFile]; [self->_inputFile closeFile];
+        self->_metricsFile = self->_inputFile = nil;
+        if (self->_restartRequested) [self startGame];
       });
     }
   }).detach();
 }
 - (void)tick {
+  [self finishCheckpointIfReady];
   if (_duration>0 && (_starting||_running) && CACurrentMediaTime()-_launchTime>_duration+120) {
     fprintf(stderr,"[ssx-test] wall-clock deadline reached\n");
     [self stopGame]; return;
   }
   if (!_running) return;
+  [self updatePlayback];
+  if (_pauseState.NeedsMenu(!_starting) && !self.presentedViewController)
+    [self showSessionMenu];
+  if (_pauseState.WantsPause()) return;
   if (_pipe<0) _pipe=open([[Documents() stringByAppendingPathComponent:@"User/Pipes/ssx3"] fileSystemRepresentation],O_WRONLY|O_NONBLOCK);
   if (Core::GetState(Core::System::GetInstance()) != Core::State::Running) return;
   if (!_startTime) {
     _startTime=CACurrentMediaTime();
     fprintf(stderr,"[ssx-app] running startup_seconds=%.3f\n",_startTime-_launchTime);
+    _menuButton.enabled = YES;
   }
   const double elapsed=CACurrentMediaTime()-_startTime;
-  if (!_active || _audioInterrupted) { [self systemActive:_active]; return; }
   if (_pipe<0) return;
   while (_eventIndex<_sequence.count && [_sequence[_eventIndex][@"at"] doubleValue]<=elapsed) {
     [self send:_sequence[_eventIndex][@"commands"]]; ++_eventIndex;
@@ -520,30 +608,127 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   std::lock_guard lock(_runtimeMutex);
   if (_runtime) _runtime->RequestStop();
 }
-- (void)systemActive:(BOOL)active {
-  _active=active;
-  const BOOL pause=!active||_audioInterrupted;
-  if (pause) [self releaseControls];
-  std::lock_guard lock(_runtimeMutex);
-  if (!_runtime || !_running) return;
-  const auto state=Core::GetState(Core::System::GetInstance());
-  if (pause && state==Core::State::Running) {
-    _runtime->Pause(); _pausedForSystem=YES; _systemPauseStart=CACurrentMediaTime();
-    fprintf(stderr,"[ssx-lifecycle] paused\n");
+- (void)showSessionMenu {
+  if (_pauseState.menu || _starting || self.presentedViewController) return;
+  _pauseState.OpenMenu();
+  [self updatePlayback];
+  _sessionMenu = [UIAlertController alertControllerWithTitle:@"SSX"
+      message:[self menuMessage:(_pendingCheckpoint ? @"Saving your paused session…" : @"Your session is paused.")]
+      preferredStyle:UIAlertControllerStyleAlert];
+  __weak SSXViewController* weakSelf = self;
+  UIAlertAction* resume = [UIAlertAction actionWithTitle:@"Resume" style:UIAlertActionStyleCancel handler:^(UIAlertAction*) {
+    SSXViewController* self = weakSelf;
+    if (!self) return;
+    self->_sessionMenu = nil;
+    NSError* error = nil;
+    const BOOL activated = [AVAudioSession.sharedInstance setActive:YES error:&error];
+    self->_pauseState.RequestResume(
+        UIApplication.sharedApplication.applicationState == UIApplicationStateActive, activated);
+    if (!activated) fprintf(stderr,"[ssx-lifecycle] audio reactivation failed: %s\n",error.description.UTF8String);
+    if (!self->_running && !self->_starting) [self startGame];
+    else [self updatePlayback];
+  }];
+  UIAlertAction* reset = [UIAlertAction actionWithTitle:@"Full Reset" style:UIAlertActionStyleDestructive handler:^(UIAlertAction*) {
+    SSXViewController* self = weakSelf;
+    [self->_sessionStore discardCheckpoint];
+    self->_sessionMenu = nil; self->_pauseState.menu = NO;
+    self->_restartRequested = YES;
+    self->_menuButton.enabled = NO;
+    self->_status.text = @"Restarting with the current game files…";
+    if (!self->_running && !self->_starting) [self startGame];
+    else [self stopGame];
+  }];
+  // The save takes a brief moment; finish it before allowing a new runtime.
+  reset.enabled = !_pendingCheckpoint;
+  [_sessionMenu addAction:resume]; [_sessionMenu addAction:reset];
+  _sessionMenu.preferredAction = resume;
+  [self presentViewController:_sessionMenu animated:YES completion:nil];
+}
+- (NSString*)menuMessage:(NSString*)status {
+  NSDictionary* build = ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"]);
+  NSString* version = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"0.1";
+  NSString* identifier = [@SSX_SESSION_BUILD_ID substringToIndex:8];
+  return [NSString stringWithFormat:@"%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, version,
+      identifier, BuildDate(build[@"built_at"]), _courseBuildDescription ?: @"Course not loaded"];
+}
+- (void)savePausedSession {
+  if (_sequence || !_sessionIdentity || !_running || _stopRequested) return;
+  if (_pendingCheckpoint) { _checkpointAgain = YES; return; }
+  _pendingCheckpoint = [_sessionStore newCheckpointPath];
+  _checkpointDeadline = CACurrentMediaTime() + 20;
+  __weak SSXViewController* weakSelf = self;
+  _saveBackgroundTask = [UIApplication.sharedApplication beginBackgroundTaskWithName:@"Save paused SSX session" expirationHandler:^{
+    [weakSelf endSaveBackgroundTask];
+  }];
+  fprintf(stderr,"[ssx-session] save requested %s\n",_pendingCheckpoint.lastPathComponent.UTF8String);
+  State::SaveAs(Core::System::GetInstance(), _pendingCheckpoint.fileSystemRepresentation);
+}
+- (void)endSaveBackgroundTask {
+  if (_saveBackgroundTask != UIBackgroundTaskInvalid) {
+    [UIApplication.sharedApplication endBackgroundTask:_saveBackgroundTask];
+    _saveBackgroundTask = UIBackgroundTaskInvalid;
   }
-  else if (!pause && _pausedForSystem && state==Core::State::Paused) {
-    [AVAudioSession.sharedInstance setActive:YES error:nil];
-    const double pauseDuration=CACurrentMediaTime()-_systemPauseStart;
-    if (_startTime) _startTime+=pauseDuration;
-    _launchTime+=pauseDuration;
-    { std::lock_guard frameLock(_framesMutex); _frames.clear(); _lastFrame=Clock::now(); }
-    _runtime->Resume(); _pausedForSystem=NO;
-    fprintf(stderr,"[ssx-lifecycle] resumed after %.3f seconds\n",pauseDuration);
+}
+- (void)finishCheckpointIfReady {
+  if (!_pendingCheckpoint) return;
+  const BOOL ready = [[NSFileManager defaultManager] fileExistsAtPath:_pendingCheckpoint];
+  if (!ready && CACurrentMediaTime() < _checkpointDeadline) return;
+  const BOOL saved = ready && [_sessionStore commitCheckpoint:_pendingCheckpoint identity:_sessionIdentity];
+  fprintf(stderr,"[ssx-session] save complete=%d\n",saved);
+  _pendingCheckpoint = nil;
+  _sessionMenu.message = [self menuMessage:(saved ? @"Your paused session is saved. Resume here next time." :
+      @"Paused. Couldn’t save for next time; you can still resume now.")];
+  for (UIAlertAction* action in _sessionMenu.actions) action.enabled = YES;
+  [self endSaveBackgroundTask];
+  // A second pause during compression must not leave the earlier position saved.
+  if (_checkpointAgain) {
+    _checkpointAgain = NO;
+    if (_pausedForSystem) [self savePausedSession];
+  }
+}
+- (void)systemActive:(BOOL)active {
+  _pauseState.SetActive(active, _running || _starting);
+  [self updatePlayback];
+}
+- (void)updatePlayback {
+  const BOOL pause = _pauseState.WantsPause();
+  if (pause && !_pausedForSystem) [self releaseControls];
+  std::lock_guard lock(_runtimeMutex);
+  if (!_runtime || !_running || _stopRequested) return;
+  const auto state = Core::GetState(Core::System::GetInstance());
+  using Pause = SSXSessionPause;
+  const auto runtimeState = state == Core::State::Running ? Pause::RuntimeState::Running :
+      state == Core::State::Paused ? Pause::RuntimeState::Paused : Pause::RuntimeState::Unavailable;
+  const auto action = _pauseState.Reconcile(runtimeState);
+  if (action == Pause::Action::Pause) {
+    if (_runtime->Pause()) return; // Retry on the next tick if startup is still finishing.
+  } else if (action == Pause::Action::Resume) {
+    if (_runtime->Resume()) return;
+    fprintf(stderr,"[ssx-lifecycle] resumed\n");
+  }
+  // This flag accounts for elapsed time only. Runtime state, not ownership of a
+  // previous Pause call, determines whether Resume is necessary.
+  if (pause && !_pausedForSystem && runtimeState != Pause::RuntimeState::Unavailable) {
+    _pausedForSystem = YES;
+    _systemPauseStart = CACurrentMediaTime();
+    [self savePausedSession];
+    fprintf(stderr,"[ssx-lifecycle] paused\n");
+  } else if (!pause && _pausedForSystem && runtimeState != Pause::RuntimeState::Unavailable) {
+    const double pauseDuration = CACurrentMediaTime() - _systemPauseStart;
+    if (_startTime) _startTime += pauseDuration;
+    _launchTime += pauseDuration;
+    { std::lock_guard frameLock(_framesMutex); _frames.clear(); _lastFrame = Clock::now(); }
+    _pausedForSystem = NO;
   }
 }
 - (void)audioEvent:(NSNotification*)event {
-  _audioInterrupted=[event.userInfo[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue]==AVAudioSessionInterruptionTypeBegan;
-  [self systemActive:_active];
+  const BOOL interrupted = [event.userInfo[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue] == AVAudioSessionInterruptionTypeBegan;
+  // Audio notifications may arrive away from the main queue. Keep all pause
+  // intent and UIKit state serialized with application lifecycle callbacks.
+  dispatch_async(dispatch_get_main_queue(), ^{
+    self->_pauseState.SetAudioInterrupted(interrupted, self->_running || self->_starting);
+    [self updatePlayback];
+  });
 }
 @end
 

@@ -3,10 +3,12 @@ import struct
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from gamecube_textures import (shape_images, world_image_record, tricky_bindings, bind_patch,  # noqa: E402
-                               decode, PALETTE_HEADER, WORLD_HEADER)
+                               decode, PALETTE_HEADER, WORLD_HEADER, import_course_textures)
+from gamecube_materials import convert_lightmap
 
 
 def shape_container(images):
@@ -41,6 +43,34 @@ def synthetic_nbd(patches, n_textures=4):
 
 
 class TextureImportTests(unittest.TestCase):
+    def test_import_keeps_stock_textures_and_resolves_identically_in_either_load_order(self):
+        def record(kind, rid, payload):
+            return (dict(kind=kind, track=255, rid=rid), payload)
+        groups = {0: [record(9, 5, b'stock shared texture')],
+                  1: [record(9, 1, b'pinned texture'), record(10, 2, b'pinned lightmap')],
+                  2: [], 3: [record(9, 5, b'stock shared texture')]}
+        world = SimpleNamespace(index=dict(global_kind_counts={9: 6, 10: 3}, groups=[
+                                    dict(index=i, kind_counts={e['kind']: 1 for e, _ in records})
+                                    for i, records in groups.items()]),
+                                records=lambda i: list(groups[i]),
+                                location=lambda _: dict(group_start=0, last_group=2))
+        img = dict(type=0x1e, width=8, height=8, pixels=bytes(32), palette=None)
+        lm = dict(type=0x14, width=8, height=8, pixels=bytes([0xff]) * 128, palette=None)
+        binding = dict(texture=0, lightmap=0, uv=[(0, -1), (0, 0), (1, -1), (1, 0)],
+                       lightmap_rect=(0, 0, 1, 1))
+        added = [(dict(kind=1, track=8, rid=0), bytes(430))]
+        replaced, patches, report = import_course_textures(world, 'A', 1, added, [binding], [img], [lm])
+        self.assertEqual(set(replaced), {1})
+        self.assertEqual(replaced[1][:2], groups[1])
+        texture_rid, lightmap_rid = struct.unpack_from('>HH', patches[0][1], 416)
+        self.assertEqual((texture_rid, lightmap_rid), (6, 3))
+        self.assertEqual(report['dropped_stock_records'], {})
+        for order in [(replaced[1], groups[0], groups[3]), (groups[3], groups[0], replaced[1])]:
+            loaded = {(e['kind'], e['rid']): p for group in order for e, p in group}
+            self.assertEqual(loaded[9, texture_rid], world_image_record(img))
+            self.assertEqual(loaded[10, lightmap_rid], world_image_record(convert_lightmap(lm)[0]))
+            self.assertEqual(loaded[9, 5], b'stock shared texture')
+
     def test_shape_images_reads_each_format(self):
         cmpr = bytes(range(32))                 # 8x8 CMPR = 4 blocks of 8 bytes
         rgb = struct.pack('>16H', *[0x8000 | (i * 31 // 15) << 10 for i in range(16)])  # 4x4 RGB5A3, red ramp

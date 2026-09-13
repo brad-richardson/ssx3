@@ -1,0 +1,23 @@
+{
+  "donor_nbd_sha256": "26460063bc5d8b3f33f1e4a7bee8238cf0bfa7de64cfae662494ef20688d0d19",
+  "scenarios": {
+    "waterfall": {
+      "position": [118505, 168347, -182933],
+      "direction": [1, 0, 0],
+      "expect_reset": true,
+      "purpose": "Recover from the 64% waterfall without an airborne-path reset loop"
+    },
+    "river": {
+      "position": [160800, 218550, -235955],
+      "direction": [1, 0, 0],
+      "expect_reset": true,
+      "purpose": "Recover from the river below the late bridge reported on iPhone"
+    },
+    "bridge": {
+      "position": [160800, 218550, -229950],
+      "direction": [0, 1, 0],
+      "expect_reset": false,
+      "purpose": "Preserve valid riding above the river"
+    }
+  }
+}

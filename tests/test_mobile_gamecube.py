@@ -1,4 +1,5 @@
 import argparse
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,9 +33,17 @@ class WorldPush(unittest.TestCase):
             world.write_bytes(b"BIGF" + bytes(12))
             args = argparse.Namespace(device="PHONE", simulator=False, world=world)
             calls = []
-            with mock.patch.object(mobile_gamecube, "copy_to", side_effect=lambda a, s, d, timeout=0: calls.append((s, d))):
+            with mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)/'reports'), \
+                 mock.patch.object(mobile_gamecube, "copy_to", side_effect=lambda a, s, d, timeout=0: calls.append((s, d))):
                 mobile_gamecube.world(args)
-            self.assertEqual(calls, [(world, "Documents/Game/files/data/worlds/bam.big")])
+            self.assertEqual(calls[0], (world, "Documents/Game/files/data/worlds/bam.big"))
+            self.assertEqual(calls[1][1], 'Documents/course-build.json')
+            metadata=json.loads(calls[1][0].read_text())
+            self.assertEqual(metadata['archive_sha256'],mobile_gamecube.native.sha256(world))
+            self.assertEqual(metadata['build'],world.parent.name)
+            (world.parent/'experiment.json').write_text(json.dumps({'output_sha256':'wrong'}))
+            with self.assertRaisesRegex(RuntimeError,'recipe'):
+                mobile_gamecube.world(args)
             world.write_bytes(b"nope")
             with self.assertRaises(RuntimeError):
                 mobile_gamecube.world(args)

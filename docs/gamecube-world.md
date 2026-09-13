@@ -1,6 +1,6 @@
 # GameCube SSX 3 world format (GXBE69)
 
-Date: 2026-09-11. Decoded by diffing the same Snow Jam records on the PS2 and
+Updated: 2026-09-12. Decoded by diffing the same Snow Jam records on the PS2 and
 GameCube discs; implemented in `tools/gamecube_world.py` and
 `tools/gamecube_terrain.py`, tested by `tests/test_gamecube_world.py`.
 
@@ -22,6 +22,21 @@ groups (kinds 9 and 10) and one gameplay group, 36, holding the same 6,884
 resources by kind as the PS2's group 33 (1,913 terrain patches, 963 kind-2,
 3,052 kind-3 props, 285 kind-12 collision, 130 kind-0, ...).
 
+The header also contains **28 global resource capacities at offset 24**, one
+big-endian halfword per kind. These allocate the RID-indexed tables for track
+255 resources; they are separate from the per-location and per-group counts.
+Stock kind 9 capacity is 788 at offset 42, kind 10 is 662 at offset 44.
+GXBE69 passes GDB + 24 to the table constructor at `0x8024A69C`; the texture
+loader reads offset 42 with `lha` at `0x80247C94`. New global IDs require
+capacity >= max RID + 1, with the signed-halfword limit respected.
+
+Location records likewise contain **28 capacities at offset 32**, filling
+the entire 88-byte record. The constructor at `0x8024A9F8` reads four groups
+of seven signed halfwords. Kinds 24–27 are the scenery color, position,
+normal and UV arrays. The writer preserves their existing reservations and
+grows them for new IDs, as it does kind-23 buffer groups. Reading only 24
+counts concealed these tables and allowed scenery probes to overrun them.
+
 ## Stream (`bam.gsb`)
 
 `CBXS`/`CEND` blocks of 32,768 bytes with a **little-endian** u32 length after
@@ -37,7 +52,8 @@ blocks because it only writes the little-endian block length.
 | ---: | --- | --- |
 | 0 | 0 | per-location id |
 | 4 | 0x9B7F4F tag | 0x4045B7 tag |
-| 8 | surface type, e.g. 0x9 | 0x90000 (same value shifted) |
+| 8 | signed 16-bit surface type (0 = normal snow) | same halfword meaning, little-endian |
+| 10 | 16-bit collision flags (stock example 9) | same halfword meaning, little-endian |
 | 12 | flags | flags |
 | 16-31 | lightmap atlas offset/size (different atlas values) | same meaning |
 | 32-63 | four corner UV pairs (identical values) | same |
@@ -56,6 +72,13 @@ coefficient vectors on both platforms, so the PS2 placement transform applies
 directly: source anchor (-1214.8, -195.5, -768.55), target
 (-118613.68, 15753.8, -228880.14), yaw 73°, scale 0.55.
 
+Bounds must enclose the whole bicubic surface. The old 8×8 sampling grid
+missed extrema on 1,131 Garibaldi patches by more than one game unit (worst
+24.01 on a denser audit). `patch_geometry.surface_bounds` now converts the
+serialized power coefficients to Bezier control points and encloses their
+convex hull, rounding bounds outward to float32. The sphere encloses this
+box after its centre is rounded; location bounds aggregate these full boxes.
+
 ## Other records (ported in `tools/gamecube_cleanup.py`)
 
 Kind 13 object tables (16-byte header, first byte 1 instead of 0, count at
@@ -69,6 +92,13 @@ the same 20/36/36 empty-return shape. Spatial (texture-tree) records are the
 same 96 bytes with big-endian floats, child indices at 80/84 and the leaf
 group at 88. Template patch 1673 binds texture 13 and lightmap 109, which
 lives only in texture group 31 (PS2: lightmap 144 in group 32).
+
+Kind 11 contains the host terrain's occlusion curtains (Snow Jam has 17,
+208 bytes each). Full terrain replacement removes them automatically;
+round-trip builds retain them. One retained Snow Jam curtain crossed 210
+forward sight lines in an offline audit of the imported Garibaldi route.
+Moving the terrain without replacing its occluders can hide the slope
+until the camera crosses a wall that no longer has visible geometry.
 
 ## Textures and lightmaps (kinds 9 and 10, `tools/gamecube_textures.py`)
 
@@ -101,13 +131,26 @@ sheet) and the four vec4s at 16 are corner UVs, v in [−1, 0] where SSX 3 uses
 [0, 1] for the same corner order. Garibaldi's terrain uses 52 of the 121
 textures (26 snow variants, plus stripe, ramp and sign textures) and all 16
 lightmaps, 947 KB in total. `--textures/--lightmaps` on the terrain replacer
-appends them to the pinned group and rewrites the binding words. Their rids
-are reclaimed from Snow Jam: build 006 showed rids reused from the location's
-other texture groups still resolve to the stock art (those groups stay
-resident despite the pinned tree), and build 007 showed fresh rids stop
-resolving somewhere between 796 and 819 (texture 19 at rid 795 drew, the
-stripe textures at 819-820 drew flat grey), so the stock records carrying the
-reclaimed rids are dropped from every group of the location.
+appends them to the pinned group and rewrites the binding words. IDs are
+allocated after the world's existing IDs and reserved global capacity;
+the GDB capacities grow with the new records. Stock images are preserved.
+The rebuilt archive is checked for conflicting global image payloads and
+out-of-capacity IDs. Garibaldi uses texture IDs 788-839 and lightmap IDs
+662-677, with capacities 840 and 678.
+
+Build 013 adds the verified [material conversion](gamecube-materials.md):
+Tricky terrain multiplies base texture and lightmap at scale 1, while SSX 3
+uses scale 2. The default importer halves donor RGB565 lightmap channels and
+stores them as RGBA8 (`0x16`, tiled A/R and G/B planes), preserving base
+textures. This avoids the clipped white snow of a raw byte-for-byte lightmap
+import. Each sheet has a conversion receipt; `--material-profile raw` retains
+the old behavior for a comparison control.
+
+The earlier reclamation approach was unsafe: 51 of the 52 donor texture
+IDs in build 009 also named different stock art in other locations. Those
+locations can stream their copies into the same global table. Build 007's
+grey patches were caused by leaving the global capacities unchanged, not
+an engine limit near 800 textures.
 
 ## Race course: track chain, gates, and the kind-21 race line (`tools/race_course.py`)
 
@@ -190,16 +233,20 @@ finish).
   groups are still resident despite the single-leaf tree.
 - `gc-gari-007` (fresh rids 788-839 and 662-677) drew the patches whose
   texture rid was 795 or below and left the stripe patches (rids 819-820)
-  flat grey, the foreign-id symptom from the PS2 hdr-003 probe.
+  flat grey. The September 12 audit found its global lookup tables had not
+  been expanded to cover those IDs.
 - `gc-gari-008` (rids reclaimed from Snow Jam: the stock textures and
   lightmaps carrying them are dropped from groups 26-30 and 32-35, 191
   records) rides the race with Garibaldi's snow, ice and striped half-pipe
   walls, zero invalid accesses, 60 FPS. Group 31 holds 140 records, 1.6 MB.
-  Lightmap orientation verified offline with `tools/lightmap_orientation.py`:
+  Lightmap orientation assessed offline with `tools/lightmap_orientation.py`:
   fitting sheet brightness against the patch normal under all eight cell
   orientations picks the identity mapping for both Snow Jam (R² 0.287, next
   best 0.223) and Tricky Garibaldi (0.612, next 0.515), so the cell is copied
-  unchanged and the darker ice sections around 25% are Tricky's own lighting.
+  unchanged. This supports the orientation choice but does not establish
+  rendered color fidelity. The later world-wide audit found texture-ID
+  conflicts still present in this build, so dark patches cannot all be
+  attributed to Tricky's lighting.
   Recipe: the 005 command plus
   `--textures local/source/gamecube/tricky/gari.gsh --lightmaps local/source/gamecube/tricky/gari_L.gsh`.
 - `gc-gari-009` (008 plus `--race-course`): the progress meter starts near
@@ -207,3 +254,56 @@ finish).
   imported course on the donor start paths and show on the meter; zero
   invalid accesses, 60 FPS. Recipe: the 008 command with `--race-course` in
   place of `--relocate-race-starts`.
+
+- `gc-gari-010` fixes the global image capacities and ID collisions, removes
+  host occlusion curtains, and replaces sampled terrain bounds with conservative
+  bounds. Its 68 donor image payloads match the source sheets byte for byte;
+  geometry coefficients, UVs and lightmap cells match build 009. A 65×65
+  per-patch audit sampled 16,414,125 surface points without a bounds violation.
+  The Mac native run `20260912-111628` rides the course at about 60 FPS with
+  zero logged invalid accesses and reaches the results screen. Unsteered
+  resets and a nonmonotonic progress reading mean this is not full race-route
+  acceptance. The subsequent [source-game comparison](garibaldi-visual-comparison.md)
+  confirms remaining rendered color and environment differences.
+- `gc-gari-011` is a scenery probe adding `--drop-kind 2`; keep its results
+  separate from the three fixes above. Adjacent locations can also contribute
+  scenery: the opening still shows floating host scenery with these models
+  removed. The short Mac ride logs zero invalid accesses, but this variant is
+  not the phone release.
+- **`gc-gari-012`** is the phone build: the three fixes in 010, with bounds
+  computed from the exact float32 coefficients written to the archive and
+  outward-rounded sphere/bounds. The coefficients, UVs and lightmap cells still
+  match 009. Its final dense audit tests 16,414,125 points with zero box or
+  sphere violations. Global image validation passes at 840 textures and 678
+  lightmaps. The 101,519,744-byte world was copied to the iPhone and read back
+  with matching SHA-256
+  `0a619708659ab5136a2a1354ad51c15ea536719adcaff4a0cc98d61369053fed`.
+
+  A fresh Mac run (`20260912-123140`) was compared with original PS2 and
+  GameCube Tricky gameplay. The [screenshot gallery and findings](garibaldi-visual-comparison.md)
+  show that snow/ice brightness and course scenery still differ. Correct
+  image payloads and valid bounds do not establish rendered visual fidelity.
+
+- `gc-gari-013`: shared Tricky→SSX 3 material profile corrects the 1×/2×
+  terrain lightmap scale mismatch. All 52 base textures and terrain records
+  are identical to 012; only 16 lightmaps change, to compensated RGBA8. Archive
+  size 101,749,120 bytes, SHA-256
+  `3efd84fffab68df7caba7b6e8dfa04859ea0ada545d7711e9953ce363c7e6032`.
+  The native run reaches gameplay/results and exits 0 with zero invalid
+  accesses or failed code checks. Installed on the iPhone with byte-for-byte
+  readback. See [comparison evidence](garibaldi-visual-comparison.md) and the
+  [reusable conversion workflow](gamecube-materials.md). Fog, donor scenery
+  and frame-by-frame visibility acceptance remain open.
+
+  Rebuild with a new, nonexistent output directory:
+
+  ```sh
+  python3 tools/gamecube_terrain.py local/source/gamecube/ssx3/BAM.BIG \
+    --nbd local/source/gamecube/tricky/gari.nbd --location ARA1 --template-rid 1673 \
+    --source-anchor=-1214.8,-195.5,-768.547891 --target-anchor=-118613.68,15753.8,-228880.14 \
+    --yaw 73 --scale .55 --drop-kind 3 --drop-kind 12 --clear-instance-references \
+    --clear-script-bindings --disable-course-scripts --pin-texture-group 31 \
+    --reset-aip local/source/gamecube/tricky/gari.aip --relocate-freeride-start --race-course \
+    --textures local/source/gamecube/tricky/gari.gsh \
+    --lightmaps local/source/gamecube/tricky/gari_L.gsh --output local/builds/gc-gari-014
+  ```

@@ -8,18 +8,23 @@ The [GameCube feasibility audit](docs/gamecube-feasibility.md) compares the newl
 supplied discs, verifies reusable Garibaldi terrain/path data, and records an
 SSX 3 code-generation probe. The [native prototype](native/README.md) now builds
 and runs stock GameCube SSX 3's Snow Jam on the Mac with Metal graphics and CPU
-JIT fallback disabled. Build gc-gari-009 races Garibaldi in the GameCube engine
-with the course's own textures, lightmaps, race line and opponents (see the
-[GameCube world notes](docs/gamecube-world.md)). A short ride and return to the starting briefing through
-Restart are recorded; full-course, save/reload, and mobile acceptance remain.
+JIT fallback disabled. Build **gc-gari-013**, copied to the iPhone with a matching
+readback hash, adds a shared [terrain material conversion](docs/gamecube-materials.md)
+that fixes the 1×/2× lighting mismatch behind clipped white snow. It retains
+the texture-ID, occlusion-wall and terrain-bounds repairs from build 012.
+The [original/before/after comparison](docs/garibaldi-visual-comparison.md)
+shows restored snow detail. Donor fog/backdrop/scenery, frame-by-frame jump
+visibility, clean route/finish acceptance and save/reload remain.
 The [iOS development app](native/ios/README.md) builds with a statically linked
 game module, Metal graphics, and touch controls for menu navigation and riding.
-Physical-device game-data setup and performance acceptance remain in progress.
+Earlier physical-device smoke runs reach about 60 FPS; sustained performance
+acceptance remains deferred. The [architecture review](docs/architecture-review.md)
+prioritizes validated course compilation and repeatable gameplay checks.
 
 This repository contains inspection, world-rebuild and emulator-driving tools.
 A Garibaldi terrain section has been imported and ridden in the Green Station
 hub. Growable archives and executable menu renames also work in PCSX2. The
-current experiment replaces Snow Jam's entire terrain set with Garibaldi,
+earlier PS2 experiment replaces Snow Jam's entire terrain set with Garibaldi,
 keeps its fallback snow material visible, and rides the complete main route
 with working resets. Old prop collision and gameplay scripts are disabled.
 A finished Garibaldi race remains in progress.
@@ -56,7 +61,11 @@ memory offsets, and the four verified coefficient changes.
 
 ## Try it yourself
 
-The latest tested prototype is **run-gari-010**, copied and hash-verified at
+For the **iPhone app**, cold-launch SSX and choose Single Event → Snow Jam Race.
+The slot currently loads **gc-gari-013**; the frontend name still needs changing.
+Its world archive and build report are in `local/builds/gc-gari-013/`.
+
+The latest **PS2** prototype is **run-gari-010**, copied and hash-verified at
 `/Volumes/share/brad/games/ssx3-workbench/builds/run-gari-010/`.
 On the Mac, double-click its `launch.command` to boot with the isolated shared
 test-002 profile. Choose Conquer the Mountain, the saved Mac character, then
@@ -106,7 +115,10 @@ settings and saves are untouched.
 ## Storage
 
 Code, tests, and small reports live here. Large inputs and archived builds live
-on the network share; current test builds and evidence use ignored `local/`:
+on the network share; current test builds and evidence use ignored `local/`.
+
+The [share recovery setup](docs/share-recovery.md) reconnects the SMB share at
+login and every minute, with status and disable commands.
 
 ```text
 /Volumes/share/brad/games/
@@ -224,3 +236,15 @@ To obtain the same reference in another checkout:
 git clone https://github.com/GlitcherOG/SSX-Library.git third_party/SSX-Library
 git -C third_party/SSX-Library checkout 5c345e08dc521b0b1041734925cf0ece085e84c9
 ```
+
+## Repository boundary
+
+This repository contains authored tools, app integration, tests, patch files
+for public runtime dependencies, and engineering notes. Retail game images,
+extracted assets, disassembly, generated/recompiled game source, saves, build
+products, signing credentials and device reports stay in ignored `local/`.
+Dependency checkouts stay in ignored `third_party/`. Do not force-add either
+directory. Reproducing a build requires supplying those inputs locally.
+
+The current 120 Hz investigation is documented in
+[the analysis notes](docs/research/120hz-analysis.md).

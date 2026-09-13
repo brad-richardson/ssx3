@@ -5,7 +5,31 @@ the Dolphin-derived Metal/runtime implementation. It includes two virtual sticks
 (left: main stick for turning, crouching and braking; right: the D-pad, which
 is what the game reads for spins and flips), A/B/X/Y, L/R, Z, and Start.
 The C-stick (board press) has no touch control yet. No physical controller is required for basic play.
-Stop shuts the runtime down; relaunch the app to start another session.
+Menu pauses the runtime and saves your place. Resume continues immediately;
+backgrounding the app also pauses and saves. Returning after backgrounding or
+an audio interruption opens the menu and waits for Resume. Resume reactivates
+audio and reconciles the actual runtime state; lifecycle state is independent
+of pause-duration accounting. Relaunch restores that checkpoint
+when the game files and app build still match. Full Reset discards the checkpoint
+and starts a new runtime with the current files; it preserves memory-card saves.
+Use Full Reset after copying new assets during development. The game's own
+Restart option may retain cached assets and is not a reliable asset reload.
+
+The pause menu shows the app version, short build identity, and binary build
+date/time in the device's local timezone. It also shows the active course build
+and archive build date. CMake stamps `build-info.json` after linking; the world
+deployment command writes `Documents/course-build.json` outside the game's
+asset tree. At runtime creation the app verifies that label against the actual
+world SHA256 and snapshots it with the loaded session. A stale/missing label
+falls back to the world hash; copying new assets during play cannot relabel
+the old in-memory course. Save-status updates retain the version information.
+
+Snapshots live in `Documents/Resume`, with a checksum and an atomically replaced
+manifest. Incomplete snapshots leave the previous checkpoint intact; changed
+assets, changed app builds, and damaged snapshots fall back to a normal boot.
+Automated test sessions neither save nor restore player checkpoints. A cold
+restore still initializes the runtime and verifies files before loading the
+snapshot; it bypasses the game's splash screens and menu navigation.
 
 The generated game code, assets, signing profiles, and build products are
 private local inputs under ignored `local/` or the existing games share.
@@ -30,7 +54,7 @@ Wi-Fi; it works while the phone is locked):
 
 ```sh
 python3 tools/mobile_gamecube.py world --device 'YOUR PAIRED IPHONE' \
-  --world local/builds/gc-gari-009/BAM.BIG
+  --world local/builds/gc-gari-013/BAM.BIG
 ```
 
 Signing selects an existing, unexpired Apple Development identity/profile that

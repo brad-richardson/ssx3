@@ -16,6 +16,7 @@ from probe_worlds import refpack
 from relayout_stream import pack_group, write_bigf
 
 LOCATION_RECORD, SPATIAL_RECORD, GROUP_RECORD = 88, 96, 68
+GLOBAL_COUNTS_OFFSET, RESOURCE_KINDS = 24, 28
 GDB_PATH, GSB_PATH = 'data/worlds/bam.gdb', 'data/worlds/bam.gsb'
 
 
@@ -27,7 +28,7 @@ def parse_gdb(gdb, byteorder='big'):
         o = 80 + i * LOCATION_RECORD
         name = gdb[o:o + 16].split(b'\0')[0].decode('ascii')
         spatial_count, group_count, last_group, spatial_start = struct.unpack_from(e + 'IIII', gdb, o + 16)
-        kinds = struct.unpack_from(e + '24H', gdb, o + 32)
+        kinds = struct.unpack_from(e + '28H', gdb, o + 32)
         locations.append(dict(index=i, name=name, spatial_start=spatial_start, spatial_count=spatial_count,
                               group_start=last_group - group_count + 1, group_count=group_count,
                               last_group=last_group, kind_counts={k: c for k, c in enumerate(kinds) if c}))
@@ -47,7 +48,9 @@ def parse_gdb(gdb, byteorder='big'):
     for loc in locations:
         for g in range(loc['group_start'], loc['last_group'] + 1):
             groups[g]['location'] = loc['name']
+    global_counts = struct.unpack_from(e + '28H', gdb, GLOBAL_COUNTS_OFFSET)
     return dict(byteorder=byteorder, locations=locations, groups=groups, spatial_base=spatial_base,
+                global_kind_counts={k: c for k, c in enumerate(global_counts) if c},
                 group_base=group_base, counts=(n_loc, n_spatial, n_group))
 
 
@@ -157,9 +160,10 @@ def update_group_index(gdb_bytes, index, records, byteorder='big'):
     struct.pack_into(e + 'H', out, o, len(records))
     struct.pack_into(e + 'I', out, o + 8, memsize)
     struct.pack_into(e + '14H', out, o + 12, *kinds)
-    # Location per-kind totals (kinds 0-23) follow the four index words.
+    # The 88-byte location record ends with 28 counts, including the four
+    # scenery arrays. Omitting those tables lets new buffers overrun them.
     loc = next(l for l in parsed['locations'] if l['group_start'] <= index <= l['last_group'])
-    totals = [0] * 24
+    totals = [0] * RESOURCE_KINDS
     for g in range(loc['group_start'], loc['last_group'] + 1):
         row = records if g == index else None
         if row is None:
@@ -170,11 +174,105 @@ def update_group_index(gdb_bytes, index, records, byteorder='big'):
             for k, c in enumerate(kinds):
                 totals[k] += c
     lo = 80 + loc['index'] * LOCATION_RECORD + 32
-    old = list(struct.unpack_from(e + '24H', gdb_bytes, lo))
-    # Kinds 14-23 are not tracked per group; keep the location's stored values.
+    old = list(struct.unpack_from(e + '28H', gdb_bytes, lo))
+    # Preserve every RID-indexed reservation, not only the high kinds. A
+    # later update to another group in this location must not shrink a model
+    # table back to its record count after sparse IDs were allocated earlier.
+    totals = [max(total, reserved) for total, reserved in zip(totals, old)]
+    # Kinds 14-27 are not tracked per group.
     totals[14:] = old[14:]
-    struct.pack_into(e + '24H', out, lo, *totals)
+    for entry, _ in records:
+        kind, capacity = entry['kind'], entry['rid'] + 1
+        if entry['track'] != 255 and 0 <= kind < RESOURCE_KINDS:
+            if not 0 < capacity <= 0x7fff:
+                raise ValueError('Local resource exceeds the signed 16-bit table capacity')
+            totals[kind] = max(totals[kind], capacity)
+    if any(capacity > 0x7fff for capacity in totals):
+        raise ValueError('Location resource totals exceed the signed 16-bit table capacity')
+    struct.pack_into(e + '28H', out, lo, *totals)
+    # Track 255 resources use global RID-indexed tables, separate from the
+    # location totals above. GXBE69 reads the texture capacity at GDB + 42
+    # (80247C94). Leaving it at 788 made new texture IDs read past that table.
+    global_counts = list(struct.unpack_from(e + '28H', gdb_bytes, GLOBAL_COUNTS_OFFSET))
+    for entry, _ in records:
+        if entry['track'] == 255:
+            kind, capacity = entry['kind'], entry['rid'] + 1
+            if not 0 <= kind < RESOURCE_KINDS or not 0 < capacity <= 0x7fff:
+                raise ValueError('Global resource exceeds the signed 16-bit table capacity')
+            global_counts[kind] = max(global_counts[kind], capacity)
+    struct.pack_into(e + '28H', out, GLOBAL_COUNTS_OFFSET, *global_counts)
     return bytes(out)
+
+
+def unused_global_rids(world, kind, needed):
+    """IDs after both the reserved capacity and every existing global record.
+
+    Repeated global IDs across locations must name identical resources. Reusing
+    a target location's IDs is unsafe: adjacent locations may load their copies.
+    assemble() grows the corresponding GDB capacity when the records are added.
+    """
+    if not 0 <= kind < RESOURCE_KINDS or needed < 0:
+        raise ValueError('Invalid global resource allocation')
+    start = world.index['global_kind_counts'].get(kind, 0)
+    for group in world.index['groups']:
+        if kind not in group['kind_counts']:
+            continue
+        for entry, _ in world.records(group['index']):
+            if entry['kind'] == kind and entry['track'] == 255:
+                start = max(start, entry['rid'] + 1)
+    if start + needed > 0x7fff:
+        raise ValueError('Global resource allocation exceeds the signed 16-bit table capacity')
+    return list(range(start, start + needed))
+
+
+def validate_resource_capacities(world):
+    """Check every serialized resource against its actual RID-indexed table.
+
+    Includes scenery arrays, which have location capacities but no per-group
+    counters. Group record counts alone cannot establish memory safety.
+    """
+    count = 0
+    locations = {loc['index']: loc for loc in world.index['locations']}
+    for group in world.index['groups']:
+        for entry, _ in world.records(group['index']):
+            kind, track, rid = entry['kind'], entry['track'], entry['rid']
+            if not 0 <= kind < RESOURCE_KINDS:
+                raise ValueError(f'Unsupported resource kind {kind}')
+            if track == 255:
+                capacities = world.index['global_kind_counts']
+            elif track in locations:
+                capacities = locations[track]['kind_counts']
+            else:
+                raise ValueError(f'Resource refers to missing location {track}')
+            if not 0 <= rid < capacities.get(kind, 0):
+                raise ValueError(f'Group {group["index"]}: kind {kind} track {track} '
+                                 f'RID {rid} exceeds its table capacity')
+            count += 1
+    return count
+
+
+def validate_global_images(world):
+    """Reject undersized lookup tables and load-order-dependent image aliases."""
+    images = {}
+    owners = {}
+    for group in world.index['groups']:
+        if not {9, 10}.intersection(group['kind_counts']):
+            continue
+        for entry, payload in world.records(group['index']):
+            kind, track, rid = entry['kind'], entry['track'], entry['rid']
+            if kind not in (9, 10):
+                continue
+            if track != 255:
+                raise ValueError(f'Image kind {kind} RID {rid} is not on global track 255')
+            if not 0 <= rid < world.index['global_kind_counts'].get(kind, 0):
+                raise ValueError(f'Image kind {kind} RID {rid} exceeds its global table capacity')
+            key = (kind, rid)
+            if key in images and images[key] != payload:
+                raise ValueError(f'Conflicting global image kind {kind} RID {rid}: '
+                                 f'groups {owners[key]} and {group["index"]}')
+            images[key] = payload
+            owners[key] = group['index']
+    return {kind: sum(k == kind for k, _ in images) for kind in (9, 10)}
 
 
 def assemble(world, replaced, jobs=4, max_decoded=81920, margin=96):
@@ -187,6 +285,13 @@ def assemble(world, replaced, jobs=4, max_decoded=81920, margin=96):
     gdb_bytes = world.gdb_bytes
     for index, records in replaced.items():
         gdb_bytes = update_group_index(gdb_bytes, index, records, world.byteorder)
+    # Validate changed records before spending time compressing them. Existing
+    # archives can be fully audited with validate_resource_capacities(world).
+    from types import SimpleNamespace
+    updated_index = parse_gdb(gdb_bytes, world.byteorder)
+    updated_index['groups'] = [dict(index=i) for i in replaced]
+    validate_resource_capacities(SimpleNamespace(index=updated_index,
+                                                 records=lambda i: replaced[i]))
     jobs_list = [(i, serialize_resources(r, world.byteorder), max_decoded, margin) for i, r in replaced.items()]
     packed = {}
     if jobs_list:

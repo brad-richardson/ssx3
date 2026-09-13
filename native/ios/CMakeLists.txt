@@ -22,7 +22,18 @@ set(CHASSIS_ABI_DIR "${CORE}/Source/Core/Core/PowerPC/StaticRecomp" CACHE PATH "
 set(RECOMPCORE_MODULE_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory("${CORE}/module-template" game-module)
 
-add_executable(SSXNative MACOSX_BUNDLE App.mm)
+add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm)
+# Saved machine state must not cross incompatible frontend/runtime builds.
+set(SESSION_SOURCES App.mm SessionStore.mm SessionStore.h SessionPause.h ../patches/recompcore-platform.patch
+  ../patches/moderngekko-platform.patch ../dependencies.json)
+set(SESSION_HASHES "")
+foreach(SOURCE IN LISTS SESSION_SOURCES)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}")
+  file(SHA256 "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}" SOURCE_HASH)
+  string(APPEND SESSION_HASHES "${SOURCE_HASH}")
+endforeach()
+string(SHA256 SESSION_BUILD_ID "${SESSION_HASHES}")
+target_compile_definitions(SSXNative PRIVATE SSX_SESSION_BUILD_ID="${SESSION_BUILD_ID}")
 set_target_properties(SSXNative PROPERTIES
   CXX_STANDARD 23 OBJCXX_STANDARD 23
   MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
@@ -32,6 +43,7 @@ target_compile_options(SSXNative PRIVATE -fobjc-arc)
 target_link_options(SSXNative PRIVATE "LINKER:-cache_path_lto,${CMAKE_CURRENT_BINARY_DIR}/lto-cache")
 target_include_directories(SSXNative PRIVATE
   "${MG}/include" "${CORE}/Source/Core" "${CORE}/GXRuntime/include"
+  "${MG}/src/runtime"
   "${CORE}/Externals/fmt/fmt/include" "${CORE}/Externals/picojson"
   "${CMAKE_CURRENT_BINARY_DIR}/moderngekko/vendor/dolphin/Source/Core")
 target_link_libraries(SSXNative PRIVATE moderngekko gGXBE69_recomp
@@ -42,5 +54,7 @@ target_link_libraries(SSXNative PRIVATE moderngekko gGXBE69_recomp
   "-framework Security" "-framework SystemConfiguration" z bz2 iconv resolv compression)
 # Resources are upstream runtime support files, not game content.
 add_custom_command(TARGET SSXNative POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" "-DOUTPUT=$<TARGET_BUNDLE_DIR:SSXNative>/build-info.json"
+    "-DBUILD_ID=${SESSION_BUILD_ID}" -P "${CMAKE_CURRENT_SOURCE_DIR}/WriteBuildInfo.cmake"
   COMMAND "${CMAKE_COMMAND}" -E copy_directory
     "${CORE}/Data/Sys" "$<TARGET_BUNDLE_DIR:SSXNative>/Sys")

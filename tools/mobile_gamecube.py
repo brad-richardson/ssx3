@@ -75,6 +75,7 @@ def build(args):
     configure(args)
     command(["cmake", "--build", WORK, "--target", "SSXNative", "-j", args.jobs])
     receipt = {"dependencies": native.PINS, "app_executable_sha256": native.sha256(APP / "SSXNative"),
+               "build_info": json.loads((APP / 'build-info.json').read_text()),
                "game_module_archive_sha256": native.sha256(WORK / "game-module/gGXBE69_recomp.a"),
                "patch_sha256": {p.name: native.sha256(p) for p in
                                 (ROOT / "native/patches").glob("*-platform.patch")},
@@ -165,19 +166,38 @@ def provision(args):
         copy_to(args, game / directory, "Documents/Game/" + directory, timeout=1800)
 
 
+def world_build_metadata(world):
+    if not world or not world.is_file():
+        raise RuntimeError("--world must name a built BAM.BIG")
+    with world.open('rb') as stream:
+        magic = stream.read(4)
+    if magic != b"BIGF":
+        raise RuntimeError("Not a BIGF archive")
+    archive_hash = native.sha256(world)
+    recipe_path = world.parent / 'experiment.json'
+    if recipe_path.exists() and json.loads(recipe_path.read_text()).get('output_sha256') != archive_hash:
+        raise RuntimeError('World archive does not match its build recipe')
+    return dict(build=world.parent.name, archive_sha256=archive_hash,
+                built_at=dt.datetime.fromtimestamp(world.stat().st_mtime,dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+
 def world(args):
     """Copy one world archive (a built BAM.BIG) over the app's files/data/worlds/bam.big."""
-    if not args.world or not args.world.is_file():
-        raise RuntimeError("--world must name a built BAM.BIG")
-    if args.world.read_bytes()[:4] != b"BIGF":
-        raise RuntimeError("Not a BIGF archive")
+    metadata = world_build_metadata(args.world)
+    REPORTS.mkdir(parents=True,exist_ok=True)
+    manifest = REPORTS / (dt.datetime.now().strftime('%Y%m%d-%H%M%S-%f')+'-course-build.json')
+    manifest.write_text(json.dumps(metadata,indent=2)+'\n')
     if args.simulator:
-        destination = simulator_documents(args) / "Game/files/data/worlds/bam.big"
+        documents = simulator_documents(args)
+        destination = documents / "Game/files/data/worlds/bam.big"
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(args.world, destination)
+        shutil.copy2(manifest, documents / 'course-build.json')
         print(f"World copied to the simulator container: {destination}")
         return
     copy_to(args, args.world, "Documents/Game/files/data/worlds/bam.big", timeout=900)
+    # Outside Game/: display metadata must not change the game's asset identity.
+    copy_to(args, manifest, "Documents/course-build.json", timeout=60)
     print(f"World copied to the device container: {args.world} ({args.world.stat().st_size} bytes)")
 
 

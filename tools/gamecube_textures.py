@@ -26,10 +26,11 @@ from pathlib import Path
 import struct
 
 from gamecube_shape import entries as shape_entries
+from gamecube_world import unused_global_rids
 
 WORLD_HEADER = 32
 PATCH_STRIDE = 448
-BITS = {0x14: 16, 0x15: 16, 0x19: 8, 0x1e: 4}
+BITS = {0x14: 16, 0x15: 16, 0x16: 32, 0x19: 8, 0x1e: 4}
 # Palette chunk header copied from GXBE69 world CI8 records (before 512 palette bytes).
 PALETTE_HEADER = bytes.fromhex('3200000000ff000100ff00001000000000000020') + bytes(12)
 
@@ -109,28 +110,8 @@ def bind_patch(payload, texture_rid, lightmap_rid, texture_group, uv, lightmap_r
     return bytes(out)
 
 
-def reclaim_rids(world, location, texture_group, kind, needed):
-    """Rids of `kind` held by the location's other texture groups (not the pinned one).
-
-    Build 006 showed those groups' textures still resolve at run time (reused rids
-    drew Snow Jam's art), and build 007 showed rids above the stock maximum stop
-    resolving around 800, so the imported records take over stock rids and the
-    stock records carrying them are dropped from every group.
-    """
-    loc = world.location(location)
-    pinned = {e['rid'] for e, _ in world.records(texture_group) if e['kind'] == kind}
-    candidates = set()
-    for g in range(loc['group_start'], loc['last_group'] + 1):
-        counts = world.index['groups'][g]['kind_counts']
-        if g != texture_group and counts and set(counts) <= {9, 10}:
-            candidates.update(e['rid'] for e, _ in world.records(g) if e['kind'] == kind)
-    free = sorted(candidates - pinned)
-    if len(free) < needed:
-        raise ValueError(f'Only {len(free)} kind-{kind} rids can be reclaimed, {needed} needed')
-    return free[:needed]
-
-
-def import_course_textures(world, location, texture_group, added, bindings, textures, lightmaps):
+def import_course_textures(world, location, texture_group, added, bindings, textures, lightmaps,
+                           material_profile='tricky-gc-to-ssx3-gc-v1'):
     """Append the donor textures/lightmaps to the pinned group and bind the added patches.
 
     added: [(entry, payload)] terrain records in donor order; bindings: tricky_bindings()
@@ -141,28 +122,24 @@ def import_course_textures(world, location, texture_group, added, bindings, text
         raise ValueError('Patch and binding counts differ')
     used_textures = sorted({b['texture'] for b in bindings})
     used_lightmaps = sorted({b['lightmap'] for b in bindings})
-    if any(t >= len(textures) for t in used_textures) or any(l >= len(lightmaps) for l in used_lightmaps):
+    if any(not 0 <= t < len(textures) for t in used_textures) or any(not 0 <= l < len(lightmaps) for l in used_lightmaps):
         raise ValueError('Binding refers to an image outside the shape containers')
-    tex_rid = dict(zip(used_textures, reclaim_rids(world, location, texture_group, 9, len(used_textures))))
-    lm_rid = dict(zip(used_lightmaps, reclaim_rids(world, location, texture_group, 10, len(used_lightmaps))))
-    taken = {9: set(tex_rid.values()), 10: set(lm_rid.values())}
     loc = world.location(location)
-    replaced, dropped = {}, {}
-    for g in range(loc['group_start'], loc['last_group'] + 1):
-        counts = world.index['groups'][g]['kind_counts']
-        if g == texture_group or not counts or set(counts) - {9, 10}:
-            continue
-        kept = [(e, p) for e, p in world.records(g) if e['rid'] not in taken.get(e['kind'], ())]
-        if len(kept) != counts.get(9, 0) + counts.get(10, 0):
-            replaced[g] = kept
-            dropped[g] = counts.get(9, 0) + counts.get(10, 0) - len(kept)
+    if not loc['group_start'] <= texture_group < loc['last_group']:
+        raise ValueError('Texture group must belong to the target location')
+    tex_rid = dict(zip(used_textures, unused_global_rids(world, 9, len(used_textures))))
+    lm_rid = dict(zip(used_lightmaps, unused_global_rids(world, 10, len(used_lightmaps))))
+    replaced = {}
     group_records = list(world.records(texture_group))
     resident = len(group_records)
     for t in used_textures:
         payload = world_image_record(textures[t])
         group_records.append((dict(kind=9, size=len(payload), track=255, rid=tex_rid[t]), payload))
+    from gamecube_materials import convert_lightmap
+    transfers = {}
     for l in used_lightmaps:
-        payload = world_image_record(lightmaps[l])
+        converted, transfers[l] = convert_lightmap(lightmaps[l], material_profile)
+        payload = world_image_record(converted)
         group_records.append((dict(kind=10, size=len(payload), track=255, rid=lm_rid[l]), payload))
     replaced[texture_group] = group_records
     rebound = []
@@ -174,7 +151,8 @@ def import_course_textures(world, location, texture_group, added, bindings, text
                   lightmaps={l: lm_rid[l] for l in used_lightmaps},
                   texture_types={t: hex(textures[t]['type']) for t in used_textures},
                   lightmap_types={l: hex(lightmaps[l]['type']) for l in used_lightmaps},
-                  dropped_stock_records=dropped,
+                  lightmap_transfer=transfers, material_profile=material_profile,
+                  allocation='new-global-rids', dropped_stock_records={},
                   added_bytes=sum(len(p) + 8 for e, p in group_records[resident:]))
     return replaced, rebound, report
 
@@ -188,7 +166,9 @@ def rgb5a3(v):
 
 
 def rgb565(v):
-    return ((v >> 11 & 31) * 255 // 31, (v >> 5 & 63) * 255 // 63, (v & 31) * 255 // 31, 255)
+    # GX expands short channels by bit replication, not floor(v * 255 / max).
+    r, g, b = v >> 11 & 31, v >> 5 & 63, v & 31
+    return ((r << 3) | (r >> 2), (g << 2) | (g >> 4), (b << 3) | (b >> 2), 255)
 
 
 def decode(img):
@@ -204,6 +184,17 @@ def decode(img):
                     for x in range(4):
                         out[(by + y) * w + bx + x] = conv(struct.unpack_from('>H', px, i)[0])
                         i += 2
+    elif kind == 0x16:
+        i = 0
+        for by in range(0, h, 4):
+            for bx in range(0, w, 4):
+                for y in range(4):
+                    for x in range(4):
+                        j = 2 * (y * 4 + x)
+                        a, r = px[i + j:i + j + 2]
+                        g, b = px[i + 32 + j:i + 34 + j]
+                        out[(by + y) * w + bx + x] = (r, g, b, a)
+                i += 64
     elif kind == 0x19:
         cols = [rgb5a3(struct.unpack_from('>H', img['palette'], i * 2)[0]) for i in range(256)]
         i = 0
