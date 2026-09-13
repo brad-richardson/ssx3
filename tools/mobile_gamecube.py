@@ -72,6 +72,23 @@ def configure(args):
              f"-DCMAKE_OSX_SYSROOT={'iphonesimulator' if args.simulator else 'iphoneos'}"])
 
 
+def write_receipt(kind, receipt):
+    # Working receipts are replaced by later builds/signatures. Retain the
+    # exact record under a content hash so delivery evidence survives that.
+    payload = json.dumps(receipt, indent=2) + "\n"
+    archive = WORK / "receipts" / (kind + "-" + hashlib.sha256(payload.encode()).hexdigest() + ".json")
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with archive.open("x") as stream:
+            stream.write(payload)
+    except FileExistsError:
+        if archive.read_text() != payload:
+            raise RuntimeError("Archived mobile receipt does not match its content hash")
+    (WORK / (kind + "-receipt.json")).write_text(payload)
+    print(f"Archived {kind} receipt: {archive}")
+    return archive
+
+
 def build(args):
     configure(args)
     command(["cmake", "--build", WORK, "--target", "SSXNative", "-j", args.jobs])
@@ -81,7 +98,7 @@ def build(args):
                "patch_sha256": {p.name: native.sha256(p) for p in
                                 (ROOT / "native/patches").glob("*-platform.patch")},
                "mobile_execution_verified": False}
-    (WORK / "build-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    write_receipt("build", receipt)
 
 
 def sign(args):
@@ -129,11 +146,12 @@ def sign(args):
     command(["codesign", "--force", "--sign", fingerprint, "--timestamp=none",
              "--entitlements", entitlements_file, APP])
     command(["codesign", "--verify", "--strict", APP])
-    (WORK / "signing-receipt.json").write_text(json.dumps({
+    write_receipt("signing", {
         "bundle_id": BUNDLE, "profile_uuid": profile["UUID"],
+        "build_info": json.loads((APP / 'build-info.json').read_text()),
         "executable_sha256": native.sha256(APP / "SSXNative"),
         "device_model": details["hardwareProperties"]["marketingName"],
-        "os": details["deviceProperties"]["osVersionNumber"]}, indent=2) + "\n")
+        "os": details["deviceProperties"]["osVersionNumber"]})
 
 
 def install(args):

@@ -24,6 +24,13 @@ world SHA256 and snapshots it with the loaded session. A stale/missing label
 falls back to the world hash; copying new assets during play cannot relabel
 the old in-memory course. Save-status updates retain the version information.
 
+Build and signing commands keep their latest receipts in the build directory
+and archive exact copies under its `receipts/` directory, named by content hash.
+Use the printed archive path for delivery records: later builds replace the
+working receipts. Signing receipts include the app build identity and the
+signed executable hash. These local records contain provisioning/device details
+and stay outside version control.
+
 The menu also offers an opt-in native smoothing trial, lasting up to 35 seconds.
 It can end early if extra rendering cannot keep up, and always drains an injected
 draw before pausing/saving. Ordinary rendering remains the default. This is a
