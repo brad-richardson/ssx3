@@ -82,7 +82,8 @@ Evidence: `local/research/120hz/output-full-null-simulator-check/` and
 Build `971dc928` completed a separate 200-second launch at 2× with Full output
 and Null audio. All measured EFB sizes were 1280 × 1056; output stayed
 2868 × 1320. It stopped cleanly, with zero invalid accesses, GPU errors, unknown
-instructions, code-verification failures or JIT fallback runs. The last capture
+instructions, code-verification failures or JIT fallback runs. All 1,900
+completed extra draws preserved every watched field. The last capture
 shows coherent riding at 23% course progress. Evidence is in
 `local/research/120hz/internal-2x-null-simulator-check/`. This establishes the
 launch configuration and graphics path on Simulator, not phone performance.

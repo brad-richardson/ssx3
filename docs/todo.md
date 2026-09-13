@@ -22,19 +22,29 @@ the build or commit that closed them.
 - [ ] Odin: pair it with adb once (wireless debugging or USB) so
       `tools/deploy_odin.py` can push future ISOs straight to Dolphin's game
       folder; confirm which folder Dolphin scans on the device.
-- [ ] 120 Hz: complete host replay state/ordering and exact-frame fidelity
-      gates before extending camera/rider interpolation. The elapsed-time
-      speed floor, lifecycle acceptance and filtered probes are installed in
-      phone build 2250d8d9. Five desktop overhead/config comparisons passed
-      correctness checks but found no substantial game-speed gain. Two phone
-      trials completed 847 unchanged extra draws and restored normal rendering
-      through the speed guard; the first has seven seconds near 120 render
-      completions/s at normal game speed. Diagnostic build c2e098d3 adds drawable
-      presentation, GPU/wait and Dolphin workload counters. Its six phone trials
-      confirm actual high-refresh presentation, including four seconds at
-      119.75 displays/s; sustain pacing and verify distinct interpolated motion.
-      The ProMotion opt-in and 120 Hz preference are already enabled. See the
+- [ ] 120 Hz: profile active callback CPU work, then reduce the dominant cost.
+      Phone build 1747c62a measured 8.45 ms thread CPU within an 8.64 ms median
+      extra draw (52 samples); both latest trials stopped after three seconds.
+      Full/Half output switching is device-verified, but a Half smoothing run
+      is still missing. Build 971dc928 adds independent 1×/2× internal detail;
+      keep 1× for the existing pacing comparison. Short high-refresh bursts
+      are established (four seconds at 119.75 actual displays/s); sustained
+      pacing and distinct interpolated motion remain open. See
+      [resolution evidence](research/120hz-output-resolution.md) and
+      [CPU/config spikes](research/120hz-cpu-overhead-spikes.md).
+- [ ] Replay: bind captures to the actual encoder frame, prove exact-image
+      fidelity in an isolated renderer, and complete owned-memory/ordering
+      gates before live replay or more interpolation. The private FIFO decode
+      audit passes, but live replay remains blocked; its capture-only gate
+      does not establish render fidelity. See the
       [review follow-up](research/120hz-review-followup.md).
+- [ ] Make MemoryWatcher reads observational: replace unchecked HostRead
+      pointer chasing with checked reads. Failed watches can reach a panic
+      path that raises a PI interrupt. The 031 river check logged 48 startup
+      warnings; the compiler comparison also saw warnings during gameplay
+      under both O2 and O3. Preserve their distinction from guest faults while
+      eliminating the observer side effect. See
+      [collision diagnostics](gamecube-collision.md).
 
 ## Garibaldi in the GameCube engine
 
@@ -52,15 +62,15 @@ the build or commit that closed them.
       See [collision evidence and format notes](gamecube-collision.md).
 - [ ] Original water physics/effect callbacks remain separate from terrain
       recovery; translate them for response at water height.
-- [ ] Collision priority 2: compile static tree/fence/rock collision meshes and
-      per-instance flags. User authorized this pass after river/reset recovery;
-      prioritize fences, buildings and route barriers, then trees.
-      Shared mesh reader/encoder and guarded static bindings are implemented.
-      Correct winding is implemented and matches all audited stock faces,
-      but native c46 still shows no rock impact. Keep candidates 029/030 off
-      the phone; investigate live collision registration/contact dispatch.
-      Multipart shapes, scripted/physics objects and conservative reset-path
-      clearance omissions are recorded explicitly. Phone remains 027.
+- [ ] Collision priority 2: validate broader static obstacle encounters and
+      deliver candidate 031 separately from phone performance comparisons.
+      The rigid-transform fix restores the engine's collision inverse while
+      preserving rendered placement: a matched rock fixture now has 22
+      positive contact returns versus zero before. Waterfall and river reset
+      checks pass. This does not certify all 2,059 enabled instances or full
+      course progression. Multipart shapes, scripted/physics objects and
+      conservative reset-path clearance omissions remain explicit. Phone
+      assets remain 027; see [collision evidence](gamecube-collision.md).
 - [ ] Preserve donor terrain surface behavior through a verified profile:
       direct reset-flag mapping is implemented in build 025; snow/powder/ice/
       rock and non-colliding patches still inherit one target header. Do not
@@ -102,6 +112,14 @@ the build or commit that closed them.
 
 ## Mobile
 
+- [ ] Priority: add a debug launch path directly to the main menu selection
+      screen, bypassing intro/logo and intervening loading screens where the
+      game's required initialization permits it. User reports over one minute
+      lost per cold phone session (September 13); automated native/Simulator
+      checks also repeat this sequence. Measure startup phases, preserve
+      required asset/game initialization, and update test input timing to use
+      menu/game state rather than the old long delays. This is distinct from
+      restoring an in-race checkpoint; keep ordinary boot available for coverage.
 - [ ] Verify lifecycle Resume repair on iPhone: return to an automatic menu
       after background/audio interruptions; reconcile actual runtime state and
       explicitly reactivate audio on Resume. Reported stuck during Sep 13 playtest.
@@ -110,6 +128,8 @@ the build or commit that closed them.
       failure reasons and common timestamps; reproduce that failure and verify
       relaunch restoration. All eight subsequent diagnostic saves succeeded
       in 97–137 ms, so the earlier failure remains unreproduced.
+      Build 1747c62a adds five successful saves and two output resizes/resumes.
+      Verify 971dc928's checkpoint/relaunch after changing internal detail.
       Active-trial cancellation on the phone remains unverified.
 
 - [x] Menu with in-memory Resume, background checkpointing and restore across

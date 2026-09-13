@@ -163,7 +163,7 @@ The first native candidate 005 failed during loading and was never installed.
 Definition +8 was incorrectly interpreted as a model ID. GXBE69 `80245F5C`
 loads that field and `80245F84` indexes the **24-byte effect callback table**
 with it. No-callback objects must use `FFFFFFFF`, not a model reference.
-Candidate 008 corrects this and is undergoing native validation. Candidate 006
+Candidate 008 corrected this and advanced to native validation. Candidate 006
 inherits the rejected metadata and must not be used for gameplay acceptance.
 
 The failed 005 run produced a repeated-error log; its first 2 MiB and final
@@ -176,7 +176,7 @@ stop are a failure, never a passing run.
 The opening-lane rock pair (`c36`/`c38`, fixtures 013/014) did not alter the rider
 trajectory. Geometry inspection found the rider below the rock's collision
 surface and partly below its instance bounds, so this is inconclusive rather
-than a demonstrated collision failure. A lower placement fixture 019 is being
+than a demonstrated collision failure. Lower placement fixture 019 was
 prepared to force an encounter with the front surface.
 
 The native narrow phase at `801DDD08` through `801DE43C` iterates render-model
@@ -206,17 +206,17 @@ The grounded pair confirmed that the old collider did not alter the opening
 trajectory. Correct winding is necessary format validation but **did not by
 itself produce an impact**: fixture 020 / `c46` on candidate 029 still crossed
 the obstacle with state 0 and the same terrain height. Normal-course `c45`
-passed with one stable hazard recovery and no native errors. None of the static
-collision candidates is ready for phone installation. Next investigate live
-instance/property binding, collision-list registration and native contact
-dispatch; do not infer physics correctness from a healthy load or screenshots.
+passed with one stable hazard recovery and no native errors. These findings
+motivated the live registration/contact audit below; a healthy load or
+screenshots alone do not establish collision correctness.
 
 Candidate 030 additionally protects the verified reset routes. Its conservative
 segment/AABB check omits 49 otherwise eligible instances near reset corridors
 (35 target-unit horizontal margin, 150-unit rider height). This is a safe
 initial omission policy, not a narrow-phase geometry proof; report the omitted
 source IDs and replace it with verified shape clearance as that support matures.
-030 is also **unverified for impacts and not installed**. The phone remains 027.
+030 lacked impact evidence and was not installed; candidate 031 below
+supersedes its transform representation. The phone remains 027.
 
 ### Live registration and rigid-transform audit
 
