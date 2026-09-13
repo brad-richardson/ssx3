@@ -80,11 +80,18 @@ def build(args):
             extra_includes += f'#include "{out / "native_pose_interpolation.h"}"\n'
             probe_namespace = 'NativeInterpolation'
             if getattr(args, 'app_trial_check', False):
+                source = '#define SSX_NATIVE_TRIAL_TEST 1\n' + source
                 driver = ROOT/'native/diagnostics/trial_test_driver.h'
                 (out/driver.name).write_bytes(driver.read_bytes())
                 receipt['trial_test_driver_sha256'] = sha(driver)
                 extra_includes += f'#include "{out / driver.name}"\n'
                 probe_namespace = 'NativeTrialTest'
+        if getattr(args, 'replay', False):
+            path = ROOT / 'native/diagnostics/native_frame_replay.h'
+            (out / path.name).write_bytes(path.read_bytes())
+            receipt['scheduler_headers'][path.name] = sha(path)
+            extra_includes += f'#include "{out / path.name}"\n'
+            probe_namespace = 'NativeReplay'
     source = source.replace(includes, f'#include "{header_copy}"\n' + extra_includes + includes)
     source = source.replace(dispatch, f'          {probe_namespace}::Step(m_guest);\n' + dispatch)
     copy = out / 'Core_Run.cpp'
@@ -213,6 +220,8 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--scheduler', action='store_true',
                    help='Include the opt-in, bounded independent render-schedule experiment')
+    p.add_argument('--replay', action='store_true',
+                   help='Include the host-side frame replay experiment (requires --scheduler)')
     p.add_argument('--interpolation', action='store_true',
                    help='Include the bounded native transform interpolation prototype (requires --scheduler)')
     p.add_argument('--app-trial-check', action='store_true',
@@ -229,6 +238,8 @@ def main():
     if args.command == 'build':
         if args.interpolation and not args.scheduler:
             parser.error('--interpolation requires --scheduler')
+        if args.replay and (not args.scheduler or args.interpolation):
+            parser.error('--replay requires --scheduler and excludes --interpolation')
         if args.app_trial_check and not args.interpolation:
             parser.error('--app-trial-check requires --interpolation')
         build(args)

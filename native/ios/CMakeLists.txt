@@ -33,6 +33,25 @@ get_target_property(CORE_SOURCES core SOURCES)
 list(FILTER CORE_SOURCES EXCLUDE REGEX "(^|/)StaticRecompCore_Run\\.cpp$")
 set_property(TARGET core PROPERTY SOURCES "${CORE_SOURCES}")
 target_sources(core PRIVATE "${TRIAL_SOURCE}")
+# Observe save stages and Metal completion in local source copies. Desktop and
+# upstream runtime sources retain their normal behavior and build products.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(DIAGNOSTIC_BUILDER "${SSX_ROOT}/tools/ios_diagnostic_sources.py")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  "${CORE}/Source/Core/Core/State.cpp"
+  "${CORE}/Source/Core/VideoBackends/Metal/MTLGfx.mm")
+execute_process(COMMAND "${Python3_EXECUTABLE}" "${DIAGNOSTIC_BUILDER}"
+  --core "${CORE}" --header "${CMAKE_CURRENT_SOURCE_DIR}/SessionDiagnostics.h"
+  --output "${CMAKE_CURRENT_BINARY_DIR}" --run "${TRIAL_SOURCE}"
+  COMMAND_ERROR_IS_FATAL ANY)
+get_target_property(CORE_SOURCES core SOURCES)
+list(FILTER CORE_SOURCES EXCLUDE REGEX "(^|/)State\\.cpp$")
+set_property(TARGET core PROPERTY SOURCES "${CORE_SOURCES}")
+target_sources(core PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/DiagnosticState.cpp")
+get_target_property(METAL_SOURCES videometal SOURCES)
+list(FILTER METAL_SOURCES EXCLUDE REGEX "(^|/)MTLGfx\\.mm$")
+set_property(TARGET videometal PROPERTY SOURCES "${METAL_SOURCES}")
+target_sources(videometal PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/DiagnosticMTLGfx.mm")
 set(GAME_ID GXBE69 CACHE STRING "" FORCE)
 set(GENERATED_DIR "${SSX_ROOT}/local/native/ssx3-module/codegen/generated" CACHE PATH "" FORCE)
 set(GXRUNTIME_DIR "${CORE}/GXRuntime" CACHE PATH "" FORCE)
@@ -40,9 +59,10 @@ set(CHASSIS_ABI_DIR "${CORE}/Source/Core/Core/PowerPC/StaticRecomp" CACHE PATH "
 set(RECOMPCORE_MODULE_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory("${CORE}/module-template" game-module)
 
-add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm)
+add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm SessionDiagnostics.mm)
 # Saved machine state must not cross incompatible frontend/runtime builds.
 set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStore.h SessionPause.h
+  SessionDiagnostics.h SessionDiagnostics.mm ../../tools/ios_diagnostic_sources.py
   ../diagnostics/native_callback_trace.h ../diagnostics/native_render_schedule.h
   ../diagnostics/native_pose_interpolation.h ../diagnostics/pose_history.h
   ../diagnostics/render_deadline.h ../diagnostics/trial_control.h ../patches/recompcore-platform.patch

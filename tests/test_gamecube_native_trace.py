@@ -2,9 +2,15 @@
 from pathlib import Path
 import sys
 import unittest
+import shutil
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from gamecube_native_trace import summarize
+import gamecube_native_trace as native_trace
+from gamecube_schedule_check import validate_trial_trace
 
 
 def event(kind='render', repeat=0, **values):
@@ -17,6 +23,46 @@ def event(kind='render', repeat=0, **values):
 
 
 class NativeTraceTests(unittest.TestCase):
+    def test_trial_builder_wires_driver_without_game_assets_or_compiler(self):
+        class StopBeforeCompile(Exception):
+            pass
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory).resolve()
+            shutil.copytree(root/'native/diagnostics', temp/'native/diagnostics')
+            source = temp/'vendor/vendor/dolphin/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp'
+            source.parent.mkdir(parents=True)
+            source.write_text('namespace\n{\n          const u32 runtime_dispatch_address = m_guest.pc;\n}')
+            game = temp/'game'
+            (game/'sys').mkdir(parents=True)
+            (game/'sys/boot.bin').write_bytes(b'GXBE69')
+            args = SimpleNamespace(game=game, output=temp/'local/player', scheduler=True,
+                                   interpolation=True, replay=False, app_trial_check=True)
+            with patch.multiple(native_trace, ROOT=temp, VENDOR=temp/'vendor'), \
+                    patch.object(native_trace, 'sha', return_value=native_trace.DOL_SHA256), \
+                    patch.object(native_trace.subprocess, 'check_output', side_effect=StopBeforeCompile):
+                with self.assertRaises(StopBeforeCompile):
+                    native_trace.build(args)
+            generated = (args.output/'Core_Run.cpp').read_text()
+            self.assertTrue((args.output/'trial_test_driver.h').is_file())
+            self.assertIn('#define SSX_NATIVE_TRIAL_TEST 1', generated)
+            self.assertIn('NativeTrialTest::Step(m_guest)', generated)
+
+    def test_lifecycle_acceptance_requires_events_and_actual_unchanged_extra(self):
+        actions = ['request', 'cancel_during_extra', 'quiescent', 'restart', 'quiescent', 'complete']
+        rows = [dict(event='trial_test', action=a, wall=i) for i, a in enumerate(actions)]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace([])
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1))
+        self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows[1:])
+        rows[-1]['rng_changed'] = 1
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+
     def test_rejected_call_is_not_a_successful_draw(self):
         counters = dict(gate_calls=1, gate_ready=0, result=0,
                         view_matrix_calls=0, frame_end_calls=0,

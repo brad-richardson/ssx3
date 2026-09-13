@@ -64,11 +64,41 @@ class ScheduleTraceTests(unittest.TestCase):
 using namespace RenderResearch;
 int main() {
  RealTimeBudget budget{10,1000};
- assert(budget.Allows(10.01,1010,1000));
- assert(!budget.Allows(10.02,1010,1000)); // host debt blocks extra work
+ assert(budget.Allows(10.02,1010,1000));  // a steady 10 ms throttle offset is allowed
+ assert(budget.Allows(10.04,1030,1000));  // still 10 ms behind
+ assert(!budget.Allows(10.06,1040,1000)); // debt grew to 20 ms: host falling behind
+ assert(budget.Allows(10.08,1070,1000));  // recovered to the reference
+ assert(budget.Allows(11.0,1960,1000));   // old minimum expired: a new steady offset passes
+ assert(!budget.Allows(11.2,2140,1000));  // growth inside the window still blocks
  assert(!budget.Allows(9.9,1010,1000));
  assert(!budget.Allows(10.01,999,1000));
  assert(!budget.Allows(10.01,1010,0));
+ SpeedFloor floor;
+ assert(!floor.Allows());                  // no history: stay real-time
+ for(unsigned i=0;i<41;++i)floor.Observe(i*0.025,uint64_t(i)*25000,1000000);
+ assert(floor.Allows());                   // guest keeps pace: 1.0
+ assert(floor.span>=0.5-1e-9);
+ SpeedFloor slow;
+ for(unsigned i=0;i<41;++i)slow.Observe(i*0.025,uint64_t(i)*15000,1000000);
+ assert(!slow.Allows());                   // 0.6 speed blocks extras
+ for(unsigned i=1;i<=32;++i)slow.Observe(1+i*.000002,600000+i*41,1000000);
+ assert(!slow.Allows());                   // bursty idle visits cannot erase the slow window
+ double wall=1.000064;uint64_t ticks=601312;
+ auto advance=[&](double speed){
+  for(unsigned i=0;i<41;++i){wall+=.025;ticks+=uint64_t(25000*speed);slow.Observe(wall,ticks,1000000);}
+ };
+ advance(.985);assert(!slow.Allows());      // hysteresis: not yet recovered
+ advance(1.0);assert(slow.Allows());
+ advance(.985);assert(slow.Allows());       // avoid toggling around one threshold
+ advance(.96);assert(!slow.Allows());
+ advance(1.0);assert(slow.Allows());
+ slow.Observe(wall-1,ticks,1000000);assert(!slow.Allows()); // clock reset
+ advance(1.0);assert(slow.Allows());
+ slow.Observe(wall,0,1000000);assert(!slow.Allows());       // savestate rewind
+ slow.Observe(wall,0,0);assert(!slow.Allows());
+ SpeedFloor burst;
+ for(unsigned i=0;i<1000;++i)burst.Observe(i*.000002,i*41,1000000);
+ assert(!burst.Allows());                  // minimum elapsed warm-up
  Deadline d{100,100,0};
  assert(d.Poll(99,0,0)==Decision::Early && d.next==100);
  assert(d.Poll(100,90,0)==Decision::Covered && d.next==200);

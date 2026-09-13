@@ -6,10 +6,31 @@ outputs must be fresh. No production config or player is changed.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 import gamecube_course_check as course
 from gamecube_draw_trace import ROOT, sha
+
+
+def validate_trial_trace(rows):
+    events = [r for r in rows if r.get('event') == 'trial_test']
+    expected = ['request', 'cancel_during_extra', 'quiescent', 'restart', 'quiescent', 'complete']
+    if [r.get('action') for r in events] != expected:
+        raise RuntimeError('Lifecycle trial did not demonstrate cancellation, drain, restart and completion')
+    if any(b['wall'] < a['wall'] for a, b in zip(events, events[1:])):
+        raise RuntimeError('Lifecycle events are out of order')
+    extras = [r for r in rows if r.get('event') == 'render' and r.get('repeat') and
+              r.get('result', 0) & 255 and r.get('view_matrix_calls') and r.get('frame_end_calls')]
+    if not extras:
+        raise RuntimeError('Lifecycle trial never completed an injected draw')
+    for r in extras:
+        if (r.get('same_rider') != 1 or r.get('same_view') != 1 or
+                r.get('state_before') != r.get('state_after') or
+                r.get('rng_changed') != 0 or r.get('position_changed') != 0 or
+                any(r.get(k) != [] for k in ('body_offsets', 'app_offsets', 'view_offsets'))):
+            raise RuntimeError('Lifecycle extra draw changed watched guest state')
+    return dict(lifecycle_complete=True, complete_extras=len(extras))
 
 
 def main():
@@ -52,6 +73,12 @@ def main():
         course.main()
     finally:
         course.subprocess.Popen = original
+    if receipt.get('trial_test_driver_sha256'):
+        path = os.environ.get('SSX_NATIVE_PROBE')
+        if not path:
+            raise RuntimeError('Lifecycle acceptance requires SSX_NATIVE_PROBE')
+        result = validate_trial_trace([json.loads(line) for line in Path(path).read_text().splitlines()])
+        print(json.dumps(result))
 
 
 if __name__ == '__main__':

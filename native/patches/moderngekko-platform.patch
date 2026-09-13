@@ -1,7 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bedf947..597318a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -104,8 +104,10 @@
+@@ -104,8 +104,10 @@ if(MODERNGEKKO_ENABLE_DOLPHIN_RUNTIME)
      set(USE_UPNP OFF CACHE BOOL "" FORCE)
      set(ENCODE_FRAMEDUMPS OFF CACHE BOOL "" FORCE)
      set(ENABLE_LLVM OFF CACHE BOOL "" FORCE)
@@ -14,7 +15,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
          set(ENABLE_CUBEB ON CACHE BOOL "" FORCE)
      else()
          set(ENABLE_CUBEB OFF CACHE BOOL "" FORCE)
-@@ -245,7 +247,15 @@
+@@ -245,7 +247,15 @@ if(MODERNGEKKO_ENABLE_DOLPHIN_RUNTIME)
              vendor/dolphin/Source/Core/DolphinNoGUI/PlatformWin32.cpp)
          target_link_libraries(moderngekko PRIVATE dwmapi)
      endif()
@@ -32,9 +33,10 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
          target_sources(moderngekko PRIVATE
              vendor/dolphin/Source/Core/DolphinNoGUI/PlatformMacos.mm)
 diff --git a/include/moderngekko/runtime.hpp b/include/moderngekko/runtime.hpp
+index af75a25..d8c792a 100644
 --- a/include/moderngekko/runtime.hpp
 +++ b/include/moderngekko/runtime.hpp
-@@ -65,6 +65,8 @@
+@@ -65,6 +65,8 @@ struct RuntimeConfig
    bool fullscreen = false;
    bool allow_interpreter = false;
    bool show_fps_in_title = true;
@@ -44,6 +46,7 @@ diff --git a/include/moderngekko/runtime.hpp b/include/moderngekko/runtime.hpp
  };
  
 diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
+index 981e098..0998c7a 100644
 --- a/src/runtime/dolphin_runtime.cpp
 +++ b/src/runtime/dolphin_runtime.cpp
 @@ -3,6 +3,7 @@
@@ -65,15 +68,55 @@ diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
  #include <algorithm>
  #include <array>
  #include <atomic>
-@@ -31,6 +36,7 @@
+@@ -31,6 +36,8 @@
  #include <cmath>
  #include <cstddef>
  #include <cstdio>
 +#include <cstdlib>
++#include <cstring>
  #include <fmt/format.h>
  #include <mutex>
  #include <thread>
-@@ -244,6 +250,10 @@
+@@ -84,6 +91,38 @@ std::string FormatWindowTitle(const std::string &title, double fps) {
+   return fmt::format("{} | Net wait {:.1f} ms/s | Buffer {}", formatted_title,
+                      s_net_wait_ms_per_second, telemetry.buffer_size);
+ }
++
++// Host-side handling of GXBE69 (SSX 3) SDK cache-range calls and the system
++// call vector, executed by the recompiler core without any per-dispatch cost
++// (see StaticRecompModuleSource::return_hooks). Dolphin runs with data-cache
++// emulation off, so DCFlushRange and friends only cost time: one native
++// dispatch per cache line plus a trailing `sc` whose vector body toggles HID0
++// around a sync. The core verifies the first and last instruction words of
++// every hooked entry before handling it; a different executable falls
++// through to the original code. Disable with SSX3_HOST_HLE=0.
++namespace ssx3_hle {
++constexpr std::array<StaticRecompModuleSource::HostReturnHook, 6> kReturns{{
++    {0x80284DA4u, 0x28040000u, 0x28u}, // DCInvalidateRange
++    {0x80284DD0u, 0x28040000u, 0x2Cu}, // DCFlushRange
++    {0x80284E00u, 0x28040000u, 0x2Cu}, // DCStoreRange
++    {0x80284E30u, 0x28040000u, 0x28u}, // DCFlushRangeNoSync
++    {0x80284E5Cu, 0x28040000u, 0x28u}, // DCStoreRangeNoSync
++    {0x8028342Cu, 0x44000002u, 0x04u}, // sc; blr helper
++}};
++
++bool Enabled() {
++  static const bool on = [] {
++    const char *value = std::getenv("SSX3_HOST_HLE");
++    return !(value && std::strcmp(value, "0") == 0);
++  }();
++  return on;
++}
++
++void Install(StaticRecompModuleSource &source) {
++  source.return_hooks.assign(kReturns.begin(), kReturns.end());
++  source.emulate_syscall_vector = true;
++}
++} // namespace ssx3_hle
+ } // namespace
+ 
+ std::vector<std::string> Host_GetPreferredLocales() { return {}; }
+@@ -244,6 +283,10 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
  
    if (impl->config.headless)
      impl->platform = Platform::CreateHeadlessPlatform();
@@ -84,7 +127,7 @@ diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
  #ifdef _WIN32
    else
      impl->platform = Platform::CreateWin32Platform();
-@@ -267,12 +277,21 @@
+@@ -267,12 +310,21 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
                           "the requested Dolphin host platform is unavailable"}};
    }
  
@@ -106,7 +149,7 @@ diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
    if (!impl->config.graphics.backend.empty())
      Config::SetBase(Config::MAIN_GFX_BACKEND, impl->config.graphics.backend);
    else if (impl->config.headless)
-@@ -292,6 +311,9 @@
+@@ -292,6 +344,9 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
               !std::ranges::contains(audio_backends,
                                      impl->config.audio.backend)) {
      constexpr std::array preferred_backends = {
@@ -116,7 +159,7 @@ diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
          BACKEND_CUBEB, BACKEND_PULSEAUDIO, BACKEND_ALSA};
      const auto preferred =
          std::ranges::find_if(preferred_backends, [&](const char *backend) {
-@@ -302,7 +324,8 @@
+@@ -302,7 +357,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
    }
    Config::SetBase(Config::MAIN_AUDIO_BACKEND, impl->config.audio.backend);
    Config::SetBase(Config::MAIN_INPUT_BACKGROUND_INPUT,
@@ -126,7 +169,16 @@ diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
  
    auto &jit = Core::System::GetInstance().GetJitInterface();
    StaticRecompModuleSource recomp_source;
-@@ -383,18 +406,31 @@
+@@ -320,6 +376,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+         &ModManager::HostCallRangeContains;
+     recomp_source.host_call_user = impl->mods.get();
+   }
++  if (ssx3_hle::Enabled())
++    ssx3_hle::Install(recomp_source);
+   jit.SetStaticRecompModuleSource(std::move(recomp_source));
+ 
+   s_runtime_active = true;
+@@ -383,18 +441,31 @@ RuntimeRunResult Runtime::Run() {
                           "Dolphin could not boot sys/main.dol"}};
    }
    m_impl->booted = true;
@@ -165,6 +217,7 @@ diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
      title_thread.join();
    m_impl->platform->SaveWindowGeometry();
 diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
+index f2edf83..14cf2a2 100644
 --- a/src/runtime/game.cpp
 +++ b/src/runtime/game.cpp
 @@ -8,6 +8,12 @@
@@ -180,12 +233,16 @@ diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
  
  namespace moderngekko
  {
-@@ -32,29 +38,87 @@
+@@ -32,29 +38,87 @@ std::uint32_t ReadBE32(const std::uint8_t* p)
           (std::uint32_t{p[2]} << 8) | p[3];
  }
  
 -std::string Sha256(std::vector<std::uint8_t> data)
--{
++// Incremental hashing avoids retaining and then growing whole asset archives.
++// Apple platforms use the system implementation; the portable path has the
++// same streaming contract for other hosts.
++class Sha256State
+ {
 -  const std::uint64_t bit_size = static_cast<std::uint64_t>(data.size()) * 8;
 -  data.push_back(0x80);
 -  while ((data.size() % 64) != 56)
@@ -196,11 +253,6 @@ diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
 -  std::array<std::uint32_t, 8> h = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
 -                                     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 -  for (std::size_t offset = 0; offset < data.size(); offset += 64)
-+// Incremental hashing avoids retaining and then growing whole asset archives.
-+// Apple platforms use the system implementation; the portable path has the
-+// same streaming contract for other hosts.
-+class Sha256State
-+{
 +public:
 +  Sha256State()
 +  {
@@ -282,21 +334,20 @@ diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
      for (std::size_t i = 0; i < 64; ++i)
      {
        const auto s1 = std::rotr(e, 6) ^ std::rotr(e, 11) ^ std::rotr(e, 25);
-@@ -64,14 +128,22 @@
+@@ -64,14 +128,22 @@ std::string Sha256(std::vector<std::uint8_t> data)
        const auto maj = (a & b) ^ (a & c) ^ (b & c);
        hh = g; g = f; f = e; e = d + t1; d = c; c = b; b = a; a = t1 + s0 + maj;
      }
 -    h[0] += a; h[1] += b; h[2] += c; h[3] += d;
 -    h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
--  }
++    m_hash[0] += a; m_hash[1] += b; m_hash[2] += c; m_hash[3] += d;
++    m_hash[4] += e; m_hash[5] += f; m_hash[6] += g; m_hash[7] += hh;
+   }
 -  std::ostringstream out;
 -  out << std::hex << std::setfill('0');
 -  for (const auto word : h)
 -    out << std::setw(8) << word;
 -  return out.str();
-+    m_hash[0] += a; m_hash[1] += b; m_hash[2] += c; m_hash[3] += d;
-+    m_hash[4] += e; m_hash[5] += f; m_hash[6] += g; m_hash[7] += hh;
-+  }
 +  std::array<std::uint32_t, 8> m_hash = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
 +                                       0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 +  std::array<std::uint8_t, 64> m_buffer{};
@@ -313,14 +364,12 @@ diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
  }
  
  std::optional<std::vector<std::uint8_t>> ReadFile(const std::filesystem::path& path)
-@@ -92,10 +164,19 @@
+@@ -92,10 +164,19 @@ std::optional<std::vector<std::uint8_t>> ReadFile(const std::filesystem::path& p
  
  std::optional<std::string> HashFileSha256(const std::filesystem::path& path)
  {
 -  auto bytes = ReadFile(path);
 -  if (!bytes)
--    return std::nullopt;
--  return Sha256(std::move(*bytes));
 +  std::ifstream file(path, std::ios::binary);
 +  if (!file)
 +    return std::nullopt;
@@ -332,7 +381,8 @@ diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
 +    state.Update(buffer.data(), static_cast<std::size_t>(file.gcount()));
 +  }
 +  if (!file.eof() || file.bad())
-+    return std::nullopt;
+     return std::nullopt;
+-  return Sha256(std::move(*bytes));
 +  return state.Finish();
  }
  

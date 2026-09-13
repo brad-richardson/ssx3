@@ -86,6 +86,52 @@ startup, loads, and pauses when evaluating it. Menu screenshots must confirm
 that a timed sequence reached gameplay before its samples count as a course
 benchmark. Simulator performance does not establish device performance.
 
+Diagnostic report schema 2 adds a build identity and shared `host_seconds`
+clock (the same uptime clock used by Metal and native trial schedule events).
+The existing `seconds` field still excludes app pauses. Use host time when
+comparing a smoothing cutoff, audio starvation, lifecycle events and presentation.
+
+- `present.csv` records drawable acquire duration, submission ID, presentation
+  callback time and the drawable's actual `presentedTime`, plus start/end/error
+  for the final Metal command buffer. GPU completion alone is not display
+  completion; that buffer's duration is not total GPU work for the frame.
+  Zero/missing timestamps remain unknown. The simulator SDK has no presentation
+  callback API, so its events explicitly say `display_unavailable`.
+  The observer buffers up to 8,192 events and drains once per second, including
+  while paused. Overflow is counted. Late callbacks retain their original
+  report across runtime reset. The iOS build instruments local copies of the
+  pinned Metal and savestate sources; no graphics settings change.
+- `lifecycle.jsonl` records app/audio transitions, trial requests/cancellation,
+  checkpoint request/CPU capture/compression-writer/file-ready/commit stages,
+  failed stages, filesystem error codes, temporary-file sizes on failure,
+  background-task expiration and long main-timer gaps. Low-level `errno` is
+  best-effort; the named failing stage and Foundation underlying error are
+  the primary evidence. A successful file rename alone is not save validation.
+- Once per emulated second, `recomp_sample` records existing native dispatch,
+  interpreter fallback, exception and host-HLE counters on the CPU thread.
+  Counts have different units and do not measure CPU time in each path.
+- Once per app metric interval, `workload` aggregates renderer frame-event
+  draw calls, primitives, geometry upload bytes and EFB peeks/pokes, with latest
+  shader/texture creation and upload counters. These are captured on the
+  renderer thread; the UI receives an aggregate. Shader creation counts are
+  not compilation durations and may reset with a cache reload. The existing
+  speed estimate excluding intentional throttle sleep is also recorded as
+  `maxSpeedExcludingThrottle`; it is not a guaranteed achievable FPS.
+
+Summarize an explicit host-clock window from `native-trial.jsonl` or
+`lifecycle.jsonl` with:
+
+```sh
+python3 tools/mobile_report.py local/reports/mobile/CAPTURE/Reports/SESSION \
+  --clock host --start HOST_START --end HOST_END
+```
+
+The summary selects displays by actual presentation time even when callbacks
+arrive late, reports pacing and acquire/GPU costs, and includes checkpoint
+stage histories. Collection can leave callbacks in flight; missing callbacks
+are not automatically dropped frames. Positive presentation timestamps still
+do not prove that each frame contains distinct interpolated motion.
+
 On iOS, the runtime uses interpreter CPU fallback, disables DSP JIT, forces
 the portable vertex loader, and aborts any call to the runtime's executable
 memory allocator. The same allocator guard can run on macOS through

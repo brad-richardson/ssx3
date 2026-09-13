@@ -23,11 +23,27 @@ int main() {
     require(![store checkpointForIdentity:@{@"assets":@"course-a", @"appBuild":@"build-b"} reason:&reason],
             @"Changed app must invalidate the snapshot");
     NSString* incomplete = [store newCheckpointPath];
+    NSError* error=nil;
+    require(![store commitCheckpoint:incomplete identity:identity error:&error] &&
+            error.code==SSXCheckpointStatError && error.userInfo[NSUnderlyingErrorKey],
+            @"Missing file must report its filesystem error");
     [[NSData dataWithBytes:"partial" length:7] writeToFile:incomplete atomically:YES];
-    require(![store commitCheckpoint:incomplete identity:identity], @"Partial save committed");
+    require(![store commitCheckpoint:incomplete identity:identity error:&error] &&
+            error.code==SSXCheckpointSizeError, @"Partial save must report its size failure");
     require([[store checkpointForIdentity:identity reason:&reason] isEqual:first], @"Failed save replaced good checkpoint");
     NSString* second = [store newCheckpointPath];
     [state writeToFile:second atomically:YES];
+    NSString* manifest=[root stringByAppendingPathComponent:@"resume.json"];
+    NSData* committed=[NSData dataWithContentsOfFile:manifest];
+    [[NSFileManager defaultManager] removeItemAtPath:manifest error:nil];
+    [[NSFileManager defaultManager] createDirectoryAtPath:manifest withIntermediateDirectories:NO attributes:nil error:nil];
+    require(![store commitCheckpoint:second identity:identity error:&error] &&
+            error.code==SSXCheckpointManifestError && error.userInfo[NSUnderlyingErrorKey],
+            @"Manifest write failure must preserve its cause");
+    require([[NSFileManager defaultManager] fileExistsAtPath:first], @"Manifest failure deleted the old snapshot");
+    [[NSFileManager defaultManager] removeItemAtPath:manifest error:nil];
+    [committed writeToFile:manifest atomically:YES];
+    require([[store checkpointForIdentity:identity reason:&reason] isEqual:first], @"Old checkpoint cannot be recovered");
     require([store commitCheckpoint:second identity:identity], @"Replacement save failed");
     require(![[NSFileManager defaultManager] fileExistsAtPath:first], @"Obsolete snapshot retained");
     ((char*)state.mutableBytes)[1024] = 1;

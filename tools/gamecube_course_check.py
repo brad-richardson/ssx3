@@ -67,6 +67,8 @@ def main():
     ap.add_argument('--output', required=True, type=Path)
     ap.add_argument('--seconds', type=int, default=300)
     ap.add_argument('--expect-reset', action='store_true')
+    ap.add_argument('--metal-validation', choices=('on', 'off'), default='on',
+                    help='Keep validation on for correctness; explicitly disable for performance comparisons')
     args = ap.parse_args()
     if not 180 <= args.seconds <= 900:
         ap.error('Use a bounded 180–900 second check')
@@ -94,7 +96,8 @@ def main():
                 time.sleep(.1)
             run = subprocess.Popen([sys.executable, str(ROOT/'tools/native_gamecube.py'), 'run',
                 '--game', str(args.game.resolve()), '--profile', args.profile, '--seconds', str(args.seconds),
-                '--pipe-controller'], cwd=ROOT, env=dict(os.environ, MTL_DEBUG_LAYER='1'),
+                '--pipe-controller'], cwd=ROOT,
+                env=dict(os.environ, MTL_DEBUG_LAYER='1' if args.metal_validation == 'on' else '0'),
                 stdout=runtime_log, stderr=subprocess.STDOUT)
             children.append(run)
             deadline = time.monotonic()+45
@@ -153,6 +156,7 @@ def main():
     events = reset_events(rows)
     loops = reset_loops(events)
     summary = dict(game=str(args.game), profile=args.profile, samples=len(rows),
+                   metal_validation=args.metal_validation,
                    menu_sequence_sha256=hashlib.sha256(sequence_path.read_bytes()).hexdigest(),
                    riding_observed_after_start=started, resets=events,
                    complete_hazard_resets=sum(bool(e['hazard'] and e['recovered']) for e in events),

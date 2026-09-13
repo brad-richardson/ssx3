@@ -22,9 +22,19 @@ the build or commit that closed them.
 - [ ] Odin: pair it with adb once (wireless debugging or USB) so
       `tools/deploy_odin.py` can push future ISOs straight to Dolphin's game
       folder; confirm which folder Dolphin scans on the device.
-- [ ] 120 Hz spike: fix the scheduling/cost problem measured on `spike/120hz`
-      (4.9 game FPS in the first color-only run), then compare a cheaper pass
-      with MetalFX and depth-reprojected motion vectors.
+- [ ] 120 Hz: complete host replay state/ordering and exact-frame fidelity
+      gates before extending camera/rider interpolation. The elapsed-time
+      speed floor, lifecycle acceptance and filtered probes are installed in
+      phone build 2250d8d9. Five desktop overhead/config comparisons passed
+      correctness checks but found no substantial game-speed gain. Two phone
+      trials completed 847 unchanged extra draws and restored normal rendering
+      through the speed guard; the first has seven seconds near 120 render
+      completions/s at normal game speed. Diagnostic build c2e098d3 adds drawable
+      presentation, GPU/wait and Dolphin workload counters. Its six phone trials
+      confirm actual high-refresh presentation, including four seconds at
+      119.75 displays/s; sustain pacing and verify distinct interpolated motion.
+      The ProMotion opt-in and 120 Hz preference are already enabled. See the
+      [review follow-up](research/120hz-review-followup.md).
 
 ## Garibaldi in the GameCube engine
 
@@ -95,6 +105,12 @@ the build or commit that closed them.
 - [ ] Verify lifecycle Resume repair on iPhone: return to an automatic menu
       after background/audio interruptions; reconcile actual runtime state and
       explicitly reactivate audio on Resume. Reported stuck during Sep 13 playtest.
+      Build 2250d8d9's subsequent session logs three resumes and three successful
+      checkpoint saves, then one failed final save. Build c2e098d3 adds save-stage
+      failure reasons and common timestamps; reproduce that failure and verify
+      relaunch restoration. All eight subsequent diagnostic saves succeeded
+      in 97–137 ms, so the earlier failure remains unreproduced.
+      Active-trial cancellation on the phone remains unverified.
 
 - [x] Menu with in-memory Resume, background checkpointing and restore across
       relaunches; Full Reset recreates the runtime and reloads files. Installed

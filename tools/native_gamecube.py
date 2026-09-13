@@ -233,7 +233,13 @@ def launch(args):
     config_dir.mkdir(exist_ok=True)
     config = config_dir / "Dolphin.ini"
     if not config.exists():
-        config.write_text("[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\n[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
+        # SSX3_IDLE_PC=0x80288ED4 (the OS idle spin in SelectThread) enables the
+        # runtime's idle-loop skipping for a fresh profile; research knob only.
+        idle = os.environ.get("SSX3_IDLE_PC")
+        extra = f"StaticRecompIdlePC = {idle}\n" if idle else ""
+        if os.environ.get('SSX3_RUSH_PRESENT') == '1':
+            extra += 'RushFramePresentation = True\n'
+        config.write_text(f"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\n{extra}[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
     if args.pipe_controller:
         pipes = profile / "Pipes"
         pipes.mkdir(exist_ok=True)
@@ -265,9 +271,14 @@ def launch(args):
     env = os.environ.copy()
     env.update(SSX3_NO_EXECUTABLE_MEMORY="0" if args.jit_fallback else "1",
                STATICRECOMP_NO_JIT="0" if args.jit_fallback else "1",
-               STATICRECOMP_DISPATCH_SAMPLES="1",
-               SSX3_RUNTIME_METRICS="1",
-               STATICRECOMP_TRACE_FILE=str(reports / f"{stamp}-dispatch.csv"))
+               SSX3_RUNTIME_METRICS="1")
+    dispatch_samples = os.environ.get('SSX3_DISPATCH_SAMPLES', '1') != '0'
+    if dispatch_samples:
+        env.update(STATICRECOMP_DISPATCH_SAMPLES='1',
+                   STATICRECOMP_TRACE_FILE=str(reports / f'{stamp}-dispatch.csv'))
+    else:
+        env.pop('STATICRECOMP_DISPATCH_SAMPLES', None)
+        env.pop('STATICRECOMP_TRACE_FILE', None)
     if not args.headless:
         env["SSX3_SCREENSHOTS"] = "1"
     if args.pipe_controller:
@@ -297,6 +308,9 @@ def launch(args):
                 process.kill()
                 code = process.wait()
     result = {"command": command, "exit_code": code, "seconds": time.monotonic() - started,
+              "dispatch_samples": dispatch_samples,
+              "metal_validation": env.get('MTL_DEBUG_LAYER'),
+              "core_config_sha256": sha256(config),
               "stopped_on_fault": stopped_on_fault,
               "requested_cpu_jit_fallback": args.jit_fallback, "log": str(log_path),
               "profile": str(profile), "runner_sha256": runner_sha256,

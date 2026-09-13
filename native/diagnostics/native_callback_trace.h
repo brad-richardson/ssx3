@@ -24,11 +24,19 @@ namespace NativeProbe {
 using Clock=std::chrono::steady_clock;
 static auto start=Clock::now();
 static double Now(){return std::chrono::duration<double>(Clock::now()-start).count();}
+// Reading the clock on every native dispatch (millions per second) slowed the
+// game by roughly 25-30% whenever the experimental window was active. Window
+// checks use a copy refreshed at the callback and idle-seam boundaries, which
+// occur at least once per frame.
+static double now_cached=0;
+static inline void RefreshNow(CPUState& c){
+ if(c.pc==0x801cad24||c.pc==0x8010550c||c.pc==0x8010a4c8)now_cached=Now();
+}
 static bool ExperimentalWindow(){
 #ifdef SSX_NATIVE_TRIAL_APP
- return NativeTrial::status.load()==NativeTrial::Status::Running&&NativeTrial::Active(Now());
+ return NativeTrial::status.load()==NativeTrial::Status::Running&&NativeTrial::Active(now_cached);
 #else
- return Now()>=140&&Now()<175;
+ return now_cached>=140&&now_cached<175;
 #endif
 }
 static bool Valid(CPUState& c,u32 a,size_t n){return a>=0x80000000u && (u64)a+n<=0x80000000ull+c.ram_size;}
@@ -104,6 +112,7 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  std::fflush(file);
 }
 static inline void Step(CPUState& c){
+ RefreshNow(c);
 #ifdef SSX_NATIVE_TRIAL_APP
  if(!ExperimentalWindow()&&!render.pending&&!update.pending)return;
 #endif
@@ -111,12 +120,11 @@ static inline void Step(CPUState& c){
  // Count cross-chunk graphics calls. Same-chunk scene helpers compile to
  // direct gotos and cannot be counted at this dispatcher boundary.
  if(render.pending){
-  if(c.pc==0x80224cc8&&c.lr==0x8010a6a8&&Now()>140&&repeats<4){
+  if(c.pc==0x80224cc8&&c.lr==0x8010a6a8&&now_cached>140&&repeats<4){
    std::fprintf(stderr,"[native-matrix] repeat=%d ptr=%08x",render.repeated,c.gpr[4]);
    for(unsigned i=0;i<16;++i){u32 bits=Word(c,c.gpr[4]+i*4);float v;std::memcpy(&v,&bits,4);std::fprintf(stderr," %.6g",v);}
    std::fprintf(stderr,"\n");
   }
-  queue_after=Word(c,c.gpr[13]-20556);
   if(render.repeated&&CameraEnabled()&&(!SweepEnabled()||(repeats>40&&repeats<=80))&&c.pc==0x8010a6a8){
    const u32 ptr=Word(c,c.gpr[3]+6132);
    if(!Valid(c,ptr,64)||offset_matrix){std::fprintf(stderr,"[native-probe] invalid matrix override\n");std::abort();}
@@ -139,6 +147,8 @@ static inline void Step(CPUState& c){
  if(c.pc!=0x8010550c && c.pc!=0x8010a4c8 && (!update.pending||c.pc!=update.ret) && (!render.pending||c.pc!=render.ret))return;
  if(update.pending&&c.pc==update.ret){auto b=Capture(c,update.app);Emit(c,"update",update,b);update.pending=false;}
  if(render.pending&&c.pc==render.ret){
+  // This field describes callback completion, not intermediate dispatches.
+  queue_after=Word(c,c.gpr[13]-20556);
   if(render.repeated&&WaitEnabled()&&!(c.gpr[3]&255)&&Now()-render.wall<2&&retries<100000){
    ++retries;c.gpr[3]=render.app;c.pc=render.entry;c.lr=render.ret;return;
   }
@@ -146,7 +156,7 @@ static inline void Step(CPUState& c){
    std::memcpy(c.ram+offset_matrix-0x80000000u,saved_matrix.data(),64);offset_matrix=0;++camera_restores;
   }
   auto b=Capture(c,render.app);Emit(c,"render",render,b);
-  if((!render.repeated||SweepEnabled())&&(c.gpr[3]&255)&&view_matrix_calls&&frame_end_calls&&DoubleEnabled()&&Now()>140&&repeats<120&&Valid(c,b.rider,0x800)&&b.state==0){
+  if((!render.repeated||SweepEnabled())&&(c.gpr[3]&255)&&view_matrix_calls&&frame_end_calls&&DoubleEnabled()&&now_cached>140&&repeats<120&&Valid(c,b.rider,0x800)&&b.state==0){
    if(!render.repeated)render.first_result=c.gpr[3];
    render.repeated=true;++repeats;
    view_matrix_calls=frame_end_calls=elapsed_calls=queue_calls=gate_calls=gate_ready=0;

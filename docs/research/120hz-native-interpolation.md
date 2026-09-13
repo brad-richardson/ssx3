@@ -70,12 +70,71 @@ comparison. The guarded run also overlapped part of an iPhone link build.
 | --- | ---: | ---: | ---: |
 | Immediate matrix interpolation, conservative schedule | 61.56 | 59.28 | 0.989 |
 | Spacing from render starts, broader motion states | 63.56 | 38.52 | 0.642 |
-| Render starts with real-time debt guard | 59.20 | 59.20 | 0.988 |
+| Render starts with real-time debt guard (original, 2 ms tolerance) | 59.20 | 59.20 | 0.988 |
+| Render starts with corrected rolling-minimum guard | 87.36 | 58.12 | 0.970 |
 
 The aggressive variant made more extra draws but slowed gameplay severely.
-The debt guard stopped issuing extras when execution fell behind; there were
-zero extras in its measured window. This is a successful protection, not a
-successful high-refresh result. Screenshots from the first variant show a
+The original debt guard stopped issuing extras when execution fell behind; there
+were zero extras in its measured window. That was not a successful protection:
+it vetoed every opportunity. On the phone, both user trials on September 13
+logged 520 vetoes, zero requests and a performance-limit exit after exactly
+three seconds, so the displayed rate stayed at 60.
+
+**Guard correction.** The original check required elapsed guest time to be
+within 2 ms of elapsed wall time since the trial started. At the scheduling
+seam the guest is normally behind by up to a frame: its virtual clock advances
+with executed cycles while the host spent real time running them, and the idle
+skip to the next retrace has not happened yet. The corrected `RealTimeBudget`
+compares the current host debt against the lowest debt seen over a rolling
+half-second window and allows an extra draw only within one 120 Hz period of
+that minimum. A steady throttle offset passes; debt that keeps growing blocks
+further extras. In the corrected Mac run (window 145–170 s) the guard still
+vetoed 1,033 opportunities while allowing 731 extra draws, all of which
+completed with zero changes in the watched rider, application, camera and RNG
+windows; the course check passed. Guest time ran at 0.970 of host time in that
+window, so the allowed slack costs about 3% of real-time speed on this Mac.
+This is still a Mac measurement of the guest re-entry mechanism, not a phone
+result or a display-rate claim.
+
+**Phone trial with the corrected guard (September 13, 13:28).** One extra draw
+completed, 186 opportunities were vetoed, and the performance limit ended the
+trial after three seconds. The guard was right. Between consecutive completed
+ordinary frames the guest clock advanced 16.7 ms while the wall clock advanced
+22.8 ms (median), and application updates ran at 44 per second instead of 60.
+The Mac shows the same shape at 17–20 ms per frame. The cost is the trial's
+own rendering path: on every ordinary frame it re-uploads the interpolated
+palettes through immediate XF commands, a median of 1,725 blended, 481
+camera-only and 711 texture matrices per frame on the phone (1,300/208/370 on
+the Mac), each as 13–14 host-side FIFO writes. The phone cannot absorb that,
+so no budget remains for extra draws. Caching the wall clock instead of reading
+it on every native dispatch (`RefreshNow`) did not change the cadence in a
+second Mac run (`guard2-run`: 70.0 renders/s, 0.959 guest/host, 17.2 ms median
+frame wall time inside the window), so the per-dispatch probe is not the
+dominant cost. Retained host-side palettes, priority 1 below, are the
+prerequisite for any phone result; tuning the guard further is not.
+
+A second contributor is now known: the scheduler's cooperative yield calls
+`CoreTiming::Idle()`, which skips at most one 20,000-cycle slice (about 41 us)
+per burst exit. Idle-loop skipping through the same path costs about 30% of
+real-time speed on the Mac (see `native/research.md`), so the trial's frame
+cadence is not attributable to matrix uploads alone. The SDK cache-range
+calls and the system-call vector are now handled by the core (same document),
+which removes about one million hook calls and 27,000 exceptions per second
+from every frame.
+
+**Phone build policy, review follow-up (September 13):** the temporary unguarded
+trial was followed by a speed-floor experiment. Review found that counting 32
+idle-seam visits did not measure half a second: those visits can happen in a
+fraction of a millisecond. The corrected policy samples at most 50 times per
+second, requires at least 0.5 seconds of elapsed history, blocks extras below
+0.98 guest seconds per host second and resumes only at 0.995. Clock rewinds,
+frequency changes and long observation gaps clear history. It is a reactive
+guard, not a guarantee that every future draw fits a deadline.
+
+After three seconds, the whole trial exits if fewer than 15 extras completed
+or the measured speed falls below 0.95. This also removes the overhead and
+visual delay of ordinary interpolated frames when extras are not useful.
+The 35-second maximum and pause/background cancellation remain. Screenshots from the first variant show a
 coherent rider, board, shadow, terrain and HUD. Scoped extra-draw comparisons
 reported no changes in watched rider, application, camera and RNG windows in
 these runs. That is not a whole-game purity or determinism proof.
@@ -137,13 +196,19 @@ python3 tools/gamecube_schedule_check.py \
 
 Add `--app-trial-check` to the builder to compile the phone control path with a
 desktop driver. It requests a trial, cancels during an injected render, verifies
-the idle transition, and requests a second trial. The first trial grants time
-credit until one extra draw is reached, so an overloaded host cannot silently
+the quiescent transition, and requests a second trial. A compile-time test-only
+override permits the first extra draw, so an overloaded host cannot silently
 skip the cancellation test. The second uses the unchanged app policy. Run that player for 230 seconds
 with only `SSX_NATIVE_PROBE` set; the phone path supplies its own policy flags.
-The driver reports quiescent transitions and fails if the lifecycle sequence
-does not finish. This checks the native control path, not UIKit backgrounding
+The builder regression test checks that this driver is actually included and
+dispatched. The runner requires ordered request/cancel/quiescent/restart/
+quiescent/complete events and a completed extra draw with unchanged watched
+state; missing events fail even if ordinary gameplay succeeds. The driver also
+has an independent watchdog. This checks the native control path, not UIKit backgrounding
 or actual on-device checkpoint reload.
+
+The corrected-guard run is `guard-run` with trace `guard-events.jsonl` and
+player `guard-player` in the same directory.
 
 The completed `lifecycle` run passed its 230-second course check. Cancellation
 during an injected draw at 141.312 seconds reached the idle seam at 141.325;

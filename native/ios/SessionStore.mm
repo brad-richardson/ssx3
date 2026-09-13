@@ -1,6 +1,16 @@
 #import "SessionStore.h"
 #include "moderngekko/game.hpp"
 
+NSString* const SSXSessionStoreErrorDomain = @"SSXSessionStore";
+static BOOL FailCheckpoint(NSError** error, SSXSessionStoreError code, NSString* stage, NSError* underlying) {
+  if (error) {
+    NSMutableDictionary* info = [@{NSLocalizedDescriptionKey:stage, @"stage":stage} mutableCopy];
+    if (underlying) info[NSUnderlyingErrorKey] = underlying;
+    *error = [NSError errorWithDomain:SSXSessionStoreErrorDomain code:code userInfo:info];
+  }
+  return NO;
+}
+
 @implementation SSXSessionStore {
   NSString* _directory;
   NSString* _manifest;
@@ -43,16 +53,25 @@
       [NSUUID.UUID.UUIDString stringByAppendingPathExtension:@"sav"]];
 }
 - (BOOL)commitCheckpoint:(NSString*)path identity:(NSDictionary*)identity {
-  if (![path.stringByDeletingLastPathComponent isEqual:_directory]) return NO;
-  NSDictionary* attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil];
-  if ([attributes fileSize] < 64) return NO;
+  return [self commitCheckpoint:path identity:identity error:nil];
+}
+- (BOOL)commitCheckpoint:(NSString*)path identity:(NSDictionary*)identity error:(NSError**)error {
+  if (error) *error = nil;
+  if (![path.stringByDeletingLastPathComponent isEqual:_directory])
+    return FailCheckpoint(error, SSXCheckpointPathError, @"invalid_path", nil);
+  NSError* cause = nil;
+  NSDictionary* attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&cause];
+  if (!attributes) return FailCheckpoint(error, SSXCheckpointStatError, @"file_stat", cause);
+  if ([attributes fileSize] < 64) return FailCheckpoint(error, SSXCheckpointSizeError, @"file_too_small", nil);
   const auto hash = moderngekko::HashFileSha256(path.fileSystemRepresentation);
-  if (!hash) return NO;
+  if (!hash) return FailCheckpoint(error, SSXCheckpointHashError, @"file_hash", nil);
   NSDictionary* manifest = @{@"schema":@1, @"file":path.lastPathComponent,
       @"sha256":@(hash->c_str()), @"identity":identity,
       @"savedAt":@(NSDate.date.timeIntervalSince1970)};
-  NSData* data = [NSJSONSerialization dataWithJSONObject:manifest options:NSJSONWritingPrettyPrinted error:nil];
-  if (![data writeToFile:_manifest options:NSDataWritingAtomic error:nil]) return NO;
+  NSData* data = [NSJSONSerialization dataWithJSONObject:manifest options:NSJSONWritingPrettyPrinted error:&cause];
+  if (!data) return FailCheckpoint(error, SSXCheckpointEncodingError, @"manifest_encoding", cause);
+  if (![data writeToFile:_manifest options:NSDataWritingAtomic error:&cause])
+    return FailCheckpoint(error, SSXCheckpointManifestError, @"manifest_write", cause);
   // Keep only the committed snapshot. A failed write above leaves the old one intact.
   for (NSString* file in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:_directory error:nil]) {
     if ([file.pathExtension isEqual:@"sav"] && ![file isEqual:path.lastPathComponent])

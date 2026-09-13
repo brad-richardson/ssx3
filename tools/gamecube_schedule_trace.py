@@ -36,6 +36,10 @@ def summarize(rows, start=145, end=170, presents=None):
                   median_extra_callback_ms=statistics.median(r['duration_ms'] for r in extras)
                   if extras else None)
     for label, group in (('extra', extras), ('regular', [r for r in renders if not r['repeat']])):
+        wall_costs = sorted(r['duration_ms'] for r in group if 'duration_ms' in r)
+        result[f'{label}_callback_wall_ms'] = dict(
+            median=statistics.median(wall_costs) if wall_costs else None,
+            p95=wall_costs[int(.95*(len(wall_costs)-1))] if wall_costs else None)
         costs = [(r['tb_end']-r['tb_start'])/40500 for r in group
                  if 'tb_start' in r and 'tb_end' in r]
         result[f'median_{label}_guest_callback_ms'] = statistics.median(costs) if costs else None

@@ -16,10 +16,12 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 #include "moderngekko/runtime.hpp"
 #include "moderngekko/game.hpp"
 #include "GrabMap.h"
 #import "SessionStore.h"
+#import "SessionDiagnostics.h"
 #include "SessionPause.h"
 #include "../diagnostics/trial_control.h"
 #include "dolphin_runtime_internal.hpp"
@@ -32,9 +34,16 @@
 #include "Core/System.h"
 #include "VideoCommon/PerformanceMetrics.h"
 #include "VideoCommon/VideoEvents.h"
+#include "VideoCommon/Statistics.h"
 
 extern "C" const ModernGekkoModuleDesc* staticrecomp_get_module();
 using Clock = std::chrono::steady_clock;
+
+struct FrameWorkload {
+  uint64_t samples=0, draw_calls=0, max_draw_calls=0, primitives=0, vertex_bytes=0, index_bytes=0;
+  uint64_t efb_peeks=0, efb_pokes=0;
+  int vertex_shaders=0, pixel_shaders=0, textures_created=0, textures_uploaded=0, textures_alive=0;
+};
 
 static NSString* Documents() {
   return NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
@@ -151,6 +160,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSString* _pendingCheckpoint;
   BOOL _checkpointAgain;
   double _checkpointDeadline;
+  double _checkpointStarted;
   UIBackgroundTaskIdentifier _saveBackgroundTask;
   SSXSessionPause _pauseState;
   BOOL _restartRequested;
@@ -171,6 +181,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   std::mutex _runtimeMutex;
   std::mutex _framesMutex;
   std::vector<double> _frames;
+  FrameWorkload _workload;
   std::atomic<bool> _running;
   std::atomic<bool> _starting;
   std::atomic<bool> _stopRequested;
@@ -180,6 +191,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   double _launchTime;
   double _systemPauseStart;
   double _lastMetric;
+  double _lastDiagnosticFlush;
+  double _lastTickHost;
+  int _lastTrialStatus;
+  BOOL _trialCancellationLogged;
   double _lastCapture;
   double _duration;
   NSArray<NSDictionary*>* _sequence;
@@ -188,6 +203,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   int _pipe;
 }
 - (void)systemActive:(BOOL)active;
+- (void)logSessionEvent:(NSString*)event details:(NSDictionary*)details;
 @end
 
 @implementation SSXViewController
@@ -406,6 +422,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _pausedForSystem = NO;
   _startTime = _lastMetric = _lastCapture = _duration = 0;
   _eventIndex = 0;
+  _lastTickHost = _lastDiagnosticFlush = 0;
+  _lastTrialStatus = -1;
+  _trialCancellationLogged = NO;
   _sequence = nil;
   _status.text = @"Starting SSX 3…";
   NSString* game = [Documents() stringByAppendingPathComponent:@"Game"];
@@ -426,6 +445,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
   freopen([[_report stringByAppendingPathComponent:@"runtime.log"] fileSystemRepresentation], "a", stderr);
   setvbuf(stderr, nullptr, _IOLBF, 0);
+  SSXDiagnosticsBegin(_report);
+  [self logSessionEvent:@"session_started" details:@{@"appBuild":@SSX_SESSION_BUILD_ID}];
   for (NSString* name in @[@"metrics.jsonl",@"input.jsonl"])
     [[NSFileManager defaultManager] createFileAtPath:[_report stringByAppendingPathComponent:name] contents:nil attributes:nil];
   _metricsFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"metrics.jsonl"]];
@@ -433,7 +454,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
     @"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = CoreAudio\n[Interface]\nConfirmStop = False\n");
   WriteText([config stringByAppendingPathComponent:@"GFX.ini"],
-    @"[Hacks]\nImmediateXFBEnable = True\nCapImmediateXFB = False\n[Settings]\nMTLUsePresentDrawable = 1\n");
+    // AspectRatio 1 forces 16:9 output. The game's own Options > Widescreen setting
+    // must be on so the 3D scene is rendered anamorphic; Auto detection is not
+    // stable across menus and gameplay.
+    @"[Hacks]\nImmediateXFBEnable = True\nCapImmediateXFB = False\n[Settings]\nMTLUsePresentDrawable = 1\nAspectRatio = 1\n");
   NSMutableString* mapping = [NSMutableString stringWithString:@"[GCPad1]\nDevice = Pipe/0/ssx3\nOptions/Always Connected = True\n"];
   for (NSString* key in @[@"A",@"B",@"X",@"Y",@"Z",@"Start"])
     [mapping appendFormat:@"Buttons/%@ = `Button %@`\n",key,key.uppercaseString];
@@ -469,7 +493,12 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     @"os":UIDevice.currentDevice.systemVersion, @"device":UIDevice.currentDevice.model,
     @"simulator":@(TARGET_OS_SIMULATOR), @"metalDevice":((CAMetalLayer*)_surface.layer).device.name ?: @"unknown",
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
-    @"renderScale":@1, @"cpuThread":@NO, @"automated":@(_sequence!=nil)};
+    @"renderScale":@1, @"cpuThread":@NO, @"automated":@(_sequence!=nil),
+    @"reportSchema":@2, @"appBuild":@SSX_SESSION_BUILD_ID,
+    @"builtAt":ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"])[@"built_at"] ?: @"unknown",
+    @"host_seconds":@(CACurrentMediaTime()), @"unix_seconds":@(NSDate.date.timeIntervalSince1970),
+    @"presentationTrace":@"Metal drawable presentedTime; final command buffer GPU timing",
+    @"presentationTimestampsSupported":@(!TARGET_OS_SIMULATOR)};
   [[NSJSONSerialization dataWithJSONObject:metadata options:NSJSONWritingPrettyPrinted error:nil]
     writeToFile:[_report stringByAppendingPathComponent:@"launch.json"] atomically:YES];
   std::thread([self,game,user,descriptor] {
@@ -520,6 +549,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
             std::string(checkpoint.fileSystemRepresentation), DeleteSavestateAfterBoot::No));
         fprintf(stderr,"[ssx-session] restoring %s\n",checkpoint.lastPathComponent.UTF8String);
       }
+      SSXSessionEvent(@"runtime_identity", @{@"identity":identity,
+        @"checkpoint":checkpoint.lastPathComponent ?: @"", @"resumeReason":resumeReason ?: @""});
       fprintf(stderr,"[ssx-startup] runtime_create_seconds=%.3f resume=%d\n",
               CACurrentMediaTime()-self->_launchTime,checkpoint!=nil);
       dispatch_async(dispatch_get_main_queue(), ^{
@@ -532,12 +563,29 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
         self->_runtime = created.runtime.get();
       }
       self->_lastFrame = Clock::now();
+      { std::lock_guard lock(self->_framesMutex); self->_workload={}; }
       self->_frameHook = GetVideoEvents().after_frame_event.Register([self](Core::System&) {
         const auto now = Clock::now();
         std::lock_guard lock(self->_framesMutex);
         if (self->_frames.size()<10000)
           self->_frames.push_back(std::chrono::duration<double,std::milli>(now-self->_lastFrame).count());
         self->_lastFrame=now;
+        // Read renderer-owned statistics at its frame event, then transfer a
+        // small aggregate under the existing lock. UIKit never reads g_stats.
+        auto& w=self->_workload;
+        const auto& f=g_stats.this_frame;
+        ++w.samples;
+        w.draw_calls+=std::max(0,f.num_draw_calls);
+        w.max_draw_calls=std::max(w.max_draw_calls,uint64_t(std::max(0,f.num_draw_calls)));
+        w.primitives+=std::max(0,f.num_prims);
+        w.vertex_bytes+=std::max(0,f.bytes_vertex_streamed);
+        w.index_bytes+=std::max(0,f.bytes_index_streamed);
+        w.efb_peeks+=std::max(0,f.num_efb_peeks); w.efb_pokes+=std::max(0,f.num_efb_pokes);
+        w.vertex_shaders=g_stats.num_vertex_shaders_created;
+        w.pixel_shaders=g_stats.num_pixel_shaders_created;
+        w.textures_created=g_stats.num_textures_created;
+        w.textures_uploaded=g_stats.num_textures_uploaded;
+        w.textures_alive=g_stats.num_textures_alive;
       });
       self->_running=true; self->_starting=false;
       auto result = self->_stopRequested ? moderngekko::RuntimeRunResult{} : created.runtime->Run();
@@ -551,6 +599,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
       created.runtime.reset();
       fprintf(stderr,"[ssx-app] stopped error=%d\n",bool(result.error));
       dispatch_async(dispatch_get_main_queue(), ^{
+        [self logSessionEvent:@"runtime_stopped" details:@{@"error":@(bool(result.error))}];
+        SSXDiagnosticsEnd();
         [self releaseControls];
         if (self->_pipe>=0) { close(self->_pipe); self->_pipe=-1; }
         self->_status.text = result.error ? @"Runtime stopped with an error; see Reports." : @"Session stopped.";
@@ -565,6 +615,11 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }).detach();
 }
 - (void)tick {
+  const double host=CACurrentMediaTime();
+  if (_lastTickHost && host-_lastTickHost>2 && (_running || _pendingCheckpoint))
+    [self logSessionEvent:@"tick_gap" details:@{@"gap_seconds":@(host-_lastTickHost)}];
+  _lastTickHost=host;
+  if (host-_lastDiagnosticFlush>=1) { SSXDiagnosticsFlush(); _lastDiagnosticFlush=host; }
   [self finishCheckpointIfReady];
   if (_duration>0 && (_starting||_running) && CACurrentMediaTime()-_launchTime>_duration+120) {
     fprintf(stderr,"[ssx-test] wall-clock deadline reached\n");
@@ -579,6 +634,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (Core::GetState(Core::System::GetInstance()) != Core::State::Running) return;
   if (!_startTime) {
     _startTime=CACurrentMediaTime();
+    [self logSessionEvent:@"running" details:@{}];
     fprintf(stderr,"[ssx-app] running startup_seconds=%.3f\n",_startTime-_launchTime);
     _menuButton.enabled = YES;
   }
@@ -590,17 +646,30 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (elapsed-_lastMetric>=1) {
     _lastMetric=elapsed;
     std::vector<double> frames;
-    { std::lock_guard lock(_framesMutex); frames.swap(_frames); }
+    FrameWorkload workload;
+    { std::lock_guard lock(_framesMutex); frames.swap(_frames); workload=_workload; _workload={}; }
     std::sort(frames.begin(),frames.end());
     const auto quantile=[&](double q){ return frames.empty()?0.0:frames[std::min(frames.size()-1,size_t(q*(frames.size()-1)))]; };
     task_vm_info_data_t vm={}; mach_msg_type_number_t count=TASK_VM_INFO_COUNT;
     task_info(mach_task_self(),TASK_VM_INFO,(task_info_t)&vm,&count);
     const auto& perf=Core::System::GetInstance().GetPerfMetrics();
+    const double maxSpeed=perf.GetMaxSpeed();
     NSDictionary* row=@{@"seconds":@(elapsed),@"fps":@(perf.GetFPS()),@"vps":@(perf.GetVPS()),
       @"speed":@(perf.GetSpeed()),@"frameIntervalP50ms":@(quantile(.5)),@"frameIntervalP95ms":@(quantile(.95)),
       @"frameIntervalP99ms":@(quantile(.99)),@"frames":@(frames.size()),@"footprintBytes":@(vm.phys_footprint),
       @"thermalState":@(NSProcessInfo.processInfo.thermalState),@"eventIndex":@(_eventIndex),
-      @"audioDMAEmptyDequeues":@(Mixer::GetDMAEmptyDequeues())};
+      @"audioDMAEmptyDequeues":@(Mixer::GetDMAEmptyDequeues()), @"host_seconds":@(CACurrentMediaTime()),
+      @"maxSpeedExcludingThrottle":std::isfinite(maxSpeed) ? @(maxSpeed) : NSNull.null,
+      @"efbWidth":@(perf.GetEFBWidth()), @"efbHeight":@(perf.GetEFBHeight()),
+      @"trialStatus":@(static_cast<int>(NativeTrial::status.load())),
+      @"trialLimited":@(NativeTrial::limited.load()), @"trialExtras":@(NativeTrial::extras.load()),
+      @"workload":@{@"frameEvents":@(workload.samples), @"drawCalls":@(workload.draw_calls),
+        @"maxDrawCallsPerFrameEvent":@(workload.max_draw_calls), @"primitives":@(workload.primitives),
+        @"vertexBytes":@(workload.vertex_bytes), @"indexBytes":@(workload.index_bytes),
+        @"efbPeeks":@(workload.efb_peeks), @"efbPokes":@(workload.efb_pokes),
+        @"vertexShadersCreated":@(workload.vertex_shaders), @"pixelShadersCreated":@(workload.pixel_shaders),
+        @"texturesCreated":@(workload.textures_created), @"texturesUploaded":@(workload.textures_uploaded),
+        @"texturesAlive":@(workload.textures_alive)}};
     [_metricsFile writeData:[NSJSONSerialization dataWithJSONObject:row options:0 error:nil]];
     [_metricsFile writeData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
     _status.text=[NSString stringWithFormat:@"SSX 3 · %.1f FPS · %.0f%% speed · %.0f MB",perf.GetFPS(),perf.GetSpeed()*100,vm.phys_footprint/1048576.0];
@@ -627,6 +696,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }];
   UIAlertAction* trial = [UIAlertAction actionWithTitle:@"Try smoothing (up to 35 seconds)"
       style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    self->_trialCancellationLogged = NO;
+    [self logSessionEvent:@"trial_requested" details:@{}];
     NativeTrial::Request();
     [weakSelf resumeSession];
   }];
@@ -681,14 +754,22 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (void)savePausedSession {
   if (_sequence || !_sessionIdentity || !_running || _stopRequested) return;
-  if (_pendingCheckpoint) { _checkpointAgain = YES; return; }
+  if (_pendingCheckpoint) {
+    _checkpointAgain = YES;
+    [self logSessionEvent:@"checkpoint_deferred" details:@{}];
+    return;
+  }
   _pendingCheckpoint = [_sessionStore newCheckpointPath];
-  _checkpointDeadline = CACurrentMediaTime() + 20;
+  _checkpointStarted = CACurrentMediaTime();
+  _checkpointDeadline = _checkpointStarted + 20;
   __weak SSXViewController* weakSelf = self;
   _saveBackgroundTask = [UIApplication.sharedApplication beginBackgroundTaskWithName:@"Save paused SSX session" expirationHandler:^{
+    [weakSelf logSessionEvent:@"checkpoint_background_expired" details:@{}];
     [weakSelf endSaveBackgroundTask];
   }];
   fprintf(stderr,"[ssx-session] save requested %s\n",_pendingCheckpoint.lastPathComponent.UTF8String);
+  [self logSessionEvent:@"checkpoint_requested" details:@{@"deadline_host_seconds":@(_checkpointDeadline),
+    @"backgroundTaskValid":@(_saveBackgroundTask!=UIBackgroundTaskInvalid)}];
   State::SaveAs(Core::System::GetInstance(), _pendingCheckpoint.fileSystemRepresentation);
 }
 - (void)endSaveBackgroundTask {
@@ -701,7 +782,24 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (!_pendingCheckpoint) return;
   const BOOL ready = [[NSFileManager defaultManager] fileExistsAtPath:_pendingCheckpoint];
   if (!ready && CACurrentMediaTime() < _checkpointDeadline) return;
-  const BOOL saved = ready && [_sessionStore commitCheckpoint:_pendingCheckpoint identity:_sessionIdentity];
+  NSError* error = nil;
+  const BOOL saved = ready && [_sessionStore commitCheckpoint:_pendingCheckpoint identity:_sessionIdentity error:&error];
+  NSError* cause = error.userInfo[NSUnderlyingErrorKey];
+  NSMutableArray* temporary = [NSMutableArray array];
+  if (!saved) {
+    NSString* parent=_pendingCheckpoint.stringByDeletingLastPathComponent;
+    for (NSString* name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:parent error:nil]) {
+      if ([name hasPrefix:_pendingCheckpoint.lastPathComponent] && [name.pathExtension isEqual:@"tmp"]) {
+        NSDictionary* attributes=[[NSFileManager defaultManager] attributesOfItemAtPath:[parent stringByAppendingPathComponent:name] error:nil];
+        [temporary addObject:@{@"file":name, @"bytes":@([attributes fileSize])}];
+      }
+    }
+  }
+  [self logSessionEvent:@"checkpoint_finished" details:@{@"saved":@(saved), @"fileExists":@(ready),
+    @"duration_seconds":@(CACurrentMediaTime()-_checkpointStarted),
+    @"reason":saved ? @"committed" : (ready ? (error.userInfo[@"stage"] ?: @"unknown_commit_failure") : @"file_timeout"),
+    @"errorDomain":error.domain ?: @"", @"errorCode":@(error.code),
+    @"underlyingDomain":cause.domain ?: @"", @"underlyingCode":@(cause.code), @"temporaryFiles":temporary}];
   fprintf(stderr,"[ssx-session] save complete=%d\n",saved);
   _pendingCheckpoint = nil;
   _sessionMenu.message = [self menuMessage:(saved ? @"Your paused session is saved. Resume here next time." :
@@ -716,6 +814,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (void)systemActive:(BOOL)active {
   _pauseState.SetActive(active, _running || _starting);
+  [self logSessionEvent:active ? @"system_active" : @"system_inactive" details:@{}];
   [self updatePlayback];
 }
 - (void)updatePlayback {
@@ -730,17 +829,28 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
       state == Core::State::Paused ? Pause::RuntimeState::Paused : Pause::RuntimeState::Unavailable;
   const auto action = _pauseState.Reconcile(runtimeState);
   const auto trial = NativeTrial::status.load();
+  if (_lastTrialStatus != static_cast<int>(trial)) {
+    _lastTrialStatus=static_cast<int>(trial);
+    [self logSessionEvent:@"trial_status" details:@{}];
+  }
   if (pause && (trial == NativeTrial::Status::Running || trial == NativeTrial::Status::Waiting)) {
       // A checkpoint cannot contain a half-finished injected render: its host
       // return context isn't part of the guest savestate. Cancel, let the CPU
       // reach its idle seam, then pause/save. Input has already been released.
       NativeTrial::Cancel();
+      if (!_trialCancellationLogged) {
+        _trialCancellationLogged=YES;
+        [self logSessionEvent:@"trial_cancel_for_pause" details:@{}];
+      }
       // An external pause may already have stopped the CPU inside the extra
       // draw. Briefly run it to the same safe seam before taking a checkpoint.
       if (runtimeState == Pause::RuntimeState::Paused) _runtime->Resume();
       if (_saveBackgroundTask == UIBackgroundTaskInvalid) {
         __weak SSXViewController* weakSelf = self;
-        _saveBackgroundTask = [UIApplication.sharedApplication beginBackgroundTaskWithName:@"Finish native trial" expirationHandler:^{ [weakSelf endSaveBackgroundTask]; }];
+        _saveBackgroundTask = [UIApplication.sharedApplication beginBackgroundTaskWithName:@"Finish native trial" expirationHandler:^{
+          [weakSelf logSessionEvent:@"trial_background_expired" details:@{}];
+          [weakSelf endSaveBackgroundTask];
+        }];
       }
       __weak SSXViewController* weakSelf = self;
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW,20*NSEC_PER_MSEC),dispatch_get_main_queue(),^{ [weakSelf updatePlayback]; });
@@ -752,6 +862,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   } else if (action == Pause::Action::Resume) {
     if (_runtime->Resume()) return;
     fprintf(stderr,"[ssx-lifecycle] resumed\n");
+    [self logSessionEvent:@"runtime_resumed" details:@{}];
   }
   // This flag accounts for elapsed time only. Runtime state, not ownership of a
   // previous Pause call, determines whether Resume is necessary.
@@ -760,12 +871,15 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     _systemPauseStart = CACurrentMediaTime();
     [self savePausedSession];
     fprintf(stderr,"[ssx-lifecycle] paused\n");
+    [self logSessionEvent:@"runtime_paused" details:@{}];
+    SSXDiagnosticsFlush();
   } else if (!pause && _pausedForSystem && runtimeState != Pause::RuntimeState::Unavailable) {
     const double pauseDuration = CACurrentMediaTime() - _systemPauseStart;
     if (_startTime) _startTime += pauseDuration;
     _launchTime += pauseDuration;
-    { std::lock_guard frameLock(_framesMutex); _frames.clear(); _lastFrame = Clock::now(); }
+    { std::lock_guard frameLock(_framesMutex); _frames.clear(); _workload={}; _lastFrame = Clock::now(); }
     _pausedForSystem = NO;
+    [self logSessionEvent:@"pause_accounted" details:@{@"pause_seconds":@(pauseDuration)}];
   }
 }
 - (void)audioEvent:(NSNotification*)event {
@@ -774,8 +888,21 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   // intent and UIKit state serialized with application lifecycle callbacks.
   dispatch_async(dispatch_get_main_queue(), ^{
     self->_pauseState.SetAudioInterrupted(interrupted, self->_running || self->_starting);
+    [self logSessionEvent:interrupted ? @"audio_interrupted" : @"audio_interruption_ended" details:@{}];
     [self updatePlayback];
   });
+}
+- (void)logSessionEvent:(NSString*)event details:(NSDictionary*)details {
+  NSMutableDictionary* row=[details mutableCopy];
+  row[@"active"]=@(_pauseState.active); row[@"menu"]=@(_pauseState.menu);
+  row[@"audioInterrupted"]=@(_pauseState.audio_interrupted);
+  row[@"applicationState"]=@(UIApplication.sharedApplication.applicationState);
+  row[@"runtimeState"]=@(static_cast<int>(Core::GetState(Core::System::GetInstance())));
+  row[@"trialStatus"]=@(static_cast<int>(NativeTrial::status.load()));
+  row[@"trialCancel"]=@(NativeTrial::cancel.load()); row[@"trialLimited"]=@(NativeTrial::limited.load());
+  row[@"checkpoint"]=_pendingCheckpoint.lastPathComponent ?: @"";
+  row[@"active_seconds"]=_startTime ? @(CACurrentMediaTime()-_startTime-(_pausedForSystem ? CACurrentMediaTime()-_systemPauseStart : 0)) : NSNull.null;
+  SSXSessionEvent(event,row);
 }
 @end
 

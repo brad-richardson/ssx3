@@ -113,6 +113,21 @@ static void Before(CPUState& c) {
  else {++texture_blended;const u32 slot=c.gpr[4];WriteXF(c,out,slot<64?slot*4:0x500+(slot-64)*4,c.gpr[5]==1?8:12);}
 }
 static inline void Step(CPUState& c){
+ // Most native dispatches cannot affect the adapter. Avoid guest reads,
+ // atomics, clock queries and runtime lookups until an observed boundary.
+ if((!update.pending||c.pc!=update.ret)&&(!render.pending||c.pc!=render.ret)){
+  switch(c.pc){
+   case 0x801cad24: case 0x8010550c: case 0x8010a4c8: // idle/update/render
+   case 0x80224cc8: case 0x8010a6a8: case 0x8021a5fc: // view/frame end
+   case 0x8015c5a0: case 0x80139f20: case 0x8010a50c: // bookkeeping/readiness
+   case 0x802a0144: // XFB destination validation
+   case 0x8029e9fc: case 0x8020f8f8: // palette setup/build
+   case 0x802a2e34: case 0x802a2f9c: // position/texture upload
+    break;
+   default:return;
+  }
+ }
+ RefreshNow(c);
 #ifdef SSX_NATIVE_TRIAL_APP
  const auto trial_status=NativeTrial::status.load();
  if(trial_status!=NativeTrial::Status::Waiting&&trial_status!=NativeTrial::Status::Running&&
@@ -138,7 +153,7 @@ static inline void Step(CPUState& c){
 extern "C" void SSXResetNativeTrial(const char* path){
  using namespace NativeProbe;
  if(output_file){std::fclose(output_file);output_file=nullptr;}
- start=Clock::now();update={};render={};offset_matrix=0;repeats=0;
+ start=Clock::now();now_cached=0;update={};render={};offset_matrix=0;repeats=0;
  NativeTrial::log_path=path?path:"";NativeTrial::status=NativeTrial::Status::Idle;NativeTrial::cancel=false;
  NativeTrial::limited=false;
  NativeTrial::frames=NativeTrial::extras=0;NativeTrial::ends=0;

@@ -31,9 +31,22 @@ static bool CompletionEnabled(){
 }
 static RenderResearch::Deadline deadline;
 static RenderResearch::RealTimeBudget budget;
-static bool BudgetEnabled(){
+static RenderResearch::SpeedFloor speed_floor;
+#ifdef SSX_NATIVE_TRIAL_TEST
+// Desktop lifecycle test only: reach one injected draw even on a slow host.
+static bool test_force_extra=false;
+#endif
+static bool SpeedFloorEnabled(){
 #ifdef SSX_NATIVE_TRIAL_APP
  return true;
+#else
+ static bool on=std::getenv("SSX_NATIVE_SPEED_FLOOR")!=nullptr;return on;
+#endif
+}
+static bool BudgetEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ // SpeedFloor supplies the phone load guard using measured elapsed time.
+ return false;
 #else
  static bool on=std::getenv("SSX_NATIVE_REALTIME_GUARD")!=nullptr;return on;
 #endif
@@ -62,10 +75,11 @@ static void StoreWord(CPUState& c,u32 address,u32 value){
  for(unsigned i=0;i<4;++i)p[i]=value>>(24-i*8);
 }
 static void ScheduleEvent(CPUState& c,const char* event,u64 ticks,u64 missed=0){
- std::fprintf(Output(),"{\"event\":\"schedule\",\"action\":\"%s\",\"wall\":%.6f,\"ticks\":%llu,\"host_seconds\":%.9f,\"missed\":%llu,\"pending\":%u}\n",event,Now(),(unsigned long long)ticks,PresentationClock(),(unsigned long long)missed,Word(c,c.gpr[13]-20556));
+ std::fprintf(Output(),"{\"event\":\"schedule\",\"action\":\"%s\",\"wall\":%.6f,\"ticks\":%llu,\"host_seconds\":%.9f,\"missed\":%llu,\"pending\":%u,\"speed_window\":%.6f,\"speed_ratio\":%.6f}\n",event,Now(),(unsigned long long)ticks,PresentationClock(),(unsigned long long)missed,Word(c,c.gpr[13]-20556),speed_floor.span,speed_floor.rate);
  std::fflush(Output());
 }
 static inline void Step(CPUState& c){
+ RefreshNow(c);
  if(!Output())return;
  auto& system=Core::System::GetInstance();
  auto& timing=system.GetCoreTiming();
@@ -90,18 +104,19 @@ static inline void Step(CPUState& c){
  }
  NativeProbe::Step(c);
  if(!enabled)return;
-#ifdef SSX_NATIVE_TRIAL_APP
- // Keeping a delayed pose without useful extra frames makes responsiveness
- // worse. End the trial if this device cannot sustain even five extras/sec.
- if(schedule_started&&ExperimentalWindow()&&Now()-budget.wall_start>=3&&NativeTrial::extras.load()<15){
-  NativeTrial::limited=true;NativeTrial::Cancel();ScheduleEvent(c,"performance_limit",timing.GetTicks());
- }
-#endif
  if(mode_changed&&(finished||c.pc==0x801cad24)&&!ExperimentalWindow()){
   c.ram[mode_address-0x80000000u]=saved_mode;mode_changed=false;
   ScheduleEvent(c,"restore_mode",timing.GetTicks());
   schedule_started=false;
  }
+#ifdef SSX_NATIVE_TRIAL_APP
+ // Completion is a quiescence property, independent of the call-site gate
+ // used to inject work. Cancellation can restore the mode at a callback
+ // return before the next eligible application idle call.
+ if((finished||c.pc==0x801cad24)&&!mode_changed&&!render.pending&&!update.pending&&
+    NativeTrial::status.load()==NativeTrial::Status::Running&&!ExperimentalWindow())
+  NativeTrial::status=NativeTrial::Status::Finished;
+#endif
  if(c.pc!=0x801cad24||c.lr!=0x801cd724||render.pending||update.pending)return;
 #ifdef SSX_NATIVE_TRIAL_APP
  // A saved session can contain our persistent single-XFB alias. Normalize its
@@ -115,8 +130,6 @@ static inline void Step(CPUState& c){
      Valid(c,mode,1)&&c.ram[mode-0x80000000u]==1)
    c.ram[mode-0x80000000u]=0;
  }
- if(NativeTrial::status.load()==NativeTrial::Status::Running&&!ExperimentalWindow())
-  NativeTrial::status=NativeTrial::Status::Finished;
  if(NativeTrial::cancel.load()&&NativeTrial::status.load()==NativeTrial::Status::Waiting)
   NativeTrial::status=NativeTrial::Status::Finished;
  if(!ExperimentalWindow()&&NativeTrial::status.load()!=NativeTrial::Status::Waiting)return;
@@ -138,7 +151,7 @@ static inline void Step(CPUState& c){
  const u64 period=system.GetSystemTimers().GetTicksPerSecond()/120;
  if(!schedule_started){
   schedule_started=true;deadline={ticks+period,period,0};last_draw=ticks;
-  budget={Now(),ticks};
+  budget={Now(),ticks};speed_floor={};
   ScheduleEvent(c,"start",ticks);
   if(CompletionEnabled()){
    const u32 graphics=Word(c,c.gpr[13]-22644);
@@ -163,6 +176,16 @@ static inline void Step(CPUState& c){
    ScheduleEvent(c,"completion_mode",ticks);
   }
  }
+ if(SpeedFloorEnabled())speed_floor.Observe(now_cached,ticks,system.GetSystemTimers().GetTicksPerSecond());
+#ifdef SSX_NATIVE_TRIAL_APP
+ // Ordinary interpolated draws also cost time. Stop the entire trial when
+ // it cannot produce useful extras, or sustained simulation speed suffers.
+ if(now_cached-budget.wall_start>=3&&
+    (NativeTrial::extras.load()<15||(speed_floor.span>=RenderResearch::SpeedFloor::Window&&speed_floor.rate<0.95))){
+  NativeTrial::limited=true;NativeTrial::Cancel();
+  ScheduleEvent(c,"performance_limit",ticks);return;
+ }
+#endif
  const auto decision=deadline.Poll(ticks,last_draw,Word(c,c.gpr[13]-20556));
  const u64 missed=deadline.missed;
  if(decision==RenderResearch::Decision::InvalidQueue){ScheduleEvent(c,"invalid_queue",ticks);std::abort();}
@@ -171,6 +194,13 @@ static inline void Step(CPUState& c){
  if(decision==RenderResearch::Decision::Render){
    if(BudgetEnabled()&&!budget.Allows(Now(),ticks,system.GetSystemTimers().GetTicksPerSecond())){
     ScheduleEvent(c,"host_budget",ticks,missed);c.pc=c.lr;timing.Idle();return;
+   }
+   bool floor_allows=speed_floor.Allows();
+#ifdef SSX_NATIVE_TRIAL_TEST
+   floor_allows|=test_force_extra;
+#endif
+   if(SpeedFloorEnabled()&&!floor_allows){
+    ScheduleEvent(c,"speed_floor",ticks,missed);c.pc=c.lr;timing.Idle();return;
    }
    ScheduleEvent(c,"request",ticks,missed);
    const u32 original_r3=c.gpr[3];
