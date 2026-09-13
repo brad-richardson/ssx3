@@ -5,6 +5,13 @@ Research only. SSX_NATIVE_PROBE must name a new JSONL output file. Explicitly
 setting SSX_NATIVE_DOUBLE_RENDER=1 attempts at most 120 extra renderer calls
 after 140 host seconds while riding. Readiness gates remain intact; an attempted
 call is not evidence of drawing or displaying another frame.
+
+Experimental flags (unset to disable): SSX_NATIVE_WAIT_REPEAT retries rejected
+extra calls with bounded guest polling; SSX_NATIVE_SKIP_BOOKKEEPING omits two
+timing helpers on extras; SSX_NATIVE_CAMERA_OFFSET offsets a copied graphics
+matrix; SSX_NATIVE_FROZEN_VIEW_SWEEP holds one state for normal/offset/restored
+phases; SSX_NATIVE_CAPTURE requests screenshots. These are research controls,
+not a high-refresh implementation. See docs/research/120hz-render-seam.md.
 """
 import argparse
 import collections
@@ -64,13 +71,41 @@ def build(args):
     if sha(production) != receipt['production_runner_sha256']:
         raise RuntimeError('Production runner changed during diagnostic build')
     receipt['player_sha256'] = sha(out / 'player')
+    # Keep the normal course runner's pin checks, fault checks and scratch-profile
+    # protection. Only substitute the isolated player in its child launcher.
+    native_launcher = out / 'run_native.py'
+    native_launcher.write_text(
+        'import sys\nfrom pathlib import Path\n'
+        f'ROOT=Path({str(ROOT)!r})\n'
+        "sys.path.insert(0,str(ROOT/'tools'))\n"
+        'import native_gamecube as native\n'
+        'original=native.executable\n'
+        f'player=Path({str(out / "player")!r})\n'
+        "native.executable=lambda name: player if name=='moderngekko-run' else original(name)\n"
+        'native.main()\n')
+    course_launcher = out / 'course_check.py'
+    course_launcher.write_text(
+        'import sys\nfrom pathlib import Path\n'
+        f'ROOT=Path({str(ROOT)!r})\n'
+        "sys.path.insert(0,str(ROOT/'tools'))\n"
+        'import gamecube_course_check as course\n'
+        'original=course.subprocess.Popen\n'
+        'def launch(args,*pos,**kw):\n'
+        ' args=list(args)\n'
+        " target=str(ROOT/'tools/native_gamecube.py')\n"
+        f' if target in args: args[args.index(target)]={str(native_launcher)!r}\n'
+        ' return original(args,*pos,**kw)\n'
+        'course.subprocess.Popen=launch\n'
+        'course.main()\n')
+    receipt['launchers'] = {p.name: sha(p) for p in (native_launcher, course_launcher)}
     (out / 'build.json').write_text(json.dumps(receipt, indent=2) + '\n')
     print(out / 'player')
 
 
-def summarize(rows, after=140):
+def summarize(rows, after=140, frozen_sequence=False):
     """Keep attempted repeats separate from observed scene-path coverage."""
-    result = dict(schema=1, after_host_seconds=after, groups={})
+    result = dict(schema=1, after_host_seconds=after,
+                  frozen_sequence=frozen_sequence, groups={})
     for label in ('update', 'render', 'repeat'):
         group = [r for r in rows if r['wall'] > after and r['rider'] and r['same_rider']
                  and (r['repeat'] if label == 'repeat' else
@@ -90,10 +125,37 @@ def summarize(rows, after=140):
             counts['results'] = dict(collections.Counter(str(r['result']) for r in group))
         result['groups'][label] = counts
     repeats = [(i, r) for i, r in enumerate(rows) if r['repeat']]
-    result['repeat_pairing_failures'] = sum(
-        i == 0 or rows[i-1]['event'] != 'render' or rows[i-1]['repeat'] or
-        rows[i-1]['app'] != r['app'] or rows[i-1]['rider'] != r['rider']
-        for i, r in repeats)
+    def paired(i, complete=False):
+        current = rows[i]
+        if i == 0:
+            return False
+        first = i - 1
+        if frozen_sequence:
+            while first > 0 and rows[first]['event'] == 'render' and rows[first]['repeat']:
+                first -= 1
+        if rows[first]['repeat']:
+            return False
+        for row in rows[first:i+1]:
+            if (row['event'] != 'render' or row['app'] != current['app'] or
+                    row['rider'] != current['rider']):
+                return False
+            if complete and not (row.get('result', 0) & 255 and
+                                 row.get('view_matrix_calls', 0) > 0 and
+                                 row.get('frame_end_calls', 0) > 0):
+                return False
+        return True
+
+    result['repeat_pairing_failures'] = sum(not paired(i) for i, _ in repeats)
+    result['verified_complete_render_pairs'] = sum(paired(i, complete=True) for i, _ in repeats)
+    result['unverified_or_incomplete_render_pairs'] = (
+        len(repeats) - result['verified_complete_render_pairs'])
+    for label in ('render', 'repeat'):
+        group = [r for r in rows if r['wall'] > after and r['rider'] and r['same_rider']
+                 and r['event'] == 'render' and bool(r['repeat']) == (label == 'repeat')]
+        for field in ('retries', 'skipped_elapsed', 'skipped_queue', 'camera_offsets',
+                      'camera_restores'):
+            if group and all(field in r for r in group):
+                result['groups'][label][field] = sum(r[field] for r in group)
     result['limits'] = ('Scoped entry/return comparisons, not whole-game determinism or a '
                         'presentation count. Dispatch counters must observe ordinary draws '
                         'before absent repeat calls are evidence of a skipped path. Guest '
@@ -110,13 +172,15 @@ def main():
     p = sub.add_parser('summarize')
     p.add_argument('trace', type=Path)
     p.add_argument('--after', type=float, default=140)
+    p.add_argument('--frozen-sequence', action='store_true',
+                   help='Validate a continuous repeat sequence anchored to one completed original render')
     p.add_argument('--output', type=Path)
     args = parser.parse_args()
     if args.command == 'build':
         build(args)
     else:
         rows = [json.loads(line) for line in args.trace.read_text().splitlines()]
-        result = summarize(rows, args.after)
+        result = summarize(rows, args.after, args.frozen_sequence)
         result['trace_sha256'] = sha(args.trace)
         encoded = json.dumps(result, indent=2) + '\n'
         if args.output:

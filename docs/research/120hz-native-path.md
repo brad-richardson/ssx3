@@ -7,6 +7,12 @@ usually hit a graphics-readiness gate, and rendering includes frame bookkeeping.
 There is no working native 120 Hz mode yet. These experiments run on the Mac;
 the installed iPhone build is unchanged.
 
+**Follow-up:** the [render-seam experiments](120hz-render-seam.md) now complete
+120 verified extra draws while respecting the queue and skipping duplicate
+timing helpers. A frozen normal/offset/restored camera test produces changed
+scene pixels and byte-identical original/restored captures. This is a native
+rendering proof, still without a high-refresh or latency claim.
+
 This follows the Downloads [handoff](ssx3-120hz-handoff-2026-09-13.md), especially
 its scheduling trace and “draw twice without an update” test. It revises the
 earlier MetalFX-first recommendation in [the broader analysis](120hz-analysis.md)

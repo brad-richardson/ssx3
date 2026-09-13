@@ -9,6 +9,10 @@ render-state boundary. [The native-path report](120hz-native-path.md) records
 the callback probes, repeated-render experiment, graphics-readiness failure
 and next steps. This supersedes the earlier MetalFX-first ordering.
 
+The subsequent [render-seam report](120hz-render-seam.md) records successful
+repeated draws and a reversible camera-image change from unchanged gameplay
+state. Queue ownership, complete visibility and mobile performance remain open.
+
 ## Initial local findings
 
 - The local GXBE69 executable matches both this project's SHA256 pin and the
