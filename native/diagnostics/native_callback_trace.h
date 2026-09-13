@@ -26,7 +26,7 @@ static auto start=Clock::now();
 static double Now(){return std::chrono::duration<double>(Clock::now()-start).count();}
 static bool ExperimentalWindow(){
 #ifdef SSX_NATIVE_TRIAL_APP
- return NativeTrial::Active(Now());
+ return NativeTrial::status.load()==NativeTrial::Status::Running&&NativeTrial::Active(Now());
 #else
  return Now()>=140&&Now()<175;
 #endif

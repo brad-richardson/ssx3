@@ -113,6 +113,11 @@ static void Before(CPUState& c) {
  else {++texture_blended;const u32 slot=c.gpr[4];WriteXF(c,out,slot<64?slot*4:0x500+(slot-64)*4,c.gpr[5]==1?8:12);}
 }
 static inline void Step(CPUState& c){
+#ifdef SSX_NATIVE_TRIAL_APP
+ const auto trial_status=NativeTrial::status.load();
+ if(trial_status!=NativeTrial::Status::Waiting&&trial_status!=NativeTrial::Status::Running&&
+    !render.pending&&!update.pending&&!NativeSchedule::mode_changed&&c.pc!=0x801cad24)return;
+#endif
  Before(c);
  NativeSchedule::Step(c);
  if(!ExperimentalWindow())reset_next=true;
