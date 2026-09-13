@@ -126,6 +126,33 @@ provisioning. Its existence is useful precedent, not SSX 3 compatibility evidenc
 
 ## Options and decision gates
 
+### September 13 clarification: PS2 recompilation remains an open alternative
+
+The earlier choice favored an available Dolphin-derived hardware runtime and
+demonstrated SSX 3 execution. It did not follow a PS2-versus-GameCube performance
+benchmark. The historical PS2 concern extended beyond VU microcode to the GS
+graphics and surrounding hardware runtime; estimates about the amount of work
+were not measured compatibility or performance results.
+
+The current [PS2Recomp documentation](https://github.com/ran-j/PS2Recomp#limitations)
+still describes partial hardware support. However, its
+[GS frontend](https://github.com/ran-j/PS2Recomp/blob/main/ps2xRuntime/src/lib/gs/gs_frontend.cpp)
+constructs a CPU backend, and that
+[backend](https://github.com/ran-j/PS2Recomp/blob/main/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp)
+implements primitive drawing and pixel operations. A blanket claim that there
+is no GS renderer is too broad. Source availability does not establish SSX 3
+compatibility or the cost of that renderer on iPhone.
+
+The user reports a separate spike with few missing VU microcodes; its artifacts
+have not been reviewed here. Reassess against the exact fork/revision: confirm
+what the VU coverage means, boot stock SSX 3, render and ride with correct audio
+and timing, and measure EE/VU/GS/runtime costs on ARM64 without runtime code
+generation. Compare matched gameplay and resolution against the working GC
+phone build before changing foundations. PS2 emulator maturity and PS2 static
+recompiler/runtime readiness are separate questions.
+
+### Original route gates
+
 | Route | Best use | Main limitation |
 | --- | --- | --- |
 | Continue PS2 course import | Fastest route to improving the existing Odin prototype | Does not itself deliver a native iOS app |
