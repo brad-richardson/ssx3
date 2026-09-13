@@ -166,6 +166,12 @@ with it. No-callback objects must use `FFFFFFFF`, not a model reference.
 Candidate 008 corrects this and is undergoing native validation. Candidate 006
 inherits the rejected metadata and must not be used for gameplay acceptance.
 
+The failed 005 run produced a repeated-error log; its first 2 MiB and final
+64 KiB are retained, with original byte count in `failure-005.json`. The native
+runner now kills its owned diagnostic on the first detected invalid access or
+unknown GPU command, or a log over 32 MiB. Missing shutdown counters after this
+stop are a failure, never a passing run.
+
 008/024/026 load and ride without native errors, but impact is still unverified.
 The opening-lane rock pair (`c36`/`c38`, fixtures 013/014) did not alter the rider
 trajectory. Geometry inspection found the rider below the rock's collision
@@ -212,12 +218,84 @@ initial omission policy, not a narrow-phase geometry proof; report the omitted
 source IDs and replace it with verified shape clearance as that support matures.
 030 is also **unverified for impacts and not installed**. The phone remains 027.
 
-The failed run produced a repeated-error log; its first 2 MiB and final 64 KiB
-are retained, with original byte count in `failure-005.json`. The native runner
-now kills its owned diagnostic on the first detected invalid access/unknown GPU
-command, or a log over 32 MiB, instead of waiting for the full run deadline.
-Missing shutdown counters after this stop are a failure, never a passing run.
+### Live registration and rigid-transform audit
 
+The isolated `gamecube_collision_trace.py` diagnostic copies three generated
+AOT chunks and inserts read-only observations at actual instruction labels.
+This covers direct same-chunk branches that do not pass through the runtime's
+dispatch hook. It preserves the original module, generated sources, guest
+state and course data; its bounded logs are correctness evidence, not a speed
+benchmark. Select a packed instance ID with `SSX_COLLISION_INSTANCE`.
+
+September 13 check `c47registration`, using the existing lowered-rock fixture
+020, confirms that registration is working: source rock 41 / target instance
+600 has flags `0x00210023`, a valid kind-1 property and one-part collision mesh,
+and reaches both broad and narrow phase. All 881 completed narrow-phase calls
+returned zero contacts. The run passed the course/runtime checks, with zero
+invalid accesses, GPU command errors, unknown guest instructions or code
+verification failures. The receipt is `local/reports/native-runs/20260913-182621.json`.
+
+An independent ABI error explains why valid registration is not sufficient:
+the scenery importer embeds uniform scale in the instance's matrix basis and
+leaves the separate float at +124 equal to 1. The rock's basis has axis length
+0.55. GXBE69 `801DDF98` calls `801C651C`, which inverts by transposing the basis;
+that requires orthonormal axes. `801DDFA4` then scales the query separately by
+the reciprocal of instance +124. The renderer also uses the separate scalar
+at `8021C4C8`. The old representation therefore draws at the right size while
+transforming collision queries into the wrong local coordinates.
+
+The candidate compiler profile `tricky-gc-static-rigid-transform-v3` factors
+uniform scale into +124 and normalizes collidable instance bases. It rejects
+nonuniform/sheared transforms as explicit omissions and validates orthonormal
+bases when reading bindings. Tests preserve forward render coordinates while
+checking that the engine's rigid inverse recovers the original local point.
+Canonical candidate 031 differs from 030 only in the basis/scalar bytes of
+2,059 instances; effective basis coefficients differ by at most `5.96e-8`
+after float32 rounding. Geometry, properties, bounds, paths, rail bindings and
+the 49 reset-corridor omissions are unchanged. Candidate SHA256:
+`c1e1c07b117d2379bd392231e649759a46d0c31ffaa389dba2b0ad07060df896`.
+
+Matched fixture 021 applies only this transform correction to fixture 020
+without moving its rock or changing the start. Native check `c48rigid` now
+produces 22 positive narrow-phase returns (38 summed contact counts, including
+repeated contacts across frames), versus zero in the control. The rider enters
+reaction state 8 at 132.29 seconds near the rock, returns to normal state 0 at
+136.29 seconds, and continues riding. A later terrain hazard reset completes
+with ground contact and subsequent hazard-free continuation; the run ends in
+ordinary riding with no reset loop or native errors. The receipt is
+`local/reports/native-runs/20260913-183224.json`; the paired summary is
+`local/evidence/garibaldi-collision/rigid-native-comparison.json`.
+
+The transform repair therefore has native impact evidence. Canonical 031's
+400-second normal-course check `c49rigidcourse` passed runtime checks and
+continued riding through a crash/reset at 307.87 seconds, with stable ground
+recovery at 312.09 seconds and no loop. Its strict `--expect-reset` gate did
+**not** pass: that reset was on terrain flags 73, so no terrain-hazard reset was
+observed. The receipt is `local/reports/native-runs/20260913-183644.json`.
+Concurrent build work slowed this correctness run; its wall-clock duration
+does not establish equivalent course coverage or a performance comparison.
+Targeted waterfall fixture 022 retains 031's geometry and reset paths and
+closes that missing gate: `c50rigidwaterfall` passed its 240-second check with
+one flags-75 terrain hazard at 128.82 seconds, ground recovery at 131.01 seconds,
+and over 100 further seconds of riding without a reset loop. The production,
+uninstrumented native module reported zero runtime/code-verification failures.
+Receipt: `local/reports/native-runs/20260913-184742.json`. Matching river fixture
+023 / `c51rigidriver` passed its 240-second check with four completed hazard
+recoveries, no reset loops and zero failures in the existing native runtime
+gates. Receipt: `local/reports/native-runs/20260913-185640.json`.
+
+The river log also contains 48 known MemoryWatcher startup messages about
+unmapped reads of the rider pointer `803da1f8` during exception handlers. The
+existing runtime tests explicitly distinguish these from guest invalid accesses.
+The watcher currently calls `MMU::HostRead` before checking the result; its
+failed hardware-read path can raise a PI interrupt. **High-priority observer
+TODO:** replace this path with checked `HostTryRead` access so the observer does
+not disturb the guest during startup. These warnings are recorded separately
+in the paired evidence summary. No runtime/platform patch changed in this audit.
+
+**031 remains experimental and is not installed; phone assets remain 027.**
+One targeted obstacle encounter does not certify every newly solid object or
+the complete course's checkpoint/finish progression.
 
 The recovery gate now requires actual ground contact and three subsequent
 hazard-free seconds. Brief aerial state 4/5 after a teleport is not a completed

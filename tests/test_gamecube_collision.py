@@ -2,7 +2,7 @@ import copy
 import struct
 import unittest
 
-from gamecube_collision import encode_collision, read_collision, read_tricky_collision
+from gamecube_collision import encode_collision, read_collision, read_tricky_collision, collision_instance_transform
 from gamecube_collision_import import bind_static, validate_static_bindings, segment_intersects_box
 from gamecube_scenery import TrickyScenery
 from gamecube_scenery_import import instance_record
@@ -22,6 +22,34 @@ def expanded(parts):
 
 
 class CollisionTests(unittest.TestCase):
+    def test_uniform_scale_preserves_rendering_and_repairs_rigid_collision_inverse(self):
+        data=bytearray(160)
+        matrix=[0.,.55,0.,0., -.55,0.,0.,0., 0.,0.,.55,0., -113459.,17177.,-228594.,1.]
+        struct.pack_into('>16f',data,8,*matrix);struct.pack_into('>f',data,124,1.)
+        struct.pack_into('>I',data,112,0x08000258)
+        with self.assertRaisesRegex(ValueError,'orthonormal'):collision_instance_transform(data)
+        fixed=collision_instance_transform(data,normalize=True)
+        original=struct.unpack_from('>16f',data,8);basis=struct.unpack_from('>16f',fixed,8)
+        scale=struct.unpack_from('>f',fixed,124)[0]
+        point=[100.,-200.,25.]
+        world=[original[12+k]+sum(original[4*j+k]*point[j] for j in range(3)) for k in range(3)]
+        transformed=[basis[12+k]+scale*sum(basis[4*j+k]*point[j] for j in range(3)) for k in range(3)]
+        for before,after in zip(world,transformed):self.assertAlmostEqual(before,after,places=5)
+        # Match the engine's transpose-based inverse followed by 1/scalar.
+        local=[sum(basis[4*j+k]*(world[k]-basis[12+k]) for k in range(3))/scale for j in range(3)]
+        wrong=[sum(original[4*j+k]*(world[k]-original[12+k]) for k in range(3)) for j in range(3)]
+        for before,after in zip(point,local):self.assertAlmostEqual(before,after,places=5)
+        self.assertGreater(abs(wrong[0]-point[0]),50)
+        self.assertEqual(fixed[:8],data[:8]);self.assertEqual(fixed[72:124],data[72:124])
+        self.assertEqual(fixed[128:],data[128:])
+
+    def test_nonuniform_scale_and_shear_require_separate_conversion(self):
+        for matrix in ([1.,0.,0.,0.,0.,2.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.],
+                       [1.,0.,0.,0.,.1,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.]):
+            data=bytearray(160);struct.pack_into('>16f',data,8,*matrix);struct.pack_into('>f',data,124,1.)
+            with self.assertRaisesRegex(ValueError,'nonuniform scale or shear'):
+                collision_instance_transform(data,normalize=True)
+
     def test_reset_corridor_intersection_checks_segment_interior_and_parallel_axes(self):
         low,high=[-1,-1,-1],[1,1,1]
         self.assertTrue(segment_intersects_box([-10,0,0],[10,0,0],low,high))

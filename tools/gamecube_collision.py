@@ -8,6 +8,42 @@ import math
 import struct
 
 
+def collision_instance_transform(data, *, normalize=False):
+    """Validate SSX 3's rigid basis / separate uniform scale representation.
+
+    GXBE69 801DDF98 calls a transpose-based rigid inverse (801C651C), then
+    scales the query by 1 / instance+124 at 801DDFA4. Baking scale into the
+    basis preserves the render transform but gives the wrong collision inverse.
+    Normalization preserves the forward transform within float32 rounding.
+    Nonuniform scale and shear require a different geometry conversion.
+    """
+    if len(data) != 160:
+        raise ValueError('Expected a 160-byte static instance')
+    matrix=list(struct.unpack_from('>16f',data,8))
+    scalar=struct.unpack_from('>f',data,124)[0]
+    if (not all(math.isfinite(v) for v in matrix+[scalar]) or scalar <= 0 or
+            matrix[3:12:4] != [0.,0.,0.] or matrix[15] != 1.):
+        raise ValueError('Invalid collision instance transform')
+    axes=[matrix[4*i:4*i+3] for i in range(3)]
+    lengths=[math.sqrt(sum(v*v for v in axis)) for axis in axes]
+    scale=sum(lengths)/3
+    if (scale <= 0 or any(abs(length/scale-1)>1e-5 for length in lengths) or
+            any(abs(sum(axes[i][k]*axes[j][k] for k in range(3)))>scale*scale*1e-5
+                for i in range(3) for j in range(i))):
+        raise ValueError('Collision instance has nonuniform scale or shear')
+    if not normalize:
+        if abs(scale-1)>1e-5:
+            raise ValueError('Collision instance basis must be orthonormal; use the separate scale field')
+        return data
+    for i in range(3):
+        for j in range(3):matrix[4*i+j]/=scale
+    result=bytearray(data)
+    struct.pack_into('>16f',result,8,*matrix)
+    struct.pack_into('>f',result,124,scalar*scale)
+    collision_instance_transform(result)
+    return bytes(result)
+
+
 def span(data, at, size, low=0, high=None):
     high = len(data) if high is None else high
     if size < 0 or at < low or at+size > high or high > len(data):

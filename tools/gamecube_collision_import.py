@@ -13,14 +13,14 @@ from pathlib import Path
 import struct
 
 from course_route import ssx3_paths
-from gamecube_collision import read_tricky_collision, encode_collision, read_collision
+from gamecube_collision import read_tricky_collision, encode_collision, read_collision, collision_instance_transform
 from gamecube_cleanup import clear_removed_instance_references
 from gamecube_scenery import TrickyScenery
 from gamecube_scenery_import import instance_record, WORLD_RESOURCE_ORDER
 from gamecube_spline_import import require_disabled_programs
 from gamecube_world import World, assemble, validate_resource_capacities
 
-PROFILE = 'tricky-gc-static-mesh-winding-v2'
+PROFILE = 'tricky-gc-static-rigid-transform-v3'
 
 
 def segment_intersects_box(a,b,low,high):
@@ -93,6 +93,7 @@ def validate_static_bindings(records, track):
         model=struct.unpack_from('>I',p,120)[0]
         if models.get(model)!=len(collisions[collision]):
             raise ValueError('Collision parts must match render-model parts')
+        collision_instance_transform(p)
     return len(ids)
 
 
@@ -127,7 +128,7 @@ def bind_static(records, scene, collisions, recipe):
     oid=lambda rid:track<<24|rid
     added, converted, defs, def_ids, bindings, remap, new_sources = [],[],[],{},[],{},{}
     collision_ids={}; skipped=Counter(); enabled=[]
-    corridors=reset_segments(records);protected=[]
+    corridors=reset_segments(records);protected=[];unsupported_transforms=[]
     for new_id,(e,p) in enumerate(instances):
         src_id=source_ids[e['rid']]
         if not 0<=src_id<len(scene.instances):raise ValueError('Source instance out of range')
@@ -154,10 +155,16 @@ def bind_static(records, scene, collisions, recipe):
                 skipped['protected-reset-corridor']+=1
                 protected.append(dict(source_instance=src_id,instance=new_id,reset_path=overlap))
             elif gameplay['collision_mode']==1 and gameplay['effect_slot']==-1:
+                try:
+                    normalized=collision_instance_transform(p,normalize=True)
+                except ValueError as error:
+                    normalized=None
+                    skipped['nonuniform-or-invalid-instance-transform']+=1
+                    unsupported_transforms.append(dict(source_instance=src_id,instance=new_id,reason=str(error)))
                 index=gameplay['collision_or_physics']
                 if not 0<=index<len(collisions):raise ValueError('Source collision reference out of range')
                 key=(index,scale)
-                if key not in collision_ids:
+                if normalized is not None and key not in collision_ids:
                     data=encode_collision(collisions[index],geometry_scale=scale)
                     read_collision(data)
                     parts=struct.unpack_from('>H',data,2)[0]
@@ -169,10 +176,11 @@ def bind_static(records, scene, collisions, recipe):
                     else:
                         rid=len(added);collision_ids[key]=(rid,parts)
                         added.append((dict(kind=12,track=track,rid=rid,size=len(data)),data))
-                collision=collision_ids[key]
-                if collision is None:
+                collision=collision_ids.get(key) if normalized is not None else None
+                if normalized is not None and collision_ids[key] is None:
                     skipped['multipart-collision-needs-matching-render-parts']+=1
-                else:
+                elif collision is not None:
+                    p=normalized
                     enabled.append(dict(source_instance=src_id,instance=new_id,source_collision=index,collision=collision[0]))
             else:
                 skipped[f'mode-{gameplay["collision_mode"]}/effect-{gameplay["effect_slot"]}']+=1
@@ -210,6 +218,8 @@ def bind_static(records, scene, collisions, recipe):
                     collision_bytes=sum(len(p) for e,p in added),skipped_instances=dict(skipped),
                     definitions=len(defs),instance_id_remap=remap,instance_source_ids=new_sources,
                     protected_reset_instances=protected,
+                    unsupported_transform_instances=unsupported_transforms,
+                    transform_profile='orthonormal-basis-plus-uniform-scale',
                     reset_clearance=dict(method='conservative instance bounds',radius=35,height=150),
                     response_profile='stock-static-behavior-3',native_impact_verified=False)
 
