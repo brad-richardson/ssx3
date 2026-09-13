@@ -21,6 +21,7 @@
 #include "GrabMap.h"
 #import "SessionStore.h"
 #include "SessionPause.h"
+#include "../diagnostics/trial_control.h"
 #include "dolphin_runtime_internal.hpp"
 #include "Common/HookableEvent.h"
 #include "Common/Logging/Log.h"
@@ -153,6 +154,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   UIBackgroundTaskIdentifier _saveBackgroundTask;
   SSXSessionPause _pauseState;
   BOOL _restartRequested;
+  CADisplayLink* _trialDisplayLink;
   NSMutableArray<UIButton*>* _controls;
   SSXStickView* _stick;
   SSXStickView* _cStick;
@@ -430,6 +432,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _inputFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"input.jsonl"]];
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
     @"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = CoreAudio\n[Interface]\nConfirmStop = False\n");
+  WriteText([config stringByAppendingPathComponent:@"GFX.ini"],
+    @"[Hacks]\nImmediateXFBEnable = True\nCapImmediateXFB = False\n[Settings]\nMTLUsePresentDrawable = 1\n");
   NSMutableString* mapping = [NSMutableString stringWithString:@"[GCPad1]\nDevice = Pipe/0/ssx3\nOptions/Always Connected = True\n"];
   for (NSString* key in @[@"A",@"B",@"X",@"Y",@"Z",@"Start"])
     [mapping appendFormat:@"Buttons/%@ = `Button %@`\n",key,key.uppercaseString];
@@ -470,6 +474,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     writeToFile:[_report stringByAppendingPathComponent:@"launch.json"] atomically:YES];
   std::thread([self,game,user,descriptor] {
     @autoreleasepool {
+      SSXResetNativeTrial([[self->_report stringByAppendingPathComponent:@"native-trial.jsonl"] fileSystemRepresentation]);
       moderngekko::RuntimeConfig options;
       options.game_root = game.fileSystemRepresentation;
       options.user_directory = user.fileSystemRepresentation;
@@ -604,6 +609,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (_duration>0 && elapsed>=_duration) [self stopGame];
 }
 - (void)stopGame {
+  NativeTrial::Cancel();
   [self releaseControls]; _stopRequested=true;
   std::lock_guard lock(_runtimeMutex);
   if (_runtime) _runtime->RequestStop();
@@ -617,17 +623,14 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
       preferredStyle:UIAlertControllerStyleAlert];
   __weak SSXViewController* weakSelf = self;
   UIAlertAction* resume = [UIAlertAction actionWithTitle:@"Resume" style:UIAlertActionStyleCancel handler:^(UIAlertAction*) {
-    SSXViewController* self = weakSelf;
-    if (!self) return;
-    self->_sessionMenu = nil;
-    NSError* error = nil;
-    const BOOL activated = [AVAudioSession.sharedInstance setActive:YES error:&error];
-    self->_pauseState.RequestResume(
-        UIApplication.sharedApplication.applicationState == UIApplicationStateActive, activated);
-    if (!activated) fprintf(stderr,"[ssx-lifecycle] audio reactivation failed: %s\n",error.description.UTF8String);
-    if (!self->_running && !self->_starting) [self startGame];
-    else [self updatePlayback];
+    [weakSelf resumeSession];
   }];
+  UIAlertAction* trial = [UIAlertAction actionWithTitle:@"Try smoothing (up to 35 seconds)"
+      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+    NativeTrial::Request();
+    [weakSelf resumeSession];
+  }];
+  trial.enabled = _running && !_pendingCheckpoint;
   UIAlertAction* reset = [UIAlertAction actionWithTitle:@"Full Reset" style:UIAlertActionStyleDestructive handler:^(UIAlertAction*) {
     SSXViewController* self = weakSelf;
     [self->_sessionStore discardCheckpoint];
@@ -640,15 +643,40 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }];
   // The save takes a brief moment; finish it before allowing a new runtime.
   reset.enabled = !_pendingCheckpoint;
-  [_sessionMenu addAction:resume]; [_sessionMenu addAction:reset];
+  [_sessionMenu addAction:resume]; [_sessionMenu addAction:trial]; [_sessionMenu addAction:reset];
   _sessionMenu.preferredAction = resume;
   [self presentViewController:_sessionMenu animated:YES completion:nil];
+}
+- (void)resumeSession {
+  _sessionMenu = nil;
+  NSError* error = nil;
+  const BOOL activated = [AVAudioSession.sharedInstance setActive:YES error:&error];
+  _pauseState.RequestResume(UIApplication.sharedApplication.applicationState == UIApplicationStateActive, activated);
+  if (!activated) fprintf(stderr,"[ssx-lifecycle] audio reactivation failed: %s\n",error.description.UTF8String);
+  if (!_running && !_starting) [self startGame];
+  else [self updatePlayback];
+}
+- (void)trialDisplayTick:(CADisplayLink*)link {
+  // This is a refresh-rate hint. Display-link callbacks are not proof that a
+  // new game frame reached the screen; the native trial logs render counts.
+}
+- (void)updateTrialDisplayLink {
+  const BOOL running = NativeTrial::status.load() == NativeTrial::Status::Running && !_pauseState.WantsPause();
+  if (running && !_trialDisplayLink) {
+    _trialDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(trialDisplayTick:)];
+    const float maximum = self.view.window.screen.maximumFramesPerSecond;
+    _trialDisplayLink.preferredFrameRateRange = CAFrameRateRangeMake(MIN(60,maximum),maximum,maximum);
+    [_trialDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
+  }
+  if (!running && _trialDisplayLink) { [_trialDisplayLink invalidate]; _trialDisplayLink=nil; }
 }
 - (NSString*)menuMessage:(NSString*)status {
   NSDictionary* build = ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"]);
   NSString* version = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"0.1";
   NSString* identifier = [@SSX_SESSION_BUILD_ID substringToIndex:8];
-  return [NSString stringWithFormat:@"%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, version,
+  NSString* trial = NativeTrial::limited.load() ? @"Smoothing trial ended: extra frames couldn’t keep up. Normal rendering restored." :
+      @"Smoothing is experimental and may add visual delay. A trial starts while riding and returns to normal within 35 seconds.";
+  return [NSString stringWithFormat:@"%@\n\n%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, trial, version,
       identifier, BuildDate(build[@"built_at"]), _courseBuildDescription ?: @"Course not loaded"];
 }
 - (void)savePausedSession {
@@ -692,6 +720,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (void)updatePlayback {
   const BOOL pause = _pauseState.WantsPause();
+  [self updateTrialDisplayLink];
   if (pause && !_pausedForSystem) [self releaseControls];
   std::lock_guard lock(_runtimeMutex);
   if (!_runtime || !_running || _stopRequested) return;
@@ -700,7 +729,25 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   const auto runtimeState = state == Core::State::Running ? Pause::RuntimeState::Running :
       state == Core::State::Paused ? Pause::RuntimeState::Paused : Pause::RuntimeState::Unavailable;
   const auto action = _pauseState.Reconcile(runtimeState);
+  const auto trial = NativeTrial::status.load();
+  if (pause && (trial == NativeTrial::Status::Running || trial == NativeTrial::Status::Waiting)) {
+      // A checkpoint cannot contain a half-finished injected render: its host
+      // return context isn't part of the guest savestate. Cancel, let the CPU
+      // reach its idle seam, then pause/save. Input has already been released.
+      NativeTrial::Cancel();
+      // An external pause may already have stopped the CPU inside the extra
+      // draw. Briefly run it to the same safe seam before taking a checkpoint.
+      if (runtimeState == Pause::RuntimeState::Paused) _runtime->Resume();
+      if (_saveBackgroundTask == UIBackgroundTaskInvalid) {
+        __weak SSXViewController* weakSelf = self;
+        _saveBackgroundTask = [UIApplication.sharedApplication beginBackgroundTaskWithName:@"Finish native trial" expirationHandler:^{ [weakSelf endSaveBackgroundTask]; }];
+      }
+      __weak SSXViewController* weakSelf = self;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,20*NSEC_PER_MSEC),dispatch_get_main_queue(),^{ [weakSelf updatePlayback]; });
+      return;
+  }
   if (action == Pause::Action::Pause) {
+    [self endSaveBackgroundTask];
     if (_runtime->Pause()) return; // Retry on the next tick if startup is still finishing.
   } else if (action == Pause::Action::Resume) {
     if (_runtime->Resume()) return;

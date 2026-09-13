@@ -24,6 +24,13 @@ world SHA256 and snapshots it with the loaded session. A stale/missing label
 falls back to the world hash; copying new assets during play cannot relabel
 the old in-memory course. Save-status updates retain the version information.
 
+The menu also offers an opt-in native smoothing trial, lasting up to 35 seconds.
+It can end early if extra rendering cannot keep up, and always drains an injected
+draw before pausing/saving. Ordinary rendering remains the default. This is a
+geometry-interpolation experiment with a visual-delay tradeoff, not a verified
+120 fps or latency improvement. See the [prototype findings](../../docs/research/120hz-native-interpolation.md)
+for performance limits, ownership rules and reproduction.
+
 Snapshots live in `Documents/Resume`, with a checksum and an atomically replaced
 manifest. Incomplete snapshots leave the previous checkpoint intact; changed
 assets, changed app builds, and damaged snapshots fall back to a normal boot.

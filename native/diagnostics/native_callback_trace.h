@@ -16,11 +16,21 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#ifdef SSX_NATIVE_TRIAL_APP
+#include "trial_control.h"
+#endif
 
 namespace NativeProbe {
 using Clock=std::chrono::steady_clock;
-static const auto start=Clock::now();
+static auto start=Clock::now();
 static double Now(){return std::chrono::duration<double>(Clock::now()-start).count();}
+static bool ExperimentalWindow(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return NativeTrial::Active(Now());
+#else
+ return Now()>=140&&Now()<175;
+#endif
+}
 static bool Valid(CPUState& c,u32 a,size_t n){return a>=0x80000000u && (u64)a+n<=0x80000000ull+c.ram_size;}
 static u32 Word(CPUState& c,u32 a){
  if(!Valid(c,a,4))return 0;const auto* p=c.ram+(a-0x80000000u);
@@ -57,20 +67,31 @@ static unsigned camera_offsets=0,camera_restores=0;
 static unsigned retries=0,skipped_elapsed=0,skipped_queue=0;
 static u32 queue_before=0,queue_after=0;
 static unsigned view_matrix_calls=0,frame_end_calls=0,elapsed_calls=0,queue_calls=0,gate_calls=0,gate_ready=0;
+static FILE* output_file=nullptr;
 static FILE* Output(){
- static FILE* file=[](){
+ if(!output_file){
+#ifdef SSX_NATIVE_TRIAL_APP
+  const char* p=NativeTrial::log_path.empty()?nullptr:NativeTrial::log_path.c_str();
+#else
   const char* p=std::getenv("SSX_NATIVE_PROBE");
+#endif
   if(!p)return static_cast<FILE*>(nullptr);
   FILE* f=std::fopen(p,"wx");
   if(!f){std::perror("native probe output");std::abort();}
-  return f;
- }();
- return file;
+  output_file=f;
+ }
+ return output_file;
 }
 static bool DoubleEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_RENDER");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool WaitEnabled(){static const bool on=std::getenv("SSX_NATIVE_WAIT_REPEAT")!=nullptr;return on;}
 static bool SweepEnabled(){static const bool on=std::getenv("SSX_NATIVE_FROZEN_VIEW_SWEEP")!=nullptr;return on;}
-static bool SkipEnabled(){static const bool on=std::getenv("SSX_NATIVE_SKIP_BOOKKEEPING")!=nullptr;return on;}
+static bool SkipEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return true;
+#else
+ static const bool on=std::getenv("SSX_NATIVE_SKIP_BOOKKEEPING")!=nullptr;return on;
+#endif
+}
 static bool CameraEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAMERA_OFFSET")!=nullptr;return on;}
 static bool CaptureEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAPTURE")!=nullptr;return on;}
 static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
@@ -83,6 +104,9 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  std::fflush(file);
 }
 static inline void Step(CPUState& c){
+#ifdef SSX_NATIVE_TRIAL_APP
+ if(!ExperimentalWindow()&&!render.pending&&!update.pending)return;
+#endif
  if(!Output())return;
  // Count cross-chunk graphics calls. Same-chunk scene helpers compile to
  // direct gotos and cannot be counted at this dispatcher boundary.

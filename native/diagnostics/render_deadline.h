@@ -3,6 +3,16 @@
 #include <cstdint>
 
 namespace RenderResearch {
+struct RealTimeBudget {
+  double wall_start=0;
+  uint64_t ticks_start=0;
+  bool Allows(double wall,uint64_t ticks,uint64_t frequency) const {
+    if(!frequency||ticks<ticks_start||wall<wall_start)return false;
+    // Never spend more guest time to chase extra frames when the host is
+    // already behind. Two milliseconds tolerate timer/dispatch granularity.
+    return double(ticks-ticks_start)/frequency + .002 >= wall-wall_start;
+  }
+};
 enum class Decision { Early, Covered, Full, Render, InvalidQueue };
 struct Deadline {
   uint64_t next = 0;

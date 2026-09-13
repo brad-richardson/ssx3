@@ -1,5 +1,9 @@
 # Native rendering investigation — September 13, 2026
 
+**Latest:** the [native pose prototype](120hz-native-interpolation.md) adds
+model-instance transform history and an optional, guarded iPhone trial. The
+immediate-upload version is not fast enough to recommend as the default.
+
 **Continue with a targeted native render-state investigation.** The executable
 has distinct application update and render callbacks, and observed rendering
 leaves several important gameplay fields unchanged. However, repeated calls

@@ -15,10 +15,38 @@
 #include "Core/Config/GraphicsSettings.h"
 namespace NativeSchedule {
 using namespace NativeProbe;
-static bool ScheduleEnabled(){static bool on=std::getenv("SSX_NATIVE_SCHEDULE")!=nullptr;return on;}
-static bool CompletionEnabled(){static bool on=std::getenv("SSX_NATIVE_COMPLETION_RELEASE")!=nullptr;return on;}
+static bool ScheduleEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return true;
+#else
+ static bool on=std::getenv("SSX_NATIVE_SCHEDULE")!=nullptr;return on;
+#endif
+}
+static bool CompletionEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return true;
+#else
+ static bool on=std::getenv("SSX_NATIVE_COMPLETION_RELEASE")!=nullptr;return on;
+#endif
+}
 static RenderResearch::Deadline deadline;
+static RenderResearch::RealTimeBudget budget;
+static bool BudgetEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return true;
+#else
+ static bool on=std::getenv("SSX_NATIVE_REALTIME_GUARD")!=nullptr;return on;
+#endif
+}
 static u64 last_draw=0;
+static bool StartSpacingEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return true;
+#else
+ static bool on=std::getenv("SSX_NATIVE_START_SPACING")!=nullptr;return on;
+#endif
+}
+static bool ActiveRiderState(u32 state){return StartSpacingEnabled()?(state<6||state==7):state==0;}
 static bool schedule_started=false,mode_changed=false;
 static unsigned char saved_mode=0;
 static u32 mode_address=0,first_xfb=0;
@@ -55,28 +83,62 @@ static inline void Step(CPUState& c){
  const bool finished=render.pending&&c.pc==render.ret;
  const bool completed=finished&&(c.gpr[3]&255)&&view_matrix_calls&&frame_end_calls;
  const bool extra=render.repeated;
+ if(enabled&&StartSpacingEnabled()&&c.pc==0x8010a4c8)last_draw=timing.GetTicks();
  if(completed&&enabled){
-  last_draw=timing.GetTicks();
-  if(schedule_started)ScheduleEvent(c,extra?"extra_complete":"regular_complete",last_draw);
+  if(!StartSpacingEnabled())last_draw=timing.GetTicks();
+  if(schedule_started)ScheduleEvent(c,extra?"extra_complete":"regular_complete",timing.GetTicks());
  }
  NativeProbe::Step(c);
  if(!enabled)return;
- if(mode_changed&&(finished||c.pc==0x801cad24)&&Now()>=175){
+#ifdef SSX_NATIVE_TRIAL_APP
+ // Keeping a delayed pose without useful extra frames makes responsiveness
+ // worse. End the trial if this device cannot sustain even five extras/sec.
+ if(schedule_started&&ExperimentalWindow()&&Now()-budget.wall_start>=3&&NativeTrial::extras.load()<15){
+  NativeTrial::limited=true;NativeTrial::Cancel();ScheduleEvent(c,"performance_limit",timing.GetTicks());
+ }
+#endif
+ if(mode_changed&&(finished||c.pc==0x801cad24)&&!ExperimentalWindow()){
   c.ram[mode_address-0x80000000u]=saved_mode;mode_changed=false;
   ScheduleEvent(c,"restore_mode",timing.GetTicks());
+  schedule_started=false;
  }
  if(c.pc!=0x801cad24||c.lr!=0x801cd724||render.pending||update.pending)return;
- const double wall=Now();if(wall<140||wall>=175)return;
+#ifdef SSX_NATIVE_TRIAL_APP
+ // A saved session can contain our persistent single-XFB alias. Normalize its
+ // completion mode after restore, before accepting a new trial. Per-entry mode
+ // flags still release any already queued frames through their original path.
+ if(!mode_changed&&NativeTrial::status.load()!=NativeTrial::Status::Running&&c.gpr[13]==0x803dfa60){
+  const u32 graphics=Word(c,c.gpr[13]-22644),xfb=Word(c,c.gpr[13]-20600);
+  const u32 mode=c.gpr[13]-20602;
+  if(Valid(c,graphics,7572)&&Valid(c,xfb,Word(c,graphics+7552))&&xfb&&
+     Word(c,graphics+7556)==xfb&&!Word(c,graphics+7560)&&Word(c,c.gpr[13]-20596)==xfb&&
+     Valid(c,mode,1)&&c.ram[mode-0x80000000u]==1)
+   c.ram[mode-0x80000000u]=0;
+ }
+ if(NativeTrial::status.load()==NativeTrial::Status::Running&&!ExperimentalWindow())
+  NativeTrial::status=NativeTrial::Status::Finished;
+ if(NativeTrial::cancel.load()&&NativeTrial::status.load()==NativeTrial::Status::Waiting)
+  NativeTrial::status=NativeTrial::Status::Finished;
+ if(!ExperimentalWindow()&&NativeTrial::status.load()!=NativeTrial::Status::Waiting)return;
+#else
+ if(!ExperimentalWindow())return;
+#endif
  const u32 manager=Word(c,0x803da9d8);
  // Recover the active application through the manager and validate its type.
  const u32 app=Word(c,manager+4);
  if(!Valid(c,manager,64)||!Valid(c,app,0x400)||Word(c,app)!=0x802e543c)return;
  const auto state=Capture(c,app);
- if(!Valid(c,state.rider,0x800)||state.state!=0)return;
+ if(!Valid(c,state.rider,0x800)||!ActiveRiderState(state.state))return;
+#ifdef SSX_NATIVE_TRIAL_APP
+ if(NativeTrial::status.load()==NativeTrial::Status::Waiting){
+  NativeTrial::ends=Now()+35;NativeTrial::status=NativeTrial::Status::Running;
+ }
+#endif
  const u64 ticks=timing.GetTicks();
  const u64 period=system.GetSystemTimers().GetTicksPerSecond()/120;
  if(!schedule_started){
   schedule_started=true;deadline={ticks+period,period,0};last_draw=ticks;
+  budget={Now(),ticks};
   ScheduleEvent(c,"start",ticks);
   if(CompletionEnabled()){
    const u32 graphics=Word(c,c.gpr[13]-22644);
@@ -85,8 +147,14 @@ static inline void Step(CPUState& c){
    if(!Config::Get(Config::GFX_HACK_IMMEDIATE_XFB)||
       Config::Get(Config::GFX_HACK_CAP_IMMEDIATE_XFB)||
       !bytes||bytes>2*1024*1024||!Valid(c,first_xfb,bytes)||
-      first_xfb!=Word(c,graphics+7556)||Word(c,c.gpr[13]-20596)){
-    ScheduleEvent(c,"invalid_immediate_copy_setup",ticks);std::abort();
+      first_xfb!=Word(c,graphics+7556)||
+      (Word(c,c.gpr[13]-20596)&&Word(c,c.gpr[13]-20596)!=first_xfb)){
+    ScheduleEvent(c,"invalid_immediate_copy_setup",ticks);
+#ifdef SSX_NATIVE_TRIAL_APP
+    NativeTrial::status=NativeTrial::Status::Unavailable;schedule_started=false;return;
+#else
+    std::abort();
+#endif
    }
    StoreWord(c,c.gpr[13]-20596,first_xfb);
    ScheduleEvent(c,"shared_xfb_alias",ticks);
@@ -101,10 +169,14 @@ static inline void Step(CPUState& c){
  if(decision==RenderResearch::Decision::Covered)ScheduleEvent(c,"covered",ticks,missed);
  if(decision==RenderResearch::Decision::Full)ScheduleEvent(c,"queue_full",ticks,missed);
  if(decision==RenderResearch::Decision::Render){
+   if(BudgetEnabled()&&!budget.Allows(Now(),ticks,system.GetSystemTimers().GetTicksPerSecond())){
+    ScheduleEvent(c,"host_budget",ticks,missed);c.pc=c.lr;timing.Idle();return;
+   }
    ScheduleEvent(c,"request",ticks,missed);
    const u32 original_r3=c.gpr[3];
    c.gpr[3]=app;c.pc=0x8010a4c8;
    NativeProbe::Step(c);render.repeated=true;render.first_result=original_r3;++repeats;
+   if(StartSpacingEnabled())last_draw=ticks;
    return;
  }
  // Cooperatively yield a CPU slice instead of sleeping the guest main thread

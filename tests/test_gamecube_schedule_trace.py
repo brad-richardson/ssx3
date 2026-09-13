@@ -63,6 +63,12 @@ class ScheduleTraceTests(unittest.TestCase):
 #include <cassert>
 using namespace RenderResearch;
 int main() {
+ RealTimeBudget budget{10,1000};
+ assert(budget.Allows(10.01,1010,1000));
+ assert(!budget.Allows(10.02,1010,1000)); // host debt blocks extra work
+ assert(!budget.Allows(9.9,1010,1000));
+ assert(!budget.Allows(10.01,999,1000));
+ assert(!budget.Allows(10.01,1010,0));
  Deadline d{100,100,0};
  assert(d.Poll(99,0,0)==Decision::Early && d.next==100);
  assert(d.Poll(100,90,0)==Decision::Covered && d.next==200);

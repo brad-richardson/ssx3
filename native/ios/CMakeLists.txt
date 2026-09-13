@@ -15,6 +15,24 @@ foreach(DEP FMT LZ4 ZSTD ZLIB MBEDTLS CURL LIBSPNG PUGIXML MINIZIP BZIP2)
   set(USE_SYSTEM_${DEP} OFF CACHE BOOL "" FORCE)
 endforeach()
 add_subdirectory("${MG}" moderngekko EXCLUDE_FROM_ALL)
+# Keep the pinned upstream checkout untouched. Compile one local source copy
+# with the authored, opt-in research hook, using core's normal build settings.
+set(TRIAL_DIR "${SSX_ROOT}/native/diagnostics")
+set(RUN_SOURCE "${CORE}/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp")
+file(READ "${RUN_SOURCE}" RUN_CODE)
+set(DISPATCH_MARKER "          const u32 runtime_dispatch_address = m_guest.pc;")
+string(FIND "${RUN_CODE}" "${DISPATCH_MARKER}" DISPATCH_POSITION)
+if(DISPATCH_POSITION LESS 0)
+  message(FATAL_ERROR "Native trial dispatch seam changed")
+endif()
+string(REPLACE "namespace\n{" "#define SSX_NATIVE_TRIAL_APP 1\n#include \"${TRIAL_DIR}/native_callback_trace.h\"\n#include \"${TRIAL_DIR}/native_render_schedule.h\"\n#include \"${TRIAL_DIR}/native_pose_interpolation.h\"\nnamespace\n{" RUN_CODE "${RUN_CODE}")
+string(REPLACE "${DISPATCH_MARKER}" "          NativeInterpolation::Step(m_guest);\n${DISPATCH_MARKER}" RUN_CODE "${RUN_CODE}")
+set(TRIAL_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/NativeTrial_Run.cpp")
+file(WRITE "${TRIAL_SOURCE}" "${RUN_CODE}")
+get_target_property(CORE_SOURCES core SOURCES)
+list(FILTER CORE_SOURCES EXCLUDE REGEX "(^|/)StaticRecompCore_Run\\.cpp$")
+set_property(TARGET core PROPERTY SOURCES "${CORE_SOURCES}")
+target_sources(core PRIVATE "${TRIAL_SOURCE}")
 set(GAME_ID GXBE69 CACHE STRING "" FORCE)
 set(GENERATED_DIR "${SSX_ROOT}/local/native/ssx3-module/codegen/generated" CACHE PATH "" FORCE)
 set(GXRUNTIME_DIR "${CORE}/GXRuntime" CACHE PATH "" FORCE)
@@ -24,7 +42,10 @@ add_subdirectory("${CORE}/module-template" game-module)
 
 add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm)
 # Saved machine state must not cross incompatible frontend/runtime builds.
-set(SESSION_SOURCES App.mm SessionStore.mm SessionStore.h SessionPause.h ../patches/recompcore-platform.patch
+set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStore.h SessionPause.h
+  ../diagnostics/native_callback_trace.h ../diagnostics/native_render_schedule.h
+  ../diagnostics/native_pose_interpolation.h ../diagnostics/pose_history.h
+  ../diagnostics/render_deadline.h ../diagnostics/trial_control.h ../patches/recompcore-platform.patch
   ../patches/moderngekko-platform.patch ../dependencies.json)
 set(SESSION_HASHES "")
 foreach(SOURCE IN LISTS SESSION_SOURCES)
@@ -33,7 +54,7 @@ foreach(SOURCE IN LISTS SESSION_SOURCES)
   string(APPEND SESSION_HASHES "${SOURCE_HASH}")
 endforeach()
 string(SHA256 SESSION_BUILD_ID "${SESSION_HASHES}")
-target_compile_definitions(SSXNative PRIVATE SSX_SESSION_BUILD_ID="${SESSION_BUILD_ID}")
+target_compile_definitions(SSXNative PRIVATE SSX_SESSION_BUILD_ID="${SESSION_BUILD_ID}" SSX_NATIVE_TRIAL_APP=1)
 set_target_properties(SSXNative PROPERTIES
   CXX_STANDARD 23 OBJCXX_STANDARD 23
   MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
