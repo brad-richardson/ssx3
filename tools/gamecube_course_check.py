@@ -6,6 +6,14 @@ The MemoryWatcher observer never writes guest memory. Menu navigation is timed;
 start requests wait for observed state 6 after menu input has finished. That
 state also exists during loading, so requests repeat until riding is observed.
 Screenshots and the runtime receipt remain essential to interpret the ride.
+
+--restart-after rides for that many observed seconds, then takes the pause
+menu's Restart and requires riding to be observed a second time. The pause
+menu opens on Return with Restart one step below, and Restart confirms with
+"Are you sure?" defaulting to No; the whole path is sent in one pass, because
+a menu left open stops frame production. The second ride must follow a freshly
+observed briefing state, since the rider observation can hold its last
+pre-restart value.
 """
 import argparse
 import hashlib
@@ -72,9 +80,14 @@ def main():
     ap.add_argument('--cpu-thread', action='store_true',
                     help='Dual-core runtime (CPUThread = True) for this fresh profile')
     ap.add_argument('--module', type=Path, help='Module dylib to load instead of the default build')
+    ap.add_argument('--restart-after', type=int,
+                    help='Seconds of observed riding before choosing the pause menu Restart; '
+                         'the check then requires riding again')
     args = ap.parse_args()
     if not 180 <= args.seconds <= 900:
         ap.error('Use a bounded 180–900 second check')
+    if args.restart_after is not None and not 5 <= args.restart_after <= args.seconds-120:
+        ap.error('Restart must follow at least 5 riding seconds and leave 120 seconds to ride again')
     if Path(args.profile).name != args.profile or args.profile in ('.', '..'):
         ap.error('Use a single isolated profile name')
     profile = ROOT/'local/native/profiles'/args.profile
@@ -120,6 +133,10 @@ def main():
             children.append(replay)
             briefing_since = None
             last_request = -float('inf')
+            riding_since = None
+            restart_wall = None
+            observed_starts = 0
+            briefing_after_restart = False
             with rows_path.open() as stream:
                 latest = None
                 while run.poll() is None:
@@ -127,9 +144,45 @@ def main():
                         raise RuntimeError('Observer stopped during gameplay')
                     for line in stream:
                         latest = json.loads(line)
-                    ready = latest and latest['state'] == 6 and time.time()-latest['wall_time'] < 2
-                    if latest and last_request > 0 and latest['state'] in range(10) and latest['state'] != 6:
-                        started = True
+                    # A restart can leave the observed rider fixed at its last
+                    # pre-restart value, so only a freshly written sample counts.
+                    fresh = bool(latest) and time.time()-latest['wall_time'] < 2
+                    ready = fresh and latest['state'] == 6
+                    if ready and restart_wall is not None:
+                        briefing_after_restart = True
+                    if fresh and last_request > 0 and latest['state'] in range(10) and latest['state'] != 6:
+                        # After a restart, riding only counts once the briefing
+                        # state has been seen again; otherwise a stale wipeout
+                        # sample would pass as a second ride.
+                        if restart_wall is not None and not briefing_after_restart:
+                            pass
+                        else:
+                            if not started:
+                                observed_starts += 1
+                                riding_since = time.monotonic()
+                            started = True
+                    # The pause menu opens on Return with Restart one below it,
+                    # and Restart then asks "Are you sure?" with No selected, so
+                    # the confirmation needs an explicit move up to Yes. Drive
+                    # the whole path in one pass: a menu left open stops frame
+                    # production and the run fails its own rendering evidence.
+                    if (args.restart_after is not None and restart_wall is None and started
+                            and riding_since is not None
+                            and time.monotonic()-riding_since >= args.restart_after):
+                        for button, settle in (('START', 2.0), ('D_DOWN', 1.0), ('A', 2.0),
+                                               ('D_UP', 1.0), ('A', 0.0)):
+                            subprocess.run([sys.executable, str(ROOT/'tools/gamecube_input.py'),
+                                '--profile', args.profile, 'tap', button], cwd=ROOT, check=True,
+                                stdout=input_log, stderr=subprocess.STDOUT)
+                            time.sleep(settle)
+                        restart_wall = time.time()
+                        # Require riding to be observed again, and let the
+                        # existing state-6 retry carry the post-restart briefing.
+                        started = False
+                        riding_since = None
+                        last_request = time.monotonic()
+                        input_log.write(f'Requested restart at {restart_wall}\n'); input_log.flush()
+                        continue
                     if ready and replay.poll() == 0 and not started:
                         if briefing_since is None:
                             briefing_since = time.monotonic()
@@ -163,12 +216,18 @@ def main():
                    metal_validation=args.metal_validation, cpu_thread=args.cpu_thread,
                    module=str(args.module.resolve()) if args.module else None,
                    menu_sequence_sha256=hashlib.sha256(sequence_path.read_bytes()).hexdigest(),
-                   riding_observed_after_start=started, resets=events,
+                   riding_observed_after_start=observed_starts >= 1,
+                   restart_requested_wall=restart_wall,
+                   riding_observed_after_restart=(observed_starts >= 2
+                                                  if args.restart_after is not None else None),
+                   resets=events,
                    complete_hazard_resets=sum(bool(e['hazard'] and e['recovered']) for e in events),
                    reset_loops=loops, source='read-only GXBE69 MemoryWatcher; native Metal check')
     (args.output/'observations.json').write_text(json.dumps(summary, indent=2)+'\n')
     print(json.dumps({k:v for k,v in summary.items() if k!='resets'}, indent=2))
-    if not started or not rows or loops or args.expect_reset and not summary['complete_hazard_resets']:
+    if (not summary['riding_observed_after_start'] or not rows or loops or
+            args.restart_after is not None and not summary['riding_observed_after_restart'] or
+            args.expect_reset and not summary['complete_hazard_resets']):
         raise RuntimeError('Expected gameplay evidence was not observed')
 
 

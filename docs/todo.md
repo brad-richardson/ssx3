@@ -159,6 +159,32 @@ the build or commit that closed them.
       placements and is installed on the iPhone with checksum readback.
       Native riding verified; phone test launch is blocked by the locked
       device. See [scenery scope and evidence](gamecube-scenery.md).
+- [ ] Scene animation is missing across the board, in three independent
+      layers; the user reported no moving scenery on September 14 (direction
+      arrows, block interactions, breaking glass, crowd). Measured against the
+      donor NBD/GSF, not guessed:
+      **(a) Animated and multipart prefabs are never imported.**
+      `eligibility()` rejects them, so 102 of Garibaldi's 3,393 placements
+      (3.0%) are absent entirely: 79 across 20 animated two-part models
+      (269-288, all with a 60.0 s animation time, tall and narrow — the
+      likely crowd figures), 13 across three non-animated two-part models
+      (model 132 is perfectly flat, a billboard/arrow candidate), and 10
+      across three 24-part models. These are missing objects, not still ones.
+      **(b) Material flipbooks are staged but never sequenced.** 16 of 125
+      donor materials carry a 2-5 frame flipbook, covering 74 placements;
+      the countdown light is one of them (material 66, flipbook 5, five
+      frames). The start gate work proves the images import correctly and
+      that nothing advances them.
+      **(c) Every LUN course program is an empty stub** (235 disabled), so no
+      authored scripted behaviour runs at all: timed gates, block and glass
+      interactions, effects. The
+      [start gate](gamecube-scenery.md) is the first probe at re-attaching
+      one event, and it found the visibility bit is plain data, which is the
+      cheap half of (c).
+      Sequence the work (b) → (c) → (a): flipbooks need no new geometry
+      pipeline, scripted events are already half-solved, and animated prefabs
+      need multipart/local-matrix import plus a runtime animation binding
+      that nothing else depends on. Nothing here is started beyond the gate.
 - [ ] Breakable glass/blocks: translate authored break behavior and effects;
       user confirmed objects remain intact on impact (Sep 13).
 - [ ] Restore the Garibaldi start gate and countdown lights; user reconfirmed
@@ -183,10 +209,16 @@ the build or commit that closed them.
       by seven bytes, all inside that definition. Two clean 185 s checks
       confirm it: at the same countdown number and camera the visible run
       draws the canopy, six starting stalls and the light column, and the
-      hidden control run draws none of them, with riding unaffected. Next:
-      observe a restart, then write the handler that drives that bit from
-      `StartlightBegin`/`StartgateOpen`. Timing, the flipbook sequence,
-      restart behaviour and the authored gate appearance remain open.
+      hidden control run draws none of them, with riding unaffected.
+      The restart is observed too, over three races in one 481 s check:
+      both events re-dispatch (windows 3.919 s and 3.736 s), so a handler
+      must be re-entrant; re-entering the course after a finish raises
+      `StartgateOpen` **alone**, so it must not assume the pair; and the
+      three instances bind once and survive both, so the course is not
+      reloaded and a handler can hold the definition. All five lookups
+      still return value type 0. Next: write that handler. Countdown
+      length (both windows exceed the donor's 2.5 s of authored waits),
+      the flipbook sequence and the authored gate appearance remain open.
       Validate
       and target `StartgateOpen` dispatch, then check countdown, unobstructed
       GO and restart. Keep hidden helper geometry excluded. See the

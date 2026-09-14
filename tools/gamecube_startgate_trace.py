@@ -36,16 +36,34 @@ TIMEBASE_HZ = 40500000
 EVENT_HASHES = {'startlight_begin': 0x0ebf88fe, 'startgate_open': 0x0dfb527e}
 
 
-def countdown_window(dispatches):
-    """Seconds between the first lights and gate dispatch, from guest ticks."""
-    first = {}
+def countdown_windows(dispatches):
+    """Seconds from each lights dispatch to the gate dispatch that follows it.
+
+    A restart raises both events again, and re-entering the course after a
+    finish raises StartgateOpen on its own, so the events must be paired in
+    order rather than assumed to occur once or always together. Gate
+    dispatches with no preceding lights are reported separately, not dropped.
+    """
+    windows, unpaired, lights = [], 0, None
     for dispatch in dispatches:
         if dispatch['hash'] != EVENT_HASHES[dispatch['event']]:
             raise ValueError(f'Unexpected {dispatch["event"]} event hash')
-        first.setdefault(dispatch['event'], dispatch['ticks'])
-    if len(first) != 2:
-        return None
-    return (first['startgate_open'] - first['startlight_begin']) / TIMEBASE_HZ
+        if dispatch['event'] == 'startlight_begin':
+            # Two lights in a row would mean a missed gate, not a window.
+            unpaired += lights is not None
+            lights = dispatch['ticks']
+        elif lights is None:
+            unpaired += 1
+        else:
+            windows.append((dispatch['ticks'] - lights) / TIMEBASE_HZ)
+            lights = None
+    return windows, unpaired + (lights is not None)
+
+
+def countdown_window(dispatches):
+    """The first complete lights-to-gate window, or None."""
+    windows, _ = countdown_windows(dispatches)
+    return windows[0] if windows else None
 
 
 def read_observations(log):
@@ -82,8 +100,11 @@ def summarize(rows):
         elif stage == 'instance_bound':
             bindings.append(dict(instance_id=row['instance_id'], flags=row['flags'],
                                  property_flags=row['property_flags']))
+    windows, unpaired = countdown_windows(dispatches)
     return dict(dispatches=dispatches, named_lookups=lookups, bindings=bindings,
-                countdown_window_seconds=countdown_window(dispatches),
+                countdown_window_seconds=windows[0] if windows else None,
+                countdown_windows_seconds=windows,
+                unpaired_dispatches=unpaired,
                 events_per_translation_unit=counts,
                 truncated_translation_units=[name for name, count in counts.items() if count >= 1000],
                 limits='Observed dispatch and binding only. Missing events in a capped translation unit '

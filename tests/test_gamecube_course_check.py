@@ -1,4 +1,10 @@
+import contextlib
+import io
+import sys
 import unittest
+from unittest import mock
+
+import gamecube_course_check
 from gamecube_course_check import reset_events, reset_loops
 
 
@@ -35,3 +41,27 @@ class CourseCheckTests(unittest.TestCase):
     def test_three_failed_nearby_resets_are_a_loop(self):
         r=[sample(t,s,18 if s==9 else 0) for t,s in [(1,9),(2,4),(4,9),(5,4),(7,9),(8,4)]]
         self.assertTrue(reset_loops(reset_events(r)))
+
+
+class RestartArgumentTests(unittest.TestCase):
+    """The restart bounds are rejected before any profile or output is created."""
+
+    def run_main(self, *extra, profile='p'):
+        argv = ['gamecube_course_check.py', '--game', 'g', '--profile', profile,
+                '--output', 'o', *extra]
+        with mock.patch.object(sys, 'argv', argv), contextlib.redirect_stderr(io.StringIO()) as err:
+            with self.assertRaises(SystemExit):
+                gamecube_course_check.main()
+        return err.getvalue()
+
+    def test_restart_must_leave_time_to_ride_again(self):
+        self.assertIn('leave 120 seconds', self.run_main('--seconds', '200', '--restart-after', '100'))
+        self.assertIn('at least 5 riding seconds', self.run_main('--seconds', '400', '--restart-after', '4'))
+
+    def test_restart_at_the_bounds_passes_validation(self):
+        # The profile check follows the restart check, so reaching it means the
+        # bounds were accepted; a rejected profile stops before any run starts.
+        for after in ('280', '5'):
+            self.assertIn('isolated profile',
+                          self.run_main('--seconds', '400', '--restart-after', after,
+                                        profile='../escape'))

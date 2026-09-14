@@ -414,6 +414,57 @@ remaining time is unattributed.
 Next: observe a restart to see whether both events dispatch again, and identify
 a reversible visibility/material operation before writing any handler.
 
+### Observed restart and a third, unpaired gate event (September 14)
+
+A 481-second check on the visible candidate rode for 20 seconds, took the
+pause menu's Restart, rode again, then finished and re-entered the course.
+Clean: exit 0, no fault, zero invalid accesses, zero GPU command errors, zero
+fallback JIT runs, 151 screenshots. Observations in
+`local/research/startgate/restart-evidence/report.json`.
+
+| Observation | Result |
+| --- | --- |
+| Countdown windows, lights to gate | 3.919 s (race 1), 3.736 s (race 2) |
+| `StartgateOpen` dispatches with no preceding lights | 1, on the third race |
+| Staged instance bindings | 3, all at the first load; none repeated |
+| Named lookups | 5, every one course 8 and value type 0 |
+| `event_invoke` observations | 0 |
+| Translation units reaching the 1,000-event cap | None |
+
+Three things follow for a handler:
+
+**Both events do re-dispatch on a restart.** The countdown is raised again,
+about 49 seconds after the first pair, so a handler is called more than once
+per session and must be re-entrant rather than one-shot.
+
+**The two events are not always paired.** Re-entering the course after the
+race-2 finish raised `StartgateOpen` alone, with no `StartlightBegin` before
+it. A handler that only restores state on the lights event would leave the
+gate shut for that race. The summarizer now reports every window and counts
+unpaired dispatches rather than reporting the first pair alone.
+
+**The staged instances are bound once and survive.** `instance_bound` fired
+three times, at the first course load, and not again across a restart or a
+finish. The course is not reloaded, so the instance objects and their shared
+definition persist; a handler can hold the definition and does not need to
+rediscover it. Their observed `property_flags` is `0x00010000` and instance
+flags `0x00010003`, which is the visible candidate's own definition edit read
+back through the engine, confirming the field a handler would drive.
+
+The two countdown windows differ by 0.18 s, and both still exceed the donor's
+2.5 s of authored waits, so the countdown length remains unattributed. This
+observes dispatch and binding only; no animation, flipbook or visibility
+change is executed.
+
+Driving the restart needed two corrections to `gamecube_course_check.py`, both
+of which had silently produced a false pass first time. Restart confirms with
+"Are you sure?" defaulting to **No**, so selecting Restart and pressing A
+cancels it. And the rider observation can hold its last pre-restart value
+indefinitely, so a stale wipeout sample satisfied "riding observed again"
+while the game sat in the confirmation dialog. The check now moves up to Yes
+explicitly, and only counts a second ride after a freshly observed briefing
+state.
+
 ## Collision and river reset follow-up
 
 The river screenshot at 89% is a separate, still-open gameplay issue.

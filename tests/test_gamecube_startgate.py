@@ -6,7 +6,7 @@ import unittest
 
 from tests.test_gamecube_scenery import fixture  # Adds tools to sys.path.
 from gamecube_startgate import append_hidden_bindings, visible_scenery_definition
-from gamecube_startgate_trace import read_observations, summarize
+from gamecube_startgate_trace import countdown_windows, read_observations, summarize
 
 
 def script_fixture():
@@ -88,6 +88,30 @@ class StartgateTests(unittest.TestCase):
                 dict(stage='startgate_open', ticks=810000, r4=0x0dfb527e)]
         self.assertAlmostEqual(summarize(rows)['countdown_window_seconds'], 0.01)
         self.assertIsNone(summarize(rows[:1])['countdown_window_seconds'])
+
+    def test_each_restart_contributes_its_own_countdown_window(self):
+        lights, gate = 0x0ebf88fe, 0x0dfb527e
+        def d(event, ticks, h): return dict(event=event, ticks=ticks, hash=h)
+        rows = [d('startlight_begin', 0, lights), d('startgate_open', 40500000, gate),
+                d('startlight_begin', 100_000_000, lights),
+                d('startgate_open', 100_000_000+81000000, gate)]
+        windows, unpaired = countdown_windows(rows)
+        self.assertEqual(windows, [1.0, 2.0])
+        self.assertEqual(unpaired, 0)
+
+    def test_a_gate_without_lights_is_counted_not_paired_with_a_later_one(self):
+        lights, gate = 0x0ebf88fe, 0x0dfb527e
+        def d(event, ticks, h): return dict(event=event, ticks=ticks, hash=h)
+        # Re-entering the course after a finish raises the gate event alone.
+        rows = [d('startgate_open', 0, gate), d('startlight_begin', 10, lights),
+                d('startgate_open', 40500010, gate)]
+        windows, unpaired = countdown_windows(rows)
+        self.assertEqual(windows, [1.0])
+        self.assertEqual(unpaired, 1)
+        # Lights with no gate after them are unpaired too, not a zero window.
+        self.assertEqual(countdown_windows([d('startlight_begin', 0, lights)]), ([], 1))
+        self.assertEqual(countdown_windows([d('startlight_begin', 0, lights),
+                                            d('startlight_begin', 5, lights)]), ([], 2))
 
     def test_rejects_a_dispatch_whose_event_hash_does_not_match(self):
         rows = [dict(stage='startgate_open', ticks=0, r4=0x0ebf88fe)]
