@@ -324,16 +324,18 @@ properties on the source side; the agreement is what makes the reading more
 than a guess. Word 4 is a draw distance and word 6 is a packed pair of 16-bit
 sentinels whose meaning is not established, so neither is synthesized.
 
-This matters because definition 39 is used by the three staged countdown
-instances **and nothing else**. Toggling one 28-byte record therefore shows or
-hides exactly the gate and lights, reversibly, with no effect on any other
-scenery and no engine call. The probe already reads this word: it is the
-`property_flags` field, observed 0, at `instance+136` then `+4`.
+Definition 39 is used by the three staged countdown instances **and nothing
+else**, so that one 28-byte record decides whether the gate and lights exist in
+the scene, with no effect on any other scenery. The probe already reads this
+word: it is the `property_flags` field, observed 0, at `instance+136` then
+`+4`.
 
-This supersedes the earlier search for a callable hide/show routine. Builtin 2
-(`8019193c`) is still not a safe substitute — its `DeadNode`/`RestoreNode`
-lifecycle commands and guards remain unmodelled — but a handler no longer needs
-it for visibility.
+**This bit is load-time only.** It decides what the course starts with, and the
+static comparison below proves that. It is not a runtime switch: writing it
+during play changes nothing on screen, as the handler experiment further down
+establishes. The search for a callable hide/show routine is therefore not
+superseded, and builtin 2 (`8019193c`) with its `DeadNode`/`RestoreNode`
+lifecycle commands remains the candidate the earlier audit identified.
 
 `gamecube_startgate.py --visible` stages the countdown models permanently drawn
 by copying the course's own visible non-colliding definition verbatim, so
@@ -464,6 +466,52 @@ indefinitely, so a stale wipeout sample satisfied "riding observed again"
 while the game sat in the confirmation dialog. The check now moves up to Yes
 explicitly, and only counts a second ride after a freshly observed briefing
 state.
+
+### The visibility bit does not work at runtime (September 14)
+
+`tools/gamecube_startgate_handler.py` builds an isolated module that hooks the
+two countdown dispatches and the staged instances' binding, and drives the
+visibility bit: set on `StartlightBegin`, cleared on `StartgateOpen`. Clearing
+is the donor's own authored post-countdown state, so the gate would "open" by
+leaving and need no animation. It runs against a `--countdown-ready`
+candidate, whose definition differs from ordinary scenery in that bit alone.
+
+The handler works exactly as intended. Over a 302-second run with a restart
+(clean: exit 0, no fault, zero invalid accesses, zero GPU command errors, 94
+screenshots), it bound one definition from all three instances, then made four
+effective writes — show, hide, show, hide — with no redundant writes and no
+refusals, changing no bit outside the visibility flag:
+
+| Event | Definition `+4` | Instance `+128` | Instances changed |
+| --- | --- | --- | --- |
+| `StartlightBegin` | 0 → 0x10000 | 2 → 0x10002 | 3 |
+| `StartgateOpen` | 0x10000 → 0 | 0x10002 → 2 | 3 |
+| `StartlightBegin` (after restart) | 0 → 0x10000 | 2 → 0x10002 | 3 |
+| `StartgateOpen` (after restart) | 0x10000 → 0 | 0x10002 → 2 | 3 |
+
+**The gate was never drawn.** Not in either countdown, with the bit set in both
+the shared definition and every live instance's own runtime flags. Evidence:
+`local/research/startgate/handler-evidence/`.
+
+The first attempt wrote only the definition, on the theory that the engine
+reads it per draw. It does not: the bit is copied into each instance's
+`+128` word when the instance binds. Driving that word as well changed nothing
+either, so the copy is not the end of the chain. The most likely remaining
+explanation is that the bit decides membership of a draw structure built once
+at course load — which is consistent with everything observed, including the
+instances binding exactly once and surviving restarts.
+
+So the correct reading of the static result is narrower than it first appeared:
+definition word 1 bit 16 is the **load-time** visibility property, proven by
+the visible/hidden comparison, and it is not a runtime operation. A countdown
+handler cannot be a flag write. The next candidate is the engine's own node
+lifecycle, builtin 2 (`8019193c`) with its `DeadNode`/`RestoreNode` commands,
+which the September 13 audit already identified and warned not to assume
+reversible; it now has to be characterised rather than avoided.
+
+The handler itself is retained. It is the harness that produced this result,
+its writes are bounded and exactly reversible, and it will drive whatever
+operation replaces the flag write.
 
 ## Collision and river reset follow-up
 

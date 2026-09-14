@@ -36,12 +36,29 @@ class StartgateTests(unittest.TestCase):
         self.assertEqual(struct.unpack_from('>4I', changed, 160), (0, 0, 0xffffffff, 0xffffffff))
         self.assertEqual(changed[spline_at:], original[168:])
 
+    def test_countdown_staging_differs_from_scenery_only_in_the_visibility_bit(self):
+        original = script_fixture()
+        struct.pack_into('>2I', original, 148, 0x7149f2ca, 0x0000ffff)
+        changed, report = append_hidden_bindings(original, 1, 3, 'countdown')
+        self.assertEqual(report['mode'], 'countdown')
+        self.assertFalse(report['initially_visible'])
+        self.assertTrue(report['handler_drives_visibility'])
+        staged, template = changed[160:188], bytes(original[132:160])
+        self.assertEqual(struct.unpack_from('>I', staged, 4)[0] ^ struct.unpack_from('>I', template, 4)[0],
+                         0x00010000)
+        self.assertEqual(staged[:4], template[:4])
+        self.assertEqual(staged[8:], template[8:])
+
+    def test_rejects_an_unsupported_staging_mode(self):
+        with self.assertRaisesRegex(ValueError, 'staging mode'):
+            append_hidden_bindings(script_fixture(), 1, 3, 'always')
+
     def test_visible_staging_copies_the_course_scenery_definition_verbatim(self):
         original = script_fixture()
         # Trailing words carry a draw distance and a packed pair, so a synthesized
         # definition would be a guess; only a verbatim copy is accepted.
         struct.pack_into('>2I', original, 148, 0x7149f2ca, 0x0000ffff)
-        changed, report = append_hidden_bindings(original, 1, 3, visible=True)
+        changed, report = append_hidden_bindings(original, 1, 3, 'visible')
         self.assertTrue(report['initially_visible'])
         self.assertFalse(report['collision'])
         self.assertIsNone(report['callback'])
@@ -52,7 +69,7 @@ class StartgateTests(unittest.TestCase):
         original = script_fixture()
         with self.assertRaisesRegex(ValueError, 'visible non-colliding'):
             append_hidden_bindings(bytearray(script_fixture()[:132]) + struct.pack(
-                '>4I3f', 0, 0x210000, 0xffffffff, 0xffffffff, 0, 0, 0) + original[160:], 1, 3, visible=True)
+                '>4I3f', 0, 0x210000, 0xffffffff, 0xffffffff, 0, 0, 0) + original[160:], 1, 3, 'visible')
         # A colliding definition must never become the staged countdown template.
         base, = struct.unpack_from('>I', original, 64)
         with self.assertRaisesRegex(ValueError, 'visible non-colliding'):
