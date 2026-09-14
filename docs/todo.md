@@ -27,7 +27,10 @@ the build or commit that closed them.
       extra draw (52 samples). Build 971dc928 verifies 1×/2× detail changes;
       its Half-output 2× trials reach 102.94/112.67 positive displays/s over
       8.92/18.38 seconds, but the longest warmed span is only 15.88 seconds
-      at 114.34 displays/s. Half-output 1× smoothing is still unmeasured.
+      at 114.34 displays/s. The newer f40bfef6 Garibaldi-only run measures
+      Half/1× at 117.22 displays/s over its best 7.75-second warmed window,
+      still too short with unresolved audio boundaries. Most collected thermal
+      samples are serious; repeat a fixed route after returning to nominal.
       Course/trajectory differences prevent a causal output-size comparison.
       Preserve the three legacy app-span alerts and lifecycle clock unknowns
       without loosening guards. The newer Garibaldi-only 113c9b20 run preserves
@@ -42,6 +45,13 @@ the build or commit that closed them.
       (14.5% named FP/conversion helpers included), with 6.6% inclusive software
       vertex conversion. Next: phase-tagged phone attribution and one narrow,
       equivalent helper optimization; desktop 3× shares are not phone timings.
+      The [conversion spike](research/float-conversion-spike.md) passes all
+      float32 bit patterns but trades call removal against code growth and
+      rare-input regressions. Keep it scoped to a private hot-chunk build until
+      workload evidence supports promotion. The independent
+      [FMA classifier spike](research/float-arithmetic-audit.md) preserves full
+      tested guest/host state; small, noisy timing gains do not justify a phone
+      change. Existing phone builds already use optimized Release settings.
 - [ ] Phone: compare 75%, Match internal and Half output on the same route
       at fixed internal detail; verify Match through menu 1× ↔ 2× changes.
       Build 113c9b20's phone run confirms Match/2×: output 1947 × 896,

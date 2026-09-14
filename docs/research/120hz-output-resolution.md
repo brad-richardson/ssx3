@@ -365,3 +365,84 @@ Evidence: `local/research/120hz/direct-menu-ui-check/` and
 `direct-menu-open.png`, `direct-menu-match-2x.png` and `direct-menu-half-2x.png`
 record the actual Simulator UI. These are Null-audio automated checks and do
 not close phone audio, checkpoint/Full Reset or sustained-pacing acceptance.
+
+## Phone f40bfef6: thermal pressure and direct controls
+
+The user confirmed **Garibaldi only**, reported worse performance and suggested
+charging heat as a possible cause. Session `1789348333.517` shows **higher
+thermal pressure** than the previous nominal-state reports: of 466 metrics in the first collected snapshot,
+56 are nominal, 142 fair and 268 serious. In the metric's active clock, the
+first fair sample occurs at 58.650 s and serious at 175.483 s. It briefly returns
+to fair at 392.652 s, then serious at 421.490 s. The later follow-up is still
+serious at 521.064 active seconds. There is no critical-state sample.
+
+This supports heat as a plausible contributor, but does not quantify throttling
+or attribute it to charging: battery level, charging status, temperature and
+CPU/GPU clock frequencies are not recorded. Prior build 113c was also a
+Garibaldi-only ride, but trajectories and resolution settings were different;
+971 included both Garibaldi and Metro. The earlier nominal-state Half/2× bursts
+cannot serve as a controlled regression comparison. f40 changes the menu, preferences and
+trial-readiness behavior; it retains the existing runtime load/speed guard.
+
+The launch correctly requests **Half output / 2× detail**, with an actual
+1434 × 660 drawable. Renderer samples establish both 1280 × 1056 and 640 × 528
+internal detail during play. Four detail changes and five output changes occur
+with `menu=true`; the panel remains paused while the user makes selections.
+Actual Metal submits include 23,022 Half-size and 6,779 at 75% (2151 × 990).
+No Match or Full output is measured in this snapshot. A later read of saved
+preferences records Half/2×, agreeing with follow-up telemetry returning from
+75% to Half at 495.164 active seconds. This verifies stored values and in-process
+changes; fresh-launch loading of those phone preferences remains untested.
+
+Fast start reaches the real main menu at **20.525500 s after guest execution
+begins**. All 14 checkpoint saves commit. Ten trial requests produce nine native
+trial spans; one request is canceled while waiting before native trial start.
+All nine native trials restore ordinary rendering, and all **1,525 completed
+extras** preserve every watched field, including the original raw app span.
+Every extra validates the 540-byte GameModule extent, with no owned or adjacent
+changes. These observations do not clear the older session's app-span alerts.
+
+| Native trial | Detail / output | Duration | Positive displays/s | Extra CPU median | Final GPU-buffer median | Thermal |
+| ---: | --- | ---: | ---: | ---: | ---: | --- |
+| 1 | 2× / Half | 3.429 s | 87.77 | 7.005 ms | 5.135 ms | Fair |
+| 2 | 2× / Half | 3.569 s | 77.60 | 9.073 ms | 4.535 ms | Fair |
+| 3 | 1× / Half | 6.818 s | 99.60 | 5.941 ms | 1.909 ms | Fair |
+| 4 | 1× / Half | 10.246 s | 112.24 | 4.209 ms | 1.136 ms | Fair |
+| 5 | 1× / Half | 4.555 s | 86.49 | 8.036 ms | 1.749 ms | Serious |
+| 6 | 1× / Half | 3.006 s | 73.85 | 8.888 ms | 2.052 ms | Serious |
+| 7 | 2× / Half | 9.228 s | 77.92 | 3.433 ms | 4.298 ms | Serious |
+| 8 | 2× / 75% | 6.398 s | 83.15 | 6.332 ms | 4.487 ms | Fair |
+| 9 | 2× / 75% | 4.001 s | 73.98 | 9.556 ms | 4.332 ms | Fair |
+
+Rates use positive Metal presentation timestamps over native start-to-restoration
+spans, including warm-up. Eight trials end through the speed guard; trial 7 ends
+on system inactivity, followed by an audio interruption and a later successful
+resume. Extra callback wall medians range from 3.460 to 9.645 ms; CPU-active work
+remains substantial, but acquisition waits vary too (trial 7's p95 is 4.003 ms).
+The final GPU command buffer is only one part of total renderer cost. These
+different course sections and thermal states do not isolate any one cause.
+
+Half/1× is now measured. Trial 4's warmed 7.746-second window reaches **117.22
+positive displays/s**, but its audio counter rises by one across the enclosing
+boundary, the event time is unknown, and it is far shorter than the required
+25 seconds. Trial 8 has three known starvation-counter increases inside its
+warmed window. Full-trial inside-snapshot increments are 0/1/1/0/0/1/0/4/1;
+zeros do not prove full-trial continuity because the enclosing audio brackets
+are missing, sparse or cross an interruption. The session counter reaches 192,
+including startup, pauses and the explicit interruption; it is not a smoothing-
+only count. All strict sustained verdicts remain inconclusive. Five lifecycle
+delivery-order backtracks and 27 zero presentation timestamps remain unknown;
+there are no Metal trace drops or incomplete copied records.
+
+The bulk collection initially failed with a CoreDevice socket-close error.
+Targeted read-only copies succeeded without launching, pausing or changing the
+phone. This is a live collection with differing file-tail times, not a completed
+shutdown receipt; all analyzed trial ends precede the earliest metrics tail.
+Raw files and copy receipts are under
+`local/reports/mobile/20260913-212200-targeted/`; the failed copy is retained at
+`20260913-212027`. Compact results, hashes and separate unchanged 1×/2× policies
+are in `local/research/120hz/direct-menu-phone-user-results.json` and
+`direct-menu-phone-{1x,2x}-pacing.json`, with CLI logs. Both required-sustained
+commands exit 1. A useful next comparison repeats the same short route and
+settings after thermal state returns to nominal, recording charging state
+explicitly; no guard extension or timing-default change follows from this run.
