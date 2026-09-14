@@ -1,8 +1,11 @@
 # Output size, internal detail and callback CPU timing
 
 These are separate controls. Full/75%/Match/Half output changes the final Metal drawable;
-1×/2× internal detail changes Dolphin's EFB resolution. Normal launches use
-Full output at 1×. Each choice survives Full Reset during that app process.
+1×/2× internal detail changes Dolphin's EFB resolution. Delivered build
+`113c9b20` starts at Full output and 1×. Each choice survives Full Reset during
+that app process. Direct menu choices, remembered settings, and an initial
+Half-output/2× default are requested follow-up work, currently in progress;
+they are not part of the delivered build documented here.
 
 | Control on iPhone 16 Pro Max | Dimensions | Pixel count relative to its baseline |
 | --- | --- | ---: |
@@ -212,6 +215,54 @@ raw reports, captures, source hashes, `validation.json` and strict `pacing.json`
 The full integrated Python suite passes all 262 tests. Phone delivery is recorded below; menu/1× ↔ 2× Match transitions still need
 on-device validation.
 
+## Phone Match/2× run on build 113c9b20
+
+Session `1789345362.689`, collected September 13 at 20:29, was **Garibaldi
+only**, according to the user. Fast start worked well and the picture looked
+fine; smoothing did not hold. The phone reached the real main menu at
+**20.614526 seconds after guest execution began**, excluding runtime creation
+and asset verification. All ten checkpoint saves committed.
+
+Metal records 10,306 submits at **1947 × 896**. In 164 Match samples, both the
+aspect-corrected source picture and visible target rectangle are **1556 × 896**;
+the internal EFB is **1280 × 1056**. These describe different stages of the
+same image. The screenshot's confusing dimension labels did not demonstrate
+a sizing failure. Label output, visible picture and internal detail separately;
+iOS compositor scaling to the physical panel still applies.
+
+All three trials used Match output and 2× detail. Rates below count positive
+Metal `presentedTime` values over native start-to-restoration spans, including
+warm-up; they are not callback rates.
+
+| Trial | Duration | Positive displays/s | Complete extras | Extra CPU / wall median |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 3.493 s | 73.86 | 55 | 9.112 / 9.155 ms |
+| 2 | 4.879 s | 94.28 | 172 | 6.045 / 6.076 ms |
+| 3 | 13.546 s | 78.18 | 267 | 4.728 / 4.861 ms |
+
+All **494 extra callbacks** preserve the complete watched fields, including
+the original raw app span. The new vtable diagnostic validates the 540-byte
+GameModule extent in every extra; no owned or adjacent app changes occur.
+This does not clear the older session's three unresolved alerts. All three
+trials hit the existing speed guard and restored ordinary rendering.
+
+Thermal state remains nominal. Trial 1's audio-starvation counter rises by
+five between snapshots strictly inside the trial. Trial 2's inside snapshots
+show zero increase, but its enclosing bracket rises by one; the event's exact
+time is unknown. Trial 3 also has zero inside-snapshot increase without a valid
+full-trial bracket. These zeros do not prove uninterrupted audio throughout
+either trial. There are no Metal trace drops; 20 session presentation timestamps
+are zero, and lifecycle delivery-order clock reversals remain unknown.
+All sustained verdicts are inconclusive, with warmed windows at most 11.046 s
+and rates below target. No sustained-120 or causal output-speedup claim follows.
+
+Raw evidence: `local/reports/mobile/20260913-202904/Reports/1789345362.689`.
+The source/evidence hashes, descriptive results and explicit 2× pacing report
+are in `local/research/120hz/match-startup-phone-user-results.json` and
+`match-startup-phone-user-pacing.json`. Remaining checks include remembered
+settings across relaunch, menu Match transitions at both detail levels, and
+matched-route output comparisons.
+
 ## Simulator checks and limits
 
 The first three Simulator launches aborted in Apple's `AURemoteIO::Start`
@@ -260,11 +311,57 @@ used the default startup behavior with no override. The 75%/2× check confirms
 2151 × 990 output. Match/1× confirms 973 × 448 output with a 778 × 448 source and
 target picture. The earlier Match/2× ride supplies the smoothing check above.
 All three stopped cleanly with no runtime/graphics faults or JIT fallback runs.
-They used Null audio; phone audio, startup timing, new menu transitions and
-sustained performance await device testing.
+They used Null audio. The later phone run above confirms startup and Match/2×
+dimensions; menu transitions, audio continuity and sustained pacing remain
+separate acceptance checks.
 
 Delivery, archived build/signing receipts, signed executable hash, installation
 receipt, validation hashes and remaining checks are indexed in
 `local/research/120hz/match-startup-delivery.json`. The additional default-start
 checks are in `active-title-default-repeat1-check/` and
 `active-title-default-repeat2-check/` under the same research directory.
+
+
+## Direct pause-menu choices and saved defaults
+
+The direct menu replaces cycling actions with Half / 75% / Full / Match output
+and 1× / 2× detail selections. Both stay in the paused panel, with Resume and
+Try smoothing always visible. Initial settings are Half output + 2× detail,
+chosen by the user after the earlier phone comparison. Successful manual
+changes persist independently across launches and Full Reset; command-line
+choices override only the current process, including explicit Full and 1×.
+
+The resolution text distinguishes the measured visible image from total output
+including bars. A paused detail change displays “updates on resume” until a
+fresh render supplies dimensions. A requested trial resumes first, then waits
+for a stable source at the selected detail after both configuration and surface
+resize. This applies to every output mode. Match also requires its exact target
+surface size before requesting a trial. Another pause cancels the pending
+request. Existing trial duration, speed, audio and ownership gates remain.
+
+Preference tests use an isolated Foundation defaults suite to verify reopening,
+invalid stored values, launch precedence and cross-dimension isolation. The
+source-readiness checks cover stale detail/resize samples, the first unstable
+source, invalid dimensions and fresh measured replacements. Simulator UI
+inspection caught and fixed a cross-row constraint activated before its views
+shared an ancestor; the corrected menu opens and accepts multiple selections.
+Phone interaction and performance still need verification on the delivered build.
+
+
+Build **f40bfef6** was installed on the phone September 13 at 20:59 EDT,
+retaining course assets 027. Forty-nine relevant tests passed (preferences,
+lifecycle/store/diagnostics, mobile launch/pacing/report tools, output readiness
+and startup). The final Simulator build completed both a 100-active-second
+interactive menu run and a 40-second fresh-launch preferences check with clean
+shutdown and zero runtime faults/JIT entries. Six successful manual setting
+changes occur while the menu stays open. The deferred trial request follows
+both a measured 2× picture and the actual post-resize presentation, at output
+1947 × 896; reopening Menu cancels the waiting trial. No riding extras occur in
+this UI check. A later unqualified launch uses the saved 75%/1× selection,
+confirming persistence rather than merely falling back to Half/2× defaults.
+
+Evidence: `local/research/120hz/direct-menu-ui-check/` and
+`direct-menu-persist-check/`, with delivery receipts in `direct-menu-delivery.json`.
+`direct-menu-open.png`, `direct-menu-match-2x.png` and `direct-menu-half-2x.png`
+record the actual Simulator UI. These are Null-audio automated checks and do
+not close phone audio, checkpoint/Full Reset or sustained-pacing acceptance.

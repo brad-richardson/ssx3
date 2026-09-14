@@ -164,9 +164,10 @@ archive hash, avoiding confusion between an app update and an asset update.
 
 The iPhone report on build 021 showed a large red obstruction near 1%
 progress. Two missing gameplay semantics were found: 48 imported instances
-are initially hidden, and the donor's temporary start gate is removed after
-the countdown. Rendering every instance permanently exposes trigger meshes
-and leaves the countdown structure across the race.
+are initially hidden, and the donor has a `NoCountDown` visibility program
+that hides its start gate. Rendering every instance permanently exposes
+trigger meshes and leaves the countdown structure across the race. The exact
+donor timing of that visibility program was not traced (see the follow-up below).
 
 The scenery CLI now requires the matching `.gsf`. Its 24-byte object
 properties have visibility/collision flags at **+8** and U2 at +10 on
@@ -182,7 +183,7 @@ commands, invalid references and cycles instead of guessing. Garibaldi's
 function calls `HideStartGate`, which hides source instances 136, 137 and
 138. These IDs are discovered from source data, not hard-coded exclusions.
 
-The current static race profile bakes that post-countdown state: SSX 3's
+The current static race profile bakes that no-countdown state: SSX 3's
 countdown HUD remains, but the temporary Tricky gate is absent even before
 the start. Timed donor gate animation still requires a gameplay script pass.
 This does not claim support for other scripted visibility, such as switching
@@ -207,6 +208,47 @@ Build 022 is installed on the iPhone; the archive read back from the device
 matches this SHA-256. The user confirmed the red start-area obstruction is
 fixed on iPhone. The validation receipt is
 `local/evidence/garibaldi-visibility/validation-022.json`.
+
+### Start-gate audit (September 13, assets 027)
+
+The missing gate does **not** require the general animated-prefab importer.
+The donor `local/source/gamecube/tricky/gari.map` names models 30, 58 and 59
+`Mdl_StartGate_1000`, `Mdl_StartGate_Cover_1000` and `Mdl_StartLights_1000`
+(lines 54, 82–83; instance rows 4730–4732). The checked NBD reader finds one
+part, no animation and no local matrix for all three. Their instances
+136/137/138 were removed explicitly by build 022's visibility pass, at target
+RIDs 2051/2444/2445; their models remain in the 027 and 031 recipes.
+
+The donor GSF contains this small program, separate from mesh animation:
+
+- `StartCountDown` (function 17) calls `CountDownStart` (0), which invokes
+  effects 14–18 on lights instance 138, with waits of 1.0, 0.5, 0.5 and 0.5
+  seconds. Effect 14 is main 0/subtype 11, the texture-flip effect in the
+  reference reader; effects 15–18 are main 9 with `(2, 1.0…4.0)` parameters.
+  The latter command's native meaning remains unverified.
+- `EndCountDown` (18) is empty. `NoCountDown` (19) calls `HideStartGate` (1),
+  hiding all three instances. Thus the static profile name “post-countdown”
+  does not establish when the donor actually hides the gate.
+
+Lights material 66 uses image 69. Its final halfwords are `(0, 5)`; NBD
+flipbook table 5 contains images 69–73. The current reader takes `+68` and
+reports flipbook 0. Taking `+70` instead matches the base image for **all 16**
+non-default flipbook materials, versus one with `+68`. This is strong static
+evidence of another GC halfword-order mismatch, pending native loader
+validation. The 027/031 scenery texture maps contain image 69, but not 70–73;
+restoring the instances alone cannot restore the light sequence.
+
+The shortest next spike is to validate that material field and the countdown
+dispatch, then bind these three supported models and their five light frames
+to the target's existing start event. SSX 3 has `StartgateOpen` at
+`0x802e32bc`: `0x801015b4` materializes it, calls the hash routine at
+`0x801015bc`, and dispatches through `0x801016c0` at `0x801015c8` (existing
+`local/evidence/garibaldi-scenery/ssx3-disasm.txt:260342`). This is a static
+trace candidate, not an established patch point. The imported course's 235
+LUN programs are currently replaced by empty returns, so retain those guards
+and add a narrow verified binding instead of reenabling the old course scripts.
+Acceptance needs the original countdown appearance, unobstructed GO, and a
+correct second countdown after restart; phone assets remain unchanged.
 
 ## Collision and river reset follow-up
 

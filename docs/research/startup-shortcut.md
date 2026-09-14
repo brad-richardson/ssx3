@@ -101,8 +101,9 @@ the START press/release, and sequence start. `startup.jsonl` includes relative
 elapsed time, guest timebase, source PC/LR and the movie mask. Further reducing
 the 14-second guest initialization phase or the original five-second title
 readiness wait requires separate initialization/asset profiling. Native
-success does not establish phone cold-start latency or persisted preference
-behavior; validate those on the next installed build.
+success alone does not establish phone cold-start latency or persisted
+preference behavior; the subsequent phone timing is recorded below, while
+saved-toggle/relaunch coverage remains open.
 
 ## Reproduction
 
@@ -146,6 +147,43 @@ runs reached Main Menu at 20.492, 20.530 and 20.467 seconds; each sent exactly
 one START after a complete active title input update. Two runs used the default
 preference with no launch override. The Match/2× run continued into a ride and
 smoothing trial, then restored and stopped cleanly. These checks validate the
-repeat-startup fix on Simulator; phone timing, audio and saved toggle behavior
-remain device checks. Delivery evidence is indexed in
+repeat-startup fix on Simulator. Delivery evidence is indexed in
 `local/research/120hz/match-startup-delivery.json`.
+
+The user's subsequent Garibaldi-only phone session `1789345362.689` reaches
+the real main menu at **20.614526 s after guest execution began**. The user
+reports that fast start worked great. All ten checkpoint saves committed.
+This confirms the active-input shortcut on the phone; it does not include
+runtime creation or full asset verification, prove saved-toggle persistence,
+or validate every Full Reset/checkpoint-restore path. The ride's three guarded
+smoothing trials do not establish sustained 120 Hz, and their audio counters
+do not establish uninterrupted audio. Results and hashes are in
+`local/research/120hz/match-startup-phone-user-results.json`; detailed pacing
+limits are in the [resolution report](120hz-output-resolution.md).
+
+## Loading and memory-card follow-up
+
+Benchmark the remaining loading phases before changing their timing: actual
+file I/O, decompression and resource initialization; emulated DVD/card delays;
+and game UI/readiness timers. Record wall and guest time for cold startup,
+memory-card checking and course loading, with fresh-process and warm-cache
+runs distinguished. Preserve normal boot and verify menu readiness, card
+read/write/relaunch behavior, loading transitions and ordinary riding.
+
+The first isolated configuration candidate is Dolphin's **FastDiscSpeed**,
+currently defaulting to false in pinned `Core/Config/MainSettings.cpp:211`.
+`Core/HW/DVD/DVDInterface.cpp:1069` treats all reads as buffered when enabled,
+changing modeled disc latency without skipping actual data reads or game
+initialization. The subsequent [six-run Mac comparison](loading-speed-spike.md)
+reduces median time to the main menu from 20.10 to 14.85 s, with startup states
+and runtime checks passing. It remains off on the phone. Next compare on the
+phone with identical assets/startup mode, then measure course loading separately;
+retain the correctness checks above before considering adoption.
+
+Memory-card delays need a separate audit. Pinned
+`Core/HW/EXI/EXI_DeviceMemoryCard.cpp:48` models 512 KiB/s reads and
+96.125 KiB/s writes, with asynchronous completion events in `DMARead` and
+`DMAWrite` (lines 522–555). No simple fast-memory-card flag is established.
+Measure the card-check phase and preserve completion/interrupt ordering and
+save durability; do not replace it with a shorter UI wait. These source paths
+are relative to `third_party/ModernGekko/vendor/dolphin/Source/Core/`.

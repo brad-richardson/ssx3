@@ -30,16 +30,24 @@ the build or commit that closed them.
       at 114.34 displays/s. Half-output 1× smoothing is still unmeasured.
       Course/trajectory differences prevent a causal output-size comparison.
       Preserve the three legacy app-span alerts and lifecycle clock unknowns
-      while collecting the new ownership diagnostic; do not loosen guards.
+      without loosening guards. The newer Garibaldi-only 113c9b20 run preserves
+      all 494 extras, including the new ownership fields, but its three Match/2×
+      trials end through load protection after 3.49–13.55 s. No sustained pass.
       Short high-refresh bursts are established, but sustained pacing and
       distinct interpolated motion remain open. See
       [resolution evidence](research/120hz-output-resolution.md) and
-      [CPU/config spikes](research/120hz-cpu-overhead-spikes.md).
+      [CPU/config spikes](research/120hz-cpu-overhead-spikes.md). The new
+      [ordinary-frame profile](research/normal-frame-cpu-spike.md) attributes
+      72.5% of sampled desktop CPU-thread self work to generated guest code
+      (14.5% named FP/conversion helpers included), with 6.6% inclusive software
+      vertex conversion. Next: phase-tagged phone attribution and one narrow,
+      equivalent helper optimization; desktop 3× shares are not phone timings.
 - [ ] Phone: compare 75%, Match internal and Half output on the same route
       at fixed internal detail; verify Match through menu 1× ↔ 2× changes.
-      Build 113c9b20 is installed. Simulator confirms exact 75% output plus
-      Match at 1×/2× and a clean 1,233-extra-draw trial; this is not phone
-      performance/audio acceptance. See [resolution evidence](research/120hz-output-resolution.md).
+      Build 113c9b20's phone run confirms Match/2×: output 1947 × 896,
+      visible picture 1556 × 896, EFB 1280 × 1056. The picture looked fine;
+      label these stages clearly. Audio inside-snapshot zeros do not prove
+      full-trial continuity. See [resolution evidence](research/120hz-output-resolution.md).
 - [ ] Replay: bind captures to the actual encoder frame, prove exact-image
       fidelity in an isolated renderer, and complete owned-memory/ordering
       gates before live replay or more interpolation. The private FIFO audit
@@ -94,8 +102,14 @@ the build or commit that closed them.
       device. See [scenery scope and evidence](gamecube-scenery.md).
 - [ ] Breakable glass/blocks: translate authored break behavior and effects;
       user confirmed objects remain intact on impact (Sep 13).
-- [ ] Restore the authored animated start gate with its countdown/removal
-      behavior; do not reintroduce the red helper geometry removed in 022.
+- [ ] Restore the Garibaldi start gate and countdown lights; user reconfirmed
+      they are missing on iPhone on September 13 (assets 027). The three gate
+      models are supported static geometry, deliberately omitted by 022;
+      restore their timed visibility/flipbook binding, not general mesh
+      animation. Validate the suspected GC flipbook halfword-order mismatch
+      and target `StartgateOpen` dispatch, then check countdown, unobstructed
+      GO and restart. Keep hidden helper geometry excluded. See the
+      [source audit and next spike](gamecube-scenery.md#start-gate-audit-september-13-assets-027).
 - [ ] Complete donor scenery lighting/material flags, animated/multipart
       models, grind splines and object collision.
 - [x] Build 021: reusable donor rail reader/encoder, topology and distance
@@ -126,11 +140,22 @@ the build or commit that closed them.
       once after the title's first active input pass. Enabled by default,
       including Full Reset, with ordinary-boot override and checkpoint restore
       precedence. Build 113c9b20 is installed. Three final Simulator launches
-      reach the real menu at 20.47–20.53 s; a state-anchored ride/smoothing check
-      passes. See [startup shortcut](research/startup-shortcut.md).
-- [ ] Phone: confirm default fast-start timing/audio and persisted menu toggle,
-      including Full Reset and checkpoint restore. Required game initialization
+      reach the real menu at 20.47–20.53 s; the phone reaches it at 20.614526 s
+      after guest execution begins. User confirms fast start worked great.
+      See [startup shortcut](research/startup-shortcut.md).
+- [ ] Phone: verify the persisted fast-start toggle, Full Reset and checkpoint
+      restore combinations, with audio continuity. Required game initialization
       and the original title-readiness wait remain; profile them separately.
+- [x] Direct menu choices for output/internal detail, staying paused for
+      multiple changes, and remembered selections across launches. Initial
+      Half output + 2× detail confirmed by the user. Build f40bfef6 installed
+      on iPhone September 13 at 20:59 EDT. Simulator UI checks verify direct
+      selections, Resume, post-resize trial readiness, Match dimensions and
+      a fresh launch restoring saved 75%/1× instead of defaults. Explicit
+      Full/1× launch overrides and independent preference storage pass.
+- [ ] Phone: verify the redesigned menu's saved choices with checkpoint
+      restore/Full Reset and ordinary audio; Simulator UI checks use Null
+      audio and automated sessions omit checkpoints.
 - [ ] Verify lifecycle Resume repair on iPhone: return to an automatic menu
       after background/audio interruptions; reconcile actual runtime state and
       explicitly reactivate audio on Resume. Reported stuck during Sep 13 playtest.
@@ -144,19 +169,27 @@ the build or commit that closed them.
       cancellation for pause with drain/restoration. Verify fresh-launch
       checkpoint restoration after changing detail and repeated background/
       audio interruptions; the one cancellation does not close those gates.
+      The later 113c9b20 phone session adds ten committed saves.
 
 - [x] Menu with in-memory Resume, background checkpointing and restore across
       relaunches; Full Reset recreates the runtime and reloads files. Installed
       on iPhone; race restore and reset verified in the simulator. See
       [iOS notes](../native/ios/README.md).
 - [ ] Profile cold startup separately: runtime initialization, full asset
-      hashing, game loading, splash screens and menu transitions. Investigate
-      cached verification and safely bypassing unnecessary startup delays;
-      preserve asset reloads during development. User requested backlog work,
-      not changes to loading timers as part of resume/menu implementation.
+      hashing, memory-card checking and course loading. Separate actual I/O,
+      decompression/resource initialization, emulated DVD/card delays and UI
+      timers. The isolated six-run FastDiscSpeed comparison reduces median
+      Mac startup to menu from 20.10 to 14.85 s (26.15%), with complete startup
+      states and runtime checks. Next: an explicit phone comparison, then
+      course-load phase anchors; no phone default change or memory-card/course
+      speedup is established. See [loading spike](research/loading-speed-spike.md)
+      and [phase separation](research/startup-shortcut.md#loading-and-memory-card-follow-up).
 - [ ] 15-minute sustained soak on the iPhone (thermal, audio starvation),
       deferred by the user; short functional checks take priority.
-- [ ] Save / memory-card behaviour on the phone.
+- [ ] Save / memory-card behavior on the phone, including read/write/relaunch
+      and the checking-screen duration. Dolphin models asynchronous transfers
+      at 512 KiB/s read and 96.125 KiB/s write; no simple fast-card flag is
+      established. Measure before changing timing or completion ordering.
 - [ ] Android native build (Vulkan backend, NDK toolchain); user has a dev
       account to configure. Not needed for the Odin while Dolphin runs the
       patched disc with JIT.
