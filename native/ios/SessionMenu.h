@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, nullable) void (^onOutput)(NSString* mode);
 @property(nonatomic, copy, nullable) void (^onInternal)(NSInteger scale);
 @property(nonatomic, copy, nullable) void (^onFastStart)(BOOL enabled);
+@property(nonatomic, copy, nullable) void (^onDualCore)(BOOL enabled);
 
 // Output modes: full, three-quarter, match-internal, half.
 // Resolution is user-facing picture/output information supplied by the owner.
@@ -19,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
           internalScale:(NSInteger)scale
              resolution:(NSString*)resolution
               fastStart:(BOOL)fastStart
+               dualCore:(BOOL)dualCore
            canConfigure:(BOOL)canConfigure
                canTrial:(BOOL)canTrial
                canReset:(BOOL)canReset

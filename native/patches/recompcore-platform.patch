@@ -32,6 +32,306 @@ index 9f837ec..733f9f8 100644
    dolphin_find_optional_system_library(HIDAPI Externals/hidapi)
  endif()
  
+diff --git a/GXRuntime/include/core/cpu_fast_fp.h b/GXRuntime/include/core/cpu_fast_fp.h
+new file mode 100644
+index 0000000..1a59985
+--- /dev/null
++++ b/GXRuntime/include/core/cpu_fast_fp.h
+@@ -0,0 +1,294 @@
++/* Inline floating-point fast paths for generated chunks.
++ *
++ * Forced-included (-include) before each generated chunk when the module is
++ * built with RECOMPCORE_FAST_FP. Function-like macros redirect the chunk's
++ * calls to the arithmetic helpers below; every other translation unit,
++ * including the interpreter and the helpers themselves, is unchanged.
++ *
++ * Value semantics for finite operands are exactly the helpers': the same
++ * double-precision operation, the same 25-bit rounding of the C operand for
++ * multiplies, the same single rounding, the same NI flush of tiny results.
++ * A NaN result, or any enabled FPSCR exception (VE/OE/UE/ZE/XE), falls back
++ * to the exact helper so payload propagation and exception state stay the
++ * same. What the fast path deliberately omits is FPSCR bookkeeping for
++ * non-exceptional results: FPRF classification, FI/FR and sticky inexact,
++ * zero-divide and invalid flags. That matches Dolphin's JIT defaults (FPRF
++ * off, AccurateNaNs off), which is the accuracy every Dolphin user runs.
++ */
++#pragma once
++#include "core/cpu.h"
++#include <math.h>
++#include <string.h>
++
++#define GX_FASTFP_INLINE static inline __attribute__((always_inline))
++#define GX_FASTFP_UNLIKELY(x) __builtin_expect(!!(x), 0)
++#define GX_FASTFP_ANY_E 0xF8u  /* VE OE UE ZE XE */
++#define GX_FASTFP_NI 0x04u
++
++GX_FASTFP_INLINE u64 gx_fastfp_bits(f64 v) { u64 b; memcpy(&b, &v, 8); return b; }
++GX_FASTFP_INLINE f64 gx_fastfp_f64(u64 b) { f64 v; memcpy(&v, &b, 8); return v; }
++GX_FASTFP_INLINE bool gx_fastfp_strict(const CPUState* cpu) { return (cpu->fpscr & GX_FASTFP_ANY_E) != 0; }
++
++/* force_single: NI flushes |value| < 2^-126 to a signed zero, then rounds. */
++GX_FASTFP_INLINE f32 gx_fastfp_force_single(const CPUState* cpu, f64 value) {
++    if (cpu->fpscr & GX_FASTFP_NI) {
++        const u64 bits = gx_fastfp_bits(value);
++        if ((bits & 0x7FFFFFFFFFFFFFFFull) < 0x3810000000000000ull) {
++            const u32 flushed = (u32)((bits & 0x8000000000000000ull) >> 32);
++            f32 r; memcpy(&r, &flushed, 4); return r;
++        }
++    }
++    return (f32)value;
++}
++
++/* force_25bit_c: C-operand rounding used by fmuls and the paired-single ops. */
++GX_FASTFP_INLINE f64 gx_fastfp_force_25bit_c(f64 d) {
++    u64 integral = gx_fastfp_bits(d);
++    const u64 exponent = integral & 0x7FF0000000000000ull;
++    const u64 fraction = integral & 0x000FFFFFFFFFFFFFull;
++    if (exponent == 0 && fraction != 0) {
++        s64 keep_mask = (s64)0xFFFFFFFFF8000000ll;
++        u64 round = 0x8000000u;
++        const unsigned shift = (unsigned)__builtin_clzll(fraction) - 11u;
++        keep_mask >>= shift;
++        round >>= shift;
++        integral = (integral & (u64)keep_mask) + (integral & round);
++    } else {
++        integral = (integral & 0xFFFFFFFFF8000000ull) + (integral & 0x8000000ull);
++    }
++    return gx_fastfp_f64(integral);
++}
++
++/* force_25_bit: C-operand rounding used by the scalar fused multiply-add. */
++GX_FASTFP_INLINE f64 gx_fastfp_force_25_bit(f64 value) {
++    u64 bits = gx_fastfp_bits(value);
++    const u64 fraction = bits & 0x000FFFFFFFFFFFFFull;
++    u64 keep_mask = 0xFFFFFFFFF8000000ull;
++    u64 round = 0x0000000008000000ull;
++    if ((bits & 0x7FF0000000000000ull) == 0 && fraction != 0) {
++        const unsigned shift = (unsigned)__builtin_clzll(fraction) - 11u;
++        if (shift < 28) {
++            keep_mask = ~((1ull << (27 - shift)) - 1);
++            round >>= shift;
++        } else {
++            keep_mask = ~0ull;
++            round = 0;
++        }
++    }
++    bits = (bits & keep_mask) + (bits & round);
++    return gx_fastfp_f64(bits);
++}
++
++/* Single-precision fused multiply-add as ni_madd_msub computes it (value only). */
++GX_FASTFP_INLINE f64 gx_fastfp_madd_single(f64 a, f64 c, f64 b, bool sub) {
++    const f64 c_round = gx_fastfp_force_25bit_c(c);
++    const f64 b_sign = sub ? -b : b;
++    f64 result = fma(a, c_round, b_sign);
++    const u64 result_bits = gx_fastfp_bits(result);
++    if ((result_bits & 0x000000001FFFFFFFull) == 0x0000000010000000ull) {
++        const f64 a_prime = b_sign - result;
++        const f64 b_prime = result + a_prime;
++        const f64 error = fma(a, c_round, a_prime) + (b_sign - b_prime);
++        if (error != 0.0)
++            result = gx_fastfp_f64(((error > 0.0) == (result > 0.0)) ? result_bits + 1 : result_bits - 1);
++    }
++    return result;
++}
++
++GX_FASTFP_INLINE void gx_fastfp_write_single(CPUState* cpu, u8 d, f32 v) {
++    cpu->fpr[d] = (f64)v;
++    cpu->ps1[d] = (f64)v;
++}
++GX_FASTFP_INLINE void gx_fastfp_write_both(CPUState* cpu, u8 d, f32 ps0, f32 ps1) {
++    cpu->fpr[d] = (f64)ps0;
++    cpu->ps1[d] = (f64)ps1;
++}
++
++/* ---- scalar single ---- */
++GX_FASTFP_INLINE void gx_fastfp_fadds(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fadds(cpu, d, a, b); return; }
++    const f64 r = cpu->fpr[a] + cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fadds(cpu, d, a, b); return; }
++    gx_fastfp_write_single(cpu, d, gx_fastfp_force_single(cpu, r));
++}
++GX_FASTFP_INLINE void gx_fastfp_fsubs(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fsubs(cpu, d, a, b); return; }
++    const f64 r = cpu->fpr[a] - cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fsubs(cpu, d, a, b); return; }
++    gx_fastfp_write_single(cpu, d, gx_fastfp_force_single(cpu, r));
++}
++GX_FASTFP_INLINE void gx_fastfp_fmuls(CPUState* cpu, u8 d, u8 a, u8 c) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fmuls(cpu, d, a, c); return; }
++    const f64 r = cpu->fpr[a] * gx_fastfp_force_25bit_c(cpu->fpr[c]);
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fmuls(cpu, d, a, c); return; }
++    gx_fastfp_write_single(cpu, d, gx_fastfp_force_single(cpu, r));
++}
++GX_FASTFP_INLINE void gx_fastfp_fdivs(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fdivs(cpu, d, a, b); return; }
++    const f64 r = cpu->fpr[a] / cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fdivs(cpu, d, a, b); return; }
++    gx_fastfp_write_single(cpu, d, gx_fastfp_force_single(cpu, r));
++}
++GX_FASTFP_INLINE void gx_fastfp_frsp(CPUState* cpu, u8 d, u8 b) {
++    const f64 value = cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu) || isnan(value))) { ppc_frsp(cpu, d, b); return; }
++    gx_fastfp_write_single(cpu, d, gx_fastfp_force_single(cpu, value));
++}
++
++/* ---- scalar double ---- */
++GX_FASTFP_INLINE void gx_fastfp_fadd(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fadd(cpu, d, a, b); return; }
++    const f64 r = cpu->fpr[a] + cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fadd(cpu, d, a, b); return; }
++    cpu->fpr[d] = r;
++}
++GX_FASTFP_INLINE void gx_fastfp_fsub(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fsub(cpu, d, a, b); return; }
++    const f64 r = cpu->fpr[a] - cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fsub(cpu, d, a, b); return; }
++    cpu->fpr[d] = r;
++}
++GX_FASTFP_INLINE void gx_fastfp_fmul(CPUState* cpu, u8 d, u8 a, u8 c) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fmul(cpu, d, a, c); return; }
++    const f64 r = cpu->fpr[a] * cpu->fpr[c];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fmul(cpu, d, a, c); return; }
++    cpu->fpr[d] = r;
++}
++GX_FASTFP_INLINE void gx_fastfp_fdiv(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_fdiv(cpu, d, a, b); return; }
++    const f64 r = cpu->fpr[a] / cpu->fpr[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r))) { ppc_fdiv(cpu, d, a, b); return; }
++    cpu->fpr[d] = r;
++}
++
++/* ---- fused multiply-add, generated form: returns whether output was written ---- */
++GX_FASTFP_INLINE bool gx_fastfp_fma(CPUState* cpu, f64 a, f64 c, f64 b, bool single,
++                                    bool subtract, bool negative, f64* output) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu)))
++        return ppc_fma(cpu, a, c, b, single, subtract, negative, output);
++    const f64 addend = subtract ? -b : b;
++    f64 result;
++    if (!single) {
++        result = fma(a, c, addend);
++    } else {
++        const f64 rounded_c = gx_fastfp_force_25_bit(c);
++        result = fma(a, rounded_c, addend);
++        u64 bits = gx_fastfp_bits(result);
++        if ((bits & 0x000000001FFFFFFFull) == 0x0000000010000000ull) {
++            const f64 a_prime = addend - result;
++            const f64 b_prime = result + a_prime;
++            const f64 error = fma(a, rounded_c, a_prime) + (addend - b_prime);
++            if (error != 0.0) {
++                if ((error > 0.0) == (result > 0.0)) bits++;
++                else bits--;
++                result = gx_fastfp_f64(bits);
++            }
++        }
++        result = (f64)(f32)result;
++    }
++    if (GX_FASTFP_UNLIKELY(isnan(result)))
++        return ppc_fma(cpu, a, c, b, single, subtract, negative, output);
++    *output = negative ? -result : result;
++    return true;
++}
++
++/* ---- paired single ---- */
++GX_FASTFP_INLINE void gx_fastfp_ps_add(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_add_op(cpu, d, a, b); return; }
++    const f64 r0 = cpu->fpr[a] + cpu->fpr[b], r1 = cpu->ps1[a] + cpu->ps1[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r0) || isnan(r1))) { ppc_ps_add_op(cpu, d, a, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, r1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_sub(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_sub_op(cpu, d, a, b); return; }
++    const f64 r0 = cpu->fpr[a] - cpu->fpr[b], r1 = cpu->ps1[a] - cpu->ps1[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r0) || isnan(r1))) { ppc_ps_sub_op(cpu, d, a, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, r1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_mul(CPUState* cpu, u8 d, u8 a, u8 c) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_mul_op(cpu, d, a, c); return; }
++    const f64 r0 = cpu->fpr[a] * gx_fastfp_force_25bit_c(cpu->fpr[c]);
++    const f64 r1 = cpu->ps1[a] * gx_fastfp_force_25bit_c(cpu->ps1[c]);
++    if (GX_FASTFP_UNLIKELY(isnan(r0) || isnan(r1))) { ppc_ps_mul_op(cpu, d, a, c); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, r1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_div(CPUState* cpu, u8 d, u8 a, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_div_op(cpu, d, a, b); return; }
++    const f64 r0 = cpu->fpr[a] / cpu->fpr[b], r1 = cpu->ps1[a] / cpu->ps1[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r0) || isnan(r1))) { ppc_ps_div_op(cpu, d, a, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, r1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_madd(CPUState* cpu, u8 d, u8 a, u8 c, u8 b, bool subtract, bool negative) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_madd_op(cpu, d, a, c, b, subtract, negative); return; }
++    const f64 t0 = gx_fastfp_madd_single(cpu->fpr[a], cpu->fpr[c], cpu->fpr[b], subtract);
++    const f64 t1 = gx_fastfp_madd_single(cpu->ps1[a], cpu->ps1[c], cpu->ps1[b], subtract);
++    if (GX_FASTFP_UNLIKELY(isnan(t0) || isnan(t1))) { ppc_ps_madd_op(cpu, d, a, c, b, subtract, negative); return; }
++    f32 ps0 = gx_fastfp_force_single(cpu, t0), ps1 = gx_fastfp_force_single(cpu, t1);
++    if (negative) { ps0 = -ps0; ps1 = -ps1; }
++    gx_fastfp_write_both(cpu, d, ps0, ps1);
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_madds0(CPUState* cpu, u8 d, u8 a, u8 c, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_madds0(cpu, d, a, c, b); return; }
++    const f64 t0 = gx_fastfp_madd_single(cpu->fpr[a], cpu->fpr[c], cpu->fpr[b], false);
++    const f64 t1 = gx_fastfp_madd_single(cpu->ps1[a], cpu->fpr[c], cpu->ps1[b], false);
++    if (GX_FASTFP_UNLIKELY(isnan(t0) || isnan(t1))) { ppc_ps_madds0(cpu, d, a, c, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, t0), gx_fastfp_force_single(cpu, t1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_madds1(CPUState* cpu, u8 d, u8 a, u8 c, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_madds1(cpu, d, a, c, b); return; }
++    const f64 t0 = gx_fastfp_madd_single(cpu->fpr[a], cpu->ps1[c], cpu->fpr[b], false);
++    const f64 t1 = gx_fastfp_madd_single(cpu->ps1[a], cpu->ps1[c], cpu->ps1[b], false);
++    if (GX_FASTFP_UNLIKELY(isnan(t0) || isnan(t1))) { ppc_ps_madds1(cpu, d, a, c, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, t0), gx_fastfp_force_single(cpu, t1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_muls0(CPUState* cpu, u8 d, u8 a, u8 c) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_muls0(cpu, d, a, c); return; }
++    const f64 c0 = gx_fastfp_force_25bit_c(cpu->fpr[c]);
++    const f64 r0 = cpu->fpr[a] * c0, r1 = cpu->ps1[a] * c0;
++    if (GX_FASTFP_UNLIKELY(isnan(r0) || isnan(r1))) { ppc_ps_muls0(cpu, d, a, c); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, r1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_muls1(CPUState* cpu, u8 d, u8 a, u8 c) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_muls1(cpu, d, a, c); return; }
++    const f64 c1 = gx_fastfp_force_25bit_c(cpu->ps1[c]);
++    const f64 r0 = cpu->fpr[a] * c1, r1 = cpu->ps1[a] * c1;
++    if (GX_FASTFP_UNLIKELY(isnan(r0) || isnan(r1))) { ppc_ps_muls1(cpu, d, a, c); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, r1));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_sum0(CPUState* cpu, u8 d, u8 a, u8 c, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_sum0(cpu, d, a, c, b); return; }
++    const f64 r0 = cpu->fpr[a] + cpu->ps1[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r0))) { ppc_ps_sum0(cpu, d, a, c, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, r0), gx_fastfp_force_single(cpu, cpu->ps1[c]));
++}
++GX_FASTFP_INLINE void gx_fastfp_ps_sum1(CPUState* cpu, u8 d, u8 a, u8 c, u8 b) {
++    if (GX_FASTFP_UNLIKELY(gx_fastfp_strict(cpu))) { ppc_ps_sum1(cpu, d, a, c, b); return; }
++    const f64 r1 = cpu->fpr[a] + cpu->ps1[b];
++    if (GX_FASTFP_UNLIKELY(isnan(r1))) { ppc_ps_sum1(cpu, d, a, c, b); return; }
++    gx_fastfp_write_both(cpu, d, gx_fastfp_force_single(cpu, cpu->fpr[c]), gx_fastfp_force_single(cpu, r1));
++}
++
++/* Redirect the generated chunk's calls. Declarations in core/cpu.h were
++ * already processed above, so only call sites in the chunk expand. */
++#define ppc_fadds(ctx, d, a, b) gx_fastfp_fadds((ctx), (d), (a), (b))
++#define ppc_fsubs(ctx, d, a, b) gx_fastfp_fsubs((ctx), (d), (a), (b))
++#define ppc_fmuls(ctx, d, a, c) gx_fastfp_fmuls((ctx), (d), (a), (c))
++#define ppc_fdivs(ctx, d, a, b) gx_fastfp_fdivs((ctx), (d), (a), (b))
++#define ppc_frsp(ctx, d, b) gx_fastfp_frsp((ctx), (d), (b))
++#define ppc_fadd(ctx, d, a, b) gx_fastfp_fadd((ctx), (d), (a), (b))
++#define ppc_fsub(ctx, d, a, b) gx_fastfp_fsub((ctx), (d), (a), (b))
++#define ppc_fmul(ctx, d, a, c) gx_fastfp_fmul((ctx), (d), (a), (c))
++#define ppc_fdiv(ctx, d, a, b) gx_fastfp_fdiv((ctx), (d), (a), (b))
++#define ppc_fma(ctx, a, c, b, single, sub, neg, out) gx_fastfp_fma((ctx), (a), (c), (b), (single), (sub), (neg), (out))
++#define ppc_ps_add_op(ctx, d, a, b) gx_fastfp_ps_add((ctx), (d), (a), (b))
++#define ppc_ps_sub_op(ctx, d, a, b) gx_fastfp_ps_sub((ctx), (d), (a), (b))
++#define ppc_ps_mul_op(ctx, d, a, c) gx_fastfp_ps_mul((ctx), (d), (a), (c))
++#define ppc_ps_div_op(ctx, d, a, b) gx_fastfp_ps_div((ctx), (d), (a), (b))
++#define ppc_ps_madd_op(ctx, d, a, c, b, sub, neg) gx_fastfp_ps_madd((ctx), (d), (a), (c), (b), (sub), (neg))
++#define ppc_ps_madds0(ctx, d, a, c, b) gx_fastfp_ps_madds0((ctx), (d), (a), (c), (b))
++#define ppc_ps_madds1(ctx, d, a, c, b) gx_fastfp_ps_madds1((ctx), (d), (a), (c), (b))
++#define ppc_ps_muls0(ctx, d, a, c) gx_fastfp_ps_muls0((ctx), (d), (a), (c))
++#define ppc_ps_muls1(ctx, d, a, c) gx_fastfp_ps_muls1((ctx), (d), (a), (c))
++#define ppc_ps_sum0(ctx, d, a, c, b) gx_fastfp_ps_sum0((ctx), (d), (a), (c), (b))
++#define ppc_ps_sum1(ctx, d, a, c, b) gx_fastfp_ps_sum1((ctx), (d), (a), (c), (b))
++#define RECOMPCORE_FAST_FP_ACTIVE 1
 diff --git a/Source/Core/AudioCommon/AudioCommon.cpp b/Source/Core/AudioCommon/AudioCommon.cpp
 index 8ec653a..e050adf 100644
 --- a/Source/Core/AudioCommon/AudioCommon.cpp
@@ -632,7 +932,7 @@ index e3581cc..f65369e 100644
                   "StaticRecomp: shutdown. native_dispatches={} fallback_steps={} "
                   "native_exceptions={} hook_fallback_instructions={} smc_failed_chunks={} "
 diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
-index 44d027b..5961f59 100644
+index 44d027b..4a1aee7 100644
 --- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
 +++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
 @@ -113,6 +113,7 @@ private:
@@ -659,11 +959,87 @@ index 44d027b..5961f59 100644
    u64 m_bursts = 0;          // SyncIn..SyncOut native runs (diagnostic)
    u64 m_charged_cycles = 0;  // cycles flushed from module charges (diagnostic)
  
+@@ -187,11 +193,41 @@ private:
+   u64 m_verifications = 0;    // chunk hash checks performed
+   u64 m_reverify_events = 0;  // invalidations that reset a chunk to Unverified
+ 
+-  // Lookup table optimization for O(1) chunk searches
+-  std::vector<int> m_chunk_lookup_table;
++  // Chunk lookup: one entry per 256-byte granule of RAM/EXRAM instead of one
++  // per word, so the table the dispatcher probes on every burst back-edge is
++  // 192 KiB rather than 24 MiB and no longer evicts the guest's working set.
++  //   >= 0  every word of the granule belongs to that chunk
++  //   -1    no chunk covers the granule
++  //   -2    mixed (chunk boundary or return hook inside): resolve per word
++  static constexpr u32 kLookupShift = 8;
++  static constexpr s16 kLookupNone = -1;
++  static constexpr s16 kLookupMixed = -2;
++  std::vector<s16> m_chunk_lookup_table;
+   u32 m_lookup_ram_size = 0;
+   u32 m_lookup_exram_size = 0;
+-  int GetAddressLookupIndex(u32 address) const;
++  bool m_chunk_ranges_sorted = false;
++  int GetAddressLookupIndex(u32 address) const
++  {
++    if (address >= 0x80000000u && address < 0x80000000u + m_lookup_ram_size)
++      return static_cast<int>((address - 0x80000000u) >> kLookupShift);
++    if (address >= 0x90000000u && address < 0x90000000u + m_lookup_exram_size)
++      return static_cast<int>((m_lookup_ram_size >> kLookupShift) +
++                              ((address - 0x90000000u) >> kLookupShift));
++    return -1;
++  }
++  u32 GranuleStartAddress(int index) const;
++  int LookupChunkSlow(u32 linked_address) const;
++  // Chunk index for a linked (module) address, or -1. Hot path: one table load.
++  int LookupChunk(u32 linked_address) const
++  {
++    const int index = GetAddressLookupIndex(linked_address);
++    if (index < 0 || index >= static_cast<int>(m_chunk_lookup_table.size()))
++      return -1;
++    const s16 entry = m_chunk_lookup_table[static_cast<size_t>(index)];
++    if (entry >= kLookupNone)
++      return entry;
++    return LookupChunkSlow(linked_address);
++  }
+   void InitLookupTable(u32 ram_size, u32 exram_size);
+ 
+   // Dispatch locality: most control transfers stay inside one chunk, so the
 diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
-index 71a21c5..f03c6b3 100644
+index 71a21c5..60ffe23 100644
 --- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
 +++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
-@@ -93,6 +93,7 @@ void StaticRecompCore::Run()
+@@ -41,7 +41,9 @@ FilePtr OpenDispatchTrace()
+   if (!path || !*path)
+     return {};
+ 
+-  FilePtr file(std::fopen(path, "w"));
++  // Append: the run loop is re-entered on pauses and host locks, and the trace
++  // must cover the whole session for execution-equivalence comparisons.
++  FilePtr file(std::fopen(path, "a"));
+   if (file)
+   {
+     std::fprintf(file.get(), "dispatch,pc,lr,ctr,cr,timebase,ppc_downcount\n");
+@@ -73,18 +75,7 @@ void StaticRecompCore::Run()
+     if (!m_module_active || m_chunk_lookup_table.empty())
+       return false;
+ 
+-    int lookup_index = -1;
+-    if (address >= 0x80000000u && address < 0x80000000u + m_lookup_ram_size)
+-    {
+-      lookup_index = static_cast<int>((address - 0x80000000u) >> 2);
+-    }
+-    else if (address >= 0x90000000u && address < 0x90000000u + m_lookup_exram_size)
+-    {
+-      lookup_index = static_cast<int>((m_lookup_ram_size >> 2) + ((address - 0x90000000u) >> 2));
+-    }
+-    if (lookup_index < 0 || lookup_index >= static_cast<int>(m_chunk_lookup_table.size()))
+-      return false;
+-    const int chunk = m_chunk_lookup_table[lookup_index];
++    const int chunk = LookupChunk(address);
+     return chunk >= 0 && m_chunk_state[chunk] == CHUNK_VERIFIED;
+   };
+ 
+@@ -93,6 +84,7 @@ void StaticRecompCore::Run()
  
    if (!m_module_active && m_fallback_jit && !m_guest.host_call)
    {
@@ -671,7 +1047,7 @@ index 71a21c5..f03c6b3 100644
      m_fallback_jit->Run();
      return;
    }
-@@ -100,9 +101,6 @@ void StaticRecompCore::Run()
+@@ -100,9 +92,6 @@ void StaticRecompCore::Run()
    while (*state_ptr == CPU::State::Running)
    {
      core_timing.Advance();
@@ -681,7 +1057,7 @@ index 71a21c5..f03c6b3 100644
      do
      {
        // MSR.FP needs no gate here: generated FPU instructions raise the
-@@ -220,19 +218,29 @@ void StaticRecompCore::Run()
+@@ -220,19 +209,29 @@ void StaticRecompCore::Run()
          }
          // SingleStepInner delivers synchronous exceptions itself; external
          // interrupts are delivered at slice start, as in Interpreter::Run.
@@ -713,22 +1089,112 @@ index 71a21c5..f03c6b3 100644
              ++m_fallback_steps;
            } while (!(m_module_active && DispatchableAt(ppc.pc)) &&
 diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp
-index 491c57e..a274c44 100644
+index 491c57e..e466554 100644
 --- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp
 +++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp
-@@ -198,6 +198,67 @@ void StaticRecompCore::InitLookupTable(u32 ram_size, u32 exram_size)
-       }
-     }
+@@ -120,10 +120,8 @@ bool StaticRecompCore::ResolveNativeAddress(u32 runtime_address, u32* linked_add
+   };
+   if (resolve_active())
+     return true;
+-  const int direct_index = GetAddressLookupIndex(runtime_address);
+-  if (direct_index >= 0 && direct_index < static_cast<int>(m_chunk_lookup_table.size()))
+   {
+-    const int chunk = m_chunk_lookup_table[direct_index];
++    const int chunk = LookupChunk(runtime_address);
+     if (chunk >= 0 && m_chunk_rel_sections[chunk] < 0)
+     {
+       *linked_address = runtime_address;
+@@ -158,12 +156,41 @@ u32 StaticRecompCore::TranslateRelAddress(u32 linked_address)
+   return runtime_address;
+ }
+ 
+-int StaticRecompCore::GetAddressLookupIndex(u32 address) const
++u32 StaticRecompCore::GranuleStartAddress(int index) const
+ {
+-  if (address >= 0x80000000u && address < 0x80000000u + m_lookup_ram_size)
+-    return static_cast<int>((address - 0x80000000u) >> 2);
+-  if (address >= 0x90000000u && address < 0x90000000u + m_lookup_exram_size)
+-    return static_cast<int>((m_lookup_ram_size >> 2) + ((address - 0x90000000u) >> 2));
++  const u32 ram_granules = m_lookup_ram_size >> kLookupShift;
++  if (static_cast<u32>(index) < ram_granules)
++    return 0x80000000u + (static_cast<u32>(index) << kLookupShift);
++  return 0x90000000u + ((static_cast<u32>(index) - ram_granules) << kLookupShift);
++}
++
++int StaticRecompCore::LookupChunkSlow(u32 linked_address) const
++{
++  // Mixed granule: a return hook or a chunk boundary lives inside it.
++  for (const auto& hook : m_return_hooks)
++    if (hook.address == linked_address)
++      return -1;
++  if (!m_module)
++    return -1;
++  const StaticRecompRange* ranges = m_module->chunk_ranges;
++  if (m_chunk_ranges_sorted)
++  {
++    u32 lo = 0, hi = m_module->num_chunk_ranges;
++    while (lo < hi)
++    {
++      const u32 mid = lo + (hi - lo) / 2;
++      if (linked_address < ranges[mid].start)
++        hi = mid;
++      else if (linked_address >= ranges[mid].end)
++        lo = mid + 1;
++      else
++        return static_cast<int>(mid);
++    }
++    return -1;
++  }
++  for (u32 i = 0; i < m_module->num_chunk_ranges; ++i)
++    if (linked_address >= ranges[i].start && linked_address < ranges[i].end)
++      return static_cast<int>(i);
+   return -1;
+ }
+ 
+@@ -181,23 +208,93 @@ void StaticRecompCore::InitLookupTable(u32 ram_size, u32 exram_size)
+     return;
    }
+ 
+-  u32 total_instructions = (ram_size + exram_size) >> 2;
+-  m_chunk_lookup_table.assign(total_instructions, -1);
++  const u32 granule = 1u << kLookupShift;
++  const u32 total_granules = (ram_size >> kLookupShift) + (exram_size >> kLookupShift);
++  m_chunk_lookup_table.assign(total_granules, kLookupNone);
++  m_chunk_ranges_sorted = true;
+ 
+   for (u32 i = 0; i < m_module->num_chunk_ranges; ++i)
+   {
+     const auto& chunk = m_module->chunk_ranges[i];
+-    int start_idx = GetAddressLookupIndex(chunk.start);
+-    int end_idx = GetAddressLookupIndex(chunk.end);
++    if (i > 0 && m_module->chunk_ranges[i - 1].end > chunk.start)
++      m_chunk_ranges_sorted = false;
++    if (chunk.end <= chunk.start || i > 0x7FFE)
++      continue;
++    const int first = GetAddressLookupIndex(chunk.start);
++    const int last = GetAddressLookupIndex(chunk.end - 1);
++    if (first < 0 || last < first)
++      continue;
++    for (int idx = first; idx <= last; ++idx)
++    {
++      const u32 granule_start = GranuleStartAddress(idx);
++      const bool whole = chunk.start <= granule_start && chunk.end >= granule_start + granule;
++      s16& entry = m_chunk_lookup_table[static_cast<size_t>(idx)];
++      entry = (whole && entry == kLookupNone) ? static_cast<s16>(i) : kLookupMixed;
++    }
++  }
 +  // Host return hooks: bursts must stop at these entries so TryHostHle runs.
++  // Their granules resolve per word, and the slow path answers "no chunk"
++  // for the hook address itself.
 +  for (const auto& hook : m_return_hooks)
 +  {
 +    const int idx = GetAddressLookupIndex(hook.address);
 +    if (idx >= 0 && idx < static_cast<int>(m_chunk_lookup_table.size()))
-+      m_chunk_lookup_table[idx] = -1;
++      m_chunk_lookup_table[static_cast<size_t>(idx)] = kLookupMixed;
 +  }
 +}
-+
+ 
+-    if (start_idx >= 0 && end_idx >= start_idx)
 +bool StaticRecompCore::TryHostHle(PowerPC::PowerPCState& ppc)
 +{
 +  auto& memory = m_system.GetMemory();
@@ -747,13 +1213,15 @@ index 491c57e..a274c44 100644
 +    static constexpr u32 kStub[7] = {0x7d30faa6u, 0x612a0008u, 0x7d50fba6u, 0x4c00012cu,
 +                                     0x7c0004acu, 0x7d30fba6u, 0x4c000064u};
 +    for (u32 i = 0; i < 7; ++i)
-+    {
+     {
+-      for (int idx = start_idx; idx < end_idx; ++idx)
 +      if (word(0x80000C00u + 4 * i) != kStub[i])
-+      {
+       {
+-        m_chunk_lookup_table[idx] = static_cast<int>(i);
 +        ++m_hle_rejects;
 +        return false;
-+      }
-+    }
+       }
+     }
 +    const u32 mask = 0x87C0FFFFu;
 +    ppc.msr.Hex = (ppc.msr.Hex & ~mask) | (ppc.spr[SPR_SRR1] & mask);
 +    ppc.msr.Hex &= 0xFFFBFFFFu;
@@ -763,7 +1231,7 @@ index 491c57e..a274c44 100644
 +    ppc.downcount -= 8;
 +    ++m_hle_vectors;
 +    return true;
-+  }
+   }
 +  for (const auto& hook : m_return_hooks)
 +  {
 +    if (hook.address != ppc.pc)
@@ -784,6 +1252,19 @@ index 491c57e..a274c44 100644
  }
  
  int StaticRecompCore::ChunkIndexOf(u32 address)
+@@ -208,11 +305,7 @@ int StaticRecompCore::ChunkIndexOf(u32 address)
+   u32 linked_address = address;
+   if (!ResolveNativeAddress(address, &linked_address, nullptr))
+     return -1;
+-  int idx = GetAddressLookupIndex(linked_address);
+-  if (idx < 0 || idx >= static_cast<int>(m_chunk_lookup_table.size()))
+-    return -1;
+-
+-  return m_chunk_lookup_table[idx];
++  return LookupChunk(linked_address);
+ }
+ 
+ bool StaticRecompCore::FastDispatchableAt(u32 address)
 diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompModuleSource.h b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompModuleSource.h
 index 07e1385..febf039 100644
 --- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompModuleSource.h
@@ -937,7 +1418,7 @@ index 4b744fe..f1029fe 100644
 @@ -525,6 +530,15 @@ TextureConfig cfg(info.width, info.height, 1, 1, 1, info.format, AbstractTexture
    CGSize size = [m_layer bounds].size;
    const float scale = [m_layer contentsScale];
-
+ 
 +#if !TARGET_OS_OSX
 +  // The UIKit host owns integer output dimensions. Reconstructing them from
 +  // bounds and float contentsScale loses pixels for source-matched sizing.
@@ -1141,7 +1622,7 @@ index 4ac11c8..c452c89 100644
  }
  
 diff --git a/module-template/CMakeLists.txt b/module-template/CMakeLists.txt
-index 3b00450..dbf30cf 100644
+index 3b00450..f50ae8b 100644
 --- a/module-template/CMakeLists.txt
 +++ b/module-template/CMakeLists.txt
 @@ -84,7 +84,12 @@ if(NOT CHUNK_INPUTS)
@@ -1158,3 +1639,19 @@ index 3b00450..dbf30cf 100644
    module_export.c
    "${MODULE_TABLES}"
    "${GXRUNTIME_DIR}/src/core/cpu.c"
+@@ -121,6 +126,15 @@ if(UNIX AND NOT APPLE)
+ endif()
+ 
+ option(RECOMPCORE_MODULE_ENABLE_IPO "Enable Clang module interprocedural optimization when supported" ON)
++option(RECOMPCORE_FAST_FP
++  "Compile generated chunks against GXRuntime/include/core/cpu_fast_fp.h: inline JIT-fidelity floating point (no FPRF/FI/FR bookkeeping on non-exceptional results)" OFF)
++if(RECOMPCORE_FAST_FP)
++  # Chunks only: the helpers and interpreter keep their exact definitions.
++  set_source_files_properties(${CHUNK_INPUTS} PROPERTIES
++    COMPILE_OPTIONS "-include;${GXRUNTIME_DIR}/include/core/cpu_fast_fp.h")
++  target_compile_definitions(${MODULE_NAME} PRIVATE RECOMPCORE_FAST_FP=1)
++  message(STATUS "Module fast floating point: on (cpu_fast_fp.h forced into generated chunks)")
++endif()
+ set(RECOMPCORE_MODULE_OPT_LEVEL "2" CACHE STRING
+     "Optimization level for generated module translation units (0, 1, 2, or 3)")
+ set_property(CACHE RECOMPCORE_MODULE_OPT_LEVEL PROPERTY STRINGS 0 1 2 3)

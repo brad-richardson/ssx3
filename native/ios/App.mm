@@ -28,6 +28,7 @@
 #include "SessionPause.h"
 #include "../diagnostics/trial_control.h"
 #include "../diagnostics/startup_skip.h"
+#include "../diagnostics/callback_timer.h"
 #include "dolphin_runtime_internal.hpp"
 #include "Common/HookableEvent.h"
 #include "Common/Logging/Log.h"
@@ -45,6 +46,17 @@
 
 extern "C" const ModernGekkoModuleDesc* staticrecomp_get_module();
 using Clock = std::chrono::steady_clock;
+
+static NSDictionary* RiderSummary(const CallbackTimer::RiderSample& r) {
+  if (!r.valid) return @{@"valid":@NO, @"updates":@(r.updates)};
+  return @{@"valid":@YES, @"pointer":@(r.rider), @"x":@(r.x), @"y":@(r.y), @"z":@(r.z), @"state":@(r.state),
+           @"guestTimebase":@(r.timebase), @"updates":@(r.updates)};
+}
+static NSDictionary* CallbackSummary(const CallbackTimer::Summary& s) {
+  const auto value=[](double v){ return v>=0 ? (id)@(v) : (id)NSNull.null; };
+  return @{@"count":@(s.count), @"cpuMedianMs":value(s.cpu_median_ms), @"cpuP95Ms":value(s.cpu_p95_ms),
+           @"wallMedianMs":value(s.wall_median_ms), @"wallP95Ms":value(s.wall_p95_ms)};
+}
 
 struct FrameWorkload {
   uint64_t samples=0, draw_calls=0, max_draw_calls=0, primitives=0, vertex_bytes=0, index_bytes=0;
@@ -182,6 +194,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   int _internalScale;
   BOOL _simulatorNullAudio;
   BOOL _debugMainMenu;
+  BOOL _cpuThread;        // mode of the running/next runtime; smoothing trial unavailable when on
+  int _cpuThreadOverride; // -1 saved preference, 0 -ssxSingleCore, 1 -ssxCPUThread (this process only)
+  BOOL _fastDisc;         // launch-only Dolphin FastDiscSpeed comparison
+  BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
   StartupBoot::AdvanceInput _startupInput;
   int _startupPhaseLogged;
   BOOL _sequenceFromMainMenu;
@@ -250,6 +266,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (BOOL)applyInternalScale:(int)scale;
 - (void)refreshSessionMenu;
 - (void)dismissSessionMenuThen:(dispatch_block_t)completion;
+- (BOOL)cpuThreadRequested;
 @end
 
 @implementation SSXViewController
@@ -278,6 +295,12 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _debugMainMenu=[NSUserDefaults.standardUserDefaults boolForKey:@"SSXDebugMainMenu"];
   if([launchArgs containsObject:@"-ssxDebugMainMenu"]) _debugMainMenu=YES;
   if([launchArgs containsObject:@"-ssxNormalBoot"]) _debugMainMenu=NO;
+  [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXCPUThread":@YES}];
+  _cpuThreadOverride=[launchArgs containsObject:@"-ssxSingleCore"] ? 0 :
+      ([launchArgs containsObject:@"-ssxCPUThread"] ? 1 : -1);
+  _cpuThread=[self cpuThreadRequested];
+  _fastDisc=[launchArgs containsObject:@"-ssxFastDisc"];
+  _dispatchSamples=[launchArgs containsObject:@"-ssxDispatchSamples"];
   _simulatorNullAudio=NO;
 #if TARGET_OS_SIMULATOR
   // Graphics-only escape hatch for Simulator RemoteIO RPC failures. This
@@ -510,6 +533,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }
   _starting = true;
   _launchTime = CACurrentMediaTime();
+  _cpuThread=[self cpuThreadRequested];  // a changed menu choice applies to this new runtime
   _stopRequested = false;
   NSString* user = [Documents() stringByAppendingPathComponent:@"User"];
   NSString* config = [user stringByAppendingPathComponent:@"Config"];
@@ -528,7 +552,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _inputFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"input.jsonl"]];
   const char* audioBackend=_simulatorNullAudio ? BACKEND_NULLSOUND : BACKEND_COREAUDIO;
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
-    [NSString stringWithFormat:@"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",audioBackend]);
+    [NSString stringWithFormat:@"[Core]\nCPUThread = %s\nFastDiscSpeed = %s\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",
+      _cpuThread ? "True" : "False",_fastDisc ? "True" : "False",audioBackend]);
   WriteText([config stringByAppendingPathComponent:@"GFX.ini"],
     // AspectRatio 1 forces 16:9 output. The game's own Options > Widescreen setting
     // must be on so the 3D scene is rendered anamorphic; Auto detection is not
@@ -557,7 +582,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   UIApplication.sharedApplication.idleTimerDisabled = YES;
   setenv("STATICRECOMP_NO_JIT","1",1);
   setenv("SSX3_NO_EXECUTABLE_MEMORY","1",1);
-  setenv("STATICRECOMP_DISPATCH_SAMPLES","1",1);
+  // Presence-based in the runtime: only a launch flag enables the per-dispatch sampling branch.
+  if (_dispatchSamples) setenv("STATICRECOMP_DISPATCH_SAMPLES","1",1); else unsetenv("STATICRECOMP_DISPATCH_SAMPLES");
   Common::Log::SetEmbedderLogCallback(RuntimeLog,nullptr);
   NSArray* args = NSProcessInfo.processInfo.arguments;
   _scheduledTrialAt=-1;
@@ -582,7 +608,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     @"os":UIDevice.currentDevice.systemVersion, @"device":UIDevice.currentDevice.model,
     @"simulator":@(TARGET_OS_SIMULATOR), @"metalDevice":((CAMetalLayer*)_surface.layer).device.name ?: @"unknown",
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
-    @"renderScale":@(_internalScale), @"cpuThread":@NO, @"automated":@(_sequence!=nil),
+    @"renderScale":@(_internalScale), @"cpuThread":@(_cpuThread), @"fastDiscSpeed":@(_fastDisc),
+    @"dispatchSamples":@(_dispatchSamples), @"automated":@(_sequence!=nil),
     @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
     @"debugMainMenuRequested":@(_debugMainMenu),
     @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
@@ -832,6 +859,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
       @"maxSpeedExcludingThrottle":std::isfinite(maxSpeed) ? @(maxSpeed) : NSNull.null,
       @"trialStatus":@(static_cast<int>(NativeTrial::status.load())),
       @"trialLimited":@(NativeTrial::limited.load()), @"trialExtras":@(NativeTrial::extras.load()),
+      @"callbackTiming":@{@"update":CallbackSummary(CallbackTimer::Drain(CallbackTimer::update_ring)),
+        @"render":CallbackSummary(CallbackTimer::Drain(CallbackTimer::render_ring)), @"cpuThread":@(_cpuThread)},
+      @"rider":RiderSummary(CallbackTimer::ReadRider()),
       @"workload":@{@"frameEvents":@(workload.samples), @"drawCalls":@(workload.draw_calls),
         @"maxDrawCallsPerFrameEvent":@(workload.max_draw_calls), @"primitives":@(workload.primitives),
         @"vertexBytes":@(workload.vertex_bytes), @"indexBytes":@(workload.index_bytes),
@@ -857,6 +887,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (void)showSessionMenu {
   if (_pauseState.menu || _starting || self.presentedViewController) return;
   _pauseState.OpenMenu();
+  [self logSessionEvent:@"menu_opened" details:@{@"cpuThread":@(_cpuThread), @"internalScale":@(_internalScale)}];
   [self updatePlayback];
   _menuStatus = _pendingCheckpoint ? @"Saving your place…" : @"Paused";
   NSDictionary* build=ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"]);
@@ -911,11 +942,19 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [self logSessionEvent:@"startup_preference_changed" details:@{@"enabled":@(enabled)}];
     [self refreshSessionMenu];
   };
+  _sessionMenu.onDualCore = ^(BOOL enabled) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    [NSUserDefaults.standardUserDefaults setBool:enabled forKey:@"SSXCPUThread"];
+    [self logSessionEvent:@"runtime_preference_changed" details:@{@"cpuThread":@(enabled), @"active":@(self->_cpuThread)}];
+    [self refreshSessionMenu];
+  };
   _sessionMenu.onReset = ^{
     SSXViewController* self=weakSelf;
     if (!self || self->_pendingCheckpoint || self->_starting || self->_stopRequested) return;
     const auto trial=NativeTrial::status.load();
     if (trial==NativeTrial::Status::Waiting || trial==NativeTrial::Status::Running) return;
+    [self logSessionEvent:@"full_reset_requested" details:@{@"cpuThreadNext":@([self cpuThreadRequested])}];
     [self dismissSessionMenuThen:^{
       SSXViewController* self=weakSelf;
       if (!self) return;
@@ -992,8 +1031,11 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSString* status=_pendingCheckpoint ? @"Saving your place…" : (_menuStatus ?: @"Paused");
   if (!_pendingCheckpoint && NativeTrial::limited.load())
     status=[status stringByAppendingString:@" · Smoothing ended to maintain game speed."];
+  if ([NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]!=(BOOL)_cpuThread && _cpuThreadOverride<0)
+    status=[status stringByAppendingString:@" · Dual-core change applies after Full Reset."];
   [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
-      fastStart:_debugMainMenu canConfigure:canConfigure canTrial:canConfigure
+      fastStart:_debugMainMenu dualCore:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]
+      canConfigure:canConfigure canTrial:canConfigure
       canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&
           trial!=NativeTrial::Status::Waiting && trial!=NativeTrial::Status::Running) build:_menuBuild ?: @""];
 }
@@ -1022,6 +1064,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     @"pictureEFBHeight":_picture.host ? @(_picture.efb_height) : NSNull.null,
     @"outputWidth":@(layer.drawableSize.width), @"outputHeight":@(layer.drawableSize.height),
     @"drawableWidth":@(layer.drawableSize.width), @"drawableHeight":@(layer.drawableSize.height)};
+}
+- (BOOL)cpuThreadRequested {
+  return _cpuThreadOverride>=0 ? _cpuThreadOverride==1 : [NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"];
 }
 - (BOOL)canChangeOutputScale {
   const auto trial=NativeTrial::status.load();
@@ -1108,7 +1153,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (BOOL)applyInternalScale:(int)scale {
   std::lock_guard lock(_runtimeMutex);
-  if (!_runtime || ![self canChangeOutputScale] || (scale != 1 && scale != 2)) {
+  if (!_runtime || ![self canChangeOutputScale] || scale < 1 || scale > 4) {
     [self logSessionEvent:@"internal_resolution_rejected" details:@{@"targetInternalScale":@(scale)}];
     return NO;
   }

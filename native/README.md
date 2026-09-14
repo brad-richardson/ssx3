@@ -118,6 +118,32 @@ automatically; stick commands return to center. Without pipe mode the upstream
 keyboard defaults use Return for Start, X for A, Z for B, arrow keys for the main
 stick, and Q/W for the shoulder triggers.
 
+## Determinism gate and the fast floating-point module
+
+`SSX3_MOVIE_RECORD=path` makes the runtime record this session's GameCube pad
+input as a Dolphin DTM movie on shutdown; `SSX3_MOVIE_PLAY=path` replays one
+from power-on. Under playback every guest input poll receives the recorded
+pad state and the guest clock is fixed, so a single-core run is deterministic.
+`tools/native_determinism_check.py record|play|compare` wraps the course checker
+around that: record once with a baseline module, replay against a candidate,
+and compare the runtime's periodic dispatch trace (pc, lr, ctr, cr, timebase per
+1,048,576 dispatches) row for row. Equal rows are execution equivalence; the
+first differing row locates a divergence. `run --module PATH` and the course
+checker's `--module` select which module dylib a run loads.
+
+`module --fast-fp` builds the generated chunks against
+`GXRuntime/include/core/cpu_fast_fp.h` (`RECOMPCORE_FAST_FP`). The header is
+forced into each chunk after `core/cpu.h` and redirects the chunk's calls to
+the scalar and paired-single arithmetic helpers to inline versions that
+compute the same values (same double operation, 25-bit C rounding, single
+rounding and NI flush) but skip FPRF, FI/FR and sticky-flag bookkeeping for
+non-exceptional results, matching Dolphin's JIT defaults. NaN results and any
+enabled FPSCR exception fall back to the exact helpers. The helpers,
+interpreter and generated sources are unchanged; `manifest.json` records
+`fast_fp`. The core's chunk lookup table is now one entry per 256-byte
+granule (192 KiB) instead of one per word (24 MiB); granules holding a chunk
+boundary or a return hook resolve per word.
+
 ## Targeted reverse engineering
 
 ```sh

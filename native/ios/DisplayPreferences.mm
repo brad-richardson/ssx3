@@ -12,7 +12,8 @@ static BOOL ValidOutputMode(id value) {
 static BOOL ValidStoredScale(id value) {
   return [value isKindOfClass:NSNumber.class] &&
       CFGetTypeID((__bridge CFTypeRef)value) != CFBooleanGetTypeID() &&
-      ([value isEqualToNumber:@1] || [value isEqualToNumber:@2]);
+      [value integerValue] >= 1 && [value integerValue] <= 4 &&
+      [value isEqualToNumber:@([value integerValue])];
 }
 
 @interface SSXDisplayPreferences ()
@@ -44,8 +45,9 @@ static BOOL ValidStoredScale(id value) {
         ++i;
       } else if ([flag isEqualToString:@"-ssxInternalScale"] &&
                  [value isKindOfClass:NSString.class] &&
-                 ([value isEqualToString:@"1"] || [value isEqualToString:@"2"])) {
-        _internalScale = [value isEqualToString:@"1"] ? 1 : 2;
+                 ([value isEqualToString:@"1"] || [value isEqualToString:@"2"] ||
+                  [value isEqualToString:@"3"] || [value isEqualToString:@"4"])) {
+        _internalScale = [value integerValue];
         ++i;
       }
       // Invalid values are ignored. Do not consume a following option token;
@@ -63,7 +65,7 @@ static BOOL ValidStoredScale(id value) {
 }
 
 - (void)saveInternalScale:(NSInteger)scale {
-  if (!_defaults || (scale != 1 && scale != 2)) return;
+  if (!_defaults || scale < 1 || scale > 4) return;
   [_defaults setInteger:scale forKey:SSXDisplayInternalScaleKey];
   _internalScale = scale;
 }

@@ -75,7 +75,7 @@ static void StoreWord(CPUState& c,u32 address,u32 value){
  for(unsigned i=0;i<4;++i)p[i]=value>>(24-i*8);
 }
 static void ScheduleEvent(CPUState& c,const char* event,u64 ticks,u64 missed=0){
- std::fprintf(Output(),"{\"event\":\"schedule\",\"action\":\"%s\",\"wall\":%.6f,\"ticks\":%llu,\"host_seconds\":%.9f,\"missed\":%llu,\"pending\":%u,\"speed_window\":%.6f,\"speed_ratio\":%.6f}\n",event,Now(),(unsigned long long)ticks,PresentationClock(),(unsigned long long)missed,Word(c,c.gpr[13]-20556),speed_floor.span,speed_floor.rate);
+ std::fprintf(Output(),"{\"event\":\"schedule\",\"action\":\"%s\",\"wall\":%.6f,\"ticks\":%llu,\"host_seconds\":%.9f,\"missed\":%llu,\"pending\":%u,\"speed_window\":%.6f,\"speed_ratio\":%.6f,\"long_speed_window\":%.6f,\"long_speed_ratio\":%.6f}\n",event,Now(),(unsigned long long)ticks,PresentationClock(),(unsigned long long)missed,Word(c,c.gpr[13]-20556),speed_floor.span,speed_floor.rate,speed_floor.long_span,speed_floor.long_rate);
  std::fflush(Output());
 }
 static inline void Step(CPUState& c){
@@ -178,10 +178,15 @@ static inline void Step(CPUState& c){
  }
  if(SpeedFloorEnabled())speed_floor.Observe(now_cached,ticks,system.GetSystemTimers().GetTicksPerSecond());
 #ifdef SSX_NATIVE_TRIAL_APP
- // Ordinary interpolated draws also cost time. Stop the entire trial when
- // it cannot produce useful extras, or sustained simulation speed suffers.
- if(now_cached-budget.wall_start>=3&&
-    (NativeTrial::extras.load()<15||(speed_floor.span>=RenderResearch::SpeedFloor::Window&&speed_floor.rate<0.95))){
+ // Ordinary interpolated draws also cost time. Stop the entire trial when,
+ // after a settling period, it cannot produce useful extras or simulation
+ // speed over the long window stays low. The per-frame veto above already
+ // withholds extras during short dips, so this decides only whether the
+ // trial as a whole is worth keeping.
+ static constexpr double Grace=10.0;
+ if(now_cached-budget.wall_start>=Grace&&
+    (NativeTrial::extras.load()<15||
+     (speed_floor.long_span>=RenderResearch::SpeedFloor::LongWindow&&speed_floor.long_rate<0.95))){
   NativeTrial::limited=true;NativeTrial::Cancel();
   ScheduleEvent(c,"performance_limit",ticks);return;
  }

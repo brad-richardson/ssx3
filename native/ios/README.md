@@ -53,8 +53,11 @@ signed executable hash. These local records contain provisioning/device details
 and stay outside version control.
 
 The menu also offers an opt-in native smoothing trial, lasting up to 35 seconds.
-It can end early if extra rendering cannot keep up, and always drains an injected
-draw before pausing/saving. Ordinary rendering remains the default. This is a
+It ends early only after a 10-second settling period, when fewer than 15 extra
+frames have completed or game speed over a 2-second window stays below 0.95;
+inside the trial, extras are withheld frame by frame while the 0.5-second
+speed is under 0.97 and resume at 0.99. It always drains an injected draw
+before pausing/saving. Ordinary rendering remains the default. This is a
 geometry-interpolation experiment with a visual-delay tradeoff, not a verified
 latency improvement. Device reports have shown short stretches of actual
 120 Hz presentation; sustaining that pacing remains experimental.
@@ -95,7 +98,7 @@ on resume. The Metal backend
 honors exact integer drawable dimensions on iOS, avoiding float-scale rounding.
 Outputs larger than native screen size are capped and reported in telemetry.
 
-**1× / 2×** changes the GameCube rendering resolution independently of output
+**1× / 2× / 3× / 4×** changes the GameCube rendering resolution independently of output
 size. The initial default is 2×, with subsequent menu choices remembered. The
 allocated EFB is 640 × 528 at 1× (337,920 pixels) or 1280 × 1056 at 2×
 (1,351,680 pixels), four times the pixels. These allocation dimensions differ
@@ -141,7 +144,7 @@ This option does not persist a preference; a normal app launch uses the saved
 choice, initially Half. Always specify both output and internal detail for
 controlled comparisons.
 `--internal-scale 2` selects 2× internal detail for a launch, or use
-`--internal-scale 1` for the explicit baseline. It accepts only `1` or `2`, is
+`--internal-scale 1` for the explicit baseline. It accepts `1` to `4`, is
 launch-only, and can be combined with any output mode and with `--sequence`.
 Invalid values or use on another command are rejected before device changes.
 With a bounded `--sequence`, `--smoothing-at 155` requests one trial at that
@@ -149,6 +152,24 @@ active test time, using the same riding-state checks, 35-second cap and speed
 fallback as the menu. The test must leave at least 40 seconds after the request;
 the option is rejected before copying inputs otherwise. It never restarts an
 already pending/running trial. Automated sessions skip player checkpoints.
+
+**Dual-core** is the default runtime mode since build 1b of September 13:
+Dolphin's `CPUThread = True` moves FIFO decoding, software vertex conversion
+and Metal encoding to a second thread. The September 13 phone comparison on
+the same build held 1.00 speed through the stadium section that ran at
+0.84–0.91 single-core, with the render callback's CPU-thread cost falling
+from 9.5 to 7.8 ms and about 25% guest headroom remaining. The pause menu's
+**Dual-core** switch saves the choice; it applies at the next Full Reset or
+relaunch, and the menu says so while the running runtime differs. The
+smoothing trial is also offered under dual-core; its guards are unchanged and
+that combination has no device evidence yet. Steady memory footprint is
+about 110 MB higher in dual-core mode.
+Launch-only overrides for one process, recorded in `launch.json` and never
+persisted: `--cpu-thread` and `--single-core` (the comparison control) force
+the mode; `--fast-disc` enables `FastDiscSpeed` for a loading comparison;
+`--dispatch-samples` turns the runtime's per-dispatch sampling branch back
+on, which ordinary launches no longer enable. All work with or without
+`--sequence`.
 Retain the sequence and compare actual riding state and presentations: equal
 wall-timed inputs alone do not establish identical game trajectories.
 
@@ -263,6 +284,21 @@ dimensions remain in the existing metrics fields.
   not compilation durations and may reset with a cache reload. The existing
   speed estimate excluding intentional throttle sleep is also recorded as
   `maxSpeedExcludingThrottle`; it is not a guaranteed achievable FPS.
+- Every metric interval also carries `rider`: the rider pointer, position
+  (x, y, z), state and guest timebase sampled once per second at the update
+  callback through the same pointer chain the Mac observer uses, so slow
+  seconds can be placed on the course and compared across runs. Lifecycle
+  events name every menu action: `menu_opened`, `output_resolution_requested`,
+  `internal_resolution_requested`, `startup_preference_changed`,
+  `runtime_preference_changed` (dual-core switch), `trial_resume_requested`
+  and `full_reset_requested`.
+- Every metric interval also carries `callbackTiming`: count, median and p95
+  thread-CPU and wall milliseconds of the ordinary application update and
+  render callbacks completed in that interval, measured on the CPU thread at
+  the callback boundaries only. Frames inside a pending or running smoothing
+  trial are excluded. `cpuThread` records the launch mode. In dual-core mode
+  the render value no longer includes FIFO decoding, which runs on the other
+  thread; wall minus CPU includes any wait for FIFO space.
 
 Summarize an explicit host-clock window from `native-trial.jsonl` or
 `lifecycle.jsonl` with:

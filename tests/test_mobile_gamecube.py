@@ -37,7 +37,7 @@ class DeviceLaunch(unittest.TestCase):
 
     def test_internal_scale_rejects_invalid_values_before_device_changes(self):
         for simulator in (False, True):
-            for scale in (0, 3, 1.5, "2", True):
+            for scale in (0, 5, 1.5, "2", True):
                 with self.subTest(simulator=simulator, scale=scale), \
                         mock.patch.object(mobile_gamecube, "copy_to") as copy, \
                         mock.patch.object(mobile_gamecube, "simulator_documents") as documents, \
@@ -51,7 +51,7 @@ class DeviceLaunch(unittest.TestCase):
 
     def test_internal_scale_parser_rejects_nonlaunch_and_invalid_choices(self):
         for operation, scale in (("collect", "2"), ("install", "1"), ("launch", "0"),
-                                 ("launch", "3"), ("launch", "1.5")):
+                                 ("launch", "5"), ("launch", "1.5")):
             with self.subTest(operation=operation, scale=scale), \
                     mock.patch("sys.argv", ["mobile_gamecube.py", operation, "--device", "PHONE",
                                            "--internal-scale", scale]), \

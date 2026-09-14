@@ -40,13 +40,15 @@ struct RealTimeBudget {
 // hysteresis before resuming extras. This is a reactive guard, not a guarantee
 // that the next draw will fit its deadline.
 struct SpeedFloor {
-  static constexpr unsigned Samples=32;
-  static constexpr double Interval=0.02, Window=0.5;
-  static constexpr double Stop=0.98, Resume=0.995;
+  // 128 samples at 20 ms spacing keep about 2.5 s of history: the per-frame
+  // veto reads the 0.5 s window, trial cancellation the 2 s LongWindow rate.
+  static constexpr unsigned Samples=128;
+  static constexpr double Interval=0.02, Window=0.5, LongWindow=2.0;
+  static constexpr double Stop=0.97, Resume=0.99;
   double wall[Samples]={};
   double guest[Samples]={};
   unsigned count=0,next=0;
-  double last_wall=0, rate=0, span=0;
+  double last_wall=0, rate=0, span=0, long_rate=0, long_span=0;
   uint64_t last_ticks=0, last_frequency=0;
   bool allowed=false;
   void Observe(double wall_now,uint64_t ticks,uint64_t frequency){
@@ -58,15 +60,20 @@ struct SpeedFloor {
     wall[next]=wall_now;guest[next]=double(ticks)/frequency;
     next=(next+1)%Samples;if(count<Samples)++count;
     const unsigned newest=(next+Samples-1)%Samples;
-    span=rate=0;
+    span=rate=long_span=long_rate=0;
+    bool short_done=false;
     for(unsigned age=1;age<count;++age){
       const unsigned old=(newest+Samples-age)%Samples;
       const double elapsed=wall[newest]-wall[old];
-      if(elapsed+1e-9<Window)continue;
-      span=elapsed;rate=(guest[newest]-guest[old])/elapsed;
-      allowed=rate>=(allowed?Stop:Resume);return;
+      if(!short_done&&elapsed+1e-9>=Window){
+        span=elapsed;rate=(guest[newest]-guest[old])/elapsed;
+        allowed=rate>=(allowed?Stop:Resume);short_done=true;
+      }
+      if(elapsed+1e-9>=LongWindow){
+        long_span=elapsed;long_rate=(guest[newest]-guest[old])/elapsed;return;
+      }
     }
-    allowed=false;
+    if(!short_done)allowed=false;
   }
   bool Allows() const {return allowed;}
 };

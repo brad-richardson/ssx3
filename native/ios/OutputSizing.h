@@ -17,7 +17,7 @@ inline bool SourceReady(int width, int height, int efb_width, int efb_height,
                         unsigned stable, double sample_host, double changed_host,
                         int internal_scale) {
   return width > 0 && height > 0 && width <= 16384 && height <= 16384 &&
-      (internal_scale == 1 || internal_scale == 2) &&
+      internal_scale >= 1 && internal_scale <= 4 &&
       efb_width == 640*internal_scale && efb_height == 528*internal_scale &&
       stable >= 2 && std::isfinite(sample_host) && std::isfinite(changed_host) &&
       changed_host >= 0 && sample_host > changed_host;

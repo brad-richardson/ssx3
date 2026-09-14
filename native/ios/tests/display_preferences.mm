@@ -55,14 +55,14 @@ int main() {
       for (id invalid in @[@"FULL", @"0.75", @"", @1, @[], @{}])
         [prefs saveOutputMode:invalid];
       [prefs saveOutputMode:nil];
-      const NSInteger invalidScales[] = {0, -1, 3, 999};
+      const NSInteger invalidScales[] = {0, -1, 5, 999};
       for (NSInteger invalid : invalidScales) [prefs saveInternalScale:invalid];
       Check(prefs, @"half", 2);
       Require([[defaults persistentDomainForName:suite] isEqual:before], @"Invalid save changed storage");
 
       // Invalid stored dimensions fall back independently, with no implicit repair write.
       [defaults setObject:@"full" forKey:SSXDisplayOutputModeKey];
-      for (id invalid in @[@0, @3, @1.5, @YES, @"1", @[], @{}]) {
+      for (id invalid in @[@0, @5, @1.5, @YES, @"1", @[], @{}]) {
         [defaults setObject:invalid forKey:SSXDisplayInternalScaleKey];
         Check([[SSXDisplayPreferences alloc] initWithDefaults:defaults arguments:@[]], @"full", 2);
         Require([[defaults objectForKey:SSXDisplayInternalScaleKey] isEqual:invalid], @"Invalid scale was silently rewritten");
@@ -78,7 +78,7 @@ int main() {
         @[@"-ssxOutputScale"], @[@"-ssxInternalScale"],
         @[@"-ssxOutputScale", @"FULL", @"-ssxInternalScale", @"1.0"],
         @[@"-ssxOutputScale", @1, @"-ssxInternalScale", @2],
-        @[@"-ssxOutputScale", NSNull.null, @"-ssxInternalScale", @"3"],
+        @[@"-ssxOutputScale", NSNull.null, @"-ssxInternalScale", @"5"],
         @[@1, @[], @"unrelated"], @[@"-ssxInternalScale", @""],
       ];
       for (NSArray* arguments in malformed)
@@ -87,6 +87,12 @@ int main() {
       Check([[SSXDisplayPreferences alloc] initWithDefaults:defaults arguments:(id)@"invalid"], @"three-quarter", 1);
       Check([[SSXDisplayPreferences alloc] initWithDefaults:defaults
           arguments:@[@"-ssxOutputScale", @"-ssxInternalScale", @"2"]], @"three-quarter", 2);
+      Check([[SSXDisplayPreferences alloc] initWithDefaults:defaults
+          arguments:@[@"-ssxInternalScale", @"4"]], @"three-quarter", 4);
+      [prefs saveInternalScale:3];
+      Check(prefs, @"half", 3);
+      [prefs saveInternalScale:2];
+      [defaults setInteger:1 forKey:SSXDisplayInternalScaleKey];  // restore the stored value the later reopen checks expect
       Check([[SSXDisplayPreferences alloc] initWithDefaults:defaults
           arguments:@[@"-ssxOutputScale", @"full", @"-ssxOutputScale", @"match-internal",
                       @"-ssxInternalScale", @"2", @"-ssxInternalScale", @"bad"]], @"match-internal", 2);

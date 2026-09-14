@@ -137,11 +137,13 @@ def module(args):
          "-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0", f"-DGAME_ID={PINS['disc_id']}",
          f"-DGENERATED_DIR={generated}", f"-DGXRUNTIME_DIR={CORE / 'GXRuntime'}",
          f"-DCHASSIS_ABI_DIR={CORE / 'Source/Core/Core/PowerPC/StaticRecomp'}",
-         f"-DRECOMPCORE_MODULE_OPT_LEVEL={args.opt_level}"])
+         f"-DRECOMPCORE_MODULE_OPT_LEVEL={args.opt_level}",
+         f"-DRECOMPCORE_FAST_FP={'ON' if getattr(args, 'fast_fp', False) else 'OFF'}"])
     run(["cmake", "--build", MODULE / "build", "-j", args.jobs])
     library = MODULE / "build/gGXBE69_recomp.dylib"
     metadata = {**identity, "dependencies": PINS, "module_sha256": sha256(library),
-                "opt_level": args.opt_level, "cpu_jit_required": "not established by compilation"}
+                "opt_level": args.opt_level, "fast_fp": bool(getattr(args, "fast_fp", False)),
+                "cpu_jit_required": "not established by compilation"}
     (MODULE / "manifest.json").write_text(json.dumps(metadata, indent=2) + "\n")
     run([executable("moderngekko-module-info"), library])
 
@@ -232,6 +234,7 @@ def launch(args):
     config_dir = profile / "Config"
     config_dir.mkdir(exist_ok=True)
     config = config_dir / "Dolphin.ini"
+    cpu_thread = "True" if getattr(args, "cpu_thread", False) else "False"
     if not config.exists():
         # SSX3_IDLE_PC=0x80288ED4 (the OS idle spin in SelectThread) enables the
         # runtime's idle-loop skipping for a fresh profile; research knob only.
@@ -239,7 +242,9 @@ def launch(args):
         extra = f"StaticRecompIdlePC = {idle}\n" if idle else ""
         if os.environ.get('SSX3_RUSH_PRESENT') == '1':
             extra += 'RushFramePresentation = True\n'
-        config.write_text(f"[Core]\nCPUThread = False\nDSPHLE = True\nSkipIPL = True\n{extra}[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
+        config.write_text(f"[Core]\nCPUThread = {cpu_thread}\nDSPHLE = True\nSkipIPL = True\n{extra}[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
+    if f"CPUThread = {cpu_thread}\n" not in config.read_text():
+        raise RuntimeError(f"Existing profile {args.profile} does not use CPUThread = {cpu_thread}; use a fresh --profile")
     if args.pipe_controller:
         pipes = profile / "Pipes"
         pipes.mkdir(exist_ok=True)
@@ -283,14 +288,15 @@ def launch(args):
         env["SSX3_SCREENSHOTS"] = "1"
     if args.pipe_controller:
         env["SSX3_BACKGROUND_INPUT"] = "1"
+    module_path = (args.module.resolve() if getattr(args, "module", None) else MODULE / "build/gGXBE69_recomp.dylib")
     command = [str(executable("moderngekko-run")), "--game", str(game), "--module",
-               str(MODULE / "build/gGXBE69_recomp.dylib"), "--user-dir", str(profile),
+               str(module_path), "--user-dir", str(profile),
                "--no-mods", "--graphics", "Null" if args.headless else "Metal"]
     if args.headless:
         command += ["--headless", "--audio", "Null"]
     print(f"Log: {log_path}", flush=True)
     runner_sha256 = sha256(command[0])
-    module_sha256 = sha256(MODULE / "build/gGXBE69_recomp.dylib")
+    module_sha256 = sha256(module_path)
     world_archive = game / 'files/data/worlds/bam.big'
     world_sha256 = sha256(world_archive) if world_archive.is_file() else None
     started_wall = time.time()
@@ -309,6 +315,8 @@ def launch(args):
                 code = process.wait()
     result = {"command": command, "exit_code": code, "seconds": time.monotonic() - started,
               "dispatch_samples": dispatch_samples,
+              "cpu_thread": cpu_thread == "True",
+              "module_path": str(module_path),
               "metal_validation": env.get('MTL_DEBUG_LAYER'),
               "core_config_sha256": sha256(config),
               "stopped_on_fault": stopped_on_fault,
@@ -346,6 +354,11 @@ def main():
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--jit-fallback", action="store_true", help="Desktop diagnostic only; default is interpreter fallback")
     parser.add_argument("--pipe-controller", action="store_true", help="Map a test pad to PROFILE/Pipes/ssx3")
+    parser.add_argument("--fast-fp", action="store_true",
+                        help="module: build generated chunks with the inline JIT-fidelity floating-point paths")
+    parser.add_argument("--module", type=Path, help="run: module dylib to load instead of the default build")
+    parser.add_argument("--cpu-thread", action="store_true",
+                        help="Dual-core runtime (CPUThread = True); applies to a fresh profile's Dolphin.ini")
     args = parser.parse_args()
     if args.jobs < 1:
         parser.error("--jobs must be positive")

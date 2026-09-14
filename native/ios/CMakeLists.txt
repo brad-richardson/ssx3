@@ -25,9 +25,9 @@ string(FIND "${RUN_CODE}" "${DISPATCH_MARKER}" DISPATCH_POSITION)
 if(DISPATCH_POSITION LESS 0)
   message(FATAL_ERROR "Native trial dispatch seam changed")
 endif()
-string(REPLACE "namespace\n{" "#define SSX_NATIVE_TRIAL_APP 1\n#include \"${TRIAL_DIR}/native_callback_trace.h\"\n#include \"${TRIAL_DIR}/native_render_schedule.h\"\n#include \"${TRIAL_DIR}/native_pose_interpolation.h\"\nnamespace\n{" RUN_CODE "${RUN_CODE}")
+string(REPLACE "namespace\n{" "#define SSX_NATIVE_TRIAL_APP 1\n#include \"${TRIAL_DIR}/native_callback_trace.h\"\n#include \"${TRIAL_DIR}/native_render_schedule.h\"\n#include \"${TRIAL_DIR}/native_pose_interpolation.h\"\n#include \"${TRIAL_DIR}/dispatch_hooks.h\"\nnamespace\n{" RUN_CODE "${RUN_CODE}")
 string(PREPEND RUN_CODE "#include \"${TRIAL_DIR}/startup_skip.h\"\n")
-string(REPLACE "${DISPATCH_MARKER}" "          StartupBoot::Step(m_guest);\n          NativeInterpolation::Step(m_guest);\n${DISPATCH_MARKER}" RUN_CODE "${RUN_CODE}")
+string(REPLACE "${DISPATCH_MARKER}" "          SSXDispatchStep(m_guest);\n${DISPATCH_MARKER}" RUN_CODE "${RUN_CODE}")
 set(TRIAL_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/NativeTrial_Run.cpp")
 file(WRITE "${TRIAL_SOURCE}" "${RUN_CODE}")
 get_target_property(CORE_SOURCES core SOURCES)
@@ -66,7 +66,7 @@ set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStor
   SessionMenu.h SessionMenu.mm DisplayPreferences.h DisplayPreferences.mm
   SessionDiagnostics.h SessionDiagnostics.mm ../../tools/ios_diagnostic_sources.py
   ../diagnostics/native_callback_trace.h ../diagnostics/native_render_schedule.h
-  ../diagnostics/callback_timing.h
+  ../diagnostics/callback_timing.h ../diagnostics/callback_timer.h ../diagnostics/dispatch_hooks.h
   ../diagnostics/startup_skip.h
   ../diagnostics/native_pose_interpolation.h ../diagnostics/pose_history.h
   ../diagnostics/render_deadline.h ../diagnostics/trial_control.h ../patches/recompcore-platform.patch
@@ -77,6 +77,9 @@ foreach(SOURCE IN LISTS SESSION_SOURCES)
   file(SHA256 "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}" SOURCE_HASH)
   string(APPEND SESSION_HASHES "${SOURCE_HASH}")
 endforeach()
+# The module option changes the linked game code without touching any hashed
+# source, so it must be part of the identity too.
+string(APPEND SESSION_HASHES "fast_fp=${RECOMPCORE_FAST_FP}")
 string(SHA256 SESSION_BUILD_ID "${SESSION_HASHES}")
 target_compile_definitions(SSXNative PRIVATE SSX_SESSION_BUILD_ID="${SESSION_BUILD_ID}" SSX_NATIVE_TRIAL_APP=1)
 set_target_properties(SSXNative PROPERTIES

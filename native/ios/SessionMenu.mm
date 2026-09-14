@@ -28,6 +28,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   UISegmentedControl* _output;
   UISegmentedControl* _detail;
   UISwitch* _fastStart;
+  UISwitch* _dualCore;
   UIButton* _resume;
   UIButton* _smoothing;
   UIButton* _reset;
@@ -94,10 +95,10 @@ static void SetLabel(UILabel* label, NSString* text) {
 
   UILabel* detailLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
   detailLabel.text=@"Detail";
-  _detail=[[UISegmentedControl alloc] initWithItems:@[@"1×",@"2×"]];
+  _detail=[[UISegmentedControl alloc] initWithItems:@[@"1×",@"2×",@"3×",@"4×"]];
   _detail.accessibilityLabel=@"Internal detail";
   _detail.accessibilityIdentifier=@"SSX Internal Detail";
-  [_detail.widthAnchor constraintEqualToConstant:120].active=YES;
+  [_detail.widthAnchor constraintEqualToConstant:200].active=YES;
   [_detail addTarget:self action:@selector(detailChanged) forControlEvents:UIControlEventValueChanged];
   UIView* spacer=[[UIView alloc] init];
   [spacer setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
@@ -112,8 +113,22 @@ static void SetLabel(UILabel* label, NSString* text) {
   UIStackView* detailRow=MenuStack(@[detailLabel,_detail,spacer,fastLabel,_fastStart],
                                   UILayoutConstraintAxisHorizontal,12);
   detailRow.alignment=UIStackViewAlignmentCenter;
+  UILabel* dualLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
+  dualLabel.text=@"Dual-core";
+  [dualLabel setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  _dualCore=[[UISwitch alloc] init];
+  _dualCore.accessibilityLabel=@"Dual-core";
+  _dualCore.accessibilityIdentifier=@"SSX Dual Core";
+  _dualCore.accessibilityHint=@"Run graphics decoding on a second thread. Applies after Full Reset or relaunch.";
+  [_dualCore addTarget:self action:@selector(dualCoreChanged) forControlEvents:UIControlEventValueChanged];
+  UILabel* dualNote=MenuLabel(UIFontTextStyleFootnote,UIColor.secondaryLabelColor);
+  dualNote.text=@"Applies after Full Reset or relaunch";
+  UIView* dualSpacer=[[UIView alloc] init];
+  [dualSpacer setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  UIStackView* runtimeRow=MenuStack(@[dualLabel,_dualCore,dualNote,dualSpacer],UILayoutConstraintAxisHorizontal,12);
+  runtimeRow.alignment=UIStackViewAlignmentCenter;
 
-  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,_resolutionLabel,_buildLabel],
+  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,_resolutionLabel,_buildLabel],
                                 UILayoutConstraintAxisVertical,12);
   content.translatesAutoresizingMaskIntoConstraints=NO;
   UIScrollView* scroll=[[UIScrollView alloc] init];
@@ -151,7 +166,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   UILayoutGuide* safe=self.view.safeAreaLayoutGuide;
   NSLayoutConstraint* width=[panel.widthAnchor constraintEqualToAnchor:safe.widthAnchor constant:-28];
   width.priority=UILayoutPriorityDefaultHigh;
-  NSLayoutConstraint* height=[panel.heightAnchor constraintEqualToConstant:372];
+  NSLayoutConstraint* height=[panel.heightAnchor constraintEqualToConstant:412];
   height.priority=UILayoutPriorityDefaultHigh;
   [NSLayoutConstraint activateConstraints:@[
     // Cross-row constraints require the completed common content hierarchy.
@@ -196,12 +211,14 @@ static void SetLabel(UILabel* label, NSString* text) {
 }
 - (void)detailChanged {
   NSInteger index=_detail.selectedSegmentIndex;
-  if (index>=0 && index<2 && self.onInternal) self.onInternal(index+1);
+  if (index>=0 && index<4 && self.onInternal) self.onInternal(index+1);
 }
 - (void)fastStartChanged { if (self.onFastStart) self.onFastStart(_fastStart.on); }
+- (void)dualCoreChanged { if (self.onDualCore) self.onDualCore(_dualCore.on); }
 
 - (void)updateWithStatus:(NSString*)status outputMode:(NSString*)mode internalScale:(NSInteger)scale
-             resolution:(NSString*)resolution fastStart:(BOOL)fastStart canConfigure:(BOOL)canConfigure
+             resolution:(NSString*)resolution fastStart:(BOOL)fastStart dualCore:(BOOL)dualCore
+           canConfigure:(BOOL)canConfigure
                canTrial:(BOOL)canTrial canReset:(BOOL)canReset build:(NSString*)build {
   NSAssert(NSThread.isMainThread,@"Session menu updates require the main thread");
   [self loadViewIfNeeded];
@@ -211,12 +228,14 @@ static void SetLabel(UILabel* label, NSString* text) {
   NSUInteger outputIndex=[@[@"half",@"three-quarter",@"full",@"match-internal"] indexOfObject:mode];
   NSInteger selected=outputIndex==NSNotFound ? UISegmentedControlNoSegment : (NSInteger)outputIndex;
   if (!_output.tracking && _output.selectedSegmentIndex!=selected) _output.selectedSegmentIndex=selected;
-  selected=(scale==1 || scale==2) ? scale-1 : UISegmentedControlNoSegment;
+  selected=(scale>=1 && scale<=4) ? scale-1 : UISegmentedControlNoSegment;
   if (!_detail.tracking && _detail.selectedSegmentIndex!=selected) _detail.selectedSegmentIndex=selected;
   if (!_fastStart.tracking && _fastStart.on!=fastStart) [_fastStart setOn:fastStart animated:NO];
+  if (!_dualCore.tracking && _dualCore.on!=dualCore) [_dualCore setOn:dualCore animated:NO];
   _output.enabled=canConfigure;
   _detail.enabled=canConfigure;
   _fastStart.enabled=canConfigure;
+  _dualCore.enabled=canConfigure;
   _smoothing.enabled=canTrial;
   _reset.enabled=canReset;
 }

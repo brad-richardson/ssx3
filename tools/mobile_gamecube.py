@@ -69,6 +69,7 @@ def configure(args):
              "-DCMAKE_C_COMPILER=/usr/bin/clang", "-DCMAKE_CXX_COMPILER=/usr/bin/clang++",
              "-DCMAKE_OBJCXX_COMPILER=/usr/bin/clang++", "-DCMAKE_AR=/usr/bin/ar",
              "-DCMAKE_RANLIB=/usr/bin/ranlib", "-DCMAKE_BUILD_TYPE=Release",
+             f"-DRECOMPCORE_FAST_FP={'ON' if getattr(args, 'fast_fp', False) else 'OFF'}",
              f"-DCMAKE_OSX_SYSROOT={'iphonesimulator' if args.simulator else 'iphoneos'}"])
 
 
@@ -97,6 +98,7 @@ def build(args):
                "game_module_archive_sha256": native.sha256(WORK / "game-module/gGXBE69_recomp.a"),
                "patch_sha256": {p.name: native.sha256(p) for p in
                                 (ROOT / "native/patches").glob("*-platform.patch")},
+               "fast_fp": bool(getattr(args, "fast_fp", False)),
                "mobile_execution_verified": False}
     write_receipt("build", receipt)
 
@@ -223,8 +225,8 @@ def world(args):
 def launch(args):
     flags = []
     internal_scale = getattr(args, "internal_scale", None)
-    if internal_scale is not None and (type(internal_scale) is not int or internal_scale not in (1, 2)):
-        raise ValueError("--internal-scale must be 1 or 2")
+    if internal_scale is not None and (type(internal_scale) is not int or internal_scale not in (1, 2, 3, 4)):
+        raise ValueError("--internal-scale must be 1, 2, 3 or 4")
     null_audio = getattr(args, "simulator_null_audio", False)
     if null_audio and not args.simulator:
         raise ValueError("--simulator-null-audio requires --simulator")
@@ -257,6 +259,14 @@ def launch(args):
         flags.append("-ssxDebugMainMenu")
     if getattr(args,"normal_boot",False):
         flags.append("-ssxNormalBoot")
+    if getattr(args,"cpu_thread",False):
+        flags.append("-ssxCPUThread")
+    if getattr(args,"single_core",False):
+        flags.append("-ssxSingleCore")
+    if getattr(args,"fast_disc",False):
+        flags.append("-ssxFastDisc")
+    if getattr(args,"dispatch_samples",False):
+        flags.append("-ssxDispatchSamples")
     if args.simulator:
         command(["xcrun", "simctl", "launch", "--terminate-running-process", args.device, BUNDLE, *flags])
         return
@@ -295,7 +305,7 @@ def main():
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
     parser.add_argument("--output-scale", choices=("full", "three-quarter", "match-internal", "half"),
                         help="Launch-only drawable scale; normal launches use the saved choice (initially half)")
-    parser.add_argument("--internal-scale", type=int, choices=(1, 2),
+    parser.add_argument("--internal-scale", type=int, choices=(1, 2, 3, 4),
                         help="Launch-only GameCube internal detail; normal launches use the saved choice (initially 2x)")
     parser.add_argument("--smoothing-at", type=float,
                         help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
@@ -307,7 +317,21 @@ def main():
     boot.add_argument("--normal-boot",action="store_true",
                       help="Launch with normal cold starts, overriding the saved faster-start preference")
     parser.add_argument("--world", type=Path, help="Built BAM.BIG for the world command")
+    core=parser.add_mutually_exclusive_group()
+    core.add_argument("--cpu-thread", action="store_true",
+                      help="Launch-only dual-core runtime for this process, ignoring the saved menu choice (default on)")
+    core.add_argument("--single-core", action="store_true",
+                      help="Launch-only single-core runtime for this process; the control for dual-core comparisons")
+    parser.add_argument("--fast-disc", action="store_true",
+                        help="Launch-only Dolphin FastDiscSpeed for a loading comparison")
+    parser.add_argument("--fast-fp", action="store_true",
+                        help="configure/build: compile the generated module with the inline JIT-fidelity floating-point paths")
+    parser.add_argument("--dispatch-samples", action="store_true",
+                        help="Launch-only native dispatch-site sampling (diagnostic overhead)")
     args = parser.parse_args()
+    for flag in ("cpu_thread", "single_core", "fast_disc", "dispatch_samples"):
+        if getattr(args, flag) and args.command != "launch":
+            parser.error(f"--{flag.replace('_', '-')} applies only to launch")
     if (args.debug_main_menu or args.normal_boot) and args.command!="launch":
         parser.error("--debug-main-menu and --normal-boot apply only to launch")
     if args.output_scale and args.command != "launch":

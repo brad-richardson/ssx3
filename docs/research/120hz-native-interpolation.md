@@ -131,8 +131,11 @@ second, requires at least 0.5 seconds of elapsed history, blocks extras below
 frequency changes and long observation gaps clear history. It is a reactive
 guard, not a guarantee that every future draw fits a deadline.
 
-After three seconds, the whole trial exits if fewer than 15 extras completed
-or the measured speed falls below 0.95. This also removes the overhead and
+September 13 evening revision: after a ten-second settling period, the whole
+trial exits if fewer than 15 extras completed or speed over a two-second
+window is below 0.95; the per-frame veto stops at 0.97 and resumes at 0.99.
+The earlier policy ended trials three seconds in on a half-second window,
+which on the phone cut every dual-core trial at 0.93–0.95 measured speed. This also removes the overhead and
 visual delay of ordinary interpolated frames when extras are not useful.
 The 35-second maximum and pause/background cancellation remain. Screenshots from the first variant show a
 coherent rider, board, shadow, terrain and HUD. Scoped extra-draw comparisons

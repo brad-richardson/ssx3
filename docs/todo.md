@@ -5,6 +5,19 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Performance: follow the [September 13 performance review](research/performance-review-2026-09-13.md).
+      Done September 13: always-on callback timer, dispatch sampling opt-in,
+      dual-core validated on Mac and phone (stadium section 0.89 → 1.00 speed,
+      render callback 9.5 → 7.8 ms) and made the persisted default in build 1b.
+      Batch 2 (same evening): movie-based determinism gate, chunk-granular
+      lookup table, and the fast-FP module, replay-identical to baseline over
+      1,022 samples; phone module build pending measurement. Next: measure
+      fast FP on the phone, fewer chassis round-trips, a 15-minute dual-core
+      thermal soak at 3×. 120 Hz mainline is now the
+      [depth reprojection design](research/120hz-reprojection.md): synthesize
+      the in-between frame on the GPU from the last frame's color, depth and
+      predicted camera; target 3× Match at 100–120 with speed ≥ 0.95. Helper
+      micro-spikes are closed.
 - [ ] Follow the [September 12 architecture priorities](architecture-review.md):
       validated imports, state-aware route checks, and explicit course ownership.
 - [ ] Restore donor fog/backdrop and check remaining visual differences at

@@ -125,6 +125,23 @@ def summarize(folder, start, end, clock='active'):
         if any('maxSpeedExcludingThrottle' in row for row in rows):
             result['max_speed_excluding_throttle'] = distribution(
                 [row['maxSpeedExcludingThrottle'] for row in rows if 'maxSpeedExcludingThrottle' in row])
+        timing = [row['callbackTiming'] for row in rows if isinstance(row.get('callbackTiming'), dict)]
+        if timing:
+            summary = {}
+            for kind in ('update', 'render'):
+                intervals = [t[kind] for t in timing if isinstance(t.get(kind), dict) and t[kind].get('count')]
+                if intervals:
+                    summary[kind] = dict(
+                        samples=sum(t['count'] for t in intervals), intervals=len(intervals),
+                        cpu_median_ms=distribution([t.get('cpuMedianMs') for t in intervals]),
+                        cpu_p95_ms=distribution([t.get('cpuP95Ms') for t in intervals]),
+                        wall_median_ms=distribution([t.get('wallMedianMs') for t in intervals]),
+                        wall_p95_ms=distribution([t.get('wallP95Ms') for t in intervals]))
+            summary['cpu_thread'] = any(t.get('cpuThread') for t in timing)
+            summary['note'] = ('Ordinary update/render callback thread-CPU and wall time on the CPU thread; '
+                               'trial frames are excluded. Distributions are over one-second interval values, '
+                               'not pooled samples.')
+            result['callback_timing'] = summary
         workloads = [row['workload'] for row in rows if row.get('workload', {}).get('frameEvents')]
         if workloads:
             result['renderer_workload'] = dict(
