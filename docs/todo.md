@@ -180,9 +180,13 @@ the build or commit that closed them.
       countdown instances and nothing else, so toggling that one record shows
       or hides exactly the gate and lights. `--visible` builds
       `gc-gari-startgate-visible-001`, which differs from the hidden candidate
-      by seven bytes, all inside that definition. Next: ride the visible
-      candidate to check placement and appearance, then observe a restart
-      before writing a handler.
+      by seven bytes, all inside that definition. Two clean 185 s checks
+      confirm it: at the same countdown number and camera the visible run
+      draws the canopy, six starting stalls and the light column, and the
+      hidden control run draws none of them, with riding unaffected. Next:
+      observe a restart, then write the handler that drives that bit from
+      `StartlightBegin`/`StartgateOpen`. Timing, the flipbook sequence,
+      restart behaviour and the authored gate appearance remain open.
       Validate
       and target `StartgateOpen` dispatch, then check countdown, unobstructed
       GO and restart. Keep hidden helper geometry excluded. See the

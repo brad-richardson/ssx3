@@ -348,6 +348,37 @@ This is a static always-visible check. It is not a countdown, and it does not
 establish timing, the flipbook sequence, restart behaviour or the gate's
 authored appearance.
 
+#### Result: the gate draws, and the control run proves it (September 14)
+
+Two 185-second automated checks, identical except for the archive, both clean
+(exit 0, no fault, zero invalid accesses, zero GPU command errors, zero
+fallback JIT runs, module loaded):
+
+| Run | Archive | Profile | Receipt |
+| --- | --- | --- | --- |
+| Visible | `1b12206c…` | `sg-vis2` | `20260914-125550.json` |
+| Hidden (control) | `dd8c6d8a…` | `sg-hid2` | `20260914-125957.json` |
+
+At the same countdown number and camera, the visible run shows a glass and
+metal canopy over the start, six starting stalls with rails between the
+riders, and a countdown light column beside the engine's own "2". The control
+run shows riders standing on open snow with none of it. Riding after the start
+is unaffected. Screenshots, hashes and the receipt references are in
+`local/research/startgate/visibility-evidence/report.json`.
+
+The only difference between the two archives is definition 39's visibility
+bit, draw distance and sentinel low half, so this isolates the visibility
+operation itself.
+
+Not established by this: countdown timing, the flipbook frame sequence,
+restart behaviour, the gate's authored appearance or materials, and the gate
+opening animation. The staging is permanently drawn; a handler still has to
+drive it.
+
+Capturing this needed a finer screenshot cadence than the fixed 15 seconds,
+which can miss a countdown entirely. `SSX3_SCREENSHOT_SECONDS` now sets it
+(1-3600, default 15, unchanged when unset).
+
 ### Observed countdown events (September 14, staged candidate)
 
 The first observer run rode the hidden staging candidate for 841 samples with
