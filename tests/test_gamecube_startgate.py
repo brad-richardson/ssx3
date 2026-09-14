@@ -5,7 +5,8 @@ import tempfile
 import unittest
 
 from tests.test_gamecube_scenery import fixture  # Adds tools to sys.path.
-from gamecube_startgate import append_hidden_bindings, visible_scenery_definition
+from gamecube_startgate import (SEQUENCE_MODE, append_hidden_bindings,
+                               replace_material_sequence, visible_scenery_definition)
 from gamecube_startgate_trace import countdown_windows, read_observations, summarize
 
 
@@ -22,6 +23,12 @@ def script_fixture():
     return script
 
 
+def material_rows(texture=0x036e, track=8, mode=0xffffffff):
+    """One plain 20-byte kind-0 record, the form every course material starts in."""
+    payload = struct.pack('>H3HIHHI', texture, 0xffff, 0xffff, 0xffff, 0, 7, 1, mode)
+    return [({'kind': 0, 'rid': 194, 'track': track, 'size': len(payload)}, payload)]
+
+
 class StartgateTests(unittest.TestCase):
     def test_hidden_additions_preserve_existing_programs_definitions_and_splines(self):
         original = script_fixture()
@@ -35,6 +42,39 @@ class StartgateTests(unittest.TestCase):
         self.assertEqual(struct.unpack_from('>2I', changed, offsets), (0, 28))
         self.assertEqual(struct.unpack_from('>4I', changed, 160), (0, 0, 0xffffffff, 0xffffffff))
         self.assertEqual(changed[spline_at:], original[168:])
+
+    def test_frame_sequence_extends_the_record_the_engine_s_own_way(self):
+        rows, previous = replace_material_sequence(material_rows(), 8, 0x036e,
+                                                   [895, 896, 897, 898, 899], SEQUENCE_MODE)
+        entry, payload = rows[0]
+        self.assertEqual(previous['rid'], 194)
+        self.assertEqual(entry['size'], len(payload))
+        self.assertEqual(len(payload), 44)
+        # Base texture becomes the first frame; mode replaces the plain marker.
+        self.assertEqual(struct.unpack_from('>H', payload, 0)[0], 895)
+        self.assertEqual(struct.unpack_from('>I', payload, 16)[0], SEQUENCE_MODE)
+        self.assertEqual(struct.unpack_from('>I', payload, 20)[0], 5)
+        self.assertEqual(list(struct.unpack_from('>5I', payload, 24)),
+                         [895, 896, 897, 898, 899])
+        # Everything before the mode word is untouched.
+        self.assertEqual(payload[2:16], material_rows()[0][1][2:16])
+
+    def test_refuses_a_material_that_already_carries_a_sequence(self):
+        rows, _ = replace_material_sequence(material_rows(), 8, 0x036e, [895, 896], SEQUENCE_MODE)
+        with self.assertRaises(ValueError):
+            replace_material_sequence(rows, 8, 895, [900, 901], SEQUENCE_MODE)
+
+    def test_refuses_frames_that_are_not_two_or_more_contiguous_ids(self):
+        for frames in ([895], [895, 897], [895, 896, 899]):
+            with self.assertRaises(ValueError):
+                replace_material_sequence(material_rows(), 8, 0x036e, frames, SEQUENCE_MODE)
+
+    def test_refuses_when_the_base_texture_does_not_name_exactly_one_material(self):
+        with self.assertRaises(ValueError):
+            replace_material_sequence(material_rows(), 8, 0x9999, [895, 896], SEQUENCE_MODE)
+        doubled = material_rows()+material_rows()
+        with self.assertRaises(ValueError):
+            replace_material_sequence(doubled, 8, 0x036e, [895, 896], SEQUENCE_MODE)
 
     def test_countdown_staging_differs_from_scenery_only_in_the_visibility_bit(self):
         original = script_fixture()

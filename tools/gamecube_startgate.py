@@ -112,7 +112,40 @@ def append_hidden_bindings(script, expected_count, added_count, mode='hidden'):
                             collision=False, callback=None, added_instances=added_count)
 
 
-def stage(world, recipe, scene, images, source_ids, mode='hidden'):
+SEQUENCE_NONE = 0xffffffff
+# Matches the stock five-frame countdown-light records; see the note below.
+SEQUENCE_MODE = 1
+
+
+def replace_material_sequence(rows, track, base_texture, frames, mode):
+    """Turn a 20-byte material record into the engine's own frame sequence.
+
+    SSX 3 already carries this: 25 stock materials use a longer kind-0 record
+    whose trailing words are a mode, a frame count, and that many global image
+    IDs, with the plain form marked by mode 0xffffffff. Extend the record the
+    game's own way rather than inventing a field.
+    """
+    matches = [i for i, (e, p) in enumerate(rows)
+               if e['kind'] == 0 and e['track'] == track and len(p) >= 2
+               and struct.unpack_from('>H', p, 0)[0] == base_texture]
+    if len(matches) != 1:
+        raise ValueError('Countdown flipbook does not name exactly one course material')
+    index = matches[0]
+    entry, payload = rows[index]
+    if len(payload) != 20 or struct.unpack_from('>I', payload, 16)[0] != SEQUENCE_NONE:
+        raise ValueError('Countdown material already carries a frame sequence')
+    if len(frames) < 2 or frames != list(range(frames[0], frames[0]+len(frames))):
+        raise ValueError('Frame sequence must be two or more contiguous image IDs')
+    updated = bytearray(payload)
+    struct.pack_into('>H', updated, 0, frames[0])
+    struct.pack_into('>I', updated, 16, mode)
+    updated += struct.pack(f'>I{len(frames)}I', len(frames), *frames)
+    rows = list(rows)
+    rows[index] = (dict(entry, size=len(updated)), bytes(updated))
+    return rows, dict(rid=entry['rid'], before=payload.hex())
+
+
+def stage(world, recipe, scene, images, source_ids, mode='hidden', animate=False):
     group, track = recipe['group'], recipe['track']
     rows = world.records(group)
     if not source_ids:
@@ -145,7 +178,15 @@ def stage(world, recipe, scene, images, source_ids, mode='hidden'):
             if m['flipbook'] != -1:
                 frames = scene.flipbooks[m['flipbook']]
                 needed.update(frames)
-                flips.append(dict(material=material, flipbook=m['flipbook'], frames=frames))
+                # Mode 0/1/2 all occur in stock records, including both values
+                # on the same two-frame sequence, so it is a phase or rate
+                # rather than an enable. Choose by the closest stock analogue
+                # instead of by overall frequency: of the 25 extended records,
+                # the only two that carry five frames are the host's own
+                # countdown lights (texture 454), and both use mode 1. Mode 0
+                # leads only because 14 two-frame records use it.
+                flips.append(dict(material=material, flipbook=m['flipbook'],
+                                  frames=frames, mode=SEQUENCE_MODE))
         rid = len(instances)+len(added)
         scale = 4 if model['parts'][0]['meshes'][0]['strips'][0]['opcode'] == 0x9b else 1
         payload = instance_record(instance, recipe['matrix'], recipe['translation'], scale,
@@ -168,23 +209,51 @@ def stage(world, recipe, scene, images, source_ids, mode='hidden'):
     if any(source_id >= len(images) for source_id in needed):
         raise ValueError('Countdown image is absent from donor GSH')
     missing = sorted(needed-texture_ids.keys())
-    for source_id, target_id in zip(missing, unused_global_rids(world, 9, len(missing))):
+    sequences = [flip for a in assets for flip in a['flipbooks']] if animate else []
+    # One allocation: unused_global_rids reads the unmodified world, so a second
+    # call would hand back IDs this one has already taken.
+    pool = unused_global_rids(world, 9, len(missing)+sum(len(f['frames']) for f in sequences))
+    for source_id, target_id in zip(missing, pool[:len(missing)]):
         texture_ids[source_id] = target_id
         textures.append(record(9, target_id, world_image_record(images[source_id]), 255))
     for source_id in needed:
         expected = world_image_record(images[source_id])
         if not any(e['kind'] == 9 and e['rid'] == texture_ids[source_id] and p == expected for e, p in textures):
             raise ValueError('Countdown image mapping does not match donor pixels')
+    animated = []
+    at = len(missing)
+    for flip in sequences:
+        frames = flip['frames']
+        # Every stock sequence lists contiguous IDs starting at the material's
+        # own base texture, so give each one its own contiguous block rather
+        # than relying on the engine reading the explicit list.
+        block = pool[at:at+len(frames)]
+        at += len(frames)
+        for source_id, target_id in zip(frames, block):
+            textures.append(record(9, target_id, world_image_record(images[source_id]), 255))
+        base = texture_ids[scene.materials[flip['material']]['texture']]
+        changed, previous = replace_material_sequence(changed, track, base, block, flip['mode'])
+        animated.append(dict(material=flip['material'], flipbook=flip['flipbook'],
+                             source_frames=frames, texture_ids=block, mode=flip['mode'],
+                             previous_record=previous))
     return {group: changed, texture_group: textures}, dict(
+        animated_materials=animated,
         profile='tricky-gc-countdown-assets-v2', assets=assets, binding=binding,
         new_images=missing, frame_texture_ids={str(k): texture_ids[k] for k in sorted(needed)},
         source_instance_map={str(a['target_instance']): a['source_instance'] for a in assets},
         runtime_binding=False, countdown_verified=False, restart_verified=False,
-        limitation=dict(
-            hidden='Hidden asset staging only; no countdown event, timing, visibility or flipbook execution',
-            visible='Always-visible asset staging; no countdown event, timing or flipbook execution',
+        # The sequence is written in the engine's own extended form, but no run
+        # has yet shown a frame advancing, and the mode value is chosen by
+        # analogy with the stock records rather than demonstrated. Say written,
+        # not executing, until a run distinguishes the frames.
+        flipbooks_verified=False,
+        limitation=' '.join(filter(None, (dict(
+            hidden='Hidden asset staging only; no countdown event, timing or visibility execution',
+            visible='Always-visible asset staging; no countdown event or timing execution',
             countdown='Handler-ready staging; the definition differs from ordinary scenery only in the '
-                      'visibility bit. Nothing drives it here, and no timing or flipbook executes.')[mode])
+                      'visibility bit. Nothing drives it here and no timing executes.')[mode],
+            'Flipbook frame sequences are written but unverified; no run has distinguished a frame.'
+            if animated else 'No flipbook sequence is written.'))))
 
 
 def main():
@@ -198,6 +267,9 @@ def main():
     mode.add_argument('--countdown-ready', action='store_true',
                       help='Stage them hidden but otherwise shaped like ordinary scenery, so a '
                            'handler shows and hides them by toggling the visibility bit alone')
+    parser.add_argument('--animate-flipbooks', action='store_true',
+                        help="Give each staged flipbook material the engine's own frame sequence, "
+                             'so the countdown lights cycle without any handler')
     args = parser.parse_args()
     if args.output.exists():
         raise ValueError('Use a fresh candidate directory')
@@ -212,7 +284,8 @@ def main():
     replacements, report = stage(World(original), recipe, scene, shape_images(args.textures.read_bytes()),
                                   post_countdown_hidden(gsf, len(scene.instances)),
                                   'visible' if args.visible else
-                                  'countdown' if args.countdown_ready else 'hidden')
+                                  'countdown' if args.countdown_ready else 'hidden',
+                                  args.animate_flipbooks)
     result, _ = assemble(World(original), replacements)
     report.update(base_sha256=hashlib.sha256(original).hexdigest(),
                   archive_sha256=hashlib.sha256(result).hexdigest(),

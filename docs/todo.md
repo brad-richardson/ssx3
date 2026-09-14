@@ -175,6 +175,23 @@ the build or commit that closed them.
       the countdown light is one of them (material 66, flipbook 5, five
       frames). The start gate work proves the images import correctly and
       that nothing advances them.
+      September 14: SSX 3's own frame-sequence format is decoded and written.
+      A plain 20-byte kind-0 material is marked by `mode == 0xffffffff`; an
+      animated one appends a count and that many global image IDs. 25 of the
+      archive's 2,687 kind-0 records are extended, consistently. `mode` is
+      not an enable (the same two-frame sequence appears under 0, 1 and 2),
+      so it is chosen by analogy: the only two five-frame records are the
+      host's own countdown lights and both use mode 1.
+      **Written but unverified — needs a second validation.** Builds
+      `gc-gari-startgate-flipbook-001` (mode 0) and `-002` (mode 1) differ in
+      exactly one field of one record, and neither is shown to animate. The
+      mode 0 run was inconclusive because the intro camera moves up to 113 px
+      per second with rotation, so screenshot crops compare different content;
+      the mode 1 run is outstanding. Re-validate with a method that survives a
+      moving camera: hook the engine's frame index, or build a probe whose
+      five frames are visually distinct textures. Generalising emission from
+      `gamecube_startgate.py` to the other 15 flipbook materials / 74
+      placements in `gamecube_scenery_import.py` is not started.
       **(c) Every LUN course program is an empty stub** (235 disabled), so no
       authored scripted behaviour runs at all: timed gates, block and glass
       interactions, effects. The

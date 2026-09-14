@@ -275,6 +275,60 @@ three 160-byte instances (3239–3241), and a 36-byte extension to the script
 binding record. Target models 993/1019/1020 remain unchanged. The complete
 countdown frames are present, but no frame sequence executes.
 
+### Material frame sequences (September 14)
+
+SSX 3 carries its own flipbook format, so the importer extends a material the
+game's own way instead of inventing a field. A `kind 0` material is normally
+20 bytes:
+
+```
+tex(H) 0xffff 0xffff 0xffff | 0(I) | f0(H) f1(H) | mode(I)
+```
+
+with `mode == 0xffffffff` marking the plain form. An animated material appends
+`count(I)` and `count` 32-bit global image IDs. Of 2,687 `kind 0` records in
+the staged archive, 2,662 are plain and **25 are extended**, and the layout is
+consistent across all 25: the first listed ID always equals the base texture,
+and the IDs are always contiguous.
+
+| mode | records | frames | base texture |
+| ---- | ------- | ------ | ------------ |
+| 0    | 14      | 2      | 165          |
+| 1    | 7       | 2      | 165          |
+| 1    | 2       | 5      | 454          |
+| 2    | 2       | 2      | 165          |
+
+`mode` is not an enable: the same two-frame sequence from texture 165 appears
+under all three values, so it is more likely a phase or rate. Its value is
+therefore chosen by the closest stock analogue rather than by frequency. The
+only two five-frame records in the game are the host's own countdown lights
+(texture 454) and both use mode 1, so `SEQUENCE_MODE = 1`. Mode 0 leads the
+overall count only because 14 two-frame records use it.
+
+`--animate-flipbooks` writes this form for each staged flipbook material.
+`gc-gari-startgate-flipbook-002` differs from the mode 0 build
+`gc-gari-startgate-flipbook-001` in exactly one field of one record
+(material 66, rid 194, group 36):
+
+```
+001  ...0007 0001 00000000 00000005 0000037f 00000380 00000381 00000382 00000383
+002  ...0007 0001 00000001 00000005 0000037f 00000380 00000381 00000382 00000383
+                  ^^^^^^^^ mode
+```
+
+**Neither build is verified to animate.** The format decode and the one-field
+A/B are established; whether any frame advances is not. The mode 0 run
+captured the countdown at one screenshot per second, and the comparison was
+inconclusive: the intro camera shifts up to 113 px between consecutive seconds
+with rotation, so a fixed crop compares different scene content, and the
+countdown digit changes next to the lights regardless. Translation-only
+registration leaves 9-77 MAE residual and put the light-region change at
+0.39-0.76x the global change, which is not a signal either way. The mode 1 run
+is outstanding. When it is taken, it needs a method that survives a moving
+camera -- either a hook on the engine's frame index, or a diagnostic build
+whose sequence frames are five visually distinct textures, so an advance is
+unmistakable wherever the camera points.
+
 ```sh
 python3 tools/gamecube_startgate.py \
   --base-build local/builds/gc-gari-031 \
