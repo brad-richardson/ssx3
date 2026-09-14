@@ -79,6 +79,49 @@ differ materially, label the comparison inconclusive rather than attributing
 the difference to fast-FP. End after the bounded pair; sustained thermal
 acceptance remains deferred.
 
+## Result: the bounded phone pair is inconclusive (September 14)
+
+Both arms ran on September 14 at Half output, 2x internal detail, dual-core,
+no smoothing and no dispatch sampling, over the prepared 166-second sequence.
+Both completed cleanly: 186.4 s and 186.6 s active, `error=false`, zero
+fallback JIT runs, no audio interruption, thermal nominal throughout, and 87
+riding rows each after the ordinary-only/thermal-zero/configuration filters,
+with zero excluded riding rows.
+
+| Riding rows only | Fast-FP `53e2e1e4` | Baseline `94f5096e` |
+| --- | ---: | ---: |
+| Render callback CPU median / p95 | 7.630 / 8.415 ms | 8.756 / 9.772 ms |
+| Update callback CPU median / p95 | 3.290 / 3.682 ms | 3.104 / 3.597 ms |
+| Draw calls per frame, median | 591.1 | 660.4 |
+| Speed median / minimum | 1.000 / 0.792 | 1.000 / 0.802 |
+| Slow rows | 12 | 13 |
+| Guest headroom median | 1.270 | 1.198 |
+| Audio empty dequeues | 30 | 16 |
+
+**These numbers do not measure fast-FP.** The two runs rode different lines.
+The automated sequence is input-identical, but the dual-core runtime is not
+deterministic, and the rider positions separate within about three seconds of
+the race starting: of the 86 riding seconds present in both runs, only four
+(77-80, the gate and first moments) are within 100 world units of each other,
+and the median separation across the rest is 13,614 units with a maximum of
+27,146. Per-second draw calls diverge with them, 34,521/s against 40,109/s.
+
+The apparent 12.9% render-callback advantage therefore tracks a 10.5% lighter
+rendering workload in the same direction, which is what the follow-up's own
+guard says to treat as inconclusive rather than attribute to the compile
+option. The update callback moves the other way, fast-FP 6.0% slower, which no
+general floating-point speedup explains either. Artifacts:
+`local/research/perf-batch2/phone-pair/pair-cost.json` and `pair-run.log`.
+
+What this does establish is that the automated sequence cannot produce a
+matched route on a dual-core phone at all, so no number of repeats of this
+design will settle fast-FP. A conclusive pair needs route control that this
+harness does not yet have: a deterministic single-core arm, which isolates the
+compile option but is not the shipping configuration, or movie-driven input on
+the device the way the desktop reprojection captures are paired. Fast-FP
+remains unmeasured on the phone, and the September 14 strict-provenance gap in
+the historical desktop comparison is unchanged.
+
 ## Current execution status
 
 The device connection initially timed out, then recovered. At 00:04 and 00:11
