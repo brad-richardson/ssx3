@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-"""Stage hidden countdown assets in a fresh local course candidate.
+"""Stage countdown assets in a fresh local course candidate.
 
 This does not bind or animate a countdown. The three authored NoCountDown
-instances stay hidden and non-colliding, and every course program stays empty.
-The candidate supplies checked instances and complete flipbook images for a
-later, independently verified StartlightBegin/StartgateOpen binding.
+instances stay non-colliding, and every course program stays empty. The
+candidate supplies checked instances and complete flipbook images for a later,
+independently verified StartlightBegin/StartgateOpen binding.
+
+The added instances share one course-script definition of their own, whose
+word 1 bit 16 draws and bit 21 collides. That definition is therefore the
+reversible visibility operation a countdown handler needs, and it touches
+those three instances alone. --visible stages them permanently drawn, by
+copying the course's own visible non-colliding scenery definition verbatim,
+so placement and the visibility bit can be checked before any binding exists.
 """
 import argparse
 import hashlib
@@ -19,8 +26,38 @@ from gamecube_textures import shape_images, world_image_record
 from gamecube_world import World, assemble, unused_global_rids, validate_resource_capacities
 
 
-def append_hidden_bindings(script, expected_count, added_count):
-    """Extend dense instance ordinals; preserve old definitions and all LUNs."""
+VISIBLE_FLAG = 0x00010000
+COLLISION_FLAG = 0x00200000
+
+
+def visible_scenery_definition(script, base, definitions, starts, table):
+    """The course's own ordinary visible, non-colliding scenery definition.
+
+    Copied verbatim rather than synthesized. Its trailing words carry a draw
+    distance and a packed pair whose meaning is not established, so guessing
+    them is not safe; requiring exactly one such shape keeps the copy honest.
+    """
+    shapes = set()
+    for start in starts:
+        row = script[base+start:base+start+28]
+        if len(row) != 28:
+            raise ValueError('Truncated instance definition')
+        kind, flags, callback, collision = struct.unpack_from('>4I', row)
+        if (kind, flags, callback, collision) == (0, VISIBLE_FLAG, 0xffffffff, 0xffffffff):
+            shapes.add(bytes(row))
+    if len(shapes) != 1:
+        raise ValueError('Course has no single visible non-colliding scenery definition to copy')
+    return shapes.pop()
+
+
+def append_hidden_bindings(script, expected_count, added_count, visible=False):
+    """Extend dense instance ordinals; preserve old definitions and all LUNs.
+
+    With visible=True the added definition is a verbatim copy of the course's
+    own visible non-colliding scenery definition, which is the whole reversible
+    visibility operation: definition word 1 bit 16 draws, bit 21 collides, and
+    the staged countdown definition is used by those instances alone.
+    """
     require_disabled_programs(script)
     base = struct.unpack_from('>I', script, 64)[0]
     count, table, definitions, offsets, splines, spline_at = struct.unpack_from('>6I', script, 68)
@@ -34,8 +71,12 @@ def append_hidden_bindings(script, expected_count, added_count):
             list(starts) != sorted(set(starts)) or starts[0] != 0 or base+starts[-1] >= table):
         raise ValueError('Invalid dense instance definition indices')
     # Kind zero, no visibility/collision bits, no callbacks or collision model.
-    hidden = struct.pack('>4I3f', 0, 0, 0xffffffff, 0xffffffff, 0, 0, 0)
-    out = bytearray(script[:table]+hidden)
+    added = (visible_scenery_definition(script, base, definitions, starts, table) if visible
+             else struct.pack('>4I3f', 0, 0, 0xffffffff, 0xffffffff, 0, 0, 0))
+    flags = struct.unpack_from('>I', added, 4)[0]
+    if flags & COLLISION_FLAG or struct.unpack_from('>2I', added, 8) != (0xffffffff, 0xffffffff):
+        raise ValueError('Staged countdown definition must stay non-colliding and unbound')
+    out = bytearray(script[:table]+added)
     new_table = len(out)
     out += script[table:table+count*2]+struct.pack('>H', definitions)*added_count
     out += bytes(-len(out) % 4)
@@ -46,11 +87,12 @@ def append_hidden_bindings(script, expected_count, added_count):
     struct.pack_into('>6I', out, 68, count+added_count, new_table, definitions+1,
                      new_offsets, splines, new_spline_at)
     require_disabled_programs(out)
-    return bytes(out), dict(definition=definitions, flags=0, initially_visible=False,
+    return bytes(out), dict(definition=definitions, flags=flags,
+                            initially_visible=bool(flags & VISIBLE_FLAG),
                             collision=False, callback=None, added_instances=added_count)
 
 
-def stage(world, recipe, scene, images, source_ids):
+def stage(world, recipe, scene, images, source_ids, visible=False):
     group, track = recipe['group'], recipe['track']
     rows = world.records(group)
     if not source_ids:
@@ -96,7 +138,7 @@ def stage(world, recipe, scene, images, source_ids):
     scripts = [(e, p) for e, p in rows if e['kind'] == 16]
     if len(scripts) != 1 or scripts[0][0]['track'] != track:
         raise ValueError('Expected one course-owned script binding table')
-    script, binding = append_hidden_bindings(scripts[0][1], len(instances), len(added))
+    script, binding = append_hidden_bindings(scripts[0][1], len(instances), len(added), visible)
     changed = [(dict(e, size=len(script)), script) if e == scripts[0][0] else (e, p) for e, p in rows]
     changed += added
     changed.sort(key=lambda r: WORLD_RESOURCE_ORDER.index(r[0]['kind']))
@@ -114,17 +156,22 @@ def stage(world, recipe, scene, images, source_ids):
         if not any(e['kind'] == 9 and e['rid'] == texture_ids[source_id] and p == expected for e, p in textures):
             raise ValueError('Countdown image mapping does not match donor pixels')
     return {group: changed, texture_group: textures}, dict(
-        profile='tricky-gc-hidden-countdown-assets-v1', assets=assets, binding=binding,
+        profile='tricky-gc-countdown-assets-v2', assets=assets, binding=binding,
         new_images=missing, frame_texture_ids={str(k): texture_ids[k] for k in sorted(needed)},
         source_instance_map={str(a['target_instance']): a['source_instance'] for a in assets},
         runtime_binding=False, countdown_verified=False, restart_verified=False,
-        limitation='Hidden asset staging only; no countdown event, timing, visibility or flipbook execution')
+        limitation=('Always-visible asset staging; no countdown event, timing or flipbook execution'
+                    if visible else
+                    'Hidden asset staging only; no countdown event, timing, visibility or flipbook execution'))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('base-build', 'nbd', 'gsf', 'textures', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
+    parser.add_argument('--visible', action='store_true',
+                        help='Stage the countdown models always visible, to check placement '
+                             'and the definition visibility bit before any event binding')
     args = parser.parse_args()
     if args.output.exists():
         raise ValueError('Use a fresh candidate directory')
@@ -137,7 +184,7 @@ def main():
         raise ValueError('Base archive or donor NBD/GSF does not match recipe')
     scene = TrickyScenery(nbd, gsf)
     replacements, report = stage(World(original), recipe, scene, shape_images(args.textures.read_bytes()),
-                                  post_countdown_hidden(gsf, len(scene.instances)))
+                                  post_countdown_hidden(gsf, len(scene.instances)), args.visible)
     result, _ = assemble(World(original), replacements)
     report.update(base_sha256=hashlib.sha256(original).hexdigest(),
                   archive_sha256=hashlib.sha256(result).hexdigest(),

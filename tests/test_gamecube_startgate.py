@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from tests.test_gamecube_scenery import fixture  # Adds tools to sys.path.
-from gamecube_startgate import append_hidden_bindings
+from gamecube_startgate import append_hidden_bindings, visible_scenery_definition
 from gamecube_startgate_trace import read_observations, summarize
 
 
@@ -35,6 +35,30 @@ class StartgateTests(unittest.TestCase):
         self.assertEqual(struct.unpack_from('>2I', changed, offsets), (0, 28))
         self.assertEqual(struct.unpack_from('>4I', changed, 160), (0, 0, 0xffffffff, 0xffffffff))
         self.assertEqual(changed[spline_at:], original[168:])
+
+    def test_visible_staging_copies_the_course_scenery_definition_verbatim(self):
+        original = script_fixture()
+        # Trailing words carry a draw distance and a packed pair, so a synthesized
+        # definition would be a guess; only a verbatim copy is accepted.
+        struct.pack_into('>2I', original, 148, 0x7149f2ca, 0x0000ffff)
+        changed, report = append_hidden_bindings(original, 1, 3, visible=True)
+        self.assertTrue(report['initially_visible'])
+        self.assertFalse(report['collision'])
+        self.assertIsNone(report['callback'])
+        self.assertEqual(changed[160:188], original[132:160])
+        self.assertEqual(changed[92:160], original[92:160])
+
+    def test_visible_staging_needs_one_unambiguous_non_colliding_template(self):
+        original = script_fixture()
+        with self.assertRaisesRegex(ValueError, 'visible non-colliding'):
+            append_hidden_bindings(bytearray(script_fixture()[:132]) + struct.pack(
+                '>4I3f', 0, 0x210000, 0xffffffff, 0xffffffff, 0, 0, 0) + original[160:], 1, 3, visible=True)
+        # A colliding definition must never become the staged countdown template.
+        base, = struct.unpack_from('>I', original, 64)
+        with self.assertRaisesRegex(ValueError, 'visible non-colliding'):
+            visible_scenery_definition(
+                original[:132] + struct.pack('>4I3f', 0, 0x210000, 0xffffffff, 0xffffffff, 0, 0, 0)
+                + original[160:], base, 1, (0,), 160)
 
     def test_rejects_live_programs_and_incorrect_instance_ownership(self):
         original = script_fixture()

@@ -22,13 +22,20 @@ the build or commit that closed them.
       rider/board, which better rasterizing cannot address.
       No live smoothing mode or phone budget is established. See the
       [revised reprojection evidence](research/120hz-reprojection.md).
-- [ ] Finish the [fast-FP phone pair](research/performance-batch2-followup.md)
-      when the iPhone is unlocked. Signed baseline 94f5096e and candidate
-      53e2e1e4 are archived; the candidate remains installed on unchanged 027.
-      The historical 1,022 sampled control-register rows match, but missing
-      run-captured movie hashes prevent strict provenance acceptance. The new
-      checker rejects that gap, failed/native-zero runs and partial coverage.
-      Phone performance and exact gameplay equivalence remain unverified.
+- [ ] Fast-FP needs route-controlled phone input before it can be measured.
+      The [bounded pair](research/performance-batch2-followup.md) ran both arms
+      cleanly on September 14 (186 s each, no fault, no JIT fallback, thermal
+      nominal, 87 riding rows each) and is **inconclusive**: dual-core is not
+      deterministic, so the two runs separate within three seconds of the race
+      start and share only 4 of 86 riding seconds within 100 units, median
+      separation 13,614. The 12.9% render-callback difference tracks a 10.5%
+      draw-call difference and the update callback moves the other way.
+      Repeating this design cannot settle it. Next: either a deterministic
+      single-core arm, which isolates the compile option but is not the
+      shipping configuration, or movie-driven input on the device. The
+      historical desktop 1,022 control-register rows still match with the
+      strict-provenance movie-hash gap unchanged. Baseline 94f5096e is now the
+      installed phone build; the signed 53e2e1e4 archive is preserved.
 - [ ] Performance: follow the [September 13 performance review](research/performance-review-2026-09-13.md).
       Done September 13: always-on callback timer, dispatch sampling opt-in,
       dual-core validated on Mac and phone (stadium section 0.89 → 1.00 speed,
@@ -165,8 +172,17 @@ the build or commit that closed them.
       the dispatch side: `StartlightBegin` and `StartgateOpen` each fire once,
       3.72 s apart, with the staged instances bound, and both named lookups
       return value type 0 rather than a callback — so the lookup is the
-      attachment point and nothing runs there yet. Next: observe a restart and
-      find a reversible visibility/material operation before writing a handler.
+      attachment point and nothing runs there yet. September 14: the reversible
+      visibility operation is found and is pure data, not an engine call.
+      Every instance selects one of the course script's 28-byte definitions;
+      word 1 bit 16 draws and bit 21 collides, matching the donor GSF's own
+      bit 0 and bit 5 shifted by 16. Definition 39 is used by the three staged
+      countdown instances and nothing else, so toggling that one record shows
+      or hides exactly the gate and lights. `--visible` builds
+      `gc-gari-startgate-visible-001`, which differs from the hidden candidate
+      by seven bytes, all inside that definition. Next: ride the visible
+      candidate to check placement and appearance, then observe a restart
+      before writing a handler.
       Validate
       and target `StartgateOpen` dispatch, then check countdown, unobstructed
       GO and restart. Keep hidden helper geometry excluded. See the

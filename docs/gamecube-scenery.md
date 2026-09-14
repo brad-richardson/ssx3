@@ -305,6 +305,49 @@ The observer caps each copied translation unit at 1,000 events; its summarizer
 marks any unit reaching that count as truncated. Missing later events from a
 capped unit are unknown, not evidence that a callback is absent.
 
+### The reversible visibility operation is a course-script definition (September 14)
+
+Reading the candidate's own course-script binding record settles what a
+countdown handler has to touch, without reverse-engineering an engine routine.
+The record holds 40 instance definitions of 28 bytes each, and every one of the
+3,242 instance ordinals selects one of them:
+
+| Definition shape | Word 0 | Word 1 | Words 2-3 | Word 4 | Word 6 | Definitions | Instances |
+| --- | ---: | ---: | --- | ---: | ---: | ---: | ---: |
+| Visible, non-colliding scenery | 0 | `0x00010000` | none/none | 1e30 | `0x0000ffff` | 1 | 1,180 |
+| Visible, colliding | 1 | `0x00210000` | none/`0x080000xx` | 1e30 | `0x0003ffff` | 38 | 2,059 |
+| Staged countdown (definition 39) | 0 | `0x00000000` | none/none | 0 | `0x00000000` | 1 | 3 |
+
+Word 1 bit 16 draws and bit 21 collides. That is the donor GSF's own bit 0 and
+bit 5 shifted left by 16, which is why `instance_gameplay` reads the same two
+properties on the source side; the agreement is what makes the reading more
+than a guess. Word 4 is a draw distance and word 6 is a packed pair of 16-bit
+sentinels whose meaning is not established, so neither is synthesized.
+
+This matters because definition 39 is used by the three staged countdown
+instances **and nothing else**. Toggling one 28-byte record therefore shows or
+hides exactly the gate and lights, reversibly, with no effect on any other
+scenery and no engine call. The probe already reads this word: it is the
+`property_flags` field, observed 0, at `instance+136` then `+4`.
+
+This supersedes the earlier search for a callable hide/show routine. Builtin 2
+(`8019193c`) is still not a safe substitute — its `DeadNode`/`RestoreNode`
+lifecycle commands and guards remain unmodelled — but a handler no longer needs
+it for visibility.
+
+`gamecube_startgate.py --visible` stages the countdown models permanently drawn
+by copying the course's own visible non-colliding definition verbatim, so
+placement and the visibility bit can be checked before any binding exists.
+Candidate `local/builds/gc-gari-startgate-visible-001` (SHA-256
+`1b12206c7658cc5fe5222f95b461fd61739ae264ddefc7a3b8713b5446b047ef`, 108,467
+validated resources) differs from the hidden candidate by seven bytes, all
+inside definition 39: the visibility bit, the draw distance and the low half of
+the sentinel pair. Every other resource in both changed groups is identical.
+
+This is a static always-visible check. It is not a countdown, and it does not
+establish timing, the flipbook sequence, restart behaviour or the gate's
+authored appearance.
+
 ### Observed countdown events (September 14, staged candidate)
 
 The first observer run rode the hidden staging candidate for 841 samples with
