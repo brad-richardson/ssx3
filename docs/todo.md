@@ -203,8 +203,9 @@ the build or commit that closed them.
       Every instance selects one of the course script's 28-byte definitions;
       word 1 bit 16 draws and bit 21 collides, matching the donor GSF's own
       bit 0 and bit 5 shifted by 16. Definition 39 is used by the three staged
-      countdown instances and nothing else, so toggling that one record shows
-      or hides exactly the gate and lights. `--visible` builds
+      countdown instances and nothing else, so that one record decides whether
+      the gate and lights exist in the scene. That bit is **load-time only**.
+      `--visible` builds
       `gc-gari-startgate-visible-001`, which differs from the hidden candidate
       by seven bytes, all inside that definition. Two clean 185 s checks
       confirm it: at the same countdown number and camera the visible run
@@ -216,9 +217,20 @@ the build or commit that closed them.
       `StartgateOpen` **alone**, so it must not assume the pair; and the
       three instances bind once and survive both, so the course is not
       reloaded and a handler can hold the definition. All five lookups
-      still return value type 0. Next: write that handler. Countdown
-      length (both windows exceed the donor's 2.5 s of authored waits),
-      the flipbook sequence and the authored gate appearance remain open.
+      still return value type 0.
+      **The handler is written and the flag write does not work.**
+      `gamecube_startgate_handler.py` sets the bit on the lights and clears
+      it on the gate, in the shared definition and in every live instance's
+      own `+128` word: four effective writes over two races, no redundant
+      write, no refusal -- and the gate is never drawn. The bit decides what
+      the course loads with, not what it draws now; the likely mechanism is
+      membership of a draw structure built once at load. Next: characterise
+      builtin 2 (`8019193c`) `DeadNode`/`RestoreNode`, which the September 13
+      audit identified and warned not to assume reversible. It has to be
+      understood rather than avoided, and the handler will drive it once it
+      is. Countdown length (both windows exceed the donor's 2.5 s of
+      authored waits), the flipbook sequence and the authored gate
+      appearance remain open.
       Validate
       and target `StartgateOpen` dispatch, then check countdown, unobstructed
       GO and restart. Keep hidden helper geometry excluded. See the
