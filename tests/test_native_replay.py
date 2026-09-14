@@ -3,6 +3,14 @@ from tools.native_replay import validate_sequence
 
 
 class ReplayValidation(unittest.TestCase):
+    def test_sequence_start_state_is_explicit_and_bounded(self):
+        for anchor in ("runtime_running","main_menu"):
+            sequence={"duration":20,"start_when":anchor,"events":[]}
+            self.assertIs(validate_sequence(sequence),sequence)
+        for anchor in (None,"riding",True,0):
+            with self.subTest(anchor=anchor),self.assertRaises(ValueError):
+                validate_sequence({"duration":20,"start_when":anchor,"events":[]})
+
     def test_press_release_and_stick_are_valid(self):
         sequence = {"duration": 2, "events": [
             {"at": 0, "commands": "PRESS A\nSET MAIN 0.75 0.5\n"},

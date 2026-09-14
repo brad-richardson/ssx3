@@ -26,7 +26,8 @@ if(DISPATCH_POSITION LESS 0)
   message(FATAL_ERROR "Native trial dispatch seam changed")
 endif()
 string(REPLACE "namespace\n{" "#define SSX_NATIVE_TRIAL_APP 1\n#include \"${TRIAL_DIR}/native_callback_trace.h\"\n#include \"${TRIAL_DIR}/native_render_schedule.h\"\n#include \"${TRIAL_DIR}/native_pose_interpolation.h\"\nnamespace\n{" RUN_CODE "${RUN_CODE}")
-string(REPLACE "${DISPATCH_MARKER}" "          NativeInterpolation::Step(m_guest);\n${DISPATCH_MARKER}" RUN_CODE "${RUN_CODE}")
+string(PREPEND RUN_CODE "#include \"${TRIAL_DIR}/startup_skip.h\"\n")
+string(REPLACE "${DISPATCH_MARKER}" "          StartupBoot::Step(m_guest);\n          NativeInterpolation::Step(m_guest);\n${DISPATCH_MARKER}" RUN_CODE "${RUN_CODE}")
 set(TRIAL_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/NativeTrial_Run.cpp")
 file(WRITE "${TRIAL_SOURCE}" "${RUN_CODE}")
 get_target_property(CORE_SOURCES core SOURCES)
@@ -61,10 +62,11 @@ add_subdirectory("${CORE}/module-template" game-module)
 
 add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm SessionDiagnostics.mm)
 # Saved machine state must not cross incompatible frontend/runtime builds.
-set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStore.h SessionPause.h
+set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStore.h SessionPause.h OutputSizing.h
   SessionDiagnostics.h SessionDiagnostics.mm ../../tools/ios_diagnostic_sources.py
   ../diagnostics/native_callback_trace.h ../diagnostics/native_render_schedule.h
   ../diagnostics/callback_timing.h
+  ../diagnostics/startup_skip.h
   ../diagnostics/native_pose_interpolation.h ../diagnostics/pose_history.h
   ../diagnostics/render_deadline.h ../diagnostics/trial_control.h ../patches/recompcore-platform.patch
   ../patches/moderngekko-platform.patch ../dependencies.json)

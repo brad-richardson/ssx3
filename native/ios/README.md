@@ -15,6 +15,26 @@ and starts a new runtime with the current files; it preserves memory-card saves.
 Use Full Reset after copying new assets during development. The game's own
 Restart option may retain cached assets and is not a reliable asset reload.
 
+Faster cold launches are enabled by default, including Full Reset.
+**Turn off faster cold starts** in Menu restores ordinary startup; this saved
+preference applies to the next cold boot or Full Reset. Compatible checkpoint
+restores still take precedence. It skips
+startup movies, waits for the initialized title screen, and advances once
+through normal START input to the main menu. Required game/UI loading remains.
+`mobile_gamecube.py launch --debug-main-menu` opts in for that process;
+`--normal-boot` overrides a saved preference for ordinary-boot coverage. Neither
+launch override changes the saved preference. Native and repeated Simulator testing reached the real
+menu in about 20 seconds after guest execution began. Installed build 113c9b20
+includes the active-input readiness fix; phone timing and saved preference
+behavior need validation. See [startup evidence and reproduction](../../docs/research/startup-shortcut.md).
+
+For state-based startup automation, use `--debug-main-menu --sequence
+native/ios/main-menu-smoke.json`. Its 20-second clock begins at actual main-menu
+readiness; it does not repeat the old timed START/A startup inputs. Metrics
+retain the runtime clock and separately record `sequenceSeconds`; lifecycle
+logs mark `sequence_started`. Smoothing scheduled for a state-anchored sequence
+uses the same sequence clock. The usual overall startup deadline remains.
+
 The pause menu shows the app version, short build identity, and binary build
 date/time in the device's local timezone. It also shows the active course build
 and archive build date. CMake stamps `build-info.json` after linking; the world
@@ -40,21 +60,32 @@ latency improvement. Device reports have shown short stretches of actual
 See the [prototype findings](../../docs/research/120hz-native-interpolation.md)
 for performance limits, ownership rules and reproduction.
 
-The pause menu also offers **Use half-size output** / **Use full-size output**
-for a reversible output-resolution comparison. Selecting it resumes play at
+The pause menu's output action cycles **Full → 75% → Match internal → Half → Full**, with the
+next size named on the action, for a reversible output-resolution comparison. Selecting it resumes play at
 the selected size; open the menu again to start a smoothing trial. The menu
 shows the current size. Full is the launch default, and the selection survives
-Full Reset during that app launch. On the iPhone 16 Pro Max, full is 2868 × 1320
-and half is 1434 × 660. This control leaves the independently selected internal
+Full Reset during that app launch. On the iPhone 16 Pro Max, full is 2868 × 1320,
+75% is 2151 × 990, and half is 1434 × 660. This control leaves the independently selected internal
 detail unchanged; touch controls and UIKit text keep their normal screen resolution.
-Half reduces the final drawable's pixel count to one quarter. Its effect on
+75% uses 56.25% of full output's pixels; Half uses one quarter. Their effect on
 presentation cost, sustained smoothing and image quality must be measured.
 The action is unavailable while the smoothing draw drains or a checkpoint is
 being written. A Dolphin CPU/FIFO guard synchronizes the layer-scale change;
 the Metal renderer rebuilds its backbuffer after resuming.
 
+Match internal uses the visible, aspect-correct picture reported after rendering,
+not the whole allocated EFB. For the observed 2× gameplay picture (1556 × 896),
+it requests a 1947 × 896 drawable with side bars. It preserves picture shape;
+iOS still scales that drawable onto the physical screen. The app waits for two
+consistent source frames at the selected internal detail before matching.
+Automatic updates use the same CPU/FIFO guard outside waiting/active smoothing
+trials, checkpoints and lifecycle transitions; output stays fixed throughout
+a trial. The menu says “adjusting” while a match is pending. The Metal backend
+honors exact integer drawable dimensions on iOS, avoiding float-scale rounding.
+Outputs larger than native screen size are capped and reported in telemetry.
+
 **Use 2× internal detail** / **Use 1× internal detail** changes the GameCube
-rendering resolution independently of Full/Half output. The launch default is
+rendering resolution independently of output size. The launch default is
 1× (640 × 528, 337,920 pixels); 2× is 1280 × 1056 (1,351,680 pixels), four times
 the pixels. Selecting either resumes play. The choice lasts for the app process
 and survives Full Reset; an ordinary relaunch returns to 1×. The same paused,
@@ -69,8 +100,10 @@ across a detail change still needs device validation.
 memory bandwidth, and framebuffer memory use. It does not reduce guest CPU
 work or establish sustained 120 Hz performance. Half output does not cancel
 the cost of a 2× internal framebuffer. Keep internal detail at 1× for the
-existing Full/Half pacing comparison; the analyzer's baseline policy remains
-640 × 528. Compare internal detail separately and exclude resize/startup frames.
+default Full/Half pacing comparison; the analyzer's baseline policy remains
+640 × 528. `mobile_pacing_check.py --internal-scale 2` explicitly expects
+1280 × 1056 with unchanged speed, audio and duration gates. Compare internal
+detail separately and exclude resize/startup frames.
 
 Launch metadata's `renderScale` records the selected initial integer. Launch,
 metrics, and lifecycle rows also record `requestedInternalScale`; `efbWidth`,
@@ -90,10 +123,13 @@ gameplay. The smoothing deadline and speed fallback apply at both resolutions.
 For reproducible launches, `mobile_gamecube.py launch --output-scale half`
 (with the usual device options) selects half output for that process. It can
 be combined with `--sequence`; `--output-scale full` is the explicit baseline.
+`--output-scale three-quarter` selects 75% output; `--output-scale match-internal`
+selects automatic source matching. Metal's BGRA drawable path
+uses integer pixel dimensions and imposes no even-width requirement here.
 This option does not persist a preference, so a normal app launch starts full.
 `--internal-scale 2` opts into 2× internal detail for a launch, or use
 `--internal-scale 1` for the explicit baseline. It accepts only `1` or `2`, is
-launch-only, and can be combined with either output scale and with `--sequence`.
+launch-only, and can be combined with any output mode and with `--sequence`.
 Invalid values or use on another command are rejected before device changes.
 With a bounded `--sequence`, `--smoothing-at 155` requests one trial at that
 active test time, using the same riding-state checks, 35-second cap and speed
@@ -108,7 +144,7 @@ timeout, a bounded graphics check can use `--simulator-null-audio`:
 
 ```sh
 python3 tools/mobile_gamecube.py launch --simulator --device SIMULATOR_UUID \
-  --sequence native/ios/snow-jam-smoke.json --output-scale half \
+  --sequence native/ios/snow-jam-smoke.json --normal-boot --output-scale half \
   --smoothing-at 155 --simulator-null-audio
 ```
 

@@ -20,10 +20,12 @@
 #include "moderngekko/runtime.hpp"
 #include "moderngekko/game.hpp"
 #include "GrabMap.h"
+#include "OutputSizing.h"
 #import "SessionStore.h"
 #import "SessionDiagnostics.h"
 #include "SessionPause.h"
 #include "../diagnostics/trial_control.h"
+#include "../diagnostics/startup_skip.h"
 #include "dolphin_runtime_internal.hpp"
 #include "Common/HookableEvent.h"
 #include "Common/Logging/Log.h"
@@ -46,6 +48,14 @@ struct FrameWorkload {
   uint64_t samples=0, draw_calls=0, max_draw_calls=0, primitives=0, vertex_bytes=0, index_bytes=0;
   uint64_t efb_peeks=0, efb_pokes=0;
   int vertex_shaders=0, pixel_shaders=0, textures_created=0, textures_uploaded=0, textures_alive=0;
+};
+
+struct PresentedPicture {
+  int width=0, height=0, target_width=0, target_height=0;
+  uint32_t efb_width=0, efb_height=0;
+  uint64_t frame=0;
+  unsigned stable=0;
+  double host=0;
 };
 
 static NSString* Documents() {
@@ -160,8 +170,16 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   UIAlertAction* _outputAction;
   UIAlertAction* _internalAction;
   CGFloat _outputScale;
+  BOOL _matchInternal;
+  CGSize _matchedDrawable;
+  double _internalConfiguredHost;
   int _internalScale;
   BOOL _simulatorNullAudio;
+  BOOL _debugMainMenu;
+  StartupBoot::AdvanceInput _startupInput;
+  int _startupPhaseLogged;
+  BOOL _sequenceFromMainMenu;
+  double _sequenceStarted;
   SSXSessionStore* _sessionStore;
   NSDictionary* _sessionIdentity;
   NSString* _courseBuildDescription;
@@ -192,10 +210,12 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   FrameWorkload _workload;
   uint32_t _efbWidth, _efbHeight;
   double _efbSampleHost;
+  PresentedPicture _picture;
   std::atomic<bool> _running;
   std::atomic<bool> _starting;
   std::atomic<bool> _stopRequested;
   Common::EventHook _frameHook;
+  Common::EventHook _presentHook;
   Clock::time_point _lastFrame;
   double _startTime;
   double _launchTime;
@@ -218,6 +238,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (NSDictionary*)outputDetails;
 - (BOOL)canChangeOutputScale;
 - (BOOL)applyOutputScale:(CGFloat)scale;
+- (SSXOutput::Size)matchedOutputSize;
+- (BOOL)canApplyMatchedOutput;
+- (void)applyMatchedOutput;
 - (BOOL)applyInternalScale:(int)scale;
 @end
 
@@ -238,6 +261,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _internalScale = 1;
   // These choices last for this process; normal launches use full output at 1x.
   NSArray<NSString*>* launchArgs=NSProcessInfo.processInfo.arguments;
+  [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXDebugMainMenu":@YES}];
+  _debugMainMenu=[NSUserDefaults.standardUserDefaults boolForKey:@"SSXDebugMainMenu"];
+  if([launchArgs containsObject:@"-ssxDebugMainMenu"]) _debugMainMenu=YES;
+  if([launchArgs containsObject:@"-ssxNormalBoot"]) _debugMainMenu=NO;
   _simulatorNullAudio=NO;
 #if TARGET_OS_SIMULATOR
   // Graphics-only escape hatch for Simulator RemoteIO RPC failures. This
@@ -248,6 +275,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSUInteger scaleArg=[launchArgs indexOfObject:@"-ssxOutputScale"];
   if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
       [launchArgs[scaleArg+1] isEqualToString:@"half"]) _outputScale=.5;
+  if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
+      [launchArgs[scaleArg+1] isEqualToString:@"three-quarter"]) _outputScale=.75;
+  if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
+      [launchArgs[scaleArg+1] isEqualToString:@"match-internal"]) _matchInternal=YES;
   NSUInteger internalArg=[launchArgs indexOfObject:@"-ssxInternalScale"];
   if (internalArg != NSNotFound && internalArg+1 < launchArgs.count &&
       [launchArgs[internalArg+1] isEqualToString:@"2"]) _internalScale=2;
@@ -329,8 +360,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   // Only the Metal game surface changes resolution. UIKit controls and text
   // retain the screen's normal content scale.
   layer.contentsScale = self.view.window.screen.scale * _outputScale;
-  layer.drawableSize = CGSizeMake((NSUInteger)(bounds.size.width * layer.contentsScale),
-                                 (NSUInteger)(bounds.size.height * layer.contentsScale));
+  layer.drawableSize = _matchInternal && _matchedDrawable.width>0 ? _matchedDrawable :
+      CGSizeMake((NSUInteger)(bounds.size.width * layer.contentsScale),
+                 (NSUInteger)(bounds.size.height * layer.contentsScale));
   const CGFloat left = safe.left + 12, right = bounds.size.width - safe.right - 174;
   const CGFloat top = MAX(safe.top, 8), bottom = bounds.size.height - safe.bottom - 166;
   const CGPoint positions[] = {{right+56,bottom+112},{right+112,bottom+56},{right,bottom+56},{right+56,bottom},
@@ -383,6 +415,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   [self send:[NSString stringWithFormat:@"RELEASE %@\n",[name uppercaseString]]];
 }
 - (void)releaseControls {
+  _startupInput.held=false;
   [_pressed removeAllObjects];
   _padButtons = [NSSet set];
   _touchDpad = [NSSet set];
@@ -459,8 +492,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _eventIndex = 0;
   _lastTickHost = _lastDiagnosticFlush = 0;
   _lastTrialStatus = -1;
+  _startupInput={}; _startupPhaseLogged=-1; _sequenceStarted=-1; _sequenceFromMainMenu=NO;
   _trialCancellationLogged = NO;
-  { std::lock_guard lock(_framesMutex); _efbWidth=_efbHeight=0; _efbSampleHost=0; }
+  { std::lock_guard lock(_framesMutex); _efbWidth=_efbHeight=0; _efbSampleHost=0; _picture={}; }
+  _internalConfiguredHost=0;
   _sequence = nil;
   _status.text = @"Starting SSX 3…";
   NSString* game = [Documents() stringByAppendingPathComponent:@"Game"];
@@ -527,6 +562,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     NSData* data = [NSData dataWithContentsOfFile:sequencePath];
     NSDictionary* test = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
     _sequence = test[@"events"] ?: @[];
+    _sequenceFromMainMenu=[test[@"start_when"] isEqual:@"main_menu"];
     _duration = [test[@"duration"] doubleValue];
     fprintf(stderr,"[ssx-test] events=%lu duration=%.1f\n",(unsigned long)_sequence.count,_duration);
     NSUInteger trialArg=[args indexOfObject:@"-ssxSmoothingAt"];
@@ -544,6 +580,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
     @"renderScale":@(_internalScale), @"cpuThread":@NO, @"automated":@(_sequence!=nil),
     @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
+    @"debugMainMenuRequested":@(_debugMainMenu),
+    @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
     @"scheduledSmoothingAt":_scheduledTrialAt>=0 ? @(_scheduledTrialAt) : NSNull.null,
     @"reportSchema":@2, @"appBuild":@SSX_SESSION_BUILD_ID,
     @"builtAt":ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"])[@"built_at"] ?: @"unknown",
@@ -554,7 +592,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   [[NSJSONSerialization dataWithJSONObject:metadata options:NSJSONWritingPrettyPrinted error:nil]
     writeToFile:[_report stringByAppendingPathComponent:@"launch.json"] atomically:YES];
   const int internalScale=_internalScale;
-  std::thread([self,game,user,descriptor,internalScale] {
+  const BOOL debugMainMenu=_debugMainMenu;
+  std::thread([self,game,user,descriptor,internalScale,debugMainMenu] {
     @autoreleasepool {
       SSXResetNativeTrial([[self->_report stringByAppendingPathComponent:@"native-trial.jsonl"] fileSystemRepresentation]);
       moderngekko::RuntimeConfig options;
@@ -602,6 +641,11 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
             std::string(checkpoint.fileSystemRepresentation), DeleteSavestateAfterBoot::No));
         fprintf(stderr,"[ssx-session] restoring %s\n",checkpoint.lastPathComponent.UTF8String);
       }
+      StartupBoot::Configure(debugMainMenu && !checkpoint ?
+          [[self->_report stringByAppendingPathComponent:@"startup.jsonl"] fileSystemRepresentation] : nullptr,
+          debugMainMenu && !checkpoint);
+      SSXSessionEvent(@"startup_mode", @{@"debugMainMenuRequested":@(debugMainMenu),
+          @"debugMainMenuEnabled":@(debugMainMenu && !checkpoint), @"checkpointRestore":@(checkpoint!=nil)});
       SSXSessionEvent(@"runtime_identity", @{@"identity":identity,
         @"checkpoint":checkpoint.lastPathComponent ?: @"", @"resumeReason":resumeReason ?: @""});
       fprintf(stderr,"[ssx-startup] runtime_create_seconds=%.3f resume=%d\n",
@@ -645,10 +689,25 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
         w.textures_uploaded=g_stats.num_textures_uploaded;
         w.textures_alive=g_stats.num_textures_alive;
       });
+      self->_presentHook = GetVideoEvents().after_present_event.Register([self](PresentInfo& info) {
+        // Present() has now updated the aspect-correct source suggestion. Copy
+        // it on the renderer thread; UIKit reads no renderer-owned pointers.
+        if (!g_presenter || info.reason==PresentInfo::PresentReason::VideoInterfaceDuplicate) return;
+        const auto [width,height]=g_presenter->GetSuggestedWindowSize();
+        const auto& target=g_presenter->GetTargetRectangle();
+        const auto& perf=Core::System::GetInstance().GetPerfMetrics();
+        std::lock_guard lock(self->_framesMutex);
+        auto& p=self->_picture;
+        const auto ew=perf.GetEFBWidth(), eh=perf.GetEFBHeight();
+        const unsigned stable=p.width==width && p.height==height && p.efb_width==ew &&
+            p.efb_height==eh && p.frame!=info.frame_count ? std::min(p.stable+1,3u) : 1;
+        p={width,height,target.GetWidth(),target.GetHeight(),ew,eh,info.frame_count,stable,CACurrentMediaTime()};
+      });
       self->_running=true; self->_starting=false;
       auto result = self->_stopRequested ? moderngekko::RuntimeRunResult{} : created.runtime->Run();
       self->_running=false;
       self->_frameHook={};
+      self->_presentHook={};
       {
         std::lock_guard lock(self->_runtimeMutex);
         self->_runtime=nullptr;
@@ -685,6 +744,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }
   if (!_running) return;
   [self updatePlayback];
+  if (_matchInternal) [self applyMatchedOutput];
   if (_pauseState.NeedsMenu(!_starting) && !self.presentedViewController)
     [self showSessionMenu];
   if (_pauseState.WantsPause()) return;
@@ -698,10 +758,29 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }
   const double elapsed=CACurrentMediaTime()-_startTime;
   if (_pipe<0) return;
-  while (_eventIndex<_sequence.count && [_sequence[_eventIndex][@"at"] doubleValue]<=elapsed) {
+  const auto startupPhase=StartupBoot::phase.load();
+  if (_startupPhaseLogged!=static_cast<int>(startupPhase)) {
+    _startupPhaseLogged=static_cast<int>(startupPhase);
+    [self logSessionEvent:@"startup_phase" details:@{@"phase":@(_startupPhaseLogged)}];
+  }
+  const BOOL manualStart=[_pressed containsObject:@"Start"] || [_padButtons containsObject:@"START"];
+  const auto startupAction=_startupInput.Update(startupPhase,host,!manualStart);
+  if (startupAction==StartupBoot::InputAction::PressStart) {
+    [self send:@"PRESS START\n"];
+    [self logSessionEvent:@"startup_start_pressed" details:@{}];
+  } else if(startupAction==StartupBoot::InputAction::ReleaseStart) {
+    if(!manualStart) [self send:@"RELEASE START\n"];
+    [self logSessionEvent:@"startup_start_released" details:@{}];
+  }
+  if(_sequenceFromMainMenu && _sequenceStarted<0 && startupPhase==StartupBoot::Phase::MainMenu) {
+    _sequenceStarted=elapsed;
+    [self logSessionEvent:@"sequence_started" details:@{@"anchor":@"main_menu"}];
+  }
+  const double sequenceElapsed=_sequenceFromMainMenu ? (_sequenceStarted<0 ? -1 : elapsed-_sequenceStarted) : elapsed;
+  while (_eventIndex<_sequence.count && [_sequence[_eventIndex][@"at"] doubleValue]<=sequenceElapsed) {
     [self send:_sequence[_eventIndex][@"commands"]]; ++_eventIndex;
   }
-  if (_scheduledTrialAt>=0 && elapsed>=_scheduledTrialAt) {
+  if (_scheduledTrialAt>=0 && sequenceElapsed>=_scheduledTrialAt) {
     const double requested=_scheduledTrialAt;
     _scheduledTrialAt=-1;
     const auto trial=NativeTrial::status.load();
@@ -728,6 +807,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
       @"speed":@(perf.GetSpeed()),@"frameIntervalP50ms":@(quantile(.5)),@"frameIntervalP95ms":@(quantile(.95)),
       @"frameIntervalP99ms":@(quantile(.99)),@"frames":@(frames.size()),@"footprintBytes":@(vm.phys_footprint),
       @"thermalState":@(NSProcessInfo.processInfo.thermalState),@"eventIndex":@(_eventIndex),
+      @"sequenceSeconds":sequenceElapsed>=0 ? @(sequenceElapsed) : NSNull.null,
       @"audioDMAEmptyDequeues":@(Mixer::GetDMAEmptyDequeues()), @"host_seconds":@(CACurrentMediaTime()),
       @"maxSpeedExcludingThrottle":std::isfinite(maxSpeed) ? @(maxSpeed) : NSNull.null,
       @"trialStatus":@(static_cast<int>(NativeTrial::status.load())),
@@ -745,7 +825,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     _status.text=[NSString stringWithFormat:@"SSX 3 · %.1f FPS · %.0f%% speed · %.0f MB",perf.GetFPS(),perf.GetSpeed()*100,vm.phys_footprint/1048576.0];
   }
   if (_sequence && elapsed-_lastCapture>=15) { _lastCapture=elapsed; Core::SaveScreenShot(); }
-  if (_duration>0 && elapsed>=_duration) [self stopGame];
+  if (_duration>0 && sequenceElapsed>=_duration) [self stopGame];
 }
 - (void)stopGame {
   NativeTrial::Cancel();
@@ -774,12 +854,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [weakSelf resumeSession];
   }];
   trial.enabled = _running && !_pendingCheckpoint;
-  _outputAction = [UIAlertAction actionWithTitle:(_outputScale == 1 ? @"Use half-size output" : @"Use full-size output")
+  _outputAction = [UIAlertAction actionWithTitle:(_matchInternal ? @"Use half-size output" :
+      (_outputScale == 1 ? @"Use 75% output" :
+      (_outputScale == .75 ? @"Match internal output" : @"Use full-size output")))
       style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
     SSXViewController* self=weakSelf;
     if (!self) return;
-    const CGFloat scale = self->_outputScale == 1 ? .5 : 1;
-    [self logSessionEvent:@"output_resolution_requested" details:@{@"requestedOutputScale":@(scale)}];
+    const CGFloat scale = self->_matchInternal ? .5 :
+        (self->_outputScale == 1 ? .75 : (self->_outputScale == .75 ? 0 : 1));
+    [self logSessionEvent:@"output_resolution_requested" details:@{
+        @"requestedOutputScale":scale ? @(scale) : NSNull.null,
+        @"requestedOutputMode":scale ? @"fixed" : @"match-internal"}];
     const BOOL applied=[self applyOutputScale:scale];
     [self resumeSession];
     if (!applied) self->_status.text=@"Output size unchanged. Try again from Menu.";
@@ -796,6 +881,16 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     if (!configured) self->_status.text=@"Internal detail unchanged. Try again from Menu.";
   }];
   _internalAction.enabled = [self canChangeOutputScale];
+  UIAlertAction* startup = [UIAlertAction actionWithTitle:(_debugMainMenu ? @"Turn off faster cold starts" : @"Turn on faster cold starts")
+      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+    SSXViewController* self=weakSelf;
+    if(!self)return;
+    self->_debugMainMenu=!self->_debugMainMenu;
+    [NSUserDefaults.standardUserDefaults setBool:self->_debugMainMenu forKey:@"SSXDebugMainMenu"];
+    [self logSessionEvent:@"startup_preference_changed" details:@{@"enabled":@(self->_debugMainMenu)}];
+    [self resumeSession];
+    self->_status.text=self->_debugMainMenu ? @"Faster starts enabled for the next cold boot or Full Reset." : @"Normal cold starts restored.";
+  }];
   UIAlertAction* reset = [UIAlertAction actionWithTitle:@"Full Reset" style:UIAlertActionStyleDestructive handler:^(UIAlertAction*) {
     SSXViewController* self = weakSelf;
     [self->_sessionStore discardCheckpoint];
@@ -809,7 +904,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   // The save takes a brief moment; finish it before allowing a new runtime.
   reset.enabled = !_pendingCheckpoint;
   [_sessionMenu addAction:resume]; [_sessionMenu addAction:trial];
-  [_sessionMenu addAction:_outputAction]; [_sessionMenu addAction:_internalAction]; [_sessionMenu addAction:reset];
+  [_sessionMenu addAction:_outputAction]; [_sessionMenu addAction:_internalAction];
+  [_sessionMenu addAction:startup]; [_sessionMenu addAction:reset];
   _sessionMenu.preferredAction = resume;
   [self presentViewController:_sessionMenu animated:YES completion:nil];
 }
@@ -845,8 +941,13 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSString* trial = NativeTrial::limited.load() ? @"Smoothing trial ended: extra frames couldn’t keep up. Normal rendering restored." :
       @"Smoothing is experimental and may add visual delay. A trial starts while riding and returns to normal within 35 seconds.";
   CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+  const auto matched=[self matchedOutputSize];
+  const BOOL matchPending=_matchInternal && (!matched.width ||
+      !CGSizeEqualToSize(layer.drawableSize,CGSizeMake(matched.width,matched.height)));
   NSString* output=[NSString stringWithFormat:@"Render output: %@ (%.0f × %.0f)",
-      _outputScale == 1 ? @"Full" : @"Half", layer.drawableSize.width, layer.drawableSize.height];
+      _matchInternal ? (matchPending ? @"Match internal, adjusting" : @"Match internal") :
+      (_outputScale == 1 ? @"Full" : (_outputScale == .75 ? @"75%" : @"Half")),
+      layer.drawableSize.width, layer.drawableSize.height];
   NSString* internal=[NSString stringWithFormat:@"Internal detail: %d× (%d × %d)",
       _internalScale, 640*_internalScale, 528*_internalScale];
   return [NSString stringWithFormat:@"%@\n\n%@\n%@\n%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, trial, output, internal, version,
@@ -854,14 +955,26 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (NSDictionary*)outputDetails {
   CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+  const auto matched=[self matchedOutputSize];
   std::lock_guard lock(_framesMutex);
   return @{@"outputScale":@(_outputScale), @"screenScale":@(self.view.window.screen.scale),
+    @"outputMode":_matchInternal ? @"match-internal" : @"fixed",
+    @"matchPending":@(_matchInternal && (!matched.width ||
+        !CGSizeEqualToSize(layer.drawableSize,CGSizeMake(matched.width,matched.height)))),
+    @"matchCappedAtNative":@(_matchInternal && matched.capped),
     @"requestedInternalScale":@(_internalScale),
     @"efbWidth":_efbSampleHost ? @(_efbWidth) : NSNull.null,
     @"efbHeight":_efbSampleHost ? @(_efbHeight) : NSNull.null,
     @"efbSampleHostSeconds":_efbSampleHost ? @(_efbSampleHost) : NSNull.null,
-    @"outputWidth":@((NSUInteger)(layer.bounds.size.width * layer.contentsScale)),
-    @"outputHeight":@((NSUInteger)(layer.bounds.size.height * layer.contentsScale)),
+    @"sourcePictureWidth":_picture.host ? @(_picture.width) : NSNull.null,
+    @"sourcePictureHeight":_picture.host ? @(_picture.height) : NSNull.null,
+    @"pictureTargetWidth":_picture.host ? @(_picture.target_width) : NSNull.null,
+    @"pictureTargetHeight":_picture.host ? @(_picture.target_height) : NSNull.null,
+    @"pictureSampleHostSeconds":_picture.host ? @(_picture.host) : NSNull.null,
+    @"pictureFrame":_picture.host ? @(_picture.frame) : NSNull.null,
+    @"pictureEFBWidth":_picture.host ? @(_picture.efb_width) : NSNull.null,
+    @"pictureEFBHeight":_picture.host ? @(_picture.efb_height) : NSNull.null,
+    @"outputWidth":@(layer.drawableSize.width), @"outputHeight":@(layer.drawableSize.height),
     @"drawableWidth":@(layer.drawableSize.width), @"drawableHeight":@(layer.drawableSize.height)};
 }
 - (BOOL)canChangeOutputScale {
@@ -876,21 +989,72 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   // capture have drained. The renderer rebuilds its backbuffer on its next
   // BindBackbuffer; UIKit never calls renderer methods that create GPU objects.
   std::lock_guard lock(_runtimeMutex);
-  if (!_runtime || ![self canChangeOutputScale] || (scale != 1 && scale != .5)) {
+  if (!_runtime || ![self canChangeOutputScale] || (scale != 0 && scale != 1 && scale != .75 && scale != .5)) {
     [self logSessionEvent:@"output_resolution_rejected" details:@{@"requestedOutputScale":@(scale)}];
     return NO;
   }
   {
     Core::CPUThreadGuard guard(Core::System::GetInstance());
     CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
-    _outputScale=scale;
-    layer.contentsScale=self.view.window.screen.scale * scale;
-    layer.drawableSize=CGSizeMake((NSUInteger)(layer.bounds.size.width * layer.contentsScale),
-                                 (NSUInteger)(layer.bounds.size.height * layer.contentsScale));
+    _matchInternal=scale==0;
+    if (_matchInternal) {
+      const auto size=[self matchedOutputSize];
+      if (size.width>0) {
+        _outputScale=size.scale;
+        _matchedDrawable=CGSizeMake(size.width,size.height);
+        layer.contentsScale=self.view.window.screen.scale * _outputScale;
+        layer.drawableSize=_matchedDrawable;
+      }
+      // If the source is not ready, retain the current surface until a fresh
+      // measured presentation arrives. No EFB-allocation-size guess is used.
+    } else {
+      _outputScale=scale; _matchedDrawable=CGSizeZero;
+      layer.contentsScale=self.view.window.screen.scale * scale;
+      layer.drawableSize=CGSizeMake((NSUInteger)(layer.bounds.size.width * layer.contentsScale),
+                                   (NSUInteger)(layer.bounds.size.height * layer.contentsScale));
+    }
     if (g_presenter) g_presenter->ResizeSurface();
   }
   [self logSessionEvent:@"output_resolution_applied" details:@{}];
   return YES;
+}
+- (SSXOutput::Size)matchedOutputSize {
+  std::lock_guard lock(_framesMutex);
+  if (_picture.stable<2 || _picture.host<=_internalConfiguredHost ||
+      _picture.efb_width!=640*_internalScale || _picture.efb_height!=528*_internalScale) return {};
+  const CGSize bounds=_surface.bounds.size;
+  const double screenScale=self.view.window.screen.scale;
+  return SSXOutput::Match(bounds.width*screenScale,bounds.height*screenScale,_picture.width,_picture.height);
+}
+- (BOOL)canApplyMatchedOutput {
+  const auto trial=NativeTrial::status.load();
+  if (!_matchInternal || !_running || _starting || _stopRequested || _pendingCheckpoint ||
+      trial==NativeTrial::Status::Waiting || trial==NativeTrial::Status::Running ||
+      UIApplication.sharedApplication.applicationState!=UIApplicationStateActive) return NO;
+  return [self canChangeOutputScale] || (!_pausedForSystem && !_pauseState.WantsPause() &&
+      Core::GetState(Core::System::GetInstance())==Core::State::Running);
+}
+- (void)applyMatchedOutput {
+  if (![self canApplyMatchedOutput]) return;
+  auto size=[self matchedOutputSize];
+  CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+  if (!size.width || CGSizeEqualToSize(layer.drawableSize,CGSizeMake(size.width,size.height))) return;
+  std::lock_guard lock(_runtimeMutex);
+  if (!_runtime || ![self canApplyMatchedOutput]) return;
+  {
+    // Also safe for the first measured image during ordinary play: this guard
+    // drains CPU/FIFO and restores their prior running state. Never hold the
+    // frame snapshot mutex while acquiring it, or resize within a trial/save.
+    Core::CPUThreadGuard guard(Core::System::GetInstance());
+    size=[self matchedOutputSize];
+    if (!size.width) return;
+    _outputScale=size.scale;
+    _matchedDrawable=CGSizeMake(size.width,size.height);
+    layer.contentsScale=self.view.window.screen.scale * _outputScale;
+    layer.drawableSize=_matchedDrawable;
+    if (g_presenter) g_presenter->ResizeSurface();
+  }
+  [self logSessionEvent:@"output_resolution_applied" details:@{@"automatic":@YES,@"cappedAtNative":@(size.capped)}];
 }
 - (BOOL)applyInternalScale:(int)scale {
   std::lock_guard lock(_runtimeMutex);
@@ -902,6 +1066,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     Core::CPUThreadGuard guard(Core::System::GetInstance());
     Config::SetBase(Config::GFX_EFB_SCALE, scale);
     _internalScale=scale;
+    _internalConfiguredHost=CACurrentMediaTime();
   }
   // Configured is intentional: the EFB is recreated by VideoConfig's next
   // render-thread config check after Resume. Keep reporting the last measured

@@ -9,6 +9,32 @@ from tools import mobile_gamecube
 
 
 class DeviceLaunch(unittest.TestCase):
+    def test_fast_boot_modes_and_state_anchor_require_explicit_launch_authorization(self):
+        for argv in (["collect","--debug-main-menu"], ["install","--normal-boot"],
+                     ["launch","--debug-main-menu","--normal-boot"]):
+            with self.subTest(argv=argv), mock.patch("sys.argv",["mobile_gamecube.py",*argv,"--device","PHONE"]), \
+                    mock.patch.object(mobile_gamecube,"command") as command:
+                with self.assertRaises(SystemExit) as stopped:mobile_gamecube.main()
+                self.assertEqual(stopped.exception.code,2);command.assert_not_called()
+        for simulator in (False,True):
+            with self.subTest(simulator=simulator), tempfile.TemporaryDirectory() as tmp, \
+                    mock.patch.object(mobile_gamecube,"REPORTS",Path(tmp)), \
+                    mock.patch.object(mobile_gamecube,"copy_to") as copy, \
+                    mock.patch.object(mobile_gamecube,"simulator_documents",return_value=Path(tmp)) as documents, \
+                    mock.patch.object(mobile_gamecube,"command") as command:
+                args=argparse.Namespace(device="DEVICE",simulator=simulator,
+                    sequence=Path("native/ios/main-menu-smoke.json"),debug_main_menu=False)
+                with self.assertRaisesRegex(ValueError,"debug-main-menu"):mobile_gamecube.launch(args)
+                copy.assert_not_called();documents.assert_not_called();command.assert_not_called()
+                args.debug_main_menu=True;mobile_gamecube.launch(args)
+                argv=command.call_args.args[0]
+                self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:],
+                    ([] if simulator else ["--"])+["-ssxAutoTest","-ssxDebugMainMenu"])
+                args.sequence=None;args.debug_main_menu=False;args.normal_boot=True
+                mobile_gamecube.launch(args);argv=command.call_args.args[0]
+                self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:],
+                    ([] if simulator else ["--"])+["-ssxNormalBoot"])
+
     def test_internal_scale_rejects_invalid_values_before_device_changes(self):
         for simulator in (False, True):
             for scale in (0, 3, 1.5, "2", True):
@@ -48,7 +74,7 @@ class DeviceLaunch(unittest.TestCase):
     def test_internal_scale_reaches_app_independently_of_output_and_automation(self):
         for simulator in (False, True):
             for scale in (1, 2):
-                for output in (None, "half"):
+                for output in (None, "three-quarter", "match-internal", "half"):
                     for sequence in (None, Path("native/ios/snow-jam-smoke.json")):
                         with self.subTest(simulator=simulator, scale=scale, output=output, sequence=sequence), \
                                 tempfile.TemporaryDirectory() as tmp, \
@@ -141,7 +167,7 @@ class DeviceLaunch(unittest.TestCase):
 
     def test_resolution_option_reaches_app_with_and_without_sequence(self):
         for simulator in (False, True):
-            for scale in ("full", "half"):
+            for scale in ("full", "three-quarter", "match-internal", "half"):
                 for sequence in (None, Path("native/ios/snow-jam-smoke.json")):
                     with self.subTest(simulator=simulator, scale=scale, sequence=sequence), \
                             tempfile.TemporaryDirectory() as tmp, \

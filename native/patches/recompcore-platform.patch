@@ -908,7 +908,7 @@ index 01dc87b..57326ab 100644
    if (inhibit)
    {
 diff --git a/Source/Core/VideoBackends/Metal/MTLGfx.mm b/Source/Core/VideoBackends/Metal/MTLGfx.mm
-index 4b744fe..abdd622 100644
+index 4b744fe..f1029fe 100644
 --- a/Source/Core/VideoBackends/Metal/MTLGfx.mm
 +++ b/Source/Core/VideoBackends/Metal/MTLGfx.mm
 @@ -21,7 +21,9 @@
@@ -934,6 +934,22 @@ index 4b744fe..abdd622 100644
  
    if (bits & CONFIG_CHANGE_BIT_ANISOTROPY)
    {
+@@ -525,6 +530,15 @@ TextureConfig cfg(info.width, info.height, 1, 1, 1, info.format, AbstractTexture
+   CGSize size = [m_layer bounds].size;
+   const float scale = [m_layer contentsScale];
+
++#if !TARGET_OS_OSX
++  // The UIKit host owns integer output dimensions. Reconstructing them from
++  // bounds and float contentsScale loses pixels for source-matched sizing.
++  const CGSize drawable_size = [m_layer drawableSize];
++  if (drawable_size.width >= 1 && drawable_size.height >= 1)
++    return {static_cast<u32>(drawable_size.width), static_cast<u32>(drawable_size.height), scale,
++            Util::ToAbstract([m_layer pixelFormat])};
++#endif
++
+   return {static_cast<u32>(size.width * scale), static_cast<u32>(size.height * scale), scale,
+           Util::ToAbstract([m_layer pixelFormat])};
+ }
 diff --git a/Source/Core/VideoBackends/Metal/MTLStateTracker.mm b/Source/Core/VideoBackends/Metal/MTLStateTracker.mm
 index a9fb4e6..2b223d4 100644
 --- a/Source/Core/VideoBackends/Metal/MTLStateTracker.mm
@@ -1014,6 +1030,25 @@ index 9298c5b..d679514 100644
    options.platform = spirv_cross::CompilerMSL::Options::iOS;
    // Otherwise SPIRV-Cross will try to compile subgroup ops to quad ops instead
    // (And crash because there's no quad_min or quad_max)
+diff --git a/Source/Core/VideoCommon/Present.h b/Source/Core/VideoCommon/Present.h
+index 91ba870..957ae77 100644
+--- a/Source/Core/VideoCommon/Present.h
++++ b/Source/Core/VideoCommon/Present.h
+@@ -55,6 +55,14 @@ public:
+   u32 AutoIntegralScale() const;
+   AbstractTextureFormat GetBackbufferFormat() const { return m_backbuffer_format; }
+   void SetSuggestedWindowSize(int width, int height);
++  // Renderer-thread snapshot of the last aspect-correct, source-sized picture.
++  // Zero without a current XFB; includes the current internal scale.
++  std::tuple<int, int> GetSuggestedWindowSize() const
++  {
++    if (!m_xfb_entry)
++      return {0, 0};
++    return {m_last_window_request_width, m_last_window_request_height};
++  }
+   void SetBackbuffer(int backbuffer_width, int backbuffer_height);
+   void SetBackbuffer(SurfaceInfo info);
+   void OnBackbufferSet(bool size_changed, bool is_first_set);
 diff --git a/Source/Core/VideoCommon/VertexLoaderBase.cpp b/Source/Core/VideoCommon/VertexLoaderBase.cpp
 index 98eb651..343b28a 100644
 --- a/Source/Core/VideoCommon/VertexLoaderBase.cpp

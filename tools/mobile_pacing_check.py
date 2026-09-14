@@ -76,7 +76,11 @@ def read_jsonl(path):
 
 
 class Report:
-    def __init__(self, folder):
+    def __init__(self, folder, *, internal_scale=1):
+        if type(internal_scale) is not int or internal_scale not in (1, 2):
+            raise ValueError('Expected internal scale must be 1 or 2')
+        self.internal_scale = internal_scale
+        self.expected_internal_size = (640 * internal_scale, 528 * internal_scale)
         self.folder = Path(folder)
         self.launch = json.loads((self.folder / 'launch.json').read_text())
         self.native, self.native_issues = read_jsonl(self.folder / 'native-trial.jsonl')
@@ -336,8 +340,9 @@ def analyze_window(report, start, end):
         unknowns.append('physical iPhone presentation support is not established')
     if report.launch.get('audioEnabled', True) is not True:
         unknowns.append('audio disabled or availability unknown; audio integrity is not established')
-    if metrics['internal_sizes'] != [(640, 528)]:
-        unknowns.append('internal resolution is not consistently measured at 640x528')
+    if metrics['internal_sizes'] != [report.expected_internal_size]:
+        width, height = report.expected_internal_size
+        unknowns.append(f'internal resolution is not consistently measured at {width}x{height}')
     if len(presentation['drawable_sizes']) != 1 or any(min(size) <= 0 for size in presentation['drawable_sizes']):
         unknowns.append('drawable resolution missing or changed within the window')
     if len(metrics['output_scales']) > 1:
@@ -345,6 +350,9 @@ def analyze_window(report, start, end):
     if any(start <= row.get('host_seconds', -1) < end and row.get('event') in
            ('output_resolution_requested', 'output_resolution_applied') for row in report.lifecycle):
         unknowns.append('output resize crosses the window')
+    if any(start <= row.get('host_seconds', -1) < end and row.get('event') in
+           ('internal_resolution_requested', 'internal_resolution_configured') for row in report.lifecycle):
+        unknowns.append('internal detail change crosses the window')
     if native['game_speed_from_timebase'] is None:
         unknowns.append('guest timebase speed unavailable')
     if not native['completed_extras'] or native['extras_missing_watched_fields']:
@@ -412,7 +420,9 @@ def analyze_session(report, segment_pauses=False):
     trials = [analyze_trial(report, trial, segment_pauses) for trial in report.trials]
     files = ('launch.json', 'lifecycle.jsonl', 'metrics.jsonl', 'native-trial.jsonl', 'present.csv', 'runtime.log')
     return dict(report=str(report.folder), launch=report.launch, runtime_identity=report.identity,
-                policy=POLICY, clock='host_seconds / Metal presentedTime; native wall aligned by measured anchors',
+                policy=dict(POLICY, expected_internal_scale=report.internal_scale,
+                            expected_internal_size=report.expected_internal_size),
+                clock='host_seconds / Metal presentedTime; native wall aligned by measured anchors',
                 clock_anchor_spread_seconds=report.clock_spread, segment_pauses=segment_pauses,
                 trial_count=len(trials), trials=trials,
                 trace_health=dict(unknowns=list(dict.fromkeys(report.native_issues+report.lifecycle_issues+
@@ -436,6 +446,8 @@ def compare_trials(baseline, candidate, baseline_trial=1, candidate_trial=1):
         return dict(comparison_validity=verdict(unknowns=['no common warmed duration']))
     full, half = analyze_window(baseline, a, a+duration), analyze_window(candidate, b, b+duration)
     failures, unknowns = [], []
+    if baseline.internal_scale != candidate.internal_scale:
+        failures.append('expected internal-resolution policies differ')
     for label, report, trial in (('full', baseline, left), ('half', candidate, right)):
         integrity = analyze_trial(report, trial)['functional_integrity']
         failures.extend(label+': '+reason for reason in integrity['failures'])
@@ -455,8 +467,9 @@ def compare_trials(baseline, candidate, baseline_trial=1, candidate_trial=1):
     if len(fs) != 1 or len(hs) != 1 or any(abs(x-2*y) > 1 for x, y in zip(fs[0], hs[0])):
         failures.append('candidate Metal drawable is not half the full drawable in both dimensions')
     for label, result, scale in (('full', full, 1.0), ('half', half, .5)):
-        if result['metrics']['internal_sizes'] != [(640, 528)]:
-            failures.append(label+' internal resolution is not 640x528')
+        expected = baseline.expected_internal_size if label == 'full' else candidate.expected_internal_size
+        if result['metrics']['internal_sizes'] != [expected]:
+            failures.append(f'{label} internal resolution is not {expected[0]}x{expected[1]}')
         if result['metrics']['output_scales'] != [scale]:
             unknowns.append(label+' measured outputScale is missing or inconsistent')
         unknowns.extend(label+': '+reason for reason in result['sustained_120']['unknowns'])
@@ -476,16 +489,18 @@ def main():
     parser.add_argument('--compare', type=Path, help='half-output report; positional report is full output')
     parser.add_argument('--baseline-trial', type=int, default=1)
     parser.add_argument('--candidate-trial', type=int, default=1)
+    parser.add_argument('--internal-scale', type=int, choices=(1, 2), default=1,
+                        help='explicit expected EFB scale; default 1, unchanged pacing/audio/speed requirements')
     parser.add_argument('--segment-pauses', action='store_true',
                         help='analyze separate active segments, warming each; never stitch durations together')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--require-sustained', action='store_true', help='exit nonzero unless a warmed trial passes')
     args = parser.parse_args()
     try:
-        report = Report(args.report)
+        report = Report(args.report, internal_scale=args.internal_scale)
         result = analyze_session(report, args.segment_pauses)
         if args.compare:
-            candidate = Report(args.compare)
+            candidate = Report(args.compare, internal_scale=args.internal_scale)
             if not 1 <= args.baseline_trial <= len(report.trials) or not 1 <= args.candidate_trial <= len(candidate.trials):
                 parser.error('comparison trial numbers must identify recorded native trials')
             result['comparison'] = compare_trials(report, candidate, args.baseline_trial, args.candidate_trial)

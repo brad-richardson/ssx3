@@ -229,6 +229,8 @@ def launch(args):
     if null_audio and not args.simulator:
         raise ValueError("--simulator-null-audio requires --simulator")
     sequence = validate_sequence(json.loads(args.sequence.read_text())) if args.sequence else None
+    if sequence and sequence.get("start_when")=="main_menu" and not getattr(args,"debug_main_menu",False):
+        raise ValueError("main_menu sequences require --debug-main-menu")
     if null_audio and sequence is None:
         raise ValueError("--simulator-null-audio requires a bounded --sequence")
     smoothing_at = getattr(args, "smoothing_at", None)
@@ -251,6 +253,10 @@ def launch(args):
         flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
     if null_audio:
         flags.append("-ssxNullAudio")
+    if getattr(args,"debug_main_menu",False):
+        flags.append("-ssxDebugMainMenu")
+    if getattr(args,"normal_boot",False):
+        flags.append("-ssxNormalBoot")
     if args.simulator:
         command(["xcrun", "simctl", "launch", "--terminate-running-process", args.device, BUNDLE, *flags])
         return
@@ -287,7 +293,7 @@ def main():
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
     parser.add_argument("--game", type=Path, default=native.DEFAULT_GAME)
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
-    parser.add_argument("--output-scale", choices=("full", "half"),
+    parser.add_argument("--output-scale", choices=("full", "three-quarter", "match-internal", "half"),
                         help="Launch-only drawable scale; normal launches use full output")
     parser.add_argument("--internal-scale", type=int, choices=(1, 2),
                         help="Launch-only GameCube internal detail; normal launches use 1x independently of output scale")
@@ -295,8 +301,15 @@ def main():
                         help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
     parser.add_argument("--simulator-null-audio", action="store_true",
                         help="Graphics-only Simulator diagnostic; requires launch, --simulator, and bounded --sequence")
+    boot=parser.add_mutually_exclusive_group()
+    boot.add_argument("--debug-main-menu",action="store_true",
+                      help="Launch with faster cold starts; preserve checkpoint restore and saved preference")
+    boot.add_argument("--normal-boot",action="store_true",
+                      help="Launch with normal cold starts, overriding the saved faster-start preference")
     parser.add_argument("--world", type=Path, help="Built BAM.BIG for the world command")
     args = parser.parse_args()
+    if (args.debug_main_menu or args.normal_boot) and args.command!="launch":
+        parser.error("--debug-main-menu and --normal-boot apply only to launch")
     if args.output_scale and args.command != "launch":
         parser.error("--output-scale applies only to launch")
     if args.internal_scale is not None and args.command != "launch":

@@ -48,6 +48,7 @@ static u32 Word(CPUState& c,u32 a){
 static u32 Rider(CPUState& c){u32 a=Word(c,0x803da1f8);for(u32 o:{0x74u,0xcu,0x28u}){if(!Valid(c,a,4))return 0;a=Word(c,a+o);}return a;}
 struct Snapshot {
  u32 rider=0,app=0,view=0,state=0;
+ bool application_valid=false;
  std::array<unsigned char,0x800> body{};
  std::array<unsigned char,0x400> application{};
  std::array<unsigned char,0x100> camera{};
@@ -58,6 +59,7 @@ static Snapshot Capture(CPUState& c,u32 app){
  s.state=Word(c,Word(c,s.rider+0x718)+0xd30);
  s.view=Word(c,Word(c,app+132)+4);
  auto copy=[&](auto& bytes,u32 a){if(Valid(c,a,bytes.size()))std::memcpy(bytes.data(),c.ram+(a-0x80000000u),bytes.size());};
+ s.application_valid=Valid(c,app,s.application.size());
  copy(s.body,s.rider);copy(s.application,app);copy(s.camera,s.view);copy(s.random,0x8035de2c);
  return s;
 }
@@ -65,6 +67,43 @@ template<size_t N>static std::string Diff(const std::array<unsigned char,N>&a,co
  std::string s="[";int count=0;
  for(size_t i=0;i<N;i+=4){if(std::memcmp(a.data()+i,b.data()+i,4)) {if(count++)s+=",";s+=std::to_string(i);}}
  return s+"]";
+}
+// GXBE69 DOL b92162d6c616be3ce46b4eb61d5ddbb49891bc387ea7ddb2fea5792842fa29ce:
+// 8010EBB4 requests 540 bytes (li r3,0x21c), 8010EBB8 calls allocator 801CCB88,
+// and 8010EBC4 calls ctor 801073AC. The allocation label at 802E399C is GameModule.
+// Ctor stores vtable 802E543C at 801073D4 and initializes through +536 at 80107604.
+// Preserve the original 0x400-byte watch: its tail is adjacent RAM, not proven
+// GameModule ownership. Classification adds evidence; it does not forgive a
+// raw difference, identify neighboring owners, or restore any guest memory.
+static constexpr u32 GameModuleVtable=0x802e543c;
+static constexpr size_t GameModuleBytes=540;
+static u32 ApplicationWord(const Snapshot& s,size_t offset){
+ const auto* p=s.application.data()+offset;
+ return (u32(p[0])<<24)|(u32(p[1])<<16)|(u32(p[2])<<8)|p[3];
+}
+static std::string ApplicationDiagnostics(const Snapshot& before,const Snapshot& after){
+ const bool valid=before.application_valid&&after.application_valid;
+ const u32 old_vtable=before.application_valid?ApplicationWord(before,0):0;
+ const u32 new_vtable=after.application_valid?ApplicationWord(after,0):0;
+ const bool known=valid&&before.app==after.app&&old_vtable==GameModuleVtable&&new_vtable==GameModuleVtable;
+ std::string owned="[",adjacent="[",words="[";
+ auto append=[](std::string& list,const std::string& value){if(list.size()>1)list+=",";list+=value;};
+ if(valid)for(size_t offset=0;offset<before.application.size();offset+=4){
+  const u32 old_word=ApplicationWord(before,offset),new_word=ApplicationWord(after,offset);
+  if(old_word==new_word)continue;
+  const auto index=std::to_string(offset);
+  append(words,"{\"offset\":"+index+",\"before\":"+std::to_string(old_word)+",\"after\":"+std::to_string(new_word)+"}");
+  if(known)append(offset<GameModuleBytes?owned:adjacent,index);
+ }
+ owned+="]";adjacent+="]";words+="]";
+ return std::string(",\"app_snapshot_valid_before\":")+(before.application_valid?"true":"false")+
+  ",\"app_snapshot_valid_after\":"+(after.application_valid?"true":"false")+
+  ",\"app_vtable_before\":"+(before.application_valid?std::to_string(old_vtable):"null")+
+  ",\"app_vtable_after\":"+(after.application_valid?std::to_string(new_vtable):"null")+
+  ",\"app_owned_extent_bytes\":"+(known?std::to_string(GameModuleBytes):"null")+
+  ",\"app_owned_offsets\":"+(known?owned:"null")+
+  ",\"app_adjacent_offsets\":"+(known?adjacent:"null")+
+  ",\"app_word_changes\":"+(valid?words:"null");
 }
 static u64 Hash(const unsigned char* p,size_t n){u64 h=14695981039346656037ull;for(size_t i=0;i<n;++i){h^=p[i];h*=1099511628211ull;}return h;}
 struct Active {bool pending=false,repeated=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0,cpu_start=-1;Snapshot before;};
@@ -111,9 +150,10 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  FILE* file=Output();
  if(!file)return;
  const auto body=Diff(a.before.body,b.body),app=Diff(a.before.application,b.application),camera=Diff(a.before.camera,b.camera);
+ const auto app_details=ApplicationDiagnostics(a.before,b);
  const bool moved=std::memcmp(a.before.body.data()+240,b.body.data()+240,12)!=0;
- std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s}\n",
- kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str());
+ std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s%s}\n",
+ kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str());
  std::fflush(file);
 }
 static inline void Step(CPUState& c){

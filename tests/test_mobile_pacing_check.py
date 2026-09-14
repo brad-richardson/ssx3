@@ -74,6 +74,44 @@ class MobilePacingCheckTests(unittest.TestCase):
         self.assertEqual(window['sustained_120']['status'], 'inconclusive')
         self.assertIn('short burst', ' '.join(window['sustained_120']['unknowns']))
 
+    def test_two_x_requires_explicit_policy_and_actual_consistent_dimensions(self):
+        folder = self.fixture(scale=.5)
+        rows = self.json_rows(folder, 'metrics.jsonl')
+        for row in rows:
+            row.update(efbWidth=1280, efbHeight=1056)
+        self.write_rows(folder, 'metrics.jsonl', rows)
+        self.assertEqual(analyze_session(Report(folder))['trials'][0]['sustained_120_status'], 'inconclusive')
+        result = analyze_session(Report(folder, internal_scale=2))
+        self.assertEqual(result['policy']['expected_internal_size'], (1280, 1056))
+        self.assertEqual(result['trials'][0]['sustained_120_status'], 'passed')
+        rows[10].update(efbWidth=640, efbHeight=528)
+        self.write_rows(folder, 'metrics.jsonl', rows)
+        self.assertEqual(analyze_session(Report(folder, internal_scale=2))['trials'][0]['sustained_120_status'], 'inconclusive')
+
+    def test_two_x_does_not_relax_audio_or_speed_or_resize_requirements(self):
+        folder = self.fixture(scale=.75)
+        rows = self.json_rows(folder, 'metrics.jsonl')
+        for row in rows:
+            row.update(efbWidth=1280, efbHeight=1056, speed=.97,
+                       audioDMAEmptyDequeues=int(row['host_seconds'] >= 110))
+        self.write_rows(folder, 'metrics.jsonl', rows)
+        result = analyze_window(Report(folder, internal_scale=2), 102, 129.5)
+        self.assertEqual(result['sustained_120']['status'], 'failed')
+        self.assertIn('audio starvation counter increased', result['sustained_120']['failures'])
+        self.assertIn('metric game speed below 0.98x', result['sustained_120']['failures'])
+        with (folder/'lifecycle.jsonl').open('a') as out:
+            out.write(json.dumps(dict(event='internal_resolution_configured',host_seconds=110))+'\n')
+        result = analyze_window(Report(folder, internal_scale=2), 102, 129.5)
+        self.assertEqual(result['sustained_120']['status'], 'inconclusive')
+        self.assertIn('internal detail change crosses the window', result['sustained_120']['unknowns'])
+
+    def test_internal_policy_is_bounded_and_comparisons_cannot_mix_policies(self):
+        for scale in (0, 3, True, 1.5, '2'):
+            with self.assertRaisesRegex(ValueError, 'internal scale'):
+                Report(self.root/'absent', internal_scale=scale)
+        full, half = Report(self.fixture()), Report(self.fixture('half',scale=.5),internal_scale=2)
+        self.assertIn('expected internal-resolution policies differ', compare_trials(full,half)['comparison_validity']['failures'])
+
     def test_cpu_time_is_optional_and_not_inferred_from_wall_time(self):
         folder = self.fixture(duration=4)
         original = analyze_window(Report(folder), 100, 104)['native']

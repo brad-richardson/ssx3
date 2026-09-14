@@ -24,20 +24,30 @@ the build or commit that closed them.
       folder; confirm which folder Dolphin scans on the device.
 - [ ] 120 Hz: profile active callback CPU work, then reduce the dominant cost.
       Phone build 1747c62a measured 8.45 ms thread CPU within an 8.64 ms median
-      extra draw (52 samples); both latest trials stopped after three seconds.
-      Full/Half output switching is device-verified, but a Half smoothing run
-      is still missing. Build 971dc928 adds independent 1×/2× internal detail;
-      keep 1× for the existing pacing comparison. Short high-refresh bursts
-      are established (four seconds at 119.75 actual displays/s); sustained
-      pacing and distinct interpolated motion remain open. See
+      extra draw (52 samples). Build 971dc928 verifies 1×/2× detail changes;
+      its Half-output 2× trials reach 102.94/112.67 positive displays/s over
+      8.92/18.38 seconds, but the longest warmed span is only 15.88 seconds
+      at 114.34 displays/s. Half-output 1× smoothing is still unmeasured.
+      Course/trajectory differences prevent a causal output-size comparison.
+      Preserve the three legacy app-span alerts and lifecycle clock unknowns
+      while collecting the new ownership diagnostic; do not loosen guards.
+      Short high-refresh bursts are established, but sustained pacing and
+      distinct interpolated motion remain open. See
       [resolution evidence](research/120hz-output-resolution.md) and
       [CPU/config spikes](research/120hz-cpu-overhead-spikes.md).
+- [ ] Phone: compare 75%, Match internal and Half output on the same route
+      at fixed internal detail; verify Match through menu 1× ↔ 2× changes.
+      Build 113c9b20 is installed. Simulator confirms exact 75% output plus
+      Match at 1×/2× and a clean 1,233-extra-draw trial; this is not phone
+      performance/audio acceptance. See [resolution evidence](research/120hz-output-resolution.md).
 - [ ] Replay: bind captures to the actual encoder frame, prove exact-image
       fidelity in an isolated renderer, and complete owned-memory/ordering
-      gates before live replay or more interpolation. The private FIFO decode
-      audit passes, but live replay remains blocked; its capture-only gate
-      does not establish render fidelity. See the
-      [review follow-up](research/120hz-review-followup.md).
+      gates before live replay or more interpolation. The private FIFO audit
+      and 180-second capture/continuation check pass, but screenshot-request
+      identity does not prove the encoder's frame identity or render fidelity.
+      Carry the frame ID through FrameDumper, then compare a separate-runtime
+      replay against that exact image. Phone replay remains disabled. See
+      [replay evidence and remaining boundaries](research/120hz-host-replay.md).
 - [ ] Make MemoryWatcher reads observational: replace unchecked HostRead
       pointer chasing with checked reads. Failed watches can reach a panic
       path that raises a PI interrupt. The 031 river check logged 48 startup
@@ -112,14 +122,15 @@ the build or commit that closed them.
 
 ## Mobile
 
-- [ ] Priority: add a debug launch path directly to the main menu selection
-      screen, bypassing intro/logo and intervening loading screens where the
-      game's required initialization permits it. User reports over one minute
-      lost per cold phone session (September 13); automated native/Simulator
-      checks also repeat this sequence. Measure startup phases, preserve
-      required asset/game initialization, and update test input timing to use
-      menu/game state rather than the old long delays. This is distinct from
-      restoring an in-race checkpoint; keep ordinary boot available for coverage.
+- [x] Fast cold start to the main menu: skip pending intro movies and advance
+      once after the title's first active input pass. Enabled by default,
+      including Full Reset, with ordinary-boot override and checkpoint restore
+      precedence. Build 113c9b20 is installed. Three final Simulator launches
+      reach the real menu at 20.47–20.53 s; a state-anchored ride/smoothing check
+      passes. See [startup shortcut](research/startup-shortcut.md).
+- [ ] Phone: confirm default fast-start timing/audio and persisted menu toggle,
+      including Full Reset and checkpoint restore. Required game initialization
+      and the original title-readiness wait remain; profile them separately.
 - [ ] Verify lifecycle Resume repair on iPhone: return to an automatic menu
       after background/audio interruptions; reconcile actual runtime state and
       explicitly reactivate audio on Resume. Reported stuck during Sep 13 playtest.
@@ -129,8 +140,10 @@ the build or commit that closed them.
       relaunch restoration. All eight subsequent diagnostic saves succeeded
       in 97–137 ms, so the earlier failure remains unreproduced.
       Build 1747c62a adds five successful saves and two output resizes/resumes.
-      Verify 971dc928's checkpoint/relaunch after changing internal detail.
-      Active-trial cancellation on the phone remains unverified.
+      Build 971dc928 adds 16 committed saves and one explicit active-trial
+      cancellation for pause with drain/restoration. Verify fresh-launch
+      checkpoint restoration after changing detail and repeated background/
+      audio interruptions; the one cancellation does not close those gates.
 
 - [x] Menu with in-memory Resume, background checkpointing and restore across
       relaunches; Full Reset recreates the runtime and reloads files. Installed
