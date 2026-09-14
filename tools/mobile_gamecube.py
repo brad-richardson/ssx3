@@ -294,9 +294,9 @@ def main():
     parser.add_argument("--game", type=Path, default=native.DEFAULT_GAME)
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
     parser.add_argument("--output-scale", choices=("full", "three-quarter", "match-internal", "half"),
-                        help="Launch-only drawable scale; normal launches use full output")
+                        help="Launch-only drawable scale; normal launches use the saved choice (initially half)")
     parser.add_argument("--internal-scale", type=int, choices=(1, 2),
-                        help="Launch-only GameCube internal detail; normal launches use 1x independently of output scale")
+                        help="Launch-only GameCube internal detail; normal launches use the saved choice (initially 2x)")
     parser.add_argument("--smoothing-at", type=float,
                         help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
     parser.add_argument("--simulator-null-audio", action="store_true",

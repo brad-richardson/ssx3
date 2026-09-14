@@ -22,6 +22,8 @@
 #include "GrabMap.h"
 #include "OutputSizing.h"
 #import "SessionStore.h"
+#import "SessionMenu.h"
+#import "DisplayPreferences.h"
 #import "SessionDiagnostics.h"
 #include "SessionPause.h"
 #include "../diagnostics/trial_control.h"
@@ -166,13 +168,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   SSXMetalView* _surface;
   UILabel* _status;
   UIButton* _menuButton;
-  UIAlertController* _sessionMenu;
-  UIAlertAction* _outputAction;
-  UIAlertAction* _internalAction;
+  SSXSessionMenu* _sessionMenu;
+  SSXDisplayPreferences* _displayPreferences;
+  NSString* _menuStatus;
+  NSString* _menuBuild;
+  BOOL _menuClosing;
+  BOOL _trialAfterOutput;
   CGFloat _outputScale;
   BOOL _matchInternal;
   CGSize _matchedDrawable;
   double _internalConfiguredHost;
+  double _outputResizedHost;
   int _internalScale;
   BOOL _simulatorNullAudio;
   BOOL _debugMainMenu;
@@ -242,6 +248,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (BOOL)canApplyMatchedOutput;
 - (void)applyMatchedOutput;
 - (BOOL)applyInternalScale:(int)scale;
+- (void)refreshSessionMenu;
+- (void)dismissSessionMenuThen:(dispatch_block_t)completion;
 @end
 
 @implementation SSXViewController
@@ -257,10 +265,15 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _padButtons = [NSSet set];
   _touchDpad = [NSSet set];
   _overlayAlpha = 1;
-  _outputScale = 1;
-  _internalScale = 1;
-  // These choices last for this process; normal launches use full output at 1x.
   NSArray<NSString*>* launchArgs=NSProcessInfo.processInfo.arguments;
+  _displayPreferences=[[SSXDisplayPreferences alloc] initWithDefaults:NSUserDefaults.standardUserDefaults
+      arguments:launchArgs];
+  NSString* outputMode=_displayPreferences.outputMode;
+  _matchInternal=[outputMode isEqualToString:@"match-internal"];
+  // Match holds this initial surface until a measured picture is available.
+  _outputScale=[outputMode isEqualToString:@"full"] ? 1 :
+      ([outputMode isEqualToString:@"three-quarter"] ? .75 : .5);
+  _internalScale=(int)_displayPreferences.internalScale;
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXDebugMainMenu":@YES}];
   _debugMainMenu=[NSUserDefaults.standardUserDefaults boolForKey:@"SSXDebugMainMenu"];
   if([launchArgs containsObject:@"-ssxDebugMainMenu"]) _debugMainMenu=YES;
@@ -272,16 +285,6 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _simulatorNullAudio=[launchArgs containsObject:@"-ssxAutoTest"] &&
       [launchArgs containsObject:@"-ssxNullAudio"];
 #endif
-  NSUInteger scaleArg=[launchArgs indexOfObject:@"-ssxOutputScale"];
-  if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
-      [launchArgs[scaleArg+1] isEqualToString:@"half"]) _outputScale=.5;
-  if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
-      [launchArgs[scaleArg+1] isEqualToString:@"three-quarter"]) _outputScale=.75;
-  if (scaleArg != NSNotFound && scaleArg+1 < launchArgs.count &&
-      [launchArgs[scaleArg+1] isEqualToString:@"match-internal"]) _matchInternal=YES;
-  NSUInteger internalArg=[launchArgs indexOfObject:@"-ssxInternalScale"];
-  if (internalArg != NSNotFound && internalArg+1 < launchArgs.count &&
-      [launchArgs[internalArg+1] isEqualToString:@"2"]) _internalScale=2;
   self.view.backgroundColor = UIColor.blackColor;
   _surface = [[SSXMetalView alloc] init];
   CAMetalLayer* layer = (CAMetalLayer*)_surface.layer;
@@ -494,8 +497,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   _lastTrialStatus = -1;
   _startupInput={}; _startupPhaseLogged=-1; _sequenceStarted=-1; _sequenceFromMainMenu=NO;
   _trialCancellationLogged = NO;
+  _trialAfterOutput = NO;
   { std::lock_guard lock(_framesMutex); _efbWidth=_efbHeight=0; _efbSampleHost=0; _picture={}; }
-  _internalConfiguredHost=0;
+  _internalConfiguredHost=_outputResizedHost=0;
   _sequence = nil;
   _status.text = @"Starting SSX 3…";
   NSString* game = [Documents() stringByAppendingPathComponent:@"Game"];
@@ -742,7 +746,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     fprintf(stderr,"[ssx-test] wall-clock deadline reached\n");
     [self stopGame]; return;
   }
-  if (!_running) return;
+  if (!_running) { [self refreshSessionMenu]; return; }
   [self updatePlayback];
   if (_matchInternal) [self applyMatchedOutput];
   if (_pauseState.NeedsMenu(!_starting) && !self.presentedViewController)
@@ -750,6 +754,22 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (_pauseState.WantsPause()) return;
   if (_pipe<0) _pipe=open([[Documents() stringByAppendingPathComponent:@"User/Pipes/ssx3"] fileSystemRepresentation],O_WRONLY|O_NONBLOCK);
   if (Core::GetState(Core::System::GetInstance()) != Core::State::Running) return;
+  if (_trialAfterOutput && !_pendingCheckpoint) {
+    BOOL fresh;
+    {
+      std::lock_guard lock(_framesMutex);
+      fresh=SSXOutput::SourceReady(_picture.width,_picture.height,_picture.efb_width,_picture.efb_height,
+          _picture.stable,_picture.host,std::max(_internalConfiguredHost,_outputResizedHost),_internalScale);
+    }
+    const auto matched=[self matchedOutputSize];
+    const BOOL ready=fresh && (!_matchInternal || (matched.width && CGSizeEqualToSize(
+        ((CAMetalLayer*)_surface.layer).drawableSize,CGSizeMake(matched.width,matched.height))));
+    if (ready) {
+      _trialAfterOutput=NO;
+      [self logSessionEvent:@"trial_requested" details:@{}];
+      NativeTrial::Request();
+    }
+  }
   if (!_startTime) {
     _startTime=CACurrentMediaTime();
     [self logSessionEvent:@"running" details:@{}];
@@ -828,6 +848,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (_duration>0 && sequenceElapsed>=_duration) [self stopGame];
 }
 - (void)stopGame {
+  _trialAfterOutput=NO;
   NativeTrial::Cancel();
   [self releaseControls]; _stopRequested=true;
   std::lock_guard lock(_runtimeMutex);
@@ -837,88 +858,104 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if (_pauseState.menu || _starting || self.presentedViewController) return;
   _pauseState.OpenMenu();
   [self updatePlayback];
-  _sessionMenu = [UIAlertController alertControllerWithTitle:@"SSX"
-      message:[self menuMessage:(_pendingCheckpoint ? @"Saving your paused session…" : @"Your session is paused.")]
-      preferredStyle:UIAlertControllerStyleAlert];
+  _menuStatus = _pendingCheckpoint ? @"Saving your place…" : @"Paused";
+  NSDictionary* build=ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"]);
+  NSString* version=[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"0.1";
+  _menuBuild=[NSString stringWithFormat:@"App %@ · %@ · Built %@\n%@",version,
+      [@SSX_SESSION_BUILD_ID substringToIndex:8],BuildDate(build[@"built_at"]),
+      _courseBuildDescription ?: @"Course not loaded"];
+  _sessionMenu = [SSXSessionMenu new];
   __weak SSXViewController* weakSelf = self;
-  UIAlertAction* resume = [UIAlertAction actionWithTitle:@"Resume" style:UIAlertActionStyleCancel handler:^(UIAlertAction*) {
-    [weakSelf resumeSession];
-  }];
-  UIAlertAction* trial = [UIAlertAction actionWithTitle:@"Try smoothing (up to 35 seconds)"
-      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+  _sessionMenu.onResume = ^{ [weakSelf resumeSession]; };
+  _sessionMenu.onSmoothing = ^{
+    SSXViewController* self=weakSelf;
+    if (!self || ![self canChangeOutputScale]) return;
+    [self dismissSessionMenuThen:^{
+      SSXViewController* self=weakSelf;
+      if (!self) return;
+      // Let fresh frames settle a changed detail/Match selection before the
+      // trial freezes output size. The pause loop cancels this intent as well.
+      self->_trialCancellationLogged = NO;
+      self->_trialAfterOutput=YES;
+      [self logSessionEvent:@"trial_resume_requested" details:@{}];
+      [self resumeSession];
+    }];
+  };
+  _sessionMenu.onOutput = ^(NSString* mode) {
     SSXViewController* self=weakSelf;
     if (!self) return;
-    self->_trialCancellationLogged = NO;
-    [self logSessionEvent:@"trial_requested" details:@{}];
-    NativeTrial::Request();
-    [weakSelf resumeSession];
-  }];
-  trial.enabled = _running && !_pendingCheckpoint;
-  _outputAction = [UIAlertAction actionWithTitle:(_matchInternal ? @"Use half-size output" :
-      (_outputScale == 1 ? @"Use 75% output" :
-      (_outputScale == .75 ? @"Match internal output" : @"Use full-size output")))
-      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
-    SSXViewController* self=weakSelf;
-    if (!self) return;
-    const CGFloat scale = self->_matchInternal ? .5 :
-        (self->_outputScale == 1 ? .75 : (self->_outputScale == .75 ? 0 : 1));
+    const CGFloat scale=[mode isEqualToString:@"match-internal"] ? 0 :
+        ([mode isEqualToString:@"half"] ? .5 : ([mode isEqualToString:@"three-quarter"] ? .75 : 1));
     [self logSessionEvent:@"output_resolution_requested" details:@{
         @"requestedOutputScale":scale ? @(scale) : NSNull.null,
         @"requestedOutputMode":scale ? @"fixed" : @"match-internal"}];
     const BOOL applied=[self applyOutputScale:scale];
-    [self resumeSession];
-    if (!applied) self->_status.text=@"Output size unchanged. Try again from Menu.";
-  }];
-  _outputAction.enabled = [self canChangeOutputScale];
-  _internalAction = [UIAlertAction actionWithTitle:(_internalScale == 1 ? @"Use 2× internal detail" : @"Use 1× internal detail")
-      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+    if (applied) [self->_displayPreferences saveOutputMode:mode];
+    else self->_menuStatus=@"Still finishing the pause. Try again in a moment.";
+    [self refreshSessionMenu];
+  };
+  _sessionMenu.onInternal = ^(NSInteger scale) {
     SSXViewController* self=weakSelf;
     if (!self) return;
-    const int scale=self->_internalScale == 1 ? 2 : 1;
     [self logSessionEvent:@"internal_resolution_requested" details:@{@"targetInternalScale":@(scale)}];
-    const BOOL configured=[self applyInternalScale:scale];
-    [self resumeSession];
-    if (!configured) self->_status.text=@"Internal detail unchanged. Try again from Menu.";
-  }];
-  _internalAction.enabled = [self canChangeOutputScale];
-  UIAlertAction* startup = [UIAlertAction actionWithTitle:(_debugMainMenu ? @"Turn off faster cold starts" : @"Turn on faster cold starts")
-      style:UIAlertActionStyleDefault handler:^(UIAlertAction*) {
+    const BOOL configured=[self applyInternalScale:(int)scale];
+    if (configured) [self->_displayPreferences saveInternalScale:scale];
+    else self->_menuStatus=@"Still finishing the pause. Try again in a moment.";
+    [self refreshSessionMenu];
+  };
+  _sessionMenu.onFastStart = ^(BOOL enabled) {
     SSXViewController* self=weakSelf;
-    if(!self)return;
-    self->_debugMainMenu=!self->_debugMainMenu;
-    [NSUserDefaults.standardUserDefaults setBool:self->_debugMainMenu forKey:@"SSXDebugMainMenu"];
-    [self logSessionEvent:@"startup_preference_changed" details:@{@"enabled":@(self->_debugMainMenu)}];
-    [self resumeSession];
-    self->_status.text=self->_debugMainMenu ? @"Faster starts enabled for the next cold boot or Full Reset." : @"Normal cold starts restored.";
-  }];
-  UIAlertAction* reset = [UIAlertAction actionWithTitle:@"Full Reset" style:UIAlertActionStyleDestructive handler:^(UIAlertAction*) {
-    SSXViewController* self = weakSelf;
-    [self->_sessionStore discardCheckpoint];
-    self->_sessionMenu = nil; self->_pauseState.menu = NO;
-    self->_restartRequested = YES;
-    self->_menuButton.enabled = NO;
-    self->_status.text = @"Restarting with the current game files…";
-    if (!self->_running && !self->_starting) [self startGame];
-    else [self stopGame];
-  }];
-  // The save takes a brief moment; finish it before allowing a new runtime.
-  reset.enabled = !_pendingCheckpoint;
-  [_sessionMenu addAction:resume]; [_sessionMenu addAction:trial];
-  [_sessionMenu addAction:_outputAction]; [_sessionMenu addAction:_internalAction];
-  [_sessionMenu addAction:startup]; [_sessionMenu addAction:reset];
-  _sessionMenu.preferredAction = resume;
+    if (!self) return;
+    self->_debugMainMenu=enabled;
+    [NSUserDefaults.standardUserDefaults setBool:enabled forKey:@"SSXDebugMainMenu"];
+    [self logSessionEvent:@"startup_preference_changed" details:@{@"enabled":@(enabled)}];
+    [self refreshSessionMenu];
+  };
+  _sessionMenu.onReset = ^{
+    SSXViewController* self=weakSelf;
+    if (!self || self->_pendingCheckpoint || self->_starting || self->_stopRequested) return;
+    const auto trial=NativeTrial::status.load();
+    if (trial==NativeTrial::Status::Waiting || trial==NativeTrial::Status::Running) return;
+    [self dismissSessionMenuThen:^{
+      SSXViewController* self=weakSelf;
+      if (!self) return;
+      [self->_sessionStore discardCheckpoint];
+      self->_pauseState.menu = NO;
+      self->_restartRequested = YES;
+      self->_menuButton.enabled = NO;
+      self->_status.text = @"Restarting with the current game files…";
+      if (!self->_running && !self->_starting) [self startGame];
+      else [self stopGame];
+    }];
+  };
+  [self refreshSessionMenu];
   [self presentViewController:_sessionMenu animated:YES completion:nil];
 }
+- (void)dismissSessionMenuThen:(dispatch_block_t)completion {
+  if (_menuClosing) return;
+  if (!_sessionMenu) { completion(); return; }
+  // Keep pause intent until the animation finishes. Prevent repeated taps from
+  // resuming or resetting a runtime twice while the modal is disappearing.
+  _menuClosing=YES;
+  _sessionMenu.view.userInteractionEnabled=NO;
+  [self dismissViewControllerAnimated:YES completion:^{
+    self->_sessionMenu=nil;
+    self->_menuClosing=NO;
+    completion();
+  }];
+}
 - (void)resumeSession {
-  _sessionMenu = nil;
-  _outputAction = nil;
-  _internalAction = nil;
-  NSError* error = nil;
-  const BOOL activated = _simulatorNullAudio || [AVAudioSession.sharedInstance setActive:YES error:&error];
-  _pauseState.RequestResume(UIApplication.sharedApplication.applicationState == UIApplicationStateActive, activated);
-  if (!activated) fprintf(stderr,"[ssx-lifecycle] audio reactivation failed: %s\n",error.description.UTF8String);
-  if (!_running && !_starting) [self startGame];
-  else [self updatePlayback];
+  __weak SSXViewController* weakSelf=self;
+  [self dismissSessionMenuThen:^{
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    NSError* error = nil;
+    const BOOL activated = self->_simulatorNullAudio || [AVAudioSession.sharedInstance setActive:YES error:&error];
+    self->_pauseState.RequestResume(UIApplication.sharedApplication.applicationState == UIApplicationStateActive, activated);
+    if (!activated) fprintf(stderr,"[ssx-lifecycle] audio reactivation failed: %s\n",error.description.UTF8String);
+    if (!self->_running && !self->_starting) [self startGame];
+    else [self updatePlayback];
+  }];
 }
 - (void)trialDisplayTick:(CADisplayLink*)link {
   // This is a refresh-rate hint. Display-link callbacks are not proof that a
@@ -934,24 +971,31 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }
   if (!running && _trialDisplayLink) { [_trialDisplayLink invalidate]; _trialDisplayLink=nil; }
 }
-- (NSString*)menuMessage:(NSString*)status {
-  NSDictionary* build = ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"]);
-  NSString* version = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"0.1";
-  NSString* identifier = [@SSX_SESSION_BUILD_ID substringToIndex:8];
-  NSString* trial = NativeTrial::limited.load() ? @"Smoothing trial ended: extra frames couldn’t keep up. Normal rendering restored." :
-      @"Smoothing is experimental and may add visual delay. A trial starts while riding and returns to normal within 35 seconds.";
+- (void)refreshSessionMenu {
+  if (!_sessionMenu || _menuClosing) return;
   CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
+  PresentedPicture picture;
+  { std::lock_guard lock(_framesMutex); picture=_picture; }
+  const BOOL fresh=SSXOutput::SourceReady(picture.width,picture.height,picture.efb_width,picture.efb_height,
+      picture.stable,picture.host,_internalConfiguredHost,_internalScale);
+  NSString* visible=fresh ? [NSString stringWithFormat:@"Visible image %d × %d",picture.width,picture.height] :
+      @"Visible image updates on resume";
   const auto matched=[self matchedOutputSize];
-  const BOOL matchPending=_matchInternal && (!matched.width ||
+  const BOOL pending=_matchInternal && (!matched.width ||
       !CGSizeEqualToSize(layer.drawableSize,CGSizeMake(matched.width,matched.height)));
-  NSString* output=[NSString stringWithFormat:@"Render output: %@ (%.0f × %.0f)",
-      _matchInternal ? (matchPending ? @"Match internal, adjusting" : @"Match internal") :
-      (_outputScale == 1 ? @"Full" : (_outputScale == .75 ? @"75%" : @"Half")),
-      layer.drawableSize.width, layer.drawableSize.height];
-  NSString* internal=[NSString stringWithFormat:@"Internal detail: %d× (%d × %d)",
-      _internalScale, 640*_internalScale, 528*_internalScale];
-  return [NSString stringWithFormat:@"%@\n\n%@\n%@\n%@\n\nApp %@ (%@)\nBuilt %@\n%@", status, trial, output, internal, version,
-      identifier, BuildDate(build[@"built_at"]), _courseBuildDescription ?: @"Course not loaded"];
+  NSString* resolution=[NSString stringWithFormat:@"%@\nOutput %.0f × %.0f, including bars%@",visible,
+      layer.drawableSize.width,layer.drawableSize.height,pending ? @" · Match updates on resume" : @""];
+  NSString* mode=_matchInternal ? @"match-internal" :
+      (_outputScale==1 ? @"full" : (_outputScale==.75 ? @"three-quarter" : @"half"));
+  const auto trial=NativeTrial::status.load();
+  const BOOL canConfigure=[self canChangeOutputScale];
+  NSString* status=_pendingCheckpoint ? @"Saving your place…" : (_menuStatus ?: @"Paused");
+  if (!_pendingCheckpoint && NativeTrial::limited.load())
+    status=[status stringByAppendingString:@" · Smoothing ended to maintain game speed."];
+  [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
+      fastStart:_debugMainMenu canConfigure:canConfigure canTrial:canConfigure
+      canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&
+          trial!=NativeTrial::Status::Waiting && trial!=NativeTrial::Status::Running) build:_menuBuild ?: @""];
 }
 - (NSDictionary*)outputDetails {
   CAMetalLayer* layer=(CAMetalLayer*)_surface.layer;
@@ -963,6 +1007,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
         !CGSizeEqualToSize(layer.drawableSize,CGSizeMake(matched.width,matched.height)))),
     @"matchCappedAtNative":@(_matchInternal && matched.capped),
     @"requestedInternalScale":@(_internalScale),
+    @"internalConfiguredHostSeconds":@(_internalConfiguredHost),
+    @"outputResizedHostSeconds":@(_outputResizedHost),
     @"efbWidth":_efbSampleHost ? @(_efbWidth) : NSNull.null,
     @"efbHeight":_efbSampleHost ? @(_efbHeight) : NSNull.null,
     @"efbSampleHostSeconds":_efbSampleHost ? @(_efbSampleHost) : NSNull.null,
@@ -1014,14 +1060,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
                                    (NSUInteger)(layer.bounds.size.height * layer.contentsScale));
     }
     if (g_presenter) g_presenter->ResizeSurface();
+    // The guard has drained earlier CPU/FIFO work. A later after-present
+    // sample acknowledges this resize before smoothing can freeze the output.
+    _outputResizedHost=CACurrentMediaTime();
   }
   [self logSessionEvent:@"output_resolution_applied" details:@{}];
   return YES;
 }
 - (SSXOutput::Size)matchedOutputSize {
   std::lock_guard lock(_framesMutex);
-  if (_picture.stable<2 || _picture.host<=_internalConfiguredHost ||
-      _picture.efb_width!=640*_internalScale || _picture.efb_height!=528*_internalScale) return {};
+  if (!SSXOutput::SourceReady(_picture.width,_picture.height,_picture.efb_width,_picture.efb_height,
+      _picture.stable,_picture.host,_internalConfiguredHost,_internalScale)) return {};
   const CGSize bounds=_surface.bounds.size;
   const double screenScale=self.view.window.screen.scale;
   return SSXOutput::Match(bounds.width*screenScale,bounds.height*screenScale,_picture.width,_picture.height);
@@ -1053,6 +1102,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     layer.contentsScale=self.view.window.screen.scale * _outputScale;
     layer.drawableSize=_matchedDrawable;
     if (g_presenter) g_presenter->ResizeSurface();
+    _outputResizedHost=CACurrentMediaTime();
   }
   [self logSessionEvent:@"output_resolution_applied" details:@{@"automatic":@YES,@"cappedAtNative":@(size.capped)}];
 }
@@ -1124,11 +1174,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     @"underlyingDomain":cause.domain ?: @"", @"underlyingCode":@(cause.code), @"temporaryFiles":temporary}];
   fprintf(stderr,"[ssx-session] save complete=%d\n",saved);
   _pendingCheckpoint = nil;
-  _sessionMenu.message = [self menuMessage:(saved ? @"Your paused session is saved. Resume here next time." :
-      @"Paused. Couldn’t save for next time; you can still resume now.")];
-  for (UIAlertAction* action in _sessionMenu.actions) action.enabled = YES;
-  _outputAction.enabled = [self canChangeOutputScale];
-  _internalAction.enabled = [self canChangeOutputScale];
+  _menuStatus = saved ? @"Your place is saved" : @"Couldn’t save for next time. You can still resume.";
+  [self refreshSessionMenu];
   [self endSaveBackgroundTask];
   // A second pause during compression must not leave the earlier position saved.
   if (_checkpointAgain) {
@@ -1143,6 +1190,10 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (void)updatePlayback {
   const BOOL pause = _pauseState.WantsPause();
+  if (pause && _trialAfterOutput) {
+    _trialAfterOutput=NO;
+    [self logSessionEvent:@"trial_cancel_before_start" details:@{}];
+  }
   [self updateTrialDisplayLink];
   if (pause && !_pausedForSystem) [self releaseControls];
   std::lock_guard lock(_runtimeMutex);
@@ -1205,8 +1256,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     _pausedForSystem = NO;
     [self logSessionEvent:@"pause_accounted" details:@{@"pause_seconds":@(pauseDuration)}];
   }
-  _outputAction.enabled = [self canChangeOutputScale];
-  _internalAction.enabled = [self canChangeOutputScale];
+  [self refreshSessionMenu];
 }
 - (void)audioEvent:(NSNotification*)event {
   if (_simulatorNullAudio) return;

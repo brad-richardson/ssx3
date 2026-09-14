@@ -60,9 +60,10 @@ set(CHASSIS_ABI_DIR "${CORE}/Source/Core/Core/PowerPC/StaticRecomp" CACHE PATH "
 set(RECOMPCORE_MODULE_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory("${CORE}/module-template" game-module)
 
-add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm SessionDiagnostics.mm)
+add_executable(SSXNative MACOSX_BUNDLE App.mm SessionStore.mm SessionDiagnostics.mm SessionMenu.mm DisplayPreferences.mm)
 # Saved machine state must not cross incompatible frontend/runtime builds.
 set(SESSION_SOURCES App.mm CMakeLists.txt Info.plist SessionStore.mm SessionStore.h SessionPause.h OutputSizing.h
+  SessionMenu.h SessionMenu.mm DisplayPreferences.h DisplayPreferences.mm
   SessionDiagnostics.h SessionDiagnostics.mm ../../tools/ios_diagnostic_sources.py
   ../diagnostics/native_callback_trace.h ../diagnostics/native_render_schedule.h
   ../diagnostics/callback_timing.h

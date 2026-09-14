@@ -16,7 +16,7 @@ Use Full Reset after copying new assets during development. The game's own
 Restart option may retain cached assets and is not a reliable asset reload.
 
 Faster cold launches are enabled by default, including Full Reset.
-**Turn off faster cold starts** in Menu restores ordinary startup; this saved
+Turn **Fast start** off in Menu to restore ordinary startup; this saved
 preference applies to the next cold boot or Full Reset. Compatible checkpoint
 restores still take precedence. It skips
 startup movies, waits for the initialized title screen, and advances once
@@ -25,8 +25,9 @@ through normal START input to the main menu. Required game/UI loading remains.
 `--normal-boot` overrides a saved preference for ordinary-boot coverage. Neither
 launch override changes the saved preference. Native and repeated Simulator testing reached the real
 menu in about 20 seconds after guest execution began. Installed build 113c9b20
-includes the active-input readiness fix; phone timing and saved preference
-behavior need validation. See [startup evidence and reproduction](../../docs/research/startup-shortcut.md).
+includes the active-input readiness fix; the latest phone run reaches the menu
+at 20.61 seconds and the user confirms the shortcut works. Saved toggle/restore
+combinations still need phone validation. See [startup evidence and reproduction](../../docs/research/startup-shortcut.md).
 
 For state-based startup automation, use `--debug-main-menu --sequence
 native/ios/main-menu-smoke.json`. Its 20-second clock begins at actual main-menu
@@ -60,18 +61,25 @@ latency improvement. Device reports have shown short stretches of actual
 See the [prototype findings](../../docs/research/120hz-native-interpolation.md)
 for performance limits, ownership rules and reproduction.
 
-The pause menu's output action cycles **Full → 75% → Match internal → Half → Full**, with the
-next size named on the action, for a reversible output-resolution comparison. Selecting it resumes play at
-the selected size; open the menu again to start a smoothing trial. The menu
-shows the current size. Full is the launch default, and the selection survives
-Full Reset during that app launch. On the iPhone 16 Pro Max, full is 2868 × 1320,
-75% is 2151 × 990, and half is 1434 × 660. This control leaves the independently selected internal
-detail unchanged; touch controls and UIKit text keep their normal screen resolution.
-75% uses 56.25% of full output's pixels; Half uses one quarter. Their effect on
-presentation cost, sustained smoothing and image quality must be measured.
-The action is unavailable while the smoothing draw drains or a checkpoint is
-being written. A Dolphin CPU/FIFO guard synchronizes the layer-scale change;
-the Metal renderer rebuilds its backbuffer after resuming.
+The pause menu has direct **Half / 75% / Full / Match** output choices and
+**1× / 2×** internal detail choices. It stays open while either setting changes;
+Resume returns to play. Initial defaults are **Half output + 2× detail**, the
+user's preferred clarity/performance compromise. Subsequent successful menu
+changes are saved independently across launches and Full Reset. Explicit launch
+overrides affect only that process and never overwrite either saved preference.
+On the iPhone 16 Pro Max, full is 2868 × 1320, 75% is 2151 × 990, and half is
+1434 × 660. Output and internal detail remain independent; touch controls and
+UIKit text keep their normal screen resolution. Half uses one quarter of Full's
+output pixels and about 46% fewer than the measured Match/2× output. Match is
+not an automatic performance optimum. These choices do not establish sustained
+smoothing performance.
+
+The resolution labels show the visible picture and the complete output including
+bars, separately from the selected internal detail. After a paused detail change,
+new measured dimensions appear after Resume; the UI does not infer them from
+EFB allocation size. Resolution controls are unavailable while a smoothing draw
+drains or a checkpoint is being written. A Dolphin CPU/FIFO guard synchronizes
+the change; the Metal renderer rebuilds its backbuffer after resuming.
 
 Match internal uses the visible, aspect-correct picture reported after rendering,
 not the whole allocated EFB. For the observed 2× gameplay picture (1556 × 896),
@@ -80,16 +88,19 @@ iOS still scales that drawable onto the physical screen. The app waits for two
 consistent source frames at the selected internal detail before matching.
 Automatic updates use the same CPU/FIFO guard outside waiting/active smoothing
 trials, checkpoints and lifecycle transitions; output stays fixed throughout
-a trial. The menu says “adjusting” while a match is pending. The Metal backend
+a trial. If detail and Match change together, Try smoothing resumes first and
+waits for the measured output to settle before requesting the trial; another
+pause cancels that pending request. The menu labels a pending match as updating
+on resume. The Metal backend
 honors exact integer drawable dimensions on iOS, avoiding float-scale rounding.
 Outputs larger than native screen size are capped and reported in telemetry.
 
-**Use 2× internal detail** / **Use 1× internal detail** changes the GameCube
-rendering resolution independently of output size. The launch default is
-1× (640 × 528, 337,920 pixels); 2× is 1280 × 1056 (1,351,680 pixels), four times
-the pixels. Selecting either resumes play. The choice lasts for the app process
-and survives Full Reset; an ordinary relaunch returns to 1×. The same paused,
-checkpoint-complete, smoothing-drained gate applies. The app changes Dolphin's
+**1× / 2×** changes the GameCube rendering resolution independently of output
+size. The initial default is 2×, with subsequent menu choices remembered. The
+allocated EFB is 640 × 528 at 1× (337,920 pixels) or 1280 × 1056 at 2×
+(1,351,680 pixels), four times the pixels. These allocation dimensions differ
+from the visible picture. The same paused, checkpoint-complete,
+smoothing-drained gate applies. The app changes Dolphin's
 configuration under its CPU/FIFO guard; the renderer recreates the EFB and
 updates viewport/scissor state at its next frame config check after resuming.
 The pinned savestate loader supports restoring differently sized EFB images by
@@ -126,8 +137,10 @@ be combined with `--sequence`; `--output-scale full` is the explicit baseline.
 `--output-scale three-quarter` selects 75% output; `--output-scale match-internal`
 selects automatic source matching. Metal's BGRA drawable path
 uses integer pixel dimensions and imposes no even-width requirement here.
-This option does not persist a preference, so a normal app launch starts full.
-`--internal-scale 2` opts into 2× internal detail for a launch, or use
+This option does not persist a preference; a normal app launch uses the saved
+choice, initially Half. Always specify both output and internal detail for
+controlled comparisons.
+`--internal-scale 2` selects 2× internal detail for a launch, or use
 `--internal-scale 1` for the explicit baseline. It accepts only `1` or `2`, is
 launch-only, and can be combined with any output mode and with `--sequence`.
 Invalid values or use on another command are rejected before device changes.
@@ -145,7 +158,7 @@ timeout, a bounded graphics check can use `--simulator-null-audio`:
 ```sh
 python3 tools/mobile_gamecube.py launch --simulator --device SIMULATOR_UUID \
   --sequence native/ios/snow-jam-smoke.json --normal-boot --output-scale half \
-  --smoothing-at 155 --simulator-null-audio
+  --internal-scale 1 --smoothing-at 155 --simulator-null-audio
 ```
 
 This option requires `launch`, `--simulator`, and a valid bounded `--sequence`;
@@ -217,7 +230,7 @@ clock (the same uptime clock used by Metal and native trial schedule events).
 The existing `seconds` field still excludes app pauses. Use host time when
 comparing a smoothing cutoff, audio starvation, lifecycle events and presentation.
 Launch metadata, metrics and lifecycle events also record `outputScale`
-(1 or 0.5), `screenScale`, requested `outputWidth`/`outputHeight` and the
+(the fixed fraction or measured Match fraction), `screenScale`, requested `outputWidth`/`outputHeight` and the
 layer's actual `drawableWidth`/`drawableHeight`. `output_resolution_requested`
 and `output_resolution_applied` mark the menu change. The latter means the
 synchronized resize was queued; confirm actual submitted dimensions in
