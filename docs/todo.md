@@ -5,18 +5,35 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] September 14 priority: course restoration is the main track; keep 120 Hz
+      research bounded. First reprojection batch captured eight matching riding
+      frames and demonstrated an offline half-step warp. September 14: a
+      footprint splat cuts uncovered pixels from 1.875% to 0.440% — 77% of the
+      holes were sampling cracks — while static-wall MAE moves by under 0.02
+      units, so raster coverage is no longer the open question. Next: a real
+      alpha HUD layer, then GPU-resident cost measurement.
+      No live smoothing mode or phone budget is established. See the
+      [revised reprojection evidence](research/120hz-reprojection.md).
+- [ ] Finish the [fast-FP phone pair](research/performance-batch2-followup.md)
+      when the iPhone is unlocked. Signed baseline 94f5096e and candidate
+      53e2e1e4 are archived; the candidate remains installed on unchanged 027.
+      The historical 1,022 sampled control-register rows match, but missing
+      run-captured movie hashes prevent strict provenance acceptance. The new
+      checker rejects that gap, failed/native-zero runs and partial coverage.
+      Phone performance and exact gameplay equivalence remain unverified.
 - [ ] Performance: follow the [September 13 performance review](research/performance-review-2026-09-13.md).
       Done September 13: always-on callback timer, dispatch sampling opt-in,
       dual-core validated on Mac and phone (stadium section 0.89 → 1.00 speed,
       render callback 9.5 → 7.8 ms) and made the persisted default in build 1b.
       Batch 2 (same evening): movie-based determinism gate, chunk-granular
-      lookup table, and the fast-FP module, replay-identical to baseline over
-      1,022 samples; phone module build pending measurement. Next: measure
+      lookup table, and the fast-FP module, matching baseline over
+      1,022 sampled control-register rows (see September 14 provenance limit
+      above); phone module built, measurement pending. Next: measure
       fast FP on the phone, fewer chassis round-trips, a 15-minute dual-core
-      thermal soak at 3×. 120 Hz mainline is now the
-      [depth reprojection design](research/120hz-reprojection.md): synthesize
-      the in-between frame on the GPU from the last frame's color, depth and
-      predicted camera; target 3× Match at 100–120 with speed ≥ 0.95. Helper
+      thermal soak at 3× (still deferred). The bounded
+      [depth reprojection experiment](research/120hz-reprojection.md) uses
+      the last frame's color, depth and predicted camera; 3× Match at
+      100–120 with speed ≥ 0.95 remains a target, not a result. Helper
       micro-spikes are closed.
 - [ ] Follow the [September 12 architecture priorities](architecture-review.md):
       validated imports, state-aware route checks, and explicit course ownership.
@@ -112,6 +129,10 @@ the build or commit that closed them.
       course progression. Multipart shapes, scripted/physics objects and
       conservative reset-path clearance omissions remain explicit. Phone
       assets remain 027; see [collision evidence](gamecube-collision.md).
+      September 14: original-position rock and sign fixtures produce 44 and 8
+      positive engine contact returns with clean runtime checks. Player query
+      ownership remains unknown; the tree fixture missed its obstacle.
+      Next: a steered player encounter/query identity and route/bridge clearance.
 - [ ] Preserve donor terrain surface behavior through a verified profile:
       direct reset-flag mapping is implemented in build 025; snow/powder/ice/
       rock and non-colliding patches still inherit one target header. Do not
@@ -129,7 +150,16 @@ the build or commit that closed them.
       they are missing on iPhone on September 13 (assets 027). The three gate
       models are supported static geometry, deliberately omitted by 022;
       restore their timed visibility/flipbook binding, not general mesh
-      animation. Validate the suspected GC flipbook halfword-order mismatch
+      animation. September 14: native loader proves the flipbook is a full
+      signed 32-bit field at +68; the shared reader is corrected and tested.
+      Hidden staging candidate retains all five light frames and three models;
+      its event binding is still unimplemented. The first observer run confirms
+      the dispatch side: `StartlightBegin` and `StartgateOpen` each fire once,
+      3.72 s apart, with the staged instances bound, and both named lookups
+      return value type 0 rather than a callback — so the lookup is the
+      attachment point and nothing runs there yet. Next: observe a restart and
+      find a reversible visibility/material operation before writing a handler.
+      Validate
       and target `StartgateOpen` dispatch, then check countdown, unobstructed
       GO and restart. Keep hidden helper geometry excluded. See the
       [source audit and next spike](gamecube-scenery.md#start-gate-audit-september-13-assets-027).

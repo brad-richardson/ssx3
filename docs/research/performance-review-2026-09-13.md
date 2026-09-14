@@ -265,8 +265,9 @@ follows the gate below.
   record and replay Dolphin input movies; `tools/native_determinism_check.py`
   wraps the course checker and compares the runtime's dispatch trace (now
   appended across run-loop re-entries) row for row by dispatch count.
-  Replaying the recording against the baseline module reproduces it exactly,
-  so the harness is deterministic in single-core mode.
+  Replaying the recording against the baseline module reproduces the sampled
+  control-register rows in single-core mode. This is a control-flow check;
+  floating-point registers and gameplay memory are not covered.
 - **Fast floating point** (`RECOMPCORE_FAST_FP`, `cpu_fast_fp.h`): inline
   scalar and paired-single arithmetic at Dolphin-JIT fidelity, forced into the
   generated chunks by a compile option; helpers, interpreter and generated
@@ -301,3 +302,23 @@ different rides and thermal states. Counts from the hot chunk describe one
 of 176 chunks. No new run was executed for this review. The phone-side
 attribution with callback signposts planned in the ordinary-frame profile
 remains the right next measurement and does not conflict with any item here.
+
+## September 14 follow-up: bound the fast-FP gate before expanding it
+
+The [bounded phone comparison and evidence audit](performance-batch2-followup.md)
+keeps fast-FP as a candidate pending a paired phone measurement. The updated
+comparator confirms 1,022 identical samples in an uninterrupted prefix from
+dispatch zero, matching runner/course/configuration and clean reported native
+execution/fault counters. The legacy runs did not capture movie hashes, so
+their historical input identity cannot satisfy the new strict acceptance gate.
+Both runs also show the same 83 successive rider-state entries
+(82 changes after the initial state).
+However, the rider observations use host time, and the sampled dispatch trace
+does not include FPRs or gameplay memory. **Gameplay-state equivalence remains
+unverified.** Future semantic changes need samples aligned to guest updates.
+
+The earlier categorical GPU statements above are also hypotheses, not a
+complete scheduling proof: the phone's presenting-command-buffer timing is
+not total GPU work, and near-zero render callback wall-minus-CPU time in
+dual-core mode does not establish GPU headroom. The next 120 Hz batch measures
+coherent capture and reprojection cost without changing physics cadence.

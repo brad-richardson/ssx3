@@ -127,8 +127,12 @@ pad state and the guest clock is fixed, so a single-core run is deterministic.
 `tools/native_determinism_check.py record|play|compare` wraps the course checker
 around that: record once with a baseline module, replay against a candidate,
 and compare the runtime's periodic dispatch trace (pc, lr, ctr, cr, timebase per
-1,048,576 dispatches) row for row. Equal rows are execution equivalence; the
-first differing row locates a divergence. `run --module PATH` and the course
+1,048,576 dispatches) row for row. Equal rows establish matching sampled control
+flow, not equality of all floating-point registers, game memory or gameplay.
+The first differing row locates an observed divergence. Strict comparison also
+requires complete trace coverage, successful native execution and input provenance
+captured for those runs; legacy reports remain descriptive when those fields are
+missing. `run --module PATH` and the course
 checker's `--module` select which module dylib a run loads.
 
 `module --fast-fp` builds the generated chunks against

@@ -230,13 +230,18 @@ The donor GSF contains this small program, separate from mesh animation:
   hiding all three instances. Thus the static profile name “post-countdown”
   does not establish when the donor actually hides the gate.
 
-Lights material 66 uses image 69. Its final halfwords are `(0, 5)`; NBD
-flipbook table 5 contains images 69–73. The current reader takes `+68` and
-reports flipbook 0. Taking `+70` instead matches the base image for **all 16**
-non-default flipbook materials, versus one with `+68`. This is strong static
-evidence of another GC halfword-order mismatch, pending native loader
-validation. The 027/031 scenery texture maps contain image 69, but not 70–73;
-restoring the instances alone cannot restore the light sequence.
+Lights material 66 uses image 69, and NBD flipbook table 5 contains images
+69–73. The original audit suggested moving the halfword reader from `+68`
+to `+70`, because the latter matches all 16 non-default flipbooks. Native
+loader inspection on September 14 establishes the actual field: a **signed
+32-bit index at +68**. GSTE69 `8012e424` loads that word, handles `-1`, indexes
+the flipbook pointer table and replaces the word with a pointer. The material
+resolver at `8012e454` advances by 72 bytes and calls that virtual fixup; the
+getter at `8012dffc` independently uses the same stride. Reading `+70` only
+works accidentally for small indices. The checked reader now reads the full
+word and validates flipbook extents, frame IDs and material references.
+The 027/031 texture maps contain image 69, but not 70–73; restoring instances
+alone cannot restore the light sequence.
 
 The shortest next spike is to validate that material field and the countdown
 dispatch, then bind these three supported models and their five light frames
@@ -249,6 +254,91 @@ LUN programs are currently replaced by empty returns, so retain those guards
 and add a narrow verified binding instead of reenabling the old course scripts.
 Acceptance needs the original countdown appearance, unobstructed GO, and a
 correct second countdown after restart; phone assets remain unchanged.
+
+### Countdown staging and event boundary (September 14)
+
+`tools/gamecube_startgate.py` builds a separate **hidden asset staging**
+candidate from 031. It reuses retained static models, restores only the source
+instances found through the authored `NoCountDown` program, adds their missing
+flipbook images, and appends an explicitly hidden, non-colliding definition.
+Existing instance ordinals, definitions, spline bindings and all empty LUN
+programs are preserved. Its `startgate.json` keeps ownership separate from the
+verified racing scenery map. This is not a countdown implementation or a
+candidate for phone installation.
+
+Candidate `local/builds/gc-gari-startgate-assets-001` has 108,467 validated
+resources and SHA-256
+`dd8c6d8a9f7ab19abeffe899f4c34f1e97d13879b893e9d1f2b93fecbcce2900`.
+Compared with 031, the two changed groups retain 9,901 existing resource
+bodies byte-for-byte. Changes are four 2,080-byte images (RIDs 891–894),
+three 160-byte instances (3239–3241), and a 36-byte extension to the script
+binding record. Target models 993/1019/1020 remain unchanged. The complete
+countdown frames are present, but no frame sequence executes.
+
+```sh
+python3 tools/gamecube_startgate.py \
+  --base-build local/builds/gc-gari-031 \
+  --nbd local/source/gamecube/tricky/gari.nbd \
+  --gsf local/source/gamecube/tricky/gari.gsf \
+  --textures local/source/gamecube/tricky/gari.gsh \
+  --output local/builds/gc-gari-startgate-assets-review
+```
+
+The target also dispatches `StartlightBegin` (hash `0x0ebf88fe`) at
+`80101804`; `StartgateOpen` is hash `0x0dfb527e`. The stock Snow Jam LUN
+program 3 registers the latter using an embedded closure. Its opening closure
+calls builtin 3 (`801921f0`, allocating `AnimObject`) on the stock gates.
+Builtin 2 (`8019193c`) includes `DeadNode`/`RestoreNode` lifecycle commands and
+special guards; it must not be substituted as an assumed reversible hide/show
+operation. A fresh scoped initializer also needs the correct course table and
+restart ownership. No original course scripts have been reenabled.
+
+`tools/gamecube_startgate_trace.py` builds a read-only observer from four copied
+generated chunks, leaving the original module and runtime unchanged. It
+observes countdown dispatch, named-event lookup/invocation and the staged
+instances' runtime binding flags, including same-chunk AOT jumps. Static source
+and target excerpts, source program commands and hashes are retained under
+`local/research/startgate/`. The next binding decision requires observed event
+timing and a verified reversible visibility/material operation; allocation
+names alone do not establish that behavior.
+The observer caps each copied translation unit at 1,000 events; its summarizer
+marks any unit reaching that count as truncated. Missing later events from a
+capped unit are unknown, not evidence that a callback is absent.
+
+### Observed countdown events (September 14, staged candidate)
+
+The first observer run rode the hidden staging candidate for 841 samples with
+no runtime fault, and its retained lines are summarized in
+`local/research/startgate/event-probe-001.json` (log
+`run-assets-003-runtime.log`). Because the observer's lines go to the runtime's
+own log rather than the check's `observer.log`, read them with
+`python3 tools/gamecube_startgate_trace.py --summarize RUNTIME_LOG`.
+
+| Observation | Result |
+| --- | --- |
+| `StartlightBegin` dispatches | 1, hash `0x0ebf88fe` as documented |
+| `StartgateOpen` dispatches | 1, hash `0x0dfb527e` as documented |
+| Interval between them | 3.719 s of guest time (150,611,679 ticks at 40.5 MHz) |
+| Named lookup for each hash | Found, course index 8, value type 0 |
+| Staged instances bound | 3239, 3240, 3241; flags 2, property flags 0 |
+| Translation units reaching the 1,000-event cap | None |
+
+This establishes the dispatch side of the binding: the imported course really
+does raise both countdown events, once each, about 3.72 seconds apart, and the
+three staged models are live objects by then. It does **not** establish a
+handler. Both named lookups return value type 0 rather than the callback type
+5, which is what the emptied LUN programs should produce — so the lookup is the
+place a narrow binding would attach, and nothing currently runs there.
+
+Because no translation unit was truncated, the absence of further events within
+these four hooks is meaningful. It says nothing about code outside them: the
+light material fixup, the visibility operation and restart ownership are all
+unobserved. The 3.72 s figure is one run of one automated start; it is not a
+verified countdown length, and the donor's authored waits total 2.5 s, so the
+remaining time is unattributed.
+
+Next: observe a restart to see whether both events dispatch again, and identify
+a reversible visibility/material operation before writing any handler.
 
 ## Collision and river reset follow-up
 

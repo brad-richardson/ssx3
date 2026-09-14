@@ -302,3 +302,70 @@ hazard-free seconds. Brief aerial state 4/5 after a teleport is not a completed
 recovery. Three failed resets close together in time and position fail the check.
 Telemetry records the terrain flags and the reset-state course-path request byte
 (rider +1816, then +728), in addition to position, main state and surface.
+
+### Broader static encounters, September 14
+
+Three new 180-second fixtures start near original obstacles in canonical 031.
+Only the six race starts move; obstacle placement, collider geometry, rigid
+transforms, reset paths and all other course resources stay unchanged. The
+definitions are `static-tree`, `static-rock` and `static-sign` in
+`native/diagnostics/garibaldi-course-checks.json`. Source IDs bind the observations
+to the candidate's enabled-instance map instead of relying on model names.
+
+| Fixture | Source / target instance | Narrow-phase returns / positive returns | Result |
+| --- | --- | --- | --- |
+| Original bushy-tree trunk | 9 / 767 | 0 / 0 | Registered and visited by broad phase; rider slid past it. Contact remains unverified. |
+| Second original rock | 22 / 599 | 2,437 / 44 | Engine contact established; 54 summed contacts, including repeated frames. |
+| Directional sign stand | 79 / 2,216 | 805 / 8 | Engine contact established; 23 summed contacts, including repeated frames. |
+
+All three runs passed the native runtime gates with zero invalid accesses,
+GPU command errors, unknown instructions, JIT fallback runs or failed chunk
+checks, and no detected reset loops. Tree and rock runs each completed a terrain
+hazard recovery. Sign continued riding but did not observe a completed terrain
+hazard recovery; it was not a required gate for that scenario.
+
+**These contacts are not yet tied to the player's query.** The read-only trace
+can also observe opponents. Neither successful contact run captured a player
+reaction state 8 within the selected object's expanded bounds. That does not
+prove the player failed to collide (not every contact causes that state), but
+does prevent claiming a player-only impact from these counters. The next
+validation step is a steered player approach and explicit query ownership,
+followed by route/bridge clearance checks. 031 remains experimental; phone
+assets remain 027. No importer or physics behavior changed in this batch.
+
+`tools/gamecube_collision_check.py` now checks actual archive/recipe/runtime
+identity, native execution/fault evidence, selected instance registration and
+positive contact returns. A clean ride with no contact is reported with a
+nonzero exit status. Trace overflow is rejected. Player spatial observations
+are reported separately from object-contact evidence. Four focused regressions
+cover false acceptance from missing execution, wrong worlds/instances, absent
+contacts and truncated traces.
+
+Reproduce with a fresh profile and output (long profile names exceed the
+platform's Unix socket path limit):
+
+```sh
+python3 tools/gamecube_course_fixture.py \
+  --base-build local/builds/gc-gari-031 \
+  --scenarios native/diagnostics/garibaldi-course-checks.json \
+  --scenario static-rock --output local/builds/gc-gari-collision-rock-review
+# Create a corresponding extracted game root using that BAM.BIG, then use
+# the isolated collision-trace module with the normal course checker.
+SSX_COLLISION_INSTANCE=0x08000257 python3 tools/gamecube_course_check.py \
+  --game local/game/gc-gari-collision-rock-review --profile cb-rock-review \
+  --output local/research/collision-batch/rock-review --seconds 180 \
+  --module local/evidence/garibaldi-collision/registration-player-001/build/gGXBE69_recomp.dylib
+python3 tools/gamecube_collision_check.py \
+  --run local/research/collision-batch/rock-review \
+  --build local/builds/gc-gari-collision-rock-review --source-instance 22 \
+  --output local/research/collision-batch/rock-review/contact-report.json
+```
+
+Local reports (including archive, module, log and rider-trace hashes) are under
+`local/research/collision-batch/{tree-002,rock-001,sign-001}/contact-report.json`.
+Runtime receipts are `20260914-001125`, `20260914-001526` and `20260914-001907`
+under `local/reports/native-runs/`. The initial `tree-001` attempt failed before
+launch because its profile socket path was too long; it supplies no gameplay
+evidence. All three accepted runtime runs used the same existing read-only
+diagnostic module, SHA-256
+`a8d6b3b1f7be2fac20385432677892335cfecf18d6c74e1f7b3f655cf0a0fe6e`.

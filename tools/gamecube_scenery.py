@@ -118,12 +118,33 @@ class TrickyScenery:
         self.positions = self.array(self.header[34], self.header[35], '3h')
         self.uvs = self.array(self.header[35], self.header[36], '2h')
         self.normals = self.array(self.header[36], len(data), '3h')
+        self.flipbooks = []
+        o, end = self.header[25:27]
+        for _ in range(self.header[10]):
+            self.span(o, 4, self.header[25], end)
+            count = self.u32(o)
+            if count == 0:
+                raise ValueError('Empty scenery texture flipbook')
+            self.span(o+4, count*4, self.header[25], end)
+            frames = self.unpack(f'{count}I', o+4)
+            if any(frame >= self.header[13] for frame in frames):
+                raise ValueError('Scenery flipbook image is outside texture table')
+            self.flipbooks.append(frames)
+            o += 4+count*4
+        if self.header[10] and o != end:
+            raise ValueError('Scenery flipbook table does not end at model pointers')
         self.materials = []
         for i in range(self.header[5]):
             o = self.header[20] + 72*i
             self.span(o, 72)
+            # GSTE69 8012e424 reads a full word, compares -1, then replaces it
+            # with a pointer from the flipbook table. +70 only happens to work
+            # for small positive IDs; the PS2 halfword layout is not this ABI.
+            flipbook = self.unpack('i', o+68)[0]
+            if not -1 <= flipbook < len(self.flipbooks):
+                raise ValueError('Scenery material refers outside flipbook table')
             self.materials.append(dict(texture=self.unpack('H', o)[0],
-                                       flipbook=self.unpack('h', o+68)[0], raw=data[o:o+72]))
+                                       flipbook=flipbook, raw=data[o:o+72]))
         self.material_blocks = []
         o = self.header[21]
         for _ in range(self.header[6]):
@@ -246,6 +267,7 @@ class TrickyScenery:
 
     def report(self):
         return dict(models=len(self.models), instances=len(self.instances), materials=len(self.materials),
+                    flipbooks=len(self.flipbooks),
                     positions=len(self.positions), normals=len(self.normals), uvs=len(self.uvs),
                     animated_models=[m['rid'] for m in self.models if any(p['animated'] for p in m['parts'])],
                     mesh_count=sum(len(p['meshes']) for m in self.models for p in m['parts']),

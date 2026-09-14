@@ -30,7 +30,7 @@ def fixture():
     h[26], h[27], h[28], h[33], h[34], h[35], h[36] = 380, 384, 500, 500, 532, 550, 562
     struct.pack_into('>40I', b, 0, *h)
     struct.pack_into('>16f', b, 160, *[float(i % 5 == 0) for i in range(16)])
-    struct.pack_into('>h', b, 368, -1)
+    struct.pack_into('>i', b, 368, -1)
     struct.pack_into('>2I', b, 372, 1, 0)
     struct.pack_into('>7I', b, 384, 116, 1, 28, 0, 0, 0, 0)
     struct.pack_into('>6I', b, 412, 0xffffffff, 24, 24, 24, 0, 0xffffffff)
@@ -44,6 +44,33 @@ def fixture():
 
 
 class SceneryTests(unittest.TestCase):
+    def test_gc_flipbook_is_a_signed_word_and_frames_have_checked_extents(self):
+        b = fixture()
+        # Insert a flipbook before the model pointers; model-relative offsets
+        # remain intact while the header's absolute geometry offsets move.
+        struct.pack_into('>I', b, 10*4, 1)
+        struct.pack_into('>I', b, 13*4, 74)
+        struct.pack_into('>I', b, 25*4, 380)
+        for index in (26, 27, 28, 33, 34, 35, 36):
+            struct.pack_into('>I', b, index*4, struct.unpack_from('>I', b, index*4)[0]+24)
+        b[380:380] = struct.pack('>6I', 5, 69, 70, 71, 72, 73)
+        struct.pack_into('>i', b, 368, 0)
+        scene = TrickyScenery(b)
+        self.assertEqual(scene.flipbooks, [(69, 70, 71, 72, 73)])
+        self.assertEqual(scene.materials[0]['flipbook'], 0)
+        # A halfword reader at +70 would incorrectly accept this as ID zero.
+        struct.pack_into('>i', b, 368, 0x10000)
+        with self.assertRaisesRegex(ValueError, 'outside flipbook'):
+            TrickyScenery(b)
+        struct.pack_into('>i', b, 368, 0)
+        struct.pack_into('>I', b, 400, 74)
+        with self.assertRaisesRegex(ValueError, 'outside texture'):
+            TrickyScenery(b)
+        struct.pack_into('>I', b, 400, 73)
+        struct.pack_into('>I', b, 380, 6)
+        with self.assertRaisesRegex(ValueError, 'Scenery span'):
+            TrickyScenery(b)
+
     def test_gameplay_visibility_uses_gc_flags_not_ps2_halfword_order(self):
         gsf = gameplay_fixture(0x1020)
         p = instance_gameplay(gsf, 1)[0]

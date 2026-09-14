@@ -1,205 +1,262 @@
-# 120 Hz by depth reprojection — design, September 13, 2026
+# 120 Hz reprojection research — bounded first batch, September 14, 2026
 
-**Proposal:** stop producing the in-between frame with the emulator at all.
-Keep the game at 60 Hz on its two threads and let the GPU synthesize every
-second displayed frame by reprojecting the last real frame with its depth
-buffer and the camera's predicted half-step motion, with the HUD composited
-unwarped. This is the "timewarp" technique from VR, applied to the emulated
-picture. It is the only approach found so far whose cost fits the phone at
-2× internal detail and comes close at 3×.
+**Recommendation:** keep the original 60 Hz simulation as the reference and test
+camera/depth reprojection as a small presentation experiment. The first milestone
+is a matched capture and an offline half-step warp, not a live 120 Hz mode. Course
+restoration remains the main project priority.
 
-Target stated by the user: 3× Match at 100–120 displayed frames per second
-with no drop below 0.95 game speed. The game never does extra work in this
-design, so the speed condition holds by construction; the display-rate
-condition is bounded by the GPU budget measured below.
+The initial September 13 proposal made stronger claims than the evidence supports.
+This revision replaces those claims with explicit gates. No phone speed, resolution,
+image-quality or latency target has yet been demonstrated by reprojection.
 
-## What has been tried, and why none of it can reach the target
+## What the evidence supports
 
-| Approach | Status | Why it cannot reach the target |
+The September 13 phone session (`local/reports/mobile/20260913-231157/`, build
+`060197cd`, dual-core) recorded these riding costs:
+
+| Internal detail | Presenting GPU command buffer median / p95 / max | CPU update + render |
 | --- | --- | --- |
-| Native re-entry: re-run the guest render callback with interpolated palettes (`120hz-native-interpolation.md`, the phone's "Try smoothing") | Built, measured on the phone through September 13 | Each extra frame costs the guest's whole render callback on the CPU thread: 7.8 ms after dual-core. Update plus render already take 11.1 ms of a 16.7 ms frame; a second render is 18.9 ms. Every phone trial ended through the speed guard, and relaxing the guard only lengthens a trial that cannot fit. Structural, not a tuning problem. |
-| Color-only frame generation: block-matching motion estimation between two presented frames (`spike/120hz`, approach 1) | Built and measured once on the Mac, September 11 | 10.4 ms GPU per synthesized frame at 1556 × 966 and the game fell to 4.9 FPS at 0.36× because the presentation path blocked the emulation thread. Motion estimated from color is expensive and wrong where color is ambiguous (snow). |
-| Camera-aware interpolation with depth feeding Apple's MetalFX frame interpolator (`spike/120hz`, approach 2) | Designed, camera trace written, **never built or run** (the runtime rebuild was blocked by a full disk, then the native path took priority) | Sound inputs, but interpolation needs the *next* real frame before it can show the in-between one, adding a frame of input latency, and its cost on the phone is unmeasured. Kept here as the alternative backend. |
-| Camera-only re-render by FIFO replay (`spike/120hz` approach 3; `120hz-host-replay.md`) | Capture and private audit only; rendering deliberately blocked | Re-rasterizes the whole frame: at 3× that is a second 7.4 ms median GPU frame, about 15 ms per 16.7 ms with p95 over 20. Fits at 1×, marginal at 2×, out at 3×. |
+| 1× | 1.8–2.3 / 3.0 / 5.5 ms | 3.0 + 8.3 ms |
+| 2× | 4.4–5.0 / 6–7 / 9.9 ms | 3.2 + 6.9 ms |
+| 3× | 7.1–7.4 / 9–10.5 / 15.5 ms | 3.4 + 8.1 ms |
+| 4× | 8.5–8.8 / 13.5 / 16.0 ms | 3.3 + 8.1 ms |
 
-To be precise about the question that prompted this document: MetalFX was
-never attempted. The failed attempt was the color-only block matcher.
+These are **presenting command buffer** timings, not verified total GPU work for
+each frame. One real and one synthetic frame share a 16.67 ms aggregate budget:
+real rendering + capture + warp + HUD composition. Scheduling must also meet the
+individual 8.33 ms presentation deadlines. A real frame does not inherently need to
+finish within 8.33 ms, but command ordering and drawable waits can spoil pacing.
 
-## Measured budget
+The proposed 1–2 ms warp is unmeasured. “2× consistent 120,” “3× 100–110,” and
+“4× impossible” were predictions, not results. GPU, memory and thermal contention
+can slow the game even if simulation remains at 60 Hz. There is no game-speed
+guarantee “by construction.” Fixed 3× internal resolution is a quality preference;
+lower or adaptive resolution remains a reasonable way to protect pacing.
 
-From the user's September 13 session at every detail and output setting
-(`local/reports/mobile/20260913-231157/Reports/1789354928.040`, build
-`060197cd`, dual-core, riding seconds only). GPU time is the presenting
-command buffer's duration, which is close to the whole frame's GPU work here.
+Repeated guest render callbacks are too expensive in the current phone build:
+update + render is about 11.1 ms; another 7.8 ms callback exceeds a 16.67 ms CPU
+budget. This constrains the present implementation, not every future renderer or
+native optimization. The color-only block matcher was built and failed: 10.4 ms
+GPU at 1556×966 and a blocking presentation path that dropped the game to 4.9 FPS.
+MetalFX frame interpolation was **not** the failed prototype; it was never built.
 
-| Internal detail | GPU per real frame, median / p95 / max | CPU thread per frame (update + render) | Render wall minus CPU |
-| --- | ---: | ---: | ---: |
-| 1× | 1.8–2.3 / 3.0 / 5.5 ms | 3.0 + 8.3 ms | ≤ 0.06 ms |
-| 2× | 4.4–5.0 / 6–7 / 9.9 ms | 3.2 + 6.9 ms | ≤ 0.05 ms |
-| 3× | 7.1–7.4 / 9–10.5 / 15.5 ms | 3.4 + 8.1 ms | ≤ 0.05 ms |
-| 4× | 8.5–8.8 / 13.5 / 16.0 ms | 3.3 + 8.1 ms | ≤ 0.05 ms |
+## The first batch
 
-Two conclusions. Internal detail costs the CPU thread nothing and the GPU
-thread has kept up at every setting, so a synthesized frame must be paid for
-on the GPU alone, and it must be cheap: at 3× the real frame already uses
-about 7.4 ms of every 8.33 ms display slot at the median and exceeds it at
-the 95th percentile. A full-screen reprojection pass at output resolution is
-in the 1–2 ms class on this GPU. Expected result: 2× Match at a consistent
-120 with margin; 3× Match mostly at 120 with real frames occasionally landing a
-slot late in the heaviest sections (about 100–110 effective); 4× is out.
+`tools/gamecube_reprojection.py` compiles isolated copies of three renderer source
+files into a fresh `local/` output and links them ahead of the existing libraries.
+It checks injection anchors and records source/header/player hashes. It never edits
+vendor sources, the production player, the module, phone settings, simulation or
+the presentation scheduler. Generated assets and players stay ignored under
+`local/research/120hz/reprojection-batch/`.
 
-## The design
+The GPU decoder captures at most eight consecutive XFB intervals after the chosen
+start time:
 
-```text
-CPU thread (unchanged 60 Hz game)
-  update → render → FIFO ……………………………………………… side channel: view matrix V_k, frame id k
-GPU thread (Dolphin video thread, dual-core)
-  decode frame k → EFB → at the XFB copy:
-      keep color_k (before HUD) , depth_k , HUD_k (ortho draws) , P_k (projection)
-      present real frame k
-      C = V_pred × V_k⁻¹  with V_pred = extrapolate(V_{k-1}, V_k, +½ step)
-      synth = warp(color_k, depth_k, P_k, C)  ⊕  HUD_k  → present at k + ½
-  decode frame k+1 …
+1. Observe GX indexed position-matrix array slot zero (48-byte stride) after the
+   decoder has consumed the load. The existing native palette investigation
+   identifies slot zero as the camera candidate. Record the actual decoded values,
+   array ownership, load count and frame association. This avoids reading a CPU
+   “latest camera” that may already belong to another frame. Semantic camera
+   validation remains separate from transport/frame matching.
+2. At the first perspective-to-orthographic draw transition, read back EFB world
+   color and depth before the orthographic draw executes. Save the preceding
+   perspective projection, viewport, scissor offsets, pixel-center correction and
+   backend depth convention together with the camera candidate.
+3. At the XFB copy, before clear/reuse, read back final EFB color and record its
+   source rectangle/address, draw-batch flush counts and any perspective draws after the split.
+   Later perspective work invalidates a simple “orthographic tail = HUD” assumption.
+
+These are deliberately blocking readbacks for correctness research. Their FPS and
+wall time must **not** be used to estimate live capture or phone performance.
+Unsupported formats or missing attachment/camera data fail the offline input gate.
+
+`tools/gamecube_reprojection_warp.py` reconstructs view-space positions using the
+captured GX projection, depth range and viewport, predicts half a camera step from
+two consecutive rigid camera poses, then uses a depth-tested forward splat.
+It rejects camera cuts/teleports and non-rigid camera candidates. Holes remain
+magenta instead of being concealed by inpainting. An identity transform must
+reproduce the original pixels, and synthetic translation controls check the
+expected perspective/parallax direction and magnitude.
+
+The tool exports source/final/depth views, a half-step image, coverage and motion
+statistics, and a visual contact sheet. This is an offline geometry proof, not a
+realtime implementation.
+
+Each source pixel splats either as a point or as its own screen-space footprint.
+The footprint half-extent comes from the warped step to that pixel's own
+neighbours, capped at two pixels, and a step across a depth discontinuity is
+discarded rather than used — a silhouette is not a stretched surface, so
+foreground must not be widened over the background behind it. Because the
+half-extent never falls below half a pixel, the footprint splat always covers
+everything the point splat covers. This approximates rasterizing the depth
+buffer as a mesh; it is not that rasterizer, and no live backend uses it.
+
+**HUD gate:** final-minus-world color is a useful diagnostic of what the candidate
+tail changed, but is not a separate alpha HUD texture. Given one composited image,
+alpha and foreground color cannot generally be recovered. Adding that residual to
+a warped background is explicitly labeled approximate and is not an acceptable
+live HUD implementation. Proper draw routing or another validated isolation method
+is required; perspective/orthographic classification alone does not prove ownership.
+
+## First-batch run and validation
+
+Build and run commands (choose fresh output/profile names):
+
+```sh
+python3 tools/gamecube_reprojection.py build \
+  --output local/research/120hz/reprojection-batch/player
+SSX_REPROJECTION_CAPTURE="$PWD/local/research/120hz/reprojection-batch/capture" \
+SSX_REPROJECTION_AFTER=140 SSX3_DISPATCH_SAMPLES=0 \
+python3 tools/gamecube_reprojection.py check \
+  --player-dir local/research/120hz/reprojection-batch/player \
+  --game local/game/gc-gari-027 --profile reprojection-example \
+  --output local/research/120hz/reprojection-batch/run --seconds 180
 ```
 
-- **Inputs already available.** Depth: `FramebufferManager::GetEFBDepthTexture()`
-  (R32F, inverted when the backend supports a reversed range). Projection:
-  `VertexShaderManager` holds the expanded 4×4; `xfmem.projection` gives the
-  raw GX form and its perspective/orthographic type. Color: the EFB at the
-  XFB copy. View matrix: GX has no separate view matrix, but the native
-  pose-interpolation adapter already recovers the camera from the guest's
-  view-matrix call (`0x80224cc8`, `120hz-native-path.md`) and interpolates it;
-  that recovery becomes a per-frame side channel to the renderer instead of a
-  reason to re-enter the guest.
-- **Capture point.** The XFB copy (`TextureCacheBase::CopyRenderTargetToTexture`,
-  `is_xfb_copy`) is the end of the guest's frame and precedes the next clear;
-  capturing at `Presenter::Present` is too late. Color must be split before
-  the HUD: record the EFB color when the first orthographic-projection draw of
-  the frame starts, and let the HUD draws land in a separate target. Whether
-  every HUD element is orthographic is an assumption to verify with a capture.
-- **Warp.** Per output pixel: reconstruct the view-space point from depth and
-  P_k⁻¹, apply C, project with P_k, sample color_k at the resulting position.
-  Implement as a gather with a small forward-splat fallback for disocclusion
-  holes, or as a coarse depth-mesh drawn with C (the common VR form); either
-  is one pass at output resolution. Holes appear at screen edges and behind
-  foreground objects only for half a frame of camera motion.
-- **Prediction, not interpolation.** V_pred extrapolates from the last two
-  camera poses, so the synthesized frame is shown before the next real frame
-  exists and no input latency is added. Extrapolation errors are bounded by
-  half a frame of camera acceleration; camera cuts, respawns and teleports
-  reset history and skip synthesis for that frame, using the adapter's
-  existing teleport detection.
-- **Scheduling.** Reuse the deadline and pacing machinery from the native
-  trial (`render_deadline.h`, presentation trace, pacing acceptance), moved to
-  the GPU thread: after presenting real frame k, if the synthesized frame can
-  be encoded before the next 8.33 ms slot, encode and present it; otherwise
-  drop it. Never wait on the CPU thread and never block the video thread on
-  a drawable: the September 11 prototype fell to 5 FPS precisely because its
-  presentation path stalled emulation. Keep three drawables and measure
-  `nextDrawable` waits.
-- **Fallback.** Any budget miss, missing history or unsupported state presents
-  real frames only. The game is never slowed.
+Offline analysis requires NumPy and Pillow; install into a private research venv.
+The standard tests skip numerical controls when these optional dependencies are
+absent; run the numerical controls explicitly in that venv:
 
-## Known limitations
+```sh
+local/research/120hz/reprojection-batch/venv/bin/python -m unittest discover \
+  -s tests -p test_gamecube_reprojection.py -v
+```
 
-- Objects with their own motion (rider, opponents, snow spray, gates) move at
-  60 Hz inside a 120 Hz camera. With a chase camera their screen-space motion
-  is small, so this reads as slight softness of motion on the rider, not judder
-  of the world. Per-object reprojection would need object palettes and depth
-  IDs and is out of scope for the first version.
-- Transparent and unlit passes (spray, lens flares, skybox drawn at infinity)
-  reproject with the depth that was written, which may be wrong for them.
-- Disocclusion at edges and behind the rider for half a frame of motion.
-- Depth conventions (GX Z range, Dolphin's inverted R32F depth, any vertex
-  depth remap) must be derived once and verified on captures.
-- The HUD split relies on identifying HUD draws; UIKit touch controls are not
-  part of the image and are unaffected.
-- This is presentation smoothing: physics, input polling and animation stay at
-  60 Hz.
+Current first-batch controls: injection anchors, identity reprojection, known camera
+translation, depth-dependent parallax, half-step pose prediction, camera cut/nonrigid
+rejection and explicit holes. Live capture evidence is recorded below when available.
 
-## True 120 Hz simulation, and the hybrid that could actually work
+### September 14 capture result
 
-Running the whole game loop at 120 Hz, fixing every timestep consumer with
-targeted decompilation, is the approach that would need no synthesis at
-all. On this phone it is blocked by budget before it is blocked by math:
+The isolated `player-v3` build and 180-second desktop run completed with Metal
+validation enabled against `gc-gari-027`. The run used a fresh profile and the
+unchanged production module. Eight consecutive frame intervals, 7558–7565, captured
+at around 140 seconds all contain world color, depth, final color and a GPU-consumed
+camera candidate. None has later perspective batches after the candidate HUD split.
+The source interval is visibly midair riding (75 MPH, game timer around eight seconds),
+with moving rider-state telemetry; it is not a loading/menu capture.
 
-- **CPU thread.** Update plus render is 11.1 ms per game frame after
-  dual-core; at 120 Hz that is 22.2 ms per 16.7 ms, 133% of a core. The
-  render callback alone (7.8 ms) would have to be halved. Generated-code
-  work (fast floating point, fewer chassis round trips) is expected to
-  recover tens of percent, not half, and the callback is the game's own
-  scene traversal.
-- **GPU.** At 3× internal a real frame costs 7.4 ms median; 120 real frames
-  is 14.8 ms per 16.7 ms with p95 over 20. Same wall as re-rasterizing.
-- **Timestep consumers.** Physics substeps, trick windows, camera smoothing
-  constants, animation and particle rates, AI, UI timers. The handoff's
-  time-normalized experiments (`ssx3-120hz-handoff-2026-09-13.md` §02) are
-  the way to find them, and the engine has leads: the application loop's
-  accumulator at `0x801CD248` derives an integer update count per iteration,
-  and the render callback consumes an elapsed count (`application+168`,
-  incremented per update, converted with `/60.0`), which suggests the game
-  already separates simulation steps from rendered frames.
+Active XFB area is 1920×1344 within a 1920×1584 EFB at 3×. The palette source
+alternates between two buffers; requiring the same source pointer would incorrectly
+reject this history. Matching uses GPU decoder order and actual matrix values.
 
-Those same leads point at a hybrid that fits the budget: **simulate at
-120 Hz, rasterize at 60 Hz, present at 120 Hz by reprojection.** The update
-callback is only 3.3 ms, so two updates per rendered frame is 6.6 + 7.8 =
-14.4 ms on the CPU thread, inside the 16.7 ms frame with fast floating
-point's margin on top. Input is polled and integrated at 120 Hz, so input
-latency halves. The camera pose at the half step is then *real*, not
-predicted, so the reprojected frame is exact for the camera and all
-static geometry; only objects with their own motion keep a 60 Hz cadence,
-and the elapsed-count bookkeeping suggests animation would advance by the
-right amount when render runs every second update. This still needs the
-timestep work (halved dt everywhere it is baked in) and a controlled way
-to run the render callback on alternate updates, which is the readiness
-gate and elapsed-count seam already mapped in `120hz-native-path.md`.
+For frame 7559, the identity control reproduces every active pixel exactly. Predicted
+half-step motion is 4.0 pixels median / 13.2 pixels p95, with 1.875% uncovered pixels
+left magenta under a point splat. These include sampling cracks as well as
+disocclusion; they are not a final image-quality score. The candidate HUD tail
+changes 7.00% of active pixels and visually contains the expected HUD elements.
 
-Sequence that keeps risk low: build the reprojection presentation first
-(it works with either simulation rate and is the deliverable), and run the
-time-normalized experiments as the research track: half cadence with
-doubled dt on the Mac under movie playback to list what does not honor a
-common timestep, then double cadence with halved dt. If the simulation can
-be made to run at 120 Hz cleanly, plug it into the same presentation path
-and the extrapolation step disappears.
+**Most of that hole area is sampling cracks, not newly exposed scenery.** The
+footprint splat on the same frame leaves **0.440%** uncovered, closing 1.435% of
+the active area — 77% of the point splat's holes. This matters for the ranking:
+the fraction a camera-only warp genuinely cannot know is closer to a half percent
+than two percent, so hole filling is a smaller problem than the first run
+suggested. The remaining 0.440% is still not established to be disocclusion, and
+a widened splat can overdraw a true silhouette; only the depth-edge guard and the
+accuracy check below argue against that here.
 
-## MetalFX as the alternative backend
+An independent check warps frame 7558 using the **actual next camera** and compares
+it with the captured frame 7559, on two visible static-wall candidate regions:
 
-`MTLFXFrameInterpolator` (iOS 26, iPhone 16 Pro Max supported) takes previous
-and current color, depth, per-pixel motion, a separate UI texture and the
-projection scalars, and produces the in-between frame in hardware, with
-learned disocclusion filling. The same capture (color before HUD, depth, HUD
-layer, projection) feeds it; motion vectors come from the same reprojection
-math (static-geometry motion from depth and the camera delta). Its two costs
-are one frame of added latency, because it interpolates between k and k+1
-rather than predicting, and an unmeasured GPU time. Build the capture and the
-camera side channel once; try our warp first, MetalFX second if edge quality
-is unacceptable.
+| Region | Covered pixels | Unwarped RGB MAE | Warped RGB MAE | Footprint covered | Footprint MAE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Left wall | 93.78% | 10.28 | 1.12 | 99.73% | 1.14 |
+| Right wall | 95.39% | 14.50 | 2.60 | 99.06% | 2.60 |
 
-## Batch 3 plan
+Errors use the same covered pixels on both comparisons, in 0–255 channel units;
+each footprint column is scored over its own covered pixels, so coverage and
+colour accuracy stay separate measurements. The extra coverage is close to free:
+on these regions the footprint splat reaches over 99% while changing MAE by 0.02
+and 0.005 units. That is evidence on two static walls of one frame, not a general
+quality result — the rider, moving objects and transparency are not measured here.
+This supports the camera/depth convention on this scene beyond the identity
+round trip. It does not certify all render passes, independent object motion,
+transparency, or half-step prediction under acceleration. The report keeps broad
+camera-semantic acceptance false pending more scenes.
 
-1. **Instrument** (small): GPU-thread busy fraction per second; total GPU
-   time per frame across all command buffers; `nextDrawable` wait; per-frame
-   view matrix from the adapter side channel logged with the frame id.
-2. **Capture** (medium): at the XFB copy keep color-before-HUD, HUD, depth and
-   projection for the last frame; verify on captures that depth covers the
-   whole frame at that point and that HUD draws are orthographic.
-3. **Warp and present** (medium): the reprojection pass and the GPU-thread
-   scheduler behind the existing "Try smoothing" control, real-frames-only
-   fallback everywhere.
-4. **Measure** on the phone with the existing pacing acceptance tool
-   (117 presentations per second, p95 spacing ≤ 10 ms, speed ≥ 0.98, thermal
-   fair or better, 25 continuous seconds): 2× Match first, then 3× Match.
-   Compare synthesized frames against the real frame that follows them from
-   frame dumps to quantify edge artifacts before judging by eye.
+Visual QA confirms that world geometry and rider depth are recognizable and the
+predicted scene moves coherently. It also exposes cracks around the rider and on
+expanding surfaces, plus edge holes; the rider has no independently advanced pose.
+The residual-composited HUD remains an approximation.
 
-Acceptance is the user's target restated: 3× Match, sustained 100–120
-presentations per second, game speed never below 0.95, with frame dumps that
-show the synthesized frames are distinct and coherent.
+Raster coverage is now addressed offline by the footprint splat above, and the
+contact sheet shows both splats side by side. **The open item for the next small
+batch is a proper alpha HUD layer, then GPU-resident cost measurement**, before
+adding a live scheduler. No phone-performance conclusion follows from this run:
+both splats are NumPy on the host, and the footprint splat's extra work is real
+but unmeasured on a GPU.
 
-## Evidence
+Evidence, all ignored and local:
 
-Phone session and GPU-time buckets: `local/reports/mobile/20260913-231157/`
-and `docs/research/performance-review-2026-09-13.md` (batch 1 and 2
-results). Earlier attempts: `spike/120hz` worktree
-(`native/spike-120hz/README.md`, September 11 measurement),
-`120hz-analysis.md`, `120hz-native-interpolation.md`, `120hz-host-replay.md`.
+- `local/research/120hz/reprojection-batch/player-v3/build.json`: immutable-source
+  build receipt and hashes, including the unchanged production player.
+- `local/research/120hz/reprojection-batch/run-002/`: runtime/input/observer logs,
+  rider observations and the course check result.
+- `local/research/120hz/reprojection-batch/capture-002/`: eight matching raw captures
+  and per-frame draw-batch metadata (about 279 MiB).
+- `local/research/120hz/reprojection-batch/analysis-002/contact-sheet.png` and
+  `report.json`: visually checked proof and scene-specific comparison metrics.
+
+Ten focused controls pass in the private NumPy/Pillow environment, including an
+analytic world plane test for both ordinary and Metal vertex depth conventions,
+and rejection of missing scene depth or mismatched frame attachments.
+
+## Next gates, after the offline proof
+
+- Validate depth convention against recognizable course geometry and camera motion;
+  match the GPU camera candidate to the game's recovered view seam. Exercise tricks,
+  rails, close obstacles, opponents, spray, reset/camera cuts and fast transitions.
+- Establish a compositable HUD layer and coherent frame ownership. Confirm world
+  color/depth correspond across multiple projection and transparent passes.
+- Implement GPU-resident attachments and the warp behind a desktop research switch.
+  Measure **all** command-buffer work, GPU-thread busy time, queue/drawable waits,
+  memory and capture/warp/composition costs. Never infer phone budget from NumPy.
+- Only then investigate a bounded presentation scheduler: submit extra frames when
+  ready and drop them on deadline misses. It must not block CPU progress on an extra
+  drawable. Measure the actual outcome; fallback is not proof against contention.
+- Phone comparison comes later, beginning at 2× and comparing 3× and lower/adaptive
+  resolution. Consistent 120 means coherent distinct motion and regular pacing,
+  not merely 100–120 average presentations. Existing acceptance targets include
+  ≥117 presentations/s, p95 spacing ≤10 ms, speed ≥0.98 and 25 continuous seconds;
+  longer sustained/thermal acceptance remains a separate step.
+
+Camera-only reprojection does not advance the rider, opponents or particles. Chase
+camera proximity does not establish that 60 Hz rider motion is acceptable: spins,
+grabs and obstacle encounters are the important quality cases. Disoccluded scenery
+cannot be recovered from one image. Transparent effects may have inappropriate
+background depth. Prediction avoids waiting for a future real frame but does not
+prove zero added end-to-end latency; queues and presentation timing still matter.
+
+## Long-term options
+
+| Option | Role |
+| --- | --- |
+| 60 Hz simulation + camera/depth reprojection | First bounded experiment; preserve original handling. |
+| Reproject scenery and separately redraw rider/board/opponents | Possible later response to dynamic-object artifacts; requires ownership and composition work. |
+| 60 Hz simulation + retained host render state + 120 real renders | Preferred long-term faithful-smoothness direction if effort is justified: avoid repeated guest traversal and interpolate presentation transforms. |
+| MetalFX frame interpolation | Unmeasured alternative using two frames, depth, motion and UI inputs; requires a later frame and a latency/scheduling comparison. Color-only prototype failure does not rule it out. |
+| 120 Hz simulation + 60 Hz rendering + reprojection | Later timestep/scheduling research, not a demonstrated budget fit. |
+| Full 120 Hz simulation/rendering | Largest behavioral and performance scope; remains research rather than a prerequisite for restoration. |
+
+The hybrid arithmetic `2 × 3.3 + 7.8 = 14.4 ms` is only an average CPU budget. The
+update and render callbacks share a thread; an 11.1 ms update+render interval does
+not yield evenly spaced updates every 8.33 ms. The input producer must acquire fresh
+input at 120 Hz; two updates may otherwise consume the same sample. Even ideal
+polling changes reduce average polling wait from 8.3 to 4.2 ms, not necessarily
+halve total input-to-display latency.
+
+The discovered render elapsed-time calculation is `update_count / 60`. Two half-dt
+updates would report `2/60` unless that bookkeeping changes. It is a useful seam,
+not evidence that animation automatically advances correctly. Physics, collision,
+trick windows, camera filters, animation, particles, AI and UI timers need their own
+time-normalized validation. A true half-step camera also cannot restore disoccluded
+pixels or independently moving objects. Do not begin this physics conversion in the
+same batch as the capture proof.
+
+## Prior evidence
+
+Phone measurements: `performance-review-2026-09-13.md`,
+`local/reports/mobile/20260913-231157/`. Native callback/timestep seams:
+`120hz-native-path.md`, `ssx3-120hz-handoff-2026-09-13.md`.
+Earlier alternatives: `120hz-analysis.md`, `120hz-native-interpolation.md`,
+`120hz-host-replay.md`, and the local `spike/120hz` worktree.
