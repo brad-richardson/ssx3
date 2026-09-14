@@ -98,6 +98,84 @@ a warped background is explicitly labeled approximate and is not an acceptable
 live HUD implementation. Proper draw routing or another validated isolation method
 is required; perspective/orthographic classification alone does not prove ownership.
 
+### Paired-background HUD alpha (September 14)
+
+One composite has two unknowns per pixel and one equation, so no amount of care
+recovers alpha from a single run. Two runs do, provided they render the *same*
+guest frame. Under `SSX3_MOVIE_PLAY` a single-core run replays recorded pad
+input against a fixed guest clock, so guest frame numbers repeat exactly where
+host wall time does not — hence `SSX_REPROJECTION_FROM_FRAME`, which arms the
+capture on the guest's XFB counter rather than `SSX_REPROJECTION_AFTER`.
+
+`SSX_REPROJECTION_HUD_CLEAR=RRGGBB` clears the EFB colour, and only the colour,
+at the split. Depth survives, so the tail still depth-tests against real
+scenery, and the presented frame is deliberately wrong for that run. Writing the
+tail over two known constants `B0` and `B1` gives
+
+    C0 = F + k*B0        C1 = F + k*B1        k = 1 - alpha
+
+per channel, so `k = (C1-C0)/(B1-B0)` and `F = C0 - k*B0`. `F` is the
+premultiplied foreground; `1-k` is the alpha.
+
+This is exact only where the tail's effect on the destination is affine, which
+covers ordinary source-over and additive blending but not a blend that reads
+destination colour non-linearly. A **third, untouched run** of the same movie
+frame is therefore the acceptance test rather than a convenience: `F + k*world`
+must reproduce that run's real composite. `tools/gamecube_reprojection_hud.py`
+solves the pair, runs that check, and only reports `hud_alpha_layer` true when
+the reconstruction stays within two levels. Before solving it requires both runs
+to agree on frame ID, draw counts, camera, projection, viewport, EFB pixel
+format, and the world colour and depth buffers byte-for-byte — the last being
+the strongest available evidence that two runs reached the same guest frame.
+
+Recovering the layer offline still says nothing about compositing it live.
+
+#### Result: the HUD layer is recovered and checked (September 14)
+
+Three 200-second runs of `det-record-1.dtm` against the pinned baseline module,
+single-core, armed at `SSX_REPROJECTION_FROM_FRAME=7500`, captured frames
+7500–7507 in each: `capture-natural`, `capture-dark` (`000000`) and
+`capture-light` (`ffffff`). Replay determinism held exactly — every frame in
+every run reports the same draw, perspective and orthographic counts (703/619/84
+at 7500), and world colour and depth match byte-for-byte inside the presented
+area.
+
+`efb_pixel_format` is **0, `RGB8_Z24`**: this EFB carries no destination alpha.
+Routing the tail to a transparent target would not have produced an alpha
+channel, so the paired-background route was necessary, not merely convenient.
+
+All eight frames solve and pass the check:
+
+| Frame | HUD coverage | Mean alpha where covered | Reconstruction mean / max error | Within one level |
+| --- | ---: | ---: | ---: | ---: |
+| 7500 | 7.045% | 0.727 | 0.0142 / 1.73 | 99.992% |
+| 7501 | 7.044% | 0.727 | 0.0142 / 1.77 | 99.992% |
+| 7502 | 7.043% | 0.727 | 0.0142 / 1.79 | 99.991% |
+| 7503 | 7.042% | 0.727 | 0.0143 / 1.68 | 99.992% |
+| 7504 | 6.986% | 0.725 | 0.0142 / 1.64 | 99.993% |
+| 7505 | 7.045% | 0.727 | 0.0143 / 1.63 | 99.992% |
+| 7506 | 7.045% | 0.727 | 0.0143 / 1.71 | 99.992% |
+| 7507 | 7.044% | 0.727 | 0.0143 / 1.71 | 99.992% |
+
+Errors are in 0–255 channel units over the presented area. Every pixel of every
+frame reconstructs within two levels and 99.99% within one, so **the tail is
+affine in the destination colour and this is a real alpha layer**, not another
+approximation. The 7.04% coverage independently agrees with the 7.00% that the
+old final-minus-world residual mask reported changed — the residual was counting
+the right pixels, it just could not say how much of each belonged to the HUD.
+
+One trap is worth recording. The first gate compared whole buffers and rejected
+frames 7501 onward for differing world colour. The difference was exactly 240 of
+1584 rows — precisely the EFB rows outside the 1344-row XFB area. The game never
+redraws them, so each run keeps whichever clear it applied there for the rest of
+the run. Those rows are not part of the frame; the gate now compares the
+presented area, and all eight frames pass.
+
+This still does not composite anything live. It gives the offline pipeline a
+correct HUD layer to composite over a warped background instead of the residual
+approximation, and it gives a per-frame alpha to test a live implementation
+against.
+
 ## First-batch run and validation
 
 Build and run commands (choose fresh output/profile names):
@@ -148,12 +226,35 @@ changes 7.00% of active pixels and visually contains the expected HUD elements.
 
 **Most of that hole area is sampling cracks, not newly exposed scenery.** The
 footprint splat on the same frame leaves **0.440%** uncovered, closing 1.435% of
-the active area — 77% of the point splat's holes. This matters for the ranking:
-the fraction a camera-only warp genuinely cannot know is closer to a half percent
-than two percent, so hole filling is a smaller problem than the first run
-suggested. The remaining 0.440% is still not established to be disocclusion, and
-a widened splat can overdraw a true silhouette; only the depth-edge guard and the
-accuracy check below argue against that here.
+the active area — 77% of the point splat's holes. The remaining 0.440% is still
+not established to be disocclusion, and a widened splat can overdraw a true
+silhouette; the depth-edge guard and the accuracy check below are what argue
+against that here.
+
+Frame 7559 turns out to be an easy frame. Four consecutive pairs from the
+movie-driven capture (`capture-natural`, frames 7500–7507) are much harder, and
+they are the ones to plan against:
+
+| Pair | Motion p50 / p95 (px) | Point-splat holes | Footprint holes | Cracks closed |
+| --- | ---: | ---: | ---: | ---: |
+| 7500→7501 | 14.3 / 127.8 | 10.01% | 2.35% | 77% |
+| 7502→7503 | 10.6 / 97.6 | 8.33% | 1.64% | 80% |
+| 7504→7505 | 1.6 / 83.0 | 7.38% | 1.39% | 81% |
+| 7506→7507 | 1.3 / 76.2 | 6.63% | 1.23% | 81% |
+| 7558→7559 (earlier capture) | 4.0 / 13.2 | 1.88% | 0.44% | 77% |
+
+Two things hold across all five, and one does not. The share of holes that are
+cracks is stable at **77–81%** regardless of how fast the frame moves, and the
+footprint splat never covers less than the point splat. But the **absolute**
+hole fraction is not a property of the method: it ranges from 0.44% on the calm
+frame to 2.35% on the fastest, an over-fivefold spread. Planning from frame 7559
+alone would have understated the problem.
+
+The p50/p95 split is itself informative. A median under two pixels beside a p95
+near a hundred means most of the image is nearly still while a small near-field
+population — rider, board, close scenery — sweeps across it. That is where
+camera-only reprojection is weakest, and it is not something better rasterizing
+can fix.
 
 An independent check warps frame 7558 using the **actual next camera** and compares
 it with the captured frame 7559, on two visible static-wall candidate regions:

@@ -15,6 +15,7 @@
 #include "VideoCommon/AbstractStagingTexture.h"
 #include "VideoCommon/FramebufferManager.h"
 #include "VideoCommon/VertexShaderManager.h"
+#include "VideoCommon/VideoCommon.h"
 #include "VideoCommon/VideoConfig.h"
 #include "VideoCommon/XFMemory.h"
 #include "VideoCommon/CPMemory.h"
@@ -37,10 +38,21 @@ inline FILE* metadata = nullptr;
 inline const auto start = std::chrono::steady_clock::now();
 inline double Now() { return std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count(); }
 inline const char* Directory() { static const char* p = std::getenv("SSX_REPROJECTION_CAPTURE"); return p; }
+// Host wall time differs between two runs of the same movie, so a paired
+// capture must arm on the guest's own XFB frame counter instead.
 inline bool Armed() {
   if (!Directory() || captured >= 8) return false;
+  if (const char* from = std::getenv("SSX_REPROJECTION_FROM_FRAME")) return frame >= std::strtoul(from,nullptr,0);
   const char* begin = std::getenv("SSX_REPROJECTION_AFTER");
   return Now() >= (begin ? std::atof(begin) : 140.0);
+}
+// A known constant background under the HUD tail. Two runs of one movie over
+// two such backgrounds determine the tail's alpha exactly; one run cannot.
+inline bool HudClear(u32* color) {
+  const char* value = std::getenv("SSX_REPROJECTION_HUD_CLEAR");
+  if (!value) return false;
+  *color = 0xff000000u | (u32(std::strtoul(value,nullptr,16)) & 0xffffffu);
+  return true;
 }
 inline void Floats(FILE* f, const float* data, size_t count) {
   std::fputc('[',f);
@@ -108,7 +120,18 @@ inline void Draw() {
     std::fputs(",\"scissor_offset\":",metadata);Floats(metadata,scissor_offset.data(),2);
     std::fprintf(metadata,",\"vertex_depth_range\":%s",vertex_depth_range?"true":"false");
     std::fputs(",\"pixel_center_correction\":",metadata);Floats(metadata,correction.data(),4);
-    std::fprintf(metadata,",\"reversed_depth\":%s}\n",g_backend_info.bSupportsReversedDepthRange?"true":"false");
+    std::fprintf(metadata,",\"reversed_depth\":%s",g_backend_info.bSupportsReversedDepthRange?"true":"false");
+    const PixelFormat format=bpmem.zcontrol.pixel_format;
+    std::fprintf(metadata,",\"efb_pixel_format\":%u",unsigned(format));
+    u32 clear=0;
+    if (HudClear(&clear)) {
+      // Colour and alpha only: the tail still depth-tests against real scenery.
+      g_framebuffer_manager->ClearEFB(MathUtil::Rectangle<int>(0,0,int(EFB_WIDTH),int(EFB_HEIGHT)),
+          true,true,false,clear,0,format);
+      std::fprintf(metadata,",\"hud_clear\":%u}\n",clear&0xffffffu);
+    } else {
+      std::fputs(",\"hud_clear\":null}\n",metadata);
+    }
   }
   if (persp && !split) {
     auto& constants=Core::System::GetInstance().GetVertexShaderManager().constants;
@@ -124,10 +147,14 @@ inline void Draw() {
 inline void Xfb(u32 address, const MathUtil::Rectangle<int>& rectangle) {
   if (!Directory()) return;
   if (active) {
+    u32 ignored=0;
+    const bool cleared=HudClear(&ignored);
+    // Under a clear this file is the tail over that constant, not the real frame.
     const bool final_ok=Save(false,"-final.rgba");
-    std::fprintf(metadata,"{\"event\":\"frame\",\"schema\":1,\"frame_id\":%u,\"wall_seconds\":%.6f,\"xfb_address\":%u,\"xfb_rect\":[%d,%d,%d,%d],\"draws\":%u,\"perspective\":%u,\"ortho\":%u,\"late_perspective\":%u,\"camera_loads\":%u,\"final_ok\":%s,\"hud_alpha_layer\":false,\"timing_representative\":false}\n",
+    std::fprintf(metadata,"{\"event\":\"frame\",\"schema\":1,\"frame_id\":%u,\"wall_seconds\":%.6f,\"xfb_address\":%u,\"xfb_rect\":[%d,%d,%d,%d],\"draws\":%u,\"perspective\":%u,\"ortho\":%u,\"late_perspective\":%u,\"camera_loads\":%u,\"final_ok\":%s,\"hud_cleared\":%s,\"hud_alpha_layer\":false,\"timing_representative\":false}\n",
         frame,Now(),address,rectangle.left,rectangle.top,rectangle.right,rectangle.bottom,
-        draws,perspective,ortho,late_perspective,camera_loads,final_ok?"true":"false");
+        draws,perspective,ortho,late_perspective,camera_loads,final_ok?"true":"false",
+        cleared?"true":"false");
     std::fclose(metadata);metadata=nullptr;++captured;
   }
   ++frame;draws=perspective=ortho=late_perspective=camera_loads=0;

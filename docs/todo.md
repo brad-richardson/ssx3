@@ -8,10 +8,18 @@ the build or commit that closed them.
 - [ ] September 14 priority: course restoration is the main track; keep 120 Hz
       research bounded. First reprojection batch captured eight matching riding
       frames and demonstrated an offline half-step warp. September 14: a
-      footprint splat cuts uncovered pixels from 1.875% to 0.440% — 77% of the
-      holes were sampling cracks — while static-wall MAE moves by under 0.02
-      units, so raster coverage is no longer the open question. Next: a real
-      alpha HUD layer, then GPU-resident cost measurement.
+      footprint splat closes 77-81% of the point splat's holes across five
+      frame pairs, with static-wall MAE moving under 0.02 units. Absolute
+      uncovered area is frame-dependent though: 0.44% on the calm frame 7559
+      but 1.2-2.4% on the movie-driven 7500-7507 pairs, whose p95 motion runs
+      76-128 px. Raster coverage is answered; near-field motion is not.
+      The alpha HUD layer is now done: three movie-driven runs over natural,
+      black and white backgrounds solve the tail exactly on all eight frames
+      7500-7507 (7.04% coverage, mean alpha 0.727, every pixel within two
+      levels of the untouched run). The EFB is RGB8_Z24 with no destination
+      alpha, so a transparent render target could not have worked.
+      Next: GPU-resident cost measurement, and near-field motion for the
+      rider/board, which better rasterizing cannot address.
       No live smoothing mode or phone budget is established. See the
       [revised reprojection evidence](research/120hz-reprojection.md).
 - [ ] Finish the [fast-FP phone pair](research/performance-batch2-followup.md)

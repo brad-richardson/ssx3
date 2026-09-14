@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """Build/run an isolated GPU capture player. Offline research; never presents extra frames.
 
-Captures at most eight frames after SSX_REPROJECTION_AFTER (default 140 seconds).
+Captures at most eight frames after SSX_REPROJECTION_AFTER (default 140 seconds),
+or from guest XFB frame SSX_REPROJECTION_FROM_FRAME. Use the frame form with
+SSX3_MOVIE_PLAY: host wall time differs between runs, guest frame numbers do not.
 The first perspective-to-orthographic boundary is a candidate HUD split, explicitly
 invalidated if perspective draws follow it. Color subtraction is NOT a HUD alpha layer.
+
+SSX_REPROJECTION_HUD_CLEAR=RRGGBB replaces the EFB colour (not depth) at that split,
+so the tail composites over a known background and the presented frame is deliberately
+wrong. Two such runs of one movie, plus an untouched third, feed
+gamecube_reprojection_hud.py, which solves the tail's alpha and checks it.
 """
 import argparse
 import json
