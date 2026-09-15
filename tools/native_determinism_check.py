@@ -56,6 +56,12 @@ def course_check(args, output, profile, env_extra, module):
         # A redirected event has to be redirected the same way in both arms, and
         # the checker records the manifest it applied in its observations.
         command += ['--course-manifest', str(args.course_manifest.resolve())]
+    if getattr(args, 'texture_pack', None):
+        # Replaying one movie against two packs is the only way to compare them
+        # at the same moment of the same ride (docs/texture-remaster.md).
+        command += ['--texture-pack', str(args.texture_pack.resolve())]
+    if getattr(args, 'texture_dump', False):
+        command += ['--texture-dump']
     if module:
         command += ['--module', str(Path(module).resolve())]
     print('+', ' '.join(command), flush=True)
@@ -250,6 +256,10 @@ def main():
         p.add_argument('--module', type=Path, help='Module dylib; default is the current build')
         p.add_argument('--course-manifest', type=Path,
                        help='Course-redirect manifest for both arms (docs/course-selection.md)')
+        p.add_argument('--texture-pack', type=Path,
+                       help='Replacement textures for this arm (docs/texture-remaster.md)')
+        p.add_argument('--texture-dump', action='store_true',
+                       help='Dump every texture this arm loads')
         if name == 'play':
             p.add_argument('--movie', type=Path, required=True)
         p.set_defaults(fn=fn)

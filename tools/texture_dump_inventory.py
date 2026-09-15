@@ -16,7 +16,13 @@ import json
 from pathlib import Path
 import re
 
-NAME = re.compile(r'^tex1_(\d+)x(\d+)_([0-9a-f]+)(?:_([0-9a-f]+))?_(\d+)(_arb)?$')
+# Dolphin's texture name (VideoCommon/TextureInfo.cpp CalculateTextureName):
+#   tex1_<w>x<h>[_m]_<tex hash>[_<palette hash>]_<format>[_arb][_mipN]
+# `_m` means the guest texture has mipmaps enabled, and a dump then also writes
+# one `_mipN` sidecar per level. Both hashes are XXH64, 16 hex digits — the
+# palette hash covers only the palette range the texels actually index.
+NAME = re.compile(r'^tex1_(\d+)x(\d+)(_m)?_([0-9a-f]{16})(?:_([0-9a-f]{16}))?_(\d+)'
+                  r'(_arb)?(?:_mip(\d+))?$')
 FORMATS = {0: 'I4', 1: 'I8', 2: 'IA4', 3: 'IA8', 4: 'RGB565', 5: 'RGB5A3', 6: 'RGBA8',
            8: 'C4', 9: 'C8', 10: 'C14X2', 14: 'CMPR'}
 
@@ -25,10 +31,11 @@ def parse(path):
     match = NAME.match(path.stem)
     if not match:
         return None
-    width, height, texture_hash, tlut_hash, fmt, arbitrary = match.groups()
+    width, height, mipmapped, texture_hash, tlut_hash, fmt, arbitrary, mip = match.groups()
     return {'name': path.name, 'width': int(width), 'height': int(height),
             'texture_hash': texture_hash, 'tlut_hash': tlut_hash,
             'format': int(fmt), 'format_name': FORMATS.get(int(fmt), f'0x{int(fmt):x}'),
+            'mipmapped': bool(mipmapped), 'mip_level': int(mip) if mip else 0,
             'arbitrary_mips': bool(arbitrary), 'bytes': path.stat().st_size,
             'mtime': path.stat().st_mtime, 'path': str(path)}
 
@@ -114,12 +121,19 @@ def main():
                           'ride' if entry['mtime'] >= start else
                           'course load' if entry['mtime'] >= briefing else 'frontend')
         entry['framebuffer'] = is_framebuffer(entry)
-    course = [e for e in entries if e['phase'] in ('course load', 'ride') and not e['framebuffer']]
+    # A `_mipN` file is another level of its base texture, not a texture of its
+    # own, and this loader replaces a mipmapped texture from the base image
+    # alone, so the sidecars are counted but never selected or packed.
+    course = [e for e in entries if e['phase'] in ('course load', 'ride')
+              and not e['framebuffer'] and not e['mip_level']]
     report = {
         'dump': str(args.dump), 'run': str(args.run) if args.run else None,
         'briefing_wall': briefing, 'race_start_wall': start, 'textures': len(entries),
         'by_phase': dict(Counter(e['phase'] for e in entries)),
         'framebuffer_copies': sum(e['framebuffer'] for e in entries),
+        'mip_sidecars': sum(1 for e in entries if e['mip_level']),
+        'mipmapped_course_textures': sum(1 for e in entries if e['mipmapped'] and not e['mip_level']
+                                         and e['phase'] in ('course load', 'ride')),
         'course_art': len(course),
         'course_by_format': dict(Counter(e['format_name'] for e in course).most_common()),
         'course_by_size': dict(Counter(f"{e['width']}x{e['height']}" for e in course).most_common()),

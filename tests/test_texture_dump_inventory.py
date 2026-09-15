@@ -28,7 +28,18 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(paletted['tlut_hash'], 'bbbbbbbbbbbbbbbb')
         self.assertEqual(paletted['format_name'], 'C8')
         self.assertFalse(paletted['arbitrary_mips'])
-        self.assertTrue(parse(self.dumped('tex1_32x32_dead_5_arb.png'))['arbitrary_mips'])
+        self.assertTrue(parse(self.dumped('tex1_32x32_deadbeefdeadbeef_5_arb.png'))['arbitrary_mips'])
+
+    def test_mipmapped_names_and_their_sidecars(self):
+        base = parse(self.dumped('tex1_128x128_m_015e396b80054909_14.png'))
+        self.assertTrue(base['mipmapped'])
+        self.assertEqual(base['mip_level'], 0)
+        self.assertEqual((base['width'], base['format']), (128, 14))
+        self.assertEqual(base['texture_hash'], '015e396b80054909')
+        level = parse(self.dumped('tex1_128x128_m_015e396b80054909_14_mip3.png'))
+        self.assertEqual(level['mip_level'], 3)
+        self.assertTrue(level['mipmapped'])
+        self.assertFalse(parse(self.dumped('tex1_64x64_0123456789abcdef_5.png'))['mipmapped'])
 
     def test_unrelated_files_are_ignored(self):
         self.assertIsNone(parse(self.dumped('screenshot.png')))

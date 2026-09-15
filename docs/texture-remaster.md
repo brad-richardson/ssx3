@@ -27,15 +27,31 @@ because the earlier plan aimed at the wrong code:
   exists on this path.
 
 Both halves share one key, which is why a dump is directly usable as the
-replacement's file name:
+replacement's file name. From
+`VideoCommon/TextureInfo.cpp CalculateTextureName`:
 
 ```
-tex1_<width>x<height>_<texture hash>[_<palette hash>]_<gx format>.png
+tex1_<width>x<height>[_m]_<texture hash>[_<palette hash>]_<gx format>[_arb][_mipN].png
 ```
 
-`<gx format>`: 0 I4, 1 I8, 2 IA4, 3 IA8, 4 RGB565, 5 RGB5A3, 6 RGBA8, 8 C4,
-9 C8, 10 C14X2, 14 CMPR. A `_arb` suffix marks arbitrary mipmaps, and `$` in
-place of either hash is a wildcard.
+- `<gx format>`: 0 I4, 1 I8, 2 IA4, 3 IA8, 4 RGB565, 5 RGB5A3, 6 RGBA8, 8 C4,
+  9 C8, 10 C14X2, 14 CMPR.
+- Both hashes are XXH64 with seed 0, 16 hex digits. The texture hash covers the
+  base level's guest bytes; the palette hash covers **only the palette range the
+  texels actually index** (Dolphin walks the indices for min and max first), so
+  it is not a hash of the whole TLUT.
+- **`_m` means the guest texture has mipmaps**, and it is part of the name — a
+  replacement for a mipmapped texture must carry it. This is the easiest thing
+  in the whole pipeline to get wrong: a dump also writes one `_mipN` sidecar per
+  level, and a file-name pattern that does not expect `_m` silently drops every
+  mipmapped texture. On R&B that was **92 of 198** course textures, including
+  all the trees and rocks — the first pack here looked complete and left them
+  untouched.
+- `_arb` marks arbitrary (non-generated) mipmaps. `$` in place of either hash is
+  a wildcard.
+
+This loader replaces a mipmapped texture from its base image alone, so a pack
+needs the `_m` base files and not the `_mipN` sidecars.
 
 **Where the settings must live.** Not in `GFX.ini`: `UICommon::Init` runs
 `Config::SetBaseOrCurrent(Config::GFX_DUMP_TEXTURES, false)` and then
@@ -95,12 +111,12 @@ A run dumps far more than its course. The inventory separates them three ways,
 using the run's own rider trace: the observer's first sample is the briefing (so
 the course is loading from then on) and its first movement is the race start.
 
-Measured on R&B: **1,142** files dumped, of which **1,036 are the frontend and
+Measured on R&B: **1,437** files dumped, of which **1,036 are the frontend and
 the attract movie**, **1,012 are Dolphin's EFB/XFB copies** (paletted and
-screen-shaped — the inventory flags these, and they are not art), leaving
-**106 course textures**: 66 CMPR, 27 RGB5A3, 6 C8, 3 RGBA8, 2 RGB565, 1 C4,
-1 I8. Sizes: 47 at 128x128, 16 at 256x256, 12 at 64x64, 11 at 16x16, 9 at 32x32,
-8 at 256x128, and three odd ones.
+screen-shaped — the inventory flags these, and they are not art) and **203 are
+`_mipN` sidecars**, leaving **198 course textures**: 126 CMPR, 38 C8,
+27 RGB5A3, 3 RGBA8, 2 RGB565, 1 C4, 1 I8. **92 of the 198 are mipmapped.**
+Mostly 128x128 and 256x256.
 
 `--select N` takes the N largest distinct course textures, which on R&B is a
 usable cross-section: snow and ice terrain tiles, rider clothing, a face, crowd
@@ -229,7 +245,58 @@ right, and any later "no visible change" is about the model rather than the
 plumbing. Keep the tinted pack around; it is the fastest way to re-check after
 changing profiles, game builds or platforms.
 
-## 7. Doing this for another course, or another asset class
+## 7. What the R&B spike produced
+
+Files under `local/research/remaster/`:
+
+| what | where |
+| --- | --- |
+| the course-redirect manifest | `rnb-stock.txt` |
+| the dump run and its inventory | `dump-rnb-002/`, `inventory-rnb-002.json` |
+| 198 course textures, grouped by family | `groups-rnb/{block-compressed,direct-colour,paletted}/` |
+| a 30-texture working set and its contact sheet | `source-rnb-30/` |
+| four upscaler passes over that set | `passes/out-{lanczos,esrgan,span,pbrify4}/` |
+| the four-way comparison sheet | `compare-first6.png` |
+| the complete per-family pack, 198 textures, 64 MB | `pack-mixed/` |
+| the tinted proof pack | `pack-proof-magenta/` |
+| rides | `ride-esrgan-001/` (30-texture pack), `ride-proof-001/` (tint) |
+
+GPU time for the whole course is about 40 seconds: 126 block-compressed
+textures through PBRify V4 in 30 s, 32 direct-colour and 40 paletted through
+Real-ESRGAN in 7 s.
+
+### It reaches the screen, and it looks better
+
+Two things were verified at runtime rather than asserted.
+
+**The mechanism.** `pack-proof-magenta/` is the same 106 textures the first
+(incomplete) pack held, each tinted 50% magenta at 4x. Riding with it turned the
+course pink — snow, sky panorama, HUD numerals, boost meter
+(`ride-proof-001`, profile `tex-rnb-4`). That is what proved the key, the
+directory and the config layer at once. It is also what exposed the `_m`
+mipmapped names: the trees and the rock faces stayed their normal colour,
+because 92 of the course's textures were never in that pack.
+
+**The result.** One movie was recorded on stock R&B
+(`det-record-rnb.dtm`, `bd121e8d`) and replayed twice, once bare and once with
+the complete 198-texture pack (`det-play-stock`, `det-play-pack`). Both arms
+reach the same instant — the HUD reads `00:00:40` and `4810` points in both
+frames — so the pair is a real before/after rather than two different moments:
+`before-after-full.png` and, cropped to the rock face and snow,
+`before-after-rock-snow.png`.
+
+The rock face is the clearest gain: flat, mushy blur becomes visible striation
+and grain. Snow keeps fine streaks where the stock texture smears, and the
+`dnL` and SSX 3 banners become legible. Rider and opponent clothing sharpens.
+
+Honest about the rest: the two screenshots are the same guest second but not the
+same frame (the harness captures on wall-clock, so the camera has moved a
+fraction of a second), so this is a visual comparison and not a pixel diff. And
+the upscaled snow has the classic invented-grain look in places — a model
+putting detail where the original had none. Nothing here measures that; see the
+quality-gate gap below.
+
+## 8. Doing this for another course, or another asset class
 
 Steps 1-6 are course-agnostic: change the manifest in step 1 and the profile
 names. Nothing in the tools knows about R&B.
