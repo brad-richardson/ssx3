@@ -150,14 +150,42 @@ inert for the rest of the boot. The briefing screen shows the patched `name`
 the course length on that screen stayed Snow Jam's — they are not in these
 tables.
 
+## The discipline is the menu's, so host on an event of the right discipline
+
+**September 15 (later): the `mode` caveat below is an artifact of hosting on a
+race event.** Every manifest written so far redirects **event 0, Snow Jam, a
+race** (`course_manifests.py --target-event` defaults to 0), because the
+harness's menu sequence walked Single Event's Race branch, whose Peak 1 list is
+Snow Jam / Metro-City / Happiness. The Single Event menu passes the discipline
+of the event the player picked, so a race host stays a race however the mode
+word is patched.
+
+The Freestyle branch is not locked. **Select Peak → Select Mode offers Race and
+Freestyle**, and Freestyle's Peak 1 list is **R&B / Crow's Nest / The Junction /
+Happiness Jam** — the slopestyle, big-air and halfpipe events. Taking it needs
+one D-pad press: `native/diagnostics/course-start-freestyle.json`. Stock R&B
+ridden through that path (`fs-stock-2`, 1,192 observed samples) shows the real
+slopestyle HUD — score, `OPPONENT +31841`, no lap counter — and its briefing
+reads "Single Event - Slopestyle" with the score standings screen and a 340,000
+record score.
+
+So a donor course goes into a slot **of its own discipline**: R&B (event 5) for
+slopestyle, and no table patch is needed beyond the archive, because event 5
+already carries `code = ASS1`, `location = 5` and `mode = 3`.
+
+Two practical notes. The menu sequence is open-loop, so its slots must be
+wide: five-second slots drift by enough between runs that the Freestyle press
+landed on Select Peak instead and walked the highlight onto a locked peak, at
+which point A does nothing and the run sits there. Ten-second slots hold. And
+the Freestyle branch inserts a **My Rules** screen between the event list and
+the briefing, so the sequence needs one more A than the race path.
+
 ## Still unknown
 
-- **`mode` did not switch the HUD.** With `mode = 3` (slopestyle) the ride's HUD
-  still showed a race — "1st/6" and a lap timer — and the briefing header still
-  read "Single Event - Race". The consumer at `0x801093D0` takes the event's own
-  word only when its caller passes 7, and the Single Event menu path evidently
-  passes the discipline the player picked. So the mode word is real but the menu
-  overrides it on this path; what still reads it is untraced.
+- **What reads the `mode` word.** It is real - the tables carry it and
+  `0x801093D0` reads the event's own value when its caller passes 7 - but the
+  Single Event path passes the player's pick, so patching it changes nothing
+  there. Hosting on a same-discipline event sidesteps the question entirely.
 - **Scoring and the end of a run** are unproven for a redirected event, as in
   `docs/aloha-conversion.md`. The Aloha ride scored tricks but was not taken to a
   finish.

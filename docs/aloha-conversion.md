@@ -830,3 +830,49 @@ What is still unmeasured: whether a redirected event that *is* reached as
 slopestyle scores and finishes correctly with converted data. Reaching a finish
 at all needs steering ([route control](route-control.md)), which is why that
 work comes first.
+## 11. The event *can* be selected: the Freestyle branch (September 15)
+
+Section 7's first blocker is gone, and it was never a table problem. Single
+Event's **Select Peak → Select Mode** offers **Race** and **Freestyle**; the
+harness's fixed controller sequence had always taken Race, whose Peak 1 list is
+Snow Jam / Metro-City / Happiness. One D-pad press takes Freestyle, and its
+Peak 1 list is **R&B / Crow's Nest / The Junction / Happiness Jam**.
+
+`native/diagnostics/course-start-freestyle.json` walks it. Two details cost a
+run each: the branch inserts a **My Rules** screen between the event list and
+the briefing, so the sequence needs one more A; and the slots have to be
+**ten seconds**, because boot speed varies by about five seconds between runs
+and a five-second slot put the Freestyle press on the Select Peak screen, which
+walked the highlight onto a locked peak where A does nothing.
+
+**Stock R&B through that path rides as slopestyle** (`fs-stock-2`, 1,192
+observed samples): score in the corner, `OPPONENT +31841`, no lap counter, a
+"Single Event - Slopestyle" briefing and a standings screen with a 340,000
+record score. So the discipline follows the *event the player picks*, and a
+donor course wants a slot of its own discipline - which ASS1 already is. No
+`mode` patch, no manifest at all: `game-aloha-007` stages the Aloha build as
+`bam.big`, and event 5 already carries `code = ASS1`, `location = 5`,
+`mode = 3`.
+
+### The converted course crashes on the slopestyle load path
+
+Reproducible in two runs (`ride-freestyle-001`, `-002`): the menu reaches the
+R&B standings screen, then the run dies on `Invalid read from 0x903d850c,
+PC = 0x80222b80`, followed by reads from `0xc`, `0x18`, `0x0` - a null
+structure pointer, not a stray address. Stock R&B through the identical
+sequence rides fine, so this is the converted content on a path the event-0
+race host never exercised.
+
+One concrete fault found while looking, `tools/gamecube_slot_probe.py` against
+the build: **every imported patch carries page word `0x0008002a`** - texture
+group 42 (right) with track **8** (wrong; ASS1 is track 11). `bind_patch`
+hard-coded `0x80000 | group`, which is correct only for ARA1, whose track *is*
+8, so the Garibaldi lineage never noticed. Fixed: the page word is now
+`track << 16 | group` and the track defaults to the target record's own, so
+both lineages get their own slot's value. Whether that is *the* crash is
+unproven - it needs a stage-1 rebuild and another ride.
+
+The kind-21 race line, at least, is right: 248 nodes, four trailer entries,
+total 154,184.8 with type-1 markers at 0.2833 and 0.6938 of it, matching stock
+ASS1's fractions.
+

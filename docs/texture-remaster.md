@@ -703,7 +703,52 @@ python3 tools/pack_mipmaps.py PACK-mips --output PACK-mips.json
 python3 tools/texture_pack_audit.py UNION PACK --output audit.json --copy-flagged flagged/
 ```
 
-## 11. Putting a pack on the iPhone
+## 11. Art passes a model cannot do: foliage
+
+Upscaling makes SSX 3's trees *smoother*, which is not the same as better. A
+tree here is an alpha-tested card a few dozen pixels tall on screen, and what
+sells it is the silhouette - so the model's two habits both hurt: its soft
+alpha, thresholded, covers more area than the guest's (branches fatten), and
+its outline is smooth where a conifer's is ragged. `tools/foliage_detail.py`
+does three passes over a card, all derived from the card itself:
+
+1. **Coverage-preserving alpha** - the threshold is chosen so the fraction of
+   pixels passing the alpha test matches the source's. This undoes the
+   fattening by measurement rather than by guess.
+2. **A silhouette cut from the card's own shading.** The darkest pixels along
+   the outline are the gaps between needle sprays; the model drew them and left
+   them opaque. Cutting there opens the gaps. Random noise was tried first and
+   reads as bite marks - shading-driven cuts follow the tree the artist drew.
+   The cut only ever removes area, so a cutout can never grow past the guest's
+   outline.
+3. **Canopy depth** - tips lifted, interior dropped by local thickness, mean
+   restored. A flat card gains the shading a round canopy would have.
+
+**Thin cards are protected by local thickness.** A bare-branch tree is "tip"
+everywhere: cutting its outline deletes twigs, and shading by thickness washes
+the whole tree pale. Both passes skip cards that are not solid enough, which
+the tests cover.
+
+```sh
+python3 tools/foliage_detail.py local/research/remaster/union-all PACK PACK \
+  --names foliage.json --fringe 0.45 --depth 0.10 --report foliage-pack.json
+```
+
+Applied at `--fringe 0.45 --depth 0.10` ("medium" of three variants reviewed) to
+the six cards that appear in 9, 9, 9, 9, 6 and 6 of the 17 courses - the game's
+workhorse conifers and bare trees. Coverage came back to within 3 points of
+each source (0.4578 → 0.4359, 0.1658 → 0.1343, …), the pack rode clean, and
+`texture_pack_audit.py` flags these cards as `alpha-drift`, which here is the
+intended change rather than a defect: the gate measures alpha movement and
+cannot tell a deliberate silhouette from a chewed edge.
+
+Two limits worth stating. The pass is **tuned by eye on a review sheet** (stock
+/ pack / light / medium / strong, at both zoom and game scale) - there is no
+metric for "reads like a tree". And it is **foliage-shaped**: crowd sprites,
+which are the next most dated asset, are a different problem (animation frames,
+not silhouettes) and are untouched.
+
+## 12. Putting a pack on the iPhone
 
 The app has a **Remastered textures** switch in its pause menu, beside
 Dual-core, and a **Course** row next to it that picks any installed course
@@ -733,7 +778,7 @@ not on a phone. Both states are recorded in the session log
 (`texture_pack_state`, `texture_pack_preference_changed`), so a report says
 which textures a session actually ran with.
 
-## 12. Doing this for another course, or another asset class
+## 13. Doing this for another course, or another asset class
 
 Steps 1-6 are course-agnostic: change the manifest in step 1 and the profile
 names. Nothing in the tools knows about R&B.

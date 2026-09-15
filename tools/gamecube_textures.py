@@ -92,12 +92,18 @@ def tricky_bindings(nbd):
     return out
 
 
-def bind_patch(payload, texture_rid, lightmap_rid, texture_group, uv, lightmap_rect, lightmap_size=128, inset=0.5):
+def bind_patch(payload, texture_rid, lightmap_rid, texture_group, uv, lightmap_rect,
+               lightmap_size=128, inset=0.5, track=8):
     """Write texture/lightmap binding words into a GameCube SSX 3 terrain payload.
 
     Tricky corner UVs use v in [-1, 0] where SSX 3 uses [0, 1] for the same corner
     order, so v is shifted by +1. The lightmap rectangle gets a half-texel inset
     like the stock records (cell 16 px -> u + 0.5/128, w - 1/128).
+
+    The page word at 412 is `track << 16 | texture group`. It used to be written
+    as `0x80000 | group`, i.e. always track 8 - right for ARA1, whose track *is*
+    8, and wrong for every other slot: the Aloha build's ASS1 patches all read
+    page track 8 where stock ASS1 reads 11. Pass the target location's track.
     """
     out = bytearray(payload)
     u, v, w, h = lightmap_rect
@@ -105,13 +111,13 @@ def bind_patch(payload, texture_rid, lightmap_rid, texture_group, uv, lightmap_r
     struct.pack_into('>4f', out, 16, u + step, v + step, w - 2 * step, h - 2 * step)
     for k, (tu, tv) in enumerate(uv):
         struct.pack_into('>2f', out, 32 + 8 * k, tu, tv + 1.0)
-    struct.pack_into('>I', out, 412, 0x80000 | texture_group)
+    struct.pack_into('>I', out, 412, (track << 16) | texture_group)
     struct.pack_into('>HH', out, 416, texture_rid, lightmap_rid)
     return bytes(out)
 
 
 def import_course_textures(world, location, texture_group, added, bindings, textures, lightmaps,
-                           material_profile='tricky-gc-to-ssx3-gc-v1'):
+                           material_profile='tricky-gc-to-ssx3-gc-v1', track=None):
     """Append the donor textures/lightmaps to the pinned group and bind the added patches.
 
     added: [(entry, payload)] terrain records in donor order; bindings: tricky_bindings()
@@ -146,7 +152,8 @@ def import_course_textures(world, location, texture_group, added, bindings, text
     for (entry, payload), b in zip(added, bindings):
         lm = lightmaps[b['lightmap']]
         rebound.append((entry, bind_patch(payload, tex_rid[b['texture']], lm_rid[b['lightmap']], texture_group,
-                                          b['uv'], b['lightmap_rect'], lightmap_size=lm['width'])))
+                                          b['uv'], b['lightmap_rect'], lightmap_size=lm['width'],
+                                          track=entry['track'] if track is None else track)))
     report = dict(texture_group=texture_group, textures={t: tex_rid[t] for t in used_textures},
                   lightmaps={l: lm_rid[l] for l in used_lightmaps},
                   texture_types={t: hex(textures[t]['type']) for t in used_textures},
