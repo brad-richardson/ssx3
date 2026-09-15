@@ -126,6 +126,35 @@ def geometry_parts(model):
     return [p for _, p in geometry_part_items(model)]
 
 
+def untextured_materials(scene):
+    """Donor material indices with no base texture.
+
+    A GC Tricky material opens with the same four texture-stage halfwords the
+    target uses, and `0xffff` marks an unused stage: 2,456 of SSX 3's 2,575
+    stock materials leave stages 1-3 unset and 119 use two. Aloha's material 1
+    leaves *stage 0* unset as well and clears flags bit 3 (`0x00015000` against
+    `0x00015008`/`0x00055008` on the textured ones), so it is the donor's
+    untextured material, not an out-of-range image ID.
+
+    No stock SSX 3 material leaves stage 0 unset, so the target's handling of
+    that form is unverified and the importer does not emit it. The meshes that
+    use such a material are dropped instead (`mesh_items`); a model with nothing
+    else is refused by `eligibility`.
+    """
+    return {i for i, material in enumerate(scene.materials) if material['texture'] == 0xffff}
+
+
+def mesh_items(model, skip_materials=()):
+    """`(part index, mesh)` for the meshes this importer will emit.
+
+    `skip_materials` drops the meshes of materials the target cannot express;
+    with the default empty set this is every mesh of every geometry part, which
+    is what the Garibaldi lineage sees.
+    """
+    return [(i, mesh) for i, part in geometry_part_items(model) for mesh in part['meshes']
+            if mesh['material'] not in skip_materials]
+
+
 def multiply(a, b):
     """Row-vector 4x4 product: `a` applied first, then `b`."""
     return tuple(sum(a[4*r+k] * b[4*k+c] for k in range(4)) for r in range(4) for c in range(4))
@@ -175,7 +204,7 @@ def needs_composition(model):
     return len(parts) != 1 or parts[0]['matrix'] is not None
 
 
-def eligibility(model, animated_as_static=False, compose_local_matrices=False):
+def eligibility(model, animated_as_static=False, compose_local_matrices=False, skip_materials=()):
     """Why this model cannot be imported, or None.
 
     `animated_as_static` admits a model whose single geometry part carries
@@ -205,12 +234,17 @@ def eligibility(model, animated_as_static=False, compose_local_matrices=False):
         # rigid transform. Every Garibaldi part matrix is orthonormal to 1e-11.
         if not all(orthonormal(m) for m in composed_matrices(model)):
             return 'non-orthonormal local matrix'
-    items = geometry_part_items(model)
-    normals = {(i, v[1]) for i, p in items for mesh in p['meshes']
+    meshes = mesh_items(model)
+    kept = mesh_items(model, skip_materials)
+    # Only a model that is *entirely* untextured is refused: one whose other
+    # meshes survive imports without them rather than disappearing.
+    if meshes and not kept:
+        return 'untextured material only'
+    normals = {(i, v[1]) for i, mesh in kept
                for strip in mesh['strips'] for v in strip['vertices']}
     if len(normals) > 256:
         return 'normal palette exceeds 256'
-    opcodes = {strip['opcode'] for _, p in items for mesh in p['meshes'] for strip in mesh['strips']}
+    opcodes = {strip['opcode'] for _, mesh in kept for strip in mesh['strips']}
     if len(opcodes) != 1:
         return 'mixed or absent position formats'
     return None
@@ -324,7 +358,8 @@ def validate_reclamation(world, group, track):
     return checked
 
 
-def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_static=False, compose=None):
+def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_static=False, compose=None,
+                 skip_materials=()):
     """One rigid target part. `compose` bakes donor part matrices into it.
 
     When composing, `compose` is a `composition()` result carrying an extra
@@ -333,10 +368,10 @@ def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_stat
     target part, because the matrices that separated them are now in the
     vertices; the palette and bounds follow the transformed data.
     """
-    reason = eligibility(model, animated_as_static, compose is not None)
+    reason = eligibility(model, animated_as_static, compose is not None, skip_materials)
     if reason:
         raise ValueError(f'Model {model["rid"]}: {reason}')
-    meshes = [(i, mesh) for i, part in geometry_part_items(model) for mesh in part['meshes']]
+    meshes = mesh_items(model, skip_materials)
     normals = sorted({(i, v[1]) for i, mesh in meshes for strip in mesh['strips'] for v in strip['vertices']})
     normal_ids = {n: i for i, n in enumerate(normals)}
     materials = list(dict.fromkeys(mesh['material'] for _, mesh in meshes))
@@ -408,7 +443,8 @@ def instance_record(source, matrix, translation, scale, oid, instance_id, model_
 
 
 def compile_static(source, records, texture_ids, matrix, translation, track, page, model_ids,
-                   reclaim_host_models=False, animated_as_static=(), compose_local_matrices=False):
+                   reclaim_host_models=False, animated_as_static=(), compose_local_matrices=False,
+                   skip_materials=()):
     """Preserve existing resources and allocate each new kind independently."""
     def oid(rid):
         if not 0 <= rid < 0x7fff:
@@ -420,7 +456,8 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
 
     position_id, uv_id, color_id = [next_id(k) for k in (25, 27, 24)]
     first_normal, first_buffer, first_model, first_instance = [next_id(k) for k in (26, 23, 2, 3)]
-    materials = sorted({mesh['material'] for i in model_ids for p in source.models[i]['parts'] for mesh in p['meshes']})
+    materials = sorted({mesh['material'] for i in model_ids
+                        for _, mesh in mesh_items(source.models[i], skip_materials)})
     material_ids = {src: next_id(0) + i for i, src in enumerate(materials)}
     added = []
     for src, dst in material_ids.items():
@@ -433,7 +470,8 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
     reuse = {}
     for i, value in enumerate(positions):
         reuse.setdefault(value, i)
-    converted, instances, hidden, composed = [], [], [], {}
+    converted, instances, hidden, composed, source_ids = [], [], [], {}, {}
+    dropped_meshes = {}
     for index, source_id in enumerate(model_ids):
         model = source.models[source_id]
         model_id, buffer_id, normal_id = first_model+index, first_buffer+index, first_normal+index
@@ -446,8 +484,11 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
                     positions.append(value)
                 compose['index'][key] = reuse[value]
             composed[source_id] = compose['parts']
+        dropped = len(mesh_items(model)) - len(mesh_items(model, skip_materials))
+        if dropped:
+            dropped_meshes[str(source_id)] = dropped
         data, normals, scale = model_record(model, oid, model_id, buffer_id, material_ids,
-                                            source_id in animated_as_static, compose)
+                                            source_id in animated_as_static, compose, skip_materials)
         added.append(record(26, normal_id, b''.join(
             pack('3f', *(compose['normals'][key] if compose else
                          [x/16384 for x in source.normals[key[1]]])) for key in normals), track))
@@ -462,6 +503,11 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
                 data = instance_record(instance, matrix, translation, scale, oid, rid, model_id,
                                        color_id, page, compose and compose['bounds'])
                 instances.append(record(3, rid, data, track))
+                # The donor instance this placement came from, recorded where
+                # the decision is made. Visibility is applied here and some
+                # models have an empty parts[0], so no later pass can rebuild
+                # the pairing from the archive; static collision needs it.
+                source_ids[str(rid)] = source_instance_id
     if len(positions) > POSITION_LIMIT:
         raise ValueError(f'Composed positions exceed the halfword vertex index: {len(positions)}')
     added = [record(25, position_id, b''.join(pack('3h', *v) for v in positions), track),
@@ -481,6 +527,12 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
     result.sort(key=lambda r: WORLD_RESOURCE_ORDER.index(r[0]['kind']))
     return result, dict(source_models=model_ids, added_models=len(converted), added_instances=len(instances),
                         hidden_source_instances=hidden,
+                        # Target instance RID -> donor scene instance. The
+                        # static-collision binder's only way back to the donor
+                        # gameplay record for a placement.
+                        instance_source_ids=source_ids,
+                        untextured_materials=sorted(skip_materials),
+                        untextured_meshes_skipped=dropped_meshes,
                         # Frozen at the rest pose. Named separately so a later reader cannot
                         # mistake their presence for animation support.
                         animated_imported_as_static=sorted(animated_as_static),
@@ -531,8 +583,10 @@ def main():
     records = world.records(args.group)
     location = next(l for l in world.index['locations'] if l['group_start'] <= args.group <= l['last_group'])
     reclamation_references = validate_reclamation(world, args.group, location['index']) if args.reclaim_host_models else 0
+    skip_materials = untextured_materials(source)
     omitted = {m['rid']: reason for m in source.models
-               if (reason := eligibility(m, args.animated_as_static, args.compose_local_matrices))}
+               if (reason := eligibility(m, args.animated_as_static, args.compose_local_matrices,
+                                         skip_materials))}
     out_of_range = screen_compositions(source, omitted) if args.compose_local_matrices else {}
     # A frozen model's animation is discarded at its rest pose, whether or not
     # its parts were also composed, so this set never widens past the imported.
@@ -549,13 +603,13 @@ def main():
     images = shape_images(args.textures.read_bytes())
     texture_ids = {int(k): v for k, v in experiment['textures']['textures'].items()}
     needed = sorted({source.materials[mesh['material']]['texture'] for i in ids
-                     for p in source.models[i]['parts'] for mesh in p['meshes']} - texture_ids.keys())
+                     for _, mesh in mesh_items(source.models[i], skip_materials)} - texture_ids.keys())
     for src, dst in zip(needed, unused_global_rids(world, 9, len(needed))):
         texture_ids[src] = dst
         textures.append(record(9, dst, world_image_record(images[src]), 255))
     records, report = compile_static(source, records, texture_ids, experiment['matrix'], experiment['translation'],
                                      location['index'], args.page, ids, args.reclaim_host_models,
-                                     frozen & set(ids), args.compose_local_matrices)
+                                     frozen & set(ids), args.compose_local_matrices, skip_materials)
     if args.reclaim_geometry_textures:
         textures, report['texture_residency'] = prune_geometry_texture_page(
             world, {args.group: records, args.texture_group: textures}, args.texture_group)

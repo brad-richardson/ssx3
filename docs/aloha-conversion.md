@@ -421,12 +421,173 @@ Phase 2, and everything this document does not establish:
 - **Start gate.** `gamecube_startgate.py` binds Snow Jam's countdown slot
   (`COUNTDOWN_SLOT = 3`) and a six-gate race; a three-gate slopestyle start has
   not been checked.
-- **Static collision** (§6) — `scenery.instance_source_ids` has to move into
-  `gamecube_scenery_import.py`.
+- ~~**Static collision** (§6) — `scenery.instance_source_ids` has to move into
+  `gamecube_scenery_import.py`.~~ Done, §8.1. What remains is the build order
+  against rails (§8.5) and a native impact check (§8.4).
 - **Reaching the event** (§7) — either the frontend's Select Event list has to
   offer R&B (a save/unlock question), or the DOL pin and the recompiled module
   have to accept a repointed event table.
-- **The 0xFFFF scenery material** — eight Aloha models are excluded until
-  `gamecube_scenery_import.py` treats it as "no texture".
+- ~~**The 0xFFFF scenery material** — eight Aloha models are excluded until
+  `gamecube_scenery_import.py` treats it as "no texture".~~ Done, §8.2: the
+  untextured mesh is dropped, six of the eight models import, and the two that
+  are nothing else are refused without losing a visible placement.
 - **Flipbook cycling.** Aloha's beach/stadium art is flipbook-heavy and nothing
   advances a frame index.
+
+## 8. Static collision, unblocked (September 15)
+
+Both §6 blockers are fixed in `tools/gamecube_scenery_import.py`, and Aloha now
+has a static-collision build.
+
+### 8.1 The placement map is recorded where the decision is made
+
+`compile_static` now writes `scenery.instance_source_ids` — target instance RID
+(as a JSON string) → donor scene instance index — at the moment it appends each
+placement, next to the visibility test that decides whether the placement exists
+at all. That is the field `gamecube_collision_import.bind_static` needs, and it
+replaces the retired `local/evidence/garibaldi-visibility/build-022.py`. Nothing
+else about the archive changes: the map lives only in `scenery.json` /
+`experiment.json`.
+
+Re-deriving it afterwards is impossible for the reasons in
+`local/research/aloha/collision-blocker.md`, and the fix is to stop trying.
+
+**Garibaldi is byte-identical.** The stage that reads `gc-gari-013` — scenery —
+was rebuilt twice from the §1 command, once with HEAD's tools and once with the
+changed ones:
+
+| Build | Archive SHA-256 |
+| --- | --- |
+| `local/builds/gc-gari-regress-scenery-head` (HEAD tools) | `c479370fffd7d0d771875d846cfb4d603862ca31ebb7ba7f2bd8b80813276664` |
+| `local/builds/gc-gari-regress-scenery-new` (changed tools) | `c479370fffd7d0d771875d846cfb4d603862ca31ebb7ba7f2bd8b80813276664` |
+
+**Identical**, 624 models and 3,252 placements either way. The recipe JSON gains
+exactly three keys (`instance_source_ids`, `untextured_materials`,
+`untextured_meshes_skipped`) and no existing value changes.
+
+The new Garibaldi map also cross-checks against the retired script's: the 3,252
+pairs are in the same order as `gc-gari-022`'s 3,239, and the 13 extra entries
+are exactly the instances 022 removed. Aloha's map is checked much harder — see
+§8.3.
+
+### 8.2 Texture index 0xFFFF is the donor's untextured material
+
+A GC Tricky material opens with the same four texture-stage halfwords SSX 3
+uses, and `0xffff` marks an unused stage. Of the 2,575 stock SSX 3 materials,
+2,456 leave stages 1-3 unset and 119 use two stages, so the stages are an array
+the engine walks, skipping `0xffff`. Aloha's material 1 leaves **stage 0** unset
+as well and clears flags bit 3 (`0x00015000` against `0x00015008` /`0x00055008`
+on the textured ones), which is the donor's own "untextured" marking — not an
+out-of-range image ID.
+
+It is **not** passed through. No stock SSX 3 material leaves stage 0 unset (0 of
+2,575), so a material with no base texture is an unverified target encoding, and
+this pipeline does not emit untested forms (the same rule that keeps donor
+geometry flags out of the model record). `--models` is no longer needed either
+way, because the sentinel is now handled instead of avoided:
+
+- `untextured_materials()` collects the donor materials with texture `0xffff`.
+- `mesh_items()` drops **only those meshes**; the rest of the model imports.
+- `eligibility()` refuses a model only when it has *nothing else*
+  (`untextured material only`).
+
+All 8 affected models use the single material 1 for exactly one mesh each, and
+every one of those meshes is a small untextured box or quad:
+
+| model | meshes | dropped mesh | donor placements (visible) | outcome |
+| ---: | ---: | --- | ---: | --- |
+| 128 | 2 | 6 quads | 4 (4) | imported without it |
+| 135 | 3 | 6 quads | 23 (23) | imported without it |
+| 136 | 3 | 8 quads | 23 (23) | imported without it |
+| 139 | 3 | 3 quads | 1 (0) | imported without it |
+| 216 | 5 | 2 strips, 10 verts | 3 (3) | imported without it |
+| 443 | 2 | 6 quads | 4 (4) | imported without it |
+| 247 | 1 | the whole model (1 quad) | 1 (0) | **refused** |
+| 469 | 1 | the whole model (1 flat quad) | 1 (0) | **refused** |
+
+So **no visible placement is lost**: 247 and 469 have one donor instance each
+and both are hidden. Eligible models go from 640 (the §6 `--models` workaround)
+to **646** of 687.
+
+### 8.3 The builds
+
+```sh
+python3 tools/gamecube_scenery_import.py --base-build local/builds/gc-aloha-001 \
+  --nbd local/source/gamecube/tricky/aloha.nbd --gsf local/source/gamecube/tricky/aloha.gsf \
+  --textures local/source/gamecube/tricky/aloha.gsh \
+  --group 48 --texture-group 42 --page 0x000b002a \
+  --reclaim-host-models --reclaim-geometry-textures \
+  --output local/builds/gc-aloha-004
+
+python3 tools/gamecube_collision_import.py --base-build local/builds/gc-aloha-004 \
+  --nbd local/source/gamecube/tricky/aloha.nbd --gsf local/source/gamecube/tricky/aloha.gsf \
+  --output local/builds/gc-aloha-005
+```
+
+| build | stage | archive SHA-256 |
+| --- | --- | --- |
+| `gc-aloha-004` | scenery, no `--models` | `5acf74c2b2b9a9253df109022ab1b7922b69592147b5e4ccac1d0fb76468c14e` |
+| `gc-aloha-005` | static collision | `c0d0b336a436e6ad3877c722014bbba55afb7e95d5f919fad8fb7a357832360c` |
+
+`gc-aloha-004` (scenery), against `gc-aloha-002`'s 640/1,594:
+
+| | |
+| --- | ---: |
+| models imported | **646** of 687 (omitted: 26 animated, 5 local matrix, 4 normal palette, 4 multipart, 2 untextured-only) |
+| placements | **1,651** (189 hidden donor instances skipped) |
+| untextured meshes dropped | 6, one each on models 128/135/136/139/216/443 |
+| new scenery textures | 80 |
+| host records reclaimed | 567 (1,136,476 B) |
+| group 48 records / memsize | 7,289 / 2,283,186 (stock 5,602 / 2,504,486) |
+| resources (capacity-validated) | 107,298 |
+| `instance_source_ids` | 1,651 pairs |
+
+`gc-aloha-005` (static collision):
+
+| | |
+| --- | ---: |
+| colliding instances enabled | **677** of 1,651 |
+| collision resources / bytes | 163 / 307,116 |
+| distinct donor collision meshes | 163 |
+| binding definitions | 164 (163 colliding + 1 shared non-colliding) |
+| skipped | 329 — 92 `mode-2/effect-8`, 44 protected-reset-corridor, 36 `mode-3/effect-51`, 35 `mode-2/effect-35`, 7 multipart-collision, and 115 more across 20 mode/effect pairs |
+| non-colliding placements (no GSF collision flag) | 645 |
+| group 48 records / memsize | 7,452 / 2,591,606 |
+| resources (capacity-validated) | 107,461; 107,298 reference records audited |
+
+The memsize is 3.5% over ASS1's stock 2,504,486. That is well inside the
+precedent: `gc-gari-031` runs ARA1's group 36 at 2,825,886 against a stock
+2,397,894 (+18%).
+
+### 8.4 What was validated, and what was not
+
+Every static check the two tools own passed, and one of them is a direct proof
+of the new map: `bind_static` re-derives each placement's 160-byte instance
+record from the donor instance the map names and requires it to match the bytes
+already in the archive, so all **1,651** pairs are confirmed against the donor,
+not merely plausible. Also:
+
+- `validate_static_bindings` on the rebuilt binding table: 1,651 bound
+  instances, extents, definition kinds, no effect callbacks, and collision part
+  count equal to render-model part count on every colliding definition.
+- Archive readback: group 48 re-read from the assembled archive equals what was
+  written, record for record; every other group's blocks are byte-identical.
+- `validate_resource_capacities`: all 107,461 resources within their
+  RID-indexed tables.
+- No retained object/NIS references anywhere (107,298 records audited).
+
+**Not validated: anything at runtime.** `native_impact_verified` is still false
+and no contact-return check exists that does not need the native runtime — the
+only checker, `tools/gamecube_collision_check.py`, consumes a native trace.
+Another agent held the runtime for this task's window, so nothing was ridden and
+nothing was observed either way.
+
+### 8.5 One ordering question left
+
+`gc-aloha-004`/`005` is the scenery→collision chain the template runs. It does
+**not** contain rails: `gc-aloha-003` was built on the superseded `gc-aloha-002`
+scenery. The Garibaldi lineage ran splines *before* collision, so the rails
+stage has to be re-run on the new scenery build and the chain re-ordered
+(`004` → splines → collision), or `gamecube_spline_import.py` has to be checked
+against a kind-16 record that already carries instance bindings. That is the
+next step for this course, and it is a build-order question, not a converter gap.

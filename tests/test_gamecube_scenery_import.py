@@ -3,19 +3,74 @@ import struct
 import unittest
 from tests.test_gamecube_scenery import fixture, gameplay_fixture
 from gamecube_scenery import TrickyScenery
-from gamecube_scenery_import import (compile_static, model_record, validate_reclamation,
-                                     prune_geometry_texture_page)
+from gamecube_scenery_import import (compile_static, eligibility, model_record, untextured_materials,
+                                     validate_reclamation, prune_geometry_texture_page)
 from types import SimpleNamespace
+
+IDENTITY_PLACEMENT = ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], [0, 0, 0])
+
+
+def untextured_scene(flags=1):
+    """The authored triangle plus a second mesh on an untextured material."""
+    source = TrickyScenery(fixture(), gameplay_fixture(flags))
+    source.materials.append(dict(texture=0xffff, flipbook=-1, raw=b''))
+    meshes = source.models[0]['parts'][0]['meshes']
+    meshes.append(dict(material=len(source.materials)-1, strips=list(meshes[0]['strips'])))
+    return source
 
 
 class StaticSceneryImportTests(unittest.TestCase):
     def test_hidden_trigger_geometry_is_not_instantiated(self):
         source = TrickyScenery(fixture(), gameplay_fixture(0x1020))
-        result, report = compile_static(source, [], {0: 0}, [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-                                        [0, 0, 0], 0, 31, [0])
+        result, report = compile_static(source, [], {0: 0}, *IDENTITY_PLACEMENT, 0, 31, [0])
         self.assertFalse(any(e['kind'] == 3 for e, _ in result))
         self.assertEqual(report['hidden_source_instances'], [0])
         self.assertEqual(report['added_instances'], 0)
+        self.assertEqual(report['instance_source_ids'], {})
+
+    def test_the_source_map_names_the_donor_instance_behind_each_placement(self):
+        # Visibility is applied here, so the map is not the identity and no
+        # later pass can rebuild it: donor instance 0 is hidden and absent.
+        source = TrickyScenery(fixture(), gameplay_fixture())
+        hidden = dict(source.instances[0])
+        hidden['gameplay'] = dict(hidden['gameplay'], visible=False)
+        source.instances.insert(0, hidden)
+        existing = [(dict(kind=3, rid=4, track=0), b'host')]
+        _, report = compile_static(source, existing, {0: 0}, *IDENTITY_PLACEMENT, 0, 31, [0])
+        self.assertEqual(report['hidden_source_instances'], [0])
+        self.assertEqual(report['added_instances'], 1)
+        # Keyed by the target RID the importer allocated, past the host's.
+        self.assertEqual(report['instance_source_ids'], {'5': 1})
+
+    def test_an_untextured_material_drops_its_mesh_and_not_the_model(self):
+        source = untextured_scene()
+        skip = untextured_materials(source)
+        self.assertEqual(skip, {1})
+        self.assertIsNone(eligibility(source.models[0], skip_materials=skip))
+        records, report = compile_static(source, [], {0: 99}, *IDENTITY_PLACEMENT, 0, 31, [0],
+                                         skip_materials=skip)
+        self.assertEqual(report['untextured_materials'], [1])
+        self.assertEqual(report['untextured_meshes_skipped'], {'0': 1})
+        # One target material, referring to the one imported image, and one
+        # mesh left in the model's geometry header.
+        materials = [p for e, p in records if e['kind'] == 0]
+        self.assertEqual([struct.unpack_from('>4H', p) for p in materials],
+                         [(99, 65535, 65535, 65535)])
+        model = next(p for e, p in records if e['kind'] == 2)
+        geometry = struct.unpack_from('>I', model, 8)[0] + 16
+        self.assertEqual(struct.unpack_from('>I', model, geometry + 28)[0], 1)
+
+    def test_a_wholly_untextured_model_is_refused_rather_than_emitted_empty(self):
+        source = untextured_scene()
+        del source.models[0]['parts'][0]['meshes'][0]
+        skip = untextured_materials(source)
+        self.assertEqual(eligibility(source.models[0], skip_materials=skip),
+                         'untextured material only')
+        with self.assertRaisesRegex(ValueError, 'untextured material only'):
+            model_record(source.models[0], lambda r: r, 0, 0, {}, skip_materials=skip)
+        # Without the sentinel set it is still a perfectly ordinary model, so
+        # the refusal comes from the target encoding, not from the geometry.
+        self.assertIsNone(eligibility(source.models[0]))
 
     def test_donor_geometry_flag_does_not_enable_target_dynamic_path(self):
         source = TrickyScenery(fixture())
