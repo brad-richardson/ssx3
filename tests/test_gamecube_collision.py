@@ -5,7 +5,7 @@ import unittest
 from gamecube_collision import encode_collision, read_collision, read_tricky_collision, collision_instance_transform
 from gamecube_collision_import import bind_static, validate_static_bindings, segment_intersects_box
 from gamecube_scenery import TrickyScenery
-from gamecube_scenery_import import instance_record
+from gamecube_scenery_import import composition, instance_record
 from race_course import path_geometry
 from tests.test_gamecube_scenery import fixture, gameplay_fixture
 
@@ -151,3 +151,46 @@ class CollisionTests(unittest.TestCase):
         self.assertEqual(next(p for e,p in guarded if e['kind']==14),aip)
         scene.instances[0]['gameplay']['visible']=False
         with self.assertRaisesRegex(ValueError,'Hidden helper'):bind_static(rows,scene,[[mesh()]],recipe)
+
+
+class ComposedLocalMatrixTests(unittest.TestCase):
+    """A composed model's placement must be re-derived the same way here."""
+
+    # Row-vector: a quarter turn about Z, then a translation.
+    SPIN = (0., 1., 0., 0., -1., 0., 0., 0., 0., 0., 1., 0., 10., 20., 30., 1.)
+
+    def rows(self, scene, bounds):
+        identity, translation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [10, 20, 30]
+        recipe = dict(track=8, matrix=identity, translation=translation,
+                      scenery=dict(source_models=[0], instance_source_ids={0: 0}))
+        p = instance_record(scene.instances[0], identity, translation, 1, lambda i: 8 << 24 | i,
+                            0, 7, 6, 31, bounds)
+        script = bytearray(136)
+        struct.pack_into('>I', script, 0, 0x00100000)
+        struct.pack_into('>3I', script, 56, 1, 92, 132)
+        struct.pack_into('>I', script, 92, 96)
+        script[96:132] = bytes.fromhex('004e554c0000001400000024000000242aff0000ffffffec000000000000000200000000')
+        struct.pack_into('>2I', script, 84, 1, 132)
+        script[132:] = bytes.fromhex('0003000a')
+        return [(dict(kind=2, rid=7, track=8, size=8), struct.pack('>2I', 0x08000007, 1)),
+                (dict(kind=3, rid=0, track=8, size=len(p)), p),
+                (dict(kind=16, rid=0, track=8, size=len(script)), bytes(script))], recipe
+
+    def scene(self):
+        scene = TrickyScenery(fixture(), gameplay_fixture(0x21))
+        scene.models[0]['parts'][0]['matrix'] = self.SPIN
+        scene.instances[0]['gameplay'].update(collision_mode=1, collision_or_physics=0, effect_slot=-1)
+        return scene
+
+    def test_composed_bounds_agree_and_the_donor_authored_ones_do_not(self):
+        scene = self.scene()
+        composed = composition(scene, scene.models[0])
+        rows, recipe = self.rows(scene, composed['bounds'])
+        _, report = bind_static(rows, scene, [[mesh()]], recipe)
+        self.assertEqual(report['local_matrix_composed_models'], [0])
+        self.assertEqual(len(report['enabled_instances']), 1)
+        # The donor's authored instance bounds predate the part matrix, so a
+        # placement built from them must not be accepted as this one.
+        stale, recipe = self.rows(scene, None)
+        with self.assertRaisesRegex(ValueError, 'placement/source mismatch'):
+            bind_static(stale, scene, [[mesh()]], recipe)

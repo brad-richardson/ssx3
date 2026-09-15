@@ -5,7 +5,8 @@ import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from gamecube_scenery import TrickyScenery, buffer_group, instance_gameplay, post_countdown_hidden
-from gamecube_scenery_import import eligibility, geometry_parts
+from gamecube_scenery_import import (compile_static, composed_matrices, composition, eligibility,
+                                     geometry_parts, needs_composition, screen_compositions)
 
 
 def gameplay_fixture(flags=1):
@@ -198,3 +199,144 @@ class SceneryTests(unittest.TestCase):
         struct.pack_into('>f', b, 160, float('nan'))
         with self.assertRaisesRegex(ValueError, 'Nonfinite'):
             TrickyScenery(b)
+
+
+IDENTITY = (1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.)
+# Row-vector layout, verified against the donor: rows 0-2 are the basis and
+# row 3 the translation, the same convention instance_record already reads.
+SPIN_Z = (0., 1., 0., 0., -1., 0., 0., 0., 0., 0., 1., 0., 10., 20., 30., 1.)
+
+
+def geometry_part(vertices, matrix=None, parent=0xffffffff, material=0, animated=False):
+    """A part whose one mesh draws one strip of (position, normal, uv) triples."""
+    return {'parent': parent, 'matrix': matrix, 'animated': animated, 'bounds': (0.,)*6,
+            'meshes': [{'material': material,
+                        'strips': [{'opcode': 0x9a, 'vertices': list(vertices)}]}]}
+
+
+class Scene:
+    """The subset of TrickyScenery the static compiler reads."""
+
+    def __init__(self, models, positions, instances=None):
+        self.models = [dict(rid=i, parts=parts) for i, parts in enumerate(models)]
+        self.positions = list(positions)
+        self.uvs = [(0, 0)] * 4
+        self.normals = [(16384, 0, 0), (0, 16384, 0)]
+        self.materials = [dict(texture=5, flipbook=-1)]
+        self.instances = instances if instances is not None else [
+            dict(model=i, matrix=IDENTITY, bounds=(0.,)*6, gameplay=dict(visible=True))
+            for i in range(len(models))]
+
+
+def display_positions(payload):
+    """Every position index the compiled model's display lists reference.
+
+    Each mesh's list is padded to 32 bytes, so skip the NOPs between them.
+    """
+    at, out = struct.unpack_from('>I', payload, 28)[0], []
+    while at < len(payload):
+        if payload[at] != 0x9a:
+            at += 1
+            continue
+        count = struct.unpack_from('>H', payload, at+1)[0]
+        at += 3
+        out += [struct.unpack_from('>HBHH', payload, at+7*i)[0] for i in range(count)]
+        at += 7*count
+    return out
+
+
+def compile_scene(scene, **kwargs):
+    records, report = compile_static(scene, [], {5: 700}, [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                                     [0, 0, 0], 8, 0x0008001f, list(range(len(scene.models))),
+                                     **kwargs)
+    models = [p for e, p in records if e['kind'] == 2]
+    shared = [v for e, p in records if e['kind'] == 25
+              for v in struct.iter_unpack('>3h', p)]
+    return models, shared, report
+
+
+class LocalMatrixTests(unittest.TestCase):
+    """(a3): part matrices baked into transformed vertex copies."""
+
+    def test_the_flag_is_what_admits_a_matrix_or_a_second_part(self):
+        one = {'rid': 280, 'parts': [part(meshes=0), part(matrix=SPIN_Z)]}
+        many = {'rid': 49, 'parts': [part(meshes=0), part(), part(matrix=SPIN_Z)]}
+        self.assertEqual(eligibility(one), 'local matrix')
+        self.assertEqual(eligibility(many), 'multipart')
+        self.assertTrue(needs_composition(one) and needs_composition(many))
+        self.assertIsNone(eligibility(one, compose_local_matrices=True))
+        self.assertIsNone(eligibility(many, compose_local_matrices=True))
+
+    def test_a_scaling_matrix_is_refused_rather_than_rotating_its_normals(self):
+        stretched = list(IDENTITY)
+        stretched[0] = 2.0
+        model = {'rid': 7, 'parts': [part(matrix=tuple(stretched))]}
+        self.assertEqual(eligibility(model, compose_local_matrices=True),
+                         'non-orthonormal local matrix')
+
+    def test_a_single_parts_matrix_is_applied_to_its_own_position_copies(self):
+        # Donor quarter units: stored (4, 0, 0) is the donor-unit point (1, 0, 0).
+        # SPIN_Z turns it a quarter turn about Z and adds (10, 20, 30).
+        scene = Scene([[geometry_part([(0, 0, 0), (1, 0, 0), (2, 1, 0)])],
+                       [geometry_part([(0, 0, 0), (1, 0, 0), (2, 1, 0)], matrix=SPIN_Z)]],
+                      [(0, 0, 0), (4, 0, 0), (0, 4, 0)])
+        composed = composition(scene, scene.models[1])
+        self.assertEqual(composed['vertices'][0, 0], (40, 80, 120))
+        self.assertEqual(composed['vertices'][0, 1], (40, 84, 120))
+        self.assertEqual(composed['vertices'][0, 2], (36, 80, 120))
+        self.assertEqual(composed['parts'], 1)
+        self.assertIsNone(composition(scene, scene.models[0]))
+        models, shared, report = compile_scene(scene, compose_local_matrices=True)
+        # The shared array keeps its original entries: every other model still
+        # indexes them. The transformed copies are appended after them.
+        self.assertEqual(shared[:3], [(0, 0, 0), (4, 0, 0), (0, 4, 0)])
+        self.assertEqual(shared[3:], [(40, 80, 120), (40, 84, 120), (36, 80, 120)])
+        self.assertEqual(display_positions(models[0]), [0, 1, 2])
+        self.assertEqual(display_positions(models[1]), [3, 4, 5])
+        self.assertEqual(report['local_matrix_composed'], {'1': 1})
+        # Bounds follow the transformed copies, in the model's local units.
+        self.assertEqual(struct.unpack_from('>6f', models[1], 56), (9., 20., 30., 10., 21., 30.))
+
+    def test_an_out_of_range_composition_is_refused_and_reported(self):
+        far = list(IDENTITY)
+        far[12] = 9000.0  # Donor units; the 1x encoding stores quarter units.
+        scene = Scene([[geometry_part([(0, 0, 0)], matrix=tuple(far))]], [(0, 0, 0)])
+        with self.assertRaisesRegex(ValueError, 'signed 16-bit'):
+            composition(scene, scene.models[0])
+        omitted = {}
+        self.assertIn('signed 16-bit', screen_compositions(scene, omitted)[0])
+        self.assertEqual(omitted, {0: 'local matrix out of range'})
+        with self.assertRaisesRegex(ValueError, 'signed 16-bit'):
+            compile_scene(scene, compose_local_matrices=True)
+
+    def test_a_child_part_composes_through_its_parent(self):
+        child = list(IDENTITY)
+        child[12], child[13] = 5.0, 0.0
+        parts = [geometry_part([(0, 0, 0)]),
+                 geometry_part([(1, 0, 0)], matrix=SPIN_Z, parent=0),
+                 geometry_part([(1, 0, 0)], matrix=tuple(child), parent=1)]
+        scene = Scene([parts], [(0, 0, 0), (4, 0, 0)])
+        matrices = composed_matrices(scene.models[0])
+        self.assertEqual(matrices[0], IDENTITY)
+        self.assertEqual(matrices[1], SPIN_Z)
+        # child x parent: the child's +5 X is spun onto +Y before the parent's
+        # own translation, so (1,0,0) lands at (10, 20+5+1, 30).
+        self.assertEqual(tuple(round(v, 6) for v in matrices[2][12:15]), (10., 25., 30.))
+        composed = composition(scene, scene.models[0])
+        self.assertEqual(composed['vertices'][0, 0], (0, 0, 0))
+        self.assertEqual(composed['vertices'][1, 1], (40, 84, 120))
+        self.assertEqual(composed['vertices'][2, 1], (40, 104, 120))
+        self.assertEqual(composed['parts'], 3)
+        # One rigid target part carries every composed part's meshes.
+        models, shared, report = compile_scene(scene, compose_local_matrices=True)
+        self.assertEqual(struct.unpack_from('>I', models[0], 4)[0], 1)
+        # The untransformed copy is the value the shared array already holds,
+        # so it is reused instead of appended.
+        self.assertEqual(display_positions(models[0]), [0, 2, 3])
+        self.assertEqual(shared[2:], [(40, 84, 120), (40, 104, 120)])
+        self.assertEqual(report['local_matrix_composed'], {'0': 3})
+
+    def test_composition_is_off_unless_asked_for(self):
+        scene = Scene([[geometry_part([(0, 0, 0)], matrix=SPIN_Z)]], [(0, 0, 0)])
+        with self.assertRaisesRegex(ValueError, 'local matrix'):
+            compile_scene(scene)

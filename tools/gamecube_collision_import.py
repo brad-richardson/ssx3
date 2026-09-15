@@ -16,7 +16,7 @@ from course_route import ssx3_paths
 from gamecube_collision import read_tricky_collision, encode_collision, read_collision, collision_instance_transform
 from gamecube_cleanup import clear_removed_instance_references
 from gamecube_scenery import TrickyScenery
-from gamecube_scenery_import import geometry_parts, instance_record, WORLD_RESOURCE_ORDER
+from gamecube_scenery_import import composition, instance_record, model_scale, WORLD_RESOURCE_ORDER
 from gamecube_spline_import import require_disabled_programs
 from gamecube_world import World, assemble, validate_resource_capacities
 
@@ -127,7 +127,7 @@ def bind_static(records, scene, collisions, recipe):
         raise ValueError('Invalid property base')
     oid=lambda rid:track<<24|rid
     added, converted, defs, def_ids, bindings, remap, new_sources = [],[],[],{},[],{},{}
-    collision_ids={}; skipped=Counter(); enabled=[]
+    collision_ids={}; skipped=Counter(); enabled=[]; composed={}
     corridors=reset_segments(records);protected=[];unsupported_transforms=[]
     for new_id,(e,p) in enumerate(instances):
         src_id=source_ids[e['rid']]
@@ -135,12 +135,20 @@ def bind_static(records, scene, collisions, recipe):
         src=scene.instances[src_id]; gameplay=src['gameplay']
         if not gameplay['visible']:raise ValueError('Hidden helper must not re-enter the scene')
         model=models[src['model']]
-        opcode=geometry_parts(scene.models[src['model']])[0]['meshes'][0]['strips'][0]['opcode']
-        scale=4 if opcode==0x9b else 1
+        # Mirror the scenery importer's composition: one scale per model, and
+        # for a model whose part matrices were baked into vertex copies the
+        # bounds recomputed from those copies rather than the donor's authored
+        # instance bounds. Both come from the same helpers, so this comparison
+        # neither fails spuriously nor passes a differently derived record.
+        if src['model'] not in composed:
+            composed[src['model']]=composition(scene,scene.models[src['model']])
+        compose=composed[src['model']]
+        scale=model_scale(scene.models[src['model']])
         color,offset=struct.unpack_from('>2I',p,152)
         if color>>24!=track or offset!=0:raise ValueError('Unexpected instance color reference')
         expected=instance_record(src,recipe['matrix'],recipe['translation'],scale,oid,e['rid'],model,
-                                 color&0xffffff,struct.unpack_from('>I',p,116)[0])
+                                 color&0xffffff,struct.unpack_from('>I',p,116)[0],
+                                 compose and compose['bounds'])
         if expected!=p:raise ValueError(f'Imported placement/source mismatch at {e["rid"]}')
         collision=None
         if gameplay['player_collision']:
@@ -220,6 +228,7 @@ def bind_static(records, scene, collisions, recipe):
                     protected_reset_instances=protected,
                     unsupported_transform_instances=unsupported_transforms,
                     transform_profile='orthonormal-basis-plus-uniform-scale',
+                    local_matrix_composed_models=sorted(k for k,v in composed.items() if v),
                     reset_clearance=dict(method='conservative instance bounds',radius=35,height=150),
                     response_profile='stock-static-behavior-3',native_impact_verified=False)
 

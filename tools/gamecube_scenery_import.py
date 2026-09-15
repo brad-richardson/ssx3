@@ -23,6 +23,11 @@ from patch_geometry import outward_float32
 WORLD_RESOURCE_ORDER = (25, 26, 27, 24, 23, 0, 6, 7, 2, 3, 4, 5, 1, 8, 12, 11,
                         13, 15, 17, 20, 14, 16, 18, 21, 22)
 
+IDENTITY = (1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+
+# A display-list vertex stores its position index as a halfword.
+POSITION_LIMIT = 0x10000
+
 
 def pack(fmt, *values):
     return struct.pack('>' + fmt, *values)
@@ -100,21 +105,77 @@ def record(kind, rid, payload, track):
     return dict(kind=kind, rid=rid, track=track, size=len(payload)), bytes(payload)
 
 
-def geometry_parts(model):
-    """The parts that actually carry geometry.
+def geometry_part_items(model):
+    """The parts that actually carry geometry, with their index in `parts`.
 
     Every multipart donor model has exactly one part with no meshes: a
     transform-free root the geometry hangs from (parent 0xffffffff, no matrix,
     no bounds). Counting it made a model with a single geometry part look
     multipart, which dropped models 132/133/153 -- 13 placements -- although
     they need nothing the importer does not already do. An empty part that
-    carries its own matrix is a real transform, so it stays counted and the
-    model is still rejected.
+    carries its own matrix is a real transform, so it stays counted; without
+    `--compose-local-matrices` the model is still rejected.
+
+    The index is the part's own position in `model['parts']`, which is what
+    `parent` references and what keys the composed per-part vertex copies.
     """
-    return [p for p in model['parts'] if p['meshes'] or p['matrix'] is not None]
+    return [(i, p) for i, p in enumerate(model['parts']) if p['meshes'] or p['matrix'] is not None]
 
 
-def eligibility(model, animated_as_static=False):
+def geometry_parts(model):
+    return [p for _, p in geometry_part_items(model)]
+
+
+def multiply(a, b):
+    """Row-vector 4x4 product: `a` applied first, then `b`."""
+    return tuple(sum(a[4*r+k] * b[4*k+c] for k in range(4)) for r in range(4) for c in range(4))
+
+
+def transform_point(m, p):
+    return [sum(p[k] * m[4*k+c] for k in range(3)) + m[12+c] for c in range(3)]
+
+
+def transform_direction(m, v):
+    return [sum(v[k] * m[4*k+c] for k in range(3)) for c in range(3)]
+
+
+def composed_matrices(model):
+    """Every part's matrix composed with its parent chain.
+
+    A donor part matrix is 16 floats in the same row-vector layout the importer
+    already reads from an instance: rows 0-2 are the basis and row 3 is the
+    translation, which is how `instance_record` consumes `src[row*4:row*4+3]`
+    and `src[12:15]`. Verified against the donor rather than assumed: composing
+    model 49's parts as child x parent and pushing its vertices through the
+    donor instance matrix reproduces that instance's own authored bounds to
+    0.2 units, which ignoring the part matrices does not.
+
+    `parent` indexes an earlier part (the reader rejects a forward or cyclic
+    reference); the transform-free root is 0xffffffff.
+    """
+    out = []
+    for part in model['parts']:
+        local = part['matrix'] if part['matrix'] is not None else IDENTITY
+        out.append(local if part['parent'] == 0xffffffff else multiply(local, out[part['parent']]))
+    return out
+
+
+def orthonormal(m, tolerance=1e-4):
+    """A rigid transform: normals may be rotated instead of inverse-transposed."""
+    if tuple(m[3::4]) != (0.0, 0.0, 0.0, 1.0):
+        return False
+    rows = [m[4*i:4*i+3] for i in range(3)]
+    return all(abs(sum(rows[a][k]*rows[b][k] for k in range(3)) - (a == b)) <= tolerance
+               for a in range(3) for b in range(3))
+
+
+def needs_composition(model):
+    """Whether importing this model means baking part matrices into vertices."""
+    parts = geometry_parts(model)
+    return len(parts) != 1 or parts[0]['matrix'] is not None
+
+
+def eligibility(model, animated_as_static=False, compose_local_matrices=False):
     """Why this model cannot be imported, or None.
 
     `animated_as_static` admits a model whose single geometry part carries
@@ -122,22 +183,120 @@ def eligibility(model, animated_as_static=False):
     animation. That is a deliberate downgrade, not animation support: the
     part's geometry is read the same way either way, since `animated` only
     reports that the part object names separate animation data.
+
+    `compose_local_matrices` admits a model whose parts carry local matrices by
+    baking each composed matrix into transformed vertex copies (see
+    `composition`). It is likewise a downgrade, not a scene-graph: the parts
+    collapse into one rigid target part and any animation that would have
+    driven those matrices is discarded.
     """
     parts = geometry_parts(model)
-    if len(parts) != 1:
+    composing = compose_local_matrices and needs_composition(model)
+    if not composing and len(parts) != 1:
         return 'multipart'
-    part = parts[0]
-    if part['animated'] and not animated_as_static:
+    if any(p['animated'] for p in parts) and not animated_as_static:
         return 'animated'
-    if part['matrix'] is not None:
+    if not composing and parts[0]['matrix'] is not None:
         return 'local matrix'
-    normals = {v[1] for mesh in part['meshes'] for strip in mesh['strips'] for v in strip['vertices']}
+    if composing:
+        if not any(p['meshes'] for p in parts):
+            return 'no geometry to compose'
+        # Rotating a normal by the basis is only the inverse transpose for a
+        # rigid transform. Every Garibaldi part matrix is orthonormal to 1e-11.
+        if not all(orthonormal(m) for m in composed_matrices(model)):
+            return 'non-orthonormal local matrix'
+    items = geometry_part_items(model)
+    normals = {(i, v[1]) for i, p in items for mesh in p['meshes']
+               for strip in mesh['strips'] for v in strip['vertices']}
     if len(normals) > 256:
         return 'normal palette exceeds 256'
-    opcodes = {strip['opcode'] for mesh in part['meshes'] for strip in mesh['strips']}
+    opcodes = {strip['opcode'] for _, p in items for mesh in p['meshes'] for strip in mesh['strips']}
     if len(opcodes) != 1:
         return 'mixed or absent position formats'
     return None
+
+
+def model_scale(model):
+    """The instance compensation for this model's donor position format.
+
+    The target VAT reads quarter units. A donor 0x9b model stores whole units,
+    so its instance basis is multiplied by 4 and its local bounds divided by
+    it. Shared by the collision importer so both derive one scale per model
+    rather than reading the first part's first strip.
+    """
+    opcodes = {strip['opcode'] for _, p in geometry_part_items(model)
+               for mesh in p['meshes'] for strip in mesh['strips']}
+    if len(opcodes) != 1:
+        raise ValueError(f'Model {model["rid"]}: mixed or absent position formats')
+    return 4 if opcodes.pop() == 0x9b else 1
+
+
+def composition(scene, model):
+    """Bake a matrix-carrying model's part transforms into vertex copies.
+
+    None when the model needs none. Otherwise a dict of
+
+    * `vertices`: `{(part, source position): stored signed-16 triple}`
+    * `normals`: `{(part, source normal): unit float triple}`
+    * `bounds`: 6 donor-unit floats recomputed from the transformed positions
+    * `parts`: how many geometry parts were composed
+
+    Strip vertices index globally shared arrays, so a matrix cannot be applied
+    in place; the caller appends these copies and remaps that model's indices.
+
+    Donor stored positions are quarter units for the 1x format and whole units
+    for the 4x one, so a donor-unit point is `stored/4` or `stored` and the
+    inverse restores the encoding. A transformed position that leaves the
+    signed 16-bit range raises: the model is refused, never re-encoded wrong.
+    """
+    if not needs_composition(model):
+        return None
+    matrices = composed_matrices(model)
+    scale = model_scale(model)
+    unit = 0.25 if scale == 1 else 1.0
+    vertices, normals, stored = {}, {}, []
+    for i, part in geometry_part_items(model):
+        matrix = matrices[i]
+        for mesh in part['meshes']:
+            for strip in mesh['strips']:
+                for position, normal, _ in strip['vertices']:
+                    if (i, position) not in vertices:
+                        point = transform_point(matrix, [v*unit for v in scene.positions[position]])
+                        value = tuple(math.floor(v/unit + 0.5) for v in point)
+                        if any(not -0x8000 <= v <= 0x7fff for v in value):
+                            raise ValueError(
+                                f'Model {model["rid"]}: composed position {value} on part {i} '
+                                f'leaves the signed 16-bit {scale}x encoding')
+                        vertices[i, position] = value
+                        stored.append(value)
+                    if (i, normal) not in normals:
+                        direction = transform_direction(matrix, [v/16384 for v in scene.normals[normal]])
+                        length = math.dist(direction, (0, 0, 0)) or 1.0
+                        normals[i, normal] = tuple(v/length for v in direction)
+    bounds = tuple([min(v[k] for v in stored)*unit for k in range(3)] +
+                   [max(v[k] for v in stored)*unit for k in range(3)])
+    return dict(vertices=vertices, normals=normals, bounds=bounds,
+                parts=sum(1 for _, p in geometry_part_items(model) if p['meshes']))
+
+
+def screen_compositions(scene, omitted):
+    """Refuse models whose composed positions leave the 16-bit encoding.
+
+    The range check needs the transformed vertices, so it cannot live in
+    `eligibility()`. `omitted` gains the model with a reason; the returned map
+    keeps the message, so the receipt names the model instead of the importer
+    silently emitting a re-encoded position that does not fit.
+    """
+    out_of_range = {}
+    for model in scene.models:
+        if model['rid'] in omitted or not needs_composition(model):
+            continue
+        try:
+            composition(scene, model)
+        except ValueError as error:
+            out_of_range[model['rid']] = str(error)
+            omitted[model['rid']] = 'local matrix out of range'
+    return out_of_range
 
 
 def validate_reclamation(world, group, track):
@@ -165,15 +324,22 @@ def validate_reclamation(world, group, track):
     return checked
 
 
-def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_static=False):
-    reason = eligibility(model, animated_as_static)
+def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_static=False, compose=None):
+    """One rigid target part. `compose` bakes donor part matrices into it.
+
+    When composing, `compose` is a `composition()` result carrying an extra
+    `index` map from `(part, source position)` to the global position index of
+    the transformed copy. Every geometry part's meshes are emitted into the one
+    target part, because the matrices that separated them are now in the
+    vertices; the palette and bounds follow the transformed data.
+    """
+    reason = eligibility(model, animated_as_static, compose is not None)
     if reason:
         raise ValueError(f'Model {model["rid"]}: {reason}')
-    part = geometry_parts(model)[0]
-    normals = sorted({v[1] for mesh in part['meshes'] for strip in mesh['strips'] for v in strip['vertices']})
+    meshes = [(i, mesh) for i, part in geometry_part_items(model) for mesh in part['meshes']]
+    normals = sorted({(i, v[1]) for i, mesh in meshes for strip in mesh['strips'] for v in strip['vertices']})
     normal_ids = {n: i for i, n in enumerate(normals)}
-    materials = list(dict.fromkeys(mesh['material'] for mesh in part['meshes']))
-    meshes = part['meshes']
+    materials = list(dict.fromkeys(mesh['material'] for _, mesh in meshes))
     objects = 36 + 4 * len(materials)
     geometry = objects + 16
     table = geometry + 36
@@ -187,19 +353,24 @@ def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_stat
     struct.pack_into('>4I', data, objects, 0xffffffff, geometry, 0, 0xffffffff)
     # The target VAT uses quarter-unit positions. Keep source whole-unit
     # vertices exact by compensating in the instance matrix and local bounds.
-    scale = 4 if meshes[0]['strips'][0]['opcode'] == 0x9b else 1
+    scale = model_scale(model)
+    # Composed bounds come from the transformed copies, not the donor's
+    # per-part bounds, which are stated in each part's own pre-matrix space.
+    bounds = compose['bounds'] if compose else geometry_parts(model)[0]['bounds']
     # Donor geometry flags are not a target ABI. Copying Tricky bit 0 makes
     # SSX 3 mutate unrelated display-list bytes during riding (probe 018).
     # Encode the tested static/precolored path explicitly; translating the
     # donor's dynamic lighting behavior needs its own storage/layout profile.
-    struct.pack_into('>6f3I', data, geometry, *(v/scale for v in part['bounds']),
+    struct.pack_into('>6f3I', data, geometry, *(v/scale for v in bounds),
                      0, len(meshes), table)
-    for i, mesh in enumerate(meshes):
+    for i, (part_index, mesh) in enumerate(meshes):
         display = bytearray()
         for strip in mesh['strips']:
             display += pack('BH', 0x9a, len(strip['vertices']))
             for position, normal, uv in strip['vertices']:
-                display += pack('HBHH', position, normal_ids[normal], position, uv)
+                if compose:
+                    position = compose['index'][part_index, position]
+                display += pack('HBHH', position, normal_ids[part_index, normal], position, uv)
         display += bytes(-len(display) % 32)
         struct.pack_into('>I', data, table + 4*i, headers + 12*i)
         struct.pack_into('>HHII', data, headers + 12*i, materials.index(mesh['material']),
@@ -208,14 +379,22 @@ def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_stat
     return bytes(data), normals, scale
 
 
-def instance_record(source, matrix, translation, scale, oid, instance_id, model_id, color_id, page):
+def instance_record(source, matrix, translation, scale, oid, instance_id, model_id, color_id, page,
+                    local_bounds=None):
+    """`local_bounds` replaces the donor's authored world bounds for a composed
+    model. The donor's bounds for models 280-282 were authored from the
+    unrotated part, so they no longer contain the composed geometry; the model
+    box is taken through the instance matrix instead. The collision importer
+    re-derives this record byte for byte, so it composes the same bounds.
+    """
     src = source['matrix']
     transformed = []
     for row in range(3):
         transformed += [v*scale for v in apply(matrix, [0, 0, 0], src[row*4:row*4+3])] + [0]
     transformed += apply(matrix, translation, src[12:15]) + [1]
-    corners = [apply(matrix, translation, c) for c in itertools.product(
-        *[(source['bounds'][k], source['bounds'][k+3]) for k in range(3)])]
+    box = source['bounds'] if local_bounds is None else local_bounds
+    corners = [apply(matrix, translation, c if local_bounds is None else transform_point(src, c))
+               for c in itertools.product(*[(box[k], box[k+3]) for k in range(3)])]
     low = [outward_float32(min(c[k] for c in corners)-1, False) for k in range(3)]
     high = [outward_float32(max(c[k] for c in corners)+1, True) for k in range(3)]
     center = [struct.unpack('>f', pack('f', (low[k]+high[k])/2))[0] for k in range(3)]
@@ -229,7 +408,7 @@ def instance_record(source, matrix, translation, scale, oid, instance_id, model_
 
 
 def compile_static(source, records, texture_ids, matrix, translation, track, page, model_ids,
-                   reclaim_host_models=False, animated_as_static=()):
+                   reclaim_host_models=False, animated_as_static=(), compose_local_matrices=False):
     """Preserve existing resources and allocate each new kind independently."""
     def oid(rid):
         if not 0 <= rid < 0x7fff:
@@ -243,18 +422,35 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
     first_normal, first_buffer, first_model, first_instance = [next_id(k) for k in (26, 23, 2, 3)]
     materials = sorted({mesh['material'] for i in model_ids for p in source.models[i]['parts'] for mesh in p['meshes']})
     material_ids = {src: next_id(0) + i for i, src in enumerate(materials)}
-    added = [record(25, position_id, b''.join(pack('3h', *v) for v in source.positions), track),
-             record(27, uv_id, b''.join(pack('2h', *v) for v in source.uvs), track),
-             record(24, color_id, pack('H', 0x7bef) * len(source.positions), track)]
+    added = []
     for src, dst in material_ids.items():
         texture = texture_ids[source.materials[src]['texture']]
         added.append(record(0, dst, pack('4HI2HI', texture, 65535, 65535, 65535, 0, 7, 1, 0xffffffff), track))
-    converted, instances, hidden = [], [], []
+    # Transformed vertex copies extend the shared arrays rather than replacing
+    # entries in them: a stored position is referenced by every model that
+    # happens to use that value.
+    positions = list(source.positions)
+    reuse = {}
+    for i, value in enumerate(positions):
+        reuse.setdefault(value, i)
+    converted, instances, hidden, composed = [], [], [], {}
     for index, source_id in enumerate(model_ids):
+        model = source.models[source_id]
         model_id, buffer_id, normal_id = first_model+index, first_buffer+index, first_normal+index
-        data, normals, scale = model_record(source.models[source_id], oid, model_id, buffer_id,
-                                            material_ids, source_id in animated_as_static)
-        added.append(record(26, normal_id, b''.join(pack('3f', *(x/16384 for x in source.normals[n])) for n in normals), track))
+        compose = composition(source, model) if compose_local_matrices else None
+        if compose is not None:
+            compose['index'] = {}
+            for key, value in compose['vertices'].items():
+                if value not in reuse:
+                    reuse[value] = len(positions)
+                    positions.append(value)
+                compose['index'][key] = reuse[value]
+            composed[source_id] = compose['parts']
+        data, normals, scale = model_record(model, oid, model_id, buffer_id, material_ids,
+                                            source_id in animated_as_static, compose)
+        added.append(record(26, normal_id, b''.join(
+            pack('3f', *(compose['normals'][key] if compose else
+                         [x/16384 for x in source.normals[key[1]]])) for key in normals), track))
         added.append(record(23, buffer_id, buffer_group(oid(position_id), oid(uv_id), oid(normal_id)), track))
         converted.append(record(2, model_id, data, track))
         for source_instance_id, instance in enumerate(source.instances):
@@ -263,8 +459,14 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
                     hidden.append(source_instance_id)
                     continue
                 rid = first_instance + len(instances)
-                data = instance_record(instance, matrix, translation, scale, oid, rid, model_id, color_id, page)
+                data = instance_record(instance, matrix, translation, scale, oid, rid, model_id,
+                                       color_id, page, compose and compose['bounds'])
                 instances.append(record(3, rid, data, track))
+    if len(positions) > POSITION_LIMIT:
+        raise ValueError(f'Composed positions exceed the halfword vertex index: {len(positions)}')
+    added = [record(25, position_id, b''.join(pack('3h', *v) for v in positions), track),
+             record(27, uv_id, b''.join(pack('2h', *v) for v in source.uvs), track),
+             record(24, color_id, pack('H', 0x7bef) * len(positions), track)] + added
     reclaimed = []
     if reclaim_host_models:
         if any(e['kind'] == 3 and e['track'] == track for e, _ in records):
@@ -282,6 +484,10 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
                         # Frozen at the rest pose. Named separately so a later reader cannot
                         # mistake their presence for animation support.
                         animated_imported_as_static=sorted(animated_as_static),
+                        # Part matrices baked into vertex copies, per model the
+                        # number of geometry parts collapsed into one rigid
+                        # part. This is composition, never animated transforms.
+                        local_matrix_composed={str(k): v for k, v in sorted(composed.items())},
                         lighting_profile='neutral-diagnostic', collision=False, grind_splines=False,
                         reclaimed_host_records=len(reclaimed), reclaimed_host_bytes=sum(len(p) for _, p in reclaimed))
 
@@ -306,6 +512,12 @@ def main():
                         help='Import animated single-part prefabs frozen at their rest pose. They are '
                              'absent today, so this trades still geometry for nothing at all. It is not '
                              'animation support and does not import any animation data.')
+    parser.add_argument('--compose-local-matrices', action='store_true',
+                        help='Admit models whose parts carry a local matrix by baking each composed '
+                             'part matrix into transformed vertex copies. The parts collapse into one '
+                             'rigid part; this is not a scene graph and not animated transforms. A '
+                             'model whose result leaves the signed 16-bit encoding is refused and '
+                             'listed as local_matrix_out_of_range.')
     args = parser.parse_args()
     if args.output.exists():
         raise ValueError('Output exists; use a fresh experiment directory')
@@ -320,12 +532,13 @@ def main():
     location = next(l for l in world.index['locations'] if l['group_start'] <= args.group <= l['last_group'])
     reclamation_references = validate_reclamation(world, args.group, location['index']) if args.reclaim_host_models else 0
     omitted = {m['rid']: reason for m in source.models
-               if (reason := eligibility(m, args.animated_as_static))}
-    # Only single-geometry-part models can be frozen; a genuinely multipart one
-    # is still rejected above, so this set never widens past what was imported.
+               if (reason := eligibility(m, args.animated_as_static, args.compose_local_matrices))}
+    out_of_range = screen_compositions(source, omitted) if args.compose_local_matrices else {}
+    # A frozen model's animation is discarded at its rest pose, whether or not
+    # its parts were also composed, so this set never widens past the imported.
     frozen = {m['rid'] for m in source.models
               if args.animated_as_static and m['rid'] not in omitted
-              and geometry_parts(m)[0]['animated']}
+              and any(p['animated'] for p in geometry_parts(m))}
     ids = args.models if args.models is not None else [m['rid'] for m in source.models if m['rid'] not in omitted]
     if len(set(ids)) != len(ids) or any(not 0 <= i < len(source.models) for i in ids):
         raise ValueError('Invalid or duplicate model selection')
@@ -342,12 +555,13 @@ def main():
         textures.append(record(9, dst, world_image_record(images[src]), 255))
     records, report = compile_static(source, records, texture_ids, experiment['matrix'], experiment['translation'],
                                      location['index'], args.page, ids, args.reclaim_host_models,
-                                     frozen & set(ids))
+                                     frozen & set(ids), args.compose_local_matrices)
     if args.reclaim_geometry_textures:
         textures, report['texture_residency'] = prune_geometry_texture_page(
             world, {args.group: records, args.texture_group: textures}, args.texture_group)
     archive, _ = assemble(world, {args.group: records, args.texture_group: textures})
-    report.update(omitted_models=omitted, new_textures=needed, texture_ids=texture_ids,
+    report.update(omitted_models=omitted, local_matrix_out_of_range={str(k): v for k, v in out_of_range.items()},
+                  new_textures=needed, texture_ids=texture_ids,
                   visibility_profile='tricky-gc-post-countdown-v1',
                   post_countdown_hidden=source.post_countdown_hidden,
                   geometry_profile='static-precolored-gc-v1',
