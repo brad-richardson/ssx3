@@ -755,6 +755,53 @@ python3 tools/texture_pack_audit.py UNION PACK-v7 --output audit-v7.json
 Note `pack_mipmaps.py --output` names a **report file**, not a destination: the
 `_mipN` sidecars are written next to the bases, in place.
 
+### 10.11 Upscale factor is the phone's memory budget
+
+The pack that fixed §10.10 still cost too much to ride: the app's footprint went
+from about **457 MB without it to 1,137 MB with it**, and the frame-interval
+spikes that came with it are PNG decode on the texture-load path. Disk size is
+the wrong number to reason about here — Dolphin decodes a custom texture to
+RGBA8 and uploads it, so what the pack costs is its *decoded* size, and a 4x
+pack costs 16x the art it replaces. Measured over all 927 textures, base plus
+chain:
+
+| source side | textures | decoded RGBA8 |
+| --- | ---: | ---: |
+| <= 32 px | 138 | 11 MB |
+| <= 64 px | 165 | 54 MB |
+| <= 128 px | 519 | 693 MB |
+| <= 256 px | 85 | 445 MB |
+| | 907 | **1,203 MB** |
+
+Which is the opposite of where the *visual* defects were. The small tiled art
+caused §10.10 and costs 5% of the memory; the cost is entirely in the two
+largest buckets, where 4x of a 256-px source is 1024 px of texture feeding a
+1280x1056 internal render — past the point where any of it reaches a pixel.
+
+`tools/texture_pack_cap.py` caps the **upscaled side**, not the factor, so a
+32-px tile keeps its full 4x while a 256-px source drops to 2x. Two details
+matter. The reduction is a Lanczos downsample of the pack's own output, so no
+model runs again. And the cap may not cross a floor of 2x: a 216x368 source
+cannot reach 512 at 2x, and without the floor the search walks down to 1x and
+hands back the guest's own art — throwing the remaster away to save memory on
+one texture.
+
+At `--max-side 512`: 98 textures capped, 829 untouched, decoded total **1,283
+MB -> 894 MB** (-30%), and the heaviest textures decode 4x faster. The audit is
+unchanged apart from the scale column (`local_shift` max 12.1 -> 12.5).
+
+A capped texture's existing `_mipN` sidecars are deleted rather than kept: a
+stale chain is worse than none, because the levels no longer halve from the new
+base and Dolphin takes the mip count from whatever the pack supplies. Re-run
+`pack_mipmaps.py` afterwards.
+
+Further reduction means block compression rather than another cap — one DDS
+carries its whole mip chain (`CustomTextureData.cpp`, the `mip_count` loop), it
+uploads without decode, and BC1 is a eighth of RGBA8. The catch is that BC on
+iOS is a runtime capability (`MTLUtil.mm` gates `bSupportsST3CTextures` on
+`[device supportsBCTextureCompression]`, iOS 16.4+), so it needs a probe on the
+actual device before the pipeline is built around it.
+
 ## 11. Art passes a model cannot do: foliage
 
 Upscaling makes SSX 3's trees *smoother*, which is not the same as better. A
