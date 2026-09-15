@@ -74,9 +74,16 @@ the build or commit that closed them.
       rewriting 16 bytes. Descriptions live in `cmnamer.loc` (little-endian,
       Snow Jam is index 508, no empty slots, hash function unsolved). Any DOL
       patch forces a module regeneration (`dol_sha256` is enforced).
-      Recommended first step: keep Snow Jam's event row and let the native
-      runtime patch the archive-name and title strings in guest memory at
-      boot from a host-side manifest, then add a picker in the app's menu.
+      **Done September 15: the boot-time redirect exists.** The runtime
+      patches Snow Jam's event row in guest RAM from a manifest
+      (`SSX_COURSE_MANIFEST`, `--course-manifest`, `-ssxCourseManifest`;
+      schema in [course selection](course-selection.md)); no DOL byte or
+      module changes. The archive basename must match the BIGF member
+      basenames inside it; case folds. `sg-redirect-5` is the first ride of
+      the converted Aloha course. Open: `mode` alone does not switch the
+      HUD or briefing (the Single Event menu overrides it), the save record
+      keys by event slot, and the picture/drop/length stay the host's. Next:
+      the picker in the app's menu.
       Unknowns: file-name case folding on the FST, and whether the save record
       is a fixed event-indexed array.
 - [ ] September 14 priority: course restoration is the main track; keep 120 Hz

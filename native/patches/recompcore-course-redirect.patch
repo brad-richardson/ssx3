@@ -1,0 +1,394 @@
+diff --git a/Source/Core/Core/Boot/Boot.cpp b/Source/Core/Core/Boot/Boot.cpp
+index d44b638..234867b 100644
+--- a/Source/Core/Core/Boot/Boot.cpp
++++ b/Source/Core/Core/Boot/Boot.cpp
+@@ -30,6 +30,7 @@
+ #include "Core/Achievements/AchievementManager.h"
+ #include "Core/Boot/DolReader.h"
+ #include "Core/Boot/ElfReader.h"
++#include "Core/Boot/Ssx3CoursePatch.h"
+ #include "Core/CommonTitles.h"
+ #include "Core/Config/MainSettings.h"
+ #include "Core/Config/SYSCONFSettings.h"
+@@ -423,6 +424,14 @@ bool CBoot::BootUp(Core::System& system, const Core::CPUThreadGuard& guard,
+ 
+   DiscIO::Riivolution::ApplyGeneralMemoryPatches(guard, boot->riivolution_patches);
+ 
++  // SSX 3 course redirect. Every arm above leaves the executable's image in
++  // guest RAM with the CPU not yet running, which is the only moment a host
++  // can rewrite the frontend's event table without touching sys/main.dol.
++  // BootUp is the single entry point for loading a title, so a re-boot or a
++  // full reset re-applies the manifest.
++  if (!SSX3::ApplyCourseManifest(system))
++    return false;
++
+   return true;
+ }
+ 
+diff --git a/Source/Core/Core/CMakeLists.txt b/Source/Core/Core/CMakeLists.txt
+--- a/Source/Core/Core/CMakeLists.txt
++++ b/Source/Core/Core/CMakeLists.txt
+@@ -22,6 +22,8 @@
+   Boot/ElfReader.cpp
+   Boot/ElfReader.h
+   Boot/ElfTypes.h
++  Boot/Ssx3CoursePatch.cpp
++  Boot/Ssx3CoursePatch.h
+   Boot/BootManager.cpp
+   Boot/BootManager.h
+   Cheats/CheatCodes.h
+diff --git a/Source/Core/Core/Boot/Ssx3CoursePatch.h b/Source/Core/Core/Boot/Ssx3CoursePatch.h
+new file mode 100644
+index 0000000..4300be4
+--- /dev/null
++++ b/Source/Core/Core/Boot/Ssx3CoursePatch.h
+@@ -0,0 +1,30 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++//
++// SSX 3 (GXBE69) host-side course redirect.
++//
++// The frontend's event table lives in the DOL's data5 section and is only ever
++// *read* by the game: the world archive filename, the SDB location code, the
++// two menu strings, the per-event topology row's location id and the event
++// mode word are all plain data. Rewriting them in guest RAM after the DOL
++// image is loaded and before the CPU starts therefore redirects an event to a
++// different course without changing a byte of sys/main.dol -- the pinned
++// dol_sha256 stays valid and the recompiled module needs no regeneration
++// (the module only hashes *code* chunks, which this never touches).
++//
++// Driven by a host-side manifest named by SSX_COURSE_MANIFEST. No manifest,
++// no patching, and the hook is inert for every other game.
++
++#pragma once
++
++namespace Core
++{
++class System;
++}
++
++namespace SSX3
++{
++// Applies SSX_COURSE_MANIFEST to guest RAM. Call once per guest boot, after the
++// DOL sections are in memory and before execution starts. Returns false only
++// when a manifest was requested and could not be applied.
++bool ApplyCourseManifest(Core::System& system);
++}  // namespace SSX3
+diff --git a/Source/Core/Core/Boot/Ssx3CoursePatch.cpp b/Source/Core/Core/Boot/Ssx3CoursePatch.cpp
+new file mode 100644
+index 0000000..9bc2b08
+--- /dev/null
++++ b/Source/Core/Core/Boot/Ssx3CoursePatch.cpp
+@@ -0,0 +1,313 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++
++#include "Core/Boot/Ssx3CoursePatch.h"
++
++#include <cctype>
++#include <cstdarg>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <fstream>
++#include <optional>
++#include <string>
++#include <vector>
++
++#include "Common/CommonTypes.h"
++#include "Core/HW/Memmap.h"
++#include "Core/System.h"
++
++namespace SSX3
++{
++namespace
++{
++// GXBE69 revision 0 guest addresses. See local/research/course-selection.md
++// and local/research/next-course-spike.md section 2.1.
++constexpr u32 EVENT_TABLE = 0x802CE5ECu;  // 23 records x 100 bytes
++constexpr u32 EVENT_RECORD_SIZE = 100u;
++constexpr u32 EVENT_COUNT = 23u;
++constexpr u32 TOPOLOGY_TABLE = 0x802E2880u;  // 23 rows x 40 bytes
++constexpr u32 TOPOLOGY_ROW_SIZE = 40u;
++constexpr u32 TOPOLOGY_LOCATION_OFFSET = 16u;
++constexpr u32 MODE_TABLE = 0x802E2C18u;  // 23 rows x 8 bytes
++constexpr u32 MODE_ROW_SIZE = 8u;
++constexpr u32 MODE_OFFSET = 4u;
++constexpr u32 LOCATION_COUNT = 50u;  // the 50-row location table at 0x802CEEE8
++
++// Offset and NUL-padded width of each string field inside an event record.
++constexpr u32 FIELD_NAME = 4u, WIDTH_NAME = 32u;
++constexpr u32 FIELD_SHORT = 36u, WIDTH_SHORT = 16u;
++constexpr u32 FIELD_CODE = 52u, WIDTH_CODE = 16u;
++constexpr u32 FIELD_ARCHIVE = 68u, WIDTH_ARCHIVE = 16u;
++
++struct Redirect
++{
++  int event = -1;
++  std::optional<std::string> name;
++  std::optional<std::string> short_name;
++  std::optional<std::string> code;
++  std::optional<std::string> archive;
++  std::optional<u32> location;
++  std::optional<u32> mode;
++};
++
++void Log(const char* format, ...)
++{
++  std::va_list args;
++  va_start(args, format);
++  std::fputs("[ssx3-course] ", stderr);
++  std::vfprintf(stderr, format, args);
++  std::fputc('\n', stderr);
++  va_end(args);
++}
++
++std::string Trim(const std::string& text)
++{
++  const auto begin = text.find_first_not_of(" \t\r\n");
++  if (begin == std::string::npos)
++    return {};
++  return text.substr(begin, text.find_last_not_of(" \t\r\n") - begin + 1);
++}
++
++// Every string this writes ends up in a menu or a DVD path, so refuse anything
++// that is not plain printable ASCII and anything that would not fit NUL
++// terminated inside its fixed-width field.
++bool ValidText(const std::string& value, u32 width, const char* key)
++{
++  if (value.size() + 1 > width)
++  {
++    Log("error: %s is %zu bytes; the field holds %u including the NUL", key, value.size(),
++        width);
++    return false;
++  }
++  for (const char c : value)
++  {
++    if (static_cast<unsigned char>(c) < 0x20u || static_cast<unsigned char>(c) > 0x7Eu)
++    {
++      Log("error: %s contains a non-printable byte", key);
++      return false;
++    }
++  }
++  return true;
++}
++
++bool ParseNumber(const std::string& value, u32 limit, const char* key, std::optional<u32>* out)
++{
++  char* end = nullptr;
++  const unsigned long parsed = std::strtoul(value.c_str(), &end, 10);
++  if (value.empty() || end == value.c_str() || *end != '\0' || parsed >= limit)
++  {
++    Log("error: %s must be an integer in [0,%u), got \"%s\"", key, limit, value.c_str());
++    return false;
++  }
++  *out = static_cast<u32>(parsed);
++  return true;
++}
++
++bool ParseManifest(const std::string& path, std::vector<Redirect>* out)
++{
++  std::ifstream file(path);
++  if (!file)
++  {
++    Log("error: cannot open manifest %s", path.c_str());
++    return false;
++  }
++  std::string line;
++  unsigned number = 0;
++  while (std::getline(file, line))
++  {
++    ++number;
++    const std::string trimmed = Trim(line);
++    if (trimmed.empty() || trimmed[0] == '#')
++      continue;
++    const auto equals = trimmed.find('=');
++    if (equals == std::string::npos)
++    {
++      Log("error: %s:%u is not key = value", path.c_str(), number);
++      return false;
++    }
++    const std::string key = Trim(trimmed.substr(0, equals));
++    const std::string value = Trim(trimmed.substr(equals + 1));
++    if (key == "event")
++    {
++      std::optional<u32> index;
++      if (!ParseNumber(value, EVENT_COUNT, "event", &index))
++        return false;
++      out->push_back(Redirect{});
++      out->back().event = static_cast<int>(*index);
++      continue;
++    }
++    if (out->empty())
++    {
++      Log("error: %s:%u has \"%s\" before any \"event =\" line", path.c_str(), number,
++          key.c_str());
++      return false;
++    }
++    Redirect& redirect = out->back();
++    std::optional<std::string>* text = nullptr;
++    u32 width = 0;
++    if (key == "name")
++    {
++      text = &redirect.name;
++      width = WIDTH_NAME;
++    }
++    else if (key == "short")
++    {
++      text = &redirect.short_name;
++      width = WIDTH_SHORT;
++    }
++    else if (key == "code")
++    {
++      text = &redirect.code;
++      width = WIDTH_CODE;
++    }
++    else if (key == "archive")
++    {
++      text = &redirect.archive;
++      width = WIDTH_ARCHIVE;
++    }
++    if (text)
++    {
++      if (text->has_value())
++      {
++        Log("error: %s:%u repeats \"%s\" for event %d", path.c_str(), number, key.c_str(),
++            redirect.event);
++        return false;
++      }
++      if (!ValidText(value, width, key.c_str()))
++        return false;
++      *text = value;
++      continue;
++    }
++    std::optional<u32>* word = nullptr;
++    u32 limit = 0;
++    if (key == "location")
++    {
++      word = &redirect.location;
++      limit = LOCATION_COUNT;
++    }
++    else if (key == "mode")
++    {
++      word = &redirect.mode;
++      limit = 7u;  // 1 station/debug, 2 race, 3 slopestyle, 4 big air, 5 halfpipe, 6 backcountry
++    }
++    if (!word)
++    {
++      Log("error: %s:%u has unknown key \"%s\"", path.c_str(), number, key.c_str());
++      return false;
++    }
++    if (word->has_value())
++    {
++      Log("error: %s:%u repeats \"%s\" for event %d", path.c_str(), number, key.c_str(),
++          redirect.event);
++      return false;
++    }
++    if (!ParseNumber(value, limit, key.c_str(), word))
++      return false;
++    if (key == "mode" && **word == 0u)
++    {
++      Log("error: mode must be 1..6");
++      return false;
++    }
++    continue;
++  }
++  if (out->empty())
++  {
++    Log("error: manifest %s names no events", path.c_str());
++    return false;
++  }
++  return true;
++}
++
++std::string ReadGuestField(Memory::MemoryManager& memory, u32 address, u32 width)
++{
++  std::vector<char> bytes(width + 1, '\0');
++  memory.CopyFromEmu(bytes.data(), address, width);
++  std::string text;
++  for (u32 i = 0; i < width && bytes[i] != '\0'; ++i)
++  {
++    const unsigned char c = static_cast<unsigned char>(bytes[i]);
++    text += (c >= 0x20u && c <= 0x7Eu) ? static_cast<char>(c) : '?';
++  }
++  return text;
++}
++
++void WriteGuestField(Memory::MemoryManager& memory, u32 address, u32 width, const std::string& value,
++                     const char* key, int event)
++{
++  const std::string before = ReadGuestField(memory, address, width);
++  std::vector<char> bytes(width, '\0');
++  std::memcpy(bytes.data(), value.data(), value.size());
++  memory.CopyToEmu(address, bytes.data(), width);
++  Log("event %d %s at %08x: \"%s\" -> \"%s\"", event, key, address, before.c_str(), value.c_str());
++}
++
++void WriteGuestWord(Memory::MemoryManager& memory, u32 address, u32 value, const char* key,
++                    int event)
++{
++  const u32 before = memory.Read_U32(address);
++  memory.Write_U32(value, address);
++  Log("event %d %s at %08x: %u -> %u", event, key, address, before, value);
++}
++
++// The tables are identified by their own contents rather than by a DOL hash:
++// every event record and every mode row starts with its own index, so a table
++// that is not where this build expects it fails here instead of corrupting RAM.
++bool TablesLookRight(Memory::MemoryManager& memory)
++{
++  for (u32 i = 0; i < EVENT_COUNT; ++i)
++  {
++    if (memory.Read_U32(EVENT_TABLE + i * EVENT_RECORD_SIZE) != i ||
++        memory.Read_U32(TOPOLOGY_TABLE + i * TOPOLOGY_ROW_SIZE) != i ||
++        memory.Read_U32(MODE_TABLE + i * MODE_ROW_SIZE) != i)
++    {
++      Log("error: event tables do not match GXBE69 revision 0 at index %u; refusing to patch", i);
++      return false;
++    }
++  }
++  return true;
++}
++}  // namespace
++
++bool ApplyCourseManifest(Core::System& system)
++{
++  const char* path = std::getenv("SSX_COURSE_MANIFEST");
++  if (!path || *path == '\0')
++    return true;
++
++  std::vector<Redirect> redirects;
++  if (!ParseManifest(path, &redirects))
++    return false;
++
++  auto& memory = system.GetMemory();
++  if (!TablesLookRight(memory))
++    return false;
++
++  Log("applying %s", path);
++  for (const Redirect& redirect : redirects)
++  {
++    const u32 record = EVENT_TABLE + static_cast<u32>(redirect.event) * EVENT_RECORD_SIZE;
++    if (redirect.name)
++      WriteGuestField(memory, record + FIELD_NAME, WIDTH_NAME, *redirect.name, "name",
++                      redirect.event);
++    if (redirect.short_name)
++      WriteGuestField(memory, record + FIELD_SHORT, WIDTH_SHORT, *redirect.short_name, "short",
++                      redirect.event);
++    if (redirect.code)
++      WriteGuestField(memory, record + FIELD_CODE, WIDTH_CODE, *redirect.code, "code",
++                      redirect.event);
++    if (redirect.archive)
++      WriteGuestField(memory, record + FIELD_ARCHIVE, WIDTH_ARCHIVE, *redirect.archive, "archive",
++                      redirect.event);
++    if (redirect.location)
++      WriteGuestWord(memory,
++                     TOPOLOGY_TABLE + static_cast<u32>(redirect.event) * TOPOLOGY_ROW_SIZE +
++                         TOPOLOGY_LOCATION_OFFSET,
++                     *redirect.location, "location", redirect.event);
++    if (redirect.mode)
++      WriteGuestWord(memory,
++                     MODE_TABLE + static_cast<u32>(redirect.event) * MODE_ROW_SIZE + MODE_OFFSET,
++                     *redirect.mode, "mode", redirect.event);
++  }
++  return true;
++}
++}  // namespace SSX3

@@ -99,6 +99,11 @@ Patches:
 - `moderngekko-platform.patch`: runtime metrics, captures, controller integration,
   and the iOS render surface.
 
+- `recompcore-course-redirect.patch`: the boot-time course redirect
+  (`Source/Core/Core/Boot/Ssx3CoursePatch.*` plus its call at the end of
+  `CBoot::BootUp`). See `docs/course-selection.md`. Not folded into
+  `recompcore-platform.patch`; apply it on top.
+
 Bootstrap applies these combined patches. The earlier observability/metrics
 patch files are retained for historical reference, not applied separately.
 

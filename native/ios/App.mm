@@ -584,6 +584,27 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   setenv("SSX3_NO_EXECUTABLE_MEMORY","1",1);
   // Presence-based in the runtime: only a launch flag enables the per-dispatch sampling branch.
   if (_dispatchSamples) setenv("STATICRECOMP_DISPATCH_SAMPLES","1",1); else unsetenv("STATICRECOMP_DISPATCH_SAMPLES");
+  // Course redirect: -ssxCourseManifest <name> names a manifest in Documents/
+  // that the runtime applies to the event table at boot (docs/course-selection.md).
+  // A bare file name only, so a launch flag cannot reach outside the sandbox.
+  {
+    NSArray<NSString*>* launch = NSProcessInfo.processInfo.arguments;
+    NSUInteger flag = [launch indexOfObject:@"-ssxCourseManifest"];
+    unsetenv("SSX_COURSE_MANIFEST");
+    if (flag != NSNotFound && flag+1 < launch.count) {
+      NSString* name = launch[flag+1];
+      if ([name containsString:@"/"] || [name hasPrefix:@"."]) {
+        fprintf(stderr,"[ssx3-course] ignoring -ssxCourseManifest %s: bare file name required\n",
+                name.UTF8String);
+      } else {
+        NSString* path = [Documents() stringByAppendingPathComponent:name];
+        if ([NSFileManager.defaultManager fileExistsAtPath:path])
+          setenv("SSX_COURSE_MANIFEST",path.UTF8String,1);
+        else
+          fprintf(stderr,"[ssx3-course] no manifest at %s\n",path.UTF8String);
+      }
+    }
+  }
   Common::Log::SetEmbedderLogCallback(RuntimeLog,nullptr);
   NSArray* args = NSProcessInfo.processInfo.arguments;
   _scheduledTrialAt=-1;

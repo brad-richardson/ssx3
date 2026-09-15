@@ -26,6 +26,61 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# Course-redirect manifest (docs/course-selection.md). The runtime applies it to
+# guest RAM at boot; this mirror rejects a bad file before a bounded run spends
+# three minutes discovering the same thing. Keep both sides in step.
+MANIFEST_EVENT_COUNT = 23
+MANIFEST_LOCATION_COUNT = 50
+MANIFEST_MODES = range(1, 7)
+MANIFEST_TEXT_WIDTHS = {'name': 32, 'short': 16, 'code': 16, 'archive': 16}
+
+
+def parse_course_manifest(text):
+    """Parse a course-redirect manifest into a list of per-event patch dicts."""
+    events = []
+    for number, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith('#'):
+            continue
+        if '=' not in stripped:
+            raise ValueError(f'line {number} is not key = value')
+        key, _, value = (part.strip() for part in stripped.partition('='))
+        if key == 'event':
+            index = _manifest_number(value, MANIFEST_EVENT_COUNT, key, number)
+            events.append({'event': index})
+            continue
+        if not events:
+            raise ValueError(f'line {number}: "{key}" appears before any "event =" line')
+        if key in events[-1]:
+            raise ValueError(f'line {number}: "{key}" is repeated for event {events[-1]["event"]}')
+        if key in MANIFEST_TEXT_WIDTHS:
+            width = MANIFEST_TEXT_WIDTHS[key]
+            if len(value.encode()) + 1 > width:
+                raise ValueError(f'line {number}: "{key}" needs {width} bytes including the NUL')
+            if any(not 0x20 <= ord(c) <= 0x7E for c in value):
+                raise ValueError(f'line {number}: "{key}" is not printable ASCII')
+            events[-1][key] = value
+        elif key == 'location':
+            events[-1][key] = _manifest_number(value, MANIFEST_LOCATION_COUNT, key, number)
+        elif key == 'mode':
+            mode = _manifest_number(value, max(MANIFEST_MODES) + 1, key, number)
+            if mode not in MANIFEST_MODES:
+                raise ValueError(f'line {number}: "mode" must be 1..6')
+            events[-1][key] = mode
+        else:
+            raise ValueError(f'line {number}: unknown key "{key}"')
+    if not events:
+        raise ValueError('manifest names no events')
+    if any(len(event) == 1 for event in events):
+        raise ValueError('every "event =" block must patch at least one field')
+    return events
+
+
+def _manifest_number(value, limit, key, number):
+    if not value.isdigit() or not 0 <= int(value) < limit:
+        raise ValueError(f'line {number}: "{key}" must be an integer in [0,{limit})')
+    return int(value)
+
 
 def reset_events(rows):
     """Require ground contact and three hazard-free seconds after a reset."""
@@ -83,6 +138,9 @@ def main():
     ap.add_argument('--menu-sequence', type=Path, default=ROOT/'native/diagnostics/course-start.json',
                     help='Controller sequence that walks the frontend to a briefing. The default walks to '
                          "Single Event's first course (Snow Jam / ARA1); another event needs its own sequence.")
+    ap.add_argument('--course-manifest', type=Path,
+                    help='Course-redirect manifest applied to guest RAM at boot '
+                         '(docs/course-selection.md); passed through as SSX_COURSE_MANIFEST')
     ap.add_argument('--restart-after', type=int,
                     help='Seconds of observed riding before choosing the pause menu Restart; '
                          'the check then requires riding again')
@@ -96,7 +154,15 @@ def main():
     profile = ROOT/'local/native/profiles'/args.profile
     if profile.exists() or args.output.exists():
         ap.error('Preserving existing profile/evidence; choose fresh paths')
+    redirects = None
+    if args.course_manifest:
+        try:
+            redirects = parse_course_manifest(args.course_manifest.read_text())
+        except (OSError, ValueError) as error:
+            ap.error(f'--course-manifest: {error}')
     args.output.mkdir(parents=True)
+    if args.course_manifest:
+        (args.output/'course-manifest.txt').write_bytes(args.course_manifest.read_bytes())
     sequence_path=args.output/'menu-sequence.json'
     sequence_path.write_bytes(args.menu_sequence.read_bytes())
     rows_path = args.output/'rider.jsonl'
@@ -117,7 +183,9 @@ def main():
                 '--game', str(args.game.resolve()), '--profile', args.profile, '--seconds', str(args.seconds),
                 '--pipe-controller', *(['--cpu-thread'] if args.cpu_thread else []),
                 *(['--module', str(args.module.resolve())] if args.module else [])], cwd=ROOT,
-                env=dict(os.environ, MTL_DEBUG_LAYER='1' if args.metal_validation == 'on' else '0'),
+                env=dict(os.environ, MTL_DEBUG_LAYER='1' if args.metal_validation == 'on' else '0',
+                         **({'SSX_COURSE_MANIFEST': str(args.course_manifest.resolve())}
+                            if args.course_manifest else {})),
                 stdout=runtime_log, stderr=subprocess.STDOUT)
             children.append(run)
             deadline = time.monotonic()+45
@@ -217,6 +285,8 @@ def main():
     loops = reset_loops(events)
     summary = dict(game=str(args.game), profile=args.profile, samples=len(rows),
                    menu_sequence=str(args.menu_sequence),
+                   course_manifest=str(args.course_manifest) if args.course_manifest else None,
+                   course_redirects=redirects,
                    metal_validation=args.metal_validation, cpu_thread=args.cpu_thread,
                    module=str(args.module.resolve()) if args.module else None,
                    menu_sequence_sha256=hashlib.sha256(sequence_path.read_bytes()).hexdigest(),

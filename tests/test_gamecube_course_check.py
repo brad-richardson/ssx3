@@ -1,7 +1,9 @@
 import contextlib
 import io
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 import gamecube_course_check
@@ -65,3 +67,65 @@ class RestartArgumentTests(unittest.TestCase):
             self.assertIn('isolated profile',
                           self.run_main('--seconds', '400', '--restart-after', after,
                                         profile='../escape'))
+
+
+class CourseManifestTests(unittest.TestCase):
+    def parse(self, text):
+        return gamecube_course_check.parse_course_manifest(text)
+
+    def test_parses_a_full_redirect(self):
+        self.assertEqual(self.parse('''
+            # Snow Jam -> Aloha
+            event = 0
+            archive = ALOHA
+            code = ASS1
+            name = Aloha Ice Jam
+            short = Aloha
+            location = 5
+            mode = 3
+        '''), [dict(event=0, archive='ALOHA', code='ASS1', name='Aloha Ice Jam',
+                    short='Aloha', location=5, mode=3)])
+
+    def test_several_event_blocks(self):
+        self.assertEqual(self.parse('event = 0\narchive = GARI\nevent = 5\nmode = 2\n'),
+                         [dict(event=0, archive='GARI'), dict(event=5, mode=2)])
+
+    def test_values_keep_their_spaces_but_not_their_padding(self):
+        self.assertEqual(self.parse('event = 0\nname =   Snow  Jam  \n')[0]['name'], 'Snow  Jam')
+
+    def reject(self, text):
+        with self.assertRaises(ValueError) as caught:
+            self.parse(text)
+        return str(caught.exception)
+
+    def test_rejects_an_out_of_range_event(self):
+        self.assertIn('[0,23)', self.reject('event = 23\nmode = 2\n'))
+
+    def test_rejects_a_field_that_cannot_hold_a_terminator(self):
+        # 15 bytes plus the NUL exactly fills the 16-byte archive field.
+        self.assertEqual(self.parse('event = 0\narchive = ' + 'A'*15)[0]['archive'], 'A'*15)
+        self.assertIn('16 bytes', self.reject('event = 0\narchive = ' + 'A'*16))
+        self.assertIn('32 bytes', self.reject('event = 0\nname = ' + 'A'*32))
+
+    def test_rejects_non_ascii_and_control_bytes(self):
+        self.assertIn('printable ASCII', self.reject('event = 0\nname = Aloha’s\n'))
+
+    def test_rejects_an_out_of_range_location_or_mode(self):
+        self.assertIn('[0,50)', self.reject('event = 0\nlocation = 50\n'))
+        self.assertIn('1..6', self.reject('event = 0\nmode = 0\n'))
+        self.assertIn('[0,7)', self.reject('event = 0\nmode = 7\n'))
+
+    def test_rejects_structural_mistakes(self):
+        self.assertIn('before any', self.reject('archive = BAM\n'))
+        self.assertIn('unknown key', self.reject('event = 0\npeak = 1\n'))
+        self.assertIn('repeated', self.reject('event = 0\nmode = 2\nmode = 3\n'))
+        self.assertIn('not key = value', self.reject('event = 0\nmode 3\n'))
+        self.assertIn('no events', self.reject('# nothing here\n'))
+        self.assertIn('at least one field', self.reject('event = 0\n'))
+
+    def test_main_rejects_a_bad_manifest_before_running(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = Path(directory)/'course.txt'
+            manifest.write_text('event = 99\n')
+            self.assertIn('--course-manifest',
+                          RestartArgumentTests.run_main(self, '--course-manifest', str(manifest)))
