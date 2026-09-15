@@ -15,6 +15,15 @@ the texture-ID, occlusion-wall and terrain-bounds repairs from build 012.
 The [original/before/after comparison](docs/garibaldi-visual-comparison.md)
 shows restored snow detail. Donor fog/backdrop/scenery, frame-by-frame jump
 visibility, clean route/finish acceptance and save/reload remain.
+A second donor course now rides too: SSX Tricky's **Aloha Ice Jam**, converted
+into the ASS1 slopestyle slot with terrain, scenery, rails and static collision
+in one archive (`gc-aloha-007`), selected at boot by a
+[course-redirect manifest](docs/course-selection.md) that patches an event row in
+guest RAM and changes no byte of `main.dol`. One run kept stock `bam.big` and the
+course's own `alo.big` resident at the same time, which is the data model an
+in-game course picker needs. Scoring, a finish, gates and the donor's art remain
+([Aloha notes](docs/aloha-conversion.md)); the repeatability those need is
+tracked as route control in [the todo](docs/todo.md).
 The [iOS development app](native/ios/README.md) builds with a statically linked
 game module, Metal graphics, and touch controls for menu navigation and riding.
 Earlier physical-device smoke runs reach about 60 FPS; sustained performance

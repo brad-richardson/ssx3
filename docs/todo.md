@@ -6,8 +6,30 @@ the build or commit that closed them.
 ## Now
 
 - [ ] Plan of record: [implementation plan, September 15](impl-plan-2026-09-15.md).
-      Paused September 15 on quota; resume by landing the three in-flight
-      agents (Aloha collision, boot-time course redirect, breaking glass).
+      The three in-flight agents landed (Aloha collision, boot-time course
+      redirect, breaking glass) and are pushed. **Done September 15 (later):**
+      the Aloha chain is re-ordered into one archive — `gc-aloha-006` (rails on
+      the new scenery) then `gc-aloha-007` (terrain + scenery + rails +
+      collision, `73ad0ab6`) — and it **rides** through the redirect, including
+      one run with stock `bam.big` and the course's own `alo.big` resident at
+      the same time ([the ride](aloha-conversion.md#9-the-ride-september-15)).
+      Next in the plan's order: the app's course picker (item 3), Aloha phase 2
+      (item 5, the scoring driver), and the deliberate-contact ride of
+      `gc-gari-interactions-002`, which now has a measured blocker — see the
+      route-control item below.
+- [ ] Route control for the native runtime (measured September 15). Two runs of
+      the *same* archive, single core, identical scripted input, diverge within
+      0.21 guest seconds of the race start and end a median 449 / max 69,184
+      world units apart, so no world-data A/B and no gate, finish or
+      deliberate-contact claim can rest on a free-running ride
+      ([evidence](aloha-conversion.md#92-what-the-rides-do-not-show-and-why-an-ab-failed)).
+      Two instruments exist and neither is wired up: movie-driven playback
+      (`tools/native_determinism_check.py` fixes the guest clock and replays pad
+      state) and a waypoint autopilot — `tools/gamecube_input.py` already has
+      `stick x y` and `gamecube_course_check.py` already reads rider samples
+      live, so the follower is the missing piece. The PS2 tools
+      (`ride_route.py`, `ride_autopilot.py`) drive PINE and do not apply. This
+      also unblocks the phone A/B noted below.
 - [ ] Next Tricky course, not a race (user, September 14): after Garibaldi
       reaches parity (physics interactions and sprite/animation cycling are
       the remaining gaps), pick a Tricky Showoff course and map it onto one of
@@ -82,8 +104,13 @@ the build or commit that closed them.
       basenames inside it; case folds. `sg-redirect-5` is the first ride of
       the converted Aloha course. Open: `mode` alone does not switch the
       HUD or briefing (the Single Event menu overrides it), the save record
-      keys by event slot, and the picture/drop/length stay the host's. Next:
-      the picker in the app's menu.
+      keys by event slot, and the picture/drop/length stay the host's.
+      **September 15 (later):** two courses are resident at once — stock
+      `bam.big` plus `alo.big`, selected by `archive = alo` — staged by the new
+      `tools/gamecube_game_dir.py`, which renames an archive's BIGF world
+      members so a second course can live beside the stock one. The receipt now
+      hashes every installed `*.big`. Next: the picker in the app's menu; the
+      host side of the data model is done.
       Unknowns: file-name case folding on the FST, and whether the save record
       is a fixed event-indexed array.
 - [ ] September 14 priority: course restoration is the main track; keep 120 Hz

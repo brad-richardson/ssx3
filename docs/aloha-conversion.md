@@ -582,12 +582,131 @@ only checker, `tools/gamecube_collision_check.py`, consumes a native trace.
 Another agent held the runtime for this task's window, so nothing was ridden and
 nothing was observed either way.
 
-### 8.5 One ordering question left
+### 8.5 The ordering question, answered
 
-`gc-aloha-004`/`005` is the scenery→collision chain the template runs. It does
-**not** contain rails: `gc-aloha-003` was built on the superseded `gc-aloha-002`
-scenery. The Garibaldi lineage ran splines *before* collision, so the rails
-stage has to be re-run on the new scenery build and the chain re-ordered
-(`004` → splines → collision), or `gamecube_spline_import.py` has to be checked
-against a kind-16 record that already carries instance bindings. That is the
-next step for this course, and it is a build-order question, not a converter gap.
+`gc-aloha-004`/`005` was the scenery→collision chain without rails:
+`gc-aloha-003` had been built on the superseded `gc-aloha-002` scenery, so no
+single archive held all four stages. Re-running the chain in the Garibaldi
+order — scenery → splines → collision — closes it, and the conversion needed
+no change:
+
+```sh
+python3 tools/gamecube_spline_import.py --base-build local/builds/gc-aloha-004 \
+  --nbd local/source/gamecube/tricky/aloha.nbd --gsf local/source/gamecube/tricky/aloha.gsf \
+  --output local/builds/gc-aloha-006
+
+python3 tools/gamecube_collision_import.py --base-build local/builds/gc-aloha-006 \
+  --nbd local/source/gamecube/tricky/aloha.nbd --gsf local/source/gamecube/tricky/aloha.gsf \
+  --output local/builds/gc-aloha-007
+```
+
+| build | stage | archive SHA-256 |
+| --- | --- | --- |
+| `gc-aloha-006` | rails on the new scenery | `f52893ffbdf11292315c4fe7ac409da4f4816cb2f60b6757791a3b2d12fea569` |
+| `gc-aloha-007` | **terrain + scenery + rails + collision** | `73ad0ab6ceab2ff1f7e3e31a5e57ed231b9b45eba354c986c1141cd0eeedd2d7` |
+
+The two stages are independent, which is the useful part. `gc-aloha-006`'s rails
+report equals `gc-aloha-003`'s to the digit — 133 splines, 454 segments,
+replacing 268 host splines, 116,678 audit samples, max position error 0.0167
+units, max join gap 0.0308, zero bound violations — so re-seating the stage on
+646 models instead of 640 changed nothing about the conversion. And
+`gc-aloha-007`'s collision report is identical to `gc-aloha-005`'s field for
+field (163 collision resources / 307,116 B, 164 definitions, the same 329
+skipped instances across the same 25 mode/effect reasons, no unsupported
+transforms) except for the three values that *must* move: the base and output
+hashes and the record counts the rails stage changed (107,163 audited reference
+records against 005's 107,298, because rails replaced 268 host splines with
+133). Placement accounting still adds up: 1,651 placements = 677 colliding +
+645 non-colliding + 329 skipped.
+
+`gc-aloha-007` is the build to ride, install and carry forward; `005` is
+superseded. Its group 48 holds **7,317 records / 2,497,358 B** against ASS1's
+stock 5,602 / 2,504,486 — the four-stage course now fits *under* the stock
+memsize, because the rails stage replaced 268 host splines with 133 and cut
+spline geometry from 164,928 to 71,760 bytes, more than paying for the 307,116
+bytes of collision.
+
+## 9. The ride (September 15)
+
+The [boot-time course redirect](course-selection.md) removed the §7 blocker, so
+`gc-aloha-007` was ridden on the native runtime. Four bounded 200-second checks,
+each on a fresh isolated profile, all exit 0, all `riding_observed_after_start:
+true`, none with a detected reset loop, and every one with zero invalid memory
+accesses, GPU command errors, unknown guest instructions and JIT fallback runs:
+
+| run | archive ridden | game directory | profile | receipt |
+| --- | --- | --- | --- | --- |
+| `ride-003` | `gc-aloha-007` (`73ad0ab6`) | `game-aloha-007` | `sg-aloha-7` | `20260915-084429` |
+| `ride-004` | `gc-aloha-006` (`f52893ff`), no collision | `game-aloha-006` | `sg-aloha-6` | `20260915-084941` |
+| `ride-005` | `gc-aloha-007` again | `game-aloha-007` | `sg-aloha-7b` | `20260915-085350` |
+| `ride-006` | `gc-aloha-007` as `alo.big` | `game-two-course-001` | `sg-2crs-1` | `20260915-085730` |
+
+All four are under `local/research/aloha/`; the manifests are
+`aloha-007-ass1.txt` and `two-course-alo.txt`. Every run spawned at exactly
+`(-113667.5, 72738.8, -228282.9)`, and across all four the rider stayed inside
+ASS1's corridor: x −142,947…−113,667, y 61,361…87,235, z −291,840…−228,283. The
+stock control `ride-002`, same archive but no redirect, rode ARA1 instead — x
+down to −196,811 and y no higher than 45,879 — so the corridor is what
+identifies the course that loaded. Screenshots under each profile's
+`ScreenShots/GXBE69/` show the rider on Aloha's geometry at 36–67 mph with its
+scenery standing, and the trick score rising (840 at one capture).
+
+So **the four-stage course rides**: terrain, scenery, rails and collision in one
+archive, reached with a stock DOL through the event-row redirect.
+
+### 9.1 Two courses resident at once
+
+`ride-006` is the course-picker data model rather than another Aloha check.
+`tools/gamecube_game_dir.py` staged a game directory holding **both** stock
+`bam.big` (symlinked, untouched) and `gc-aloha-007` installed as `alo.big` with
+its BIGF world members renamed to `data/worlds/alo.*`, and the manifest pointed
+event 0 at `archive = alo`. The runtime logged
+`event 0 archive at 802ce630: "BAM" -> "alo"`, and the ride spawned on Aloha at
+the same coordinates as `ride-003`. Adding a course therefore replaces no stock
+file and needs no rebuild — only an archive and a manifest line.
+
+That exposed one provenance gap, now fixed: `tools/native_gamecube.py` hashed
+`files/data/worlds/bam.big` alone, so in a two-course directory the receipt
+named the stock archive rather than the one ridden. The receipt now also carries
+`world_archives_sha256` for every installed `*.big`, and
+`gamecube_collision_check.py` accepts a candidate that is any installed archive
+instead of requiring it to be `bam.big`.
+
+### 9.2 What the rides do not show, and why an A/B failed
+
+`ride-003`/`ride-004` were meant to be a controlled A/B of static collision:
+the two archives differ only by the collision stage, and the harness sends no
+riding input, so a path difference would have been the colliders doing
+something. `ride-005` is the control that says whether that reasoning holds,
+and it says it does not. `tools/ride_compare.py` (added here; it re-bases each
+trace at its own race start, because the harness repeats its start request
+until riding is observed and the runs leave the gate 15 guest seconds apart):
+
+| pair | archives | median separation | max | first beyond 10 units |
+| --- | --- | ---: | ---: | --- |
+| `ride-003` vs `ride-005` (the floor) | **same** (`gc-aloha-007` twice) | 449 | 69,184 | 14.5 units, 0.21 s after the start |
+| `ride-003` vs `ride-004` (the A/B) | 007 with collision vs 006 without | 4,883 | 68,988 | 16.1 units, 0.31 s after the start |
+
+Both pairs start at a separation of exactly 0 and both leave the 10-unit
+tolerance within a third of a second. Two runs of the *same* archive,
+single-core, with identical scripted input, end up a median 449 units and a
+maximum 69,184 units apart, so the harness's free-running ride is not
+reproducible at all. The A/B's median is about eleven times the floor's, which
+is suggestive and nothing more: one control pair whose own maximum is 69,184
+units cannot support attributing a 4,883-unit median to the colliders.
+**The collision A/B is inconclusive by design, not by result.** Reports:
+`local/research/aloha/floor-007-vs-007.json` and `ab-007-vs-006.json`.
+
+What this rules in is the instrument, not more runs: either movie-driven
+playback (`tools/native_determinism_check.py`, which fixes the guest clock and
+replays pad state) or a native waypoint autopilot — the PS2 route tools
+(`ride_route.py`, `ride_autopilot.py`) drive PINE and do not apply, but
+`gamecube_input.py` already has `stick x y` and the harness already reads rider
+samples live, so the pieces exist. That same gap blocks the deliberate-contact
+test for the Garibaldi breakables and any claim about gates or a finish.
+
+Not shown by any run here: a completed run, gate or checkpoint passage, scoring
+at the end, collision contact with a specific object, and anything about the
+donor's own art (the geometry is untextured). The HUD still reads a race —
+"3rd/6" with a lap timer — which is the known `mode` limitation in
+[course selection](course-selection.md), not an Aloha problem.

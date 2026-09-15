@@ -68,6 +68,34 @@ write is logged to stderr with its address and its pre-patch value:
 [ssx3-course] event 0 location at 802e2890: 0 -> 5
 ```
 
+## Staging the game directory
+
+`tools/gamecube_game_dir.py` builds the directory the runtime boots. Every stock
+entry is a symlink, so a staged course costs only the archives it installs:
+
+```sh
+# The imported course in the stock archive's place
+python3 tools/gamecube_game_dir.py local/research/aloha/game-aloha-007 \
+  --world local/builds/gc-aloha-007
+
+# Or beside it, under its own name, with stock bam.big still present
+python3 tools/gamecube_game_dir.py local/research/aloha/game-two-course-001 \
+  --world alo=local/builds/gc-aloha-007 --receipt .../receipt.json
+```
+
+The second form is what the rule below requires: `--world NAME=PATH` rewrites the
+archive's four world member names to `data/worlds/NAME.*` before installing it as
+`NAME.big`. The rewrite is directory-only — the 16-byte header, every entry's
+offset/size words and the directory trailer are copied, and the rebuilt
+directory must still end before the first member — so all 97 MB of member data
+keeps its original offsets and a same-length rename is a pure in-place
+substitution. A basename that would push the directory into the first member is
+refused with the length that archive allows (25 characters for SSX 3's
+`bam.big`). Applied to stock `bam.big` with `ala`, the tool reproduces
+`local/research/course-redirect/ala.big` — the hand-made archive `run-ala-001`
+actually rode — byte for byte, which is the regression `tests/test_gamecube_game_dir.py`
+runs when that evidence is present.
+
 ## What the fields actually do — measured
 
 Four bounded native checks, 200 s each, `tools/gamecube_course_check.py`,
@@ -143,3 +171,22 @@ tables.
   the course picture and the medal targets remain the host event's.
 - **In-game listing.** One event row means the list of imported courses lives in
   the host manifest, not in the game's menu.
+
+## Two courses resident (September 15)
+
+`ride-006` under `local/research/aloha/` boots a game directory that holds stock
+`bam.big` *and* `alo.big` (`local/builds/gc-aloha-007` with its world members
+renamed), with `archive = alo` in the manifest. The runtime logged
+`event 0 archive at 802ce630: "BAM" -> "alo"` and the ride spawned on Aloha at
+`(-113667.5, 72738.8, -228282.9)`, the same coordinates as the single-archive
+run — so an added course replaces no stock file, and the stock archive stays
+available to every other event. That is the picker's whole data model: an
+archive plus a manifest line.
+
+One consequence for evidence: `tools/native_gamecube.py` used to hash
+`files/data/worlds/bam.big` as *the* world archive, which in a multi-archive
+directory names a file the run never loaded. The receipt now carries
+`world_archives_sha256` for every installed `*.big` alongside the old key, and
+`gamecube_collision_check.py` accepts a candidate that is any installed archive.
+Anything else reading `world_archive_sha256` for identity needs the same
+treatment before it is trusted on a two-course directory.
