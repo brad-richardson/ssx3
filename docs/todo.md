@@ -200,16 +200,21 @@ the build or commit that closed them.
       not an enable (the same two-frame sequence appears under 0, 1 and 2),
       so it is chosen by analogy: the only two five-frame records are the
       host's own countdown lights and both use mode 1.
-      **Written but unverified — needs a second validation.** Builds
-      `gc-gari-startgate-flipbook-001` (mode 0) and `-002` (mode 1) differ in
-      exactly one field of one record, and neither is shown to animate. The
-      mode 0 run was inconclusive because the intro camera moves up to 113 px
-      per second with rotation, so screenshot crops compare different content;
-      the mode 1 run is outstanding. Re-validate with a method that survives a
-      moving camera: hook the engine's frame index, or build a probe whose
-      five frames are visually distinct textures. Generalising emission from
-      `gamecube_startgate.py` to the other 15 flipbook materials / 74
-      placements in `gamecube_scenery_import.py` is not started.
+      **Validated September 14: neither mode advances the sequence.** The
+      mode 1 run is clean (896 samples, exit 0) and its light column holds the
+      same lamp pattern through the countdown, as mode 0 does. The control is
+      four mode 0 frames (16:09:32-35) showing an identical column; the
+      apparent change in earlier crops is a translucent blue panel that tints
+      the column at one camera angle, present in the first frame of both runs.
+      The test was capable: donor images 69-73 are five distinct textures
+      forming a progressive countdown (dim, red, +yellow, green last).
+      Evidence in `local/research/startgate/flipbook-evidence/`.
+      Writing the extended record is therefore necessary but not sufficient —
+      something must drive the frame index and nothing in the course does, so
+      **the countdown flipbook belongs to (c), not (b)**, exactly like the
+      gate visibility bit before it. Do not generalise flipbook emission to
+      the other 15 materials / 74 placements until (c) can drive one; the
+      records would be correct and inert.
       **(c) Every LUN course program is an empty stub** (235 disabled), so no
       authored scripted behaviour runs at all: timed gates, block and glass
       interactions, effects. The
@@ -222,8 +227,9 @@ the build or commit that closed them.
       unit of work first: **(a1) done** → **(a2) crowd as static, 79
       placements** → **scenery interactions (glass, blocks), the visible
       slice of (c)** → **(a3) local matrices, 10 placements** → the runtime
-      animation binding and the rest of (c). (b) is written but unverified
-      and needs a second validation, not more work.
+      animation binding and the rest of (c). (b) is written, validated as
+      inert, and now folded into (c): the records are correct and will stay
+      dormant until something drives a frame index.
 - [ ] Scenery interactions — breaking glass and scattering blocks. User
       request September 14: queued as the batch after the (a1)/(a2) geometry
       work. Objects remain intact on impact (user, Sep 13). This is layer (c)

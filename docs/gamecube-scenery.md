@@ -363,18 +363,31 @@ overall count only because 14 two-frame records use it.
                   ^^^^^^^^ mode
 ```
 
-**Neither build is verified to animate.** The format decode and the one-field
-A/B are established; whether any frame advances is not. The mode 0 run
-captured the countdown at one screenshot per second, and the comparison was
-inconclusive: the intro camera shifts up to 113 px between consecutive seconds
-with rotation, so a fixed crop compares different scene content, and the
-countdown digit changes next to the lights regardless. Translation-only
-registration leaves 9-77 MAE residual and put the light-region change at
-0.39-0.76x the global change, which is not a signal either way. The mode 1 run
-is outstanding. When it is taken, it needs a method that survives a moving
-camera -- either a hook on the engine's frame index, or a diagnostic build
-whose sequence frames are five visually distinct textures, so an advance is
-unmistakable wherever the camera points.
+**Neither mode advances the sequence.** The mode 1 run is clean (896 samples,
+exit 0, riding observed) and the light column renders the same lamp pattern
+throughout the countdown, exactly as mode 0 does. Evidence and hashes are in
+`local/research/startgate/flipbook-evidence/`.
+
+The control is what makes this readable. Across four mode 0 countdown frames
+(16:09:32-35) the column is identical: two red lamp rows, a yellow band, green
+at the bottom, all lit at once. Earlier crop statistics suggested a change
+because the column is seen through a translucent blue panel at one camera
+angle, which tints it heavily; that artifact appears in the first frame of
+*both* runs and is not a texture change. Fixed-crop and phase-correlation
+comparisons are both unusable here -- the intro camera shifts up to 113 px
+between shots with rotation, leaving 9-77 MAE residual after registration.
+
+The test would have detected an advance. Donor images 69-73 are five distinct
+textures (differing SHA-256 and byte lengths) forming a progressive countdown:
+all lamps dim, then red, then red plus yellow, then green last. The game shows
+one fixed state instead.
+
+So writing the record in the engine's own extended form is necessary but not
+sufficient: something has to drive the frame index, and nothing in the course
+does. That moves the countdown flipbook out of (b) and into (c) -- it needs an
+authored program, like the gate visibility before it. A frame-index hook or a
+five-distinct-texture probe would confirm the mechanism, but neither is needed
+to establish that the sequence alone does nothing.
 
 ```sh
 python3 tools/gamecube_startgate.py \
