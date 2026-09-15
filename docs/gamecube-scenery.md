@@ -424,11 +424,14 @@ and the IDs are always contiguous.
 | 2    | 2       | 2      | 165          |
 
 `mode` is not an enable: the same two-frame sequence from texture 165 appears
-under all three values, so it is more likely a phase or rate. Its value is
-therefore chosen by the closest stock analogue rather than by frequency. The
-only two five-frame records in the game are the host's own countdown lights
-(texture 454) and both use mode 1, so `SEQUENCE_MODE = 1`. Mode 0 leads the
-overall count only because 14 two-frame records use it.
+under all three values. Its value was chosen by the closest stock analogue:
+the only two five-frame records in the game (texture 454, the countdown
+lights of two other stock courses, not Snow Jam's) both use mode 1, so
+`SEQUENCE_MODE = 1`. Settled later the same day by the material fixup at
+`0x802482FC` (see `local/research/startgate/builtin22-diagnosis.md`): the
+word is a bare flag, `mode == -1` leaves `+16` null and anything else points
+`+16` at the appended `{count, ids}` block in place, so 0, 1 and 2 are
+equivalent.
 
 `--animate-flipbooks` writes this form for each staged flipbook material.
 `gc-gari-startgate-flipbook-002` differs from the mode 0 build
@@ -789,6 +792,37 @@ run only removes it at `StartgateOpen`, behind the camera. Next: an observer
 hook on builtin 22 (`8018F0E4`) and the factory (`801F59E0`) to see whether the
 call reaches the modifier, and a probe that looks back after the restart.
 Evidence: `local/research/startgate/script-evidence/`.
+
+### The countdown lights run from the script too (September 14)
+
+Builtin 22 had done nothing because it attaches to the instance's modifier
+host at `+132`, and nothing creates that host but script builtin 0; with the
+host absent the builtin returns silently (`8018F27C`), whereas builtins 2
+and 3 treat the absent host as "do it myself", which is why `DeadNode` worked
+and the flip did not. Every stock use of a modifier calls builtin 0 on the
+instance first. The material side was never the problem: the load fixup at
+`0x802482FC` points `+16` at the appended `{count, ids}` block whenever the
+mode word is not `-1`. Full decode in
+`local/research/startgate/builtin22-diagnosis.md`.
+
+The `StartlightBegin` handler now calls builtin 0 on the lights and then
+builtin 22 (loop, forward, 1.3 flips/s). Candidate
+`gc-gari-startgate-script-003` rode a clean 300 s countdown-plus-restart
+check (exit 0, no fault, zero invalid accesses, GPU command errors or
+fallback JIT runs). In the restart race's countdown the column shows every
+lamp dim at 23:12:10 and red plus yellow lit at 23:12:12; two seconds after
+GO the canopy and stalls are gone. Evidence:
+`script-evidence/script-003-countdown-lights-dim.png`,
+`script-003-countdown-lights-red-yellow.png`, `script-003-go-gate-removed.png`.
+
+So the start gate is complete on the shipping path: the gate and lights are
+present from load, the lights cycle through the countdown, and the gate is
+removed at the gate-open event, with the restart handled by the engine's own
+course reset. The sequence is a free-running loop at a chosen rate rather
+than the donor's authored 1.0/0.5/0.5/0.5 s beats, and the countdown window
+(3.7 s) is the engine's, not the donor's 2.5 s; both are tuning, not
+mechanism. The same three builtins (0, 2, 22) and the assembler are what the
+glass, block and crowd interactions will use.
 
 ## Collision and river reset follow-up
 

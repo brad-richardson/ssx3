@@ -77,7 +77,8 @@ def test_countdown_program_registers_both_handlers():
     names = [c[4] for c in register['code'] if c[0] == lun.OP_LOADNAME]
     assert names == [lun.name_hash('StartgateOpen'), lun.name_hash('StartlightBegin')]
     assert [c for c in hide["code"] if c[0] == lun.OP_CALLBUILTIN] == [(33, 2, 2, 2, None)]*3
-    assert [c for c in lights['code'] if c[0] == lun.OP_CALLBUILTIN] == [(33, 2, 22, 4, None)]
+    assert [c for c in lights['code'] if c[0] == lun.OP_CALLBUILTIN] == \
+        [(33, 2, 0, 1, None), (33, 2, 22, 4, None)]   # modifier host first, then the flip
     assert lights['stack'] == 4 and hide['stack'] == 2
 
 
@@ -95,4 +96,4 @@ def test_probe_variant_moves_the_gate_removal_to_the_lights_event():
     _, hide, lights = lun.disassemble(lun.countdown_program([7, 8, 9], 9, 1.0, probe=True))
     assert [c for c in hide['code'] if c[0] == lun.OP_CALLBUILTIN] == [(33, 2, 2, 2, None)]
     assert [c for c in lights['code'] if c[0] == lun.OP_CALLBUILTIN] == \
-        [(33, 2, 2, 2, None)]*2 + [(33, 2, 22, 4, None)]
+        [(33, 2, 2, 2, None)]*2 + [(33, 2, 0, 1, None), (33, 2, 22, 4, None)]

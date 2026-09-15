@@ -5,6 +5,30 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Next Tricky course, not a race (user, September 14): after Garibaldi
+      reaches parity (physics interactions and sprite/animation cycling are
+      the remaining gaps), pick a Tricky Showoff course and map it onto one of
+      SSX 3's non-race event types (slopestyle, big air, halfpipe,
+      backcountry). Spike done September 14, see
+      `local/research/next-course-spike.md`. **Recommendation: Aloha Ice Jam
+      Showoff (`aloha.sop`) into `ASS1` "R&B", event 5, slopestyle.** Closest
+      length match of any donor/slot pair, fits the slot's 6.99 MB without
+      growth, decorative rather than machinery-driven, and on the peak the
+      harness already rides. All twelve GameCube Tricky archives are already
+      under `local/game/gste69-original/files/data/models/`. Facts: Tricky's
+      mode data is `.aip` (Race) vs `.sop` (Showoff), same format, plus
+      `RaceMode`/`ShowoffMode` GSF programs; no `.sop` reader exists and no
+      showoff scoring table was found. SSX 3's event mode is the second word
+      of the `0x802E2C18` row (2 race, 3 slopestyle, 4 big air, 5 halfpipe, 6
+      backcountry), not the peak. Kind 21 is the only mode-gated record kind
+      (absent in big air and halfpipe) and its header word is 4 for
+      slopestyle with two extra distance markers, which `race_course.py`
+      hard-codes as race; gate counts differ too (race 6, slopestyle 3).
+      Pipedream rejected (its `.sop` equals its `.aip`, halfpipe has no kind
+      21); Megaplex rejected while layer (c) is stubbed. Gap about 9-14 days,
+      the largest items the scoring driver in the course script (2-4 d) and
+      the per-course transform preset (2-3 d); the script driver is the same
+      work Garibaldi's glass/block physics and flipbooks need.
 - [ ] Visual remaster with trained upscalers (user, September 14; SSX 3 first,
       the PS2 games after). Hybrid pipeline, not "an image model upscales the
       game": classify assets → dedicated super-resolution per asset family
@@ -358,9 +382,12 @@ the build or commit that closed them.
       writes a program into slot 3: the observer shows both named lookups now
       return a callback (type 5) and both closures are invoked; the probe
       variant removes the canopy and stalls during the countdown by script-side
-      DeadNode (`script-evidence/`). Open: builtin 22 does not advance the
-      light flipbook (diagnosis in progress), and whether a DeadNode'd gate
-      returns after a restart is unobserved. Earlier attempt, kept for the record:
+      DeadNode (`script-evidence/`). **Lights done too (script-003):** the
+      handler calls builtin 0 to create the instance's modifier host, then
+      builtin 22; the lamps cycle through the countdown and the gate returns
+      after a restart (engine course reset). Remaining polish: the donor's
+      authored 1.0/0.5/0.5/0.5 s beats versus the free-running 1.3 flips/s
+      loop. Earlier attempt, kept for the record:
       **The handler is written and the flag write does not work.**
       `gamecube_startgate_handler.py` sets the bit on the lights and clears
       it on the gate, in the shared definition and in every live instance's

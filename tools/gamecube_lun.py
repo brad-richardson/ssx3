@@ -185,7 +185,12 @@ def countdown_program(gate_ids, lights_id, rate, probe=False):
     at_lights = gates if probe else []
     hide = dict(code=sum((dead_node(oid) for oid in at_open), []) + [return_nil()],
                 params=3, stack=2)
+    # Builtin 22 attaches to the instance's modifier host at +132, which only
+    # builtin 0 creates; without it the builtin returns silently. The stock
+    # courses always call builtin 0 on an instance before attaching modifiers
+    # (local/research/startgate/builtin22-diagnosis.md).
     lights = dict(code=sum((dead_node(oid) for oid in at_lights), []) + [
+        push_int(0, lights_id), call_builtin(2, 0, 1),
         push_int(0, lights_id), push_byte(1, 0), push_byte(3, 1), push_float(4, rate),
         call_builtin(2, 22, 4), return_nil()], params=3, stack=4)
     return assemble([register, hide, lights])
