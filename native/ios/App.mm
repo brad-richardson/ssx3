@@ -1,6 +1,7 @@
 // SSX development frontend. Runtime integration follows SunPad's Apple host;
 // see native/ios/README.md for attribution and the validation boundary.
 #import <UIKit/UIKit.h>
+#include <dirent.h>
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 #import <AVFAudio/AVFAudio.h>
@@ -184,6 +185,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   SSXDisplayPreferences* _displayPreferences;
   NSString* _menuStatus;
   NSString* _menuBuild;
+  int _packInstalled;                       // -1 unknown, 0 no, 1 yes
+  NSArray<NSString*>* _coursesCache;
   BOOL _menuClosing;
   BOOL _trialAfterOutput;
   CGFloat _outputScale;
@@ -276,9 +279,27 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 @end
 
 @implementation SSXViewController
+// Launch trace: the session report only exists once a runtime starts, so a
+// crash or a watchdog kill during UI setup leaves nothing behind. This appends
+// one line per startup step to Documents/launch-trace.txt, which `collect`
+// pulls, and is the only evidence available for a launch that never gets as
+// far as starting the game.
+static void SSXLaunchTrace(NSString* step) {
+  NSString* path=[Documents() stringByAppendingPathComponent:@"launch-trace.txt"];
+  NSString* line=[NSString stringWithFormat:@"%.3f %@\n", NSDate.date.timeIntervalSince1970, step];
+  fprintf(stderr, "[ssx-launch] %s", line.UTF8String);
+  fflush(stderr);
+  if (FILE* file=fopen(path.fileSystemRepresentation, "a")) {
+    fwrite(line.UTF8String, 1, strlen(line.UTF8String), file);
+    fclose(file);
+  }
+}
+
 - (void)viewDidLoad {
+  SSXLaunchTrace(@"viewDidLoad enter");
   [super viewDidLoad];
   _pipe = -1;
+  _packInstalled = -1;
   _pauseState.active = YES;
   _saveBackgroundTask = UIBackgroundTaskInvalid;
   _sessionStore = [[SSXSessionStore alloc] initWithDirectory:
@@ -377,6 +398,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllersChanged:)
       name:GCControllerDidDisconnectNotification object:nil];
   [self controllersChanged:nil];
+  SSXLaunchTrace(@"viewDidLoad starting tick timer");
   _timer = [NSTimer scheduledTimerWithTimeInterval:0.05 target:self selector:@selector(tick)
       userInfo:nil repeats:YES];
 }
@@ -817,6 +839,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   }).detach();
 }
 - (void)tick {
+  static bool traced=false;
+  if (!traced) { traced=true; SSXLaunchTrace(@"first tick"); }
   const double host=CACurrentMediaTime();
   if (_lastTickHost && host-_lastTickHost>2 && (_running || _pendingCheckpoint))
     [self logSessionEvent:@"tick_gap" details:@{@"gap_seconds":@(host-_lastTickHost)}];
@@ -827,7 +851,14 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     fprintf(stderr,"[ssx-test] wall-clock deadline reached\n");
     [self stopGame]; return;
   }
-  if (!_running) { [self refreshSessionMenu]; return; }
+  if (!_running) {
+    static bool tracedMenu=false;
+    if (!tracedMenu) { tracedMenu=true; SSXLaunchTrace(@"first menu refresh"); }
+    [self refreshSessionMenu];
+    static bool tracedMenuDone=false;
+    if (!tracedMenuDone) { tracedMenuDone=true; SSXLaunchTrace(@"first menu refresh done"); }
+    return;
+  }
   [self updatePlayback];
   if (_matchInternal) [self applyMatchedOutput];
   if (_pauseState.NeedsMenu(!_starting) && !self.presentedViewController)
@@ -1152,14 +1183,18 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   return _cpuThreadOverride>=0 ? _cpuThreadOverride==1 : [NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"];
 }
 - (NSArray<NSString*>*)installedCourses {
-  // Documents/Courses/*.txt, as written by tools/course_manifests.py.
+  // Documents/Courses/*.txt, as written by tools/course_manifests.py. Cached
+  // for the same reason as the pack check: the menu asks several times per
+  // refresh and the set only changes when a new install restarts the app.
+  if (_coursesCache) return _coursesCache;
   NSString* directory=[Documents() stringByAppendingPathComponent:@"Courses"];
   NSArray* entries=[[NSFileManager defaultManager] contentsOfDirectoryAtPath:directory error:nil];
   NSMutableArray* courses=[NSMutableArray array];
   for (NSString* name in [entries sortedArrayUsingSelector:@selector(compare:)])
     if ([name.pathExtension isEqualToString:@"txt"] && ![name hasPrefix:@"."])
       [courses addObject:name];
-  return courses;
+  _coursesCache = courses;
+  return _coursesCache;
 }
 - (nullable NSString*)chosenCourseFile {
   NSString* chosen=[NSUserDefaults.standardUserDefaults stringForKey:@"SSXCourseManifest"];
@@ -1169,9 +1204,25 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (BOOL)remasterPackInstalled {
   // Dolphin reads Load/Textures/<game id>/; an empty directory is not a pack.
+  //
+  // This answer is cached and found by reading a single directory entry. The
+  // first version listed the directory with contentsOfDirectoryAtPath:, which
+  // builds an array of every name in it - fine for a handful of files, fatal
+  // for a real pack: the 17-course pack is 8,904 files, the paused menu
+  // refreshes at 20 Hz, and two calls per refresh starved the main thread
+  // until the watchdog killed the app on launch.
+  if (_packInstalled >= 0) return _packInstalled > 0;
   NSString* pack=[Documents() stringByAppendingPathComponent:@"User/Load/Textures/GXBE69"];
-  NSArray* entries=[[NSFileManager defaultManager] contentsOfDirectoryAtPath:pack error:nil];
-  return entries.count>0;
+  _packInstalled = 0;
+  if (DIR* directory=opendir(pack.fileSystemRepresentation)) {
+    while (struct dirent* entry=readdir(directory)) {
+      if (entry->d_name[0]=='.') continue;      // ".", "..", and dot files
+      _packInstalled = 1;
+      break;
+    }
+    closedir(directory);
+  }
+  return _packInstalled > 0;
 }
 - (BOOL)remasterRequested {
   return [self remasterPackInstalled] &&
@@ -1438,18 +1489,37 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 @end
 
-@interface SSXAppDelegate : UIResponder<UIApplicationDelegate>
+// The iOS 26 SDK made UIScene adoption mandatory: UIKit traps in
+// _UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption when an app
+// linked against it still builds its window from the app delegate, so the
+// window and the active/inactive edges live on a scene delegate instead.
+@interface SSXSceneDelegate : UIResponder<UIWindowSceneDelegate>
 @property(nonatomic,strong) UIWindow* window;
+@end
+@implementation SSXSceneDelegate
+- (void)scene:(UIScene*)scene willConnectToSession:(UISceneSession*)session options:(UISceneConnectionOptions*)options {
+  SSXLaunchTrace(@"scene willConnect enter");
+  if (![scene isKindOfClass:UIWindowScene.class]) return;
+  self.window=[[UIWindow alloc] initWithWindowScene:(UIWindowScene*)scene];
+  self.window.rootViewController=[[SSXViewController alloc] init];
+  [self.window makeKeyAndVisible];
+}
+- (SSXViewController*)controller {
+  UIViewController* root=self.window.rootViewController;
+  return [root isKindOfClass:SSXViewController.class] ? (SSXViewController*)root : nil;
+}
+- (void)sceneWillResignActive:(UIScene*)scene { [self.controller systemActive:NO]; }
+- (void)sceneDidBecomeActive:(UIScene*)scene { [self.controller systemActive:YES]; }
+@end
+
+@interface SSXAppDelegate : UIResponder<UIApplicationDelegate>
 @end
 @implementation SSXAppDelegate
 - (BOOL)application:(UIApplication*)app didFinishLaunchingWithOptions:(NSDictionary*)options {
+  SSXLaunchTrace(@"didFinishLaunching enter");
   signal(SIGPIPE,SIG_IGN);
-  self.window=[[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
-  self.window.rootViewController=[[SSXViewController alloc] init];
-  [self.window makeKeyAndVisible]; return YES;
+  return YES;
 }
-- (void)applicationWillResignActive:(UIApplication*)app { [(SSXViewController*)self.window.rootViewController systemActive:NO]; }
-- (void)applicationDidBecomeActive:(UIApplication*)app { [(SSXViewController*)self.window.rootViewController systemActive:YES]; }
 @end
 int main(int argc,char** argv) {
   @autoreleasepool { return UIApplicationMain(argc,argv,nil,NSStringFromClass(SSXAppDelegate.class)); }
