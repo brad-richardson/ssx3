@@ -16,6 +16,7 @@ from pathlib import Path
 import plistlib
 import re
 import shutil
+import tempfile
 import subprocess
 import sys
 import time
@@ -170,21 +171,64 @@ def copy_to(args, source, destination, timeout=300):
                         "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=timeout)
 
 
+# The three UI sheets that carry the prompt icons; their `art_` images are
+# identical, and the game picks whichever sheet the current screen uses.
+GLYPH_SHEETS = ("fe_1", "ov_1", "gl_1")
+
+
+def patched_ui(game, workspace):
+    """The Xbox-position prompt glyphs, rebuilt from this game's own UI sheets.
+
+    The game draws the GameCube input's icon for every prompt, so reading
+    "B for recovery" while holding an Xbox-style overlay means hunting for the
+    button. `patch_ui_glyphs.py` repaints each icon for the Xbox button at the
+    same physical position, and provisioning applies it every time because it
+    has to: provisioning copies `files/` from the pristine disc, so a patch
+    that lives only in the device container is reverted by the next install and
+    the prompts silently revert to GameCube letters.
+    """
+    try:
+        from patch_ui_glyphs import patch_sheet
+    except ImportError:
+        from tools.patch_ui_glyphs import patch_sheet
+    destination = workspace / "ui"
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in GLYPH_SHEETS:
+        patch_sheet(game / "files/data/ui" / f"{name}.gsh", destination / f"{name}.gsh")
+    return destination
+
+
 def provision(args):
     game = args.game.resolve()
     if native.sha256(game / "sys/main.dol") != native.PINS["dol_sha256"]:
         raise RuntimeError("Game DOL is not the verified GXBE69 revision 0")
-    if args.simulator:
-        destination = simulator_documents(args) / "Game"
-        if destination.is_symlink():
-            raise RuntimeError("Simulator Game is a symlink; refusing to write through it")
+    workspace = None
+    glyphs = None
+    if not args.stock_glyphs:
+        workspace = Path(tempfile.mkdtemp(prefix="ssx-ui-"))
+        glyphs = patched_ui(game, workspace)
+    try:
+        if args.simulator:
+            destination = simulator_documents(args) / "Game"
+            if destination.is_symlink():
+                raise RuntimeError("Simulator Game is a symlink; refusing to write through it")
+            for directory in ("sys", "files"):
+                shutil.copytree(game / directory, destination / directory, dirs_exist_ok=True)
+            if glyphs:
+                shutil.copytree(glyphs, destination / "files/data/ui", dirs_exist_ok=True)
+            print("Game data copied to the local simulator container")
+            return
+        # Explicit subdirectories avoid ambiguity about directory-copy roots.
         for directory in ("sys", "files"):
-            shutil.copytree(game / directory, destination / directory, dirs_exist_ok=True)
-        print("Game data copied to the local simulator container")
-        return
-    # Explicit subdirectories avoid ambiguity about directory-copy roots.
-    for directory in ("sys", "files"):
-        copy_to(args, game / directory, "Documents/Game/" + directory, timeout=1800)
+            copy_to(args, game / directory, "Documents/Game/" + directory, timeout=1800)
+        if glyphs:
+            # After files/, so it overwrites the pristine sheets rather than
+            # being overwritten by them.
+            copy_to(args, glyphs, "Documents/Game/files/data/ui", timeout=300)
+            print(f"Xbox-position prompt glyphs applied to {', '.join(GLYPH_SHEETS)}")
+    finally:
+        if workspace:
+            shutil.rmtree(workspace, ignore_errors=True)
 
 
 def world_build_metadata(world):
@@ -357,6 +401,8 @@ def main():
     parser.add_argument("--simulator", action="store_true", help="Use the iOS Simulator SDK and simctl")
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
     parser.add_argument("--game", type=Path, default=native.DEFAULT_GAME)
+    parser.add_argument("--stock-glyphs", action="store_true",
+                        help="Provision the disc's own GameCube prompt icons instead of repainting them for Xbox positions")
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")
     parser.add_argument("--output-scale", choices=("full", "three-quarter", "match-internal", "half"),
                         help="Launch-only drawable scale; normal launches use the saved choice (initially half)")
