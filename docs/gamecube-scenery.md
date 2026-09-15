@@ -187,6 +187,64 @@ the accurate reason: each is a single animated geometry part, and 17 of the 20
 have no local matrix. Only models 49/86/90 are genuinely multipart (23
 geometry parts, 22 local matrices each).
 
+### Importing animated prefabs frozen (`--animated-as-static`)
+
+`animated` on a part means only that the part object names separate animation
+data at +16; the geometry display lists are read the same way either way. So a
+single-geometry-part animated model can be imported at its rest pose with no
+new pipeline. These prefabs are **absent** today, so this trades still
+geometry for nothing at all.
+
+The flag is opt-in and the receipt names the frozen models separately as
+`animated_imported_as_static`, so their presence can never be read as
+animation support. With it:
+
+| verdict | default | `--animated-as-static` |
+| ------- | ------- | ---------------------- |
+| imported | 624 models / 3,303 placements | **641 / 3,367** |
+| animated | 20 / 79 | 0 |
+| local matrix | 0 | 3 / 15 |
+| multipart | 3 / 10 | 3 / 10 |
+
+17 of the 20 crowd models import (+64 placements). The remaining three --
+280, 281 and 282, 15 placements -- carry a local matrix on the geometry part
+and now report `local matrix`, joining the (a3) work rather than staying
+hidden behind `animated`.
+
+Candidate `local/builds/gc-gari-scenery-crowd-001`: 641 models, 3,316
+instances, 108,570 validated resources, archive SHA-256 prefix
+`b0a1f7e29841b1e3`, with 17 models listed in `animated_imported_as_static`.
+
+Both candidates ride clean. `run-multipart-001` (849 samples) and
+`run-crowd-001` (845 samples) each exit 0 with riding observed and **zero**
+invalid accesses, GPU command errors, unknown instructions and JIT fallbacks.
+
+**Visual confirmation is still missing for both.** The screenshots are 15 s
+apart and the two runs diverge on the course, so no controlled A/B of the same
+camera pose exists; the crowd figures were not identified in the stands. What
+is established is structural -- the placements are in the archive and the
+course rides without faults. For (a1) the new models were at least located:
+the nearest instance of 132/133/153 is 121,470 units from where the
+`run-multipart-001` camera clipped through terrain at 31%, on a course whose
+diagonal is about 236,000 units, so that artifact belongs to the 013-lineage
+scenery-only build and not to the new geometry. Models 132 and 133/153 are
+co-located in pairs (instances 1468/1470, 2296/2299), a flat ground marker
+under an upright banner.
+
+### Why local matrices are not a quick follow-on
+
+Strip vertices are `(position, normal, uv)` index triples into **globally
+shared** arrays, written once as single kind-25/27/24/26 resources for the
+whole import. A part's local matrix therefore cannot be applied in place:
+transforming a shared position would move every other model that references
+it. Doing (a3) properly means appending transformed copies of the positions a
+matrix-carrying part uses, remapping that part's indices, and checking the
+results still fit the 16-bit signed position encoding alongside the model's
+1x/4x scale. `gamecube_collision_import.py` also re-derives and compares
+instance records, so folding a part matrix into the instance matrix instead --
+tempting for the three single-part cases -- would have to be mirrored there.
+None of that is hard, but it is real work with its own validation, not a flag.
+
 Candidate `local/builds/gc-gari-scenery-multipart-001` carries 624 kind-2
 models and 3,252 kind-3 instances, with 108,444 validated resources and
 archive SHA-256

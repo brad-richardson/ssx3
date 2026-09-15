@@ -114,12 +114,20 @@ def geometry_parts(model):
     return [p for p in model['parts'] if p['meshes'] or p['matrix'] is not None]
 
 
-def eligibility(model):
+def eligibility(model, animated_as_static=False):
+    """Why this model cannot be imported, or None.
+
+    `animated_as_static` admits a model whose single geometry part carries
+    animation, importing its rest-pose display lists and ignoring the
+    animation. That is a deliberate downgrade, not animation support: the
+    part's geometry is read the same way either way, since `animated` only
+    reports that the part object names separate animation data.
+    """
     parts = geometry_parts(model)
     if len(parts) != 1:
         return 'multipart'
     part = parts[0]
-    if part['animated']:
+    if part['animated'] and not animated_as_static:
         return 'animated'
     if part['matrix'] is not None:
         return 'local matrix'
@@ -157,8 +165,8 @@ def validate_reclamation(world, group, track):
     return checked
 
 
-def model_record(model, oid, model_id, buffer_id, material_ids):
-    reason = eligibility(model)
+def model_record(model, oid, model_id, buffer_id, material_ids, animated_as_static=False):
+    reason = eligibility(model, animated_as_static)
     if reason:
         raise ValueError(f'Model {model["rid"]}: {reason}')
     part = geometry_parts(model)[0]
@@ -221,7 +229,7 @@ def instance_record(source, matrix, translation, scale, oid, instance_id, model_
 
 
 def compile_static(source, records, texture_ids, matrix, translation, track, page, model_ids,
-                   reclaim_host_models=False):
+                   reclaim_host_models=False, animated_as_static=()):
     """Preserve existing resources and allocate each new kind independently."""
     def oid(rid):
         if not 0 <= rid < 0x7fff:
@@ -244,7 +252,8 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
     converted, instances, hidden = [], [], []
     for index, source_id in enumerate(model_ids):
         model_id, buffer_id, normal_id = first_model+index, first_buffer+index, first_normal+index
-        data, normals, scale = model_record(source.models[source_id], oid, model_id, buffer_id, material_ids)
+        data, normals, scale = model_record(source.models[source_id], oid, model_id, buffer_id,
+                                            material_ids, source_id in animated_as_static)
         added.append(record(26, normal_id, b''.join(pack('3f', *(x/16384 for x in source.normals[n])) for n in normals), track))
         added.append(record(23, buffer_id, buffer_group(oid(position_id), oid(uv_id), oid(normal_id)), track))
         converted.append(record(2, model_id, data, track))
@@ -270,6 +279,9 @@ def compile_static(source, records, texture_ids, matrix, translation, track, pag
     result.sort(key=lambda r: WORLD_RESOURCE_ORDER.index(r[0]['kind']))
     return result, dict(source_models=model_ids, added_models=len(converted), added_instances=len(instances),
                         hidden_source_instances=hidden,
+                        # Frozen at the rest pose. Named separately so a later reader cannot
+                        # mistake their presence for animation support.
+                        animated_imported_as_static=sorted(animated_as_static),
                         lighting_profile='neutral-diagnostic', collision=False, grind_splines=False,
                         reclaimed_host_records=len(reclaimed), reclaimed_host_bytes=sum(len(p) for _, p in reclaimed))
 
@@ -290,6 +302,10 @@ def main():
                         help='Remove unplaced host models/buffers while preserving their IDs as holes')
     parser.add_argument('--reclaim-geometry-textures', action='store_true',
                         help='Rebuild the replaced static geometry page from surviving terrain/model users')
+    parser.add_argument('--animated-as-static', action='store_true',
+                        help='Import animated single-part prefabs frozen at their rest pose. They are '
+                             'absent today, so this trades still geometry for nothing at all. It is not '
+                             'animation support and does not import any animation data.')
     args = parser.parse_args()
     if args.output.exists():
         raise ValueError('Output exists; use a fresh experiment directory')
@@ -303,7 +319,13 @@ def main():
     records = world.records(args.group)
     location = next(l for l in world.index['locations'] if l['group_start'] <= args.group <= l['last_group'])
     reclamation_references = validate_reclamation(world, args.group, location['index']) if args.reclaim_host_models else 0
-    omitted = {m['rid']: reason for m in source.models if (reason := eligibility(m))}
+    omitted = {m['rid']: reason for m in source.models
+               if (reason := eligibility(m, args.animated_as_static))}
+    # Only single-geometry-part models can be frozen; a genuinely multipart one
+    # is still rejected above, so this set never widens past what was imported.
+    frozen = {m['rid'] for m in source.models
+              if args.animated_as_static and m['rid'] not in omitted
+              and geometry_parts(m)[0]['animated']}
     ids = args.models if args.models is not None else [m['rid'] for m in source.models if m['rid'] not in omitted]
     if len(set(ids)) != len(ids) or any(not 0 <= i < len(source.models) for i in ids):
         raise ValueError('Invalid or duplicate model selection')
@@ -319,7 +341,8 @@ def main():
         texture_ids[src] = dst
         textures.append(record(9, dst, world_image_record(images[src]), 255))
     records, report = compile_static(source, records, texture_ids, experiment['matrix'], experiment['translation'],
-                                     location['index'], args.page, ids, args.reclaim_host_models)
+                                     location['index'], args.page, ids, args.reclaim_host_models,
+                                     frozen & set(ids))
     if args.reclaim_geometry_textures:
         textures, report['texture_residency'] = prune_geometry_texture_page(
             world, {args.group: records, args.texture_group: textures}, args.texture_group)

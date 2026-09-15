@@ -69,6 +69,21 @@ class EligibilityTests(unittest.TestCase):
         self.assertEqual(eligibility({'rid': 49, 'parts': [part(meshes=0), part(), part()]}),
                          'multipart')
 
+    def test_animated_as_static_admits_only_a_single_animated_geometry_part(self):
+        root = part(meshes=0)
+        animated = {'rid': 269, 'parts': [root, part(animated=True)]}
+        self.assertEqual(eligibility(animated), 'animated')
+        self.assertIsNone(eligibility(animated, animated_as_static=True))
+
+    def test_animated_as_static_does_not_excuse_a_matrix_or_extra_parts(self):
+        root = part(meshes=0)
+        # Models 280-282: animated single part that also carries a matrix.
+        self.assertEqual(eligibility({'rid': 280, 'parts': [root, part(animated=True, matrix=(1,)*16)]},
+                                     animated_as_static=True), 'local matrix')
+        # Models 49/86/90 stay multipart however the flag is set.
+        self.assertEqual(eligibility({'rid': 49, 'parts': [root, part(), part(animated=True)]},
+                                     animated_as_static=True), 'multipart')
+
     def test_a_single_geometry_part_is_still_judged_on_its_own_properties(self):
         root = part(meshes=0)
         self.assertEqual(eligibility({'rid': 269, 'parts': [root, part(animated=True)]}),

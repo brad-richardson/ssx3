@@ -369,3 +369,47 @@ launch because its profile socket path was too long; it supplies no gameplay
 evidence. All three accepted runtime runs used the same existing read-only
 diagnostic module, SHA-256
 `a8d6b3b1f7be2fac20385432677892335cfecf18d6c74e1f7b3f655cf0a0fe6e`.
+
+## Donor interaction inventory (September 14)
+
+First step of the scenery-interaction work: find what the donor already marks
+as breakable or movable, before translating any behaviour. Read from the GSF
+property table, 531 records over 3,393 instances, 24 bytes each:
+
+```
+u0(f) bounce(f) flags(H) u2(H) surface(I) mode(h) collision_or_physics(h) effect_slot(h) u8(h)
+```
+
+`instance_gameplay()` decodes all nine but exposes six; `u0` and `bounce` are
+dropped, and both are informative. `u2` and `u8` are 0 in every record.
+
+- **`u0` is an immovability sentinel.** 483 records hold 1e30, the same
+  "infinite" constant the course script uses for draw distance. Only 48 hold a
+  finite value: 45 at 0.0 and 3 at 5.0.
+- **`bounce` is restitution**, four values: 0.6 (359), 0.5 (165), 0.2 (4),
+  0.03 (3).
+- **`collision_mode` separates the classes.** Mode 1 is ordinary collision with
+  a physics reference and no effect. Mode 2 carries an effect slot and no
+  physics. **Mode 3 carries both**, and every mode 3 record also has the low
+  0.20 bounce.
+
+Mode 3 is the scattering-block candidate set -- physics, an effect, low
+restitution, and finite mass:
+
+| property | u0 | bounce | phys | effect | model | instances |
+| -------- | -- | ------ | ---- | ------ | ----- | --------- |
+| 110 | 0.0 | 0.20 | 6 | 46 | 7 | 39 |
+| 111 | 5.0 | 0.20 | 7 | 47 | 19 | 22 |
+| 26 | 5.0 | 0.20 | 2 | 29 | 1 | 1 |
+| 27 | 5.0 | 0.20 | 2 | 30 | 1 | 1 |
+
+63 placements across three models. Separately, 23 mode 2 records are
+**hidden** (`visible` clear) and carry an effect slot with no physics -- models
+60-70 and 114-118 -- which is the shape of an effect trigger volume rather than
+a drawn object. The crowd prefabs 269-288 carry effect slots 4, 5 and 6 across
+79 placements, the likely crowd reaction.
+
+None of this is translated to target behaviour. It is also gated behind the
+same problem as the start gate and the countdown flipbook: the authored
+behaviour lives in LUN course programs that are all empty stubs, so correct
+data alone stays inert. Identify-then-drive, not import-then-hope.

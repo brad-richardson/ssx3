@@ -179,15 +179,26 @@ the build or commit that closed them.
       flipbook on texture 61 — the best direction-arrow candidates in the
       donor. Model 132 is a 4-vertex quad flat in Y (3x0x1362), a ground
       decal.
-      **(a2) 79 placements need only an animation decision.** Models 269-288
-      are each a single *animated* geometry part; 17 of the 20 have no local
-      matrix at all. Importing them frozen would populate the stands now and
-      reuses the (a1) path. Present-but-still beats absent, but it needs an
-      explicit flag so it is never mistaken for animation support.
-      **(a3) 10 placements need real local-matrix composition.** Models
-      49/86/90 only: 23 geometry parts with 22 local matrices each. This is
-      the one genuinely multipart case. Model 32 (normal palette over 256,
-      1 placement) remains separate.
+      **(a2) done September 14: 64 of the 79 land frozen.**
+      `--animated-as-static` admits a single-geometry-part animated model and
+      imports its rest-pose display lists; `animated` only reports that the
+      part names separate animation data, and the geometry is read the same
+      way regardless. 641 models / 3,367 placements, up from 624 / 3,303. The
+      receipt lists them as `animated_imported_as_static` so their presence is
+      never read as animation support. The remaining three models (280-282,
+      15 placements) carry a local matrix and now report `local matrix`,
+      joining (a3) instead of hiding behind `animated`.
+      **(a3) 25 placements need local-matrix composition** — models 49/86/90
+      (10, genuinely multipart: 23 geometry parts, 22 matrices each) plus
+      280/281/282 (15, single part with a matrix). Scoped September 14 and
+      **not** a quick win: strip vertices are index triples into globally
+      shared position/uv/normal arrays written once for the whole import, so a
+      local matrix cannot be applied in place without moving every other model
+      that shares those positions. It needs transformed position copies, index
+      remapping, a 16-bit signed range check against the model's 1x/4x scale,
+      and the same composition mirrored in `gamecube_collision_import.py`,
+      which re-derives and compares instance records. Model 32 (normal palette
+      over 256, 1 placement) remains separate.
       **(b) Material flipbooks are staged but never sequenced.** 16 of 125
       donor materials carry a 2-5 frame flipbook, covering 74 placements;
       the countdown light is one of them (material 66, flipbook 5, five
@@ -235,14 +246,20 @@ the build or commit that closed them.
       work. Objects remain intact on impact (user, Sep 13). This is layer (c)
       applied to a specific, visible case, so it inherits the LUN stub
       problem: the authored break behaviour lives in disabled course programs.
-      Donor bindings that should drive it are already read and carried:
-      824 of 3,393 instances name an `effect_slot` (74 distinct, the rest
-      -1), 2,749 name a `collision_or_physics` entry (412 distinct), and
-      `collision_mode` has four values — 0 non-colliding (295), 1 (2,599),
-      2 (349) and 3 (150), where modes 2 and 3 are the likely non-rigid
-      breakable/movable classes. None of these are translated to target
-      behaviour yet. Start by identifying which instances the donor marks
-      breakable, before any effect or physics work.
+      **Inventory done September 14** — the identify step is complete; see
+      [collision evidence](gamecube-collision.md). `u0` in the GSF property
+      record is an immovability sentinel: 483 of 531 records hold 1e30, only
+      48 hold a finite value. `collision_mode` separates the classes, and
+      **mode 3 carries both a physics reference and an effect slot**, always
+      with the low 0.20 restitution: models 7 (39 placements), 19 (22) and 1
+      (2) — 63 placements, the scattering-block candidates. A further 23
+      mode 2 records are hidden and carry an effect with no physics, the shape
+      of a trigger volume; the crowd prefabs 269-288 carry effect slots 4/5/6.
+      `instance_gameplay()` decodes `u0` and `bounce` but drops them from the
+      dict — expose them first.
+      Nothing is translated to target behaviour, and it is gated behind the
+      same driver problem as the gate bit and the flipbook: correct data alone
+      stays inert while every LUN program is a stub.
 - [ ] Restore the Garibaldi start gate and countdown lights; user reconfirmed
       they are missing on iPhone on September 13 (assets 027). The three gate
       models are supported static geometry, deliberately omitted by 022;
