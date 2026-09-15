@@ -46,9 +46,15 @@ the build or commit that closed them.
       calibrates the steering sense itself and measured it: a positive stick x
       turns the heading clockwise in the x/z plane, so `sign = -1`. One route
       reached 2 of 6 waypoints, a second reached 0 of 3 — a proportional
-      controller on heading error will not hold a line down a mountain. Next:
-      pure pursuit with a look-ahead point, routes that engage near their
-      target rather than driving the whole descent, and some speed control.
+      controller on heading error will not hold a line down a mountain. Pure
+      pursuit with late engagement does: routed at a collider 2,637 units off
+      the natural line, the rider closed to **868** units and the engine
+      narrow-phase tested that object 19 times where it had never tested it
+      before — no contact yet, 68 units outside its own tolerance. The steering
+      sign is now inferred from the controller's own error growth, because
+      holding an input to calibrate it reads the terrain rather than the stick.
+      Next: vertical alignment (steering is horizontal, so a route can arrive
+      beside an object it passes over), tolerance and gain, and speed control.
       See [route control](route-control.md).
 - [ ] Next Tricky course, not a race (user, September 14): after Garibaldi
       reaches parity (physics interactions and sprite/animation cycling are

@@ -64,50 +64,50 @@ position for reasons a route cannot answer.
 
 ## Measured, September 15
 
-The first steered run on Aloha (`local/research/aloha/route-001`, 200 s, exit 0,
-riding observed) calibrated and followed:
+Four steered runs on Aloha, each 200 s, exit 0, riding observed.
 
-```
-{'t': 125.75, 'calibration': 'started'}
-{'t': 127.26, 'calibration': 'done', 'turned_degrees': -11.98, 'sign': -1}
-{'t': 128.35, 'reached': 0, 'waypoint': [-119899.1, -230494.1]}
-{'t': 131.71, 'reached': 1, 'waypoint': [-118654.3, -231618.5]}
-```
+**The controller.** Heading-error steering does not work: one route reached 2 of
+6 waypoints and a second, wider one 0 of 3. Replacing it with pure pursuit —
+aim at a point a fixed distance ahead *along* the polyline — plus late
+engagement is what made it steer usefully.
 
-So on this game and camera **a positive stick x turns the heading clockwise in
-the x/z plane** — the calibration measured −12° over 1.5 s and adopted
-`sign = -1`. No writes were lost (`unavailable_writes: 0`) once the pipe is
-opened per write; holding one open across the menu-to-gameplay transition gets
-`EPIPE`, because the runtime closes and reopens its read end.
+**The sign cannot be calibrated by holding an input.** The first version held
++0.15 for 1.5 s and read the heading change: −12°, so `sign = -1`. That reading
+is dominated by the terrain, which turns the rider far harder than a test
+offset, and pinning it produced runs that steered *away* from the target: the
+unsteered line passed within 27 units of collider 524 while the steered ones
+managed only 598 and 725. The sign is now inferred from the controller's own
+behaviour — steer with a tentative sense, and if the mean heading error grows
+over the first 1.5 s, flip once. In the run below it started at +1, watched the
+error go from 71.6° to 111.1°, and flipped to −1 at t = 131.08.
 
-That route reached 2 of its 6 waypoints. A second attempt at the same object
-with three wider waypoints, a 1,500-unit tolerance and the sign pinned
-(`route-002`, with the collision-trace module aimed at instance 524) rode
-cleanly for 999 samples and reached **none** of them, and
-`gamecube_collision_check` reported no contact.
+**It moves the rider toward a chosen target.** Collider rid 529 (donor instance
+883) sits 2,637 units off the natural line. Routed at it with a 6,000-unit
+engagement radius (`route-004`):
 
-So the honest state is: **the steering mechanism works and route *following*
-does not yet.** Calibration measures the sense, the stick reaches the runtime,
-waypoints are consumed when the rider passes near one — but a proportional
-controller on heading error alone does not hold a line down a mountain. The
-rider accelerates, the terrain turns under it, and the first waypoint 14,000
-units downhill is never approached within tolerance.
+| | unsteered (`ride-003`) | steered (`route-004`) |
+| --- | ---: | ---: |
+| closest approach to the target | 2,636 units | **868 units** |
+| broad-phase tests of that object | — | 794 |
+| narrow-phase queries | — | 19 |
+| positive contacts | — | 0 |
 
-What it needs next, in order:
+So steering closed two thirds of the gap and brought the object from never
+being tested to being narrow-phase tested nineteen times, and it still did not
+touch it — it stopped 68 units outside its own 800-unit tolerance. What is
+left is tuning rather than mechanism:
 
-1. **Pure pursuit instead of raw heading error** — aim at a point a fixed
-   distance ahead *along* the route rather than at the next waypoint, which is
-   what keeps a fast vehicle on a curved path.
-2. **Engage late.** A short route that starts near its target is far more
-   likely to work than one that tries to drive the whole descent, and it is all
-   a deliberate-contact test needs.
-3. **Speed.** Nothing currently brakes or tucks; a controller that cannot slow
-   down has one attempt per approach.
+1. **Vertical alignment.** Steering is horizontal by design, so a route can
+   arrive beside an object it passes over or under. The target's *mesh* is
+   also much smaller than its 6,605-unit bounding box.
+2. **Tolerance and gain** are guesses; 868 against 800 is one notch away.
+3. **Speed.** Nothing brakes or tucks, so each approach gets one attempt.
 
-Until then, the tool that reliably reaches a *chosen* object is a recorded
-movie whose line already passes through it
-([contact](aloha-conversion.md#93-static-collision-observed-under-movie-playback)),
-with the autopilot for objects no recorded line happens to hit.
+A recorded movie whose line already passes through the target remains the
+reliable way to prove contact
+([example](aloha-conversion.md#93-static-collision-observed-under-movie-playback));
+the autopilot is what extends that to objects no recorded line happens to hit,
+and it is now close enough to be worth finishing.
 
 ## What it is for
 
