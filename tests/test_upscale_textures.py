@@ -156,3 +156,43 @@ class CutoutTests(unittest.TestCase):
         for point in ((0, 0), (31, 31), (0, 31), (16, 0)):
             self.assertEqual(data[point][3], 0)
             self.assertGreater(max(data[point][:3]), 50, point)
+
+
+@unittest.skipUnless(HAVE_PIL, 'Pillow is required')
+class ColourTests(unittest.TestCase):
+    """The model may add detail; it may not change the art's colour."""
+
+    def source(self):
+        image = Image.new('RGBA', (8, 8), (200, 150, 100, 255))
+        for x in range(8):
+            image.putpixel((x, 0), (120, 90, 60, 255))
+        return image
+
+    def test_a_darkened_result_is_brought_back(self):
+        from upscale_textures import match_colour
+        source = self.source()
+        darker = source.resize((32, 32), Image.NEAREST).point(lambda v: int(v * 0.8))
+        fixed = match_colour(darker, source)
+        import numpy as np
+        want = np.asarray(source, float)[..., :3].mean(axis=(0, 1))
+        got = np.asarray(fixed, float)[..., :3].mean(axis=(0, 1))
+        for channel in range(3):
+            self.assertAlmostEqual(got[channel], want[channel], delta=1.5)
+
+    def test_detail_survives_the_correction(self):
+        from upscale_textures import match_colour
+        source = self.source()
+        scaled = source.resize((32, 32), Image.NEAREST).point(lambda v: int(v * 0.8))
+        fixed = match_colour(scaled, source)
+        # the bright/dark split the source has is still there
+        self.assertGreater(fixed.getpixel((16, 16))[0], fixed.getpixel((16, 1))[0])
+
+    def test_transparent_pixels_do_not_drive_the_mean(self):
+        from upscale_textures import match_colour
+        source = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
+        for y in range(4, 8):
+            for x in range(8):
+                source.putpixel((x, y), (200, 200, 200, 255))
+        scaled = source.resize((32, 32), Image.NEAREST).point(lambda v: int(v * 0.5))
+        fixed = match_colour(scaled, source)
+        self.assertGreater(fixed.getpixel((16, 24))[0], 150)

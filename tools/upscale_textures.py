@@ -11,6 +11,10 @@ RGB, and a game texture's alpha is usually a hard cutout, so the two are scaled
 separately — RGB by the model, alpha by Lanczos — and recombined. `--mode
 lanczos` skips the model entirely and is the baseline to compare against.
 
+The model may add detail but not change the art's colour: each result's mean
+over the pixels the source shows is scaled back to the source's
+(`--no-match-colour` to see the drift instead).
+
 Fully transparent pixels carry no usable colour, so their RGB is filled from
 the nearest opaque pixel before scaling (otherwise the model spreads the
 background colour into the visible edge).
@@ -132,6 +136,40 @@ def run_model(model, image, device):
     return Image.fromarray((out * 255.0 + 0.5).astype(np.uint8), 'RGB')
 
 
+def match_colour(result, source, strength=1.0):
+    """Put the average colour back where the source had it.
+
+    A super-resolution model is free to invent detail; it is not free to change
+    the art's colour. These models do both - Real-ESRGAN darkens SSX 3's
+    paletted foliage by 10 to 13 levels, which reads in game as dark specks
+    where the stock game has faint debris. The correction is a per-channel gain
+    chosen so the mean over the pixels the source shows is preserved, which
+    leaves the detail the model added and removes the drift.
+    """
+    from PIL import Image
+    import numpy as np
+    out = np.asarray(result.convert('RGBA') if result.mode == 'RGBA' else result.convert('RGB'),
+                     dtype=np.float32).copy()
+    src = np.asarray(source.convert('RGBA') if source.mode == 'RGBA' else source.convert('RGB'),
+                     dtype=np.float32)
+    if src.shape[-1] == 4:
+        visible_src = src[..., 3] > 8
+        visible_out = out[..., 3] > 8
+    else:
+        visible_src = np.ones(src.shape[:2], dtype=bool)
+        visible_out = np.ones(out.shape[:2], dtype=bool)
+    if not visible_src.any() or not visible_out.any():
+        return result
+    for channel in range(3):
+        want = float(src[..., channel][visible_src].mean())
+        have = float(out[..., channel][visible_out].mean())
+        if have <= 1.0 or want <= 1.0:
+            continue
+        gain = 1.0 + strength * (want / have - 1.0)
+        out[..., channel] = np.clip(out[..., channel] * gain, 0, 255)
+    return Image.fromarray(out.astype('uint8'), 'RGBA' if out.shape[-1] == 4 else 'RGB')
+
+
 def binary_alpha(image, tolerance=0.95):
     """Is this a hard cutout? Then its scaled alpha has to stay hard.
 
@@ -192,6 +230,10 @@ def main():
                          '(default auto: only textures whose source already wraps)')
     ap.add_argument('--wrap-pad', type=int, default=16,
                     help='Source pixels of circular padding (default 16)')
+    ap.add_argument('--match-colour', dest='match_colour', action='store_true', default=True,
+                    help='Preserve each texture\'s average colour (default)')
+    ap.add_argument('--no-match-colour', dest='match_colour', action='store_false',
+                    help='Leave the model\'s colour alone, drift included')
     ap.add_argument('--receipt', type=Path, help='Write a JSON receipt here')
     args = ap.parse_args()
     if args.mode == 'model' and not args.model:
@@ -217,6 +259,8 @@ def main():
         image = image.convert('RGBA') if image.mode in ('RGBA', 'LA', 'P') else image.convert('RGB')
         wrap = args.wrap == 'always' or (args.wrap == 'auto' and tileable(image))
         result = upscale(image, model, args.scale, device, wrap=wrap, pad=args.wrap_pad)
+        if args.match_colour:
+            result = match_colour(result, image)
         target = args.output / path.name
         result.save(target)
         entries.append({'name': path.name, 'source_size': list(image.size),
@@ -225,6 +269,7 @@ def main():
                         'output_sha256': hashlib.sha256(target.read_bytes()).hexdigest()})
         print(f'{path.name}: {image.size[0]}x{image.size[1]} -> {result.size[0]}x{result.size[1]}')
     receipt = {'mode': args.mode, 'wrap': args.wrap, 'wrap_pad': args.wrap_pad,
+               'match_colour': args.match_colour,
                'wrapped': sum(1 for e in entries if e['wrapped']),
                'model': str(args.model) if args.model else None,
                'model_sha256': hashlib.sha256(args.model.read_bytes()).hexdigest() if args.model else None,

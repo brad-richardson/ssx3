@@ -606,7 +606,20 @@ a colour channel.** A model must never see it, a scaler must not soften it when
 the guest tests it, and whatever sits behind a cutout must be filled with
 something plausible before anything touches the image.
 
-### 10.6 Two textures the pack must not touch
+### 10.6 A model may add detail; it may not change the colour
+
+Real-ESRGAN darkens SSX 3's paletted foliage by **10 to 13 levels**, which is
+what reads in game as dark specks where the stock game has faint debris, and 47
+of the first pack's textures drifted more than 6 levels on some channel. The
+correction is not a different model: after scaling, each texture's mean over
+the pixels the source shows is scaled back to the source's, per channel
+(`upscale_textures.py --match-colour`, on by default; `--no-match-colour` to
+see the drift). The detail the model invented survives; the drift does not.
+
+Over the pack this took `colour-shift` flags from **32 to 1** and the median
+worst-channel drift from 1.43 to 0.65 levels.
+
+### 10.7 Two textures the pack must not touch
 
 The menus and the boot sequence were remastered as an afterthought - 24
 textures - and the result **tore the EA BIG and THX logos into horizontal
@@ -627,7 +640,7 @@ texture is not always art.** Framebuffer copies were already excluded; thin
 strips are the second case, and a pack for another game wants the same check
 before anyone judges what the models did.
 
-### 10.7 The identity experiment, which is how to find this class of bug
+### 10.8 The identity experiment, which is how to find this class of bug
 
 When something looks wrong with a pack in game, the cheapest way to separate
 "the pipeline is broken" from "a model made a bad guess" is to build a pack out
@@ -644,7 +657,7 @@ route. Anything that differs is the *mechanism*. Both identity arms here
 matched stock (and the mip arm confirmed the generated levels are correct),
 which is what pointed at the 640x4 strips within minutes.
 
-### 10.8 The v2 recipe
+### 10.9 The v2 recipe
 
 `tools/texture_pack_plan.py` writes the class decision down once, so running
 the pipeline is a loop rather than a judgement call:
@@ -664,10 +677,11 @@ python3 tools/texture_pack_plan.py local/research/remaster/union-all \
 | `direct-colour` | everything else | Real-ESRGAN | never | 21 |
 
 Then one upscale pass per class directory with the model the report names, and
-`pack_mipmaps.py` over the result. Against the first pack: 90 flagged textures
-instead of 109 — alpha drift 64 → 21 and colour shift 47 → 32 — 13 broken seams
-instead of 66, mip chains on all 931 (the 24 frontend textures included), and
-the cutout leak down by a factor of sixteen.
+`pack_mipmaps.py` over the result. Against the first pack: **59 flagged
+textures instead of 109** — and 24 of those 59 are only the frontend textures
+the course-union audit has no source for, so the real count is 35 of 931. Alpha
+drift 64 → 21, colour shift 47 → **1**, broken seams 66 → 13, the cutout leak
+down by a factor of sixteen, and mip chains on everything.
 
 The whole rebuild, once the dumps exist, is about **six minutes**: 40 seconds of
 GPU for the four model classes, a couple of seconds of CPU for the two Lanczos
@@ -700,10 +714,10 @@ labelled "No texture pack installed" when the pack directory is empty, so it is
 never a dead control.
 
 ```sh
-python3 tools/mobile_gamecube.py textures --device <identifier> --pack local/research/remaster/pack-v4-mips
+python3 tools/mobile_gamecube.py textures --device <identifier> --pack local/research/remaster/pack-v6-mips
 ```
 
-A pack with its mip levels is **927 textures plus 7,969 sidecars, 443 MB**, and
+A pack with its mip levels is **927 textures plus 7,977 sidecars, 448 MB**, and
 copying nine thousand files to a phone is the slow step of an install. Cutting
 the chain short (`pack_mipmaps.py --min-size 16`) removes roughly a third of
 the files for a few hundred kilobytes, at the cost of the last two levels.
