@@ -113,7 +113,13 @@ def disable_course_scripts(records):
             if stop - start < 36:
                 raise ValueError('Truncated LUN program')
             magic, code_end, data_end, length = struct.unpack_from('>4I', payload, start)
-            if magic != 0x4e554c or not 20 <= code_end <= data_end <= length == stop - start:
+            # The span after the last program is padded to the section end. 29 of
+            # the world's 49 locations pad it (4, 8 or 12 zero bytes); ARA1 does
+            # not, which is why an exact length was enough for Snow Jam. Only
+            # zero padding, and only up to one 16-byte boundary, is accepted.
+            padding = stop - start - length
+            if (magic != 0x4e554c or not 20 <= code_end <= data_end <= length
+                    or not 0 <= padding < 16 or payload[start + length:stop] != bytes(padding)):
                 raise ValueError('Unsupported LUN program bounds')
         template = payload[spans[0][0]:spans[0][1]]
         if (len(template) != 36 or template != payload[spans[1][0]:spans[1][1]] or

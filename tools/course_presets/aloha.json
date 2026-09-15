@@ -1,0 +1,40 @@
+{
+  "name": "aloha",
+  "note": "SSX Tricky's Aloha Ice Jam (Showoff, aloha.sop) into SSX 3's R&B (ASS1, event 5, peak A, mode 3 slopestyle). See docs/aloha-conversion.md.",
+  "donor": {
+    "code": "aloha",
+    "mode": "showoff",
+    "big": "local/game/gste69-original/files/data/models/aloha.big",
+    "nbd": "local/source/gamecube/tricky/aloha.nbd",
+    "textures": "local/source/gamecube/tricky/aloha.gsh",
+    "lightmaps": "local/source/gamecube/tricky/aloha_L.gsh",
+    "gsf": "local/source/gamecube/tricky/aloha.gsf",
+    "reset_paths": "local/source/gamecube/tricky/aloha.sop",
+    "race_paths": "local/source/gamecube/tricky/aloha.sop"
+  },
+  "target": {
+    "location": "ASS1",
+    "event": 5,
+    "discipline": "slopestyle",
+    "discipline_word": 3,
+    "group": 48,
+    "track": 11,
+    "template_rid": 63,
+    "texture_group": 42,
+    "page": "0x000b002a"
+  },
+  "placement": {
+    "source_anchor": [-343.59, -2877.282, 58695.381],
+    "target_anchor": [-113619.003, 72924.477, -228281.771],
+    "yaw_degrees": 71.4499,
+    "scale": 0.55,
+    "derivation": "Derived, not measured: source anchor is the mean origin of aloha.sop's six start paths, target anchor the mean position of ASS1's three stock race gates (start records 0, 1, 9), yaw the difference of their mean 2D headings (161.4499 - 90.0). Scale reuses the Garibaldi lineage's 0.55 Tricky->SSX 3 unit factor."
+  },
+  "race": {
+    "race_line_kind": "slopestyle",
+    "gates": 3,
+    "checkpoints": 2,
+    "marker_fractions": [0.2833229, 0.6937548],
+    "marker_note": "ASS1's stock type-1 markers are 69760.5 and 170814.9 of a 246217.5 total; the fractions preserve their position when the converted run is a different length. Meaning unverified."
+  }
+}

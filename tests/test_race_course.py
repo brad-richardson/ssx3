@@ -7,7 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from race_course import (build_track, track_points, chain_tracks, race_line_table, point_along,  # noqa: E402
-                         convert_race_course, FINISH_EVENT, CHECKPOINT_EVENT)
+                         convert_race_course, race_markers, select_donor_starts,
+                         FINISH_EVENT, CHECKPOINT_EVENT)
 
 
 def straight(x0, n, step=100.0, y=0.0):
@@ -77,6 +78,60 @@ class RaceCourseTests(unittest.TestCase):
         self.assertEqual(moved[5:8], (1.0, 0.0, 0.0))
         with self.assertRaises(ValueError):
             convert_race_course(races, donor_ai, [0], lambda p: p, 1.0, old_tracks, starts, tail)
+
+    def test_slopestyle_markers_extend_the_trailer(self):
+        self.assertEqual(race_markers(100.0), [(0, 0.0), (2, 100.0)])
+        with self.assertRaises(ValueError):
+            race_markers(100.0, 'race', (0.5, 0.5))
+        with self.assertRaises(ValueError):
+            race_markers(100.0, 'slopestyle', (0.5,))
+        with self.assertRaises(ValueError):
+            race_markers(100.0, 'slopestyle', (0.5, 1.5))
+        markers = race_markers(200.0, 'slopestyle', (0.25, 0.75))
+        self.assertEqual(markers, [(0, 0.0), (2, 200.0), (1, 50.0), (1, 150.0)])
+        race = race_line_table([straight(0, 2), straight(200, 2)], 350.0)
+        slope = race_line_table([straight(0, 2), straight(200, 2)], 350.0,
+                                race_markers(350.0, 'slopestyle', (0.25, 0.75)))
+        # Only the trailer differs: same node count, same nodes, b=4 and 16 more bytes.
+        self.assertEqual(race[16:-20], slope[16:-36])
+        self.assertEqual(struct.unpack_from('>4I', slope), (5, 20, 4, len(slope) - 16))
+        self.assertEqual(struct.unpack_from('>f3Ifff', slope, len(slope) - 36)[0], 350.0)
+        trailer = [struct.unpack_from('>If', slope, len(slope) - 32 + 8 * i) for i in range(4)]
+        self.assertEqual(trailer, [(0, 0.0), (2, 350.0), (1, 87.5), (1, 262.5)])
+
+    def test_select_donor_starts_keeps_the_outer_lanes(self):
+        self.assertEqual(select_donor_starts([0, 1, 2, 3, 4, 5], 6), [0, 1, 2, 3, 4, 5])
+        self.assertEqual(select_donor_starts([0, 1, 2, 3, 4, 5], 3), [0, 2, 5])
+        self.assertEqual(select_donor_starts([0, 1, 2, 3, 4, 5], 2), [0, 5])
+        self.assertEqual(select_donor_starts([0, 1, 2, 3, 4, 5], 1), [0])
+        with self.assertRaises(ValueError):
+            select_donor_starts([0, 1], 3)
+
+    def test_fewer_gates_than_donor_lanes_and_a_slopestyle_trailer(self):
+        races = [dict(index=0, points=straight(0, 4), events=[]),
+                 dict(index=1, points=straight(400, 4), events=[(11, 60, 200.0, 200.0),
+                                                                (11, 60, 300.0, 300.0)]),
+                 dict(index=2, points=straight(800, 4), events=[(9, 0, 300.0, 300.0)])]
+        donor_ai = [dict(index=i, fields=(2,) * 7,
+                         points=[(0, -50 + 20 * i, 0), (100, -50 + 20 * i, 0)]) for i in range(6)]
+        old_tracks = [build_track((1, 0, 4), straight(0, 2), 400.0, []),
+                      build_track((1, 0, 4), straight(200, 2), 200.0, [(FINISH_EVENT, 0, 150.0, 150.0)])]
+        starts = [(0, 0, 10.0, 30.0, 0.0, 1.0, 0.0, 0.0, 7, 0), (1, 0, 10.0, -30.0, 0.0, 1.0, 0.0, 0.0, 8, 0),
+                  (1, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 9, 1)]
+        tail = struct.pack('<I', 0) + struct.pack('<I', len(starts)) + b''.join(
+            struct.pack('<2I6f2I', *s) for s in starts)
+        tracks, new_tail, assign, table, report = convert_race_course(
+            races, donor_ai, [0, 1, 2, 3, 4, 5], lambda p: tuple(p), 1.0, old_tracks, starts, tail,
+            checkpoint_limit=1, race_line_kind='slopestyle', marker_fractions=(0.25, 0.75))
+        # Two gates against six donor lanes: the outer lanes are kept.
+        self.assertEqual(report['selected_donor_start_indices'], [0, 5])
+        self.assertEqual(sorted(assign.values()), [0, 5])
+        self.assertEqual(struct.unpack_from('>I', table, 8)[0], 4)
+        self.assertEqual(report['race_line_markers'][2:],
+                         [(1, report['finish_distance'] * 0.25), (1, report['finish_distance'] * 0.75)])
+        # checkpoint_limit=1 keeps one of the donor's two checkpoint events.
+        self.assertEqual([e for e in track_points(tracks[1])[3] if e[0] == CHECKPOINT_EVENT],
+                         [(CHECKPOINT_EVENT, 0, 200.0, 200.0)])
 
 
 if __name__ == '__main__':

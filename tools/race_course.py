@@ -15,8 +15,14 @@ paths, big-endian table):
   dropped, a final node at the finish point copying the previous normal, then a
   trailer (total, 0, 0, u32 2, total). Node 0 carries the total instead of 0.
   Regenerating it from the stock chain reproduces the stock record.
-- Start records with a zero second flag are the six race gates; each names the
-  AI path its rider follows. Tricky's AIP lists six start paths, one per gate.
+- Start records with a zero second flag are the race gates; each names the
+  AI path its rider follows. Tricky's AIP and SOP both list six start paths.
+  A race slot has six gates (one per donor lane); the slopestyle slots have
+  three and the backcountry slots two, so `select_donor_starts` folds the
+  donor lanes down to the slot's gate count.
+- The kind-21 trailer is one float total plus `b` (tag, distance) pairs. Race,
+  backcountry and hub records use b=2; the three slopestyle records use b=4,
+  adding two type-1 markers (see `race_markers`).
 """
 import math
 import struct
@@ -94,8 +100,37 @@ def point_along(points, distance):
     return tuple(points[-1])
 
 
-def race_line_table(point_lists, finish_distance):
-    """Kind-21 payload for a chain of track vertex lists ending at finish_distance (2D, from the start)."""
+def race_markers(total, kind='race', extra_fractions=()):
+    """Trailer marker pairs for a kind-21 record.
+
+    Every stock record starts with (0, 0.0) and (2, total). The three stock
+    slopestyle records carry two further type-1 markers at course-specific
+    distances; nothing else in the world does. What a type-1 marker means is
+    still unknown (see docs/aloha-conversion.md), so they are reproduced by
+    position only.
+    """
+    markers = [(0, 0.0), (2, total)]
+    if kind == 'race':
+        if extra_fractions:
+            raise ValueError('Race race-line tables carry no extra markers')
+        return markers
+    if kind != 'slopestyle':
+        raise ValueError(f'Unknown race-line kind: {kind}')
+    fractions = list(extra_fractions)
+    if len(fractions) != 2:
+        raise ValueError('Slopestyle race-line tables carry exactly two type-1 markers')
+    for f in fractions:
+        if not 0 < f < 1:
+            raise ValueError('Type-1 marker fractions must lie inside the run')
+    return markers + [(1, total * f) for f in fractions]
+
+
+def race_line_table(point_lists, finish_distance, markers=None):
+    """Kind-21 payload for a chain of track vertex lists ending at finish_distance (2D, from the start).
+
+    `markers` is the trailer's (tag, distance) list; it defaults to the race
+    pair [(0, 0.0), (2, finish_distance)] that every race/backcountry slot uses.
+    """
     verts = merged_vertices(point_lists)
     cum = [0.0]
     for a, b in zip(verts, verts[1:]):
@@ -113,11 +148,15 @@ def race_line_table(point_lists, finish_distance):
         nodes.append([cum[i - 1] if i else finish_distance, *normals[-1], a[0], a[1]])
     finish = point_along(verts, finish_distance)
     nodes.append([cum[keep[-1]], *normals[-1], finish[0], finish[1]])
+    if markers is None:
+        markers = race_markers(finish_distance)
     count = len(nodes)
-    out = struct.pack('>4I', count, 20, 2, 20 * count + 20)
+    out = struct.pack('>4I', count, 20, len(markers), 20 * count + 4 + 8 * len(markers))
     for node in nodes:
         out += struct.pack('>5f', *node)
-    out += struct.pack('>3fI f', finish_distance, 0, 0, 2, finish_distance)
+    out += struct.pack('>f', finish_distance)
+    for tag, distance in markers:
+        out += struct.pack('>If', tag, distance)
     return out
 
 
@@ -138,15 +177,40 @@ def donor_path_distance(path):
     return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(pts, pts[1:]))
 
 
-def convert_race_course(races, donor_ai, start_list, apply, scale, old_tracks, starts, tail, gate_track_chain=None):
+def select_donor_starts(start_list, gate_count):
+    """Pick `gate_count` donor start paths, keeping the outer lanes and spreading evenly.
+
+    A race slot has one gate per donor start path and this is the identity. A
+    slopestyle slot has three gates against six donor lanes, so the first and
+    last donor lanes are kept and the rest are spaced evenly between them. The
+    engine's own preference among the donor lanes is unverified.
+    """
+    if gate_count == len(start_list):
+        return list(range(len(start_list)))
+    if not 1 <= gate_count < len(start_list):
+        raise ValueError('Gate count must be between one and the donor start count')
+    if gate_count == 1:
+        return [0]
+    last = len(start_list) - 1
+    return [round(k * last / (gate_count - 1)) for k in range(gate_count)]
+
+
+def convert_race_course(races, donor_ai, start_list, apply, scale, old_tracks, starts, tail, gate_track_chain=None,
+                        checkpoint_limit=2, race_line_kind='race', marker_fractions=()):
     """Replace the gate track chain with the donor race line and move the gates to the donor start paths.
 
-    apply(point) transforms a donor point into the target world. Returns
+    apply(point) transforms a donor point into the target world. `checkpoint_limit`
+    is the slot's own checkpoint-event count; `race_line_kind` and
+    `marker_fractions` shape the kind-21 trailer. Returns
     (new tracks list, new tail bytes, {ai slot: donor start path}, kind-21 payload, report).
     """
     gates = [(i, s) for i, s in enumerate(starts) if s[1] == 0]
-    if len(gates) != len(start_list) or len({s[-1] for _, s in gates}) != 1:
-        raise ValueError('Expected one race gate per donor start path, sharing one track path')
+    if len({s[-1] for _, s in gates}) != 1:
+        raise ValueError('Expected the race gates to share one track path')
+    if len(gates) > len(start_list):
+        raise ValueError('The slot has more race gates than the donor has start paths')
+    chosen = select_donor_starts(start_list, len(gates))
+    start_list = [start_list[k] for k in chosen]
     chain = gate_track_chain or chain_tracks(old_tracks, gates[0][1][-1])
     donor_chain = donor_race_chain(races)
     if len(donor_chain) < 2 or len(chain) < 2:
@@ -166,7 +230,8 @@ def convert_race_course(races, donor_ai, start_list, apply, scale, old_tracks, s
         for e in races[i]['events']:
             if e[0] == TRICKY_CHECKPOINT and length:
                 checkpoints.append((order, min(1.0, e[2] / length)))
-    checkpoints = checkpoints[:2]  # Snow Jam has two checkpoints; keep the table's count
+    # Keep the slot's own checkpoint-event count (two on every stock run).
+    checkpoints = checkpoints[:checkpoint_limit]
     # Distribute donor segments over the gate chain; extra donor segments fold into
     # the last track, and surplus stock tracks drop out of the chain.
     chain = chain[:len(segments)]
@@ -207,7 +272,8 @@ def convert_race_course(races, donor_ai, start_list, apply, scale, old_tracks, s
         header = track_points(old_tracks[index])[0]
         new_tracks[index] = build_track(header, point_lists[t], finish_distance - cumulative, events[t])
         cumulative += lengths[t]
-    table = race_line_table(point_lists, finish_distance)
+    markers = race_markers(finish_distance, race_line_kind, marker_fractions)
+    table = race_line_table(point_lists, finish_distance, markers)
     # Gates: pair by lateral order with the donor start paths.
     donor_starts = [donor_ai[i] for i in start_list]
     for d in donor_starts:
@@ -242,5 +308,8 @@ def convert_race_course(races, donor_ai, start_list, apply, scale, old_tracks, s
     report = dict(track_chain=chain, donor_race_chain=donor_chain, track_lengths=lengths,
                   finish_distance=finish_distance, finish_fraction_of_last=finish_frac,
                   checkpoints=[(seg_track[o], f) for o, f in checkpoints], gates=moved,
-                  race_line_nodes=struct.unpack_from('>I', table)[0])
+                  race_line_nodes=struct.unpack_from('>I', table)[0],
+                  race_line_kind=race_line_kind, race_line_markers=markers,
+                  donor_start_paths=[start_list[k] for k in range(len(start_list))],
+                  selected_donor_start_indices=chosen)
     return new_tracks, bytes(tail), assignments, table, report

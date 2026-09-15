@@ -245,8 +245,15 @@ def main():
     if not (recipe.get('safe_reset_paths') or recipe.get('cleanup_detail',{}).get('safe_reset_paths')):
         raise ValueError('Compile grounded recovery paths before enabling static collision')
     nbd,gsf=args.nbd.read_bytes(),args.gsf.read_bytes()
+    # The GSF that produced the imported instances. The Garibaldi lineage ran an
+    # ad-hoc visibility pass that recorded it; that pass has no CLI, so fall back
+    # to the scenery import's own record of the same file.
+    imported_gsf=(recipe.get('visibility') or {}).get('source_gsf_sha256') or \
+                 (recipe.get('scenery') or {}).get('gameplay_sha256')
+    if not imported_gsf:
+        raise ValueError('Base build records no imported-scenery GSF to match')
     if (hashlib.sha256(nbd).hexdigest()!=recipe['donor_nbd_sha256'] or
-        hashlib.sha256(gsf).hexdigest()!=recipe['visibility']['source_gsf_sha256']):
+        hashlib.sha256(gsf).hexdigest()!=imported_gsf):
         raise ValueError('Collision source does not match imported scenery')
     scene=TrickyScenery(nbd,gsf,phase='racing');collisions=read_tricky_collision(gsf)
     world=World((args.base_build/'BAM.BIG').read_bytes());group,track=recipe['group'],recipe['track']

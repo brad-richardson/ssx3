@@ -12,12 +12,19 @@ import struct
 
 from import_terrain import transform_coefficients
 
+# Two NBD header words appear across the ten GameCube Tricky courses:
+# 0x00161d03 (gari, merquer, snow) and 0x00161b03 (the other seven). Every
+# course's terrain section passes the same 448-byte stride and extent checks
+# under both, so the third byte is treated as a version/flag, not a layout
+# change. Surveyed 2026-09-14 over all ten `*.nbd` members.
+NBD_MAGICS = (0x00161d03, 0x00161b03)
+
 RESET_PROFILE = 'tricky-gc-to-ssx3-gc-reset-v2'
 PROFILES = (RESET_PROFILE, 'template')
 
 
 def source_patches(raw):
-    if len(raw) < 160 or struct.unpack_from('>I', raw)[0] != 0x00161d03:
+    if len(raw) < 160 or struct.unpack_from('>I', raw)[0] not in NBD_MAGICS:
         raise ValueError('Expected a GameCube Tricky NBD header')
     count = struct.unpack_from('>I', raw, 8)[0]
     start, end = struct.unpack_from('>2I', raw, 68)

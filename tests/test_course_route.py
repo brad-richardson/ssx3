@@ -1,10 +1,46 @@
+import hashlib
 from pathlib import Path
 import struct
+import tempfile
 import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from course_route import Route, race_paths, ai_paths, make_reset_aip, ssx3_paths, route_points
+from course_route import (Route, race_paths, ai_paths, make_reset_aip, ssx3_paths, route_points,
+                          donor_paths, start_list)
+
+
+def donor_file(ai_count=2, race_count=1, starts=(0, 1)):
+    """A minimal Tricky path container; `.aip` and `.sop` share this layout."""
+    geometry = struct.pack('<9f8f', 10, 20, 30, 10, 20, 28, 12, 23, 30,
+                           1, 0, -1, 2, 0, 1, 0, 3)
+    ai = struct.pack('<9I', 1, 1, 0, 2, 100, 4, 50, 2, 0) + geometry
+    race = struct.pack('<3If2I', 1, 0, 4, 100, 2, 0) + geometry
+    section = struct.pack('<2I', ai_count, len(starts)) + struct.pack(f'<{len(starts)}I', *starts) + ai * ai_count
+    out = struct.pack('<4I', 0x0a0a0a0a, 2, 0, len(section)) + section
+    out += struct.pack('<4I', 1, 8 + len(race) * race_count, race_count, 0) + race * race_count
+    return out
+
+
+class DonorPathFileTests(unittest.TestCase):
+    def test_sop_and_aip_use_one_reader(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for suffix in ('.aip', '.sop'):
+                path = Path(tmp) / f'course{suffix}'
+                path.write_bytes(donor_file())
+                donor = donor_paths(path)
+                self.assertEqual(len(donor['ai_paths']), 2)
+                self.assertEqual(len(donor['race_paths']), 1)
+                self.assertEqual(donor['start_list'], [0, 1])
+                self.assertEqual(donor['sha256'], hashlib.sha256(donor['data']).hexdigest())
+
+    def test_a_start_outside_the_ai_section_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'course.sop'
+            path.write_bytes(donor_file(starts=(0, 9)))
+            self.assertEqual(start_list(path.read_bytes()), [0, 9])
+            with self.assertRaisesRegex(ValueError, 'absent path'):
+                donor_paths(path)
 
 
 class RouteTests(unittest.TestCase):

@@ -85,6 +85,34 @@ def ai_paths(data):
     return paths
 
 
+def start_list(data):
+    """The donor's start-path indices (AIP and SOP share this header)."""
+    count = struct.unpack_from('<I', data, 20)[0]
+    if 24 + 4 * count > len(data):
+        raise ValueError('Truncated Tricky start list')
+    return [struct.unpack_from('<I', data, 24 + 4 * i)[0] for i in range(count)]
+
+
+def donor_paths(path):
+    """Read a Tricky `.aip` (Race) or `.sop` (Showoff) file.
+
+    Both files are the same container: the magic-0x0a0a0a0a header, the start
+    list, the 72-byte AI-path section and the 60-byte race-path section. The
+    Showoff file simply carries the Showoff authoring - a different start line,
+    its own race chain and checkpoints, and roughly a third of the AI paths
+    because there are no CPU opponents. Verified on all ten GameCube Tricky
+    courses; the parsers are unchanged.
+    """
+    data = Path(path).read_bytes()
+    paths = ai_paths(data)
+    races = race_paths(data)
+    starts = start_list(data)
+    if any(i >= len(paths) for i in starts):
+        raise ValueError('Donor start list references an absent path')
+    return dict(path=str(path), data=data, sha256=hashlib.sha256(data).hexdigest(),
+                ai_paths=paths, race_paths=races, start_list=starts)
+
+
 def ssx3_paths(data):
     """Split a bounded SSX 3 AIP while retaining index-addressed records."""
     def read(fmt, pos):
@@ -121,7 +149,7 @@ def ssx3_paths(data):
 
 
 def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start=False, relocate_race_starts=False,
-                   race_course=None):
+                   race_course=None, race_data=None):
     """Convert donor AI and track paths for experimental SSX 3 freeride resets.
 
     Path layouts match SSX-Library's WorldAIP.cs. Existing indexed paths and
@@ -129,8 +157,12 @@ def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start
     downhill slots receive donor reset paths without foreign events. Path
     counts stay unchanged. relocate_start moves the existing freeride start
     and its indexed approach paths to the donor's first start path. This
-    supplies no new race setup.
+    supplies no new race setup. race_data is an alternative donor path file for
+    the race/gate conversion only (a `.sop` for a Showoff course); the reset
+    paths still come from `data`.
     """
+    if race_data is None:
+        race_data = data
     donor_ai = ai_paths(data)
     ai = [path for path in donor_ai if path['fields'][6]]
 
@@ -191,15 +223,18 @@ def make_reset_aip(data, matrix, translation, scale, original, *, relocate_start
                           direction=direction)
     race_edit = None
     if race_course is not None:
-        start_count = struct.unpack_from('<I', data, 20)[0]
-        start_list = [struct.unpack_from('<I', data, 24 + 4 * i)[0] for i in range(start_count)]
-        if any(i >= len(donor_ai) for i in start_list):
+        race_ai = donor_ai if race_data is data else ai_paths(race_data)
+        starts_here = start_list(race_data)
+        if any(i >= len(race_ai) for i in starts_here):
             raise ValueError('Donor start list references an absent path')
         old_tracks, tail, assignments, race_course['table'], race_edit = convert_race_course(
-            race_paths(data), donor_ai, start_list, lambda p: apply(matrix, translation, p), scale,
-            old_tracks, starts, tail)
+            race_paths(race_data), race_ai, starts_here, lambda p: apply(matrix, translation, p), scale,
+            old_tracks, starts, tail,
+            checkpoint_limit=race_course.get('checkpoint_limit', 2),
+            race_line_kind=race_course.get('race_line_kind', 'race'),
+            marker_fractions=race_course.get('marker_fractions', ()))
         for slot, donor_index in assignments.items():
-            replacements[slot] = donor_ai[donor_index]
+            replacements[slot] = race_ai[donor_index]
     elif relocate_race_starts:
         # Race gates are the start records with a zero second flag (types 0-5 on
         # Snow Jam). Keep their lateral spacing along the original start line,

@@ -17,7 +17,9 @@ import json
 import math
 from pathlib import Path
 import struct
+import sys
 
+import course_preset
 from gamecube_world import World, assemble, sha256, validate_global_images
 from gamecube_cleanup import clear_removed_instance_references, clear_script_bindings, disable_course_scripts, pin_texture_group
 from import_terrain import transform_coefficients, UV_CORNERS
@@ -108,11 +110,11 @@ def vector(value):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('archive', type=Path, help='Stock GameCube BAM.BIG')
-    ap.add_argument('--nbd', type=Path, required=True, help='GameCube Tricky terrain (gari.nbd)')
+    ap.add_argument('--nbd', type=Path, help='GameCube Tricky terrain (e.g. gari.nbd); required unless --preset supplies it')
     ap.add_argument('--location', default='ARA1')
     ap.add_argument('--template-rid', type=int, default=1673)
-    ap.add_argument('--source-anchor', type=vector, required=True)
-    ap.add_argument('--target-anchor', type=vector, required=True)
+    ap.add_argument('--source-anchor', type=vector)
+    ap.add_argument('--target-anchor', type=vector)
     ap.add_argument('--yaw', type=float, default=0.0)
     ap.add_argument('--scale', type=float, default=1.0)
     ap.add_argument('--drop-kind', type=int, action='append', default=[])
@@ -127,14 +129,26 @@ def main():
                     help='Verified engine lighting transfer; raw is an uncorrected comparison control')
     ap.add_argument('--surface-profile', choices=SURFACE_PROFILES, default=RESET_PROFILE,
                     help='Restore authored reset terrain; template retains the unconverted control behavior')
-    ap.add_argument('--reset-aip', type=Path, help='Donor Tricky AIP: convert reset paths into the kind-14 resource')
+    ap.add_argument('--reset-aip', type=Path, help='Donor Tricky AIP/SOP: convert reset paths into the kind-14 resource')
+    ap.add_argument('--race-aip', type=Path,
+                    help='Donor path file for the race/gate conversion only (a .sop for a Showoff course); '
+                         'defaults to --reset-aip')
     ap.add_argument('--relocate-freeride-start', action='store_true')
     ap.add_argument('--relocate-race-starts', action='store_true')
     ap.add_argument('--race-course', action='store_true', help='Donor race line on the whole gate track chain, gate riders on the donor start paths, regenerated kind-21 table')
     ap.add_argument('--roundtrip', action='store_true', help='Control build: rewrite the group unchanged')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--jobs', type=int, default=4)
+    ap.add_argument('--preset', help='Course preset name under tools/course_presets (or a path to one). '
+                                     'It only supplies options that were not given on the command line: '
+                                     f'available {", ".join(course_preset.available())}')
     args = ap.parse_args()
+    preset = course_preset.apply(ap, args, sys.argv[1:])
+    for required in ('nbd', 'source_anchor', 'target_anchor'):
+        if getattr(args, required) is None:
+            ap.error(f'--{required.replace("_", "-")} is required (pass it or use a --preset that carries it)')
+    if args.race_aip and not args.reset_aip:
+        ap.error('--race-aip converts the race line inside the kind-14 rebuild; it needs --reset-aip')
     if args.output.exists():
         ap.error('Output directory already exists; choose a new build name')
     if not args.roundtrip and args.surface_profile == RESET_PROFILE and not args.reset_aip:
@@ -182,11 +196,17 @@ def main():
         candidates = [(e, p) for e, p in new_records if e['kind'] == 14 and p]
         if len(candidates) != 1 or candidates[0][0]['rid'] != 0:
             raise ValueError('Expected one populated kind-14 path resource with ID zero')
-        race = {} if args.race_course else None
+        race = None
+        if args.race_course:
+            shape = (preset or {}).get('race', {})
+            race = dict(checkpoint_limit=shape.get('checkpoints', 2),
+                        race_line_kind=shape.get('race_line_kind', 'race'),
+                        marker_fractions=tuple(shape.get('marker_fractions', ()) or ()))
+        race_data = args.race_aip.read_bytes() if args.race_aip else None
         reset_data, cleanup['reset_paths'] = make_reset_aip(
             args.reset_aip.read_bytes(), matrix, translation, args.scale, candidates[0][1],
             relocate_start=args.relocate_freeride_start, relocate_race_starts=args.relocate_race_starts,
-            race_course=race)
+            race_course=race, race_data=race_data)
         if args.surface_profile == RESET_PROFILE:
             reset_data, safe_reset_paths = compile_reset_paths(
                 reset_data, args.reset_aip.read_bytes(), new_records, matrix, translation, args.scale)
@@ -194,7 +214,7 @@ def main():
         cleanup['reset_paths'] = [cleanup['reset_paths']]
         new_records = [(dict(e, size=len(reset_data)), reset_data) if e['kind'] == 14 and e['rid'] == 0 else (e, p)
                        for e, p in new_records]
-        if race:
+        if race is not None:
             tables = [(e, p) for e, p in new_records if e['kind'] == 21]
             if len(tables) != 1 or tables[0][0]['rid'] != 0:
                 raise ValueError('Expected one kind-21 race-line table with ID zero')
@@ -261,6 +281,9 @@ def main():
                       group_index=dict(count=g['count'], memsize=g['memsize'], kind_counts=g['kind_counts']),
                       surfaces=surfaces, textures=textures, donor_textures_sha256=sha256(args.textures.read_bytes()) if args.textures else None,
                       donor_lightmaps_sha256=sha256(args.lightmaps.read_bytes()) if args.lightmaps else None,
+                      donor_race_paths=str(args.race_aip) if args.race_aip else None,
+                      donor_race_paths_sha256=sha256(args.race_aip.read_bytes()) if args.race_aip else None,
+                      preset=preset,
                       layout=[l for l in layout if l['replaced']])
     (args.output / 'experiment.json').write_text(json.dumps(experiment, indent=2) + '\n')
     print(json.dumps({k: v for k, v in experiment.items() if k not in ('matrix', 'translation', 'layout', 'cleanup_detail', 'textures')}, indent=2))

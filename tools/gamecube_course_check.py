@@ -80,6 +80,9 @@ def main():
     ap.add_argument('--cpu-thread', action='store_true',
                     help='Dual-core runtime (CPUThread = True) for this fresh profile')
     ap.add_argument('--module', type=Path, help='Module dylib to load instead of the default build')
+    ap.add_argument('--menu-sequence', type=Path, default=ROOT/'native/diagnostics/course-start.json',
+                    help='Controller sequence that walks the frontend to a briefing. The default walks to '
+                         "Single Event's first course (Snow Jam / ARA1); another event needs its own sequence.")
     ap.add_argument('--restart-after', type=int,
                     help='Seconds of observed riding before choosing the pause menu Restart; '
                          'the check then requires riding again')
@@ -95,7 +98,7 @@ def main():
         ap.error('Preserving existing profile/evidence; choose fresh paths')
     args.output.mkdir(parents=True)
     sequence_path=args.output/'menu-sequence.json'
-    sequence_path.write_bytes((ROOT/'native/diagnostics/course-start.json').read_bytes())
+    sequence_path.write_bytes(args.menu_sequence.read_bytes())
     rows_path = args.output/'rider.jsonl'
     children = []
     started = False
@@ -213,6 +216,7 @@ def main():
     events = reset_events(rows)
     loops = reset_loops(events)
     summary = dict(game=str(args.game), profile=args.profile, samples=len(rows),
+                   menu_sequence=str(args.menu_sequence),
                    metal_validation=args.metal_validation, cpu_thread=args.cpu_thread,
                    module=str(args.module.resolve()) if args.module else None,
                    menu_sequence_sha256=hashlib.sha256(sequence_path.read_bytes()).hexdigest(),

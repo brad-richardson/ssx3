@@ -7,6 +7,7 @@ registers the bounds at +104/+116. Keep gameplay/style binding separate.
 import math
 import struct
 
+from gamecube_surfaces import NBD_MAGICS
 from import_terrain import apply
 from patch_geometry import outward_float32
 
@@ -57,7 +58,7 @@ def read_tricky_splines(nbd, gsf):
     The segment array need not be in traversal order. Unknown styles remain
     available to callers for reporting; encoders must explicitly support them.
     """
-    if len(nbd) < 160 or struct.unpack_from('>I', nbd)[0] != 0x00161d03:
+    if len(nbd) < 160 or struct.unpack_from('>I', nbd)[0] not in NBD_MAGICS:
         raise ValueError('Unsupported Tricky GC NBD header')
     h = struct.unpack_from('>40I', nbd)
     count, segment_count = h[8:10]

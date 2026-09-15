@@ -1,0 +1,39 @@
+{
+  "name": "garibaldi",
+  "note": "SSX Tricky's Garibaldi (Race) into SSX 3's Snow Jam (ARA1, event 0, peak A, mode 2 race). Records the gc-gari-013 lineage as data; the documented command line still passes every flag explicitly, so builds made with it are unaffected by this file.",
+  "donor": {
+    "code": "gari",
+    "mode": "race",
+    "big": "local/game/gste69-original/files/data/models/gari.big",
+    "nbd": "local/source/gamecube/tricky/gari.nbd",
+    "textures": "local/source/gamecube/tricky/gari.gsh",
+    "lightmaps": "local/source/gamecube/tricky/gari_L.gsh",
+    "gsf": "local/source/gamecube/tricky/gari.gsf",
+    "reset_paths": "local/source/gamecube/tricky/gari.aip",
+    "race_paths": "local/source/gamecube/tricky/gari.aip"
+  },
+  "target": {
+    "location": "ARA1",
+    "event": 0,
+    "discipline": "race",
+    "discipline_word": 2,
+    "group": 36,
+    "track": 8,
+    "template_rid": 1673,
+    "texture_group": 31,
+    "page": "0x0008001f"
+  },
+  "placement": {
+    "source_anchor": [-1214.8, -195.5, -768.547891],
+    "target_anchor": [-118613.68, 15753.8, -228880.14],
+    "yaw_degrees": 73.0,
+    "scale": 0.55,
+    "derivation": "Hand-calibrated: the donor entry point after Garibaldi's opening bend, mapped onto a measured PCSX2 rider position five seconds after the A_ARA1 connector spawn. docs/full-course-experiment.md."
+  },
+  "race": {
+    "race_line_kind": "race",
+    "gates": 6,
+    "checkpoints": 2,
+    "marker_fractions": []
+  }
+}
