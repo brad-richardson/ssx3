@@ -12,6 +12,8 @@ import math
 from pathlib import Path
 import struct
 
+from gamecube_surfaces import NBD_MAGICS
+
 
 def buffer_group(position, uv, normal):
     """SSX 3 kind-23 references. Distinct IDs matter: stock often uses 0/0/0.
@@ -44,7 +46,10 @@ def instance_gameplay(gsf, expected_count):
             raise ValueError('Unsupported GSF instance property')
         properties.append(dict(property_index=i, flags=flags, visible=bool(flags & 1),
                                player_collision=bool(flags & 32), surface=surface,
-                               collision_mode=mode, collision_or_physics=collision, effect_slot=effect))
+                               collision_mode=mode, collision_or_physics=collision, effect_slot=effect,
+                               # u0 is an immovability sentinel (1e30 on 483 of 531 records);
+                               # bounce is the restitution the physics classes carry.
+                               immovable=u0 >= 1e29, bounce=bounce))
     result = []
     for i in range(instances):
         index = struct.unpack_from('>I', gsf, table+4*i)[0]
@@ -112,7 +117,7 @@ def post_countdown_hidden(gsf, instance_count):
 class TrickyScenery:
     def __init__(self, data, gsf=None, *, phase='initial'):
         self.data = data
-        if len(data) < 160 or self.u32(0) != 0x00161d03:
+        if len(data) < 160 or self.u32(0) not in NBD_MAGICS:
             raise ValueError('Expected a GameCube Tricky NBD header')
         self.header = self.unpack('40I', 0)
         self.positions = self.array(self.header[34], self.header[35], '3h')

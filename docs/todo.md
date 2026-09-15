@@ -332,8 +332,24 @@ the build or commit that closed them.
       (2) — 63 placements, the scattering-block candidates. A further 23
       mode 2 records are hidden and carry an effect with no physics, the shape
       of a trigger volume; the crowd prefabs 269-288 carry effect slots 4/5/6.
-      `instance_gameplay()` decodes `u0` and `bounce` but drops them from the
-      dict — expose them first.
+      `instance_gameplay()` now exposes them as `immovable` and `bounce`.
+      **Pushable blocks bound September 15 (`tools/gamecube_interactions.py
+      --pushable-blocks`).** The stock mechanism, decoded in
+      `local/research/startgate/breakables-recipe.md`: definition word 2 is
+      a behaviour-class oid indexing the script record's 24-byte class table,
+      whose slot 1 (create) names a program; the stock pushable is a
+      one-function program calling builtin 6 AnimTeeter on the firing
+      instance. Every imported definition had word 2 = -1, which is why no
+      event ever fired. The tool clones the 63 mode-3 placements' definition
+      with the class pointer set, claims class row 0, and writes the teeter
+      program (stock mass/travel, donor restitution 0.20) into stub slot 69.
+      `gc-gari-interactions-001` (on top of the countdown build) rides a
+      clean 300 s check and is **installed on the iPhone** (September 15,
+      00:06). Not yet observed: a block actually moving on contact; the
+      donor's physics and effect records stay untranslated. Glass next: the
+      23 hidden mode-2 trigger volumes need a contact-slot program (stock
+      ABC1 program 171 shape: restore self, AnimObject per debris piece, 52
+      inline particle args), and the debris models are not yet identified.
       Nothing is translated to target behaviour, and it is gated behind the
       same driver problem as the gate bit and the flipbook: correct data alone
       stays inert while every LUN program is a stub.
