@@ -120,3 +120,30 @@ class ClassifyTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(HAVE_PIL, 'Pillow is required')
+class SkipTests(unittest.TestCase):
+    """Some textures must not be replaced at all."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_a_few_pixel_strip_is_skipped(self):
+        image = Image.new('RGBA', (640, 4), (120, 60, 30, 255))
+        path = self.dir / 'tex1_640x4_00_3.png'
+        image.save(path)
+        klass, _ = plan.classify(path)
+        self.assertEqual(klass, 'skip')
+
+    def test_a_skipped_texture_is_counted_but_not_copied(self):
+        Image.new('RGBA', (320, 4), (10, 10, 10, 255)).save(self.dir / 'tex1_320x4_01_3.png')
+        out = self.dir / 'plan'
+        report = plan.plan(self.dir, out)
+        self.assertEqual(report['classes'], {'skip': 1})
+        self.assertFalse((out / 'skip').exists())
+        self.assertNotIn('skip', report['models'])

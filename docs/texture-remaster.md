@@ -606,7 +606,45 @@ a colour channel.** A model must never see it, a scaler must not soften it when
 the guest tests it, and whatever sits behind a cutout must be filled with
 something plausible before anything touches the image.
 
-### 10.6 The v2 recipe
+### 10.6 Two textures the pack must not touch
+
+The menus and the boot sequence were remastered as an afterthought - 24
+textures - and the result **tore the EA BIG and THX logos into horizontal
+bands**. The identity experiment placed the blame exactly: a pack holding the
+*stock* art rendered those logos correctly, and only the upscaled pack broke
+them, so the fault was the content of a particular texture rather than the
+replacement mechanism or the mip levels.
+
+The culprits are four IA8 strips - two 640x4 and two 320x4. A texture four
+pixels tall is not art; it is a gradient or a scanline ramp the boot sequence
+draws through, and a model's guess at one is noise with a 160x multiplier on
+it. `texture_pack_plan.py` now classifies anything with a side of 8 pixels or
+less as `skip` and leaves it to the game. No course texture is that thin, so
+this costs nothing on the slopes.
+
+**The general rule this suggests: a pack should replace art, and a dumped
+texture is not always art.** Framebuffer copies were already excluded; thin
+strips are the second case, and a pack for another game wants the same check
+before anyone judges what the models did.
+
+### 10.7 The identity experiment, which is how to find this class of bug
+
+When something looks wrong with a pack in game, the cheapest way to separate
+"the pipeline is broken" from "a model made a bad guess" is to build a pack out
+of the dump itself - same textures, same names, no upscale - and ride it:
+
+```sh
+# every distinct texture, at its own size, as a pack
+python3 tools/texture_pack_union.py --output union ... && cp union/*/tex1_*.png identity/
+python3 tools/pack_mipmaps.py identity-mips      # the same pack, plus generated levels
+```
+
+That pack should be invisible: it is the game's own art arriving by another
+route. Anything that differs is the *mechanism*. Both identity arms here
+matched stock (and the mip arm confirmed the generated levels are correct),
+which is what pointed at the 640x4 strips within minutes.
+
+### 10.8 The v2 recipe
 
 `tools/texture_pack_plan.py` writes the class decision down once, so running
 the pipeline is a loop rather than a judgement call:
@@ -662,8 +700,13 @@ labelled "No texture pack installed" when the pack directory is empty, so it is
 never a dead control.
 
 ```sh
-python3 tools/mobile_gamecube.py textures --device <identifier> --pack local/research/remaster/pack-all
+python3 tools/mobile_gamecube.py textures --device <identifier> --pack local/research/remaster/pack-v4-mips
 ```
+
+A pack with its mip levels is **927 textures plus 7,969 sidecars, 443 MB**, and
+copying nine thousand files to a phone is the slow step of an install. Cutting
+the chain short (`pack_mipmaps.py --min-size 16`) removes roughly a third of
+the files for a few hundred kilobytes, at the cost of the last two levels.
 
 `local/research/remaster/install-tonight.sh` does the whole sequence — build,
 sign, install, copy the pack, launch — for the paired phone.

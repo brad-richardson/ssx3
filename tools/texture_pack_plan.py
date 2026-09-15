@@ -24,6 +24,7 @@ The classes below are the outcome of the September 15 comparison over SSX 3's
 | `tile` | the source already wraps | PBRify SPAN (invents least, holds the seam) | yes |
 | `block-compressed` | CMPR, not a tile | PBRify V4 (smooths CMPR blocks) | no |
 | `paletted`, `direct-colour` | everything else | Real-ESRGAN (best on art and text) | no |
+| `skip` | 8 pixels or less on a side | not replaced at all | - |
 
 The output is one directory per class plus a JSON receipt naming the model each
 one wants, so the upscale step is a loop over the plan rather than a judgement
@@ -52,6 +53,11 @@ PALETTED_FORMATS = {0, 1, 8, 9, 10}
 
 FLAT_STD = 4.0
 SOFT_ALPHA_FRACTION = 0.4
+# A texture only a few pixels tall is not art: SSX 3's boot sequence draws its
+# logos through 640x4 and 320x4 IA8 strips, and a model's guess at those tore
+# the EA BIG and THX logos into horizontal bands. Nothing that thin has detail
+# to reconstruct, so it is left alone rather than replaced.
+THIN_SIDE = 8
 
 
 def texture_format(name):
@@ -81,7 +87,9 @@ def classify(path):
     tiles = bool(tileable(image))
     fmt = texture_format(path.name)
 
-    if colour_std < FLAT_STD and alpha_std < FLAT_STD:
+    if min(image.width, image.height) <= THIN_SIDE:
+        name = 'skip'
+    elif colour_std < FLAT_STD and alpha_std < FLAT_STD:
         name = 'flat'
     elif partial > SOFT_ALPHA_FRACTION:
         name = 'soft-sprite'
@@ -105,7 +113,7 @@ def plan(union, output, copy=True):
         klass, measures = classify(path)
         counts[klass] = counts.get(klass, 0) + 1
         entries.append({'name': name, 'class': klass, **measures})
-        if copy:
+        if copy and klass != 'skip':
             directory = output / klass
             directory.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, directory / name)
