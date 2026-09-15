@@ -38,6 +38,7 @@ from gamecube_native_trace import DOL_SHA256
 MODULE = ROOT/'local/native/ssx3-module'
 HEADER = ROOT/'native/diagnostics/startgate_handler.h'
 VISIBLE_FLAG = 0x00010000
+RUNTIME_VISIBLE_FLAG = 0x00000001  # instance-only mirror bit, driven under SSX_STARTGATE_MIRROR=1
 # Show on the lights, hide on the gate: hiding is the donor's own authored
 # post-countdown state, so the gate "opens" by leaving, needing no animation.
 HOOKS = {
@@ -69,9 +70,10 @@ def summarize(rows):
     shows = [r for r in changed if r['show']]
     hides = [r for r in changed if not r['show']]
     for row in sets:
+        instance_mask = ~(VISIBLE_FLAG | RUNTIME_VISIBLE_FLAG)
         if (row['before'] & ~VISIBLE_FLAG != row['after'] & ~VISIBLE_FLAG or
-                row.get('instance_before', 0) & ~VISIBLE_FLAG !=
-                row.get('instance_after', 0) & ~VISIBLE_FLAG):
+                row.get('instance_before', 0) & instance_mask !=
+                row.get('instance_after', 0) & instance_mask):
             raise ValueError('Handler changed a bit outside the visibility flag')
     return dict(
         bindings=binds, definitions=definitions,

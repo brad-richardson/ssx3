@@ -291,6 +291,16 @@ the build or commit that closed them.
       three instances bind once and survive both, so the course is not
       reloaded and a handler can hold the definition. All five lookups
       still return value type 0.
+      **Visibility solved September 14 (handler-004): the runtime bit is bit 0
+      of the same `+128` word.** The visible build reads back `0x10003`, the
+      hidden one `2`, and handler-003 only ever wrote `0x10002`. Builtin 2's
+      command 1 mirrors the property half into the low half (`srawi 16; or`),
+      which is what pointed at it. With `SSX_STARTGATE_MIRROR=1` the handler
+      drives bit 0 too, and the gate draws at countdown "3" and is gone at GO,
+      on both the first race and after the restart (clean 300 s check).
+      Evidence in `local/research/startgate/handler-evidence/`. Still open:
+      the light flipbook does not advance, and the handler is a host-side
+      hook, not a course-side callback. Earlier attempt, kept for the record:
       **The handler is written and the flag write does not work.**
       `gamecube_startgate_handler.py` sets the bit on the lights and clears
       it on the gate, in the shared definition and in every live instance's

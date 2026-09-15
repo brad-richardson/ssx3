@@ -11,6 +11,12 @@
 #include <stdlib.h>
 
 #define SSX_GATE_VISIBLE 0x00010000u
+// The engine's own flag routines (DeadNode/RestoreNode constructors, builtin 2
+// command 1) mirror the property half of instance+128 into its low half:
+// the visible build reads back 0x00010003 where the hidden one reads 2. The
+// definition-only experiment produced 0x10002, never touching the low bit, so
+// drive the runtime bit as well when SSX_STARTGATE_MIRROR=1.
+#define SSX_GATE_RUNTIME_VISIBLE 0x00000001u
 #define SSX_GATE_UNBOUND 0xffffffffu
 
 // This header is included by every hooked translation unit, and the binding
@@ -26,6 +32,16 @@ static int ssx_gate_on(void) {
   static int initialized = 0, enabled = 0;
   if (!initialized) {
     const char* value = getenv("SSX_STARTGATE_HANDLER");
+    enabled = value && value[0] == '1';
+    initialized = 1;
+  }
+  return enabled;
+}
+
+static int ssx_gate_mirror(void) {
+  static int initialized = 0, enabled = 0;
+  if (!initialized) {
+    const char* value = getenv("SSX_STARTGATE_MIRROR");
     enabled = value && value[0] == '1';
     initialized = 1;
   }
@@ -115,7 +131,8 @@ static void ssx_gate_set(CPUState* c, int show, const char* stage) {
     const unsigned address = ssx_gate_instances[i] + 128;
     if (!ssx_gate_in_ram(c, address)) continue;
     const unsigned was = ssx_gate_load(c, address);
-    const unsigned now = show ? (was | SSX_GATE_VISIBLE) : (was & ~SSX_GATE_VISIBLE);
+    const unsigned mask = SSX_GATE_VISIBLE | (ssx_gate_mirror() ? SSX_GATE_RUNTIME_VISIBLE : 0u);
+    const unsigned now = show ? (was | mask) : (was & ~mask);
     if (!i) { instance_before = was; instance_after = now; }
     if (now != was) { ssx_gate_store(c, address, now); ++ssx_gate_writes; ++touched; }
   }

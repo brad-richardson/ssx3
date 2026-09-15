@@ -685,6 +685,44 @@ The handler itself is retained. It is the harness that produced this result,
 its writes are bounded and exactly reversible, and it will drive whatever
 operation replaces the flag write.
 
+### The runtime visibility bit is the low half of the same word (September 14)
+
+The flag write failed for a narrower reason than draw-list membership. The
+engine keeps two copies of the visibility in each instance's `+128` word: the
+property half at bit 16, copied from the definition when the instance binds,
+and a runtime half at bit 0. The visible candidate reads back `0x00010003` and
+the hidden one `0x00000002`; handler-003 only ever produced `0x00010002`. The
+engine's own routines are what pointed at it: builtin 2's command 1
+(`80191bb8`) rewrites `+128` with `srawi r3, r4, 16; or r3, r4, r3`, mirroring
+the property half into the runtime half, and both the `DeadNode` (`801fb794`)
+and `RestoreNode` (`801faf80`) constructors edit low bits of the same word
+(clear `0x60` and `0x2`, set `0x4`) before their node runs.
+
+`SSX_STARTGATE_MIRROR=1` makes the handler drive bit 0 alongside bit 16 in
+each live instance; the definition write is unchanged. Handler-004 ran the
+same 300 s countdown-plus-restart check (exit 0, no fault, zero invalid
+accesses, GPU command errors or fallback JIT runs, 1,914 samples, riding
+observed after the start and after the restart):
+
+| Event | Instance `+128` | Drawn |
+| --- | --- | --- |
+| `StartlightBegin` | `0x2` → `0x10003` | canopy, six stalls, light column at countdown "3" |
+| `StartgateOpen` | `0x10003` → `0x2` | none at GO |
+| `StartlightBegin` (after restart) | `0x2` → `0x10003` | — (no screenshot landed in the 3.8 s window) |
+| `StartgateOpen` (after restart) | `0x10003` → `0x2` | none at GO |
+
+Evidence: `handler-evidence/countdown-runtime-bit-drawn.png` (21:59:59,
+countdown 3, gate drawn) and `go-after-restart-hidden.png` (22:00:52, GO,
+gate absent), `handler-004.json`, `handler-004-run.json`.
+
+So the reversible visibility operation is pure data after all, and it is a
+host-side write today: setting or clearing bit 0 of a live instance's `+128`
+word shows or hides it on the next frame. What the September 13 audit
+identified in builtin 2 is the engine's own way of doing the same thing from
+a script. That closes the gate's visibility question and leaves two open:
+the five-frame light sequence still does not advance, and the shipping path
+is still a course-side callback rather than a hook in generated code.
+
 ## Collision and river reset follow-up
 
 The river screenshot at 89% is a separate, still-open gameplay issue.
