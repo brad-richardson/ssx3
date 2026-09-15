@@ -344,6 +344,37 @@ python3 tools/texture_pack_union.py --output local/research/remaster/union \
 Then one upscale pass per family directory, as in step 4, and the merged output
 is the pack.
 
+### Measured over all 17 courses
+
+| | |
+| --- | ---: |
+| dumped files across the 17 runs | 23,011 |
+| distinct course textures | **907** |
+| source art | 13.9 MB |
+| block-compressed / paletted / direct-colour | 698 / 159 / 50 |
+| mipmapped | 509 |
+| pack at 4x | **288 MB**, 907 files |
+| GPU time for the whole pack | 3 min 40 s (699 s block, 3 s direct, 17 s paletted) |
+
+Sharing is why the union matters: Snow Jam alone contributes 221 textures, but
+by the seventeenth course a new one adds only 15-35. Roughly half the pack is
+used by a single course and 28 textures appear in all of them (the rider and
+HUD set).
+
+So the cost of the whole game, from nothing to an installed pack, is about
+**40 minutes of wall clock**: half an hour of dumps four at a time, four
+minutes of GPU, and a few minutes of copying.
+
+### Verified across courses
+
+Three courses were ridden with the whole 907-texture pack — Snow Jam (`ARA1`,
+race), Crow's Nest (`ABA1`, big air) and The Throne (`EBC3`, backcountry) —
+under `local/research/remaster/verify/`. All three: exit 0, riding observed
+(817 / 862 / 815 samples), and zero invalid memory accesses, GPU command
+errors, unknown instructions or JIT fallback runs. A pack covering the game
+does not destabilise a course it was not built for, because the key is the
+texture rather than the course.
+
 ## 9. Putting a pack on the iPhone
 
 The app has a **Remastered textures** switch in its pause menu, beside
@@ -353,8 +384,11 @@ labelled "No texture pack installed" when the pack directory is empty, so it is
 never a dead control.
 
 ```sh
-python3 tools/mobile_gamecube.py textures --device '<iPhone>' --pack local/research/remaster/pack-all
+python3 tools/mobile_gamecube.py textures --device <identifier> --pack local/research/remaster/pack-all
 ```
+
+`local/research/remaster/install-tonight.sh` does the whole sequence — build,
+sign, install, copy the pack, launch — for the paired phone.
 
 That copies the directory to `Documents/User/Load/Textures/GXBE69`. The app
 writes `Documents/User/GameSettings/GXBE69.ini` at every launch with

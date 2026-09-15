@@ -386,7 +386,9 @@ def launch(args):
                     if p.stat().st_mtime >= started_wall]
         result['rendering'] = dict(screenshot_count=len(captures),
                                    last_screenshot_age_seconds=time.time()-max(captures) if captures else None)
-    (reports / f"{stamp}.json").write_text(json.dumps(result, indent=2) + "\n")
+    # Beside its own log, so `<log>.json` is this run's receipt even when
+    # several runs share a second.
+    log_path.with_suffix(".json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
     if code:
         raise RuntimeError(f"Runtime exited {code}; inspect {log_path}")
