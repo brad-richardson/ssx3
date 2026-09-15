@@ -247,6 +247,35 @@ def textures(args):
           "Turn it on in the app's pause menu (Remastered textures), then Full Reset.")
 
 
+def courses(args):
+    """Copy course-redirect manifests into the app's Documents/Courses."""
+    source = args.courses_dir
+    if not source or not source.is_dir():
+        raise RuntimeError("--courses-dir must name a directory of manifest .txt files")
+    manifests = sorted(p for p in source.iterdir() if p.suffix == '.txt')
+    if not manifests:
+        raise RuntimeError(f"No .txt manifests in {source}")
+    for path in manifests:
+        # The app applies these to the event table at boot; a malformed one
+        # would fail the boot, so parse each before it leaves the Mac.
+        try:
+            from gamecube_course_check import parse_course_manifest
+        except ImportError:
+            from tools.gamecube_course_check import parse_course_manifest
+        parse_course_manifest(path.read_text())
+    print(f"{len(manifests)} manifests: " + ", ".join(p.stem for p in manifests))
+    if args.simulator:
+        destination = simulator_documents(args) / "Courses"
+        destination.mkdir(parents=True, exist_ok=True)
+        for path in manifests:
+            shutil.copy2(path, destination / path.name)
+        print(f"Courses copied to the simulator container: {destination}")
+        return
+    copy_to(args, source, "Documents/Courses", timeout=300)
+    print("Courses copied to the device container: Documents/Courses\n"
+          "Pick one in the app's pause menu (Course), then Full Reset.")
+
+
 def launch(args):
     flags = []
     internal_scale = getattr(args, "internal_scale", None)
@@ -323,7 +352,7 @@ def main():
     global WORK, APP
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("configure", "build", "sign", "install", "provision", "world",
-                                           "textures", "launch", "collect"))
+                                           "textures", "courses", "launch", "collect"))
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--simulator", action="store_true", help="Use the iOS Simulator SDK and simctl")
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
@@ -345,6 +374,8 @@ def main():
     parser.add_argument("--world", type=Path, help="Built BAM.BIG for the world command")
     parser.add_argument("--pack", type=Path,
                         help="Directory of tex1_*.png replacements for the textures command")
+    parser.add_argument("--courses-dir", type=Path,
+                        help="Directory of course-redirect manifests for the courses command")
     core=parser.add_mutually_exclusive_group()
     core.add_argument("--cpu-thread", action="store_true",
                       help="Launch-only dual-core runtime for this process, ignoring the saved menu choice (default on)")

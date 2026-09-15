@@ -172,6 +172,25 @@ tables.
 - **In-game listing.** One event row means the list of imported courses lives in
   the host manifest, not in the game's menu.
 
+## The picker (September 15)
+
+`tools/course_manifests.py` writes one manifest per event straight out of the
+DOL's own tables, and the iOS app lists them. `mobile_gamecube.py courses
+--courses-dir DIR` copies a directory of manifests to `Documents/Courses`
+(parsing each one first, so a malformed manifest never reaches the phone), and
+the pause menu gains a **Course** row: a native menu listing "Stock event" plus
+every installed manifest by name, with the current choice checked. Choosing one
+stores `SSXCourseManifest` and it loads on the next Full Reset or relaunch, like
+the other runtime settings.
+
+Resolution order at boot: `-ssxCourseManifest <name>` from the launch arguments
+wins (the harness keeps using it), then the stored choice, then the stock event.
+Both paths take a bare file name only, so neither a launch flag nor a stored
+preference can point outside the sandbox, and a preference naming a manifest
+that is no longer installed falls back to stock rather than failing the boot.
+The manifest a session actually booted with is recorded as `course_selection`
+in its log.
+
 ## Two courses resident (September 15)
 
 `ride-006` under `local/research/aloha/` boots a game directory that holds stock

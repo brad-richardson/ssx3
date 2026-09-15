@@ -378,7 +378,9 @@ texture rather than the course.
 ## 9. Putting a pack on the iPhone
 
 The app has a **Remastered textures** switch in its pause menu, beside
-Dual-core. It writes `SSXRemasterTextures` and takes effect on the next Full
+Dual-core, and a **Course** row next to it that picks any installed course
+([course selection](course-selection.md)) — a pack covers the whole game, so
+the two together are what make an A/B on the phone worth doing. It writes `SSXRemasterTextures` and takes effect on the next Full
 Reset or relaunch, like the other runtime switches. The switch is disabled and
 labelled "No texture pack installed" when the pack directory is empty, so it is
 never a dead control.

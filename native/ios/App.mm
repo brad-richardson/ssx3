@@ -196,6 +196,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _debugMainMenu;
   BOOL _cpuThread;        // mode of the running/next runtime; smoothing trial unavailable when on
   BOOL _remasterActive;   // whether the running runtime was configured with the texture pack
+  NSString* _activeCourse; // manifest file the running runtime booted with, nil for stock
   int _cpuThreadOverride; // -1 saved preference, 0 -ssxSingleCore, 1 -ssxCPUThread (this process only)
   BOOL _fastDisc;         // launch-only Dolphin FastDiscSpeed comparison
   BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
@@ -270,6 +271,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (BOOL)cpuThreadRequested;
 - (BOOL)remasterRequested;
 - (BOOL)remasterPackInstalled;
+- (NSArray<NSString*>*)installedCourses;
+- (nullable NSString*)chosenCourseFile;
 @end
 
 @implementation SSXViewController
@@ -602,26 +605,38 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   setenv("SSX3_NO_EXECUTABLE_MEMORY","1",1);
   // Presence-based in the runtime: only a launch flag enables the per-dispatch sampling branch.
   if (_dispatchSamples) setenv("STATICRECOMP_DISPATCH_SAMPLES","1",1); else unsetenv("STATICRECOMP_DISPATCH_SAMPLES");
-  // Course redirect: -ssxCourseManifest <name> names a manifest in Documents/
-  // that the runtime applies to the event table at boot (docs/course-selection.md).
-  // A bare file name only, so a launch flag cannot reach outside the sandbox.
+  // Course redirect: a manifest applied to the event table at boot
+  // (docs/course-selection.md). -ssxCourseManifest <name> names one in
+  // Documents/ and wins; otherwise the menu's chosen course names one in
+  // Documents/Courses/. Both are bare file names, so neither a launch flag nor
+  // a stored preference can reach outside the sandbox.
   {
     NSArray<NSString*>* launch = NSProcessInfo.processInfo.arguments;
     NSUInteger flag = [launch indexOfObject:@"-ssxCourseManifest"];
     unsetenv("SSX_COURSE_MANIFEST");
+    NSString* path = nil;
     if (flag != NSNotFound && flag+1 < launch.count) {
       NSString* name = launch[flag+1];
-      if ([name containsString:@"/"] || [name hasPrefix:@"."]) {
+      if ([name containsString:@"/"] || [name hasPrefix:@"."])
         fprintf(stderr,"[ssx3-course] ignoring -ssxCourseManifest %s: bare file name required\n",
                 name.UTF8String);
+      else
+        path = [Documents() stringByAppendingPathComponent:name];
+    } else if (NSString* chosen=[self chosenCourseFile]) {
+      path = [[Documents() stringByAppendingPathComponent:@"Courses"] stringByAppendingPathComponent:chosen];
+    }
+    _activeCourse = nil;
+    if (path) {
+      if ([NSFileManager.defaultManager fileExistsAtPath:path]) {
+        setenv("SSX_COURSE_MANIFEST",path.UTF8String,1);
+        _activeCourse = path.lastPathComponent;
       } else {
-        NSString* path = [Documents() stringByAppendingPathComponent:name];
-        if ([NSFileManager.defaultManager fileExistsAtPath:path])
-          setenv("SSX_COURSE_MANIFEST",path.UTF8String,1);
-        else
-          fprintf(stderr,"[ssx3-course] no manifest at %s\n",path.UTF8String);
+        fprintf(stderr,"[ssx3-course] no manifest at %s\n",path.UTF8String);
       }
     }
+    [self logSessionEvent:@"course_selection" details:@{
+        @"manifest":_activeCourse ?: NSNull.null,
+        @"source":flag!=NSNotFound ? @"launch flag" : (_activeCourse ? @"menu" : @"stock")}];
   }
   Common::Log::SetEmbedderLogCallback(RuntimeLog,nullptr);
   NSArray* args = NSProcessInfo.processInfo.arguments;
@@ -998,6 +1013,17 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
                               : @"The game's own textures apply after Full Reset or relaunch.";
     [self refreshSessionMenu];
   };
+  _sessionMenu.onCourse = ^(NSString* course) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    if (course) [NSUserDefaults.standardUserDefaults setObject:course forKey:@"SSXCourseManifest"];
+    else [NSUserDefaults.standardUserDefaults removeObjectForKey:@"SSXCourseManifest"];
+    [self logSessionEvent:@"course_preference_changed" details:@{@"manifest":course ?: NSNull.null}];
+    self->_menuStatus=course ? [NSString stringWithFormat:@"%@ loads after Full Reset or relaunch.",
+                                    course.stringByDeletingPathExtension]
+                             : @"The stock event loads after Full Reset or relaunch.";
+    [self refreshSessionMenu];
+  };
   _sessionMenu.onReset = ^{
     SSXViewController* self=weakSelf;
     if (!self || self->_pendingCheckpoint || self->_starting || self->_stopRequested) return;
@@ -1084,9 +1110,14 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     status=[status stringByAppendingString:@" · Dual-core change applies after Full Reset."];
   if ([self remasterRequested]!=_remasterActive)
     status=[status stringByAppendingString:@" · Texture change applies after Full Reset."];
+  NSString* wantedCourse=[self chosenCourseFile];
+  if (_running && ((wantedCourse==nil)!=(_activeCourse==nil) ||
+                   (wantedCourse && ![wantedCourse isEqualToString:_activeCourse])))
+    status=[status stringByAppendingString:@" · Course change applies after Full Reset."];
   [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
       fastStart:_debugMainMenu dualCore:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]
       remaster:[self remasterRequested] remasterAvailable:[self remasterPackInstalled]
+      courses:[self installedCourses] course:[self chosenCourseFile]
       canConfigure:canConfigure canTrial:canConfigure
       canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&
           trial!=NativeTrial::Status::Waiting && trial!=NativeTrial::Status::Running) build:_menuBuild ?: @""];
@@ -1119,6 +1150,22 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (BOOL)cpuThreadRequested {
   return _cpuThreadOverride>=0 ? _cpuThreadOverride==1 : [NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"];
+}
+- (NSArray<NSString*>*)installedCourses {
+  // Documents/Courses/*.txt, as written by tools/course_manifests.py.
+  NSString* directory=[Documents() stringByAppendingPathComponent:@"Courses"];
+  NSArray* entries=[[NSFileManager defaultManager] contentsOfDirectoryAtPath:directory error:nil];
+  NSMutableArray* courses=[NSMutableArray array];
+  for (NSString* name in [entries sortedArrayUsingSelector:@selector(compare:)])
+    if ([name.pathExtension isEqualToString:@"txt"] && ![name hasPrefix:@"."])
+      [courses addObject:name];
+  return courses;
+}
+- (nullable NSString*)chosenCourseFile {
+  NSString* chosen=[NSUserDefaults.standardUserDefaults stringForKey:@"SSXCourseManifest"];
+  // A preference that names a manifest which is no longer installed reverts to
+  // the stock event rather than failing the boot.
+  return (chosen.length && [[self installedCourses] containsObject:chosen]) ? chosen : nil;
 }
 - (BOOL)remasterPackInstalled {
   // Dolphin reads Load/Textures/<game id>/; an empty directory is not a pack.

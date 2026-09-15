@@ -118,8 +118,11 @@ the build or commit that closed them.
       `bam.big` plus `alo.big`, selected by `archive = alo` — staged by the new
       `tools/gamecube_game_dir.py`, which renames an archive's BIGF world
       members so a second course can live beside the stock one. The receipt now
-      hashes every installed `*.big`. Next: the picker in the app's menu; the
-      host side of the data model is done.
+      hashes every installed `*.big`. **Done September 15: the picker.**
+      `tools/course_manifests.py` writes one manifest per event from the DOL's
+      own tables, `mobile_gamecube.py courses` copies them to the phone, and the
+      pause menu's Course row lists them; a launch flag still wins over the
+      stored choice. Compiles for the device; not yet exercised on it.
       Unknowns: file-name case folding on the FST, and whether the save record
       is a fixed event-indexed array.
 - [ ] September 14 priority: course restoration is the main track; keep 120 Hz
