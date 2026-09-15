@@ -703,6 +703,58 @@ python3 tools/pack_mipmaps.py PACK-mips --output PACK-mips.json
 python3 tools/texture_pack_audit.py UNION PACK --output audit.json --copy-flagged flagged/
 ```
 
+### 10.10 The gate's colour check was blind by construction
+
+Riding `pack-v6` on the phone showed patchy colour and grid lines across snow
+that the audit called clean: `colour-shift` flagged **1 texture of 927**. The
+check was not wrong, it was measuring the wrong thing. `colour-shift` is the
+mean per-channel bias over the whole texture, and §10.6's `match_colour()`
+restores exactly that mean — so the gate's colour test is guaranteed to pass
+whatever the model did *within* a texture. A model that warms one region and
+cools another scores zero bias.
+
+Pooling the error fixes it. `local_shift` reduces the pack to the source's
+resolution, takes the per-texel colour error, averages it over a grid of tiles
+(`LOCAL_TILES = 8` a side) and keeps the worst tile. On `pack-v6`:
+
+| measure | median | p95 | max | over 16 |
+| --- | ---: | ---: | ---: | ---: |
+| `local_shift`, pack-v6 | 7.0 | 20.5 | 44.3 | **98 of 907** |
+| `local_shift`, pack-v7 | 7.0 | 12.0 | 12.1 | 0 |
+
+The offenders are **small block-compressed sources**: 31 of the worst 50 are
+CMPR, at 16x16 to 64x64. CMPR is a 4x4 block codec, so the dumped PNG carries
+the codec's own quantization as faint square steps in what should be a smooth
+gradient. A detail model reads those steps as structure worth sharpening and
+returns a hard speckled grid with invented colour inside each block. Terrain
+tiles that art, so the invented motif repeats — which is why it reads in game
+as grid join lines rather than as noise.
+
+`tools/texture_pack_blend.py` is the cheap repair, and it needs no model run.
+For each texture it builds a **faithful reference** — a Lanczos upscale plus
+the per-texel residual that makes `box_down(reference) == source` exactly, so
+the reference is a real image with provably zero local shift — then bisects the
+blend weight between that reference and the model's output for the largest
+weight whose `local_shift` is still within `--target` (12, under the gate's 16
+so a pack passes with room). Alpha is never blended: the guest alpha-*tests*
+foliage (§10.5) and the pack's mask is already correct.
+
+Gating per texture is what keeps this from being a blur pass. Over the whole
+pack, **724 of 907 textures were already faithful and kept full strength**; 183
+were tempered, the worst to weight 0.27 (44.3 -> 12.0). `colour-shift` and
+`structure-drift` both went to zero as a side effect, because a mean-preserving
+reference also pulls moved edges back.
+
+```sh
+python3 tools/texture_pack_blend.py UNION PACK --output PACK-v7 \
+    --report PACK-v7-blend.json          # every texture, each gated on its own
+python3 tools/pack_mipmaps.py PACK-v7 --output PACK-v7-mips.json
+python3 tools/texture_pack_audit.py UNION PACK-v7 --output audit-v7.json
+```
+
+Note `pack_mipmaps.py --output` names a **report file**, not a destination: the
+`_mipN` sidecars are written next to the bases, in place.
+
 ## 11. Art passes a model cannot do: foliage
 
 Upscaling makes SSX 3's trees *smoother*, which is not the same as better. A

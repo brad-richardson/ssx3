@@ -32,6 +32,9 @@ static void SetLabel(UILabel* label, NSString* text) {
   UISwitch* _remaster;
   UILabel* _remasterNote;
   UIButton* _course;
+  NSArray<NSString*>* _courseMenuNames;   // what _course.menu was last built from
+  NSString* _courseMenuChoice;
+  BOOL _courseMenuBuilt;
   UIButton* _resume;
   UIButton* _smoothing;
   UIButton* _reset;
@@ -258,6 +261,17 @@ static void SetLabel(UILabel* label, NSString* text) {
 }
 
 - (void)rebuildCourseMenu:(NSArray<NSString*>*)courses course:(NSString* _Nullable)course {
+  // Only when the contents changed. Reassigning a button's menu dismisses the
+  // one on screen, and this is reached from updateWithStatus: at the session's
+  // refresh rate, so rebuilding unconditionally closed the picker about twenty
+  // times a second and made it impossible to choose anything.
+  courses=courses ?: @[];
+  if (_courseMenuBuilt && [_courseMenuNames isEqualToArray:courses]
+      && (_courseMenuChoice==course || [_courseMenuChoice isEqualToString:course]))
+    return;
+  _courseMenuNames=[courses copy];
+  _courseMenuChoice=[course copy];
+  _courseMenuBuilt=YES;
   __weak __typeof(self) weakSelf=self;
   NSMutableArray<UIAction*>* actions=[NSMutableArray array];
   UIAction* stock=[UIAction actionWithTitle:@"Stock event" image:nil identifier:nil

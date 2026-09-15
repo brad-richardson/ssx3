@@ -76,11 +76,26 @@ def manifest(row, target_event=0):
     return '\n'.join(lines) + '\n'
 
 
+def manifest_filename(row, taken=()):
+    """The picker shows a manifest's file name, so name the file after the track.
+
+    `ASS1` is the archive code, not something a player recognises, so the file
+    is named from the event's own display name with only the characters a
+    sandboxed bare file name needs. The code is the fallback when a name has
+    nothing usable in it, and the suffix when two events share a name.
+    """
+    stem = ''.join(c for c in row['name'] if c.isalnum() or c in " '-&").strip()
+    stem = ' '.join(stem.split()) or row['code']
+    if stem in taken:
+        stem = f"{stem} ({row['code']})"
+    return stem + '.txt'
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--dol', type=Path, default=Path('local/source/gamecube/ssx3/sys/main.dol'))
-    ap.add_argument('--output', type=Path, help='Directory for one <code>.txt manifest per event')
+    ap.add_argument('--output', type=Path, help='Directory for one "<track name>.txt" manifest per event')
     ap.add_argument('--target-event', type=int, default=0,
                     help='Which event row the manifests redirect (default 0, Snow Jam)')
     ap.add_argument('--only', nargs='*', help='Limit to these codes')
@@ -93,8 +108,11 @@ def main():
               and (not args.only or e['code'] in args.only)]
     if args.output:
         args.output.mkdir(parents=True, exist_ok=True)
+        written = []
         for row in chosen:
-            (args.output / f"{row['code']}.txt").write_text(manifest(row, args.target_event))
+            name = manifest_filename(row, written)
+            written.append(name.removesuffix('.txt'))
+            (args.output / name).write_text(manifest(row, args.target_event))
     if args.json:
         args.json.write_text(json.dumps(events, indent=2) + '\n')
     for row in chosen:

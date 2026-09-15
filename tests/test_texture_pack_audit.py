@@ -65,6 +65,34 @@ class AuditTests(unittest.TestCase):
         self.assertIn('colour-shift', result['flags'])
         self.assertGreater(result['max_bias'], audit.COLOUR_SHIFT)
 
+    def test_a_region_recoloured_with_a_matched_mean_is_a_local_shift(self):
+        """The defect the whole-texture colour check cannot see.
+
+        The upscaler restores each texture's mean colour, so a model that warms
+        one half and cools the other leaves `max_bias` at zero. This is how
+        small block-compressed textures came back with patchy colour while the
+        audit reported the pack clean.
+        """
+        source = self.noisy_texture(size=32)
+        packed = self.nearest(source)
+        pixels = packed.load()
+        for y in range(packed.height):
+            for x in range(packed.width):
+                r, g, b, a = pixels[x, y]
+                shift = 40 if y < packed.height // 2 else -40
+                pixels[x, y] = (max(0, min(255, r + shift)), g, b, a)
+        result = self.measure('tex1_32x32_0a_14.png', source, packed)
+        self.assertLess(result['max_bias'], audit.COLOUR_SHIFT)
+        self.assertNotIn('colour-shift', result['flags'])
+        self.assertIn('local-shift', result['flags'])
+        self.assertGreater(result['local_shift'], audit.LOCAL_SHIFT)
+
+    def test_a_faithful_upscale_has_no_local_shift(self):
+        source = self.noisy_texture(size=32)
+        result = self.measure('tex1_32x32_0b_14.png', source, self.nearest(source))
+        self.assertNotIn('local-shift', result['flags'])
+        self.assertAlmostEqual(result['local_shift'], 0.0, places=6)
+
     def test_moved_structure_is_structure_drift(self):
         source = self.noisy_texture()
         packed = self.nearest(source).transpose(Image.FLIP_LEFT_RIGHT)

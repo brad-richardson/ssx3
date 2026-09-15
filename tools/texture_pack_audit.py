@@ -6,6 +6,13 @@ kinds of invention are defects rather than gains:
 
 * **colour shift** — the pack's average colour differs from the source's, so
   the art changes hue or brightness on screen even before any detail lands.
+* **local shift** — the average matches but a *region* does not, so the art
+  changes colour in patches. This needs its own check because the upscaler's
+  own colour matching restores the mean, which is what the whole-texture
+  measure looks at: a model that invents warmth in one corner and cools
+  another passes "colour shift" with a perfect score. Small block-compressed
+  sources are the ones this catches, because their 4x4 codec quantization
+  reads to a detail model as structure worth sharpening.
 * **structure drift** — reduced back to the source's own resolution, the pack
   no longer matches it, so the model has moved edges rather than sharpened
   them.
@@ -39,6 +46,8 @@ STRUCTURE_DRIFT = 12.0
 ALPHA_DRIFT = 8.0
 FLAT_SOURCE_STD = 4.0
 FLAT_INVENTION = 3.0
+LOCAL_SHIFT = 16.0
+LOCAL_TILES = 8
 
 LUMA = (0.2126, 0.7152, 0.0722)
 
@@ -59,6 +68,24 @@ def box_down(array, factor):
 
 def luma(rgb):
     return rgb[..., 0] * LUMA[0] + rgb[..., 1] * LUMA[1] + rgb[..., 2] * LUMA[2]
+
+
+def local_shift(delta, visible):
+    """Worst tile-average of the per-texel colour error.
+
+    Pooling matters: a mean over the whole texture cancels a warm region
+    against a cool one, and the upscaler's colour matching guarantees that
+    cancellation by construction.
+    """
+    import numpy as np
+    height, width = visible.shape
+    tile = max(1, min(height, width) // LOCAL_TILES)
+    magnitude = np.where(visible, np.abs(delta).max(axis=2), 0.0)
+    rows, columns = height // tile, width // tile
+    if not (rows and columns):
+        return float(magnitude.max())
+    tiles = magnitude[:rows * tile, :columns * tile]
+    return float(tiles.reshape(rows, tile, columns, tile).mean(axis=(1, 3)).max())
 
 
 def measure(source_path, pack_path):
@@ -93,6 +120,13 @@ def measure(source_path, pack_path):
         invented = float(luma(pack[..., :3] - carried[..., :3]).std())
     else:
         invented = 0.0
+    # Local colour shift. `bias` is a mean over the whole texture, so a model
+    # that invents warmth in one region and cools another scores a perfect
+    # colour match - and match_colour() in the upscaler restores exactly that
+    # mean, which makes the whole-texture number blind by construction. Pool
+    # the per-texel error into a grid of tiles and keep the worst tile.
+    shift = local_shift(delta, visible)
+
     source_std = float(source_luma[visible].std())
     alpha_std = float(source[..., 3].std())
 
@@ -101,6 +135,8 @@ def measure(source_path, pack_path):
         flags.append('colour-shift')
     if rms > STRUCTURE_DRIFT:
         flags.append('structure-drift')
+    if shift > LOCAL_SHIFT:
+        flags.append('local-shift')
     if alpha_rms > ALPHA_DRIFT:
         flags.append('alpha-drift')
     if (source_std < FLAT_SOURCE_STD and alpha_std < FLAT_SOURCE_STD
@@ -111,6 +147,7 @@ def measure(source_path, pack_path):
             'bias': [round(b, 3) for b in bias],
             'max_bias': round(max(abs(b) for b in bias), 3),
             'rms': round(rms, 3), 'alpha_rms': round(alpha_rms, 3),
+            'local_shift': round(shift, 3),
             'invented': round(invented, 3), 'source_std': round(source_std, 3),
             'alpha_std': round(alpha_std, 3),
             'flags': flags}
@@ -148,9 +185,10 @@ def audit(source_dir, pack_dir):
         'flagged': len(flagged), 'flag_counts': counts,
         'thresholds': {'colour_shift': COLOUR_SHIFT, 'structure_drift': STRUCTURE_DRIFT,
                        'alpha_drift': ALPHA_DRIFT, 'flat_source_std': FLAT_SOURCE_STD,
-                       'flat_invention': FLAT_INVENTION},
+                       'flat_invention': FLAT_INVENTION, 'local_shift': LOCAL_SHIFT},
         'medians': {key: round(sorted(r[key] for r in scored)[len(scored) // 2], 3)
-                    for key in ('max_bias', 'rms', 'alpha_rms', 'invented')} if scored else {},
+                    for key in ('max_bias', 'local_shift', 'rms', 'alpha_rms',
+                               'invented')} if scored else {},
         'worst': sorted(scored, key=lambda r: -r['rms'])[:20],
         'entries': results,
         'missing': missing[:50],
