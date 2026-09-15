@@ -399,12 +399,13 @@ DOL) are both staged for whoever runs it next.
 
 Phase 2, and everything this document does not establish:
 
-- **Scoring and the end of the run.** A slopestyle event scores instead of
-  timing (`behiloc.dbb` row 5 is five descending scores, not times). Whether
-  that lives in the executable's mode-3 path or in ASS1's kind-16 LUN programs
-  is undetermined, and every imported LUN program is a 36-byte stub, so the
-  event cannot be expected to score or finish. This is the same layer-(c)
-  blocker that keeps Garibaldi's breakables inert.
+- **Scoring and the end of the run.** Answered in §10: it is the executable's
+  mode path, not the course script — no builtin or handler name distinguishes
+  the slopestyle courses' scripts from any other discipline's. So the stubbed
+  LUN programs cost props and animation rather than scoring, and what remains
+  is running the event *as* slopestyle (the `mode` limitation in
+  [course selection](course-selection.md)) plus medal targets in
+  `behiloc.dbb`.
 - **Type-1 marker semantics** (§4) — reproduced by position, not understood.
 - **Showoff prop set.** The donor GSF's `ShowoffMode`/`HideRace` programs, and
   GSF opcode 25 (68 undecoded commands, presumed to be the `Patch_ShowOff_*`
@@ -784,3 +785,48 @@ seconds is not.
 This also makes `gc-gari-interactions-002` testable the same way: record a
 movie, aim `SSX_COLLISION_INSTANCE` at a bound block or pane, and the
 deliberate-contact question becomes a replay instead of a lucky autopilot.
+
+## 10. Phase 2: scoring is not in the course script (September 15)
+
+The open item said "whether that lives in the executable's mode-3 path or in
+ASS1's kind-16 LUN programs is undetermined", and costed a script-side scoring
+driver at 2-4 days. It is the executable, so that driver should not be written.
+
+Every stock course's kind-16 script was disassembled with `tools/gamecube_lun.py`
+— all 17 courses across the five disciplines, 2,000-odd programs, every one of
+them decoding cleanly — and two vocabularies compared: the builtin indices each
+program calls, and the name hashes it registers handlers under.
+
+| discipline | courses | builtins common / union | handler names common / union |
+| --- | ---: | ---: | ---: |
+| race | 5 | 42 / 63 | 7 / 45 |
+| slopestyle | 3 | 40 / 54 | 3 / 41 |
+| big air | 3 | 37 / 55 | 3 / 33 |
+| halfpipe | 3 | 35 / 43 | 3 / 19 |
+| backcountry | 3 | 39 / 53 | 7 / 45 |
+
+**No builtin and no handler name is common to a discipline's courses and absent
+from every other discipline — except backcountry.** Slopestyle, big air,
+halfpipe and race each contribute an empty set; backcountry's three courses
+share five name hashes nothing else uses, so that discipline does have
+script-side machinery of its own. A slopestyle course's script is props and
+decoration, the same as a race course's.
+
+So the discipline is engine-side, and this reframes what Aloha still needs:
+
+1. **Run the event as slopestyle.** This is the `mode` limitation already
+   measured in [course selection](course-selection.md): setting the event's
+   mode word to 3 does not switch the HUD or the briefing, because the Single
+   Event menu passes the discipline the player picked, and the consumer at
+   `0x801093D0` reads the event's own word only when its caller passes 7. That
+   is the blocker — not a missing script. Disabling the imported course's
+   scripts costs props and animation, not scoring.
+2. **Medal targets.** `behiloc.dbb` row 5 is five descending scores and no tool
+   writes it.
+3. The kind-21 slopestyle trailer (`b = 4` with the two type-1 markers) and the
+   three-gate start line the importer already produces.
+
+What is still unmeasured: whether a redirected event that *is* reached as
+slopestyle scores and finishes correctly with converted data. Reaching a finish
+at all needs steering ([route control](route-control.md)), which is why that
+work comes first.

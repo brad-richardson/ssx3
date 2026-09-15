@@ -80,6 +80,13 @@ the build or commit that closed them.
       the largest items the scoring driver in the course script (2-4 d) and
       the per-course transform preset (2-3 d); the script driver is the same
       work Garibaldi's glass/block physics and flipbooks need.
+      **September 15: the scoring driver should not be written.** Disassembling
+      every stock course's script across all five disciplines shows no builtin
+      and no handler name that belongs to the slopestyle courses and to no
+      other discipline (only backcountry has any), so scoring is engine-side.
+      What Aloha needs instead is to be *reached* as slopestyle — the `mode`
+      word alone does not switch it — plus medal targets in `behiloc.dbb`.
+      See [Aloha §10](aloha-conversion.md#10-phase-2-scoring-is-not-in-the-course-script-september-15).
 - [ ] Visual remaster with trained upscalers (user, September 14; SSX 3 first,
       the PS2 games after). Hybrid pipeline, not "an image model upscales the
       game": classify assets → dedicated super-resolution per asset family
