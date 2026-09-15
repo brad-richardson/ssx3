@@ -141,6 +141,10 @@ def main():
     ap.add_argument('--course-manifest', type=Path,
                     help='Course-redirect manifest applied to guest RAM at boot '
                          '(docs/course-selection.md); passed through as SSX_COURSE_MANIFEST')
+    ap.add_argument('--texture-dump', action='store_true',
+                    help='Dump every texture the run loads into the profile (docs/texture-remaster.md)')
+    ap.add_argument('--texture-pack', type=Path,
+                    help='Load replacement textures from this directory for the run')
     ap.add_argument('--restart-after', type=int,
                     help='Seconds of observed riding before choosing the pause menu Restart; '
                          'the check then requires riding again')
@@ -182,6 +186,8 @@ def main():
             run = subprocess.Popen([sys.executable, str(ROOT/'tools/native_gamecube.py'), 'run',
                 '--game', str(args.game.resolve()), '--profile', args.profile, '--seconds', str(args.seconds),
                 '--pipe-controller', *(['--cpu-thread'] if args.cpu_thread else []),
+                *(['--texture-dump'] if args.texture_dump else []),
+                *(['--texture-pack', str(args.texture_pack.resolve())] if args.texture_pack else []),
                 *(['--module', str(args.module.resolve())] if args.module else [])], cwd=ROOT,
                 env=dict(os.environ, MTL_DEBUG_LAYER='1' if args.metal_validation == 'on' else '0',
                          **({'SSX_COURSE_MANIFEST': str(args.course_manifest.resolve())}
@@ -286,6 +292,8 @@ def main():
     summary = dict(game=str(args.game), profile=args.profile, samples=len(rows),
                    menu_sequence=str(args.menu_sequence),
                    course_manifest=str(args.course_manifest) if args.course_manifest else None,
+                   texture_dump=args.texture_dump,
+                   texture_pack=str(args.texture_pack) if args.texture_pack else None,
                    course_redirects=redirects,
                    metal_validation=args.metal_validation, cpu_thread=args.cpu_thread,
                    module=str(args.module.resolve()) if args.module else None,

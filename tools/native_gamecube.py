@@ -245,6 +245,41 @@ def launch(args):
         config.write_text(f"[Core]\nCPUThread = {cpu_thread}\nDSPHLE = True\nSkipIPL = True\n{extra}[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
     if f"CPUThread = {cpu_thread}\n" not in config.read_text():
         raise RuntimeError(f"Existing profile {args.profile} does not use CPUThread = {cpu_thread}; use a fresh --profile")
+    texture_settings = {}
+    if getattr(args, "texture_dump", False):
+        # Dolphin's own dumper writes PROFILE/Dump/Textures/<game id>/ with the
+        # standard tex1_<w>x<h>_<hash>[_<tlut hash>]_<format>.png name, which is
+        # the same key the hi-res loader reads back.
+        texture_settings["DumpTextures"] = "True"
+        texture_settings["DumpBaseTextures"] = "True"
+    if getattr(args, "texture_pack", None):
+        pack = Path(args.texture_pack).resolve()
+        if not pack.is_dir():
+            raise RuntimeError(f"No texture pack directory at {pack}")
+        # D_HIRESTEXTURES is PROFILE/Load/Textures; Dolphin searches the game-id
+        # subdirectory recursively for tex1_*.png / .dds.
+        load = profile / "Load/Textures"
+        load.mkdir(parents=True, exist_ok=True)
+        link = load / "GXBE69"
+        if link.is_symlink() or link.exists():
+            if not link.is_symlink() or link.resolve() != pack:
+                raise RuntimeError(f"{link} already exists; use a fresh --profile")
+        else:
+            link.symlink_to(pack)
+        texture_settings["HiresTextures"] = "True"
+        texture_settings["CacheHiresTextures"] = "True"
+    if texture_settings:
+        # These belong in the per-game layer, not GFX.ini: UICommon::Init runs
+        # SetBaseOrCurrent(GFX_DUMP_TEXTURES, false) and saves, so a base-layer
+        # GFX.ini value is overwritten before the video backend reads it.
+        # GameSettings/<id>.ini is the LocalGame layer, which sits above base,
+        # and its [Video_Settings] maps to the GFX "Settings" section
+        # (Core/ConfigLoaders/GameConfigLoader.cpp).
+        settings_dir = profile / "GameSettings"
+        settings_dir.mkdir(exist_ok=True)
+        game_ini = settings_dir / "GXBE69.ini"
+        body = "".join(f"{key} = {value}\n" for key, value in sorted(texture_settings.items()))
+        game_ini.write_text(f"[Video_Settings]\n{body}")
     if args.pipe_controller:
         pipes = profile / "Pipes"
         pipes.mkdir(exist_ok=True)
@@ -330,6 +365,8 @@ def launch(args):
               "module_sha256": module_sha256,
               "world_archive_sha256": world_sha256,
               "world_archives_sha256": world_archives,
+              "texture_dump": bool(getattr(args, "texture_dump", False)),
+              "texture_pack": str(Path(args.texture_pack).resolve()) if getattr(args, "texture_pack", None) else None,
               "evidence": runtime_evidence(log_path.read_text(errors="replace"))}
     if not args.headless:
         captures = [p.stat().st_mtime for p in (profile / 'ScreenShots').rglob('*.png')
@@ -365,6 +402,11 @@ def main():
     parser.add_argument("--module", type=Path, help="run: module dylib to load instead of the default build")
     parser.add_argument("--cpu-thread", action="store_true",
                         help="Dual-core runtime (CPUThread = True); applies to a fresh profile's Dolphin.ini")
+    parser.add_argument("--texture-dump", action="store_true",
+                        help="run: dump every texture the game loads to PROFILE/Dump/Textures/GXBE69")
+    parser.add_argument("--texture-pack", type=Path,
+                        help="run: load replacement textures from this directory (linked as "
+                             "PROFILE/Load/Textures/GXBE69)")
     args = parser.parse_args()
     if args.jobs < 1:
         parser.error("--jobs must be positive")
