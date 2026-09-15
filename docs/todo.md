@@ -5,6 +5,9 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Plan of record: [implementation plan, September 15](impl-plan-2026-09-15.md).
+      Paused September 15 on quota; resume by landing the three in-flight
+      agents (Aloha collision, boot-time course redirect, breaking glass).
 - [ ] Next Tricky course, not a race (user, September 14): after Garibaldi
       reaches parity (physics interactions and sprite/animation cycling are
       the remaining gaps), pick a Tricky Showoff course and map it onto one of
