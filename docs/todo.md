@@ -39,6 +39,17 @@ the build or commit that closed them.
       follower is the missing piece; the PS2 tools (`ride_route.py`,
       `ride_autopilot.py`) drive PINE and do not apply. Movie playback should
       also settle the phone A/B noted below.
+      **September 15 (later): steering exists, following does not.**
+      `gamecube_course_check.py --route FILE` follows waypoints from the live
+      rider samples and writes `SET MAIN x y` to the pad pipe (opened per write;
+      a held writer gets EPIPE when the runtime reopens its read end). It
+      calibrates the steering sense itself and measured it: a positive stick x
+      turns the heading clockwise in the x/z plane, so `sign = -1`. One route
+      reached 2 of 6 waypoints, a second reached 0 of 3 — a proportional
+      controller on heading error will not hold a line down a mountain. Next:
+      pure pursuit with a look-ahead point, routes that engage near their
+      target rather than driving the whole descent, and some speed control.
+      See [route control](route-control.md).
 - [ ] Next Tricky course, not a race (user, September 14): after Garibaldi
       reaches parity (physics interactions and sprite/animation cycling are
       the remaining gaps), pick a Tricky Showoff course and map it onto one of

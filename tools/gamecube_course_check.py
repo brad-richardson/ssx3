@@ -24,6 +24,8 @@ import subprocess
 import sys
 import time
 
+from native_route import load_route
+
 ROOT = Path(__file__).resolve().parents[1]
 
 # Course-redirect manifest (docs/course-selection.md). The runtime applies it to
@@ -141,6 +143,8 @@ def main():
     ap.add_argument('--course-manifest', type=Path,
                     help='Course-redirect manifest applied to guest RAM at boot '
                          '(docs/course-selection.md); passed through as SSX_COURSE_MANIFEST')
+    ap.add_argument('--route', type=Path,
+                    help='Waypoint route to steer along once riding (docs/route-control.md)')
     ap.add_argument('--texture-dump', action='store_true',
                     help='Dump every texture the run loads into the profile (docs/texture-remaster.md)')
     ap.add_argument('--texture-pack', type=Path,
@@ -208,6 +212,31 @@ def main():
                 '--profile', args.profile, '--sequence', str(sequence_path.resolve())],
                 cwd=ROOT, stdout=input_log, stderr=subprocess.STDOUT)
             children.append(replay)
+            # Steering writes `SET MAIN x y` straight to the pad pipe rather
+            # than spawning gamecube_input.py per correction: a route needs an
+            # update every observed sample. The pipe is opened per write because
+            # the runtime closes and reopens its read end across the menu and
+            # gameplay, which breaks a held writer.
+            route = load_route(args.route) if args.route else None
+            steering = None
+            steer_failures = 0
+
+            def send_stick(x, y):
+                nonlocal steer_failures
+                try:
+                    fd = os.open(profile/'Pipes/ssx3', os.O_WRONLY | os.O_NONBLOCK)
+                except OSError:
+                    steer_failures += 1
+                    return False
+                try:
+                    os.write(fd, ('SET MAIN %.3f %.3f\n' % (x, y)).encode('ascii'))
+                    return True
+                except OSError:
+                    steer_failures += 1
+                    return False
+                finally:
+                    os.close(fd)
+
             briefing_since = None
             last_request = -float('inf')
             riding_since = None
@@ -216,6 +245,7 @@ def main():
             briefing_after_restart = False
             with rows_path.open() as stream:
                 latest = None
+                steered_sample = None
                 while run.poll() is None:
                     if watcher.poll() is not None:
                         raise RuntimeError('Observer stopped during gameplay')
@@ -224,6 +254,15 @@ def main():
                     # A restart can leave the observed rider fixed at its last
                     # pre-restart value, so only a freshly written sample counts.
                     fresh = bool(latest) and time.time()-latest['wall_time'] < 2
+                    if route and fresh and started and latest is not steered_sample:
+                        steered_sample = latest
+                        # Only steer while the rider is actually riding: a reset
+                        # or a wipeout moves the position for reasons a route
+                        # cannot answer.
+                        wanted = route.update(latest) if latest['state'] in (0, 4, 5) else None
+                        if wanted != steering:
+                            steering = wanted
+                            send_stick(*(wanted if wanted else (0.5, 0.5)))
                     ready = fresh and latest['state'] == 6
                     if ready and restart_wall is not None:
                         briefing_after_restart = True
@@ -292,6 +331,9 @@ def main():
     summary = dict(game=str(args.game), profile=args.profile, samples=len(rows),
                    menu_sequence=str(args.menu_sequence),
                    course_manifest=str(args.course_manifest) if args.course_manifest else None,
+                   route=str(args.route) if args.route else None,
+                   route_result=dict(route.report(), unavailable_writes=steer_failures)
+                        if route else None,
                    texture_dump=args.texture_dump,
                    texture_pack=str(args.texture_pack) if args.texture_pack else None,
                    course_redirects=redirects,
