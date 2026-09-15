@@ -306,8 +306,19 @@ def launch(args):
             pad.write_text(mapping)
     reports = ROOT / "local/reports/native-runs"
     reports.mkdir(parents=True, exist_ok=True)
+    # The profile is part of the name because several runs can be in flight at
+    # once (texture dumps across courses, for one) and a bare timestamp
+    # collides at one-second resolution: two runs then interleave into one log
+    # and each reads the other's evidence from it.
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    log_path = reports / f"{stamp}.log"
+    safe_profile = "".join(c if c.isalnum() or c in "._-" else "_" for c in args.profile)
+    log_path = reports / f"{stamp}-{safe_profile}.log"
+    for attempt in range(2, 100):
+        if not log_path.exists():
+            break
+        log_path = reports / f"{stamp}-{safe_profile}-{attempt}.log"
+    if log_path.exists():
+        raise RuntimeError("Could not find an unused run log name")
     env = os.environ.copy()
     env.update(SSX3_NO_EXECUTABLE_MEMORY="0" if args.jit_fallback else "1",
                STATICRECOMP_NO_JIT="0" if args.jit_fallback else "1",
@@ -315,7 +326,9 @@ def launch(args):
     dispatch_samples = os.environ.get('SSX3_DISPATCH_SAMPLES', '1') != '0'
     if dispatch_samples:
         env.update(STATICRECOMP_DISPATCH_SAMPLES='1',
-                   STATICRECOMP_TRACE_FILE=str(reports / f'{stamp}-dispatch.csv'))
+                   # Beside its own log, so parallel runs keep separate traces and
+                   # `<log stem>-dispatch.csv` still finds the right one.
+                   STATICRECOMP_TRACE_FILE=str(log_path.with_name(log_path.stem + '-dispatch.csv')))
     else:
         env.pop('STATICRECOMP_DISPATCH_SAMPLES', None)
         env.pop('STATICRECOMP_TRACE_FILE', None)

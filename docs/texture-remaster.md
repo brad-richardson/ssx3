@@ -296,7 +296,75 @@ the upscaled snow has the classic invented-grain look in places — a model
 putting detail where the original had none. Nothing here measures that; see the
 quality-gate gap below.
 
-## 8. Doing this for another course, or another asset class
+## 8. The whole game at once
+
+A replacement is keyed by content, not by course, so **one pack covers every
+course** — and it has to, because courses share most of their art (rider, HUD,
+trees, rocks). Three steps:
+
+**Manifests.** `tools/course_manifests.py` reads SSX 3's own event, topology and
+mode tables out of `main.dol` and writes one redirect manifest per event, so no
+code, location id or discipline is ever guessed:
+
+```sh
+python3 tools/course_manifests.py --output local/research/remaster/manifests
+```
+
+It cross-checks all three tables against each row index and refuses to emit
+anything if they disagree. The 17 courses are events 0-16; `--stations` adds the
+five hubs and the debug track.
+
+**Dumps, in parallel.** One run per course, and they do run concurrently:
+three, then four at a time all rode cleanly here, each dumping normally. The
+harness enforces 180-900 seconds, so a course costs about 3.5 minutes of wall
+clock and four at a time puts the whole game inside half an hour.
+
+```sh
+for c in ARA1 CRA3 DRA4 ERA5; do
+  python3 tools/gamecube_course_check.py --game local/game/gxbe69-stock \
+    --profile td-$c --output local/research/remaster/dumps/$c \
+    --course-manifest local/research/remaster/manifests/$c.txt \
+    --texture-dump --seconds 180 &
+done
+wait
+```
+
+Watch the disk: each course dumps 1,300-1,700 files, roughly 60 MB.
+
+**Union, then upscale once.** `tools/texture_pack_union.py` keeps each distinct
+texture once and groups the result by family:
+
+```sh
+python3 tools/texture_pack_union.py --output local/research/remaster/union \
+  --report local/research/remaster/union.json \
+  --course ARA1=local/native/profiles/td-ARA1/Dump/Textures/GXBE69:local/research/remaster/dumps/ARA1 \
+  --course ...
+```
+
+Then one upscale pass per family directory, as in step 4, and the merged output
+is the pack.
+
+## 9. Putting a pack on the iPhone
+
+The app has a **Remastered textures** switch in its pause menu, beside
+Dual-core. It writes `SSXRemasterTextures` and takes effect on the next Full
+Reset or relaunch, like the other runtime switches. The switch is disabled and
+labelled "No texture pack installed" when the pack directory is empty, so it is
+never a dead control.
+
+```sh
+python3 tools/mobile_gamecube.py textures --device '<iPhone>' --pack local/research/remaster/pack-all
+```
+
+That copies the directory to `Documents/User/Load/Textures/GXBE69`. The app
+writes `Documents/User/GameSettings/GXBE69.ini` at every launch with
+`HiresTextures` set from the preference and **`CacheHiresTextures = False`** —
+caching would preload the entire pack into memory, which is fine on the Mac and
+not on a phone. Both states are recorded in the session log
+(`texture_pack_state`, `texture_pack_preference_changed`), so a report says
+which textures a session actually ran with.
+
+## 10. Doing this for another course, or another asset class
 
 Steps 1-6 are course-agnostic: change the manifest in step 1 and the profile
 names. Nothing in the tools knows about R&B.

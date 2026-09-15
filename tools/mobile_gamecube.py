@@ -222,6 +222,31 @@ def world(args):
     print(f"World copied to the device container: {args.world} ({args.world.stat().st_size} bytes)")
 
 
+def textures(args):
+    """Copy a replacement texture pack into the app's Load/Textures/GXBE69."""
+    pack = args.pack
+    if not pack or not pack.is_dir():
+        raise RuntimeError("--pack must name a directory of tex1_*.png replacements")
+    images = sorted(p for p in pack.iterdir() if p.suffix.lower() in ('.png', '.dds')
+                    and p.name.startswith('tex1_'))
+    if not images:
+        raise RuntimeError(f"No tex1_*.png / .dds replacements in {pack}")
+    total = sum(p.stat().st_size for p in images)
+    # The app leaves CacheHiresTextures off, so a pack is read on demand rather
+    # than preloaded, but it still has to fit in the container.
+    print(f"{len(images)} textures, {total / 1e6:.0f} MB")
+    if args.simulator:
+        destination = simulator_documents(args) / "User/Load/Textures/GXBE69"
+        destination.mkdir(parents=True, exist_ok=True)
+        for image in images:
+            shutil.copy2(image, destination / image.name)
+        print(f"Texture pack copied to the simulator container: {destination}")
+        return
+    copy_to(args, pack, "Documents/User/Load/Textures/GXBE69", timeout=1800)
+    print("Texture pack copied to the device container: Documents/User/Load/Textures/GXBE69\n"
+          "Turn it on in the app's pause menu (Remastered textures), then Full Reset.")
+
+
 def launch(args):
     flags = []
     internal_scale = getattr(args, "internal_scale", None)
@@ -297,7 +322,8 @@ def collect(args):
 def main():
     global WORK, APP
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("configure", "build", "sign", "install", "provision", "world", "launch", "collect"))
+    parser.add_argument("command", choices=("configure", "build", "sign", "install", "provision", "world",
+                                           "textures", "launch", "collect"))
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--simulator", action="store_true", help="Use the iOS Simulator SDK and simctl")
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
@@ -317,6 +343,8 @@ def main():
     boot.add_argument("--normal-boot",action="store_true",
                       help="Launch with normal cold starts, overriding the saved faster-start preference")
     parser.add_argument("--world", type=Path, help="Built BAM.BIG for the world command")
+    parser.add_argument("--pack", type=Path,
+                        help="Directory of tex1_*.png replacements for the textures command")
     core=parser.add_mutually_exclusive_group()
     core.add_argument("--cpu-thread", action="store_true",
                       help="Launch-only dual-core runtime for this process, ignoring the saved menu choice (default on)")

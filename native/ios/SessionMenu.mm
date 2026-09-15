@@ -29,6 +29,8 @@ static void SetLabel(UILabel* label, NSString* text) {
   UISegmentedControl* _detail;
   UISwitch* _fastStart;
   UISwitch* _dualCore;
+  UISwitch* _remaster;
+  UILabel* _remasterNote;
   UIButton* _resume;
   UIButton* _smoothing;
   UIButton* _reset;
@@ -128,7 +130,23 @@ static void SetLabel(UILabel* label, NSString* text) {
   UIStackView* runtimeRow=MenuStack(@[dualLabel,_dualCore,dualNote,dualSpacer],UILayoutConstraintAxisHorizontal,12);
   runtimeRow.alignment=UIStackViewAlignmentCenter;
 
-  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,_resolutionLabel,_buildLabel],
+  UILabel* remasterLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
+  remasterLabel.text=@"Remastered textures";
+  [remasterLabel setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  _remaster=[[UISwitch alloc] init];
+  _remaster.accessibilityLabel=@"Remastered textures";
+  _remaster.accessibilityIdentifier=@"SSX Remastered Textures";
+  _remaster.accessibilityHint=@"Load the upscaled texture pack instead of the game's own art. Applies after Full Reset or relaunch.";
+  [_remaster addTarget:self action:@selector(remasterChanged) forControlEvents:UIControlEventValueChanged];
+  _remasterNote=MenuLabel(UIFontTextStyleFootnote,UIColor.secondaryLabelColor);
+  _remasterNote.text=@"Applies after Full Reset or relaunch";
+  UIView* remasterSpacer=[[UIView alloc] init];
+  [remasterSpacer setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  UIStackView* remasterRow=MenuStack(@[remasterLabel,_remaster,_remasterNote,remasterSpacer],
+                                    UILayoutConstraintAxisHorizontal,12);
+  remasterRow.alignment=UIStackViewAlignmentCenter;
+
+  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,remasterRow,_resolutionLabel,_buildLabel],
                                 UILayoutConstraintAxisVertical,12);
   content.translatesAutoresizingMaskIntoConstraints=NO;
   UIScrollView* scroll=[[UIScrollView alloc] init];
@@ -215,9 +233,11 @@ static void SetLabel(UILabel* label, NSString* text) {
 }
 - (void)fastStartChanged { if (self.onFastStart) self.onFastStart(_fastStart.on); }
 - (void)dualCoreChanged { if (self.onDualCore) self.onDualCore(_dualCore.on); }
+- (void)remasterChanged { if (self.onRemaster) self.onRemaster(_remaster.on); }
 
 - (void)updateWithStatus:(NSString*)status outputMode:(NSString*)mode internalScale:(NSInteger)scale
              resolution:(NSString*)resolution fastStart:(BOOL)fastStart dualCore:(BOOL)dualCore
+               remaster:(BOOL)remaster remasterAvailable:(BOOL)remasterAvailable
            canConfigure:(BOOL)canConfigure
                canTrial:(BOOL)canTrial canReset:(BOOL)canReset build:(NSString*)build {
   NSAssert(NSThread.isMainThread,@"Session menu updates require the main thread");
@@ -232,10 +252,15 @@ static void SetLabel(UILabel* label, NSString* text) {
   if (!_detail.tracking && _detail.selectedSegmentIndex!=selected) _detail.selectedSegmentIndex=selected;
   if (!_fastStart.tracking && _fastStart.on!=fastStart) [_fastStart setOn:fastStart animated:NO];
   if (!_dualCore.tracking && _dualCore.on!=dualCore) [_dualCore setOn:dualCore animated:NO];
+  if (!_remaster.tracking && _remaster.on!=remaster) [_remaster setOn:remaster animated:NO];
+  // A switch with no pack behind it would be a dead control: say so instead.
+  SetLabel(_remasterNote,remasterAvailable ? @"Applies after Full Reset or relaunch"
+                                           : @"No texture pack installed");
   _output.enabled=canConfigure;
   _detail.enabled=canConfigure;
   _fastStart.enabled=canConfigure;
   _dualCore.enabled=canConfigure;
+  _remaster.enabled=canConfigure && remasterAvailable;
   _smoothing.enabled=canTrial;
   _reset.enabled=canReset;
 }

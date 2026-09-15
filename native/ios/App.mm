@@ -195,6 +195,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _simulatorNullAudio;
   BOOL _debugMainMenu;
   BOOL _cpuThread;        // mode of the running/next runtime; smoothing trial unavailable when on
+  BOOL _remasterActive;   // whether the running runtime was configured with the texture pack
   int _cpuThreadOverride; // -1 saved preference, 0 -ssxSingleCore, 1 -ssxCPUThread (this process only)
   BOOL _fastDisc;         // launch-only Dolphin FastDiscSpeed comparison
   BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
@@ -267,6 +268,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (void)refreshSessionMenu;
 - (void)dismissSessionMenuThen:(dispatch_block_t)completion;
 - (BOOL)cpuThreadRequested;
+- (BOOL)remasterRequested;
+- (BOOL)remasterPackInstalled;
 @end
 
 @implementation SSXViewController
@@ -296,6 +299,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   if([launchArgs containsObject:@"-ssxDebugMainMenu"]) _debugMainMenu=YES;
   if([launchArgs containsObject:@"-ssxNormalBoot"]) _debugMainMenu=NO;
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXCPUThread":@YES}];
+  [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXRemasterTextures":@NO}];
   _cpuThreadOverride=[launchArgs containsObject:@"-ssxSingleCore"] ? 0 :
       ([launchArgs containsObject:@"-ssxCPUThread"] ? 1 : -1);
   _cpuThread=[self cpuThreadRequested];
@@ -566,6 +570,20 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   [mapping appendString:@"C-Stick/Up = `Axis C Y +`\nC-Stick/Down = `Axis C Y -`\nC-Stick/Left = `Axis C X -`\nC-Stick/Right = `Axis C X +`\nC-Stick/Calibration = 100.00\n"];
   [mapping appendString:@"D-Pad/Up = `Button D_UP`\nD-Pad/Down = `Button D_DOWN`\nD-Pad/Left = `Button D_LEFT`\nD-Pad/Right = `Button D_RIGHT`\nTriggers/L = `Button L`\nTriggers/R = `Button R`\n"];
   WriteText([config stringByAppendingPathComponent:@"GCPadNew.ini"],mapping);
+  // Remastered textures: the pack lives in User/Load/Textures/GXBE69 and is
+  // switched on per game, not in GFX.ini — UICommon::Init rewrites base-layer
+  // graphics settings at startup (docs/texture-remaster.md). Caching is left
+  // off here: it would preload the whole pack into memory on the device.
+  NSString* settingsDir=[user stringByAppendingPathComponent:@"GameSettings"];
+  [[NSFileManager defaultManager] createDirectoryAtPath:settingsDir
+                            withIntermediateDirectories:YES attributes:nil error:nil];
+  const BOOL remaster=[self remasterRequested];
+  _remasterActive=remaster;  // a changed menu choice applies to the next runtime
+  WriteText([settingsDir stringByAppendingPathComponent:@"GXBE69.ini"],
+    [NSString stringWithFormat:@"[Video_Settings]\nHiresTextures = %s\nCacheHiresTextures = False\n",
+      remaster ? "True" : "False"]);
+  [self logSessionEvent:@"texture_pack_state" details:@{
+      @"requested":@(remaster), @"installed":@([self remasterPackInstalled])}];
   NSString* fifo = [pipes stringByAppendingPathComponent:@"ssx3"];
   if (mkfifo(fifo.fileSystemRepresentation,0600) != 0 && errno != EEXIST) {
     _status.text = @"Could not create controller pipe"; _starting=false; return;
@@ -970,6 +988,16 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     [self logSessionEvent:@"runtime_preference_changed" details:@{@"cpuThread":@(enabled), @"active":@(self->_cpuThread)}];
     [self refreshSessionMenu];
   };
+  _sessionMenu.onRemaster = ^(BOOL enabled) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    [NSUserDefaults.standardUserDefaults setBool:enabled forKey:@"SSXRemasterTextures"];
+    [self logSessionEvent:@"texture_pack_preference_changed" details:@{
+        @"enabled":@(enabled), @"installed":@([self remasterPackInstalled])}];
+    self->_menuStatus=enabled ? @"Remastered textures apply after Full Reset or relaunch."
+                              : @"The game's own textures apply after Full Reset or relaunch.";
+    [self refreshSessionMenu];
+  };
   _sessionMenu.onReset = ^{
     SSXViewController* self=weakSelf;
     if (!self || self->_pendingCheckpoint || self->_starting || self->_stopRequested) return;
@@ -1054,8 +1082,11 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
     status=[status stringByAppendingString:@" · Smoothing ended to maintain game speed."];
   if ([NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]!=(BOOL)_cpuThread && _cpuThreadOverride<0)
     status=[status stringByAppendingString:@" · Dual-core change applies after Full Reset."];
+  if ([self remasterRequested]!=_remasterActive)
+    status=[status stringByAppendingString:@" · Texture change applies after Full Reset."];
   [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
       fastStart:_debugMainMenu dualCore:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]
+      remaster:[self remasterRequested] remasterAvailable:[self remasterPackInstalled]
       canConfigure:canConfigure canTrial:canConfigure
       canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&
           trial!=NativeTrial::Status::Waiting && trial!=NativeTrial::Status::Running) build:_menuBuild ?: @""];
@@ -1088,6 +1119,16 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 }
 - (BOOL)cpuThreadRequested {
   return _cpuThreadOverride>=0 ? _cpuThreadOverride==1 : [NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"];
+}
+- (BOOL)remasterPackInstalled {
+  // Dolphin reads Load/Textures/<game id>/; an empty directory is not a pack.
+  NSString* pack=[Documents() stringByAppendingPathComponent:@"User/Load/Textures/GXBE69"];
+  NSArray* entries=[[NSFileManager defaultManager] contentsOfDirectoryAtPath:pack error:nil];
+  return entries.count>0;
+}
+- (BOOL)remasterRequested {
+  return [self remasterPackInstalled] &&
+      [NSUserDefaults.standardUserDefaults boolForKey:@"SSXRemasterTextures"];
 }
 - (BOOL)canChangeOutputScale {
   const auto trial=NativeTrial::status.load();
