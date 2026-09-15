@@ -49,6 +49,16 @@ class CollisionAcceptanceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'overflow'):
             assess(*bad)
 
+    def test_candidate_may_be_any_installed_world_archive(self):
+        """A course-redirect directory boots one of several archives, not bam.big."""
+        args = copy.deepcopy(self.fixture())
+        args[1]['world_archive_sha256'] = 'stock-bam'
+        args[1]['world_archives_sha256'] = {'bam.big': 'stock-bam', 'alo.big': 'world'}
+        self.assertTrue(assess(*args)['selected_obstacle_contact_verified'])
+        args[1]['world_archives_sha256'] = {'bam.big': 'stock-bam', 'alo.big': 'another'}
+        with self.assertRaisesRegex(ValueError, 'Runtime world'):
+            assess(*args)
+
     def test_absent_shutdown_fault_and_reset_loop_rejected(self):
         for alter in (lambda a: a[1]['evidence'].pop('shutdown_counters'),
                       lambda a: a[1]['evidence'].update(gpu_command_errors=1),

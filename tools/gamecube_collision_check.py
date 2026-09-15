@@ -18,7 +18,11 @@ def assess(recipe, receipt, observations, events, riders, source_instance):
     if len(matches) != 1:
         raise ValueError('Expected one enabled source obstacle in the candidate')
     selected = (recipe['track'] << 24) | matches[0]['instance']
-    if receipt.get('world_archive_sha256') != recipe['output_sha256']:
+    # A game directory may install several world archives and boot one by
+    # manifest, so the candidate has to be among them rather than be bam.big.
+    installed = set((receipt.get('world_archives_sha256') or {}).values())
+    installed.add(receipt.get('world_archive_sha256'))
+    if recipe['output_sha256'] not in installed:
         raise ValueError('Runtime world does not match the candidate recipe')
     evidence = receipt.get('evidence') or {}
     counters = evidence.get('shutdown_counters') or {}

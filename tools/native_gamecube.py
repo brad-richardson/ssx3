@@ -299,6 +299,11 @@ def launch(args):
     module_sha256 = sha256(module_path)
     world_archive = game / 'files/data/worlds/bam.big'
     world_sha256 = sha256(world_archive) if world_archive.is_file() else None
+    # A course-redirect game directory can hold several world archives and boot
+    # any of them (docs/course-selection.md), so bam.big alone no longer says
+    # what was ridden. Record every installed archive.
+    world_archives = {path.name: sha256(path)
+                      for path in sorted((game / 'files/data/worlds').glob('*.big'))}
     started_wall = time.time()
     started = time.monotonic()
     with log_path.open("w") as log:
@@ -324,6 +329,7 @@ def launch(args):
               "profile": str(profile), "runner_sha256": runner_sha256,
               "module_sha256": module_sha256,
               "world_archive_sha256": world_sha256,
+              "world_archives_sha256": world_archives,
               "evidence": runtime_evidence(log_path.read_text(errors="replace"))}
     if not args.headless:
         captures = [p.stat().st_mtime for p in (profile / 'ScreenShots').rglob('*.png')
