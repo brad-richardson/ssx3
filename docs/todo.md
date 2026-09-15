@@ -165,11 +165,29 @@ the build or commit that closed them.
       donor NBD/GSF, not guessed:
       **(a) Animated and multipart prefabs are never imported.**
       `eligibility()` rejects them, so 102 of Garibaldi's 3,393 placements
-      (3.0%) are absent entirely: 79 across 20 animated two-part models
-      (269-288, all with a 60.0 s animation time, tall and narrow — the
-      likely crowd figures), 13 across three non-animated two-part models
-      (model 132 is perfectly flat, a billboard/arrow candidate), and 10
-      across three 24-part models. These are missing objects, not still ones.
+      (3.0%) are absent entirely. These are missing objects, not still ones.
+      September 14: every multipart donor model carries exactly one *meshless*
+      part — a transform-free root (parent 0xffffffff, no matrix, no bounds)
+      that the geometry hangs from. Counting it made models with a single
+      geometry part look multipart, so the 102 split three ways rather than
+      needing one big pipeline:
+      **(a1) 13 placements needed nothing.** Models 132/133/153 are one
+      geometry part, not animated, no local matrix. `geometry_parts()` now
+      ignores transform-free empty roots and they import: 624 models / 3,303
+      placements, up from 621 / 3,290. Models 133 and 153 are long tall
+      banners (108 verts, extent 43x112x2470) whose materials carry a 2-frame
+      flipbook on texture 61 — the best direction-arrow candidates in the
+      donor. Model 132 is a 4-vertex quad flat in Y (3x0x1362), a ground
+      decal.
+      **(a2) 79 placements need only an animation decision.** Models 269-288
+      are each a single *animated* geometry part; 17 of the 20 have no local
+      matrix at all. Importing them frozen would populate the stands now and
+      reuses the (a1) path. Present-but-still beats absent, but it needs an
+      explicit flag so it is never mistaken for animation support.
+      **(a3) 10 placements need real local-matrix composition.** Models
+      49/86/90 only: 23 geometry parts with 22 local matrices each. This is
+      the one genuinely multipart case. Model 32 (normal palette over 256,
+      1 placement) remains separate.
       **(b) Material flipbooks are staged but never sequenced.** 16 of 125
       donor materials carry a 2-5 frame flipbook, covering 74 placements;
       the countdown light is one of them (material 66, flipbook 5, five
@@ -198,12 +216,27 @@ the build or commit that closed them.
       [start gate](gamecube-scenery.md) is the first probe at re-attaching
       one event, and it found the visibility bit is plain data, which is the
       cheap half of (c).
-      Sequence the work (b) → (c) → (a): flipbooks need no new geometry
-      pipeline, scripted events are already half-solved, and animated prefabs
-      need multipart/local-matrix import plus a runtime animation binding
-      that nothing else depends on. Nothing here is started beyond the gate.
-- [ ] Breakable glass/blocks: translate authored break behavior and effects;
-      user confirmed objects remain intact on impact (Sep 13).
+      Original sequencing was (b) → (c) → (a), on the assumption that (a)
+      needed a whole new pipeline. The empty-root finding retires that: only
+      10 of (a)'s 102 placements do. Current order, most visible payoff per
+      unit of work first: **(a1) done** → **(a2) crowd as static, 79
+      placements** → **scenery interactions (glass, blocks), the visible
+      slice of (c)** → **(a3) local matrices, 10 placements** → the runtime
+      animation binding and the rest of (c). (b) is written but unverified
+      and needs a second validation, not more work.
+- [ ] Scenery interactions — breaking glass and scattering blocks. User
+      request September 14: queued as the batch after the (a1)/(a2) geometry
+      work. Objects remain intact on impact (user, Sep 13). This is layer (c)
+      applied to a specific, visible case, so it inherits the LUN stub
+      problem: the authored break behaviour lives in disabled course programs.
+      Donor bindings that should drive it are already read and carried:
+      824 of 3,393 instances name an `effect_slot` (74 distinct, the rest
+      -1), 2,749 name a `collision_or_physics` entry (412 distinct), and
+      `collision_mode` has four values — 0 non-colliding (295), 1 (2,599),
+      2 (349) and 3 (150), where modes 2 and 3 are the likely non-rigid
+      breakable/movable classes. None of these are translated to target
+      behaviour yet. Start by identifying which instances the donor marks
+      breakable, before any effect or physics work.
 - [ ] Restore the Garibaldi start gate and countdown lights; user reconfirmed
       they are missing on iPhone on September 13 (assets 027). The three gate
       models are supported static geometry, deliberately omitted by 022;

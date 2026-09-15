@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from gamecube_scenery import TrickyScenery, buffer_group, instance_gameplay, post_countdown_hidden
+from gamecube_scenery_import import eligibility, geometry_parts
 
 
 def gameplay_fixture(flags=1):
@@ -41,6 +42,39 @@ def fixture():
     struct.pack_into('>6h', b, 550, 0, 0, 4096, 0, 0, 4096)
     struct.pack_into('>9h', b, 562, 0, 0, 16384, 0, 0, 16384, 0, 0, 16384)
     return b
+
+
+def part(meshes=1, animated=False, matrix=None, parent=0xffffffff):
+    """A donor model part; an empty one stands for the transform-free root."""
+    mesh = {'material': 0, 'strips': [{'opcode': 0x9a, 'vertices': [((0, 0, 0), 0)]}]}
+    return {'parent': parent, 'matrix': matrix, 'animated': animated,
+            'meshes': [dict(mesh) for _ in range(meshes)], 'bounds': (0,)*6}
+
+
+class EligibilityTests(unittest.TestCase):
+    """Every multipart donor model carries one meshless root node."""
+
+    def test_a_meshless_transform_free_root_is_not_a_second_part(self):
+        model = {'rid': 132, 'parts': [part(meshes=0), part()]}
+        self.assertEqual(len(geometry_parts(model)), 1)
+        self.assertIsNone(eligibility(model))
+
+    def test_a_meshless_part_carrying_a_matrix_still_counts(self):
+        # An empty part with its own matrix is a real transform, not a root.
+        model = {'rid': 49, 'parts': [part(meshes=0, matrix=(1,)*16), part()]}
+        self.assertEqual(len(geometry_parts(model)), 2)
+        self.assertEqual(eligibility(model), 'multipart')
+
+    def test_two_geometry_parts_are_still_multipart(self):
+        self.assertEqual(eligibility({'rid': 49, 'parts': [part(meshes=0), part(), part()]}),
+                         'multipart')
+
+    def test_a_single_geometry_part_is_still_judged_on_its_own_properties(self):
+        root = part(meshes=0)
+        self.assertEqual(eligibility({'rid': 269, 'parts': [root, part(animated=True)]}),
+                         'animated')
+        self.assertEqual(eligibility({'rid': 280, 'parts': [root, part(matrix=(1,)*16)]}),
+                         'local matrix')
 
 
 class SceneryTests(unittest.TestCase):

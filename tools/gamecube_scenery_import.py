@@ -100,10 +100,25 @@ def record(kind, rid, payload, track):
     return dict(kind=kind, rid=rid, track=track, size=len(payload)), bytes(payload)
 
 
+def geometry_parts(model):
+    """The parts that actually carry geometry.
+
+    Every multipart donor model has exactly one part with no meshes: a
+    transform-free root the geometry hangs from (parent 0xffffffff, no matrix,
+    no bounds). Counting it made a model with a single geometry part look
+    multipart, which dropped models 132/133/153 -- 13 placements -- although
+    they need nothing the importer does not already do. An empty part that
+    carries its own matrix is a real transform, so it stays counted and the
+    model is still rejected.
+    """
+    return [p for p in model['parts'] if p['meshes'] or p['matrix'] is not None]
+
+
 def eligibility(model):
-    if len(model['parts']) != 1:
+    parts = geometry_parts(model)
+    if len(parts) != 1:
         return 'multipart'
-    part = model['parts'][0]
+    part = parts[0]
     if part['animated']:
         return 'animated'
     if part['matrix'] is not None:
@@ -146,7 +161,7 @@ def model_record(model, oid, model_id, buffer_id, material_ids):
     reason = eligibility(model)
     if reason:
         raise ValueError(f'Model {model["rid"]}: {reason}')
-    part = model['parts'][0]
+    part = geometry_parts(model)[0]
     normals = sorted({v[1] for mesh in part['meshes'] for strip in mesh['strips'] for v in strip['vertices']})
     normal_ids = {n: i for i, n in enumerate(normals)}
     materials = list(dict.fromkeys(mesh['material'] for mesh in part['meshes']))

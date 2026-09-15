@@ -23,7 +23,8 @@ from pathlib import Path
 import struct
 
 from gamecube_scenery import TrickyScenery, post_countdown_hidden
-from gamecube_scenery_import import WORLD_RESOURCE_ORDER, eligibility, instance_record, record
+from gamecube_scenery_import import (WORLD_RESOURCE_ORDER, eligibility, geometry_parts,
+                                     instance_record, record)
 from gamecube_spline_import import require_disabled_programs
 from gamecube_textures import shape_images, world_image_record
 from gamecube_world import World, assemble, unused_global_rids, validate_resource_capacities
@@ -188,7 +189,7 @@ def stage(world, recipe, scene, images, source_ids, mode='hidden', animate=False
                 flips.append(dict(material=material, flipbook=m['flipbook'],
                                   frames=frames, mode=SEQUENCE_MODE))
         rid = len(instances)+len(added)
-        scale = 4 if model['parts'][0]['meshes'][0]['strips'][0]['opcode'] == 0x9b else 1
+        scale = 4 if geometry_parts(model)[0]['meshes'][0]['strips'][0]['opcode'] == 0x9b else 1
         payload = instance_record(instance, recipe['matrix'], recipe['translation'], scale,
                                   lambda value: track << 24 | value, rid,
                                   model_ids[instance['model']], color_oid & 0xffffff, page)

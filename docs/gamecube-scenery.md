@@ -155,6 +155,53 @@ python3 tools/gamecube_scenery_import.py \
   --output local/builds/gc-gari-scenery-review
 ```
 
+### Empty root nodes and the multipart filter (September 14)
+
+`eligibility()` rejected any model whose `parts` list was not length 1. Every
+multipart donor model in Garibaldi carries exactly one **meshless** part: a
+transform-free root (`parent` 0xffffffff, no matrix, no bounds) that the
+geometry hangs from. Counting it made a model with a single geometry part look
+multipart.
+
+`geometry_parts()` now ignores an empty part unless it carries its own matrix,
+in which case it is a real transform and the model stays rejected. The filter
+outcome over the donor's 648 models / 3,393 placements:
+
+| verdict | before | after |
+| ------- | ------ | ----- |
+| imported | 621 models / 3,290 placements | **624 / 3,303** |
+| animated | (reported as multipart) | 20 / 79 |
+| multipart | 26 / 102 | 3 / 10 |
+| normal palette over 256 | 1 / 1 | 1 / 1 |
+
+The three newly admitted models are 132 (6 placements), 133 (2) and 153 (5).
+Models 133 and 153 share geometry -- 108 vertices, extent 43x112x2470, long and
+tall -- and their materials both use texture 61 with a 2-frame flipbook, which
+makes them the donor's strongest direction-arrow candidates. Model 132 is a
+single 4-vertex quad with zero Y extent (3x0x1362), a ground decal or track
+line. None is animated and none carries a local matrix, so they need nothing
+the importer did not already do.
+
+The 20 animated models now report `animated` rather than `multipart`, which is
+the accurate reason: each is a single animated geometry part, and 17 of the 20
+have no local matrix. Only models 49/86/90 are genuinely multipart (23
+geometry parts, 22 local matrices each).
+
+Candidate `local/builds/gc-gari-scenery-multipart-001` carries 624 kind-2
+models and 3,252 kind-3 instances, with 108,444 validated resources and
+archive SHA-256
+`c479370fffd7d0d771875d846cfb4d603862ca31ebb7ba7f2bd8b80813276664`. The three
+new models appear as rids 1091, 1092 and 1112 with 6, 2 and 5 instances --
+the donor's 13 placements, counted in the built archive rather than inferred.
+The instance total reconciles against the 3,290 of build 020, which predates
+the build 022 visibility work: 3,290 - 51 hidden helpers + 13 = 3,252.
+
+**Not yet ridden.** This is a structural result: the models, instances and
+resource counts are verified in the archive, and the full test suite passes.
+No native run has confirmed how the three models look or where they sit, so
+whether models 133/153 are in fact the direction arrows is a reading of their
+geometry and flipbook material, not an observation.
+
 `scenery.json` records imported and omitted models, reclaimed bytes, source
 and archive hashes, and validation scope. `experiment.json` retains the
 terrain transform and recipe. Native run receipts also include the world

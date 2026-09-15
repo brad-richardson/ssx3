@@ -16,7 +16,7 @@ from course_route import ssx3_paths
 from gamecube_collision import read_tricky_collision, encode_collision, read_collision, collision_instance_transform
 from gamecube_cleanup import clear_removed_instance_references
 from gamecube_scenery import TrickyScenery
-from gamecube_scenery_import import instance_record, WORLD_RESOURCE_ORDER
+from gamecube_scenery_import import geometry_parts, instance_record, WORLD_RESOURCE_ORDER
 from gamecube_spline_import import require_disabled_programs
 from gamecube_world import World, assemble, validate_resource_capacities
 
@@ -135,7 +135,7 @@ def bind_static(records, scene, collisions, recipe):
         src=scene.instances[src_id]; gameplay=src['gameplay']
         if not gameplay['visible']:raise ValueError('Hidden helper must not re-enter the scene')
         model=models[src['model']]
-        opcode=scene.models[src['model']]['parts'][0]['meshes'][0]['strips'][0]['opcode']
+        opcode=geometry_parts(scene.models[src['model']])[0]['meshes'][0]['strips'][0]['opcode']
         scale=4 if opcode==0x9b else 1
         color,offset=struct.unpack_from('>2I',p,152)
         if color>>24!=track or offset!=0:raise ValueError('Unexpected instance color reference')
