@@ -86,3 +86,29 @@ class WriteTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(HAVE_PIL, 'Pillow is required')
+class AlphaWeightTests(unittest.TestCase):
+    """A cutout's colour must not absorb what sits behind it."""
+
+    def test_hidden_colour_does_not_bleed_into_a_visible_pixel(self):
+        # One opaque white pixel per 2x2 block, the rest transparent black.
+        image = Image.new('RGBA', (4, 4), (0, 0, 0, 0))
+        for y in (0, 2):
+            for x in (0, 2):
+                image.putpixel((x, y), (255, 255, 255, 255))
+        level = pack_mipmaps.build_levels(image)[0]
+        self.assertEqual(level.size, (2, 2))
+        red, green, blue, alpha = level.getpixel((0, 0))
+        self.assertEqual((red, green, blue), (255, 255, 255))  # colour survives
+        self.assertAlmostEqual(alpha, 64, delta=2)             # coverage drops
+
+    def test_an_opaque_image_is_still_a_plain_box_filter(self):
+        image = Image.new('RGBA', (2, 2))
+        image.putpixel((0, 0), (0, 0, 0, 255))
+        image.putpixel((1, 0), (255, 255, 255, 255))
+        image.putpixel((0, 1), (0, 0, 0, 255))
+        image.putpixel((1, 1), (255, 255, 255, 255))
+        level = pack_mipmaps.build_levels(image)[0]
+        self.assertEqual(level.getpixel((0, 0))[:3], (128, 128, 128))

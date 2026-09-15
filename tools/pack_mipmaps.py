@@ -41,12 +41,34 @@ def chain_sizes(width, height, min_size=1):
 
 
 def build_levels(image, min_size=1):
-    """Box-filter the chain. Each level is exactly half of the one above it."""
+    """Box-filter the chain. Each level is exactly half of the one above it.
+
+    Colour is averaged *weighted by alpha*, which is what a cutout needs: an
+    unweighted average drags the colour behind the art into the pixels that are
+    still visible, so distant foliage drifts toward whatever the hidden pixels
+    hold. Alpha itself is averaged plainly.
+    """
     from PIL import Image
+    import numpy as np
     levels = []
     current = image
     for width, height in chain_sizes(image.width, image.height, min_size):
-        current = current.resize((width, height), Image.BOX)
+        if current.mode != 'RGBA':
+            current = current.resize((width, height), Image.BOX)
+            levels.append(current)
+            continue
+        array = np.asarray(current, dtype=float)
+        fy, fx = current.height // height, current.width // width
+        blocks = array[:height * fy, :width * fx].reshape(height, fy, width, fx, 4)
+        alpha = blocks[..., 3:4]
+        weight = alpha.sum(axis=(1, 3))
+        colour = (blocks[..., :3] * alpha).sum(axis=(1, 3)) / np.maximum(weight, 1e-6)
+        plain = blocks[..., :3].mean(axis=(1, 3))
+        # Where a whole block is transparent there is no colour to weight, so
+        # keep the plain average rather than dividing by nothing.
+        colour = np.where(weight > 0, colour, plain)
+        out = np.concatenate([colour, alpha.mean(axis=(1, 3))], axis=-1)
+        current = Image.fromarray(np.clip(out + 0.5, 0, 255).astype('uint8'), 'RGBA')
         levels.append(current)
     return levels
 
