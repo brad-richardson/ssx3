@@ -231,7 +231,27 @@ scenery-only build and not to the new geometry. Models 132 and 133/153 are
 co-located in pairs (instances 1468/1470, 2296/2299), a flat ground marker
 under an upright banner.
 
-### Why local matrices are not a quick follow-on
+### Local matrices, composed (September 14)
+
+Done after all, by composition rather than a scene graph:
+`--compose-local-matrices` composes each part's matrix along the parent chain
+(child x parent, row-vector 4x4 with row 3 the translation, the layout
+`instance_record` already reads), writes transformed copies of the positions
+and rotated normals to the shared arrays, remaps the strip indices, and
+refuses any model whose composed coordinates leave the signed 16-bit range.
+`gamecube_collision_import.py` re-derives the placement from the same
+composition so its byte comparison still agrees. The receipt lists the models
+under `local_matrix_composed`; models 49/86/90 (23 parts each) and 280-282
+(one part with a matrix) all land: 647 models / 3,392 placements, up from
+641 / 3,367. Model 49's composed vertices reproduce its donor instance
+bounds to 0.2 units, which is the check that the convention is right.
+Caveats: 49/86/90 have their initial-visibility bit clear on every donor
+placement, so they add models but no drawn instances today; 280-282's donor
+bounds ignore their quarter-turn rest matrix, so if the donor's runtime does
+not apply that rest matrix to an animated part the crowd figures are rotated
+a quarter turn from what Tricky drew. Ride check recorded in the todo.
+
+### Why local matrices were not a quick follow-on (superseded above)
 
 Strip vertices are `(position, normal, uv)` index triples into **globally
 shared** arrays, written once as single kind-25/27/24/26 resources for the
@@ -722,6 +742,53 @@ identified in builtin 2 is the engine's own way of doing the same thing from
 a script. That closes the gate's visibility question and leaves two open:
 the five-frame light sequence still does not advance, and the shipping path
 is still a course-side callback rather than a hook in generated code.
+
+### The course script slot is live: registration and removal work (September 14)
+
+The shipping path is a course-side program, not a host hook, and it works.
+`tools/gamecube_lun.py` assembles Luno bytecode in the format decoded from the
+stock Snow Jam record (`local/research/startgate/lun-callback-path.md`) and
+round-trips all 238 stock programs byte for byte. `gamecube_startgate.py
+--countdown-script RATE` writes a 176-byte program into slot 3 -- Snow Jam's
+course event program, which the imported course inherits -- with three
+functions: function 0 registers two closures under the `StartgateOpen` and
+`StartlightBegin` name hashes with SETINDEX on the course object; the
+handlers call builtin 2 command 0 (`DeadNode`) on the staged instances and
+builtin 22 (texture-flip modifier) on the lights. The other 237 slots stay
+stubs.
+
+Candidate `gc-gari-startgate-script-001` (visible staging, flipbook record,
+script) rode a clean 300 s countdown-plus-restart check, and the observer run
+on it settles the registration question that every earlier probe left open:
+
+| Observation | Before (hidden staging) | With the script |
+| --- | --- | --- |
+| Named lookup `StartlightBegin` | value type 0 | **type 5, callback** |
+| Named lookup `StartgateOpen` | value type 0 | **type 5, callback** |
+| `event_invoke` | 0 | 2, one per event |
+
+So the imported course's script container resolves, function 0 runs at load,
+and both closures are invoked at the right moments.
+
+`--countdown-script-probe` moves the gate removal to `StartlightBegin` so a
+countdown screenshot can see it. Candidate `gc-gari-startgate-script-002`
+(clean 200 s check) shows the canopy and six stalls **gone during the
+countdown** with the light column still standing
+(`script-evidence/script-002-probe-countdown-gate-removed.png`); the
+always-visible run shows them present at the same moment. Script-side
+`DeadNode` therefore removes instances, which closes the visibility half of
+(c) on the shipping path.
+
+Two things did not happen. The five-frame light sequence still shows one fixed
+lamp pattern in every countdown frame of both runs, so builtin 22 either did
+not attach a modifier or attached one that does not tick (rate scaled to
+zero, or the instance's modifier-host predicate refusing). And whether the
+removed gate returns on a restart is unobserved in the probe; in the
+script-001 run the gate was drawn again in the second countdown, but that
+run only removes it at `StartgateOpen`, behind the camera. Next: an observer
+hook on builtin 22 (`8018F0E4`) and the factory (`801F59E0`) to see whether the
+call reaches the modifier, and a probe that looks back after the restart.
+Evidence: `local/research/startgate/script-evidence/`.
 
 ## Collision and river reset follow-up
 

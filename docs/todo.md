@@ -5,6 +5,53 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Visual remaster with trained upscalers (user, September 14; SSX 3 first,
+      the PS2 games after). Hybrid pipeline, not "an image model upscales the
+      game": classify assets → dedicated super-resolution per asset family
+      (PBRify DAT2/SPAN, Real-ESRGAN baselines) → generative restoration only
+      for a hand-picked top slice → automated QA → repack in the engine's own
+      texture formats. Hardware: RTX 4070 12 GB available now, a 64 GB M5 Pro
+      mini arrives the week of September 21 as orchestrator. First experiment:
+      ~30 representative SSX 3 textures across environment, snow, clothing,
+      boards, UI and effects, run through Lanczos / Real-ESRGAN / PBRify SPAN /
+      PBRify DAT2, then put back in the actual game, not just contact sheets.
+      Fact-finding done September 14, see `local/research/texture-remaster.md`:
+      prototype **runtime replacement keyed by texture hash** first, not
+      archive repacking. The native GPU backend already carries most of it
+      (`texture_replacement.cpp`, PNG/DDS loaders, a 4 GB LRU cache) with no
+      caller yet; the remaining work is a pack-directory flag, a dump flag, and
+      the lookup in `gxcore_draw.cpp`'s texture resolve, about 2-4 days. The
+      one real decision is reconciling the gxcore content hash (XXH3 over GX
+      bytes + TLUT) with the dump-filename key (XXH64) so packs stay portable
+      with Dolphin's convention. Repacking into archives needs CMPR/RGB5A3
+      encoders, a GX tiler, a mip writer and a palette quantiser that do not
+      exist, and ARA1 already sits near the 24 MiB wall. The 30-texture
+      experiment and tooling gaps are itemised in the report.
+- [ ] Course selection for added tracks (user, September 14): a menu or
+      selection path that lists every imported course so new tracks can be
+      added without a rebuild and without replacing a stock event. Today
+      Garibaldi replaces Snow Jam's event and inherits its script slot, name,
+      description and location tables. Fact-finding first: how the frontend
+      enumerates events/locations, where names and descriptions come from
+      (see [locale tables](locale-tables.md) and
+      [peaks and locations](peaks-and-locations.md)), and whether the tables
+      can grow in place or need a DOL patch. Design later.
+      Fact-finding done September 14, see
+      `local/research/course-selection.md`: the event table (23 x 100 B at
+      `0x802CE5EC`) and location table (50 x 24 B at `0x802CEEE8`) abut each
+      other and the next string with zero slack, so in-place growth is out;
+      counts are hard-coded in a handful of enumerable sites (23 at
+      `0x8005D638`, 50/49 at `0x801084B0`/`0x80109414`) plus `behiloc.dbb`
+      and `bam.gdb`. The world archive name is the event record's `+68`
+      string joined to `data/worlds/`, so a different archive loads by
+      rewriting 16 bytes. Descriptions live in `cmnamer.loc` (little-endian,
+      Snow Jam is index 508, no empty slots, hash function unsolved). Any DOL
+      patch forces a module regeneration (`dol_sha256` is enforced).
+      Recommended first step: keep Snow Jam's event row and let the native
+      runtime patch the archive-name and title strings in guest memory at
+      boot from a host-side manifest, then add a picker in the app's menu.
+      Unknowns: file-name case folding on the FST, and whether the save record
+      is a fixed event-indexed array.
 - [ ] September 14 priority: course restoration is the main track; keep 120 Hz
       research bounded. First reprojection batch captured eight matching riding
       frames and demonstrated an offline half-step warp. September 14: a
@@ -188,6 +235,12 @@ the build or commit that closed them.
       never read as animation support. The remaining three models (280-282,
       15 placements) carry a local matrix and now report `local matrix`,
       joining (a3) instead of hiding behind `animated`.
+      **(a3) done September 14: `--compose-local-matrices`** lands all six
+      models (647 models / 3,392 placements); build
+      `gc-gari-scenery-localmatrix-001` rides a clean 180 s check (exit 0,
+      zero faults). Visual confirmation of the rotated crowd figures is still
+      unverified, and 49/86/90 add no drawn instances (all placements start
+      hidden). Original scoping kept below.
       **(a3) 25 placements need local-matrix composition** — models 49/86/90
       (10, genuinely multipart: 23 geometry parts, 22 matrices each) plus
       280/281/282 (15, single part with a matrix). Scoped September 14 and
@@ -298,9 +351,16 @@ the build or commit that closed them.
       which is what pointed at it. With `SSX_STARTGATE_MIRROR=1` the handler
       drives bit 0 too, and the gate draws at countdown "3" and is gone at GO,
       on both the first race and after the restart (clean 300 s check).
-      Evidence in `local/research/startgate/handler-evidence/`. Still open:
-      the light flipbook does not advance, and the handler is a host-side
-      hook, not a course-side callback. Earlier attempt, kept for the record:
+      Evidence in `local/research/startgate/handler-evidence/`.
+      **Course-side script path works (September 14).** User chose course-side
+      scripts over host hooks. `tools/gamecube_lun.py` assembles Luno bytecode
+      (round-trips all 238 stock programs) and `--countdown-script RATE`
+      writes a program into slot 3: the observer shows both named lookups now
+      return a callback (type 5) and both closures are invoked; the probe
+      variant removes the canopy and stalls during the countdown by script-side
+      DeadNode (`script-evidence/`). Open: builtin 22 does not advance the
+      light flipbook (diagnosis in progress), and whether a DeadNode'd gate
+      returns after a restart is unobserved. Earlier attempt, kept for the record:
       **The handler is written and the flag write does not work.**
       `gamecube_startgate_handler.py` sets the bit on the lights and clears
       it on the gate, in the shared definition and in every live instance's

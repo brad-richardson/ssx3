@@ -26,6 +26,7 @@ from gamecube_scenery import TrickyScenery, post_countdown_hidden
 from gamecube_scenery_import import (WORLD_RESOURCE_ORDER, eligibility, geometry_parts,
                                      instance_record, record)
 from gamecube_spline_import import require_disabled_programs
+from gamecube_lun import countdown_program, replace_program
 from gamecube_textures import shape_images, world_image_record
 from gamecube_world import World, assemble, unused_global_rids, validate_resource_capacities
 
@@ -257,6 +258,32 @@ def stage(world, recipe, scene, images, source_ids, mode='hidden', animate=False
             if animated else 'No flipbook sequence is written.'))))
 
 
+COUNTDOWN_SLOT = 3      # stock Snow Jam's course event program; this course replaces Snow Jam
+LIGHTS_SOURCE_INSTANCE = 138  # Mdl_StartLights_1000 in the donor
+
+
+def write_countdown_script(replacements, recipe, assets, rate, probe=False):
+    group, track = recipe['group'], recipe['track']
+    lights = [a for a in assets if a['source_instance'] == LIGHTS_SOURCE_INSTANCE]
+    if len(lights) != 1 or not any(a['flipbooks'] for a in lights):
+        raise ValueError('Countdown script needs the staged lights instance and its flipbook')
+    oid = lambda a: track << 24 | a['target_instance']
+    program = countdown_program([oid(a) for a in assets], oid(lights[0]), rate, probe)
+    rows = list(replacements[group])
+    scripts = [i for i, (e, _) in enumerate(rows) if e['kind'] == 16 and e['track'] == track]
+    if len(scripts) != 1:
+        raise ValueError('Expected one course-owned script binding table')
+    entry, payload = rows[scripts[0]]
+    rows[scripts[0]] = (entry, replace_program(payload, COUNTDOWN_SLOT, program))
+    return {**replacements, group: rows}, dict(
+        slot=COUNTDOWN_SLOT, size=len(program), program=program.hex(), rate=rate,
+        gate_instances=[oid(a) for a in assets], lights_instance=oid(lights[0]),
+        handlers=dict(StartgateOpen='builtin 2 command 0 (DeadNode) on the lights' + ('' if probe else ' and gate'),
+                      StartlightBegin='builtin 22 texture-flip modifier on the lights, loop, forward' +
+                                      (' and DeadNode on the gate (probe)' if probe else '')),
+        probe=probe, verified=False)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('base-build', 'nbd', 'gsf', 'textures', 'output'):
@@ -268,6 +295,14 @@ def main():
     mode.add_argument('--countdown-ready', action='store_true',
                       help='Stage them hidden but otherwise shaped like ordinary scenery, so a '
                            'handler shows and hides them by toggling the visibility bit alone')
+    parser.add_argument('--countdown-script', type=float, metavar='FLIPS_PER_SECOND',
+                        help='Write a real course program into slot 3 (the course event slot the '
+                             'imported course inherits from Snow Jam): StartlightBegin starts the '
+                             'light flipbook at this rate through builtin 22, and StartgateOpen '
+                             'removes the staged instances through builtin 2 DeadNode')
+    parser.add_argument('--countdown-script-probe', action='store_true',
+                        help='Diagnostic variant: remove the gate at StartlightBegin instead, so a '
+                             'countdown screenshot shows whether the script-side removal works')
     parser.add_argument('--animate-flipbooks', action='store_true',
                         help="Give each staged flipbook material the engine's own frame sequence, "
                              'so the countdown lights cycle without any handler')
@@ -287,6 +322,10 @@ def main():
                                   'visible' if args.visible else
                                   'countdown' if args.countdown_ready else 'hidden',
                                   args.animate_flipbooks)
+    if args.countdown_script is not None:
+        replacements, report['script'] = write_countdown_script(
+            replacements, recipe, report['assets'], args.countdown_script,
+            args.countdown_script_probe)
     result, _ = assemble(World(original), replacements)
     report.update(base_sha256=hashlib.sha256(original).hexdigest(),
                   archive_sha256=hashlib.sha256(result).hexdigest(),
