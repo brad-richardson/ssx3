@@ -374,18 +374,21 @@ python3 tools/gamecube_course_check.py \
   --profile sg-aloha-2 --output local/research/aloha/ride-002 --seconds 180
 ```
 
-That check **did not get the machine**. Only one native runtime may run at a
-time, and another agent's 300-second check
-(`local/research/startgate/run-interactions-001`) held it for the whole of this
-task's window; the queued launcher waits on
-`pgrep -f "bin/python3 .*gamecube_course_check.py"` and had not been let
-through. So the boot/ride evidence for the Aloha archive is **not collected**.
-It is a contention gap, not a failure: nothing was observed either way.
+Result: **exit 0**, 817 observed samples, `riding_observed_after_start: true`,
+no reset loops, 60 FPS throughout, zero invalid accesses / GPU errors / unknown
+instructions / failed chunk checks in
+`local/reports/native-runs/20260915-000612.log`. Screenshots:
+`local/research/aloha/ride-002-screenshots/` (5 frames).
 
-The one native run that did happen is the rejected DOL probe,
-`local/research/aloha/ride-001`, whose `runtime.log` ends at
-`error: Extracted game's DOL hash is incorrect` — that is the evidence for
-reason 2 above, and it never reached the emulator.
+What this does and does not show. With the stock DOL the harness's first
+Select Event entry is still **Snow Jam / ARA1**, and the ride confirms it: the
+743 riding samples span x −199,522…−131,865, y 11,987…45,879, z
+−296,883…−228,771, which is ARA1's corridor, not ASS1's
+(−113,728…−233,737 / 72,830…208,559). The screenshots show stock Snow Jam with
+six racers. So this establishes that the rebuilt archive **boots, streams and
+plays**, and that replacing ASS1's groups and growing the world image tables to
+869/674 leaves an untouched location riding normally. It is **not** evidence
+about the converted course, which was never loaded.
 
 `local/research/aloha/game-aloha-rails-001` (stock DOL, `gc-aloha-003`'s
 archive, everything else symlinked from `local/game/gxbe69-stock`) and
