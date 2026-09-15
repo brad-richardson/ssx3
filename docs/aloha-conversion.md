@@ -422,8 +422,10 @@ Phase 2, and everything this document does not establish:
   (`COUNTDOWN_SLOT = 3`) and a six-gate race; a three-gate slopestyle start has
   not been checked.
 - ~~**Static collision** (§6) — `scenery.instance_source_ids` has to move into
-  `gamecube_scenery_import.py`.~~ Done, §8.1. What remains is the build order
-  against rails (§8.5) and a native impact check (§8.4).
+  `gamecube_scenery_import.py`.~~ Done, §8.1; the build order against rails is
+  answered in §8.5, and §9.3 has the native impact check: the engine returns
+  contacts against an imported collider and the ride differs from the same
+  archive without collision. Per-object query ownership is still unproven.
 - **Reaching the event** (§7) — either the frontend's Select Event list has to
   offer R&B (a save/unlock question), or the DOL pin and the recompiled module
   have to accept a repointed event table.
@@ -672,7 +674,7 @@ named the stock archive rather than the one ridden. The receipt now also carries
 `gamecube_collision_check.py` accepts a candidate that is any installed archive
 instead of requiring it to be `bam.big`.
 
-### 9.2 What the rides do not show, and why an A/B failed
+### 9.2 A free-running ride cannot A/B anything
 
 `ride-003`/`ride-004` were meant to be a controlled A/B of static collision:
 the two archives differ only by the collision stage, and the harness sends no
@@ -697,16 +699,88 @@ units cannot support attributing a 4,883-unit median to the colliders.
 **The collision A/B is inconclusive by design, not by result.** Reports:
 `local/research/aloha/floor-007-vs-007.json` and `ab-007-vs-006.json`.
 
-What this rules in is the instrument, not more runs: either movie-driven
-playback (`tools/native_determinism_check.py`, which fixes the guest clock and
-replays pad state) or a native waypoint autopilot — the PS2 route tools
-(`ride_route.py`, `ride_autopilot.py`) drive PINE and do not apply, but
-`gamecube_input.py` already has `stick x y` and the harness already reads rider
-samples live, so the pieces exist. That same gap blocks the deliberate-contact
-test for the Garibaldi breakables and any claim about gates or a finish.
+What this rules in is the instrument, not more runs. §9.3 uses the one that
+works.
 
-Not shown by any run here: a completed run, gate or checkpoint passage, scoring
-at the end, collision contact with a specific object, and anything about the
-donor's own art (the geometry is untextured). The HUD still reads a race —
-"3rd/6" with a lap timer — which is the known `mode` limitation in
-[course selection](course-selection.md), not an Aloha problem.
+Not shown by the four free runs: a completed run, gate or checkpoint passage,
+scoring at the end, or anything about the donor's own art (the geometry is
+untextured). The HUD still reads a race — "3rd/6" with a lap timer — which is
+the known `mode` limitation in [course selection](course-selection.md), not an
+Aloha problem.
+
+### 9.3 Static collision, observed under movie playback
+
+`tools/native_determinism_check.py` records a Dolphin input movie and replays
+it with the guest clock fixed, and it now takes `--course-manifest` so both arms
+are redirected identically. One movie was recorded on `gc-aloha-007`
+(`det-record-007.dtm`, `05cf8cb7`) and replayed three times, 200 s each, exit 0
+with clean counters throughout.
+
+**Playback is deterministic.** Two replays on the same archive
+(`det-play-007-a`, `det-play-007-b`) agree on **all 879** sampled control-flow
+rows — dispatch 0 through 920,649,728, equal pc, lr, ctr, cr and guest timebase
+— with equal observed rider state transitions
+(`dispatch-playback-floor.json`). Their rider traces read as *exactly* equal at
+many sampled instants and never exceed 113 units apart except for one 1,860-unit
+sampling spike, which is the host-timed observer catching the two runs at
+slightly different guest instants rather than a path difference
+(`floor-playback.json`).
+
+**The same movie on the same course without collision rides differently.**
+Replaying it on `gc-aloha-006` (`det-play-006`) tracks the collision arm for
+twenty seconds — separations inside the floor's envelope, exactly 0.0 as late as
+t = 20.01 s after the race start — and then parts permanently:
+
+| t after the start | floor (007 vs 007) | A/B (007 vs 006) |
+| ---: | ---: | ---: |
+| 10 s | 0 | 111 |
+| 20 s | 0 | 0 |
+| 30 s | 88 | 2,956 |
+| 40 s | 0 | 12,852 |
+| 60 s | 113 | 21,572 |
+| 75 s | 0 | 53,261 |
+
+The A/B's median separation is 10,840 units against the floor's 24, and it
+passes the floor's *maximum* at t = 22.03 s and never returns
+(`ab-playback-007-vs-006.json`).
+
+**What happens at the split is a contact.** From t = 20.9 s the collision arm's
+rider holds a constant height — y = 68,742 exactly — for 1.8 s while its x
+reverses direction, and it is inside the world-space volume of enabled collider
+**rid 524** (donor scene instance **1128**, 48 collision vertices, world box
+x −119,497…−117,747, y 67,588…69,395, z −271,320…−265,669) the whole time. The
+no-collision arm passes through the same volume without slowing and keeps
+climbing, y 68,661 → 70,263, into the next object's volume. Same recorded pad
+input, one archive difference.
+
+**And the engine says so directly.** Replaying the movie once more with the
+existing collision-trace module (`a8d6b3b1`) and
+`SSX_COLLISION_INSTANCE=0x0B00020C` — track 11, instance 524 — then
+`tools/gamecube_collision_check.py --source-instance 1128`:
+
+```
+"stages": {"bound": 1, "broad_contact": 632, "narrow_enter": 592, "narrow_exit": 592},
+"contact_return_histogram": {"0": 591, "3": 1},
+"positive_returns": 1,
+"selected_obstacle_contact_verified": true
+```
+
+The imported obstacle registers with world bounds the engine computes itself,
+is broad-phase tested 632 times, reaches the narrow phase 592 times, and returns
+**3 contacts** once. That return's query box centre is 59.5 units from the
+player's own position 0.4 s after its constrained interval ends. Report:
+`local/research/aloha/contact-524/contact-report.json`.
+
+Two limits stay, and they are the checker's own: the trace can observe opponents
+too, so `player_query_identity_verified` is **false** — the positive return is
+not *proven* to be the player's query, only to be against the selected object
+at the player's position and time. And one positive return across a 1.8-second
+constrained interval is fewer than a sustained slide along the object would
+suggest, so the held height may be terrain with the traced contact a separate
+event. What is established is that Aloha's imported static collision is live in
+the engine and changes the ride; which surface held the rider for those 1.8
+seconds is not.
+
+This also makes `gc-gari-interactions-002` testable the same way: record a
+movie, aim `SSX_COLLISION_INSTANCE` at a bound block or pane, and the
+deliberate-contact question becomes a replay instead of a lucky autopilot.

@@ -48,6 +48,13 @@ local/tooling/dtk disc extract \
   '/Volumes/share/brad/games/ssx3-workbench/native/GXBE69'
 ```
 
+To boot a converted course instead of the stock world, stage a game directory
+with `tools/gamecube_game_dir.py` — stock entries are symlinks, `--world
+NAME=BUILD` installs a build's archive as `files/data/worlds/NAME.big` (renaming
+its BIGF members to match when NAME is not `bam`) — and select it with a
+[course-redirect manifest](../docs/course-selection.md). Several courses can be
+installed at once; the manifest picks which one an event loads.
+
 Keep dependencies in ignored `third_party/`, game files and generated code in
 ignored `local/` or on the share. Do not add generated code or disc data to Git.
 The module command resumes compilation after a failure, checks its generation

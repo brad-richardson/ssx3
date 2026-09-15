@@ -52,6 +52,10 @@ def course_check(args, output, profile, env_extra, module):
     command = [sys.executable, str(ROOT / 'tools/gamecube_course_check.py'), '--game', str(args.game.resolve()),
                '--profile', profile, '--output', str(output), '--seconds', str(args.seconds),
                '--metal-validation', 'off']
+    if getattr(args, 'course_manifest', None):
+        # A redirected event has to be redirected the same way in both arms, and
+        # the checker records the manifest it applied in its observations.
+        command += ['--course-manifest', str(args.course_manifest.resolve())]
     if module:
         command += ['--module', str(Path(module).resolve())]
     print('+', ' '.join(command), flush=True)
@@ -244,6 +248,8 @@ def main():
         p.add_argument('--output', type=Path, required=True, help='Fresh output directory')
         p.add_argument('--seconds', type=int, default=200)
         p.add_argument('--module', type=Path, help='Module dylib; default is the current build')
+        p.add_argument('--course-manifest', type=Path,
+                       help='Course-redirect manifest for both arms (docs/course-selection.md)')
         if name == 'play':
             p.add_argument('--movie', type=Path, required=True)
         p.set_defaults(fn=fn)

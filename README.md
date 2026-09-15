@@ -21,9 +21,11 @@ in one archive (`gc-aloha-007`), selected at boot by a
 [course-redirect manifest](docs/course-selection.md) that patches an event row in
 guest RAM and changes no byte of `main.dol`. One run kept stock `bam.big` and the
 course's own `alo.big` resident at the same time, which is the data model an
-in-game course picker needs. Scoring, a finish, gates and the donor's art remain
-([Aloha notes](docs/aloha-conversion.md)); the repeatability those need is
-tracked as route control in [the todo](docs/todo.md).
+in-game course picker needs. Its imported static collision is live in the engine: under deterministic movie
+playback the same archive without collision rides the identical line for twenty
+seconds and then parts for good, and the engine's own narrow phase returns
+contacts against the imported obstacle. Scoring, a finish, gates and the donor's
+art remain ([Aloha notes](docs/aloha-conversion.md)).
 The [iOS development app](native/ios/README.md) builds with a statically linked
 game module, Metal graphics, and touch controls for menu navigation and riding.
 Earlier physical-device smoke runs reach about 60 FPS; sustained performance

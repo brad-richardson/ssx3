@@ -370,6 +370,30 @@ evidence. All three accepted runtime runs used the same existing read-only
 diagnostic module, SHA-256
 `a8d6b3b1f7be2fac20385432677892335cfecf18d6c74e1f7b3f655cf0a0fe6e`.
 
+## A second course, and an A/B that works (September 15)
+
+The same static-collision importer ran on SSX Tricky's Aloha Ice Jam into ASS1
+(`gc-aloha-007`, 677 colliding instances, 163 meshes), and the September 14
+limitation above — "these contacts are not yet tied to the player's query" —
+now has a companion measurement that does not need query ownership.
+
+Movie playback is deterministic on this runtime: two replays of one recorded
+movie agree on all 879 sampled control-flow rows and their rider traces stay
+within 113 units. Replaying that movie on the same archive *without* the
+collision stage rides the identical line for twenty seconds and then parts
+permanently, while the collision arm's rider holds a constant height inside
+enabled collider rid 524's world volume and the other arm passes straight
+through it. Aimed at that instance, the trace module and
+`gamecube_collision_check.py` report `bound` 1, `broad_contact` 632,
+`narrow_enter`/`narrow_exit` 592 and one return of 3 contacts:
+`selected_obstacle_contact_verified: true`.
+
+So the importer's output is live in the engine on a second course, by two
+independent routes. `player_query_identity_verified` is still false, and a
+single positive return across a 1.8-second constrained interval does not
+establish which surface held the rider. Method and numbers:
+[the Aloha ride](aloha-conversion.md#93-static-collision-observed-under-movie-playback).
+
 ## Donor interaction inventory (September 14)
 
 First step of the scenery-interaction work: find what the donor already marks

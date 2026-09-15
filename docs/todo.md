@@ -13,23 +13,32 @@ the build or commit that closed them.
       collision, `73ad0ab6`) — and it **rides** through the redirect, including
       one run with stock `bam.big` and the course's own `alo.big` resident at
       the same time ([the ride](aloha-conversion.md#9-the-ride-september-15)).
-      Next in the plan's order: the app's course picker (item 3), Aloha phase 2
-      (item 5, the scoring driver), and the deliberate-contact ride of
-      `gc-gari-interactions-002`, which now has a measured blocker — see the
-      route-control item below.
-- [ ] Route control for the native runtime (measured September 15). Two runs of
-      the *same* archive, single core, identical scripted input, diverge within
-      0.21 guest seconds of the race start and end a median 449 / max 69,184
-      world units apart, so no world-data A/B and no gate, finish or
-      deliberate-contact claim can rest on a free-running ride
-      ([evidence](aloha-conversion.md#92-what-the-rides-do-not-show-and-why-an-ab-failed)).
-      Two instruments exist and neither is wired up: movie-driven playback
-      (`tools/native_determinism_check.py` fixes the guest clock and replays pad
-      state) and a waypoint autopilot — `tools/gamecube_input.py` already has
-      `stick x y` and `gamecube_course_check.py` already reads rider samples
-      live, so the follower is the missing piece. The PS2 tools
-      (`ride_route.py`, `ride_autopilot.py`) drive PINE and do not apply. This
-      also unblocks the phone A/B noted below.
+      Static collision on the new course is **observed**: under movie playback
+      the collision archive and the same archive without collision ride the same
+      line for 20 s and then part for good, and the engine's narrow phase
+      returns contacts against imported collider 524 (§9.3). Next in the plan's
+      order: the app's course picker (item 3), Aloha phase 2 (item 5, the
+      scoring driver), and the deliberate-contact ride of
+      `gc-gari-interactions-002`, which is now a movie-playback job rather than
+      a lucky autopilot.
+- [ ] Route control for the native runtime (measured September 15). A
+      free-running ride cannot A/B anything: two runs of the *same* archive,
+      single core, identical scripted input, diverge within 0.21 guest seconds
+      of the race start and end a median 449 / max 69,184 world units apart.
+      **Movie playback is the instrument and it works** — two replays of one
+      recorded movie agree on all 879 sampled control-flow rows and their rider
+      traces stay inside 113 units, so `tools/native_determinism_check.py
+      play --course-manifest ...` is now the way to compare two archives or
+      chase one object
+      ([evidence](aloha-conversion.md#93-static-collision-observed-under-movie-playback)).
+      What is still missing is *steering on demand*: a movie only replays the
+      line it recorded, so hitting a chosen object still depends on that line
+      passing through it. A waypoint autopilot would fix that —
+      `tools/gamecube_input.py` already has `stick x y` and
+      `gamecube_course_check.py` already reads rider samples live, so the
+      follower is the missing piece; the PS2 tools (`ride_route.py`,
+      `ride_autopilot.py`) drive PINE and do not apply. Movie playback should
+      also settle the phone A/B noted below.
 - [ ] Next Tricky course, not a race (user, September 14): after Garibaldi
       reaches parity (physics interactions and sprite/animation cycling are
       the remaining gaps), pick a Tricky Showoff course and map it onto one of
