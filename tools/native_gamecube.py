@@ -334,6 +334,8 @@ def launch(args):
         env.pop('STATICRECOMP_TRACE_FILE', None)
     if not args.headless:
         env["SSX3_SCREENSHOTS"] = "1"
+        if getattr(args, 'screenshot_seconds', None):
+            env["SSX3_SCREENSHOT_SECONDS"] = str(args.screenshot_seconds)
     if args.pipe_controller:
         env["SSX3_BACKGROUND_INPUT"] = "1"
     module_path = (args.module.resolve() if getattr(args, "module", None) else MODULE / "build/gGXBE69_recomp.dylib")
@@ -417,6 +419,10 @@ def main():
     parser.add_argument("--module", type=Path, help="run: module dylib to load instead of the default build")
     parser.add_argument("--cpu-thread", action="store_true",
                         help="Dual-core runtime (CPUThread = True); applies to a fresh profile's Dolphin.ini")
+    parser.add_argument("--screenshot-seconds", type=int,
+                        help="Screenshot cadence for a visual run (default 15). A visual A/B "
+                             "needs a fine cadence: two arms can only be matched to within "
+                             "half an interval of each other (docs/texture-remaster.md)")
     parser.add_argument("--texture-dump", action="store_true",
                         help="run: dump every texture the game loads to PROFILE/Dump/Textures/GXBE69")
     parser.add_argument("--texture-pack", type=Path,

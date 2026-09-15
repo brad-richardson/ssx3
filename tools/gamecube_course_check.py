@@ -145,6 +145,9 @@ def main():
                          '(docs/course-selection.md); passed through as SSX_COURSE_MANIFEST')
     ap.add_argument('--route', type=Path,
                     help='Waypoint route to steer along once riding (docs/route-control.md)')
+    ap.add_argument('--screenshot-seconds', type=int,
+                    help='Screenshot cadence in seconds (default 15); a finer one makes a '
+                         'visual A/B between two runs matchable')
     ap.add_argument('--texture-dump', action='store_true',
                     help='Dump every texture the run loads into the profile (docs/texture-remaster.md)')
     ap.add_argument('--texture-pack', type=Path,
@@ -190,6 +193,8 @@ def main():
             run = subprocess.Popen([sys.executable, str(ROOT/'tools/native_gamecube.py'), 'run',
                 '--game', str(args.game.resolve()), '--profile', args.profile, '--seconds', str(args.seconds),
                 '--pipe-controller', *(['--cpu-thread'] if args.cpu_thread else []),
+                *(['--screenshot-seconds', str(args.screenshot_seconds)]
+                  if args.screenshot_seconds else []),
                 *(['--texture-dump'] if args.texture_dump else []),
                 *(['--texture-pack', str(args.texture_pack.resolve())] if args.texture_pack else []),
                 *(['--module', str(args.module.resolve())] if args.module else [])], cwd=ROOT,
@@ -334,6 +339,7 @@ def main():
                    route=str(args.route) if args.route else None,
                    route_result=dict(route.report(), unavailable_writes=steer_failures)
                         if route else None,
+                   screenshot_seconds=args.screenshot_seconds,
                    texture_dump=args.texture_dump,
                    texture_pack=str(args.texture_pack) if args.texture_pack else None,
                    course_redirects=redirects,

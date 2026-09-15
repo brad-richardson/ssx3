@@ -109,6 +109,26 @@ the build or commit that closed them.
       encoders, a GX tiler, a mip writer and a palette quantiser that do not
       exist, and ARA1 already sits near the 24 MiB wall. The 30-texture
       experiment and tooling gaps are itemised in the report.
+      **Done September 15: all 17 SSX 3 courses, no C++ written.** The 2-4 day
+      gxcore estimate above was wrong about the renderer: the native build
+      compiles Dolphin's `HiresTextures.cpp`, not the aurora replacement path,
+      so dumping and replacement are configuration
+      (`tools/native_gamecube.py --texture-dump/--texture-pack`,
+      `[Video_Settings]` in the per-game layer) and the hash reconciliation
+      never arose. 17 dumps four at a time, 907 distinct course textures,
+      per-family models (PBRify V4 for CMPR, Real-ESRGAN for everything else),
+      288 MB at 4x, about 40 minutes end to end; ridden clean on three courses;
+      an iPhone switch and a course picker in the pause menu. The runbook is
+      [texture remaster](texture-remaster.md).
+      **Quality gate, same day:** `tools/texture_pack_audit.py` measures
+      colour shift, structure drift, alpha drift and flat invention per texture
+      against its source. 109 of 907 flagged, nearly all of them improvements;
+      the two real defect classes were flat fills gaining grain (15 textures,
+      repaired with Lanczos in the shipped pack) and soft particle sprites
+      gaining hard outlines (unfixed - no classifier separates a soft gradient
+      from a blurred edge yet). Remaining: the particle family, weighting by
+      on-screen area, mipmap sidecars, archive repacking, and the PS2 path
+      (PCSX2's mechanism, different key).
 - [ ] Course selection for added tracks (user, September 14): a menu or
       selection path that lists every imported course so new tracks can be
       added without a rebuild and without replacing a stock event. Today

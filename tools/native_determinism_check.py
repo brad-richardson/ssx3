@@ -62,6 +62,10 @@ def course_check(args, output, profile, env_extra, module):
         command += ['--texture-pack', str(args.texture_pack.resolve())]
     if getattr(args, 'texture_dump', False):
         command += ['--texture-dump']
+    if getattr(args, 'screenshot_seconds', None):
+        # Two arms can only be matched to within half a screenshot interval, so a
+        # visual comparison wants a fine cadence in both.
+        command += ['--screenshot-seconds', str(args.screenshot_seconds)]
     if module:
         command += ['--module', str(Path(module).resolve())]
     print('+', ' '.join(command), flush=True)
@@ -260,6 +264,9 @@ def main():
                        help='Replacement textures for this arm (docs/texture-remaster.md)')
         p.add_argument('--texture-dump', action='store_true',
                        help='Dump every texture this arm loads')
+        p.add_argument('--screenshot-seconds', type=int,
+                       help='Screenshot cadence in seconds (default 15); pass the same value '
+                            'to both arms to make the frames matchable')
         if name == 'play':
             p.add_argument('--movie', type=Path, required=True)
         p.set_defaults(fn=fn)

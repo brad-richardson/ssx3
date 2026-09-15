@@ -108,6 +108,9 @@ def main():
     ap.add_argument('--copy-groups', type=Path,
                     help='Copy every course texture into DIR/<asset family>/, so each family '
                          'can go through the model that suits it')
+    ap.add_argument('--copy-frontend', type=Path,
+                    help='Copy every frontend texture into DIR/<asset family>/ instead of the '
+                         "course's, for remastering the menus")
     ap.add_argument('--sheet', type=Path, help='Write a contact sheet of the selection here')
     ap.add_argument('--output', type=Path, help='Write the JSON inventory here')
     args = ap.parse_args()
@@ -122,10 +125,14 @@ def main():
                           'course load' if entry['mtime'] >= briefing else 'frontend')
         entry['framebuffer'] = is_framebuffer(entry)
     # A `_mipN` file is another level of its base texture, not a texture of its
-    # own, and this loader replaces a mipmapped texture from the base image
-    # alone, so the sidecars are counted but never selected or packed.
+    # own, so the sidecars are counted but never selected as art. A pack still
+    # needs levels - the loader takes a custom texture's mip count from the
+    # files the pack supplies - but they are generated from the pack's own base
+    # by `pack_mipmaps.py`, not carried over from the guest's dump.
     course = [e for e in entries if e['phase'] in ('course load', 'ride')
               and not e['framebuffer'] and not e['mip_level']]
+    frontend = [e for e in entries if e['phase'] == 'frontend'
+                and not e['framebuffer'] and not e['mip_level']]
     report = {
         'dump': str(args.dump), 'run': str(args.run) if args.run else None,
         'briefing_wall': briefing, 'race_start_wall': start, 'textures': len(entries),
@@ -134,7 +141,7 @@ def main():
         'mip_sidecars': sum(1 for e in entries if e['mip_level']),
         'mipmapped_course_textures': sum(1 for e in entries if e['mipmapped'] and not e['mip_level']
                                          and e['phase'] in ('course load', 'ride')),
-        'course_art': len(course),
+        'course_art': len(course), 'frontend_art': len(frontend),
         'course_by_format': dict(Counter(e['format_name'] for e in course).most_common()),
         'course_by_size': dict(Counter(f"{e['width']}x{e['height']}" for e in course).most_common()),
     }
@@ -148,6 +155,19 @@ def main():
         report['groups'] = {name: sum(1 for e in course if family(e) == name)
                             for name in sorted({family(e) for e in course})}
         report['groups_directory'] = str(args.copy_groups)
+    if args.copy_frontend:
+        import shutil
+        seen = set()
+        for entry in frontend:
+            if entry['texture_hash'] in seen:
+                continue
+            seen.add(entry['texture_hash'])
+            directory = args.copy_frontend / family(entry)
+            directory.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(entry['path'], directory / entry['name'])
+        report['frontend_groups'] = {name: sum(1 for e in frontend if family(e) == name)
+                                     for name in sorted({family(e) for e in frontend})}
+        report['frontend_directory'] = str(args.copy_frontend)
     selection = []
     if args.select:
         # Largest first, one per content hash, spread across formats by keeping

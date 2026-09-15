@@ -375,7 +375,283 @@ errors, unknown instructions or JIT fallback runs. A pack covering the game
 does not destabilise a course it was not built for, because the key is the
 texture rather than the course.
 
-## 9. Putting a pack on the iPhone
+## 9. The quality gate
+
+`tools/texture_pack_audit.py` compares a finished pack with the dump it was
+built from and ranks the textures worth a human's attention. An upscaler is
+*meant* to invent detail, so the gate cannot ask "did anything change" — it
+asks whether the change is one of four kinds that are wrong by construction:
+
+| flag | what it measures | what it looks like |
+| --- | --- | --- |
+| `colour-shift` | mean per-channel delta over the pixels the source shows | the art changes hue or brightness before any detail lands |
+| `structure-drift` | RMS luma delta once the pack is box-reduced to source size | the model moved edges instead of sharpening them |
+| `alpha-drift` | RMS alpha delta, same reduction | a fringe or a chewed edge on a cutout |
+| `flat-invention` | high-frequency energy the pack holds under a flat source | grain where there was nothing to reconstruct |
+
+Every measure compares the pack with its own source *at the source's
+resolution* — the pack is box-averaged down by its scale factor, which is the
+closest thing to "what the guest would have authored". Colour statistics only
+count pixels whose source alpha is non-zero, so a transparent border cannot
+drag them around.
+
+```sh
+python3 tools/texture_pack_audit.py local/research/remaster/union-all \
+  local/research/remaster/pack-all \
+  --output local/research/remaster/audit-pack-all.json \
+  --copy-flagged local/research/remaster/flagged
+```
+
+`--copy-flagged` writes `source/` and `pack/` directories holding just the
+flagged pairs, which is what you actually open.
+
+### What it said about the 17-course pack
+
+**109 of 907 textures flagged**: 64 `alpha-drift`, 47 `colour-shift`, 20
+`structure-drift`. Medians across the pack are `max_bias` 1.6, `rms` 3.5,
+`alpha_rms` 0.0 — so the flags really are a tail and not a verdict on the pack.
+Paletted art carries nearly all of it: 69 of 157 C8 textures flag, and 15 of 45
+RGB5A3, against 27 of 698 CMPR. Those are the families with alpha, and alpha is
+where these models are weakest.
+
+**A flag means "large change", not "bad change" — the triage is visual and
+cannot be skipped.** Opening all 109 (the sheet recipe is below), most flagged
+textures are *improvements*: a dithered chain-link fence becomes a clean
+lattice, a nose ring becomes round, an exclamation mark gets straight edges,
+bare winter branches thicken slightly but read better. Two classes were real
+defects:
+
+- **Flat fills gaining grain.** 15 textures whose source has no colour *and* no
+  alpha structure came back speckled — a flat black 16x16 became grey noise.
+  There was nothing to reconstruct, so the model's output is pure invention.
+  These are now Lanczos in `pack-all/` (on a flat source, Lanczos is exact), and
+  `flat-invention` reads 0 for the pack.
+- **Soft particle sprites gaining hard outlines.** The clearest is
+  `tex1_32x32_84d2dbfb7e0bebb8_5.png`, a snow puff: a soft white blob with a
+  radial alpha falloff came back as a cartoon shape with dark edges
+  (`max_bias` 16.1). Real-ESRGAN treats a smooth gradient as a blurred edge and
+  restores an edge that was never there. Unfixed — see below.
+
+### The trap: "flat" has to mean flat in alpha too
+
+The first cut of this gate called a font sheet flat. A glyph sheet is white
+everywhere it is visible, so its colour variance is exactly zero while all of
+its shape sits in the alpha channel; the same is true of glow and lens-flare
+sprites. Those upscale *well*, and routing them to Lanczos threw away the best
+results in the pack. `flat-invention` therefore requires low variance in colour
+**and** in alpha. The 18 candidates split 15 genuinely flat, 3 mask-carried.
+
+### The review sheet
+
+The numbers pick the textures; the eye decides. For each flagged texture, put
+the source at nearest-neighbour 4x beside the pack over a checkerboard, and
+print its measures next to it:
+
+```python
+from PIL import Image
+a = Image.open(source).convert('RGBA').resize((180, 180), Image.NEAREST)
+b = Image.open(packed).convert('RGBA').resize((180, 180), Image.LANCZOS)
+# composite each over a checkerboard so the alpha channel is visible
+```
+
+Nearest-neighbour on the source matters: Lanczos there hides the texels the
+guest really had and makes every pack look like a smaller improvement than it
+is. A checkerboard matters because two thirds of the flags are alpha.
+
+### Still not measured
+
+- **The particle family.** There is no automatic test that separates "soft
+  gradient sprite" from "blurred photo texture", which is exactly the
+  distinction the model gets wrong. Smoke, spray, glow and lens flare should
+  go through Lanczos or SPAN rather than Real-ESRGAN; until they are
+  classified, the pack keeps a handful of hard-edged puffs.
+- **On-screen scale.** The gate compares textures, not frames. A defect in a
+  32x32 particle matters less than the same number on a 256x256 rock face, and
+  nothing here weights by how much screen the texture covers.
+
+## 10. Three defects the numbers missed, and the v2 recipe
+
+The gate in section 9 compares each texture with its own source, which cannot
+see anything about *how the texture is used*. Riding the pack and looking at the
+snow found three defects that are invisible to a per-texture metric, and all
+three were reported by a person looking at a screenshot before any tool caught
+them. They are worth knowing before remastering anything else, because every
+one of them is a property of the pipeline rather than of a model.
+
+### 10.1 A single-level PNG destroys the mip chain
+
+**This is the biggest one.** Dolphin sets a custom texture's mip count from the
+files the *pack* supplies:
+
+```cpp
+// TextureCacheBase.cpp, CreateTextureEntry
+const u32 texLevels = no_mips ? 1 : (u32)custom_texture_data->m_slices[0].m_levels.size();
+```
+
+A stock mipmapped texture gets `texture_info.GetLevelCount()` levels; replacing
+it with one PNG leaves it with **one**. The base level is then sampled at every
+distance, and a 4x base has four times as much detail to alias with, so distant
+snow and groomed piste shimmer and show moire banding that the stock game does
+not have. 509 of the 907 textures in this game's pack are mipmapped (`_m` in
+the name), including all the terrain — so most of what the pack replaces lost
+its chain.
+
+`tools/pack_mipmaps.py` fixes it by shipping the levels. Dolphin looks for
+`<name>_mip1`, `_mip2`, … beside the base, loads until one is missing, and
+requires each to be exactly half the previous (`TextureAssetUtils.cpp`), which
+is what a box filter of the level above gives:
+
+```sh
+python3 tools/pack_mipmaps.py local/research/remaster/pack-v2-mips \
+  --output local/research/remaster/pack-v2-mips.json
+```
+
+Levels come from the pack's own base, not from the guest's dumped `_mipN`
+sidecars, so the chain is consistent with the art that ships. Cost for 907
+textures: **7,789 extra files and about 117 MB** (289 MB → 425 MB). Build the
+mip pack as hard links to the base pack so the two can be A/B'd without storing
+the bases twice.
+
+### 10.2 An upscaler invents a seam in every tile
+
+A terrain tile repeats across a surface, so its left edge has to keep matching
+its right edge, and no super-resolution model knows that. Run one over a tile
+and its border pixels get invented context, which shows in game as a line along
+every tile boundary — the seam people notice first on a wide snow slope.
+
+Measured over SSX 3's 200 tiling textures (a tile is detectable: its wrap
+discontinuity is no worse than its own interior detail), the first pack broke
+**66** of them. The fix is `--wrap` in `tools/upscale_textures.py`: pad the
+source circularly, upscale the padded image, crop the padding off.
+`--wrap auto`, the default, pads only textures whose source already wraps —
+padding a sprite or a face would pull the opposite edge of the image into view.
+
+Two details matter:
+
+- **The padding has to be wider than the texture for small tiles.** A 16x16
+  tile padded by 16 still came out with a seam: a convolutional model's border
+  handling reaches further than 16 pixels. The padding is now at least 32 px
+  *and* at least the texture's own size, built by indexing the source modulo
+  its size rather than pasting a 3x3 grid.
+- **Lanczos breaks seams too**, less severely, so the classes that skip the
+  model still pass `--wrap auto`.
+
+With wrapping, broken seams fell from 66 to **13** of 200.
+
+### 10.3 A sharpening model puts a hard rim on a soft sprite
+
+Snow spray, smoke, glow and lens flare are smooth alpha falloffs. Real-ESRGAN
+reads a smooth gradient as a blurred edge and restores an edge that was never
+there: the snow-spray puff (`tex1_32x32_84d2dbfb7e0bebb8_5.png`) came back with
+a hard navy outline, so every puff of spray on the slope had a black rim. The
+cure is not a better model — there is nothing in a gradient to reconstruct — it
+is to leave those textures to Lanczos.
+
+### 10.4 Do the models differ? Yes, per class, and not by much otherwise
+
+Seven models were compared over 33 textures, and six of them over the snow
+tiles specifically (`4x-UltraSharp`, `4x_foolhardy_Remacri`,
+`RealESRGAN_x4plus_anime_6B` and `4xNomos8kDAT` in addition to the three the
+spike used). On the snow tiles, with wrapping on:
+
+| pass | seam ratio | invented detail | delta from source |
+| --- | ---: | ---: | ---: |
+| stock | 1.16 | — | — |
+| span (wrapped) | **1.11** | 7.3 | 3.1 |
+| lanczos | 1.26 | 5.1 | **1.3** |
+| ultrasharp (wrapped) | 1.29 | 9.1 | 2.9 |
+| nomos8kDAT (wrapped) | 1.46 | 7.9 | 3.7 |
+| remacri (wrapped) | 1.48 | 9.7 | 2.9 |
+| pbrify v4 (wrapped) | 1.55 | 8.5 | 2.2 |
+| esrgan (wrapped) | 2.12 | 9.2 | 5.9 |
+| esrgan (no wrap) | 6.06 | 9.4 | 6.1 |
+
+The ranking is stable and unsurprising once the classes are right: the gentle
+models (SPAN, PBRify V4) suit terrain, the sharp ones (Real-ESRGAN, UltraSharp,
+Remacri) suit art and text, and **no model is better than the correct class
+assignment**. Chasing a better checkpoint is worth much less than wrapping the
+tiles and shipping the mips.
+
+### 10.5 A scaled cutout leaks, and what leaks through is black
+
+The defect a person spots first in a screenshot: distant bushes, branches and
+mesh fences appear as **hard black blobs** on the snow. Two pipeline properties
+combine to produce it.
+
+- The guest draws those cutouts with an **alpha test**, not alpha blending.
+  A test has no soft edge - a pixel either passes or it does not - so scaling
+  the alpha channel with Lanczos grows the shape by a pixel or two of whatever
+  is *behind* the art.
+- In a dump, what is behind the art is usually **black**: a paletted texture's
+  hidden pixels are palette entry 0. `opaque_fill` bled the visible colour
+  outward, but only four pixels' worth, so anything further out stayed black.
+  Measured across the 176 textures with alpha, 44-75% of the hidden pixels in
+  the worst offenders were black.
+
+Both halves are fixed in `tools/upscale_textures.py`:
+
+- `binary_alpha()` detects a hard cutout - 95% or more of its alpha is 0 or
+  255 - and re-thresholds the scaled alpha at the halfway point, so the outline
+  stays exactly where the guest drew it. (Trees and fences turn out to be
+  strictly two-level, which is why the `soft-sprite` class never caught them.)
+- `opaque_fill()` now floods the whole transparent area instead of four pixels,
+  so a pixel that does leak past an alpha test shows the art's own colour.
+
+Measured over the pack: the area the pack reveals where the source hid it fell
+from **0.99% to 0.06%** of hidden pixels, and the share of that leak which is
+black from 4.9% to 1.4%. `alpha-drift` flags fell from 64 to 21.
+
+**The general lesson, worth carrying to every asset in both games: alpha is not
+a colour channel.** A model must never see it, a scaler must not soften it when
+the guest tests it, and whatever sits behind a cutout must be filled with
+something plausible before anything touches the image.
+
+### 10.6 The v2 recipe
+
+`tools/texture_pack_plan.py` writes the class decision down once, so running
+the pipeline is a loop rather than a judgement call:
+
+```sh
+python3 tools/texture_pack_plan.py local/research/remaster/union-all \
+  local/research/remaster/plan-all --report local/research/remaster/plan-all.json
+```
+
+| class | test | model | wrap | SSX 3 count |
+| --- | --- | --- | --- | ---: |
+| `flat` | no colour and no alpha structure | Lanczos | auto | 16 |
+| `soft-sprite` | >40% of pixels partially transparent | Lanczos | auto | 69 |
+| `tile` | the source already wraps | PBRify SPAN | always | 169 |
+| `block-compressed` | CMPR, not a tile | PBRify V4 | never | 571 |
+| `paletted` | C4/C8/C14X2, not a tile or sprite | Real-ESRGAN | never | 61 |
+| `direct-colour` | everything else | Real-ESRGAN | never | 21 |
+
+Then one upscale pass per class directory with the model the report names, and
+`pack_mipmaps.py` over the result. Against the first pack: 90 flagged textures
+instead of 109 — alpha drift 64 → 21 and colour shift 47 → 32 — 13 broken seams
+instead of 66, mip chains on all 931 (the 24 frontend textures included), and
+the cutout leak down by a factor of sixteen.
+
+The whole rebuild, once the dumps exist, is about **six minutes**: 40 seconds of
+GPU for the four model classes, a couple of seconds of CPU for the two Lanczos
+classes, and four minutes to write 8,019 mip levels.
+
+```sh
+# 1. classes
+python3 tools/texture_pack_plan.py UNION PLAN --report PLAN.json
+# 2. one pass per class, with the model and wrap mode PLAN.json names
+python3 tools/upscale_textures.py PLAN/tile PACK --model .../SPAN --wrap always --wrap-pad 32
+python3 tools/upscale_textures.py PLAN/block-compressed PACK --model .../PBRifyV4 --wrap never
+python3 tools/upscale_textures.py PLAN/paletted PACK --model .../RealESRGAN --wrap never
+python3 tools/upscale_textures.py PLAN/direct-colour PACK --model .../RealESRGAN --wrap never
+python3 tools/upscale_textures.py PLAN/soft-sprite PACK --mode lanczos --wrap auto
+python3 tools/upscale_textures.py PLAN/flat PACK --mode lanczos --wrap auto
+# 3. the mip chain (hard-link PACK into PACK-mips first to keep both)
+python3 tools/pack_mipmaps.py PACK-mips --output PACK-mips.json
+# 4. the gate, then ride it
+python3 tools/texture_pack_audit.py UNION PACK --output audit.json --copy-flagged flagged/
+```
+
+## 11. Putting a pack on the iPhone
 
 The app has a **Remastered textures** switch in its pause menu, beside
 Dual-core, and a **Course** row next to it that picks any installed course
@@ -400,7 +676,7 @@ not on a phone. Both states are recorded in the session log
 (`texture_pack_state`, `texture_pack_preference_changed`), so a report says
 which textures a session actually ran with.
 
-## 10. Doing this for another course, or another asset class
+## 12. Doing this for another course, or another asset class
 
 Steps 1-6 are course-agnostic: change the manifest in step 1 and the profile
 names. Nothing in the tools knows about R&B.
@@ -419,7 +695,8 @@ Not yet established, in order of how much they matter:
 - **The PS2 games.** This whole runbook is the GameCube native path. PCSX2 has
   its own replacement mechanism with a different key, so treat the PS2 side as
   unsolved rather than as a port of this.
-- **Automated quality gates.** Everything above is eyeballed. The plan's "QA"
-  stage does not exist yet; a first cut would be a per-texture metric against
-  the source (structure kept, palette kept, no new saturation) run over a pass
-  directory.
+- **Automated quality gates.** [Section 9](#9-the-quality-gate) is the first
+  cut: four per-texture defect measures against the source, which found and
+  fixed one defect class in the shipped pack. It ranks candidates rather than
+  passing or failing a pack, and it does not look at frames — see that
+  section's own gaps.
