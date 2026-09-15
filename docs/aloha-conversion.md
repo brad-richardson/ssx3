@@ -696,7 +696,7 @@ maximum 69,184 units apart, so the harness's free-running ride is not
 reproducible at all. The A/B's median is about eleven times the floor's, which
 is suggestive and nothing more: one control pair whose own maximum is 69,184
 units cannot support attributing a 4,883-unit median to the colliders.
-**The collision A/B is inconclusive by design, not by result.** Reports:
+**This free-run A/B is inconclusive by design, not by result.** Reports:
 `local/research/aloha/floor-007-vs-007.json` and `ab-007-vs-006.json`.
 
 What this rules in is the instrument, not more runs. §9.3 uses the one that
