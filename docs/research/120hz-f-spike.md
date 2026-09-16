@@ -761,5 +761,13 @@ VI-paced with a 2-deep queue (headroom backlog 10) or the
 smoothing/XFB presentation path. Open question carried to the
 phone: whether smoothing extra draws also evict ordinaries
 (answerable from present.csv presented/s in existing trial data).
-The F phone trial itself is unaffected (no extra draws, no
-eviction). Repro: interleave-player + SKIP=1946/TICKS=60.
+ANSWERED same day from the manual smoothing run (274 extras over
+8.5 s): 783 displays in the trial window = ~60/s ordinaries + ~32/s
+extras, EXACTLY additive — every extra draw presents, zero
+eviction on the phone XFB/high-refresh path. Desktop eviction is
+a desktop-queue phenomenon. Gate-4b (F sim + smoothing-path extra
+draws) is therefore de-risked for presentation: the path already
+presents 92 displayed/s. (Pre-trial dip and post-trial present
+gap are manual-session menu/pause artifacts.) The F phone trial
+itself is unaffected (no extra draws, no eviction). Repro:
+interleave-player + SKIP=1946/TICKS=60.

@@ -301,8 +301,9 @@ the build or commit that closed them.
       VERDICT September 16: back-to-back render-every-update draws
       fully but the game's single-slot queue evicts the ordinary draw
       (59/59 rejected) — net 60 Hz half-stale, so true-120 needs
-      VI-paced 2-deep queue (backlog 10) or the smoothing/XFB path;
-      check smoothing eviction from present.csv on the phone;
+      VI-paced 2-deep queue (backlog 10) or the smoothing/XFB path
+      (phone path PROVEN additive: 783 displays = 60/s + 32/s extras,
+      zero eviction — gate-4b de-risked);
       (5) pacing acceptance (>=117 displayed/s + sim speed >= 0.98 +
       input-latency measurement) with fallback to F-sim/60-draws, then
       stock, on budget miss. No step starts until the gate before it passes.
