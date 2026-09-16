@@ -285,6 +285,14 @@ the build or commit that closed them.
       **Bias battery PASS-leaning (overnight):** 4 movies, matched player;
       lateral drift mixed signs with <1% mean, flip == engage in all four
       ([results](research/120hz-f-spike.md#bias-battery-results-overnight-post-merge)).
+      **Idle-cancel stuck fixed September 16:** a cancel landing with nothing
+      in flight restored consts but never cleared Running (return-site finish
+      unreachable); F now also finishes at the update entry (13 ms desktop,
+      phone-verified 537 doubled + clean finish). Lifecycle test grows a third
+      leg + restore-after-idle-cancel gate (`1dd045b`).
+      **A/B flags September 16:** `--course-manifest` (bare name or `stock`)
+      and `--textures stock|remaster` override menu choices per launch
+      (`d6441dd`); course/texture session events record effective values.
 - [ ] 120 Hz render test on the F sim backend (user, September 15): when F sim
       is validated, prove >60 FPS presentation driven by doubled updates.
       Gated order: (1) F sim correctness — CLOSED September 16: reset
@@ -340,8 +348,20 @@ the build or commit that closed them.
       physics at 120 split — CLOSED September 16 as answered-NO (no
       view work inside the doubled update to split); (10) VI-paced true-120 (2x update+render) vs
       back-to-back halves — end-architecture question, needs 1–3 first.
+      **Measured September 16 (4 phone runs):** 1x helps (render 12.25 →
+      9.37 same-window, speed 0.82 → 0.91) but pair+render ≈ 12 ms still
+      misses 8.33 — (2) alone does not reach budget; dual-core shows no
+      F-trial win (CPU-saturated updates leave nothing to overlap) and no
+      dual-specific trial stalls; cross-run render medians (9.4–13.0) are
+      section-dominated (blind sequence doesn't hold a line). Fast-FP
+      kitchen-sink (1x + dual + fast-FP) bounds the possible next.
       Audio skipping in heavy areas is a budget-overrun symptom (CPU
       starvation → DMA underrun), fixed by headroom, not audio work.
+      **Menu static fixed September 16:** separate mechanism — an idled AX
+      task leaves pushed DSP at a frozen nonzero constant (whole seconds,
+      2 distinct samples, proven in DSP dumps); DC-blocker in the iOS
+      backend settles it to silence, user-confirmed fixed. `--audio-dump`
+      + dump collect stays as the pushed-sample oracle.
 - [ ] 120 Hz by frame generation is ruled out, not pending. The Metal
       interpolation prototype on `spike/120hz` (worktree
       `../ssx3-120hz`, unmerged on purpose) cut emulation to 4.9 FPS at 0.36
