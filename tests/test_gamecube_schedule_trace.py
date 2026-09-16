@@ -1,9 +1,11 @@
 """Reject false high-refresh evidence and exercise deadline overload behavior."""
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from gamecube_schedule_trace import summarize
 from test_gamecube_native_trace import event
 
