@@ -41,6 +41,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   BOOL _courseMenuBuilt;
   UIButton* _resume;
   UIButton* _smoothing;
+  UIButton* _fTrial;
   UIButton* _reset;
 }
 @end
@@ -246,7 +247,16 @@ static void SetLabel(UILabel* label, NSString* text) {
   _smoothing.configuration=smoothingConfig;
   _smoothing.accessibilityIdentifier=@"SSX Try Smoothing";
   [_smoothing addTarget:self action:@selector(smoothingPressed) forControlEvents:UIControlEventTouchUpInside];
-  UIStackView* actions=MenuStack(@[_smoothing,_resume],UILayoutConstraintAxisHorizontal,12);
+  _fTrial=[UIButton buttonWithType:UIButtonTypeSystem];
+  UIButtonConfiguration* fConfig=[UIButtonConfiguration tintedButtonConfiguration];
+  fConfig.title=@"Try 120Hz sim";
+  fConfig.subtitle=@"Up to 35 seconds";
+  fConfig.baseForegroundColor=UIColor.labelColor;
+  fConfig.cornerStyle=UIButtonConfigurationCornerStyleMedium;
+  _fTrial.configuration=fConfig;
+  _fTrial.accessibilityIdentifier=@"SSX Try F";
+  [_fTrial addTarget:self action:@selector(fPressed) forControlEvents:UIControlEventTouchUpInside];
+  UIStackView* actions=MenuStack(@[_smoothing,_fTrial,_resume],UILayoutConstraintAxisHorizontal,12);
   actions.distribution=UIStackViewDistributionFillEqually;
   [actions.heightAnchor constraintGreaterThanOrEqualToConstant:48].active=YES;
 
@@ -293,6 +303,7 @@ static void SetLabel(UILabel* label, NSString* text) {
 }
 - (void)resumePressed { if (self.onResume) self.onResume(); }
 - (void)smoothingPressed { if (self.onSmoothing) self.onSmoothing(); }
+- (void)fPressed { if (self.onF) self.onF(); }
 - (void)resetPressed { if (self.onReset) self.onReset(); }
 - (void)outputChanged {
   NSArray<NSString*>* modes=@[@"half",@"three-quarter",@"full",@"match-internal"];
@@ -392,6 +403,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   [self rebuildCourseMenu:courses course:course];
   _course.enabled=canConfigure && courses.count>0;
   _smoothing.enabled=canTrial;
+  _fTrial.enabled=canTrial;
   _reset.enabled=canReset;
 }
 @end

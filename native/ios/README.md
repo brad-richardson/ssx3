@@ -64,6 +64,16 @@ latency improvement. Device reports have shown short stretches of actual
 See the [prototype findings](../../docs/research/120hz-native-interpolation.md)
 for performance limits, ownership rules and reproduction.
 
+The menu also offers **Try 120Hz sim** (route F): up to 35 seconds of doubled
+update cadence with halved dt and full integer replay, rendering normally at
+60 FPS. It changes handling feel, not the display rate, and takes a different
+racing line by design (statistical parity, not trajectory parity). The trial
+patches dt consts on its first live update and restores them before finishing,
+so pausing or checkpointing always sees stock dt; drift ends the trial
+gracefully with evidence rather than aborting. It requests no high-refresh
+display mode. Automated runs schedule it with `--f-at` (mirroring
+`--smoothing-at`). See [the F spike](../../docs/research/120hz-f-spike.md).
+
 The pause menu has direct **Half / 75% / Full / Match** output choices and
 **1× / 2×** internal detail choices. It stays open while either setting changes;
 Resume returns to play. Initial defaults are **Half output + 2× detail**, the

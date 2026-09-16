@@ -149,6 +149,33 @@ class DeviceLaunch(unittest.TestCase):
                 copy.assert_not_called()
                 command.assert_not_called()
 
+    def test_scheduled_f_trial_requires_bounded_sequence_before_device_changes(self):
+        for sequence, at in ((None, 10), (Path("native/ios/snow-jam-smoke.json"), float('nan')),
+                             (Path("native/ios/snow-jam-smoke.json"), -1),
+                             (Path("native/ios/snow-jam-smoke.json"), 201)):
+            with self.subTest(sequence=sequence, at=at), \
+                    mock.patch.object(mobile_gamecube, "copy_to") as copy, \
+                    mock.patch.object(mobile_gamecube, "command") as command:
+                with self.assertRaises(ValueError):
+                    mobile_gamecube.launch(argparse.Namespace(device="PHONE", simulator=False,
+                                                             sequence=sequence, f_at=at))
+                copy.assert_not_called()
+                command.assert_not_called()
+
+    def test_f_flag_reaches_app_after_argument_separator(self):
+        args = argparse.Namespace(device="PHONE", simulator=False,
+                                  sequence=Path("native/ios/snow-jam-smoke.json"), f_at=155.0)
+        calls = []
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "copy_to"), \
+                mock.patch.object(mobile_gamecube, "command", side_effect=lambda c: calls.append(c)):
+            mobile_gamecube.launch(args)
+        self.assertEqual(len(calls), 1)
+        command = calls[0]
+        bundle = command.index(mobile_gamecube.BUNDLE)
+        self.assertEqual(command[bundle + 1:], ["--", "-ssxAutoTest", "-ssxFAt", "155.0"])
+
     def test_app_flags_follow_argument_separator(self):
         # devicectl parsed "-ssxAutoTest" as its own "-t" option until "--" was added.
         args = argparse.Namespace(device="PHONE", simulator=False,

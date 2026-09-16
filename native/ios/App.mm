@@ -257,10 +257,12 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   double _lastDiagnosticFlush;
   double _lastTickHost;
   int _lastTrialStatus;
+  int _lastTrialKind;
   BOOL _trialCancellationLogged;
   double _lastCapture;
   double _duration;
   double _scheduledTrialAt;
+  double _scheduledFAt;
   NSArray<NSDictionary*>* _sequence;
   NSUInteger _eventIndex;
   BOOL _pausedForSystem;
@@ -555,6 +557,7 @@ static void SSXLaunchTrace(NSString* step) {
   _eventIndex = 0;
   _lastTickHost = _lastDiagnosticFlush = 0;
   _lastTrialStatus = -1;
+  _lastTrialKind = -1;
   _startupInput={}; _startupPhaseLogged=-1; _sequenceStarted=-1; _sequenceFromMainMenu=NO;
   _trialCancellationLogged = NO;
   _trialAfterOutput = NO;
@@ -712,6 +715,7 @@ static void SSXLaunchTrace(NSString* step) {
   Common::Log::SetEmbedderLogCallback(RuntimeLog,nullptr);
   NSArray* args = NSProcessInfo.processInfo.arguments;
   _scheduledTrialAt=-1;
+  _scheduledFAt=-1;
   if ([args containsObject:@"-ssxAutoTest"]) {
     NSString* sequencePath = [Documents() stringByAppendingPathComponent:@"test-sequence.json"];
     NSData* data = [NSData dataWithContentsOfFile:sequencePath];
@@ -726,6 +730,13 @@ static void SSXLaunchTrace(NSString* step) {
       double requested=0;
       if ([scanner scanDouble:&requested] && scanner.isAtEnd && std::isfinite(requested) &&
           requested>=0 && requested<=_duration-40) _scheduledTrialAt=requested;
+    }
+    NSUInteger fArg=[args indexOfObject:@"-ssxFAt"];
+    if (fArg != NSNotFound && fArg+1 < args.count) {
+      NSScanner* scanner=[NSScanner scannerWithString:args[fArg+1]];
+      double requested=0;
+      if ([scanner scanDouble:&requested] && scanner.isAtEnd && std::isfinite(requested) &&
+          requested>=0 && requested<=_duration-40) _scheduledFAt=requested;
     }
   }
   const auto* descriptor = staticrecomp_get_module();
@@ -745,6 +756,7 @@ static void SSXLaunchTrace(NSString* step) {
     @"debugMainMenuRequested":@(_debugMainMenu),
     @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
     @"scheduledSmoothingAt":_scheduledTrialAt>=0 ? @(_scheduledTrialAt) : NSNull.null,
+    @"scheduledFAt":_scheduledFAt>=0 ? @(_scheduledFAt) : NSNull.null,
     @"reportSchema":@2, @"appBuild":@SSX_SESSION_BUILD_ID,
     @"builtAt":ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"])[@"built_at"] ?: @"unknown",
     @"host_seconds":@(CACurrentMediaTime()), @"unix_seconds":@(NSDate.date.timeIntervalSince1970),
@@ -965,8 +977,12 @@ static void SSXLaunchTrace(NSString* step) {
     if(!manualStart) [self send:@"RELEASE START\n"];
     [self logSessionEvent:@"startup_start_released" details:@{}];
   }
+  const auto bootTrial=NativeTrial::status.load();
+  // A checkpoint must never capture a trial mid-flight: F rewrites guest dt
+  // consts that a save would persist. The flag stays wanted and fires later.
   if(_bootCheckpointWanted && startupPhase==StartupBoot::Phase::MainMenu
-     && !_pendingCheckpoint && _running && !_stopRequested && _sessionIdentity) {
+     && !_pendingCheckpoint && _running && !_stopRequested && _sessionIdentity
+     && bootTrial!=NativeTrial::Status::Waiting && bootTrial!=NativeTrial::Status::Running) {
     _bootCheckpointWanted = NO;
     [self logSessionEvent:@"boot_checkpoint_requested" details:@{
         @"active_seconds":@(elapsed)}];
@@ -994,6 +1010,18 @@ static void SSXLaunchTrace(NSString* step) {
       [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"reason":@"A trial is already pending or running."}];
     }
   }
+  if (_scheduledFAt>=0 && sequenceElapsed>=_scheduledFAt) {
+    const double requested=_scheduledFAt;
+    _scheduledFAt=-1;
+    const auto trial=NativeTrial::status.load();
+    if (trial != NativeTrial::Status::Waiting && trial != NativeTrial::Status::Running) {
+      _trialCancellationLogged=NO;
+      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"kind":@"F", @"scheduledAt":@(requested)}];
+      NativeTrial::RequestF();
+    } else {
+      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@"F", @"reason":@"A trial is already pending or running."}];
+    }
+  }
   if (elapsed-_lastMetric>=1) {
     _lastMetric=elapsed;
     std::vector<double> frames;
@@ -1013,7 +1041,9 @@ static void SSXLaunchTrace(NSString* step) {
       @"audioDMAEmptyDequeues":@(Mixer::GetDMAEmptyDequeues()), @"host_seconds":@(CACurrentMediaTime()),
       @"maxSpeedExcludingThrottle":std::isfinite(maxSpeed) ? @(maxSpeed) : NSNull.null,
       @"trialStatus":@(static_cast<int>(NativeTrial::status.load())),
+      @"trialKind":@(static_cast<int>(NativeTrial::kind.load())),
       @"trialLimited":@(NativeTrial::limited.load()), @"trialExtras":@(NativeTrial::extras.load()),
+      @"trialDoubled":@(NativeTrial::updates_doubled.load()),
       @"callbackTiming":@{@"update":CallbackSummary(CallbackTimer::Drain(CallbackTimer::update_ring)),
         @"render":CallbackSummary(CallbackTimer::Drain(CallbackTimer::render_ring)), @"cpuThread":@(_cpuThread)},
       @"rider":RiderSummary(CallbackTimer::ReadRider()),
@@ -1064,6 +1094,20 @@ static void SSXLaunchTrace(NSString* step) {
       self->_trialCancellationLogged = NO;
       self->_trialAfterOutput=YES;
       [self logSessionEvent:@"trial_resume_requested" details:@{}];
+      [self resumeSession];
+    }];
+  };
+  _sessionMenu.onF = ^{
+    SSXViewController* self=weakSelf;
+    if (!self || ![self canChangeOutputScale]) return;
+    [self dismissSessionMenuThen:^{
+      SSXViewController* self=weakSelf;
+      if (!self) return;
+      // F renders normally, so unlike smoothing it needs no output-settle
+      // wait: request while paused; the trial starts at the next riding idle.
+      self->_trialCancellationLogged = NO;
+      [self logSessionEvent:@"trial_resume_requested" details:@{@"kind":@"F"}];
+      NativeTrial::RequestF();
       [self resumeSession];
     }];
   };
@@ -1208,7 +1252,10 @@ static void SSXLaunchTrace(NSString* step) {
   // new game frame reached the screen; the native trial logs render counts.
 }
 - (void)updateTrialDisplayLink {
-  const BOOL running = NativeTrial::status.load() == NativeTrial::Status::Running && !_pauseState.WantsPause();
+  // Only smoothing presents above 60; F renders at the normal rate and must
+  // not raise the display refresh it cannot fill.
+  const BOOL running = NativeTrial::status.load() == NativeTrial::Status::Running &&
+      NativeTrial::kind.load() == NativeTrial::Kind::Smoothing && !_pauseState.WantsPause();
   if (running && !_trialDisplayLink) {
     _trialDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(trialDisplayTick:)];
     const float maximum = self.view.window.screen.maximumFramesPerSecond;
@@ -1237,7 +1284,8 @@ static void SSXLaunchTrace(NSString* step) {
   const BOOL canConfigure=[self canChangeOutputScale];
   NSString* status=_pendingCheckpoint ? @"Saving your place…" : (_menuStatus ?: @"Paused");
   if (!_pendingCheckpoint && NativeTrial::limited.load())
-    status=[status stringByAppendingString:@" · Smoothing ended to maintain game speed."];
+    status=[status stringByAppendingString:(NativeTrial::kind.load()==NativeTrial::Kind::F ?
+        @" · Sim trial ended to maintain game speed." : @" · Smoothing ended to maintain game speed.")];
   if ([NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]!=(BOOL)_cpuThread && _cpuThreadOverride<0)
     status=[status stringByAppendingString:@" · Dual-core change applies after Full Reset."];
   if ([self remasterRequested]!=_remasterActive)
@@ -1565,9 +1613,12 @@ static void SSXLaunchTrace(NSString* step) {
       state == Core::State::Paused ? Pause::RuntimeState::Paused : Pause::RuntimeState::Unavailable;
   const auto action = _pauseState.Reconcile(runtimeState);
   const auto trial = NativeTrial::status.load();
-  if (_lastTrialStatus != static_cast<int>(trial)) {
+  const int trialKind = static_cast<int>(NativeTrial::kind.load());
+  if (_lastTrialStatus != static_cast<int>(trial) || _lastTrialKind != trialKind) {
     _lastTrialStatus=static_cast<int>(trial);
-    [self logSessionEvent:@"trial_status" details:@{}];
+    _lastTrialKind=trialKind;
+    [self logSessionEvent:@"trial_status" details:@{@"kind":@(trialKind),
+        @"doubled":@(NativeTrial::updates_doubled.load()), @"extras":@(NativeTrial::extras.load())}];
   }
   if (pause && (trial == NativeTrial::Status::Running || trial == NativeTrial::Status::Waiting)) {
       // A checkpoint cannot contain a half-finished injected render: its host
@@ -1638,6 +1689,7 @@ static void SSXLaunchTrace(NSString* step) {
   row[@"applicationState"]=@(UIApplication.sharedApplication.applicationState);
   row[@"runtimeState"]=@(static_cast<int>(Core::GetState(Core::System::GetInstance())));
   row[@"trialStatus"]=@(static_cast<int>(NativeTrial::status.load()));
+  row[@"trialKind"]=@(static_cast<int>(NativeTrial::kind.load()));
   row[@"trialCancel"]=@(NativeTrial::cancel.load()); row[@"trialLimited"]=@(NativeTrial::limited.load());
   row[@"checkpoint"]=_pendingCheckpoint.lastPathComponent ?: @"";
   row[@"active_seconds"]=_startTime ? @(CACurrentMediaTime()-_startTime-(_pausedForSystem ? CACurrentMediaTime()-_systemPauseStart : 0)) : NSNull.null;

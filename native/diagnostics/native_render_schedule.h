@@ -112,9 +112,12 @@ static inline void Step(CPUState& c){
 #ifdef SSX_NATIVE_TRIAL_APP
  // Completion is a quiescence property, independent of the call-site gate
  // used to inject work. Cancellation can restore the mode at a callback
- // return before the next eligible application idle call.
+ // return before the next eligible application idle call. F finishes in the
+ // probe step instead, after restoring its dt consts; finishing here would
+ // unblock a checkpoint with the guest still halved.
  if((finished||c.pc==0x801cad24)&&!mode_changed&&!render.pending&&!update.pending&&
-    NativeTrial::status.load()==NativeTrial::Status::Running&&!ExperimentalWindow())
+    NativeTrial::status.load()==NativeTrial::Status::Running&&!ExperimentalWindow()&&
+    NativeTrial::kind.load()!=NativeTrial::Kind::F)
   NativeTrial::status=NativeTrial::Status::Finished;
 #endif
  if(c.pc!=0x801cad24||c.lr!=0x801cd724||render.pending||update.pending)return;
@@ -145,6 +148,11 @@ static inline void Step(CPUState& c){
 #ifdef SSX_NATIVE_TRIAL_APP
  if(NativeTrial::status.load()==NativeTrial::Status::Waiting){
   NativeTrial::ends=Now()+35;NativeTrial::status=NativeTrial::Status::Running;
+  // New trial, new epoch: the start block below re-inits the deadline,
+  // budget and speed floor. Without this a trial after an F trial (which
+  // never takes completion mode, the only other reset path) inherits a
+  // stale budget and dies instantly on made<15 past a long-dead grace.
+  schedule_started=false;
  }
 #endif
  const u64 ticks=timing.GetTicks();
@@ -153,7 +161,14 @@ static inline void Step(CPUState& c){
   schedule_started=true;deadline={ticks+period,period,0};last_draw=ticks;
   budget={Now(),ticks};speed_floor={};
   ScheduleEvent(c,"start",ticks);
-  if(CompletionEnabled()){
+#ifdef SSX_NATIVE_TRIAL_APP
+  // F renders normally through production double-buffering; only smoothing
+  // takes the single-XFB completion alias for its injected draws.
+  const bool f_start=NativeTrial::kind.load()==NativeTrial::Kind::F;
+#else
+  const bool f_start=false;
+#endif
+  if(CompletionEnabled()&&!f_start){
    const u32 graphics=Word(c,c.gpr[13]-22644);
    const u32 bytes=Word(c,graphics+7552);
    first_xfb=Word(c,c.gpr[13]-20600);
@@ -182,14 +197,20 @@ static inline void Step(CPUState& c){
  // after a settling period, it cannot produce useful extras or simulation
  // speed over the long window stays low. The per-frame veto above already
  // withholds extras during short dips, so this decides only whether the
- // trial as a whole is worth keeping.
+ // trial as a whole is worth keeping. F doubles nearly every update while
+ // riding, so its floor counts doubled updates instead of extras.
  static constexpr double Grace=10.0;
+ const bool f_kind=NativeTrial::kind.load()==NativeTrial::Kind::F;
+ const unsigned made=f_kind?NativeTrial::updates_doubled.load():NativeTrial::extras.load();
  if(now_cached-budget.wall_start>=Grace&&
-    (NativeTrial::extras.load()<15||
+    (made<15||
      (speed_floor.long_span>=RenderResearch::SpeedFloor::LongWindow&&speed_floor.long_rate<0.95))){
   NativeTrial::limited=true;NativeTrial::Cancel();
   ScheduleEvent(c,"performance_limit",ticks);return;
  }
+ // F keeps production idle waits; its doubling happens inside updates and it
+ // injects no extra renders, so there is no deadline to poll.
+ if(f_kind)return;
 #endif
  const auto decision=deadline.Poll(ticks,last_draw,Word(c,c.gpr[13]-20556));
  const u64 missed=deadline.missed;

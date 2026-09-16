@@ -51,19 +51,36 @@ class NativeTraceTests(unittest.TestCase):
             self.assertIn('NativeTrialTest::Step(m_guest)', generated)
 
     def test_lifecycle_acceptance_requires_events_and_actual_unchanged_extra(self):
-        actions = ['request', 'cancel_during_extra', 'quiescent', 'restart', 'quiescent', 'complete']
+        actions = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent', 'complete']
         rows = [dict(event='trial_test', action=a, wall=i) for i, a in enumerate(actions)]
         with self.assertRaises(RuntimeError):
             validate_trial_trace([])
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
-        rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1))
+        # Trial 1 (F) must patch, double cleanly, and restore before restart.
+        rows.append(dict(event='f_trial', action='patched', wall=1))
+        rows.append(dict(event='f_trial', action='restored', wall=2))
+        rows.append(event('update', repeat=1, wall=2))
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1, wall=4))
+        self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
+        # A draw from before the restart cannot satisfy trial 2: with a stale
+        # schedule epoch the second trial limits instantly and makes nothing.
+        rows[-1]['wall'] = 2
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        rows[-1]['wall'] = 4
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows[1:])
         rows[-1]['rng_changed'] = 1
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
+        rows[-1]['rng_changed'] = 0
+        without_restore = [r for r in rows if not (r.get('event') == 'f_trial' and r.get('action') == 'restored')]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(without_restore)
 
     def test_rejected_call_is_not_a_successful_draw(self):
         counters = dict(gate_calls=1, gate_ready=0, result=0,

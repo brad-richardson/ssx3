@@ -69,12 +69,21 @@ static void WriteXF(CPUState& c,const Matrix& m,u32 address,unsigned count) {
 static void Before(CPUState& c) {
  auto& timing=Core::System::GetInstance().GetCoreTiming();
  if(update.pending&&c.pc==update.ret){++generation;update_ticks=timing.GetTicks();}
- if(render.pending&&c.pc==render.ret&&active){
+ if(render.pending&&c.pc==render.ret){
 #ifdef SSX_NATIVE_TRIAL_APP
-  if((c.gpr[3]&255)&&frame_end_calls){++NativeTrial::frames;if(render.repeated)++NativeTrial::extras;}
+  // Frames count completed draws during any running trial; extras need an
+  // active smoothing pass. Smoothing behavior is unchanged: active implies a
+  // running smoothing trial.
+  const bool f_run=NativeTrial::kind.load()==NativeTrial::Kind::F&&
+                   NativeTrial::status.load()==NativeTrial::Status::Running;
+  if((active||f_run)&&(c.gpr[3]&255)&&frame_end_calls){
+   ++NativeTrial::frames;if(active&&render.repeated)++NativeTrial::extras;
+  }
 #endif
-  std::fprintf(Output(),"{\"event\":\"interpolation\",\"wall\":%.6f,\"repeat\":%d,\"generation\":%llu,\"alpha\":%.6f,\"loaded\":%u,\"blended\":%u,\"camera_only\":%u,\"texture_blended\":%u,\"bindings\":%u}\n",Now(),render.repeated,(unsigned long long)generation,alpha,loaded,blended,camera_only,texture_blended,captured_bindings);
-  std::fflush(Output());active=false;
+  if(active){
+   std::fprintf(Output(),"{\"event\":\"interpolation\",\"wall\":%.6f,\"repeat\":%d,\"generation\":%llu,\"alpha\":%.6f,\"loaded\":%u,\"blended\":%u,\"camera_only\":%u,\"texture_blended\":%u,\"bindings\":%u}\n",Now(),render.repeated,(unsigned long long)generation,alpha,loaded,blended,camera_only,texture_blended,captured_bindings);
+   std::fflush(Output());active=false;
+  }
  }
  if(!render.pending||!active)return;
  if(c.pc==0x8029e9fc&&c.gpr[3]==21){base=c.gpr[4];stride=c.gpr[5];bindings.clear();}
@@ -138,7 +147,14 @@ static inline void Step(CPUState& c){
  if(!ExperimentalWindow())reset_next=true;
  if(c.pc==0x8010a4c8&&render.pending){
   const auto state=Capture(c,render.app);
-  active=ExperimentalWindow()&&NativeSchedule::ActiveRiderState(state.state)&&Valid(c,state.rider,0x800);
+#ifdef SSX_NATIVE_TRIAL_APP
+  // F renders normally; the immediate-upload interpolation path stays off so
+  // the trial measures doubled updates rather than matrix re-uploads.
+  const bool smoothing_trial=NativeTrial::kind.load()!=NativeTrial::Kind::F;
+#else
+  const bool smoothing_trial=true;
+#endif
+  active=smoothing_trial&&ExperimentalWindow()&&NativeSchedule::ActiveRiderState(state.state)&&Valid(c,state.rider,0x800);
   prepared=false;has_camera_delta=false;loaded=blended=camera_only=texture_blended=captured_bindings=0;
   bindings.clear();
   if(!active){history.Reset();return;}
@@ -156,7 +172,9 @@ extern "C" void SSXResetNativeTrial(const char* path){
  start=Clock::now();now_cached=0;update={};render={};offset_matrix=0;repeats=0;
  NativeTrial::log_path=path?path:"";NativeTrial::status=NativeTrial::Status::Idle;NativeTrial::cancel=false;
  NativeTrial::limited=false;
- NativeTrial::frames=NativeTrial::extras=0;NativeTrial::ends=0;
+ NativeTrial::kind=NativeTrial::Kind::Smoothing;
+ NativeTrial::frames=NativeTrial::extras=NativeTrial::updates_doubled=0;NativeTrial::ends=0;
+ f_patched=false;
  NativeSchedule::deadline={};NativeSchedule::last_draw=0;
  NativeSchedule::schedule_started=NativeSchedule::mode_changed=false;
  NativeSchedule::mode_address=NativeSchedule::first_xfb=0;

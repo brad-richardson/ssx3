@@ -15,12 +15,24 @@ from gamecube_draw_trace import ROOT, sha
 
 def validate_trial_trace(rows):
     events = [r for r in rows if r.get('event') == 'trial_test']
-    expected = ['request', 'cancel_during_extra', 'quiescent', 'restart', 'quiescent', 'complete']
+    expected = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent', 'complete']
     if [r.get('action') for r in events] != expected:
         raise RuntimeError('Lifecycle trial did not demonstrate cancellation, drain, restart and completion')
     if any(b['wall'] < a['wall'] for a, b in zip(events, events[1:])):
         raise RuntimeError('Lifecycle events are out of order')
+    walls = {r['action']: r['wall'] for r in events}
+    first = [r for r in rows if walls['request'] < r.get('wall', 0) < walls['restart']]
+    if not any(r.get('event') == 'f_trial' and r.get('action') == 'patched' for r in first):
+        raise RuntimeError('Lifecycle F trial never patched its dt consts')
+    if not any(r.get('event') == 'f_trial' and r.get('action') == 'restored' for r in first):
+        raise RuntimeError('Lifecycle F trial never restored its dt consts')
+    repeats = [r for r in first if r.get('event') == 'update' and r.get('repeat') == 1]
+    if not any(r.get('same_rider') == 1 and r.get('state_before') == r.get('state_after') for r in repeats):
+        raise RuntimeError('Lifecycle F trial never completed a clean doubled update')
+    # Trial 2 must make real extras: with a stale schedule epoch it limits
+    # instantly past trial 1's grace and this finds nothing.
     extras = [r for r in rows if r.get('event') == 'render' and r.get('repeat') and
+              r.get('wall', 0) > walls['restart'] and
               r.get('result', 0) & 255 and r.get('view_matrix_calls') and r.get('frame_end_calls')]
     if not extras:
         raise RuntimeError('Lifecycle trial never completed an injected draw')
@@ -30,7 +42,7 @@ def validate_trial_trace(rows):
                 r.get('rng_changed') != 0 or r.get('position_changed') != 0 or
                 any(r.get(k) != [] for k in ('body_offsets', 'app_offsets', 'view_offsets'))):
             raise RuntimeError('Lifecycle extra draw changed watched guest state')
-    return dict(lifecycle_complete=True, complete_extras=len(extras))
+    return dict(lifecycle_complete=True, complete_extras=len(extras), first_trial_repeats=len(repeats))
 
 
 def main():

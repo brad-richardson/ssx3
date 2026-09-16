@@ -68,11 +68,29 @@ static double now_cached=0;
 static inline void RefreshNow(CPUState& c){
  if(c.pc==0x801cad24||c.pc==0x8010550c||c.pc==0x8010a4c8)now_cached=Now();
 }
+#ifdef SSX_NATIVE_TRIAL_APP
+// Route F on the phone: the trial arms the v3b configuration (doubled updates,
+// halved dt consts, full integer replay) without any environment. FMode is the
+// live window; FTrial owns finish/restore once Running even after cancel.
+static bool FMode(){
+ return NativeTrial::status.load()==NativeTrial::Status::Running&&
+  NativeTrial::kind.load()==NativeTrial::Kind::F&&NativeTrial::Active(now_cached);
+}
+static bool FTrial(){
+ return NativeTrial::status.load()==NativeTrial::Status::Running&&
+  NativeTrial::kind.load()==NativeTrial::Kind::F;
+}
+static bool f_patched=false;
+#endif
 static bool GuestWindowEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_GUEST_WINDOW");return p&&std::strcmp(p,"1")==0;}();return value;}
 static unsigned GuestWindowTicks(){static unsigned value=[](){const char* p=std::getenv("SSX_NATIVE_WINDOW_TICKS");if(!p||!*p)return 4000000000u;long v=std::strtol(p,nullptr,10);return v>0?(unsigned)v:4000000000u;}();return value;}
 static unsigned GuestWindowSkip(){static unsigned value=[](){const char* p=std::getenv("SSX_NATIVE_WINDOW_SKIP");if(!p||!*p)return 0u;long v=std::strtol(p,nullptr,10);return v>0?(unsigned)v:0u;}();return value;}
 static bool SpeedGateEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_SPEED_GATE");return p&&std::strcmp(p,"1")==0;}();return value;}
-static bool CounterRestoreEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_COUNTER_RESTORE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool CounterRestoreEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ if(FMode())return true;
+#endif
+ static bool value=[](){const char* p=std::getenv("SSX_NATIVE_COUNTER_RESTORE");return p&&std::strcmp(p,"1")==0;}();return value;}
 static u32 tick_saved=0;static bool tick_have=false;static unsigned tick_restores=0;
 static u32 stamp_saved[5]={0,0,0,0,0};static u32 appflag_saved=0;static u32 rng_saved[12]={0,0,0,0,0,0,0,0,0,0,0,0};
 static const u32 StampOffs[5]={0x30u,0x50u,0x70u,0x90u,0xB0u};
@@ -184,21 +202,28 @@ static FILE* Output(){
  return output_file;
 }
 static bool DoubleEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_RENDER");return p&&std::strcmp(p,"1")==0;}();return value;}
-static bool DoubleUpdateEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_UPDATE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool DoubleUpdateEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ if(FMode())return true;
+#endif
+ static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_UPDATE");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool HalfCadenceEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_CADENCE");return p&&std::strcmp(p,"1")==0;}();return value;}
-static bool HalfDtEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_DT");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool HalfDtEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ if(FMode())return true;
+#endif
+ static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_DT");return p&&std::strcmp(p,"1")==0;}();return value;}
 static const u32 HalfDtAddrs[]={0x803db490,0x803dbba8,0x803dbd44,0x803dc0d4,0x803dc884,0x803dce70,0x803dd6dc,0x803dd8cc,0x803de62c,0x803df0b0,0x803df58c};
 static const unsigned HalfDtCount=sizeof(HalfDtAddrs)/sizeof(HalfDtAddrs[0])+4;
-static void WriteConstSet(CPUState& c,bool to_half,const char* tag){
+struct PlannedConst {u32 addr,expect,value;};
+static unsigned PlanConstSet(bool to_half,PlannedConst* plan){
  float sixth=1.0f/60.0f,twelfth=1.0f/120.0f,sixty=60.0f,onetwenty=120.0f;
  u32 exp6,half12,exp60,half120;
  std::memcpy(&exp6,&sixth,4);std::memcpy(&half12,&twelfth,4);
  std::memcpy(&exp60,&sixty,4);std::memcpy(&half120,&onetwenty,4);
- struct Planned {u32 addr,expect,value;};
- Planned plan[HalfDtCount];
  unsigned n=0;
  auto want=[&](u32 a,u32 stock,u32 halved){
-  plan[n++]=Planned{a,to_half?stock:halved,to_half?halved:stock};
+  plan[n++]=PlannedConst{a,to_half?stock:halved,to_half?halved:stock};
  };
  for(u32 a:HalfDtAddrs)want(a,exp6,half12);
  want(0x803dcee0,exp60,half120);
@@ -206,29 +231,102 @@ static void WriteConstSet(CPUState& c,bool to_half,const char* tag){
  want(0x803db7e8,0x3f7ae148,0x3f7d6d55);
  want(0x803db7ec,0x3f74bc6a,0x3f7a4dfd);
  want(0x803db7f0,0x3f7a740e,0x3f7d3624);
- // Verify the whole set before writing any of it. Interleaving the check with
- // the write leaves a drifting guest half-patched and then aborts, and on the
- // restore path that strands the run at 1/120 with no way back - the failure
- // this ordering exists to prevent.
- for(unsigned i=0;i<n;++i){
-  if(!Valid(c,plan[i].addr,4)||Word(c,plan[i].addr)!=plan[i].expect){
-   std::fprintf(stderr,"[native-probe] %s const drift at %08x (%u of %u verified, none written)\n",
-                tag,plan[i].addr,i,n);
-   std::abort();
-  }
- }
+ return n;
+}
+// Returns the first unverified index, or n when the whole set matches.
+static unsigned VerifyConstSet(CPUState& c,PlannedConst* plan,unsigned n){
+ for(unsigned i=0;i<n;++i)
+  if(!Valid(c,plan[i].addr,4)||Word(c,plan[i].addr)!=plan[i].expect)return i;
+ return n;
+}
+static void WriteConstPlan(CPUState& c,PlannedConst* plan,unsigned n){
  for(unsigned i=0;i<n;++i){
   auto* p=c.ram+plan[i].addr-0x80000000u;const u32 v=plan[i].value;
   p[0]=(unsigned char)(v>>24);p[1]=(unsigned char)(v>>16);p[2]=(unsigned char)(v>>8);p[3]=(unsigned char)v;
  }
 }
+static void WriteConstSet(CPUState& c,bool to_half,const char* tag){
+ PlannedConst plan[HalfDtCount];
+ const unsigned n=PlanConstSet(to_half,plan);
+ // Verify the whole set before writing any of it. Interleaving the check with
+ // the write leaves a drifting guest half-patched and then aborts, and on the
+ // restore path that strands the run at 1/120 with no way back - the failure
+ // this ordering exists to prevent.
+ const unsigned bad=VerifyConstSet(c,plan,n);
+ if(bad<n){
+  std::fprintf(stderr,"[native-probe] %s const drift at %08x (%u of %u verified, none written)\n",
+               tag,plan[bad].addr,bad,n);
+  std::abort();
+ }
+ WriteConstPlan(c,plan,n);
+}
 static void PatchHalfDt(CPUState& c){
  static bool done=false;
  if(GuestWindowEnabled())return;
+#ifdef SSX_NATIVE_TRIAL_APP
+ if(FTrial())return; // F owns its patch/restore lifecycle below
+#endif
  if(done||!HalfDtEnabled()||!ExperimentalWindow())return;
  WriteConstSet(c,true,"HALF_DT");
  done=true;
  std::fprintf(stderr,"[native-probe] HALF_DT patched %u consts\n",HalfDtCount);
+}
+#ifdef SSX_NATIVE_TRIAL_APP
+static void FEmit(CPUState& c,const char* action){
+ FILE* f=Output();
+ if(f){
+  std::fprintf(f,"{\"event\":\"f_trial\",\"action\":\"%s\",\"wall\":%.6f,\"tb\":%llu,\"doubled\":%u}\n",
+               action,Now(),(unsigned long long)c.timebase,NativeTrial::updates_doubled.load());
+  std::fflush(f);
+ }
+}
+// Patch on the first live F update. Drift ends the trial gracefully with full
+// evidence instead of aborting: the desktop abort exists to catch model errors
+// during research, and a dead phone run keeps no more evidence than this.
+static void FPatch(CPUState& c){
+ if(f_patched||!FMode())return;
+ PlannedConst plan[HalfDtCount];
+ const unsigned n=PlanConstSet(true,plan);
+ const unsigned bad=VerifyConstSet(c,plan,n);
+ if(bad<n){
+  std::fprintf(stderr,"[native-probe] F_TRIAL const drift at %08x (%u of %u verified, none written)\n",
+               plan[bad].addr,bad,n);
+  NativeTrial::limited=true;NativeTrial::Cancel();return;
+ }
+ WriteConstPlan(c,plan,n);
+ f_patched=true;
+ std::fprintf(stderr,"[native-probe] F_TRIAL patched %u consts\n",n);
+ FEmit(c,"patched");
+}
+// Restore dt consts once the trial leaves the live window. Idempotent: the
+// update-entry call does the work and the update-return call only finishes.
+// A restore drift is loud and sticky: the guest stays halved until Full
+// Reset rather than crashing the session.
+static void FRestore(CPUState& c){
+ if(!f_patched)return;
+ PlannedConst plan[HalfDtCount];
+ const unsigned n=PlanConstSet(false,plan);
+ const unsigned bad=VerifyConstSet(c,plan,n);
+ if(bad<n){
+  std::fprintf(stderr,"[native-probe] F_TRIAL restore drift at %08x (%u of %u verified, guest stays halved)\n",
+               plan[bad].addr,bad,n);
+  NativeTrial::limited=true;
+ }else{
+  WriteConstPlan(c,plan,n);
+  std::fprintf(stderr,"[native-probe] F_TRIAL restored %u consts\n",n);
+ }
+ f_patched=false;
+ FEmit(c,"restored");
+}
+static bool FReady(){return !FTrial()||f_patched;}
+static bool FCounterWindow(){return FMode()&&f_patched;}
+#else
+static bool FReady(){return true;}
+static bool FCounterWindow(){return false;}
+#endif
+static bool CounterWindow(){
+ if(FCounterWindow())return true;
+ return CounterRestoreEnabled()&&GuestWindowEnabled()&&guest_phase==1;
 }
 static bool WaitEnabled(){static const bool on=std::getenv("SSX_NATIVE_WAIT_REPEAT")!=nullptr;return on;}
 static bool SweepEnabled(){static const bool on=std::getenv("SSX_NATIVE_FROZEN_VIEW_SWEEP")!=nullptr;return on;}
@@ -275,6 +373,14 @@ static inline void Step(CPUState& c){
   c.pc=c.lr;return;
  }
 #ifdef SSX_NATIVE_TRIAL_APP
+ // F restores consts at update entries, ahead of the trial-app early return:
+ // a cancelled trial must restore even though its window is already closed.
+ // Finishing waits for the matching return so Finished always means
+ // quiescent. Repeats re-enter with pending set and skip both.
+ if(c.pc==0x8010550c&&!update.pending&&!render.pending){
+  if(FTrial()&&!NativeTrial::Active(now_cached))FRestore(c);
+  else FPatch(c);
+ }
  if(!ExperimentalWindow()&&!render.pending&&!update.pending)return;
 #endif
  if(WatchCount()&&ExperimentalWindow()&&update.pending){
@@ -334,26 +440,56 @@ static inline void Step(CPUState& c){
     std::fprintf(stderr,"[native-probe] GUEST_WINDOW engaged at update %u\n",update_entries);
    }
   }
-  if(!just_armed&&!update.repeated&&DoubleUpdateEnabled()&&ExperimentalWindow()&&Valid(c,b.rider,0x800)&&update.before.state==b.state){
+  if(!just_armed&&!update.repeated&&DoubleUpdateEnabled()&&ExperimentalWindow()&&FReady()&&Valid(c,b.rider,0x800)&&update.before.state==b.state){
    update.repeated=true;++update_repeats;
    if(GuestWindowEnabled()&&guest_phase==1)++guest_doubled;
-   if(CounterRestoreEnabled()&&GuestWindowEnabled()&&guest_phase==1){
+   bool skip_repeat=false;
+   if(CounterWindow()){
     const u32 g=TickCounterAddr(c);
-    if(!g||!Valid(c,g,4)){std::fprintf(stderr,"[native-probe] COUNTER_RESTORE no addr\n");std::abort();}
-    const u32 v=Word(c,g);
-    if(!tick_have||v!=tick_saved+1){std::fprintf(stderr,"[native-probe] COUNTER_RESTORE model drift saved=%u have=%d now=%u\n",tick_saved,tick_have?1:0,v);std::abort();}
-    auto putw=[&](u32 a,u32 value){auto* q=c.ram+a-0x80000000u;q[0]=(unsigned char)(value>>24);q[1]=(unsigned char)(value>>16);q[2]=(unsigned char)(value>>8);q[3]=(unsigned char)value;};
-    putw(g,tick_saved);
-    const u32 r=Rider(c);
-    if(r&&Valid(c,r,0x800))for(int i=0;i<5;++i)putw(r+StampOffs[i],stamp_saved[i]);
-    if(Valid(c,update.app+168,4))putw(update.app+168,appflag_saved);
-    if(Valid(c,0x8035de2c,48))for(int i=0;i<12;++i)putw(0x8035de2c+4*i,rng_saved[i]);
-    if(++tick_restores<=5)std::fprintf(stderr,"[native-probe] COUNTER_RESTORE #%u saved=%u\n",tick_restores,tick_saved);
+    const bool have_addr=g&&Valid(c,g,4);
+    const u32 v=have_addr?Word(c,g):0;
+    const bool model_ok=have_addr&&tick_have&&v==tick_saved+1;
+    if(!model_ok){
+     bool graceful=false;
+#ifdef SSX_NATIVE_TRIAL_APP
+     if(FTrial()){
+      std::fprintf(stderr,"[native-probe] F_TRIAL counter drift (graceful end)\n");
+      NativeTrial::limited=true;NativeTrial::Cancel();skip_repeat=true;graceful=true;
+     }
+#endif
+     if(!graceful){
+      if(!have_addr){std::fprintf(stderr,"[native-probe] COUNTER_RESTORE no addr\n");std::abort();}
+      std::fprintf(stderr,"[native-probe] COUNTER_RESTORE model drift saved=%u have=%d now=%u\n",tick_saved,tick_have?1:0,v);std::abort();
+     }
+    }
+    if(!skip_repeat){
+     auto putw=[&](u32 a,u32 value){auto* q=c.ram+a-0x80000000u;q[0]=(unsigned char)(value>>24);q[1]=(unsigned char)(value>>16);q[2]=(unsigned char)(value>>8);q[3]=(unsigned char)value;};
+     putw(g,tick_saved);
+     const u32 r=Rider(c);
+     if(r&&Valid(c,r,0x800))for(int i=0;i<5;++i)putw(r+StampOffs[i],stamp_saved[i]);
+     if(Valid(c,update.app+168,4))putw(update.app+168,appflag_saved);
+     if(Valid(c,0x8035de2c,48))for(int i=0;i<12;++i)putw(0x8035de2c+4*i,rng_saved[i]);
+     if(++tick_restores<=5)std::fprintf(stderr,"[native-probe] COUNTER_RESTORE #%u saved=%u\n",tick_restores,tick_saved);
+    }
    }
-   update.before=b;update.tb=c.timebase;update.wall=Now();update.cpu_start=RenderResearch::ThreadCPUSeconds();
-   c.gpr[3]=update.app;c.pc=update.entry;c.lr=update.ret;return;
+   if(skip_repeat){update.pending=false;}
+   else{
+#ifdef SSX_NATIVE_TRIAL_APP
+    if(FTrial())++NativeTrial::updates_doubled;
+#endif
+    update.before=b;update.tb=c.timebase;update.wall=Now();update.cpu_start=RenderResearch::ThreadCPUSeconds();
+    c.gpr[3]=update.app;c.pc=update.entry;c.lr=update.ret;return;
+   }
   }
   update.pending=false;
+#ifdef SSX_NATIVE_TRIAL_APP
+  // Finish at the quiescent return, after the entry restore above has run:
+  // the frontend waits for Running to clear before pausing/checkpointing.
+  if(FTrial()&&!NativeTrial::Active(now_cached)){
+   FRestore(c);
+   NativeTrial::status=NativeTrial::Status::Finished;
+  }
+#endif
  }
  if(render.pending&&c.pc==render.ret){
   // This field describes callback completion, not intermediate dispatches.
@@ -388,7 +524,7 @@ static inline void Step(CPUState& c){
     guest_phase=2;
     std::fprintf(stderr,"[native-probe] GUEST_WINDOW closed at update %u (doubled %u)\n",update_entries,guest_doubled);
    }
-   if(CounterRestoreEnabled()&&GuestWindowEnabled()&&guest_phase==1){
+   if(CounterWindow()){
     const u32 g=TickCounterAddr(c);
     if(g&&Valid(c,g,4)){tick_saved=Word(c,g);tick_have=true;}
     const u32 r=Rider(c);

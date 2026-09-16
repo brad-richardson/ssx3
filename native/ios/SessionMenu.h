@@ -7,6 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SSXSessionMenu : UIViewController
 @property(nonatomic, copy, nullable) void (^onResume)(void);
 @property(nonatomic, copy, nullable) void (^onSmoothing)(void);
+@property(nonatomic, copy, nullable) void (^onF)(void);
 @property(nonatomic, copy, nullable) void (^onReset)(void);
 @property(nonatomic, copy, nullable) void (^onOutput)(NSString* mode);
 @property(nonatomic, copy, nullable) void (^onInternal)(NSInteger scale);

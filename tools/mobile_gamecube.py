@@ -367,6 +367,12 @@ def launch(args):
             raise ValueError("--smoothing-at requires a bounded --sequence")
         if not math.isfinite(smoothing_at) or not 0 <= smoothing_at <= sequence["duration"]-40:
             raise ValueError("--smoothing-at must be nonnegative and leave 40 seconds before test end")
+    f_at = getattr(args, "f_at", None)
+    if f_at is not None:
+        if sequence is None:
+            raise ValueError("--f-at requires a bounded --sequence")
+        if not math.isfinite(f_at) or not 0 <= f_at <= sequence["duration"]-40:
+            raise ValueError("--f-at must be nonnegative and leave 40 seconds before test end")
     if args.sequence:
         if args.simulator:
             shutil.copy2(args.sequence, simulator_documents(args) / "test-sequence.json")
@@ -379,6 +385,8 @@ def launch(args):
         flags.extend(["-ssxInternalScale", str(internal_scale)])
     if smoothing_at is not None:
         flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
+    if f_at is not None:
+        flags.extend(["-ssxFAt", str(f_at)])
     if null_audio:
         flags.append("-ssxNullAudio")
     if getattr(args,"debug_main_menu",False):
@@ -440,6 +448,8 @@ def main():
                         help="Launch-only GameCube internal detail; normal launches use the saved choice (initially 2x)")
     parser.add_argument("--smoothing-at", type=float,
                         help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
+    parser.add_argument("--f-at", type=float,
+                        help="Request one guarded route-F sim trial at active test seconds; requires --sequence and 40 seconds remaining")
     parser.add_argument("--simulator-null-audio", action="store_true",
                         help="Graphics-only Simulator diagnostic; requires launch, --simulator, and bounded --sequence")
     boot=parser.add_mutually_exclusive_group()
@@ -475,6 +485,8 @@ def main():
         parser.error("--internal-scale applies only to launch")
     if args.smoothing_at is not None and args.command != "launch":
         parser.error("--smoothing-at applies only to launch")
+    if args.f_at is not None and args.command != "launch":
+        parser.error("--f-at applies only to launch")
     if args.simulator_null_audio and (args.command != "launch" or not args.simulator or not args.sequence):
         parser.error("--simulator-null-audio requires launch, --simulator, and a bounded --sequence")
     if args.simulator:

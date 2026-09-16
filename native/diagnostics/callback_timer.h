@@ -1,7 +1,7 @@
 // Always-on timing of the ordinary GXBE69 application update and render
 // callbacks. The CPU thread reads clocks only at those four boundaries per
 // frame, never per dispatch; the app's metric timer drains the rings once per
-// second. Samples are skipped while a smoothing trial is pending or running so
+// second. Samples are skipped while any trial is pending or running so
 // the numbers describe ordinary frames only. No guest state is read or written.
 #pragma once
 #include <algorithm>
