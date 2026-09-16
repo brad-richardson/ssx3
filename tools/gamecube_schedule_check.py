@@ -15,9 +15,11 @@ from gamecube_draw_trace import ROOT, sha
 
 def validate_trial_trace(rows):
     events = [r for r in rows if r.get('event') == 'trial_test']
-    expected = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent', 'complete']
+    expected = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent',
+                'restart2', 'cancel_idle', 'quiescent', 'complete']
     if [r.get('action') for r in events] != expected:
-        raise RuntimeError('Lifecycle trial did not demonstrate cancellation, drain, restart and completion')
+        raise RuntimeError('Lifecycle trial did not demonstrate cancellation, drain, restart, '
+                           'idle cancellation and completion')
     if any(b['wall'] < a['wall'] for a, b in zip(events, events[1:])):
         raise RuntimeError('Lifecycle events are out of order')
     walls = {r['action']: r['wall'] for r in events}
@@ -47,6 +49,12 @@ def validate_trial_trace(rows):
                 r.get('rng_changed') != 0 or r.get('position_changed') != 0 or
                 any(r.get(k) != [] for k in ('body_offsets', 'app_offsets', 'view_offsets'))):
             raise RuntimeError('Lifecycle extra draw changed watched guest state')
+    # Leg 3 re-runs F and cancels it idle. Finishing without restoring would
+    # strand the guest halved, so the restore after that cancel is required.
+    third = [r for r in rows if r.get('event') == 'f_trial' and r.get('action') == 'restored' and
+             r.get('wall', 0) > walls['cancel_idle']]
+    if not third:
+        raise RuntimeError('Lifecycle idle-cancelled F trial never restored its dt consts')
     return dict(lifecycle_complete=True, complete_extras=len(extras), first_trial_repeats=len(repeats))
 
 

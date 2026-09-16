@@ -461,10 +461,13 @@ static inline void Step(CPUState& c){
 #ifdef SSX_NATIVE_TRIAL_APP
  // F restores consts at update entries, ahead of the trial-app early return:
  // a cancelled trial must restore even though its window is already closed.
- // Finishing waits for the matching return so Finished always means
- // quiescent. Repeats re-enter with pending set and skip both.
+ // A cancel that lands with nothing in flight never reaches an update
+ // return, so the return-site finish below cannot run: finish here instead.
+ // The gate guarantees quiescence (no callback outstanding) and FRestore
+ // runs first, so Finished still means restored with nothing owed. Repeats
+ // re-enter with pending set and skip both.
  if(c.pc==0x8010550c&&!update.pending&&!render.pending){
-  if(FTrial()&&!NativeTrial::Active(now_cached))FRestore(c);
+  if(FTrial()&&!NativeTrial::Active(now_cached)){FRestore(c);NativeTrial::status=NativeTrial::Status::Finished;}
   else FPatch(c);
  }
  if(!ExperimentalWindow()&&!render.pending&&!update.pending)return;
@@ -576,8 +579,9 @@ static inline void Step(CPUState& c){
   }
   update.pending=false;
 #ifdef SSX_NATIVE_TRIAL_APP
-  // Finish at the quiescent return, after the entry restore above has run:
-  // the frontend waits for Running to clear before pausing/checkpointing.
+  // Finish an in-flight trial at the quiescent return, after the entry
+  // restore above has run: the frontend waits for Running to clear before
+  // pausing/checkpointing. Idle cancels finish at the entry site instead.
   if(FTrial()&&!NativeTrial::Active(now_cached)){
    FRestore(c);
    NativeTrial::status=NativeTrial::Status::Finished;

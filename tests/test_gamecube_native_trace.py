@@ -51,7 +51,8 @@ class NativeTraceTests(unittest.TestCase):
             self.assertIn('NativeTrialTest::Step(m_guest)', generated)
 
     def test_lifecycle_acceptance_requires_events_and_actual_unchanged_extra(self):
-        actions = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent', 'complete']
+        actions = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent',
+                   'restart2', 'cancel_idle', 'quiescent', 'complete']
         rows = [dict(event='trial_test', action=a, wall=i) for i, a in enumerate(actions)]
         with self.assertRaises(RuntimeError):
             validate_trial_trace([])
@@ -60,6 +61,7 @@ class NativeTraceTests(unittest.TestCase):
         # Trial 1 (F) must patch, double cleanly under patch, and restore.
         rows.append(dict(event='f_trial', action='patched', wall=1))
         rows.append(dict(event='f_trial', action='restored', wall=2))
+        rows.append(dict(event='f_trial', action='restored', wall=7))
         rows.append(event('update', repeat=1, wall=1.5))
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
@@ -95,6 +97,13 @@ class NativeTraceTests(unittest.TestCase):
             validate_trial_trace(rows)
         rows[-2]['same_rider'] = 1
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
+        # The idle-cancelled leg must restore too: dropping only its restore
+        # fails even though trial 1 restored cleanly.
+        restores = [i for i, r in enumerate(rows)
+                    if r.get('event') == 'f_trial' and r.get('action') == 'restored']
+        without_third = [r for i, r in enumerate(rows) if i != restores[-1]]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(without_third)
 
     def test_rejected_call_is_not_a_successful_draw(self):
         counters = dict(gate_calls=1, gate_ready=0, result=0,

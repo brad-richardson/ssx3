@@ -198,17 +198,22 @@ python3 tools/gamecube_schedule_check.py \
 ```
 
 Add `--app-trial-check` to the builder to compile the phone control path with a
-desktop driver. It requests a trial, cancels during an injected render, verifies
-the quiescent transition, and requests a second trial. A compile-time test-only
-override permits the first extra draw, so an overloaded host cannot silently
-skip the cancellation test. The second uses the unchanged app policy. Run that player for 230 seconds
+desktop driver. It requests an F trial, cancels mid-repeat, verifies the
+quiescent transition, then runs a smoothing trial through automatic expiration.
+A compile-time test-only override permits the first extra draw, so an
+overloaded host cannot silently skip the cancellation test. The second uses
+the unchanged app policy. A third leg re-runs F and cancels it genuinely
+idle (nothing in flight), the phone path for a pre-ride or user cancel that
+lands between callbacks; without an entry-site finish the trial restores but
+never clears Running and the watchdog fires. Run that player for 230 seconds
 with only `SSX_NATIVE_PROBE` set; the phone path supplies its own policy flags.
 The builder regression test checks that this driver is actually included and
 dispatched. The runner requires ordered request/cancel/quiescent/restart/
-quiescent/complete events and a completed extra draw with unchanged watched
-state; missing events fail even if ordinary gameplay succeeds. The driver also
-has an independent watchdog. This checks the native control path, not UIKit backgrounding
-or actual on-device checkpoint reload.
+quiescent/restart2/cancel_idle/quiescent/complete events, a completed extra
+draw with unchanged watched state, and a dt-const restore after the idle
+cancel; missing events fail even if ordinary gameplay succeeds. The driver
+also has an independent watchdog. This checks the native control path, not
+UIKit backgrounding or actual on-device checkpoint reload.
 
 The corrected-guard run is `guard-run` with trace `guard-events.jsonl` and
 player `guard-player` in the same directory.
