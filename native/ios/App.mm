@@ -197,6 +197,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   double _outputResizedHost;
   int _internalScale;
   BOOL _simulatorNullAudio;
+  BOOL _audioDump;
   BOOL _debugMainMenu;
   BOOL _cpuThread;        // mode of the running/next runtime; smoothing trial unavailable when on
   BOOL _remasterActive;   // whether the running runtime was configured with the texture pack
@@ -339,6 +340,7 @@ static void SSXLaunchTrace(NSString* step) {
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXFastDisc":@NO}];
   _fastDiscForced=[launchArgs containsObject:@"-ssxFastDisc"];
   _dispatchSamples=[launchArgs containsObject:@"-ssxDispatchSamples"];
+  _audioDump=[launchArgs containsObject:@"-ssxAudioDump"];
   _simulatorNullAudio=NO;
 #if TARGET_OS_SIMULATOR
   // Graphics-only escape hatch for Simulator RemoteIO RPC failures. This
@@ -608,8 +610,9 @@ static void SSXLaunchTrace(NSString* step) {
   // default names the device when it is on.
   NSString* slots=_memoryCard ? @"" : @"SlotA = 255\nSlotB = 255\n";
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
-    [NSString stringWithFormat:@"[Core]\nCPUThread = %s\nFastDiscSpeed = %s\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n%@[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",
-      _cpuThread ? "True" : "False",_fastDisc ? "True" : "False",slots,audioBackend]);
+    [NSString stringWithFormat:@"[Core]\nCPUThread = %s\nFastDiscSpeed = %s\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n%@[DSP]\nEnableJIT = False\nBackend = %s\n%@[Interface]\nConfirmStop = False\n",
+      _cpuThread ? "True" : "False",_fastDisc ? "True" : "False",slots,audioBackend,
+      _audioDump ? @"DumpAudio = True\n" : @""]);
   WriteText([config stringByAppendingPathComponent:@"GFX.ini"],
     // AspectRatio 1 forces 16:9 output. The game's own Options > Widescreen setting
     // must be on so the 3D scene is rendered anamorphic; Auto detection is not
@@ -757,6 +760,7 @@ static void SSXLaunchTrace(NSString* step) {
     @"dispatchSamples":@(_dispatchSamples), @"automated":@(_sequence!=nil),
     @"cardReadSpeedup":@(_cardSpeedup), @"memoryCard":@(_memoryCard),
     @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
+    @"audioDump":@(_audioDump),
     @"debugMainMenuRequested":@(_debugMainMenu),
     @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
     @"scheduledSmoothingAt":_scheduledTrialAt>=0 ? @(_scheduledTrialAt) : NSNull.null,

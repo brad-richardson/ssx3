@@ -230,6 +230,27 @@ class DeviceLaunch(unittest.TestCase):
                 copy.assert_not_called()
                 command.assert_not_called()
 
+    def test_audio_dump_applies_only_to_launch_and_reaches_app(self):
+        with mock.patch("sys.argv", ["mobile_gamecube.py", "collect", "--device", "PHONE",
+                "--audio-dump"]), \
+                mock.patch.object(mobile_gamecube, "collect") as collect, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            with self.assertRaises(SystemExit) as stopped:
+                mobile_gamecube.main()
+            self.assertEqual(stopped.exception.code, 2)
+            collect.assert_not_called()
+            command.assert_not_called()
+        args = argparse.Namespace(device="PHONE", simulator=False, sequence=None, audio_dump=True)
+        calls = []
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "copy_to"), \
+                mock.patch.object(mobile_gamecube, "command", side_effect=lambda c: calls.append(c)):
+            mobile_gamecube.launch(args)
+        command = calls[0]
+        bundle = command.index(mobile_gamecube.BUNDLE)
+        self.assertEqual(command[bundle + 1:], ["--", "-ssxAudioDump"])
+
     def test_boot_overrides_reach_app_without_sequence(self):
         args = argparse.Namespace(device="PHONE", simulator=False, sequence=None,
                                   course_manifest="stock", textures="stock")

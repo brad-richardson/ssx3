@@ -411,6 +411,8 @@ def launch(args):
         flags.append("-ssxFastDisc")
     if getattr(args,"dispatch_samples",False):
         flags.append("-ssxDispatchSamples")
+    if getattr(args,"audio_dump",False):
+        flags.append("-ssxAudioDump")
     if args.simulator:
         command(["xcrun", "simctl", "launch", "--terminate-running-process", args.device, BUNDLE, *flags])
         return
@@ -429,12 +431,20 @@ def collect(args):
         documents = simulator_documents(args)
         for source, folder in (("Reports", "Reports"), ("User/ScreenShots", "ScreenShots")):
             shutil.copytree(documents / source, destination / folder)
+        if (documents / "User/Dump/Audio").is_dir():
+            shutil.copytree(documents / "User/Dump/Audio", destination / "Audio")
         print(f"Collected simulator reports: {destination}")
         return
     for source, folder in (("Documents/Reports", "Reports"), ("Documents/User/ScreenShots", "ScreenShots")):
         device_call(["device", "copy", "from", "--device", args.device,
                      "--source", source, "--destination", str(destination / folder),
                      "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=300)
+    try:
+        device_call(["device", "copy", "from", "--device", args.device,
+                     "--source", "Documents/User/Dump/Audio", "--destination", str(destination / "Audio"),
+                     "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=300)
+    except subprocess.CalledProcessError:
+        print("No audio dump in container")
     print(f"Collected: {destination}")
 
 
@@ -487,8 +497,10 @@ def main():
                         help="configure/build: compile the generated module with the inline JIT-fidelity floating-point paths")
     parser.add_argument("--dispatch-samples", action="store_true",
                         help="Launch-only native dispatch-site sampling (diagnostic overhead)")
+    parser.add_argument("--audio-dump", action="store_true",
+                        help="Launch-only DSP/DTK pushed-sample WAV dump (diagnostic storage)")
     args = parser.parse_args()
-    for flag in ("cpu_thread", "single_core", "fast_disc", "dispatch_samples"):
+    for flag in ("cpu_thread", "single_core", "fast_disc", "dispatch_samples", "audio_dump"):
         if getattr(args, flag) and args.command != "launch":
             parser.error(f"--{flag.replace('_', '-')} applies only to launch")
     if (args.debug_main_menu or args.normal_boot) and args.command!="launch":
