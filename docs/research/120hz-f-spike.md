@@ -592,6 +592,19 @@ movies diverge before their crashes (base crashes, v3b takes a clean line),
 and the v3 replay set covers only the race counter, five stamps, app+168
 and RNG. Crash/state-timer coverage is the next desktop work.
 
+Second live fire (same night, manual play, dual-core, 3x): 1770 doubled
+over ~30 s before the guard limited on 0.879 speed — 3x the single-core
+trial length, still render-bound. Three rails ridden under F (1.28/5.01/
+0.39 s, state 7 = grind inferred from 0→7 mount / 7→4→5 dismount) show
+speeds in the ordinary range (~2364 vs ~2572 u/s) — no F rail-speed effect
+in this sample; one F rail ended in a crash (7→4→5→8→9), single sample,
+unattributed. Back-to-back trials in one runtime died instantly (stale
+schedule epoch — fixed, with an F-first lifecycle test). Separately, the
+run's 40% zone dips (fps 57.5, audio underruns) are heavy-vertex load
+(190–234 MB/s vertex bytes, render ~12 ms, primitives flat, software
+vertex decode) with the F trial long over — a vertex-pipeline issue, not
+an F issue, and dual-core did not cover it.
+
 ## Mainline merge plan (spike/f-120hz-sim → main)
 
 Do NOT merge: local/ (players, runs, reports — gitignored build/run
