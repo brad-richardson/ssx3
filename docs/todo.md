@@ -384,6 +384,15 @@ the build or commit that closed them.
       tiny (-0.16ms/pair, parity questions). Only merge: `--preload-textures`
       launch override (`f8e2f75`) scoping pack-decode cost out of trial
       windows. DDS pack (-85% resident) queued for phone verify.
+      **Preload A/B September 16 (phone):** remaster + smoothing, flag on vs
+      off, both held the full 35 s window unlimited. Preload is a tail fix,
+      as designed: trial p99 medians 14.1 vs 15.1 ms, worst second 22 vs
+      35 ms — the off arm's worst second lands exactly on trial start
+      (first extras + fresh angles decoding on demand); +66 extras with
+      preload (1238 vs 1172). Pre-trial tails identical (worst hitches are
+      section/sim, not texture). First attempt voided: user pause shifted
+      run 1 into a heavier section (limited), run 2 stillborn on likely
+      auto-lock suspend — keep the phone awake during chains.
       Audio skipping in heavy areas is a budget-overrun symptom (CPU
       starvation → DMA underrun), fixed by headroom, not audio work.
       **Menu static fixed September 16:** separate mechanism — an idled AX
