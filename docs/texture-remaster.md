@@ -829,6 +829,54 @@ alpha-tested foliage (§10.5). Pillow 12 writes DXT1 and DXT5, one level at a
 time, so the remaining work is assembling the levels into a single DDS with a
 `dwMipMapCount` header.
 
+### 10.13 The DDS pack, and why a pack cannot simply be replaced
+
+`tools/texture_pack_dds.py` converts a finished PNG pack to block-compressed
+DDS. Measured on `pack-v8`:
+
+| | PNG | DDS |
+| --- | ---: | ---: |
+| files | 8,806 | **927** |
+| on disk | 315 MB | 131 MB |
+| resident | 894 MB decoded RGBA8 | **130 MB block bytes** |
+
+Format is chosen per texture, not per pack: DXT1 (half a byte a pixel) wherever
+alpha is absent or already binary, DXT5 (one byte) only for a genuine gradient.
+That came out 770 DXT1 to 157 DXT5. Binary counts as DXT1-grade because its one
+alpha bit reproduces a hard mask *exactly* - PIL's DXT1 round-trips a cutout
+edge as precisely {0, 255}, so the mask the guest alpha-*tests* (§10.5) survives
+compression, which is the part that would otherwise rule BC out for foliage.
+
+Levels come from the pack's own `_mipN` sidecars, so the alpha-weighted colour
+averaging of §10.1 is carried over rather than recomputed; all 927 chains were
+reused. A partial chain is rebuilt whole instead of mixed, because Dolphin stops
+at the first level that is not exactly half of the one above it.
+
+Two details of the header are load-bearing, both from `ParseDDSHeader`:
+
+- `DDSD_PITCH` and `DDSD_LINEARSIZE` must not *both* be set. Dolphin
+  reinterprets `dwPitchOrLinearSize` as a pitch only when both appear, so
+  neither flag is claimed and the layout is derived from the dimensions.
+- A chain may contain at most one 1x1 level. `PurgeInvalidMipsFromTextureData`
+  drops the offending level and everything after it.
+
+`tests/test_texture_pack_dds.py` reimplements those checks as
+`parse_like_dolphin` and runs them over every file the converter writes, so a
+header that is valid DDS but invalid *to Dolphin* fails on this machine. All 927
+files pass.
+
+**Replacing a pack in place is the hard part.** `HiresTexture::Update` searches
+one directory for both extensions and keys what it finds on the file *stem*, so
+a stem present as both `.png` and `.dds` is resolved by whichever the file
+search happens to return first - and `devicectl` copies but never deletes, so
+pushing the 927 DDS files leaves 8,806 PNGs behind to fight with. The installer
+now records the format it pushed in `Documents/User/pack-format.txt` and refuses
+a pack that mixes extensions; the app prunes the other format from its own
+container at startup, which is the only side that can delete anything, and logs
+`texture_pack_pruned` with the count. This is the same lesson as the device
+checklist in `native/ios/README.md`: what lives only in the container is the
+app's to manage, because nothing else can.
+
 ## 11. Art passes a model cannot do: foliage
 
 Upscaling makes SSX 3's trees *smoother*, which is not the same as better. A

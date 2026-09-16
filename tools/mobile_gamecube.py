@@ -276,17 +276,29 @@ def textures(args):
     if not images:
         raise RuntimeError(f"No tex1_*.png / .dds replacements in {pack}")
     total = sum(p.stat().st_size for p in images)
-    # The app leaves CacheHiresTextures off, so a pack is read on demand rather
-    # than preloaded, but it still has to fit in the container.
     print(f"{len(images)} textures, {total / 1e6:.0f} MB")
+    # Which format this pack is, recorded for the app to act on. Dolphin's
+    # HiresTexture::Update searches one directory for both .png and .dds and
+    # keys the result on the file *stem*, so a stem present in both formats is
+    # resolved by whichever the file search happens to return first - and a
+    # device container cannot be pruned from here, because devicectl copies but
+    # never deletes. The app removes the other format at startup instead.
+    formats = {p.suffix.lower() for p in images}
+    if len(formats) > 1:
+        raise RuntimeError(f"Pack mixes {', '.join(sorted(formats))}; Dolphin would "
+                           f"resolve duplicate stems unpredictably")
+    marker = WORK / "pack-format.txt"
+    marker.write_text(formats.pop().lstrip('.') + '\n')
     if args.simulator:
         destination = simulator_documents(args) / "User/Load/Textures/GXBE69"
         destination.mkdir(parents=True, exist_ok=True)
         for image in images:
             shutil.copy2(image, destination / image.name)
+        shutil.copy2(marker, destination.parent.parent.parent / "pack-format.txt")
         print(f"Texture pack copied to the simulator container: {destination}")
         return
     copy_to(args, pack, "Documents/User/Load/Textures/GXBE69", timeout=1800)
+    copy_to(args, marker, "Documents/User/pack-format.txt", timeout=60)
     print("Texture pack copied to the device container: Documents/User/Load/Textures/GXBE69\n"
           "Turn it on in the app's pause menu (Remastered textures), then Full Reset.")
 

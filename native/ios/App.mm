@@ -607,6 +607,7 @@ static void SSXLaunchTrace(NSString* step) {
   // HiresTexture::Update() decodes the whole pack at startup and holds it, so
   // the stalls go away and the cost moves to boot time and resident memory
   // (about 894 MB decoded for pack-v8, which an 8 GB phone can hold).
+  [self prunePackToInstalledFormat];
   NSString* settingsDir=[user stringByAppendingPathComponent:@"GameSettings"];
   [[NSFileManager defaultManager] createDirectoryAtPath:settingsDir
                             withIntermediateDirectories:YES attributes:nil error:nil];
@@ -1227,6 +1228,44 @@ static void SSXLaunchTrace(NSString* step) {
   // A preference that names a manifest which is no longer installed reverts to
   // the stock event rather than failing the boot.
   return (chosen.length && [[self installedCourses] containsObject:chosen]) ? chosen : nil;
+}
+// Remove pack files of the format this container is not meant to hold.
+//
+// HiresTexture::Update searches one directory for both .png and .dds and keys
+// what it finds on the file *stem*, so a stem present in both is resolved by
+// whichever the search returns first - and pushing a DDS pack cannot remove the
+// PNG pack it replaces, because devicectl copies and never deletes. The
+// installer records the format it pushed in User/pack-format.txt; this is the
+// only side that can act on it.
+- (NSUInteger)prunePackToInstalledFormat {
+  NSString* user=[Documents() stringByAppendingPathComponent:@"User"];
+  NSString* marker=[user stringByAppendingPathComponent:@"pack-format.txt"];
+  NSString* wanted=[[NSString stringWithContentsOfFile:marker encoding:NSUTF8StringEncoding
+                                                 error:nil]
+      stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+  if (!wanted.length) return 0;
+  NSString* stale=[wanted isEqualToString:@"dds"] ? @"png"
+                 : ([wanted isEqualToString:@"png"] ? @"dds" : nil);
+  if (!stale) return 0;
+  NSString* pack=[user stringByAppendingPathComponent:@"Load/Textures/GXBE69"];
+  NSFileManager* files=NSFileManager.defaultManager;
+  NSUInteger removed=0;
+  // Enumerated in batches rather than with contentsOfDirectoryAtPath: a stale
+  // PNG pack is 8,806 names and this runs on the main thread before the boot.
+  NSDirectoryEnumerator* walk=[files enumeratorAtURL:[NSURL fileURLWithPath:pack]
+      includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles
+                    errorHandler:nil];
+  for (NSURL* url in walk) {
+    if (![url.pathExtension.lowercaseString isEqualToString:stale]) continue;
+    if (![url.lastPathComponent hasPrefix:@"tex1_"]) continue;
+    if ([files removeItemAtURL:url error:nil]) removed++;
+  }
+  if (removed) {
+    _packInstalled=-1;                  // the probe's answer may have changed
+    [self logSessionEvent:@"texture_pack_pruned" details:@{
+        @"format":wanted, @"removed":@(removed), @"removedExtension":stale}];
+  }
+  return removed;
 }
 - (BOOL)supportsBlockCompression {
   id<MTLDevice> device = ((CAMetalLayer*)_surface.layer).device;
