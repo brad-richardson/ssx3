@@ -658,3 +658,108 @@ mechanism consistent. n=3 clean is thin and all one course; strengthen
 opportunistically, not as a blocker. Repro: det-rec{2,3,4}.dtm +
 /tmp/battery.sh + /tmp/battery_analysis.py (scratch; rerun via the
 crash-player recipe above).
+
+## Crash/state-timer coverage (desktop, gate 1 closed September 16)
+
+Reset sequencer (state 9, crash-player pair): base 4676→4717 (41
+ticks), F rows 5059→5140 (40 ordinary ticks) — matched, not 2x. No
+per-tick countdown word exists in app (only the +168 flag, already
+replayed) or body (crash-only offsets 484/664/676 are one-shots, not
+timers): the mid-reset phase event lands at +20 ordinary ticks in
+both arms (4696 base, row 5100 F), entry one-shots fire once on the
+transitioning half with no double-fire, and durations match — the
+sequencer is race-counter-driven and the v3b replay set covers it.
+
+Tumble (state 8) under F, first coverage (tumble-f run, det-base,
+SKIP=712/TICKS=150 over rows 1840–2141): entry tick EXACT (1852 both
+arms, same 0→4→5→8 path, transitions split across halves with no
+double-transition — repeats correctly skip unstable ticks); exit +2
+ordinary ticks (1956 vs 1954, 2% — a float-threshold shift inside
+F's statistical-parity ceiling, not a rate effect). Post-window
+butterfly as usual (F grinds a rail where base tumbles next).
+Pre-window determinism holds (1840/1840 states, body-hash flip at
+1839 = engage).
+
+0x100 trap over the tumble (500 lines, cap): every site fires both
+halves symmetrically (105/104, 56/49, 39/36, 35/26 — no
+half-specific writer), values are float LSB jitter (physics
+scratch, not a timer), and the governor site (802bf5fc/8002ad48)
+goes silent mid-tumble while 8002acf4/80026f64 + 80026f64 +
+800101ec dominate — phase-routed physics, no state-8-specific
+integer writer, nothing for the replay set. The §3d open trap item
+is closed.
+
+Pair tail (headroom backlog 5, crash-f window, 598 pairs): CPU med
+4.13 / p95 4.79 / max 5.35 ms, wall med 4.14 / p95 4.84 / max 7.90
+ms, zero pairs over 8.33. Top wall spikes show wall≫cpu (7.90 vs
+4.46) — host scheduling, all state 0, spread across the window.
+The Phase-1 wall p95 10.31 (load-~2 host) does not reproduce on a
+quiet host: the desktop tail is host-side, not pair-work. Ship tail
+risk moves to phone-side measurement.
+
+Gate (1) verdict: CLOSED. No un-restored crash integer state found
+on the reset or tumble axes; residuals are float-threshold jitter
+(+2 ticks on a 102-tick tumble). Next gate: (2) consume-per-tick
+input latching.
+
+## Gate 2 scoping: input latching is research tooling, not product (September 16)
+
+Desync mechanism confirmed in vendor source: PlayController
+advances m_current_byte on EVERY SI poll (Movie.cpp), and the game
+polls ~2x/VI (~117/s over the 200 s runs) — so doubled updates
+consume the DTM stream 2x and post-window inputs shift. But all
+four battery movies carry exactly neutral sticks in all ~24k
+frames, and buttons are menu/briefing-only: the last cluster is
+state-6 A presses (≈ rows 817–841), riding starts at row 1168,
+and zero input frames vary from 1168 to movie end. Every F window
+plus all post-window regions consumed byte-identical neutral
+frames — body1/body2 inputs identical, post-window shift landing
+on identical frames — so the input-drift confound is ZERO for
+every F result to date, and flip==engage stands as float epsilon.
+
+Live/phone inputs need no latch either: natural re-poll is already
+correct (consumed edges are consumed once, matching stock; held
+levels are identical across halves; a tap landing between halves
+registers in the same tick — half-tick-faster response, not loss).
+Latching live inputs would DOUBLE-fire consumed edges. No shipped
+input-path change is required.
+
+Remaining gate-2 work is desktop research tooling only and does
+NOT block phone/render progress: movie-stream gating (repeat-half
+polls re-serve the current frame without advancing) to unblock
+early/menu-window measurement — v3's early-window effect is still
+desync-poisoned and unmeasurable. Design: a shared repeat-half
+flag set by the probe around update re-entry plus a vendor-patch
+branch in PlayController; inert unless doubling, phone unaffected
+(no movie there). Note the build cost: the probe.o single-TU
+trick does not cover Movie.cpp, so gating needs a vendor core
+rebuild — or a probe-TU-only alternative.
+
+## Gate 4a desktop: mid-tick draws work, the queue evicts (September 16)
+
+New probe mode SSX_NATIVE_INTERLEAVE_RENDER (research header only,
+env-gated, no trial branch): each doubled tick runs body1 →
+mid-tick draw → body2 → ordinary draw, with the +1 counter check
+at body1 completion and the integer restore deferred to body2
+dispatch so the mid-tick draw observes the consistent post-body1
+snapshot. Rows carry interleaved=1; the analyzer excludes them
+from ordinary repeat pairing (+2 tests). First run (det-base,
+clean riding, SKIP=1946/TICKS=60): 60/60 mid-tick draws complete
+the full scene path (result=1, view+frame-end) on post-body1
+state, zero wedges/aborts, pre-window determinism intact
+(3074/3074 states, flip at 3073 = engage).
+
+But the game's single-slot graphics queue cannot drain 2
+draws/tick: all 59 subsequent ordinary draws are REJECTED
+(result=0, gate not ready, no scene traversal) — 56 dropped, 4
+retried-and-accepted at ~12-tick queue-depth periods. Net
+presentation over the window is ~60 Hz of HALF-STALE frames
+(post-body1 states drawn; post-body2 computed but never drawn).
+Back-to-back "render every update" therefore does NOT yield 120
+Hz presentation on this queue — the end architecture must be
+VI-paced with a 2-deep queue (headroom backlog 10) or the
+smoothing/XFB presentation path. Open question carried to the
+phone: whether smoothing extra draws also evict ordinaries
+(answerable from present.csv presented/s in existing trial data).
+The F phone trial itself is unaffected (no extra draws, no
+eviction). Repro: interleave-player + SKIP=1946/TICKS=60.

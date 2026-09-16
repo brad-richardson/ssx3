@@ -25,7 +25,8 @@ later, repeats start the next tick, consts restore after
 SSX_NATIVE_WINDOW_TICKS doubled ticks; SSX_NATIVE_SPEED_GATE re-arms the
 v2 0x8002DE04 skip; SSX_NATIVE_WATCH_OFFS logs in-window rider-word
 changers; SSX_NATIVE_COUNTER_RESTORE saves/restores the race tick counter
-across repeats). These are research
+across repeats; SSX_NATIVE_INTERLEAVE_RENDER draws once between the two
+update halves of each doubled tick, cap 600). These are research
 controls, not a high-refresh implementation. See docs/research/120hz-render-seam.md.
 
 With build --scheduler, SSX_NATIVE_SCHEDULE enables the independent deadline
@@ -177,9 +178,10 @@ def summarize(rows, after=140, frozen_sequence=False):
     """Keep attempted repeats separate from observed scene-path coverage."""
     result = dict(schema=1, after_host_seconds=after,
                   frozen_sequence=frozen_sequence, groups={})
-    for label in ('update', 'render', 'repeat'):
+    for label in ('update', 'render', 'repeat', 'interleave'):
         group = [r for r in rows if r['wall'] > after and r['rider'] and r['same_rider']
-                 and (r['repeat'] if label == 'repeat' else
+                 and (r['repeat'] and not r.get('interleaved') if label == 'repeat' else
+                      r['event'] == 'render' and bool(r.get('interleaved')) if label == 'interleave' else
                       r['event'] == label and not r['repeat'])]
         counts = dict(calls=len(group))
         for field in ('position_changed', 'rng_changed', 'view_offsets', 'body_offsets', 'app_offsets'):
@@ -195,7 +197,13 @@ def summarize(rows, after=140, frozen_sequence=False):
                     counts[field] = sum(r[field] for r in group)
             counts['results'] = dict(collections.Counter(str(r['result']) for r in group))
         result['groups'][label] = counts
-    repeats = [(i, r) for i, r in enumerate(rows) if r['repeat'] and r['event'] == 'render']
+    repeats = [(i, r) for i, r in enumerate(rows) if r['repeat'] and r['event'] == 'render'
+               and not r.get('interleaved')]
+    interleaves = [r for r in rows if r['event'] == 'render' and r.get('interleaved')]
+    result['interleave_renders'] = len(interleaves)
+    result['verified_complete_interleave_renders'] = sum(
+        1 for r in interleaves if r.get('result', 0) & 255 and
+        r.get('view_matrix_calls', 0) > 0 and r.get('frame_end_calls', 0) > 0)
     def paired(i, complete=False):
         current = rows[i]
         if i == 0:

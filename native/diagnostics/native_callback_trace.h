@@ -43,6 +43,13 @@
 // in-window ordinary entry and restores it at repeat entry, so both
 // halves replay the tick from identical integer state (aborts if the
 // counter did not advance exactly +1 in the first half).
+// SSX_NATIVE_INTERLEAVE_RENDER=1 (desktop only: no trial branch, the phone
+// sets no environment) dispatches one extra render between the two halves
+// of each doubled tick: body1, mid-tick draw, body2, ordinary draw. The
+// +1 counter check stays at body1 completion; the integer restore moves to
+// body2 dispatch so the mid-tick draw observes the consistent post-body1
+// snapshot. Rows carry interleaved=1 and sit between update rows by design,
+// so the analyzer excludes them from ordinary repeat pairing. Cap 600.
 #pragma once
 #include "Core/Core.h"
 #include "callback_timing.h"
@@ -175,10 +182,12 @@ static std::string ApplicationDiagnostics(const Snapshot& before,const Snapshot&
   ",\"app_word_changes\":"+(valid?words:"null");
 }
 static u64 Hash(const unsigned char* p,size_t n){u64 h=14695981039346656037ull;for(size_t i=0;i<n;++i){h^=p[i];h*=1099511628211ull;}return h;}
-struct Active {bool pending=false,repeated=false,skipped=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0,cpu_start=-1;Snapshot before;};
+struct Active {bool pending=false,repeated=false,skipped=false,interleaved=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0,cpu_start=-1;Snapshot before;};
 static Active update,render;
 static unsigned repeats=0;
 static unsigned update_repeats=0;
+static unsigned interleaves=0;
+static bool interleave_armed=false;
 static unsigned half_cadence_updates=0;
 static u32 offset_matrix=0;
 static std::array<unsigned char,64> saved_matrix{};
@@ -208,6 +217,7 @@ static bool DoubleUpdateEnabled(){
 #endif
  static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_UPDATE");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool HalfCadenceEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_CADENCE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool InterleaveEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_INTERLEAVE_RENDER");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool HalfDtEnabled(){
 #ifdef SSX_NATIVE_TRIAL_APP
  if(FMode())return true;
@@ -359,9 +369,20 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
   }
   body_words.push_back(']');
  }
- std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"skipped_update\":%d,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s%s,\"body_words\":%s}\n",
- kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,a.skipped?1:0,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str(),body_words.c_str());
+ std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"interleaved\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"skipped_update\":%d,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s%s,\"body_words\":%s}\n",
+ kind,a.repeated?1:0,a.interleaved?1:0,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,a.skipped?1:0,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str(),body_words.c_str());
  std::fflush(file);
+}
+static void RestoreIntegers(CPUState& c){
+ auto putw=[&](u32 a,u32 value){auto* q=c.ram+a-0x80000000u;q[0]=(unsigned char)(value>>24);q[1]=(unsigned char)(value>>16);q[2]=(unsigned char)(value>>8);q[3]=(unsigned char)value;};
+ const u32 g=TickCounterAddr(c);
+ if(!g||!Valid(c,g,4)){std::fprintf(stderr,"[native-probe] COUNTER_RESTORE lost addr at restore\n");std::abort();}
+ putw(g,tick_saved);
+ const u32 r=Rider(c);
+ if(r&&Valid(c,r,0x800))for(int i=0;i<5;++i)putw(r+StampOffs[i],stamp_saved[i]);
+ if(Valid(c,update.app+168,4))putw(update.app+168,appflag_saved);
+ if(Valid(c,0x8035de2c,48))for(int i=0;i<12;++i)putw(0x8035de2c+4*i,rng_saved[i]);
+ if(++tick_restores<=5)std::fprintf(stderr,"[native-probe] COUNTER_RESTORE #%u saved=%u\n",tick_restores,tick_saved);
 }
 static inline void Step(CPUState& c){
  RefreshNow(c);
@@ -413,8 +434,11 @@ static inline void Step(CPUState& c){
    auto* bytes=c.ram+ptr+48-0x80000000u;for(unsigned i=0;i<4;++i)bytes[i]=bits>>(24-i*8);
    ++camera_offsets;
   }
-  if(CaptureEnabled()&&c.pc==0x8021a5fc&&c.lr==0x8010abf0&&render.repeated&&repeats%20==0){
+  if(CaptureEnabled()&&c.pc==0x8021a5fc&&c.lr==0x8010abf0&&render.repeated&&!interleave_armed&&repeats%20==0){
    Core::SaveScreenShot("native-seam-request-repeat-"+std::to_string(repeats));
+  }
+  if(CaptureEnabled()&&c.pc==0x8021a5fc&&c.lr==0x8010abf0&&interleave_armed&&interleaves%20==0){
+   Core::SaveScreenShot("native-seam-request-interleave-"+std::to_string(interleaves));
   }
   if(render.repeated&&SkipEnabled()&&c.pc==0x8015c5a0&&c.lr==0x8010ac24){++skipped_elapsed;c.pc=c.lr;return;}
   if(render.repeated&&SkipEnabled()&&c.pc==0x80139f20&&c.lr==0x8010ac2c){++skipped_queue;c.pc=c.lr;return;}
@@ -462,22 +486,25 @@ static inline void Step(CPUState& c){
       std::fprintf(stderr,"[native-probe] COUNTER_RESTORE model drift saved=%u have=%d now=%u\n",tick_saved,tick_have?1:0,v);std::abort();
      }
     }
-    if(!skip_repeat){
-     auto putw=[&](u32 a,u32 value){auto* q=c.ram+a-0x80000000u;q[0]=(unsigned char)(value>>24);q[1]=(unsigned char)(value>>16);q[2]=(unsigned char)(value>>8);q[3]=(unsigned char)value;};
-     putw(g,tick_saved);
-     const u32 r=Rider(c);
-     if(r&&Valid(c,r,0x800))for(int i=0;i<5;++i)putw(r+StampOffs[i],stamp_saved[i]);
-     if(Valid(c,update.app+168,4))putw(update.app+168,appflag_saved);
-     if(Valid(c,0x8035de2c,48))for(int i=0;i<12;++i)putw(0x8035de2c+4*i,rng_saved[i]);
-     if(++tick_restores<=5)std::fprintf(stderr,"[native-probe] COUNTER_RESTORE #%u saved=%u\n",tick_restores,tick_saved);
-    }
    }
+   const bool interleave=InterleaveEnabled()&&!skip_repeat&&render.entry!=0&&interleaves<600;
    if(skip_repeat){update.pending=false;}
    else{
 #ifdef SSX_NATIVE_TRIAL_APP
     if(FTrial())++NativeTrial::updates_doubled;
 #endif
     update.before=b;update.tb=c.timebase;update.wall=Now();update.cpu_start=RenderResearch::ThreadCPUSeconds();
+    if(!interleave&&CounterWindow())RestoreIntegers(c);
+    if(interleave){
+     if(!Valid(c,render.app,4)){std::fprintf(stderr,"[native-probe] INTERLEAVE no render app\n");std::abort();}
+     ++interleaves;interleave_armed=true;
+     if(interleaves<=5)std::fprintf(stderr,"[native-probe] INTERLEAVE #%u at update %u\n",interleaves,update_entries);
+     view_matrix_calls=frame_end_calls=elapsed_calls=queue_calls=gate_calls=gate_ready=0;
+     retries=skipped_elapsed=skipped_queue=camera_offsets=camera_restores=0;queue_before=Word(c,c.gpr[13]-20556);
+     render.pending=true;render.repeated=true;render.interleaved=true;
+     render.before=Capture(c,render.app);render.tb=c.timebase;render.wall=Now();render.cpu_start=RenderResearch::ThreadCPUSeconds();
+     c.gpr[3]=render.app;c.pc=render.entry;c.lr=render.ret;return;
+    }
     c.gpr[3]=update.app;c.pc=update.entry;c.lr=update.ret;return;
    }
   }
@@ -501,6 +528,13 @@ static inline void Step(CPUState& c){
    std::memcpy(c.ram+offset_matrix-0x80000000u,saved_matrix.data(),64);offset_matrix=0;++camera_restores;
   }
   auto b=Capture(c,render.app);Emit(c,"render",render,b);
+  if(interleave_armed){
+   interleave_armed=false;
+   render.pending=false;render.repeated=false;render.interleaved=false;
+   if(CounterWindow())RestoreIntegers(c);
+   update.wall=Now();update.cpu_start=RenderResearch::ThreadCPUSeconds();
+   c.gpr[3]=update.app;c.pc=update.entry;c.lr=update.ret;return;
+  }
   if((!render.repeated||SweepEnabled())&&(c.gpr[3]&255)&&view_matrix_calls&&frame_end_calls&&DoubleEnabled()&&now_cached>140&&repeats<120&&Valid(c,b.rider,0x800)&&b.state==0){
    if(!render.repeated)render.first_result=c.gpr[3];
    render.repeated=true;++repeats;
@@ -546,7 +580,7 @@ static inline void Step(CPUState& c){
    Emit(c,"update",a,a.before);a.skipped=false;
    c.pc=c.lr;return;
   }
-  a.pending=true;a.repeated=false;a.skipped=false;a.entry=c.pc;a.ret=c.lr;a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.cpu_start=RenderResearch::ThreadCPUSeconds();a.before=Capture(c,a.app);
+  a.pending=true;a.repeated=false;a.skipped=false;a.interleaved=false;a.entry=c.pc;a.ret=c.lr;a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.cpu_start=RenderResearch::ThreadCPUSeconds();a.before=Capture(c,a.app);
  }
 }
 }

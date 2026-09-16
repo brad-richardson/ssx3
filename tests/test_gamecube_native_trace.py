@@ -181,6 +181,28 @@ class NativeTraceTests(unittest.TestCase):
         self.assertEqual(result['repeat_pairing_failures'], 0)
         self.assertEqual(result['unverified_or_incomplete_render_pairs'], 0)
 
+    def test_interleave_renders_skip_repeat_pairing_by_design(self):
+        # body1, mid-tick draw, body2, ordinary draw: the interleave sits
+        # between update rows on purpose, so it must not count as a
+        # pairing failure nor as an ordinary extra draw.
+        complete = dict(result=1, view_matrix_calls=1, frame_end_calls=1)
+        rows = [event('update'), event(repeat=1, interleaved=1, **complete),
+                event('update', repeat=1), event(**complete)]
+        result = summarize(rows)
+        self.assertEqual(result['interleave_renders'], 1)
+        self.assertEqual(result['verified_complete_interleave_renders'], 1)
+        self.assertEqual(result['repeat_pairing_failures'], 0)
+        self.assertEqual(result['unverified_or_incomplete_render_pairs'], 0)
+
+    def test_incomplete_interleave_is_counted_not_verified(self):
+        rows = [event('update'), event(repeat=1, interleaved=1, result=0,
+                                      view_matrix_calls=0, frame_end_calls=0),
+                event('update', repeat=1)]
+        result = summarize(rows)
+        self.assertEqual(result['interleave_renders'], 1)
+        self.assertEqual(result['verified_complete_interleave_renders'], 0)
+        self.assertEqual(result['repeat_pairing_failures'], 0)
+
 
 if __name__ == '__main__':
     unittest.main()

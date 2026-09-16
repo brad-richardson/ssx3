@@ -287,14 +287,22 @@ the build or commit that closed them.
       ([results](research/120hz-f-spike.md#bias-battery-results-overnight-post-merge)).
 - [ ] 120 Hz render test on the F sim backend (user, September 15): when F sim
       is validated, prove >60 FPS presentation driven by doubled updates.
-      Gated order: (1) F sim correctness — crash/state-timer coverage from
-      the desktop crash comparison plus trap-found sites in the replay set,
-      then the multi-movie bias battery (small mean drift, mixed signs);
-      (2) consume-per-tick input latching so doubled ticks never eat edge
-      inputs; (3) phone F headroom at 1x internal (pair + render + system <
-      8.33 ms sustained); (4) 120 Hz draws from sim state — render every
-      update, or decoupled render with camera interpolation, reusing the
-      smoothing schedule/XFB presentation path with an F-kind deadline;
+      Gated order: (1) F sim correctness — CLOSED September 16: reset
+      sequencer is counter-driven (40 vs 41 ticks, +20 phase event exact,
+      no double-fires), first tumble under F enters exact and exits +2
+      (float threshold), 0x100 trap shows symmetric float physics with no
+      state-8 integer writer, bias battery PASS-leaning
+      ([evidence](research/120hz-f-spike.md#crashstate-timer-coverage-desktop-gate-1-closed-september-16));
+      (2) input latching — RE-SCOPED September 16 as desktop research
+      tooling only (movie-stream gating for menu-window measurement;
+      all F results to date have zero input confound, live re-poll is
+      already correct, no product change) — not blocking phone/render; (3) phone F headroom at 1x internal (pair + render + system <
+      8.33 ms sustained); (4) 120 Hz draws from sim state — DESKTOP
+      VERDICT September 16: back-to-back render-every-update draws
+      fully but the game's single-slot queue evicts the ordinary draw
+      (59/59 rejected) — net 60 Hz half-stale, so true-120 needs
+      VI-paced 2-deep queue (backlog 10) or the smoothing/XFB path;
+      check smoothing eviction from present.csv on the phone;
       (5) pacing acceptance (>=117 displayed/s + sim speed >= 0.98 +
       input-latency measurement) with fallback to F-sim/60-draws, then
       stock, on budget miss. No step starts until the gate before it passes.
@@ -308,9 +316,9 @@ the build or commit that closed them.
       trial's per-body Diff/Hash/Emit/fflush rides in every measured pair,
       size the ship prize with a quiet-mode run; (4) phase-tagged update
       breakdown — what the 3 ms ordinary update spends in game vs view vs
-      bookkeeping decides all downstream work; (5) update-pair tail — desktop
-      p95 10.31 ms exceeds the period, spikes kill pacing, attribute before
-      optimizing the median; (6) fast-FP phone measurement (built, pending)
+      bookkeeping decides all downstream work; (5) update-pair tail —
+      CLOSED September 16 as host-attributed (crash-f window: CPU max
+      5.35, wall max 7.90, zero over 8.33; spikes show wall≫cpu); (6) fast-FP phone measurement (built, pending)
       plus hot-chunk float-conversion where the breakdown points; (7) fewer
       chassis round-trips (existing item); (8) 1x BC texture pack for perf
       mode (bandwidth, not the 4x quality pack); (9) view/camera at 60 +
