@@ -55,6 +55,11 @@
 // snapshots top buckets to a SEPARATE file every 500 in-window ordinary
 // updates (last snapshot wins) plus at guest close. Phase-tagged update
 // breakdown sizing; the main JSONL schema is untouched.
+// SSX_NATIVE_QUIET=1 skips the per-row Diff/Hash/word-dump compute and
+// flushes every 128 rows instead of every row (timing, states, counts,
+// and result columns stay exact; offset/hash columns go quiet). Desktop
+// sizing for the production-quiet ship prize; quiet rows cannot support
+// flip/divergence analysis.
 #pragma once
 #include "Core/Core.h"
 #include "callback_timing.h"
@@ -234,6 +239,14 @@ static const unsigned PcHistBuckets=131072;
 static u64 pc_hist[3][131072]={};
 static u64 pc_hist_other[3]={};
 static unsigned pc_hist_ticks=0;
+static bool QuietEnabled(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return false;
+#else
+ static bool value=[](){const char* p=std::getenv("SSX_NATIVE_QUIET");return p&&std::strcmp(p,"1")==0;}();return value;
+#endif
+}
+static unsigned emit_rows=0;
 static void EmitPcHist(){
  const char* p=PcHistPath();if(!p)return;
  FILE* f=std::fopen(p,"w");if(!f)return;
@@ -395,8 +408,17 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  if(cpu_ms>=0)std::snprintf(cpu_text,sizeof(cpu_text),"%.6f",cpu_ms);
  FILE* file=Output();
  if(!file)return;
- const auto body=Diff(a.before.body,b.body),app=Diff(a.before.application,b.application),camera=Diff(a.before.camera,b.camera);
- const auto app_details=ApplicationDiagnostics(a.before,b);
+ const bool quiet=QuietEnabled();
+ const std::string body=quiet?"[]":Diff(a.before.body,b.body);
+ const std::string app=quiet?"[]":Diff(a.before.application,b.application);
+ const std::string camera=quiet?"[]":Diff(a.before.camera,b.camera);
+ const std::string app_details=quiet?
+  std::string(",\"app_snapshot_valid_before\":")+ (a.before.application_valid?"true":"false")+
+  ",\"app_snapshot_valid_after\":"+(b.application_valid?"true":"false")+
+  ",\"app_vtable_before\":"+(a.before.application_valid?std::to_string(ApplicationWord(a.before,0)):"null")+
+  ",\"app_vtable_after\":"+(b.application_valid?std::to_string(ApplicationWord(b,0)):"null")+
+  ",\"app_owned_extent_bytes\":null,\"app_owned_offsets\":[],\"app_adjacent_offsets\":[],\"app_word_changes\":[]"
+  :ApplicationDiagnostics(a.before,b);
  const bool moved=std::memcmp(a.before.body.data()+240,b.body.data()+240,12)!=0;
  std::string body_words="null";
  if(BodyDumpEnabled()){
@@ -408,8 +430,8 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
   body_words.push_back(']');
  }
  std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"interleaved\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"skipped_update\":%d,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s%s,\"body_words\":%s}\n",
- kind,a.repeated?1:0,a.interleaved?1:0,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,a.skipped?1:0,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str(),body_words.c_str());
- std::fflush(file);
+ kind,a.repeated?1:0,a.interleaved?1:0,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,a.skipped?1:0,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,quiet?0ULL:(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),quiet?0ULL:(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str(),body_words.c_str());
+ if(!quiet||++emit_rows%128==0)std::fflush(file);
 }
 static void RestoreIntegers(CPUState& c){
  auto putw=[&](u32 a,u32 value){auto* q=c.ram+a-0x80000000u;q[0]=(unsigned char)(value>>24);q[1]=(unsigned char)(value>>16);q[2]=(unsigned char)(value>>8);q[3]=(unsigned char)value;};

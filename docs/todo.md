@@ -315,7 +315,8 @@ the build or commit that closed them.
       (2) 1x internal for 120 Hz mode — render dominates, config-only change,
       isolates the F update question; (3) production-quiet probe delta — the
       trial's per-body Diff/Hash/Emit/fflush rides in every measured pair,
-      size the ship prize with a quiet-mode run; (4) phase-tagged update
+      size the ship prize with a quiet-mode run — CLOSED September 16
+      (~0.1 ms med, ~2% per pair; no headroom); (4) phase-tagged update
       breakdown — CLOSED September 16 (pc histogram: update ~99%
       traversal+physics, bookkeeping ~1%, view 0%; render runs 2x the
       guest instructions of update); (5) update-pair tail —

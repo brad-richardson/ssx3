@@ -799,3 +799,16 @@ update to split out; the 60/120 view/physics split has no
 premise. (c) update optimization = object traversal + the FPU
 regions above; render remains the binding constraint either
 way. Repro: pchist-player + SKIP=1946, no DOUBLE_UPDATE.
+
+## Quiet probe delta: ~0.1 ms, ~2% (September 16)
+
+New probe mode SSX_NATIVE_QUIET=1 (desktop-only): skips per-row
+Diff/Hash/word-dump compute and flushes every 128 rows; timing,
+states, counts, and results stay exact. A/B on the identical
+tumble window (SKIP=712/TICKS=150, trajectories verified
+bit-identical over 5908 update rows — the probe is read-only so
+the guest cannot tell): pair CPU med 4.614 → 4.510 ms, p95
+5.279 → 5.085 ms. The full probe costs ~0.1 ms med (~2%) per
+pair; production-quiet buys ~0.1 ms, not headroom. Phone pair
+5.12 ms projects to ~5.0 ms ship — still render-bound. Backlog 3
+CLOSED. Repro: quiet-player + SKIP=712/TICKS=150 + QUIET.
