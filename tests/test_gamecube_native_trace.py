@@ -117,6 +117,39 @@ class NativeTraceTests(unittest.TestCase):
         rows.insert(2, event('update'))
         self.assertEqual(summarize(rows, frozen_sequence=True)['verified_complete_render_pairs'], 1)
 
+    def test_update_repeats_need_an_ordinary_update_predecessor(self):
+        rows = [event('update'), event('update', repeat=1)]
+        result = summarize(rows)
+        self.assertEqual(result['update_repeats'], 1)
+        self.assertEqual(result['verified_update_repeats'], 1)
+        self.assertEqual(result['verified_complete_render_pairs'], 0)
+        orphan = summarize([event('render'), event('update', repeat=1)])
+        self.assertEqual(orphan['update_repeats'], 1)
+        self.assertEqual(orphan['verified_update_repeats'], 0)
+        self.assertEqual(result['repeat_pairing_failures'], 0)
+        self.assertEqual(result['unverified_or_incomplete_render_pairs'], 0)
+
+    def test_skipped_updates_counted_without_render_pair_pollution(self):
+        rows = [event('update'), event('update', skipped_update=1),
+                event('update'), event('update', skipped_update=1)]
+        result = summarize(rows)
+        self.assertEqual(result['skipped_updates'], 2)
+        self.assertEqual(result['update_repeats'], 0)
+        self.assertEqual(result['repeat_pairing_failures'], 0)
+        self.assertEqual(result['unverified_or_incomplete_render_pairs'], 0)
+        legacy = summarize([event('update'), event('update')])
+        self.assertEqual(legacy['skipped_updates'], 0)
+
+    def test_combo_mode_counts_repeats_and_skips_independently(self):
+        rows = [event('update'), event('update', repeat=1),
+                event('update', skipped_update=1)]
+        result = summarize(rows)
+        self.assertEqual(result['update_repeats'], 1)
+        self.assertEqual(result['verified_update_repeats'], 1)
+        self.assertEqual(result['skipped_updates'], 1)
+        self.assertEqual(result['repeat_pairing_failures'], 0)
+        self.assertEqual(result['unverified_or_incomplete_render_pairs'], 0)
+
 
 if __name__ == '__main__':
     unittest.main()

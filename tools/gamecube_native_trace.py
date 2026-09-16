@@ -6,12 +6,27 @@ setting SSX_NATIVE_DOUBLE_RENDER=1 attempts at most 120 extra renderer calls
 after 140 host seconds while riding. Readiness gates remain intact; an attempted
 call is not evidence of drawing or displaying another frame.
 
-Experimental flags (unset to disable): SSX_NATIVE_WAIT_REPEAT retries rejected
+Experimental flags (unset to disable): SSX_NATIVE_DOUBLE_UPDATE=1 re-enters the
+application update once per ordinary update in the window (same dt, same render
+rate: a 2x-update workload probe, not a timestep change); SSX_NATIVE_HALF_CADENCE=1
+skips every other application update in the window (same dt, same render rate:
+a half-cadence wrong-control probe; with DOUBLE_UPDATE also set this is the
+time-normalized 30 Hz mode, 60 executions per guest second in pairs);
+SSX_NATIVE_HALF_DT=1 one-shot rewrites dt constants in guest RAM on window
+entry (1/60 to 1/120, render divisor 60.0 to 120.0; with DOUBLE_UPDATE this
+is the 120 Hz candidate v0); SSX_NATIVE_WAIT_REPEAT retries rejected
 extra calls with bounded guest polling; SSX_NATIVE_SKIP_BOOKKEEPING omits two
 timing helpers on extras; SSX_NATIVE_CAMERA_OFFSET offsets a copied graphics
 matrix; SSX_NATIVE_FROZEN_VIEW_SWEEP holds one state for normal/offset/restored
-phases; SSX_NATIVE_CAPTURE requests screenshots. These are research controls,
-not a high-refresh implementation. See docs/research/120hz-render-seam.md.
+phases; SSX_NATIVE_CAPTURE requests screenshots. SSX_NATIVE_GUEST_WINDOW=1
+replaces the host-clock window with guest-timed edges (arms on the first
+stable update that moves the rider, engages SSX_NATIVE_WINDOW_SKIP ticks
+later, repeats start the next tick, consts restore after
+SSX_NATIVE_WINDOW_TICKS doubled ticks; SSX_NATIVE_SPEED_GATE re-arms the
+v2 0x8002DE04 skip; SSX_NATIVE_WATCH_OFFS logs in-window rider-word
+changers; SSX_NATIVE_COUNTER_RESTORE saves/restores the race tick counter
+across repeats). These are research
+controls, not a high-refresh implementation. See docs/research/120hz-render-seam.md.
 
 With build --scheduler, SSX_NATIVE_SCHEDULE enables the independent deadline
 experiment during host seconds 140–175. It requires SKIP_BOOKKEEPING and no
@@ -180,7 +195,7 @@ def summarize(rows, after=140, frozen_sequence=False):
                     counts[field] = sum(r[field] for r in group)
             counts['results'] = dict(collections.Counter(str(r['result']) for r in group))
         result['groups'][label] = counts
-    repeats = [(i, r) for i, r in enumerate(rows) if r['repeat']]
+    repeats = [(i, r) for i, r in enumerate(rows) if r['repeat'] and r['event'] == 'render']
     def paired(i, complete=False):
         current = rows[i]
         if i == 0:
@@ -205,6 +220,18 @@ def summarize(rows, after=140, frozen_sequence=False):
     result['verified_complete_render_pairs'] = sum(paired(i, complete=True) for i, _ in repeats)
     result['unverified_or_incomplete_render_pairs'] = (
         len(repeats) - result['verified_complete_render_pairs'])
+    update_repeats = [(i, r) for i, r in enumerate(rows)
+                      if r['repeat'] and r['event'] == 'update']
+    def update_paired(i):
+        if i == 0:
+            return False
+        prev, current = rows[i - 1], rows[i]
+        return (prev['event'] == 'update' and not prev['repeat'] and
+                prev['app'] == current['app'] and prev['rider'] == current['rider'])
+    result['update_repeats'] = len(update_repeats)
+    result['verified_update_repeats'] = sum(update_paired(i) for i, _ in update_repeats)
+    result['skipped_updates'] = sum(1 for r in rows if r['event'] == 'update'
+                                    and r.get('skipped_update', 0))
     for label in ('render', 'repeat'):
         group = [r for r in rows if r['wall'] > after and r['rider'] and r['same_rider']
                  and r['event'] == 'render' and bool(r['repeat']) == (label == 'repeat')]

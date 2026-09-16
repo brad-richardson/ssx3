@@ -8,6 +8,41 @@
 // CAMERA_OFFSET adds 500 to one copied matrix component, not a complete camera.
 // FROZEN_VIEW_SWEEP holds one application state for 40 normal, 40 offset and
 // 40 restored draws. Screenshot names mark requests, not exact display IDs.
+// DOUBLE_UPDATE re-enters the application update once per ordinary update in
+// the window when rider state is stable across the callback. Same dt, same
+// render rate: a 2x-update workload probe for the phase-1 budget question,
+// not a timestep change or a 120 Hz mode.
+// HALF_CADENCE skips every other application update in the window (entry
+// jumps straight to return, same dt, same render rate). Wrong-control probe:
+// fingerprints cadence-dependent advancement. Combined with DOUBLE_UPDATE it
+// is the time-normalized 30 Hz mode: skipped alternates plus doubled
+// survivors, 60 executions per guest second in back-to-back pairs.
+// HALF_DT one-shot rewrites dt constants in guest RAM on window entry:
+// eleven 1/60 floats to 1/120 plus the render divisor 60.0 to 120.0
+// (pinned-DOL census, SDA-resolved). Verified before writing; aborts on
+// drift. With DOUBLE_UPDATE this is the 120 Hz candidate v0: const-driven
+// systems normalize while fixed-step integration still double-advances,
+// which cleanly separates the two consumer classes. v1 adds sqrt
+// renormalization of the 0x8002784C damping factors (0.98/0.956/0.978333).
+// v2 gates the speed update (0x8002DE04) to first-body-only: its additive
+// accel carries no dt const, so re-entered bodies must not re-apply it.
+// GUEST_WINDOW replaces the host-clock window with guest-timed edges: the
+// window arms on the first stable update that moves the rider (menus and
+// loading never repeat, so movie inputs cannot desync), engages (consts
+// patch) SSX_NATIVE_WINDOW_SKIP ordinary ticks later, repeats start the
+// NEXT tick (no 1.5x transitional tick), and after
+// SSX_NATIVE_WINDOW_TICKS doubled ticks the window closes and the consts
+// restore under the same drift check (no half-speed tail). All edges are
+// guest-deterministic: identical-prefix runs arm, engage and close on
+// identical ticks. The default tick limit is effectively infinite;
+// SSX_NATIVE_SPEED_GATE re-arms the v2 0x8002DE04 skip (off by default);
+// SSX_NATIVE_WATCH_OFFS="0x24,0x30,..." logs pc/lr/body of in-window
+// rider-body word changes (cap 500 lines).
+// SSX_NATIVE_COUNTER_RESTORE=1 (v3) saves the integer bookkeeping (race
+// tick counter, five element stamps, app+168 flag, 48 RNG bytes) at each
+// in-window ordinary entry and restores it at repeat entry, so both
+// halves replay the tick from identical integer state (aborts if the
+// counter did not advance exactly +1 in the first half).
 #pragma once
 #include "Core/Core.h"
 #include "callback_timing.h"
@@ -33,7 +68,22 @@ static double now_cached=0;
 static inline void RefreshNow(CPUState& c){
  if(c.pc==0x801cad24||c.pc==0x8010550c||c.pc==0x8010a4c8)now_cached=Now();
 }
+static bool GuestWindowEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_GUEST_WINDOW");return p&&std::strcmp(p,"1")==0;}();return value;}
+static unsigned GuestWindowTicks(){static unsigned value=[](){const char* p=std::getenv("SSX_NATIVE_WINDOW_TICKS");if(!p||!*p)return 4000000000u;long v=std::strtol(p,nullptr,10);return v>0?(unsigned)v:4000000000u;}();return value;}
+static unsigned GuestWindowSkip(){static unsigned value=[](){const char* p=std::getenv("SSX_NATIVE_WINDOW_SKIP");if(!p||!*p)return 0u;long v=std::strtol(p,nullptr,10);return v>0?(unsigned)v:0u;}();return value;}
+static bool SpeedGateEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_SPEED_GATE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool CounterRestoreEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_COUNTER_RESTORE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static u32 tick_saved=0;static bool tick_have=false;static unsigned tick_restores=0;
+static u32 stamp_saved[5]={0,0,0,0,0};static u32 appflag_saved=0;static u32 rng_saved[12]={0,0,0,0,0,0,0,0,0,0,0,0};
+static const u32 StampOffs[5]={0x30u,0x50u,0x70u,0x90u,0xB0u};
+static unsigned WatchOffs[]{0,0,0,0,0,0,0,0};
+static unsigned WatchCount(){static unsigned n=[](){const char* p=std::getenv("SSX_NATIVE_WATCH_OFFS");if(!p||!*p)return 0u;unsigned c=0;const char* s=p;while(*s&&c<8){while(*s==' '||*s==',')++s;if(!*s)break;char* e=nullptr;unsigned long v=std::strtoul(s,&e,0);if(e==s)break;WatchOffs[c++]=(unsigned)v;s=e;}return c;}();return n;}
+static unsigned guest_phase=0;
+static unsigned guest_doubled=0;
+static unsigned guest_skipped=0;
+static unsigned update_entries=0;
 static bool ExperimentalWindow(){
+ if(GuestWindowEnabled())return guest_phase==1;
 #ifdef SSX_NATIVE_TRIAL_APP
  return NativeTrial::status.load()==NativeTrial::Status::Running&&NativeTrial::Active(now_cached);
 #else
@@ -46,6 +96,7 @@ static u32 Word(CPUState& c,u32 a){
  return (u32(p[0])<<24)|(u32(p[1])<<16)|(u32(p[2])<<8)|p[3];
 }
 static u32 Rider(CPUState& c){u32 a=Word(c,0x803da1f8);for(u32 o:{0x74u,0xcu,0x28u}){if(!Valid(c,a,4))return 0;a=Word(c,a+o);}return a;}
+static u32 TickCounterAddr(CPUState& c){u32 a=Word(c,c.gpr[13]-22632);for(u32 o:{116u,12u}){if(!Valid(c,a,4))return 0;a=Word(c,a+o);}return a?a+8:0;}
 struct Snapshot {
  u32 rider=0,app=0,view=0,state=0;
  bool application_valid=false;
@@ -106,9 +157,11 @@ static std::string ApplicationDiagnostics(const Snapshot& before,const Snapshot&
   ",\"app_word_changes\":"+(valid?words:"null");
 }
 static u64 Hash(const unsigned char* p,size_t n){u64 h=14695981039346656037ull;for(size_t i=0;i<n;++i){h^=p[i];h*=1099511628211ull;}return h;}
-struct Active {bool pending=false,repeated=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0,cpu_start=-1;Snapshot before;};
+struct Active {bool pending=false,repeated=false,skipped=false;u32 entry=0,ret=0,app=0,first_result=0;u64 tb=0;double wall=0,cpu_start=-1;Snapshot before;};
 static Active update,render;
 static unsigned repeats=0;
+static unsigned update_repeats=0;
+static unsigned half_cadence_updates=0;
 static u32 offset_matrix=0;
 static std::array<unsigned char,64> saved_matrix{};
 static unsigned camera_offsets=0,camera_restores=0;
@@ -131,6 +184,34 @@ static FILE* Output(){
  return output_file;
 }
 static bool DoubleEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_RENDER");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool DoubleUpdateEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_UPDATE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool HalfCadenceEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_CADENCE");return p&&std::strcmp(p,"1")==0;}();return value;}
+static bool HalfDtEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_DT");return p&&std::strcmp(p,"1")==0;}();return value;}
+static const u32 HalfDtAddrs[]={0x803db490,0x803dbba8,0x803dbd44,0x803dc0d4,0x803dc884,0x803dce70,0x803dd6dc,0x803dd8cc,0x803de62c,0x803df0b0,0x803df58c};
+static void WriteConstSet(CPUState& c,bool to_half,const char* tag){
+ float sixth=1.0f/60.0f,twelfth=1.0f/120.0f,sixty=60.0f,onetwenty=120.0f;
+ u32 exp6,half12,exp60,half120;
+ std::memcpy(&exp6,&sixth,4);std::memcpy(&half12,&twelfth,4);
+ std::memcpy(&exp60,&sixty,4);std::memcpy(&half120,&onetwenty,4);
+ auto put=[&](u32 a,u32 expect,u32 value){
+  if(!Valid(c,a,4)||Word(c,a)!=expect){std::fprintf(stderr,"[native-probe] %s const drift at %08x\n",tag,a);std::abort();}
+  auto* p=c.ram+a-0x80000000u;p[0]=(unsigned char)(value>>24);p[1]=(unsigned char)(value>>16);p[2]=(unsigned char)(value>>8);p[3]=(unsigned char)value;
+ };
+ for(u32 a:HalfDtAddrs)put(a,to_half?exp6:half12,to_half?half12:exp6);
+ put(0x803dcee0,to_half?exp60:half120,to_half?half120:exp60);
+ // v1: per-tick damping factors (0x8002784C loop) renormalized to sqrt.
+ put(0x803db7e8,to_half?0x3f7ae148:0x3f7d6d55,to_half?0x3f7d6d55:0x3f7ae148);
+ put(0x803db7ec,to_half?0x3f74bc6a:0x3f7a4dfd,to_half?0x3f7a4dfd:0x3f74bc6a);
+ put(0x803db7f0,to_half?0x3f7a740e:0x3f7d3624,to_half?0x3f7d3624:0x3f7a740e);
+}
+static void PatchHalfDt(CPUState& c){
+ static bool done=false;
+ if(GuestWindowEnabled())return;
+ if(done||!HalfDtEnabled()||!ExperimentalWindow())return;
+ WriteConstSet(c,true,"HALF_DT");
+ done=true;
+ std::fprintf(stderr,"[native-probe] HALF_DT patched %u consts\n",(unsigned)(sizeof(HalfDtAddrs)/sizeof(HalfDtAddrs[0])+4));
+}
 static bool WaitEnabled(){static const bool on=std::getenv("SSX_NATIVE_WAIT_REPEAT")!=nullptr;return on;}
 static bool SweepEnabled(){static const bool on=std::getenv("SSX_NATIVE_FROZEN_VIEW_SWEEP")!=nullptr;return on;}
 static bool SkipEnabled(){
@@ -142,6 +223,7 @@ static bool SkipEnabled(){
 }
 static bool CameraEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAMERA_OFFSET")!=nullptr;return on;}
 static bool CaptureEnabled(){static const bool on=std::getenv("SSX_NATIVE_CAPTURE")!=nullptr;return on;}
+static bool BodyDumpEnabled(){static const bool on=std::getenv("SSX_NATIVE_BODY_DUMP")!=nullptr;return on;}
 static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  const double wall_end=Now();
  const double cpu_ms=RenderResearch::CPUMilliseconds(a.cpu_start,RenderResearch::ThreadCPUSeconds());
@@ -152,15 +234,44 @@ static void Emit(CPUState& c,const char* kind,Active& a,const Snapshot& b){
  const auto body=Diff(a.before.body,b.body),app=Diff(a.before.application,b.application),camera=Diff(a.before.camera,b.camera);
  const auto app_details=ApplicationDiagnostics(a.before,b);
  const bool moved=std::memcmp(a.before.body.data()+240,b.body.data()+240,12)!=0;
- std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s%s}\n",
- kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str());
+ std::string body_words="null";
+ if(BodyDumpEnabled()){
+  body_words="[";const auto* p=b.body.data();
+  for(size_t i=0;i+4<=b.body.size();i+=4){
+   if(i)body_words.push_back(',');
+   body_words+=std::to_string((u32)((u32)p[i]<<24|(u32)p[i+1]<<16|(u32)p[i+2]<<8|(u32)p[i+3]));
+  }
+  body_words.push_back(']');
+ }
+ std::fprintf(file,"{\"event\":\"%s\",\"repeat\":%d,\"retries\":%u,\"camera_offsets\":%u,\"camera_restores\":%u,\"skipped_elapsed\":%u,\"skipped_queue\":%u,\"skipped_update\":%d,\"queue_before\":%u,\"queue_after\":%u,\"result\":%u,\"view_matrix_calls\":%u,\"frame_end_calls\":%u,\"elapsed_calls\":%u,\"queue_calls\":%u,\"gate_calls\":%u,\"gate_ready\":%u,\"wall\":%.6f,\"duration_ms\":%.6f,\"cpu_duration_ms\":%s,\"tb_start\":%llu,\"tb_end\":%llu,\"app\":%u,\"rider\":%u,\"same_rider\":%d,\"state_before\":%u,\"state_after\":%u,\"position_changed\":%d,\"rng_changed\":%d,\"body_hash_before\":%llu,\"body_hash_after\":%llu,\"body_offsets\":%s,\"app_offsets\":%s,\"view\":%u,\"same_view\":%d,\"view_offsets\":%s%s,\"body_words\":%s}\n",
+ kind,a.repeated,retries,camera_offsets,camera_restores,skipped_elapsed,skipped_queue,a.skipped?1:0,queue_before,queue_after,c.gpr[3],render.pending?view_matrix_calls:0,render.pending?frame_end_calls:0,render.pending?elapsed_calls:0,render.pending?queue_calls:0,render.pending?gate_calls:0,render.pending?gate_ready:0,wall_end,(wall_end-a.wall)*1000,cpu_text,(unsigned long long)a.tb,(unsigned long long)c.timebase,a.app,b.rider,a.before.rider==b.rider,a.before.state,b.state,moved,a.before.random!=b.random,(unsigned long long)Hash(a.before.body.data(),a.before.body.size()),(unsigned long long)Hash(b.body.data(),b.body.size()),body.c_str(),app.c_str(),b.view,a.before.view==b.view,camera.c_str(),app_details.c_str(),body_words.c_str());
  std::fflush(file);
 }
 static inline void Step(CPUState& c){
  RefreshNow(c);
+ // v2: run the speed update (0x8002DE04) once per tick. Gate at its entry
+ // (a block start, observed pre-execution, so no frame exists to undo).
+ // Env-gated: HALF_DT alone must mean v1 consts, never the v2 gate.
+ if(c.pc==0x8002de04&&SpeedGateEnabled()&&ExperimentalWindow()&&update.pending&&update.repeated){
+  static bool logged=false;if(!logged){logged=true;std::fprintf(stderr,"[native-probe] SPEED_GATE engaged\n");}
+  c.pc=c.lr;return;
+ }
 #ifdef SSX_NATIVE_TRIAL_APP
  if(!ExperimentalWindow()&&!render.pending&&!update.pending)return;
 #endif
+ if(WatchCount()&&ExperimentalWindow()&&update.pending){
+  static unsigned logged=0;static bool init=false;static u32 last[8]={0,0,0,0,0,0,0,0};
+  u32 r=Rider(c);
+  if(r&&Valid(c,r,0x800)){
+   if(!init){for(unsigned i=0;i<WatchCount();++i)last[i]=Word(c,r+WatchOffs[i]);init=true;}
+   else if(logged<500){
+    for(unsigned i=0;i<WatchCount();++i){
+     u32 v=Word(c,r+WatchOffs[i]);
+     if(v!=last[i]){std::fprintf(stderr,"[native-probe] WATCH off=%x pc=%08x lr=%08x body%d %08x->%08x\n",WatchOffs[i],c.pc,c.lr,update.repeated?2:1,last[i],v);last[i]=v;if(++logged>=500)break;}
+    }
+   }
+  }
+ }
  if(!Output())return;
  // Count cross-chunk graphics calls. Same-chunk scene helpers compile to
  // direct gotos and cannot be counted at this dispatcher boundary.
@@ -190,7 +301,42 @@ static inline void Step(CPUState& c){
   if(c.pc==0x8010a50c){++gate_calls;if(c.gpr[3]&255)++gate_ready;}
  }
  if(c.pc!=0x8010550c && c.pc!=0x8010a4c8 && (!update.pending||c.pc!=update.ret) && (!render.pending||c.pc!=render.ret))return;
- if(update.pending&&c.pc==update.ret){auto b=Capture(c,update.app);Emit(c,"update",update,b);update.pending=false;}
+ if(update.pending&&c.pc==update.ret){
+  auto b=Capture(c,update.app);Emit(c,"update",update,b);
+  bool just_armed=false;
+  if(GuestWindowEnabled()&&guest_phase==0&&Valid(c,b.rider,0x800)&&update.before.state==b.state&&std::memcmp(update.before.body.data()+240,b.body.data()+240,12)!=0){
+   guest_phase=3;guest_skipped=0;just_armed=true;
+   std::fprintf(stderr,"[native-probe] GUEST_WINDOW armed at update %u (skip %u limit %u)\n",update_entries,GuestWindowSkip(),GuestWindowTicks());
+  }
+  if(GuestWindowEnabled()&&guest_phase==3&&!update.repeated){
+   ++guest_skipped;
+   if(guest_skipped>GuestWindowSkip()){
+    if(HalfDtEnabled())WriteConstSet(c,true,"GUEST_WINDOW");
+    guest_phase=1;just_armed=true;
+    std::fprintf(stderr,"[native-probe] GUEST_WINDOW engaged at update %u\n",update_entries);
+   }
+  }
+  if(!just_armed&&!update.repeated&&DoubleUpdateEnabled()&&ExperimentalWindow()&&Valid(c,b.rider,0x800)&&update.before.state==b.state){
+   update.repeated=true;++update_repeats;
+   if(GuestWindowEnabled()&&guest_phase==1)++guest_doubled;
+   if(CounterRestoreEnabled()&&GuestWindowEnabled()&&guest_phase==1){
+    const u32 g=TickCounterAddr(c);
+    if(!g||!Valid(c,g,4)){std::fprintf(stderr,"[native-probe] COUNTER_RESTORE no addr\n");std::abort();}
+    const u32 v=Word(c,g);
+    if(!tick_have||v!=tick_saved+1){std::fprintf(stderr,"[native-probe] COUNTER_RESTORE model drift saved=%u have=%d now=%u\n",tick_saved,tick_have?1:0,v);std::abort();}
+    auto putw=[&](u32 a,u32 value){auto* q=c.ram+a-0x80000000u;q[0]=(unsigned char)(value>>24);q[1]=(unsigned char)(value>>16);q[2]=(unsigned char)(value>>8);q[3]=(unsigned char)value;};
+    putw(g,tick_saved);
+    const u32 r=Rider(c);
+    if(r&&Valid(c,r,0x800))for(int i=0;i<5;++i)putw(r+StampOffs[i],stamp_saved[i]);
+    if(Valid(c,update.app+168,4))putw(update.app+168,appflag_saved);
+    if(Valid(c,0x8035de2c,48))for(int i=0;i<12;++i)putw(0x8035de2c+4*i,rng_saved[i]);
+    if(++tick_restores<=5)std::fprintf(stderr,"[native-probe] COUNTER_RESTORE #%u saved=%u\n",tick_restores,tick_saved);
+   }
+   update.before=b;update.tb=c.timebase;update.wall=Now();update.cpu_start=RenderResearch::ThreadCPUSeconds();
+   c.gpr[3]=update.app;c.pc=update.entry;c.lr=update.ret;return;
+  }
+  update.pending=false;
+ }
  if(render.pending&&c.pc==render.ret){
   // This field describes callback completion, not intermediate dispatches.
   queue_after=Word(c,c.gpr[13]-20556);
@@ -217,7 +363,34 @@ static inline void Step(CPUState& c){
   if(a.pending){std::fprintf(stderr,"[native-probe] unexpected recursive callback\n");return;}
   if(c.pc==0x8010a4c8)view_matrix_calls=frame_end_calls=elapsed_calls=queue_calls=gate_calls=gate_ready=0;
   if(c.pc==0x8010a4c8){retries=skipped_elapsed=skipped_queue=camera_offsets=camera_restores=0;queue_before=Word(c,c.gpr[13]-20556);}
-  a.pending=true;a.repeated=false;a.entry=c.pc;a.ret=c.lr;a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.cpu_start=RenderResearch::ThreadCPUSeconds();a.before=Capture(c,a.app);
+  if(c.pc==0x8010550c){
+   ++update_entries;
+   if(GuestWindowEnabled()&&guest_phase==1&&guest_doubled>=GuestWindowTicks()){
+    if(HalfDtEnabled())WriteConstSet(c,false,"GUEST_WINDOW");
+    guest_phase=2;
+    std::fprintf(stderr,"[native-probe] GUEST_WINDOW closed at update %u (doubled %u)\n",update_entries,guest_doubled);
+   }
+   if(CounterRestoreEnabled()&&GuestWindowEnabled()&&guest_phase==1){
+    const u32 g=TickCounterAddr(c);
+    if(g&&Valid(c,g,4)){tick_saved=Word(c,g);tick_have=true;}
+    const u32 r=Rider(c);
+    if(r&&Valid(c,r,0x800))for(int i=0;i<5;++i)stamp_saved[i]=Word(c,r+StampOffs[i]);
+    const u32 app=c.gpr[3];
+    if(app&&Valid(c,app+168,4))appflag_saved=Word(c,app+168);
+    if(Valid(c,0x8035de2c,48))for(int i=0;i<12;++i)rng_saved[i]=Word(c,0x8035de2c+4*i);
+   }
+  }
+  if(c.pc==0x8010550c)PatchHalfDt(c);
+  if(c.pc==0x8010550c&&HalfCadenceEnabled()&&ExperimentalWindow()&&++half_cadence_updates%2==0){
+   // Emit a zero-work marker without arming: the hook observes post-execution
+   // pc, so an armed skip would miss its completion and wedge pending until
+   // the next return. The guest body never runs.
+   a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.cpu_start=RenderResearch::ThreadCPUSeconds();
+   a.before=Capture(c,a.app);a.repeated=false;a.skipped=true;
+   Emit(c,"update",a,a.before);a.skipped=false;
+   c.pc=c.lr;return;
+  }
+  a.pending=true;a.repeated=false;a.skipped=false;a.entry=c.pc;a.ret=c.lr;a.app=c.gpr[3];a.tb=c.timebase;a.wall=Now();a.cpu_start=RenderResearch::ThreadCPUSeconds();a.before=Capture(c,a.app);
  }
 }
 }
