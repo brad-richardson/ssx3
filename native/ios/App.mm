@@ -186,6 +186,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   NSString* _menuStatus;
   NSString* _menuBuild;
   int _packInstalled;                       // -1 unknown, 0 no, 1 yes
+  BOOL _preloadActive;                      // pack preloaded by this runtime
   NSArray<NSString*>* _coursesCache;
   BOOL _menuClosing;
   BOOL _trialAfterOutput;
@@ -324,6 +325,7 @@ static void SSXLaunchTrace(NSString* step) {
   if([launchArgs containsObject:@"-ssxNormalBoot"]) _debugMainMenu=NO;
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXCPUThread":@YES}];
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXRemasterTextures":@NO}];
+  [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXPreloadTextures":@NO}];
   _cpuThreadOverride=[launchArgs containsObject:@"-ssxSingleCore"] ? 0 :
       ([launchArgs containsObject:@"-ssxCPUThread"] ? 1 : -1);
   _cpuThread=[self cpuThreadRequested];
@@ -597,18 +599,27 @@ static void SSXLaunchTrace(NSString* step) {
   WriteText([config stringByAppendingPathComponent:@"GCPadNew.ini"],mapping);
   // Remastered textures: the pack lives in User/Load/Textures/GXBE69 and is
   // switched on per game, not in GFX.ini — UICommon::Init rewrites base-layer
-  // graphics settings at startup (docs/texture-remaster.md). Caching is left
-  // off here: it would preload the whole pack into memory on the device.
+  // graphics settings at startup (docs/texture-remaster.md).
+  //
+  // CacheHiresTextures decides *when* the pack is paid for. Off, every texture
+  // is read and PNG-decoded the first time it is drawn, so a burst of new art
+  // - a crash, a camera cut, a new stretch of terrain - stalls the frame. On,
+  // HiresTexture::Update() decodes the whole pack at startup and holds it, so
+  // the stalls go away and the cost moves to boot time and resident memory
+  // (about 894 MB decoded for pack-v8, which an 8 GB phone can hold).
   NSString* settingsDir=[user stringByAppendingPathComponent:@"GameSettings"];
   [[NSFileManager defaultManager] createDirectoryAtPath:settingsDir
                             withIntermediateDirectories:YES attributes:nil error:nil];
   const BOOL remaster=[self remasterRequested];
   _remasterActive=remaster;  // a changed menu choice applies to the next runtime
+  const BOOL preload=[self preloadRequested];
+  _preloadActive=preload;
   WriteText([settingsDir stringByAppendingPathComponent:@"GXBE69.ini"],
-    [NSString stringWithFormat:@"[Video_Settings]\nHiresTextures = %s\nCacheHiresTextures = False\n",
-      remaster ? "True" : "False"]);
+    [NSString stringWithFormat:@"[Video_Settings]\nHiresTextures = %s\nCacheHiresTextures = %s\n",
+      remaster ? "True" : "False", preload ? "True" : "False"]);
   [self logSessionEvent:@"texture_pack_state" details:@{
-      @"requested":@(remaster), @"installed":@([self remasterPackInstalled])}];
+      @"requested":@(remaster), @"installed":@([self remasterPackInstalled]),
+      @"preload":@(preload), @"supportsBC":@([self supportsBlockCompression])}];
   NSString* fifo = [pipes stringByAppendingPathComponent:@"ssx3"];
   if (mkfifo(fifo.fileSystemRepresentation,0600) != 0 && errno != EEXIST) {
     _status.text = @"Could not create controller pipe"; _starting=false; return;
@@ -683,6 +694,11 @@ static void SSXLaunchTrace(NSString* step) {
   NSMutableDictionary* metadata = [@{@"disc":@"GXBE69", @"moduleABI":@(descriptor->abi_version),
     @"os":UIDevice.currentDevice.systemVersion, @"device":UIDevice.currentDevice.model,
     @"simulator":@(TARGET_OS_SIMULATOR), @"metalDevice":((CAMetalLayer*)_surface.layer).device.name ?: @"unknown",
+    // Whether a block-compressed texture pack is even possible on this GPU.
+    // Dolphin gates bSupportsST3CTextures/bSupportsBPTC on exactly this
+    // (MTLUtil.mm), and a BC pack would upload with no decode at an eighth of
+    // RGBA8 - so record the answer rather than guessing from the chip family.
+    @"supportsBCTextureCompression":@([self supportsBlockCompression]),
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
     @"renderScale":@(_internalScale), @"cpuThread":@(_cpuThread), @"fastDiscSpeed":@(_fastDisc),
     @"dispatchSamples":@(_dispatchSamples), @"automated":@(_sequence!=nil),
@@ -1034,6 +1050,15 @@ static void SSXLaunchTrace(NSString* step) {
     [self logSessionEvent:@"runtime_preference_changed" details:@{@"cpuThread":@(enabled), @"active":@(self->_cpuThread)}];
     [self refreshSessionMenu];
   };
+  _sessionMenu.onPreload = ^(BOOL enabled) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    [NSUserDefaults.standardUserDefaults setBool:enabled forKey:@"SSXPreloadTextures"];
+    [self logSessionEvent:@"texture_preload_preference_changed" details:@{@"enabled":@(enabled)}];
+    self->_menuStatus=enabled ? @"The pack will be decoded at startup; the next load is slower."
+                              : @"The pack will be decoded while riding, as before.";
+    [self refreshSessionMenu];
+  };
   _sessionMenu.onRemaster = ^(BOOL enabled) {
     SSXViewController* self=weakSelf;
     if (!self) return;
@@ -1148,6 +1173,7 @@ static void SSXLaunchTrace(NSString* step) {
   [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
       fastStart:_debugMainMenu dualCore:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]
       remaster:[self remasterRequested] remasterAvailable:[self remasterPackInstalled]
+      preload:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXPreloadTextures"]
       courses:[self installedCourses] course:[self chosenCourseFile]
       canConfigure:canConfigure canTrial:canConfigure
       canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&
@@ -1201,6 +1227,16 @@ static void SSXLaunchTrace(NSString* step) {
   // A preference that names a manifest which is no longer installed reverts to
   // the stock event rather than failing the boot.
   return (chosen.length && [[self installedCourses] containsObject:chosen]) ? chosen : nil;
+}
+- (BOOL)supportsBlockCompression {
+  id<MTLDevice> device = ((CAMetalLayer*)_surface.layer).device;
+  if (@available(iOS 16.4, macOS 11.0, *))
+    return device && [device supportsBCTextureCompression];
+  return NO;
+}
+- (BOOL)preloadRequested {
+  return [NSUserDefaults.standardUserDefaults boolForKey:@"SSXPreloadTextures"]
+      && [self remasterRequested] && [self remasterPackInstalled];
 }
 - (BOOL)remasterPackInstalled {
   // Dolphin reads Load/Textures/<game id>/; an empty directory is not a pack.
