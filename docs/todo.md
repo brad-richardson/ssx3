@@ -316,15 +316,16 @@ the build or commit that closed them.
       isolates the F update question; (3) production-quiet probe delta — the
       trial's per-body Diff/Hash/Emit/fflush rides in every measured pair,
       size the ship prize with a quiet-mode run; (4) phase-tagged update
-      breakdown — what the 3 ms ordinary update spends in game vs view vs
-      bookkeeping decides all downstream work; (5) update-pair tail —
+      breakdown — CLOSED September 16 (pc histogram: update ~99%
+      traversal+physics, bookkeeping ~1%, view 0%; render runs 2x the
+      guest instructions of update); (5) update-pair tail —
       CLOSED September 16 as host-attributed (crash-f window: CPU max
       5.35, wall max 7.90, zero over 8.33; spikes show wall≫cpu); (6) fast-FP phone measurement (built, pending)
       plus hot-chunk float-conversion where the breakdown points; (7) fewer
       chassis round-trips (existing item); (8) 1x BC texture pack for perf
       mode (bandwidth, not the 4x quality pack); (9) view/camera at 60 +
-      physics at 120 split — semantic change, only if the breakdown shows
-      view dominating; (10) VI-paced true-120 (2x update+render) vs
+      physics at 120 split — CLOSED September 16 as answered-NO (no
+      view work inside the doubled update to split); (10) VI-paced true-120 (2x update+render) vs
       back-to-back halves — end-architecture question, needs 1–3 first.
       Audio skipping in heavy areas is a budget-overrun symptom (CPU
       starvation → DMA underrun), fixed by headroom, not audio work.

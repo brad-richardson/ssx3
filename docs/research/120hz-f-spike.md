@@ -771,3 +771,31 @@ presents 92 displayed/s. (Pre-trial dip and post-trial present
 gap are manual-session menu/pause artifacts.) The F phone trial
 itself is unaffected (no extra draws, no eviction). Repro:
 interleave-player + SKIP=1946/TICKS=60.
+
+## Update breakdown: physics traversal, not bookkeeping (September 16)
+
+New probe mode SSX_NATIVE_PC_HIST=path (desktop-only, separate
+file, main schema untouched): per-callback-class dispatch-pc
+histogram over the window. Sizing run (det-base, guest window,
+no doubling, engage→end): ordinary update 48.8M dispatches,
+render 97.4M (2.0x — render executes twice the guest
+instructions of update, consistent with phone render 12.25 ms
+vs pair 5.12 ms).
+
+Update split: integer bookkeeping (counter getter 0.43% +
+stamp loop 0.38% + speed 0.15% + governor caller 0.08%) ≈ 1%;
+view-marker work (view-matrix/frame-end/queue/gate pcs) = 0% —
+view runs in render, not update. The update is ~99%
+game/physics. Top: 0x802b16 loop 9.1% (counted loop over a
+CTR-dispatched virtual call = per-object update fan-out —
+dispatch shape, hard to optimize), governor/damping 0x802bf5
+7.4%, math/geometry lib 0x80008a 5.8% (paired-single + FPU),
+FPU physics cluster 0x801c47/48 ~7.2%.
+
+Decisions: (a) backlog 4 CLOSED — the 3 ms update is
+traversal+physics; bookkeeping is noise. (b) backlog 9 CLOSED
+as answered-NO — there is no view work inside the doubled
+update to split out; the 60/120 view/physics split has no
+premise. (c) update optimization = object traversal + the FPU
+regions above; render remains the binding constraint either
+way. Repro: pchist-player + SKIP=1946, no DOUBLE_UPDATE.

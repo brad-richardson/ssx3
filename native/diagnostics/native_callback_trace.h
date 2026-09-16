@@ -50,6 +50,11 @@
 // body2 dispatch so the mid-tick draw observes the consistent post-body1
 // snapshot. Rows carry interleaved=1 and sit between update rows by design,
 // so the analyzer excludes them from ordinary repeat pairing. Cap 600.
+// SSX_NATIVE_PC_HIST=path histograms guest dispatch pcs per callback class
+// (ordinary update, repeat half, render) while the window is open and
+// snapshots top buckets to a SEPARATE file every 500 in-window ordinary
+// updates (last snapshot wins) plus at guest close. Phase-tagged update
+// breakdown sizing; the main JSONL schema is untouched.
 #pragma once
 #include "Core/Core.h"
 #include "callback_timing.h"
@@ -218,6 +223,39 @@ static bool DoubleUpdateEnabled(){
  static bool value=[](){const char* p=std::getenv("SSX_NATIVE_DOUBLE_UPDATE");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool HalfCadenceEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_CADENCE");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool InterleaveEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_INTERLEAVE_RENDER");return p&&std::strcmp(p,"1")==0;}();return value;}
+static const char* PcHistPath(){
+#ifdef SSX_NATIVE_TRIAL_APP
+ return nullptr;
+#else
+ static const char* p=std::getenv("SSX_NATIVE_PC_HIST");return (p&&*p)?p:nullptr;
+#endif
+}
+static const unsigned PcHistBuckets=131072;
+static u64 pc_hist[3][131072]={};
+static u64 pc_hist_other[3]={};
+static unsigned pc_hist_ticks=0;
+static void EmitPcHist(){
+ const char* p=PcHistPath();if(!p)return;
+ FILE* f=std::fopen(p,"w");if(!f)return;
+ const char* names[3]={"ord","rep","ren"};
+ for(int t=0;t<3;++t){
+  u64 total=pc_hist_other[t];for(unsigned i=0;i<PcHistBuckets;++i)total+=pc_hist[t][i];
+  std::fprintf(f,"{\"event\":\"pc_hist\",\"table\":\"%s\",\"total\":%llu,\"other\":%llu,\"buckets\":[",names[t],(unsigned long long)total,(unsigned long long)pc_hist_other[t]);
+  static u64 work[131072];
+  std::memcpy(work,pc_hist[t],sizeof(work));
+  unsigned shown=0;
+  for(unsigned k=0;k<256;++k){
+   unsigned best=0;u64 bestv=0;
+   for(unsigned i=0;i<PcHistBuckets;++i)if(work[i]>bestv){bestv=work[i];best=i;}
+   if(!bestv)break;
+   if(shown++)std::fprintf(f,",");
+   std::fprintf(f,"[\"%08x\",%llu]",0x80000000u+(best<<8),(unsigned long long)bestv);
+   work[best]=0;
+  }
+  std::fprintf(f,"]}\n");
+ }
+ std::fclose(f);
+}
 static bool HalfDtEnabled(){
 #ifdef SSX_NATIVE_TRIAL_APP
  if(FMode())return true;
@@ -386,6 +424,11 @@ static void RestoreIntegers(CPUState& c){
 }
 static inline void Step(CPUState& c){
  RefreshNow(c);
+ if(PcHistPath()&&ExperimentalWindow()&&(update.pending||render.pending)){
+  int t=(render.pending&&(interleave_armed||!update.pending))?2:(update.repeated?1:0);
+  if(c.pc>=0x80000000u&&c.pc<0x82000000u)++pc_hist[t][(c.pc-0x80000000u)>>8];
+  else++pc_hist_other[t];
+ }
  // v2: run the speed update (0x8002DE04) once per tick. Gate at its entry
  // (a block start, observed pre-execution, so no frame exists to undo).
  // Env-gated: HALF_DT alone must mean v1 consts, never the v2 gate.
@@ -451,6 +494,7 @@ static inline void Step(CPUState& c){
  if(c.pc!=0x8010550c && c.pc!=0x8010a4c8 && (!update.pending||c.pc!=update.ret) && (!render.pending||c.pc!=render.ret))return;
  if(update.pending&&c.pc==update.ret){
   auto b=Capture(c,update.app);Emit(c,"update",update,b);
+  if(PcHistPath()&&!update.repeated&&ExperimentalWindow()&&++pc_hist_ticks%500==0)EmitPcHist();
   bool just_armed=false;
   if(GuestWindowEnabled()&&guest_phase==0&&Valid(c,b.rider,0x800)&&update.before.state==b.state&&std::memcmp(update.before.body.data()+240,b.body.data()+240,12)!=0){
    guest_phase=3;guest_skipped=0;just_armed=true;
@@ -559,6 +603,7 @@ static inline void Step(CPUState& c){
     if(HalfDtEnabled())WriteConstSet(c,false,"GUEST_WINDOW");
     guest_phase=2;
     std::fprintf(stderr,"[native-probe] GUEST_WINDOW closed at update %u (doubled %u)\n",update_entries,guest_doubled);
+    EmitPcHist();
    }
    if(CounterWindow()){
     const u32 g=TickCounterAddr(c);

@@ -26,7 +26,8 @@ SSX_NATIVE_WINDOW_TICKS doubled ticks; SSX_NATIVE_SPEED_GATE re-arms the
 v2 0x8002DE04 skip; SSX_NATIVE_WATCH_OFFS logs in-window rider-word
 changers; SSX_NATIVE_COUNTER_RESTORE saves/restores the race tick counter
 across repeats; SSX_NATIVE_INTERLEAVE_RENDER draws once between the two
-update halves of each doubled tick, cap 600). These are research
+update halves of each doubled tick, cap 600; SSX_NATIVE_PC_HIST=path
+histograms guest pcs per callback class to a separate file). These are research
 controls, not a high-refresh implementation. See docs/research/120hz-render-seam.md.
 
 With build --scheduler, SSX_NATIVE_SCHEDULE enables the independent deadline
