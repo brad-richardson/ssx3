@@ -385,6 +385,9 @@ def launch(args):
     textures = getattr(args, "textures", None)
     if textures is not None and textures not in ("stock", "remaster"):
         raise ValueError("--textures must be 'stock' or 'remaster'")
+    preload_textures = getattr(args, "preload_textures", None)
+    if preload_textures is not None and preload_textures not in ("on", "off"):
+        raise ValueError("--preload-textures must be 'on' or 'off'")
     if args.sequence:
         if args.simulator:
             shutil.copy2(args.sequence, simulator_documents(args) / "test-sequence.json")
@@ -399,6 +402,8 @@ def launch(args):
         flags.extend(["-ssxCourseManifest", course_manifest])
     if textures is not None:
         flags.extend(["-ssxTextures", textures])
+    if preload_textures is not None:
+        flags.extend(["-ssxPreloadTextures", preload_textures])
     if smoothing_at is not None:
         flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
     if f_at is not None:
@@ -484,6 +489,8 @@ def main():
                         help="Launch-only course redirect manifest (bare file name in Documents/, or 'stock' to ignore the menu choice)")
     parser.add_argument("--textures", choices=("stock", "remaster"),
                         help="Launch-only texture override; normal launches use the saved remaster choice")
+    parser.add_argument("--preload-textures", choices=("on", "off"),
+                        help="Launch-only texture-preload override; force on to pay pack decode at boot instead of stalling first-draw frames in trial windows")
     parser.add_argument("--simulator-null-audio", action="store_true",
                         help="Graphics-only Simulator diagnostic; requires launch, --simulator, and bounded --sequence")
     boot=parser.add_mutually_exclusive_group()
@@ -529,6 +536,8 @@ def main():
         parser.error("--course-manifest applies only to launch")
     if args.textures is not None and args.command != "launch":
         parser.error("--textures applies only to launch")
+    if args.preload_textures is not None and args.command != "launch":
+        parser.error("--preload-textures applies only to launch")
     if args.simulator_null_audio and (args.command != "launch" or not args.simulator or not args.sequence):
         parser.error("--simulator-null-audio requires launch, --simulator, and a bounded --sequence")
     if args.simulator:

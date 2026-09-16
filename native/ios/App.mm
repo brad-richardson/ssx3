@@ -1344,7 +1344,7 @@ static void SSXLaunchTrace(NSString* step) {
   [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
       fastStart:_debugMainMenu dualCore:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]
       remaster:[self remasterRequested] remasterAvailable:[self remasterPackInstalled]
-      preload:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXPreloadTextures"]
+      preload:[self preloadRequested]
       fastLoad:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXFastDisc"]
       memoryCard:![NSUserDefaults.standardUserDefaults boolForKey:@"SSXNoMemoryCard"]
       courses:[self installedCourses] course:[self chosenCourseFile]
@@ -1446,6 +1446,21 @@ static void SSXLaunchTrace(NSString* step) {
   return NO;
 }
 - (BOOL)preloadRequested {
+  // Launch-flag override for trial runs; the saved choice applies otherwise.
+  // Preloading still needs a remaster pack: with stock textures there is
+  // nothing to pay for at boot.
+  NSArray<NSString*>* launch = NSProcessInfo.processInfo.arguments;
+  NSUInteger flag = [launch indexOfObject:@"-ssxPreloadTextures"];
+  if (flag != NSNotFound && flag+1 < launch.count) {
+    NSString* want = launch[flag+1];
+    if ([want isEqualToString:@"on"]) return [self remasterRequested] && [self remasterPackInstalled];
+    if ([want isEqualToString:@"off"]) return NO;
+    static BOOL warned = NO;
+    if (!warned) {
+      warned = YES;
+      fprintf(stderr,"[ssx-test] ignoring invalid -ssxPreloadTextures %s\n",want.UTF8String);
+    }
+  }
   return [NSUserDefaults.standardUserDefaults boolForKey:@"SSXPreloadTextures"]
       && [self remasterRequested] && [self remasterPackInstalled];
 }

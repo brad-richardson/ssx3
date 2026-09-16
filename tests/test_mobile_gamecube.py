@@ -297,6 +297,31 @@ class DeviceLaunch(unittest.TestCase):
                          ["--", "-ssxCourseManifest", "stock", "-ssxTextures", "stock"])
         self.assertNotIn("--", command[:bundle])
 
+    def test_preload_textures_override_reaches_app_and_applies_only_to_launch(self):
+        with mock.patch("sys.argv", ["mobile_gamecube.py", "collect", "--device", "PHONE",
+                "--preload-textures", "on"]), \
+                mock.patch.object(mobile_gamecube, "collect") as collect, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            with self.assertRaises(SystemExit) as stopped:
+                mobile_gamecube.main()
+            self.assertEqual(stopped.exception.code, 2)
+            collect.assert_not_called()
+            command.assert_not_called()
+        for value in ("on", "off"):
+            with self.subTest(value=value):
+                args = argparse.Namespace(device="PHONE", simulator=False, sequence=None,
+                                          preload_textures=value)
+                calls = []
+                with tempfile.TemporaryDirectory() as tmp, \
+                        mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                        mock.patch.object(mobile_gamecube, "copy_to"), \
+                        mock.patch.object(mobile_gamecube, "command",
+                                          side_effect=lambda c: calls.append(c)):
+                    mobile_gamecube.launch(args)
+                command = calls[0]
+                bundle = command.index(mobile_gamecube.BUNDLE)
+                self.assertEqual(command[bundle + 1:], ["--", "-ssxPreloadTextures", value])
+
     def test_resolution_option_reaches_app_with_and_without_sequence(self):
         for simulator in (False, True):
             for scale in ("full", "three-quarter", "match-internal", "half"):
