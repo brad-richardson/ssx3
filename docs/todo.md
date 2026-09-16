@@ -630,6 +630,10 @@ the build or commit that closed them.
 - [x] 2026-09-11 Xbox prompt glyphs: `tools/patch_ui_glyphs.py` repaints the
       B/X/Y icons in the three UI sheets; in-game menu shows green A and blue X.
       Installed on the phone, in the gc-gari-005 disc root and the shared ISO.
+      2026-09-15: the hand-installed copy was lost when the phone's container
+      was rebuilt, because `provision` copies `files/` from the pristine disc.
+      Now re-applied by `provision` itself (`--stock-glyphs` opts out) and
+      covered by `tests/test_patch_ui_glyphs.py`.
 
 - [x] 2026-09-11 `tools/build_gc_iso.py` rebuilds a GameCube ISO; stock FST
       reproduced byte for byte.

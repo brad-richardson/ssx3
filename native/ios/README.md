@@ -215,6 +215,27 @@ python3 tools/mobile_gamecube.py provision --device 'YOUR PAIRED IPHONE'
 python3 tools/mobile_gamecube.py launch --device 'YOUR PAIRED IPHONE'
 ```
 
+`provision` gets you the stock disc plus the Xbox-position prompt glyphs, which
+it rebuilds each time (`--stock-glyphs` keeps the GameCube icons). **Everything
+else the phone rides is separate, and reinstalling does not restore any of it:**
+
+```sh
+python3 tools/mobile_gamecube.py world --device 'YOUR PAIRED IPHONE' \
+  --world local/builds/gc-gari-interactions-002/BAM.BIG      # converted course
+python3 tools/mobile_gamecube.py textures --device 'YOUR PAIRED IPHONE' \
+  --pack local/research/remaster/pack-v8                     # remastered art
+python3 tools/mobile_gamecube.py courses --device 'YOUR PAIRED IPHONE' \
+  --courses-dir local/courses                                # the pause-menu picker
+```
+
+This list is the one to check after any container rebuild. In September 2026 a
+reinstall silently reverted the world archive to stock, emptied the course
+picker, and restored the GameCube prompt glyphs, and each was diagnosed
+separately as a regression before the common cause was recognised. The glyphs
+are now derived during provisioning; the world, pack and manifests are not, and
+`local/reports/mobile/*-course-build.json` is the record of which world archive
+the phone last received.
+
 A new course build only changes the world archive, so after the first
 provisioning push just that file (about 100 MB, a few seconds over USB or
 Wi-Fi; it works while the phone is locked):
