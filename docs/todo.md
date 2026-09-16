@@ -261,6 +261,44 @@ the build or commit that closed them.
       [FMA classifier spike](research/float-arithmetic-audit.md) preserves full
       tested guest/host state; small, noisy timing gains do not justify a phone
       change. Existing phone builds already use optimized Release settings.
+- [ ] 120 Hz route F (double update, halved dt) is the live track; its probes
+      are on main. `gamecube_native_trace.py build` injects
+      `native/diagnostics/native_callback_trace.h` into a diagnostic copy of
+      the run loop under `local/`, so DOUBLE_UPDATE, HALF_CADENCE, HALF_DT,
+      GUEST_WINDOW, SPEED_GATE and COUNTER_RESTORE can never reach a shipped
+      build; each is off unless its variable is set. Next is the kill order in
+      [the F spike plan](research/120hz-f-spike.md): the 2x-update workload
+      probe on desktop first, since a desktop CPU that cannot hold
+      `guest_seconds_per_host_second` >= 0.95 ends F before any dt work.
+      Compare arms with `gamecube_parity_compare.py` (absolute guest timebase,
+      end-of-tick body hashes) and gate them with `gamecube_f_regression.py`.
+      Two known rough edges, neither blocking: `WriteConstSet` aborts on const
+      drift *after* it has already written earlier addresses, so a failed
+      restore leaves the guest at halved dt - validate all fourteen addresses
+      before writing any; and `group_ticks` in the parity tool treats a
+      HALF_CADENCE skip row as its own tick, which flatters the wrong-control
+      arm's tick count.
+- [ ] 120 Hz by frame generation is ruled out, not pending. The Metal
+      interpolation prototype on `spike/120hz` (worktree
+      `../ssx3-120hz`, unmerged on purpose) cut emulation to 4.9 FPS at 0.36
+      speed against 59.4/0.99 stock, and cost 10.4 ms of GPU per synthesized
+      frame - more than half a frame period on its own. The branch's own
+      diagnosis blames a CPU wait on the interpolation command buffer, but
+      there is no `waitUntilCompleted` on the per-frame path; the likely cause
+      is `[layer nextDrawable]` back-pressure, since it presents twice per game
+      frame with `presentAfterMinimumDuration:1/120` on a 60 Hz panel that can
+      retire only one - which the branch's own iOS section had predicted would
+      throttle emulation. Keep the branch for its approach-2 reading: the
+      `rawProjection` to near/far/fov/aspect derivation, the XFB-copy snapshot
+      point for EFB depth, and the `MTLFXFrameInterpolator` contract including
+      the `uiTexture` input that would fix HUD ghosting. Do not re-measure
+      frame generation on the Mac's 60 Hz display; it cannot show the cadence.
+      Its `check_stacked_patches` change to `tools/native_gamecube.py` must not
+      be merged as written: it engages whenever `spike-120hz.patch` merely
+      exists, which breaks `configure`/`build`/`run` on main, and its stack
+      omits `recompcore-course-redirect.patch`, so it fails even with the spike
+      applied (residual: `Source/Core/Core/CMakeLists.txt`). A correct version
+      keys on which overlays are *applied* and lists them all.
 - [ ] Phone: compare 75%, Match internal and Half output on the same route
       at fixed internal detail; verify Match through menu 1× ↔ 2× changes.
       Build 113c9b20's phone run confirms Match/2×: output 1947 × 896,
