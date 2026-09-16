@@ -16,10 +16,11 @@ from gamecube_draw_trace import ROOT, sha
 def validate_trial_trace(rows):
     events = [r for r in rows if r.get('event') == 'trial_test']
     expected = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent',
-                'restart2', 'cancel_idle', 'quiescent', 'complete']
+                'restart2', 'cancel_idle', 'quiescent', 'restart3', 'cancel_combined',
+                'quiescent', 'complete']
     if [r.get('action') for r in events] != expected:
         raise RuntimeError('Lifecycle trial did not demonstrate cancellation, drain, restart, '
-                           'idle cancellation and completion')
+                           'idle cancellation, combined composition and completion')
     if any(b['wall'] < a['wall'] for a, b in zip(events, events[1:])):
         raise RuntimeError('Lifecycle events are out of order')
     walls = {r['action']: r['wall'] for r in events}
@@ -39,7 +40,7 @@ def validate_trial_trace(rows):
     # Trial 2 must make real extras: with a stale schedule epoch it limits
     # instantly past trial 1's grace and this finds nothing.
     extras = [r for r in rows if r.get('event') == 'render' and r.get('repeat') and
-              r.get('wall', 0) > walls['restart'] and
+              walls['restart'] < r.get('wall', 0) < walls['restart2'] and
               r.get('result', 0) & 255 and r.get('view_matrix_calls') and r.get('frame_end_calls')]
     if not extras:
         raise RuntimeError('Lifecycle trial never completed an injected draw')
@@ -51,10 +52,32 @@ def validate_trial_trace(rows):
             raise RuntimeError('Lifecycle extra draw changed watched guest state')
     # Leg 3 re-runs F and cancels it idle. Finishing without restoring would
     # strand the guest halved, so the restore after that cancel is required.
+    # The window ends at leg 4's cancel, not its start: the driver prints
+    # transition events with its entry-captured clock while restores emit
+    # with the clock refreshed mid-dispatch, so leg 3's restore lands
+    # microseconds after the restart3 print. Leg 4's own restore always
+    # follows its cancel, so this still excludes it.
     third = [r for r in rows if r.get('event') == 'f_trial' and r.get('action') == 'restored' and
-             r.get('wall', 0) > walls['cancel_idle']]
+             walls['cancel_idle'] < r.get('wall', 0) < walls['cancel_combined']]
     if not third:
         raise RuntimeError('Lifecycle idle-cancelled F trial never restored its dt consts')
+    # Leg 4 composes both halves under one kind: it must restore its consts
+    # after the cancel and inject at least one clean extra draw.
+    fourth = [r for r in rows if r.get('event') == 'f_trial' and r.get('action') == 'restored' and
+              r.get('wall', 0) > walls['cancel_combined']]
+    if not fourth:
+        raise RuntimeError('Lifecycle combined trial never restored its dt consts')
+    combined = [r for r in rows if r.get('event') == 'render' and r.get('repeat') and
+                r.get('wall', 0) > walls['restart3'] and
+                r.get('result', 0) & 255 and r.get('view_matrix_calls') and r.get('frame_end_calls')]
+    if not combined:
+        raise RuntimeError('Lifecycle combined trial produced no extra draw')
+    for r in combined:
+        if (r.get('same_rider') != 1 or r.get('same_view') != 1 or
+                r.get('state_before') != r.get('state_after') or
+                r.get('rng_changed') != 0 or r.get('position_changed') != 0 or
+                any(r.get(k) != [] for k in ('body_offsets', 'app_offsets', 'view_offsets'))):
+            raise RuntimeError('Lifecycle combined extra draw changed watched guest state')
     return dict(lifecycle_complete=True, complete_extras=len(extras), first_trial_repeats=len(repeats))
 
 

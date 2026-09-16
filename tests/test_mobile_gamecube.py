@@ -187,6 +187,36 @@ class DeviceLaunch(unittest.TestCase):
         bundle = command.index(mobile_gamecube.BUNDLE)
         self.assertEqual(command[bundle + 1:], ["--", "-ssxAutoTest", "-ssxFAt", "155.0"])
 
+    def test_combo_at_requires_bounded_sequence_and_reaches_app(self):
+        args = argparse.Namespace(device="PHONE", simulator=False,
+                                  sequence=Path("native/ios/snow-jam-smoke.json"), combo_at=155.0)
+        calls = []
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "copy_to"), \
+                mock.patch.object(mobile_gamecube, "command", side_effect=lambda c: calls.append(c)):
+            mobile_gamecube.launch(args)
+        self.assertEqual(len(calls), 1)
+        command = calls[0]
+        bundle = command.index(mobile_gamecube.BUNDLE)
+        self.assertEqual(command[bundle + 1:], ["--", "-ssxAutoTest", "-ssxCombinedAt", "155.0"])
+        with mock.patch.object(mobile_gamecube, "copy_to") as copy, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            with self.assertRaises(ValueError):
+                mobile_gamecube.launch(argparse.Namespace(device="PHONE", simulator=False,
+                                                          sequence=None, combo_at=155.0))
+            copy.assert_not_called()
+            command.assert_not_called()
+        with mock.patch("sys.argv", ["mobile_gamecube.py", "collect", "--device", "PHONE",
+                "--combo-at", "155"]), \
+                mock.patch.object(mobile_gamecube, "collect") as collect, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            with self.assertRaises(SystemExit) as stopped:
+                mobile_gamecube.main()
+            self.assertEqual(stopped.exception.code, 2)
+            collect.assert_not_called()
+            command.assert_not_called()
+
     def test_app_flags_follow_argument_separator(self):
         # devicectl parsed "-ssxAutoTest" as its own "-t" option until "--" was added.
         args = argparse.Namespace(device="PHONE", simulator=False,

@@ -89,13 +89,16 @@ static inline void RefreshNow(CPUState& c){
 // Route F on the phone: the trial arms the v3b configuration (doubled updates,
 // halved dt consts, full integer replay) without any environment. FMode is the
 // live window; FTrial owns finish/restore once Running even after cancel.
+// Combined trials share both: they double updates under halved dt exactly
+// like F and additionally inject interpolated extras through the smoothing
+// schedule path.
+static bool FKind(){const auto k=NativeTrial::kind.load();return k==NativeTrial::Kind::F||k==NativeTrial::Kind::Combined;}
 static bool FMode(){
  return NativeTrial::status.load()==NativeTrial::Status::Running&&
-  NativeTrial::kind.load()==NativeTrial::Kind::F&&NativeTrial::Active(now_cached);
+  FKind()&&NativeTrial::Active(now_cached);
 }
 static bool FTrial(){
- return NativeTrial::status.load()==NativeTrial::Status::Running&&
-  NativeTrial::kind.load()==NativeTrial::Kind::F;
+ return NativeTrial::status.load()==NativeTrial::Status::Running&&FKind();
 }
 static bool f_patched=false;
 #endif
@@ -464,10 +467,12 @@ static inline void Step(CPUState& c){
  // A cancel that lands with nothing in flight never reaches an update
  // return, so the return-site finish below cannot run: finish here instead.
  // The gate guarantees quiescence (no callback outstanding) and FRestore
- // runs first, so Finished still means restored with nothing owed. Repeats
- // re-enter with pending set and skip both.
+ // runs first, so Finished still means restored with nothing owed. Combined
+ // restores here but finishes in the schedule step, which restores the XFB
+ // mode first in the same dispatch. Repeats re-enter with pending set and
+ // skip both.
  if(c.pc==0x8010550c&&!update.pending&&!render.pending){
-  if(FTrial()&&!NativeTrial::Active(now_cached)){FRestore(c);NativeTrial::status=NativeTrial::Status::Finished;}
+  if(FTrial()&&!NativeTrial::Active(now_cached)){FRestore(c);if(NativeTrial::kind.load()==NativeTrial::Kind::F)NativeTrial::status=NativeTrial::Status::Finished;}
   else FPatch(c);
  }
  if(!ExperimentalWindow()&&!render.pending&&!update.pending)return;
@@ -581,10 +586,13 @@ static inline void Step(CPUState& c){
 #ifdef SSX_NATIVE_TRIAL_APP
   // Finish an in-flight trial at the quiescent return, after the entry
   // restore above has run: the frontend waits for Running to clear before
-  // pausing/checkpointing. Idle cancels finish at the entry site instead.
+  // pausing/checkpointing. Idle F cancels finish at the entry site instead.
+  // A combined trial holds the smoothing completion alias too: it restores
+  // consts here but finishes in the schedule step, after the mode restore.
   if(FTrial()&&!NativeTrial::Active(now_cached)){
    FRestore(c);
-   NativeTrial::status=NativeTrial::Status::Finished;
+   if(NativeTrial::kind.load()==NativeTrial::Kind::F)
+    NativeTrial::status=NativeTrial::Status::Finished;
   }
 #endif
  }

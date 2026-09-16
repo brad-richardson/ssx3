@@ -373,6 +373,12 @@ def launch(args):
             raise ValueError("--f-at requires a bounded --sequence")
         if not math.isfinite(f_at) or not 0 <= f_at <= sequence["duration"]-40:
             raise ValueError("--f-at must be nonnegative and leave 40 seconds before test end")
+    combo_at = getattr(args, "combo_at", None)
+    if combo_at is not None:
+        if sequence is None:
+            raise ValueError("--combo-at requires a bounded --sequence")
+        if not math.isfinite(combo_at) or not 0 <= combo_at <= sequence["duration"]-40:
+            raise ValueError("--combo-at must be nonnegative and leave 40 seconds before test end")
     course_manifest = getattr(args, "course_manifest", None)
     if course_manifest is not None and ("/" in course_manifest or course_manifest.startswith(".")):
         raise ValueError("--course-manifest must be a bare file name or 'stock'")
@@ -397,6 +403,8 @@ def launch(args):
         flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
     if f_at is not None:
         flags.extend(["-ssxFAt", str(f_at)])
+    if combo_at is not None:
+        flags.extend(["-ssxCombinedAt", str(combo_at)])
     if null_audio:
         flags.append("-ssxNullAudio")
     if getattr(args,"debug_main_menu",False):
@@ -467,9 +475,11 @@ def main():
     parser.add_argument("--internal-scale", type=int, choices=(1, 2, 3, 4),
                         help="Launch-only GameCube internal detail; normal launches use the saved choice (initially 2x)")
     parser.add_argument("--smoothing-at", type=float,
-                        help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --f-at by 40+ seconds or the later trial skips")
+                        help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --f-at/--combo-at by 40+ seconds or the later trial skips")
     parser.add_argument("--f-at", type=float,
-                        help="Request one guarded route-F sim trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --smoothing-at by 40+ seconds or the later trial skips")
+                        help="Request one guarded route-F sim trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --smoothing-at/--combo-at by 40+ seconds or the later trial skips")
+    parser.add_argument("--combo-at", type=float,
+                        help="Request one combined sim+smoothing trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --smoothing-at/--f-at by 40+ seconds or the later trial skips")
     parser.add_argument("--course-manifest",
                         help="Launch-only course redirect manifest (bare file name in Documents/, or 'stock' to ignore the menu choice)")
     parser.add_argument("--textures", choices=("stock", "remaster"),
@@ -513,6 +523,8 @@ def main():
         parser.error("--smoothing-at applies only to launch")
     if args.f_at is not None and args.command != "launch":
         parser.error("--f-at applies only to launch")
+    if args.combo_at is not None and args.command != "launch":
+        parser.error("--combo-at applies only to launch")
     if args.course_manifest is not None and args.command != "launch":
         parser.error("--course-manifest applies only to launch")
     if args.textures is not None and args.command != "launch":

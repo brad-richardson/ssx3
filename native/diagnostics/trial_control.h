@@ -2,13 +2,14 @@
 // to the CPU thread; only that thread owns the game adapter and pose history.
 // Smoothing trials inject extra renders with interpolated poses; F trials
 // double the update cadence with halved dt and render normally (route F).
+// Combined trials do both: doubled updates plus interpolated extras.
 #pragma once
 #include <atomic>
 #include <cstdio>
 #include <string>
 namespace NativeTrial {
 enum class Status { Idle, Waiting, Running, Finished, Unavailable };
-enum class Kind { Smoothing, F };
+enum class Kind { Smoothing, F, Combined };
 inline std::atomic<Status> status{Status::Idle};
 inline std::atomic<Kind> kind{Kind::Smoothing};
 inline std::atomic<bool> cancel{false};
@@ -28,6 +29,7 @@ inline void Begin(Kind next) {
 }
 inline void Request() { Begin(Kind::Smoothing); }
 inline void RequestF() { Begin(Kind::F); }
+inline void RequestCombined() { Begin(Kind::Combined); }
 inline void Cancel() { cancel=true; }
 inline bool Active(double now) {
  return status.load()==Status::Running && !cancel.load() && now<ends;

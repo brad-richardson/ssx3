@@ -52,7 +52,8 @@ class NativeTraceTests(unittest.TestCase):
 
     def test_lifecycle_acceptance_requires_events_and_actual_unchanged_extra(self):
         actions = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent',
-                   'restart2', 'cancel_idle', 'quiescent', 'complete']
+                   'restart2', 'cancel_idle', 'quiescent', 'restart3', 'cancel_combined',
+                   'quiescent', 'complete']
         rows = [dict(event='trial_test', action=a, wall=i) for i, a in enumerate(actions)]
         with self.assertRaises(RuntimeError):
             validate_trial_trace([])
@@ -62,24 +63,34 @@ class NativeTraceTests(unittest.TestCase):
         rows.append(dict(event='f_trial', action='patched', wall=1))
         rows.append(dict(event='f_trial', action='restored', wall=2))
         rows.append(dict(event='f_trial', action='restored', wall=7))
+        third_restore = rows[-1]
         rows.append(event('update', repeat=1, wall=1.5))
+        repeat_row = rows[-1]
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
         rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1, wall=4))
+        extra_row = rows[-1]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        # Leg 4 restores after its cancel and injects a clean extra draw.
+        rows.append(dict(event='f_trial', action='restored', wall=10))
+        combined_restore = rows[-1]
+        rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1, wall=10))
+        combined_extra = rows[-1]
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
         # A draw from before the restart cannot satisfy trial 2: with a stale
         # schedule epoch the second trial limits instantly and makes nothing.
-        rows[-1]['wall'] = 2
+        extra_row['wall'] = 2
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
-        rows[-1]['wall'] = 4
+        extra_row['wall'] = 4
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows[1:])
-        rows[-1]['rng_changed'] = 1
+        extra_row['rng_changed'] = 1
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
-        rows[-1]['rng_changed'] = 0
+        extra_row['rng_changed'] = 0
         without_restore = [r for r in rows if not (r.get('event') == 'f_trial' and r.get('action') == 'restored')]
         with self.assertRaises(RuntimeError):
             validate_trial_trace(without_restore)
@@ -88,22 +99,36 @@ class NativeTraceTests(unittest.TestCase):
             validate_trial_trace(without_patch)
         # The clean repeat must sit strictly between patch and restore: a
         # repeat outside the patched window, or a dirty one inside it, fails.
-        rows[-2]['wall'] = 0.5
+        repeat_row['wall'] = 0.5
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
-        rows[-2]['wall'] = 1.5
-        rows[-2]['same_rider'] = 0
+        repeat_row['wall'] = 1.5
+        repeat_row['same_rider'] = 0
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
-        rows[-2]['same_rider'] = 1
+        repeat_row['same_rider'] = 1
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
-        # The idle-cancelled leg must restore too: dropping only its restore
-        # fails even though trial 1 restored cleanly.
-        restores = [i for i, r in enumerate(rows)
-                    if r.get('event') == 'f_trial' and r.get('action') == 'restored']
-        without_third = [r for i, r in enumerate(rows) if i != restores[-1]]
+        # A restore must follow the idle cancel inside leg 3's own window:
+        # dropping only leg 3's restore fails even though leg 4 restored
+        # cleanly after it. (Leg 3's own finish implies its restore — the
+        # entry site restores before clearing Running — so this guards the
+        # restore evidence and the window bound, not the leg.)
+        without_third = [r for r in rows if r is not third_restore]
         with self.assertRaises(RuntimeError):
             validate_trial_trace(without_third)
+        # The combined leg must restore and inject cleanly on its own: neither
+        # leg 3's restore nor trial 2's extra can cover for it.
+        without_fourth = [r for r in rows if r is not combined_restore]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(without_fourth)
+        without_combined_extra = [r for r in rows if r is not combined_extra]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(without_combined_extra)
+        combined_extra['rng_changed'] = 1
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        combined_extra['rng_changed'] = 0
+        self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
 
     def test_rejected_call_is_not_a_successful_draw(self):
         counters = dict(gate_calls=1, gate_ready=0, result=0,

@@ -264,6 +264,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   double _duration;
   double _scheduledTrialAt;
   double _scheduledFAt;
+  double _scheduledCombinedAt;
   NSArray<NSDictionary*>* _sequence;
   NSUInteger _eventIndex;
   BOOL _pausedForSystem;
@@ -719,6 +720,7 @@ static void SSXLaunchTrace(NSString* step) {
   NSArray* args = NSProcessInfo.processInfo.arguments;
   _scheduledTrialAt=-1;
   _scheduledFAt=-1;
+  _scheduledCombinedAt=-1;
   if ([args containsObject:@"-ssxAutoTest"]) {
     NSString* sequencePath = [Documents() stringByAppendingPathComponent:@"test-sequence.json"];
     NSData* data = [NSData dataWithContentsOfFile:sequencePath];
@@ -745,6 +747,15 @@ static void SSXLaunchTrace(NSString* step) {
       else fprintf(stderr,"[ssx-test] ignoring out-of-range -ssxFAt %s\n",
           [args[fArg+1] UTF8String]);
     }
+    NSUInteger combinedArg=[args indexOfObject:@"-ssxCombinedAt"];
+    if (combinedArg != NSNotFound && combinedArg+1 < args.count) {
+      NSScanner* scanner=[NSScanner scannerWithString:args[combinedArg+1]];
+      double requested=0;
+      if ([scanner scanDouble:&requested] && scanner.isAtEnd && std::isfinite(requested) &&
+          requested>=0 && requested<=_duration-40) _scheduledCombinedAt=requested;
+      else fprintf(stderr,"[ssx-test] ignoring out-of-range -ssxCombinedAt %s\n",
+          [args[combinedArg+1] UTF8String]);
+    }
   }
   const auto* descriptor = staticrecomp_get_module();
   NSMutableDictionary* metadata = [@{@"disc":@"GXBE69", @"moduleABI":@(descriptor->abi_version),
@@ -765,6 +776,7 @@ static void SSXLaunchTrace(NSString* step) {
     @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
     @"scheduledSmoothingAt":_scheduledTrialAt>=0 ? @(_scheduledTrialAt) : NSNull.null,
     @"scheduledFAt":_scheduledFAt>=0 ? @(_scheduledFAt) : NSNull.null,
+    @"scheduledCombinedAt":_scheduledCombinedAt>=0 ? @(_scheduledCombinedAt) : NSNull.null,
     @"reportSchema":@2, @"appBuild":@SSX_SESSION_BUILD_ID,
     @"builtAt":ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"])[@"built_at"] ?: @"unknown",
     @"host_seconds":@(CACurrentMediaTime()), @"unix_seconds":@(NSDate.date.timeIntervalSince1970),
@@ -1041,6 +1053,18 @@ static void SSXLaunchTrace(NSString* step) {
       [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::F)), @"reason":@"A trial is already pending or running."}];
     }
   }
+  if (_scheduledCombinedAt>=0 && sequenceElapsed>=_scheduledCombinedAt && !_pendingCheckpoint) {
+    const double requested=_scheduledCombinedAt;
+    _scheduledCombinedAt=-1;
+    const auto trial=NativeTrial::status.load();
+    if (trial != NativeTrial::Status::Waiting && trial != NativeTrial::Status::Running) {
+      _trialCancellationLogged=NO;
+      NativeTrial::RequestCombined();
+      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"kind":@(static_cast<int>(NativeTrial::Kind::Combined)), @"scheduledAt":@(requested)}];
+    } else {
+      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::Combined)), @"reason":@"A trial is already pending or running."}];
+    }
+  }
   if (elapsed-_lastMetric>=1) {
     _lastMetric=elapsed;
     std::vector<double> frames;
@@ -1273,10 +1297,10 @@ static void SSXLaunchTrace(NSString* step) {
   // new game frame reached the screen; the native trial logs render counts.
 }
 - (void)updateTrialDisplayLink {
-  // Only smoothing presents above 60; F renders at the normal rate and must
-  // not raise the display refresh it cannot fill.
+  // Smoothing and combined present above 60; pure F renders at the normal
+  // rate and must not raise the display refresh it cannot fill.
   const BOOL running = NativeTrial::status.load() == NativeTrial::Status::Running &&
-      NativeTrial::kind.load() == NativeTrial::Kind::Smoothing && !_pauseState.WantsPause();
+      NativeTrial::kind.load() != NativeTrial::Kind::F && !_pauseState.WantsPause();
   if (running && !_trialDisplayLink) {
     _trialDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(trialDisplayTick:)];
     const float maximum = self.view.window.screen.maximumFramesPerSecond;
@@ -1304,9 +1328,11 @@ static void SSXLaunchTrace(NSString* step) {
   const auto trial=NativeTrial::status.load();
   const BOOL canConfigure=[self canChangeOutputScale];
   NSString* status=_pendingCheckpoint ? @"Saving your place…" : (_menuStatus ?: @"Paused");
-  if (!_pendingCheckpoint && NativeTrial::limited.load())
-    status=[status stringByAppendingString:(NativeTrial::kind.load()==NativeTrial::Kind::F ?
-        @" · Sim trial ended to maintain game speed." : @" · Smoothing ended to maintain game speed.")];
+  if (!_pendingCheckpoint && NativeTrial::limited.load()) {
+    const auto kind=NativeTrial::kind.load();
+    status=[status stringByAppendingString:(kind==NativeTrial::Kind::F ? @" · Sim trial ended to maintain game speed." :
+        (kind==NativeTrial::Kind::Combined ? @" · Sim + smoothing ended to maintain game speed." : @" · Smoothing ended to maintain game speed."))];
+  }
   if ([NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]!=(BOOL)_cpuThread && _cpuThreadOverride<0)
     status=[status stringByAppendingString:@" · Dual-core change applies after Full Reset."];
   if ([self remasterRequested]!=_remasterActive)

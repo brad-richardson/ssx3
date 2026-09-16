@@ -112,12 +112,16 @@ static inline void Step(CPUState& c){
 #ifdef SSX_NATIVE_TRIAL_APP
  // Completion is a quiescence property, independent of the call-site gate
  // used to inject work. Cancellation can restore the mode at a callback
- // return before the next eligible application idle call. F finishes in the
- // probe step instead, after restoring its dt consts; finishing here would
- // unblock a checkpoint with the guest still halved.
+ // return before the next eligible application idle call. Pure F finishes
+ // in the probe step instead, after restoring its dt consts; finishing here
+ // would unblock a checkpoint with the guest still halved. Combined also
+ // finishes here, but only once its consts are restored: the mode restore
+ // above runs first in this same dispatch, so Finished means fully clean
+ // short of const drift, where the flag clears unwritten per F's policy.
  if((finished||c.pc==0x801cad24)&&!mode_changed&&!render.pending&&!update.pending&&
     NativeTrial::status.load()==NativeTrial::Status::Running&&!ExperimentalWindow()&&
-    NativeTrial::kind.load()!=NativeTrial::Kind::F)
+    (NativeTrial::kind.load()==NativeTrial::Kind::Smoothing||
+     (NativeTrial::kind.load()==NativeTrial::Kind::Combined&&!NativeProbe::f_patched)))
   NativeTrial::status=NativeTrial::Status::Finished;
 #endif
  if(c.pc!=0x801cad24||c.lr!=0x801cd724||render.pending||update.pending)return;
@@ -199,10 +203,14 @@ static inline void Step(CPUState& c){
  // speed over the long window stays low. The per-frame veto above already
  // withholds extras during short dips, so this decides only whether the
  // trial as a whole is worth keeping. F doubles nearly every update while
- // riding, so its floor counts doubled updates instead of extras.
+ // riding, so its floor counts doubled updates instead of extras. Combined
+ // must produce both halves: the floor takes the weaker of the two.
  static constexpr double Grace=10.0;
  const bool f_kind=NativeTrial::kind.load()==NativeTrial::Kind::F;
- const unsigned made=f_kind?NativeTrial::updates_doubled.load():NativeTrial::extras.load();
+ const bool combined=NativeTrial::kind.load()==NativeTrial::Kind::Combined;
+ const unsigned made=f_kind?NativeTrial::updates_doubled.load():
+  (combined?std::min(NativeTrial::updates_doubled.load(),NativeTrial::extras.load()):
+   NativeTrial::extras.load());
  if(now_cached-budget.wall_start>=Grace&&
     (made<15||
      (speed_floor.long_span>=RenderResearch::SpeedFloor::LongWindow&&speed_floor.long_rate<0.95))){
