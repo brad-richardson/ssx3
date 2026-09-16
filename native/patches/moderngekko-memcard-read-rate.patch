@@ -1,21 +1,23 @@
 diff --git a/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp b/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp
-index 35cad68..9fae778 100644
+index 35cad68..bb8baaf 100644
 --- a/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp
 +++ b/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp
-@@ -3,6 +3,8 @@
+@@ -3,6 +3,9 @@
  
  #include "Core/HW/EXI/EXI_DeviceMemoryCard.h"
  
++#include <cstdio>
 +#include <cstdlib>
 +
  #include <array>
  #include <functional>
  #include <memory>
-@@ -45,7 +47,30 @@ namespace ExpansionInterface
+@@ -45,8 +48,61 @@ namespace ExpansionInterface
  #define MC_STATUS_READY 0x01
  #define SIZE_TO_Mb (1024 * 8 * 16)
  
 -static const u32 MC_TRANSFER_RATE_READ = 512 * 1024;
+-static const auto MC_TRANSFER_RATE_WRITE = static_cast<u32>(96.125f * 1024.0f);
 +// Real hardware read rate. SSX 3 scans the card before its main menu, and at
 +// 512 KiB/s that scan is several seconds of purely modelled delay on a device
 +// with no card to be slow. SSX3_MEMCARD_READ_SPEEDUP divides the modelled read
@@ -25,21 +27,90 @@ index 35cad68..9fae778 100644
 +// Writes are deliberately left at hardware rate: save durability depends on the
 +// game seeing the write complete when it expects to, and nothing about the boot
 +// wait is improved by rushing them.
-+static u32 MemcardReadRate()
++// Read per call rather than cached in a static: a card DMA happens a handful of
++// times per boot, so parsing is free, and caching would freeze the value for the
++// whole process - meaning a changed setting needed a relaunch rather than the
++// Full Reset the UI promises.
++static u32 MemcardRate(const char* variable, u32 base)
 +{
-+  static const u32 rate = [] {
-+    const u32 base = 512 * 1024;
-+    const char* env = std::getenv("SSX3_MEMCARD_READ_SPEEDUP");
-+    if (!env)
-+      return base;
-+    const double factor = std::atof(env);
-+    if (!(factor >= 1.0) || factor > 1024.0)
-+      return base;
-+    return static_cast<u32>(base * factor);
-+  }();
-+  return rate;
++  const char* env = std::getenv(variable);
++  if (!env)
++    return base;
++  const double factor = std::atof(env);
++  if (!(factor >= 1.0) || factor > 1024.0)
++    return base;
++  return static_cast<u32>(base * factor);
 +}
-+#define MC_TRANSFER_RATE_READ (MemcardReadRate())
- static const auto MC_TRANSFER_RATE_WRITE = static_cast<u32>(96.125f * 1024.0f);
++
++// How much of a boot the modelled card latency actually accounts for, which is
++// the only way to tell a card wait from the game's own timers. Printed once at
++// shutdown next to the other runtime counters.
++struct MemcardTraffic
++{
++  u64 reads = 0, read_bytes = 0, read_ticks = 0;
++  u64 writes = 0, write_bytes = 0, write_ticks = 0;
++};
++static MemcardTraffic s_traffic;
++
++void ReportMemcardTraffic(u32 ticks_per_second)
++{
++  if (!s_traffic.reads && !s_traffic.writes)
++  {
++    std::fprintf(stderr, "[ssx3-memcard] no card traffic\n");
++    return;
++  }
++  const double rate = ticks_per_second ? static_cast<double>(ticks_per_second) : 1.0;
++  std::fprintf(stderr,
++               "[ssx3-memcard] reads=%llu bytes=%llu modelled=%.3fs | "
++               "writes=%llu bytes=%llu modelled=%.3fs\n",
++               static_cast<unsigned long long>(s_traffic.reads),
++               static_cast<unsigned long long>(s_traffic.read_bytes),
++               s_traffic.read_ticks / rate,
++               static_cast<unsigned long long>(s_traffic.writes),
++               static_cast<unsigned long long>(s_traffic.write_bytes),
++               s_traffic.write_ticks / rate);
++}
++#define MC_TRANSFER_RATE_READ (MemcardRate("SSX3_MEMCARD_READ_SPEEDUP", 512 * 1024))
++#define MC_TRANSFER_RATE_WRITE \
++  (MemcardRate("SSX3_MEMCARD_WRITE_SPEEDUP", static_cast<u32>(96.125f * 1024.0f)))
  
  static Common::EnumMap<CoreTiming::EventType*, MAX_MEMCARD_SLOT> s_et_cmd_done;
+ static Common::EnumMap<CoreTiming::EventType*, MAX_MEMCARD_SLOT> s_et_transfer_complete;
+@@ -238,6 +294,7 @@ CEXIMemoryCard::~CEXIMemoryCard()
+   auto& core_timing = m_system.GetCoreTiming();
+   core_timing.RemoveEvent(s_et_cmd_done[m_card_slot]);
+   core_timing.RemoveEvent(s_et_transfer_complete[m_card_slot]);
++  ReportMemcardTraffic(m_system.GetSystemTimers().GetTicksPerSecond());
+ }
+ 
+ bool CEXIMemoryCard::UseDelayedTransferCompletion() const
+@@ -531,8 +588,13 @@ void CEXIMemoryCard::DMARead(u32 addr, u32 size)
+   }
+ 
+   // Schedule transfer complete later based on read speed
++  const u64 read_ticks =
++      size * (m_system.GetSystemTimers().GetTicksPerSecond() / MC_TRANSFER_RATE_READ);
++  s_traffic.reads++;
++  s_traffic.read_bytes += size;
++  s_traffic.read_ticks += read_ticks;
+   m_system.GetCoreTiming().ScheduleEvent(
+-      size * (m_system.GetSystemTimers().GetTicksPerSecond() / MC_TRANSFER_RATE_READ),
++      read_ticks,
+       s_et_transfer_complete[m_card_slot], static_cast<u64>(m_card_slot));
+ }
+ 
+@@ -549,8 +611,13 @@ void CEXIMemoryCard::DMAWrite(u32 addr, u32 size)
+   }
+ 
+   // Schedule transfer complete later based on write speed
++  const u64 write_ticks =
++      size * (m_system.GetSystemTimers().GetTicksPerSecond() / MC_TRANSFER_RATE_WRITE);
++  s_traffic.writes++;
++  s_traffic.write_bytes += size;
++  s_traffic.write_ticks += write_ticks;
+   m_system.GetCoreTiming().ScheduleEvent(
+-      size * (m_system.GetSystemTimers().GetTicksPerSecond() / MC_TRANSFER_RATE_WRITE),
++      write_ticks,
+       s_et_transfer_complete[m_card_slot], static_cast<u64>(m_card_slot));
+ }
+ }  // namespace ExpansionInterface

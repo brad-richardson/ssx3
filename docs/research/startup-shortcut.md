@@ -201,6 +201,55 @@ same question: how much of the boot is modelled hardware latency rather than
 real work. Still to measure on the phone: time to main menu with the switch on
 against off, and the card-check phase in isolation.
 
+## Measured on the phone (September 15): neither lever is where the time is
+
+The card is instrumented now - `[ssx3-memcard]` at shutdown reports transfers
+and the modelled delay they scheduled. One boot to the main menu:
+
+    reads=1360 bytes=696320 modelled=0.165s | writes=0 bytes=0 modelled=0.000s
+
+That is with an 8x read multiplier, so the stock cost is **1.32 s, and there are
+no writes at all** - the folder-backed card is scanned, not written. Whatever
+the pre-menu card screen is waiting for, at most 1.3 s of it was ever the card.
+
+Nor does FastDiscSpeed reproduce its Mac result here. Across 82 sessions with a
+readiness trace:
+
+| fastDisc | card multiplier | n | main menu ready | frontend update |
+| --- | --- | ---: | ---: | ---: |
+| off | 1 | 2 | 20.45 s | 14.41 s |
+| off | (absent) | 65 | 20.69 s | 14.65 s |
+| on | 8 | 1 | 19.39 s | 13.32 s |
+
+The 1.2 s saved is essentially the 1.15 s of card latency removed, so
+FastDiscSpeed bought close to nothing - against 20.10 -> 14.85 s on the Mac.
+The difference is what the bottleneck is: the Mac was fast enough that modelled
+latency dominated, while the phone is CPU-bound, so buffering reads changes
+nothing. Latency knobs cannot recover more than about 1.2 s of this 20 s boot.
+(n=1 on the last row; worth repeating before leaning on it.)
+
+## The boot is already skippable, and that is the lever
+
+`SessionStore` restores a savestate on launch when the runtime identity matches,
+and a checkpoint is about 104 MB written in 0.115 s - against a 20 s cold boot.
+It works: 16 sessions restored. But 84 rejected it with "Game files or app
+changed. Starting fresh.", because the identity is disc + DOL + module ABI +
+**appBuild** + a hash of the whole `files` directory
+(`HashDirectorySha256(root / "files")`, `src/runtime/game.cpp:300`).
+
+So every app install invalidates it, and so does every world push and every
+provision, since the patched glyph sheets live in `files/data/ui`. A session
+spent iterating on the app guarantees a cold boot every time. The texture pack
+does *not* invalidate it - the pack lives under `User/`, outside `files`.
+
+Which reframes the question. Rather than shaving modelled latency, the boot is
+avoided entirely by leaving the identity alone, and the remaining work is to
+make resume the normal path: hold a checkpoint taken at main-menu readiness
+rather than only at the last pause, and narrow the identity to what a savestate
+genuinely depends on. Note also that hashing a 1.3 GB `files` tree happens on
+every launch and is part of the ~1.9 s `runtime_create_seconds`; caching it
+against file count, size and newest mtime would pay for itself.
+
 Memory-card delays need a separate audit. Pinned
 `Core/HW/EXI/EXI_DeviceMemoryCard.cpp:48` models 512 KiB/s reads and
 96.125 KiB/s writes, with asynchronous completion events in `DMARead` and

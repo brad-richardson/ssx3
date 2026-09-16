@@ -204,6 +204,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   int _cpuThreadOverride; // -1 saved preference, 0 -ssxSingleCore, 1 -ssxCPUThread (this process only)
   BOOL _fastDisc;         // Dolphin FastDiscSpeed
   double _cardSpeedup;    // modelled memory-card read-rate multiplier
+  BOOL _fastDiscForced;   // -ssxFastDisc on the command line
   BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
   StartupBoot::AdvanceInput _startupInput;
   int _startupPhaseLogged;
@@ -331,19 +332,7 @@ static void SSXLaunchTrace(NSString* step) {
       ([launchArgs containsObject:@"-ssxCPUThread"] ? 1 : -1);
   _cpuThread=[self cpuThreadRequested];
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXFastDisc":@NO}];
-  // FastDiscSpeed was reachable only as a launch flag, so an ordinary tap on
-  // the icon never got it - and the six-run Mac comparison in
-  // docs/research/loading-speed-spike.md puts time to the main menu at 14.85 s
-  // with it against 20.10 s without. Stored now, with the flag still forcing it on.
-  _fastDisc=[launchArgs containsObject:@"-ssxFastDisc"]
-      || [NSUserDefaults.standardUserDefaults boolForKey:@"SSXFastDisc"];
-  // Card reads are modelled at hardware speed (512 KiB/s), which is several
-  // seconds of the boot spent scanning a card that is not real. The core reads
-  // this and keeps the same completion ordering.
-  _cardSpeedup=[NSUserDefaults.standardUserDefaults doubleForKey:@"SSXCardReadSpeedup"];
-  if (!(_cardSpeedup>=1)) _cardSpeedup=1;
-  setenv("SSX3_MEMCARD_READ_SPEEDUP",
-         [NSString stringWithFormat:@"%.0f",_cardSpeedup].UTF8String, 1);
+  _fastDiscForced=[launchArgs containsObject:@"-ssxFastDisc"];
   _dispatchSamples=[launchArgs containsObject:@"-ssxDispatchSamples"];
   _simulatorNullAudio=NO;
 #if TARGET_OS_SIMULATOR
@@ -621,6 +610,21 @@ static void SSXLaunchTrace(NSString* step) {
   // HiresTexture::Update() decodes the whole pack at startup and holds it, so
   // the stalls go away and the cost moves to boot time and resident memory
   // (about 894 MB decoded for pack-v8, which an 8 GB phone can hold).
+  // Read here, not in viewDidLoad: this runs again on a Full Reset, and both
+  // settings are consumed from here on - FastDiscSpeed through Dolphin.ini
+  // below, the card rate through the environment, which the core now parses per
+  // transfer rather than caching for the process. Reading them once at launch
+  // made the menu's "applies after Full Reset" promise false.
+  _fastDisc=_fastDiscForced
+      || [NSUserDefaults.standardUserDefaults boolForKey:@"SSXFastDisc"];
+  _cardSpeedup=[NSUserDefaults.standardUserDefaults doubleForKey:@"SSXCardReadSpeedup"];
+  if (!(_cardSpeedup>=1)) _cardSpeedup=1;
+  // Writes matter here as much as reads: an empty folder-backed card means the
+  // game creates its save during the boot, and that is write traffic.
+  setenv("SSX3_MEMCARD_READ_SPEEDUP",
+         [NSString stringWithFormat:@"%.0f",_cardSpeedup].UTF8String, 1);
+  setenv("SSX3_MEMCARD_WRITE_SPEEDUP",
+         [NSString stringWithFormat:@"%.0f",_cardSpeedup].UTF8String, 1);
   [self prunePackToInstalledFormat];
   NSString* settingsDir=[user stringByAppendingPathComponent:@"GameSettings"];
   [[NSFileManager defaultManager] createDirectoryAtPath:settingsDir
