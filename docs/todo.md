@@ -293,6 +293,12 @@ the build or commit that closed them.
       (float threshold), 0x100 trap shows symmetric float physics with no
       state-8 integer writer, bias battery PASS-leaning
       ([evidence](research/120hz-f-spike.md#crashstate-timer-coverage-desktop-gate-1-closed-september-16));
+      Adversarially reviewed same day: envelope 41=41 exact (stronger),
+      mid-tick entry disclosed, phase +20/+21 1-tick residual (non-counter
+      gate input), 484s are transition one-shots (11x cruise rate open),
+      governor silent whole tumble, k computed (renorm candidate), r2 fix;
+      accepted risks logged (same-context reset, 484 rate, renorm call,
+      router flags);
       (2) input latching — RE-SCOPED September 16 as desktop research
       tooling only (movie-stream gating for menu-window measurement;
       all F results to date have zero input confound, live re-poll is

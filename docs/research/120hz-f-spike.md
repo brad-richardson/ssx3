@@ -452,11 +452,17 @@ near 0x80040xxx for SDA-load→stw-0x10). Periodic 0x24: body1 ONLY
 (20/0) at 0x802BEDB4 — it does NOT double-execute; its 2x rate comes
 from reading the 2x global counter (mod gate), so fixing the counter
 fixes the periodic too (single fix point). Carve 0x100: both bodies at
-lr=0x8002AD48 (governor block); r2 resolved by consensus to 0x803E37E4,
-confirming the block reads the E8/F0 damping consts (k=0.99930<1) —
-but k²-vs-k predicts −7e-4/tick while +5.8e-4 was measured (SIGN
-CONTRADICTION), so the governor scaling is not the w64 source; the
-state-8 0x100 writer is still unidentified (trap 0x100 with SKIP≈972).
+lr=0x8002AD48 (governor block). CORRECTIONS (adversarial review,
+September 16, verified): r2 is the canonical 0x803E3460 (DOL
+section 0x803DB460+0x8000), not 0x803E37E4 by consensus — the old
+value cannot reach const 0x803DB490. And k is COMPUTED (k≈1/f1
+with div-guard; FDIVs in the callee), not the E8/F0 const — so the
+old k²-vs-k sign contradiction (predicted −7e-4/tick vs measured
++5.8e-4) was a wrong-k-model artifact, and the governor
+double-applies unnormalized (~3%/window), making it a v2-style
+renorm candidate rather than a replay item; the state-8 0x100
+writer question is separately closed by the gate-1 trap
+(phase-routed float physics, no integer writer).
 Also seen: early-window 0x100 writers at 0x80007xxx (start-gate
 setup, both bodies — the +30% script perturbation's likely source).
 
@@ -661,46 +667,86 @@ crash-player recipe above).
 
 ## Crash/state-timer coverage (desktop, gate 1 closed September 16)
 
-Reset sequencer (state 9, crash-player pair): base 4676→4717 (41
-ticks), F rows 5059→5140 (40 ordinary ticks) — matched, not 2x. No
-per-tick countdown word exists in app (only the +168 flag, already
-replayed) or body (crash-only offsets 484/664/676 are one-shots, not
-timers): the mid-reset phase event lands at +20 ordinary ticks in
-both arms (4696 base, row 5100 F), entry one-shots fire once on the
-transitioning half with no double-fire, and durations match — the
-sequencer is race-counter-driven and the v3b replay set covers it.
+Convention: 0-based update-row indices; u = ordinary tick, r =
+file row (repeats interleave). Adversarially reviewed same day;
+all review findings below were independently re-verified.
+
+Reset sequencer (state 9, crash-player pair): base entry r4676
+(5→9) → exit r4717 (9→4), envelope 41; F entry r5059 rep=1
+(0→9, SECOND HALF of u4784 — mid-tick entry) → exit r5140
+(u4825), envelope 41 = 41 EXACT — matched, not 2x. The mid-reset
+phase event: base r4696 (+20 entry/+21 exit), F r5100 (u4805:
++21/+20) — a genuine 1-tick residual under every alignment, so
+the phase gate has a non-counter input (float threshold or
+half-parity artifact); the envelope is counter-exact. Entry
+one-shots fire once per transition (r5061 doesn't refire r5060's
+set — no double-fire at entry), but 484/664/676 are
+transition/event one-shots, NOT crash-only (whole-file base
+7/3/3, F 18/14/14: tumble entry/exit, settle, pre-ride, cruise),
+and F fires them at ~11x the base cruise rate in-window (open:
+line-divergence vs spurious setup). The phase follow-up subset
+(36/40/68/…) refires in the repeat half — sub-tick smear. App
+side: only the +168 flag, always 0→1 (confirmed; 0/600 repeats
+touch app). Body no-countdown is offsets-level only (values
+unseen; only reset-correlated per-tick word is float 696).
+Caveat: the two crashes differ (5→9 vs 0→9, ~110 ticks apart) —
+cross-context, n=1.
 
 Tumble (state 8) under F, first coverage (tumble-f run, det-base,
-SKIP=712/TICKS=150 over rows 1840–2141): entry tick EXACT (1852 both
-arms, same 0→4→5→8 path, transitions split across halves with no
-double-transition — repeats correctly skip unstable ticks); exit +2
-ordinary ticks (1956 vs 1954, 2% — a float-threshold shift inside
-F's statistical-parity ceiling, not a rate effect). Post-window
-butterfly as usual (F grinds a rail where base tumbles next).
-Pre-window determinism holds (1840/1840 states, body-hash flip at
-1839 = engage).
+SKIP=712/TICKS=150 over 0-based rows 1839–2141: 153 ordinary +
+150 repeats): entry EXACT u1852 both arms, same 0→4→5→8 path
+(F's 0→4 lands in u1850's repeat half — same tick, second half),
+no double-transition; the no-repeat-on-unstable rule verified
+both directions over all 153 in-window ticks. Exit +2 (u1956 vs
+u1954, 2%) — float-threshold-mediated, the only viable class:
+skip-delay is directionally ruled out (skips don't perturb the
+counter trajectory, and per-body counting would exit F earlier,
+but F is later). Post-window butterfly confirmed exactly (F
+rail-mount u2010 post-close; base 0→3/3→8 later). Pre-window
+determinism holds (states match, hashes identical through the
+engage tick, first flip at the first doubled tick = engage+1).
+F's exit write set = base's +664/676/680 (3/100 words,
+pose-driven).
 
-0x100 trap over the tumble (500 lines, cap): every site fires both
-halves symmetrically (105/104, 56/49, 39/36, 35/26 — no
-half-specific writer), values are float LSB jitter (physics
-scratch, not a timer), and the governor site (802bf5fc/8002ad48)
-goes silent mid-tumble while 8002acf4/80026f64 + 80026f64 +
-800101ec dominate — phase-routed physics, no state-8-specific
-integer writer, nothing for the replay set. The §3d open trap item
-is closed.
+0x100 trap over the tumble (500 lines; joint WATCH↔events walk
+via tag transitions replaces the unsafe line-count thirds): the
+governor site is silent across the WHOLE tumble (u1850–1952 incl.
+margins vs tumble u1852–1956; skip-merge ±1) and active in
+cruise on both sides — governor is state-0-only, tumble sites
+tumble-exclusive. Cap hit ≈u1963, ~29 ticks before close; exit
+rows merge. Two write classes, not "LSB jitter": float-recompute
+(8002acf4 med 43K ULP, governor med 284K ULP) and ±1–2 ULP
+small-evolution (215+ lines). WATCH pcs are lag/observation
+points (callee-entry/post-return thunks), not stores: 2
+writer-pairs × lag points = the 10 sites. Disassembly (review;
+structurally corroborated: FDIVs in the callee, float-op
+writers, zero integer ALU on 0x100 data) confirms no integer
+writer statically — stronger than offsets reasoning. Governor
+recategorized: k is COMPUTED (k≈1/f1 with div-guard), not the
+E8/F0 const (§3b attribution corrected), and double-applies
+unnormalized (~3%/window — F-ceiling-harmless, but a v2-style
+RENORM candidate, not replay). §3d r2 corrected to the canonical
+0x803E3460 (DOL section 0x803DB460+0x8000; the old 0x803E37E4
+cannot reach const 0x803DB490). Residual: router integer flags
+unreplayed (n=1 coverage).
 
-Pair tail (headroom backlog 5, crash-f window, 598 pairs): CPU med
-4.13 / p95 4.79 / max 5.35 ms, wall med 4.14 / p95 4.84 / max 7.90
-ms, zero pairs over 8.33. Top wall spikes show wall≫cpu (7.90 vs
-4.46) — host scheduling, all state 0, spread across the window.
-The Phase-1 wall p95 10.31 (load-~2 host) does not reproduce on a
-quiet host: the desktop tail is host-side, not pair-work. Ship tail
-risk moves to phone-side measurement.
+Pair tail (headroom backlog 5, crash-f window, all 600 pairs):
+CPU med 4.13 / p95 4.79 / max 5.35 ms, wall med 4.14 / p95 4.85
+/ max 7.90 ms, zero over 8.33. Stalls are repeat-half-only
+(ordinary max wall−cpu gap 0.048 ms vs 3.44 repeat) —
+preemption/quantum on the 2nd half (Emit I/O not ruled out);
+burst-clustered early+late with a 260-tick mid-gap, not spread;
+state-0 for the top 5, mixed below (15/5 in top 20). CPU-tail
+and wall-tail disjoint. The Phase-1 wall p95 10.31 does not
+reproduce in the crash-player window (max 7.90): desktop tail
+is host-side, not pair-work. Ship tail risk moves to phone-side
+measurement.
 
-Gate (1) verdict: CLOSED. No un-restored crash integer state found
-on the reset or tumble axes; residuals are float-threshold jitter
-(+2 ticks on a 102-tick tumble). Next gate: (2) consume-per-tick
-input latching.
+Gate (1) verdict: CLOSED with accepted risks — (i) same-context
+reset replication to ID the phase gate's non-counter input,
+(ii) 484/664/676 cruise-rate attribution, (iii) governor
+renorm-vs-accept decision, (iv) router-flag coverage beyond one
+tumble. Next gate: (2) consume-per-tick input latching.
 
 ## Gate 2 scoping: input latching is research tooling, not product (September 16)
 
