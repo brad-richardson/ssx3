@@ -310,6 +310,12 @@ the build or commit that closed them.
       VI-paced 2-deep queue (backlog 10) or the smoothing/XFB path
       (phone path PROVEN additive: 783 displays = 60/s + 32/s extras,
       zero eviction — gate-4b de-risked);
+      DESKTOP 4b September 16: MECHANICS GREEN (F + schedule + pose
+      interp compose: 60/60 doubled, 36/36 interpolated extras at
+      alpha 0.6–0.78, zero eviction, zero wedge) — remaining 4b is
+      the combined trial kind on the phone with present.csv oracle.
+      Trap logged: DTM playback stomps GFX config from the movie
+      header (fixed via det-sched.dtm byte 149);
       (5) pacing acceptance (>=117 displayed/s + sim speed >= 0.98 +
       input-latency measurement) with fallback to F-sim/60-draws, then
       stock, on budget miss. No step starts until the gate before it passes.

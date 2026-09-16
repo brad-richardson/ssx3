@@ -858,3 +858,34 @@ the guest cannot tell): pair CPU med 4.614 → 4.510 ms, p95
 pair; production-quiet buys ~0.1 ms, not headroom. Phone pair
 5.12 ms projects to ~5.0 ms ship — still render-bound. Backlog 3
 CLOSED. Repro: quiet-player + SKIP=712/TICKS=150 + QUIET.
+
+## Gate 4b desktop: F + schedule + interpolation compose (September 16)
+
+Methodological trap first: DTM playback stomps host graphics
+config from the movie header (MovieConfigLoader; bSaveConfig=1
+in our movies), so schedule runs under det-base-run.dtm aborted
+at engage with imm=0 despite a correct profile GFX.ini — the
+movie recorded bImmediateXFB=0. Fix: det-sched.dtm, a header-only
+variant with byte 149 set (inputs untouched). Rule going
+forward: any desktop run needing profile host-config under a
+movie must patch the movie header or record fresh; GFX.ini
+alone is silently ignored.
+
+With that fixed, the full 4b desktop stack composes cleanly
+(det-sched.dtm, SKIP=1946/TICKS=60): v1 (F + independent
+schedule) 60/60 doubled, 36/36 idle-time extras complete,
+5249/5249 ordinaries accepted — ZERO eviction, vs 59/59
+evicted for mid-tick interleave draws. Eviction is
+mid-tick-timing-specific (queue still full); idle-time extras
+fit the drain cycle, on desktop as on the phone. v2 (+ pose
+interpolation) identical mechanics plus 36/36 interpolated
+extras at alpha 0.60–0.78 — genuine mid-blend draws, no wedge,
+no abort, pre-window determinism 3074/3074 both runs
+(XFB-immediate mode is guest-invisible).
+
+Gate-4b desktop verdict: MECHANICS GREEN. The remaining 4b work
+is the combined trial kind on the phone (F doubling + smoothing
+deadline extras + completion alias through the proven 92/s
+presentation path) with present.csv as the display oracle —
+desktop cannot show >60 displayed/s. Repro: sched-f-player2 /
+interp-f-player + det-sched.dtm + SKIP=1946/TICKS=60.

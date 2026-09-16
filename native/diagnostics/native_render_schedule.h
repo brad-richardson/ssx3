@@ -177,7 +177,8 @@ static inline void Step(CPUState& c){
       !bytes||bytes>2*1024*1024||!Valid(c,first_xfb,bytes)||
       first_xfb!=Word(c,graphics+7556)||
       (Word(c,c.gpr[13]-20596)&&Word(c,c.gpr[13]-20596)!=first_xfb)){
-    ScheduleEvent(c,"invalid_immediate_copy_setup",ticks);
+    std::fprintf(stderr,"[native-schedule] invalid setup: imm=%d cap=%d bytes=%u xfb=%08x g7556=%08x slot=%08x\n",(int)Config::Get(Config::GFX_HACK_IMMEDIATE_XFB),(int)Config::Get(Config::GFX_HACK_CAP_IMMEDIATE_XFB),bytes,first_xfb,Word(c,graphics+7556),Word(c,c.gpr[13]-20596));
+   ScheduleEvent(c,"invalid_immediate_copy_setup",ticks);
 #ifdef SSX_NATIVE_TRIAL_APP
     NativeTrial::status=NativeTrial::Status::Unavailable;schedule_started=false;return;
 #else
