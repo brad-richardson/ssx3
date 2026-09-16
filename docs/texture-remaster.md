@@ -795,12 +795,39 @@ stale chain is worse than none, because the levels no longer halve from the new
 base and Dolphin takes the mip count from whatever the pack supplies. Re-run
 `pack_mipmaps.py` afterwards.
 
-Further reduction means block compression rather than another cap — one DDS
-carries its whole mip chain (`CustomTextureData.cpp`, the `mip_count` loop), it
-uploads without decode, and BC1 is a eighth of RGBA8. The catch is that BC on
-iOS is a runtime capability (`MTLUtil.mm` gates `bSupportsST3CTextures` on
-`[device supportsBCTextureCompression]`, iOS 16.4+), so it needs a probe on the
-actual device before the pipeline is built around it.
+### 10.12 Preload or pay per frame, and the phone can do block compression
+
+`CacheHiresTextures` decides *when* the pack is paid for, and the answer was
+wrong by default. Off, `HiresTexture::Search` builds each texture the first time
+it is drawn, so every burst of new art — a crash, a camera cut, a new stretch of
+terrain — reads and PNG-decodes on the frame that needs it. That is the
+mid-ride stall, and it is why a fall tanks the frame rate and then recovers. On,
+`HiresTexture::Update` calls `LoadTexture()` for all of them at startup and
+holds them, moving the whole cost to load time. The app now writes it from a
+**Preload pack** switch next to the remaster switch (`SSXPreloadTextures`),
+which is only enabled when there is a pack to preload.
+
+The reason to preload is simply that the device has the memory: 894 MB decoded
+for `pack-v8` against 8 GB, with the app otherwise peaking near 457 MB. The
+cost is boot time — 8,806 PNGs decoded before the first frame — so the switch
+defaults off and the session log records which mode a run used.
+
+**BC works on the phone.** `MTLUtil.mm` gates `bSupportsST3CTextures` and
+`bSupportsBPTCTextures` on `[device supportsBCTextureCompression]` (iOS 16.4+),
+which is a runtime question, so the app now records the answer in `launch.json`
+rather than inferring it from the chip. On the A18 Pro it is **true**:
+
+    metalDevice = Apple A18 Pro GPU    supportsBCTextureCompression = True
+
+That makes DDS the route worth taking, and it beats both levers above at once:
+one DDS file carries its whole mip chain (`CustomTextureData.cpp`, the
+`mip_count` loop at line 527) so 8,806 files become 927; block data uploads
+with no decode at all, which removes the stall rather than relocating it; and
+BC1 is an eighth of RGBA8, which turns 894 MB into roughly 110 MB and makes
+preloading free. BC1's 1-bit alpha also happens to be exactly right for
+alpha-tested foliage (§10.5). Pillow 12 writes DXT1 and DXT5, one level at a
+time, so the remaining work is assembling the levels into a single DDS with a
+`dwMipMapCount` header.
 
 ## 11. Art passes a model cannot do: foliage
 
