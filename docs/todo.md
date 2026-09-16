@@ -355,6 +355,15 @@ the build or commit that closed them.
       dual-specific trial stalls; cross-run render medians (9.4–13.0) are
       section-dominated (blind sequence doesn't hold a line). Fast-FP
       kitchen-sink (1x + dual + fast-FP) bounds the possible next.
+      **Kitchen-sink HELD September 16:** 1x + dual + fast-FP rode 25 s at
+      speed 1.0 with 1479 doubled, no limit — the first F trial to hold a
+      full window. Attribution split the credit: single-core + fast-FP
+      limited at ~10 s / 503 doubled (speed 0.97 → 0.83 on trial start,
+      present oracle pure 60 Hz), so dual-core carries F doubling;
+      smoothing under dual-core held its full 35 s window untouched
+      (1097 extras, no limit) with the present oracle at ~91/s median
+      8.4 ms — 60 originals + ~32 extras/s, every extra reaching glass.
+      Combined kind (`e07d74a`) merges both paths next.
       Audio skipping in heavy areas is a budget-overrun symptom (CPU
       starvation → DMA underrun), fixed by headroom, not audio work.
       **Menu static fixed September 16:** separate mechanism — an idled AX
