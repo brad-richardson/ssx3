@@ -597,18 +597,13 @@ static void SSXLaunchTrace(NSString* step) {
   // while leaving the key out keeps Dolphin's own default (MemoryCardFolder)
   // rather than this code having to name it correctly.
   _memoryCard=![NSUserDefaults.standardUserDefaults boolForKey:@"SSXNoMemoryCard"];
-  // And when it is on, present a smaller card. Dolphin defaults to
-  // MBIT_SIZE_MEMORY_CARD_2043 - the 16 MB, 2043-block card - and EXI.cpp
-  // accepts MemoryCardSize 0..4 as MBIT_SIZE_MEMORY_CARD_59 << n.
-  //
-  // 2 is the 251-block card rather than 0's 59 blocks, because SSX 3 saves
-  // three kinds of file and says so itself: "1 file and %d blocks to save an
-  // Options file, 1 file and %d blocks to save a Game file, and 1 file and %d
-  // blocks to save a Replay file". Options and Game are fixed - a GameCube save
-  // is created at a fixed byte count and never grows - but replays accumulate
-  // one file each, so the smallest card is a real ceiling for anyone who keeps
-  // them. 251 blocks is still an eighth of the default to walk.
-  NSString* slots=_memoryCard ? @"MemoryCardSize = 2\n" : @"SlotA = 255\nSlotB = 255\n";
+  // Card size is deliberately left at Dolphin's default. Asking for the
+  // 59-block card instead of the 2043-block one was measured and changed
+  // nothing: main menu ready 19.40 s against 19.39 s, frontend update 13.36 s
+  // against 13.32 s. The scan is not proportional to the card, so shrinking it
+  // only costs capacity. SlotA is written only when the card is off, so the
+  // default names the device when it is on.
+  NSString* slots=_memoryCard ? @"" : @"SlotA = 255\nSlotB = 255\n";
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
     [NSString stringWithFormat:@"[Core]\nCPUThread = %s\nFastDiscSpeed = %s\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n%@[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",
       _cpuThread ? "True" : "False",_fastDisc ? "True" : "False",slots,audioBackend]);

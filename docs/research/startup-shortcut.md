@@ -250,6 +250,39 @@ genuinely depends on. Note also that hashing a 1.3 GB `files` tree happens on
 every launch and is part of the ~1.9 s `runtime_create_seconds`; caching it
 against file count, size and newest mtime would pay for itself.
 
+## What the pre-menu card screen actually is (September 15)
+
+Three things were tried against the reported 7 s wait, and the first two did
+nothing measurable:
+
+| change | main menu ready | frontend update |
+| --- | ---: | ---: |
+| baseline | 20.69 s | 14.65 s |
+| FastDiscSpeed + 8x card read rate | 19.39 s | 13.32 s |
+| ... and the 59-block card instead of 2043 | 19.40 s | 13.36 s |
+
+So the scan is **not** proportional to card size, and only ~1.3 s of the wait
+was ever modelled card latency. The card-size override was removed again rather
+than kept for nothing.
+
+The timeline says where the time is: nothing until `frontend_update` at 13.4 s,
+then `title_loading` to `title_assets_ready` spanning **5.0 s**, then the menu
+at 19.4 s. The screen that reads as a card check is that asset load - real file
+reads and decompression, CPU-bound on this device, which is also why
+FastDiscSpeed does not reproduce its Mac win here.
+
+Which leaves not doing it. A checkpoint captured at main-menu readiness turns
+the whole thing into a one-off:
+
+    [ssx-session] restoring 2639E4EF-FA70-48BC-988D-C312BC05D5B4.sav
+    [ssx-startup] runtime_create_seconds=1.810 resume=1
+    [ssx3-memcard] no card traffic
+
+1.8 s to the main menu, and no card traffic at all, because the boot never
+happens. The checkpoint commits in 0.105 s. It is captured only when the
+identity has none, so the ~20 s boot is paid once per app build or world push
+rather than once per launch.
+
 Memory-card delays need a separate audit. Pinned
 `Core/HW/EXI/EXI_DeviceMemoryCard.cpp:48` models 512 KiB/s reads and
 96.125 KiB/s writes, with asynchronous completion events in `DMARead` and
