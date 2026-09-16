@@ -374,6 +374,16 @@ the build or commit that closed them.
       apart at the end, clean Finished, no stuck Running. Post-trial fps
       dip at seq ~196 repeats run B's at the same sequence point: section
       confounder, not trial-related.
+      **Perf spikes September 16 (desktop, phone down):** five parallel
+      spikes, zero tracked edits, artifacts in local/research/120hz/spike-*/.
+      Render breakdown maps 11.05ms quiet pair+render (top: 4.73ms update-pair
+      host, 2.74ms ph2 GPU-completion wait; EFB/uploads/shaders closed as
+      levers); res curve keeps 1x (all toggle deltas within noise, 1x
+      minimizes fill by construction); adaptive extra-capping is a negative
+      (displays fall 1:1 with extras); fast-libm doubling cut is real but
+      tiny (-0.16ms/pair, parity questions). Only merge: `--preload-textures`
+      launch override (`f8e2f75`) scoping pack-decode cost out of trial
+      windows. DDS pack (-85% resident) queued for phone verify.
       Audio skipping in heavy areas is a budget-overrun symptom (CPU
       starvation → DMA underrun), fixed by headroom, not audio work.
       **Menu static fixed September 16:** separate mechanism — an idled AX
