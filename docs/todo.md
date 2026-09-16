@@ -364,6 +364,16 @@ the build or commit that closed them.
       (1097 extras, no limit) with the present oracle at ~91/s median
       8.4 ms — 60 originals + ~32 extras/s, every extra reaching glass.
       Combined kind (`e07d74a`) merges both paths next.
+      **Combined oracle September 16:** kind=2 rode 155 → 173 at kitchen-sink
+      settings, then the floor limited on long_rate 0.946 < 0.95 (2 s
+      window) — not on output: doubled held full rate (1048, 58/s) while
+      extras trickled at half the pure-smoothing rate (278, 16/s), presents
+      44% above-60 in bursts (fps peaked 102). Both costs compose, as
+      predicted; the finish proved the kind's real point on device —
+      completion_mode at start, restore_mode + dt-const restore 0.5 ms
+      apart at the end, clean Finished, no stuck Running. Post-trial fps
+      dip at seq ~196 repeats run B's at the same sequence point: section
+      confounder, not trial-related.
       Audio skipping in heavy areas is a budget-overrun symptom (CPU
       starvation → DMA underrun), fixed by headroom, not audio work.
       **Menu static fixed September 16:** separate mechanism — an idled AX
