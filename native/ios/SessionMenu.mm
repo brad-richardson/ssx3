@@ -34,6 +34,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   UISwitch* _preload;
   UILabel* _preloadNote;
   UISwitch* _fastLoad;
+  UISwitch* _memoryCard;
   UIButton* _course;
   NSArray<NSString*>* _courseMenuNames;   // what _course.menu was last built from
   NSString* _courseMenuChoice;
@@ -185,6 +186,22 @@ static void SetLabel(UILabel* label, NSString* text) {
                                     UILayoutConstraintAxisHorizontal,12);
   fastLoadRow.alignment=UIStackViewAlignmentCenter;
 
+  UILabel* cardLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
+  cardLabel.text=@"Memory card";
+  [cardLabel setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  _memoryCard=[[UISwitch alloc] init];
+  _memoryCard.accessibilityLabel=@"Memory card";
+  _memoryCard.accessibilityIdentifier=@"SSX Memory Card";
+  _memoryCard.accessibilityHint=@"Present an emulated memory card. Turning it off skips the card screen during the boot, and the game cannot save.";
+  [_memoryCard addTarget:self action:@selector(memoryCardChanged) forControlEvents:UIControlEventValueChanged];
+  UILabel* cardNote=MenuLabel(UIFontTextStyleFootnote,UIColor.secondaryLabelColor);
+  cardNote.text=@"Off skips the card screen; no saving";
+  UIView* cardSpacer=[[UIView alloc] init];
+  [cardSpacer setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  UIStackView* cardRow=MenuStack(@[cardLabel,_memoryCard,cardNote,cardSpacer],
+                                UILayoutConstraintAxisHorizontal,12);
+  cardRow.alignment=UIStackViewAlignmentCenter;
+
   UILabel* courseLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
   courseLabel.text=@"Course";
   [courseLabel setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
@@ -201,7 +218,7 @@ static void SetLabel(UILabel* label, NSString* text) {
                                   UILayoutConstraintAxisHorizontal,12);
   courseRow.alignment=UIStackViewAlignmentCenter;
 
-  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,remasterRow,preloadRow,fastLoadRow,courseRow,_resolutionLabel,_buildLabel],
+  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,remasterRow,preloadRow,fastLoadRow,cardRow,courseRow,_resolutionLabel,_buildLabel],
                                 UILayoutConstraintAxisVertical,12);
   content.translatesAutoresizingMaskIntoConstraints=NO;
   UIScrollView* scroll=[[UIScrollView alloc] init];
@@ -291,6 +308,7 @@ static void SetLabel(UILabel* label, NSString* text) {
 - (void)remasterChanged { if (self.onRemaster) self.onRemaster(_remaster.on); }
 - (void)preloadChanged { if (self.onPreload) self.onPreload(_preload.on); }
 - (void)fastLoadChanged { if (self.onFastLoad) self.onFastLoad(_fastLoad.on); }
+- (void)memoryCardChanged { if (self.onMemoryCard) self.onMemoryCard(_memoryCard.on); }
 
 - (NSString*)courseTitle:(NSString* _Nullable)course {
   // "ASS1.txt" reads as a slot code; show it without the extension.
@@ -339,6 +357,7 @@ static void SetLabel(UILabel* label, NSString* text) {
                remaster:(BOOL)remaster remasterAvailable:(BOOL)remasterAvailable
                 preload:(BOOL)preload
                fastLoad:(BOOL)fastLoad
+             memoryCard:(BOOL)memoryCard
                 courses:(NSArray<NSString*>*)courses course:(NSString* _Nullable)course
            canConfigure:(BOOL)canConfigure
                canTrial:(BOOL)canTrial canReset:(BOOL)canReset build:(NSString*)build {
@@ -357,6 +376,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   if (!_remaster.tracking && _remaster.on!=remaster) [_remaster setOn:remaster animated:NO];
   if (!_preload.tracking && _preload.on!=preload) [_preload setOn:preload animated:NO];
   if (!_fastLoad.tracking && _fastLoad.on!=fastLoad) [_fastLoad setOn:fastLoad animated:NO];
+  if (!_memoryCard.tracking && _memoryCard.on!=memoryCard) [_memoryCard setOn:memoryCard animated:NO];
   // A switch with no pack behind it would be a dead control: say so instead.
   SetLabel(_remasterNote,remasterAvailable ? @"Applies after Full Reset or relaunch"
                                            : @"No texture pack installed");
@@ -368,6 +388,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   // Preloading only means anything when there is a pack to preload.
   _preload.enabled=canConfigure && remasterAvailable && remaster;
   _fastLoad.enabled=canConfigure;
+  _memoryCard.enabled=canConfigure;
   [self rebuildCourseMenu:courses course:course];
   _course.enabled=canConfigure && courses.count>0;
   _smoothing.enabled=canTrial;

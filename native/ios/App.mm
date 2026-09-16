@@ -205,6 +205,9 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _fastDisc;         // Dolphin FastDiscSpeed
   double _cardSpeedup;    // modelled memory-card read-rate multiplier
   BOOL _fastDiscForced;   // -ssxFastDisc on the command line
+  BOOL _bootCheckpointWanted;  // no checkpoint for this identity yet
+  BOOL _bootCheckpointInFlight;
+  BOOL _memoryCard;       // emulated card present
   BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
   StartupBoot::AdvanceInput _startupInput;
   int _startupPhaseLogged;
@@ -585,9 +588,30 @@ static void SSXLaunchTrace(NSString* step) {
   _metricsFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"metrics.jsonl"]];
   _inputFile = [NSFileHandle fileHandleForWritingAtPath:[_report stringByAppendingPathComponent:@"input.jsonl"]];
   const char* audioBackend=_simulatorNullAudio ? BACKEND_NULLSOUND : BACKEND_COREAUDIO;
+  // The pre-menu memory-card screen is the game reading an empty card in 1,360
+  // separate DMAs and parsing between them. Only about 1.3 s of that is the
+  // modelled transfer latency; the rest is guest CPU work, which is why raising
+  // the modelled rate barely moved it. Removing the device removes the scan.
+  //
+  // SlotA is only written when the card is off: EXIDeviceType::None is 0xFF,
+  // while leaving the key out keeps Dolphin's own default (MemoryCardFolder)
+  // rather than this code having to name it correctly.
+  _memoryCard=![NSUserDefaults.standardUserDefaults boolForKey:@"SSXNoMemoryCard"];
+  // And when it is on, present a smaller card. Dolphin defaults to
+  // MBIT_SIZE_MEMORY_CARD_2043 - the 16 MB, 2043-block card - and EXI.cpp
+  // accepts MemoryCardSize 0..4 as MBIT_SIZE_MEMORY_CARD_59 << n.
+  //
+  // 2 is the 251-block card rather than 0's 59 blocks, because SSX 3 saves
+  // three kinds of file and says so itself: "1 file and %d blocks to save an
+  // Options file, 1 file and %d blocks to save a Game file, and 1 file and %d
+  // blocks to save a Replay file". Options and Game are fixed - a GameCube save
+  // is created at a fixed byte count and never grows - but replays accumulate
+  // one file each, so the smallest card is a real ceiling for anyone who keeps
+  // them. 251 blocks is still an eighth of the default to walk.
+  NSString* slots=_memoryCard ? @"MemoryCardSize = 2\n" : @"SlotA = 255\nSlotB = 255\n";
   WriteText([config stringByAppendingPathComponent:@"Dolphin.ini"],
-    [NSString stringWithFormat:@"[Core]\nCPUThread = %s\nFastDiscSpeed = %s\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",
-      _cpuThread ? "True" : "False",_fastDisc ? "True" : "False",audioBackend]);
+    [NSString stringWithFormat:@"[Core]\nCPUThread = %s\nFastDiscSpeed = %s\nDSPHLE = True\nSkipIPL = True\nLargeEntryPointsMap = False\n%@[DSP]\nEnableJIT = False\nBackend = %s\n[Interface]\nConfirmStop = False\n",
+      _cpuThread ? "True" : "False",_fastDisc ? "True" : "False",slots,audioBackend]);
   WriteText([config stringByAppendingPathComponent:@"GFX.ini"],
     // AspectRatio 1 forces 16:9 output. The game's own Options > Widescreen setting
     // must be on so the 3D scene is rendered anamorphic; Auto detection is not
@@ -721,7 +745,7 @@ static void SSXLaunchTrace(NSString* step) {
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
     @"renderScale":@(_internalScale), @"cpuThread":@(_cpuThread), @"fastDiscSpeed":@(_fastDisc),
     @"dispatchSamples":@(_dispatchSamples), @"automated":@(_sequence!=nil),
-    @"cardReadSpeedup":@(_cardSpeedup),
+    @"cardReadSpeedup":@(_cardSpeedup), @"memoryCard":@(_memoryCard),
     @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
     @"debugMainMenuRequested":@(_debugMainMenu),
     @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
@@ -794,6 +818,12 @@ static void SSXLaunchTrace(NSString* step) {
       fprintf(stderr,"[ssx-startup] runtime_create_seconds=%.3f resume=%d\n",
               CACurrentMediaTime()-self->_launchTime,checkpoint!=nil);
       dispatch_async(dispatch_get_main_queue(), ^{
+        // Nothing to resume into, so capture the main menu once it is reached.
+        // A cold boot is about 20 s against 0.1 s to restore, and this is the
+        // only way a *fresh* identity ever gets a checkpoint - installing the
+        // app or pushing a world changes the identity, so an iteration cycle
+        // otherwise pays the full boot every single time.
+        self->_bootCheckpointWanted = (checkpoint == nil);
         self->_sessionIdentity = identity;
         self->_courseBuildDescription = courseDescription;
         self->_status.text = checkpoint ? @"Resuming your last session…" : (resumeReason ?: @"Starting SSX 3…");
@@ -940,6 +970,15 @@ static void SSXLaunchTrace(NSString* step) {
     if(!manualStart) [self send:@"RELEASE START\n"];
     [self logSessionEvent:@"startup_start_released" details:@{}];
   }
+  if(_bootCheckpointWanted && startupPhase==StartupBoot::Phase::MainMenu
+     && !_pendingCheckpoint && _running && !_stopRequested && _sessionIdentity) {
+    _bootCheckpointWanted = NO;
+    [self logSessionEvent:@"boot_checkpoint_requested" details:@{
+        @"active_seconds":@(elapsed)}];
+    _bootCheckpointInFlight = YES;
+    [self savePausedSession];
+    _bootCheckpointInFlight = NO;
+  }
   if(_sequenceFromMainMenu && _sequenceStarted<0 && startupPhase==StartupBoot::Phase::MainMenu) {
     _sequenceStarted=elapsed;
     [self logSessionEvent:@"sequence_started" details:@{@"anchor":@"main_menu"}];
@@ -1068,6 +1107,16 @@ static void SSXLaunchTrace(NSString* step) {
     if (!self) return;
     [NSUserDefaults.standardUserDefaults setBool:enabled forKey:@"SSXCPUThread"];
     [self logSessionEvent:@"runtime_preference_changed" details:@{@"cpuThread":@(enabled), @"active":@(self->_cpuThread)}];
+    [self refreshSessionMenu];
+  };
+  _sessionMenu.onMemoryCard = ^(BOOL enabled) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    [NSUserDefaults.standardUserDefaults setBool:!enabled forKey:@"SSXNoMemoryCard"];
+    [self logSessionEvent:@"memory_card_preference_changed" details:@{@"present":@(enabled)}];
+    self->_menuStatus=enabled
+        ? @"Memory card on. Saving works; the card screen costs a few seconds."
+        : @"Memory card off. No saving, and the card screen is skipped.";
     [self refreshSessionMenu];
   };
   _sessionMenu.onFastLoad = ^(BOOL enabled) {
@@ -1207,6 +1256,7 @@ static void SSXLaunchTrace(NSString* step) {
       remaster:[self remasterRequested] remasterAvailable:[self remasterPackInstalled]
       preload:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXPreloadTextures"]
       fastLoad:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXFastDisc"]
+      memoryCard:![NSUserDefaults.standardUserDefaults boolForKey:@"SSXNoMemoryCard"]
       courses:[self installedCourses] course:[self chosenCourseFile]
       canConfigure:canConfigure canTrial:canConfigure
       canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&
@@ -1437,7 +1487,11 @@ static void SSXLaunchTrace(NSString* step) {
   return YES;
 }
 - (void)savePausedSession {
-  if (_sequence || !_sessionIdentity || !_running || _stopRequested) return;
+  // A sequence run is normally excluded so an automated ride never becomes the
+  // resume point; the boot checkpoint is the exception, being a main-menu state
+  // that is identical either way.
+  if ((_sequence && !_bootCheckpointInFlight) || !_sessionIdentity || !_running || _stopRequested)
+    return;
   if (_pendingCheckpoint) {
     _checkpointAgain = YES;
     [self logSessionEvent:@"checkpoint_deferred" details:@{}];
