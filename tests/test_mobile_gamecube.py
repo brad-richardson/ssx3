@@ -201,6 +201,49 @@ class DeviceLaunch(unittest.TestCase):
         command = calls[0]
         bundle = command.index(mobile_gamecube.BUNDLE)
         self.assertEqual(command[bundle + 1:], ["--", "-ssxAutoTest", "-ssxSmoothingAt", "155.0"])
+
+    def test_course_manifest_and_textures_apply_only_to_launch(self):
+        for argv in (["mobile_gamecube.py", "collect", "--device", "PHONE",
+                     "--course-manifest", "stock"],
+                    ["mobile_gamecube.py", "collect", "--device", "PHONE",
+                     "--textures", "stock"],
+                    ["mobile_gamecube.py", "launch", "--device", "PHONE",
+                     "--textures", "upscaled"]):
+            with self.subTest(argv=argv), \
+                    mock.patch("sys.argv", argv), \
+                    mock.patch.object(mobile_gamecube, "collect") as collect, \
+                    mock.patch.object(mobile_gamecube, "command") as command:
+                with self.assertRaises(SystemExit) as stopped:
+                    mobile_gamecube.main()
+                self.assertEqual(stopped.exception.code, 2)
+                collect.assert_not_called()
+                command.assert_not_called()
+
+    def test_course_manifest_rejects_non_bare_names_before_device_changes(self):
+        for name in ("../Garibaldi.txt", ".hidden", "sub/dir.txt"):
+            with self.subTest(name=name), \
+                    mock.patch.object(mobile_gamecube, "copy_to") as copy, \
+                    mock.patch.object(mobile_gamecube, "command") as command:
+                with self.assertRaises(ValueError):
+                    mobile_gamecube.launch(argparse.Namespace(device="PHONE", simulator=False,
+                                                              sequence=None, course_manifest=name))
+                copy.assert_not_called()
+                command.assert_not_called()
+
+    def test_boot_overrides_reach_app_without_sequence(self):
+        args = argparse.Namespace(device="PHONE", simulator=False, sequence=None,
+                                  course_manifest="stock", textures="stock")
+        calls = []
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "copy_to"), \
+                mock.patch.object(mobile_gamecube, "command", side_effect=lambda c: calls.append(c)):
+            mobile_gamecube.launch(args)
+        self.assertEqual(len(calls), 1)
+        command = calls[0]
+        bundle = command.index(mobile_gamecube.BUNDLE)
+        self.assertEqual(command[bundle + 1:],
+                         ["--", "-ssxCourseManifest", "stock", "-ssxTextures", "stock"])
         self.assertNotIn("--", command[:bundle])
 
     def test_resolution_option_reaches_app_with_and_without_sequence(self):

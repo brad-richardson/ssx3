@@ -694,7 +694,7 @@ static void SSXLaunchTrace(NSString* step) {
       if ([name containsString:@"/"] || [name hasPrefix:@"."])
         fprintf(stderr,"[ssx3-course] ignoring -ssxCourseManifest %s: bare file name required\n",
                 name.UTF8String);
-      else
+      else if (![name isEqualToString:@"stock"])
         path = [Documents() stringByAppendingPathComponent:name];
     } else if (NSString* chosen=[self chosenCourseFile]) {
       path = [[Documents() stringByAppendingPathComponent:@"Courses"] stringByAppendingPathComponent:chosen];
@@ -710,7 +710,7 @@ static void SSXLaunchTrace(NSString* step) {
     }
     [self logSessionEvent:@"course_selection" details:@{
         @"manifest":_activeCourse ?: NSNull.null,
-        @"source":flag!=NSNotFound ? @"launch flag" : (_activeCourse ? @"menu" : @"stock")}];
+        @"source":(flag!=NSNotFound&&_activeCourse) ? @"launch flag" : (_activeCourse ? @"menu" : @"stock")}];
   }
   Common::Log::SetEmbedderLogCallback(RuntimeLog,nullptr);
   NSArray* args = NSProcessInfo.processInfo.arguments;
@@ -1442,6 +1442,19 @@ static void SSXLaunchTrace(NSString* step) {
   return _packInstalled > 0;
 }
 - (BOOL)remasterRequested {
+  // Launch-flag override for A/B runs; the saved choice applies otherwise.
+  NSArray<NSString*>* launch = NSProcessInfo.processInfo.arguments;
+  NSUInteger flag = [launch indexOfObject:@"-ssxTextures"];
+  if (flag != NSNotFound && flag+1 < launch.count) {
+    NSString* want = launch[flag+1];
+    if ([want isEqualToString:@"stock"]) return NO;
+    if ([want isEqualToString:@"remaster"]) return [self remasterPackInstalled];
+    static BOOL warned = NO;
+    if (!warned) {
+      warned = YES;
+      fprintf(stderr,"[ssx-test] ignoring invalid -ssxTextures %s\n",want.UTF8String);
+    }
+  }
   return [self remasterPackInstalled] &&
       [NSUserDefaults.standardUserDefaults boolForKey:@"SSXRemasterTextures"];
 }

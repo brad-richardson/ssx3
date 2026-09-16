@@ -373,6 +373,12 @@ def launch(args):
             raise ValueError("--f-at requires a bounded --sequence")
         if not math.isfinite(f_at) or not 0 <= f_at <= sequence["duration"]-40:
             raise ValueError("--f-at must be nonnegative and leave 40 seconds before test end")
+    course_manifest = getattr(args, "course_manifest", None)
+    if course_manifest is not None and ("/" in course_manifest or course_manifest.startswith(".")):
+        raise ValueError("--course-manifest must be a bare file name or 'stock'")
+    textures = getattr(args, "textures", None)
+    if textures is not None and textures not in ("stock", "remaster"):
+        raise ValueError("--textures must be 'stock' or 'remaster'")
     if args.sequence:
         if args.simulator:
             shutil.copy2(args.sequence, simulator_documents(args) / "test-sequence.json")
@@ -383,6 +389,10 @@ def launch(args):
         flags.extend(["-ssxOutputScale", args.output_scale])
     if internal_scale is not None:
         flags.extend(["-ssxInternalScale", str(internal_scale)])
+    if course_manifest is not None:
+        flags.extend(["-ssxCourseManifest", course_manifest])
+    if textures is not None:
+        flags.extend(["-ssxTextures", textures])
     if smoothing_at is not None:
         flags.extend(["-ssxSmoothingAt", str(smoothing_at)])
     if f_at is not None:
@@ -450,6 +460,10 @@ def main():
                         help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --f-at by 40+ seconds or the later trial skips")
     parser.add_argument("--f-at", type=float,
                         help="Request one guarded route-F sim trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --smoothing-at by 40+ seconds or the later trial skips")
+    parser.add_argument("--course-manifest",
+                        help="Launch-only course redirect manifest (bare file name in Documents/, or 'stock' to ignore the menu choice)")
+    parser.add_argument("--textures", choices=("stock", "remaster"),
+                        help="Launch-only texture override; normal launches use the saved remaster choice")
     parser.add_argument("--simulator-null-audio", action="store_true",
                         help="Graphics-only Simulator diagnostic; requires launch, --simulator, and bounded --sequence")
     boot=parser.add_mutually_exclusive_group()
@@ -487,6 +501,10 @@ def main():
         parser.error("--smoothing-at applies only to launch")
     if args.f_at is not None and args.command != "launch":
         parser.error("--f-at applies only to launch")
+    if args.course_manifest is not None and args.command != "launch":
+        parser.error("--course-manifest applies only to launch")
+    if args.textures is not None and args.command != "launch":
+        parser.error("--textures applies only to launch")
     if args.simulator_null_audio and (args.command != "launch" or not args.simulator or not args.sequence):
         parser.error("--simulator-null-audio requires launch, --simulator, and a bounded --sequence")
     if args.simulator:
