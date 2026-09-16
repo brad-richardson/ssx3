@@ -282,6 +282,9 @@ the build or commit that closed them.
       doubled, clean restore, guard-limited at 10 s on 0.82 speed; update
       pair 5.12 ms fits but render costs 12.25 ms at saved 3x internal
       ([results](research/120hz-f-spike.md#phase-4b-phone-attribution-trial-shipped-first-live-fire-in-progress)).
+      **Bias battery PASS-leaning (overnight):** 4 movies, matched player;
+      lateral drift mixed signs with <1% mean, flip == engage in all four
+      ([results](research/120hz-f-spike.md#bias-battery-results-overnight-post-merge)).
 - [ ] 120 Hz render test on the F sim backend (user, September 15): when F sim
       is validated, prove >60 FPS presentation driven by doubled updates.
       Gated order: (1) F sim correctness — crash/state-timer coverage from

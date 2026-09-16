@@ -630,3 +630,31 @@ order: (1) multi-movie bias battery (THE F gate — §F verdict),
 (2) consume-per-tick input latching (product requirement — windows must
 currently open post-race-start), (3) live F phone trial (§Phase 4b
 runbook), (4) production 120 Hz mode without probe scaffolding.
+
+## Bias battery results (overnight, post-merge)
+
+Four movies (det-base + rec2/3/4, same course, naturally divergent
+lines: endpoints 14–47k units apart), one matched probe player, base +
+v3b (SKIP=999/TICKS=300) replays each. Divergence starts at the first
+doubled tick in all four (flip == engage: float epsilon, then
+butterfly cascade — consistent mechanism). End displacement decomposed
+against each movie's base heading:
+
+| movie | flip | along | lateral | path F/B | note |
+|---|---|---|---|---|---|
+| det-base | 2126 | +39,754 | −6,759 | 1.130 | crash-confounded: base crashed @4676, F clean |
+| rec2 | 1859 | −1,355 | +1,689 | 1.010 | clean |
+| rec3 | 2105 | +4,493 | −1,636 | 1.018 | clean |
+| rec4 | 2128 | +28,750 | −2,642 | 1.089 | clean, no hazards either arm |
+
+Lateral (the bias axis): signs mixed, mean over the three clean pairs
+−863 units (<1% of ~100k-unit runs). Along-track: mixed signs, cascade
+scale varies (rec4 +28k crash-free both arms — terrain cascade, not
+drift; det-base +40k is crash-miss). Path ratios ≥1 throughout (F
+travels farther — carvier lines, consistent with v3b in-window
+findings). Crash rate 1 base vs 0 F (thin, noted not concluded).
+Verdict: PASS-leaning — no systematic pull detected, magnitudes small,
+mechanism consistent. n=3 clean is thin and all one course; strengthen
+opportunistically, not as a blocker. Repro: det-rec{2,3,4}.dtm +
+/tmp/battery.sh + /tmp/battery_analysis.py (scratch; rerun via the
+crash-player recipe above).
