@@ -202,7 +202,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _remasterActive;   // whether the running runtime was configured with the texture pack
   NSString* _activeCourse; // manifest file the running runtime booted with, nil for stock
   int _cpuThreadOverride; // -1 saved preference, 0 -ssxSingleCore, 1 -ssxCPUThread (this process only)
-  BOOL _fastDisc;         // launch-only Dolphin FastDiscSpeed comparison
+  BOOL _fastDisc;         // Dolphin FastDiscSpeed
+  double _cardSpeedup;    // modelled memory-card read-rate multiplier
   BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
   StartupBoot::AdvanceInput _startupInput;
   int _startupPhaseLogged;
@@ -329,7 +330,20 @@ static void SSXLaunchTrace(NSString* step) {
   _cpuThreadOverride=[launchArgs containsObject:@"-ssxSingleCore"] ? 0 :
       ([launchArgs containsObject:@"-ssxCPUThread"] ? 1 : -1);
   _cpuThread=[self cpuThreadRequested];
-  _fastDisc=[launchArgs containsObject:@"-ssxFastDisc"];
+  [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXFastDisc":@NO}];
+  // FastDiscSpeed was reachable only as a launch flag, so an ordinary tap on
+  // the icon never got it - and the six-run Mac comparison in
+  // docs/research/loading-speed-spike.md puts time to the main menu at 14.85 s
+  // with it against 20.10 s without. Stored now, with the flag still forcing it on.
+  _fastDisc=[launchArgs containsObject:@"-ssxFastDisc"]
+      || [NSUserDefaults.standardUserDefaults boolForKey:@"SSXFastDisc"];
+  // Card reads are modelled at hardware speed (512 KiB/s), which is several
+  // seconds of the boot spent scanning a card that is not real. The core reads
+  // this and keeps the same completion ordering.
+  _cardSpeedup=[NSUserDefaults.standardUserDefaults doubleForKey:@"SSXCardReadSpeedup"];
+  if (!(_cardSpeedup>=1)) _cardSpeedup=1;
+  setenv("SSX3_MEMCARD_READ_SPEEDUP",
+         [NSString stringWithFormat:@"%.0f",_cardSpeedup].UTF8String, 1);
   _dispatchSamples=[launchArgs containsObject:@"-ssxDispatchSamples"];
   _simulatorNullAudio=NO;
 #if TARGET_OS_SIMULATOR
@@ -703,6 +717,7 @@ static void SSXLaunchTrace(NSString* step) {
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
     @"renderScale":@(_internalScale), @"cpuThread":@(_cpuThread), @"fastDiscSpeed":@(_fastDisc),
     @"dispatchSamples":@(_dispatchSamples), @"automated":@(_sequence!=nil),
+    @"cardReadSpeedup":@(_cardSpeedup),
     @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
     @"debugMainMenuRequested":@(_debugMainMenu),
     @"sequenceStart":_sequenceFromMainMenu ? @"main_menu" : @"runtime_running",
@@ -1051,6 +1066,18 @@ static void SSXLaunchTrace(NSString* step) {
     [self logSessionEvent:@"runtime_preference_changed" details:@{@"cpuThread":@(enabled), @"active":@(self->_cpuThread)}];
     [self refreshSessionMenu];
   };
+  _sessionMenu.onFastLoad = ^(BOOL enabled) {
+    SSXViewController* self=weakSelf;
+    if (!self) return;
+    // One switch for both, because they are one question: how much of the boot
+    // is modelled hardware latency rather than work. 8x on card reads keeps the
+    // scan's ordering while taking it from seconds to well under one.
+    [NSUserDefaults.standardUserDefaults setBool:enabled forKey:@"SSXFastDisc"];
+    [NSUserDefaults.standardUserDefaults setDouble:enabled ? 8 : 1 forKey:@"SSXCardReadSpeedup"];
+    [self logSessionEvent:@"fast_load_preference_changed" details:@{@"enabled":@(enabled)}];
+    self->_menuStatus=@"Loading speed applies after Full Reset or relaunch.";
+    [self refreshSessionMenu];
+  };
   _sessionMenu.onPreload = ^(BOOL enabled) {
     SSXViewController* self=weakSelf;
     if (!self) return;
@@ -1175,6 +1202,7 @@ static void SSXLaunchTrace(NSString* step) {
       fastStart:_debugMainMenu dualCore:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXCPUThread"]
       remaster:[self remasterRequested] remasterAvailable:[self remasterPackInstalled]
       preload:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXPreloadTextures"]
+      fastLoad:[NSUserDefaults.standardUserDefaults boolForKey:@"SSXFastDisc"]
       courses:[self installedCourses] course:[self chosenCourseFile]
       canConfigure:canConfigure canTrial:canConfigure
       canReset:(!_pendingCheckpoint && !_starting && !_stopRequested &&

@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, nullable) void (^onDualCore)(BOOL enabled);
 @property(nonatomic, copy, nullable) void (^onRemaster)(BOOL enabled);
 @property(nonatomic, copy, nullable) void (^onPreload)(BOOL enabled);
+@property(nonatomic, copy, nullable) void (^onFastLoad)(BOOL enabled);
 // nil selects the stock event; otherwise a manifest file name from `courses`.
 @property(nonatomic, copy, nullable) void (^onCourse)(NSString* _Nullable course);
 
@@ -28,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
                remaster:(BOOL)remaster
         remasterAvailable:(BOOL)remasterAvailable
                 preload:(BOOL)preload
+               fastLoad:(BOOL)fastLoad
                 courses:(NSArray<NSString*>*)courses
                  course:(NSString* _Nullable)course
            canConfigure:(BOOL)canConfigure

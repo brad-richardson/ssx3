@@ -33,6 +33,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   UILabel* _remasterNote;
   UISwitch* _preload;
   UILabel* _preloadNote;
+  UISwitch* _fastLoad;
   UIButton* _course;
   NSArray<NSString*>* _courseMenuNames;   // what _course.menu was last built from
   NSString* _courseMenuChoice;
@@ -168,6 +169,22 @@ static void SetLabel(UILabel* label, NSString* text) {
                                    UILayoutConstraintAxisHorizontal,12);
   preloadRow.alignment=UIStackViewAlignmentCenter;
 
+  UILabel* fastLoadLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
+  fastLoadLabel.text=@"Faster loading";
+  [fastLoadLabel setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  _fastLoad=[[UISwitch alloc] init];
+  _fastLoad.accessibilityLabel=@"Faster loading";
+  _fastLoad.accessibilityIdentifier=@"SSX Faster Loading";
+  _fastLoad.accessibilityHint=@"Buffer disc reads and stop modelling the memory card at hardware speed. Shortens the boot and the loading screens. Applies after Full Reset or relaunch.";
+  [_fastLoad addTarget:self action:@selector(fastLoadChanged) forControlEvents:UIControlEventValueChanged];
+  UILabel* fastLoadNote=MenuLabel(UIFontTextStyleFootnote,UIColor.secondaryLabelColor);
+  fastLoadNote.text=@"Disc and memory-card timing";
+  UIView* fastLoadSpacer=[[UIView alloc] init];
+  [fastLoadSpacer setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  UIStackView* fastLoadRow=MenuStack(@[fastLoadLabel,_fastLoad,fastLoadNote,fastLoadSpacer],
+                                    UILayoutConstraintAxisHorizontal,12);
+  fastLoadRow.alignment=UIStackViewAlignmentCenter;
+
   UILabel* courseLabel=MenuLabel(UIFontTextStyleSubheadline,UIColor.labelColor);
   courseLabel.text=@"Course";
   [courseLabel setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
@@ -184,7 +201,7 @@ static void SetLabel(UILabel* label, NSString* text) {
                                   UILayoutConstraintAxisHorizontal,12);
   courseRow.alignment=UIStackViewAlignmentCenter;
 
-  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,remasterRow,preloadRow,courseRow,_resolutionLabel,_buildLabel],
+  UIStackView* content=MenuStack(@[_statusLabel,outputRow,detailRow,runtimeRow,remasterRow,preloadRow,fastLoadRow,courseRow,_resolutionLabel,_buildLabel],
                                 UILayoutConstraintAxisVertical,12);
   content.translatesAutoresizingMaskIntoConstraints=NO;
   UIScrollView* scroll=[[UIScrollView alloc] init];
@@ -273,6 +290,7 @@ static void SetLabel(UILabel* label, NSString* text) {
 - (void)dualCoreChanged { if (self.onDualCore) self.onDualCore(_dualCore.on); }
 - (void)remasterChanged { if (self.onRemaster) self.onRemaster(_remaster.on); }
 - (void)preloadChanged { if (self.onPreload) self.onPreload(_preload.on); }
+- (void)fastLoadChanged { if (self.onFastLoad) self.onFastLoad(_fastLoad.on); }
 
 - (NSString*)courseTitle:(NSString* _Nullable)course {
   // "ASS1.txt" reads as a slot code; show it without the extension.
@@ -320,6 +338,7 @@ static void SetLabel(UILabel* label, NSString* text) {
              resolution:(NSString*)resolution fastStart:(BOOL)fastStart dualCore:(BOOL)dualCore
                remaster:(BOOL)remaster remasterAvailable:(BOOL)remasterAvailable
                 preload:(BOOL)preload
+               fastLoad:(BOOL)fastLoad
                 courses:(NSArray<NSString*>*)courses course:(NSString* _Nullable)course
            canConfigure:(BOOL)canConfigure
                canTrial:(BOOL)canTrial canReset:(BOOL)canReset build:(NSString*)build {
@@ -337,6 +356,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   if (!_dualCore.tracking && _dualCore.on!=dualCore) [_dualCore setOn:dualCore animated:NO];
   if (!_remaster.tracking && _remaster.on!=remaster) [_remaster setOn:remaster animated:NO];
   if (!_preload.tracking && _preload.on!=preload) [_preload setOn:preload animated:NO];
+  if (!_fastLoad.tracking && _fastLoad.on!=fastLoad) [_fastLoad setOn:fastLoad animated:NO];
   // A switch with no pack behind it would be a dead control: say so instead.
   SetLabel(_remasterNote,remasterAvailable ? @"Applies after Full Reset or relaunch"
                                            : @"No texture pack installed");
@@ -347,6 +367,7 @@ static void SetLabel(UILabel* label, NSString* text) {
   _remaster.enabled=canConfigure && remasterAvailable;
   // Preloading only means anything when there is a pack to preload.
   _preload.enabled=canConfigure && remasterAvailable && remaster;
+  _fastLoad.enabled=canConfigure;
   [self rebuildCourseMenu:courses course:course];
   _course.enabled=canConfigure && courses.count>0;
   _smoothing.enabled=canTrial;

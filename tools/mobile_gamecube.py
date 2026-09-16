@@ -157,11 +157,27 @@ def sign(args):
         "os": details["deviceProperties"]["osVersionNumber"]})
 
 
+def app_is_running(args):
+    """Whether SSXNative is live on the device right now."""
+    report = device_call(["device", "info", "processes", "--device", args.device], timeout=120)
+    processes = (report or {}).get("result", {}).get("runningProcesses", [])
+    return any("SSXNative" in str(entry.get("executable", "")) for entry in processes)
+
+
 def install(args):
     if args.simulator:
         command(["xcrun", "simctl", "install", args.device, APP])
         return
     command(["codesign", "--verify", "--strict", APP])
+    # Installing over a running app ends that session *without* a checkpoint -
+    # the process is replaced mid-ride and the runtime never gets to stop
+    # cleanly, which reads in the telemetry as a session that simply stops after
+    # its last lifecycle event. That is indistinguishable from a crash to whoever
+    # was playing, so refuse rather than explain it afterwards.
+    if not args.force_install and app_is_running(args):
+        raise RuntimeError(
+            "SSXNative is running on the device; installing would end that session "
+            "without a checkpoint. Quit the app, or pass --force-install.")
     device_call(["device", "install", "app", "--device", args.device, str(APP)], timeout=300)
 
 
@@ -413,6 +429,8 @@ def main():
     parser.add_argument("--simulator", action="store_true", help="Use the iOS Simulator SDK and simctl")
     parser.add_argument("--device", help="Paired iPhone name/identifier, or simulator UUID with --simulator")
     parser.add_argument("--game", type=Path, default=native.DEFAULT_GAME)
+    parser.add_argument("--force-install", action="store_true",
+                        help="Install even though the app is running, ending that session")
     parser.add_argument("--stock-glyphs", action="store_true",
                         help="Provision the disc's own GameCube prompt icons instead of repainting them for Xbox positions")
     parser.add_argument("--sequence", type=Path, help="Optional bounded automated input sequence")

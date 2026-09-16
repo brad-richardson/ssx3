@@ -180,6 +180,27 @@ and runtime checks passing. It remains off on the phone. Next compare on the
 phone with identical assets/startup mode, then measure course loading separately;
 retain the correctness checks above before considering adoption.
 
+## Both levers reached the phone (September 15)
+
+`FastDiscSpeed` existed only as the `-ssxFastDisc` launch flag, so an ordinary
+tap on the icon never got the 20.10 -> 14.85 s improvement measured below. It is
+now a stored setting.
+
+The memory-card wait is modelled, not work: `MC_TRANSFER_RATE_READ` is
+512 KiB/s, so scanning a card the device does not physically have costs seconds
+of simulated latency. `SSX3_MEMCARD_READ_SPEEDUP` divides that read time
+(`native/patches/moderngekko-memcard-read-rate.patch`); completion still runs
+through the same `CoreTiming` events in the same order, so only the delay
+changes. **Write rate is deliberately untouched** at 96.125 KiB/s - save
+durability depends on the game seeing a write finish when it expects to, and
+rushing writes improves no part of the boot.
+
+Both sit behind one **Faster loading** switch in the pause menu, which sets
+`SSXFastDisc` and an 8x card-read multiplier together, because they are the
+same question: how much of the boot is modelled hardware latency rather than
+real work. Still to measure on the phone: time to main menu with the switch on
+against off, and the card-check phase in isolation.
+
 Memory-card delays need a separate audit. Pinned
 `Core/HW/EXI/EXI_DeviceMemoryCard.cpp:48` models 512 KiB/s reads and
 96.125 KiB/s writes, with asynchronous completion events in `DMARead` and

@@ -1,0 +1,45 @@
+diff --git a/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp b/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp
+index 35cad68..9fae778 100644
+--- a/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp
++++ b/Source/Core/Core/HW/EXI/EXI_DeviceMemoryCard.cpp
+@@ -3,6 +3,8 @@
+ 
+ #include "Core/HW/EXI/EXI_DeviceMemoryCard.h"
+ 
++#include <cstdlib>
++
+ #include <array>
+ #include <functional>
+ #include <memory>
+@@ -45,7 +47,30 @@ namespace ExpansionInterface
+ #define MC_STATUS_READY 0x01
+ #define SIZE_TO_Mb (1024 * 8 * 16)
+ 
+-static const u32 MC_TRANSFER_RATE_READ = 512 * 1024;
++// Real hardware read rate. SSX 3 scans the card before its main menu, and at
++// 512 KiB/s that scan is several seconds of purely modelled delay on a device
++// with no card to be slow. SSX3_MEMCARD_READ_SPEEDUP divides the modelled read
++// time by its value; completion still runs through the same CoreTiming events in
++// the same order, so only the delay changes.
++//
++// Writes are deliberately left at hardware rate: save durability depends on the
++// game seeing the write complete when it expects to, and nothing about the boot
++// wait is improved by rushing them.
++static u32 MemcardReadRate()
++{
++  static const u32 rate = [] {
++    const u32 base = 512 * 1024;
++    const char* env = std::getenv("SSX3_MEMCARD_READ_SPEEDUP");
++    if (!env)
++      return base;
++    const double factor = std::atof(env);
++    if (!(factor >= 1.0) || factor > 1024.0)
++      return base;
++    return static_cast<u32>(base * factor);
++  }();
++  return rate;
++}
++#define MC_TRANSFER_RATE_READ (MemcardReadRate())
+ static const auto MC_TRANSFER_RATE_WRITE = static_cast<u32>(96.125f * 1024.0f);
+ 
+ static Common::EnumMap<CoreTiming::EventType*, MAX_MEMCARD_SLOT> s_et_cmd_done;
