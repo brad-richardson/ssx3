@@ -57,10 +57,10 @@ class NativeTraceTests(unittest.TestCase):
             validate_trial_trace([])
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
-        # Trial 1 (F) must patch, double cleanly, and restore before restart.
+        # Trial 1 (F) must patch, double cleanly under patch, and restore.
         rows.append(dict(event='f_trial', action='patched', wall=1))
         rows.append(dict(event='f_trial', action='restored', wall=2))
-        rows.append(event('update', repeat=1, wall=2))
+        rows.append(event('update', repeat=1, wall=1.5))
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
         rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1, wall=4))
@@ -81,6 +81,20 @@ class NativeTraceTests(unittest.TestCase):
         without_restore = [r for r in rows if not (r.get('event') == 'f_trial' and r.get('action') == 'restored')]
         with self.assertRaises(RuntimeError):
             validate_trial_trace(without_restore)
+        without_patch = [r for r in rows if not (r.get('event') == 'f_trial' and r.get('action') == 'patched')]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(without_patch)
+        # The clean repeat must sit strictly between patch and restore: a
+        # repeat outside the patched window, or a dirty one inside it, fails.
+        rows[-2]['wall'] = 0.5
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        rows[-2]['wall'] = 1.5
+        rows[-2]['same_rider'] = 0
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        rows[-2]['same_rider'] = 1
+        self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
 
     def test_rejected_call_is_not_a_successful_draw(self):
         counters = dict(gate_calls=1, gate_ready=0, result=0,

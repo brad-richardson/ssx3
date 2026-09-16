@@ -448,7 +448,7 @@ static inline void Step(CPUState& c){
     const u32 g=TickCounterAddr(c);
     const bool have_addr=g&&Valid(c,g,4);
     const u32 v=have_addr?Word(c,g):0;
-    const bool model_ok=have_addr&&tick_have&&v==tick_saved+1;
+    const bool model_ok=have_addr&&tick_have&&(v-tick_saved)==1u;
     if(!model_ok){
      bool graceful=false;
 #ifdef SSX_NATIVE_TRIAL_APP
@@ -514,7 +514,9 @@ static inline void Step(CPUState& c){
  }
  if(c.pc==0x8010550c||c.pc==0x8010a4c8){
   auto& a=c.pc==0x8010550c?update:render;
-  if(a.pending){std::fprintf(stderr,"[native-probe] unexpected recursive callback\n");return;}
+  // Repeats deliberately re-dispatch with pending set; only genuinely
+  // unexpected recursion is worth a log line.
+  if(a.pending){if(!(a.repeated&&c.pc==a.entry))std::fprintf(stderr,"[native-probe] unexpected recursive callback\n");return;}
   if(c.pc==0x8010a4c8)view_matrix_calls=frame_end_calls=elapsed_calls=queue_calls=gate_calls=gate_ready=0;
   if(c.pc==0x8010a4c8){retries=skipped_elapsed=skipped_queue=camera_offsets=camera_restores=0;queue_before=Word(c,c.gpr[13]-20556);}
   if(c.pc==0x8010550c){

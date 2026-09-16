@@ -4,6 +4,7 @@
 // double the update cadence with halved dt and render normally (route F).
 #pragma once
 #include <atomic>
+#include <cstdio>
 #include <string>
 namespace NativeTrial {
 enum class Status { Idle, Waiting, Running, Finished, Unavailable };
@@ -15,8 +16,18 @@ inline std::atomic<bool> limited{false};
 inline std::atomic<unsigned> frames{0}, extras{0}, updates_doubled{0};
 inline std::string log_path; // set only while the runtime is stopped
 inline double ends=0;       // CPU thread only
-inline void Request() { cancel=false; limited=false; frames=0; extras=0; updates_doubled=0; kind=Kind::Smoothing; status=Status::Waiting; }
-inline void RequestF() { cancel=false; limited=false; frames=0; extras=0; updates_doubled=0; kind=Kind::F; status=Status::Waiting; }
+// Requests are terminal-state-only: overwriting a live trial would orphan its
+// guest state (an F trial's halved consts, a smoothing trial's XFB alias).
+// The frontend guards first; this backstop keeps diagnostics safe anyway.
+inline void Begin(Kind next) {
+ const auto live=status.load();
+ if(live==Status::Waiting||live==Status::Running){
+  std::fprintf(stderr,"[native-trial] request ignored: trial already active\n");return;
+ }
+ cancel=false; limited=false; frames=0; extras=0; updates_doubled=0; kind=next; status=Status::Waiting;
+}
+inline void Request() { Begin(Kind::Smoothing); }
+inline void RequestF() { Begin(Kind::F); }
 inline void Cancel() { cancel=true; }
 inline bool Active(double now) {
  return status.load()==Status::Running && !cancel.load() && now<ends;

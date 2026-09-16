@@ -447,9 +447,9 @@ def main():
     parser.add_argument("--internal-scale", type=int, choices=(1, 2, 3, 4),
                         help="Launch-only GameCube internal detail; normal launches use the saved choice (initially 2x)")
     parser.add_argument("--smoothing-at", type=float,
-                        help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining")
+                        help="Request one guarded trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --f-at by 40+ seconds or the later trial skips")
     parser.add_argument("--f-at", type=float,
-                        help="Request one guarded route-F sim trial at active test seconds; requires --sequence and 40 seconds remaining")
+                        help="Request one guarded route-F sim trial at active test seconds; requires --sequence and 40 seconds remaining; separate from --smoothing-at by 40+ seconds or the later trial skips")
     parser.add_argument("--simulator-null-audio", action="store_true",
                         help="Graphics-only Simulator diagnostic; requires launch, --simulator, and bounded --sequence")
     boot=parser.add_mutually_exclusive_group()

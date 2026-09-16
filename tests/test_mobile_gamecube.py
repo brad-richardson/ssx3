@@ -162,6 +162,17 @@ class DeviceLaunch(unittest.TestCase):
                 copy.assert_not_called()
                 command.assert_not_called()
 
+    def test_f_at_applies_only_to_launch(self):
+        with mock.patch("sys.argv", ["mobile_gamecube.py", "collect", "--device", "PHONE",
+                "--f-at", "10"]), \
+                mock.patch.object(mobile_gamecube, "collect") as collect, \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            with self.assertRaises(SystemExit) as stopped:
+                mobile_gamecube.main()
+            self.assertEqual(stopped.exception.code, 2)
+            collect.assert_not_called()
+            command.assert_not_called()
+
     def test_f_flag_reaches_app_after_argument_separator(self):
         args = argparse.Namespace(device="PHONE", simulator=False,
                                   sequence=Path("native/ios/snow-jam-smoke.json"), f_at=155.0)

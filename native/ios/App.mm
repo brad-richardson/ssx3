@@ -730,6 +730,8 @@ static void SSXLaunchTrace(NSString* step) {
       double requested=0;
       if ([scanner scanDouble:&requested] && scanner.isAtEnd && std::isfinite(requested) &&
           requested>=0 && requested<=_duration-40) _scheduledTrialAt=requested;
+      else fprintf(stderr,"[ssx-test] ignoring out-of-range -ssxSmoothingAt %s\n",
+          [args[trialArg+1] UTF8String]);
     }
     NSUInteger fArg=[args indexOfObject:@"-ssxFAt"];
     if (fArg != NSNotFound && fArg+1 < args.count) {
@@ -737,6 +739,8 @@ static void SSXLaunchTrace(NSString* step) {
       double requested=0;
       if ([scanner scanDouble:&requested] && scanner.isAtEnd && std::isfinite(requested) &&
           requested>=0 && requested<=_duration-40) _scheduledFAt=requested;
+      else fprintf(stderr,"[ssx-test] ignoring out-of-range -ssxFAt %s\n",
+          [args[fArg+1] UTF8String]);
     }
   }
   const auto* descriptor = staticrecomp_get_module();
@@ -951,8 +955,16 @@ static void SSXLaunchTrace(NSString* step) {
         ((CAMetalLayer*)_surface.layer).drawableSize,CGSizeMake(matched.width,matched.height))));
     if (ready) {
       _trialAfterOutput=NO;
-      [self logSessionEvent:@"trial_requested" details:@{}];
-      NativeTrial::Request();
+      // A pending smoothing intent must not overwrite a live trial (an F
+      // trial's halved consts would strand): drop the intent if the machine
+      // is busy. The native Request backstop ignores it either way.
+      const auto trial=NativeTrial::status.load();
+      if (trial == NativeTrial::Status::Waiting || trial == NativeTrial::Status::Running) {
+        [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::Smoothing)), @"reason":@"A trial is already pending or running."}];
+      } else {
+        NativeTrial::Request();
+        [self logSessionEvent:@"trial_requested" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::Smoothing))}];
+      }
     }
   }
   if (!_startTime) {
@@ -998,28 +1010,31 @@ static void SSXLaunchTrace(NSString* step) {
   while (_eventIndex<_sequence.count && [_sequence[_eventIndex][@"at"] doubleValue]<=sequenceElapsed) {
     [self send:_sequence[_eventIndex][@"commands"]]; ++_eventIndex;
   }
-  if (_scheduledTrialAt>=0 && sequenceElapsed>=_scheduledTrialAt) {
+  // A scheduled trial never fires into an in-flight checkpoint: F would patch
+  // dt consts the savestate then persists. The timer is not consumed, so the
+  // trial fires on a later tick once the checkpoint clears.
+  if (_scheduledTrialAt>=0 && sequenceElapsed>=_scheduledTrialAt && !_pendingCheckpoint) {
     const double requested=_scheduledTrialAt;
     _scheduledTrialAt=-1;
     const auto trial=NativeTrial::status.load();
     if (trial != NativeTrial::Status::Waiting && trial != NativeTrial::Status::Running) {
       _trialCancellationLogged=NO;
-      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"scheduledAt":@(requested)}];
       NativeTrial::Request();
+      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"kind":@(static_cast<int>(NativeTrial::Kind::Smoothing)), @"scheduledAt":@(requested)}];
     } else {
-      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"reason":@"A trial is already pending or running."}];
+      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::Smoothing)), @"reason":@"A trial is already pending or running."}];
     }
   }
-  if (_scheduledFAt>=0 && sequenceElapsed>=_scheduledFAt) {
+  if (_scheduledFAt>=0 && sequenceElapsed>=_scheduledFAt && !_pendingCheckpoint) {
     const double requested=_scheduledFAt;
     _scheduledFAt=-1;
     const auto trial=NativeTrial::status.load();
     if (trial != NativeTrial::Status::Waiting && trial != NativeTrial::Status::Running) {
       _trialCancellationLogged=NO;
-      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"kind":@"F", @"scheduledAt":@(requested)}];
       NativeTrial::RequestF();
+      [self logSessionEvent:@"trial_requested" details:@{@"automated":@YES, @"kind":@(static_cast<int>(NativeTrial::Kind::F)), @"scheduledAt":@(requested)}];
     } else {
-      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@"F", @"reason":@"A trial is already pending or running."}];
+      [self logSessionEvent:@"scheduled_trial_skipped" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::F)), @"reason":@"A trial is already pending or running."}];
     }
   }
   if (elapsed-_lastMetric>=1) {
@@ -1093,7 +1108,7 @@ static void SSXLaunchTrace(NSString* step) {
       // trial freezes output size. The pause loop cancels this intent as well.
       self->_trialCancellationLogged = NO;
       self->_trialAfterOutput=YES;
-      [self logSessionEvent:@"trial_resume_requested" details:@{}];
+      [self logSessionEvent:@"trial_resume_requested" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::Smoothing))}];
       [self resumeSession];
     }];
   };
@@ -1105,9 +1120,11 @@ static void SSXLaunchTrace(NSString* step) {
       if (!self) return;
       // F renders normally, so unlike smoothing it needs no output-settle
       // wait: request while paused; the trial starts at the next riding idle.
+      // Clear any pending smoothing intent so it cannot overwrite this one.
       self->_trialCancellationLogged = NO;
-      [self logSessionEvent:@"trial_resume_requested" details:@{@"kind":@"F"}];
+      self->_trialAfterOutput=NO;
       NativeTrial::RequestF();
+      [self logSessionEvent:@"trial_resume_requested" details:@{@"kind":@(static_cast<int>(NativeTrial::Kind::F))}];
       [self resumeSession];
     }];
   };
@@ -1621,13 +1638,15 @@ static void SSXLaunchTrace(NSString* step) {
         @"doubled":@(NativeTrial::updates_doubled.load()), @"extras":@(NativeTrial::extras.load())}];
   }
   if (pause && (trial == NativeTrial::Status::Running || trial == NativeTrial::Status::Waiting)) {
-      // A checkpoint cannot contain a half-finished injected render: its host
-      // return context isn't part of the guest savestate. Cancel, let the CPU
-      // reach its idle seam, then pause/save. Input has already been released.
+      // A checkpoint cannot contain a half-finished injected render (its host
+      // return context isn't part of the guest savestate), nor an F trial's
+      // halved dt consts. Cancel, let the CPU drain to a quiescent finish,
+      // then pause/save. Input has already been released. The wait is
+      // unbounded by design: pausing early would persist the hazard.
       NativeTrial::Cancel();
       if (!_trialCancellationLogged) {
         _trialCancellationLogged=YES;
-        [self logSessionEvent:@"trial_cancel_for_pause" details:@{}];
+        [self logSessionEvent:@"trial_cancel_for_pause" details:@{@"kind":@(static_cast<int>(NativeTrial::kind.load()))}];
       }
       // An external pause may already have stopped the CPU inside the extra
       // draw. Briefly run it to the same safe seam before taking a checkpoint.

@@ -22,13 +22,18 @@ def validate_trial_trace(rows):
         raise RuntimeError('Lifecycle events are out of order')
     walls = {r['action']: r['wall'] for r in events}
     first = [r for r in rows if walls['request'] < r.get('wall', 0) < walls['restart']]
-    if not any(r.get('event') == 'f_trial' and r.get('action') == 'patched' for r in first):
+    patched = [r['wall'] for r in first if r.get('event') == 'f_trial' and r.get('action') == 'patched']
+    restored = [r['wall'] for r in first if r.get('event') == 'f_trial' and r.get('action') == 'restored']
+    if not patched:
         raise RuntimeError('Lifecycle F trial never patched its dt consts')
-    if not any(r.get('event') == 'f_trial' and r.get('action') == 'restored' for r in first):
-        raise RuntimeError('Lifecycle F trial never restored its dt consts')
+    if not restored or min(restored) < min(patched):
+        raise RuntimeError('Lifecycle F trial never restored its dt consts after patching')
+    # The phone claim is doubled updates UNDER halved dt: the clean repeat
+    # must sit strictly between patch and restore, not merely in the window.
     repeats = [r for r in first if r.get('event') == 'update' and r.get('repeat') == 1]
-    if not any(r.get('same_rider') == 1 and r.get('state_before') == r.get('state_after') for r in repeats):
-        raise RuntimeError('Lifecycle F trial never completed a clean doubled update')
+    windowed = [r for r in repeats if min(patched) < r.get('wall', 0) < min(restored)]
+    if not any(r.get('same_rider') == 1 and r.get('state_before') == r.get('state_after') for r in windowed):
+        raise RuntimeError('Lifecycle F trial never completed a clean doubled update under patch')
     # Trial 2 must make real extras: with a stale schedule epoch it limits
     # instantly past trial 1's grace and this finds nothing.
     extras = [r for r in rows if r.get('event') == 'render' and r.get('repeat') and
