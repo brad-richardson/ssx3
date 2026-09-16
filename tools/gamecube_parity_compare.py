@@ -7,7 +7,8 @@ timebase (tb_start) is the alignment grid — no per-run normalization (a
 host-window edge can fall on different guest ticks per arm, which
 normalization would misalign). End states compare by body_hash_after of
 the tick's LAST body (the repeat row when a tick re-enters, the ordinary
-row otherwise).
+row otherwise). HALF_CADENCE skip rows never ran a body and are left off
+the grid, reported as skipped_rows_a/b.
 
 Usage:
   gamecube_parity_compare.py A.jsonl B.jsonl [--telemetry A-rider.jsonl B-rider.jsonl]
@@ -36,14 +37,24 @@ def load_updates(path, start, end):
 
 
 def group_ticks(rows):
-    """Ordinary row plus its immediately following repeats = one tick."""
-    ticks = []
+    """Ordinary row plus its immediately following repeats = one tick.
+
+    A HALF_CADENCE skip row carries repeat=0 like an ordinary update, but the
+    guest body never ran, so its end state is its start state. Counting one as
+    a tick of its own would put a no-op on the alignment grid opposite a base
+    tick that did advance, and the wrong-control arm would read as divergent
+    for a bookkeeping reason rather than a simulation one. They are dropped
+    from the grid and counted, so the surviving ticks keep their real tb_start.
+    """
+    ticks, skipped = [], 0
     for r in rows:
-        if not r['repeat']:
+        if r.get('skipped_update'):
+            skipped += 1
+        elif not r['repeat']:
             ticks.append([r])
         elif ticks:
             ticks[-1].append(r)
-    return ticks
+    return ticks, skipped
 
 
 def tick_key(tick):
@@ -51,9 +62,10 @@ def tick_key(tick):
 
 
 def compare(a_path, b_path, start=145, end=170, telemetry=()):
-    a_ticks = group_ticks(load_updates(a_path, start, end))
-    b_ticks = group_ticks(load_updates(b_path, start, end))
-    report = {'ticks_a': len(a_ticks), 'ticks_b': len(b_ticks)}
+    a_ticks, a_skipped = group_ticks(load_updates(a_path, start, end))
+    b_ticks, b_skipped = group_ticks(load_updates(b_path, start, end))
+    report = {'ticks_a': len(a_ticks), 'ticks_b': len(b_ticks),
+              'skipped_rows_a': a_skipped, 'skipped_rows_b': b_skipped}
     if not a_ticks or not b_ticks:
         return dict(report, verdict='no-ticks')
     b_keys = [tick_key(t) for t in b_ticks]

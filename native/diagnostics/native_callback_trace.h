@@ -188,21 +188,39 @@ static bool DoubleUpdateEnabled(){static bool value=[](){const char* p=std::gete
 static bool HalfCadenceEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_CADENCE");return p&&std::strcmp(p,"1")==0;}();return value;}
 static bool HalfDtEnabled(){static bool value=[](){const char* p=std::getenv("SSX_NATIVE_HALF_DT");return p&&std::strcmp(p,"1")==0;}();return value;}
 static const u32 HalfDtAddrs[]={0x803db490,0x803dbba8,0x803dbd44,0x803dc0d4,0x803dc884,0x803dce70,0x803dd6dc,0x803dd8cc,0x803de62c,0x803df0b0,0x803df58c};
+static const unsigned HalfDtCount=sizeof(HalfDtAddrs)/sizeof(HalfDtAddrs[0])+4;
 static void WriteConstSet(CPUState& c,bool to_half,const char* tag){
  float sixth=1.0f/60.0f,twelfth=1.0f/120.0f,sixty=60.0f,onetwenty=120.0f;
  u32 exp6,half12,exp60,half120;
  std::memcpy(&exp6,&sixth,4);std::memcpy(&half12,&twelfth,4);
  std::memcpy(&exp60,&sixty,4);std::memcpy(&half120,&onetwenty,4);
- auto put=[&](u32 a,u32 expect,u32 value){
-  if(!Valid(c,a,4)||Word(c,a)!=expect){std::fprintf(stderr,"[native-probe] %s const drift at %08x\n",tag,a);std::abort();}
-  auto* p=c.ram+a-0x80000000u;p[0]=(unsigned char)(value>>24);p[1]=(unsigned char)(value>>16);p[2]=(unsigned char)(value>>8);p[3]=(unsigned char)value;
+ struct Planned {u32 addr,expect,value;};
+ Planned plan[HalfDtCount];
+ unsigned n=0;
+ auto want=[&](u32 a,u32 stock,u32 halved){
+  plan[n++]=Planned{a,to_half?stock:halved,to_half?halved:stock};
  };
- for(u32 a:HalfDtAddrs)put(a,to_half?exp6:half12,to_half?half12:exp6);
- put(0x803dcee0,to_half?exp60:half120,to_half?half120:exp60);
+ for(u32 a:HalfDtAddrs)want(a,exp6,half12);
+ want(0x803dcee0,exp60,half120);
  // v1: per-tick damping factors (0x8002784C loop) renormalized to sqrt.
- put(0x803db7e8,to_half?0x3f7ae148:0x3f7d6d55,to_half?0x3f7d6d55:0x3f7ae148);
- put(0x803db7ec,to_half?0x3f74bc6a:0x3f7a4dfd,to_half?0x3f7a4dfd:0x3f74bc6a);
- put(0x803db7f0,to_half?0x3f7a740e:0x3f7d3624,to_half?0x3f7d3624:0x3f7a740e);
+ want(0x803db7e8,0x3f7ae148,0x3f7d6d55);
+ want(0x803db7ec,0x3f74bc6a,0x3f7a4dfd);
+ want(0x803db7f0,0x3f7a740e,0x3f7d3624);
+ // Verify the whole set before writing any of it. Interleaving the check with
+ // the write leaves a drifting guest half-patched and then aborts, and on the
+ // restore path that strands the run at 1/120 with no way back - the failure
+ // this ordering exists to prevent.
+ for(unsigned i=0;i<n;++i){
+  if(!Valid(c,plan[i].addr,4)||Word(c,plan[i].addr)!=plan[i].expect){
+   std::fprintf(stderr,"[native-probe] %s const drift at %08x (%u of %u verified, none written)\n",
+                tag,plan[i].addr,i,n);
+   std::abort();
+  }
+ }
+ for(unsigned i=0;i<n;++i){
+  auto* p=c.ram+plan[i].addr-0x80000000u;const u32 v=plan[i].value;
+  p[0]=(unsigned char)(v>>24);p[1]=(unsigned char)(v>>16);p[2]=(unsigned char)(v>>8);p[3]=(unsigned char)v;
+ }
 }
 static void PatchHalfDt(CPUState& c){
  static bool done=false;
@@ -210,7 +228,7 @@ static void PatchHalfDt(CPUState& c){
  if(done||!HalfDtEnabled()||!ExperimentalWindow())return;
  WriteConstSet(c,true,"HALF_DT");
  done=true;
- std::fprintf(stderr,"[native-probe] HALF_DT patched %u consts\n",(unsigned)(sizeof(HalfDtAddrs)/sizeof(HalfDtAddrs[0])+4));
+ std::fprintf(stderr,"[native-probe] HALF_DT patched %u consts\n",HalfDtCount);
 }
 static bool WaitEnabled(){static const bool on=std::getenv("SSX_NATIVE_WAIT_REPEAT")!=nullptr;return on;}
 static bool SweepEnabled(){static const bool on=std::getenv("SSX_NATIVE_FROZEN_VIEW_SWEEP")!=nullptr;return on;}

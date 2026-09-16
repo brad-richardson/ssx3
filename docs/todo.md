@@ -272,12 +272,9 @@ the build or commit that closed them.
       `guest_seconds_per_host_second` >= 0.95 ends F before any dt work.
       Compare arms with `gamecube_parity_compare.py` (absolute guest timebase,
       end-of-tick body hashes) and gate them with `gamecube_f_regression.py`.
-      Two known rough edges, neither blocking: `WriteConstSet` aborts on const
-      drift *after* it has already written earlier addresses, so a failed
-      restore leaves the guest at halved dt - validate all fourteen addresses
-      before writing any; and `group_ticks` in the parity tool treats a
-      HALF_CADENCE skip row as its own tick, which flatters the wrong-control
-      arm's tick count.
+      The two rough edges found in review are fixed: `WriteConstSet` now
+      verifies all fourteen addresses before writing any, and the parity tool
+      leaves HALF_CADENCE skip rows off the alignment grid.
 - [ ] 120 Hz by frame generation is ruled out, not pending. The Metal
       interpolation prototype on `spike/120hz` (worktree
       `../ssx3-120hz`, unmerged on purpose) cut emulation to 4.9 FPS at 0.36

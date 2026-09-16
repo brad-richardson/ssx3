@@ -57,6 +57,22 @@ class ParityCompareTests(unittest.TestCase):
         self.assertEqual(rep['verdict'], 'parity')
         self.assertEqual(rep['matched_ticks'], 3)
 
+    def test_half_cadence_skips_leave_the_grid_and_are_counted(self):
+        """The wrong-control arm must not read as divergent for bookkeeping."""
+        tb0 = 10**16
+        base = [row(tb0 + i * TB, h=100 + i) for i in range(4)]
+        # Half cadence: every other tick is a skip whose body never ran, so it
+        # carries the previous end hash. Its survivors keep the base hashes.
+        half = []
+        for i in range(4):
+            half.append(row(tb0 + i * TB, h=100 + i))
+            half.append(row(tb0 + i * TB + TB // 2, skipped=1, h=100 + i))
+        rep = compare(write(base), write(half))
+        self.assertEqual(rep['skipped_rows_b'], 4)
+        self.assertEqual(rep['skipped_rows_a'], 0)
+        self.assertEqual(rep['ticks_b'], 4, 'a skip row became a tick of its own')
+        self.assertEqual(rep['verdict'], 'parity')
+
     def test_body_dump_reports_diverged_words(self):
         tb0 = 10**16
         a = [row(tb0, h=1, words=[10, 20, 30, 40])]
