@@ -1,0 +1,56 @@
+diff --git a/Source/Core/AudioCommon/CoreAudioSoundStream.h b/Source/Core/AudioCommon/CoreAudioSoundStream.h
+--- a/Source/Core/AudioCommon/CoreAudioSoundStream.h
++++ b/Source/Core/AudioCommon/CoreAudioSoundStream.h
+@@ -21,4 +21,7 @@ private:
+   AudioUnit m_audio_unit = nullptr;
+   int m_volume = 100;
+   bool m_running = false;
++  // First-order DC blocker state, render thread only.
++  float m_dc_prev_x_l = 0, m_dc_prev_x_r = 0, m_dc_prev_y_l = 0, m_dc_prev_y_r = 0;
++  void BlockDC(s16* samples, UInt32 frames);
+ };
+diff --git a/Source/Core/AudioCommon/CoreAudioSoundStream.cpp b/Source/Core/AudioCommon/CoreAudioSoundStream.cpp
+--- a/Source/Core/AudioCommon/CoreAudioSoundStream.cpp
++++ b/Source/Core/AudioCommon/CoreAudioSoundStream.cpp
+@@ -23,8 +23,11 @@ OSStatus CoreAudioSound::OutputCallback(void* ref_con, AudioUnitRenderActionFlag
+   AudioBuffer& buffer = io_data->mBuffers[0];
+   const UInt32 available_frames = buffer.mDataByteSize / (2 * sizeof(s16));
+   const UInt32 frames = std::min(number_frames, available_frames);
+   if (buffer.mData && frames > 0)
+-    sound->GetMixer()->Mix(static_cast<s16*>(buffer.mData), frames);
++  {
++    sound->GetMixer()->Mix(static_cast<s16*>(buffer.mData), frames);
++    sound->BlockDC(static_cast<s16*>(buffer.mData), frames);
++  }
+ 
+   static std::atomic<bool> logged_callback = false;
+   if (!logged_callback.exchange(true))
+@@ -35,6 +38,28 @@ OSStatus CoreAudioSound::OutputCallback(void* ref_con, AudioUnitRenderActionFlag
+   return noErr;
+ }
+ 
++// An idled AX task can leave the pushed stream sitting at a nonzero constant
++// for seconds (stale init / stale DMA frame, varying per occasion); phone
++// speakers turn that pedestal into audible static between menu sounds. A
++// first-order blocker (R=0.995, ~38 Hz cutoff at 48 kHz) settles a stuck
++// constant to silence in ~4 ms and is inaudible for real content.
++void CoreAudioSound::BlockDC(s16* samples, UInt32 frames)
++{
++  for (UInt32 i = 0; i < frames; ++i)
++  {
++    for (int ch = 0; ch < 2; ++ch)
++    {
++      const float x = samples[i * 2 + ch];
++      float& prev_x = ch == 0 ? m_dc_prev_x_l : m_dc_prev_x_r;
++      float& prev_y = ch == 0 ? m_dc_prev_y_l : m_dc_prev_y_r;
++      const float y = x - prev_x + 0.995f * prev_y;
++      prev_x = x;
++      prev_y = y;
++      samples[i * 2 + ch] = static_cast<s16>(std::clamp(y, -32768.0f, 32767.0f));
++    }
++  }
++}
++
+ CoreAudioSound::~CoreAudioSound()
+ {
+   if (!m_audio_unit)
