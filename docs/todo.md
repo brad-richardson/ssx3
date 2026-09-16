@@ -275,6 +275,47 @@ the build or commit that closed them.
       The two rough edges found in review are fixed: `WriteConstSet` now
       verifies all fourteen addresses before writing any, and the parity tool
       leaves HALF_CADENCE skip rows off the alignment grid.
+      **Phone trial shipped September 15 (night):** `NativeTrial::Kind::F`,
+      trial-armed v3b drivers, a Try 120Hz sim menu entry, `-ssxFAt`/`--f-at`,
+      graceful drift handling and stock-dt restore before finish/checkpoint.
+      First live fire (single-core snow-jam-smoke, `--f-at 155`): 533/534
+      doubled, clean restore, guard-limited at 10 s on 0.82 speed; update
+      pair 5.12 ms fits but render costs 12.25 ms at saved 3x internal
+      ([results](research/120hz-f-spike.md#phase-4b-phone-attribution-trial-shipped-first-live-fire-in-progress)).
+- [ ] 120 Hz render test on the F sim backend (user, September 15): when F sim
+      is validated, prove >60 FPS presentation driven by doubled updates.
+      Gated order: (1) F sim correctness — crash/state-timer coverage from
+      the desktop crash comparison plus trap-found sites in the replay set,
+      then the multi-movie bias battery (small mean drift, mixed signs);
+      (2) consume-per-tick input latching so doubled ticks never eat edge
+      inputs; (3) phone F headroom at 1x internal (pair + render + system <
+      8.33 ms sustained); (4) 120 Hz draws from sim state — render every
+      update, or decoupled render with camera interpolation, reusing the
+      smoothing schedule/XFB presentation path with an F-kind deadline;
+      (5) pacing acceptance (>=117 displayed/s + sim speed >= 0.98 +
+      input-latency measurement) with fallback to F-sim/60-draws, then
+      stock, on budget miss. No step starts until the gate before it passes.
+- [ ] 120 Hz headroom backlog (user, September 15): measured budget is
+      update pair ~5.1 ms + render ~12.3 ms at 3x single-core on the phone vs
+      8.33 ms. Biggest first: (1) F + dual-core phone run — unknown, and
+      dual-core previously moved render 9.5 → 7.8 ms with 25% headroom; the
+      ship config may be F+dual-core while tests stay single-core;
+      (2) 1x internal for 120 Hz mode — render dominates, config-only change,
+      isolates the F update question; (3) production-quiet probe delta — the
+      trial's per-body Diff/Hash/Emit/fflush rides in every measured pair,
+      size the ship prize with a quiet-mode run; (4) phase-tagged update
+      breakdown — what the 3 ms ordinary update spends in game vs view vs
+      bookkeeping decides all downstream work; (5) update-pair tail — desktop
+      p95 10.31 ms exceeds the period, spikes kill pacing, attribute before
+      optimizing the median; (6) fast-FP phone measurement (built, pending)
+      plus hot-chunk float-conversion where the breakdown points; (7) fewer
+      chassis round-trips (existing item); (8) 1x BC texture pack for perf
+      mode (bandwidth, not the 4x quality pack); (9) view/camera at 60 +
+      physics at 120 split — semantic change, only if the breakdown shows
+      view dominating; (10) VI-paced true-120 (2x update+render) vs
+      back-to-back halves — end-architecture question, needs 1–3 first.
+      Audio skipping in heavy areas is a budget-overrun symptom (CPU
+      starvation → DMA underrun), fixed by headroom, not audio work.
 - [ ] 120 Hz by frame generation is ruled out, not pending. The Metal
       interpolation prototype on `spike/120hz` (worktree
       `../ssx3-120hz`, unmerged on purpose) cut emulation to 4.9 FPS at 0.36

@@ -545,12 +545,18 @@ valid line, not a rate error); the bound comes from the multi-movie
 bias battery (post-merge). Merge gate = counter_rate + repeat_count +
 restore PASS (deterministic invariants); drift REPORTED per movie.
 
-## Phase 4b: phone attribution (analytical + runbook; live fire pending)
+## Phase 4b: phone attribution (trial shipped; first live fire in progress)
 
-No live F phone trial exists: the trial system (NativeTrial in
-native/diagnostics/trial_control.h, -ssxSmoothingAt in native/ios/
-App.mm → Request() → 40 s bounded run) supports render/smoothing
-trials only — no update-doubling trial type. Analytical projection
+The F phone trial is implemented on main: `NativeTrial::Kind::{Smoothing,F}`
+in native/diagnostics/trial_control.h, trial-armed v3b drivers (no
+environment) in native/diagnostics/native_callback_trace.h, kind-gated
+schedule/interpolation in native_render_schedule.h and
+native_pose_interpolation.h, a Try 120Hz sim menu entry plus `-ssxFAt` in
+native/ios, and `--f-at` in tools/mobile_gamecube.py. F renders normally
+through production double-buffering with production idle waits; smoothing
+keeps the XFB alias, extra renders and high-refresh hint. Const patch on the
+first live F update, restore before finish, graceful (limited + cancel)
+drift handling, no display-rate change. Analytical projection
 (desktop pair CPU × phone singles): desktop ordinary+repeat ≈ 5.3–6.5
 ms CPU (probe overhead included; production drops hashing/writes);
 phone ordinary update ≈ 3.3–3.5 ms (prior trials) → projected phone
@@ -559,19 +565,32 @@ but plausible; trial load already drops 1x updates to 44/s, so margin
 is thin and the live trial decides. Desktop pair CPU for the exact
 projection: recompute from gw9's in-window cpu_duration_ms
 (ordinary+repeat) when it lands.
-Runbook for the live F trial (post-merge product work): (1) add a
-trial type (render vs F-double) through NativeTrial::Request +
--ssxFAt launch flag in App.mm + mobile_gamecube.py passthrough (mirror
---smoothing-at: bounded --sequence, 40 s remaining); (2) trial-app
-build with the F header (ExperimentalWindow already honors
-NativeTrial::Active; arm DOUBLE_UPDATE + guest window + counter
-restore via trial defs); (3) configure/build/sign/install/launch/
-collect per tools/mobile_gamecube.py --help against the paired device
-(Brad's iPhone 16 Pro Max is paired and available; do NOT use the
-simulator — its timing is unrepresentative); (4) attribute with
-tools/mobile_frame_cost.py + update cpu_duration_ms from the probe
-log; PASS = pair + render + system < 8.33 ms sustained with no
-readiness/queue regressions. Do not fire without explicit device go.
+First live fire (2026-09-15 night, iPhone 16 Pro Max, single-core to match
+desktop methodology): snow-jam-smoke.json with `--f-at 155`. 533/534 updates
+doubled over 10.0 s, 15 consts patched and restored, zero drift/aborts,
+thermal nominal; the guard correctly ended it at the 10 s grace on speed
+(0.97→0.82, long 0.819). Pair CPU med 5.12 ms (ordinary 3.02 + repeat 2.06,
+p95 5.92) fits the period, but render med 12.25 ms at the saved 3x internal
+dominates — the binding constraint is render, not the doubled update. Speed
+recovered to 1.00 within 5 s of restore (no half-speed tail). A 1x-internal
+run is still needed to isolate F update headroom. Never use the simulator —
+its timing is unrepresentative. Attribution is update-pair cpu_duration_ms
+from native-trial.jsonl plus metric speed/fps/thermal rows; the always-on
+callback timer stays quiet during trials by design. PASS = pair + render +
+system < 8.33 ms sustained with no readiness/queue regressions.
+
+Watch-report from that run, both checked against the trace: (1) the "late
+start" is stock script behavior, not F — both race starts ran with no trial
+active and the script gives zero launch input (menu A presses only), so the
+rider coasts while AI sprints. F has still never covered a countdown→GO
+anywhere; an `--f-at` over the start is the open test. (2) No crash occurred
+under F in the window (states 0/5 only, no stalls), so "tumbling 2x" is no
+controlled crash comparison — but it is consistent with unnormalized
+per-body consumers running 2x/tick against a world dragged to 0.82x (exact
+2:1 relative contrast), and crash-under-F is genuinely uncovered: desktop
+movies diverge before their crashes (base crashes, v3b takes a clean line),
+and the v3 replay set covers only the race counter, five stamps, app+168
+and RNG. Crash/state-timer coverage is the next desktop work.
 
 ## Mainline merge plan (spike/f-120hz-sim → main)
 
