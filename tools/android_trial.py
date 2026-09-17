@@ -86,6 +86,20 @@ def trial_env(at=None, kind='smoothing', secs=0):
     return env
 
 
+def screenshot_env(seconds):
+    """Screenshot env; 0 disables capture for unperturbed trial windows.
+
+    The runner keys capture off the presence of SSX3_SCREENSHOTS (a 0
+    cadence would fall back to its 15 s default), so disabling means
+    omitting the variable, not zeroing it. PNG deflate + readbacks run
+    beside the trial, so profile-grade runs should pass 0."""
+    if seconds == 0:
+        return {}
+    if seconds < 0:
+        raise ValueError('Screenshot seconds must be >= 0')
+    return {'SSX3_SCREENSHOTS': '1', 'SSX3_SCREENSHOT_SECONDS': str(seconds)}
+
+
 def seed_gfx_ini(text, immediate=True):
     """Set [Hacks] ImmediateXFBEnable/CapImmediateXFB, preserving other lines.
 
@@ -354,9 +368,9 @@ def run(args):
         local_gfx.write_text(seeded)
         subprocess.run(['adb', '-s', serial, 'push', str(local_gfx),
                         f'{DEVICE_DIR}/{user}/Config/GFX.ini'], check=True, capture_output=True)
-    env = dict(STATICRECOMP_VERBOSE='1', SSX3_RUNTIME_METRICS='1', SSX3_SCREENSHOTS='1',
-               SSX3_SCREENSHOT_SECONDS=str(args.screenshot_seconds),
+    env = dict(STATICRECOMP_VERBOSE='1', SSX3_RUNTIME_METRICS='1',
                SSX3_MOVIE_PLAY=f'{DEVICE_DIR}/{args.movie}', SSX_NATIVE_PROBE=probe,
+               **screenshot_env(args.screenshot_seconds),
                **trial_env(args.trial_at, args.trial_kind, args.trial_secs))
     pid = adb(['shell', launch_command(tag, env, user, args.module, args.timeout)],
               serial).stdout.strip()
@@ -514,7 +528,9 @@ def main():
     p.add_argument('--trial-secs', type=float, default=0,
                    help='Cancel N seconds after Running (0: natural end)')
     p.add_argument('--timeout', type=int, default=240)
-    p.add_argument('--screenshot-seconds', type=int, default=2)
+    p.add_argument('--screenshot-seconds', type=int, default=2,
+                   help='Capture cadence in seconds (default 2; 0 disables '
+                        'capture for unperturbed trial windows)')
     p.add_argument('--serial', help='adb device serial when more than one is attached')
     p = sub.add_parser('analyze')
     p.add_argument('--probe', type=Path, required=True)

@@ -11,7 +11,61 @@ the build or commit that closed them.
       controlled thread with a mid-ride guard (defer until quit-to-frontend;
       never poke a loaded ride), desktop trigger + iOS immediate apply,
       frontend refresh contract (re-entry relabels), maintained test.
-      Agent running; temp SSX3_TEST_* trigger to be removed.
+      First agent died to a provider content-filter error (work preserved);
+      respawn continuing from tree state. MUST keep Android outer stack
+      green (its platform.patch edit broke egl apply at dolphin_runtime.cpp).
+- [ ] Odin HEAD re-profile campaign (September 17, review finding 1): M5
+      profiled a pre-Wave-B module (built before 07:15 fast-FP default;
+      ppc_fmuls/fadds/fma at ~12% in the dump), so "CPU core is the
+      frontier" and the pace/FP conclusions are stale. Agent running:
+      psq always_inline + HEAD rebuild with sha provenance + M4 recipe +
+      EGL/Vulkan uncapped ceilings (is 1.16 EGL-only?) + Vulkan trial +
+      comm/psr placement + ini record. Desktop psq-symbol check last.
+- [ ] Patch-stack drift receipts (September 17, review finding 8): the
+      per-layer checker excludes shared files, so a lost lower hunk passes
+      silently. The suggested concat reverse-check does NOT work (verified:
+      fails on HEAD's own stack — git applies same-file hunks in file
+      order, so overlapping regions can't peel). Spec: bootstrap records
+      per-file sha256 of patch-touched files + patch/pin identity; checker
+      compares, falls back to layered checks with a note when the stack
+      moved. Needs a re-baseline rule for branch switches.
+- [ ] Trial driver fast path (September 17, review finding 6):
+      NativeTrialAndroid::Step runs atomics + clock reads on every dispatch
+      before any PC filter, so the trial binary is slower than control by
+      construction and the SpeedFloor judges what it perturbs. Move status
+      checks behind the boundary-PC filter. Minor: kind shadowing,
+      watchdog-only at+120. Note: t3-vs-t4 stands (both pay it equally).
+- [ ] FIFO exception-poll change (September 17, review finding 3b): static
+      recomp has no FIFO-write exception check (CompileExceptionCheck call
+      is an unconsumed set-insert on the recomp path) — candidate root
+      cause of the deterministic ~15 s Adreno-only GatherPipe panic. 3a
+      answered without new runs: trial template runs SyncGPU=false
+      (default; absent from ini) and still panics at the normal point, so
+      the panic is NOT SyncGPU-specific; M5's ini stays unrecorded but is
+      downgraded. Next: make the 0xCC008000 write hook request an
+      exception poll at next dispatch when the watermark interrupt is up.
+- [ ] Frame-exact snow A/B (September 17, review finding 11 caveat): the
+      standing backend-independent verdict is movie-aligned (same
+      m3-menu.dtm, matched race timers, deterministic panic point,
+      mvk1/mvk2 byte-identical speeds) but screenshots are wall-clock
+      cadenced, so capture phase dominates pixel diffs (agent's own
+      caveat). Proceed with scorer + matched timers; build emu-frame-
+      triggered screenshots if the shared-code hunt stalls. The /tmp/snow
+      cross-device pairs compare different frames — cite only the movie
+      A/B for parity from now on.
+- [ ] Hot-thread affinity/priority (September 17, review finding 4): nothing
+      sets affinity; placement on the prime core is worth more than helper
+      inlining. Needs the comm/psr capture from the re-profile campaign
+      first, then pin/renice the emu thread (sched_setaffinity from the
+      app needs no root).
+- [ ] Alpha-period residual (September 17, review finding 5): alpha uses
+      TicksPerSecond/59.94 while Deadline uses /120 (prior review note,
+      still open). Reconcile before re-issuing gate 4b.
+- [ ] Signpost update-blindness note (September 17, review finding 10):
+      signposts can only speak to the render side (same-chunk callees are
+      gotos; u=0 by construction). Consumers of attribution.json must
+      treat update columns as unobservable, not zero — put that in the
+      generator's doc, not just the header.
 - [ ] fsck_exfat the archive SSD at a quiet time (September 17): the
       plumbing agent found 8 zeroed clusters in the SSD trial binary (size/
       mtime unchanged; caught by receipt check, restored from the verified
@@ -891,6 +945,18 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 architecture review triage (docs/research/
+      review-2026-09-17-architecture.md): all checkable claims verified
+      against dumps/tree (M5 pre-Wave-B timestamps + symbols, psq leaves,
+      FIFO preprocess bounds, GC-Adapter-Scan thread, SyncGPU default
+      false, snow movie-alignment). Acted now: blended-ratio floor in
+      validate_trial_trace (+ tests/test_gamecube_schedule_check.py),
+      --screenshot-seconds 0 disables capture (+ test), temp-trigger
+      removal + stack-green bar in live-apply brief, Odin re-profile
+      campaign launched. Validated with no action: generation fix,
+      mixer skip, clocks, idle revert. Backlogged: findings 3b, 4
+      (affinity), 5 (alpha), 6, 8 (receipts spec; concat disproven),
+      10, 11 (frame-exact A/B).
 - [x] 2026-09-17 Android trial plumbing (Odin3, on-device EGL): ported
       kind selection, schedule ingestion, receipt/log collection
       (native/diagnostics/android_trial_driver.h + tools/android_trial.py

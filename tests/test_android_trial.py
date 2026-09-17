@@ -59,6 +59,15 @@ class AndroidTrialTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'secs'):
             trial.trial_env(1, 'f', -2)
 
+    def test_screenshot_env_zero_disables_by_omission(self):
+        env = trial.screenshot_env(2)
+        self.assertEqual(env, {'SSX3_SCREENSHOTS': '1',
+                               'SSX3_SCREENSHOT_SECONDS': '2'})
+        # The runner captures on presence, so 0 must omit the key entirely.
+        self.assertEqual(trial.screenshot_env(0), {})
+        with self.assertRaisesRegex(ValueError, 'Screenshot seconds'):
+            trial.screenshot_env(-1)
+
     def test_seed_gfx_ini_preserves_settings_and_updates_hacks(self):
         before = ('[Settings]\nInternalResolution = 1\nShaderCache = True\n'
                   '[Hacks]\nImmediateXFBEnable = False\n')

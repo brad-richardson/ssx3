@@ -59,6 +59,15 @@ def validate_trial_trace(rows):
                      r.get('blended', 0) > 0]
     if not smooth_blends:
         raise RuntimeError('Lifecycle smoothing trial never blended an extra draw')
+    # The existential above passes with one matrix out of ~6000, so a
+    # regression that blends only the camera still reads green. The
+    # aggregate blended/loaded ratio must also clear a floor (healthy runs
+    # sit near 1.0); rows without a loaded count predate the field and are
+    # excluded rather than failing the run.
+    smooth_ratio = _blend_ratio(rows, walls['restart'], walls['restart2'])
+    if smooth_ratio is not None and smooth_ratio < 0.5:
+        raise RuntimeError(f'Lifecycle smoothing trial blended too few matrices '
+                           f'({smooth_ratio:.3f} of loaded)')
     # Leg 3 re-runs F and cancels it idle. Finishing without restoring would
     # strand the guest halved, so the restore after that cancel is required.
     # The window ends at leg 4's cancel, not its start: the driver prints
@@ -91,7 +100,28 @@ def validate_trial_trace(rows):
                        r.get('wall', 0) > walls['restart3'] and r.get('blended', 0) > 0]
     if not combined_blends:
         raise RuntimeError('Lifecycle combined trial never blended an extra draw')
-    return dict(lifecycle_complete=True, complete_extras=len(extras), first_trial_repeats=len(repeats))
+    combined_ratio = _blend_ratio(rows, walls['restart3'], float('inf'))
+    if combined_ratio is not None and combined_ratio < 0.5:
+        raise RuntimeError(f'Lifecycle combined trial blended too few matrices '
+                           f'({combined_ratio:.3f} of loaded)')
+    return dict(lifecycle_complete=True, complete_extras=len(extras), first_trial_repeats=len(repeats),
+                smooth_blend_ratio=smooth_ratio, combined_blend_ratio=combined_ratio)
+
+
+def _blend_ratio(rows, start, end):
+    """Aggregate blended/loaded over repeat interpolation rows in a window.
+
+    Returns None when no row carries a loaded count, so traces from before
+    the field existed keep the existential gate only."""
+    loaded = blended = 0
+    for r in rows:
+        if (r.get('event') == 'interpolation' and r.get('repeat') and
+                start < r.get('wall', 0) < end and r.get('loaded', 0) > 0):
+            loaded += r['loaded']
+            blended += r.get('blended', 0)
+    if not loaded:
+        return None
+    return blended / loaded
 
 
 def main():
