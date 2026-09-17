@@ -5,13 +5,22 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] Android trial plumbing (September 17): trial/diagnostic code is absent
-      from the Android build (zero references in the android patches). Port
-      kind selection, schedule ingestion, and receipt/log collection from
-      the iOS/desktop patterns; validate with real on-device runs (device
-      idle for hours; prefer on-device over headless-only to avoid edge
-      cases). Snow verdict delivered (backend-independent); plumbing agent
-      running on-device; APK/display path follows.
+- [ ] Course-row live apply, production wiring (September 17): spike proved
+      reset-free switching (re-apply mid-menu loads the new course on event
+      entry). Wire the pause-menu Course choice to ApplyCourseManifest on a
+      controlled thread with a mid-ride guard (defer until quit-to-frontend;
+      never poke a loaded ride), desktop trigger + iOS immediate apply,
+      frontend refresh contract (re-entry relabels), maintained test.
+      Agent running; temp SSX3_TEST_* trigger to be removed.
+- [ ] fsck_exfat the archive SSD at a quiet time (September 17): the
+      plumbing agent found 8 zeroed clusters in the SSD trial binary (size/
+      mtime unchanged; caught by receipt check, restored from the verified
+      device copy). Same exFAT fragility as the earlier archive flag errors.
+- [ ] APK/display path for Android trials (September 17): headless EGL
+      trials run (see Done) but extras are counted/blended draws, not
+      presented frames — no display-link proof. Still pending: Vulkan trial
+      run (same binary, --graphics Vulkan), APK surface/swap path. Window
+      is panic-bound (~10 s; natural 35 s end unreachable).
 - [ ] New menu entry / new peak = fixed-table surgery, parked (September 17):
       menu spike proved Tricky tracks are menu-selectable TODAY via the
       existing manifest (Aloha Ice Jam hosted on event 5 R&B row, 3-field
@@ -40,6 +49,11 @@ the build or commit that closed them.
       Idle default reverted to opt-in on desktop and iOS (Odin ini kept
       pending an O2-era A/B). Understand the mechanism (guard misread vs
       real starvation?) before re-enabling anywhere trials run.
+      Android half answered (September 17): INVERTED on Odin — idle-ON
+      (race 1.00) runs healthy extras (t3: 22/22 blended), idle-OFF (race
+      0.70–0.92) runs the full lifecycle with 0 extras via 357
+      speed-floor vetoes (t4). Keep the Odin idle ini for trials; the
+      desktop starvation mechanism is still unexplained.
 - [ ] Desktop launch re-hashes the game every boot (September 17):
       `moderngekko-run` spends its whole startup in `InspectGame →
       HashDirectorySha256` over the 1.2 GB share root (sampled main
@@ -877,6 +891,23 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 Android trial plumbing (Odin3, on-device EGL): ported
+      kind selection, schedule ingestion, receipt/log collection
+      (native/diagnostics/android_trial_driver.h + tools/android_trial.py
+      build/run/analyze + tests/test_android_trial.py, 12 green). Validated
+      full lifecycles on-device: smoothing t3 (253 frames, 22/22 extras
+      blended, cancel→Finished 9 ms), F t5 (165 doubled, no movie desync),
+      combined t6 (211 doubled + 4 blended). Fixed: movie-layer
+      ImmediateXFB override (m3-menu-imm.dtm 1 byte), ~10 s driver/title
+      clock lag (AT=124/SECS=4). Trial binary on SSD
+      (android-spike/trial/, notes in TRIAL_NOTES.md); receipts
+      /tmp/android-trial/t*/. Device left clean.
+- [x] 2026-09-17 live-switch spike (desktop): LIVE RE-READ CONFIRMED —
+      manifest re-applied mid-menu without reset takes full effect (event 5
+      R&B→Aloha: logged re-apply + readback, briefing "Peak 1-Aloha Ice
+      Jam", bit-exact Aloha spawn; evidence local/research/live-switch/).
+      Displayed menus keep build-time strings (list needs re-entry);
+      post-standings fault is the known conversion-side signature.
 - [x] 2026-09-17 menu spike (desktop): Tricky tracks menu-selectable with
       the existing manifest — Aloha Ice Jam hosted on event 5 (3-field
       manifest, DOL pin-identical, other 22 rows intact, screenshots in
