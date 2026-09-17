@@ -1712,3 +1712,100 @@ index 65f316f..ee3bef9 100644
          return true;
      }
      return ppc_psq_store(cpu, frS, ea, w, gqr_index, indexed, cia);
+diff --git a/Source/Core/Core/HW/GPFifo.cpp b/Source/Core/Core/HW/GPFifo.cpp
+index 0de434b..a81cb4c 100644
+--- a/Source/Core/Core/HW/GPFifo.cpp
++++ b/Source/Core/Core/HW/GPFifo.cpp
+@@ -9,6 +9,7 @@
+ #include "Common/ChunkFile.h"
+ #include "Common/CommonTypes.h"
+ #include "Common/Swap.h"
++#include "Core/Config/MainSettings.h"
+ #include "Core/HW/Memmap.h"
+ #include "Core/HW/ProcessorInterface.h"
+ #include "Core/PowerPC/JitInterface.h"
+@@ -126,7 +127,18 @@ void GPFifoManager::CheckGatherPipe()
+     UpdateGatherPipe();
+ 
+     // Profile where slow FIFO writes are occurring.
+-    m_system.GetJitInterface().CompileExceptionCheck(JitInterface::ExceptionType::FIFOWrite);
++    // On the static recomp there is no JIT block to recompile with an
++    // exception check, so this is dead work (a set insert plus an icache
++    // invalidation per FIFO-writing PC, ~0.5% CPU) and is skipped there.
++    // External interrupts from FIFO writes are still delivered promptly:
++    // GatherPipeBursted raises them synchronously and ForceExceptionChecks
++    // the burst, and the dispatch loop polls at the next boundary.
++    // SSX3_FIFO_FIX=0 restores the call. Cached once: the CPU core is fixed.
++    static const bool skip_fifo_write_check =
++        CommandProcessor::FifoWmIntFixEnabled() &&
++        Config::Get(Config::MAIN_CPU_CORE) == PowerPC::CPUCore::StaticRecomp;
++    if (!skip_fifo_write_check)
++      m_system.GetJitInterface().CompileExceptionCheck(JitInterface::ExceptionType::FIFOWrite);
+   }
+ }
+ 
+diff --git a/Source/Core/VideoCommon/CommandProcessor.cpp b/Source/Core/VideoCommon/CommandProcessor.cpp
+index 1dbf466..c091aec 100644
+--- a/Source/Core/VideoCommon/CommandProcessor.cpp
++++ b/Source/Core/VideoCommon/CommandProcessor.cpp
+@@ -4,6 +4,7 @@
+ #include "VideoCommon/CommandProcessor.h"
+ 
+ #include <atomic>
++#include <cstdlib>
+ #include <fmt/format.h>
+ 
+ #include "Common/Assert.h"
+@@ -22,6 +23,17 @@
+ 
+ namespace CommandProcessor
+ {
++// SSX3 FIFO watermark-interrupt fix (deterministic-GPU-thread CP update path).
++// Cached once: the CPU core and GPU determinism mode are fixed for the run.
++bool FifoWmIntFixEnabled()
++{
++  static bool enabled = [] {
++    const char* e = std::getenv("SSX3_FIFO_FIX");
++    return !(e && e[0] == '0' && e[1] == '\0');
++  }();
++  return enabled;
++}
++
+ static bool IsOnThread(const Core::System& system)
+ {
+   return system.IsDualCoreMode();
+@@ -495,7 +507,17 @@ void CommandProcessorManager::SetCPStatusFromGPU()
+   if (interrupt != m_interrupt_set.IsSet() && !m_interrupt_waiting.IsSet())
+   {
+     const u64 userdata = interrupt ? 1 : 0;
+-    if (IsOnThread(m_system))
++    // In deterministic-GPU-thread mode the video thread never calls this (its
++    // FIFO loop is skipped); the only caller is RunGpuOnCpu on the CPU thread,
++    // and UpdateInterruptsFromVideoBackend is a no-op there, so the async path
++    // below would wedge m_interrupt_waiting set and gate every future CP
++    // interrupt update (the watermark throttle never engages and the FIFO
++    // overruns on slower GPUs). Handle it synchronously instead, the same as
++    // single-core. SSX3_FIFO_FIX=0 restores the old behavior.
++    const bool async_ok =
++        IsOnThread(m_system) &&
++        !(FifoWmIntFixEnabled() && m_system.GetFifo().UseDeterministicGPUThread());
++    if (async_ok)
+     {
+       if (!interrupt || bpInt || undfInt || ovfInt)
+       {
+diff --git a/Source/Core/VideoCommon/CommandProcessor.h b/Source/Core/VideoCommon/CommandProcessor.h
+index 976592c..f8bd163 100644
+--- a/Source/Core/VideoCommon/CommandProcessor.h
++++ b/Source/Core/VideoCommon/CommandProcessor.h
+@@ -208,4 +208,11 @@ private:
+   Core::System& m_system;
+ };
+ 
++// SSX3 FIFO watermark-interrupt fix: env gate (SSX3_FIFO_FIX=0 disables).
++// In deterministic-GPU-thread mode the CP interrupt update from the video
++// backend is a no-op, so SetCPStatusFromGPU handles it synchronously instead
++// of wedging m_interrupt_waiting set; GPFifo also skips its dead
++// CompileExceptionCheck on the static recomp path when enabled.
++bool FifoWmIntFixEnabled();
++
+ }  // namespace CommandProcessor
