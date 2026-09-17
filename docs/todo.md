@@ -5,6 +5,34 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Android trial plumbing (September 17): trial/diagnostic code is absent
+      from the Android build (zero references in the android patches). Port
+      kind selection, schedule ingestion, and receipt/log collection from
+      the iOS/desktop patterns; validate with real on-device runs (device
+      idle for hours; prefer on-device over headless-only to avoid edge
+      cases). Snow verdict delivered (backend-independent); plumbing agent
+      running on-device; APK/display path follows.
+- [ ] New menu entry / new peak = fixed-table surgery, parked (September 17):
+      menu spike proved Tricky tracks are menu-selectable TODAY via the
+      existing manifest (Aloha Ice Jam hosted on event 5 R&B row, 3-field
+      manifest, rider spawned at Aloha coords; screenshots in
+      local/research/menu-spike/ride-001/screens/) — zero mechanism work,
+      per track just a converted archive + 4-line manifest on a
+      same-discipline Peak-1 row (gating sidestepped; peak labels live in
+      disc locale files, not the DOL). But there are NO spare menu slots:
+      Single Event walks an explicit nav-graph of fixed 100-byte records
+      (guest 0x802C35B0–0x802C4938), not the mode table, so event 22 (debug,
+      vestigial, tail order -1, linked from nothing) can't surface by a
+      mode flip. A new entry must move/edit the nav-graph + neighbor
+      edge links/flags/labels + the 20-entry guest-pointer table at file
+      0x2C1972 + locale labels (+ 3-peak UI/pass logic for a 4th peak), and
+      list heads are entered by address (head refs may live in code → SMC
+      guard). Cheapest unverified probe: in-place repurpose of a DONOTUSE
+      separator as an event-22 node + one edge repoint (node lookup and
+      separator semantics unconfirmed; 1–2 sessions to verify before any
+      implementation). Separate conversion-side bug found: Aloha-as-slopestyle
+      faults after standings (suspect unchecked 3-gate start gate; rides
+      fine as race) — belongs to course conversion, not menus.
 - [ ] Idle-skip × smoothing-trial guard interaction (September 17):
       desktop idle-skip ON starves smoothing-trial extras to zero (SpeedFloor
       ratio 0.44 vs 0.88, trial `performance_limit`s; two no-idle arms
@@ -32,7 +60,23 @@ the build or commit that closed them.
       dispatch). Snow corruption SURVIVES: clean at race 0:04, garbage by
       0:14 — onset inside the race just before the ~0:15 FIFO-panic point
       (see /tmp/m5/shots-e). Lead: pre-panic FIFO-state symptom; the
-      texture-path investigation should chase onset timing first.**
+      texture-path investigation should chase onset timing first.
+      **Verdict September 17: OGL/EGL-backend-specific, shared root excluded
+      by Metal cross-check (iPad stock clean 0:02–1:17 where Odin OGL goes
+      blue→black→psychedelic; pairs in /tmp/snow/). Scale-independent,
+      angle-dependent (airborne clean, grazing corrupts), FIFO panic
+      downstream/separate. Vulkan spike triggered (running). Scorer:
+      tools/gamecube_snow_check.py. Separate: iPad Metal stock goes
+      orange-streak post-restart — the standing iOS review note is a
+      restart-path phenomenon, not this bug; needs its own follow-up.
+      **Superseded September 17: Vulkan headless works on Odin (full speed,
+      one dual-backend binary) and reproduces the corruption with the same
+      character (verified by scorer + eyeball: 0.53→0.92 black-ground
+      progression). The bug is upstream of the backend — shared VideoCommon
+      or module data, Adreno-visible but Apple-tolerant (Metal-clean does
+      not exonerate shared code). Redirect the texture-path investigation
+      to shared sampling/shader/TLUT code; scorer + Vulkan binary are the
+      comparison harness.**
 - [ ] Course texture/lighting review (user, September 16): wild-looking
       textures with the lighting observed in-course as a casual observer —
       particularly ground/snow. Needs a review pass over the course's
@@ -833,6 +877,25 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 menu spike (desktop): Tricky tracks menu-selectable with
+      the existing manifest — Aloha Ice Jam hosted on event 5 (3-field
+      manifest, DOL pin-identical, other 22 rows intact, screenshots in
+      local/research/menu-spike/ride-001/screens/). Slot census: 17 runs +
+      5 stations live in menus, event 22 vestigial/unlinked; Single Event
+      walks a fixed-100B-record nav-graph (guest 0x802C35B0–0x802C4938),
+      not the mode table. New entry/peak parked as fixed-table surgery
+      (see Now); Aloha-as-slopestyle post-standings fault is
+      conversion-side (start-gate suspect), not menu-side.
+- [x] 2026-09-17 Vulkan Android headless works on Odin (full speed, one
+      dual-backend EGL+Vulkan binary via
+      native/patches/recompcore-android-vulkan.patch stacked on
+      moderngekko-dolphin-mixer-skip-silent via CORE_STACK;
+      tests/test_android_patch_stack.py). Reproduces snow with the same
+      character (scorer + eyeball: 0.53→0.92 black-ground progression),
+      so snow is backend-independent — redirected to shared
+      sampling/shader/TLUT code. Scorer: tools/gamecube_snow_check.py
+      (+ tests/test_gamecube_snow_check.py); comparison harness is the
+      dual-backend binary.
 - [x] 2026-09-16 iPad GPU trace analysis: first Metal System Trace of a
       smoothing trial window (local/reports/gpu-captures/20260917-015031,
       191 MB, trial Finished) plus the per-process extraction recipe
