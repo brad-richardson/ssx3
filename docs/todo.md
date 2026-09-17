@@ -5,6 +5,44 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Odin thread affinity/priority (September 17, review finding 4): the
+      one hot thread's placement on the 1+4+3 Snapdragon is worth more
+      than any helper inlining, and nothing in the headless runner or
+      trial harness sets affinity or priority. Record
+      `/proc/<pid>/task/*/comm` + `psr` on the next run (M5's 80.7%
+      "GC Adapter Scan" thread is a mislabel or a placement bug), then
+      pin/prioritize the emu thread. Possible avg-75 lever.
+- [ ] SyncGPU double-decode cost (September 17, review finding 3): the
+      deterministic GPU thread path decodes every FIFO byte twice
+      (CPU-thread preprocess + video-thread real) with slot-boundary
+      waits. Quantify on Odin and gate SyncGPU to movie-determinism
+      runs if it is on for regular trials. Check the pace-hunt
+      numbers first — its attribution may already show this.
+- [ ] Trial-driver fast-path cost (September 17, review finding 6,
+      post-pace): NativeTrialAndroid::Step pays status-load atomics
+      before the PC filter on every dispatch, so the trial binary is
+      slower than the control by construction and the SpeedFloor judges
+      a biased number. Move the checks behind the PC filter. Do not
+      touch while the pace agent measures.
+- [ ] Screenshot cadence in trial windows (September 17, review
+      finding 4, post-pace): PNG deflate + readbacks perturb the exact
+      window being measured. Scope screenshots out of trial windows
+      (before/after, or lengthened cadence inside), like texture
+      preload. Do not touch while the pace agent measures.
+- [ ] Interp alpha period (September 17, review finding 5, XS):
+      alpha uses TicksPerSecond/59.94 while Deadline uses /120
+      (native/diagnostics/native_pose_interpolation.h:167). Confirm
+      which is right for the 120Hz path.
+- [ ] f32-from-bits-slow histogram (September 17, review finding 2,
+      low): the "exceptional inputs" fallback stays hot after the
+      conversion split (~1/4 of Run()). One-run histogram of what
+      reaches it (suspects: signed zeros, NI-flush denormals); route
+      the common cases through the inline path.
+- [ ] Signpost update-side caveat (September 17, review finding 10,
+      docs XS): same-chunk callees compile to gotos and never
+      dispatch, so attribution.json update columns are
+      "unobservable", not zero. Note it at the consumers; the
+      pc-histogram result stays the only update attribution.
 - [ ] Live-apply deferred→applied-after-quit E2E (September 17): run-001
       proves the apply branch and run-002 the defer branch, but no run
       shows a queued switch landing after an actual quit-to-frontend (no
