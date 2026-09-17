@@ -70,7 +70,8 @@ def configure(args):
              "-DCMAKE_C_COMPILER=/usr/bin/clang", "-DCMAKE_CXX_COMPILER=/usr/bin/clang++",
              "-DCMAKE_OBJCXX_COMPILER=/usr/bin/clang++", "-DCMAKE_AR=/usr/bin/ar",
              "-DCMAKE_RANLIB=/usr/bin/ranlib", "-DCMAKE_BUILD_TYPE=Release",
-             f"-DRECOMPCORE_FAST_FP={'ON' if getattr(args, 'fast_fp', False) else 'OFF'}",
+             # Inline JIT-fidelity FP is default-on, same as the desktop module.
+             "-DRECOMPCORE_FAST_FP=ON",
              f"-DCMAKE_OSX_SYSROOT={'iphonesimulator' if args.simulator else 'iphoneos'}"])
 
 
@@ -99,7 +100,7 @@ def build(args):
                "game_module_archive_sha256": native.sha256(WORK / "game-module/gGXBE69_recomp.a"),
                "patch_sha256": {p.name: native.sha256(p) for p in
                                 (ROOT / "native/patches").glob("*-platform.patch")},
-               "fast_fp": bool(getattr(args, "fast_fp", False)),
+               "fast_fp": True,
                "mobile_execution_verified": False}
     write_receipt("build", receipt)
 
@@ -520,7 +521,7 @@ def main():
     parser.add_argument("--fast-disc", action="store_true",
                         help="Launch-only Dolphin FastDiscSpeed for a loading comparison")
     parser.add_argument("--fast-fp", action="store_true",
-                        help="configure/build: compile the generated module with the inline JIT-fidelity floating-point paths")
+                        help="configure/build: no-op, the inline JIT-fidelity floating-point paths are now default-on")
     parser.add_argument("--dispatch-samples", action="store_true",
                         help="Launch-only native dispatch-site sampling (diagnostic overhead)")
     parser.add_argument("--audio-dump", action="store_true",

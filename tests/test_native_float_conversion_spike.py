@@ -42,15 +42,21 @@ class ConversionEvidenceTests(unittest.TestCase):
                 spike.run(args)
 
 
-@unittest.skipUnless(spike.GENERATED.exists() and Path('/usr/bin/clang').exists(),
-                     'Requires the local generated header and production Apple compiler')
+# The pinned pre-split header is the oracle. The live generated header is the
+# shipped split candidate, so these tests must not read it.
+ORACLE = Path(__file__).resolve().parent / 'float-conversion-original-generated.h'
+
+
+@unittest.skipUnless(ORACLE.exists() and Path('/usr/bin/clang').exists(),
+                     'Requires the pinned oracle header and production Apple compiler')
 class ConversionNativeOracleTests(unittest.TestCase):
     def test_checker_rejects_an_incorrect_normal_exponent(self):
         # The production helper is the oracle. A plausible one-bit-format bug
         # must cause the native differential checker to exit unsuccessfully.
         with tempfile.TemporaryDirectory(dir=spike.ROOT / 'local') as temporary:
             output = Path(temporary) / 'negative-control'
-            receipt = spike.prepare(output)
+            with patch.object(spike, 'GENERATED', ORACLE):
+                receipt = spike.prepare(output)
             source = (output / 'check.c').read_text()
             self.assertEqual(source.count('exp + 896u'), 1)
             (output / 'check.c').write_text(source.replace('exp + 896u', 'exp + 895u'))
@@ -61,7 +67,7 @@ class ConversionNativeOracleTests(unittest.TestCase):
             self.assertIn('from mismatch', result.stderr)
 
     def test_unrelated_helpers_and_original_exceptional_paths_are_retained(self):
-        original = spike.GENERATED.read_text()
+        original = ORACLE.read_text()
         candidate = spike.split_helpers(original)
         start, end = spike.helper_span(original)
         self.assertTrue(candidate.startswith(original[:start]))

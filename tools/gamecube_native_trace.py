@@ -29,7 +29,9 @@ across repeats; SSX_NATIVE_INTERLEAVE_RENDER draws once between the two
 update halves of each doubled tick, cap 600; SSX_NATIVE_PC_HIST=path
 histograms guest pcs per callback class to a separate file;
 SSX_NATIVE_QUIET=1 skips per-row Diff/Hash compute for ship-prize
-sizing). These are research
+sizing). SSX_NATIVE_SIGNPOSTS=path (with a --signposts player build)
+snapshots cumulative per-callback-class entry counts at the 9 hot-chunk
+signposts (native/diagnostics/chunk_signposts.h). These are research
 controls, not a high-refresh implementation. See docs/research/120hz-render-seam.md.
 
 With build --scheduler, SSX_NATIVE_SCHEDULE enables the independent deadline
@@ -79,6 +81,10 @@ def build(args):
     timing = ROOT / 'native/diagnostics/callback_timing.h'
     (out / timing.name).write_bytes(timing.read_bytes())
     receipt['callback_timing_sha256'] = sha(timing)
+    if getattr(args, 'signposts', False):
+        signposts = ROOT / 'native/diagnostics/chunk_signposts.h'
+        (out / signposts.name).write_bytes(signposts.read_bytes())
+        receipt['signposts_header_sha256'] = sha(signposts)
     extra_includes = ''
     if getattr(args, 'app_trial_check', False):
         source = '#define SSX_NATIVE_TRIAL_APP 1\n' + source
@@ -118,8 +124,15 @@ def build(args):
             receipt['scheduler_headers'][path.name] = sha(path)
             extra_includes += f'#include "{out / path.name}"\n'
             probe_namespace = 'NativeReplay'
+    if getattr(args, 'signposts', False):
+        extra_includes += f'#include "{out / "chunk_signposts.h"}"\n'
     source = source.replace(includes, f'#include "{header_copy}"\n' + extra_includes + includes)
-    source = source.replace(dispatch, f'          {probe_namespace}::Step(m_guest);\n' + dispatch)
+    step = f'          {probe_namespace}::Step(m_guest);\n'
+    if getattr(args, 'signposts', False):
+        # After the probe step so signposts observe the final dispatch pc
+        # (repeat/skip redirects included), never a pre-redirect one.
+        step += '          ChunkSignposts::Step(m_guest);\n'
+    source = source.replace(dispatch, step + dispatch)
     copy = out / 'Core_Run.cpp'
     copy.write_text(source)
     commands = subprocess.check_output(
@@ -271,6 +284,9 @@ def main():
                    help='Include the bounded native transform interpolation prototype (requires --scheduler)')
     p.add_argument('--app-trial-check', action='store_true',
                    help='Exercise iOS trial cancellation and restart controls in an isolated desktop player')
+    p.add_argument('--signposts', action='store_true',
+                   help='Count cross-chunk entries at the 9 hot-chunk signposts '
+                        '(SSX_NATIVE_SIGNPOSTS=path snapshots the JSON counters)')
     p.add_argument('--presentation-object', type=Path,
                    help='Link an isolated MTLGfx.o built by gamecube_present_trace.py')
     p = sub.add_parser('summarize')

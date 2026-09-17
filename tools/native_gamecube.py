@@ -31,14 +31,13 @@ def sha256(path):
         return hashlib.file_digest(file, "sha256").hexdigest()
 
 
-# Guest OS idle spin (SelectThread). Skipping it is default-on: M4 measured
-# 1.18x in-race / 2.5x in menus on the Odin with no regression, and the
-# runtime treats 0 as disabled, so SSX3_IDLE_PC= (empty) opts out.
-DEFAULT_IDLE_PC = "0x80288ED4"
-
-
+# Guest OS idle spin (SelectThread). Research knob only, default off: M4
+# measured 1.18x in-race / 2.5x in menus on the Odin, but on desktop the
+# skip starves smoothing-trial extras to zero (the SpeedFloor load guard
+# trips at ratio 0.44 vs 0.88) while buying ~0% in-race. Set SSX3_IDLE_PC
+# (e.g. 0x80288ED4) to opt a profile in; the runtime treats 0 as disabled.
 def idle_pc_ini_line(env=None):
-    idle = (env if env is not None else os.environ).get("SSX3_IDLE_PC", DEFAULT_IDLE_PC)
+    idle = (env if env is not None else os.environ).get("SSX3_IDLE_PC", "")
     return f"StaticRecompIdlePC = {idle}\n" if idle else ""
 
 
@@ -175,6 +174,26 @@ def module(args):
         run([generator, f"-j{args.jobs}", "--backend=c", "--cpu", "gekko", "--gamecube", dol, MODULE / "codegen"])
         shutil.copy2(dol, generated / "main.dol")
         receipt.write_text(json.dumps(identity, indent=2) + "\n")
+    # Proven float-conversion split (docs/research/float-conversion-spike.md):
+    # the normal f32 widen/narrow path inlines at every site while exceptional
+    # inputs keep the exact original mapping in cold functions. Whole-file
+    # hashes pin the spike's verified bytes (exhaustive widening + narrowing
+    # checks across 4 host rounding modes); anything else fails closed.
+    try:
+        from .native_float_conversion_spike import split_helpers
+    except ImportError:
+        from native_float_conversion_spike import split_helpers
+    conversion_original = "05b40083d151a9db2098c8746e637b1ecbae62d73213b26b94b74945fa1b5a1f"
+    conversion_candidate = "dcac6fc866a0e49d9f5875c7c5a4a045e11209472f2123a0fc96062adee922d8"
+    header_path = generated / "generated.h"
+    header_sha = hashlib.sha256(header_path.read_bytes()).hexdigest()
+    if header_sha == conversion_original:
+        header_path.write_text(split_helpers(header_path.read_text()))
+        header_sha = hashlib.sha256(header_path.read_bytes()).hexdigest()
+        if header_sha != conversion_candidate:
+            raise RuntimeError("Conversion split output differs from the verified candidate bytes")
+    elif header_sha != conversion_candidate:
+        raise RuntimeError("generated.h matches neither the verified original nor the candidate; re-spike required")
     run(["cmake", "-S", CORE / "module-template", "-B", MODULE / "build", "-G", "Ninja",
          f"-DCMAKE_MAKE_PROGRAM={ninja()}", "-DCMAKE_C_COMPILER=/usr/bin/clang",
          "-DCMAKE_AR=/usr/bin/ar", "-DCMAKE_RANLIB=/usr/bin/ranlib", "-DCMAKE_BUILD_TYPE=Release",
@@ -182,11 +201,14 @@ def module(args):
          f"-DGENERATED_DIR={generated}", f"-DGXRUNTIME_DIR={CORE / 'GXRuntime'}",
          f"-DCHASSIS_ABI_DIR={CORE / 'Source/Core/Core/PowerPC/StaticRecomp'}",
          f"-DRECOMPCORE_MODULE_OPT_LEVEL={args.opt_level}",
-         f"-DRECOMPCORE_FAST_FP={'ON' if getattr(args, 'fast_fp', False) else 'OFF'}"])
+         # Inline JIT-fidelity FP is default-on: frame-compare clean, scalar/paire
+         # helper leaves drop out of profiled chunks (--fast-fp now a no-op).
+         "-DRECOMPCORE_FAST_FP=ON"])
     run(["cmake", "--build", MODULE / "build", "-j", args.jobs])
     library = MODULE / "build/gGXBE69_recomp.dylib"
     metadata = {**identity, "dependencies": PINS, "module_sha256": sha256(library),
-                "opt_level": args.opt_level, "fast_fp": bool(getattr(args, "fast_fp", False)),
+                "opt_level": args.opt_level, "fast_fp": True,
+                "conversion_split": True, "generated_header_sha256": header_sha,
                 "cpu_jit_required": "not established by compilation"}
     (MODULE / "manifest.json").write_text(json.dumps(metadata, indent=2) + "\n")
     run([executable("moderngekko-module-info"), library])
@@ -283,9 +305,7 @@ def launch(args):
     config = config_dir / "Dolphin.ini"
     cpu_thread = "True" if getattr(args, "cpu_thread", False) else "False"
     if not config.exists():
-        # Idle-loop skipping defaults on for fresh profiles; SSX3_IDLE_PC
-        # overrides the PC, SSX3_IDLE_PC= (empty) disables. Existing profiles
-        # keep whatever they have: add the line by hand or use a fresh profile.
+        # Idle-loop skipping is opt-in per profile (see idle_pc_ini_line).
         extra = idle_pc_ini_line()
         if os.environ.get('SSX3_RUSH_PRESENT') == '1':
             extra += 'RushFramePresentation = True\n'
@@ -462,7 +482,7 @@ def main():
     parser.add_argument("--jit-fallback", action="store_true", help="Desktop diagnostic only; default is interpreter fallback")
     parser.add_argument("--pipe-controller", action="store_true", help="Map a test pad to PROFILE/Pipes/ssx3")
     parser.add_argument("--fast-fp", action="store_true",
-                        help="module: build generated chunks with the inline JIT-fidelity floating-point paths")
+                        help="No-op retained for CLI compat; inline FP is now always on for module builds")
     parser.add_argument("--module", type=Path, help="run: module dylib to load instead of the default build")
     parser.add_argument("--cpu-thread", action="store_true",
                         help="Dual-core runtime (CPUThread = True); applies to a fresh profile's Dolphin.ini")

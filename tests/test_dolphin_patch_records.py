@@ -38,5 +38,23 @@ class DolphinPatchRecords(unittest.TestCase):
                                 f"{name} neither applies nor reverse-applies; record diverged")
 
 
+class PlatformPsqMerge(unittest.TestCase):
+    MERGED_LOAD = "u8* ptr = get_ram_ptr(cpu, ea, 8, NULL);"
+    MERGED_STORE = "u8* ptr = get_ram_ptr(cpu, ea, 8, &offset);"
+
+    def test_cpu_header_carries_merged_psq_access(self):
+        patch = (ROOT / "native/patches/recompcore-platform.patch").read_text()
+        blocks = patch.split("diff --git a/GXRuntime/include/core/cpu.h b/GXRuntime/include/core/cpu.h")
+        self.assertEqual(len(blocks), 2, "platform patch must carry exactly one cpu.h block")
+        block = blocks[1].split("diff --git ")[0]
+        self.assertIn("+" + "        " + self.MERGED_LOAD, block)
+        self.assertIn("+" + "        " + self.MERGED_STORE, block)
+        header = ROOT / "third_party/ModernGekko/vendor/dolphin/GXRuntime/include/core/cpu.h"
+        if header.exists():
+            text = header.read_text()
+            self.assertIn(self.MERGED_LOAD, text)
+            self.assertIn(self.MERGED_STORE, text)
+
+
 if __name__ == "__main__":
     unittest.main()

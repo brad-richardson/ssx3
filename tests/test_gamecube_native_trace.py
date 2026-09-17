@@ -50,6 +50,61 @@ class NativeTraceTests(unittest.TestCase):
             self.assertIn('#define SSX_NATIVE_TRIAL_TEST 1', generated)
             self.assertIn('NativeTrialTest::Step(m_guest)', generated)
 
+    def test_signpost_builder_wires_hot_chunk_step_without_game_assets_or_compiler(self):
+        class StopBeforeCompile(Exception):
+            pass
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory).resolve()
+            shutil.copytree(root/'native/diagnostics', temp/'native/diagnostics')
+            source = temp/'vendor/vendor/dolphin/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp'
+            source.parent.mkdir(parents=True)
+            source.write_text('namespace\n{\n          const u32 runtime_dispatch_address = m_guest.pc;\n}')
+            game = temp/'game'
+            (game/'sys').mkdir(parents=True)
+            (game/'sys/boot.bin').write_bytes(b'GXBE69')
+            args = SimpleNamespace(game=game, output=temp/'local/player', scheduler=False,
+                                   interpolation=False, replay=False, app_trial_check=False,
+                                   signposts=True)
+            with patch.multiple(native_trace, ROOT=temp, VENDOR=temp/'vendor'), \
+                    patch.object(native_trace, 'sha', return_value=native_trace.DOL_SHA256), \
+                    patch.object(native_trace.subprocess, 'check_output', side_effect=StopBeforeCompile):
+                with self.assertRaises(StopBeforeCompile):
+                    native_trace.build(args)
+            generated = (args.output/'Core_Run.cpp').read_text()
+            self.assertTrue((args.output/'chunk_signposts.h').is_file())
+            self.assertEqual((args.output/'chunk_signposts.h').read_bytes(),
+                             (root/'native/diagnostics/chunk_signposts.h').read_bytes())
+            self.assertIn('#include "', generated)
+            self.assertIn('chunk_signposts.h', generated)
+            probe_at = generated.index('NativeProbe::Step(m_guest)')
+            sign_at = generated.index('ChunkSignposts::Step(m_guest)')
+            self.assertLess(probe_at, sign_at)
+
+    def test_signpost_step_stays_out_of_default_builds(self):
+        class StopBeforeCompile(Exception):
+            pass
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory).resolve()
+            shutil.copytree(root/'native/diagnostics', temp/'native/diagnostics')
+            source = temp/'vendor/vendor/dolphin/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp'
+            source.parent.mkdir(parents=True)
+            source.write_text('namespace\n{\n          const u32 runtime_dispatch_address = m_guest.pc;\n}')
+            game = temp/'game'
+            (game/'sys').mkdir(parents=True)
+            (game/'sys/boot.bin').write_bytes(b'GXBE69')
+            args = SimpleNamespace(game=game, output=temp/'local/player', scheduler=False,
+                                   interpolation=False, replay=False, app_trial_check=False)
+            with patch.multiple(native_trace, ROOT=temp, VENDOR=temp/'vendor'), \
+                    patch.object(native_trace, 'sha', return_value=native_trace.DOL_SHA256), \
+                    patch.object(native_trace.subprocess, 'check_output', side_effect=StopBeforeCompile):
+                with self.assertRaises(StopBeforeCompile):
+                    native_trace.build(args)
+            generated = (args.output/'Core_Run.cpp').read_text()
+            self.assertNotIn('ChunkSignposts', generated)
+            self.assertFalse((args.output/'chunk_signposts.h').exists())
+
     def test_lifecycle_acceptance_requires_events_and_actual_unchanged_extra(self):
         actions = ['request', 'cancel_during_repeat', 'quiescent', 'restart', 'quiescent',
                    'restart2', 'cancel_idle', 'quiescent', 'restart3', 'cancel_combined',

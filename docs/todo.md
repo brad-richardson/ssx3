@@ -5,6 +5,13 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Idle-skip × smoothing-trial guard interaction (September 17):
+      desktop idle-skip ON starves smoothing-trial extras to zero (SpeedFloor
+      ratio 0.44 vs 0.88, trial `performance_limit`s; two no-idle arms
+      complete, two idle arms fail leg 2) while buying ~0% in-race at O2.
+      Idle default reverted to opt-in on desktop and iOS (Odin ini kept
+      pending an O2-era A/B). Understand the mechanism (guard misread vs
+      real starvation?) before re-enabling anywhere trials run.
 - [ ] Desktop launch re-hashes the game every boot (September 17):
       `moderngekko-run` spends its whole startup in `InspectGame →
       HashDirectorySha256` over the 1.2 GB share root (sampled main
@@ -18,6 +25,14 @@ the build or commit that closed them.
       /tmp/m3-shots/final). Needs perf triage (hotspot + what full-speed
       requires) and a texture-path investigation — possibly the same
       ground/snow issue as the iOS note below — before APK packaging.
+      **Update September 17 (M5): perf triage closed — full speed in-race
+      (0.97–1.0 capped, ~1.05–1.16 uncapped) from module -O2+ThinLTO,
+      idle skip, and EFB 1 alone; new profile: endian helpers 12.1→0.00,
+      FP outlined 25.8→16.2, CPU core now the frontier (Run/HookExternal/
+      dispatch). Snow corruption SURVIVES: clean at race 0:04, garbage by
+      0:14 — onset inside the race just before the ~0:15 FIFO-panic point
+      (see /tmp/m5/shots-e). Lead: pre-panic FIFO-state symptom; the
+      texture-path investigation should chase onset timing first.**
 - [ ] Course texture/lighting review (user, September 16): wild-looking
       textures with the lighting observed in-course as a casual observer —
       particularly ground/snow. Needs a review pass over the course's

@@ -1655,3 +1655,57 @@ index 3b00450..f50ae8b 100644
  set(RECOMPCORE_MODULE_OPT_LEVEL "2" CACHE STRING
      "Optimization level for generated module translation units (0, 1, 2, or 3)")
  set_property(CACHE RECOMPCORE_MODULE_OPT_LEVEL PROPERTY STRINGS 0 1 2 3)
+diff --git a/GXRuntime/include/core/cpu.h b/GXRuntime/include/core/cpu.h
+index 65f316f..ee3bef9 100644
+--- a/GXRuntime/include/core/cpu.h
++++ b/GXRuntime/include/core/cpu.h
+@@ -419,13 +419,22 @@ bool ppc_psq_store(CPUState* cpu, u8 frS, u32 ea, bool w, u8 gqr, bool indexed,
+  *
+  * The win is bigger than skipping a call: at every generated site w, gqr_index,
+  * indexed and cia are literals, so inlining lets the compiler fold the LSQE
+- * test and the w branch away per site, which it cannot do across a call. */
++ * test and the w branch away per site, which it cannot do across a call.
++ *
++ * Both words go through one 8-byte RAM translation instead of two 4-byte
++ * ones. Any address the 8-byte window does not cover (region edges, mirrors,
++ * external memory) falls back to the exact out-of-line helper, which keeps
++ * the two independent accesses; reservation clearing, journal order and
++ * conversions are unchanged, so this is behavior-identical on every input. */
+ static inline bool ppc_psq_load_inline(CPUState* cpu, u8 frD, u32 ea, bool w,
+                                        u8 gqr_index, bool indexed, u32 cia) {
+     const u32 gqr = cpu->gqr[gqr_index & 7u];
+     if (((gqr >> 16) & 7u) == 0u && (indexed || (cpu->hid2 & PPC_HID2_LSQE) != 0u)) {
+-        cpu->fpr[frD] = f64_value(convert_to_double(mem_read32(cpu, ea)));
+-        cpu->ps1[frD] = w ? 1.0 : f64_value(convert_to_double(mem_read32(cpu, ea + 4u)));
++        u8* ptr = get_ram_ptr(cpu, ea, 8, NULL);
++        if (ptr == NULL)
++            return ppc_psq_load(cpu, frD, ea, w, gqr_index, indexed, cia);
++        cpu->fpr[frD] = f64_value(convert_to_double(read_be32(ptr)));
++        cpu->ps1[frD] = w ? 1.0 : f64_value(convert_to_double(read_be32(ptr + 4u)));
+         return true;
+     }
+     return ppc_psq_load(cpu, frD, ea, w, gqr_index, indexed, cia);
+@@ -435,9 +444,20 @@ static inline bool ppc_psq_store_inline(CPUState* cpu, u8 frS, u32 ea, bool w,
+                                         u8 gqr_index, bool indexed, u32 cia) {
+     const u32 gqr = cpu->gqr[gqr_index & 7u];
+     if ((gqr & 7u) == 0u && (indexed || (cpu->hid2 & PPC_HID2_LSQE) != 0u)) {
+-        mem_write32(cpu, ea, convert_to_single_ftz(f64_bits(cpu->fpr[frS])));
+-        if (!w)
+-            mem_write32(cpu, ea + 4u, convert_to_single_ftz(f64_bits(cpu->ps1[frS])));
++        u32 offset;
++        u8* ptr = get_ram_ptr(cpu, ea, 8, &offset);
++        if (ptr == NULL)
++            return ppc_psq_store(cpu, frS, ea, w, gqr_index, indexed, cia);
++        clear_matching_reservation(cpu, ea);
++        if (g_mem_write_journal && offset != (u32)-1)
++            g_mem_write_journal(offset, 4, g_mem_write_journal_user);
++        write_be32(ptr, convert_to_single_ftz(f64_bits(cpu->fpr[frS])));
++        if (!w) {
++            clear_matching_reservation(cpu, ea + 4u);
++            if (g_mem_write_journal && offset != (u32)-1)
++                g_mem_write_journal(offset + 4u, 4, g_mem_write_journal_user);
++            write_be32(ptr + 4u, convert_to_single_ftz(f64_bits(cpu->ps1[frS])));
++        }
+         return true;
+     }
+     return ppc_psq_store(cpu, frS, ea, w, gqr_index, indexed, cia);

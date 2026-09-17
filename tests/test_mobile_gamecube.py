@@ -436,5 +436,50 @@ class TexturePackPolicy(unittest.TestCase):
             self.assertEqual((Path(tmp) / "work/pack-format.txt").read_text(), "png\n")
 
 
+class FastFpDefault(unittest.TestCase):
+    def test_configure_enables_fast_fp_without_flag(self):
+        args = argparse.Namespace(simulator=False, fast_fp=False)
+        with mock.patch("tools.native_gamecube.check_pins"), \
+                mock.patch("tools.native_gamecube.check_patches"), \
+                mock.patch("tools.native_gamecube.sha256",
+                           return_value=mobile_gamecube.native.PINS["dol_sha256"]), \
+                mock.patch.object(mobile_gamecube, "command") as command:
+            mobile_gamecube.configure(args)
+        self.assertIn("-DRECOMPCORE_FAST_FP=ON", command.call_args.args[0])
+
+    def test_build_receipt_records_fast_fp_without_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp) / "work"
+            app = work / "SSXNative.app"
+            app.mkdir(parents=True)
+            (app / "SSXNative").write_bytes(b"exe")
+            (app / "build-info.json").write_text('{"build_id": "test"}')
+            archive = work / "game-module/gGXBE69_recomp.a"
+            archive.parent.mkdir(parents=True)
+            archive.write_bytes(b"archive")
+            args = argparse.Namespace(jobs=4, simulator=False, fast_fp=False)
+            with mock.patch("tools.native_gamecube.check_pins"), \
+                    mock.patch("tools.native_gamecube.check_patches"), \
+                    mock.patch("tools.native_gamecube.sha256",
+                               return_value=mobile_gamecube.native.PINS["dol_sha256"]), \
+                    mock.patch.object(mobile_gamecube.native, "ninja", return_value=Path(tmp) / "ninja"), \
+                    mock.patch.object(mobile_gamecube, "WORK", work), \
+                    mock.patch.object(mobile_gamecube, "APP", app), \
+                    mock.patch.object(mobile_gamecube, "command") as command:
+                mobile_gamecube.build(args)
+            receipt = json.loads((work / "build-receipt.json").read_text())
+            self.assertTrue(receipt["fast_fp"])
+            self.assertIn("-DRECOMPCORE_FAST_FP=ON", command.call_args_list[0].args[0])
+
+
+class IdleSkipDefaultInAppConfig(unittest.TestCase):
+    def test_app_config_write_leaves_idle_pc_out(self):
+        # Reverted default-on: on desktop the skip starves smoothing-trial
+        # extras to zero via the SpeedFloor guard, and iOS shares that guard.
+        # Re-add with a trial-gated switch once the interaction is understood.
+        source = (mobile_gamecube.ROOT / "native/ios/App.mm").read_text()
+        self.assertNotIn("StaticRecompIdlePC", source)
+
+
 if __name__ == "__main__":
     unittest.main()
