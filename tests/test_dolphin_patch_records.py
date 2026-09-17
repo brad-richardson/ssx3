@@ -55,6 +55,17 @@ class PlatformPsqMerge(unittest.TestCase):
             self.assertIn(self.MERGED_LOAD, text)
             self.assertIn(self.MERGED_STORE, text)
 
+    def test_cpu_header_forces_psq_inline(self):
+        # M5 showed both psq helpers outlined as ~1% leaves; the per-site
+        # LSQE/w folding only happens when the body actually inlines.
+        patch = (ROOT / "native/patches/recompcore-platform.patch").read_text()
+        blocks = patch.split("diff --git a/GXRuntime/include/core/cpu.h b/GXRuntime/include/core/cpu.h")
+        self.assertEqual(len(blocks), 2, "platform patch must carry exactly one cpu.h block")
+        block = blocks[1].split("diff --git ")[0]
+        for name in ("ppc_psq_load_inline", "ppc_psq_store_inline"):
+            self.assertIn(
+                f"+static inline __attribute__((always_inline)) bool {name}(", block)
+
 
 if __name__ == "__main__":
     unittest.main()

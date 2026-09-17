@@ -39,10 +39,10 @@ diff --git a/Source/Core/Core/CMakeLists.txt b/Source/Core/Core/CMakeLists.txt
    Cheats/CheatCodes.h
 diff --git a/Source/Core/Core/Boot/Ssx3CoursePatch.h b/Source/Core/Core/Boot/Ssx3CoursePatch.h
 new file mode 100644
-index 0000000..4300be4
+index 0000000..d19fc3c
 --- /dev/null
 +++ b/Source/Core/Core/Boot/Ssx3CoursePatch.h
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,78 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
 +//
 +// SSX 3 (GXBE69) host-side course redirect.
@@ -58,8 +58,19 @@ index 0000000..4300be4
 +//
 +// Driven by a host-side manifest named by SSX_COURSE_MANIFEST. No manifest,
 +// no patching, and the hook is inert for every other game.
++//
++// Live apply (no reset) reuses the same manifest parser, the same 69-word
++// table re-verify and the same per-write logging through
++// ApplyCourseManifestLive. It must run on a controlled host thread while the
++// caller holds Core::CPUThreadGuard -- the pause point -- so no guest read
++// can tear across the multi-byte string writes. It never pokes while a ride
++// is loaded (RideLoaded): a mid-ride switch stays queued and applies once the
++// rider is gone, i.e. after quit-to-frontend. See docs/course-selection.md,
++// "Live apply".
 +
 +#pragma once
++
++#include <string>
 +
 +namespace Core
 +{
@@ -72,23 +83,62 @@ index 0000000..4300be4
 +// DOL sections are in memory and before execution starts. Returns false only
 +// when a manifest was requested and could not be applied.
 +bool ApplyCourseManifest(Core::System& system);
++
++enum class LiveApplyResult
++{
++  Applied,            // the manifest is in guest RAM
++  DeferredRideLoaded, // a ride is loaded; nothing was written
++  Failed,             // a manifest was requested and could not be applied
++  NoPending,          // ApplyPendingCourseManifest only: the queue is empty
++};
++
++// True while a ride is loaded: the first-rider pointer chain resolves inside
++// MEM1 and the rider has a finite, sane, nonzero position. Menus keep the
++// rider at exactly (0,0,0), so that pose reads as no ride. Best-effort guest
++// peek; call with Core::CPUThreadGuard held.
++bool RideLoaded(Core::System& system);
++
++// Re-applies a manifest to the live event table. Guarded by RideLoaded and by
++// the same table re-verify as the boot hook. Call with Core::CPUThreadGuard
++// held, on a controlled host thread -- never a polling thread.
++LiveApplyResult ApplyCourseManifestLive(Core::System& system, const std::string& manifest_path);
++
++// Deferred queue for switches filed mid-ride. ApplyPendingCourseManifest
++// attempts the queued manifest: Applied and Failed both drain the queue (a
++// manifest that cannot parse must not wedge it), DeferredRideLoaded keeps it
++// for a later attempt. Call with Core::CPUThreadGuard held.
++LiveApplyResult ApplyPendingCourseManifest(Core::System& system);
++
++// Host-side queue bookkeeping. Thread-safe, no guard needed.
++void QueueCourseManifest(std::string manifest_path);
++void ClearPendingCourseManifest();
++bool HasPendingCourseManifest();
++
++// Desktop trigger (docs/course-selection.md "Live apply"): consumes an
++// SSX_COURSE_REQUEST file -- first line names a manifest, "stock" clears the
++// queue -- into the pending queue. Returns false when there is no request to
++// consume. Thread-safe, no guard needed; the queued switch still applies under
++// the guard through ApplyPendingCourseManifest.
++bool ConsumeCourseRequestFile(const char* request_path);
 +}  // namespace SSX3
 diff --git a/Source/Core/Core/Boot/Ssx3CoursePatch.cpp b/Source/Core/Core/Boot/Ssx3CoursePatch.cpp
 new file mode 100644
-index 0000000..9bc2b08
+index 0000000..aa339cb
 --- /dev/null
 +++ b/Source/Core/Core/Boot/Ssx3CoursePatch.cpp
-@@ -0,0 +1,313 @@
+@@ -0,0 +1,496 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
 +
 +#include "Core/Boot/Ssx3CoursePatch.h"
 +
 +#include <cctype>
++#include <cmath>
 +#include <cstdarg>
 +#include <cstdio>
 +#include <cstdlib>
 +#include <cstring>
 +#include <fstream>
++#include <mutex>
 +#include <optional>
 +#include <string>
 +#include <vector>
@@ -119,6 +169,16 @@ index 0000000..9bc2b08
 +constexpr u32 FIELD_SHORT = 36u, WIDTH_SHORT = 16u;
 +constexpr u32 FIELD_CODE = 52u, WIDTH_CODE = 16u;
 +constexpr u32 FIELD_ARCHIVE = 68u, WIDTH_ARCHIVE = 16u;
++
++// First-rider chain for the mid-ride guard: game singleton -> race -> rider
++// manager -> first rider, then position at +240/+244/+248 and the state word
++// behind +0x718/+0xd30. Same chain tools/gamecube_telemetry.py watches
++// (RIDER = '803da1f8 74 c 28'); the bounds below mirror its valid_rider.
++constexpr u32 MEM1_BASE = 0x80000000u;
++constexpr u32 MEM1_END = 0x81800000u;  // exclusive
++constexpr u32 RIDER_ROOT = 0x803DA1F8u;
++constexpr u32 RIDER_POS_X = 240u;
++constexpr float RIDER_POS_LIMIT = 1e7f;
 +
 +struct Redirect
 +{
@@ -347,14 +407,9 @@ index 0000000..9bc2b08
 +  }
 +  return true;
 +}
-+}  // namespace
 +
-+bool ApplyCourseManifest(Core::System& system)
++bool ApplyManifestFile(Core::System& system, const std::string& path, bool live)
 +{
-+  const char* path = std::getenv("SSX_COURSE_MANIFEST");
-+  if (!path || *path == '\0')
-+    return true;
-+
 +  std::vector<Redirect> redirects;
 +  if (!ParseManifest(path, &redirects))
 +    return false;
@@ -363,7 +418,7 @@ index 0000000..9bc2b08
 +  if (!TablesLookRight(memory))
 +    return false;
 +
-+  Log("applying %s", path);
++  Log("%sapplying %s", live ? "live " : "", path.c_str());
 +  for (const Redirect& redirect : redirects)
 +  {
 +    const u32 record = EVENT_TABLE + static_cast<u32>(redirect.event) * EVENT_RECORD_SIZE;
@@ -389,6 +444,182 @@ index 0000000..9bc2b08
 +                     MODE_TABLE + static_cast<u32>(redirect.event) * MODE_ROW_SIZE + MODE_OFFSET,
 +                     *redirect.mode, "mode", redirect.event);
 +  }
++  return true;
++}
++
++// Every link is range-checked before it is dereferenced, so a partially
++// constructed game singleton reads as "no ride" instead of faulting the host.
++bool InMem1(u32 address, u32 size)
++{
++  if (address < MEM1_BASE || address >= MEM1_END)
++    return false;
++  return size <= MEM1_END - address;
++}
++
++struct RiderSnapshot
++{
++  bool loaded = false;
++  u32 rider = 0;
++  float x = 0, y = 0, z = 0;
++  bool have_state = false;
++  u32 state = 0;
++};
++
++RiderSnapshot ReadRiderSnapshot(Core::System& system)
++{
++  RiderSnapshot snapshot;
++  auto& memory = system.GetMemory();
++  u32 link = memory.Read_U32(RIDER_ROOT);
++  for (const u32 offset : {0x74u, 0xcu, 0x28u})
++  {
++    if (!InMem1(link, offset + 4u))
++      return snapshot;
++    link = memory.Read_U32(link + offset);
++  }
++  if (!InMem1(link, RIDER_POS_X + 12u))
++    return snapshot;
++  snapshot.rider = link;
++  u32 bits[3];
++  for (int i = 0; i < 3; ++i)
++    bits[i] = memory.Read_U32(link + RIDER_POS_X + 4u * static_cast<u32>(i));
++  std::memcpy(&snapshot.x, &bits[0], 4);
++  std::memcpy(&snapshot.y, &bits[1], 4);
++  std::memcpy(&snapshot.z, &bits[2], 4);
++  if (!std::isfinite(snapshot.x) || !std::isfinite(snapshot.y) || !std::isfinite(snapshot.z) ||
++      std::fabs(snapshot.x) >= RIDER_POS_LIMIT || std::fabs(snapshot.y) >= RIDER_POS_LIMIT ||
++      std::fabs(snapshot.z) >= RIDER_POS_LIMIT)
++  {
++    return snapshot;
++  }
++  // The state word is forensics for the deferral log, not part of the rule.
++  if (InMem1(link, 0x718u + 4u))
++  {
++    const u32 body = memory.Read_U32(link + 0x718u);
++    if (InMem1(body, 0xd30u + 4u))
++    {
++      snapshot.state = memory.Read_U32(body + 0xd30u);
++      snapshot.have_state = true;
++    }
++  }
++  // Menus park the first rider at exactly (0,0,0); every observed riding pose
++  // is nonzero (evidence: local/research/live-apply/). A zero pose is no ride.
++  snapshot.loaded = !(snapshot.x == 0.0f && snapshot.y == 0.0f && snapshot.z == 0.0f);
++  return snapshot;
++}
++
++std::mutex s_pending_mutex;
++std::string s_pending_manifest;  // empty means no queued switch
++}  // namespace
++
++bool ApplyCourseManifest(Core::System& system)
++{
++  const char* path = std::getenv("SSX_COURSE_MANIFEST");
++  if (!path || *path == '\0')
++    return true;
++  return ApplyManifestFile(system, path, false);
++}
++
++bool RideLoaded(Core::System& system)
++{
++  return ReadRiderSnapshot(system).loaded;
++}
++
++LiveApplyResult ApplyCourseManifestLive(Core::System& system, const std::string& manifest_path)
++{
++  if (manifest_path.empty())
++  {
++    Log("error: live apply with no manifest path");
++    return LiveApplyResult::Failed;
++  }
++  const RiderSnapshot rider = ReadRiderSnapshot(system);
++  if (rider.loaded)
++  {
++    if (rider.have_state)
++    {
++      Log("live apply of %s deferred: ride loaded "
++          "(rider=%08x x=%.1f y=%.1f z=%.1f state=%u)",
++          manifest_path.c_str(), rider.rider, rider.x, rider.y, rider.z, rider.state);
++    }
++    else
++    {
++      Log("live apply of %s deferred: ride loaded (rider=%08x x=%.1f y=%.1f z=%.1f)",
++          manifest_path.c_str(), rider.rider, rider.x, rider.y, rider.z);
++    }
++    return LiveApplyResult::DeferredRideLoaded;
++  }
++  if (!ApplyManifestFile(system, manifest_path, true))
++    return LiveApplyResult::Failed;
++  Log("live apply of %s done", manifest_path.c_str());
++  return LiveApplyResult::Applied;
++}
++
++LiveApplyResult ApplyPendingCourseManifest(Core::System& system)
++{
++  std::string path;
++  {
++    const std::lock_guard<std::mutex> lock(s_pending_mutex);
++    path = s_pending_manifest;
++  }
++  if (path.empty())
++    return LiveApplyResult::NoPending;
++  const LiveApplyResult result = ApplyCourseManifestLive(system, path);
++  if (result == LiveApplyResult::Applied || result == LiveApplyResult::Failed)
++  {
++    const std::lock_guard<std::mutex> lock(s_pending_mutex);
++    if (s_pending_manifest == path)
++      s_pending_manifest.clear();
++  }
++  return result;
++}
++
++void QueueCourseManifest(std::string manifest_path)
++{
++  const std::lock_guard<std::mutex> lock(s_pending_mutex);
++  s_pending_manifest = std::move(manifest_path);
++  if (!s_pending_manifest.empty())
++    Log("queued %s (applies when no ride is loaded)", s_pending_manifest.c_str());
++}
++
++void ClearPendingCourseManifest()
++{
++  const std::lock_guard<std::mutex> lock(s_pending_mutex);
++  s_pending_manifest.clear();
++  Log("pending course switch cleared");
++}
++
++bool HasPendingCourseManifest()
++{
++  const std::lock_guard<std::mutex> lock(s_pending_mutex);
++  return !s_pending_manifest.empty();
++}
++
++bool ConsumeCourseRequestFile(const char* request_path)
++{
++  if (!request_path || *request_path == '\0')
++    return false;
++  std::ifstream file(request_path);
++  if (!file)
++    return false;
++  std::string line;
++  std::getline(file, line);
++  file.close();
++  // Consume before applying so a crash cannot replay the request; the pending
++  // queue (or the next filed request) is the retry path.
++  std::remove(request_path);
++  const std::string want = Trim(line);
++  if (want.empty())
++  {
++    Log("ignoring empty course request in %s", request_path);
++    return true;
++  }
++  if (want == "stock")
++  {
++    ClearPendingCourseManifest();
++    Log("course request: stock (the stock event restores on the next reset)");
++    return true;
++  }
++  Log("course request: %s", want.c_str());
++  QueueCourseManifest(want);
 +  return true;
 +}
 +}  // namespace SSX3

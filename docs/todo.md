@@ -5,15 +5,15 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] Course-row live apply, production wiring (September 17): spike proved
-      reset-free switching (re-apply mid-menu loads the new course on event
-      entry). Wire the pause-menu Course choice to ApplyCourseManifest on a
-      controlled thread with a mid-ride guard (defer until quit-to-frontend;
-      never poke a loaded ride), desktop trigger + iOS immediate apply,
-      frontend refresh contract (re-entry relabels), maintained test.
-      First agent died to a provider content-filter error (work preserved);
-      respawn continuing from tree state. MUST keep Android outer stack
-      green (its platform.patch edit broke egl apply at dolphin_runtime.cpp).
+- [ ] Live-apply deferred→applied-after-quit E2E (September 17): run-001
+      proves the apply branch and run-002 the defer branch, but no run
+      shows a queued switch landing after an actual quit-to-frontend (no
+      known quit input sequence in tools/; iOS covers it via menu-open
+      pump). Needs a quit sequence, then a file-fire → defer → quit →
+      applied run.
+- [ ] Live-apply iOS compile check (September 17): App.mm liveApplyCourse:/
+      applyPendingCourse wiring is pattern-matched and wiring-tested but
+      never compiled (needs Xcode + signing).
 - [ ] Odin HEAD re-profile campaign (September 17, review finding 1): M5
       profiled a pre-Wave-B module (built before 07:15 fast-FP default;
       ppc_fmuls/fadds/fma at ~12% in the dump), so "CPU core is the
@@ -945,6 +945,18 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 course-row live apply shipped (desktop/iOS): manifest
+      re-applied without reset via ApplyCourseManifestLive under
+      CPUThreadGuard on the title thread (no polling thread; temp
+      SSX3_TEST_* removed, absence test-enforced). RideLoaded telemetry
+      guard defers mid-ride switches until quit-to-frontend (run-002:
+      24 per-tick defers, exit 0); run-001 applies mid-menu with 3
+      logged writes + bit-exact Aloha spawn. Desktop
+      SSX3_COURSE_REQUEST file trigger (tools/live_course_request.py),
+      iOS Course row immediate-apply, Android C++ API only. Refresh
+      contract in docs/course-selection.md; 12 wiring tests green;
+      Android outer stack rebased + green. Evidence
+      local/research/live-apply/ (+ README).
 - [x] 2026-09-17 architecture review triage (docs/research/
       review-2026-09-17-architecture.md): all checkable claims verified
       against dumps/tree (M5 pre-Wave-B timestamps + symbols, psq leaves,

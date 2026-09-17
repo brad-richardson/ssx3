@@ -36,6 +36,7 @@
 #include "AudioCommon/Mixer.h"
 #include "Core/Core.h"
 #include "Core/Boot/Boot.h"
+#include "Core/Boot/Ssx3CoursePatch.h"
 #include "Core/Config/GraphicsSettings.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/State.h"
@@ -201,7 +202,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _debugMainMenu;
   BOOL _cpuThread;        // mode of the running/next runtime; smoothing trial unavailable when on
   BOOL _remasterActive;   // whether the running runtime was configured with the texture pack
-  NSString* _activeCourse; // manifest file the running runtime booted with, nil for stock
+  NSString* _activeCourse; // manifest active in the running runtime (boot or live apply), nil for stock
   int _cpuThreadOverride; // -1 saved preference, 0 -ssxSingleCore, 1 -ssxCPUThread (this process only)
   BOOL _fastDisc;         // Dolphin FastDiscSpeed
   double _cardSpeedup;    // modelled memory-card read-rate multiplier
@@ -286,6 +287,8 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
 - (BOOL)remasterPackInstalled;
 - (NSArray<NSString*>*)installedCourses;
 - (nullable NSString*)chosenCourseFile;
+- (NSString*)liveApplyCourse:(NSString* _Nullable)course;
+- (void)applyPendingCourse;
 @end
 
 @implementation SSXViewController
@@ -1119,6 +1122,8 @@ static void SSXLaunchTrace(NSString* step) {
   [self logSessionEvent:@"menu_opened" details:@{@"cpuThread":@(_cpuThread), @"internalScale":@(_internalScale)}];
   [self updatePlayback];
   _menuStatus = _pendingCheckpoint ? @"Saving your place…" : @"Paused";
+  // A switch queued mid-ride applies on the next menu open after quit-to-frontend.
+  [self applyPendingCourse];
   NSDictionary* build=ReadBuildInfo([NSBundle.mainBundle pathForResource:@"build-info" ofType:@"json"]);
   NSString* version=[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"0.1";
   _menuBuild=[NSString stringWithFormat:@"App %@ · %@ · Built %@\n%@",version,
@@ -1241,9 +1246,7 @@ static void SSXLaunchTrace(NSString* step) {
     if (course) [NSUserDefaults.standardUserDefaults setObject:course forKey:@"SSXCourseManifest"];
     else [NSUserDefaults.standardUserDefaults removeObjectForKey:@"SSXCourseManifest"];
     [self logSessionEvent:@"course_preference_changed" details:@{@"manifest":course ?: NSNull.null}];
-    self->_menuStatus=course ? [NSString stringWithFormat:@"%@ loads after Full Reset or relaunch.",
-                                    course.stringByDeletingPathExtension]
-                             : @"The stock event loads after Full Reset or relaunch.";
+    self->_menuStatus=[self liveApplyCourse:course];
     [self refreshSessionMenu];
   };
   _sessionMenu.onReset = ^{
@@ -1339,7 +1342,9 @@ static void SSXLaunchTrace(NSString* step) {
   if ([self remasterRequested]!=_remasterActive)
     status=[status stringByAppendingString:@" · Texture change applies after Full Reset."];
   NSString* wantedCourse=[self chosenCourseFile];
-  if (_running && ((wantedCourse==nil)!=(_activeCourse==nil) ||
+  if (_running && SSX3::HasPendingCourseManifest())
+    status=[status stringByAppendingString:@" · Course switch applies when you quit to the menus."];
+  else if (_running && ((wantedCourse==nil)!=(_activeCourse==nil) ||
                    (wantedCourse && ![wantedCourse isEqualToString:_activeCourse])))
     status=[status stringByAppendingString:@" · Course change applies after Full Reset."];
   [_sessionMenu updateWithStatus:status outputMode:mode internalScale:_internalScale resolution:resolution
@@ -1401,6 +1406,67 @@ static void SSXLaunchTrace(NSString* step) {
   // A preference that names a manifest which is no longer installed reverts to
   // the stock event rather than failing the boot.
   return (chosen.length && [[self installedCourses] containsObject:chosen]) ? chosen : nil;
+}
+// Pause-menu Course row: apply immediately subject to the mid-ride guard
+// (docs/course-selection.md "Live apply"). Mirrors applyOutputScale: runtime
+// mutex, then a CPUThreadGuard pause point for the guest writes. A mid-ride
+// choice is queued and applies on the next menu open after quit-to-frontend.
+- (NSString*)liveApplyCourse:(NSString*)course {
+  NSString* label=course ? course.stringByDeletingPathExtension : @"The stock event";
+  if (!_running || _starting || _stopRequested || !_runtime)
+    return [NSString stringWithFormat:@"%@ loads after Full Reset or relaunch.", label];
+  if (!course) {
+    SSX3::ClearPendingCourseManifest();
+    return @"The stock event restores after Full Reset or relaunch.";
+  }
+  NSString* path=[[Documents() stringByAppendingPathComponent:@"Courses"]
+      stringByAppendingPathComponent:course];
+  std::lock_guard lock(_runtimeMutex);
+  if (!_runtime || _starting || _stopRequested)
+    return [NSString stringWithFormat:@"%@ loads after Full Reset or relaunch.", label];
+  const auto state=Core::GetState(Core::System::GetInstance());
+  if (state != Core::State::Paused && state != Core::State::Running)
+    return [NSString stringWithFormat:@"%@ loads after Full Reset or relaunch.", label];
+  SSX3::LiveApplyResult result;
+  {
+    Core::CPUThreadGuard guard(Core::System::GetInstance());
+    result=SSX3::ApplyCourseManifestLive(Core::System::GetInstance(), path.UTF8String);
+  }
+  if (result == SSX3::LiveApplyResult::Applied) {
+    _activeCourse=course;
+    [self logSessionEvent:@"course_applied_live" details:@{@"manifest":course}];
+    return [NSString stringWithFormat:@"%@ loaded. Menus relabel as you re-enter them.", label];
+  }
+  if (result == SSX3::LiveApplyResult::DeferredRideLoaded) {
+    SSX3::QueueCourseManifest(path.UTF8String);
+    [self logSessionEvent:@"course_queued_mid_ride" details:@{@"manifest":course}];
+    return [NSString stringWithFormat:@"%@ applies when you quit to the menus.", label];
+  }
+  [self logSessionEvent:@"course_apply_failed" details:@{@"manifest":course}];
+  return [NSString stringWithFormat:@"%@ could not be applied. See the log.", label];
+}
+- (void)applyPendingCourse {
+  if (!_running || _starting || _stopRequested || !_runtime || !SSX3::HasPendingCourseManifest())
+    return;
+  const auto state=Core::GetState(Core::System::GetInstance());
+  if (state != Core::State::Paused && state != Core::State::Running)
+    return;
+  std::lock_guard lock(_runtimeMutex);
+  if (!_runtime || _starting || _stopRequested)
+    return;
+  SSX3::LiveApplyResult result;
+  {
+    Core::CPUThreadGuard guard(Core::System::GetInstance());
+    result=SSX3::ApplyPendingCourseManifest(Core::System::GetInstance());
+  }
+  if (result != SSX3::LiveApplyResult::Applied)
+    return;
+  NSString* course=[self chosenCourseFile];
+  _activeCourse=course;
+  [self logSessionEvent:@"course_applied_live" details:@{@"manifest":course ?: NSNull.null,
+      @"from":@"queue"}];
+  _menuStatus=[NSString stringWithFormat:@"%@ loaded. Menus relabel as you re-enter them.",
+      course.stringByDeletingPathExtension ?: @"Course"];
 }
 // Remove pack files of the format this container is not meant to hold.
 //

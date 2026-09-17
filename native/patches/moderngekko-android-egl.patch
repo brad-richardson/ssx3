@@ -20,10 +20,10 @@ index 0b98a8c..75f025f 100644
      if(APPLE)
 
 diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
-index 71bf5d6..51aae45 100644
+index bd8124d..c2c63c6 100644
 --- a/src/runtime/dolphin_runtime.cpp
 +++ b/src/runtime/dolphin_runtime.cpp
-@@ -468,8 +468,11 @@ RuntimeRunResult Runtime::Run() {
+@@ -484,8 +484,11 @@ RuntimeRunResult Runtime::Run() {
    std::thread title_thread;
    std::atomic<bool> stop_title{false};
    const bool collect_metrics = std::getenv("SSX3_RUNTIME_METRICS") != nullptr;
@@ -37,13 +37,12 @@ index 71bf5d6..51aae45 100644
    // A fixed cadence misses short events: a countdown can fall entirely between
    // two shots. Keep the 15 s default; allow a run to ask for a finer one.
    unsigned screenshot_seconds = 15;
-@@ -478,7 +481,8 @@ RuntimeRunResult Runtime::Run() {
-     if (requested >= 1 && requested <= 3600)
-       screenshot_seconds = unsigned(requested);
+@@ -500,7 +503,7 @@ RuntimeRunResult Runtime::Run() {
+     std::fprintf(stderr, "[ssx3-course] request file: %s\n", course_request_file.c_str());
    }
--  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics) {
-+  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics ||
-+      capture_screenshots) {
+   if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics ||
+-      !course_request_file.empty()) {
++      capture_screenshots || !course_request_file.empty()) {
      title_thread = std::thread([collect_metrics, capture_screenshots, screenshot_seconds,
-                                 &stop_title] {
+                                 course_request_file, &stop_title] {
        unsigned seconds = 0;

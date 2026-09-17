@@ -106,10 +106,10 @@ Patches:
 - `moderngekko-platform.patch`: runtime metrics, captures, controller integration,
   and the iOS render surface.
 
-- `recompcore-course-redirect.patch`: the boot-time course redirect
+- `recompcore-course-redirect.patch`: the course redirect
   (`Source/Core/Core/Boot/Ssx3CoursePatch.*` plus its call at the end of
-  `CBoot::BootUp`). See `docs/course-selection.md`. Not folded into
-  `recompcore-platform.patch`; apply it on top.
+  `CBoot::BootUp`), boot-time and live. See `docs/course-selection.md`. Not
+  folded into `recompcore-platform.patch`; apply it on top.
 - `moderngekko-dolphin-mixer-skip-silent.patch`: skip never-fed and
   fully-faded mixer FIFOs (a GameCube game feeds 2 of 11), reclaiming most
   of the audio-thread CPU. Flagged by `AudioSkipSilentFifos` (default on);

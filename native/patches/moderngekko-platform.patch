@@ -46,16 +46,17 @@ index af75a25..d8c792a 100644
  };
  
 diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
-index 981e098..71bf5d6 100644
+index 981e098..bd8124d 100644
 --- a/src/runtime/dolphin_runtime.cpp
 +++ b/src/runtime/dolphin_runtime.cpp
-@@ -3,11 +3,13 @@
+@@ -3,11 +3,14 @@
  #include "AudioCommon/AudioCommon.h"
  #include "Common/Config/Config.h"
  #include "Common/HookableEvent.h"
 +#include "Common/MemoryUtil.h"
  #include "Core/Boot/Boot.h"
  #include "Core/Boot/BootManager.h"
++#include "Core/Boot/Ssx3CoursePatch.h"
  #include "Core/Config/GraphicsSettings.h"
  #include "Core/Config/MainSettings.h"
  #include "Core/Core.h"
@@ -63,7 +64,7 @@ index 981e098..71bf5d6 100644
  #include "Core/HW/GBACore.h"
  #include "Core/Host.h"
  #include "Core/NetPlay/NetPlayClient.h"
-@@ -24,6 +26,10 @@
+@@ -24,6 +27,10 @@
  #include "moderngekko/mod_loader.hpp"
  #include "moderngekko/module_loader.hpp"
  
@@ -74,7 +75,7 @@ index 981e098..71bf5d6 100644
  #include <algorithm>
  #include <array>
  #include <atomic>
-@@ -31,12 +37,18 @@
+@@ -31,12 +38,18 @@
  #include <cmath>
  #include <cstddef>
  #include <cstdio>
@@ -93,7 +94,7 @@ index 981e098..71bf5d6 100644
  static_assert(sizeof(ModernGekkoModuleDesc) == sizeof(StaticRecompModuleDesc));
  static_assert(offsetof(ModernGekkoModuleDesc, chunk_hashes) ==
                offsetof(StaticRecompModuleDesc, chunk_hashes));
-@@ -84,6 +96,38 @@ std::string FormatWindowTitle(const std::string &title, double fps) {
+@@ -84,6 +97,53 @@ std::string FormatWindowTitle(const std::string &title, double fps) {
    return fmt::format("{} | Net wait {:.1f} ms/s | Buffer {}", formatted_title,
                       s_net_wait_ms_per_second, telemetry.buffer_size);
  }
@@ -129,10 +130,25 @@ index 981e098..71bf5d6 100644
 +  source.emulate_syscall_vector = true;
 +}
 +} // namespace ssx3_hle
++
++// Desktop live-course trigger (docs/course-selection.md "Live apply").
++// SSX3_COURSE_REQUEST names a request file; each tick of the existing title
++// thread consumes it into the pending queue and, while the core runs, attempts
++// the pending switch under a CPUThreadGuard -- the pause point -- so no new
++// polling thread exists and no write races guest execution. Mid-ride attempts
++// stay queued until the ride unloads. Unset => one empty-string check per tick.
++void PumpCourseRequests(Core::System &system, const std::string &request_file) {
++  if (!request_file.empty())
++    SSX3::ConsumeCourseRequestFile(request_file.c_str());
++  if (!SSX3::HasPendingCourseManifest() || !Core::IsRunning(system))
++    return;
++  Core::CPUThreadGuard guard(system);
++  SSX3::ApplyPendingCourseManifest(system);
++}
  } // namespace
  
  std::vector<std::string> Host_GetPreferredLocales() { return {}; }
-@@ -244,6 +288,10 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+@@ -244,6 +304,10 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
  
    if (impl->config.headless)
      impl->platform = Platform::CreateHeadlessPlatform();
@@ -143,7 +159,7 @@ index 981e098..71bf5d6 100644
  #ifdef _WIN32
    else
      impl->platform = Platform::CreateWin32Platform();
-@@ -267,12 +315,21 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+@@ -267,12 +331,21 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
                           "the requested Dolphin host platform is unavailable"}};
    }
  
@@ -165,7 +181,7 @@ index 981e098..71bf5d6 100644
    if (!impl->config.graphics.backend.empty())
      Config::SetBase(Config::MAIN_GFX_BACKEND, impl->config.graphics.backend);
    else if (impl->config.headless)
-@@ -292,6 +349,9 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+@@ -292,6 +365,9 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
               !std::ranges::contains(audio_backends,
                                      impl->config.audio.backend)) {
      constexpr std::array preferred_backends = {
@@ -175,7 +191,7 @@ index 981e098..71bf5d6 100644
          BACKEND_CUBEB, BACKEND_PULSEAUDIO, BACKEND_ALSA};
      const auto preferred =
          std::ranges::find_if(preferred_backends, [&](const char *backend) {
-@@ -302,7 +362,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+@@ -302,7 +378,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
    }
    Config::SetBase(Config::MAIN_AUDIO_BACKEND, impl->config.audio.backend);
    Config::SetBase(Config::MAIN_INPUT_BACKGROUND_INPUT,
@@ -185,7 +201,7 @@ index 981e098..71bf5d6 100644
  
    auto &jit = Core::System::GetInstance().GetJitInterface();
    StaticRecompModuleSource recomp_source;
-@@ -320,6 +381,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
+@@ -320,6 +397,8 @@ RuntimeCreateResult Runtime::Create(RuntimeConfig config) {
          &ModManager::HostCallRangeContains;
      recomp_source.host_call_user = impl->mods.get();
    }
@@ -194,7 +210,7 @@ index 981e098..71bf5d6 100644
    jit.SetStaticRecompModuleSource(std::move(recomp_source));
  
    s_runtime_active = true;
-@@ -375,6 +438,25 @@ RuntimeRunResult Runtime::Run() {
+@@ -375,6 +454,25 @@ RuntimeRunResult Runtime::Run() {
          if (state == Core::State::Uninitialized && m_impl->platform)
            m_impl->platform->Stop();
        });
@@ -220,7 +236,7 @@ index 981e098..71bf5d6 100644
    if (!BootManager::BootCore(Core::System::GetInstance(), std::move(boot),
                               m_impl->platform->GetWindowSystemInfo())) {
      m_impl->running = false;
-@@ -383,21 +465,51 @@ RuntimeRunResult Runtime::Run() {
+@@ -383,21 +481,58 @@ RuntimeRunResult Runtime::Run() {
                           "Dolphin could not boot sys/main.dol"}};
    }
    m_impl->booted = true;
@@ -241,13 +257,20 @@ index 981e098..71bf5d6 100644
 +    if (requested >= 1 && requested <= 3600)
 +      screenshot_seconds = unsigned(requested);
 +  }
-+  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics) {
++  std::string course_request_file;
++  if (const char* request = std::getenv("SSX3_COURSE_REQUEST")) {
++    course_request_file = request;
++    std::fprintf(stderr, "[ssx3-course] request file: %s\n", course_request_file.c_str());
++  }
++  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics ||
++      !course_request_file.empty()) {
 +    title_thread = std::thread([collect_metrics, capture_screenshots, screenshot_seconds,
-+                                &stop_title] {
++                                course_request_file, &stop_title] {
 +      unsigned seconds = 0;
 +      while (!stop_title.load()) {
          Host_UpdateTitle({});
 -        for (int i = 0; i < 10 && !stop_token.stop_requested(); ++i)
++        PumpCourseRequests(Core::System::GetInstance(), course_request_file);
 +        if (collect_metrics && seconds % 5 == 0) {
 +          const auto& metrics = Core::System::GetInstance().GetPerfMetrics();
 +          std::fprintf(stderr, "[ssx3-metrics] sample=%u fps=%.3f vps=%.3f speed=%.6f\n",

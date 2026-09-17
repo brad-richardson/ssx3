@@ -237,3 +237,72 @@ directory names a file the run never loaded. The receipt now carries
 `gamecube_collision_check.py` accepts a candidate that is any installed archive.
 Anything else reading `world_archive_sha256` for identity needs the same
 treatment before it is trusted on a two-course directory.
+
+## Live apply (no reset)
+
+The pause-menu Course choice applies immediately, without a reset. The live
+path reuses the boot hook's machinery — the same manifest parser, the same
+69-word table re-verify, the same per-write logging — through
+`SSX3::ApplyCourseManifestLive`, announced in the log as `live applying`:
+
+```
+[ssx3-course] live applying /…/event5-aloha.txt
+[ssx3-course] event 5 name at 802ce7e4: "R&B" -> "Aloha Ice Jam"
+[ssx3-course] event 5 archive at 802ce824: "BAM" -> "alo"
+[ssx3-course] live apply of /…/event5-aloha.txt done
+```
+
+The write runs on a controlled host thread while the caller holds
+`Core::CPUThreadGuard` — the pause point — so no guest read can tear across
+the multi-byte string writes. There is no polling thread: each platform pumps
+the shared pending queue from a thread it already owns.
+
+**Mid-ride guard.** A switch never lands while a ride is loaded, so an
+end-of-run standings screen or save cannot mislabel one course's result under
+another event's name. `SSX3::RideLoaded` resolves the first-rider pointer
+chain (`0x803da1f8` → `+0x74` → `+0xc` → `+0x28`, the chain
+`tools/gamecube_telemetry.py` watches) and reads the pose at `+240/+244/+248`:
+a ride is loaded when the chain lands inside MEM1 with a finite, sane
+(`< 1e7`), nonzero position. Menus park the rider at exactly `(0,0,0)`, so
+that pose reads as no ride. A guarded switch is deferred, not dropped:
+`DeferredRideLoaded` keeps it queued (`… deferred: ride loaded (rider=…
+x=… state=…)`) and the next pump applies it once the rider is gone, i.e.
+after quit-to-frontend. A manifest that cannot parse fails loudly and drains
+the queue instead of wedging it.
+
+**Frontend refresh contract.** Menu screens read the event table fresh when
+they are *built*, not per frame. A screen already on display keeps its
+build-time strings until it is rebuilt — leave and re-enter the Select Event
+list to relabel it — while screens built after the switch (briefing,
+standings) read the new table, and entering the event loads the new course.
+Evidence: `local/research/live-switch/` (spike) and
+`local/research/live-apply/` (production path).
+
+**Desktop.** `moderngekko-run` has no pause menu, so the trigger is a
+request file named by `SSX3_COURSE_REQUEST`, consumed by the existing
+title/metrics thread once a second. Unset, the whole mechanism is one
+empty-string check per tick. File one with:
+
+```sh
+SSX3_COURSE_REQUEST=/path/run.request <runner …> &
+python3 tools/live_course_request.py /path/run.request --manifest /path/event5-aloha.txt
+```
+
+The write is atomic and filing fails while an earlier request is still
+queued. The first line names the manifest; the word `stock` drops a queued
+switch. Stock itself restores only on the next reset — live apply cannot
+un-poke the table, so there is deliberately no live restore.
+
+**iOS.** The pause menu's Course row applies immediately subject to the
+guard: a frontend choice lands at once, a mid-ride choice queues and the
+menu says so, and a queued switch applies on the next menu open after
+quit-to-frontend. Stock clears the queue and restores on the next Full
+Reset or relaunch, as before.
+
+**Android.** The same C++ entry points serve the platform UI:
+`SSX3::ApplyCourseManifestLive` for an immediate choice and
+`SSX3::ApplyPendingCourseManifest` for the deferred queue, both called with
+`Core::CPUThreadGuard` held; `SSX3::RideLoaded`,
+`SSX3::QueueCourseManifest`, `SSX3::ClearPendingCourseManifest` and
+`SSX3::HasPendingCourseManifest` for guard and queue bookkeeping. There is
+no Android settings UI in the tree yet, so this is API-only until one lands.
