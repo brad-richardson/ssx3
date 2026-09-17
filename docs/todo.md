@@ -14,9 +14,11 @@ the build or commit that closed them.
       finding 1) withdrew gate-4b MECHANICS GREEN and the phone Combined
       oracle — every extra under F doubling was drawn unblended. The
       one-generation-per-tick fix, the blended validator gate, and the
-      trialExtrasBlended phone metric are in; still needed: rerun interp-fx
-      and the lifecycle combined leg and confirm blended > 0, re-run the
-      phone Combined trial with blending actually on (that number, not the
+      trialExtrasBlended phone metric are in. First on-device proof
+      September 16 (later): iPad smoothing trial on the fixed build
+      blended 35/36 extras. Still needed: rerun interp-fx and the
+      lifecycle combined leg and confirm blended > 0, re-run the phone
+      Combined trial with blending actually on (that number, not the
       recorded one, decides whether retained host palettes are next), and
       re-issue both verdicts.
 - [ ] Arch-review findings 2–4 (September 16): (2) consolidate the trial
@@ -799,8 +801,10 @@ the build or commit that closed them.
       union per process). Pre-fix baseline on iPad M2 at 1x: GPU 7.65%
       busy over 60.8 s, per-display-frame median 1.255 / p99 1.853 ms
       (fragment-dominated) — ~15–24% of an 8.33 ms 120 Hz budget, so the
-      frame budget binds on CPU, not GPU. Post-fix baseline re-capture
-      running.
+      frame budget binds on CPU, not GPU. Post-fix baseline
+      (local/reports/gpu-captures/20260917-024156, blending on): GPU 7.89%
+      busy, per-frame median 1.436 / p99 1.848 ms — blending costs ~0.2 ms
+      median on M2, tail unchanged, still ~17–25% of budget.
 - [x] 2026-09-12 gc-gari-013: identify the terrain lightmap scale mismatch
       across 108 matched image pairs, add a shared engine material profile,
       preserve source images and conversion receipts, test every RGB565 color,

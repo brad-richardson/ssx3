@@ -1,0 +1,32 @@
+diff --git a/Source/Core/Common/CMakeLists.txt b/Source/Core/Common/CMakeLists.txt
+index 87cf3ba..9eba878 100644
+--- a/Source/Core/Common/CMakeLists.txt
++++ b/Source/Core/Common/CMakeLists.txt
+@@ -308,7 +308,10 @@ if(ENABLE_EGL AND EGL_FOUND)
+     GL/GLInterface/EGL.cpp
+     GL/GLInterface/EGL.h
+   )
+-  if(ANDROID)
++  # NOTE(android-egl): same target-system test as the M1 headless patch:
++  # ENABLE_HEADLESS sets the ANDROID var to 0, but GLContext::Create still
++  # references GLContextEGLAndroid under -DANDROID when HAVE_EGL is on.
++  if(ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
+     target_sources(common PRIVATE
+       GL/GLInterface/EGLAndroid.cpp
+       GL/GLInterface/EGLAndroid.h
+
+diff --git a/Source/Core/VideoCommon/ShaderCache.cpp b/Source/Core/VideoCommon/ShaderCache.cpp
+index 565e4f4..1577e03 100644
+--- a/Source/Core/VideoCommon/ShaderCache.cpp
++++ b/Source/Core/VideoCommon/ShaderCache.cpp
+@@ -171,6 +171,10 @@ void ShaderCache::WaitForAsyncCompiler()
+   bool running = true;
+ 
+   constexpr auto update_ui_progress = [](size_t completed, size_t total) {
++    // NOTE(android-egl): headless targets never create an ImGui context
++    // (Presenter skips OnScreenUI), so there is no progress window to draw.
++    if (g_gfx->IsHeadless())
++      return;
+     const float center_x = ImGui::GetIO().DisplaySize.x * 0.5f;
+     const float center_y = ImGui::GetIO().DisplaySize.y * 0.5f;
+     const float scale = ImGui::GetIO().DisplayFramebufferScale.x;

@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0b98a8c..75f025f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -117,7 +117,14 @@ if(MODERNGEKKO_ENABLE_DOLPHIN_RUNTIME)
+     set(ENABLE_HWDB OFF CACHE BOOL "" FORCE)
+     set(ENABLE_EVDEV OFF CACHE BOOL "" FORCE)
+     set(ENABLE_WAYLAND ON CACHE BOOL "" FORCE)
+-    set(ENABLE_EGL OFF CACHE BOOL "" FORCE)
++    # NOTE(android-egl): the Odin PIE renders headless through EGL/GLES
++    # (Dolphin's Headless WSI maps to GLContextEGL), so the Android target
++    # keeps EGL on. Every other target keeps the historical forced-off.
++    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
++        set(ENABLE_EGL ON CACHE BOOL "" FORCE)
++    else()
++        set(ENABLE_EGL OFF CACHE BOOL "" FORCE)
++    endif()
+     set(USE_SYSTEM_SDL3 OFF CACHE BOOL "" FORCE)
+     # SDL bundles its own copy of the macOS hidapi backend
+     if(APPLE)
+
+diff --git a/src/runtime/dolphin_runtime.cpp b/src/runtime/dolphin_runtime.cpp
+index 71bf5d6..51aae45 100644
+--- a/src/runtime/dolphin_runtime.cpp
++++ b/src/runtime/dolphin_runtime.cpp
+@@ -468,8 +468,11 @@ RuntimeRunResult Runtime::Run() {
+   std::thread title_thread;
+   std::atomic<bool> stop_title{false};
+   const bool collect_metrics = std::getenv("SSX3_RUNTIME_METRICS") != nullptr;
+-  const bool capture_screenshots = !m_impl->config.headless &&
+-                                  std::getenv("SSX3_SCREENSHOTS") != nullptr;
++  // NOTE(android-egl): headless runs may render (EGL/GLES on the Odin PIE),
++  // so screenshots stay available there when the harness opts in. Desktop
++  // headless runs never set SSX3_SCREENSHOTS, leaving them unchanged.
++  const bool capture_screenshots =
++      std::getenv("SSX3_SCREENSHOTS") != nullptr;
+   // A fixed cadence misses short events: a countdown can fall entirely between
+   // two shots. Keep the 15 s default; allow a run to ask for a finer one.
+   unsigned screenshot_seconds = 15;
+@@ -478,7 +481,8 @@ RuntimeRunResult Runtime::Run() {
+     if (requested >= 1 && requested <= 3600)
+       screenshot_seconds = unsigned(requested);
+   }
+-  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics) {
++  if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics ||
++      capture_screenshots) {
+     title_thread = std::thread([collect_metrics, capture_screenshots, screenshot_seconds,
+                                 &stop_title] {
+       unsigned seconds = 0;
