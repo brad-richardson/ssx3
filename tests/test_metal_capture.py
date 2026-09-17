@@ -128,6 +128,28 @@ class MetalCaptureTests(unittest.TestCase):
                 wait.assert_not_called()
             self.assertEqual(receipt["target"], "all-processes")
 
+    def test_receipt_hashes_directory_trace_bundles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            outdir = Path(tmp) / "cap"
+            outdir.mkdir()
+            trace = outdir / "capture.trace"
+            (trace / "instrument_data").mkdir(parents=True)
+            (trace / "instrument_data" / "run.bin").write_bytes(b"trace-bytes")
+            seq = Path(tmp) / "seq.json"
+            seq.write_text("{}")
+            args = capture_args(sequence=seq, output=outdir)
+            receipt = metal_capture.write_receipt(outdir, trace, args, target="all-processes")
+            saved = json.loads((outdir / "receipt.json").read_text())
+            self.assertEqual(saved["trace_sha256"], receipt["trace_sha256"])
+            self.assertEqual(saved["target"], "all-processes")
+            self.assertEqual(metal_capture.trace_size(trace), 11)
+            # Order-independent: same content re-hashes identically.
+            again = Path(tmp) / "cap2"
+            (again / "capture.trace" / "instrument_data").mkdir(parents=True)
+            (again / "capture.trace" / "instrument_data" / "run.bin").write_bytes(b"trace-bytes")
+            self.assertEqual(metal_capture.sha(again / "capture.trace"),
+                             receipt["trace_sha256"])
+
     def test_capture_surfaces_xctrace_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
             outdir = Path(tmp) / "cap"

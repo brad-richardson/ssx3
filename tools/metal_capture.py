@@ -27,11 +27,30 @@ DEFAULT_TEMPLATE = "Metal System Trace"
 
 
 def sha(path):
+    path = Path(path)
+    if path.is_dir():
+        # A .trace bundle is a directory: hash names plus contents.
+        digest = hashlib.sha256()
+        for file in sorted(path.rglob("*")):
+            if not file.is_file():
+                continue
+            digest.update(str(file.relative_to(path)).encode())
+            with open(file, "rb") as handle:
+                for chunk in iter(lambda: handle.read(1 << 20), b""):
+                    digest.update(chunk)
+        return digest.hexdigest()
     digest = hashlib.sha256()
     with open(path, "rb") as handle:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def trace_size(trace):
+    trace = Path(trace)
+    if trace.is_file():
+        return trace.stat().st_size
+    return sum(p.stat().st_size for p in trace.rglob("*") if p.is_file())
 
 
 def check_device(device, run=subprocess.run):
@@ -107,9 +126,17 @@ def capture(args, clock=time.sleep, run=subprocess.run):
         raise RuntimeError(f"xctrace record failed: {stderr}")
     collect_args = argparse.Namespace(device=args.device, simulator=False)
     mobile_gamecube.collect(collect_args)
+    receipt = write_receipt(outdir, trace, args,
+                            target="all-processes" if all_processes else f"pid:{pid}")
+    print(f"Captured {trace} ({trace_size(trace) / 1e6:.0f} MB)")
+    return receipt
+
+
+def write_receipt(outdir, trace, args, target):
+    """Write the receipt for a finished capture; reused to salvage runs
+    whose recording completed but whose receipt step never ran."""
     receipt = {
-        "device": args.device, "template": args.template,
-        "target": "all-processes" if all_processes else f"pid:{pid}",
+        "device": args.device, "template": args.template, "target": target,
         "attach_delay_wall_s": args.attach_delay, "window_s": args.window,
         "trace": str(trace), "trace_sha256": sha(trace),
         "sequence": str(args.sequence), "sequence_sha256": sha(args.sequence),
@@ -118,8 +145,7 @@ def capture(args, clock=time.sleep, run=subprocess.run):
                        "f_at", "combo_at", "textures", "preload_textures",
                        "course_manifest")},
     }
-    (outdir / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
-    print(f"Captured {trace} ({trace.stat().st_size / 1e6:.0f} MB)")
+    (Path(outdir) / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     return receipt
 
 
