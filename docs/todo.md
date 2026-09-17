@@ -20,11 +20,13 @@ the build or commit that closed them.
       ThinLTO layout). A retry needs a layout strategy (PGO, hot/cold
       split, section ordering), not a blind rebuild. Evidence + exact
       design preserved in local/research/fcmp/ (dylibs, legs, NOTES.md).
-- [ ] Swap-timestamp probe rows (September 17, display gap 1): the real
-      display-link proof for onscreen trials — hook GLContextEGL::Swap /
-      Vulkan present + correlate the AChoreographer feed (proven working:
-      1194 callbacks @ 8.229ms vs 8.199ms swaps). Spec'd S (one shadowed
-      TU, same interposition technique). Device free; proposed next.
+- [ ] Onscreen trial hardening (September 17): budget-stop fires up to
+      1 s late (integer-division truncation, inherited) — 1-line XS fix,
+      noted untested. Vulkan present hook not built (needs a core-vk
+      APK, S). ot3's end-cause is unproven (log stops at 59.9 FPS with
+      no tombstone file — "died on the FIFO panic" is inference from
+      the known movie terminator, plausible but unreceipted); next
+      onscreen run should capture the tombstone or the clean stop.
 - [ ] Display production wiring (September 17, display gaps 2-6): real
       CreateAndroidPlatform branch (replace the spike's
       CreateHeadlessPlatform interposition), headless=false,
@@ -972,6 +974,15 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 onscreen smoothing trial (ot3): 25/25 extras blended
+      AND presented, swap-correlated (median 0.67ms, max 0.80ms;
+      analyzer reproduced every number). Full lifecycle in-race
+      (258 frames), 259 in-window swaps @ 64.3/s vs 49.7/s baseline,
+      in-window race confirmed onscreen (5th/6, 3%, 48 MPH, 0:06).
+      Pacing: game-cadence-driven, vsync effectively off (don't lock
+      future trials). at=128 (APK probe-wall lags ~18s on .so load;
+      ot1/ot2 at=124 hit the heavy zone, 0 extras). Zero repo writes;
+      APK + probes in android-spike/onscreen-trial/.
 - [x] 2026-09-17 fcmp spike: NO-SHIP (verified). gx_fastfp_fcmp exact
       inline + macro redirect: parity clean (690/690, 706/706 strict
       identical; 510k differential, 0 failures), symbol 31/33/38 → 0,
