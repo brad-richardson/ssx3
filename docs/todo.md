@@ -27,11 +27,9 @@ the build or commit that closed them.
       unconditionally or keeps the rider-state gate, and record it in the
       plan of record. Plus the §5 smaller items (Output() abort on device,
       App.mm trial-flag table, stale menu label, Deadline/alpha periods).
-- [ ] iPad GPU trace analysis (September 16): first Metal System Trace of a
-      smoothing trial window captured (local/reports/gpu-captures/20260917-015031,
-      191 MB, receipted, trial Finished). Still needed: the per-process
-      GPU-ms extraction recipe (xctrace export --toc/--xpath) for SSXNative.
+
 - [ ] Plan of record: [implementation plan, September 15](impl-plan-2026-09-15.md).
+
       The three in-flight agents landed (Aloha collision, boot-time course
       redirect, breaking glass) and are pushed. **Done September 15 (later):**
       the Aloha chain is re-ordered into one archive — `gc-aloha-006` (rails on
@@ -794,6 +792,15 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-16 iPad GPU trace analysis: first Metal System Trace of a
+      smoothing trial window (local/reports/gpu-captures/20260917-015031,
+      191 MB, trial Finished) plus the per-process extraction recipe
+      (`tools/metal_gpu_ms.py`: metal-gpu-intervals xpath export, depth-0
+      union per process). Pre-fix baseline on iPad M2 at 1x: GPU 7.65%
+      busy over 60.8 s, per-display-frame median 1.255 / p99 1.853 ms
+      (fragment-dominated) — ~15–24% of an 8.33 ms 120 Hz budget, so the
+      frame budget binds on CPU, not GPU. Post-fix baseline re-capture
+      running.
 - [x] 2026-09-12 gc-gari-013: identify the terrain lightmap scale mismatch
       across 108 matched image pairs, add a shared engine material profile,
       preserve source images and conversion receipts, test every RGB565 color,
