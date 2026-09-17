@@ -1,0 +1,104 @@
+diff --git a/Source/Core/AudioCommon/Mixer.cpp b/Source/Core/AudioCommon/Mixer.cpp
+--- a/Source/Core/AudioCommon/Mixer.cpp
++++ b/Source/Core/AudioCommon/Mixer.cpp
+@@ -5,6 +5,7 @@
+ 
+ #include <algorithm>
+ #include <cmath>
++#include <cstdlib>
+ #include <cstring>
+ #include <span>
+ 
+@@ -113,6 +114,28 @@
+     in_sample_rate *= m_dynamic_rate;
+   }
+ #endif
++
++  // Skip FIFOs that cannot contribute audible output. A never-fed FIFO holds only
++  // zeros (exact no-op). A starved non-DMA FIFO whose fade envelope decayed below
++  // sub-LSB level contributes silence; snapping the envelope to zero keeps the skip
++  // sticky and preserves the fade-in ramp when data resumes. The DMA FIFO is
++  // excluded from the faded case so the empty-dequeue starvation diagnostic keeps
++  // counting and the iOS adaptive-rate logic above keeps seeing every callback.
++  if (m_mixer->m_config_skip_silent_fifos)
++  {
++    if (!m_ever_fed.load(std::memory_order_relaxed))
++      return;
++    if (this != &m_mixer->m_dma_mixer && m_fade_volume < 1e-5f)
++    {
++      const std::size_t head = m_queue_head.load(std::memory_order_acquire);
++      const std::size_t tail = m_queue_tail.load(std::memory_order_acquire);
++      if (head == tail)
++      {
++        m_fade_volume = 0.0f;
++        return;
++      }
++    }
++  }
+ 
+   const double base = static_cast<double>(1 << GRANULE_FRAC_BITS);
+   const u32 index_jump = std::lround(base * in_sample_rate / out_sample_rate);
+@@ -457,6 +480,12 @@
+   m_config_emulation_speed = Config::Get(Config::MAIN_EMULATION_SPEED);
+   m_config_audio_preserve_pitch = Config::Get(Config::MAIN_AUDIO_PRESERVE_PITCH);
+   m_config_fill_audio_gaps = Config::Get(Config::MAIN_AUDIO_FILL_GAPS);
++  m_config_skip_silent_fifos = Config::Get(Config::MAIN_AUDIO_SKIP_SILENT_FIFOS);
++  // Debug kill-switch: SSX3_MIXER_SKIP_SILENT_FIFOS=0 forces the pre-optimization
++  // behavior without rebuilding (read once per config refresh, not per sample).
++  const char* skip_silent_env = std::getenv("SSX3_MIXER_SKIP_SILENT_FIFOS");
++  if (skip_silent_env && std::strcmp(skip_silent_env, "0") == 0)
++    m_config_skip_silent_fifos = false;
+   m_config_audio_buffer_ms = Config::Get(Config::MAIN_AUDIO_BUFFER_SIZE);
+   m_config_wiimote_routing_enabled = Config::Get(Config::MAIN_WIIMOTE_AUDIO_ROUTING_ENABLED);
+   for (std::size_t i = 0; i < m_config_wiimote_output_enabled.size(); ++i)
+@@ -574,6 +603,7 @@
+     m_queue[head][i] = m_next_buffer[(i + start_index) & GRANULE_MASK] * GRANULE_WINDOW[i];
+ 
+   m_queue_head.store(next_head, std::memory_order_release);
++  m_ever_fed.store(true, std::memory_order_relaxed);
+   m_queue_fading.store(false, std::memory_order_relaxed);
+   m_queue_looping.store(false, std::memory_order_relaxed);
+ }
+diff --git a/Source/Core/AudioCommon/Mixer.h b/Source/Core/AudioCommon/Mixer.h
+--- a/Source/Core/AudioCommon/Mixer.h
++++ b/Source/Core/AudioCommon/Mixer.h
+@@ -153,6 +153,9 @@
+     std::array<Granule, MAX_GRANULE_QUEUE_SIZE> m_queue;
+     std::atomic<std::size_t> m_queue_head{0};
+     std::atomic<std::size_t> m_queue_tail{0};
++    // One-way latch set by Enqueue. A FIFO that was never fed holds only zeros,
++    // so Mix can skip it entirely (exact no-op: Mix only accumulates).
++    std::atomic<bool> m_ever_fed{false};
+     std::atomic<bool> m_queue_fading{false};
+     std::atomic<bool> m_queue_looping{false};
+     float m_fade_volume = 1.0;
+@@ -203,6 +206,7 @@
+   float m_config_emulation_speed;
+   bool m_config_audio_preserve_pitch;
+   bool m_config_fill_audio_gaps;
++  bool m_config_skip_silent_fifos;
+   int m_config_audio_buffer_ms;
+   bool m_config_wiimote_routing_enabled = false;
+   std::array<bool, 4> m_config_wiimote_output_enabled{};
+diff --git a/Source/Core/Core/Config/MainSettings.cpp b/Source/Core/Core/Config/MainSettings.cpp
+--- a/Source/Core/Core/Config/MainSettings.cpp
++++ b/Source/Core/Core/Config/MainSettings.cpp
+@@ -75,6 +75,7 @@
+ const Info<int> MAIN_AUDIO_LATENCY{{System::Main, "Core", "AudioLatency"}, 20};
+ const Info<int> MAIN_AUDIO_BUFFER_SIZE{{System::Main, "Core", "AudioBufferSize"}, 80};
+ const Info<bool> MAIN_AUDIO_FILL_GAPS{{System::Main, "Core", "AudioFillGaps"}, true};
++const Info<bool> MAIN_AUDIO_SKIP_SILENT_FIFOS{{System::Main, "Core", "AudioSkipSilentFifos"}, true};
+ const Info<bool> MAIN_AUDIO_PRESERVE_PITCH{{System::Main, "Core", "AudioPreservePitch"}, false};
+ const Info<std::string> MAIN_MEMCARD_A_PATH{{System::Main, "Core", "MemcardAPath"}, ""};
+ const Info<std::string> MAIN_MEMCARD_B_PATH{{System::Main, "Core", "MemcardBPath"}, ""};
+diff --git a/Source/Core/Core/Config/MainSettings.h b/Source/Core/Core/Config/MainSettings.h
+--- a/Source/Core/Core/Config/MainSettings.h
++++ b/Source/Core/Core/Config/MainSettings.h
+@@ -80,6 +80,7 @@
+ extern const Info<int> MAIN_AUDIO_LATENCY;
+ extern const Info<int> MAIN_AUDIO_BUFFER_SIZE;
+ extern const Info<bool> MAIN_AUDIO_FILL_GAPS;
++extern const Info<bool> MAIN_AUDIO_SKIP_SILENT_FIFOS;
+ extern const Info<bool> MAIN_AUDIO_PRESERVE_PITCH;
+ extern const Info<std::string> MAIN_MEMCARD_A_PATH;
+ extern const Info<std::string> MAIN_MEMCARD_B_PATH;

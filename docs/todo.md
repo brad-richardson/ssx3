@@ -5,6 +5,12 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Desktop launch re-hashes the game every boot (September 17):
+      `moderngekko-run` spends its whole startup in `InspectGame →
+      HashDirectorySha256` over the 1.2 GB share root (sampled main
+      thread; per-char iostream reads), so fresh-profile runs die at
+      `--seconds 90` before the module loads. Cache the inspection by
+      size/mtime (or add a skip flag) to unblock fast A/B iteration.
 - [ ] Odin viability gap (September 16): M3 proved scripted input drives a
       live Snow Jam race on the Odin3 (Pipe/0/ssx3 backend, no rebuild) but
       the device holds only ~1/8th speed in-race (stderr speed ~0.11–0.13)
@@ -15,7 +21,10 @@ the build or commit that closed them.
 - [ ] Course texture/lighting review (user, September 16): wild-looking
       textures with the lighting observed in-course as a casual observer —
       particularly ground/snow. Needs a review pass over the course's
-      textures and lightmaps.
+      textures and lightmaps. Baseline is now known-stock: the iPad ran a
+      preloaded DDS pack until September 17, when it was pruned back to
+      shipped assets (see `asset-policy.md`); the Odin was already stock,
+      so EGL snow is not a pack artifact.
 - [ ] 120 Hz verdict re-issue after the generation fix (September 16): the
       architecture review ([review-2026-09-16-architecture.md](research/review-2026-09-16-architecture.md)
       finding 1) withdrew gate-4b MECHANICS GREEN and the phone Combined
@@ -146,6 +155,10 @@ the build or commit that closed them.
       encoders, a GX tiler, a mip writer and a palette quantiser that do not
       exist, and ARA1 already sits near the 24 MiB wall. The 30-texture
       experiment and tooling gaps are itemised in the report.
+      **Paused September 17 (user decision, see `asset-policy.md`):**
+      shipped assets everywhere until the perf/gate-review window closes.
+      Tricky injection and its assets stay; packs frozen under
+      `local/research/remaster/`, devices normalized to stock.
       **Done September 15: all 17 SSX 3 courses, no C++ written.** The 2-4 day
       gxcore estimate above was wrong about the renderer: the native build
       compiles Dolphin's `HiresTextures.cpp`, not the aurora replacement path,

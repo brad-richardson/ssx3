@@ -285,6 +285,9 @@ def world(args):
 
 def textures(args):
     """Copy a replacement texture pack into the app's Load/Textures/GXBE69."""
+    if os.environ.get("SSX3_ALLOW_TEXTURE_PACK") != "1":
+        raise RuntimeError("Texture packs are paused by docs/asset-policy.md (shipped assets until "
+                           "the risky window closes); set SSX3_ALLOW_TEXTURE_PACK=1 to override.")
     pack = args.pack
     if not pack or not pack.is_dir():
         raise RuntimeError("--pack must name a directory of tex1_*.png replacements")

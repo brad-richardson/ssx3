@@ -49,9 +49,33 @@ def check_pins():
             raise RuntimeError(f"{path}: expected {expected}, found {actual}")
 
 
+# Dolphin-submodule stack, bottom to top. Higher patches may touch the same
+# files as lower ones, so each layer is reverse-checked excluding the files
+# owned by the layers above it (those layers' own checks prove the content
+# underneath through their context lines).
+CORE_STACK = ("recompcore-platform.patch", "recompcore-course-redirect.patch",
+              "moderngekko-memcard-read-rate.patch", "moderngekko-dolphin-mixer-skip-silent.patch")
+
+
+def patch_files(patch):
+    """Paths touched by a unified diff, relative to the checkout it applies to."""
+    files = []
+    for line in Path(patch).read_text().splitlines():
+        if line.startswith("diff --git a/"):
+            files.append(line[len("diff --git a/"):].split(" b/", 1)[0])
+    return files
+
+
 def check_patches():
-    for checkout, filename in ((CORE, "recompcore-platform.patch"), (SOURCE, "moderngekko-platform.patch")):
-        run(["git", "-C", checkout, "apply", "--reverse", "--check", ROOT / "native/patches" / filename])
+    touched_above = set()
+    for filename in reversed(CORE_STACK):
+        patch = ROOT / "native/patches" / filename
+        overlap = sorted(set(patch_files(patch)) & touched_above)
+        excludes = [f"--exclude={path}" for path in overlap]
+        run(["git", "-C", CORE, "apply", "--reverse", "--check", *excludes, patch])
+        touched_above.update(patch_files(patch))
+    run(["git", "-C", SOURCE, "apply", "--reverse", "--check",
+         ROOT / "native/patches" / "moderngekko-platform.patch"])
 
 
 def bootstrap(args):
@@ -68,13 +92,22 @@ def bootstrap(args):
          *PINS["core_submodules"]])
     run(["git", "-C", CORE / "Externals/cubeb/cubeb", "submodule", "update", "--init", "--recursive", "--depth", "1"])
     check_pins()
-    for checkout, filename in ((CORE, "recompcore-platform.patch"), (SOURCE, "moderngekko-platform.patch")):
+    for filename in CORE_STACK:
+        # A stacked patch is missing exactly when it forward-applies: an
+        # applied layer fails forward-check whether or not higher layers sit
+        # on top of it, and a diverged tree fails loudly in check_patches.
         patch = ROOT / "native/patches" / filename
-        already = subprocess.run(["git", "-C", str(checkout), "apply", "--reverse", "--check", str(patch)],
+        missing = subprocess.run(["git", "-C", str(CORE), "apply", "--check", str(patch)],
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-        if not already:
-            run(["git", "-C", checkout, "apply", "--check", patch])
-            run(["git", "-C", checkout, "apply", patch])
+        if missing:
+            run(["git", "-C", CORE, "apply", patch])
+    patch = ROOT / "native/patches" / "moderngekko-platform.patch"
+    already = subprocess.run(["git", "-C", str(SOURCE), "apply", "--reverse", "--check", str(patch)],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+    if not already:
+        run(["git", "-C", SOURCE, "apply", "--check", patch])
+        run(["git", "-C", SOURCE, "apply", patch])
+    check_patches()
 
 
 def ninja():
@@ -220,6 +253,9 @@ def verify_rendered_frames(rendering, seconds):
 
 
 def launch(args):
+    if getattr(args, "texture_pack", None) and os.environ.get("SSX3_ALLOW_TEXTURE_PACK") != "1":
+        raise RuntimeError("Texture packs are paused by docs/asset-policy.md (shipped assets until "
+                           "the risky window closes); set SSX3_ALLOW_TEXTURE_PACK=1 to override.")
     check_pins()
     check_patches()
     if args.seconds is not None and args.seconds <= 0:

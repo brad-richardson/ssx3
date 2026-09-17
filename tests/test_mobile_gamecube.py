@@ -412,5 +412,29 @@ class WorldPush(unittest.TestCase):
                 mobile_gamecube.world(args)
 
 
+class TexturePackPolicy(unittest.TestCase):
+    def test_textures_push_refuses_without_policy_override(self):
+        args = argparse.Namespace(pack=Path("whatever"), simulator=False, device="PHONE")
+        with mock.patch.dict("os.environ", {}, clear=True):
+            with self.assertRaisesRegex(RuntimeError, "asset-policy"):
+                mobile_gamecube.textures(args)
+
+    def test_textures_push_allowed_with_override_simulator(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pack = Path(tmp) / "pack"
+            pack.mkdir()
+            (pack / "tex1_foo.png").write_bytes(b"png")
+            documents = Path(tmp) / "documents"
+            args = argparse.Namespace(pack=pack, simulator=True, device="SIM")
+            with mock.patch.dict("os.environ", {"SSX3_ALLOW_TEXTURE_PACK": "1"}), \
+                    mock.patch.object(mobile_gamecube, "simulator_documents",
+                                      return_value=documents), \
+                    mock.patch.object(mobile_gamecube, "WORK", Path(tmp) / "work"):
+                mobile_gamecube.WORK.mkdir(exist_ok=True)
+                mobile_gamecube.textures(args)
+            self.assertTrue((documents / "User/Load/Textures/GXBE69/tex1_foo.png").is_file())
+            self.assertEqual((Path(tmp) / "work/pack-format.txt").read_text(), "png\n")
+
+
 if __name__ == "__main__":
     unittest.main()

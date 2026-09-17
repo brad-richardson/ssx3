@@ -1,8 +1,11 @@
+import argparse
+import os
 import unittest
 import tempfile
 from pathlib import Path
+from unittest import mock
 
-from tools.native_gamecube import runtime_evidence, verify_runtime_execution, verify_rendered_frames, runtime_fault, wait_for_runtime
+from tools.native_gamecube import CORE_STACK, ROOT, launch, patch_files, runtime_evidence, verify_runtime_execution, verify_rendered_frames, runtime_fault, wait_for_runtime
 
 
 class RuntimeEvidence(unittest.TestCase):
@@ -92,6 +95,34 @@ class RuntimeEvidence(unittest.TestCase):
         self.assertEqual(evidence['invalid_memory_accesses'], 1)
         with self.assertRaisesRegex(RuntimeError, 'invalid memory'):
             verify_runtime_execution(evidence)
+
+
+class TexturePackPolicy(unittest.TestCase):
+    def test_launch_with_pack_refuses_without_policy_override(self):
+        args = argparse.Namespace(texture_pack=Path("whatever"))
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesRegex(RuntimeError, "asset-policy"):
+                launch(args)
+
+
+class PatchStack(unittest.TestCase):
+    def test_patch_files_lists_touched_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            patch = Path(tmp) / "sample.patch"
+            patch.write_text("diff --git a/Source/Foo.cpp b/Source/Foo.cpp\n"
+                             "--- a/Source/Foo.cpp\n"
+                             "+++ b/Source/Foo.cpp\n"
+                             "@@ -1 +1 @@\n"
+                             "-a\n+b\n"
+                             "diff --git a/Source/New.h b/Source/New.h\n"
+                             "new file mode 100644\n")
+            self.assertEqual(patch_files(patch), ["Source/Foo.cpp", "Source/New.h"])
+
+    def test_core_stack_patches_exist(self):
+        self.assertTrue(CORE_STACK)
+        for name in CORE_STACK:
+            with self.subTest(patch=name):
+                self.assertTrue((ROOT / "native/patches" / name).is_file())
 
 
 if __name__ == "__main__":

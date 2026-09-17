@@ -110,6 +110,11 @@ Patches:
   (`Source/Core/Core/Boot/Ssx3CoursePatch.*` plus its call at the end of
   `CBoot::BootUp`). See `docs/course-selection.md`. Not folded into
   `recompcore-platform.patch`; apply it on top.
+- `moderngekko-dolphin-mixer-skip-silent.patch`: skip never-fed and
+  fully-faded mixer FIFOs (a GameCube game feeds 2 of 11), reclaiming most
+  of the audio-thread CPU. Flagged by `AudioSkipSilentFifos` (default on);
+  `SSX3_MIXER_SKIP_SILENT_FIFOS=0` forces the old behavior without
+  rebuilding. Apply on top of the bootstrap stack.
 
 Bootstrap applies these combined patches. The earlier observability/metrics
 patch files are retained for historical reference, not applied separately.
