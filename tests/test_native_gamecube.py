@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
-from tools.native_gamecube import CORE_STACK, ROOT, launch, patch_files, runtime_evidence, verify_runtime_execution, verify_rendered_frames, runtime_fault, wait_for_runtime
+from tools.native_gamecube import CORE_STACK, ROOT, idle_pc_ini_line, launch, patch_files, runtime_evidence, verify_runtime_execution, verify_rendered_frames, runtime_fault, wait_for_runtime
 
 
 class RuntimeEvidence(unittest.TestCase):
@@ -123,6 +123,14 @@ class PatchStack(unittest.TestCase):
         for name in CORE_STACK:
             with self.subTest(patch=name):
                 self.assertTrue((ROOT / "native/patches" / name).is_file())
+
+
+class IdleSkipDefault(unittest.TestCase):
+    def test_idle_skip_defaults_on_with_env_override_and_opt_out(self):
+        self.assertEqual(idle_pc_ini_line({}), "StaticRecompIdlePC = 0x80288ED4\n")
+        self.assertEqual(idle_pc_ini_line({"SSX3_IDLE_PC": "0x1234"}),
+                         "StaticRecompIdlePC = 0x1234\n")
+        self.assertEqual(idle_pc_ini_line({"SSX3_IDLE_PC": ""}), "")
 
 
 if __name__ == "__main__":

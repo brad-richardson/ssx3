@@ -31,6 +31,17 @@ def sha256(path):
         return hashlib.file_digest(file, "sha256").hexdigest()
 
 
+# Guest OS idle spin (SelectThread). Skipping it is default-on: M4 measured
+# 1.18x in-race / 2.5x in menus on the Odin with no regression, and the
+# runtime treats 0 as disabled, so SSX3_IDLE_PC= (empty) opts out.
+DEFAULT_IDLE_PC = "0x80288ED4"
+
+
+def idle_pc_ini_line(env=None):
+    idle = (env if env is not None else os.environ).get("SSX3_IDLE_PC", DEFAULT_IDLE_PC)
+    return f"StaticRecompIdlePC = {idle}\n" if idle else ""
+
+
 def run(command, **kwargs):
     print("+", " ".join(map(str, command)), flush=True)
     return subprocess.run(list(map(str, command)), check=True, **kwargs)
@@ -272,10 +283,10 @@ def launch(args):
     config = config_dir / "Dolphin.ini"
     cpu_thread = "True" if getattr(args, "cpu_thread", False) else "False"
     if not config.exists():
-        # SSX3_IDLE_PC=0x80288ED4 (the OS idle spin in SelectThread) enables the
-        # runtime's idle-loop skipping for a fresh profile; research knob only.
-        idle = os.environ.get("SSX3_IDLE_PC")
-        extra = f"StaticRecompIdlePC = {idle}\n" if idle else ""
+        # Idle-loop skipping defaults on for fresh profiles; SSX3_IDLE_PC
+        # overrides the PC, SSX3_IDLE_PC= (empty) disables. Existing profiles
+        # keep whatever they have: add the line by hand or use a fresh profile.
+        extra = idle_pc_ini_line()
         if os.environ.get('SSX3_RUSH_PRESENT') == '1':
             extra += 'RushFramePresentation = True\n'
         config.write_text(f"[Core]\nCPUThread = {cpu_thread}\nDSPHLE = True\nSkipIPL = True\n{extra}[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
