@@ -23,13 +23,30 @@ def capture_args(**overrides):
 
 
 class MetalCaptureTests(unittest.TestCase):
-    def test_record_command_attaches_by_process_name_with_bounds(self):
+    def test_record_command_attaches_by_pid_with_bounds(self):
         self.assertEqual(
             metal_capture.build_record_command(device="IPAD", template="Metal System Trace",
-                                               window=60, output=Path("/tmp/c.trace")),
+                                               window=60, output=Path("/tmp/c.trace"), pid=4242),
             ["xctrace", "record", "--template", "Metal System Trace", "--device", "IPAD",
-             "--attach", "SSXNative", "--time-limit", "60s",
+             "--attach", "4242", "--time-limit", "60s",
              "--no-prompt", "--output", "/tmp/c.trace"])
+
+    def test_wait_for_process_matches_executable_basename(self):
+        hit = {"result": {"runningProcesses": [
+            {"executable": "file:///sbin/launchd", "processIdentifier": 1},
+            {"executable": "file:///private/var/containers/Bundle/Application/x/SSXNative.app/SSXNative",
+             "processIdentifier": 4242}]}}
+        with mock.patch.object(metal_capture.mobile_gamecube, "device_call",
+                               return_value=hit) as call:
+            self.assertEqual(metal_capture.wait_for_process("IPAD", sleep=lambda s: None), 4242)
+            call.assert_called_once()
+
+    def test_wait_for_process_retries_then_times_out(self):
+        empty = {"result": {"runningProcesses": []}}
+        with mock.patch.object(metal_capture.mobile_gamecube, "device_call",
+                               return_value=empty):
+            with self.assertRaises(RuntimeError):
+                metal_capture.wait_for_process("IPAD", timeout_s=0, sleep=lambda s: None)
 
     def test_check_passes_on_clean_probe_and_fails_dirty(self):
         ok = SimpleNamespace(returncode=0, stderr="")
@@ -61,8 +78,11 @@ class MetalCaptureTests(unittest.TestCase):
 
             with mock.patch.object(metal_capture.mobile_gamecube, "launch") as launch, \
                     mock.patch.object(metal_capture.mobile_gamecube, "collect") as collect, \
+                    mock.patch.object(metal_capture, "wait_for_process",
+                                      return_value=4242) as wait, \
                     mock.patch.object(metal_capture.time, "sleep") as sleep:
                 receipt = metal_capture.capture(args, clock=sleep, run=fake_run)
+                wait.assert_called_once_with("IPAD")
             launch.assert_called_once()
             sent = launch.call_args[0][0]
             self.assertEqual(sent.device, "IPAD")
@@ -83,6 +103,7 @@ class MetalCaptureTests(unittest.TestCase):
             args = capture_args(sequence=seq, output=outdir)
             record = SimpleNamespace(returncode=1, stderr="attach refused")
             with mock.patch.object(metal_capture.mobile_gamecube, "launch"), \
+                    mock.patch.object(metal_capture, "wait_for_process", return_value=4242), \
                     mock.patch.object(metal_capture.mobile_gamecube, "collect") as collect:
                 with self.assertRaises(RuntimeError):
                     metal_capture.capture(args, clock=lambda s: None,

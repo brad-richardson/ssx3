@@ -48,10 +48,27 @@ def check_device(device, run=subprocess.run):
     return True
 
 
-def build_record_command(*, device, template, window, output):
+def build_record_command(*, device, template, window, output, pid):
     return ["xctrace", "record", "--template", template, "--device", device,
-            "--attach", PROCESS, "--time-limit", f"{window}s",
+            "--attach", str(pid), "--time-limit", f"{window}s",
             "--no-prompt", "--output", str(output)]
+
+
+def wait_for_process(device, timeout_s=30, poll_s=2, sleep=time.sleep):
+    """Poll the device process list for our executable; attach needs a PID."""
+    deadline = time.monotonic() + timeout_s
+    while True:
+        result = mobile_gamecube.device_call(
+            ["device", "info", "processes", "--device", device], timeout=60)
+        processes = (result.get("result", {}) or {}).get("runningProcesses", [])
+        for process in processes:
+            executable = process.get("executable", "")
+            if executable.rsplit("/", 1)[-1] == PROCESS:
+                return process["processIdentifier"]
+        if time.monotonic() >= deadline:
+            raise RuntimeError(f"{PROCESS} not running on {device} "
+                               f"(exited early? check the session)")
+        sleep(poll_s)
 
 
 def launch_namespace(args):
@@ -73,10 +90,13 @@ def capture(args, clock=time.sleep, run=subprocess.run):
     trace = outdir / "capture.trace"
     mobile_gamecube.launch(launch_namespace(args))
     clock(args.attach_delay)
+    pid = wait_for_process(args.device)
     completed = run(build_record_command(device=args.device, template=args.template,
-                                         window=args.window, output=trace))
+                                         window=args.window, output=trace, pid=pid),
+                    capture_output=True, text=True)
     if completed.returncode:
-        raise RuntimeError(f"xctrace record failed: {completed.stderr.strip()[:300]}")
+        stderr = (completed.stderr or "").strip()[:300]
+        raise RuntimeError(f"xctrace record failed: {stderr}")
     collect_args = argparse.Namespace(device=args.device, simulator=False)
     mobile_gamecube.collect(collect_args)
     receipt = {
