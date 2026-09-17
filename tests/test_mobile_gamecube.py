@@ -1,5 +1,6 @@
 import argparse
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -341,6 +342,35 @@ class DeviceLaunch(unittest.TestCase):
                             flags.append("-ssxAutoTest")
                         flags.extend(["-ssxOutputScale", scale])
                         self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:], flags)
+
+
+class DeviceCollect(unittest.TestCase):
+    def test_fresh_container_without_screenshots_still_collects(self):
+        copied = []
+
+        def fake_device_call(argv, **kwargs):
+            source = argv[argv.index("--source") + 1]
+            if "ScreenShots" in source or "Dump/Audio" in source:
+                raise subprocess.CalledProcessError(1, argv)
+            copied.append(source)
+
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "device_call", side_effect=fake_device_call):
+            mobile_gamecube.collect(argparse.Namespace(device="PHONE", simulator=False))
+        self.assertEqual(copied, ["Documents/Reports"])
+
+    def test_simulator_fresh_container_without_screenshots_still_collects(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                tempfile.TemporaryDirectory() as documents, \
+                mock.patch.object(mobile_gamecube, "REPORTS", Path(tmp)), \
+                mock.patch.object(mobile_gamecube, "simulator_documents",
+                                  return_value=Path(documents)):
+            (Path(documents) / "Reports").mkdir()
+            mobile_gamecube.collect(argparse.Namespace(device="SIM", simulator=True))
+            collected = next(iter(Path(tmp).iterdir()))
+            self.assertTrue((collected / "Reports").is_dir())
+            self.assertFalse((collected / "ScreenShots").exists())
 
 
 class WorldPush(unittest.TestCase):

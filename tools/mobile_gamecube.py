@@ -442,22 +442,27 @@ def collect(args):
     destination.mkdir(parents=True)
     if args.simulator:
         documents = simulator_documents(args)
-        for source, folder in (("Reports", "Reports"), ("User/ScreenShots", "ScreenShots")):
-            shutil.copytree(documents / source, destination / folder)
+        shutil.copytree(documents / "Reports", destination / "Reports")
+        if (documents / "User/ScreenShots").is_dir():
+            shutil.copytree(documents / "User/ScreenShots", destination / "ScreenShots")
         if (documents / "User/Dump/Audio").is_dir():
             shutil.copytree(documents / "User/Dump/Audio", destination / "Audio")
         print(f"Collected simulator reports: {destination}")
         return
-    for source, folder in (("Documents/Reports", "Reports"), ("Documents/User/ScreenShots", "ScreenShots")):
-        device_call(["device", "copy", "from", "--device", args.device,
-                     "--source", source, "--destination", str(destination / folder),
-                     "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=300)
-    try:
-        device_call(["device", "copy", "from", "--device", args.device,
-                     "--source", "Documents/User/Dump/Audio", "--destination", str(destination / "Audio"),
-                     "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=300)
-    except subprocess.CalledProcessError:
-        print("No audio dump in container")
+    device_call(["device", "copy", "from", "--device", args.device,
+                 "--source", "Documents/Reports", "--destination", str(destination / "Reports"),
+                 "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=300)
+    # Screenshots and audio dumps may not exist yet on a fresh container.
+    for source, folder, missing in (("Documents/User/ScreenShots", "ScreenShots",
+                                     "No screenshots in container"),
+                                    ("Documents/User/Dump/Audio", "Audio",
+                                     "No audio dump in container")):
+        try:
+            device_call(["device", "copy", "from", "--device", args.device,
+                         "--source", source, "--destination", str(destination / folder),
+                         "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE], timeout=300)
+        except subprocess.CalledProcessError:
+            print(missing)
     print(f"Collected: {destination}")
 
 
