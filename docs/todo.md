@@ -5,6 +5,77 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Codegen entry-switch pruning, one-chunk spike (September 17,
+      perf-review §2, TOP avg-75 lever, desktop-only): every guest
+      instruction is an entry-dispatcher case, forbidding
+      cross-instruction register allocation; 77–83% of cases prunable
+      to block leaders, PC stored at 95% of instructions. Guest bodies
+      are 45–57% of cycles — a 1.3× there is ~1.15× overall. Bounded
+      experiment: regenerate ONE hot chunk (8022D7A0/802197A0) with
+      entry cases restricted to leaders ∪ return_targets ∪
+      pre-return materialised addresses + cleared materialize_pc off
+      hook paths; A/B via gamecube_movie_ab (trajectory-gated) +
+      chunk signposts. Measurement is movie + wall throughput, NOT
+      the profiler (update side unobservable by construction).
+      Correctness enumeration (starts, m_return_hooks, loop heads,
+      exception vectors) before any rollout. Proposed: desktop spike
+      agent, no device needed.
+- [ ] fast-FP on/off re-A/B off the wall (September 17, perf-review
+      §1, HIGH): the "0.00 prize" and the STOP/no-rebuild decision
+      were measured at the phantom wall (void). The 0.83× reality may
+      reverse the descope. Needs Odin or desktop A/B with CPU-ms per
+      guest frame as the metric.
+- [ ] Determinism on/off re-test (September 17, perf-review §1+§4,
+      HIGH): "0.0%" void; the determinism switch (not SyncGPU) is
+      what double-decodes every FIFO byte on movie runs. Re-test
+      quantifies the harness tax all movie numbers carry. Record
+      plainly: the FIFO fix (309f639) unblocked measurement, it did
+      not fix a shipping bug (gated on deterministic-GPU mode, a
+      no-op in normal rides).
+- [ ] EFB re-A/B + EFB-copy cost (September 17, perf-review §1+§6):
+      "EFB 2× full speed" void; re-A/B 1×/2×. Separate: CopyRender-
+      TargetToTexture is 1.18% on the video thread, untouched by the
+      (CPU-access) EFB verdict.
+- [ ] Throttle s64 intermediate hardening (September 17, perf-review
+      §1, post-affinity): ticks * new_clock_per_sec can approach the
+      s64 limit (~2.4e18 vs 9.2e18, unbounded pre-first-Throttle);
+      divide-first or __int128, zero behavior change. Record alongside:
+      the was_limited guard (not Throttle's short-circuit) protects
+      UpdateSpeedLimit's transition division — do not refactor away.
+- [ ] Memory fast paths, ranked (September 17, perf-review §3,
+      post-affinity, desktop-A/B-able): (1) #if-out g_mem_write_journal
+      (XS, nothing ships it); (2) GC compile-time constants — no EXRAM
+      branch, folded bound check — plus convert_to_double
+      always_inline (0.66% outlined, same failure as psq); (3) hoist
+      the gather-pipe test into mem_write* (HookExternalWrite 1.69% +
+      Write32 1.16% + indirect-call overhead); (4) preserve_most on
+      cold hooks; (5) fastmem last (structural).
+- [ ] Desktop cost-table re-run (September 17, perf-review §4,
+      post-affinity): the "needs 1.3–1.9×" arithmetic predates the FP
+      wave by a day and was taken with validation on. Re-run on a HEAD
+      module with MTL_DEBUG_LAYER pinned off before quoting again
+      (player + script preserved, cheap).
+- [ ] Harness measurement fixes (September 17, perf-review §1+§4,
+      post-affinity batch): allow EmulationSpeed=0 (true unlimited;
+      native_gamecube.py + m7run.sh hardcode 10); record the vertex
+      loader in every receipt (Odin runs the ARM64 JIT, iOS/desktop
+      the portable loader — all render-cost comparisons cross it);
+      pin MTL_DEBUG_LAYER off for measurement runs and assert it;
+      move screenshots + dispatch-sampling out of trial windows.
+- [ ] Texture-cache mode + video-thread atomics (September 17,
+      perf-review §6, low-medium, post-affinity): Safe-mode
+      re-hashing at 0.58% never A/B'd; __aarch64_cas1 1.52% + futex
+      share on the video thread unexplained.
+- [ ] 120Hz track: replay re-scope + empty-queue sync (September 17,
+      perf-review §5): re-scope replay to "re-issue a recorded frame
+      with patched XF + new XFB?" (drops the exact-fidelity bar an
+      interpolated frame doesn't need); schedule the named fix for
+      the per-frame empty-queue GPU sync (~3.3ms floor, 2.74ms spin,
+      largest named render item, fix named but never scheduled).
+- [ ] Research/product boundary plan (September 17, perf-review §7,
+      planning): the trial system (~2.8k lines, 20 hard-coded guest
+      addresses) ships in the app with no stated plan for what
+      becomes product. Needs an explicit cut line.
 - [ ] Odin thread affinity/priority (September 17, review finding 4): the
       one hot thread's placement on the 1+4+3 Snapdragon is worth more
       than any helper inlining, and nothing in the headless runner or
@@ -58,6 +129,10 @@ the build or commit that closed them.
       ThinLTO layout). A retry needs a layout strategy (PGO, hot/cold
       split, section ordering), not a blind rebuild. Evidence + exact
       design preserved in local/research/fcmp/ (dylibs, legs, NOTES.md).
+      September 17 (perf-review §2/§6): read as evidence of a
+      layout/I-cache-bound regime, not a mystery — the retry is an
+      order file built from line_tables + the 63 chunk signposts,
+      not a blind re-inline.
 - [ ] Onscreen trial hardening (September 17): budget-stop fires up to
       1 s late (integer-division truncation, inherited) — 1-line XS fix,
       noted untested. Vulkan present hook not built (needs a core-vk
@@ -86,14 +161,6 @@ the build or commit that closed them.
       construction and the SpeedFloor judges what it perturbs. Move status
       checks behind the boundary-PC filter. Minor: kind shadowing,
       watchdog-only at+120. Note: t3-vs-t4 stands (both pay it equally).
-- [ ] Pace mechanism (September 17): the ~1.16 ceiling is STRUCTURAL,
-      not Odin throttling — desktop Metal uncapped binds at menu ~1.17
-      (69.5fps rock-steady, validation on/off identical, 3 runs) matching
-      Odin EGL 1.1626 / Vulkan 1.1627 to 4 decimals. Fast-FP A/B identical
-      on Odin. Backend/SyncGPU/placement-independent. Root cause unknown
-      (dual-core/static-recomp sync? handoff-quantum/EFB-sync?); this
-      gates every wall-clock win AND the avg-75 milestone on all devices.
-      Race ceiling still unmeasured anywhere (panic-blocked).
 - [ ] Frame-exact snow A/B (September 17, review finding 11 caveat): the
       standing backend-independent verdict is movie-aligned (same
       m3-menu.dtm, matched race timers, deterministic panic point,
@@ -106,8 +173,9 @@ the build or commit that closed them.
 - [ ] Hot-thread affinity/priority (September 17, review finding 4):
       M7 capture shows the scheduler holds the hot thread on prime core
       7 unpinned in all 8 runs (video wanders 0/1/4/5) — pinning deferred
-      unless a regression appears. Revisit only if a future profile
-      shows migration.
+      unless a regression appears. **SUPERSEDED September 17 (perf-review
+      §1): the 0.0% pinning verdict was measured at the phantom wall
+      (void). Affinity agent launched on the Odin — see top of Now.**
 - [ ] Alpha-period residual (September 17, review finding 5): alpha uses
       TicksPerSecond/59.94 while Deadline uses /120 (prior review note,
       still open). Reconcile before re-issuing gate 4b.
@@ -167,7 +235,13 @@ the build or commit that closed them.
       (0.97–1.0 capped, ~1.05–1.16 uncapped) from module -O2+ThinLTO,
       idle skip, and EFB 1 alone; new profile: endian helpers 12.1→0.00,
       FP outlined 25.8→16.2, CPU core now the frontier (Run/HookExternal/
-      dispatch). Snow corruption SURVIVES: clean at race 0:04, garbage by
+      dispatch). **SUPERSEDED September 17 (perf-review §1/§8): the
+      uncapped arm sat at the phantom wall (void); "12.1→0.00" reads
+      "inlined, now unattributable" (cost moved into func_* bodies);
+      the profile predates Wave B (morning-review finding 1); "full
+      speed in-race" contradicts the verified 0.83× race pace —
+      reconciliation via a capped arm is steered into the affinity
+      agent.** Snow corruption SURVIVES: clean at race 0:04, garbage by
       0:14 — onset inside the race just before the ~0:15 FIFO-panic point
       (see /tmp/m5/shots-e). Lead: pre-panic FIFO-state symptom; the
       texture-path investigation should chase onset timing first.
@@ -987,9 +1061,18 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 pace mechanism: RESOLVED — the ~1.16 ceiling was u32
+      throttle-clock overflow, not structural (fixed 1f1bc2d). True
+      Odin race ceiling 0.83× OGL / 0.73× VK (m3-menu, verified
+      racing). Voids the at-wall verdicts: fast-FP 0.00, determinism
+      0.0%, pinning 0.0%, EGL==Vulkan, EFB-2× full speed, desktop 1.17
+      + validation sub-verdict, psq wall-clock null (perf-review §1;
+      current numbers in docs/numbers-ledger.md).
 - [x] 2026-09-17 desktop ceiling probe: uncapped menus bind at ~1.17
       (69.5fps, rock-steady across validation on/off + movie runs) —
       the pace is structural, matching Odin EGL/Vulkan to 4 decimals.
+      **VOID September 17 (1f1bc2d + perf-review §1): the wall was u32
+      throttle overflow; true race ceiling is 0.83× OGL / 0.73× VK.**
       Race ceiling unmeasured (panic). Evidence
       local/research/ceil-probe/. Tooling kept: SSX3_EMULATION_SPEED
       passthrough (+ test).
