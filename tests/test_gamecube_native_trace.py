@@ -72,11 +72,17 @@ class NativeTraceTests(unittest.TestCase):
         extra_row = rows[-1]
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
+        rows.append(dict(event='interpolation', repeat=1, wall=4, blended=3))
+        smooth_blend = rows[-1]
         # Leg 4 restores after its cancel and injects a clean extra draw.
         rows.append(dict(event='f_trial', action='restored', wall=10))
         combined_restore = rows[-1]
         rows.append(event(repeat=1, result=1, view_matrix_calls=1, frame_end_calls=1, wall=10))
         combined_extra = rows[-1]
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        rows.append(dict(event='interpolation', repeat=1, wall=10, blended=2))
+        combined_blend = rows[-1]
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
         # A draw from before the restart cannot satisfy trial 2: with a stale
         # schedule epoch the second trial limits instantly and makes nothing.
@@ -128,6 +134,17 @@ class NativeTraceTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             validate_trial_trace(rows)
         combined_extra['rng_changed'] = 0
+        self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
+        # A duplicate frame must not pass as an interpolated extra: zero
+        # blends in either smoothing window fails even with clean extras.
+        smooth_blend['blended'] = 0
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        smooth_blend['blended'] = 3
+        combined_blend['blended'] = 0
+        with self.assertRaises(RuntimeError):
+            validate_trial_trace(rows)
+        combined_blend['blended'] = 2
         self.assertTrue(validate_trial_trace(rows)['lifecycle_complete'])
 
     def test_rejected_call_is_not_a_successful_draw(self):

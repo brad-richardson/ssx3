@@ -5,6 +5,32 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Course texture/lighting review (user, September 16): wild-looking
+      textures with the lighting observed in-course as a casual observer —
+      particularly ground/snow. Needs a review pass over the course's
+      textures and lightmaps.
+- [ ] 120 Hz verdict re-issue after the generation fix (September 16): the
+      architecture review ([review-2026-09-16-architecture.md](research/review-2026-09-16-architecture.md)
+      finding 1) withdrew gate-4b MECHANICS GREEN and the phone Combined
+      oracle — every extra under F doubling was drawn unblended. The
+      one-generation-per-tick fix, the blended validator gate, and the
+      trialExtrasBlended phone metric are in; still needed: rerun interp-fx
+      and the lifecycle combined leg and confirm blended > 0, re-run the
+      phone Combined trial with blending actually on (that number, not the
+      recorded one, decides whether retained host palettes are next), and
+      re-issue both verdicts.
+- [ ] Arch-review findings 2–4 (September 16): (2) consolidate the trial
+      state machine (four headers of file-scope statics; SSXResetNativeTrial
+      misses counters) into per-namespace TrialState with a single Finish;
+      (3) add a tainted-guest guard so a verify-failed halved guest can never
+      be checkpointed; (4) decide explicitly whether the ship path doubles
+      unconditionally or keeps the rider-state gate, and record it in the
+      plan of record. Plus the §5 smaller items (Output() abort on device,
+      App.mm trial-flag table, stale menu label, Deadline/alpha periods).
+- [ ] iPad GPU trace analysis (September 16): first Metal System Trace of a
+      smoothing trial window captured (local/reports/gpu-captures/20260917-015031,
+      191 MB, receipted, trial Finished). Still needed: the per-process
+      GPU-ms extraction recipe (xctrace export --toc/--xpath) for SSXNative.
 - [ ] Plan of record: [implementation plan, September 15](impl-plan-2026-09-15.md).
       The three in-flight agents landed (Aloha collision, boot-time course
       redirect, breaking glass) and are pushed. **Done September 15 (later):**
@@ -322,6 +348,9 @@ the build or commit that closed them.
       interp compose: 60/60 doubled, 36/36 interpolated extras at
       alpha 0.6–0.78, zero eviction, zero wedge) — remaining 4b is
       the combined trial kind on the phone with present.csv oracle.
+      **WITHDRAWN September 16 (later)** — the 36/36 extras were
+      unblended duplicates (generation double-count; review finding 1).
+      Re-issue needs the interp-fx/lifecycle reruns with blended > 0.
       Trap logged: DTM playback stomps GFX config from the movie
       header (fixed via det-sched.dtm byte 149);
       (5) pacing acceptance (>=117 displayed/s + sim speed >= 0.98 +
@@ -374,6 +403,9 @@ the build or commit that closed them.
       apart at the end, clean Finished, no stuck Running. Post-trial fps
       dip at seq ~196 repeats run B's at the same sequence point: section
       confounder, not trial-related.
+      **ORACLE UNDERSTATED September 16 (later)** — the immediate-XF upload
+      path was effectively disabled (zero blends), so the composed cost
+      understates; the honest re-run number decides retained host palettes.
       **Perf spikes September 16 (desktop, phone down):** five parallel
       spikes, zero tracked edits, artifacts in local/research/120hz/spike-*/.
       Render breakdown maps 11.05ms quiet pair+render (top: 4.73ms update-pair

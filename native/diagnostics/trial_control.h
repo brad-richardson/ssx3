@@ -14,7 +14,7 @@ inline std::atomic<Status> status{Status::Idle};
 inline std::atomic<Kind> kind{Kind::Smoothing};
 inline std::atomic<bool> cancel{false};
 inline std::atomic<bool> limited{false};
-inline std::atomic<unsigned> frames{0}, extras{0}, updates_doubled{0};
+inline std::atomic<unsigned> frames{0}, extras{0}, updates_doubled{0}, extras_blended{0};
 inline std::string log_path; // set only while the runtime is stopped
 inline double ends=0;       // CPU thread only
 // Requests are terminal-state-only: overwriting a live trial would orphan its
@@ -25,7 +25,7 @@ inline void Begin(Kind next) {
  if(live==Status::Waiting||live==Status::Running){
   std::fprintf(stderr,"[native-trial] request ignored: trial already active\n");return;
  }
- cancel=false; limited=false; frames=0; extras=0; updates_doubled=0; kind=next; status=Status::Waiting;
+ cancel=false; limited=false; frames=0; extras=0; updates_doubled=0; extras_blended=0; kind=next; status=Status::Waiting;
 }
 inline void Request() { Begin(Kind::Smoothing); }
 inline void RequestF() { Begin(Kind::F); }

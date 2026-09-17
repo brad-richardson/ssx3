@@ -68,7 +68,10 @@ static void WriteXF(CPUState& c,const Matrix& m,u32 address,unsigned count) {
 }
 static void Before(CPUState& c) {
  auto& timing=Core::System::GetInstance().GetCoreTiming();
- if(update.pending&&c.pc==update.ret){++generation;update_ticks=timing.GetTicks();}
+ // Count one generation per tick at the first half's return: under F doubling
+ // the repeat half returns through update.ret too, and counting it would
+ // advance two generations per tick and empty the pose history every frame.
+ if(update.pending&&c.pc==update.ret&&!update.repeated){++generation;update_ticks=timing.GetTicks();}
  if(render.pending&&c.pc==render.ret){
 #ifdef SSX_NATIVE_TRIAL_APP
   // Frames count completed draws during any running trial; extras need an
@@ -78,6 +81,7 @@ static void Before(CPUState& c) {
                    NativeTrial::status.load()==NativeTrial::Status::Running;
   if((active||f_run)&&(c.gpr[3]&255)&&frame_end_calls){
    ++NativeTrial::frames;if(active&&render.repeated)++NativeTrial::extras;
+   if(render.repeated&&blended>0)++NativeTrial::extras_blended;
   }
 #endif
   if(active){
@@ -173,7 +177,7 @@ extern "C" void SSXResetNativeTrial(const char* path){
  NativeTrial::log_path=path?path:"";NativeTrial::status=NativeTrial::Status::Idle;NativeTrial::cancel=false;
  NativeTrial::limited=false;
  NativeTrial::kind=NativeTrial::Kind::Smoothing;
- NativeTrial::frames=NativeTrial::extras=NativeTrial::updates_doubled=0;NativeTrial::ends=0;
+ NativeTrial::frames=NativeTrial::extras=NativeTrial::updates_doubled=0;NativeTrial::extras_blended=0;NativeTrial::ends=0;
  f_patched=false;
  NativeSchedule::deadline={};NativeSchedule::last_draw=0;
  NativeSchedule::schedule_started=NativeSchedule::mode_changed=false;

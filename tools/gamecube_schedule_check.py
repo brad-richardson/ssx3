@@ -50,6 +50,15 @@ def validate_trial_trace(rows):
                 r.get('rng_changed') != 0 or r.get('position_changed') != 0 or
                 any(r.get(k) != [] for k in ('body_offsets', 'app_offsets', 'view_offsets'))):
             raise RuntimeError('Lifecycle extra draw changed watched guest state')
+    # An extra drawn at the current pose is a duplicate frame, and presents/s
+    # cannot tell the difference: at least one smoothing extra must genuinely
+    # blend. (The first extra after a history reset legitimately blends
+    # nothing, so this is existential, not per-draw.)
+    smooth_blends = [r for r in rows if r.get('event') == 'interpolation' and r.get('repeat') and
+                     walls['restart'] < r.get('wall', 0) < walls['restart2'] and
+                     r.get('blended', 0) > 0]
+    if not smooth_blends:
+        raise RuntimeError('Lifecycle smoothing trial never blended an extra draw')
     # Leg 3 re-runs F and cancels it idle. Finishing without restoring would
     # strand the guest halved, so the restore after that cancel is required.
     # The window ends at leg 4's cancel, not its start: the driver prints
@@ -78,6 +87,10 @@ def validate_trial_trace(rows):
                 r.get('rng_changed') != 0 or r.get('position_changed') != 0 or
                 any(r.get(k) != [] for k in ('body_offsets', 'app_offsets', 'view_offsets'))):
             raise RuntimeError('Lifecycle combined extra draw changed watched guest state')
+    combined_blends = [r for r in rows if r.get('event') == 'interpolation' and r.get('repeat') and
+                       r.get('wall', 0) > walls['restart3'] and r.get('blended', 0) > 0]
+    if not combined_blends:
+        raise RuntimeError('Lifecycle combined trial never blended an extra draw')
     return dict(lifecycle_complete=True, complete_extras=len(extras), first_trial_repeats=len(repeats))
 
 

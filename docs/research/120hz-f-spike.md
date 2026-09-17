@@ -889,3 +889,12 @@ deadline extras + completion alias through the proven 92/s
 presentation path) with present.csv as the display oracle —
 desktop cannot show >60 displayed/s. Repro: sched-f-player2 /
 interp-f-player + det-sched.dtm + SKIP=1946/TICKS=60.
+
+**September 16 (later) — verdict WITHDRAWN, see the [architecture
+review](review-2026-09-16-architecture.md) finding 1.** v2's "36/36
+interpolated extras" were drawn at the current pose: under F doubling
+`Before` counted two generations per tick, so the pose history rejected
+every frame (`blended:0` on all 97 interpolation rows) while alpha still
+read 0.60–0.78. The validator now requires blended extras and the fix
+counts one generation per tick; this verdict stands withdrawn until the
+interp-fx and lifecycle reruns confirm blended > 0.

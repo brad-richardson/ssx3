@@ -1086,6 +1086,7 @@ static void SSXLaunchTrace(NSString* step) {
       @"trialStatus":@(static_cast<int>(NativeTrial::status.load())),
       @"trialKind":@(static_cast<int>(NativeTrial::kind.load())),
       @"trialLimited":@(NativeTrial::limited.load()), @"trialExtras":@(NativeTrial::extras.load()),
+      @"trialExtrasBlended":@(NativeTrial::extras_blended.load()),
       @"trialDoubled":@(NativeTrial::updates_doubled.load()),
       @"callbackTiming":@{@"update":CallbackSummary(CallbackTimer::Drain(CallbackTimer::update_ring)),
         @"render":CallbackSummary(CallbackTimer::Drain(CallbackTimer::render_ring)), @"cpuThread":@(_cpuThread)},
