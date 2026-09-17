@@ -302,10 +302,16 @@ index 981e098..bd8124d 100644
    Core::Shutdown(Core::System::GetInstance());
    m_impl->booted = false;
 diff --git a/src/runtime/game.cpp b/src/runtime/game.cpp
-index f2edf83..14cf2a2 100644
+index f2edf83..b7048a2 100644
 --- a/src/runtime/game.cpp
 +++ b/src/runtime/game.cpp
-@@ -8,6 +8,12 @@
+@@ -4,10 +4,18 @@
+ #include <array>
+ #include <bit>
+ #include <cctype>
++#include <cstdio>
++#include <cstdlib>
+ #include <fstream>
  #include <iomanip>
  #include <sstream>
  #include <vector>
@@ -318,7 +324,7 @@ index f2edf83..14cf2a2 100644
  
  namespace moderngekko
  {
-@@ -32,29 +38,87 @@ std::uint32_t ReadBE32(const std::uint8_t* p)
+@@ -32,29 +40,87 @@ std::uint32_t ReadBE32(const std::uint8_t* p)
           (std::uint32_t{p[2]} << 8) | p[3];
  }
  
@@ -419,7 +425,7 @@ index f2edf83..14cf2a2 100644
      for (std::size_t i = 0; i < 64; ++i)
      {
        const auto s1 = std::rotr(e, 6) ^ std::rotr(e, 11) ^ std::rotr(e, 25);
-@@ -64,14 +128,22 @@ std::string Sha256(std::vector<std::uint8_t> data)
+@@ -64,14 +130,22 @@ std::string Sha256(std::vector<std::uint8_t> data)
        const auto maj = (a & b) ^ (a & c) ^ (b & c);
        hh = g; g = f; f = e; e = d + t1; d = c; c = b; b = a; a = t1 + s0 + maj;
      }
@@ -449,7 +455,7 @@ index f2edf83..14cf2a2 100644
  }
  
  std::optional<std::vector<std::uint8_t>> ReadFile(const std::filesystem::path& path)
-@@ -92,10 +164,19 @@ std::optional<std::vector<std::uint8_t>> ReadFile(const std::filesystem::path& p
+@@ -92,10 +166,19 @@ std::optional<std::vector<std::uint8_t>> ReadFile(const std::filesystem::path& p
  
  std::optional<std::string> HashFileSha256(const std::filesystem::path& path)
  {
@@ -472,3 +478,127 @@ index f2edf83..14cf2a2 100644
  }
  
  std::optional<std::string> HashDirectorySha256(const std::filesystem::path& root)
+@@ -141,6 +224,114 @@ std::optional<std::string> HashDirectorySha256(const std::filesystem::path& root
+   return Sha256(std::move(manifest));
+ }
+ 
++struct AssetsMetaEntry
++{
++  std::string relative;
++  std::uint64_t size = 0;
++  std::uint64_t mtime = 0;
++};
++
++// Assets-hash metadata cache. HashDirectorySha256 reads every byte of files/
++// on every boot (1.2 GB from the desktop share); the hash itself is
++// provenance-only (receipts), so remember it keyed on the sorted per-file
++// (path, size, mtime) manifest. The cache lives in sys/, outside files/, so
++// it can never perturb the hash. Any error, any mismatch, or
++// SSX3_FULL_ASSET_HASH=1 falls back to a full re-hash. Same-size rewrites
++// within the filesystem's mtime granularity (notably exFAT's 2 s) reuse a
++// stale hash — acceptable for a receipt, never for a gate.
++std::optional<std::vector<AssetsMetaEntry>> ScanAssetsMeta(const std::filesystem::path& files)
++{
++  std::error_code ec;
++  if (!std::filesystem::is_directory(files, ec) || ec)
++    return std::nullopt;
++  std::vector<std::filesystem::path> paths;
++  std::filesystem::recursive_directory_iterator iterator(
++      files, std::filesystem::directory_options::skip_permission_denied, ec);
++  const std::filesystem::recursive_directory_iterator end;
++  while (!ec && iterator != end)
++  {
++    if (iterator->is_regular_file(ec) && !ec)
++      paths.push_back(iterator->path());
++    iterator.increment(ec);
++  }
++  if (ec)
++    return std::nullopt;
++  std::vector<AssetsMetaEntry> entries;
++  for (const auto& path : paths)
++  {
++    const std::string relative = std::filesystem::relative(path, files, ec).generic_string();
++    const auto size = std::filesystem::file_size(path, ec);
++    if (ec)
++      return std::nullopt;
++    const auto mtime = std::filesystem::last_write_time(path, ec);
++    if (ec)
++      return std::nullopt;
++    entries.push_back({relative, static_cast<std::uint64_t>(size),
++                       static_cast<std::uint64_t>(mtime.time_since_epoch().count())});
++  }
++  std::ranges::sort(entries, [&](const auto& left, const auto& right) {
++    return left.relative < right.relative;
++  });
++  return entries;
++}
++
++std::string AssetsMetaText(const std::vector<AssetsMetaEntry>& entries)
++{
++  std::string text;
++  for (const auto& entry : entries)
++  {
++    text += std::to_string(entry.size);
++    text += ' ';
++    text += std::to_string(entry.mtime);
++    text += ' ';
++    text += entry.relative;
++    text += '\n';
++  }
++  return text;
++}
++
++std::optional<std::string> CachedAssetsSha256(const std::filesystem::path& root)
++{
++  const auto files = root / "files";
++  const auto meta = ScanAssetsMeta(files);
++  if (!meta)
++    return HashDirectorySha256(files);
++  const std::string current = AssetsMetaText(*meta);
++  const auto cache_path = root / "sys" / ".ssx3_assets_cache";
++  if (std::getenv("SSX3_FULL_ASSET_HASH") == nullptr)
++  {
++    std::ifstream cache(cache_path);
++    std::string line;
++    if (cache && std::getline(cache, line) && line == "ssx3-assets-cache-v1" &&
++        std::getline(cache, line) && line == root.generic_string())
++    {
++      std::string hash;
++      if (std::getline(cache, hash))
++      {
++        const std::string rest((std::istreambuf_iterator<char>(cache)), {});
++        if (rest == current)
++        {
++          std::fprintf(stderr, "[ssx3-assets] metadata cache hit (%zu files)\n", meta->size());
++          return hash;
++        }
++      }
++    }
++  }
++  const auto hash = HashDirectorySha256(files);
++  if (!hash)
++    return std::nullopt;
++  if (std::getenv("SSX3_FULL_ASSET_HASH") == nullptr)
++  {
++    std::error_code ec;
++    std::filesystem::create_directories(cache_path.parent_path(), ec);
++    std::ofstream out(cache_path, std::ios::trunc);
++    if (out)
++      out << "ssx3-assets-cache-v1\n" << root.generic_string() << '\n' << *hash << '\n' << current;
++  }
++  std::fprintf(stderr, "[ssx3-assets] hashed %zu files\n", meta->size());
++  return hash;
++}
++
+ GameInspectResult InspectGame(const std::filesystem::path& input_root)
+ {
+   std::error_code ec;
+@@ -215,7 +406,7 @@ GameInspectResult InspectGame(const std::filesystem::path& input_root)
+       return {{}, "can't hash files/_Main.rel"};
+     metadata.rel_sha256 = *rel_hash;
+   }
+-  const auto assets_hash = HashDirectorySha256(root / "files");
++  const auto assets_hash = CachedAssetsSha256(root);
+   if (!assets_hash)
+     return {{}, "can't hash the files directory"};
+   metadata.assets_sha256 = *assets_hash;

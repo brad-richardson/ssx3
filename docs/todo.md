@@ -74,7 +74,8 @@ the build or commit that closed them.
       trials run (see Done) but extras are counted/blended draws, not
       presented frames — no display-link proof. Still pending: Vulkan trial
       run (same binary, --graphics Vulkan), APK surface/swap path. Window
-      is panic-bound (~10 s; natural 35 s end unreachable).
+      is panic-bound (~10 s; natural 35 s end unreachable). QUEUED behind
+      the re-profile campaign for the Odin (user-approved next).
 - [ ] New menu entry / new peak = fixed-table surgery, parked (September 17):
       menu spike proved Tricky tracks are menu-selectable TODAY via the
       existing manifest (Aloha Ice Jam hosted on event 5 R&B row, 3-field
@@ -119,12 +120,14 @@ the build or commit that closed them.
       tick under-advancement by the skip itself, or an extras-gate
       (deadline/veto/injection-pattern) interaction with burst
       dispatches — needs the skip code + one fresh desktop idle A/B.
-- [ ] Desktop launch re-hashes the game every boot (September 17):
-      `moderngekko-run` spends its whole startup in `InspectGame →
-      HashDirectorySha256` over the 1.2 GB share root (sampled main
-      thread; per-char iostream reads), so fresh-profile runs die at
-      `--seconds 90` before the module loads. Cache the inspection by
-      size/mtime (or add a skip flag) to unblock fast A/B iteration.
+- [ ] Boot asset-hash cache: boot verification (September 17): the
+      re-hash hits ALL devices (InspectGame in the shared boot path, not
+      desktop-only). Landed: size/mtime-manifest cache in sys/
+      (.ssx3_assets_cache), best-effort with full-hash fallback,
+      SSX3_FULL_ASSET_HASH=1 force flag, hit/miss stderr lines; patch
+      applies byte-exact, outer stack green, game.cpp syntax-clean.
+      Still needs a desktop boot test (miss → hit → touch-invalidation)
+      once the desktop frees up (idle-A/B + fcmp building now).
 - [ ] Odin viability gap (September 16): M3 proved scripted input drives a
       live Snow Jam race on the Odin3 (Pipe/0/ssx3 backend, no rebuild) but
       the device holds only ~1/8th speed in-race (stderr speed ~0.11–0.13)
