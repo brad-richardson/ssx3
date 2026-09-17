@@ -31,6 +31,15 @@ class MetalCaptureTests(unittest.TestCase):
              "--attach", "4242", "--time-limit", "60s",
              "--no-prompt", "--output", "/tmp/c.trace"])
 
+    def test_record_command_all_processes_skips_attach(self):
+        self.assertEqual(
+            metal_capture.build_record_command(device="IPAD", template="Metal System Trace",
+                                               window=60, output=Path("/tmp/c.trace"),
+                                               all_processes=True),
+            ["xctrace", "record", "--template", "Metal System Trace", "--device", "IPAD",
+             "--all-processes", "--time-limit", "60s",
+             "--no-prompt", "--output", "/tmp/c.trace"])
+
     def test_wait_for_process_matches_executable_basename(self):
         # device_call returns the already-unwrapped "result" object.
         hit = {"deviceIdentifier": "IPAD", "runningProcesses": [
@@ -95,6 +104,29 @@ class MetalCaptureTests(unittest.TestCase):
             saved = json.loads((outdir / "receipt.json").read_text())
             self.assertEqual(saved["trace_sha256"], receipt["trace_sha256"])
             self.assertEqual(saved["run_flags"]["textures"], "remaster")
+
+    def test_capture_all_processes_skips_pid_wait(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            outdir = Path(tmp) / "cap"
+            trace = outdir / "capture.trace"
+            seq = Path(tmp) / "seq.json"
+            seq.write_text("{}")
+            args = capture_args(sequence=seq, output=outdir, all_processes=True)
+            record = SimpleNamespace(returncode=0, stderr="")
+
+            def fake_run(cmd, **kwargs):
+                self.assertIn("--all-processes", cmd)
+                self.assertNotIn("--attach", cmd)
+                trace.write_bytes(b"trace-bytes")
+                return record
+
+            with mock.patch.object(metal_capture.mobile_gamecube, "launch"), \
+                    mock.patch.object(metal_capture.mobile_gamecube, "collect"), \
+                    mock.patch.object(metal_capture, "wait_for_process") as wait, \
+                    mock.patch.object(metal_capture.time, "sleep"):
+                receipt = metal_capture.capture(args, clock=lambda s: None, run=fake_run)
+                wait.assert_not_called()
+            self.assertEqual(receipt["target"], "all-processes")
 
     def test_capture_surfaces_xctrace_failure(self):
         with tempfile.TemporaryDirectory() as tmp:

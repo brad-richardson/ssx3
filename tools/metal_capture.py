@@ -48,9 +48,11 @@ def check_device(device, run=subprocess.run):
     return True
 
 
-def build_record_command(*, device, template, window, output, pid):
+def build_record_command(*, device, template, window, output, pid=None,
+                         all_processes=False):
+    target = ["--all-processes"] if all_processes else ["--attach", str(pid)]
     return ["xctrace", "record", "--template", template, "--device", device,
-            "--attach", str(pid), "--time-limit", f"{window}s",
+            *target, "--time-limit", f"{window}s",
             "--no-prompt", "--output", str(output)]
 
 
@@ -91,9 +93,14 @@ def capture(args, clock=time.sleep, run=subprocess.run):
     trace = outdir / "capture.trace"
     mobile_gamecube.launch(launch_namespace(args))
     clock(args.attach_delay)
-    pid = wait_for_process(args.device)
+    # Device-process attach is broken host-side (xctrace cannot resolve any
+    # device PID or name); --all-processes records system-wide instead and the
+    # app's counters are extracted from the trace by process name.
+    all_processes = getattr(args, "all_processes", False)
+    pid = None if all_processes else wait_for_process(args.device)
     completed = run(build_record_command(device=args.device, template=args.template,
-                                         window=args.window, output=trace, pid=pid),
+                                         window=args.window, output=trace, pid=pid,
+                                         all_processes=all_processes),
                     capture_output=True, text=True)
     if completed.returncode:
         stderr = (completed.stderr or "").strip()[:300]
@@ -102,6 +109,7 @@ def capture(args, clock=time.sleep, run=subprocess.run):
     mobile_gamecube.collect(collect_args)
     receipt = {
         "device": args.device, "template": args.template,
+        "target": "all-processes" if all_processes else f"pid:{pid}",
         "attach_delay_wall_s": args.attach_delay, "window_s": args.window,
         "trace": str(trace), "trace_sha256": sha(trace),
         "sequence": str(args.sequence), "sequence_sha256": sha(args.sequence),
@@ -129,6 +137,8 @@ def main(argv=None):
                      help="Wall seconds after launch to attach (default 160)")
     cap.add_argument("--window", type=float, default=60,
                      help="Recording seconds (default 60)")
+    cap.add_argument("--all-processes", action="store_true",
+                     help="Record system-wide; extract the app by process name later")
     cap.add_argument("--output", type=Path, help="Capture directory")
     cap.add_argument("--internal-scale", type=int, choices=(1, 2, 3, 4))
     cap.add_argument("--cpu-thread", action="store_true")
