@@ -106,8 +106,19 @@ the build or commit that closed them.
       Android half answered (September 17): INVERTED on Odin — idle-ON
       (race 1.00) runs healthy extras (t3: 22/22 blended), idle-OFF (race
       0.70–0.92) runs the full lifecycle with 0 extras via 357
-      speed-floor vetoes (t4). Keep the Odin idle ini for trials; the
-      desktop starvation mechanism is still unexplained.
+      speed-floor vetoes (t4). Keep the Odin idle ini for trials.
+      Finding-7 verdict (September 17, no new run): the specified
+      wall-vs-host check is inoperable — logged `wall` is fresh Now(),
+      not now_cached (native_callback_trace.h:79/84), and wall≡host to
+      0.0000s empirically; now_cached is never logged. Clock-staleness
+      at the floor is refuted by code: Step refreshes every dispatch
+      and Observe is gated on the idle PC, itself a refresh PC, so the
+      cached clock is microseconds-fresh at every Observe. The 0.44
+      arms' traces are not in the 120hz lifecycle files (healthy
+      ratios/extras there) and were never path-cited. Narrowed leads:
+      tick under-advancement by the skip itself, or an extras-gate
+      (deadline/veto/injection-pattern) interaction with burst
+      dispatches — needs the skip code + one fresh desktop idle A/B.
 - [ ] Desktop launch re-hashes the game every boot (September 17):
       `moderngekko-run` spends its whole startup in `InspectGame →
       HashDirectorySha256` over the 1.2 GB share root (sampled main
