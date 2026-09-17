@@ -18,8 +18,8 @@ the build or commit that closed them.
       chunk signposts. Measurement is movie + wall throughput, NOT
       the profiler (update side unobservable by construction).
       Correctness enumeration (starts, m_return_hooks, loop heads,
-      exception vectors) before any rollout. Proposed: desktop spike
-      agent, no device needed.
+      exception vectors) before any rollout. Launched: desktop spike
+      agent 43, no device.
 - [ ] fast-FP on/off re-A/B off the wall (September 17, perf-review
       §1, HIGH): the "0.00 prize" and the STOP/no-rebuild decision
       were measured at the phantom wall (void). The 0.83× reality may
@@ -72,10 +72,6 @@ the build or commit that closed them.
       interpolated frame doesn't need); schedule the named fix for
       the per-frame empty-queue GPU sync (~3.3ms floor, 2.74ms spin,
       largest named render item, fix named but never scheduled).
-- [ ] Research/product boundary plan (September 17, perf-review §7,
-      planning): the trial system (~2.8k lines, 20 hard-coded guest
-      addresses) ships in the app with no stated plan for what
-      becomes product. Needs an explicit cut line.
 - [ ] Odin thread affinity/priority (September 17, review finding 4): the
       one hot thread's placement on the 1+4+3 Snapdragon is worth more
       than any helper inlining, and nothing in the headless runner or
