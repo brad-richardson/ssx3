@@ -344,6 +344,22 @@ class DeviceLaunch(unittest.TestCase):
                         self.assertEqual(argv[argv.index(mobile_gamecube.BUNDLE)+1:], flags)
 
 
+class AppIsRunning(unittest.TestCase):
+    def test_reads_unwrapped_process_list(self):
+        args = argparse.Namespace(device="IPAD")
+        # device_call returns the already-unwrapped "result" object.
+        hit = {"deviceIdentifier": "IPAD", "runningProcesses": [
+            {"executable": "file:///sbin/launchd"},
+            {"executable": "file:///private/var/containers/Bundle/Application/x/SSXNative.app/SSXNative"}]}
+        with mock.patch.object(mobile_gamecube, "device_call", return_value=hit):
+            self.assertTrue(mobile_gamecube.app_is_running(args))
+        with mock.patch.object(mobile_gamecube, "device_call",
+                               return_value={"runningProcesses": []}):
+            self.assertFalse(mobile_gamecube.app_is_running(args))
+        with mock.patch.object(mobile_gamecube, "device_call", return_value=None):
+            self.assertFalse(mobile_gamecube.app_is_running(args))
+
+
 class DeviceCollect(unittest.TestCase):
     def test_fresh_container_without_screenshots_still_collects(self):
         copied = []

@@ -160,7 +160,8 @@ def sign(args):
 def app_is_running(args):
     """Whether SSXNative is live on the device right now."""
     report = device_call(["device", "info", "processes", "--device", args.device], timeout=120)
-    processes = (report or {}).get("result", {}).get("runningProcesses", [])
+    # device_call already unwraps the top-level "result" key.
+    processes = (report or {}).get("runningProcesses", [])
     return any("SSXNative" in str(entry.get("executable", "")) for entry in processes)
 
 
