@@ -330,6 +330,109 @@ def await_exit(serial, pid, deadline, interval=5):
     return False
 
 
+# Thread roles for --affinity. The emu role matches the CPU thread's comm,
+# which is currently the mislabeled 'GC Adapter Scan' (affinity hunt: the
+# thread running StaticRecompCore::Run carries that comm; a separate scan
+# thread was never observed on device). Keep this mapping beside the
+# evidence (android-spike/affinity/) and update it if Dolphin renames it.
+AFFINITY_ROLES = {'emu': 'GC Adapter Scan', 'video': 'Video thread'}
+
+
+def affinity_spec(value):
+    """Parse --affinity 'emu=80,video=40' into ((role, mask), ...) in order.
+
+    Masks are bare hex (toybox taskset form, no 0x); 80 pins cpu7, 40 cpu6.
+    """
+    specs = []
+    for chunk in value.split(','):
+        role, eq, mask = chunk.partition('=')
+        role, mask = role.strip(), mask.strip().lower().removeprefix('0x')
+        if not eq or role not in AFFINITY_ROLES or not mask:
+            raise ValueError(
+                f'Affinity must be role=hexmask with roles {sorted(AFFINITY_ROLES)}: {chunk!r}')
+        try:
+            bits = int(mask, 16)
+        except ValueError:
+            raise ValueError(f'Affinity mask must be hex: {chunk!r}') from None
+        if bits <= 0 or bits > 0xffffffff:
+            raise ValueError(f'Affinity mask out of range: {chunk!r}')
+        specs.append((role, mask))
+    if not specs:
+        raise ValueError('Affinity is empty')
+    return tuple(specs)
+
+
+def resolve_tids(listing, specs):
+    """Map affinity specs to TIDs from a [(tid, comm)] listing.
+
+    First comm match wins (short-lived Video/FrameDumping threads share
+    names); raises when a role's thread has not appeared yet.
+    """
+    by_comm = {}
+    for tid, comm in listing:
+        by_comm.setdefault(comm, tid)
+    resolved = {}
+    for role, _ in specs:
+        want = AFFINITY_ROLES[role]
+        if want not in by_comm:
+            raise ValueError(f'Thread {want!r} (role {role}) not found')
+        resolved[role] = by_comm[want]
+    return resolved
+
+
+def child_pid(serial, wrapper_pid, runner=adb):
+    """Real trial PID under the `timeout` wrapper recorded at launch."""
+    out = runner(['shell', 'ps', '-A', '-o', 'PID,PPID,ARGS'], serial).stdout
+    for line in out.splitlines():
+        parts = line.split(None, 2)
+        if (len(parts) == 3 and parts[1] == str(wrapper_pid)
+                and TRIAL_BINARY in parts[2] and 'timeout' not in parts[2]):
+            return parts[0]
+    raise ValueError(f'No trial child under wrapper pid {wrapper_pid}')
+
+
+def apply_affinity(serial, pid, specs, tag, runner=adb, timeout=30):
+    """Pin threads by role via taskset; returns the manifest record.
+
+    Polls for the threads (boot spawns them seconds after launch), pins each
+    role, verifies the mask read back, and notes the metrics sample at
+    intervention time so the race window can prove the pins predated it.
+    Raises when a role never appears: a silently unpinned run would poison
+    an A/B.
+    """
+    deadline = time.time() + timeout
+    tids = None
+    while time.time() < deadline:
+        out = runner(['shell', f'grep . /proc/{pid}/task/*/comm'], serial).stdout
+        listing = []
+        for line in out.splitlines():
+            path, _, comm = line.partition(':')
+            parts = path.split('/')
+            if len(parts) >= 5 and comm:
+                listing.append((parts[4], comm))
+        try:
+            tids = resolve_tids(listing, specs)
+        except ValueError:
+            time.sleep(1)
+            continue
+        break
+    if tids is None:
+        raise ValueError(f'Affinity threads did not appear under pid {pid}')
+    record = {}
+    for role, mask in specs:
+        tid = tids[role]
+        set_out = runner(['shell', f'taskset -p {mask} {tid}'], serial).stdout
+        if 'new affinity mask' not in set_out:
+            raise ValueError(f'taskset {mask} on {role} tid {tid} failed: {set_out.strip()}')
+        got = runner(['shell', f'taskset -p {tid}'], serial).stdout
+        record[role] = dict(tid=tid, mask=mask,
+                            verified=got.strip().split()[-1].lower() == mask)
+    sample = runner(['shell', f"grep -o 'sample=[0-9]*' {DEVICE_DIR}/{tag}.err | tail -1"],
+                    serial).stdout.strip()
+    record['sample'] = sample or None
+    return record
+
+
 def run(args):
     serial = resolve_serial(args.serial)
     if 'moderngekko-run' in adb(['shell', 'ps', '-A'], serial).stdout:
@@ -378,11 +481,17 @@ def run(args):
                                        graphics=args.graphics)],
               serial).stdout.strip()
     print(f'launched pid {pid}: {tag} (trial_at={args.trial_at} kind={args.trial_kind})', flush=True)
+    affinity_record = None
+    if args.affinity:
+        specs = affinity_spec(args.affinity)
+        real_pid = child_pid(serial, pid)
+        affinity_record = apply_affinity(serial, real_pid, specs, tag)
+        print(f'affinity {affinity_record}', flush=True)
     exited = await_exit(serial, pid, time.time() + args.timeout + 120)
     manifest = dict(schema=1, tag=tag, pid=pid, serial=serial, trial_binary_sha256=digest,
                     device_dol_sha256=dol, template=args.template, idle=bool(args.idle),
                     immediate_xfb=not args.no_immediate_xfb, env=env, timeout=args.timeout,
-                    exited=exited)
+                    affinity=affinity_record, exited=exited)
     out_dir = args.output.resolve()
     out_dir.mkdir(parents=True, exist_ok=False)
     for remote, local in [(f'{tag}.out', f'{tag}.out'), (f'{tag}.err', f'{tag}.err'),
@@ -533,6 +642,10 @@ def main():
     p.add_argument('--trial-secs', type=float, default=0,
                    help='Cancel N seconds after Running (0: natural end)')
     p.add_argument('--timeout', type=int, default=240)
+    p.add_argument('--affinity',
+                   help="Pin threads by role right after launch, e.g. "
+                        "'emu=80,video=40' (bare hex masks: 80 pins cpu7, "
+                        "40 cpu6 on the Odin 3)")
     p.add_argument('--screenshot-seconds', type=int, default=2,
                    help='Capture cadence in seconds (default 2; 0 disables '
                         'capture for unperturbed trial windows)')

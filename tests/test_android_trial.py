@@ -242,6 +242,81 @@ class AndroidTrialTests(unittest.TestCase):
                                    for n in trial.INNER_ANDROID_STACK])
         self.assertEqual(calls[-1][3:5], ['worktree', 'remove'])
 
+    def test_affinity_spec_parses_masks_and_rejects_bad_roles(self):
+        self.assertEqual(trial.affinity_spec('emu=80,video=40'),
+                         (('emu', '80'), ('video', '40')))
+        self.assertEqual(trial.affinity_spec('emu=0xC0'), (('emu', 'c0'),))
+        with self.assertRaisesRegex(ValueError, 'role'):
+            trial.affinity_spec('cpu=80')
+        with self.assertRaisesRegex(ValueError, 'hex'):
+            trial.affinity_spec('emu=zz')
+        with self.assertRaisesRegex(ValueError, 'range'):
+            trial.affinity_spec('emu=0')
+        with self.assertRaisesRegex(ValueError, 'role'):
+            trial.affinity_spec('emu')
+
+    def test_resolve_tids_matches_mislabeled_emu_and_first_video(self):
+        listing = [('100', 'moderngekko-run'), ('104', 'GC Adapter Scan'),
+                   ('110', 'Video thread'), ('131', 'Video thread')]
+        specs = (('emu', '80'), ('video', '40'))
+        self.assertEqual(trial.resolve_tids(listing, specs),
+                         {'emu': '104', 'video': '110'})
+        with self.assertRaisesRegex(ValueError, 'GC Adapter Scan'):
+            trial.resolve_tids([('100', 'moderngekko-run')], specs)
+
+    def test_child_pid_selects_trial_child_not_wrapper(self):
+        out = ('  PID  PPID ARGS\n'
+               '16864     1 timeout 300 ./moderngekko-run-trial --headless\n'
+               '16865 16864 moderngekko-run-trial --headless --game g\n')
+
+        def runner(argv, serial=None, **kw):
+            return SimpleNamespace(stdout=out)
+
+        self.assertEqual(trial.child_pid('serial', '16864', runner), '16865')
+        with self.assertRaisesRegex(ValueError, 'No trial child'):
+            trial.child_pid('serial', '99999', runner)
+
+    def test_apply_affinity_pins_and_verifies_each_role(self):
+        seen = []
+
+        def runner(argv, serial=None, **kw):
+            seen.append(argv[1])
+            if 'task/*/comm' in argv[1]:
+                return SimpleNamespace(
+                    stdout='/proc/1/task/104/comm:GC Adapter Scan\n'
+                           '/proc/1/task/110/comm:Video thread\n')
+            if argv[1].startswith('taskset -p 80'):
+                return SimpleNamespace(
+                    stdout="pid 104's current affinity mask: ff\n"
+                           "pid 104's new affinity mask: 80\n")
+            if argv[1].startswith('taskset -p 40'):
+                return SimpleNamespace(
+                    stdout="pid 110's current affinity mask: ff\n"
+                           "pid 110's new affinity mask: 40\n")
+            if argv[1] == 'taskset -p 104':
+                return SimpleNamespace(stdout="pid 104's current affinity mask: 80\n")
+            if argv[1] == 'taskset -p 110':
+                return SimpleNamespace(stdout="pid 110's current affinity mask: 40\n")
+            return SimpleNamespace(stdout='sample=20\n')
+
+        record = trial.apply_affinity('serial', '1',
+                                      (('emu', '80'), ('video', '40')),
+                                      'tag', runner, timeout=5)
+        self.assertEqual(record, {'emu': {'tid': '104', 'mask': '80', 'verified': True},
+                                  'video': {'tid': '110', 'mask': '40', 'verified': True},
+                                  'sample': 'sample=20'})
+        self.assertTrue(any(c.startswith('taskset -p 80 104') for c in seen))
+        self.assertTrue(any(c.startswith('taskset -p 40 110') for c in seen))
+
+    def test_apply_affinity_raises_when_threads_never_appear(self):
+        def runner(argv, serial=None, **kw):
+            return SimpleNamespace(stdout='/proc/1/task/100/comm:moderngekko-run\n')
+
+        with mock.patch.object(trial.time, 'time', side_effect=[0, 100, 100]):
+            with self.assertRaisesRegex(ValueError, 'did not appear'):
+                trial.apply_affinity('serial', '1', (('emu', '80'),), 'tag',
+                                     runner, timeout=30)
+
 
 if __name__ == '__main__':
     unittest.main()
