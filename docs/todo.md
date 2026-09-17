@@ -112,29 +112,15 @@ the build or commit that closed them.
       implementation). Separate conversion-side bug found: Aloha-as-slopestyle
       faults after standings (suspect unchecked 3-gate start gate; rides
       fine as race) — belongs to course conversion, not menus.
-- [ ] Idle-skip × smoothing-trial guard interaction (September 17):
-      desktop idle-skip ON starves smoothing-trial extras to zero (SpeedFloor
-      ratio 0.44 vs 0.88, trial `performance_limit`s; two no-idle arms
-      complete, two idle arms fail leg 2) while buying ~0% in-race at O2.
-      Idle default reverted to opt-in on desktop and iOS (Odin ini kept
-      pending an O2-era A/B). Understand the mechanism (guard misread vs
-      real starvation?) before re-enabling anywhere trials run.
-      Android half answered (September 17): INVERTED on Odin — idle-ON
-      (race 1.00) runs healthy extras (t3: 22/22 blended), idle-OFF (race
-      0.70–0.92) runs the full lifecycle with 0 extras via 357
-      speed-floor vetoes (t4). Keep the Odin idle ini for trials.
-      Finding-7 verdict (September 17, no new run): the specified
-      wall-vs-host check is inoperable — logged `wall` is fresh Now(),
-      not now_cached (native_callback_trace.h:79/84), and wall≡host to
-      0.0000s empirically; now_cached is never logged. Clock-staleness
-      at the floor is refuted by code: Step refreshes every dispatch
-      and Observe is gated on the idle PC, itself a refresh PC, so the
-      cached clock is microseconds-fresh at every Observe. The 0.44
-      arms' traces are not in the 120hz lifecycle files (healthy
-      ratios/extras there) and were never path-cited. Narrowed leads:
-      tick under-advancement by the skip itself, or an extras-gate
-      (deadline/veto/injection-pattern) interaction with burst
-      dispatches — needs the skip code + one fresh desktop idle A/B.
+- [ ] Self-clearing short-window veto (September 17, idle F1): the
+      SpeedFloor 0.97/0.99 hysteresis latches total starvation on
+      transient dips (40/1102 allowed while averaging 0.92). Time-based
+      re-probe or a narrower Resume-Stop gap, so dips withhold a few
+      extras instead of all. Structural alternative (F2): key trial
+      legs to guest ticks/rider progress, killing wall-gated phase
+      offsets. Hygiene (F3): verdict-grade A/Bs need an exclusive
+      host; same movie diverged across the skip knob pre-trial, so
+      cross-knob trajectory identity can't be assumed.
 - [ ] Boot asset-hash cache: boot verification (September 17): the
       re-hash hits ALL devices (InspectGame in the shared boot path, not
       desktop-only). Landed: size/mtime-manifest cache in sys/
@@ -974,6 +960,21 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 desktop idle × trial mechanism (idle-A/B): no skip
+      pathology — with the skip firing, ON ran healthy (270 extras,
+      tick/wall 0.983, full VI-period spans); tick under-advancement
+      and burst interaction both refuted. The A/B inverted on host
+      load (OFF arm overlapped a sibling emu run: 40 extras at 0.918)
+      and M4's 0.44 shape didn't replicate (plausibly confounded the
+      same way — inference, traces never cited). Real finding: the
+      floor hysteresis AMPLIFIES small rate gaps into total starvation
+      (load-fragile trial gate). Evidence local/research/idle-ab/
+      (report + analyzer + legs + frozen module). Agent retired after
+      delivering (wedged on a leftover background search). Standing
+      guidance unchanged: Odin idle ini stays ON for trials (idle-OFF
+      runs 0 extras via floor vetoes, t4); desktop/iOS idle stays
+      opt-in (no in-race pathology, no trial pathology — just no
+      measured buy at O2).
 - [x] 2026-09-17 onscreen smoothing trial (ot3): 25/25 extras blended
       AND presented, swap-correlated (median 0.67ms, max 0.80ms;
       analyzer reproduced every number). Full lifecycle in-race

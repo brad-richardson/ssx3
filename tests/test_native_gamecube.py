@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest import mock
 
 from tools import native_gamecube
-from tools.native_gamecube import CORE_STACK, ROOT, idle_pc_ini_line, launch, patch_files, runtime_evidence, verify_runtime_execution, verify_rendered_frames, runtime_fault, wait_for_runtime
+from tools.native_gamecube import CORE_STACK, ROOT, emulation_speed_ini_line, idle_pc_ini_line, launch, patch_files, runtime_evidence, verify_runtime_execution, verify_rendered_frames, runtime_fault, wait_for_runtime
 
 
 class RuntimeEvidence(unittest.TestCase):
@@ -133,6 +133,17 @@ class IdleSkipDefault(unittest.TestCase):
         self.assertEqual(idle_pc_ini_line({"SSX3_IDLE_PC": "0x80288ED4"}),
                          "StaticRecompIdlePC = 0x80288ED4\n")
         self.assertEqual(idle_pc_ini_line({"SSX3_IDLE_PC": ""}), "")
+
+
+class EmulationSpeedOptIn(unittest.TestCase):
+    def test_emulation_speed_defaults_off_with_env_opt_in(self):
+        self.assertEqual(emulation_speed_ini_line({}), "")
+        self.assertEqual(emulation_speed_ini_line({"SSX3_EMULATION_SPEED": "10"}),
+                         "EmulationSpeed = 10\n")
+        with self.assertRaisesRegex(ValueError, "must be a number"):
+            emulation_speed_ini_line({"SSX3_EMULATION_SPEED": "fast"})
+        with self.assertRaisesRegex(ValueError, "must be positive"):
+            emulation_speed_ini_line({"SSX3_EMULATION_SPEED": "0"})
 
 
 class FastFpDefault(unittest.TestCase):

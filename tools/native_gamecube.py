@@ -41,6 +41,19 @@ def idle_pc_ini_line(env=None):
     return f"StaticRecompIdlePC = {idle}\n" if idle else ""
 
 
+def emulation_speed_ini_line(env=None):
+    value = (env if env is not None else os.environ).get("SSX3_EMULATION_SPEED", "")
+    if not value:
+        return ""
+    try:
+        speed = float(value)
+    except ValueError:
+        raise ValueError(f"SSX3_EMULATION_SPEED must be a number, got {value!r}")
+    if speed <= 0:
+        raise ValueError(f"SSX3_EMULATION_SPEED must be positive, got {value!r}")
+    return f"EmulationSpeed = {speed:g}\n"
+
+
 def run(command, **kwargs):
     print("+", " ".join(map(str, command)), flush=True)
     return subprocess.run(list(map(str, command)), check=True, **kwargs)
@@ -307,6 +320,7 @@ def launch(args):
     if not config.exists():
         # Idle-loop skipping is opt-in per profile (see idle_pc_ini_line).
         extra = idle_pc_ini_line()
+        extra += emulation_speed_ini_line()
         if os.environ.get('SSX3_RUSH_PRESENT') == '1':
             extra += 'RushFramePresentation = True\n'
         config.write_text(f"[Core]\nCPUThread = {cpu_thread}\nDSPHLE = True\nSkipIPL = True\n{extra}[DSP]\nEnableJIT = False\n[Interface]\nConfirmStop = False\n")
