@@ -1671,7 +1671,8 @@ index 65f316f..ee3bef9 100644
 + * external memory) falls back to the exact out-of-line helper, which keeps
 + * the two independent accesses; reservation clearing, journal order and
 + * conversions are unchanged, so this is behavior-identical on every input. */
- static inline bool ppc_psq_load_inline(CPUState* cpu, u8 frD, u32 ea, bool w,
+-static inline bool ppc_psq_load_inline(CPUState* cpu, u8 frD, u32 ea, bool w,
++static inline __attribute__((always_inline)) bool ppc_psq_load_inline(CPUState* cpu, u8 frD, u32 ea, bool w,
                                         u8 gqr_index, bool indexed, u32 cia) {
      const u32 gqr = cpu->gqr[gqr_index & 7u];
      if (((gqr >> 16) & 7u) == 0u && (indexed || (cpu->hid2 & PPC_HID2_LSQE) != 0u)) {
@@ -1685,7 +1686,9 @@ index 65f316f..ee3bef9 100644
          return true;
      }
      return ppc_psq_load(cpu, frD, ea, w, gqr_index, indexed, cia);
-@@ -435,9 +444,20 @@ static inline bool ppc_psq_store_inline(CPUState* cpu, u8 frS, u32 ea, bool w,
+@@ -434,10 +443,21 @@ static inline bool ppc_psq_store_inline(CPUState* cpu, u8 frS, u32 ea, bool w,
+-static inline bool ppc_psq_store_inline(CPUState* cpu, u8 frS, u32 ea, bool w,
++static inline __attribute__((always_inline)) bool ppc_psq_store_inline(CPUState* cpu, u8 frS, u32 ea, bool w,
                                          u8 gqr_index, bool indexed, u32 cia) {
      const u32 gqr = cpu->gqr[gqr_index & 7u];
      if ((gqr & 7u) == 0u && (indexed || (cpu->hid2 & PPC_HID2_LSQE) != 0u)) {

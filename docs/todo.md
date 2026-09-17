@@ -14,19 +14,12 @@ the build or commit that closed them.
 - [ ] Live-apply iOS compile check (September 17): App.mm liveApplyCourse:/
       applyPendingCourse wiring is pattern-matched and wiring-tested but
       never compiled (needs Xcode + signing).
-- [ ] Commit platform.patch psq + fcmp together (September 17): M7's
-      psq always_inline is verified (symtab/profile 0) but uncommitted,
-      sharing the file with the running fcmp spike's disjoint
-      cpu_fast_fp.h hunk. Land both only after the fcmp verdict; then
-      re-apply the platform patch to the live CORE tree (check_patches
-      currently fails on the psq hunk) and confirm green. NOTE: 7fed74d
-      is internally inconsistent until then — test_cpu_header_forces_
-      psq_inline (swept in from the shared tree) asserts a hunk the
-      commit lacks, so bare-7fed74d checkouts run red.
-- [ ] fcmp fast-path spike (September 17): ppc_fcmp is the largest
-      remaining scalar helper (0.63% Odin, 120-170 desktop samples).
-      Agent running desktop-only (inline in cpu_fast_fp.h + movie A/B
-      parity); platform.patch commit waits for its verdict.
+- [ ] Layout-lottery follow-up (September 17, optional): the fcmp inline
+      regressed wall throughput 7.3% ABA-confirmed despite removing the
+      call with an identical body (+347KB/+17K branches shifting the 82MB
+      ThinLTO layout). A retry needs a layout strategy (PGO, hot/cold
+      split, section ordering), not a blind rebuild. Evidence + exact
+      design preserved in local/research/fcmp/ (dylibs, legs, NOTES.md).
 - [ ] Swap-timestamp probe rows (September 17, display gap 1): the real
       display-link proof for onscreen trials — hook GLContextEGL::Swap /
       Vulkan present + correlate the AChoreographer feed (proven working:
@@ -979,6 +972,18 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 fcmp spike: NO-SHIP (verified). gx_fastfp_fcmp exact
+      inline + macro redirect: parity clean (690/690, 706/706 strict
+      identical; 510k differential, 0 failures), symbol 31/33/38 → 0,
+      all 4,229 sites expand — but wall throughput −7.3% ABA-confirmed
+      (3.55 → 3.29 → 3.55 M/s, recomputed from shutdown counters;
+      guest speed agrees). Second-order layout effect, not body cost.
+      Hunk reverted from patch file + live tree (check_patches green);
+      design kept in local/research/fcmp/ for a layout-strategy retry.
+- [x] 2026-09-17 psq always_inline committed: both helpers forced inline
+      (M7: symtab 0/0, profile leaves 1.07/1.06% → 0). Live CORE tree
+      synced (fcmp agent's byte-exact sync kept for psq; its fcmp lines
+      peeled after NO-SHIP). Resolves the 7fed74d test inconsistency.
 - [x] 2026-09-17 Android display spike: org.ssx3.display APK installs,
       launches, presents SSX3 onscreen (memcard check, Snow Jam menu,
       race start gate via screencap; 147 FPS samples, median 59.8,
