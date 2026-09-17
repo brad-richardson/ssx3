@@ -5,6 +5,25 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Codegen prune follow-up: capped CPU-gated A/B (September 17,
+      HIGH): the one-chunk spike (802197A0) was INCONCLUSIVE — desktop
+      uncapped can't resolve the ~2% expectation (fanless-Air thermal
+      lottery ±10–85%, fingerprint divergence, B-C-C-B ordering), NOT
+      a kill (signs disagree across cycles; nothing flat-or-negative
+      on the merits). Correctness proven (1617/4096 pruned set covers
+      all 149 census entries, full movie, no trap). Staged patch
+      (DolRecomp-only, env-gated, default byte-identical) + record
+      test on SSD codegen/ — land as-is IF a capped-1x CPU-ms/frame
+      A/B (thermally cool + deterministic) or an Odin run confirms a
+      win. CORRECTION to the review formula: leaders ∪ return_targets
+      is INSUFFICIENT — FP-unavailable faults rfi-resume mid-block,
+      entry sets must include FP-sites (candidate 1 trapped at boot
+      without them); full enumeration in the spike report.
+- [ ] FP-unavailable fault storm (September 17, NEW lead): 41,022
+      FP faults in 25 s module-wide on desktop, two ops faulting
+      ~600×/s each. If that rate holds on Odin, silencing the storm
+      (MSR_FP handling? fast path?) is a direct win independent of
+      §2. Needs Odin confirmation + per-op attribution first.
 - [ ] Codegen entry-switch pruning, one-chunk spike (September 17,
       perf-review §2, TOP avg-75 lever, desktop-only): every guest
       instruction is an entry-dispatcher case, forbidding
@@ -18,8 +37,9 @@ the build or commit that closed them.
       chunk signposts. Measurement is movie + wall throughput, NOT
       the profiler (update side unobservable by construction).
       Correctness enumeration (starts, m_return_hooks, loop heads,
-      exception vectors) before any rollout. Launched: desktop spike
-      agent 43, no device.
+      exception vectors) before any rollout. **SPIKE DONE 09-17
+      (agent 43): INCONCLUSIVE, see follow-up item above — do not
+      re-run uncapped.**
 - [ ] fast-FP on/off re-A/B off the wall (September 17, perf-review
       §1, HIGH): the "0.00 prize" and the STOP/no-rebuild decision
       were measured at the phantom wall (void). The 0.83× reality may
