@@ -32,17 +32,18 @@ class MetalCaptureTests(unittest.TestCase):
              "--no-prompt", "--output", "/tmp/c.trace"])
 
     def test_wait_for_process_matches_executable_basename(self):
-        hit = {"result": {"runningProcesses": [
+        # device_call returns the already-unwrapped "result" object.
+        hit = {"deviceIdentifier": "IPAD", "runningProcesses": [
             {"executable": "file:///sbin/launchd", "processIdentifier": 1},
             {"executable": "file:///private/var/containers/Bundle/Application/x/SSXNative.app/SSXNative",
-             "processIdentifier": 4242}]}}
+             "processIdentifier": 4242}]}
         with mock.patch.object(metal_capture.mobile_gamecube, "device_call",
                                return_value=hit) as call:
             self.assertEqual(metal_capture.wait_for_process("IPAD", sleep=lambda s: None), 4242)
             call.assert_called_once()
 
     def test_wait_for_process_retries_then_times_out(self):
-        empty = {"result": {"runningProcesses": []}}
+        empty = {"deviceIdentifier": "IPAD", "runningProcesses": []}
         with mock.patch.object(metal_capture.mobile_gamecube, "device_call",
                                return_value=empty):
             with self.assertRaises(RuntimeError):

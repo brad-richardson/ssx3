@@ -60,7 +60,8 @@ def wait_for_process(device, timeout_s=30, poll_s=2, sleep=time.sleep):
     while True:
         result = mobile_gamecube.device_call(
             ["device", "info", "processes", "--device", device], timeout=60)
-        processes = (result.get("result", {}) or {}).get("runningProcesses", [])
+        # device_call already unwraps the top-level "result" key.
+        processes = (result or {}).get("runningProcesses", [])
         for process in processes:
             executable = process.get("executable", "")
             if executable.rsplit("/", 1)[-1] == PROCESS:
