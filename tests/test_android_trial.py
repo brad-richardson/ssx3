@@ -68,6 +68,13 @@ class AndroidTrialTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Screenshot seconds'):
             trial.screenshot_env(-1)
 
+    def test_launch_command_passes_graphics_backend(self):
+        default = trial.launch_command('t', {}, 'u', 'm.so', 60)
+        self.assertIn('--graphics OGL', default)
+        vk = trial.launch_command('t', {}, 'u', 'm.so', 60, graphics='Vulkan')
+        self.assertIn('--graphics Vulkan', vk)
+        self.assertNotIn('--graphics OGL', vk)
+
     def test_seed_gfx_ini_preserves_settings_and_updates_hacks(self):
         before = ('[Settings]\nInternalResolution = 1\nShaderCache = True\n'
                   '[Hacks]\nImmediateXFBEnable = False\n')

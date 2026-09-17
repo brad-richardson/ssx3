@@ -306,15 +306,17 @@ def ensure_idle(serial, user, idle_on):
         raise ValueError('Idle-skip line survived its removal')
 
 
-def launch_command(tag, env, user, module, timeout, binary=TRIAL_BINARY):
+def launch_command(tag, env, user, module, timeout, binary=TRIAL_BINARY,
+                   graphics='OGL'):
     """One remote shell line: env-prefixed bounded run, backgrounded, prints PID.
 
     `cd X; ... &` (never `cd X && ... &`) so adb returns instantly instead
-    of hanging on the session fds until the run ends.
+    of hanging on the session fds until the run ends. The --graphics flag
+    overrides the template's GFXBackend, so Vulkan trials need no ini edit.
     """
     assignments = ' '.join(f'{key}={value}' for key, value in env.items())
     return (f'cd {DEVICE_DIR}; {assignments} timeout {timeout} ./{binary} --headless '
-            f'--graphics OGL --game {DEVICE_DIR}/game --user-dir {DEVICE_DIR}/{user} '
+            f'--graphics {graphics} --game {DEVICE_DIR}/game --user-dir {DEVICE_DIR}/{user} '
             f'--module {DEVICE_DIR}/{module} >{tag}.out 2>{tag}.err & echo $!')
 
 
@@ -372,7 +374,8 @@ def run(args):
                SSX3_MOVIE_PLAY=f'{DEVICE_DIR}/{args.movie}', SSX_NATIVE_PROBE=probe,
                **screenshot_env(args.screenshot_seconds),
                **trial_env(args.trial_at, args.trial_kind, args.trial_secs))
-    pid = adb(['shell', launch_command(tag, env, user, args.module, args.timeout)],
+    pid = adb(['shell', launch_command(tag, env, user, args.module, args.timeout,
+                                       graphics=args.graphics)],
               serial).stdout.strip()
     print(f'launched pid {pid}: {tag} (trial_at={args.trial_at} kind={args.trial_kind})', flush=True)
     exited = await_exit(serial, pid, time.time() + args.timeout + 120)
@@ -520,6 +523,8 @@ def main():
     p.add_argument('--template', default='m6h', help='Device user dir template (default m6h)')
     p.add_argument('--movie', default='m3-menu.dtm')
     p.add_argument('--module', default='gGXBE69_recomp.so')
+    p.add_argument('--graphics', choices=('OGL', 'Vulkan'), default='OGL',
+                   help='GPU backend for the run (default OGL)')
     p.add_argument('--idle', choices=('on', 'off'), default='on')
     p.add_argument('--no-immediate-xfb', action='store_true',
                    help='Negative control: leave ImmediateXFBEnable off')

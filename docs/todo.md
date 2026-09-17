@@ -14,13 +14,23 @@ the build or commit that closed them.
 - [ ] Live-apply iOS compile check (September 17): App.mm liveApplyCourse:/
       applyPendingCourse wiring is pattern-matched and wiring-tested but
       never compiled (needs Xcode + signing).
-- [ ] Odin HEAD re-profile campaign (September 17, review finding 1): M5
-      profiled a pre-Wave-B module (built before 07:15 fast-FP default;
-      ppc_fmuls/fadds/fma at ~12% in the dump), so "CPU core is the
-      frontier" and the pace/FP conclusions are stale. Agent running:
-      psq always_inline + HEAD rebuild with sha provenance + M4 recipe +
-      EGL/Vulkan uncapped ceilings (is 1.16 EGL-only?) + Vulkan trial +
-      comm/psr placement + ini record. Desktop psq-symbol check last.
+- [ ] Commit platform.patch psq + fcmp together (September 17): M7's
+      psq always_inline is verified (symtab/profile 0) but uncommitted,
+      sharing the file with the running fcmp spike's disjoint
+      cpu_fast_fp.h hunk. Land both only after the fcmp verdict; then
+      re-apply the platform patch to the live CORE tree (check_patches
+      currently fails on the psq hunk) and confirm green. NOTE: 7fed74d
+      is internally inconsistent until then — test_cpu_header_forces_
+      psq_inline (swept in from the shared tree) asserts a hunk the
+      commit lacks, so bare-7fed74d checkouts run red.
+- [ ] fcmp fast-path spike (September 17): ppc_fcmp is the largest
+      remaining scalar helper (0.63% Odin, 120-170 desktop samples).
+      Agent running desktop-only (inline in cpu_fast_fp.h + movie A/B
+      parity); platform.patch commit waits for its verdict.
+- [ ] APK/display path spike (September 17): agent running on the Odin
+      (sole user): thinnest presented path (SDL activity APK or
+      headless-with-swaps) + onscreen-trial definition + production
+      cost. Timeboxed; headless EGL/Vulkan trials already run.
 - [ ] Patch-stack drift receipts (September 17, review finding 8): the
       per-layer checker excludes shared files, so a lost lower hunk passes
       silently. The suggested concat reverse-check does NOT work (verified:
@@ -53,11 +63,11 @@ the build or commit that closed them.
       triggered screenshots if the shared-code hunt stalls. The /tmp/snow
       cross-device pairs compare different frames — cite only the movie
       A/B for parity from now on.
-- [ ] Hot-thread affinity/priority (September 17, review finding 4): nothing
-      sets affinity; placement on the prime core is worth more than helper
-      inlining. Needs the comm/psr capture from the re-profile campaign
-      first, then pin/renice the emu thread (sched_setaffinity from the
-      app needs no root).
+- [ ] Hot-thread affinity/priority (September 17, review finding 4):
+      M7 capture shows the scheduler holds the hot thread on prime core
+      7 unpinned in all 8 runs (video wanders 0/1/4/5) — pinning deferred
+      unless a regression appears. Revisit only if a future profile
+      shows migration.
 - [ ] Alpha-period residual (September 17, review finding 5): alpha uses
       TicksPerSecond/59.94 while Deadline uses /120 (prior review note,
       still open). Reconcile before re-issuing gate 4b.
@@ -70,12 +80,14 @@ the build or commit that closed them.
       plumbing agent found 8 zeroed clusters in the SSD trial binary (size/
       mtime unchanged; caught by receipt check, restored from the verified
       device copy). Same exFAT fragility as the earlier archive flag errors.
-- [ ] APK/display path for Android trials (September 17): headless EGL
-      trials run (see Done) but extras are counted/blended draws, not
-      presented frames — no display-link proof. Still pending: Vulkan trial
-      run (same binary, --graphics Vulkan), APK surface/swap path. Window
-      is panic-bound (~10 s; natural 35 s end unreachable). QUEUED behind
-      the re-profile campaign for the Odin (user-approved next).
+- [ ] Pace mechanism (September 17): the ~1.16 uncapped ceiling survives
+      the HEAD module on BOTH backends (EGL menus 1.1626, Vulkan 1.1627,
+      match to 4 decimals) and a fast-FP on/off A/B prints identical
+      ceilings (wall prize 0.00 until the pace lifts). Backend-independent,
+      SyncGPU-independent, placement-independent (prime 7 unpinned),
+      panic at the fixed ~130 emu-s point in all 9 runs. Root cause still
+      unknown (handoff-quantum/EFB-sync candidates); this gates every
+      wall-clock FP/core win on the Odin.
 - [ ] New menu entry / new peak = fixed-table surgery, parked (September 17):
       menu spike proved Tricky tracks are menu-selectable TODAY via the
       existing manifest (Aloha Ice Jam hosted on event 5 R&B row, 3-field
@@ -959,6 +971,18 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 Odin HEAD re-profile (M7): finding 1 closed — M5 module
+      predated Wave B; at HEAD fp_helpers collapses 16.2→1.7%
+      (fmuls/fadds/fma + unsplit conversion + both psq leaves gone;
+      remainder _slow 0.96/fcmp 0.63/fctiw 0.17), func 45→57%, rest
+      matches M5 to ~0.5%. CPU core (~15.5%: Run 2.78, HookExternal
+      1.69, Write32 1.16, dispatch 1.14) genuinely the frontier.
+      Provenance exemplary (module 1c6c89cf…/a34ee6dd…, m7/
+      provenance.json). Trials: t7smooth 37/37, t7vk Vulkan 45/45
+      (android_trial.py gained --graphics). Placement: hot thread on
+      prime 7 unpinned; GC-Adapter-Scan comm confirms finding 4.
+      Evidence SSD android-spike/m7/ + /tmp/android-m7/. Pending:
+      desktop psq-symbol check, _slow histogram, Vulkan profile.
 - [x] 2026-09-17 course-row live apply shipped (desktop/iOS): manifest
       re-applied without reset via ApplyCourseManifestLive under
       CPUThreadGuard on the title thread (no polling thread; temp
