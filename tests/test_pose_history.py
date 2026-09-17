@@ -26,7 +26,13 @@ int main() {
  NativeTrial::Cancel(); assert(!NativeTrial::Active(2));
  // Cancellation cannot claim quiescence: the CPU adapter must drain first.
  assert(NativeTrial::status.load()==NativeTrial::Status::Running);
- NativeTrial::limited=true; NativeTrial::Request(); assert(!NativeTrial::limited.load());
+ // Requests are terminal-state-only: a live trial ignores Request, and a
+ // terminal one resets the counters including the blended-extra count.
+ NativeTrial::limited=true; NativeTrial::extras_blended=7; NativeTrial::Request();
+ assert(NativeTrial::limited.load()); assert(NativeTrial::extras_blended.load()==7);
+ NativeTrial::status=NativeTrial::Status::Finished; NativeTrial::Request();
+ assert(!NativeTrial::limited.load()); assert(NativeTrial::extras_blended.load()==0);
+ assert(NativeTrial::status.load()==NativeTrial::Status::Waiting);
  Matrix first{1,0,0,0, 0,1,0,0, 0,0,1,0}, next=first, out{};
  next[3]=10;
  Matrix inverse;
