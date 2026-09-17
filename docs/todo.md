@@ -27,10 +27,18 @@ the build or commit that closed them.
       remaining scalar helper (0.63% Odin, 120-170 desktop samples).
       Agent running desktop-only (inline in cpu_fast_fp.h + movie A/B
       parity); platform.patch commit waits for its verdict.
-- [ ] APK/display path spike (September 17): agent running on the Odin
-      (sole user): thinnest presented path (SDL activity APK or
-      headless-with-swaps) + onscreen-trial definition + production
-      cost. Timeboxed; headless EGL/Vulkan trials already run.
+- [ ] Swap-timestamp probe rows (September 17, display gap 1): the real
+      display-link proof for onscreen trials — hook GLContextEGL::Swap /
+      Vulkan present + correlate the AChoreographer feed (proven working:
+      1194 callbacks @ 8.229ms vs 8.199ms swaps). Spec'd S (one shadowed
+      TU, same interposition technique). Device free; proposed next.
+- [ ] Display production wiring (September 17, display gaps 2-6): real
+      CreateAndroidPlatform branch (replace the spike's
+      CreateHeadlessPlatform interposition), headless=false,
+      TERM_WINDOW→pause/ChangeSurface, audio choice (M, 1-2 sessions);
+      vsync/pacing policy for 122Hz panel vs 60fps game (S); input glue
+      for playability, not needed for trials (M); warm/ship shader cache
+      (XS); 1.25GB asset + 16KB-page packaging story (M, product call).
 - [ ] Patch-stack drift receipts (September 17, review finding 8): the
       per-layer checker excludes shared files, so a lost lower hunk passes
       silently. The suggested concat reverse-check does NOT work (verified:
@@ -971,6 +979,16 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 Android display spike: org.ssx3.display APK installs,
+      launches, presents SSX3 onscreen (memcard check, Snow Jam menu,
+      race start gate via screencap; 147 FPS samples, median 59.8,
+      race ~56, clean 150s budget stop). Probe APK: 1200 swaps @
+      8.199ms vsync-locked + AChoreographer feed; app-context verdicts
+      (dlopen/module/mmap OK, /data/local/tmp writes denied →
+      app-private user dir). Zero repo writes (spike-only
+      CreateHeadlessPlatform interposition); 3 APKs shas recorded,
+      still installed. Evidence SSD android-spike/display/ +
+      /tmp/android-display/. Gaps 1-6 costed (XS–M).
 - [x] 2026-09-17 Odin HEAD re-profile (M7): finding 1 closed — M5 module
       predated Wave B; at HEAD fp_helpers collapses 16.2→1.7%
       (fmuls/fadds/fma + unsplit conversion + both psq leaves gone;
