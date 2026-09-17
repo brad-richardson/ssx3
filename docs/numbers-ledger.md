@@ -28,14 +28,17 @@ Rules that keep this table honest (perf-review §1+§7):
 | Desktop menu ceiling | 3.89× OGL / 4.0× Metal / 6.6× idle-skip | 09-17 | Mac, m3-menu, post-throttle-fix | pace-hunt Phase 1 |
 | Throttle proof | speed9: 0.15× pre (= predicted 0.1626×) → 3.66× post; speed10 menus 3.89×; speed1/2 intact; throttle sleep 56% → 0% | 09-17 | Desktop + Odin | `1f1bc2d` |
 | FIFO fix | Control panics sample 140 (tombstoned GatherPipe stack); fix runs clean to completion, zero tombstones; desktop baseline panics ~129 s, fix exits 0 at 200 s; movie A/B 2234-prefix identical | 09-17 | Odin + desktop | `309f639`, `panic-fix/` |
+| Pinned tail (emu→7, vid→6) | 1.974× (+25%) / 14.93 ms/frame (−19.5%) vs 1.578×/18.52 unpinned | 09-17 | Odin 3 (2+6, prime cpu6–7 @4.32GHz), m3-menu EGL, speed 0 | `23c5b86`, `affinity/` (pin2/both agree; flag replicates manual within 0.6%) |
+| Pinned load dip | 0.70 → 1.15 (+64%); lows 0.63–0.70 → 0.94+ | 09-17 | Same | Same; FD alone +37%, FD+pin stacks ≈1.41× |
+| Priority / quarantine | renice −10: nil; emu→cpu0 control: −41% tail | 09-17 | Same | Same (contaminated pin1 kept as negative control) |
+| Capped/uncapped reconciliation | RESOLVED: capped saturates 1.0 while sub-capability dips run identically in both regimes — content + cap saturation, no DVFS paradox | 09-17 | Odin, m3-menu capped arm + busy fraction | Affinity hunt |
 | Snow scorer calibration | clean ≤0.05 (iPad) / ≤0.08 (Odin menu); corrupt ≥0.17 transition / ≥0.38 full; threshold 0.12 | 09-17 | Archived shots | `tools/gamecube_snow_check.py` |
 | Onscreen trial | 25/25 presented + correlated | 09-17 | Odin onscreen | `8df3c42` |
 
 ## Contested
 
-| Metric | Conflict | Resolution |
-| --- | --- | --- |
-| "The Odin's speed" | M5: 0.97–1.0 capped in-race vs pace: 0.83× uncapped race (different window? vehicle? DVFS governor under never-idle load?) | Capped m3-menu arm + busy fraction steered into the affinity agent; neither quoted until reconciled |
+None currently. (Resolved 09-17: M5-vs-0.83× — see Live "Capped/uncapped
+reconciliation".)
 
 ## Stale (re-run before quoting)
 

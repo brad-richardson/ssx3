@@ -72,13 +72,14 @@ the build or commit that closed them.
       interpolated frame doesn't need); schedule the named fix for
       the per-frame empty-queue GPU sync (~3.3ms floor, 2.74ms spin,
       largest named render item, fix named but never scheduled).
-- [ ] Odin thread affinity/priority (September 17, review finding 4): the
-      one hot thread's placement on the 1+4+3 Snapdragon is worth more
-      than any helper inlining, and nothing in the headless runner or
-      trial harness sets affinity or priority. Record
-      `/proc/<pid>/task/*/comm` + `psr` on the next run (M5's 80.7%
-      "GC Adapter Scan" thread is a mislabel or a placement bug), then
-      pin/prioritize the emu thread. Possible avg-75 lever.
+- [ ] Affinity follow-through (September 17): runner-side prime
+      discovery (sysfs max-freq, never hardcode 6/7) +
+      pthread_setaffinity_np at emu/video entries with silent fallback
+      — design in affinity-summary.json proposal_runner, --affinity
+      flag is the on-device oracle. Smaller: rename audit (why the CPU
+      task carries 'GC Adapter Scan'; DOLPHIN_NO_JVM stub is private
+      to androidcommon) and the FD pause-timing fragility note (disc
+      latency shifts pause edges run-to-run under bSyncGPU=0).
 - [ ] SyncGPU double-decode cost (September 17, review finding 3): the
       deterministic GPU thread path decodes every FIFO byte twice
       (CPU-thread preprocess + video-thread real) with slot-boundary
@@ -1057,6 +1058,12 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 Odin affinity (23c5b86): --affinity emu/video pin flag
+      + 5 tests. Pinned tail 1.578×→1.974× (+25%), 18.52→14.93 ms/frame;
+      load dip 0.70→1.15 (+64%); lows →0.94+; prio nil; cpu0 control
+      −41%. Mislabel resolved (GC Adapter Scan IS the CPU thread);
+      Odin 3 is 2+6 prime cpu6–7 @4.32GHz, not 1+4+3. M5 contradiction
+      reconciled (cap saturation + content, no DVFS paradox).
 - [x] 2026-09-17 pace mechanism: RESOLVED — the ~1.16 ceiling was u32
       throttle-clock overflow, not structural (fixed 1f1bc2d). True
       Odin race ceiling 0.83× OGL / 0.73× VK (m3-menu, verified
