@@ -5,6 +5,13 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] Odin viability gap (September 16): M3 proved scripted input drives a
+      live Snow Jam race on the Odin3 (Pipe/0/ssx3 backend, no rebuild) but
+      the device holds only ~1/8th speed in-race (stderr speed ~0.11–0.13)
+      and ground/snow renders as green/red/black garbage under EGL (see
+      /tmp/m3-shots/final). Needs perf triage (hotspot + what full-speed
+      requires) and a texture-path investigation — possibly the same
+      ground/snow issue as the iOS note below — before APK packaging.
 - [ ] Course texture/lighting review (user, September 16): wild-looking
       textures with the lighting observed in-course as a casual observer —
       particularly ground/snow. Needs a review pass over the course's
@@ -16,7 +23,8 @@ the build or commit that closed them.
       one-generation-per-tick fix, the blended validator gate, and the
       trialExtrasBlended phone metric are in. First on-device proof
       September 16 (later): iPad smoothing trial on the fixed build
-      blended 35/36 extras. Desktop lifecycle proof same night:
+      blended 35/36 extras, and an iPad Combined trial blended 30/30
+      with 562 doubled updates. Desktop lifecycle proof same night:
       lifecycle-postfix2 (on gc-gari-026; 027's files were cleaned and
       are not in the archive) passes the blended gates — 202/203 extras
       blended, 262k matrices, generations step +1. Still needed: interp-fx
@@ -807,7 +815,10 @@ the build or commit that closed them.
       frame budget binds on CPU, not GPU. Post-fix baseline
       (local/reports/gpu-captures/20260917-024156, blending on): GPU 7.89%
       busy, per-frame median 1.436 / p99 1.848 ms — blending costs ~0.2 ms
-      median on M2, tail unchanged, still ~17–25% of budget.
+      median on M2, tail unchanged, still ~17–25% of budget. Combined-kind
+      trace (local/reports/gpu-captures/20260917-031834): GPU 7.36% busy,
+      median 1.162 / p99 1.760 ms — F doubling adds no GPU cost, as
+      expected; 30/30 extras blended with 562 doubled updates.
 - [x] 2026-09-12 gc-gari-013: identify the terrain lightmap scale mismatch
       across 108 matched image pairs, add a shared engine material profile,
       preserve source images and conversion receipts, test every RGB565 color,
