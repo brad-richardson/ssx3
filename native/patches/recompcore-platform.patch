@@ -1809,3 +1809,33 @@ index 976592c..f8bd163 100644
 +bool FifoWmIntFixEnabled();
 +
  }  // namespace CommandProcessor
+diff --git a/Source/Core/Core/CoreTiming.cpp b/Source/Core/Core/CoreTiming.cpp
+index 26e9973..9757088 100644
+--- a/Source/Core/Core/CoreTiming.cpp
++++ b/Source/Core/Core/CoreTiming.cpp
+@@ -498,8 +498,10 @@ void CoreTimingManager::UpdateSpeedLimit(s64 cycle, double new_speed)
+ {
+   m_emulation_speed = new_speed;
+ 
+-  const u32 new_clock_per_sec =
+-      std::lround(m_system.GetSystemTimers().GetTicksPerSecond() * new_speed);
++  // s64: the u32 clock wrapped at 2^32 ticks/s, so EmulationSpeed=10 on the
++  // 486 MHz GameCube clock throttled "uncapped" runs to exactly 1.16262x.
++  const s64 new_clock_per_sec =
++      std::llround(m_system.GetSystemTimers().GetTicksPerSecond() * new_speed);
+ 
+   const bool was_limited = m_throttle_adj_clock_per_sec != 0;
+   if (was_limited)
+diff --git a/Source/Core/Core/CoreTiming.h b/Source/Core/Core/CoreTiming.h
+index 29d636e..a98ddd5 100644
+--- a/Source/Core/Core/CoreTiming.h
++++ b/Source/Core/Core/CoreTiming.h
+@@ -213,7 +213,7 @@ private:
+ 
+   s64 m_throttle_reference_cycle = 0;
+   TimePoint m_throttle_reference_time = Clock::now();
+-  u32 m_throttle_adj_clock_per_sec = 0;
++  s64 m_throttle_adj_clock_per_sec = 0;
+   bool m_throttle_disable_vi_int = false;
+ 
+   DT m_max_fallback = {};
