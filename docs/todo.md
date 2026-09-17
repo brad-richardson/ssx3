@@ -48,15 +48,14 @@ the build or commit that closed them.
       construction and the SpeedFloor judges what it perturbs. Move status
       checks behind the boundary-PC filter. Minor: kind shadowing,
       watchdog-only at+120. Note: t3-vs-t4 stands (both pay it equally).
-- [ ] FIFO exception-poll change (September 17, review finding 3b): static
-      recomp has no FIFO-write exception check (CompileExceptionCheck call
-      is an unconsumed set-insert on the recomp path) — candidate root
-      cause of the deterministic ~15 s Adreno-only GatherPipe panic. 3a
-      answered without new runs: trial template runs SyncGPU=false
-      (default; absent from ini) and still panics at the normal point, so
-      the panic is NOT SyncGPU-specific; M5's ini stays unrecorded but is
-      downgraded. Next: make the 0xCC008000 write hook request an
-      exception poll at next dispatch when the watermark interrupt is up.
+- [ ] Pace mechanism (September 17): the ~1.16 ceiling is STRUCTURAL,
+      not Odin throttling — desktop Metal uncapped binds at menu ~1.17
+      (69.5fps rock-steady, validation on/off identical, 3 runs) matching
+      Odin EGL 1.1626 / Vulkan 1.1627 to 4 decimals. Fast-FP A/B identical
+      on Odin. Backend/SyncGPU/placement-independent. Root cause unknown
+      (dual-core/static-recomp sync? handoff-quantum/EFB-sync?); this
+      gates every wall-clock win AND the avg-75 milestone on all devices.
+      Race ceiling still unmeasured anywhere (panic-blocked).
 - [ ] Frame-exact snow A/B (September 17, review finding 11 caveat): the
       standing backend-independent verdict is movie-aligned (same
       m3-menu.dtm, matched race timers, deterministic panic point,
@@ -83,14 +82,6 @@ the build or commit that closed them.
       plumbing agent found 8 zeroed clusters in the SSD trial binary (size/
       mtime unchanged; caught by receipt check, restored from the verified
       device copy). Same exFAT fragility as the earlier archive flag errors.
-- [ ] Pace mechanism (September 17): the ~1.16 uncapped ceiling survives
-      the HEAD module on BOTH backends (EGL menus 1.1626, Vulkan 1.1627,
-      match to 4 decimals) and a fast-FP on/off A/B prints identical
-      ceilings (wall prize 0.00 until the pace lifts). Backend-independent,
-      SyncGPU-independent, placement-independent (prime 7 unpinned),
-      panic at the fixed ~130 emu-s point in all 9 runs. Root cause still
-      unknown (handoff-quantum/EFB-sync candidates); this gates every
-      wall-clock FP/core win on the Odin.
 - [ ] New menu entry / new peak = fixed-table surgery, parked (September 17):
       menu spike proved Tricky tracks are menu-selectable TODAY via the
       existing manifest (Aloha Ice Jam hosted on event 5 R&B row, 3-field
@@ -121,14 +112,12 @@ the build or commit that closed them.
       offsets. Hygiene (F3): verdict-grade A/Bs need an exclusive
       host; same movie diverged across the skip knob pre-trial, so
       cross-knob trajectory identity can't be assumed.
-- [ ] Boot asset-hash cache: boot verification (September 17): the
-      re-hash hits ALL devices (InspectGame in the shared boot path, not
-      desktop-only). Landed: size/mtime-manifest cache in sys/
-      (.ssx3_assets_cache), best-effort with full-hash fallback,
-      SSX3_FULL_ASSET_HASH=1 force flag, hit/miss stderr lines; patch
-      applies byte-exact, outer stack green, game.cpp syntax-clean.
-      Still needs a desktop boot test (miss → hit → touch-invalidation)
-      once the desktop frees up (idle-A/B + fcmp building now).
+- [ ] FIFO exception-poll change (September 17, review finding 3b): agent
+      implementing (desktop parity + Odin validation). DESKTOP REPRO
+      FOUND: uncapped (EmulationSpeed=10) + m3-menu.dtm panics on Metal
+      with the exact Odin signature (GatherPipeBursted, CP:548) right
+      after race load — agent notified, iterating locally. Recipe +
+      log: local/research/ceil-probe/run-003.log.
 - [ ] Odin viability gap (September 16): M3 proved scripted input drives a
       live Snow Jam race on the Odin3 (Pipe/0/ssx3 backend, no rebuild) but
       the device holds only ~1/8th speed in-race (stderr speed ~0.11–0.13)
@@ -960,6 +949,17 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] 2026-09-17 desktop ceiling probe: uncapped menus bind at ~1.17
+      (69.5fps, rock-steady across validation on/off + movie runs) —
+      the pace is structural, matching Odin EGL/Vulkan to 4 decimals.
+      Race ceiling unmeasured (panic). Evidence
+      local/research/ceil-probe/. Tooling kept: SSX3_EMULATION_SPEED
+      passthrough (+ test).
+- [x] 2026-09-17 asset-cache boot verification: all paths proven live
+      (miss→hash→write, hit→reuse, add/remove/mtime → miss). Stock
+      restored byte-list-identical (110 files; a phantom empty bam.big
+      I created by touching a nonexistent path was removed; DOL pin
+      intact throughout).
 - [x] 2026-09-17 desktop idle × trial mechanism (idle-A/B): no skip
       pathology — with the skip firing, ON ran healthy (270 extras,
       tick/wall 0.983, full VI-period spans); tick under-advancement
