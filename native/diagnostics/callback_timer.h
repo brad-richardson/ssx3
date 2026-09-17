@@ -10,7 +10,11 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
+#ifdef __APPLE__
 #include <mach/mach_time.h>
+#else
+#include <time.h>
+#endif
 #include "callback_timing.h"
 #include "trial_control.h"
 
@@ -32,16 +36,29 @@ struct Ring {
 struct Pending { bool active=false; std::uint32_t ret=0; double cpu=-1; std::uint64_t wall=0; };
 inline Ring update_ring, render_ring;
 inline Pending update, render;
+inline std::uint64_t WallNow(){
+#ifdef __APPLE__
+  return mach_absolute_time();
+#else
+  timespec value{};
+  clock_gettime(CLOCK_MONOTONIC,&value);
+  return std::uint64_t(value.tv_sec)*1000000000ull+std::uint64_t(value.tv_nsec);
+#endif
+}
 inline double WallMsPerTick(){
+#ifdef __APPLE__
   static const double value=[]{ mach_timebase_info_data_t info; mach_timebase_info(&info);
     return double(info.numer)/double(info.denom)/1e6; }();
   return value;
+#else
+  return 1e-6;
+#endif
 }
 template<class CPU> inline void Begin(Pending& p,const CPU& c){
-  p.active=true; p.ret=c.lr; p.wall=mach_absolute_time(); p.cpu=RenderResearch::ThreadCPUSeconds();
+  p.active=true; p.ret=c.lr; p.wall=WallNow(); p.cpu=RenderResearch::ThreadCPUSeconds();
 }
 template<class CPU> inline void End(Pending& p,Ring& ring,const CPU&){
-  const auto wall=mach_absolute_time();
+  const auto wall=WallNow();
   const double cpu=RenderResearch::ThreadCPUSeconds();
   p.active=false;
   Sample s;

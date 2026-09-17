@@ -11,7 +11,11 @@
 // until process exit so queued entries cannot select a null destination.
 #pragma once
 #include "render_deadline.h"
+#ifdef __APPLE__
 #include <mach/mach_time.h>
+#else
+#include <time.h>
+#endif
 #include "Core/Config/GraphicsSettings.h"
 namespace NativeSchedule {
 using namespace NativeProbe;
@@ -66,8 +70,14 @@ static u32 mode_address=0,first_xfb=0;
 // libc++ steady_clock includes time spent asleep on this Mac; Metal uses the
 // absolute uptime clock. Use Metal's clock domain for presentation alignment.
 static double PresentationClock(){
+#ifdef __APPLE__
  static mach_timebase_info_data_t info=[](){mach_timebase_info_data_t value;mach_timebase_info(&value);return value;}();
  return double(mach_absolute_time())*info.numer/info.denom/1e9;
+#else
+ timespec value{};
+ clock_gettime(CLOCK_MONOTONIC,&value);
+ return double(value.tv_sec)+double(value.tv_nsec)/1e9;
+#endif
 }
 static void StoreWord(CPUState& c,u32 address,u32 value){
  if(!Valid(c,address,4))std::abort();

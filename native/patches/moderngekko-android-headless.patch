@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 597318a..0b98a8c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,10 @@
+ cmake_minimum_required(VERSION 3.20)
++# NOTE(spike): language selection must be target-aware. if(APPLE) before
++# project() sees the HOST, which breaks Android cross-configure. Native
++# behavior is unchanged: OBJCXX is still enabled on Apple targets below.
++project(ModernGekko LANGUAGES C CXX)
+ if(APPLE)
+-    project(ModernGekko LANGUAGES C CXX OBJCXX)
+-else()
+-    project(ModernGekko LANGUAGES C CXX)
++    enable_language(OBJCXX)
+ endif()
+ 
+ include(CTest)
+diff --git a/tools/moderngekko_run.cpp b/tools/moderngekko_run.cpp
+index a1fba9f..d2eb72a 100644
+--- a/tools/moderngekko_run.cpp
++++ b/tools/moderngekko_run.cpp
+@@ -228,7 +228,9 @@ int RunMain(int argc, char **argv) {
+     return 2;
+   }
+   config.graphics.internal_resolution_scale = frontend_config.dolphin_scale;
+-  if (config.graphics.backend.empty())
++  // Headless never inherits the frontend's windowed rendering backend; the runtime falls back to
++  // Null, matching the explicit `--graphics Null` the desktop harness passes for headless runs.
++  if (config.graphics.backend.empty() && !config.headless)
+     config.graphics.backend = frontend_config.graphics_backend;
+   config.fullscreen = frontend_config.fullscreen;
+   config.show_fps_in_title = frontend_config.show_fps_in_title;

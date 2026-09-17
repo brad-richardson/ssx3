@@ -1,0 +1,250 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 733f9f8..36f06e3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -607,7 +607,10 @@ endif()
+ #
+ include_directories(Source/Core)
+ include_directories(GXRuntime/include)
+-if(ANDROID)
++# NOTE(spike): test the target system, not the ANDROID var: ENABLE_HEADLESS
++# deliberately sets ANDROID=0 ("we want an executable"), but the NDK toolchain
++# still compiles with -DANDROID, so the JNI headers must stay visible.
++if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+   include_directories(Source/Android)
+ endif()
+ 
+@@ -716,7 +719,10 @@ if(ENABLE_CUBEB)
+   add_definitions(-DHAVE_CUBEB)
+ endif()
+ 
+-if(NOT ANDROID AND NOT (CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS"))
++# NOTE(spike): test the target system: under ENABLE_HEADLESS the ANDROID var is
++# deliberately 0, but upstream Android never builds libusb (its backend
++# selection has no Android arm, so the archive comes out incomplete).
++if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT (CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS"))
+   dolphin_find_optional_system_library(LibUSB Externals/libusb)
+   add_definitions(-D__LIBUSB__)
+ endif()
+@@ -744,7 +750,9 @@ dolphin_find_optional_system_library(MBEDTLS Externals/mbedtls 2.28)
+ 
+ dolphin_find_optional_system_library(CURL Externals/curl)
+ 
+-if(NOT ANDROID AND NOT (CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS"))
++# NOTE(spike): same target-system test as LibUSB above; upstream Android builds
++# neither, and all consumers are if(TARGET ...)-gated.
++if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT (CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS"))
+   dolphin_find_optional_system_library(HIDAPI Externals/hidapi)
+ endif()
+ 
+diff --git a/Source/CMakeLists.txt b/Source/CMakeLists.txt
+index 7871083..081744c 100644
+--- a/Source/CMakeLists.txt
++++ b/Source/CMakeLists.txt
+@@ -82,6 +82,11 @@ endif()
+ add_subdirectory(Core)
+ if (ANDROID)
+   add_subdirectory(Android/jni)
++elseif (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android")
++  # NOTE(spike): headless executable build still needs the JNI helper
++  # archive (androidcommon) for FileUtil's AndroidContent paths, but not the
++  # full `main` app library.
++  add_subdirectory(Android/jni/AndroidCommon)
+ endif()
+ 
+ if (ENABLE_TESTS)
+diff --git a/Source/Core/Common/CMakeLists.txt b/Source/Core/Common/CMakeLists.txt
+index 14f54ed..87cf3ba 100644
+--- a/Source/Core/Common/CMakeLists.txt
++++ b/Source/Core/Common/CMakeLists.txt
+@@ -232,7 +232,7 @@ elseif(WIN32)
+   if (_M_X86_64)
+     target_link_libraries(common PRIVATE opengl32.lib)
+   endif()
+-elseif (ANDROID)
++elseif (ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
+   target_link_libraries(common
+   PRIVATE
+     androidcommon
+@@ -241,7 +241,7 @@ elseif(HAIKU)
+   target_link_libraries(common PRIVATE be GL)
+ endif()
+ 
+-if(ANDROID)
++if(ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
+   target_sources(common PRIVATE
+     Logging/ConsoleListenerDroid.cpp
+     MemArenaAndroid.cpp
+diff --git a/Source/Core/Core/CMakeLists.txt b/Source/Core/Core/CMakeLists.txt
+index 9a41888..dc4813a 100644
+--- a/Source/Core/Core/CMakeLists.txt
++++ b/Source/Core/Core/CMakeLists.txt
+@@ -802,7 +802,7 @@ if (APPLE)
+     ${IOK_LIBRARY}
+     resolv
+   )
+-elseif (ANDROID)
++elseif (ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
+   target_link_libraries(core
+   PRIVATE
+     androidcommon
+@@ -878,7 +878,7 @@ elseif(UNIX)
+   target_sources(core PRIVATE
+     HW/EXI/BBA/TAP_Unix.cpp
+   )
+-  if(ANDROID)
++  if(ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
+     target_sources(core PRIVATE
+       HW/WiimoteReal/IOAndroid.cpp
+       HW/WiimoteReal/IOAndroid.h
+diff --git a/Source/Core/InputCommon/CMakeLists.txt b/Source/Core/InputCommon/CMakeLists.txt
+index 60bda72..8e20ba6 100644
+--- a/Source/Core/InputCommon/CMakeLists.txt
++++ b/Source/Core/InputCommon/CMakeLists.txt
+@@ -141,14 +141,22 @@ elseif(X11_FOUND)
+     ControllerInterface/Xlib/XInput2.h
+   )
+   target_link_libraries(inputcommon PRIVATE PkgConfig::X11_INPUT)
+-elseif(ANDROID)
+-  target_compile_definitions(inputcommon PRIVATE -DCIFACE_USE_ANDROID)
+-  target_sources(inputcommon PRIVATE
+-    ControllerInterface/Android/Android.cpp
+-    ControllerInterface/Android/Android.h
+-    ControllerInterface/Touch/InputOverrider.cpp
+-    ControllerInterface/Touch/InputOverrider.h
+-  )
++elseif(ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
++  # NOTE(milestone): a headless Android-target binary has no JVM, so the
++  # Android input backend (whose constructor calls IDCache::GetEnvForThread)
++  # must stay out. The androidcommon link stays: GCAdapter references it, and
++  # DOLPHIN_NO_JVM compiles out the unreachable JNI calls.
++  if(ANDROID)
++    target_compile_definitions(inputcommon PRIVATE -DCIFACE_USE_ANDROID)
++    target_sources(inputcommon PRIVATE
++      ControllerInterface/Android/Android.cpp
++      ControllerInterface/Android/Android.h
++      ControllerInterface/Touch/InputOverrider.cpp
++      ControllerInterface/Touch/InputOverrider.h
++    )
++  else()
++    target_compile_definitions(inputcommon PRIVATE DOLPHIN_NO_JVM)
++  endif()
+   target_link_libraries(inputcommon PRIVATE
+     androidcommon
+   )
+diff --git a/Source/Core/Common/GL/GLContext.cpp b/Source/Core/Common/GL/GLContext.cpp
+index e275278..1b6df97 100644
+--- a/Source/Core/Common/GL/GLContext.cpp
++++ b/Source/Core/Common/GL/GLContext.cpp
+@@ -87,7 +87,7 @@ std::unique_ptr<GLContext> GLContext::Create(const WindowSystemInfo& wsi, bool s
+   if (wsi.type == WindowSystemType::Windows)
+     context = std::make_unique<GLContextWGL>();
+ #endif
+-#if defined(ANDROID)
++#if defined(ANDROID) && HAVE_EGL
+   if (wsi.type == WindowSystemType::Android)
+     context = std::make_unique<GLContextEGLAndroid>();
+ #endif
+diff --git a/Source/Core/Core/HW/GCMemcard/GCMemcardUtils.cpp b/Source/Core/Core/HW/GCMemcard/GCMemcardUtils.cpp
+index c7e0aa0..c866418 100644
+--- a/Source/Core/Core/HW/GCMemcard/GCMemcardUtils.cpp
++++ b/Source/Core/Core/HW/GCMemcard/GCMemcardUtils.cpp
+@@ -21,7 +21,7 @@ constexpr std::array<u8, 12> SAV_MAGIC = {0x44, 0x41, 0x54, 0x45, 0x4C, 0x47,
+                                           0x43, 0x5F, 0x53, 0x41, 0x56, 0x45};  // "DATELGC_SAVE"
+ constexpr u32 SAV_HEADER_SIZE = 0xC0;
+ constexpr u32 SAV_DENTRY_OFFSET = 0x80;
+-constexpr std::array<u8, 6> GCS_MAGIC = {0x47, 0x43, 0x53, 0x41, 0x56, 0x45};  // "GCSAVE"
++constexpr std::array<u8, 6> GCSAVE_MAGIC = {0x47, 0x43, 0x53, 0x41, 0x56, 0x45};  // "GCSAVE"
+ constexpr u32 GCS_HEADER_SIZE = 0x150;
+ constexpr u32 GCS_DENTRY_OFFSET = 0x110;
+ 
+@@ -153,7 +153,7 @@ static std::variant<ReadSavefileErrorCode, Savefile> ReadSavefileInternalGCS(Fil
+   if (!file.ReadBytes(gcs_header.data(), gcs_header.size()))
+     return ReadSavefileErrorCode::IOError;
+ 
+-  if (std::memcmp(gcs_header.data(), GCS_MAGIC.data(), GCS_MAGIC.size()) != 0)
++  if (std::memcmp(gcs_header.data(), GCSAVE_MAGIC.data(), GCSAVE_MAGIC.size()) != 0)
+     return ReadSavefileErrorCode::DataCorrupted;
+ 
+   Savefile savefile;
+@@ -245,7 +245,7 @@ static bool WriteSavefileInternalGCS(File::IOFile& file, const Savefile& savefil
+ {
+   std::array<u8, GCS_HEADER_SIZE> header;
+   std::memset(header.data(), 0, header.size());
+-  std::memcpy(header.data(), GCS_MAGIC.data(), GCS_MAGIC.size());
++  std::memcpy(header.data(), GCSAVE_MAGIC.data(), GCSAVE_MAGIC.size());
+ 
+   DEntry gcs_entry = savefile.dir_entry;
+   gcs_entry.m_block_count = 1;  // always stored as 1 in GCS files
+diff --git a/Source/Core/InputCommon/GCAdapter.cpp b/Source/Core/InputCommon/GCAdapter.cpp
+index 2b4f9bd..fe0ef1e 100644
+--- a/Source/Core/InputCommon/GCAdapter.cpp
++++ b/Source/Core/InputCommon/GCAdapter.cpp
+@@ -6,6 +6,11 @@
+ #ifndef ANDROID
+ #define GCADAPTER_USE_LIBUSB_IMPLEMENTATION true
+ #define GCADAPTER_USE_ANDROID_IMPLEMENTATION false
++#elif defined(DOLPHIN_NO_JVM)
++// Headless Android-target binary: no JVM for the Android implementation and no
++// libusb linked for the USB implementation, so GCAdapter compiles to stubs.
++#define GCADAPTER_USE_LIBUSB_IMPLEMENTATION false
++#define GCADAPTER_USE_ANDROID_IMPLEMENTATION false
+ #else
+ #define GCADAPTER_USE_LIBUSB_IMPLEMENTATION false
+ #define GCADAPTER_USE_ANDROID_IMPLEMENTATION true
+diff --git a/Source/Android/jni/AndroidCommon/CMakeLists.txt b/Source/Android/jni/AndroidCommon/CMakeLists.txt
+index c9c48e0..5ba6454 100644
+--- a/Source/Android/jni/AndroidCommon/CMakeLists.txt
++++ b/Source/Android/jni/AndroidCommon/CMakeLists.txt
+@@ -14,3 +14,9 @@ PRIVATE
+   "-Wl,--whole-archive"
+   "-Wl,--no-whole-archive"
+ )
++
++if(ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android")
++  # Headless Android-target binary: no JVM exists, so IDCache must not define
++  # JNI_OnLoad (SDL's unsupported-core stub already provides one).
++  target_compile_definitions(androidcommon PRIVATE DOLPHIN_NO_JVM)
++endif()
+diff --git a/Source/Android/jni/AndroidCommon/IDCache.cpp b/Source/Android/jni/AndroidCommon/IDCache.cpp
+index 18b4860..cffae2f 100644
+--- a/Source/Android/jni/AndroidCommon/IDCache.cpp
++++ b/Source/Android/jni/AndroidCommon/IDCache.cpp
+@@ -579,6 +579,7 @@ jmethodID GetAudioUtilsGetFramesPerBuffer()
+ 
+ extern "C" {
+ 
++#ifndef DOLPHIN_NO_JVM
+ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
+ {
+   s_java_vm = vm;
+@@ -818,6 +819,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
+ 
+   return JNI_VERSION;
+ }
++#endif  // !defined(DOLPHIN_NO_JVM)
+ 
+ JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved)
+ {
+diff --git a/Source/Core/Core/DolphinAnalytics.cpp b/Source/Core/Core/DolphinAnalytics.cpp
+index b41725e..0a52819 100644
+--- a/Source/Core/Core/DolphinAnalytics.cpp
++++ b/Source/Core/Core/DolphinAnalytics.cpp
+@@ -296,9 +296,14 @@ void DolphinAnalytics::MakeBaseBuilder()
+   builder.AddData("win-ver-build", static_cast<u32>(winver.dwBuildNumber));
+ #elif defined(ANDROID)
+   builder.AddData("os-type", "android");
+-  builder.AddData("android-manufacturer", s_get_val_func("DEVICE_MANUFACTURER"));
+-  builder.AddData("android-model", s_get_val_func("DEVICE_MODEL"));
+-  builder.AddData("android-version", s_get_val_func("DEVICE_OS"));
++  // NOTE(milestone): s_get_val_func is installed by the Android app's JNI layer; a headless
++  // binary has no JVM, so it stays empty and these fields are skipped.
++  if (s_get_val_func)
++  {
++    builder.AddData("android-manufacturer", s_get_val_func("DEVICE_MANUFACTURER"));
++    builder.AddData("android-model", s_get_val_func("DEVICE_MODEL"));
++    builder.AddData("android-version", s_get_val_func("DEVICE_OS"));
++  }
+ #elif defined(__APPLE__)
+   builder.AddData("os-type", "osx");
+ 
