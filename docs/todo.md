@@ -16,11 +16,14 @@ the build or commit that closed them.
       one-generation-per-tick fix, the blended validator gate, and the
       trialExtrasBlended phone metric are in. First on-device proof
       September 16 (later): iPad smoothing trial on the fixed build
-      blended 35/36 extras. Still needed: rerun interp-fx and the
-      lifecycle combined leg and confirm blended > 0, re-run the phone
-      Combined trial with blending actually on (that number, not the
-      recorded one, decides whether retained host palettes are next), and
-      re-issue both verdicts.
+      blended 35/36 extras. Desktop lifecycle proof same night:
+      lifecycle-postfix2 (on gc-gari-026; 027's files were cleaned and
+      are not in the archive) passes the blended gates — 202/203 extras
+      blended, 262k matrices, generations step +1. Still needed: interp-fx
+      determinism re-proof (needs 027-exact bytes for det-sched.dtm, or a
+      fresh movie), the phone Combined re-run with blending actually on
+      (that number decides retained host palettes), and re-issuing both
+      verdicts.
 - [ ] Arch-review findings 2–4 (September 16): (2) consolidate the trial
       state machine (four headers of file-scope statics; SSXResetNativeTrial
       misses counters) into per-namespace TrialState with a single Finish;
