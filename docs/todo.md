@@ -5,6 +5,11 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Plan of record for 120 fps (September 17 evening):**
+      [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
+      gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
+      Briefs never edit this file or the ledger; the owner does after each
+      gate read.
 - [ ] Codegen prune follow-up: capped CPU-gated A/B (September 17,
       HIGH): the one-chunk spike (802197A0) was INCONCLUSIVE — desktop
       uncapped can't resolve the ~2% expectation (fanless-Air thermal
