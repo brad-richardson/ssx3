@@ -93,6 +93,15 @@ the build or commit that closed them.
       table walk) — fixed by feeding the recompiler a function-map CSV
       (`general.ghidra_output`, rows name,start,end,size) built from the
       generated sources with splits at each reported prologue, iterated.
+      Third stall (15:20, with the CD image readable): every guest thread
+      parks in the scheduler (99% in its idle wait). Cause: the game uses
+      the SDK's asynchronous CD callback (binds `sceCdCallback` and
+      `sceCdInitEeCB`), and the runtime implements both as no-ops, so the
+      callback that signals the game's semaphore never fires. P1b adds an
+      idle-thread snapshot dump (diagnostic) and an HLE CD callback path
+      that queues a guest invocation after each read completes, the way
+      `EeScheduler::dispatchIrq` runs interrupt handlers; both as patch
+      files (upstream PR candidates).
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
