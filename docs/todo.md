@@ -81,6 +81,18 @@ the build or commit that closed them.
       applier entry if dispatch fails; inventory IOP module requests).
       GS renderer read (mine, later): 4 files, ~146 KB, CPU rasterizer
       only, 2 TODOs. Ledger row added.
+      P1b progress (15:05): with the scanner stubbed the boot climbs to
+      SifInitRpc and loads six IOP modules through the HLE (SIO2MAN,
+      PADMAN, LIBSD, SNDDRV, MCMAN, MCSERV), then dies on `sceCdRead` of
+      LBN 0x10 (the ISO9660 volume descriptor): the runtime can serve raw
+      sectors from `IoPaths.cdImage` but nothing in the runner sets it —
+      P1b applies a one-hunk `PS2X_CD_IMAGE` env hook (upstream PR
+      candidate). Second class of stall: missing indirect-call targets
+      that are real prologues the analyzer merged into neighbours
+      (0x3b07b8 inside sub_003B0770, reached from a function-pointer
+      table walk) — fixed by feeding the recompiler a function-map CSV
+      (`general.ghidra_output`, rows name,start,end,size) built from the
+      generated sources with splits at each reported prologue, iterated.
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
