@@ -1,0 +1,7 @@
+printf 'S2b-build' > /tmp/ssx3-host-lease
+mkdir -p /tmp/s2b-link
+python3 local/research/S2/build_android_trial.py --game local/game/gxbe69-stock --build-dir "/Volumes/Extreme SSD/android-spike/core-vk-build" --output /tmp/s2b-link/trial-vk1
+python3 local/research/S2/build_android_trial.py --game local/game/gxbe69-stock --build-dir "/Volumes/Extreme SSD/android-spike/core-vk-build" --reference-tu "/Volumes/Extreme SSD/android-spike/m4-src/vendor/dolphin/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp" --output /tmp/s2b-link/trial-vk2
+mkdir -p "/Volumes/Extreme SSD/android-spike/S2b/trial-vk1" && cp -R /tmp/s2b-link/trial-vk2/. "/Volumes/Extreme SSD/android-spike/S2b/trial-vk1/"
+shasum -a 256 <binary>; python3 -c receipt sha check (link + SSD)
+rm -f /tmp/ssx3-host-lease

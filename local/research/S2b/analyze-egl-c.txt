@@ -1,0 +1,10 @@
+| Arm | Replays | Wall med / p95 / min / max (ms) | Thread-CPU med / p95 (ms) | Frame B / updates | done | seq wall |
+| --- | ---: | --- | --- | --- | :-: | --- |
+| s2-egl-c | 200 | 0.806 / 0.874 / 0.781 / 1.013 | 0.802 / 0.872 | 422600 / 3389 | YES | seq_wall_ms=163.934 |
+
+| Arm | mem_ms med | cp_ms med | pre_ms med | run_ms med (execute+GPU idle) | sync_ms med | run_ms p95 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| s2-egl-c | 0.206 | 0.001 | 0.046 | 0.553 | 0.000 | 0.570 |
+
+s2-egl-c: events=['record_start', 'recorded', 'gpu_stall', 'pipe_saved', 'restored', 'done']
+s2-egl-c: restored detail = det=1 dual=1 mask_bp=2 dls=0 dl_bytes=0 indexed=2075 aux_bytes=99600 walk=422600/422600 unknown=0 benign=1

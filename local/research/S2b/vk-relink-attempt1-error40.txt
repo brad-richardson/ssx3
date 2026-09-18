@@ -1,0 +1,14 @@
+ld.lld: error: undefined symbol: StaticRecompCore::TryHleFpUnavailable()
+>>> referenced by Core_Run.cpp:180 (/private/tmp/s2b-link/trial-vk1/Core_Run.cpp:180)
+>>>               /private/tmp/s2b-link/trial-vk1/trial.o:(StaticRecompCore::Run())
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/S2/build_android_trial.py", line 206, in <module>
+    main()
+  File "/Users/bradrichardson/dev/ssx3/local/research/S2/build_android_trial.py", line 202, in main
+    build(parser.parse_args())
+  File "/Users/bradrichardson/dev/ssx3/local/research/S2/build_android_trial.py", line 176, in build
+    run(trial.adapt_link_command(trial.parse_link_command(commands.stdout), trial_obj, trial_binary))
+  File "/Users/bradrichardson/dev/ssx3/local/research/S2/build_android_trial.py", line 162, in run
+    subprocess.run(command, cwd=build_dir, check=True, **kw)
+subprocess.CalledProcessError: Command '[...clang++ ... -o /private/tmp/s2b-link/trial-vk1/moderngekko-run-trial /private/tmp/s2b-link/trial-vk1/trial.o libmoderngekko.a ... libvideovulkan.a ...]' returned non-zero exit status 1.

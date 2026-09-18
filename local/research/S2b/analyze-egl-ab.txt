@@ -1,0 +1,14 @@
+| Arm | Replays | Wall med / p95 / min / max (ms) | Thread-CPU med / p95 (ms) | Frame B / updates | done | seq wall |
+| --- | ---: | --- | --- | --- | :-: | --- |
+| s2-egl-a | 200 | 0.665 / 0.729 / 0.638 / 0.874 | 0.660 / 0.723 | 343226 / 2433 | YES | seq_wall_ms=135.095 |
+| s2-egl-b | 200 | 0.861 / 0.940 / 0.826 / 1.077 | 0.856 / 0.929 | 441988 / 3561 | YES | seq_wall_ms=175.174 |
+
+| Arm | mem_ms med | cp_ms med | pre_ms med | run_ms med (execute+GPU idle) | sync_ms med | run_ms p95 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| s2-egl-a | 0.164 | 0.001 | 0.035 | 0.460 | 0.000 | 0.489 |
+| s2-egl-b | 0.191 | 0.001 | 0.051 | 0.615 | 0.001 | 0.652 |
+
+s2-egl-a: events=['record_start', 'recorded', 'gpu_stall', 'pipe_saved', 'restored', 'done']
+s2-egl-a: restored detail = det=1 dual=1 mask_bp=2 dls=0 dl_bytes=0 indexed=1170 aux_bytes=56160 walk=343226/343226 unknown=0 benign=1
+s2-egl-b: events=['record_start', 'recorded', 'gpu_stall', 'pipe_saved', 'restored', 'done']
+s2-egl-b: restored detail = det=1 dual=1 mask_bp=2 dls=0 dl_bytes=0 indexed=1649 aux_bytes=79152 walk=441988/441988 unknown=0 benign=1

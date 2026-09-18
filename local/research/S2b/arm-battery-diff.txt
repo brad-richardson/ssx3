@@ -1,0 +1,26 @@
+--- local/research/S2/arm.py	2026-09-18 12:04:46
++++ local/research/S2b/arm.py	2026-09-18 13:24:55
+@@ -95,8 +95,12 @@
+         except ValueError:
+             pass
+     # status: 1 unknown, 2 charging, 3 discharging, 4 not charging, 5 full
++    # Orchestrator exception 2026-09-18: status 3 (discharging) is accepted
++    # when level >= 80 (cabled device on a port that always reports 3; the
++    # rule exists to prevent drain to zero). Level >= 20 floor unchanged.
+     out["ok_to_launch"] = bool(out["level"] is not None and out["level"] >= 20 and
+-                               out["status"] in (2, 5))
++                               (out["status"] in (2, 5) or
++                                (out["status"] == 3 and out["level"] >= 80)))
+     out["suspect_battery_saver"] = out["low_power"] == "1"
+     return out
+ 
+@@ -198,7 +202,8 @@
+     batt = battery()
+     if not batt["ok_to_launch"]:
+         raise SystemExit(
+-            "battery gate: need level >= 20 and status 2 (charging) or 5 (full); "
++            "battery gate: need level >= 20 and (status 2/5, or status 3 with "
++            "level >= 80); "
+             f"have level={batt['level']} status={batt['status']} "
+             f"ac_powered={batt['ac_powered']} -- do not launch")
+     if batt["suspect_battery_saver"]:

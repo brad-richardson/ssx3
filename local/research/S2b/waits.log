@@ -1,0 +1,20 @@
+S2b start (UTC): 2026-09-18T16:26:28Z
+D8 fallback earliest (start+3h): compute at report time
+16:26Z LEASE=USER-nethersx2 (USER-* = user has device, wait, never remove); battery 83% status 2 (pass); hottest cpu 61.9C (thermal wait required); no moderngekko proc; D8 REPORT.md absent; host lease absent; s2-egl-c-receipts absent check below
+ls: /Volumes/Extreme SSD/android-spike/S2/s2-egl-c-receipts: No such file or directory
+host lease released at 2026-09-18T16:29:05Z
+2026-09-18T16:29:17Z LEASE cleared (was USER-nethersx2, now absent); D8 REPORT.md still absent; D8 ordering blocks arms until 19:26Z fallback
+2026-09-18T16:36:31Z adb offline; connect once -> 'Operation timed out', still offline; D8 REPORT.md still absent; polling every 5 min
+2026-09-18T16:41:38Z connect -> 'No route to host'; device unreachable (Wi-Fi + USB); D8 REPORT.md absent; polling
+2026-09-18T16:46:51Z D8 ACTIVE: d8-base-cap-prelaunch.json t=12:29:18EDT lease=D8 batt=86/2; device adb down (Host is down); D8 REPORT.md absent; D8 runs first -> keep waiting
+2026-09-18T16:51:47Z device back (USB+WiFi); LEASE=D8 (foreign, wait); no moderngekko proc; D8 REPORT.md absent; waiting
+2026-09-18T16:52:29Z link note: serial now USB 622c49b1 (Wi-Fi dropping); LEASE=D8 via USB; D8 REPORT.md absent; waiting
+2026-09-18T16:57:22Z poll: LEASE=D8, D8 REPORT.md absent; waiting
+2026-09-18T17:06:54Z poll: LEASE=D8, D8 REPORT.md absent; waiting
+2026-09-18T17:12:06Z D8 REPORT.md present (17:10Z); LEASE absent; NO arm: battery status=3 discharging (need 2/5); host lease held by foreign (see above)
+2026-09-18T17:17:04Z batt still 97/status 3, lease absent; waiting
+2026-09-18T17:22:01Z batt 97/status 3 static, lease absent; waiting (no setting changes)
+2026-09-18T17:25:01Z orchestrator gate update: D8 done, S2b/arm.py battery exception (3 only if lvl>=80); launching s2-egl-c
+2026-09-18T17:36:26Z s2-egl-c launched (S2b/arm.py, trial-egl15, serial 622c49b1); awaiting completion
+2026-09-18T17:39:44Z launching s2-vk-a (Vulkan, S2b/trial-vk1 dd5fb34b)
+2026-09-18T17:40:25Z vk-a boot SIGSEGV (Run+1032, uptime 20s); running vk-b same way
