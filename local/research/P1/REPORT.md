@@ -2799,3 +2799,267 @@ find <dir> -name '._*' -delete (after every edit/copy)
 - `waits.log`: no waits (no foreign lease during P1d).
 - Time box: about 50 min of the 5 h box used.
 
+---
+
+# P1e report — Part 6 (brief local/muse/prompts/P1e.md)
+
+Run wall: lease `P1e` acquired with `/tmp/ssx3-host-lease` absent;
+`Diag:` commit `b15aff0` + push, strict rebuild, boot 1
+(`boot-p1e-1.log`, ~19:12–19:15 EDT, 180 s, terminated by the operator
+while healthy, exit -15/SIGTERM), Steps 2–3 (no build), Step 4 gate not
+met (implement nothing, no boot 2). Inside the 4-hour box.
+`W` = `/Volumes/Extreme SSD/ps2recomp-spike`. No verdicts.
+
+## P6-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` absent; wrote `P1e` |
+| Build/boot | Lease kept as `P1e` across diag commit, strict rebuild, boot 1 |
+| Foreign leases / waits | None observed; no `waits.log` |
+| `adb` | Not used |
+| End | Removed after the `[P1e]` push, verified absent |
+
+## P6-1. Diagnostics diff + dormant/return lines (Step 1, one commit, one build, one boot)
+
+Diff (`b15aff0`, 3 files, no `runner/` or `._*` files):
+
+| File | Change |
+|---|---|
+| `ps2xRuntime/include/ps2_runtime.h` | +1: `std::string formatDispatchHistory() const;` |
+| `ps2xRuntime/src/lib/ps2_runtime.cpp` | Internal `formatDispatchHistory()` renamed to `formatDispatchHistoryImpl()` (3 call sites updated); new `PS2Runtime::formatDispatchHistory()` wrapper; new `diagReportAll()` (`PS2X_DIAG_REPORT_ALL=1`, cached static, same pattern as `diagPeriodMs`); `reportMissingFunction` prints when `firstReport \|\| diagReportAll()` (break-once logic still `firstReport`-only; default behaviour unchanged when unset) |
+| `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp` | At both `makeDormant` sites in `run()` (pc==0 site, no-function-slot site): when `diagPeriod != 0u`, print `[diag:dormant]` with thread id, entry, pc, ra, sp, gp, v0, a0, `g_diagSchedCounts[id]`, `m_runtime.formatDispatchHistory()` |
+
+De-dup finding: `reportMissingFunction` suppression is a single global
+once-flag (`m_missingFunctionReported`, `ps2_runtime.cpp:1236`); no
+per-target set exists anywhere in `ps2xRuntime/`. With
+`PS2X_DIAG_REPORT_ALL=1` every occurrence prints. The `trace=` field was
+already emitted on every printed report of any kind, so every
+Return-kind report carries its dispatch history.
+
+Boot 1 (`$W/P1/run/boot-p1e-1.log`, 21,751 lines, 22,539,130 B, strict
+binary `a660c92b62c61ca26c7c1049e8fe94def756bb8ddc211d375524fe7aebb0eaec`,
+env `PS2X_DIAG_PERIOD_MS=5000 PS2X_DIAG_REPORT_ALL=1`):
+
+| Receipt | Value |
+|---|---|
+| `[diag:dormant]` total | 10,705 |
+| `[diag:dormant] id=-1 entry=0x0` (ephemeral invocation threads) | 10,704 |
+| `[diag:dormant] id=1` (thread 1) | 1 (line 200, quoted below) |
+| `missing-target` total | 10,725, all `kind=Return op=JR $ra target=0x0` |
+| Return-to-0 by source | `0x3e4e8c` ×10,703; `0x3e35a4` ×20; `0x42cba8` ×1 (startup `sub_0042CB78`); `0x3dcc7c` ×1 (thread-1 returner) |
+| Returns immediately followed by a dormant line | 10,705 (every dormant is preceded by its Return) |
+| Returns NOT followed by dormant | 20: 19× `0x3e4e8c` (each followed by a `0x3e35a4` Return, then one dormant: nested invocation pairs) + 1× `0x42cba8` (startup; execution continued, no dormant) |
+
+Thread-1 Return (line 199, in full):
+
+```
+[guest-branch:missing-target] kind=Return op=JR $ra source=0x3dcc7c target=0x0 pc=0x0 ra=0x0 sp=0x1ffff60 gp=0x4a30f0 a0=0x450000 a1=0x51eda8 a2=0x51eda8 a3=0x51eda8 s0=0x1ffff70 s1=0x0 v0=0x1 v1=0x1 a0Readable=yes a0[0]=0x0 a0[4]=0x0 a0[8]=0x0 a0[c]=0x0 s0Readable=yes s0[0]=0x24 s0[4]=0x252fa0 s0[8]=0x2523a8 s0[c]=0x2 recordReadable=yes record[0]=0x27bdfff0 record[4]=0xc0402d record[8]=0xffbf0000 record[c]=0x24060080 vtableReadable=no vtbl[0]=0x0 vtbl[4]=0x0 vtbl[8]=0x0 vtbl[c]=0x0 codeRegion=no policy=1 trace=0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x419878 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3a7c -> 0x3e438c -> 0x2523a8 -> 0x317e98 -> 0x3e5700 -> 0x423c90 -> 0x423de0 -> 0x423c90 -> 0x319b48 -> 0x31a088 -> 0x3200c0 -> 0x31ed60 -> 0x31eee8 -> 0x31e6d8 -> 0x40fcb0 -> 0x4114d0 -> 0x31ffd8 -> 0x31ffd8 -> 0x31ffd8 -> 0x3e5760 -> 0x423c90 -> 0x423dc0 -> 0x423da0 -> 0x423ba0 -> 0x423bc0 -> 0x3e3be0 -> 0x423de0 -> 0x423bc8 -> 0x3e4418 -> 0x400a78 -> 0x4008a0 -> 0x3e57f8 -> 0x3dcd4c -> 0x3e3020 -> 0x3e57f8 -> 0x3dcc64
+```
+
+Thread-1 dormant (line 200, in full):
+
+```
+[diag:dormant] id=1 entry=0x100008 pc=0x0 ra=0x0 sp=0x1ffff60 gp=0x4a30f0 v0=0x1 a0=0x450000 scheduled=22 trace=0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x419878 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3a7c -> 0x3e438c -> 0x2523a8 -> 0x317e98 -> 0x3e5700 -> 0x423c90 -> 0x423de0 -> 0x423c90 -> 0x319b48 -> 0x31a088 -> 0x3200c0 -> 0x31ed60 -> 0x31eee8 -> 0x31e6d8 -> 0x40fcb0 -> 0x4114d0 -> 0x31ffd8 -> 0x31ffd8 -> 0x31ffd8 -> 0x3e5760 -> 0x423c90 -> 0x423dc0 -> 0x423da0 -> 0x423ba0 -> 0x423bc0 -> 0x3e3be0 -> 0x423de0 -> 0x423bc8 -> 0x3e4418 -> 0x400a78 -> 0x4008a0 -> 0x3e57f8 -> 0x3dcd4c -> 0x3e3020 -> 0x3e57f8 -> 0x3dcc64
+```
+
+## P6-2. Returner table + quoted body (Step 2, no build)
+
+| Item | Value |
+|---|---|
+| Final `jr $ra` with ra 0 | `0x3dcc7c` (`jr $ra`, delay slot `addiu $sp,$sp,0x60`) |
+| Enclosing function | `sub_003DCBD8`, sweep CSV line 8036: `sub_003DCBD8,0x3dcbd8,0x3dcc88,0xb0` |
+| Entry path | Mid-function entry at `0x3dcc64` (trace last hop; generated entry-switch `case 0x3dcc64u: goto label_3dcc64`, skipping the `0x3dcbd8` prologue and the `sd $ra,0($sp)` delay slot at `0x3dcc08`) |
+| Only `ra=0x3dcc64` setter in generated sources | `sub_003DCBD8:296` (`SET_GPR_U32(ctx, 31, 0x3DCC64u)`, the JAL at `0x3dcc5c` calling `0x3dcc88`); no constant call/jump edge targets `0x3dcc64` anywhere in `output/` |
+| Condition (registers on the line) | `ld $ra,0($sp)` loaded `0x0` (slot never written on this entry path); `sp=0x1ffff60 gp=0x4a30f0 v0=0x1 a0=0x450000`; `jr $ra` unconditional |
+| Role | Prologue (`sp-0x60`, save s-regs, `s4=a0 s2=a1 s3=a2`, flag `lw [0x520000-0x6550]`), branch on flag (`beqz` to the `0x3dcc14` pointer-building path vs JAL `0x3dcc88`/epilogue path), epilogue (`lq s0–s4`, `ld ra`, `jr ra`, `sp+=0x60`). No `sceSif*`/`sceCd*`/`scePad*`/`sceMc*`/`sceGs*`/`_start` pattern recognisable in the returner; `0x423xxx` hops are EE-syscall thunks (`0x423ba0` CreateThread site `0x423ba8`, `0x423bc0` StartThread site `0x423bc8`, `0x423da0` CreateSema site `0x423da8`, `0x423dc0` SignalSema site `0x423dc8`, `0x423de0` WaitSema site `0x423de8`); `0x3e3588`/`0x3e3968` are the alarm/comparator callbacks; `0x400a78`/`0x4008a0` are the TOML `sceCdInitEeCB`/`sceCdCallback` stubs |
+| Game `main` clause | Not applicable (returner is `sub_003DCBD8`, not `main`) |
+
+Caller chain: 64 hops, 32 distinct (ring mixes executor-thread activity
+from thread 1, thread 2, and callback invocations):
+
+| Hops | Address | CSV row |
+|---|---|---|
+| ×17 | `0x3e3968` START | `sub_003E3968,0x3e3968,0x3e39a8` |
+| ×1 | `0x419878` mid+0x980 | `sub_00418EF8,0x418ef8,0x4198d8` |
+| ×10 | `0x3e3968` START | `sub_003E3968,0x3e3968,0x3e39a8` |
+| ×1 | `0x3e3a7c` mid+0xd4 | `sub_003E39A8,0x3e39a8,0x3e3b00` |
+| ×1 | `0x3e438c` mid+0x34c | `sub_003E4040,0x3e4040,0x3e44b0` |
+| ×1 | `0x2523a8` START | `sub_002523A8,0x2523a8,0x252658` |
+| ×1 | `0x317e98` START | `sub_00317E98,0x317e98,0x317f38` |
+| ×1 | `0x3e5700` START | `sub_003E5700,0x3e5700,0x3e5760` |
+| ×1 | `0x423c90` START | `sub_00423C90,0x423c90,0x423ca0` |
+| ×1 | `0x423de0` START | `sub_00423DE0,0x423de0,0x423df0` (WaitSema thunk) |
+| ×1 | `0x423c90` START | `sub_00423C90,0x423c90,0x423ca0` |
+| ×1 | `0x319b48` START | `sub_00319B48,0x319b48,0x319b98` |
+| ×1 | `0x31a088` START | `sub_0031A088,0x31a088,0x31a130` |
+| ×1 | `0x3200c0` START | `sub_003200C0,0x3200c0,0x3200e8` |
+| ×1 | `0x31ed60` START | `sub_0031ED60,0x31ed60,0x31eee8` |
+| ×1 | `0x31eee8` START | `sub_0031EEE8,0x31eee8,0x31f2c8` |
+| ×1 | `0x31e6d8` START | `sub_0031E6D8,0x31e6d8,0x31e818` |
+| ×1 | `0x40fcb0` START | `sub_0040FCB0,0x40fcb0,0x4103a0` |
+| ×1 | `0x4114d0` START | `sub_004114D0,0x4114d0,0x411530` |
+| ×3 | `0x31ffd8` START | `sub_0031FFD8,0x31ffd8,0x320034` |
+| ×1 | `0x3e5760` START | `sub_003E5760,0x3e5760,0x3e57f8` |
+| ×1 | `0x423c90` START | `sub_00423C90,0x423c90,0x423ca0` |
+| ×1 | `0x423dc0` START | `sub_00423DC0,0x423dc0,0x423dd0` (SignalSema thunk) |
+| ×1 | `0x423da0` START | `sub_00423DA0,0x423da0,0x423db0` (CreateSema thunk) |
+| ×1 | `0x423ba0` START | `sub_00423BA0` range (CreateThread site `0x423ba8`) |
+| ×1 | `0x423bc0` START | `sub_00423BC0,0x423bc0,0x423be0` (StartThread site `0x423bc8`) |
+| ×1 | `0x3e3be0` START | `sub_003E3BE0,0x3e3be0,0x3e3d78` (thread-2 entry) |
+| ×1 | `0x423de0` START | `sub_00423DE0,0x423de0,0x423df0` (thread-2 WaitSema call) |
+| ×1 | `0x423bc8` mid+0x8 | `sub_00423BC0,0x423bc0,0x423be0` (thread-1 resumption) |
+| ×1 | `0x3e4418` mid+0x3d8 | `sub_003E4040,0x3e4040,0x3e44b0` |
+| ×1 | `0x400a78` START | `sceCdInitEeCB` stub (`[diag:cd]` line 198 fires just before line 199) |
+| ×1 | `0x4008a0` START | `sceCdCallback` stub |
+| ×1 | `0x3e57f8` START | `sub_003E57F8,0x3e57f8,0x3e58c8` (exits via its own `jr $ra` at `0x3e58bc`; the silent valid-slot return that dispatched `0x3dcc64`) |
+| ×1 | `0x3dcd4c` mid+0xc4 | `sub_003DCC88,0x3dcc88,0x3dcd98` (fallthrough of the JAL at `0x3dcd44` calling `0x3e4040`) |
+| ×1 | `0x3e3020` START | `sub_003E3020,0x3e3020,0x3e3098` |
+| ×1 | `0x3e57f8` START | `sub_003E57F8,0x3e57f8,0x3e58c8` (second dispatch) |
+| ×1 | `0x3dcc64` mid+0x8c | `sub_003DCBD8,0x3dcbd8,0x3dcc88` (epilogue entry; dense-table slot `register_functions.cpp:377984` maps `0x3dcc64` to `sub_003DCBD8_0x3dcbd8`) |
+
+Quoted body (`$W/P1/output/sub_003DCBD8_0x3dcbd8.cpp`, lines 324–363, 40 lines):
+
+```cpp
+label_3dcc74:
+    // 0x3dcc74: 0x7bb40010  lq          $s4, 0x10($sp)
+    ctx->pc = 0x3dcc74u;
+    SET_GPR_VEC(ctx, 20, READ128(ADD32(GPR_U32(ctx, 29), 16)));
+label_3dcc78:
+    // 0x3dcc78: 0xdfbf0000  ld          $ra, 0x0($sp)
+    ctx->pc = 0x3dcc78u;
+    SET_GPR_U64(ctx, 31, READ64(ADD32(GPR_U32(ctx, 29), 0)));
+label_3dcc7c:
+    // 0x3dcc7c: 0x3e00008  jr          $ra
+label_3dcc80:
+    if (ctx->pc == 0x3DCC80u) {
+        ctx->pc = 0x3DCC80u;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x3DCC7Cu;
+        // 0x3dcc80: 0x27bd0060  addiu       $sp, $sp, 0x60 (Delay Slot)
+        SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 96));
+        ctx->in_delay_slot = false;
+        ctx->pc = 0x3DCC84u;
+        goto label_3dcc84;
+    }
+    ctx->pc = 0x3DCC7Cu;
+    {
+        const uint32_t jumpTarget = GPR_U32(ctx, 31);
+        ctx->pc = 0x3DCC80u;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x3DCC7Cu;
+        // 0x3dcc80: 0x27bd0060  addiu       $sp, $sp, 0x60 (Delay Slot)
+        SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 96));
+        ctx->in_delay_slot = false;
+        ctx->pc = jumpTarget;
+        #if defined(PS2X_STRICT_RETURN_DIAGNOSTICS) && PS2X_STRICT_RETURN_DIAGNOSTICS
+        (void)runtime->dispatchGuestBranch(rdram, ctx, jumpTarget, 0x3DCC7Cu, 0u, PS2Runtime::GuestBranchKind::Return, "JR $ra");
+        return;
+        #else
+        ctx->pc = jumpTarget;
+        return;
+        #endif
+    }
+    ctx->pc = 0x3DCC84u;
+```
+
+## P6-3. Semaphore 26 table (Step 3, no build)
+
+Syscall ids (`Dispatcher.cpp`): `0x40` CreateSema, `0x41` DeleteSema,
+`0x42` SignalSema, `-0x43` (`0xffffffbd`) iSignalSema, `0x44` WaitSema,
+`0xFC` SetAlarm. Boot-1 block-0 counts: CreateSema 26 (thunk site
+`0x423da8`), DeleteSema 20 (site `0x423db8`), SignalSema 12 (site
+`0x423dc8`), iSignalSema 20 (site `0x423dd8`), WaitSema 33 (site
+`0x423de8`), SetAlarm 20 (site `0x423b28`); blocks 1+ empty. Ids allocate
+from 1 via `allocatePositiveId` starting at `m_nextSemaphoreId` (never
+reuses freed low ids), so 26 creates yield ids 1–26 in call order and id
+26 is the 26th (last) create.
+
+| Item | Value |
+|---|---|
+| CreateSema→id 26 | 26th of 26 calls, all via `0x423da8` (`sub_00423DA0`, `$v1=0x40`); stub row `target=0x423da0 count=26 firstRa=0x42c0fc lastRa=0x3e43c4` |
+| First create (id 1) | `0x42c0f4` (`sub_0042C0D8`): JAL `func_423DA0`, ra `0x42c0fc`, `a0=$sp` (stack struct `+4=1 +8=1 +0x24=1 +0x28=1`) |
+| Last create (id 26) | `0x3e43bc` (`sub_003E4040`): JAL `func_423DA0`, ra `0x3e43c4`, `a0=$sp+0x30` (stack struct `[+0x34]=0x20 [+0x38]=0`) |
+| Ephemeral creates (20 of the 26) | `0x3e35d4` (`sub_003E35B0`): JAL `func_423DA0`, ra `0x3e35dc`, `a0=$sp` (stack struct `+4=1 +8=0 +0x14=0`); id→`$s0`; paired 1:1 with 20 DeleteSema at `0x3e35fc` (ra `0x3e3604`, `a0=$s0`) |
+| SignalSema sites (12 calls) | `0x418d34` (`sub_00418D08`): JAL `func_423DC0`, ra `0x418d3c`, `a0=[0x455248]` (global); `0x3e57b4` (`sub_003E5760`): JAL `func_423DC0`, ra `0x3e57bc`, delay slot `a0=[$s0+0xC]`; 21 static JAL sites exist, per-site split of the 12 is below the stub top-30 cutoff (no row) |
+| iSignalSema sites (20 calls) | Single site `0x3e3590` (`sub_003E3588` alarm handler): JAL `func_423DD0` (`$v1=-0x43`), ra `0x3e3598`, delay slot `a0=a2` (alarm argument = the ephemeral sema id armed by `sub_003E35B0` at `0x3e35e4` via SetAlarm `a1=0x3e3588 a2=$s0`); 20 handler exits (`0x3e35a4` Returns) = 20 calls, straight-line code |
+| WaitSema sites (33 = 20 ephemeral + 12 + 1 park) | `0x3e35f4` ×20 (`sub_003E35B0`, `a0=$s0`); `0x418ce0` (`sub_00418CA8`, stub firstRa); `0x3e3c20` (`sub_003E3BE0`, stub lastRa): JAL `func_423DE0` at `0x3e3c18`, ra `0x3e3c20`, delay slot `a0=[$s2+0xC]`, `$s2=$s0-0x20` — thread 2's park (`waitId=26`) |
+
+| Site | Thread |
+|---|---|
+| `0x42c0fc`, `0x3e43c4` creates; `0x418d34`, `0x3e57b4` signals; `0x418ce0` waits; `0x3e35d4/0x3e35f4/0x3e35fc` ephemeral loop | Thread 1 (main, entry `0x100008`; thread 2 runs only `0x3e3be0–0x3e3c20` in its single scheduling; alarm/comparator subtrees contain only the `0x423dd0` call) |
+| `0x3e3c20` wait (id 26) | Thread 2 (entry `0x3e3be0`, one scheduling, parked `WaitSema` on 26) |
+| `0x3e3590` iSignalSema ×20 | Alarm invocation thread (`id=-1`; `0x3e3588→0x423dd0` present on id=-1 dormant traces, absent from thread-1 window; handler `ra=0` from invocation setup) |
+
+## P6-4. Artefact record, no fix (Step 4)
+
+Step 2 names game code (`sub_003DCBD8` epilogue), not an HLE stub or
+syscall value: the returning branch (`jr $ra` at `0x3dcc7c`) is
+unconditional and tests nothing; `ra=0` is stale stack residue (the
+`0x3dcc08` `sd $ra` never ran on the `0x3dcc64` mid-function entry path).
+No `Kernel/Stubs/` or `Syscalls/` value selected the return, so nothing
+was implemented and there is no boot 2 and no ladder.
+
+Record (recompilation-shape note): the return pair is `0x3dcc78
+ld $ra,0($sp)` + `0x3dcc7c jr $ra` (delay slot `0x3dcc80
+addiu $sp,$sp,0x60`); generated code for both sides is the P6-2 quote
+(lines 324–363: `label_3dcc78` load, `label_3dcc7c` jump, strict
+`dispatchGuestBranch(..., Return, "JR $ra")` + `return`). The function was
+entered at `0x3dcc64` through the dense-table fallback slot
+(`register_functions.cpp:377984`) and entry-switch `goto label_3dcc64`,
+which skips the prologue ra-save; the preceding edge (`0x3e57f8`→`0x3dcc64`)
+is the silent valid-slot return from `sub_003E57F8`'s own `jr $ra` at
+`0x3e58bc` (no constant call/jump edge targets `0x3dcc64` in `output/`; the
+only `ra=0x3dcc64` setter is the `0x3dcc5c` JAL).
+
+## P6-5. Binaries and commits
+
+| Binary | sha256 | Sources |
+|---|---|---|
+| `/tmp/p1-link-strict/ps2xRuntime/ps2EntryRunner` (boot 1) | `a660c92b62c61ca26c7c1049e8fe94def756bb8ddc211d375524fe7aebb0eaec` | Sweep runner sources + `b15aff0` diag + `STRICT_RETURN_DIAGNOSTICS=ON` |
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (normal, untouched) | `3a70f0f94eb3108054bdd1962adb28a45a4798878140e4d12f5b20bb4a39ac06` | Unchanged since P1d |
+
+`ssx3` commits (pushed `fork ssx3`, no `runner/` or `._` files; trailers on each):
+
+| Commit | File(s) | Push |
+|---|---|---|
+| `b15aff0` Diag: dormant lines at both makeDormant sites plus PS2X_DIAG_REPORT_ALL | `ps2xRuntime/include/ps2_runtime.h` (+1), `ps2xRuntime/src/lib/ps2_runtime.cpp`, `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp` | `f0b5040..b15aff0` |
+| This report | `local/research/P1/REPORT.md` (`[P1e]` prefix, same trailers) | after commit |
+
+`register_functions.cpp` (generated replacement) remains a local
+modification, never added.
+
+## P6-6. Exact commands
+
+```
+printf 'P1e\n' > /tmp/ssx3-host-lease   (absent before; removed at end)
+git log/show (trailer format), ELF/CSV/grep reads for P5 facts
+(edit_file) ps2_runtime.h: +formatDispatchHistory decl
+(edit_file) ps2_runtime.cpp: impl rename + wrapper + diagReportAll + shouldPrint
+(edit_file) EeScheduler.cpp: [diag:dormant] at both makeDormant sites
+find ps2xRuntime /tmp/p1-link-strict -name '._*' -delete (after every edit)
+git add ps2xRuntime/include/ps2_runtime.h ps2xRuntime/src/lib/ps2_runtime.cpp ps2xRuntime/src/lib/Kernel/EeScheduler.cpp; git commit -m "Diag: ..." (trailers); git push fork ssx3
+cmake --build /tmp/p1-link-strict --target ps2EntryRunner; shasum -a 256 (binary)
+python3 /tmp/p1e-boot1.py (foreground 180 s, CWD $W/P1/run, PS2X_CD_IMAGE + PS2X_DIAG_PERIOD_MS=5000 + PS2X_DIAG_REPORT_ALL=1, stdbuf -o0 -e0, log direct to boot-p1e-1.log, SIGTERM)
+log reads: grep/sed/python3 on the closed log only (never piped while running)
+CSV resolutions (python3 csv+bisect over ssx3-functions.sweep.csv); generated-source greps/seds in $W/P1/output
+git add -f local/research/P1/REPORT.md; git commit -m "[P1e] ..." (trailers); git push origin main
+rm /tmp/ssx3-host-lease (verified absent)
+```
+
+## P6-7. What I could not do
+
+- Per-site split of the 12 SignalSema calls: below the stub top-30
+  cutoff (no `target=0x423dc0` row); two firing sites verified in source
+  (`0x418d34`, `0x3e57b4`), 21 static JAL sites total.
+- Full `ra=0x3dcc64` provenance across the tail-jump chain
+  (`0x3dcd4c`→`0x3e3020`→`0x3e57f8`→`0x3dcc64`): only the setter (JAL at
+  `0x3dcc5c`) and the absence of constant edges are established; the
+  register-indirect hop in between is not traced per-instruction.
+- No Step-4 boot 2 or ladder: the gate named game code, so per the brief
+  nothing was implemented and Step 5 follows directly.
+- The 10,704 `id=-1` dormant lines are invocation-thread ephemera (one
+  per callback completion); only the single `id=1` line answers Step 1.
+- `waits.log`: no waits (no foreign lease during P1e).
+- Time box: about 35 min of the 4 h box used.
+
