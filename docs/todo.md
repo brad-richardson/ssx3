@@ -67,7 +67,8 @@ the build or commit that closed them.
       "could a PS2 static recomp reach full-sim 120": run the PS2 game
       uncapped in NetherSX2 on the Odin in the Snow Jam race window and
       read speed % plus EE/GS/VU thread busy from the OSD. Needs the
-      user's hands for the in-app setup; ISO goes to `/sdcard/PS2/`;
+      user's hands for the in-app setup; the stock ISO is already
+      configured in NetherSX2 under `/sdcard/Documents/Ps2` (no push);
       device lease `USER-nethersx2` while it runs; sequence: after S2
       releases, before D8 and S2b. ≥2× with GS unsaturated = the recomp
       has headroom and the GS renderer is the only gate; <2× = the PS2
