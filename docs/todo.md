@@ -42,6 +42,15 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **M4 gate read (09-18 01:25):** LSE flags landed (nm-clean,
+      harmless) but the A/B is inconclusive — straddles at ±7% and the
+      window was the pause menu. Shader cache: nothing is ever written,
+      item closed. Control probe still open (trial skips under the pace
+      template) → D6: control probe with the trial template plus a
+      simpleperf race-window profile at stock, after D5 on the device.
+      Rule reinforced for every device brief: race windows are anchored
+      by HUD-visible screenshots at recorded wall times (D1b method),
+      never by sample-index guesses.
 - [ ] **M1c read (09-18 01:10):** the native-ABI LLVM flavor links but
       nothing in upstream can run it (no runtime for that ABI), the
       upstream runner has no movie/frame-dump path, so the C-vs-LLVM
