@@ -44,6 +44,14 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **Opus spikes cut off (09-18 05:55):** S3 (FP HLE; report §1–6
+      written, no commit yet) and S1b (Android repin port done, build
+      not started) were killed by the session usage limit; the three
+      concurrent Opus agents consumed it. Their remaining steps are
+      runbook work and moved to muse: S3b (analysis of on-disk receipts,
+      final tables, commit gate) and S1c (Android runtime + upstream C
+      module from `s1b-src`, Odin A/B behind the device queue). Lesson:
+      S1b should have been muse from the start; stagger Opus spikes.
 - [ ] **S1 gate read (09-18 05:20) — backend decision:** LLVM route
       PARKED. The recompcore-flavor LLVM module never reaches a race
       under our automation stack (syscall-vector exceptions 1:1 with
