@@ -192,6 +192,18 @@ the build or commit that closed them.
       Return reports, name the returner and the exit condition, map
       semaphore 26's owner, one fix if the runtime owns the tested value.
       Ledger row added.
+      P1e read (09-18 19:55): the main thread dies in the epilogue of
+      `sub_003DCBD8` reading a zero return address from its stack slot
+      at 0x1ffff60; the function had been re-entered mid-body through
+      the dispatcher after the StartThread thread switch (the runtime
+      unwinds C frames on a switch), so guest memory is the only carrier
+      of ra. I checked the generated prologue: the delay-slot `sd $ra`
+      is emitted correctly, so something else zeroes the slot (thread
+      2's stack placement, an invocation stack reserved inside the main
+      stack, or a stored handler sp) or ra was 0 on entry. P1f launched
+      (`local/muse/prompts/P1f.md`): watchpoint on the slot, stack map
+      per dump, StartThread parameter dump, then the fix in the runtime
+      if it owns the writer. Ledger row added.
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
