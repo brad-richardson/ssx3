@@ -17,7 +17,7 @@ timing helpers. A frozen normal/offset/restored camera test produces changed
 scene pixels and byte-identical original/restored captures. This is a native
 rendering proof, still without a high-refresh or latency claim.
 
-This follows the Downloads [handoff](ssx3-120hz-handoff-2026-09-13.md), especially
+This follows the Downloads [handoff](../archive/ssx3-120hz-handoff-2026-09-13.md), especially
 its scheduling trace and “draw twice without an update” test. It revises the
 earlier MetalFX-first recommendation in [the broader analysis](120hz-analysis.md)
 to match the priority on accurate geometry and lower latency. Image

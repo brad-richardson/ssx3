@@ -1,3 +1,5 @@
+Archived 2026-09-18; superseded by docs/impl-plan-2026-09-15.md and native/README.md.
+
 # Roadmap: Garibaldi in SSX 3, and a generic Tricky → SSX 3 course patcher
 
 Date: 2026-09-10. This plans the work after the first ridden terrain edit. Each

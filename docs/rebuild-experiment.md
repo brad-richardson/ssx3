@@ -545,7 +545,7 @@ word at 8 selects the surface response (0x90003 behaves as deep snow); the
 per-location word, flags word, lightmap rectangle, and corner UVs produced no
 visible or measurable effect in these tests. Evidence under `evidence/hdr-00N/`.
 
-The next gates are described in [the roadmap](roadmap.md): re-laid-out streams
+The next gates are described in [the roadmap](archive/roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.
 
 ## scale-001 and scale-002: memory-budget test (roadmap M5)

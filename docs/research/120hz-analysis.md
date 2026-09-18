@@ -1,6 +1,6 @@
 # 120 Hz investigation — September 13, 2026
 
-The [imported handoff](ssx3-120hz-handoff-2026-09-13.md) is preserved verbatim
+The [imported handoff](../archive/ssx3-120hz-handoff-2026-09-13.md) is preserved verbatim
 from Downloads. Its external claims are a research snapshot, not results from
 this repository. No timing changes have been deployed to the phone.
 

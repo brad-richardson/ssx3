@@ -358,6 +358,6 @@ same batch as the capture proof.
 
 Phone measurements: `performance-review-2026-09-13.md`,
 `local/reports/mobile/20260913-231157/`. Native callback/timestep seams:
-`120hz-native-path.md`, `ssx3-120hz-handoff-2026-09-13.md`.
+`120hz-native-path.md`, `../archive/ssx3-120hz-handoff-2026-09-13.md`.
 Earlier alternatives: `120hz-analysis.md`, `120hz-native-interpolation.md`,
 `120hz-host-replay.md`, and the local `spike/120hz` worktree.
