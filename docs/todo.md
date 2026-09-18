@@ -44,6 +44,14 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **S1 launched (09-18 03:25):** M1d built this repo's runner on
+      upstream but the outer platform patch left 3 files rejected, and
+      those hunks carry movie playback, HLE hooks and screenshots, so
+      no pace comparison is possible from muse work alone. S1 (Opus):
+      hand-port the rejected hunks onto upstream (deliverable: a rebased
+      `moderngekko-platform.upstream.patch` for the repin), rebuild,
+      then the same movie under upstream-LLVM, upstream-C and pinned-C
+      with screenshots; that table is the backend decision.
 - [ ] **D6 gate read (09-18 03:10) — route decision:** at stock the
       emu thread spends 3.2 ms in update and 7.9 ms in the render
       callback per frame (p95 11.0, max 20.7). The F route (sim at
