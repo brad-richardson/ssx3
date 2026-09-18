@@ -59,7 +59,7 @@ Applied with `git grep -l` + `sed -i ''`, plus hand edits for the three bare
 | File | Before | After |
 |---|---|---|
 | `docs/full-course-validation.json` | 6× `~/` | 0 (`~/dev/ssx3/…`) |
-| `docs/impl-plan-2026-09-15.md` | 1 (`ssh <gpu-box>`) | 0 (`ssh <gpu-box>`; `user bradr` kept — not in the token list, see Left #4) |
+| `docs/impl-plan-2026-09-15.md` | 1 (`ssh <gpu-box>`) | 0 (`ssh <gpu-box>`; `user <gpu-user>` kept — not in the token list, see Left #4) |
 | `docs/plan-120fps-2026-09-17.md` | 4 (2× serial, 2× the-gpu-box) | 0 (`<odin-serial>`; `optional the GPU box WSL`; `the GPU box's WSL2` + `ssh <gpu-box>`) |
 | `docs/research/ps2recomp-spike-2026-09-12/README.md` | 2 (`the-media-server` ×3 incl. `the-media-server-ps2recomp/`) | 0 (`the media server`, incl. `` `the media server-ps2recomp/sessions/` `` — see Left #5) |
 | `docs/texture-remaster.md` | 5 (4× `ssh <gpu-box>`, 1× `the-gpu-box:` scp) | 0 (`ssh <gpu-box>`, `<gpu-box>:set.tgz`) |
@@ -70,7 +70,7 @@ Applied with `git grep -l` + `sed -i ''`, plus hand edits for the three bare
 
 `smb://` hosts already read `YOUR_SMB_HOST` — untouched. Post-scrub grep over
 the nine files: empty. Whole-tree re-run
-`git grep -nE '192\.168\.|<odin-serial>|the-media-server|the-gpu-box|/Users/bradrichardson|macbook\.air'`:
+`git grep -nE '192\.168\.|<odin-serial>|the-media-server|the-gpu-box|~|macbook\.air'`:
 hits remain **only** in `local/research/*` (A2 22, A3 1, G0 5, P1 2,
 S2 REPORT 5 / arm.py 2 / wait_device.sh 2 / waits.log 1, S2b REPORT 2 /
 arm.py 2 / vk-relink-attempt1-error40.txt 4 / waits.log 2) — untouchable per
@@ -147,7 +147,7 @@ not touched. See Left #1. Net file change: none. Related tests after revert:
    `tools/odin_wireless.sh:17` `SSD_FILE="/Volumes/Extreme SSD/…"` has no
    matching variable in the brief's vocabulary (`SSX3_WORKBENCH`/`SSX3_GAMES`
    don't cover Extreme SSD) — left as-is.
-4. **Tokens outside the step-3 list, left as-is:** `user bradr`
+4. **Tokens outside the step-3 list, left as-is:** `user <gpu-user>`
    (impl-plan), `~/…` + `/mnt/c/Users/bradr/…` (texture-remaster),
    `/Users/bradr` (not `bradrichardson`). None match the listed patterns or
    the verification grep.

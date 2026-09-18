@@ -82,7 +82,7 @@ Pattern set: `192.168.*`, `10.*`, hostnames (`the-media-server`, `the-gpu-box`, 
 | docs/full-course-validation.json | 18 | `"shared_build": "/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-002"` | in tree | edit |
 | docs/gamecube-feasibility.md | 1 | `Both images remain on \`/Volumes/share/brad/games/gamecube/\`.` | in tree | edit |
 | docs/garibaldi-visual-comparison.md | 1 | `` `SSX Tricky (USA).iso` on `/Volumes/share/brad/games/ps2/`, running in PCSX2 ... `` | in tree | edit |
-| docs/impl-plan-2026-09-15.md | 1 | `` `ssh <gpu-box>` (Tailscale, user bradr) reaches the RTX 4070; `` | in tree | edit |
+| docs/impl-plan-2026-09-15.md | 1 | `` `ssh <gpu-box>` (Tailscale, user <gpu-user>) reaches the RTX 4070; `` | in tree | edit |
 | docs/investigation.md | 2 | `The source images remain unchanged, now under \`/Volumes/share/brad/games/ps2/\`.` | in tree | edit |
 | docs/numbers-ledger.md | 3 | `` `/Volumes/Extreme SSD/upstream-review/build-m1` `` | in tree | edit |
 | docs/plan-120fps-2026-09-17.md | 12 | `` `adb -s <odin-serial> shell ...` `` | in tree | edit |
@@ -120,7 +120,7 @@ Pattern set: `192.168.*`, `10.*`, hostnames (`the-media-server`, `the-gpu-box`, 
 | tools/ride_locations.py | 1 | `default=Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG')` | in tree | edit |
 | tools/upscale_textures.py | 1 | `Written for the RTX 4070 box (\`ssh <gpu-box>\`), where torch and spandrel live in` | in tree | edit |
 
-Additional values observed in the same rows: `<odin-ip>:5555`, `<odin-ip>:5555` (in `local/research/S2b/REPORT.md` history of serial), `<odin-serial>`, `<mac>`, `the-media-server`, `the-gpu-box`, `user bradr`, `~/ssx3-remaster/...`, `/mnt/c/Users/bradr/set.tgz`, `/data/local/tmp/mg/`, `/data/local/tmp/mg/LEASE`, `/tmp/ssx3-host-lease`, `~/dev/ssx3/...`, `~/dev/ps2xGS/...`, `/Volumes/Extreme SSD/...`, `/Volumes/share-1/...`, `smb://YOUR_SMB_HOST/share`, `smb://host/share`. No Wi-Fi SSID value and no MAC address value were observed. No iPhone UUID value was observed; one `.sav` filename with UUID shape `2639E4EF-FA70-48BC-988D-C312BC05D5B4.sav` occurs in `docs/research/startup-shortcut.md` (matched UUID pattern search).
+Additional values observed in the same rows: `<odin-ip>:5555`, `<odin-ip>:5555` (in `local/research/S2b/REPORT.md` history of serial), `<odin-serial>`, `<mac>`, `the-media-server`, `the-gpu-box`, `user <gpu-user>`, `~/ssx3-remaster/...`, `/mnt/c/Users/bradr/set.tgz`, `/data/local/tmp/mg/`, `/data/local/tmp/mg/LEASE`, `/tmp/ssx3-host-lease`, `~/dev/ssx3/...`, `~/dev/ps2xGS/...`, `/Volumes/Extreme SSD/...`, `/Volumes/share-1/...`, `smb://YOUR_SMB_HOST/share`, `smb://host/share`. No Wi-Fi SSID value and no MAC address value were observed. No iPhone UUID value was observed; one `.sav` filename with UUID shape `2639E4EF-FA70-48BC-988D-C312BC05D5B4.sav` occurs in `docs/research/startup-shortcut.md` (matched UUID pattern search).
 
 ## 4. Session and tooling residue
 
@@ -240,7 +240,7 @@ cat native/ios/WriteBuildInfo.cmake
 git grep -n -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}' -- $(git ls-files)
 git grep -n -E '192\.168\.|10\.[0-9]+\.[0-9]+\.[0-9]+|the-media-server|the-gpu-box|\.lan|tailscale|Tailscale|/Volumes/share|smb://|/Users/brad|/Users/[a-z]+|SSID|MAC |serial|UDID|adb |ssh ' -- $(git ls-files)
 git grep -c -E '/Volumes/share|/Volumes/Extreme SSD|smb://|share-1' -- $(git ls-files) | grep -v ':0$'
-git grep -c -E '/Users/bradrichardson|/Users/brad|/home/brad|/mnt/c/Users' -- $(git ls-files) | grep -v ':0$'
+git grep -c -E '~|/Users/brad|~|/mnt/c/Users' -- $(git ls-files) | grep -v ':0$'
 git grep -n -E 'claude\.ai/code/session|Claude-Session|Co-Authored-By|/private/tmp/claude|herdr|pane.*[0-9]+|local/lease|odin-serial|/tmp/PS2Recomp|/tmp/ssx3' -- $(git ls-files)
 git grep -c -E 'claude\.ai/code/session|Claude-Session' -- $(git ls-files) | head -n 40
 git grep -n -E 'herdr|/private/tmp|ssx3-host-lease|LEASE|odin-serial|local/lease|pane' -- $(git ls-files)
@@ -251,7 +251,7 @@ git grep -n 'claude.ai/code/session' -- $(git ls-files)
 git grep -n 'claude.ai/code/session' $(git rev-list --all) --
 git grep -n -E '\.lan|Tailscale|the-media-server|the-gpu-box|192\.168\.|<odin-serial>' $(git rev-list --all) --
 git grep -n -E 'DEVELOPMENT_TEAM|TeamIdentifier|ApplicationIdentifierPrefix|ProvisionedDevices|embedded\.mobileprovision' $(git rev-list --all) --
-git grep -l -E '192\.168\.|the-media-server|the-gpu-box|\.lan|Tailscale|/Volumes/share|/Volumes/Extreme SSD|smb://|/Users/bradrichardson|/home/brad|/mnt/c/Users|<odin-serial>|5555|/data/local/tmp|share-1' -- $(git ls-files)
+git grep -l -E '192\.168\.|the-media-server|the-gpu-box|\.lan|Tailscale|/Volumes/share|/Volumes/Extreme SSD|smb://|~|~|/mnt/c/Users|<odin-serial>|5555|/data/local/tmp|share-1' -- $(git ls-files)
 git grep -l -E 'herdr|/tmp/ssx3-host-lease|/data/local/tmp/mg/LEASE|local/odin-serial|/tmp/PS2Recomp|/tmp/ssx3|ODIN_SERIAL|pane wN|/tmp/ps2xgs-build' -- $(git ls-files)
 git grep -l -E 'games/|SSX 3 \(USA\)\.iso|SSX Tricky|SLUS-20772' -- $(git ls-files)
 ```

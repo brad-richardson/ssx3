@@ -308,7 +308,7 @@ ls -la tools/README* native/README* docs/README*
 grep -n -i -e license -e MIT -e GPL README.md native/README.md native/ios/README.md docs/asset-policy.md
 git grep -n 'local/' -- 'README.md' 'docs/*.md' 'docs/research/*.md' 'native/README.md' 'native/ios/README.md'
 git grep -n '/Volumes/' -- '*.md'
-git grep -n -e '/tmp/' -e '/home/brad' -e '/mmt/' -- '*.md'
+git grep -n -e '/tmp/' -e '~' -e '/mmt/' -- '*.md'
 git grep -n 'ODIN-TESTING' -- '*.md'
 ls builds/ emulator/
 mkdir -p local/research/A3/drafts/docs local/research/A3/drafts/native local/research/A3/drafts/tools
