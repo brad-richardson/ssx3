@@ -163,6 +163,23 @@ the build or commit that closed them.
       source, at most three completion fixes with one boot each, Part 4.
       G1 brief drafted (`local/muse/prompts/G1.md`), launches when a
       frame presents. Ledger row added.
+      P1c read (09-18 18:20): Part 4 delivered in 1 h 10 min. The
+      silence was one thread in WaitSema on a semaphore that only the
+      game's alarm callback signals, and SetAlarm had refused that
+      callback because its address had no function-table slot: the
+      same unsplit-prologue class as the constructors. Two splits later
+      (alarm callback, a frameless comparator) the boot creates the CD
+      thread, inits the CD callback, reads the PVD and directory
+      sectors, then both threads go Dormant with pc 0 and no exit
+      syscall; the CD thread never ran (its entry is also mid-function
+      in the map; Thread.cpp:269 refuses unknown entries). Lesson: every
+      function reachable only through a data pointer (constructor
+      tables, alarm/thread/RPC handlers, comparators) is invisible to
+      the analyzer. P1d launched (`local/muse/prompts/P1d.md`): a
+      one-pass code-pointer sweep over the ELF (data words + lui/addiu
+      pairs, split only on prologue or after a `jr $ra`), a strict-return
+      build to catch the return to 0, and a CD payload check. Ledger
+      row added.
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
