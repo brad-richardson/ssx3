@@ -1,0 +1,40 @@
+13:40:00Z S2 start: device gate = S1b/REPORT.md absent (only WAITING.md); 3h clock starts now. Host lease reads ABSENT
+13:46:26Z host lease S2 claimed for trial-egl13 build, released after (build ok, 4 pre-existing warnings)
+13:47:33Z trial-egl13 built sha=e737d8858e250da6; device lease=S1c
+13:49:27Z waiting for device: lease=S1c procs=1
+13:54:28Z waiting for device: lease=S1c procs=0
+13:59:29Z waiting for device: lease=S1c procs=1
+14:04:30Z waiting for device: lease=S1c procs=0
+14:09:31Z waiting for device: lease=S1c procs=1
+14:14:33Z waiting for device: lease=S1c procs=0
+14:19:34Z waiting for device: lease=S1c procs=1
+14:24:35Z waiting for device: lease=S1c procs=0
+14:29:35Z waiting for device: lease=S1c procs=0
+14:29:50Z BATTERY GATE (orchestrator rule): level=2% status=3 (discharging, AC powered true, not charging), low_power=0. Below the level>=20 + status in (2,5) bar. Not launching. Polling every 5 min; desktop work meanwhile.
+14:30:23Z waiting: lease=S1c procs=0 battery=2% status=3
+14:30:28Z host lease S2 claimed for desktop player build+run
+14:34:36Z waiting for device: lease=EMPTY_OR_ADB_DOWN procs=?
+14:34:53Z host lease S2 released after desktop run
+14:35:24Z waiting: lease=ADB_DOWN procs= battery=-1% status=-1
+14:39:37Z waiting for device: lease=S1c procs=0
+14:40:18Z host lease S2 released after desktop2 run
+14:40:25Z waiting: lease=S1c procs=0 battery=9% status=3
+14:40:56Z adb over Wi-Fi: serial now 192.168.1.53:5555 (local/odin-serial); arm.py + wait_device.sh switched. Battery 2%->9%, status 3, charging. Waiter restarted.
+14:41:07Z waiting: lease=S1c procs=0 battery=9% status=3
+14:42:54Z host lease S2 released after s2-det run
+14:46:08Z waiting: lease=S1c procs=0 battery=13% status=2
+14:47:57Z host lease S2 released after s2-det2 run
+14:48:50Z DESKTOP det=1 dual=1 run: 200/200 replays, done verified, aux_bytes=78672 -> 2MiB/78672=26.66 replays (D2b died at 27). Fix validated on the device code path.
+14:51:10Z waiting: lease=S1c procs=0 battery=17% status=2
+14:56:12Z waiting: lease=S1c procs=1 battery=22% status=2
+15:01:14Z waiting: lease=S1c procs=0 battery=26% status=2
+15:06:17Z waiting: lease=S1c procs=0 battery=31% status=2
+15:11:19Z waiting: lease=S1c procs=1 battery=35% status=2
+15:16:21Z waiting: lease=S1c procs=1 battery=39% status=2
+15:21:23Z waiting: lease=S1c procs=0 battery=42% status=2
+15:26:25Z waiting: lease=S1c procs=1 battery=46% status=2
+15:31:28Z waiting: lease=S1c procs=0 battery=50% status=2
+15:36:30Z device USABLE: lease ABSENT, no procs, battery 54% status 2
+15:36:35Z device USABLE (lease ABSENT, batt 54% charging) -> launching s2-egl-a
+15:38:12Z trial-egl13 receipt/disk mismatch (stale read); rebuilt as trial-egl14 (receipt==disk, header 31ffc39d = validated desktop header). Launching s2-egl-a.
+16:06:28Z S2 ending per orchestrator: arms s2-egl-a and s2-egl-b both 200/200 with done; vk not runnable on the EGL build (no libvideovulkan.a). Both leases released.
