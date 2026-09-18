@@ -35,6 +35,7 @@ Rules that keep this table honest (perf-review §1+§7):
 | Capped/uncapped reconciliation | RESOLVED: capped saturates 1.0 while sub-capability dips run identically in both regimes — content + cap saturation, no DVFS paradox | 09-17 | Odin, m3-menu capped arm + busy fraction | Affinity hunt |
 | Snow scorer calibration | clean ≤0.05 (iPad) / ≤0.08 (Odin menu); corrupt ≥0.17 transition / ≥0.38 full; threshold 0.12 | 09-17 | Archived shots | `tools/gamecube_snow_check.py` |
 | Onscreen trial | 25/25 presented + correlated | 09-17 | Odin onscreen | `8df3c42` |
+| Odin prime-core clock under load | `cpu7 scaling_max_freq` = 3.072 GHz vs `cpuinfo_max_freq` 4.32 GHz, with `performance_mode` 0 and 1, at 37 °C (policy cap, not thermal); emu core pinned at 3.072 GHz for every race-window sample; cpu-* zones 74–92 °C in-race, no frequency drop | 09-17 | Odin 3, d1-base-a (pinned, uncapped, m3-menu) | `android-spike/D1/REPORT.md`, `d1-base-a-receipts/*-sampler.log` (D1 matrix still in progress) |
 
 ## Contested
 
