@@ -52,6 +52,22 @@ the build or commit that closed them.
       ZTE — plan §5a now routes those features to a second oracle instead
       of byte-exact-vs-CPU. Next: G1 (game captures) waits on P1b
       rendering; G2 (loop brief) after G1. Ledger row added.
+- [ ] **Audit review + C1 cleanup launched (09-18 16:35):** A1 found no
+      game bytes, images, big blobs or deleted files in tree or history;
+      third-party trees are untracked with licenses recorded; the one
+      "generated code" flag (`tests/float-conversion-original-generated.h`)
+      is DolRecomp's template output (helpers + address-keyed prototypes),
+      kept with a provenance comment. Short game-text quotes trimmed. A2
+      found no secrets and no personal data beyond the GitHub handle; the
+      real exposure is author-machine detail (share paths as tool defaults,
+      LAN IP, Odin serial, home-server names, home paths) — C1 scrubs
+      tracked files to placeholders and moves tool defaults to
+      `SSX3_WORKBENCH` / `SSX3_GAMES`; no history rewrite (the values are
+      a private LAN address, a handheld's USB serial and mount paths).
+      A3: two docs archived, docs index adopted, README rewritten from its
+      draft with my status text, MIT LICENSE + licensing section (vendored
+      GPL-3 trees, GPL-3 patches, GPL-3 combined builds). Visibility flips
+      only after C1's verification tables and my read.
 - [ ] **ssx3 publication audit LAUNCHED (09-18 16:00), user decision:**
       go public with MIT for the project's own code (vendored trees keep
       GPL-3; patches to them and combined builds are GPL-3), so the
