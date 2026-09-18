@@ -576,7 +576,7 @@ Result (`evidence/name-001/`): the game boots, and the Peak 1 freeride
 transport list shows **Garibaldi** in Snow Jam's place with the race route
 highlighted on the map; selecting it opens the normal "Transport to this
 area now?" dialog. The description paragraph under the list still reads
-"Snow Jam is an exciting BEGINNER track", so the descriptions live in the
+"Snow Jam is an…", so the descriptions live in the
 `LOCH`/`LOCT` locale tables (`DATA/LOCALE/*.LOC`), not in the executable;
 they are the next string to decode. Green Station's list entry uses the short
 name field, so both fields matter.
