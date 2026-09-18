@@ -84,7 +84,9 @@ the build or commit that closed them.
 - [ ] **PS2 throughput gate READ (09-18 12:10) — the PS2 avenue is
       alive:** stock SSX 3 runs at 4.2–4.4× real time in the Snow Jam
       race under NetherSX2 on the Odin (Vulkan 1×, MTVU, limiter off, on
-      battery). EE 2.5–2.9 ms per frame on its own thread, GS 1.5–2.4,
+      battery; a 2.5× capped rerun holds 250% in open riding at a
+      3.28 GHz prime clock and dips to ~2.0× at the six-rider start
+      gate, 1.58× uncapped there). EE 2.5–2.9 ms per frame on its own thread, GS 1.5–2.4,
       VU 1.6–2.4, GPU 0.7–1.1: full-sim 120 Hz (the F route) has ~3×
       headroom on the PS2 side even under a JIT, where the GameCube
       route was 1.05–1.2× short. Ledger row + OSD frames under
@@ -97,6 +99,9 @@ the build or commit that closed them.
       evaluation track (muse: build for arm64, boot stock SSX 3, measure
       EE/VU/GS split with the software GS, inventory the GS renderer
       gap) alongside host replay, or keep it parked.
+      HOUSEKEEPING: the SSX 3 per-game ini in NetherSX2 still carries the
+      2.5× cap + OSD override; restore `local/research/ps2-gate/08FFF00D.ini.orig`
+      to `gamesettings/08FFF00D.ini` when the user is done testing.
 - [ ] **PS2 throughput gate (queued 09-18 11:50):** the cheap answer to
       "could a PS2 static recomp reach full-sim 120": run the PS2 game
       uncapped in NetherSX2 on the Odin in the Snow Jam race window and
