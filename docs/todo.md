@@ -44,6 +44,16 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **GPU GS backend plan written (09-18 14:50):**
+      `docs/plan-gs-gpu-backend-2026-09-18.md` — gates for the autonomous
+      loop on the new Mac mini (harness: recording backend + replay/diff +
+      synthetic streams + identity test; census; game rendering through
+      the CPU backend), the decisions made up front (exact compute
+      rasterizer over a VRAM storage buffer, Vulkan + MoltenVK, byte-exact
+      acceptance, scope containment, MIT), the S0–S8 staged loop, repo
+      `ps2xGS` with upstream as a pinned submodule. Prep briefs: G0
+      (harness + census on synthetic streams, runnable now), G1
+      (reference captures, after P1b/P2 render), G2 (the loop brief).
 - [ ] **Laptop disk evacuation (09-18 14:25):** the data volume hit 100%
       mid-run (herdr logging degraded); now 34 GB free. Moved to the SSD:
       old `/tmp` link dirs (`tmp-evacuated-0918/`), `local/builds`
