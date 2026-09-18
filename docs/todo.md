@@ -44,6 +44,14 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **G0 read (09-18 15:40) — harness + census DONE, pushed:** 78
+      synthetic captures, identity replay byte-exact on all, census
+      renders every feature, CTest 6/6; `ps2xGS` public under GPL-3 with
+      G0's commits. Finding that changes the loop's acceptance: the CPU
+      backend ignores TEX1, DIMX/DTHE, COLCLAMP, SCANMSK, aa1, fix and
+      ZTE — plan §5a now routes those features to a second oracle instead
+      of byte-exact-vs-CPU. Next: G1 (game captures) waits on P1b
+      rendering; G2 (loop brief) after G1. Ledger row added.
 - [ ] **Repos and licenses (09-18 15:35):** `ps2xGS` is public at
       github.com/brad-richardson/ps2xGS under GPL-3.0 (switched from MIT
       to match PS2Recomp and avoid the combined-work question); push

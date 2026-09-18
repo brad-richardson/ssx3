@@ -151,6 +151,21 @@ gate is owned by the P-series briefs, not by this plan.
    Upstream has no written contribution or AI-assistance policy; ask on
    its Discord before the upstream PR and disclose the assistance.
 
+
+### 5a. Amendment after G0 (2026-09-18 15:40): the reference has gaps
+
+G0 found that the CPU backend never reads TEX1 (filtering/mip fields have
+no effect; resolved `linearFilter`/texture size are carried instead) and
+ignores DIMX/DTHE, COLCLAMP, SCANMSK, `aa1`, `fix` and the ZTE bit. A
+byte-exact-vs-CPU acceptance would enshrine those omissions. Rule for the
+loop: for every feature on that list, the GPU backend implements the real
+GS semantics from the hardware documentation, the census flags captures
+that exercise it as **reference-incomplete**, and those captures are
+compared against a second oracle (PCSX2's software renderer on the same
+stream, or hand-computed expectations in the synthetic set) rather than
+against the CPU backend. Everything else stays byte-exact against the CPU
+backend. The list is also the first batch of upstream issues.
+
 ## 6. The staged loop (each stage is one muse brief with a diff table as its receipt)
 
 | Stage | Deliverable | Pass |
