@@ -37,11 +37,21 @@ the build or commit that closed them.
       context switch (keep MSR.FP set, save/restore FPRs in
       OSLoadContext) instead of the SDK's lazy trap; that needs the
       native-ABI FPR location, so it waits for the M1/S1 decision.
+      **D5 (09-18):** attributed — see the D5 gate read above; S3 owns
+      the fix.
       **D1b (09-17):** Odin in-race native_exc is 35,646/s (menus
       ≈1.5k/s), 20× the desktop rate — if these are FP-unavailable
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **D5 gate read (09-18 02:05) → S3 launched:** the Odin storm
+      is 100% FP-unavailable, 5.7% of race emu CPU uncapped (3.8%
+      capped), 59% from one thread pair. S3 (Opus spike): HLE the SDK
+      FP-unavailable handler in the core the way the syscall vector was
+      HLE'd (`emulate_syscall_vector`), validated by the same
+      determinism tooling, A/B'd on the Odin in the D1 race window.
+      Expected win ≈0.5 ms per 60 Hz frame; gate to land: strict
+      compare clean + Odin race A/B outside pair noise.
 - [ ] **M4 gate read (09-18 01:25):** LSE flags landed (nm-clean,
       harmless) but the A/B is inconclusive — straddles at ±7% and the
       window was the pause menu. Shader cache: nothing is ever written,
