@@ -40,8 +40,11 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gamecube_draw_trace import BUILD, ROOT, VENDOR, compile_copy, sha
 from gamecube_native_trace import DOL_SHA256, HEADER
+from paths import workbench_root
 
-GAME_DEFAULT = Path('/Volumes/share/brad/games/ssx3-workbench/native/GXBE69')
+# Default for --game; resolved lazily in main() so importing this module
+# never requires SSX3_WORKBENCH.
+GAME_DEFAULT = None
 HOST_LEASE = Path('/tmp/ssx3-host-lease')
 LEASE_ID = 'M3'
 # Orchestrator sequencing history: legs were once gated on M2's Part 2
@@ -786,11 +789,13 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('build-player')
-    p.add_argument('--game', type=Path, default=GAME_DEFAULT)
+    p.add_argument('--game', type=Path, default=GAME_DEFAULT,
+                   help='Extracted game dir (default: $SSX3_WORKBENCH/native/GXBE69)')
     p.add_argument('--output', type=Path, required=True)
     p.set_defaults(fn=build_player)
     p = sub.add_parser('run')
-    p.add_argument('--game', type=Path, default=GAME_DEFAULT)
+    p.add_argument('--game', type=Path, default=GAME_DEFAULT,
+                   help='Extracted game dir (default: $SSX3_WORKBENCH/native/GXBE69)')
     p.add_argument('--player-dir', type=Path, required=True)
     p.add_argument('--manifest', type=Path, required=True)
     p.add_argument('--profile', required=True)
@@ -806,6 +811,8 @@ def main():
     p.add_argument('--output', type=Path)
     p.set_defaults(fn=table)
     args = parser.parse_args()
+    if args.command in ('build-player', 'run') and args.game is None:
+        args.game = workbench_root() / 'native/GXBE69'
     if getattr(args, 'seconds', CENSUS_SECONDS) != CENSUS_SECONDS:
         parser.error(f'Legs run at the {CENSUS_SECONDS} s tool floor')
     raise SystemExit(args.fn(args))

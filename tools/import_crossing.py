@@ -12,12 +12,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from inspect_disc import Region, big_members, file_region
 from probe_worlds import refpack, resource_records, patch_point
+from paths import workbench_root
 
 log, build = Path(sys.argv[1]), Path(sys.argv[2])
 samples = json.loads((build / 'surface-samples.json').read_text())
 exp = json.loads((build / 'experiment.json').read_text())
 report = json.load(open(ROOT / 'local/reports/ssx3-world.json'))
-src = Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG')
+src = workbench_root() / 'source/ssx3/BAM.BIG'
 with src.open('rb') as f:
     a = Region(f, 0, src.stat().st_size); _, ms = big_members(a); ssb = file_region(a, ms, 'data/worlds/bam.ssb')
     raw = b''.join(refpack(ssb.read(b['offset'], b['size'])[8:])[0] for b in report['groups'][exp['group']]['blocks'])

@@ -18,12 +18,16 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paths import workbench_root
 PINS = json.loads((ROOT / "native/dependencies.json").read_text())
 SOURCE = ROOT / "third_party/ModernGekko"
 CORE = SOURCE / "vendor/dolphin"
 BUILD = ROOT / "local/native/runtime-build"
 MODULE = ROOT / "local/native/ssx3-module"
-DEFAULT_GAME = Path("/Volumes/share/brad/games/ssx3-workbench/native/GXBE69")
+# Default for --game; resolved lazily in main() so importing this module
+# never requires SSX3_WORKBENCH.
+DEFAULT_GAME = None
 
 
 def sha256(path):
@@ -489,7 +493,8 @@ def main():
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--dol", type=Path, default=ROOT / "local/source/gamecube/ssx3/sys/main.dol")
     parser.add_argument("--opt-level", choices=("0", "1", "2", "3"), default="2")
-    parser.add_argument("--game", type=Path, default=DEFAULT_GAME)
+    parser.add_argument("--game", type=Path, default=DEFAULT_GAME,
+                        help="Extracted game dir (default: $SSX3_WORKBENCH/native/GXBE69)")
     parser.add_argument("--profile", default="stock")
     parser.add_argument("--seconds", type=float)
     parser.add_argument("--headless", action="store_true")
@@ -513,6 +518,8 @@ def main():
     if args.jobs < 1:
         parser.error("--jobs must be positive")
     try:
+        if args.game is None and args.command == "run":
+            args.game = workbench_root() / "native/GXBE69"
         {"bootstrap": bootstrap, "configure": configure, "build": build,
          "module": module, "run": launch}[args.command](args)
     except (RuntimeError, OSError, subprocess.CalledProcessError) as error:

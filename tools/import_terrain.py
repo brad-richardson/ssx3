@@ -24,6 +24,7 @@ from probe_worlds import refpack, resource_records, patch_point, probe_ssx3, exp
 from build_world_experiment import serialize_resources
 from relayout_stream import assemble_archive
 from grow_group import add_resources_to_sdb, KIND_PATCH
+from paths import workbench_root
 
 TRICKY_STRIDE, TRICKY_COEFF = 448, 80
 UV_CORNERS = [(0, 0), (0, 1), (1, 0), (1, 1)]  # SSX 3 stored corner order
@@ -101,7 +102,8 @@ def make_record(template, coeffs):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('archive', type=Path)
-    ap.add_argument('--pbd', type=Path, default=Path('/Volumes/share/brad/games/ssx3-workbench/extracted/garibaldi/gari.pbd'))
+    ap.add_argument('--pbd', type=Path, default=None,
+                      help='Donor PBD (default: $SSX3_WORKBENCH/extracted/garibaldi/gari.pbd)')
     ap.add_argument('--world-report', type=Path, default=Path('local/reports/ssx3-world.json'))
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--group', type=int, default=2)
@@ -117,6 +119,8 @@ def main():
     ap.add_argument('--jobs', type=int, default=6)
     ap.add_argument('--dry-run', action='store_true', help='fit only; print the fit and exit')
     args = ap.parse_args()
+    if args.pbd is None:
+        args.pbd = workbench_root() / 'extracted/garibaldi/gari.pbd'
     if args.output.exists() and not args.dry_run:
         ap.error('Output directory already exists')
     # --- Tricky section

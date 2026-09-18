@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from inspect_disc import Region, big_members, file_region
 from probe_worlds import refpack, resource_records, patch_point
+from paths import workbench_root
 
 CELL = 4000
 
@@ -19,10 +20,13 @@ CELL = 4000
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('log', type=Path)
-    ap.add_argument('--archive', type=Path, default=Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG'))
+    ap.add_argument('--archive', type=Path, default=None,
+                      help='SSX3 world archive (default: $SSX3_WORKBENCH/source/ssx3/BAM.BIG)')
     ap.add_argument('--world-report', type=Path, default=ROOT / 'local/reports/ssx3-world.json')
     ap.add_argument('--max-distance', type=float, default=2500)
     a = ap.parse_args()
+    if a.archive is None:
+        a.archive = workbench_root() / 'source/ssx3/BAM.BIG'
     report = json.loads(a.world_report.read_text())
     grid = defaultdict(list)
     with a.archive.open('rb') as f:

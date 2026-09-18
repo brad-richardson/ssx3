@@ -8,6 +8,10 @@ import json
 from pathlib import Path
 import shlex
 import shutil
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paths import games_root, workbench_root
 
 
 def main():
@@ -18,10 +22,15 @@ def main():
                         "Library/Application Support/PCSX2")
     parser.add_argument("--bios-dir", type=Path, default=Path.home() / "Downloads/PS2_BIOS")
     parser.add_argument("--app", type=Path, default=Path("/Applications/PCSX2-v2.8.2.app"))
-    parser.add_argument("--games", type=Path, default=Path("/Volumes/share/brad/games/ps2"))
-    parser.add_argument("--builds", type=Path, default=Path(
-        "/Volumes/share/brad/games/ssx3-workbench/builds"))
+    parser.add_argument("--games", type=Path, default=None,
+                        help="Games library (default: $SSX3_GAMES/ps2)")
+    parser.add_argument("--builds", type=Path, default=None,
+                        help="Staged builds (default: $SSX3_WORKBENCH/builds)")
     args = parser.parse_args()
+    if args.games is None:
+        args.games = games_root() / "ps2"
+    if args.builds is None:
+        args.builds = workbench_root() / "builds"
     binary = args.app / "Contents/MacOS/PCSX2"
     config = configparser.ConfigParser(interpolation=None, strict=False)
     config.optionxform = str
