@@ -44,6 +44,19 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
+      parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
+      three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
+      the 6 ms gate, all captured at +100 s wall with the emu thread
+      ≥0.93 busy (race, not menu). Vulkan cannot be measured until
+      `core-vk-build` is rebuilt from the current vendor tree (the
+      09-17 libs predate the S3 HLE symbol; the m4-src TU that links
+      crashes at boot). Queue a muse build brief for it only when a
+      Vulkan production path is on the table; the route decision does
+      not wait on it. Next on the 120 route: milestone 2 as muse briefs
+      — ReplayContext ownership items from S2's Part 4 inventory, each
+      with the desktop determinism gate, then pose interpolation on the
+      `XFReplay::g_transform` seam. Ledger row added.
 - [ ] **D8 gate read (09-18 13:30) — clock-floor levers DEAD, floor
       smaller than feared:** capped 1.0 on Crow's Nest the control opens
       at ~0.90× for the first 50 s and runs at pace after; the spin pacer
