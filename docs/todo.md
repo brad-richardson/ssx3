@@ -44,6 +44,19 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **PS2Recomp track OPENED (09-18 12:45), all muse:** the user
+      approved the evaluation track; the 09-12 spike's tree on bradflix
+      was lost to a reboot, so its transcript was recovered into
+      `docs/research/ps2recomp-spike-2026-09-12/` (README = the spike's
+      three verdict messages; commands-and-outputs; four decoder scripts).
+      P1 (pane wN:pF) re-spikes on the Mac: build ran-j/PS2Recomp
+      `14b1e5cb` for arm64, reproduce the VU1 census (7,305 instr / 85 ops
+      / 0 unimplemented) and the EE recompile (8143 / 8017 / 126 stubs),
+      then build the runtime and attempt a boot; GS inventory for my read.
+      S2b (pane wN:pG) finishes the replay arms (egl-c, Vulkan relink +
+      arms) behind D8 and the user's `USER-*` lease. Next after P1:
+      P2 = EE/VU/GS split measurement on the Mac + GS renderer gap read
+      (mine), P3 = Odin port.
 - [ ] **S2 gate read (09-18 12:15) — host replay capacity PASSED:**
       with the paired preprocess pass, aux-buffer rewind, PE-token
       masking and per-replay memory/CP/XF restore, the Odin replays a
