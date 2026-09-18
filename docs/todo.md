@@ -44,6 +44,18 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **M3 gate read (09-18 04:05) — corpus switch:** Snow Jam is the
+      LIGHTEST of 13 measured courses; Crow's Nest (heaviest that rides)
+      costs 3.7× its render and 2.6× its update on the desktop. Every
+      Odin budget number to date is the easy case. From now on budget
+      numbers come from the corpus movies (Snow Jam 3-min = light
+      anchor, Crow's Nest 3-min = heavy anchor); M3b runs both on the
+      Odin with the pace binary first thing after S3 frees the device
+      (per-track race pace + busy fractions), then reruns the 4
+      unmeasured courses on the desktop (The Throne is likely heavier
+      still). Crow's Nest strict compare is flaky under dual-core
+      interleave (trajectory equal) — use its rider-state gate, not the
+      dispatch gate, until a single-core recording exists.
 - [ ] **S1 launched (09-18 03:25):** M1d built this repo's runner on
       upstream but the outer platform patch left 3 files rejected, and
       those hunks carry movie playback, HLE hooks and screenshots, so
