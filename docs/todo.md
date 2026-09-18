@@ -61,8 +61,12 @@ the build or commit that closed them.
       generated guest code, big blobs or secrets, but the docs carry
       reverse-engineering detail) and a top-level LICENSE (GPL-3 for
       `native/`, patches and vendored trees; tools/docs could be split).
-      PS2Recomp fork for the runtime patches: recommended, not yet
-      created (user's call).
+      PS2Recomp fork created at github.com/brad-richardson/PS2Recomp
+      (15:50): branch `ssx3` on top of upstream `14b1e5cb`, plain commits
+      per fix for speed (user's choice), cleaned into upstream PRs later;
+      the working clone on the SSD has remote `fork`. Generated runner
+      sources (guest code) are gitignored there and must never be pushed.
+      ps2xGS's submodule moves to the fork branch once fixes land (G1).
 - [ ] **GPU GS backend plan written (09-18 14:50):**
       `docs/plan-gs-gpu-backend-2026-09-18.md` — gates for the autonomous
       loop on the new Mac mini (harness: recording backend + replay/diff +
