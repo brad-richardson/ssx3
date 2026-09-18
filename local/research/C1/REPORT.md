@@ -54,23 +54,23 @@ full suite passed unchanged — no test updates needed.
 ## Step 3 — Scrub private infrastructure tokens (commit `7fb18fc`)
 
 Applied with `git grep -l` + `sed -i ''`, plus hand edits for the three bare
-`bytesize` leftovers and `tools/odin_wireless.sh`.
+`the-gpu-box` leftovers and `tools/odin_wireless.sh`.
 
 | File | Before | After |
 |---|---|---|
-| `docs/full-course-validation.json` | 6× `/Users/bradrichardson/` | 0 (`~/dev/ssx3/…`) |
-| `docs/impl-plan-2026-09-15.md` | 1 (`ssh bytesize`) | 0 (`ssh <gpu-box>`; `user bradr` kept — not in the token list, see Left #4) |
-| `docs/plan-120fps-2026-09-17.md` | 4 (2× serial, 2× bytesize) | 0 (`<odin-serial>`; `optional the GPU box WSL`; `the GPU box's WSL2` + `ssh <gpu-box>`) |
-| `docs/research/ps2recomp-spike-2026-09-12/README.md` | 2 (`bradflix` ×3 incl. `bradflix-ps2recomp/`) | 0 (`the media server`, incl. `` `the media server-ps2recomp/sessions/` `` — see Left #5) |
-| `docs/texture-remaster.md` | 5 (4× `ssh bytesize`, 1× `bytesize:` scp) | 0 (`ssh <gpu-box>`, `<gpu-box>:set.tgz`) |
-| `docs/todo.md` | 1 (`bradflix`) | 0 |
-| `tests/test_android_trial.py` | 4 (synthetic `192.168.1.50:5555`, `622c49b1`) | 0 (`<odin-ip>:5555`, `<odin-serial>`; values stay consistent so the tests still pass — 23 passed) |
-| `tools/odin_wireless.sh` | 2 (`622c49b1`) | 0 (`ODIN_USB_SERIAL="${ODIN_USB_SERIAL:-$(cat local/odin-usb-serial 2>/dev/null \|\| true)}"`, documented in the header; `USB` follows the variable; `zsh -n` ok; env passthrough and empty-unset verified) |
-| `tools/upscale_textures.py` | 1 (`ssh bytesize`) | 0 (`ssh <gpu-box>`) |
+| `docs/full-course-validation.json` | 6× `~/` | 0 (`~/dev/ssx3/…`) |
+| `docs/impl-plan-2026-09-15.md` | 1 (`ssh <gpu-box>`) | 0 (`ssh <gpu-box>`; `user bradr` kept — not in the token list, see Left #4) |
+| `docs/plan-120fps-2026-09-17.md` | 4 (2× serial, 2× the-gpu-box) | 0 (`<odin-serial>`; `optional the GPU box WSL`; `the GPU box's WSL2` + `ssh <gpu-box>`) |
+| `docs/research/ps2recomp-spike-2026-09-12/README.md` | 2 (`the-media-server` ×3 incl. `the-media-server-ps2recomp/`) | 0 (`the media server`, incl. `` `the media server-ps2recomp/sessions/` `` — see Left #5) |
+| `docs/texture-remaster.md` | 5 (4× `ssh <gpu-box>`, 1× `the-gpu-box:` scp) | 0 (`ssh <gpu-box>`, `<gpu-box>:set.tgz`) |
+| `docs/todo.md` | 1 (`the-media-server`) | 0 |
+| `tests/test_android_trial.py` | 4 (synthetic `<odin-ip>:5555`, `<odin-serial>`) | 0 (`<odin-ip>:5555`, `<odin-serial>`; values stay consistent so the tests still pass — 23 passed) |
+| `tools/odin_wireless.sh` | 2 (`<odin-serial>`) | 0 (`ODIN_USB_SERIAL="${ODIN_USB_SERIAL:-$(cat local/odin-usb-serial 2>/dev/null \|\| true)}"`, documented in the header; `USB` follows the variable; `zsh -n` ok; env passthrough and empty-unset verified) |
+| `tools/upscale_textures.py` | 1 (`ssh <gpu-box>`) | 0 (`ssh <gpu-box>`) |
 
 `smb://` hosts already read `YOUR_SMB_HOST` — untouched. Post-scrub grep over
 the nine files: empty. Whole-tree re-run
-`git grep -nE '192\.168\.|622c49b1|bradflix|bytesize|/Users/bradrichardson|macbook\.air'`:
+`git grep -nE '192\.168\.|<odin-serial>|the-media-server|the-gpu-box|/Users/bradrichardson|macbook\.air'`:
 hits remain **only** in `local/research/*` (A2 22, A3 1, G0 5, P1 2,
 S2 REPORT 5 / arm.py 2 / wait_device.sh 2 / waits.log 1, S2b REPORT 2 /
 arm.py 2 / vk-relink-attempt1-error40.txt 4 / waits.log 2) — untouchable per
@@ -148,10 +148,10 @@ not touched. See Left #1. Net file change: none. Related tests after revert:
    matching variable in the brief's vocabulary (`SSX3_WORKBENCH`/`SSX3_GAMES`
    don't cover Extreme SSD) — left as-is.
 4. **Tokens outside the step-3 list, left as-is:** `user bradr`
-   (impl-plan), `/home/brad/…` + `/mnt/c/Users/bradr/…` (texture-remaster),
+   (impl-plan), `~/…` + `/mnt/c/Users/bradr/…` (texture-remaster),
    `/Users/bradr` (not `bradrichardson`). None match the listed patterns or
    the verification grep.
-5. **Mechanical artifact:** `bradflix-ps2recomp/sessions/` became `` `the
+5. **Mechanical artifact:** `the-media-server-ps2recomp/sessions/` became `` `the
    media server-ps2recomp/sessions/` `` (ps2recomp-spike README) — faithful
    to the mapping, awkward as a path; flagging in case a rename is wanted.
 6. **Cosmetic:** `course_census.py` with env unset raises `RuntimeError`

@@ -9,8 +9,8 @@ Brief: `local/muse/prompts/S2b.md`. Continuation of S2
   (ends ~21:26Z). D8 fallback (start + 3 h) would have been ~19:26:28Z but
   was not needed: D8's REPORT.md appeared 17:10Z.
 - Serial: `local/odin-serial` read before every adb call. Was
-  `192.168.1.53:5555` (Wi-Fi); per operator note the Odin moved to USB and
-  the file now reads `622c49b1`. One `adb connect` was run at 16:35Z while
+  `<odin-ip>:5555` (Wi-Fi); per operator note the Odin moved to USB and
+  the file now reads `<odin-serial>`. One `adb connect` was run at 16:35Z while
   Wi-Fi flapped, before the note (timed out); none after, no `adb tcpip`.
 - Device lease: 16:26Z `USER-nethersx2` (USER-* = user has device: waited,
   never removed). 16:29:05Z absent. 16:29:18Z `D8` (D8's

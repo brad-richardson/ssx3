@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 def _serial():
     """The Odin moved to adb over Wi-Fi so it can charge on a wall charger;
-    local/odin-serial carries the current serial (USB 622c49b1 may vanish)."""
+    local/odin-serial carries the current serial (USB <odin-serial> may vanish)."""
     for candidate in (ROOT / "local/odin-serial",
                       Path("/Volumes/Extreme SSD/android-spike/ODIN_SERIAL")):
         try:
@@ -42,7 +42,7 @@ def _serial():
             continue
         if value:
             return value
-    return "622c49b1"
+    return "<odin-serial>"
 
 
 SERIAL = _serial()

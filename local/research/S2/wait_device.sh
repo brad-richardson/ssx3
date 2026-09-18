@@ -1,8 +1,8 @@
 #!/bin/sh
 # Poll until the Odin is usable: lease absent, no moderngekko, battery >= 20%
 # and status 2 (charging) or 5 (full). Logs every 5 min. Exit 0 = usable.
-LOG=/Users/bradrichardson/dev/ssx3/local/research/S2/waits.log
-S=$(cat /Users/bradrichardson/dev/ssx3/local/odin-serial 2>/dev/null || echo 622c49b1)
+LOG=~/dev/ssx3/local/research/S2/waits.log
+S=$(cat ~/dev/ssx3/local/odin-serial 2>/dev/null || echo <odin-serial>)
 adb connect "$S" >/dev/null 2>&1
 n=0
 while [ $n -lt 150 ]; do

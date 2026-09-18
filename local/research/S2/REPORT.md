@@ -1,7 +1,7 @@
 # S2 — Replay state architecture: REPORT
 
-Spike: S2 (reasoning-class). Repo `/Users/bradrichardson/dev/ssx3`, device Odin 3
-`622c49b1`. Continues D2/D2b. No docs edits, no commits, no verdicts.
+Spike: S2 (reasoning-class). Repo `~/dev/ssx3`, device Odin 3
+`<odin-serial>`. Continues D2/D2b. No docs edits, no commits, no verdicts.
 
 Status: stopped by orchestrator instruction after the second Odin arm
 (reasoning-class agents halted for quota). Milestone 1 measured on EGL;
@@ -480,7 +480,7 @@ tools/android_trial.py run --binary .../moderngekko-run-trial --build-json .../b
   --tag s2-egl-a --output .../S2/s2-egl-a-receipts --template d2single \
   --movie m3-snow-jam-3min.dtm --graphics OGL --idle on --trial-kind smoothing \
   --trial-secs 0.0 --timeout 600 --affinity emu=80,video=40 --sampler \
-  --screenshot-seconds 2 --serial 192.168.1.53:5555
+  --screenshot-seconds 2 --serial <odin-ip>:5555
 ```
 
 Probe: `record_start -> recorded -> gpu_stall -> pipe_saved -> restored ->
@@ -545,7 +545,7 @@ The difference between arm 1 (0.665 ms) and arm 2 (0.881 ms) tracks frame size:
 
 ## Part 3c — Odin capacity table
 
-Device Odin 3 `622c49b1` (adb over Wi-Fi, `192.168.1.53:5555`), OGL/EGL,
+Device Odin 3 `<odin-serial>` (adb over Wi-Fi, `<odin-ip>:5555`), OGL/EGL,
 `d2single` template, `--affinity emu=80,video=40` (verified both arms), movie
 `m3-snow-jam-3min.dtm`, module `gGXBE69_recomp.so`, 200 unmodified replays at
 one idle seam with the guest parked, presentation suppressed, `Flush()` +
@@ -607,7 +607,7 @@ No Odin arm was run. Two independent blocks, in order:
 | --- | --- |
 | 13:40-14:30+ | `/data/local/tmp/mg/LEASE` held by **S1c** continuously (foreign lease = wait, per the brief). `local/research/S1b/REPORT.md` never appeared either; the brief's 3-hour fallback had not elapsed. |
 | 14:29 onward | **Battery gate.** `dumpsys battery`: level **2%**, status **3** (discharging) with `AC powered: true` — i.e. plugged through the dongle but not charging. The orchestrator's rule (level >= 20 AND status 2/5) forbids launching. `settings get global low_power` = 0. |
-| 14:5x | Device moved to adb over Wi-Fi (`192.168.1.53:5555`, `local/odin-serial`) so it could charge on a wall charger; `arm.py` and `wait_device.sh` switched to read that file (USB serial as fallback). |
+| 14:5x | Device moved to adb over Wi-Fi (`<odin-ip>:5555`, `local/odin-serial`) so it could charge on a wall charger; `arm.py` and `wait_device.sh` switched to read that file (USB serial as fallback). |
 | 14:54 | **Battery gate cleared**: level 20%, status 2 (charging). It kept climbing (40% by 15:17). |
 | 14:54-15:17+ | Only block left: `LEASE` still reads **S1c**, with a `moderngekko` process running. Foreign lease = wait. |
 

@@ -21,7 +21,7 @@ Feasible as a spike, not as a quick port.
 2. Ghidra export -> `ps2xRecomp` on ELF, count funcs vs `TODO_NAMED`/unresolved
 3. Link subset with `ps2xRuntime`, boot to first syscall/CD-read
 
-**Blocked:** I can't see `/mmt/share/brad/games` from here — shell sandbox is down (`bwrap` missing) and file tools are confined to `/home/brad/dev`, so that absolute path is denied.
+**Blocked:** I can't see `/mmt/share/brad/games` from here — shell sandbox is down (`bwrap` missing) and file tools are confined to `~/dev`, so that absolute path is denied.
 
 Questions:
 1. Can you paste `ls -lh /mmt/share/brad/games` + region of the SSX3 ISO?

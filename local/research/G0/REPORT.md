@@ -41,17 +41,17 @@ First 30 lines:
 [3/17] Building CXX object CMakeFiles/test_gsregs.dir/tests/test_gsregs.cpp.o
 [4/17] Building CXX object CMakeFiles/gsreplay.dir/harness/backend_factory.cpp.o
 [5/17] Building CXX object CMakeFiles/ps2xgs_upstream_cpu.dir/upstream/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp.o
-In file included from /Users/bradrichardson/dev/ps2xGS/upstream/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp:3:
-/Users/bradrichardson/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:67:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
+In file included from ~/dev/ps2xGS/upstream/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp:3:
+~/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:67:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
    67 |                 switch (psm)
       |                         ^~~
-/Users/bradrichardson/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:67:11: note: add missing switch cases
+~/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:67:11: note: add missing switch cases
    67 |                 switch (psm)
       |                         ^
-/Users/bradrichardson/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:91:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
+~/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:91:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
    91 |                 switch (psm)
       |                         ^~~
-/Users/bradrichardson/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:91:11: note: add missing switch cases
+~/dev/ps2xGS/upstream/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:91:11: note: add missing switch cases
    91 |                 switch (psm)
       |                         ^~
 ```

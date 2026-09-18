@@ -24,7 +24,7 @@ each table reports the recorded value or states the step was not run.
 
 | Item | Value |
 |---|---|
-| Host | `Darwin brads.macbook.air.lan 27.0.0 Darwin Kernel Version 27.0.0 … RELEASE_ARM64_T8132 arm64` |
+| Host | `Darwin <mac> 27.0.0 Darwin Kernel Version 27.0.0 … RELEASE_ARM64_T8132 arm64` |
 | OS | macOS 27.0 (Build 26A428) |
 | CPU | Apple M4 (`hw.optional.arm64 = 1`) |
 | `cmake --version` | `cmake version 4.4.3` |
@@ -99,7 +99,7 @@ None. No file outside `local/research/P1/` was modified; no file under
 
 ## 8. Exact commands used
 
-From `/Users/bradrichardson/dev/ssx3`:
+From `~/dev/ssx3`:
 
 ```
 mkdir -p "local/research/P1"

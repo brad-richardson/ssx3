@@ -73,7 +73,7 @@ Commit trailers (history, not file contents): `Co-Authored-By: Claude Fable 5.1 
 
 ## 3. Private infrastructure
 
-Pattern set: `192.168.*`, `10.*`, hostnames (`bradflix`, `bytesize`, `*.lan`, Tailscale names), SSH ports/usernames, device serials (Odin USB serial, iPhone UUIDs), share paths (`/Volumes/share/...`, SMB names), Wi-Fi SSIDs, MAC addresses, home-directory paths (`/Users/<name>/...`). One example line per file. Counts are `git grep -c -E` per file for the combined pattern.
+Pattern set: `192.168.*`, `10.*`, hostnames (`the-media-server`, `the-gpu-box`, `*.lan`, Tailscale names), SSH ports/usernames, device serials (Odin USB serial, iPhone UUIDs), share paths (`/Volumes/share/...`, SMB names), Wi-Fi SSIDs, MAC addresses, home-directory paths (`/Users/<name>/...`). One example line per file. Counts are `git grep -c -E` per file for the combined pattern.
 
 | file | count | example | in tree / history-only | removal shape |
 |---|---|---|---|---|
@@ -82,26 +82,26 @@ Pattern set: `192.168.*`, `10.*`, hostnames (`bradflix`, `bytesize`, `*.lan`, Ta
 | docs/full-course-validation.json | 18 | `"shared_build": "/Volumes/share-1/brad/games/ssx3-workbench/builds/run-gari-002"` | in tree | edit |
 | docs/gamecube-feasibility.md | 1 | `Both images remain on \`/Volumes/share/brad/games/gamecube/\`.` | in tree | edit |
 | docs/garibaldi-visual-comparison.md | 1 | `` `SSX Tricky (USA).iso` on `/Volumes/share/brad/games/ps2/`, running in PCSX2 ... `` | in tree | edit |
-| docs/impl-plan-2026-09-15.md | 1 | `` `ssh bytesize` (Tailscale, user bradr) reaches the RTX 4070; `` | in tree | edit |
+| docs/impl-plan-2026-09-15.md | 1 | `` `ssh <gpu-box>` (Tailscale, user bradr) reaches the RTX 4070; `` | in tree | edit |
 | docs/investigation.md | 2 | `The source images remain unchanged, now under \`/Volumes/share/brad/games/ps2/\`.` | in tree | edit |
 | docs/numbers-ledger.md | 3 | `` `/Volumes/Extreme SSD/upstream-review/build-m1` `` | in tree | edit |
-| docs/plan-120fps-2026-09-17.md | 12 | `` `adb -s 622c49b1 shell ...` `` | in tree | edit |
+| docs/plan-120fps-2026-09-17.md | 12 | `` `adb -s <odin-serial> shell ...` `` | in tree | edit |
 | docs/rebuild-experiment.md | 8 | `Root: \`/Volumes/share/brad/games/ssx3-workbench/builds/\`` | in tree | edit |
-| docs/research/ps2recomp-spike-2026-09-12/README.md | 3 | `# PS2Recomp feasibility spike (muse on bradflix, 2026-09-11/12) — recovered transcript` | in tree | edit |
+| docs/research/ps2recomp-spike-2026-09-12/README.md | 3 | `# PS2Recomp feasibility spike (muse on the-media-server, 2026-09-11/12) — recovered transcript` | in tree | edit |
 | docs/runtime-validation.json | 5 | `"state": "/Volumes/share-1/brad/games/ssx3-workbench/emulator/test-002/evidence/control-hub.p2s"` | in tree | edit |
 | docs/share-recovery.md | 3 | `The workbench share is \`smb://YOUR_SMB_HOST/share\`, mounted at \`/Volumes/share\`.` | in tree | edit |
-| docs/texture-remaster.md | 8 | `On the GPU box — \`ssh bytesize\` over Tailscale reaches the RTX 4070.` | in tree | edit |
-| docs/todo.md | 2 | `the 09-12 spike's tree on bradflix` | in tree | edit |
-| local/research/G0/REPORT.md | 9 | `In file included from /Users/bradrichardson/dev/ps2xGS/upstream/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp:3:` | in tree | edit |
-| local/research/P1/REPORT.md | 22 | `` `Darwin brads.macbook.air.lan 27.0.0 Darwin Kernel Version ...` `` | in tree | edit |
-| local/research/S2/REPORT.md | 21 | `Device Odin 3 \`622c49b1\` (adb over Wi-Fi, \`192.168.1.53:5555\`)` | in tree | edit |
+| docs/texture-remaster.md | 8 | `On the GPU box — \`ssh <gpu-box>\` over Tailscale reaches the RTX 4070.` | in tree | edit |
+| docs/todo.md | 2 | `the 09-12 spike's tree on the-media-server` | in tree | edit |
+| local/research/G0/REPORT.md | 9 | `In file included from ~/dev/ps2xGS/upstream/ps2xRuntime/src/lib/gs/ps2_gs_memory.cpp:3:` | in tree | edit |
+| local/research/P1/REPORT.md | 22 | `` `Darwin <mac> 27.0.0 Darwin Kernel Version ...` `` | in tree | edit |
+| local/research/S2/REPORT.md | 21 | `Device Odin 3 \`<odin-serial>\` (adb over Wi-Fi, \`<odin-ip>:5555\`)` | in tree | edit |
 | local/research/S2/arm.py | 9 | `* device lease \`/data/local/tmp/mg/LEASE\` must be absent (or already S2);` | in tree | edit |
 | local/research/S2/build_android_trial.py | 2 | `D5_PATCH = Path("/Volumes/Extreme SSD/android-spike/D5/instrument.patch")` | in tree | edit |
-| local/research/S2/wait_device.sh | 3 | `S=$(cat /Users/bradrichardson/dev/ssx3/local/odin-serial 2>/dev/null \|\| echo 622c49b1)` | in tree | edit |
-| local/research/S2/waits.log | 1 | `14:40:56Z adb over Wi-Fi: serial now 192.168.1.53:5555 (local/odin-serial); ...` | in tree | edit |
-| local/research/S2b/REPORT.md | 17 | `` `192.168.1.53:5555` (Wi-Fi); per operator note the Odin moved to USB ... `` | in tree | edit |
+| local/research/S2/wait_device.sh | 3 | `S=$(cat ~/dev/ssx3/local/odin-serial 2>/dev/null \|\| echo <odin-serial>)` | in tree | edit |
+| local/research/S2/waits.log | 1 | `14:40:56Z adb over Wi-Fi: serial now <odin-ip>:5555 (local/odin-serial); ...` | in tree | edit |
+| local/research/S2b/REPORT.md | 17 | `` `<odin-ip>:5555` (Wi-Fi); per operator note the Odin moved to USB ... `` | in tree | edit |
 | local/research/S2b/arm.py | 9 | `* device lease \`/data/local/tmp/mg/LEASE\` must be absent (or already S2);` | in tree | edit |
-| local/research/S2b/vk-relink-attempt1-error40.txt | 4 | `File "/Users/bradrichardson/dev/ssx3/local/research/S2/build_android_trial.py", line 206, in <module>` | in tree | edit |
+| local/research/S2b/vk-relink-attempt1-error40.txt | 4 | `File "~/dev/ssx3/local/research/S2/build_android_trial.py", line 206, in <module>` | in tree | edit |
 | local/research/S2b/vk-relink-commands.log | 3 | `python3 local/research/S2/build_android_trial.py --game local/game/gxbe69-stock --build-dir "/Volumes/Extreme SSD/android-spike/core-vk-build" ...` | in tree | edit |
 | local/research/S2b/waits.log | 3 | `ls: /Volumes/Extreme SSD/android-spike/S2/s2-egl-c-receipts: No such file or directory` | in tree | edit |
 | native/README.md | 3 | `defaults to \`/Volumes/share/brad/games/ssx3-workbench/native/GXBE69\`; override` | in tree | edit |
@@ -118,9 +118,9 @@ Pattern set: `192.168.*`, `10.*`, hostnames (`bradflix`, `bytesize`, `*.lan`, Ta
 | tools/patch_crossing.py | 1 | `src = Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG')` | in tree | edit |
 | tools/prepare_emulator.py | 2 | `parser.add_argument("--games", type=Path, default=Path("/Volumes/share/brad/games/ps2"))` | in tree | edit |
 | tools/ride_locations.py | 1 | `default=Path('/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG')` | in tree | edit |
-| tools/upscale_textures.py | 1 | `Written for the RTX 4070 box (\`ssh bytesize\`), where torch and spandrel live in` | in tree | edit |
+| tools/upscale_textures.py | 1 | `Written for the RTX 4070 box (\`ssh <gpu-box>\`), where torch and spandrel live in` | in tree | edit |
 
-Additional values observed in the same rows: `192.168.1.53:5555`, `192.168.1.50:5555` (in `local/research/S2b/REPORT.md` history of serial), `622c49b1`, `brads.macbook.air.lan`, `bradflix`, `bytesize`, `user bradr`, `/home/brad/ssx3-remaster/...`, `/mnt/c/Users/bradr/set.tgz`, `/data/local/tmp/mg/`, `/data/local/tmp/mg/LEASE`, `/tmp/ssx3-host-lease`, `/Users/bradrichardson/dev/ssx3/...`, `/Users/bradrichardson/dev/ps2xGS/...`, `/Volumes/Extreme SSD/...`, `/Volumes/share-1/...`, `smb://YOUR_SMB_HOST/share`, `smb://host/share`. No Wi-Fi SSID value and no MAC address value were observed. No iPhone UUID value was observed; one `.sav` filename with UUID shape `2639E4EF-FA70-48BC-988D-C312BC05D5B4.sav` occurs in `docs/research/startup-shortcut.md` (matched UUID pattern search).
+Additional values observed in the same rows: `<odin-ip>:5555`, `<odin-ip>:5555` (in `local/research/S2b/REPORT.md` history of serial), `<odin-serial>`, `<mac>`, `the-media-server`, `the-gpu-box`, `user bradr`, `~/ssx3-remaster/...`, `/mnt/c/Users/bradr/set.tgz`, `/data/local/tmp/mg/`, `/data/local/tmp/mg/LEASE`, `/tmp/ssx3-host-lease`, `~/dev/ssx3/...`, `~/dev/ps2xGS/...`, `/Volumes/Extreme SSD/...`, `/Volumes/share-1/...`, `smb://YOUR_SMB_HOST/share`, `smb://host/share`. No Wi-Fi SSID value and no MAC address value were observed. No iPhone UUID value was observed; one `.sav` filename with UUID shape `2639E4EF-FA70-48BC-988D-C312BC05D5B4.sav` occurs in `docs/research/startup-shortcut.md` (matched UUID pattern search).
 
 ## 4. Session and tooling residue
 
@@ -131,7 +131,7 @@ Not sensitive; counted separately. Commit trailers are in history (see §2). Fil
 | docs/numbers-ledger.md | 1 | `` `local/research/D2/d2_replay_capacity.h` `` (matched `waits.log` alternative? no; matched `herdr`-adjacent? see note) | in tree | edit |
 | docs/plan-120fps-2026-09-17.md | 2 | `` `/data/local/tmp/mg/LEASE` `` must be ... | in tree | edit |
 | docs/research/120hz-f-spike.md | 3 | `Branch \`spike/f-120hz-sim\`, worktree \`/tmp/ssx3-f120\`.` | in tree | edit |
-| docs/research/ps2recomp-spike-2026-09-12/README.md | 2 | `Source: muse sessions \`2026/09/11/01a092b8…\` and \`2026/09/12/01a092fb…\` on bradflix ...` | in tree | edit |
+| docs/research/ps2recomp-spike-2026-09-12/README.md | 2 | `Source: muse sessions \`2026/09/11/01a092b8…\` and \`2026/09/12/01a092fb…\` on the-media-server ...` | in tree | edit |
 | docs/research/ps2recomp-spike-2026-09-12/commands-and-outputs.md | 159 | `git clone --depth 1 https://github.com/ran-j/PS2Recomp.git /tmp/PS2Recomp 2>&1` | in tree | edit |
 | docs/research/ps2recomp-spike-2026-09-12/scripts/census.py | 4 | `# write_file /tmp/ssx3vu/census.py` | in tree | edit |
 | docs/research/ps2recomp-spike-2026-09-12/scripts/final_census.py | 3 | `# write_file /tmp/ssx3vu/final_census.py` | in tree | edit |
@@ -142,8 +142,8 @@ Not sensitive; counted separately. Commit trailers are in history (see §2). Fil
 | local/research/P1/REPORT.md | 17 | `` `/tmp/ssx3-host-lease` absent during all P1 work ... `` | in tree | edit |
 | local/research/S2/REPORT.md | 4 | `Host build gate: \`/tmp/ssx3-host-lease\` absent at each` | in tree | edit |
 | local/research/S2/arm.py | 5 | `* device lease \`/data/local/tmp/mg/LEASE\` must be absent (or already S2);` | in tree | edit |
-| local/research/S2/wait_device.sh | 2 | `S=$(cat /Users/bradrichardson/dev/ssx3/local/odin-serial ...)` | in tree | edit |
-| local/research/S2/waits.log | 1 | `14:40:56Z adb over Wi-Fi: serial now 192.168.1.53:5555 (local/odin-serial); ...` | in tree | edit |
+| local/research/S2/wait_device.sh | 2 | `S=$(cat ~/dev/ssx3/local/odin-serial ...)` | in tree | edit |
+| local/research/S2/waits.log | 1 | `14:40:56Z adb over Wi-Fi: serial now <odin-ip>:5555 (local/odin-serial); ...` | in tree | edit |
 | local/research/S2b/REPORT.md | 5 | `- Serial: \`local/odin-serial\` read before every adb call.` | in tree | edit |
 | local/research/S2b/arm.py | 5 | `* device lease \`/data/local/tmp/mg/LEASE\` must be absent (or already S2);` | in tree | edit |
 | local/research/S2b/vk-relink-attempt1-error40.txt | 3 | `referenced by Core_Run.cpp:180 (/private/tmp/s2b-link/trial-vk1/Core_Run.cpp:180)` | in tree | edit |
@@ -238,7 +238,7 @@ cat native/ios/Info.plist
 cat native/ios/toolchain.cmake
 cat native/ios/WriteBuildInfo.cmake
 git grep -n -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}' -- $(git ls-files)
-git grep -n -E '192\.168\.|10\.[0-9]+\.[0-9]+\.[0-9]+|bradflix|bytesize|\.lan|tailscale|Tailscale|/Volumes/share|smb://|/Users/brad|/Users/[a-z]+|SSID|MAC |serial|UDID|adb |ssh ' -- $(git ls-files)
+git grep -n -E '192\.168\.|10\.[0-9]+\.[0-9]+\.[0-9]+|the-media-server|the-gpu-box|\.lan|tailscale|Tailscale|/Volumes/share|smb://|/Users/brad|/Users/[a-z]+|SSID|MAC |serial|UDID|adb |ssh ' -- $(git ls-files)
 git grep -c -E '/Volumes/share|/Volumes/Extreme SSD|smb://|share-1' -- $(git ls-files) | grep -v ':0$'
 git grep -c -E '/Users/bradrichardson|/Users/brad|/home/brad|/mnt/c/Users' -- $(git ls-files) | grep -v ':0$'
 git grep -n -E 'claude\.ai/code/session|Claude-Session|Co-Authored-By|/private/tmp/claude|herdr|pane.*[0-9]+|local/lease|odin-serial|/tmp/PS2Recomp|/tmp/ssx3' -- $(git ls-files)
@@ -249,9 +249,9 @@ git grep -n -i -E 'AKIA|ghp_|xox|BEGIN .*PRIVATE KEY|password|secret|token|apike
 git grep -n -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}' $(git rev-list --all) --
 git grep -n 'claude.ai/code/session' -- $(git ls-files)
 git grep -n 'claude.ai/code/session' $(git rev-list --all) --
-git grep -n -E '\.lan|Tailscale|bradflix|bytesize|192\.168\.|622c49b1' $(git rev-list --all) --
+git grep -n -E '\.lan|Tailscale|the-media-server|the-gpu-box|192\.168\.|<odin-serial>' $(git rev-list --all) --
 git grep -n -E 'DEVELOPMENT_TEAM|TeamIdentifier|ApplicationIdentifierPrefix|ProvisionedDevices|embedded\.mobileprovision' $(git rev-list --all) --
-git grep -l -E '192\.168\.|bradflix|bytesize|\.lan|Tailscale|/Volumes/share|/Volumes/Extreme SSD|smb://|/Users/bradrichardson|/home/brad|/mnt/c/Users|622c49b1|5555|/data/local/tmp|share-1' -- $(git ls-files)
+git grep -l -E '192\.168\.|the-media-server|the-gpu-box|\.lan|Tailscale|/Volumes/share|/Volumes/Extreme SSD|smb://|/Users/bradrichardson|/home/brad|/mnt/c/Users|<odin-serial>|5555|/data/local/tmp|share-1' -- $(git ls-files)
 git grep -l -E 'herdr|/tmp/ssx3-host-lease|/data/local/tmp/mg/LEASE|local/odin-serial|/tmp/PS2Recomp|/tmp/ssx3|ODIN_SERIAL|pane wN|/tmp/ps2xgs-build' -- $(git ls-files)
 git grep -l -E 'games/|SSX 3 \(USA\)\.iso|SSX Tricky|SLUS-20772' -- $(git ls-files)
 ```
