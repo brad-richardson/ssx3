@@ -33,7 +33,7 @@ each table reports the recorded value or states the step was not run.
 | Repo HEAD (ssx3) | `c7150168840576528b3ca64c397e4bbbbdb95691` |
 | Work dir (SSD) | `/Volumes/Extreme SSD/ps2recomp-spike/` (`P1/` subdirectory created, empty) |
 | Link dir | `/tmp/p1-link/` (created, unused — no build was started) |
-| Host lease | Never acquired (no build or boot was started); `/tmp/ssx3-host-lease` absent at start and end; no foreign lease seen; no waits, no `waits.log` |
+| Host lease | Never acquired (no build or boot was started); `/tmp/ssx3-host-lease` absent during all P1 work; at 12:28 EDT, after the P1 commit, a foreign lease `S2b-build` was observed and left untouched; no waits, no `waits.log` |
 | Wall start | 2026-09-18 16:26:07 UTC (Fri Sep 18 12:26:07 EDT 2026) |
 | Homebrew installs | None (cmake/ninja present, nothing installed) |
 | `adb` | Not used |
@@ -138,7 +138,7 @@ Transcript reads (no writes): `local/muse/prompts/P1.md`,
 | `/Volumes/Extreme SSD/ps2recomp-spike/P1/` | Work dir | Empty (no receipts; stopped before Step 2) |
 | `local/research/P1/REPORT.md` | This report | Committed under `[P1]` (see git log) |
 | `/tmp/p1-link/` | Link dir | Created, unused |
-| `/tmp/ssx3-host-lease` | Lease | Absent throughout; released state = absent |
+| `/tmp/ssx3-host-lease` | Lease | Absent during P1 work (never acquired, nothing to release); foreign `S2b-build` seen post-commit, untouched |
 
 ## 10. What I could not do
 
