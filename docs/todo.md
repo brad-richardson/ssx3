@@ -44,6 +44,21 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **S1 gate read (09-18 05:20) — backend decision:** LLVM route
+      PARKED. The recompcore-flavor LLVM module never reaches a race
+      under our automation stack (syscall-vector exceptions 1:1 with
+      native exceptions, speed decays to 0.01×), the native-ABI flavor
+      has no runtime anywhere upstream, and the flavor that links is
+      compat-ABI dominated. Revisit only when upstream ships a runtime
+      for the native module ABI. What S1 did deliver is the repin:
+      a rebased outer platform patch (+254/−19, builds green) and the
+      finding that the repo pin is one CPU-ABI generation behind
+      (3 vs 4). S1b (Opus): port the Android patch stack the same way,
+      build the Android runtime + upstream C module on the repinned
+      tree, and run the D1 base shape on the Odin against the pinned
+      stack — the direct test of upstream's C-backend codegen changes
+      (region-leader entry switches, proven-pointer memory) on the
+      target. That number decides the repin.
 - [ ] **M3 gate read (09-18 04:05) — corpus switch:** Snow Jam is the
       LIGHTEST of 13 measured courses; Crow's Nest (heaviest that rides)
       costs 3.7× its render and 2.6× its update on the desktop. Every
