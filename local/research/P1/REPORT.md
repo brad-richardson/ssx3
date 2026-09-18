@@ -835,3 +835,1256 @@ find $W/P1 -name "._*" -delete (repeated); mv repo-root strays (none this round)
 - IOP profile table for the 6 modules: the background grep did not return a complete table before report time; no profiles were modified; module-load success (6/6) recorded instead.
 - `waits.log`: no waits (no foreign lease during P1b).
 - Time boxes: P1b base box + 2 h (amendment 1) + 2 h (amendment 2) were not exhausted.
+# P1c report — Part 4 (brief local/muse/prompts/P1c.md)
+
+Run wall: 2026-09-18 21:00 → 22:05 UTC (17:00 → 18:05 EDT), inside the
+5-hour box. `W` = `/Volumes/Extreme SSD/ps2recomp-spike`. No verdicts.
+
+## P4-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` held `P1c` (written when absent) |
+| Builds/boots | Lease kept as `P1c` across all builds and boots 1–3 |
+| Foreign leases / waits | None observed; no `waits.log` |
+| `adb` | Not used |
+| End | Removed after the `[P1c]` push, verified absent |
+
+## P4-1. Diagnostics diff + boot-1 period blocks
+
+Step 1 design (all gated on `PS2X_DIAG_PERIOD_MS`; unset = compiled in,
+nothing printed, per-iteration cost one counter increment plus a cached
+static check):
+
+| Item | Location | Behavior |
+|---|---|---|
+| Thread dump | `EeScheduler.cpp` `EeScheduler::run()` (~line 240); print helper in anonymous namespace (~line 88) | Every period: Fix C table for all threads + `priority` + `scheduled` count since last dump; counts cleared after print |
+| Syscall histogram | `Syscalls/Dispatcher.cpp` `dispatchNumericSyscall()` (line 89); flusher `diagSyscallsPeriodicFlush()` (line 55) | Per id: count, first/last `ctx->pc`; top 20 every period, then reset |
+| Call-target histogram | `ps2_runtime.cpp` `dispatchGuestBranch()`, hook before the binding lookup (line 1452; lookup at line 1455) | Per call target: count, first/last `$ra`; top 30 every period, then reset |
+| CD queued receipt | `Stubs/CD.cpp` `queueCdCallback()` (line ~60) | One `[cd:callback] queued` line (func id, callback pc); tags the invocation `0x43444342…|func` |
+| CD start receipt | `EeScheduler.cpp` `run()`, both invocation pop sites (lines ~328, ~407) | One `[cd:callback] start` line when the tagged invocation starts |
+| CD entry logs | `Stubs/CD.cpp` `sceCdRead` (line 268), `sceCdCallback` (line 481), `sceCdInitEeCB` (line 483) | One `[diag:cd]` line per guest call (added for the Step 2 CD question) |
+
+The HLE stub histogram site is `PS2Runtime::dispatchGuestBranch()` in
+`ps2xRuntime/src/lib/ps2_runtime.cpp`: the `lookupFunction(targetPc)` call
+at line 1455 is where the `register_functions.cpp` bindings are looked up
+at call time; the counting hook sits directly above it (line 1452).
+Fix C printing is reused via `printEeThreadDiagLine()` (same field order;
+the `[ee:idle]` call site output is byte-identical, the periodic block
+appends `priority` and `scheduled`).
+Flush correction: histograms first flushed only on later events, which
+dropped the startup burst when the guest went quiet before the first
+boundary; the scheduler tick now calls both flushers every period, so
+quiet stretches emit empty blocks.
+
+Diff `04905db..dbf0080` (4 files, +368/-9):
+
+```
+diff --git a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+index a9786bb..bb6b1e0 100644
+--- a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
++++ b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+@@ -6,10 +6,21 @@
+ #include <algorithm>
+ #include <cassert>
+ #include <chrono>
++#include <cstdlib>
+ #include <cstring>
+ #include <iostream>
+ #include <limits>
+ #include <stdexcept>
++#include <unordered_map>
++
++// P1c histogram flushers owned by other translation units (defined in
++// Kernel/Syscalls/Dispatcher.cpp and ps2_runtime.cpp). Called from the
++// periodic tick below so quiet periods still emit blocks.
++namespace ps2_syscalls
++{
++    void diagSyscallsPeriodicFlush();
++}
++void diagCallsPeriodicFlush();
+ 
+ namespace
+ {
+@@ -72,6 +83,63 @@ namespace
+         } while (candidate != first);
+         return 0;
+     }
++
++    // P1c steady-state diagnostics. Everything below is gated on
++    // PS2X_DIAG_PERIOD_MS: unset/empty/0 means compiled in, nothing printed,
++    // and callers pay only a counter increment plus a cached static check.
++    uint64_t diagPeriodMs()
++    {
++        static const uint64_t period = [] {
++            if (const char *env = std::getenv("PS2X_DIAG_PERIOD_MS"))
++            {
++                if (env[0] != '\0')
++                {
++                    char *end = nullptr;
++                    const unsigned long long parsed = std::strtoull(env, &end, 10);
++                    if (end != env)
++                    {
++                        return static_cast<uint64_t>(parsed);
++                    }
++                }
++            }
++            return static_cast<uint64_t>(0);
++        }();
++        return period;
++    }
++
++    uint64_t diagNowMs()
++    {
++        return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
++                                         std::chrono::steady_clock::now().time_since_epoch())
++                                         .count());
++    }
++
++    // Shared printer for the Fix C thread table. Fix C callers pass "ee:idle";
++    // the periodic P1c dump passes "diag:thread" and appends priority plus
++    // the per-thread schedule count.
++    void printEeThreadDiagLine(std::ostream &os, const char *prefix, const EeThreadSnapshot &thread)
++    {
++        os << "[" << prefix << "] id=" << thread.id
++           << " status=" << static_cast<int>(thread.status)
++           << " waitReason=" << static_cast<int>(thread.waitReason)
++           << " waitId=" << thread.waitId << " pc=0x"
++           << std::hex << thread.pc << std::dec
++           << " entry=0x" << std::hex << thread.entry << std::dec;
++    }
++
++    // Tag mark for CD-completion invocations queued by queueCdCallback
++    // (Kernel/Stubs/CD.cpp). Upper 32 bits are the 'CDCB' magic, lower 32
++    // bits are the SCE callback function id.
++    constexpr uint64_t kCdCallbackDiagTagBase = 0x4344434200000000ULL;
++    constexpr uint64_t kCdCallbackDiagTagMask = 0xFFFFFFFF00000000ULL;
++
++    bool isCdCallbackDiagTag(uint64_t tag)
++    {
++        return (tag & kCdCallbackDiagTagMask) == kCdCallbackDiagTagBase;
++    }
++
++    // Per-thread schedule counts since the last periodic dump.
++    std::unordered_map<int, uint64_t> g_diagSchedCounts;
+ }
+ 
+ EeScheduler::EeScheduler(PS2Runtime &runtime)
+@@ -159,6 +227,12 @@ void EeScheduler::run()
+     assertExecutor();
+     m_running.store(true, std::memory_order_release);
+ 
++    // P1c steady-state diagnostics state. When PS2X_DIAG_PERIOD_MS is unset
++    // the per-iteration cost below is one counter increment plus a check.
++    static uint64_t s_diagTick = 0;
++    static uint64_t s_diagLastMs = 0;
++    static uint64_t s_diagBlock = 0;
++
+     while (!m_stopRequested.load(std::memory_order_acquire))
+     {
+         processPendingEvents();
+@@ -167,6 +241,40 @@ void EeScheduler::run()
+             break;
+         }
+ 
++        ++s_diagTick;
++        const uint64_t diagPeriod = diagPeriodMs();
++        if (diagPeriod != 0u)
++        {
++            const uint64_t diagNow = diagNowMs();
++            if (s_diagLastMs == 0u)
++            {
++                s_diagLastMs = diagNow;
++            }
++            else if (diagNow - s_diagLastMs >= diagPeriod)
++            {
++                s_diagLastMs = diagNow;
++                publishSnapshot();
++                const EeKernelSnapshot diagSnap = snapshot();
++                std::cerr << "[diag:threads] block=" << s_diagBlock++
++                          << " threads=" << diagSnap.threads.size()
++                          << " period_ms=" << diagPeriod << std::endl;
++                for (const EeThreadSnapshot &diagThread : diagSnap.threads)
++                {
++                    uint64_t scheduled = 0u;
++                    if (auto it = g_diagSchedCounts.find(diagThread.id); it != g_diagSchedCounts.end())
++                    {
++                        scheduled = it->second;
++                    }
++                    printEeThreadDiagLine(std::cerr, "diag:thread", diagThread);
++                    std::cerr << " priority=" << diagThread.currentPriority
++                              << " scheduled=" << scheduled << std::endl;
++                }
++                g_diagSchedCounts.clear();
++                ps2_syscalls::diagSyscallsPeriodicFlush();
++                diagCallsPeriodicFlush();
++            }
++        }
++
+         if (m_currentThreadId == 0)
+         {
+             GuestThread *next = selectReady();
+@@ -190,15 +298,8 @@ void EeScheduler::run()
+                               << idleSnap.threads.size() << std::endl;
+                     for (const EeThreadSnapshot &idleThread : idleSnap.threads)
+                     {
+-                        std::cerr << "[ee:idle] id=" << idleThread.id
+-                                  << " status="
+-                                  << static_cast<int>(idleThread.status)
+-                                  << " waitReason="
+-                                  << static_cast<int>(idleThread.waitReason)
+-                                  << " waitId=" << idleThread.waitId << " pc=0x"
+-                                  << std::hex << idleThread.pc << std::dec
+-                                  << " entry=0x" << std::hex << idleThread.entry
+-                                  << std::dec << std::endl;
++                        printEeThreadDiagLine(std::cerr, "ee:idle", idleThread);
++                        std::cerr << std::endl;
+                     }
+                 }
+                 waitForEvent();
+@@ -209,12 +310,25 @@ void EeScheduler::run()
+             if (next)
+             {
+                 makeRunning(*next);
++                if (diagPeriod != 0u)
++                {
++                    ++g_diagSchedCounts[next->id];
++                }
+             }
+             else
+             {
+                 GuestThread *owner = &acquireInvocationThread();
+                 GuestInvocation invocation = std::move(m_pendingInvocations.front());
+                 m_pendingInvocations.pop_front();
++                if (diagPeriod != 0u)
++                {
++                    ++g_diagSchedCounts[owner->id];
++                    if (isCdCallbackDiagTag(invocation.tag))
++                    {
++                        std::cerr << "[cd:callback] start func=" << (invocation.tag & 0xFFFFFFFFu)
++                                  << " cb=0x" << std::hex << invocation.context.pc << std::dec << std::endl;
++                    }
++                }
+                 owner->status = EeThreadStatus::Running;
+                 m_currentThreadId = owner->id;
+                 renewTimeSlice();
+@@ -288,6 +402,11 @@ void EeScheduler::run()
+         {
+             GuestInvocation invocation = std::move(m_pendingInvocations.front());
+             m_pendingInvocations.pop_front();
++            if (diagPeriod != 0u && isCdCallbackDiagTag(invocation.tag))
++            {
++                std::cerr << "[cd:callback] start func=" << (invocation.tag & 0xFFFFFFFFu)
++                          << " cb=0x" << std::hex << invocation.context.pc << std::dec << std::endl;
++            }
+             if (getRegU32(&invocation.context, 29) == 0u)
+             {
+                 SET_GPR_U32(&invocation.context, 29, invocationStackTop());
+diff --git a/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp b/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
+index 9a7507b..aa9aa89 100644
+--- a/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
++++ b/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
+@@ -38,6 +38,31 @@ namespace ps2_stubs
+         uint32_t g_cdCallbackGp = 0u;
+         uint32_t g_cdCallbackStackTop = 0u;
+ 
++        // P1c steady-state diagnostics, gated on PS2X_DIAG_PERIOD_MS (unset =
++        // compiled in, nothing printed). The tag mark lets the scheduler log
++        // when it starts the queued invocation (see EeScheduler::run()).
++        constexpr uint64_t kCdCallbackDiagTagBase = 0x4344434200000000ULL;
++
++        uint64_t diagPeriodMs()
++        {
++            static const uint64_t period = [] {
++                if (const char *env = std::getenv("PS2X_DIAG_PERIOD_MS"))
++                {
++                    if (env[0] != '\0')
++                    {
++                        char *end = nullptr;
++                        const unsigned long long parsed = std::strtoull(env, &end, 10);
++                        if (end != env)
++                        {
++                            return static_cast<uint64_t>(parsed);
++                        }
++                    }
++                }
++                return static_cast<uint64_t>(0);
++            }();
++            return period;
++        }
++
+         void queueCdCallback(R5900Context *ctx, PS2Runtime *runtime, uint32_t func)
+         {
+             (void)ctx;
+@@ -47,12 +72,18 @@ namespace ps2_stubs
+             }
+             GuestInvocation invocation{};
+             invocation.kind = GuestInvocationKind::Interrupt;
++            invocation.tag = kCdCallbackDiagTagBase | static_cast<uint64_t>(func);
+             invocation.context.pc = g_cdCallbackFn;
+             SET_GPR_U32(&invocation.context, 4, func);
+             SET_GPR_U32(&invocation.context, 5, 0u);
+             SET_GPR_U32(&invocation.context, 28, g_cdCallbackGp);
+             SET_GPR_U32(&invocation.context, 29, g_cdCallbackStackTop);
+             SET_GPR_U32(&invocation.context, 31, 0u);
++            if (diagPeriodMs() != 0u)
++            {
++                std::cerr << "[cd:callback] queued func=" << func
++                          << " cb=0x" << std::hex << g_cdCallbackFn << std::dec << std::endl;
++            }
+             runtime->eeScheduler().queueInvocation(std::move(invocation));
+         }
+ 
+@@ -234,6 +265,13 @@ namespace ps2_stubs
+         const uint32_t a0 = getRegU32(ctx, 4); // usually lbn
+         const uint32_t a1 = getRegU32(ctx, 5); // usually sector count
+         const uint32_t a2 = getRegU32(ctx, 6); // usually destination buffer
++        if (diagPeriodMs() != 0u)
++        {
++            std::cerr << "[diag:cd] sceCdRead lbn=0x" << std::hex << a0
++                      << " sectors=" << std::dec << a1
++                      << " buf=0x" << std::hex << a2
++                      << " ret=0x" << ctx->pc << std::dec << std::endl;
++        }
+ 
+         struct CdReadArgs
+         {
+@@ -440,6 +478,12 @@ namespace ps2_stubs
+         const uint32_t stackAddr = getRegU32(ctx, 5);
+         const uint32_t stackSize = getRegU32(ctx, 6);
+         g_cdCallbackStackTop = stackAddr + stackSize;
++        if (diagPeriodMs() != 0u)
++        {
++            std::cerr << "[diag:cd] sceCdInitEeCB stack=0x" << std::hex << stackAddr
++                      << " size=0x" << stackSize
++                      << " ret=0x" << ctx->pc << std::dec << std::endl;
++        }
+         setReturnS32(ctx, 1);
+     }
+ 
+@@ -1026,3 +1070,4 @@ namespace ps2_stubs
+         setReturnS32(ctx, 1);
+     }
+ }
++
+diff --git a/ps2xRuntime/src/lib/Kernel/Syscalls/Dispatcher.cpp b/ps2xRuntime/src/lib/Kernel/Syscalls/Dispatcher.cpp
+index 89de596..2c5a8ed 100644
+--- a/ps2xRuntime/src/lib/Kernel/Syscalls/Dispatcher.cpp
++++ b/ps2xRuntime/src/lib/Kernel/Syscalls/Dispatcher.cpp
+@@ -2,10 +2,107 @@
+ #include "Dispatcher.h"
+ #include "System.h"
+ 
++#include <cstdlib>
++
++namespace
++{
++    // P1c steady-state diagnostics, gated on PS2X_DIAG_PERIOD_MS (unset =
++    // compiled in, nothing printed, callers pay only a counter increment).
++    uint64_t diagPeriodMs()
++    {
++        static const uint64_t period = [] {
++            if (const char *env = std::getenv("PS2X_DIAG_PERIOD_MS"))
++            {
++                if (env[0] != '\0')
++                {
++                    char *end = nullptr;
++                    const unsigned long long parsed = std::strtoull(env, &end, 10);
++                    if (end != env)
++                    {
++                        return static_cast<uint64_t>(parsed);
++                    }
++                }
++            }
++            return static_cast<uint64_t>(0);
++        }();
++        return period;
++    }
++
++    uint64_t diagNowMs()
++    {
++        return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
++                                         std::chrono::steady_clock::now().time_since_epoch())
++                                         .count());
++    }
++
++    struct SyscallDiagEntry
++    {
++        uint64_t count = 0;
++        uint32_t firstPc = 0;
++        uint32_t lastPc = 0;
++    };
++
++    std::unordered_map<uint32_t, SyscallDiagEntry> g_diagSyscallCounts;
++    uint64_t g_diagSyscallLastMs = 0;
++    uint64_t g_diagSyscallBlock = 0;
++}
++
+ namespace ps2_syscalls
+ {
++    // Flushes the pending syscall histogram when a period boundary has
++    // passed. Called from the dispatch hook below and from the scheduler
++    // tick so a quiet steady state still emits (possibly empty) blocks.
++    void diagSyscallsPeriodicFlush()
++    {
++        const uint64_t period = diagPeriodMs();
++        if (period == 0u)
++        {
++            return;
++        }
++        const uint64_t now = diagNowMs();
++        if (g_diagSyscallLastMs == 0u)
++        {
++            g_diagSyscallLastMs = now;
++            return;
++        }
++        if (now - g_diagSyscallLastMs < period)
++        {
++            return;
++        }
++        g_diagSyscallLastMs = now;
++        std::vector<std::pair<uint32_t, SyscallDiagEntry>> sorted(g_diagSyscallCounts.begin(), g_diagSyscallCounts.end());
++        std::sort(sorted.begin(), sorted.end(),
++                  [](const auto &a, const auto &b) { return a.second.count > b.second.count; });
++        std::cerr << "[diag:syscalls] block=" << g_diagSyscallBlock++
++                  << " distinct=" << sorted.size()
++                  << " period_ms=" << period << std::endl;
++        for (size_t i = 0; i < sorted.size() && i < 20u; ++i)
++        {
++            std::cerr << "[diag:syscall] id=0x" << std::hex << sorted[i].first << std::dec
++                      << " count=" << sorted[i].second.count
++                      << " first=0x" << std::hex << sorted[i].second.firstPc
++                      << " last=0x" << std::hex << sorted[i].second.lastPc << std::dec << std::endl;
++        }
++        g_diagSyscallCounts.clear();
++    }
++
+     bool dispatchNumericSyscall(uint32_t syscallNumber, uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
++        static uint64_t s_diagTick = 0;
++        ++s_diagTick;
++        if (diagPeriodMs() != 0u)
++        {
++            const uint32_t callerPc = (ctx != nullptr) ? ctx->pc : 0u;
++            SyscallDiagEntry &entry = g_diagSyscallCounts[syscallNumber];
++            if (entry.count == 0u)
++            {
++                entry.firstPc = callerPc;
++            }
++            entry.lastPc = callerPc;
++            ++entry.count;
++            diagSyscallsPeriodicFlush();
++        }
++
+         if (dispatchSyscallOverride(syscallNumber, rdram, ctx, runtime))
+         {
+             return true;
+diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
+index 0e8471e..2ccc4a5 100644
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -19,6 +19,7 @@
+ #include <algorithm>
+ #include <array>
+ #include <cctype>
++#include <cstdlib>
+ #include <cstring>
+ #include <limits>
+ #include <chrono>
+@@ -26,6 +27,7 @@
+ #include <thread>
+ #include <unordered_map>
+ #include <sstream>
++#include <vector>
+ 
+ namespace ps2_stubs
+ {
+@@ -1031,6 +1033,46 @@ void PS2Runtime::configureIoPathsFromElf(const std::string &elfPath)
+ 
+ namespace
+ {
++    // P1c steady-state diagnostics, gated on PS2X_DIAG_PERIOD_MS (unset =
++    // compiled in, nothing printed, callers pay only a counter increment).
++    uint64_t diagPeriodMs()
++    {
++        static const uint64_t period = [] {
++            if (const char *env = std::getenv("PS2X_DIAG_PERIOD_MS"))
++            {
++                if (env[0] != '\0')
++                {
++                    char *end = nullptr;
++                    const unsigned long long parsed = std::strtoull(env, &end, 10);
++                    if (end != env)
++                    {
++                        return static_cast<uint64_t>(parsed);
++                    }
++                }
++            }
++            return static_cast<uint64_t>(0);
++        }();
++        return period;
++    }
++
++    uint64_t diagNowMs()
++    {
++        return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
++                                         std::chrono::steady_clock::now().time_since_epoch())
++                                         .count());
++    }
++
++    struct CallDiagEntry
++    {
++        uint64_t count = 0;
++        uint32_t firstRa = 0;
++        uint32_t lastRa = 0;
++    };
++
++    std::unordered_map<uint32_t, CallDiagEntry> g_diagCallCounts;
++    uint64_t g_diagCallLastMs = 0;
++    uint64_t g_diagCallBlock = 0;
++
+     bool generatedFunctionTableSlot(uint32_t address, uint32_t &slot)
+     {
+         if ((address & 3u) != 0u || g_ps2RecompiledFunctionTableSlotCount == 0u)
+@@ -1049,6 +1091,44 @@ namespace
+     }
+ }
+ 
++// Flushes the pending call-target histogram when a period boundary has
++// passed. Called from the dispatchGuestBranch hook below and from the
++// scheduler tick so a quiet steady state still emits (possibly empty)
++// blocks.
++void diagCallsPeriodicFlush()
++{
++    const uint64_t period = diagPeriodMs();
++    if (period == 0u)
++    {
++        return;
++    }
++    const uint64_t now = diagNowMs();
++    if (g_diagCallLastMs == 0u)
++    {
++        g_diagCallLastMs = now;
++        return;
++    }
++    if (now - g_diagCallLastMs < period)
++    {
++        return;
++    }
++    g_diagCallLastMs = now;
++    std::vector<std::pair<uint32_t, CallDiagEntry>> sorted(g_diagCallCounts.begin(), g_diagCallCounts.end());
++    std::sort(sorted.begin(), sorted.end(),
++              [](const auto &a, const auto &b) { return a.second.count > b.second.count; });
++    std::cerr << "[diag:stubs] block=" << g_diagCallBlock++
++              << " distinct=" << sorted.size()
++              << " period_ms=" << period << std::endl;
++    for (size_t i = 0; i < sorted.size() && i < 30u; ++i)
++    {
++        std::cerr << "[diag:stub] target=0x" << std::hex << sorted[i].first << std::dec
++                  << " count=" << sorted[i].second.count
++                  << " firstRa=0x" << std::hex << sorted[i].second.firstRa
++                  << " lastRa=0x" << std::hex << sorted[i].second.lastRa << std::dec << std::endl;
++    }
++    g_diagCallCounts.clear();
++}
++
+ bool PS2Runtime::replaceFunction(uint32_t address, RecompiledFunction func)
+ {
+     uint32_t slot = 0u;
+@@ -1354,6 +1434,24 @@ bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
+         return false;
+     }
+ 
++    // P1c HLE stub/call histogram at the register_functions.cpp binding
++    // lookup (lookupFunction below resolves the guest call target to the
++    // registered host function). Counts per call target with first/last $ra.
++    static uint64_t s_diagCallTick = 0;
++    ++s_diagCallTick;
++    if (diagPeriodMs() != 0u)
++    {
++        const uint32_t callerRa = (ctx != nullptr) ? getRegU32(ctx, 31) : 0u;
++        CallDiagEntry &entry = g_diagCallCounts[targetPc];
++        if (entry.count == 0u)
++        {
++            entry.firstRa = callerRa;
++        }
++        entry.lastRa = callerRa;
++        ++entry.count;
++        diagCallsPeriodicFlush();
++    }
++
+     RecompiledFunction targetFn = lookupFunction(targetPc);
+     const uint32_t entryPc = ctx->pc;
+     targetFn(rdram, ctx, this);
+```
+
+Binary shas (`/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner`, sha256):
+
+| Binary | Content | Boots |
+|---|---|---|
+| `ea4b352b…97b52c` | First Diag commit only (superseded before any boot) | none |
+| `4ccb9c1e…79999` | + histogram flush fix | 1 |
+| `381008af…21b906` | + CD entry logs; runner refreshed with `sub_003E3588` split | 2 |
+| `b7fff2c5…289ee89` | runner refreshed with `sub_003E3968` split (no code change) | 3 |
+
+Boot-1 last three period blocks, verbatim (`boot-p1c-1.log` tail):
+
+```
+[diag:threads] block=15 threads=1 period_ms=5000
+[diag:thread] id=1 status=2 waitReason=2 waitId=6 pc=0x423de8 entry=0x100008 priority=100 scheduled=0
+[diag:syscalls] block=14 distinct=0 period_ms=5000
+[diag:stubs] block=14 distinct=0 period_ms=5000
+[diag:threads] block=16 threads=1 period_ms=5000
+[diag:thread] id=1 status=2 waitReason=2 waitId=6 pc=0x423de8 entry=0x100008 priority=100 scheduled=0
+[diag:syscalls] block=15 distinct=0 period_ms=5000
+[diag:stubs] block=15 distinct=0 period_ms=5000
+[diag:threads] block=17 threads=1 period_ms=5000
+[diag:thread] id=1 status=2 waitReason=2 waitId=6 pc=0x423de8 entry=0x100008 priority=100 scheduled=0
+[diag:syscalls] block=16 distinct=0 period_ms=5000
+[diag:stubs] block=16 distinct=0 period_ms=5000
+```
+
+Note: `[diag:threads]` block N pairs with `[diag:syscalls]`/`[diag:stubs]`
+block N-1 (flushers arm on the first scheduler tick, one period later).
+
+## P4-2. Loop table with quoted bodies
+
+### Thread table (boot 1, all 18 dumps)
+
+One thread in every dump: `id=1 status=2 (Waiting) waitReason=2
+(Semaphore) waitId=6 pc=0x423de8 entry=0x100008 priority=100`.
+`scheduled`: 1 in block 0 (initial scheduling), 0 in blocks 1–17.
+pc is `0x423de8` in all 18 dumps.
+
+### Syscall top 20 (boot 1, block 0, distinct=17)
+
+| id | count | first | last |
+|---|---|---|---|
+| 0x2f | 32 | 0x423c98 | 0x423c98 |
+| 0x44 | 12 | 0x423de8 | 0x423de8 |
+| 0x42 | 11 | 0x423dc8 | 0x423dc8 |
+| 0x74 | 8 | 0x42cbc8 | 0x42cbc8 |
+| 0x5b | 6 | 0x42cbb8 | 0x42cbb8 |
+| 0x40 | 6 | 0x423da8 | 0x423da8 |
+| 0x64 | 4 | 0x424028 | 0x424028 |
+| 0x3e | 3 | 0x423d88 | 0x423d88 |
+| 0x4a | 2 | 0x423e48 | 0x423e48 |
+| 0x4b | 2 | 0x423e58 | 0x423e58 |
+| 0x14 | 1 | 0x423ae8 | 0x423ae8 |
+| 0x10 | 1 | 0x423a88 | 0x423a88 |
+| 0xfc | 1 | 0x423b28 | 0x423b28 |
+| 0x5a | 1 | 0x42cb70 | 0x42cb70 |
+| 0x29 | 1 | 0x423c38 | 0x423c38 |
+| 0x3d | 1 | 0x100198 | 0x100198 |
+| 0x3c | 1 | 0x10017c | 0x10017c |
+
+Trampoline map for the syscall caller pcs: `0x423c98`→`sub_00423C90`
+(GetThreadId 0x2F), `0x423de8`→`sub_00423DE0` (WaitSema 0x44),
+`0x423dc8`→`sub_00423DC0` (SignalSema 0x42), `0x423da8`→`sub_00423DA0`
+(CreateSema 0x40), `0x423d88`→`sub_00423D80` (EndOfHeap 0x3E),
+`0x423b28`→`sub_00423B20` (SetAlarm 0xFC), `0x423dd8`→`sub_00423DD0`
+(iSignalSema -0x43; zero calls in boot 1), `0x423db8`→`sub_00423DB0`
+(DeleteSema 0x41; zero calls in boot 1). Each is a 3-instruction wrapper
+(`addiu $v1,$zero,imm`; `syscall 0`; `jr $ra`).
+
+### Stub top 30 (boot 1, block 0, distinct=251)
+
+| target | fn | count | firstRa | lastRa |
+|---|---|---|---|---|
+| 0x31bf60 | sub_0031BF60 | 640 | 0x392e2c | 0x392e2c |
+| 0x317618 | sub_00317618 | 583 | 0x317684 | 0x317684 |
+| 0x317670 | sub_00317670 | 583 | 0x284770 | 0x21c5ac |
+| 0x2cbcc8 | sub_002CBCC8 | 414 | 0x250784 | 0x24d2b4 |
+| 0x2ca258 | sub_002CA258 | 414 | 0x2cd2c0 | 0x2cd92c |
+| 0x416210 | sub_00416210 | 342 | 0x393958 | 0x21c5a0 |
+| 0x2cdce8 | sub_002CDCE8 | 202 | 0x25033c | 0x24d154 |
+| 0x416810 | sub_00416810 | 162 | 0x318308 | 0x4189ac |
+| 0x2cd8f8 | sub_002CD8F8 | 134 | 0x2502d8 | 0x24d194 |
+| 0x418958 | sub_00418958 | 133 | 0x41cae8 | 0x41cae8 |
+| 0x370b60 | sub_00370B60 | 64 | 0x3714cc | 0x3714cc |
+| 0x3714b8 | sub_003714B8 | 64 | 0x2f758c | 0x2f758c |
+| 0x2f7a68 | sub_002F7A68 | 64 | 0x370b90 | 0x370b90 |
+| 0x2cf908 | sub_002CF908 | 35 | 0x2cf8c0 | 0x2d03a0 |
+| 0x41605c | sub_0041605C | 35 | 0x41d71c | 0x41d71c |
+| 0x423c90 | sub_00423C90 | 32 | 0x3e5028 | 0x3e5774 |
+| 0x2ced20 | sub_002CED20 | 28 | 0x2d0320 | 0x2d0350 |
+| 0x2caa58 | sub_002CAA58 | 25 | 0x250254 | 0x24cf14 |
+| 0x2cd2a0 | sub_002CD2A0 | 18 | 0x250294 | 0x24cf44 |
+| 0x2cd350 | sub_002CD350 | 18 | 0x2502a8 | 0x24cf58 |
+| 0x41ca70 | sub_0041CA70 | 14 | 0x41b718 | 0x41b718 |
+| 0x31ed60 | sub_0031ED60 | 14 | 0x31f470 | 0x31f4c4 |
+| 0x417828 | sub_00417828 | 14 | 0x319680 | 0x319700 |
+| 0x41b658 | sub_0041B658 | 14 | 0x417894 | 0x417894 |
+| 0x423de0 | sub_00423DE0 | 12 | 0x418ce0 | 0x3e35fc |
+| 0x423dc0 | sub_00423DC0 | 11 | 0x418d3c | 0x3e57bc |
+| 0x31ffd8 | sub_0031FFD8 | 10 | 0x31e3d8 | 0x31e3d8 |
+| 0x3e6448 | sub_003E6448 | 10 | 0x2268cc | 0x3e6234 |
+| 0x31e2d8 | sub_0031E2D8 | 9 | 0x31eca0 | 0x31eca0 |
+| 0x31f2c8 | sub_0031F2C8 | 9 | 0x320068 | 0x320068 |
+
+Caller-ra enclosures (first→last): `0x392e2c`→`sub_00392DF0`;
+`0x317684`→`sub_00317670` (self-return); `0x284770`→`sub_00283E60`,
+`0x21c5ac`→`sub_002127E8`; `0x250784`/`0x24d2b4`→`sub_002501E8`/
+`sub_0024CEB0`; `0x2cd2c0`→`sub_002CD2A0`, `0x2cd92c`→`sub_002CD8F8`;
+`0x393958`→`sub_00393048`, `0x21c5a0`→`sub_002127E8`; the sema-cluster
+ras resolve in the semaphore table below.
+
+### Quoted bodies (≤40 lines each, MIPS in comments)
+
+Park site `sub_00423DE0` (WaitSema 0x44; thread pc `0x423de8` is the
+resume point after the syscall):
+
+```cpp
+// Function: sub_00423DE0
+// Address: 0x423de0 - 0x423df0
+void sub_00423DE0_0x423de0(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+#ifdef PS2_FUNCTION_LOG_TRACKER
+    PS_LOG_ENTRY("sub_00423DE0_0x423de0");
+#endif
+
+    switch (ctx->pc) {
+        case 0x423de8u: goto label_423de8;
+        default: break;
+    }
+
+    ctx->pc = 0x423de0u;
+
+    // 0x423de0: 0x24030044  addiu       $v1, $zero, 0x44
+    ctx->pc = 0x423de0u;
+    SET_GPR_S32(ctx, 3, (int32_t)ADD32(GPR_U32(ctx, 0), 68));
+    // 0x423de4: 0xc  syscall     0
+    ctx->pc = 0x423de4u;
+    ctx->pc = 0x423DE8u;
+runtime->handleSyscall(rdram, ctx, 0x0u);
+label_423de8:
+    // 0x423de8: 0x3e00008  jr          $ra
+    ctx->pc = 0x423DE8u;
+    {
+        const uint32_t jumpTarget = GPR_U32(ctx, 31);
+        ctx->pc = jumpTarget;
+        #if defined(PS2X_STRICT_RETURN_DIAGNOSTICS) && PS2X_STRICT_RETURN_DIAGNOSTICS
+        (void)runtime->dispatchGuestBranch(rdram, ctx, jumpTarget, 0x423DE8u, 0u, PS2Runtime::GuestBranchKind::Return, "JR $ra");
+        return;
+        #else
+        ctx->pc = jumpTarget;
+```
+
+`sub_00423DC0` (SignalSema 0x42), `sub_00423DA0` (CreateSema 0x40),
+`sub_00423C90` (GetThreadId 0x2F) are the identical 3-instruction shape
+with immediates `0x42`, `0x40`, `0x2F`.
+
+Wait chain in `sub_003E35B0` (CreateSema→SetAlarm→WaitSema→DeleteSema;
+parks at the `func_423DE0` call, ra `0x3e35fc`):
+
+```cpp
+    // 0x3e35ec: 0xc108ec8  jal         func_423B20
+    ctx->pc = 0x3E35ECu;
+    SET_GPR_U32(ctx, 31, 0x3E35F4u);
+    ctx->pc = 0x3E35F0u;
+    ctx->in_delay_slot = true;
+    ctx->branch_pc = 0x3E35ECu;
+    // 0x3e35f0: 0x220202d  daddu       $a0, $s1, $zero (Delay Slot)
+    SET_GPR_U64(ctx, 4, (uint64_t)GPR_U64(ctx, 17) + (uint64_t)GPR_U64(ctx, 0));
+    ctx->in_delay_slot = false;
+    ctx->pc = 0x423B20u;
+    if (!runtime->dispatchGuestBranch(rdram, ctx, 0x423B20u, 0x3E35ECu, 0x3E35F4u, PS2Runtime::GuestBranchKind::DirectCall, "JAL")) {
+        return;
+    }
+    ctx->pc = 0x3E35F4u;
+label_3e35f4:
+    // 0x3e35f4: 0xc108f78  jal         func_423DE0
+    ctx->pc = 0x3E35F4u;
+    SET_GPR_U32(ctx, 31, 0x3E35FCu);
+    ctx->pc = 0x3E35F8u;
+    ctx->in_delay_slot = true;
+    ctx->branch_pc = 0x3E35F4u;
+    // 0x3e35f8: 0x200202d  daddu       $a0, $s0, $zero (Delay Slot)
+    SET_GPR_U64(ctx, 4, (uint64_t)GPR_U64(ctx, 16) + (uint64_t)GPR_U64(ctx, 0));
+    ctx->in_delay_slot = false;
+    ctx->pc = 0x423DE0u;
+    if (!runtime->dispatchGuestBranch(rdram, ctx, 0x423DE0u, 0x3E35F4u, 0x3E35FCu, PS2Runtime::GuestBranchKind::DirectCall, "JAL")) {
+        return;
+    }
+    ctx->pc = 0x3E35FCu;
+label_3e35fc:
+    // 0x3e35fc: 0xc108f6c  jal         func_423DB0
+```
+
+Alarm callback entry `0x3E3588` in `sub_003E3538` (calls `func_423DD0`
+= iSignalSema with `$a0=$a2`):
+
+```cpp
+        #endif
+    }
+    ctx->pc = 0x3E3584u;
+    // 0x3e3584: 0x0  nop
+    ctx->pc = 0x3e3584u;
+    // NOP
+    // 0x3e3588: 0x27bdfff0  addiu       $sp, $sp, -0x10
+    ctx->pc = 0x3e3588u;
+    SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 4294967280));
+    // 0x3e358c: 0xffbf0000  sd          $ra, 0x0($sp)
+    ctx->pc = 0x3e358cu;
+    WRITE64(ADD32(GPR_U32(ctx, 29), 0), GPR_U64(ctx, 31));
+    // 0x3e3590: 0xc108f74  jal         func_423DD0
+    ctx->pc = 0x3E3590u;
+    SET_GPR_U32(ctx, 31, 0x3E3598u);
+    ctx->pc = 0x3E3594u;
+    ctx->in_delay_slot = true;
+    ctx->branch_pc = 0x3E3590u;
+    // 0x3e3594: 0xc0202d  daddu       $a0, $a2, $zero (Delay Slot)
+    SET_GPR_U64(ctx, 4, (uint64_t)GPR_U64(ctx, 6) + (uint64_t)GPR_U64(ctx, 0));
+    ctx->in_delay_slot = false;
+    ctx->pc = 0x423DD0u;
+    if (!runtime->dispatchGuestBranch(rdram, ctx, 0x423DD0u, 0x3E3590u, 0x3E3598u, PS2Runtime::GuestBranchKind::DirectCall, "JAL")) {
+        return;
+    }
+    ctx->pc = 0x3E3598u;
+label_3e3598:
+    // 0x3e3598: 0xf  sync
+    ctx->pc = 0x3e3598u;
+    // SYNC instruction - memory barrier
+```
+
+Comparator leaf at `0x3e3968` in `sub_003E3758` (frameless, `jr $ra`
+exits at `0x3e3990/0x3e3998/0x3e39a0`):
+
+```cpp
+        ctx->pc = jumpTarget;
+        return;
+        #endif
+    }
+    ctx->pc = 0x3E3968u;
+    // 0x3e3968: 0x9c830000  lwu         $v1, 0x0($a0)
+    ctx->pc = 0x3e3968u;
+    SET_GPR_U32(ctx, 3, READ32(ADD32(GPR_U32(ctx, 4), 0)));
+    // 0x3e396c: 0x9ca20000  lwu         $v0, 0x0($a1)
+    ctx->pc = 0x3e396cu;
+    SET_GPR_U32(ctx, 2, READ32(ADD32(GPR_U32(ctx, 5), 0)));
+    // 0x3e3970: 0x62182f  dsubu       $v1, $v1, $v0
+    ctx->pc = 0x3e3970u;
+    SET_GPR_U64(ctx, 3, GPR_U64(ctx, 3) - GPR_U64(ctx, 2));
+    // 0x3e3974: 0x460000a  bltz        $v1, . + 4 + (0xA << 2)
+    ctx->pc = 0x3E3974u;
+    {
+        const bool branch_taken_0x3e3974 = (GPR_S32(ctx, 3) < 0);
+        ctx->pc = 0x3E3978u;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x3E3974u;
+        // 0x3e3978: 0x2402ffff  addiu       $v0, $zero, -0x1 (Delay Slot)
+        SET_GPR_S32(ctx, 2, (int32_t)ADD32(GPR_U32(ctx, 0), 4294967295));
+        ctx->in_delay_slot = false;
+        if (branch_taken_0x3e3974) {
+            ctx->pc = 0x3E39A0u;
+            goto label_3e39a0;
+        }
+    }
+    ctx->pc = 0x3E397Cu;
+    // 0x3e397c: 0x1c600006  bgtz        $v1, . + 4 + (0x6 << 2)
+    ctx->pc = 0x3E397Cu;
+    {
+        const bool branch_taken_0x3e397c = (GPR_S32(ctx, 3) > 0);
+        ctx->pc = 0x3E3980u;
+```
+
+Top-5 startup callees (constructor phase, not the wait):
+
+`sub_0031BF60` (float compare/select):
+
+```cpp
+// Address: 0x31bf60 - 0x31c040
+void sub_0031BF60_0x31bf60(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+#ifdef PS2_FUNCTION_LOG_TRACKER
+    PS_LOG_ENTRY("sub_0031BF60_0x31bf60");
+#endif
+
+    ctx->pc = 0x31bf60u;
+
+    // 0x31bf60: 0x44800800  mtc1        $zero, $f1
+    ctx->pc = 0x31bf60u;
+    { uint32_t bits = GPR_U32(ctx, 0); std::memcpy(&ctx->f[1], &bits, sizeof(bits)); }
+    // 0x31bf64: 0xc780d158  lwc1        $f0, -0x2EA8($gp)
+    ctx->pc = 0x31bf64u;
+    { uint32_t bits = READ32(ADD32(GPR_U32(ctx, 28), 4294955352)); float f; std::memcpy(&f, &bits, sizeof(f)); ctx->f[0] = f; }
+    // 0x31bf68: 0x46016034  c.lt.s      $f12, $f1
+    ctx->pc = 0x31bf68u;
+    ctx->fcr31 = (FPU_C_OLT_S(ctx->f[12], ctx->f[1])) ? (ctx->fcr31 | 0x800000) : (ctx->fcr31 & ~0x800000);
+    // 0x31bf6c: 0x0  nop
+    ctx->pc = 0x31bf6cu;
+    // NOP
+    // 0x31bf70: 0x45000005  bc1f        . + 4 + (0x5 << 2)
+    ctx->pc = 0x31BF70u;
+    {
+        const bool branch_taken_0x31bf70 = (!(ctx->fcr31 & 0x800000));
+        ctx->pc = 0x31BF74u;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x31BF70u;
+        // 0x31bf74: 0x46006042  mul.s       $f1, $f12, $f0 (Delay Slot)
+        ctx->f[1] = FPU_MUL_S(ctx->f[12], ctx->f[0]);
+        ctx->in_delay_slot = false;
+        if (branch_taken_0x31bf70) {
+            ctx->pc = 0x31BF88u;
+            goto label_31bf88;
+        }
+    }
+    ctx->pc = 0x31BF78u;
+    // 0x31bf78: 0x3c013f00  lui         $at, 0x3F00
+    ctx->pc = 0x31bf78u;
+    SET_GPR_S32(ctx, 1, (int32_t)((uint32_t)16128 << 16));
+    // 0x31bf7c: 0x44810000  mtc1        $at, $f0
+```
+
+`sub_00317670` (calls `func_317618`, ra `0x317684`):
+
+```cpp
+// Function: sub_00317670
+// Address: 0x317670 - 0x317690
+void sub_00317670_0x317670(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+#ifdef PS2_FUNCTION_LOG_TRACKER
+    PS_LOG_ENTRY("sub_00317670_0x317670");
+#endif
+
+    switch (ctx->pc) {
+        case 0x317684u: goto label_317684;
+        default: break;
+    }
+
+    ctx->pc = 0x317670u;
+
+    // 0x317670: 0x27bdffe0  addiu       $sp, $sp, -0x20
+    ctx->pc = 0x317670u;
+    SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 4294967264));
+    // 0x317674: 0x80282d  daddu       $a1, $a0, $zero
+    ctx->pc = 0x317674u;
+    SET_GPR_U64(ctx, 5, (uint64_t)GPR_U64(ctx, 4) + (uint64_t)GPR_U64(ctx, 0));
+    // 0x317678: 0xffbf0010  sd          $ra, 0x10($sp)
+    ctx->pc = 0x317678u;
+    WRITE64(ADD32(GPR_U32(ctx, 29), 16), GPR_U64(ctx, 31));
+    // 0x31767c: 0xc0c5d86  jal         func_317618
+    ctx->pc = 0x31767Cu;
+    SET_GPR_U32(ctx, 31, 0x317684u);
+    ctx->pc = 0x317680u;
+    ctx->in_delay_slot = true;
+    ctx->branch_pc = 0x31767Cu;
+    // 0x317680: 0x3a0202d  daddu       $a0, $sp, $zero (Delay Slot)
+    SET_GPR_U64(ctx, 4, (uint64_t)GPR_U64(ctx, 29) + (uint64_t)GPR_U64(ctx, 0));
+    ctx->in_delay_slot = false;
+    ctx->pc = 0x317618u;
+    if (!runtime->dispatchGuestBranch(rdram, ctx, 0x317618u, 0x31767Cu, 0x317684u, PS2Runtime::GuestBranchKind::DirectCall, "JAL")) {
+        return;
+    }
+    ctx->pc = 0x317684u;
+label_317684:
+    // 0x317684: 0xdfbf0010  ld          $ra, 0x10($sp)
+    ctx->pc = 0x317684u;
+```
+
+`sub_00317618` (byte loop over `$a1`):
+
+```cpp
+// Address: 0x317618 - 0x317670
+void sub_00317618_0x317618(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+#ifdef PS2_FUNCTION_LOG_TRACKER
+    PS_LOG_ENTRY("sub_00317618_0x317618");
+#endif
+
+    switch (ctx->pc) {
+        case 0x317630u: goto label_317630;
+        default: break;
+    }
+
+    ctx->pc = 0x317618u;
+
+    // 0x317618: 0x80a20000  lb          $v0, 0x0($a1)
+    ctx->pc = 0x317618u;
+    SET_GPR_S32(ctx, 2, (int8_t)READ8(ADD32(GPR_U32(ctx, 5), 0)));
+    // 0x31761c: 0x182d  daddu       $v1, $zero, $zero
+    ctx->pc = 0x31761cu;
+    SET_GPR_U64(ctx, 3, (uint64_t)GPR_U64(ctx, 0) + (uint64_t)GPR_U64(ctx, 0));
+    // 0x317620: 0x10400010  beqz        $v0, . + 4 + (0x10 << 2)
+    ctx->pc = 0x317620u;
+    {
+        const bool branch_taken_0x317620 = (GPR_U64(ctx, 2) == GPR_U64(ctx, 0));
+        ctx->pc = 0x317624u;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x317620u;
+        // 0x317624: 0x90a60000  lbu         $a2, 0x0($a1) (Delay Slot)
+        SET_GPR_U32(ctx, 6, (uint8_t)READ8(ADD32(GPR_U32(ctx, 5), 0)));
+        ctx->in_delay_slot = false;
+        if (branch_taken_0x317620) {
+            ctx->pc = 0x317664u;
+            goto label_317664;
+        }
+    }
+    ctx->pc = 0x317628u;
+    // 0x317628: 0x3c07f000  lui         $a3, 0xF000
+    ctx->pc = 0x317628u;
+    SET_GPR_S32(ctx, 7, (int32_t)((uint32_t)61440 << 16));
+    // 0x31762c: 0x0  nop
+    ctx->pc = 0x31762cu;
+```
+
+`sub_002CBCC8` (store/compare chain):
+
+```cpp
+// Address: 0x2cbcc8 - 0x2cbd50
+void sub_002CBCC8_0x2cbcc8(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+#ifdef PS2_FUNCTION_LOG_TRACKER
+    PS_LOG_ENTRY("sub_002CBCC8_0x2cbcc8");
+#endif
+
+    switch (ctx->pc) {
+        case 0x2cbcf0u: goto label_2cbcf0;
+        default: break;
+    }
+
+    ctx->pc = 0x2cbcc8u;
+
+    // 0x2cbcc8: 0x4c10002  bgez        $a2, . + 4 + (0x2 << 2)
+    ctx->pc = 0x2CBCC8u;
+    {
+        const bool branch_taken_0x2cbcc8 = (GPR_S32(ctx, 6) >= 0);
+        ctx->pc = 0x2CBCCCu;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x2CBCC8u;
+        // 0x2cbccc: 0xaca40000  sw          $a0, 0x0($a1) (Delay Slot)
+        WRITE32(ADD32(GPR_U32(ctx, 5), 0), GPR_U32(ctx, 4));
+        ctx->in_delay_slot = false;
+        if (branch_taken_0x2cbcc8) {
+            ctx->pc = 0x2CBCD4u;
+            goto label_2cbcd4;
+        }
+    }
+    ctx->pc = 0x2CBCD0u;
+    // 0x2cbcd0: 0x8c860000  lw          $a2, 0x0($a0)
+    ctx->pc = 0x2cbcd0u;
+    SET_GPR_S32(ctx, 6, (int32_t)READ32(ADD32(GPR_U32(ctx, 4), 0)));
+label_2cbcd4:
+    // 0x2cbcd4: 0x8c880000  lw          $t0, 0x0($a0)
+    ctx->pc = 0x2cbcd4u;
+    SET_GPR_S32(ctx, 8, (int32_t)READ32(ADD32(GPR_U32(ctx, 4), 0)));
+    // 0x2cbcd8: 0x2489000c  addiu       $t1, $a0, 0xC
+    ctx->pc = 0x2cbcd8u;
+    SET_GPR_S32(ctx, 9, (int32_t)ADD32(GPR_U32(ctx, 4), 12));
+    // 0x2cbcdc: 0xc8102a  slt         $v0, $a2, $t0
+```
+
+`sub_002CA258` (struct init, `$v0=0x486F28`):
+
+```cpp
+// Function: sub_002CA258
+// Address: 0x2ca258 - 0x2ca280
+void sub_002CA258_0x2ca258(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+#ifdef PS2_FUNCTION_LOG_TRACKER
+    PS_LOG_ENTRY("sub_002CA258_0x2ca258");
+#endif
+
+    ctx->pc = 0x2ca258u;
+
+    // 0x2ca258: 0x3c020048  lui         $v0, 0x48
+    ctx->pc = 0x2ca258u;
+    SET_GPR_S32(ctx, 2, (int32_t)((uint32_t)72 << 16));
+    // 0x2ca25c: 0x24030001  addiu       $v1, $zero, 0x1
+    ctx->pc = 0x2ca25cu;
+    SET_GPR_S32(ctx, 3, (int32_t)ADD32(GPR_U32(ctx, 0), 1));
+    // 0x2ca260: 0x24426f28  addiu       $v0, $v0, 0x6F28
+    ctx->pc = 0x2ca260u;
+    SET_GPR_S32(ctx, 2, (int32_t)ADD32(GPR_U32(ctx, 2), 28456));
+    // 0x2ca264: 0xac830004  sw          $v1, 0x4($a0)
+    ctx->pc = 0x2ca264u;
+    WRITE32(ADD32(GPR_U32(ctx, 4), 4), GPR_U32(ctx, 3));
+    // 0x2ca268: 0xac820010  sw          $v0, 0x10($a0)
+    ctx->pc = 0x2ca268u;
+    WRITE32(ADD32(GPR_U32(ctx, 4), 16), GPR_U32(ctx, 2));
+    // 0x2ca26c: 0x80102d  daddu       $v0, $a0, $zero
+    ctx->pc = 0x2ca26cu;
+    SET_GPR_U64(ctx, 2, (uint64_t)GPR_U64(ctx, 4) + (uint64_t)GPR_U64(ctx, 0));
+    // 0x2ca270: 0xac850008  sw          $a1, 0x8($a0)
+    ctx->pc = 0x2ca270u;
+    WRITE32(ADD32(GPR_U32(ctx, 4), 8), GPR_U32(ctx, 5));
+    // 0x2ca274: 0x3e00008  jr          $ra
+    ctx->pc = 0x2CA274u;
+    {
+        const uint32_t jumpTarget = GPR_U32(ctx, 31);
+        ctx->pc = 0x2CA278u;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x2CA274u;
+        // 0x2ca278: 0xac80000c  sw          $zero, 0xC($a0) (Delay Slot)
+        WRITE32(ADD32(GPR_U32(ctx, 4), 12), GPR_U32(ctx, 0));
+        ctx->in_delay_slot = false;
+```
+
+Waited object: kernel semaphore id 6 (`EeScheduler` semaphore object;
+`waitReason=2` Semaphore, `waitId=6`). Writers: `SignalSema` (0x42) and
+`iSignalSema` (-0x43). Boot-1 steady state: zero syscalls after block 0,
+so nothing writes it after startup; the 12th `WaitSema` (from `0x3e35fc`)
+has no matching signal (11 `SignalSema`, 0 `iSignalSema` in boot 1).
+
+### INTC registration (single AddIntcHandler + single EnableIntc)
+
+Runtime dispatch sites (`EeScheduler.cpp`): cause 2 on `VBlankStart`
+(line 2046), cause 3 on `VBlankEnd` (line 2052), causes 9+timer on EE
+timer interrupts (line 1896), `dispatchIrq` at line 1403. The `Dmac`
+event case performs no dispatch.
+
+| Static JAL site | $a0 (cause) | $a1 (handler) |
+|---|---|---|
+| `0x361FD0` (`sub_00361F98`) | `$s0` (saved reg) | `$s2` (saved reg) |
+| `0x3C2170` (`sub_003C1B80`) | `2` | `0x3C1980` |
+| `0x3E4C50` (`sub_003E4AF0`) | `0xA` (10) | `0x3E4DB8` |
+| `0x40C1C4` (`sub_0040C028`) | `3` | `0x40CF88` |
+| EnableIntc at `0x424918` (`sub_004248E8`) | `$s1` = incoming `$a0` of `sub_004248E8` | — |
+
+The dynamic ra for the single `AddIntcHandler`/`EnableIntc` calls fell
+below the top-30 stub print cutoff (count 1 each), so the firing site is
+one of the rows above (not distinguished in this log).
+
+### Semaphore order and id flow
+
+| Fact | Value |
+|---|---|
+| `CreateSema` calls (boot 1) | 6, all via `0x423da8` (`sub_00423DA0`); dynamic ras below top-30 cutoff |
+| Certain create | `sub_003E35B0`: stack struct (`+4=1`, `+8=0`, `+0x14=0`), `$a0=$sp`; id returned in `$v0`, stored to `$s0` |
+| `WaitSema` calls (boot 1) | 12 via `0x423de0`; firstRa `0x418ce0` (`sub_00418CA8`, `$a0` = `lw 0x5248($v0)`), lastRa `0x3e35fc` (`sub_003E35B0`, `$a0=$s0`) |
+| `SignalSema` calls (boot 1) | 11 via `0x423dc0`; firstRa `0x418d3c` (`sub_00418D08`, `$a0` = `lw 0x5248($v0)`), lastRa `0x3e57bc` (`sub_003E5760`, `$a0` = `lw 0xC($s0)`) |
+| `iSignalSema` calls (boot 1) | 0 |
+| Parked id | 6 = last of the six created ids; waited by the 12th `WaitSema` |
+| Static `CreateSema` JAL sites | `sub_00319930`, `sub_0031A6B8`, `sub_00375A08`, `sub_003C1B80`, `sub_003C3300`, `sub_003E35B0`, `sub_003E4040`, `sub_003E5698`, `sub_003F5000`, `sub_00400C00`, `sub_0040B400`, `sub_0040C028` (≥12 static, 6 fired) |
+| Signaller in boots 2–3 | Alarm callback `0x3E3588` via `func_423DD0` (iSignalSema): `target=0x423dd0` count=20, firstRa=lastRa=`0x3e3598` |
+
+### CD registration and reads
+
+| Fact | Value |
+|---|---|
+| TOML CD stubs | `sceCdCallback@0x4008A0`, `sceCdInitEeCB@0x400A78`, `sceCdRead@0x401DF8`, `sceCdSync@0x4013E8`, among others |
+| Boot 1 `[cd:callback]` lines | 0 queued, 0 started |
+| Boot 1 `sceCdCallback`/`sceCdInitEeCB`/`sceCdRead` invocations | Not determinable from the top-30 histogram (below cutoff or zero); entry logs added for boots 2–3 |
+| Boots 2–3 `[diag:cd]` | `sceCdInitEeCB` 1x (`stack=0x51a480 size=0x800 ret=0x3e442c`); `sceCdRead` 20x (`buf=0x519c80 ret=0x3e3694`; lbn `0x10`,`0x105`–`0x117`,`0x108`); `sceCdCallback` 0x |
+
+## P4-3. Fixes + ladders per boot
+
+Map splits do not count against the three completion fixes (orchestrator
+note); both fixes below are CSV map splits in the P3-4 class, changing no
+tracked repo file, hence no `Pad:`/`MC:`/`CD:`/`SIF:` commit exists for
+them. No HLE stub completion was implemented: the waited semaphore is
+written by the guest alarm callback (iSignalSema), not by an HLE stub.
+
+### Fix 1 — alarm-callback split (`sub_003E3588`)
+
+| Item | Value |
+|---|---|
+| Cause | `SetAlarm` (`Sync.cpp` via `EeScheduler::setAlarm`, `EeScheduler.cpp:1208`) rejects handler `0x3E3588`: no `register_functions.cpp` slot (0 hits), so it returns `KE_ERROR`, no alarm is queued, and the 12th `WaitSema` (sema 6, from `0x3e35fc`) parks forever |
+| Evidence | ELF word at `0x3E3588` = `0x27bdfff0` (`addiu $sp,$sp,-0x10`, prologue); callback body calls `func_423DD0` (iSignalSema) with `$a0=$a2` |
+| CSV edit | `sub_003E3538,0x3e3538,0x3e35b0,0x78` → `sub_003E3538,0x3e3538,0x3e3588,0x50` + `sub_003E3588,0x3e3588,0x3e35b0,0x28` (row 7210; 8244→8245 data rows) |
+| Recompile | `recomp-p1c-alarm.log`: discovered 8244 (one subsumed), recompiled 8068, stubs 176, skipped 0, decode failures 0, unhandled 0; entrypoints 391,299; warnings 3,596; fallbacks 724,860; `ret0@0x42c1f0` intact |
+| Binary | `381008af…21b906` (runner refreshed, sidecars purged) |
+| Boot | `boot-p1c-2.log`, 3 min, `PS2X_DIAG_PERIOD_MS=5000` |
+
+Boot-2 ladder (new rung vs boot 1 in bold):
+
+| Rung | Boot 2 |
+|---|---|
+| Process start / ELF load / exec start | Same as boot 8 |
+| **First new syscall ids** | **0x20 CreateThread, 0x22 StartThread, 0x41 DeleteSema, 0xffffffbd iSignalSema** (block 0 distinct 17→21) |
+| **WaitSema balance** | **32 = SignalSema 12 + iSignalSema 20** (park cleared) |
+| **Second thread** | **id 2, entry `0x3e3be0` (in `sub_003E3B00`), priority 12** |
+| **First CD reads** | **20x `sceCdRead` (`buf=0x519c80 ret=0x3e3694`) + 1x `sceCdInitEeCB`** |
+| **First missing-target** | **IndirectCall JALR `0x4190b8`→`0x3e3968` (once; skipped, policy 1)** |
+| First VIF MPG/MSCAL | None |
+| First GIF kick | None |
+| First presented frame | None (host window blank) |
+| Crash | None |
+| End state | Threads 1+2 Dormant (status 5, pc 0); quiet after block 0 |
+
+Boot-1 → boot-2 delta: the only repo change between the boots is CD.cpp
+entry logs (diagnostic-only); the behavioral change is the CSV split row
+for `0x3E3588` plus recompile and runner refresh (untracked outputs). The guest site that signalled the semaphore is the alarm callback at
+`0x3E3588`: all 20 `iSignalSema` calls come from ra `0x3e3598` (the JAL
+at `0x3e3590` inside the callback). `sceCdCallback` was never invoked by
+the guest (0 `[diag:cd]` lines), so Fix D queued nothing in any boot.
+
+### Fix 2 — comparator-callback split (`sub_003E3968`)
+
+| Item | Value |
+|---|---|
+| Cause | Boot-2 missing-target: JALR at `0x4190b8` (`sub_00418EF8`, target passed in `$a3`) to `0x3e3968`; no table slot (0 hits); skipped call stalls the CD state machine |
+| Evidence | `0x3e3968` follows a `jr $ra` (0x3e3960) and starts a frameless compare leaf (`lwu $v1,0($a0)` … `jr $ra` exits); next prologue at `0x3e39a8` |
+| CSV edit | `sub_003E3758,0x3e3758,0x3e39a8,0x250` → `sub_003E3758,0x3e3758,0x3e3968,0x210` + `sub_003E3968,0x3e3968,0x3e39a8,0x40` (8245→8246 data rows) |
+| Recompile | `recomp-p1c-cmp.log`: discovered 8245 (one subsumed), recompiled 8069, stubs 176, skipped 0, decode failures 0, unhandled 0; entrypoints 391,299; warnings 3,596; fallbacks 724,860 |
+| Binary | `b7fff2c5…289ee89` (runner refreshed, sidecars purged) |
+| Boot | `boot-p1c-3.log`, 3 min, `PS2X_DIAG_PERIOD_MS=5000` |
+
+Boot-3 ladder (new rung vs boot 2 in bold):
+
+| Rung | Boot 3 |
+|---|---|
+| **Missing-target lines** | **None (gap closed)** |
+| **Comparator calls** | **`target=0x3e3968` count=1135, ras `0x4190c0`→`0x41903c`** |
+| Stub distinct (block 0) | 275 (vs 274) |
+| Syscall ids | Same 21 as boot 2 (no new ids) |
+| CD lines | Same 21 `[diag:cd]` lines as boot 2 |
+| First VIF MPG/MSCAL | None |
+| First GIF kick | None |
+| First presented frame | None |
+| Crash | None |
+| End state | Threads 1+2 Dormant (status 5, pc 0); quiet after block 0 |
+
+Missing-target sweep over all three `boot-p1c-*.log` files: exactly one
+(`0x3e3968`, boot 2), fixed; boot 3 reports none, so no further splits
+were made. No third completion iteration was run: the end state has no
+Waiting thread (nothing for an HLE stub to complete).
+
+Threads went Dormant through return, not through a syscall: boot-2 and
+boot-3 block-0 id sets contain no `ExitThread` (0x04/0x23),
+`ExitDeleteThread` (0x24), `TerminateThread` (0x25), `DeleteThread`
+(0x21) or `ReferThreadStatus`-adjacent exits; both threads show `pc=0x0`
+with empty invocation stacks (`makeDormant` on `pc==0` in
+`EeScheduler::run()`).
+
+## P4-4. Binaries and commits
+
+| Commit | Files | Push |
+|---|---|---|
+| `25eaf77` Diag: steady-state stall diagnostics | `EeScheduler.cpp`, `CD.cpp`, `Dispatcher.cpp`, `ps2_runtime.cpp` (+313/-9) | `04905db..25eaf77` |
+| `3a1156b` Diag: flush histograms on scheduler tick | `EeScheduler.cpp`, `Dispatcher.cpp`, `ps2_runtime.cpp` (+94/-53) | `25eaf77..3a1156b` |
+| `dbf0080` Diag: CD entry logs | `CD.cpp` (+14) | `3a1156b..dbf0080` |
+| Map splits (2x) | `$W/P1/ssx3-functions.csv` only (outside the repo; 8244→8245→8246 rows); runner outputs refreshed locally, never added | no commit (no tracked file changed) |
+| This report | `local/research/P1/REPORT.md` (`[P1c]` prefix, same trailers) | after commit |
+
+All pushes to `fork ssx3`, verified via `git show --stat`.
+`register_functions.cpp` remains a local modification, never added.
+Trailers on every commit: `Co-Authored-By: Claude Fable 5.1
+<noreply@anthropic.com>`, `Claude-Session:
+https://claude.ai/code/session_01H9JEyNpHtANpAU2dB1YuC7`.
+
+## P4-5. Exact commands
+
+```
+printf 'P1c\n' > /tmp/ssx3-host-lease   (absent before; removed at end)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner   (x3: Diag, flush fix, CD logs)
+shasum -a 256 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner   (after each build)
+git add <the 4 files>; git commit -m "Diag: …" (trailers); git push fork ssx3   (x3)
+cd "$W/P1/run" && PS2X_CD_IMAGE="$W/SSX 3 (USA).iso" PS2X_DIAG_PERIOD_MS=5000 stdbuf -o0 -e0 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner "$W/P1/cd/SLUS_207.72" > boot-p1c-N.log 2>&1   (N=1: 90 s; N=2,3: 180 s; foreground, killed by timeout)
+python3 CSV split edits (2x); cp ssx3-functions.csv /tmp/ssx3-functions.csv.p1c-bak (before first split)
+cd "$W/P1" && ./bin/ps2_recomp ssx3.toml | tee recomp-p1c-alarm.log / recomp-p1c-cmp.log
+cp -X $W/P1/output/*.{cpp,h} $W/PS2Recomp/ps2xRuntime/src/runner/; sidecar purges
+log reads: grep/awk/sed/tail on closed logs only (never piped through head while running)
+ELF word reads: python3 struct reads at file offset 0x1000 + (va - 0x100000)
+```
+
+## P4-6. What I could not do
+
+- Boot-1 `sceCdCallback`/`sceCdInitEeCB`/`sceCdRead` counts: not in the
+  top-30 print (below cutoff or zero); answered for boots 2–3 by entry logs.
+- Dynamic ra for the single `AddIntcHandler`/`EnableIntc` calls: below the
+  top-30 cutoff; reported as static candidate sites instead.
+- Dynamic ras for the six boot-1 `CreateSema` calls: below the cutoff;
+  only the `sub_003E35B0` instance is exactly placed.
+- No `Pad:`/`MC:`/`CD:`/`SIF:` completion fix: the semaphore writer is the
+  guest alarm callback, not an HLE stub; nothing was implemented in
+  `Kernel/Stubs/` or `Syscalls/` beyond diagnostics.
+- No VIF MPG/MSCAL, GIF kick, presented frame, or crash in any P1c boot;
+  the post-fix park (two Dormant threads, no waiters) was not chased — no
+  waiter exists for an HLE stub to complete.
+- Time box: about 1 h 10 min of the 5 h box used.
+
