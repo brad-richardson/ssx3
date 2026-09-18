@@ -180,6 +180,18 @@ the build or commit that closed them.
       pairs, split only on prologue or after a `jr $ra`), a strict-return
       build to catch the return to 0, and a CD payload check. Ledger
       row added.
+      P1d read (09-18 19:10): sweep delivered in 50 min: 1,024 new
+      functions found only through data pointers, zero recompile
+      failures; the CD thread now runs and waits on semaphore 26. The
+      main thread still returns to pc 0 after 22 schedulings; the strict
+      build only reported a benign startup return in the bss-clear loop
+      (ra 0 from crt0) and the report path likely de-duplicates per
+      target, so the real return was silent. CD raw reads verified byte
+      correct. P1e launched (`local/muse/prompts/P1e.md`): receipt at
+      both makeDormant sites with the dispatch history, un-deduplicated
+      Return reports, name the returner and the exit condition, map
+      semaphore 26's owner, one fix if the runtime owns the tested value.
+      Ledger row added.
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
