@@ -44,6 +44,20 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **D6 gate read (09-18 03:10) — route decision:** at stock the
+      emu thread spends 3.2 ms in update and 7.9 ms in the render
+      callback per frame (p95 11.0, max 20.7). The F route (sim at
+      120 Hz on the emu thread) is dead on this SoC: render alone
+      fills 95% of an 8.33 ms budget before update. The 120 route is
+      host-side replay of the second frame (D2 capacity → S2 replay
+      context) plus the emu-thread wins that make the 60 Hz sim
+      comfortable: S3 (5.7%), codegen on the two hot chunks (14.5%
+      of the thread; entry-switch pruning + FP helper calls
+      `ppc_fcmp`/`f32_from_bits_slow`), LSE atomics (~1.2%),
+      determinism-off in shipping (7%). Profile buckets in the
+      ledger. M2b CANCELLED: Fix A (0.36% in D6) lands on the record
+      tests + profile basis once S3's commit sequence runs (same
+      patch file); D2 takes the M2 panel, gated behind M1d's runs.
 - [ ] **D5 gate read (09-18 02:05) → S3 launched:** the Odin storm
       is 100% FP-unavailable, 5.7% of race emu CPU uncapped (3.8%
       capped), 59% from one thread pair. S3 (Opus spike): HLE the SDK
@@ -93,10 +107,10 @@ the build or commit that closed them.
       times the desktop's, unattributed. Next: M4 (lse rebuild + trial
       relink for the control probe) on the device now, D5 (exception
       attribution on the Odin) queued behind it.
-- [ ] M2 status (09-17 21:30): Fix A (rounding-mode sync guard)
-      implemented in the platform patch + record tests, NOT landed:
-      A/B deferred to M2b on a quiet host (recipe in
-      `local/research/M2/REPORT.md`). Fix B stopped after measurement
+- [ ] M2 status (09-18 03:10): Fix A (rounding-mode sync guard)
+      implemented in the platform patch + record tests; A/B waived
+      (0.36% in the D6 profile, semantically identical guard, host
+      contention) — lands with S3's commit sequence as `[M2]`. Fix B stopped after measurement
       (above). Fix C (fallback-JIT `InvalidateICache` on yield)
       propose-only; M2b counts calls/s.
 - [ ] Codegen entry-switch pruning, one-chunk spike (September 17,
