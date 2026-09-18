@@ -333,6 +333,17 @@ the build or commit that closed them.
       fix is one PIN entry on the panel, then D4 relaunches. Wireless adb
       re-enabled after the reboot (`local/odin-usb-serial` written so
       `tools/odin_wireless.sh enable` works again).
+      D4 Part 2 read (09-18 19:40): delivered in 1 h 35 min, nine of
+      them bootstrap attempts (thread names with spaces, pinning must
+      go through run-as). Parity onscreen vs headless recorded (1.134×
+      vs 1.273× race pace, HWC overlay, 120 Hz panel). Display proof
+      failed on method, not on the game: EGL frame timestamps return
+      nothing on Adreno, so presents could not be counted; the 120 Hz
+      request itself lands in SurfaceFlinger. D4c launched
+      (`local/muse/prompts/D4c.md`): SurfaceFlinger timestats per layer
+      (totalFrames + present-to-present histogram, verified on the
+      device) sampled once a second across the same three arms. Ledger
+      row added.
 - [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
       floor problem:** on the device the heaviest track costs only ~11%
       more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
