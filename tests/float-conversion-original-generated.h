@@ -1,4 +1,3 @@
-// DolRecomp-generated (GPL-3 tool output) kept as a test oracle; contains no game code.
 // DolRecomp output
 // cpu: gekko
 
