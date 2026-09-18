@@ -1,261 +1,114 @@
-# SSX 3 course-port investigation
+# SSX 3 preservation and performance research
 
-The first donor course is **Garibaldi from SSX Tricky**. The intended experience
-is standalone Tricky courses with SSX 3's handling. The working prototype uses
-the PS2 games; a GameCube AOT runtime now provides the native-port foundation.
+GameCube static recompilation of SSX 3 on a Dolphin-derived runtime, 120 Hz
+display work, the PS2 route, and the ps2xGS capture/replay harness.
 
-The [GameCube feasibility audit](docs/gamecube-feasibility.md) compares the newly
-supplied discs, verifies reusable Garibaldi terrain/path data, and records an
-SSX 3 code-generation probe. The [native prototype](native/README.md) now builds
-and runs stock GameCube SSX 3's Snow Jam on the Mac with Metal graphics and CPU
-JIT fallback disabled. Build **gc-gari-013**, copied to the iPhone with a matching
-readback hash, adds a shared [terrain material conversion](docs/gamecube-materials.md)
-that fixes the 1×/2× lighting mismatch behind clipped white snow. It retains
-the texture-ID, occlusion-wall and terrain-bounds repairs from build 012.
-The [original/before/after comparison](docs/garibaldi-visual-comparison.md)
-shows restored snow detail. Donor fog/backdrop/scenery, frame-by-frame jump
-visibility, clean route/finish acceptance and save/reload remain.
-A second donor course now rides too: SSX Tricky's **Aloha Ice Jam**, converted
-into the ASS1 slopestyle slot with terrain, scenery, rails and static collision
-in one archive (`gc-aloha-007`), selected at boot by a
-[course-redirect manifest](docs/course-selection.md) that patches an event row in
-guest RAM and changes no byte of `main.dol`. One run kept stock `bam.big` and the
-course's own `alo.big` resident at the same time, which is the data model an
-in-game course picker needs. Its imported static collision is live in the engine: under deterministic movie
-playback the same archive without collision rides the identical line for twenty
-seconds and then parts for good, and the engine's own narrow phase returns
-contacts against the imported obstacle. Scoring, a finish, gates and the donor's
-art remain ([Aloha notes](docs/aloha-conversion.md)).
-The [iOS development app](native/ios/README.md) builds with a statically linked
-game module, Metal graphics, and touch controls for menu navigation and riding.
-Earlier physical-device smoke runs reach about 60 FPS; sustained performance
-acceptance remains deferred. The [architecture review](docs/architecture-review.md)
-prioritizes validated course compilation and repeatable gameplay checks.
+The GameCube path recompiles the stock GXBE69 game ahead of time and runs it
+natively on macOS and iOS (Metal graphics, CPU JIT fallback disabled). The
+120 Hz work covers in-engine doubled simulation (route F), host-side frame
+replay, and native pose smoothing. The PS2 route re-examines SSX 3
+(SLUS-20772) under PS2Recomp on the Mac, with `ps2xGS` as the standalone
+Graphics Synthesizer capture/replay harness feeding a GPU-backend loop.
 
-This repository contains inspection, world-rebuild and emulator-driving tools.
-A Garibaldi terrain section has been imported and ridden in the Green Station
-hub. Growable archives and executable menu renames also work in PCSX2. The
-earlier PS2 experiment replaces Snow Jam's entire terrain set with Garibaldi,
-keeps its fallback snow material visible, and rides the complete main route
-with working resets. Old prop collision and gameplay scripts are disabled.
-A finished Garibaldi race remains in progress.
+## Status
 
-## Current results
+Current measured numbers live in `docs/numbers-ledger.md`; the working plan is `docs/todo.md`.
 
-- Both supplied PS2 disc inventories parsed and independently matched `bsdtar`.
-- SSX 3's executable matches the decompilation project's supported NTSC-U version.
-- SSX 3's complete world archive decodes: 159 groups, 30,644 terrain patches.
-- Garibaldi's terrain decodes: 3,885 patches; an untextured OBJ preview is staged.
-- Staged archives are byte-identical to independent extraction from the ISOs.
-- Recompressed one terrain-containing SSB block without changing decoded data.
-- Built a second version with a 100-game-unit bump in one A-hub terrain patch.
-- Both complete test ISOs pass readback hashes; all bytes outside the selected
-  32 KiB block and every ISO directory entry are unchanged.
-- Original, control, and bump images cold-boot and reach gameplay in an isolated
-  PCSX2 profile on the share. Control and bump load the target patch at Green
-  Station; their in-memory coefficients differ by exactly the four planned floats.
-- A second bump (75 units, `patch_A_hub_1024`) lies on the Green Station free-ride
-  line. Riding through it, the rider sits up to 73 units above the original surface,
-  matching the edited surface within 4 units; on the control the rider stays within
-  3 units of the original. A visible crest appears at the same spot.
-- Live PCSX2 memory reads (PINE) and a position-feedback autopilot drive these tests;
-  the rider position lives at EE offset `0x5409c0` in this game version.
+- GameCube native runtime: boots, menus and races on macOS/iOS.
+- 120 Hz: host replay measured at ~0.7–0.9 ms per replayed frame on the Odin 3.
+- PS2 route: recompiled boot climbing the SDK/IOP ladder, with `ps2xGS` as the GS harness.
 
-See [the investigation log](docs/investigation.md) for evidence, format findings,
-limitations, upstream provenance, and the next implementation steps.
-See [the rebuild experiment](docs/rebuild-experiment.md) for test image paths,
-the exact edit, validation results, and emulator test instructions.
-See [the full-course experiment](docs/full-course-experiment.md) for the resumed
-Snow Jam replacement, its placement, reproducible commands and remaining limits.
-The [runtime comparison](docs/runtime-validation.json) records state hashes,
-memory offsets, and the four verified coefficient changes.
+On the GameCube side, stock SSX 3 boots through menus and runs Snow Jam on
+the Mac with Metal rendering and CPU JIT fallback disabled; donor courses
+ride: Garibaldi (build gc-gari-013 lineage) and Aloha Ice Jam in the ASS1
+slopestyle slot (gc-aloha-007) via a boot-time course-redirect manifest that
+changes no byte of `main.dol`. See `docs/aloha-conversion.md`,
+`docs/course-selection.md`, `native/README.md`.
 
-## Try it yourself
-
-For the **iPhone app**, cold-launch SSX and choose Single Event → Snow Jam Race.
-The slot currently loads **gc-gari-013**; the frontend name still needs changing.
-Its world archive and build report are in `local/builds/gc-gari-013/`.
-
-The latest **PS2** prototype is **run-gari-010**, copied and hash-verified at
-`/Volumes/share/brad/games/ssx3-workbench/builds/run-gari-010/`.
-On the Mac, double-click its `launch.command` to boot with the isolated shared
-test-002 profile. Choose Conquer the Mountain, the saved Mac character, then
-Transport → Peak 1 → Freeride → Garibaldi. This build restores Garibaldi's
-original start and opening right turn, which build 009's approach bypassed.
-The main descent and five reset checks pass with no logged TLB memory faults.
-The fallback snow texture/lightmap still has
-repeating bands; original Garibaldi art and race setup remain unfinished.
-
-For the **Odin 3**, copy `iso/SSX3-relocated.iso` from that build to the handheld
-and open it in your Android PS2 emulator (likely NetherSX2). Cold-boot the ISO;
-do not resume an older save state. See the [Odin test guide](docs/odin-testing.md),
-also included as `ODIN-TESTING.md` in the shared build. The user has confirmed
-that build 009 loads and rides on Odin 3 and recognizes the layout. The missing
-textures and scenery make it harder to read. Build 010 still needs handheld
-feedback; the measured runtime evidence is from Mac PCSX2 2.8.2.
-
-The launcher at `local/builds/run-gari-010/` uses
-`local/emulator/course-cleanup/profile` and a symlink to the shared ISO, so the
-share must be mounted. Local test ISO copies and disposable caches were removed
-to recover disk space; build archives, recipes, and runtime evidence remain.
-Older shared builds are retained separately, with build 009's opening-coverage
-correction in its notes.
-
-For the earlier hub experiments listed below, cold-boot an image in PCSX2
-(2.x), choose Conquer the Mountain with the Mac
-save, pause, Transport → Peak 1 → Freeride → Green Station, and ride the main
-line down the hub. The edited patch (`patch_A_hub_1024`) is about 20 seconds
-after the spawn, just before the Race/Slope Style banner tent.
-
-| Image | What to look for |
-| --- | --- |
-| `builds/bump-002/SSX3-bump.iso` | a rounded 75-unit crest on the trail that the board rides over |
-| `builds/grown-001/iso/SSX3-relocated.iso` | a raised strip of five copied patches; the rider rides on it |
-| `builds/hdr-003/SSX3-words.iso` | the same patch renders dark and untextured (foreign texture ids) |
-| `builds/hdr-006/SSX3-words.iso` | the board sinks into deep snow on that patch (material word) |
-| `builds/gari-003/iso/SSX3-relocated.iso` | **Garibaldi terrain in SSX 3**: big banked walls overlaid on the hub line right after the lodge |
-| `builds/scale-002/iso/SSX3-relocated.iso` | 1,439 Garibaldi patches in the hub (memory-budget test); huge walls, easy to get stuck in |
-| `builds/name-001/SSX3-named.iso` | **"Garibaldi" in the transport menu** (Peak 1 freeride list) and "Tricky Base Station"; same terrain as scale-002 |
-| `builds/control-005/iso/SSX3-relocated.iso` | should look exactly like the original: our block layout, our archive |
-| `builds/control-006/SSX3-relocated.iso` | should look exactly like the original: archive appended to a bigger image |
-
-The test-002 profile under `emulator/` has double-clickable launchers for each
-image; they use an isolated PCSX2 profile and copied memory cards, so your own
-settings and saves are untouched.
-
-## Storage
-
-Code, tests, and small reports live here. Large inputs and archived builds live
-on the network share; current test builds and evidence use ignored `local/`.
-
-The [share recovery setup](docs/share-recovery.md) reconnects the SMB share at
-login and every minute, with status and disable commands.
+## Repository map
 
 ```text
-/Volumes/share/brad/games/
-  ps2/
-    SSX 3 (USA).iso                # original, read-only input
-    SSX Tricky (USA).iso           # original, read-only input
-  ssx3-workbench/
-    source/ssx3/BAM.BIG            # exact archive extracted from SSX 3
-    source/tricky/GARI.BIG         # exact archive extracted from Tricky
-    extracted/garibaldi/
-      gari.pbd                    # decompressed terrain/scene container
-      garibaldi-terrain.obj        # terrain preview, original coordinates
-    builds/
-      control-001/                 # unchanged-content recompression control
-        BAM.BIG
-        SSX3-control.iso
-        experiment.json
-        image.json
-      bump-001/                    # one original SSX 3 patch has a centre bump
-        BAM.BIG
-        SSX3-bump.iso
-        experiment.json
-        image.json
-      bump-002/                    # bump on the Green Station line, ridden and rendered
-      run-gari-002/                # earlier full-course prototype
-      run-gari-009/                # terrain/resets fixed; original opening bypassed
-      run-gari-010/                # original opening, main descent and resets tested
-        iso/SSX3-relocated.iso
-        launch.command
-        ODIN-TESTING.md            # Odin 3 test steps and known limitations
-        evidence/                 # saved measurements, screenshots and test log
-        launch-logs/              # logs from subsequent launches
-        transfer.json             # verified copy hashes and original paths
-    emulator/test-002/             # isolated PCSX2 profile, launchers, evidence/
+README.md            this file
+docs/                plans, references, runbooks (index: docs/README.md)
+docs/todo.md         living working list (most recent first per section)
+docs/numbers-ledger.md  the one table for every quoted metric
+docs/plan-120fps-2026-09-17.md   120 fps plan of record
+docs/plan-gs-gpu-backend-2026-09-18.md  GPU GS backend plan (ps2xGS loop)
+native/              GameCube native prototype (README, patches, diagnostics)
+native/ios/          iOS development app
+tools/               inspection, conversion, harness and measurement scripts
+                     (index: tools/README.md; 120 scripts, stdlib-first)
+tests/               unit tests (run: python3 -m unittest discover -s tests -v)
+third_party/         vendored upstream trees (own licenses, see below)
+local/               ignored: game data, builds, reports, receipts (never committed)
 ```
 
-`local/` and `third_party/` are ignored by Git. No game assets, executables, ISOs,
-or generated meshes belong in commits. The upstream clone is only about 3.3 MiB.
+## Building what can be built without game data
 
-## Running the tools
-
-Python 3.10+ and the standard library suffice for the inspection and build tools.
-The independent verification tool also uses macOS's `bsdtar`. The emulator-driving
-tools need PCSX2 with PINE enabled, `swiftc` for the small input helpers
-(`sh tools/macos/build.sh`), and the screen-recording permission for window capture.
-No .NET runtime, game SDK, or additional BIOS is needed.
-
-Inventory the discs and relevant archive directories without copying whole ISOs:
+Prerequisites: Python 3.11+, Git, CMake, Ninja, Apple Clang on macOS
+(GameCube runtime); Xcode + signing identity + device (iOS app);
+Python 3.10+ stdlib + macOS `bsdtar` (inspection tools).
 
 ```sh
-python3 tools/inspect_disc.py '/Volumes/share/brad/games/ps2/SSX 3 (USA).iso' --archive DATA/WORLDS/BAM.BIG --output local/reports/ssx3-disc.json
-python3 tools/inspect_disc.py '/Volumes/share/brad/games/ps2/SSX Tricky (USA).iso' --archive DATA/MODELS/GARI.BIG --output local/reports/tricky-disc.json
+python3 -m unittest discover -s tests -v   # no game data needed
+python3 tools/inspect_disc.py --help       # read-only disc/archive inspection
+python3 tools/native_gamecube.py bootstrap # fetches pinned submodules only
 ```
 
-Reproduce reports from the staged archives (read-only):
+Anything that compiles the game module, stages a game directory, launches
+the runtime, or opens the iOS app requires user-supplied game data (below)
+and stays under ignored `local/` or the device. Fetched submodules land in
+ignored `third_party/`; generated guest code is never committed.
 
-```sh
-python3 tools/probe_worlds.py ssx3 '/Volumes/share/brad/games/ssx3-workbench/source/ssx3/BAM.BIG' --report local/reports/ssx3-world.json
-python3 tools/probe_worlds.py tricky '/Volumes/share/brad/games/ssx3-workbench/source/tricky/GARI.BIG' --report local/reports/garibaldi.json
-python3 tools/verify_inputs.py --staging '/Volumes/share/brad/games/ssx3-workbench'
-python3 -m unittest discover -s tests -v
-```
+## Configuration
 
-Rebuild and image tools (all refuse to overwrite existing outputs and verify their
-own output by readback):
+Author-machine data locations come from the environment (defaults live in
+`tools/paths.py`); the repository itself contains no game data. Every tool
+that reads discs, extracted trees, or staged builds takes an explicit path
+flag — the variables below apply only when a flag is omitted.
 
-```sh
-python3 tools/build_world_experiment.py SRC/BAM.BIG --height 75 --rid 213 --output BUILDS/bump-00N   # one-patch edit
-python3 tools/build_test_images.py 'PS2/SSX 3 (USA).iso' BUILDS/bump-00N                            # same-size archive into a new ISO
-python3 tools/recompress_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 8                # every block re-encoded in place
-python3 tools/relayout_stream.py SRC/BAM.BIG --output BUILDS/control-00N --jobs 8                  # new block boundaries, new SDB offsets
-python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso            # archive into PAD0.000 (same image size)
-python3 tools/relocate_archive.py 'PS2/SSX 3 (USA).iso' BUILDS/x/BAM.BIG --output BUILDS/x/iso --append   # archive appended, image grows
-python3 tools/grow_group.py SRC/BAM.BIG --group 2 --rids 152,199,29,213,270 --dz 60 --output BUILDS/grown-00N   # add patch copies to a group
-python3 tools/patch_executable.py IN.iso --output OUT.iso --rename 'ARA1=Garibaldi:Gari'   # rename a level-selector entry
-python3 tools/patch_locale.py IN.iso --find 'Snow Jam'                                    # inspect UTF-16 locale descriptions
-python3 tools/build_course_image.py IN.iso BUILDS/x/BAM.BIG --output BUILDS/x/iso          # world + Garibaldi name + description
-python3 tools/import_terrain.py SRC/BAM.BIG --line RIDE.jsonl --z-range=-24000,-19000 --lateral 3500 --output BUILDS/gari-00N  # Garibaldi section into hub A
-```
+- `SSX3_WORKBENCH`: root of the ssx3-workbench tree — `builds/` (staged
+  experiment builds), `source/` (e.g. `source/ssx3/BAM.BIG`), `extracted/`
+  (e.g. `extracted/garibaldi/gari.pbd`), `native/` (e.g. `native/GXBE69`,
+  the extracted GameCube tree), `emulator/` (PCSX2 profiles).
+- `SSX3_GAMES`: root of the local games library — `ps2/`
+  (e.g. `SSX 3 (USA).iso`), `gamecube/` (e.g. `SSX 3 (USA).rvz`).
 
-Emulator tools (macOS, PCSX2 with PINE enabled in the test profile):
+A tool that needs one of these paths and finds neither the flag nor the
+variable exits with an error naming the variable.
 
-```sh
-sh tools/macos/build.sh                                   # compiles keyd, press_keys, window_id into local/bin
-python3 tools/pine.py                                     # emulator status, serial, title
-SIGN=1 CAPTURE_AT=-89775,40015 sh tools/macos/green_station_ride.sh LAUNCHER OUT_DIR '-89775,40015;-93000,40400'
-python3 tools/patch_crossing.py OUT_DIR/ride.jsonl BUILDS/bump-002   # rider height versus original and edited surfaces
-python3 tools/ride_locations.py OUT_DIR/ride.jsonl                  # which locations a ride passed through
-```
+## Deliberately not included
 
-`inspect_disc.py --extract PATH --output FILE` extracts one file as stored,
-optionally from `--archive`; it refuses to overwrite an existing file. For a new
-Tricky preview, pass `probe_worlds.py tricky ... --assets NEW_DIRECTORY`.
-Preview output files must not already exist. Reports may be regenerated in place.
-`--hash-iso` optionally hashes a whole disc, which reads several GB over the share;
-full-disc hashing was not needed for this initial investigation.
-The image-building stage subsequently computed the SSX 3 full-disc SHA-256;
-it is recorded in each build's `image.json`.
+Game images, extracted assets and recompiled guest code are never in this
+repository: this clone contains no game images, no extracted game assets,
+and no recompiled guest code — no `.iso`/`.rvz`/`.gcm`,
+no `BAM.BIG`/`GARI.BIG` contents, no `main.dol`/`SLUS_207.72` copies, no
+generated `output/` trees. You must supply them yourself from your own
+retail copies:
 
-The OBJ has no textures, props, or validated collision. It samples each bicubic
-patch on a 5×5 vertex grid and retains original game axes and units. It is suitable
-for inspection in a mesh viewer, not direct insertion into SSX 3.
+- GameCube: SSX 3 (USA), Game ID GXBE69 rev 0 — verified by SHA-256 at
+  build and launch (`b92162d6…fa29ce` per `native/research.md`); SSX Tricky
+  (GameCube) for donor courses.
+- PS2: SSX 3 (USA) SLUS-207.72 and SSX Tricky (USA) for the PS2-route tools.
 
-## Upstream reference
+Extract with the documented commands (see `native/README.md`) into ignored
+`local/` paths; originals stay read-only.
 
-[GlitcherOG/SSX-Library](https://github.com/GlitcherOG/SSX-Library), GPL-3.0,
-is cloned under `third_party/SSX-Library` at commit
-`5c345e08dc521b0b1041734925cf0ece085e84c9`. Its binary layout and compression
-implementations informed these tools; several labels needed correction against
-the actual discs. The Python tools do not require or build the C# library.
+## Licensing
 
-To obtain the same reference in another checkout:
+MIT for this repository's own code and documentation (see `LICENSE`); the
+vendored trees under `third_party/` keep their own licenses (GPL-3 for
+ModernGekko, SSX-Library and sunpad-reference); the patches under
+`native/patches/` modify GPL-3 code and are GPL-3; any build that combines
+them is GPL-3; `tests/float-conversion-original-generated.h` is DolRecomp
+(GPL-3) tool output kept as a test oracle.
 
-```sh
-git clone https://github.com/GlitcherOG/SSX-Library.git third_party/SSX-Library
-git -C third_party/SSX-Library checkout 5c345e08dc521b0b1041734925cf0ece085e84c9
-```
+## Related repositories
 
-## Repository boundary
-
-This repository contains authored tools, app integration, tests, patch files
-for public runtime dependencies, and engineering notes. Retail game images,
-extracted assets, disassembly, generated/recompiled game source, saves, build
-products, signing credentials and device reports stay in ignored `local/`.
-Dependency checkouts stay in ignored `third_party/`. Do not force-add either
-directory. Reproducing a build requires supplying those inputs locally.
-
-The current 120 Hz investigation is documented in
-[the analysis notes](docs/research/120hz-analysis.md).
+- `brad-richardson/ps2xGS` — standalone GS capture/replay harness + census
+  (public, GPL-3).
+- `brad-richardson/PS2Recomp` branch `ssx3` — fork for SSX 3 fixes, on top
+  of upstream `14b1e5cb`; generated runner sources are never pushed.
+- Upstream `ran-j/PS2Recomp` — the PS2 static-recompilation project.
+- `ModernGekko/DolRecomp` — the GameCube static-recompilation upstream
+  behind the native runtime.
