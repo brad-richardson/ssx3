@@ -44,6 +44,11 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [x] **S3 landed (09-18 07:40):** FP-unavailable HLE committed
+      (1aa479c, default OFF, env-gated) with M2 fix A (f58470d); strict
+      determinism clean; Odin effect inside noise (ledger "FP-unavailable
+      HLE"). The storm lever is closed: the 5.7% was inherent FPU
+      context-switch work. The FP item below is DONE as a lever.
 - [ ] **Opus spikes cut off (09-18 05:55):** S3 (FP HLE; report §1–6
       written, no commit yet) and S1b (Android repin port done, build
       not started) were killed by the session usage limit; the three
