@@ -44,6 +44,15 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **D2b read (09-18 10:15) → S2 launched:** Odin EGL replay costs
+      2.0 ms wall / 2.0 ms CPU per frame for 26 replays, then dies in
+      `LoadIndexedXF` because indexed-array (CP/XF) state drifts across
+      re-executions; the named fix is restore-before-each-replay, which
+      is the first item of S2's ReplayContext spec. S2 (Opus, the only
+      Opus spike running): milestone 1 = per-replay restore in the D2
+      research header until `done` verifies on EGL and Vulkan (the
+      capacity gate); milestone 2 = the ReplayContext boundary from
+      `docs/research/120hz-host-replay.md` only if capacity ≤ 6 ms holds.
 - [ ] **D4 blocked (09-18 09:50):** since the Odin's USB drop the
       device refuses every APK launch from adb shell (`am start` error
       type 3 / result -92, resolve-activity finds nothing) for both the
