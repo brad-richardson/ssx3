@@ -37,6 +37,23 @@ the build or commit that closed them.
       context switch (keep MSR.FP set, save/restore FPRs in
       OSLoadContext) instead of the SDK's lazy trap; that needs the
       native-ABI FPR location, so it waits for the M1/S1 decision.
+      **D1b (09-17):** Odin in-race native_exc is 35,646/s (menus
+      ≈1.5k/s), 20× the desktop rate — if these are FP-unavailable
+      faults this is the single largest emu-thread lever measured so
+      far; D5 attributes them by vector and times raise→rfi on the
+      device before anything is built on the assumption.
+- [ ] **D1b gate read (09-17 22:50):** matrix complete at stock
+      clocks (ledger rows "Odin race pace, stock vs underclock",
+      "determinism tax", "Null video backend", "capped 1.0 budget",
+      "in-race native exception rate", "shader cache", "stock
+      thermals", "per-callback split BLOCKED"). What changed: the GPU
+      driver is out of the picture (Null = base); the emu thread at
+      stock needs ≈9.7 ms per guest frame capped, ≈12 ms uncapped
+      (the uncapped/capped gap is unexplained — det sync explains
+      7 points); the native exception rate in-race is 35.6k/s, twenty
+      times the desktop's, unattributed. Next: M4 (lse rebuild + trial
+      relink for the control probe) on the device now, D5 (exception
+      attribution on the Odin) queued behind it.
 - [ ] M2 status (09-17 21:30): Fix A (rounding-mode sync guard)
       implemented in the platform patch + record tests, NOT landed:
       A/B deferred to M2b on a quiet host (recipe in
@@ -64,13 +81,10 @@ the build or commit that closed them.
       were measured at the phantom wall (void). The 0.83× reality may
       reverse the descope. Needs Odin or desktop A/B with CPU-ms per
       guest frame as the metric.
-- [ ] Determinism on/off re-test (September 17, perf-review §1+§4,
-      HIGH): "0.0%" void; the determinism switch (not SyncGPU) is
-      what double-decodes every FIFO byte on movie runs. Re-test
-      quantifies the harness tax all movie numbers carry. Record
-      plainly: the FIFO fix (309f639) unblocked measurement, it did
-      not fix a shipping bug (gated on deterministic-GPU mode, a
-      no-op in normal rides).
+- [x] Determinism on/off re-test — DONE on the Odin by D1b (09-17):
+      det-none +7% race pace, replicated (ledger "Odin determinism
+      tax"); the harness tax every movie number carries. The FIFO fix
+      (309f639) unblocked measurement, it did not fix a shipping bug.
 - [ ] EFB re-A/B + EFB-copy cost (September 17, perf-review §1+§6):
       "EFB 2× full speed" void; re-A/B 1×/2×. Separate: CopyRender-
       TargetToTexture is 1.18% on the video thread, untouched by the
