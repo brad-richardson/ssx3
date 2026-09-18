@@ -293,6 +293,17 @@ the build or commit that closed them.
       shows the launcher entry. D4 asked for a device reboot; the user
       was pinged for authorization. Headless briefs (D2b, S1c, D8) are
       unaffected and run first.
+      Root cause (09-18 17:30, orchestrator): the 08:55 "USB drop" was a
+      device reboot (uptime 8 h 32 min at 17:27), and nobody entered the
+      PIN afterwards, so user 0 stayed in `RUNNING_LOCKED` (direct-boot,
+      keyguard up, `strongAuthRequired`). Activities that are not
+      direct-boot aware do not resolve in that state, which is the
+      "Error type 3 / No activity found" D4 saw; adb-shell binaries do
+      not care, so every headless brief kept working. The authorized
+      reboot (17:27, 26 s to boot) reproduced the same locked state; the
+      fix is one PIN entry on the panel, then D4 relaunches. Wireless adb
+      re-enabled after the reboot (`local/odin-usb-serial` written so
+      `tools/odin_wireless.sh enable` works again).
 - [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
       floor problem:** on the device the heaviest track costs only ~11%
       more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
