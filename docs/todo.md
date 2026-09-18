@@ -151,6 +151,18 @@ the build or commit that closed them.
       that queues a guest invocation after each read completes, the way
       `EeScheduler::dispatchIrq` runs interrupt handlers; both as patch
       files (upstream PR candidates).
+      P1b read (09-18 17:10): Part 3 delivered. The constructor table at
+      0x43ce38 (39 entries, all prologues) was split in one pass; boot 8
+      with all four fixes has zero missing targets and no CD error, then
+      goes silent: no syscall, VIF, GIF or frame for 10 minutes, no idle
+      dump (so some thread stays runnable), runner at ~10% CPU. Fix D
+      (CD callback HLE) has no receipt that it ran. Four commits pushed
+      on the fork branch `ssx3`. P1c launched (`local/muse/prompts/P1c.md`):
+      env-gated diagnostics (periodic thread dump, syscall and HLE-stub
+      histograms, CD-callback receipt), name the loop from the generated
+      source, at most three completion fixes with one boot each, Part 4.
+      G1 brief drafted (`local/muse/prompts/G1.md`), launches when a
+      frame presents. Ledger row added.
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
