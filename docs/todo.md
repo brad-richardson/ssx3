@@ -44,6 +44,20 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **D8 gate read (09-18 13:30) — clock-floor levers DEAD, floor
+      smaller than feared:** capped 1.0 on Crow's Nest the control opens
+      at ~0.90× for the first 50 s and runs at pace after; the spin pacer
+      and the ADPF hint (session creation proven) change nothing (0.895 /
+      0.895 / 0.911 opening, 0.978 / 0.978 / 0.989 full) and spin costs
+      +10 °C. cpu7 parks at the 3.28 GHz policy minimum in every arm
+      regardless. M3b's 0.84× opening did not reproduce today (0.90×);
+      treat the capped opening dip as ≤10% and condition-dependent, not
+      as a DVFS bug to fix. High-performance arm skipped; not worth the
+      user's hand now that the two software levers are null. Ledger row
+      added. Side finding: `dumpsys battery` status 3 while charge-limited
+      (`battery_charging_enforce_level=90`) — the "status 2/5" gate in
+      agent briefs is unreliable above ~90%; use level ≥ 20 plus a cable
+      (S2b told to accept status 3 at level ≥ 80).
 - [ ] **PS2Recomp track OPENED (09-18 12:45), all muse:** the user
       approved the evaluation track; the 09-12 spike's tree on bradflix
       was lost to a reboot, so its transcript was recovered into
