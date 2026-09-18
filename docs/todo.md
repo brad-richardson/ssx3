@@ -44,6 +44,19 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **P1 read (09-18 14:10) — PS2Recomp boots to the kernel-patch
+      scanner; P1b launched:** census and recompile reproduced exactly on
+      the Mac (arm64); runtime + 425/425 tests + port runner all build;
+      the game loads, starts, sets up its heap, then spins in the SDK's
+      kernel-patch scanner (`sub_0042C1F0`) polling syscall 0x83
+      `FindAddress`, which can never match without a kernel image. The
+      scan result (0x455230) only feeds a patch applier that is a no-op
+      at 0, so P1b stubs the scanner via the TOML (`ret0@0x0042c1f0`),
+      stages the disc tree (runner maps `cdrom0:` to the ELF directory),
+      and climbs the ladder with two allowed follow-ups (stub the
+      applier entry if dispatch fails; inventory IOP module requests).
+      GS renderer read (mine, later): 4 files, ~146 KB, CPU rasterizer
+      only, 2 TODOs. Ledger row added.
 - [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
       parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
       three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
