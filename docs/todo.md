@@ -66,8 +66,8 @@ the build or commit that closed them.
       a private LAN address, a handheld's USB serial and mount paths).
       A3: two docs archived, docs index adopted, README rewritten from its
       draft with my status text, MIT LICENSE + licensing section (vendored
-      GPL-3 trees, GPL-3 patches, GPL-3 combined builds). Visibility flips
-      only after C1's verification tables and my read.
+      GPL-3 trees, GPL-3 patches, GPL-3 combined builds). DONE 16:30: C1 verified (746 tests pass, scrub grep
+      empty), pushed, repository PUBLIC at github.com/brad-richardson/ssx3.
 - [ ] **ssx3 publication audit LAUNCHED (09-18 16:00), user decision:**
       go public with MIT for the project's own code (vendored trees keep
       GPL-3; patches to them and combined builds are GPL-3), so the
