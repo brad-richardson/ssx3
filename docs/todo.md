@@ -44,6 +44,14 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **D2 Odin read (09-18 08:20) → D2b:** replay on the Odin looks
+      an order of magnitude cheaper than the S2 gate needs (≈0.5 ms wall
+      per replay, unverified partial) but the bulk section kills the
+      process after the loop; D2 named the fixes (flush per row; save/
+      drain/restore the GPFifo gather-pipe accumulator with the BP/CP/XF/
+      TMEM + RAM state). D2b (muse, same panel) implements them, re-arms
+      EGL then Vulkan, behind D4 on the device. If `done` verifies, S2
+      launches on that number.
 - [x] **S3 landed (09-18 07:40):** FP-unavailable HLE committed
       (1aa479c, default OFF, env-gated) with M2 fix A (f58470d); strict
       determinism clean; Odin effect inside noise (ledger "FP-unavailable
