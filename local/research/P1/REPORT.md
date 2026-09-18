@@ -402,3 +402,29 @@ find $W/P1 -name "._*" -delete; rm /tmp/ssx3-host-lease
 - Boot fixes: none applied (no TOML stub remap, no IOP profile, no C++ change). The stall is a poll loop in `sub_0042C1F0` on `sub_0042C1A8` (`syscall 0`, `$v1=0x83`); characterizing the correct Deci2/IOP HLE response needs analysis beyond the remaining box.
 - Run 4 was terminated by the operator after ticks passed 9,960 (~5.5 min) with the process healthy; no exit code was captured.
 - `waits.log`: no waits occurred (no foreign lease during Part 2).
+
+## P2-13. Function-trace receipt and corrections (appended pre-commit)
+
+Correction to P2-7: `PS2_FUNCTION_LOG_TRACKER` is consumed by `PS_LOG_ENTRY`
+in the generated `sub_*.cpp` files. Run 4 (aggressive-log build) wrote
+`ps2_log.txt` (2.7 GB, 92,887,045 lines) to the process working directory,
+which was the repo root — outside the allowed work dirs. Both strays were
+moved into `$W/P1/`: `ps2_log.txt` → `$W/P1/ps2-function-trace.log`,
+`imgui.ini` (243 B, raylib/imgui window state) → `$W/P1/imgui.ini`. Repo root
+verified clean afterward. Streaming analysis of the trace:
+
+| Item | Value |
+|---|---|
+| Lines | 92,887,045 |
+| Distinct functions | 7 |
+| Boot call order (first appearance) | `sub_00100008` (entry) → `sub_0042C300` → `sub_0042C0D8` → `sub_00423DA0` (×2) → `sub_0042C1F0` → `sub_0042C2F0` (×2) → `sub_0042C1A8` (steady state) |
+| `sub_0042C1A8` enters / exits | 46,442,759 / 46,442,759 (balanced; the poll-loop body) |
+| `sub_0042C1F0` enters / exits | 757 / 756 (deficit 1 = the live frame at termination) |
+| Others | `sub_00100008`, `sub_0042C300`, `sub_0042C0D8`: 1/1; `sub_00423DA0`: 2/2; `sub_0042C2F0`: 2/2 |
+| No other function ever entered | No stub, syscall-handler, GS, or CD function appears in the trace |
+
+Ladder addendum: the steady state is 46.4M balanced executions of
+`sub_0042C1A8`, whose recompiled body unconditionally reaches
+`runtime->handleSyscall(rdram, ctx, 0x0u)` (`$v1=0x83`) on its return path;
+`handleSyscall` itself emits no log line, so dispatch stays unconfirmed in
+the log. "First syscall (in code)" remains Partial as stated in P2-7.
