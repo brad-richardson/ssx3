@@ -5,9 +5,13 @@
 # the charger. `status` prints what adb sees. The TCP serial (ip:5555) is
 # written to local/odin-serial and android-spike/ODIN_SERIAL for the
 # briefs; tools/android_trial.py falls back to the sole attached device
-# when the USB serial 622c49b1 is absent.
+# when the USB serial is absent.
+#
+# The USB serial is never hard-coded: ODIN_USB_SERIAL comes from the
+# environment, or from the ignored local/odin-usb-serial file when unset.
 set -e
-USB=622c49b1
+ODIN_USB_SERIAL="${ODIN_USB_SERIAL:-$(cat local/odin-usb-serial 2>/dev/null || true)}"
+USB="$ODIN_USB_SERIAL"
 PORT=5555
 SERIAL_FILE=local/odin-serial
 SSD_FILE="/Volumes/Extreme SSD/android-spike/ODIN_SERIAL"

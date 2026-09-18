@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Upscale a directory of dumped game textures with a spandrel model, alpha kept separate.
 
-Written for the RTX 4070 box (`ssh bytesize`), where torch and spandrel live in
+Written for the RTX 4070 box (`ssh <gpu-box>`), where torch and spandrel live in
 a venv; it runs anywhere those import. Input names are Dolphin's texture-dump
 convention (`tex1_<w>x<h>_<hash>[_<tlut hash>]_<format>.png`) and are preserved
 exactly, because that name is the key the hi-res loader matches.

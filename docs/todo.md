@@ -179,7 +179,7 @@ the build or commit that closed them.
       agent briefs is unreliable above ~90%; use level ≥ 20 plus a cable
       (S2b told to accept status 3 at level ≥ 80).
 - [ ] **PS2Recomp track OPENED (09-18 12:45), all muse:** the user
-      approved the evaluation track; the 09-12 spike's tree on bradflix
+      approved the evaluation track; the 09-12 spike's tree on the media server
       was lost to a reboot, so its transcript was recovered into
       `docs/research/ps2recomp-spike-2026-09-12/` (README = the spike's
       three verdict messages; commands-and-outputs; four decoder scripts).

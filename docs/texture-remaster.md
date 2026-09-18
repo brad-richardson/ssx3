@@ -126,7 +126,7 @@ spending GPU time.
 
 ## 4. Upscale
 
-On the GPU box — `ssh bytesize` over Tailscale reaches the RTX 4070. WSL2 Ubuntu
+On the GPU box — `ssh <gpu-box>` over Tailscale reaches the RTX 4070. WSL2 Ubuntu
 does the work. **The venv `/home/brad/upscale` has no `bin/activate`**; call
 `/home/brad/upscale/bin/python` directly. It has torch 2.6.0+cu124 and spandrel
 0.4.2, and CUDA sees the 4070.
@@ -137,12 +137,12 @@ stdin and run them, rather than inlining shell or Python.
 ```sh
 # Copy the tool and the working set over (scp to the Windows side, untar in WSL)
 tar czf /tmp/set.tgz -C local/research/remaster/source-rnb-30 .
-scp /tmp/set.tgz bytesize:set.tgz
-ssh bytesize 'cmd.exe /c wsl -d Ubuntu -e bash -lc "cat > /home/brad/ssx3-remaster/upscale_textures.py"' < tools/upscale_textures.py
-ssh bytesize 'cmd.exe /c wsl -d Ubuntu -e bash -lc "mkdir -p /home/brad/ssx3-remaster/source && tar xzf /mnt/c/Users/bradr/set.tgz -C /home/brad/ssx3-remaster/source"'
+scp /tmp/set.tgz <gpu-box>:set.tgz
+ssh <gpu-box> 'cmd.exe /c wsl -d Ubuntu -e bash -lc "cat > /home/brad/ssx3-remaster/upscale_textures.py"' < tools/upscale_textures.py
+ssh <gpu-box> 'cmd.exe /c wsl -d Ubuntu -e bash -lc "mkdir -p /home/brad/ssx3-remaster/source && tar xzf /mnt/c/Users/bradr/set.tgz -C /home/brad/ssx3-remaster/source"'
 
 # One pass per model, plus the no-model baseline
-ssh bytesize 'cmd.exe /c wsl -d Ubuntu -e bash -lc "cd /home/brad/ssx3-remaster && /home/brad/upscale/bin/python upscale_textures.py source out-esrgan --model /home/brad/upscale-models/RealESRGAN_x4plus.pth --receipt out-esrgan.json"'
+ssh <gpu-box> 'cmd.exe /c wsl -d Ubuntu -e bash -lc "cd /home/brad/ssx3-remaster && /home/brad/upscale/bin/python upscale_textures.py source out-esrgan --model /home/brad/upscale-models/RealESRGAN_x4plus.pth --receipt out-esrgan.json"'
 ```
 
 Models fetched to `/home/brad/upscale-models`:

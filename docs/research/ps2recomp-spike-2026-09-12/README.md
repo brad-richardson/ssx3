@@ -1,6 +1,6 @@
-# PS2Recomp feasibility spike (muse on bradflix, 2026-09-11/12) — recovered transcript
+# PS2Recomp feasibility spike (muse on the media server, 2026-09-11/12) — recovered transcript
 
-Source: muse sessions `2026/09/11/01a092b8…` and `2026/09/12/01a092fb…` on bradflix (copies on the SSD under `bradflix-ps2recomp/sessions/`). The working trees `/tmp/PS2Recomp` and `/tmp/ssx3vu` were lost when bradflix rebooted on 2026-09-18; `commands-and-outputs.md` is every shell command with its output, `scripts/` are the four scratch decoders the spike wrote. Upstream at the time: ran-j/PS2Recomp `main` (last commit 2026-08-18 `14b1e5cb`, still the head on 2026-09-18). No runtime was built (raylib needed X11); no boot was attempted. Verdicts below are the spike agent's words, not verified here.
+Source: muse sessions `2026/09/11/01a092b8…` and `2026/09/12/01a092fb…` on the media server (copies on the SSD under `the media server-ps2recomp/sessions/`). The working trees `/tmp/PS2Recomp` and `/tmp/ssx3vu` were lost when the media server rebooted on 2026-09-18; `commands-and-outputs.md` is every shell command with its output, `scripts/` are the four scratch decoders the spike wrote. Upstream at the time: ran-j/PS2Recomp `main` (last commit 2026-08-18 `14b1e5cb`, still the head on 2026-09-18). No runtime was built (raylib needed X11); no boot was attempted. Verdicts below are the spike agent's words, not verified here.
 
 ## 1. Feasibility answer (09-11)
 
