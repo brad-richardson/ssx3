@@ -42,6 +42,13 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **M1c read (09-18 01:10):** the native-ABI LLVM flavor links but
+      nothing in upstream can run it (no runtime for that ABI), the
+      upstream runner has no movie/frame-dump path, so the C-vs-LLVM
+      pace question moves to M1d: this repo's desktop patch stack
+      rebuilt on upstream ModernGekko, then the same movie under
+      upstream-LLVM, upstream-C and (if the ABI check passes) pinned-C,
+      with screenshots. That table is the S1 gate.
 - [ ] **M1b gate read (09-18 00:45):** the upstream LLVM backend now
       generates and links a module for the stock DOL, and it ran 155 s
       natively on Metal with zero fallback (ledger "Upstream LLVM module
