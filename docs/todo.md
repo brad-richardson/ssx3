@@ -42,6 +42,19 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **M1b gate read (09-18 00:45):** the upstream LLVM backend now
+      generates and links a module for the stock DOL, and it ran 155 s
+      natively on Metal with zero fallback (ledger "Upstream LLVM module
+      boots"). Not yet a green S1 gate: no pixels seen (no screen
+      capture in any agent context, fixed by frame dump in M1c), no
+      pace number, and the flavor that links is compat-ABI-dominated;
+      the native-ABI flavor has no link path (upstream template gap).
+      M1c (muse): frame-dump boot proof from the SSD game copy, movie
+      pace C-vs-LLVM on the same Mac, a budgeted attempt to link the
+      native-ABI flavor, explain native_exc=0. S1 launches on M1c's
+      pace table, not before. Side facts: upstream runner defaults to
+      Vulkan on macOS and SHA-256s the whole game root at startup
+      (15 min over SMB; game copied to the SSD).
 - [ ] **D1b gate read (09-17 22:50):** matrix complete at stock
       clocks (ledger rows "Odin race pace, stock vs underclock",
       "determinism tax", "Null video backend", "capped 1.0 budget",
