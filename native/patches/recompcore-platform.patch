@@ -1875,3 +1875,480 @@ diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Sync.cpp b/S
  }
 
  void StaticRecompCore::PropagateGuestMSR()
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
+@@ -179,6 +179,19 @@
+   // forces the first SyncOut to program the host state.
+   u32 m_last_sync_fpscr_rm_ni = 0xFFFFFFFFu;
+ 
++  // S3: host emulation of the SDK's FP-unavailable (vector 0x800) path. The
++  // Dolphin SDK runs a lazy FPU, so a thread that is not the current FPU owner
++  // traps on its first FP instruction; on the Odin that trap is 100% of the
++  // in-race guest exceptions (D5: 36,121/s, 1,408 ns each, 5.68% of the
++  // emulation thread's race CPU). TryHleFpUnavailable performs the vector's and
++  // __OSFPUnavailableHandler's state effects directly on m_guest and guest RAM
++  // and resumes at srr0, so the vector body never runs. Verified word-for-word
++  // against main.dol on every fault; any mismatch falls back to the guest path.
++  bool TryHleFpUnavailable();
++  bool m_hle_fp_unavailable = false;
++  u64 m_hle_fp = 0;          // faults emulated on the host
++  u64 m_hle_fp_rejects = 0;  // faults handed back to the guest vector
++
+   // D4 guard state: parallel to m_module->chunk_ranges.
+   std::vector<u8> m_chunk_state;
+   mutable std::vector<u8> m_chunk_host_call_state;
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_SMC.cpp
+@@ -297,6 +297,365 @@
+   return false;
+ }
+ 
++// ---------------------------------------------------------------------------
++// S3: host emulation of the SDK's FP-unavailable path (guest vector 0x800).
++//
++// The Dolphin SDK runs a lazy FPU. OSLoadContext leaves MSR[FP] clear for a
++// thread that is not the current FPU owner, so that thread's first FP
++// instruction traps to 0x800; the trap swaps the FPU register file between two
++// OSContexts and resumes. On the Odin at stock clocks this is 100% of the
++// in-race guest exceptions (D5: 36,121/s, mean 1,408 ns raise-to-rfi, 5.68% of
++// the emulation thread's race CPU), and two PCs in a thread pair carry 59% of
++// them.
++//
++// Everything below was decoded from local/source/gamecube/ssx3/sys/main.dol
++// (full listing in local/research/S3/REPORT.md):
++//
++//   0x80283e6c __OSEVStart .. 0x80283f04 __OSEVEnd  38-word vector template.
++//              __OSExceptionInit copies it to each vector with word 26
++//              (__OSEVSetNumber, `li r3,0`) OR-ed with the exception number;
++//              FP-unavailable is __OS_EXCEPTION_FLOATING_POINT == 7, so
++//              0x80000800 holds the template with word 26 == 0x38600007.
++//   0x80003000 OSExceptionTable (base written by __OSExceptionInit); entry 7
++//              is set once, by __OSContextInit at 0x80285a1c, to 0x80285998.
++//   0x80285998 __OSFPUnavailableHandler, 33 words, ending in rfi.
++//   0x80285318 __OSSaveFPUContext, 74 words.
++//   0x802851f4 __OSLoadFPUContext, 73 words.
++//
++//   OSContext: gpr[32] @0x00, cr @0x80, lr @0x84, ctr @0x88, xer @0x8c,
++//              fpr[32] (f64) @0x90, fpscr (as stfd of mffs) @0x190,
++//              srr0 @0x198, srr1 @0x19c, mode @0x1a0, state @0x1a2,
++//              gqr[8] @0x1a4, psf[32] (paired-single halves) @0x1c8,
++//              sizeof == 0x2c8.
++//   Low memory: __OSCurrentContext @0x800000d4, its physical alias (written by
++//              OSSetCurrentContext, used by the vector with translation off)
++//              @0x800000c0, __OSFPUContext @0x800000d8.
++//
++// Net state effect of vector + handler, which is what this reproduces:
++//   * the vector saves r3/r4/r5, cr, lr, ctr, xer, srr0, srr1 into the current
++//     OSContext and sets state |= OS_CONTEXT_STATE_EXC;
++//   * the handler ORs MSR[FP] into the *machine* SRR1 (never into the saved
++//     context), swaps the FPU file if __OSFPUContext != the current context,
++//     publishes __OSFPUContext = current, restores cr/lr/ctr/xer/srr0 and
++//     r3/r4/r5 from the context, clears OS_CONTEXT_STATE_EXC, and rfis.
++//   So r3/r4/r5, cr, lr, ctr and xer round-trip unchanged; srr0 keeps the
++//   faulting PC; srr1 gains MSR[FP]; the OSContext memory writes are real and
++//   are reproduced here; and the resumed MSR is rfi(srr1 | MSR[FP]).
++//
++// Guest cycles: the real path runs through Dolphin's fallback JIT, which
++// charges the instructions it executes. The emulation charges the same
++// instruction count (Gekko costs are 1 cycle for every opcode on these paths)
++// so the emulated CPU's apparent speed does not change.
++// ---------------------------------------------------------------------------
++namespace
++{
++constexpr u32 kOSCurrentContextPhysAddr = 0x800000C0u;
++constexpr u32 kOSCurrentContextAddr = 0x800000D4u;
++constexpr u32 kOSFPUContextAddr = 0x800000D8u;
++constexpr u32 kOSExceptionTableAddr = 0x80003000u;
++constexpr u32 kFpExceptionNumber = 7u;
++constexpr u32 kFpVectorAddr = 0x80000800u;
++constexpr u32 kFpHandlerAddr = 0x80285998u;
++constexpr u32 kSaveFpuContextAddr = 0x80285318u;
++constexpr u32 kLoadFpuContextAddr = 0x802851F4u;
++
++constexpr u32 kCtxGpr = 0x000u;
++constexpr u32 kCtxCr = 0x080u;
++constexpr u32 kCtxLr = 0x084u;
++constexpr u32 kCtxCtr = 0x088u;
++constexpr u32 kCtxXer = 0x08Cu;
++constexpr u32 kCtxFpr = 0x090u;
++constexpr u32 kCtxFpscr = 0x190u;
++constexpr u32 kCtxSrr0 = 0x198u;
++constexpr u32 kCtxSrr1 = 0x19Cu;
++constexpr u32 kCtxState = 0x1A2u;
++constexpr u32 kCtxPsf = 0x1C8u;
++constexpr u32 kCtxSize = 0x2C8u;
++constexpr u16 kCtxStateFpSaved = 0x0001u;  // OS_CONTEXT_STATE_FPSAVED
++constexpr u16 kCtxStateExc = 0x0002u;      // OS_CONTEXT_STATE_EXC
++
++constexpr u32 kFpscrFexBit = 0x40000000u;
++constexpr u32 kFpscrVxBit = 0x20000000u;
++constexpr u32 kFpscrVxAnyMask = 0x01F80700u;
++
++// main.dol 0x80283e6c..0x80283f04, word 26 patched to `li r3,7`.
++constexpr u32 kFpVectorWords[38] = {
++    0x7c9043a6u, 0x808000c0u, 0x9064000cu, 0x7c7042a6u, 0x90640010u, 0x90a40014u, 0xa06401a2u,
++    0x60630002u, 0xb06401a2u, 0x7c600026u, 0x90640080u, 0x7c6802a6u, 0x90640084u, 0x7c6902a6u,
++    0x90640088u, 0x7c6102a6u, 0x9064008cu, 0x7c7a02a6u, 0x90640198u, 0x7c7b02a6u, 0x9064019cu,
++    0x7c651b78u, 0x60000000u, 0x7c6000a6u, 0x60630030u, 0x7c7b03a6u, 0x38600007u, 0x808000d4u,
++    0x54a507bdu, 0x40820014u, 0x3ca08028u, 0x38a53f08u, 0x7cba03a6u, 0x4c000064u, 0x546515bau,
++    0x80a53000u, 0x7cba03a6u, 0x4c000064u};
++
++// main.dol 0x80285998 __OSFPUnavailableHandler.
++constexpr u32 kFpHandlerWords[33] = {
++    0x7ca000a6u, 0x60a52000u, 0x7ca00124u, 0x4c00012cu, 0x80a4019cu, 0x60a52000u, 0x7cbb03a6u,
++    0x3c608000u, 0x80a300d8u, 0x908300d8u, 0x7c052000u, 0x41820014u, 0x2c050000u, 0x41820008u,
++    0x4bfff949u, 0x4bfff821u, 0x80640080u, 0x7c6ff120u, 0x80640084u, 0x7c6803a6u, 0x80640198u,
++    0x7c7a03a6u, 0x80640088u, 0x7c6903a6u, 0x8064008cu, 0x7c6103a6u, 0xa06401a2u, 0x546307fau,
++    0xb06401a2u, 0x80a40014u, 0x8064000cu, 0x80840010u, 0x4c000064u};
++
++// __OSSaveFPUContext head/tail around the two 32-instruction runs.
++constexpr u32 kSaveFpuHead[3] = {0xa06501a2u, 0x60630001u, 0xb06501a2u};
++constexpr u32 kSaveFpuMid[6] = {0xfc00048eu, 0xd8050190u, 0xc8050090u,
++                                0x7c78e2a6u, 0x54631fffu, 0x41820084u};
++// __OSLoadFPUContext head around its two 32-instruction runs.
++constexpr u32 kLoadFpuHead[8] = {0xa0a401a2u, 0x54a507ffu, 0x41820118u, 0xc8040190u,
++                                 0xfdfe058eu, 0x7cb8e2a6u, 0x54a51fffu, 0x41820084u};
++constexpr u32 kBlrWord = 0x4e800020u;
++
++// Guest cycles of every path through vector + handler, summed with Dolphin's
++// own PPCTables costs (the fallback JIT charges those per executed block):
++// every opcode on these paths costs 1 except mtspr and rfi (2) and mtfsf (3).
++// Instruction counts: vector 34; handler 29 same-owner / 33 full switch /
++// 32 load-only; __OSSaveFPUContext 74 with paired singles, 42 without;
++// __OSLoadFPUContext 73 / 41, or 4 when the context has no saved FPU state.
++constexpr u32 kVectorCycles = 38;          // 34 + 3 mtspr + 1 rfi
++constexpr u32 kHandlerCommonCycles = 35;   // owner already current
++constexpr u32 kHandlerSwitchCycles = 39;   // save + load both called
++constexpr u32 kHandlerLoadOnlyCycles = 38; // no previous owner
++constexpr u32 kSaveFpuCycles = 42;         // paired singles disabled
++constexpr u32 kSaveFpuPsCycles = 74;
++constexpr u32 kLoadFpuSkipCycles = 4;      // context has no saved FPU state
++constexpr u32 kLoadFpuCycles = 43;         // 41 + 2 (mtfsf)
++constexpr u32 kLoadFpuPsCycles = 75;       // 73 + 2 (mtfsf)
++}  // namespace
++
++bool StaticRecompCore::TryHleFpUnavailable()
++{
++  // Caller guarantees: m_guest.exception == PPC_EXC_FP_UNAVAILABLE and
++  // m_guest.pc == PPC_VECTOR_FP_UNAVAILABLE, i.e. DolRecomp's runtime has
++  // already redirected pc/msr/srr0/srr1 for the raise.
++  u8* const ram = m_guest.ram;
++  const u32 ram_size = m_guest.ram_size;
++  const auto reject = [this]() {
++    ++m_hle_fp_rejects;
++    return false;
++  };
++  if (ram == nullptr)
++    return reject();
++  const auto mapped = [&](u32 ea, u32 size) {
++    return ea >= 0x80000000u && (ea - 0x80000000u) <= ram_size - size;
++  };
++  const auto rd32 = [&](u32 ea) {
++    const u8* p = ram + (ea - 0x80000000u);
++    return (u32(p[0]) << 24) | (u32(p[1]) << 16) | (u32(p[2]) << 8) | u32(p[3]);
++  };
++  const auto rd16 = [&](u32 ea) {
++    const u8* p = ram + (ea - 0x80000000u);
++    return u16((u32(p[0]) << 8) | u32(p[1]));
++  };
++  const auto rd64 = [&](u32 ea) {
++    return (u64(rd32(ea)) << 32) | u64(rd32(ea + 4));
++  };
++  const auto wr32 = [&](u32 ea, u32 value) {
++    u8* p = ram + (ea - 0x80000000u);
++    p[0] = u8(value >> 24);
++    p[1] = u8(value >> 16);
++    p[2] = u8(value >> 8);
++    p[3] = u8(value);
++  };
++  const auto wr16 = [&](u32 ea, u16 value) {
++    u8* p = ram + (ea - 0x80000000u);
++    p[0] = u8(value >> 8);
++    p[1] = u8(value);
++  };
++  const auto wr64 = [&](u32 ea, u64 value) {
++    wr32(ea, u32(value >> 32));
++    wr32(ea + 4, u32(value));
++  };
++  const auto words_match = [&](u32 ea, const u32* expected, u32 count) {
++    for (u32 i = 0; i < count; ++i)
++    {
++      if (rd32(ea + 4 * i) != expected[i])
++        return false;
++    }
++    return true;
++  };
++  // Two 32-instruction runs of the form `op f(i), disp+8*i(rA)`.
++  const auto reg_run_matches = [&](u32 ea, u32 first_word) {
++    for (u32 i = 0; i < 32; ++i)
++    {
++      if (rd32(ea + 4 * i) != first_word + (i << 21) + 8 * i)
++        return false;
++    }
++    return true;
++  };
++
++  // Low memory, the vector, the handler table entry and every instruction of
++  // the three SDK routines this replaces must be exactly what was decoded.
++  if (!mapped(kFpVectorAddr, sizeof(kFpVectorWords)) ||
++      !mapped(kLoadFpuContextAddr, 0x124u) || !mapped(kSaveFpuContextAddr, 0x128u) ||
++      !mapped(kFpHandlerAddr, sizeof(kFpHandlerWords)))
++  {
++    return reject();
++  }
++  if (!words_match(kFpVectorAddr, kFpVectorWords, 38))
++    return reject();
++  if (rd32(kOSExceptionTableAddr + 4 * kFpExceptionNumber) != kFpHandlerAddr)
++    return reject();
++  if (!words_match(kFpHandlerAddr, kFpHandlerWords, 33))
++    return reject();
++  if (!words_match(kSaveFpuContextAddr, kSaveFpuHead, 3) ||
++      !reg_run_matches(kSaveFpuContextAddr + 0x0Cu, 0xd8050090u) ||
++      !words_match(kSaveFpuContextAddr + 0x8Cu, kSaveFpuMid, 6) ||
++      !reg_run_matches(kSaveFpuContextAddr + 0xA4u, 0xf00501c8u) ||
++      rd32(kSaveFpuContextAddr + 0x124u) != kBlrWord)
++  {
++    return reject();
++  }
++  if (!words_match(kLoadFpuContextAddr, kLoadFpuHead, 8) ||
++      !reg_run_matches(kLoadFpuContextAddr + 0x20u, 0xe00401c8u) ||
++      !reg_run_matches(kLoadFpuContextAddr + 0xA0u, 0xc8040090u) ||
++      rd32(kLoadFpuContextAddr + 0x120u) != kBlrWord)
++  {
++    return reject();
++  }
++
++  // The raise itself must look like the lazy-FPU trap the SDK expects: MSR[FP]
++  // clear in the interrupted state, MSR[RI] set (a clear RI sends the vector to
++  // __OSUnhandledException instead), and a resumable faulting PC.
++  if ((m_guest.srr1 & PPC_MSR_FP) != 0 || (m_guest.srr1 & PPC_MSR_RI) == 0)
++    return reject();
++  const u32 faulting_pc = m_guest.srr0 & ~3u;
++  if (!mapped(faulting_pc, 4))
++    return reject();
++
++  // Context pointers. The vector reaches the context through the physical
++  // alias at 0xc0 and the handler through the effective pointer at 0xd4;
++  // OSSetCurrentContext keeps them consistent, and both must name real RAM.
++  // Alignment: 8, what the context's stfd/lfd fields need -- OSDumpContext
++  // builds one at r1+16, so a stricter test would reject real contexts.
++  const u32 current_phys = rd32(kOSCurrentContextPhysAddr);
++  const u32 current_ctx = rd32(kOSCurrentContextAddr);
++  if (current_ctx == 0 || (current_ctx & 0x7u) != 0 ||
++      (current_phys | 0x80000000u) != current_ctx || !mapped(current_ctx, kCtxSize))
++  {
++    return reject();
++  }
++  const u32 owner_ctx = rd32(kOSFPUContextAddr);
++  if (owner_ctx != 0 && ((owner_ctx & 0x7u) != 0 || !mapped(owner_ctx, kCtxSize)))
++    return reject();
++
++  // Paired-single register halves move only when HID2[PSE] is set, through
++  // psq_st/psq_l with GQR0; the SDK reserves GQR0 for the default (f32, no
++  // scale) format, and a non-indexed psq with HID2[LSQE] clear would raise an
++  // illegal-instruction program exception instead of storing.
++  const bool paired_singles = (m_guest.hid2 & PPC_HID2_PSE) != 0;
++  if (paired_singles && ((m_guest.gqr[0] & 0x3F073F07u) != 0 ||
++                         (m_guest.hid2 & PPC_HID2_LSQE) == 0))
++  {
++    return reject();
++  }
++
++  // The host SIMD rounding mode is re-armed only at burst boundaries, so a
++  // context whose FPSCR would change RN/NI has to take the guest path.
++  const bool switching = owner_ctx != current_ctx;
++  u32 loaded_fpscr = m_guest.fpscr;
++  if (switching && (rd16(current_ctx + kCtxState) & kCtxStateFpSaved) != 0)
++    loaded_fpscr = u32(rd64(current_ctx + kCtxFpscr));
++  if (((loaded_fpscr ^ m_guest.fpscr) & 0x7u) != 0)
++    return reject();
++
++  // ---- committed from here: the SDK's effects, in the SDK's order ----------
++  u32 cycles = kVectorCycles;
++
++  // __OSEVStart: save the interrupted state into the current context.
++  wr32(current_ctx + kCtxGpr + 3 * 4, m_guest.gpr[3]);
++  wr32(current_ctx + kCtxGpr + 4 * 4, m_guest.gpr[4]);
++  wr32(current_ctx + kCtxGpr + 5 * 4, m_guest.gpr[5]);
++  wr16(current_ctx + kCtxState, u16(rd16(current_ctx + kCtxState) | kCtxStateExc));
++  wr32(current_ctx + kCtxCr, m_guest.cr);
++  wr32(current_ctx + kCtxLr, m_guest.lr);
++  wr32(current_ctx + kCtxCtr, m_guest.ctr);
++  wr32(current_ctx + kCtxXer, m_guest.xer);
++  wr32(current_ctx + kCtxSrr0, m_guest.srr0);
++  wr32(current_ctx + kCtxSrr1, m_guest.srr1);
++
++  // __OSFPUnavailableHandler: SRR1 gains MSR[FP] (the saved copy does not),
++  // then the FPU file is swapped if this context is not already the owner.
++  const u32 srr1_resume = rd32(current_ctx + kCtxSrr1) | PPC_MSR_FP;
++  wr32(kOSFPUContextAddr, current_ctx);
++  if (!switching)
++  {
++    cycles += kHandlerCommonCycles;
++  }
++  else
++  {
++    cycles += owner_ctx != 0 ? kHandlerSwitchCycles : kHandlerLoadOnlyCycles;
++    if (owner_ctx != 0)
++    {
++      // __OSSaveFPUContext(owner): the previous owner's file must be banked
++      // before the new one is loaded.
++      wr16(owner_ctx + kCtxState, u16(rd16(owner_ctx + kCtxState) | kCtxStateFpSaved));
++      for (u32 i = 0; i < 32; ++i)
++        wr64(owner_ctx + kCtxFpr + 8 * i, f64_bits(m_guest.fpr[i]));
++      // mffs materializes FPSCR in the low word of an f64 whose high word is
++      // 0xfff80000; stfd writes both.
++      wr64(owner_ctx + kCtxFpscr, 0xFFF8000000000000ull | u64(m_guest.fpscr));
++      if (paired_singles)
++      {
++        for (u32 i = 0; i < 32; ++i)
++        {
++          wr32(owner_ctx + kCtxPsf + 8 * i, convert_to_single_ftz(f64_bits(m_guest.fpr[i])));
++          wr32(owner_ctx + kCtxPsf + 8 * i + 4, convert_to_single_ftz(f64_bits(m_guest.ps1[i])));
++        }
++      }
++      cycles += paired_singles ? kSaveFpuPsCycles : kSaveFpuCycles;
++    }
++    // __OSLoadFPUContext(current): a context that never saved FP state loads
++    // nothing and inherits the file it finds.
++    if ((rd16(current_ctx + kCtxState) & kCtxStateFpSaved) == 0)
++    {
++      cycles += kLoadFpuSkipCycles;
++    }
++    else
++    {
++      u32 fpscr = u32(rd64(current_ctx + kCtxFpscr));
++      fpscr = (fpscr & ~kFpscrVxBit) | ((fpscr & kFpscrVxAnyMask) != 0 ? kFpscrVxBit : 0u);
++      fpscr = (fpscr & ~kFpscrFexBit) |
++              ((((fpscr >> 22) & fpscr & 0x000000F8u) != 0) ? kFpscrFexBit : 0u);
++      m_guest.fpscr = fpscr;
++      if (paired_singles)
++      {
++        for (u32 i = 0; i < 32; ++i)
++        {
++          m_guest.fpr[i] = f64_value(convert_to_double(rd32(current_ctx + kCtxPsf + 8 * i)));
++          m_guest.ps1[i] = f64_value(convert_to_double(rd32(current_ctx + kCtxPsf + 8 * i + 4)));
++        }
++      }
++      for (u32 i = 0; i < 32; ++i)
++        m_guest.fpr[i] = f64_value(rd64(current_ctx + kCtxFpr + 8 * i));
++      cycles += paired_singles ? kLoadFpuPsCycles : kLoadFpuCycles;
++    }
++  }
++
++  // Handler tail: restore the interrupted registers, drop the exception flag
++  // in the context state, and rfi back to the faulting instruction with
++  // MSR[FP] set.
++  m_guest.cr = rd32(current_ctx + kCtxCr);
++  m_guest.lr = rd32(current_ctx + kCtxLr);
++  m_guest.ctr = rd32(current_ctx + kCtxCtr);
++  m_guest.xer = rd32(current_ctx + kCtxXer);
++  const u32 srr0_resume = rd32(current_ctx + kCtxSrr0);
++  wr16(current_ctx + kCtxState, u16(rd16(current_ctx + kCtxState) & ~kCtxStateExc));
++  m_guest.gpr[5] = rd32(current_ctx + kCtxGpr + 5 * 4);
++  m_guest.gpr[3] = rd32(current_ctx + kCtxGpr + 3 * 4);
++  m_guest.gpr[4] = rd32(current_ctx + kCtxGpr + 4 * 4);
++  m_guest.srr0 = srr0_resume;
++  m_guest.srr1 = srr1_resume;
++  // The vector ran with MSR[IR|DR] restored and the handler set MSR[FP]; both
++  // live inside the rfi mask, so only the unmasked bits of the exception MSR
++  // survive, exactly as ppc_rfi would compute it.
++  const u32 handler_msr = m_guest.msr | 0x0030u | PPC_MSR_FP;
++  m_guest.msr = (handler_msr & ~PPC_MSR_RFI_MASK) | (srr1_resume & PPC_MSR_RFI_MASK);
++  m_guest.msr &= ~PPC_MSR_POW;
++  m_guest.pc = srr0_resume & ~3u;
++  m_guest.downcount -= static_cast<s64>(cycles);
++  ++m_hle_fp;
++  return true;
++}
++
+ int StaticRecompCore::ChunkIndexOf(u32 address)
+ {
+   if (!m_module_active || m_chunk_lookup_table.empty())
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Run.cpp
+@@ -163,9 +163,23 @@
+           {
+             // DolRecomp's runtime already redirected pc/msr/srr to the guest
+             // exception vector; the flag only signals that it happened.
+-            m_guest.exception = 0;
+-            m_guest.program_exception = 0;
+-            ++m_native_exceptions;
++            // S3: the SDK's lazy FPU makes vector 0x800 the only exception that
++            // occurs in-race (D5: 36,121/s, 5.68% of the emulation thread), and
++            // its handler is a pure FPU-context swap. Emulate it here, inside
++            // the burst, so the fault costs no SyncOut/fallback round trip and
++            // the next iteration dispatches straight back at the faulting PC.
++            if (m_hle_fp_unavailable && m_guest.exception == PPC_EXC_FP_UNAVAILABLE &&
++                m_guest.pc == PPC_VECTOR_FP_UNAVAILABLE && TryHleFpUnavailable())
++            {
++              m_guest.exception = 0;
++              m_guest.program_exception = 0;
++            }
++            else
++            {
++              m_guest.exception = 0;
++              m_guest.program_exception = 0;
++              ++m_native_exceptions;
++            }
+           }
+           if ((ppc.Exceptions & SYNC_EXCEPTION_MASK) != 0)
+             break;  // Hook-raised synchronous exception: deliver via Dolphin below.
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.cpp
+@@ -8,6 +8,7 @@
+ #include <cstdlib>
+ #include <cstring>
+ #include <sstream>
++#include <string_view>
+ 
+ #include "Common/Config/Config.h"
+ #include "Common/DynamicLibrary.h"
+@@ -28,6 +29,13 @@
+ #endif
+ 
+ 
++// S3: default state of the FP-unavailable HLE (vector 0x800). The A/B arms
++// build the same source with -DSSX_HLE_FP_UNAVAILABLE_DEFAULT=0 / =1; on hosts
++// that can set environment variables SSX_HLE_FP_UNAVAILABLE overrides it.
++#ifndef SSX_HLE_FP_UNAVAILABLE_DEFAULT
++#define SSX_HLE_FP_UNAVAILABLE_DEFAULT false
++#endif
++
+ StaticRecompCore* g_static_recomp_core = nullptr;
+ 
+ u32 StaticRecompShouldYieldAt(u32 address)
+@@ -149,6 +157,10 @@
+   g_static_recomp_core = this;
+   RefreshConfig();
+   m_collect_dispatch_samples = std::getenv("STATICRECOMP_DISPATCH_SAMPLES") != nullptr;
++  // S3: host emulation of the SDK's FP-unavailable handler (vector 0x800).
++  // SSX_HLE_FP_UNAVAILABLE=0 restores the guest path for an A/B.
++  const char* hle_fp = std::getenv("SSX_HLE_FP_UNAVAILABLE");
++  m_hle_fp_unavailable = hle_fp ? std::string_view(hle_fp) != "0" : SSX_HLE_FP_UNAVAILABLE_DEFAULT;
+   m_return_hooks = m_module_source.return_hooks;
+   m_emulate_syscall_vector = m_module_source.emulate_syscall_vector;
+   const char* fallback_override = std::getenv("STATICRECOMP_FALLBACK_RANGES");
+@@ -217,14 +229,16 @@
+   std::fprintf(stderr,
+                "[staticrecomp] shutdown: native=%llu fallback=%llu native_exc=%llu hook_fb=%llu "
+                "smc_failed=%u verifications=%llu reverify_events=%llu bursts=%llu cycles=%llu "
+-               "hle_returns=%llu hle_vectors=%llu hle_rejects=%llu\n",
++               "hle_returns=%llu hle_vectors=%llu hle_rejects=%llu "
++               "hle_fp=%llu hle_fp_rejects=%llu\n",
+                (unsigned long long)m_native_dispatches, (unsigned long long)m_fallback_steps,
+                (unsigned long long)m_native_exceptions,
+                (unsigned long long)m_hook_fallback_instructions, m_failed_chunks,
+                (unsigned long long)m_verifications, (unsigned long long)m_reverify_events,
+                (unsigned long long)m_bursts, (unsigned long long)m_charged_cycles,
+                (unsigned long long)m_hle_returns, (unsigned long long)m_hle_vectors,
+-               (unsigned long long)m_hle_rejects);
++               (unsigned long long)m_hle_rejects, (unsigned long long)m_hle_fp,
++               (unsigned long long)m_hle_fp_rejects);
+   std::vector<std::pair<u32, u64>> dispatch_samples(m_dispatch_samples.begin(),
+                                                     m_dispatch_samples.end());
+   std::sort(dispatch_samples.begin(), dispatch_samples.end(),
