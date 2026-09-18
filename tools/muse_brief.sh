@@ -4,6 +4,8 @@
 #   tools/muse_brief.sh D1 stop   stop it
 #   python3 tools/muse_mon.py D1  summarize its log
 # Prompts live in local/muse/prompts/<ID>.md, logs in local/muse/logs/.
+# Runs with --yolo (no approval prompts, no sandbox: adb and pgrep need it)
+# and xhigh reasoning; override with MUSE_EFFORT=high.
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 ID=${1:?usage: tools/muse_brief.sh <brief id> [stop]}
@@ -26,8 +28,8 @@ fi
 STAMP=$(date +%Y%m%d-%H%M%S)
 LOG="$DIR/logs/$ID-$STAMP"
 cd "$ROOT"
-nohup muse exec --prompt-file "$PROMPT" --permission-profile :unrestricted \
-  --reasoning-effort high --user-input-auto-resolve --json \
+nohup muse exec --prompt-file "$PROMPT" --yolo \
+  --reasoning-effort "${MUSE_EFFORT:-xhigh}" --user-input-auto-resolve --json \
   > "$LOG.jsonl" 2> "$LOG.err" < /dev/null &
 PID=$!
 echo "$PID" > "$PIDFILE"
