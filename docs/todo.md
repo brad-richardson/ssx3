@@ -44,6 +44,34 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **S1c gate read (09-18 11:50) — repin PARKED:** upstream's C
+      backend on the repinned Android stack is not faster on the Odin.
+      Repinned emu ms/frame ≥ pinned on every pair: uncapped +10–20%
+      (under a battery-collapsed 1.02 GHz regime, relative only), the one
+      clean boosted capped pair a wash within ±5%, Crow's Nest +3–7% but
+      confounded by divergent race states. Pinned runs MORE native
+      instructions with 6× more hook fallbacks and is still faster, so
+      upstream's region-leader entry switches and proven-pointer memory
+      bring nothing on this target. Keep the pin; the rebased platform
+      patches (desktop +254/−19, Android port on the SSD) stay as the
+      mechanical path if a later upstream feature needs them. Optional
+      follow-up: a strict dispatch/movie-validity compare between the
+      two stacks (the cn pair diverged, so one stack is not bit-faithful
+      to the other's movie). Ledger row added.
+- [ ] **No Opus from here (user, 09-18 11:45):** quota. S2 told to stop
+      after its running arm and hand back its table; the remaining
+      replay arms (Vulkan) and any milestone-2 work become muse briefs
+      (S2b). Every implementation step is a muse brief; judgment stays
+      in this session between briefs.
+- [ ] **PS2 throughput gate (queued 09-18 11:50):** the cheap answer to
+      "could a PS2 static recomp reach full-sim 120": run the PS2 game
+      uncapped in NetherSX2 on the Odin in the Snow Jam race window and
+      read speed % plus EE/GS/VU thread busy from the OSD. Needs the
+      user's hands for the in-app setup; ISO goes to `/sdcard/PS2/`;
+      device lease `USER-nethersx2` while it runs; sequence: after S2
+      releases, before D8 and S2b. ≥2× with GS unsaturated = the recomp
+      has headroom and the GS renderer is the only gate; <2× = the PS2
+      avenue is dead for the same reason F is.
 - [ ] **Device link (09-18 12:10):** the Odin drained to 2% under
       back-to-back runs (a dongle charged slower than the runs drew; the
       Mac port did not charge it at all). Now on a wall charger and driven
