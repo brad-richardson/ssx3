@@ -112,9 +112,8 @@ the build or commit that closed them.
       evaluation track (muse: build for arm64, boot stock SSX 3, measure
       EE/VU/GS split with the software GS, inventory the GS renderer
       gap) alongside host replay, or keep it parked.
-      HOUSEKEEPING: the SSX 3 per-game ini in NetherSX2 still carries the
-      2.5× cap + OSD override; restore `local/research/ps2-gate/08FFF00D.ini.orig`
-      to `gamesettings/08FFF00D.ini` when the user is done testing.
+      Housekeeping done 12:55: the user's original NetherSX2 per-game ini
+      is restored (the 2.5×/OSD variants stay under `local/research/ps2-gate/`).
 - [ ] **PS2 throughput gate (queued 09-18 11:50):** the cheap answer to
       "could a PS2 static recomp reach full-sim 120": run the PS2 game
       uncapped in NetherSX2 on the Odin in the Snow Jam race window and
