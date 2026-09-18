@@ -3,8 +3,34 @@
 Spike: S2 (reasoning-class). Repo `/Users/bradrichardson/dev/ssx3`, device Odin 3
 `622c49b1`. Continues D2/D2b. No docs edits, no commits, no verdicts.
 
-Status: **milestone 1 in progress** — diagnosis complete, fixed research header
-built into an Android trial TU, device arms pending (see Part 3).
+Status: stopped by orchestrator instruction after the second Odin arm
+(reasoning-class agents halted for quota). Milestone 1 measured on EGL;
+Vulkan not runnable with these builds; milestone 2 not started.
+
+## Five-line summary
+
+1. D2b's `LoadIndexedXF` SIGSEGV at replay 27 was not CP/XF state drift: the
+   Odin runs dual-core with a movie, so `m_use_deterministic_gpu_thread` is
+   true and `LoadIndexedXF` pops indexed-XF bytes from a fixed 2 MiB FIFO aux
+   buffer that only the paired `RunFifo<true>` preprocess pass fills — the
+   loop ran `RunFifo<false>` alone, so the unchecked read pointer walked off
+   the array. Desktop is single-core, the flag is false there, and the same
+   header read guest RAM instead: that is the whole platform asymmetry.
+2. The fix pairs a preprocess pass with each replay, rewinds the aux pointers,
+   masks the three PE BP writes out of the preprocess copy (the preprocess
+   pass is where `SetToken`/`SetFinish` are raised in deterministic mode), and
+   restores memory updates + CP + XF registers before every replay.
+3. It was validated on the device code path *before* any device attempt, by
+   forcing determinism on a dual-core desktop run — which also caught a bug in
+   my own mask (0x44/0x48 are known-but-ignored opcodes, not parse failures).
+4. Odin EGL, 200 unmodified replays at one idle seam, pinned emu=80/video=40:
+   `s2-egl-a` 200/200 with `done`, **0.665 ms** median per replay (p95 0.729);
+   `s2-egl-b` 200/200 with `done`, **0.866 ms** median (p95 0.963); no
+   tombstones; kill rule never tripped. `aux_bytes × 27 ≈ 2 MiB` on both arms,
+   matching D2b's death index exactly.
+5. Vulkan was not run and cannot be with these builds (no `libvideovulkan.a`
+   in `core-egl-d5-build`); milestone 2 was not started; no verdict is offered
+   on the capacity gate — the table is in Part 3c.
 
 ---
 
