@@ -35,7 +35,7 @@ Rules that keep this table honest (perf-review §1+§7):
 | Capped/uncapped reconciliation | RESOLVED: capped saturates 1.0 while sub-capability dips run identically in both regimes — content + cap saturation, no DVFS paradox | 09-17 | Odin, m3-menu capped arm + busy fraction | Affinity hunt |
 | Snow scorer calibration | clean ≤0.05 (iPad) / ≤0.08 (Odin menu); corrupt ≥0.17 transition / ≥0.38 full; threshold 0.12 | 09-17 | Archived shots | `tools/gamecube_snow_check.py` |
 | Onscreen trial | 25/25 presented + correlated | 09-17 | Odin onscreen | `8df3c42` |
-| Odin prime-core clock under load | `cpu7 scaling_max_freq` = 3.072 GHz vs `cpuinfo_max_freq` 4.32 GHz, with `performance_mode` 0 and 1, at 37 °C (policy cap, not thermal); emu core pinned at 3.072 GHz for every race-window sample; cpu-* zones 74–92 °C in-race, no frequency drop | 09-17 | Odin 3, d1-base-a (pinned, uncapped, m3-menu) | `android-spike/D1/REPORT.md`, `d1-base-a-receipts/*-sampler.log` (D1 matrix still in progress) |
+| Odin clock caps | The 3.072 GHz prime / 2.75 GHz mid `scaling_max_freq` caps seen in D1 part 1 were a user-installed underclock tool running by default; removed 09-17 ~21:35, stock caps now read cpu6–7 4.32 GHz, cpu0–5 3.53 GHz, GPU max 1.1 GHz. `performance_mode` 0/1 never changed the caps. **Every Odin number dated 09-17 before ~21:35 (pace hunt, affinity, D1 base-a/base-b) was measured underclocked at ≤3.07 GHz on the emulation core.** D1b re-runs base at stock; the stock-vs-underclock base pair is the DVFS answer | 09-17 | Odin 3 | adb sysfs read-back; `android-spike/D1/REPORT.md` Part 1 for the underclocked arm (emu core 3.072 GHz every race sample, cpu zones 74–92 °C) |
 
 ## Contested
 
