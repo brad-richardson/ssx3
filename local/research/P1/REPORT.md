@@ -428,3 +428,410 @@ Ladder addendum: the steady state is 46.4M balanced executions of
 `runtime->handleSyscall(rdram, ctx, 0x0u)` (`$v1=0x83`) on its return path;
 `handleSyscall` itself emits no log line, so dispatch stays unconfirmed in
 the log. "First syscall (in code)" remains Partial as stated in P2-7.
+
+---
+
+# P1b report — Part 3 (brief local/muse/prompts/P1b.md + 2 amendments + workflow change)
+
+Run wall: 2026-09-18 18:02 → 20:58 UTC (14:02 → 16:58 EDT). No verdicts.
+`W` = `/Volumes/Extreme SSD/ps2recomp-spike`.
+
+## P3-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` absent |
+| Builds | `printf 'P1b-build' > /tmp/ssx3-host-lease` before each build |
+| Boots | `printf 'P1b' > /tmp/ssx3-host-lease` before each boot |
+| End | `rm /tmp/ssx3-host-lease`, verified absent |
+| Foreign leases / waits | None during P1b; no `waits.log` |
+| `adb` | Not used |
+
+## P3-1. Disc staging + path-resolution table (Step 1)
+
+Staged with `hdiutil` (no Python fallback needed). macOS mounted the ISO
+as `cd9660` (ISO9660 bridge, not UDF).
+
+| Item | Value |
+|---|---|
+| Mount | `hdiutil attach -readonly -nobrowse -mountpoint /tmp/p1-iso "$W/SSX 3 (USA).iso"`, exit 0 (`/dev/disk11`) |
+| Copy | `cp -R /tmp/p1-iso/. $W/P1/cd/`, exit 0; `hdiutil detach /tmp/p1-iso`, exit 0 |
+| Files | 163 (after purging 181 AppleDouble `._*` sidecars the copy created) |
+| Bytes | 3,004,221,507 |
+| Top level | `CNF DATA NETGUI PAD0.000 PAD1.000 SLUS_207.72 SYSTEM.CNF` |
+| `$W/P1/cd/SLUS_207.72` sha1 | `77114dfd1205eaccf1ccc18c5f9650097fa78bd8` (matches) |
+| `$W/P1/cd/SYSTEM.CNF` | Present, `BOOT2=cdrom0:\SLUS_207.72;1`, `VER=1.00`, `VMODE=NTSC` |
+
+Path resolution (`Syscalls/Helpers/Runtime.h:117-149`, `Stubs/Helpers/Support.h:160-175`):
+
+| Guest pattern | Prefix match | Root | Rest rewrite |
+|---|---|---|---|
+| `host0:` / `host:` | case-insensitive, 6/5 chars | `hostRoot` (= ELF dir) | `\`→`/`, trailing `;`+digits stripped, leading slashes stripped, case preserved |
+| `cdrom0:` / `cdrom:` | case-insensitive, 7/6 chars | `cdRoot` (= ELF dir) | same as above |
+| `mc0:` / `mc:` | exact `mc` starts, 4/3 chars | `mcRoot` (= ELF dir `/mc0`) | same as above |
+| leading `/` or `\` | — | `cdRoot` | same rewrite |
+| `X:` (any other letter) | — | passed through unchanged | — |
+| bare relative | — | `cdRoot` | same rewrite |
+
+CD HLE (`Support.h`): `normalizeCdPathNoPrefix` lowercases drive/dir/file
+for cd9660 matching; raw LBN reads need a sector→file map or `cdImage`
+(`Support.h:430-480`); `IoPaths.cdImage` is set by nothing in the runner
+(confirmed by grep over `main.cpp`/`ps2_runtime.*`: no env var, no flag).
+
+## P3-2. Stub the scanner (Step 2)
+
+| Item | Value |
+|---|---|
+| TOML edit | One line appended to `general.stubs`: `"ret0@0x0042c1f0",` (diff `203a204`, all other entries kept) |
+| Recompile | `ps2_recomp ssx3.toml` → `recomp-p1b.log`, exit 0: discovered 8143, processed 8143, recompiled 8016, stubs 127, skipped 0, decode failures 0, unhandled 0; entrypoints 391,169; warnings 3,594; fallbacks 724,768 |
+| Wrapper | `output/sub_0042C1F0_0x42c1f0.cpp` is exactly the ret0 stub (`ctx->pc = getRegU32(ctx,31); ps2_stubs::ret0(...)`) |
+| Runner refresh | `cp -X output/*.{cpp,h}` → `PS2Recomp/ps2xRuntime/src/runner/` (8,146 files; sidecars purged) |
+| Rebuild | `cmake --build … --target ps2EntryRunner` with `RUNTIME_LOGS=ON`, aggressive/tracker OFF, exit 0 (`build-port-p1b.log`); binary sha256 `98dba1e59bbf16710c63c2b1d8eb91c28c054268b9c78982b4b0d631830fd91d` |
+
+## P3-3. Boot ladders (Steps 3–4, one table per boot)
+
+Common setup: CWD `$W/P1/run` (strays `imgui.ini`, `mc0/`, `mc1/` land there
+as required), ELF `$W/P1/cd/SLUS_207.72` as argv[1]. All logs < 5 KB
+(200 MB cap respected trivially). No boot crashed.
+
+| Boot | Binary (fixes in tree) | Log | Ladder |
+|---|---|---|---|
+| 1 `boot-p1b-1.log` | ret0 stub, no image | 0 lines (brief's `timeout` missing on macOS; `head -c` pipe used, its block buffer hid all output on kill) | No ladder (void). Strays prove it ran. Command deviated, recorded below. |
+| 2 `boot-p1b-2.log` | same as 1 | 58 lines | Entry `0x100008` → trace `…0x42c1f0→0x42c7c8…→0x414728` → `missing-target IndirectCall JALR 0x40fc6c→0x3b07b8` (non-fatal) → `SifInitRpc Initialized` → 6 SIF module loads (`SIO2MAN PADMAN LIBSD SNDDRV MCMAN MCSERV`, uppercase+`;1` resolved) → `sceCdRead unresolved LBN 0x10 sectors=1 (no mapped file and no configured CD image)` pc=`0x3e3694` (in `sub_003E3618`); then static. First syscall id seen in log: none (no dispatch lines). cdrom0 paths opened: the 6 module paths. VIF MPG/MSCAL: none. GIF kick: none. Presented frame: none. Crash: none. |
+| 3 `boot-p1b-3.log` | + Fix A, `PS2X_CD_IMAGE` set | 56 lines | Same path through module 6; LBN error line gone (raw read served silently); then static, no new lines in 7 min. |
+| 4 `boot-p1b-4.log` | + map split 1 (`0x3b07b8`) | 50 lines | New: `missing-target DirectCall JAL 0x42c310→0x42c1f0` (map dropped stub rows); trace dies after `0x423da0`. Fix ordered per orchestrator note. |
+| 5 `boot-p1b-5.log` | + full map (189 stub rows; binary also contains Fix C, see P3-6) | 56 lines | `0x42c1f0` resolved; `0x3b07b8` split works (trace `→0x3b07b8→0x3b0770→0x3b0410`); modules 1–6; new `missing-target IndirectCall JALR 0x40fc6c→0x3adda0`. |
+| 6 `boot-p1b-6.log` | + split `0x3adda0` | 56 lines | `→0x3adda0→0x3ad290`; new `missing-target IndirectCall JALR 0x40fc6c→0x3a6648`. |
+| 7 `boot-p1b-7.log` | + split `0x3a6648` | 56 lines | `→0x3a6648→0x3a3f48→0x39e288`; new `missing-target IndirectCall JALR 0x40fc6c→0x3970f8`; modules 1–6. |
+| 8 `boot-p1b-8.log` | + batch 35 splits + Fix D (binary `a72fff15…`) | 55 lines, 10 min | No missing-target lines at all (all 39 constructor entries resolved); modules 1–6; no LBN error; no `ee:idle` dump (scheduler never >3 s without a runnable thread); no VIF MPG/MSCAL; no GIF kick; no presented game frame; no crash. Runner at ~10% CPU (render loop). |
+
+Boot-2 firsts: first SIF/IOP request = the 6 module loads above (in order);
+first CD read = `sceCdRead` LBN `0x10` (ISO9660 PVD), unresolved without image.
+
+## P3-4. Constructor table (one walk routine, 39 entries)
+
+Walk: `sub_0040FB88` @ `0x40fbe0`: `$a3=0x440000`, table base
+`0x440000-0x31C8=0x43ce38`; word[0]=`0x27`=39 is an explicit count
+(non-`-1` path jumps to `0x40fc44` with count in `$a1`); `$s0` starts at
+`0x43ce38+39*4=0x43ced4`; calls words[39]…words[1] in reverse via
+`jalr` at `0x40fc6c`. Word[40] = `0x00000000` (terminator, not called).
+Every entry verified as prologue two ways: ELF word
+(`addiu $sp,$sp,-0x10` = `0x27bdfff0`, once `0x27bdffe0`) AND the
+`// 0xADDR: ENC mnemonic` comment in `output/` (all `addiu`).
+
+| # | Address | Prior map state | Split row added |
+|---|---|---|---|
+| 1 | `0x1448b8` | in `sub_001448A8` | `sub_001448B8` |
+| 2 | `0x15c8f0` | in `sub_0015C228` | `sub_0015C8F0` |
+| 3 | `0x168298` | in `sub_00168150` | `sub_00168298` |
+| 4 | `0x176a28` | in `sub_00176890` | `sub_00176A28` |
+| 5 | `0x177e30` | in `sub_00177650` | `sub_00177E30` |
+| 6 | `0x179738` | in `sub_00178F58` | `sub_00179738` |
+| 7 | `0x179fa8` | in `sub_00179798` | `sub_00179FA8` |
+| 8 | `0x1e12b0` | in `sub_001E1090` | `sub_001E12B0` |
+| 9 | `0x222428` | in `sub_00220AD0` | `sub_00222428` |
+| 10 | `0x2267f0` | in `sub_00226628` | `sub_002267F0` |
+| 11 | `0x247e20` | in `sub_00247AB0` | `sub_00247E20` |
+| 12 | `0x2501a8` | in `sub_0024E8D8` | `sub_002501A8` |
+| 13 | `0x251690` | in `sub_00250CB0` | `sub_00251690` |
+| 14 | `0x254330` | in `sub_00253B58` | `sub_00254330` |
+| 15 | `0x2557c0` | in `sub_00254E60` | `sub_002557C0` |
+| 16 | `0x269ea0` | in `sub_00269CF0` | `sub_00269EA0` |
+| 17 | `0x26c438` | in `sub_0026BAE8` | `sub_0026C438` |
+| 18 | `0x2722c0` | in `sub_00272288` | `sub_002722C0` |
+| 19 | `0x284b80` | in `sub_00283E60` | `sub_00284B80` |
+| 20 | `0x2baee8` | in `sub_002BADD0` | `sub_002BAEE8` |
+| 21 | `0x2bb0e0` | in `sub_002BAFB0` | `sub_002BB0E0` |
+| 22 | `0x2bc4e0` | in `sub_002BBC38` | `sub_002BC4E0` |
+| 23 | `0x2c1688` | in `sub_002C0B70` | `sub_002C1688` |
+| 24 | `0x2d4060` | in `sub_002D2988` | `sub_002D4060` |
+| 25 | `0x2d48d0` | in `sub_002D40C0` | `sub_002D48D0` |
+| 26 | `0x2f8370` | in `sub_002F7BE0` | `sub_002F8370` |
+| 27 | `0x2f9818` | in `sub_002F9040` | `sub_002F9818` |
+| 28 | `0x2fae18` | in `sub_002FA640` | `sub_002FAE18` |
+| 29 | `0x30d498` | in `sub_0030C8D8` | `sub_0030D498` |
+| 30 | `0x315a00` | in `sub_003150F8` | `sub_00315A00` |
+| 31 | `0x316878` | in `sub_00315A20` | `sub_00316878` |
+| 32 | `0x320b28` | in `sub_00320550` | `sub_00320B28` |
+| 33 | `0x341368` | in `sub_003411B8` | `sub_00341368` |
+| 34 | `0x361e10` | in `sub_003612C0` | `sub_00361E10` |
+| 35 | `0x3970f8` | exact (split earlier) | — (already `sub_003970F8`) |
+| 36 | `0x3a6648` | exact (split earlier) | — (already `sub_003A6648`) |
+| 37 | `0x3adda0` | exact (split earlier) | — (already `sub_003ADDA0`) |
+| 38 | `0x3b07b8` | exact (split earlier) | — (already `sub_003B07B8`) |
+| 39 | `0x1001d8` | in `sub_001001C8` | `sub_001001D8` |
+
+Non-prologue entries: none (0 recorded, 0 skipped). Map: 8,209 → 8,244
+data rows. Batch recompile (`recomp-p1b-batch.log`): discovered 8,243
+(map loads 8,244, one subsumed), recompiled 8,067, stubs 176, skipped 0,
+decode failures 0, unhandled 0; entrypoints 391,298; warnings 3,596;
+fallbacks 724,860. Note: `stubs:` reads 176 in map mode (all 176 gap stub
+rows bind), not 126 as the orchestrator note expected — 126 was the
+analyzer-mode count (P1). `ret0` wrapper for `sub_0042C1F0` verified intact
+after every recompile.
+
+## P3-5. Patch files (upstream PR candidates, quoted in full)
+
+All three live under `$W/P1/` and are committed on `ssx3` (see P3-6).
+
+### cd-image-env.patch (/Volumes/Extreme SSD/ps2recomp-spike/P1/cd-image-env.patch)
+
+```diff
+diff --git a/ps2xRuntime/src/main.cpp b/ps2xRuntime/src/main.cpp
+index 563bcbd..5ecba2a 100644
+--- a/ps2xRuntime/src/main.cpp
++++ b/ps2xRuntime/src/main.cpp
+@@ -226,6 +226,16 @@ int main(int argc, char *argv[])
+             return 1;
+         }
+ 
++        if (const char *cdImageEnv = std::getenv("PS2X_CD_IMAGE"))
++        {
++            if (cdImageEnv[0] != '\0')
++            {
++                PS2Runtime::IoPaths ioPaths = PS2Runtime::getIoPaths();
++                ioPaths.cdImage = std::filesystem::path(cdImageEnv);
++                PS2Runtime::setIoPaths(ioPaths);
++            }
++        }
++
+         runtime.run();
+ 
+ #ifdef _DEBUG
+```
+
+### idle-dump.patch (/Volumes/Extreme SSD/ps2recomp-spike/P1/idle-dump.patch)
+
+```diff
+diff --git a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+index 3a6ec7d..a9786bb 100644
+--- a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
++++ b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+@@ -5,7 +5,9 @@
+ 
+ #include <algorithm>
+ #include <cassert>
++#include <chrono>
+ #include <cstring>
++#include <iostream>
+ #include <limits>
+ #include <stdexcept>
+ 
+@@ -168,12 +170,42 @@ void EeScheduler::run()
+         if (m_currentThreadId == 0)
+         {
+             GuestThread *next = selectReady();
++            // Diagnostic idle dump (function statics keep this to run()).
++            static auto idleSince = std::chrono::steady_clock::time_point{};
++            static bool idleDumpPrinted = false;
+             if (!next && m_pendingInvocations.empty())
+             {
+                 publishSnapshot();
++                const auto idleNow = std::chrono::steady_clock::now();
++                if (idleSince == std::chrono::steady_clock::time_point{})
++                {
++                    idleSince = idleNow;
++                }
++                else if (!idleDumpPrinted &&
++                         idleNow - idleSince >= std::chrono::seconds(3))
++                {
++                    idleDumpPrinted = true;
++                    const EeKernelSnapshot idleSnap = snapshot();
++                    std::cerr << "[ee:idle] no runnable thread for 3s; threads="
++                              << idleSnap.threads.size() << std::endl;
++                    for (const EeThreadSnapshot &idleThread : idleSnap.threads)
++                    {
++                        std::cerr << "[ee:idle] id=" << idleThread.id
++                                  << " status="
++                                  << static_cast<int>(idleThread.status)
++                                  << " waitReason="
++                                  << static_cast<int>(idleThread.waitReason)
++                                  << " waitId=" << idleThread.waitId << " pc=0x"
++                                  << std::hex << idleThread.pc << std::dec
++                                  << " entry=0x" << std::hex << idleThread.entry
++                                  << std::dec << std::endl;
++                    }
++                }
+                 waitForEvent();
+                 continue;
+             }
++            idleSince = std::chrono::steady_clock::time_point{};
++            idleDumpPrinted = false;
+             if (next)
+             {
+                 makeRunning(*next);
+```
+
+### cd-callback.patch (/Volumes/Extreme SSD/ps2recomp-spike/P1/cd-callback.patch)
+
+```diff
+diff --git a/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp b/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
+index 56a978e..9a7507b 100644
+--- a/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
++++ b/ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
+@@ -31,6 +31,31 @@ namespace ps2_stubs
+         uint32_t g_cdStReadTraceCount = 0u;
+         CdStreamTimingState g_cdStreamTiming;
+ 
++        // Async CD callback (sceCdCallback / sceCdInitEeCB HLE). The game
++        // registers a CD completion callback whose invocation signals the
++        // semaphore its thread waits on.
++        uint32_t g_cdCallbackFn = 0u;
++        uint32_t g_cdCallbackGp = 0u;
++        uint32_t g_cdCallbackStackTop = 0u;
++
++        void queueCdCallback(R5900Context *ctx, PS2Runtime *runtime, uint32_t func)
++        {
++            (void)ctx;
++            if (g_cdCallbackFn == 0u || runtime == nullptr)
++            {
++                return;
++            }
++            GuestInvocation invocation{};
++            invocation.kind = GuestInvocationKind::Interrupt;
++            invocation.context.pc = g_cdCallbackFn;
++            SET_GPR_U32(&invocation.context, 4, func);
++            SET_GPR_U32(&invocation.context, 5, 0u);
++            SET_GPR_U32(&invocation.context, 28, g_cdCallbackGp);
++            SET_GPR_U32(&invocation.context, 29, g_cdCallbackStackTop);
++            SET_GPR_U32(&invocation.context, 31, 0u);
++            runtime->eeScheduler().queueInvocation(std::move(invocation));
++        }
++
+         uint64_t currentCdStreamTick(PS2Runtime *runtime)
+         {
+             return runtime != nullptr ? runtime->eeScheduler().currentVSyncTick() : 0u;
+@@ -317,6 +342,7 @@ namespace ps2_stubs
+         {
+             g_cdStreamingLbn = selected.lbn + selected.sectors;
+             setReturnS32(ctx, 1); // command accepted/success
++            queueCdCallback(ctx, runtime, 1u); // SCECdFuncRead
+             return;
+         }
+ 
+@@ -355,7 +381,12 @@ namespace ps2_stubs
+ 
+     void sceCdCallback(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
+-        setReturnS32(ctx, 0);
++        (void)rdram;
++        (void)runtime;
++        const uint32_t previous = g_cdCallbackFn;
++        g_cdCallbackFn = getRegU32(ctx, 4);
++        g_cdCallbackGp = getRegU32(ctx, 28);
++        setReturnS32(ctx, static_cast<int32_t>(previous));
+     }
+ 
+     void sceCdChangeThreadPriority(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+@@ -404,6 +435,11 @@ namespace ps2_stubs
+ 
+     void sceCdInitEeCB(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
++        (void)rdram;
++        (void)runtime;
++        const uint32_t stackAddr = getRegU32(ctx, 5);
++        const uint32_t stackSize = getRegU32(ctx, 6);
++        g_cdCallbackStackTop = stackAddr + stackSize;
+         setReturnS32(ctx, 1);
+     }
+ 
+@@ -445,6 +481,7 @@ namespace ps2_stubs
+     void sceCdPause(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
+         setReturnS32(ctx, 1);
++        queueCdCallback(ctx, runtime, 5u); // SCECdFuncPause
+     }
+ 
+     void sceCdPosToInt(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+@@ -657,6 +694,7 @@ namespace ps2_stubs
+     void sceCdStandby(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
+         setReturnS32(ctx, 1);
++        queueCdCallback(ctx, runtime, 3u); // SCECdFuncStandby
+     }
+ 
+     void sceCdStatus(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+@@ -689,6 +727,7 @@ namespace ps2_stubs
+     void sceCdStop(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
+         setReturnS32(ctx, 1);
++        queueCdCallback(ctx, runtime, 4u); // SCECdFuncStop
+     }
+ 
+     void sceCdStPause(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+```
+
+## P3-6. Ordering deviations, binaries, commits
+
+| Item | Value |
+|---|---|
+| Boot-1 command | `timeout` does not exist on macOS; used foreground run + terminate (equivalent of the brief's background+sleep+kill fallback). The `head -c` pipe was then dropped from boot 2 on (direct-to-file) because its block buffer hid all output on kill; the 200 MB cap was enforced by log sizes instead (all < 5 KB). |
+| Fix C in boot-5 binary | `EeScheduler.cpp` was edited while the split-1 rebuild was still compiling, so boot 5's binary (`bcdfa765…`) contains A + B + C. C is diagnostic-only (no behavior change); recorded here. |
+| `._EeScheduler.cpp` build break | The edit tool creates AppleDouble sidecars on this volume; the lib glob compiled `._EeScheduler.cpp` and failed one build. Purged; all subsequent edits were followed by purges. No source harmed. |
+| Split-4 build (binary `12dd42ed…`) | Built but never booted: the batch-splits instruction superseded it. |
+| `stubs: 176` vs expected 126 | In map mode every gap stub row binds (176); 126 was the analyzer-mode count. `ret0@0x0042c1f0` verified firing (boot-5 trace passes through `0x42c1f0`). |
+| CSV row math | 8,017 (8,016 + `0x3b07b8` split) → 8,206 (+189 stub rows; 155 contained skipped: 5 stubs + 150 untracked, recorded) → 8,207/8,208/8,209 (single splits) → 8,244 (+35 batch). Recompiles: `recomp-p1b.log` 8143/8016/127, `recomp-p1b-map.log` 8017/8017/0(count artifact; bindings verified in files), `recomp-p1b-map2.log` 8205/8029/176, `map3` 8206/8030/176, `map4` 8207/8031/176, `map5` 8208/8032/176, `batch` 8243/8067/176; all 0 decode failures, 0 unhandled. |
+
+Binaries (`/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` sha256):
+
+| Binary | Fixes in tree | Foreground boots |
+|---|---|---|
+| `98dba1e5…` | ret0 stub, RUNTIME_LOGS on | 1, 2 |
+| `9d84b59f…` | + Fix A | 3 |
+| `d1babad2…` | + map split 1 (`0x3b07b8`) | 4 |
+| `bcdfa765…` | + full map (189 stub rows) + Fix C | 5 |
+| `fba4f584…` | + split `0x3adda0` | 6 |
+| `12dd42ed…` | + split `0x3a6648` | 7 |
+| `a72fff15…` | + split `0x3970f8` + batch 35 + Fix D | 8 |
+
+Attribution is by build order cross-checked against each boot log's trace
+(each log shows exactly which splits are present); per-launch shas were not
+captured. The split-`0x3970f8` (map5) intermediate binary was superseded by
+the batch+D rebuild before any boot ran on it (no sha recorded).
+
+`ssx3` commits (pushed `fork ssx3`, verified `git show --stat` each time —
+one file each, no `runner/` or `._` files):
+
+| Commit | File | Push |
+|---|---|---|
+| `c0af340` ignore generated guest sources + `._*` | `.gitignore` (+4/-1) | `14b1e5c..cf06e36` (with A) |
+| `cf06e36` Fix A: PS2X_CD_IMAGE hook | `ps2xRuntime/src/main.cpp` (+10) | same push |
+| `fc5cf72` Fix C: idle-thread dump | `…/Kernel/EeScheduler.cpp` (+32) | `cf06e36..fc5cf72` |
+| `04905db` Fix D: CD callback HLE | `…/Kernel/Stubs/CD.cpp` (+40/-1) | `fc5cf72..04905db` |
+
+`register_functions.cpp` (generated replacement) left as a local
+modification, never added. All trailers present on each commit.
+
+## P3-7. Exact commands used (Part 3, abridged to the load-bearing ones)
+
+```
+hdiutil attach -readonly -nobrowse -mountpoint /tmp/p1-iso "$W/SSX 3 (USA).iso"
+mkdir -p $W/P1/cd && cp -R /tmp/p1-iso/. $W/P1/cd/; hdiutil detach /tmp/p1-iso
+find $W/P1/cd -name "._*" -delete; find $W/P1/cd -type f | wc -l; shasum -a 1 $W/P1/cd/SLUS_207.72
+grep cdRoot/hostRoot (scoped, runner/ excluded); reads of Path.h, Runtime.h, Support.h, CD.cpp
+printf 'P1b-build' > /tmp/ssx3-host-lease   (before each build; 'P1b' before each boot; rm at end)
+cp -X $W/P1/ssx3.toml $W/P1/ssx3.toml.p1-orig; python3 TOML insert (ret0 row); diff
+cd $W/P1 && $W/P1/bin/ps2_recomp $W/P1/ssx3.toml | tee recomp-p1b.log
+cat output/sub_0042C1F0_0x42c1f0.cpp (wrapper quote)
+cp -X $W/P1/output/*.{cpp,h} $W/PS2Recomp/ps2xRuntime/src/runner/  (+ sidecar purges)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner | tee build-port-p1b.log; shasum -a 256 (binary)
+mkdir -p $W/P1/run; cd $W/P1/run && PS2X_CD_IMAGE=... stdbuf -o0 -e0 runner $W/P1/cd/SLUS_207.72 > boot-p1b-N.log 2>&1  (N=1..8; N=1 with | head -c pipe)
+ELF word reads (table base, entries, prologues); CSV generators (split-only backup, stub rows, batch splits)
+python TOML ghidra_output set; recompiles map/map2/map3/map4/map5/batch (tee logs)
+main.cpp hunk (edit_file); git diff > $W/P1/cd-image-env.patch
+EeScheduler.cpp hunks (edit_file); git diff > $W/P1/idle-dump.patch
+CD.cpp hunks (edit_file x5); git diff > $W/P1/cd-callback.patch
+git add <specific files>; git commit (4x, trailers); git show --stat; git push fork ssx3 (3x)
+strings binary | grep -c ee:idle (C-in-binary check)
+trace/ladder greps per boot; constructor-table prologue verification via output/ comments
+find $W/P1 -name "._*" -delete (repeated); mv repo-root strays (none this round)
+```
+
+## P3-8. What I could not do
+
+- Ghidra-export path: the CSV map is derived from analyzer output, not Ghidra.
+- `stubs: 126` in map mode: reads 176 (see P3-6); bindings verified per-file instead.
+- Boot 8 emits no `ee:idle` dump (scheduler never >3 s idle) and no VIF/GIF/crash lines; per amendment 2, nothing further implemented — parked-on-different-wait dump did not occur either (no dump at all).
+- IOP profile table for the 6 modules: the background grep did not return a complete table before report time; no profiles were modified; module-load success (6/6) recorded instead.
+- `waits.log`: no waits (no foreign lease during P1b).
+- Time boxes: P1b base box + 2 h (amendment 1) + 2 h (amendment 2) were not exhausted.
