@@ -44,6 +44,24 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **S2 gate read (09-18 12:15) — host replay capacity PASSED:**
+      with the paired preprocess pass, aux-buffer rewind, PE-token
+      masking and per-replay memory/CP/XF restore, the Odin replays a
+      Snow Jam frame in 0.67–0.87 ms median on the video thread,
+      200/200 with `done`, no tombstone (gate was ≤6 ms). The D2b death
+      was the deterministic dual-core FIFO aux buffer, not state drift,
+      so the fix is small and lives in the research header. Not done:
+      Vulkan (EGL trial has no Vulkan backend; relink against
+      `core-vk-build`), HUD verification of the arms (m4-src trial
+      records no screenshots), milestone 2 (`ReplayContext`; Part 4 of
+      the report is the verified side-effect inventory). Continuations
+      are muse from here: S2b = s2-egl-c with a screenshot-capable
+      trial for HUD proof + s2-vk-a relinked (report has the exact
+      commands); milestone 2 splits into ReplayContext ownership items
+      (EFB/XFB + texture-cache resources, event suppression, frame
+      counter) each as a brief with the desktop determinism gate, then
+      pose interpolation on the `XFReplay::g_transform` seam. Ledger
+      row added; the D2b row is superseded.
 - [ ] **S1c gate read (09-18 11:50) — repin PARKED:** upstream's C
       backend on the repinned Android stack is not faster on the Odin.
       Repinned emu ms/frame ≥ pinned on every pair: uncapped +10–20%
@@ -63,6 +81,22 @@ the build or commit that closed them.
       replay arms (Vulkan) and any milestone-2 work become muse briefs
       (S2b). Every implementation step is a muse brief; judgment stays
       in this session between briefs.
+- [ ] **PS2 throughput gate READ (09-18 12:10) — the PS2 avenue is
+      alive:** stock SSX 3 runs at 4.2–4.4× real time in the Snow Jam
+      race under NetherSX2 on the Odin (Vulkan 1×, MTVU, limiter off, on
+      battery). EE 2.5–2.9 ms per frame on its own thread, GS 1.5–2.4,
+      VU 1.6–2.4, GPU 0.7–1.1: full-sim 120 Hz (the F route) has ~3×
+      headroom on the PS2 side even under a JIT, where the GameCube
+      route was 1.05–1.2× short. Ledger row + OSD frames under
+      `local/research/ps2-gate/`. What it does NOT show: a static
+      recomp's cost (EE/VU normally faster than the JIT; PS2Recomp's GS
+      is a CPU software backend, so a GPU GS renderer is the whole
+      gate), VU microcode coverage for this game, audio/timing under
+      the recomp, and the game-side 120 Hz timestep patch (PS2 has the
+      published scheduling patch sites). USER DECISION: open a PS2Recomp
+      evaluation track (muse: build for arm64, boot stock SSX 3, measure
+      EE/VU/GS split with the software GS, inventory the GS renderer
+      gap) alongside host replay, or keep it parked.
 - [ ] **PS2 throughput gate (queued 09-18 11:50):** the cheap answer to
       "could a PS2 static recomp reach full-sim 120": run the PS2 game
       uncapped in NetherSX2 on the Odin in the Snow Jam race window and
