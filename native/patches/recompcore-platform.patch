@@ -1839,3 +1839,39 @@ index 29d636e..a98ddd5 100644
    bool m_throttle_disable_vi_int = false;
  
    DT m_max_fallback = {};
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore.h
+@@ -173,5 +173,11 @@ private:
+   u64 m_bursts = 0;          // SyncIn..SyncOut native runs (diagnostic)
+   u64 m_charged_cycles = 0;  // cycles flushed from module charges (diagnostic)
++  // M2 Fix A: last FPSCR RN+NI programmed into the host SIMD unit by SyncOut.
++  // RoundingModeUpdated + SetSIMDMode cost ~0.51% of cycles (M7); FPSCR RN/NI
++  // bits (Hex & 0x7) change only when the guest changes rounding mode, so
++  // SyncOut skips the host FPCR write when they are unchanged. 0xFFFFFFFFu
++  // forces the first SyncOut to program the host state.
++  u32 m_last_sync_fpscr_rm_ni = 0xFFFFFFFFu;
+
+   // D4 guard state: parallel to m_module->chunk_ranges.
+   std::vector<u8> m_chunk_state;
+diff --git a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Sync.cpp b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Sync.cpp
+--- a/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Sync.cpp
++++ b/Source/Core/Core/PowerPC/StaticRecomp/StaticRecompCore_Sync.cpp
+@@ -107,7 +107,16 @@ void StaticRecompCore::SyncOut()
+     ppc.msr.Hex = m_guest.msr;
+     power_pc.MSRUpdated();
+   }
+-  PowerPC::RoundingModeUpdated(ppc);
++  // M2 Fix A: RoundingModeUpdated programs the host FPCR (SetSIMDMode, an
++  // MSR read on arm64) at every burst boundary. The host mode depends only on
++  // FPSCR RN (bits 0-1) and NI (bit 2), which the guest almost never changes,
++  // so skip the write when they match the last programmed value.
++  const u32 rm_ni = ppc.fpscr.Hex & 0x7u;
++  if (rm_ni != m_last_sync_fpscr_rm_ni)
++  {
++    m_last_sync_fpscr_rm_ni = rm_ni;
++    PowerPC::RoundingModeUpdated(ppc);
++  }
+ }
+
+ void StaticRecompCore::PropagateGuestMSR()
