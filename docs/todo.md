@@ -44,6 +44,20 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **Laptop disk evacuation (09-18 14:25):** the data volume hit 100%
+      mid-run (herdr logging degraded); now 34 GB free. Moved to the SSD:
+      old `/tmp` link dirs (`tmp-evacuated-0918/`), `local/builds`
+      (symlink left), and as tar archives under `laptop-evacuated-0918/`
+      with verified entry counts: `local/research/{120hz,startgate,
+      remaster,float-opt-psq}`, `local/reports`, `local/fast-game`,
+      `local/native/{profiles,profiles-f120,ios-device,ios-simulator}`
+      (sources removed; empty `local/reports` and `local/native/profiles`
+      recreated for tools that write there). Kept: `local/game`,
+      `local/native/{ssx3-module,runtime-build}`. Lessons: the SSD is
+      ExFAT with 1 MiB clusters and no symlinks — tar small-file trees,
+      never `mv` them; this Mac's `find` is bfs, which rejects
+      `-newermt "-3 hours"` (use an ISO timestamp). Briefs now write
+      receipts and binaries to the SSD and use `/tmp` only for the link.
 - [ ] **P1 read (09-18 14:10) — PS2Recomp boots to the kernel-patch
       scanner; P1b launched:** census and recompile reproduced exactly on
       the Mac (arm64); runtime + 425/425 tests + port runner all build;
