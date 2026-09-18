@@ -308,6 +308,24 @@ class AndroidTrialTests(unittest.TestCase):
         self.assertTrue(any(c.startswith('taskset -p 80 104') for c in seen))
         self.assertTrue(any(c.startswith('taskset -p 40 110') for c in seen))
 
+    def test_sampler_command_backgrounds_against_the_real_pid(self):
+        line = trial.sampler_command('d1-base-a', '16865', 480)
+        self.assertIn('cd /data/local/tmp/mg;', line)
+        self.assertIn('sh ./odin_sampler.sh 16865 d1-base-a.err '
+                      'd1-base-a-sampler.log 480 1', line)
+        self.assertTrue(line.rstrip().endswith('& echo $!'))
+
+    def test_launch_env_sets_probe_quiet_only_on_request(self):
+        args = SimpleNamespace(movie='m3-menu.dtm', screenshot_seconds=2,
+                               trial_at=None, trial_kind='smoothing',
+                               trial_secs=0, probe_quiet=False)
+        env = trial.launch_env(args, '/data/local/tmp/mg/t-probe.jsonl')
+        self.assertNotIn('SSX_NATIVE_QUIET', env)
+        self.assertNotIn('SSX_ANDROID_TRIAL_AT', env)
+        args.probe_quiet = True
+        quiet = trial.launch_env(args, '/data/local/tmp/mg/t-probe.jsonl')
+        self.assertEqual(quiet['SSX_NATIVE_QUIET'], '1')
+
     def test_apply_affinity_raises_when_threads_never_appear(self):
         def runner(argv, serial=None, **kw):
             return SimpleNamespace(stdout='/proc/1/task/100/comm:moderngekko-run\n')

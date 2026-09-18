@@ -58,6 +58,9 @@ INNER_ANDROID_STACK = tuple(CORE_STACK) + (
 )
 DEVICE_DIR = '/data/local/tmp/mg'
 TRIAL_BINARY = 'moderngekko-run-trial'
+SAMPLER_SCRIPT = 'odin_sampler.sh'
+SAMPLER_INTERVAL = 1
+SAMPLER_MARGIN_SECS = 180
 PANIC_MARKERS = ('FIFO is overflowed by GatherPipe', 'GatherPipeBursted')
 # TrialControl Status order (Idle, Waiting, Running, Finished, Unavailable).
 STATUS_RUNNING, STATUS_FINISHED, STATUS_UNAVAILABLE = 2, 3, 4
@@ -433,6 +436,29 @@ def apply_affinity(serial, pid, specs, tag, runner=adb, timeout=30):
     return record
 
 
+def launch_env(args, probe):
+    """Remote env for a run: metrics, movie, probe, screenshots, trial."""
+    env = dict(STATICRECOMP_VERBOSE='1', SSX3_RUNTIME_METRICS='1',
+               SSX3_MOVIE_PLAY=f'{DEVICE_DIR}/{args.movie}', SSX_NATIVE_PROBE=probe,
+               **screenshot_env(args.screenshot_seconds),
+               **trial_env(args.trial_at, args.trial_kind, args.trial_secs))
+    if args.probe_quiet:
+        env['SSX_NATIVE_QUIET'] = '1'
+    return env
+
+
+def sampler_command(tag, pid, nticks, interval=SAMPLER_INTERVAL):
+    """One remote shell line: background the odin sampler against a live PID.
+
+    The sampler appends ticks to <tag>-sampler.log until nticks elapse or
+    the PID exits; `cd X; ... &` (never `cd X && ... &`) so adb returns
+    instantly instead of hanging on the session fds.
+    """
+    return (f'cd {DEVICE_DIR}; sh ./{SAMPLER_SCRIPT} {pid} '
+            f'{tag}.err {tag}-sampler.log {nticks} {interval} '
+            f'>sampler-{tag}.out 2>&1 & echo $!')
+
+
 def run(args):
     serial = resolve_serial(args.serial)
     if 'moderngekko-run' in adb(['shell', 'ps', '-A'], serial).stdout:
@@ -473,31 +499,52 @@ def run(args):
         local_gfx.write_text(seeded)
         subprocess.run(['adb', '-s', serial, 'push', str(local_gfx),
                         f'{DEVICE_DIR}/{user}/Config/GFX.ini'], check=True, capture_output=True)
-    env = dict(STATICRECOMP_VERBOSE='1', SSX3_RUNTIME_METRICS='1',
-               SSX3_MOVIE_PLAY=f'{DEVICE_DIR}/{args.movie}', SSX_NATIVE_PROBE=probe,
-               **screenshot_env(args.screenshot_seconds),
-               **trial_env(args.trial_at, args.trial_kind, args.trial_secs))
+    env = launch_env(args, probe)
     pid = adb(['shell', launch_command(tag, env, user, args.module, args.timeout,
                                        graphics=args.graphics)],
               serial).stdout.strip()
     print(f'launched pid {pid}: {tag} (trial_at={args.trial_at} kind={args.trial_kind})', flush=True)
     affinity_record = None
+    real_pid = None
     if args.affinity:
         specs = affinity_spec(args.affinity)
         real_pid = child_pid(serial, pid)
         affinity_record = apply_affinity(serial, real_pid, specs, tag)
         print(f'affinity {affinity_record}', flush=True)
+    sampler_record = None
+    if args.sampler:
+        if real_pid is None:
+            real_pid = child_pid(serial, pid)
+        subprocess.run(['adb', '-s', serial, 'push',
+                        str(ROOT / 'tools' / SAMPLER_SCRIPT),
+                        f'{DEVICE_DIR}/{SAMPLER_SCRIPT}'], check=True)
+        pushed_sampler = adb(
+            ['shell', 'sha256sum', f'{DEVICE_DIR}/{SAMPLER_SCRIPT}'],
+            serial).stdout.split()[0]
+        if pushed_sampler != sha(ROOT / 'tools' / SAMPLER_SCRIPT):
+            raise ValueError('Sampler script hash mismatch on device')
+        nticks = args.timeout + SAMPLER_MARGIN_SECS
+        sampler_pid = adb(['shell', sampler_command(tag, real_pid, nticks)],
+                          serial).stdout.strip()
+        sampler_record = dict(pid=sampler_pid, nticks=nticks,
+                              interval=SAMPLER_INTERVAL,
+                              sha256=pushed_sampler)
+        print(f'sampler {sampler_record}', flush=True)
     exited = await_exit(serial, pid, time.time() + args.timeout + 120)
     manifest = dict(schema=1, tag=tag, pid=pid, serial=serial, trial_binary_sha256=digest,
                     device_dol_sha256=dol, template=args.template, idle=bool(args.idle),
                     immediate_xfb=not args.no_immediate_xfb, env=env, timeout=args.timeout,
-                    affinity=affinity_record, exited=exited)
+                    affinity=affinity_record, sampler=sampler_record,
+                    exited=exited)
     out_dir = args.output.resolve()
     out_dir.mkdir(parents=True, exist_ok=False)
-    for remote, local in [(f'{tag}.out', f'{tag}.out'), (f'{tag}.err', f'{tag}.err'),
-                          (f'{tag}-probe.jsonl', f'{tag}-probe.jsonl'),
-                          (f'{user}/Config/GFX.ini', f'{tag}-GFX-post.ini'),
-                          (f'{user}/Config/Dolphin.ini', f'{tag}-Dolphin-post.ini')]:
+    pulls = [(f'{tag}.out', f'{tag}.out'), (f'{tag}.err', f'{tag}.err'),
+             (f'{tag}-probe.jsonl', f'{tag}-probe.jsonl'),
+             (f'{user}/Config/GFX.ini', f'{tag}-GFX-post.ini'),
+             (f'{user}/Config/Dolphin.ini', f'{tag}-Dolphin-post.ini')]
+    if args.sampler:
+        pulls.append((f'{tag}-sampler.log', f'{tag}-sampler.log'))
+    for remote, local in pulls:
         result = subprocess.run(['adb', '-s', serial, 'pull', f'{DEVICE_DIR}/{remote}',
                                  str(out_dir / local)],
                                 capture_output=True, text=True)
@@ -632,7 +679,7 @@ def main():
     p.add_argument('--template', default='m6h', help='Device user dir template (default m6h)')
     p.add_argument('--movie', default='m3-menu.dtm')
     p.add_argument('--module', default='gGXBE69_recomp.so')
-    p.add_argument('--graphics', choices=('OGL', 'Vulkan'), default='OGL',
+    p.add_argument('--graphics', choices=('OGL', 'Vulkan', 'Null'), default='OGL',
                    help='GPU backend for the run (default OGL)')
     p.add_argument('--idle', choices=('on', 'off'), default='on')
     p.add_argument('--no-immediate-xfb', action='store_true',
@@ -646,6 +693,12 @@ def main():
                    help="Pin threads by role right after launch, e.g. "
                         "'emu=80,video=40' (bare hex masks: 80 pins cpu7, "
                         "40 cpu6 on the Odin 3)")
+    p.add_argument('--sampler', action='store_true',
+                   help='Push tools/odin_sampler.sh, start it at launch '
+                        'against the real PID with a 1 s interval, and pull '
+                        'its log into the receipts')
+    p.add_argument('--probe-quiet', action='store_true',
+                   help='Set SSX_NATIVE_QUIET=1 for control-probe runs')
     p.add_argument('--screenshot-seconds', type=int, default=2,
                    help='Capture cadence in seconds (default 2; 0 disables '
                         'capture for unperturbed trial windows)')
