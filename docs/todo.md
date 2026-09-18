@@ -44,6 +44,13 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **Device link (09-18 12:10):** the Odin drained to 2% under
+      back-to-back runs (a dongle charged slower than the runs drew; the
+      Mac port did not charge it at all). Now on a wall charger and driven
+      over adb-TCP (`tools/odin_wireless.sh`, serial in `local/odin-serial`);
+      the harness refuses to launch below 10% (`--min-battery`) and
+      records battery state; briefs wait for ≥ 20% and charging. TCP mode
+      resets on reboot (redo `enable` on USB after D4's reboot).
 - [ ] **D2b read (09-18 10:15) → S2 launched:** Odin EGL replay costs
       2.0 ms wall / 2.0 ms CPU per frame for 26 replays, then dies in
       `LoadIndexedXF` because indexed-array (CP/XF) state drifts across
