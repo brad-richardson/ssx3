@@ -29,6 +29,20 @@ the build or commit that closed them.
       ~600×/s each. If that rate holds on Odin, silencing the storm
       (MSR_FP handling? fast path?) is a direct win independent of
       §2. Needs Odin confirmation + per-op attribution first.
+      **M2 read (09-17 21:30):** the `0x800` body is NOT a stub like
+      the syscall vector — it is the SDK generic exception entry
+      (full context save + handler-table branch), so vector HLE is
+      off the table. The lead now is cost per fault (M2b instruments
+      raise→rfi host ns) and, if the cost is real, an eager-FP
+      context switch (keep MSR.FP set, save/restore FPRs in
+      OSLoadContext) instead of the SDK's lazy trap; that needs the
+      native-ABI FPR location, so it waits for the M1/S1 decision.
+- [ ] M2 status (09-17 21:30): Fix A (rounding-mode sync guard)
+      implemented in the platform patch + record tests, NOT landed:
+      A/B deferred to M2b on a quiet host (recipe in
+      `local/research/M2/REPORT.md`). Fix B stopped after measurement
+      (above). Fix C (fallback-JIT `InvalidateICache` on yield)
+      propose-only; M2b counts calls/s.
 - [ ] Codegen entry-switch pruning, one-chunk spike (September 17,
       perf-review §2, TOP avg-75 lever, desktop-only): every guest
       instruction is an entry-dispatcher case, forbidding
