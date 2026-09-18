@@ -52,6 +52,16 @@ the build or commit that closed them.
       ZTE — plan §5a now routes those features to a second oracle instead
       of byte-exact-vs-CPU. Next: G1 (game captures) waits on P1b
       rendering; G2 (loop brief) after G1. Ledger row added.
+- [ ] **ssx3 publication audit LAUNCHED (09-18 16:00), user decision:**
+      go public with MIT for the project's own code (vendored trees keep
+      GPL-3; patches to them and combined builds are GPL-3), so the
+      upstream maintainers can see what we care about and why patches
+      exist. Three read-only muse audits: A1 game-derived and third-party
+      content (tree + history), A2 secrets / personal data / private
+      infrastructure (tree + history), A3 docs structure + README drafts.
+      Then the orchestrator reviews the findings, decides redactions,
+      deletions or history rewrites, adds LICENSE + READMEs, and only
+      then the visibility change.
 - [ ] **Repos and licenses (09-18 15:35):** `ps2xGS` is public at
       github.com/brad-richardson/ps2xGS under GPL-3.0 (switched from MIT
       to match PS2Recomp and avoid the combined-work question); push
