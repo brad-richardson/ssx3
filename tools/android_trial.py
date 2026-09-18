@@ -278,9 +278,17 @@ def resolve_serial(explicit):
     attached = [line.split()[0] for line in adb(['devices']).stdout.splitlines()[1:]
                 if line.strip() and line.split()[1] == 'device']
     if explicit:
-        if explicit not in attached:
-            raise ValueError(f'Device {explicit} is not attached: {attached}')
-        return explicit
+        if explicit in attached:
+            return explicit
+        # A device driven over adb-over-TCP shows as ip:port; when the
+        # requested USB serial is absent and exactly one device is attached,
+        # use it and say so, so briefs written against the USB serial keep
+        # working after a wireless switch.
+        if len(attached) == 1:
+            print(f'device {explicit} not attached; using the sole attached device '
+                  f'{attached[0]}', flush=True)
+            return attached[0]
+        raise ValueError(f'Device {explicit} is not attached: {attached}')
     if len(attached) != 1:
         raise ValueError(f'Need exactly one attached device, pass --serial: {attached}')
     return attached[0]

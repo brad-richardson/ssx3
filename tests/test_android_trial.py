@@ -330,6 +330,16 @@ class AndroidTrialTests(unittest.TestCase):
         self.assertEqual(state['low_power'], '1')
         self.assertEqual(trial.check_battery('abc', 3, runner=fake_adb)['level'], 3)
 
+    def test_resolve_serial_falls_back_to_the_sole_attached_device(self):
+        listing = SimpleNamespace(stdout='List of devices attached\n192.168.1.50:5555\tdevice\n')
+        with mock.patch.object(trial, 'adb', return_value=listing):
+            self.assertEqual(trial.resolve_serial('622c49b1'), '192.168.1.50:5555')
+            self.assertEqual(trial.resolve_serial(None), '192.168.1.50:5555')
+        two = SimpleNamespace(stdout='List of devices attached\na\tdevice\nb\tdevice\n')
+        with mock.patch.object(trial, 'adb', return_value=two):
+            with self.assertRaises(ValueError):
+                trial.resolve_serial('622c49b1')
+
     def test_sampler_command_backgrounds_against_the_real_pid(self):
         line = trial.sampler_command('d1-base-a', '16865', 480)
         self.assertIn('cd /data/local/tmp/mg;', line)
