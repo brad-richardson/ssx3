@@ -44,6 +44,19 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
+      floor problem:** on the device the heaviest track costs only ~11%
+      more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
+      uncapped); the desktop 3.7× was the single-core player carrying
+      the Metal backend, so earlier "3× worse" framing is withdrawn.
+      The real finding: capped at 60 Hz the governor parks cpu7 at its
+      3.28 GHz floor and Crow's Nest runs its first 51 s at 0.82× —
+      below real time — then locks 1.0×. Shipping at any rate needs a
+      clock floor: cheap probe first (user's "High performance" quick
+      setting on the crows-cap arm), then an ADPF/sustained-performance
+      hint or a busy-wait pacer in the runtime (D8). Movie note: the
+      Snow Jam 3-min movie exhausts at HUD 3:33 at 1.0×; record a longer
+      one if capped full-race numbers are needed.
 - [ ] **D2 Odin read (09-18 08:20) → D2b:** replay on the Odin looks
       an order of magnitude cheaper than the S2 gate needs (≈0.5 ms wall
       per replay, unverified partial) but the bulk section kills the
@@ -83,7 +96,8 @@ the build or commit that closed them.
 - [ ] **M3 gate read (09-18 04:05) — corpus switch:** Snow Jam is the
       LIGHTEST of 13 measured courses; Crow's Nest (heaviest that rides)
       costs 3.7× its render and 2.6× its update on the desktop. Every
-      Odin budget number to date is the easy case. From now on budget
+      Odin budget number to date is the easy case (CORRECTED 09:20: on
+      the Odin the spread is ~11%, see the M3b read). Budget
       numbers come from the corpus movies (Snow Jam 3-min = light
       anchor, Crow's Nest 3-min = heavy anchor); M3b runs both on the
       Odin with the pace binary first thing after S3 frees the device
