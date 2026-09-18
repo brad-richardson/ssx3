@@ -2088,3 +2088,714 @@ ELF word reads: python3 struct reads at file offset 0x1000 + (va - 0x100000)
   waiter exists for an HLE stub to complete.
 - Time box: about 1 h 10 min of the 5 h box used.
 
+# P1d report — Part 5 (brief local/muse/prompts/P1d.md)
+
+Run wall: lease `P1d` acquired with `/tmp/ssx3-host-lease` absent;
+sweep script written ~18:14, sweep recompile + runner refresh + normal
+rebuild, boot 1 (`boot-p1d-1.log`, ~18:29–18:32, 185 s), CD payload
+`Diag:` commit `f0b5040` + push, strict configure + build, boot 2
+(`boot-p1d-2.log`, ~18:43–18:46, 185 s). Inside the 5-hour box.
+`W` = `/Volumes/Extreme SSD/ps2recomp-spike`. No verdicts.
+
+## P5-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` absent; wrote `P1d` |
+| Builds/boots | Lease kept as `P1d` across sweep recompile, normal rebuild, boot 1, payload commit, strict configure/build, boot 2 |
+| Foreign leases / waits | None observed; no `waits.log` |
+| `adb` | Not used |
+| End | Removed after the `[P1d]` push, verified absent |
+
+## P5-1. Thread-entry table (Step 1, no build)
+
+`Kernel/Syscalls/Thread.cpp:269` (`StartThread`): returns `KE_ERROR`
+when `!runtime->hasFunction(target->entry)`. `hasFunction` is a dense
+per-address slot check (`ps2_runtime.cpp:1153-1157`): only exact map
+starts have non-null slots.
+
+| Address | Map row (`ssx3-functions.csv`, pre-sweep) | Prologue evidence (ELF words `0x3e3bd8–0x3e3be8`) | Verdict-free note |
+|---|---|---|---|
+| `0x3e3be0` | Not a map start; contained in line 7217 `sub_003E3B00,0x3e3b00,0x3e3d78,0x278` | `0x3e3bd8=0x27bd0070` (`addiu $sp,$sp,+0x70`), `0x3e3bdc=0x00000000` (`nop`), `0x3e3be0=0x27bdffa0` (`addiu $sp,$sp,-0x60`), `0x3e3be4=0x3c020052` (`lui $v0,0x52`), `0x3e3be8=0x7fb00050` (`sq $s0,0x50($sp)`); `T-8`/`T-4` are not `jr $ra`, `T-4` is not `j`/`jr` | Boot-p1c-3 block 0–34: thread 2 `entry=0x3e3be0 priority=12 scheduled=0`, status Dormant; block-0 syscall ids include `0x20 CreateThread` + `0x22 StartThread`; generated `sub_003E3B00` holds `0x3e3be0` as sequential code with no `case 0x3e3be0u` / `label_3e3be0` |
+
+## P5-2. Sweep script + count table + recompile + boot-1 ladder
+
+Script: `$W/P1/tools/codeptr_sweep.py` (kept in `$W/P1/tools/`, not
+committed under `docs/research/`; quoted in full below). Inputs: ELF
+`$W/P1/cd/SLUS_207.72`, CSV `$W/P1/ssx3-functions.csv`. `.text`
+from ELF section headers: `[0x100000,0x42e020)`; loaded segments: one
+`PT_LOAD` (`vaddr=0x100000 filesz=0x3a4bf4 memsz=0x43eadc
+off=0x1000`). `j`/`jr` = opcode `0x02` / `SPECIAL` funct `0x08`;
+branch = opcodes `0x01–0x07`, `SPECIAL 0x08/0x09`, COP1 `BC`
+(fmt `0x08`). Collision check reads only the enclosing function's
+`output/sub_*.cpp` (AppleDouble `._*` skipped) for lowercase
+`case 0x<T>u` / `label_<T>`.
+
+Count table (`$W/P1/sweep-counts.log`):
+
+| Item | Value |
+|---|---|
+| Source (a) distinct / refs | 7995 / 20820 |
+| Source (b) distinct / refs | 269 / 336 |
+| Source (c) distinct | 42 (specials 3 + ctors 39) |
+| Self-check ctors in (a) / in (b) | 39/39 / 0/39 |
+| Self-check specials in (a) / in (b) | 0/3 / 3/3 |
+| Self-check combined | all 39 ctors + 3 specials present in (a)/(b)/(c) |
+| Map rows / starts (pre-sweep) | 8246 / 8245 |
+| Already-mapped candidates | 462 |
+| Proposed pre-collision / rejected | 3663 / 4124 |
+| Collisions (internal branch target) | 2639 |
+| Split | 1024 |
+| New CSV | `$W/P1/ssx3-functions.sweep.csv`: 9270 data rows (+1024 splits) |
+
+Top 20 rejected by frequency (address, refs, instruction word at T):
+
+| Address | Freq | Instr |
+|---|---|---|
+| `0x1ce138` | 94 | `0x8e030008` |
+| `0x417dd0` | 87 | `0x3c02004a` |
+| `0x101880` | 79 | `0x03e00008` |
+| `0x101080` | 71 | `0x4480a800` |
+| `0x1cdb80` | 66 | `0x7bb00040` |
+| `0x17da0c` | 63 | `0x7bb00060` |
+| `0x1cc4f0` | 62 | `0x0c0731f2` |
+| `0x1cd2a4` | 62 | `0x3c020044` |
+| `0x425bd8` | 62 | `0x26520001` |
+| `0x41d134` | 56 | `0x12a00200` |
+| `0x1adc04` | 53 | `0x0c06a390` |
+| `0x4182c8` | 52 | `0x32620080` |
+| `0x37bc8c` | 51 | `0x0000382d` |
+| `0x37bcd4` | 51 | `0x0000182d` |
+| `0x37bd88` | 51 | `0x0000102d` |
+| `0x37bf2c` | 51 | `0x8e235a3c` |
+| `0x37bf80` | 51 | `0x8e235a40` |
+| `0x108080` | 50 | `0x7bb000e0` |
+| `0x1a8f7c` | 50 | `0x7bb00030` |
+| `0x41bf28` | 50 | `0x12c00201` |
+
+Collision list head (2639 total, first 50):
+`0x1009e0, 0x100b90, 0x100f88, 0x1036a0, 0x103918, 0x108fa8,
+0x10a768, 0x10a898, 0x10a8e8, 0x10c498, 0x10c4c0, 0x10c4dc,
+0x10e770, 0x10e7d0, 0x10e830, 0x113b94, 0x113cc0, 0x113ce0,
+0x113ce8, 0x113cf0, 0x113d10, 0x113d18, 0x113d30, 0x113d38,
+0x113d48, 0x113d80, 0x113d88, 0x113db0, 0x113e18, 0x113e48,
+0x113e50, 0x113e78, 0x123210, 0x1234d0, 0x1278c0, 0x1278e0,
+0x1278e8, 0x127998, 0x128660, 0x128680, 0x1287b8, 0x128818,
+0x1291e0, 0x1298e0, 0x12b7f0, 0x12b948, 0x131600, 0x145844,
+0x14584c, 0x145854 ...`
+
+Thread-entry split in the sweep CSV (lines 8155–8158):
+
+| Line | Row |
+|---|---|
+| 8155 | `sub_003E39A8,0x3e39a8,0x3e3b00,0x158` |
+| 8156 | `sub_003E3B00,0x3e3b00,0x3e3be0,0xe0` |
+| 8157 | `sub_003E3BE0,0x3e3be0,0x3e3d78,0x198` |
+| 8158 | `sub_003E3D78,0x3e3d78,0x3e4000,0x288` |
+
+Recompile (`$W/P1/recomp-p1d-sweep.log`, CWD `$W/P1`,
+`ghidra_output = "ssx3-functions.sweep.csv"`, `ret0@0x42c1f0` intact):
+
+| Item | Value |
+|---|---|
+| Map loaded | 9270 functions from Ghidra map (one subsumed) |
+| Functions discovered / processed | 9269 / 9269 |
+| Recompiled / stubs / skipped | 9092 / 177 / 0 |
+| Decode failures / unhandled | 0 / 0 |
+| Additional entrypoints | 393727 |
+| Warnings (unresolved JR/JALR) | 3598 |
+| Fallback entries | 724964 |
+| New output file | `output/sub_003E3BE0_0x3e3be0.cpp` (`0x3e3be0–0x3e3d78`) |
+| Runner refresh | `cp -X output/*.{cpp,h}` to `ps2xRuntime/src/runner/` (9273 files), sidecars purged |
+| Rebuild | `cmake --build /tmp/p1-link/runtime --target ps2EntryRunner`, exit 0 |
+| Binary sha256 (boot 1) | `3a70f0f94eb3108054bdd1962adb28a45a4798878140e4d12f5b20bb4a39ac06` |
+
+Boot-1 ladder (`$W/P1/run/boot-p1d-1.log`, 516 lines, 34807 B, 185 s,
+`PS2X_DIAG_PERIOD_MS=5000`):
+
+| Rung | Boot 1 |
+|---|---|
+| Process start / ELF load / exec start | Same as boot-p1c-3 (`0x100008`) |
+| First new syscall ids vs boot-p1c-3 | None (block 0 distinct=21, same id set; top-20 print lists 20 of 21) |
+| Second thread (block 0) | `id=2 entry=0x3e3be0 priority=12 scheduled=1 status=2 (Waiting) waitReason=2 (Semaphore) waitId=26 pc=0x423de8` (boot-p1c-3: `scheduled=0`, Dormant) |
+| Thread table at last dump (block 77) | `id=1 status=5 waitReason=0 waitId=0 pc=0x0 entry=0x100008 priority=100 scheduled=0`; `id=2 status=2 waitReason=2 waitId=26 pc=0x423de8 entry=0x3e3be0 priority=12 scheduled=0` |
+| CD lines | 20x `sceCdRead` (`buf=0x519c80 ret=0x3e3694`; lbn `0x10,0x105,0x106,0x107,0x109–0x117,0x108,0x117` order with `0x108` second-last) + 1x `sceCdInitEeCB` (`stack=0x51a480 size=0x800 ret=0x3e442c`) |
+| Stub block 0 distinct | 275 (new vs boot-p1c-3 top rows: `0x4166f4` count=543 ras `0x3e38cc→0x3e3a3c`, `0x416810` 325, `0x3e6574` 205, `0x4162d0` 181, `0x3e36f8` 163; `0x3e3968` still 1135) |
+| Missing targets | None (0 `missing-target` lines) |
+| First VIF MPG/MSCAL | None |
+| First GIF kick | None |
+| First presented frame | None (host window blank) |
+| Crash | None |
+
+Sweep script `$W/P1/tools/codeptr_sweep.py`, quoted in full:
+
+```python
+#!/usr/bin/env python3
+"""P1d code-pointer sweep (brief Step 2).
+
+Inputs: ELF $W/P1/cd/SLUS_207.72, CSV map $W/P1/ssx3-functions.csv.
+Collects every candidate code address T in .text from:
+  (a) every 32-bit aligned word in every loaded segment whose value lies
+      in [text_start, text_end) and is word-aligned,
+  (b) every `lui rX, hi` followed within 4 instructions by
+      `addiu rX, rX, lo` or `ori rX, rX, lo` whose composed value lies
+      in .text,
+  (c) the a1/handler arguments already seen: 0x3e3588 (SetAlarm),
+      0x3e3968 (comparator), 0x3e3be0 (thread entry), the 39
+      constructors (self-check: the script must find all of them).
+
+A candidate becomes a split when T is not already a map start AND at
+least one of:
+  - instruction at T is `addiu $sp,$sp,-N`,
+  - instruction at T-8 is `jr $ra` (0x03e00008) or at T-4 is `jr $ra`,
+  - instruction at T-4 is `j`/`jr` and T-8 is not a branch.
+Everything else is listed but not split.
+
+Sanity: never split inside a function whose generated source shows the
+address as an internal branch target (grep output/sub_*.cpp for
+`case 0x<T>` / `L_<T>` labels; list collisions instead of splitting).
+
+Output: new CSV (ssx3-functions.sweep.csv), and a table of counts
+printed to stdout.
+"""
+import argparse
+import bisect
+import csv
+import os
+import struct
+import sys
+from collections import Counter, defaultdict
+
+JR_RA = 0x03E00008
+
+# 39 constructor entries from REPORT P3-4 (walk routine sub_0040FB88).
+CONSTRUCTORS = [
+    0x1448B8, 0x15C8F0, 0x168298, 0x176A28, 0x177E30, 0x179738,
+    0x179FA8, 0x1E12B0, 0x222428, 0x2267F0, 0x247E20, 0x2501A8,
+    0x251690, 0x254330, 0x2557C0, 0x269EA0, 0x26C438, 0x2722C0,
+    0x284B80, 0x2BAEE8, 0x2BB0E0, 0x2BC4E0, 0x2C1688, 0x2D4060,
+    0x2D48D0, 0x2F8370, 0x2F9818, 0x2FAE18, 0x30D498, 0x315A00,
+    0x316878, 0x320B28, 0x341368, 0x361E10, 0x3970F8, 0x3A6648,
+    0x3ADDA0, 0x3B07B8, 0x1001D8,
+]
+SPECIALS = [0x3E3588, 0x3E3968, 0x3E3BE0]
+
+
+def parse_elf(elf_path):
+    with open(elf_path, "rb") as f:
+        hdr = f.read(52)
+        e_phoff = struct.unpack("<I", hdr[0x1C:0x20])[0]
+        e_phentsize = struct.unpack("<H", hdr[0x2A:0x2C])[0]
+        e_phnum = struct.unpack("<H", hdr[0x2C:0x2E])[0]
+        e_shoff = struct.unpack("<I", hdr[0x20:0x24])[0]
+        e_shentsize = struct.unpack("<H", hdr[0x2E:0x30])[0]
+        e_shnum = struct.unpack("<H", hdr[0x30:0x32])[0]
+        e_shstrndx = struct.unpack("<H", hdr[0x32:0x34])[0]
+        # program headers
+        f.seek(e_phoff)
+        segments = []
+        for _ in range(e_phnum):
+            vals = struct.unpack("<IIIIIIII", f.read(32))
+            ptype, poff, pvaddr, ppaddr, pfilesz, pmemsz, pflags, palign = vals
+            segments.append(
+                dict(type=ptype, off=poff, vaddr=pvaddr,
+                     filesz=pfilesz, memsz=pmemsz, flags=pflags))
+        # section headers: find .text for [text_start, text_end)
+        text_start = text_end = None
+        if e_shoff != 0 and e_shnum != 0:
+            def parse_sh(i):
+                f.seek(e_shoff + i * e_shentsize)
+                return struct.unpack("<IIIIIIIIII", f.read(40))
+            str_vals = parse_sh(e_shstrndx)
+            str_off, str_size = str_vals[4], str_vals[5]
+            f.seek(str_off)
+            strtab = f.read(str_size)
+
+            def getname(ni):
+                return strtab[ni:].split(b"\x00")[0].decode(errors="replace")
+            for i in range(e_shnum):
+                v = parse_sh(i)
+                if getname(v[0]) == ".text":
+                    text_start, text_end = v[3], v[3] + v[5]
+        # file bytes
+        f.seek(0)
+        whole = f.read()
+    loads = [s for s in segments if s["type"] == 1]
+    return whole, loads, text_start, text_end
+
+
+def read_word(whole, loads, va):
+    for s in loads:
+        if s["vaddr"] <= va < s["vaddr"] + s["filesz"] - 3:
+            off = s["off"] + (va - s["vaddr"])
+            return struct.unpack_from("<I", whole, off)[0]
+    return None
+
+
+def is_addiu_sp_neg(w):
+    return (w is not None and (w & 0xFFFF0000) == 0x27BD0000
+            and (w & 0x8000) != 0 and (w & 0xFFFF) != 0)
+
+
+def is_j_or_jr(w):
+    if w is None:
+        return False
+    op = (w >> 26) & 0x3F
+    if op == 0x02:  # j
+        return True
+    if op == 0x00 and (w & 0x3F) == 0x08:  # jr (any rs)
+        return True
+    return False
+
+
+def is_branch(w):
+    if w is None:
+        return False
+    op = (w >> 26) & 0x3F
+    if op in (0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07):
+        return True
+    if op == 0x00 and (w & 0x3F) in (0x08, 0x09):  # jr/jalr
+        return True
+    if op == 0x11 and ((w >> 21) & 0x1F) == 0x08:  # bc1f/bc1t
+        return True
+    return False
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("elf")
+    ap.add_argument("csv_in")
+    ap.add_argument("csv_out")
+    ap.add_argument("--output-dir", default=None,
+                    help="generated sub_*.cpp dir for collision check")
+    args = ap.parse_args()
+
+    whole, loads, text_start, text_end = parse_elf(args.elf)
+    if text_start is None:
+        print("no .text section", file=sys.stderr)
+        sys.exit(1)
+    print(f"text range: [{text_start:#010x},{text_end:#010x})")
+    for s in loads:
+        print(f"load: vaddr={s['vaddr']:#010x} filesz={s['filesz']:#x} "
+              f"memsz={s['memsz']:#x} off={s['off']:#x}")
+
+    # ---- (a) every aligned word in every loaded segment ----
+    freq_a = Counter()
+    for s in loads:
+        base = s["off"]
+        for off_in_seg in range(0, s["filesz"] - 3, 4):
+            w = struct.unpack_from("<I", whole, base + off_in_seg)[0]
+            if text_start <= w < text_end and (w & 3) == 0:
+                freq_a[w] += 1
+    set_a = set(freq_a.keys())
+    print(f"source (a) distinct: {len(set_a)} refs: {sum(freq_a.values())}")
+
+    # ---- (b) lui + addiu/ori within 4 ----
+    # Build flat word list over the first load (contains .text); lui sites
+    # restricted to .text.
+    seg0 = loads[0]
+    nwords = seg0["filesz"] // 4
+    words = [struct.unpack_from("<I", whole, seg0["off"] + i * 4)[0]
+             for i in range(nwords)]
+
+    def va_of_index(i):
+        return seg0["vaddr"] + i * 4
+    text_i0 = (text_start - seg0["vaddr"]) // 4
+    text_i1 = (text_end - seg0["vaddr"]) // 4
+    text_i0 = max(text_i0, 0)
+    text_i1 = min(text_i1, nwords)
+    freq_b = Counter()
+    sites_b = defaultdict(list)
+    for i in range(text_i0, text_i1):
+        w = words[i]
+        if ((w >> 26) & 0x3F) != 0x0F:
+            continue
+        rt = (w >> 16) & 0x1F
+        hi = w & 0xFFFF
+        lui_va = va_of_index(i)
+        for j in range(1, 5):
+            if i + j >= nwords:
+                break
+            w2 = words[i + j]
+            op = (w2 >> 26) & 0x3F
+            comp = None
+            kind = None
+            if op == 0x09:  # addiu
+                rs = (w2 >> 21) & 0x1F
+                rtd = (w2 >> 16) & 0x1F
+                if rs == rt and rtd == rt:
+                    lo = w2 & 0xFFFF
+                    slo = lo if lo < 0x8000 else lo - 0x10000
+                    comp = ((hi << 16) + slo) & 0xFFFFFFFF
+                    kind = "addiu"
+            elif op == 0x0D:  # ori
+                rs = (w2 >> 21) & 0x1F
+                rtd = (w2 >> 16) & 0x1F
+                if rs == rt and rtd == rt:
+                    comp = ((hi << 16) | (w2 & 0xFFFF)) & 0xFFFFFFFF
+                    kind = "ori"
+            if comp is not None and text_start <= comp < text_end \
+                    and (comp & 3) == 0:
+                freq_b[comp] += 1
+                sites_b[comp].append((lui_va, j, kind))
+    set_b = set(freq_b.keys())
+    print(f"source (b) distinct: {len(set_b)} refs: {sum(freq_b.values())}")
+
+    # ---- (c) explicit ----
+    set_c = set(SPECIALS + CONSTRUCTORS)
+    print(f"source (c) distinct: {len(set_c)} "
+          f"(specials={len(SPECIALS)} ctors={len(CONSTRUCTORS)})")
+
+    # ---- self-check: script must find all 39 ctors + 3 specials ----
+    combined = set_a | set_b | set_c
+    missing_ctors = [a for a in CONSTRUCTORS if a not in combined]
+    missing_specials = [a for a in SPECIALS if a not in combined]
+    print(f"self-check ctors in (a): "
+          f"{sum(1 for a in CONSTRUCTORS if a in set_a)}/39")
+    print(f"self-check ctors in (b): "
+          f"{sum(1 for a in CONSTRUCTORS if a in set_b)}/39")
+    print(f"self-check specials in (a): "
+          f"{sum(1 for a in SPECIALS if a in set_a)}/3")
+    print(f"self-check specials in (b): "
+          f"{sum(1 for a in SPECIALS if a in set_b)}/3")
+    if missing_ctors or missing_specials:
+        print(f"SELF-CHECK FAIL missing_ctors="
+              f"{[hex(x) for x in missing_ctors]} missing_specials="
+              f"{[hex(x) for x in missing_specials]}", file=sys.stderr)
+        sys.exit(1)
+    print("self-check: all 39 ctors + 3 specials present in (a)|(b)|(c)")
+
+    # ---- map starts ----
+    with open(args.csv_in, newline="") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+    starts = set(int(r["start"], 16) for r in rows)
+    print(f"map rows: {len(rows)} starts: {len(starts)}")
+
+    # ---- split predicate ----
+    cands = set_a | set_b | set_c
+    # frequency for top-rejected: (a) refs, plus (b) refs
+    freq_all = Counter()
+    for k, v in freq_a.items():
+        freq_all[k] += v
+    for k, v in freq_b.items():
+        freq_all[k] += v
+    for k in set_c:
+        freq_all.setdefault(k, 1)
+
+    proposed = []
+    rejected = []  # (T, reason)
+    for T in sorted(cands):
+        if T in starts:
+            continue
+        wT = read_word(whole, loads, T)
+        wM4 = read_word(whole, loads, T - 4)
+        wM8 = read_word(whole, loads, T - 8)
+        c1 = is_addiu_sp_neg(wT)
+        c2 = (wM8 == JR_RA) or (wM4 == JR_RA)
+        c3 = is_j_or_jr(wM4) and not is_branch(wM8)
+        if c1 or c2 or c3:
+            proposed.append(T)
+        else:
+            rejected.append(T)
+    print(f"already-mapped: {len(cands & starts)}")
+    print(f"proposed pre-collision: {len(proposed)} "
+          f"rejected: {len(rejected)}")
+
+    # ---- collision check against generated sources ----
+    outdir = args.output_dir
+    if outdir is None:
+        # sibling output/ next to the CSV
+        outdir = os.path.join(os.path.dirname(
+            os.path.abspath(args.csv_in)), "output")
+    # enclosing-function lookup
+    by_start = {int(r["start"], 16): (r["name"], int(r["end"], 16))
+                for r in rows}
+    sorted_starts = sorted(by_start.keys())
+
+    def enclosing(T):
+        i = bisect.bisect_right(sorted_starts, T) - 1
+        if i < 0:
+            return None
+        s = sorted_starts[i]
+        name, end = by_start[s]
+        if T < end:
+            return (s, name, end)
+        return None
+
+    cache = {}
+    collisions = []
+    survivors = []
+
+    def file_text_for(start):
+        if start in cache:
+            return cache[start]
+        try:
+            names = os.listdir(outdir)
+        except FileNotFoundError:
+            cache[start] = None
+            return None
+        want = f"sub_{start:08x}_"
+        hit = None
+        for fn in names:
+            if fn.startswith("._"):
+                continue
+            if fn.lower().startswith(want):
+                hit = fn
+                break
+        if hit is None:
+            cache[start] = None
+            return None
+        try:
+            with open(os.path.join(outdir, hit), errors="ignore") as f:
+                cache[start] = f.read().lower()
+        except OSError:
+            cache[start] = None
+        return cache[start]
+
+    for T in proposed:
+        enc = enclosing(T)
+        if enc is None:
+            survivors.append(T)
+            continue
+        s, name, end = enc
+        txt = file_text_for(s)
+        if txt is None:
+            survivors.append(T)
+            continue
+        if (f"case 0x{T:x}u" in txt) or (f"label_{T:x}" in txt):
+            collisions.append(T)
+        else:
+            survivors.append(T)
+    print(f"collisions (internal branch target): {len(collisions)}")
+    print(f"split: {len(survivors)}")
+
+    # ---- top 20 rejected by frequency ----
+    rej_sorted = sorted(rejected, key=lambda t: (-freq_all.get(t, 0), t))
+    print("top 20 rejected by frequency:")
+    for T in rej_sorted[:20]:
+        wT = read_word(whole, loads, T)
+        print(f"  {T:#010x} freq={freq_all.get(T,0)} "
+              f"instr={('none' if wT is None else f'{wT:#010x}')}")
+
+    # ---- emit new CSV ----
+    split_set = set(survivors)
+    # group splits by enclosing original row
+    splits_by_row = defaultdict(list)
+    for T in survivors:
+        enc = enclosing(T)
+        if enc is None:
+            print(f"warn: split {T:#x} has no enclosing row; skipping",
+                  file=sys.stderr)
+            continue
+        splits_by_row[enc[0]].append(T)
+    new_rows = []
+    for r in rows:
+        s = int(r["start"], 16)
+        e = int(r["end"], 16)
+        if s not in splits_by_row:
+            new_rows.append((s, r["name"], e))
+            continue
+        cuts = sorted(splits_by_row[s])
+        # sanity: cuts must lie strictly inside (s, e)
+        cuts = [c for c in cuts if s < c < e]
+        bounds = [s] + cuts + [e]
+        for a, b in zip(bounds, bounds[1:]):
+            nm = f"sub_{a:08X}"
+            new_rows.append((a, nm, b))
+    new_rows.sort()
+    with open(args.csv_out, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["name", "start", "end", "size"])
+        for s, nm, e in new_rows:
+            w.writerow([nm, f"{s:#x}", f"{e:#x}", f"{e - s:#x}"])
+    print(f"wrote {args.csv_out}: {len(new_rows)} data rows "
+          f"(+{len(new_rows) - len(rows)} splits)")
+    if collisions:
+        print(f"collision list ({len(collisions)}): "
+              + ", ".join(f"{x:#x}" for x in sorted(collisions)[:50])
+              + (" ..." if len(collisions) > 50 else ""))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## P5-3. Strict-return receipt + quoted body (Step 3, one build, one boot)
+
+Strict plumbing: `ps2xRuntime/CMakeLists.txt:16`
+(`option(PS2X_STRICT_RETURN_DIAGNOSTICS ... OFF)`) → `:420-424`
+(`target_compile_definitions(ps2_runtime PUBLIC
+PS2X_STRICT_RETURN_DIAGNOSTICS=1)`); consumed in
+`ps2xRecomp/src/lib/control_flow_emitter.cpp:257-269`
+(`emitExternalRegisterJumpDispatch`: `JR $ra` returns route through
+`dispatchGuestBranch(..., GuestBranchKind::Return, "JR $ra")` instead
+of a direct `ctx->pc` assignment). Non-call targets with no slot
+report via `reportMissingFunction` (`ps2_runtime.cpp:1228-1384`).
+
+Second build dir `/tmp/p1-link-strict` configured with
+`-DPS2X_BUILD_STUDIO=OFF -DPS2X_BUILD_RUNTIME=ON
+-DPS2X_BUILD_TEST=ON -DCMAKE_BUILD_TYPE=Release
+-DPS2X_ENABLE_RUNTIME_LOGS=ON -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF
+-DPS2X_ENABLE_IOP_RPC_TRACE=ON
+-DPS2X_STRICT_RETURN_DIAGNOSTICS=ON` (configure exit 0, ~65 s);
+same runner sources as boot 1 (sweep output, shared
+`ps2xRuntime/src/runner/`). Build
+`cmake --build /tmp/p1-link-strict --target ps2EntryRunner`, exit 0
+(387 targets). Binary sha256:
+`8da15c0c558d230c34dd0bd8cd47a41569e3bc1fdb9bf1a3420fb9ace99d4f21`
+(normal binary for comparison:
+`3a70f0f94eb3108054bdd1962adb28a45a4798878140e4d12f5b20bb4a39ac06`).
+
+Boot 2 (`$W/P1/run/boot-p1d-2.log`, 537 lines, 37011 B, 185 s,
+`PS2X_DIAG_PERIOD_MS=5000`, strict binary): the first diagnostic is
+line 49, a Return to 0 before any stub/call histogram line exists.
+
+| Item | Value |
+|---|---|
+| First diagnostic | `[guest-branch:missing-target] kind=Return op=JR $ra source=0x42cba8 target=0x0 pc=0x0 ra=0x0 sp=0x1fffff0 gp=0x4a30f0 ... codeRegion=no policy=1 trace=0x100008 -> 0x42c300 -> 0x42c0d8 -> 0x423da0 -> 0x423da0 -> 0x42c1f0 -> 0x42c7c8 -> 0x424b78 -> 0x42c410 -> 0x42c3a8 -> 0x423e50 -> 0x423e40 -> 0x423e50 -> 0x423e40 -> 0x42cbd0 -> 0x42cc00 -> 0x42cb68 -> 0x42cb78` |
+| Function | `sub_0042CB78` (sweep CSV line 9262: `sub_0042CB78,0x42cb78,0x42cbb0,0x38`; pre-sweep line 8238 the address was inside `sub_0042CB68,0x42cb68,0x42cbb0,0x48`) |
+| pc / ra / sp | `0x0` / `0x0` / `0x1fffff0` |
+| Last 5 stub/call lines before it | None exist: lines 44–48 are `INFO: ... Sample rate`, `INFO: ... Periods size`, `INFO: TIMER`, `Loading segment ...`, `Registered code region ... / ELF file loaded ... / Starting execution ...`; line 50 is `INFO: TEXTURE: [ID 4] ...`; stub histogram starts at block 0 (line 122, distinct=275) |
+| ELF at source | `0x42cba0=0x1440fff9` (`bnez`), `0x42cba4=0x00000000` (`nop`), `0x42cba8=0x03e00008` (`jr $ra`), `0x42cbac=0x0000102d` (`daddu $v0,$zero,$zero`, delay slot), `0x42cbb0=0x2403005b` (next function) |
+
+Generated body around the return
+(`$W/P1/output/sub_0042CB78_0x42cb78.cpp`, lines 63–102, 40 lines):
+
+```cpp
+    // 0x42cb98: 0xac830000  sw          $v1, 0x0($a0)
+    ctx->pc = 0x42cb98u;
+    WRITE32(ADD32(GPR_U32(ctx, 4), 0), GPR_U32(ctx, 3));
+    // 0x42cb9c: 0x24840004  addiu       $a0, $a0, 0x4
+    ctx->pc = 0x42cb9cu;
+    SET_GPR_S32(ctx, 4, (int32_t)ADD32(GPR_U32(ctx, 4), 4));
+    // 0x42cba0: 0x1440fff9  bnez        $v0, . + 4 + (-0x7 << 2)
+    ctx->pc = 0x42CBA0u;
+    {
+        const bool branch_taken_0x42cba0 = (GPR_U64(ctx, 2) != GPR_U64(ctx, 0));
+        if (branch_taken_0x42cba0) {
+            ctx->pc = 0x42CB88u;
+            if (runtime->eeCheckpointDue()) {
+                return;
+            }
+            goto label_42cb88;
+        }
+    }
+    ctx->pc = 0x42CBA8u;
+label_42cba8:
+    // 0x42cba8: 0x3e00008  jr          $ra
+    ctx->pc = 0x42CBA8u;
+    {
+        const uint32_t jumpTarget = GPR_U32(ctx, 31);
+        ctx->pc = 0x42CBACu;
+        ctx->in_delay_slot = true;
+        ctx->branch_pc = 0x42CBA8u;
+        // 0x42cbac: 0x102d  daddu       $v0, $zero, $zero (Delay Slot)
+        SET_GPR_U64(ctx, 2, (uint64_t)GPR_U64(ctx, 0) + (uint64_t)GPR_U64(ctx, 0));
+        ctx->in_delay_slot = false;
+        ctx->pc = jumpTarget;
+        #if defined(PS2X_STRICT_RETURN_DIAGNOSTICS) && PS2X_STRICT_RETURN_DIAGNOSTICS
+        (void)runtime->dispatchGuestBranch(rdram, ctx, jumpTarget, 0x42CBA8u, 0u, PS2Runtime::GuestBranchKind::Return, "JR $ra");
+        return;
+        #else
+        ctx->pc = jumpTarget;
+        return;
+        #endif
+    }
+    ctx->pc = 0x42CBB0u;
+```
+
+Boot-2 ladder (remainder identical to boot 1 unless noted):
+
+| Rung | Boot 2 |
+|---|---|
+| First diagnostic | Return to 0 above (1 `missing-target` line total; boot 1 had 0) |
+| Syscalls block 0 | distinct=21, same id set as boot 1 |
+| Stubs block 0 | distinct=275, same top rows as boot 1 |
+| Threads first/last dump | block 0 `id=1 Dormant scheduled=22`, `id=2 Waiting sema 26 scheduled=1`; last block 77 same park as boot 1 (`id=2 status=2 waitReason=2 waitId=26 pc=0x423de8`) |
+| CD lines | 21 entry + 20 payload lines (see P5-4) |
+| First VIF MPG/MSCAL | None |
+| First GIF kick | None |
+| First presented frame | None |
+| Crash | None |
+
+No boot 3: the brief's `makeDormant`-caller logging fallback applies
+only if no diagnostic fires; a diagnostic fired on line 49.
+
+## P5-4. CD payload lines (Step 4, folded into boot 2)
+
+Change: in `sceCdRead`'s `if (ok)` block (`Kernel/Stubs/CD.cpp`),
+after the read is served, print the first 8 bytes of the destination
+buffer in hex (`selected.buf & PS2_RAM_MASK`, `PS2_RAM_SIZE`-guarded),
+gated on `PS2X_DIAG_PERIOD_MS`, committed as `Diag:` (`f0b5040`),
+present in the strict binary only (boot 1 predates it).
+
+| LBN | Entry line | Payload line |
+|---|---|---|
+| `0x10` (PVD) | `[diag:cd] sceCdRead lbn=0x10 sectors=1 buf=0x519c80 ret=0x3e3694` | `[diag:cd] sceCdRead payload lbn=0x10 buf=0x519c80 bytes=0143443030310100` (bytes `01 43 44 30 30 31` = PVD `01 CD001`) |
+| `0x105` (first directory-content sector after the PVD) | `[diag:cd] sceCdRead lbn=0x105 sectors=1 buf=0x519c80 ret=0x3e3694` | `[diag:cd] sceCdRead payload lbn=0x105 buf=0x519c80 bytes=3000050100000000` |
+
+All 20 payload lines pair 1:1 with the 20 entry lines in read order.
+
+## P5-5. Binaries and commits
+
+| Binary | sha256 | Sources |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot 1) | `3a70f0f94eb3108054bdd1962adb28a45a4798878140e4d12f5b20bb4a39ac06` | Sweep runner sources, pre-payload `CD.cpp` |
+| `/tmp/p1-link-strict/ps2xRuntime/ps2EntryRunner` (boot 2) | `8da15c0c558d230c34dd0bd8cd47a41569e3bc1fdb9bf1a3420fb9ace99d4f21` | Same runner sources + payload `Diag:` + `STRICT_RETURN_DIAGNOSTICS=ON` |
+
+`ssx3` commits (pushed `fork ssx3`, one file each, no `runner/` or
+`._` files; trailers on each):
+
+| Commit | File | Push |
+|---|---|---|
+| `f0b5040` Diag: log first 8 bytes of sceCdRead destination after serve | `ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp` (+20) | `dbf0080..f0b5040` |
+| Map sweep (no commit) | `$W/P1/ssx3-functions.sweep.csv` only (outside the repo; 8246 rows incl. header → 9271 lines incl. header); `TOML ghidra_output` retarget in `$W/P1/ssx3.toml` (outside the repo; backup `$W/P1/ssx3.toml.p1d-orig`); runner outputs refreshed locally, never added | no commit (no tracked file changed) |
+| This report | `local/research/P1/REPORT.md` (`[P1d]` prefix, same trailers) | after commit |
+
+`register_functions.cpp` (generated replacement) remains a local
+modification, never added.
+
+## P5-6. Exact commands
+
+```
+printf 'P1d\n' > /tmp/ssx3-host-lease   (absent before; removed at end)
+python3 ELF word reads (file offset 0x1000 + (va - 0x100000)) for 0x3e3bd8-0x3e3be8, 0x42cba0-0x42cbb0
+grep/ssx3-functions.csv lookups (0x3e3be0 container row; 0x42cbxx rows)
+mkdir -p $W/P1/tools
+python3 $W/P1/tools/codeptr_sweep.py $W/P1/cd/SLUS_207.72 $W/P1/ssx3-functions.csv $W/P1/ssx3-functions.sweep.csv --output-dir $W/P1/output | tee $W/P1/sweep-counts.log
+cp -X $W/P1/ssx3.toml $W/P1/ssx3.toml.p1d-orig; python3 TOML ghidra_output set to ssx3-functions.sweep.csv
+cd $W/P1 && ./bin/ps2_recomp ssx3.toml | tee recomp-p1d-sweep.log
+cp -X $W/P1/output/*.cpp $W/PS2Recomp/ps2xRuntime/src/runner/; cp -X $W/P1/output/*.h $W/PS2Recomp/ps2xRuntime/src/runner/; sidecar purges
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner; shasum -a 256 (binary)
+cd $W/P1/run && PS2X_CD_IMAGE="$W/SSX 3 (USA).iso" PS2X_DIAG_PERIOD_MS=5000 stdbuf -o0 -e0 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner $W/P1/cd/SLUS_207.72 > boot-p1d-1.log 2>&1   (foreground, 185 s, terminated)
+CD.cpp payload hunk (edit_file); sidecar purge
+git add ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp; git commit -m "Diag: ..." (trailers); git show --stat; git push fork ssx3
+cmake -S $W/PS2Recomp -B /tmp/p1-link-strict -G Ninja -DPS2X_BUILD_STUDIO=OFF -DPS2X_BUILD_RUNTIME=ON -DPS2X_BUILD_TEST=ON -DCMAKE_BUILD_TYPE=Release -DPS2X_ENABLE_RUNTIME_LOGS=ON -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF -DPS2X_ENABLE_IOP_RPC_TRACE=ON -DPS2X_STRICT_RETURN_DIAGNOSTICS=ON
+cmake --build /tmp/p1-link-strict --target ps2EntryRunner; shasum -a 256 (both binaries)
+cd $W/P1/run && PS2X_CD_IMAGE="$W/SSX 3 (USA).iso" PS2X_DIAG_PERIOD_MS=5000 stdbuf -o0 -e0 /tmp/p1-link-strict/ps2xRuntime/ps2EntryRunner $W/P1/cd/SLUS_207.72 > boot-p1d-2.log 2>&1   (foreground, 185 s, terminated)
+log reads: grep/sed/tail on closed logs only (never piped through head while running)
+git add -f local/research/P1/REPORT.md; git commit -m "[P1d] ..." (trailers); git push fork ssx3
+rm /tmp/ssx3-host-lease (verified absent)
+find <dir> -name '._*' -delete (after every edit/copy)
+```
+
+## P5-7. What I could not do
+
+- `stubs: 176` in map mode: reads 177 (`recomp-p1d-sweep.log`;
+  discovered 9269 vs map 9270, one subsumed). The extra stub row vs
+  the brief's expectation was not chased; `ret0@0x42c1f0` verified
+  intact and the new `sub_003E3BE0` file verified present.
+- CSV line endings: the sweep writer's default `\r\n` was normalized
+  to the repo-CSV `\n` before recompile.
+- No VIF MPG/MSCAL, GIF kick, presented frame, or crash in either P1d
+  boot; thread 2 parks on semaphore 26 (`pc=0x423de8`) after one
+  scheduling; thread 1 is Dormant with `pc=0`.
+- The `0x42cba8` Return-to-0 diagnostic fires during startup before
+  any stub/call histogram line exists, so no 5-line stub/call
+  preamble precedes it; the dispatch trace field is recorded instead.
+- No boot 3: per the brief, the `makeDormant`-caller logging fallback
+  runs only when no diagnostic fires.
+- `waits.log`: no waits (no foreign lease during P1d).
+- Time box: about 50 min of the 5 h box used.
+
