@@ -44,6 +44,13 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **D4 blocked (09-18 09:50):** since the Odin's USB drop the
+      device refuses every APK launch from adb shell (`am start` error
+      type 3 / result -92, resolve-activity finds nothing) for both the
+      new trial-d4 APK and the previously proven ot3 APK, while dumpsys
+      shows the launcher entry. D4 asked for a device reboot; the user
+      was pinged for authorization. Headless briefs (D2b, S1c, D8) are
+      unaffected and run first.
 - [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
       floor problem:** on the device the heaviest track costs only ~11%
       more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
