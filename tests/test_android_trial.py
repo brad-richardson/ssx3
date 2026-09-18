@@ -308,6 +308,28 @@ class AndroidTrialTests(unittest.TestCase):
         self.assertTrue(any(c.startswith('taskset -p 80 104') for c in seen))
         self.assertTrue(any(c.startswith('taskset -p 40 110') for c in seen))
 
+    def test_check_battery_refuses_below_floor_and_records_state(self):
+        calls = []
+
+        def fake_adb(argv, serial=None, check=True, timeout=None):
+            calls.append(argv)
+            if argv[:2] == ['shell', 'dumpsys']:
+                return SimpleNamespace(stdout=(
+                    'Current Battery Service state:\n  AC powered: true\n'
+                    '  USB powered: false\n  status: 3\n  level: 3\n'
+                    '  temperature: 320\n'), stderr='')
+            return SimpleNamespace(stdout='1\n', stderr='')
+
+        with self.assertRaises(ValueError) as ctx:
+            trial.check_battery('abc', 10, runner=fake_adb)
+        self.assertIn('3%', str(ctx.exception))
+        state = trial.battery_state('abc', runner=fake_adb)
+        self.assertEqual(state['level'], 3)
+        self.assertEqual(state['status'], 3)
+        self.assertTrue(state['ac_powered'])
+        self.assertEqual(state['low_power'], '1')
+        self.assertEqual(trial.check_battery('abc', 3, runner=fake_adb)['level'], 3)
+
     def test_sampler_command_backgrounds_against_the_real_pid(self):
         line = trial.sampler_command('d1-base-a', '16865', 480)
         self.assertIn('cd /data/local/tmp/mg;', line)

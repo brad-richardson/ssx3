@@ -459,10 +459,40 @@ def sampler_command(tag, pid, nticks, interval=SAMPLER_INTERVAL):
             f'>sampler-{tag}.out 2>&1 & echo $!')
 
 
+def battery_state(serial, runner=adb):
+    """Battery level/status plus the battery-saver flag, from dumpsys."""
+    text = runner(['shell', 'dumpsys', 'battery'], serial).stdout
+    record = {}
+    for key, name, conv in (('level', 'level', int), ('status', 'status', int),
+                            ('AC powered', 'ac_powered', lambda v: v == 'true'),
+                            ('USB powered', 'usb_powered', lambda v: v == 'true'),
+                            ('temperature', 'temperature_deci_c', int)):
+        match = re.search(rf'^\s*{re.escape(key)}: (\S+)', text, re.M)
+        record[name] = conv(match.group(1)) if match else None
+    saver = runner(['shell', 'settings', 'get', 'global', 'low_power'], serial).stdout.strip()
+    record['low_power'] = saver if saver else None
+    return record
+
+
+def check_battery(serial, minimum, runner=adb):
+    """Refuse to launch below `minimum` percent; battery saver is a warning."""
+    record = battery_state(serial, runner=runner)
+    level = record.get('level')
+    if level is None:
+        raise ValueError('Could not read the device battery level')
+    if level < minimum:
+        raise ValueError(f'Device battery at {level}% is below the {minimum}% launch floor')
+    if record.get('low_power') == '1':
+        print(f'WARNING battery saver is on (low_power=1) at {level}%', flush=True)
+    return record
+
+
 def run(args):
     serial = resolve_serial(args.serial)
     if 'moderngekko-run' in adb(['shell', 'ps', '-A'], serial).stdout:
         raise ValueError('A trial binary is already running on the device')
+    battery_record = check_battery(serial, args.min_battery)
+    print(f'battery {battery_record}', flush=True)
     dol = adb(['shell', 'sha256sum', f'{DEVICE_DIR}/game/sys/main.dol'], serial).stdout.split()[0]
     if dol != DOL_SHA256:
         raise ValueError(f'Device game DOL {dol} is not the pinned executable')
@@ -535,6 +565,7 @@ def run(args):
                     device_dol_sha256=dol, template=args.template, idle=bool(args.idle),
                     immediate_xfb=not args.no_immediate_xfb, env=env, timeout=args.timeout,
                     affinity=affinity_record, sampler=sampler_record,
+                    battery=battery_record,
                     exited=exited)
     out_dir = args.output.resolve()
     out_dir.mkdir(parents=True, exist_ok=False)
@@ -703,6 +734,8 @@ def main():
                    help='Capture cadence in seconds (default 2; 0 disables '
                         'capture for unperturbed trial windows)')
     p.add_argument('--serial', help='adb device serial when more than one is attached')
+    p.add_argument('--min-battery', type=int, default=10,
+                   help='Refuse to launch below this battery percent (default 10)')
     p = sub.add_parser('analyze')
     p.add_argument('--probe', type=Path, required=True)
     p.add_argument('--stderr', type=Path)
