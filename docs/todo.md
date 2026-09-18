@@ -44,6 +44,17 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
+- [ ] **Repos and licenses (09-18 15:35):** `ps2xGS` is public at
+      github.com/brad-richardson/ps2xGS under GPL-3.0 (switched from MIT
+      to match PS2Recomp and avoid the combined-work question); push
+      after each G-brief lands. `ssx3` STAYS PRIVATE: before any
+      visibility change it needs a full pass for sensitive or
+      copyrighted material (the quick audit found no binaries, images,
+      generated guest code, big blobs or secrets, but the docs carry
+      reverse-engineering detail) and a top-level LICENSE (GPL-3 for
+      `native/`, patches and vendored trees; tools/docs could be split).
+      PS2Recomp fork for the runtime patches: recommended, not yet
+      created (user's call).
 - [ ] **GPU GS backend plan written (09-18 14:50):**
       `docs/plan-gs-gpu-backend-2026-09-18.md` — gates for the autonomous
       loop on the new Mac mini (harness: recording backend + replay/diff +

@@ -144,8 +144,10 @@ gate is owned by the P-series briefs, not by this plan.
    upstream is a pinned submodule; the agent never edits the runtime, the
    interface, or the recompiler. If the interface must change, that is a
    stage gate for a person, filed as an upstream issue.
-5. **License:** MIT for the backend and harness (GPL-compatible, easiest
-   for upstream to vendor); any combined binary with the runtime is GPL-3.
+5. **License:** GPL-3.0 for the whole repo, matching upstream (decided
+   2026-09-18 15:35: MIT is compatible but the combined binary is GPL-3
+   anyway, and one license removes the question). Public at
+   `github.com/brad-richardson/ps2xGS`.
    Upstream has no written contribution or AI-assistance policy; ask on
    its Discord before the upstream PR and disclose the assistance.
 
