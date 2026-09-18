@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 597318a..fa33117 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -8,6 +8,18 @@ endif()
+ include(CTest)
+ include(CheckIncludeFileCXX)
+
++# NOTE(android-lse): the outer chassis target (libmoderngekko.a) compiles
++# inner-tree sources directly (e.g. vendor/dolphin/Source/Core/DolphinNoGUI/
++# Platform.cpp), which the inner-tree flags hunk in
++# recompcore-android-flags.patch never reaches (inner add_compile_options
++# postdates the outer targets). Give the outer targets the same armv8.2+LSE
++# flags under the same target-system test; desktop builds are unaffected.
++if(ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
++  include(${CMAKE_CURRENT_SOURCE_DIR}/vendor/dolphin/CMake/CheckAndAddFlag.cmake)
++  check_and_add_flag(HAVE_OUTER_ARCH_ARMV8_LSE -march=armv8.2-a+crc+lse)
++  check_and_add_flag(HAVE_OUTER_NO_OUTLINE_ATOMICS -mno-outline-atomics)
++endif()
++
+ if(WIN32)
+     set(MODERNGEKKO_DYNAMIC_MODULES_DEFAULT ON)
+ else()
+@@ -127,5 +127,12 @@ if(MODERNGEKKO_ENABLE_DOLPHIN_RUNTIME)
+     set(ENABLE_HWDB OFF CACHE BOOL "" FORCE)
+     set(ENABLE_EVDEV OFF CACHE BOOL "" FORCE)
+     set(ENABLE_WAYLAND ON CACHE BOOL "" FORCE)
+-    set(ENABLE_EGL OFF CACHE BOOL "" FORCE)
++    # NOTE(android-lse): the desktop default kills EGL, but the Android EGL
++    # runtime needs it (EGLAndroid GL interface + HAVE_EGL backend paths).
++    # Keep it off everywhere except Android-headless cross builds.
++    if(ANDROID OR (ENABLE_HEADLESS AND CMAKE_SYSTEM_NAME STREQUAL "Android"))
++        set(ENABLE_EGL ON CACHE BOOL "" FORCE)
++    else()
++        set(ENABLE_EGL OFF CACHE BOOL "" FORCE)
++    endif()
+     set(USE_SYSTEM_SDL3 OFF CACHE BOOL "" FORCE)
