@@ -5,6 +5,40 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1m + G3 launched (09-19):** P1m (miss-mechanism diagnosis, no
+      fix — watchpoint coverage audit + driver-entry census + frame
+      table, one boot max) reuses the P1l pane (`wN:t1A` → P1m); G3
+      (Present-heuristic tests + CLUT/RMW spikes, identity-proven)
+      reuses the G2 pane (`wN:t17` → G3). All three lanes full (P1m
+      fork, G3 ps2xGS, M7 ssx3); lease shared P1m↔M7. Remaining queue:
+      `sceGsSyncVCallback` test fix (after P1m), G4 perf (after G3).
+- [ ] **G2 read (09-19) — PASS, harness proven sensitive:** 20 new
+      captures (98 total, +105 MB, 691 MB under the 700 cap), `strict`
+      backend wrapping cpu and honoring all 7 G0-§9 fields; cross table
+      14 flipped rows ALL field-mapped (incl. 2 old G0 captures) and 84
+      exact; G0 `blend-colclamp` no-flip honestly explained (no
+      overflow); census decodes everything new; CTest 9/9 incl. 3 new
+      sensitivity gates. Caveat recorded: strict's honored semantics
+      are plausible-but-unverified (aa1 halving, LOD=min, SCANMSK
+      restore, post-blend dither — agent disclosed all) — a test
+      instrument, not a hardware reference. Verified: files, factory
+      reg, cpu/upstream untouched since G0, 98 captures, ssx3 copy
+      identical, CTest 9/9 re-run, pushed (`origin/main` == HEAD).
+      Ledger row added.
+- [ ] **P1l read (09-19) — PASS, missing target gone, park holds:**
+      4 splits (CSV 9270→9274, recompile 9092→9096, 0/0), boot shows 0
+      missing-target lines; thread 1 still in driver/SYNCTASK
+      (`0x3e5980` ×14 + `0x3e5440` ×3); outer-caller receipt missed
+      AGAIN on both `sw` and `sd` addrs (addrs audited arithmetically
+      correct — now a miss-*mechanism* question, 8 candidates stand);
+      first `[gs:kick]` lines ever (66) correctly attributed to
+      aggressive-logging visibility (old binary had it off), not guest
+      change; ~4× wall-clock rate vs p1k open (no host-load record);
+      tests 424/425 same pre-existing failure (re-proven without stash:
+      no tracked source changed + runner symbols absent from test
+      binary). Verified: log counts/census/callback/threads/csv/splits/
+      ELF spot/regs/binary sha/fork untouched+up-to-date. Next: P1m.
+      Ledger row added.
 - [ ] **M7 launched (09-19, `local/muse/prompts/M7.md`):** milestone 2
       item 3 — pose interpolation + camera delta on the `g_transform`
       seam inside the M6 context. Step 1 closes M6's three unordered
