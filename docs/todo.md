@@ -5,6 +5,10 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **G6 launched (09-19, user go-ahead):** Release-build numbers
+      (-O2 CTest + timing tables on all four backends vs -O0) +
+      upstream PR prep (`upstream-patches/PR.md`, verified figures,
+      NO submit). Reuses G5 pane. 4h box, no lease.
 - [ ] **P1p + M9 launched (09-19, user go-ahead):** P1p (which flag
       writer fires for entry 0: table-addrs boot + writer-catch boot,
       max 2) reuses P1o pane; M9 (VAT/texgen closure + upload-timing
