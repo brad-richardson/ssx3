@@ -356,6 +356,17 @@ the build or commit that closed them.
       (totalFrames + present-to-present histogram, verified on the
       device) sampled once a second across the same three arms. Ledger
       row added.
+      D4 Part 3 read (09-18 20:10) — D4 CLOSED on method: SurfaceFlinger
+      timestats count presents. The old smoothing trial reaches 75–91
+      presents/s at a two-vsync median spacing (16.5 ms) because it
+      only swaps ~81 times a second; the explicit 120 Hz request is
+      honoured by SurfaceFlinger but changes nothing. Uncapped with no
+      trial the same APK path presents at a single-vsync median (8.5
+      ms), so the panel and composition path are not the limiter.
+      Verdict: the display proof is a property of the frame source,
+      and it gets re-run once the host-replay route runs in the APK.
+      `part3/sfstats.sh` + `sfstats_analyze.py` are the tools. Ledger
+      row added.
 - [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
       floor problem:** on the device the heaviest track costs only ~11%
       more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
