@@ -5,6 +5,18 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I4 read (09-19) — PASS, simulator binary BUILT:** SDL2
+      2.32.10 static arm64 (2.1 MB, 266/266) → raylib 5.5-SDL-ES2
+      arm64 (ObjC-mode retry; linkprobe proved compile-scoped `-x`)
+      → 2 fork commits (+12 iOS-SDL select, +7 ObjC mode), pushed,
+      desktop-proof (`no work to do`, tests 424/425 same failure) →
+      runtime configure exit 0 (G1/G3 gone) → Release BUILD
+      SUCCEEDED: 120 MB arm64 `.app` (292 SDL symbols, InitWindow +
+      SDL_Init, SDL framework linkage). Debug config stalls in -O0
+      codegen on the 32 MB unity TU (terminated, receipted). .app
+      never launched (I5). Verified: both diffs, all 3 products
+      (bytes/arch/symbols), linkage set, no sims booted, internal
+      disk still 41G (25G scratch on SSD). Ledger row added.
 - [ ] **M13 read (09-19) — PASS, slot-36 partitioned + per-draw scan
       works:** slot-36 windows on one frame (3001 / 890 / 3001
       fail-closed-verbatim / 1553-1561 24-25-uniform) → shares
