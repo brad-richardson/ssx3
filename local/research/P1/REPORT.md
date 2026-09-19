@@ -4815,3 +4815,230 @@ Env delta vs boot-p1l-1: none (no boot). Source delta: none (no commit).
 - No runtime fix (per the brief): miss mechanism only. The `*(entry+8)`
   driver-flag writer and sema-26 non-delivery remain out of scope, untouched.
 
+---
+
+## Part 15 (P1n): probe fires once — fresh caller is 0x3ded80, 4037 steady-state enters are scheduler resumes
+
+Brief `local/muse/prompts/P1n.md`. Probe + caller only; no runtime fix. Tables, no verdicts.
+
+## P15-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (`/tmp/ssx3-host-lease` missing, 11:31:57 UTC) |
+| Step 1 + rebuild + tests | No lease (source edit, commit, push, `-j4` build, tests need none) |
+| Pre-boot checks (11:35:11 UTC) | Lease absent; `pgrep -f ps2EntryRunner` exit 1 (none); binary `7a7d4b64` fresh (just built); ISO (2.8 GB) + ELF (3.7 MB) present |
+| Claim | `printf 'P1n\n' > /tmp/ssx3-host-lease` 11:35:18 UTC, immediately before boot-p1n-1 |
+| Boot | 90 s foreground, SIGTERM rc=-15, returned 11:36:49 UTC |
+| Release | `rm -f /tmp/ssx3-host-lease` 11:36:54 UTC; verified absent; `pgrep` exit 1 |
+| Foreign holds (M8) | None during claim window (no poll loop ran; `$W/P1/run/p1n-waits.log` does not exist); `M8` claimed 11:43 UTC, after P1n release — left untouched |
+| Leases held at end | None (P1n released 11:36:54 UTC; `M8` holds at session end) |
+| `adb` | Not used |
+
+## P15-1. Probe diff + build + tests
+
+### a. Diff (one commit, one file, +37/−0)
+
+`ps2xRuntime/src/lib/ps2_runtime.cpp` only (`R=$W/PS2Recomp`):
+
+| Line | Code |
+|---|---|
+| 1385–1395 | `diagDriverProbeEnabled()`: cached `PS2X_DIAG_DRIVER_PROBE=1` check (`env[0]=='1' && env[1]=='\0'`), same shape as `diagReportAll()` |
+| 1397–1404 | `diagDriverEntryEmit(sp, ra, sourcePc, checkpointed)`: prints `[diag:driver-entry] sp=0x… ra=0x… sourcePc=0x… checkpointed=0/1` |
+| 1582–1586 | Checkpoint arm: inside `checkpointDue` block, before `return false`, `if (targetPc == 0x3DD1D8u && …)` → emit `checkpointed=1` |
+| 1642–1646 | Call arm: after the stub histogram, before `lookupFunction(targetPc)`/`targetFn(…)` → emit `checkpointed=0` |
+
+`sp`/`ra` = `getRegU32(ctx, 29/31)` at dispatch; `sourcePc` = dispatch arg. Default off (one bool check per dispatch to `0x3dd1d8`).
+
+| Item | Value |
+|---|---|
+| Commit | `e73e36a83bd962ac28daa0198b7de50c930f2924` `Diag: P1n driver-entry probe for 0x3dd1d8 (P14-1d)` (two trailers) |
+| Push | `git push fork ssx3` from fork clone only: `8fad69e..e73e36a ssx3 -> ssx3`, exit 0 |
+| Worktree after | Sole `M ps2xRuntime/src/runner/register_functions.cpp` (pre-existing generated, never added) |
+
+### b. Rebuild (no lease, `-j4`)
+
+| Item | Value |
+|---|---|
+| Build | `cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4`, exit 0 (incremental, 5 steps) |
+| `ps2EntryRunner` sha256 | `7a7d4b645094d3ad82746a7d420b223422bf6444e5d06f6e56998e9057f5b4cd` (163,329,504 B) |
+| `ps2x_tests` sha256 | `c72bf50f139d60946f656adaae08f50cd81d39e3a39c92ea7bc6f26097f0e4cb` |
+
+### c. Test receipts (`ps2x_tests`, CWD fork root; full log `$W/P1/ps2x-tests-p1n.log`)
+
+| Run | Total | Passed | Failed |
+|---|---|---|---|
+| Probe tree (`e73e36a`) | 425 | 424 | 1: `sceGsSyncVCallback runs as a scheduler invocation on its callback stack` (`callback invocation should use the reserved async stack pool`), log :526/:528 — same test + assertion + lines as P1l (`ps2x-tests-p1l.log` :526/:528) |
+
+Not fixed (per the brief).
+
+## P15-2. Boot + caller answer
+
+Boot-p1n-1: `$W/P1/run/boot-p1n-1.log`, 9,330 lines, 873,388 B, 17 blocks, CWD `$W/P1/run`,
+env = p1l env + `PS2X_DIAG_DRIVER_PROBE=1` (WATCH unchanged, 11 addrs), foreground 90 s, SIGTERM rc=-15.
+Binary `7a7d4b64` (fresh; §P15-1b). Trace `$W/P1/run/ps2_log.txt` fresh (2.2 GB, 74,114,872 lines, Sep 19 07:36).
+
+### a. Probe lines: 1 (P14-1d expected ~3940)
+
+| Item | Value |
+|---|---|
+| Count | 1 (boot log :436; between `[cd:callback]` :434–435 and block-0 flush) |
+| Line | `[diag:driver-entry] sp=0x1fffe80 ra=0x3ded88 sourcePc=0x3ded80 checkpointed=0` |
+| Distinct `sp` | `0x1fffe80` ×1 |
+| Distinct `ra` | `0x3ded88` ×1 |
+| Distinct `sourcePc` | `0x3ded80` ×1 |
+| `checkpointed` split | 1 × `checkpointed=0`, 0 × `checkpointed=1` |
+
+Both probe arms were live (env on); `dispatchGuestBranch` was called with `targetPc==0x3dd1d8` exactly once in 90 s.
+
+### b. Caller named + true frames vs watched addrs
+
+| Item | Value |
+|---|---|
+| Fresh-call caller (NAMED) | `sub_003DED50` @ `0x3ded80` (P12 candidate #6), `ra=0x3ded88`, entry `sp=0x1fffe80` |
+| Trace cross-check | First driver enter trace :18930, depth 1, nested under `>> sub_003DED50` :18929 (depth 0); `003DED50` enters=2 (:18623 depth-2, :18929 depth-0) |
+| True frame (fresh call) | Entry `sp` `0x1fffe80` − `0x80` = base `0x1fffe00`: `sw` @ `0x1fffe00`, `sd` @ `0x1fffe10` |
+| Independent `sp` | 7× `[run:tick]` `pc=0x3dd290 ra=0x3dd290 sp=0x1fffe00` (driver post-alloc `sp` at the run-call fallthrough) |
+| Park chain | `sp` `0x1fffd80` @ `0x3e5980` = `0x1fffe00`−`0x80` (run post-alloc); blk4 `sp` `0x1fffe00` @ `0x3dd278` (driver post-alloc) |
+| Watched addrs | `0x1ffe000` / `0x1ffe010` (15 + 15 lines, all pre-park `sq` zeros, `pc=0x3e65dc`/`0x3e65b0`; 0 `pc=0x3dd1e0`/`0x3dd214`; 0 `pc=0x3dd*` of 8,134) |
+| True − watched | `0x1fffe00` − `0x1ffe000` = `0x1e00` (both `sw` and `sd` addrs) |
+| P13-3 equation recomputed | `0x1fffd80+0x80` = `0x1fffe00` (true frame base); P13-3 wrote `0x1ffe000` |
+| Park `sp` every boot | p1k 15× / p1l 14× / p1n 16× `0x1fffd80` (+ `0x1fffe00`/`0x1fffde0` at other sampled pcs; §P15-2e) |
+
+### c. Residue: the other 4037 enters (no guest caller; scheduler resumes)
+
+| Item | Value |
+|---|---|
+| Trace enters/exits | Driver 4038/4037 (deficit 1 = live frame); run `003E5928` 12341879/12341878; `003E5440` 12338277/12338277; `003E5398` 0/0 |
+| Last driver enter | Trace :74107619, depth 0 (no guest parent), after `<< sub_0031AAF0`; same shape as p1l :72315349 |
+| Fresh vs resume (P14-5 open question) | 1 fresh (probed call; prologue runs) + 4037 resumes (prologue skipped); trace `>>` fires for both (`PS_LOG_ENTRY` precedes the resume switch) |
+
+Resume path sites (sources + generated):
+
+| Step | Site |
+|---|---|
+| Backward edge sets `ctx->pc=<loop head>`, `if (eeCheckpointDue()) return;` | Driver `sub_003DD1D8_0x3dd1d8.cpp:331` (`0x3dd278`); run `:396` (`0x3e5980`), `:635` |
+| Unwind: `if (!dispatchGuestBranch(…)) return;` | Driver `:193` (`0x3e5440`), `:218` (`0x3e5928`), `:250` (`0x3e5398`); run `:339` |
+| `dispatchGuestBranch` returns false (`ctx->pc` ≠ entry, ≠ fallthrough) | `ps2_runtime.cpp:1649-1664` region (post-`targetFn` checks) |
+| Scheduler catches, loops, re-dispatches at `context.pc` | `EeScheduler.cpp:562` (`catch EeDispatcherTransfer`), `:543` `lookupFunction(context.pc)`, `:558` `function(…)` — no `dispatchGuestBranch`, no probe |
+| Table maps loop heads to containing fns | `register_functions.cpp`: `0x3dd278`→`sub_003DD1D8` (slot 750748); `0x3e5980`→`sub_003E5928` (slot 759390) |
+| Resume switch skips prologue | Driver `:21-27` (`0x3dd278/0x3dd280/0x3dd290/0x3dd2a0`); run `:22+` (`0x3e5928…0x3e5980…`); trace entry `:18` before switch |
+
+### d. Watch per-addr census (p1l → p1n)
+
+| addr + width | p1l | p1n |
+|---|---|---|
+| `0x51eda4` w4 (busy) / `0x51edb4` w4 | 2630 / 2629 | 2694 / 2693 |
+| `0x51eda0` w4 / `0x51edb0` w4 (next-tick `pc=0x3e59d4`) | 1316 / 1315 | 1348 / 1347 |
+| `0x1ffe000` w16 / `0x1ffe010` w16 (pre-park `sq` zeros) | 15 / 15 | 15 / 15 |
+| One-timers (`0x519c40` w16, `0x519c48` w8, `0x519c4c` w4, `0x519c50` w16+w4×2+w8, `0x51ed90` w16, `0x51ed98` w4×3, `0x51ed9c` w4×2, `0x51eda0` w16×2, `0x51eda8` w4, `0x51edac` w4, `0x51edb0` w16×2, `0x51edc0` w16×2, `0x51edd0` w16) | 1/1/1/1+2+1, 1/3/2/2, 1/1/2, 2/1 | Identical counts |
+| Total | 7,942 | 8,134 (+192, steady-state only) |
+
+### e. Ladder delta vs boot-p1l-1
+
+| Rung | boot-p1l-1 (9,137 lines, 855,709 B) | boot-p1n-1 (9,330 lines, 873,388 B) | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×14, `0x3e5440` ×3 | `0x3e5980` ×16, `0x3dd278` ×1 (blk4) | Same park family (per-block table below) |
+| Thread-1 sp | `0x1fffd80` ×14, `0x1fffe00` ×3 | `0x1fffd80` ×16, `0x1fffe00` ×1 | Same values (pc↔sp mapping holds) |
+| Missing target | 0 (`395cf0`: 0 hits) | 0 (`missing`/`No exact`: 0; `395cf0`: 0) | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18 | None |
+| Syscall distinct b0 / b1+ | 27 / 3 | 27 / 3; printed id sets identical (20 ids incl `0x15`/`0x17`; comm clean) | None |
+| CD callback | queued+start log:434-435 | queued+start log:434-435 | Same lines |
+| Threads 2/4/5 | sema-parked 26/29/30 @ `0x423de8` | Same (ids/entries/priorities/stacks identical; blk0 ids 1–5) | None |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | `gs:gif` 2, `gs:kick` 66, `gs:reg` 122, `gs:prim` 33, `gs:copy-reg` 8; first kick log:216 | 2 / 66 / 122 / 33 / 8; first kick log:216 (`idx=0 drawing=1 prim=6 vtxCount=1`) | None (all counts + line equal) |
+| `run:tick` | 7 (ticks 120–840) | 7 | None |
+| Presented frame | None (raylib line only) | None (sole `frame` hit = raylib line) | None |
+| Crash | 0 | 0 | None |
+| Dormant / StartThread | 40 / 4 (ids 2,3,4,5) | 40 / 4 (ids 2,3,4,5; same addrs) | None |
+| Literal `dispatch` lines | 0 | 0 | None |
+| Slot fills | fn `0x3e4000`/`0x0`/`0x31ad20`, writers `0x3e4458`/`0x31af4c`(del)/`0x31af60`, init next `0x28` | Byte-identical 3 lines (same pcs/ras/sps); init next `0x28` | None |
+| Slot next last | `0x54b` (1316 ticks) | `0x56b` (1348 ticks; +32 ticks = +`0x20`) | Tick count |
+| `*(0x519C4C)` | `0x1a` (`pc=0x3e43fc ra=0x3e43c4`) | `0x1a` (same pc/ra/sp) | None |
+
+Per-block table (17 blocks; `sch` = id1/id4 `scheduled`; `stub` = `target=0x423c90` count):
+
+| blk | p1l pc | p1l sch | p1l stub | p1n pc | p1n sch | p1n stub |
+|---|---|---|---|---|---|---|
+| 0 | `0x3e5440` | 78/54 | 484849 | `0x3e5980` | 83/59 | 535656 |
+| 1 | `0x3e5440` | 79/79 | 722340 | `0x3e5980` | 80/80 | 725335 |
+| 2 | `0x3e5980` | 74/74 | 679267 | `0x3e5980` | 80/80 | 730612 |
+| 3 | `0x3e5980` | 73/73 | 664939 | `0x3e5980` | 80/80 | 733844 |
+| 4 | `0x3e5980` | 71/71 | 651414 | `0x3dd278` | 68/68 | 620570 |
+| 5 | `0x3e5980` | 72/72 | 657899 | `0x3e5980` | 81/81 | 736170 |
+| 6 | `0x3e5440` | 62/62 | 563060 | `0x3e5980` | 79/79 | 724123 |
+| 7 | `0x3e5980` | 78/78 | 712451 | `0x3e5980` | 74/74 | 682261 |
+| 8 | `0x3e5980` | 80/80 | 733748 | `0x3e5980` | 78/78 | 709438 |
+| 9 | `0x3e5980` | 79/79 | 724724 | `0x3e5980` | 77/77 | 703159 |
+| 10 | `0x3e5980` | 75/75 | 687329 | `0x3e5980` | 68/68 | 619512 |
+| 11 | `0x3e5980` | 77/77 | 705702 | `0x3e5980` | 81/81 | 738237 |
+| 12 | `0x3e5980` | 68/68 | 615412 | `0x3e5980` | 81/81 | 737659 |
+| 13 | `0x3e5980` | 79/79 | 726712 | `0x3e5980` | 80/80 | 734618 |
+| 14 | `0x3e5980` | 80/80 | 729929 | `0x3e5980` | 78/78 | 718217 |
+| 15 | `0x3e5980` | 80/80 | 731936 | `0x3e5980` | 77/77 | 706211 |
+| 16 | `0x3e5980` | 79/79 | 717806 | `0x3e5980` | 69/69 | 617855 |
+
+Rate rows (p1l → p1n): `scheduled` ~75 → ~77; steady stub ~0.69M → ~0.70M; watch 7,942 → 8,134. Same regime.
+
+Block-0 stub comm (32 printed lines each): 23 byte-identical; 9 differ in `count` only (same `firstRa`/`lastRa`,
+incl `0x3e5928`/`0x3e5440`/`0x423c90` recurring); 1 cutoff swap (`0x412500` count=68 in p1l vs `0x4123e8`
+count=68 in p1n). `firstRa=lastRa=0x3dd290` (`0x3e5928`) and `0x3dd280` (`0x3e5440`) every block, both boots.
+
+## P15-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1n-1) | `7a7d4b645094d3ad82746a7d420b223422bf6444e5d06f6e56998e9057f5b4cd` | `e73e36a` tree + regen runner sources (unchanged since p1l) |
+| `/tmp/p1-link/runtime/ps2xTest/ps2x_tests` | `c72bf50f139d60946f656adaae08f50cd81d39e3a39c92ea7bc6f26097f0e4cb` | Same tree; 424/425 (§P15-1c) |
+| `PS2Recomp` branch `ssx3` HEAD | `e73e36a` | One `Diag:` commit this brief (§P15-1a); worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added |
+| Fork push | `git push fork ssx3` from fork clone only (`8fad69e..e73e36a`) | Verified pushed; no push in `/Users/bradrichardson/dev/ssx3` |
+| This report | `[P1n]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P15-4. Exact commands
+
+From `$W/PS2Recomp` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `$O=$W/P1/output`,
+`$R=$W/PS2Recomp`, `$LOG=$W/P1/run/boot-p1n-1.log`:
+
+```
+# Step 1 (no lease)
+sed -n '1544,1630p' $R/ps2xRuntime/src/lib/ps2_runtime.cpp      # dispatchGuestBranch shape
+sed -n '1040,1300p' ditto; grep getenv PS2X_DIAG (x3 sites)     # diag gate patterns
+(edit_file: +37 lines probe; find -name '._*' -delete)
+git -C $R diff --stat; git -C $R add ps2xRuntime/src/lib/ps2_runtime.cpp
+git -C $R commit -m "Diag: P1n driver-entry probe ..." (two trailers)  # e73e36a, 1 file
+git -C $R push fork ssx3                                        # 8fad69e..e73e36a, exit 0
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4  # exit 0
+shasum -a 256 (both binaries)
+cd $R && ps2x_tests | tee $W/P1/ps2x-tests-p1n.log              # 425/424/1, same lines 526/528
+# Step 2 (lease protocol)
+cat /tmp/ssx3-host-lease (absent); pgrep -f ps2EntryRunner (none)
+shasum ps2EntryRunner (7a7d4b64 fresh); ls ISO + ELF
+printf 'P1n\n' > /tmp/ssx3-host-lease (11:35:18 UTC)
+python3 /tmp/p1n-boot1.py (CWD $W/P1/run, p1l env + PROBE=1, 90 s, SIGTERM rc=-15)
+rm -f /tmp/ssx3-host-lease; ls (absent 11:36:54 UTC); pgrep (none)
+log greps: driver-entry 1 (:436); watch census; thread/stub/syscall comms;
+  gs:/run:tick/frame/crash/dormant/missing-target sweeps; slot fills
+trace greps: enters 4038/12341879/12338277/0/2; sed :18920-18935, :74107610-74107625
+source greps: lookupFunction callers (2); table slots 750748/759390; resume switches
+python3 hex recompute (0x1fffd80+0x80 = 0x1fffe00)
+# Step 3
+(edit_file append Part 15; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1n] ..." (two trailers; NO push there)
+```
+
+Env delta vs boot-p1l-1: `+PS2X_DIAG_DRIVER_PROBE=1` only. Source delta: §P15-1a only.
+
+## P15-5. What I could not do
+
+- Capture steady-state driver-entry `sp` values: the 4037 resumes bypass `dispatchGuestBranch`
+  (§P15-2c), so the P14-1d probe is blind there by construction; a scheduler-loop probe
+  (`EeScheduler.cpp:543/558`) would be a new `Diag:` commit, outside this brief — not implemented.
+- Re-census the 8 direct-jal candidates in the p1n trace: unnecessary — the probe is exhaustive
+  for the guest-call path (both arms live, env on), and exactly 1 guest call occurred.
+- No runtime fix (per the brief): probe + caller only. The `*(entry+8)` driver-flag writer and
+  sema-26 non-delivery remain out of scope, untouched.
+- No new data on the P13-6 ~4× rate question (p1n runs at the p1l rate, ~77 scheduled/block)
+  or the stub-distinct +1 (p1n b0 distinct is also 486; top-30 truncation unchanged).
+- One boot only (per the brief): no A/B on any rung.
+
