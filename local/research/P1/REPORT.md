@@ -3707,3 +3707,155 @@ find <dir> -name '._*' -delete (after every edit/copy)
 - Sibling LUI-only scans (`analysis_passes.cpp:63-72` self-modifying signal) were left untouched — out of brief scope.
 - Time box: about 35 min of the 4 h box used.
 
+---
+
+# P1i report — Part 10 (brief local/muse/prompts/P1i.md)
+
+Run wall: 2026-09-18 21:40 → 21:50 EDT (Fri). `W` = `/Volumes/Extreme SSD/ps2recomp-spike`.
+No verdicts. Step 1 answered from the closed `boot-p1h-1.log` + ELF + sources;
+Step 2 skipped (no boot, no lease action). No runtime fix per the brief.
+
+## P10-0. Lease record
+
+| Event | Value |
+|---|---|
+| Checks | `/tmp/ssx3-host-lease` read `M6` (foreign) at the Step-1 start and end checks; never written, never removed |
+| Steps 1–3 | No lease (reads only; Step 2 skipped so no boot needed one) |
+| Foreign waits | None; no poll loop ran, no `$W/P1/run/p1i-waits.log` exists |
+| `adb` | Not used |
+| End | Lease untouched (`M6` still holds it); nothing of mine to release |
+
+## P10-1. Park diagnosis (Step 1, no lease, no boot)
+
+### a. CSR-bit table (bits 15:14 and `0x4000`)
+
+| Bit(s) | In-tree meaning | Cite |
+|---|---|---|
+| 0 | SIGNAL: set by SIGNAL-reg write; guest write-one-to-clear | `ps2_memory.cpp:100-101` (W1C comment); `gs_frontend.cpp:1462-1471`; `gs_types.h:98` (`GS_REG_SIGNAL = 0x60`); `ps2_gs_tests.cpp:2105,2110` (`CSR.SIGNAL`) |
+| 1 | FINISH: set by FINISH-reg write; guest write-one-to-clear | `ps2_memory.cpp:100-101`; `gs_frontend.cpp:1475-1483`; `gs_types.h:99` (`GS_REG_FINISH = 0x61`); `ps2_gs_tests.cpp:2106,2114` (`CSR.FINISH`) |
+| 13 (`0x2000`) | FIELD: set on odd vsync tick, cleared on even tick | `ps2_memory.cpp:106` ("vsync worker (FIELD bit)"); `EeScheduler.cpp:2154-2161` |
+| 15:14 (`0xC000`) | No name in tree | `0xC000`/`0xc000`: 0 hits in `ps2xRuntime/src/lib` + `ps2xRuntime/include` + `ps2xRecomp` + `ps2xAnalyzer` (only KSEG2/`0xC0000000` and COP0-EntryHi hits); `REV`/`ID`/`FIFO`/`NFIELD`: 0 hits in `gs/` + `ps2_memory.*` + `EeScheduler.cpp`; ssx3 docs name CSR only in `docs/numbers-ledger.md:84`, `docs/todo.md:14-15,36` (no layout) |
+| `0x4000` (bit 14 set, bit 15 clear) | Unnamed in tree; it is the game's exit state, not a runtime constant | ELF `0x375d08` `addiu $a0,$zero,0x4000` vs `0x375d14` `andi $v0,$v0,0xC000` (words tabled in §c) |
+
+### b. Producer table (every `gs_regs.csr` writer — exhaustive `csr` grep over `ps2xRuntime/src/lib` + `ps2xRuntime/include`)
+
+| # | Site | Op / bits | Condition | Fired in boot-p1h-1? |
+|---|---|---|---|---|
+| 1 | `ps2_memory.cpp:363` `gs_regs.csr.store(0)` | all bits → 0 | `PS2Memory` init (after `memset`, `:360-363`) | Yes: boot reached execution (`Starting execution at address 0x100008`) |
+| 2 | `EeScheduler.cpp:2156` `fetch_or(0x2000)` | bit 13 set | `processEvent(VBlankStart)`, odd `m_vsyncTick` | Pump live (row below); no log line or counter records firings (0 `vsync`/`vblank`/`VSync` lines in 1298); effect outside the `0xC000` mask in all cases |
+| 3 | `EeScheduler.cpp:2160` `fetch_and(~0x2000)` | bit 13 clear | `processEvent(VBlankStart)`, even `m_vsyncTick` | Same as #2 |
+| 4 | `gs_frontend.cpp:1471` `fetch_or(0x1)` | bit 0 set | `writeRegister(GS_REG_SIGNAL)`: GIF packets (`:709`,`:766`) or GS HLE stubs (`GS.cpp:117-122`,`:782`,`:1165-1208` via `Support.h:1893-1900`) | No: 0 `gif` lines whole log; 30 distinct `[diag:stub]` targets whole log, 0 at the 3 sceGs addrs (`0x3FD910`/`0x3FDAB0`/`0x3FDB18`, `ssx3.toml:24-26`); clear path writes testa/prim/rgbaq/xyz/test only |
+| 5 | `gs_frontend.cpp:1483` `fetch_or(0x2)` | bit 1 set | `writeRegister(GS_REG_FINISH)`, same callers as #4 | No: same evidence as #4 |
+| 6 | `ps2_memory.cpp:956` `writeCsrHalf` ← `write32` | guest merge (bits ≥2 plain, bits 0–1 W1C; `:108-128`) | guest store to `0x12001000` | Unobservable (CSR write paths emit no log); park loop body contains no store (gen `:2119-2156`); 35-block stable park proves masked value ≠ `0x4000` at every dump |
+| 7 | `ps2_memory.cpp:1015` `writeCsrFull` ← `write64` | guest merge (bits ≥2 plain, bits 0–1 W1C; `:132-141`) | guest store to `0x12001000` | Same as #6 |
+| 8 | `ps2_memory.cpp:1150` `writeCsrHalf` ← `writeIORegister` | same merge | direct callers only (`:1141-1143`: unreachable from `write8/16/32/64`) | No caller in this boot (dead path) |
+
+Vsync worker / present path / timer paths (brief coverage):
+
+| Path | CSR writes | Wiring + boot evidence |
+|---|---|---|
+| Vsync worker | Bit 13 only (#2–#3 above) | Pump: `run()` `:242,575` → `processPendingEvents` (`:2025`) → `processDueDeadlines` (`:2059`; due = cycle + host deadlines, `:2096-2099`) → `VBlankStart` (`:2151`; seeded at reset `:223-225`, 16667 µs; reseeded `:2130-2137`); `m_eeCycle` advances via `checkpointDue`→`accountCycles` (`:617-618`,`:650-659`), and the spin itself calls `eeCheckpointDue` each iteration (gen `:2151-2153`) |
+| Present path | None (`csr`: 0 refs in `gs_cpu_backend.cpp`; frontend present `:506-578` reads pmode/dispfb/vsyncTick, not csr) | Host tick `UploadFrame` (`ps2_runtime.cpp:378-397`) latches on vsync-tick change; log: 0 present/game-frame lines (sole `frame` hit = raylib target-time line) |
+| Timer paths | None (exhaustive grep) | `accountCycles :654` → `advanceEeTimers` (`ps2_memory.cpp:407`) → `dispatchIrq(9+t)` (`:2027-2034`); log: 0 `timer`/`Timer`/`interrupt`/`Interrupt` lines |
+| Frontend↔memory wiring | (not a writer; proves #4–#5 land in the read atomic) | `m_gs.init(…, &m_memory.gs())` (`ps2_runtime.cpp:626`); `GS::init` stores `m_privRegs` (`gs_frontend.cpp:114-123`) |
+
+P4 §5 candidate-producer context (skimmed, not prescription):
+
+| Row | Mechanism | CSR relevance |
+|---|---|---|
+| S4 | Empty-transfer completion (TheTharin `7f29bbd`, DMAC STR rule) | None: touches CHCR.STR/`queueCompletedDmacCause`, not CSR; its rung (VIF0 park) is past |
+| S12 | EE-timer HLE (phmdacosta `e465b4d`) | None: delivers causes 9–12 via `dispatchIrq`; our `advanceEeTimers` likewise CSR-free |
+| S17 | Guest tick-function pump pattern (bt3 `4b8a766`) | None: park is a CSR-value spin, not an undriven guest queue |
+
+### c. Consumer routing (`0x375d10 ld`)
+
+| Item | Value |
+|---|---|
+| `0x375d10` in `[mmio]`? | No: 0 hits for `375d`/`375D` in `ssx3.toml` (`[mmio]` §`:607`, 273 entries) |
+| Generated line | `output/sub_00375A08_0x375a08.cpp:2122`: `SET_GPR_U64(ctx, 2, READ64(ADD32(GPR_U32(ctx, 3), 0)));` — address computed from `$v1` (built `:2110` `lui` + `:2118` `ori` → `0x12001000`); no baked constant; runner copy identical (`diff -q`) |
+| Routing | `READ64` (`ps2_runtime_macros.h:344-348`) → `isSpecialAddress` true (GS range, `ps2_address.h:43-48`; `ps2_runtime.h:442-445`) → `Load64` → `m_memory.read64` (`ps2_runtime.cpp:2270-2273`) → `isGsPrivReg` (`ps2_memory.cpp:39-42`) → `kGsCsrRegOffset` (`:100`) → `gs_regs.csr.load()` (`:789-795`, load at `:792`) |
+| Base cites | `PS2_GS_BASE 0x12000000` (`ps2_memory.h:48`); `PS2_GS_PRIV_REG_BASE/SIZE 0x12000000/0x2000` (`:49-50`); `csr` decl (`:208`); sibling loads: `read32 :745`, direct-caller `read :2194` |
+
+ELF words (file off `0x1000+(va-0x100000)`, `SLUS_207.72`), confirming the P9-3 decode:
+
+| va | word | disasm |
+|---|---|---|
+| `0x375d04` | `0x3c031200` | `lui $v1,0x1200` |
+| `0x375d08` | `0x24044000` | `addiu $a0,$zero,0x4000` |
+| `0x375d0c` | `0x34631000` | `ori $v1,$v1,0x1000` |
+| `0x375d10` | `0xdc620000` | `ld $v0,0($v1)` — park head |
+| `0x375d14` | `0x3042c000` | `andi $v0,$v0,0xC000` |
+| `0x375d18` | `0x00000000` | `nop` |
+| `0x375d1c` | `0x00000000` | `nop` |
+| `0x375d20` | `0x00000000` | `nop` |
+| `0x375d24` | `0x1444fffa` | `bne $v0,$a0→0x375d10` |
+| `0x375d28` | `0x00000000` | delay-slot `nop` |
+
+### d. Missing producer (Step 1d)
+
+| Question | Answer (exact lines/words) |
+|---|---|
+| Exit requirement | `(CSR&0xC000)==0x4000`, i.e. bit 14 = 1 and bit 15 = 0 (ELF `0x375d14` + `0x375d08`/`0x375d24`) |
+| Runtime writers to bit 14 | None (producer table §b: bits touched = {0, 1, 13} + init-0 + guest merge) |
+| Runtime writers to bit 15 | None (same table) |
+| Init value | `0` (`ps2_memory.cpp:363`) |
+| Only in-tree path that could set bit 14 | A guest CSR store with bit 14 = 1 / bit 15 = 0 (plain merge for bits ≥2, `ps2_memory.cpp:108-141`); the loop performs no store |
+| Log receipt that it never held | `id=1 pc=0x375d10` in 35/35 blocks, no other value (`grep -c` on `[diag:thread] id=1`); park-caller return via `0x375a94` and `sp=0x1fffd90` per P9-3 |
+| Step 2 | Skipped: the closed log + ELF + sources answer; no missing receipt |
+
+## P10-2. Ladder delta vs boot-p1h-1 (Step 2 skipped — no new boot)
+
+| Rung | boot-p1h-1 (P9-3) | boot-p1i-1 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x375d10` all 35 blocks | Not run | None (no new ladder) |
+| First new syscall ids | None | Not run | None |
+| First VIF MPG/MSCAL | None | Not run | None |
+| First GIF kick | None | Not run | None |
+| First presented frame | None | Not run | None |
+| Crash | None | Not run | None |
+
+## P10-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (read-only `shasum`, no rebuild) | `43aba129a36e4c1626463175f86f52f5d68053e05d93e0898d57e0051cf95314` | Identical to the boot-p1h-1 binary; not stale (no source change since `f2149e7`) |
+| `PS2Recomp` branch `ssx3` HEAD | `f2149e7` (unchanged) | No fork commit (diagnose-only); worktree keeps only the pre-existing local `M ps2xRuntime/src/runner/register_functions.cpp`, never added |
+| This report | `[P1i]` commit on `/Users/bradrichardson/dev/ssx3` (trailer; local only — no push there per the push rule) | Sole ssx3-repo change of this brief; no `runner/`, log, or `._*` file added |
+| Push | `git push fork ssx3` from the fork clone only (up-to-date check; the only push allowed) | No push in `/Users/bradrichardson/dev/ssx3` |
+
+## P10-4. Exact commands
+
+```
+cat /tmp/ssx3-host-lease   (M6 foreign at start and end; never written/removed)
+grep -n "375d|375D" $W/P1/ssx3.toml   (0 hits); awk [mmio] count (273)
+grep -rn "csr" <fork>/ps2xRuntime/src/lib <fork>/ps2xRuntime/include   (exhaustive writer/load table)
+grep -rn -i "REV|HSINT|VSINT|NFIELD|EDWINT|..." gs+include   (layout search, ~0 hits)
+grep -rn "0xC000|0xc000" src/lib include ps2xRecomp ps2xAnalyzer   (0 relevant hits)
+sed -n reads: ps2_memory.cpp:39-42,80-145,350-370,735-800,935-1020,1140-1160,2180-2198
+sed -n reads: EeScheduler.cpp:188-228,605-660,1990-2180,2340-2355; ee_scheduler.h:420
+sed -n reads: gs_frontend.cpp:108-125,1440-1500; gs_types.h:95-100; GS.cpp:110-125,775-800,1160-1210
+sed -n reads: ps2_runtime.cpp:378-400,620-630,2270-2290; ps2_memory.h:40-60,190-230
+sed -n reads: ps2_runtime_macros.h:340-352; ps2_runtime.h:438-445; ps2_address.h:1-60
+sed -n reads: ps2_gs_tests.cpp:420-430,2095-2115; ps2_runtime_interrupt_tests.cpp:120-200
+python3 ELF words 0x375d04-0x375d28 (file off 0x1000+(va-0x100000))
+grep -n "375d10|..." output/sub_00375A08_0x375a08.cpp; diff -q output/ runner/ (identical)
+log: wc -l (1298); keyword counts (vsync/vblank/VSync/gs:/present/csr/gif/vif/timer/interrupt/callback/dispatch = 0; frame = 1)
+log: grep -o target=... sort -u (30 distinct); sceGs targets grep -c (0)
+log: id=1 pc values (35x 0x375d10); tail -45 block 34; diag prefix census
+grep -rn "csr" ps2xTest/src (tests); grep -rn "0x12001000|12001000" src/lib include README (0 hits)
+grep -rli "csr" /Users/bradrichardson/dev/ssx3/docs (numbers-ledger.md, todo.md only)
+shasum -a 256 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner (43aba129..., read-only)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md; commit -m "[P1i] ..." (trailer; NO push there)
+git -C <fork> push fork ssx3   (up-to-date check; the only push allowed)
+find <dir> -name '._*' -delete (after every edit/copy; nothing created this session)
+```
+
+## P10-5. What I could not do
+
+- Bits 15:14 have no in-tree meaning to report: no runtime comment, test, or doc names them, so per the brief's no-guess rule the hardware meaning is recorded as unidentified-from-tree (the diagnosis does not need it: no writer sets bit 14 regardless of its name).
+- VBlankStart firings are uncounted: this build emits no vsync-marked log line and keeps no exposed vsync counter (only the silent `m_vsyncTick`/`vsyncTick` stores at `EeScheduler.cpp:2152-2153`).
+- Guest CSR stores are unobservable: all three CSR write paths (`:956`,`:1015`,`:1150`) emit no log line; only the loop's read-only body + the stable park bound them.
+- No boot was run and no `/tmp/p1-link` file was written; `$W/P1/run/boot-p1i-1.log` does not exist (Step 2 skipped by the brief's own gate).
+- P4 S4/S12/S17 were skimmed as context only; none was applied or verified by boot (out of brief scope).
+- Time box: about 10 min of the 2 h box used.
+
