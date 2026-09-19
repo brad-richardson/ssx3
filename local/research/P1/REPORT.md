@@ -3488,3 +3488,222 @@ git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md; commit
 - `0x2f` (57 hits, block 0) has no `Dispatcher.cpp` case and falls to `TODO()` via `handleSyscall`; its guest meaning was not pursued (boot-time only, absent from steady state).
 - Time box: well under the 2 h box (single session, no boots, no builds).
 
+# P1h report — Part 9 (brief local/muse/prompts/P1h.md)
+
+Run wall: 2026-09-18 21:05 → 21:40 EDT (Fri). `W` = `/Volumes/Extreme SSD/ps2recomp-spike`.
+No verdicts. Step 1 (analyzer fix + commit + push) and Step 2 (regen + audit)
+ran without the lease; Step 3 (rebuild + one boot) took the lease while absent.
+
+## P9-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` read `M5` (foreign, priority); not taken, not overwritten |
+| Steps 1–2 + rebuild | No lease (analyzer build, regen file-to-file, runtime rebuild need none) |
+| 21:21 EDT | Lease absent (M5's hold gone; never overwritten) |
+| 21:26 EDT | Lease absent; wrote `P1h`; booted 21:26–21:29 EDT |
+| Foreign waits | None; no poll loop ran, no `$W/P1/run/p1h-waits.log` exists |
+| `adb` | Not used |
+| End | Removed after the report commit, verified absent |
+
+## P9-1. Analyzer rule + diff (Step 1, one commit)
+
+Scan first (all 273 current-TOML `[mmio]` pcs, ELF words at `0x1000+(va-0x100000)`):
+
+| Item | Value |
+|---|---|
+| pcs with nearest LUI to the base reg within 5 back | 273/273 |
+| pcs with ≥1 intervening writer to the base reg | 245, each exactly one |
+| intervening opcode | Same-register `ORI $r,$r,imm` in all 245; zero `ADDIU`, zero any other opcode |
+| pcs with no intervening writer | 28 (24 specific-offset + the 4 genuine-`0x10000000` of P9-2) |
+
+Exact rule (covers `ORI` + `ADDIU` per the brief; the `ADDIU` arm is unobservable
+in this game — no `ADDIU` low-half writer occurs in the 273): keep the nearest-LUI
+≤5 scanback unchanged; then apply, in program order, every same-register
+(`rt==rs==base`) `ORI` (`base |= imm`, zero-extended) and `ADDIU`
+(`base += sign_extend(imm)`, 32-bit wrap) strictly between the LUI and the
+access; `target = base + sign_extend(offset)`. No LUI found keeps the old
+behavior (no entry). Other intervening writers are ignored (none occur in the
+273). Composition mirrors the sibling `addSignedImm16`/`orUnsignedImm16`
+convention (`analysis_passes.cpp:101-109,291-303`).
+
+```diff
+--- a/ps2xAnalyzer/src/elf_analyzer.cpp
++++ b/ps2xAnalyzer/src/elf_analyzer.cpp
+@@ -425,6 +425,7 @@
+                         // Look for the LUI instruction that sets up the high bits
+                         uint32_t baseAddr = 0;
++                        uint32_t luiAddr = 0;
+                         for (int i = 1; i <= 5 && ...) // unchanged scanback
+@@ -438,10 +439,37 @@
+                             if (OPCODE(prevInst) == OPCODE_LUI && RT(prevInst) == inst.rs)
+                             {
+                                 baseAddr = IMMEDIATE(prevInst) << 16;
++                                luiAddr = prevAddr;
+                                 break;
+                             }
+                         }
++
++                        // Account for the low half: apply same-register ORI/ADDIU
++                        // writers between the LUI and the access, in program order.
++                        if (luiAddr != 0)
++                        {
++                            for (uint32_t midAddr = luiAddr + 4; midAddr < inst.address; midAddr += 4)
++                            {
++                                uint32_t midInst = 0;
++                                if (!tryReadWord(m_elfParser.get(), midAddr, midInst))
++                                    continue;
++                                if (RT(midInst) == inst.rs && RS(midInst) == inst.rs)
++                                {
++                                    if (OPCODE(midInst) == OPCODE_ORI)
++                                        baseAddr |= IMMEDIATE(midInst);
++                                    else if (OPCODE(midInst) == OPCODE_ADDIU)
++                                        baseAddr += (uint32_t)(int32_t)(int16_t)IMMEDIATE(midInst);
++                                }
++                            }
++                        }
+```
+
+| Receipt | Value |
+|---|---|
+| Commit | `f2149e7` `Analyzer: fold LUI low half from ORI/ADDIU into MMIO target` (1 file, +28; trailers) |
+| Push | `fork ssx3` `6046260..f2149e7` |
+| Analyzer rebuild | `cmake --build /tmp/p1-link/tools --target ps2_analyzer -j4`, exit 0 |
+| New analyzer sha256 | `900660c98aba33ace85152586bdf922e92629eaf8c04d3bbdf0d91ba746720d4` (`/tmp/p1-link/tools/ps2xAnalyzer/ps2_analyzer`) |
+
+## P9-2. Regen audit (Step 2, no lease)
+
+Regen: new analyzer → `ssx3.toml.p1h-new` (raw), then the two standing deltas
+re-applied (`ghidra_output = "ssx3-functions.sweep.csv"`, `"ret0@0x0042c1f0",`
+after `InitTLB@0x0042CD58`); final `ssx3.toml` differs from `ssx3.toml.p1h-orig`
+only in `[mmio]` (backup kept). Raw-new vs analyzer-pristine `ssx3.toml.p1-orig`:
+all 494 diff lines are `[mmio]` entries, no other section changed.
+`$W/P1/bin/ps2_analyzer` left at the old build (`4bf4ba2b…`); the new analyzer
+ran from the `/tmp` build path. Recomp binary unchanged (`7654e7fe…` both paths).
+
+| Item | Value |
+|---|---|
+| `[mmio]` entries old → new | 273 → 273 (0 added, 0 removed) |
+| Entries changed | 245 |
+| Entries still `0x10000000` | 4 (tabled below) |
+| Hand cross-check | Independent python model of the new rule vs all 273 new targets: 0 mismatches |
+| Recomp summary (`recomp-p1h.log`) | discovered 9269 / processed 9269 / recompiled 9092 / stubs 177 / skipped 0 / decode failures 0 / unhandled 0; entrypoints 393727; warnings 3598; fallbacks 724964 (identical to `recomp-p1d-sweep.log`) |
+| Runner-source diff (`output/` vs pre-regen `runner/`) | 57 files, 263 insertions / 263 deletions; every changed line is an MMIO-constant line; old side all `0x10000000u`; new side real targets (`0x10008000/20/30`, `0x10009000/10/20/30`, `0x1000A000/10/20/30`, timers, `0x1000F000/130/520`, `0x10002000/10/20`, etc.); MMIO code lines 346 both sides; folded code lines 267 → 4. Never committed. |
+
+Remaining folded entries, one line each (hand decode; all folds correct):
+
+| pc | True address | Why the new rule still folds it |
+|---|---|---|
+| `0x3e4cd0` (lw `$v1,0($v0)`) | `0x10000000` | `LUI $v0,0x1000` @`0x3e4ccc`, no writer to `$v0`, offset 0 |
+| `0x3e4cd4` (sw `$a2,0($v0)`) | `0x10000000` | Same LUI, no writer, offset 0 |
+| `0x3e4cd8` (sw `$a3,0($v0)`) | `0x10000000` | Same LUI, no writer, offset 0 |
+| `0x3e4c78` (lw `$a2,0($v1)`) | `0x10000000` | `LUI $v1,0x1000` @`0x3e4c70`, no writer to `$v1` (the `ORI` @`0x3e4c7c` targets `$v0`), offset 0 |
+
+The 7 `sub_003912A8` pcs (TOML old → new; regenerated `.cpp` lines):
+
+| pc | TOML before | TOML after | `output/sub_003912A8_0x3912a8.cpp` |
+|---|---|---|---|
+| `0x3912b8` (lw) | `0x10000000` | `0x10008000` | `:44 Load32 … 0x10008000u` |
+| `0x3912d0` (lw) | `0x10000000` | `0x10008000` | `:73 Load32 … 0x10008000u` |
+| `0x391300` (sw TADR) | `0x10000000` | `0x10008030` | `:117 Store32 … 0x10008030u` |
+| `0x39130c` (sw QWC) | `0x10000000` | `0x10008020` | `:126 Store32 … 0x10008020u` |
+| `0x391318` (sw CHCR) | `0x10000000` | `0x10008000` | `:135 Store32 … 0x10008000u` |
+| `0x39131c` (lw) | `0x10000000` | `0x10008000` | `:138 Load32 … 0x10008000u` |
+| `0x391330` (lw, ex-park) | `0x10000000` | `0x10008000` | `:164 Load32 … 0x10008000u` |
+
+Only one regenerated file still contains `MMIO: 0x10000000`
+(`output/sub_003E4AF0_0x3e4af0.cpp`, the 4 genuine pcs).
+
+## P9-3. Boot ladder (Step 3: rebuild `/tmp/p1-link`, boot 1)
+
+Runner refresh: `cp -X output/*.{cpp,h}` → `ps2xRuntime/src/runner/` (9273 files,
+`diff -rq` clean after), sidecars purged. Rebuild
+`cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4`, exit 0.
+Boot 1 (`$W/P1/run/boot-p1h-1.log`, 1298 lines, 132689 B, CWD `$W/P1/run`,
+env `PS2X_CD_IMAGE` + `PS2X_DIAG_PERIOD_MS=5000`, no `WATCH`/`REPORT_ALL`,
+foreground 180 s, SIGTERM, exit -15, no stray left):
+
+| Rung | Boot 1 |
+|---|---|
+| Binary sha256 | `43aba129a36e4c1626463175f86f52f5d68053e05d93e0898d57e0051cf95314` |
+| Thread-1 pc past `0x391344`? | Yes: `0x375d10` in all 35 blocks (returned via `0x375a94`, +`0x27c` into caller `sub_00375A08,[0x375a08,0x376938)`) |
+| Thread table, last dump (block 34, lines 1268–1271) | `id=1 status=0 Running waitReason=0 waitId=0 pc=0x375d10 entry=0x100008 pri=100 scheduled=300`; `id=2 status=2 Waiting sema 26 pc=0x423de8 entry=0x3e3be0 pri=12 scheduled=0`; `id=3 status=1 Ready pc=0x31ac60 entry=0x31ac60 pri=101 scheduled=0`; `id=4 status=2 Waiting sema 29 pc=0x423de8 entry=0x31ac08 pri=99 scheduled=300` |
+| Thread-1 stack (block-34 `[diag:stacks]`) | `[0x1fe0000,0x2000000)` `sp=0x1fffd90` (vs `0x1fffd80` at the P8 park: +`0x10`, the `sub_003912A8` frame popped) |
+| Last dispatch lines | No literal `dispatch` lines in the log (`grep -ci dispatch` = 0, as in P8-1c); per-dispatch receipt is the `[diag:thread] … scheduled=N` line: block 34 `id=1/4 scheduled=300`, `id=2/3 scheduled=0` |
+| First new syscall ids | None: block-0 same id set as boot-p1f-2 block 0 (`distinct=24`, same 20 shown; counts `0x44` 301/`0xffffffbd` 278/`0x2f` 63/`0x40` 31/`0x42` 21/`0x41` 20/`0xfc` 20/`0x4b` 9/`0x74` 8/`0x5b` 6/`0x64` 6/`0x22,0x20,0x3e,0x6f` 3/`0x4a,0x14,0x10` 2/`0x30,0x29` 1); blocks 1–34 only `0x44` + `0xffffffbd` (block 34: 305/305) |
+| First VIF MPG/MSCAL | None (0 `vif`/`mpg`/`mscal` lines) |
+| First GIF kick | None (0 `gif` lines) |
+| First presented frame | None (sole `frame` hit is the raylib `Target time per frame` line) |
+| Crash | None (0 `crash` lines) |
+| Missing targets | 0 |
+| CD | 41 lines (20 `sceCdRead`+payload pairs + `sceCdInitEeCB`); idle after; 6 SIF modules |
+| Dormant / StartThread / stubs-34 | 42 `id=-1` dormant, 0 `id=1`; 3 StartThread (ids 2,3,4); stubs `distinct=12`, same target/`ra` pattern as P8 block 34 |
+
+New park (recorded, no fix per the brief): `sub_00375A08` loop `0x375d10–0x375d28`
+(`output/sub_00375A08_0x375a08.cpp:2106-2156`):
+
+```
+0x375d04: lui  $v1,0x1200        ($v1=0x12000000)
+0x375d08: addiu $a0,$zero,0x4000 ($a0=0x4000)
+0x375d0c: ori  $v1,$v1,0x1000    ($v1=0x12001000 = GS priv base + CSR off)
+0x375d10: ld   $v0,0($v1)        PARK HEAD
+0x375d14: andi $v0,$v0,0xC000
+0x375d18-0x375d20: nop ×3
+0x375d24: bne  $v0,$a0→0x375d10  (spin while (CSR&0xC000)!=0x4000)
+```
+
+Read path: `ld` → `READ64` → `PS2Memory::read64`, which returns
+`gs_regs.csr.load()` for CSR offset `0x1000` (`ps2_memory.cpp:787-796`;
+`PS2_GS_BASE 0x12000000` / `kGsCsrRegOffset 0x1000`: `ps2_memory.h:48-49` /
+`ps2_memory.cpp:100`). CSR value and exit condition not pursued (stop).
+
+## P9-4. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/tools/ps2xAnalyzer/ps2_analyzer` | `900660c98aba33ace85152586bdf922e92629eaf8c04d3bbdf0d91ba746720d4` | `f2149e7` tree |
+| `$W/P1/bin/ps2_analyzer` | `4bf4ba2bdb5af44c002013ef26ca9d65aab696228dfbb22b305708bd8b3e699f` | Old build, deliberately untouched |
+| `ps2_recomp` (`$W/P1/bin` and `/tmp` build) | `7654e7fe4a7316476dfcc00a418c850bd8ecffeb301b345624500304e22e826f` | Unchanged since P2 (both paths agree) |
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot 1) | `43aba129a36e4c1626463175f86f52f5d68053e05d93e0898d57e0051cf95314` | Regen runner sources on `f2149e7` tree (replaces `f4d16b98`) |
+| `PS2Recomp` branch `ssx3` HEAD | `f2149e7` (`Analyzer: fold LUI low half …`) | Pushed `fork ssx3` (`6046260..f2149e7`); worktree keeps only the pre-existing local `M ps2xRuntime/src/runner/register_functions.cpp`, never added |
+| This report | `[P1h]` commit on `/Users/bradrichardson/dev/ssx3` (trailers; local only — no push there per the push rule) | Sole ssx3-repo commit of this brief; no `runner/`, log, or `._*` file added |
+
+## P9-5. Exact commands
+
+```
+cat /tmp/ssx3-host-lease   (M5 at start; absent 21:21; P1h 21:26–21:40; removed at end)
+python3 /tmp/p1h-scan.py   (273-TOML-pc low-half scan: 245× ORI, 0 ADDIU, 0 other)
+python3 /tmp/p1h-scanall.py   (broad .text scan, context only)
+python3 /tmp/p1h-dump4.py   (hand words for the 4 no-writer pcs)
+(edit_file) ps2xAnalyzer/src/elf_analyzer.cpp (+28 low-half fold)
+cmake --build /tmp/p1-link/tools --target ps2_analyzer -j4; shasum -a 256 (900660c9…)
+git -C <fork> add ps2xAnalyzer/src/elf_analyzer.cpp; commit -m "Analyzer: ..." (trailers); show --stat; push fork ssx3   (f2149e7)
+cp -X $W/P1/ssx3.toml $W/P1/ssx3.toml.p1h-orig
+cd $W/P1 && /tmp/p1-link/tools/ps2xAnalyzer/ps2_analyzer SLUS_207.72 ssx3.toml.p1h-new | tee analyzer-p1h.log   (exit 0)
+diff ssx3.toml.p1-orig ssx3.toml.p1h-new   (494 lines, all [mmio])
+python3 TOML delta re-apply (sweep csv + ret0) → ssx3.toml; diff vs p1h-orig (mmio only)
+cd $W/P1 && ./bin/ps2_recomp ssx3.toml | tee recomp-p1h.log   (exit 0; counts = P1d-sweep)
+python3 /tmp/p1h-verify.py   (new-rule hand model vs 273 new targets: 0 mismatches)
+diff -rq $W/P1/output <runner>   (57 files; 263+/263-, all MMIO-constant lines)
+cp -X $W/P1/output/*.{cpp,h} → ps2xRuntime/src/runner/; sidecar purges; diff -rq clean
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4; shasum -a 256 (43aba129…)
+printf 'P1h\n' > /tmp/ssx3-host-lease   (absent before)
+python3 /tmp/p1h-boot1.py   (CWD $W/P1/run, PS2X_CD_IMAGE + PS2X_DIAG_PERIOD_MS=5000, stdbuf -o0 -e0, log direct to boot-p1h-1.log, foreground 180 s, SIGTERM)
+log reads: grep/awk/python3 on the closed boot-p1h-1.log only (never piped while running)
+reads (no edits): ps2_memory.cpp:780-825,941-999; ps2_memory.h:48-49; ps2_runtime_macros.h:344-348; output/sub_00375A08_0x375a08.cpp:2100-2159
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md; commit -m "[P1h] ..." (trailers; NO push there)
+git -C <fork> push fork ssx3   (up-to-date check; the only push allowed)
+rm /tmp/ssx3-host-lease (verified absent)
+find <dir> -name '._*' -delete (after every edit/copy)
+```
+
+## P9-6. What I could not do
+
+- No `p1h-waits.log`: no waits occurred (M5's start-of-session lease was gone by 21:21; the lease was absent when the boot was ready, so no poll loop ran).
+- Block-0's 4 unprinted syscall ids (`distinct=24`, top-20 cap) still unrecovered — same gap as P8.
+- 263 changed emission lines vs 245 changed TOML entries: 16 MMIO pcs are emitted twice across overlapping sweep outputs (346 MMIO code lines from 273 pcs both sides); recorded, not chased.
+- The new `0x375d10` GS-CSR park is recorded only (thread table + loop + read path); the CSR value and exit condition were not pursued — brief says stop, no further fix.
+- `$W/P1/bin/ps2_analyzer` was left at the old build (the fixed analyzer ran from `/tmp/p1-link/tools`); `$W/P1/output/` vs `runner/` are identical post-refresh.
+- Sibling LUI-only scans (`analysis_passes.cpp:63-72` self-modifying signal) were left untouched — out of brief scope.
+- Time box: about 35 min of the 4 h box used.
+
