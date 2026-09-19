@@ -5,9 +5,27 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M13 read (09-19) — PASS, slot-36 partitioned + per-draw scan
+      works:** slot-36 windows on one frame (3001 / 890 / 3001
+      fail-closed-verbatim / 1553-1561 24-25-uniform) → shares
+      2111/0/1440; drawscan: 31 shapes, one draw carries 884 B, five
+      31–221 B, three negative (-1/-6/-3), eighteen exactly 0, every
+      shape uniform; pre-fix det3 attempt honestly kept
+      (delta-armed-all bug + exit -5). Verified: header shas,
+      analyzer rows, guard receipts, window/shape rows + refhashes,
+      3/3 hashes, lease log (0 waits). Ledger row added.
+- [ ] **P1u read (09-19) — PASS, `-1` attributed to zero-max
+      CreateSema:** F2 ctor table + full field layout; sole writer
+      #2 store; dynamic census (33 creates, exactly the 2 zero-param
+      fail with -1, singleton `s0` 257,125×); game expects zero-max
+      to succeed (host-parity gap, not guest bug); thread-3
+      flag-clearer starved by the no-block spin (prio 100 beats 101).
+      Verified: 33 lines + F2 4 verbatim, s0 singleton, `de7ff17`
+      +51/-7 pushed, host rule in source, ELF 6/6, binary fresh.
+      Next: P1v (the max_count validation decision). Ledger row added.
 - [ ] **Standing order (09-19, user): keep queueing follow-ups without
-      asking unless input is needed.** Holds: I-lane (raylib scope
-      call owed), publishes/pushes in ssx3 (never), external submits.
+      asking unless input is needed.** Holds: publishes/pushes in ssx3
+      (never), external submits. (I-lane hold lifted: SDL path chosen.)
 - [ ] **I4 launched (09-19, user picked SDL path):** SDL2 for
       iphonesimulator + raylib-SDL build + fork CMake integration +
       runtime configure/build attempt. Reuses I3 pane. Standing-order
