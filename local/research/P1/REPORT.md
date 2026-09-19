@@ -5994,3 +5994,352 @@ Env delta vs boot-p1p-2: WATCH `0x5e0088`→10 addrs (`0x5e0080,88,90,98,a0,a8,b
 
 ---
 
+## Part 19 (P1r): worker wakes once on 3E4648's signal, issues the CD read, re-parks before the callback's signal; site #9 never reached
+
+Brief `local/muse/prompts/P1r.md`. Static worker-path + registration analysis, then 1
+dynamic receipt boot; no fix. Tables, no verdicts. Stale-reading guard: Part 18
+(P18-1f sites #7/#9/#10, P18-1g CD→W1 break, P18-2a :411–:416, P18-5 poll-vs-lost-wake
+residue) + Part 17 §P17-1 (sema-26 context, out of scope) re-read before acting.
+
+## P19-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `M10` (observed 16:11:44Z) |
+| Polls (no boot attempted yet) | 16:16:53Z absent; 16:20:22Z `M10`; 16:23:22Z absent |
+| Waits log | `$W/P1/run/p1r-waits.log` (6 lines: 3 holds/absent polls + claim + release) |
+| Pre-boot checks (16:23:32Z) | `pgrep -f "[p]s2EntryRunner"` exit 1 (none); binary `7a7d4b64` fresh (matches P18-3, no rebuild); fork HEAD `e73e36a`; ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1r\n' > /tmp/ssx3-host-lease` 16:23:32Z (file absent, verified twice), immediately before boot-p1r-1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15 |
+| Release | `rm -f /tmp/ssx3-host-lease` 16:27:31Z; verified absent; `pgrep` exit 1 |
+| Second boot | None (Step-1 question closed by boot 1; reserve unused) |
+| `adb` | Not used |
+
+## P19-1. Static: worker path, gates, registration (no lease, no boot)
+
+Conventions: `3E3B00` fused file `sub_003E3B00` (`0x3e3b00`–`0x3e3d78`, build map
+`ssx3-functions.csv`); `3E33B0` = `0x3e33b0` label inside fused `sub_003E3350`
+(`0x3e3350`–`0x3e3478`); stale split duplicates (`sub_003E3BE0`, `sub_003E33B0`,
+`sub_003E4000`) exist in `$O` but are NOT in the build map (sweep-only). All words
+ELF-verified §P19-1e; all hand hex machine-checked §P19-1e.
+
+### a. Callback → worker wake link
+
+| Item | Value |
+|---|---|
+| Callback | `0x3e3ad8` (in `sub_003E39A8`): `lui $v0,0x52` + `lw $a0,-0x63B4($v0)` = `*(0x519C4C)` + `jal 0x423DD0` (iSignalSema, v1=`-0x43`) |
+| Worker wait | `0x3e3c18` (in worker loop `0x3e3be0`): `jal 0x423DE0` (WaitSema, v1=`0x44`) with `$a0` = `*(0x519C4C)` (`lw $a0,0xC($s2)`, s2=`0x519C40`) |
+| Sema id | `*(0x519C4C)` = `0x1A` = 26 (boot-1 :175 @ `0x3e43fc` = CreateSema ret; thread 2 `waitId=26` every block) |
+| Sema create | `0x3e43bc` `jal 0x423DA0` (CreateSema) in `0x3e4040`; block `$a0`=`$sp+0x30`: `[+4]`=max `0x20` (`0x3e43b8`), `[+8]`=init 0 (`0x3e43b4`); attr/option (`[+16]`/`[+20]`) have no store anywhere in the function (stale stack words; runtime observed `attr=0x0` in start-thread line) |
+
+### b. Worker-loop gates (second half `0x3e3be0`, thread 2)
+
+One row per predicate between wake and W1 `jal 0x3e3d64`. s1=`0x520000`
+(`-0x63C0`→`0x519C40` state), s2=`0x519C40`, s0=`0x519C60` (checks §P19-1e).
+
+| # | pc (word ✓) | Condition (fail → effect) | Pass → effect |
+|---|---|---|---|
+| G0 | `0x3e3c18` (`0xc108f78`) | WaitSema(`*(0x519C4C)`) blocks | Returns to `0x3e3c20` |
+| G1 | `0x3e3c20` (`0xc1008c0`) + `0x3e3c28` (`0x14400004`) | `sceCdGetError()`==0 → fall to G2 (delay always loads state→`$v1`) | ≠0 → `0x3e3c3c` (G3 error path) |
+| G2 | `0x3e3c30`/`0x3e3c34` (`0x30620008`/`0x10400011`) | state&8==0 → `0x3e3c7c` (G4; delay precomputes state&1) | ≠0 → `0x3e3c3c` (G3) |
+| G3 | `0x3e3c3c`–`0x3e3c48` (`0x2402fff7`/`0x622024`/`0x30630002`/`0x1060fff3`) | state&2==0 → store `state&~8` (delay `0x3e3c4c`) + loop to G0 | ≠0 → `0x3e3c50` (G5) |
+| G4 | `0x3e3c7c` (`0x1040000a`) | state&1==0 → `0x3e3ca8` (G6; delay `v1=state&~2`) | ≠0 → memcpy block + `jal 0x3E6574` @ `0x3e3ca0`, state:=`state&~1` (`0x3e3c9c`), then G6 |
+| G5 | `0x3e3c50`–`0x3e3c58` (`0x8e420010`/`0x2442ffff`/`0x18400005`) | `--*(0x519C50)`≤0 (stored `0x3e3c5c`) → `0x3e3c70`: state:=`(old&~8)\|4`, loop to G0 | >0 → `jal 0x3E3B00` @ `0x3e3c60` (ISSUE), loop to G0 |
+| G6 | `0x3e3ca8`/`0x3e3cac` (`0x8e070004`/`0x18e00029`) | `*(0x519C64)`≤0 → `0x3e3d54` = W1 PRELUDE (load state, `&~2`, `$a0`=1, `jal 0x3DE420` @ `0x3e3d64`, delay store) | >0 → size-split S1/S2 below (never reaches #9 this pass; issues @ `0x3e3d44`, loops to G0) |
+
+Size-split (remaining>0 only): S1 `0x3e3cd4` (`0x10c00007`, `$a2`=`rem<0x800`):
+taken→`0x3e3cf4`; not-taken→`0x3e3cdc` block (state\|=1) →`0x3e3d38`. S2 `0x3e3cf8`
+(`0x10400007`, `(rem-base)&0x3F`): taken→`0x3e3d18` (state&=−2); not-taken→`0x3e3d00`
+block (state\|=1) →`0x3e3d38`. Join `0x3e3d38`: `*(0x519C64)`−=`*(0x519C60)`,
+`jal 0x3E3B00` @ `0x3e3d44`, loop to G0.
+
+Issuer retry gates (first half `0x3e3b00`, runs on whichever thread calls it):
+R1 `0x3e3b70` (`0x1040000c`, `$s2`<3): exhausted→`0x3e3ba4`.
+R2 `0x3e3b8c` (`0x1040fff2`, `sceCdRead` ret @ `0x3e3b84`): 0→retry via `0x3e3b58`
+(delay `$v0`=`$s2`+1; `0x3E35B0` sleep + `sceCdSync` @ `0x3e3b64`); ≠0→success:
+`$s4`=1, state\|=2 (`0x3e3b9c`/`0x3e3ba0`, s0−0x1C=`0x519C40`).
+R3 `0x3e3ba4` (`0x16800005`, `$s4`): 0→state\|=6 (`0x3e3bb4`/`0x3e3bb8`,
+retry-exhausted pattern); ≠0→return.
+
+Site-#7 gates (`0x3e33b0` poll, runs on thread 1 via §P19-1c): A1 `0x3e33d4`
+(`0x10600020`, `*(0x519C20)`): 0→exit `0x3e3458`. A2 `0x3e33ec` (`0x14640005`,
+`*(0x450C40)` vs `*(0x519C24)`): ≠→`0x3e3404` (`0x428168` path); ==→A3 `0x3e33fc`
+(`0x10620006`, `*(0x450C4C)` vs `*(0x519C2C)`): ==→`0x3e3418` (skip `0x428168`);
+≠→`0x3e3404`. Join: `0x4283A0` @ `0x3e3424`, `*(0x450C40)`:=old `*(0x519C24)`,
+`*(0x450C4C)`:=`*(0x519C2C)`+`*(0x519C30)`, flag:=0 (`0x3e344c`), W1 @ `0x3e3450`.
+Arm (case-2 non-1 path, `0x3e3350`): `*(0x519C20)`:=1 + args→`0x519C24`/`28`/`2C`/`30`
+(`0x3e3378`–`0x3e338c`, contiguous, no branch between). Topbyte==1 path instead
+`jal 0x3E4648` @ `0x3e3398` (gate `0x3e3368`, inline, same thread).
+
+### c. Poll registration + worker trigger (P18-1f residues closed statically)
+
+| Target | Registration (word ✓) | Dispatch / trigger |
+|---|---|---|
+| `0x3e33b0` poll (site #7) | `0x3e3024`/`0x3e302c` (`lui $a0,0x3E`+`addiu 0x33B0`) → `$a0`=`0x3e33b0`, `$a1`=`$a2`=0 → `jal 0x3E57F8` @ `0x3e3048`; `0x3e3020` ← `jal` @ `0x3dcd5c` (init `sub_003DCC88`, delay `$a0`=`$s5`, `$a1`=`$v0`: 0 if `*(0x450C60)`==0 else computed) | `0x3E57F8` inserts into 16-slot table `0x51ED98` (`0x520000`−`0x1268`, stride `0x10`: +0 func, +4 flag, +8 due, +0xC busy; guard `*(0x450E00)`++/−−; clear `memset(.,0,0x100)` @ `0x3e57d0`; unregister `0x3E58C8` zeroes match); swept by thread-1 park loop `0x3E5928` (`$s0`=table+`0xC`, 16 iters): skip if func==0 (`0x3e5984`), `*(0x450DD0)`<due (`0x3e5998`), busy≠0 (`0x3e59a4`); else busy:=1 + `jalr` @ `0x3e59b8` (`0xc0f809` ✓) |
+| `0x3e4000` poll (second slot) | `0x3e443c`/`0x3e4444` (`lui`+`addiu 0x4000`) → `$a0`=`0x3e4000`, `$a1`=0 → `jal 0x3E57F8` @ `0x3e4450` (in `0x3e4040`) | Same table/`jalr`; body: if (`*(0x519C40)`&6)==6 (`0x3e4014`) clear bits 1–2 (`0x3e401c`/`0x3e4020`/`0x3e4028`) + `jal 0x3E3D78` @ `0x3e4024`, else return 0 |
+| Worker thread `0x3e3be0` (site #9 host) | `0x3e43c4`/`0x3e43d0` (`lui $v1,0x3E`+`addiu 0x3BE0`) → `$v1`=`0x3e3be0`; CreateThread block `$a0`=`$sp` (`0x3e43e8`): `[+4]`=entry (`0x3e43e4`), `[+8]`=stack `0x51AC80` (`0x3e43ec`), `[+0xC]`=size `0x4000` (`0x3e43f4`), `[+0x10]`=gp `0x4A30F0` (`0x3e43f0`), `[+0x14]`=prio `0xC` (`0x3e43f8`), `[+0x20]`=0 (delay `0x3e4404`); `jal 0x423BA0` (CreateThread) @ `0x3e4400`, `jal 0x423BC0` (StartThread) @ `0x3e4410`; `0x3e4040` ← `jal` @ `0x3dcd44` (init) | Boot-1 start-thread line matches exactly: `id=2 func=0x3e3be0 stack=0x51ac80 stack_size=0x4000 gp=0x4a30f0 priority=12`; `*(0x519C48)`=2 @ `0x3e4414` (StartThread ret = tid) |
+| First half `0x3e3b00` (issuer) | Direct `jal` ONLY from worker loop: @ `0x3e3c60` (G5) and @ `0x3e3d44` (size-join); JAL word `0xc0f8ec0` absent tree-wide otherwise; `jal`-words to `0x3e33b0` (`0xc0f8cec`), `0x3e3be0` (`0xc0f8ef8`), `0x3e3ad8` (`0xc0f8eb6`) absent tree-wide (pointer/thread/callback-reached only) | Runs on the caller's thread (boot-1: thread 2, :430 `:433` sp=`0x51exxx`) |
+| Callback `0x3e3ad8` | `sceCdCallback`(`0x4008A0`) sites: clear `$a0`=0 @ `0x3e3dac` (head `0x3e3d78`); set `$a0`=`0x3e3ad8` @ `0x3e3fb4` (tail `0x3e3d78` ← `jal` @ `0x31ad90` AND ← `jal` @ `0x3e4024` poll path) and @ `0x3e4430` (in `0x3e4040` init); `sceCdInitEeCB`(`0x400A78`) before each set: stack `0x51A480`+`0x800` → top `0x51AC80` (= worker stack base) | Runtime `queueCdCallback` → scheduler invocation `func=1 cb=0x3e3ad8` (boot-1 :432/:434) |
+| `0x3e3d78` prime (SignalSema) | `jal 0x423DC0` (SignalSema) @ `0x3e3fc4` with `$a0`=`*(0x519C4C)` (delay `lw $a0,0xC($v1)`, v1=`0x519C40`) | Boot-1: tail never ran (no `sceCdInitEeCB ... ret=0x3e3fb0` print; `0x3e3d78` single-exit via tail `jr` @ `0x3e3ff8`; no thread inside it) → prime never fired; :428 wake is 3E4648 @ `0x3e48b0` instead (§P19-2b) |
+
+### d. Lost-wake candidates (flag/counter × writer pc × timing)
+
+| # | Flag/counter | Writer pc(s) | Timing vs waiter | Shape |
+|---|---|---|---|---|
+| L1 | Sema-26 count (host-side, unwatchable) | init 0 @ `0x3e43bc`-block; +1 @ `0x3e48b0` (3E4648, thread 1, boot-1 :426–:427 window); +1 @ `0x3e3ae8` (callback, post-:434); prime @ `0x3e3fc4` never fired (this boot) | W1: `0x3e48b0` signal lands while worker parked (first wait) → wake :428. W2: callback signal lands while worker RE-parked (:433→:434 order) → no wake (delivery mechanism = out-of-scope sema-26 item; ORDER is the in-scope receipt) | Signal-during-park, not signal-before-wait |
+| L2 | `*(0x519C50)` retry counter | `3` @ `0x3e48ac` (3E4648, thread 1, :426); `3→2` @ `0x3e3c5c` (worker, :429) | Set (thread 1) strictly before worker's G5 read (order :426→:429); same-epoch handoff, no pre-arm staleness | Consumed once, then worker re-parks; no second fill |
+| L3 | `*(0x519C64)` remaining (G6 predicate) | `0` @ `0x3e4790` (3E4648, thread 1, :424) | Set before any worker G6 read; worker never reaches G6 (re-parks at G0) | Gate would pass (`0≤0`→W1); unreached |
+| X1 (excluded) | `*(0x519C20)` async flag + `0x450C40`/`0x450C4C` | Arm @ `0x3e3378`–`0x3e338c` (thread 1); test+clear @ `0x3e33d4`/`0x3e344c` (thread 1 park sweep) | Same-thread arm/poll; and boot-1: zero writes (site #7 never armed — case 2 took topbyte==1 path A) | No cross-thread race; not taken |
+| X2 (excluded) | State bits 1/3/0/8 in worker loop | Set by issuer synchronously in worker thread (`0x3e3ba0`/`0x3e3bb8`) or worker itself (`0x3e3c4c`/`0x3e3c78`/`0x3e3c9c`) | Synchronous, no race | Except cross-thread clear of pattern 6 by `0x3e4000` poll (thread 1): pattern 6 never occurred (states observed: 0, `0xA`, 2) |
+
+### e. ELF verification words + machine-check paste block
+
+Batch word check (77 addrs; every word matched its disassembly comment in `$O`;
+ELF `$W/P1/SLUS_207.72` = `$W/P1/cd/SLUS_207.72`, sha256 `1b49d05c…af7bc`, equal;
+mapping file-off = va−`0x100000`+`0x1000`):
+
+```
+0x3e3c18 0xc108f78 / 0x3e3c1c 0x8e44000c / 0x3e3c20 0xc1008c0 / 0x3e3c28 0x14400004
+0x3e3c2c 0x8e239c40 / 0x3e3c30 0x30620008 / 0x3e3c34 0x10400011 / 0x3e3c38 0x30620001
+0x3e3c3c 0x2402fff7 / 0x3e3c40 0x622024 / 0x3e3c44 0x30630002 / 0x3e3c48 0x1060fff3
+0x3e3c4c 0xae249c40 / 0x3e3c50 0x8e420010 / 0x3e3c54 0x2442ffff / 0x3e3c58 0x18400005
+0x3e3c5c 0xae420010 / 0x3e3c60 0xc0f8ec0 / 0x3e3c70 0x34820004 / 0x3e3c78 0xae229c40
+0x3e3c7c 0x1040000a / 0x3e3c80 0x741824 / 0x3e3c9c 0xae239c40 / 0x3e3ca0 0xc0f995d
+0x3e3ca8 0x8e070004 / 0x3e3cac 0x18e00029 / 0x3e3cb0 0x28e60800 / 0x3e3cd4 0x10c00007
+0x3e3cf8 0x10400007 / 0x3e3d44 0xc0f8ec0 / 0x3e3d54 0x8e229c40 / 0x3e3d58 0x2403fffd
+0x3e3d5c 0x24040001 / 0x3e3d60 0x431024 / 0x3e3d64 0xc0f7908 / 0x3e3d68 0xae229c40
+0x3e3b6c 0x2a420003 / 0x3e3b70 0x1040000c / 0x3e3b84 0xc10077e / 0x3e3b8c 0x1040fff2
+0x3e3b9c 0x34420002 / 0x3e3ba0 0xae02ffe4 / 0x3e3ba4 0x16800005 / 0x3e3bb4 0x34420006
+0x3e3bb8 0xac629c40 / 0x3e3ad8 0x3c020052 / 0x3e3ae0 0x8c449c4c / 0x3e3ae8 0xc108f74
+0x3e3024 0x3c04003e / 0x3e302c 0x248433b0 / 0x3e3048 0xc0f95fe / 0x3e3fb0 0x3c04003e
+0x3e3fb4 0xc100228 / 0x3e3fb8 0x24843ad8 / 0x3e3fc4 0xc108f70 / 0x3e43c4 0x3c03003e
+0x3e43d0 0x24633be0 / 0x3e43bc 0xc108f68 / 0x3e43fc 0xae02000c / 0x3e4400 0xc108ee8
+0x3e4410 0xc108ef0 / 0x3e4430 0xc100228 / 0x3e4434 0x24843ad8 / 0x3e4450 0xc0f95fe
+0x3dcd44 0xc0f9010 / 0x3dcd5c 0xc0f8c08 / 0x3e4024 0xc0f8f5e / 0x3e59b8 0xc0f809
+0x3e33d4 0x10600020 / 0x3e33ec 0x14640005 / 0x3e33fc 0x10620006 / 0x3e3378 0xac689c20
+0x3e48ac 0xaca30010 / 0x3e4790 0xae020004 / 0x3de380 0xc0f8cd4 / 0x3de394 0xc0f8cd4
+0x3de364 0x5080000a
+```
+
+Machine-check paste block (every hand computation in §P19-1; command then `→` output):
+
+```
+python3 -c "branch targets: pc+4+off*4 ..."
+→ 0x3e3c3c 0x3e3c7c 0x3e3c18 0x3e3c70 / 0x3e3ca8 0x3e3d54 0x3e3cf4 0x3e3d18
+→ 0x3e3ba4 0x3e3b58 0x3e3bbc 0x3e402c / 0x3e3458 0x3e3404 0x3e3418 0x3de3a4 0x3de390
+python3 -c "print(hex(0x520000-0x63C0), hex(0x520000-0x63A0), hex(0x520000-0x63A4), hex(0x520000-0x63E0), hex(0x520000-0x63B4))"
+→ 0x519c40 0x519c60 0x519c5c 0x519c20 0x519c4c
+python3 -c "print(hex(0x520000-0x1268), hex(0x520000-0x5B80), hex(0x51A480+0x800), hex(0x520000-0x5380), hex(0x4A0000+0x30F0))"
+→ 0x51ed98 0x51a480 0x51ac80 0x51ac80 0x4a30f0
+python3 -c "print(s2/s0 offsets...)"
+→ 0x519c4c 0x519c50 0x519c7c 0x519c54 0x519c60 / 0x519c64 0x519c60 0x519c68 0x519c6c 0x519c70 0x519c74
+python3 -c "masks -9/-2/-3/-7 and ~8/~2"
+→ 0xfffffff7 0xfffffffe 0xfffffffd 0xfffffff9 (+ ~8=0x8 ~2=0x2)
+python3 -c "jal decode: ((pc+4)&0xF0000000)|((w&0x3FFFFFF)<<2)"
+→ 0x3e3c18→0x423de0 0x3e3c20→0x402300 0x3e3ca0→0x3e6574 0x3e3c60/0x3e3d44→0x3e3b00
+  0x3e3d64→0x3de420 0x3e3b84→0x401df8 0x3e3ae8→0x423dd0 0x3e3048/0x3e4450→0x3e57f8
+  0x3e3fb4/0x3e4430→0x4008a0 0x3e3fc4→0x423dc0 0x3e43bc→0x423da0 0x3e4400→0x423ba0
+  0x3e4410→0x423bc0 0x3dcd44→0x3e4040 0x3dcd5c→0x3e3020 0x3e4024→0x3e3d78 0x3de380→0x3e3350
+python3 -c "jal words for 0x3e33b0/0x3e3b00/0x3e3be0/0x3e3ad8/0x3e3020/0x3e3d78/0x3e4040 (absence search)"
+→ 0xc0f8cec 0xc0f8ec0 0xc0f8ef8 0xc0f8eb6 / 0xc0f8c08 0xc0f8f5e 0xc0f9010
+```
+
+### f. P6 names
+
+No rows for any touched function (`3E3020`/`3350`/`33B0`/`3B00`/`3BE0`/`3D78`/
+`4040`/`4000`/`57F8`/`58C8`/`5928`/`4648`/`39A8`/`35B0`/`6574`; re-grepped
+`local/research/P6/ssx3-decomp-names.csv`, 802 lines).
+
+## P19-2. Dynamic receipt (boot-p1r-1, 1 boot)
+
+`$W/P1/run/boot-p1r-1.log`, 1,253 lines, 132,454 B, 17 blocks, CWD `$W/P1/run`,
+env = p1q env with WATCH = 11 addrs (`0x519c40,48,50,60,68,70,78,0x519c20,28`,
+`0x450c40,48`; 8B spacing, no overlap), PROBE=1 kept on, foreground 90 s, SIGTERM
+rc=-15. Binary `7a7d4b64` (fresh; §P19-3). Design: §P19-1 gates G0–G6/R1–R3/A1–A3
+plus init stores; `0x519C30` covered by implication (contiguous arm block), table
+`0x51ED98` not watched (slot index unknown statically).
+
+### a. All 57 watch lines
+
+Zero-init (9 lines, 5 writes; w16 overlap doubles per P17-1a range semantics):
+
+| Line | addr + width | value | pc | thread |
+|---|---|---|---|---|
+| :49–50 | `0x519c20` w16 ×2 | zeros | `0x10012c` | 1 |
+| :51–52 | `0x519c40` w16 ×2 | zeros | `0x10012c` | 1 |
+| :53 | `0x519c50` w16 | zeros | `0x10012c` | 1 |
+| :54–55 | `0x519c60` w16 ×2 | zeros | `0x10012c` | 1 |
+| :56–57 | `0x519c70` w16 ×2 | zeros | `0x10012c` | 1 |
+
+Memset 64-loop (7 lines, `ra`=`0x3e4098` = in `0x3e4040`, thread 1, sp=`0x1ffec70`):
+
+| Line | addr + width | value | pc |
+|---|---|---|---|
+| :65–71 | `0x519c40`/`48`/`50`/`60`/`68`/`70`/`78` w8 | `0x0` | `0x3e64c8`–`0x3e64ec` |
+
+Early lbn register (20 lines, thread 1; `0x519c6c` = lbn for the `ret=0x3e3694`
+early reader, pairs with :73–:167 CD reads):
+
+| Line | value | pc | ra | sp |
+|---|---|---|---|---|
+| :72 | `0x10` | `0x3e4138` | `0x3e4128` | `0x1ffec80` |
+| :86 | `0x105` | `0x3e3938` | `0x3e38d8` | `0x1ffd900` |
+| :95–:160 (14 lines) | `0x107` | `0x3e3938` | `0x3e38d8` | `0x1ffcf40` |
+| :161 | `0x105` | `0x3e3938` | `0x3e3864` | `0x1ffd900` |
+| :170 | `0x108` | `0x3e3938` | `0x3e38d8` | `0x1ffcf40` |
+| :171 | `0x105` | `0x3e3938` | `0x3e38d8` | `0x1ffd900` |
+| :172 | `0x10` | `0x3e3938` | `0x3e3864` | `0x1ffe2c0` |
+
+Init stores (9 lines, thread 1):
+
+| Line | addr + width | value | pc | ra | Decodes to |
+|---|---|---|---|---|---|
+| :173 | `0x519c78` w4 | `0x5e3980` | `0x3e4380` | `0x3e4350` | `sw $a1,0x38($s0)` |
+| :174 | `0x519c44` w4 | `0xa3` | `0x3e4388` | `0x3e438c` | delay of `jal 0x3E39A8` |
+| :175 | `0x519c4c` w4 | `0x1a` (26) | `0x3e43fc` | `0x3e43c4` | CreateSema ret = sema id |
+| :176 | `0x519c48` w4 | `0x2` | `0x3e4414` | `0x3e4418` | StartThread ret = tid 2 |
+| :179 | `0x519c7c` w4 | `0x519c80` | `0x3e4448` | `0x3e4438` | pointer init |
+| :180 | `0x450c48` w4 | `0x2` | `0x3e305c` | `0x3e3050` | `0x3e3020` unconditional (delay) |
+| :181 | `0x450c48` w4 | `0x3` | `0x3e306c` | `0x3e3050` | `$a1`≠0 path taken → `*(0x450C60)`≠0 at init |
+| :182 | `0x450c44` w4 | `0x1` | `0x3e3074` | `0x3e3050` | same path |
+| :183 | `0x450c44` w4 | `0x1` | `0x3ddedc` | `0x3ddeb8` | second writer (`3DDDF0`), same value |
+
+Completion-epoch fills + worker progress (12 lines; NO watch line after :433):
+
+| Line | addr + width | value | pc | thread | ra | sp | Decodes to |
+|---|---|---|---|---|---|---|---|
+| :419 | `0x519c68` w4 | `0x0` | `0x3e46c0` | 1 | `0x3e33a0` | `0x1fffa50` | 3E4648 fill (topbyte==1 path A) |
+| :420 | `0x519c74` w4 | `0x9d0800` | `0x3e46cc` | 1 | `0x3e33a0` | `0x1fffa50` | buf (later CD buf) |
+| :421 | `0x519c40` w4 | `0x0` | `0x3e4768` | 1 | `0x3e33a0` | `0x1fffa50` | state clear |
+| :422 | `0x519c60` w4 | `0x800` | `0x3e4770` | 1 | `0x3e33a0` | `0x1fffa50` | base/chunk |
+| :423 | `0x519c70` w4 | `0x1` | `0x3e4774` | 1 | `0x3e33a0` | `0x1fffa50` | — |
+| :424 | `0x519c64` w4 | `0x0` | `0x3e4790` | 1 | `0x3e33a0` | `0x1fffa50` | remaining = 0 (G6 would pass) |
+| :425 | `0x519c6c` w4 | `0x5f1a3` | `0x3e47a8` | 1 | `0x3e33a0` | `0x1fffa50` | lbn (later CD lbn) |
+| :426 | `0x519c50` w4 | `0x3` | `0x3e48ac` | 1 | `0x3e33a0` | `0x1fffa50` | retry counter = 3 |
+| :427 | `0x519c40` w4 | `0xa` | `0x3e48b4` | 1 | `0x3e48b8` | `0x1fffa50` | state = 10 (after `0x3e48b0` SignalSema(26), silent syscall) |
+| :428 | `0x519c40` w4 | `0x2` | `0x3e3c4c` | 2 | `0x3e3c28` | `0x51ec20` | WORKER wake: G1(0)→G2(8)→G3: `0xA&~8`=2, bit1 set → G5 |
+| :429 | `0x519c50` w4 | `0x2` | `0x3e3c5c` | 2 | `0x3e3c28` | `0x51ec20` | WORKER G5: `3→2` >0 → ISSUE @ `0x3e3c60` |
+| :433 | `0x519c40` w4 | `0x2` | `0x3e3ba0` | 2 | `0x3e3b8c` | `0x51ebb0` | WORKER issuer success (R2, state\|=2, no-op) |
+
+Interleaved CD/callback/probe: :430–:431 `sceCdRead lbn=0x5f1a3 sectors=1
+buf=0x9d0800 ret=0x3e3b8c` + `BIGF` payload (`42494746147c1a00`); :432 queued
+`func=1 cb=0x3e3ad8`; :434 start (same); :435 driver probe (p1o bytes,
+`sp=0x1fffe80 ra=0x3ded88 sourcePc=0x3ded80 checkpointed=0`). Order: :429 (issue
+call) → :430 (read) → :432 (queued) → :433 (issuer store) → :434 (callback
+start). Early reads: 20 `ret=0x3e3694` lines (:73–:167, lbn `0x10`/`0x105`–`0x117`
+buf `0x519c80`); :178 `sceCdInitEeCB stack=0x51a480 size=0x800 ret=0x3e442c`
+(init site; NO `ret=0x3e3fb0` line = §P19-1c prime never fired).
+
+Zero-count addrs (no line beyond zero-init): `0x519C20` (site-#7 flag — never
+armed), `0x519C28`, `0x450C40` (zero lines at all). Coverage gaps (in no 8B
+window): `0x519C30`–`0x3F`, `0x519C58`–`0x5F`, `0x519C80`+.
+
+### b. Derived answer (Step-2 question: stall ON a gate, or never advance?)
+
+| Item | Value |
+|---|---|
+| Wake source for :428 | 3E4648 `SignalSema(26)` @ `0x3e48b0` (thread 1, between :426 and :427; silent syscall; order :427→:428; alternatives excluded: `0x3e3d78` prime never fired — no `ret=0x3e3fb0` print + single-exit; pump `0x3E5760` signals a non-26 sema — steady-state pumps never wake the worker) |
+| Gates passed (values) | G0 wake → G1 `GetError`=0 (fallthrough) → G2 `0xA`&8≠0 (fallthrough) → G3 bit1 set (fallthrough, store :428) → G5 `3→2`>0 (:429) → ISSUE |
+| Last observed progress | :433 `0x519c40`=`0x2` @ `0x3e3ba0` thread 2 (issuer R2 success); then silent epilogue → `0x3e3c68` → G0 re-park |
+| Re-park vs signal order | Worker re-parks (WaitSema @ `0x3e3c18`) BEFORE callback signals: :433 (thread 2, still running issuer) → :434 callback START (scheduler dispatches it only after thread 2 blocks); thread 2 `scheduled=0` blocks 1–16, `pc=0x423de8` all 17 blocks |
+| Site #9 (`0x3e3d64`) | Never reached: zero watch lines after :433; G6 (`*(0x519C64)`=`0`→W1) unreached; NOT an on-gate stall (no gate held the worker — it cycled to G0 and the completion wake never landed) |
+| Site #7 (`0x3e3450`) | Never armed this boot: case-2 took path A topbyte==1 (`ra`=`0x3e33a0` on :419–:426 ⟹ via `0x3e3398`); `*(0x519C20)` zero writes; `0x450C40`/`0x450C4C` init-only |
+| Shape | Signal-during-park (L1/W2): completion signal arrived while worker parked and did not wake it. Delivery mechanism = out-of-scope sema-26 item (not chased); ORDER + last-progress point = this receipt |
+
+### c. Ladder delta vs boot-p1q-1 (1,234 lines, 130,595 B)
+
+Boot-p1r-1: 1,253 lines, 132,454 B, 17 blocks.
+
+| Rung | boot-p1q-1 | boot-p1r-1 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×16, `0x0` ×1 (blk16 teardown) | `0x3e5980` ×17 (all blocks) | No teardown line this boot |
+| Thread-1 sch | 84/82/81/80/81/81/81/80/78/68/81/82/81/79/78/68/81 | 82/82/82/81/80/78/68/82/81/82/79/79/68/81/81/81/80 | Same regime (~68–84) |
+| Thread-2 (worker) | parked sema 26 @ `0x423de8`, sch 2 then 0 ×16 | Same bytes (`:490` sch 2, `:536`–`:1232` sch 0) | None |
+| Threads 4/5 | sema-parked 29/30 @ `0x423de8` | Same ids/pcs/entries (4: sch 58 b0; 5: sch 1 b0) | Counts regime only |
+| Missing target | 0 | 0 | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18; b0 30/30 targets identical (sort-compared) | None |
+| Syscall distinct b0 / b1+ | 27 / 3; 20 printed ids | 27 / 3; same 20 ids (sort-compared, identical) | None |
+| Syscall sema counts | b0: Wait 159 / Sig 77 / iSig 79; steady Wait==iSig/block, Sig absent | b0: Wait 157 / Sig 77 / iSig 77; steady Wait==iSig/block (82/82,81/81,…,68/68), Sig absent | b0 counts −2/0/−2; same lockstep shape |
+| CD callback | :414–:415 queued+start | :432 + :434 (same func/cb; :433 issuer store between) | Line shift + interleave |
+| CD read | :412 `lbn=0x5f1a3 ret=0x3e3b8c` + payload | :430 same lbn/ret/buf/payload bytes | Line number only |
+| Probe | 1 (:416, p1o bytes) | 1 (:435, p1o bytes) | Line number only |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | 2 / 66 / 122 / 33 / 8 | 2 / 66 / 122 / 33 / 8 | None |
+| `run:tick` | 7 | 7 | None |
+| Presented frame | None | None (sole `frame` hit = raylib TIMER line :46) | None |
+| Crash | 0 | 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| SIF module lines | 6 (`IRX` grep) | 6 | None |
+| `firstRa=0x3dd290` / `0x3dd280` | 17 / 17 | 17 / 17 | None |
+| `target=0x3de420` / `0x3ddfa8` | 0 / 0 | 0 / 0 | None (direct JALs) |
+
+## P19-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1r-1) | `7a7d4b645094d3ad82746a7d420b223422bf6444e5d06f6e56998e9057f5b4cd` | `e73e36a` tree, no rebuild (fresh; §P19-0 pre-boot check) |
+| `ps2x_tests` | Not re-run (no source change; P15-1c 424/425 stands for this tree) | Same tree `e73e36a` |
+| `PS2Recomp` branch `ssx3` HEAD | `e73e36a` | No fork commit (env-only boot; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added) |
+| Fork push | `git push fork ssx3` from fork clone only | Up-to-date check (expect nothing to push) |
+| This report | `[P1r]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P19-4. Exact commands
+
+From `$W/PS2Recomp` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`$O=$W/P1/output`, `$R=$W/PS2Recomp`, `$LOG=$W/P1/run/boot-p1r-1.log`:
+
+```
+# Step 1 (lease-free static; M10 holds observed at start, flapping mid-step)
+re-read REPORT Part 18 + Part 17 P17-1 (paged reads)
+read $O/sub_003E3B00 (worker both halves) + sub_003E33B0/3350 (site 7) + sub_003E39A8 (callback)
+read $O/sub_00401DF8 (sceCdRead) / 4013E8 (sceCdSync) / 402300 (sceCdGetError) / 423DD0 (iSignalSema) / 423DE0 (WaitSema) / 423DC0/3BA0/3BC0/3DA0/3B20 (syscall id decodes)
+read CD.cpp (sceCdRead/sync/getError/callback/InitEeCB, g_lastCdError init 0) + Dispatcher.cpp (0x20/22/40/42/-43/44/FC) + Sync.cpp/State.h (ee_sema_t layout)
+pointer search: JAL-word absence (0xc0f8cec/ef8/eb6) + lui/addiu pairs -> 0x3e3020 (poll reg), 0x3e3fb4/0x3e4430 (cb reg), 0x3e43c4 block (thread+cb+poll reg)
+read $O/sub_003E57F8 (table insert) / 3E58C8 (unregister) / 3E5928 (park sweep + jalr 0x3e59b8) / 3E5760 (unlock helper + table clear) / 3E3D78 + 3E4040 (init chain) / 3E4648 (fills) / 3DDFA8 case-2 prelude
+ELF batch: python3 struct check 77 words (0 mismatches); hex machine-checks (each pasted §P19-1e)
+P6 grep (ssx3-decomp-names.csv, 802 lines, no rows); old-log harvest (thread-2 rows, :412-:416, syscall hist)
+# Step 2 (lease protocol)
+cat /tmp/ssx3-host-lease (M10 16:11:44Z; absent 16:16:53Z; M10 16:20:22Z; absent 16:23:22Z); pgrep (exit 1)
+shasum ps2EntryRunner (7a7d4b64 fresh); git log/status (e73e36a); ls ISO + ELF
+printf 'P1r\n' > /tmp/ssx3-host-lease (16:23:32Z, absent verified twice)
+(write /tmp/p1r-boot1.py: p1q env, WATCH 11 addrs, probe on; diff vs p1q-boot1.py = docstring + LOG + WATCH only)
+python3 /tmp/p1r-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 132454 B)
+log greps: watch 57 (zero-init doubles + memset + lbn reg + init + fills + worker :428/:429/:433, none after);
+  cd reads (20 early ret=0x3e3694 + :430 ret=0x3e3b8c); InitEeCB 1 (:178 ret=0x3e442c, no ret=0x3e3fb0);
+  callback pair (:432/:434 with :433 between); probe 1 (:435); thread-2 17 rows (sch 2 then 0)
+ladder sweeps: thread pcs/sch per block; stub 486/18 + b0 30-target comm; syscall 27/3 + 20-id
+  sort-compare (identical) + sema counts per block; gs:/run:tick/frame/crash/dormant/start-thread/missing-target;
+  firstRa 17/17; SIF 6; thread-4 sch noted (58/82, parked pc, not chased)
+rm -f /tmp/ssx3-host-lease (16:27:31Z); ls (absent); pgrep (none)
+# Step 3
+(edit_file append Part 19 in 3 chunks; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1r] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (up-to-date check; the only push allowed)
+```
+
+Env delta vs boot-p1q-1: WATCH 10 addrs → 11 addrs (Step-1 gate set) only.
+Source delta: none.
+
+## P19-5. What I could not do
+
+- Run the reserve 2nd boot (not needed): still-unwatched words it could close directly —
+  site-#10 W1 observability (`0x5e00b8` flag + `0x519AD4` current: did 3E4648's `0x3e4888`
+  run? P18's stuck-current receipt rests on the p1q boot), `0x519C30` (arm +0x10 datum,
+  implied by contiguous block), `0x519C58`–`0x5F` (in no 8B window), `0x51ED98` poll-table
+  slots (index unknown statically).
+- Observe sema-26 count transitions (host-side `EeScheduler` state, not RDRAM — unwarchable);
+  the W1/W2 signal ORDER is the receipt, the delivery mechanism stays out of scope (per brief).
+- Name the pump `0x3E5760`'s signaled sema id (`*(mutex+0xC)` value unobserved; excluded as
+  the :428 waker by steady-state non-wake, §P19-2b).
+- Read `*(0x450C60)` (init branch value; inferred ≠0 from the taken `$a1`≠0 path, :181–:182).
+- Determine whether `0x3e3d78`'s head ran without completing (completed-no is proven: no
+  `ret=0x3e3fb0` print + single-exit + no thread inside; a partial run leaving no watched
+  trace cannot be excluded).
+- Explain thread 4's `scheduled=58/82` with parked pc (observed, not chased — different sema).
+- No runtime fix (per the brief): worker-path + registration + receipts only. The sema-26
+  non-delivery mechanism remains out of scope, untouched.
+- One boot used (of the brief's max two): no A/B on any rung.
+
+---
+
