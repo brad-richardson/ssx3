@@ -367,6 +367,13 @@ the build or commit that closed them.
       and it gets re-run once the host-replay route runs in the APK.
       `part3/sfstats.sh` + `sfstats_analyze.py` are the tools. Ledger
       row added.
+      M5 launched (09-18 20:25, `local/muse/prompts/M5.md`): host-replay
+      milestone 2 item 1 on the desktop, derived from the S2 header:
+      XFB fidelity hash per replay, fail-closed side-effect counters
+      (texture cache, pending EFB copies, FrameCount, after_frame
+      triggers, PE pending, VI hash, record flag), then a replay-owned
+      XFB destination rewritten in the execute stream, continuation
+      check. No vendor change, no device.
 - [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
       floor problem:** on the device the heaviest track costs only ~11%
       more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
