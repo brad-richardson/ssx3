@@ -3859,3 +3859,177 @@ find <dir> -name '._*' -delete (after every edit/copy; nothing created this sess
 - P4 S4/S12/S17 were skimmed as context only; none was applied or verified by boot (out of brief scope).
 - Time box: about 10 min of the 2 h box used.
 
+## Part 11 (P1j): CSR bits 15:14 identified as FIFO; exit state produced; thread 1 past `0x375d24`
+
+## P11-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (`cat /tmp/ssx3-host-lease`: no such file) |
+| Claim | `printf 'P1j\n' > /tmp/ssx3-host-lease`, after pre-boot checks, before boot-p1j-1 |
+| Foreign holder seen | None this session (no poll loop ran) |
+| Waits log | `$W/P1/run/p1j-waits.log` does not exist (no waits) |
+| Release | `rm -f /tmp/ssx3-host-lease` immediately after boot-p1j-1 SIGTERM; verified absent |
+| Stray runner check | `pgrep ps2EntryRunner` exit 1 (none) before claiming |
+
+## P11-1. Bit table, producer, cheat row
+
+### a. Bits 15:14 from public sources (Step 1, no code)
+
+| Bit | Name | Set-by | Cleared-by | Reset value | Exact cite |
+|---|---|---|---|---|---|
+| 14 | FIFO bit 0 (LSB of 2-bit GS FIFO status; read-only) | GIF-path FIFO occupancy reaching empty (field value `01`); DobieStation: drained path queue + FINISH assert, GIF reset, path-deactivation stall | FIFO leaving empty (data arriving / FQC > 0 drives `00`/`10`); DobieStation: `feed_GIF` on new tag data | `1` (field `01` = empty) | DobieStation `src/core/gsregisters.cpp:319` (`FIFO_status << 14`), `:428` (`= 0x1; //Empty` in `GS_REGISTERS::reset`), `src/core/gif.cpp:33` (reset), `:253` (`0x2 //FIFO Full`), `:295` (`0x1 //FIFO Empty`), `:410`; `src/core/gs.cpp:105-108` (`set_CSR_FIFO`) |
+| 15 | FIFO bit 1 (MSB of 2-bit GS FIFO status; read-only) | FIFO reaching almost-full (field value `10`); PCSX2: GIF STAT FQC ≥ 15 | FIFO draining below almost-full; PCSX2: FQC = 0 → empty, else normal | `0` (field `01` = empty) | PCSX2 `pcsx2/GS.h:16-22` (`CSR_FifoState`: 0 normal / 1 empty / 2 full / 3 reserved), `:106-113` (FIFO field doc), `:140-146` (`tGS_CSR::Reset`: FIFO = EMPTY, REV `0x1B`, ID `0x55`); `pcsx2/Gif.cpp:30-51` (`clearFIFOstuff`, `CalculateFIFOCSR`), `pcsx2/Gif_Unit.h:576`; layout `pcsx2/GS/GSRegs.h:300` (`rFIFO : 2`) |
+
+Field-value cross-checks (online, URL + section):
+
+| Source | Section | Values |
+|---|---|---|
+| `https://github.com/ps2dev/gsKit` `ee/gs/include/gsInit.h`, `struct gsRegisters` | `u64 FIFO: 2 /* ro */` after NFIELD:1 (bit 12) + FIELD:1 (bit 13); `GS_CSR` at `0x12001000` | Layout only (no value semantics in header) |
+| `https://github.com/jpd002/Play-` `Source/gs/GSHandler.h`, `CGSHandler` CSR enum | `CSR_FIFO_STATUS = 0xC000`, `CSR_FIFO_NEITHER = 0x0000`, `CSR_FIFO_EMPTY = 0x4000`, `CSR_FIFO_FULL = 0x8000` | `00` neither / `01` empty / `10` full; reset `Source/gs/GSHandler.cpp:166` (`ResetBase`: `m_nCSR = CSR_FIFO_EMPTY \| REV << 16`, `GS_REVISION 7`) |
+
+Hardware event sequence producing `0x4000`: reset (all four sources reset the field to `01`), or GIF FIFO drained to empty (FQC = 0 / path queue drained). No vsync, FIELD, or FINISH involvement: FIFO is GIF-occupancy only. Every cell above is cited; nothing marked open.
+
+### b. Producer (Step 2, one commit)
+
+Lifecycle point: init value (not vsync worker, not finish-event path). Why from Step 1: all sources set FIFO = empty at reset; the dynamic producer (GIF-path occupancy) is a whole unbuilt subsystem in this runtime (0 `gif` lines in every boot log; no GIF FIFO exists). So the minimal producer is the reset value, guarded against guest clobbering because the game provably writes CSR with `00` in bits 15:14 (writer table below) and FIFO is read-only on hardware (gsKit `/* ro */`, PCSX2 "read-only", DobieStation: no CSR-write path touches `FIFO_status`).
+
+Static guest CSR writers (from `$W/P1/output` MIPS comments; all target `0x12001000`):
+
+| va | Insn | Value written | Bits 15:14 | Effect on plain merge |
+|---|---|---|---|---|
+| `0x2ec6cc` | `sd $v0,0($s0)`, `$v0`=2 | `2` (FINISH) | `00` | Clears exit state |
+| `0x2ec728` | `sd $v1,0($v0)`, `$v1`=2 | `2` (FINISH) | `00` | Clears exit state |
+| `0x37c0dc` | `sd $a0,0($v0)`, `$a0`=8 | `8` (VSINT) | `00` | Clears exit state |
+| `0x382c5c` | `sd $a0,0($v0)`, `$a0`=8 | `8` (VSINT) | `00` | Clears exit state |
+
+FIFO-wait sites sharing the `(CSR&0xC000)==0x4000` idiom (`lui 0x1200` + `ori 0x1000` + `ld` + `andi 0xC000` + compare `0x4000`): `0x2ec694`, `0x2ec82c` (sub_002EC418), `0x375d04` (sub_00375A08, thread-1 park), `0x3828d4`, `0x3829c4`, `0x382a8c` (sub_00382760), `0x382c24` (sub_00382AF0).
+
+Producer diff (commit `8fad69e`, 2 files, `+43/-7`):
+
+| File:lines | Change |
+|---|---|
+| `ps2xRuntime/src/lib/ps2_memory.cpp:102-121` | Comment (Step 1 cites + HLE note) + `kGsCsrFifoMask 0xC000` + `kGsCsrFifoEmpty 0x4000` |
+| `ps2_memory.cpp:141-142` | `writeCsrHalf` low dword: force `(desired & ~mask) \| 0x4000` after W1C |
+| `ps2_memory.cpp:163-164` | `writeCsrFull`: same force after W1C |
+| `ps2_memory.cpp:387-388` | Init: `gs_regs.csr.store(kGsCsrFifoEmpty)` instead of `store(0)` |
+| `ps2xTest/src/ps2_gs_tests.cpp:425-446` | Round-trip expectations updated for read-only FIFO (contract change, see row below) + init-`0x4000` + `write64(8)→0x4008` + `write64(2)→0x4000` assertions |
+
+Cheat row:
+
+| What was faked | What would replace it |
+|---|---|
+| FIFO occupancy hard-wired EMPTY: constant at init, guest writes to bits 15:14 ignored (documented in code comment at `ps2_memory.cpp:102-117`) | GIF-path/FIFO occupancy tracking that sets EMPTY/FULL/NORMAL from transfer state (cf. PCSX2 `CalculateFIFOCSR` from GIF STAT FQC; DobieStation `feed_GIF`/path-queue drain) |
+
+Contract-change decision (test update, not a silent rewrite): the old test asserted plain-RAM round-trip of all CSR bits, which contradicts all four hardware sources (FIFO is read-only) and is incompatible with the game's proven CSR writes carrying `00` in bits 15:14 — no producer satisfying both the old test and the game exists (read-path OR, worker re-assert, and preserve-old all break the old exact-match or the exit state). Expectation deltas: `write64(pat)→0xA1B2C3D4E5F64718` (was `...0718`), `read32 lo→0xE5F64718`, `write32 lo→0xA1B2C3D411227344`, `write32 hi→0x5566778811227344`. FIELD/vsync tests untouched (they assert bit 13 only).
+
+### c. Test receipts
+
+| Run | Total | Passed | Failed |
+|---|---|---|---|
+| With fix (`ps2x_tests` rebuilt from `8fad69e` tree) | 425 | 424 | 1: `sceGsSyncVCallback runs as a scheduler invocation on its callback stack` (`callback invocation should use the reserved async stack pool`, `ps2_gs_tests.cpp:4041`) |
+| At unmodified HEAD `f2149e7` (fix stashed, rebuilt) | 425 | 424 | Same single test, same assertion |
+
+The failing test asserts callback SP placement in the reserved async stack pool; it does not touch CSR. Identical failure with and without the fix.
+
+## P11-2. Boot ladder (boot-p1j-1 vs boot-p1h-1)
+
+Boot 1: `$W/P1/run/boot-p1j-1.log`, 1789 lines, 173100 B, 35 period blocks, CWD `$W/P1/run`, env `PS2X_CD_IMAGE` + `PS2X_DIAG_PERIOD_MS=5000`, no `WATCH`/`REPORT_ALL`, foreground 180 s, SIGTERM, binary `e5f81397...`.
+
+| Rung | boot-p1h-1 (P9-3/P10-2) | boot-p1j-1 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x375d10` all 35 blocks | `0x3e5980` ×31, `0x423c90` ×2, `0x3dd278` ×2; 0 hits at `0x375d10` | Past `0x375d24` |
+| First new syscall ids | None | `0x15` (count 4, caller `0x423af8`), `0x17` (count 1, caller `0x423b18`) | 2 new ids |
+| First VIF MPG/MSCAL | None | None (0 `vif` lines) | None |
+| First GIF kick | None | None (0 `gif` lines) | None |
+| First presented frame | None | None (sole `frame` hit = raylib target-time line) | None |
+| Crash | None | None (0 `crash`/`FATAL`/`assert` lines) | None |
+| Missing targets | 0 lines | 1 line (log:146): `[guest-branch:missing-target] kind=IndirectCall op=JALR source=0x3760d0 target=0x395cf0 pc=0x395cf0 ra=0x3760d8 sp=0x1fffd90` (+ register/memory readability fields verbatim in log) | 1 new |
+| Distinct stub targets | 30 | 31 (8 new: `0x31ad20`, `0x3825f8`, `0x395cf0`, `0x3e33b0`, `0x3e5440`, `0x3e5928`, `0x411c38`, `0x423c90`; 7 from h absent) | Net +1 |
+| CD callback | None | First queued+start: log:149-150 `[cd:callback] queued func=1 cb=0x3e3ad8`, `start func=1 cb=0x3e3ad8` | New |
+| Threads | 4 (ids 1-4) | 5 (new id=5: status=2 waitReason=2 waitId=30 pc=`0x423de8` entry=`0x382740` stack `0x621540`/`0x1000` sp `0x622480`) | +1 thread |
+
+New park, recorded only (thread table + loop). Thread table, block 0 (representative; ids 2/4/5 at `0x423de8` all 35 blocks, id 3 at `0x31ac60` all 35):
+
+```
+[diag:thread] id=1 status=0 waitReason=0 waitId=0 pc=0x3e5980 entry=0x100008 priority=100 scheduled=283
+[diag:thread] id=2 status=2 waitReason=2 waitId=26 pc=0x423de8 entry=0x3e3be0 priority=12 scheduled=2
+[diag:thread] id=3 status=1 waitReason=0 waitId=0 pc=0x31ac60 entry=0x31ac60 priority=101 scheduled=0
+[diag:thread] id=4 status=2 waitReason=2 waitId=29 pc=0x423de8 entry=0x31ac08 priority=99 scheduled=259
+[diag:thread] id=5 status=2 waitReason=2 waitId=30 pc=0x423de8 entry=0x382740 priority=5 scheduled=1
+```
+
+Thread-1 stack at park: `[diag:stacks] block=0 thread id=1 stack=0x1fe0000 stackSize=0x20000 sp=0x1fffd80 entry=0x100008 pc=0x3e5980`. Scheduled counts stay ~300/block (spinning, not blocked).
+
+Loop: `0x3e5980` is inside sub_003E5928 (`0x3e5928-0x3e5a78`, `ssx3-functions.csv`), a 16-slot dispatch loop (`$s1` from `0xF`, `$s0 += 0x10`, back edge `0x3e59dc: bgez $s1 → 0x3e5980`):
+
+```
+0x3e5980: lw   $a2, -0xC($s0)     # loop head: load slot fn pointer (park pc)
+0x3e5984: beql $a2, $zero → 0x3e59dc
+0x3e598c: lw   $v0, 0xDD0($s6)
+0x3e5990: lw   $v1, -0x4($s0)
+0x3e5994: slt  $v0, $v0, $v1
+0x3e5998: bnel $v0, $zero → 0x3e59dc
+0x3e59a0: lw   $v0, 0x0($s0)
+0x3e59a4: bnel $v0, $zero → 0x3e59dc
+0x3e59b8: jalr $a2                # indirect call; ra=0x3e59c0 matches stub firstRa
+0x3e59c0: or   $s2, $s2, $v0
+0x3e59d8: addiu $s1, $s1, -0x1
+0x3e59dc: bgez $s1 → 0x3e5980     # (delay slot: addiu $s0, $s0, 0x10)
+```
+
+Mid driver in sub_003DD1D8 (`0x3dd1d8-0x3dd310`):
+
+```
+0x3dd278: jal  func_3E5440        # stub 0x3e5440 count=2369599 firstRa=0x3dd280
+0x3dd280: beqz $v0 → +5
+0x3dd288: jal  func_3E5928        # stub 0x3e5928 count=2369619 firstRa=0x3dd290
+0x3dd290: b    → +4
+```
+
+Stub `0x423c90` count=2369833 (firstRa `0x3e5028`, lastRa `0x3e5454`) matches the same ~2.3M-iteration outer spin. sub_003DD1D8 itself returns (`0x3dd308: jr $ra`); its spinning caller is not identified (many `jal func_3DD1D8` sites; recorded open, no fix per brief).
+
+## P11-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1j-1 binary) | `e5f8139772efe522aeb344e59692fecf04b175d0e695838bc714e134fcdbc1ca` | Rebuilt from `8fad69e` tree (`ninja: no work to do` at boot time) |
+| `PS2Recomp` branch `ssx3` HEAD | `8fad69e` (`GS: hard-wire CSR FIFO bits to EMPTY ...`, 2 files `+43/-7`, two trailers) | Pushed `fork ssx3` (`f2149e7..8fad69e`); worktree keeps only the pre-existing local `M ps2xRuntime/src/runner/register_functions.cpp`, never added |
+| HEAD-baseline test binary | Same path, rebuilt from stashed (unmodified `f2149e7`) tree, then rebuilt again after pop | 424/425 with the identical single failure (receipt for pre-existing status) |
+| This report | `[P1j]` commit on `/Users/bradrichardson/dev/ssx3` (trailers; local only — no push there per the push rule) | Sole ssx3-repo change of this brief; no `runner/`, log, or `._*` file added |
+| Push | `git push fork ssx3` from the fork clone only | No push in `/Users/bradrichardson/dev/ssx3` |
+
+## P11-4. Exact commands
+
+```
+cat /tmp/ssx3-host-lease   (absent at start; claimed P1j pre-boot; removed post-boot; verified absent)
+grep -rn -i "csr" dobiestation src (layout search) ; sed reads gsregisters.hpp:100-170, gsregisters.cpp:169-271,300-330,420-450, gs.cpp:60-140, gif.cpp:20-45,240-300,395-415
+grep -rn "set_CSR_FIFO" dobiestation src (4 GIF writers + decl)
+grep -rn -i "csr|fifo" pcsx2-ref/pcsx2/GS/GSRegs.h ; sed GSRegs.h:270-340 ; grep -rn CSR pcsx2/GS (read/write paths) ; sed GSState.cpp:100-130,151-230 GS.cpp:395-415 GSState.h:510-530
+grep -rn NFIELD pcsx2 tree ; sed pcsx2/GS.h:1-200 (CSR_FifoState, tGS_CSR, Reset) ; sed pcsx2/Gif.cpp:1-70 Gif_Unit.h:565-585 ; grep -rn clearFIFOstuff|CalculateFIFOCSR pcsx2 (8 call sites)
+web: ps2dev/gsKit ee/gs/include/gsInit.h (struct gsRegisters, GS_CSR 0x12001000) ; jpd002/Play- Source/gs/GSHandler.h (CSR_FIFO_*) + GSHandler.cpp (ResetBase:166) ; israpps/ps2tek PS2/GS listing (no CSR page)
+grep -rn "lui.*0x1200" $W/P1/output (10 files) ; per-site MIPS dump (guest CSR writers + FIFO-wait idiom table)
+grep -rn -i csr fork ps2xTest/src (impact) ; sed ps2_runtime_interrupt_tests.cpp:150-175,425-470 ps2_gs_tests.cpp:410-436,4041-4110
+4 sequential muse.edit_file on ps2_memory.cpp (constants, half-merge, full-merge, init) ; 1 on ps2_gs_tests.cpp (expectations + regress shapes)
+find <lib|test src> -name '._*' -delete (after edits)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4 (one mid-session corruption from parallel same-file edits: restored via git checkout, re-applied sequentially, verified 4 hunks + intact tail)
+ps2x_tests full run (425/424-1) ; stash push 2 files + rebuild + run at HEAD (same 425/424-1) ; stash pop + rebuild both targets + re-run (425/424-1)
+git -C fork add <2 files only> ; commit -m "GS: ..." (trailers) ; push fork ssx3 (f2149e7..8fad69e)
+sed /tmp/p1h-boot1.py -> /tmp/p1j-boot1.py (LOG=boot-p1j-1.log) ; pgrep ps2EntryRunner (none) ; printf P1j lease ; cmake --build (no-op) ; shasum runner (e5f81397...)
+python3 /tmp/p1j-boot1.py (foreground 180 s, SIGTERM, 173100 B) ; rm lease
+log: wc -l (1789); thread-pc census (id=1: 31x 0x3e5980, 2x 0x423c90, 2x 0x3dd278); keyword counts j-vs-h; target= comm (8 new, 7 gone); syscall id= comm (0x15, 0x17 new); missing-target (1, log:146); cd:callback (log:149-150)
+ssx3-functions.csv + output/sub_003E5928 + sub_003DD1D8 reads (park loop + driver + back-edge search)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md; commit -m "[P1j] ..." (trailers; NO push there)
+git -C <fork> push fork ssx3 (up-to-date check; the only push allowed)
+find <dir> -name '._*' -delete (after every edit/copy)
+```
+
+## P11-5. What I could not do
+
+- GIF-occupancy-driven FIFO: the field is hard-wired EMPTY (cheat row above); a real GIF FIFO with FQC-like tracking would replace it. No in-between/almost-full state is reachable.
+- REV/ID bits (16-31) left zero: DobieStation/PCSX2 use REV `0x1B` ID `0x55`, Play! uses REV 7 ("fairly arbitrary"); the game masks `0xC000` so they are irrelevant to this wait — recorded, not implemented.
+- The one failing test (`sceGsSyncVCallback ... callback stack`) fails identically at unmodified HEAD; fixing it is out of this brief's scope (recorded only).
+- The spinning caller of sub_003DD1D8 (outer back edge above `0x3dd278`) is unidentified: many `jal func_3DD1D8` sites exist and no RA/stack receipt names the live one. The new park is recorded, not fixed, per the brief.
+- VBlankStart firings remain uncounted (no vsync-marked log line, same as P10); guest CSR stores remain log-silent (all write paths emit no line).
+- Time box: about 2 h of the 4 h box used (Step 1 sources + static scan ~60 min, implement/corruption-repair/test ~40 min, boot + ladder + report ~25 min).
+
