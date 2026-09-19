@@ -5,6 +5,21 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1g launched (09-18 20:45, `local/muse/prompts/P1g.md`):**
+      diagnose the post-fix park at `0x391330` (`sub_003912A8`, pc
+      stable but `scheduled` advancing) from the closed boot-2 log +
+      ELF disasm; no fix. One ≤90 s boot only if the log cannot name
+      the wait object, yielding the host lease to M5. Ledger row added.
+- [ ] **P1f read (09-18 20:40) — ra-slot writer caught, fix VERIFIED:**
+      boot 1b watch on `0x1ffff00` caught 32,682 writes, all but 153
+      from the INTC handler prologue zeroing thread 1's frame; fix
+      `6046260` (sp=0 + reserved stacks in `[0x80000,0x100000)`)
+      pushed to fork `ssx3`; boot 2 shows 165/0 handler writes and
+      thread 1 `Running` at `0x391330` with threads 3+4 new. Part 7
+      appended, `[P1f]` 6e90355. Process note: P1f pushed ssx3
+      `origin/main` too though the brief said fork only — content was
+      benign (briefs, todo, report) but future briefs now say
+      fork-remote-only. Next: P1g.
 - [ ] **P2 + P3 launched (09-18 20:30, `local/muse/prompts/P2.md`,
       P3.md):** two read-only P-branch research angles alongside P1f's
       fix — P2 reads PCSX2 source (EE INTC/alarm/CD/async stacks) for
