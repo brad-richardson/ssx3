@@ -5,6 +5,43 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I1 read (09-19) — PASS, spike correctly FAILED with receipted
+      gaps:** pinned raylib 5.5 has NO iOS backend (enum rejects iOS,
+      no `rcore_ios`, bundled GLFW/RGFW iOS-free); configure dies on
+      the fork `install()` missing BUNDLE DESTINATION (all 4 attempts,
+      2 generators — needs a fork CMake edit, out of spike scope);
+      sse2neon fixed by toolchain v2; FFmpeg host dylibs can't link
+      iOS (mirror Android OFF); touch input nowhere (runtime +
+      rlImGui). 7 gaps (3 dep-code sharing one root, 3 config, 1
+      platform). Constraints obeyed: runtimes unchanged, fork
+      untouched, scratch 112K, heavy dirs on SSD, disk still 42G
+      free. Verified: enum/platforms, install line, error in log,
+      SSD dirs, runtimes, disk. Next: I2 needs fork write access.
+      Ledger row added.
+- [ ] **M10 read (09-19) — PASS, zero-pixel mystery SOLVED:** order
+      excluded (0/689 consuming draws before first covering load),
+      matrices live (11/11 siblings bit-identical, live==snap),
+      visibility excluded (96–99% in-range, 0 culled) — and the
+      pixel-compare audit proves M7/M8/M9 "0 pixels" measured the
+      skip-to-VRAM uninit pattern, not rendered output (det5/det6
+      NOP-all contrast 0/200 vs 200/200). True-delta arm: slot-0
+      delta moves 32954/573440 bytes on 100/100 replays vs rendered
+      pristine ref. Open: per-draw depth, indexed-path partition,
+      texture-mediated share, slot-36 delta. Verified: header shas,
+      analyzer rows, ref2 event verbatim, 7/7 hashes, lease log (0
+      waits). Ledger row added.
+- [ ] **P1r read (09-19) — PASS, signal-during-park ORDER proven:**
+      worker wakes once on 3E4648's signal, passes G1/G2/G3/G5,
+      issues the CD read, re-parks at G0 BEFORE the callback's
+      signal (:433→:434); site #9 never reached, G6 never evaluated;
+      site #7 never armed (topbyte-1 path A). Poll registration
+      (`0x3e33b0` via table + `jalr`) + worker-thread trigger closed
+      statically; 77 ELF words machine-checked. Delivery mechanism
+      stays out of scope — but it is now THE critical-path item (P1s
+      should take sema-26 delivery; nothing else unblocks FILESYS).
+      Verified: 57 watches + epoch lines verbatim, thread-2 sch,
+      ELF spot, P6 802 lines, fork untouched, waits log (M10
+      deference). Ledger row added.
 - [ ] **P1r launched (09-19):** CD-completion→W1 gap — worker path
       gates + poll registration + lost-wake candidates statically,
       minimal watch set dynamically (≤2 boots). Reuses P1q pane.
