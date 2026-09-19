@@ -5417,3 +5417,209 @@ Source delta: none.
   remains out of scope, untouched.
 - One boot only (per the brief): no A/B on any rung.
 
+---
+
+## Part 17 (P1p): table base 0x5e0080 learned, entry-0+8 = 0x5e0088, sole runtime writer is init-time sd at 0x3e64d0 (W1/W2/W3 silent)
+
+Brief `local/muse/prompts/P1p.md`. Table learn + writer catch; no runtime fix. Tables, no verdicts.
+Stale-reading guard: Part 16 (P16-2c–2e writers W1/W2/W3 + table writer, P16-2k designed
+receipt, P16-2l machine-check block) re-read before acting.
+
+## P17-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (`/tmp/ssx3-host-lease` missing; checked 14:31:32 UTC and pre-claim 14:31:50 UTC) |
+| Pre-boot checks (14:31:44 UTC) | `pgrep -f "[p]s2EntryRunner"` exit 1 (none); binary `7a7d4b64` fresh (matches P16-3, no rebuild); fork HEAD `e73e36a`; ISO (2.8 GB) + ELF (3.7 MB) present |
+| Claim | `printf 'P1p\n' > /tmp/ssx3-host-lease` 14:31:50 UTC, immediately before boot-p1p-1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, returned 14:33:32 UTC |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, returned 14:36:04 UTC (lease still `P1p`, verified 14:34:31 UTC) |
+| Release | `rm -f /tmp/ssx3-host-lease` 14:38:24 UTC; verified absent; `pgrep` exit 1 |
+| Foreign holds (M9) | None observed during the session; no poll waits; `$W/P1/run/p1p-waits.log` does not exist |
+| `adb` | Not used |
+
+## P17-1. Table addrs (Boot 1)
+
+Boot-p1p-1: `$W/P1/run/boot-p1p-1.log`, 1,205 lines, 127,906 B, 17 blocks, CWD `$W/P1/run`,
+env = p1o env with WATCH swapped to `0x519AD8,0x519AD4` (2 addrs; PROBE=1 kept on),
+foreground 90 s, SIGTERM rc=-15. Binary `7a7d4b64` (fresh; §P17-3).
+
+### a. All 9 watch lines (7 distinct stores; `diagWatchEmit` prints one line per overlapping WATCH entry, `ps2_runtime.cpp:1200-1204`)
+
+| Line | addr + width | value | pc | ra | sp |
+|---|---|---|---|---|---|
+| :49–50 | `0x519ad0` w16 | `0x0` (128-bit zeros) | `0x10012c` | `0x0` | `0x0` |
+| :58–59 | `0x519ad8` w4 | `0x5e0080` | `0x3dccfc` | `0x3dcd00` | `0x1fffe90` |
+| :60 | `0x519adc` w4 | `0x5e0680` | `0x3dcd30` | `0x3dcd10` | `0x1fffe90` |
+| :379 | `0x519ad4` w4 | `0x5e00b0` | `0x3de0b0` | `0x3de0b4` | `0x1fffb40` |
+| :380 | `0x519ad4` w4 | `0x0` | `0x3de470` | `0x3de300` | `0x1fffb20` |
+| :381 | `0x519ad4` w4 | `0x0` | `0x3de0b0` | `0x3de0b4` | `0x1fff8b0` |
+| :382 | `0x519ad4` w4 | `0x5e00b0` | `0x3de0b0` | `0x3de0b4` | `0x1fffab0` |
+
+(thread=1 on all 9 lines. :49–50 / :58–59 double because the write overlaps both
+`[0x519AD4,0x519ADC)` and `[0x519AD8,0x519AE0)` ranges; :60 / :379–382 single.)
+
+### b. Receipts
+
+| Receipt | Value |
+|---|---|
+| Table base `*(0x519AD8)` | `0x5e0080` (:58–59; writer pc `0x3dccfc`, the P16-2c pc) |
+| Current entry `*(0x519AD4)` | `0x5e00b0` set @ `0x3de0b0` (:379), `0x0` clear @ `0x3de470` (:380), `0x0` set @ `0x3de0b0` (:381), `0x5e00b0` set @ `0x3de0b0` (:382) — set/clear pcs are the P16-2e pcs |
+| Current entry index | `0x5e00b0` − `0x5e0080` = `0x30` → entry 1 (check §P17-1d) |
+| Entry-0+8 absolute addr | `0x5e0088` = `0x5e0080`+8 (check §P17-1d) |
+| Neighbor `*(0x519ADC)` | `0x5e0680` = table+`0x600` = table+`0x20` entries (:60 @ `0x3dcd30`, `sub_003DCC88`, `sw $a2,0x2C($s0)` delay slot, ELF `0xae06002c` ✓) |
+| Zero-init `:49–50` | `sq $zero,0($v0)` @ `0x10012c` (`sub_00100008`, ELF `0x7c400000` ✓) |
+
+### c. Ladder delta vs boot-p1o-1
+
+| Rung | boot-p1o-1 (9,638 lines, 906,252 B) | boot-p1p-1 (1,205 lines, 127,906 B) | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×16, `0x423c90` ×1 (blk11) | `0x3e5980` ×16, `0x423c90` ×1 (blk14) | Same family, other block |
+| Thread-1 sp | `0x1fffd80` ×16, `0x1fffde0` ×1 | `0x1fffd80` ×16, `0x1fffde0` ×1 | Same values (pc↔sp mapping holds) |
+| Missing target | 0 | 0 | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18 | None |
+| Syscall distinct b0 / b1+ | 27 / 3; 20 printed ids | 27 / 3; same 20 ids (sort-compared) | None |
+| CD callback | queued+start :685–686 | queued+start :385–386 (func=1 cb=`0x3e3ad8`) | Same pair, earlier lines |
+| Probe | 1 (:687, `sp=0x1fffe80 ra=0x3ded88 sourcePc=0x3ded80 checkpointed=0`) | 1 (:387, same bytes) | Line number only |
+| Threads 2/4/5 | sema-parked 26/29/30 @ `0x423de8` | Same (blk0 ids/entries/priorities/stacks identical) | None |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | `gs:gif` 2, `gs:kick` 66, `gs:reg` 122, `gs:prim` 33, `gs:copy-reg` 8; first kick :410 | 2 / 66 / 122 / 33 / 8; first kick :165 (same content `idx=0 drawing=1 prim=6 vtxCount=1`) | Line shift only |
+| `run:tick` | 7 (ticks 120–840) | 7 (same ticks/counters) | None |
+| Presented frame | None (raylib line only) | None (sole `frame` hit = raylib TIMER line :46) | None |
+| Crash | 0 | 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| Slot fills | init next `0x28` etc. (slot WATCH addrs) | Not observed (slot addrs not watched) | Coverage, not behavior |
+| `target=0x3de420` / `0x3ddfa8` | 0 / 0 | 0 / 0 | None |
+| `firstRa=0x3dd290` / `0x3dd280` | 17 / 17 | 17 / 17 | None |
+
+Per-block thread-1 (p1p-1; `sch` = id1 `scheduled`): blk0–13 `0x3e5980`
+(84/82/77/82/82/81/80/79/72/82/82/82/79/77), blk14 `0x423c90` (71), blk15–16
+`0x3e5980` (83/82).
+
+### d. Machine-check paste block (every hand computation in §P17-1)
+
+```
+python3 -c "print(hex(0x5e0080+8), hex(0x5e00b0-0x5e0080), hex((0x5e00b0-0x5e0080)//0x30), hex(0x5e0080+0*0x30+8))"
+→ 0x5e0088 0x30 0x1 0x5e0088
+python3 -c "print(hex(0x5e0680-0x5e0080), hex((0x5e0680-0x5e0080)//0x30), hex(0x519adc-0x519ab0))"
+→ 0x600 0x20 0x2c
+```
+
+## P17-2. Runtime writer answer (Boot 2)
+
+Boot-p1p-2: `$W/P1/run/boot-p1p-2.log`, 1,197 lines, 127,111 B, 17 blocks, CWD `$W/P1/run`,
+env = p1p-1 env with WATCH swapped to the §P17-1 addr `0x5e0088` (1 addr; PROBE=1 kept on),
+foreground 90 s, SIGTERM rc=-15. Binary `7a7d4b64` (fresh; §P17-3).
+
+### a. Watch: exactly 1 line
+
+| Line | addr + width | value | pc | ra | sp |
+|---|---|---|---|---|---|
+| :57 | `0x5e0088` w8 | `0x0` | `0x3e64d0` | `0x3dcd10` | `0x1fffe80` |
+
+(thread=1.)
+
+### b. W1/W2/W3: 0 hits
+
+| pc | Occurrences anywhere in boot-p1p-2.log |
+|---|---|
+| W1 `0x3de468` | 0 |
+| W2 `0x3dd83c` | 0 |
+| W3 `0x3ddd30` | 0 |
+
+(`target=0x3de420`: 0; `target=0x3ddfa8`: 0 — same as boot 1.)
+
+### c. Fourth writer (residue per Step 2)
+
+| Item | Value |
+|---|---|
+| pc | `0x3e64d0` |
+| Insn (ELF ✓) | `sd $v1, 0x8($a0)` = `0xfc830008` |
+| Owning function | `sub_003E6448` (`0x3e6448`–`0x3e6574` per `ssx3-functions.csv`) |
+| P6 | — (no row for `0x3e6448`; re-grepped `local/research/P6/ssx3-decomp-names.csv`, 802 lines) |
+| Value / width | `0x0` / w8 (covers entry-0+8 and +12) |
+| Caller | `jal func_3E6448` @ `0x3dcd08` in `sub_003DCC88` (ra `0x3dcd10` = return addr) |
+| Loop context | `addiu $a2,$a2,-0x40` @ `0x3e64cc` immediately precedes the `sd` |
+| Position | Log :57 (early init; before SIF/CD/probe :377–379) |
+
+### d. Ladder delta vs boot-p1p-1
+
+| Rung | boot-p1p-1 | boot-p1p-2 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×16, `0x423c90` ×1 (blk14) | `0x3e5980` ×15, `0x423c90` ×1 (blk0), `0x3dd278` ×1 (blk11) | Same park family |
+| Thread-1 sp | `0x1fffd80` ×16, `0x1fffde0` ×1 | `0x1fffd80` ×15, `0x1fffde0` ×1, `0x1fffe00` ×1 | pc↔sp mapping holds |
+| Missing target | 0 | 0 | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18 | None |
+| Syscall distinct b0 / b1+ | 27 / 3; same 20 ids as p1o | 27 / 3; same 20 ids (sort-compared vs p1o) | None |
+| CD callback | :385–386 | :377–378 (same func/cb) | Same pair, earlier lines |
+| Probe | 1 (:387, p1o bytes) | 1 (:379, p1o bytes) | Line number only |
+| Threads 2/4/5 | sema-parked 26/29/30 @ `0x423de8` | Same | None |
+| GIF/GS | 2 / 66 / 122 / 33 / 8; first kick :165 | 2 / 66 / 122 / 33 / 8; first kick :161 | Line shift only |
+| `run:tick` | 7 | 7 | None |
+| Presented frame | None | None (sole `frame` hit = raylib TIMER line :46) | None |
+| Crash | 0 | 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| `firstRa=0x3dd290` / `0x3dd280` | 17 / 17 | 17 / 17 | None |
+
+Per-block thread-1 (p1p-2): blk0 `0x423c90` (81), blk1–10 `0x3e5980`
+(77/82/82/82/80/79/69/82/82/81), blk11 `0x3dd278` (79), blk12–16 `0x3e5980`
+(77/68/81/82/82).
+
+## P17-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1p-1 + boot-p1p-2) | `7a7d4b645094d3ad82746a7d420b223422bf6444e5d06f6e56998e9057f5b4cd` | `e73e36a` tree, no rebuild (fresh; §P17-0 pre-boot check) |
+| `ps2x_tests` | Not re-run (no source change; P15-1c 424/425 stands for this tree) | Same tree `e73e36a` |
+| `PS2Recomp` branch `ssx3` HEAD | `e73e36a` | No fork commit (env-only boots; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added) |
+| Fork push | `git push fork ssx3` from fork clone only | Up-to-date check (expect nothing to push) |
+| This report | `[P1p]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P17-4. Exact commands
+
+From `$W/PS2Recomp` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `$O=$W/P1/output`,
+`$R=$W/PS2Recomp`:
+
+```
+# Pre-boot (lease protocol)
+cat /tmp/ssx3-host-lease (absent 14:31:32 UTC); pgrep -f "[p]s2EntryRunner" (exit 1)
+shasum ps2EntryRunner (7a7d4b64 fresh); git log/status (e73e36a); ls ISO + ELF
+cat /tmp/ssx3-host-lease (absent); printf 'P1p\n' > /tmp/ssx3-host-lease (14:31:50 UTC)
+# Step 1
+(write /tmp/p1p-boot1.py: p1o env, WATCH 0x519AD8,0x519AD4, probe on; diff vs p1o-boot1.py)
+python3 /tmp/p1p-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 127906 B; returned 14:33:32 UTC)
+log greps: driver-entry 1 (:387); watch 9 (:49/:50/:58/:59/:60/:379-:382); watch census
+python3 hex checks (§P17-1d, each pasted)
+ladder greps: thread/stub/syscall comms; syscall b0 sort-compare vs p1o (identical);
+  gs:/run:tick/frame/crash/dormant/start-thread/missing-target sweeps; SIF count
+P6 grep (ssx3-decomp-names.csv); ELF words (0x3dcd30, 0x10012c); gen MIPS quotes
+# Step 2 (lease still P1p, verified 14:34:31 UTC)
+(sed /tmp/p1p-boot1.py -> /tmp/p1p-boot2.py: LOG boot-p1p-2, WATCH 0x5e0088; diff shown)
+python3 /tmp/p1p-boot2.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 127111 B; returned 14:36:04 UTC)
+log greps: driver-entry 1 (:379); watch 1 (:57); W1/W2/W3 pc counts 0/0/0; ladder (same sweeps)
+python3 range lookup (0x3e64d0/0x3dcd10); P6 grep (no rows); ELF words; gen MIPS quotes;
+  diagWatchEmit source read (ps2_runtime.cpp:1200-1204)
+# Step 3
+rm -f /tmp/ssx3-host-lease (14:38:24 UTC); ls (absent); pgrep (none)
+(edit_file append Part 17; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1p] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (up-to-date check; the only push allowed)
+```
+
+Env delta vs boot-p1o-1: WATCH `11 addrs`→`0x519AD8,0x519AD4` (boot 1) →`0x5e0088` (boot 2) only.
+Source delta: none.
+
+## P17-5. What I could not do
+
+- Observe a W1/W2/W3 write to entry-0+8 at runtime: 0 hits in the 90 s boot-2 window
+  (§P17-2b), and `target=0x3de420`/`0x3ddfa8` printed 0 lines in both p1p boots (boot 1
+  did not watch entry-0+8). No longer-than-90 s watch and no completion-driving stimulus
+  was run (outside the brief's 2-boot box — both used).
+- Re-read the table base in boot 2: `0x519AD8` was not watched there (per the brief), so the
+  `0x5e0080` base rests on the boot-1 read alone (the boot-2 :57 hit at the derived addr is
+  the only cross-boot evidence).
+- No runtime fix (per the brief): table learn + writer catch only. The sema-26 non-delivery
+  remains out of scope, untouched.
+- Two boots used (the brief's max): no A/B on any rung.
+
