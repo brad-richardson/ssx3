@@ -5,6 +5,13 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Hourly agent poll (09-19, user call):** cron `ssx3-hourly`
+      (`17 * * * *`) checks P1n/G4/M8 states every hour — done →
+      gate-read commits per repo convention; blocked → read dialog,
+      report, do NOT answer it; working past box → flag overtime.
+      No new-agent launches from the poll; report only. (A background
+      `herdr agent wait` only signals completion and can't detect
+      stuck — the hourly check is the stuck-agent cover.)
 - [ ] **P1n + G4 + M8 launched (09-19):** P1n (driver-entry sp/ra
       probe, `Diag:` commit + rebuild + one boot — names the live
       caller) reuses P1m pane; G4 (profile + one fast path,
