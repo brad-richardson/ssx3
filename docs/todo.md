@@ -5,6 +5,36 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1o + G5 launched (09-19):** P1o (true-frame watch confirm +
+      driver-flag writer hunt, ≤2 boots; carries the new standing
+      rule: machine-check every hand hex) reuses P1n pane; G5 (port
+      CLUT/RMW/Present spikes to real upstream patches + proof
+      target) reuses G4 pane. M8 still working. Remaining queue:
+      `sceGsSyncVCallback` test fix (fork, after P1o).
+- [ ] **G4 read (09-19) — PASS, Present fast path lands:** profile
+      (sample + instrumentation) attributes single-shot ~16 ms to
+      vector fill-construct/teardown (~96% Present); `[G4-PRESENT]`
+      bulk scratch buffers cut median_ms 15.8→0.55 on standard
+      captures (6.1/3.2 on multi/field paths — temp destroys
+      disclosed as remaining); identity exact on 102/102; CTest
+      11/11 (no new tests — spike-identity pins it); captures
+      unchanged (md5s match G3). Verified: +67/-7 one file,
+      upstream/strict/factory untouched, CTest re-run, timing
+      reproduced (15.539 vs 0.550, both exact), pushed. Caveat: all
+      -O0 libc++ observations. Ledger row added.
+- [ ] **P1n read (09-19) — PASS, caller NAMED + slip found:** probe
+      (`e73e36a`, pushed) fires exactly once: fresh caller `0x3ded80`
+      (#6, `sub_003DED50`), entry sp `0x1fffe80`, true frame
+      `0x1fffe00`/`0x1fffe10`; other 4037 enters are scheduler-loop
+      resumes (prologue skipped, bypass dispatch — probe blind by
+      construction). ROOT CAUSE of the 3-brief saga: P13-3 hex slip
+      (`0x1fffd80+0x80` written as `0x1ffe000`, true `0x1fffe00`) —
+      "audited correct" twice. Ladder unchanged (16/1 park, 0
+      missing, gs counts equal); tests 424/425 same failure. Verified:
+      probe line verbatim, trace 4038, +37 one file, binary sha,
+      fork pushed, lease clean (M8 untouched). Next: P1o. Lesson:
+      machine-check all hand hex (added to runbook boilerplate).
+      Ledger row added.
 - [ ] **Hourly agent poll (09-19, user call):** cron `ssx3-hourly`
       (`17 * * * *`) checks P1n/G4/M8 states every hour — done →
       gate-read commits per repo convention; blocked → read dialog,
