@@ -5,6 +5,13 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P4 launched (09-18 21:25, `local/muse/prompts/P4.md`):** closes
+      P3's admitted gap (per-fork diff bodies): reads the M1–M14 diffs
+      from the existing `fork-survey/` clones, diffs working
+      bt3-recomp against our fork (boot/MMIO/GPU/CD), boot learnings
+      from sm2/halogen/drakengard/reo, and the EeScheduler delivery
+      point for message-not-nesting. Read-only, fully parallel to
+      M5/P1h. README gained a "Legal notes for contributors" section.
 - [ ] **P1h launched (09-18 21:15, `local/muse/prompts/P1h.md`):**
       fix the analyzer's LUI-only MMIO detector (read the ORI/ADDIU
       low half), regenerate + audit all 273 `[mmio]` entries, rebuild,
