@@ -5,6 +5,22 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1t + M12 + I3 launched (09-19, user go-ahead):** P1t (FIX:
+      mid-label invocation dispatch, first behavior fix + ≤2 boots)
+      reuses P1s pane; M12 (same-frame partition via alternating NOP
+      streams + slot-36 indexed decode) reuses M11 pane; I3 (raylib
+      decision spike: upgrade/fork-patch/SDL evidence, read-only, no
+      verdict) reuses I2 pane. Remaining queue: `sceGsSyncVCallback`
+      test fix (fork, after P1t).
+- [ ] **M11 read (09-19) — PASS, partitions measured:** slot-36 delta
+      moves 501 B on 100/100 (texcoord stage excluded); `pnmtxidx`
+      decoded (49–118 exposed draws/frame, cross-checked vs M9);
+      indexed-only arm 498 B + shared-only arm 72719 B surviving;
+      NOPTEXT arm 44470 B surviving (texture epochs cancel by
+      restore). Honest frame-confounded caveat throughout (each arm
+      its own frame — same-frame partition open). Verified: header
+      shas, analyzer rows, ref2 rows + all 4 refhashes, 6/6 hashes,
+      lease log (0 waits). Ledger row added.
 - [ ] **I2 read (09-19) — PASS, CMake fixes land, raylib wall stands:**
       3 commits (G4 BUNDLE DESTINATION +17/-5, G6 FFmpeg-iOS-OFF,
       G5 ARM-inference + FATAL guard), pushed; desktop-proof
