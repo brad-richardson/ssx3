@@ -4616,3 +4616,202 @@ fresh-build confound (§P13-6): same sources, same flags, new build dir.
 - No runtime fix (per the brief): splits + ladder only. Thread 1 did not advance to a new park
   (still the driver/`SYNCTASK_run` loop), so no further fix was owed or attempted.
 
+---
+
+## Part 14 (P1m): watch-miss mechanism is frame-elsewhere; driver entered 3940x, 7 of 8 candidates never ran, Step 2 skipped
+
+Brief `local/muse/prompts/P1m.md`. Miss mechanism only; no runtime fix. Tables, no verdicts.
+P6: driver `0x3dd1d8` has no row (P12 absence list, unchanged) → `sub_*` below; only
+candidate #8 has a P6 row (`0x3df9d8 ASYNCFILE_release`, P12).
+
+## P14-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `M7` (foreign; shared-host lease, M7 agent active) |
+| Step 1 (coverage + census + frames) | No lease (closed logs + sources only, no boot, no build) |
+| Step 2 | Skipped per Step 1d (mechanism from closed sources; 0 boots, no lease needed) |
+| Poll loops / waits | None (no boot attempted, nothing to poll for; `$W/P1/run/p1m-waits.log` does not exist) |
+| Lease at session end | `M7` (foreign, left untouched; never overwritten, never forced) |
+| Leases held by P1m | None (nothing to remove) |
+| `adb` | Not used |
+
+## P14-1. Coverage audit + entry census + frame table (Step 1, no lease, no boot)
+
+### a. Watchpoint coverage audit (which store paths fire `PS2X_DIAG_WATCH`)
+
+`R=$W/PS2Recomp`. Overlap test `ps2_runtime.cpp:1202`
+(`writeAddr < w+8 && w < writeAddr+width`); each watch entry covers `[w,w+8)`.
+
+| # | Store path (guest op → emitted code) | Fires | File:line |
+|---|---|---|---|
+| 1 | `sb` dynamic → `WRITE8` (report before segment check) | fires | `ps2_runtime_macros.h:356` (report `:361`) |
+| 2 | `sh` dynamic → `WRITE16` | fires | `ps2_runtime_macros.h:372` (report `:377`) |
+| 3 | `sw`/`swc1` dynamic → `WRITE32`; driver `sw $a0,0($sp)` at `0x3dd1e0` uses this | fires | `ps2_runtime_macros.h:388` (report `:393`); driver `sub_003DD1D8_0x3dd1d8.cpp:39` |
+| 4 | `sd` dynamic → `WRITE64`; driver `sd $ra,0x10($sp)` at `0x3dd214` uses this | fires | `ps2_runtime_macros.h:404` (report `:409`); driver `:78` |
+| 5 | `sq`/`sqc2`/`sdc2` dynamic → `WRITE128` (pre-park `sq` clears observed, P13-3) | fires | `ps2_runtime_macros.h:420` (report `:427`) |
+| 6 | `Store8/16/32/64/128` (const special/MMIO target, `runtime->Store*`) | fires | `ps2_runtime.cpp:2296/2313/2330/2348/2365` (reports `:2301/2318/2335/2353/2372`) |
+| 7 | Special-addr via `WRITE*` (report) then `Store*` (report again) | fires twice | `ps2_runtime_macros.h:393-396` + `ps2_runtime.cpp:2333-2335`; stack is non-special → single fire, N/A to miss |
+| 8 | Const non-special addr → `genFastWrite` → `FAST_WRITE*` (trace only, no watch call); 138 files in `$O`, e.g. `sub_0013FB20` `swc1` to `0x4A5E70` | never-fires | `instruction_translator.cpp:42-63` (gen), `:119` (const call site); driver uses no `FAST_WRITE` |
+| 9 | `swl`/`swr`/`sdl`/`sdr` (aligned read-modify-write via `genRead`+`genWrite`) | fires if dynamic, never if const | `instruction_translator.cpp:295/307/319/331` |
+| 10 | `sc` (conditional `WRITE32` on `llbit` match, else no write) | fires if taken | `instruction_translator.cpp:352-359` |
+| 11 | `sb`/`sh` const non-special → `FAST_WRITE8/16` (same const split as #8) | never-fires | `instruction_translator.cpp:198/200` via `:105-119` |
+| 12 | HLE direct (`getMemPtr` + `memcpy`/`memset`, e.g. `sceCdGetToc` 1024 B clear) | never-fires | `Stubs/CD.cpp:479-481` (example; P7-6 class) |
+| 13 | Scheduler `writeGuestU32` (report then `memcpy`) | fires | `EeScheduler.cpp:2290` (report), `:2292` (write) |
+| 14 | `setVSyncFlag` tick zero (init path) | fires | `EeScheduler.cpp:1587` (report), `:1589` (write) |
+| 15 | Steady-state vsync tick update (`memcpy`, no watch) | never-fires | `EeScheduler.cpp:2168` |
+| 16 | KSEG-aliased write (`0x80000000+`) vs KUSEG watch (raw `vaddr` compare, no normalization) | never-fires (no match) | `ps2_runtime.cpp:1202`; driver sp is KUSEG (`0x1f…`), N/A |
+| 17 | Cached vs uncached segment (`WRITE*` reports before `isSpecialAddress`) | fires (segment-independent) | `ps2_runtime_macros.h:393-395`; `ps2_address.h:53`; `ps2_runtime.h:442` |
+
+Driver `sw`/`sd` take FIRES paths (#3/#4, dynamic `WRITE32`/`WRITE64`); no never-fire
+path covers them. The P12 `sd`-path theory is excluded by source (#4 fires; P7-1
+observed `width=8` at `pc=0x3dcc08`).
+
+### b. Driver-entry census (`0x3dd1d8` per-period, not once)
+
+Trace `$W/P1/run/ps2_log.txt` is p1l-only (2.1 GB, 72,315,942 lines, Sep 19 00:02);
+p1k ran the old binary with no tracker (no p1k trace exists).
+
+| Item | p1l | p1k |
+|---|---|---|
+| `>> sub_003DD1D8` enters / `<<` exits | 3940 / 3939 (deficit 1 = live frame at termination) | no trace |
+| First enter / first exit (trace lines) | 18930 (nested under `003DED50`) / 42491 | — |
+| Last enter (trace lines, total 72315942) | 72315349 (depth 0, no guest parent) | — |
+| Rate over 90 s | ~44/s (per-period re-entry, not once-at-setup) | — |
+| Stub-histogram `target=0x3dd1d8` hits | 0 (all 17 blocks; top-30 truncation does not explain: 44/s ≈ 220/block exceeds p1l cutoff 68) | 0 (all 17 blocks) |
+| `0x3e5928`/`0x3e5440` every block, `firstRa=lastRa=0x3dd290`/`0x3dd280` | yes (driver live in steady state) | yes (P13-3) |
+| `pc=0x3dd1e0` / `pc=0x3dd214` anywhere in boot log | 0 / 0 | 0 / 0 (P13-3) |
+| Watch lines with `pc=0x3dd*` | 0 of 7,942 | 0 of 32,077 |
+
+Dispatch note (why 0 stub hits with 3940 enters): every guest call goes through
+`dispatchGuestBranch` (`ps2_runtime.cpp:1544-1626`), which records the histogram
+(`:1590-1605`) then calls `targetFn` directly (nested). On `checkpointDue` it
+returns false before both (caller unwinds; central loop dispatches at depth 0,
+uncounted). The 3939 sibling (depth-0) enters are checkpointed calls/resumes;
+only the first enter nests (non-checkpointed direct call).
+
+### c. Frame placement (sp at driver entry vs park sp `0x1fffd80`)
+
+Run frame `0x80` (`sub_003E5928_0x3e5928.cpp:112` `-0x80`; loop head `0x3e5980`
+after alloc, no further allocs per P13-3). Park `0x1fffd80` + `0x80` =
+watched driver frame `0x1ffe000` (`sw`) / `0x1ffe010` (`sd`), same derivation
+as P13-3. Each candidate has a single prologue alloc and no further `sp`
+write before its `jal` (verified per file). `entry_sp` = candidate's entry
+`sp` (unknown absolute); `sp@jal` = `entry_sp − alloc`;
+driver frame = `sp@jal − 0x80`.
+
+| # | Site | File (= sweep start) | Alloc | `sp@jal` | Driver frame | `entry_sp` for watched frame | Trace enters | Places watched frame |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `0x3dec20` | `sub_003DEBF0` | `0x40` | entry−`0x40` | entry−`0xC0` | `0x1ffe0c0` | 0 | no (never entered) |
+| 2 | `0x3debc0` | `sub_003DEB50` | `0x40` | entry−`0x40` | entry−`0xC0` | `0x1ffe0c0` | 0 | no (never entered) |
+| 3 | `0x3decc8` | `sub_003DECA0` | `0x30` | entry−`0x30` | entry−`0xB0` | `0x1ffe0b0` | 0 | no (never entered) |
+| 4 | `0x3dee40` | `sub_003DEE18` | `0x30` | entry−`0x30` | entry−`0xB0` | `0x1ffe0b0` | 0 | no (never entered) |
+| 5 | `0x3dede8` | `sub_003DEDC0` | `0x30` | entry−`0x30` | entry−`0xB0` | `0x1ffe0b0` | 0 | no (never entered) |
+| 6 | `0x3ded80` | `sub_003DED50` | `0x40` | entry−`0x40` | entry−`0xC0` | `0x1ffe0c0` | 2 (called driver once, trace :18930; 0 watch hits → its frame was elsewhere) | no (elsewhere for the observed call) |
+| 7 | `0x3ded20` | `sub_003DECF8` | `0x30` | entry−`0x30` | entry−`0xB0` | `0x1ffe0b0` | 0 | no (never entered) |
+| 8 | `0x3dfa5c` | `sub_003DF9D8` | `0x60` | entry−`0x60` | entry−`0xE0` | `0x1ffe0e0` | 0 | no (never entered) |
+| live | (3940th enter, trace :72315349) | caller unknown (depth 0, no guest parent; `003DED50` exited at :42492, long before end) | — | unknown | unknown (0 hits → not watched) | — | 1 (no exit) | no (missed) |
+
+All 8 direct-`jal` sites confirmed as `dispatchGuestBranch(…,0x3DD1D8u,…DirectCall…)`
+(one line each, `sub_003D*.cpp:89-268`); no other direct refs to `3dd1d8` exist
+in `$O` (case-insensitive grep over `*.cpp`: 8 caller files + driver + headers
++ `register_functions.cpp` only). The 3939 non-`003DED50` enters therefore come
+from checkpointed/indirect dispatch, not the 8 direct sites.
+
+### d. Step-1d statement + designed Step-2 receipt (not run)
+
+| Item | Value |
+|---|---|
+| Single most likely miss mechanism (Step 1d) | Frame-elsewhere: the driver's actual frames (including the live one) are not at the watched `0x1ffe000`/`0x1ffe010`; the watched addrs assume caller `sp=0x1fffe80`, but 7 candidates never ran, the 8th's one observed call wrote elsewhere (0 hits), and the live caller is unknown with unknown `sp` |
+| Why not coverage | Driver `sw`/`sd` emit `WRITE32`/`WRITE64` on the dynamic (fires) path (§a #3/#4) |
+| Why not entered-once-before-watch | 3940 enters over 90 s; watch env is process-lifetime (§b) |
+| Step 2 skipped | Yes: mechanism determined from closed sources per Step 1d (0 hits + fires-paths + fresh enter proven by nesting at trace :18930) |
+| Designed ONE receipt (for a future brief) | Env-gated driver-entry probe in `dispatchGuestBranch` for `targetPc==0x3dd1d8`: log `[diag:driver-entry] sp ra sourcePc checkpointed` on BOTH the checkpoint path (before `return false`) and the call path (before `targetFn`), one line per fresh enter (~3940 lines); actual entry `sp` values name the true frames and the live caller via `ra`, distinguishing frame-elsewhere from any residual coverage doubt |
+
+## P14-2. Boot + mechanism answer (Step 2 skipped)
+
+| Item | Value |
+|---|---|
+| Boots | 0 (`$W/P1/run/boot-p1m-*.log`: none; Step 2 skipped per Step 1d) |
+| Mechanism answer | Frame-elsewhere (§P14-1d): watched addrs are arithmetically correct for park `sp` but the driver's frames are not there — 7 of 8 direct-jal candidates never entered in 72.3M trace lines, the 8th wrote elsewhere, live caller unknown |
+| Caller named | No (live caller is a depth-0 dispatch with no guest parent in trace) |
+| Next receipt | Driver-entry `sp`/`ra` probe (§P14-1d) to capture actual frames + live caller |
+| Standard ladder row | N/A (no boot; park/threads/CD/syscalls unchanged from boot-p1l-1 by construction) |
+
+## P14-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (current, NOT booted) | `0b38f7b68d4adb1e0ef722b1ff9d0c077631e787cd7d1c14063bdc64c7266a18` | Identical to boot-p1l-1 binary → fresh, no rebuild (no source change, no boot) |
+| `PS2Recomp` branch `ssx3` HEAD | `8fad69e` | Same as P1l; worktree sole `M ps2xRuntime/src/runner/register_functions.cpp` (pre-existing generated, never added) |
+| Fork commits this brief | None (diagnose only; no source, TOML, CSV, or test change) | Nothing to push from the fork clone |
+| Fork push | `git push fork ssx3` from the fork clone only (up-to-date check) | Verified up-to-date; no push in `/Users/bradrichardson/dev/ssx3` (forbidden) |
+| This report | `[P1m]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P14-4. Exact commands
+
+From `/Users/bradrichardson/dev/ssx3` unless noted; `W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`O=$W/P1/output`, `R=$W/PS2Recomp`:
+
+```
+# Step 1a (no lease, no boot; sources only)
+grep -n "DiagWatch|DIAG_WATCH|ps2DiagWatch" $R/ps2xRuntime/src/lib/ps2_runtime.cpp
+sed -n '1130,1290p;2280,2385p' $R/ps2xRuntime/src/lib/ps2_runtime.cpp   # parse/emit/Store hooks
+sed -n '300,440p' $R/ps2xRuntime/include/ps2_runtime_macros.h           # WRITE*/FAST_* macros
+sed -n '1,120p;120,200p;200,360p' $R/ps2xRecomp/src/lib/instruction_translator.cpp  # genFastWrite, SB/SW/SD/SQ/SWL/SWR/SDL/SDR/SC
+cat $R/ps2xRuntime/include/runtime/ps2_address.h                        # KSEG/special map
+grep -rn "FAST_WRITE" $O --include="*.cpp" -l | wc -l                   # 138 const-addr files
+grep -n "WRITE|FAST_WRITE|Store" $O/sub_003DD1D8_0x3dd1d8.cpp           # driver :39 WRITE32, :78 WRITE64
+grep -rn "getMemPtr|m_memory.write" $R/ps2xRuntime/src/lib/Kernel/ | head  # HLE uncovered class
+sed -n '2267,2300p;1563,1600p;2160,2172p' $R/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp  # writeGuestU32/vsync covered+uncovered
+sed -n '1544,1626p;1090,1136p' $R/ps2xRuntime/src/lib/ps2_runtime.cpp   # dispatchGuestBranch + stub histogram
+# Step 1b (closed logs only)
+grep -c "diag:stub" $W/P1/run/boot-p1l-1.log                            # 335
+grep "diag:stub" $W/P1/run/boot-p1l-1.log | grep -E "target=0x3dd1d8|target=0x3e5928|target=0x3e5440"
+grep -c "3dd1d8" $W/P1/run/boot-p1l-1.log $W/P1/run/boot-p1k-1.log       # 0 / 0
+grep -c ">> sub_003DD1D8" $W/P1/run/ps2_log.txt                         # 3940 enters
+grep -c "<< sub_003DD1D8" $W/P1/run/ps2_log.txt                         # 3939 exits
+grep -n ">> sub_003DD1D8" $W/P1/run/ps2_log.txt | head/tail             # :18930 first, :72315349 last
+sed -n '42480,42510p' $W/P1/run/ps2_log.txt                             # sibling (depth-0) context
+grep -c "diag:watch.*addr=0x1ffe000|addr=0x1ffe010" boot-p1l-1.log      # 15 / 15 (all sq clears)
+grep -c "diag:watch.*pc=0x3dd" $W/P1/run/boot-p1l-1.log                 # 0
+# Step 1c (sources + trace)
+grep -rn "dispatchGuestBranch.*0x3DD1D8" $O --include="*.cpp"           # 8 direct-jal lines
+grep -n "addiu.*sp" $O/sub_003D*.cpp (8 files) $O/sub_003E5928_0x3e5928.cpp  # allocs 0x40/0x40/0x30/0x30/0x30/0x40/0x30/0x60, run 0x80
+for f in 003DEBF0 ... 003DF9D8; do grep -c ">> sub_${f}_" ps2_log.txt; done  # 0/0/0/0/0/2/0/0
+grep -rni "3dd1d8" $O --include="*.cpp" -l                              # 8 callers + driver + headers + register only
+# Step 3
+cat /tmp/ssx3-host-lease                                                # M7 (foreign, untouched)
+shasum -a 256 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner           # 0b38f7b6 (fresh)
+git -C $R log --oneline -1; git -C $R status --short                    # 8fad69e + pre-existing M
+(edit_file append Part 14; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1m] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (up-to-date check; the only push allowed)
+```
+
+Env delta vs boot-p1l-1: none (no boot). Source delta: none (no commit).
+
+## P14-5. What I could not do
+
+- Name the live outer caller of `sub_003DD1D8`: it enters at trace :72315349 as a
+  depth-0 dispatch with no guest parent; the 8 direct-jal candidates are excluded
+  for the live invocation (7 × 0 enters, `003DED50` exited at :42492). The 3939
+  sibling enters come from checkpointed/indirect dispatch, whose call-site `sp`
+  is not in closed logs.
+- Capture actual driver-entry `sp` values (the true frames): requires the §P14-1d
+  probe (a `Diag:` commit + rebuild + 1 boot); Step 2 was skipped per Step 1d
+  since the frame-elsewhere mechanism is already determined (0 hits on fires-paths
+  + fresh enter proven by nesting).
+- Distinguish fresh (prologue runs, frame written) vs resume (prologue skipped)
+  among the 3940 enters: the trace logs function names only (no `pc`/regs); at
+  least 1 fresh is proven (nested :18930); the rest are consistent with either.
+- Explain the exact park-sp derivation error (park `0x1fffd80` + `0x80` is
+  arithmetically watched, yet 0 hits): the live frame's true `sp` is unknown
+  without the probe, so which derivation premise fails (run frame, park sampling,
+  or caller chain) is open.
+- No boot this brief (Step 2 skipped): no new ladder row, no `boot-p1m-*.log`,
+  no revisit of the P13-6 ~4× rate question or the stub-distinct +1.
+- No runtime fix (per the brief): miss mechanism only. The `*(entry+8)`
+  driver-flag writer and sema-26 non-delivery remain out of scope, untouched.
+
