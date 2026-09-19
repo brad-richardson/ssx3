@@ -103,6 +103,7 @@ reconciliation".)
 | Desktop cost table ("needs 1.3–1.9×") | Predates the FP wave by a day; taken with Metal validation on |
 | M5 profile ("CPU core now the frontier") | Module predates Wave B (no fast-FP, no conversion split) |
 | "Endian helpers 12.1 → 0.00" | Reads "inlined, now unattributable" — cost moved into `func_*` bodies |
+| Host replay milestone 2 item 2 (M6) | Scoped bus: `dafter_live` 0/0, `dpend` 0/0, `dtex` 0/+1, `done` stands, 200/200 scratch-equal; +1 driver NAMED (`Presenter::ImmediateSwap` `Present.cpp:235` via `VideoConfig` after_frame listener, flag re-armed mid-Trigger — code path + elimination, no direct flip observation); guard fires pre-replay-0 (`replay=0 armed=1`, 0 rows, `done` stands, bus restored); continuation hash quintuple-identical `0cbfe49a0d4ee325` (seams differ, comparison skipped per rule) | 09-19 | Mac, Metal, 640x528, `gxbe69-stock`, 5 × 240 s `m6-det` runs (negctrl post-hold on AC) | `local/research/M6/REPORT.md` (orchestrator-verified: header shas, guard event verbatim, analyzer rows reproduced, 5/5 hashes) |
 
 ## Void (measured at the phantom 1.16 wall — never quote)
 

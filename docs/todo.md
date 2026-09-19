@@ -5,6 +5,19 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M6 read (09-19) — PASS, milestone 2 item 2 done:** scoped bus
+      (`dafter_live` 0/0, `dpend` 0/0, queue never grows — in-stream
+      flush points still drain); `dframe` frozen 0/0 with replay-local
+      counter; M5's +1 driver NAMED (`ImmediateSwap` `Present.cpp:235`
+      re-armed by the `VideoConfig` after-frame listener mid-Trigger —
+      file:line + trigger + 11-listener elimination, honestly noted as
+      code-path-plus-elimination, no direct flip observation); guard
+      proven by negative control (`record_flag_set` pre-replay-0, 0
+      rows, `done` stands, bus restored on break path); continuation
+      hash identical ×5 (comparison skipped, seams differ). Verified:
+      header shas, guard event verbatim, analyzer rows reproduced,
+      5/5 hashes, lease log incl. battery hold obeyed. No push. Ledger
+      row added.
 - [ ] **G2 launched (09-19, `local/muse/prompts/G2.md`):** harness
       sensitivity — `strict` second backend honoring all G0-§9-ignored
       fields + mip-chain/TEX1/paired-isolation captures; sensitivity +
