@@ -5,6 +5,22 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1t read (09-19) — PASS, THE FIX WORKS, new stall found:**
+      `58c9144` (+46, pc-keyed shim, yields to future splits):
+      callback body ran (1 `ra=0x3e3af0` line), worker consumed,
+      passed G6, issued site #9, driver ran; entry-0 cycled 0→1→0
+      (SET @ `0x3de468`, CLEAR @ `0x3e6518`); thread 1 left the park
+      (cycles `0x3e5980`/`0x31a278`/others) and now spins on
+      `WaitSema(-1)` (1.39M `KE_UNKNOWN_SEMID`, `sub_0031A6B8` —
+      slot writer unattributed, next brief owns it); before/after
+      dispatch receipts prove no leakage (old `-1`-less loop gone is
+      the intended effect). Tests 424/425 before/after identical
+      (GsSyncV — and the AFAIL↔GsSyncV flip across builds is now
+      documented 2nd-order weirdness). Verified: line counts,
+      signal line, epoch, -1 census (1387579+24+57 interleave),
+      entry-0 lines, +46 pushed, binary sha, tests re-run by me
+      (424/425, GsSyncV named). Next: P1u (the `-1` stall). Ledger
+      row added.
 - [ ] **I3 read (09-19) — PASS, raylib decision fully tabled:** A:
       no release/master has an iOS backend (PR #3880 closed
       unmerged); 6.0 breaks itemized, project uses 0 changed APIs;
