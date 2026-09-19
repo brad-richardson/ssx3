@@ -7533,3 +7533,450 @@ Env delta boot 1 vs boot-p1t-1: `PS2X_DIAG_SEMA_CREATE=1` +
 
 ---
 
+## Part 23 (P1v): FIX — zero-max CreateSema accepted as binary sema; WaitSema(-1) spin gone, thread 3 runs, old outer loop exits; new stall is thread-3's poll on the unwritten word 0x52BE04
+
+Brief `local/muse/prompts/P1v.md`. The second behavior fix, 1 `Fix:`
+commit (2 files, +46/-2, of which 38 test) + 2 boots. Tables, no
+verdicts. Stale-reading guard: Part 22 re-read before acting (P22-1a the
+F-table + F2 ctor shape, P22-1b/1c the `+0x18` slot + sole writer @
+`0x31a7b8`, P22-1d the F2 zero-param #1/#2 → -1 table, P22-1e the
+handshake + starvation chain, P22-2a the 33-create census, P22-2b the
+`s0`=`0x604890` singleton + epoch order). `W=/Volumes/Extreme
+SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork, branch `ssx3`),
+`O=$W/P1/output`, `LOG=$W/P1/run/boot-p1v-1.log`,
+`LOG2=$W/P1/run/boot-p1v-2.log`. File:line refs below are
+`ps2xRuntime/src/lib/` unless noted. Every hand hex machine-checked
+§P23-1h; all cited MIPS words ELF-verified §P23-1i.
+
+## P23-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | M14 (another agent; briefed share — poll every 5 min, never force) |
+| Waits log | `$W/P1/run/p1v-waits.log` (4 lines: start, poll 1, claim, release) |
+| Poll 1 (23:35:05Z) | M14 still holds, `pgrep -x ps2EntryRunner` absent; logged, continued wait |
+| Poll 2 (23:40:16Z) | Lease absent, runner absent |
+| Pre-claim checks (23:41:01Z) | Absent verified twice; `pgrep -x` exit 1; binary `52f766a5` (P1v Fix build); fork HEAD `8d10619`; ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1v\n' > /tmp/ssx3-host-lease` 23:41:01Z, immediately before boot 1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG 7,852 lines, 1,053,739 B, 17 blocks |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, LOG2 7,915 lines, 1,063,718 B (WATCH swap only) |
+| Release | After Step 3 push (below); verified absent; `pgrep -x` exit 1 |
+| `adb` | Not used |
+
+## P23-1. Evidence + fix + choice + tests
+
+Conventions: `Sched` = `Kernel/EeScheduler.cpp`; `Sync.cpp` =
+`Kernel/Syscalls/Sync.cpp`; `macros.h` = `ps2xRuntime/include/ps2_runtime_macros.h`.
+
+### a. Step-0: what a real PS2 does with max_count=0 (reference clones read-only)
+
+| # | Source | Finding |
+|---|---|---|
+| 1 | `pcsx2-ref/pcsx2/R5900OpcodeImpl.cpp:107` | `CreateSema` appears ONLY in the EE syscall-name table (`//0x40` row); no kernel HLE, no validation — PCSX2 boots the Sony BIOS (LLE), silent on max=0 |
+| 2 | `pcsx2-ref/pcsx2/IopBios.cpp` | Zero `Sema` matches (grep over the file): IOP HLE covers modules, not semaphores — silent |
+| 3 | `pcsx2-ref/pcsx2/ps2/BiosTools.cpp` (388 lines) | IRX loading only — silent |
+| 4 | `dobiestation-q4/src/core/ee/emotion.cpp:68` | `CreateSema` again ONLY a syscall-name-table row (`//0x40`); LLE, silent on max=0 |
+| 5 | ps2tek EE_Syscalls `40h` | "Creates a semaphore. Returns the semaphore's id if successful and `-1` if not. Only `s->init_count` and `s->max_count` need to be specified." — return convention only, silent on max=0 validity |
+| 6 | ps2tek EE_Threading (`SemaParam`/`sema` structs + scheduler) | Internal layout (`count`/`max_count`/`attr`/`option`/`wait_threads`) + wait/signal behavior; no create-time validation documented — silent |
+| 7 | ps2sdk `ee/kernel/include/kernel.h` (`t_ee_sema`, `s32 CreateSema(ee_sema_t *)`) | Struct + syscall-stub prototype only; validation lives in the Sony BIOS — silent |
+| 8 | Host rule provenance | `git log -L` → upstream `f4309cd` ("refactor: from guest threads to EE scheduler (#184)"); the `maxCount<=0 → KE_ERROR` check arrived with the refactor, no hardware citation |
+| 9 | Game-as-oracle (decisive) | SSX 3 is a shipped title that runs on real PS2s; F2's ctor runs at boot (id-29 artifact, P22-1c row 5) and stores two unchecked all-zero creates; on hardware the boot proceeds past F6's blocking wait — so the real BIOS returns a usable id for max_count=0 |
+
+Net per the brief's ground rule: written sources are silent or LLE (rows
+1–7 say so explicitly), the host rule is uncited (row 8), and the
+artifact itself (row 9) proves acceptance. Stored-max semantics (clamped
+vs stored-0) are NOT pinned by any source → the fix below is recorded as
+PROVISIONAL.
+
+### b. The fix (one `Fix:` commit, `8d10619`; non-test diff 8+/2−)
+
+Single choke point `EeScheduler::createSemaphore` (`Sched:1115`);
+`Sync.cpp:84` `CreateSema` stays a pure pass-through (`ee_sema_t` =
+`Syscalls/Helpers/State.h:129-137`). `KE_ERROR`/`KE_UNKNOWN_SEMID`/
+`KE_SEMA_ZERO` = `Sched:32/36/43` (-1/-408/-419).
+
+```diff
+ int EeScheduler::createSemaphore(int initCount, int maxCount, uint32_t attr, uint32_t option)
+ {
+     assertExecutor();
+-    if (maxCount <= 0 || initCount < 0 || initCount > maxCount)
++    // P1v: real PS2 hardware accepts max_count=0 (SSX 3 ships two unchecked
++    // all-zero creates at boot and runs on hardware), so treat an exact zero
++    // max as a binary semaphore. Provisional: reference emulators are LLE
++    // and ps2tek/ps2sdk are silent on the stored-max semantics; a negative
++    // max stays rejected and init is validated against the effective max.
++    const int effectiveMax = (maxCount == 0) ? 1 : maxCount;
++    if (effectiveMax <= 0 || initCount < 0 || initCount > effectiveMax)
+     {
+         return KE_ERROR;
+     }
+@@
+-    semaphore.maxCount = maxCount;
++    semaphore.maxCount = effectiveMax;
+```
+
+Choice: exact-zero → binary sema (max stored as 1). Alternatives rejected:
+
+| Alt | Rule | Rejected because |
+|---|---|---|
+| A | Bypass validation, store max=0 as-is | Waiter-less signals then always hit `count==maxCount → KE_SEMA_OVF` (signal path, `Sched:1214` pre-fix numbering) and are LOST; the F6/F7 handshake has a flag-set-but-not-yet-waiting race window, so this risks wedging iterations on a lost signal |
+| B | Clamp ALL max≤0 → 1 | No evidence for negative max; blast radius larger than the game's exact-0 case |
+| C | Unlimited max (INT_MAX) | Changes OVF semantics broadly with zero evidence |
+| D | Fix in `Sync.cpp` instead | Scheduler is the single choke point; syscall layer stays a pure pass-through |
+
+Why clamp-1 satisfies the game's pattern: F6 WaitSema blocks at count 0
+(real block → thread 1 yields → thread 3 can run); F7 SignalSema with a
+waiter wakes it (waiters-first branch, no max check); waiter-less signals
+store count 0→1 instead of being lost; the PollSema drain behaves as a
+normal binary sema.
+
+### c. BEFORE/AFTER receipts (same new test, unfixed vs fixed tree)
+
+New test `PS2RuntimeKernel / CreateSema with zero max_count returns a
+usable binary semaphore (P1v)` (`ps2xTest/src/ps2_runtime_kernel_tests.cpp`,
++38, through the real `CreateSema` syscall with an all-zero `EeSemaStatus`):
+
+| Receipt | Unfixed tree | Fixed tree (`8d10619`) |
+|---|---|---|
+| Zero-max create returns | `KE_ERROR` (-1), no object (test FAILS: "must return a usable id", "must create an object") | id > 0, object exists, `maxCount`=1, `count`=0 (test PASSES) |
+| Valid create (max=7, init=3) | Unchanged (same assertions pass both runs) | id > 0, `maxCount`=7, `count`=3 |
+| Negative max (-2) | Rejected (`KE_ERROR`) | Rejected (`KE_ERROR`) |
+| Full suite | 426 total / 424 pass / 2 fail (new test + known GsSyncV) | 426 total / 425 pass / 1 fail |
+| Sole remaining failure | — | `sceGsSyncVCallback ... reserved async stack pool` (same test+assertion as the P21/P22 baseline; pre-existing, unrelated) |
+| Baseline before the new test | 425 / 424 / 1 (same GsSyncV) — confirms no test-harness drift | — |
+| Rebuild | `ps2x_tests` exit 0 | `ps2x_tests` exit 0 + `ps2EntryRunner` exit 0 |
+
+### h. Machine-check paste block (every hand computation in Part 23)
+
+```
+python3 -c "…rows A–G…"
+→ A-mbox-base: 0x52be00 0x52be04
+→ B-beqz-tgt: 0x40b1d0
+→ C2-index-shl2: 0x425cf0 0x4261b0 0x3e5928
+→ D-ra: 0x40b1d8 0x316f50 0x316f70
+→ E-base2: 0x52bcd8
+→ F-316f-br: 0x316fac 0x316f94 0x317140 0x3171c8
+→ G-logdelta: 250932 27926556 796.1 27.5
+```
+
+Row A: mailbox base (`0x530000`−`0x4200`) + polled word (`+1<<2`).
+Row B: `beqz` @ `0x40b1d8` loop-back target. Row C2: analyzer JAL
+convention (target = index<<2, NOT OR'd with the region nibble — the
+textbook OR would give `0x40425cf0`; the log/recomp/ELF all speak
+index<<2, verified on 3 samples: `0x10973c`→`0x425cf0`,
+`0x10986c`→`0x4261b0`, `0x0f964a`→`0x3e5928`). Row D: 3 `jal`/`jalr`→`ra`
+(+8) checks. Row E: setter-file base-2 getter (`0x530000`−`0x4328`).
+Row F: 4 `sub_316F00` branch targets (`beq`/`beqz`/`beql`/`b`). Row G:
+LOG-vs-P22 line/byte deltas, `-1`-wait→29-wait ratio (796.1×), byte
+ratio (27.5×).
+
+### i. ELF verification words (12 addrs, 0 mismatches; mapping file-off = va−`0x100000`+`0x1000`)
+
+```
+0x40b1d0 0xc10973c / 0x40b1d4 0x24040001 / 0x40b1d8 0x1040fffd
+0x425cf0 0x3c020053 / 0x425cf4 0x42080 / 0x425cf8 0x2442be00
+0x425cfc 0x822021 / 0x425d04 0x8c820000
+0x316f48 0x60f809 / 0x316f50 0xc0f964a / 0x316f68 0x60f809 / 0x316f70 0x8e030058
+```
+
+## P23-2. Dynamic answer (boot-p1v-1 + boot-p1v-2, 2 boots)
+
+LOG 7,852 lines, 1,053,739 B, 17 blocks, CWD `$W/P1/run`, env = p1u-boot1
+unchanged (`PS2X_DIAG_SEMA` + `SEMA_CREATE` + `SEMA_S0` already on;
+script diff = docstring + LOG only), WATCH `0x519c40,0x450de4`,
+foreground 90 s, SIGTERM rc=-15. LOG2 7,915 lines, 1,063,718 B, same env
+except WATCH `0x52BE04,0x450de4` (script diff = docstring + LOG + the one
+watch addr). Binary `52f766a5` (§P23-3) both boots.
+
+### a. CreateSema census: all 33 succeed, F2's zero-param pair returns ids 28/29
+
+| Line(s) | `ra` (site) | `{count,max,init,wait,attr,option}` | `ret` |
+|---|---|---|---|
+| F2 #1 + #2 | `0x31a780` / `0x31a7a0` | {0,**0**,0,0,0,0} / same | **28** / **29** (was -1/-1) |
+| F2 #3 + #4 | `0x31a7c8` / `0x31a858` | {0,**1024**,0,0,0,0} / same | **30** / **31** (shifted +2) |
+| Rest of game | unchanged sites/pcs | unchanged params | 1–27, 32, 33 contiguous |
+
+Verbatim F2 lines (all `tid`=1, `pc`=`0x423da8`):
+
+```
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a780 param=0x1fffe60 count=0 max=0 init=0 wait=0 attr=0 option=0 ret=28
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a7a0 param=0x1fffe80 count=0 max=0 init=0 wait=0 attr=0 option=0 ret=29
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a7c8 param=0x1fffea0 count=0 max=1024 init=0 wait=0 attr=0 option=0 ret=30
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a858 param=0x1fffea0 count=0 max=1024 init=0 wait=0 attr=0 option=0 ret=31
+```
+
+Id-shift map (this boot vs P22): `+0x0C` 28 (was -1), **`+0x18` 29 (was
+-1, THE SLOT)**, `+0x14044` 30 (was 28), `+0x4034` 31 (was 29), thread-5
+park 32 (was 30), its mate 33 (was 31). `ret` sequence 1–33 contiguous,
+zero failures game-wide. `op=wait id=-1` count: **0** (was 257,125).
+
+### b. Steady-state thread table (all 17 blocks; sch series in full)
+
+Every block: t1 WAIT 29 @ `0x423de8`; t2 WAIT 26 @ `0x423de8`; t3
+status=0 (running) pc `0x40b1d0`/`0x425cf0`; t4 WAIT 31 @ `0x423de8`; t5
+WAIT 32 @ `0x423de8`.
+
+| Thread | sch b0–b16 | pc pattern |
+|---|---|---|
+| t1 (prio 100) | 72,36,38,36,36,36,36,38,36,38,36,36,30,38,36,38,36 | `0x423de8` ×17 (parks inside F6 every sample) |
+| t2 (prio 12) | 2,0 ×16 | `0x423de8` ×17 (parked 26, same as P22) |
+| t3 (prio 101) | 27,36,38,36,36,36,36,38,36,38,36,36,30,38,36,38,36 | `0x40b1d0` ×8 (b0,b1,b5,b6,b9,b10,b12,b14), `0x425cf0` ×9 |
+| t4 (prio 99) | 25,18,19,18,18,18,18,19,18,19,18,18,15,19,18,19,18 | `0x423de8` ×17 (parked 31) |
+| t5 (prio 5) | 46,36,38,36,36,36,36,38,36,38,36,36,30,38,36,38,36 | `0x423de8` ×17 (parked 32) |
+
+t3/t5 sch = t1 sch from b1 on (b0 differs: warmup). t4 sch = t1 sch / 2
+from b1 on (36/18, 38/19, 30/15 exact). Thread 3 scheduled≠0 in ALL 17
+blocks (was sch=0 in all 16 P22 blocks). Thread 1's sch≠0 while WAITing
+= wake/block cycling (322 F7 wakes §P23-2c).
+
+### c. Signal/wait group-bys (balanced — the system cycles)
+
+| id | signals | waits | Sites (waker, `ra`) |
+|---|---|---|---|
+| 29 (`+0x18`) | 322 | 323 | waits: 323× t1 `0x31aa8c` (F6); signals: 322× t4 `0x31aae4` (F7, target=1 woken every line) |
+| 30 (`+0x14044`) | 2 | 2 | signals: 2× t1 `0x31acf4` (`0x31acd8`, :629/:680); waits: 2× t3 `0x31aca4` (:631 consume, :632 park → :680 woken) |
+| 31 (`+0x4034`) | 322 | 323 | waits: 323× t4 `0x31ac30`; signals: 310× t3 + 12× waker=-1, all `ra`=`0x31abf8` (INTC-tail iSignal, `+8` of `0x31abf0`) |
+| 32 (t5 park) | 963 | 964 | waits: 964× t5 `0x3827e0`; signals: 321× t1 `0x377b6c` + 321× t5 `0x3826b4` + 311× t3 `0x382640` + 10× waker=-1 |
+| 33 | 1284 | 1284 | waits: 963× t5 `0x3827e8` + 321× t1 `0x377b24`; signals: 963× t5 `0x382ae8` + 321× t1 `0x377b64` |
+| 4 / 5 (pump) | 67 / 13 | 67 / 13 | unchanged `0x3e5738`/`0x3e57bc` shapes |
+| 26 | 2 | 3 | first park + callback signal + consume + re-park (same shapes as P22) |
+| 1 | 2 | 2 | — |
+| 6–25 (drainer) | 1 each | 1 each | signals carry waker=-1, iSafe=1, invKind=1 (interrupt context) |
+
+`waker=-1` total: 42 lines, all INTC-context iSignals. F6/F7 handshake
+alive: 322 wakes of thread 1, `count=0->0 waiters=1->0` every line.
+F6's PollSema trampoline (`0x423df0`): 0 printed stub lines (323 total
+F6 iters sit below the top-30 cutoff — a display cutoff, not an absence).
+
+### d. Epoch order (:604–:640; same skeleton as P22, new ending)
+
+| Line(s) | Event |
+|---|---|
+| :604 | id-5 pair (pump) |
+| :605/:606 | `0x519c40`=`0x0`→`0xA` (same pcs/values as P22) |
+| :607 | first signal 26→thread 2 (`ra`=`0x3e48b8`) |
+| :608 | wake `0x2` (watch) |
+| :609/:610 | cdread `lbn=0x5f1a3` + `BIGF` payload (same bytes: `42494746147c1a00`) |
+| :611 | queued (`func=1 cb=0x3e3ad8`) |
+| :612 | watch `0x2` |
+| :613 | start (`func=1 cb=0x3e3ad8`, P1t fix still firing) |
+| :614 | callback signal (`ra`=`0x3e3af0`, inInt=1) |
+| :615 | worker consume (wait 26) + :616 watch `0x0` + :617–:625 id-5 pairs + worker 26 re-park |
+| :626 | driver-entry (`sp=0x1fffe80 ra=0x3ded88 sourcePc=0x3ded80 checkpointed=0` — byte-identical in all 3 boots P22/P23-1/P23-2, :626/:626/:620) |
+| :629 | id-30 signal (`ra`=`0x31acf4`, the `0x31acd8` submit — 1st of 2 this boot) |
+| :630 | **first 29-wait parks thread 1** (`ra`=`0x31aa8c`, `result=park` — the P22 spin-begin line is now a park) |
+| :631 | thread 3 consumes 30 (count 1→0, `ra`=`0x31aca4`) |
+| :632 | thread 3 parks on 30 |
+| :634 | id-31 INTC kick wakes thread 4 (waker=-1, `ra`=`0x31abf8`) |
+| :636 | **F7 wakes thread 1** (first of 322; target=1) |
+| :637/:638 | threads 4/1 re-park (31/29) |
+| :640 | id-31 kick again |
+| :680 | 2nd id-30 signal wakes thread 3 (target=3) — thread 3 never waits again |
+
+### e. The new thread-3 park: `while (*(0x52BE04)==0)` (≈2.2M calls/block)
+
+`[diag:stub] target=0x425cf0` all 17 blocks, sole `ra`=`0x40b1d8`:
+1,486,763 (b0), then 2,179,378 / 2,251,023 / 2,244,471 / 2,197,159 /
+2,168,489 / 2,158,029 / 1,971,444 / 2,239,744 / 2,242,324 / 2,196,821 /
+2,165,927 / 2,167,895 / 1,947,855 / 2,243,643 / 2,250,663 / 2,212,551
+(≈36.3M total). Caller `0x40b1d0` ∈ `sub_0040B130`
+(`0x40b130`–`0x40b1f8`); target = `sub_00425CF0` (`0x425cf0`–`0x425d38`).
+
+Caller loop (`$O/sub_0040B130`, MIPS + recomp agreement; branch check row B):
+
+```
+0x40b1d0: jal  0x425cf0        (delay: $a0 = 1)
+0x40b1d8: beqz $v0 → 0x40b1d0  (loops while the callee returns 0)
+```
+
+Polled function (`$O/sub_00425CF0`, entry only; ELF batch §P23-1i; base check row A):
+
+```
+0x425cf0: lui   $v0, 0x53      ($v0 = 0x530000)
+0x425cf4: sll   $a0, $a0, 2    (arg 1 → 4)
+0x425cf8: addiu $v0, $v0, -0x4200  ($v0 = 0x52BE00)
+0x425cfc: addu  $a0, $a0, $v0  ($a0 = 0x52BE04)
+0x425d00: jr    $ra            (delay: $v0 = *(u32 *)0x52BE04)
+```
+
+Net: thread 3 spins on `*(0x52BE04) != 0`. Same file holds two more
+entries: `0x425d08` (setter: `*(base+arg<<2) = $a1`) and `0x425d28`
+(returns `0x52BCD8`, check row E) — 0 printed stub lines each (below the
+top-30 cutoff if called at all; no JAL sweep run — §P23-5).
+
+### f. The new thread-1 park: WAIT 29 inside F6, outer phase advanced to sub_316F00
+
+Old outer loop (`sub_00316D60`) is GONE: 0 stub lines carry the old ras
+(`0x316e04`/`0x316e24`/`0x316e3c`/`0x316e5c`); F6/F7/predicate
+(`0x31aa58`/`0x31aac8`/`0x31ad00`) all below the top-30 cutoff. F4/F5
+(`0x31a9d8`/`0x31aa18`) run ~48–57/block from NEW outer ras `0x316f50`
+/ `0x316f70` (23 lines) ∈ `sub_00316F00` (`0x316f00`–`0x317328`), plus
+F6's vcalls (`0x31aa84`/`0x31aab8`); F4/F5 sub-methods `0x31a3c0`/
+`0x31a308` ~54/block (sole ras `0x31aa08`/`0x31aa48`); `0x317328`
+trampoline ~72/block.
+
+New outer window (`$O/sub_00316F00`; ra checks row D, branch targets row F):
+
+```
+0x316f48: jalr $v1 (= F4, iface+0x5C)   ra = 0x316f50
+0x316f50: jal  0x3E5928                 (legacy rung, as in the old loop)
+0x316f68: jalr $v1 (= F5, iface+0x64)   ra = 0x316f70
+0x316f70: lw   $v1, 0x58($s0)
+0x316f74: beq  $v1, $s2 → 0x316fac
+0x316f7c: beqz $v0 → 0x316f94
+0x316f84: beql $v1, $zero → 0x317140
+0x316f8c: b → 0x3171c8
+```
+
+Thread 1 parks inside F6's WaitSema (323 waits, `ra`=`0x31aa8c`) every
+block; F6's exact `jalr` site inside `sub_316F00` is unpinned (F6 below
+stub cutoff — §P23-5).
+
+### g. Chain answer (fix fires; completion lands; stall moves)
+
+| Link | Receipt |
+|---|---|
+| Zero-max creates fixed | 28/29 returned (§P23-2a); -1 waits 257,125 → 0 |
+| Thread 1 genuinely blocks | 323 F6 waits / 322 F7 wakes, balanced; WAIT 29 @ `0x423de8` all 17 samples |
+| Thread 3 (flag-clearer) runs | sch≠0 all 17 blocks (27–38); consumed id-30 twice (:631/:680), then runs free |
+| Old outer loop exits | 0 old-ras; phase advanced `sub_316D60` → `sub_316F00` (F4/F5 outer ras move) |
+| Boot advances | GS kicks 66→96, prims 33→64 (textured prim=6, `drawing=1`); `run:tick` dma 888→4992, gif 50→278 over 6 ticks; pump/drainer/INTC paths all cycle |
+| NEW stall | Thread 3's `*(0x52BE04)` poll (≈36.3M calls) — the word is never written (§P23-2i) |
+
+### h. Ladder delta vs P22 LOG (boot-p1u-1: 258,784 lines, 28,980,295 B, 16 blocks)
+
+LOG: 7,852 lines (−250,932), 1,053,739 B (−27,926,556), 17 blocks.
+
+| Rung | P22 LOG | LOG | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×9 + cycle | `0x423de8` (WAIT 29) ×17 | Parks in F6 (was free-spin) |
+| Thread-1 sch | 27/3 ×16 | 72,36–38 ×16, 30 ×1 | Wake/block cycling regime |
+| Thread-2 | parked 26, sch 2 then 0 | Same bytes | None |
+| Thread-3 | Ready @ `0x31ac60`, sch 0 | Running, sch 27–38, pc `0x40b1d0`/`0x425cf0` | Starvation lifted |
+| Thread-4 | parked 29, sch 3 b0 | parked 31, sch 25/18/19/15 | Id shift + cycling |
+| Thread-5 | parked 30, sch 1 b0 | parked 32, sch 46/36/38 | Cycling (964 waits) |
+| Missing / `No exact` | 0 / 0 | 0 / 0 | None |
+| Old-loop ras | dominant | 0 | Old loop exited |
+| `0x425cf0` spin | 0 | ~2.2M/block ×17 | NEW stall (thread 3) |
+| CD reads total | 21 | 21 | None |
+| CD callback | :611/:613, same bytes | :611/:613, same bytes | None (P1t fix firing) |
+| Driver-entry | :626 | :626, byte-identical | None |
+| Watch | 8 lines | 8 lines (same addrs/pcs) | None |
+| `run:tick` | 9 (`pc`=`0x316e04`/`0x316e0c`) | 6 (`pc`=`0x40b1d0` ×5 + `0x3827e0` ×1) | New pcs; dma/gif climb |
+| GIF/GS sweep | 2/66/122/33/8/1 | 48/96/128/64/64/30 | Drawing advances |
+| Presented frame | None (TIMER only) | None (:46 TIMER only) | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | None |
+| Dormant / start-thread | 40 / 4 | 65 / 4 | Count only |
+| SIF modules | 6 | 6 | None |
+| `0x3e5440` | 0 hits | 0 hits | None |
+
+### i. Boot 2: the polled word is never written (the one receipt)
+
+LOG2 (WATCH `0x52BE04,0x450de4`): exactly **1** watch line —
+`:50 addr=0x52be00 width=16 value=0x0… pc=0x10012c thread=1` (loader
+zero-init, same init pattern as `0x519c40`'s line). Zero CPU-store
+writes to `[0x52BE04,0x52BE0C)` across 90 s. Steady state otherwise
+reproduces: 33 creates, `0x425cf0` 1.54M/2.15M/2.25M (b0–b2),
+`op=wait id=-1` = 0, driver-entry byte-identical (:620, −6 line shift
+from the missing `0x519c40` lines). Watch coverage: guest
+WRITE8/16/32/64 macros all report when enabled (`macros.h:361-410`);
+overlap rule `writeAddr < w+8 && w < writeAddr+width`
+(`ps2_runtime.cpp:1196-1200`); the init line proves the watch armed on
+this range.
+
+## P23-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (both boots) | `52f766a5c64024d145e10a306e37f141aa1b95173bf748b6afb2471ce9f34af7` | `8d10619` tree (P1v `Fix:` on `53bac61`; `-j4` rebuild, exit 0) |
+| `ps2x_tests` (CWD `$R`, rebuilt) | Total 426, Passed 425, Failed 1 (`sceGsSyncVCallback … reserved async stack pool`, same test+assertion as P21/P22) | No new failure from the `Fix:` (new P1v test passes; pre-existing stands) |
+| `PS2Recomp` branch `ssx3` HEAD | `8d10619` (`Fix: accept zero-max CreateSema as a binary semaphore (P23-1)`, 2 files, +46/-2, two trailers) | Sole P1v fork commit; worktree `M` = generated `runner/register_functions.cpp` only, never added |
+| Post-script (shared tree) | Peer `bdae295` (I6, iOS-only CMake, desktop-inert) landed on `8d10619` during Step-2 analysis, pushed by its author; `8d10619` is on `fork/ssx3` as its parent; my `push fork ssx3` returned up-to-date | Boots/binary used the `8d10619` tree; peer change touches neither file nor the Darwin build |
+| Fork push | `git push fork ssx3` from fork clone only (§P23-4) | The only push allowed (no push in ssx3) |
+| This report | `[P1v]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P23-4. Exact commands
+
+From `$R` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`$O=$W/P1/output`, `LOG=$W/P1/run/boot-p1v-1.log`,
+`LOG2=$W/P1/run/boot-p1v-2.log`:
+
+```
+# Step 0 (lease-free evidence; reference clones read-only)
+re-read REPORT Part 22 (paged reads)
+read Sched create/delete/signal/poll/wait + KE codes + Sync.cpp CreateSema
+  + ee_sema_t (Syscalls/Helpers/State.h) + MiniTest harness + kernel tests
+grep CreateSema/max_count/maxCount pcsx2-ref (R5900OpcodeImpl:107 only) +
+  IopBios (0) + BiosTools (IRX only); dobiestation emotion.cpp:68 (name table)
+git log -L (host rule <- f4309cd #184 refactor, no citation)
+web: ps2tek EE_Syscalls 40h + EE_Threading + ps2sdk kernel.h (all silent on max=0)
+# Step 1 (Fix commit + builds + tests, no lease needed)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests -j4 (exit 0, HEAD unmodified)
+ps2x_tests CWD $R (425/424/1 GsSyncV baseline; named via [Failed] grep)
+(edit_file: add P1v zero-max test to ps2_runtime_kernel_tests.cpp only)
+find ps2xTest -name '._*' -delete; rebuild ps2x_tests (exit 0)
+ps2x_tests (426/424/2: BEFORE — new test fails ret=-1, valid asserts pass)
+(edit_file: Sched effectiveMax clamp + store; 8+/2-)
+find ps2xRuntime ps2xTest -name '._*' -delete
+rebuild ps2x_tests + ps2EntryRunner (exit 0 both)
+ps2x_tests (426/425/1 GsSyncV: AFTER — new test passes)
+shasum -a 256 ps2EntryRunner (52f766a5)
+git add <2 NAMED lib/test files>; git commit -m "Fix: ..." (two trailers) -> 8d10619
+(write /tmp/p1v-boot1.py; diff vs p1u-boot1.py = docstring + LOG only)
+# Step 2 (lease protocol + boot 1)
+cat /tmp/ssx3-host-lease (M14 held; briefed share)
+sleep/poll 5 min x2 (23:35:05Z M14; 23:40:16Z absent) + >> p1v-waits.log
+pgrep -x ps2EntryRunner (exit 1); shasum fresh; git log (8d10619); ls ISO + ELF
+printf 'P1v\n' > /tmp/ssx3-host-lease (23:41:01Z, absent verified twice) + >> p1v-waits.log
+python3 /tmp/p1v-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 1053739 B)
+# Step 2 (log analysis, lease held)
+sema-create census (33; F2 4 verbatim; ret 1-33 contiguous); -1 waits (0)
+per-block thread table (17x5, sch series); signal/wait group-bys (id + ra/waker)
+stub hist (0x425cf0 17/17; F4/F5 new ras; F6/F7/pred below cutoff; old ras 0)
+resolve 0x40b1d0/0x425cf0/0x316f50/0x316f70 via ssx3-functions.csv (python3)
+read $O/sub_0040B130 (loop) + sub_00425CF0 (whole) + sub_00316F00 (window)
+epoch :604-:640 + :680; driver-entry bytes x3 boots; watch/probe/cd/dormant/SIF
+GIF/GS sweep (48/96/128/64/64/30); python3 checks rows A-G; ELF batch 12 (0 bad)
+read watch impl (macros.h:361-410; ps2_runtime.cpp emit + overlap + callers)
+# Step 2 (boot 2: NEW stall worth one receipt)
+(sed /tmp/p1v-boot1.py -> /tmp/p1v-boot2.py: LOG + WATCH 0x52BE04; docstring edit)
+cat lease (P1v); pgrep -x (exit 1)
+python3 /tmp/p1v-boot2.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 1063718 B)
+watch grep (1 line: loader init only); steady-state sanity (33/1.5M+/0)
+# Step 3
+(edit_file append Part 23 in 4 chunks)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1v] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (the only push allowed)
+rm -f /tmp/ssx3-host-lease; ls (absent); pgrep -x (exit 1)
+```
+
+Env delta boot 1 vs boot-p1u-1: none (script diff = docstring + LOG).
+Env delta boot 2 vs boot 1: WATCH `0x519c40` → `0x52BE04` only. Source
+delta: `EeScheduler.cpp` (8+/2− behavior) + `ps2_runtime_kernel_tests.cpp`
+(+38 test).
+
+## P23-5. What I could not do
+
+- Pin the stored-max semantics from a written source: all references
+  silent/LLE (§P23-1a rows 1–7) → clamp recorded as provisional pending
+  real-BIOS evidence.
+- Name the `0x52BE04` writer statically: no JAL/word sweep for the
+  setter entry `0x425d08` (0 printed stub lines = below top-30 cutoff,
+  not proof of absence); boot 2 answers it dynamically for CPU stores
+  (none in 90 s) but host-side memcpy/DMA/SIF blits that bypass the
+  `macros.h` report path would not emit — not excluded.
+- Pin F6's exact `jalr` site inside `sub_316F00` (F6 below stub cutoff;
+  only its WaitSema `ra`=`0x31aa8c` is observed) and read the rest of
+  `sub_316F00` past the quoted window.
+- Resolve the analyzer JAL convention (§P23-1h row C2): log/recomp/ELF
+  agree on target = index<<2 (3 samples), while the textbook
+  region-nibble OR gives `0x40425cf0` for the `0x40b1d0` call — tabled
+  as observed, not adjudicated.
+- Dump `0x52BE04`'s ELF section/initial bytes beyond the loader-init
+  zeros, and chase why `run:tick` fired 6× (vs 9× in P22) — timing
+  regime, unmeasured.
+- Run a 3rd boot (max 2 used; both receipts closed).
+
+---
+
