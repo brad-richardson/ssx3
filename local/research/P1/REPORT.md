@@ -7118,3 +7118,418 @@ Env delta boot 2 vs boot 1: `PS2X_DIAG_SEMA` unset + WATCH swapped to
 
 ---
 
+## Part 22 (P1u): the WaitSema(-1) slot attributed — CreateSema#2 zero-param return (-1) stored unchecked; singleton object 0x604890; thread 3 (flag-clearer) starved by the no-block spin
+
+Brief `local/muse/prompts/P1u.md`. Static slot+writers+loop analysis, 1
+`Diag:` commit (2 files, +51/-7) + 1 boot. Tables, no verdicts.
+Stale-reading guard: Part 21 (P21-2c the `-1` spin shape + call sites,
+P21-2f census, P21-5 the unattributed-slot residue) + Part 20 §P20-1 (sema
+signal/wait paths, id-validation read) re-read before acting.
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork, branch
+`ssx3`), `O=$W/P1/output`, `LOG=$W/P1/run/boot-p1u-1.log`. File:line refs
+below are `ps2xRuntime/src/lib/` unless noted. All hand hex
+machine-checked §P22-1f; all cited MIPS words ELF-verified §P22-1g.
+
+## P22-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (verified before Step 1; static work claimed none) |
+| M13 hold | Never observed this session; no poll loop ran, zero wait polls |
+| Waits log | `$W/P1/run/p1u-waits.log` (2 lines: claim timestamp + claim record) |
+| Pre-claim checks (20:01:01Z) | `pgrep -x ps2EntryRunner` exit 1; lease absent (verified twice); binary `559521a6` (P1u Diag build); fork HEAD `de7ff17`; ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1u\n' > /tmp/ssx3-host-lease` 20:01:10Z, immediately before boot-p1u-1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, end ≈20:02:41Z (log mtime; ExFAT local clock), LOG 28,980,295 B, 258,784 lines, 16 blocks |
+| Second boot | None (Step-2 question closed by boot 1; reserve unused) |
+| Release | After Step 3 push (below); verified absent; `pgrep -x` exit 1 |
+| `adb` | Not used |
+
+## P22-1. Slot + writers + loop intent (static, no lease, no boot)
+
+Conventions: `Sched` = `Kernel/EeScheduler.cpp`; `Sync.cpp` =
+`Kernel/Syscalls/Sync.cpp`; `Dispatch` = `Kernel/Syscalls/Dispatcher.cpp`.
+`$O/sub_0031A6B8` = analyzer-merged `0x31a6b8`–`0x31aaf0` (CSV single row
+`sub_0031A6B8,0x31a6b8,0x31aaf0,0x438`); `$O/sub_0031AAF0` =
+`0x31aaf0`–`0x31ad18`. Method shorthands F1–F7 (table §P22-1a).
+
+### a. The object + its method table (F2 = ctor, F3 = dtor, F6 = wait, F7 = signal)
+
+Zero direct JALs to any of `0x31a6d8/0x31a920/0x31a9d8/0x31aa18/0x31aa58/
+0x31aac8` exist in the ELF (full-word sweep; JAL words check row A
+§P22-1f; sweep validity: 73 hits for the WaitSema JAL word, 1 hit for
+`0x31a6b8` at `0x22863c`). All six addresses appear once each as RAW data
+words in one pointer table at `0x48db7c` (8-byte `{code-ptr, 0}` slots;
+offsets check row G):
+
+| Table+ | Entry | Block | Role (static shape) |
+|---|---|---|---|
+| `+0x00` | `0x31a6d8` | F2 | ctor: sp-`0x150`, `$s0`=`$a0`, 4× CreateSema, 2× CreateThread+StartThread, AddIntcHandler; straight-line, ends `jr $ra` @ `0x31a914` |
+| `+0x08` | `0x31a920` | F3 | dtor: mirrors F2 (RemoveIntcHandler, Terminate+DeleteThread ×2, SignalSema ×2, DeleteSema ×4); ends @ `0x31a9cc` |
+| `+0x10` | `0x31aa58` | F6 | wait: flag=1, vcall, WaitSema(`+0x18`), flag=0, PollSema drain, vcall; ends @ `0x31aac0` |
+| `+0x18` | `0x31aac8` | F7 | signal: `if (*(obj+0x1C)) SignalSema(*(obj+0x18))`; ends @ `0x31aae8` |
+| `+0x20` | `0x320b08` | — | Outside both method files (not read) |
+| `+0x28` | `0x31abc0` | — | `jr $ra` (bare return) |
+| `+0x30` | `0x31abc8` | — | `jr $ra`, delay `$v0`=`0x3C` |
+| `+0x38` | `0x31acd8` | — | `*(obj+0x14048)`=`$a1`, then SignalSema(`*(obj+0x14044)`) @ `0x31acec` (`ra`=`0x31acf4`) |
+| `+0x40` | `0x31ad00` | — | predicate: return (`*(obj+0x14048)`<`1`) |
+| `+0x48` | `0x31a9d8` | F4 | `if (*(obj+0x14048)) jal 0x31a3c0(obj+0x14080)` |
+| `+0x50` | `0x31aa18` | F5 | `if (*(obj+0x14048)) jal 0x31a308(obj+0x14080)` |
+| `+0x58` | `0x31ab30` | — | `*(obj+0x4038)`=1 + GetThreadId + compares (head read) |
+| `+0x60` | `0x31ab10` | — | SignalSema(`+0x0C`) @ `0x31ab18`, then SleepThread forever |
+
+Adjacent-but-not-a-member: F1 @ `0x31a6b8` (loads thread id from `gp`+`0xDDC`
+— the cell F2's first StartThread stores @ `0x31a834` — then
+ChangeThreadPriority(tid,`0x65`)); sole direct JAL @ `0x22863c`.
+
+Instance size ≥ `0x14080` + sub-object (`s3`=`s0`+`0x10000` throughout F2;
+sub-object methods take `s0`+`0x14080`; checks row D).
+
+### b. Field layout around `+0x18` (every access ELF-verified §P22-1g)
+
+| Offset | Content | Writers (ELF word) | Readers |
+|---|---|---|---|
+| `+0x00`/`+0x04` | Untouched by either method file (no access in-file) | None found | None |
+| `+0x08` | Iface pointer (F6 dereferences → fnptr at `+0x5C`/`+0x64`, halfword arg-offs at `+0x58`/`+0x60`) | None in either method file (set by the table-external instantiation path) | F6 @ `0x31aa70`/`0x31aaa4` (`0x8e030008`/`0x8e020008`); AAF0 @ `0x31ab7c` |
+| `+0x0C` | Sema id A (= -1 this boot, §P22-1d) | F2 CreateSema#1 store @ `0x31a794` (`0xae02000c`, delay slot) | F3 DeleteSema @ `0x31a9b8` (delay `0x8e24000c`); `0x31ab10` SignalSema @ `0x31ab18` (delay `0x8c84000c`; never ran this boot — 0 `ra`=`0x31ab20` lines §P22-2c) |
+| `+0x10` | Thread id (GetThreadId result) | F2 @ `0x31a744` (`0xae020010`) | F2 ReferThreadStatus arg @ `0x31a750`; thread-4 WakeupThread arg @ `0x31ac40`; AAF0 @ `0x31ab68`/`0x31ab74`/`0x31acb4` |
+| `+0x14` | Thread-status word (`*(sp+0x18)` of ReferThreadStatus) = 100 (thread-1 prio; §P22-2c) | F2 @ `0x31a76c` (`0xae030014`) | Priority derivation ±1 @ `0x31a7f4`/`0x31a87c` → threads at prio 101/99 |
+| `+0x18` | **Sema id B = -1 (THE SLOT)** | **F2 CreateSema#2 store @ `0x31a7b8` (`0xae020018`, delay slot) — sole writer (§P22-1c)** | F6 WaitSema @ `0x31aa84` (delay `0x8e040018`), PollSema @ `0x31aa90` (delay `0x8e040018`), compare @ `0x31aa98` (`0x8e030018`); F7 SignalSema @ `0x31aadc` (delay `0x8c840018`); F3 DeleteSema @ `0x31a9b0` (delay `0x8e240018`) |
+| `+0x1C` | Flag (0 = idle) | F2 init 0 @ `0x31a7a4` (`0xae00001c`); F6 set 1 @ `0x31aa6c` (`0xae02001c`), clear @ `0x31aa8c` (`0xae00001c`) | F7 gate @ `0x31aad0` (`0x8c82001c`; `beqz`→`0x31aae8` skips the signal) |
+| `+0x20` | Done word (0 = run) | F2 init 0 @ `0x31a720` (`0xae000020`); F3 set 1 @ `0x31a95c` (`0xae230020`) | Thread-4 exit test @ `0x31ac30` (`0x8e030020`; nonzero → WakeupThread+SleepThread) |
+| `+0x30` | Address-taken once | — (address `s0`+`0x30` passed to 2nd CreateThread @ `0x31a874`) | — |
+| `+0x4030` | Thread id B (CreateThread#2) | F2 @ `0x31a8bc` (`0xae024030`, delay) | F3 Terminate+DeleteThread @ `0x31a980`/`0x31a988` |
+| `+0x4034` | Sema id D (= 29, valid) | F2 CreateSema#4 store @ `0x31a868` (`0xae024034`, delay) | Thread-4 WaitSema @ `0x31ac28` (delay `0x8e044034`); F3 signal+delete; INTC-tail iSignalSema @ `0x31abf0` |
+| `+0x4038` | Kick-enable (0 = kick) | F2 init 0 @ `0x31a838` (`0xae004038`); `0x31ab30` set 1 @ `0x31ab48` (`0xae024038`) | INTC-tail gate @ `0x31abe4` (`bnez` skips the id-29 kick) |
+| `+0x4040` | Thread id A (CreateThread#1) | F2 @ `0x31a824` (`0xae624040`) | F3 Terminate+DeleteThread @ `0x31a990`/`0x31a998` |
+| `+0x4048` (`s0` frame) | Zero (AAF0 `s0`-frame slot; thread-3's frame differs — see sub-row) | AAF0 @ `0x31ac98` (`0xae004048`) | AAF0 @ `0x31ac80` |
+| `+0x14040`/`+0x14044`/`+0x14048`/`+0x14290` (via `s3`=`s0`+`0x10000`) | Thread id A alias / sema id C (= 28, valid) / **completion flag** / INTC-handler id | F2: #3 store @ `0x31a7e0` (`0xae624044`, delay), flag init 0 @ `0x31a7cc` (`0xae604048`), handler id @ `0x31a8e4` (`0xae624290`); `0x31acd8` sets flag=`$a1` @ `0x31ace8` | F4/F5 flag guards; predicate `0x31ad00` flag test; `0x31acd8` id-28 signal; thread-3 (`s0`=obj+`0x10000`) waits id-28, clears flag |
+
+### c. Every writer to the `+0x18` slot
+
+| # | Writer | Evidence |
+|---|---|---|
+| 1 | F2 CreateSema#2 store @ `0x31a7b8` (`sw $v0,0x18($s0)`, delay of the `memset` jal @ `0x31a7b4`) | Sole `+0x18` store in `$O/sub_0031A6B8` (census of all `s0`/`a0`-relative `0x18` accesses) AND in `$O/sub_0031AAF0` (same-object methods: only READS @ `0x31ab1c`/`0x31ac2c`/etc., zero `+0x18`/`+0x0C` stores) |
+| 2 | DeleteSema clears | NONE: F3 reads the slot for DeleteSema @ `0x31a9b0` but stores nothing back (no `sw *,0x18` in F3's range) |
+| 3 | `-1` sentinels | NONE: no `addiu *,−1`/`0xFFFFFFFF` store to the slot in either method file (sole `-1` constant in-file is the thread-priority `addiu` @ `0x31a87c`, unrelated) |
+| 4 | Init memsets | NONE touch the slot: F2 memsets only STACK sema params (`sp`+`0x30`/`0x50`/`0x70`, `0x18` bytes each) and thread params; object fields are stored individually |
+| 5 | Tree-wide cross-check (rare-offset family) | `sw` to `+0x4034`/`+0x4044`/`+0x4030`/`+0x4040`/`+0x4290`: ONLY F2's five stores tree-wide (each ×2 = delay-slot dual print); other-width stores to those offsets are all `($sp)`-relative frames (`0x3378c8`/`0x38fef8`/…), never object stores — so F2's stores are the sole instance writers, and the valid id-29 in `+0x4034` proves F2 RAN (straight-line ⇒ the `+0x18` store executed too) |
+
+F2 is branch-free (`0x31a6d8`–`0x31a914`: zero branch mnemonics; zero
+`branch_taken_` predicates) with no `$v0` test between any CreateSema and
+its store — all four returns are stored raw and unchecked. `s1` is written
+only at `0x31a760`/`0x31a780`/`0x31a7a0` (`sp`+`0x30`/`0x50`/`0x70`); `s5`
+only at `0x31a70c` (=`0x400`).
+
+### d. The `-1` source (one row per candidate)
+
+F2's four CreateSema params (`ee_sema_t` = `{count, max_count, init_count,
+wait_threads, attr, option}` = `0x18` bytes, `State.h:129-139`; `memset`
+HLE verified `LibC.cpp:132-154`: `$a0`=dest, `$a1`&`0xFF`=value,
+`$a2`=size, returns dest):
+
+| Call | Param (`s1`) | Post-`memset` field store? | Effective `{init, max, attr, option}` | Host result (`Sched:1103-1125`) |
+|---|---|---|---|---|
+| #1 @ `0x31a778` (`ra`=`0x31a780`) → `+0x0C` | `sp`+`0x30`, `memset`(_,0,`0x18`) @ `0x31a770` | NONE (adjacent jals; delays only move `$a0`) | {0, 0, 0, 0} | `maxCount`≤0 → `KE_ERROR` = **-1** (`Sched:32,1106-1109`) |
+| #2 @ `0x31a798` (`ra`=`0x31a7a0`) → **`+0x18`** | `sp`+`0x50`, `memset` @ `0x31a790` | NONE (same; delay stores #1's `$v0` to the OBJECT, not the param) | {0, 0, 0, 0} | **-1** (same rule) |
+| #3 @ `0x31a7c0` (`ra`=`0x31a7c8`) → `+0x14044` | `sp`+`0x70`, `memset` @ `0x31a7b4` | YES: `sw s5,0x74(sp)` @ `0x31a7bc` = param+4 = `max_count`=`0x400` (offset check row E) | {0, 1024, 0, 0} | Valid id (**28** observed §P22-2a) |
+| #4 @ `0x31a850` (`ra`=`0x31a858`) → `+0x4034` | `sp`+`0x70` reused, `memset` @ `0x31a844` | YES: `sw s5,0x74(sp)` @ `0x31a84c` = `max_count`=`0x400` | {0, 1024, 0, 0} | Valid id (**29** observed) |
+
+| Candidate (brief's list) | Standing |
+|---|---|
+| CreateSema failure return propagated | **Confirmed**: #2's all-zero param deterministically fails the host check; the `−1` is stored unchecked by the slot's sole writer. Boot receipt: exactly the 2 all-zero creates fail game-wide (33 creates, §P22-2a) |
+| Init path never ran | **Excluded**: F2 ran — `+0x4034` holds working id 29 whose sole tree-wide writer is F2's #4 store (§P22-1c row 5); F2 straight-line ⇒ #2's store executed. (Direct caller unresolvable statically — zero JALs, table dispatch — but execution is proven by the artifact.) |
+| Delete-then-reuse | **Excluded**: F3 never ran this boot (0 DeleteSema lines for `+0x18`/`+0x0C`/`+0x4034`/`+0x4044` ras; no teardown marker), and F3 clears nothing anyway |
+| Stale object / uninitialized slot | **Excluded**: the slot is deterministically written at init (above), and reads back `-1` constantly (1.39M identical reads P21; 257,125 here, single `s0` §P22-2b) |
+
+Guest bug vs host-side init (brief's Step-1c question), as named by the receipts:
+
+| Reading | Evidence |
+|---|---|
+| The game expects CreateSema(`max_count`=0) to SUCCEED | Shipped code performs no error check and cannot function if #1/#2 fail (F6's wait + the outer completion loop assume a blocking-capable sema); #3/#4 show the game sets `max_count`=`0x400` where it wants a bound — the #1/#2 zero is the configuration the game ships, so the real kernel must accept it (as unlimited or clamped — beyond repo evidence) |
+| The host rejects what the game requires | `createSemaphore` (`Sched:1106-1109`) returns `KE_ERROR` (-1) for `maxCount`≤0; `Sync.cpp:69-87` passes the game's zeros straight through. No other host init is missing (threads, INTC, params all valid — the 29 sibling creates succeed) |
+| Net | A host-parity gap on one validation rule, not a guest logic bug: the game is "accidentally correct on hardware" (zero-max accepted there) and deterministically broken here |
+
+### e. The loop's intent (F6 + F4/F5 + PollSema + outer `beql`)
+
+Per-outer-iteration call graph (all `jalr` targets resolved dynamically via
+`firstRa`/`lastRa` = call-site+8, `ps2_runtime.cpp:1623-1639`, §P22-2c;
+ra checks row B):
+
+| Site | Call | Rate | Role |
+|---|---|---|---|
+| `jalr` @ `0x316dfc` (`ra`=`0x316e04`, +`0x5C`) | F4 (`0x31a9d8`) | 2×/iter (with F6's `+0x5C` call) | `if (flag) jal 0x31a3c0(obj+0x14080)` |
+| `jal` @ `0x316e04` | `0x3E5928`(0) | 1× | Unchanged legacy rung (P21-2g) |
+| `jalr` @ `0x316e1c` (`ra`=`0x316e24`, +`0x64`) | F5 (`0x31aa18`) | 2×/iter (with F6's `+0x64` call) | `if (flag) jal 0x31a308(obj+0x14080)` |
+| `jalr` @ `0x316e34` (`ra`=`0x316e3c`, +`0x24`) | **F6** (`0x31aa58`) | 1×/iter (sole caller both ways) | The wait (below) |
+| `jal` @ `0x316e3c` | `0x317328`→`0x3174a8` | 1× | Trampoline + `jalr`-only fan-out (no direct JALs) |
+| `jalr` @ `0x316e54` (`ra`=`0x316e5c`, +`0x54`) | `0x31ad00` predicate | 1×/iter (sole caller both ways) | Returns (`*(obj+0x14048)`<`1`); `beql $v0,$zero` @ `0x316e5c` loops back to `0x316df0` while nonzero-flag (target check row C) |
+
+F6 per call with `-1` in the slot (`s0` = object): flag=1; vcall
+(`*(iface+0x5C)` = F4); WaitSema(-1) → `KE_UNKNOWN_SEMID` (-408), NO block
+(`Sched:1248-1267`, the P20-1 id-validation read); flag=0; PollSema(-1) →
+-408 ≠ -1 → drain loop (`beq` @ `0x31aa9c` → `0x31aa90`) exits after
+EXACTLY ONE poll (dynamic 1:1:1 F6:Wait:Poll §P22-2c; with a valid id the
+loop drains `count`+1 polls, exiting on `KE_SEMA_ZERO` -419); vcall
+(`*(iface+0x64)` = F5); return. Net: with `-1`, a designed BLOCKING wait
+degrades to a straight-line no-op, and the outer iteration — which on
+hardware parks inside F6 until worker completion — free-spins.
+
+The completion handshake that never completes: once, pre-spin, thread 1
+calls `0x31acd8` (flag=`$a1` + the single id-28 signal @ `ra`=`0x31acf4`,
+§P22-2b) submitting to thread 3 (`entry`=`0x31ac60`, prio 101, `s0`=obj+`0x10000`,
+waits id-28, clears the flag).
+Thread 3 NEVER executes (`status`=Ready, `pc`=entry, `sch`=0 all blocks
+incl. b0): starved, because the never-blocking thread-1 spin (prio 100)
+beats prio 101 at every `selectReady` scan (low-number-first, §P20-1a).
+Thread 4 (prio 99) does run (40 F7 calls via `0x3173dc`-`jalr`, §P22-2c)
+but its 4 in-window signals hit the `-1` slot (`result`=-408, lost). So
+the `-1` breaks completion twice: directly (F6/F7 handshake on a dead id)
+and indirectly (busy spin starves the flag-clearer). F2's prio derivation
+(`*(s0+0x14)`=100 ±1 → 101/99, check row I) shows the design ASSUMES
+thread 1 blocks.
+
+### f. Machine-check paste block (every hand computation in Part 22)
+
+```
+python3 -c "…rows A–I…"
+→ A: 0xc0c69b6 0xc0c6a48 0xc0c6a76 0xc0c6a86 0xc0c6a96 0xc0c6ab2 0xc0c69ae
+→ B: 0x31a780 0x31a7a0 0x31a7c8 0x31a858 0x31aa8c 0x31aae4 0x3173e4 0x316e3c 0x316e24 0x31aab8 0x316e04 0x31aa84 0x316e5c 0x31aa08 0x31aa48 0x31ac30 0x31ab20
+→ C: 0x31aa90 0x31aae8 0x31ac20 0x316df0
+→ D: 0x31ac60 0x31ac08 0x31a490 0x31abd0 0x14080 0x14044 0x14040 0x14048 0x14290
+→ E: 0x20 0x20 0x1fffe30 0x4 1024
+→ F: 0x6048a8
+→ G: 0x8 0x10 0x18 0x48 0x50
+→ H: 1130869 110021428 1130454 5.4 5.39 2857 2.8
+→ I: 10130 100 100 10
+```
+
+Row A: JAL words for `0x31a6d8/0x31a920/0x31a9d8/0x31aa18/0x31aa58/0x31aac8/
+0x31a6b8` (caller sweeps). Row B: 17 `jal`/`jalr`→`ra` (+8) checks in the
+order cited (4 CreateSema sites, F6/F7, F7-caller, 6 outer/virtual
+callers, F4/F5 inner jals, worker wait, `0x31ab10` signal). Row C: 4 branch
+targets (PollSema loop-back, F7 skip, worker loop-back, outer loop-back).
+Row D: thread entries (`0x320000`−`0x53A0`/`0x53F8`), INTC handler/arg
+(`0x320000`−`0x5B70`/`0x5430`), sub-object + `s3`-relative offsets. Row E:
+CreateSema param spacing (`sp`=`0x1fffe30`), `max_count` field offset (4),
+`0x400`=1024. Row F: slot absolute addr (`s0`+`0x18`). Row G: method-table
+entry offsets from `0x48db7c`. Row H: LOG1−LOG line/byte deltas, wait
+delta, `-1`-wait ratio (5.4×), id-29 ratio (5.39×), `-1`/s (2857),
+id-29/block (2.8). Row I: stub-tail gap (10130), prio back-derivation
+(100/100), F7 signal hit rate (10%).
+
+### g. ELF verification words (46 addrs, 0 mismatches; mapping file-off = va−`0x100000`+`0x1000`)
+
+```
+0x31a6d8 0x27bdfeb0 / 0x31a6e0 0x80802d / 0x31a70c 0x24150400 / 0x31a720 0xae000020
+0x31a744 0xae020010 / 0x31a76c 0xae030014 / 0x31a778 0xc108f68 / 0x31a794 0xae02000c
+0x31a798 0xc108f68 / 0x31a7a4 0xae00001c / 0x31a7b8 0xae020018 / 0x31a7bc 0xafb50074
+0x31a7c0 0xc108f68 / 0x31a7cc 0xae604048 / 0x31a7e0 0xae624044 / 0x31a7f8 0x2442ac60
+0x31a824 0xae624040 / 0x31a834 0xaf820ddc / 0x31a838 0xae004038 / 0x31a84c 0xafb50074
+0x31a850 0xc108f68 / 0x31a868 0xae024034 / 0x31a880 0x2442ac08 / 0x31a8e4 0xae624290
+0x31a9a4 0x8e244034 / 0x31a9ac 0x8e044044 / 0x31a9b4 0x8e240018 / 0x31a9bc 0x8e24000c
+0x31aa6c 0xae02001c / 0x31aa70 0x8e030008 / 0x31aa84 0xc108f78 / 0x31aa88 0x8e040018
+0x31aa8c 0xae00001c / 0x31aa90 0xc108f7c / 0x31aa94 0x8e040018 / 0x31aa98 0x8e030018
+0x31aa9c 0x1043fffc / 0x31aad0 0x8c82001c / 0x31aadc 0xc108f70 / 0x31aae0 0x8c840018
+0x31ab1c 0x8c84000c / 0x31ab48 0xae024038 / 0x31ac2c 0x8e044034 / 0x31ac30 0x8e030020
+0x31ac98 0xae004048 / 0x316e5c 0x5040ffe4
+```
+
+(Method-table words `0x48db60`–`0x48dc0c` were dumped from the ELF directly
+§P22-1a; no separate verification needed.)
+
+## P22-2. Dynamic answer (boot-p1u-1, 1 boot)
+
+LOG 258,784 lines, 28,980,295 B, 16 blocks, CWD `$W/P1/run`, env = p1t-boot1
++ `PS2X_DIAG_SEMA_CREATE=1` + `PS2X_DIAG_SEMA_S0=1` (script diff = docstring
++ LOG + those 2 vars only), WATCH `0x519c40,0x450de4`, foreground 90 s,
+SIGTERM rc=-15. Binary `559521a6` (§P22-3). New-line formats:
+`[diag:sema-create] tid pc ra param count max init wait attr option ret`
+(`Sync.cpp` emit, `pc`=`0x423da8` = post-syscall trampoline pc on all 33
+lines); unknown-id waits gain a trailing `s0=0x…` iff `PS2X_DIAG_SEMA_S0`
+is set (else byte-identical to P1s).
+
+### a. CreateSema census: F2 ran; exactly its 2 zero-param calls fail (2 of 33)
+
+| Line(s) | `ra` (site) | `{count,max,init,wait,attr,option}` | `ret` |
+|---|---|---|---|
+| F2 #1 + #2 | `0x31a780` / `0x31a7a0` | {0,**0**,0,0,0,0} / same | **-1** / **-1** |
+| F2 #3 + #4 | `0x31a7c8` / `0x31a858` | {0,**1024**,0,0,0,0} / same | **28** / **29** |
+| 2 | `0x42c0fc`/`0x42c10c` | max=1,init=1 | 1 / 2 |
+| 3 | `0x3e56c4` (×3) | max=1,init=1 | 3 / 4 / 5 |
+| 20 | `0x3e35dc` (one-shot drainer ×20) | max=1,init=0 | 6–25 |
+| 1 | `0x3e43c4` | max=32,init=0 | 26 |
+| 1 | `0x3e56c4` | max=1,init=1 | 27 |
+| 2 | `0x375d74`/`0x375d88` | max=16,init=0 / max=1,init=1 | 30 / 31 |
+
+Verbatim F2 lines (all `tid`=1, `pc`=`0x423da8`):
+
+```
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a780 param=0x1fffe60 count=0 max=0 init=0 wait=0 attr=0 option=0 ret=-1
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a7a0 param=0x1fffe80 count=0 max=0 init=0 wait=0 attr=0 option=0 ret=-1
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a7c8 param=0x1fffea0 count=0 max=1024 init=0 wait=0 attr=0 option=0 ret=28
+[diag:sema-create] tid=1 pc=0x423da8 ra=0x31a858 param=0x1fffea0 count=0 max=1024 init=0 wait=0 attr=0 option=0 ret=29
+```
+
+Params confirm the static layout: `sp`=`0x1fffe30`, #1=`sp`+`0x30`,
+#2=`sp`+`0x50`, #3=#4=`sp`+`0x70` (spacing check row E). F2's are the
+ONLY `max`=0 params game-wide; all 31 other creates pass `max`≥1 and
+succeed. `ret` sequence 1–31 with exactly the 2 F2 holes as -1.
+
+### b. The slot, first wait, and epoch position
+
+| Receipt | Value |
+|---|---|
+| `s0` on `-1` waits | **Single value `0x604890` on all 257,125 waits** → one singleton instance; slot absolute addr **`0x6048a8`** (check row F) |
+| `-1` waits / signals | 257,125 waits (`ra`=`0x31aa8c`, `waker`=1, `result`=-408) / 4 signals (`ra`=`0x31aae4`, `waker`=4, `result`=-408) |
+| First `-1` wait | :630 (P21 :597; +33 = the 33 new create lines shifting the log) |
+| Epoch order (:605–:630) | :605/:606 `0x519c40`=`0x0`→`0xA` → :607 first signal 26→thread 2 → :608 wake `0x2` → :609/:610 cdread+`BIGF` payload (same bytes) → :611 queued → :612 issuer `0x2` → :613 start → :614 callback signal (`ra`=`0x3e3af0`, fix still firing) → :615 worker consume → :616 #9 store → :617/:618 worker id-5 pair → :619 worker re-park → :620–:625 thread-1 id-5 pairs → :626 driver probe (same bytes) → :627/:628 id-5 pair → :629 id-28 signal (`ra`=`0x31acf4`, the `0x31acd8` once-call) → :630 spin begins |
+| Same-vs-shared instance | SHARED singleton: every F6 execution is thread 1 (all `-1` waits `waker`=1, and F6 unconditionally executes the wait), so the `+0x1C`=1 that thread 4's F7 observed 4× was set by thread 1's F6 — plus the single dynamic `s0` |
+| `+0x0C` sibling (`ra`=`0x31ab20` signals) | 0 (method `0x31ab10` never ran; the slot is write-once, delete-never-this-boot) |
+| id-26 record | 5 lines (first park, first signal, callback signal, consume, re-park — same shapes as P21-2b) |
+| Watch lines | `0x519c40` ×7 (:49 width-16 zero-init, :83 width-8, :605/:606/:608/:612/:616) + neighbor `0x519c44` ×1 (:226) = 8 total, same kinds as LOG1; `0x450de4` 0 writes |
+
+### c. Virtual-target resolutions + ratios (the `firstRa`/`lastRa` receipts)
+
+| Target | Count(total) | `firstRa` / `lastRa` | Resolves to |
+|---|---|---|---|
+| F6 `0x31aa58` | 246,995 | `0x316e3c` / same, all blocks | Sole caller: outer `jalr` @ `0x316e34` (+`0x24` slot) |
+| F4 `0x31a9d8` | 2×/iter (b0 22,880) | `0x316e04` / `0x31aa84` | Two callers: outer `jalr` @ `0x316dfc` (+`0x5C`) + F6's vcall @ `0x31aa7c` (sole `lastRa`=`0x31aa84` target, 13 blocks) |
+| F5 `0x31aa18` | 2×/iter (b0 22,879) | `0x316e24`+`0x31aab8` across blocks | Two callers: outer `jalr` @ `0x316e1c` (+`0x64`) + F6's vcall @ `0x31aab0` |
+| `0x31ad00` predicate | 246,996 | `0x316e5c` / same, all blocks | Sole caller: outer `jalr` @ `0x316e54` (+`0x54` slot) |
+| F7 `0x31aac8` | 40 (all 16 blocks) | `0x3173e4` / same, all blocks | Sole caller: `jalr` @ `0x3173dc` in `0x317348` (+`0x2C` slot); thread-4 path `0x31ac20`→`0x317500`→`0x317348`→F7 |
+| PollSema `0x423df0` | = F6 b0 (11,440) | `0x31aa98` | Exactly 1 poll per F6 (drain exits first try) |
+
+F6:Wait:Poll = 1:1:1 per iteration (b0 11,440/11,547/11,440 — the +107
+WaitSema are non-F6 waits, `firstRa`=`0x418ce0`). F7 40 calls → 4 signals
+(10% hit the `+0x1C` race window, check row I). Stub-total vs sema-line
+gap (F6 246,995 vs waits 257,125 = 10,130) = the unflushed tail after the
+last period flush (SIGTERM kills before flush; sema lines are per-call and
+complete) — a method note, not a path difference.
+
+### d. Ladder delta vs LOG1 (boot-p1t-1: 1,389,653 lines, 139,001,723 B, 17 blocks)
+
+LOG: 258,784 lines (−1,130,869), 28,980,295 B (−110,021,428), 16 blocks.
+Rate uniformly ~5.4× lower (`-1` waits 1,387,579→257,125; id-29 237→44
+signals / 238→45 waits; thread-1 sch steady 12–15→2–3 with b0 36→27):
+independent paths (thread-1 spin AND INTC-driven id-29) scale together ⇒
+host-speed effect (shared-host contention), not a guest-path change.
+
+| Rung | LOG1 | LOG | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×8, `0x31a278` ×4, 4 others ×1 | `0x3e5980` ×9, `0x31a278` ×3, `0x317328` ×2, `0x316df0` ×1 | Same cycle (loop-top `0x316df0` sampled once) |
+| Thread-1 sch | 36/15/14/13/14/13/12/14/14/14/14/14/12/15/14/14/14 | 27/3/3/3/3/3/2/3/3/2/3/2/3/2/3/3 | Rate only (16 blocks: one fewer period elapsed) |
+| Thread-2 | parked 26 @ `0x423de8`, sch 2 then 0 ×16 | Same bytes | None |
+| Thread-3 | Ready @ `0x31ac60`, sch 0 | Same + prio 101 (derivation §P22-1e) | None (+prio recorded) |
+| Thread-4 | parked 29 @ `0x423de8` (sch 12 b0) | Same ids/pcs/entries, prio 99 (sch 3 b0) | Count regime only |
+| Thread-5 | parked 30 (sch 1 b0) | Same (sch 1 b0; 1 wait `ra`=`0x3827e0`) | None |
+| Missing / `No exact` | 0 / 0 | 0 / 0 | None |
+| `firstRa` old loop | 0 / 0 | 0 / 0 | None |
+| `0x3e5440` | Unhit | 0 hits | None |
+| CD callback / read | :578/:580, :576 same bytes | :611/:613, :609/:610 same bytes | Line shift only |
+| CD reads total | 21 | 21 | None |
+| Probe | 1 (same bytes) | 1 (:626, same bytes) | Line number only |
+| Watch | 8 lines | 8 lines (same kinds) | None |
+| `run:tick` | 7 (`pc`=`0x316e3c`) | 9 (`pc`=`0x316e04`/`0x316e0c`, `gp`=`0x4a30f0`, `dma`=7, 5 threads) | Timing regime |
+| GIF/GS | 2/66/122/33/8/1 | Same sweep values (gif/kick/reg/prim/copy-reg/texa as LOG1) | None |
+| Presented frame | None (TIMER line only) | None (:46 TIMER line only) | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| SIF modules | 6 | 6 | None |
+
+## P22-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot 1) | `559521a6280cbd623b43222ee6bf74aef8549ab814452ba07335c53479cce404` | `de7ff17` tree (P1u `Diag:` on `58c9144`; `-j4` rebuild, exit 0) |
+| `ps2x_tests` (CWD `$R`, rebuilt) | Total 425, Passed 424, Failed 1 (`sceGsSyncVCallback … reserved async stack pool`, same test+assertion as P21) | No new failure from the `Diag:` change (pure emit additions); pre-existing, unrelated, not fixed |
+| `PS2Recomp` branch `ssx3` HEAD | `de7ff17` (`Diag: P1u CreateSema param/return census + s0 capture on unknown-id waits (P22-2)`, 2 files, +51/-7, two trailers) | Sole P1u fork commit; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added |
+| Fork push | `git push fork ssx3` from fork clone only (§P22-4; pull-`--rebase` + retry-once rule armed for the shared tree) | The only push allowed (no push in ssx3) |
+| This report | `[P1u]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+`Diag:` diff shape: `Sync.cpp`: `diagSemaCreateEnabled()` (`PS2X_DIAG_SEMA_CREATE`,
+cached static, default off) + `[diag:sema-create]` emit on both `CreateSema`
+return paths (tid/pc/ra, param addr + all 6 `ee_sema_t` fields, `ret`;
+`noparam` variant for the null path). `Sched`: `diagSemaS0Enabled()`
+(`PS2X_DIAG_SEMA_S0`, cached static, default off) + trailing `s0=0x…`
+(reg 16) on the unknown-id wait emit only. Zero behavior change when unset
+(cached bool checks; wait lines byte-identical to P1s without the new var).
+
+## P22-4. Exact commands
+
+From `$R` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`$O=$W/P1/output`, `LOG=$W/P1/run/boot-p1u-1.log`:
+
+```
+# Step 1 (lease-free static)
+re-read REPORT Part 21 + Part 20 P20-1 (paged reads)
+read $O/sub_0031A6B8 (F1/F2/F3/F4/F5/F6/F7 windows) + trampolines 0x423DA0-0x423DF0
+  + 12 surrounding trampolines ($v1 map) + Dispatcher names + Sync.cpp + State.h ee_sema_t
+  + Sched create/delete/signal/poll/wait (1095-1290) + KE codes (28-50)
+  + LibC memset (132-154) + Interrupt addHandler (26-40)
+read $O/sub_0031AAF0 (0x31ab10/0x31ab30/0x31abc0/0x31abc8/0x31abd0/threads/0x31acd8/0x31ad00)
+  + sub_00316D60 (loop 0x316df0-0x316e64) + sub_00317328 (all) + sub_0031A268 (all)
+  + sub_00317500 (all) + sub_00317348 (jalr ctx) + sub_0031A3C0 (0x31a490 head)
+  + sub_00424880/0x4248E8 (calls) + ps2_runtime.cpp stub-hist emit (1623-1639)
+ELF sweeps (python3 struct): 6 JAL words (0 hits each) + J-opcode (0) + raw words
+  (1 hit each @ 0x48db7c cluster) + table dump 0x48db60-0x48dc0c + lui-0x48 census
+censuses: F2 branches (0) + $v0 checks (0) + s1/s5 dests; sw-to-rare-offsets tree-wide
+  (F2's 5 only) + other-width stores (sp-frames only); AAF0 slot accesses
+python3 hex checks (rows A-I §P22-1f); ELF batch 46 words (0 mismatches §P22-1g)
+P6 grep (no rows for 0x31a6b8 region; 0x31adb0/0x31af80 only nearby)
+# Step 2 (Diag commit + build + tests, no lease needed)
+(edit_file: Sync.cpp helper + CreateSema emits; Sched helper + s0 field)
+find ps2xRuntime/src/lib/Kernel -name '._*' -delete (repo-wide before build)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 (exit 0)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests -j4 (exit 0)
+ps2x_tests CWD $R (425/424/1 GsSyncV, same as P21; named via [Failed] grep)
+shasum -a 256 ps2EntryRunner (559521a6)
+git add <2 NAMED lib files>; git commit -m "Diag: ..." (two trailers) -> de7ff17
+(write /tmp/p1u-boot1.py; diff vs p1t-boot1.py = docstring + LOG + 2 env vars)
+# Step 2 (lease protocol + boot 1)
+cat /tmp/ssx3-host-lease (absent 20:01:01Z; M13 never seen; no polls)
+pgrep -x ps2EntryRunner (exit 1); shasum fresh; git log (de7ff17); ls ISO + ELF
+printf 'P1u\n' > /tmp/ssx3-host-lease (20:01:10Z, absent verified twice) + >> p1u-waits.log
+python3 /tmp/p1u-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 28980295 B)
+# Step 2 (log analysis, lease-free; lease still held)
+sema-create census (33; F2 4 verbatim; 2 ret=-1); -1 waits (257125, s0 singleton)
+  + signals (4) + first-wait :630; epoch order :605-:630; id-26 5-line record
+signal group-by (ra): 4x-1 / 44x29 / 1x28 / 20x(6-25) / 2x26 / 79x(4/5) / 2x1
+wait group-by (ra): 257125x-1 / 45x29 / 79xpump / 20xdrainer / 3x26 / 2x1 / 1x30-park
+virtual resolutions via firstRa/lastRa (F6/F4/F5/predicate/F7); F7 total 40
+per-block thread table (16x5); watch/probe/cd sweeps; ladder delta vs LOG1
+GIF/GS sweep (2/66/122/33/8/1 exact); python3 checks rows F/H/I
+# Step 3
+(edit_file append Part 22 in 4 chunks + 1 typo fix; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1u] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (the only push allowed; rebase-retry rule on reject)
+rm -f /tmp/ssx3-host-lease; ls (absent); pgrep -x (exit 1)
+```
+
+Env delta boot 1 vs boot-p1t-1: `PS2X_DIAG_SEMA_CREATE=1` +
+`PS2X_DIAG_SEMA_S0=1` only. Source delta: `Sync.cpp` + `EeScheduler.cpp`
+(+51/-7 diag emits).
+
+## P22-5. What I could not do
+
+- Watch the slot's absolute addr (`0x6048a8`) across a boot: the addr was
+  learned FROM boot 1 (s0 capture), so watching it needs boot 2 — unused
+  because boot 1 closed the attribution (F2 ran + #2→-1 + sole writer +
+  singleton s0). A watch would re-confirm the `0x31a7b8` store pc only.
+- Name `0x31acd8`'s once-caller (below the stub-histogram top-30 cutoff at
+  count 1) and the `+0x08` iface-pointer writer (outside both method files;
+  set by the table-external instantiation path, whose vptr/table-plumbing
+  was not chased).
+- Read `0x31a308`/`0x31a3c0` bodies (F4/F5 sub-methods), `0x320b08` (table
+  +`0x20`), and thread 3's full consume/clear sequence past its `s0` base —
+  the flag-clearer role is inferred from slot accesses + starvation, with
+  that boundary stated.
+- Close P20-5's INTC residue fully: cause-3 handler = `0x31a490`
+  (FPU-saving prologue, registered by F2) but its link to the id-29
+  `iSignalSema` @ `0x31abf0` (no direct JAL; likely `jalr`) was not traced.
+- Run the reserve 2nd boot (not needed); no A/B on any rung. The ~5.4× rate
+  delta vs LOG1 is attributed to shared-host contention (uniform across
+  independent paths), not measured against isolated hardware.
+
+---
+
