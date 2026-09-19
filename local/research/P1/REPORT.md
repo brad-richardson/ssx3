@@ -4310,3 +4310,309 @@ Env delta vs boot-p1j-1 (recorded deviation): `+PS2X_DIAG_WATCH` (the Step-2 cap
 - Push-collateral verification: nothing to push from the fork (no fork commit this brief); fork-clone `git push` up-to-date check could not run (volume EPERM). No push was run in `/Users/bradrichardson/dev/ssx3` (forbidden).
 - No runtime fix (per the brief): park, missing target, and sema-26 non-delivery are diagnosed, not changed.
 
+---
+
+## Part 13 (P1l): 0x395cf0 + 3 siblings split, missing target gone, park unchanged, outer-caller receipt missed again
+
+Brief `local/muse/prompts/P1l.md`. Splits + ladder only; no runtime fix. Tables, no verdicts.
+P6: 0 `0x395*` rows (re-verified 09-19) → `sub_*` names below.
+
+## P13-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `M6` (foreign; `/tmp/ssx3-host-lease` dated Sep 18 23:30) |
+| Steps 1–2 + rebuild + tests | No lease (CSV edit, recomp file-to-file, fresh configure+build need none) |
+| 03:39 UTC | Lease absent (M6 hold gone; never overwritten) |
+| Pre-boot checks (04:01 UTC) | `pgrep -f ps2EntryRunner` exit 1 (none); binary `0b38f7b6` fresh (just built); ISO + ELF present |
+| Claim | `printf 'P1l\n' > /tmp/ssx3-host-lease` 04:01:07 UTC, immediately before boot-p1l-1 |
+| Release | `rm -f /tmp/ssx3-host-lease` in the same command as the boot return; verified absent 04:02:38 UTC |
+| Waits | None (no poll loop ran; `$W/P1/run/p1l-waits.log` does not exist) |
+| `adb` | Not used |
+
+## P13-1. Splits + regen audit
+
+### a. CSV (`ssx3-functions.sweep.csv`; TOML `ghidra_output` unchanged)
+
+| Item | Value |
+|---|---|
+| Rows before | 9271 lines = header + 9270 data |
+| Rows after | 9275 lines = header + 9274 data (+4, as expected) |
+| Backup | `ssx3-functions.sweep.csv.p1l-orig` (9271 lines, pre-edit bytes) |
+| Line endings | LF only before and after (0 CR) |
+| Duplicate starts | `0x42c1f0` ×2 before and after (pre-existing `ret0` row; no new dup) |
+| `0x395c70` pre-existing row (before, line 7007) | `sub_00395C70,0x395c70,0x395d60,0xf0` — no new row needed |
+| `0x395c70` split file + reg (pre-regen) | `sub_00395C70_0x395c70.cpp` present; 1 reg line (`:352206`); not re-split |
+
+Replaced 2 rows (lines 7006–7007) with 6 (lines 7006–7011):
+
+| Line | Row |
+|---|---|
+| 7006 | `sub_00395750,0x395750,0x395c38,0x4e8` |
+| 7007 | `sub_00395C38,0x395c38,0x395c68,0x30` |
+| 7008 | `sub_00395C68,0x395c68,0x395c70,0x8` |
+| 7009 | `sub_00395C70,0x395c70,0x395cf0,0x80` |
+| 7010 | `sub_00395CF0,0x395cf0,0x395d28,0x38` |
+| 7011 | `sub_00395D28,0x395d28,0x395d60,0x38` |
+
+Contiguity: `0x4e8+0x30+0x8=0x520`, `0x80+0x38+0x38=0xf0` (both parents' sizes preserved).
+
+ELF boundary words (`SLUS_207.72`, file off `0x1000+(va-0x100000)`):
+
+| T | T−12 | T−8 | T−4 | T | T+4 |
+|---|---|---|---|---|---|
+| `0x395c38` | `0x03e00008` (jr $ra) | `0x27bd00e0` (addiu sp,+N, delay) | `0x00000000` (nop) | `0x8c8213e4` (lw) | `0xd8a10000` (lqc2) |
+| `0x395c68` | `0x03e00008` (jr $ra) | `0xac806b90` (sw, delay) | `0x00000000` (nop) | `0x03e00008` (jr $ra; 2-insn stub + delay-load) | `0x8c8213e4` (lw, delay) |
+| `0x395cf0` | `0x03e00008` (jr $ra) | `0xac806b90` (sw, delay) | `0x00000000` (nop) | `0x3c020050` (lui $v0,0x50) | `0x8c8313e4` (lw) |
+| `0x395d28` | `0x03e00008` (jr $ra) | `0xac806b90` (sw, delay) | `0x00000000` (nop) | `0x8c8213e4` (lw) | `0xd8440000` (lqc2) |
+
+Collision check (Part-5 predicate: `case 0x<T>u` / `label_<T>` in enclosing file): 0 for all 4
+(`0x395c38`/`0x395c68` in `sub_00395750`, `0x395cf0`/`0x395d28` in `sub_00395C70`).
+Pre-regen: 0 split files + 0 reg lines for all 4 addrs.
+
+### b. Regen (`recomp-p1l.log`, CWD `$W/P1`, `./bin/ps2_recomp ssx3.toml`, exit 0)
+
+Analyzer not re-run: no analyzer source change, no TOML change — `ps2_recomp` only, mirroring P1d.
+Recomp binary `7654e7fe…e826f` (unchanged since P2).
+
+| Item | p1h (`recomp-p1h.log`) | p1l (`recomp-p1l.log`) |
+|---|---|---|
+| Discovered / processed | 9269 / 9269 | 9273 / 9273 (+4) |
+| Recompiled / stubs / skipped | 9092 / 177 / 0 | 9096 / 177 / 0 (+4 recompiled) |
+| Decode failures / unhandled | 0 / 0 | 0 / 0 |
+| Entrypoints | 393727 | 393727 (same) |
+| Warnings (unresolved JR/JALR) / fallbacks | 3598 / 724964 | 3598 / 724964 (same) |
+
+| Addr | New split file (bytes) | `register_functions.cpp` line |
+|---|---|---|
+| `0x395c38` | `sub_00395C38_0x395c38.cpp` (2793) | `:352206` → `sub_00395C38_0x395c38` |
+| `0x395c68` | `sub_00395C68_0x395c68.cpp` (1300; jr $ra + delay-load only) | `:352207` → `sub_00395C68_0x395c68` |
+| `0x395cf0` | `sub_00395CF0_0x395cf0.cpp` (3031; `lui $v0,0x50` head) | `:352209` → `sub_00395CF0_0x395cf0` |
+| `0x395d28` | `sub_00395D28_0x395d28.cpp` (3855) | `:352210` → `sub_00395D28_0x395d28` |
+| `0x395c70` | (retained, truncated to `0x395c70–0x395cf0`) | `:352208` retained |
+
+Runner refresh: `cp -X output/*.{cpp,h}` → `ps2xRuntime/src/runner/` (9273 → 9277 files),
+sidecars purged, `diff -rq output/ runner/` clean (exit 0). Never added/committed.
+
+### c. Fresh `/tmp/p1-link` (old dir gone with `/tmp`; all `/tmp/p1*` absent at session start)
+
+| Item | Value |
+|---|---|
+| Configure | `cmake -S $W/PS2Recomp -B /tmp/p1-link/runtime -G Ninja -DPS2X_BUILD_STUDIO=OFF -DPS2X_BUILD_RUNTIME=ON -DPS2X_BUILD_TEST=ON -DCMAKE_BUILD_TYPE=Release -DPS2X_ENABLE_RUNTIME_LOGS=ON -DPS2X_ENABLE_AGRESSIVE_LOGS=ON` (P2 flags), exit 0, 84 s (`configure-runtime-p1l.log`) |
+| Build | `cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4`, exit 0, 534 targets (`build-runtime-p1l.log`; unity build) |
+| `ps2EntryRunner` sha256 | `0b38f7b68d4adb1e0ef722b1ff9d0c077631e787cd7d1c14063bdc64c7266a18` (163,329,408 B; differs from p1k `e5f81397` — fresh dir, same sources+flags) |
+| `ps2x_tests` sha256 | `7f0102cebc4718b98f482f68cb9e6cf311817b65c0452367f8c3781f15b57155` |
+
+### d. Test receipts (`ps2x_tests`, CWD fork root; full log `$W/P1/ps2x-tests-p1l.log`)
+
+| Run | Total | Passed | Failed |
+|---|---|---|---|
+| Regen tree (HEAD `8fad69e` + refreshed runner glue) | 425 | 424 | 1: `sceGsSyncVCallback runs as a scheduler invocation on its callback stack` (`callback invocation should use the reserved async stack pool`) — same test + assertion as P1j |
+
+Pre-existing-status receipts (no stash A/B re-run: no tracked source changed this brief):
+
+| Item | Value |
+|---|---|
+| Tracked tree vs P1j with-fix run | Identical HEAD (`8fad69e`); identical `git status` (sole `M ps2xRuntime/src/runner/register_functions.cpp`, generated, never added) |
+| Runner symbols in `ps2x_tests` | 0 (`sub_00395C70`/`sub_0031AD20`/`sub_003E5928`/`sub_00395CF0` all 0 hits via `strings`; control: `sub_00395CF0` 1 hit in `ps2EntryRunner`) |
+| Table definition linked by tests | `ps2xRuntime/src/lib/ps2_runtime.cpp` (non-runner; unchanged this brief) |
+
+## P13-2. Boot ladder delta vs boot-p1k-1
+
+Boot-p1l-1: `$W/P1/run/boot-p1l-1.log`, 9,137 lines, 855,709 B, 17 blocks, CWD `$W/P1/run`,
+env = p1k env + `0x1ffe000` appended to `PS2X_DIAG_WATCH` (11 addrs), foreground 90 s, SIGTERM rc=-15.
+Binary `0b38f7b6` (fresh; §P13-1c).
+
+| Rung | boot-p1k-1 (33,038 lines, 3,052,064 B) | boot-p1l-1 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×15, `0x3dd278` ×1, `0x423c90` ×1 | `0x3e5980` ×14, `0x3e5440` ×3 | Same park family (per-block table below); no new park |
+| Missing target | 1 line (`0x3760d0→0x395cf0`, log:187) | 0 lines (`395cf0`/`395CF0`: 0 hits anywhere) | Gone |
+| Stub distinct b0 / b1–16 | 485 / 18 | 486 / 18 | +1 in b0 (below-cutoff member unnameable; top-30 truncation) |
+| Syscall distinct b0 / b1+ | 27 / 3 | 27 / 3 | None; printed b0 id sets identical (20 ids incl `0x15`/`0x17`); first new ids: none |
+| CD callback | queued+start log:192-193 | queued+start log:434-435 | Same pair, later lines |
+| Threads 2/4/5 | sema-parked 26/29/30 (p1j; p1k not re-checked) | `pc=0x423de8` sema 26/29/30 all 17 blocks | Confirmed |
+| Threads (block 0) | ids 1–5 | ids 1–5 (same entries/priorities/stacks) | None |
+| VIF MPG/MSCAL | 0 | 0 (`mpg`/`mscal`: 0 hits; 7 `vif` hits are all `[run:tick]` counters) | None |
+| GIF kick | 0 `gif` lines | First `[gs:kick]` log:216 (`idx=0 drawing=1 prim=6 vtxCount=1`); totals `gs:gif` 2, `gs:kick` 66, `gs:reg` 122, `gs:prim` 33, `gs:copy-reg` 8 | Visibility-only (gating table below) |
+| Presented frame | None (raylib line only) | None (sole `frame` hit = raylib target-time line) | None |
+| Crash | 0 | 0 (`crash`/`FATAL`/`assert`: 0) | None |
+| Watch lines | 32,077 | 7,942 (~4×; per-addr census below) | Rate (see below) |
+| Dormant / StartThread | 45 / 4 (ids 2,3,4,5) | 40 / 4 (ids 2,3,4,5) | −5 dormant |
+| Literal `dispatch` lines | 0 | 0 | None (per-dispatch receipt = `scheduled=N`) |
+| Slot fills | fn/period/next `0x27`, writers `0x3e4458`/`0x3e3050`/`0x31af60`, del `0x31af4c` | Same fns/writers/sp; next `0x28`; `*(0x519C4C)=0x1a` (`pc=0x3e43fc ra=0x3e43c4`) same | Tick +1 |
+
+Per-block table (both boots, 17 blocks; `sch` = id1/id4 `scheduled`; `stub` = `target=0x423c90` count):
+
+| blk | p1k pc | p1k sch | p1k stub | p1l pc | p1l sch | p1l stub |
+|---|---|---|---|---|---|---|
+| 0 | `0x3e5980` | 283/259 | 2369833 | `0x3e5440` | 78/54 | 484849 |
+| 1 | `0x3dd278` | 300/300 | 2750793 | `0x3e5440` | 79/79 | 722340 |
+| 2 | `0x3e5980` | 301/301 | 2759963 | `0x3e5980` | 74/74 | 679267 |
+| 3 | `0x3e5980` | 301/301 | 2759964 | `0x3e5980` | 73/73 | 664939 |
+| 4 | `0x3e5980` | 300/300 | 2750793 | `0x3e5980` | 71/71 | 651414 |
+| 5 | `0x3e5980` | 302/302 | 2769132 | `0x3e5980` | 72/72 | 657899 |
+| 6 | `0x3e5980` | 301/301 | 2759964 | `0x3e5440` | 62/62 | 563060 |
+| 7 | `0x3e5980` | 302/302 | 2769131 | `0x3e5980` | 78/78 | 712451 |
+| 8 | `0x3e5980` | 300/300 | 2750795 | `0x3e5980` | 80/80 | 733748 |
+| 9 | `0x3e5980` | 300/300 | 2750793 | `0x3e5980` | 79/79 | 724724 |
+| 10 | `0x3e5980` | 301/301 | 2754287 | `0x3e5980` | 75/75 | 687329 |
+| 11 | `0x423c90` | 301/301 | 2765640 | `0x3e5980` | 77/77 | 705702 |
+| 12 | `0x3e5980` | 301/301 | 2754870 | `0x3e5980` | 68/68 | 615412 |
+| 13 | `0x3e5980` | 301/301 | 2759923 | `0x3e5980` | 79/79 | 726712 |
+| 14 | `0x3e5980` | 299/299 | 2746756 | `0x3e5980` | 80/80 | 729929 |
+| 15 | `0x3e5980` | 301/301 | 2759965 | `0x3e5980` | 80/80 | 731936 |
+| 16 | `0x3e5980` | 300/300 | 2750793 | `0x3e5980` | 79/79 | 717806 |
+
+Rate rows (p1k → p1l): `scheduled` ~300 → ~75 (4.0×); steady stub ~2.75M → ~0.69M (~4.0×);
+watch 32,077 → 7,942 (4.0×). Cause open (§P13-6).
+
+Byte-identical block-0 one-time stub rows (count + firstRa + lastRa equal in both boots):
+
+| Target | Count | firstRa | lastRa |
+|---|---|---|---|
+| `0x416210` | 3985 | `0x393958` | `0x237d4c` |
+| `0x3e3968` | 1149 | `0x4190c0` | `0x418868` |
+| `0x31bf60` | 640 | `0x392e2c` | `0x392e2c` |
+| `0x317670` | 583 | `0x284770` | `0x21c5ac` |
+| `0x317618` | 583 | `0x317684` | `0x317684` |
+| `0x4166f4` | 550 | `0x3e38cc` | `0x4163f0` |
+| `0x416810` | 425 | `0x318308` | `0x3e3714` |
+| `0x2ca258` | 414 | `0x2cd2c0` | `0x2cd92c` |
+| `0x2cbcc8` | 414 | `0x250784` | `0x24d2b4` |
+| `0x411c38` | 392 | `0x412520` | `0x4126b8` |
+| `0x418958` | 221 | `0x41cae8` | `0x41b7a8` |
+| `0x3e6574` | 208 | `0x317948` | `0x37c820` |
+
+Block-0 top-30 set diff (10 out, 10 in; cutoffs 208 → 68):
+out: `0x227f58`,`0x317348`,`0x317500`,`0x317520`,`0x31aac8`,`0x31abd0`,`0x31ad20`(259),`0x326b88`,`0x3825f8`,`0x3e33b0`(259)
+(all p1k count 258–259 = per-period recurring work, below p1l cutoff 68 at p1l rates);
+in: `0x2cd8f8`,`0x2cdce8`,`0x3e36f8`,`0x3e5700`,`0x3e5760`,`0x411b08`,`0x412500`,`0x41605c`,`0x4162d0`,`0x423dc0`.
+
+Aggressive-gating table (all `gs:*` + `[run:tick]` sites wrapped in `PS2_IF_AGRESSIVE_LOGS:
+`ps2_runtime.cpp:2625` (run:tick), `gs_frontend.cpp:650` (gs:gif), `:1530` (gs:kick)):
+
+| Boot log | `run:tick` | `gs:gif` | `gs:kick` | `gs:reg` | `gs:prim` | `gs:copy` |
+|---|---|---|---|---|---|---|
+| p1b-8, p1c-3, p1d-2, p1f-2, p1h-1, p1j-1, p1k-1 (each) | 0 | 0 | 0 | 0 | 0 | 0 |
+| p1l-1 | 7 (ticks 120–840; `dma=7 gif=2 gsw=0 vif=2` constant) | 2 | 66 | 122 | 33 | 8 |
+
+Watch per-addr census (one-timers identical; steady-state ~4×):
+
+| addr + width | p1k | p1l |
+|---|---|---|
+| `0x1ffe000` w16 | — (not watched) | 15 (all `pc=0x3e65dc`, zeros) |
+| `0x1ffe010` w16 | 15 (all `pc=0x3e65b0`, zeros) | 15 (all `pc=0x3e65b0`, zeros) |
+| `0x519c40` w16 / `0x519c48` w8 / `0x519c4c` w4 / `0x519c50` w16+w4×2+w8 | 1/1/1/1+2+1 | 1/1/1/1+2+1 (identical) |
+| `0x51ed90` w16 / `0x51ed98` w4 / `0x51ed9c` w4 / `0x51eda0` w16 | 1/3/2/2 | 1/3/2/2 (identical) |
+| `0x51eda0` w4 (next-tick updates `pc=0x3e59d4`) | 5341 | 1316 |
+| `0x51eda4` w4 (busy 1/0 `pc=0x3e59b4`/`0x3e59cc`) | 10680 | 2630 |
+| `0x51eda8` w4 / `0x51edac` w4 / `0x51edb0` w16 | 1/1/2 | 1/1/2 (identical) |
+| `0x51edb0` w4 | 5340 | 1315 |
+| `0x51edb4` w4 | 10679 | 2629 |
+| `0x51edc0` w16 / `0x51edd0` w16 | 2/1 | 2/1 (identical) |
+
+## P13-3. Outer-caller receipt
+
+| Item | Value |
+|---|---|
+| `0x1ffe000` lines | 15 total, all `pc=0x3e65dc` w16 zeros (pre-park `sq` clears, `ra=0x3e382c sp=0x1ffd900`); **0 `pc=0x3dd1e0`** |
+| `0x1ffe010` lines | 15 total, all `pc=0x3e65b0` w16 zeros; **0 `pc=0x3dd214`** (same as p1k) |
+| `pc=0x3dd1e0` / `pc=0x3dd214` anywhere in log | 0 / 0 |
+| Receipt | **Missed again** — no candidate of the P12-1d 8-table named; the 8 stand |
+
+Derivation audit (static; watched addrs are arithmetically correct for the observed park):
+
+| Item | Value |
+|---|---|
+| Driver frame (`0x3dd1d8` `addiu sp,-0x80`) | `0x80`; `sw $a0,0($sp)` at `0x3dd1e0`, `sd $ra,0x10($sp)` at `0x3dd214` (both after alloc) |
+| Run frame (`0x3e5928` `addiu sp,-0x80`) | `0x80`; sampled at loop head (no further allocs) |
+| Park sp `0x1fffd80` | 14/17 blocks p1l, 15/17 p1k |
+| Derived `sw` addr | `0x1fffd80+0x80` = `0x1ffe000` ✓ watched |
+| Derived `sd` addr | `0x1fffd80+0x90` = `0x1ffe010` ✓ watched |
+| Run callers | Only the driver (`firstRa=lastRa=0x3dd290` for `0x3e5928`, all 17 blocks both boots) |
+| Steady-state busy/next pcs (fills the P12 per-pc gap) | `0x3e59b4` (busy=1, `ra=0x3dd290`), `0x3e59cc` (busy=0, `ra=0x3e59c0`), `0x3e59d4` (next+=period, `ra=0x3e59c0`) |
+
+Park sp is a function of sampled pc in both boots (no frame shift):
+
+| pc | sp | p1l blocks | p1k blocks |
+|---|---|---|---|
+| `0x3e5980` | `0x1fffd80` | 14 (all except 0,1,6) | 15 (all except 1,11) |
+| `0x3e5440` / `0x3dd278` | `0x1fffe00` | 0,1,6 | 1 |
+| `0x423c90` | `0x1fffde0` | — | 11 |
+
+## P13-4. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1l-1) | `0b38f7b68d4adb1e0ef722b1ff9d0c077631e787cd7d1c14063bdc64c7266a18` | Fresh `/tmp/p1-link` from `8fad69e` tree + regen runner sources |
+| `/tmp/p1-link/runtime/ps2xTest/ps2x_tests` | `7f0102cebc4718b98f482f68cb9e6cf311817b65c0452367f8c3781f15b57155` | Same tree; 424/425 (§P13-1d) |
+| `$W/P1/bin/ps2_recomp` | `7654e7fe4a7316476dfcc00a418c850bd8ecffeb301b345624500304e22e826f` | Unchanged since P2 |
+| `PS2Recomp` branch `ssx3` HEAD | `8fad69e` | No fork commit (CSV untracked, no source change); worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added |
+| Fork push | `git push fork ssx3` from fork clone only (up-to-date check) | Nothing to push; verified up-to-date; no push in `/Users/bradrichardson/dev/ssx3` |
+| This report | `[P1l]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P13-5. Exact commands
+
+From `$W/PS2Recomp` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `$O=$W/P1/output`:
+
+```
+# Step 1 (no lease)
+grep -n ghidra_output $W/P1/ssx3.toml                        # sweep CSV is the live map
+wc -l $W/P1/ssx3-functions.sweep.csv                         # 9271 = header + 9270
+grep 395 region rows; ls $O | grep -i 395C70/CF0/C38/C68/D28 # 0x395c70 file present, 4 absent
+grep -c 395c70/cf0/c38/c68/d28 $O/register_functions.cpp     # 1/0/0/0/0
+python3 ELF words T-12..T+4 x4 + T=0x395c70                   # boundary table
+grep -ci "case 0x<T>u|label_<T>" enclosing files x4          # 0 each (no collision)
+cp -X sweep.csv sweep.csv.p1l-orig                           # backup
+python3 replace 2 rows -> 6 rows (LF, sizes rechecked)       # 9275 lines = header + 9274
+python3 sortedness/dup audit (dup 0x42c1f0 x2 pre-existing)  # edit introduces no dup
+find $W/P1 -maxdepth 1 -name '._*' -delete
+# Step 2 (no lease)
+./bin/ps2_recomp ssx3.toml | tee recomp-p1l.log              # CWD $W/P1, exit 0
+grep discovered/processed/recompiled/stubs/decode/unhandled/entrypoints/warnings
+ls new sub_*.cpp x4; grep -n reg lines (352206/07/09/10)
+cp -X $O/*.{cpp,h} -> runner/; sidecar purges; diff -rq clean # 9273 -> 9277
+cmake -S $W/PS2Recomp -B /tmp/p1-link/runtime (P2 flags) | tee configure-runtime-p1l.log  # exit 0
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4 | tee build-runtime-p1l.log  # 534 targets, exit 0
+shasum -a 256 (both binaries)
+cd $R && ps2x_tests (x3; 3rd tee $W/P1/ps2x-tests-p1l.log)   # 425/424/1, same single failure
+nm/strings runner-symbol checks on ps2x_tests (0 hits)       # test/runner independence
+# Step 3 (lease protocol)
+cat /tmp/ssx3-host-lease (M6 at start; absent 03:39 UTC); pgrep (none)
+printf 'P1l\n' > /tmp/ssx3-host-lease (04:01:07 UTC)
+python3 /tmp/p1l-boot1.py (CWD $W/P1/run, p1k env + 0x1ffe000, 90 s, SIGTERM rc=-15)
+rm -f /tmp/ssx3-host-lease; ls (absent 04:02:38 UTC)
+log greps: missing-target 0; thread census; watch census; syscall/stub comms;
+  run:tick/gs: sweep over p1b..p1k logs (all 0); prologue frame greps; pgrep (none)
+# Step 4
+(edit_file append Part 13; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1l] ..." (two trailers; NO push there)
+git -C $W/PS2Recomp push fork ssx3 (up-to-date check; the only push allowed)
+```
+
+Env delta vs boot-p1k-1: `+0x1ffe000` in `PS2X_DIAG_WATCH` (11 addrs) only. Plus the
+fresh-build confound (§P13-6): same sources, same flags, new build dir.
+
+## P13-6. What I could not do
+
+- Name the live outer caller of `sub_003DD1D8`: the w4 `0x1ffe000` watch missed again
+  (15 pre-park `sq` clears, 0 `pc=0x3dd1e0`), as did `0x1ffe010` (0 `pc=0x3dd214`, same as p1k).
+  The P12 `sd`-path theory is now insufficient (the `sw` is covered yet also missed), and the
+  derivation audit (§P13-3) confirms the addrs are arithmetically correct for the observed park —
+  so the open question is the miss mechanism, not the addr. 8 candidates stand (P12-1d).
+- Explain the ~4× wall-clock execution rate (scheduled ~300→~75, steady stub ~2.75M→~0.69M,
+  watch 32,077→7,942, all per equal 90 s / 17 blocks): candidates include shared-host contention
+  (M6 holds no boot lease during my boot but builds are unleased), post-build thermal state
+  (boot ran 5 min after a `-j4` full build), and fresh-build codegen differences; no host-load
+  record was kept, and the brief allows one boot (no A/B).
+- Attribute the stub-distinct +1 (485→486, block 0) to `0x395cf0`: the histogram prints top 30
+  (cutoff 68) of 486, so a count-1 target is unprintable; the +1 is a net over unobserved churn.
+- Recover what the old binary would have printed for `gs:*`/`run:tick`: all those sites are
+  `PS2_IF_AGRESSIVE_LOGS`-gated and every boot p1b→p1k shows 0 such lines, so the old build had
+  aggressive logging effectively off — contradicting P2's recorded `+AGRESSIVE_LOGS=ON`
+  reconfigure. The old build dir is gone with `/tmp`, so the contradiction is unresolved; the p1l
+  `gs:`/`run:tick` lines are therefore a visibility delta with no p1k counterpart.
+- No runtime fix (per the brief): splits + ladder only. Thread 1 did not advance to a new park
+  (still the driver/`SYNCTASK_run` loop), so no further fix was owed or attempted.
+
