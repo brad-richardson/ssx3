@@ -5,6 +5,29 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I2 read (09-19) — PASS, CMake fixes land, raylib wall stands:**
+      3 commits (G4 BUNDLE DESTINATION +17/-5, G6 FFmpeg-iOS-OFF,
+      G5 ARM-inference + FATAL guard), pushed; desktop-proof
+      (cmake_install byte-identical `790994cb`, build green, tests
+      424/425 same pre-existing failure — which independently re-names
+      the queued test fix); probe A hits G1 (enum rejects iOS),
+      probe B passes G4/G6 and dies on G3 (OPENGL_LIBRARY NOTFOUND);
+      raylib untouched per scope. One disclosed nit: desktop build
+      compiled with P1s's then-uncommitted edit present (CMake-only
+      fixes unaffected). Verified: 3 diffs, sha, 4 log lines, no sims
+      booted, scratch 196K. Next: I3 = the raylib decision (needs a
+      scope call: upgrade / fork-patch / SDL switch). Ledger row added.
+- [ ] **P1s read (09-19) — PASS, callback body never dispatched:**
+      signal path intact (no callback guard anywhere — identical wake
+      decision both paths); the CD callback invocation is attached
+      then SILENTLY dropped (`hasFunction(0x3e3ad8)` false, mid-label,
+      pc zeroed, popped, no trace); signal census complete (1360×29
+      from `0x31abf0`, pump 66×4 + 8×5 thread-site only, pump-i 0,
+      callback site 0); pump semas named. So sema-26 "non-delivery" =
+      non-dispatch: the fix is a table entry / mid-label invocation
+      rule, not scheduler wake logic. Next: P1t (fix brief).
+      Verified: 2917 sema lines, 3-line record verbatim, absences,
+      census incl. 66+8 split, CSV absence, fork pushed. Ledger row added.
 - [ ] **P1s + M11 + I2 launched (09-19, user go-ahead):** P1s (sema-26
       delivery mechanism: signal/wait paths + `Diag:` commit + ≤2
       boots) reuses P1r pane; M11 (slot-36 delta + indexed partition
