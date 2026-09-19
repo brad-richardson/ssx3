@@ -5042,3 +5042,378 @@ Env delta vs boot-p1l-1: `+PS2X_DIAG_DRIVER_PROBE=1` only. Source delta: §P15-1
   or the stub-distinct +1 (p1n b0 distinct is also 486; top-30 truncation unchanged).
 - One boot only (per the brief): no A/B on any rung.
 
+---
+
+## Part 16 (P1o): true-frame hits land (caller saga CLOSED) + driver-flag writers named statically (3DE420/3DD7E0/3DDC30)
+
+Brief `local/muse/prompts/P1o.md`. Watch confirm + writer hunt; no runtime fix. Tables, no verdicts.
+Stale-reading guard: Part 15 (P15-2b true frames, P13-3 hex slip, P15-2c resume path) + Part 12 §P12-1
+(driver flag `*(entry+8)`, `$s1` = `*(0x519AD8)`+byte·`0x30`, P6 lead `0x3de420`) re-read before acting.
+
+## P16-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `M8` (foreign; 11:59:17 UTC) → logged to `$W/P1/run/p1o-waits.log`; boot deferred, lease-free static work (§P16-2) + boot-script prep first |
+| Poll | 12:03:06 UTC: lease absent (M8 hold gone; never overwritten) |
+| Pre-boot checks (12:03:18 UTC) | `pgrep -f ps2EntryRunner` exit 1 (none); binary `7a7d4b64` fresh (matches P15-1b, no rebuild); ISO (2.8 GB) + ELF (3.7 MB) present |
+| Claim | `printf 'P1o\n' > /tmp/ssx3-host-lease` 12:03:18 UTC, immediately before boot-p1o-1 |
+| Boot | 90 s foreground, SIGTERM rc=-15, returned 12:05:02 UTC |
+| Release | `rm -f /tmp/ssx3-host-lease` 12:05:07 UTC; verified absent; `pgrep` exit 1 |
+| Waits log | `$W/P1/run/p1o-waits.log`, 2 lines (start-hold + poll/claim/boot/release) |
+| Second boot | None (static named the writers; Step 2b moot) → no re-claim |
+| `adb` | Not used |
+
+## P16-1. Watch confirm (caller saga CLOSED)
+
+Boot-p1o-1: `$W/P1/run/boot-p1o-1.log`, 9,638 lines, 906,252 B, 17 blocks, CWD `$W/P1/run`,
+env = p1n env with WATCH frame addrs swapped (`0x1ffe000`→`0x1fffe00`, `0x1ffe010`→`0x1fffe10`;
+other 9 addrs unchanged; 11 total), `PS2X_DIAG_DRIVER_PROBE=1` kept on. Binary `7a7d4b64` (fresh; §P16-3).
+
+### a. Expectation (machine-checked)
+
+`python3 -c "print(hex(0x1fffe80-0x80), hex(0x1fffe00+0x10), hex(0x1fffe00-0x1ffe000))"`
+→ `0x1fffe00 0x1fffe10 0x1e00`: entry `sp` `0x1fffe80`−`0x80` = `sw` addr `0x1fffe00`
+(`0x3dd1e0`), +`0x10` = `sd` addr `0x1fffe10` (`0x3dd214`); `0x1e00` above the p1l/p1n watches.
+
+### b. Probe line: 1 (same bytes as P15-2a)
+
+| Item | Value |
+|---|---|
+| Count | 1 (boot log :687; between `[cd:callback]` :685–686 and block-0 flush, same position as p1n :434–436, shifted by frame-watch volume) |
+| Line | `[diag:driver-entry] sp=0x1fffe80 ra=0x3ded88 sourcePc=0x3ded80 checkpointed=0` |
+| Delta vs p1n :436 | Line number only; `sp`/`ra`/`sourcePc`/`checkpointed` byte-identical |
+
+### c. True-frame hits: exactly 1 each (expectation met)
+
+| Line | addr + width | value | pc | ra | sp |
+|---|---|---|---|---|---|
+| :688 | `0x1fffe00` w4 | `0x900001` (= `$a0`; top byte `0x00` → entry 0; §P16-2b) | `0x3dd1e0` | `0x3ded88` | `0x1fffe00` |
+| :689 | `0x1fffe10` w8 | `0x3ded88` (= `$ra`) | `0x3dd214` | `0x3ded88` | `0x1fffe00` |
+
+`pc=0x3dd1e0` / `pc=0x3dd214` counts anywhere in log: 1 / 1. The caller saga is CLOSED:
+fresh caller `0x3ded80` (#6) writes its prologue frame exactly at the P15-2b true addrs.
+
+### d. Frame-addr reuse (pre-probe stack traffic; 0 lines after :689)
+
+| addr | Lines | Width split | pc-prefix split | Last pre-probe | Post-:689 |
+|---|---|---|---|---|---|
+| `0x1fffe00` | 164 | 84×w16 / 38×w4 / 42×w8 | — (joint below) | :680 (`pc=0x3dcf8c ra=0x3ddbd8 sp=0x1fffdf0`) | 0 |
+| `0x1fffe10` | 95 | 67×w16 / 14×w4 / 14×w8 | — | :675 (`pc=0x3ddaf0 ra=0x3ded74 sp=0x1fffe10`, fresh-call chain) | 0 |
+| Joint 259 | 164+95 | 151×w16 / 52×w4 / 56×w8 | 107×`0x2*` / 135×`0x3*` / 17×`0x4*` | :680 | 0 |
+
+All 259 lines are :60–:680 (early-boot stack reuse through the same addrs); nothing touches the
+true frame after the driver prologue runs — consistent with the park (`sp` `0x1fffd80`) never
+returning up. (p1n frame addrs: 15 + 15 pre-park `sq` zeros.)
+
+### e. Watch per-addr census (p1n → p1o)
+
+| addr + width | p1n | p1o |
+|---|---|---|
+| `0x51eda4` w4 (busy) / `0x51edb4` w4 | 2694 / 2693 | 2712 / 2711 (+18/+18 = +9 ticks) |
+| `0x51eda0` w4 / `0x51edb0` w4 (next-tick `pc=0x3e59d4`) | 1348 / 1347 | 1357 / 1356 (+9/+9) |
+| Frame addrs (old `0x1ffe000`/`0x1ffe010` → new `0x1fffe00`/`0x1fffe10`) | 15 / 15 | 164 / 95 |
+| One-timers (`0x519c40` w16, `0x519c48` w8, `0x519c4c` w4, `0x519c50` w16+w4×2+w8, `0x51ed90` w16, `0x51ed98` w4×3, `0x51ed9c` w4×2, `0x51eda0` w16×2, `0x51eda8` w4, `0x51edac` w4, `0x51edb0` w16×2, `0x51edc0` w16×2, `0x51edd0` w16) | §P15-2d counts | Identical counts (each re-grepped) |
+| Total (`^` anchored; :188 shares `[SifInitRpc]`+watch on one line) | 8,134 | 8,441 (8,442 unanchored) |
+
+### f. Ladder delta vs boot-p1n-1
+
+| Rung | boot-p1n-1 (9,330 lines, 873,388 B) | boot-p1o-1 (9,638 lines, 906,252 B) | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×16, `0x3dd278` ×1 (blk4) | `0x3e5980` ×16, `0x423c90` ×1 (blk11) | Same park family (per-block table below) |
+| Thread-1 sp | `0x1fffd80` ×16, `0x1fffe00` ×1 | `0x1fffd80` ×16, `0x1fffde0` ×1 | pc↔sp mapping holds |
+| Missing target | 0 | 0 (`missing`/`No exact`/`395cf0`: 0) | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18 | None |
+| Syscall distinct b0 / b1+ | 27 / 3; 20 printed ids | 27 / 3; same 20 ids incl `0x15`/`0x17` (sort-compared) | None |
+| CD callback | queued+start :434–435 | queued+start :685–686 | Same pair, later lines |
+| Threads 2/4/5 | sema-parked 26/29/30 @ `0x423de8` | Same (ids/entries/priorities/stacks identical; blk0 ids 1–5) | None |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | `gs:gif` 2, `gs:kick` 66, `gs:reg` 122, `gs:prim` 33, `gs:copy-reg` 8; first kick :216 | 2 / 66 / 122 / 33 / 8; first kick :410 (same content) | Line shift only |
+| `run:tick` | 7 (ticks 120–840) | 7 (same ticks/counters) | None |
+| Presented frame | None (raylib line only) | None (sole `frame` hit = raylib line) | None |
+| Crash | 0 | 0 | None |
+| Dormant / start-thread | 40 / 4 (`diag:dormant`/`diag:start-thread`) | 40 / 4 | None |
+| Literal `dispatch` lines | 0 | 0 | None |
+| Slot fills | fn `0x3e4000`/`0x3e33b0`/`0x31ad20`, writers `0x3e4458`/`0x3e3050`/`0x31af60`, del `0x31af4c`, init next `0x28` | Byte-identical pcs/ras/sps/values (log :340–351); init next `0x28` | None |
+| Slot next last | `0x56b` (1348 ticks) | `0x574` (1357 ticks; +9 = `0x574`−`0x56b`, check §P16-2l) | Tick count |
+| `*(0x519C4C)` | `0x1a` (`pc=0x3e43fc ra=0x3e43c4 sp=0x1ffec80`) | `0x1a` (same pc/ra/sp; log :337) | None |
+| SIF modules | 6 (id 1 line shares `[SifInitRpc]`) | 6, same order/paths (:192–207) | Line-merge artifact only |
+| Prefix census | Not tabulated in P15 | p1o counts equal p1n on every prefix except watch total (above) + SIF line split | Compared |
+
+Per-block table (17 blocks; `sch` = id1/id4 `scheduled`; `stub` = `target=0x423c90` count):
+
+| blk | p1n pc | p1n sch | p1n stub | p1o pc | p1o sch | p1o stub |
+|---|---|---|---|---|---|---|
+| 0 | `0x3e5980` | 83/59 | 535656 | `0x3e5980` | 82/58 | 526397 |
+| 1 | `0x3e5980` | 80/80 | 725335 | `0x3e5980` | 79/79 | 720012 |
+| 2 | `0x3e5980` | 80/80 | 730612 | `0x3e5980` | 75/75 | 679645 |
+| 3 | `0x3e5980` | 80/80 | 733844 | `0x3e5980` | 80/80 | 731297 |
+| 4 | `0x3dd278` | 68/68 | 620570 | `0x3e5980` | 80/80 | 732107 |
+| 5 | `0x3e5980` | 81/81 | 736170 | `0x3e5980` | 79/79 | 729072 |
+| 6 | `0x3e5980` | 79/79 | 724123 | `0x3e5980` | 76/76 | 690312 |
+| 7 | `0x3e5980` | 74/74 | 682261 | `0x3e5980` | 75/75 | 692411 |
+| 8 | `0x3e5980` | 78/78 | 709438 | `0x3e5980` | 69/69 | 624039 |
+| 9 | `0x3e5980` | 77/77 | 703159 | `0x3e5980` | 79/79 | 722822 |
+| 10 | `0x3e5980` | 68/68 | 619512 | `0x3e5980` | 74/74 | 675935 |
+| 11 | `0x3e5980` | 81/81 | 738237 | `0x423c90` | 78/78 | 717207 |
+| 12 | `0x3e5980` | 81/81 | 737659 | `0x3e5980` | 76/76 | 693804 |
+| 13 | `0x3e5980` | 80/80 | 734618 | `0x3e5980` | 76/76 | 689663 |
+| 14 | `0x3e5980` | 78/78 | 718217 | `0x3e5980` | 70/70 | 637415 |
+| 15 | `0x3e5980` | 77/77 | 706211 | `0x3e5980` | 79/79 | 727083 |
+| 16 | `0x3e5980` | 69/69 | 617855 | `0x3e5980` | 80/80 | 729788 |
+
+Rate rows (p1n → p1o): `scheduled` ~77 → ~77; steady stub ~0.70M → ~0.70M. Same regime.
+
+Block-0 stub comm (30 rows each): same 30 targets; 22 byte-identical; 8 differ in `count` only
+(same `firstRa`/`lastRa`: `0x326eb0`,`0x3e5440`,`0x3e5928`,`0x3ffa58`,`0x3ffbc0`,`0x423c90`,
+`0x423dd0`,`0x423de0`); 0 `ra` diffs; no cutoff swap. `firstRa=lastRa=0x3dd290` (`0x3e5928`)
+and `0x3dd280` (`0x3e5440`) all 17 blocks, both boots (17/17 re-grepped in p1o).
+
+## P16-2. Flag-writer hunt (static + ELF; no second boot)
+
+### a. Driver flag recap (sources + checks)
+
+`sub_003DD1D8`: `$t0` = `0x52<<16` − `0x6550`; `lw $a2,0x28($t0)` → `$a2` = `*(0x519AD8)`;
+`$v0` = top byte of `$a0` × `0x30`; `$s1` = `$a2`+`$v0`. Flag reads `lw $v0,8($s1)` at
+`0x3dd258` (pre-check), `0x3dd2dc` + `beqz` `0x3dd2e0` (SYNCTASK-wait loop), `0x3dd2e8` (exit read).
+
+`python3 -c "print(hex(0x520000-0x6550), hex(0x519AB0+0x28), hex(0x520000-0x6550+0x28))"`
+→ `0x519ab0 0x519ad8 0x519ad8`.
+
+### b. Parked entry index (from the :688 value)
+
+`python3 -c "print(hex(0x574-0x56b), hex(9*0x30), hex(0x900001>>24), hex(0x900001&0xFFFFF))"`
+→ `0x9 0x1b0 0x0 0x1`: slot-next delta +9 ticks (§P16-1f); `$a0` = `0x900001` top byte =
+`0x00` (the check, not the hand read, rules: `0x900001` is 6 hex digits, bits 24–31 are `0x00`).
+
+`python3 -c "print(hex(0x900001>>24), hex(0*0x30), hex(0x519AB0+0x28))"`
+→ `0x0 0x0 0x519ad8`: parked byte 0 → entry offset `0x0` → the wait is on table-entry 0,
+`*( *(0x519AD8) + 8 )`. Low-20 of `$a0` = `0x1` (entry+0 id-compare half).
+
+### c. Writers to `0x519AD8` (the `$s1` base): exactly 1
+
+| pc | Insn (ELF ✓) | Base proof | Value | Owning function | P6 |
+|---|---|---|---|---|---|
+| `0x3dccfc` (delay) | `sw $s3,0x28($s0)` = `0xae130028` | `$s0` = `0x520000`−`0x6550` = `0x519AB0` (`0x3dccb4`); +`0x28` = `0x519AD8` | `$s3` = `$a3` (set :73, no clobber before use; epilogue restore only) = fresh table from `sub_003DCBD8` | `sub_003DCC88` | — (no row) |
+
+Table-source chain: `sub_003DCBD8` (sole caller: `0x31af2c` in `sub_0031ADB0` = P6 `systemInit`)
+jalr-allocs (`$a0`=`0x495D28`, `$a1`=ret(`func_3DCD98`), `$a2`=`0x100`; target `*(`0x450C10`+4)`)
+→ `$v0` = table; `0x3dcc50` `sw $v0,-0x6518($v1)` (`$v1`=`0x520000`) also stores it to `*(0x519AE8)`;
+delay `0x3dcc60` passes `$a3`=`$v0` to `func_3DCC88`.
+
+`python3 -c "print(hex(0x450C10+4), hex(0x520000-0x6518))"` → `0x450c14 0x519ae8`.
+`python3 -c "print(hex(0x520000-0x6518), hex(0x100//0x30), hex(0x100%0x30))"` → `0x519ae8 0x5 0x10`.
+ELF: `0x3dcc50` = `0xac629ae8` ✓, `0x3dccfc` = `0xae130028` ✓.
+
+Exclusion: no `sw -0x6528` / `sw -0x652C` anywhere in `$O` (all `-0x6528` hits are `lw`);
+every other `sw *,0x28($s0)` site's `$s0` ≠ `0x519AB0` (`3D11B8` `$s0`=`$a1`;
+`3DF028`/`3DF690`/`3DF748`/`3E06D8` arg/return-derived; §P16-2h).
+
+### d. Writers to `*(entry+8)` (the flag): 3
+
+| # | pc | Insn (ELF ✓) | Entry provenance | Value | Owning function | P6 |
+|---|---|---|---|---|---|---|
+| W1 | `0x3de468` | `sw $v0,8($a1)` = `0xaca20008` | `$a1` = `*(0x519AB0+0x24)` = `*(0x519AD4)` (current entry; read `0x3de43c`) | −1 if `*(entry+4)`≠0 else (−2, or 1 if `$a0`≠0) | `sub_003DE420` | `iFILESYS_CommandCompleteCallback` |
+| W2 | `0x3dd83c` | `sw $v0,8($s2)` = `0xae420008` | `$s2` = ret(`func_3DE670`) = table+idx·`0x30` (jal `0x3dd800`) | 1 | `sub_003DD7E0` | — (no row) |
+| W3 | `0x3ddd30` | `sw $v0,8($s3)` = `0xae620008` | `$s3` = ret(`func_3DE670`) (jal `0x3ddc70`) | −2 | `sub_003DDC30` | — (no row) |
+
+`sub_003DE670` returns table entries: scan loop `0x3de740`–`0x3de748` counts `$s1` with
+`$a3`+=`0x30` delay; exit `$v0`=`0x30` (delay `0x3de764`), `mult $v0,$s1,$v0` (`0x3de788`),
+`$v1` = `*(`0x519AB0`+`0x28`)` = `*(0x519AD8)` (`0x3de78c`), return `$v1`+`$v0` (`0x3de7a0`).
+
+`python3 -c "print(hex(0x519AB0+0x10), hex(0x519AB0+0x24), hex(0x519AB0+0x28), hex(0x520000-0x519AD4))"`
+→ `0x519ac0 0x519ad4 0x519ad8 0x652c`.
+`python3 -c "print(hex(0x520000-0x653C), hex(0x519AC4-0x14))"` → `0x519ac4 0x519ab0`
+(`3DE670` mutex/unlock path addrs). ELF: `0x3de7a0` = `0x621021` ✓.
+
+Callers of `func_3DE670` (10 jal sites): `0x3dd458` (`3DD438`), `0x3dd510` (`3DD4E8`),
+`0x3dd5c0` (`3DD5A0`), `0x3dd680`+`0x3dd758` (`3DD648`), `0x3dd758` (`3DD720` overlap),
+`0x3dd800`+`0x3dd890` (`3DD7E0`), `0x3ddaf4` (`3DDAC0`), `0x3ddc70` (`3DDC30`).
+
+W1 context (`3DE420`): `*(0x519AC0)`++ (`0x3de444`); early return if current entry null;
+flag store; `*(0x519AD4)` = 0 (`0x3de470`); chained `jalr *($a1+0x28)` if set;
+`*(0x519AC0)`−− (`0x3de49c`); if zero, `jal func_3DDFA8` (`0x3de4ac`, P6 `iFILESYS_ExecCommand`).
+
+### e. Writers to `0x519AD4` (current entry): set + clear
+
+| pc | Insn (ELF ✓) | Effect | Owning function | P6 |
+|---|---|---|---|---|
+| `0x3de0b0` (delay) | `sw $s1,0x24($v0)` = `0xac510024` (`$v0` = `$s4`−`0x6550`, `$s4`=`0x520000` unclobbered) | `*(0x519AD4)` = `$s1` = `$a0` request | `sub_003DDFA8` | `iFILESYS_ExecCommand` |
+| `0x3de470` | `sw $zero,0x24($s0)` = `0xae000024` (`$s0`=`0x519AB0`) | `*(0x519AD4)` = 0 | `sub_003DE420` | `iFILESYS_CommandCompleteCallback` |
+
+### f. P6 lead `0x3de420` check
+
+| Item | Value |
+|---|---|
+| Exists | Yes: `sub_003DE420_0x3de420.cpp` (379 lines, 13,688 B); ELF `0x3de420` = `0x27bdffe0` ✓ |
+| P6 row | `0x3de420,iFILESYS_CommandCompleteCallback,config/symbol_addrs.txt` (:735) |
+| Called from (10 jal sites) | `0x3de0c8`/`0x3de2f8`/`0x3de340`/`0x3de3a4`/`0x3de3e0`/`0x3de3f4` (all in `3DDFA8`); `0x3e3450` (in `3E3350`+`3E33B0` overlap — same pc, count once); `0x3e34c0` (`3E3478`); `0x3e3d64` (`3E3B00`) |
+| Near the flag | It writes the flag: W1 `0x3de468` (§P16-2d) |
+| Ran in boot-p1o-1 | 0 `target=0x3de420` stub lines (absent from printed b1–16, distinct 18 each; b0 below-cutoff unobservable per P13-6); `target=0x3ddfa8` also 0 |
+
+### g. SYNCTASK slot array (brief formula recomputed)
+
+Brief shorthand `0x51ED98+8·slot` hits the wrong words:
+
+`python3 -c "print([hex(0x51ED98+8*i) for i in range(4)])"`
+→ `['0x51ed98', '0x51eda0', '0x51eda8', '0x51edb0']`
+(= slot0-fn / slot0-next / slot0-busy / slot1-next — NOT one word across slots).
+
+Correct (stride `0x10`, §P12-1a):
+
+`python3 -c "print(hex(0x520000-0x1268)); print([hex(0x51ED98+8+i*0x10) for i in range(4)]); print(hex(0x51ED98+8+15*0x10), hex(0x51ED98+0x100))"`
+→ `0x51ed98 ['0x51eda0', '0x51edb0', '0x51edc0', '0x51edd0'] 0x51ee90 0x51ee98`.
+
+Writers (only 4 guest files reference `-0x1268`, re-verified — same files as P12):
+
+| Function (P6) | Store pcs | Words |
+|---|---|---|
+| `SYNCTASK_init` (`0x3e57d0`, in `3E5760` file) | None inline (zeroes via `func_3E6448(0x51ED98,0,0x100)` call); nearby inline `0x3e578c`-region stores belong to `MUTEX_unlock` (`0x3e5760`) | — |
+| `SYNCTASK_add` (`0x3e57f8`) | `0x3e5898` fn / `0x3e58a0` period / `0x3e58a8` next / `0x3e58b0` busy=0 | slot `i`×4 |
+| `SYNCTASK_del` (`0x3e58c8`) | `0x3e591c` (delay; single word) | fn = 0 only |
+| `SYNCTASK_run` (`0x3e5928`) | `0x3e59b4` busy=1 / `0x3e59cc` busy=0 / `0x3e59d4` next+=period | steady-state |
+
+(`3E57F8` also `FAST_WRITE32(0x450E00)` + `$t5`+`0xE00` tick bookkeeping — not slots.
+`python3 -c "print(hex(0x450000+3088), hex(3584), hex(3588))"` → `0x450c10 0xe00 0xe04`.)
+
+### h. Excluded `+8` writers (base provenance ≠ entry table)
+
+Complete census: every `sw *,0x8(` in `3DC*`–`3DF*` + the sole non-`sw` (`sh`); every
+`0x24`/`0x28` store in `3DC*`–`3DF*` for the global-struct question.
+
+| Site | Base provenance | Reason excluded |
+|---|---|---|
+| `3DDFA8:0x3de2bc` `sw $v0,8($a0)` | `$a0` = `*($s1+0x24)`, `$s1` = `$a0` request | Request-relative, not table/current entry (aliasing unproven) |
+| `3DDFA8:0x3de338` `sw $zero,0x24($s1)` | `$s1` = `$a0` request | Clears req→`0x24`, not `0x519AD4` |
+| `3DDAC0:0x3ddb9c` `sw $s4,8($s1)` | `$s1` = `jalr *($s0+4)` return (`$s0`=`$a3` arg) | Allocator-return base; no table path |
+| `3DE9B8:0x3dea3c` + `:0x3dea80` | `$s1`/`$a0` = `0x450000`-based (`0x450C10`) | Different region (`0x450008`-family) |
+| `3DE8C0:0x3de918` / `3DFE18:0x3dfe54` / `3DFED0:0x3dffc0` | Arg/heap-derived; 0 table refs in function | No `519AD8`/`3DE670`/`-0x6528`/`-0x651C` in file |
+| `3DF028` ×4 (`0x3df1a0`-fam `+8`) | `$s0` = `0x519C08` early (→`0x519C10`, CD region) else `*($a0+16)`/`$a2`/restored; 0 table refs | `python3 -c "print(hex(0x519C08+8), hex(0x519C08+0x24), hex(0x519C08+0x28))"` → `0x519c10 0x519c2c 0x519c30` |
+| `3DF690` / `3DF748` ×3 / `3E06D8` / `3D11B8` ×2 | `$s0` = `$v0`-return / `$a3` / `$a1` | Arg/return-derived; 0 table refs |
+| `3DC450`(`USTR_vsprintf`):`0x3dc988` `sh $t0,8($v0)` | `$v0` small-int/return-derived; 0 table refs | Sole non-`sw` +8 store; vsprintf scratch |
+| `3DD7E0:0x3dd798` + `0x3dd938` (`+0x24`) | `$s1` = `$a1`/`$a2` args; `$a1` = `*($s1+16)` | Request-relative, not `0x519AD4` |
+| `0x3dcfa0`/`0x3dd498`/`0x3dd54c`/`0x3dd5fc`/`0x3dd6c4`/`0x3ddb54` (`+0x24`/`+0x28`) | Owning files have 0 `lui *,0x51` | Cannot construct `0x519AB0`; entry/request-relative |
+
+`python3 -c "print(hex(0x520000-0x63F8), hex(4294967296-4294941704), hex(4294967296-4294941360), hex(4294967296-4294941412))"`
+→ `0x519c08 0x63f8 0x6550 0x651c` (two's-complement decodes used above).
+P6: `0x3dc450,USTR_vsprintf` (:732); no rows for any other §P16-2h/2d site function
+(re-grepped 30 addrs, 1 hit).
+
+### i. Neighbor writers in the `0x519AB0` struct (not the flag)
+
+`python3 -c "print(hex(0x520000-0x6550), hex(0x520000-0x651C), hex(0x519AD8-0x519AB0))"`
+→ `0x519ab0 0x519ae4 0x28`.
+`python3 -c "print(hex(0x519AB0+8), hex(0x519AB0+4), hex(0x519AB0+0x14), hex(0x520000-0x6528))"`
+→ `0x519ab8 0x519ab4 0x519ac4 0x519ad8`.
+
+| pc | Effect | Owning function | P6 |
+|---|---|---|---|
+| `3DCC88:0x3dccdc` / `:0x3dcce0` / `:0x3dcce8`(delay) | `*(0x519AB8)`=`0xFF` / `*(0x519AB0)`=`$s1` / `*(0x519AB4)`=`$s5` (init) | `sub_003DCC88` | — |
+| `3DCBD8:0x3dcc50` | `*(0x519AE8)` = table (dup of `0x519AD8`) | `sub_003DCBD8` | — |
+| `3DDDF0:0x3dde20`(delay) / `:0x3dde24` | `*(0x519AB8)` = `$a2`, then restored (swap around indirect call) | `sub_003DDDF0` | `FILESYS_atomic` |
+| `3DE420:0x3de444` / `:0x3de49c` | `*(0x519AC0)`++ / −− (inflight counter) | `sub_003DE420` | `iFILESYS_CommandCompleteCallback` |
+
+Readers of `*(0x519AD8)` (`lw -0x6528`, base `0x520000`): `3DCE90` ×3 (`0x3dceec`/`0x3dcf20`/
+`0x3dcf50` + `0x3dcebc`), `3DCF70:0x3dcf80`, `3DD148` ×2, `3DD310:0x3dd328`,
+`3DD7E0:0x3dda20`, driver `0x3dd218` (via `$t0`+`0x28`). Readers of `*(0x519AE4)`
+(`-0x651C`): `3DCD98:0x3dce00`, `3DD5A0:0x3dd5e4`, `3DDAC0:0x3ddaf8`, `3DE4D0:0x3de5dc`.
+
+### j. ELF verification words (`SLUS_207.72`, file off = va−`0x100000`+`0x1000`)
+
+| va | word | disasm | match |
+|---|---|---|---|
+| `0x3dd1e0` | `0xafa40000` | `sw $a0,0($sp)` | OK |
+| `0x3dd214` | `0xffbf0010` | `sd $ra,0x10($sp)` | OK |
+| `0x3de420` | `0x27bdffe0` | `addiu $sp,-0x20` | OK |
+| `0x3de444` | `0xac620010` | `sw $v0,0x10($v1)` | OK |
+| `0x3de468` | `0xaca20008` | `sw $v0,8($a1)` (W1) | OK |
+| `0x3de470` | `0xae000024` | `sw $zero,0x24($s0)` | OK |
+| `0x3de49c` | `0xae020010` | `sw $v0,0x10($s0)` | OK |
+| `0x3dcc50` | `0xac629ae8` | `sw $v0,-0x6518($v1)` | OK |
+| `0x3dccfc` | `0xae130028` | `sw $s3,0x28($s0)` (`0x519AD8` writer) | OK |
+| `0x3de0b0` | `0xac510024` | `sw $s1,0x24($v0)` (current-entry set) | OK |
+| `0x3de2bc` | `0xac820008` | `sw $v0,8($a0)` (request-relative) | OK |
+| `0x3dd83c` | `0xae420008` | `sw $v0,8($s2)` (W2) | OK |
+| `0x3ddd30` | `0xae620008` | `sw $v0,8($s3)` (W3) | OK |
+| `0x3de7a0` | `0x00621021` | `addu $v0,$v1,$v0` (lookup return) | OK |
+
+### k. Step 2b (not run — static succeeded)
+
+Static named the writers (§P16-2c–2e), so no dynamic receipt was needed and no second boot
+ran. Residue: which of W1/W2/W3 fires for entry 0 at runtime (W1 has 0 printed stub hits;
+W2/W3 indexes resolve at runtime). Exact next receipt for a future brief (not run): one ≤90 s
+boot with `PS2X_DIAG_WATCH=0x519AD8,0x519AD4` (learn table base + current entry; both are
+w4 single words, zero steady-state traffic expected), then a targeted entry-0+8 watch.
+
+### l. Machine-check paste block (every hand computation above)
+
+```
+0x519ab0 0x519ad8 0x519ad8
+0x51ed98 ['0x51eda0', '0x51edb0', '0x51edc0', '0x51edd0'] 0x51ee90 0x51ee98
+['0x51ed98', '0x51eda0', '0x51eda8', '0x51edb0']
+0x519ab0 0x519ae4 0x28
+0x519ab8 0x519ab4 0x519ac4 0x519ad8
+0x519ac0 0x519ad4 0x519ad8 0x652c
+0x519c08 0x63f8 0x6550 0x651c
+0x519ae8 0x5 0x10
+0x1fffe00 0x1fffe10 0x1e00
+0x9 0x1b0 0x0 0x1
+0x0 0x0 0x519ad8
+0x450c14 0x519ae8
+0x519ac4 0x519ab0
+0x450c10 0xe00 0xe04
+0x519c10 0x519c2c 0x519c30
+```
+
+## P16-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1o-1) | `7a7d4b645094d3ad82746a7d420b223422bf6444e5d06f6e56998e9057f5b4cd` | `e73e36a` tree, no rebuild (fresh; §P16-0 pre-boot check) |
+| `ps2x_tests` | Not re-run (no source change; P15-1c 424/425 stands for this tree) | Same tree `e73e36a` |
+| `PS2Recomp` branch `ssx3` HEAD | `e73e36a` | No fork commit (env-only boot; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added) |
+| Fork push | `git push fork ssx3` from fork clone only | Up-to-date check (expect nothing to push) |
+| This report | `[P1o]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P16-4. Exact commands
+
+From `$W/PS2Recomp` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `$O=$W/P1/output`,
+`$R=$W/PS2Recomp`, `$LOG=$W/P1/run/boot-p1o-1.log`:
+
+```
+# Step 2-first (lease held by M8; no lease needed)
+cat /tmp/ssx3-host-lease (M8 11:59:17 UTC); log to $W/P1/run/p1o-waits.log
+shasum ps2EntryRunner (7a7d4b64 fresh); git log/status; ls ISO + ELF; pgrep (none)
+sed/grep $O/sub_003DD1D8 (flag reads); python3 hex checks (§P16-2l, each pasted)
+grep -rn "519AD8|-0x6528|-0x651C|-0x6550|-0x1268|sw .*,0x8(|sw .*,0x24(|sw .*,0x28(" $O
+sed regions: 3DCC88, 3DCBD8, 3DDFA8 (x3), 3DE420 (full), 3DE670 (loop+tail),
+  3DD7E0/3DDC30/3DDAC0/3DDDF0 provenances; P6 grep (30 addrs); ELF words x14
+# Step 1 (lease protocol)
+cat /tmp/ssx3-host-lease (absent 12:03:06 UTC)
+printf 'P1o\n' > /tmp/ssx3-host-lease (12:03:18 UTC)
+python3 hex recompute (0x1fffe80-0x80 = 0x1fffe00)
+(write /tmp/p1o-boot1.py: p1n env, WATCH frame swap, probe on)
+python3 /tmp/p1o-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 906252 B)
+rm -f /tmp/ssx3-host-lease (12:05:07 UTC); ls (absent); pgrep (none)
+log greps: driver-entry 1 (:687); frame hits :688/:689; watch census; thread/stub/syscall comms;
+  gs:/run:tick/frame/crash/dormant/start-thread/missing-target sweeps; slot fills; SIF merge check
+# Step 3
+(edit_file append Part 16; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1o] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (up-to-date check; the only push allowed)
+```
+
+Env delta vs boot-p1n-1: WATCH `0x1ffe000`→`0x1fffe00`, `0x1ffe010`→`0x1fffe10` only.
+Source delta: none.
+
+## P16-5. What I could not do
+
+- Confirm which of W1/W2/W3 fires for entry 0 at runtime: W1 (`3DE420`) has 0 printed stub
+  hits (§P16-2f) and W2/W3 indexes resolve at runtime; the §P16-2k receipt (WATCH
+  `0x519AD8`+`0x519AD4`) is designed but not run — Step 1 used the boot, Step 2b needs none.
+- Read the table base / entry-0 absolute address: `0x519AD8` was never watched (value unknown).
+- No runtime fix (per the brief): watch confirm + writer hunt only. The sema-26 non-delivery
+  remains out of scope, untouched.
+- One boot only (per the brief): no A/B on any rung.
+
