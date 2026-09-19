@@ -5,6 +5,47 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M6 launched (09-18 21:50, `local/muse/prompts/M6.md`):**
+      host-replay milestone 2 item 2 (S2 Part 4 items 2–4): scoped
+      `after_frame_event` suppression + `FrameCount`/frame-aging
+      semantics + the `dframe` +1 driver chase + fail-closed
+      `g_record_fifo_data` guard, on M5's header, desktop only.
+- [ ] **P1i launched (09-18 21:50, `local/muse/prompts/P1i.md`):**
+      diagnose the GS CSR park at `0x375d10`
+      (`(CSR&0xC000)!=0x4000` spin) from the closed boot-p1h-1 log +
+      ELF + sources; no fix. One ≤90 s boot only if the log cannot
+      name the missing producer. Lease is free.
+- [ ] **M5 read (09-18 21:45) — PASS, milestone 2 item 1 done:**
+      200/200 + `done` on all runs; `xfb_equal=200/200` (range
+      `0x004dc660`, 573440 B); counters fail-closed (`dpend` 0/0,
+      `pediff`/`vidiff` 0/0 det=1, no `record_flag_set`);
+      `xfb_equal_scratch=200/200` + `live_xfb_untouched=1`;
+      continuation skipped per brief (seam fc 8121 vs 8142). Verified:
+      probe row counts + receipts by independent parse, S2-sha
+      handling, vendor untouched (pre-existing Sep 10–17 uncommitted
+      hunks are not M5's), lease discipline. Notes: brief's pinned S2
+      sha was stale (M5 recorded both, used on-disk); `#define
+      private` promotion is header-local and layout-safe; one "Sync
+      snaps" failure in scrollback never surfaced in the report
+      (receipts all landed — watch item). Next: M6. Ledger row added.
+- [ ] **P1h read (09-18 21:45) — PASS, ladder advances past the MMIO
+      park:** analyzer fix `f2149e7` (ORI/ADDIU low-half fold, 1 file
+      +28) pushed to fork `ssx3`; 245/273 `[mmio]` entries corrected
+      (4 remaining folds proven genuine); regen recompiled clean;
+      boot 1 runs thread 1 to `0x375d10` (all 35 blocks, frame popped,
+      via `0x375a94`). New park recorded: GS CSR spin at `0x375d10`.
+      P1h obeyed the hardened push rule (ssx3 commit local-only).
+      Verified: fork push, TOML, recomp lines, boot log, park ELF
+      words + branch arithmetic. Next: P1i. Ledger row added.
+- [ ] **P4 read (09-18 21:45) — PASS, fork diffs mined with bodies:**
+      M1/M2/M7/M10/M12 full diffs; bt3's dynamic MMIO dispatch
+      (immunity-by-construction alternative to P1h), sync-CD + tick
+      pump, GPU/async-kick architecture; sm2/halogen/drakengard/reo
+      boot learnings; Q4 EeScheduler delivery point for
+      message-not-nesting; 20-row borrowable table (S1–S20) with
+      license re-cites. Gaps honest (depth-1 clones hide 7 revs).
+      Verified: bt3 MMIO + sync-CD bodies, M1 dispatch + STR bodies.
+      Findings feed P1i/P1j scoping. Ledger row added.
 - [ ] **P4 launched (09-18 21:25, `local/muse/prompts/P4.md`):** closes
       P3's admitted gap (per-fork diff bodies): reads the M1–M14 diffs
       from the existing `fork-survey/` clones, diffs working
