@@ -6693,3 +6693,428 @@ Env delta vs boot-p1r-1: WATCH 11 addrs → 2 addrs (`0x519C40`, `0x450DE4`) +
 
 ---
 
+## Part 21 (P1t): FIX — 0x3e3ad8 callback dispatched via host shim; worker passes G6, issues site #9, driver runs; thread 1 now spins on WaitSema(-1); entry-0 cycled 0→1→0
+
+Brief `local/muse/prompts/P1t.md`. First behavior fix on the critical path:
+1 `Fix:` commit (1 file, +46) + 2 boots. Tables, no verdicts. Stale-reading
+guard: Part 20 (P20-1b invocation context + table rule, P20-2a–2b the
+silent-drop receipts, P20-5 diagnosed-untouched note) re-read before acting.
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork, branch
+`ssx3`), `O=$W/P1/output`, `LOG1=$W/P1/run/boot-p1t-1.log`,
+`LOG2=$W/P1/run/boot-p1t-2.log`. File:line refs below are
+`ps2xRuntime/src/lib/` unless noted. All hand hex machine-checked §P21-1e.
+
+## P21-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (verified before Step 1; no claim — static work needs none) |
+| M12 hold | Observed once mid-session (between build start and 18:54:25Z; exact minute not recorded); absent at 18:54:25Z and at claim-check 18:55:02Z — no poll loop ran |
+| Waits log | `$W/P1/run/p1t-waits.log` (1 line: the claim record; zero wait polls) |
+| Pre-claim checks (18:55:02Z) | `pgrep -x ps2EntryRunner` exit 1; lease absent (verified twice); binary `7c67f285` (P1t Fix build); fork HEAD `58c9144`; ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1t\n' > /tmp/ssx3-host-lease` 18:55:07Z, immediately before boot-p1t-1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG1 139,001,723 B (exceeds the 50 MB soft cap; §P21-5) |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15 (lease still `P1t`, verified 19:03:02Z pre-boot; `pgrep -x` exit 1) |
+| Release | `rm -f /tmp/ssx3-host-lease` after Step 3 push; verified absent; `pgrep -x` exit 1 |
+| `adb` | Not used |
+
+## P21-1. Fix diff + choice + tests
+
+### a. Why (a)-as-written and (b) were not chosen (code evidence)
+
+| Option | Finding | Receipt |
+|---|---|---|
+| (a) exact entry → containing function | `sub_003E39A8` pc switch (`$O/sub_003E39A8_0x3e39a8.cpp:21-29`) has cases only for `0x3e39f0/0x3e3a08/0x3e3a14/0x3e3a3c/0x3e3a7c/0x3e3af0`; NO `case 0x3e3ad8`, NO `label_3e3ad8` anywhere in the file; `default: break` falls through to `ctx->pc = 0x3e39a8` (function top). Registering `0x3e3ad8` → containing fn would run the parent from its prologue, not the callback body | File excerpt above; table slots `:380392-380398` in `register_functions.cpp` mirror exactly the entry + 6 switch cases |
+| (b) backward-scan to registered range | Scan finds `0x3e39a8` → same run-from-top mis-execution; MORE code than (a); changes miss semantics for EVERY mid-range pc; no range table exists in the runtime (sparse slots only — a scan has no principled bound) | `ps2_runtime.cpp:1289-1293` (`hasFunction` = one slot test); no range API in `ps2_runtime.h` |
+| CSV split (P1l mechanism; not a brief option) | Functionally correct: `0x3e3ad8` sits on a clean `jr $ra` @ `0x3e3acc` / delay @ `0x3e3ad0` / `nop` @ `0x3e3ad4` boundary, body ends `jr $ra` @ `0x3e3af4` / delay @ `0x3e3af8` / `nop` @ `0x3e3afc`; collision predicate (`case`/`label_` in enclosing file) = 0. NOT chosen: both CSVs live in `$W/P1` (untracked — `git ls-files` shows no CSV), so a split yields no tracked diff and fails the brief's `Fix:`-commit + `the diff` receipt | `$O/sub_003E39A8:351-374,394-419`; `git ls-files \| grep csv` = analyzer sources only |
+| (c) chosen shape | Exact table entry for `0x3e3ad8` pointing at a faithful host shim of the 8 straight-line insns (not at the containing function). Pc-keyed (`== 0x3E3AD8u`): zero effect on any other pc/game. `!hasFunction` guard: yields to any future real entry (CSV split overrides the shim with no code change) | Diff §P21-1b |
+
+### b. The diff (`58c9144`, 1 file, +46, both trailers)
+
+`Stubs/CD.cpp` anonymous namespace (shim) + 4-line hook in `queueCdCallback`
+(after the `g_cdCallbackFn == 0u` early return). Registration runs lazily at
+first qualifying callback (post-table-init; a static-init registration would
+race table setup). Test-linkable: calls lib APIs only (`dispatchGuestBranch`,
+table APIs, `SET_GPR_*`/`READ*`/`WRITE64`/`FAST_READ32` via `Common.h` →
+`ps2_runtime_macros.h`); no generated symbols (tests link without runner).
+
+```
++        // P1t: SSX3 registers its CD-completion callback at 0x3E3AD8, which
++        // sits mid-function (inside sub_003E39A8's range) with no exact table
++        // entry, so the scheduler silently drops the invocation (!hasFunction
++        // + nonempty invocations zeroes pc). The containing recompiled
++        // function cannot enter mid-block (its pc switch has no 0x3E3AD8
++        // case; default falls through to the function top), so the exact
++        // entry points at this faithful host emulation of the 8 straight-line
++        // MIPS insns instead. Yields to any real recompiled entry (CSV split).
++        constexpr uint32_t kSsx3CdCallbackPc = 0x3E3AD8u;
++
++        void ssx3CdCallbackSemaSignal(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
++        {
++            // 0x3e3ad8: lui $v0,0x52
++            SET_GPR_S32(ctx, 2, 0x00520000);
++            // 0x3e3adc: addiu $sp,$sp,-0x10
++            SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 4294967280));
++            // 0x3e3ae0: lw $a0,-0x63B4($v0) ($a0 = *(0x519C4C))
++            SET_GPR_S32(ctx, 4, (int32_t)FAST_READ32(0x519C4Cu));
++            // 0x3e3ae4: sd $ra,0x0($sp)
++            WRITE64(ADD32(GPR_U32(ctx, 29), 0), GPR_U64(ctx, 31));
++            // 0x3e3ae8: jal 0x423DD0 (iSignalSema; ra = 0x3E3AF0)
++            SET_GPR_U32(ctx, 31, 0x3E3AF0u);
++            ctx->pc = 0x423DD0u;
++            if (!runtime->dispatchGuestBranch(rdram,
++                                              ctx,
++                                              0x423DD0u,
++                                              0x3E3AE8u,
++                                              0x3E3AF0u,
++                                              PS2Runtime::GuestBranchKind::DirectCall,
++                                              "JAL"))
++            {
++                return;
++            }
++            ctx->pc = 0x3E3AF0u;
++            // 0x3e3af0: ld $ra,0x0($sp)
++            SET_GPR_U64(ctx, 31, READ64(ADD32(GPR_U32(ctx, 29), 0)));
++            // 0x3e3af4: jr $ra / 0x3e3af8 (delay): addiu $sp,$sp,+0x10
++            const uint32_t target = GPR_U32(ctx, 31);
++            SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 16));
++            ctx->pc = target;
++        }
++
+             if (g_cdCallbackFn == kSsx3CdCallbackPc && !runtime->hasFunction(g_cdCallbackFn))
+             {
+                 runtime->registerFunction(g_cdCallbackFn, ssx3CdCallbackSemaSignal);
+             }
+```
+
+(Hook shown abridged: 4 added lines inside `queueCdCallback` + blank; the
+`void queueCdCallback...` context lines are unchanged.)
+
+### c. Shim fidelity (each guest insn → shim line)
+
+| Guest @ pc | Effect | Shim line | Same-as-recompiled check |
+|---|---|---|---|
+| `lui $v0,0x52` @ `0x3e3ad8` | `$v0`=`0x520000` | `SET_GPR_S32(ctx, 2, 0x00520000)` | Literal copy of `$O:376` |
+| `addiu $sp,-0x10` @ `0x3e3adc` | `sp`-16 | `ADD32(sp, 4294967280)` | `4294967280`=`0xFFFFFFF0`=-16 (check §P21-1e); mirrors `$O:379` |
+| `lw $a0,-0x63B4($v0)` @ `0x3e3ae0` | `$a0`=`*(0x519C4C)` | `FAST_READ32(0x519C4Cu)` | `0x520000-0x63B4`=`0x519C4C` (check); `FAST_` matches `$O:382` (const addr, no special check) |
+| `sd $ra,0(sp)` @ `0x3e3ae4` | stack spill | `WRITE64(ADD32(sp, 0), GPR_U64(ra))` | Token-identical to `$O:385` (watch/trace/special handling included) |
+| `jal 0x423DD0` @ `0x3e3ae8` | `ra`=`0x3e3af0`, call | `SET_GPR_U32(ra, 0x3E3AF0u)` + `ctx->pc=0x423DD0` + `dispatchGuestBranch(…,0x423DD0,0x3E3AE8,0x3E3AF0,DirectCall,"JAL")` + `if(!…)return; ctx->pc=0x3E3AF0` | Token-identical to `$O:388-393`; trampoline sets `pc`=`0x423DD8`/`$v1`=`-0x43`, so the `[diag:sema]` emit sees `pc`=`0x423DD8` `ra`=`0x3e3af0` exactly as the compiled path would |
+| `ld $ra,0(sp)` @ `0x3e3af0` | restore `ra` (0) | `SET_GPR_U64(ra, READ64(ADD32(sp,0)))` | Token-identical to `$O:397` |
+| `jr $ra` @ `0x3e3af4` + delay `addiu sp,+0x10` @ `0x3e3af8` | `pc`=`ra`=0 (invocation pops), `sp` net-zero | `target=GPR_U32(ra); sp+=16; ctx->pc=target; return` | Same order as `$O:401-415` (delay before `pc` write); `pc`=0 → scheduler pop path (`Sched:461-478`) unchanged |
+| `EeDispatcherTransfer` from the signal path | — | No catch in shim (same as any recompiled caller) → propagates to the scheduler's catch identically | `dispatchGuestBranch` has no catch (`ps2_runtime.cpp:1649-1663`); scheduler catches at `Sched:575-579` |
+
+Net register/memory effect at return: `$v0`=signal result, `$v1`=`-0x43`,
+`$a0`=sema id, `sp`/`$ra` restored, one 8-byte stack slot written, `pc`=0 —
+the same state the compiled body would leave.
+
+### d. Tests + build (before/after A/B with stash)
+
+| Run | Tree | Total | Passed | Failed |
+|---|---|---|---|---|
+| Baseline (fix stashed, sidecars purged, rebuilt) | `be01146` | 425 | 424 | 1: `sceGsSyncVCallback runs as a scheduler invocation on its callback stack` (`callback invocation should use the reserved async stack pool`) |
+| Fixed (8 pre-stash runs + 1 post-restore run, sidecars purged, rebuilt) | `be01146` + CD.cpp | 425 | 424 | 1: same test + same assertion (9/9 fixed runs; 11/11 runs session-wide identical) |
+
+| Item | Value |
+|---|---|
+| New failures from the fix | 0 (before/after identical: same totals, same single test, same assertion) |
+| P1s-baseline mismatch note | P20-3 recorded the 1 failure as `GS alpha-test AFAIL…`; this session's BASELINE rebuild (same `be01146` tracked tree, fix stashed) fails `sceGsSyncVCallback` instead — the AFAIL↔GsSyncV flip predates this session (same sources, different failing test across builds; P13-1d also recorded GsSyncV failing at P1l). Out of scope; §P21-5 |
+| Rebuild | `cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4`, exit 0 (final, post-purge) |
+| Sidecar incident | `._CD.cpp` AppleDouble re-created on the volume after edits; globbed as a TU → `3968 warnings and 13 errors`. Fixed by repo-wide `find . -name '._*' -delete` before every build (3 purges this session); never committed |
+| Binary | `7c67f28588ef679bdb08f2d72e6a5ba49e6f63274a624894a5056e552a81e414` (`ps2EntryRunner`, 163 MB class) |
+
+### e. Machine-check paste block (every hand computation in Part 21)
+
+```
+python3 -c "print(hex(4294967280), hex((0x520000-0x63B4)&0xFFFFFFFF), hex(0x3e3ae8+8), 757352+(0x3e3ad8-0x3e39a8)//4)"
+→ 0xfffffff0 0x519c4c 0x3e3af0 757428
+python3 -c "print(hex(0xFFFFFFFF & -1), hex(0x31aa84+8), hex(0x31aadc+8), hex(0x31acec+8), 1389653-4119, 139001723-566220, round(237/17,2), round(1387579/90))"
+→ 0xffffffff 0x31aa8c 0x31aae4 0x31acf4 1385534 138435503 13.94 15418
+python3 -c "print(1388287-2917, 1385534-(1388287-2917))"
+→ 1385370 164
+```
+
+Row 1: addiu `-16` word; `lw` address; callback `jal` ra; table slot of
+`0x3e3ad8` (slot(`0x3e39a8`)=757352 from `register_functions.cpp:380392`).
+Row 2: sema id `-1` word; the three `jal`→`ra` checks (§P21-2c); LOG1−p1s
+line delta (+1,385,534) and byte delta (+138,435,503); id-29 signals/block
+(~14); `-1` waits/second (~15,418).
+Row 3: `[diag:sema]` line delta (LOG1 1,388,287 − p1s 2,917) and the misc
+remainder (+164).
+
+## P21-2. Boot + chain answer (2 boots)
+
+### a. Boot headers
+
+| Item | Boot 1 (LOG1) | Boot 2 (LOG2) |
+|---|---|---|
+| Log | `$W/P1/run/boot-p1t-1.log`, 1,389,653 lines, 139,001,723 B, 17 blocks | `$W/P1/run/boot-p1t-2.log`, 1,370 lines, 139,914 B, 17 blocks |
+| Env | p1s env byte-identical (`/tmp/p1t-boot1.py` differs from `/tmp/p1s-boot1.py` in docstring + LOG only): `PS2X_DIAG_PERIOD_MS=5000`, probe on, `PS2X_DIAG_SEMA=1`, WATCH `0x519c40,0x450de4` | p1s env MINUS `PS2X_DIAG_SEMA` (boot-1's 1.39M-line `-1` flood would repeat; entry-0 needs only WATCH — matches the p1p-2 entry-0 method), WATCH `0x5e0088,0x519c40` |
+| Run | Foreground 90 s, SIGTERM rc=-15, CWD `$W/P1/run`, binary `7c67f285` | Same harness, SIGTERM rc=-15, same binary |
+| Boot-2 justification (brief's rule) | — | Fix fired + chain stalling at a NEW point (worker re-parked post-#9; thread 1 in `-1` spin) + entry-0 is a brief-required receipt only obtainable with swapped WATCH |
+
+### b. The fix fired: callback signal + epoch order (LOG1)
+
+`ra=0x3e3af0` lines: **1** (LOG1:581; p1s: 0). CD-tagged (`cbFunc=43444342…`)
+signals: **1** (same line; p1s: 0). `pc=0x3e3ad8` dispatches: 0 both boots
+(the shim emits no pc line; the signal line IS the dispatch proof).
+
+| Line | Content (abridged) |
+|---|---|
+| :205 | `op=wait id=26 … parked=1 waker=2 pc=0x423de8 ra=0x3e3c20` (first park; same as p1s) |
+| :574 | `op=signal id=26 … waiters=1->0 waker=1 pc=0x423dc8 ra=0x3e48b8 … target=2 … result=26` (first signal; same bytes as p1s) |
+| :581 | `op=signal id=26 count=0->1 waiters=0->0 waker=2 pc=0x423dd8 ra=0x3e3af0 inInt=1 iSafe=1 invKind=0 invDepth=1 cbFunc=4344434200000001 target=- … result=26` (**NEW**: the callback body ran; count path — worker had not yet re-parked) |
+| :582 | `op=wait id=26 count=1->0 parked=0 waker=2 … ra=0x3e3c20 … result=26` (**NEW**: worker consumed the callback's signal, no park) |
+| :586 | `op=wait id=26 count=0->0 parked=1 waker=2 … result=park` (worker re-park; same shape as p1s :581) |
+
+Full epoch order (:570–:597; :570–:580 byte-identical to p1s :570–:580,
+same line numbers — divergence starts :581):
+
+| Line | Event |
+|---|---|
+| :572–:573 | `0x519c40` = `0x0` → `0xA` (thread 1, `0x3e4768`/`0x3e48b4`) |
+| :574 | first signal 26 → thread 2 |
+| :575 | `0x519c40` = `0x2` (thread 2, `0x3e3c4c` — worker wake) |
+| :576–:577 | `sceCdRead lbn=0x5f1a3 sectors=1 buf=0x9d0800 ret=0x3e3b8c` + `BIGF` payload (`42494746147c1a00`; same bytes as p1s) |
+| :578 | `[cd:callback] queued func=1 cb=0x3e3ad8` |
+| :579 | `0x519c40` = `0x2` (thread 2, `0x3e3ba0` — issuer success) |
+| :580 | `[cd:callback] start func=1 cb=0x3e3ad8` (attach; thread 2 still running) |
+| :581 | **callback signal** (table above; replaces p1s's silent drop) |
+| :582 | worker wait consumes `1->0`, no park |
+| :583 | `0x519c40` = `0x0` (thread 2, `pc=0x3e3d68 ra=0x3e3d6c` — the site-#9 `jal 0x3DE420` delay-slot store; G6 passed, W1 issued) |
+| :584–:585 | worker pump id-5 lock/unlock pair (`waker=2`, `ra=0x3e5738`/`0x3e57bc`) |
+| :586 | worker re-parks on 26 |
+| :587–:592 | thread-1 id-5 pairs |
+| :593 | `[diag:driver-entry] sp=0x1fffe80 ra=0x3ded88 sourcePc=0x3ded80 checkpointed=0` (same bytes as p1s :582 — the driver ran downstream of #9) |
+| :594–:595 | thread-1 id-5 pair |
+| :596 | `op=signal id=28 count=0->1 … waker=1 pc=0x423dc8 ra=0x31acf4 … result=28` (**NEW** id; `jal SignalSema` @ `0x31acec`, delay `lw $a0,0x4044($v1)`, `sub_0031AAF0`) |
+| :597 → :1389654 | thread-1 `WaitSema(-1)` spin begins (§P21-2c) |
+
+Chain answer rows (brief's Step-2 list):
+
+| Receipt | Value |
+|---|---|
+| `ra=0x3e3af0` signal lines | 1 (:581 — the callback body RAN) |
+| Thread-2 wake past the epoch | None: thread-2 `scheduled` = 2 (b0) then 0 ×16 (same bytes as p1s); worker did its pass inside b0 and re-parked :586; nothing re-signaled 26 after |
+| Site #9 / G6 | **REACHED**: G6 passed (W1 prelude ran), site-#9 `jal` issued (:583 delay store), driver entered (:593 probe). No new residue at #9 — the worker cycled to G0 and re-parked awaiting the next completion |
+| Entry-0 flag at park | **Still 0** (LOG2: set `0x1` @ `0x3de468` :387, cleared @ `0x3e6518` :389; §P21-2e). Thread 1 has no single new park (samples spread; §P21-2d) — the chain did not settle |
+
+### c. New stall point: `WaitSema(-1)` spin (LOG1 :597 → end)
+
+| Item | Value |
+|---|---|
+| Shape | `op=wait id=-1 count=-1->-1 parked=0 waker=1 pc=0x423de8 ra=0x31aa8c inInt=0 result=-408` (`KE_UNKNOWN_SEMID`; never blocks → hot guest loop) |
+| Count | 1,387,579 waits (1,387,578 at `ra=0x31aa8c` + 1 stderr-interleaved line :549183); ~15,418/s over 90 s |
+| Call site | `jal WaitSema` @ `0x31aa84` (delay `lw $a0,0x18($s0)` → `$a0`=`*($s0+0x18)`=`-1` = `0xFFFFFFFF`), `sub_0031A6B8` (`0x31a6b8`–`0x31aaf0`); post-call `sw $zero,0x1C($s0)` @ `0x31aa8c` (`$O/sub_0031A6B8:2105-2133`) |
+| Sibling signals | 24 × `op=signal id=-1 … waker=4 pc=0x423dc8 ra=0x31aae4 inInt=0 … result=-408` (`jal SignalSema` @ `0x31aadc`, delay `lw $a0,0x18($a0)`, same function `$O:2305-2331`) |
+| Steady stub cluster (b1, all blocks same regime) | `0x31a9d8`/`0x31a268`/`0x31aa18`/`0x31a308`/`0x31a3c0` @174,669; `0x423de0` (WaitSema) @87,349 `firstRa=0x31aa8c`; `0x423df0` (PollSema, syscall `0x45` — NEW id) @87,335 `firstRa=0x31aa98`; `0x3174a8`/`0x31ad00`/`0x3e5928`/`0x31aa58`/`0x317328` @87,334 (outer loop via `0x316e0c`/`0x316e3c`/`0x316e44`/`0x316e5c`, `sub_00316D60`; tick pc `0x316e3c` = `jal func_317328`) |
+| Steady syscalls (b1) | `0x44` @87,350, `0x45` @87,335, `0xffffffbd` @15, `0x42` @1 (p1s b1: `0x2f` @740,054, `0x44` @80, `0xffffffbd` @80) |
+| Old-loop absence | `firstRa=0x3dd280`/`0x3dd290`: 17/17 (p1s) → 0/0; `0x3e5440` 536K–740K/block (p1s) → unprinted all blocks (a 740K entry would print #1; truly unhit, not cutoff) |
+
+P1s comparison: ZERO `id=-1` lines in p1s (P20-2c: every signal returned
+its id, no `-408`). The spin starts :597, immediately after the :593 driver
+probe — new behavior downstream of the chain progress.
+
+### d. Per-block threads (LOG1, all 17; `sch` = `scheduled`)
+
+Thread 1 and thread 4 dispatch in lockstep b1+ (identical counts every
+block); thread 2 sch 2 then 0 ×16; thread 3 Ready @ `0x31ac60` sch 0
+(always; same as p1s); thread 5 sch 1 (b0) then 0 ×16 (same as p1s).
+
+| blk | id1 pc | id1 sch | id2 sch | id4 sch | blk | id1 pc | id1 sch | id2 sch | id4 sch |
+|---|---|---|---|---|---|---|---|---|---|
+| 0 | `0x317328` | 36 | 2 | 12 | 9 | `0x3e5980` | 14 | 0 | 14 |
+| 1 | `0x3e5980` | 15 | 0 | 15 | 10 | `0x3e5980` | 14 | 0 | 14 |
+| 2 | `0x3e5980` | 14 | 0 | 14 | 11 | `0x31ad00` | 14 | 0 | 14 |
+| 3 | `0x31a278` | 13 | 0 | 13 | 12 | `0x31a278` | 12 | 0 | 12 |
+| 4 | `0x3e5928` | 14 | 0 | 14 | 13 | `0x31a278` | 15 | 0 | 15 |
+| 5 | `0x3e5980` | 13 | 0 | 13 | 14 | `0x3e5980` | 14 | 0 | 14 |
+| 6 | `0x3e5980` | 12 | 0 | 12 | 15 | `0x3e5980` | 14 | 0 | 14 |
+| 7 | `0x3e5980` | 14 | 0 | 14 | 16 | `0x31a278` | 14 | 0 | 14 |
+| 8 | `0x423df0` | 14 | 0 | 14 | | | | | |
+
+(Threads 2/4/5 pcs `0x423de8` all blocks; waitIds 26/29/30; entries
+`0x3e3be0`/`0x31ac08`/`0x382740`; priorities 12/99/5 — all same as p1s.
+New-pc resolutions: `0x317328` = entry `sub_00317328`; `0x31a278` in
+`sub_0031A268`; `0x31ad00` in `sub_0031AAF0`; `0x3e5928` = entry
+`sub_003E5928`; `0x423df0` = entry `sub_00423DF0` (PollSema trampoline).)
+
+### e. Boot 2: entry-0 + epoch reproduce (LOG2, 1,370 lines)
+
+| Line | addr + width | value | pc | thread | ra | sp |
+|---|---|---|---|---|---|---|
+| :58 | `0x5e0088` w8 | `0x0` | `0x3e64d0` | 1 | `0x3dcd10` | `0x1fffe80` (init-time `sd`; same bytes as p1p-2 :57) |
+| :387 | `0x5e0088` w4 | `0x1` | `0x3de468` | 1 | `0x3de3fc` | `0x1fffa90` (**SET**; in `sub_003DE420` range) |
+| :389 | `0x5e0088` w4 | `0x0` | `0x3e6518` | 1 | `0x3de7e4` | `0x1fffe00` (**CLEARED**; last write — final value 0) |
+
+Order around the cycle: :386 worker #9 delay store (`0x519c40`=`0x0` @
+`0x3e3d68`, thread 2 — the :583-equivalent) → :387 entry-0 SET (thread 1)
+→ :388 driver probe (same bytes as LOG1 :593) → :389 entry-0 CLEAR
+(thread 1). Epoch control fully reproduced: :378/:379 (`0`→`0xA`),
+:380 (wake `0x2`), :383 queued, :384 (issuer `0x2`), :385 start, :386 (#9),
+:388 (probe). `0x450DE4`: 0 writes (LOG1; same as p1s).
+
+Boot-2 thread-1 pcs: `0x3e5980` ×12, `0x31a278` ×4, `0x31a268` ×1 (LOG1:
+`0x3e5980` ×8, `0x31a278` ×4, `0x317328`/`0x3e5928`/`0x423df0`/`0x31ad00`
+×1) — both boots sample a cycle, not a point.
+
+### f. Before/after: dispatch behaviors the fix must not change (LOG1 vs p1s)
+
+No scheduler/dispatch/table code changed (the fix only ADDS table slot
+757428 at runtime); these receipts confirm the addition leaked nowhere.
+
+| Behavior | Before (p1s) | After (LOG1) | Reading |
+|---|---|---|---|
+| Exact-entry hits (stub b0 top-30) | 30 printed (486 distinct) | 30 printed (496 distinct); 20/30 shared with p1s b0 | 10 dropped from b0 top-30, 10 added (§below) |
+| Dropped from b0 top-30 | — | `0x326eb0`/`0x3ffa58`/`0x3ffbc0`/`0x423dc0`/`0x423dd0` reappear in LOG1 b1+ blocks (below b0 cutoff=134, still dispatched); `0x3e5700`/`0x3e5760` (pump; p1s b0 count 74 < 134) proven still dispatched by the sema trace (66 id-4 + 13 id-5 pairs with pump `ra`s); `0x4123e8`/`0x41605c` (p1s b0 counts 68/117 < 134) unobservable below cutoff; `0x3e5440` (p1s 536K–740K/block) truly unhit — thread 1 left that loop (the fix's effect, §P21-2c) | Cutoff effects + 1 genuine (intended) path change |
+| Added to b0 top-30 | — | `0x317328`/`0x3174a8`/`0x31a268`/`0x31a308`/`0x31a3c0`/`0x31a9d8`/`0x31aa18`/`0x31aa58`/`0x31ad00`/`0x423df0` (the `-1`-spin cluster; counts 134–129,855) | New code reached, not new dispatch rules |
+| All-block printed sets | 40 targets | 49 targets (5 p1s-only listed above; 14 LOG1-only = the 10 + `0x3ffcd8`/`0x3ffd60`/`0x400190`/`0x400250`) | Same story at full-boot scope |
+| Syscall ids printed | 20 ids (b0 27 distinct, b1+ 3) | 19 p1s ids + `0x45` NEW (PollSema; the spin loop), `0x17` unobserved (p1s: count 1, b0-only boot call — below cutoff or path change) | `0x2f` (740K/block p1s steady) gone from steady with the old loop; `0x44`/`0xffffffbd` still hit (new rates) |
+| Miss diagnostics | `missing-target` 0; `No exact recompiled function` 0 | 0; 0 | Silent paths exactly as before |
+| Empty-invocations path | `[diag:dormant]` 40; `[diag:start-thread]` 4 | 40; 4 (same counts) | Same code, same counts |
+| Sema result census | Every signal returned its id (no `-408`) | Same EXCEPT the NEW `id=-1` class (1,387,579 waits + 24 signals, all `-408` — guest passing a bad id, not a path change) | Path behavior identical; new guest input class |
+
+Full signal census (LOG1; `waits/sigs`):
+
+| Waits | Sigs | `ra` (site) | `id` | Decodes to |
+|---|---|---|---|---|
+| 1,387,579 | 24 | `0x31aa8c` / `0x31aae4` | -1 | `jal WaitSema` @ `0x31aa84` / `jal SignalSema` @ `0x31aadc` (`sub_0031A6B8`); all `result=-408`; waits `waker=1`, sigs `waker=4 inInt=0 iSafe=0` |
+| 238 | 237 | `0x31ac30` / `0x31abf8` | 29 | Same shape as p1s (`waker=1 inInt=1 iSafe=1 invKind=0 invDepth=1 cbFunc=0`, `target=4`; byte-identical line shape) — count only changed (1,360→237) |
+| 66 | 66 | `0x3e5738` / `0x3e57bc` | 4 | Pump thread-site; same counts as p1s |
+| 13 | 13 | `0x3e5738` / `0x3e57bc` | 5 | Same site (12× `waker=1` + 1× `waker=2` worker pair :584–:585); p1s was 8/8 |
+| 3 | 2 | `0x3e3c20` / `0x3e48b8`+`0x3e3af0` | 26 | §P21-2b (first + callback signals; first park + consume + re-park) |
+| 1 each | 1 each | `0x3e3598` | 6–25 | One-shot drainer (same as p1s) |
+| 2 | 2 | `0x418ce0` / `0x418d3c` | 1 | Count-path pair (same as p1s) |
+| 0 | 1 | `0x31acf4` | 28 | NEW single (`jal SignalSema` @ `0x31acec`, `sub_0031AAF0`; :596) |
+| 0 | 0 | `0x3e57ac` | — | Pump i-site never taken (same as p1s) |
+| 1 | — | `0x316e3c` bleed | — | NOT a site: 1 wait line (:549183) interleaved mid-line with a `[run:tick]` line (concurrent stderr; `pc=0x316e3c` belongs to the tick). A 2nd wait line ends `…inInt=0` (truncated twin). Both counted in the `-1` total; neither is a sema-path variant |
+
+### g. Ladder delta vs boot-p1s-1 (4,119 lines, 566,220 B)
+
+LOG1: 1,389,653 lines, 139,001,723 B, 17 blocks (+1,385,534 lines =
++1,385,370 `[diag:sema]` + 164 misc; check row 3 §P21-1e).
+
+| Rung | boot-p1s-1 | LOG1 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×17 | `0x3e5980` ×8, `0x31a278` ×4, 4 others ×1 (§P21-2d) | Left the static park; cycles |
+| Thread-1 sch | 84/81/81/80/70/81/81/81/78/77/69/81/81/81/78/78/70 | 36/15/14/13/14/13/12/14/14/14/14/14/12/15/14/14/14 | New regime (~12–15 + b0 36) |
+| Thread-2 | parked 26 @ `0x423de8`, sch 2 then 0 ×16 | Same bytes | None |
+| Thread-3 | Ready @ `0x31ac60`, sch 0 | Same | None |
+| Thread-4 | parked 29 @ `0x423de8` (sch 60 b0) | Same ids/pcs/entries (sch 12 b0, 12–15 steady) | Count regime only |
+| Thread-5 | parked 30 @ `0x423de8` (sch 1 b0) | Same (sch 1 b0) | None |
+| Missing target / `No exact` | 0 / 0 | 0 / 0 | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 496 / 31,27 ×15 | +10 / +13,+9 (new paths) |
+| Syscall distinct b0 / b1+ | 27 / 3; 20 printed ids | 28 / 4; 19 shared + `0x45`, minus `0x17` | §P21-2f |
+| CD callback | :578 + :580 (func=1 cb=`0x3e3ad8`) | :578 + :580 (same func/cb/lines) | None |
+| CD read | :576 same lbn/ret/buf/payload | Same line, same bytes | None |
+| CD reads total | 21 | 21 | None |
+| Probe | 1 (:582, p1o bytes) | 1 (:593, same bytes) | Line number only |
+| Watch `0x519C40` | 7 lines | 8 lines (+:583 #9 store) | The progress receipt |
+| Watch `0x450DE4` | 0 writes | 0 writes | None |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | gif 2 / kick 66 / reg 122 / prim 33 / copy-reg 8 / texa 1 | 2 / 66 / 122 / 33 / 8 / 1 | None |
+| `run:tick` | 6 | 7 (sampled `pc=0x316e3c`) | +1 (timing regime) |
+| Presented frame | None | None (sole `frame` hit = raylib TIMER line) | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| SIF module lines | 6 | 6 | None |
+| `firstRa=0x3dd290` / `0x3dd280` | 17 / 17 | 0 / 0 | Old loop gone |
+| `target=0x3de420` / `0x3ddfa8` | 0 / 0 | 0 / 0 | None (the #9 `jal 0x3DE420` executed — :583 + :593 prove it — but count 1 sits below the print cutoff; `0x3de420` has a CSV row + 44 reg lines, so dispatch was exact, not missed) |
+
+## P21-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (both boots) | `7c67f28588ef679bdb08f2d72e6a5ba49e6f63274a624894a5056e552a81e414` | `58c9144` tree (P1t `Fix:` on `be01146`; incremental `-j4` rebuild, exit 0) |
+| `ps2x_tests` (CWD `$R`, rebuilt) | Total 425, Passed 424, Failed 1 (`sceGsSyncVCallback … reserved async stack pool`) | Before/after A/B identical (§P21-1d); failure pre-existing (also P1l/P1j), unrelated, not fixed |
+| `PS2Recomp` branch `ssx3` HEAD | `58c9144` (`Fix: dispatch the mid-label CD callback at 0x3E3AD8 via a faithful host shim (P21-1)`, 1 file, +46, two trailers) | Sole P1t fork commit; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added |
+| I2 commits in history | `66d992c` (I2-G5), `d62c4b5` (I2-G6) | Other agent's; present at session start, untouched |
+| Fork push | `git push fork ssx3` from fork clone only (§P21-4) | The only push allowed (no push in ssx3) |
+| This report | `[P1t]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P21-4. Exact commands
+
+From `$R` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`$O=$W/P1/output`, `LOG1`/`LOG2` as above:
+
+```
+# Step 1 (static; no lease)
+re-read REPORT Part 20 (paged reads)
+read EeScheduler.cpp run loop (280-585) + ps2_runtime.cpp table/slot/dispatch
+  (1060-1096, 1240-1293, 1314-1347, 1580-1664) + Stubs/CD.cpp queueCdCallback (1-88)
+  + Sync.cpp (all) + ps2_runtime.h API decls + trampoline sub_00423DD0
+read $O/sub_003E39A8 (switch 1-30, callback 330-419) + csv rows (7215-7216)
+python3 hex checks (row 1 §P21-1e); slot/label census (register_functions.cpp:380392-8)
+(edit_file: kSsx3CdCallbackPc + ssx3CdCallbackSemaSignal + queueCdCallback hook, CD.cpp only)
+find ps2xRuntime/src/lib/Kernel -name '._*' -delete   (re-run repo-wide before EVERY build)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 (exit 0)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests -j4 (exit 0)
+ps2x_tests CWD $R (8 runs: 425/424/1 GsSyncV each; named via [Failed] grep)
+git stash push -- <CD.cpp>; purge; rebuild; ps2x_tests x2 (baseline 425/424/1 GsSyncV)
+git stash pop; purge; rebuild both targets (exit 0); ps2x_tests (425/424/1)
+shasum -a 256 ps2EntryRunner (7c67f285)
+git add ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp (NAMED file only; runner/ left alone)
+git commit -m "Fix: ..." (two trailers; NO push yet) -> 58c9144
+(write /tmp/p1t-boot1.py; diff vs p1s-boot1.py = docstring + LOG only)
+# Step 2 (lease protocol + boot 1)
+cat /tmp/ssx3-host-lease (M12 once mid-session; absent 18:54:25Z + 18:55:02Z; no polls)
+pgrep -x ps2EntryRunner (exit 1); shasum (7c67f285 fresh); git log (58c9144); ls ISO + ELF
+printf 'P1t\n' > /tmp/ssx3-host-lease (18:55:07Z, absent verified twice) + >> p1t-waits.log
+python3 /tmp/p1t-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 139001723 B)
+# Step 2 (log analysis, lease-free; lease still held)
+sema census: 1388287 lines; id-26 5-line record; ra=0x3e3af0 x1; cbFunc-tagged x1
+epoch order :570-:597; per-block thread table (17x5); watch/probe/cd sweeps
+-1 census: waits by ra/waker/result; sigs by ra/waker; ra-resolution via csv + $O excerpts
+  (sub_0031A6B8:2095-2133 + :2305-2331, sub_0031AAF0:1235-1266, sub_00316D60:491-531)
+stub b0 sort-compare (comm) + all-block set compare + cutoff + b1 steady table
+syscall id-set compare + b1 lists; dormant/start-thread/VIF/GIF/frame/crash/
+  missing-target/No-exact/SIF/firstRa/target sweeps; p1p-2 entry-0 method re-read (P17-1/2)
+# Step 2 (boot 2)
+(write /tmp/p1t-boot2.py: SEMA unset, WATCH 0x5e0088,0x519c40, LOG2)
+cat lease (P1t); pgrep -x (exit 1)
+python3 /tmp/p1t-boot2.py (90 s, SIGTERM rc=-15, 139914 B)
+entry-0 3-line record (:58/:387/:389) + epoch-control check (:378-:388) + pc sample lists
+python3 hex checks (row 2 §P21-1e)
+# Step 3
+(edit_file append Part 21 in 3 chunks)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1t] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (the only push allowed)
+rm -f /tmp/ssx3-host-lease; ls (absent); pgrep -x (exit 1)
+```
+
+Env delta boot 1 vs boot-p1s-1: NONE (script diff = docstring + LOG).
+Env delta boot 2 vs boot 1: `PS2X_DIAG_SEMA` unset + WATCH swapped to
+`0x5e0088,0x519c40`. Source delta: `Stubs/CD.cpp` (+46).
+
+## P21-5. What I could not do
+
+- Attribute the `-1` sema slot to a writer: `$a0`=`*($s0+0x18)` at the
+  `0x31aa84` call (thread 1) and `$a0`=`*($a0+0x18)` at `0x31aadc`
+  (thread 4) read `-1` constantly (1.39M identical reads; nothing wrote the
+  slot this boot). The next brief owns the `-1` stall (CreateSema failure?
+  uninitialized slot? deleted sema?).
+- Observe `0x4123e8`/`0x41605c` in LOG1 (below the b0 print cutoff of 134;
+  p1s b0 counts were boot-phase 68/117). Presence neither confirmed nor
+  denied — the histogram cannot see below cutoff.
+- Explain the AFAIL↔GsSyncV single-failure flip across builds (same
+  `be01146` tree fails different single tests in different build/run
+  sessions). Within-session before/after is identical (11/11 runs), so it
+  does not touch this fix; the GS-test order/state dependence is untouched.
+- Add a committed unit test for the shim: the runbook's Step-1 receipt list
+  is closed (diff + `ps2xTest` baseline + rebuild green) and demands a
+  minimal one-file diff; a scheduler+callback harness would be a second
+  file of substantial line count. The two boots are the behavior receipts.
+- Keep LOG1 under the 50 MB soft cap: the brief mandates the p1s env
+  (`PS2X_DIAG_SEMA=1`), and the `-1` spin (guest behavior unlocked by the
+  fix) emits 1.39M trace lines under it. Under the 200 MB hard cap (139 MB).
+  Boot 2 ran SEMA-off for the entry-0 receipt.
+- Settle thread 1 on a single park: both boots sample a cycle
+  (`0x3e5980`/`0x31a278`/others), and entry-0 ended at 0 — the chain
+  advanced (worker full pass + driver run) but did not complete.
+- Run a third boot (reserve exhausted at two by the brief's max).
+- One `.[._*]`-class note: two LOG1 sema lines are malformed by concurrent-
+  stderr interleaving (:549183 tick-bleed + 1 truncated twin); both counted
+  in the `-1` total, neither a sema-path variant.
+
+---
+
