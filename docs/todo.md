@@ -5,6 +5,39 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1h launched (09-18 21:15, `local/muse/prompts/P1h.md`):**
+      fix the analyzer's LUI-only MMIO detector (read the ORI/ADDIU
+      low half), regenerate + audit all 273 `[mmio]` entries, rebuild,
+      one boot for the ladder. Builds any time, boots yield the lease
+      to M5. Push rule hardened again: `git push` only inside the fork
+      clone, never in ssx3 (P1g pushed origin despite the fork-only
+      rule, rationalized in P8-0 — content benign).
+- [ ] **P1g read (09-18 21:10) — PASS, park fully diagnosed:** the
+      `0x391330` spin is a recompiler bug, not game logic: the MMIO
+      detector folds LUI+ORI accesses to the page base, so the VIF0
+      DMA kick + STR poll both hit `m_ioRegisters[0x10000000]` (stuck
+      `0x104`). Verified: ELF words, TOML folds, recomp `:164`,
+      detector source, both memory-path gates, branch arithmetic.
+      249/273 `[mmio]` entries fold the same way (7 proven). No boot
+      needed. Next: P1h. Ledger row added.
+- [ ] **P2 read (09-18 21:10) — PASS, strong negative result:** PCSX2
+      (`1275b25a`) runs the real BIOS and HLEs almost nothing on the
+      EE, so it contains no handler/alarm/CD/RPC stack behavior to
+      borrow — P1f's direction stands uncontradicted. One real
+      tension: `EENULL`/`EELOAD` live inside P1f's borrowed
+      `[0x80000,0x100000)` on real hardware (no BIOS here, and the
+      SSX3 ELF doesn't touch the range, so no action). Verified: rev,
+      enum, EELOAD lines. Ledger row added.
+- [ ] **P3 read (09-18 21:10) — PASS with follow-up queued:** 133
+      forks / 50 PRs enumerated; bt3-recomp (GPL-3, playable, GPU
+      path) is the most relevant downstream; N64ModernRuntime's
+      message-not-nesting is the architectural alternative; fork
+      LICENSE files are near-uniformly GPL-3 (M1–M14 snippets
+      borrowable); PSXRecomp is PolyForm Noncommercial (unusable).
+      Gap: per-fork diff bodies didn't survive (clones persist under
+      `fork-survey/` for a P4 follow-up if needed — not launched;
+      MMIO fix is the priority). Verified: bt3, N64MR, 2 licenses.
+      Ledger row added.
 - [ ] **P1g launched (09-18 20:45, `local/muse/prompts/P1g.md`):**
       diagnose the post-fix park at `0x391330` (`sub_003912A8`, pc
       stable but `scheduled` advancing) from the closed boot-2 log +
