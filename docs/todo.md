@@ -5,6 +5,18 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P6 read (09-18 23:00) — PASS, thin but honest:** 801-row
+      addr→name CSV (names only, longest line 86 chars — license rule
+      held); only 6.67% sweep coverage and ALL 11 ladder addrs UNNAMED
+      (decomp is early: 6 split files, 390 stubs). Real wins anyway:
+      `main` at `0x31af80`, GS-wait caller reached from the
+      `cSSXApp` constructor row (verified `jal`), sweep vindicated
+      (100% JAL recall, 0 splits in 106 tight pairs — merges only),
+      sweep dup found (`0x42c1f0` lines 9229–9230 — KNOWN ISSUE, do
+      not touch mid-ladder; dedup at next CSV regen), tooling theft
+      table. Verified: rev, license absence, sha1, 749 symbols, CSV
+      rows, dup lines, caller JAL. P1k already instructed to use the
+      CSV if present. Ledger row added.
 - [ ] **P1k launched (09-18 22:45, `local/muse/prompts/P1k.md`):**
       diagnose the `0x3e5980` 16-slot dispatch-loop park (slot
       contents, filler, exit condition) + name the outer caller of
