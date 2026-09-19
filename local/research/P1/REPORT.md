@@ -5623,3 +5623,374 @@ Source delta: none.
   remains out of scope, untouched.
 - Two boots used (the brief's max): no A/B on any rung.
 
+---
+
+## Part 18 (P1q): entry 0 never queued (3DDAC0 path B) + current stuck at recycled slot (nibble-4 CD read); the entry-1 "re-select" is slot reuse (id 3)
+
+Brief `local/muse/prompts/P1q.md`. Static selection/completion analysis + 1 dynamic receipt
+boot; no fix. Tables, no verdicts. Stale-reading guard: Part 17 (P17-1 table base +
+current-entry transitions, P17-2 sole init hit + W1/W2/W3 silence) + Part 16 §P16-2d–2f
+re-read before acting.
+
+## P18-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (`/tmp/ssx3-host-lease` missing; checked 15:32:35 UTC and pre-claim) |
+| Pre-boot checks | `pgrep -f "[p]s2EntryRunner"` exit 1 (none); binary `7a7d4b64` fresh (matches P17-3, no rebuild); fork HEAD `e73e36a`; ISO (3005415424 B) + ELF (3890784 B) present |
+| Claim | `printf 'P1q\n' > /tmp/ssx3-host-lease` 15:33:22 UTC, immediately before boot-p1q-1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, returned 15:34:53 UTC |
+| Release | `rm -f /tmp/ssx3-host-lease` 15:35:58 UTC; verified absent; `pgrep` exit 1 |
+| Foreign holds (M10) | None observed during the session; no poll waits; `$W/P1/run/p1q-waits.log` does not exist |
+| Second boot | None (Step 1 residue closed by boot 1; reserve unused) |
+| `adb` | Not used |
+
+## P18-1. Entry-0 + selection + completion analysis (static + boot-1 reads)
+
+### a. Entry-0's request (3DED50 → 3DDAC0 path B)
+
+| Step | Value |
+|---|---|
+| Driver caller | `sub_003DED50` (`0x3ded50`–`0x3dedc0`), no P6 row; `jal func_3DDAC0` @ `0x3ded6c` (ELF `0xc0f76b0` ✓), `jal func_3DD1D8` @ `0x3ded80` (ELF `0xc0f7476` ✓, JAL→`0x3dd1d8` ✓) with `$a0` = ret(`3DDAC0`) |
+| Allocator | `sub_003DDAC0`, lookup site `0x3ddaf4`; `$s2` = entry 0 (`0x5e0080`) |
+| Fill (watched, §P18-2a :388–390) | `+0x14` = `$a3` = `0x0` @ `0x3ddb10` (ELF `0xae500014` ✓); `+0x10` = `$a2` = `0x64` @ `0x3ddb18` (ELF `0xae550010` ✓); `+0` = `(old & 0xFF0FFFFF) \| 0x00900000` = `0x900001` @ `0x3ddb24` (ELF `0xae420000` ✓; mask `0x3ddb00`/`0x3ddb08` = `0x3c03ff0f`/`0x3463ffff` ✓, const `0x3ddb0c` = `0x3c040090` ✓) |
+| Path branch | `0x3ddb20` `beqz $s1` (ELF `0x12200011` ✓) → `0x3ddb68` = path B (check §P18-1h); `$s1` = `*(0x519AE4)` (devlist head, read `0x3ddaf8` delay) |
+| Path A (not taken) | Device-list walk + `str*` match; `+0x24` = device word (delay `0x3ddb54`, ELF `0xae420024` ✓); enqueue @ `0x3ddb50` (ELF `0xc0f77ea` ✓, JAL→`0x3ddfa8` ✓) |
+| Path B (taken) | Node alloc via `jalr *(0x450C14)`; `jal func_3DD4E8` @ `0x3ddbc0` (entry-1 alloc+enqueue); `jal func_3DCF70` @ `0x3ddbd0` with `$a1` = `0x3E0000`−`0x25F0` = `0x3DDA10` (ELF `0x24a5da10` ✓); `$s2` (entry 0) never touched again |
+| Discriminator | Entry-0 `+0x24`: zero writes in 90 s (§P18-2a) → path B; entry 0 never enqueued |
+
+### b. `0x30`-byte table-entry layout (all 12 words; ELF ✓ = word matches disasm comment)
+
+| Off | Readers | Writers | Entry-0 value (watched unless noted) |
+|---|---|---|---|
+| `+0x0` id = idx≪24 \| nibble≪20 \| counter | Driver low-20 cmp `0x3dd240` (ELF `0x8c620000` ✓); dispatch nibble `0x3de0d8`/`0x3de0dc` (ELF `0x21502`/`0x3042000f` ✓); W1 chained `$a0` `0x3de484`; allocator returns | Lookup: state:=1 `0x3de6f8` (ELF `0xaca30000` ✓), `sb` idx `0x3de704` (ELF `0xa0510003` ✓), id `0x3de72c` (ELF `0xac820000` ✓); allocators nibble-OR; clearer `3DE7B0` zeros | `0x900001` (idx 0, nibble 9, id 1; check §P18-1h) |
+| `+0x4` | W1 `0x3de450` (≠0 → flag −1); Exec `0x3de0bc` (ELF `0x8e220004` ✓; ≠0 → immediate W1) | NONE found (census: 7 allocator files + Exec + W1; `3DD7E0:0x3dd988` + `3DDAC0:0x3ddb94` are node stores, bases are not entries) | `0x0` (init zero, never written) |
+| `+0x8` flag | Driver `0x3dd258`/`0x3dd2dc`/`0x3dd2e8` (all ELF `0x8e220008` ✓); `3DCF70` `0x3dcf98` (ELF `0x8c650008` ✓); W1 chained `$a1` `0x3de488` | W1 `0x3de468`, W2 `0x3dd83c`, W3 `0x3ddd30` (P16-2d); init `sd` | `0x0` (init `:60` only) |
+| `+0xC` case predicate | Cases 1/5/7/8: `$a0` = (`+0xC` < 1) `0x3de344`/`0x3de3f8` (both ELF `0x2c840001` ✓) | `3DD4E8` =2 (`0x3dd55c` ELF `0xae62000c` ✓), `3DD7E0` =6, `3DD438` =2, `0x3dda10`-fail =4 (`0x3dda64` ELF `0xac62000c` ✓), W3-path =8 (`0x3ddd38` ELF `0xae63000c` ✓), case-1 handler | `0x0` |
+| `+0x10` prio/key | Enqueue sort `0x3ddff4`/`0x3de014`; P4 gate `0x3de07c` (ELF `0x8e230010` ✓) vs `*(0x519AB8)` | Allocators from `$a2`/`$t0`/`$s1` (`3DDAC0:0x3ddb18`, `3DD4E8:0x3dd53c` ELF `0xae720010` ✓, `3DD648:0x3dd6a4`, …) | `0x64` = 100 (would pass P4 vs init `0xFF`) |
+| `+0x14` node/cb-arg | W1 chained `$a2` `0x3de480`; `3DCF70`-invoke `$a2`; callbacks' `$s1` | Allocators from `$a3`/`$t1`/node (`3DDAC0:0x3ddb10`, `3DD4E8:0x3dd52c` ELF `0xae700014` ✓, …) | `0x0` (`$a3` = 0 in this call) |
+| `+0x18` | Case 0 `&1` `0x3de19c`; cases 2/3 pass as `$a2` | `3DD4E8` from `$a1` (`0x3dd534` ELF `0xae710018` ✓); `3DD438` =1 (`0x3dd490` delay); W2-path = `*($a0+4)` (`0x3dd844` ELF `0xae430018` ✓); case 0 terminal =`$s2` (`0x3de2f4` ELF `0xae320018` ✓); case 4 (delay `0x3de3e4` ELF `0xae220018` ✓) | `0x0` |
+| `+0x1C` case-2 predicate | `blez` @ `0x3de354` (ELF `0x18e00013` ✓) → sync W1 `0x3de3a4`; case 3 passes as `$a3` | `3DD648` site 1 (`0x3dd6ec` delay) / site 2 (`0x3dd7a4`) only | `0x0` |
+| `+0x20` | Cases 2/3 pass as `$a1` | `3DD648` from `$a2` (`0x3dd6d4`/`0x3dd7b0`) only | `0x0` |
+| `+0x24` device/path node | Case-0 string ops + device fns; case 1 | Path-A `0x3ddb54`; `3DD4E8:0x3dd54c` (ELF `0xae620024` ✓) / `3DD438:0x3dd498` = ret(`3DE800` node pool); `3DD5A0:0x3dd5fc`; `3DD648:0x3dd6c4` | `0x0` (path-B discriminator) |
+| `+0x28` completion cb | W1 chained `jalr` (`0x3de474` read, `0x3de48c` call) | `3DCF70:0x3dcfa0` delay ONLY (ELF `0xac680028` ✓, unconditional); cleared by `3DE7B0`. Zero `sw *,0x28(` in all 7 allocator files | `0x0` (no `3DCF70` call names entry 0) |
+| `+0x2C` queue link | Dequeue `0x3de094`/`0x3de0a0` (ELF `0xac830030` ✓) | Enqueue `0x3ddfec` (ELF `0xae22002c` ✓) / `0x3de030` (ELF `0xac91002c` ✓) | `0x0` (never linked) |
+
+`3DE800` = node-pool allocator (scans `*(0x519ADC)`-based pool at stride `0x110`, marks used);
+`3DE7B0` = entry clearer (`MUTEX_lock`, `memset(entry,0,0x30)` @ `0x3de7dc` ELF `0xc0f9912` ✓ JAL→`0x3e6448` ✓
+with `$a2` = `0x30` @ `0x3de7e0` ELF `0x24060030` ✓, `MUTEX_unlock`), called from `3DD310` @ `0x3dd414`
+(ELF `0xc0f79ec` ✓ JAL→`0x3de7b0` ✓); `3DE668` = no-op stub (`jr $ra`/`nop`, ELF `0x3e00008`/`0x0` ✓).
+
+### c. Allocator survey (7 functions, 9 lookup sites, nibbles 2–10)
+
+| Fn (P6: none) | Lookup site | Nibble (`lui $a0`, ELF ✓) | `+0x10` / `+0x14` sources | Enqueue? |
+|---|---|---|---|---|
+| `3DD438` | `0x3dd458` | 8 (`0x3dd464` `0x3c040080`) | `$s1` / `$s0` (arg regs; mapping not traced) | Yes `0x3dd4c0` |
+| `3DD4E8` | `0x3dd510` | 2 (`0x3dd51c` `0x3c040020`) | `$a2` / `$a3` (= node in path B) | Yes `0x3dd574` |
+| `3DD5A0` | `0x3dd5c0` | 3 (`0x3dd5dc` `0x3c040030`) | `$s0` / `$s1` (arg regs; mapping not traced) | Yes `0x3dd620` |
+| `3DD648` site 1 | `0x3dd680` | 4 (`0x3dd698` `0x3c040040`) | `$t0` / `$t1` (= prio / node in `0x3dda10`-success) | Yes `0x3dd6e8` |
+| `3DD648` site 2 | `0x3dd758` | 5 (`0x3dd770` `0x3c040050`) | Not read (fill outside Step-1 need) | Yes `0x3dd7ac` |
+| `3DD7E0` site 1 | `0x3dd800` | 6 (`0x3dd818` `0x3c040060`) | `$a1` / `$s0` | NO — W2 sync: `$a0`≠0 (`0x3dd82c` ELF `0x12600006` ✓) → flag=1 + `+0x18`=`*($a0+4)` (`0x3dd834` ELF `0x8e630004` ✓); else `+0xC`=6 + `3DE668` no-op |
+| `3DD7E0` site 2 | `0x3dd890` | 7 (`0x3dd89c` `0x3c040070`) | `$a1` / `$a2` | Yes `0x3dd8c0` |
+| `3DDAC0` | `0x3ddaf4` | 9 (`0x3ddb0c` `0x3c040090`) | `$a2` (=`0x64`) / `$a3` (=0) | Path A yes `0x3ddb50`; path B NO |
+| `3DDC30` | `0x3ddc70` | 10 (`0x3ddc7c` `0x3c0400a0`) | `$s7` / `$s1` (arg regs; mapping not traced) | NO — W3 sync: pool-scan match → flag=−2 (`0x3ddd30` ELF `0xae620008` ✓, −2 const `0x3ddd28` ELF `0x2402fffe` ✓), `+0xC`=8 |
+
+Non-allocator enqueue sources: none — `3DDDF0` (`FILESYS_atomic`) issues dequeue-only
+`ExecCommand(0)` calls (`0x3dde2c`/`0x3dde60`, `$a0`=0 delay `0x3dde30`); the `0x3ddc00`
+trampoline (`jal 3DD310` @ `0x3ddc0c` ELF `0xc0f74c4` ✓, `jal ExecCommand` @ `0x3ddc14` ELF
+`0xc0f77ea` ✓) has no `jal` caller (`0x0c0f7700` absent tree-wide) — residue §P18-5.
+
+### d. Selection: enqueue + 5 dequeue predicates (one row per predicate/site)
+
+Enqueue (`0x3ddfdc`–`0x3de044`, when `$a0`≠0): priority-insert by `+0x10` into the
+`*(0x519AE0)`-headed chain via `+0x2C` links; count `*(0x519ABC)`++ @ `0x3de044`
+(ELF `0xac62000c` ✓); head write @ `0x3de034` (ELF `0xac510030` ✓). Then falls through to
+the dequeue below (same call selects when the predicates pass).
+
+| # | pc (ELF ✓) | Predicate (fail → effect) | This boot |
+|---|---|---|---|
+| P1 | `0x3de050` (`0x14400004`; read `0x3de04c` `0x8c820024` = `*(0x519AD4)`) | Current == null, else unlock + exit (no select, no store) | FAILS after :411: current stuck at recycled slot → every later pump exits here |
+| P2 | `0x3de05c` (read `0x3de058` `0x8c820010` = `*(0x519AC0)` inflight) | Inflight == 0, else unlock + exit | Passed at both dequeues (selects happened); value not directly watched |
+| P3 | `0x3de074` (head `0x3de060` `0x8c910030` = `*(0x519AE0)`) | Head != null, else current := 0 (the `0x3de0b0` store) | :400 fired with head provably 0 (`:396` `head:=0`, no write between) → empty-store, not P4 |
+| P4 | `0x3de088` (`0x54400006`; `0x3de07c` `0x8e230010` = head→`+0x10`, `0x3de080` `0x8c820008` = `*(0x519AB8)`, `slt` `0x3de084` `0x43102a`) | head→`+0x10` ≤ `*(0x519AB8)`, else current := 0 (same store shape; head NOT advanced) | Never fired (both heads selected first try); entry 0's `0x64` ≤ init `0xFF` would pass |
+| P5 | `0x3de0bc` (`0x8e220004` = `*(entry+4)`) | `+4` == 0, else immediate W1 @ `0x3de0c8` (`$a0`=0 → flag −1) | Never taken (`+4` unwritten everywhere, §P18-1b) |
+
+Select store @ `0x3de0b0` (delay of unlock `jal`, P16-2e) + dispatch on `( +0≫20)&0xF`
+(`0x3de0d8`–`0x3de0e4` ELF ✓; range check `0x3de0e4` `0x2c830009`, fail exit → `0x3de3fc`
+via `0x3de0e8` `0x106000c4`, check §P18-1h; table base `0x3de0f4` `0x24425d80` = `0x495D80`).
+
+Why the slot and never entry 0: entry 0 is never in the queue (§P18-1a: path B, no
+`+0x24`, no enqueue line, `+0x2C` stays 0), so no dequeue can name it; after :411 P1
+additionally blocks every pump while current stays non-null.
+
+### e. Dispatch (nibble → case; jump table `0x495D80` + 9 words ELF-verified, §P18-1h)
+
+| Nibble (from) | Case entry | Body | W1 site(s) | Sync? event |
+|---|---|---|---|---|
+| 2 (`3DD4E8`) / 8 (`3DD438`) | `0x3de108` | `strchr`/`strcpy`/`strncpy` path prep + `3E3208` + device fns + `BIG_locateentryz` (`0x3e2768`, P6) device walk; `$s2` = (nibble≠8) | Terminal `0x3de2f8` (`$a0`=`$s2`; delay `0x3de2fc` ELF `0x240202d` ✓); every branch target re-verified to reach it (`0x3de1c8`→`0x3de23c`, `0x3de1e4`→`0x3de23c`, `0x3de23c`-taken→`0x3de2d8`, `0x3de2cc`-loop→`0x3de260`, `0x3de2e4`-taken→`0x3de2f8`; delay `0x3de2e8` = `nop` ELF `0x0` ✓) | SYNC, no wait. Reached: YES (`:398` `ra`=`0x3de300` = site+8 ✓) |
+| 3 (`3DD5A0`) | `0x3de308` | `+0xC` protocol + `3E32F8`/`3DE8C0`; clears `+0x24` | Terminal `0x3de340` (`$a0`=(`+0xC`<1)) | SYNC. Reached: no (no nibble-3 alloc watched) |
+| 4 (`3DD648`/1) | `0x3de350` | `+0x1C`≤0 → sync W1; else `3E3350` async variants | `0x3de3a4` (`$a0`=1; delay `0x3de3a8` ELF `0x24040001` ✓) or via `3E3350` | Reached: YES via recycled slot (`:411`→`:412` CD read); the `+0x1C`>0 branch (no `0x3de3a4` clear watched; `+0x1C` itself unwatched — inferred) |
+| 5 (`3DD648`/2) | `0x3de3b4` | `3E3478` inline RPC-ish pair + W1 | `0x3e34c0` (`$a0`=1) | SYNC. Reached: no (no nibble-5 alloc watched) |
+| 6 (`3DD7E0`/1) | `0x3de3d4` | `+0x18` = `*(*(+0x24)+4)` | Terminal `0x3de3e0` (`$a0`=1) | SYNC but DISPATCH-DEAD: nibble-6 never enqueued (§P18-1c), `3DDDF0` dequeues-only, trampoline callerless |
+| 7 (`3DD7E0`/2) / 9 (`3DDAC0`) / 10 (`3DDC30`) | `0x3de3f0` | `$a0` = (`+0xC`<1) | Terminal `0x3de3f4` | SYNC. Entry 0's case: `+0xC`=0 → `$a0`=1 → flag would be 1 (`+4`=0). Never selected |
+| 0/1/11–15 | `0x3de3fc` exit | Epilogue restore, no W1 | None — current STAYS set | Not taken (both selects had nibbles 2, 4) |
+
+### f. W1 (`iFILESYS_CommandCompleteCallback`) — 10 unique `jal` sites
+
+(P16-2f listed 9 unique pcs + 1 overlap dup; the true 10th unique pc is `0x3e4888` in
+`sub_003E4648`. All 10 words are `0xc0f7908` ✓: 6 in Exec + `0x3e3450`/`0x3e34c0`/`0x3e3d64`/`0x3e4888`.)
+
+| # | Site (`ra` = site+8, check §P18-1h) | Host | Sync/async; event waited on | Reached in this boot? |
+|---|---|---|---|---|
+| 1 | `0x3de0c8` (`0x3de0d0`) | Exec `+4`≠0 path | Sync, none (immediate, `$a0`=0 → flag −1) | No (`+4`==0 everywhere) |
+| 2 | `0x3de2f8` (`0x3de300`) | Case 0/6 terminal | Sync, none (`$a0`=`$s2`) | YES — `:398` flag=1 + `:399` clear, `ra`=`0x3de300` |
+| 3 | `0x3de340` (`0x3de348`) | Case 1 terminal | Sync, none (`$a0`=(`+0xC`<1)) | No (no nibble-3) |
+| 4 | `0x3de3a4` (`0x3de3ac`) | Case 2 `+0x1C`≤0 | Sync, none (`$a0`=1) | No (recycled slot took `+0x1C`>0 branch) |
+| 5 | `0x3de3e0` (`0x3de3e8`) | Case 4 terminal | Sync, none (`$a0`=1) | No (case 4 dispatch-dead) |
+| 6 | `0x3de3f4` (`0x3de3fc`) | Case 5/7/8 terminal | Sync, none (`$a0`=(`+0xC`<1)) | No (entry 0 unselected; no nibble-7/10 select) |
+| 7 | `0x3e3450` (`0x3e3458`) | `0x3e33b0` poll (folded in `3E3350` range) | Async: `*(0x519C20)` flag (`0x520000`−`0x63E0`, check §P18-1h; test `0x3e33d4` ELF `0x10600020` ✓) + `0x450C40`/`0x450C4C` counter match; calls `0x428168` (`0x3e3410` ELF `0xc10a05a` ✓) + `0x4283A0` (`0x3e3424` ELF `0xc10a0e8` ✓); clears flag (`0x3e344c` ELF `0xae409c20` ✓) | No (no `jal` caller of `0x3e33b0` found tree-wide — residue; flag never watched) |
+| 8 | `0x3e34c0` (`0x3e34c8`) | `3E3478` (case-3 callee) | Sync, none: `0x428168` (`0x3e34a8` ✓) + `0x428600` (`0x3e34b8` ELF `0xc10a180` ✓) inline, `$a0`=1 (`0x3e34c4` ELF `0x24040001` ✓) | No (no nibble-5) |
+| 9 | `0x3e3d64` (`0x3e3d6c`) | `3E3B00` CD worker (no `jal` caller; device-table/indirect — `sceCdRead ret=0x3e3b8c` proves it ran) | Async: CD-transfer completion (`$a0`=1 `0x3e3d5c` ELF `0x24040001` ✓; state `&~2` writeback `0x3e3d68` ELF `0xae229c40` ✓) | Host RAN, site NOT reached: CD callback queued+started (`:414`–`:415`) but no current-clear after `:411` |
+| 10 | `0x3e4888` (`0x3e4890`) | `3E4648` CD worker (caller: `3E3350`-topbyte==1 @ `0x3e3398` ELF `0xc0f9192` ✓ JAL→`0x3e4648` ✓; gate `0x3e3368` ELF `0x1088000b` ✓) | Async: CD-transfer completion (same idiom: `$a0`=1 `0x3e4880` ✓, `0x3e488c` ✓) | No (needs case 2 via `3E3350` topbyte-1 arm; no evidence) |
+
+`0x428168`/`0x4283A0`/`0x428600` = `sub_00428168`/`sub_004283A0`/`sub_00428600`, no P6 rows
+(JAL targets verified §P18-1h; roles not traced — residue). No-`jal`-caller functions
+(`0x3e33b0`, `3E3B00`) are reached via pointers/tables (residue: exact registration sites).
+
+### g. Entry-0's completion chain (traced statically, broken at the CD→W1 link)
+
+| Link | Evidence |
+|---|---|
+| `3DCF70`(handle1, `0x3dda10`) sees flag1=1 (`:398`) → immediate `jalr 0x3dda10` (`0x3dcfac` ELF `0x100f809` ✓) | `:387`–`:398` order; `3DCF70` flag test `0x3dcf9c` + always-set `+0x28` `0x3dcfa0` |
+| `0x3dda10` success (`$s0`==1 @ `0x3dda58` ELF `0x12020007` ✓): `3DD310` → `3DE7B0` clears slot (`:401`–`:404`, `ra`=`0x3de7e4` = memset-`jal`+8 ✓); `3DD648`-site1 re-allocs slot as nibble 4/id 3 (`:405`–`:408`); `3DCF70`(handle2, `0x3dd8e8`) (`0x3dda9c` ELF `0xc0f73dc` ✓; `0x3E0000`−`0x2718` = `0x3dd8e8` ✓) | `:401`–`:408` watched; fail path (`+0xC`=4 + `ExecCommand(entry0)` @ `0x3dda68` ELF `0xc0f77ea` ✓) NOT taken — no entry-0 enqueue watched |
+| Recycled slot selected (`:409`–`:411`), case 2 dispatches CD read (`:412` `lbn=0x5f1a3`, `ret=0x3e3b8c`, `BIGF` payload) | `:411` select + `:412` CD line + `:414`–`:415` callback pair, all before probe `:416` |
+| BREAK: callback fired, W1 never ran (no clear after `:411`) → chained `0x3dd8e8` never runs → its fast path (`ExecCommand(*($s1+0x10))` = entry 0 @ `0x3dd9e8`) never fires | Zero `0x519AD4` lines after `:411`; entry-0 `+8`/`+0x2C` never written |
+| Entry 0 therefore never selected (P1 would also block it now) and its sync case-7 completion (`0x3de3f4`) never fires | `0x5e0080` never a `0x519AD4` value (grep: sole `value=0x5e0080` is the `:58` table-base store) |
+
+### h. ELF verification words + machine-check paste block
+
+Jump table `0x495D80` (file off = va−`0x100000`+`0x1000`): case→entry
+`0→0x3de108`, `1→0x3de308`, `2→0x3de350`, `3→0x3de3b4`, `4→0x3de3d4`, `5→0x3de3f0`,
+`6→0x3de108`, `7→0x3de3f0`, `8→0x3de3f0` (words read from `0x495D80`–`0x495DA0`, check §P18-1h).
+
+Batch word check (101 addrs; every word matched its disassembly comment in `$O`):
+
+```
+0x3ddb00 0x3c03ff0f / 0x3ddb08 0x3463ffff / 0x3ddb0c 0x3c040090 / 0x3ddb10 0xae500014
+0x3ddb14 0x431024 / 0x3ddb18 0xae550010 / 0x3ddb1c 0x441025 / 0x3ddb20 0x12200011
+0x3ddb24 0xae420000 / 0x3ddb50 0xc0f77ea / 0x3ddb54 0xae420024
+0x3dd51c 0x3c040020 / 0x3dd52c 0xae700014 / 0x3dd534 0xae710018 / 0x3dd53c 0xae720010
+0x3dd544 0xae630000 / 0x3dd54c 0xae620024 / 0x3dd55c 0xae62000c / 0x3dd574 0xc0f77ea
+0x3dd464 0x3c040080 / 0x3dd5dc 0x3c040030 / 0x3dd698 0x3c040040 / 0x3dd770 0x3c040050
+0x3dd818 0x3c040060 / 0x3dd89c 0x3c040070 / 0x3ddc7c 0x3c0400a0
+0x3dd82c 0x12600006 / 0x3dd834 0x8e630004 / 0x3dd844 0xae430018
+0x3ddd28 0x2402fffe / 0x3ddd30 0xae620008 / 0x3ddd38 0xae63000c
+0x3de6f8 0xaca30000 / 0x3de704 0xa0510003 / 0x3de72c 0xac820000
+0x3de6dc 0x31502 / 0x3de6e0 0x3042000f
+0x3de7dc 0xc0f9912 / 0x3de7e0 0x24060030 / 0x3dd414 0xc0f79ec
+0x3dcfa0 0xac680028 / 0x3dcf98 0x8c650008 / 0x3dcfac 0x100f809
+0x3dda58 0x12020007 / 0x3dda5c 0x24020004 / 0x3dda64 0xac62000c / 0x3dda68 0xc0f77ea
+0x3dda6c 0x8e240010 / 0x3dda48 0xc0f74c4 / 0x3dda9c 0xc0f73dc
+0x3de04c 0x8c820024 / 0x3de050 0x14400004 / 0x3de058 0x8c820010 / 0x3de060 0x8c910030
+0x3de07c 0x8e230010 / 0x3de080 0x8c820008 / 0x3de084 0x43102a / 0x3de09c 0xac82000c
+0x3de0a0 0xac830030 / 0x3de0bc 0x8e220004 / 0x3de0d8 0x21502 / 0x3de0dc 0x3042000f
+0x3de0e0 0x2444fffe / 0x3de0e4 0x2c830009 / 0x3de0e8 0x106000c4 / 0x3de0f4 0x24425d80
+0x3de0fc 0x8c640000 / 0x3de100 0x800008
+0x3de2f4 0xae320018 / 0x3de2fc 0x240202d / 0x3de344 0x2c840001 / 0x3de3a8 0x24040001
+0x3de3e4 0xae220018 / 0x3de3f8 0x2c840001 / 0x3de354 0x18e00013
+0x3e344c 0xae409c20 / 0x3e3454 0xae230c4c / 0x3e34c4 0x24040001 / 0x3e3d5c 0x24040001
+0x3e3d68 0xae229c40 / 0x3e4880 0x24040001 / 0x3e488c 0xae229c40
+0x3e3368 0x1088000b / 0x3e3398 0xc0f9192 / 0x3e33d4 0x10600020 / 0x3e3410 0xc10a05a
+0x3e3424 0xc10a0e8 / 0x3e34a8 0xc10a05a / 0x3e34b8 0xc10a180
+0x3ded6c 0xc0f76b0 / 0x3ded80 0xc0f7476 / 0x3dd218 0x8d060028 / 0x3dd240 0x8c620000
+0x3dd258 0x8e220008 / 0x3dd2dc 0x8e220008 / 0x3dd2e8 0x8e220008
+0x3ddfec 0xae22002c / 0x3de030 0xac91002c / 0x3de034 0xac510030 / 0x3de044 0xac62000c
+0x3ddc0c 0xc0f74c4 / 0x3ddc14 0xc0f77ea / 0x3de2e4 0x14430004 / 0x3de2e8 0x0
+0x3de1c8 0x1040001c / 0x3de1e4 0x10400015 / 0x3de23c 0x56400026 / 0x3de2cc 0x1240ffe4
+```
+
+Machine-check paste block (every hand computation in §P18-1; command then `→` output):
+
+```
+python3 -c "print(hex(0x5e0080+0x30), hex(0x5e0080+0x24), hex(0x5e0080+0x28), hex(0x5e00b0+8), hex(0x5e00b0+0x28))"
+→ 0x5e00b0 0x5e00a4 0x5e00a8 0x5e00b8 0x5e00d8
+python3 -c "print(hex(0x520000-0x6550), hex(0x519AB0+0x24), hex(0x519AB0+0x30), hex(0x519AB0+0x34), hex(0x520000-0x653C), hex(0x519AC4+0x1C), hex(0x520000-0x63E0), hex(0x520000-0x63C0))"
+→ 0x519ab0 0x519ad4 0x519ae0 0x519ae4 0x519ac4 0x519ae0 0x519c20 0x519c40
+python3 -c "print(hex(0x3E0000-0x25F0), hex(0x3E0000-0x2718))"
+→ 0x3dda10 0x3dd8e8
+python3 -c "print(hex(0x3de354+4+0x13*4), hex(0x3de1c8+4+0x1C*4), hex(0x3de1e4+4+0x15*4), hex(0x3de2e4+4+0x4*4), hex(0x3de23c+4+0x26*4), hex(0x3de2cc+4-0x1C*4), hex(0x3de0e8+4+0xC4*4), hex(0x3ddb20+4+0x11*4))"
+→ 0x3de3a4 0x3de23c 0x3de23c 0x3de2f8 0x3de2d8 0x3de260 0x3de3fc 0x3ddb68
+python3 -c "print(hex(0x900001>>24), hex((0x900001>>20)&0xF), hex(0x900001&0xFFFFF), hex(0x1200002>>24), hex((0x1200002>>20)&0xF), hex(0x1200002&0xFFFFF), hex(0x1400003>>24), hex((0x1400003>>20)&0xF), hex(0x1400003&0xFFFFF))"
+→ 0x0 0x9 0x1 0x1 0x2 0x2 0x1 0x4 0x3
+python3 -c "print([hex(0x495D80+i*4) for i in range(9)])"
+→ ['0x495d80', '0x495d84', '0x495d88', '0x495d8c', '0x495d90', '0x495d94', '0x495d98', '0x495d9c', '0x495da0']
+python3 -c "jal decode: ((pc+4)&0xF0000000)|((w&0x3FFFFFF)<<2)"
+→ 0x3ddb50:0xc0f77ea→0x3ddfa8 0x3de0c8:0xc0f7908→0x3de420 0x3dd458:0xc0f799c→0x3de670
+  0x3dd558:0xc0f799a→0x3de668 0x3de7dc:0xc0f9912→0x3e6448 0x3dd414:0xc0f79ec→0x3de7b0
+  0x3ded80:0xc0f7476→0x3dd1d8 0x3e3398:0xc0f9192→0x3e4648 0x3e3410:0xc10a05a→0x428168
+  0x3e3424:0xc10a0e8→0x4283a0 0x3e34b8:0xc10a180→0x428600
+python3 -c "print([hex(s+8) for s in [0x3de0c8,0x3de2f8,0x3de340,0x3de3a4,0x3de3e0,0x3de3f4,0x3e3450,0x3e34c0,0x3e3d64,0x3e4888]])"
+→ ['0x3de0d0', '0x3de300', '0x3de348', '0x3de3ac', '0x3de3e8', '0x3de3fc', '0x3e3458', '0x3e34c8', '0x3e3d6c', '0x3e4890']
+```
+
+## P18-2. Dynamic receipts (boot-p1q-1, 1 boot)
+
+`$W/P1/run/boot-p1q-1.log`, 1,234 lines, 130,595 B, 17 blocks, CWD `$W/P1/run`,
+env = p1p-2 env with WATCH = 10 addrs (`0x5e0080,88,90,98,a0,a8,b0,b8` +
+`0x519ad4,0x519ae0`; 8B spacing per P17-1a range semantics), PROBE=1 kept on,
+foreground 90 s, SIGTERM rc=-15. Binary `7a7d4b64` (fresh; §P18-3). Design note:
+the brief's "targeted stub observation of `0x3ddfa8`/`0x3de420`" is executed as the
+`0x5e00b8` W1-write `ra` receipt + `0x519AD4` select pcs (direct JALs bypass the HLE
+stub histogram, P16-2f; `target=0x3de420`/`0x3ddfa8` print 0 lines again, §P18-2c).
+
+### a. All 38 watch lines (thread=1 on all; no double-prints: 8B spacing, no overlap)
+
+Init (11 lines):
+
+| Line | addr + width | value | pc | ra | sp |
+|---|---|---|---|---|---|
+| :49–50 | `0x519ad0`/`0x519ae0` w16 | zeros | `0x10012c` | `0x0` | `0x0` |
+| :58 | `0x519ad8` w4 | `0x5e0080` (table base; single print — overlaps only the `0x519ad4` range) | `0x3dccfc` | `0x3dcd00` | `0x1fffe90` |
+| :59–66 | `0x5e0080`–`0x5e00b8` w8 ×8 | `0x0` | `0x3e64c8`–`0x3e64ec` step 4 (memset 64-loop) | `0x3dcd10` | `0x1fffe80` |
+
+Entry-0 alloc + fill (6 lines; first life of the table):
+
+| Line | addr + width | value | pc | ra | sp | Decodes to |
+|---|---|---|---|---|---|---|
+| :385 | `0x5e0080` w4 | `0x100000` | `0x3de6f8` | `0x3de69c` | `0x1fffdc0` | Lookup: state nibble := 1 |
+| :386 | `0x5e0083` w1 | `0x0` | `0x3de704` | `0x3de69c` | `0x1fffdc0` | Lookup: index byte := 0 |
+| :387 | `0x5e0080` w4 | `0x100001` | `0x3de72c` | `0x3de69c` | `0x1fffdc0` | Lookup: id := counter = 1 (first alloc → id 1) |
+| :388 | `0x5e0094` w4 | `0x0` | `0x3ddb10` | `0x3ddafc` | `0x1fffe10` | `3DDAC0`: `+0x14` = `$a3` = 0 |
+| :389 | `0x5e0090` w4 | `0x64` | `0x3ddb18` | `0x3ddafc` | `0x1fffe10` | `3DDAC0`: `+0x10` = `$a2` = 100 |
+| :390 | `0x5e0080` w4 | `0x900001` | `0x3ddb24` | `0x3ddafc` | `0x1fffe10` | `3DDAC0`: nibble := 9 (parked `$a0` ✓) |
+
+Entry-1 first life + select + complete (10 lines):
+
+| Line | addr + width | value | pc | ra | sp | Decodes to |
+|---|---|---|---|---|---|---|
+| :391 | `0x5e00b0` w4 | `0x100000` | `0x3de6f8` | `0x3de69c` | `0x1fffd60` | Lookup: state := 1 |
+| :392 | `0x5e00b3` w1 | `0x1` | `0x3de704` | `0x3de69c` | `0x1fffd60` | Lookup: index := 1 |
+| :393 | `0x5e00b0` w4 | `0x1100002` | `0x3de72c` | `0x3de69c` | `0x1fffd60` | Lookup: id := 2 (counter now 2) |
+| :394 | `0x5e00b0` w4 | `0x1200002` | `0x3dd544` | `0x3dd548` | `0x1fffdb0` | `3DD4E8`: nibble := 2 (delay of `jal 3DE800`) |
+| :395 | `0x519ae0` w4 | `0x5e00b0` | `0x3de034` | `0x3ddfdc` | `0x1fffb40` | Enqueue: head := entry 1 |
+| :396 | `0x519ae0` w4 | `0x0` | `0x3de0a0` | `0x3ddfdc` | `0x1fffb40` | Dequeue: head := 0 (queue empty) |
+| :397 | `0x519ad4` w4 | `0x5e00b0` | `0x3de0b0` | `0x3de0b4` | `0x1fffb40` | Select entry 1 (= p1p-1 `:379`) |
+| :398 | `0x5e00b8` w4 | `0x1` | `0x3de468` | `0x3de300` | `0x1fffb20` | W1 from site `0x3de2f8` (`ra`−8 ✓): `+4`==0, `$a0`=`$s2`=1 → flag 1 |
+| :399 | `0x519ad4` w4 | `0x0` | `0x3de470` | `0x3de300` | `0x1fffb20` | W1 clears current (= p1p-1 `:380`) |
+| :400 | `0x519ad4` w4 | `0x0` | `0x3de0b0` | `0x3de0b4` | `0x1fff8b0` | Tail-dequeue P3 empty-store (= p1p-1 `:381`; head provably 0) |
+
+Slot clear + re-alloc (nibble 4/id 3) + re-select (11 lines):
+
+| Line | addr + width | value | pc | ra | sp | Decodes to |
+|---|---|---|---|---|---|---|
+| :401–404 | `0x5e00b0`/`b4`/`b8`/`bc` w4 | `0x0` | `0x3e6508`/`0x3e6510`/`0x3e6518`/`0x3e651c` (memset 16-loop) | `0x3de7e4` | `0x1fffd20` | `3DE7B0` clears slot (`ra` = `0x3de7dc`+8 ✓; iters 2–3 at `+0x10`…`+0x2C` unwatched but implied by `$a2`=`0x30`) |
+| :405 | `0x5e00b0` w4 | `0x100000` | `0x3de6f8` | `0x3de69c` | `0x1fffcd0` | Re-alloc: state := 1 (slot free: idx 0 still nibble 9) |
+| :406 | `0x5e00b3` w1 | `0x1` | `0x3de704` | `0x3de69c` | `0x1fffcd0` | Re-alloc: index := 1 (same slot) |
+| :407 | `0x5e00b0` w4 | `0x1100003` | `0x3de72c` | `0x3de69c` | `0x1fffcd0` | Re-alloc: id := 3 (counter monotonic) |
+| :408 | `0x5e00b0` w4 | `0x1400003` | `0x3dd6b0` | `0x3dd688` | `0x1fffd20` | `3DD648`-site1: nibble := 4 (delay of `bnez $s4`) |
+| :409 | `0x519ae0` w4 | `0x5e00b0` | `0x3de034` | `0x3ddfdc` | `0x1fffab0` | Enqueue: head := slot |
+| :410 | `0x519ae0` w4 | `0x0` | `0x3de0a0` | `0x3ddfdc` | `0x1fffab0` | Dequeue: head := 0 |
+| :411 | `0x519ad4` w4 | `0x5e00b0` | `0x3de0b0` | `0x3de0b4` | `0x1fffab0` | Select recycled slot (= p1p-1 `:382`; SAME addr, NEW request id 3/nibble 4) |
+
+After `:411`: zero watch lines (28th transition never comes); then `:412`–`:413`
+`sceCdRead lbn=0x5f1a3 ret=0x3e3b8c` (`BIGF` payload), `:414`–`:415` CD callback
+pair, `:416` driver probe (p1o bytes).
+
+### b. Derived tables
+
+Current entry (`*(0x519AD4)`): 4 lines, same shape as p1p-1 (`entry1/clear/empty/slot`;
+`0x5e0080` never a value — entry 0 never selected, not even transiently).
+Queue head (`*(0x519AE0)`): 5 lines (`:50` init zero, `:395`/`409` in, `:396`/`410` out;
+empty at `:400` and at end). Entry-0 `+8`: init `:60` only (never completed).
+Entry-0 final words (watched): `+0`=`0x900001`, `+4`=`+8`=`+0xC`=0, `+0x10`=`0x64`,
+`+0x14`=0, `+0x18`/`+0x1C`/`+0x20`/`+0x24`/`+0x28`/`+0x2C`=0 (zero writes after init).
+Counter: ids 1→2→3 across the three allocs (lookup `$a1` = pre-increment counter).
+
+### c. Ladder delta vs boot-p1p-2 (1,197 lines, 127,111 B)
+
+| Rung | boot-p1p-2 | boot-p1q-1 (1,234 lines, 130,595 B) | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×15, `0x423c90` ×1 (blk0), `0x3dd278` ×1 (blk11) | `0x3e5980` ×16 (blk0–15), `0x0` ×1 (blk16, status=1; teardown-race shape, plus `id=-1` zero stack line) | Same park family; last-block teardown line |
+| Thread-1 sch | 81/77/82/82/82/80/79/69/82/82/81/79/77/68/81/82/82 | 84/82/81/80/81/81/81/80/78/68/81/82/81/79/78/68/81 | Same regime (~77–84) |
+| Missing target | 0 | 0 | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18; b0 30/30 rows identical modulo `count` | None |
+| Syscall distinct b0 / b1+ | 27 / 3; 20 printed ids | 27 / 3; same 20 ids (sort-compared, identical incl. `0x15`/`0x17`) | None |
+| CD callback | :377–378 | :414–415 (same func/cb) | Line shift only |
+| Probe | 1 (:379, p1o bytes) | 1 (:416, p1o bytes) | Line number only |
+| Threads 2/4/5 | sema-parked 26/29/30 @ `0x423de8` | Same (blk0 ids/entries/priorities/stacks identical) | None |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | 2 / 66 / 122 / 33 / 8 | 2 / 66 / 122 / 33 / 8 | None |
+| `run:tick` | 7 | 7 | None |
+| Presented frame | None | None (sole `frame` hit = raylib TIMER line :46) | None |
+| Crash | 0 | 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| SIF module lines | 6 (`irx` grep) | 6 | None |
+| `firstRa=0x3dd290` / `0x3dd280` | 17 / 17 | 17 / 17 | None |
+| `target=0x3de420` / `0x3ddfa8` | 0 / 0 | 0 / 0 | None (direct JALs; receipt via §P18-2a instead) |
+
+## P18-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1q-1) | `7a7d4b645094d3ad82746a7d420b223422bf6444e5d06f6e56998e9057f5b4cd` | `e73e36a` tree, no rebuild (fresh; §P18-0 pre-boot check) |
+| `ps2x_tests` | Not re-run (no source change; P15-1c 424/425 stands for this tree) | Same tree `e73e36a` |
+| `PS2Recomp` branch `ssx3` HEAD | `e73e36a` | No fork commit (env-only boot; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added) |
+| Fork push | `git push fork ssx3` from fork clone only | Up-to-date check (expect nothing to push) |
+| This report | `[P1q]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P18-4. Exact commands
+
+From `$W/PS2Recomp` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `$O=$W/P1/output`,
+`$R=$W/PS2Recomp`, `$LOG=$W/P1/run/boot-p1q-1.log`:
+
+```
+# Step 1 (lease-free static; lease absent throughout)
+re-read REPORT Part 17 + Part 16 P16-2d-2f (paged reads)
+grep -rn "jal func_3DDFA8/3DE420/3DE670" $O (caller pcs); python3 range lookups (ssx3-functions.csv)
+read $O/sub_003D{CC88,CBD8,DD1D8,DDAC0,DED50,DD4E8,DCF70,DE670,DE420,DDFA8(dequeue+dispatch),E6448,DE7B0,DE800,DDDF0}
+grep regions: 3DD438/3DD5A0/3DD648/3DD7E0/3DDC30 fills, W2 (0x3dd82c) + W3 (0x3ddd20) predicates,
+  3E3350/3E3478/3E3B00/3E4648 W1 neighborhoods, 3ED678 (ruled out), 0x3ddc00 trampoline (callerless)
+P6 grep (ssx3-decomp-names.csv: BIG_*/str*/MUTEX/SYNCTASK/FILESYS/iFILESYS rows)
+python3 ELF batch (101 words + jump table 9 + nibble luis + JAL decodes); python3 hex checks (each pasted §P18-1h)
+# Step 2 (lease protocol)
+cat /tmp/ssx3-host-lease (absent 15:32:35 UTC); pgrep -f "[p]s2EntryRunner" (exit 1)
+shasum ps2EntryRunner (7a7d4b64 fresh); git log/status (e73e36a); ls ISO + ELF
+printf 'P1q\n' > /tmp/ssx3-host-lease (15:33:22 UTC)
+(write /tmp/p1q-boot1.py: p1p-2 env, WATCH 10 addrs, probe on; diff vs p1p-boot2.py)
+python3 /tmp/p1q-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 130595 B; returned 15:34:53 UTC)
+log greps: watch 38 (:49/:50/:58-:66/:385-:411); driver-entry 1 (:416); cd pair (:414-415);
+  cd reads (early ret=0x3e3694 + :412 ret=0x3e3b8c); value=0x5e0080 census (only :58)
+ladder sweeps: thread pcs/sch per block; stub 486/18 + b0 30-row comm; syscall 27/3 + 20-id
+  sort-compare (identical); gs:/run:tick/frame/crash/dormant/start-thread/missing-target;
+  firstRa 17/17; SIF 6; Blk16 teardown line noted
+rm -f /tmp/ssx3-host-lease (15:35:58 UTC); ls (absent); pgrep (none)
+# Step 3
+(edit_file append Part 18 in 4 chunks; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1q] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (up-to-date check; the only push allowed)
+```
+
+Env delta vs boot-p1p-2: WATCH `0x5e0088`→10 addrs (`0x5e0080,88,90,98,a0,a8,b0,b8`,
+`0x519ad4,0x519ae0`) only. Source delta: none.
+
+## P18-5. What I could not do
+
+- Run the reserve 2nd boot (not needed): still-unwatched words it could close directly —
+  recycled-slot `+0x10`…`+0x2C` (fill predicted from `3DD648`-site1 reads, only `+0` watched),
+  `*(0x519AC0)`/`*(0x519AB8)` (P2/P4 values; passed-at-dequeues inferred, not traced),
+  recycled-slot `+0x1C` (branch inferred from absent `0x3de3a4` clear), `*(0x519AE4)`
+  (path-A/B branch value; path B proven by absent `+0x24` write instead).
+- Name the `0x3e33b0`-poll caller (no `jal` found tree-wide) or the `0x3ddc00`-trampoline
+  caller (word `0x0c0f7700` absent); both are pointer-reached (registration sites unknown).
+- ID `0x428168`/`0x4283A0`/`0x428600` (no P6 rows; JAL targets verified, roles not traced).
+- Read `3DD648`-site2 fill sources (nibble + enqueue pc recorded; `+0x10`/`+0x14` not traced).
+- Trace the CD-completion→W1 gap (callback `0x3e3ad8` queued+started, W1 site `0x3e3d64`
+  never reached): poll-vs-lost-wake undetermined. Entry 0 needs selection first anyway
+  (its case-7 completion is synchronous), so this gap sits behind, not beside, the P1q question.
+- No runtime fix (per the brief): selection/completion analysis + receipts only. The
+  sema-26 non-delivery remains out of scope, untouched.
+- One boot used (of the brief's max two): no A/B on any rung.
+
+---
+
