@@ -5,17 +5,29 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] **BLOCKER 23:15 — `/Volumes/Extreme SSD` EPERM for shell
-      sessions (drive healthy: mounted, writable, 712 GB free, not
-      read-only — macOS TCC/privacy flake, not hardware). ALL
-      SSD-backed work stops: PS2 fork, P1 runs, ELF, all reference
-      clones, M6 run dirs. USER ACTION: re-grant Files and Folders →
-      Removable Volumes (or Full Disk Access) to the terminal app in
-      System Settings, or replug the drive, then tell me to retry.
-      On recovery: re-run P12's deferred verifications (cheap greps,
-      listed in ledger) before launching P1l.
-- [ ] **P1k read (09-18 23:20) — CONDITIONAL PASS, SSD receipts
-      deferred:** park = `SYNCTASK_run` queue drained by a driver flag
+- [ ] **P1l launched (09-19, `local/muse/prompts/P1l.md`):** split
+      `0x395cf0` + 3 unsplit siblings (`0x395c70` already split —
+      verify only), regen + rebuild + `ps2xTest` (re-prove the 1
+      pre-existing failure), one ≤90 s boot with `+w4 0x1ffe000`
+      outer-caller receipt. Splits + ladder only; driver-flag writer,
+      sema-26, and any park fix out of scope. Fresh agent in the
+      freed P1k pane (`wN:p1A`).
+- [ ] **RECOVERED 09-19 — `/Volumes/Extreme SSD` writable again
+      after restart (write test passed). Herdr panes wiped by the
+      restart: P5/P1j/P6/P1k agents gone but all four tracks already
+      committed + gate-read — no resume needed. M6 released (MacBook
+      on AC, 65% charging — battery-hold condition met). P1l briefs
+      fresh agent in the freed P1k pane.
+- [ ] **P1k read UPGRADED 09-19 — PASS, all deferred receipts
+      verified post-recovery:** 33,038 lines / 3,052,064 B; thread-1
+      census 15/1/1; threads 2/4/5 sema-parked 26/29/30
+      (sched 0/~300/0); watch 32,077 lines, widths 32050/25/2;
+      fills/del/sema lines verbatim; 15× w16 zeros, 0× `0x3dd214`;
+      stub top-3 identical to p1j; `0x15` ×4 / `0x17` ×1; ELF 11/11
+      + sha1 `77114dfd`; fork `8fad69e` + pre-existing M, no strays,
+      lease absent. NUANCE: sibling `0x395c70` already HAS a split
+      file + reg line (P1l splits only the other three + `0x395cf0`).
+      Original 09-18 23:20 conditional read:** park = `SYNCTASK_run` queue drained by a driver flag
       (`*(entry+8)`, writer unknown); slots 0–1 fire ~600×/5 s
       (fills traced to `systemInit` + `sub_003E3020`, third filler
       del'd pre-fire); outer caller narrowed to 8 wrappers (one is
@@ -27,8 +39,8 @@ the build or commit that closed them.
       repo-locally: 14/14 P6 names verbatim + both absences. SSD
       counts/ELF/fork UNVERIFIED (volume failed mid-brief; agent
       marked NOT RE-CHECKED honestly). Nit: report says "23:05 UTC",
-      means EDT. Next: P1l (fix brief) only after volume recovery +
-      re-verification. Ledger row added (flagged).
+      means EDT. Recovery + re-verification done 09-19; P1l
+      launched below. Ledger row updated (flag lifted).
 - [ ] **P6 read (09-18 23:00) — PASS, thin but honest:** 801-row
       addr→name CSV (names only, longest line 86 chars — license rule
       held); only 6.67% sweep coverage and ALL 11 ladder addrs UNNAMED
