@@ -248,6 +248,8 @@ the build or commit that closed them.
       --pane <id> -- --yolo` — bare `muse` stops at approval dialogs
       (M6 proved it on an SSD touch). If a pane sits at `~`, cd it to
       ssx3 before starting (avoids the workspace-trust dialog).
+      Effort (09-19, user call): append `--reasoning-effort max`
+      (not xhigh) to all new agent starts; running agents stay as-is.
 - [ ] **P1l launched (09-19, `local/muse/prompts/P1l.md`):** split
       `0x395cf0` + 3 unsplit siblings (`0x395c70` already split —
       verify only), regen + rebuild + `ps2xTest` (re-prove the 1
