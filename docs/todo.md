@@ -5,6 +5,26 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I3 read (09-19) — PASS, raylib decision fully tabled:** A:
+      no release/master has an iOS backend (PR #3880 closed
+      unmerged); 6.0 breaks itemized, project uses 0 changed APIs;
+      B: `ghera/raylib-iOS` prior art (789-line backend + ANGLE
+      packaging) sized with file table; C: SDL probe configures
+      (C2 exit 0) + TU probes (rcore clean, raudio needs ObjC);
+      G7 touch gap persists under B/C. No verdict given, as
+      briefed. Verified: 6.0 enum/platforms, rlImGui tag, 789 lines,
+      C2 log, syntax logs, 26 SDL files, fork untouched by I3, disk
+      41G. DECISION OWED (orchestrator → user): upgrade / fork-patch
+      / SDL. Ledger row added.
+- [ ] **M12 read (09-19) — PASS, same-frame partition measured:**
+      4 windows × 25/25 uniform on one frame (70584 / 2572 / 33377 /
+      34105); removed shares 68012 / 37207 / 36479 with the honest
+      non-additivity (105219 vs 70584) tabulated; slot-36 indexed
+      decode on 2 frames (pos 0/0, Tex1 254/92, Tex2-indexed 0) +
+      own true deltas (1372/1827 B); per-draw depth restated open
+      (no header hook, re-verified). Verified: header shas,
+      analyzer rows, window rows verbatim, 6 refhashes, 3/3 hashes,
+      lease log (0 waits). Ledger row added.
 - [ ] **P1t + M12 + I3 launched (09-19, user go-ahead):** P1t (FIX:
       mid-label invocation dispatch, first behavior fix + ≤2 boots)
       reuses P1s pane; M12 (same-frame partition via alternating NOP
