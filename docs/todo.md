@@ -35,9 +35,17 @@ the build or commit that closed them.
       Verified: 33 lines + F2 4 verbatim, s0 singleton, `de7ff17`
       +51/-7 pushed, host rule in source, ELF 6/6, binary fresh.
       Next: P1v (the max_count validation decision). Ledger row added.
+- [ ] **P1v + M14 + I5 launched (09-19, standing order):** P1v
+      (FIX: zero-max CreateSema parity from real-PS2 evidence + ≤2
+      boots) reuses P1u pane; M14 (camera-delta true delta +
+      drawscan carriers) reuses M13 pane; I5 (first Simulator
+      launch: install/run/window-or-crash) reuses I4 pane. Remaining
+      queue: `sceGsSyncVCallback` test fix (fork, after P1v).
 - [ ] **Standing order (09-19, user): keep queueing follow-ups without
       asking unless input is needed.** Holds: publishes/pushes in ssx3
       (never), external submits. (I-lane hold lifted: SDL path chosen.)
+      Polls now carry launch authority too (cron recreated 09-19 —
+      no more idle lanes between user check-ins).
 - [ ] **I4 launched (09-19, user picked SDL path):** SDL2 for
       iphonesimulator + raylib-SDL build + fork CMake integration +
       runtime configure/build attempt. Reuses I3 pane. Standing-order
