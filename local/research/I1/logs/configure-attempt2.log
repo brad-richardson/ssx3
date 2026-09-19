@@ -1,0 +1,499 @@
+-- Populating raylib
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project raylib-populate.xcodeproj build -configuration Debug -parallelizeTargets -hideShellScriptEnvironment -target ALL_BUILD
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'ALL_BUILD' in project 'raylib-populate'
+        ➜ Explicit dependency on target 'raylib-populate' in project 'raylib-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'raylib-populate'
+    Target 'raylib-populate' in project 'raylib-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'raylib-populate'
+    Target 'ZERO_CHECK' in project 'raylib-populate' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+Build description signature: 03bfcd4d546bc3256057dcecdca6d6c7
+Build description path: /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/XCBuildData/03bfcd4d546bc3256057dcecdca6d6c7.xcbuilddata
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'raylib-populate')
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/ZERO_CHECK.build/Script-D0647BCBB510ECCF7FC5B43A.sh (in target 'ZERO_CHECK' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/ZERO_CHECK.build/Script-D0647BCBB510ECCF7FC5B43A.sh
+make: `/private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/CMakeFiles/cmake.check_cache' is up to date.
+
+note: Run script build phase 'Generate raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-patch' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'raylib-populate' from project 'raylib-populate')
+note: Run script build phase 'Generate raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-update' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'raylib-populate' from project 'raylib-populate')
+note: Run script build phase 'Generate CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-complete' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'raylib-populate' from project 'raylib-populate')
+note: Run script build phase 'Generate CMakeFiles/raylib-populate' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'raylib-populate' from project 'raylib-populate')
+PhaseScriptExecution Generate\ raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-update /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-AECA6865B507BBD5308D4CDD.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-AECA6865B507BBD5308D4CDD.sh
+-- Already at requested tag: 5.5
+
+PhaseScriptExecution Generate\ raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-patch /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-EE00B2C26335EE24106749ED.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-EE00B2C26335EE24106749ED.sh
+
+PhaseScriptExecution Generate\ raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-configure /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-17A147C7CCB18EF342B80E63.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-17A147C7CCB18EF342B80E63.sh
+
+PhaseScriptExecution Generate\ raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-build /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-6D1430D17E00D46DBB452930.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-6D1430D17E00D46DBB452930.sh
+
+PhaseScriptExecution Generate\ raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-install /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-DB341F0CBE9758DFA0E352EC.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-DB341F0CBE9758DFA0E352EC.sh
+
+PhaseScriptExecution Generate\ raylib-populate-prefix/src/raylib-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-test /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-B5C9BBE928337F2D370DF47E.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-B5C9BBE928337F2D370DF47E.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/raylib-populate-complete /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-6F3E12B507ED521C1B8EEF56.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-6F3E12B507ED521C1B8EEF56.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/raylib-populate /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-2F1827F73D46430272616C1E.sh (in target 'raylib-populate' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/raylib-populate.build/Script-2F1827F73D46430272616C1E.sh
+
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'raylib-populate')
+PhaseScriptExecution Generate\ CMakeFiles/ALL_BUILD /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/ALL_BUILD.build/Script-96F9CDC3FBF47A4CAC92C802.sh (in target 'ALL_BUILD' from project 'raylib-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/raylib-populate.build/Debug/ALL_BUILD.build/Script-96F9CDC3FBF47A4CAC92C802.sh
+Build all projects
+
+PruneExplicitPrecompiledModules /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /private/tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-subbuild/build/ExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+
+CMake Warning (deprecated) at /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Testing if -Werror=pointer-arith can be used -- compiles
+-- Testing if -Werror=implicit-function-declaration can be used -- compiles
+-- Testing if -fno-strict-aliasing can be used -- compiles
+-- Using raylib's GLFW
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Including Cocoa support
+CMake Warning (author) at /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-src/cmake/LibraryConfigurations.cmake:22 (MESSAGE):
+  OpenGL is deprecated starting with macOS 10.14 (Mojave)!
+Call Stack (most recent call first):
+  /tmp/ps2x-ios-spike/build-attempt1/_deps/raylib-src/src/CMakeLists.txt:49 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated config types: Debug
+-- Compiling with the flags:
+--   PLATFORM=PLATFORM_DESKTOP
+--   GRAPHICS=GRAPHICS_API_OPENGL_33
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui) is deprecated, call
+  FetchContent_MakeAvailable(imgui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(imgui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:96 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating imgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project imgui-populate.xcodeproj build -configuration Debug -parallelizeTargets -hideShellScriptEnvironment -target ALL_BUILD
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'ALL_BUILD' in project 'imgui-populate'
+        ➜ Explicit dependency on target 'imgui-populate' in project 'imgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'imgui-populate'
+    Target 'imgui-populate' in project 'imgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'imgui-populate'
+    Target 'ZERO_CHECK' in project 'imgui-populate' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+Build description signature: 25d9dea3efe348b6689a4707a06f7f07
+Build description path: /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/XCBuildData/25d9dea3efe348b6689a4707a06f7f07.xcbuilddata
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build
+
+CreateBuildDirectory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+
+note: Run script build phase 'Generate imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-patch' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-update' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-complete' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate CMakeFiles/imgui-populate' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-F9A1D6594776A6EF344FF2EA.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-F9A1D6594776A6EF344FF2EA.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-E3A3EFC48264CC3C083F466E.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-E3A3EFC48264CC3C083F466E.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-569F9CAF6B5BCD869145379B.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-569F9CAF6B5BCD869145379B.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-718508AAC5A2091AD062BA58.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-718508AAC5A2091AD062BA58.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AAA79566C1E2DC949B8B8D58.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AAA79566C1E2DC949B8B8D58.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-50C85A0114744412E85698AF.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-50C85A0114744412E85698AF.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-37C2FF61DBB34605C92DB6E6.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-37C2FF61DBB34605C92DB6E6.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-451885FEBEDEAC3F8B8797A0.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-451885FEBEDEAC3F8B8797A0.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-83987A593FB8F0A3BE022D54.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-83987A593FB8F0A3BE022D54.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-C9D620CCB2920A9CF4EF1D87.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-C9D620CCB2920A9CF4EF1D87.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-836EAE2DAB4D9EA09AB10A49.sh (in target 'ZERO_CHECK' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-836EAE2DAB4D9EA09AB10A49.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-130D851D266FC14C0414BC7F.sh (in target 'ALL_BUILD' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-130D851D266FC14C0414BC7F.sh
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/SwiftExplicitPrecompiledModules
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/SharedPrecompiledHeaders
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/SharedPrecompiledHeaders
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/ExplicitPrecompiledModules
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/ExplicitPrecompiledModules
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/Debug
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/Debug
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/EagerLinkingTBDs/Debug
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/EagerLinkingTBDs/Debug
+
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-836EAE2DAB4D9EA09AB10A49.sh (in target 'ZERO_CHECK' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-836EAE2DAB4D9EA09AB10A49.sh
+make: `/private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/CMakeFiles/cmake.check_cache' is up to date.
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-mkdir /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-C9D620CCB2920A9CF4EF1D87.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-C9D620CCB2920A9CF4EF1D87.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-download /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AAA79566C1E2DC949B8B8D58.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AAA79566C1E2DC949B8B8D58.sh
+Cloning into 'imgui-src'...
+HEAD is now at b1bcb12 Merge branch 'master' into docking
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-update /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-83987A593FB8F0A3BE022D54.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-83987A593FB8F0A3BE022D54.sh
+-- Already at requested tag: v1.92.7-docking
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-patch /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-F9A1D6594776A6EF344FF2EA.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-F9A1D6594776A6EF344FF2EA.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-configure /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-718508AAC5A2091AD062BA58.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-718508AAC5A2091AD062BA58.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-build /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-37C2FF61DBB34605C92DB6E6.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-37C2FF61DBB34605C92DB6E6.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-install /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-50C85A0114744412E85698AF.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-50C85A0114744412E85698AF.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-test /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-E3A3EFC48264CC3C083F466E.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-E3A3EFC48264CC3C083F466E.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-complete /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-569F9CAF6B5BCD869145379B.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-569F9CAF6B5BCD869145379B.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/imgui-populate /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-451885FEBEDEAC3F8B8797A0.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-451885FEBEDEAC3F8B8797A0.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/ALL_BUILD /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-130D851D266FC14C0414BC7F.sh (in target 'ALL_BUILD' from project 'imgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-130D851D266FC14C0414BC7F.sh
+Build all projects
+
+PruneExplicitPrecompiledModules /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /private/tmp/ps2x-ios-spike/build-attempt1/_deps/imgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'imgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'imgui-populate')
+** BUILD SUCCEEDED **
+
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(rlImGui) is deprecated, call
+  FetchContent_MakeAvailable(rlImGui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(rlImGui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:119 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating rlimgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project rlimgui-populate.xcodeproj build -configuration Debug -parallelizeTargets -hideShellScriptEnvironment -target ALL_BUILD
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'ALL_BUILD' in project 'rlimgui-populate'
+        ➜ Explicit dependency on target 'rlimgui-populate' in project 'rlimgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'rlimgui-populate'
+    Target 'rlimgui-populate' in project 'rlimgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'rlimgui-populate'
+    Target 'ZERO_CHECK' in project 'rlimgui-populate' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+Build description signature: dad738f715f97fb8accd93e701ada682
+Build description path: /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/XCBuildData/dad738f715f97fb8accd93e701ada682.xcbuilddata
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build
+
+CreateBuildDirectory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+
+note: Run script build phase 'Generate CMakeFiles/rlimgui-populate' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-update' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-complete' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-patch' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9501378A6918429695FD33FD.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9501378A6918429695FD33FD.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-29912AE050E9B4930A00924C.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-29912AE050E9B4930A00924C.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-427E3E9A779BBBEDF8655169.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-427E3E9A779BBBEDF8655169.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-F0BA0767515741B986B9992D.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-F0BA0767515741B986B9992D.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-35B7F174021D016F3A17B642.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-35B7F174021D016F3A17B642.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D55D99D3D53CC3A43BCADD9C.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D55D99D3D53CC3A43BCADD9C.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-72F368DAA3BA1D6B45176FAB.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-72F368DAA3BA1D6B45176FAB.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8E338108C162946119BBCBC9.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8E338108C162946119BBCBC9.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-2CB00AEC93CE1B9DFA09CA49.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-2CB00AEC93CE1B9DFA09CA49.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-4D8BE5BE0FCA90D5BFE4BD58.sh (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-4D8BE5BE0FCA90D5BFE4BD58.sh
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-1D6207F161C3495775C9203F.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-1D6207F161C3495775C9203F.sh
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/SwiftExplicitPrecompiledModules
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/SharedPrecompiledHeaders
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/SharedPrecompiledHeaders
+
+WriteAuxiliaryFile /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-6B4D4F30817F8A77D9A10132.sh (in target 'ALL_BUILD' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    write-file /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-6B4D4F30817F8A77D9A10132.sh
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/ExplicitPrecompiledModules
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/ExplicitPrecompiledModules
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/EagerLinkingTBDs/Debug
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/EagerLinkingTBDs/Debug
+
+CreateBuildDirectory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/Debug
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/Debug
+
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-4D8BE5BE0FCA90D5BFE4BD58.sh (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-4D8BE5BE0FCA90D5BFE4BD58.sh
+make: `/private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/CMakeFiles/cmake.check_cache' is up to date.
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-mkdir /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8E338108C162946119BBCBC9.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8E338108C162946119BBCBC9.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-download /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-427E3E9A779BBBEDF8655169.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-427E3E9A779BBBEDF8655169.sh
+Cloning into 'rlimgui-src'...
+HEAD is now at 118221c Update headings in README.md for consistency
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-update /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-F0BA0767515741B986B9992D.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-F0BA0767515741B986B9992D.sh
+-- Already at requested tag: Raylib_5_5
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-patch /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D55D99D3D53CC3A43BCADD9C.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D55D99D3D53CC3A43BCADD9C.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-configure /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-35B7F174021D016F3A17B642.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-35B7F174021D016F3A17B642.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-build /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-2CB00AEC93CE1B9DFA09CA49.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-2CB00AEC93CE1B9DFA09CA49.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-install /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-29912AE050E9B4930A00924C.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-29912AE050E9B4930A00924C.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-test /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-72F368DAA3BA1D6B45176FAB.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-72F368DAA3BA1D6B45176FAB.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-complete /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9501378A6918429695FD33FD.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9501378A6918429695FD33FD.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/rlimgui-populate /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-1D6207F161C3495775C9203F.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-1D6207F161C3495775C9203F.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/ALL_BUILD /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-6B4D4F30817F8A77D9A10132.sh (in target 'ALL_BUILD' from project 'rlimgui-populate')
+    cd /tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild
+    /bin/sh -c /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-6B4D4F30817F8A77D9A10132.sh
+Build all projects
+
+PruneExplicitPrecompiledModules /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /private/tmp/ps2x-ios-spike/build-attempt1/_deps/rlimgui-subbuild/build/ExplicitPrecompiledModules
+
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'rlimgui-populate')
+** BUILD SUCCEEDED **
+
+-- Found PkgConfig: /opt/homebrew/bin/pkg-config (found version "3.0.7")
+-- Checking for modules 'libavcodec;libavformat;libavutil;libswresample;libswscale'
+--   Found libavcodec, version 63.1.101
+--   Found libavformat, version 63.1.101
+--   Found libavutil, version 61.1.101
+--   Found libswresample, version 7.1.101
+--   Found libswscale, version 10.1.101
+CMake Error at ps2xRuntime/CMakeLists.txt:592 (install):
+  install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
+  target "ps2EntryRunner".
+
+
+-- Configuring incomplete, errors occurred!
