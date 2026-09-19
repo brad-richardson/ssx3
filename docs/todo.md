@@ -5,6 +5,14 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1s + M11 + I2 launched (09-19, user go-ahead):** P1s (sema-26
+      delivery mechanism: signal/wait paths + `Diag:` commit + ≤2
+      boots) reuses P1r pane; M11 (slot-36 delta + indexed partition
+      + NOPTEXT share) reuses M10 pane; I2 (fork CMake fixes G4/G6/G5
+      + configure/build attempt, raylib wall out of scope) reuses I1
+      pane. Note: P1s + I2 share the fork tree (different files;
+      both briefed pull --rebase-and-retry-once on push reject).
+      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1s).
 - [ ] **I1 read (09-19) — PASS, spike correctly FAILED with receipted
       gaps:** pinned raylib 5.5 has NO iOS backend (enum rejects iOS,
       no `rcore_ios`, bundled GLFW/RGFW iOS-free); configure dies on
