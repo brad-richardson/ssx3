@@ -5,6 +5,26 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1j launched (09-18 22:05, `local/muse/prompts/P1j.md`):**
+      identify GS CSR bits 15:14 from public sources (DobieStation /
+      PCSX2 GS / PS2 docs, all cited), implement the minimal producer
+      for the `0x4000` exit state, rebuild, one boot for the ladder.
+- [ ] **P1i read (09-18 22:00) — PASS, strong partial-negative:** no
+      producer for CSR bits 15:14 exists anywhere (exhaustive `csr`
+      grep: writers touch {0,1,13} + init-0 + guest merge only);
+      consumer is dynamic `READ64` (not TOML); vsync/present/timer
+      paths all CSR-free for these bits. Bits honestly recorded as
+      unidentified-from-tree (no-guess rule held). 10 min, no boot,
+      push rule obeyed. Verified: TOML absence, generated line,
+      `0xC000` absence, ELF words (in report). Next: P1j. Ledger row
+      added.
+- [ ] **P5 redirect (09-18 22:05):** +Q6 sp00nznet/xboxrecomp (OG
+      Xbox, SSX 3 runs on it): license read first (author's reo was
+      unlicensed — idea-level only if so), Xbox kernel-HLE approach,
+      any SSX3-Xbox-specific workarounds, NV2A GPU approach vs
+      ps2xGS. Quota note: user nearly out of muse free credits —
+      no new launches after P1j until confirmed; P5 running lean
+      solo, M6 runs held (battery).
 - [ ] **P5 launched (09-18 22:00, `local/muse/prompts/P5.md`):** mine
       360/N64/PSP recomp tooling — XenonRecomp ordinal-HLE stub
       generation/tracing, N64+Xenon indirect-branch/function tooling,
