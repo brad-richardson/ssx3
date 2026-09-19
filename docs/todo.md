@@ -5,6 +5,20 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **G2 launched (09-19, `local/muse/prompts/G2.md`):** harness
+      sensitivity — `strict` second backend honoring all G0-§9-ignored
+      fields + mip-chain/TEX1/paired-isolation captures; sensitivity +
+      specificity tables prove the diff table catches real differences
+      on synthetics alone. No lease, no emulator. Agent in renamed P5
+      pane (`wN:t17` → G2).
+- [ ] **G-series reordered (09-19, user call — harness must not block
+      on first frame):** G1 (game captures + pad scripts + real census)
+      stays queued, gated on first presented frame. G2 (sensitivity,
+      this row) runs now. Probable sequence after: G3 = Present
+      `fbp==0` heuristic tests + CLUT-cache/RMW-lookup upstream TODO
+      spikes (both validated by identity replay); G4 = CPU-backend perf
+      profile + one fast-path spike (Unleashed-style batching
+      candidate); then G1 the moment P-series delivers frames.
 - [ ] **Resume recipe (09-19, learned from this restart):** track
       agents must start with `herdr agent start <name> --kind muse
       --pane <id> -- --yolo` — bare `muse` stops at approval dialogs
