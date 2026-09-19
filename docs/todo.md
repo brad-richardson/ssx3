@@ -5,6 +5,30 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **BLOCKER 23:15 — `/Volumes/Extreme SSD` EPERM for shell
+      sessions (drive healthy: mounted, writable, 712 GB free, not
+      read-only — macOS TCC/privacy flake, not hardware). ALL
+      SSD-backed work stops: PS2 fork, P1 runs, ELF, all reference
+      clones, M6 run dirs. USER ACTION: re-grant Files and Folders →
+      Removable Volumes (or Full Disk Access) to the terminal app in
+      System Settings, or replug the drive, then tell me to retry.
+      On recovery: re-run P12's deferred verifications (cheap greps,
+      listed in ledger) before launching P1l.
+- [ ] **P1k read (09-18 23:20) — CONDITIONAL PASS, SSD receipts
+      deferred:** park = `SYNCTASK_run` queue drained by a driver flag
+      (`*(entry+8)`, writer unknown); slots 0–1 fire ~600×/5 s
+      (fills traced to `systemInit` + `sub_003E3020`, third filler
+      del'd pre-fire); outer caller narrowed to 8 wrappers (one is
+      P6 `ASYNCFILE_release`) — `sd`-path watch miss documented with
+      next receipt (`w4 0x1ffe000`); `0x395cf0` = unsplit frameless
+      leaf (split-class fix, 4 siblings); first CD callback signals
+      sema 26 yet T2 never wakes (completion unobservable — no finish
+      line exists); `0x15`/`0x17` = one-shot disables. Verified
+      repo-locally: 14/14 P6 names verbatim + both absences. SSD
+      counts/ELF/fork UNVERIFIED (volume failed mid-brief; agent
+      marked NOT RE-CHECKED honestly). Nit: report says "23:05 UTC",
+      means EDT. Next: P1l (fix brief) only after volume recovery +
+      re-verification. Ledger row added (flagged).
 - [ ] **P6 read (09-18 23:00) — PASS, thin but honest:** 801-row
       addr→name CSV (names only, longest line 86 chars — license rule
       held); only 6.67% sweep coverage and ALL 11 ladder addrs UNNAMED
