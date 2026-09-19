@@ -5,6 +5,14 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P2 + P3 launched (09-18 20:30, `local/muse/prompts/P2.md`,
+      P3.md):** two read-only P-branch research angles alongside P1f's
+      fix — P2 reads PCSX2 source (EE INTC/alarm/CD/async stacks) for
+      a reference comparison + patch sketch, P3 surveys PS2Recomp
+      forks, independent PS2 static recomps, sibling recomps and
+      readable dynamic emus for borrowable prior art + license
+      verdicts. Neither builds, boots, edits the fork, or takes a
+      lease, so both run fully parallel to P1f and M5.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
