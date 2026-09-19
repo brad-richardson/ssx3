@@ -1,0 +1,26 @@
+In file included from /Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/raudio.c:180:
+/Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/external/miniaudio.h:33929:14: warning: 'AVAudioSessionInterruptionTypeBegan' is deprecated: first deprecated in iOS 27.0 - Use AVAudioSessionDidBecomeInactiveNotification and AVAudioSessionResumptionRecommendationNotification instead [-Wdeprecated-declarations]
+ 33929 |         case AVAudioSessionInterruptionTypeBegan:
+       |              ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/System/Library/Frameworks/AVFAudio.framework/Headers/AVAudioSessionTypes.h:640:29: note: 'AVAudioSessionInterruptionType' has been explicitly marked deprecated here
+  640 | typedef NS_ENUM(NSUInteger, AVAudioSessionInterruptionType) {
+      |                             ^
+In file included from /Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/raudio.c:180:
+/Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/external/miniaudio.h:33946:14: warning: 'AVAudioSessionInterruptionTypeEnded' is deprecated: first deprecated in iOS 27.0 - Use AVAudioSessionDidBecomeInactiveNotification and AVAudioSessionResumptionRecommendationNotification instead [-Wdeprecated-declarations]
+ 33946 |         case AVAudioSessionInterruptionTypeEnded:
+       |              ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/System/Library/Frameworks/AVFAudio.framework/Headers/AVAudioSessionTypes.h:640:29: note: 'AVAudioSessionInterruptionType' has been explicitly marked deprecated here
+  640 | typedef NS_ENUM(NSUInteger, AVAudioSessionInterruptionType) {
+      |                             ^
+In file included from /Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/raudio.c:218:
+/Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/external/stb_vorbis.c:1404:75: warning: pointer comparison always evaluates to false [-Wtautological-compare]
+ 1404 |       if (f->stream_start + loc >= f->stream_end || f->stream_start + loc < f->stream_start) {
+      |                                                                           ^
+In file included from /Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/raudio.c:270:
+/Volumes/Extreme SSD/ps2x-ios-spike-attempt1/_deps/raylib-src/src/external/jar_xm.h:521:9: warning: 'ALIGN' macro redefined [-Wmacro-redefined]
+  521 | #define ALIGN(x, b) (((x) + ((b) - 1)) & ~((b) - 1))
+      |         ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/usr/include/arm/param.h:61:9: note: previous definition is here
+   61 | #define ALIGN(p)        __DARWIN_ALIGN(p)
+      |         ^
+4 warnings generated.
