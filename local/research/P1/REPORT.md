@@ -3063,3 +3063,197 @@ rm /tmp/ssx3-host-lease (verified absent)
 - `waits.log`: no waits (no foreign lease during P1e).
 - Time box: about 35 min of the 4 h box used.
 
+---
+
+# P1f report — Part 7 (brief local/muse/prompts/P1f.md)
+
+## P7-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` absent; wrote `P1f` |
+| Builds/boots | Lease kept as `P1f` across diag commits, normal rebuild, boot 1 (superseded slot), boot 1b (corrected slot), Kernel fix, rebuild, boot 2 |
+| Foreign leases / waits | None observed; no `waits.log` |
+| `adb` | Not used |
+| End | Removed after the `[P1f]` push, verified absent |
+
+## P7-1. Diag diff + watch/stacks/StartThread lines (Step 1, two commits, two builds, three boots)
+
+Commits (`ssx3`, pushed `fork ssx3`, no `runner/` or `._*` files; trailers on each):
+
+| Commit | File(s) |
+|---|---|
+| `8d203d1` Diag: P1f watchpoint on guest RAM plus stack map and StartThread line | `ps2xRuntime/include/ps2_runtime.h` (+22: `ps2DiagWatch*` decls), `ps2xRuntime/include/ps2_runtime_macros.h` (WRITE8/16/32/64/128 call `ps2DiagWatchReport` behind `ps2DiagWatchEnabled()`), `ps2xRuntime/src/lib/ps2_runtime.cpp` (+151: `PS2X_DIAG_WATCH` parse, `diagWatchEmit`, `ps2DiagWatch*` impl, Store8/16/32/64/128 hooks), `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp` (+113: `[diag:stacks]` block, `[diag:start-thread]` line, watch-thread setter before guest dispatch, `writeGuestU32`/`setVSyncFlag` direct watch), `ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp` (+5: `getCdCallbackStackTop()`), `ps2xRuntime/src/lib/Kernel/Stubs/CD.h` (+1: decl) |
+| `a44b101` Diag: forward-declare PS2Runtime for watch helpers | `ps2xRuntime/include/ps2_runtime.h` (+1: build fix, decls precede class) |
+
+Watch format: `[diag:watch] addr=0x<writeAddr hex> width=<bytes dec> value=0x<hex; 128-bit as 32 zero-padded hex hi+lo> pc=0x<ctx pc hex> thread=<m_currentThreadId dec> ra=0x<hex> sp=0x<hex>`. `PS2X_DIAG_WATCH` is a comma list parsed with base 0; each entry names `[addr, addr+8)`. Thread id is the scheduler's current thread at dispatch (`-1` for invocation threads); invocations running on their owner share the owner id. Covered writers: generated-code WRITE8/16/32/64/128 (fast + special paths), `Store8/16/32/64/128`, `EeScheduler::writeGuestU32`, vsync tick `memcpy`. HLE `getMemPtr`/`memcpy`/`memset` stubs are not covered (see P7-6).
+
+Boot 1 (`$W/P1/run/boot-p1f-1.log`, 11,366 lines, normal binary `3c9dbe8cba53dc7be6bf69d8df6be19485d3eabb3df9dfa9aa4d044b037058c4`, env `PS2X_DIAG_WATCH=0x1ffff60`) is superseded: the dormant line prints the context after the epilogue delay slot (`addiu $sp,$sp,0x60`) ran, so `sp=0x1ffff60` is the caller frame and the 36 writes caught there are thread-1 init saves, not the answer. Boot 1b re-runs the same binary watching the true frame slots.
+
+Boot 1b (`$W/P1/run/boot-p1f-1b.log`, 44,094 lines, 13,264,174 B, same `3c9dbe8c` binary, env `PS2X_CD_IMAGE` + `PS2X_DIAG_PERIOD_MS=5000` + `PS2X_DIAG_WATCH=0x1ffff00,0x1ffff08,0x1ffff10`, foreground 180 s, SIGTERM):
+
+| Receipt | Value |
+|---|---|
+| `[diag:watch]` total | 32,682 parsed (thread=1: 153, thread=-1: 32,529; 99 distinct pc/width/value/thread/sp groups) |
+| `[diag:start-thread]` total | 1 (line 410, quoted below) |
+| `[diag:dormant] id=1` total | 1 (line 412, quoted below) |
+| `[diag:dormant] id=-1` total | 10,844 |
+| `[diag:stacks]` total | 245 |
+
+WRITE64 coverage: the `WRITE64` macro (`ps2xRuntime/include/ps2_runtime_macros.h`) calls `ps2DiagWatchReport(rdram, _addr, 8u, ...)` behind `ps2DiagWatchEnabled()`, and `PS2Runtime::Store64` (`ps2_runtime.cpp`) does the same; the prologue `sd $ra` store is observed as line 208 below (`width=8 ... pc=0x3dcc08`).
+
+Log lines 205–213 (prologue save, then the first overwrites; `cut -c1-220`):
+
+```
+[diag:watch] addr=0x1ffff00 width=8 value=0x450000 pc=0x4248ec thread=1 ra=0x3e4c64 sp=0x1fffef0
+[diag:watch] addr=0x1ffff10 width=8 value=0x3e4c64 pc=0x4248f0 thread=1 ra=0x3e4c64 sp=0x1fffef0
+[diag:watch] addr=0x1ffff10 width=16 value=0x00000000000000000000000000000000 pc=0x3dcbec thread=1 ra=0x31af34 sp=0x1ffff00
+[diag:watch] addr=0x1ffff00 width=8 value=0x31af34 pc=0x3dcc08 thread=1 ra=0x31af34 sp=0x1ffff00
+[diag:cd] sceCdRead lbn=0x10 sectors=1 buf=0x519c80 ret=0x3e3694
+[diag:cd] sceCdRead payload lbn=0x10 buf=0x519c80 bytes=0143443030310100
+[diag:watch] addr=0x1ffff10 width=16 value=0x00000000000000000000000000000000 pc=0x3e4dc0 thread=-1 ra=0x0 sp=0x1fffed0
+[diag:watch] addr=0x1ffff00 width=16 value=0x00000000000000000000000000000000 pc=0x3e4dc8 thread=-1 ra=0x0 sp=0x1fffed0
+[diag:watch] addr=0x1ffff00 width=16 value=0x00000000000000000000000000000000 pc=0x3e4dc8 thread=-1 ra=0x0 sp=0x1fffed0
+```
+
+No `thread=1` write appears after line 208 (count 0 past line 211); the overwrites run lines 211–44093 while thread 1 is parked.
+
+Overwrite counts by pc (all `width=16 value=0x0...0 ra=0x0 sp=0x1fffed0 thread=-1`):
+
+| pc | CSV row | ELF word / instruction | addr | Count |
+|---|---|---|---|---|
+| `0x3e4dc0` | `sub_003E4AF0,[0x3e4af0,0x3e4e98)` | `0x7fb00040` / `sq $s0,0x40($sp)` (`0x1fffed0+0x40=0x1ffff10`) | `0x1ffff10` | 10,843 |
+| `0x3e4dc8` | `sub_003E4AF0,[0x3e4af0,0x3e4e98)` | `0x7fb10030` / `sq $s1,0x30($sp)` (`0x1fffed0+0x30=0x1ffff00`) | `0x1ffff00` | 21,686 |
+
+Handler entry `0x3e4db8 = 0x27bdffb0` (`addiu $sp,$sp,-0x50`): stored `sp=0x1ffff20` minus `0x50` is the observed `sp=0x1fffed0`. Entry `0x3e4db8` is `0xc8` past the sweep row start, i.e. the registered INTC handler for cause 10. Generated prologue (`$W/P1/output/sub_003E4AF0_0x3e4af0.cpp` lines 1488–1509):
+
+```cpp
+label_3e4db8:
+    // 0x3e4db8: 0x27bdffb0  addiu       $sp, $sp, -0x50
+    ...
+label_3e4dc0:
+    // 0x3e4dc0: 0x7fb00040  sq          $s0, 0x40($sp)
+    ...
+    WRITE128(ADD32(GPR_U32(ctx, 29), 64), GPR_VEC(ctx, 16));
+    ...
+label_3e4dc8:
+    // 0x3e4dc8: 0x7fb10030  sq          $s1, 0x30($sp)
+    ...
+    WRITE128(ADD32(GPR_U32(ctx, 29), 48), GPR_VEC(ctx, 17));
+```
+
+StartThread line (line 410):
+
+```
+[diag:start-thread] id=2 func=0x3e3be0 stack=0x51ac80 stack_size=0x4000 gp=0x4a30f0 priority=12 attr=0x0 initial_sp=0x51ec80
+```
+
+Thread-1 dormant (line 412, `sp=0x1ffff60` post-delay-slot, same P6-1 trace ending `0x3e57f8 -> 0x3dcc64`):
+
+```
+[diag:dormant] id=1 entry=0x100008 pc=0x0 ra=0x0 sp=0x1ffff60 gp=0x4a30f0 v0=0x1 a0=0x450000 scheduled=22 trace=0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x419878 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3968 -> 0x3e3a7c -> 0x3e438c -> 0x2523a8 -> 0x317e98 -> 0x3e5700 -> 0x423c90 -> 0x423de0 -> 0x423c90 -> 0x319b48 -> 0x31a088 -> 0x3200c0 -> 0x31ed60 -> 0x31eee8 -> 0x31e6d8 -> 0x40fcb0 -> 0x4114d0 -> 0x31ffd8 -> 0x31ffd8 -> 0x31ffd8 -> 0x3e5760 -> 0x423c90 -> 0x423dc0 -> 0x423da0 -> 0x423ba0 -> 0x423bc0 -> 0x3e3be0 -> 0x423de0 -> 0x423bc8 -> 0x3e4418 -> 0x400a78 -> 0x4008a0 -> 0x3e57f8 -> 0x3dcd4c -> 0x3e3020 -> 0x3e57f8 -> 0x3dcc64
+```
+
+`[diag:stacks]` block nearest the thread-1 Dormant line (block 0, lines 1444–1450):
+
+```
+[diag:stacks] block=0 thread id=2 stack=0x51ac80 stackSize=0x4000 sp=0x51ec20 entry=0x3e3be0 pc=0x423de8
+[diag:stacks] block=0 thread id=-1 stack=0x0 stackSize=0x0 sp=0x0 entry=0x0 pc=0x0
+[diag:stacks] block=0 thread id=1 stack=0x1fe0000 stackSize=0x20000 sp=0x1ffff60 entry=0x100008 pc=0x0
+[diag:stacks] block=0 invocation key=0x100000000 thread=1 depth=0 top=0x1fffff0
+[diag:stacks] block=0 cdCallbackStackTop=0x51ac80
+[diag:stacks] block=0 intc id=1 cause=10 handler=0x3e4db8 sp=0x1ffff20
+[diag:stacks] block=0 pending kind=0 pc=0x3e4db8 sp=0x1ffff20
+```
+
+Reserves-from record: `reserveAsyncCallbackStack(0x4000)` allocates down from `PS2_RAM_SIZE` (`0x2000000`) while `m_asyncCallbackStackTop` stays above `m_asyncCallbackStackFloor`; the first top returned is `0x2000000 - 0x10 = 0x1fffff0` (block-0 `top=0x1fffff0`). Thread-2 initial sp `0x51ec80 = 0x51ac80 + 0x4000` masked to 16 (`EeScheduler::startThread`). Thread-1 stack descriptor (`stack=0x1fe0000 stackSize=0x20000`, range `[0x1fe0000, 0x2000000)`) is the live main-thread descriptor read from the scheduler at the dump. `sceCdInitEeCB` line in this boot: `[diag:cd] sceCdInitEeCB stack=0x51a480 size=0x800 ret=0x3e442c`, so `g_cdCallbackStackTop = 0x51a480 + 0x800 = 0x51ac80`. INTC `handler.sp` comes from the `AddIntcHandler` sp argument; the alarm sp comes from `SetAlarm`'s caller sp (`getRegU32(ctx, 29)`); no alarm rows are present in any `[diag:stacks]` output.
+
+## P7-2. Writer table (Step 2, no build; from boot 1b)
+
+Writes to the true ra slot `0x1ffff00` (`0($sp)` with prologue `sp=0x1ffff00`) and its neighbours, in log order. The slot's own writer rows first; the remaining 151 thread-1 writes (97 groups, all log lines <208: init-sequence `sq` pairs and post-init frame saves at `0x317d94`/`0x317da0`/`0x319738`/`0x31ff84`/`0x3e56a4`/`0x3e56c0`/`0x3e64bc`/`0x3e64c0`/`0x418cb0`/`0x418cb4`/`0x41dc10`/`0x41dc14`/`0x41e348`/`0x41e350`/`0x4248ec`/`0x4248f0` plus the constructor pairs) precede the prologue save and never recur after line 208.
+
+| # | Value | Width | pc → CSV row → ELF word / instruction | Thread / invocation, sp/ra | Order |
+|---|---|---|---|---|---|
+| 1 | `0x31af34` | 8 | `0x3dcc08` → `sub_003DCBD8,[0x3dcbd8,0x3dcc88)` → `0xffbf0000` `sd $ra,0($sp)` (delay slot of `beqz` at `0x3dcc04`) | Thread 1, `sp=0x1ffff00` `ra=0x31af34` | Log line 208; the prologue save (WRITE64 hook observed) |
+| 2 | `0x0` | 16 | `0x3dcbec` → `sub_003DCBD8,[0x3dcbd8,0x3dcc88)` → `0x7fb40010` `sq $s4,0x10($sp)` (`0x1ffff00+0x10=0x1ffff10`) | Thread 1, `sp=0x1ffff00` `ra=0x31af34` | Log line 207, same prologue |
+| 3 | `0x0` | 16 | `0x3e4dc0` → `sub_003E4AF0,[0x3e4af0,0x3e4e98)` → `0x7fb00040` `sq $s0,0x40($sp)` (`0x1fffed0+0x40=0x1ffff10`) | Invocation (`thread=-1`, `ra=0x0`), `sp=0x1fffed0` | ×10,843, lines 211–44091 |
+| 4 | `0x0` | 16 | `0x3e4dc8` → `sub_003E4AF0,[0x3e4af0,0x3e4e98)` → `0x7fb10030` `sq $s1,0x30($sp)` (`0x1fffed0+0x30=0x1ffff00`) | Invocation (`thread=-1`, `ra=0x0`), `sp=0x1fffed0` | ×21,686, lines 212–44093 |
+
+Rows 3–4 are the INTC cause-10 handler prologue (`0x3e4db8 = 0x27bdffb0 addiu $sp,$sp,-0x50`; stored `sp=0x1ffff20` minus `0x50` is the observed `sp=0x1fffed0`). The fresh invocation context zeroes the s-regs, so the `sq` stores write 0 over thread 1's parked frame, including the ra slot `0x1ffff00` (row 4). Row 4 is the write that left the 0 the epilogue (`0x3dcc78 ld $ra,0($sp)` + `0x3dcc7c jr $ra`) read: the prologue saved `0x31af34` at line 208, the first overwrite lands at line 212, no `thread=1` write recurs after line 208, and the thread-1 Dormant line follows at 412. An invocation prologue, as listed in the brief's writer kinds.
+
+## P7-3. Fix + ladder (Step 3, one commit `Kernel:`, rebuild, boot 2)
+
+Fix (`6046260`, `Kernel:` prefix, 3 files): `EeScheduler::dispatchIrq` and the `Alarm` event queued handler invocations with the registration-time thread sp (`handler.sp` / `alarm.sp`, `EeScheduler.cpp`). That stack belongs to a live guest thread: the `0x3e4db8` prologue stored zeros over thread 1's ra slot (P7-2 rows 3–4). Both sites now queue with `sp=0`, so the `run()` dequeue path (`sp==0` → `invocationStackTop()`) assigns a reserved top. `reserveAsyncCallbackStack` (`ps2_runtime.cpp`, header member inits, and the `loadELF` reset) no longer hands out the RAM top: it allocates down from `0x00100000` with floor `0x00080000`.
+
+Region and why it is free: `[0x80000, 0x100000)` sits inside the EE kernel-reserved `0x00000000–0x000fffff` area. ELF program headers (single `PT_LOAD`, `vaddr=0x00100000 filesz=0x3a4bf4 memsz=0x43eadc`) load no image below `0x100000`. Guest heap base defaults to `0x00100000` (`kGuestHeapDefaultBase`) and `SetupHeap`/`EndOfHeap` cap the limit at `0x01F00000`, so heap blocks grow up from at or above `0x100000` while these stacks grow down from it. Guest thread stacks (`[0x51ac80,0x51ec80)`, `[0x1fe0000,0x2000000)`, plus boot-2 `[0x6048c0,0x6088c0)` / `[0x6088d0,0x6188d0)`), the CD stack (`[0x51a480,0x51ac80)`), and the old invocation tops (`0x1fffff0`) all sit at or above `0x100000`. Capacity `[0x80000,0x100000)` is 512 KB for `0x4000` stacks; exhaustion keeps the existing throw.
+
+Boot 2 (`$W/P1/run/boot-p1f-2.log`, 1,464 lines, 151,824 B, fixed binary `f4d16b988d319cd8751350d0cf2554895ef1b7b2f732526d33b01615ec372fba`, same watch env, foreground 180 s, SIGTERM):
+
+| Rung | Boot 2 |
+|---|---|
+| `[diag:watch]` total | 165 (`thread=-1`: 0; `pc=0x3e4dc8`: 0; prologue save `pc=0x3dcc08 value=0x31af34` still present) |
+| `[diag:dormant] id=1` | 0 (thread 1 runs past the old point) |
+| Thread table at last dump (block 34, 4 threads) | `id=1 status=0 waitReason=0 waitId=0 pc=0x391330 entry=0x100008 priority=100 scheduled=306`; `id=2 status=2 waitReason=2 waitId=26 pc=0x423de8 entry=0x3e3be0 priority=12 scheduled=0`; `id=3 status=1 waitReason=0 waitId=0 pc=0x31ac60 entry=0x31ac60 priority=101 scheduled=0`; `id=4 status=2 waitReason=2 waitId=29 pc=0x423de8 entry=0x31ac08 priority=99 scheduled=306` |
+| New park | Thread 1 `Running` at `pc=0x391330` (in `sub_003912A8,[0x3912a8,0x391360)`), `scheduled` 302→304→306 across the last blocks with stable pc; threads 3 (`sub_0031AAF0` entry `0x31ac60`) and 4 (`sub_0031AAF0` entry `0x31ac08`, parked `WaitSema` on 29) exist only after the fix |
+| First new syscall ids (block 0 `distinct=24`) | `0x44,0xffffffbd,0x2f,0x40,0x41,0xfc,0x42,0x4b,0x74,0x5b,0x64,0x22,0x20,0x3e,0x6f,0x4a,0x14,0x10,0x30,0x29` (20 of 24 shown; block-0 count was 21 pre-fix; per-id baseline diff tabled in P7-6 as not performed) |
+| Stubs block 0 | `distinct=334` (top `0x3e3968` count=1135) |
+| Invocation tops (block 0) | `key=0xffffffff00000000 top=0xfbff0`, `key=0xffffffff00000001 top=0xf7ff0`, `key=0x100000000 top=0xffff0` (all inside `[0x80000,0x100000)`) |
+| Pending (blocks 13/17/19) | `kind=0 pc=0x3e4db8 sp=0x0` (queued with sp=0, assigned at dequeue) |
+| CD | `sceCdInitEeCB stack=0x51a480 size=0x800` + 20 `sceCdRead` payload lines (`buf=0x519c80`) |
+| First VIF MPG/MSCAL | None |
+| First GIF kick | None |
+| First presented frame | None (host window blank) |
+| Crash | None |
+| Missing targets | 0 (normal build) |
+
+No further boot or fix: thread 1 is still executing at the end of boot 2 (`Running`, `scheduled` advancing); an identical third boot would repeat the observation.
+
+## P7-4. Binaries and commits
+
+| Binary | sha256 | Sources |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boots 1/1b) | `3c9dbe8cba53dc7be6bf69d8df6be19485d3eabb3df9dfa9aa4d044b037058c4` | Sweep runner sources + `8d203d1` + `a44b101` diag |
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot 2) | `f4d16b988d319cd8751350d0cf2554895ef1b7b2f732526d33b01615ec372fba` | Above + `6046260` fix |
+| `/tmp/p1-link-strict/ps2xRuntime/ps2EntryRunner` (untouched) | `a660c92b62c61ca26c7c1049e8fe94def756bb8ddc211d375524fe7aebb0eaec` | Unchanged since P1e |
+
+`ssx3` commits (pushed `fork ssx3`, no `runner/` or `._` files; trailers on each): `8d203d1` Diag watch/stacks/StartThread (`b15aff0..8d203d1`), `a44b101` Diag forward-declare fix (`8d203d1..a44b101`), `6046260` Kernel INTC/DMAC/alarm reserved stacks (`a44b101..6046260`). `register_functions.cpp` (generated replacement) remains a local modification, never added.
+
+## P7-5. Exact commands
+
+```
+printf 'P1f\n' > /tmp/ssx3-host-lease   (absent before; removed at end)
+ELF/CSV/python3 reads for P6 facts; sed on $W/P1/output/sub_003DCBD8_0x3dcbd8.cpp lines 116-144
+(edit_file) ps2_runtime.h: ps2DiagWatch* decls + forward declare
+(edit_file) ps2_runtime.cpp: watch parse/emit/report + Store8/16/32/64/128 hooks
+(edit_file) ps2_runtime_macros.h: WRITE8/16/32/64/128 watch hooks
+(edit_file) EeScheduler.cpp: stacks block + start-thread line + watch-thread setter + writeGuestU32/vsync watch
+(edit_file) CD.h/CD.cpp: getCdCallbackStackTop decl/impl
+find ps2xRuntime /tmp/p1-link -name '._*' -delete (after every edit)
+git add <6 diag files>; git commit -m "Diag: ..." (trailers); git push fork ssx3   (8d203d1)
+git add ps2xRuntime/include/ps2_runtime.h; git commit -m "Diag: ..." (trailers); git push fork ssx3   (a44b101)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner; shasum -a 256 (3c9dbe8c)
+python3 /tmp/p1f-boot1.py (foreground 180 s, CWD $W/P1/run, PS2X_CD_IMAGE + PS2X_DIAG_PERIOD_MS=5000 + PS2X_DIAG_WATCH=0x1ffff60, stdbuf -o0 -e0, log direct to boot-p1f-1.log, SIGTERM)
+python3 /tmp/p1f-boot1b.py (same, PS2X_DIAG_WATCH=0x1ffff00,0x1ffff08,0x1ffff10, log to boot-p1f-1b.log)
+log reads: grep/sed/python3 grouping on closed logs only (never piped while running)
+ELF words at 0x1000+(va-0x100000); csv+bisect over ssx3-functions.sweep.csv; seds in $W/P1/output (sub_003E4AF0_0x3e4af0.cpp)
+ELF program headers via python3 struct over SLUS_207.72; SetupHeap/EndOfHeap reads in System.cpp
+(edit_file) ps2_runtime.h + ps2_runtime.cpp: async stacks to [0x80000,0x100000)
+(edit_file) EeScheduler.cpp: dispatchIrq + Alarm queue with sp=0
+git add <3 fix files>; git commit -m "Kernel: ..." (trailers); git push fork ssx3   (6046260)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner; shasum -a 256 (f4d16b98)
+python3 /tmp/p1f-boot2.py (same watch env as 1b, log to boot-p1f-2.log)
+git add -f local/research/P1/REPORT.md; git commit -m "[P1f] ..." (trailers); git push fork ssx3
+rm /tmp/ssx3-host-lease (verified absent)
+```
+
+## P7-6. What I could not do
+
+- HLE `getMemPtr`/`memcpy`/`memset` stubs write guest RAM without passing the watch hooks; boot-2's zero `thread=-1` count covers only the hooked writers (the 165 remaining boot-2 watch lines are `thread=1`).
+- Watch thread id is the scheduler's current thread at dispatch; invocations running on their owner share the owner id (only `id=-1` invocation threads are distinct).
+- Step 1 took two commits instead of one (`a44b101` repairs the `8d203d1` build break); all three `ssx3` commits are tabled in P7-1/P7-3.
+- Per-id new-syscall baseline diff vs the pre-fix 21-id set not performed (the 20 listed boot-2 block-0 ids are given without the old set beside them).
+- Full `ra=0x3dcc64` provenance across the tail-jump chain (`0x3dcd4c`→`0x3e3020`→`0x3e57f8`→`0x3dcc64`) remains at the P6-7 state; boot 1b shows the prologue save did run this time (line 208), so the skipped-save path is boot-dependent.
+- No boot 3: thread 1 is still executing at the end of boot 2, and an identical boot would repeat the observation; no further fix per the brief.
+- `waits.log`: no waits (no foreign lease during P1f).
+- Time box: about 2 h of the 4 h box used.
+
