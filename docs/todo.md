@@ -5,6 +5,23 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1k launched (09-18 22:45, `local/muse/prompts/P1k.md`):**
+      diagnose the `0x3e5980` 16-slot dispatch-loop park (slot
+      contents, filler, exit condition) + name the outer caller of
+      `sub_003DD1D8` + analyze missing target `0x395cf0` + first CD
+      callback + syscalls `0x15`/`0x17`; uses P6 names if landed. No
+      fix. Lease free.
+- [ ] **P1j read (09-18 22:45) — PASS, CSR park cleared, ladder
+      jumps:** bits 15:14 identified as FIFO (DobieStation + PCSX2 +
+      gsKit + Play!, all cited); fix `8fad69e` (init EMPTY + force
+      read-only on guest writes, +43/-7, cheat row documented)
+      pushed to fork `ssx3`; boot 1 runs thread 1 to `0x3e5980` with
+      FIRST `[cd:callback]` fire, thread 5, syscalls `0x15`/`0x17`,
+      1 new missing target (JALR `0x3760d0→0x395cf0`). Tests 424/425
+      with the 1 failure proven pre-existing (stash A/B). Verified:
+      fork push, hunks, both FIFO cites verbatim, boot pcs/counts.
+      Queued (not launched): `sceGsSyncVCallback` stack-pool test
+      fix. Next: P1k. Ledger row added.
 - [ ] **P6 launched (09-18 22:35, `local/muse/prompts/P6.md`):** mine
       ssxdecomp/ssx3 (PS2 SLUS_207.72 matching decomp, SAME sha1 as
       our ELF, 433 src files, NO license → names/addresses/facts
