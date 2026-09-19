@@ -5,6 +5,54 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1n + G4 + M8 launched (09-19):** P1n (driver-entry sp/ra
+      probe, `Diag:` commit + rebuild + one boot — names the live
+      caller) reuses P1m pane; G4 (profile + one fast path,
+      identity-proven) reuses G3 pane; M8 (delta propagation: slot
+      census + second-slot delta + projection reachability) reuses M7
+      pane. Remaining queue: `sceGsSyncVCallback` test fix (fork,
+      after P1n). Monitoring note: orchestrator does NOT watch
+      between user check-ins — all three prior agents finished
+      unnoticed; user check-in is the actual monitoring loop (waits
+      only run inside active turns).
+- [ ] **M7 read (09-19) — PASS, item 3 mostly done, one open
+      question:** baseline reproduces M6; all three M6 gaps closed
+      (det=0 matches suppressed shape except `pediff` 0/+2,
+      replay_disabled continuation clean, mid-Trigger flip DIRECTLY
+      observed: `trig_imx` 1/1, `dimx` once at replay 0, `dframe` +1
+      ×200 — M6's elimination upgraded to observation); no-op parity
+      holds with `trig_imx` 0/0 as the negative control; camera delta
+      (+0.1 posmtx0 tx) applies 152×/replay yet 0/200 frames differ by
+      any byte, no drift, guest/event state clean. OPEN: why zero
+      pixel diff (slot unused? seam overwritten pre-use?) — agent
+      quantified honestly but didn't pursue; that's M8. Verified:
+      header sha, analyzer rows reproduced, xform_stats verbatim,
+      6/6 hashes, flip counters, lease log. Ledger row added.
+- [ ] **G3 read (09-19) — PASS, present pinned + both TODOs spiked:**
+      4 new captures (102 total, 719 MB under the 800 cap) pin the
+      `fbp==0` fallback (black→context[0], nonblack→0, multi→first
+      nonblack, empty→0); `spike` fork backend (cpu/strict/upstream
+      untouched) carries CLUT-cache + RMW-lookup spikes, both
+      identity-exact on all 102; timing deltas recorded as observed
+      (CLUT ~15–20% submit savings on paletted captures, RMW up to
+      ~40% on fbmsk); CTest 11/11. Honest limits: CLUT memo assumes
+      no mid-batch footprint writes; RMW CT32-only; strict+spike
+      uncombined. Verified: md5s, factory reg, old-98 byte-identical
+      (md5 lists differ ONLY by the 4 added lines), CTest 11/11
+      re-run, pushed. Ledger row added.
+- [ ] **P1m read (09-19) — PASS, miss mechanism found, Step 2
+      skipped legitimately:** 17-path coverage audit proves driver
+      `sw`/`sd` emit on fires-paths (P12 sd-theory excluded BY
+      SOURCE); p1l-only 72.3M-line trace: driver entered 3940×/
+      exited 3939× (~44/s, per-period), 0 stub hits explained
+      (checkpointed depth-0 dispatch uncounted); 7 of 8 direct-jal
+      candidates NEVER entered, 8th wrote elsewhere → frame-elsewhere
+      mechanism; live caller unknown (depth-0, no guest parent);
+      next receipt designed (driver-entry sp/ra probe, both dispatch
+      paths). Verified: trace 72,315,942 lines, 3940/3939, candidate
+      0/0/0/0/0/2/0/0, overlap line verbatim, driver :39/:78,
+      138 FAST files, 11 refs, fork untouched, no p1m boot. Next:
+      P1n implements the probe. Ledger row added.
 - [ ] **P1m + G3 launched (09-19):** P1m (miss-mechanism diagnosis, no
       fix — watchpoint coverage audit + driver-entry census + frame
       table, one boot max) reuses the P1l pane (`wN:t1A` → P1m); G3
