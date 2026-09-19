@@ -10,6 +10,10 @@ the build or commit that closed them.
       `after_frame_event` suppression + `FrameCount`/frame-aging
       semantics + the `dframe` +1 driver chase + fail-closed
       `g_record_fifo_data` guard, on M5's header, desktop only.
+      HOLD 21:55: MacBook untethered (battery 80%) — M6 finishes Step 1,
+      then holds all runs until back on power (battery + thermal-noise
+      protection); prep work continues. P1i unaffected. Odin unplugged:
+      no track needs the device, no blockers.
 - [ ] **P1i launched (09-18 21:50, `local/muse/prompts/P1i.md`):**
       diagnose the GS CSR park at `0x375d10`
       (`(CSR&0xC000)!=0x4000` spin) from the closed boot-p1h-1 log +
