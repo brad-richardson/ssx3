@@ -5,6 +5,42 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1q + M10 launched (09-19):** P1q (why entry 0 is never
+      selected/completed: entry contents + ExecCommand selection +
+      completion trigger, ≤2 boots) reuses P1p pane; M10
+      (discriminating instruments: hit/draw order + full matrices +
+      render-target/occlusion) reuses M9 pane. G-lane resting.
+      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1q).
+- [ ] **M9 read (09-19) — PASS, residue narrowed hard:** VAT+texgen
+      closed (M8's 1346-draw Tex2 reach corrected to 21 shared+enabled;
+      slot-0 shared-pos reach 664–800); upload timing EXCLUDED
+      (snapshots hold perturbed values 200/200, dirty flags fire);
+      shadow copy EXCLUDED; yet 21 Tex2 + 800 Pos draws consume
+      perturbed matrices with 0/200 pixels differing. Residue: hit/draw
+      order, full-matrix values, render-target/occlusion, texcoord
+      stage — discriminating instruments specified, not built (M10).
+      Verified: header sha, analyzer rows, xform_stats ×2 verbatim,
+      4/4 hashes, lease log (1 P1p wait). Ledger row added.
+- [ ] **G6 read (09-19) — PASS, -O2 collapses the delta:** Release
+      (-O3) CTest 12/12 green, no fixes; cpu median 15.8→0.36 ms —
+      the G4 fast-path advantage vanishes (all backends ~0.35–0.55,
+      within noise); -O0 columns re-measured in-session and match
+      G4/G5; PR prep file written with verified figures, nothing
+      submitted, no network writes. Verified: ninja flags, CTest
+      re-run, spot timing both exact, PR.md base rev, CMakeLists +
+      upstream untouched by G6, pushed. Implication recorded: CPU
+      backend at release is sub-ms on synthetics — GPU urgency
+      question reopens on game-sized frames. Ledger row added.
+- [ ] **P1p read (09-19) — PASS, entry-0 flag never set:** table base
+      `0x5e0080` + current-entry transitions (entry 1 / null, never
+      entry 0) learned; entry-0+8 = `0x5e0088` watched: exactly ONE
+      hit, an init-time zeroing `sd` @ `0x3e64d0` (memset loop in
+      `sub_003E6448`); W1/W2/W3 all silent across the boot. So the
+      SYNCTASK wait never exits because entry 0 is never completed —
+      current entry is entry 1. Next: P1q (why is entry 0 never
+      selected/completed?). Verified: 9 + 1 watch lines verbatim,
+      counts, ELF 3/3, P6 absence, fork untouched, lease clean.
+      Ledger row added.
 - [ ] **G6 launched (09-19, user go-ahead):** Release-build numbers
       (-O2 CTest + timing tables on all four backends vs -O0) +
       upstream PR prep (`upstream-patches/PR.md`, verified figures,
