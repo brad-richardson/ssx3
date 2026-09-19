@@ -5,11 +5,30 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1r launched (09-19):** CD-completion→W1 gap — worker path
+      gates + poll registration + lost-wake candidates statically,
+      minimal watch set dynamically (≤2 boots). Reuses P1q pane.
+      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1r).
+- [ ] **P1q read (09-19) — PASS, entry 0 never queued + slot-reuse
+      decoded:** entry 0 fills (id `0x900001`, prio `0x64`) but takes
+      `3DDAC0` path B (no device match — `+0x24` never written, never
+      enqueued, `+0x2C` stays 0); full 12-word entry layout + 7
+      allocators + 5 dequeue predicates + nibble→case dispatch (jump
+      table 9/9 ELF) + all 10 W1 sites tabled; entry-1 "re-select" is
+      slot reuse (cleared, re-alloc'd nibble 4/id 3, selected for a CD
+      read whose callback fires but never reaches W1 — the chain
+      breaks at CD→W1, poll-vs-lost-wake open). Verified: 38 watch
+      lines + key lines verbatim, jump table, ELF spot, P6 row, fork
+      untouched, lease clean. Next: P1r. Ledger row added.
 - [ ] **I1 launched (09-19, user go-ahead):** iOS spike — dep
       inventory + platform surface + configure/build attempts for
       iphonesimulator arm64, gaps as fix-classed rows, no fixes.
       Read-only in fork, no lease, no device. Reuses P6 pane. First
-      agent on `--reasoning-effort max`.
+      agent on `--reasoning-effort max`. Constraints (user, steered
+      mid-run): ONLY the installed iOS 27.0 runtime + existing
+      devices, never download runtimes; internal disk 42 GB free —
+      scratch in `/tmp/ps2x-ios-spike`, >500 MB to SSD, never touch
+      other agents' build dirs.
 - [ ] **P1q + M10 launched (09-19):** P1q (why entry 0 is never
       selected/completed: entry contents + ExecCommand selection +
       completion trigger, ≤2 boots) reuses P1p pane; M10
