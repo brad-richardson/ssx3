@@ -5,6 +5,12 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P6 launched (09-18 22:35, `local/muse/prompts/P6.md`):** mine
+      ssxdecomp/ssx3 (PS2 SLUS_207.72 matching decomp, SAME sha1 as
+      our ELF, 433 src files, NO license → names/addresses/facts
+      only, never bodies): addr→name CSV joined against our 9,270-row
+      sweep, ladder-function naming, boot/park structure, boundary
+      truth sample, tooling theft. Read-only.
 - [ ] **Monitoring switched to event waits (09-18 22:30, user
       call):** `herdr agent wait --until done,blocked --timeout
       <box>` replaces sleep-polls — done → check `[ID]` commit →
