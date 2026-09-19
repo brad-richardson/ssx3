@@ -5,6 +5,27 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Monitoring switched to event waits (09-18 22:30, user
+      call):** `herdr agent wait --until done,blocked --timeout
+      <box>` replaces sleep-polls — done → check `[ID]` commit →
+      gate read; blocked → read dialog; timeout → stuck/overtime →
+      read + redirect. No agent cooperation needed (no
+      agent→orchestrator message primitive exists; waits observe
+      lifecycle server-side). Artifact proof unchanged: the commit,
+      never the status label.
+- [ ] **P5 read (09-18 22:30) — PASS, 32 borrowable rows:** Xenon
+      ordinal-HLE (weak-link override, addr→name map, BL-sweep,
+      gap-fill Analyse, offline switch TOML); psprecomp HLE work-list
+      census + miss-log + zero-ring + entry trace + self-test;
+      N64 CreateStatic + jump-table discovery + patch/hook system;
+      UnleashedRecomp API-level GPU HLE (no capture stream) +
+      render-thread split + shader-hash tables; xboxrecomp MIT,
+      ordinal-switch HLE + coverage audit + NV2A census/executor —
+      but NO SSX3-Xbox specifics (titles are Burnout 3/Halo).
+      Verified: xbox MIT, psprecomp + N64 quotes verbatim, P5's
+      "zero SSX matches" is substance-true (one English-word
+      "tricky" false positive it should have named — nit).
+      No push. Ledger row added.
 - [ ] **P1j launched (09-18 22:05, `local/muse/prompts/P1j.md`):**
       identify GS CSR bits 15:14 from public sources (DobieStation /
       PCSX2 GS / PS2 docs, all cited), implement the minimal producer
