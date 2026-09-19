@@ -5,6 +5,19 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I5 read (09-19) — PASS, install blocked on missing bundle
+      id:** `simctl install` exit 13 (IXErrorDomain, Missing bundle
+      ID); Info.plist has 19 keys, zero `CFBundleIdentifier`; no
+      launch attempted per stop rule (no window, no crash, no logs —
+      screenshot absence reasoned); static entry table:
+      `_main`+`_SDL_Init`+`_InitWindow` present, SDL2main still
+      unlinked (292 SDL symbols, matches I4), adhoc sig,
+      `main.cpp:167` argv→loadELF, fork CMake sets no bundle id; 4 gap
+      rows with exact next briefs (gap 1 = I6). Verified:
+      install.log verbatim, plist grep 0 + 3 keys, nm 3 lines + 292,
+      codesign adhoc/19, otool head, trailer, sim Shutdown, 44K
+      evidence. Next: I6 (bundle-id fix + rebuild + re-measure).
+      Ledger row added.
 - [ ] **I4 read (09-19) — PASS, simulator binary BUILT:** SDL2
       2.32.10 static arm64 (2.1 MB, 266/266) → raylib 5.5-SDL-ES2
       arm64 (ObjC-mode retry; linkprobe proved compile-scoped `-x`)
