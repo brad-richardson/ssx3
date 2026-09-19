@@ -5,6 +5,14 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M7 launched (09-19, `local/muse/prompts/M7.md`):** milestone 2
+      item 3 — pose interpolation + camera delta on the `g_transform`
+      seam inside the M6 context. Step 1 closes M6's three unordered
+      runs (det=0, replay_disabled, direct flip observation); steps 2–3
+      no-op parity then camera delta vs the S2 honesty gate. Desktop,
+      lease-shared with P1l. Agent in freed M6 pane (`wN:t16` → M7).
+      Deferred queue behind live agents: `sceGsSyncVCallback` test fix
+      (fork tree, after P1l), G3 (ps2xGS tree, after G2).
 - [ ] **M6 read (09-19) — PASS, milestone 2 item 2 done:** scoped bus
       (`dafter_live` 0/0, `dpend` 0/0, queue never grows — in-stream
       flush points still drain); `dframe` frozen 0/0 with replay-local
