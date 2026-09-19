@@ -4033,3 +4033,280 @@ find <dir> -name '._*' -delete (after every edit/copy)
 - VBlankStart firings remain uncounted (no vsync-marked log line, same as P10); guest CSR stores remain log-silent (all write paths emit no line).
 - Time box: about 2 h of the 4 h box used (Step 1 sources + static scan ~60 min, implement/corruption-repair/test ~40 min, boot + ladder + report ~25 min).
 
+---
+
+## Part 12 (P1k): 0x3e5980 dispatch-loop park diagnosed, slot fills captured, caller narrowed to 8, 0x395cf0 = unsplit leaf
+
+Brief `local/muse/prompts/P1k.md`. Diagnose only; no runtime fix. Tables, no verdicts.
+P6 names file WAS present (`local/research/P6/ssx3-decomp-names.csv`, 802 lines = header + 801 names, dated Sep 18 22:40, i.e. after boot-p1j-1): P6 names used below, `sub_*` where P6 has no row.
+
+P6 addr→name rows cited in this Part (exact CSV text):
+
+| addr | name |
+|---|---|
+| `0x3e5928` | `SYNCTASK_run` |
+| `0x3e57f8` | `SYNCTASK_add` |
+| `0x3e57d0` | `SYNCTASK_init` |
+| `0x3e58c8` | `SYNCTASK_del` |
+| `0x3e5700` | `MUTEX_lock` |
+| `0x3e5760` | `MUTEX_unlock` |
+| `0x31adb0` | `systemInit` |
+| `0x3df9d8` | `ASYNCFILE_release` |
+| `0x3dee70` | `queueadd` |
+| `0x3defc0` | `releaserequest` |
+| `0x3de420` | `iFILESYS_CommandCompleteCallback` |
+| `0x3de4d0` | `FILESYS_bypassqueuefileinfo` |
+| `0x3dddf0` | `FILESYS_atomic` |
+| `0x3ddfa8` | `iFILESYS_ExecCommand` |
+
+P6 absence (0 rows each, verified by grep): `0x395*`, `0x376*`, `0x375*`, `0x423*`, `0x382*`, `0x411*`; no row for `0x3dd1d8`, `0x3e4040`, `0x3e3020`, `0x3e3350`/`0x3e33b0`, `0x31ad18`/`0x31ad20`, `0x3e3ad8`, `0x3e3be0`, `0x31ac08`, `0x382740`, seven of the eight §P12-1 caller sites' functions.
+
+## P12-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (`cat /tmp/ssx3-host-lease`: no such file) |
+| Pre-boot checks | `pgrep -f ps2EntryRunner` exit 1 (none); binary sha matches boot-p1j-1 (no rebuild, see P12-5) |
+| Claim | `printf 'P1k\n' > /tmp/ssx3-host-lease` immediately before boot-p1k-1 |
+| Foreign holder seen | None (no poll loop ran) |
+| Waits log | `$W/P1/run/p1k-waits.log` does not exist (no waits) |
+| Release | `rm -f /tmp/ssx3-host-lease` in the same command as the boot return; verified absent after |
+| `adb` | Not used |
+| Post-boot volume state | From ~23:05 UTC all data reads under `/Volumes/Extreme SSD/` fail with `Operation not permitted` (EPERM; `ls` metadata still works; `/Users` and `/tmp` unaffected; no stray runner — PID seen once by `pgrep` was gone on `ps`). All P12 receipts below were captured before the failure except where marked `NOT RE-CHECKED`. |
+
+## P12-1. Park + driver + caller (Steps 1a/1b)
+
+Park function is `SYNCTASK_run` (P6 `0x3e5928`; sweep `sub_003E5928 0x3e5928-0x3e5a78`).
+
+### a. Slot table layout (static; init/add/del/run agree)
+
+Base `0x51ED98` (`lui 0x52` + `-0x1268`), stride `0x10`, 16 slots. Only 4 guest files reference `-0x1268` (`sub_003E5760` init, `sub_003E57F8` add, `sub_003E58C8` del, `sub_003E5928` run); no other writer exists.
+
+| Word | Add writes (`0x3e5898`-`0x3e58b0`) | Run reads (`$s0`=base+`0xC`+i*`0x10`) |
+|---|---|---|
+| `[0]` fn | `$t1`=$a0 (fn) | `-0xC($s0)` → `jalr $a2` (`0x3e59b8`) |
+| `[4]` period | `$t0` ($a1, with 0→1, -1→0) | `-0x8($s0)`, added to tick after fire (`0x3e59d0`) |
+| `[8]` next-tick | tick+`$a2` (tick=`*(0x450DD0)`) | `-0x4($s0)`; skip slot if tick < next (`0x3e598c`-`0x3e5998`) |
+| `[C]` busy | 0 | `0x0($s0)`; skip if nonzero; set 1 before call (`0x3e59b4`), clear after (`0x3e59cc`) |
+
+Init (`SYNCTASK_init`, `0x3e57d0`, inside sweep file `sub_003E5760`): `func_3E6448(0x51ED98, 0, 0x100)` = zero 256 B = all 16 slots. Region is BSS (ELF file covers va–`0x4A4BF4`; `0x51ED98` above it), so zero at load too.
+
+### b. Slot values + fillers + run evidence (Step-2 WATCH receipts, boot-p1k-1)
+
+`PS2X_DIAG_WATCH` slots 0–3 + `0x1ffe010` + `0x519c4c`; 32,077 watch lines (32,050 w4, 25 w16, 2 w8).
+
+| Slot | fn | period | next@fill | Filled by (watch ra → static site) | Fires/5 s (p1j, `firstRa=0x3e59c0`) |
+|---|---|---|---|---|---|
+| 0 | `0x31ad20` | 1 | `0x27` | add `ra=0x31af60` = site `0x31af58` (`lui 0x32; addiu -0x52E0` → $a0=`0x31AD20`, $a1=0, $a2=0) in `sub_0031ADB0` = P6 `systemInit`; sp=`0x1ffff60` | ~300, 35/35 blocks |
+| 1 | `0x3e33b0` | 1 | `0x27` | add `ra=0x3e3050` = site `0x3e3048` (`lui 0x3E; addiu 0x33B0` → $a0=`0x3E33B0`) in `sub_003E3020`; sp=`0x1fffe60` | ~300, 35/35 blocks |
+| 0 (earlier) | `0x3e4000` | 1 | `0x27` | add `ra=0x3e4458` = site `0x3e4450` ($a0=`0x3E4000`) in `sub_003E4040`; sp=`0x1ffec80`; then `del` (`pc=0x3e591c`, `ra=0x31af4c`, the `jal SYNCTASK_del(0x3e4000)` 2 insns before site 2) zeroed slot 0, and `0x31ad20` reused it | 0 (del'd before firing; no stub line) |
+| 2–15 | 0 | 0 | 0 | — (init/BSS zeros; only zero-writes observed on slots 2–3 watches; e.g. `pc=0x10012c` w16 entry-BSS clear) | 0 |
+
+The two other static add sites never filled a watched slot in this boot: `0x2ae0b0` (fn `0x2AE020`, $a1=5, $a2=`0x64`, in `sub_002AE048`) and `0x3b54ac` (fn `0x3B5450`, in `sub_003B5478`); no stub line for either target with `firstRa=0x3e59c0` in any of 35 p1j blocks. Steady-state w4 volume (~32K lines/90 s on slot words 2–3) is consistent with per-fire busy/next updates (`0x3e59b4`/`0x3e59cc`/`0x3e59d4`); per-pc split of the remainder was NOT RE-CHECKED (volume EPERM).
+
+### c. Exit conditions (which loop never exits, and why)
+
+| Loop | Exit condition | Holds? | Evidence |
+|---|---|---|---|
+| 16-slot scan (`0x3e5980`–`0x3e59dc`, `$s1` 15→−1) | `$s1 < 0` after 16 slots | Yes, every pass (returns OR-accumulator `$s2`) | Bounded countdown; 2.75M dispatches/block each return (driver re-calls) |
+| Per-slot fire | fn≠0 ∧ tick ≥ next ∧ busy=0 | Holds ~600×/5 s (slots 0–1) | Stub counts `0x31ad20`/`0x3e33b0` ~300/block each |
+| Driver `sub_003DD1D8` inner loop (`0x3dd278`→`0x3dd2e0`) | `*( $s1+8 ) ≠ 0` at `0x3dd2e0` (`$s1` = `*(0x519AD8)` + byte·`0x30`) | **Never** (35/35 p1j blocks, 17/17 p1k blocks parked) | `0x3e5440` count == `0x3e5928` count every block (always takes run path: `*(0x450DFC)`≠0); park pcs `0x3e5980`/`0x3dd278`/`0x423c90` only |
+| Outer caller (one frame above `0x3dd1d8`) | `sub_003DD1D8` returns | Never (same park) | Thread 1 never sampled above `0x3dd278` |
+
+Wait object: the `+8` flag of the `*(0x519AD8)` table entry selected by `sub_003DD1D8`'s `$a0` byte. Its writer is unidentified (address is dynamic; no static writer found; no watch was placed — address not known until `$a0` is). Tick `*(0x450DD0)` producer likewise untraced (lead, unverified: `EeScheduler.cpp:1587` writes a `tickAddress` to guest RAM). Next fix class per item: 16-scan — none (bounded); slot fire — none (fires); driver flag — trace producer of `*(entry+8)` (one level up: the 8 callers below select the entry).
+
+### d. Outer caller: narrowed to 8, not named (receipt missed)
+
+Closed log has no RA/stack receipt for the live caller: thread dumps carry no `ra`; stub histogram is hard-capped at top 30 (`ps2_runtime.cpp:1127`, `i < 30u`, no REPORT_ALL override — block 0 prints 30 entries + header for distinct=485); all 8 sites + entries have 0 hits in boot-p1j-1; P6 names only one containing function. Back-edge search (`jal func_3DD1D8` over `$W/P1/output`):
+
+| # | Site | File (= sweep start) | ra | Delay `$a0` | Pre-context | P6 in function |
+|---|---|---|---|---|---|---|
+| 1 | `0x3dec20` | `sub_003DEBF0` | `0x3dec24` | `$s0` (null-checked) | `$s0`=$v0; `beql $s0,0` skip | — |
+| 2 | `0x3debc0` | `sub_003DEB50` | `0x3debc4` | `lw $a0,0x20($sp)` | after `jal func_3DCF70` | — |
+| 3 | `0x3decc8` | `sub_003DECA0` | `0x3deccc` | `$s0` (null-checked) | `$s0`=$v0; `beqz` skip | — |
+| 4 | `0x3dee40` | `sub_003DEE18` | `0x3dee44` | `$s0` (null-checked) | `$s0`=$v0; `beqz` skip | — |
+| 5 | `0x3dede8` | `sub_003DEDC0` | `0x3debec` | `$s0` (null-checked) | `$s0`=$v0; `beqz` skip | — |
+| 6 | `0x3ded80` | `sub_003DED50` | `0x3ded84` | `$s0` (null-checked) | `$s0`=$v0; `beql` skip | — |
+| 7 | `0x3ded20` | `sub_003DECF8` | `0x3ded24` | `$s0` (null-checked) | `$s0`=$v0; `beqz` skip | — |
+| 8 | `0x3dfa5c` | `sub_003DF9D8` | `0x3dfa60` | (site+4 insn; not re-read) | `lw $a0,0x1C($s1)` after null-check | `0x3df9d8 ASYNCFILE_release` (exact start) |
+
+All 8 are straight-line wrappers (`$s0`=$v0 from a prior call, null-check, `jal 3DD1D8`); none sits in a loop, so static shape does not distinguish the live one. What the caller waits on (one level): the `sub_003DD1D8` call itself. Step-2 receipt attempted: WATCH `0x1ffe010` (= park_sp `0x1fffd80`+`0x90`, the `sd $ra,0x10($sp)` save at `0x3dd214`) — MISSED: 15 w16 zero-writes from `pc=0x3e65b0` (pre-park stack reuse) and zero `pc=0x3dd214` lines; only 2 w8 lines in all 32,077 (both `value=0x0` at `0x519c48`/`0x519c50`, `pc=0x3e64d0`/`0x3e64d8`), consistent with the P1f watchpoint not covering the guest `sd` path while covering `sw`/`sq` — source re-check blocked by volume EPERM (see P12-7). Single next receipt for a future brief: w4-watch `0x1ffe000` (the `sw $a0,0($sp)` at `0x3dd1e0`, same frame, `ra`=caller).
+
+## P12-2. Missing-target analysis (Step 1c)
+
+### a. Target `0x395cf0`: unsplit frameless leaf inside `sub_003956B0`
+
+| Item | Value |
+|---|---|
+| Containing function (sweep CSV) | `sub_003956B0,0x3956b0,0x396128,0xa78` (current `output/sub_003956B0_0x3956b0.cpp` agrees; no `sub_00395CF0` file) |
+| P6 name | None (0 `0x395*` rows) |
+| Target block (ELF-verified) | `0x395cf0: lui $v0,0x50` (`0x3c020050`); `0x395cf4: lw $v1,0x13E4($a0)`; `0x395cf8: addiu $v0,-0xE60`; 4×`lqc2` + 4×`sqc2` (matrix copy `$v0[0x50F1A0]`→`$v1`); `0x395d1c: jr $ra` (`0x3e00008`); delay `sw $zero,0x6B90($a0)`; `0x395d24: nop` |
+| Preceding boundary (ELF-verified) | `0x395ce4: jr $ra` (`0x03e00008`); `0x395ce8` delay `sw`; `0x395cec: nop` (`0x00000000`) — textbook function boundary the sweep did not split |
+| Registration | `output/register_functions.cpp`: **0 lines** for `0x395cf0` (vs 3 for containing `0x3956b0`) |
+| Sibling unsplit leaves in same sweep function (same jr/nop/prologue pattern, none split, none registered — NOT RE-CHECKED individually post-volume-failure except by the earlier listing read) | `0x395c38` (`lw $v0,0x13E4($a0)`…), `0x395c68` (`jr $ra` + delay-load), `0x395c70`, `0x395d28` |
+| Why no slot | `dispatchGuestBranch` (`ps2_runtime.cpp:1544-1593`) exact-matches `hasFunction(targetPc)`; indirect JALR targets are never promoted (cf. 3,594 `unresolved JR/JALR` analyzer warnings); `0x395cf0` was never a direct-call target (0 `func_395CF0` refs in `output/`) and never split into its own function, so no table entry exists |
+| Effect at runtime | `reportMissingFunction` prints once; policy=1 = `ContinueToTarget` (`ps2_runtime.h:333-339`: log once, `ctx->pc`=target, caller unwinds); for `isCall` the generated JALR wrapper then falls through to `ra` — the call is skipped, non-fatal (boot continues to the park) |
+| One-line fix class | **split** (analyzer: split `sub_003956B0` at `0x395cf0` — and sibling leaves — with entrypoint registration, mirroring the existing splits below) |
+
+Control pair (same unsplit-prologue pattern, but the analyzer DID split and register these — which is why slot dispatch to them resolves):
+
+| Addr | Split file exists | `register_functions.cpp` lines | Direct `func_*` refs in `output/` |
+|---|---|---|---|
+| `0x31ad20` | `sub_0031AD20_0x31ad20.cpp` (overlaps `sub_0031AD18`, which starts with a 2-insn `jr $ra` stub) | 4 (`0x31ad20`/`54`/`74`/`98` → `sub_0031AD20`, e.g. line 296302) | 0 |
+| `0x3e33b0` | `sub_003E33B0_0x3e33b0.cpp` | 4 (`0x3e33b0`/`0x3e3418`/`0x3e342c`/`0x3e3458`, lines 380337-380340) | 0 |
+| `0x395cf0` | none | 0 | 0 |
+
+Note: entries `0x31ad20`/`0x3e33b0` resolve despite 0 direct refs, so promotion is not direct-call-only; the discriminator the evidence supports is split-vs-unsplit. The sweep CSV (`ssx3-functions.csv`, Sep 18 17:48) predates the p1h recompile (`output/`, Sep 18 21:15+) and still shows the unsplit rows (`sub_0031AD18 0x31ad18-0x31adb0`, `sub_003E3350 0x3e3350-0x3e3478`); current `output/` + `register_functions.cpp` above are authoritative.
+
+### b. JALR site `0x3760d0` (ELF-verified)
+
+| Item | Value |
+|---|---|
+| Insns | `0x3760c4: lw $v1,0x10D8($s2)`; `0x3760c8: lh $a0,0x128($v1)`; `0x3760cc: lw $v0,0x12C($v1)` (`0x8c62012c`); `0x3760d0: jalr $v0` (`0x0040f809`); delay `addu $a0,$s2,$a0`; `0x3760d8` (`ra`) `: lwc1 $f4,-0x27EC($gp)` |
+| Loads | `$v0` = object-table dispatch: `*( *( $s2+0x10D8 ) + 0x12C )`; target `0x395cf0` is a data-seated code pointer (vtable-style slot), reached with `a0=0x61ba60` (=`$s0`, readable, all-zero first 16 B) |
+| Containing function | Sweep `sub_00375A08 0x375a08-0x376938` (the old CSR-park function; park was at `0x375d10`); no P6 name (0 `0x375*`/`0x376*` rows) |
+| Thread | 1 (`sp=0x1fffd90` ∈ T1 stack `0x1fe0000/0x20000`); pre-park, log:146 (p1j) / log:187 (p1k), byte-identical incl. regs + 64-entry dispatch trace (`0x411c38…→0x3760c4`) |
+
+### c. Other new stubs: called-from, returns-or-parks
+
+(`called-from` = stub-histogram `firstRa`/`lastRa`; `returns` = `jr $ra` reachable + balanced counts; park = none of these park.)
+
+| Target | Called-from (log) | Shape (output/) | Returns-or-parks | Block presence (p1j) |
+|---|---|---|---|---|
+| `0x31ad20` | `0x3e59c0` (slot dispatch in `SYNCTASK_run`) | frame `-0x40`, `jr $ra` @`0x31ada8` (`$v0`=0) | returns | 35/35, ~300/block |
+| `0x3825f8` | `0x3825dc` (ret of `jal func_3825F8` @`0x3825d4` in INTC cause-2 handler entry `0x3825c0` = stacks `intc id=3 cause=2 handler=0x3825c0`; the `sync` at `0x3825dc` is the return slot) | `jr $ra` @`0x38267c` (`$v0`=1) | returns | 35/35, ~300/block (60/s ≈ vsync rate) |
+| `0x3e33b0` | `0x3e59c0` (slot dispatch) | frame `-0x50`, `jr $ra` @`0x3e3470` | returns | 35/35, ~300/block |
+| `0x3e5440` | `0x3dd280` (driver) | `jal GetThreadId` @`0x3e544c`; `$a0`=0 path returns `*(0x450DFC)` (always nonzero here: run-path counts equal) | returns | 35/35, ~2.75M/block |
+| `0x3e5928` (`SYNCTASK_run`) | `0x3dd290` (driver) | 16-scan, `jr $ra` @`0x3e5a08` (`$v0`=`$s2` OR) | returns | 35/35, ~2.75M/block |
+| `0x411c38` | `0x412520`/`0x4126b8` = `sub_00412500+0x20` / `sub_004126A0+0x18` | frameless 64-bit leaf, `jr $ra` @`0x411ccc` | returns | block 0 only (392) → early-boot-only |
+| (`0x423c90`, 8th new in P11) | `0x3e5454` steady (= ret of `jal` @`0x3e544c`), `0x3e5028` boot | `syscall 0x2F` = `GetThreadId`, `jr $ra` @`0x423c98` | returns | 35/35, ~2.75M/block |
+
+## P12-3. CD + syscall deltas (Steps 1d/1e)
+
+### a. First CD callback
+
+| Item | Value |
+|---|---|
+| What queued it | `sceCdRead lbn=0x5f1a3 sectors=1 buf=0x9d0800 ret=0x3e3b8c` (p1j log:147-148; HLE completes synchronously: `CD.cpp:402-403` `setReturnS32(ctx,1)` + `queueCdCallback(ctx,runtime,1u)` = `SCECdFuncRead`) |
+| Why earlier reads didn't queue | Reads at lbn `0x10`,`0x105`-`0x117`,`0x108` (log:58-138) pre-date callback registration (`sceCdInitEeCB` log:142 → `sceCdCallback` setter `CD.cpp:445` sets `g_cdCallbackFn=0x3e3ad8`); `queueCdCallback` early-returns while `g_cdCallbackFn==0` (`CD.cpp:69`) |
+| Start line | Present (log:149-150 p1j; log:192-193 p1k): `queued func=1 cb=0x3e3ad8`, `start func=1 cb=0x3e3ad8` |
+| Completion/finish line | **None exists in sources** (emits are only `queued` `CD.cpp:84` + `start` `EeScheduler.cpp:398,495`); completion is unobservable by design |
+| Callback body (`0x3e3ad8` ∈ `sub_003E39A8`) | `$a0`= `*(0x519C4C)`; `jal func_423DD0` = syscall `-0x43` = `iSignalSema`; `jr $ra` |
+| `*(0x519C4C)` value (Step-2 WATCH) | `0x1a` = **26**, written once (`pc=0x3e43fc`, `ra=0x3e43c4`, thread 1, `sp=0x1ffec80`) |
+| Bearing on thread 2 (sema 26) | Direct: T2 (`entry 0x3e3be0`) issued this read (`jal func_401DF8` ret `0x3e3b8c`, `$v0`=1 accepted, `beqz` not taken) and parks in `WaitSema(*($s2+0xC))` @`0x3e3c18` (`ra=0x3e3c1c`); the callback signals sema 26 — but T2 is still parked at block 34 (`scheduled`≈0), so the signal did not land within 180 s (callback completion unconfirmed — no finish line) |
+| Bearing on thread 4 (sema 29) | None via CD: T4 (`entry 0x31ac08`) loops `func_317500($s0)` + `WaitSema(*($s0+0x4034))` @`0x31ac28` (`ra=0x31ac30` = steady-state `firstRa` of stub `0x423de0`), waking ~300/block from a non-CD source |
+| Bearing on thread 5 (sema 30) | None via CD: T5 (`entry 0x382740` → `jal func_382760`) parks in `WaitSema` @`0x3827d8` (`ra=0x3827e0`), `scheduled`≈0 |
+
+### b. Syscalls `0x15`/`0x17`
+
+| Item | `0x15` | `0x17` |
+|---|---|---|
+| Name (`Dispatcher.cpp:137/143`) | `DisableIntc` | `DisableDmac` |
+| Purpose | `setCauseEnabled(…,dmac=false,…)` (`Interrupt.cpp:108-111`): clear bit `$a0` in INTC enable mask | Same for DMAC mask (`Interrupt.cpp:178-181`) |
+| Return value (source-derived; `EeScheduler.cpp:1506-1522`, `State.h:24`) | `KE_OK` = 0, always (previous state NOT returned) | `KE_OK` = 0, always |
+| Caller stub (output/) | `sub_00423AF0`: `addiu $v1,0x15; syscall; jr $ra` — log `first=0x423af8` is the `jr $ra` edge | `sub_00423B10`: same shape for `0x17`; `first=0x423b18` |
+| Counts (p1j block 0; p1k block 0 identical) | 4 | 1 |
+| `$a0` cause args / observed `$v0` | Not in log (histogram records count + caller pc only); a boot cannot capture them either (no per-syscall arg/return diag; enables live in host masks, no guest-RAM write to watch) — source-derived values only | Same |
+
+Wait object / next fix class: none for either (one-shot disables returning constant 0; no wait). Related wrappers decoded for context: `0x423c90`=`GetThreadId` (`0x2F`), `0x423de0`=`WaitSema` (`0x44`), `0x423dd0`=`iSignalSema` (`-0x43`), `0x423dc0`=`SignalSema` (`0x42`), `0x423da0`=`CreateSema` (`0x40`).
+
+## P12-4. Ladder delta vs boot-p1j-1
+
+Boot-p1k-1: `$W/P1/run/boot-p1k-1.log`, 33,038 lines, 3,052,064 B, 17 period blocks, CWD `$W/P1/run`, env = p1j env + `PS2X_DIAG_WATCH` (10 addrs; see P12-6), foreground 90 s, SIGTERM rc=-15. Binary identical to p1j (see P12-5), so deltas below are run-to-run determinism, not code change.
+
+| Rung | boot-p1j-1 (180 s, 35 blocks) | boot-p1k-1 (90 s, 17 blocks) | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×31, `0x423c90` ×2, `0x3dd278` ×2 | `0x3e5980` ×15, `0x3dd278` ×1, `0x423c90` ×1 | Same park, same 3 pcs |
+| Thread-1 sp at park | `0x1fffd80` | `0x1fffd80` (block 0) | Same |
+| Stub top-3 block 0 | `0x423c90` 2369833, `0x3e5928` 2369619, `0x3e5440` 2369599 (firstRa `0x3e5028`/`0x3dd290`/`0x3dd280`) | Identical counts + ras | None (deterministic) |
+| Missing target | 1 line, log:146 | 1 line, log:187, byte-identical (regs + trace) | None |
+| CD callback | queued+start log:149-150 | queued+start log:192-193 | None |
+| Syscalls `0x15`/`0x17` block 0 | 4 / 1 | 4 / 1 | None |
+| Threads 2/4/5 states | sema-parked 26/29/30 | NOT RE-CHECKED (volume EPERM) | Unknown |
+| VIF/GIF/frame/crash | 0/0/0/0 | NOT RE-CHECKED (volume EPERM) | Unknown |
+
+ELF decode check for every block cited in P12-1–P12-3 (`SLUS_207.72`, file_off = va−`0x100000`+`0x1000`):
+
+| va | word | disasm | match |
+|---|---|---|---|
+| `0x3760cc` | `0x8c62012c` | `lw $v0,0x12C($v1)` | OK |
+| `0x3760d0` | `0x0040f809` | `jalr $v0` | OK |
+| `0x395ce4` | `0x03e00008` | `jr $ra` | OK |
+| `0x395cec` | `0x00000000` | `nop` | OK |
+| `0x395cf0` | `0x3c020050` | `lui $v0,0x50` | OK |
+| `0x3e5980` | `0x8e06fff4` | `lw $a2,-0xC($s0)` | OK |
+| `0x3e59b8` | `0x00c0f809` | `jalr $a2` | OK |
+| `0x3dd278` | `0x0c0f9510` | `jal 0x3E5440` | OK |
+| `0x3dd288` | `0x0c0f964a` | `jal 0x3E5928` | OK |
+| `0x31af54` | `0x2484ad20` | `addiu $a0,$a0,-0x52E0` (→`0x31AD20`) | OK |
+| `0x3e304c` | `0x0000302d` | `daddu $a2,$zero,$zero` (delay of add-site jal) | OK |
+
+## P12-5. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1k-1 binary) | `e5f8139772efe522aeb344e59692fecf04b175d0e695838bc714e134fcdbc1ca` | Identical to boot-p1j-1 binary → fresh, no rebuild (brief: rebuild only if stale) |
+| `PS2Recomp` branch `ssx3` HEAD | `8fad69e` (last verified pre-boot; post-boot NOT RE-CHECKED) | Worktree: only pre-existing local `M ps2xRuntime/src/runner/register_functions.cpp`, never added |
+| Fork commits this brief | None (diagnose only; no source, TOML, or test change) | Nothing to push from the fork clone; push rule (`git push` only in fork clone) satisfied vacuously; no push run anywhere |
+| This report | `[P1k]` commit on `/Users/bradrichardson/dev/ssx3` (two trailers; local only — no push there per the push rule) | Sole ssx3-repo change; no `runner/`, log, or `._*` file added |
+
+## P12-6. Exact commands
+
+From `/Users/bradrichardson` (cwd) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `$O=$W/P1/output`, `$R=$W/PS2Recomp`:
+
+```
+# Step 1 (no lease, no boot)
+ls -l local/research/P6/ssx3-decomp-names.csv            # present -> P6 names used
+grep -n "^# P1\|P11-" local/research/P1/REPORT.md         # locate Part 11 (lines 3862-4035)
+grep -n "missing-target" $W/P1/run/boot-p1j-1.log        # log:146
+grep -n "cd:callback" $W/P1/run/boot-p1j-1.log           # log:149-150
+grep "diag:thread.*id=1 " log | sed pc-census            # 31/2/2 split
+grep "diag:syscall\|diag:stub\|diag:stacks" log          # histograms + stacks (top-30 truncation found)
+python3 sweep-map: 26 addrs -> ssx3-functions.csv rows   # containing functions
+grep -o "// 0x..." $O/sub_*.cpp                          # MIPS listings: 003E5928, 003DD1D8, 003E5440,
+                                                         # 003E57F8/58C8/5760(init), 00375A08, 003956B0,
+                                                         # 00423AF0/B10/C90/DE0/DD0/DC0/DA0, 0031AD18,
+                                                         # 003E3350, 003825F8, 00411C38, 003E3B00,
+                                                         # 0031AAF0, 00382730, 003E39A8, 0037E120 tail
+grep -rn "jal         func_3DD1D8" $O                    # 8 caller sites
+grep -rn "jal         func_3E57F8" $O                    # 5 add sites (+ $a0 decode each)
+grep -c "func_31AD20|func_3E33B0|func_395CF0" $O/sub_*.cpp  # 0/0/0 direct refs
+grep -c "31ad20|3e33b0|395cf0" $O/register_functions.cpp # 4/4/0 registration lines
+Dispatcher.cpp:137/143 (0x15/0x17), 0x2F/0x40/0x42/-0x43/0x44 names
+Interrupt.cpp DisableIntc/Dmac; EeScheduler.cpp:1506 setIrqCauseEnabled (KE_OK=0)
+ps2_runtime.cpp:1384-1626 dispatchGuestBranch/missing-target/policy; :1098-1133 top-30;
+  :1137-1240 + :2301-2372 WATCH parse/hooks; ps2_runtime.h:333-339 policy enum
+CD.cpp:66-90 queue, :402-403 read+queue, :445 setter; EeScheduler.cpp:398,495 starts
+python3 ELF word check x11 (all OK) + BSS check (0x51ED98 above file end 0x4A4BF4)
+shasum -a 256 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner   # e5f81397 (fresh)
+git -C $R log --oneline -1; git -C $R status --short            # 8fad69e + pre-existing M
+# Step 2 (lease protocol)
+cat /tmp/ssx3-host-lease                                        # absent
+pgrep -f ps2EntryRunner                                         # none
+sed /tmp/p1j-boot1.py -> /tmp/p1k-boot1.py                     # LOG boot-p1k-1, SECS 90,
+                                                              # + PS2X_DIAG_WATCH=0x51ed98,0x51eda0,
+                                                              # 0x51eda8,0x51edb0,0x51edb8,0x51edc0,
+                                                              # 0x51edc8,0x51edd0,0x1ffe010,0x519c4c
+printf 'P1k\n' > /tmp/ssx3-host-lease
+python3 /tmp/p1k-boot1.py                                       # foreground 90 s, SIGTERM rc=-15, 3052064 B
+rm -f /tmp/ssx3-host-lease; ls /tmp/ssx3-host-lease            # released, verified absent
+grep "diag:watch" log harvest: fills (3e5898 x3), del (3e591c), sema (519c4c=0x1a),
+  stack (1ffe010: 15x w16 zeros, 0x 3dd214), widths (32050/25/2), slot0 pcs
+grep ladder: thread-1 census 15/1/1, stub b0 top-3 identical, missing-target :187
+  identical, callback :192-193, syscall 0x15 x4 / 0x17 x1
+# Step 3
+(edit_file append Part 12; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1k] ..." (two trailers; NO push there)
+```
+
+Env delta vs boot-p1j-1 (recorded deviation): `+PS2X_DIAG_WATCH` (the Step-2 capture mechanism for the three named missing receipts: slot-fill values/writers, `0x1ffe010` ra-save, `*(0x519C4C)` sema id) and `SECS 90` (brief max) vs 180. No other env change; no rebuild; no source change.
+
+## P12-7. What I could not do
+
+- Name the live outer caller of `sub_003DD1D8` (Step 1b): the single Step-2 boot (brief allows one) missed the `0x3dd214` `sd` receipt — 15 pre-park `sq` zero-writes fired on `0x1ffe010` but zero `pc=0x3dd214` lines, with only 2 w8 lines in 32,077, consistent with the P1f watchpoint covering `sw`/`sq` but not the guest `sd` path. 8 candidates tabled (§P12-1d); next receipt for a future brief: w4-watch `0x1ffe000` (`sw` at `0x3dd1e0`, same frame).
+- Trace the producers of the driver-flag `*(entry+8)` (`$s1`=`*(0x519AD8)`+byte·`0x30`), the SYNCTASK tick `*(0x450DD0)`, and the run-gate `*(0x450DFC)`: all dynamic/host-side, no static writer identified, no watch placed (addresses unknown until `$a0`/scheduler mapping is known). Nearest P6 lead (unverified): `0x3de420 iFILESYS_CommandCompleteCallback` for a FILESYS-family completion flag.
+- Re-verify in boot-p1k-1 (volume EPERM after ~23:05 UTC, all SSD data reads fail): threads 2/4/5 states, VIF/GIF/frame/crash zeros, per-pc split of the ~32K steady-state slot w4 remainder, sibling-leaf (`0x395c38`/`0x395c68`/`0x395c70`/`0x395d28`) split-file/registration exclusion greps, and fork post-boot state (git status, stray files, sidecar check — last known pre-boot: `8fad69e` + pre-existing `M`, no strays created by this brief's own commands).
+- Push-collateral verification: nothing to push from the fork (no fork commit this brief); fork-clone `git push` up-to-date check could not run (volume EPERM). No push was run in `/Users/bradrichardson/dev/ssx3` (forbidden).
+- No runtime fix (per the brief): park, missing target, and sema-26 non-delivery are diagnosed, not changed.
+
