@@ -3257,3 +3257,234 @@ rm /tmp/ssx3-host-lease (verified absent)
 - `waits.log`: no waits (no foreign lease during P1f).
 - Time box: about 2 h of the 4 h box used.
 
+# P1g report — Part 8 (brief local/muse/prompts/P1g.md)
+
+## P8-0. Lease record
+
+| Event | Value |
+|---|---|
+| Start | `/tmp/ssx3-host-lease` read `M5` (foreign, host-lease priority); not taken, not overwritten |
+| Step 1 | No lease needed (closed `boot-p1f-2.log` + ELF + checked-in sources only); no polling, no `p1g-waits.log` |
+| Step 2 | Skipped: Step 1 answers the park (P8-1d), so no boot, no lease hold at all |
+| `adb` | Not used |
+| End | Lease still `M5`; left untouched; no `boot-p1g-*.log` produced |
+| Push note | No `PS2Recomp` commit in this brief (diagnose only); the lease/push rules for `fork ssx3` therefore move no code. This report commit goes to the `ssx3` repo (`origin/main`, where `[P1e]`/`[P1f]` already sit); nothing is pushed to the `ran-j` upstream |
+
+## P8-1. Park diagnosis (Step 1 only; Step 2 skipped per P8-1d)
+
+### P8-1a. ELF hand disassembly of `sub_003912A8` (`SLUS_207.72`, `off=0x1000+(va-0x100000)`)
+
+`mipsel-linux-gnu-objdump` is not installed (`command not found`); no install per the brief. Each word below was decoded by hand from the opcode table and cross-checked against the recomp comments in `$W/P1/output/sub_003912A8_0x3912a8.cpp` (identical bytes in `ps2xRuntime/src/runner/`, `diff -q` clean). `beq $r,$zero`/`bne $r,$zero` are the `beqz`/`bnez` the recomp prints.
+
+| va | word | mnemonic | what it does |
+|---|---|---|---|
+| 0x3912a8 | 0x27bdfff0 | addiu $sp,$sp,-0x10 | frame: sp-=16 |
+| 0x3912ac | 0x3c021000 | lui $v0,0x1000 | $v0=0x10000000 |
+| 0x3912b0 | 0xffbf0000 | sd $ra,0($sp) | save ra |
+| 0x3912b4 | 0x34428000 | ori $v0,$v0,0x8000 | $v0=0x10008000 (VIF0_CHCR) |
+| 0x3912b8 | 0x8c430000 | lw $v1,0($v0) | $v1=\*0x10008000 |
+| 0x3912bc | 0x30630100 | andi $v1,$v1,0x100 | isolate bit 8 (STR) |
+| 0x3912c0 | 0x1060000a | beq $v1,$zero→0x3912ec | skip loop 1 if STR clear (DS next) |
+| 0x3912c4 | 0x3c031000 | lui $v1,0x1000 (DS) | $v1=0x10000000 (always runs) |
+| 0x3912c8 | 0x34638000 | ori $v1,$v1,0x8000 | $v1=0x10008000 |
+| 0x3912cc | 0x00000000 | nop | |
+| 0x3912d0 | 0x8c620000 | lw $v0,0($v1) | loop 1: $v0=\*0x10008000 |
+| 0x3912d4 | 0x30420100 | andi $v0,$v0,0x100 | |
+| 0x3912d8 | 0x00000000 | nop | |
+| 0x3912dc | 0x00000000 | nop | |
+| 0x3912e0 | 0x00000000 | nop | |
+| 0x3912e4 | 0x1440fffa | bne $v0,$zero→0x3912d0 | spin while STR set |
+| 0x3912e8 | 0x00000000 | nop (DS) | |
+| 0x3912ec | 0x3c041000 | lui $a0,0x1000 | $a0=0x10000000 |
+| 0x3912f0 | 0x3c020044 | lui $v0,0x44 | $v0=0x00440000 |
+| 0x3912f4 | 0x2442bd00 | addiu $v0,$v0,-0x4300 | $v0=0x0043bd00 |
+| 0x3912f8 | 0x34848030 | ori $a0,$a0,0x8030 | $a0=0x10008030 (VIF0_TADR) |
+| 0x3912fc | 0x3c031000 | lui $v1,0x1000 | $v1=0x10000000 |
+| 0x391300 | 0xac820000 | sw $v0,0($a0) | \*0x10008030=0x43bd00 (TADR) |
+| 0x391304 | 0x34638020 | ori $v1,$v1,0x8020 | $v1=0x10008020 (VIF0_QWC) |
+| 0x391308 | 0x3c041000 | lui $a0,0x1000 | $a0=0x10000000 |
+| 0x39130c | 0xac600000 | sw $zero,0($v1) | \*0x10008020=0 (QWC) |
+| 0x391310 | 0x34848000 | ori $a0,$a0,0x8000 | $a0=0x10008000 (VIF0_CHCR) |
+| 0x391314 | 0x24030104 | addiu $v1,$zero,0x104 | $v1=0x104 (STR bit 8 + chain mode bit 2) |
+| 0x391318 | 0xac830000 | sw $v1,0($a0) | \*0x10008000=0x104 (DMA kick) |
+| 0x39131c | 0x8c820000 | lw $v0,0($a0) | $v0=\*0x10008000 |
+| 0x391320 | 0x30420100 | andi $v0,$v0,0x100 | |
+| 0x391324 | 0x10400009 | beq $v0,$zero→0x39134c | skip loop 2 if STR clear (DS next) |
+| 0x391328 | 0x3c031000 | lui $v1,0x1000 (DS) | $v1=0x10000000 |
+| 0x39132c | 0x34638000 | ori $v1,$v1,0x8000 | $v1=0x10008000 |
+| 0x391330 | 0x8c620000 | lw $v0,0($v1) | PARK: loop 2 head, $v0=\*0x10008000 |
+| 0x391334 | 0x30420100 | andi $v0,$v0,0x100 | |
+| 0x391338 | 0x00000000 | nop | |
+| 0x39133c | 0x00000000 | nop | |
+| 0x391340 | 0x00000000 | nop | |
+| 0x391344 | 0x1440fffa | bne $v0,$zero→0x391330 | spin while STR set (park) |
+| 0x391348 | 0x00000000 | nop (DS) | |
+| 0x39134c | 0x0c109008 | jal 0x424020 | FlushCache trampoline (never reached while parked; DS next) |
+| 0x391350 | 0x0000202d | daddu $a0,$zero,$zero (DS) | $a0=0 |
+| 0x391354 | 0xdfbf0000 | ld $ra,0($sp) | restore ra |
+| 0x391358 | 0x03e00008 | jr $ra | return (DS next) |
+| 0x39135c | 0x27bd0010 | addiu $sp,$sp,0x10 (DS) | pop frame |
+
+Branch targets: `0x3912c0→0x3912ec` (else `0x3912c8`); `0x3912e4→0x3912d0` (else `0x3912ec`); `0x391324→0x39134c` (else `0x39132c`); `0x391344→0x391330` (else `0x39134c`); `0x39134c→0x424020` (ret `0x391354`); `0x391358→$ra`. Enclosing block of the park = `0x39132c–0x391348`. Register names for `0x10008000/20/30`: `ps2_debug_panel.cpp:1918-1921` (`VIF0_CHCR`, `VIF0_MADR`, `VIF0_QWC`, `VIF0_TADR`); DMA channel bases incl. `0x10008000u`: `Support.h:1233`; `VIF0_CHANNEL = 0x10008000`: `ps2_memory.cpp:1749`.
+
+True MMIO address per access (hand decode, LUI+ORI+offset) vs the folded constant the recompiled code actually uses:
+
+| pc | true address | recomp constant (`sub_003912A8_0x3912a8.cpp` line) | `$W/P1/ssx3.toml` `[mmio]` line |
+|---|---|---|---|
+| 0x3912b8 (lw) | 0x10008000 | 0x10000000u (:44) | 767 |
+| 0x3912d0 (lw) | 0x10008000 | 0x10000000u (:73) | 716 |
+| 0x391300 (sw TADR) | 0x10008030 | 0x10000000u (:117) | 760 |
+| 0x39130c (sw QWC) | 0x10008020 | 0x10000000u (:126) | 715 |
+| 0x391318 (sw CHCR) | 0x10008000 | 0x10000000u (:135) | 695 |
+| 0x39131c (lw) | 0x10008000 | 0x10000000u (:138) | 714 |
+| 0x391330 (lw, park) | 0x10008000 | 0x10000000u (:164) | 737 |
+
+All 7 map to `0x10000000`: the TOML `[mmio]` map holds 273 entries, 249 of them `0x10000000` (only 24 specific, e.g. `0x371b04→0x10008000`). The analyzer's detector (`ps2xAnalyzer/src/elf_analyzer.cpp:424-456`) scans back ≤5 instructions for the LUI, takes `baseAddr = IMM<<16`, and adds only the `int16` load/store offset — the ORI low half (`ori $v,$v,0x8000/0x8020/0x8030`) is never read, so every LUI+ORI+`0($r)` access folds to the page base.
+
+### P8-1b. Function bounds + callers
+
+| Item | Value |
+|---|---|
+| Sweep row (`ssx3-functions.sweep.csv:6968`) | `sub_003912A8,0x3912a8,0x391360,0xb8` (46 instructions, tabled above) |
+| Neighbours | `sub_00390EF8,[0x390ef8,0x3912a8)` ends `jr $ra` at `0x3912a0` (no fallthrough); `sub_00391360,[0x391360,0x391418)` follows |
+| Direct J/JAL into `[0x3912a8,0x391360)` (full `.text` scan, `vaddr=0x100000 off=0x1000 filesz=0x3a4bf4`) | 1: `0x375a8c: 0x0c0e44aa jal` → field `0x0e44aa<<2 = 0x3912a8` (function entry; no J, no mid-range target) |
+| Caller delay slot + return | `0x375a90: 0x0200202d daddu $a0,$s0,$zero` ($a0=$s0; callee clobbers $a0 at `0x3912ec`, arg unused); ret `0x375a94: 0x0c0e44d8 jal 0x391360` (next function, same $a0) |
+| Caller function | `sub_00375A08,[0x375a08,0x376938)` (sweep); recomp `sub_00375A08_0x375a08.cpp:1209-1231` (`label_375a8c`, `dispatchGuestBranch(...,0x3912A8u,0x375A8Cu,0x375A94u,...)`); same bytes in `runner/` (3 `3912A8` refs) |
+| Branches into range (BEQ/BNE/BLEZ/BGTZ/REGIMM, outside→inside) | 0 |
+| Indirect (JR/JALR via register, function tables) | Not enumerable from the closed log + ELF; no runtime trace of the call was recorded |
+| Other recomp refs to `3912A8` | `ps2_recompiled_functions.h`, `register_functions.cpp`, own file, predecessor file (fallthrough check only) |
+| Tail callee | `0x39134c jal 0x424020`: `sub_00424020,[0x424020,0x424050)` = 3 syscall trampolines (`0x424020: addiu $v1,0x64; syscall` = FlushCache; `0x424030: $v1=0x66`; `0x424040: $v1=-0x67`); park never reaches it |
+
+### P8-1c. Closed-log receipts (`boot-p1f-2.log`, 1464 lines)
+
+The log contains no literal `dispatch` lines (`grep -ci dispatch` = 0). The per-dispatch receipt is the `[diag:thread] ... scheduled=N` line (one per thread per 5 s block). Last 30 such lines (log lines 1212–1213 + 1242–1437 = block-27 tail + blocks 28–34):
+
+| log line | block | id | pc | scheduled |
+|---|---|---|---|---|
+| 1212–1213 | 27 (tail) | 3, 4 | 0x31ac60, 0x423de8 | 0, 303 |
+| 1242–1245 | 28 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 302, 0, 0, 302 |
+| 1274–1277 | 29 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 303, 0, 0, 303 |
+| 1306–1309 | 30 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 300, 0, 0, 300 |
+| 1338–1341 | 31 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 305, 0, 0, 305 |
+| 1370–1373 | 32 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 304, 0, 0, 304 |
+| 1402–1405 | 33 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 302, 0, 0, 302 |
+| 1434–1437 | 34 | 1, 2, 3, 4 | 0x391330, 0x423de8, 0x31ac60, 0x423de8 | 306, 0, 0, 306 |
+
+Thread 1 pc is `0x391330` in all 35 blocks (lines 307–1434, first at block 0 `scheduled=280`): one stable stop sampled every 5 s over ~175 s with ~300 scheduler passes per period re-entering the same pc — a tight spin, not one stop among many. Mechanism in the recomp: `label_391330` takes `if (eeCheckpointDue()) return` on the back edge (`sub_003912A8_0x3912a8.cpp:182-186`), and re-entry lands on `case 0x391330u: goto label_391330` (:23), so each checkpoint yields to the scheduler (`scheduled++`) and resumes at the same pc.
+
+Last block (34) full thread table (lines 1433–1448; status/wait enums `ee_scheduler.h:25-44`: status 0=Running 1=Ready 2=Waiting; reason 0=None 2=Semaphore):
+
+| id | status | waitReason | waitId | pc | entry | priority | scheduled | stack (sp) |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 0 Running | 0 None | 0 | 0x391330 | 0x100008 | 100 | 306 | [0x1fe0000,0x2000000) sp=0x1fffd80 |
+| 2 | 2 Waiting | 2 Semaphore | 26 | 0x423de8 | 0x3e3be0 | 12 | 0 | [0x51ac80,0x51ec80) sp=0x51ec20 |
+| 3 | 1 Ready | 0 None | 0 | 0x31ac60 | 0x31ac60 | 101 | 0 | [0x6088d0,0x6188d0) sp=0x6188d0 |
+| 4 | 2 Waiting | 2 Semaphore | 29 | 0x423de8 | 0x31ac08 | 99 | 306 | [0x6048c0,0x6088c0) sp=0x6088a0 |
+
+Block-34 companions: invocation tops `0xfbff0/0xf7ff0/0xffff0` (in `[0x80000,0x100000)`); `cdCallbackStackTop=0x51ac80`; `intc id=2 cause=3 handler=0x31a490 sp=0x1fffe30`; `intc id=1 cause=10 handler=0x3e4db8 sp=0x1ffff20`; no `pending` row in block 34 (pending `kind=0 pc=0x3e4db8 sp=0x0` appears only at blocks 13/17/19, lines 774/903/968); no vsync/alarm rows in any block.
+
+Syscalls (names from `Dispatcher.cpp` case list; histogram prints top 20, `distinct` is exact):
+
+| block | distinct | ids (count, first/last pc) |
+|---|---|---|
+| 0 (lines 322–342) | 24 (20 shown, 4 unprinted — not recoverable from the closed log) | 0x44 WaitSema (298, 0x423de8); 0xffffffbd iSignalSema/-0x43 (277, 0x423dd8); 0x2f unhandled→TODO/default (57, 0x423c98); 0x40 CreateSema (31); 0x41 DeleteSema (20); 0xfc SetAlarm (20); 0x42 SignalSema (19); 0x4b GetOsdConfigParam (9); 0x74 SetSyscall (8); 0x5b GetEntryAddress (6); 0x64 FlushCache (4, 0x424028); 0x22 StartThread (3); 0x20 CreateThread (3); 0x3e EndOfHeap (3); 0x6f GetOsdConfigParam2 (3); 0x4a SetOsdConfigParam (2); 0x14 EnableIntc (2); 0x10 AddIntcHandler (2); 0x30 ReferThreadStatus (1); 0x29 ChangeThreadPriority (1) |
+| 1–34 | 2 each | 0x44 WaitSema + 0xffffffbd iSignalSema only, counts equal to the period's thread-1/4 `scheduled` (300–306); first=last=0x423de8 / 0x423dd8 every block |
+
+Trampolines (ELF): `0x423dd0: addiu $v1,$zero,-0x43; syscall; jr $ra` (post-syscall pc `0x423dd8`); `0x423de0: addiu $v1,$zero,0x44; syscall; jr $ra` (post-syscall pc `0x423de8`). Both steady-state syscall pcs are thread 4's (and thread 2's) parked pc — never `0x391330`: thread 1 issues no syscall while parked. Block-34 stubs (`distinct=12`, lines 1452–1464): counts 306 (612 for the 3 double-hit: `0x3ffa58/0x3ffbc0/0x326eb0`), `firstRa=lastRa` per target (`0x3271e8/0x326f24/0x326bf8/0x31ac30/0x3173e4/0x227f70/0x3173c4/0x317514/0x31ac28/0x31abf8/0x31abe0/0x31a5a0`), none in `0x391xxx` — thread 4's WaitSema/iSignalSema ping-pong (`sub_0031AAF0` loop via `0x423dd0/0x423de0`), no thread-1 stub activity.
+
+CD/VIF/GIF/frame/crash (last activity):
+
+| rung | receipt |
+|---|---|
+| Last CD | line 291 `[diag:cd] sceCdInitEeCB stack=0x51a480 size=0x800`; 20 `sceCdRead`+payload pairs lines 209–287 (lbns `0x10,0x105-0x107,0x109-0x117`); nothing after line 291 |
+| `[cd:callback]` (Fix D receipt) | 0 lines in the whole log |
+| VIF / GIF / MPG / MSCAL (case-insensitive) | 0 / 0 / 0 / 0 lines; the only `frame` hit is raylib line 46 (`Target time per frame`); the only `DMA` hit is the `PADMAN.IRX` substring (line 161) |
+| Presented frame / crash / `Missing targets` | 0 / 0 / 0 lines |
+| Dormant | 41 lines, all `id=-1`, lines 211–289; zero `id=1`; none after line 289 |
+| Watch | 164 lines start with `[diag:watch]`, 165 contain it (line 158 is `[SifInitRpc] Initialized[diag:watch]...`); all `thread=1`, last at line 305 — none during the park |
+| StartThread | 3 lines: 290 (`id=2`), 303 (`id=3`), 304 (`id=4`) |
+| SIF modules | 6 loads, lines 159–169 (`SIO2MAN/PADMAN/LIBSD/SNDDRV/MCMAN/MCSERV`) |
+
+What thread 1 is waiting on (elimination table):
+
+| candidate | log evidence | held? |
+|---|---|---|
+| Sema id 26/29 | thread 1 `waitReason=0 waitId=0` every block; sema waits belong to threads 2 (id 26) and 4 (id 29) | no |
+| VSync / alarm | no vsync/alarm wait rows in any `[diag:stacks]` block; `SetAlarm` appears only in block-0 syscalls | no |
+| CD callback | last CD line 291; zero `[cd:callback]` lines; `cdCallbackStackTop` static | no |
+| VIF MPG/MSCAL completion | zero VIF/GIF lines; the polled bit never clears for a different reason (P8-1d) | no (nothing VIF-side is in flight) |
+| Kernel object of any kind | status `Running`, `scheduled` advancing ~300/period, no syscall/stub from `0x391xxx` | no |
+| MMIO bit 8 (0x100) at true `0x10008000` (VIF0_CHCR STR), read as `m_ioRegisters[0x10000000]` | P8-1d proof chain | **yes** |
+
+### P8-1d. Wait object + proof (Step 1d answer; Step 2 skipped)
+
+Wait object: bit 8 (`0x100`, the CHCR start bit the runtime tests at `ps2_memory.cpp:1270` and clears at `:1779/:2230`) of the VIF0 DMA channel control register at true address `0x10008000`, polled by the `0x391330` loop. Under the shipped recomp the loop reads `m_ioRegisters[0x10000000]` instead, which holds `0x104` (the last of the three folded stores), so the bit reads set on every pass and `bnez` never falls through. Exact proof chain:
+
+| # | fact | exact line / word |
+|---|---|---|
+| 1 | Guest programs TADR/QWC/CHCR then polls CHCR bit 8 | ELF `0x391300 sw→0x10008030`, `0x39130c sw 0→0x10008020`, `0x391318 sw 0x104→0x10008000`, `0x391330 lw` + `0x391334 andi 0x100` + `0x391344 bnez→0x391330` (P8-1a) |
+| 2 | Recomp folds all 7 accesses to `0x10000000u` | `sub_003912A8_0x3912a8.cpp:44,73,117,126,135,138,164` (output == runner, `diff -q` clean) |
+| 3 | Fold values come from the TOML map | `ssx3.toml:695,714,715,716,737,760,767` (`"0x3913xx" = "0x10000000"`); map read at `config_manager.cpp:129-146`, applied at `ps2_recompiler.cpp:1972-1977` |
+| 4 | The map is wrong because the detector ignores ORI | `elf_analyzer.cpp:427-447` (LUI-only `baseAddr`, `+ int16(offset)`); `0x10008000` needs the `ori 0x8000` the detector never reads |
+| 5 | Folded stores persist `0x104` at `0x10000000`, kick path never runs | `writeIORegister`: unconditional `m_ioRegisters[address]=value` (`ps2_memory.cpp:1198`); DMA block requires `address≥0x10008000` (`:1268`), so the three stores land in order `0x43bd00, 0, 0x104` with no transfer, no STR clear |
+| 6 | Folded reads return `0x104` forever (no auto-clear off-range) | `readIORegister`: CHCR auto-clear (`:2230`) only inside `[0x10008000,0x1000F000)` (`:2226`); `0x10000000` falls to the generic `m_ioRegisters` lookup (`:2255-2258`) → `0x104`, bit set every pass |
+| 7 | Hence pc-stable + scheduled-advancing, no kernel wait | log lines 307–1434 (`pc=0x391330` × 35 blocks, `scheduled` 280→306/period); `status=0/reason=0`; zero syscalls/stubs from `0x391xxx` (P8-1c) |
+
+No further receipt is needed: the closed log plus the ELF plus the checked-in sources fully determine the park, so Step 2 (lease-poll + ≤90 s boot) is skipped with no missing receipt.
+
+## P8-2. Ladder delta vs boot 2 (no new boot)
+
+Step 2 was skipped, so there is no `boot-p1g-1.log` and no ladder delta. Boot-2 ladder (from `boot-p1f-2.log`, fixed binary `f4d16b98`) restated as the baseline P1g starts from:
+
+| Rung | Boot 2 (unchanged by P1g) |
+|---|---|
+| Thread 1 | `Running` at `pc=0x391330` in all blocks 0–34, `scheduled` ~300/period |
+| Threads 2 / 3 / 4 | WaitSema-26 (`scheduled=0` after block 0) / Ready (`scheduled=0`) / WaitSema-29 (`scheduled` tracks thread 1) |
+| New syscall ids | Block-0 set only (P8-1c); blocks 1–34 add none |
+| First VIF MPG/MSCAL | None |
+| First GIF kick | None |
+| First presented frame | None |
+| Crash | None |
+| CD | Idle since line 291 |
+
+## P8-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` | `f4d16b988d319cd8751350d0cf2554895ef1b7b2f732526d33b01615ec372fba` | Unchanged since P1f boot 2 (re-verified this session); no rebuild in P1g |
+| `PS2Recomp` branch `ssx3` HEAD | `6046260` (`Kernel: run INTC/DMAC/alarm handlers on reserved stacks, not thread sp`) | No new commit (diagnose only); worktree has only the pre-existing local `M ps2xRuntime/src/runner/register_functions.cpp`, never added |
+| This report | `[P1g]` commit on `ssx3` repo `main` (trailers below) | The sole new commit of this brief; no `runner/`, log, or `._*` file added |
+
+No `fork ssx3` push moves code (nothing committed there); the report commit is pushed to the `ssx3` repo's `origin/main`, matching `[P1e]`/`[P1f]`.
+
+## P8-4. Exact commands
+
+```
+cat /tmp/ssx3-host-lease   (M5 at start and end; never written, never removed)
+git -C <PS2Recomp> branch --show-current; git remote -v   (ssx3; fork + origin)
+git -C /Users/bradrichardson/dev/ssx3 log --oneline -12; git status --short   (HEAD 5a6b9d3, clean)
+shasum -a 256 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner   (f4d16b98…)
+which mipsel-linux-gnu-objdump   (not found; hand decode, no install)
+python3 struct over $W/P1/SLUS_207.72 at off=0x1000+(va-0x100000): words 0x3912a8–0x391360, caller 0x375a8c–0x375a94, trampolines 0x423dd0–0x423dec + 0x424020–0x424050; hand MIPS decode per word
+grep -n sub_003912A8 $W/P1/ssx3-functions.sweep.csv   (line 6968) + neighbours; csv enclosing-function lookups for caller/pc/stub pcs
+full-.text J/JAL + branch-target scan into [0x3912a8,0x391360)   (1 JAL at 0x375a8c, 0 branches)
+diff -q runner/sub_003912A8_0x3912a8.cpp $W/P1/output/sub_003912A8_0x3912a8.cpp   (clean); grep Load32/Store32 MMIO lines in both
+grep -n '"0x391...' $W/P1/ssx3.toml   ([mmio] lines 695,714-716,737,760,767); python3 Counter over [mmio] (273 entries, 249 × 0x10000000)
+reads (no edits): ps2_memory.cpp:941-999,1104-1200,1262-1560,1748-1789,2203-2262; ps2_runtime.cpp:2257-2268,2330-2346,2447-2450; elf_analyzer.cpp:423-456; config_manager.cpp:129-146; Dispatcher.cpp case list + :81 top-20 cap; ee_scheduler.h:25-44; ps2_debug_panel.cpp:1910-1922
+python3 over boot-p1f-2.log (closed log only): line-kind Counter; last-30 [diag:thread]; all id=1 pcs; all [diag:syscalls/syscall]; block-0 vs block-34 stubs; cd lines; case-insensitive counts for vif/gif/mpg/mscal/frame/crash/missing; dormant/watch/start-thread/SIF surveys
+grep -c 'cd:callback' boot-p1f-2.log   (0)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md; commit -m "[P1g] ..." (trailers); push origin main
+```
+
+## P8-5. What I could not do
+
+- No boot in this brief: Step 1 answered the park, so Step 2 was skipped by design; the M5 lease was never touched and no `p1g-waits.log` / `boot-p1g-*.log` exists.
+- Block-0's 4 unprinted syscall ids (`distinct=24`, top-20 print cap at `Dispatcher.cpp:81`) are not recoverable from the closed log; only the 20 shown are tabled.
+- The other 242 TOML `[mmio]` entries folding to `0x10000000` were not audited: truncation is proven only for this function's 7 pcs (P8-1a table).
+- Indirect callers (JR/JALR, function tables) into `[0x3912a8,0x391360)` are not enumerable from ELF + closed log; the direct J/JAL/branch scan is exhaustive, the indirect set is unknown.
+- No disassembler: all mnemonics are hand-decoded (cross-checked against recomp comments, which agree on every word).
+- No runtime fix per the brief: the next rung (correct LUI+ORI MMIO addresses, or dynamic MMIO dispatch) is named in P8-1d and left for a later brief.
+- Watch-count note: P7-3's `165` counts lines *containing* `[diag:watch]` (incl. line 158's `[SifInitRpc]`-prefixed line); `164` lines *start* with it. Both numbers are correct under their count.
+- `0x2f` (57 hits, block 0) has no `Dispatcher.cpp` case and falls to `TODO()` via `handleSyscall`; its guest meaning was not pursued (boot-time only, absent from steady state).
+- Time box: well under the 2 h box (single session, no boots, no builds).
+
