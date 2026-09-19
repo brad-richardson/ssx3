@@ -5,6 +5,43 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M8 read (09-19) — PASS, propagation scoped, mechanism open:**
+      baseline reproduces M7; slot census on 3 frames (slot 0 read +
+      796–906 PosNormal draws — NOT unused, deepening M7's puzzle;
+      7-way all-draws tie at 36/39/42/45/48/51/60); slot-36 delta
+      (53 hits/replay, Tex2-only) moves zero pixels → re-scoped per
+      the clause to "seam writes don't reach rendering"; projection
+      UNREACHABLE (2 seam call sites, regs branch has none,
+      regcalls=0/514k, 11 proj writes all via regs path). Honest
+      gaps: VAT/indexed-vs-shared split, per-draw texgen enablement
+      undecided. Next: M9 (upload-timing/shadow-copy mechanism + a
+      PosNormal-path delta). Verified: header sha, analyzer rows,
+      xform_stats verbatim ×2, 4/4 hashes, lease log (1 P1n wait).
+      Ledger row added.
+- [ ] **G5 read (09-19) — PASS, spikes are real patches:** 3 files
+      (6/5/4 hunks, 4376/4893/4638 B), each dry-run clean solo on my
+      own scratch copy; proof target (`patched-cpu`, build-time
+      apply, submodule pristine) identity-exact on 102/102 with G4's
+      timings reproduced (0.55 standard, 6.1 multi); CTest 12/12
+      (11 old + patched-identity). Patches inherit G3/G4 caveats,
+      disclosed; not submitted upstream. Verified: hunks/bytes,
+      dry-runs, submodule rev, smoke replay, CTest re-run, pushed.
+      Ledger row added.
+- [ ] **P1o read (09-19) — PASS, caller saga CLOSED + writers named:**
+      true-frame watch lands exactly 1 hit each (`0x900001` @
+      `0x3dd1e0`, `0x3ded88` @ `0x3dd214`, sp `0x1fffe00`) with the
+      probe line byte-identical to p1n; parked `$a0` top byte `0x00`
+      → entry 0; static hunt names ONE `0x519AD8` writer (`0x3dccfc`,
+      table from `systemInit`-called allocator) + THREE flag writers
+      (W1 `0x3de468` = P6 `iFILESYS_CommandCompleteCallback`, W2
+      `0x3dd83c` = 1, W3 `0x3ddd30` = −2) with full exclusion census
+      + 14 ELF words, all machine-checked (standing rule obeyed —
+      paste block present); brief's slot formula corrected (stride
+      `0x10`, not +8·slot). Open: which writer fires for entry 0 at
+      runtime (receipt designed: watch `0x519AD8`+`0x519AD4`). Lease
+      exemplary (deferred to M8, never forced). Verified: lines
+      :687–:689 verbatim, counts, ELF 6/6 spot, P6 :735, fork
+      untouched, waits log. Next: P1p. Ledger row added.
 - [ ] **P1o + G5 launched (09-19):** P1o (true-frame watch confirm +
       driver-flag writer hunt, ≤2 boots; carries the new standing
       rule: machine-check every hand hex) reuses P1n pane; G5 (port
