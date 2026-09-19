@@ -5,6 +5,12 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P5 launched (09-18 22:00, `local/muse/prompts/P5.md`):** mine
+      360/N64/PSP recomp tooling — XenonRecomp ordinal-HLE stub
+      generation/tracing, N64+Xenon indirect-branch/function tooling,
+      UnleashedRecomp GPU capture/replay vs the ps2xGS plan, patch
+      systems vs our TOML stubs, recompiler testing patterns (which
+      test catches the next LUI+ORI fold?). Read-only, battery-light.
 - [ ] **M6 launched (09-18 21:50, `local/muse/prompts/M6.md`):**
       host-replay milestone 2 item 2 (S2 Part 4 items 2–4): scoped
       `after_frame_event` suppression + `FrameCount`/frame-aging
