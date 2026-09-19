@@ -95,7 +95,11 @@ the build or commit that closed them.
       HOLD 21:55: MacBook untethered (battery 80%) — M6 finishes Step 1,
       then holds all runs until back on power (battery + thermal-noise
       protection); prep work continues. P1i unaffected. Odin unplugged:
-      no track needs the device, no blockers.
+      no track needs the device, no blockers. PARKED 23:05: M6 finished
+      all run-free prep (Step 1 receipts verified, analyzer tested vs
+      synthetic guard-stop, negctrl table scaffolded in REPORT) — only
+      the m6-negctrl run + table fill + commit remain. Event wait
+      terminated as pointless while parked; re-arm on release.
 - [ ] **P1i launched (09-18 21:50, `local/muse/prompts/P1i.md`):**
       diagnose the GS CSR park at `0x375d10`
       (`(CSR&0xC000)!=0x4000` spin) from the closed boot-p1h-1 log +
