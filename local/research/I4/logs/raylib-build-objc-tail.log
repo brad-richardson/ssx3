@@ -1,0 +1,16 @@
+# Step-2 raylib retry (fresh dir + -DCMAKE_C_FLAGS="-x objective-c"): configure exit 0, build exit 0. Verbatim tails.
+/Volumes/Extreme SSD/ps2x-i4/raylib-sdl-sim-objc --   GRAPHICS=GRAPHICS_API_OPENGL_ES2 (configure tail)
+-- Configuring done (3.6s)
+-- Generating done (0.3s)
+-- Build files have been written to: /Volumes/Extreme SSD/ps2x-i4/raylib-sdl-sim-objc
+CFG_EXIT=0
+# build tail -6 (warnings only, e.g. ALIGN macro redefinition vs arm/param.h):
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/usr/include/arm/param.h:61:9: note: previous definition is here
+   61 | #define ALIGN(p)        __DARWIN_ALIGN(p)
+      |         ^
+4 warnings generated.
+[8/8] Linking C static library raylib/libraylib.a
+BUILD_EXIT=0
+# product: raylib/libraylib.a, Non-fat arm64, 1940168 bytes
+# build.ninja FLAGS (all raylib TUs): -fno-strict-aliasing -Werror=implicit-function-declaration -Werror=pointer-arith -x objective-c -O3 -DNDEBUG -std=gnu99 -arch arm64 -isysroot .../iPhoneSimulator27.0.sdk
+# build.ninja SDL includes: /Volumes/Extreme SSD/ps2x-i4/sdl2-ios-sim/include + /include/SDL2 ; defines: -DGRAPHICS_API_OPENGL_ES2 -DPLATFORM_DESKTOP_SDL

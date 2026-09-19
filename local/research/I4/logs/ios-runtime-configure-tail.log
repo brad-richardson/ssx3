@@ -1,0 +1,15 @@
+# observed tail, Step-3 runtime iOS configure (exit 0); verbatim tail -15 (Xcode GENERATOR notes + subbuild BUILD SUCCEEDED lines + done lines)
+note: Run script build phase 'Generate CMakeFiles/rlimgui-populate' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-update' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-complete' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-patch' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'rlimgui-populate')
+** BUILD SUCCEEDED **
+-- FFmpeg disabled; MPEG video decode falls back to stub frames
+-- Configuring done (55.6s)
+-- Generating done (17.7s)
+-- Build files have been written to: /Volumes/Extreme SSD/ps2x-i4/ios-runtime
+CFG_EXIT=0
+# post-configure greps: raylib.xcodeproj contains GRAPHICS_API_OPENGL_ES2, -x objective-c, PLATFORM_DESKTOP_SDL
+# _deps populated: imgui-{src,build,subbuild}, rlimgui-{src,build,subbuild}, sse2neon-{src,build,subbuild}, raylib-build (raylib sources via FETCHCONTENT_SOURCE_DIR_RAYLIB, no raylib-src copy)

@@ -1,0 +1,11 @@
+# Step-3 runtime BUILD attempt 1: --config Debug. No error; the build stalled in -O0 codegen, not in diagnostics.
+# Log frozen at 3251 lines / 0 "error:" for 45+ min on the last TU (289/290 unity objects done):
+#   /opt/homebrew/opt/llvm/bin/clang -x c++ -target arm64-apple-ios27.0-simulator ... -O0(implicit Debug) ...
+#     -c .../ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx -o .../unity_0_cxx.o
+# unity_0 contains ps2xRuntime/src/runner/register_functions.cpp (32MB, 398775 lines, mtime Sep 18 23:37, P1u work-in-progress, unchanged all session).
+# `sample` of the clang pid (100% CPU, RSS flat ~1GB): all samples in llvm::Localizer::localizeIntraBlock
+#   (via FPPassManager::runOnFunction <- emitBackendOutput <- ParseAST) -- quadratic codegen pass on a giant function at -O0.
+# Contrast: desktop Release (-O3, same homebrew clang-23, same unity_0 input) compiled in a <10 min total build.
+# Terminated by operator after Release retry succeeded; Debug never emitted its first error (or object): 289/290 at stop.
+# NOTE: runtime configures ran with env CC=/opt/homebrew/opt/llvm/bin/clang (not unset), so the Xcode projects use
+# homebrew clang-23 -- unlike Steps 1-2 (AppleClang). Static-lib ABI compatible; recorded, not re-run.

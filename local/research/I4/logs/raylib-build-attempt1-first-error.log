@@ -1,0 +1,9 @@
+# Step-2 raylib build attempt 1 (no ObjC flag): exit 1. First failure: raudio.c.o, ObjC-in-C (20 errors). Verbatim grep of FAILED + error: lines.
+FAILED: [code=1] raylib/CMakeFiles/raylib.dir/raudio.c.o
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSObjCRuntime.h:650:1: error: expected identifier or '('
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSObjCRuntime.h:652:9: error: unknown type name 'NSString'
+[... NSObjCRuntime.h NSString errors ...]
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+ninja: build stopped: subcommand failed.
+BUILD_EXIT=1

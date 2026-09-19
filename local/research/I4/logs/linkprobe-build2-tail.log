@@ -1,0 +1,14 @@
+# Integration rehearsal (Step-2 bonus): FetchContent-raylib + target_compile_options(raylib PRIVATE -x objective-c) + consumer exe.
+# Build 1 (CMAKE_C_FLAGS=-x objective-c): FAILED at probe link -- -x also hit the link line, clang re-parsed main.c.o as ObjC source:
+FAILED: [code=1] probe.app/probe
+CMakeFiles/probe.dir/main.c.o:1:1: error: source file is not valid UTF-8
+# (20 errors; finding: -x must be compile-scoped, not in CMAKE_C_FLAGS)
+# Build 2 (target_compile_options from parent scope, no CMAKE_C_FLAGS): exit 0:
+-- LINKPROBE raylib INTERFACE_LINK_LIBRARIES=SDL2::SDL2
+-- Configuring done (5.5s)
+4 warnings generated.
+[9/10] Linking C static library _deps/raylib-build/raylib/libraylib.a
+[10/10] Linking C executable probe.app/probe
+PROBE2_EXIT=0
+# product: probe.app/probe, Mach-O 64-bit executable arm64; build.ninja link line contains libSDL2.a + UIKit et al (SDL2::SDL2 propagates via raylib plain-signature link)
+# otool -L shows CoreVideo/CoreAudio/AudioToolbox/AVFoundation/CoreBluetooth/CoreGraphics/... (nm SDL_* count 0: unreferenced static members dead-stripped, expected)

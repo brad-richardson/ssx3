@@ -1,0 +1,8 @@
+# observed tail, Step-1 SDL2 build (exit 0, 266/266); verbatim tail -8; only warnings are iOS-27 Metal-API deprecations
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLDevice.h:737:1: note: 'supportsFeatureSet:' has been explicitly marked deprecated here
+  737 | - (BOOL)supportsFeatureSet:(MTLFeatureSet)featureSet API_DEPRECATED("Use supportsFamily instead", macos(10.11, 13.0), ios(8.0, 16.0), tvos(9.0, 16.0));
+      | ^
+8 warnings generated.
+[265/266] Building C object CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_syssem.c.o
+[266/266] Linking C static library libSDL2.a
+BUILD_EXIT=0

@@ -1,0 +1,11 @@
+# Step-3 runtime BUILD retry (one variant): fresh dir W/ios-runtime-rel, CMAKE_CONFIGURATION_TYPES=Release, --config Release.
+# Configure: exit 0 (65.5s + 18.7s generate; FFmpeg disabled line; same flags otherwise).
+# Build: exit 0, 0 "error:", 80 "warning:" lines, tail:
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'PS2RetroX')
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'PS2RetroX')
+** BUILD SUCCEEDED **
+# Product: W/ios-runtime-rel/ps2xRuntime/Release-iphonesimulator/ps2EntryRunner.app/ps2EntryRunner
+#   Mach-O 64-bit executable arm64, 120264240 bytes
+#   nm: 292 "T _SDL_" text symbols; _InitWindow (raylib) + _SDL_Init (SDL2) present
+#   otool -L: libSystem + CoreVideo CoreAudio AudioToolbox AVFoundation CoreBluetooth CoreGraphics CoreMotion
+#     Foundation GameController(weak) Metal OpenGLES QuartzCore UIKit CoreHaptics(weak) libc++ AVFAudio CoreFoundation libobjc
