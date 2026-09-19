@@ -6343,3 +6343,353 @@ Source delta: none.
 
 ---
 
+## Part 20 (P1s): sema-26 signal path intact; callback body never runs (0x3e3ad8 has no table entry, invocation pc zeroed silently); pump semas are 4 + 5
+
+Brief `local/muse/prompts/P1s.md`. Static signal/wait paths + 1 `Diag:` commit +
+1 dynamic receipt boot; no fix. Tables, no verdicts. Stale-reading guard: Part 19
+(P19-1a callback→wake link, P19-2b :433→:434 order, P19-5 unwarchable-count +
+pump-sema residues) + Part 17 §P17-1 (sema-26 history) re-read before acting.
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork, branch `ssx3`),
+`O=$W/P1/output`, `LOG=$W/P1/run/boot-p1s-1.log`. File:line refs below are
+`ps2xRuntime/src/lib/` unless noted.
+
+## P20-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `M11` (observed 16:50:31Z) |
+| Polls (5 min, logged) | 16:50:35Z `M11`; 16:55:56Z `M11` (absent 16:55:44Z, re-claimed by M11 before claim); 17:00:53Z `M11`; 17:05:53Z `M11`; 17:10:51Z `M11`; 17:15:41Z absent |
+| Waits log | `$W/P1/run/p1s-waits.log` (7 lines: 5 holds + claim + release) |
+| pgrep note (16:55:56Z) | `pgrep -f "[p]s2EntryRunner"` matched 11 clang++ PIDs (I2 unity-build compile lines mentioning ps2EntryRunner paths); `pgrep -x ps2EntryRunner` exit 1 (no runner process). Recorded, nothing touched |
+| Pre-claim checks (17:15:4xZ) | `pgrep -x ps2EntryRunner` exit 1; lease absent (verified twice); binary `6ac8e6c1` (P1s Diag build); fork HEAD `be01146`; ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1s\n' > /tmp/ssx3-host-lease` 17:15:46Z, immediately before boot-p1s-1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, returned 17:17:21Z |
+| Release | `rm -f /tmp/ssx3-host-lease` 17:19:15Z; verified absent; `pgrep -x` exit 1 |
+| Second boot | None (Step-2 question closed by boot 1; reserve unused) |
+| `adb` | Not used |
+
+## P20-1. Paths + differences (static, no lease, no boot)
+
+Conventions: `Sync.cpp` = `Kernel/Syscalls/Sync.cpp`; `Sched` =
+`Kernel/EeScheduler.cpp` (+ `ps2xRuntime/include/runtime/ee_scheduler.h`);
+`Dispatch` = `Kernel/Syscalls/Dispatcher.cpp`. Guest trampolines `$O/sub_00423D*.cpp`.
+All words ELF-verified §P20-1e; all hand hex machine-checked §P20-1e.
+
+### a. Wait path (WaitSema `0x423DE0` → scheduler)
+
+| Step | Location | Value |
+|---|---|---|
+| Guest call | Worker `0x3e3c18` `jal 0x423DE0` | `$a0` = `*(0x519C4C)` = 26 |
+| Trampoline | `$O/sub_00423DE0` | `$v1`=`0x44`, `syscall 0` @ `0x423de4`, post-syscall pc `0x423de8` (the parked pc in every thread-2 row) |
+| Dispatch | `Dispatch:268-270` | `case 0x44: WaitSema(...)` |
+| Syscall layer | `Sync.cpp:109-112` | `scheduler(...).waitSemaphore(a0)`; no return-value write here (set inside scheduler or on wake) |
+| Fast path | `Sched:1190-1198` | `count!=0` → `--count`, `setReturnS32(activeContext,id)`, NO block |
+| Unknown id | `Sched:1183-1189` | `setReturnS32(KE_UNKNOWN_SEMID=-408)`, NO block |
+| Park | `Sched:1199-1202` | `count==0` → `waiters.push_back(self->id)` then `blockCurrent(Semaphore,id)` |
+| Block | `Sched:1965-1974` | `wait`=payload, status=`Waiting` (`suspendCount==0`) else `WaitingSuspended`, `m_currentThreadId=0`, `publishSnapshot`, `throw EeDispatcherTransfer` |
+| Wake requires | `Sched:1143-1152` | `signalSemaphore(id)`: `waiters` nonempty → pop FRONT, `makeReady(waiter,id,…)`; count untouched |
+| Ready | `Sched:1976-1989` | `wait={}`, `setReturnS32(activeContext,result)`; `suspendCount!=0` → `Suspended` (NOT runnable); else `enqueueReady` + `requestPreemptionIfHigher` |
+| Selection | `Sched:1896-1912` | `selectReady` scans `m_readyQueues[0..127]` low→high: lower number = higher priority |
+| Preemption | `Sched:1991-2003` | Only if woken prio STRICTLY lower number than running; worker 12 vs thread-1/invocation-thread 0 → never preempts |
+| Timeslice | `Sched:639-647` + `2386-2397` | Preempts only for ready-at-or-above (number ≤) running prio; worker 12 never qualifies against prio 0 |
+
+### b. Signal paths: `SignalSema` (`0x423DC0`) vs `iSignalSema` (`0x423DD0`)
+
+Guest + dispatch rows:
+
+| Item | Thread path (`SignalSema`) | Callback path (`iSignalSema`) |
+|---|---|---|
+| Guest trampoline | `$v1`=`0x42` @ `0x423dc0`, post pc `0x423dc8` | `$v1`=`-0x43` @ `0x423dd0`, post pc `0x423dd8` |
+| Dispatch | `Dispatch:262-264` `case 0x42` | `Dispatch:265-267` `case -0x43` |
+| Syscall layer | `Sync.cpp:99-102` → `signalSemaphoreImpl(…,false)` | `Sync.cpp:104-107` → `signalSemaphoreImpl(…,true)` |
+| Shared impl | `Sync.cpp:33-42`: `ee.signalSemaphore(a0,interruptSafe)`, `setReturnS32`, `ee.transferIfRequested(interruptSafe)` — same code | Same code |
+
+`signalSemaphore` (`Sched:1135-1160`) — NO branch on `interruptSafe` in the wake decision:
+
+| Branch | Code | Both paths |
+|---|---|---|
+| Unknown id | `:1138-1142` → `KE_UNKNOWN_SEMID` | Identical |
+| Waiters nonempty | `:1143-1152` pop front + `makeReady(waiter,id,interruptSafe)` | Identical (no callback guard, no deferred queue, no dropped-if-not-waiting branch) |
+| `count==max` | `:1153-1156` → `KE_SEMA_OVF` | Identical |
+| Else | `:1157-1159` `++count` | Identical |
+
+Downstream `interruptSafe` differences (post-wake only):
+
+| Item | `false` (thread) | `true` (callback/interrupt) |
+|---|---|---|
+| `requestPreemptionIfHigher` (`Sched:1991-2003`) | `m_rescheduleRequested=true` only (when woken prio higher) | Same + `m_checkpointPending=true` |
+| `transferIfRequested` (`Sched:1070-1088`) | Throws (immediate preempt) when reschedule requested and not in interrupt | Returns (preemption deferred to `processPendingEvents`→`applyPendingPreemption` after guest fn returns) |
+| When woken prio LOWER than running (this boot: 12 vs 0) | `requestPreemptionIfHigher` no-ops; `transferIfRequested` no-ops (`!m_rescheduleRequested`) | Same no-ops — ZERO behavioral difference |
+
+Other `signalSemaphore` callers (census): `RPC.cpp:142-149` `signalRpcCompletionSema`
+(`interruptSafe=true`, id = guest SIF-RPC `endParameter`), called at `RPC.cpp:543`
+(nowait completion), `:547` (completion), `:657` (missing-callback fallback). No
+other callers tree-wide (grep over `ps2xRuntime/src` excl. `EeScheduler.cpp`,
+`ee_scheduler.h`, `Sync.cpp`).
+
+Callback invocation context (for §P20-2):
+
+| Item | Location | Value |
+|---|---|---|
+| Queue | `Stubs/CD.cpp:66-88` | `kind=Interrupt`, `tag=0x43444342…\|func`, `pc=g_cdCallbackFn`, `sp=g_cdCallbackStackTop`, `ra=0` |
+| Attach (running) | `Sched:489-504` | Pushed onto RUNNING thread's `invocations`; `[cd:callback] start` printed at `:493-497` (attach ≠ execution) |
+| Attach (idle) | `Sched:388-410` | Negative-id invocation thread (prio 0); `start` printed at `:396-401` |
+| `m_insideInterrupt` | `Sched:552` | Set iff back invocation `kind==Interrupt` (CD callbacks qualify) |
+| No-function + invocation | `Sched:506-512` | `!hasFunction(pc)` + nonempty invocations → `context.pc=0` SILENTLY (no `reportMissingFunction`; that call is only in the empty-invocations else-branch `:513-540`) |
+| Pop | `Sched:448-465` | `pc==0` + nonempty → pop, run `onComplete` (CD callbacks register none), thread resumes own context |
+| Table rule | `ps2_runtime.cpp:1081-1096,1289-1293` | Per-word slot `(addr-base)>>2`; populated at registered entries only; `lookupFunction` errors "No EXACT recompiled function" |
+| `0x3e3ad8` entry? | `$W/P1/ssx3-functions.csv` | NO row starts at `0x3e3ad8` (mid-`sub_003E39A8`, `0x3e39a8`–`0x3e3b00`) → `hasFunction(0x3e3ad8)` is false |
+
+Callback body (`$O/sub_003E39A8`, `0x3e3ad8`–`0x3e3af8`): straight-line —
+`lui $v0,0x52`; `lw $a0,-0x63B4($v0)` (`*(0x519C4C)`); `jal 0x423DD0` @ `0x3e3ae8`
+(ra `0x3e3af0`); `jr $ra`. No branch: IF it ran, the signal would always fire.
+
+### c. Pump `0x3E5760` (P6 `MUTEX_unlock`) + lock `0x3E5700` (P6 `MUTEX_lock`)
+
+| Item | Value |
+|---|---|
+| Lock (`$O/sub_003E5700`) | `jal WaitSema(0x423DE0)` @ `0x3e5730` (delay `lw $a0,0xC($s0)` @ `0x3e5734`; ra `0x3e5738`); ELF `0xc108f78`/`0x8e04000c` ✓ |
+| Unlock gates | `GetThreadId` (syscall `0x2F`, `Dispatch:211-214`) @ `0x3e576c`; owner check `0x3e5778`; recursion `0x3e5780`–`0x3e5788`; clear `0x3e5790` |
+| Unlock-i | `jal iSignalSema` @ `0x3e57a4` (delay `lw $a0,0xC($s0)` @ `0x3e57a8`; ra `0x3e57ac`) iff `*(0x450DE4)!=0` (read @ `0x3e5798`); ELF `0xc108f74`/`0x8e04000c`/`0x8c430de4` ✓ |
+| Unlock-thread | `jal SignalSema` @ `0x3e57b4` (delay @ `0x3e57b8`; ra `0x3e57bc`); ELF `0xc108f70`/`0x8e04000c` ✓ |
+| Selector `*(0x450DE4)` writer | `lui $s2,0x45` @ `0x3e4e04` (ELF `0x3c120045` ✓; no `$s2` write before the stores); `sw $s3,0xDE4($s2)` @ `0x3e4e58` delay-of-`jalr $v0` (ELF `0xae530de4` ✓), `$s3`=1 (`addiu` @ `0x3e4e1c`, ELF `0x24130001` ✓); `sw $zero,0xDE4($s2)` @ `0x3e4e5c` (ELF `0xae400de4` ✓) |
+| Other absolute writers | NONE among all 419 files containing `lui *,0x45`: 7 also contain `3556` (`0xDE4`), all struct-relative (`$a0`/`$a2`/`$s1` bases; one `23556` false positive) except the `3E4AF0` hit above (full-file census, no `head` truncation) |
+| Direct JAL sites (ELF word `0x0c0f95d8`, 50) | `0x19d098 0x19d950 0x2525d0 0x252628 0x2526f4 0x252928 0x252f14 0x255e98 0x255efc 0x2c299c 0x2c2bc0 0x2c2e0c 0x317e04 0x317e7c 0x317ec4 0x317efc 0x319a0c 0x319c3c 0x319c64 0x319c94 0x319cec 0x3dd120 0x3de064 0x3de0ac 0x3de754 0x3de7e4 0x3de860 0x3de8f4 0x3deeb8 0x3def18 0x3df064 0x3df944 0x3df9b8 0x3dfa34 0x3dfb5c 0x3dfc80 0x3dfd38 0x3dfdb0 0x3dff70 0x3dfff8 0x3e022c 0x3e02e8 0x3e0490 0x3e0d28 0x3e0e4c 0x3e0f74 0x3e103c 0x3e1354 0x3e147c 0x3e1684` |
+| Static id? | Unresolvable statically (50 sites × own mutex); folded into Step 2 (§P20-2c: ids 4 + 5) |
+| Steady iSig source (old-log harvest) | `boot-p1r-1.log`: `id=0xffffffbd` every block, `first=last=0x423dd8` (trampoline pc; no ra recorded) — source unidentified statically; §P20-2c names it (`0x31abf8`) |
+
+### d. P6 names
+
+| Addr | P6 row (`local/research/P6/ssx3-decomp-names.csv`, 802 lines) |
+|---|---|
+| `0x3e5700` | `MUTEX_lock` (line 749) |
+| `0x3e5760` | `MUTEX_unlock` (line 750) |
+| `0x31aaf0` / `0x3e39a8` / `0x3e4648` / `0x3e4e04` region | No rows |
+
+### e. ELF verification words + machine-check paste block
+
+Batch word check (20 addrs; every word matched its disassembly comment in `$O`;
+ELF `$W/P1/SLUS_207.72`, mapping file-off = va−`0x100000`+`0x1000`):
+
+```
+0x3e4e04 0x3c120045 / 0x3e4e1c 0x24130001 / 0x3e4e54 0x40f809 / 0x3e4e58 0xae530de4
+0x3e4e5c 0xae400de4 / 0x3e5798 0x8c430de4 / 0x3e57a4 0xc108f74 / 0x3e57a8 0x8e04000c
+0x3e57b4 0xc108f70 / 0x3e57b8 0x8e04000c / 0x423c90 0x2403002f / 0x3e5730 0xc108f78
+0x3e5734 0x8e04000c / 0x31abf0 0xc108f74 / 0x31abf4 0x8c644034 / 0x31ac28 0xc108f78
+0x31ac2c 0x8e044034
+```
+
+Machine-check paste block (every hand computation in §P20-1; command then `→` output):
+
+```
+python3 -c "print(hex(0x0C000000|((0x3E5760>>2)&0x3FFFFFF)), hex(0x0C000000|((0x423DA0>>2)&0x3FFFFFF)))"
+→ 0xc0f95d8 0xc108f68
+python3 -c "jal decode: ((pc+4)&0xF0000000)|((w&0x3FFFFFF)<<2)"
+→ 0x31abf0→0x423dd0 0x31ac28→0x423de0 0x3e5730→0x423de0
+  0x3e57a4→0x423dd0 0x3e57b4→0x423dc0 0x3e576c→0x423c90
+python3 -c "print(hex(0x450000+0xDE4), hex(0x31ac28+8), hex(0x3e5730+8), hex(0x31abf0+8))"
+→ 0x450de4 0x31ac30 0x3e5738 0x31abf8
+```
+
+## P20-2. Dynamic answer (boot-p1s-1, 1 boot)
+
+`$W/P1/run/boot-p1s-1.log`, 4,119 lines, 566,220 B, 17 blocks, CWD `$W/P1/run`,
+env = p1r env with WATCH = 2 addrs (`0x519C40`, `0x450DE4`) + `PS2X_DIAG_SEMA=1`
+(new `Diag:` commit `be01146`), PROBE=1 kept on, foreground 90 s, SIGTERM rc=-15.
+Binary `6ac8e6c1` (§P20-3). `PS2X_DIAG_SEMA` format: `op` signal|wait, `id`,
+`count` before→after, `waiters` before→after, waker tid/`pc`/`ra`, `inInt`
+(`m_insideInterrupt`), `iSafe` (`interruptSafe`), `invKind`/`invDepth`/`cbFunc`
+(back-invocation kind/depth/tag), wake `target` + pre-wake `tStatus`/`tSusp`/
+`tWaitReason`/`tWaitId`, `result`. Status ints: 0 Running, 1 Ready, 2 Waiting,
+3 WaitingSuspended, 4 Suspended, 5 Dormant; waitReason 2 = Semaphore.
+
+### a. sema-26: the complete signal/wake record (3 lines, whole boot)
+
+| Line | Line content (abridged) |
+|---|---|
+| :205 | `op=wait id=26 count=0->0 parked=1 waker=2 pc=0x423de8 ra=0x3e3c20` (first park) |
+| :574 | `op=signal id=26 count=0->0 waiters=1->0 waker=1 pc=0x423dc8 ra=0x3e48b8 inInt=0 iSafe=0 invKind=-1 invDepth=0 target=2 tStatus=2 tSusp=0 tWaitReason=2 tWaitId=26 result=26` (thread-1 first signal wakes thread 2) |
+| :581 | `op=wait id=26 count=0->0 parked=1 waker=2 pc=0x423de8 ra=0x3e3c20` (re-park) |
+
+Absence rows (counts over all 4,119 lines):
+
+| Query | Count |
+|---|---|
+| `op=signal id=26` total | 1 (:574 only) |
+| `ra=0x3e3af0` (callback's `jal iSignalSema` return) | 0 |
+| `pc=0x3e3ad8` (callback body dispatched) | 0 |
+| `op=signal` with `cbFunc=0x43444342…` (CD-callback-tagged invocation) | 0 |
+| `missing-target` / `No exact recompiled function` | 0 |
+
+Order around the callback (:572–:582):
+
+| Line | Event |
+|---|---|
+| :572–:573 | `0x519c40` = `0x0` → `0xA` (thread 1, `0x3e4768`/`0x3e48b4`) |
+| :574 | signal id=26 → thread 2 (above) |
+| :575 | `0x519c40` = `0x2` (thread 2, `0x3e3c4c` — worker wake) |
+| :576–:577 | `sceCdRead lbn=0x5f1a3 sectors=1 buf=0x9d0800 ret=0x3e3b8c` + `BIGF` payload (`42494746147c1a00`) |
+| :578 | `[cd:callback] queued func=1 cb=0x3e3ad8` |
+| :579 | `0x519c40` = `0x2` (thread 2, `0x3e3ba0` — issuer success) |
+| :580 | `[cd:callback] start func=1 cb=0x3e3ad8` (attach; thread 2 still running) |
+| :581 | worker re-park (`op=wait id=26`, above) |
+| :582 | driver probe (p1o bytes) |
+
+Thread-2 rows: parked sema 26 @ `0x423de8` all 17 blocks (`:490`-area sch 2, then
+sch 0 ×16 — same bytes as p1r). No signal ever names `target=2` again after :574.
+
+### b. The break, as named by the receipts (§P20-1b + §P20-2a)
+
+| # | Receipt | Value |
+|---|---|---|
+| 1 | Wake path works | :574 signal (waiters 1→0, `target=2`, `tStatus=2`, `tSusp=0`) + 1,360 id-29 wake pairs (§P20-2c) + 74 pump count-pairs: `signalSemaphore` wakes whenever it is CALLED with a waiter parked |
+| 2 | Callback attached, never dispatched | :580 `start` (= attach, `Sched:493-497`) with thread 2 running → invocation pushed onto thread 2; next dispatch: `hasFunction(0x3e3ad8)` false (no table entry, §P20-1b) → `Sched:506-512` zeroes invocation pc SILENTLY → pop (`:448-465`) → thread 2 resumes own context → :581 re-park |
+| 3 | Silence is total | 0 `ra=0x3e3af0` signals, 0 `pc=0x3e3ad8` dispatches, 0 missing-target lines, 0 `No exact` errors — the invocation left no trace between :580 and :581 except thread 2 continuing |
+| 4 | ORDER refinement vs P19-2b | P19 inferred re-park-before-callback-start from `:433`→`:434` adjacency; the wait line (:581) now shows thread 2's re-park call arrives AFTER callback attach (:580) — the attach-while-running + silent-drop sequence above |
+
+### c. Pump sema ids + steady-state signal census (P19-5 residue closed)
+
+All `op=signal` lines grouped by (`ra`, `id`) — full census (1,457 signal + 1,460 wait = 2,917 `[diag:sema]` lines):
+
+| Count | `ra` (site) | `id` | Site decodes to |
+|---|---|---|---|
+| 1360 | `0x31abf8` | 29 | `jal iSignalSema` @ `0x31abf0` in `sub_0031AAF0` (delay `lw $a0,0x4034($v1)`); all `waker=1 inInt=1 iSafe=1 invKind=0 invDepth=1 cbFunc=0` (Interrupt-kind invocation, tag 0 — NOT a CD callback) |
+| 66 | `0x3e57bc` | 4 | Pump thread-site (`MUTEX_unlock` @ `0x3e57b4`); all `waker=1 inInt=0 iSafe=0` |
+| 8 | `0x3e57bc` | 5 | Same site, second mutex; all `waker=1 inInt=0 iSafe=0` |
+| 20 | `0x3e3598` | 6–25 (1 each) | One-shot drainer (early boot) |
+| 2 | `0x418d3c` | 1 | Count-path pair (`0->1`, no waiters; waits at `ra=0x418ce0` consume `1->0`) |
+| 1 | `0x3e48b8` | 26 | First signal (:574) |
+| 0 | `0x3e57ac` | — | Pump i-site NEVER taken this boot |
+| 0 | `0x3e3af0` | — | Callback site NEVER executed (§P20-2a) |
+
+Matching waits: id 29: 1,361 parks (`ra=0x31ac30` ← `jal WaitSema` @ `0x31ac28`,
+delay `lw $a0,0x4034($s0)`; thread 4, `entry=0x31ac08 prio=99`); id 4: 66 ×
+`count=1->0 parked=0` (`ra=0x3e5738`, `MUTEX_lock`, waker=1); id 5: 8 × same.
+Signal `result` census: every signal returned its id (no `-408`, no `-420`).
+
+`*(0x450DE4)` (pump selector): 0 watch writes in 90 s (value never changed from
+zero-init; consistent with 0 pump-i lines). `0x519C40` watch: 7 lines (:49
+zero-init, :77 memset, :201 neighbor `0x519c44`, :572/:573/:575/:579 §P20-2a).
+
+### d. Ladder delta vs boot-p1r-1 (1,253 lines, 132,454 B)
+
+Boot-p1s-1: 4,119 lines, 566,220 B, 17 blocks (+2,966 lines = 2,917 `[diag:sema]`
++ 49-line env/watch/probe shift).
+
+| Rung | boot-p1r-1 | boot-p1s-1 | Delta |
+|---|---|---|---|
+| Thread-1 pc | `0x3e5980` ×17 | `0x3e5980` ×17 | None |
+| Thread-1 sch | 82/82/82/81/80/78/68/82/81/82/79/79/68/81/81/81/80 | 84/81/81/80/70/81/81/81/78/77/69/81/81/81/78/78/70 | Same regime (~68–84) |
+| Thread-2 | parked 26 @ `0x423de8`, sch 2 then 0 ×16 | Same bytes | None |
+| Thread-4 | sema-parked 29 @ `0x423de8` (sch 58 b0) | Same ids/pcs/entries (`entry=0x31ac08 prio=99`; sch 60 b0) | b0 count regime only |
+| Thread-5 | sema-parked 30 @ `0x423de8` (sch 1 b0) | Same (`entry=0x382740 prio=5`; sch 1 b0) | None |
+| Missing target | 0 | 0 | None |
+| Stub distinct b0 / b1–16 | 486 / 18 | 486 / 18; b0 30/30 targets identical (sort-compared) | None |
+| Syscall distinct b0 / b1+ | 27 / 3; 20 printed ids | 27 / 3; same 20 ids (sort-compared, identical) | None |
+| CD callback | :432 + :434 (same func/cb) | :578 + :580 (same func/cb) | Line shift only |
+| CD read | :430 same lbn/ret/buf/payload | :576 same lbn/ret/buf/payload bytes | Line number only |
+| Probe | 1 (:435, p1o bytes) | 1 (:582, p1o bytes) | Line number only |
+| VIF MPG/MSCAL | 0 | 0 | None |
+| GIF/GS | gif 2 / kick 66 / reg 122 / prim 33 / copy-reg 8 / texa 1 | 2 / 66 / 122 / 33 / 8 / 1 | None |
+| `run:tick` | 7 | 6 | −1 (timing regime) |
+| Presented frame | None | None (sole `frame` hit = raylib TIMER line :46) | None |
+| Crash | 0 | 0 | None |
+| Dormant / start-thread | 40 / 4 | 40 / 4 | None |
+| SIF module lines | 6 | 6 | None |
+| `firstRa=0x3dd290` / `0x3dd280` | 17 / 17 | 17 / 17 | None |
+| `target=0x3de420` / `0x3ddfa8` | 0 / 0 | 0 / 0 | None |
+
+## P20-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (boot-p1s-1) | `6ac8e6c13552a4bfd11bd4b404634c92ddbc45fe3077be0cf45a66f3aae9cba1` | `be01146` tree (P1s `Diag:` + I2 `66d992c`/`d62c4b5` parents; rebuilt `-j4`, exit 0) |
+| `ps2x_tests` (CWD `$R`, rebuilt) | Total 425, Passed 424, Failed 1 (`GS alpha-test AFAIL independently masks framebuffer and depth`) | P15-1c 424/425 baseline re-confirmed; failure pre-existing, unrelated, not fixed |
+| `PS2Recomp` branch `ssx3` HEAD | `be01146` (`Diag: P1s sema signal/wait trace gated on PS2X_DIAG_SEMA (P20-2)`, 1 file, +97, two trailers) | Sole P1s fork commit; worktree sole `M` = pre-existing generated `runner/register_functions.cpp`, never added |
+| I2 commits in history | `66d992c` (I2-G5), `d62c4b5` (I2-G6) | Other agent's; present at session start, untouched |
+| Fork push | `git push fork ssx3` from fork clone only (pull-`--rebase` + retry-once rule armed; §P20-4) | The only push allowed |
+| This report | `[P1s]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+`Diag:` diff shape (`Sched` only): `diagSemaEnabled()` (`PS2X_DIAG_SEMA`
+non-empty; cached static; default off) + `[diag:sema]` emit on all 4
+`signalSemaphore` return paths (waker tid/pc/ra, `inInt`, `iSafe`,
+`invKind`/`invDepth`/`cbFunc`, `count`/`waiters` before→after, pre-wake
+`tStatus`/`tSusp`/`tWaitReason`/`tWaitId`, `result`) + all 3 `waitSemaphore`
+paths (`parked`, same context fields). No behavior change when unset (one cached
+bool check per call).
+
+## P20-4. Exact commands
+
+From `$R` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`$O=$W/P1/output`, `$LOG=$W/P1/run/boot-p1s-1.log`:
+
+```
+# Step 1 (lease-free static)
+re-read REPORT Part 19 + Part 17 P17-1 (paged reads)
+read Sync.cpp (all) + Sync.h + Dispatcher.cpp (sema cases, diag head) + ee_scheduler.h (all)
+read EeScheduler.cpp: wait/signal (1060-1210), invocations (1370-1450), run loop
+  (280-585), block/makeReady/preempt (1851-2024), snapshot/helpers (1744-1810, 2254-2260, 2386-2412)
+read Stubs/CD.cpp queueCdCallback (30-88); RPC.cpp signalRpcCompletionSema (142-149, 520-560, 630-660)
+read $O/sub_00423DC0/3DD0/3DE0/3C90 (trampolines) + sub_003E5760 (pump) + sub_003E39A8:370-400 (callback)
+  + sub_003E5700:85-115 (lock) + sub_0031AAF0 lockstep windows + sub_003E5928 jal census
+ELF JAL-word sweeps: 0x0c0f95d8 (pump, 50 sites) + 0x0c108f68 (CreateSema word, computed only)
+lui-0x45 census: 419 files; intersect 3556 -> 8 files; provenance check ($s2 @ 0x3e4e04 live to stores)
+ELF batch: python3 struct check 20 words (0 mismatches); hex machine-checks (each pasted §P20-1e)
+P6 grep (ssx3-decomp-names.csv, 802 lines: MUTEX_lock/unlock rows 749-750)
+old-log harvest: boot-p1r-1.log iSig first/last (0x423dd8, all blocks)
+# Step 2 (Diag commit + build + tests, no lease needed)
+(edit_file: diagSemaEnabled + signal/wait emits, EeScheduler.cpp only)
+find ps2xRuntime/src/lib/Kernel -name '._*' -delete
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 (exit 0)
+/tmp/p1-link/runtime/ps2xTest/ps2x_tests rebuilt; run CWD $R (425/424/1, GS AFAIL; re-run for name)
+shasum -a 256 ps2EntryRunner (6ac8e6c1)
+git add ps2xRuntime/src/lib/Kernel/EeScheduler.cpp (NAMED file only; I2 files + runner/ left alone)
+git commit -m "Diag: ..." (two trailers; NO push yet) -> be01146
+(write /tmp/p1s-boot1.py: p1r env + PS2X_DIAG_SEMA=1, WATCH 2 addrs; diff vs p1r-boot1.py = docstring + LOG + SEMA + WATCH only)
+# Step 2 (lease protocol + boot 1)
+cat /tmp/ssx3-host-lease (M11 16:50:31Z ... absent 17:15:41Z; 5-min polls, each >> p1s-waits.log)
+pgrep -x ps2EntryRunner (exit 1); shasum (6ac8e6c1 fresh); git log/status (be01146); ls ISO + ELF
+printf 'P1s\n' > /tmp/ssx3-host-lease (17:15:46Z, absent verified twice)
+python3 /tmp/p1s-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 566220 B; returned 17:17:21Z)
+rm -f /tmp/ssx3-host-lease (17:19:15Z); ls (absent); pgrep -x (exit 1)
+# Step 2 (log analysis, lease-free)
+sema census: 2917 lines (1457 signal + 1460 wait); id-26 3-line record; ra=0x3e3af0 0; pc=0x3e3ad8 0
+signal group-by (ra,id): 1360x29 / 66x4 / 8x5 / 20x(6-25) / 2x1 / 1x26; pump-i 0; result census (all = id)
+watch: 0x450DE4 0 writes; 0x519C40 7 lines; callback pair :578/:580; probe :582
+ladder sweeps: thread pcs/sch per block; stub 486/18 + b0 30-target comm (identical);
+  syscall 27/3 + 20-id sort-compare (identical); gs:/run:tick/frame/crash/dormant/start-thread/
+  missing-target/SIF/firstRa/target/VIF sweeps; gs:texa + run:tick cross-checks vs p1r
+hasFunction/lookupFunction/slot reads (ps2_runtime.cpp:1075-1096, 1289-1347); csv entry check (no 0x3e3ad8 row)
+# Step 3
+(edit_file append Part 20 in 3 chunks + 2 count fixes; commit below)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1s] ..." (two trailers; NO push there)
+git -C $R push fork ssx3 (the only push allowed; rebase-retry rule per brief on reject)
+```
+
+Env delta vs boot-p1r-1: WATCH 11 addrs → 2 addrs (`0x519C40`, `0x450DE4`) +
+`PS2X_DIAG_SEMA=1` only. Source delta: `EeScheduler.cpp` (+97 diag lines).
+
+## P20-5. What I could not do
+
+- Attribute pump sema 4 vs 5 to specific mutex objects / JAL call sites: the
+  `[diag:sema]` line records the pump return `ra` (`0x3e57bc`) but not `$a0`
+  (mutex addr). Both mutexes live on thread 1 (all 148 pump lines `waker=1`).
+  Closing this needs `$a0` in the line (another `Diag:` + boot; reserve boot
+  unused, time remains in the 4 h box).
+- Identify the Interrupt-kind tag-0 invoker behind the 1,360 id-29 signals
+  (`sub_0031AAF0`, thread-4 waiter): `invKind=0 invDepth=1 cbFunc=0` fits the
+  INTC/DMAC `dispatchIrq` path (tagless) but the handler pc was not logged.
+  Not chased (different sema).
+- Run the reserve 2nd boot (not needed): still-unwatched words it could close
+  directly — `*(0x519C4C)` rewrite check (callback would have read it; body
+  never ran, so moot), `0x51ED98` poll-table slots, `0x519C30`/`0x519C58`.
+- Observe sema-26 count transitions other than logged: all transitions ARE now
+  logged (host-side state made visible; P19-5 unwarchable residue closed for
+  sema ops).
+- No runtime fix (per the brief): paths + receipts only. The mid-label
+  invocation-drop (`Sched:506-512`) is diagnosed, untouched.
+- One boot used (of the brief's max two): no A/B on any rung.
+
+---
+
