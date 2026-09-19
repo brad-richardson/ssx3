@@ -5,6 +5,11 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I1 launched (09-19, user go-ahead):** iOS spike — dep
+      inventory + platform surface + configure/build attempts for
+      iphonesimulator arm64, gaps as fix-classed rows, no fixes.
+      Read-only in fork, no lease, no device. Reuses P6 pane. First
+      agent on `--reasoning-effort max`.
 - [ ] **P1q + M10 launched (09-19):** P1q (why entry 0 is never
       selected/completed: entry contents + ExecCommand selection +
       completion trigger, ≤2 boots) reuses P1p pane; M10
