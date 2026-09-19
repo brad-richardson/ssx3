@@ -5,6 +5,18 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Standing order (09-19, user): keep queueing follow-ups without
+      asking unless input is needed.** Holds: I-lane (raylib scope
+      call owed), publishes/pushes in ssx3 (never), external submits.
+- [ ] **I4 launched (09-19, user picked SDL path):** SDL2 for
+      iphonesimulator + raylib-SDL build + fork CMake integration +
+      runtime configure/build attempt. Reuses I3 pane. Standing-order
+      hold on I-lane lifted for C.
+- [ ] **P1u + M13 launched (09-19, standing order):** P1u (attribute
+      the `-1` sema slot: struct + writers + loop intent, ≤2 boots)
+      reuses P1t pane; M13 (slot-36 same-frame partition + time-boxed
+      per-draw depth attempt) reuses M12 pane. Remaining queue:
+      `sceGsSyncVCallback` test fix (fork, after P1u).
 - [ ] **P1t read (09-19) — PASS, THE FIX WORKS, new stall found:**
       `58c9144` (+46, pc-keyed shim, yields to future splits):
       callback body ran (1 `ra=0x3e3af0` line), worker consumed,
