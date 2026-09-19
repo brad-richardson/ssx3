@@ -103,6 +103,26 @@ ModernGekko, SSX-Library and sunpad-reference); the patches under
 them is GPL-3; `tests/float-conversion-original-generated.h` is DolRecomp
 (GPL-3) tool output kept as a test oracle.
 
+## Legal notes for contributors
+
+Short version: this project is a clean-room reimplementation effort —
+no Sony, Nintendo, or game-publisher code or data is redistributed
+here, and every contribution must keep it that way.
+
+- Supply your own retail copies: game images, BIOS/firmware dumps, and
+  extracted assets must come from hardware and discs you own
+  (see "Deliberately not included" above). Never commit or push game
+  bytes, BIOS files, extracted assets, or generated guest/recompiled
+  code — the `.gitignore` enforces this; briefs restate it.
+- Generated recompiled output is a derivative of the game binary: build
+  it locally, never publish it.
+- Docs and reports may cite facts (addresses, short disassembly,
+  measured numbers) but not reproduce long excerpts of game, BIOS, or
+  SDK code or text.
+- Borrowed third-party code must be license-compatible and keep its
+  attribution (see "Licensing" above); record the source and license
+  when you add any.
+
 ## Related repositories
 
 - `brad-richardson/ps2xGS` — standalone GS capture/replay harness + census
