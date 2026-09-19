@@ -5,6 +5,11 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Resume recipe (09-19, learned from this restart):** track
+      agents must start with `herdr agent start <name> --kind muse
+      --pane <id> -- --yolo` — bare `muse` stops at approval dialogs
+      (M6 proved it on an SSD touch). If a pane sits at `~`, cd it to
+      ssx3 before starting (avoids the workspace-trust dialog).
 - [ ] **P1l launched (09-19, `local/muse/prompts/P1l.md`):** split
       `0x395cf0` + 3 unsplit siblings (`0x395c70` already split —
       verify only), regen + rebuild + `ps2xTest` (re-prove the 1
