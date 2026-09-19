@@ -5,6 +5,13 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1p + M9 launched (09-19, user go-ahead):** P1p (which flag
+      writer fires for entry 0: table-addrs boot + writer-catch boot,
+      max 2) reuses P1o pane; M9 (VAT/texgen closure + upload-timing
+      survival test + PosNormal-path delta) reuses M8 pane. G-lane
+      RESTING (G1 still gated; upstream submission needs an explicit
+      publish call). Remaining queue: `sceGsSyncVCallback` test fix
+      (fork, after P1p).
 - [ ] **M8 read (09-19) — PASS, propagation scoped, mechanism open:**
       baseline reproduces M7; slot census on 3 frames (slot 0 read +
       796–906 PosNormal draws — NOT unused, deepening M7's puzzle;
