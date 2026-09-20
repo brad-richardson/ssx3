@@ -204,5 +204,83 @@ Full outputs: `align-boot3.txt` (74 lines, exit 1), `align-t17c.txt`
 | sceSifGetReg / +SIF DMA/chain/reg | 260,722 / ~1,900 | 0 / 0 | Reference-only: EE↔IOP SIF storm has no HLE counterpart |
 | iReferSemaStatus / RFU005 / iPollSema | 67,629 / 46,042 / 45,104 | 0 / 0 / 0 | Reference-only (BIOS-pump + interrupt-context mix) |
 | FlushCache | 0 | 14,356 | Runtime-only (recomp cache maintenance via 0x64) |
-| RFU252 (fc) / RFU116 (74) / RFU091 (5b) / RFU090 (5a) | 0 | 21 / 8 / 6
-...[truncated 4177 chars]
+| RFU252 (fc) / RFU116 (74) / RFU091 (5b) / RFU090 (5a) | 0 | 21 / 8 / 6 / 1 | Runtime-only numbers (0xFC via RFU fallback; 0x74/0x5b/0x5a are PCSX2 table names) |
+| Boot-rare agreement (0x3c/0x3d/0x12/0x16/0x17/0x4a/0x4b…) | ≤9 each | ≤9 each | Same boot-preamble vocabulary, different order after k=2 |
+
+### T17c plug table (deeper trace reached SSD mid-run as `5f7057e`)
+
+| # | Item | Receipt |
+|---|---|---|
+| 1 | File | `/Volumes/Extreme SSD/ps2x-t4/emulog-t17c.txt`, 7,648,547 lines / 540,313,630 B (held-✕ to User Prefs) |
+| 2 | Format | `--format-check`: 914,791 events, zeros across, exit 0 — no tool change needed |
+| 3 | Anchor | `ExecPS2:2` HIT ev:162 file:142465 — SAME file lines as boot3 (boot prefix EE-identical; independent park-match confirm) |
+| 4 | Divergence | k=2, same events both sides, 0 name mismatches, opening shingle NOT FOUND — boot3 result reproduced exactly |
+| 5 | Unlock | Post-✕ EE epochs now exist on the SSD; the aligner consumes them today (`REF=emulog-t17c.txt`, same flags); longer runtime boots remain the other half |
+
+## T18-3. Exact commands
+
+From `/Users/bradrichardson/dev/ssx3` unless noted; `$R`, `$W` quoted
+(path contains a space):
+
+```text
+# Recon (lease-free)
+read local/research/T4/REPORT.md + samples.txt + census-final.txt (all)
+grep T4 row docs/research/review-2026-09-19-progress.md (§12)
+git -C $R status/log (ssx3 @7eed783 + foreign register_functions.cpp)
+sed PCSX2 SYSCALL emit + bios[256] table (REF R5900OpcodeImpl.cpp:84,906-917)
+sed Dispatcher.cpp / ps2_runtime.cpp:1854-1878 / special_translator.cpp:43-46
+grep dispatchNumericSyscall callers (only handleSyscall + 2 test files)
+ls /tmp/ssx3-p-lane-lease (absent); ls /tmp/t*-boot1.py (T16 survives)
+# Channel (lease-free)
+write Syscalls/TraceChannel.h + TraceChannel.cpp (new files)
+edit Dispatcher.cpp (+1 include, +1 hook call at :89)
+rm 3 AppleDouble sidecars (back to 13)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 (exit 0)
+strings/shasum new binary (a2a2f660, 163464224 B); warnings census
+# Aligner (lease-free)
+write tools/trace_align.py; py_compile; --selftest (t7 bug → fix → 17/17)
+python3 /tmp/t18-table-check.py (128/128 + 42/42 ALL MATCH)
+--format-check on boot3 + empty-rt anchor receipt (HIT ev:162 file:142465)
+# Boots (lease T18 held 15:41:07–15:49:33Z)
+sed /tmp/t16-boot1.py -> /tmp/t18-boot-{off,on}.py (diff-verified) + py_compile
+pre-claim checks; printf claim; python3 /tmp/t18-boot-off.py (240s, rc=0)
+verify snapshot+log; python3 /tmp/t18-boot-on.py (240s, rc=0)
+verify trace (781372 ev) + snapshot; rewrite t18-waits.log; rm lease
+# Ladder + align (lease-free)
+cp ps2_log.txt ps2_log-t18-on.txt (OFF's lost — gap G1)
+$R/tools/ladder_diff.py off on --names off,on (1053/245/5/1 DELTA→tabled)
+/tmp/t18-ladder-logs.py both logs (47/47 series, id ratios)
+--format-check syscalls-t18-on.txt (781372 ev, zeros)
+trace_align.py boot3 vs rt --locate 20 --census (exit 1; census NameError → fix)
+grep anchors (ExecPS2 0 in rt; vblank 417152 + ExecPS2 pair in ref)
+slice locates (ev1000 + ev500000, both NOT FOUND)
+# T17 plug (landed mid-run) + commits
+--format-check + full align on emulog-t17c.txt (reproduces boot3 exactly)
+git -C $R add 3 paths + commit f2b1852 (ladder held)
+shasum 5 artifacts; cp 3 txt evidences to local/research/T18/
+git add -f tool + 4 evidence files; commit [T18] (no push)
+```
+
+## T18-4. Gap rows
+
+| # | Gap | Detail |
+|---|---|---|
+| G1 | OFF `ps2_log.txt` lost (my miss) | ON boot overwrote CWD `ps2_log.txt` before I copied; only `ps2_log-t18-on.txt` (1,387,485,353 B) preserved. T4-G7 mirror. Ladder rests on snapshots + diag series (sufficient for a channel proof; no 394ED0 enter/exit join for OFF) |
+| G2 | Wall-capped, not progress-capped | Both boots are 240 s wall caps: throughput counters differ ~0.5% by guest progress, and SIGTERM-phase samples (5 SAMPLED + sema.33) are wall artifacts. A guest-progress cap (N syscalls / block count) would make the ladder byte-tight |
+| G3 | IOP/vblank out of scope | Vblank + all IOP-side calls are invisible to the EE channel by construction; cross-side epoch binding (vblank counts) needs an IOP channel or the diag tick series |
+| G4 | No args/returns on EE side | Both PCSX2 and the channel log name + number only; sema ids, wait sites, return values are unobservable in either stream (P1x-6 row c stands) |
+| G5 | `≥0x80` names beyond PCSX2 | 0xFC (and any future ≥0x80 id) has no PCSX2 name; the `RFUddd` fallback preserves shape but is a T18 coinage, tabled wherever it fires |
+| G6 | Encoded-id vs `$v1` caveat | Runtime dispatches on the instruction code field when nonzero, PCSX2 on `$v1`; per-event equivalence unverified (values agreed everywhere both were observable this run) |
+| G7 | Deeper-trace half outstanding | t17c plugs in and reproduces boot3; post-✕/gameplay alignment still needs a runtime boot that reaches those epochs (longer P-lane boots, future brief) |
+| G8 | Session wall | ~0.5 h active of the 6 h box; zero lease waits |
+
+## Evidence files
+
+`REPORT.md` (this file), `align-boot3.txt` (74-line full alignment +
+census), `align-t17c.txt` (25-line T17 plug receipt), `ladder.txt`
+(1,306-row `ladder_diff` table). Plus `tools/trace_align.py` (the
+deliverable tool, committed alongside). Full-size artifacts stay on the
+SSD by path+sha: `boot-t18-off.log` (92,549,633 B, `19f57bac…`),
+`boot-t18-on.log` (92,943,027 B, `3859c699…`), `syscalls-t18-on.txt`
+(37,348,669 B, `88852184…`), `ps2_log-t18-on.txt` (1,387,485,353 B),
+both park snapshots, `$W/P1/run/t18-waits.log`.
