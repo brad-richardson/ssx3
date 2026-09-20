@@ -5,6 +5,11 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1y + P1z launched 09-19 (beyond 4 panes, user lifted the
+      cap — CPU/Odin is the only budget):** P1y (flaky AFAIL↔GsSyncV
+      fix, own SSD build dir, no lease) in new tab t1C; P1z (EE kernel
+      CreateSema disassembly settles P1v rule, read-only) in new tab
+      t1D. Six agents live: p1w/p1x/p1y/p1z/m14/i6, none on Odin.
 - [ ] **Steering answers 09-19 (user picked all recommendations):**
       tooling-first (P1w = no-silent-drops + CSV tracking, P1x = PCSX2
       ref trace in parallel); CSV → fork branch; frontier direction
