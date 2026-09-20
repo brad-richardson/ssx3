@@ -5,6 +5,20 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M40 read (09-20) — PASS, asymmetry missing-only, row shape predicts nothing:**
+      4/4 row pins + 13/13 value pins exact (s0c311/s0c312
+      measured); missing sides split in medians (10.0 vs
+      17.5 — H3 not met) but agree in signs (4/4 vs 4/4
+      ++ — H4 met); extra sides agree in medians (13.0
+      vs 13) but split in signs (2/4 vs 1/1 ++ — H5 not
+      met); n0/overlap interleave (H6 not met); all 4
+      missing sides pure (H7 met). H1/H2/H4/H7 met. 0 B
+      explained. (Two estimator runs: receipt-cosmetic
+      H7 label between, canon identical, disclosed.)
+      Verified: baselines, H1/H2 aggregates, c311 pin,
+      canon identical, 21/21, C-SPLIT exact, PNG 88545 B,
+      mtimes clean. ~0.1 h. Next: M41 (near-miss triple,
+      M35 gap 2) in freed pane. Ledger row added.
 - [ ] **M39 read (09-20) — PASS, s3 uniform, missing sides agree, extras split:**
       10/10 row-lists + 14/14 value pins exact (s0c316
       measured [264]); s3 7/7 delta-1 (4 extra-only + 3
@@ -529,7 +543,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t13 (PHASE EXITED — stub-phase @ block 235, mining exit tables, lease released) · m40 (shape-9 standing asymmetry, offline, 4h). Held for post-T13 briefs (T13's REPORT names them): t1D + t1A + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree).
+- [ ] **Live panes:** t13 (PHASE EXITED — stub-phase @ block 235, mining exit tables, lease released) · m41 (near-miss triple, offline, 4h). Held for post-T13 briefs (T13's REPORT names them): t1D + t1A + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
