@@ -5,6 +5,65 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **I7 launched 09-19 (poll, launch authority):** UIKit-entry
+      wiring (I6 gap 1) reuses I6 pane. Rec-#9 tension noted: parking
+      now would strand the lane on a crashing no-window binary, and
+      the phone changes nothing about UIKit entry — I7 completes the
+      first-launch receipt (first window), park after. Queued-for-user:
+      M15 scope, P1x path (Devel build vs Rosetta), P1z amendment
+      after P1w (+frontier trigger). p1w/p1y still working (final
+      steps).
+- [ ] **I6 read (09-19) — PASS, install fixed, main runs, SDL wall
+      found:** `bdae295` one-hunk (GUI identifier, desktop-inert)
+      pushed first-try (carried P-lane `8d10619` up); rebuild
+      120264208 B, symbols/linkage reproduce I5 + identifier; install
+      exit 0, listapps provisioned; no-arg launch clean-fatals on
+      missing ELF path (main ran); argv probe reaches `InitWindow` →
+      SDL video fails → SEGV in `rlLoadTexture` (ips captured, stack
+      to main); no window; harness lessons (ExFAT EPERM →
+      --console+redirect; exit-0-despite-crash) as standing rules.
+      Verified: one-hunk pushed (P1w `5b5ac3d` now on top), bundle id
+      + bytes, console sizes, SDL line, crash 4 markers, 292, sim
+      Shutdown. Next: I7 (UIKit entry). Ledger row added.
+- [ ] **P1z read (09-19) — PASS, kernel settles it: P1v AMENDED:**
+      stock CreateSema @`0x800049b8` (table `0x80014f40[0x40]`): only
+      -1 paths are freelist-empty + init<0; max stored as-is, never
+      read by signal/wait/poll (Refer-only) → no OVF possible on the
+      EE path; verdict: success CONFIRMED, clamp-1→store-as-is
+      AMENDED, OVF-check→delete AMENDED (exact A1–A3 spelled, no edit
+      made); bonus divergence noted (PollSema -1 vs fork -419).
+      Verified: BIOS pristine (sha = P1x's independent hash), 9/9
+      words re-derived (my first pass had a 0x100 hex slip — caught
+      by the receipt mismatch, redone), 0 branches in success
+      stretch, SSD receipts, commit scope. Next: amendment brief
+      AFTER P1w lands (same file) + frontier-read trigger flagged.
+      Ledger row added.
+- [ ] **P1x read (09-19) — PASS, negative result with receipts +
+      cheapest path:** trace unproducible: B1 x86_64-only APP + no
+      Rosetta (Bad CPU type rc=1, no oahd), B2 Release compiles all
+      trace channels out (DEVBUILD gate `Debug.h:216-220`, only
+      Debug/Devel define it), B3 -nogui still needs a display
+      (QtHost main/show lines); full CLI/channel survey + §P23-2d
+      fill-in map with gap rows (thread-table/sch + stub-histogram
+      unmappable — no channels) + ranked path (arm64 Devel, or
+      Rosetta + x86_64 Devel) + unexecuted capture recipe; inputs
+      hashed in `$W/P1/ref`. Verified: B1/B2/B3 reproduced from
+      source+exec, BIOS sha matches P1z's, ref dir + BLOCKED marker,
+      commit scope 1 file, no fork contact. Next: QUEUED-FOR-USER
+      (downloads + Qt build + GUI session, or Rosetta restore).
+      Ledger row added.
+- [ ] **M14 read (09-19) — PASS, camera-delta payoff + drawscan
+      carriers:** step 2: slot-0 +0.1 moves 53636/573440 B identically
+      on 100/100 delta replays vs the rendered ref (pristine 99×0 +
+      r0 127103); step 3 autoscan (2P+2D, 644 shapes, 643 spans ok):
+      one draw carries 8293 B (19%), next 1714, 229+/333 zero/81
+      negative (worst −990), 619/644 uniform (25 spread ≤10 B); det3
+      exact-fit attempt honestly kept (kref=0, 573× share inflation →
+      motivated the re-run). Verified: header shas (`40533e4d`
+      committed, `b09643b1` M13), waits (3 waits/4 pairs never
+      forced), probe bytes exact ×4, analyzer det2 (53636/refhash/
+      gt0-100) + det4 (44087). Next: M15 QUEUED-FOR-USER
+      (milestone-3 scope). Ledger row added.
 - [ ] **P1y + P1z launched 09-19 (beyond 4 panes, user lifted the
       cap — CPU/Odin is the only budget):** P1y (flaky AFAIL↔GsSyncV
       fix, own SSD build dir, no lease) in new tab t1C; P1z (EE kernel
