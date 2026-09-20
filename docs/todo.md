@@ -5,6 +5,27 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1ai read (09-20) — PASS, post-exit diagnosed, next-park spec written:**
+      Part 32 (503 lines, append-only): main returns via pc==0
+      dormant site (1 line @2489892, ra 0x1d8efc — same site
+      as P1e, all regs differ); driver unwinds 73 lines after
+      last exit; 4049-frame unwind reconciles exactly (20
+      roots: 784 + 781×4 + 115 + …); 31-drain = 781-iter pump
+      subprocess (3 root chains + 2 HLE pad calls/iter, zero
+      trace lines by design); 29-halt mid-b239 (74.1%) with
+      29sig→31wait→dormant on 3 adjacent lines; handshakes
+      72178/72178 + 72959/72958 + 4/3 (31 +1 @ EOF line,
+      29 +2 bounded ≤2, unlocalized); freeze same-tick
+      (8658/234 → 0/0); b241 residue = complete 13-target
+      drain chain; silence re-audit 0/0/0/0/0 (§P32-4 lasts
+      to the line); von-Neumann snapshot + 10 invariants +
+      12-watch W1–W12 + 10-row M1–M10 spec for T15. Verified:
+      dormant line, status-5 ×2, trio adjacency, 29 72178/72178,
+      sema :643, drop :73, CD :7174, exit-region 0/0, unwind
+      @185265063/64, HLE 0/0, residue 13 rows byte-exact,
+      4049 arithmetic, append-only (503+/0−), fork HEAD
+      unmoved, ahead (no push). ~80 min. Next: held — next P
+      brief needs T15's run (t1D + t19 held). Ledger row added.
 - [ ] **M45 read (09-20) — PASS, bottom group IS the full s22 set:**
       s22 tail 106 / J 0.9623 / priv 4 / miss 0 / shared
       102 exact; 3 extra-only cells (c296 11/9 + c295 1/0
@@ -638,7 +659,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** p1ai (post-exit diagnosis, no boot, 4h) · t15 (run past exit, lease, 4h) · m46 (far/near split, offline, 4h). Held: t19 (for the P1ai/T15-directed follow-up). Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree). P1ae still queued (post-exit audit shows no SIF-shaped park — SIF silent).
+- [ ] **Live panes:** t15 (run past exit, boot 14 min in, holds P-lane lease) · m46 (far/near split, writing REPORT). Held for the T15-directed follow-up: t1D + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree). P1ae still queued (no SIF-shaped park — SIF silent).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
