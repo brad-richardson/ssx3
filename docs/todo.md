@@ -5,6 +5,13 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1x-path decision 09-20 (user): DEFER Devel build to the Mac
+      mini** (RAM + CPU headroom). Approach banked: APFS sparsebundle
+      on the SSD (symlinks/perms), aqtinstall Qt to SSD prefix,
+      TMPDIR into workspace — zero new internal-disk footprint.
+      Joins the mini day-one list (with S1 + P-lane builds/boots).
+      Trace stays parked; 0x52BE04 diagnosis goes first with the
+      `[drop]` census.
 - [ ] **P1aa launched (immediate poll, user: don't wait):** P1v
       amendment (P1z A1–A3: store max as-is, delete OVF block,
       update + extend test) reuses P1w pane; ≤2 lease-gated boots
