@@ -385,4 +385,17 @@ VM). Full traces (NOT in git): `/Volumes/Extreme SSD/ps2x-t4/emulog-r1a.txt`
 SSD/ps2x-t4/emulog-r1b.txt` (528,190,303 B, sha `b3ca14e…42e412`) + the
 bytesize originals (`/home/brad/pcsx2-r1/dat/PCSX2/logs/`).
 
-...[truncated 4166 chars]
+## Tail receipt
+
+Report written in chunks; tail verified intact (no truncation marker):
+
+```text
+$ grep -c "truncated 4166" local/research/R1/REPORT.md; tail -2 local/research/R1/REPORT.md
+0
+trailer `Orchestrated-By: Muse Code`, no push (orchestrator pushes at poll).
+End of R1 report.
+```
+
+Commit: `git add -f local/research/R1/…` (19 files), message `[R1] …`,
+trailer `Orchestrated-By: Muse Code`, no push (orchestrator pushes at poll).
+End of R1 report.
