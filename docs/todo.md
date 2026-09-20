@@ -5,6 +5,27 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P11 launched (event-driven, p10 wait fired):** SIF `:949`
+      one-liner (`-419`→`-1`) + ladder-confirmation boots with a
+      size-checked game image (the check P10 missed is a receipt
+      here) reuses P10 pane. Baseline: P25-boot1, or post-split
+      ladder if P9 has landed (brief states which).
+- [ ] **P10 read (09-20) — PASS, PollSema settled to -1 (ladder
+      carried):** kernel re-derived (table slots + `blez`→shared
+      `jr`/`-1` pair, no -419 in KERNEL — CONFIRMED); blast radius:
+      0 host branchers, 23/23 guest consumers value-agnostic (F6
+      beq-drain + id-compares + sign tests), 1 stale SIF expectation
+      out of scope; `69bb1ff` (+41/-1, pushed): miss → `KE_ERROR` +
+      new test; BEFORE/AFTER 428/427/1 (P10 face) → 428/427/1 (SIF
+      face); both boots burned on game-less binary (438 B stub +
+      missed log opts — diagnosed, patch exonerated ×5, recipe
+      recorded). Verified: pushed, BIOS sha + 3/3 words (true-word
+      convention — my first compare used byte order, redone), JAL
+      census 23/23 on the TRUE word (report prose has a nibble typo
+      `9F7C`/`8F7C` — analysis used the right value), F6 drain
+      decode, suite RE-RUN BY ME 428/427/1 SIF face, 152-line stall
+      logs, waits, scope. Next: P11 (SIF one-liner + ladder
+      confirm). Ledger row added.
 - [ ] **P1ab + P9 + P10 launched (event-driven, waits fired):**
       P1ab (0x52BE04 diagnosis with census in hand, Part 26) reuses
       P1aa pane; P9 (shim→CSV-split at 0x3E3AD8 + ladder-identical
