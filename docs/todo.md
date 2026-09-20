@@ -5,6 +5,47 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M44 read (09-20) — PASS, wipe-vs-growth + 10× identical crowd site:**
+      c298: s0 [28,29,34,35], 709 wipe (4/4 noncell,
+      −−/−0/−0/−0) vs 732 +2 growth [26,27] (both bulk,
+      |δ| 8/14, −−/−−), 4 kept rows (|δ| up 3/4); c311:
+      12 movers 1/11/0, s9 lone (296,311) (10/noncell/
+      24/7 ++) vs 11 extras = 10× (259,311) byte-identical
+      (17/noncell/−37/−37) + s3 (258,311) (34); lone 10
+      < crowd med 17. H1/H3/H5 met; H2/H4/H6 not. 0 B
+      explained. (Control: 2 tabled control-only fixes,
+      receipt untouched; PNG absent by rule — H4 unmet.)
+      Verified: baselines, TSV guard, 732 rows, H3 11/11,
+      canon identical, 150/150, O-OPP pass, mtimes clean.
+      ~0.3 h. Next: M45 (shape-22 cluster, M34 gap 5) in
+      freed pane. Ledger row added.
+- [ ] **T13 read (09-20) — PASS, PHASE EXITED at block 235, N = 72,176:**
+      1 boot (08:41:40Z, lease 08:41:05–09:01:58Z), monitor
+      led 29 s, TRIGGER stub-phase b235 @ logline 2453403
+      (~09:01:28Z) + 30 s grace → SIGTERM; N = 72176/72176
+      balanced (last exit @185264990, 28032 post lines,
+      empty stack); per-inv 20/19 exact ords 75–72175
+      (non = ramp 0–74 only); exit seq 222→218→211→189→13
+      (b235–241) → 29-halt (b239 partial) + 31-drain (781)
+      → main DORMANT pc 0x0 → dma/gif freeze; sema-30
+      4w/3s parked (no 4th, t3 never releases); single
+      caller ×72176; CD/SIF/GS/RPC silent past b2; rate
+      flat 60 → dip 48 → rebound → 2× surge 104 (b205–215)
+      → exit, guest ratios fixed. Deviations tabled:
+      stub preamble counts, t3 transient pc, empty EOF
+      stack, dormant surplus extent, exit-tail len-52
+      regime, 4049-frame unwind. Yielded ~11 min to T12
+      (cross-SIGTERM contained, messaged). Verified:
+      log 2493828 L / 448535827 B, trace 185293022 L /
+      6581094749 B, trigger line, park tail + newline,
+      blocks.tsv 242 (233×222, b235 = 218@2453403, exit
+      rows), ticks.tsv 167 (freeze), N 72176/72176,
+      last-exit line, post 28032, 394ED0 2×1442182,
+      sema-30 7, binary sha+size exact, fork HEAD unmoved
+      + zero T13 commits, lease absent, 1 boot, ahead
+      (no push). ~2.5 h. Next: P1ai (post-exit diagnosis,
+      no boot) + T15 (run past exit, lease) launched in
+      held panes. Ledger row added.
 - [ ] **M43 read (09-20) — PASS, dests listed, only 761c54 is c54-like:**
       5/5 cells exact (FULL TSV identical); rows 761
       [259,261,263,274] (M37 exact) + 731/733 at 25–33/34;
@@ -583,7 +624,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t13 (PHASE EXITED — stub-phase @ block 235, REPORT writing (T13/ dir appeared), lease released) · m44 (split columns, offline, 4h). Held for post-T13 briefs (T13's REPORT names them): t1D + t1A + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree).
+- [ ] **Live panes:** p1ai (post-exit diagnosis, no boot, 4h) · t15 (run past exit, lease, 4h) · m45 (shape-22 cluster, offline, 4h). Held: t19 (for the P1ai/T15-directed follow-up). Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree). P1ae still queued (post-exit audit shows no SIF-shaped park — SIF silent).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
