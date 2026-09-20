@@ -1,0 +1,872 @@
+#!/usr/bin/env python3
+"""M43 big-delta fresh columns: dest-row listing + value table (offline).
+
+Usage: m43.py M16_DIR M15_DIR M34TSV WORK_DIR EVID_DIR
+
+Reads M16 per-shape triplets + loo.txt, the M15 triplet (baseline
+guard only), and m34-census.tsv (761/731/733 unnamed rows to
+reproduce: k 1/2/2 + cell lists + standings + deltas); raw XFB dumps,
+573440 B = 640x448 YUYV. Read-only inputs; receipt text goes to stdout
+(redirect to WORK_DIR/m43.txt); PNG dest-cell maps to WORK_DIR
+(evidence copy iff the DESIGN.md rule meets, decided at report
+time).
+
+Tasks (see DESIGN.md, recorded before running):
+  1: dest-row listing (5 fresh cells: s0-rows vs Q-rows vs extras)
+  2: value tables (41 sites M36-style + per-cell stats + c54 side-by-side)
+  3: controls (control.py) + determinism + shas + Model-0 recompute
+Tables, no verdicts.
+"""
+import hashlib
+import re
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+
+W, H = 640, 448
+N = W * H * 2  # YUYV bytes
+ROWB = W * 2
+R0_M16, R0_M15 = 22815, 13418
+FNV_S0, FNV_M15 = "6b9ffda25bd76c6f", "306b5c778898b64a"
+M34_FOLD = ("6c906897a3321e78fcc480e646353f833e0c88424ae397f8f7b346e"
+            "61fd423b1")
+M19_CELL_S0 = 2475  # s761/s731/s733 cell counts unpinned: tabled as measured
+M20_TAIL_S0 = 102
+M20_TAIL_S0_SUB = (28, 74)  # (8-15, 16+)
+M20_TAIL_S0_MAX = 47
+M19_POSRATE_S0 = 0.8093  # P(d>0) on s0 cell 7
+M16_TOP10 = [694, 693, 701, 368, 369, 366, 370, 376, 748, 750]
+M16_TOP10_SHARES = [6525, 1580, 1126, 441, 393, 372, 262, 260, 245, 239]
+NAMED8 = [257, 277, 296, 301, 321, 340, 342, 343]
+# Per-shape pins from the M34 TSV rows (shapes 761/731/733, read before running).
+# NOV: {col: (n, ov)}; N0: {col: s0 n}; STAND: {col: (miss, extra, delta, stand)}.
+SHAPES = {
+    761: {"tail": 106, "jacc": "0.9623",
+          "moved": [54],
+          "nov": {54: (4, 0)},
+          "n0": {54: 0},
+          "stand": {54: (0, 4, 4, "extra")},
+          "pool": (4, 0)},  # (extras, missings)
+    731: {"tail": 100, "jacc": "0.6833",
+          "moved": [259, 279],
+          "nov": {259: (9, 0), 279: (9, 0)},
+          "n0": {259: 0, 279: 0},
+          "stand": {259: (0, 9, 9, "extra"),
+                    279: (0, 9, 9, "extra")},
+          "pool": (18, 0)},
+    733: {"tail": 100, "jacc": "0.6694",
+          "moved": [303, 323],
+          "nov": {303: (9, 0), 323: (10, 0)},
+          "n0": {303: 0, 323: 0},
+          "stand": {303: (0, 9, 9, "extra"),
+                    323: (0, 10, 10, "extra")},
+          "pool": (19, 0)},
+}
+QLIST = [761, 731, 733]
+M37_761_ROWS = [259, 261, 263, 274]  # M37 probe cross-check (H1)
+C54_ROWS = [245, 246, 247, 252, 253, 258, 259, 278, 279,
+            283]  # M36 citation, by reference (H6/side-by-side)
+
+
+def fnv1a(data: bytes) -> int:
+    h = 14695981039346656037
+    for b in data:
+        h ^= b
+        h = (h * 1099511628211) & 0xFFFFFFFFFFFFFFFF
+    return h
+
+
+def load_dump(path: Path) -> bytes:
+    b = path.read_bytes()
+    assert len(b) == N, f"{path}: {len(b)} bytes, want {N}"
+    return b
+
+
+def split_planes(raw: np.ndarray):
+    y = np.empty((H, W), np.uint8)
+    y[:, 0::2] = raw.reshape(H, W * 2)[:, 0::4]
+    y[:, 1::2] = raw.reshape(H, W * 2)[:, 2::4]
+    u = raw.reshape(H, W * 2)[:, 1::4].astype(np.uint8)
+    v = raw.reshape(H, W * 2)[:, 3::4].astype(np.uint8)
+    return y, u, v
+
+
+def flat_to_planes(x: np.ndarray):
+    """Scatter a flat (N,) array to (Y, U, V) planes (same geometry)."""
+    r = x.reshape(H, ROWB)
+    y = np.empty((H, W), x.dtype)
+    y[:, 0::2] = r[:, 0::4]
+    y[:, 1::2] = r[:, 2::4]
+    return y, r[:, 1::4].copy(), r[:, 3::4].copy()
+
+
+def yuv_to_rgb(y: np.ndarray, u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    uu = np.repeat(u.astype(np.float32), 2, axis=1)
+    vv = np.repeat(v.astype(np.float32), 2, axis=1)
+    yy = y.astype(np.float32)
+    r = yy + 1.402 * (vv - 128)
+    g = yy - 0.344136 * (uu - 128) - 0.714136 * (vv - 128)
+    b = yy + 1.772 * (uu - 128)
+    return np.clip(np.stack([r, g, b], -1), 0, 255).astype(np.uint8)
+
+
+def xdiff(a: bytes, b: bytes):
+    aa = np.frombuffer(a, np.uint8).astype(np.int16)
+    bb = np.frombuffer(b, np.uint8).astype(np.int16)
+    d = np.abs(aa - bb)
+    nz = d[d > 0]
+    if len(nz) == 0:
+        return 0, 0, 0.0
+    return int(len(nz)), int(nz.max()), float(nz.mean())
+
+
+def synth_w_bytes(v0b: bytes, fullb: bytes, w: float) -> bytes:
+    # M18 verbatim: full + floor(w*(v0-full)); at w=0.5 == (v0+full)//2.
+    a = np.frombuffer(v0b, np.uint8).astype(np.float64)
+    b = np.frombuffer(fullb, np.uint8).astype(np.float64)
+    return np.clip(b + np.floor(w * (a - b)), 0, 255).astype(np.uint8).tobytes()
+
+
+def interior_sites(v0b: bytes, midb: bytes, fullb: bytes, synth: bytes):
+    """Cell-7 membership (M19 id 7 verbatim) + delta = mid - blend."""
+    a = np.frombuffer(v0b, np.uint8).astype(np.int16)
+    m = np.frombuffer(midb, np.uint8).astype(np.int16)
+    b = np.frombuffer(fullb, np.uint8).astype(np.int16)
+    s = np.frombuffer(synth, np.uint8).astype(np.int16)
+    res = s != m
+    moved = a != b
+    lo = np.minimum(a, b)
+    hi = np.maximum(a, b)
+    mask = res & moved & (m > lo) & (m < hi)
+    return {"mask": mask, "delta": (m - s).astype(np.int16),
+            "n": int(mask.sum())}
+
+
+def tail_bulk_masks(mask: np.ndarray, delta: np.ndarray):
+    """Split a cell-7 mask into tail (|d|>=8) and bulk (|d|<8)."""
+    ad = np.abs(delta)
+    tail = mask & (ad >= 8)
+    bulk = mask & (ad < 8)
+    return tail, bulk
+
+
+def plane_of_byte():
+    """Flat (N,) plane ids: 0=Y, 1=U, 2=V."""
+    t = np.arange(N) % 4
+    return np.where((t == 0) | (t == 2), 0, np.where(t == 1, 1, 2))
+
+
+def plane_coords():
+    """Flat (N,) plane-native (row, col) coords: Y (H,W), U/V (H,W/2)."""
+    o = np.arange(N)
+    r = (o // ROWB).astype(np.int32)
+    t = o % ROWB
+    g = t // 4
+    c = np.where((t % 4 == 0) | (t % 4 == 2),
+                 (2 * g + (t % 4 == 2)).astype(np.int32),
+                 g.astype(np.int32))
+    return r, c
+
+
+def parse_loo(path: Path):
+    out = {}
+    pat = re.compile(r"^\|\s*(\d+)\s*\|\s*\([^)]*\)\s*\|\s*(\d+)\s*\|\s*(\d+)")
+    for line in path.read_text(errors="replace").splitlines():
+        m = pat.match(line)
+        if m:
+            out[int(m.group(1))] = (int(m.group(2)), int(m.group(3)))
+    return out
+
+
+def jaccard(a: np.ndarray, b: np.ndarray) -> float:
+    inter = int((a & b).sum())
+    union = int((a | b).sum())
+    if union == 0:
+        return 1.0  # both empty: identical (tabled, see receipt)
+    return inter / union
+
+
+def off_of(r: int, c: int) -> int:
+    """Flat byte offset of Y site (r, c)."""
+    return r * ROWB + (c // 2) * 4 + (0 if c % 2 == 0 else 2)
+
+
+def y_col_rows(mask: np.ndarray, c: int, pl, pr, pc):
+    """Sorted Y-tail rows of mask in column c."""
+    idx = np.nonzero(mask & (pl == 0) & (pc == c))[0]
+    return sorted(int(pr[o]) for o in idx)
+
+
+def tail_y_cols(t: np.ndarray, pl, pr, pc):
+    """Group tail-mask Y sites by column -> {col: sorted rows}."""
+    out = {}
+    for o in np.nonzero(t & (pl == 0))[0]:
+        out.setdefault(int(pc[o]), []).append(int(pr[o]))
+    return {c: sorted(v) for c, v in out.items()}
+
+
+def census_unnamed_of(colrows, s0u):
+    """Per-unnamed-column presence over universe s0u (exact-match rule).
+
+    colrows: {col: rows} (missing key == []); s0u: {col: rows0}.
+    Returns {col: {n, ov, pres, miss, extra, delta}}.
+    """
+    out = {}
+    for c, r0 in s0u.items():
+        rs = colrows.get(c, [])
+        ov = len(set(rs) & set(r0))
+        miss, extra = len(r0) - ov, len(rs) - ov
+        out[c] = {"n": len(rs), "ov": ov,
+                  "pres": 1 if rs == r0 else 0,
+                  "miss": miss, "extra": extra, "delta": miss + extra}
+    return out
+
+
+PNAME = ("Y", "U", "V")
+
+
+def attrib_lines(tag, priv, miss, shared, dA, mA, dB, mB,
+                 v0A, fullA, v0B, fullB):
+    """Task 1.1/1.2: per-site private + missing rows with cross values.
+
+    A = s0, B = other shape. priv = T_B - T_A (or the per-cell
+    extra subset), miss = T_A - T_B (or the per-cell missing
+    subset). Returns (lines, summary_dict). Offsets in ascending
+    order. (M27/M33/M36 verbatim.)
+    """
+    L = []
+    pl = plane_of_byte()
+    pr, pc = plane_coords()
+    aA = np.frombuffer(v0A, np.uint8).astype(np.int16)
+    bA = np.frombuffer(fullA, np.uint8).astype(np.int16)
+    aB = np.frombuffer(v0B, np.uint8).astype(np.int16)
+    bB = np.frombuffer(fullB, np.uint8).astype(np.int16)
+    gA = aA - bA
+    gB = aB - bB
+    out = {}
+    for nm, q, dQ, dO, mO, gQ, gO in (
+            ("priv", priv, dB, dA, mA, gB, gA),
+            ("miss", miss, dA, dB, mB, gA, gB)):
+        idx = np.nonzero(q)[0]
+        n_near = n_far = n_non = 0
+        bulk_ads = []
+        geq = ageq = 0
+        for o in idx:
+            o = int(o)
+            adq = int(abs(int(dQ[o])))
+            if mO[o]:
+                ad = int(abs(int(dO[o])))
+                assert ad < 8, f"{tag} {nm} o={o}: other-frame tail?!"
+                st = "bulk"
+                bulk_ads.append(ad)
+                if ad in (6, 7):
+                    n_near += 1
+                else:
+                    n_far += 1
+                ado = str(ad)
+            else:
+                st = "noncell"
+                n_non += 1
+                ado = "n/a"
+            if int(gQ[o]) == int(gO[o]):
+                geq += 1
+            if abs(int(gQ[o])) == abs(int(gO[o])):
+                ageq += 1
+            L.append(f"{tag} {nm} o={o} plane={PNAME[int(pl[o])]} "
+                     f"rc=({int(pr[o])},{int(pc[o])}) adQ={adq} "
+                     f"ostat={st} adO={ado} gQ={int(gQ[o])} gO={int(gO[o])}")
+        n = len(idx)
+        L.append(f"{tag} {nm} summary: n={n} near={n_near} "
+                 f"({n_near / n if n else 0:.4f}) far={n_far} "
+                 f"({n_far / n if n else 0:.4f}) noncell={n_non} "
+                 f"({n_non / n if n else 0:.4f})")
+        if bulk_ads:
+            ba = np.array(bulk_ads, np.int16)
+            vals, cnts = np.unique(ba, return_counts=True)
+            L.append(f"{tag} {nm} bulk-adO values: "
+                     + " ".join(f"{int(v)}:{int(c)}"
+                                for v, c in zip(vals, cnts)))
+        else:
+            L.append(f"{tag} {nm} bulk-adO values: (none: all noncell)")
+        L.append(f"{tag} {nm} gaps: signed-eq={geq}/{n} "
+                 f"({geq / n if n else 0:.4f}) abs-eq={ageq}/{n} "
+                 f"({ageq / n if n else 0:.4f})")
+        out[nm] = {"n": n, "near": n_near, "far": n_far, "non": n_non}
+    out["shared_n"] = int(shared.sum())
+    return L, out
+
+
+def gapsign_lines(tag, priv, miss, v0A, fullA, v0B, fullB):
+    """Task 2.2: signed-gap sign tables (g_Q x g_O per site)."""
+    L = []
+    aA = np.frombuffer(v0A, np.uint8).astype(np.int16)
+    bA = np.frombuffer(fullA, np.uint8).astype(np.int16)
+    aB = np.frombuffer(v0B, np.uint8).astype(np.int16)
+    bB = np.frombuffer(fullB, np.uint8).astype(np.int16)
+    gA, gB = aA - bA, aB - bB
+
+    def sgn(x):
+        return "+" if x > 0 else ("-" if x < 0 else "0")
+
+    for nm, q, gQ, gO in (("priv", priv, gB, gA),
+                          ("miss", miss, gA, gB)):
+        idx = [int(o) for o in np.nonzero(q)[0]]
+        n = len(idx)
+        cells = {}
+        for o in idx:
+            k = (sgn(int(gQ[o])), sgn(int(gO[o])))
+            cells[k] = cells.get(k, 0) + 1
+        order = [(a, b) for a in ("+", "-", "0") for b in ("+", "-", "0")]
+        L.append(f"{tag} gapsign {nm}: n={n} "
+                 + " ".join(f"{a}{b}={cells.get((a, b), 0)}"
+                            for a, b in order))
+        pp = cells.get(("+", "+"), 0)
+        L.append(f"{tag} gapsign {nm} plusplus: {pp}/{n} "
+                 f"({pp / n if n else 0:.4f})")
+    return L
+
+
+def dstats_lines(tag, priv, miss, dB, dA):
+    """Task 2.3: |d| stats per set (|d_Q| on priv, |d_s0| on miss)."""
+    L = []
+    for nm, q, dQ in (("priv", priv, dB), ("miss", miss, dA)):
+        idx = [int(o) for o in np.nonzero(q)[0]]
+        ads = sorted(int(abs(int(dQ[o]))) for o in idx)
+        n = len(ads)
+        if n:
+            a = np.asarray(ads, dtype=np.float64)
+            L.append(f"{tag} dstats {nm}: n={n} list=[{','.join(map(str, ads))}] "
+                     f"min={a.min():.0f} med={np.median(a):.1f} "
+                     f"mean={a.mean():.4f} max={a.max():.0f}")
+        else:
+            L.append(f"{tag} dstats {nm}: n=0 (empty set)")
+    return L
+
+
+def load_triplet(m16d: Path, s: int):
+    vv = load_dump(m16d / f"m16-v0-s{s:04d}.bin")
+    mm = load_dump(m16d / f"m16-mid-s{s:04d}.bin")
+    ff = load_dump(m16d / f"m16-full-s{s:04d}.bin")
+    return vv, mm, ff, synth_w_bytes(vv, ff, 0.5)
+
+
+def compute_sets_for(v0, mid0, full0, b0, vQ, midQ, fullQ, bQ, moved):
+    """Cell-7 + tail + per-cell sets for s0+Q (shared pass 1/2)."""
+    sp0 = interior_sites(v0, mid0, full0, b0)
+    spQ = interior_sites(vQ, midQ, fullQ, bQ)
+    mask0, d0 = sp0["mask"], sp0["delta"]
+    maskQ, dQ = spQ["mask"], spQ["delta"]
+    t0, _ = tail_bulk_masks(mask0, d0)
+    tQ, _ = tail_bulk_masks(maskQ, dQ)
+    priv = tQ & ~t0
+    miss = t0 & ~tQ
+    shared = tQ & t0
+    pl = plane_of_byte()
+    pr, pc = plane_coords()
+    # per-cell extra/missing masks over this shape's unnamed cells
+    cells = {}
+    for c in moved:
+        r0 = set(y_col_rows(t0, c, pl, pr, pc))
+        rQ = set(y_col_rows(tQ, c, pl, pr, pc))
+        ex = np.zeros(N, bool)
+        mi = np.zeros(N, bool)
+        for r in sorted(rQ - r0):
+            ex[off_of(r, c)] = True
+        for r in sorted(r0 - rQ):
+            mi[off_of(r, c)] = True
+        cells[c] = {"ex": ex, "mi": mi, "r0": sorted(r0),
+                    "rQ": sorted(rQ)}
+    return {"sp0": sp0, "spQ": spQ, "mask0": mask0, "d0": d0,
+            "maskQ": maskQ, "dQ": dQ, "t0": t0, "tQ": tQ,
+            "priv": priv, "miss": miss, "shared": shared,
+            "pl": pl, "pr": pr, "pc": pc, "cells": cells}
+
+
+def is_c54like_cell(ex, dQ, mask0, gQ, g0):
+    """True iff every extra site reads |dQ|==8 + bulk-on-s0 + --."""
+    idx = [int(o) for o in np.nonzero(ex)[0]]
+    if not idx:
+        return False
+    for o in idx:
+        if int(abs(int(dQ[o]))) != 8:
+            return False
+        if not mask0[o]:
+            return False
+        if not (int(gQ[o]) < 0 and int(g0[o]) < 0):
+            return False
+    return True
+
+
+def task_lines_for(Q, sets, v0, full0, vQ, fullQ):
+    """All Task-1+2 receipt lines for one shape (rowlists + values)."""
+    L = []
+    d0, m0 = sets["d0"], sets["mask0"]
+    dQ, mQ = sets["dQ"], sets["maskQ"]
+    shared = sets["shared"]
+    g0 = (np.frombuffer(v0, np.uint8).astype(np.int16)
+          - np.frombuffer(full0, np.uint8).astype(np.int16))
+    gQ = (np.frombuffer(vQ, np.uint8).astype(np.int16)
+          - np.frombuffer(fullQ, np.uint8).astype(np.int16))
+    ex_all = np.zeros(N, bool)
+    mi_all = np.zeros(N, bool)
+    for c in SHAPES[Q]["moved"]:
+        ex, mi = sets["cells"][c]["ex"], sets["cells"][c]["mi"]
+        ex_all |= ex
+        mi_all |= mi
+        r0 = sets["cells"][c]["r0"]
+        rQ = sets["cells"][c]["rQ"]
+        ov = len(set(r0) & set(rQ))
+        fresh = (len(r0) == 0 and ov == 0 and int(mi.sum()) == 0)
+        L.append(f"rowlist s{Q}c{c}: s0rows={r0} s{Q}rows={rQ} "
+                 f"ex_rows={sorted(set(rQ) - set(r0))} "
+                 f"mi_rows={sorted(set(r0) - set(rQ))} "
+                 f"miss_n={int(mi.sum())} extra_n={int(ex.sum())}")
+        L.append(f"fresh s{Q}c{c}: n0={len(r0)} ov={ov} "
+                 f"miss={int(mi.sum())} extra={int(ex.sum())} "
+                 f"delta={int(mi.sum()) + int(ex.sum())} fresh={fresh}")
+        la, _ = attrib_lines(f"s{Q}c{c}", ex, mi, shared, d0, m0,
+                             dQ, mQ, v0, full0, vQ, fullQ)
+        L += la
+        L += dstats_lines(f"s{Q}c{c}", ex, mi, dQ, d0)
+        L += gapsign_lines(f"s{Q}c{c}", ex, mi, v0, full0, vQ, fullQ)
+        L.append(f"c54like s{Q}c{c}: "
+                 f"{is_c54like_cell(ex, dQ, m0, gQ, g0)}")
+    la_pool, summ = attrib_lines(f"s{Q}pool", ex_all, mi_all, shared,
+                                 d0, m0, dQ, mQ, v0, full0, vQ,
+                                 fullQ)
+    L += la_pool
+    L += dstats_lines(f"s{Q}pool", ex_all, mi_all, dQ, d0)
+    L += gapsign_lines(f"s{Q}pool", ex_all, mi_all, v0, full0, vQ,
+                       fullQ)
+    return L, summ, ex_all, mi_all
+
+
+def main():
+    m16d, m15d, m34tsv, workd, evidd = (Path(a) for a in sys.argv[1:6])
+    workd.mkdir(parents=True, exist_ok=True)
+    evidd.mkdir(parents=True, exist_ok=True)
+    t_start = time.time()
+
+    print("== inputs (read-only) ==")
+    inputs = [m16d / "m16-v0-s0000.bin", m16d / "m16-mid-s0000.bin",
+              m16d / "m16-full-s0000.bin",
+              m16d / "m16-v0-s0761.bin", m16d / "m16-mid-s0761.bin",
+              m16d / "m16-full-s0761.bin",
+              m16d / "m16-v0-s0731.bin", m16d / "m16-mid-s0731.bin",
+              m16d / "m16-full-s0731.bin",
+              m16d / "m16-v0-s0733.bin", m16d / "m16-mid-s0733.bin",
+              m16d / "m16-full-s0733.bin",
+              m15d / "m15-v0.bin", m15d / "m15-mid.bin",
+              m15d / "m15-full.bin"]
+    for p in inputs:
+        b = p.read_bytes()
+        print(f"input {p}: bytes={len(b)} sha256={hashlib.sha256(b).hexdigest()}")
+    qb = m34tsv.read_bytes()
+    print(f"input {m34tsv}: bytes={len(qb)} "
+          f"sha256={hashlib.sha256(qb).hexdigest()}")
+
+    print("== loo.txt + top-10 ==")
+    loo = parse_loo(m16d / "loo.txt")
+    print(f"loo.txt parsed R_s rows: n={len(loo)} (want 764)")
+    shares = {s: (R0_M16 - rs) for s, (_, rs) in loo.items() if s != 0}
+    top10 = sorted(shares, key=lambda s: -shares[s])[:10]
+    print(f"derived top-10 shapes: {top10}")
+    print(f"derived shares: {[shares[s] for s in top10]}")
+    carriers_ok = (top10 == M16_TOP10
+                   and [shares[s] for s in top10] == M16_TOP10_SHARES
+                   and len(loo) == 764)
+    print("carrier cross-check vs M16 REPORT: "
+          + ("OK" if carriers_ok else "MISMATCH: STOP, tabled"))
+
+    print("== model 0 (baseline recompute) ==")
+    v015 = load_dump(m15d / "m15-v0.bin")
+    mid15 = load_dump(m15d / "m15-mid.bin")
+    full15 = load_dump(m15d / "m15-full.bin")
+    b15 = synth_w_bytes(v015, full15, 0.5)
+    r15 = xdiff(b15, mid15)[0]
+    f15 = f"{fnv1a(b15):016x}"
+    v0, mid0, full0, b0 = load_triplet(m16d, 0)
+    trips = {Q: load_triplet(m16d, Q) for Q in QLIST}
+    r0 = xdiff(b0, mid0)[0]
+    f0 = f"{fnv1a(b0):016x}"
+    print(f"m15 baseline: R_0={r15} fnv={f15} (want {R0_M15})")
+    print(f"s0 baseline: R_0={r0} fnv={f0} (want {R0_M16} / {FNV_S0})")
+    if r0 != R0_M16 or r15 != R0_M15 or f0 != FNV_S0 or f15 != FNV_M15:
+        print("MISMATCH vs M17-M42 baselines: STOP, tabled.")
+        return
+    if not carriers_ok:
+        print("carrier mismatch: STOP, tabled.")
+        return
+    print("baseline cross-check: OK")
+
+    pl = plane_of_byte()
+    pr, pc = plane_coords()
+
+    # ---- s0 cell-7 + tail + guards ----
+    print("== s0 guards ==")
+    sp0 = interior_sites(v0, mid0, full0, b0)
+    mask0, d0, n0 = sp0["mask"], sp0["delta"], sp0["n"]
+    print(f"s0 cell7 n={n0} (want {M19_CELL_S0})")
+    if n0 != M19_CELL_S0:
+        print("s0 COUNT MISMATCH: STOP, tabled.")
+        return
+    dd0 = d0[mask0]
+    print(f"s0 delta==0 count={int((dd0 == 0).sum())} (want 0)")
+    print(f"s0 P(d>0)={float((dd0 > 0).mean()):.4f} "
+          f"(M19/M20 want {M19_POSRATE_S0})")
+    if float(f"{float((dd0 > 0).mean()):.4f}") != M19_POSRATE_S0:
+        print("s0 P(d>0) MISMATCH: STOP, tabled.")
+        return
+    t0, _ = tail_bulk_masks(mask0, d0)
+    nt0 = int(t0.sum())
+    ad0 = np.abs(d0[t0]).astype(np.int16)
+    n815 = int(((ad0 >= 8) & (ad0 < 16)).sum())
+    n16p = int((ad0 >= 16).sum())
+    print(f"s0 tail n={nt0} (want {M20_TAIL_S0}); 8-15={n815} 16+={n16p} "
+          f"(want {M20_TAIL_S0_SUB[0]}+{M20_TAIL_S0_SUB[1]}); "
+          f"max={int(ad0.max())} (want {M20_TAIL_S0_MAX})")
+    if (nt0 != M20_TAIL_S0 or (n815, n16p) != M20_TAIL_S0_SUB
+            or int(ad0.max()) != M20_TAIL_S0_MAX):
+        print("s0 TAIL MISMATCH: STOP, tabled.")
+        return
+    print(f"self Jaccard={jaccard(t0, t0):.4f} (want 1.0000)")
+
+    # ---- full 764 pass ----
+    print("== full 764 pass (R_s vs loo + cell/tail + Y colrows) ==")
+    t1 = time.time()
+    loo_hexes = []
+    per = {}
+    rs_bad, d0_bad = [], 0
+    for s in range(764):
+        vv = load_dump(m16d / f"m16-v0-s{s:04d}.bin")
+        mm = load_dump(m16d / f"m16-mid-s{s:04d}.bin")
+        ff = load_dump(m16d / f"m16-full-s{s:04d}.bin")
+        loo_hexes += [hashlib.sha256(vv).hexdigest(),
+                      hashlib.sha256(mm).hexdigest(),
+                      hashlib.sha256(ff).hexdigest()]
+        bl = synth_w_bytes(vv, ff, 0.5)
+        xd = xdiff(bl, mm)[0]
+        rs = loo.get(s, ("?", "?"))[1]
+        if xd != rs:
+            rs_bad.append(s)
+            continue
+        if s == 0:
+            sp, t = sp0, t0
+        else:
+            sp = interior_sites(vv, mm, ff, bl)
+            t, _ = tail_bulk_masks(sp["mask"], sp["delta"])
+        dd = sp["delta"][sp["mask"]]
+        if int((dd == 0).sum()) != 0:
+            d0_bad += 1
+            continue
+        nt = int(t.sum())
+        jj = jaccard(t, t0)
+        ycols = tail_y_cols(t, pl, pr, pc)
+        per[s] = {"tail": nt, "j": jj, "rs": xd, "ycols": ycols}
+    fold = hashlib.sha256("".join(loo_hexes).encode()).hexdigest()
+    print(f"triplet fold sha (764x3 bins): {fold}")
+    print(f"fold vs M28/M34 want: match={fold == M34_FOLD}")
+    print(f"R_s vs loo mismatches: n={len(rs_bad)} {rs_bad[:20]}")
+    print(f"delta==0 violations: n={d0_bad} shapes")
+    print(f"shapes recorded: n={len(per)} (want 764)")
+    print(f"(full-pass wall: {time.time() - t1:.1f}s)")
+    if rs_bad or d0_bad or len(per) != 764 or fold != M34_FOLD:
+        print("FULL-PASS MISMATCH: STOP, tabled.")
+        return
+
+    # ---- UNNAMED domain ----
+    print("== UNNAMED domain ==")
+    allcols = set()
+    for s in range(764):
+        allcols.update(per[s]["ycols"])
+    UNNAMED = sorted(c for c in allcols if c not in NAMED8)
+    s0y = per[0]["ycols"]
+    s0u = {c: s0y.get(c, []) for c in UNNAMED}
+    n0pos = sorted(c for c in UNNAMED if s0u[c])
+    n0zero = sorted(c for c in UNNAMED if not s0u[c])
+    print(f"union tail-Y cols (all 764): n={len(allcols)}")
+    print(f"UNNAMED (union minus named8): n={len(UNNAMED)} (want 33)")
+    print(f"s0-bearing unnamed (n0>0): n={len(n0pos)} (want 13)")
+    print(f"pure-private unnamed (n0==0): n={len(n0zero)} (want 20)")
+
+    # ---- FULL unnamed TSV guard (M34 match or stop) ----
+    print("== unnamed TSV guard (M34 match or stop) ==")
+    tsv_lines = m34tsv.read_text(errors="replace").splitlines()
+    want_hdr = "\t".join(["shape", "tail_n", "J_vs_s0"]
+                         + [f"{k}{c}" for c in UNNAMED
+                            for k in ("n", "ov", "pres")])
+    hdr_cols = []
+    for tok in tsv_lines[0].split("\t")[3:]:
+        if tok.startswith("n"):
+            hdr_cols.append(int(tok[1:]))
+    print(f"m34-census.tsv rows={len(tsv_lines) - 1} "
+          f"hdr_match={tsv_lines[0] == want_hdr} "
+          f"universe_match={hdr_cols == UNNAMED}")
+    tsv_ok = (tsv_lines[0] == want_hdr and len(tsv_lines) == 765
+              and hdr_cols == UNNAMED and len(UNNAMED) == 33
+              and len(n0pos) == 13 and len(n0zero) == 20)
+    first_bad = None
+    for s in range(764):
+        rec = per[s]
+        cen = census_unnamed_of(rec["ycols"], s0u)
+        rec["ucen"] = cen
+        rec["umoved"] = sorted(c for c in UNNAMED if cen[c]["pres"] == 0)
+        row = [str(s), str(rec["tail"]), f"{rec['j']:.4f}"]
+        for c in UNNAMED:
+            row += [str(cen[c]["n"]), str(cen[c]["ov"]),
+                    str(cen[c]["pres"])]
+        if "\t".join(row) != tsv_lines[s + 1]:
+            tsv_ok = False
+            if first_bad is None:
+                first_bad = s
+    print(f"unnamed TSV full match (764 rows): {tsv_ok}"
+          + ("" if tsv_ok else f" first_bad_shape={first_bad}"))
+    if first_bad is not None:
+        print(f"m34 row: {tsv_lines[first_bad + 1]}")
+        rec = per[first_bad]
+        row = [str(first_bad), str(rec["tail"]), f"{rec['j']:.4f}"]
+        for c in UNNAMED:
+            row += [str(rec["ucen"][c]["n"]), str(rec["ucen"][c]["ov"]),
+                    str(rec["ucen"][c]["pres"])]
+        print(f"mine row: {'\t'.join(row)}")
+    print("TSV guard: " + ("OK" if tsv_ok else
+                           "MISMATCH vs M34: STOP, tabled."))
+    if not tsv_ok:
+        return
+
+    # ---- 761/731/733 unnamed row guards (k 1/2/2 + standings + deltas) ----
+    print("== 761/731/733 unnamed row guards (5 cells or stop) ==")
+    row_ok = True
+    for Q in QLIST:
+        spec = SHAPES[Q]
+        rQ = per[Q]
+        print(f"s{Q} tail={rQ['tail']} (want {spec['tail']}) "
+              f"J={rQ['j']:.4f} (want {spec['jacc']})")
+        print(f"s{Q} umoved={rQ['umoved']} (want {spec['moved']})")
+        row_ok = (row_ok and rQ["tail"] == spec["tail"]
+                  and f"{rQ['j']:.4f}" == spec["jacc"]
+                  and rQ["umoved"] == spec["moved"])
+        for c in spec["moved"]:
+            e = rQ["ucen"][c]
+            wn, wov = spec["nov"][c]
+            wn0 = spec["n0"][c]
+            wm, we, wd, wst = spec["stand"][c]
+            stand = ("missing" if e["miss"] > 0 and e["extra"] == 0
+                     else ("extra" if e["miss"] == 0 and e["extra"] > 0
+                           else "mixed"))
+            good = (e["n"] == wn and e["ov"] == wov and len(s0u[c]) == wn0
+                    and e["miss"] == wm and e["extra"] == we
+                    and e["delta"] == wd and stand == wst
+                    and e["pres"] == 0)
+            row_ok = row_ok and good
+            print(f"s{Q} c{c}: n/ov={e['n']}/{e['ov']} (want {wn}/{wov}) "
+                  f"n0={len(s0u[c])} (want {wn0}) miss/extra/delta="
+                  f"{e['miss']}/{e['extra']}/{e['delta']} "
+                  f"(want {wm}/{we}/{wd}) stand={stand} (want {wst}) "
+                  f"match={good}")
+    print("761/731/733 row guards: " + ("OK" if row_ok else
+                                       "MISMATCH vs M34: STOP, tabled."))
+    if not row_ok:
+        return
+
+    # ---- s0+Q sets + pooled-count guards ----
+    print("== s0+Q sets + pooled-count guards ==")
+    allsets = {}
+    pool_ok = True
+    for Q in QLIST:
+        vQ, midQ, fullQ, bQ = trips[Q]
+        sets = compute_sets_for(v0, mid0, full0, b0, vQ, midQ, fullQ, bQ,
+                                SHAPES[Q]["moved"])
+        allsets[Q] = sets
+        maskQ, dQ = sets["maskQ"], sets["dQ"]
+        ddQ = dQ[maskQ]
+        print(f"s{Q} cell7 n={sets['spQ']['n']} (unpinned: tabled) "
+              f"delta==0 count={int((ddQ == 0).sum())} (want 0)")
+        pool_ok = pool_ok and int((ddQ == 0).sum()) == 0
+        ex_n = sum(int(sets["cells"][c]["ex"].sum())
+                   for c in SHAPES[Q]["moved"])
+        mi_n = sum(int(sets["cells"][c]["mi"].sum())
+                   for c in SHAPES[Q]["moved"])
+        wex, wmi = SHAPES[Q]["pool"]
+        print(f"s{Q} pooled unnamed extras={ex_n} (want {wex}) "
+              f"missings={mi_n} (want {wmi})")
+        pool_ok = pool_ok and ex_n == wex and mi_n == wmi
+    ex_planes = {int(pl[o]) for Q in QLIST for c in SHAPES[Q]["moved"]
+                 for o in np.nonzero(allsets[Q]["cells"][c]["ex"])[0]}
+    mi_planes = {int(pl[o]) for Q in QLIST for c in SHAPES[Q]["moved"]
+                 for o in np.nonzero(allsets[Q]["cells"][c]["mi"])[0]}
+    print(f"pooled extras planes={sorted(ex_planes)} (want [0]=all-Y)")
+    print(f"pooled missings planes={sorted(mi_planes)} (want []=none)")
+    pool_ok = pool_ok and ex_planes == {0} and mi_planes == set()
+    print("pooled-count guards: "
+          + ("OK" if pool_ok else "MISMATCH: STOP, tabled."))
+    if not pool_ok:
+        for Q in QLIST:
+            ex_rc = sorted((int(pr[o]), int(pc[o]))
+                           for c in SHAPES[Q]["moved"]
+                           for o in np.nonzero(allsets[Q]["cells"][c]["ex"])[0])
+            mi_rc = sorted((int(pr[o]), int(pc[o]))
+                           for c in SHAPES[Q]["moved"]
+                           for o in np.nonzero(allsets[Q]["cells"][c]["mi"])[0])
+            print(f"s{Q} extras rc={ex_rc}")
+            print(f"s{Q} missings rc={mi_rc}")
+        return
+
+    # ---- Task 1+2: per-shape rowlists + per-site values + stats ----
+    print("== Task 1+2 (761/731/733): rowlists + values (5 cells) ==")
+    t1 = time.time()
+    canon = []
+    ex_byQ, mi_byQ = {}, {}
+    for Q in QLIST:
+        vQ, _, fullQ, _ = trips[Q]
+        cl, _, ex_all, mi_all = task_lines_for(
+            Q, allsets[Q], v0, full0, vQ, fullQ)
+        ex_byQ[Q], mi_byQ[Q] = ex_all, mi_all
+        canon += [f"--- shape {Q} ---"] + cl
+    # cross-checks (canon: deterministic from the same sets)
+    rows761 = allsets[761]["cells"][54]["rQ"]
+    canon.append(f"xcheck 761 rows={rows761} want={M37_761_ROWS} "
+                 f"match={rows761 == M37_761_ROWS}")
+    canon.append(f"xcheck c54 cited rows={C54_ROWS} (M36, by reference)")
+    ov761c54 = sorted(set(rows761) & set(C54_ROWS))
+    canon.append(f"xcheck 761-vs-c54 overlap={ov761c54} n={len(ov761c54)}")
+    for ln in canon:
+        print(ln)
+    print(f"(Task-1+2 wall: {time.time() - t1:.1f}s)")
+
+    # ---- c54 side-by-side (per-cell legs vs 700-c54 uniform-8/bulk/--) ----
+    print("== c54 side-by-side (per-cell legs) ==")
+    g0 = (np.frombuffer(v0, np.uint8).astype(np.int16)
+          - np.frombuffer(full0, np.uint8).astype(np.int16))
+    print("c54 cited (M36): n=10 ad8=10/10 bulk=10/10 mm=10/10 "
+          "c54like=True (by reference, not re-attributed)")
+    for Q in QLIST:
+        vQ, _, fullQ, _ = trips[Q]
+        gQ = (np.frombuffer(vQ, np.uint8).astype(np.int16)
+              - np.frombuffer(fullQ, np.uint8).astype(np.int16))
+        dQ = allsets[Q]["dQ"]
+        for c in SHAPES[Q]["moved"]:
+            ex = allsets[Q]["cells"][c]["ex"]
+            idx = [int(o) for o in np.nonzero(ex)[0]]
+            n = len(idx)
+            nad8 = sum(1 for o in idx if int(abs(int(dQ[o]))) == 8)
+            nbulk = sum(1 for o in idx if mask0[o])
+            nmm = sum(1 for o in idx
+                      if int(gQ[o]) < 0 and int(g0[o]) < 0)
+            like = is_c54like_cell(ex, dQ, mask0, gQ, g0)
+            print(f"sidebyside s{Q}c{c}: n={n} ad8={nad8}/{n} "
+                  f"bulk={nbulk}/{n} mm={nmm}/{n} c54like={like} "
+                  f"(c54: 10/10 10/10 10/10 True)")
+
+    # ---- determinism re-run (Tasks on s0+761+731+733, fresh loads) ----
+    print("== determinism re-run (Tasks on s0+761+731+733, second pass) ==")
+    v0b, mid0b, full0b, b0b = load_triplet(m16d, 0)
+    trips2 = {Q: load_triplet(m16d, Q) for Q in QLIST}
+    canon2 = []
+    for Q in QLIST:
+        vQb, midQb, fullQb, bQb = trips2[Q]
+        sets2 = compute_sets_for(v0b, mid0b, full0b, b0b, vQb, midQb,
+                                 fullQb, bQb, SHAPES[Q]["moved"])
+        cl2, _, _, _ = task_lines_for(Q, sets2, v0b, full0b, vQb,
+                                      fullQb)
+        canon2 += [f"--- shape {Q} ---"] + cl2
+    rows761b = compute_sets_for(v0b, mid0b, full0b, b0b,
+                                *trips2[761], SHAPES[761]["moved"]
+                                )["cells"][54]["rQ"]
+    canon2.append(f"xcheck 761 rows={rows761b} want={M37_761_ROWS} "
+                  f"match={rows761b == M37_761_ROWS}")
+    canon2.append(f"xcheck c54 cited rows={C54_ROWS} (M36, by reference)")
+    ov761c54b = sorted(set(rows761b) & set(C54_ROWS))
+    canon2.append(f"xcheck 761-vs-c54 overlap={ov761c54b} n={len(ov761c54b)}")
+    h1 = hashlib.sha256("\n".join(canon).encode()).hexdigest()
+    h2 = hashlib.sha256("\n".join(canon2).encode()).hexdigest()
+    print(f"canon sha pass1={h1}")
+    print(f"canon sha pass2={h2} identical={h1 == h2}")
+    print(f"canon lines: n={len(canon)}/{len(canon2)} "
+          f"match={canon == canon2}")
+    for Q in QLIST:
+        print(f"sets identical s{Q}: ex={int(ex_byQ[Q].sum())} "
+              f"mi={int(mi_byQ[Q].sum())} "
+              f"shared={int(allsets[Q]['shared'].sum())}")
+
+    # ---- PNG dest-cell maps (work dir; evidence copy iff rule meets) ----
+    print("== PNG dest-cell maps ==")
+    y0p, u0p, v0p = split_planes(np.frombuffer(mid0, np.uint8))
+    rgbm = yuv_to_rgb(y0p, u0p, v0p)
+    base = 0.35 * rgbm.astype(np.float32)
+    for Q in QLIST:
+        vQ, _, fullQ, _ = trips[Q]
+        gQ = (np.frombuffer(vQ, np.uint8).astype(np.int16)
+              - np.frombuffer(fullQ, np.uint8).astype(np.int16))
+        dQ = allsets[Q]["dQ"]
+        over = base.copy()
+        shared = allsets[Q]["shared"]
+        like_mask = np.zeros(N, bool)
+        other_mask = np.zeros(N, bool)
+        for c in SHAPES[Q]["moved"]:
+            ex = allsets[Q]["cells"][c]["ex"]
+            if is_c54like_cell(ex, dQ, mask0, gQ, g0):
+                like_mask |= ex
+            else:
+                other_mask |= ex
+        im_s, _, _ = flat_to_planes(shared)
+        im_like, _, _ = flat_to_planes(like_mask)
+        im_other, _, _ = flat_to_planes(other_mask)
+        over[im_s] = np.array([0, 255, 0])        # shared green
+        over[im_like] = np.array([255, 255, 0])   # c54-like cell yellow
+        over[im_other] = np.array([255, 0, 0])    # non-c54-like red
+        p = workd / f"m43-destmap-s{Q:04d}.png"
+        Image.fromarray(over.astype(np.uint8)).resize((320, 224),
+                                                      Image.BILINEAR).save(p)
+        print(f"png {p}: {p.stat().st_size} B (budget 5242880) "
+              f"like_n={int(like_mask.sum())} "
+              f"other_n={int(other_mask.sum())} "
+              f"shared_n={int(shared.sum())}")
+    print("legend: green=shared tail(Y) yellow=dest extras in c54-like "
+          "cells red=dest extras in non-c54-like cells (s0 geometry; "
+          "Y only; per-cell coloring per DESIGN.md)")
+
+    # ---- falsification-bar measurements (values + thresholds) ----
+    print("== falsification-bar measurements ==")
+    print(f"H1_761ROWS: rows={rows761} want={M37_761_ROWS} "
+          f"exact={rows761 == M37_761_ROWS} (bar: exact)")
+    p_n = p_ad8 = p_bulk = p_mm = 0
+    like_cells = 0
+    for Q in QLIST:
+        vQ, _, fullQ, _ = trips[Q]
+        gQ = (np.frombuffer(vQ, np.uint8).astype(np.int16)
+              - np.frombuffer(fullQ, np.uint8).astype(np.int16))
+        dQ = allsets[Q]["dQ"]
+        for c in SHAPES[Q]["moved"]:
+            ex = allsets[Q]["cells"][c]["ex"]
+            if is_c54like_cell(ex, dQ, mask0, gQ, g0):
+                like_cells += 1
+        for o in np.nonzero(ex_byQ[Q])[0]:
+            o = int(o)
+            p_n += 1
+            if int(abs(int(dQ[o]))) == 8:
+                p_ad8 += 1
+            if mask0[o]:
+                p_bulk += 1
+            if int(gQ[o]) < 0 and int(g0[o]) < 0:
+                p_mm += 1
+    print(f"H2_UNIFORM8: ad8 {p_ad8}/{p_n} "
+          f"({p_ad8 / p_n if p_n else 0:.4f}; bar >=0.50)")
+    print(f"H3_BULK: bulk {p_bulk}/{p_n} "
+          f"({p_bulk / p_n if p_n else 0:.4f}; bar >=0.50)")
+    print(f"H4_GAPMM: mm {p_mm}/{p_n} "
+          f"({p_mm / p_n if p_n else 0:.4f}; bar >=0.50)")
+    print(f"H5_C54LIKE: c54like cells {like_cells}/5 (bar >=3)")
+    print(f"H6_ROWOVERLAP: overlap={ov761c54} n={len(ov761c54)} "
+          f"(bar >=1)")
+    print("N: 0 explained; tail stands (attribution, not explanation)")
+
+    print(f"== total wall: {time.time() - t_start:.1f}s ==")
+    print("tests: T1=rowlists T2=values+sbs R=controls")
+
+
+if __name__ == "__main__":
+    main()
