@@ -15,8 +15,15 @@ numbers only (T4 format notes).
 Usage:
   trace_align.py REF RT [--ref-after NAME[:OCC]] [--rt-after NAME[:OCC]]
                    [--window N] [--locate K] [--census] [--context N]
+                   [--drop-names N,...] [--project shared] [--milestones]
   trace_align.py --format-check FILE [FILE ...]
   trace_align.py --selftest
+
+T22 projection: --drop-names removes exact-name events from BOTH streams
+after anchor resolution (comparison + locate + milestones; census stays
+full post-start). --project shared is the F3 S19 preset (SIF layer, sema
+pump, GetThreadId, FlushCache, RFU005). --milestones prints the projected
+rare-vocabulary sequences with stamps, both sides.
 
 Exit codes:
   0  no divergence in the compared window (bound tabled)
@@ -44,6 +51,38 @@ def parse_after(spec):
     return (spec, 1)
 
 
+# T22 --project shared preset: the F3 S19 projection (order = table order).
+# SIF layer (HLE'd by construction; runtime can never emit), sema pump
+# (drowns both streams), GetThreadId + FlushCache (runtime-only storms),
+# RFU005 (reference-only interrupt-return path, host-side on runtime).
+# Deliberately NOT dropped: CreateSema/DeleteSema/ReferSemaStatus (S19
+# milestones), iFlushCache (0/0 on both sides), Dmac handlers, Deci2Call.
+SHARED_DROPS = (
+    "sceSifGetReg",
+    "sceSifSetDma_isceSifSetDma",
+    "sceSifSetDChain_isceSifSetDChain",
+    "sceSifSetReg",
+    "sceSifDmaStat_isceSifDmaStat",
+    "sceSifStopDma",
+    "WaitSema",
+    "SignalSema",
+    "iSignalSema",
+    "PollSema",
+    "iPollSema",
+    "iReferSemaStatus",
+    "GetThreadId",
+    "FlushCache",
+    "RFU005",
+)
+
+
+def parse_drop_names(spec):
+    """'A,B,...' -> [names]; empty entries ignored, whitespace stripped."""
+    if spec is None:
+        return []
+    return [n.strip() for n in spec.split(",") if n.strip()]
+
+
 class Stream:
     """Parsed event stream: numbers + file lines + interned names."""
 
@@ -52,12 +91,13 @@ class Stream:
         self.nums = array("I")
         self.lines = array("I")
         self.name_ids = array("I")
+        self.ts = array("d")  # T22: host-wall stamp per event (NaN if unparseable)
         self.names = []
         self._name_to_id = {}
         self.file_lines = 0
         self.skipped = 0
 
-    def append(self, file_lineno, name, num):
+    def append(self, file_lineno, name, num, ts):
         nid = self._name_to_id.get(name)
         if nid is None:
             nid = len(self.names)
@@ -66,6 +106,7 @@ class Stream:
         self.nums.append(num)
         self.lines.append(file_lineno)
         self.name_ids.append(nid)
+        self.ts.append(ts)
 
     def __len__(self):
         return len(self.nums)
@@ -83,7 +124,9 @@ def parse_stream(path, progress_every=0):
             if not m:
                 st.skipped += 1
                 continue
-            st.append(lineno, m.group(1), int(m.group(2), 16))
+            t = TS_RE.match(line)
+            ts = float(t.group(1)) if t else float("nan")
+            st.append(lineno, m.group(1), int(m.group(2), 16), ts)
             if progress_every and len(st) % progress_every == 0:
                 print(f"... {path}: {len(st)} events", file=sys.stderr)
     return st
@@ -112,6 +155,10 @@ def fmt_event(st, i):
     return f"{st.name(i)} ({st.nums[i]:x}) @file:{st.lines[i]} ev:{i}"
 
 
+def fmt_ts(ts):
+    return f"{ts:8.4f}" if ts == ts else "     ---"  # NaN -> no stamp
+
+
 def cmd_align(args):
     ref = parse_stream(args.ref)
     rt = parse_stream(args.rt)
@@ -120,6 +167,21 @@ def cmd_align(args):
     print(f"  file_lines={ref.file_lines} events={len(ref)} skipped={ref.skipped}")
     print(f"rt:  {args.rt}")
     print(f"  file_lines={rt.file_lines} events={len(rt)} skipped={rt.skipped}")
+
+    # T22 projection: preset + explicit drops resolve to one ordered list
+    # (union, preset first). Unknown preset is a usage error (exit 2).
+    project = getattr(args, "project", None)
+    drops = []
+    if project is not None:
+        if project != "shared":
+            print(f"project: unknown preset '{project}' (want: shared)")
+            print("result: USAGE-ERROR")
+            return 2
+        drops.extend(SHARED_DROPS)
+    for n in parse_drop_names(getattr(args, "drop_names", None)):
+        if n not in drops:
+            drops.append(n)
+    milestones = bool(getattr(args, "milestones", False))
 
     ref_after = parse_after(args.ref_after)
     rt_after = parse_after(args.rt_after)
@@ -159,8 +221,37 @@ def cmd_align(args):
         print("result: ANCHOR-MISS")
         return 2
 
-    n_ref = len(ref) - ref_start
-    n_rt = len(rt) - rt_start
+    # Projected post-start index lists (None = no projection; the old path).
+    # Milestones without drops still needs full post-start ranges.
+    ref_idx = rt_idx = None
+    if drops or milestones:
+        drop_set = set(drops)
+        ref_idx = [t for t in range(ref_start, len(ref))
+                   if ref.name(t) not in drop_set]
+        rt_idx = [t for t in range(rt_start, len(rt))
+                  if rt.name(t) not in drop_set]
+
+    if drops:
+        print("--- project ---")
+        print(f"project={project or 'none'} drops={len(drops)} "
+              f"ref_post={len(ref) - ref_start} rt_post={len(rt) - rt_start} "
+              f"ref_proj={len(ref_idx)} rt_proj={len(rt_idx)}")
+        cref_post = Counter(ref.name(t) for t in range(ref_start, len(ref)))
+        crt_post = Counter(rt.name(t) for t in range(rt_start, len(rt)))
+        for n in drops:
+            print(f"  {n} ref={cref_post.get(n, 0)} rt={crt_post.get(n, 0)}")
+
+    def at(k):
+        if ref_idx is None:
+            return (ref_start + k, rt_start + k)
+        return (ref_idx[k], rt_idx[k])
+
+    if ref_idx is None:
+        n_ref = len(ref) - ref_start
+        n_rt = len(rt) - rt_start
+    else:
+        n_ref = len(ref_idx)
+        n_rt = len(rt_idx)
     limit = min(n_ref, n_rt)
     if args.window and args.window > 0:
         limit = min(limit, args.window)
@@ -169,7 +260,7 @@ def cmd_align(args):
     div = None
     name_mismatches = []
     for k in range(limit):
-        i, j = ref_start + k, rt_start + k
+        i, j = at(k)
         if ref.nums[i] != rt.nums[j]:
             div = k
             break
@@ -182,24 +273,26 @@ def cmd_align(args):
         print(f"  k={k} ref={fmt_event(ref, i)} rt={fmt_event(rt, j)}")
 
     ctx = args.context
+    pmark = " (projected)" if drops else ""
     if div is not None:
-        i, j = ref_start + div, rt_start + div
+        i, j = at(div)
         print("--- divergence ---")
-        print(f"k={div} (agreement run before it: {div} events)")
+        print(f"k={div}{pmark} (agreement run before it: {div} events)")
         print(f"ref: {fmt_event(ref, i)}")
         print(f"rt:  {fmt_event(rt, j)}")
         print(f"--- context (+-{ctx}) ---")
         for k in range(max(0, div - ctx), min(limit, div + ctx + 1)):
             mark = ">>>" if k == div else "   "
+            ci, cj = at(k)
             print(
-                f"{mark} k={k} ref={fmt_event(ref, ref_start + k)} "
-                f"rt={fmt_event(rt, rt_start + k)}"
+                f"{mark} k={k} ref={fmt_event(ref, ci)} "
+                f"rt={fmt_event(rt, cj)}"
             )
         print("result: DIVERGENCE")
         rc = 1
     else:
         print("--- bound ---")
-        print(f"agreement_run={limit} events (no divergence in window)")
+        print(f"agreement_run={limit} events{pmark} (no divergence in window)")
         if args.window and args.window > 0 and limit == args.window:
             end = "window-cap"
         elif n_ref == n_rt == limit:
@@ -209,23 +302,29 @@ def cmd_align(args):
         else:
             end = "ref-exhausted"
         print(f"end={end} ref_events_after_start={n_ref} rt_events_after_start={n_rt}")
-        if ref_start + limit < len(ref):
-            print(f"ref_next: {fmt_event(ref, ref_start + limit)}")
-        if rt_start + limit < len(rt):
-            print(f"rt_next: {fmt_event(rt, rt_start + limit)}")
+        if limit < n_ref:
+            print(f"ref_next: {fmt_event(ref, at(limit)[0])}")
+        if limit < n_rt:
+            print(f"rt_next: {fmt_event(rt, at(limit)[1])}")
         print("result: NO-DIVERGENCE")
         rc = 0
 
     if args.locate and args.locate > 0:
         k = args.locate
         print("--- locate ---")
-        if len(rt) - rt_start < k:
+        if n_rt < k:
             print(f"rt has fewer than {k} post-start events; skipped")
         else:
             # NOTE: bytes(array('I')) would reinterpret raw memory; convert
             # via lists so each event is one byte (all real nums are u8).
-            needle = list(rt.nums[rt_start : rt_start + k])
-            hay = list(ref.nums[ref_start:])
+            if ref_idx is None:
+                needle = list(rt.nums[rt_start : rt_start + k])
+                hay = list(ref.nums[ref_start:])
+                ev_at = lambda s: ref_start + s  # noqa: E731
+            else:
+                needle = [rt.nums[t] for t in rt_idx[:k]]
+                hay = [ref.nums[t] for t in ref_idx]
+                ev_at = lambda s: ref_idx[s]  # noqa: E731
             try:
                 pos = bytes(hay).find(bytes(needle))
             except ValueError:
@@ -235,17 +334,31 @@ def cmd_align(args):
                         pos = s
                         break
             if pos < 0:
-                print(f"rt opening {k}-shingle NOT FOUND in ref post-start window")
+                print(f"rt opening {k}-shingle NOT FOUND in ref post-start window{pmark}")
             else:
                 print(
-                    f"rt opening {k}-shingle first occurs at ref ev:{ref_start + pos} "
-                    f"file:{ref.lines[ref_start + pos]}"
+                    f"rt opening {k}-shingle first occurs at ref ev:{ev_at(pos)} "
+                    f"file:{ref.lines[ev_at(pos)]}{pmark}"
                 )
+
+    if milestones:
+        ref_ms = ref_idx if ref_idx is not None else range(ref_start, len(ref))
+        rt_ms = rt_idx if rt_idx is not None else range(rt_start, len(rt))
+        print(f"--- milestones ref ({len(ref_ms)} events) ---")
+        for t in ref_ms:
+            print(f"  {fmt_ts(ref.ts[t])} {ref.name(t)} ({ref.nums[t]:x}) "
+                  f"@file:{ref.lines[t]} ev:{t}")
+        print(f"--- milestones rt ({len(rt_ms)} events) ---")
+        for t in rt_ms:
+            print(f"  {fmt_ts(rt.ts[t])} {rt.name(t)} ({rt.nums[t]:x}) "
+                  f"@file:{rt.lines[t]} ev:{t}")
 
     if args.census:
         print("--- census (post-start) ---")
-        cref = Counter(ref.name(ref_start + t) for t in range(n_ref))
-        crt = Counter(rt.name(rt_start + t) for t in range(n_rt))
+        # Full post-start ranges even under projection (n_ref/n_rt are the
+        # compared/projected lengths; the census is the vocabulary table).
+        cref = Counter(ref.name(t) for t in range(ref_start, len(ref)))
+        crt = Counter(rt.name(t) for t in range(rt_start, len(rt)))
         print(f"{'name':40s} {'ref':>10s} {'rt':>10s}")
         for name, c in cref.most_common():
             print(f"{name:40s} {c:10d} {crt.get(name, 0):10d}")
@@ -307,7 +420,8 @@ def _write(path, lines):
 
 def _args(**kw):
     d = dict(ref_after="none", rt_after="none", window=0, locate=0,
-             census=False, context=2)
+             census=False, context=2, drop_names=None, project=None,
+             milestones=False)
     d.update(kw)
     return argparse.Namespace(**d)
 
@@ -424,6 +538,70 @@ def cmd_selftest():
         check("t8-short-exit0", rc == 0, f"rc={rc}")
         check("t8-short-bound", "end=rt-exhausted" in out)
 
+        # t9: --drop-names removes pump events from BOTH sides before compare.
+        # ref=[A,Pump,B] rt=[A,Pump,C]: undropped k=2, dropped k=1.
+        evr9 = [(0.001 * i, n, h) for i, (n, h) in enumerate(
+            [("RFU060", 0x3C), ("WaitSema", 0x44), ("AddDmacHandler", 0x12)])]
+        evt9 = [(0.001 * i, n, h) for i, (n, h) in enumerate(
+            [("RFU060", 0x3C), ("WaitSema", 0x44), ("CreateSema", 0x40)])]
+        p9r, p9t = f"{td}/r9.txt", f"{td}/t9.txt"
+        _write(p9r, evr9)
+        _write(p9t, evt9)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = cmd_align(_args(ref=p9r, rt=p9t, drop_names="WaitSema"))
+        out = buf.getvalue()
+        check("t9-drop-exit1", rc == 1, f"rc={rc}")
+        check("t9-drop-k1", "k=1 (projected)" in out)
+        check("t9-drop-table", "WaitSema ref=1 rt=1" in out)
+        check("t9-drop-projcounts", "ref_proj=2 rt_proj=2" in out)
+
+        # t10: --project shared applies the 15-name preset.
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = cmd_align(_args(ref=p9r, rt=p9t, project="shared"))
+        out = buf.getvalue()
+        check("t10-shared-exit1", rc == 1, f"rc={rc}")
+        check("t10-shared-k1", "k=1 (projected)" in out)
+        check("t10-shared-table", "project=shared drops=15" in out
+              and "GetThreadId ref=0 rt=0" in out)
+
+        # t11: unknown drop-name -> matched=0 row, exit unaffected.
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = cmd_align(_args(ref=p9r, rt=p9t, drop_names="NoSuchCall"))
+        out = buf.getvalue()
+        check("t11-unknown-exit1", rc == 1, f"rc={rc}")
+        check("t11-unknown-k2", "k=2 (projected)" in out)
+        check("t11-unknown-row", "NoSuchCall ref=0 rt=0" in out)
+
+        # t12: --milestones prints stamped rare-vocabulary sequences, both sides.
+        # Census stays full post-start under projection (regression: it once
+        # counted only the first len(projected) post-start events).
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = cmd_align(_args(ref=p9r, rt=p9t, project="shared",
+                                 milestones=True, census=True))
+        out = buf.getvalue()
+        check("t12-mile-exit1", rc == 1, f"rc={rc}")
+        check("t12-mile-ref", "--- milestones ref (2 events) ---" in out
+              and "AddDmacHandler (12)" in out)
+        check("t12-mile-rt", "--- milestones rt (2 events) ---" in out
+              and "CreateSema (40)" in out)
+        check("t12-mile-stamps", "0.0000" in out and "0.0020" in out)
+        check("t12-mile-pumpgone", "WaitSema (44)" not in out.split("--- milestones")[1])
+        check("t12-mile-censusfull", "AddDmacHandler" in out.split("--- census")[1]
+              and "CreateSema" in out.split("--- census")[1])
+
+        # t13: unknown --project preset -> exit 2, no anchor table.
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = cmd_align(_args(ref=p9r, rt=p9t, project="bogus"))
+        out = buf.getvalue()
+        check("t13-badproject-exit2", rc == 2, f"rc={rc}")
+        check("t13-badproject-msg", "unknown preset 'bogus'" in out
+              and "USAGE-ERROR" in out)
+
     print(f"selftest: {'ALL PASS' if not fails else 'FAILURES: ' + ','.join(fails)}")
     return 0 if not fails else 2
 
@@ -441,6 +619,14 @@ def main(argv=None):
                     help="locate rt's opening K-shingle in ref (0=off)")
     ap.add_argument("--census", action="store_true", help="print post-start per-name census")
     ap.add_argument("--context", type=int, default=5, help="divergence context events")
+    ap.add_argument("--drop-names", default=None, metavar="N,...",
+                    help="drop exact-name events from both sides (comma list; "
+                    "unknown names table matched=0, non-fatal)")
+    ap.add_argument("--project", default=None, metavar="PRESET",
+                    help="projection preset: only 'shared' (F3 S19: SIF layer, "
+                    "sema pump, GetThreadId, FlushCache, RFU005)")
+    ap.add_argument("--milestones", action="store_true",
+                    help="print stamped projected sequences, both sides")
     ap.add_argument("--format-check", nargs="+", metavar="FILE",
                     help="validate PCSX2 line shape of FILEs")
     ap.add_argument("--selftest", action="store_true", help="run synthetic self-tests")

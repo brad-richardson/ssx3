@@ -1,0 +1,134 @@
+[0/2] Re-checking globbed directories...
+-- GLOB mismatch!
+The following files were removed:
+  -/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/Syscalls/._Dispatcher.cpp
+  -/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/Syscalls/._TraceChannel.cpp
+[1/2] Re-running CMake...
+-- ARM target detected, fetching sse2neon
+-- macOS ARM64 - using default compiler flags
+CMake Warning (deprecated) at /tmp/p1-link/runtime/_deps/toml11-src/CMakeLists.txt:25 (cmake_policy):
+  The OLD behavior for policy CMP0127 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- {fmt} version: 12.1.0
+-- Build type: Release
+-- Building dwarfgen    ... OFF
+-- Building dwarfexample... OFF
+-- Building api tests   ... 
+-- HAVE_UINTPTR_T 1: uintptr_t defined in stdint.h... YES
+-- uintptr_t value considered NO 
+-- HAVE_INTPTR_T 1: intptr_t defined in stdint.h... YES
+-- intptr_t value considered NO 
+-- ENABLE_DECOMPRESSION : ON
+-- Found libzstd           : TRUE
+-- Found zlib              : TRUE
+-- Build with zlib and zstd: TRUE
+-- CMAKE_SIZEOF_VOID_P ... : 8
+-- Compiler warning options... NO
+-- Install prefix ... /usr/local
+> Enabling optimization for: ps2_recomp_lib
+> Enabling optimization for: ps2_recomp
+-- sccache not found; continuing without compiler launcher
+-- Populating raylib
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/p1-link/runtime/_deps/raylib-subbuild
+[0/7] Performing update step for 'raylib-populate'
+-- Already at requested tag: 5.5
+[1/7] No patch step for 'raylib-populate'
+[3/7] No configure step for 'raylib-populate'
+[4/7] No build step for 'raylib-populate'
+[5/7] No install step for 'raylib-populate'
+[6/7] No test step for 'raylib-populate'
+[7/7] Completed 'raylib-populate'
+CMake Warning (deprecated) at /tmp/p1-link/runtime/_deps/raylib-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Testing if -Werror=pointer-arith can be used -- compiles
+-- Testing if -Werror=implicit-function-declaration can be used -- compiles
+-- Testing if -fno-strict-aliasing can be used -- compiles
+-- Using raylib's GLFW
+-- Including Cocoa support
+CMake Warning (author) at /tmp/p1-link/runtime/_deps/raylib-src/cmake/LibraryConfigurations.cmake:22 (MESSAGE):
+  OpenGL is deprecated starting with macOS 10.14 (Mojave)!
+Call Stack (most recent call first):
+  /tmp/p1-link/runtime/_deps/raylib-src/src/CMakeLists.txt:49 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated build type: Release
+-- Compiling with the flags:
+--   PLATFORM=PLATFORM_DESKTOP
+--   GRAPHICS=GRAPHICS_API_OPENGL_33
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui) is deprecated, call
+  FetchContent_MakeAvailable(imgui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(imgui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:122 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating imgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/p1-link/runtime/_deps/imgui-subbuild
+[0/7] Performing update step for 'imgui-populate'
+-- Already at requested tag: v1.92.7-docking
+[1/7] No patch step for 'imgui-populate'
+[3/7] No configure step for 'imgui-populate'
+[4/7] No build step for 'imgui-populate'
+[5/7] No install step for 'imgui-populate'
+[6/7] No test step for 'imgui-populate'
+[7/7] Completed 'imgui-populate'
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(rlImGui) is deprecated, call
+  FetchContent_MakeAvailable(rlImGui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(rlImGui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:145 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating rlimgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/p1-link/runtime/_deps/rlimgui-subbuild
+[0/7] Performing update step for 'rlimgui-populate'
+-- Already at requested tag: Raylib_5_5
+[1/7] No patch step for 'rlimgui-populate'
+[3/7] No configure step for 'rlimgui-populate'
+[4/7] No build step for 'rlimgui-populate'
+[5/7] No install step for 'rlimgui-populate'
+[6/7] No test step for 'rlimgui-populate'
+[7/7] Completed 'rlimgui-populate'
+> Enabling optimization for: ps2_runtime
+> Enabling optimization for: ps2EntryRunner
+-- Using the multi-header code from /tmp/p1-link/runtime/_deps/nlohmann_json-src/include/
+> Enabling optimization for: ps2_analyzer_lib
+> Enabling optimization for: ps2_analyzer
+> Enabling optimization for: ps2_test_lib
+> Enabling optimization for: ps2x_tests
+-- Configuring done (3.2s)
+-- Generating done (1.9s)
+-- Build files have been written to: /tmp/p1-link/runtime
+[0/4] Re-checking globbed directories...
+[1/5] Linking CXX static library ps2xRuntime/libps2_runtime.a
+[2/5] Linking CXX executable ps2xRuntime/ps2EntryRunner
