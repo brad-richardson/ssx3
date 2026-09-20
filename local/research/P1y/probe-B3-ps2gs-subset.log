@@ -1,0 +1,114 @@
+
+[Suite]: CodeGenerator
+
+[Suite]: ElfAnalyzerHeuristics
+
+[Suite]: PS2GS
+[33m  [Run]: [0mCT32 raster writes alias cleanly into later CT32 texture sampling [32m  [Passed][0m
+[33m  [Run]: [0mFBA forces the framebuffer alpha high bit on CT32 writes [32m  [Passed][0m
+[33m  [Run]: [0mFST sprite 1:1 CT32 copies preserve source texels at the right and bottom edges [32m  [Passed][0m
+[33m  [Run]: [0mGIF IMAGE packet writes host-to-local data into GS VRAM [32m  [Passed][0m
+[33m  [Run]: [0mGIF PACKED A+D writes DISPFB1 and DISPLAY1 privileged registers [32m  [Passed][0m
+[33m  [Run]: [0mGIF PACKED A+D writes DISPFB2 and DISPLAY2 privileged registers [32m  [Passed][0m
+[33m  [Run]: [0mGIF REGLIST NREG=0 is treated as sixteen descriptors [32m  [Passed][0m
+[33m  [Run]: [0mGIF REGLIST with odd register count consumes 128-bit padding before next tag [32m  [Passed][0m
+[33m  [Run]: [0mGIF load-image packet uses native upload fast path [32m  [Passed][0m
+[33m  [Run]: [0mGS CLAMP modes transform texture coordinates before sampling [32m  [Passed][0m
+[33m  [Run]: [0mGS CSR/IMR support coherent 64-bit and 32-bit access [32m  [Passed][0m
+[33m  [Run]: [0mGS CT24 host-local-host transfer preserves 24-bit RGB payload [32m  [Passed][0m
+[33m  [Run]: [0mGS CT32 upload aliases cleanly into later PSMT8 sampling [32m  [Passed][0m
+[33m  [Run]: [0mGS DATE and DATM inspect the framebuffer-format alpha bit [32m  [Passed][0m
+[33m  [Run]: [0mGS HIGHLIGHT adds vertex alpha into RGB and texture alpha into A [32m  [Passed][0m
+[33m  [Run]: [0mGS HIGHLIGHT2 keeps texture alpha while adding vertex alpha into RGB [32m  [Passed][0m
+[33m  [Run]: [0mGS PSMT4 host-local upload keeps position across split IMAGE packets [32m  [Passed][0m
+[33m  [Run]: [0mGS PSMT4 host-local-host keeps nibble packing stable [32m  [Passed][0m
+[33m  [Run]: [0mGS PSMT4 local-local copy respects swizzled page layout [32m  [Passed][0m
+[33m  [Run]: [0mGS RGB_ONLY falls back to FB_ONLY outside CT32 [32m  [Passed][0m
+[33m  [Run]: [0mGS SIGNAL and FINISH set CSR bits that clear by CSR write-one acknowledge [32m  [Passed][0m
+[33m  [Run]: [0mGS STQ triangle interpolation divides homogeneous coordinates after DDA [32m  [Passed][0m
+[33m  [Run]: [0mGS T4 CSM1 lookup matches Veronica ClutCopy layout [32m  [Passed][0m
+[33m  [Run]: [0mGS T4 CSM1 preserves CSA bit 4 for CT16 CLUTs [32m  [Passed][0m
+[33m  [Run]: [0mGS T4 triangle sampling reads manual-layout texels from a 512x512 atlas [32m  [Passed][0m
+[33m  [Run]: [0mGS T4HL upload deactivates the transfer at total_pixels and discards excess bytes [32m  [Passed][0m
+[33m  [Run]: [0mGS T4HL/T4HH sampling reads only its own plane through independent CLUTs [32m  [Passed][0m
+[33m  [Run]: [0mGS T4HL/T4HH shared-plane upload preserves both index planes via RMW [32m  [Passed][0m
+[33m  [Run]: [0mGS T8 CSM1 applies CSA and masks CSA bit 4 for CT32 CLUTs [32m  [Passed][0m
+[33m  [Run]: [0mGS T8 CT32-uploaded CSM1 CLUT follows swizzled palette layout [32m  [Passed][0m
+[33m  [Run]: [0mGS TCC=0 MODULATE uses texture RGB and keeps vertex alpha [32m  [Passed][0m
+[33m  [Run]: [0mGS TEX0 dimensions saturate at 1024 pixels [32m  [Passed][0m
+[33m  [Run]: [0mGS TEX1 linear filter blends T4 STQ triangle samples [32m  [Passed][0m
+[33m  [Run]: [0mGS TEX2 updates CLUT state independently from TEX0 [32m  [Passed][0m
+[33m  [Run]: [0mGS TEXA expands CT24 alpha and honors AEM for black texels [32m  [Passed][0m
+[33m  [Run]: [0mGS TEXCLUT offsets T8 CLUT fetch coordinates [32m  [Passed][0m
+[33m  [Run]: [0mGS ZMSK suppresses depth without suppressing framebuffer writes [32m  [Passed][0m
+[33m  [Run]: [0mGS alpha-test AFAIL independently masks framebuffer and depth [32m  [Passed][0m
+[33m  [Run]: [0mGS backend replacement preserves canonical local memory [32m  [Passed][0m
+[33m  [Run]: [0mGS fog blends the shaded color toward FOGCOL before framebuffer blending [32m  [Passed][0m
+[33m  [Run]: [0mGS local-to-host transfer supports partial incremental reads [32m  [Passed][0m
+[33m  [Run]: [0mGS triangle fan subpixel quad fills rows without interior holes [32m  [Passed][0m
+[33m  [Run]: [0mGS writeIORegister increments GS write counter [32m  [Passed][0m
+[33m  [Run]: [0mGsPutIMR and GsGetIMR roundtrip old and new values PS2 GsPutIMR:  new=0x3689367578881368610 a0_64=0x3689367578881368610 a0_32=0x286335522 a1_32=0x0 pc=0x0 ra=0x0
+PS2 GsGetIMR: Returning IMR=0x3333444411112222 pc=0x0 ra=0x0
+[32m  [Passed][0m
+[33m  [Run]: [0mGsSetCrt updates SMODE2 for host presentation mode PS2 GsSetCrt: interlaced=1, videoMode=0, frameMode=0
+[32m  [Passed][0m
+[33m  [Run]: [0mPABE bypasses alpha blend for low-alpha source pixels [32m  [Passed][0m
+[33m  [Run]: [0mPRMODE supplies primitive attributes while PRMODECONT AC is clear [32m  [Passed][0m
+[33m  [Run]: [0mPSMT4 address mapping matches GS manual layout [32m  [Passed][0m
+[33m  [Run]: [0mPSMT4 large atlases keep manual page layout across 512x512 textures [32m  [Passed][0m
+[33m  [Run]: [0mPSMT8 address mapping matches Veronica Conv8to32 layout [32m  [Passed][0m
+[33m  [Run]: [0mXYZ3 culls a triangle strip primitive without desynchronizing the vertex queue [32m  [Passed][0m
+[33m  [Run]: [0mclearFramebufferContext clears the requested context even if another context is active [32m  [Passed][0m
+[33m  [Run]: [0mfullscreen display copy tracks the preferred presentation source frame [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation frame is returned tightly packed for narrower display widths [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation frame stays stable until the next latch [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation line-doubles interlaced field output [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation merges both enabled PMODE circuits [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation normalizes alpha for single-circuit display [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation preserves 480-line display height [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation reads direct CT32 display frames with GS swizzle [32m  [Passed][0m
+[33m  [Run]: [0mlatched host presentation reads preferred CT32 source with GS swizzle [32m  [Passed][0m
+[33m  [Run]: [0mreserved PSM 0x3F uses null VRAM handlers [32m  [Passed][0m
+[33m  [Run]: [0msceGifPkRefLoadImage seeds A+D GIFtag nloop once (no double-count) [32m  [Passed][0m
+[33m  [Run]: [0msceGsExecLoadImage and sceGsExecStoreImage roundtrip and free guest packets [32m  [Passed][0m
+[33m  [Run]: [0msceGsResetGraph frees its temporary GIF packet [32m  [Passed][0m
+[33m  [Run]: [0msceGsSetDefDBuffDc accepts trailing args from the recompiler register ABI [32m  [Passed][0m
+[33m  [Run]: [0msceGsSetDefDBuffDc seeds a clear packet and swap clears the draw buffer [32m  [Passed][0m
+[33m  [Run]: [0msceGsSetDefDBuffDc seeds display envs and swap applies the selected page [32m  [Passed][0m
+[33m  [Run]: [0msceGsSyncV resumes through the scheduler with deterministic field parity [32m  [Passed][0m
+[p1y-probe] cbSp=0xffff0 cbGp=0x36a7f0 hits=1 tick=1 prev=0x0
+[33m  [Run]: [0msceGsSyncVCallback runs as a scheduler invocation on its callback stack [31m  [Failed][0m
+      - callback invocation should use the reserved async stack pool
+[33m  [Run]: [0munknown GS privileged offsets are no-op and read as zero [32m  [Passed][0m
+
+[Suite]: PS2IopSubsystem
+
+[Suite]: PS2Memory
+
+[Suite]: PS2Recompiler
+
+[Suite]: PS2RuntimeExpansion
+
+[Suite]: PS2RuntimeIO
+
+[Suite]: PS2RuntimeInterrupt
+
+[Suite]: PS2RuntimeKernel
+
+[Suite]: PS2SifDma
+
+[Suite]: PS2SifRpc
+
+[Suite]: PS2VU0Math
+
+[Suite]: PS2VU1
+
+[Suite]: PadInput
+
+[Suite]: R5900Decoder
+
+========================================
+Total Tests: 71
+Passed: 70
+Failed: 1
+========================================
