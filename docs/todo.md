@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps.
-- [ ] **Live panes:** m63 (done, gate read next poll → pane to RC1) · t23 (done, gate read next poll → pane to T25) · t24 (pc= boot proof + site split, P-lane lease, 4h) · a1 (G1 resolution, dynamic reads, 4h) · r1 (pc-tagged reference, bytesize, 2h, held pane).
-- [ ] **Queue:** R1 routes all (TBD by its 3 outcomes; NO A-series successor before R1) · T26 writer-watch boot (0x501420 + flag halfwords, 240 s, t24's pane next) · item-3 trampoline fix (iff R1 shows faithful path) · T25 NVM-verify + scripted path to title (t23's pane next; premise: T23 hit Settings-completed — confirm at gate read) · RC1 route criteria doc (m63's pane next; GameCube numbers now, PS2 blank) · OD1 Odin readiness (after RC1) · E3 conditional (R1-state-dependency OR writer-watch-neither) · E2b/E2c HELD · P1ae (due iff writer is SIF/RPC-delivered) · I-lane unpark (phone return) · G-lane (first game frames) · mini day-one.
+- [ ] **Live panes:** rc1 (route criteria doc, 4h) · t25 (NVM-verify + scripted path, bytesize, 6h) · t26 (writer-watch boot, P-lane lease, 4h) · r1 (pc-tagged reference, bytesize, 2h) · mf1 (MetalFX spike s1, GameCube track, 6h, new pane) · a1-pane HELD (no A-successor before R1).
+- [ ] **Queue:** R1 routes all (TBD by its 3 outcomes; NO A-series successor before R1) · item-3 trampoline fix (iff R1 shows faithful path) · OD1 Odin readiness (after RC1) · E3 conditional (R1-state-dependency OR writer-watch-neither) · E2b/E2c HELD · P1ae (due iff writer is SIF/RPC-delivered) · I8 audio-wall repro (iPad wifi confirmed; iPhone when user confirms; needs a free pane) · G-lane (first game frames) · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,85 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **A1 read (09-20) — PASS, fork at 3rd event both windows, segment has zero reads/branches:**
+      P1 opening events 1–26 reproduced (8×74+6×5b+1×5a+2×64
+      in 9–25, 26th FlushCache); P2 zeros re-derived proper
+      -E end-anchored (post/full/pre tables match A0);
+      R1 reference-entry: RFU pairs in 3 phases (generic SDK
+      shape), fork at 3rd EE event BOTH windows (CreateSema
+      vs ExecPS2#2/AddDmacHandler), SIF storm 260,722,
+      first CreateSema @405064, (6)=0 full-file; R2 source:
+      BIOS_LOG once, ExecPS2 falls through to real handler,
+      recSYSCALL skips ONLY 0x64/0x68 (verbatim — (64)=0
+      has logging read, (74)/(5b)/(5a) none); H1 HLE setup
+      (sp/heap/thread/bss, alarms/threads establish nothing,
+      21 IRX game-triggered); F1 fork table; B1 branch-hunt
+      exhaustive (9 rows: sole gate B1-2 taken + post-fork;
+      all jr plain; ei after installer); S1 zero reads on
+      RFU061→CreateSema (10 rows); V1 verdict-shapes with
+      settling experiments; G1-e scanner premise tabled
+      (survives only via missed branch or non-game-code).
+      Nits: IOP printf trailing arg 1fda6c vs 1fdbbc
+      (immaterial); audit preserved byte-exact. Verified:
+      R1 lines re-sedded exact, zero counts, recSYSCALL
+      source via ssh verbatim, P1 cross-checked via T24 pc=
+      (8/6/1/3 exact, pcs +4 consistent), 502+/225−
+      (audit move). Reference-state row: both states read.
+      ~2.5 h. Next: pane HELD (no A-successor before R1).
+      Ledger row added.
+- [x] **T24 read (09-20) — PASS, pc= boot proof closes T22 G1; site split honestly negative:**
+      ONE pc=-on boot (600 s wall BOUND, exit 241): 1,959,328
+      events, 100.0000% pc=; suffix-stripped sequence =
+      T18's full 781,372 (T18-exhausted-T24-longer);
+      ts-normalized head diff EMPTY; format-check zeros;
+      pre-boot linkage receipts in-binary (E2a G1 lesson);
+      epoch b0–119 (preamble T11-exact, 222 steady, 235
+      unreached — labeled capture window). Negative: pc= is
+      post-SYSCALL dispatch pc (wrapper+8): GetThreadId
+      726,490 ALL @0x423c98, FlushCache 36,170 ALL
+      @0x424028 — per-site split needs ra= (A0 G4 open);
+      29 names / 28 single-pc (AddIntcHandler 4+2 sole
+      multi). Rates 20.18/1.005 per VBLANK. Verified: byte
+      sizes, pc share, GetThreadId count, census sum =
+      1,959,328, prefix parity re-run EMPTY, lease removed,
+      668+/0−. Reference-state row: runtime in-phase
+      (capture boot, no exit). ~0.5 h. Next: T26
+      (writer-watch boot) in freed pane. Ledger row added.
+- [x] **T23 read (09-20) — PASS, 4th ✕ to STATIC Settings-completed park, chain reproduces:**
+      Build reused bit-identical; park-1 bit-identical (snap
+      sha full, ExecPS2/SIF/vblank lines exact, vblanks@park
+      6,100 −2 pace); presses 534.8/534.5/533.5 ms → Prefs
+      (0.10/0) + TZ (0.02/0) + DST (0.07/1) region-matched;
+      press-4 533.7 ms → NEW static Settings-completed
+      screen by +5 s, 6/6 snaps sha-identical (first static
+      screen); t23 trace 8,340,484 lines / 590 MB (EE
+      977,568/42 + IOP 5,696,960/103 + SIF 1,023,502 + cdvd
+      490,918 + ~152k other untabled — same minor); 25,325
+      vblanks; NVRAM saved marker (T25 premise); WSL 5 flaps
+      around run, full dmesg + event-log captured (zero Win
+      entries; kill-to-remount 32 s). Verified: park sha, 6
+      snaps 1 sha, SSD bytes, ExecPS2 re-grepped exact,
+      holds re-timed, 2922+/0−, no lease. ~12 min. Next:
+      T25 (NVM-verify + scripted path) in freed pane. Ledger
+      row added. Reference-state row: the trace IS the
+      reference (game reaches each park).
+- [x] **M63 read (09-20) — PASS, head pair column-local-ish, neighbor δ flipped-sign echo:**
+      4 head rows M62-exact (probe-d 1/2/4/5 verified);
+      132/132 probes, 5 with δ: m15 r323 bulk on 310/311/
+      315 (−3/+3/−1) + r324 bulk on 311 alone (+1), 0 tail;
+      s0 1 bulk (c76 r323 +1/d9) + 131 noncell; m15
+      neighbors all-neg vs c311 all-pos (|δ| 3/1 echoed
+      flipped); dec-0 on 7 cols (bulk on c311 only);
+      decspan-1 on 12 cols (verified list), 2 on 21.
+      H1–H7 ALL met. Control green, no fixes; re-run
+      269/269; PNG 511 B rule-met (active [310,315]); 0 B
+      explained, 102 stands. Minor: tail-3 receipt missing
+      (report complete). Verified: head rows, probe-d,
+      slices, echo list, decspan list, gradients, fnvs,
+      2780+/0−. Reference-state row: n/a (offline frames).
+      ~0.5 h. MICROSCOPY ENDS HERE (Part 4 dec 4). Next:
+      RC1 (route criteria doc) in freed pane. Ledger row
+      added.
 - [x] **E2a read (09-20) — PASS, first stimulus null: delivered + latched, NO response to cap:**
       Fork 282ce92 (+227 Pad.cpp): fired reads-gated @
       reads=204,356 wall=1702 s logline 2,646,552 (b338,
