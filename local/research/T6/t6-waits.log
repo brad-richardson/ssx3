@@ -1,0 +1,10 @@
+2026-09-20 02:49:00 EDT T6 start: peer check quiet. ps matched only own shell wrapper (PID 16663); literal pgrep exit 1 (no match). No wait.
+2026-09-20 02:50:36 EDT T6 pre-full-build check: quiet (ps+pgrep no match). Full build started -j4, no contention.
+2026-09-20 03:01:18 EDT T6 cell d: pre-check quiet (pgrep none). exit=0 wall=0s.
+2026-09-20 03:06:37 EDT T6 cell a: pre-check quiet (pgrep none). exit=0 wall=315s.
+2026-09-20 03:08:25 EDT T6 cell c: pre-check quiet (pgrep none). exit=0 wall=8s.
+2026-09-20 03:22:32 EDT T6 cell b: pre-check quiet (pgrep none). exit=0 wall=844s.
+2026-09-20 03:26:59 EDT T6 cell b CONTENDED (post-hoc): peer p1-link build ran 329 edges (290 unity + 39) 03:11:11-03:21:21 inside my 03:08:28-03:22:32 window. Pre-check was quiet; peer started ~3min after me. Re-running (b) in quiet window for clean sample.
+2026-09-20 03:27:11 EDT T6 WAIT: peer runner link (PID 33495, p1-link, -flto=thin) still running; deferring clean cell-(b) rerun per etiquette. Waiting.
+2026-09-20 03:31:15 EDT T6 wait over: quiet at 03:31:12 (waited ~4min for peer link). Starting clean cell-(b) rerun.
+2026-09-20 03:42:14 EDT T6 cell b2: pre-check quiet (pgrep none). exit=0 wall=658s.
