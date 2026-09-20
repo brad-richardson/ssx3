@@ -5,6 +5,48 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **T8 read (09-20) — PASS, repetition driver cased:** all
+      13,108 reps at depth 2, parent 363490-fresh, grandparent
+      376938-depth-0 (re-parse: enclosing (0,1) ×13108);
+      reps-per-frame {0: 378922, 1: 13108} exact; E1 frame
+      entry 13108/13108 (E2/E3/E4 all 0); FRR ×13108 exact
+      (body+empty, gaps 8/7, ramp variants inv 0–74);
+      resumes skip prologue (0 children, JALs #6–16);
+      checkpoint/resume mechanism cited (ps2_runtime.cpp
+      lines); site 0x377b14 JAL→363490 in straight-line
+      window; 14 loops none spanning the site; 3 self-JALs
+      trace-invisible gotos; region entry indirect-or-resume
+      only. Verified: 3 independent streaming re-parses
+      (depth/parents/distribution/FRR), ELF words + JAL/branch
+      math, TSVs, zero commits, no boots. ~35 min. Next: T10
+      (outer-driver search) launched in freed pane. Ledger
+      row added.
+- [ ] **T9 read (09-20) — PASS, D flips to OK:** fork `935a4eb`
+      (+215/-6, pushed 0/0): waiter presence SAMPLED when
+      wait-sets differ (+ `t->sema` correlation), EXACT when
+      agree, histories untouched; tests 6/6 both forms (4/6
+      BEFORE); D BEFORE exit 1 byte-identical to T5/D.txt;
+      D AFTER exit 0 (1054/245/5/0; before-after diff = 2
+      rows + ladder line only, 0 changes outside waiter
+      class); D1/D2 byte-identical old-vs-new (exit 0);
+      T5 proof closed by table. Verified: stat/push, tests
+      both forms, all diffs, D-after rerun, D1 rerun,
+      no boots, lease absent. Next: T6 (build cache check)
+      launched in freed pane. Ledger row added.
+- [ ] **M25 read (09-20) — PASS, M23 gap 2 column profiles
+      tabled:** 8 named columns single-sign throughout
+      (sign-runs 1) but ragged in value (s0 ranges 11–34,
+      sd to 11.8); holes on c296/c340/c342 both frames +
+      m15 c343 r289 (261-span); cross-frame 6/65 agree
+      (mean|Δ| 1.5–8.3); CONST best 12/65 + 13/68 (25
+      pooled), LINEAR below CONST both frames (7/4), SIGNC
+      6/8 + 24/28 near; cross-frame CONST 0/68 + 1/65
+      (collapse; one 1299 extrapolation err tabled);
+      53/55 named-col stands. Verified: baselines, counts,
+      CONST row, collapse + agreement rows, canon
+      identical, control pass, mtimes clean. No PNG
+      (absence reasoned). ~0.1 h. Next: M26 (hump profiles)
+      launched in freed pane. Ledger row added.
 - [ ] **T5 read (09-20) — PASS with asterisk (D reads DELTA, rule
       good):** fork `1a76df4` (+289/-0, pushed 0/0): folded
       `.text` constants split (ElfParser placement, N64 rule);
@@ -210,7 +252,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t8 (repetition-driver attribution, read-only, 4h) · t9 (waiter-phase verdict rule, 0 boots, 4h) · m25 (streak-column profiles, offline, 4h).
+- [ ] **Live panes:** t10 (outer-driver search, read-only, 4h) · t6 (build cache check, no boots, 4h) · m26 (hump profiles, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
