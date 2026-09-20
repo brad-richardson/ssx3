@@ -10187,4 +10187,404 @@ changes; binary built from `e483d8d` + foreign T1 tree state
 - Session wall time ≈ 05:13–05:45Z (~32 min active + analysis),
   inside the 4 h box; zero lease waits.
 
+---
+
+## Part 31 (P1ah): Hash-phase work census — progress-indicator hunt over the P1ag 300 s trace+log (no boot, no fork changes)
+
+Brief `local/muse/prompts/P1ah.md`. Census brief (ZERO fork
+changes, NO boots): mine the EXISTING P1ag receipts for
+phase-progress indicators. Tables, no verdicts. Stale-reading
+guard: Part 29 (P1af) full + Part 30 (P1ag) full — SPR fix, main
+RUNNING, 4th sema-30 signal absent at 300 s, 13,108 balanced
+`0x362DE8` invocations, stubs steady 222, phase-exit "not
+projectable — total phase work unknown".
+`W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`LOG=$W/P1/run/boot-p1ag-1.log` (475,304 lines),
+`T=$W/P1/run/ps2_log-p1ag-1.txt` (35,916,072 lines),
+P1af pair (`boot-p1af-1.log`, `ps2_log-p1af-1.txt`) for rate
+comparison. Miners are /tmp scratch (`/tmp/p1ah-*.py`, uncommitted);
+this Part is the only evidence.
+
+Headline receipts: per-invocation guest work is EXACTLY constant
+from invocation 75 to 13,106 (20× `0x394ED0` + 19× `0x395000` +
+1× `0x362CC8` + 2,534 trace lines per invocation, machine-identical
+across 12 consecutive 1,000-chunks and across the P1af/P1ag boots);
+the only shape in the phase is the ramp (inv 0–74: 2/3/2 then
+20/inv, lockstep with the probe `total→0x14` at n=162). Wall-rate
+tables are flat at 33–37 invoc/s (slices 1–3) with a uniform
+3–5× step at blocks 49–50 (~245–250 s) across handshake, dormant,
+dma, and gif counters while every guest-denominated ratio holds
+fixed (dormant/pump 2.000, 394/inv 20.00, 395/inv 19.00,
+d_gif/d_dma 0.0270, stubs 222, single caller). Probe `total`
+saturates at 0x14 by n=162 (slope 0 over the remaining 19,838
+samples); arena/records/buckets are fixed sets by n=181 with zero
+growth after. CD/SIF/GS/RPC last events all sit in blocks 0–2;
+zero new events in blocks 3–58. Examined-and-absent table + ONE
+deciding receipt (driver-loop index+bound at call site `0x36356c`)
+in §P31-6.
+
+## P31-0. Lease / rule record (no lease, no boots, no fork changes)
+
+| Item | Value |
+|---|---|
+| P-lane lease | Never touched (no boots; `/tmp/ssx3-p-lane-lease` never created/checked-for-write) |
+| Boots | 0 (read-only mining of existing receipts) |
+| Fork changes | 0 (no source edits, no fork commits, no push; fork tree never staged) |
+| `adb` | Not used |
+| Other agents' dirs / ISO | Read-only (no writes outside `local/research/P1/REPORT.md` + /tmp scratch) |
+| ssx3 files changed | `local/research/P1/REPORT.md` ONLY (this Part); commit prefix `[P1ah]`; NO push |
+
+## P31-1. Invocation-rate shape (Task 1.1)
+
+### a. Method (trace has no timestamps)
+
+| Item | Value |
+|---|---|
+| Trace line census | 35,916,072 / 35,916,072 lines end in `enter`/`exit` (0 timestamp lines) |
+| Wall grid | 59 `[diag:stubs]` blocks, `period_ms=5000` → 5 s samples, blocks 0–58 |
+| Rate proxy | Pump handshakes `29w+31w` per block interval (1 pump cycle : 1 `0x362DE8` invocation) |
+| Proxy validation | In-block invoc proxy 13,094 + pre-block-0 14 = 13,108 = trace `0x362DE8` enters exactly |
+| `0x394ED0`/`0x395000` per-slice | Derived: 20×/19× invocation counts (§P31-1d multiplier), ramp-adjusted in slice 0; totals reconcile to ±19 (1-inv boundary tolerance) |
+
+### b. Pump rate per 60 s slice (P1ag, wall-grounded)
+
+| Slice | Blocks | Wall (≈) | Pump waits (29w+31w) | Invoc proxy | Rate (/s) |
+|---|---|---|---|---|---|
+| Pre-block-0 | — | 0–~5 s | 14 | 14 | — (boot) |
+| 0 | 0–11 | 0–60 s | 2,751 | 1,375 | 22.93 |
+| 1 | 12–23 | 60–120 s | 4,448 | 2,224 | 37.07 |
+| 2 | 24–35 | 120–180 s | 4,284 | 2,142 | 35.70 |
+| 3 | 36–47 | 180–240 s | 3,963 | 1,981 | 33.02 |
+| 4 | 48–58 | 240–300 s | 10,745 | 5,372 | 89.54 |
+
+Slice 0 is depressed by the boot preamble (blocks 0–4 ramp:
+2/2/36/111/165 per 5 s; blocks 5–11: 134–165). Slices 1–3 span
+33.02–37.07/s. Slice 4 contains the blocks-49–50 step (§P31-3c)
+and the SIGTERM-truncated block 58 (355 vs 627 in block 57).
+
+### c. P1af rate comparison (same method, 17 blocks)
+
+| Slice | Blocks | Wall (≈) | Pump waits | Invoc proxy | Rate (/s) |
+|---|---|---|---|---|---|
+| P1af 0 | 0–11 | 0–60 s | 7,670 | 3,835 | 63.92 |
+| P1af 1 | 12–16 | 60–85 s | 2,846 | 1,423 | 56.92 |
+
+P1af per-block series: b0=526 (ramp), b1–b15 flat 297–303 per
+5 s, b16=221 (SIGTERM-truncated). P1af wall rate ≈ 60/s steady;
+P1ag slices 1–3 run 0.55–0.62× that, slice 4 runs 1.49× that.
+
+### d. Per-invocation work (trace, exact — the projection-relevant shape)
+
+Per-1,000-invocation chunks of `0x362DE8` (P1ag; chunk k covers
+the trace interval of invocations 1000k…1000k+999 ±1 boundary):
+
+| Chunk (inv) | 394ED0 | 395000 | 362CC8 | Trace lines | 394/inv | 395/inv |
+|---|---|---|---|---|---|---|
+| 0–999 | 18,642 | 17,643 | 1,000 | 5,234,034 | 18.64 | 17.64 |
+| 1000–1999 … 12000–12999 (×12) | 20,000 each | 19,000 each | 1,000 each | 2,534,000 each | 20.00 | 19.00 |
+| 13000–13107 (108 + in-flight) | 2,180 | 2,071 | 108 | 274,038 | 20.19 | 19.18 |
+
+The 12 middle chunks are machine-identical (including chunks
+8000–12999, which fall in the wall-rate surge window). Tail
++20/+19 = the SIGTERM-interrupted invocation #13108, which
+completed its 39 hash calls (tail-verified: 20×/19× enters in the
+365 post-enter lines) before the process died mid-frame. P1af
+chunks are identical: chunk 0 = 18642/17643/1000/5234034
+(bit-exact), chunks 1–4 = 20000/19000/1000/2534000, tail
+5800/5510/290 (+20/+19 same structure).
+
+### e. Ramp fine profile (first 120 invocations, enter-line join)
+
+| Invocations | 394ED0/inv | 395000/inv |
+|---|---|---|
+| 0–51 | 2 | 1 |
+| 52–63 | 3 | 2 |
+| 64–74 | 2 | 1 |
+| 75–13106 | 20 | 19 |
+
+Ramp arithmetic: 52×2+12×3+11×2 = 162 `0x394ED0` calls in inv
+0–74 → probe n=162 (`total→0x14`, §P31-4) is the first call of
+invocation 75, the first steady-state invocation. Slice-0 ramp
+adjustment: 75×20−162 = 1,338 (394); 75×19−87 = 1,338 (395).
+
+### f. Derived 394ED0/395000 per-60 s slice (20×/19× §P31-1b)
+
+| Slice | Invoc | 394ED0 (derived) | 395000 (derived) |
+|---|---|---|---|
+| Pre-block-0 | 14 | 280 | 266 |
+| 0 | 1,375 | 26,162 | 24,787 |
+| 1 | 2,224 | 44,480 | 42,256 |
+| 2 | 2,142 | 42,840 | 40,698 |
+| 3 | 1,981 | 39,620 | 37,658 |
+| 4 | 5,372 | 107,440 | 102,068 |
+| Sum vs trace | 13,108 | 260,822 / 260,822 (exact) | 247,733 / 247,714 (−19 tol.) |
+
+### g. Enters per trace-tenth (POSITION proxy — explicitly not wall time)
+
+| Tenth | 362DE8 | 394ED0 | 395000 | 362CC8 |
+|---|---|---|---|---|
+| 0 | 351 | 5,682 | 5,331 | 352 |
+| 1–9 (each) | 1417–1418 | 28340–28360 | 26923–26942 | 1417–1418 |
+
+Tenth 0 holds the boot preamble (first `0x362DE8` enter at trace
+line 19,385); tenths 1–9 are flat to ±20 (±0.07%), mirroring §P31-1d.
+
+## P31-2. Caller confirmation at 300 s scale (Task 1.2)
+
+Indent-stack parent census over the full 35,916,072-line trace
+(single streaming pass; every `0x362DE8` enter attributed):
+
+| Caller (parent frame) | P1ag enters | P1af enters |
+|---|---|---|
+| `sub_00363490_0x363490` (call site `0x36356c` = +0xdc, per P1af ticks) | 13,108 / 13,108 | 5,289 / 5,289 |
+| Any other caller | 0 | 0 |
+
+New phase edges via new callers: none tabled (zero sightings).
+
+## P31-3. Counter slopes (Task 1.3)
+
+### a. dma/gif tick deltas (37 ticks; tick→block mapped)
+
+| Tick | Block | pc | d_dma | d_gif | d_gif/d_dma |
+|---|---|---|---|---|---|
+| 120 | 0 | `0x3230c0` | 259 | 16 | — (boot) |
+| 240 | 2 | `0x3827e0` | 701 | 40 | 0.05706 |
+| 360 | 4 | `0x1d8efc` | 7,206 | 207 | 0.02873 |
+| 480 | 5 | `0x3172e0` | 7,178 | 194 | 0.02703 |
+| 600–960 (×4) | 7–11 | driver pcs | 8,066–9,171 | 218–247 | 0.02693–0.02711 |
+| 1080–1560 (×5) | 13–19 | driver pcs | 9,731–10,845 | 263–293 | 0.02695–0.02711 |
+| 1680–2400 (×7) | 20–29 | driver pcs | 9,514–10,399 | 258–281 | 0.02694–0.02713 |
+| 2520–3000 (×5) | 31–37 | driver pcs | 9,547–10,179 | 259–275 | 0.02693–0.02713 |
+| 3120–3600 (×5) | 38–44 | driver pcs | 8,362–9,134 | 226–246 | 0.02693–0.02713 |
+| 3720–3960 (×3) | 46–49 | driver pcs | 8,771–9,502 | 237–256 | 0.02694–0.02703 |
+| 4080 | 50 | `0x382650` | 14,948 | 404 | 0.02703 |
+| 4200 | 52 | `0x3172e0` | 47,032 | 1,272 | 0.02705 |
+| 4320 | 54 | `0x3825c0` | 47,618 | 1,286 | 0.02701 |
+| 4440 | 57 | `0x3a0714` | 54,474 | 1,473 | 0.02704 |
+
+Full per-tick (dma, gif) series in §P31-7 miner output (kept in
+/tmp scratch, reproducible). d_dma shape: ramp (259→7.2k), flat
+8.1k–10.8k over ticks 360–3960 with a shallow dip at ticks
+3120–3600 (8.4k–9.1k, blocks 38–44 — same window as the handshake
+dip in §P31-3d), transitional 14,948 at tick 4080, 47k–54k at
+ticks 4200–4440. d_gif/d_dma holds 0.0270 ± 0.0002 across all 35
+steady ticks including the surge ticks. P1af comparison deltas:
+22,188 / 23,495 / 25,376 / 25,462 / 25,116 / 24,982 / 24,786
+(dma), 635–688 (gif), ratio 0.0273 overall — flat, no step.
+
+### b. Dormant-count slope (dormant per 60 s slice)
+
+| Slice | 29w | Dormant | Dormant/29w |
+|---|---|---|---|
+| P1ag pre-block-0 | — | — | — |
+| P1ag 0 | 1,375 | 2,704 | 1.9665 (blocks 0–1 pre-pump: 0 dormant) |
+| P1ag 1 | 2,224 | 4,448 | 2.0000 |
+| P1ag 2 | 2,142 | 4,284 | 2.0000 |
+| P1ag 3 | 1,982 | 3,962 | 1.9990 |
+| P1ag 4 | 5,372 | 10,746 | 2.0004 |
+| P1af 0 | 3,835 | 8,067 | 2.1035 |
+| P1af 1 | 1,423 | 3,028 | 2.1279 |
+
+Per-block, P1ag dormant = 2×29w in 55/59 blocks (±1 in-flight in
+blocks 37/40/47/48/54/55). Within-boot slope: flat 2.000 across
+all slices including the surge slice.
+
+### c. Slope break at blocks 49–50 (candidate tabled with evidence)
+
+| Counter | Blocks 45–48 (/5 s or /tick) | Block 49 | Blocks 50–57 | Step |
+|---|---|---|---|---|
+| 29w per 5 s | 163–178 | 211 | 452–630 | ~3.4× |
+| Dormant per 5 s | 324–356 | 422 | 904–1,260 | ~3.4× |
+| d_dma per tick | 8,771–9,502 | (tick 3960 in blk 49) | 14,948 → 47,032–54,474 | ~5.1× |
+| d_gif per tick | 237–256 | (237) | 404 → 1,272–1,473 | ~5.0× |
+
+Onset evidence: handshake transitional at block 49 (211 vs
+~170 baseline), full step at block 50 (452); dma transitional at
+tick 4080 (block 50; 14,948 vs ~9.5k baseline), full step at tick
+4200 (block 52; 47,032).
+
+### d. Uniform-scaling check across the break (wall rates vs guest ratios)
+
+| Quantity | Kind | Pre-break (slices 1–3) | Post-break (slice 4) | Factor |
+|---|---|---|---|---|
+| Handshake / 5 s | wall rate | ~170–190 | ~560–630 | ~3.4× |
+| Dormant / 5 s | wall rate | ~340–380 | ~1,120–1,260 | ~3.4× |
+| d_dma / tick | wall rate | ~8.5k–10.8k | ~47k–54k | ~5.1× |
+| d_gif / tick | wall rate | ~230–290 | ~1,270–1,470 | ~5.0× |
+| Dormant / pump | guest ratio | 2.000 | 2.000 | 1.00× |
+| 394ED0 / invoc | guest ratio | 20.00 | 20.00 | 1.00× |
+| 395000 / invoc | guest ratio | 19.00 | 19.00 | 1.00× |
+| Trace lines / invoc | guest ratio | 2,534 | 2,534 | 1.00× |
+| d_gif / d_dma | guest ratio | 0.0270 | 0.0270 | 1.00× |
+| Stub distinct | guest state | 222 | 222 | same |
+| `0x362DE8` caller set | guest state | {`0x363490`} | {`0x363490`} | same |
+| Sema-30 shape | guest state | parked (4w/3s) | parked (4w/3s) | same |
+
+Mid dip (blocks 38–44 handshake ~159–163/5 s; ticks 3240–3600
+d_dma 8.4k–9.1k): correlated across handshake + dma + gif with
+ratios fixed — same uniform-scaling signature at smaller amplitude.
+
+## P31-4. Early-phase probe trend (Task 1.4, capped 20k window)
+
+Probe cap hit at LOG :62604 (block-10 interval, ~50–55 s wall);
+n=0..19999 covers `0x394ED0` calls 0–19999 ≈ invocations 0–~1067.
+
+### a. total-vs-n (change points + fit + residuals)
+
+| n range | total | Note |
+|---|---|---|
+| 0–103 | 0x2 | — |
+| 104–139 | 0x3 | — |
+| 140–161 | 0x2 | dip-back; coincides with new a1s `0x70001c00`@140, `0x70001c80`@141 |
+| 162–19999 | 0x14 (=20) | saturated; n=162 = first call of invocation 75 (§P31-1e) |
+
+Fit: total(n) = 2 (n<104), 3 (104≤n<140), 2 (140≤n<162), 20
+(n≥162). Residuals: 0 mismatches over 19,996 parsed probe lines
+(4 lines unparseable interleave truncations; 1 additional
+truncated `total=0x` empty field at n=934 excluded as artifact —
+same class as §P29-2a). P1af change points identical (104/140/162).
+
+### b. Arena / record / bucket / key growth
+
+| Field | Distinct | First-sighting span | Growth after |
+|---|---|---|---|
+| a0 (arena) | 1 (`0x8095f0`) | n=0 | zero |
+| a1 (record addr) | 23 (`0x70000000`–`0x70002580`) | all first-seen by n=181 | zero (20/chunk cycling, §P29-2a pattern) |
+| a2 (bucket) | 5 (`0x26/0x34/0x9d/0xb0/0xd0`) | all first-seen by n=162 | zero |
+| key | 1 (`[WILD WILD WILD WILD]`, 19,998 + 2 truncated) | n=0 | zero (no key information emitted) |
+| chain | 2 (`[ NULL]`×3136, `[0x85aabc NULL]`×16862, +2 truncated) | — | — |
+| pool | 3 values {3:1067, 4:17926, 5:1003} | — | cycling, no trend |
+
+P1af values identical modulo truncation counts (pool {4:17926,
+3:1066, 5:1003}; head `0x0`×3135 both boots).
+
+### c. Extrapolation rows (fit only, no bare projection)
+
+| Item | Value |
+|---|---|
+| Steady fit (n≥162) | total = 20, slope 0 over 19,838 samples |
+| Residual distribution | all zero (exact constant) |
+| Finite-n completion event expressible by the fit | none (constant has no intercept) |
+| Records/buckets/arena trend slope past n=181 | 0 (fixed sets, cycling) |
+
+## P31-5. CD/SIF/GS silence audit (Task 1.5)
+
+P1af-window end in the P1ag log: block 17 @ :112019 (≈90 s).
+All last events sit at lines ≤7,369 (blocks 0–2).
+
+| Source | n (P1ag) | n (P1af) | First line | Last line | Last block (≈wall) | First new past P1af window (:112019+, blks 18–58) |
+|---|---|---|---|---|---|---|
+| CD `lbn=` (`0x10`→`0x4311f`) | 810 | 810 | 106 | 7,319 | 2 (~10–15 s) | none |
+| SIF module loads (id 1–21) | 21 | 21 | 75 | 1,055 | 0 (~0–5 s) | none |
+| GS kicks | 96 | 96 | 304 | 2,778 | 1 (~5–10 s) | none |
+| RPC `trace:unhandled` (:711, :1056, :1062, :5315) | 4 | 4 | 711 | 5,315 | 2 (~10–15 s) | none |
+| `SendCmd` (`cid=0x80000001`) | 1 | 1 | 1,052 | 1,052 | 0 | none |
+| Sema-30 events (shape 4w/3s, §P30-2b) | 7 | 7 | 643 | 7,369 | 2 | none |
+
+Event sets identical to P1af (§P30-3d); P1af last lines differ
+only by pump-volume shift (CD 7,177; RPC 4th @ 5,143; sema-30
+last @ 7,227). Zero new CD/SIF/RPC/GS work past block 2, and
+zero past the P1af window.
+
+## P31-6. Projection-or-receipt + 600 s table (Task 2)
+
+### a. Examined-and-absent list (indicator, where looked, reading)
+
+| # | Indicator | Where looked | Reading |
+|---|---|---|---|
+| 1 | Invocation wall rate | Handshake proxy per 60 s (§P31-1b) | flat 33–37/s slices 1–3; slice-4 step scales uniformly (§P31-3d) |
+| 2 | Per-invocation work | Trace 1,000-chunks (§P31-1d) | exactly 20/19/1/2534, inv 75–13106 |
+| 3 | Work-list shrinkage | 394/395 per-inv ramp (§P31-1e) | ramp ends inv 75; zero slope after |
+| 4 | Caller set | Full-trace indent census (§P31-2) | single caller, 0 new |
+| 5 | dma/gif slopes | 37-tick deltas (§P31-3a) | flat + uniform 5× step; ratio 0.0270 fixed |
+| 6 | Dormant slope | Per-slice dormant/29w (§P31-3b) | 2.000 flat all slices |
+| 7 | 29/31 handshake slope | Per-block w/s (§P31-1b/3c) | balanced every block; same series as #1 |
+| 8 | Table fill (`total`) | Probe n=0..19999 (§P31-4a) | saturates n=162, slope 0 after |
+| 9 | Arena growth (a0) | Probe (§P31-4b) | 1 value, zero growth |
+| 10 | Record/bucket growth (a1/a2/keys) | Probe (§P31-4b) | fixed sets by n=181; keys always WILD |
+| 11 | CD/SIF/GS/RPC resumption | Silence audit (§P31-5) | silent since ≤block 2 |
+| 12 | Stub-phase change / sema-30 release | P30 (carried) | 222 ×54 blocks; 4th signal absent |
+
+### b. ONE minimal deciding receipt (no progress indicator exists above)
+
+| Item | Value |
+|---|---|
+| Receipt | Driver-loop position + bound `(i, N)` for the loop issuing the `0x362DE8` invocations via call site `0x36356c` (`sub_00363490+0xdc`), sampled per invocation (or per 5 s block) |
+| Trend it would show | `i/N` → completion fraction; `N−i` → remaining invocations; constant-work rate (§P31-1b) converts remainder to wall time |
+| Why this one | Every cheaper candidate is flat/silent per §P31-6a; the loop bound is the only unobserved quantity in the projection equation `t_exit = (N−i) / rate` |
+| Owner | T1's snapshot emitter (owns in-tree periodic capture); fallback a P1ad-style probe brief if the emitter cannot read guest regs — named, not built |
+
+### c. First-post-phase-event signatures (for the next boot brief to check)
+
+| Signal | Trace/log signature that would mark phase exit |
+|---|---|
+| Sema-30 signal #4 | 8th `id=30` line: `op=signal`, `waiters 1→0`, `target=3` (shape of §P30-2b row 4/6) |
+| Per-invocation break | Any 1,000-chunk ≠ 20000/19000/1000/2534000, or any inv ≠ 20/19 (§P31-1d baseline) |
+| New caller | Any `0x362DE8` enter whose indent parent ≠ `sub_00363490` (§P31-2 baseline: 0) |
+| Stub-phase change | Any `[diag:stubs]` block with distinct ≠ 222 after block 5 (§P30-3c baseline) |
+| IO resumption | Any `lbn=`/SIF-load/GS-kick/RPC-unhandled past the §P31-5 last lines |
+
+### d. 600 s boot cost table (no verdict)
+
+| Item | Value |
+|---|---|
+| Lease cost | ~10 min P-lane lease + T1 contention (per brief) |
+| Value if the phase exits inside 600 s | 4th sema-30 signal + thread-3 release captured; exit invocation index recorded (gives `N` empirically); §P31-6c signatures confirmed against baselines |
+| Value if the phase continues past 600 s | Rate/work tables extended to 600 s at ~33–90/s wall rate (≈ +10k–30k invocations); per-invocation constancy re-tested over ~2× samples; still no `N` without the §P31-6b receipt |
+| What 600 s cannot supply | The driver-loop bound `N` (no existing emitter records it); probe bodies past n=19999 (cap) |
+
+## P31-7. Exact commands
+
+From `/Users/bradrichardson/dev/ssx3` unless noted; `W`,
+`LOG`, `T` as above. All receipt accesses read-only (grep/sed/
+python reads; `head`/`tail`/`wc`); no lease, no boots, no builds:
+
+```
+# Format recon (lease-free; receipts read-only)
+ls -lh LOG T + P1af pair; head -c 2000 T; sed -n '18000000,18000005p' T
+head -30 LOG; grep -n "run:tick" LOG | head -5
+grep -vc -e "enter$" -e "exit$" T  (0: trace is 100% enter/exit)
+grep -c "sub_00362DE8_0x362de8 enter" T  (13108)
+grep -c "diag:stubs/threads/syscalls" LOG (59/59/59); block line spans
+# Miners (written to /tmp, uncommitted; two IndexError fixes on group refs)
+write /tmp/p1ah-log.py (blocks/ticks/sema/dormant/probe/CD miner)
+python3 /tmp/p1ah-log.py LOG > /tmp/p1ah-p1ag-log.txt
+python3 /tmp/p1ah-log.py boot-p1af-1.log > /tmp/p1ah-p1af-log.txt
+wc -l T + P1af trace (35916072 / 16103012)
+write /tmp/p1ah-trace.py (single-pass caller census + chunks + tenths + balance)
+python3 /tmp/p1ah-trace.py T 35916072 > /tmp/p1ah-p1ag-trace.txt
+python3 /tmp/p1ah-trace.py ps2_log-p1af-1.txt 16103012 > /tmp/p1ah-p1af-trace.txt
+# Ramp + tail forensics (read-only)
+grep -n 362DE8/394ED0/395000 enters T | cut -d: -f1 > /tmp/p1ah-{362,394,395}-lines.txt
+per-inv join (bisect) for inv 0-1099 (394) and 0-119 (395)
+sed -n '35915707,35916072p' T tail forensics (in-flight invocation #13108)
+# Final tables
+write /tmp/p1ah-final.py (60 s slices, tick deltas, probe deep-dive, silence audit)
+python3 /tmp/p1ah-final.py LOG > /tmp/p1ah-p1ag-final.txt
+python3 /tmp/p1ah-final.py boot-p1af-1.log > /tmp/p1ah-p1af-final.txt
+grep probe total change points + key/chain shapes; gif/dma ratio check
+/tmp/p1ah-ratio.py (dormant/29w per slice)
+# Report (this Part)
+(edit_file append Part 31 in 3 chunks)
+git add -f local/research/P1/REPORT.md
+git commit -m "[P1ah] ..." (trailer Orchestrated-By: Muse Code; NO push)
+```
+
+## P31-8. What I could not do (gap rows)
+
+- Project a phase-exit time: no progress indicator exists in the
+  receipts (§P31-6a all flat/silent); the deciding receipt is
+  specified, not built (§P31-6b).
+- Time-resolve individual invocations inside a 5 s block: the
+  trace carries no timestamps, so per-slice 394/395 counts are
+  derived via the exact 20/19 multiplier, not directly observed.
+- See probe bodies past n=19999 (cap at :62604, §P31-4) or
+  function args anywhere (trace enter/exit only).
+- Attribute the wall-rate step's host cause from inside the
+  receipts (no host-load log was in scope); tabled as uniform
+  scaling of wall rates with fixed guest ratios (§P31-3d).
+- Session wall time ≈ 05:40–05:55Z (~15 min active), inside the
+  4 h box; zero lease waits (no lease taken).
+
+
 
