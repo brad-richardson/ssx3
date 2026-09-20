@@ -5,6 +5,22 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M58 read (09-20) — PASS, 51 on 13 cols led by c312×22, dec-1 all-positive:**
+      Hist-4 M57-exact; site-51: 0:13/1:12/3:19/4:5/5:2,
+      pooled δ +454 (pos 35/neg 16); dec-1 12/12 positive
+      (+9..+33, +214) vs dec-0 6/7, dec-3 12/7; columns
+      13 active led by c312 22/51 (0.4314, 22/23 off-mode),
+      null-4 13/51, named streak cols 0 (c343 = far only);
+      band 48×2/3×1/0×0; d 262/3/2/1 ×1/1/1/44 + N/A ×4;
+      far member (dec 3), nearest off-mode c344 r287 @
+      Manhattan 3 untied; 2nd dec-5 = c312 r317 (M57 gap 3
+      closed). H1–H7 ALL met. Control green; re-run 67/67;
+      PNG 517 B rule-met (H5); 0 B explained, 102 stands.
+      Verified: bin counts, δ sums (+39/+214/+137/+35/+29),
+      col sums = 51, at-peak 13, H7 0.2549, shares, fnvs,
+      2183+/0−, ahead (no push). ~0.2 h. Next: M59
+      (dec-1 sign census, offline) in freed pane. Ledger
+      row added.
 - [ ] **M57 read (09-20) — PASS, far dec-3 unique vs nulls, m15 owns all off-mode:**
       Seat-6: far dec-3 vs nulls 9/9/9/9/5 (H6 met — the
       two off-9 seats are the two m15 sites; carrier/701
