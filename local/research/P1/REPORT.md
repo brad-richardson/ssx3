@@ -11504,6 +11504,331 @@ evidence).
 - Session wall time ≈ 4 h box (this turn), inside the box; zero
   lease touches (no contention possible).
 
+## Part 34 (P1ak): E1 long-window diagnosis — fixed point holds over 359,749 iters (no boot)
 
+Brief `local/muse/prompts/P1ak.md`. DIAGNOSIS brief on committed
+logs — no boot, no lease of any kind, no fork changes, no `adb`.
+Tables, no verdicts. Stale-reading guard: `local/research/T16/REPORT.md`
+(all of it — E1's 7200 s run: NO drain break, 359,748 iters,
+N = 72,176 exact, 887 frozen pairs, 4 disclosed deviations) + P1
+REPORT Part 33 (P1aj's drain-termination analysis: fixed point from
+iter 2, 13-row terminator table, E2/E3 spec — the baseline) +
+`local/research/T16/blocks.tsv` + `ticks.tsv` (per-block/per-tick
+rows, read as input, re-verified below by independent miners).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`LOG=$W/P1/run/boot-t16-1.log` (4,315,920 lines),
+`T=$W/P1/run/ps2_log-t16-1.txt` (197,603,104 lines, 6,978,090,314 B).
+Scratch `/tmp/p1ak/` (miners kept there, uncommitted); this Part is
+the only evidence. Both logs read-only: streaming passes + seeks;
+never copied whole.
+
+Headline receipts: the §P33-2a fixed point holds over all 359,749
+drain iters (chunk-0 = 340-line finite tail ALL in iter 1, buckets
+101–1000 = 0; chunks 1–358 identical 15-func/34.292–34.294-line
+shape, 9-fam 1.0000/iter, 0 residual; iter 359,749 = 28-line SIGTERM
+cut, all balanced). 3E4AF0 gaps = 6:9140 + 7:43557 (n=52,697, none
+outside {6,7}); per-1000 cadence 146×184 + 147×174 over chunks
+1–358. All 13 terminator rows re-polled over blocks 242–1429 hold
+their P33 direction; per-block extremes over the 5× sample: w31
+294–308, s31−w31 ≤ +1, d/w31 1.9966–2.0502. The 5 deviations
+reproduce digit-exact; the exit-tail singleton-58 and the chunk-71
+span +2 coincide positionally (rep 71526 ∈ inv-chunk 71) with exact
++1-frame = +2-line arithmetic. Monotonic counters advance +359,749
+increments (≈0.0084% of 2^32 each; horizons evidence-invariant).
+E2a/E2b/E2c + E3 rows below are brief-shaped (guard PCs re-verified
+in `$W/P1/output` read-only this turn).
+
+## P34-0. Rule record (no lease, no boots, no fork changes)
+
+| Item | Value |
+|---|---|
+| P-lane lease | Never touched (no boots; lease file never created/checked) |
+| Boots / harness runs | 0 (read-only mining of T16's committed logs) |
+| Fork changes | 0 (fork + `$W/P1/output` sources read read-only; no edits/commits/push/pull) |
+| `adb` | Not used |
+| Other agents' dirs | Read-only (`local/research/T13|T15|T16`, `/tmp/t16-*.py` patterns only) |
+| 7.0 GB trace | 2 full streaming passes (1 new combined + 1 cycle re-run) + streaming `grep -c`/`-n`; never copied |
+| 1.2 GB boot log | 3 streaming passes (log/tick/sched) + seeks; never copied |
+| ssx3 files changed | `local/research/P1/REPORT.md` ONLY (this Part, appended); commit prefix `[P1ak]`; NO push |
+
+## P34-1. Fixed-point reconfirmation (Task 1 — 359,749 iters)
+
+Method: one new streaming pass (`/tmp/p1ak/trace_pass.py`: N/caller/
+balance + drain markers/chunks + residual/gaps + per-inv join data +
+guard-count rows) + one cycle re-run (`/tmp/p1ak/cycle_repro.py` =
+`/tmp/t16-cycle.py` verbatim, output paths only) + boot-log passes
+(`/tmp/p1ak/log_pass.py`, `tick_pass.py`, sched census). Provisional
+post boundary = T16's last-362DE8-exit 185264992, verified at EOF.
+
+### a. Chunk table (per-1000 §P33-2a schema, iters 1–359,749)
+
+360 chunks (359×1000 + 749). Steady-15 = 9-family + 31AAF0 + 326EB0 +
+423DE0 + 423DD0 + 31A6B8 + 3E4AF0. Full table: `/tmp/p1ak/
+trace_chunks.tsv` (uncommitted scratch).
+
+| Chunk | Iters | Trace lines | Lines/iter | 9-fam/iter | 31AAF0/326EB0/423DE0/423DD0/31A6B8/iter | 3E4AF0 | Distinct |
+|---|---|---|---|---|---|---|---|
+| 0 | 1–1000 | 185265559–185300540 (34,982) | 34.982 | 1.0000 ×9 | 2/2/2.001/1/1.004 | 146 | 55 (15 + 40 resid, ALL in iter 1) |
+| 1–358 | steady ×358 | — | 34.292–34.294 | 1.0000 ×9 | 2/2/2/1/1 exact | 146×184 + 147×174 | 15, 0 resid |
+| 359 | 359001–359749 | 197577425–197603104 (25,680) | 34.286 | 1.0000 ×6, 0.9987 ×3 (37E120/3C1638/3825F8 = 748) | 2/2/2/1/1 exact | 110 (/749) | 15, 0 resid |
+
+- Residuum: pre-marker unwind = 566 lines / 282 enters (top:
+  411C38×32, 411B08×16, 362660/3626D8×12, 38F738/371DD8×11,
+  423DE0×10 — T16's top-12 exact). Chunk-0 residual = 340 enters /
+  40 distinct, ALL in iter 1 (per-100 buckets: 340,0,0,0,0,0,0,0,0,0;
+  last resid = iter 1 @185266275 `001D8DE0`; resid iters = {1}).
+- Strays vs exact multiples (T13/T15 structure reproduced): 423DE0
+  +11 (10 pre-marker + 1 chunk-0), 423DD0 +2 (both pre-marker),
+  31A6B8 +8 (4 pre-marker + 4 chunk-0).
+- Post census: 12,338,112 lines over 113 functions (preset 1072),
+  0 post-only; 394ED0/395000 = 0/0 post; 362CC8 = 1/1 (the N+1);
+  376938 = 5/6, 363490 = 2/3 (one pre-bound-enter each, exits post).
+- Depth-0 roots post: 1,851,473 total / 20 distinct — T16's 20 rows
+  exact (423DE0 359752=+3; 37E120/3C1638/31A3C0/31AAF0 359749;
+  3E4AF0 52699; 376938 4; 382760 4; 423DC0 3;
+  38F300/363490/382650/316F00 2;
+  395288/232AE0/31A6B8/2C5570/23D660/23D618/1D8DE0 1). Post depth
+  min/max = 0/13.
+- First vs last iteration: iter 1 = 724 lines (steady-15 + 340-line
+  finite tail); iter 2 = 34 lines; iters 2–359,748 = pure fixed
+  point (iter 359748 = 34 lines); iter 359,749 = 28 lines
+  (31A3C0-leg + 423DE0 + 31AAF0-direct leg complete;
+  37E120/3825F8/3C1638 pairs missing — SIGTERM between root
+  dispatches; every enter balanced).
+- N rows: 362DE8 = 72,176/72,176 (first @19,385, last enter
+  @185,264,853, last exit @185,264,992, bound_ok=True, 0 post);
+  caller single `00363490` ×72,176; 394ED0 = 1,442,182 (= 20N−1338);
+  395000 = 1,370,006 (= 19N−1338); 363490 = 216,528/216,528 (= 3N).
+- Per-inv join (bisect over full enter-line arrays): non-20/19 =
+  exactly ordinals 0–74 (n=75): ords 0–51 @2/1, ords 52–63 @3/2,
+  ords 64–74 @2/1; ordinals 75–72,175 (72,101 invs) ALL exactly
+  20/19.
+- Stack: mismatches 0, max depth 29, live frames at EOF = 0 (empty
+  stack — SIGTERM landed between root dispatches, as T13/T15/T16).
+
+### b. Cadence table (3E4AF0 gaps + per-1000 alternation, full window)
+
+| Row | Value |
+|---|---|
+| Gap histogram (inter-arrival iters) | 6:9140 + 7:43557 (n=52,697; min 6, max 7; outside {6,7} = NONE) |
+| Per-1000 over chunks 1–358 | 146 ×184 chunks + 147 ×174 chunks (no other value) |
+| Chunk 0 / chunk 359 | 146 / 110 (= 0.1468/iter over 749) |
+| Post total | 52,699 enters = 52,698 in-iter + 1 pre-marker |
+| Cadence drift, chunks 72–359 | none (146/147 alternation continues; chunk-359 rate in-band) |
+
+### c. Guard table (T1–T13 re-polled over blocks 242–1429 / iters 1–359,749)
+
+"Direction" = P33 fixed direction; "T16 re-poll" = this turn's
+receipt; "nearer trip?" compares T15-scale extremes to T16-scale.
+
+| # | Guard (P33-2c) | P33 direction | T16 re-poll (this turn) | Nearer trip vs T15? |
+|---|---|---|---|---|
+| T1 | 31AAF0@0x31abe8 skip-signal | NOT taken (signal always fires) | 423DD0 post = 359,751 = iters+2 (both pre-marker); s31 post-239 = 359,728; 0 skip events over 359,749 iters | no (0 skips both scales) |
+| T2 | 31AAF0@0x31ac34 loop-exit | TAKEN (flag 0; loop repeats) | Wakeup/Sleep log lines 0; 423CD0 ×0 boot; 423CC0 ×2 early-boot only (@21198/@29109); t4 sched 294–308 EVERY post block, 0 exceptions | no (t4 never 0; trip = w31 0) |
+| T3 | 31A6B8@0x31aad4 29-skip | TAKEN post-halt (gate 0) | 29w = 0 every block 239–1429; last-29 @2,494,970 (`waker=4 ra=0x31aae4`); last-29-wait @2,494,956 (`waker=1 ra=0x31aa8c`) | no (0 both scales) |
+| T4 | 3825F8 fire (state==4 AND ctr≥limit) | fire ×0 | 423DD0 == iters+2 (no extra fire); state/ctr still unread (E3) | no (×0 both scales) |
+| T5 | 227F58 null-skip | NOT taken (nonzero) | 326B88 == 359,749 = iters (leg never skipped) | no |
+| T6 | 317348 s0==0 (1 round) | NOT taken; 1 round | 227F58 == 359,749 = iters | no |
+| T7 | 326B88 N==2 (2 rounds) | NOT taken; 2 rounds | 326EB0 == 719,498 = 2×iters exact | no |
+| T8 | 326EB0 live-span branches | fixed (pad-pair 2×/iter) | pad-pair 2×/iter exact; residue 13 same; 3FF708 ×0 boot; per-branch taken/nt still unprobed (gap carried) | no (jointly fixed both scales) |
+| T9 | 37E120 `beq a0,2` | TAKEN (a0 = host cause) | intc table identical all 1430 blocks; crash/FATAL/BREAK 0 | no |
+| T10 | 3E4AF0 vector `*(0x450DA8)` | TAKEN (vector 0; 8 fixed) | gaps {6,7} only; post-only 0; no new caller | no |
+| T11 | 31A3C0 (no branch; a1 host) | — | markers = 359,749; a1 const (handler table, all blocks) | no |
+| T12 | 3C1638 (no branch; ++ctr) | — | ++ctr unread; +359,749 increments this window | horizon-invariant (below) |
+| T13 | host VBLANK @60Hz | 71,762 consecutive | 359,749 consecutive (≈60.1/s over ~5,990 s post window) | no |
+
+Monotonic/periodic inputs (advanced how far this window):
+
+| Counter | Advance (this window) | Horizon |
+|---|---|---|
+| `*(0x50AAA8)` (T12) | +359,749 | 2^32 @60Hz ≈ 2.26 yr (≈0.0084% consumed this window) |
+| s1+0x18 (317348) | +359,749 | same class (≈2.26 yr) |
+| 3825F8 a1+0x5ABC ctr | +359,749 | same class (fire needs state==4, unread) |
+| 0x450DCC/DD0 (3E4AF0) | +52,699 (per-fire) | same class |
+| 326B88 mod-30 index | 359,749 ÷ 30 cycles (periodic by construction) | none (resets) |
+| T1 COUNT/COMP re-arm | 52,699 re-arms (periodic by construction) | none (resets) |
+
+Per-block extremes (5× sample vs T15-scale):
+
+| Band | T15 scale (234 blocks) | T16 scale (1187 blocks, this turn) |
+|---|---|---|
+| w31/post block | 295–307 | 294–308 (min @325/329/712/745/1329; b1429 partial 47) |
+| s31−w31/post block | max +1 (@b251) | max +1 (@251 first; also 295/313/340/497/557), min −1 |
+| dormant/w31/post block | 2.014–2.021 (per-slice) | 1.9966–2.0502 (@314/@581; monitor POST d31 1.997–2.050) |
+
+Sema-31 shape census (fixed-point input table): waits 431,926 =
+431,923 identical (`waker=4 pc=0x423de8 ra=0x31ac30 waiters 0→1`)
++ 3 tick-fused truncations (1 missed by strict match @3330853
+`id=31[run:tick]`, reconciled); signals 431,925 = 431,897 waker=-1
+identical + 25 waker=3 (ALL ≤ line 6782, pre-steady: 13 pre-block-0
++ 12 block-0 window) + 7 tick-fused truncations; count ≡ 0→0 on all
+non-fused lines (0 exceptions).
+
+## P34-2. Deviations + bounds + E2/E3 (Task 2)
+
+### a. Deviation table (5 reproduced + recurrence + drain-touch)
+
+| # | Deviation | T16 reproduced (this turn) | T13 | T15 | Recurs? | Drain-touch? |
+|---|---|---|---|---|---|---|
+| D1 | Collapse tail one block shorter | 211×2 (b236–237) + 189×2 (b238–239), residue-13 from b240 (×1190) | 211×3 + 189×2, residue @b241 | 211×2 + 189×3, residue @b241 | new shape (3rd variant; endpoints 218/residue same) | NO — transitional blocks only; chunk-0 resid 340 = T15's 340; unwind 566/282 identical |
+| D2 | Stub preamble b0/b1 | 961/497, steady @b2 | 897/588 | 887/603 | YES — T11-exact repeat (4th pair, 2nd distinct value) | NO — blocks 0–1, ~235 blocks pre-exit |
+| D3 | Probe NULL-head | 3135 (−1 vs 3136) | 3136 | 3136 | new value (= P1ag's 3135; T11/T13/T15 held 3136) | NO — probe ends @62119 « exit @2463373; N/ramp/chunk-0 bit-exact |
+| D4 | Exit-tail 3rd singleton | len 58 @rep 71526 (58/56/58) | 57 (58/56/57) | 57 (58/56/57) | new value (first_rep + reps identical; len +1) | NO — rep frames contain 362DE8 by construction (all pre-exit); see D4+D5 arithmetic |
+| D5 | Inv-chunk-71 span +2 | 2302066 (enters same 20000/19000/1000) | 2302064 | 2302064 | new value (+2 lines) | NO — in-phase span; drain chunks unaffected (c1–358 exact) |
+
+D4+D5 positional + arithmetic table (one mechanism, two rows):
+
+| Row | Value |
+|---|---|
+| Rep↔inv correspondence | rep frames = 72,176 = N; reps defined as ≥1 362DE8 ⟹ exactly 1 inv/rep (pigeonhole) |
+| Singleton position | rep 71526 (0-based) ↔ inv ordinal 71526 ∈ inv-chunk 71 (71001–72000) |
+| Gap-71526 frames | strictly between rep 71526 ⊃ de8[71526] and rep 71527 ⊃ de8[71527] ⟹ inside ic71's tiled span |
+| D4 delta vs T13/T15 | +1 depth-0 frame (len 58 vs 57) |
+| D5 delta vs T13/T15 | +2 trace lines (2302066 vs 2302064) = +1 frame × (enter+exit) |
+| Other ic71 deltas | none (enters 20000/19000/1000 identical; ic70 span 2520494 identical) |
+
+Halt-position envelope (boundary-shift family, third datum):
+
+| Run | Last-29 | Position | Window |
+|---|---|---|---|
+| T13 | @2,489,890 | 74.1% | window 239 (117/298) |
+| T15 | @2,494,022 | 9.1% | window 239 (5/296) |
+| T16 (this turn) | @2,494,970 | 97.85% | window 238 (279/299; span 2,489,103–2,495,099) |
+
+Halt-split trio reproduced: 2,494,970 / 2,494,971 / 2,494,972
+(+0/+1/+2 ADJACENT); dormant sched=559 = b239 t1 scheduled
+(b234–242 t1/t5: 603/604, 596/595, 601/601, 607/607, 598/598,
+559/559, 0/0, 0/0, 0/0).
+
+### b. Bound table (terminator-horizon recompute at 359,749-iter evidence)
+
+| Bound | P33-4b (T15 evidence) | P34 (T16 evidence) | Tightens? |
+|---|---|---|---|
+| No-event drain iters | 71,762 / 237 blocks / 2,400 s | 359,748 / 1188 blocks / 7,200 s (5.01×; P33 projected ~430k ≈6.0× — in-phase ~1,190 s non-contributing) | YES (count) |
+| w31 floor (trip needs 0) | 295 min over 234 samples | 294 min over 1187 samples | YES (sample; floor −1 observed) |
+| w31 ceiling | 307 | 308 | YES (sample; +1 observed) |
+| s31−w31 (trip needs >+2) | max +1 | max +1 (6 blocks: 251/295/313/340/497/557) | YES (sample; max same) |
+| d/w31 band | 2.014–2.021 per-slice | 1.9966–2.0502 per-block | YES (sample; band wider, inside [1.9,2.2]) |
+| Frozen pairs | 160 @2669132/72181 | 887 @same counters | YES (5.5× hold) |
+| Halt-position envelope | 9.1%–74.1% (w239) | + 97.85% (w238) — first sub-240 halt | YES (3rd datum; envelope widens) |
+| 32-bit counter horizons | ≈2.26 yr @60Hz | ≈2.26 yr (consumed +359,749 ≈ 0.0084% this window) | NO (evidence-invariant claim) |
+| Periodic cycles (mod-30/T1/8-loop) | reset by construction | reset by construction (11,991+ full mod-30 cycles) | NO (invariant) |
+| T4 state==4 | unread (fire ×0) | unread (fire ×0 over 359,749) | NO (needs E3 read) |
+| 326EB0 per-branch dirs | jointly fixed, unprobed | jointly fixed over 719,498 pairs, unprobed | NO (needs E3/symbolic) |
+| +2 29-side edge (72,178 vs 72,176) | unattributed (no timestamps) | unattributed (same +2; +1 in-phase window +1 markers-vs-Δ) | NO (invariant) |
+| Chunk↔block join | rate-inferred ≈60/s | rate-inferred ≈60.1/s (no timestamps either stream) | NO (invariant) |
+| Residue-13 addresses | same 13 (b241/b476) | same 13 (b240/b241/b1429, all firstRa==lastRa) | YES (sample; 1190 blocks) |
+| Post-241 syscall ids | {0x44, 0xffffffbd} | same 2 ids, all 1189 sections b241–1429 | YES (sample) |
+
+### c. E2/E3 table (brief-shape promotion rows)
+
+All guard PCs below re-verified present in `$W/P1/output`
+read-only this turn (31AAF0: `case 0x31abe8/0x31ac34` + `bnez
+$v0` body; 3825F8: `lw $a0,0x5A8C($a1)` + `bne` @0x382614;
+31A6B8: `beqz $v0` @0x31aad4; 3E4AF0: `beql` @0x3e4e4c; 326EB0:
+live `dispatchGuestBranch(0x3FFBC0@0x326F1C, 0x3FFA58@0x3271E0)`,
+dormant `0x3FF708@0x326EE4` + `0x3FFBC0@0x327080`). Pad stimulus
+surface: `ps2xRuntime/src/lib/Kernel/Stubs/Pad.cpp` (buttons
+active-low, default 0xFFFF; analog center 0x80; digital mode 0x41).
+
+| # | Experiment (brief-shape) | Trigger rows (15 s polls; T16-calibrated) | Success rows | Miner rows | Inputs needed? | Lease? | Boots? |
+|---|---|---|---|---|---|---|---|
+| E2a | STIMULUS pad-state (flip buttons/analog in `Pad.cpp` mid-drain, post-exit) | E1 triggers (P34-1c bands: w31 294–308, d/w31 [1.9,2.2], gaps {6,7}) + armed: residue ≠13 OR new HLE target in stubs OR 326EB0/iter ≠2 | dormant 326EB0 arm fires (0x3FF708@0x326EE4 or 0x3FFBC0@0x327080 executes; residue ≠13 / W2+W10) | E1 miners (P33-4a M1–M10 + P34-1a/b/c) + pre/post-stimulus residue diff + pad/HLE call census + T8 branch split if fired | fork diff (stimulus hook + arming tick) + rebuild + sha-record (T13 §T13-0 style) | YES (P-lane) | 1–2 (1,800–2,400 s; 2nd only if timing missed) |
+| E2b | STIMULUS SIF0-reply (drive dmac-1 → 0x382650 mid-drain) | E1 triggers + armed: 3825F8 enters > iters (baseline == iters exact + 2 unwind) OR 382650 in-iter enters >0 (baseline 0; unwind 2 @pre-marker) | 0x382650 handler executes in-iter (ei-entry side effects; extra 3825F8/drain shape change) | E1 miners + 382650/3825F8 enter census (pre/in/post-stimulus) + drain-chunk diff | fork diff (host SIF0-reply injection) + rebuild + sha-record | YES (P-lane) | 1–2 (same caps) |
+| E2c | STIMULUS debug SignalSema(30) (no main needed) | E1 triggers + armed: 8th `id=30` line OR t3 RUN sample (baselines: 7 lines @643–7226; t3 WAIT-30 ×1429 + RUN b0) | t3 wakes (4th wait resolves or 5th parks; `beqz *(s1+0x20)` respin read) | E1 miners + t3 state series + sema-30 line shapes + `*(s1+0x20)` if probed | fork diff (debug sema poke, post-exit timed) + rebuild + sha-record | YES (P-lane) | 1 (1,800–2,400 s) |
+| E3 | PROBE read-only diag (guard words + counters; no behavior change) | E1 triggers (no new behavior) | probe lands numbers (no park-break required): all rows below, per-VBLANK or per-100 | per-VBLANK (or per-100): `*(v1+0x4038)`+`*(v1+0x4034)` (T1@0x31abe8), `*(s0+0x20)` (T2@0x31ac34), `*(a0+0x1C)`+`*(a0+0x18)` (T3@0x31aad4), `*(a1+0x5A8C/5ABC/5AB8)` (T4@0x382614/0x382624), `*(gp±off)` ptrs, N/i (326B88), s0 (317348), `*(0x50AAA8)`, T1 COMP/COUNT, `*(0x450DA8/DCC/DD0)`, a1 args (id-2/id-3), branch-hit counts T1–T10, handler-entry hits (VBLANK:iter 1:1 proof), pad HLE return values | fork diff (read-only probe) + rebuild + zero-delta proof (N + chunk-0 + residue identical to T16) + sha-record | YES (P-lane) | 1 (1,800–2,400 s to exit + drain sample) |
+
+Why-not rows: none — every §P33-4a stimulus/probe row promotes
+(above); no row is blocked on missing inputs (all PCs/regs verified
+present; all baselines T16-calibrated). E2a attacks the largest
+live-branch surface (T8, still jointly-fixed-only after 719,498
+pairs); E2b/E2c test parked-waiter revivability (dmac-1: 2 unwind +
+0 in-iter; t3: 0 post-b0 RUN); E3 closes every P34-4 gap row.
+
+## P34-3. Exact commands + receipt paths
+
+From `/Users/bradrichardson/dev/ssx3` unless noted. All receipt
+accesses read-only (streaming python/grep/sed, `tail -c` seeks); no
+lease, no boots, no builds, no fork writes:
+
+```text
+# Reads (lease-free; T16 + P33 + TSVs + T13/T15/T11 cites)
+read local/research/T16/REPORT.md (all); P1 REPORT Part 33 (P33-2/3/4 spec);
+  local/research/T16/blocks.tsv + ticks.tsv (headers + extremes)
+# Miners (written to /tmp/p1ak/, uncommitted)
+mkdir -p /tmp/p1ak
+write /tmp/p1ak/log_pass.py (single streaming pass: stub series, per-block
+  29/31/dormant, t1/t3/t6, halt trio, sema30, syscalls post-241, residue rows,
+  probe census, silence audit, sema-31 shapes)
+python3 /tmp/p1ak/log_pass.py LOG -> log_summary.txt (done 4315920)
+write+run /tmp/p1ak/tick_pass.py (ticks/deltas/freeze/t4) (994 ticks, 887 frozen)
+sched census (heredoc python: t1-t6 scheduled post242-1428; t4 sole nonzero)
+write /tmp/p1ak/trace_pass.py (ONE streaming pass: N/callers/balance,
+  per-1000-inv chunks, per-inv join arrays, markers, per-1000 drain chunks,
+  3E4AF0 gaps, chunk-0 buckets, edge iters, post census, guard counts)
+python3 /tmp/p1ak/trace_pass.py T 197603104 -> trace_summary.txt,
+  trace_chunks.tsv (360), trace_edge.txt (done 197603104 359749)
+sed /tmp/t16-cycle.py -> /tmp/p1ak/cycle_repro.py (output paths only;
+  diff = 3 TSV/TXT paths); python3 /tmp/p1ak/cycle_repro.py T
+  -> cyc-stdout.txt (singletons 58/56/58 @70857/71014/71526), cyc-d0seq.tsv
+# Boot-log receipts (streaming greps; never copied)
+fused id=31 line (@3330853) + waker=3 signals (25x, all <=6782) + cap @62119;
+  probe change n=104/140/162 (@7592/7981/8272) + total->0x14 saturation;
+  stacks table identical x1430; Wakeup/Sleep 0; pre-b0 s31 = 25 (13+12)
+# Trace receipts (streaming greps; never copied)
+382650 post enters (@185265229/@185265243, unwind pre-marker);
+  423CC0 x2 (@21198/@29109 early-boot); 423CD0 x0
+# Static reads (read-only bodies; E2/E3 firm-up)
+$W/P1/output/sub_0031AAF0/003825F8/0031A6B8/003E4AF0/00326EB0.cpp
+  (guard PCs + call sites); $R/ps2xRuntime/src/lib/Kernel/Stubs/Pad.cpp
+# Report (this Part)
+(edit_file append Part 34 in 2 chunks)
+git add -f local/research/P1/REPORT.md
+git commit -m "[P1ak] ..." (trailer Orchestrated-By: Muse Code; NO push)
+```
+
+Receipt paths: `/tmp/p1ak/log_pass.py|log_summary.txt`,
+`/tmp/p1ak/tick_pass.py`, `/tmp/p1ak/trace_pass.py|
+trace_summary.txt|trace_chunks.tsv|trace_edge.txt`,
+`/tmp/p1ak/cycle_repro.py|cyc-stdout.txt|cyc-d0seq.tsv|
+cyc-repidx.txt` (all uncommitted scratch; tables above are the
+evidence).
+
+## P34-4. What I could not do (gap rows)
+
+- Read 3825F8's `*(a1+0x5A8C)` state (T4's first arm): fire ×0 over
+  359,749 iters is consistent with both state≠4 and counter<limit
+  (E3 reads it; brief-shaped §P34-2c).
+- Read any guard-word VALUES (`*(v1+0x4038)`, `*(s0+0x20)`,
+  `*(a0+0x1C)`, N/i, pad returns): fixed-by-count over 359,749
+  iters, values unprobed (E3 rows specified).
+- Simulate each of 326EB0's ~25 live-span branches individually:
+  jointly fixed by the exact 2×/iter pad-pair over 719,498 pairs,
+  per-branch proof needs symbolic execution or an E3 hit-count
+  probe (same for 3E4AF0's pre-0x3e4db8 body — off the handler
+  path, unexamined).
+- Name the id-2/id-3 handler `argument` (a1) constants beyond the
+  observed 0x31abd0 (id-2): registration values live in the host
+  handler table, not in the receipts (E3 reads them).
+- Join trace chunks to log blocks (no timestamps in either stream):
+  chunk↔block correspondence is rate-inferred (≈60.1/s both), not
+  observed (same gap as T13 §T13-7/T15 §T15-7/P1aj §P33-6).
+- Attribute the halt-position spread (T13 74.1% w239, T15 9.1%
+  w239, T16 97.85% w238), the wall-rate flatness, or the
+  dormant-ratio surplus from inside the receipts (no host-load log
+  in scope; tabled as guest-fixed wall variation, third datum:
+  first sub-240 halt + second flat→30.2 shape).
+- Attribute the +2 29-side edge (72,178 waits vs 72,176
+  invocations): the trace carries no timestamps (carried from
+  T13/T15/T16). The +1 in-phase 29-side window effect (blocks
+  0–237: 71,873/71,872), the +1 markers-vs-Δ effect (359,749 vs
+  359,748), and the 25 pre-block-0 s31 lines (13 waker=3 + 12
+  waker=-1) are tabled by exact count, not derived.
+- Re-mine T13/T15 traces for D4/D5 recurrence (6.6 GB each, out of
+  the 4 h box): T13/T15 singleton/chunk values are cited from
+  committed REPORTs (§T13-4/§T15-4 rows quoted); T16 values are
+  independently reproduced here.
+- Session wall time inside the 4 h box; zero lease touches (no
+  contention possible).
 
 
