@@ -5,1010 +5,9 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] **P1ak read (09-20) — PASS with erratum, fixed point holds 359,749 iters, E2/E3 brief-shaped:**
-      Part 34 (325 lines, append-only): chunk-0 tail-in-iter-1
-      + chunks 1–358 fixed (15/34.29, 9-fam 1.0) + 28-line
-      final cut; gaps {6,7} (9140/43557), cadence 146×184 +
-      147×174; T1–T13 re-polled hold (w31 294–308, s31−w31
-      ≤+1, d/w31 1.9966–2.0502); D1–D5 digit-exact with
-      D4+D5 unified (+1 frame = +2 lines, rep 71526 ∈
-      ic71); halt trio +0/+1/+2 @97.85% w238; bounds
-      tighten (count/sample) or invariant (horizons
-      2.26 yr, +0.0084%); E2a/E2b/E2c + E3 ALL brief-shaped
-      (guard PCs re-verified, T16-calibrated triggers).
-      ERRATUM: sema-31 waker=-1 identical reads 431,893 not
-      431,897 (4-line overcount; partition then closes:
-      431893+25+7=431925 — independently grepped). Verified:
-      depth-0 sum 1,851,473 exact, cadence sums, id=31 total
-      863,851, signal partition, D4/D5 arithmetic, 325+/0−,
-      fork unmoved, ahead (no push). ~4 h. Next: E2a
-      (pad stimulus) + F3 (frontier Part 3, queued) in freed
-      + spare panes. Ledger row added.
-- [ ] **T18 read (09-20) — PASS after tail restore, channel + aligner work, k=2:**
-      Fork f2b1852 (TraceChannel +1 hook, +170): 781,372
-      EE events in PCSX2 byte shape over 240 s; ladder
-      channel-off-vs-on 1053 EXACT + 245 TOL_OK ≤0.5% + 5
-      SAMPLED + 1 KEY_DELTA (sema.33 phase sample, row
-      derived); log ladder 47/47 series, rare ids 1.0000,
-      pump 1.0017; `tools/trace_align.py` (selftest 17/17,
-      t7 bug caught+fixed): anchor ExecPS2:2 HIT ev:162 vs
-      rt MISS (HLE, no BIOS) → align RFU060/061 agree then
-      DIVERGE k=2 (ref AddDmacHandler vs rt CreateSema; no
-      20-shingle re-align; GetThreadId 37% vs ~0%); t17c
-      plugs in unchanged, reproduces boot3 byte-exact.
-      Minor: headline quantifies only the KEY_DELTA (table
-      authoritative: 5 SAMPLED + 1). Verified: selftest
-      re-run ALL PASS, alignment re-run k=2 identical,
-      fork files, ladder rows, lease removed, 2073+/0−,
-      ahead (no push). ~0.5 h. Next: T20 (channel-on drain
-      census vs menu) in freed pane. Ledger row added.
-- [ ] **T17 read (09-20) — PASS after tail restore, held ✕ breaks park to User Prefs:**
-      Build reused bit-identical; pad Cross=K pre-mapped;
-      xdotool focus+XTEST proven (SPACE pause flatlines +
-      OSD); 18 ms tap no-op (6/6 park-identical) vs single
-      534 ms hold → User Prefs (Language=English) by +5 s,
-      held to T+340; park-match BIT-IDENTICAL (snaps sha
-      b6ca1aa9, ExecPS2/vblank/SIF lines exact); t17c trace
-      7,648,547 lines / 540 MB (EE 914,791/42 + IOP
-      5,211,292/103 + SIF 936,164 + cdvd 447,901 + other
-      138,399; 23,107 vblanks), SSD sha-matched; WSL killed
-      userland ~17× mid-session (G2, runs completed in
-      quiet windows). Restored tail: G1–G8 + commands.
-      Verified: channel sum exact, ExecPS2 lines + vblank
-      count re-grepped exact, snap shas, SSD bytes, 762+/0−
-      + restore, no lease, ahead (no push). ~45 min. Next:
-      T19 (2nd ✕ at User Prefs) in freed pane. Ledger row
-      added.
-- [ ] **M60 read (09-20) — PASS with erratum, c312 runs 7/10/6, decspan-6 unique max:**
-      33-col unanimity M59-exact; split set [312] alone
-      (12 all-pos + 6 all-neg n≥2, 8 singletons, 6 s0-only);
-      c312 23 sites in 3 runs (pos 316–343×7 / neg
-      353–367×10 / pos 369–379×6, r316 leads run 1, sole
-      non-1 d = r369 d2 opens run 3); rowspan 63 (2nd after
-      c343's 264); decspan 6 unique max (next 4/3/3);
-      modal d=1 on all 19 multi-site (dmax 262/3/2 on
-      343/311/312, 16/19 pure d1). H1–H7 ALL met. Control
-      green; re-run 95/95; PNG 455 B rule-met (H3); 0 B
-      explained, 102 stands. ERRATUM (prose only): "16
-      single-decile cols, 13 pure dec-9" — tables + receipt
-      read 9 pure dec-9 (7 n≥2 + 2 singletons); H-bars
-      unaffected. Verified: classes, runs, spans
-      (63/264/41), decmix sums, d-profile, receipt ndec
-      counts, fnvs, 2416+/0−, ahead (no push). ~0.2 h.
-      Next: M61 (c311-vs-c312 join, offline) in freed pane.
-      Ledger row added.
-- [ ] **T16 read (09-20) — PASS, E1 = third absence window (no break to 7200 s):**
-      Exit @b235 reproduced (tail one block shorter, residue
-      from b240); 1188 blocks past b241: 12 watches + 2
-      gated extras ALL silent — main dormant ×1191, stub-13
-      ×1190, drain 359,748 iters (Δ31−29, markers 359,749),
-      freeze 887 pairs @2669132/72181, CD/SIF/GS/RPC 0,
-      sema-30 4w/3s, t3 never releases; N = 72,176 exact
-      (20N/19N−1338, ramp 0–74, steady 20/19, caller 3N);
-      3E4AF0 gaps {6,7} only (52,697); halt trio adjacent
-      +0/+1/+2 @97.85% w238; chunk-0 T15-exact, chunks
-      1–358 fixed point, final 28-line cut; wall T15-class
-      flat ~60 → ~30.2; deviations disclosed (preamble
-      T11-repeat, NULL-head −1, singleton-58, chunk-71 +2,
-      t3 pc). Verified: byte sizes, TSV rows 1430/994,
-      arithmetic (359748, 5.01×, pc sum 1430), fork
-      unmoved, lease removed, ahead (no push). ~2.8 h.
-      Next: P1ak (long-window diagnosis, no boot) in freed
-      pane. Ledger row added.
-- [ ] **T4 read (09-20) — PASS scoped, Devel built, trace to language menu:**
-      Devel v2.9.75 on bytesize WSL2 (deps ~11.5 min, build
-      902/902 ~2.3 min, DEVBUILD ×495, recompilers proven);
-      SSX3 (SLUS-20772, CRC 08FFF00D) unattended 336 s →
-      language-select park: 7,483,481-line / 529 MB trace
-      (EE.Bios 899,875/42 names + IOP.Bios 5,095,286/103 +
-      SIF 915,373 + cdvd/hw 437,690 + other 135,257;
-      22,580 vblanks); drain NOT reached (needs pad input
-      — G1); ExecPS2 ×2, SIF storm 260,846, menu sema
-      storm; format notes + epoch anchor for Brief 2.
-      Verified: channel sum exact, census EE/IOP counts,
-      SSD copy bytes, BIOS/ISO shas vs P1x/P1z, 676+/0−,
-      no lease, ahead (no push). ~2 h. Next: T17 (G1 pad
-      automation + deeper capture) in freed pane; Brief 2
-      aligner queues after. Ledger row added.
-- [ ] **M59 read (09-20) — PASS, c312 lone split col, null-4 13/0, dec-9 off dec-1 cols:**
-      10 bins M58-exact; all-pos bins 1/5/7 (n 12/2/2 —
-      dec-1 only all-pos @n≥10); 12 sites M58-exact
-      (7 cols — brief said 8, agent correctly tabled my
-      miscount); columns 16 all-pos + 10 all-neg + c312
-      split 13/10 (sum +130 verified) + 6 s0-only; null-4
-      13/0 (H5 not — honest negative); named 59 pos vs 10
-      neg (341/342/343); dec-9/dec-8/dec-6 fully off dec-1
-      cols (0/75, 0/5, 0/1); mode-9 splits 7 pos/5 neg
-      (mode ≠ sign); r316 narrowed (δ+11 dec-7, M58 gap 1
-      nearly closed). Control green; re-run 30/30; PNG 456
-      B rule-met (H3); 0 B explained, 102 stands. Verified:
-      bin table, 12 sites, col sums = 134 (98/36), c312
-      arithmetic, modes, fnvs, 2274+/0−, ahead (no push).
-      ~0.3 h. Next: M60 (c312 unanimity, offline) in freed
-      pane. Ledger row added.
-- [ ] **M58 read (09-20) — PASS, 51 on 13 cols led by c312×22, dec-1 all-positive:**
-      Hist-4 M57-exact; site-51: 0:13/1:12/3:19/4:5/5:2,
-      pooled δ +454 (pos 35/neg 16); dec-1 12/12 positive
-      (+9..+33, +214) vs dec-0 6/7, dec-3 12/7; columns
-      13 active led by c312 22/51 (0.4314, 22/23 off-mode),
-      null-4 13/51, named streak cols 0 (c343 = far only);
-      band 48×2/3×1/0×0; d 262/3/2/1 ×1/1/1/44 + N/A ×4;
-      far member (dec 3), nearest off-mode c344 r287 @
-      Manhattan 3 untied; 2nd dec-5 = c312 r317 (M57 gap 3
-      closed). H1–H7 ALL met. Control green; re-run 67/67;
-      PNG 517 B rule-met (H5); 0 B explained, 102 stands.
-      Verified: bin counts, δ sums (+39/+214/+137/+35/+29),
-      col sums = 51, at-peak 13, H7 0.2549, shares, fnvs,
-      2183+/0−, ahead (no push). ~0.2 h. Next: M59
-      (dec-1 sign census, offline) in freed pane. Ledger
-      row added.
-- [ ] **M57 read (09-20) — PASS, far dec-3 unique vs nulls, m15 owns all off-mode:**
-      Seat-6: far dec-3 vs nulls 9/9/9/9/5 (H6 met — the
-      two off-9 seats are the two m15 sites; carrier/701
-      6/6 none/out, at-peak 1 far + 1 null); tail-Y hists
-      s0 92/102 + m15 75/134 + shared 67/69 + pooled
-      167/236 dec-9 (H1–H3 met); dec-3 pooled rank 2 at
-      19/236, s0/shared n=0; c343 pooled 5/6 vs null-4
-      14/30 (|diff| 0.3667, H7 met); m15 null-col frames 0
-      dec-9 (313/314/311) vs s0 14/17. H4 not (far dec-3,
-      expected). Control green; re-run 43/43; PNG 527 B
-      rule-met (H6); 0 B explained, 102 stands. Verified:
-      hist sums 102/134/69/236, shares to 4dp, H7 diff,
-      col counts, null-5 vs M56, fnvs, 1889+/0−, ahead
-      (no push). ~0.1 h. Next: M58 (m15 off-mode mass,
-      offline) in freed pane. Ledger row added.
-- [ ] **M56 read (09-20) — PASS, 289 alone at d=262, c343 only far column:**
-      289 site reproduces exactly (|δ| 15, s0 noncell, gaps
-      −32/0, band 1, dec 3, streak 343, carrier-none,
-      701-out; TRI p=289, QUAD res +0, hole 28–288); census
-      over s0+m15 tail-Y: 1 far pooled (d≥100), null-5 max
-      d=16 (246-row margin), 221 non-far + 14 singletons;
-      33-col table (c343 only); hole bulk 1/8 all |δ|=1;
-      H1–H4/H6–H7 met, H5 not (dec 3 vs dec-9 mode —
-      honest negative); control green; re-run identical;
-      0 B explained, 102 stands. Verified: baselines
-      13418/22815 + fnvs vs M55, 4 files 1875+/0−, no PNG,
-      ahead (no push). ~0.1 h. Next: M57 (far vs null-5
-      decile seats, offline) in freed pane. Ledger row added.
-- [ ] **P1aj read (09-20) — PASS, drain is VBLANK-paced fixed point, E1/E2/E3 spec'd:**
-      Part 33 (416 lines, append-only): W1–W12 reconciled (9
-      covered-silent, W4/W10 absent-here, W11 would-fire);
-      M1–M10 closed (M4/M5/M8-full here); invariants 8
-      reproduced + 2 deviated-as-expected; drain = 1 iter/
-      VBLANK from iter 2 (71 chunks fixed: 15 funcs, 34.29
-      L/iter, 3E4AF0 gaps {6,7}, sema-31 fixed point);
-      4 INTC handlers + t4 pump leg inputs tabled (4
-      monotonic ≥2.2-yr, 2 periodic, rest fixed); 13-row
-      terminator table (T1/T2 end by starvation/exit, T4/T10
-      latent, rest cannot); park-break census (t4 sole LIVE,
-      S1/S2/S3 missing signals with code paths, halt-split
-      tightened 9.1–74.1% + trio exact); E1/E2/E3 spec with
-      bound math (~430k iters @7200 s) + lease table. New:
-      block-N covers window N−1 (P32-8 skew dissolves).
-      Verified: dormant line, W4 = 1, trio adjacent, status-5
-      ×237 all id-1, 29 72178/72178, b239 11 lines + last
-      @2494022, residue rows byte-exact (610×3+305×10,
-      598×3+299×10), 5-func zeros FULL boot, post 362DE8 0,
-      CD @7175, drain arithmetic, append-only (416+/0−),
-      fork unmoved, ahead (no push). ~1 h. Next: T16 (E1
-      longer boot, lease) in freed pane. Ledger row added.
-- [ ] **M55 read (09-20) — PASS, drift tabled, low-drift keeps 0 again:**
-      16/16 medians + 12/65 + 13/68 + 0/68 + 1/65 + nears
-      14/14 + 2/4 M25-exact (fallbacks 27/20, no empties);
-      drift −10..+5 (|Δ| rank 257/301/277/343/340/296/321/
-      342); low-drift triple keeps 0, kept hit on c340
-      (|Δ| 3); medians below TRI peaks 0/16 (med−h −1..−25);
-      xerr 3.2–12.6 (max 27 c340). H2/H3/H6/H7 met; H1/H4/H5
-      not. 0 new bytes. (PNG absent by rule — max pooled
-      kept 1 < 3. Gap row 11 stale — M26 gap 2 closed by
-      M52.) Verified: baselines, scores, 0/68 collapse,
-      canon identical, C-P1 pass, mtimes clean. ~0.1 h.
-      Next: M56 (far-row census, M26 gap 6) in freed pane.
-      Ledger row added.
-- [ ] **M54 read (09-20) — PASS, 2–3 mass interior, depth ≠ spread:**
-      16/16 QUAD a/b/c + 4/65 + 3/68 + miss bins + errvalues
-      + colhits + 64-cell ladder M26-exact; 2–3 mass 32/23
-      pooled 55 with seats 6 peak / 12 edge / 37 interior
-      (6 hole-adj); s0 c257/c277/c321 carry 7/8/8, c296
-      carries 0 (max|res| 18); depth max s0 c340 138.55 vs
-      spread max s0 c296 9.44; signs alternate 5–7 runs,
-      pos 60/126. H1/H2/H7 met; H3–H6 not. 0 new bytes.
-      (Gap row 8's "M26 gap 2 open" is wrong — M52 closed
-      it. Receipt = 2nd invocation after ordering fix,
-      disclosed.) Verified: baselines, scores + 32/23,
-      ladder pooled, canon identical, C-P1 pass, PNG 88595
-      B, mtimes clean. ~0.1 h. Next: M55 (CONST drift, M26
-      gap 5) in freed pane. Ledger row added.
-- [ ] **M53 read (09-20) — PASS, R1 preserves, R2 destroys, p rides R1:**
-      64/64 profiles + 16/16 humps + 9/9 xshape byte-exact;
-      8/16 multi-tie (T 2–4; shapes 8/2/3/3); submax runs
-      only c257/c277/c321 (29×4 recovered); R1 moves 1/16
-      (s0 c277 25→29, top→mid) with thirds 5/8+5/8 +
-      agree 4/8; R2 moves 8/16 with thirds 3/8+1/8 + agree
-      1/8; TRI p = R1 on 15/16. H1–H4/H6/H7 met; H5 not.
-      0 new bytes. (Gap row 6's "M26 gap 2 open" is wrong —
-      M52 closed it.) Verified: baselines, guards, FT
-      thirds, R1 agree, c277 ties, canon identical, C-P1
-      pass, PNG 88598 B, mtimes clean. ~0.1 h. Next: M54
-      (QUAD residuals, M26 gap 4) in freed pane. Ledger row
-      added.
-- [ ] **M52 read (09-20) — PASS, residuals agree 14/65, disjoint from δ 6:**
-      H5 6/65 + peaks 5/8 byte-exact (profiles + xmatch +
-      hump + xshape lines); 6 δ-agrees at d_s0 6/2/1/1/0/0
-      + d_m15 6/3/2/7/6/262 (5/6 in peak-disagreeing cols);
-      residuals agree 14/65 (+17 near), per-column
-      3/4/1/2/1/2/1/0, overlap with δ-agrees 0; 7/7
-      d_m15==0 res-agree vs 5/8 at d_s0==0. H6 met only
-      (2/8−1/26 = 0.2115); H1–H5/H7 not. 51/65 stand.
-      (Gap row 5's "M26 gap 1 open" is wrong — M51 closed
-      it.) Verified: baselines, H5 6/65, res 14/65, canon
-      identical, C-P1 pass, PNG 102706 B, mtimes clean.
-      ~0.1 h. Next: M53 (plateau peaks, M26 gap 3) in freed
-      pane. Ledger row added.
-- [ ] **T15 read (09-20) — PASS, NO post-241 event to 2400s cap (drain holds):**
-      1 boot (lease 10:12:07–10:53:54Z, 2507 s, zero contention);
-      exit invariant reproduced @ b235 (218 @2461202, N =
-      72176/72176 third count, last lines identical, ramp +
-      chunks + constants exact); 235 blocks past exit to b476:
-      main DORMANT ×237, stubs residue-13 ×236 (same 13),
-      31-drain 71,762 iters (0/31 every post block, never
-      idle), dma/gif frozen 160 pairs @ T13-exact counters,
-      guest events 0, sema-30 4w/3s (t3 never releases);
-      post trace 2,462,182 lines, same 113 funcs, 0 post-only,
-      empty EOF stack; rate flat ~60 (NO dip/surge — fifth
-      shape) → ~30.2 proxy; dormant/inv 2.06–2.12 (never
-      2.0000). Deviations tabled: preamble 887/603 (third
-      pair), b238 = 189 (1-block shift), b239 5/296 vs
-      117/298, t3 transient pc. (P1ai Part 32 unread —
-      landed mid-boot; generic watches used.) Verified:
-      log 2857096 L / 602908868 B, trace 187727172 L /
-      6659595180 B, invariant line, park tail, TSVs (477:
-      b235 = 218, 211×2/189×3, 13×236; 267: 160 frozen @
-      2669132/72181), N 72176/72176, post arithmetic,
-      31 143940/143939 (drain 71762), sema-30 7, binary
-      sha, fork HEAD unmoved + zero commits, lease absent,
-      1 boot, ahead (no push). ~1.2 h. Next: P1aj
-      (drain-termination diagnosis, no boot) in freed pane.
-      Ledger row added.
-- [ ] **M51 read (09-20) — PASS, drift tabled, low-drift keeps nothing:**
-      16/16 TRI fits + 18/16 same-frame + 4/68 + 2/65
-      cross-frame exact (colhits + errvalues exact); peaks
-      stable 5/8 (c343 +262, c340 +6); |Δe|≥3 on 6/8,
-      |Δh|≥5 on 3/8, Δw==0 5/8; low-drift 296/301 (L1
-      2/4) keep 0/0 while 257/340 (L1 15/10) keep 2 each;
-      c343 kept hit = m15 r27 under s0 peak. H1/H3/H4/H7
-      met; H2/H5/H6 not. 0 new bytes. (PNG absent by rule
-      — max pooled kept 2 < 3.) Verified: baselines,
-      18/18+16/16 guards, 4/68 collapse, canon identical,
-      C-P1 pass, mtimes clean. ~0.1 h. Next: M52 (peak
-      residuals, M26 gap 2) in freed pane. Ledger row added.
-- [ ] **M50 read (09-20) — PASS, wipes + dests mirror in staticness:**
-      4/4 wipes + 5/5 dests exact (both TSVs identical);
-      wipes c257/c277 23–32 + c301 23–33 + c321 23–32
-      (full, 41 sites); dest 28/41 g_s0==0 reproduced
-      (7/9+6/9+8/9+7/10+0/4); full sets close (18/20/82 +
-      19/21/81, 0 outside); wiped 33/41 g_Q==0 (0/41 bulk,
-      +0/++ polarity) vs dest 28/37 g_s0==0 (0/37 bulk,
-      −0/−−); kept 0/163; wiped med 27.0 vs dest 16.0.
-      H1/H2/H4/H5 met; H3/H6 not. 0 B explained.
-      (Gap rows 6–8 repeat the stale-chain slip — closed,
-      not open.) Verified: baselines, 731/733 rows,
-      28/41 recount, canon identical, 27/27, C-WIPEDEST
-      pass, PNG 88708 B, mtimes clean. ~0.1 h. Next: M51
-      (TRI drift, M26 gap 1) in freed pane. Ledger row
-      added.
-- [ ] **M49 read (09-20) — PASS, 9-wipe vs +2 growth, populations disjoint:**
-      732 tail 95 / J 0.8942 / named [296] 0/0 + unnamed
-      [298] 6/4; wiped c296 9 rows (|δ| 15–47 med 35.0,
-      ++×9, 0/9 bulk); dest [26,27] (|δ| 8/14, −−×2,
-      bulk, M44 exact); kept 4/4 (−−×4, |δ| up 2/4, 2/4
-      gap-equal); accounting 9/2/4 closes (0 outside).
-      H2/H3/H5/H6 met; H1/H4 not. 0 B explained. (Control:
-      missing-main-guard + c54 fallback, both tabled,
-      receipt untouched.) Verified: baselines, 732 row,
-      sets 2/9/93, canon identical, 37/37, C-MOVE pass,
-      PNG 320 B, mtimes clean. ~0.2 h. Next: M50 (731/733
-      static census, M29 gap 10) in freed pane. Ledger row
-      added.
-- [ ] **M48 read (09-20) — PASS, 10-wipe into +2 dest, counts close:**
-      734 tail 94 / J 0.8846 / moved [340,342,343]; wipes
-      c340 [24–27,31–34] + c343 [26,27] read 0/10 bulk
-      (|δ| med 37.5, max 47 = tail max, ++×8/−−×2 split
-      by column); dest [26,33] far-bulk (|δ| 21,11,
-      −−×2, M29 exact); kept 5/5 tail-both (−−×5, 2/5
-      gap-equal); counts 10/+2/5 close (net −8, 0
-      outside). H2/H4/H5/H6 met; H1/H3 not. 0 B explained.
-      Verified: baselines, 734 row, sets 2/10/92, canon
-      identical, 41/41, C-COLLISION pass, PNG 323 B,
-      mtimes clean. ~0.1 h. Next: M49 (732 move, M28 gap
-      5) in freed pane. Ledger row added.
-- [ ] **M47 read (09-20) — PASS, pure 7-wipe, pools named (11 + 57):**
-      711 tail 95 / J 0.9314 / moved [342,343] / 0/0 both /
-      no-cand both / no unnamed moves; wiped rows c342
-      [27,28,29,34,35] + c343 [26,27] read 0/7 bulk
-      (|δ| med 18.0, −−×4 + −0×3); no-cand structural
-      (priv=0, empty candidate set); 11 singletons named
-      (9 on s9 + 2 on s22, 6/11 bulk, med 9.0); far pool
-      13 cols / 57 sites (med 15.0, s9 12/14 bulk vs
-      731/733 0/37, 734-c342 at d342=0); both pools cover
-      both wipes by count (11/57 ≥ 5/2). H1/H2/H3/H6 met;
-      H4/H5 not. 0 B explained. (Gap row 6 repeats the
-      stale-chain slip — closed, not open.) Verified:
-      baselines, both TSVs identical, 711 row, singleton
-      n=11, canon identical, 18/18, C-WIPE pass, PNG 404 B
-      valid, mtimes clean. ~0.2 h. Next: M48 (734 triple
-      move, M29 gap 7) in freed pane. Ledger row added.
-- [ ] **M46 read (09-20) — PASS, blocks split on bulk/signs, share seats:**
-      22/22 dmins exact (far 18–49 + near 1–7, hist exact);
-      far 12 far-bulk/1 near/3 noncell vs near 2/0/4; near
-      4/6 in 2 mixed comps (2+2 each); bulk 0.8125 vs
-      0.3333 (H1 met), ++ 0.9375 vs 0.5000 (H2 met), seats
-      shared (band 0.1667, dec 0.2083 — H3 not met), med
-      13.0 vs 11.5 (H5 not met), near missing-like in bulk
-      0.1667 (H4 met), mixed 4/6 (H6 met). 0 B explained.
-      (Gap rows 3–4 repeat the stale-chain slip — M33g2–3
-      + M35 closed, not open.) Verified: baselines, 22
-      dmins, canon identical, 167/167, C-SPLIT exact, PNG
-      88748 B, mtimes clean. ~0.3 h. Next: M47 (711 pair
-      wipe, M29 gap 6) in freed pane. Ledger row added.
-- [ ] **P1ai read (09-20) — PASS, post-exit diagnosed, next-park spec written:**
-      Part 32 (503 lines, append-only): main returns via pc==0
-      dormant site (1 line @2489892, ra 0x1d8efc — same site
-      as P1e, all regs differ); driver unwinds 73 lines after
-      last exit; 4049-frame unwind reconciles exactly (20
-      roots: 784 + 781×4 + 115 + …); 31-drain = 781-iter pump
-      subprocess (3 root chains + 2 HLE pad calls/iter, zero
-      trace lines by design); 29-halt mid-b239 (74.1%) with
-      29sig→31wait→dormant on 3 adjacent lines; handshakes
-      72178/72178 + 72959/72958 + 4/3 (31 +1 @ EOF line,
-      29 +2 bounded ≤2, unlocalized); freeze same-tick
-      (8658/234 → 0/0); b241 residue = complete 13-target
-      drain chain; silence re-audit 0/0/0/0/0 (§P32-4 lasts
-      to the line); von-Neumann snapshot + 10 invariants +
-      12-watch W1–W12 + 10-row M1–M10 spec for T15. Verified:
-      dormant line, status-5 ×2, trio adjacency, 29 72178/72178,
-      sema :643, drop :73, CD :7174, exit-region 0/0, unwind
-      @185265063/64, HLE 0/0, residue 13 rows byte-exact,
-      4049 arithmetic, append-only (503+/0−), fork HEAD
-      unmoved, ahead (no push). ~80 min. Next: held — next P
-      brief needs T15's run (t1D + t19 held). Ledger row added.
-- [ ] **M45 read (09-20) — PASS, bottom group IS the full s22 set:**
-      s22 tail 106 / J 0.9623 / priv 4 / miss 0 / shared
-      102 exact; 3 extra-only cells (c296 11/9 + c295 1/0
-      + c307 2/1, deltas 2/1/1); new privates (393,307)
-      |δ| 9 far-bulk-1 gaps 26/−6 dec 9 + (402,295) |δ| 8
-      far-bulk-1 gaps 19/−4 dec 8 vs pair 8,8/noncell;
-      pooled 0/2/2; gaps 4/4 +/−; dec-9 3/4; rows span 9,
-      no shared row/col, seats −1/+11. H2–H5 met; H1/H6
-      not. 0 B explained. (Control v1 infeasible
-      as-pinned, v2 re-scoped green, disclosed.) Verified:
-      baselines, s22 tail/J, c296 rows, canon identical,
-      19/19, C-BOTM/V pass, PNG 88665 B, mtimes clean.
-      ~0.5 h. Next: M46 (far/near split, M33 gap 1) in
-      freed pane. Ledger row added.
-- [ ] **M44 read (09-20) — PASS, wipe-vs-growth + 10× identical crowd site:**
-      c298: s0 [28,29,34,35], 709 wipe (4/4 noncell,
-      −−/−0/−0/−0) vs 732 +2 growth [26,27] (both bulk,
-      |δ| 8/14, −−/−−), 4 kept rows (|δ| up 3/4); c311:
-      12 movers 1/11/0, s9 lone (296,311) (10/noncell/
-      24/7 ++) vs 11 extras = 10× (259,311) byte-identical
-      (17/noncell/−37/−37) + s3 (258,311) (34); lone 10
-      < crowd med 17. H1/H3/H5 met; H2/H4/H6 not. 0 B
-      explained. (Control: 2 tabled control-only fixes,
-      receipt untouched; PNG absent by rule — H4 unmet.)
-      Verified: baselines, TSV guard, 732 rows, H3 11/11,
-      canon identical, 150/150, O-OPP pass, mtimes clean.
-      ~0.3 h. Next: M45 (shape-22 cluster, M34 gap 5) in
-      freed pane. Ledger row added.
-- [ ] **T13 read (09-20) — PASS, PHASE EXITED at block 235, N = 72,176:**
-      1 boot (08:41:40Z, lease 08:41:05–09:01:58Z), monitor
-      led 29 s, TRIGGER stub-phase b235 @ logline 2453403
-      (~09:01:28Z) + 30 s grace → SIGTERM; N = 72176/72176
-      balanced (last exit @185264990, 28032 post lines,
-      empty stack); per-inv 20/19 exact ords 75–72175
-      (non = ramp 0–74 only); exit seq 222→218→211→189→13
-      (b235–241) → 29-halt (b239 partial) + 31-drain (781)
-      → main DORMANT pc 0x0 → dma/gif freeze; sema-30
-      4w/3s parked (no 4th, t3 never releases); single
-      caller ×72176; CD/SIF/GS/RPC silent past b2; rate
-      flat 60 → dip 48 → rebound → 2× surge 104 (b205–215)
-      → exit, guest ratios fixed. Deviations tabled:
-      stub preamble counts, t3 transient pc, empty EOF
-      stack, dormant surplus extent, exit-tail len-52
-      regime, 4049-frame unwind. Yielded ~11 min to T12
-      (cross-SIGTERM contained, messaged). Verified:
-      log 2493828 L / 448535827 B, trace 185293022 L /
-      6581094749 B, trigger line, park tail + newline,
-      blocks.tsv 242 (233×222, b235 = 218@2453403, exit
-      rows), ticks.tsv 167 (freeze), N 72176/72176,
-      last-exit line, post 28032, 394ED0 2×1442182,
-      sema-30 7, binary sha+size exact, fork HEAD unmoved
-      + zero T13 commits, lease absent, 1 boot, ahead
-      (no push). ~2.5 h. Next: P1ai (post-exit diagnosis,
-      no boot) + T15 (run past exit, lease) launched in
-      held panes. Ledger row added.
-- [ ] **M43 read (09-20) — PASS, dests listed, only 761c54 is c54-like:**
-      5/5 cells exact (FULL TSV identical); rows 761
-      [259,261,263,274] (M37 exact) + 731/733 at 25–33/34;
-      761∩c54 = [259]; pooled 5/41 |δ| 8, 4/41 bulk,
-      13/41 −− with 28/41 −0; 1/5 fully c54-like
-      (761c54, itself 2 near/2 far). H1/H6 met;
-      H2–H5 not (the finding). 0 B explained. (Also
-      closes M37 gap 1. Gap rows 5–6 repeat the stale
-      M36/M35-chain slip — closed, not open.) Verified:
-      baselines, TSV guard, 761 rows, canon identical,
-      199/199, C-FRESH exact, PNG 88678 B, mtimes clean.
-      ~0.1 h. Next: M44 (split columns, M34 gap 4) in
-      freed pane. Ledger row added.
-- [ ] **M42 read (09-20) — PASS, big-5 exact, ranks + seats tabled:**
-      5/5 big pins exact (geq only (226,351)); ranks
-      extras 28/25/19 at 1/2/3, missings 45/23 at 1/2,
-      pooled 45>28>25>23>19; 4/5 noncell (bulk is
-      (241,318)); near-big two 16s, no 17/18; rows 3/5
-      edge, c314 pair adjacent (d1), rest ≥15; seats
-      5/5 dec-9, bands 1/1/1/1/2; signs 3++/2−−.
-      H1–H7 ALL met. 0 B explained. (s0-only baseline,
-      disclosed. Same M36-gaps bookkeeping slip as M41
-      — closed, not open.) Verified: baseline, H1,
-      pooled order, canon identical, 18/18, C-BIG exact,
-      PNG 88749 B, mtimes clean. ~0.1 h. Next: M43
-      (fresh-column dests, M34 gap 3) in freed pane.
-      Ledger row added.
-- [ ] **M41 read (09-20) — PASS, 3/30 exact, cross-row near gap 0.54:**
-      3/3 triple pins exact (gap-equal only (301,312));
-      s9 3/30 nears, b5 0/0, splits 1/14/7 + 2/2/4;
-      still-below 14/0/10 + 0/0/10, b5 0; extra-side
-      near gap |0.0455−0.5833| = 0.5379; all 3 nears
-      row-edge; raw-8 scan empty except shared (276,313)
-      on s2+s3. H1–H7 ALL met. 0 B explained.
-      Correction: gap row 6 mislabels M36 gaps 1–3 as
-      open — they are CLOSED (M37/M38/M39). Verified:
-      baselines, H1/H2, c336 pin, canon identical,
-      11/11, C-NEAR exact, PNG 88761 B, mtimes clean.
-      ~0.2 h. Next: M42 (big-|δ| sites, M35 gap 3) in
-      freed pane. Ledger row added.
-- [ ] **M40 read (09-20) — PASS, asymmetry missing-only, row shape predicts nothing:**
-      4/4 row pins + 13/13 value pins exact (s0c311/s0c312
-      measured); missing sides split in medians (10.0 vs
-      17.5 — H3 not met) but agree in signs (4/4 vs 4/4
-      ++ — H4 met); extra sides agree in medians (13.0
-      vs 13) but split in signs (2/4 vs 1/1 ++ — H5 not
-      met); n0/overlap interleave (H6 not met); all 4
-      missing sides pure (H7 met). H1/H2/H4/H7 met. 0 B
-      explained. (Two estimator runs: receipt-cosmetic
-      H7 label between, canon identical, disclosed.)
-      Verified: baselines, H1/H2 aggregates, c311 pin,
-      canon identical, 21/21, C-SPLIT exact, PNG 88545 B,
-      mtimes clean. ~0.1 h. Next: M41 (near-miss triple,
-      M35 gap 2) in freed pane. Ledger row added.
-- [ ] **M39 read (09-20) — PASS, s3 uniform, missing sides agree, extras split:**
-      10/10 row-lists + 14/14 value pins exact (s0c316
-      measured [264]); s3 7/7 delta-1 (4 extra-only + 3
-      missing-only, zero mixed) vs mixed d2/d3/d2;
-      missing sides agree values-deep (med 10 vs 10, ++
-      2/3 vs 1/3 — H4/H6 met); extra sides differ (med
-      8.0 vs 14.5, ++ 3/4 vs 0/4 — H3/H5 not met);
-      magnitude >1 extra-side-only (s2c332 — H7 met).
-      H1/H2/H4/H6/H7 met. 0 B explained. (Estimator
-      set-bug stopped pre-receipt, fixed, disclosed.)
-      Verified: baselines, row pins, canon identical,
-      34/34, C-UNIFORM exact, PNG 88526 B, mtimes clean.
-      ~0.1 h. Next: M40 (shape-9 standing asymmetry, M35
-      gap 1) in freed pane. Ledger row added.
-- [ ] **T3 rerun read (09-20) — PASS, SendCmd direction added + corrections:**
-      second agent, fresh extract, per-word MIPS disasm;
-      new: SNDDRV sends cid 1 @ 0x911c/0x9188, MSIFRPC
-      sends 0x80000001/0x80000018, DRTYSCKF queue addrs,
-      jalr census (no hidden stubs), DRTYSCKF/VOIPF
-      symtabs; corrections: reloc 4-type set, DEV9 PsII
-      stamp, INETCTL live 11, SIO2MAN NULLs, SNDDRV a0
-      s1-relative. Only IRX-INVENTORY.md + csv touched
-      (REPORT.md intact). Verified: extracts identical
-      (22 MD5s), sample sizes + MD5s, DEV9 sole file-row
-      change, SendCmd imports in both binaries, fork HEAD
-      unmoved, ahead (no push). ~0.2 h. Next: none — T3
-      closed, two agents agree; §13 row inputs final.
-      Ledger row added.
-- [ ] **M38 read (09-20) — PASS, shared triple recomputed, s2 diverges once:**
-      34/34 pooled pins + 3/3 shared-shape sets exact; Q
-      gaps agree 2/3 (range 0), diverge-by-2 at (278,314)
-      (s2 40 vs 42); s700 holds (276,313) in tail (|δ| 8,
-      gap 17); triple straddles sign line (2 ++ / 1 −−,
-      pooled 7/10 reproduced); row 278 echoes as c54 extra,
-      rows 276/295 + col 314 sterile, cols 313/332 bear
-      2/3 others; missings 10/10 noncell vs extras 14/10;
-      H1–H6 ALL met. 0 B explained. Verified: baselines,
-      pins, canon identical, 26/26, C-SHARED exact, PNG
-      88749 B, mtimes clean. ~0.1 h. Next: M39 (s3
-      all-delta-1 row, M36 gap 3) in freed pane. Ledger
-      row added.
-- [ ] **T14 read (09-20) — PASS, dev cell-(b) closes adoption table:**
-      dev (b) 640.9 s exit 0 (345 edges, last [344/345
-      640.935]); runner link 0.6 s (was 396.7 s / 60.3%
-      Release); compiles own 98.6% (Σ2527.2/4 ≈ 631.8 s);
-      (b) ratio 1.03×; 3-min gate over (same as Release);
-      header sha identical ×3; reuse re-verified (cache ON,
-      linkline 20,283 B zero thin); 0 peer build edges
-      (T13 boot overlapped whole window — tabled, not
-      attributed); adoption table filled (T12 gap 1);
-      gaps 1–6 named. Verified: last-edge, linkline
-      size + zero-thin, excerpt 345 (546–890), u73 137.6 s,
-      links 9.8/0.6 s, 0 FAILED, header sha, cache, fork
-      HEAD unmoved + worktree generated-only, waits
-      identical, ahead (no push). ~0.5 h. Next: T1 (park
-      snapshot) in freed pane. Ledger row added.
-- [ ] **M37 read (09-20) — PASS, 701 covers c54 geometrically:**
-      24/24 per-site pins exact; 701 mask 649 px in 12
-      contiguous cols 54–65 (c54 133, named-8 0, other
-      unnamed-32 0); c54 10/10 in, other 14 extras 14/14
-      out, c54 0/90 in other 9 masks; rows 258/259 recur;
-      c54 uniform |δ| 8 bulk −− vs others med 8.5, 4/14
-      bulk; tail census s0 0/102 vs s700 10 + s761 4 (all
-      column 54); H1/H4/H5/H6 met, H2/H3 not. Correction:
-      pooled universe is 24 = 10 + 14 — M36's "23" (copied
-      into my brief) matches no extras count; agent tabled
-      it and proceeded on M36 per the stop rule (correct).
-      0 B explained. Verified: baselines, pins, mask 649,
-      canon identical, 44/44, control exact, PNG 89403 B,
-      mtimes clean. ~0.2 h. Next: M38 (shared-site triple)
-      launched in freed pane. Ledger row added.
-- [ ] **T12 read (09-20) — PASS, dev config proven behavior-clean:**
-      fork `7eed783` (+10/-0, pushed 0/0): `PS2X_DEV_NO_THINLTO`
-      default-OFF, runner chain only; Release link line
-      byte-identical 20,294 B + cache +1 OFF line + Release
-      binary BIT-identical to T6's (full sha match); full
-      rel 710 s / dev 559 s (link 390.6→0.5 s); dev cell
-      (a) 5.9 s (vs 315 s), (c) 7.2 s; suite 439/439/0
-      BOTH (faces identical); D exit 0 (1059/245/0/0, no
-      divergence rows); T13 cross-SIGTERM handled by the
-      book (sample discarded, clean rebuild). Verified:
-      stat/push, linklines, cache diff, binary shas, suite
-      reruns both, D rerun identical, log sizes, park
-      lines, drops identical, hot-pc from snapshots,
-      cell-a log, lease absent. Next: T14 (dev cell-b)
-      launched in freed pane. Ledger row added.
-- [ ] **M36 read (09-20) — PASS after tail restore (marker at
-      line 671, restored in `e2c4a96`):** 2/3/700 k 6/7/8
-      exact, FULL TSV byte-identical; 24 extras 14 near /
-      0 far / 10 noncell (c54 10/10 bulk |δ| 8) + 10
-      missings 0/0/10; 23/24 band-1 (H4 all 3 shapes);
-      missings 7/10 ++, extras 4/24 ++ (s700 15/15 −−);
-      700 headliner (c54/c299/c311/c313/c314/c332/c620
-      rows + shared-site notes); 700-c54 10/10 in 701
-      mask (first unnamed carrier hit); all 5 bars + H6
-      met as tabled; 0 B explained. Verified: baselines,
-      TSV guard, H1/H2 rows, canon identical, 406/406,
-      control exact, PNG size (rule-met), mtimes clean.
-      ~0.2 h. Next: M37 (c54 carrier; non-conditional
-      chain exhausted — orchestrator judgment) launched
-      in freed pane. Ledger row added.
-- [ ] **M35 read (09-20) — PASS, M34 gap 1 unnamed values tabled:**
-      FULL 764×33 TSV byte-identical; 15 cells exact (11
-      extra-only / 1 missing-only / 3 mixed); 22 extras
-      1/14/7 + 8 missings 2/2/4 (pooled == M33 cluster
-      sets); c315 3 extras (1 bulk) + 2 missings (both
-      bulk |δ| 10) vs c314 1 extra (bulk) + 3 missings
-      (all noncell |δ| 12/23/45); 21/22 band-1 (H4 met);
-      missings 8/8 ++, extras 18/22 ++; c314+c315 bulk
-      4/9; 0 B explained. Verified: baselines, TSV
-      guard, pooled sets, canon identical, control
-      exact, PNG size (rule-met), mtimes clean. ~0.2 h.
-      Next: M36 (still-below unnamed values) launched in
-      freed pane. Ledger row added.
-- [ ] **M34 read (09-20) — PASS, M33 gap 2 unnamed scan done:**
-      union tail-Y 41 cols → 33 unnamed (13 s0-bearing 37
-      sites + 20 pure-private); 33/764 movers, 79 cells
-      (21 miss / 50 extra / 8 mixed; delta med 1.0, max
-      10; 12 wipes); every column moves somewhere (c311:
-      12); named∩unnamed 6/4/27/727; below join 7/26/2/729
-      (2/3/700 move unnamed k 6/7/8; 9/9 below move ≥1 of
-      41); c298 seed full wipe delta 4, 9/79 ≥; 0 B
-      explained. Verified: baselines, domain rows, TSV
-      mover recount (33), canon identical, 4/4 controls,
-      TSV size, mtimes clean. No PNG (absence reasoned:
-      H5 unmet). ~0.3 h. Next: M35 (shape-9 unnamed
-      values) launched in freed pane. Ledger row added.
-- [ ] **T11 read (09-20) — PASS, 600 s cap, N > 29,469, no exit:**
-      all 5 post-phase signatures absent over the full window;
-      29,469/29,469 + 588,042/588,042 + 558,573/558,573 exact
-      trace balance; modal cycle 29,393/29,468 + FRR
-      ×29,469 + 20/19 constancy (28 chunks) + stubs 222
-      ×117 + sema-30 4w/3s; wall rate 64→36/s smooth decay,
-      all guest ratios fixed; deviations tabled (stub
-      preamble @b2, probe +1, t3 transient, EOF slot 8);
-      1 of 2 boots, lease 07:29–07:39Z zero waits, binary
-      sha == P1ag's, zero fork changes. Verified: exact log
-      + trace sizes, sema count + last line, stub values,
-      probe 20k/0 CYCLE, full-trace awk balance, lease
-      absent, fork HEAD unmoved. ~55 min. Next: T13
-      (1800 s run) launched in freed pane. Ledger row added.
-- [ ] **M33 read (09-20) — PASS, M29 gap 2 cluster attributed:**
-      117 B @ J 0.7520 (inter 94, union 125): 22 priv 1
-      near / 14 far / 7 non-cell, 8 miss 2/2/4; 21/22
-      priv band-1 (H4 met); privates span 14 comps max 4
-      (H5 not met); miss d1 share 0.7500 all ≤2, priv
-      17/22 dmin ≥5; all 30 outside named columns (every
-      named site shared); 0 carrier bytes; 39 s9 comps vs
-      25 s0; 2 union comps interleave 2+2; 0 B explained.
-      Verified: baselines, sets + splits, canon identical,
-      control exact, PNG size (rule-met), mtimes clean.
-      ~0.1 h. Next: M34 (unnamed-column scan) launched in
-      freed pane. Ledger row added.
-- [ ] **M32 read (09-20) — PASS, M31 gap 1 admissions bracketed:**
-      K=1 gate sha-identical to M31; movers 8/9/10/10 +
-      cells 13/14/15/15 at K=233/234/366/367; admissions
-      land exactly at K=234 (r266), 366 (r400), 367 (r401);
-      diffs 0/1/1/0 cells (9 re-moves 233→234, 22 re-moves
-      234→366); extras re-census exactly 5; K=367 TSV
-      byte-identical to m28-census.tsv (windowed == exact
-      at full admission); join 5/3/4/752 → 6/3/3/752 →
-      6/4/3/751; all 10 bars met; 0 B explained. Verified:
-      baselines, gate + mover/off-span rows, diff legs,
-      canon identical, 9/9 controls, TSV md5s + K367==M28
-      bytes, PNG size (rule-met), mtimes clean. ~0.2 h.
-      Next: M33 (shape-9 cluster; M32 gap 1 conditional
-      declined — extras census pins every K) launched in
-      freed pane. Ledger row added.
-- [ ] **M31 read (09-20) — PASS, M30 gap 1 K-boundaries mapped:**
-      K=2 gate sha-identical to M30; 8 movers every K with 12
-      cells K=0 / 13 cells K≥1 (K=1/15/20/50/100 TSVs
-      byte-identical to K=2); off-span 5 sites K=0 / 3 far
-      extras K≥1; ordered diffs flip 3 cells exact→0, 1 cell
-      (734-c342) 0→1, 0 on all 7 pairs K=1..100; extras
-      census exactly 5 (no d=2); upper negative through
-      K=100 (min-K 1/1/234/366/367 computed); join
-      5/3/4/752 all K; all 9 bars met; 0 B explained.
-      Verified: baselines, gate sha, K=0 rows, diff legs,
-      canon identical, 6/6 controls, TSV md5s + sizes, PNG
-      size (rule-met), mtimes clean. ~0.1 h. Next: M32
-      (upper-K confirmation) launched in freed pane.
-      Ledger row added.
-- [ ] **T6 read (09-20) — PASS, ThinLTO link owns the wall, fix
-      correctly declined:** full 472 s (link 330 s serial
-      tail); incremental (a) 315 s (link 312.8 s = 99.3%),
-      (b) 658 s clean (link 396.7 s = 60.3%; 844 s
-      contended), (c) 8 s, (d) 0 s; sccache ON-but-NOTFOUND;
-      290 unity batches (giant TU 6.9–14.2 s — not the
-      miss). Bite met but NEITHER allowed fix applies
-      (ccache can't move link time; split can't shrink 313
-      MB link input) — zero fork changes with the numbers
-      tabled, contention handled by the book (waited 4 min,
-      clean rerun). Verified: log line counts, cell-a 5
-      edges + 314 s link, ninja-log refs, IPO line, HEAD
-      unmoved, zero commits, no boots, lease absent. Next:
-      T12 (dev build config, gap 4) launched in freed pane.
-      Ledger row added.
-- [ ] **M30 read (09-20) — PASS, M29 gap 1 window tested:** exact
-      census reproduced (bad=0 all 764, 15/15 standings);
-      K=2/5/10 row-identical (3 TSVs byte-identical md5):
-      8 movers / 13 cells (9 + 22 un-moved, 0 newly moving,
-      0 flips); off-span exactly the 3 far extras (no 4th
-      in 764); standings 7/1/5 (extra-only 3→1, assigned +
-      no-cand untouched); join still+below 3→4 (9 joins
-      2/3/700); all 6 bars met; 0 B explained. Verified:
-      baselines, guards, off-span rows, K-diff identicals,
-      canon identical, 5/5 controls, TSV md5s + sizes, PNG
-      size (rule-met), mtimes clean. ~0.1 h. Next: M31
-      (K-boundary sweep) launched in freed pane. Ledger
-      row added.
-- [ ] **M29 read (09-20) — PASS, M28 gap 1 partials attributed:**
-      6/6 cells match M28 (no 7th anywhere in 764); 9 delta
-      sites (5 extra + 4 missing, all Y): missings in-span
-      (|δ| 13–44, g +/+), extras split span-adjacent (734
-      ±1 row) vs far-flung (9 r266 +234, 22 r400/401
-      +366/+367); 7 far-bulk / 2 non-cell / 0 near; 8/9
-      dec-9; extra medians 8–9 vs missing 18.0; RT-PRES
-      un-moves all 6 (10→5), RT-DEST 0/4 (zero private-Y);
-      0 B explained. Verified: baselines, delta rows,
-      RT rows, canon identical, 2/2 controls, PNG size
-      (rule-met), mtimes clean. ~0.2 h. Next: M30
-      (span-windowed census) launched in freed pane.
-      Ledger row added.
-- [ ] **M28 read (09-20) — PASS, M27 gap 1 census done:** 10/764
-      movers (754 byte-identical on all 8), 15 moved cells
-      (6 singles / 3 pairs / 1 triple; only [296] repeats);
-      7 assigned dests (6×+2, 1×−1; 5 fresh + 734 c342
-      collision), 3 extra-only + 5 no-cand; block-diagonal
-      co-occurrence (257/277, 301/321, 340/342/343; c296
-      solitary); 2×2: 6/10 movers below 0.95, 2/3/700
-      below-but-still; 0 U/V private sites; 0 B explained.
-      Verified: baselines, mover count, swap-guard row,
-      canon identical, 5/5 controls (+aggregate), TSV 765
-      lines, PNG size (rule-met), mtimes clean. ~0.1 h.
-      Next: M29 (partial-move attribution) launched in
-      freed pane. Ledger row added.
-- [ ] **T10 read (09-20) — PASS, no bound exists in-trace:** 54-frame
-      modal dispatcher cycle (REP+53, 13,032/13,107 exact;
-      75 non-modal = ordinals 0–74 exactly); C3/C7/C1b/C1a#1
-      at +5/+15/+18/+16 in ALL 13,107 gaps (0 violations by
-      orchestrator re-parse); deeper 1:1:1 exact; owner loops
-      3/0/0/0/1, none spanning any issue site (all issues
-      struct-loaded `jalr`); host loop stop-flag-only (source
-      read); step-3 table updated (3a dead in-trace, 3b needs
-      calibration, 3c needs ~10 min lease). Verified: full
-      d0-sequence re-parse (711,361 + 1 live, reps, gaps,
-      offsets, C7 kids), ELF words + JAL/branch math, TSV
-      sizes, zero commits, no boots. ~30 min. Next: T11
-      (run-to-exit empirical N, step 3c) launched in freed
-      pane. Ledger row added.
-- [ ] **M27 read (09-20) — PASS, shape-733 divergence attributed:**
-      100 B @ J 0.6694 (inter 81, union 121): 19 priv + 21
-      miss + 81 shared, all luma; all 40 non-cell on the
-      other frame (0 near/far; 15/19 + 13/21 static there);
-      miss = s0 c301 + c321 entire, priv = c303 + c323
-      entire (two +2 whole-column swaps); d1 share 0.0000
-      both sets; 4/6 streak columns survive; 731 mirror
-      (18+20+82 @ 0.6833, c257/c277 → c259/c279, disjoint
-      sets J 0.0000 both); 0 B explained. Verified:
-      baselines, sets + Jaccards, canon identical, 2/2
-      controls, PNG size (rule-met), mtimes clean. ~0.1 h.
-      Next: M28 (column census) launched in freed pane.
-      Ledger row added.
-- [ ] **M26 read (09-20) — PASS, M25 gap 1 hump shapes fitted:**
-      TRI (symmetric triangle) best 18/65 s0 + 16/68 m15
-      (34 pooled) vs CONST 12/13, TWO 15/12, QUAD 4/3;
-      peak rows agree 5/8 cross-frame (rise/fall match on
-      none); argmax top-third 6/8 s0 (first-tie rule);
-      TRI beats-or-ties CONST 6/8 columns per frame
-      (+6/+3); cross-frame TRI 4/68 + 2/65 (collapse);
-      QUAD ∩ on all positive columns yet worst (2–3 miss
-      mass); 47/52 named-col stands. Verified: baselines,
-      32/32 profile-guard lines, TRI row, collapse row,
-      canon identical, control pass, PNG size (rule-met:
-      c301/c340 +2), mtimes clean. ~0.1 h. Next: M27
-      (shape-733 attribution) launched in freed pane.
-      Ledger row added.
-- [ ] **T8 read (09-20) — PASS, repetition driver cased:** all
-      13,108 reps at depth 2, parent 363490-fresh, grandparent
-      376938-depth-0 (re-parse: enclosing (0,1) ×13108);
-      reps-per-frame {0: 378922, 1: 13108} exact; E1 frame
-      entry 13108/13108 (E2/E3/E4 all 0); FRR ×13108 exact
-      (body+empty, gaps 8/7, ramp variants inv 0–74);
-      resumes skip prologue (0 children, JALs #6–16);
-      checkpoint/resume mechanism cited (ps2_runtime.cpp
-      lines); site 0x377b14 JAL→363490 in straight-line
-      window; 14 loops none spanning the site; 3 self-JALs
-      trace-invisible gotos; region entry indirect-or-resume
-      only. Verified: 3 independent streaming re-parses
-      (depth/parents/distribution/FRR), ELF words + JAL/branch
-      math, TSVs, zero commits, no boots. ~35 min. Next: T10
-      (outer-driver search) launched in freed pane. Ledger
-      row added.
-- [ ] **T9 read (09-20) — PASS, D flips to OK:** fork `935a4eb`
-      (+215/-6, pushed 0/0): waiter presence SAMPLED when
-      wait-sets differ (+ `t->sema` correlation), EXACT when
-      agree, histories untouched; tests 6/6 both forms (4/6
-      BEFORE); D BEFORE exit 1 byte-identical to T5/D.txt;
-      D AFTER exit 0 (1054/245/5/0; before-after diff = 2
-      rows + ladder line only, 0 changes outside waiter
-      class); D1/D2 byte-identical old-vs-new (exit 0);
-      T5 proof closed by table. Verified: stat/push, tests
-      both forms, all diffs, D-after rerun, D1 rerun,
-      no boots, lease absent. Next: T6 (build cache check)
-      launched in freed pane. Ledger row added.
-- [ ] **M25 read (09-20) — PASS, M23 gap 2 column profiles
-      tabled:** 8 named columns single-sign throughout
-      (sign-runs 1) but ragged in value (s0 ranges 11–34,
-      sd to 11.8); holes on c296/c340/c342 both frames +
-      m15 c343 r289 (261-span); cross-frame 6/65 agree
-      (mean|Δ| 1.5–8.3); CONST best 12/65 + 13/68 (25
-      pooled), LINEAR below CONST both frames (7/4), SIGNC
-      6/8 + 24/28 near; cross-frame CONST 0/68 + 1/65
-      (collapse; one 1299 extrapolation err tabled);
-      53/55 named-col stands. Verified: baselines, counts,
-      CONST row, collapse + agreement rows, canon
-      identical, control pass, mtimes clean. No PNG
-      (absence reasoned). ~0.1 h. Next: M26 (hump profiles)
-      launched in freed pane. Ledger row added.
-- [ ] **T5 read (09-20) — PASS with asterisk (D reads DELTA, rule
-      good):** fork `1a76df4` (+289/-0, pushed 0/0): folded
-      `.text` constants split (ElfParser placement, N64 rule);
-      +172 splits predicted==actual (diff clean, 172-line
-      splits.txt); 0x3E3AD8 re-derived at 2 real sites (dedup
-      no-op); +1 stub binds `_sceSifCmdIntrHdlr@0x426230`;
-      suite 439/439/0; boots exact on drops/RPC/creates/hot-pc
-      top (953,381 both), GS/sched ≤1.2%; D = 1054/245/3/2
-      DELTA — the 2 KEY_DELTAs are waiter presence, PROVEN
-      phase artifacts by orchestrator (waiter ⟺ sampled WAIT
-      status both snapshots, hists balanced both sides); the
-      misfire is the tool's verdict class, not the rule.
-      Verified: fork stat/push, suite rerun, splits file,
-      recomp logs, exact log sizes, D rerun exit 1 identical,
-      ELF site words + JAL math, hand checks, lease released.
-      Next: T9 (waiter-phase rule + re-verdict, 0 boots)
-      launched in freed pane. Ledger row added.
-- [ ] **M24 read (09-20) — PASS, M23 gap 1 near-hit mass fitted:**
-      4 fixed corrections scored exact-hit: best SIGN
-      (K45+ ±1 by gap side) 21/102 s0 + 28/134 m15 exact
-      (49 pooled) vs 14/15 K45+ baseline; FRAC uniform −1
-      both halves both frames; PARITY/POS drift cross-frame
-      (POS 16/25 vs 19/28); no split separates −1/+1 above
-      0.5882 purity; 32–63 bin holds 16/32 + 31/49 of the
-      ±1 mass; columns column-coherent (c257/277/321
-      non-positive, c296 |r|≤1, c342 positive); SIGN
-      transfers (21–24 hits shapes 1/2/733); 81/106 tail
-      stands. Verified: baselines, counts, SIGN score row,
-      canon identical, control + identity 60/60, mtimes
-      clean. No PNG (absence reasoned: no H3 split). ~0.2
-      h. Next: M25 (streak-column profiles) launched in
-      freed pane. Ledger row added.
-- [ ] **M23 read (09-20) — PASS, M22 gap 1 tail values fitted:**
-      9 fixed predictors scored exact-hit: best K45+
-      (δ=round(0.45·g)) 14/102 s0 + 15/134 m15 exact (29
-      pooled) + 32/49 near; STEP 0/102 all three; COMP
-      13/102; POS 7/102 collapsing to 1/102 cross-frame;
-      δ multi-valued in every gap bin (H6 0.2174/0.1333);
-      streak columns single-sign (22.7–36.5, c342/343
-      negative); ≤1 B in any carrier mask; K45+ transfers
-      (14–15 hits on shapes 1/2/733 incl. J-0.6694 733);
-      88/119 tail stands. Verified: baselines, counts,
-      K45+ score row, canon identical, control + identity
-      60/60, mtimes clean. No PNG (absence reasoned per
-      pre-registered-split rule). ~0.2 h. Next: M24
-      (near-hit mass) launched in freed pane. Ledger row
-      added.
-- [ ] **T7 read (09-20) — PASS, designed STOP fully verified:**
-      0x36356c is `lw` (ELF `0x8f932a90`), not a JAL — the
-      P29/P31 "call site" label came from a tick sample pc;
-      sole `362DE8` JAL at 0x3634cc (ELF `0x0c0d8b7a`,
-      target re-derived 0x362DE8) in branch-free prologue
-      (once per fresh entry); 12 back-edges min-target
-      0x3635C0, none containing a `362DE8` call; trace
-      363490 39324/39324 (= 3×13108 exact), 376938
-      392030/392029 (deficit 1); sole static caller 376938;
-      8-row examined-and-absent; next-cheapest receipt spec
-      (steps 1/2/3a-c + inner alt). Verified: ELF words +
-      JAL math + prologue scan, exact trace counts, zero T7
-      fork commits (HEAD = T5's `1a76df4`, pushed 0/0), no
-      boots, lease never touched. ~25 min. Next: T8
-      (repetition-driver attribution) launched in freed pane.
-      Ledger row added.
-- [ ] **M22 read (09-20) — PASS, M20 gap 1 tail located +
-      isolated:** 102/134 tail bytes 100% luma (all 764
-      shapes chroma-free); top-band 67.6%/56.0% + dec-9
-      90.2%/82.8% (beyond bulk); 25/31 8-conn comps, largest
-      11/13 px (r23–33 streak columns recur both frames);
-      max 1 B in any top-10 mask (701: 0); 727/764 maps
-      byte-identical (median Jaccard 1.0; 733 @ 0.6694
-      lowest); m15 Jaccard 0.4132; gaps ≥17 (mean ~54) with
-      ρ in [0.4,0.5) on 69.6%/63.4% (bulk peaks [0.3,0.4));
-      sign agrees with gap 90.2%/89.6% (bulk ~60%). No tail
-      rule (0 explained). Verified: baselines, counts,
-      plane/band/decile rows, Jaccard aggregates, canon
-      identical, 2/2 controls, PNG size, mtimes clean. ~0.2
-      h. Next: M23 (tail values) launched in freed pane.
-      Ledger row added.
-- [ ] **M21 read (09-20) — PASS after report restore (first commit
-      truncated at line 269, restored from the complete receipt
-      in `1542d4d`):** 518/764 shapes byte-identical static maps
-      (median Jaccard 1.0; 700 @ 0.0747, 694 @ 0.6565); m15
-      disjoint (92/1476, J 0.0245); ε ±1 on 98.9%/96.8%
-      (chroma all-±1); 71.3%/82.5% at d=1 of a moved edge; U&V
-      co-residual 16.0×/21.6× independence; HUD union 103/463
-      s0-Y (22.2%); no static-site rule shrinks anything.
-      Verified: baselines, cell-6 counts exact, EFB ratio,
-      canon identical, ε hist, HUD + synth rows vs receipt,
-      2/2 controls, PNG size. ~0.2 h + restore. Next: M22
-      (interior far-tail) launched in freed pane. Ledger row
-      added.
-- [ ] **P1ah read (09-20) — PASS, no progress indicator exists:**
-      per-invocation work EXACTLY constant inv 75–13106 (20×
-      394ED0 + 19× 395000 + 2534 lines, 12 identical chunks,
-      0 bad by orchestrator streaming re-parse); single caller
-      `0x363490` 13108/13108; ramp inv 0–74 (162 calls,
-      lockstep with probe total→0x14 @ n=162);
-      blocks-49–50 step is uniform 3–5× wall scaling with all
-      guest ratios fixed; probe total saturates n=162 (slope
-      0); CD/SIF/GS/RPC silent since ≤block 2. Deciding receipt
-      specified: driver-loop (i,N) @ 0x36356c, owner T1
-      emitter. Verified: full-trace re-parse (caller,
-      per-inv counts, ramp, 100% enter/exit), probe
-      changepoints exact, silence last-lines, no boots, no
-      fork changes. ~15 min. Next: T7 (the (i,N) receipt)
-      launched in freed pane. Ledger row added.
-- [ ] **T1 read (09-20) — PASS, snapshot tooling landed + proven:**
-      2 fork commits pushed 0/0 (emitter `aae2d12` 7 files
-      +1183/-0, `ladder_diff` `a611702`); proof boot wrote the
-      snapshot on SIGTERM (JSON 111,491 B: 6 threads, 1188 hot
-      pcs, 21 loads, 37 creates); D1 rerun by orchestrator exit
-      0 (97 exact / 8 tol-ok / 0 deltas); suite 436/436/0 by
-      orchestrator rerun; all 3 hand checks match (drops 6,
-      sema-30 7 lines, 4 RPC sids incl. live 0x534E44 +
-      0x80000211 — T3's static map confirmed live); void boot
-      root-caused + openly recorded; lease released, 1 P1ag
-      wait. Trivia: "3 P1af SPR" mislabels P12's test (total
-      consistent); "New-park catalogue" is a misnomer (thread 1
-      Ready + thread 5 Running = game running, agrees with
-      P1ag's no-park). Next: T5 (analyzer rule) launched in
-      freed pane. Ledger row added.
-- [ ] **M20 read (09-20) — PASS, M19 gap 1 cell-7 mechanism tabled:**
-      δ=±1 on 85.9%/83.5% (s0/m15) with a ±45 tail; 97.8%/94.2%
-      luma; δ>0 on 80.9%/80.2% (reproduces M19 negrates
-      exactly); 78.6% within d≤2 of an edge; 62.8% in top
-      gradient decile; 701-mask splits the mean (−0.97 in vs
-      +1.49 out, all 102 |δ|≥8 outside); best of 20 fixed
-      stencils hits 5.3% (131 B) — cell 7 stands at 2344 B.
-      Verified: baselines+fnvs, cell counts exact, δ hist,
-      canon identical, stencil best, 701 sha, 2/2 controls
-      exact, PNG size, mtimes clean. ~0.3 h of 4 h. Next: M21
-      (static-site mechanism) launched in freed pane. Ledger
-      row added.
-- [ ] **P1ag read (09-20) — PASS, honest negative at 300 s:** 4th
-      sema-30 signal ABSENT (exactly 7 sema-30 lines, ends
-      parked); thread-3 WAIT-30 ×56 straight; hash phase still
-      running (13,108/13,108 + 260,822/260,822 exact-balanced);
-      stubs 222 ×54, no new phase/park; main RUNNING 41/59;
-      guest rows match P1af exactly; 1 of 2 boots used (confirm
-      skipped, lease freed for T1); zero fork changes (HEAD
-      still `e483d8d`). Verified: exact log size, sema count +
-      last line, probe 20k/0 CYCLE, stub values
-      (distinct=13 = syscalls block, not stubs), exact trace
-      balance, fork HEAD. Rate contended with T1's build
-      (43.7/s vs 58.8/s — throughput, not signal). Next: P1ah
-      (hash-phase work census, no boot) launched in freed pane.
-      Ledger row added.
-- [ ] **M19 read (09-20) — PASS, M18 gap 1 closed at table level:**
-      mid = brighter endpoint on 17089/17751 endpoint bytes
-      (96.3% s0, 92.7% m15, 764/764 shapes ≥0.95); moved-outside
-      159 above / 62 below (s0); 2368 raw static-site bytes (Y
-      subset = P4's 463 exactly); no single-endpoint rule
-      shrinks R_0 (best −6786); max-side/above read synth<truth
-      throughout (arithmetic, honestly noted), static unbiased
-      0.51; 701's mask 56.6% interior. Verified: baselines+fnvs,
-      8-cell partition sums to 22815, canon identical, coarse 0
-      mismatches, 5/5 controls, PNG size, input mtimes clean.
-      Trivia: §Exact-commands says 2nd invocation, §Runs says
-      3rd — canon-identical, immaterial. ~0.5 h of 4 h. Next:
-      M20 (interior-cell mechanism) launched in freed pane.
-      Ledger row added.
-- [ ] **T3 read (09-20) — PASS, 22-IRX inventory done, §13 inputs
-      tabled:** all 22 extracted+sized+md5'd; origin Sony 18 / EA
-      3 / Logitech 1; SND path: SNDDRV 41imp/0exp/serves sid
-      0x534E44+cid 0 (pure server), SDRDRV 47/6/serves
-      0x80000701+calls 0x80000704 (EE-side), MSIFRPC = RPC
-      transport (3 cids, 0 sids), LIBSD 19/34 (no RPC);
-      HEADLINE: USBKB serves sid 0x80000211 (the §11 unclaimed
-      RPC — server named); SND cid 0-vs-1 tabled both ways, not
-      adjudicated. Verified: commit 2 files (REPORT.md
-      untouched), 22 scratch files, sizes+2 md5s, origin
-      strings, symtab anchor, CSV 22 rows, ISO mtime old, fork
-      head still `e483d8d`. Sid→site disassembly agent-attested
-      (method symtab-validated on SNDDRV). 11 min of ~1 h.
-      Next: M19 launched in freed pane; P1ae trigger gains the
-      USBKB mapping. Ledger row added.
-- [ ] **P1af read (09-20) — PASS, 394ED0 park GONE, main RUNNING, no
-      new park:** SPR normal-mode DMA fix (FROM+TO, fork `e483d8d`
-      +142/-0, pushed 0/0): probe 20k lines 0 CYCLE@ both boots;
-      trace 104,442/104,442 + 5,289/5,289 exact-balanced (vs 63+1
-      hung); TO refuted-working (n=0 a2 `0x9d`, n=1 `0x26` vs
-      pre-fix zeros); stubs 15 blocks @222 distinct, no all-13;
-      final block thread-1 RUNNING `0x39b72c` sched=601; sema-30
-      still 3sig/4wait (4th signal downstream of 90 s window —
-      PREDICTED not proven). Verified: fork stat/push/trailer,
-      committed-blob SPR block + 2 tests, exact log sizes, awk
-      trace balance, probe bytes, stub values, final block.
-      Suite 434/434/0 agent-attested (binary gone, no rerun).
-      Foreign-tree (T1) handled right: named adds, mtimes audit,
-      pull refused/push clean. Next: P1ag (long-boot 4th-signal
-      proof) launched in freed pane. Ledger row added.
-- [ ] **M18 read (09-20) — PASS, filtering-scale falsified, remainder
-      stands:** blend weight explains 0/22815 B (764/764 argmin
-      0.5, sharp cusp ±0.025→+3100 B); rounding ≤2.5% (half-even
-      best, bar 25% not met); global affine identity both frames
-      (e_A=0, field R²≈0.007); standing 22815 B = 77.8%
-      endpoint-residual + 91.7% synth<truth + 96.9% in moved mask;
-      per-carrier: effect draws prefer v0 side, HUD draws
-      weight-invariant. Verified: baselines+fnvs vs M17,
-      receipt-table awk (0 nonzero explained, 0 argmin≠0.5), 3/3
-      controls pass, PNG sizes, m15/m16 mtimes clean. ~0.5 h of
-      4 h. Next: M19 (endpoint-direction split, gap 1) queued;
-      T3 took the freed pane. Ledger row added.
-- [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** DECIDED 09-20 — bytesize (ssh verified, key auth). T4 Brief 1 launched in freed t13 pane (Devel build + SSX3 epoch trace, 6 h, no lease); track continues while useful (Brief 2 = trace channel + aligner next). Mini-deferral superseded.
-- [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** p1aj (drain-termination diagnosis, no boot, 4h) · m56 (far-row census, offline, 4h). Held for the P1aj-directed experiment: t1D + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree). P1ae still queued (no SIF-shaped park — SIF silent).
-- [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
-- [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
-
+- [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes, before any diagnosis brief on a state the reference does not enter (F3 4th trigger) · drain question CLOSED (F3 rec 11: no E1/P1ak-class brief) · gate reads carry a reference-state row (F3 rec 16) · briefs require tail-3 receipts; boot scripts get progress caps (F3 rec 17).
+- [ ] **Live panes:** m62 (gap-13 interval, offline, 4h) · t21 (3rd ✕ at Time Zone, bytesize, 6h) · t22 (aligner projection + pc=, no boots, 4h) · a0 (name the divergence, static, 2h) · e2a (pad stimulus boot, P-lane lease, 6h).
+- [ ] **Queue:** A1 (kernel-true scanner, after A0) · E3 probe (conditional on A1) · E2b/E2c HELD (F3 rec 15) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1048,14 +47,6 @@ the build or commit that closed them.
       faults this is the single largest emu-thread lever measured so
       far; D5 attributes them by vector and times raise→rfi on the
       device before anything is built on the assumption.
-- [ ] **G0 read (09-18 15:40) — harness + census DONE, pushed:** 78
-      synthetic captures, identity replay byte-exact on all, census
-      renders every feature, CTest 6/6; `ps2xGS` public under GPL-3 with
-      G0's commits. Finding that changes the loop's acceptance: the CPU
-      backend ignores TEX1, DIMX/DTHE, COLCLAMP, SCANMSK, aa1, fix and
-      ZTE — plan §5a now routes those features to a second oracle instead
-      of byte-exact-vs-CPU. Next: G1 (game captures) waits on P1b
-      rendering; G2 (loop brief) after G1. Ledger row added.
 - [ ] **Audit review + C1 cleanup launched (09-18 16:35):** A1 found no
       game bytes, images, big blobs or deleted files in tree or history;
       third-party trees are untracked with licenses recorded; the one
@@ -1121,120 +112,6 @@ the build or commit that closed them.
       never `mv` them; this Mac's `find` is bfs, which rejects
       `-newermt "-3 hours"` (use an ISO timestamp). Briefs now write
       receipts and binaries to the SSD and use `/tmp` only for the link.
-- [ ] **P1 read (09-18 14:10) — PS2Recomp boots to the kernel-patch
-      scanner; P1b launched:** census and recompile reproduced exactly on
-      the Mac (arm64); runtime + 425/425 tests + port runner all build;
-      the game loads, starts, sets up its heap, then spins in the SDK's
-      kernel-patch scanner (`sub_0042C1F0`) polling syscall 0x83
-      `FindAddress`, which can never match without a kernel image. The
-      scan result (0x455230) only feeds a patch applier that is a no-op
-      at 0, so P1b stubs the scanner via the TOML (`ret0@0x0042c1f0`),
-      stages the disc tree (runner maps `cdrom0:` to the ELF directory),
-      and climbs the ladder with two allowed follow-ups (stub the
-      applier entry if dispatch fails; inventory IOP module requests).
-      GS renderer read (mine, later): 4 files, ~146 KB, CPU rasterizer
-      only, 2 TODOs. Ledger row added.
-      P1b progress (15:05): with the scanner stubbed the boot climbs to
-      SifInitRpc and loads six IOP modules through the HLE (SIO2MAN,
-      PADMAN, LIBSD, SNDDRV, MCMAN, MCSERV), then dies on `sceCdRead` of
-      LBN 0x10 (the ISO9660 volume descriptor): the runtime can serve raw
-      sectors from `IoPaths.cdImage` but nothing in the runner sets it —
-      P1b applies a one-hunk `PS2X_CD_IMAGE` env hook (upstream PR
-      candidate). Second class of stall: missing indirect-call targets
-      that are real prologues the analyzer merged into neighbours
-      (0x3b07b8 inside sub_003B0770, reached from a function-pointer
-      table walk) — fixed by feeding the recompiler a function-map CSV
-      (`general.ghidra_output`, rows name,start,end,size) built from the
-      generated sources with splits at each reported prologue, iterated.
-      Third stall (15:20, with the CD image readable): every guest thread
-      parks in the scheduler (99% in its idle wait). Cause: the game uses
-      the SDK's asynchronous CD callback (binds `sceCdCallback` and
-      `sceCdInitEeCB`), and the runtime implements both as no-ops, so the
-      callback that signals the game's semaphore never fires. P1b adds an
-      idle-thread snapshot dump (diagnostic) and an HLE CD callback path
-      that queues a guest invocation after each read completes, the way
-      `EeScheduler::dispatchIrq` runs interrupt handlers; both as patch
-      files (upstream PR candidates).
-      P1b read (09-18 17:10): Part 3 delivered. The constructor table at
-      0x43ce38 (39 entries, all prologues) was split in one pass; boot 8
-      with all four fixes has zero missing targets and no CD error, then
-      goes silent: no syscall, VIF, GIF or frame for 10 minutes, no idle
-      dump (so some thread stays runnable), runner at ~10% CPU. Fix D
-      (CD callback HLE) has no receipt that it ran. Four commits pushed
-      on the fork branch `ssx3`. P1c launched (`local/muse/prompts/P1c.md`):
-      env-gated diagnostics (periodic thread dump, syscall and HLE-stub
-      histograms, CD-callback receipt), name the loop from the generated
-      source, at most three completion fixes with one boot each, Part 4.
-      G1 brief drafted (`local/muse/prompts/G1.md`), launches when a
-      frame presents. Ledger row added.
-      P1c read (09-18 18:20): Part 4 delivered in 1 h 10 min. The
-      silence was one thread in WaitSema on a semaphore that only the
-      game's alarm callback signals, and SetAlarm had refused that
-      callback because its address had no function-table slot: the
-      same unsplit-prologue class as the constructors. Two splits later
-      (alarm callback, a frameless comparator) the boot creates the CD
-      thread, inits the CD callback, reads the PVD and directory
-      sectors, then both threads go Dormant with pc 0 and no exit
-      syscall; the CD thread never ran (its entry is also mid-function
-      in the map; Thread.cpp:269 refuses unknown entries). Lesson: every
-      function reachable only through a data pointer (constructor
-      tables, alarm/thread/RPC handlers, comparators) is invisible to
-      the analyzer. P1d launched (`local/muse/prompts/P1d.md`): a
-      one-pass code-pointer sweep over the ELF (data words + lui/addiu
-      pairs, split only on prologue or after a `jr $ra`), a strict-return
-      build to catch the return to 0, and a CD payload check. Ledger
-      row added.
-      P1d read (09-18 19:10): sweep delivered in 50 min: 1,024 new
-      functions found only through data pointers, zero recompile
-      failures; the CD thread now runs and waits on semaphore 26. The
-      main thread still returns to pc 0 after 22 schedulings; the strict
-      build only reported a benign startup return in the bss-clear loop
-      (ra 0 from crt0) and the report path likely de-duplicates per
-      target, so the real return was silent. CD raw reads verified byte
-      correct. P1e launched (`local/muse/prompts/P1e.md`): receipt at
-      both makeDormant sites with the dispatch history, un-deduplicated
-      Return reports, name the returner and the exit condition, map
-      semaphore 26's owner, one fix if the runtime owns the tested value.
-      Ledger row added.
-      P1e read (09-18 19:55): the main thread dies in the epilogue of
-      `sub_003DCBD8` reading a zero return address from its stack slot
-      at 0x1ffff60; the function had been re-entered mid-body through
-      the dispatcher after the StartThread thread switch (the runtime
-      unwinds C frames on a switch), so guest memory is the only carrier
-      of ra. I checked the generated prologue: the delay-slot `sd $ra`
-      is emitted correctly, so something else zeroes the slot (thread
-      2's stack placement, an invocation stack reserved inside the main
-      stack, or a stored handler sp) or ra was 0 on entry. P1f launched
-      (`local/muse/prompts/P1f.md`): watchpoint on the slot, stack map
-      per dump, StartThread parameter dump, then the fix in the runtime
-      if it owns the writer. Ledger row added.
-- [ ] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
-      parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
-      three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
-      the 6 ms gate, all captured at +100 s wall with the emu thread
-      ≥0.93 busy (race, not menu). Vulkan cannot be measured until
-      `core-vk-build` is rebuilt from the current vendor tree (the
-      09-17 libs predate the S3 HLE symbol; the m4-src TU that links
-      crashes at boot). Queue a muse build brief for it only when a
-      Vulkan production path is on the table; the route decision does
-      not wait on it. Next on the 120 route: milestone 2 as muse briefs
-      — ReplayContext ownership items from S2's Part 4 inventory, each
-      with the desktop determinism gate, then pose interpolation on the
-      `XFReplay::g_transform` seam. Ledger row added.
-- [ ] **D8 gate read (09-18 13:30) — clock-floor levers DEAD, floor
-      smaller than feared:** capped 1.0 on Crow's Nest the control opens
-      at ~0.90× for the first 50 s and runs at pace after; the spin pacer
-      and the ADPF hint (session creation proven) change nothing (0.895 /
-      0.895 / 0.911 opening, 0.978 / 0.978 / 0.989 full) and spin costs
-      +10 °C. cpu7 parks at the 3.28 GHz policy minimum in every arm
-      regardless. M3b's 0.84× opening did not reproduce today (0.90×);
-      treat the capped opening dip as ≤10% and condition-dependent, not
-      as a DVFS bug to fix. High-performance arm skipped; not worth the
-      user's hand now that the two software levers are null. Ledger row
-      added. Side finding: `dumpsys battery` status 3 while charge-limited
-      (`battery_charging_enforce_level=90`) — the "status 2/5" gate in
-      agent briefs is unreliable above ~90%; use level ≥ 20 plus a cable
-      (S2b told to accept status 3 at level ≥ 80).
 - [ ] **PS2Recomp track OPENED (09-18 12:45), all muse:** the user
       approved the evaluation track; the 09-12 spike's tree on the media server
       was lost to a reboot, so its transcript was recovered into
@@ -1248,38 +125,6 @@ the build or commit that closed them.
       arms) behind D8 and the user's `USER-*` lease. Next after P1:
       P2 = EE/VU/GS split measurement on the Mac + GS renderer gap read
       (mine), P3 = Odin port.
-- [ ] **S2 gate read (09-18 12:15) — host replay capacity PASSED:**
-      with the paired preprocess pass, aux-buffer rewind, PE-token
-      masking and per-replay memory/CP/XF restore, the Odin replays a
-      Snow Jam frame in 0.67–0.87 ms median on the video thread,
-      200/200 with `done`, no tombstone (gate was ≤6 ms). The D2b death
-      was the deterministic dual-core FIFO aux buffer, not state drift,
-      so the fix is small and lives in the research header. Not done:
-      Vulkan (EGL trial has no Vulkan backend; relink against
-      `core-vk-build`), HUD verification of the arms (m4-src trial
-      records no screenshots), milestone 2 (`ReplayContext`; Part 4 of
-      the report is the verified side-effect inventory). Continuations
-      are muse from here: S2b = s2-egl-c with a screenshot-capable
-      trial for HUD proof + s2-vk-a relinked (report has the exact
-      commands); milestone 2 splits into ReplayContext ownership items
-      (EFB/XFB + texture-cache resources, event suppression, frame
-      counter) each as a brief with the desktop determinism gate, then
-      pose interpolation on the `XFReplay::g_transform` seam. Ledger
-      row added; the D2b row is superseded.
-- [ ] **S1c gate read (09-18 11:50) — repin PARKED:** upstream's C
-      backend on the repinned Android stack is not faster on the Odin.
-      Repinned emu ms/frame ≥ pinned on every pair: uncapped +10–20%
-      (under a battery-collapsed 1.02 GHz regime, relative only), the one
-      clean boosted capped pair a wash within ±5%, Crow's Nest +3–7% but
-      confounded by divergent race states. Pinned runs MORE native
-      instructions with 6× more hook fallbacks and is still faster, so
-      upstream's region-leader entry switches and proven-pointer memory
-      bring nothing on this target. Keep the pin; the rebased platform
-      patches (desktop +254/−19, Android port on the SSD) stay as the
-      mechanical path if a later upstream feature needs them. Optional
-      follow-up: a strict dispatch/movie-validity compare between the
-      two stacks (the cn pair diverged, so one stack is not bit-faithful
-      to the other's movie). Ledger row added.
 - [ ] **No Opus from here (user, 09-18 11:45):** quota. S2 told to stop
       after its running arm and hand back its table; the remaining
       replay arms (Vulkan) and any milestone-2 work become muse briefs
@@ -1322,15 +167,6 @@ the build or commit that closed them.
       the harness refuses to launch below 10% (`--min-battery`) and
       records battery state; briefs wait for ≥ 20% and charging. TCP mode
       resets on reboot (redo `enable` on USB after D4's reboot).
-- [ ] **D2b read (09-18 10:15) → S2 launched:** Odin EGL replay costs
-      2.0 ms wall / 2.0 ms CPU per frame for 26 replays, then dies in
-      `LoadIndexedXF` because indexed-array (CP/XF) state drifts across
-      re-executions; the named fix is restore-before-each-replay, which
-      is the first item of S2's ReplayContext spec. S2 (Opus, the only
-      Opus spike running): milestone 1 = per-replay restore in the D2
-      research header until `done` verifies on EGL and Vulkan (the
-      capacity gate); milestone 2 = the ReplayContext boundary from
-      `docs/research/120hz-host-replay.md` only if capacity ≤ 6 ms holds.
 - [ ] **D4 blocked (09-18 09:50):** since the Odin's USB drop the
       device refuses every APK launch from adb shell (`am start` error
       type 3 / result -92, resolve-activity finds nothing) for both the
@@ -1378,32 +214,6 @@ the build or commit that closed them.
       triggers, PE pending, VI hash, record flag), then a replay-owned
       XFB destination rewritten in the execute stream, continuation
       check. No vendor change, no device.
-- [ ] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
-      floor problem:** on the device the heaviest track costs only ~11%
-      more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
-      uncapped); the desktop 3.7× was the single-core player carrying
-      the Metal backend, so earlier "3× worse" framing is withdrawn.
-      The real finding: capped at 60 Hz the governor parks cpu7 at its
-      3.28 GHz floor and Crow's Nest runs its first 51 s at 0.82× —
-      below real time — then locks 1.0×. Shipping at any rate needs a
-      clock floor: cheap probe first (user's "High performance" quick
-      setting on the crows-cap arm), then an ADPF/sustained-performance
-      hint or a busy-wait pacer in the runtime (D8). Movie note: the
-      Snow Jam 3-min movie exhausts at HUD 3:33 at 1.0×; record a longer
-      one if capped full-race numbers are needed.
-- [ ] **D2 Odin read (09-18 08:20) → D2b:** replay on the Odin looks
-      an order of magnitude cheaper than the S2 gate needs (≈0.5 ms wall
-      per replay, unverified partial) but the bulk section kills the
-      process after the loop; D2 named the fixes (flush per row; save/
-      drain/restore the GPFifo gather-pipe accumulator with the BP/CP/XF/
-      TMEM + RAM state). D2b (muse, same panel) implements them, re-arms
-      EGL then Vulkan, behind D4 on the device. If `done` verifies, S2
-      launches on that number.
-- [x] **S3 landed (09-18 07:40):** FP-unavailable HLE committed
-      (1aa479c, default OFF, env-gated) with M2 fix A (f58470d); strict
-      determinism clean; Odin effect inside noise (ledger "FP-unavailable
-      HLE"). The storm lever is closed: the 5.7% was inherent FPU
-      context-switch work. The FP item below is DONE as a lever.
 - [ ] **Opus spikes cut off (09-18 05:55):** S3 (FP HLE; report §1–6
       written, no commit yet) and S1b (Android repin port done, build
       not started) were killed by the session usage limit; the three
@@ -1412,34 +222,6 @@ the build or commit that closed them.
       final tables, commit gate) and S1c (Android runtime + upstream C
       module from `s1b-src`, Odin A/B behind the device queue). Lesson:
       S1b should have been muse from the start; stagger Opus spikes.
-- [ ] **S1 gate read (09-18 05:20) — backend decision:** LLVM route
-      PARKED. The recompcore-flavor LLVM module never reaches a race
-      under our automation stack (syscall-vector exceptions 1:1 with
-      native exceptions, speed decays to 0.01×), the native-ABI flavor
-      has no runtime anywhere upstream, and the flavor that links is
-      compat-ABI dominated. Revisit only when upstream ships a runtime
-      for the native module ABI. What S1 did deliver is the repin:
-      a rebased outer platform patch (+254/−19, builds green) and the
-      finding that the repo pin is one CPU-ABI generation behind
-      (3 vs 4). S1b (Opus): port the Android patch stack the same way,
-      build the Android runtime + upstream C module on the repinned
-      tree, and run the D1 base shape on the Odin against the pinned
-      stack — the direct test of upstream's C-backend codegen changes
-      (region-leader entry switches, proven-pointer memory) on the
-      target. That number decides the repin.
-- [ ] **M3 gate read (09-18 04:05) — corpus switch:** Snow Jam is the
-      LIGHTEST of 13 measured courses; Crow's Nest (heaviest that rides)
-      costs 3.7× its render and 2.6× its update on the desktop. Every
-      Odin budget number to date is the easy case (CORRECTED 09:20: on
-      the Odin the spread is ~11%, see the M3b read). Budget
-      numbers come from the corpus movies (Snow Jam 3-min = light
-      anchor, Crow's Nest 3-min = heavy anchor); M3b runs both on the
-      Odin with the pace binary first thing after S3 frees the device
-      (per-track race pace + busy fractions), then reruns the 4
-      unmeasured courses on the desktop (The Throne is likely heavier
-      still). Crow's Nest strict compare is flaky under dual-core
-      interleave (trajectory equal) — use its rider-state gate, not the
-      dispatch gate, until a single-core recording exists.
 - [ ] **S1 launched (09-18 03:25):** M1d built this repo's runner on
       upstream but the outer platform patch left 3 files rejected, and
       those hunks carry movie playback, HLE hooks and screenshots, so
@@ -1448,69 +230,6 @@ the build or commit that closed them.
       `moderngekko-platform.upstream.patch` for the repin), rebuild,
       then the same movie under upstream-LLVM, upstream-C and pinned-C
       with screenshots; that table is the backend decision.
-- [ ] **D6 gate read (09-18 03:10) — route decision:** at stock the
-      emu thread spends 3.2 ms in update and 7.9 ms in the render
-      callback per frame (p95 11.0, max 20.7). The F route (sim at
-      120 Hz on the emu thread) is dead on this SoC: render alone
-      fills 95% of an 8.33 ms budget before update. The 120 route is
-      host-side replay of the second frame (D2 capacity → S2 replay
-      context) plus the emu-thread wins that make the 60 Hz sim
-      comfortable: S3 (5.7%), codegen on the two hot chunks (14.5%
-      of the thread; entry-switch pruning + FP helper calls
-      `ppc_fcmp`/`f32_from_bits_slow`), LSE atomics (~1.2%),
-      determinism-off in shipping (7%). Profile buckets in the
-      ledger. M2b CANCELLED: Fix A (0.36% in D6) lands on the record
-      tests + profile basis once S3's commit sequence runs (same
-      patch file); D2 takes the M2 panel, gated behind M1d's runs.
-- [ ] **D5 gate read (09-18 02:05) → S3 launched:** the Odin storm
-      is 100% FP-unavailable, 5.7% of race emu CPU uncapped (3.8%
-      capped), 59% from one thread pair. S3 (Opus spike): HLE the SDK
-      FP-unavailable handler in the core the way the syscall vector was
-      HLE'd (`emulate_syscall_vector`), validated by the same
-      determinism tooling, A/B'd on the Odin in the D1 race window.
-      Expected win ≈0.5 ms per 60 Hz frame; gate to land: strict
-      compare clean + Odin race A/B outside pair noise.
-- [ ] **M4 gate read (09-18 01:25):** LSE flags landed (nm-clean,
-      harmless) but the A/B is inconclusive — straddles at ±7% and the
-      window was the pause menu. Shader cache: nothing is ever written,
-      item closed. Control probe still open (trial skips under the pace
-      template) → D6: control probe with the trial template plus a
-      simpleperf race-window profile at stock, after D5 on the device.
-      Rule reinforced for every device brief: race windows are anchored
-      by HUD-visible screenshots at recorded wall times (D1b method),
-      never by sample-index guesses.
-- [ ] **M1c read (09-18 01:10):** the native-ABI LLVM flavor links but
-      nothing in upstream can run it (no runtime for that ABI), the
-      upstream runner has no movie/frame-dump path, so the C-vs-LLVM
-      pace question moves to M1d: this repo's desktop patch stack
-      rebuilt on upstream ModernGekko, then the same movie under
-      upstream-LLVM, upstream-C and (if the ABI check passes) pinned-C,
-      with screenshots. That table is the S1 gate.
-- [ ] **M1b gate read (09-18 00:45):** the upstream LLVM backend now
-      generates and links a module for the stock DOL, and it ran 155 s
-      natively on Metal with zero fallback (ledger "Upstream LLVM module
-      boots"). Not yet a green S1 gate: no pixels seen (no screen
-      capture in any agent context, fixed by frame dump in M1c), no
-      pace number, and the flavor that links is compat-ABI-dominated;
-      the native-ABI flavor has no link path (upstream template gap).
-      M1c (muse): frame-dump boot proof from the SSD game copy, movie
-      pace C-vs-LLVM on the same Mac, a budgeted attempt to link the
-      native-ABI flavor, explain native_exc=0. S1 launches on M1c's
-      pace table, not before. Side facts: upstream runner defaults to
-      Vulkan on macOS and SHA-256s the whole game root at startup
-      (15 min over SMB; game copied to the SSD).
-- [ ] **D1b gate read (09-17 22:50):** matrix complete at stock
-      clocks (ledger rows "Odin race pace, stock vs underclock",
-      "determinism tax", "Null video backend", "capped 1.0 budget",
-      "in-race native exception rate", "shader cache", "stock
-      thermals", "per-callback split BLOCKED"). What changed: the GPU
-      driver is out of the picture (Null = base); the emu thread at
-      stock needs ≈9.7 ms per guest frame capped, ≈12 ms uncapped
-      (the uncapped/capped gap is unexplained — det sync explains
-      7 points); the native exception rate in-race is 35.6k/s, twenty
-      times the desktop's, unattributed. Next: M4 (lse rebuild + trial
-      relink for the control probe) on the device now, D5 (exception
-      attribution on the Odin) queued behind it.
 - [ ] M2 status (09-18 03:10): Fix A (rounding-mode sync guard)
       implemented in the platform patch + record tests; A/B waived
       (0.36% in the D6 profile, semantically identical guard, host
@@ -2567,6 +1286,1375 @@ the build or commit that closed them.
       translate or hook if phone timings need it.
 
 ## Done
+
+
+- [x] **F3 read (09-20) — PASS, Part 3 adopted: drain closed as non-park, A0/A1 ranked first:**
+      155-line Part 3 (append-only): F1 drain ≠ park (t4
+      VBLANK pad loop, healthy background); F2 park = main's
+      VBLANK-counted return (N exact, exit wall varies —
+      ~20-min give-up); F3 ref hits SetGsCrt @1.2169 s,
+      runtime never; F4 FIRST divergence = rung-1 scanner
+      stub (ret0@0x42c1f0 = InitSystemCallTableAddress;
+      8×0x74 + 6×0x5b in opening 25 ev, 6 KE_ERROR drops
+      @70–75, ref zero both, SDK patches installed with
+      broken chaining); F5 GetThreadId/FlushCache storms
+      reference-absent; F7 k=2 is projection artefact
+      (milestone table §19); F8 9 briefs on drain-end was
+      enough. Verified: 6 drops @70, ref (74)/(5b) = 0,
+      toml:207 ret0, 8+6 in opening 25, rt SetGsCrt 0, ref
+      ExitDeleteThread ×1, counts (103+3=106, 4 restores),
+      155+/0−. ADOPTED: rec 11 (drain closed), 12 (A0 next),
+      15 (E2a finishes; E2b/E2c hold; E3 conditional), 16
+      (gate reads gain reference-state row), 17 (hygiene:
+      tail-3 receipts, progress caps, Now trim — this poll),
+      4th frontier trigger; QUEUED: 13 (A1 after A0), 14
+      (aligner projection + pc= — T22 now, runs beside A0),
+      18 (bytesize dmesg/event-log — in T21). Reference-
+      state row: n/a (review lane). Next: A0 in freed pane.
+      Ledger row added.
+- [x] **T20 read (09-20) — PASS, exit on-epoch, drain = 2-name alternation vs 12-name menu:**
+      T16 exit shape-exact (b235 218, residue-13 from b240
+      ×475, N 72,176/72,176 first @19,385, freeze @T13
+      counters, 29w/s29 N+2); deviations disclosed (NEW
+      preamble 903/586 — 5th pair; 31w/s31 balanced +0 vs
+      +1; E2a relinked /tmp/p1-link mid-boot — runner kept
+      image, receipts exact, wall dip/surge s13/s14 overlaps
+      relink, honestly tabled); drain sample 215,996 ev =
+      STRICT iSignalSema/WaitSema alternation 107,998/
+      107,998 odd/even; menu slice 12 names, 10 missing
+      drain-side (SignalSema 53,600 leads; iRef 22,915;
+      RFU005/Poll/iPoll ~15k; 4×247; ReferThread 127);
+      drain-only 0; 3 shingles NOT FOUND; k=0 (menu RFU005
+      vs drain iSignal). Nit: ev-range end 4099426 reads
+      4099425 for 215,996 ev (prose fencepost; counts
+      close). Verified: byte sizes, alternation
+      awk-verified exact, census sums = 215,996 both, first
+      enter @19385, fork 282ce92 exists, lease removed,
+      533+/0−. Reference-state row: game never in this
+      state (menu loop; F3 F1/F7 — analysis brief, no
+      frontier read needed). ~1.3 h. Next: T22 (aligner
+      projection + pc=) in freed pane. Ledger row added.
+- [x] **T19 read (09-20) — PASS, 2nd ✕ to Time Zone park, chain reproduces:**
+      Build reused bit-identical; park-1 bit-identical (snap
+      sha b6ca1aa9 full-match, ExecPS2/SIF/vblank lines
+      exact, vblanks@park 6,108, @press-1 6,776 ±1
+      disclosed); press-1 534.7 ms → User Prefs
+      (region-match mean 0.09/p99 0 — G5 heeded); press-2
+      534.1 ms → NEW Time Zone / Kabul park by +5 s, held
+      to T+352 (6-snap series); t19 trace 7,860,627 lines /
+      555 MB (EE 933,990/42 + IOP 5,360,267/103 + SIF
+      962,923 + cdvd 461,044 + other ~142k untabled in
+      REPORT — derivable, minor); 23,786 vblanks;
+      format-identical (2 SIF pos values differ); WSL
+      rebooted 2× + flapped 2× around the run (G2 stood,
+      run exit 0 in quiet window). Minor: other-category
+      not tabled in REPORT. Verified: snap sha, SSD bytes,
+      ExecPS2 re-grepped exact, holds re-timed, 653+/0−,
+      no lease. Reference-state row: the trace IS the
+      reference (game reaches each park). ~15 min. Next:
+      T21 (3rd ✕ at Time Zone) in freed pane. Ledger row
+      added.
+- [x] **M61 read (09-20) — PASS, pair exact, spans nest, runs 1-vs-3, seats shared:**
+      29 sites M59/M60-exact (c311 6/0 +129, c312 13/10
+      +130, sums re-added); decile pairs d0 2-vs-8 (A
+      2-pos vs B 7-neg/1-pos) / d1 1-vs-6 all-pos / d3
+      2-vs-6 / d5 1-vs-1 (+9/+20); missing d4/d7 0-vs-1
+      (noncell both rows on c311; r316 dec-7 both cols);
+      spans nest (19 in 63, shared [317] only, union 28,
+      merged B/both/B/A×5/B×19 — one A block); counterparts
+      1-tail/1-bulk/21-noncell vs 1-tail/1-bulk/4-noncell
+      (bulks r341 +1 / r320 +2, both dec-3); runs 1×6 vs
+      7/10/6 (c311 gaps 13/3/1/1/1); seats 29/29 shared
+      (peaks 335/373, 1 at-peak each; dmax 3@r317 vs
+      2@r369, modal 1). H1–H7 ALL met. Control green
+      (pre-staging carrier fix disclosed); re-run 53/53;
+      PNG 463 B rule-met (H5); 0 B explained, 102 stands.
+      Verified: sets, sums, pairs, gaps, merged runs,
+      seats, fnvs, 2759+/0−. Reference-state row: n/a
+      (offline frames, no boot state). ~0.2 h. Next: M62
+      (gap-13 interval, offline) in freed pane. Ledger row
+      added.
+- [x] **P1ak read (09-20) — PASS with erratum, fixed point holds 359,749 iters, E2/E3 brief-shaped:**
+      Part 34 (325 lines, append-only): chunk-0 tail-in-iter-1
+      + chunks 1–358 fixed (15/34.29, 9-fam 1.0) + 28-line
+      final cut; gaps {6,7} (9140/43557), cadence 146×184 +
+      147×174; T1–T13 re-polled hold (w31 294–308, s31−w31
+      ≤+1, d/w31 1.9966–2.0502); D1–D5 digit-exact with
+      D4+D5 unified (+1 frame = +2 lines, rep 71526 ∈
+      ic71); halt trio +0/+1/+2 @97.85% w238; bounds
+      tighten (count/sample) or invariant (horizons
+      2.26 yr, +0.0084%); E2a/E2b/E2c + E3 ALL brief-shaped
+      (guard PCs re-verified, T16-calibrated triggers).
+      ERRATUM: sema-31 waker=-1 identical reads 431,893 not
+      431,897 (4-line overcount; partition then closes:
+      431893+25+7=431925 — independently grepped). Verified:
+      depth-0 sum 1,851,473 exact, cadence sums, id=31 total
+      863,851, signal partition, D4/D5 arithmetic, 325+/0−,
+      fork unmoved, ahead (no push). ~4 h. Next: E2a
+      (pad stimulus) + F3 (frontier Part 3, queued) in freed
+      + spare panes. Ledger row added.
+- [x] **T18 read (09-20) — PASS after tail restore, channel + aligner work, k=2:**
+      Fork f2b1852 (TraceChannel +1 hook, +170): 781,372
+      EE events in PCSX2 byte shape over 240 s; ladder
+      channel-off-vs-on 1053 EXACT + 245 TOL_OK ≤0.5% + 5
+      SAMPLED + 1 KEY_DELTA (sema.33 phase sample, row
+      derived); log ladder 47/47 series, rare ids 1.0000,
+      pump 1.0017; `tools/trace_align.py` (selftest 17/17,
+      t7 bug caught+fixed): anchor ExecPS2:2 HIT ev:162 vs
+      rt MISS (HLE, no BIOS) → align RFU060/061 agree then
+      DIVERGE k=2 (ref AddDmacHandler vs rt CreateSema; no
+      20-shingle re-align; GetThreadId 37% vs ~0%); t17c
+      plugs in unchanged, reproduces boot3 byte-exact.
+      Minor: headline quantifies only the KEY_DELTA (table
+      authoritative: 5 SAMPLED + 1). Verified: selftest
+      re-run ALL PASS, alignment re-run k=2 identical,
+      fork files, ladder rows, lease removed, 2073+/0−,
+      ahead (no push). ~0.5 h. Next: T20 (channel-on drain
+      census vs menu) in freed pane. Ledger row added.
+- [x] **T17 read (09-20) — PASS after tail restore, held ✕ breaks park to User Prefs:**
+      Build reused bit-identical; pad Cross=K pre-mapped;
+      xdotool focus+XTEST proven (SPACE pause flatlines +
+      OSD); 18 ms tap no-op (6/6 park-identical) vs single
+      534 ms hold → User Prefs (Language=English) by +5 s,
+      held to T+340; park-match BIT-IDENTICAL (snaps sha
+      b6ca1aa9, ExecPS2/vblank/SIF lines exact); t17c trace
+      7,648,547 lines / 540 MB (EE 914,791/42 + IOP
+      5,211,292/103 + SIF 936,164 + cdvd 447,901 + other
+      138,399; 23,107 vblanks), SSD sha-matched; WSL killed
+      userland ~17× mid-session (G2, runs completed in
+      quiet windows). Restored tail: G1–G8 + commands.
+      Verified: channel sum exact, ExecPS2 lines + vblank
+      count re-grepped exact, snap shas, SSD bytes, 762+/0−
+      + restore, no lease, ahead (no push). ~45 min. Next:
+      T19 (2nd ✕ at User Prefs) in freed pane. Ledger row
+      added.
+- [x] **M60 read (09-20) — PASS with erratum, c312 runs 7/10/6, decspan-6 unique max:**
+      33-col unanimity M59-exact; split set [312] alone
+      (12 all-pos + 6 all-neg n≥2, 8 singletons, 6 s0-only);
+      c312 23 sites in 3 runs (pos 316–343×7 / neg
+      353–367×10 / pos 369–379×6, r316 leads run 1, sole
+      non-1 d = r369 d2 opens run 3); rowspan 63 (2nd after
+      c343's 264); decspan 6 unique max (next 4/3/3);
+      modal d=1 on all 19 multi-site (dmax 262/3/2 on
+      343/311/312, 16/19 pure d1). H1–H7 ALL met. Control
+      green; re-run 95/95; PNG 455 B rule-met (H3); 0 B
+      explained, 102 stands. ERRATUM (prose only): "16
+      single-decile cols, 13 pure dec-9" — tables + receipt
+      read 9 pure dec-9 (7 n≥2 + 2 singletons); H-bars
+      unaffected. Verified: classes, runs, spans
+      (63/264/41), decmix sums, d-profile, receipt ndec
+      counts, fnvs, 2416+/0−, ahead (no push). ~0.2 h.
+      Next: M61 (c311-vs-c312 join, offline) in freed pane.
+      Ledger row added.
+- [x] **T16 read (09-20) — PASS, E1 = third absence window (no break to 7200 s):**
+      Exit @b235 reproduced (tail one block shorter, residue
+      from b240); 1188 blocks past b241: 12 watches + 2
+      gated extras ALL silent — main dormant ×1191, stub-13
+      ×1190, drain 359,748 iters (Δ31−29, markers 359,749),
+      freeze 887 pairs @2669132/72181, CD/SIF/GS/RPC 0,
+      sema-30 4w/3s, t3 never releases; N = 72,176 exact
+      (20N/19N−1338, ramp 0–74, steady 20/19, caller 3N);
+      3E4AF0 gaps {6,7} only (52,697); halt trio adjacent
+      +0/+1/+2 @97.85% w238; chunk-0 T15-exact, chunks
+      1–358 fixed point, final 28-line cut; wall T15-class
+      flat ~60 → ~30.2; deviations disclosed (preamble
+      T11-repeat, NULL-head −1, singleton-58, chunk-71 +2,
+      t3 pc). Verified: byte sizes, TSV rows 1430/994,
+      arithmetic (359748, 5.01×, pc sum 1430), fork
+      unmoved, lease removed, ahead (no push). ~2.8 h.
+      Next: P1ak (long-window diagnosis, no boot) in freed
+      pane. Ledger row added.
+- [x] **T4 read (09-20) — PASS scoped, Devel built, trace to language menu:**
+      Devel v2.9.75 on bytesize WSL2 (deps ~11.5 min, build
+      902/902 ~2.3 min, DEVBUILD ×495, recompilers proven);
+      SSX3 (SLUS-20772, CRC 08FFF00D) unattended 336 s →
+      language-select park: 7,483,481-line / 529 MB trace
+      (EE.Bios 899,875/42 names + IOP.Bios 5,095,286/103 +
+      SIF 915,373 + cdvd/hw 437,690 + other 135,257;
+      22,580 vblanks); drain NOT reached (needs pad input
+      — G1); ExecPS2 ×2, SIF storm 260,846, menu sema
+      storm; format notes + epoch anchor for Brief 2.
+      Verified: channel sum exact, census EE/IOP counts,
+      SSD copy bytes, BIOS/ISO shas vs P1x/P1z, 676+/0−,
+      no lease, ahead (no push). ~2 h. Next: T17 (G1 pad
+      automation + deeper capture) in freed pane; Brief 2
+      aligner queues after. Ledger row added.
+- [x] **M59 read (09-20) — PASS, c312 lone split col, null-4 13/0, dec-9 off dec-1 cols:**
+      10 bins M58-exact; all-pos bins 1/5/7 (n 12/2/2 —
+      dec-1 only all-pos @n≥10); 12 sites M58-exact
+      (7 cols — brief said 8, agent correctly tabled my
+      miscount); columns 16 all-pos + 10 all-neg + c312
+      split 13/10 (sum +130 verified) + 6 s0-only; null-4
+      13/0 (H5 not — honest negative); named 59 pos vs 10
+      neg (341/342/343); dec-9/dec-8/dec-6 fully off dec-1
+      cols (0/75, 0/5, 0/1); mode-9 splits 7 pos/5 neg
+      (mode ≠ sign); r316 narrowed (δ+11 dec-7, M58 gap 1
+      nearly closed). Control green; re-run 30/30; PNG 456
+      B rule-met (H3); 0 B explained, 102 stands. Verified:
+      bin table, 12 sites, col sums = 134 (98/36), c312
+      arithmetic, modes, fnvs, 2274+/0−, ahead (no push).
+      ~0.3 h. Next: M60 (c312 unanimity, offline) in freed
+      pane. Ledger row added.
+- [x] **M58 read (09-20) — PASS, 51 on 13 cols led by c312×22, dec-1 all-positive:**
+      Hist-4 M57-exact; site-51: 0:13/1:12/3:19/4:5/5:2,
+      pooled δ +454 (pos 35/neg 16); dec-1 12/12 positive
+      (+9..+33, +214) vs dec-0 6/7, dec-3 12/7; columns
+      13 active led by c312 22/51 (0.4314, 22/23 off-mode),
+      null-4 13/51, named streak cols 0 (c343 = far only);
+      band 48×2/3×1/0×0; d 262/3/2/1 ×1/1/1/44 + N/A ×4;
+      far member (dec 3), nearest off-mode c344 r287 @
+      Manhattan 3 untied; 2nd dec-5 = c312 r317 (M57 gap 3
+      closed). H1–H7 ALL met. Control green; re-run 67/67;
+      PNG 517 B rule-met (H5); 0 B explained, 102 stands.
+      Verified: bin counts, δ sums (+39/+214/+137/+35/+29),
+      col sums = 51, at-peak 13, H7 0.2549, shares, fnvs,
+      2183+/0−, ahead (no push). ~0.2 h. Next: M59
+      (dec-1 sign census, offline) in freed pane. Ledger
+      row added.
+- [x] **M57 read (09-20) — PASS, far dec-3 unique vs nulls, m15 owns all off-mode:**
+      Seat-6: far dec-3 vs nulls 9/9/9/9/5 (H6 met — the
+      two off-9 seats are the two m15 sites; carrier/701
+      6/6 none/out, at-peak 1 far + 1 null); tail-Y hists
+      s0 92/102 + m15 75/134 + shared 67/69 + pooled
+      167/236 dec-9 (H1–H3 met); dec-3 pooled rank 2 at
+      19/236, s0/shared n=0; c343 pooled 5/6 vs null-4
+      14/30 (|diff| 0.3667, H7 met); m15 null-col frames 0
+      dec-9 (313/314/311) vs s0 14/17. H4 not (far dec-3,
+      expected). Control green; re-run 43/43; PNG 527 B
+      rule-met (H6); 0 B explained, 102 stands. Verified:
+      hist sums 102/134/69/236, shares to 4dp, H7 diff,
+      col counts, null-5 vs M56, fnvs, 1889+/0−, ahead
+      (no push). ~0.1 h. Next: M58 (m15 off-mode mass,
+      offline) in freed pane. Ledger row added.
+- [x] **M56 read (09-20) — PASS, 289 alone at d=262, c343 only far column:**
+      289 site reproduces exactly (|δ| 15, s0 noncell, gaps
+      −32/0, band 1, dec 3, streak 343, carrier-none,
+      701-out; TRI p=289, QUAD res +0, hole 28–288); census
+      over s0+m15 tail-Y: 1 far pooled (d≥100), null-5 max
+      d=16 (246-row margin), 221 non-far + 14 singletons;
+      33-col table (c343 only); hole bulk 1/8 all |δ|=1;
+      H1–H4/H6–H7 met, H5 not (dec 3 vs dec-9 mode —
+      honest negative); control green; re-run identical;
+      0 B explained, 102 stands. Verified: baselines
+      13418/22815 + fnvs vs M55, 4 files 1875+/0−, no PNG,
+      ahead (no push). ~0.1 h. Next: M57 (far vs null-5
+      decile seats, offline) in freed pane. Ledger row added.
+- [x] **P1aj read (09-20) — PASS, drain is VBLANK-paced fixed point, E1/E2/E3 spec'd:**
+      Part 33 (416 lines, append-only): W1–W12 reconciled (9
+      covered-silent, W4/W10 absent-here, W11 would-fire);
+      M1–M10 closed (M4/M5/M8-full here); invariants 8
+      reproduced + 2 deviated-as-expected; drain = 1 iter/
+      VBLANK from iter 2 (71 chunks fixed: 15 funcs, 34.29
+      L/iter, 3E4AF0 gaps {6,7}, sema-31 fixed point);
+      4 INTC handlers + t4 pump leg inputs tabled (4
+      monotonic ≥2.2-yr, 2 periodic, rest fixed); 13-row
+      terminator table (T1/T2 end by starvation/exit, T4/T10
+      latent, rest cannot); park-break census (t4 sole LIVE,
+      S1/S2/S3 missing signals with code paths, halt-split
+      tightened 9.1–74.1% + trio exact); E1/E2/E3 spec with
+      bound math (~430k iters @7200 s) + lease table. New:
+      block-N covers window N−1 (P32-8 skew dissolves).
+      Verified: dormant line, W4 = 1, trio adjacent, status-5
+      ×237 all id-1, 29 72178/72178, b239 11 lines + last
+      @2494022, residue rows byte-exact (610×3+305×10,
+      598×3+299×10), 5-func zeros FULL boot, post 362DE8 0,
+      CD @7175, drain arithmetic, append-only (416+/0−),
+      fork unmoved, ahead (no push). ~1 h. Next: T16 (E1
+      longer boot, lease) in freed pane. Ledger row added.
+- [x] **M55 read (09-20) — PASS, drift tabled, low-drift keeps 0 again:**
+      16/16 medians + 12/65 + 13/68 + 0/68 + 1/65 + nears
+      14/14 + 2/4 M25-exact (fallbacks 27/20, no empties);
+      drift −10..+5 (|Δ| rank 257/301/277/343/340/296/321/
+      342); low-drift triple keeps 0, kept hit on c340
+      (|Δ| 3); medians below TRI peaks 0/16 (med−h −1..−25);
+      xerr 3.2–12.6 (max 27 c340). H2/H3/H6/H7 met; H1/H4/H5
+      not. 0 new bytes. (PNG absent by rule — max pooled
+      kept 1 < 3. Gap row 11 stale — M26 gap 2 closed by
+      M52.) Verified: baselines, scores, 0/68 collapse,
+      canon identical, C-P1 pass, mtimes clean. ~0.1 h.
+      Next: M56 (far-row census, M26 gap 6) in freed pane.
+      Ledger row added.
+- [x] **M54 read (09-20) — PASS, 2–3 mass interior, depth ≠ spread:**
+      16/16 QUAD a/b/c + 4/65 + 3/68 + miss bins + errvalues
+      + colhits + 64-cell ladder M26-exact; 2–3 mass 32/23
+      pooled 55 with seats 6 peak / 12 edge / 37 interior
+      (6 hole-adj); s0 c257/c277/c321 carry 7/8/8, c296
+      carries 0 (max|res| 18); depth max s0 c340 138.55 vs
+      spread max s0 c296 9.44; signs alternate 5–7 runs,
+      pos 60/126. H1/H2/H7 met; H3–H6 not. 0 new bytes.
+      (Gap row 8's "M26 gap 2 open" is wrong — M52 closed
+      it. Receipt = 2nd invocation after ordering fix,
+      disclosed.) Verified: baselines, scores + 32/23,
+      ladder pooled, canon identical, C-P1 pass, PNG 88595
+      B, mtimes clean. ~0.1 h. Next: M55 (CONST drift, M26
+      gap 5) in freed pane. Ledger row added.
+- [x] **M53 read (09-20) — PASS, R1 preserves, R2 destroys, p rides R1:**
+      64/64 profiles + 16/16 humps + 9/9 xshape byte-exact;
+      8/16 multi-tie (T 2–4; shapes 8/2/3/3); submax runs
+      only c257/c277/c321 (29×4 recovered); R1 moves 1/16
+      (s0 c277 25→29, top→mid) with thirds 5/8+5/8 +
+      agree 4/8; R2 moves 8/16 with thirds 3/8+1/8 + agree
+      1/8; TRI p = R1 on 15/16. H1–H4/H6/H7 met; H5 not.
+      0 new bytes. (Gap row 6's "M26 gap 2 open" is wrong —
+      M52 closed it.) Verified: baselines, guards, FT
+      thirds, R1 agree, c277 ties, canon identical, C-P1
+      pass, PNG 88598 B, mtimes clean. ~0.1 h. Next: M54
+      (QUAD residuals, M26 gap 4) in freed pane. Ledger row
+      added.
+- [x] **M52 read (09-20) — PASS, residuals agree 14/65, disjoint from δ 6:**
+      H5 6/65 + peaks 5/8 byte-exact (profiles + xmatch +
+      hump + xshape lines); 6 δ-agrees at d_s0 6/2/1/1/0/0
+      + d_m15 6/3/2/7/6/262 (5/6 in peak-disagreeing cols);
+      residuals agree 14/65 (+17 near), per-column
+      3/4/1/2/1/2/1/0, overlap with δ-agrees 0; 7/7
+      d_m15==0 res-agree vs 5/8 at d_s0==0. H6 met only
+      (2/8−1/26 = 0.2115); H1–H5/H7 not. 51/65 stand.
+      (Gap row 5's "M26 gap 1 open" is wrong — M51 closed
+      it.) Verified: baselines, H5 6/65, res 14/65, canon
+      identical, C-P1 pass, PNG 102706 B, mtimes clean.
+      ~0.1 h. Next: M53 (plateau peaks, M26 gap 3) in freed
+      pane. Ledger row added.
+- [x] **T15 read (09-20) — PASS, NO post-241 event to 2400s cap (drain holds):**
+      1 boot (lease 10:12:07–10:53:54Z, 2507 s, zero contention);
+      exit invariant reproduced @ b235 (218 @2461202, N =
+      72176/72176 third count, last lines identical, ramp +
+      chunks + constants exact); 235 blocks past exit to b476:
+      main DORMANT ×237, stubs residue-13 ×236 (same 13),
+      31-drain 71,762 iters (0/31 every post block, never
+      idle), dma/gif frozen 160 pairs @ T13-exact counters,
+      guest events 0, sema-30 4w/3s (t3 never releases);
+      post trace 2,462,182 lines, same 113 funcs, 0 post-only,
+      empty EOF stack; rate flat ~60 (NO dip/surge — fifth
+      shape) → ~30.2 proxy; dormant/inv 2.06–2.12 (never
+      2.0000). Deviations tabled: preamble 887/603 (third
+      pair), b238 = 189 (1-block shift), b239 5/296 vs
+      117/298, t3 transient pc. (P1ai Part 32 unread —
+      landed mid-boot; generic watches used.) Verified:
+      log 2857096 L / 602908868 B, trace 187727172 L /
+      6659595180 B, invariant line, park tail, TSVs (477:
+      b235 = 218, 211×2/189×3, 13×236; 267: 160 frozen @
+      2669132/72181), N 72176/72176, post arithmetic,
+      31 143940/143939 (drain 71762), sema-30 7, binary
+      sha, fork HEAD unmoved + zero commits, lease absent,
+      1 boot, ahead (no push). ~1.2 h. Next: P1aj
+      (drain-termination diagnosis, no boot) in freed pane.
+      Ledger row added.
+- [x] **M51 read (09-20) — PASS, drift tabled, low-drift keeps nothing:**
+      16/16 TRI fits + 18/16 same-frame + 4/68 + 2/65
+      cross-frame exact (colhits + errvalues exact); peaks
+      stable 5/8 (c343 +262, c340 +6); |Δe|≥3 on 6/8,
+      |Δh|≥5 on 3/8, Δw==0 5/8; low-drift 296/301 (L1
+      2/4) keep 0/0 while 257/340 (L1 15/10) keep 2 each;
+      c343 kept hit = m15 r27 under s0 peak. H1/H3/H4/H7
+      met; H2/H5/H6 not. 0 new bytes. (PNG absent by rule
+      — max pooled kept 2 < 3.) Verified: baselines,
+      18/18+16/16 guards, 4/68 collapse, canon identical,
+      C-P1 pass, mtimes clean. ~0.1 h. Next: M52 (peak
+      residuals, M26 gap 2) in freed pane. Ledger row added.
+- [x] **M50 read (09-20) — PASS, wipes + dests mirror in staticness:**
+      4/4 wipes + 5/5 dests exact (both TSVs identical);
+      wipes c257/c277 23–32 + c301 23–33 + c321 23–32
+      (full, 41 sites); dest 28/41 g_s0==0 reproduced
+      (7/9+6/9+8/9+7/10+0/4); full sets close (18/20/82 +
+      19/21/81, 0 outside); wiped 33/41 g_Q==0 (0/41 bulk,
+      +0/++ polarity) vs dest 28/37 g_s0==0 (0/37 bulk,
+      −0/−−); kept 0/163; wiped med 27.0 vs dest 16.0.
+      H1/H2/H4/H5 met; H3/H6 not. 0 B explained.
+      (Gap rows 6–8 repeat the stale-chain slip — closed,
+      not open.) Verified: baselines, 731/733 rows,
+      28/41 recount, canon identical, 27/27, C-WIPEDEST
+      pass, PNG 88708 B, mtimes clean. ~0.1 h. Next: M51
+      (TRI drift, M26 gap 1) in freed pane. Ledger row
+      added.
+- [x] **M49 read (09-20) — PASS, 9-wipe vs +2 growth, populations disjoint:**
+      732 tail 95 / J 0.8942 / named [296] 0/0 + unnamed
+      [298] 6/4; wiped c296 9 rows (|δ| 15–47 med 35.0,
+      ++×9, 0/9 bulk); dest [26,27] (|δ| 8/14, −−×2,
+      bulk, M44 exact); kept 4/4 (−−×4, |δ| up 2/4, 2/4
+      gap-equal); accounting 9/2/4 closes (0 outside).
+      H2/H3/H5/H6 met; H1/H4 not. 0 B explained. (Control:
+      missing-main-guard + c54 fallback, both tabled,
+      receipt untouched.) Verified: baselines, 732 row,
+      sets 2/9/93, canon identical, 37/37, C-MOVE pass,
+      PNG 320 B, mtimes clean. ~0.2 h. Next: M50 (731/733
+      static census, M29 gap 10) in freed pane. Ledger row
+      added.
+- [x] **M48 read (09-20) — PASS, 10-wipe into +2 dest, counts close:**
+      734 tail 94 / J 0.8846 / moved [340,342,343]; wipes
+      c340 [24–27,31–34] + c343 [26,27] read 0/10 bulk
+      (|δ| med 37.5, max 47 = tail max, ++×8/−−×2 split
+      by column); dest [26,33] far-bulk (|δ| 21,11,
+      −−×2, M29 exact); kept 5/5 tail-both (−−×5, 2/5
+      gap-equal); counts 10/+2/5 close (net −8, 0
+      outside). H2/H4/H5/H6 met; H1/H3 not. 0 B explained.
+      Verified: baselines, 734 row, sets 2/10/92, canon
+      identical, 41/41, C-COLLISION pass, PNG 323 B,
+      mtimes clean. ~0.1 h. Next: M49 (732 move, M28 gap
+      5) in freed pane. Ledger row added.
+- [x] **M47 read (09-20) — PASS, pure 7-wipe, pools named (11 + 57):**
+      711 tail 95 / J 0.9314 / moved [342,343] / 0/0 both /
+      no-cand both / no unnamed moves; wiped rows c342
+      [27,28,29,34,35] + c343 [26,27] read 0/7 bulk
+      (|δ| med 18.0, −−×4 + −0×3); no-cand structural
+      (priv=0, empty candidate set); 11 singletons named
+      (9 on s9 + 2 on s22, 6/11 bulk, med 9.0); far pool
+      13 cols / 57 sites (med 15.0, s9 12/14 bulk vs
+      731/733 0/37, 734-c342 at d342=0); both pools cover
+      both wipes by count (11/57 ≥ 5/2). H1/H2/H3/H6 met;
+      H4/H5 not. 0 B explained. (Gap row 6 repeats the
+      stale-chain slip — closed, not open.) Verified:
+      baselines, both TSVs identical, 711 row, singleton
+      n=11, canon identical, 18/18, C-WIPE pass, PNG 404 B
+      valid, mtimes clean. ~0.2 h. Next: M48 (734 triple
+      move, M29 gap 7) in freed pane. Ledger row added.
+- [x] **M46 read (09-20) — PASS, blocks split on bulk/signs, share seats:**
+      22/22 dmins exact (far 18–49 + near 1–7, hist exact);
+      far 12 far-bulk/1 near/3 noncell vs near 2/0/4; near
+      4/6 in 2 mixed comps (2+2 each); bulk 0.8125 vs
+      0.3333 (H1 met), ++ 0.9375 vs 0.5000 (H2 met), seats
+      shared (band 0.1667, dec 0.2083 — H3 not met), med
+      13.0 vs 11.5 (H5 not met), near missing-like in bulk
+      0.1667 (H4 met), mixed 4/6 (H6 met). 0 B explained.
+      (Gap rows 3–4 repeat the stale-chain slip — M33g2–3
+      + M35 closed, not open.) Verified: baselines, 22
+      dmins, canon identical, 167/167, C-SPLIT exact, PNG
+      88748 B, mtimes clean. ~0.3 h. Next: M47 (711 pair
+      wipe, M29 gap 6) in freed pane. Ledger row added.
+- [x] **P1ai read (09-20) — PASS, post-exit diagnosed, next-park spec written:**
+      Part 32 (503 lines, append-only): main returns via pc==0
+      dormant site (1 line @2489892, ra 0x1d8efc — same site
+      as P1e, all regs differ); driver unwinds 73 lines after
+      last exit; 4049-frame unwind reconciles exactly (20
+      roots: 784 + 781×4 + 115 + …); 31-drain = 781-iter pump
+      subprocess (3 root chains + 2 HLE pad calls/iter, zero
+      trace lines by design); 29-halt mid-b239 (74.1%) with
+      29sig→31wait→dormant on 3 adjacent lines; handshakes
+      72178/72178 + 72959/72958 + 4/3 (31 +1 @ EOF line,
+      29 +2 bounded ≤2, unlocalized); freeze same-tick
+      (8658/234 → 0/0); b241 residue = complete 13-target
+      drain chain; silence re-audit 0/0/0/0/0 (§P32-4 lasts
+      to the line); von-Neumann snapshot + 10 invariants +
+      12-watch W1–W12 + 10-row M1–M10 spec for T15. Verified:
+      dormant line, status-5 ×2, trio adjacency, 29 72178/72178,
+      sema :643, drop :73, CD :7174, exit-region 0/0, unwind
+      @185265063/64, HLE 0/0, residue 13 rows byte-exact,
+      4049 arithmetic, append-only (503+/0−), fork HEAD
+      unmoved, ahead (no push). ~80 min. Next: held — next P
+      brief needs T15's run (t1D + t19 held). Ledger row added.
+- [x] **M45 read (09-20) — PASS, bottom group IS the full s22 set:**
+      s22 tail 106 / J 0.9623 / priv 4 / miss 0 / shared
+      102 exact; 3 extra-only cells (c296 11/9 + c295 1/0
+      + c307 2/1, deltas 2/1/1); new privates (393,307)
+      |δ| 9 far-bulk-1 gaps 26/−6 dec 9 + (402,295) |δ| 8
+      far-bulk-1 gaps 19/−4 dec 8 vs pair 8,8/noncell;
+      pooled 0/2/2; gaps 4/4 +/−; dec-9 3/4; rows span 9,
+      no shared row/col, seats −1/+11. H2–H5 met; H1/H6
+      not. 0 B explained. (Control v1 infeasible
+      as-pinned, v2 re-scoped green, disclosed.) Verified:
+      baselines, s22 tail/J, c296 rows, canon identical,
+      19/19, C-BOTM/V pass, PNG 88665 B, mtimes clean.
+      ~0.5 h. Next: M46 (far/near split, M33 gap 1) in
+      freed pane. Ledger row added.
+- [x] **M44 read (09-20) — PASS, wipe-vs-growth + 10× identical crowd site:**
+      c298: s0 [28,29,34,35], 709 wipe (4/4 noncell,
+      −−/−0/−0/−0) vs 732 +2 growth [26,27] (both bulk,
+      |δ| 8/14, −−/−−), 4 kept rows (|δ| up 3/4); c311:
+      12 movers 1/11/0, s9 lone (296,311) (10/noncell/
+      24/7 ++) vs 11 extras = 10× (259,311) byte-identical
+      (17/noncell/−37/−37) + s3 (258,311) (34); lone 10
+      < crowd med 17. H1/H3/H5 met; H2/H4/H6 not. 0 B
+      explained. (Control: 2 tabled control-only fixes,
+      receipt untouched; PNG absent by rule — H4 unmet.)
+      Verified: baselines, TSV guard, 732 rows, H3 11/11,
+      canon identical, 150/150, O-OPP pass, mtimes clean.
+      ~0.3 h. Next: M45 (shape-22 cluster, M34 gap 5) in
+      freed pane. Ledger row added.
+- [x] **T13 read (09-20) — PASS, PHASE EXITED at block 235, N = 72,176:**
+      1 boot (08:41:40Z, lease 08:41:05–09:01:58Z), monitor
+      led 29 s, TRIGGER stub-phase b235 @ logline 2453403
+      (~09:01:28Z) + 30 s grace → SIGTERM; N = 72176/72176
+      balanced (last exit @185264990, 28032 post lines,
+      empty stack); per-inv 20/19 exact ords 75–72175
+      (non = ramp 0–74 only); exit seq 222→218→211→189→13
+      (b235–241) → 29-halt (b239 partial) + 31-drain (781)
+      → main DORMANT pc 0x0 → dma/gif freeze; sema-30
+      4w/3s parked (no 4th, t3 never releases); single
+      caller ×72176; CD/SIF/GS/RPC silent past b2; rate
+      flat 60 → dip 48 → rebound → 2× surge 104 (b205–215)
+      → exit, guest ratios fixed. Deviations tabled:
+      stub preamble counts, t3 transient pc, empty EOF
+      stack, dormant surplus extent, exit-tail len-52
+      regime, 4049-frame unwind. Yielded ~11 min to T12
+      (cross-SIGTERM contained, messaged). Verified:
+      log 2493828 L / 448535827 B, trace 185293022 L /
+      6581094749 B, trigger line, park tail + newline,
+      blocks.tsv 242 (233×222, b235 = 218@2453403, exit
+      rows), ticks.tsv 167 (freeze), N 72176/72176,
+      last-exit line, post 28032, 394ED0 2×1442182,
+      sema-30 7, binary sha+size exact, fork HEAD unmoved
+      + zero T13 commits, lease absent, 1 boot, ahead
+      (no push). ~2.5 h. Next: P1ai (post-exit diagnosis,
+      no boot) + T15 (run past exit, lease) launched in
+      held panes. Ledger row added.
+- [x] **M43 read (09-20) — PASS, dests listed, only 761c54 is c54-like:**
+      5/5 cells exact (FULL TSV identical); rows 761
+      [259,261,263,274] (M37 exact) + 731/733 at 25–33/34;
+      761∩c54 = [259]; pooled 5/41 |δ| 8, 4/41 bulk,
+      13/41 −− with 28/41 −0; 1/5 fully c54-like
+      (761c54, itself 2 near/2 far). H1/H6 met;
+      H2–H5 not (the finding). 0 B explained. (Also
+      closes M37 gap 1. Gap rows 5–6 repeat the stale
+      M36/M35-chain slip — closed, not open.) Verified:
+      baselines, TSV guard, 761 rows, canon identical,
+      199/199, C-FRESH exact, PNG 88678 B, mtimes clean.
+      ~0.1 h. Next: M44 (split columns, M34 gap 4) in
+      freed pane. Ledger row added.
+- [x] **M42 read (09-20) — PASS, big-5 exact, ranks + seats tabled:**
+      5/5 big pins exact (geq only (226,351)); ranks
+      extras 28/25/19 at 1/2/3, missings 45/23 at 1/2,
+      pooled 45>28>25>23>19; 4/5 noncell (bulk is
+      (241,318)); near-big two 16s, no 17/18; rows 3/5
+      edge, c314 pair adjacent (d1), rest ≥15; seats
+      5/5 dec-9, bands 1/1/1/1/2; signs 3++/2−−.
+      H1–H7 ALL met. 0 B explained. (s0-only baseline,
+      disclosed. Same M36-gaps bookkeeping slip as M41
+      — closed, not open.) Verified: baseline, H1,
+      pooled order, canon identical, 18/18, C-BIG exact,
+      PNG 88749 B, mtimes clean. ~0.1 h. Next: M43
+      (fresh-column dests, M34 gap 3) in freed pane.
+      Ledger row added.
+- [x] **M41 read (09-20) — PASS, 3/30 exact, cross-row near gap 0.54:**
+      3/3 triple pins exact (gap-equal only (301,312));
+      s9 3/30 nears, b5 0/0, splits 1/14/7 + 2/2/4;
+      still-below 14/0/10 + 0/0/10, b5 0; extra-side
+      near gap |0.0455−0.5833| = 0.5379; all 3 nears
+      row-edge; raw-8 scan empty except shared (276,313)
+      on s2+s3. H1–H7 ALL met. 0 B explained.
+      Correction: gap row 6 mislabels M36 gaps 1–3 as
+      open — they are CLOSED (M37/M38/M39). Verified:
+      baselines, H1/H2, c336 pin, canon identical,
+      11/11, C-NEAR exact, PNG 88761 B, mtimes clean.
+      ~0.2 h. Next: M42 (big-|δ| sites, M35 gap 3) in
+      freed pane. Ledger row added.
+- [x] **M40 read (09-20) — PASS, asymmetry missing-only, row shape predicts nothing:**
+      4/4 row pins + 13/13 value pins exact (s0c311/s0c312
+      measured); missing sides split in medians (10.0 vs
+      17.5 — H3 not met) but agree in signs (4/4 vs 4/4
+      ++ — H4 met); extra sides agree in medians (13.0
+      vs 13) but split in signs (2/4 vs 1/1 ++ — H5 not
+      met); n0/overlap interleave (H6 not met); all 4
+      missing sides pure (H7 met). H1/H2/H4/H7 met. 0 B
+      explained. (Two estimator runs: receipt-cosmetic
+      H7 label between, canon identical, disclosed.)
+      Verified: baselines, H1/H2 aggregates, c311 pin,
+      canon identical, 21/21, C-SPLIT exact, PNG 88545 B,
+      mtimes clean. ~0.1 h. Next: M41 (near-miss triple,
+      M35 gap 2) in freed pane. Ledger row added.
+- [x] **M39 read (09-20) — PASS, s3 uniform, missing sides agree, extras split:**
+      10/10 row-lists + 14/14 value pins exact (s0c316
+      measured [264]); s3 7/7 delta-1 (4 extra-only + 3
+      missing-only, zero mixed) vs mixed d2/d3/d2;
+      missing sides agree values-deep (med 10 vs 10, ++
+      2/3 vs 1/3 — H4/H6 met); extra sides differ (med
+      8.0 vs 14.5, ++ 3/4 vs 0/4 — H3/H5 not met);
+      magnitude >1 extra-side-only (s2c332 — H7 met).
+      H1/H2/H4/H6/H7 met. 0 B explained. (Estimator
+      set-bug stopped pre-receipt, fixed, disclosed.)
+      Verified: baselines, row pins, canon identical,
+      34/34, C-UNIFORM exact, PNG 88526 B, mtimes clean.
+      ~0.1 h. Next: M40 (shape-9 standing asymmetry, M35
+      gap 1) in freed pane. Ledger row added.
+- [x] **T3 rerun read (09-20) — PASS, SendCmd direction added + corrections:**
+      second agent, fresh extract, per-word MIPS disasm;
+      new: SNDDRV sends cid 1 @ 0x911c/0x9188, MSIFRPC
+      sends 0x80000001/0x80000018, DRTYSCKF queue addrs,
+      jalr census (no hidden stubs), DRTYSCKF/VOIPF
+      symtabs; corrections: reloc 4-type set, DEV9 PsII
+      stamp, INETCTL live 11, SIO2MAN NULLs, SNDDRV a0
+      s1-relative. Only IRX-INVENTORY.md + csv touched
+      (REPORT.md intact). Verified: extracts identical
+      (22 MD5s), sample sizes + MD5s, DEV9 sole file-row
+      change, SendCmd imports in both binaries, fork HEAD
+      unmoved, ahead (no push). ~0.2 h. Next: none — T3
+      closed, two agents agree; §13 row inputs final.
+      Ledger row added.
+- [x] **M38 read (09-20) — PASS, shared triple recomputed, s2 diverges once:**
+      34/34 pooled pins + 3/3 shared-shape sets exact; Q
+      gaps agree 2/3 (range 0), diverge-by-2 at (278,314)
+      (s2 40 vs 42); s700 holds (276,313) in tail (|δ| 8,
+      gap 17); triple straddles sign line (2 ++ / 1 −−,
+      pooled 7/10 reproduced); row 278 echoes as c54 extra,
+      rows 276/295 + col 314 sterile, cols 313/332 bear
+      2/3 others; missings 10/10 noncell vs extras 14/10;
+      H1–H6 ALL met. 0 B explained. Verified: baselines,
+      pins, canon identical, 26/26, C-SHARED exact, PNG
+      88749 B, mtimes clean. ~0.1 h. Next: M39 (s3
+      all-delta-1 row, M36 gap 3) in freed pane. Ledger
+      row added.
+- [x] **T14 read (09-20) — PASS, dev cell-(b) closes adoption table:**
+      dev (b) 640.9 s exit 0 (345 edges, last [344/345
+      640.935]); runner link 0.6 s (was 396.7 s / 60.3%
+      Release); compiles own 98.6% (Σ2527.2/4 ≈ 631.8 s);
+      (b) ratio 1.03×; 3-min gate over (same as Release);
+      header sha identical ×3; reuse re-verified (cache ON,
+      linkline 20,283 B zero thin); 0 peer build edges
+      (T13 boot overlapped whole window — tabled, not
+      attributed); adoption table filled (T12 gap 1);
+      gaps 1–6 named. Verified: last-edge, linkline
+      size + zero-thin, excerpt 345 (546–890), u73 137.6 s,
+      links 9.8/0.6 s, 0 FAILED, header sha, cache, fork
+      HEAD unmoved + worktree generated-only, waits
+      identical, ahead (no push). ~0.5 h. Next: T1 (park
+      snapshot) in freed pane. Ledger row added.
+- [x] **M37 read (09-20) — PASS, 701 covers c54 geometrically:**
+      24/24 per-site pins exact; 701 mask 649 px in 12
+      contiguous cols 54–65 (c54 133, named-8 0, other
+      unnamed-32 0); c54 10/10 in, other 14 extras 14/14
+      out, c54 0/90 in other 9 masks; rows 258/259 recur;
+      c54 uniform |δ| 8 bulk −− vs others med 8.5, 4/14
+      bulk; tail census s0 0/102 vs s700 10 + s761 4 (all
+      column 54); H1/H4/H5/H6 met, H2/H3 not. Correction:
+      pooled universe is 24 = 10 + 14 — M36's "23" (copied
+      into my brief) matches no extras count; agent tabled
+      it and proceeded on M36 per the stop rule (correct).
+      0 B explained. Verified: baselines, pins, mask 649,
+      canon identical, 44/44, control exact, PNG 89403 B,
+      mtimes clean. ~0.2 h. Next: M38 (shared-site triple)
+      launched in freed pane. Ledger row added.
+- [x] **T12 read (09-20) — PASS, dev config proven behavior-clean:**
+      fork `7eed783` (+10/-0, pushed 0/0): `PS2X_DEV_NO_THINLTO`
+      default-OFF, runner chain only; Release link line
+      byte-identical 20,294 B + cache +1 OFF line + Release
+      binary BIT-identical to T6's (full sha match); full
+      rel 710 s / dev 559 s (link 390.6→0.5 s); dev cell
+      (a) 5.9 s (vs 315 s), (c) 7.2 s; suite 439/439/0
+      BOTH (faces identical); D exit 0 (1059/245/0/0, no
+      divergence rows); T13 cross-SIGTERM handled by the
+      book (sample discarded, clean rebuild). Verified:
+      stat/push, linklines, cache diff, binary shas, suite
+      reruns both, D rerun identical, log sizes, park
+      lines, drops identical, hot-pc from snapshots,
+      cell-a log, lease absent. Next: T14 (dev cell-b)
+      launched in freed pane. Ledger row added.
+- [x] **M36 read (09-20) — PASS after tail restore (marker at
+      line 671, restored in `e2c4a96`):** 2/3/700 k 6/7/8
+      exact, FULL TSV byte-identical; 24 extras 14 near /
+      0 far / 10 noncell (c54 10/10 bulk |δ| 8) + 10
+      missings 0/0/10; 23/24 band-1 (H4 all 3 shapes);
+      missings 7/10 ++, extras 4/24 ++ (s700 15/15 −−);
+      700 headliner (c54/c299/c311/c313/c314/c332/c620
+      rows + shared-site notes); 700-c54 10/10 in 701
+      mask (first unnamed carrier hit); all 5 bars + H6
+      met as tabled; 0 B explained. Verified: baselines,
+      TSV guard, H1/H2 rows, canon identical, 406/406,
+      control exact, PNG size (rule-met), mtimes clean.
+      ~0.2 h. Next: M37 (c54 carrier; non-conditional
+      chain exhausted — orchestrator judgment) launched
+      in freed pane. Ledger row added.
+- [x] **M35 read (09-20) — PASS, M34 gap 1 unnamed values tabled:**
+      FULL 764×33 TSV byte-identical; 15 cells exact (11
+      extra-only / 1 missing-only / 3 mixed); 22 extras
+      1/14/7 + 8 missings 2/2/4 (pooled == M33 cluster
+      sets); c315 3 extras (1 bulk) + 2 missings (both
+      bulk |δ| 10) vs c314 1 extra (bulk) + 3 missings
+      (all noncell |δ| 12/23/45); 21/22 band-1 (H4 met);
+      missings 8/8 ++, extras 18/22 ++; c314+c315 bulk
+      4/9; 0 B explained. Verified: baselines, TSV
+      guard, pooled sets, canon identical, control
+      exact, PNG size (rule-met), mtimes clean. ~0.2 h.
+      Next: M36 (still-below unnamed values) launched in
+      freed pane. Ledger row added.
+- [x] **M34 read (09-20) — PASS, M33 gap 2 unnamed scan done:**
+      union tail-Y 41 cols → 33 unnamed (13 s0-bearing 37
+      sites + 20 pure-private); 33/764 movers, 79 cells
+      (21 miss / 50 extra / 8 mixed; delta med 1.0, max
+      10; 12 wipes); every column moves somewhere (c311:
+      12); named∩unnamed 6/4/27/727; below join 7/26/2/729
+      (2/3/700 move unnamed k 6/7/8; 9/9 below move ≥1 of
+      41); c298 seed full wipe delta 4, 9/79 ≥; 0 B
+      explained. Verified: baselines, domain rows, TSV
+      mover recount (33), canon identical, 4/4 controls,
+      TSV size, mtimes clean. No PNG (absence reasoned:
+      H5 unmet). ~0.3 h. Next: M35 (shape-9 unnamed
+      values) launched in freed pane. Ledger row added.
+- [x] **T11 read (09-20) — PASS, 600 s cap, N > 29,469, no exit:**
+      all 5 post-phase signatures absent over the full window;
+      29,469/29,469 + 588,042/588,042 + 558,573/558,573 exact
+      trace balance; modal cycle 29,393/29,468 + FRR
+      ×29,469 + 20/19 constancy (28 chunks) + stubs 222
+      ×117 + sema-30 4w/3s; wall rate 64→36/s smooth decay,
+      all guest ratios fixed; deviations tabled (stub
+      preamble @b2, probe +1, t3 transient, EOF slot 8);
+      1 of 2 boots, lease 07:29–07:39Z zero waits, binary
+      sha == P1ag's, zero fork changes. Verified: exact log
+      + trace sizes, sema count + last line, stub values,
+      probe 20k/0 CYCLE, full-trace awk balance, lease
+      absent, fork HEAD unmoved. ~55 min. Next: T13
+      (1800 s run) launched in freed pane. Ledger row added.
+- [x] **M33 read (09-20) — PASS, M29 gap 2 cluster attributed:**
+      117 B @ J 0.7520 (inter 94, union 125): 22 priv 1
+      near / 14 far / 7 non-cell, 8 miss 2/2/4; 21/22
+      priv band-1 (H4 met); privates span 14 comps max 4
+      (H5 not met); miss d1 share 0.7500 all ≤2, priv
+      17/22 dmin ≥5; all 30 outside named columns (every
+      named site shared); 0 carrier bytes; 39 s9 comps vs
+      25 s0; 2 union comps interleave 2+2; 0 B explained.
+      Verified: baselines, sets + splits, canon identical,
+      control exact, PNG size (rule-met), mtimes clean.
+      ~0.1 h. Next: M34 (unnamed-column scan) launched in
+      freed pane. Ledger row added.
+- [x] **M32 read (09-20) — PASS, M31 gap 1 admissions bracketed:**
+      K=1 gate sha-identical to M31; movers 8/9/10/10 +
+      cells 13/14/15/15 at K=233/234/366/367; admissions
+      land exactly at K=234 (r266), 366 (r400), 367 (r401);
+      diffs 0/1/1/0 cells (9 re-moves 233→234, 22 re-moves
+      234→366); extras re-census exactly 5; K=367 TSV
+      byte-identical to m28-census.tsv (windowed == exact
+      at full admission); join 5/3/4/752 → 6/3/3/752 →
+      6/4/3/751; all 10 bars met; 0 B explained. Verified:
+      baselines, gate + mover/off-span rows, diff legs,
+      canon identical, 9/9 controls, TSV md5s + K367==M28
+      bytes, PNG size (rule-met), mtimes clean. ~0.2 h.
+      Next: M33 (shape-9 cluster; M32 gap 1 conditional
+      declined — extras census pins every K) launched in
+      freed pane. Ledger row added.
+- [x] **M31 read (09-20) — PASS, M30 gap 1 K-boundaries mapped:**
+      K=2 gate sha-identical to M30; 8 movers every K with 12
+      cells K=0 / 13 cells K≥1 (K=1/15/20/50/100 TSVs
+      byte-identical to K=2); off-span 5 sites K=0 / 3 far
+      extras K≥1; ordered diffs flip 3 cells exact→0, 1 cell
+      (734-c342) 0→1, 0 on all 7 pairs K=1..100; extras
+      census exactly 5 (no d=2); upper negative through
+      K=100 (min-K 1/1/234/366/367 computed); join
+      5/3/4/752 all K; all 9 bars met; 0 B explained.
+      Verified: baselines, gate sha, K=0 rows, diff legs,
+      canon identical, 6/6 controls, TSV md5s + sizes, PNG
+      size (rule-met), mtimes clean. ~0.1 h. Next: M32
+      (upper-K confirmation) launched in freed pane.
+      Ledger row added.
+- [x] **T6 read (09-20) — PASS, ThinLTO link owns the wall, fix
+      correctly declined:** full 472 s (link 330 s serial
+      tail); incremental (a) 315 s (link 312.8 s = 99.3%),
+      (b) 658 s clean (link 396.7 s = 60.3%; 844 s
+      contended), (c) 8 s, (d) 0 s; sccache ON-but-NOTFOUND;
+      290 unity batches (giant TU 6.9–14.2 s — not the
+      miss). Bite met but NEITHER allowed fix applies
+      (ccache can't move link time; split can't shrink 313
+      MB link input) — zero fork changes with the numbers
+      tabled, contention handled by the book (waited 4 min,
+      clean rerun). Verified: log line counts, cell-a 5
+      edges + 314 s link, ninja-log refs, IPO line, HEAD
+      unmoved, zero commits, no boots, lease absent. Next:
+      T12 (dev build config, gap 4) launched in freed pane.
+      Ledger row added.
+- [x] **M30 read (09-20) — PASS, M29 gap 1 window tested:** exact
+      census reproduced (bad=0 all 764, 15/15 standings);
+      K=2/5/10 row-identical (3 TSVs byte-identical md5):
+      8 movers / 13 cells (9 + 22 un-moved, 0 newly moving,
+      0 flips); off-span exactly the 3 far extras (no 4th
+      in 764); standings 7/1/5 (extra-only 3→1, assigned +
+      no-cand untouched); join still+below 3→4 (9 joins
+      2/3/700); all 6 bars met; 0 B explained. Verified:
+      baselines, guards, off-span rows, K-diff identicals,
+      canon identical, 5/5 controls, TSV md5s + sizes, PNG
+      size (rule-met), mtimes clean. ~0.1 h. Next: M31
+      (K-boundary sweep) launched in freed pane. Ledger
+      row added.
+- [x] **M29 read (09-20) — PASS, M28 gap 1 partials attributed:**
+      6/6 cells match M28 (no 7th anywhere in 764); 9 delta
+      sites (5 extra + 4 missing, all Y): missings in-span
+      (|δ| 13–44, g +/+), extras split span-adjacent (734
+      ±1 row) vs far-flung (9 r266 +234, 22 r400/401
+      +366/+367); 7 far-bulk / 2 non-cell / 0 near; 8/9
+      dec-9; extra medians 8–9 vs missing 18.0; RT-PRES
+      un-moves all 6 (10→5), RT-DEST 0/4 (zero private-Y);
+      0 B explained. Verified: baselines, delta rows,
+      RT rows, canon identical, 2/2 controls, PNG size
+      (rule-met), mtimes clean. ~0.2 h. Next: M30
+      (span-windowed census) launched in freed pane.
+      Ledger row added.
+- [x] **M28 read (09-20) — PASS, M27 gap 1 census done:** 10/764
+      movers (754 byte-identical on all 8), 15 moved cells
+      (6 singles / 3 pairs / 1 triple; only [296] repeats);
+      7 assigned dests (6×+2, 1×−1; 5 fresh + 734 c342
+      collision), 3 extra-only + 5 no-cand; block-diagonal
+      co-occurrence (257/277, 301/321, 340/342/343; c296
+      solitary); 2×2: 6/10 movers below 0.95, 2/3/700
+      below-but-still; 0 U/V private sites; 0 B explained.
+      Verified: baselines, mover count, swap-guard row,
+      canon identical, 5/5 controls (+aggregate), TSV 765
+      lines, PNG size (rule-met), mtimes clean. ~0.1 h.
+      Next: M29 (partial-move attribution) launched in
+      freed pane. Ledger row added.
+- [x] **T10 read (09-20) — PASS, no bound exists in-trace:** 54-frame
+      modal dispatcher cycle (REP+53, 13,032/13,107 exact;
+      75 non-modal = ordinals 0–74 exactly); C3/C7/C1b/C1a#1
+      at +5/+15/+18/+16 in ALL 13,107 gaps (0 violations by
+      orchestrator re-parse); deeper 1:1:1 exact; owner loops
+      3/0/0/0/1, none spanning any issue site (all issues
+      struct-loaded `jalr`); host loop stop-flag-only (source
+      read); step-3 table updated (3a dead in-trace, 3b needs
+      calibration, 3c needs ~10 min lease). Verified: full
+      d0-sequence re-parse (711,361 + 1 live, reps, gaps,
+      offsets, C7 kids), ELF words + JAL/branch math, TSV
+      sizes, zero commits, no boots. ~30 min. Next: T11
+      (run-to-exit empirical N, step 3c) launched in freed
+      pane. Ledger row added.
+- [x] **M27 read (09-20) — PASS, shape-733 divergence attributed:**
+      100 B @ J 0.6694 (inter 81, union 121): 19 priv + 21
+      miss + 81 shared, all luma; all 40 non-cell on the
+      other frame (0 near/far; 15/19 + 13/21 static there);
+      miss = s0 c301 + c321 entire, priv = c303 + c323
+      entire (two +2 whole-column swaps); d1 share 0.0000
+      both sets; 4/6 streak columns survive; 731 mirror
+      (18+20+82 @ 0.6833, c257/c277 → c259/c279, disjoint
+      sets J 0.0000 both); 0 B explained. Verified:
+      baselines, sets + Jaccards, canon identical, 2/2
+      controls, PNG size (rule-met), mtimes clean. ~0.1 h.
+      Next: M28 (column census) launched in freed pane.
+      Ledger row added.
+- [x] **M26 read (09-20) — PASS, M25 gap 1 hump shapes fitted:**
+      TRI (symmetric triangle) best 18/65 s0 + 16/68 m15
+      (34 pooled) vs CONST 12/13, TWO 15/12, QUAD 4/3;
+      peak rows agree 5/8 cross-frame (rise/fall match on
+      none); argmax top-third 6/8 s0 (first-tie rule);
+      TRI beats-or-ties CONST 6/8 columns per frame
+      (+6/+3); cross-frame TRI 4/68 + 2/65 (collapse);
+      QUAD ∩ on all positive columns yet worst (2–3 miss
+      mass); 47/52 named-col stands. Verified: baselines,
+      32/32 profile-guard lines, TRI row, collapse row,
+      canon identical, control pass, PNG size (rule-met:
+      c301/c340 +2), mtimes clean. ~0.1 h. Next: M27
+      (shape-733 attribution) launched in freed pane.
+      Ledger row added.
+- [x] **T8 read (09-20) — PASS, repetition driver cased:** all
+      13,108 reps at depth 2, parent 363490-fresh, grandparent
+      376938-depth-0 (re-parse: enclosing (0,1) ×13108);
+      reps-per-frame {0: 378922, 1: 13108} exact; E1 frame
+      entry 13108/13108 (E2/E3/E4 all 0); FRR ×13108 exact
+      (body+empty, gaps 8/7, ramp variants inv 0–74);
+      resumes skip prologue (0 children, JALs #6–16);
+      checkpoint/resume mechanism cited (ps2_runtime.cpp
+      lines); site 0x377b14 JAL→363490 in straight-line
+      window; 14 loops none spanning the site; 3 self-JALs
+      trace-invisible gotos; region entry indirect-or-resume
+      only. Verified: 3 independent streaming re-parses
+      (depth/parents/distribution/FRR), ELF words + JAL/branch
+      math, TSVs, zero commits, no boots. ~35 min. Next: T10
+      (outer-driver search) launched in freed pane. Ledger
+      row added.
+- [x] **T9 read (09-20) — PASS, D flips to OK:** fork `935a4eb`
+      (+215/-6, pushed 0/0): waiter presence SAMPLED when
+      wait-sets differ (+ `t->sema` correlation), EXACT when
+      agree, histories untouched; tests 6/6 both forms (4/6
+      BEFORE); D BEFORE exit 1 byte-identical to T5/D.txt;
+      D AFTER exit 0 (1054/245/5/0; before-after diff = 2
+      rows + ladder line only, 0 changes outside waiter
+      class); D1/D2 byte-identical old-vs-new (exit 0);
+      T5 proof closed by table. Verified: stat/push, tests
+      both forms, all diffs, D-after rerun, D1 rerun,
+      no boots, lease absent. Next: T6 (build cache check)
+      launched in freed pane. Ledger row added.
+- [x] **M25 read (09-20) — PASS, M23 gap 2 column profiles
+      tabled:** 8 named columns single-sign throughout
+      (sign-runs 1) but ragged in value (s0 ranges 11–34,
+      sd to 11.8); holes on c296/c340/c342 both frames +
+      m15 c343 r289 (261-span); cross-frame 6/65 agree
+      (mean|Δ| 1.5–8.3); CONST best 12/65 + 13/68 (25
+      pooled), LINEAR below CONST both frames (7/4), SIGNC
+      6/8 + 24/28 near; cross-frame CONST 0/68 + 1/65
+      (collapse; one 1299 extrapolation err tabled);
+      53/55 named-col stands. Verified: baselines, counts,
+      CONST row, collapse + agreement rows, canon
+      identical, control pass, mtimes clean. No PNG
+      (absence reasoned). ~0.1 h. Next: M26 (hump profiles)
+      launched in freed pane. Ledger row added.
+- [x] **T5 read (09-20) — PASS with asterisk (D reads DELTA, rule
+      good):** fork `1a76df4` (+289/-0, pushed 0/0): folded
+      `.text` constants split (ElfParser placement, N64 rule);
+      +172 splits predicted==actual (diff clean, 172-line
+      splits.txt); 0x3E3AD8 re-derived at 2 real sites (dedup
+      no-op); +1 stub binds `_sceSifCmdIntrHdlr@0x426230`;
+      suite 439/439/0; boots exact on drops/RPC/creates/hot-pc
+      top (953,381 both), GS/sched ≤1.2%; D = 1054/245/3/2
+      DELTA — the 2 KEY_DELTAs are waiter presence, PROVEN
+      phase artifacts by orchestrator (waiter ⟺ sampled WAIT
+      status both snapshots, hists balanced both sides); the
+      misfire is the tool's verdict class, not the rule.
+      Verified: fork stat/push, suite rerun, splits file,
+      recomp logs, exact log sizes, D rerun exit 1 identical,
+      ELF site words + JAL math, hand checks, lease released.
+      Next: T9 (waiter-phase rule + re-verdict, 0 boots)
+      launched in freed pane. Ledger row added.
+- [x] **M24 read (09-20) — PASS, M23 gap 1 near-hit mass fitted:**
+      4 fixed corrections scored exact-hit: best SIGN
+      (K45+ ±1 by gap side) 21/102 s0 + 28/134 m15 exact
+      (49 pooled) vs 14/15 K45+ baseline; FRAC uniform −1
+      both halves both frames; PARITY/POS drift cross-frame
+      (POS 16/25 vs 19/28); no split separates −1/+1 above
+      0.5882 purity; 32–63 bin holds 16/32 + 31/49 of the
+      ±1 mass; columns column-coherent (c257/277/321
+      non-positive, c296 |r|≤1, c342 positive); SIGN
+      transfers (21–24 hits shapes 1/2/733); 81/106 tail
+      stands. Verified: baselines, counts, SIGN score row,
+      canon identical, control + identity 60/60, mtimes
+      clean. No PNG (absence reasoned: no H3 split). ~0.2
+      h. Next: M25 (streak-column profiles) launched in
+      freed pane. Ledger row added.
+- [x] **M23 read (09-20) — PASS, M22 gap 1 tail values fitted:**
+      9 fixed predictors scored exact-hit: best K45+
+      (δ=round(0.45·g)) 14/102 s0 + 15/134 m15 exact (29
+      pooled) + 32/49 near; STEP 0/102 all three; COMP
+      13/102; POS 7/102 collapsing to 1/102 cross-frame;
+      δ multi-valued in every gap bin (H6 0.2174/0.1333);
+      streak columns single-sign (22.7–36.5, c342/343
+      negative); ≤1 B in any carrier mask; K45+ transfers
+      (14–15 hits on shapes 1/2/733 incl. J-0.6694 733);
+      88/119 tail stands. Verified: baselines, counts,
+      K45+ score row, canon identical, control + identity
+      60/60, mtimes clean. No PNG (absence reasoned per
+      pre-registered-split rule). ~0.2 h. Next: M24
+      (near-hit mass) launched in freed pane. Ledger row
+      added.
+- [x] **T7 read (09-20) — PASS, designed STOP fully verified:**
+      0x36356c is `lw` (ELF `0x8f932a90`), not a JAL — the
+      P29/P31 "call site" label came from a tick sample pc;
+      sole `362DE8` JAL at 0x3634cc (ELF `0x0c0d8b7a`,
+      target re-derived 0x362DE8) in branch-free prologue
+      (once per fresh entry); 12 back-edges min-target
+      0x3635C0, none containing a `362DE8` call; trace
+      363490 39324/39324 (= 3×13108 exact), 376938
+      392030/392029 (deficit 1); sole static caller 376938;
+      8-row examined-and-absent; next-cheapest receipt spec
+      (steps 1/2/3a-c + inner alt). Verified: ELF words +
+      JAL math + prologue scan, exact trace counts, zero T7
+      fork commits (HEAD = T5's `1a76df4`, pushed 0/0), no
+      boots, lease never touched. ~25 min. Next: T8
+      (repetition-driver attribution) launched in freed pane.
+      Ledger row added.
+- [x] **M22 read (09-20) — PASS, M20 gap 1 tail located +
+      isolated:** 102/134 tail bytes 100% luma (all 764
+      shapes chroma-free); top-band 67.6%/56.0% + dec-9
+      90.2%/82.8% (beyond bulk); 25/31 8-conn comps, largest
+      11/13 px (r23–33 streak columns recur both frames);
+      max 1 B in any top-10 mask (701: 0); 727/764 maps
+      byte-identical (median Jaccard 1.0; 733 @ 0.6694
+      lowest); m15 Jaccard 0.4132; gaps ≥17 (mean ~54) with
+      ρ in [0.4,0.5) on 69.6%/63.4% (bulk peaks [0.3,0.4));
+      sign agrees with gap 90.2%/89.6% (bulk ~60%). No tail
+      rule (0 explained). Verified: baselines, counts,
+      plane/band/decile rows, Jaccard aggregates, canon
+      identical, 2/2 controls, PNG size, mtimes clean. ~0.2
+      h. Next: M23 (tail values) launched in freed pane.
+      Ledger row added.
+- [x] **M21 read (09-20) — PASS after report restore (first commit
+      truncated at line 269, restored from the complete receipt
+      in `1542d4d`):** 518/764 shapes byte-identical static maps
+      (median Jaccard 1.0; 700 @ 0.0747, 694 @ 0.6565); m15
+      disjoint (92/1476, J 0.0245); ε ±1 on 98.9%/96.8%
+      (chroma all-±1); 71.3%/82.5% at d=1 of a moved edge; U&V
+      co-residual 16.0×/21.6× independence; HUD union 103/463
+      s0-Y (22.2%); no static-site rule shrinks anything.
+      Verified: baselines, cell-6 counts exact, EFB ratio,
+      canon identical, ε hist, HUD + synth rows vs receipt,
+      2/2 controls, PNG size. ~0.2 h + restore. Next: M22
+      (interior far-tail) launched in freed pane. Ledger row
+      added.
+- [x] **P1ah read (09-20) — PASS, no progress indicator exists:**
+      per-invocation work EXACTLY constant inv 75–13106 (20×
+      394ED0 + 19× 395000 + 2534 lines, 12 identical chunks,
+      0 bad by orchestrator streaming re-parse); single caller
+      `0x363490` 13108/13108; ramp inv 0–74 (162 calls,
+      lockstep with probe total→0x14 @ n=162);
+      blocks-49–50 step is uniform 3–5× wall scaling with all
+      guest ratios fixed; probe total saturates n=162 (slope
+      0); CD/SIF/GS/RPC silent since ≤block 2. Deciding receipt
+      specified: driver-loop (i,N) @ 0x36356c, owner T1
+      emitter. Verified: full-trace re-parse (caller,
+      per-inv counts, ramp, 100% enter/exit), probe
+      changepoints exact, silence last-lines, no boots, no
+      fork changes. ~15 min. Next: T7 (the (i,N) receipt)
+      launched in freed pane. Ledger row added.
+- [x] **T1 read (09-20) — PASS, snapshot tooling landed + proven:**
+      2 fork commits pushed 0/0 (emitter `aae2d12` 7 files
+      +1183/-0, `ladder_diff` `a611702`); proof boot wrote the
+      snapshot on SIGTERM (JSON 111,491 B: 6 threads, 1188 hot
+      pcs, 21 loads, 37 creates); D1 rerun by orchestrator exit
+      0 (97 exact / 8 tol-ok / 0 deltas); suite 436/436/0 by
+      orchestrator rerun; all 3 hand checks match (drops 6,
+      sema-30 7 lines, 4 RPC sids incl. live 0x534E44 +
+      0x80000211 — T3's static map confirmed live); void boot
+      root-caused + openly recorded; lease released, 1 P1ag
+      wait. Trivia: "3 P1af SPR" mislabels P12's test (total
+      consistent); "New-park catalogue" is a misnomer (thread 1
+      Ready + thread 5 Running = game running, agrees with
+      P1ag's no-park). Next: T5 (analyzer rule) launched in
+      freed pane. Ledger row added.
+- [x] **M20 read (09-20) — PASS, M19 gap 1 cell-7 mechanism tabled:**
+      δ=±1 on 85.9%/83.5% (s0/m15) with a ±45 tail; 97.8%/94.2%
+      luma; δ>0 on 80.9%/80.2% (reproduces M19 negrates
+      exactly); 78.6% within d≤2 of an edge; 62.8% in top
+      gradient decile; 701-mask splits the mean (−0.97 in vs
+      +1.49 out, all 102 |δ|≥8 outside); best of 20 fixed
+      stencils hits 5.3% (131 B) — cell 7 stands at 2344 B.
+      Verified: baselines+fnvs, cell counts exact, δ hist,
+      canon identical, stencil best, 701 sha, 2/2 controls
+      exact, PNG size, mtimes clean. ~0.3 h of 4 h. Next: M21
+      (static-site mechanism) launched in freed pane. Ledger
+      row added.
+- [x] **P1ag read (09-20) — PASS, honest negative at 300 s:** 4th
+      sema-30 signal ABSENT (exactly 7 sema-30 lines, ends
+      parked); thread-3 WAIT-30 ×56 straight; hash phase still
+      running (13,108/13,108 + 260,822/260,822 exact-balanced);
+      stubs 222 ×54, no new phase/park; main RUNNING 41/59;
+      guest rows match P1af exactly; 1 of 2 boots used (confirm
+      skipped, lease freed for T1); zero fork changes (HEAD
+      still `e483d8d`). Verified: exact log size, sema count +
+      last line, probe 20k/0 CYCLE, stub values
+      (distinct=13 = syscalls block, not stubs), exact trace
+      balance, fork HEAD. Rate contended with T1's build
+      (43.7/s vs 58.8/s — throughput, not signal). Next: P1ah
+      (hash-phase work census, no boot) launched in freed pane.
+      Ledger row added.
+- [x] **M19 read (09-20) — PASS, M18 gap 1 closed at table level:**
+      mid = brighter endpoint on 17089/17751 endpoint bytes
+      (96.3% s0, 92.7% m15, 764/764 shapes ≥0.95); moved-outside
+      159 above / 62 below (s0); 2368 raw static-site bytes (Y
+      subset = P4's 463 exactly); no single-endpoint rule
+      shrinks R_0 (best −6786); max-side/above read synth<truth
+      throughout (arithmetic, honestly noted), static unbiased
+      0.51; 701's mask 56.6% interior. Verified: baselines+fnvs,
+      8-cell partition sums to 22815, canon identical, coarse 0
+      mismatches, 5/5 controls, PNG size, input mtimes clean.
+      Trivia: §Exact-commands says 2nd invocation, §Runs says
+      3rd — canon-identical, immaterial. ~0.5 h of 4 h. Next:
+      M20 (interior-cell mechanism) launched in freed pane.
+      Ledger row added.
+- [x] **T3 read (09-20) — PASS, 22-IRX inventory done, §13 inputs
+      tabled:** all 22 extracted+sized+md5'd; origin Sony 18 / EA
+      3 / Logitech 1; SND path: SNDDRV 41imp/0exp/serves sid
+      0x534E44+cid 0 (pure server), SDRDRV 47/6/serves
+      0x80000701+calls 0x80000704 (EE-side), MSIFRPC = RPC
+      transport (3 cids, 0 sids), LIBSD 19/34 (no RPC);
+      HEADLINE: USBKB serves sid 0x80000211 (the §11 unclaimed
+      RPC — server named); SND cid 0-vs-1 tabled both ways, not
+      adjudicated. Verified: commit 2 files (REPORT.md
+      untouched), 22 scratch files, sizes+2 md5s, origin
+      strings, symtab anchor, CSV 22 rows, ISO mtime old, fork
+      head still `e483d8d`. Sid→site disassembly agent-attested
+      (method symtab-validated on SNDDRV). 11 min of ~1 h.
+      Next: M19 launched in freed pane; P1ae trigger gains the
+      USBKB mapping. Ledger row added.
+- [x] **P1af read (09-20) — PASS, 394ED0 park GONE, main RUNNING, no
+      new park:** SPR normal-mode DMA fix (FROM+TO, fork `e483d8d`
+      +142/-0, pushed 0/0): probe 20k lines 0 CYCLE@ both boots;
+      trace 104,442/104,442 + 5,289/5,289 exact-balanced (vs 63+1
+      hung); TO refuted-working (n=0 a2 `0x9d`, n=1 `0x26` vs
+      pre-fix zeros); stubs 15 blocks @222 distinct, no all-13;
+      final block thread-1 RUNNING `0x39b72c` sched=601; sema-30
+      still 3sig/4wait (4th signal downstream of 90 s window —
+      PREDICTED not proven). Verified: fork stat/push/trailer,
+      committed-blob SPR block + 2 tests, exact log sizes, awk
+      trace balance, probe bytes, stub values, final block.
+      Suite 434/434/0 agent-attested (binary gone, no rerun).
+      Foreign-tree (T1) handled right: named adds, mtimes audit,
+      pull refused/push clean. Next: P1ag (long-boot 4th-signal
+      proof) launched in freed pane. Ledger row added.
+- [x] **M18 read (09-20) — PASS, filtering-scale falsified, remainder
+      stands:** blend weight explains 0/22815 B (764/764 argmin
+      0.5, sharp cusp ±0.025→+3100 B); rounding ≤2.5% (half-even
+      best, bar 25% not met); global affine identity both frames
+      (e_A=0, field R²≈0.007); standing 22815 B = 77.8%
+      endpoint-residual + 91.7% synth<truth + 96.9% in moved mask;
+      per-carrier: effect draws prefer v0 side, HUD draws
+      weight-invariant. Verified: baselines+fnvs vs M17,
+      receipt-table awk (0 nonzero explained, 0 argmin≠0.5), 3/3
+      controls pass, PNG sizes, m15/m16 mtimes clean. ~0.5 h of
+      4 h. Next: M19 (endpoint-direction split, gap 1) queued;
+      T3 took the freed pane. Ledger row added.
+- [x] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** DECIDED 09-20 — bytesize (ssh verified, key auth). T4 Brief 1 launched in freed t13 pane (Devel build + SSX3 epoch trace, 6 h, no lease); track continues while useful (Brief 2 = trace channel + aligner next). Mini-deferral superseded.
+- [x] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
+
+- [x] **G0 read (09-18 15:40) — harness + census DONE, pushed:** 78
+      synthetic captures, identity replay byte-exact on all, census
+      renders every feature, CTest 6/6; `ps2xGS` public under GPL-3 with
+      G0's commits. Finding that changes the loop's acceptance: the CPU
+      backend ignores TEX1, DIMX/DTHE, COLCLAMP, SCANMSK, aa1, fix and
+      ZTE — plan §5a now routes those features to a second oracle instead
+      of byte-exact-vs-CPU. Next: G1 (game captures) waits on P1b
+      rendering; G2 (loop brief) after G1. Ledger row added.
+- [x] **P1 read (09-18 14:10) — PS2Recomp boots to the kernel-patch
+      scanner; P1b launched:** census and recompile reproduced exactly on
+      the Mac (arm64); runtime + 425/425 tests + port runner all build;
+      the game loads, starts, sets up its heap, then spins in the SDK's
+      kernel-patch scanner (`sub_0042C1F0`) polling syscall 0x83
+      `FindAddress`, which can never match without a kernel image. The
+      scan result (0x455230) only feeds a patch applier that is a no-op
+      at 0, so P1b stubs the scanner via the TOML (`ret0@0x0042c1f0`),
+      stages the disc tree (runner maps `cdrom0:` to the ELF directory),
+      and climbs the ladder with two allowed follow-ups (stub the
+      applier entry if dispatch fails; inventory IOP module requests).
+      GS renderer read (mine, later): 4 files, ~146 KB, CPU rasterizer
+      only, 2 TODOs. Ledger row added.
+      P1b progress (15:05): with the scanner stubbed the boot climbs to
+      SifInitRpc and loads six IOP modules through the HLE (SIO2MAN,
+      PADMAN, LIBSD, SNDDRV, MCMAN, MCSERV), then dies on `sceCdRead` of
+      LBN 0x10 (the ISO9660 volume descriptor): the runtime can serve raw
+      sectors from `IoPaths.cdImage` but nothing in the runner sets it —
+      P1b applies a one-hunk `PS2X_CD_IMAGE` env hook (upstream PR
+      candidate). Second class of stall: missing indirect-call targets
+      that are real prologues the analyzer merged into neighbours
+      (0x3b07b8 inside sub_003B0770, reached from a function-pointer
+      table walk) — fixed by feeding the recompiler a function-map CSV
+      (`general.ghidra_output`, rows name,start,end,size) built from the
+      generated sources with splits at each reported prologue, iterated.
+      Third stall (15:20, with the CD image readable): every guest thread
+      parks in the scheduler (99% in its idle wait). Cause: the game uses
+      the SDK's asynchronous CD callback (binds `sceCdCallback` and
+      `sceCdInitEeCB`), and the runtime implements both as no-ops, so the
+      callback that signals the game's semaphore never fires. P1b adds an
+      idle-thread snapshot dump (diagnostic) and an HLE CD callback path
+      that queues a guest invocation after each read completes, the way
+      `EeScheduler::dispatchIrq` runs interrupt handlers; both as patch
+      files (upstream PR candidates).
+      P1b read (09-18 17:10): Part 3 delivered. The constructor table at
+      0x43ce38 (39 entries, all prologues) was split in one pass; boot 8
+      with all four fixes has zero missing targets and no CD error, then
+      goes silent: no syscall, VIF, GIF or frame for 10 minutes, no idle
+      dump (so some thread stays runnable), runner at ~10% CPU. Fix D
+      (CD callback HLE) has no receipt that it ran. Four commits pushed
+      on the fork branch `ssx3`. P1c launched (`local/muse/prompts/P1c.md`):
+      env-gated diagnostics (periodic thread dump, syscall and HLE-stub
+      histograms, CD-callback receipt), name the loop from the generated
+      source, at most three completion fixes with one boot each, Part 4.
+      G1 brief drafted (`local/muse/prompts/G1.md`), launches when a
+      frame presents. Ledger row added.
+      P1c read (09-18 18:20): Part 4 delivered in 1 h 10 min. The
+      silence was one thread in WaitSema on a semaphore that only the
+      game's alarm callback signals, and SetAlarm had refused that
+      callback because its address had no function-table slot: the
+      same unsplit-prologue class as the constructors. Two splits later
+      (alarm callback, a frameless comparator) the boot creates the CD
+      thread, inits the CD callback, reads the PVD and directory
+      sectors, then both threads go Dormant with pc 0 and no exit
+      syscall; the CD thread never ran (its entry is also mid-function
+      in the map; Thread.cpp:269 refuses unknown entries). Lesson: every
+      function reachable only through a data pointer (constructor
+      tables, alarm/thread/RPC handlers, comparators) is invisible to
+      the analyzer. P1d launched (`local/muse/prompts/P1d.md`): a
+      one-pass code-pointer sweep over the ELF (data words + lui/addiu
+      pairs, split only on prologue or after a `jr $ra`), a strict-return
+      build to catch the return to 0, and a CD payload check. Ledger
+      row added.
+      P1d read (09-18 19:10): sweep delivered in 50 min: 1,024 new
+      functions found only through data pointers, zero recompile
+      failures; the CD thread now runs and waits on semaphore 26. The
+      main thread still returns to pc 0 after 22 schedulings; the strict
+      build only reported a benign startup return in the bss-clear loop
+      (ra 0 from crt0) and the report path likely de-duplicates per
+      target, so the real return was silent. CD raw reads verified byte
+      correct. P1e launched (`local/muse/prompts/P1e.md`): receipt at
+      both makeDormant sites with the dispatch history, un-deduplicated
+      Return reports, name the returner and the exit condition, map
+      semaphore 26's owner, one fix if the runtime owns the tested value.
+      Ledger row added.
+      P1e read (09-18 19:55): the main thread dies in the epilogue of
+      `sub_003DCBD8` reading a zero return address from its stack slot
+      at 0x1ffff60; the function had been re-entered mid-body through
+      the dispatcher after the StartThread thread switch (the runtime
+      unwinds C frames on a switch), so guest memory is the only carrier
+      of ra. I checked the generated prologue: the delay-slot `sd $ra`
+      is emitted correctly, so something else zeroes the slot (thread
+      2's stack placement, an invocation stack reserved inside the main
+      stack, or a stored handler sp) or ra was 0 on entry. P1f launched
+      (`local/muse/prompts/P1f.md`): watchpoint on the slot, stack map
+      per dump, StartThread parameter dump, then the fix in the runtime
+      if it owns the writer. Ledger row added.
+- [x] **S2b read (09-18 13:50) — EGL capacity confirmed ×3, Vulkan
+      parked:** third EGL arm 0.81 ms median, 200/200 with `done`; the
+      three EGL arms sit at 0.67–0.87 ms per replayed frame, ~7–9× under
+      the 6 ms gate, all captured at +100 s wall with the emu thread
+      ≥0.93 busy (race, not menu). Vulkan cannot be measured until
+      `core-vk-build` is rebuilt from the current vendor tree (the
+      09-17 libs predate the S3 HLE symbol; the m4-src TU that links
+      crashes at boot). Queue a muse build brief for it only when a
+      Vulkan production path is on the table; the route decision does
+      not wait on it. Next on the 120 route: milestone 2 as muse briefs
+      — ReplayContext ownership items from S2's Part 4 inventory, each
+      with the desktop determinism gate, then pose interpolation on the
+      `XFReplay::g_transform` seam. Ledger row added.
+- [x] **D8 gate read (09-18 13:30) — clock-floor levers DEAD, floor
+      smaller than feared:** capped 1.0 on Crow's Nest the control opens
+      at ~0.90× for the first 50 s and runs at pace after; the spin pacer
+      and the ADPF hint (session creation proven) change nothing (0.895 /
+      0.895 / 0.911 opening, 0.978 / 0.978 / 0.989 full) and spin costs
+      +10 °C. cpu7 parks at the 3.28 GHz policy minimum in every arm
+      regardless. M3b's 0.84× opening did not reproduce today (0.90×);
+      treat the capped opening dip as ≤10% and condition-dependent, not
+      as a DVFS bug to fix. High-performance arm skipped; not worth the
+      user's hand now that the two software levers are null. Ledger row
+      added. Side finding: `dumpsys battery` status 3 while charge-limited
+      (`battery_charging_enforce_level=90`) — the "status 2/5" gate in
+      agent briefs is unreliable above ~90%; use level ≥ 20 plus a cable
+      (S2b told to accept status 3 at level ≥ 80).
+- [x] **S2 gate read (09-18 12:15) — host replay capacity PASSED:**
+      with the paired preprocess pass, aux-buffer rewind, PE-token
+      masking and per-replay memory/CP/XF restore, the Odin replays a
+      Snow Jam frame in 0.67–0.87 ms median on the video thread,
+      200/200 with `done`, no tombstone (gate was ≤6 ms). The D2b death
+      was the deterministic dual-core FIFO aux buffer, not state drift,
+      so the fix is small and lives in the research header. Not done:
+      Vulkan (EGL trial has no Vulkan backend; relink against
+      `core-vk-build`), HUD verification of the arms (m4-src trial
+      records no screenshots), milestone 2 (`ReplayContext`; Part 4 of
+      the report is the verified side-effect inventory). Continuations
+      are muse from here: S2b = s2-egl-c with a screenshot-capable
+      trial for HUD proof + s2-vk-a relinked (report has the exact
+      commands); milestone 2 splits into ReplayContext ownership items
+      (EFB/XFB + texture-cache resources, event suppression, frame
+      counter) each as a brief with the desktop determinism gate, then
+      pose interpolation on the `XFReplay::g_transform` seam. Ledger
+      row added; the D2b row is superseded.
+- [x] **S1c gate read (09-18 11:50) — repin PARKED:** upstream's C
+      backend on the repinned Android stack is not faster on the Odin.
+      Repinned emu ms/frame ≥ pinned on every pair: uncapped +10–20%
+      (under a battery-collapsed 1.02 GHz regime, relative only), the one
+      clean boosted capped pair a wash within ±5%, Crow's Nest +3–7% but
+      confounded by divergent race states. Pinned runs MORE native
+      instructions with 6× more hook fallbacks and is still faster, so
+      upstream's region-leader entry switches and proven-pointer memory
+      bring nothing on this target. Keep the pin; the rebased platform
+      patches (desktop +254/−19, Android port on the SSD) stay as the
+      mechanical path if a later upstream feature needs them. Optional
+      follow-up: a strict dispatch/movie-validity compare between the
+      two stacks (the cn pair diverged, so one stack is not bit-faithful
+      to the other's movie). Ledger row added.
+- [x] **D2b read (09-18 10:15) → S2 launched:** Odin EGL replay costs
+      2.0 ms wall / 2.0 ms CPU per frame for 26 replays, then dies in
+      `LoadIndexedXF` because indexed-array (CP/XF) state drifts across
+      re-executions; the named fix is restore-before-each-replay, which
+      is the first item of S2's ReplayContext spec. S2 (Opus, the only
+      Opus spike running): milestone 1 = per-replay restore in the D2
+      research header until `done` verifies on EGL and Vulkan (the
+      capacity gate); milestone 2 = the ReplayContext boundary from
+      `docs/research/120hz-host-replay.md` only if capacity ≤ 6 ms holds.
+- [x] **M3b gate read (09-18 09:20) — corpus on the Odin + a DVFS
+      floor problem:** on the device the heaviest track costs only ~11%
+      more emu-thread CPU per frame than Snow Jam (12.1 vs 10.8 ms
+      uncapped); the desktop 3.7× was the single-core player carrying
+      the Metal backend, so earlier "3× worse" framing is withdrawn.
+      The real finding: capped at 60 Hz the governor parks cpu7 at its
+      3.28 GHz floor and Crow's Nest runs its first 51 s at 0.82× —
+      below real time — then locks 1.0×. Shipping at any rate needs a
+      clock floor: cheap probe first (user's "High performance" quick
+      setting on the crows-cap arm), then an ADPF/sustained-performance
+      hint or a busy-wait pacer in the runtime (D8). Movie note: the
+      Snow Jam 3-min movie exhausts at HUD 3:33 at 1.0×; record a longer
+      one if capped full-race numbers are needed.
+- [x] **D2 Odin read (09-18 08:20) → D2b:** replay on the Odin looks
+      an order of magnitude cheaper than the S2 gate needs (≈0.5 ms wall
+      per replay, unverified partial) but the bulk section kills the
+      process after the loop; D2 named the fixes (flush per row; save/
+      drain/restore the GPFifo gather-pipe accumulator with the BP/CP/XF/
+      TMEM + RAM state). D2b (muse, same panel) implements them, re-arms
+      EGL then Vulkan, behind D4 on the device. If `done` verifies, S2
+      launches on that number.
+- [x] **S3 landed (09-18 07:40):** FP-unavailable HLE committed
+      (1aa479c, default OFF, env-gated) with M2 fix A (f58470d); strict
+      determinism clean; Odin effect inside noise (ledger "FP-unavailable
+      HLE"). The storm lever is closed: the 5.7% was inherent FPU
+      context-switch work. The FP item below is DONE as a lever.
+- [x] **S1 gate read (09-18 05:20) — backend decision:** LLVM route
+      PARKED. The recompcore-flavor LLVM module never reaches a race
+      under our automation stack (syscall-vector exceptions 1:1 with
+      native exceptions, speed decays to 0.01×), the native-ABI flavor
+      has no runtime anywhere upstream, and the flavor that links is
+      compat-ABI dominated. Revisit only when upstream ships a runtime
+      for the native module ABI. What S1 did deliver is the repin:
+      a rebased outer platform patch (+254/−19, builds green) and the
+      finding that the repo pin is one CPU-ABI generation behind
+      (3 vs 4). S1b (Opus): port the Android patch stack the same way,
+      build the Android runtime + upstream C module on the repinned
+      tree, and run the D1 base shape on the Odin against the pinned
+      stack — the direct test of upstream's C-backend codegen changes
+      (region-leader entry switches, proven-pointer memory) on the
+      target. That number decides the repin.
+- [x] **M3 gate read (09-18 04:05) — corpus switch:** Snow Jam is the
+      LIGHTEST of 13 measured courses; Crow's Nest (heaviest that rides)
+      costs 3.7× its render and 2.6× its update on the desktop. Every
+      Odin budget number to date is the easy case (CORRECTED 09:20: on
+      the Odin the spread is ~11%, see the M3b read). Budget
+      numbers come from the corpus movies (Snow Jam 3-min = light
+      anchor, Crow's Nest 3-min = heavy anchor); M3b runs both on the
+      Odin with the pace binary first thing after S3 frees the device
+      (per-track race pace + busy fractions), then reruns the 4
+      unmeasured courses on the desktop (The Throne is likely heavier
+      still). Crow's Nest strict compare is flaky under dual-core
+      interleave (trajectory equal) — use its rider-state gate, not the
+      dispatch gate, until a single-core recording exists.
+- [x] **D6 gate read (09-18 03:10) — route decision:** at stock the
+      emu thread spends 3.2 ms in update and 7.9 ms in the render
+      callback per frame (p95 11.0, max 20.7). The F route (sim at
+      120 Hz on the emu thread) is dead on this SoC: render alone
+      fills 95% of an 8.33 ms budget before update. The 120 route is
+      host-side replay of the second frame (D2 capacity → S2 replay
+      context) plus the emu-thread wins that make the 60 Hz sim
+      comfortable: S3 (5.7%), codegen on the two hot chunks (14.5%
+      of the thread; entry-switch pruning + FP helper calls
+      `ppc_fcmp`/`f32_from_bits_slow`), LSE atomics (~1.2%),
+      determinism-off in shipping (7%). Profile buckets in the
+      ledger. M2b CANCELLED: Fix A (0.36% in D6) lands on the record
+      tests + profile basis once S3's commit sequence runs (same
+      patch file); D2 takes the M2 panel, gated behind M1d's runs.
+- [x] **D5 gate read (09-18 02:05) → S3 launched:** the Odin storm
+      is 100% FP-unavailable, 5.7% of race emu CPU uncapped (3.8%
+      capped), 59% from one thread pair. S3 (Opus spike): HLE the SDK
+      FP-unavailable handler in the core the way the syscall vector was
+      HLE'd (`emulate_syscall_vector`), validated by the same
+      determinism tooling, A/B'd on the Odin in the D1 race window.
+      Expected win ≈0.5 ms per 60 Hz frame; gate to land: strict
+      compare clean + Odin race A/B outside pair noise.
+- [x] **M4 gate read (09-18 01:25):** LSE flags landed (nm-clean,
+      harmless) but the A/B is inconclusive — straddles at ±7% and the
+      window was the pause menu. Shader cache: nothing is ever written,
+      item closed. Control probe still open (trial skips under the pace
+      template) → D6: control probe with the trial template plus a
+      simpleperf race-window profile at stock, after D5 on the device.
+      Rule reinforced for every device brief: race windows are anchored
+      by HUD-visible screenshots at recorded wall times (D1b method),
+      never by sample-index guesses.
+- [x] **M1c read (09-18 01:10):** the native-ABI LLVM flavor links but
+      nothing in upstream can run it (no runtime for that ABI), the
+      upstream runner has no movie/frame-dump path, so the C-vs-LLVM
+      pace question moves to M1d: this repo's desktop patch stack
+      rebuilt on upstream ModernGekko, then the same movie under
+      upstream-LLVM, upstream-C and (if the ABI check passes) pinned-C,
+      with screenshots. That table is the S1 gate.
+- [x] **M1b gate read (09-18 00:45):** the upstream LLVM backend now
+      generates and links a module for the stock DOL, and it ran 155 s
+      natively on Metal with zero fallback (ledger "Upstream LLVM module
+      boots"). Not yet a green S1 gate: no pixels seen (no screen
+      capture in any agent context, fixed by frame dump in M1c), no
+      pace number, and the flavor that links is compat-ABI-dominated;
+      the native-ABI flavor has no link path (upstream template gap).
+      M1c (muse): frame-dump boot proof from the SSD game copy, movie
+      pace C-vs-LLVM on the same Mac, a budgeted attempt to link the
+      native-ABI flavor, explain native_exc=0. S1 launches on M1c's
+      pace table, not before. Side facts: upstream runner defaults to
+      Vulkan on macOS and SHA-256s the whole game root at startup
+      (15 min over SMB; game copied to the SSD).
+- [x] **D1b gate read (09-17 22:50):** matrix complete at stock
+      clocks (ledger rows "Odin race pace, stock vs underclock",
+      "determinism tax", "Null video backend", "capped 1.0 budget",
+      "in-race native exception rate", "shader cache", "stock
+      thermals", "per-callback split BLOCKED"). What changed: the GPU
+      driver is out of the picture (Null = base); the emu thread at
+      stock needs ≈9.7 ms per guest frame capped, ≈12 ms uncapped
+      (the uncapped/capped gap is unexplained — det sync explains
+      7 points); the native exception rate in-race is 35.6k/s, twenty
+      times the desktop's, unattributed. Next: M4 (lse rebuild + trial
+      relink for the control probe) on the device now, D5 (exception
+      attribution on the Odin) queued behind it.
 
 - [x] **M17 read (09-20) — PASS, rigid falsified, remainder
       stands:** global half-pel explains 0/22815 B on 764/764
