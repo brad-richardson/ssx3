@@ -5,6 +5,29 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1ac launched (event-driven, p1ab wait fired):** SIF
+      ready-handshake completion (§P26-3c: SSX3-gated SET_SREG(1)
+      → `sregs[1]=1` + receipt line in `sceSifSendCmd`) + the
+      override-args one-liner ride-along; 2 proof boots expect the
+      poll to exit and thread 3 to advance past `0x2290E8`. Reuses
+      P1ab pane, Part 27.
+- [ ] **P1ab read (09-20) — PASS, stall attributed to missing IOP
+      SIF peer:** `0x52BE04` = `sregs[1]` (.bss, shape-matched to
+      ps2sdk `sifcmd.c`); setter has 0 callers (JAL/word/lui
+      sweeps), no guest store can form the address, all 32 slots
+      silent post-init across 2 boots; poller sends
+      `SET_SREG(1,1)` then spins; host audit: SendCmd no-op,
+      handler map write-only (4 refs), zero SIF0 emulation;
+      candidates 1–5 excluded, #6 (IOP reply via EE set_sreg)
+      attributed with responder narrowed (MSIFRPC/LIBNET pair);
+      fix brief P1ac + P1ad sketch named; P25's "Missing 0"
+      corrected (counting convention). Verified: bss/gp/JAL
+      arithmetic, sweeps (getter 2 @ exact VAs, setter/base2 0),
+      ps2sdk lines, mailbox shapes, LOG 7827/6945, census 6 +
+      0x5b×6 correlation, send bytes, watch 16/16 init-only,
+      17/17 poll + setter 0, creates 33/0, handshake 321/320,
+      waits, zero fork commits, scope. Next: P1ac (fix). Ledger
+      row added.
 - [ ] **P11 launched (event-driven, p10 wait fired):** SIF `:949`
       one-liner (`-419`→`-1`) + ladder-confirmation boots with a
       size-checked game image (the check P10 missed is a receipt
