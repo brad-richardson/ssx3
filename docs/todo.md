@@ -5,6 +5,37 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **T7 read (09-20) — PASS, designed STOP fully verified:**
+      0x36356c is `lw` (ELF `0x8f932a90`), not a JAL — the
+      P29/P31 "call site" label came from a tick sample pc;
+      sole `362DE8` JAL at 0x3634cc (ELF `0x0c0d8b7a`,
+      target re-derived 0x362DE8) in branch-free prologue
+      (once per fresh entry); 12 back-edges min-target
+      0x3635C0, none containing a `362DE8` call; trace
+      363490 39324/39324 (= 3×13108 exact), 376938
+      392030/392029 (deficit 1); sole static caller 376938;
+      8-row examined-and-absent; next-cheapest receipt spec
+      (steps 1/2/3a-c + inner alt). Verified: ELF words +
+      JAL math + prologue scan, exact trace counts, zero T7
+      fork commits (HEAD = T5's `1a76df4`, pushed 0/0), no
+      boots, lease never touched. ~25 min. Next: T8
+      (repetition-driver attribution) launched in freed pane.
+      Ledger row added.
+- [ ] **M22 read (09-20) — PASS, M20 gap 1 tail located +
+      isolated:** 102/134 tail bytes 100% luma (all 764
+      shapes chroma-free); top-band 67.6%/56.0% + dec-9
+      90.2%/82.8% (beyond bulk); 25/31 8-conn comps, largest
+      11/13 px (r23–33 streak columns recur both frames);
+      max 1 B in any top-10 mask (701: 0); 727/764 maps
+      byte-identical (median Jaccard 1.0; 733 @ 0.6694
+      lowest); m15 Jaccard 0.4132; gaps ≥17 (mean ~54) with
+      ρ in [0.4,0.5) on 69.6%/63.4% (bulk peaks [0.3,0.4));
+      sign agrees with gap 90.2%/89.6% (bulk ~60%). No tail
+      rule (0 explained). Verified: baselines, counts,
+      plane/band/decile rows, Jaccard aggregates, canon
+      identical, 2/2 controls, PNG size, mtimes clean. ~0.2
+      h. Next: M23 (tail values) launched in freed pane.
+      Ledger row added.
 - [ ] **M21 read (09-20) — PASS after report restore (first commit
       truncated at line 269, restored from the complete receipt
       in `1542d4d`):** 518/764 shapes byte-identical static maps
@@ -132,7 +163,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t7 (driver-loop (i,N) emitter receipt, 4h) · t5 (analyzer text-pointer rule, 4h) · m22 (interior far-tail, offline, 4h).
+- [ ] **Live panes:** t8 (repetition-driver attribution, read-only, 4h) · t5 (analyzer text-pointer rule, 4h) · m23 (tail value mechanism, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
