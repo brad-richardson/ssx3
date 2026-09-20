@@ -5,6 +5,24 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P12 launched (event-driven, p11 wait fired):** settle
+      `KE_UNKNOWN_SEMID` (-408) vs kernel -1 (P10-7.3/P11-7.3
+      carried divergence: re-derive + blast radius + kernel-first
+      fix) with the dead `-419` constexpr sweep as ride-along.
+      Reuses P11 pane.
+- [ ] **P11 read (09-20) — PASS, SIF closed + ladder confirmed:**
+      `bfa0213` (+2/-1: constexpr + `:949` retitle, pushed); suite
+      428/427/1 → 428/428/0; pre-split regen matches P1w counts
+      exactly; binary receipts all held pre-boot (32,658,243 B, 8
+      refs, log opts ON); 2 healthy boots ladder vs the triggered
+      post-split baseline with zero shape delta (×1.11 throughput,
+      within variance; epoch `:600-630` identical —
+      shim≡split on the wire); transitive P10-7.1 prediction
+      confirmed. Verified: diff lines, suite logs, output 9276
+      files, binary sha, LOG 7740, epoch diff clean, :614
+      callback, 33/0, census 6, 317/316, GS 96, watch/driver,
+      waits 6 lines, scope. Next: P12 (-408 divergence). Ledger
+      row added.
 - [ ] **M16 launched (event-driven, m15 wait fired):** same-frame
       per-draw residual attribution — warp leave-one-out scan
       (3-phase capture × per-draw shapes + offline warp per
