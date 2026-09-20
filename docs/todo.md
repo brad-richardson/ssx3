@@ -5,6 +5,22 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P9 read (09-20) — PASS, shim retired, ladder-identical:**
+      `4326926` (+2/-47: CSV row→2, CD.cpp -46 exact inverse of
+      `58c9144`); recomp +1/+1/+1/0 errors, slot 757428 → child,
+      `0x3e3af0` remapped; suite 428/428/0 (transient
+      P10-without-P11 window honestly walked); 2 boots reproduce
+      P25 exactly (:600-630 byte-identical, :612-614 dispatch,
+      :625 driver bytes, 33/0, census 6, watch 1, GS 96/64/48/96;
+      ×2.0 throughput = contention, LOG1-vs-LOG2 ×1.5 proves
+      variance); findings: parent untruncated
+      (merge-keeps-largest-end, dead slice unreachable) +
+      stderr-interleave forensics closed. Verified: pushed on
+      `bfa0213`, CSV rows, shim 0 refs, boundary 5/5, recomp
+      counts + slot, epoch diff clean, trio/driver/rungs, suite
+      LOG 428/428/0 + my re-run 431/431/0 on current tree (P1ac
+      WIP +3, green), waits, scope. Next: pane HELD for P1ad
+      (pending P1ac's BIND confirm). Ledger row added.
 - [ ] **P1ac launched (event-driven, p1ab wait fired):** SIF
       ready-handshake completion (§P26-3c: SSX3-gated SET_SREG(1)
       → `sregs[1]=1` + receipt line in `sceSifSendCmd`) + the
