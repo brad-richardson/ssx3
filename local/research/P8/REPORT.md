@@ -10,6 +10,7 @@ Tables, no verdicts. Static only: no fork writes, no boots, no lease, no adb.
 | ELF layout | 1 LOAD (`off=0x1000 vaddr=0x100000`, so `VA=off+0xFF000`); 81 section headers; **no `.symtab`** (fully stripped); `.text 0x100000–0x42E020`, `.rodata 0x456900–0x49B018`, `gp=0x4A30F0` (`.reginfo`) |
 | Fork | `/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp`, branch `ssx3`, HEAD `c41efce` ("Entry: add iOS scene manifest so UIKit entry reaches SDL_main (I7b)") |
 | Fork worktree | 3 pre-existing local mods, untouched: `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp`, `ps2xRuntime/src/runner/register_functions.cpp`, `ps2xTest/src/ps2_runtime_kernel_tests.cpp` |
+| Fork drift (concurrent lanes) | During this survey HEAD moved `c41efce→f26f273` (P25-1 semaphores) and P7 added `Stubs/Ssx3Movie.*`. Verified: the move touched only `EeScheduler.cpp` + kernel tests — **none of the fork files cited below changed**, so all `file:line` receipts stand |
 | Analyzer map | `/Volumes/Extreme SSD/ps2recomp-spike/P1/ssx3.toml` (`stubs` = named lib fns, `untracked_stubs` = named but recompiled) + `ssx3-functions.sweep.csv` (9270 fns) |
 | Recomp corpus | `/Volumes/Extreme SSD/ps2recomp-spike/P1/output/` — 9261 `sub_*.cpp` with disassembly comments; JAL census over all of them (8073 distinct `jal func_` targets) |
 | Boot-log cross-ref | P1b `boot-p1b-2.log` (P1/REPORT.md:500): entry → 6 SIF module loads (`SIO2MAN PADMAN LIBSD SNDDRV MCMAN MCSERV`) → `sceCdRead` park |
