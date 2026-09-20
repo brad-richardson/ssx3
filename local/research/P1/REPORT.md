@@ -8569,3 +8569,390 @@ channel; script diff = docstring + LOG only). Source delta:
 
 ---
 
+## Part 26 (P1ab): DIAGNOSIS — `0x52BE04` is SIF sregs[1]; the writer is the IOP's SET_SREG reply via EE set_sreg, and the HLE has no IOP SIF peer (SendCmd no-op, handler map write-only, no SIF0)
+
+Brief `local/muse/prompts/P1ab.md`. Diagnosis only: 0 fork
+commits + 2 boots. Tables, no verdicts. Stale-reading guard: Part 23
+§P23-2e/i re-read before acting (the stall shape + boot-2 never-written
+receipt), Part 25 §P25-2 (ladder baseline + 6-line census), Part 24
+§P24-1f/g (census coverage + exclusion rules).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork, branch
+`ssx3`), `O=$W/P1/output`, `LOG=$W/P1/run/boot-p1ab-1.log`,
+`LOG2=$W/P1/run/boot-p1ab-2.log`. File:line refs below are `$R`-relative
+unless noted. Every hand hex machine-checked §P26-1i; cited MIPS words
+ELF-verified §P26-1i.
+
+## P26-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start (02:43Z) | Absent; no polls needed |
+| Waits log | `$W/P1/run/p1ab-waits.log` (3 lines: start, claim, release) |
+| Pre-claim checks (03:00:52Z) | Absent verified twice; `pgrep -x` exit 1; binary `ae8e7b3d` (P1aa build, no rebuild — see below); ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1ab\n' > /tmp/ssx3-host-lease` 03:00:57Z, immediately before boot 1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG 7,827 lines, 1,049,583 B, 17 blocks |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, LOG2 6,945 lines, 924,930 B, 17 blocks |
+| Release | 03:04:07Z, right after boot 2 (analysis needs no lease); verified absent; `pgrep -x` exit 1 |
+| `adb` | Not used |
+
+No-rebuild note: fork HEAD at boot time was `69bb1ff` (P10
+PollSema fix, landed during my static phase) with foreign uncommitted
+mods (`CD.cpp`, sweep CSV — concurrent P9 pane) in the worktree. Per the
+read-only rule I built nothing and booted the pre-existing `ae8e7b3d`
+(`f26f273` tree): it reproduces the stall, keeps the P25 ladder
+apples-to-apples, and P10's change (PollSema miss `-419`→`-1`) is
+orthogonal to the SIF-handshake stall mechanism (§P26-5).
+
+## P26-1. Static evidence
+
+### a. `0x52BE04`'s ELF section + initial bytes (open thread (c) closed)
+
+| Item | Value |
+|---|---|
+| Section | sec45 `.bss`, type 8 (NOBITS), flags `0x3`, addr `0x4a5c00`, size `0x98edc` |
+| Offset in section | `+0x86204` |
+| Program header | ph0 type 1, vaddr `0x100000`, filesz `0x3a4bf4`, memsz `0x43eadc` (single PT_LOAD) |
+| File bytes | None: fileoff `0x42ce04` is past filesz (NOBITS zero-fill) |
+| Initial value | `0x0` (loader zero-init; the boot watch lines confirm: `value=0x0…`, `pc=0x10012c`) |
+
+### b. The full mailbox file (open thread (d) closed)
+
+`$O/sub_00425CF0_0x425cf0.cpp` (`0x425cf0`–`0x425d38`) holds three Sony
+SIF entries (shape-matched to ps2sdk `ee/kernel/src/sifcmd.c`: `static
+int sregs[32]` + `struct cmd_data`, whose comment states binary
+compatibility with the SCE libs):
+
+| Entry | Address | Semantics | Live callers |
+|---|---|---|---|
+| `sceSifGetSreg` | `0x425cf0` | `v0 = *(0x52BE00 + a0<<2)` | 1: `0x40b1d0` (thread-3 poll, `a0=1`) |
+| `sceSifSetSreg` | `0x425d08` | `*(0x52BE00 + a0<<2) = a1`, returns `a1` | 0 (§P26-1c) |
+| cmd-data accessor | `0x425d28` | returns `0x52BCD8` (`&_sif_cmd_data`) | 0 (§P26-1c) |
+
+`0x52BE04` = `sregs[1]` (EE-side SIF software register 1).
+`0x52BCD8` = `_sif_cmd_data`: guest SIF-init writes verified at
+`+0x00`=iopbuf-src, `+0x04`, `+0x08`=0, `+0x0C`=0x52BD00 (sys handlers),
+`+0x10`=`0x20` (nr_sys=32), `+0x14`=0, `+0x18`=0, `+0x1C`=`0x52BE00`
+(sregs pointer) — all 8 words match ps2sdk's `struct cmd_data` layout.
+
+### c. Setter-entry JAL/word sweep (open thread (a) closed)
+
+Whole-file sweep over the loadable range (`0x100000`, filesz `0x3a4bf4`):
+
+| Target | JAL word | JAL hits | Raw-word hits | lui-formed hits |
+|---|---|---|---|---|
+| getter `0x425cf0` | `0x0c10973c` | 2: `0x40b1d0` (live poll), `0x426560` (dead: inside stubbed Sony InitRpc) | 0 | — |
+| setter `0x425d08` | `0x0c109742` | 0 | 0 | 0 (`addiu`/`ori` imm `0x5d08`: none) |
+| base2 `0x425d28` | `0x0c10974a` | 0 | 0 | 1 base2-lo coincidence at `0x3dcc20` (rs=17, not address formation) |
+
+Direct stores to the word: `sw`/`sb`/`sh` with imm `0xBE04`: none.
+`gp`-relative: `gp=0x4a30f0` on all threads (every `run:tick`);
+`0x52BE04-0x4a30f0=0x88D14` exceeds ±32 K — excluded.
+`register_functions.cpp` holds only the `0x425cf0` entry (line 397717);
+the CSV has no `0x425d08`/`0x425d28` function starts.
+
+### d. Mailbox-immediate users (all `-0x4200`/`-0x4328` sites triaged)
+
+| Site | Base | Disposition |
+|---|---|---|
+| `0x425cf8`, `0x425d10` | `0x530000` | getter/setter proper (live, §P26-1b) |
+| `0x425dc0`, `0x425e14` | `0x530000` | dead: inside stubbed `sceSifInitCmd` (`0x425d38`, TOML:150) |
+| `0x425db0`, `0x425e50`, `0x425f48` | `$s2=0x530000` | dead: same stubbed region |
+| `0x425ff4`, `0x42600c` | `0x530000` | live `sub_00425FF0`, but struct fields only (`0x52BCE4`–`0x52BCF0`, `+0xC`/`+0x10`/`+0x14`/`+0x18`) — never `+0x12C` |
+| `0x42624c` | `$v1` | dead: inside stubbed `isceSifSendCmd` (`0x4261f0`, TOML:533) |
+| `0x2459e8`, `0x24574c` | `0x480000` | coincidence: same immediates, `lui 0x48` base (`0x48BDE8`-family, game data) |
+
+### e. The stubbed Sony SIF-init zero loops (the word's initializer on HW)
+
+Decoded from intact ELF bytes in stubbed `sceSifInitCmd` (`0x425d38`–`0x425fb8`):
+
+| Loop | Range written (value 0) | Bound check |
+|---|---|---|
+| 1 (`0x425df4`–`0x425e08`) | `0x52BD04 + 8k`, k=0..30 | max `0x52BDF4` (below the mailbox) |
+| 2 (`0x425e0c`–`0x425e38`) | `0x52BE7C − 4k`, k=0..30 | min **`0x52BE04`** — the last word zeroed is the polled word; slots 1..31 |
+
+So on HW the array reads `sregs[1..31]=0` after init; slot 0 is not
+zeroed here. In the HLE this code never runs (stub); the host
+`sceSifInitCmd` (`Stubs/SIF.cpp:679-684`) sets a flag only and writes no
+rdram — same observable zeros via the `.bss` loader fill.
+
+### f. The poller's handshake prologue + `_request_end` (why the poll exists)
+
+`sub_0040B130` (`0x40b130`–`0x40b1f8`), sole JAL site `0x2290e0`
+(`sub_00228EE0`, thread-3 init path), one-shot guard `*(0x4533E0)`:
+
+| Step | Code | Decoded |
+|---|---|---|
+| 1 | `jal 0x42C078` (DIntr) | interrupts off |
+| 2 | `jal 0x426020` (TOML:152) | `sceSifAddCmdHandler(0x80000018, 0x40B2D0, 0x528FC0)` — registers game `_request_end` (TOML:369) + handler-data struct (`+0x0`=1, `+0x4`=`0x225287C0`, `+0x8`=`0x20`, `+0xC`/`+0x10`=0) |
+| 3 | `jal 0x42C0C0` (EIntr) | interrupts on |
+| 4 | `jal 0x4261B0` (TOML:155) | `sceSifSendCmd(0x80000001`=SET_SREG, `0x528800`, `0x18`, 0,0,0) with payload words `*(0x528810)=1, *(0x528814)=1` (sreg index 1, value 1) |
+| 5 | `0x40b1d0: jal getter; 0x40b1d8: beqz` | `while (sregs[1]==0)` — the stall |
+
+`_request_end` (`0x40b2d0`, in `sub_0040B2B0`): dispatches on
+`*(packet+0x20)` (the REND `cid` word): `0x1A→0x40B340`
+(end-function + `SignalSema`), `0x19→0x40B368` (bind-fill + signal),
+`0x1D→0x40B390`, `0x1C→0x40B3A4`, else `→0x40B3A8`. Every store is
+`*($s0+off)` with `$s0=*(packet+0x1C)` (the client struct, an
+EE-controlled pointer echoed by the IOP) — never a fixed sregs address;
+0 JAL to `0x40B2D0` exist, so it fires only via SIF dispatch.
+
+Sibling raw-`SendCmd` cids (same `0x40B` RPC-client module):
+`0x19`@`0x40B52C` (BIND), `0x1D`@`0x40B670`, `0x1A`@`0x40B85C`/`0x40B8C8`
+(CALL); user-cid `1`@`0x3F4988`/`0x3F4F98`/`0x3F52E0` (other module);
+`0x3C45C0` cid unread (§P26-5). Post-poll path (`0x2290E8+`): repeated
+`jal 0x319718` config calls — no sregs use.
+
+### g. Sony's own InitRpc guest bytes (the sregs[0] control case)
+
+Decoded from intact ELF bytes in stubbed `sceSifInitRpc`
+(`0x426408`–`0x4265a8`) — ps2sdk's `sceSifInitRpc` shape exactly:
+
+| Step | Code |
+|---|---|
+| Register | `AddCmdHandler` cids `8/9/A/C` → handlers `0x426708/0x426A98/0x426C88/0x426820` (`0x4264cc/4e4/4fc/514`) |
+| Skip check | `sceSifGetReg(0x80000002)` (`jal 0x4241B0`); nonzero → return |
+| Init send | `SendCmd(INIT_CMD=2, 0x52BDC0, 0x10, 0,0,0)` with word[3] (`0x52BDCC`) `=1` (`0x426554`) |
+| Poll | `jal getter(0)` (`0x426560`, delay `$a0=0`); `beqz → 0x426560` — spins on **`sregs[0]`** |
+| Finish | tail-`j` to `sceSifSetReg` (`0x4241A0`) with (`0x80000002`, 1) |
+
+Consequence: Sony's RPC uses cids `8/9/A/C` + `sregs[0]` (RPCINIT).
+The game's `0x18/0x19/0x1A/0x1C/0x1D` + `sregs[1]` protocol is NOT
+Sony's RPC — it is a separate (EA-custom or Sony-extended) EE↔IOP
+ready-handshake whose IOP peer is narrowed but not closed (§P26-3a).
+
+### h. Host write-path audit (open thread (b) closed)
+
+Every host path that writes guest rdram bypasses the `macros.h` watch.
+Enumerated with disposition for `0x52BE04`:
+
+| # | Site | Behavior | Why it cannot be the exit writer |
+|---|---|---|---|
+| 1 | `Syscalls/RPC.cpp:987` (`sceSifSendCmd`, the serving impl — the §P26-2 log line comes from `:993`) | extra-copy iff `sizeExtra>0`; returns 1 | handshake has `sizeExtra=0` (delay `$t1=0`); otherwise no-op, no dispatch |
+| 2 | `Stubs/SIF.cpp:24-47` (duplicate `sceSifSendCmd`) | same extra-copy shape | not the serving impl (no log line); same no-op character |
+| 3 | `Syscalls/RPC.cpp:164` (`SifStopModule`), `:257/302/315` (`SifBindRpc`), `:455/505/520/595/599` (`SifCallRpc`) | struct fills + `rpcCopyToRdram` to guest-provided client/server/receive addrs | targets are caller-passed structs/buffers, never the lib-static sregs word; game JALs these stubs (15/94/9 sites) but any nonzero sregs write would end the stall, which persists |
+| 4 | `Stubs/SIF.cpp:591/610-614` (`sceSifGetOtherData`), `:882` (`sceSifSetDma` via `:275-360` `copyGuestByteRange`), `Stubs/DMA.cpp:62-65` | guest-driven copies | never invoked this boot (no log lines; SetDma/DMA not in TOML); same persistence argument |
+| 5 | `Stubs/SIF.cpp:439-446` (`sceSifAddCmdHandler`) | records `g_sifCmdHandlers[cid]=handler` | **write-only map**: only refs are `:63` decl, `:82` clear, `:444` insert, `:741` erase — the registered `_request_end` can never be invoked |
+| 6 | SIF0 DMA from IOP | — | **no emulation exists**: zero `SIF0`/`sif0` refs under `src/lib/`; all guest SIF-DMA programming is stubbed out |
+| 7 | `sceSifSetReg` (`Stubs/SIF.cpp:926`) / `sceSifGetReg` (`:631`) | host-side `g_sifRegs` map only | not in TOML (unmapped); touch no rdram; the game uses the guest sregs array instead |
+
+Net: no host path addresses the sregs array (the HLE never learns its
+address — `InitCmd` is stubbed), and the stall's persistence proves no
+channel wrote nonzero to any sreg in 90 s. A zero-valued host write
+would be unobservable and irrelevant to a `beqz` poll.
+
+### i. Machine-check paste block + ELF batch
+
+```
+mbox: 0x52be00 0x52be04 | loop2min: 0x52be04 | loop1max: 0x52bdf4
+hdata: 0x528fc0 | pkt: 0x528800 | handler: 0x40b2d0
+s2: 0x52bd80 | s0: 0x52d680 | a2b: 0x52c680 | a3b: 0x52ce80
+initpkt: 0x52bdc0 0x52bdcc
+arms: 0x40b340 0x40b368 0x40b3a4 0x40b390
+beqz-g: 0x426560 | beqz-t3: 0x40b1d0
+gp-gap: 0x88d14 (> 0x7fff, gp-relative excluded)
+b1 total 36055000 | b2 total 30176440 | p25 total 8640642
+```
+
+Rows: mailbox base/index; SIF-init loop bounds; poller
+handler-data/packet/handler immediates; Sony InitRpc struct immediates;
+INIT packet + word[3]; `_request_end` arm targets; both `beqz` loop
+targets; gp gap; per-boot `0x425cf0` totals.
+ELF batch (all words read from `SLUS_207.72`, 0 mismatches): full
+18-word mailbox (`0x425cf0`–`0x425d34`, §P26-1b); SIF-init stores +
+both loops (`0x425d38`–`0x425fb8` spot: prologue, struct writes, loop
+words); Sony InitRpc (`0x426408`–`0x4265a8`: AddCmdHandler cids,
+`0x426554` send, `0x426560`/`0x426568` poll); poller args + sibling
+cids (`0x40b1a8`–`0x40b1d8`, `0x40b51c/660/854/8c0`,
+`0x3f4974/8c/e4`).
+
+## P26-2. Boots + census + ladder check
+
+LOG 7,827 lines / 1,049,583 B / 17 blocks; LOG2 6,945 lines / 924,930 B
+/ 17 blocks. CWD `$W/P1/run`, env = p1aa-boot1 unchanged
+(`PS2X_DIAG_SEMA` + `CREATE` + `S0`, drops ON) except WATCH covers all
+32 sregs (`0x52BE00`–`0x52BE78` in 8 B windows + legacy `0x450de4`;
+script diffs = docstring + LOG + WATCH). Binary `ae8e7b3d` both boots.
+
+### a. Receipts (the stall, the census, the silence)
+
+| # | Receipt | Boot 1 | Boot 2 |
+|---|---|---|---|
+| 1 | `[drop]` census | 6 lines, sole site `syscall/dispatchSyscallOverride` `KE_ERROR` (`:69-74`; +16-line shift vs P25 from the 15 extra watch lines + 1 texture line) | same 6 (`:68-73`) |
+| 2 | Census correlation | `[diag:syscall] id=0x5b count=6 first=0x42cbb8 last=0x42cbb8` — the only count-6 syscall; `0x5B`=`GetEntryAddress` (`Dispatcher.cpp:325-327`), skipped by the override's `KE_ERROR` (`System.cpp:441`) | same line, same values |
+| 3 | Handshake send | 1× `[sceSifSendCmd] cid=0x80000001 packet=0x528800 psize=0x18 extra=0x4a29f0` (`:1047`; byte-identical to P25 `:1040`) | same bytes (`:1049`) |
+| 4 | sregs watch | 16 lines, all loader zero-init (`pc=0x10012c`, value 0) across `0x52BE00`–`0x52BE80`; **0 post-init writes to any of the 32 slots** | same 16 + 0 |
+| 5 | Poll steady state | `0x425cf0` 17/17 blocks, sole `ra=0x40b1d8`, 1.45M–2.25M/block, total 36,055,000 | 17/17, sole ra, 1.33M–2.21M/block, total 30,176,440 |
+| 6 | Setter/base2 dynamic | `target=0x425d08`: 0 lines; `target=0x425d28`: 0 lines — consistent with 0 static callers (§P26-1c), not proof alone | same 0/0 |
+| 7 | Creates / `-1` waits | 33 / 0 (P1v/P1aa fixes hold) | 33 / 0 |
+
+### b. Ladder check vs P25-boot1 (one table — same stall, faster host)
+
+P25-boot1 baseline: 3,507 lines / 443,852 B / 17 stub blocks.
+
+| Rung | P25-boot1 | LOG (boot 1) | Delta |
+|---|---|---|---|
+| Stub / thread blocks | 17 / 16 (b16 stubs-only) | 17 / 17 | None (full flush both P1ab boots) |
+| Thread-1 | WAIT 29 @ `0x423de8` ×16, sch 54,10,8,… | WAIT 29 @ `0x423de8` ×17, sch 72,36,34,38,… | Same park; cycling regime; P23-shaped counts |
+| Thread-2/4/5 | parked 26/31/32 | 17/17 each, same ids/pcs; t4 sch=t1/2 exact from b1 | None |
+| Thread-3 | running, pc `0x40b1d0`×11/`0x425cf0`×5, sch=t1 | running, pc `0x40b1d0`×6/`0x425cf0`×11, sch=t1 exact from b1 | Same two pcs (sampling jitter); same regime |
+| 29/31 handshakes | 86/85, same ras | 321/320, same F6/F7 ras + park/wake shapes | Balanced regime; 3.7× iterations (throughput) |
+| 30-handshake | 2 / 2 | 2 / 2 | None — exact |
+| Driver-entry | byte-identical (`:625`) | byte-identical (`:641`; shift only) | None |
+| `[drop]` census | 6× override site | 6× same site | None — §P26-2a |
+| SendCmd | 1× SET_SREG line | 1× same bytes | None — exact |
+| `0x425cf0` spin | 17/17 sole ra, 373K–591K/block | 17/17 sole ra, 1.45M–2.25M/block | Same stall; 4.17× counts (throughput) |
+| GS kicks / copy / gif / drawing=1 | 96 / 64 / 48 / 96 | 96 / 64 / 48 / 96 | None — exact |
+| `run:tick` | 9 ticks, dma→1500 gif→84 | 7 ticks, dma→5568 gif→310, same pc family/sp/gp | Same pcs/climb; higher totals (throughput) |
+| CD `lbn=` / SIF loads | 42 / 18 | 42 / 18 | None — exact |
+| Dormant / start-thread | 65 / 4 | 65 / 4 | None — exact |
+| Missing / `No exact` | 1 / 0 (byte-identical JALR `0x2322d4→0x395730` line in all three logs) | 1 / 0, same bytes | None — exact (P25's "0" was its counting convention; the line exists in P25-boot1 too) |
+| Presented frame | None | None | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | None |
+
+LOG2 spot check: 17/17 blocks, 33 creates, 0 `-1` waits, 272/271
+balanced handshake, same 6-line census, 17/17 `0x425cf0` sole-ra
+blocks, GS 96/64/48/96, CD 42 / SIF 18, dormant 65 — reproduces.
+Throughput note: absolute counts run 3.5–4.2× of P25 while every
+relation, shape, park, and byte-comparable is identical; no concurrent
+pane was active this time (P25 noted P7 contention). Environment
+finding, not a regression.
+
+## P26-3. Attribution + named fix brief
+
+### a. Candidate-writer table (every channel closed or narrowed)
+
+| # | Candidate | For | Against | Status |
+|---|---|---|---|---|
+| 1 | Local setter `0x425d08` (Sony `sceSifSetSreg`) | the designated local writer | 0 JAL / 0 raw words / 0 lui-formed (§P26-1c); watch silence (§P26-2a#4) | EXCLUDED |
+| 2 | SIF-init zero loops | last word written is `0x52BE04` (§P26-1e) | stubbed (never runs); writes 0, which cannot exit a `beqz` poll | EXCLUDED (as exiter) |
+| 3 | `_request_end` (`0x40B2D0`) | registered for `0x18`; runs at INTC-tail on HW | stores only `*(client+off)`, never fixed sregs (§P26-1f); HLE never dispatches it (write-only map, §P26-1h#5) | EXCLUDED as sregs writer (but REQUIRED for later RPC progress — see fix brief) |
+| 4 | Other guest CPU store | — | no formation exists (no `0xBE04` stores, no gp range, no `+0x12C` struct store — §P26-1c/d) + 0 post-init watch lines on all 32 slots across 2 boots (§P26-2a#4) | EXCLUDED |
+| 5 | Host memcpy/DMA/SIF blits | bypass the watch (§P26-1h) | enumerated sites write only caller-passed structs/buffers; several never invoked; above all, the stall's persistence proves no channel wrote nonzero to any sreg in 90 s (and the HLE never learns the array address) | EXCLUDED as exit writer |
+| 6 | SIF0 DMA from IOP + EE `set_sreg` sys-handler[1] | Sony's only sregs write path (`sregs[pkt->sreg]=pkt->val`, ps2sdk `sifcmd.c:208-214`; binary-compatible `cmd_data` verified §P26-1b); game's send/poll pair matches Sony's RPCINIT handshake shape (§P26-1g); the EE→IOP `SET_SREG(1,1)` + EE `sregs[1]` poll is a two-sided ready-flag | the IOP-side announcer (which module sends the reply, on what trigger, with what value) is not identified from EE-side evidence | ATTRIBUTED (mechanism); responder NARROWED, not closed |
+
+### b. Attribution
+
+On HW the poll exits when the IOP's `SET_SREG(1,x)` reply packet
+arrives via SIF0 DMA and EE `set_sreg` writes `sregs[1]=x`. It never
+fires in the HLE for three conjoint, file-cited reasons: (i) the
+outbound send is a no-op — `sceSifSendCmd` (`Syscalls/RPC.cpp:972-1002`)
+returns 1 without delivering anything to any IOP peer; (ii) the inbound
+path does not exist — no SIF0 emulation (§P26-1h#6), no incoming-packet
+queue, no guest SIF dispatch (that code is stubbed out); (iii) the
+registered guest completion handler is unreachable —
+`g_sifCmdHandlers` is write-only (`Stubs/SIF.cpp:63/82/444/741`). The
+guest side is correct: a one-shot EE↔IOP ready-handshake that a real
+IOP answers. This is an HLE-completeness stall, not guest-correct
+waiting on an upstream thread (no thread, sema, or callback in the boot
+can produce the write — candidates 1–5).
+
+The narrowed-but-open item is the IOP announcer's identity: Sony-side
+evidence bounds it to "the IOP's RPC-subsystem ready announcement"
+(ps2sdk's IOP `sceSifInitRpc` sends `SET_SREG` to the EE at
+`iop/system/sifcmd/src/sifrpc.c:80`; the EE's Sony `sceSifInitRpc`
+polls `sregs[0]` for it), but the game's slot (`1`, not `0`) and cids
+(`0x18+`, not `8+`) mark a distinct handshake, plausibly tied to the
+just-loaded `MSIFRPC`/`LIBNET` pair (loads 17–18 at `:1038-1039`,
+immediately before the `:1047` send). The fix below does not need the
+announcer's name — only its contract (one-shot nonzero).
+
+### c. Named fix brief: P1ac (proposed) — complete the SIF ready-handshake in the HLE
+
+| Item | Value |
+|---|---|
+| File | `ps2xRuntime/src/lib/Kernel/Syscalls/RPC.cpp`, in `sceSifSendCmd` (`:972-1002`) |
+| Hunk shape | After the extra-copy block: if the game is SSX3 (gate via the existing `ps2_game_overrides` descriptor registry, SLUS-keyed per `games_database.cpp`) AND `cid==0x80000001` (SET_SREG) AND the guest packet's word[4] (sreg index) `==1`: write u32 `1` to guest `0x52BE04` via `getMemPtr`+`memcpy` (same bypass channel as `:520/595/599`; emits no watch line — note it) + one stderr receipt line (`[sif-handshake] sregs[1]=1`, capped like `:990-998`); return stays 1 |
+| Value | `1`: any nonzero exits the `beqz` poll; mirrors the sent value and Sony's `SetReg(RPCINIT,1)` convention (§P26-1g) |
+| Safety case | One-shot flag: setter has 0 callers (§P26-1c), no other guest store can form the address (§P26-1c/d), `getter(1)`'s only live caller is the poll (§P26-1c) — writing it is unobservable except via the poll; idempotent if the handshake repeats |
+| Proof boots | 2× 90 s: expect the `0x425cf0` counts to collapse (poll exits), thread-3 pc to leave `0x40b1d0`/`0x425cf0`, thread 3 to advance past `0x2290E8`, and the new park/RPC traffic catalogued; the sregs watch stays silent (bypass write) so the receipt line + poll-exit are the proof rows |
+| Predicted next stall (must-read for P1ac) | The game's BIND (`sub_0040B400` → `SendCmd(0x19)` → `WaitSema($s2)` at `0x40B55C`) parks on an RPC sema that only `_request_end` can signal — which needs HLE RPC completion. Follow-up brief sketch (P1ad): on `SendCmd` BIND/CALL/RDATA (cids `0x19/0x1A/0x1C/0x1D`), craft the IOP's `END(0x18)` response in guest memory and invoke the `g_sifCmdHandlers[0x18]` guest address via the scheduler's `GuestInvocation` machinery (cf. `System.cpp:447-461`) |
+| Proper long-term fix (not briefed) | Un-stub the EE SIF cmd system + emulate the IOP SIF peer (incoming packets, SIF0 DMA/interrupt, guest dispatch). P1ac is the minimal faithful completion; it does not substitute for this |
+
+Ride-along (separate, pre-existing): the 6 `dispatchSyscallOverride`
+drops are now narrowed to 6× `GetEntryAddress` (`0x5B`) from
+`pc=0x42cbb8` whose game-installed override handler has no registered
+function (`System.cpp:438-445`). Recommended one-line close-out (P24's
+proposal, still open): add `syscallNumber`+`handler` args at the
+`:441` `emitDrop` (both in scope). Early-init only, benign w.r.t. this
+stall (drops at `:69-74`, handshake at `:1047`).
+
+## P26-4. Exact commands
+
+From `$R` (fork, read-only — no edits, no add, no commit, no push) unless
+noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`, `LOG`/`LOG2` as above:
+
+```
+# Step 0 (context reads; lease-free)
+re-read REPORT Part 23 §P23-2e/i + Part 25 §P25-2 + Part 24 §P24-1f/g (paged reads)
+cat /tmp/ssx3-host-lease (absent); pgrep -x ps2EntryRunner (exit 1)
+git -C $R log --oneline -5 + status (HEAD e235c4b P7, then 69bb1ff P10 + foreign P9 mods; untouched)
+git -C $R show --stat e235c4b (P7 deliberately unwired); shasum binary (ae8e7b3d, kept, no rebuild)
+# Step 1 (static: ELF + mailbox + sweeps; lease-free)
+python3 ELF header/section script (.bss sec45, NOBITS, +0x86204, past-filesz)
+cat $O/sub_00425CF0 (full mailbox file) + $O/sub_00425D38 (sceSifInitCmd stub shell)
+python3 JAL/word sweeps (getter 2 / setter 0 / base2 0; raw words 0/0/0)
+grep register_functions.cpp + headers + sweep CSV (only 0x425cf0 registered)
+python3 lui-0x52/0x53 + addiu-imm sweeps (-0x4200 x5, -0x4328 x8, all triaged)
+python3 0x425d38-region store list + 0x425df4-0x425fb8 dump (zero loops decoded)
+cat $O/sub_0040B130 (poller, 260 lines) + sed $O/sub_0040B2B0 (handler arms)
+python3 JAL sweeps (0x40b130:1 / 0x40b2d0:0 / 0x426020:9 / 0x4261b0:17 / 0x4261f0:3 / 0x423dd0:20)
+cat $O/sub_0042C0C0 (EIntr) + $O/sub_00426408 (InitRpc stub) + $O/sub_00425FF0 (struct-only)
+python3 imm-0x5D08/0x5CF0/0x5D28 + store-imm-0xBE04 sweeps (setter: none; direct: none)
+grep boot-p1aa-1.log (syscall hist 0x5b x6; thread entries; SendCmd :1040; SIF loads)
+read Stubs/SIF.cpp (SendCmd :24, AddCmdHandler :439, GetReg :631, InitCmd :679, SetDma :794, SetReg :926)
+read Syscalls/RPC.cpp SendCmd :972-1002 + Dispatcher/System.cpp override :422-461 + :496-503
+grep g_sifCmdHandlers (4 refs, write-only) + copyGuestByteRange/getMemPtr writers (audit table)
+grep SIF0/sif0 under src/lib (zero refs)
+git clone --depth 1 --filter=blob:none --sparse ps2sdk /tmp/ps2sdk-ref; sparse-checkout ee/kernel/{src/{sifcmd,sifrpc,iopcontrol}.c,include}, common/include, iop/system/{sifcmd,sifman,sifinit,msifrpc}
+read ps2sdk sifcmd.c (sregs/set_sreg/cmd_data), sifrpc.c (_request_end/InitRpc poll), sifcmd-common.h (cids), iop sifrpc.c:80 (IOP SET_SREG send), msifrpc/sifman (no 0x18 cids)
+python3 Sony InitRpc dump 0x426408-0x4265a8 (cids 8/9/A/C, INIT send, sregs[0] poll decoded)
+python3 sibling SendCmd windows (cids 0x19/0x1D/0x1A/user-1) + CSV name grep (none)
+read $O/sub_0040B400 post-send (WaitSema $s2 @0x40b55c); ELF strings 0x48AAxx (post-poll config keys)
+python3 JAL sweep Sony RPC stubs (BindRpc 15 / CallRpc 94 / CheckStat 9 / InitRpc 14 / InitCmd 2)
+# Step 2 (boots; lease P1ab held 03:00:57Z-03:04:07Z only)
+(write /tmp/p1ab-boot1.py; WATCH = 16 sregs addrs + 0x450de4; sed -> /tmp/p1ab-boot2.py, LOG-only diff)
+pre-claim checks (lease absent x2; pgrep exit 1; shasum ae8e7b3d; HEAD 69bb1ff; ISO + ELF sizes)
+printf 'P1ab' > lease + >> p1ab-waits.log; python3 /tmp/p1ab-boot1.py (90 s, SIGTERM rc=-15)
+watch/drop/SendCmd/cf0 spot greps; cat lease (P1ab); pgrep (exit 1)
+python3 /tmp/p1ab-boot2.py (90 s, SIGTERM rc=-15)
+rm lease; verify absent; pgrep exit 1; >> p1ab-waits.log (release line)
+# Step 2 (analysis, lease released)
+(write /tmp/p1ab-ladder.py; same-pattern rungs x3: P25-boot1 + both P1ab boots)
+drops shell-verified 6/6/6; missing-target byte-identity x3; t1/t3 sch series; cf0 totals; machine-check block
+# Step 3 (this report; lease released)
+(edit_file append Part 26 in 3 chunks)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1ab] ..." (Orchestrated-By trailer; NO push there)
+```
+
+Env delta boots vs boot-p1aa-1: WATCH widened to all 32 sregs (+15
+watch lines, +1 texture line shifts); script diffs = docstring + LOG +
+WATCH. Source delta: none (0 fork commits, 0 fork edits).
+
+## P26-5. What I could not do
+
+- Name the IOP announcer (which module sends the EE its
+  `SET_SREG(1,x)`, on what trigger, with what exact value): EE-side
+  evidence bounds it to the IOP's RPC-ready announcement (§P26-3b) but
+  cannot identify the module. Exact next probes: (i) `strings` + SIF-send
+  pattern grep over the disc's `MSIFRPC.IRX`/`LIBNET.IRX` (loads 17–18,
+  immediately pre-handshake); (ii) a HW/LLE SIF0 packet trace (P1x asks
+  for this); (iii) P1ac's proof boots (if `sregs[1]=1` unblocks the
+  thread past `0x2290E8` into RPC traffic, the contract is confirmed
+  without the name).
+- Decode the `0x3C45C0` `SendCmd` cid (`$a0` set outside the read
+  window) and the `0x40B670` (`0x1D`) / `0x40B3A4` (`0x1C`) arm
+  semantics beyond their targets — sibling-protocol details, not needed
+  for this poll.
+- Prove the game reaches RPC BIND after the poll (the P1ad prediction
+  rests on the post-poll `0x319718` path being unexamined past its first
+  calls); P1ac's boots decide it.
+- Re-baseline under the P10 binary (boots ran pre-P10 `ae8e7b3d`;
+  P10's PollSema `-1` changes handshake iteration counts at most —
+  orthogonal mechanism, recorded §P26-0).
+- Attribute the 6 override drops to a handler address (needs the
+  one-line args addition at `System.cpp:441` — a fork edit outside a
+  diagnosis brief) or judge their benign-ness beyond phase separation.
+- Run a 3rd boot (max 2 used; census + silence + ladder all closed).
+- Session wall time ≈ 02:43–03:35Z (~55 min), inside the 4 h box.
+
