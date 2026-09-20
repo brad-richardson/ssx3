@@ -5,6 +5,53 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1aa launched (immediate poll, user: don't wait):** P1v
+      amendment (P1z A1–A3: store max as-is, delete OVF block,
+      update + extend test) reuses P1w pane; ≤2 lease-gated boots
+      prove the ladder still reaches 0x52BE04. Frontier note:
+      semantics already settled by kernel evidence per §7.5 — no
+      muse semantics judgment in this brief. I-lane parked; M15 +
+      P1x-path still queued-for-user. p1y finishing, p7/p8 working.
+- [ ] **I7 read (09-19/20) — PASS, FIRST WINDOW + audio wall:**
+      `9c7b028` (SDL2main link + rename, pushed) then scene trap
+      (SIGTRAP before SDL_main) → miniprobe A/B proof (1.3 MB
+      repro, manifest fixes) → `2655264` (manifest template; carried
+      up by orchestrator as `c41efce` after I7's push was blocked —
+      gap 3 closed); build2: SDL video OK, GL ES 2.0 + shaders +
+      font, window photographed (black, foreground, viewed by me);
+      next wall: miniaudio CoreAudio RPC-timeout abort in
+      `InitAudioDevice` (loadELF still unreached; probe C exonerates
+      sim audio). Verified: `9c7b028` pushed, `c41efce` on
+      `fork/ssx3`, manifest+id+bytes, nm (SDL_main/UIKitRunApp/local
+      _main/LC_MAIN), 296, launch6 43 lines + GL lines, crash 4
+      markers + RPC line, probes B/C clean, screenshot viewed, sim
+      Shutdown. Next: I-LANE PARKED (first-launch receipt complete;
+      audio wall queued for unpark). Ledger row added.
+- [ ] **P1y read (09-19/20) — PASS, suite green 427/427/0:** 10/10
+      repro on GsSyncV face (2 bit-identical clean builds);
+      isolation (alone/subset/suite identical — no order
+      dependence); root cause = stale test (`0x01F00000` floor from
+      `f4309cd`, pool moved to `[0x80000,0x100000)` by `6046260`,
+      assertion never updated); fix pins both bounds (+5/-1,
+      `2caf17c` pushed); after: 5× 426/426/0 + 5× 427/427/0 on
+      rebased tree; AFAIL face unreproduced (shared-incremental-build
+      hypothesis, honestly unresolved). Verified: one-file push, -S
+      history, pool bounds in source, repro log 426, suite RE-RUN BY
+      ME 427/427/0. Next: none (lane item closed). Ledger row added.
+- [ ] **P1w read (09-19/20) — PASS, config tracked + census live:**
+      `5b5ac3d` (TOML+CSV 2 files +10897; TOML also untracked —
+      4-hunk absolutization, no loader change; recomp end-to-end
+      identical: 9274 map, 4/4 shas); `ed387c7` (179-site `[drop]`
+      census, default-on, `PS2X_DROP_SILENCE` switch, 12 exclusion
+      rules); boots park on 0x52BE04 with a 6-line census (all
+      `dispatchSyscallOverride` KE_ERROR :53-58, args gap noted);
+      kill-switch proven (boot2: 0 lines); ladder check identical
+      (33/0 creates, handshake balanced, GS/CD/SIF exact; ~0.8×
+      throughput = P1x contention, recorded). Verified: both
+      commits pushed, CSV cmp clean, LOG 6588/6133, 6-line census
+      verbatim, boot2 zero, binary `156f493b`, lease released, site
+      grep ≈179 + helper/test. Next: P1aa (P1v amendment). Ledger
+      row added.
 - [ ] **P7 + P8 launched 09-19 (user: stub movies, parallelize
       pad/sound):** P7 (movie disc survey + HLE completion stub,
       build-verified, runtime firing deferred) reuses P1x pane; P8
