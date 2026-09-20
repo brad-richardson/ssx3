@@ -10586,5 +10586,508 @@ git commit -m "[P1ah] ..." (trailer Orchestrated-By: Muse Code; NO push)
 - Session wall time ≈ 05:40–05:55Z (~15 min active), inside the
   4 h box; zero lease waits (no lease taken).
 
+## Part 32 (P1ai): Post-exit diagnosis — main-return, 31-drain, freeze sequencing + next-park spec (no boot)
+
+Brief `local/muse/prompts/P1ai.md`. DIAGNOSIS brief on committed
+logs — no boot, no lease of any kind, no fork changes, no `adb`.
+Tables, no verdicts. Stale-reading guard: `local/research/T13/REPORT.md`
+(all of it — phase EXITED at block 235, N = 72,176) + P1 REPORT Part 31
+(pre-exit ladder) + Part 24 §P24-1f/g (`[drop]` census conventions).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`LOG=$W/P1/run/boot-t13-1.log` (2,493,828 lines),
+`T=$W/P1/run/ps2_log-t13-1.txt` (185,293,022 lines, 6,581,094,749 B),
+T13's `blocks.tsv` (242) + `ticks.tsv` (166). Scratch `/tmp/p1ai/`
+(miners kept there, uncommitted); this Part is the only evidence.
+Trace never copied — one full streaming pass + EOF seeks only.
+
+Headline receipts: main returns through the pc==0 dormant site
+(exactly 1 `[diag:dormant] id=1` line @2489892, ra=0x1d8efc,
+sp=0x1fffdc0, scheduled=213 — same SITE as the P1e precedent, all
+register state different); the driver loop unwinds in-trace 73 lines
+after the last `0x362DE8` exit (`363490`@185265063, `376938`@185265064);
+T13's 4,049-frame unwind reconciles EXACTLY to 4,049 post-exit depth-0
+dispatches (20 distinct roots, tabled complete); the 31-drain is a
+781-iteration pump subprocess (3 root chains/iter + 31AAF0-subtree,
+2 HLE pad calls/iter via the stub path, zero trace lines by design);
+29 halts mid-block-239 (@2489890, 74.1% by lines) with the
+29-signal→31-wait→main-dormant trio on 3 adjacent lines; handshakes
+reproduce exactly (29 72178/72178, 30 4/3, 31 72959/72958) with the +1
+31-inflight localized to EOF line 2493828 and the +2 29-edge bounded
+(max in-flight 2, never negative) but not localizable (no timestamps);
+dma/gif freeze same-tick (partial 8658/234 @19800, 0/0 @19920);
+b241 residue = 13 connected call-targets (call-histogram, complete —
+distinct 13 ≤ 30 print cap); silence re-audit clean (0/0/0/0/0 in exit
+region, all lasts in blocks 0–2).
+
+## P32-0. Rule record (no lease, no boots, no fork changes)
+
+| Item | Value |
+|---|---|
+| P-lane lease | Never touched (no boots; lease file never created/checked-for-write) |
+| Boots / harness runs | 0 (read-only mining of T13's committed receipts) |
+| Fork changes | 0 (fork sources read read-only for site/id semantics; no edits, no commits, no push/pull) |
+| `adb` | Not used |
+| Other agents' dirs / ISO | Read-only (`/tmp/t13-*.py` read for pattern conventions only; no writes outside `local/research/P1/REPORT.md` + `/tmp/p1ai/`) |
+| 6.5 GB trace | Streamed (1 full pass) + `tail -c` seeks; never copied |
+| ssx3 files changed | `local/research/P1/REPORT.md` ONLY (this Part, appended); commit prefix `[P1ai]`; NO push |
+
+## P32-1. Main-return mechanics (Task 1)
+
+### a. Status-5 table (every sample — full-log scan, 2 total, none elsewhere)
+
+| # | Log line | Threads block | id | status | waitReason/waitId | pc | entry | scheduled |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 2490884 | 240 | 1 | 5 | 0/0 | 0x0 | 0x100008 | 213 |
+| 2 | 2492423 | 241 | 1 | 5 | 0/0 | 0x0 | 0x100008 | 0 |
+
+`ra` is NOT a `[diag:thread]` field (format carries no ra —
+`id/status/waitReason/waitId/pc/entry/priority/scheduled` only); the
+return-register state comes from the §P32-1f dormant line (ra=0x1d8efc)
+and §P32-1b stacks (sp=0x1fffdc0). Tail extension: full-log
+`status=5` scan = exactly these 2; zero status-5 for any other thread,
+zero status-5 after block 241 (log ends 2493828).
+
+### b. Thread-1 + stacks exit series (blocks 234–241)
+
+| Block | t1 line | t1 status | t1 waitId/pc | t1 scheduled | stacks sp | stacks pc |
+|---|---|---|---|---|---|---|
+| 234 | 2444114 | 2 WAIT | 29 / 0x423de8 | 602 | 0x1ffff20 | 0x423de8 |
+| 235 | 2453906 | 2 WAIT | 29 / 0x423de8 | 598 | 0x1ffff20 | 0x423de8 |
+| 236 | 2464009 | 2 WAIT | 29 / 0x423de8 | 610 | 0x1ffff20 | 0x423de8 |
+| 237 | 2473989 | 0 RUN | — / 0x2c6074 | 603 | 0x1fffce0 | 0x2c6074 |
+| 238 | 2481225 | 2 WAIT | 29 / 0x423de8 | 593 | 0x1ffff20 | 0x423de8 |
+| 239 | 2487630 | 2 WAIT | 29 / 0x423de8 | 608 | 0x1ffff20 | 0x423de8 |
+| 240 | 2490884 | 5 DORMANT | 0 / 0x0 | 213 | 0x1fffdc0 | 0x0 |
+| 241 | 2492423 | 5 DORMANT | 0 / 0x0 | 0 | 0x1fffdc0 | 0x0 |
+
+t1 holds WAIT-29/sp 0x1ffff20 through b239 (one RUN sample b237),
+then dormant/pc 0x0/sp 0x1fffdc0 at b240–241. scheduled 213 at b240 =
+§P32-1f dormant `scheduled=213` exactly; 0 at b241 (never rescheduled).
+
+### c. Return-path table (ordered exits, last `0x362DE8` exit → driver unwind)
+
+Last `0x362DE8` enter @185264851 (depth 2, parent `00363490_0x363490`,
+single caller reconfirmed); last exit @185264990 (depth 2, live stack
+after = [`00376938_0x376938`, `00363490_0x363490`]). Unwind order:
+
+| Order | Trace line | Function | Depth | Role in unwind |
+|---|---|---|---|---|
+| 0 | 185264990 | `00362DE8_0x362de8` exit | 2 | last invocation exit (70-enter steady-state invocation: 394ED0×20 + 362978×20 + 395000×19 + 364240×2 + 8 singles — §P32-1d note) |
+| 1–10 | 185264993–185265011 | 364CD0, 3625C0, 362478, 362660, 3626D8, 3625C0, 362478, 362660, 3626D8, 3627A8 exits | 3 | leaves under sibling 364360 |
+| 11 | 185265012 | `00364360_0x364360` exit | 2 | depth-2 sibling frame |
+| 12–14 | 185265015–185265019 | 38F460, 3E6448, 38F6A8 exits | 3 | leaves under sibling 364050 |
+| 15 | 185265020 | `00364050_0x364050` exit | 2 | depth-2 sibling frame |
+| 16–18 | 185265024–185265027 | 42C078, 42C0C0, 4247D8 exits | 4/4/3 | sub-chain under sibling 3666F8 |
+| 19–34 | 185265030–185265059 | 38F738→371DD8 ×8 pairs | 3/4 | 8 repeated pairs under sibling 3666F8 |
+| 35 | 185265060 | `003666F8_0x3666f8` exit | 2 | depth-2 sibling frame |
+| 36 | 185265062 | `0038F300_0x38f300` exit | 2 | depth-2 sibling frame (2-line leaf frame) |
+| 37 | 185265063 | `00363490_0x363490` exit | 1 | DRIVER-LOOP frame unwinds (73 lines after order 0) |
+| 38 | 185265064 | `00376938_0x376938` exit | 0 | TOP frame unwinds — main's call chain fully returned |
+
+Post-exit depth profile: min 0, max 13. Post-exit enters = 14,015,
+exits = 14,017 (net +2 = the two live frames above; EOF stack empty).
+Window [last-enter 185264851, EOF]: 28,172 recs, 14,085 enters
+(= 14,015 + 70 last-invocation enters: 20/20/19/2/1×8 itemized above —
+steady-state shape, no tail-off).
+
+### d. 4,049-frame unwind itemized (depth-0 dispatches — reconciles T13 exactly)
+
+T13's "post-last-rep 4,049 frames" (`t13-cycle.py:184`, depth-0-seq
+entries after last rep) = this miner's post-exit depth-0 enters =
+4,049 EXACTLY. All 20 rows (complete — no pool):
+
+| # | Root function | Enters | Share of 4,049 |
+|---|---|---|---|
+| 1 | `00423DE0_0x423de0` | 784 | 19.36% |
+| 2 | `0037E120_0x37e120` | 781 | 19.29% |
+| 3 | `003C1638_0x3c1638` | 781 | 19.29% |
+| 4 | `0031A3C0_0x31a3c0` | 781 | 19.29% |
+| 5 | `0031AAF0_0x31aaf0` | 781 | 19.29% |
+| 6 | `003E4AF0_0x3e4af0` | 115 | 2.84% |
+| 7 | `00376938_0x376938` | 4 | 0.10% |
+| 8 | `00382760_0x382760` | 4 | 0.10% |
+| 9 | `00423DC0_0x423dc0` | 3 | 0.07% |
+| 10 | `0038F300_0x38f300` | 2 | 0.05% |
+| 11 | `00363490_0x363490` | 2 | 0.05% |
+| 12 | `00382650_0x382650` | 2 | 0.05% |
+| 13 | `00316F00_0x316f00` | 2 | 0.05% |
+| 14–20 | `00395288` / `00232AE0` / `0031A6B8` / `002C5570` / `0023D660` / `0023D618` / `001D8DE0` | 1 each | 0.02% each |
+
+Check: 784 + 781×4 + 115 + 4 + 4 + 3 + 2×4 + 1×7 = 4,049. The driver
+pair re-enters post-phase at depth 0 (`376938`×5 enters / ×6 exits,
+`363490`×2 / ×3 — the +1 exits are the §P32-1c live frames).
+
+### e. Dormant-precedent table (P1e §P6-1 vs this return)
+
+Site evidence (fork `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp`,
+read-only): pc==0 site @~642 (`if (context.pc == 0u)` + empty
+invocations → `[diag:dormant]` print + `makeDormant`); no-function-slot
+site @~695 (`!hasFunction(pc)`, pc≠0). Both dormants below have pc=0x0
+→ both fired at the pc==0 site.
+
+| Row | P1e precedent (boot-p1e-1.log :200) | T13 return (line 2489892) | Match |
+|---|---|---|---|
+| Dormant site | pc==0 site (pc=0x0) | pc==0 site (pc=0x0) | SAME site |
+| id / entry | 1 / 0x100008 | 1 / 0x100008 | SAME |
+| pc | 0x0 | 0x0 | SAME |
+| ra | 0x0 | 0x1d8efc (= sub_001D8DE0+0x11c) | DIFFER |
+| sp | 0x1ffff60 | 0x1fffdc0 | DIFFER |
+| gp | 0x4a30f0 | 0x4a30f0 | SAME |
+| v0 / a0 | 0x1 / 0x450000 | 0x467960 / 0x0 | DIFFER |
+| scheduled | 22 | 213 (= t1 b240 scheduled) | DIFFER |
+| Returner | 0x3dcc7c `JR $ra` (ra=0) | dispatch tail …→0x23d654→0x1d8efc (ra≠0) | DIFFER path |
+| Invocation stack | empty (dormant printed) | empty (dormant printed; trace EOF empty) | SAME |
+| Count in boot | id=1 ×1 of 10,705 | id=1 ×1 of 149,339 | SAME shape |
+
+### f. Dormant id=1 full receipt (the main-return line)
+
+Line 2489892 (block-239 span, 2 lines after last 29-signal @2489890,
+1 line after first post-halt 31-wait @2489891):
+
+```
+[diag:dormant] id=1 entry=0x100008 pc=0x0 ra=0x1d8efc sp=0x1fffdc0
+gp=0x4a30f0 v0=0x467960 a0=0x0 scheduled=213
+trace=0x3252e8 -> 0x325260 -> … (325260/3252f8/320c48/321108/325250/325450
+cycle ×~6) … -> 0x227f80 -> 0x23c808 -> 0x23d618 -> 0x23d660 -> 0x2c55d8
+-> 0x3e6448 -> 0x2c6074 -> 0x2c51d0 -> 0x2c51d0 -> 0x2c51d0 -> 0x2c51d0
+-> 0x23d688 -> 0x23d654 -> 0x1d8efc
+```
+
+Cross-note: tick 19440 (line 2445707, block 234) already samples
+pc=0x1d8efc/sp=0x1fffdc0 — main's final pc/sp pair is visible 41,185
+log lines before the dormant line.
+
+## P32-2. 31-drain family + 29-halt split (Task 2)
+
+### a. Drain-family table (9 funcs × 781 — header decls + body structure + trace edges)
+
+Header: `$W/P1/output/ps2_recompiled_functions.h` (decls carry `sub_`
+names only — no roles; roles below are structural: body size/range +
+exact trace parent/children). All 9: post enter=exit=781.
+
+| Func | Header line | Body (lines / range / switch-ifs) | Trace parents | Trace children | Per-iter structural role |
+|---|---|---|---|---|---|
+| `0031A3C0` | :5989 | 1054 / 0x31a3c0–0x31a6b8 / 190c+8if | root ×781 | 31AAF0 ×781 | root driver → pump-branch entry (mid-entry 0x31abd0) |
+| `0037E120` | :6865 | 27814 / 0x37e120–0x3825f8 / 4406c+638if | root ×781 | 3825F8 ×781 | root driver → single-leaf branch (abuts 3825F8) |
+| `003C1638` | :7669 | 2412 / 0x3c1638–0x3c1b80 / 338c+91if | root ×781 | — (leaf) | root top-level handler, no subcalls |
+| `00317520` | :5906 | 50 / 0x317520–0x317530 / getter | 31AAF0 ×781 | — (leaf) | `v0=*(v1+8)` field load (`lw $v1,gp+0x2A74; jr $ra`) |
+| `00317500` | :5905 | 69 / 0x317500–0x317520 | 31AAF0 ×781 | 317348 ×781 | trampoline |
+| `00317348` | :5900 | 367 / 0x317348–0x317400 | 317500 ×781 | 227F58 ×781 + 31A6B8 ×781 | fan-out (mid-entry 0x31aac8 for 31A6B8) |
+| `00227F58` | :2628 | 86 / 0x227f58–0x227f80 | 317348 ×781 | 326B88 ×781 | trampoline |
+| `00326B88` | :6138 | 406 / 0x326b88–0x326c60 | 227F58 ×781 | 326EB0 ×1562 (2×/iter) | double-dispatch to pad-poll leaf |
+| `003825F8` | :6866 | 217 / 0x3825f8–0x382688 | 37E120 ×781 | — (+1 stray 423DD0) | leaf handler under 37E120 |
+
+(c=cases, if=ifs in generated entry-switch; loop=0 in all 7 probed.)
+
+### b. Drain-chain edge table (exact post-exit parent→child counts)
+
+| # | Edge | n | /iter |
+|---|---|---|---|
+| 1 | root → 31A3C0 → 31AAF0 | 781 | 1 |
+| 2 | root → 31AAF0 (direct) | 781 | 1 |
+| 3 | 31AAF0 → 317500 → 317348 → 227F58 → 326B88 | 781 each | 1 |
+| 4 | 326B88 → 326EB0 | 1562 | 2 |
+| 5 | 317348 → 31A6B8 (mid-entry 0x31aac8) | 781 | 1 |
+| 6 | 31AAF0 → 317520 / 423DD0 / 423DE0 | 781 each | 1 |
+| 7 | root → 37E120 → 3825F8 | 781 | 1 |
+| 8 | root → 3C1638 (leaf) | 781 | 1 |
+| 9 | root → 423DE0 | 784 (= 781 + 3) | ~1 |
+| 10 | 326EB0 → 3FFBC0 → 3FFA58 (HLE `scePadGetState`/`scePadRead`, stub path ×2/iter, ZERO trace lines by design — HLE shims log only under `_DEBUG`) | stub 606 each/b241 | 2 |
+
+31AAF0 total 1562 = 781 (via 31A3C0) + 781 (root-direct). 423DE0 total
+1573 = 784 (root) + 781 (via 31AAF0) + 6 (via 382760) + 1 (via 376938)
++ 1 (via 31A6B8). 423DD0 total 783 = 781 (via 31AAF0) + 1 (via 382688)
++ 1 (via 3825F8). 31A6B8 total 789 = 781 (drain) + 5 (via 316F00) + 2
+(self) + 1 (root). EOF ends inside the chain (…317348→317500 exits,
+423DE0 pair, 31AAF0@0 exit @185293022).
+
+### c. Drain-vs-tail split (repeating pump vs finite post-phase tails)
+
+| Class | Members (post enter counts) | Shape |
+|---|---|---|
+| 781-pump (repeating) | 9-family ×781; 31AAF0 ×1562; 326EB0 ×1562; 423DE0 ×1573; 423DD0 ×783 | identical every iteration; 31-coupled (below) |
+| 31 coupling | signal: `waker=-1 inInt=1 pc=0x423dd8 ra=0x31abf8` (= 31AAF0+0x108, iSignalSema 0xffffffbd); wait: `waker=4 pc=0x423de8 ra=0x31ac30` (= 31AAF0+0x140, WaitSema 0x44) | interrupt→t4 handshake; syscall b241 = WaitSema×303 + iSignalSema×303 ONLY |
+| Finite tails (non-repeating) | 3E4AF0 ×115 (root leaf); 325260 ×80; 3252F8 ×48; 411C38/320C48/321108/325250/3252E8/325450 ×32; 411B08 ×16; 362660/3626D8 ×12; 38F738/371DD8 ×11; 88 pooled funcs ×256 exits | drain-adjacent teardown-ish chains (e.g. 325450→325260→3252F8, 411F38→411C38 fans); all balanced, all pre-existing funcs |
+| In-phase gone | 394ED0/395000 ×0 post; 362DE8 ×0 post enters; 362CC8 ×1 | hash phase fully absent post-exit |
+
+### d. Halt-split table (where 29 stops while 31 continues, b239–241)
+
+Block spans: b239 2487366–2490771, b240 2490772–2492321, b241
+2492322–2493828(EOF). Per-interval counts: b239 w29/s29/w31/s31 =
+117/118/298/298; b240 = 0/0/303/303; b241 = 0/0/297/297.
+
+| Order | Log line | Block | Event | Detail |
+|---|---|---|---|---|
+| … | … | 239 | 29 wait/signal pairs continue | wait `waker=1 ra=0x31aa8c` (= 31A6B8+0x3d4) / signal `waker=4 ra=0x31aae4` (= 31A6B8+0x42c), target=1 |
+| LAST-1 | 2489876 | 239 | LAST 29 wait | `waker=1 pc=0x423de8 ra=0x31aa8c result=park` |
+| LAST | 2489890 | 239 | LAST 29 signal (line 2524/3406 = 74.1% through b239) | `waker=4 … target=1 tStatus=2 … result=29` — wakes t1 |
+| +1 | 2489891 | 239 | first 31 after last-29 (ADJACENT line) | `op=wait id=31 waker=4 ra=0x31ac30 result=park` |
+| +2 | 2489892 | 239 | main dormant (ADJACENT line) | §P32-1f id=1 line — t1 returns 2 lines after its last wake |
+| … | 2489893–2493828 | 239–241 | 31 continues alone (898-… waits+signals, no gap) | alternating wait/signal to EOF |
+| EOF | 2493828 | 241 | LAST 31 wait = log EOF (trailing newline intact) | `waker=4 ra=0x31ac30 result=park` — never answered (+1 in-flight) |
+
+29-signal side (t4, waker=4) also stops: t4's 29-branch ends with
+main's return while its 31-branch (WAIT-31, scheduled ~300/block
+through b241) continues — observed pattern, mechanism tabled as is.
+
+### e. Handshake-balance table (totals + edges + artifacts)
+
+| Row | 29 | 31 | 30 |
+|---|---|---|---|
+| waits / signals (reproduced) | 72178 / 72178 | 72959 / 72958 | 4 / 3 |
+| vs N=72,176 | N+2 | N+783 | parked (no 4th signal) |
+| Δ(31−29) | — | 781 = drain iters (§P32-2b) | — |
+| pre-block-0 (T13) | 25 / 25 | 25 / 25 | — |
+| blocks 0–238 | 72036 w / 72035 s | balanced | — |
+| block 239 interval | 117 w / 118 s (+1 signal = answer to a b238 wait; boundary pairing) | 298 / 298 | — |
+| blocks 240–241 | 0 / 0 | 600 / 600 | — |
+| running balance (wait−signal) | min 0 / max 2 / final 0 | final +1 (EOF wait) | ends parked (wait @7224) |
+| +2 29-edge localization | BOUNDED (in-flight ≤ 2, never negative) but NOT LOCALIZED — trace has no timestamps (same gap as T13 §T13-7) | — | — |
+| +1 31-inflight localization | — | line 2493828 (EOF): thread-4 wait parked, no later signal | — |
+| truncated-line artifacts (interleaved, counts unaffected) | 1: :1019100 signal fused with `[run:tick] tick=5640` | 2: :11171 signal fused with `[frame:upload]`; :944189 signal fused with `[run:tick] tick=4920` | 0 |
+| first events | wait :644 (waker=1) / signal :650 (waker=4) | wait :263 (waker=4) / signal :648 (waker=-1) | signal :643 (waker=1) |
+
+Sema-30 all 7 lines reproduced verbatim: :643 signal 0→1 / :645 wait
+1→0 / :646 wait park / :706 signal wake t3 / :6972 wait park / :7022
+signal wake t3 / :7224 wait park (4w/3s, t3 WAIT-30 ×241 + RUN b0).
+
+## P32-3. Freeze sequencing + residue (Task 3a/b)
+
+### a. Freeze table (last 5 tick pairs — T13 reproduced + block mapping)
+
+Tick semantics: `[run:tick]` every 120 units; dma/gif = cumulative
+counters. Full-run: 166 ticks (gapless, step 120) — counted via
+SUBSTRING match; 23 tick lines are interleaved (fused with truncated
+sema/dormant lines, e.g. tick 19200 @2399754 fused with an id=32
+signal) and missed by line-prefix match (143).
+
+| Tick | Log line | Block | pc | dma | gif | d_dma | d_gif | d_gif/d_dma |
+|---|---|---|---|---|---|---|---|---|
+| 19320 | 2423069 | 235 | 0x3827e0 | 2586548 | 69949 | 25124 | 680 | 0.02707 |
+| 19440 | 2445707 | 234* | 0x1d8efc | 2611264 | 70617 | 24716 | 668 | 0.02703 |
+| 19560 | 2467990 | 236 | 0x317244 | 2636275 | 71292 | 25011 | 675 | 0.02699 |
+| 19680 | 2484929 | 238 | 0x3172e0 | 2660474 | 71947 | 24199 | 655 | 0.02707 |
+| 19800 | 2491454 | 240 | 0x31ac30 | 2669132 | 72181 | 8658 | 234 | 0.02703 |
+| 19920 | 2493756 | 241 | 0x31ac30 | 2669132 | 72181 | 0 | 0 | FROZEN |
+
+*Tick/block grids are independent timers (tick 19440 lands in b234's
+line span while 19320 lands in b235's — tabled as observed.)
+Which stops first: NEITHER — same-tick freeze. Partial step (8658/234,
+ratio held 0.02703) @19800 for BOTH, then 0/0 @19920 for BOTH. Tick pc
+settles at 0x31ac30 (= 31AAF0+0x140, the 31-wait ra) with t4 sp
+0x6088a0 for the final pair. No tick after 19920 (SIGTERM 30 s grace).
+
+### b. Residue table (b241: 13/13 call-targets — COMPLETE list)
+
+`[diag:stub]` semantics (fork `ps2_runtime.cpp:1106-1132`, read-only):
+per-5 s-block guest CALL-target histogram via the dispatchGuestBranch
+hook; `distinct` = total distinct targets; only TOP 30 rows printed.
+b241 distinct=13 ≤ 30 → all 13 rows below are the COMPLETE block
+footprint (b235–240 rows are top-30 truncations — §P32-3c). Counts:
+606×3 + 303×10 = 4,848. All firstRa == lastRa (single call site each).
+
+| # | Target | Count | /iter | firstRa=lastRa | Target in | Caller (ra in) | Body class | Post trace enters |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 0x3ffa58 | 606 | 2 | 0x3271e8 | sub_003FFA58 | 326EB0+0x338 | HLE `scePadRead` (14-line shim) | 0 (HLE untraced by design) |
+| 2 | 0x3ffbc0 | 606 | 2 | 0x326f24 | sub_003FFBC0 | 326EB0+0x74 | HLE `scePadGetState` (14-line shim) | 0 (HLE untraversed in trace) |
+| 3 | 0x326eb0 | 606 | 2 | 0x326bf8 | sub_00326EB0 | 326B88+0x70 | recompiled (2580 lines) | 1562 |
+| 4 | 0x3825f8 | 303 | 1 | 0x3825dc | sub_003825F8 | 37E120+0x44bc | recompiled (217 lines) | 781 |
+| 5 | 0x423de0 | 303 | 1 | 0x31ac30 | sub_00423DE0 | 31AAF0+0x140 (= 31-wait ra) | recompiled (50 lines) | 1573 |
+| 6 | 0x31aac8 | 303 | 1 | 0x3173e4 | sub_0031A6B8+0x410 (mid-entry) | 317348+0x9c | mid-function entry (no own file) | (31A6B8: 789) |
+| 7 | 0x326b88 | 303 | 1 | 0x227f70 | sub_00326B88 | 227F58+0x18 | recompiled (406 lines) | 781 |
+| 8 | 0x227f58 | 303 | 1 | 0x3173c4 | sub_00227F58 | 317348+0x7c | recompiled (86 lines) | 781 |
+| 9 | 0x317348 | 303 | 1 | 0x317514 | sub_00317348 | 317500+0x14 | recompiled (367 lines) | 781 |
+| 10 | 0x317500 | 303 | 1 | 0x31ac28 | sub_00317500 | 31AAF0+0x138 | recompiled (69 lines) | 781 |
+| 11 | 0x423dd0 | 303 | 1 | 0x31abf8 | sub_00423DD0 | 31AAF0+0x108 (= 31-signal ra) | recompiled (50 lines) | 783 |
+| 12 | 0x317520 | 303 | 1 | 0x31abe0 | sub_00317520 | 31AAF0+0xf0 | recompiled leaf getter (50 lines) | 781 |
+| 13 | 0x31abd0 | 303 | 1 | 0x31a5a0 | sub_0031AAF0+0xe0 (mid-entry) | 31A3C0+0x1e0 | mid-function entry (no own file) | (31AAF0: 1562) |
+
+The 13 form ONE connected chain (ra links close the loop through
+31AAF0/31A3C0/37E120 — the drain footprint, §P32-2b). What REMAINS
+after the collapse: the 31-pump call chain + its 2 HLE pad calls.
+Dormant-trace cycle receipt (b241 @2492335, repeats): `0x3c1980 ->
+0x31a490 -> 0x31abd0 -> 0x317520 -> 0x423dd0 -> 0x423de8 -> 0x31ac30 ->
+0x317500 -> 0x317348 -> 0x227f58 -> 0x326b88 -> 0x326eb0 -> 0x3ffbc0 ->
+0x3ffa58 -> 0x326eb0 -> 0x3ffbc0 -> 0x3ffa58 -> 0x31aac8 -> 0x423de0 ->
+0x3825c0 -> 0x3825f8 -> 0x3c1980` (23 hops/iter, 326EB0→pad-pair ×2).
+
+### c. Stub-collapse series (blocks 235–241)
+
+| Block | Log line | distinct | Printed rows | Top-30 sum | Note |
+|---|---|---|---|---|---|
+| 235 | 2453403 | 218 | 30 (truncated) | 243,969 | FIRST EXIT EVENT |
+| 236 | 2463459 | 211 | 30 (truncated) | 249,286 | — |
+| 237 | 2473456 | 211 | 30 (truncated) | 248,192 | — |
+| 238 | 2480949 | 211 | 30 (truncated) | 214,653 | — |
+| 239 | 2487366 | 189 | 30 (truncated) | 205,504 | 29 halts mid-block |
+| 240 | 2490772 | 189 | 30 (truncated) | 79,625 | main dormant; 29 gone |
+| 241 | 2492322 | 13 | 13 (COMPLETE) | 4,848 | §P32-3b residue |
+
+## P32-4. Silence re-audit over the exit region (Task 3c)
+
+Region: log lines ≥ 2453403 (block 235 header) / trace lines ≥
+185264991 (post-phase). Conventions per Part 24 §P24-1f/g (`[drop]`
+single-site census + 12 exclusion rules — no new sites observed, no
+rule changes proposed).
+
+| Source | Marker | Total | Exit-region | Last before exit | First after exit |
+|---|---|---|---|---|---|
+| Drops | `[drop]` | 6 | 0 | :73 `[drop] syscall/dispatchSyscallOverride KE_ERROR syscall=0x5b …` (block 0) | none |
+| RPC | `trace:unhandled` | 4 | 0 | :5143 `[IOP/RPC trace:unhandled] sid=0x534e44 …` (block 2) | none |
+| CD | `lbn=` | 810 | 0 | :7174 `[diag:cd] sceCdRead payload lbn=0x4311f …` (block 2) | none |
+| SIF | `SIF…load` | 21 | 0 | :1055 `[SIF module] load id=21 … VOIPF.IRX` (block 0) | none |
+| GS kicks | `gs:kick` | 96 | 0 | :2638 `[gs:kick] idx=95 drawing=1 …` (block 1) | none |
+| gif (broad) | `[gif` | 214 full-log (T13) | 0 | — | none |
+| Trace 394/395 | enters | 0 post | 0 | last in-phase (inv 72175) | none |
+| New guest funcs | post-only | 0 of 113 | 0 | — | none |
+
+All T13 silence readings reproduce to the line number.
+
+## P32-5. Post-exit state table (von-Neumann snapshot — Task 4.1)
+
+State at EOF (log 2493828 / trace 185293022). "Next-boot invariant"
+= what the reboot must reproduce at the same landmarks (T15 checks).
+
+### a. Per-thread state (@ block 241)
+
+| Thread | Entry | status | waitId | pc | sp | scheduled b241 (b240) | State |
+|---|---|---|---|---|---|---|---|
+| t1 (main) | 0x100008 | 5 DORMANT | 0 | 0x0 | 0x1fffdc0 | 0 (213) | RETURNED (dormant @2489892, empty invocations) |
+| t2 | 0x3e3be0 | 2 WAIT | 26 | 0x423de8 | 0x51ec20 | 0 (0) | parked (never scheduled post-boot) |
+| t3 | 0x31ac60 | 2 WAIT | 30 | 0x423de8 | 0x6188a0 | 0 (0) | parked (4w/3s, no release at exit) |
+| t4 | 0x31ac08 | 2 WAIT | 31 | 0x423de8 | 0x6088a0 | 303 (304) | LIVE — 31-drain pump (sole scheduled thread) |
+| t5 | 0x382740 | 2 WAIT | 32 | 0x423de8 | 0x622480 | 0 (213) | parked (scheduled series == t1's exactly, b234–241: 602/598/610/603/593/608/213/0 — coupled to main, winds down with it) |
+| t6 | 0x3c19a8 | 2 WAIT | 36 | 0x423de8 | 0x512aa0 | 0 (0) | parked (WAIT-36 ×242) |
+
+### b. Per-device state
+
+| Device | State | Receipt |
+|---|---|---|
+| sema-29 | HALTED, balanced 72178/72178, balance 0 | last signal @2489890; 0 events b240–241 |
+| sema-30 | PARKED 4w/3s (waiters=1) | 7 lines, last @7224 (wait, waker=3) |
+| sema-31 | LIVE, 72959/72958, +1 in-flight | EOF = parked wait @2493828 (waker=4); b241 297/297 |
+| sema-32 | QUIET (t5 parked, scheduled 0) | interleaved signal line @2399754 (tick-fused artifact) |
+| dma/gif | FROZEN same-tick @ 2669132/72181 | 0/0 deltas ticks 19800→19920; pc settled 0x31ac30 |
+| call footprint | 13-target drain chain (§P32-3b) | distinct 13, counts 606×3+303×10 |
+| syscalls | WaitSema×303 + iSignalSema×303 ONLY (b241) | PollSema/FlushCache/SignalSema gone with 29 (b239: 5 ids; b240: 5 ids; b241: 2 ids) |
+| trace stack | EMPTY (0 live frames) | all 1,073 funcs enter=exit; 113 post funcs balanced (±1 on driver pair netting the 2 live frames) |
+| dormant id=1 | DONE (×1 @2489892) | scheduled=213; no second firing |
+| CD/SIF/GS/RPC/drops | SILENT since ≤ block 2 | §P32-4 |
+
+### c. Next-boot invariants (reboot must reproduce at the same landmarks)
+
+| # | Landmark | Invariant value |
+|---|---|---|
+| 1 | First `0x362DE8` enter | trace line 19,385 |
+| 2 | Stub preamble | b0/b1 distinct 897/588 (T13; T11 differed 961/497 — preamble NOT invariant, steady-@-b2 is) |
+| 3 | In-phase distinct | 222 ×233 (blocks 2–234) |
+| 4 | FIRST EXIT EVENT | block 235 distinct 218 @ ~line 2453403 |
+| 5 | Collapse | 218 → 211×3 → 189×2 → 13 (blocks 235–241) |
+| 6 | N | 72,176 balanced enters=exits (preamble variance may shift N by tens — T15 records N2) |
+| 7 | 29-halt | last 29-signal mid-b239, then 31-only |
+| 8 | Main dormant | id=1 ×1, pc=0x0, 2 lines after last 29-signal |
+| 9 | Freeze | dma/gif partial-step then 0/0 same-tick pair |
+| 10 | EOF shape | 31-wait parked; trace stack empty; 0 post-only |
+
+## P32-6. Next-park spec for T15 (Task 4.2/4.3 — signature watchlist + miner rows)
+
+### a. Watchlist table (monitor-pollable triggers; T13 baseline = "absent unless noted")
+
+| # | Signal | Trigger predicate (poll each 15 s like T13's monitor) | T13 baseline |
+|---|---|---|---|
+| W1 | New stub phase after residue | any `[diag:stubs]` block with distinct ∉ {222, 218, 211, 189, 13} after block 5 | absent (exit = 222→218→211→189→13) |
+| W2 | Residue break | any post-b241 block with distinct ≠ 13 (if boot runs past) | n/a (EOF @b241) |
+| W3 | Main wake from dormant | any `[diag:thread] id=1` with status ≠ 5 after a status=5 sample | absent (5,5 @b240–241) |
+| W4 | Second dormant firing | 2nd `[diag:dormant] id=1` line | absent (×1 @2489892) |
+| W5 | First new guest event | any `lbn=` past :7174 / SIF-load past :1055 / GS-kick past :2638 / `trace:unhandled` past :5143 / `[drop]` past :73 | absent (all silent ≤ block 2) |
+| W6 | New caller | any `0x362DE8` enter whose indent parent ≠ `sub_00363490` (trace) | absent (×72,176 single caller) |
+| W7 | dma/gif unfreeze | any `[run:tick]` with dma ≠ 2669132 or gif ≠ 72181 after a frozen pair | absent (frozen @19920) |
+| W8 | Second exit (31-halt) | any post-exit block with w31 = 0, or new status-5 for id ∈ {4, 5, 6} | absent (31 live to EOF) |
+| W9 | 4th sema-30 signal | 8th `id=30` line (`op=signal`, `waiters 1→0`, `target=3`) | absent (7 lines, parked) |
+| W10 | New stub-print shape | any `[diag:stub]` row with firstRa ≠ lastRa in a ≤30-distinct block | absent (all 13 equal) |
+| W11 | Rate-shape deviation | any 60 s slice with dormant/inv ≠ 2.0000 in-phase or d_gif/d_dma outside 0.02703±0.0002 | T13: 2.0000 slices 7–17; ratio ±0.0001/164 |
+| W12 | Trace-stall trip | trace bytes unchanged 120 s (T13's monitor rule, kept) | n/a (monotonic to EOF) |
+
+### b. Miner-row table (10 rows T15's analysis MUST emit)
+
+| # | Row | Spec | T13 value (comparison) |
+|---|---|---|---|
+| M1 | Block of next event | first post-b241 `[diag:stubs]` block # with distinct ≠ 13 (or "none — EOF @b241") | none (exit @235, EOF @241) |
+| M2 | N2 count | `0x362DE8` enters = exits on the new boot (± preamble note) | N = 72,176 |
+| M3 | Handshake deltas | 29w−N2, 31w−N2, s29−w29, s31−w31 at exit | +2, +783, 0, −1 |
+| M4 | Main-return line | `[diag:dormant] id=1` line # + (ra, sp, v0, a0, scheduled) | :2489892, 0x1d8efc/0x1fffdc0/0x467960/0x0/213 |
+| M5 | Halt-split lines | last-29 line, first-post-31 line, dormant line, adjacency? | 2489890/2489891/2489892 adjacent |
+| M6 | Drain iters | Δ(31−29) + 9-func post counts (each = iters?) | 781; 9 ×781 |
+| M7 | Freeze pair | last two ticks (dma/gif/deltas), same-tick? | (8658/234) → (0/0) same-tick |
+| M8 | Residue rows | b-last distinct + per-target (count, firstRa==lastRa?) | 13; 606×3+303×10; all equal |
+| M9 | Stack at next cap | live frames at EOF + post-only func count | 0 live; 0 post-only of 113 |
+| M10 | Silence lasts | last-line-before-exit per source (drop/RPC/CD/SIF/GS) + exit-region counts | 73/5143/7174/1055/2638; 0/0/0/0/0 |
+
+## P32-7. Exact commands + receipt paths
+
+From `/Users/bradrichardson/dev/ssx3` unless noted; `W`, `LOG`, `T`
+as above. All receipt accesses read-only (grep/sed/python reads,
+`tail -c` seeks); no lease, no boots, no builds, no fork writes:
+
+```
+# Reads (lease-free; T13 + P31 + P24-1f/g + /tmp/t13-{mine,blocks,trace,cycle}.py patterns)
+read local/research/T13/REPORT.md (all); REPORT.md Part 31 + P24-1f/g
+read /tmp/t13-mine.py /tmp/t13-blocks.py /tmp/t13-trace.py (pattern conventions only)
+# Miners (written to /tmp/p1ai/, uncommitted; one IndexError-class fix: post-exit
+#   sequence must anchor on LAST 362DE8 exit — full-pass v1 stored 92M rows, superseded
+#   by tail-seek v2; v1 headline counts kept, v1 order list discarded)
+mkdir -p /tmp/p1ai
+write /tmp/p1ai/log_exit.py (single-pass: status-5/t1/stacks/handshakes/sema30/dormant/
+  stubs-235-241/ticks/syscalls/silence/tail)
+python3 /tmp/p1ai/log_exit.py LOG > /tmp/p1ai/log_exit.txt (164 lines)
+write /tmp/p1ai/log_follow.py (first-events/ boundary-31/tick-substring/t4-t5/dormant-full/ balance)
+python3 /tmp/p1ai/log_follow.py LOG > /tmp/p1ai/log_follow.txt
+write /tmp/p1ai/trace_post.py (single full streaming pass: last362 enter/exit, pre/post sets,
+  post-only, per-func counts, live frames; ~5 min wall)
+python3 /tmp/p1ai/trace_post.py T > /tmp/p1ai/trace_post.txt
+write /tmp/p1ai/tail_unwind.py (tail -c 6MB seek: unwind order, depth profile, window counts)
+python3 /tmp/p1ai/tail_unwind.py T > /tmp/p1ai/tail_unwind.txt
+write /tmp/p1ai/callgraph.py (seeded-stack edge census + sweep-CSV ra mapping)
+python3 /tmp/p1ai/callgraph.py > /tmp/p1ai/callgraph.txt (root total 4049 verified)
+# Targeted receipts (read-only)
+grep -n "status=5" LOG (2); sed b241 stub block; sed threads b239-241
+grep -c 003FFBC0/003FFA58 T (0/0 — full-stream C greps)
+grep header decls (drain+residue+1D8DE0 addrs)
+sed EeScheduler.cpp:630-745 (dormant sites); sed Dispatcher.cpp:253-300,345-360 (id names)
+grep "diag:stub]" ps2_runtime.cpp + sed :1090-1132 (histogram+top30 semantics)
+cat HLE shim bodies (3FFA58/3FFBC0); structural grep of 7 big bodies (case/goto/if/loop)
+# Report (this Part)
+(edit_file append Part 32 in 1 chunk)
+git add -f local/research/P1/REPORT.md
+git commit -m "[P1ai] ..." (trailer Orchestrated-By: Muse Code; NO push)
+```
+
+Receipt paths: `/tmp/p1ai/log_exit.py|.txt`, `/tmp/p1ai/log_follow.py|.txt`,
+`/tmp/p1ai/trace_post.py|.txt`, `/tmp/p1ai/tail_unwind.py|.txt`,
+`/tmp/p1ai/callgraph.py|.txt` (all uncommitted scratch; tables above
+are the evidence).
+
+## P32-8. What I could not do (gap rows)
+
+- Localize WHICH 2 log lines form the +2 29-edge (29w = N+2): the
+  trace carries no timestamps, so pump-cycle↔invocation mapping past
+  the proxy is derived, not observed (same gap as T13 §T13-7; bounded
+  here: running in-flight min 0 / max 2 / final 0).
+- Time-resolve individual 31-drain iterations inside a 5 s block or
+  attribute the 303-vs-297 stub-vs-handshake per-block skew beyond
+  window-boundary attribution (both counters' windows tabled as is).
+- Name guest-level roles (source names) for the 9 drain funcs beyond
+  structural roles: the header carries `sub_` names only, and bodies
+  call through dispatchGuestBranch/JALR (zero static `sub_` refs in
+  all 9 .cpps) — callee structure came from the trace, not the text.
+- See HLE pad-shim internals beyond the 14-line trampolines
+  (`ps2_stubs::scePadRead/scePadGetState` bodies live outside this
+  diag brief's read scope needs; zero trace lines is by `_DEBUG`-only
+  logging design).
+- Attribute the t5≡t1 scheduled-coupling host/guest cause beyond the
+  exact series match (602/598/610/603/593/608/213/0 both, b234–241).
+- Session wall time ≈ 09:40–11:00Z (~80 min active), inside the 4 h box.
+
+
 
 
