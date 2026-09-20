@@ -1,0 +1,12 @@
+diff --git a/pcsx2/R5900OpcodeImpl.cpp b/pcsx2/R5900OpcodeImpl.cpp
+index fecebece9..ffd68c0b2 100644
+--- a/pcsx2/R5900OpcodeImpl.cpp
++++ b/pcsx2/R5900OpcodeImpl.cpp
+@@ -914,7 +914,7 @@ void SYSCALL()
+ 	else
+ 		call = cpuRegs.GPR.n.v1.UC[0];
+ 
+-	BIOS_LOG("Bios call: %s (%x)", R5900::bios[call], call);
++	BIOS_LOG("Bios call: %s (%x) pc=%x a0=%x", R5900::bios[call], call, cpuRegs.pc, cpuRegs.GPR.n.a0.UL[0]);
+ 
+ 	switch (static_cast<Syscall>(call))

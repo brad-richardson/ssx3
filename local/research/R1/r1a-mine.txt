@@ -1,0 +1,95 @@
++ echo '=== R1A loader lines ==='
+=== R1A loader lines ===
++ grep -n 'SYSTEM.CNF\|cdvdLoadElf\|Initializing Elf\|ELF Loading\|EntryPoint' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+17:[    0.1421] (SYSTEM.CNF) Detected PS2 Disc = cdrom0:\SLUS_207.72;1
+18:[    0.1421] (SYSTEM.CNF) Software version = 1.00
+19:[    0.1421] (SYSTEM.CNF) Disc region type = NTSC
+20:[    0.1421] cdvdLoadElf(): 'cdrom0:\SLUS_207.72;1' -> 'SLUS_207.72' in ISO.
+21:[    0.1466] Initializing Elf: 3890784 bytes
+138605:[    0.9331] ELF Loading: , Game CRC = 00000000, EntryPoint = 0xFFFFFFFF
+580678:[    5.1479] cdvdLoadElf(): Unknown device in ELF path 'rom0:PS2LOGO'
+580680:[    5.1479] ELF Loading: , Game CRC = 00000000, EntryPoint = 0xFFFFFFFF
+705870:[    8.7655] cdvdLoadElf(): 'cdrom0:\SLUS_207.72;1' -> 'SLUS_207.72' in ISO.
+705871:[    8.7682] Initializing Elf: 3890784 bytes
+705872:[    8.7701] ELF Loading: cdrom0:\SLUS_207.72;1, Game CRC = 08FFF00D, EntryPoint = 0x00100008
++ echo '=== R1A ExecPS2 context ==='
+=== R1A ExecPS2 context ===
++ grep -n 'Bios call: ExecPS2' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+142330:[    0.9549] Bios    : Bios call: ExecPS2 (7) pc=83238 a0=100008
+142426:[    0.9823] Bios    : Bios call: ExecPS2 (7) pc=1001b8 a0=200000
+696629:[    5.3241] Bios    : Bios call: ExecPS2 (7) pc=83238 a0=1000008
+696720:[    5.3451] Bios    : Bios call: ExecPS2 (7) pc=10002f8 a0=100000
+872992:[    9.8517] Bios    : Bios call: ExecPS2 (7) pc=83238 a0=100008
++ echo '=== R1A (74) lines ==='
+=== R1A (74) lines ===
++ grep -n ' (74) pc=' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+873092:[    9.8817] Bios    : Bios call: RFU116 (74) pc=42c2f8 a0=83
+873093:[    9.8817] Bios    : Bios call: RFU116 (74) pc=42c2f8 a0=5a
+873097:[    9.8819] Bios    : Bios call: RFU116 (74) pc=42c768 a0=5a
+873100:[    9.8819] Bios    : Bios call: RFU116 (74) pc=42c768 a0=5b
+873102:[    9.8820] Bios    : Bios call: RFU116 (74) pc=42c768 a0=fc
+873104:[    9.8820] Bios    : Bios call: RFU116 (74) pc=42c768 a0=fe
+873106:[    9.8820] Bios    : Bios call: RFU116 (74) pc=42c768 a0=fd
+873108:[    9.8820] Bios    : Bios call: RFU116 (74) pc=42c768 a0=ff
+873110:[    9.8820] Bios    : Bios call: RFU116 (74) pc=42c768 a0=12c
+873112:[    9.8820] Bios    : Bios call: RFU116 (74) pc=42c768 a0=8
+873123:[    9.8830] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=5a
+873125:[    9.8830] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=5b
+873126:[    9.8830] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=54
+873128:[    9.8831] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=55
+873130:[    9.8831] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=56
+873132:[    9.8831] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=57
+873134:[    9.8831] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=58
+873136:[    9.8831] Bios    : Bios call: RFU116 (74) pc=42cbc8 a0=59
++ echo '=== R1A (5b) lines ==='
+=== R1A (5b) lines ===
++ grep -n ' (5b) pc=' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+873101:[    9.8819] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42c7c0 a0=fc
+873103:[    9.8820] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42c7c0 a0=fe
+873105:[    9.8820] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42c7c0 a0=fd
+873107:[    9.8820] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42c7c0 a0=ff
+873109:[    9.8820] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42c7c0 a0=12c
+873111:[    9.8820] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42c7c0 a0=8
+873127:[    9.8830] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42cbb8 a0=55
+873129:[    9.8831] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42cbb8 a0=56
+873131:[    9.8831] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42cbb8 a0=57
+873133:[    9.8831] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42cbb8 a0=58
+873135:[    9.8831] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42cbb8 a0=59
+873137:[    9.8831] Bios    : Bios call: RFU091_GetEntryAddress (5b) pc=42cbb8 a0=3
++ echo '=== R1A (5a) lines ==='
+=== R1A (5a) lines ===
++ grep -n ' (5a) pc=' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+873098:[    9.8819] Bios    : Bios call: RFU090_iReferEventFlagStatus (5a) pc=42c778 a0=80076000
+873099:[    9.8819] Bios    : Bios call: RFU090_iReferEventFlagStatus (5a) pc=42c778 a0=82000
+873124:[    9.8830] Bios    : Bios call: RFU090_iReferEventFlagStatus (5a) pc=42cb70 a0=80075000
++ echo '=== R1A (64) lines ==='
+=== R1A (64) lines ===
++ grep -n ' (64) pc=' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
++ echo '=== R1A first 3 + last 3 EE lines ==='
+=== R1A first 3 + last 3 EE lines ===
++ grep -n -m3 'Bios call:' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+138603:[    0.9329] Bios    : Bios call: RFU060 (3c) pc=82068 a0=991f0
+138604:[    0.9330] Bios    : Bios call: RFU061 (3d) pc=82084 a0=955a4
+138745:[    0.9389] Bios    : Bios call: AddDmacHandler (12) pc=832f8 a0=5
++ echo '=== R1A tail EE ==='
+=== R1A tail EE ===
++ tail -n 3
++ grep -n 'Bios call:' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+14574150:[  119.9714] Bios    : Bios call: CreateSema (40) pc=423da8 a0=51eb10
+14574151:[  119.9714] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77) pc=424168 a0=51ea80
+14574166:[  119.9715] Bios    : Bios call: WaitSema (44) pc=423de8 a0=1d
++ echo '=== R1A misc ==='
+=== R1A misc ===
++ grep -c 'Bios call:' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+2914577
++ grep -c WaitVblankStart /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+397
++ grep -n -m2 'ReBootStart\|sceCdInit' /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+142725:[    0.9931] Bios    :  modload.004: ReBootStart (1ad28, 0, 1c, 1fe5cc)
+405620:[    1.3156] Bios    :  cdvdman.004: sceCdInit (1, 48eb8, 4, 0)
++ tail -n 5 /home/brad/pcsx2-r1/dat/PCSX2/logs/emulog.txt
+[  120.0096] DEV9: DEV9close
+[  120.0215] Unloading EGL.
+[  120.0216] DEV9: DEV9shutdown
+[  120.0224] NVRAM has not changed, not writing to disk.
+[  120.0257] Releasing host memory for virtual systems...
