@@ -5,6 +5,23 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M16 launched (event-driven, m15 wait fired):** same-frame
+      per-draw residual attribution — warp leave-one-out scan
+      (3-phase capture × per-draw shapes + offline warp per
+      shape). Reuses M15 pane.
+- [ ] **M15 read (09-20) — PASS, synth measured vs truth:** 3-phase
+      capture (v0 99×0 + r0, mid +0.05 50×17255, full +0.1 50×24858,
+      all identical); warp method chosen pre-run (mid-matrix
+      re-render correctly rejected as 0-by-construction); masked
+      SAD minimum genuinely (0,0) sharp 4.1× → synth==blend
+      (fnv); residual 13418 B (2.34%, 87% |d|=1), static 95.67%
+      exact; arm-B 791-shape guide (top 7.2%, own frame,
+      caveated); 4 PNGs 497999 B. Verified: header shas,
+      waits (0 waits/2 pairs), probe sizes+sha, dumps 5×573440,
+      analyzer rows (17255/24858/refhash/21599), synth
+      (13418/66599/fnv/dx0dy0), PNG sizes, diffmap VIEWED (red on
+      edges, sky/snow clean — matches). Next: M16 (gap-1
+      attribution). Ledger row added.
 - [ ] **P1ad launched (event-driven, p1ac wait fired):** diagnose the
       NEW park — main-thread `sub_00394ED0` list-walk
       (bounded-vs-circular via guest-memory trace) + thread-3
