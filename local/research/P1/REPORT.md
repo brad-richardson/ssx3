@@ -9250,3 +9250,383 @@ P9/P11 confounders, §P27-3).
   marked as such in §P27-2e).
 - Session wall time ≈ 03:05–03:50Z (~45 min), inside the 4 h box.
 
+## Part 28 (P1ad): DIAGNOSIS — the `sub_00394ED0` park is a self-looped hash chain (`0x85aabc→self`): the HLE's SPR_FROM DMA completes without moving data, so `sub_00362CC8` re-inits reset the pool count but never re-zero the buckets; fix brief names the SPR transfer emulation
+
+Brief `local/muse/prompts/P1ad.md`. DIAGNOSIS brief: 1 fork
+commit (read-only diag probe) + 2 boots. Tables, no verdicts.
+Stale-reading guard: Part 27 §P27-2b/c/d (the new park catalogue),
+§P27-5 (the open items this brief owns), §P27-2e (ladder).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork,
+branch `ssx3`), `O=$W/P1/output`,
+`LOG=$W/P1/run/boot-p1ad-1.log`, `LOG2=$W/P1/run/boot-p1ad-2.log`,
+`T1=$W/P1/run/ps2_log-p1ad-1.txt`, `T2=$W/P1/run/ps2_log-p1ad-2.txt`
+(own copies; the shared `ps2_log.txt` had been overwritten by a
+foreign run before this session, so P27's quoted trace counts are
+cited, not re-read). File:line refs below are `$R`-relative unless
+noted with `$O` (recompiled) or `$W/P1/run` (logs).
+
+Headline receipts: 137 fresh `0x394ED0` dispatches per boot (all
+`ra=0x363240`, one arena `a0=0x8095f0`, 63 `sub_00362DE8`
+invocations × 63 `sub_00362CC8` re-inits); the last fresh call
+(`n=136`) walks `head=0x85aabc` whose `next` is itself (slot 3
+reused after a count reset onto a stale head). P27's "15,989
+balanced calls" are 137 fresh + ~15.4–15.7k checkpoint slices of
+the one stuck call. The buckets are re-zeroed only by an SPR_FROM
+DMA that the HLE completes without moving a byte.
+
+## P28-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent (`start 04:05:27Z` in waits log) |
+| Waits log | `$W/P1/run/p1ad-waits.log` (6 lines: start, 3 waits, claim, release) |
+| Waits | `wait1 04:09:57Z`, `wait2 04:17:20Z`, `wait3 04:23:21Z`, all `lease=M16 pgrep=1` (5-min polls per the brief) |
+| Pre-claim checks (04:28:38Z) | Lease absent; `pgrep -x ps2EntryRunner` exit 1; binary `ead11aa1` (P1ad build); ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1ad\n' > /tmp/ssx3-host-lease` 04:28:38Z, immediately before boot 1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG 19,145 lines, 2,640,817 B; trace copied to T1 (109,147,867 B) |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, LOG2 19,316 lines, 2,667,013 B; trace copied to T2 (109,264,534 B) |
+| Release | 04:32:37Z, right after boot 2 (analysis needs no lease); verified absent; `pgrep -x` exit 1 |
+| Rule switch (received post-boots, pre-commit) | P-lane boots now coordinate via `/tmp/ssx3-p-lane-lease` (M lane keeps `/tmp/ssx3-host-lease`). My boots ran 04:28–04:32Z under the host-lease rule; max 2 used, so no P-lane lease action taken. Throughput rows below are marked contended accordingly |
+| `adb` | Not used |
+
+## P28-1. Static evidence
+
+### a. `sub_00394ED0` fully decoded (`$O/sub_00394ED0_0x394ed0.cpp`)
+
+Hash-intern with move-to-front. `a0`=table base, `a1`=16-byte
+key, `a2`=hash byte.
+
+| Item | Decode (instr refs) |
+|---|---|
+| Buckets | 256 × u32 at `base+0x674A0+(a2&0xFF)*4` (`0x394ed0-e8`) |
+| Walk | `t1`=link addr (head, then `node+0x14`); per node a 4-word memcmp vs key (`0x394f08-30`, bounded: counter `t0` exits at 4) |
+| Match | Returns node; if not head, unlinks + pushes front (`0x394f3c-70`) |
+| Miss-to-end | `next==0` falls to the insert path (`0x394f78-84`) |
+| Insert | Slot = `base+0x51484+24*count`, `count` at `base+0x51480` (`0x394f84-b4`); copies 20 key bytes, `new->next=old head`, pushes front, returns new node |
+| Intra-call exits | Match / full-walk-miss-insert only — the walk is infinite iff the chain has a cycle (finite memory) |
+
+### b. Outer loop above `sub_00362DE8` (`$O/sub_00362DE8_0x362de8.cpp`)
+
+`s6`=`a0`=arena base. Two phases; both call `0x394ED0` once per
+record (`0x362f68` phase 1, `0x363238` phase 2, observed
+`ra=0x363240`).
+
+| Item | Decode |
+|---|---|
+| Phase 1 (`0x362e98-363190`) | Outer `a1=1..(*(s6)/v0)`, inner `s7=v0` records of `0x80` B (`s1+=0x80`) |
+| Phase 2 (`0x363198-363454`) | `s7=0; while (s7 < *(s6)-spC*sp10)` = the remainder `*(s6) mod v0`; `s1+=0x80`, `s7++` per iter |
+| `*(s6)` mutated in-loop? | NO (loop-invariant bound): `0x394ED0` touches buckets/pool only; `0x395000` is lookup + move-to-front (§c); `0x364240` has no WRITEs/calls (pure); `0x362978` writes only the `s5` node + HW-ish `sd`; own body writes `fp+0x7494`/`s4+0x7CA4` counters only |
+| Caller chain | `0x363238 ← sub_00362DE8 ← sub_00363490:0x3634cc (a0 passthrough) ← sub_00376938:0x377b14 (a0=*(s3+0x18F0), heap)`; after return main `WaitSema(*(s3+0x5ACC))` at `0x377b1c` |
+
+### c. Sibling routines (same arena / same init)
+
+| Function | Role (offsets are `base`-relative) |
+|---|---|
+| `sub_00395000` | Pure lookup + move-to-front over buckets `+0x678A0`, links `+0x1C`, 3-key match; NEVER inserts (returns 0 on miss). Same latent stale-bucket exposure as `0x394ED0` |
+| `sub_00362CC8` | THE INIT (called by `0x3629B8` + `0x376938:0x377c00`): `*(s0)=0`, fp-count `+0x57494=0`, pool `+0x51480=*(+0x57484)` preset; `s4`-array count `+0x67CA4=0`. Bucket arrays re-zeroed ONLY via two `0x38F738` calls (`+0x674A0`/`+0x678A0`, `0x400`, `2`); tail has no bucket stores (surveyed `0x362d68`-end) |
+| `sub_0038F738` | `sub_00371DD8(ctx, dst, 64, 2)`: SPR_FROM DMA, 64 quads (`0x400` B = one bucket array) |
+| `sub_00371DD8` | Programs SPR_FROM `CHCR=0x1000D000` (`STR`), `MADR=0x1000D010=dst`, `QWC=0x1000D020=64`, `SADR=0x1000D080=*(gp+0x2A94)&0x3FFF`, then polls `D000&0x100` to clear |
+| `sub_003E6448` | Plain CPU memset (`sb/sh/sw` ladder, no calls): `362CC8` zeroes the DMA source `(*(gp+0x2A94), 0, 0x400)` — works under HLE (no MMIO involved) |
+| `*(gp+0x2A94)` | `= 0x70000000+(v0<<4)` (`$O/sub_0038F300_0x38f300.cpp:0x38f430-3c`): scratchpad + small offset. SADR is a BYTE offset (14-bit field spans exactly the 16 KB scratchpad) |
+| `sub_004247D8` | Cache writeback over the bucket ranges (mfc0/CU0/`0x42C078`/line-align), NOT a clearer |
+
+### d. Sema-30 chain map (`$O/sub_0031AAF0_0x31aaf0.cpp` lump)
+
+| Role | Site | Shape |
+|---|---|---|
+| Creator | `sub_0031A6B8:0x31a7c0`, `ra=0x31a7c8`, tid=1 | `CreateSema(max=1024, init=0)` → id 30 (`:259` boot-p1ac-1) |
+| Consumer | `0x31ac60` loop, tid=3 | `WaitSema(*(s0+0x4044))` (`ra=0x31aca4`); flag `*(s1+0x20)`; work item `*(s0+0x4048)` dispatched via JALR |
+| Producer | `0x31acd8`, tid=1 | `*(v1+0x4048)=a1; SignalSema(*(v1+0x4044))` (`ra=0x31acf4`) |
+| Poller | `0x31ad00` | `*(a0+0x10000+0x4048) < 1` |
+| Boot-1 events (P1ac) | `:643,:645,:646,:694,:6850,:6897,:7099` | 3 signals / 4 waits; last signal `:6897`, terminal park `:7099`; 12k subsequent lines carry no sema-30 traffic |
+| Sema-36 (thread 6, catalogue) | Created tid=3 `ra=0x3c1e04` (`:5121`, max=1 init=0); waiter tid=6 `ra=0x3c19f0` (`:5123`); ZERO signals all boot — parked from birth, separate chain |
+
+### e. Pre-boot proof the walk is circular (P1ac logs + scheduler source)
+
+| # | Evidence | Receipt |
+|---|---|---|
+| 1 | Park-phase histograms are COMPLETE and silent | P1ac blocks 2–16: `distinct=13` (< 30 print cap, nothing cut); all 13 = INTC/sema-pump targets; zero dispatches to `0x394ED0`/`0x362DE8`/`0x395000` for 75 s |
+| 2 | Entry-checkpoint cannot hide 14k main-thread dispatches | `EeScheduler::checkpointDue` charges global `m_eeCycle`, global slice/pending (`EeScheduler.cpp:648-680`); pump-thread dispatches in the SAME blocks proceed and are counted — main's would be too |
+| 3 | Scope-guard exits include checkpoint slices | `PS_LOG_ENTRY` (`ps2_log.h:223-226`) logs exit on every C++ return, incl. `eeCheckpointDue()` unwinds; resume re-invokes only the yielding function (`EeScheduler.cpp:574` `lookupFunction(context.pc)`), never re-dispatching |
+| 4 | Therefore | Balanced trace pairs + zero fresh dispatches + pc sampled in the walk = ONE stuck call; infinite walk over finite memory = CYCLE. Boots confirmed it directly (§P28-2) |
+| 5 | P27 wording superseded | "15,989 balanced (repeat-called, returns each call)" mixed fresh calls with slices; "outer loop driving 16k calls" is 63 small invocations (137 fresh) + one hung call |
+
+### f. HLE mechanism: SPR DMA completes without moving data
+
+| # | Evidence | Receipt |
+|---|---|---|
+| 1 | No SPR transfer emulation exists | No `SADR`/`0xD080`/`SPR_FROM`/`SPR_TO` handling anywhere in `ps2xRuntime/src/lib/`; `writeIORegister` stores channel regs; only VIF0/VIF1/GIF (`0x10008000/0x10009000/0x1000A000`) get transfer emulation (`ps2_memory.cpp:1298-1420`) |
+| 2 | Status auto-completes | `readIORegister` clears `STR` on ANY channel-CHCR read (`ps2_memory.cpp:2248-2256`: `(address&0xFF)==0x00` → `& ~0x100u`), incl. `0x1000D000` — the game observes "DMA done" with zero bytes moved |
+| 3 | CPU paths around it work | memset `0x3E6448` is pure CPU (source IS zeroed); scratchpad is a real zero-init 16 KB store (`ps2_memory.cpp:366-369`); game reads scratchpad records fine |
+
+### g. Candidate causes (for / against, with receipts)
+
+| Candidate | For | Against → status |
+|---|---|---|
+| C4 slot-reuse + stale head → self-loop | Pool resets 4→3/5→3 with heads intact (n=2, n=105…); `CYCLE@0x85aabc` at entry (n=111…); slot-3 arithmetics exact (§P28-2) | — → CONFIRMED mechanism |
+| C6 garbage/unwritten heads | Would also cycle (random-graph) | Every bucket's first touch is NULL (n=0,102,103,104,106,109,133) → arena fresh-zero → REFUTED |
+| C7 pool overflow (≥1025 inserts) | Tight arena packing (pools/buckets/arrays adjacent) | Pool never exceeds 5 → REFUTED |
+| C5 s1-record/pool overlap | Would corrupt chains | s1=`0x70000000+` (scratchpad), pool=`0x85AA74+` (RAM) → REFUTED |
+| Broken-HLE-memset | Would leave buckets stale | `0x3E6448` is pure CPU, no MMIO → REFUTED |
+| SPR_FROM no-data (host) | Stale heads across 63 inits + §f rows 1–2 | — → CONFIRMED root cause |
+| SPR_TO broken (records) | Same missing emulation as FROM | Record bytes vary per round (fits working-TO or varying-memset-window) → UNRESOLVED, co-fix recommended (§P28-3) |
+
+## P28-1append. Exact commands (static phase)
+
+```
+W="/Volumes/Extreme SSD/ps2recomp-spike"; O="$W/P1/output"; R="$W/PS2Recomp"
+# decode: cat $O/sub_00394ED0* $O/sub_00395000* ; sed windows of sub_00362DE8/
+#   sub_0031AAF0/sub_00376938/sub_0038F4F8/sub_0038F6A8/sub_0038F7B0/
+#   sub_00362CC8/sub_004247D8/sub_0038F738/sub_00371DD8/sub_003E6448/
+#   sub_0038F460/sub_00371D10/sub_0031A6B8/sub_003629B8
+# callers: grep -l func_362DE8/func_362CC8/func_3629B8/func_395000 $O/*.cpp
+# offsets: grep -h "ori.*0x74[Aa]0" $O/sub_*.cpp  # only 394ED0 + 362CC8
+# logs: /tmp/p1ad-mine1.py (sema30/drops/RPC/ticks), stub-block dumps,
+#   scheduler reads (EeScheduler.cpp:574,648-680; ps2_runtime.cpp:1565+,
+#   2248-2256,2821; ps2_log.h:223-226; Stubs/DMA.cpp; ps2_memory.h:29-31)
+```
+
+## P28-2. Boots + probe + census
+
+Env = P1ac scripts verbatim + `PS2X_DIAG_394ED0=1`
+(`diff /tmp/p1ac-boot1.py /tmp/p1ad-boot1.py`: docstring + LOG
+name + the one env line). Binary `ead11aa1` (P1ad probe build).
+CWD `$W/P1/run` both boots.
+
+### a. Fork diag (the one allowed file)
+
+`ps2xRuntime/src/lib/ps2_runtime.cpp` +143, commit `5001830`
+(pushed `da6a2d5..5001830`, `HEAD...fork/ssx3`=0/0 after).
+Env-gated dispatch tap in the `diagDriverProbeEnabled` style:
+one `[diag:394ed0]` line per FRESH guest dispatch to `0x394ED0`
+(checkpoint resumes never re-dispatch, so the probe counts true
+calls): `n ra src a0 a1 a2 total pool head key[4] chain[8 hops]`
+with `NULL`/`WILD`/`CYCLE@` termination. Read-only (GPRs +
+range-checked masked RAM reads; scratchpad addrs print WILD by
+design — see §P28-5), capped at 20000 lines, off by default.
+Justification (brief's "otherwise unattributable" bar): the
+arena base is a dynamic heap object (`*(s3+0x18F0)`); no existing
+facility logs guest regs/memory at dynamic addresses
+(`PS2X_DIAG_WATCH` needs static addrs); static analysis
+exhausted at "bounded loop, unknown bound / circular chain,
+unknown maker". No new tests (diag-only, env-off default; the
+driver-entry probe it mirrors has none either); suite stays
+431/431/0 (§P28-3 binaries).
+
+### b. Probe summary (both boots; guest bytes identical)
+
+| Item | Boot 1 | Boot 2 |
+|---|---|---|
+| Probe lines | 137 (`n=0..136`, `:661`–`:8111`) | 137 (`:661`–`:8110`-area) |
+| `ra` / `src` | 137/137 `0x363240` / `0x363238` (phase-2 site; phase 1 never calls it in this boot) | Same |
+| `a0` (arena) | `0x8095f0` all 137 (ONE reused arena) | Same |
+| `total` (`*(s6)`) | `0x2` (n=0..101) → `0x3` (n=102..136) | Same |
+| `pool` | `0x3`×119, `0x4`×12, `0x5`×6; 12 drops (re-inits), e.g. idx 2,105,108,…,129 | Same |
+| `a1` (records) | `0x70000000/80(/100)` — scratchpad ⇒ `key=[WILD×4]` (probe range gate) | Same |
+| First touches | NULL at n=0 (bkt 0), 102 (bkt 2), 103 (`0x15`), 104 (`0x23`), 106 (`0xcb`), 109 (`0x60`), 133 (`0x6b`) | Same |
+| First `CYCLE@` | n=111 `:7904` (`head=0x85aabc`, self) | n=111 `:7903` |
+| Cycle flicker | Broken n=130 (NULL-head insert at slot 3), re-created n=132 (mismatch insert onto stale head) | Same |
+| `CYCLE@` lines | 6 (n=111,117,123,129,135 + n=136) | 6, same n |
+| n=135 / n=136 | n=135 key matched → returned; n=136 (`a1=0x70000080`,`a2=0x0`) mismatched → STUCK (last fresh call; zero dispatches after) | Same, byte-identical lines |
+| Interleave truncations | 3 (`n=13,105,130`), tails recovered as orphans (`:958`,`:7851`,`:8059`) | 3 (`n=2,18,73`), same states intact in boot 1 |
+| Cap line | None (137 ≪ 20000) | None |
+
+Slot arithmetics: pool base `0x8095f0+0x51484=0x85AA74`;
+slot 3 = `0x85AA74+24*3` = **`0x85AABC`** = the cycle node.
+Insert rule `new->next = stale head` + `head == slot` ⇒ self-loop.
+n=0 inserts slot 3 (pool 3→4); first re-init (→n=2, pool→3)
+orphans the head; n=132's mismatch-insert rewrites slot 3 with
+`next=self`; n=136 walks it forever.
+
+### c. Trace decomposition (own T1/T2)
+
+| Function | Boot 1 enter/exit | Boot 2 enter/exit | Reading |
+|---|---|---|---|
+| `sub_00394ED0` | 15,576 / 15,576 | 15,837 / 15,837 | 137 fresh + ~15.4–15.7k slices of n=136 (slice count varies with wall timing, as expected) |
+| `sub_00362DE8` | 63 / 63 | 63 / 63 | 62 normal returns + 1 checkpoint-unwind exit; resumes bypass it (go straight to `0x394ED0`) |
+| `sub_00362CC8` | 63 / 63 | 63 / 63 | One re-init per invocation — init→use pairing confirmed |
+| `sub_00395000` | 113 / 113 | 113 / 113 | Second table healthy this boot (latent same-defect noted §P28-3) |
+
+### d. Census + sema + RPC (both boots)
+
+| Item | Boot 1 | Boot 2 |
+|---|---|---|
+| `[drop]` | 6× same early `GetEntryAddress` site `:68-73` | 6× same `:69-74` (+1-line frame shift, same as P1ac b1-vs-b2) |
+| Sema-30 events | 7-shape `:643,645,646,696,7193,7244,7446` (3 sig / 4 wait, ends parked) | 7-shape `:643,645,646,696,7120,7172,7374` |
+| Unhandled RPC | 4 sightings, same sids/bytes as P1ac (table below) | Same 4 |
+| `SendCmd` / handshake | 1 same-bytes `cid=0x80000001` `:1078` / 1 `:1077` | Same `:1078`/`:1077` |
+| `0x3C45C0` | 0 sightings — P27-5 item (d) closed for this boot | 0 |
+| Creates | 37 (max id 37) | 37 |
+
+Unhandled-RPC shape table (boot 1 lines; boot 2 same bytes):
+
+| # | sid | rpc | pc | send/recv | sendBytes head |
+|---|---|---|---|---|---|
+| 1 `:701` | `0x80000006` | `0xff` | `0x42b0e8` | `0x0/0`, `0x52f080/4` | `[]` |
+| 2 `:1082` | `0x237` | `0x0` | `0x3f6a04` | `0x526080/128`, `0x526140/128` | `C0 61 52 20 …` |
+| 3 `:1088` | `0x80000211` | `0x1` | `0x40c34c` | `0x529100/16`, `0x529140/144` | all `00` |
+| 4 `:5387` | `0x534e44` | `0x0` | `0x3c0bc4` | `0x50ad00/20`, `0x0/0` | `03 03 08 00 …` |
+
+### e. Ladder vs P27-boot1 (regression check, not the deliverable)
+
+P27-boot1: 19,150 lines / 2,643,773 B / 17 stub blocks.
+
+| Rung | P27-boot1 | P1ad-boot1 | P1ad-boot2 |
+|---|---|---|---|
+| Lines / bytes | 19,150 / 2,643,773 | 19,145 / 2,640,817 | 19,316 / 2,667,013 |
+| Stub / thread blocks | 17 / 17 | 17 / 17 | 17 / 17 |
+| Park onset (first all-13 stub block) | block 2 | block 5 (wall-clock boundaries; same guest point n=136) | block 5 (b2 pre-park distinct: 682/244/170/620/229) |
+| Thread-1 | RUNNING walk ×14 (+1 WAIT, 2 transients) | walk ×12 (+4 WAIT, 1 null) | walk ×12 (+4 WAIT, 1 null) |
+| Thread-3 | WAIT 30 ×17 | WAIT ×13–14 + early game-code transients | WAIT ×14 + transients |
+| Thread-6 | WAIT 36 ×17 | WAIT ×14 (absent from 3 early blocks; created later in wall-time) | WAIT ×14 |
+| 29-handshake w/s | 65 / 65 | 64 / 64 | 64 / 64 |
+| 30-handshake w/s | 4 / 3 (ends parked) | 4 / 3 (ends parked) | 4 / 3 (ends parked) |
+| 31-handshake w/s | 5287 / 5286 | 5210 / 5210 | 5297 / 5297 |
+| Creates / `-1` waits | 37 / 0 | 37 / 0 | 37 / 0 |
+| Driver-entry | 98 | 98 | 98 |
+| `[drop]` census | 6× same site + args | 6× same | 6× same |
+| SendCmd / handshake | 1 + 1 | 1 + 1, same bytes | 1 + 1 |
+| `0x394ED0` trace | 15,989 / 15,989 | 15,576 / 15,576 (= 137 + 15,439 slices) | 15,837 / 15,837 |
+| `0x362DE8`/`0x362CC8` trace | (not quoted) | 63 / 63 | 63 / 63 |
+| GS kicks / copy / gif / drawing=1 | 96 / 64 / 48 / 96 | 96 / 64 / 48 / 96 (exact) | exact |
+| `run:tick` | 19–20 ticks, pc walk-family, dma/gif 1166/65 frozen | 13 ticks (host render loop emits 1/120 frames; 17 fps vs 25 fps = host-load artifact), same frozen dma/gif | 13 ticks |
+| CD `lbn=` / first-last | 810 / `0x10`→`0x4311f` | 810 / identical | 810 / identical |
+| SIF loads | 21 | 21 | 21 |
+| Dormant / start-thread | 121 / 5 | 121 / 5 | 121 / 5 |
+| Missing / `No exact` | 1 / 0 (JALR `0x2322d4→0x395730`) | 1 / 0, same bytes | same |
+| Presented frame | None | None | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | 0 / 0 |
+
+CONTENDED (wall-throughput) rows — M-lane runs may coincide
+under the split-lease rule, so treat as host-load-sensitive, not
+regressions: park-onset block, `run:tick` counts, `0x394ED0`
+slice counts, sema-31 w/s, stub `distinct` values, and
+thread-sample mixes. Guest-event rows (probe, census, sema-30
+shape, CD/SIF/GS/RPC) are deterministic and unaffected.
+
+## P28-3. Attribution + named fix brief
+
+### a. Cause chain (each link receipted)
+
+| # | Link | Receipt |
+|---|---|---|
+| 1 | HLE completes SPR_FROM DMA without moving data | §P28-1f (no transfer emu; STR auto-clear on CHCR read) |
+| 2 | `0x362CC8` re-inits reset counts but buckets stay stale | 63 inits, pool ∈ {3,4,5} with 12+ resets; heads persist across resets (e.g. `0x85aabc` n=1→n=136) |
+| 3 | Post-reset inserts reuse live node slots | n=132 (pool 3) rewrites slot 3 = `0x85aabc` while two buckets still head at it |
+| 4 | Insert rule `new->next = stale head` + `head == slot` ⇒ SELF-LOOP | `CYCLE@0x85aabc` at entry from n=111; flickers with reuse (break n=130, re-create n=132) |
+| 5 | First key-mismatch in an aliased bucket walks forever | n=135 matched → returned; n=136 mismatched → last fresh call ever (137 total both boots) |
+| 6 | Main frozen ⟹ sema-30's 4th signal never sent | 3 signals only (`:643`,`:694`-area,`:6897`-area; tid=1 `ra=0x31acf4`); terminal thread-3 park needs one more |
+| 7 | Thread 3 correctly parked; DMAs idle; no frame | `WAIT 30 @0x423de8`; dma/gif frozen 1166/65; GS row exact-but-static |
+
+WHY the game can't proceed: main is the only producer-side
+driver past this point — it must return from `0x362DE8` (hence
+`0x376938`) to reach the next `0x31acd8` signal and the post-load
+phases. A single guest call never returning wedges the whole
+boot; the scheduler, pumps, and other threads are all healthy
+(sema-31 balanced 5210/5210 and 5297/5297).
+
+### b. Exact fix brief (the deliverable)
+
+Title: `P1ae — Emulate SPR normal-mode DMA data movement
+(SPR_FROM first); unstick the SSX3 hash-table re-init`.
+
+| Item | Content |
+|---|---|
+| File | `ps2xRuntime/src/lib/ps2_memory.cpp` (one file; mirror the VIF0/VIF1/GIF channel section ~:1298-1420) |
+| Hunk P0 (the hang) | On `CHCR` STR write to `0x1000D000` (SPR_FROM) with `MOD`=NORMAL: synchronously copy `QWC` quads (16 B each) from scratchpad host store + `SADR` to RAM `MADR&0x01FFFFFF`; then update `MADR`/`QWC`/`SADR`, clear `STR`, set the channel's `D_STAT` CIS. Observed op: `MADR`=bucket array, `QWC`=64, `SADR`=scratchpad byte offset (`*(gp+0x2A94)&0x3FFF`; byte-addressed per §P28-1c), `CHCR`=`0x100` |
+| Hunk P1 (same area, recommended co-fix) | SPR_TO (`0x1000D400`) mirror (RAM→scratchpad): same missing emulation feeds the s1 records; record bytes are currently untrustworthy (fits working-TO or varying-memset-window — §P28-1g). Fixing TO changes all hashes/table contents (expected, hardware-faithful); resolving which model holds is part of the brief (scratchpad dump or hash comparison) |
+| Keep the auto-clear? | The STR auto-clear-on-read (`:2248-2256`) stays valid once transfers run synchronously (status already clear at first poll); keep, do not re-time |
+| Tests | New `PS2Memory` unit test(s) beside the existing memory tests: program `MADR`/`QWC`/`SADR`+`STR` for FROM (and TO), assert bytes landed + regs updated + `STR` clear + `D_STAT` set; suite must stay 431+/0 |
+| Proof boots (2 × 90 s) | Reuse `/tmp/p1ad-boot{1,2}.py` + `PS2X_DIAG_394ED0=1`: (1) probe shows `head=0x0` after every re-init and `n` advancing past 136 with pool cycling cleanly; (2) a 4th sema-30 signal appears and thread 3 leaves `WAIT 30`; (3) main leaves `0x394ED0` (park gone); (4) census/drops/RPC/ladder show no other face |
+| Probe disposition | Keep `5001830` (env-off, zero-cost) or remove in the fix commit — either is fine; the proof above needs it if kept off-by-default |
+| Second-table note | `0x395000` shares the stale-bucket exposure (113/113 healthy this boot by luck: lookup-only + no aliasing hit yet); the same DMA fix cures it — no separate hunk |
+| Out of scope | SIF/RPC sightings (§P28-2d), GetEntryAddress drops, sema-36 chain — all unchanged, none blocking |
+
+### c. Binaries and commits
+
+| Item | Value |
+|---|---|
+| BEFORE `ps2x_tests` / runner | `daf0b63f…` / `5878ad69…` (= P27 AFTER pair; suite 431/431/0, CWD `$R`) |
+| AFTER `ps2x_tests` / runner | `4b2625bc…` / `ead11aa1…` (full shas in §P28-4 log); suite 431/431/0, no new tests (§P28-2a rationale) |
+| Build | `cmake --build /tmp/p1-link/runtime --target ps2x_tests ps2EntryRunner -j4`, exit 0; same `ld` duplicate-library warning as P1ac (observed as-is) |
+| Tree note | P12 `da6a2d5` (kernel-true KE_ERROR sema paths) landed + pushed mid-session AFTER my build (00:14 EDT): boots ran `45da174`+diag; my commit sits on `da6a2d5`; no interaction (all sema ids valid, census unchanged) |
+| Fork commit | `5001830` Diag: SPR_FROM-blind park probe for SSX3 0x394ED0 hash walk (P1ad) — `ps2_runtime.cpp` +143 only, trailer `Orchestrated-By: Muse Code` |
+| Push | `git push fork ssx3` → `da6a2d5..5001830`, exit 0; `HEAD...fork/ssx3` = 0/0 after; integrated no foreign history |
+| Pull --rebase | Refused (pre-existing unstaged generated `runner/register_functions.cpp`, mtime 22:50 EDT, never staged/committed/touched — same as P1ac); behind 0, nothing to replay; no foreign rebase conflict |
+| `._*` | Purged under `ps2xRuntime/src` + `include` before staging (4 sidecars); named `git add` of the one file only |
+
+## P28-4. Exact commands
+
+From `$R` (fork) unless noted; `$W`, `LOG`/`LOG2`, `T1`/`T2` as above:
+
+```
+# Step 0 (context; lease-free)
+re-read REPORT Part 27 (full) + brief local/muse/prompts/P1ad.md
+cat /tmp/ssx3-host-lease (absent at start); git -C $R status/log (45da174 + generated-file mod)
+# Step 1 (static; lease-free; details §P28-1append)
+decode $O functions (394ED0/362DE8/395000/362CC8/38F738/371DD8/3E6448/4247D8/
+  38F460/371D10/31AAF0/31A6B8/3629B8/376938-windows) + callers + ori-74A0 users
+/tmp/p1ad-mine1.py over boot-p1ac-{1,2}.log (sema30/drops/RPC/ticks/creates)
+stub-block dumps (blocks 0/1/2/16) + scheduler reads (checkpoint/slice/resume/guard)
+# Step 1 (diag; lease-free)
+edit ps2xRuntime/src/lib/ps2_runtime.cpp (+143: gate/read/word/emit + dispatch hook)
+shasum BEFORE pair; cd $R && ps2x_tests (431/431/0)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests ps2EntryRunner -j4 (exit 0)
+shasum AFTER pair: runner ead11aa17e3f2ba10d5904138e6aeeb8a682960dc1f3c4e17e47048b8904f32f
+  tests 4b2625bc86d50396e6a8317841b881edff4de173a0db6a8d3fb4fbd86672bf53
+cd $R && ps2x_tests (431/431/0)
+sed /tmp/p1ac-boot{1,2}.py -> /tmp/p1ad-boot{1,2}.py (docstring + LOG + PS2X_DIAG_394ED0=1)
+write /tmp/p1ad-mine2.py (probe/sema/census miner)
+# Step 2 (boots; lease P1ad held 04:28:38Z-04:32:37Z only)
+pre-claim checks (lease absent; pgrep exit 1; shasum ead11aa1; ISO + ELF sizes)
+printf 'P1ad' > lease + >> p1ad-waits.log; python3 /tmp/p1ad-boot1.py (90 s, SIGTERM rc=-15)
+cp ps2_log.txt ps2_log-p1ad-1.txt; spot greps (137 probe, n=136 CYCLE tail)
+cat lease (P1ad); pgrep (exit 1); python3 /tmp/p1ad-boot2.py (90 s, SIGTERM rc=-15)
+cp ps2_log.txt ps2_log-p1ad-2.txt; >> p1ad-waits.log (release); rm lease; verify absent
+# Step 2 (analysis, lease released)
+/tmp/p1ad-mine2.py both boots; probe determinism diff (131 clean-identical + 3+3 interleaves)
+trace counts (394ED0/362DE8/362CC8/395000 × T1/T2); ladder rows; orphan-fragment recovery
+HLE reads (Stubs/DMA.cpp; ps2_memory.cpp writeIO/readIO/channel sections; scratchpad store)
+# Step 3 (fork commit + push; lease released)
+find ._*-delete (src+include); git add ps2xRuntime/src/lib/ps2_runtime.cpp (named, verified)
+commit 5001830 (trailer); fetch fork; rev-list (1/0); pull --rebase (refused, recorded)
+push fork ssx3 (da6a2d5..5001830); rev-list 0/0
+# Step 3 (this report; lease released)
+(edit_file append Part 28 in 3 chunks + 6 row fixes)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1ad] ..." (trailer; NO push there)
+```
+
+Env delta boots vs boot-p1ac-1: `+PS2X_DIAG_394ED0=1` only.
+Source delta: my 1 fork commit on `da6a2d5` (boots ran
+`45da174`+diag; P12 landed between build and commit, §P28-3c).
+
+## P28-5. What I could not do
+
+- Read scratchpad key bytes: `a1` points at `0x70000000+` and the
+  probe prints `key=[WILD×4]` by its RAM-only range gate (a
+  masked read would alias RAM — deliberately refused). The cycle
+  verdict never needed keys (chain pointers suffice). Two-line
+  probe extension for the fix brief if keys become relevant:
+  branch `diag394Ed0Read` on `ps2IsScratchpadAddress` and read
+  via `ps2GetScratchpadHostPtr()+ps2ScratchpadOffset`.
+- Settle SPR_TO's status (working vs varying-memset-window —
+  §P28-1g): both models fit the per-round record variation, and
+  the fix brief resolves it empirically. No boot left to probe it
+  (max 2 used).
+- Name the IOP announcer / decode `0x3C45C0`'s `0x1C`/`0x1D` arm
+  semantics (carried from §P26-5/§P27-5; `0x3C45C0` had 0
+  sightings in both P1ad boots).
+- Run a 3rd boot (max 2 used; probe + repro + ladder all closed).
+- Avoid 3 `[frame:upload]` interleave truncations per boot log
+  (stdout/stderr share one fd; positions jitter). All tails
+  recovered via orphan fragments; every truncated line duplicates
+  a state intact in the other boot. A `2>`-split or line-buffered
+  emit would end it (not my call inside the box).
+- Re-baseline against a P9/P10/P11/P12-only binary (same
+  reasoning as §P27-5: the mechanism rows — probe, slot
+  arithmetics, DMA gap — are exclusive to this diagnosis).
+- Session wall time ≈ 04:05–04:48Z (~45 min incl. ~19 min M16
+  lease waits), inside the 4 h box.
+
+
