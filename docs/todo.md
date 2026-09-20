@@ -5,6 +5,21 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M23 read (09-20) — PASS, M22 gap 1 tail values fitted:**
+      9 fixed predictors scored exact-hit: best K45+
+      (δ=round(0.45·g)) 14/102 s0 + 15/134 m15 exact (29
+      pooled) + 32/49 near; STEP 0/102 all three; COMP
+      13/102; POS 7/102 collapsing to 1/102 cross-frame;
+      δ multi-valued in every gap bin (H6 0.2174/0.1333);
+      streak columns single-sign (22.7–36.5, c342/343
+      negative); ≤1 B in any carrier mask; K45+ transfers
+      (14–15 hits on shapes 1/2/733 incl. J-0.6694 733);
+      88/119 tail stands. Verified: baselines, counts,
+      K45+ score row, canon identical, control + identity
+      60/60, mtimes clean. No PNG (absence reasoned per
+      pre-registered-split rule). ~0.2 h. Next: M24
+      (near-hit mass) launched in freed pane. Ledger row
+      added.
 - [ ] **T7 read (09-20) — PASS, designed STOP fully verified:**
       0x36356c is `lw` (ELF `0x8f932a90`), not a JAL — the
       P29/P31 "call site" label came from a tick sample pc;
@@ -163,7 +178,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t8 (repetition-driver attribution, read-only, 4h) · t5 (analyzer text-pointer rule, 4h) · m23 (tail value mechanism, offline, 4h).
+- [ ] **Live panes:** t8 (repetition-driver attribution, read-only, 4h) · t5 (analyzer text-pointer rule, 4h) · m24 (near-hit mass, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
