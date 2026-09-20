@@ -1,0 +1,16 @@
+commit bdae29574d6882e603f461e32ea1ef1745834619
+Author:     Brad Richardson <brad-richardson@users.noreply.github.com>
+AuthorDate: Sat Sep 19 19:49:46 2026 -0400
+Commit:     Brad Richardson <brad-richardson@users.noreply.github.com>
+CommitDate: Sat Sep 19 19:49:46 2026 -0400
+
+    CMake: set iOS bundle identifier for the sim .app (I6)
+    
+    simctl install failed with exit 13 "Missing bundle ID" (I5): the Xcode-generated Info.plist has no CFBundleIdentifier. Set MACOSX_BUNDLE_GUI_IDENTIFIER on ps2EntryRunner under PS2X_IS_IOS; Xcode-generator iOS executables are always bundles, so no MACOSX_BUNDLE change is needed. Desktop-inert (guard OFF on Darwin).
+    
+    Co-Authored-By: Muse Code <muse-code@users.noreply.github.com>
+    
+    Muse-Session: striped-proteus (01a0bc11-e0ee-7c03-9943-3d2927f82dda)
+
+ ps2xRuntime/CMakeLists.txt | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
