@@ -266,5 +266,218 @@ via co-located Y (r,2c), new):
 0.1495/0.1252, both in the rank-1/694 mask.)
 
 HUD region = union of removed-Y masks {368,369,366,370,376,748}
-(DE
-...[truncated 6446 chars]
+(DESIGN.md definition, fixed before running): nYpx = 1480, bands
+[0, 0, 1480] (all bottom band).
+
+| Frame | statY in/out (share) | statU in | statV in | raw in (share) |
+| --- | --- | ---: | ---: | --- |
+| s0 | 103/360 (0.2225) | 20 | 40 | 163 (0.0688) |
+| m15 | 7/432 (0.0159) | 6 | 8 | 21 (0.0142) |
+
+(m15 joined against the same s0-derived masks, labeled. s0 Y_in
+103 = 39+6+19+12+10+17 — the six HUD masks are disjoint on
+static-Y, tabled as measured.)
+
+Static-site rule synths (fixed rules: predict v0±1 clipped on
+static sites, Model 0 elsewhere; reference predict-v0 == Model 0):
+
+| Frame | rule | cell-6 hits | R | explained (R_0 − R) | e | fnv |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| s0 | v0+1 | 1184 | 547727 | −524912 | −23.0073 | `2272316e4160df15` |
+| s0 | v0−1 | 1157 | 547754 | −524939 | −23.0085 | `e692e49d9df77261` |
+| m15 | v0+1 | 715 | 559809 | −546391 | −40.7207 | `6084cc3b24e7d6b8` |
+| m15 | v0−1 | 714 | 559810 | −546392 | −40.7208 | `afc2cd5c2fe85688` |
+
+(Cell-6 hits equal #{ε==±1} exactly (1184/1157 s0, 715/714
+m15); full-frame R explodes because the rule breaks every
+triple-equal static site — tabled both ways.)
+
+### Positive controls (`control.py`)
+
+| Control | Recovered | Want | Pass |
+| --- | --- | --- | --- |
+| C-S1 (±1, N=500) | 2868 sites, set exact, values exact, orig kept | exact | True |
+| C-S2 (±2, N=500) | 2868 sites, set exact, values exact, orig kept | exact | True |
+
+(Both pass first try: injected +1×250/−1×250 (C-S1) and
++2×250/−2×250 (C-S2) on disjoint triple-equal sites; recomputed
+cell 6 = R_s0 ∪ injected exactly, original members' ε unchanged.)
+
+### Determinism re-run receipt (same inputs, second pass)
+
+Canon sha (Task 1 on s0) pass1 `70ab3af9…f969d` vs pass2
+`70ab3af9…f969d`, identical=True; cell counts identical=True.
+
+## Step 3 — attribute
+
+Model comparison (cell-6 bytes; best fixed rule per frame, with
+full-frame R alongside):
+
+| Frame | Model | cell-6 R | explained | e | full-frame R / e |
+| --- | --- | ---: | ---: | ---: | --- |
+| m16 s0 | 0 blend (ε≠0 stands) | 2368 | 0 | 0.0000 | 22815 / 0.0000 |
+| m16 s0 | rule v0+1 | 1184 | 1184 | 0.5000 | 547727 / −23.0073 |
+| m16 s0 | rule v0−1 | 1211 | 1157 | 0.4886 | 547754 / −23.0085 |
+| m15 | 0 blend | 1476 | 0 | 0.0000 | 13418 / 0.0000 |
+| m15 | rule v0+1 | 761 | 715 | 0.4844 | 559809 / −40.7207 |
+| m15 | rule v0−1 | 762 | 714 | 0.4837 | 559810 / −40.7208 |
+
+Falsification bars (recorded before running; outcomes tabled):
+
+| Bar | Bar text | Measured |
+| --- | --- | --- |
+| H1_MAP | median J(R_t, R_s0) over t≠0 ≥ 0.50 | 1.0000 (518/764 byte-identical) — met |
+| H2_VAL | P(\|ε\|==1) over s0 static bytes ≥ 0.75 | 0.9886 (m15: 0.9682) — met |
+| H3_SIGN | majority ε-sign share ≥ 0.75 on s0 | 0.5110 (m15: 0.5136) — not met |
+| H4_EFB | pooled in/out rate ratio (R_s0, t≠0) ≥ 2 | 88601.8 (0.997150/0.000011) — met |
+| H5_CONC | some band ≥75% of s0 static Y, or some carrier ≥50%, or HUD ≥75% | max 0.5659 band / 0.0842 carrier / 0.2225 HUD — not met |
+| N | cell 6 after best fixed rule + remaining split | +1 hits 1184; 1184 B stands in cell 6 (full-frame −524912), split below |
+
+Where each test discriminates vs not: Task 1.1 discriminates by
+map identity (518/764 byte-identical to s0; 9 shapes below 0.95,
+2 below 0.90) and by sample (m15 Jaccard 0.0245 vs ≥0.94 for
+755/764 M16 shapes). Task 1.2 discriminates by magnitude
+(98.9%/96.8% ±1, chroma all-±1) but not by sign (0.51/0.51).
+Task 1.3 discriminates by edge distance (71%/82% Y at d=1 vs
+background means 11.7/31.8) but not by gradient decile on Y
+(flat s0, dec-6 bump m15 — unlike interior's 63%/65% dec-9).
+Task 2.1 discriminates inside/outside 88602× pooled (the map
+identity restated) with m15's mask at 17.5×. Task 2.2
+discriminates U&V pairing (16.0×/21.6× independence). Task 2.3
+discriminates per carrier (694 holds 15%/13% of static U/V; HUD
+draws hold 0–39 Y each) but nothing concentrates to bar level;
+no fixed rule shrinks R_0 (best full-frame −524912).
+
+Updated deliverable — explained vs standing remainder:
+
+| Content | Bytes (m16 s0) | Behavior |
+| --- | ---: | --- |
+| static (v0==mid==full) | 528464 (92.16%) | synth byte-exact (M16, unchanged) |
+| endpoint-max component | 17089 of R_0 (74.9%) | mid==bright endpoint (M19, unchanged) |
+| endpoint-min component | 662 of R_0 (2.9%) | mid==dark endpoint (M19, unchanged) |
+| moved-outside component | 221 of R_0 (1.0%) | 159 above / 62 below (M19, unchanged) |
+| interior residual | 2475 of R_0 (10.9%) | strict interior (M19/M20, unchanged) |
+| static-site ε=+1 mass | 1184 of cell 6 (50.0%) | + rule-+1-explained (full-frame −524912) |
+| static-site ε=−1 mass | 1157 of cell 6 (48.9%) | − rule-−1-explained (full-frame −524939) |
+| static-site \|ε\|≥2 | 27 of cell 6 (1.1%) | +2:23 +3:3 −2:1, all Y |
+| standing static remainder | 1184 of cell 6 (50.0%) | after best fixed rule; ε/sign/edge/decile/carrier tables in §Step 2 |
+| standing remainder (total) | 22815 (100% of R_0) | 1184 B rule-explained within cell 6 only; rest split above |
+
+Screenshot (committed): `m21-staticmap.png` 91498 B (dimmed
+truth + static Y px colored by ε sign: red/blue tracing mountain
+silhouettes, god-ray shafts, rider, fence, and HUD glyphs). The
+map discriminates spatially (sites hug edges/structures, matching
+the 71%/82% d=1 table), so it is included. Total 91498 B (budget
+5242880).
+
+Recorded without verdict: 518/764 shapes read byte-identical
+static-site maps to s0 (only 700/694 below 0.90) while m15 shares
+92/1476 sites; ε is ±1 on 2341/2368 static bytes (98.9% s0,
+96.8% m15) with chroma all-±1; static sites read 71.3%/82.5% at
+d=1 from moved edges with flat Y gradient-decile spread;
+same-pixel U&V co-residual reads 16.0×/21.6× independence; the
+HUD union holds 103/463 s0-Y static px; the best fixed rule hits
+1184/2368 cell-6 bytes and breaks full-frame R (−524912).
+
+## Mechanism table (brief items this run works through)
+
+| Brief item | Standing | Receipt |
+| --- | --- | --- |
+| static-site suite + ε definition + HUD-region definition + falsification bars, recorded before running | recorded | `DESIGN.md`: 764-shape maps + Jaccard/persistence, ε hists + plane split, band/BFS/P1 joins, cross-shape EFB rates, U/V joint, carrier + HUD cuts, fixed rules, bars H1–H5/N |
+| map/ε/position tables + EFB-diff tables + wall/exit/shas/determinism | measured | §Step 2: Jaccard/persistence dists; ε hists both frames; band/edge/P1 joins; pooled EFB ratios; U/V joints; carrier + HUD splits; rules; 7.5 s; re-run identical |
+| explained-vs-standing update (does any static-site rule shrink cell 6? by how much?) + gap rows | measured | §Step 3: best fixed rule 1184 B in-cell (full-frame negative); 1184 B stands; gaps below |
+| screenshot if a static-site map discriminates (or absence reasoned) | measured | 1 PNG, 91498 B: ε-sign map, edge-hugging, spatially discriminating |
+
+## Exact commands
+
+Staging + run (offline; inputs read-only; run from the work
+dir; the receipt is the single invocation — §Runs):
+
+```
+cp local/research/M21/m21.py local/research/M21/control.py "/Volumes/Extreme SSD/m21/"
+python3 m21.py "/Volumes/Extreme SSD/m16" "/Volumes/Extreme SSD/m15" "/Volumes/Extreme SSD/m21" /Users/bradrichardson/dev/ssx3/local/research/M21 > m21.txt 2>&1
+python3 control.py "/Volumes/Extreme SSD/m16" > control.txt 2>&1
+```
+
+## Paths
+
+Evidence (committed): `local/research/M21/` — `DESIGN.md`
+(suite + bars, recorded before running), `m21.py` (map pass +
+Jaccard/persistence + ε hists + BFS edge + P1 join + EFB rates +
+U/V joint + carrier/HUD cuts + rule synths + PNG writer),
+`control.py` (2 synthetic static-site injection controls),
+`REPORT.md` (this file), `m21-staticmap.png`.
+
+Large outputs (not committed): `/Volumes/Extreme SSD/m21/` —
+`m21.txt` (receipt: shas, baselines, Task-1 ε/edge/P1 tables both
+frames, 764-row map table, pooled EFB rates, U/V joints, carrier
++ HUD splits, rule synths, re-run, PNG size), `control.txt`,
+`m21.py`, `control.py` (working copies), `m21-staticmap.png`
+(working copy). No writes into `m15/`, `m16/`, `m17/`, `m18/`,
+`m19/`, `m20/`, or other agents' dirs.
+
+## Gap rows (exact next brief each needs)
+
+1. Shape-700 map divergence (new): shape 700's static map reads
+   Jaccard 0.0747 vs s0 (2523 B) while 518/764 shapes read
+   byte-identical (694 next-lowest at 0.6565). Needs its own
+   brief: per-byte attribution of 700's private sites (static-set
+   change vs mid change), offline — no new harness code.
+2. m15 map disjointness (new): m15 shares 92/1476 sites with s0
+   (Jaccard 0.0245); 1297/1476 never recur on any M16 shape.
+   Needs its own brief only if cross-sample map identity
+   matters: second-sample map family, offline — no new harness
+   code.
+3. U/V co-residual mechanism (new): same-pixel U&V co-residual
+   reads 16.0×/21.6× the independence expectation. Needs its own
+   brief only if chroma pairing matters: joint (εu, εv)
+   sign/magnitude table, offline — no new harness code.
+4. Interior far-tail mechanism (M20 gap 1, still open): 102 B
+   with |δ|≥8 on s0 (max 47; all outside the 701 mask; 134 B on
+   m15). Needs its own brief: locate + plane/region isolation of
+   the tail bytes, offline — no new harness code.
+5. δ-sign mechanism (M20 gap 2, still open, minor): δ>0 on
+   80.9%/80.2% with P(δ>0|v0>full) ≈ 0.90 vs P(δ>0|v0<full) ≈
+   0.70 on both frames. Needs its own brief only if the sign
+   asymmetry matters: joint (gap, parity, carrier) sign tables,
+   offline — no new harness code.
+6. m15 below-min far tail (M19 gap 3, still open, minor): 4
+   below-side bytes with dout ≥ 16 (max 47) on m15. Needs its
+   own brief only if outlier isolation matters, offline — no new
+   harness code.
+7. Negative-share mechanism (M18 gap 2, still open): 93
+   negatives (worst −244) unattributed at byte level. Needs its
+   own brief: per-shape added-residual maps + EFB-copy diffing,
+   offline — no new harness code.
+8. Odin port readiness (M18 gap 3, still open): no Odin
+   contract in-repo; handoff artifact stays `loo.txt` +
+   dumps + synths. Needs its own brief once the consumer names
+   its interface.
+9. Top-HUD glyph residual isolation (M18 gap 4, still open):
+   bottom-HUD draws identified; top-band glyph edges in the long
+   tail. Needs its own brief if draw-level top-HUD isolation
+   matters.
+10. Per-carrier weight centers (M18 gap 5, still open,
+    optional): effect-draw argmins at the fine-grid edge. Needs
+    its own brief only if per-draw filter centers matter.
+
+## What I could not do
+
+1. Jaccard printed to 4 decimals: 1.0000 ⟹ byte-identical sets
+   (a one-byte diff reads 2367/2369 = 0.9992) — tabled with the
+   arithmetic noted, not chased.
+2. No per-shape ε-value comparison: the 764-shape pass compares
+   maps only; ε values are s0 + m15.
+3. U/V-native gradient join: P1 deciles are Y-native (M18
+   verbatim); U/V bytes got the co-located-Y secondary join
+   only — tabled, not chased.
+4. Fixed ±1 rules only: no mixed, per-plane, or adaptive
+   static-site predictors attempted.
+5. Desktop only; no device work. NEVER `git push` in ssx3
+   (this commit is local-only by rule).
+
+## Files
+
+Committed under `local/research/M21/`: `DESIGN.md`, `m21.py`,
+`control.py`, `REPORT.md` (this file), `m21-staticmap.png`
+(91498 B total).
