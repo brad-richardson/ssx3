@@ -5,6 +5,19 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M35 read (09-20) — PASS, M34 gap 1 unnamed values tabled:**
+      FULL 764×33 TSV byte-identical; 15 cells exact (11
+      extra-only / 1 missing-only / 3 mixed); 22 extras
+      1/14/7 + 8 missings 2/2/4 (pooled == M33 cluster
+      sets); c315 3 extras (1 bulk) + 2 missings (both
+      bulk |δ| 10) vs c314 1 extra (bulk) + 3 missings
+      (all noncell |δ| 12/23/45); 21/22 band-1 (H4 met);
+      missings 8/8 ++, extras 18/22 ++; c314+c315 bulk
+      4/9; 0 B explained. Verified: baselines, TSV
+      guard, pooled sets, canon identical, control
+      exact, PNG size (rule-met), mtimes clean. ~0.2 h.
+      Next: M36 (still-below unnamed values) launched in
+      freed pane. Ledger row added.
 - [ ] **M34 read (09-20) — PASS, M33 gap 2 unnamed scan done:**
       union tail-Y 41 cols → 33 unnamed (13 s0-bearing 37
       sites + 20 pure-private); 33/764 movers, 79 cells
@@ -415,7 +428,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t13 (run-to-exit at 1800s, 4h) · t12 (dev build config, 4h) · m35 (shape-9 unnamed values, offline, 4h).
+- [ ] **Live panes:** t13 (run-to-exit at 1800s, 4h) · t12 (dev build config, 4h) · m36 (still-below unnamed values, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
