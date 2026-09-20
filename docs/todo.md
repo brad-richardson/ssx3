@@ -5,6 +5,19 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M27 read (09-20) — PASS, shape-733 divergence attributed:**
+      100 B @ J 0.6694 (inter 81, union 121): 19 priv + 21
+      miss + 81 shared, all luma; all 40 non-cell on the
+      other frame (0 near/far; 15/19 + 13/21 static there);
+      miss = s0 c301 + c321 entire, priv = c303 + c323
+      entire (two +2 whole-column swaps); d1 share 0.0000
+      both sets; 4/6 streak columns survive; 731 mirror
+      (18+20+82 @ 0.6833, c257/c277 → c259/c279, disjoint
+      sets J 0.0000 both); 0 B explained. Verified:
+      baselines, sets + Jaccards, canon identical, 2/2
+      controls, PNG size (rule-met), mtimes clean. ~0.1 h.
+      Next: M28 (column census) launched in freed pane.
+      Ledger row added.
 - [ ] **M26 read (09-20) — PASS, M25 gap 1 hump shapes fitted:**
       TRI (symmetric triangle) best 18/65 s0 + 16/68 m15
       (34 pooled) vs CONST 12/13, TWO 15/12, QUAD 4/3;
@@ -266,7 +279,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t10 (outer-driver search, read-only, 4h) · t6 (build cache check, no boots, 4h) · m27 (shape-733 attribution, offline, 4h).
+- [ ] **Live panes:** t10 (outer-driver search, read-only, 4h) · t6 (build cache check, no boots, 4h) · m28 (column census, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
