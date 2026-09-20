@@ -5,6 +5,78 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1ak read (09-20) — PASS with erratum, fixed point holds 359,749 iters, E2/E3 brief-shaped:**
+      Part 34 (325 lines, append-only): chunk-0 tail-in-iter-1
+      + chunks 1–358 fixed (15/34.29, 9-fam 1.0) + 28-line
+      final cut; gaps {6,7} (9140/43557), cadence 146×184 +
+      147×174; T1–T13 re-polled hold (w31 294–308, s31−w31
+      ≤+1, d/w31 1.9966–2.0502); D1–D5 digit-exact with
+      D4+D5 unified (+1 frame = +2 lines, rep 71526 ∈
+      ic71); halt trio +0/+1/+2 @97.85% w238; bounds
+      tighten (count/sample) or invariant (horizons
+      2.26 yr, +0.0084%); E2a/E2b/E2c + E3 ALL brief-shaped
+      (guard PCs re-verified, T16-calibrated triggers).
+      ERRATUM: sema-31 waker=-1 identical reads 431,893 not
+      431,897 (4-line overcount; partition then closes:
+      431893+25+7=431925 — independently grepped). Verified:
+      depth-0 sum 1,851,473 exact, cadence sums, id=31 total
+      863,851, signal partition, D4/D5 arithmetic, 325+/0−,
+      fork unmoved, ahead (no push). ~4 h. Next: E2a
+      (pad stimulus) + F3 (frontier Part 3, queued) in freed
+      + spare panes. Ledger row added.
+- [ ] **T18 read (09-20) — PASS after tail restore, channel + aligner work, k=2:**
+      Fork f2b1852 (TraceChannel +1 hook, +170): 781,372
+      EE events in PCSX2 byte shape over 240 s; ladder
+      channel-off-vs-on 1053 EXACT + 245 TOL_OK ≤0.5% + 5
+      SAMPLED + 1 KEY_DELTA (sema.33 phase sample, row
+      derived); log ladder 47/47 series, rare ids 1.0000,
+      pump 1.0017; `tools/trace_align.py` (selftest 17/17,
+      t7 bug caught+fixed): anchor ExecPS2:2 HIT ev:162 vs
+      rt MISS (HLE, no BIOS) → align RFU060/061 agree then
+      DIVERGE k=2 (ref AddDmacHandler vs rt CreateSema; no
+      20-shingle re-align; GetThreadId 37% vs ~0%); t17c
+      plugs in unchanged, reproduces boot3 byte-exact.
+      Minor: headline quantifies only the KEY_DELTA (table
+      authoritative: 5 SAMPLED + 1). Verified: selftest
+      re-run ALL PASS, alignment re-run k=2 identical,
+      fork files, ladder rows, lease removed, 2073+/0−,
+      ahead (no push). ~0.5 h. Next: T20 (channel-on drain
+      census vs menu) in freed pane. Ledger row added.
+- [ ] **T17 read (09-20) — PASS after tail restore, held ✕ breaks park to User Prefs:**
+      Build reused bit-identical; pad Cross=K pre-mapped;
+      xdotool focus+XTEST proven (SPACE pause flatlines +
+      OSD); 18 ms tap no-op (6/6 park-identical) vs single
+      534 ms hold → User Prefs (Language=English) by +5 s,
+      held to T+340; park-match BIT-IDENTICAL (snaps sha
+      b6ca1aa9, ExecPS2/vblank/SIF lines exact); t17c trace
+      7,648,547 lines / 540 MB (EE 914,791/42 + IOP
+      5,211,292/103 + SIF 936,164 + cdvd 447,901 + other
+      138,399; 23,107 vblanks), SSD sha-matched; WSL killed
+      userland ~17× mid-session (G2, runs completed in
+      quiet windows). Restored tail: G1–G8 + commands.
+      Verified: channel sum exact, ExecPS2 lines + vblank
+      count re-grepped exact, snap shas, SSD bytes, 762+/0−
+      + restore, no lease, ahead (no push). ~45 min. Next:
+      T19 (2nd ✕ at User Prefs) in freed pane. Ledger row
+      added.
+- [ ] **M60 read (09-20) — PASS with erratum, c312 runs 7/10/6, decspan-6 unique max:**
+      33-col unanimity M59-exact; split set [312] alone
+      (12 all-pos + 6 all-neg n≥2, 8 singletons, 6 s0-only);
+      c312 23 sites in 3 runs (pos 316–343×7 / neg
+      353–367×10 / pos 369–379×6, r316 leads run 1, sole
+      non-1 d = r369 d2 opens run 3); rowspan 63 (2nd after
+      c343's 264); decspan 6 unique max (next 4/3/3);
+      modal d=1 on all 19 multi-site (dmax 262/3/2 on
+      343/311/312, 16/19 pure d1). H1–H7 ALL met. Control
+      green; re-run 95/95; PNG 455 B rule-met (H3); 0 B
+      explained, 102 stands. ERRATUM (prose only): "16
+      single-decile cols, 13 pure dec-9" — tables + receipt
+      read 9 pure dec-9 (7 n≥2 + 2 singletons); H-bars
+      unaffected. Verified: classes, runs, spans
+      (63/264/41), decmix sums, d-profile, receipt ndec
+      counts, fnvs, 2416+/0−, ahead (no push). ~0.2 h.
+      Next: M61 (c311-vs-c312 join, offline) in freed pane.
+      Ledger row added.
 - [ ] **T16 read (09-20) — PASS, E1 = third absence window (no break to 7200 s):**
       Exit @b235 reproduced (tail one block shorter, residue
       from b240); 1188 blocks past b241: 12 watches + 2
