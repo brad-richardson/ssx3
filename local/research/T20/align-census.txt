@@ -1,0 +1,35 @@
+ref: /tmp/t20-slices/menu-slice.txt
+  file_lines=215996 events=215996 skipped=0
+rt:  /tmp/t20-slices/drain-sample.txt
+  file_lines=215996 events=215996 skipped=0
+--- anchor ---
+ref_start: none requested -> ev:0
+rt_start: none requested -> ev:0
+--- name-table ---
+compared=215996 name_mismatches=0
+--- divergence ---
+k=0 (agreement run before it: 0 events)
+ref: RFU005 (5) @file:1 ev:0
+rt:  iSignalSema (43) @file:1 ev:0
+--- context (+-5) ---
+>>> k=0 ref=RFU005 (5) @file:1 ev:0 rt=iSignalSema (43) @file:1 ev:0
+    k=1 ref=SignalSema (42) @file:2 ev:1 rt=WaitSema (44) @file:2 ev:1
+    k=2 ref=WaitSema (44) @file:3 ev:2 rt=iSignalSema (43) @file:3 ev:2
+    k=3 ref=PollSema (45) @file:4 ev:3 rt=WaitSema (44) @file:4 ev:3
+    k=4 ref=SignalSema (42) @file:5 ev:4 rt=iSignalSema (43) @file:5 ev:4
+    k=5 ref=PollSema (45) @file:6 ev:5 rt=WaitSema (44) @file:6 ev:5
+result: DIVERGENCE
+--- census (post-start) ---
+name                                            ref         rt
+WaitSema                                      68998     107998
+SignalSema                                    53600          0
+iSignalSema                                   23162     107998
+iReferSemaStatus                              22915          0
+RFU005                                        15525          0
+PollSema                                      15405          0
+iPollSema                                     15276          0
+CreateSema                                      247          0
+sceSifSetDma_isceSifSetDma                      247          0
+sceSifSetDChain_isceSifSetDChain                247          0
+DeleteSema                                      247          0
+ReferThreadStatus                               127          0

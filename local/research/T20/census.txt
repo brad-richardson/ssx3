@@ -1,0 +1,27 @@
+# menu=menu-slice.txt events=215996 names=12
+# drain=drain-sample.txt events=215996 names=2
+name                                           menu      drain
+WaitSema                                      68998     107998
+SignalSema                                    53600          0
+iSignalSema                                   23162     107998
+iReferSemaStatus                              22915          0
+RFU005                                        15525          0
+PollSema                                      15405          0
+iPollSema                                     15276          0
+CreateSema                                      247          0
+DeleteSema                                      247          0
+sceSifSetDChain_isceSifSetDChain                247          0
+sceSifSetDma_isceSifSetDma                      247          0
+ReferThreadStatus                               127          0
+--- missing drain-side (menu>0, drain=0) by menu count ---
+SignalSema                                    53600
+iReferSemaStatus                              22915
+RFU005                                        15525
+PollSema                                      15405
+iPollSema                                     15276
+CreateSema                                      247
+DeleteSema                                      247
+sceSifSetDChain_isceSifSetDChain                247
+sceSifSetDma_isceSifSetDma                      247
+ReferThreadStatus                               127
+--- missing menu-side (drain>0, menu=0) by drain count ---
