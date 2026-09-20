@@ -5,6 +5,16 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Steering answers 09-19 (user picked all recommendations):**
+      tooling-first (P1w = no-silent-drops + CSV tracking, P1x = PCSX2
+      ref trace in parallel); CSV → fork branch; frontier direction
+      reads at fixed points (after each behavior fix, park survives 3
+      briefs, before semantics changes — the 09-19 review counts as
+      the P1v-landing read). P1w reuses P1v pane, P1x reuses G6 pane.
+      Queued behind them: 0x52BE04 diagnosis (with census+trace in
+      hand), kernel-CreateSema check, flaky test to next free pane,
+      shim→split after CSV lands, movies stub default, I-lane park
+      after first launch, route criteria at M14+first-frame.
 - [ ] **Frontier review 09-19 read (orchestrator):**
       `docs/research/review-2026-09-19-progress.md` (8-park boot
       ladder, SYNCTASK 10-brief post-mortem, 23-commit fork
