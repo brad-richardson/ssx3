@@ -5,6 +5,23 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **T5 read (09-20) — PASS with asterisk (D reads DELTA, rule
+      good):** fork `1a76df4` (+289/-0, pushed 0/0): folded
+      `.text` constants split (ElfParser placement, N64 rule);
+      +172 splits predicted==actual (diff clean, 172-line
+      splits.txt); 0x3E3AD8 re-derived at 2 real sites (dedup
+      no-op); +1 stub binds `_sceSifCmdIntrHdlr@0x426230`;
+      suite 439/439/0; boots exact on drops/RPC/creates/hot-pc
+      top (953,381 both), GS/sched ≤1.2%; D = 1054/245/3/2
+      DELTA — the 2 KEY_DELTAs are waiter presence, PROVEN
+      phase artifacts by orchestrator (waiter ⟺ sampled WAIT
+      status both snapshots, hists balanced both sides); the
+      misfire is the tool's verdict class, not the rule.
+      Verified: fork stat/push, suite rerun, splits file,
+      recomp logs, exact log sizes, D rerun exit 1 identical,
+      ELF site words + JAL math, hand checks, lease released.
+      Next: T9 (waiter-phase rule + re-verdict, 0 boots)
+      launched in freed pane. Ledger row added.
 - [ ] **M24 read (09-20) — PASS, M23 gap 1 near-hit mass fitted:**
       4 fixed corrections scored exact-hit: best SIGN
       (K45+ ±1 by gap side) 21/102 s0 + 28/134 m15 exact
@@ -193,7 +210,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t8 (repetition-driver attribution, read-only, 4h) · t5 (analyzer text-pointer rule, 4h) · m25 (streak-column profiles, offline, 4h).
+- [ ] **Live panes:** t8 (repetition-driver attribution, read-only, 4h) · t9 (waiter-phase verdict rule, 0 boots, 4h) · m25 (streak-column profiles, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
