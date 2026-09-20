@@ -447,3 +447,158 @@ Recommendation status (§7 numbering):
   13 `runtime.user_intent.accepted`, 197 `tool_batch.effect.started`.
 - Pane states at 00:07: `herdr agent list` (p12, p1ad, m16 working; p1ac,
   i7 done; wN:p3 orchestrator idle).
+
+---
+
+# Part 3 (2026-09-20) — Frontier read at "park survives three briefs", before the first stimulus
+
+Fired on the standing rule (drain/park survived T15 → P1aj → T16, then
+P1ak). Read-only: no boots, no lease, no fork changes, no builds, no
+`adb`. Evidence: P1 REPORT Parts 33–34, `local/research/T16|T17|T18/
+REPORT.md`, `docs/numbers-ledger.md`, `docs/todo.md` Now, plus read-only
+spot checks (greps on committed traces, boot logs, recompiled output and
+fork sources on the SSD; every command in §24). Covers 09-20 00:07 →
+12:08 (ssx3 `5ebce5f..ed76d01`, 187 commits). Advisory to the
+orchestrator: E2a boots concurrently and is not gated on this read.
+Standing decision unchanged: upstreaming stays off every list.
+
+## 16. Outcome since Part 2
+
+| Since 00:07 | |
+|---|---|
+| Report commits / gate reads | 72 brief prefixes (46 M, 17 T, 9 P) / 57 gate-read commits; 4 "restore truncated REPORT tail" commits (T17, T18, M36, M21) |
+| Ladder rungs cleared | 1 (P1af `e483d8d`: SPR normal-mode DMA emulated; the `sub_00394ED0` self-loop is gone). Since then zero behaviour fixes: P1ag, P1ah, P1ai, P1aj, P1ak, T11, T13, T15, T16 all describe the same state |
+| Current state | main RETURNED at ~1,200 s guest time (dormant, pc 0) after 72,176 identical hash-walk invocations; t3 WAIT-30 on main's signal leaf; t2/t5/t6 parked; t4's VBLANK pump runs one iteration per VBLANK to any cap ("the drain"); `SetGsCrt` never issued |
+| Fork commits | 9 (`da6a2d5`..`f2b1852`): P1af fix, P12 kernel-true error code, T5 analyzer rule, T1/T9 snapshot + `ladder_diff`, T12 dev config, T18 trace channel |
+| Part 2 §12 tooling | T1 done (T1/T9), T2 folded into T1's tally, T3 done (P13), T4 done (T4 + T17 + T18: Devel PCSX2 on bytesize, 7.5 M-line reference to language select and to User Prefs, runtime channel, `tools/trace_align.py`), T5 done (`1a76df4`), T6 done (T12/T14: dev link 315 s → 5.9 s) |
+| Orchestrator | muse throughout; the fixed-point rule is in `docs/todo.md` Live rules and fired this read; Now section is 103 entries |
+
+## 17. Findings
+
+| # | Finding | Evidence |
+|---|---|---|
+| F1 | **The drain is not the park.** The 31-drain is t4's VBLANK pad-service loop (VBLANK-end handler → iSignalSema(31) → t4 wakes → two pad reads (`326EB0` ×2) → WaitSema(31)). It is what a healthy game does in the background every frame. Nothing in it can revive main: dormant is not waiting (P33 T3 row). | P33-2b/2c, P34-1a/1c |
+| F2 | **The park is main's return, and it is guest-time-counted.** N = 72,176 invocations at one per VBLANK ≈ 1,203 s of guest time. Exit wall is 1,183–1,217 s across T13/T15/T16 while N is exact to the digit, so the exit is counted in VBLANKs, not wall. That is the signature of a give-up after ~20 min of polling (20 lookups per frame, ramp of 75, then identical work) with nothing arriving. Main then unwinds 4,049 frames and returns through the runtime's dormant site. On hardware a returning main would land in the kernel's ExitThread path; the reference never issues ExitThread/ExitDeleteThread for main (its single ExitDeleteThread is the first-created helper thread at +0.34 s). | P31-1, P32-1, T16-2, T4 census |
+| F3 | **The reference reaches display init 0.62 s after game start; the runtime never does.** Reference: game start 0.5996 s → SIF init → 10 threads → `SetGsCrt` at 1.2169 s → menu loop. Runtime over 240 s: 5 threads, no `SetGsCrt`, hash loop from ~5 s. §19 has the milestone table. | §19 |
+| F4 | **The first behavioural divergence is at event 9 and it is rung 1's stub.** Reference issues zero `SetSyscall` (0x74) and zero `GetEntryAddress` (0x5b) in 336 s. Runtime issues `SetSyscall` ×8 and `GetEntryAddress` ×6 in its first 25 events, and all six GetEntryAddress calls are dropped: `[drop] syscall/dispatchSyscallOverride KE_ERROR syscall=0x5b handler=0x80075000` (boot log lines 70–75; the P1w census landed for exactly this, and the P1ac gate read tabled it as attributed). The scanner stubbed at rung 1 (`ret0@0x0042c1f0`, TOML line 207) is `InitSystemCallTableAddress` (fork CSV row 9234): libkernel's kernel-table locator, the prerequisite for the SDK's syscall patches. On a v02.00 BIOS the patches are not installed (reference); with `ret0` the runtime installs them (installer at 0x42cbf0–0x42cc70: five `SetSyscall` through the `0x42CBC0` wrapper with game-memory handlers `$a1 = 0x0045xxxx`, `FlushCache` after) and the runtime honours them (`setEeSyscallOverride`, dispatched before the HLE switch in `Dispatcher.cpp:108`). So up to seven syscalls now execute game-supplied wrappers whose chain-to-original is broken. Which seven: unread (static read of the installer's `$a0` immediates, no boot). | §24 greps; `System.cpp:498`, `:1006`; `Dispatcher.cpp:108`; `ssx3.toml:207` |
+| F5 | **Two runtime-only per-frame storms have no reference counterpart.** GetThreadId 290,210 vs 2 (≈20 per VBLANK, the same 20 as the `394ED0` lookups per invocation) and FlushCache 14,356 vs 0 (≈1 per VBLANK). Both are consistent with wrapper code the reference never runs (F4) or with a cache-fill check that never sticks. The recompiled output has no plain `addiu $v1,$zero,0x2f` site, so GetThreadId is issued through an indirect or host path; that is a one-brief static attribution. | T18 census; §24 grep |
+| F6 | **Smaller census deltas, one row each:** OSD config read at ELF entry (Get/Set/Get/Set, events 5–8) vs the reference's single Set/Get/Get2/Set2 block at +0.60 s; the runtime's later block is Get ×7 + Get2 ×3 with no Set; threads 5 vs 10; INTC handlers registered 6 (5 disabled again within 1.5 s) vs 2; the reference's in-interrupt sema polling (iReferSemaStatus 67,629, iPollSema 45,104) is absent in the runtime (RFU005's absence is expected: handler returns are host-side). | T18 census, §19 |
+| F7 | **The aligner is right and its k=2 is a projection artefact.** Filtered to the shared vocabulary (drop the SIF layer, the sema pump, GetThreadId, FlushCache, RFU005) the two streams align as milestone sequences and the first behavioural divergence is F4/F6, not "HLE skips BIOS init". The SIF layer is HLE'd by construction, so its syscalls can never appear on the runtime side. | T18-2, §19 |
+| F8 | **Nine briefs (P1ag–P1ak, T11, T13, T15, T16) and roughly 15 agent-hours since 09-20 02:00 went to when and whether the drain ends.** P1aj's own bound table (§P33-4b) already said the counter horizons are not falsifiable by a longer boot; T16 was a defensible one-time check for an unmodelled terminator; P1ak's 4 h reconfirmation at 5× was not needed. Same class as Part 1 §4.1: the anomaly that mattered (main returned; a reference in which the game never loops here existed from T4 at 14:30) was on the table at P1ai, and nobody asked which open anomaly was the runtime's fault. | ledger rows, todo Now |
+
+## 18. Question (a): is the fixed-point claim sound at 5× evidence?
+
+Yes, as a behavioural claim, and it should now be closed.
+
+| Claim | Proven by | Not proven (and does not matter) |
+|---|---|---|
+| One iteration per VBLANK | 359,748 iterations over ~5,990 s = 60.06/s; w31 294–308 per 5 s block; host raises VBLANK at 60 Hz (`EeScheduler.cpp:2605/2611`) | chunk↔block join is rate-inferred (no timestamps in either stream) |
+| Identical work per iteration | chunks 1–358 at 15 functions / 34.292–34.294 lines per iteration, 9-family exactly 1.0000, zero residual; `3E4AF0` gaps ∈ {6,7} only (52,697 gaps); sema-31 wait/signal shapes identical on 431,923 / 431,893 lines | guard-word values (T1–T4, T8 branch directions) unread |
+| No terminator in reach | T1–T13 re-polled with zero flips over 359,749 iterations; four monotonic counters are write-only or gated on a state never observed; 2^32 at 60 Hz is 2.26 years | T4's `state==4` and `326EB0`'s per-branch directions; both need E3 or symbolic execution |
+| Erratum | P34-1c sema-31 partition reads 431,897 waker=-1; the orchestrator's re-grep gives 431,893 (431,893 + 25 + 7 = 431,925). The report still carries the wrong number; the ledger row and todo carry the correction | — |
+
+Verdict: the drain will not end inside any experiment budget, and by F1 it is not the object of interest anyway. No further E1-class or P1ak-class brief.
+
+## 19. Milestone alignment, reference vs runtime (question c)
+
+EE syscalls only, rare vocabulary (pump and SIF storm removed). Reference = `emulog-boot3.txt` after `ExecPS2:2` (file line 142465, ts 0.5996); runtime = `syscalls-t18-on.txt` (240 s, channel on). Reference ts is PCSX2 host wall (Devel, not frame-limited: 67 vblank/s), so compare order, not seconds.
+
+| Step | Reference (ts, s) | Runtime (ts, s) | Reading |
+|---|---|---|---|
+| Entry | RFU060, RFU061 | RFU060, RFU061 | agree (main thread + heap init) |
+| SDK SIF init | AddDmacHandler, _EnableDmac, sceSifSetReg ×5, sceSifGetReg storm (260,722 to 0.906), Deci2Call, second AddDmacHandler | none (HLE'd; one AddDmacHandler at 1.437) | expected: the runtime has no IOP peer, so the EE's wait for the IOP is a stub |
+| Kernel patch path | none | CreateSema ×2, **Get/Set/Get/SetOsdConfigParam, SetSyscall ×8, GetEntryAddress ×6 (all dropped), FlushCache ×3** (0.0001–0.0004) | **F4: runtime-only, from rung 1's stub** |
+| First thread | CreateThread/StartThread 0.929 → ExitDeleteThread 0.940 | first CreateThread at 1.4325; no thread ever exits | reference's helper thread runs and exits; the runtime has no equivalent |
+| Module loads | (IOP-side; not in the EE channel) | RFU252/CreateSema/DeleteSema ×22, 0.0135–1.48 | the runtime's 21 `sceSifLoadModule` calls, each with a SetAlarm the reference does not log (PCSX2 has no name for 0xFC) |
+| OSD config | Set, Get, Get2, Set2 at 1.2026 (once) | Get ×7 + Get2 ×3 at 1.4348 (no Set) | different branch through the same code; needs pc attribution |
+| Thread block | 3 + 4 + 1 + 1 threads 1.2098–1.2126, SleepThread ×3, CancelWakeup | 3 threads 1.4325–1.4342, 1 thread 1.4372, 1 thread 4.5054 | 10 vs 5; the runtime's fifth arrives 3 s late |
+| INTC | AddIntcHandler ×2 (1.2122, 1.2183) | ×6 (0.0126, 1.4345, 1.4372, 1.4459 ×2, 4.506), _DisableIntc ×5 | 6 vs 2 |
+| Display init | RFU005, CreateSema ×2, CreateThread/StartThread, GsGetIMR, **SetGsCrt 1.2169**, SetGsVParam, SetGsCrt, AddIntcHandler, ChangeThreadPriority, WakeupThread | **never** | the runtime parks before the game touches the GS |
+| Steady state | ReferThreadStatus every ~0.9 s + sema pump + per-VBLANK `sceCdApplySCmd2` (IOP) | 20 GetThreadId + 20 lookups per VBLANK for 72,176 VBLANKs, then main returns | the runtime's loop has no counterpart in the reference: reference GetThreadId total is 2 |
+
+Implications for the three missing signals in P33-3b:
+
+- **S1 (sema-30 4th signal)** needs main's leaf; main is gone. The question moves upstream to why main left, which is F2 + §20 A0.
+- **S2 (IOP announcer / SIF reply)**: the reference shows the EE waiting for the IOP as a real, finite wait (the 260k-call storm completes in 0.3 s, then RPC binds, then module loads through the IOP). The runtime's game waits 20 minutes and gives up. If A0 shows the 20 lookups poll a SIF/RPC-delivered result, the generic IOP SIF peer (Part 2 §11.1, §14) is the next behaviour fix and E2b's injection is the wrong timing (post-exit, not in-phase).
+- **S3 (`0x3C45C0` SendCmd site)**: armless on both sides; no change.
+- **New S0**: the kernel-patch path (F4) precedes S1–S3, changes which code services up to seven syscalls, and is closable from config. It goes first.
+
+## 20. Question (b): which experiment next
+
+| Rank | Experiment | Boots | Why | Disposition |
+|---|---|---|---|---|
+| 1 | **A0: name the divergence (no boot, ≤2 h).** (i) Static read of the patch installer (0x42cbf0–0x42cc70 and the `0x42CBC0`/`0x42CBB0` wrappers): the seven overridden syscall numbers and their handler addresses; what `InitSystemCallTableAddress` returns on a kernel it recognises, and what the callers do with 0. (ii) Decode the hash-phase loop's exit predicate in `sub_00363490`/`sub_00376938`: what is compared each iteration, what stops it at 72,176 (a counter, a VBLANK timeout, or a flag), and what the 20 `394ED0` lookups look up. (iii) Attribute GetThreadId and FlushCache issuers (recompiled output grep plus the override table). Receipt: three tables. | 0 | Every later choice depends on (ii); (i) is the earliest divergence and the cheapest fix | **Next brief, freed pane** |
+| 2 | **A1: kernel-true scanner (1 boot, 240 s, channel on).** Replace `ret0@0x0042c1f0` with the return a v02.00 kernel produces (from (i)), or stub the installer as no-op if that is the hardware-equivalent outcome; rebuild; boot; receipt = projected alignment (§21) shows zero `RFU116`/`RFU091` events and the six KE_ERROR drops gone; then run the ladder to see whether the hash loop, the GetThreadId storm, or the FlushCache storm change. Config-shaped (TOML), rec-5 compliant (the reference trace is the kernel truth here). | 1 | Closes S0; may move the ladder for free | After A0 |
+| 3 | **E3 probe** (P34-2c row, unchanged) | 1 | Only if A1 leaves the loop in place and (ii) names a guard word that needs a value | Conditional |
+| 4 | **E2c debug SignalSema(30)** | 1 | Fakes S1; can only reveal t3's next park; useful once main's exit is understood | Hold |
+| 5 | **E2b SIF0-reply injection** | 1–2 | Right mechanism, wrong window: the reply was needed in-phase, not mid-drain | Hold; fold into the SIF peer if A0 points at SIF |
+| 6 | **E2a pad stimulus** (running) | 1–2 | Measures the pad-service loop's response to input with no consumer alive; informative about the pad HLE, not the park | Let it finish; do not queue E2b/E2c behind it |
+
+## 21. Question (d): methodology
+
+1. **Errata and truncation.** Gate reads caught P1ak (431,897 → 431,893), M60 (13 → 9), M59's brief miscount, and six stale gap-chain rows (M46–M54). Four REPORTs lost their tails on write (T17, T18, M36, M21). Rule for briefs: write the report in chunks and put `tail -3 REPORT.md` in the receipt; a truncated tail fails the gate. Numbers that appear in a headline must be re-derived by a script in the report's own commands block, not typed.
+2. **Wall caps produce phase noise.** Every ladder carries SIGTERM-phase samples (T18: 5 SAMPLED + 1 KEY_DELTA, all wall artefacts). Boot scripts get a progress cap (stub-block count or syscall count) as a one-line change so ladders are byte-tight.
+3. **bytesize is not yet gate-grade.** Seventeen WSL userland kills in fifteen minutes, cause unknown (T17 G2). Keep runs single-shot and ≤6 min; capture `dmesg` and the Windows event log in the next bytesize brief; consider the Windows console build instead of WSL.
+4. **Trace-format limits.** EE channel only, no pcs or args (T18 G3/G4). A `pc=` field on the runtime channel (env-gated, PCSX2 shape kept as default) turns F4/F5/F6 attribution into greps. Reference side: PCSX2 prints unnamed syscall numbers through a null name pointer; check whether `(null) (fc)` lines exist in `emulog-boot3.txt` before treating 0xFC as runtime-only. Reference timestamps are host wall; align on order and VBLANK counts, never on seconds.
+5. **Projection is missing from the aligner.** `trace_align.py` needs `--drop-names` (or a `--project shared` preset that removes the SIF layer, the sema pump, GetThreadId, FlushCache, RFU005) and a `--milestones` mode that prints the rare-vocabulary sequence with timestamps for both sides. §19 was produced by hand in five greps; it should be one command and land as `align-milestones.txt` in every boot brief.
+6. **Report weight.** Part 34 is 325 lines to say "still fixed". The fixed-point rows are a script's output (`tools/drain_fixed_point.py`, 10-row table); the ledger row is the evidence. The same applies to the M lane's per-brief tables.
+7. **Now is a log again** (Part 2 concern 3, unaddressed): 103 entries, most 15 lines. One line per live pane; reads move to Done when the successor launches.
+
+## 22. Recommendations and disposition
+
+Part 2 items:
+
+| Part 2 item | Status |
+|---|---|
+| §11.1 generic SIF peer at the next SIF-shaped park | Not yet due; becomes due if A0 (ii) names a SIF/RPC result as the loop's wait target |
+| §11.2 census-gated kernel-truth sweeps | Held (P12 was the last; da6a2d5) |
+| §11.3 Now as a log | Unaddressed (103 entries) |
+| §11.4 lease split | Done (`ssx3-host-lease` M, `ssx3-p-lane-lease` P) |
+| §11.5 bytesize for PCSX2 | Done (T4/T17/T18); flakiness open |
+| §12 T1–T6 | All landed (§16) |
+| §14 decisions | SIF peer: pending A0; IOP model: not due; bytesize: decided; sweeps: census-gated; lease: split |
+
+Part 3 recommendations:
+
+| # | Recommendation | Owner | Disposition |
+|---|---|---|---|
+| 11 | Close the drain question: no E1/P1ak-class brief again; ledger rows are the bound | orchestrator | Adopt now |
+| 12 | A0 (§20 rank 1) in the freed pane; three tables, no boot | orchestrator brief | Adopt now |
+| 13 | A1 (§20 rank 2): kernel-true scanner as config; receipt = projected alignment with zero patch-path events and zero KE_ERROR drops | orchestrator brief, after A0 | Queue |
+| 14 | Aligner: `--drop-names`/`--project shared`, `--milestones`; channel: `pc=` field; both env-gated, PCSX2 shape default | T20-class brief (no lease) | Queue, can run beside A0 |
+| 15 | Let E2a finish; do not queue E2b/E2c; E3 conditional on A1 | orchestrator | Adopt now |
+| 16 | Gate reads add one row per read: "does the reference show the game in this state?" A diagnosis brief on a state the reference never enters needs a frontier read first | orchestrator | Adopt now |
+| 17 | Hygiene: progress caps in boot scripts; `tail -3` receipt; fixed-point script; Now to one line per pane | orchestrator | Adopt now |
+| 18 | bytesize: capture `dmesg` + event log on the next flap; no gate-critical run there until a cause is named | next bytesize brief | Queue |
+
+## 23. Branching decisions added
+
+| Decision | When | Options | Recommendation |
+|---|---|---|---|
+| Rung 1 scanner stub | Now | keep `ret0` (SDK patches installed, chaining broken); kernel-true return (no patches, as on hardware) | Kernel-true: the reference is the truth, and seven game-supplied syscall wrappers with broken chaining are an open-ended liability |
+| Where the next behaviour fix goes | After A0 (ii) | IOP SIF peer; OSD-config truth; something the loop polls that is neither | Decide on A0's table, not before |
+| Stimulus lane (E2b/E2c) | Hold | run now; hold until the loop's wait target is named | Hold |
+| Frontier cadence | Now | rule as written (after each fix / three briefs / before semantics changes); add "before any diagnosis brief on a state the reference does not enter" | Add the fourth trigger; it would have fired at P1ai |
+
+## 24. Evidence for Part 3
+
+- ssx3 `5ebce5f..ed76d01` (187 commits); fork `45da174..f2b1852` (9 commits) on the SSD clone.
+- REPORT Parts 33–34 (`local/research/P1/REPORT.md:11091-11834`); `local/research/T16|T17|T18/REPORT.md`; `local/research/T4/census-final.txt`; `local/research/T18/align-boot3.txt`.
+- Read-only spot checks (all greps; `W=/Volumes/Extreme SSD/ps2recomp-spike`, `REF=/Volumes/Extreme SSD/ps2x-t4/emulog-boot3.txt`):
+
+```text
+head -45 $W/P1/run/syscalls-t18-on.txt                       # runtime opening sequence
+tail -n +142465 $REF | grep -m60 "Bios call"                  # reference opening sequence
+grep -n -E "Bios call: (SetGsCrt|CreateThread|...)" both       # §19 milestone rows
+grep -n -m14 -i "override|SetSyscall|GetEntryAddress" $W/P1/run/boot-t18-on.log   # six KE_ERROR drops, lines 70–75
+grep -rn -i osdconfig $R/ps2xRuntime/src                        # System.cpp:94/121/147
+grep -n "0x74|0x5b|0xfc|0x2f" $R/.../Syscalls/Dispatcher.cpp    # cases at :161/:213/:327/:376; override check :108
+grep -A12 "void SetSyscall(" / "void GetEntryAddress(" System.cpp   # :498 honours via setEeSyscallOverride; :1006 reads 0x80011F80 table
+grep -l -E "addiu +\$v1, \$zero, 0x74$" $W/P1/output/*.cpp     # 424110, 42C2F0, 42C340, 42C500, 42C760, 42CBC0
+grep -n "addiu|jal|lui" $W/P1/output/sub_0042CBC0_*.cpp        # installer 0x42cbf8–0x42cc70, $a1 = 0x0045xxxx, FlushCache after
+grep -rn -B2 -A2 42c1f0 $R/games/ssx3/                          # ssx3.toml:207 ret0; CSV row 9234 InitSystemCallTableAddress
+sed -n 900,925p /Volumes/Extreme SSD/pcsx2-ref/pcsx2/R5900OpcodeImpl.cpp   # BIOS_LOG through bios[call], no null check
+```
+
+- Counts: `git log --format=%s 5ebce5f..HEAD | grep -o '^\[[A-Za-z0-9]*\]' | sort -u` (72), `grep -c "gate read"` (57), `grep -c "restore truncated"` (4); todo Now `grep -c '^- \[ \] \*\*'` (103).
+- Wall: ~15:30–16:40Z, read-only throughout; no lease touched; fork tree untouched.
