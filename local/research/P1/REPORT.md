@@ -9943,4 +9943,248 @@ sources; foreign edits landed post-build, §P29-3).
 - Session wall time ≈ 04:35–05:30Z (~55 min, zero lease waits),
   inside the 4 h box.
 
+---
+
+## Part 30 (P1ag): Long-boot proof — 300 s, 4th sema-30 signal ABSENT; hash phase still running (13,108 balanced `0x362DE8` invocations), thread 3 WAIT-30 ×56 straight, no new park
+
+Brief `local/muse/prompts/P1ag.md`. DIAG brief (ZERO fork
+changes): 1 rebuild + 1 long boot ≤300 s (confirm boot not run,
+§P30-6). Tables, no verdicts. Stale-reading guard: Part 29
+(P1af) full — SPR fix, 104k balanced `0x394ED0`, main RUNNING at
+90 s, 4th signal predicted downstream of the hash phase.
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork,
+branch `ssx3`), `LOG=$W/P1/run/boot-p1ag-1.log`,
+`T=$W/P1/run/ps2_log-p1ag-1.txt` (own copy).
+
+Headline receipts: 300 s foreground, SIGTERM rc=-15. Sema-30
+keeps the P1af 7-shape (3 signals / 4 waits, ends parked) —
+signal #4 is NOT in the 300 s window either. Thread 3 is WAIT-30
+in blocks 3–58 (56 consecutive samples; RUNNING only at blocks
+0–1, pre-pump). The hash phase is still running at 300 s:
+13,108/13,108 balanced `0x362DE8` invocations (≈43.7/s),
+260,822/260,822 `0x394ED0`, 247,714/247,714 `0x395000`.
+Stubs hold 222 distinct in blocks 5–58 (×54, no new phase, no
+all-N park); main is RUNNING game code in 41/59 samples;
+`dma`/`gif` advance (259→455,579 / 16→12,355); 0 crash/FATAL.
+Guest-event rows (probe bodies, census, sema-30 shape, CD/SIF/GS/
+RPC, creates, driver-entry, missing) match P1af exactly.
+
+## P30-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `/tmp/ssx3-p-lane-lease` absent (05:13Z and at 05:28:07Z pre-claim) |
+| Waits log | `$W/P1/run/p1ag-waits.log` (3 lines: start, claim, release) |
+| Waits | None (no foreign P-lane holder all session; T1 was building in a separate tree `/tmp/t1-clean` + `/tmp/t1-link`, never booting — contended CPU, not lease) |
+| Pre-claim checks (05:28:02Z) | Lease absent; `pgrep -x ps2EntryRunner` exit 1; binary `81bee6c5…` (P1ag build); ISO 3005415424 B + ELF 3890784 B present; 548 Gi free |
+| Claim | `printf 'P1ag\n' > /tmp/ssx3-p-lane-lease` 05:28:08Z, immediately before boot |
+| Boot | 300 s foreground, SIGTERM rc=-15 (script exit 241); LOG 475,304 lines, 84,053,701 B; trace copied to T (35,916,072 lines, 1,275,797,618 B) |
+| Release | 05:33:24Z, right after boot (analysis needs no lease); verified absent; `pgrep -x` exit 1 |
+| Lane rule | P-lane lease held for the boot only (~316 s); build/analysis lease-free; `adb` not used |
+
+## P30-1. Tree-state-at-build + binary (ZERO fork changes)
+
+| Item | Value |
+|---|---|
+| `git log --oneline -3` | `e483d8d` Fix: emulate SPR normal-mode DMA … (P1af) / `5001830` Diag: SPR_FROM-blind park probe … (P1ad) / `da6a2d5` Fix: kernel-true KE_ERROR … (P12); branch `ssx3`, HEAD `e483d8d6726…` |
+| `git status --short` | 7 modified (`ps2_log.h`, `EeScheduler.cpp`, `RPC.cpp`, `gs_frontend.cpp`, `ps2_runtime.cpp`, `runner/register_functions.cpp`, `ps2_runtime_kernel_tests.cpp`) + 2 untracked (`ps2_park_snapshot.h`, `tools/`) — all foreign (T1 emitter work + pre-existing generated-file state, P1af §P29-3 precedent) |
+| `git diff --stat` | 399,207 insertions, 5 deletions; dominated by `register_functions.cpp` (generated-file worktree state); T1 files: `ps2_log.h` +40, `EeScheduler.cpp` +189, `RPC.cpp` +74, `gs_frontend.cpp` +11, `ps2_runtime.cpp` +4 (incl `ps2_park_snapshot.h` include + `tallyDispatch` call), `ps2_runtime_kernel_tests.cpp` +115 |
+| mtimes at build | `register_functions.cpp` Sep 19 22:50; `ps2_log.h`/`EeScheduler.cpp`/`ps2_runtime.cpp`/`park_snapshot.h` Sep 20 01:04–01:05; `RPC.cpp`/`gs_frontend.cpp`/`tools/ladder_diff.py` 01:06–01:09; `ps2_runtime_kernel_tests.cpp` 01:13 (EDT) |
+| Emitter env | `PS2X_DIAG_PARK` unset in boot env (header: unset = compiled in, nothing written); boot env = P1af verbatim except LOG/SECS (diff-verified: docstring + LOG + `SECS=300`) |
+| Foreign files | Never staged, touched, or committed (no fork commit, no push) |
+| First build | FAILED: `._RPC.cpp` AppleDouble sidecar "source file is not valid UTF-8" (ExFAT precedent, §P2-1) |
+| Sidecar purge | `find $R -name "._*" -delete` (111 files, incl `.git` shadows); `git status` unchanged after |
+| Rebuild | `cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4`, exit 0 (`/tmp/p1ag-build.log`, 18 warning lines); link ran concurrently with T1's separate-tree `-j4` build |
+| Binary | `81bee6c5c0740dafbb910fdfd9c62de8185b816372a0658603dc38c41252d40f`, 163,460,272 B (P1af's `40467623…`, 163,381,632 B, superseded) |
+
+## P30-2. Boot receipt + sema-30 table (signal #4: absent)
+
+### a. Probe (cap hit; guest bytes identical to P1af)
+
+| Item | Value |
+|---|---|
+| Probe lines | 20000 (`n=0..19999`) + cap line at :62604 |
+| `CYCLE@` / pool drops / bad drop-heads | 0 / 1066 / 0 |
+| NULL-head first touches | 3135 |
+| Arenas / distinct `a2` buckets | 1 (`0x8095f0`) / 5 |
+| `[frame:upload]` splices | 128 |
+
+### b. Sema-30: the 7-shape again, 4th signal absent
+
+| Line | op | count transition | waker | pc / ra | result |
+|---|---|---|---|---|---|
+| 643 | signal | 0→1 | 1 | `0x423dc8` / `0x31acf4` | 30 |
+| 645 | wait | 1→0 | 3 | `0x423de8` / `0x31aca4` | 30 |
+| 646 | wait | 0→0 | 3 | `0x423de8` / `0x31aca4` | park |
+| 706 | signal | 0→0, waiters 1→0 | 1 | `0x423dc8` / `0x31acf4` | target=3 |
+| 7116 | wait | 0→0 | 3 | `0x423de8` / `0x31aca4` | park |
+| 7167 | signal | 0→0, waiters 1→0 | 1 | `0x423dc8` / `0x31acf4` | target=3 |
+| 7369 | wait | 0→0 | 3 | `0x423de8` / `0x31aca4` | park |
+
+3 signals / 4 waits, ending parked — same shape as P1af
+(first 4 lines identical; last 3 shifted by pump volume:
+P1af-boot1 `:6975,7025,7227`). No further `id=30` line in the
+remaining 467,936 lines. Handshake totals: 29: 13109/13109,
+30: 4/3, 31: 13110/13109 (in-flight +1 at SIGTERM).
+
+### c. Thread 3: first RUNNING + post-90 s record
+
+| Block | status | waitId | pc | Note |
+|---|---|---|---|---|
+| 0 | 0 RUNNING | 0 | `0x3232b8` (`sub_00323268+0x50`) | First RUNNING sample (pre-pump) |
+| 1 | 0 RUNNING | 0 | `0x323ebc` (`sub_00323BD8+0x2e4`) | Pre-pump |
+| 2 | 1 mid-syscall | 0 | `0x423dc8` | — |
+| 3–58 | 2 WAIT | 30 | `0x423de8` ×56 | Consecutive; blocks 18–58 cover post-90 s — never RUNNING |
+
+Thread 6: blocks 2–58 all WAIT-36 at `0x423de8` (×57).
+
+## P30-3. Phase-exit / new-park table (main still in hash phase)
+
+### a. Main pc-sample histogram (59 samples, blocks 0–58)
+
+| status | pc | n | Attribution |
+|---|---|---|---|
+| 0 RUNNING | `0x186c04` | 15 | `sub_00186A08+0x1fc` |
+| 0 RUNNING | `0x2c6074` | 7 | `sub_002C5570+0xb04` |
+| 0 RUNNING | `0x39b72c` | 7 | `sub_0039AE98+0x894` (P1af end-pc) |
+| 0 RUNNING | `0x38f364` | 4 | `sub_0038F300+0x64` |
+| 0 RUNNING | `0x38f354` | 2 | `sub_0038F300+0x54` |
+| 0 RUNNING | `0x39e72c` | 2 | `sub_0039E6B8+0x74` |
+| 0 RUNNING | `0x3a0714` | 1 | `sub_003A04F0+0x224` |
+| 0 RUNNING | `0x39f114` | 1 | `sub_0039F100+0x14` |
+| 0 RUNNING | `0x3171bc` | 1 | `sub_00316F00+0x2bc` |
+| 0 RUNNING | `0x23d688` | 1 | `sub_0023D660+0x28` |
+| 1 mid-syscall | `0x423dc8` | 10 | syscall entry |
+| 1 mid-syscall | `0x423de8` | 2 | syscall wait addr |
+| 2 WAIT-29 | `0x423de8` | 6 | pump sample (blocks 0,1,2,39,41,58; block 58 = end of boot) |
+
+41 RUNNING + 12 mid-syscall + 6 WAIT-29. `0x362DE8`
+does NOT stop growing (trace below); nothing replaces the hash
+phase inside 300 s.
+
+### b. Trace totals + growth rate (T: 35,916,072 lines)
+
+| Function | enter / exit | vs P1af-boot1 | Rate |
+|---|---|---|---|
+| `sub_00394ED0` | 260,822 / 260,822 | 104,442 (2.50×) | — |
+| `sub_00362DE8` | 13,108 / 13,108 | 5,289 (2.48×) | 43.7 invoc/s over 300 s (P1af: 58.8/s — contended with T1's parallel build) |
+| `sub_00362CC8` | 13,108 / 13,108 | 5,290 | — |
+| `sub_00395000` | 247,714 / 247,714 | 99,153 (2.50×) | — |
+
+Every invocation returns (no hung call, no checkpoint-unwind
+exit). Projected phase-exit time: not projectable — total phase
+work is unknown; tabled rate only.
+
+### c. Stub-distinct series + new-park check
+
+| Item | Value |
+|---|---|
+| Blocks | 59 (`[diag:stubs]` + `[diag:threads]` + `[diag:syscalls]` each ×59) |
+| distinct series | b0=687, b1=250, b2=283, b3=674, b4=268, b5–b58=222 ×54 |
+| New phase | None (no new distinct count after block 5) |
+| New park | None: no all-N stub phase, no hung call (all traces balanced), no frozen counters (`dma` 259→455,579, `gif` 16→12,355 across 37 ticks) |
+| Tick pcs | All driver/game code, never the `0x394Fxx` walk: `0x3230c0` (`sub_00323098+0x28`), `0x3827e0`, `0x1d8efc`, `0x3172e0`/`0x317244`/`0x3171bc` (all `sub_00316F00`+off), `0x377ae8`/`0x377b1c` (`sub_00376938`+`0x11b0`/`0x11e4`), `0x382650` (entry), `0x36356c`, `0x423dc0`, `0x3a0714`, `0x2c6074`, `0x31a490` (`sub_0031A3C0+0xd0`), `0x3825c0` (`sub_0037E120+0x44a0`) |
+
+### d. Drop / RPC / CD / SIF / GS deltas vs P1af
+
+| Item | P1ag | P1af-boot1 | Delta |
+|---|---|---|---|
+| `[drop]` | 6× same early `GetEntryAddress` site `:68-73` | 6× same | None |
+| Unhandled RPC | 4, same sids/bytes/pcs | 4 | None |
+| `SendCmd` / handshake | 1 `cid=0x80000001` / 2 | 1 / 1 | +1 handshake substring line (same event; miner counts `handshake` case-insensitively) |
+| `0x3C45C0` | 0 | 0 | None |
+| CD `lbn=` / first-last | 810 / `0x10`→`0x4311f` | 810 / identical | None |
+| SIF loads | 21 (id 1–21, same order) | 21 | None |
+| Creates / `-1` waits | 37 / 0 | 37 / 0 | None |
+| Driver-entry | 98 | 98 | None |
+| GS kicks / copy / gif / drawing=1 | 96 / 64 / 48 / 96 | 96 / 64 / 48 / 96 | None |
+| Missing / `No exact` | 1 / 0 (JALR `0x2322d4→0x395730`) | 1 / 0, same bytes | None |
+| Presented frame | None | None | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | None |
+
+## P30-4. Ladder vs P1af-boot1
+
+| Rung | P1af-boot1 (90 s) | P1ag (300 s) |
+|---|---|---|
+| Lines / bytes | 207,189 / 36,650,891 | 475,304 / 84,053,701 |
+| Stub / thread / syscall blocks | 17 / 17 / 17 | 59 / 59 / 59 |
+| Park onset | NONE (222 ×15) | NONE (222 ×54) |
+| Thread-1 | 6 RUNNING + 11 WAIT, game pcs | 41 RUN + 12 mid-syscall + 6 WAIT-29 (end: WAIT-29) |
+| Thread-3 | WAIT-30 ×16 + 1 RUN transient | WAIT-30 ×56 (b3–58) + RUN b0–b1 (pre-pump) |
+| Thread-6 | WAIT-36 ×17 | WAIT-36 ×57 (b2–58) |
+| 29-handshake w/s | 5291 / 5290 | 13109 / 13109 |
+| 30-handshake w/s | 4 / 3 (ends parked) | 4 / 3 (ends parked) |
+| 31-handshake w/s | 5291 / 5290 | 13110 / 13109 |
+| 4th sema-30 signal | Absent | Absent |
+| `0x394ED0` trace | 104,442 / 104,442 | 260,822 / 260,822 |
+| `0x362DE8`/`0x362CC8` trace | 5289 / 5290 | 13108 / 13108 |
+| `0x395000` trace | 99153 / 99153 | 247714 / 247714 |
+| `run:tick` | 7 ticks, dma 22188→171405, gif 641→4674 | 37 ticks, dma 259→455579, gif 16→12355 |
+| Dormant / start-thread | 11160 / 5 | 26209 / 5 |
+
+CONTENDED rows (host-load-sensitive, T1's `-j4` build ran
+through the whole boot — not regressions): lines/bytes, trace
+sizes + call counts (balance is the signal), 29/31 volumes,
+dormant counts, thread-sample mixes, tick counts/pcs, sema-30
+late line numbers, stub b0–b4 values. Guest-event rows (§P30-3d,
+probe bodies, sema-30 shape) are deterministic and unaffected.
+
+## P30-5. Exact commands
+
+From `/Users/bradrichardson/dev/ssx3` unless noted; `$W`, `R`,
+`LOG`, `T` as above:
+
+```
+# Tree state + rebuild (lease-free)
+git -C $R log --oneline -5; git -C $R status --short; git -C $R diff --stat
+ls -lT (7 modified + 1 new header); ls $R/tools/; git -C $R diff (ps2_runtime.cpp, ps2_log.h)
+grep PS2X_ $R/ps2xRuntime/include/ps2_park_snapshot.h (emitter env name)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 (FAIL: ._RPC.cpp)
+find $R -name "._*" -delete (111 files); git -C $R status --short (unchanged)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 > /tmp/p1ag-build.log 2>&1 (exit 0)
+shasum -a 256 /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner (81bee6c5...)
+sed /tmp/p1af-boot1.py -> /tmp/p1ag-boot1.py (LOG + SECS=300 + docstring; diff-verified)
+cp /tmp/p1af-mine.py /tmp/p1ag-mine.py
+# Boot (lease P1ag held 05:28:08Z-05:33:24Z only)
+pre-claim checks (lease absent; pgrep exit 1; shasum 81bee6c5; ISO + ELF sizes; df)
+printf 'P1ag' > lease + >> p1ag-waits.log; python3 /tmp/p1ag-boot1.py (300 s, SIGTERM rc=-15)
+cp ps2_log.txt ps2_log-p1ag-1.txt; >> p1ag-waits.log (release); rm lease; verify absent
+# Analysis (lease released)
+python3 /tmp/p1ag-mine.py boot-p1ag-1.log (probe/sema/drops/census/threads/ticks)
+write + run /tmp/p1ag-blocks.py (stub series, t1/t3/t6 series, handshakes)
+grep -c sub_00394ED0/00362DE8/00362CC8/00395000 enter/exit on T (4×2 counts)
+grep rows (SendCmd/SIF/dormant/gif/copy/crash/missing/frame:upload); PC attribution via $W/P1/output sub_ listing
+# Report (lease released)
+(edit_file append Part 30 in 1 chunk)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1ag] ..." (trailer; NO push there)
+```
+
+Env delta vs boot-p1af-1: LOG name + SECS only (probe env
+kept, `PS2X_DIAG_PARK` unset). Source delta: none — zero fork
+changes; binary built from `e483d8d` + foreign T1 tree state
+(recorded, env-off).
+
+## P30-6. What I could not do
+
+- Produce the 4th sema-30 signal / thread-3 release inside 300 s:
+  main is still in the hash phase at 300 s (13,108 returning
+  invocations and going, stubs steady 222, no exit signature).
+  The mechanism prediction (§P28-3a link 6) is still unreached,
+  not refuted — the signal stays downstream of phase completion.
+- Project the phase-exit time: total phase work is unknown, so
+  only the growth rate (43.7 invoc/s, contended) is tabled.
+- Run the optional ≤90 s confirm boot (1 of 2 boots used):
+  the 300 s absence + all-balanced traces + exact guest-event
+  match to P1af's 2×90 s already span three consistent windows;
+  a shorter re-boot adds no new window, and the lease was freed
+  for T1's priority proof boot.
+- Raise the 20000-line probe cap (hit at :62604): the probe
+  lives in `ps2_runtime.cpp`, outside this diag brief's zero-
+  change rule. Trace enter/exit gives totals (260k here).
+- Name the IOP announcer / decode `0x3C45C0`'s `0x1C`/`0x1D` arm
+  semantics (carried from §P26-5/§P27-5/§P29-5; 0 sightings).
+- Session wall time ≈ 05:13–05:45Z (~32 min active + analysis),
+  inside the 4 h box; zero lease waits.
+
 
