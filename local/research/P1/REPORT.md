@@ -9629,4 +9629,318 @@ Source delta: my 1 fork commit on `da6a2d5` (boots ran
 - Session wall time ≈ 04:05–04:48Z (~45 min incl. ~19 min M16
   lease waits), inside the 4 h box.
 
+---
+
+## Part 29 (P1af): FIX — SPR normal-mode DMA data movement emulated (FROM + TO co-fix); the `sub_00394ED0` park is gone (104k balanced calls, 0 cycles), main RUNNING at 90 s with no new park; the 4th sema-30 signal stays downstream of the 90 s window
+
+Brief `local/muse/prompts/P1af.md`. FIX brief implementing
+§P28-3b (P0 SPR_FROM + P1 SPR_TO co-fix): 1 fork commit (2
+files) + 2 boots. Tables, no verdicts. Stale-reading guard:
+Part 28 §P28-1f/g (the HLE gap + candidate table), §P28-2b
+(probe proof), §P28-3b (this brief's exact spec).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork,
+branch `ssx3`), `O=$W/P1/output`,
+`LOG=$W/P1/run/boot-p1af-1.log`, `LOG2=$W/P1/run/boot-p1af-2.log`,
+`T1=$W/P1/run/ps2_log-p1af-1.txt`, `T2=$W/P1/run/ps2_log-p1af-2.txt`
+(own copies). File:line refs are `$R`-relative unless noted.
+
+Headline receipts: probe hit its 20000-line cap in both boots
+with ZERO `CYCLE@` (n=0..19999, `head=0x0` after every re-init,
+pool cycling 3→4→3…); traces show 104,442/105,582 balanced
+`0x394ED0` pairs, 5,289/5,346 balanced `0x362DE8` invocations
+(every invocation RETURNS — vs 63 + 1 hung in P1ad), and
+99,153/100,236 balanced `0x395000` pairs. Stub blocks hold 222
+distinct in ALL blocks 2–16 (no all-13 park phase anywhere);
+thread 1 is RUNNING game code (`0x39b72c`) at end of boot;
+`dma`/`gif` tick counters advance (22k→171k / 641→4674, were
+frozen 1166/65). Sema-30 stays 3 signals / 4 waits ending parked
+— the predicted 4th signal is downstream of the still-running
+hash phase, not reached inside 90 s. TO status resolved: record
+bytes are TO-fed (identical record addresses hash differently
+once TO moves data — "working TO" refuted). No new park; nothing
+else changed face (drops/RPC/CD/SIF/GS/creates/driver/missing all
+exact).
+
+## P29-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | `/tmp/ssx3-p-lane-lease` absent |
+| Waits log | `$W/P1/run/p1af-waits.log` (3 lines: start, claim, release) |
+| Waits | None (no foreign P-lane holder all session; no polls needed) |
+| Pre-claim checks (04:57:33Z) | Lease absent; `pgrep -x ps2EntryRunner` exit 1; binary `40467623` (P1af build); ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1af\n' > /tmp/ssx3-p-lane-lease` 04:57:33Z, immediately before boot 1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG 207,189 lines, 36,650,891 B; trace copied to T1 (572,136,194 B) |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, LOG2 208,858 lines, 36,778,835 B; trace copied to T2 (577,260,368 B) |
+| Release | 05:00:57Z, right after boot 2 (analysis needs no lease); verified absent; `pgrep -x` exit 1 |
+| Lane rule | P-lane lease held for boots only; builds/analysis lease-free; `adb` not used |
+
+## P29-1. Diff + BEFORE/AFTER + tests
+
+### a. Fork diff (2 files, +142/−0, all mine — verified by review)
+
+`ps2xRuntime/src/lib/ps2_memory.cpp` +58: inside the CHCR
+STR-write handler (`writeIORegister`, after the VIF0/VIF1/GIF
+section), a `channelBase == 0x1000D000u ‖ 0x1000D400u` block.
+On `MOD`=NORMAL with live stores: synchronously copy `QWC`
+quads (16 B each) SPR→RAM (FROM) or RAM→SPR (TO) with
+32 MB / 16 KB wraparound chunking (codebase chunk-loop style);
+access RAM at `MADR&PS2_RAM_MASK` (=`&0x01FFFFFF`) and SPR at
+`SADR&0x3FFF`; write back `MADR=MADR+bytes` (full 32-bit
+increment, hardware-faithful — upper bits preserved),
+`QWC=0`, `SADR=(SADR+bytes)&0x3FFF`, STR clear; raise `D_STAT`
+CIS bit 8 (FROM) / 9 (TO) with the same status&mask summary-bit
+logic as the GIF/VIF path; `queueCompletedDmacCause(8/9)`.
+Decisions recorded: `QWC=0` completes trivially (regs/CIS, no
+bytes — codebase `qwc>0` convention, no 64K-quad path);
+non-normal MOD keeps previous behavior (falls through, STR set
+until first read); STR auto-clear-on-read (`:2248-2256` area)
+kept — already clear at first poll since completion is
+synchronous; sits inside the existing `D_CTRL.DMAE` gate and
+`dmaStartCount` increment. Observed game op covered:
+`MADR`=bucket array, `QWC`=64, `SADR`=scratchpad byte offset,
+`CHCR`=`0x100`.
+
+`ps2xTest/src/ps2_memory_tests.cpp` +84: two `PS2Memory` cases
+in the existing `MiniTest` style (byte-pattern loops +
+register assertions, mirroring the neighboring DMAC tests):
+"SPR_FROM normal-mode DMA copies scratchpad to RAM and
+completes the channel" (64 quads, KSEG0-style MADR proving the
+`&0x01FFFFFF` access path, asserts bytes + MADR increment +
+`QWC=0` + SADR advance + STR clear + `D_STAT` bit 8) and
+"SPR_TO normal-mode DMA copies RAM to scratchpad with SADR
+wraparound" (4 quads across the 16 KB boundary, asserts wrapped
+bytes + regs + `D_STAT` bit 9).
+
+### b. BEFORE/AFTER receipts
+
+| Item | BEFORE | AFTER |
+|---|---|---|
+| Suite (P1ad binary, pre-change) | 431 / 431 / 0 (CWD `$R`) | — |
+| Suite + 2 new tests, no fix | 434 total, 432 pass, **2 fail** (both SPR cases: bytes-moved, MADR/QWC/SADR, D_STAT assertions fail; STR-clear sub-assertions pass via the read-side auto-clear — the HLE gap receipted exactly) | — |
+| Suite + fix | — | **434 / 434 / 0** (CWD `$R`), both SPR cases pass |
+| Face counts (AFTER) | — | CodeGenerator 56, ElfAnalyzerHeuristics 6, PS2GS 71, PS2IopSubsystem 7, **PS2Memory 47** (45 + my 2), PS2Recompiler 17, PS2RuntimeExpansion 31, PS2RuntimeIO 11, PS2RuntimeInterrupt 8, **PS2RuntimeKernel 38** (incl. P12 `da6a2d5`'s "unknown semaphore ids return KE_ERROR…" case, newly compiled into this build — the +1 peer test), PS2SifDma 16, PS2SifRpc 15, PS2VU0Math 44, PS2VU1 40, PadInput 12, R5900Decoder 15 |
+| Total accounting | 431 + 1 (P12, newly compiled) + 2 (P1af) = 434, all green | — |
+
+## P29-2. Boots + unstick proof + new park (none)
+
+Env = P1ad scripts verbatim except LOG names
+(`diff /tmp/p1ad-boot1.py /tmp/p1af-boot1.py`: docstring + LOG
+only; `PS2X_DIAG_394ED0=1` kept). Binary `40467623` (P1af
+build). CWD `$W/P1/run` both boots. Miner `/tmp/p1af-mine.py`
+(+ per-n determinism join).
+
+### a. Probe summary (both boots; guest bytes identical)
+
+| Item | Boot 1 | Boot 2 |
+|---|---|---|
+| Probe lines | 20000 (`n=0..19999`, cap line at :62125) | 20000 (cap line, same) |
+| `ra` / `src` / `a0` | 19999/19999 `0x363240` / `0x363238` / one arena `0x8095f0` (1 line is an interleave artifact) | 20000/20000/20000, single arena (no artifact) |
+| `total` | `0x2` early → `0x14` late | Same |
+| `pool` | Cycles 3→4→3… early; 1066 drops | Same, 1066 drops |
+| `head` after every re-init | `0x0` (1065/1066 clean; 1 apparent miss is boot-1 line :24548, a `[frame:upload]` truncation of n=6182's pool field — boot 2's n=6182 is intact: pool=`0x3` head=`0x0`, and n=6183's live head is n=6182's own insert) | `0x0` at all 1066 drops, 0 bad |
+| `CYCLE@` | 0 | 0 |
+| NULL-head first touches | 3135 | 3136 |
+| Distinct `a2` buckets | 5 | 5 |
+| Determinism (per-n join, interleaves excluded) | 19,980 common n-values, **0 diffs**; 11 n-values clean-only-in-b1 / 9 clean-only-in-b2 (truncated in the other boot; positions jitter) | — |
+| `[frame:upload]` splices | 128 | 128 |
+
+### b. Trace decomposition (own T1/T2; the probe cap hides true counts)
+
+| Function | Boot 1 enter/exit | Boot 2 enter/exit | Reading |
+|---|---|---|---|
+| `sub_00394ED0` | 104,442 / 104,442 | 105,582 / 105,582 | All fresh, all returned — the stuck call is gone (P1ad: 137 fresh + ~15.7k slices of one hung call) |
+| `sub_00362DE8` | 5,289 / 5,289 | 5,346 / 5,346 | Every invocation RETURNS (P1ad: 63 + 1 checkpoint-unwind exit) |
+| `sub_00362CC8` | 5,290 / 5,290 | 5,347 / 5,347 | Re-init per invocation + 1 (in-flight pairing at SIGTERM) |
+| `sub_00395000` | 99,153 / 99,153 | 100,236 / 100,236 | Second table healthy at scale (P1ad: 113/113) — same DMA fix cures the latent exposure, no separate hunk |
+
+Trace sizes: T1 16,103,012 lines / 572,136,194 B; T2
+16,247,288 lines / 577,260,368 B (P1ad: 109 MB — the game
+executes ~5× more calls instead of parking).
+
+### c. TO status resolved (the P1 co-fix question)
+
+Same game path (same `ra`/`src`/`a0`/`a1`/`total` sequences),
+different record bytes once TO moves data:
+
+| n | a1 (both boots, both eras) | P1ad `a2` | P1af `a2` | P1ad pool | P1af pool |
+|---|---|---|---|---|---|
+| 0,2,4,6 | `0x70000000` | `0x0` | `0x9d` | 3,3,3,3 | 3,3,3,3 |
+| 1,3,5,7 | `0x70000080` | `0x0` | `0x26` | 4,3,3,3 | 4,4,4,4 |
+
+"Working TO" is refuted (bytes change with TO emulation —
+pre-fix TO delivered nothing, matching the code inspection that
+no `0xD400` handling existed); pre-fix bytes were CPU-side
+artifacts (zeros early; varying later per §P28-2b); post-fix
+records are TO-delivered and the table functions correctly on
+them across 104k calls (0 cycles). P1af pool dynamics show the
+clean cycle (insert→re-init→insert) where P1ad's pool stuck at
+3 on stale-bucket matches.
+
+### d. Census + sema + RPC (both boots)
+
+| Item | Boot 1 | Boot 2 |
+|---|---|---|
+| `[drop]` | 6× same early `GetEntryAddress` site `:68-73` | 6× same `:69-74` (+1-line frame shift, same as P1ad b1-vs-b2) |
+| Sema-30 events | 7-shape `:643,645,646,706,6975,7025,7227` (3 sig / 4 wait, ends parked) | 7-shape `:644,646,647,707,6972,7022,7224` (same) |
+| 4th sema-30 signal | NOT in window (main still in the hash phase — 5.3k `0x362DE8` invocations in 90 s, all returning; the signal is downstream of phase completion) | Same |
+| Thread 3 at end | WAIT 30 (16/17 samples + 1 RUNNING transient) | WAIT 30 (16/17 + 1 transient) |
+| Unhandled RPC | 4 sightings, same sids/bytes/pcs as P1ad | Same 4 |
+| `SendCmd` / handshake | 1 same-bytes `cid=0x80000001` `:1052` / 1 | Same |
+| `0x3C45C0` | 0 sightings (P28-5 item stays closed) | 0 |
+| Creates | 37 (max id 37) | 37 |
+
+### e. End of boot: NO new park
+
+Last threads block (b1 block 16): thread 1 (main)
+`status=0` RUNNING game code `pc=0x39b72c`
+(`sub_0039AE98+0x894`), `scheduled=601`; threads 2/3/4/5/6 all
+`status=2` WAIT at `0x423de8` on semas 26/30/31/32/36
+(thread 5 `entry=0x382740`, `scheduled=601` — active, sampled
+waiting). 17-block census: t1 b1 = 6 RUNNING + 11 WAIT (game
+pcs `0x39e72c/0x186c04/0x38f364/0x2c6074/0x39b72c`); b2 = 4
+RUNNING + 7 sampled mid-syscall (`status=1 pc=0x423dc8`,
+`waitReason=0` — runnable, contended sample mix) + 6 WAIT.
+Tick pcs (all driver/game code, never the `0x394Fxx` walk):
+b1 `0x317244` (`sub_00316F00+0x344`), `0x36356c`
+(`sub_00363490+0xdc` — the direct caller of `0x362DE8`),
+`0x3827e0` (`sub_00382760+0x80`); b2 adds `0x1d8efc`
+(`sub_001D8DE0+0x11c`) and `0x382650` (function entry).
+
+### f. Ladder vs P28-boot1 (regression check + progress proof)
+
+P28-boot1: 19,145 lines / 2,640,817 B / 17 stub+thread blocks /
+park at block 5.
+
+| Rung | P28-boot1 | P1af-boot1 | P1af-boot2 |
+|---|---|---|---|
+| Lines / bytes | 19,145 / 2,640,817 | 207,189 / 36,650,891 | 208,858 / 36,778,835 |
+| Stub / thread / syscall blocks | 17 / 17 | 17 / 17 / 17 | 17 / 17 / 17 |
+| Park onset | block 5 (first all-13) | NONE (blocks 2–16 steady 222 distinct; b0=973, b1=491) | NONE (b0=697, b1=798, then 222×15) |
+| Thread-1 | walk ×12 (+4 WAIT, 1 null) | 6 RUNNING + 11 WAIT, game pcs | 4 RUN + 7 mid-syscall + 6 WAIT |
+| Thread-3 | WAIT ×13–14 + transients | WAIT-30 ×16 + 1 RUN | WAIT-30 ×16 + 1 RUN |
+| Thread-6 | WAIT ×14 (3 early absences) | WAIT-36 ×17 | WAIT-36 ×16 (created later in wall-time) |
+| 29-handshake w/s | 64 / 64 | 5291 / 5290 | 5348 / 5347 |
+| 30-handshake w/s | 4 / 3 (ends parked) | 4 / 3 (ends parked) | 4 / 3 (ends parked) |
+| 31-handshake w/s | 5210 / 5210 | 5291 / 5290 | 5348 / 5347 |
+| Creates / `-1` waits | 37 / 0 | 37 / 0 | 37 / 0 |
+| Driver-entry | 98 | 98 | 98 |
+| `[drop]` census | 6× same site + args | 6× same | 6× same |
+| SendCmd / handshake | 1 + 1 | 1 + 1, same bytes | 1 + 1 |
+| `0x394ED0` trace | 15,576 / 15,576 (137 + slices) | 104,442 / 104,442 (all fresh) | 105,582 / 105,582 |
+| `0x362DE8`/`0x362CC8` trace | 63 / 63 | 5289 / 5290 | 5346 / 5347 |
+| `0x395000` trace | 113 / 113 | 99153 / 99153 | 100236 / 100236 |
+| GS kicks / copy / gif / drawing=1 | 96 / 64 / 48 / 96 | 96 / 64 / 48 / 96 (exact) | exact |
+| `run:tick` | 13 ticks, walk-family, dma/gif frozen 1166/65 | 7 ticks, driver-code pcs, dma 22188→171405, gif 641→4674 | 8 ticks, same advancing (dma→191796, gif→5225) |
+| CD `lbn=` / first-last | 810 / `0x10`→`0x4311f` | 810 / identical | 810 / identical |
+| SIF loads | 21 (id 1–21, same order) | 21, same | 21, same |
+| Dormant / start-thread | 121 / 5 | 11160 / 5 | 11019 / 5 |
+| Missing / `No exact` | 1 / 0 (JALR `0x2322d4→0x395730`) | 1 / 0, same bytes | same |
+| Presented frame | None | None | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | 0 / 0 |
+
+CONTENDED (wall-throughput) rows — treat as host-load-sensitive,
+not regressions: lines/bytes, trace sizes + call counts (balance
+is the signal), stub `distinct` values, tick counts/pcs,
+thread-sample mixes, 29/31 w/s volumes (balanced throughout),
+dormant counts (all `id=-1` schedule traces — active-game volume
+vs parked-boot volume; b1≠b2 proves wall-clock-period sampling),
+sema-30 line numbers. Guest-event rows (probe bodies, census,
+sema-30 shape, CD/SIF/GS/RPC, creates, driver-entry, missing) are
+deterministic and unaffected. Dormant 121→11k and 29-handshake
+64→5.3k are progress signatures (scheduler + pump cycling instead
+of parked), not new faces: shapes benign, everything balanced,
+zero errors.
+
+## P29-3. Binaries and commits
+
+| Item | Value |
+|---|---|
+| BEFORE `ps2x_tests` / runner | `4b2625bc…` / `ead11aa1…` (= P28 AFTER pair; suite 431/431/0, CWD `$R`) |
+| AFTER `ps2x_tests` / runner | `2b353fd2…` / `40467623…` (full shas in §P29-4 log; suite 434/434/0) |
+| Build | `cmake --build /tmp/p1-link/runtime --target ps2x_tests ps2EntryRunner -j4`, exit 0; same `ld` duplicate-library warning as P1ad (observed as-is) |
+| Fork commit | `e483d8d` Fix: emulate SPR normal-mode DMA data movement (SPR_FROM + SPR_TO) (P1af) — `ps2_memory.cpp` +58, `ps2_memory_tests.cpp` +84 only, trailer `Orchestrated-By: Muse Code` |
+| Push | `git push fork ssx3` → `5001830..e483d8d`, exit 0; `HEAD...fork/ssx3` = 0/0 after; no foreign history integrated |
+| Pull --rebase | Refused (`cannot pull with rebase: You have unstaged changes` — foreign in-tree work, see below); behind 0, nothing to replay; no foreign rebase conflict |
+| Concurrent-tree note | A foreign agent edited `$R` mid-session (first new mtimes 01:04–01:06 EDT: `ps2_log.h`, `EeScheduler.cpp`, `RPC.cpp`, `ps2_runtime.cpp`, new `ps2_park_snapshot.h`; later `gs_frontend.cpp`, `ps2_runtime_kernel_tests.cpp`); all AFTER my last build finished (00:56 EDT) — binaries built from `5001830` + my 2 files only, receipts uncontaminated. Named `git add` of my 2 files only; foreign files never staged/committed/touched |
+| `._*` | Purged under `ps2xRuntime/src` + `include` before staging; named `git add` of the two files only; staged diff verified (+142/−0, all mine) |
+
+## P29-4. Exact commands
+
+From `$R` (fork) unless noted; `$W`, `LOG`/`LOG2`, `T1`/`T2` as above:
+
+```
+# Step 0 (context; lease-free)
+re-read REPORT Part 28 (full) + brief local/muse/prompts/P1af.md
+cat /tmp/ssx3-p-lane-lease (absent at start); git -C $R status/log (5001830 + generated-file mod)
+# Step 1 (tests first = BEFORE receipt; lease-free)
+append 2 SPR cases to ps2xTest/src/ps2_memory_tests.cpp
+cmake --build /tmp/p1-link/runtime --target ps2x_tests -j4 (exit 0)
+cd $R && ps2x_tests (434 total, 432 pass, 2 fail — the gap receipted)
+# Step 1 (fix; lease-free)
+edit ps2xRuntime/src/lib/ps2_memory.cpp (+58 SPR block; MADR writeback madr+bytes)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests ps2EntryRunner -j4 (exit 0)
+shasum AFTER pair: runner 404676232900a28f5fb194895111282b3feeb4f9c3b9a4cd43674aaedeed25b6
+  tests 2b353fd2c6d046e106cb0b3a16049f6ebce5b58296a11652915983f5468b12a5
+cd $R && ps2x_tests (434/434/0) + per-face counts + P12 +1-test check (git show da6a2d5)
+sed /tmp/p1ad-boot{1,2}.py -> /tmp/p1af-boot{1,2}.py (docstring + LOG only; diff-verified)
+write /tmp/p1af-mine.py (probe/sema/census/blocks/GS/CD miner)
+# Step 2 (boots; lease P1af held 04:57:33Z-05:00:57Z only)
+pre-claim checks (lease absent; pgrep exit 1; shasum 40467623; ISO + ELF sizes)
+printf 'P1af' > lease + >> p1af-waits.log; python3 /tmp/p1af-boot1.py (90 s, SIGTERM rc=-15)
+cp ps2_log.txt ps2_log-p1af-1.txt; spot greps (20000 probe, 0 CYCLE)
+cat lease (P1af); pgrep (exit 1); python3 /tmp/p1af-boot2.py (90 s, SIGTERM rc=-15)
+cp ps2_log.txt ps2_log-p1af-2.txt; >> p1af-waits.log (release); rm lease; verify absent
+# Step 2 (analysis, lease released)
+/tmp/p1af-mine.py both boots; per-n probe determinism join (19980/19980 identical)
+trace counts (394ED0/362DE8/362CC8/395000 × T1/T2); pool-drop head audit + b2 cross-check of n=6182
+PC attribution (0x317244/0x36356c/0x3827e0/0x1d8efc/0x382650/0x39b72c); P1ad-vs-P1af a2 table
+ladder rows (blocks/threads/handshakes/GS/CD/SIF/dormant/missing); status=1 sample check
+# Step 3 (fork commit + push; lease released)
+find ._*-delete (src+include); foreign-tree mtimes audit (clean-binary proof)
+git add ps2xRuntime/src/lib/ps2_memory.cpp ps2xTest/src/ps2_memory_tests.cpp (named, verified)
+commit e483d8d (trailer); fetch fork; rev-list (1/0); pull --rebase (refused, recorded)
+push fork ssx3 (5001830..e483d8d); rev-list 0/0
+# Step 3 (this report; lease released)
+(edit_file append Part 29 in 1 chunk)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1af] ..." (trailer; NO push there)
+```
+
+Env delta boots vs boot-p1ad-1: LOG names only (probe env kept).
+Source delta: my 1 fork commit on `5001830`; boots ran
+`e483d8d`-equivalent tree (built pre-commit from identical
+sources; foreign edits landed post-build, §P29-3).
+
+## P29-5. What I could not do
+
+- Produce the 4th sema-30 signal / thread-3 release inside the
+  window: main is still in the hash phase at 90 s (5.3k
+  returning invocations and going). The mechanism prediction
+  (§P28-3a link 6) stands — the signal is downstream of phase
+  completion — but the proof needs a longer boot than this
+  brief's 2×90 s box allows. No boots left (max 2 used).
+- Raise the 20000-line probe cap (hit at ~1/3 boot in both
+  runs): the probe lives in `ps2_runtime.cpp`, outside this
+  brief's fork-allowed files (`ps2_memory.cpp` + tests ONLY).
+  Probe disposition: KEEP `5001830` (env-off, zero-cost).
+  Follow-ups needing full fresh-call counts should raise the cap
+  or sample (trace enter/exit gives totals: 104k/106k here).
+- Recover ~20 interleave-truncated probe tails per boot
+  (stdout/stderr share one fd; positions jitter; 128
+  `[frame:upload]` splices per boot now that the game runs).
+  Every audited truncation duplicates a state intact in the other
+  boot (n=6182 cross-check). A `2>`-split or line-buffered emit
+  would end it (not my call inside the box).
+- Name the IOP announcer / decode `0x3C45C0`'s `0x1C`/`0x1D` arm
+  semantics (carried from §P26-5/§P27-5; `0x3C45C0` had 0
+  sightings in both P1af boots).
+- Run a 3rd boot (max 2 used; unstick + TO + ladder all closed).
+- Re-baseline against a P9/P10/P11/P12-only binary (same
+  reasoning as §P27-5/§P28-5: the mechanism rows — probe,
+  re-init zeroing, TO-fed records, balanced traces — are
+  exclusive to this fix).
+- Session wall time ≈ 04:35–05:30Z (~55 min, zero lease waits),
+  inside the 4 h box.
+
 
