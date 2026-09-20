@@ -5,6 +5,19 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M28 read (09-20) — PASS, M27 gap 1 census done:** 10/764
+      movers (754 byte-identical on all 8), 15 moved cells
+      (6 singles / 3 pairs / 1 triple; only [296] repeats);
+      7 assigned dests (6×+2, 1×−1; 5 fresh + 734 c342
+      collision), 3 extra-only + 5 no-cand; block-diagonal
+      co-occurrence (257/277, 301/321, 340/342/343; c296
+      solitary); 2×2: 6/10 movers below 0.95, 2/3/700
+      below-but-still; 0 U/V private sites; 0 B explained.
+      Verified: baselines, mover count, swap-guard row,
+      canon identical, 5/5 controls (+aggregate), TSV 765
+      lines, PNG size (rule-met), mtimes clean. ~0.1 h.
+      Next: M29 (partial-move attribution) launched in
+      freed pane. Ledger row added.
 - [ ] **T10 read (09-20) — PASS, no bound exists in-trace:** 54-frame
       modal dispatcher cycle (REP+53, 13,032/13,107 exact;
       75 non-modal = ordinals 0–74 exactly); C3/C7/C1b/C1a#1
@@ -293,7 +306,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t11 (run-to-exit empirical N, 1×≤600s, 4h) · t6 (build cache check, no boots, 4h) · m28 (column census, offline, 4h).
+- [ ] **Live panes:** t11 (run-to-exit empirical N, 1×≤600s, 4h) · t6 (build cache check, no boots, 4h) · m29 (partial-move attribution, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
