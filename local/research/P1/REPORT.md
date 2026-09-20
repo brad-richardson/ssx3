@@ -8344,3 +8344,228 @@ delta: `ps2_log.h` (+38 helper) + 179 call sites + 1 test.
 
 ---
 
+## Part 25 (P1aa): FIX — P1z kernel-true sema amendment (A1–A3: store-as-is creates + unbounded signals); boot still parks on `0x52BE04`
+
+Brief `local/muse/prompts/P1aa.md`. One `fork`-only commit
+(`Fix:`) + 2 boots. Tables, no verdicts.
+Stale-reading guard: Part 23 §P23-1a/b re-read before acting (P1v's
+clamp-1 rule + its recorded-as-PROVISIONAL note) and
+`local/research/P1z/REPORT.md` §P1z-4/§P1z-5 (verdict AMENDED + the
+exact A1–A3 amendment), plus Part 24 (P24-0 the lease protocol, P24-2
+the ladder receipts, P24-4 the command shapes).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork,
+branch `ssx3`), `LOG=$W/P1/run/boot-p1aa-1.log`,
+`LOG2=$W/P1/run/boot-p1aa-2.log`. File:line refs below are
+`$R`-relative unless noted.
+
+## P25-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start (01:48:10Z) | Absent (no `/tmp/ssx3-host-lease`); no waits, no polls needed |
+| Waits log | `$W/P1/run/p1aa-waits.log` (3 lines: start, claim, release) |
+| Pre-claim checks (01:54:39Z) | Absent verified twice; `pgrep -x` exit 1; binary `ae8e7b3d` (P1aa `Fix:` build); fork HEAD `f26f273` (pushed); ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1aa\n' > /tmp/ssx3-host-lease` 01:54:39Z, immediately before boot 1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG 3,507 lines, 443,852 B, 17 stub blocks |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, LOG2 3,459 lines, 435,497 B, 17 stub blocks |
+| Release | 01:58:03Z, right after boot 2 (analysis needs no lease); verified absent; `pgrep -x` exit 1 |
+| `adb` | Not used |
+
+## P25-1. Diff + BEFORE/AFTER + tests
+
+### a. Pre-edit sync (lease-free, no conflicts)
+
+| Item | Value |
+|---|---|
+| `fetch fork ssx3` | `2caf17c..c41efce`: P1y test fix (`2caf17c`, 1 file `ps2_gs_tests.cpp`) + rebased I7b (`c41efce`); local `2655264` was the pre-rebase I7b |
+| Tree delta `2655264..c41efce` | Exactly the P1y 1-file diff (verified `diff --stat`) — the sync target is the green 427/427/0 baseline |
+| Rebase | `git stash push -- <generated runner>` → `git rebase fork/ssx3` ("skipped previously applied commit 2655264", clean) → `git stash pop`; HEAD == `c41efce` |
+| P7 | Concurrent pane (movie stub); its 2 untracked `Stubs/Ssx3Movie.*` files present in the clone, never staged or touched; nothing from P7 on `fork/ssx3` at push time |
+
+### b. The amendment (one `Fix:` commit, `f26f273`)
+
+| # | Location | Change |
+|---|---|---|
+| A1 | `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:1149` `createSemaphore` | Deleted the `effectiveMax` clamp + comment; reject ONLY `initCount < 0` (+ existing id-exhaustion); `semaphore.maxCount = maxCount` as-is; `dropArgs` format loses `effmax` (`init=%d max=%d`) |
+| A2 | same file `:1205` `signalSemaphore` | Deleted the `count == maxCount → KE_SEMA_OVF` block incl. its diag/`emitDrop`; waiter-less signals always `++count` and return id; waiters-first branch untouched |
+| A3 | `ps2xTest/src/ps2_runtime_kernel_tests.cpp:613` P1v test | Zero-max asserts `maxCount==0`; negative-max + init>max now asserted ACCEPTED (stored as-is); init<0 still asserted rejected; added two-waiter-less-signals-then-two-waits (count reaches 2, all succeed, no OVF) |
+| — | `:45` `KE_SEMA_OVF` constexpr | Kept, unused on this path (brief's discretion) |
+| — | wait / poll / `ReferSemaStatus` | No change (already count-only / report-max) |
+
+Numstat: `EeScheduler.cpp` 9+/28−, `ps2_runtime_kernel_tests.cpp`
+52+/3− (2 files, +61/−31). Staged set verified = the 2 named files
+only (generated `runner/register_functions.cpp` + P7's untracked
+`Stubs/Ssx3Movie.*` left out).
+
+### c. BEFORE/AFTER receipts (same amended test, unfixed vs fixed tree)
+
+| Receipt | Unfixed tree (`c41efce` + A3 test only) | Fixed tree (`f26f273`) |
+|---|---|---|
+| Suite | 427 total / 426 pass / 1 fail (`/tmp/p1aa-before.log`, rc=1) | 427 / 427 / 0 (`/tmp/p1aa-after.log`, rc=0) |
+| Failing face | Sole failure = the amended P1aa test: `[Error]: <unknown>` (5 buffered assertion failures + uncaught park of the 2nd wait — see mechanism) | — (all green; P1y GsSyncV face stays fixed) |
+| Zero-max create | id > 0 but `maxCount`=1 (stored-as-is assertion fails) | id > 0, `maxCount`=0, `count`=0 |
+| Negative max (−2) | Rejected (`KE_ERROR` + `[drop] … init=0 max=-2 effmax=-2`) | id > 0, stored −2 |
+| init>max (5>3) | Rejected (`KE_ERROR` + `[drop] … init=5 max=3 effmax=3`) | id > 0, `maxCount`=3, `count`=5 |
+| init<0 | Rejected (`KE_ERROR`) | Rejected (`KE_ERROR` + `[drop] … init=-1 max=4`, no `effmax`) |
+| 2 waiter-less signals | 2nd returns `KE_SEMA_OVF` (`[drop] … id=1 count=1 max=1`), count stays 1 | Both return id, count reaches 2 |
+| 2 waits after | 1st consumes; 2nd parks (throws `EeDispatcherTransfer`) — the lost-signal wedge | Both consume, count back to 0, no throw |
+| Suite `[drop]` lines | 16 | 12 (−4: the 2 create rejections + 2 OVF emissions the amendment removes; init<0 line remains in the new format) |
+| Rebuild | `ps2x_tests` exit 0 | `ps2x_tests` exit 0 + `ps2EntryRunner` exit 0 |
+
+BEFORE mechanism (all three evidences in `/tmp/p1aa-before.log`):
+MiniTest assertions record-and-continue (execution reaches the OVF
+`[drop]` past the 5 earlier failing assertions, whose buffered reasons
+never print), then the 2nd wait parks at count 0 and its uncaught
+`EeDispatcherTransfer` (non-`std::exception`) trips MiniTest's
+`catch (...)` → `  [Error]: <unknown>` (`MiniTest.h:188`). The wedge
+is P1v's own race window made visible: clamp-1 + OVF loses the second
+signal and the second wait blocks.
+
+No other test depends on the removed behavior: every other
+`createSemaphore` call in `ps2xTest/src` uses valid init=0/max=1, no
+test names `KE_SEMA_OVF` in an assertion, and the snddrv RPC test that
+emitted the OVF `[drop]` as a side effect asserts only returned
+addresses (still passes — count now accumulates instead of overflowing).
+
+## P25-2. Boots + ladder check (regression proof, not a diagnosis)
+
+LOG 3,507 lines / 443,852 B / 17 stub blocks; LOG2 3,459 lines /
+435,497 B / 17 stub blocks. CWD `$W/P1/run`, env = p1w-boot1
+unchanged (`PS2X_DIAG_SEMA` + `CREATE` + `S0` + WATCH
+`0x52BE04,0x450de4`, drops ON; script diffs = docstring + LOG only).
+Binary `ae8e7b3d` both boots.
+
+### a. The `[drop]` census (P1w's tooling intact)
+
+| # | Site | Reason | Count | Lines |
+|---|---|---|---|---|
+| 1 | `syscall/dispatchSyscallOverride` | `KE_ERROR` | 6 | LOG :53–58 (same lines as P24-boot1; all bare `-`); LOG2 :54–59 (1-line shift, same 6 bare lines) |
+| Total | — | — | **6** | — |
+
+Same single site × 6 as P24-boot1; nothing else in the 179 sites
+fires. No `KE_SEMA_OVF` site exists anymore (A2 deleted its only
+emitter); no `effmax` arg appears anywhere (A1's format change).
+
+### b. Ladder check vs P24-boot1 (one table — the boot still parks on `*(0x52BE04)`)
+
+P24-boot1 baseline: 6,588 lines / 874,915 B / 17 stub blocks. All
+rungs below re-extracted from both logs with the same script
+(`/tmp/p1aa-ladder.py`).
+
+| Rung | P24-boot1 | LOG (boot 1) | Delta |
+|---|---|---|---|
+| Stub blocks | b0–b16 (17) | b0–b16 (17) | None |
+| Thread blocks | 17 headers (b0–b16) | 16 headers (b0–b15; b16 stubs-only — SIGTERM cut the flush between dumps) | Timing artifact; LOG2 has 17/17 |
+| Thread-1 | WAIT 29 @ `0x423de8` ×17, sch 70,32,24,22,24,28,… | WAIT 29 @ `0x423de8` ×16, sch 54,10,8,10,8,10,8,10,8,10,8,8,8,8,10,8 | Same park; cycling regime; lower absolute |
+| Thread-2 | parked 26, sch 2 then 0 | parked 26 @ `0x423de8`, sch 2 then 0 | None |
+| Thread-3 | running, pc `0x40b1d0`×10/`0x425cf0`×7, sch=t1 (±1 jitter b10/b11) | running, pc `0x40b1d0`×11/`0x425cf0`×5, sch=t1 (±1 jitter b13/b14) | None (same sampling-jitter phenomenon) |
+| Thread-4 | parked 31, sch=t1/2 exact from b1 | parked 31 @ `0x423de8`, sch=t1/2 exact from b1 (10/5, 8/4, …) | None |
+| Thread-5 | parked 32, sch=t1 | parked 32 @ `0x423de8`, sch=t1 (same ±1 jitter) | None |
+| 29-handshake | 253 waits / 252 signals, F6 `ra=0x31aa8c` / F7 `ra=0x31aae4` | 86 / 85, same ras, same park/wake shapes | Balanced regime; lower iterations |
+| 30-handshake | 2 waits / 2 signals | 2 / 2 | None — exact |
+| 31-handshake | 253 / 252 | 86 / 85 | Balanced regime; lower iterations |
+| Creates / `-1` waits | 33 / 0 | 33 / 0 | None |
+| F2 zero-param pair | ret=28/29 | ret=28/29, same sites/pcs | None |
+| Driver-entry | byte-identical (`:625`) | byte-identical (`:625`; same line) | None |
+| Watch | 1 line (`:49`, loader init `0x52be00`) | 1 line (`:49`, same bytes) | None — word still never CPU-written |
+| `0x425cf0` spin | 17/17, sole `ra=0x40b1d8`, 1.26M–1.87M/block | 17/17, sole `ra=0x40b1d8`, 373K–591K/block | Same stall; lower counts |
+| GS kicks / copy-reg / gs:gif / drawing=1 | 96 / 64 / 48 / 96 | 96 / 64 / 48 / 96 | None — exact |
+| `run:tick` | 7 ticks, pcs `0x40b1d0`/`0x40b1d8`, dma→4236 gif→236 | 9 ticks, pcs `0x40b1d0`/`0x40b1d8`/`0x3827e0`, dma→1500 gif→84 | Same pcs/climb; lower totals |
+| CD `lbn=` lines / SIF loads | 42 / 18 | 42 / 18 | None — exact |
+| Dormant / start-thread | 65 / 4 | 65 / 4 | None — exact |
+| Missing / `No exact` | 0 / 0 | 0 / 0 | None |
+| Presented frame | None | None | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | None |
+
+Throughput note: every absolute count (sch, handshakes, stub
+counts, dma/gif) runs ~0.3–0.4× of P24 while every relation,
+shape, park, and byte-comparable is identical. The amendment
+removes branches (it cannot slow anything); P7 ran concurrently
+in another pane per the brief. Recorded as contention, not a
+regression — and it is a finding about the environment, not the
+deliverable.
+
+LOG2 steady-state spot check: 17/17 thread+stub blocks, 33
+creates, 0 `-1` waits, 82/81 balanced 29-handshake (boot1: 86/85), 6-line
+census, 17/17 `0x425cf0` blocks with the sole `ra`, GS
+96/64/48/96, CD 42 / SIF 18, dormant 65 — reproduces. One
+sampling artifact: a single t3 row in block 2 reads status=1
+(Ready) pc=`0x0` (thread caught mid-switch; 1 of 17 rows).
+
+## P25-3. Binaries and commits
+
+| Binary / ref | sha256 / sha | Sources / state |
+|---|---|---|
+| `/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner` (both boots) | `ae8e7b3d7d7fe2dfb3570515bea0f75490e2f112e8188df1e30ceb3e058c4ac6` | `f26f273` tree (P1aa `Fix:` on `c41efce`; `-j4` rebuild, exit 0) |
+| `ps2x_tests` (CWD `$R`, rebuilt) | Total 427, Passed 427, Failed 0 | All green (new P1aa test passes; P1y baseline preserved; no failure face to name) |
+| `PS2Recomp` branch `ssx3` HEAD | `f26f273` (`Fix: kernel-true CreateSema store-as-is plus unbounded waiter-less signals (P25-1)`, 2 files, +61/−31, three trailers) | Sole P1aa fork commit; worktree `M` = generated `runner/register_functions.cpp` only, never added |
+| Parent | `c41efce` (`Entry: add iOS scene manifest … (I7b)`, on P1y `2caf17c`) | Pre-edit sync target (§P25-1a) |
+| Fork push | `git push fork ssx3` from the fork clone only (`c41efce..f26f273`, fast-forward) | The only push allowed (no push in ssx3); `pull --rebase` refused on the unstageable generated runner file with a clean pre-fetch, recorded §P25-4 |
+| This report | `[P1aa]` commit (two trailers; local only) | Sole ssx3-repo change; no `runner/`, log, or `._*` added |
+
+## P25-4. Exact commands
+
+From `$R` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`LOG=$W/P1/run/boot-p1aa-1.log`, `LOG2=$W/P1/run/boot-p1aa-2.log`:
+
+```
+# Step 0 (context reads; lease-free)
+re-read REPORT Part 23 §P23-1a/b + P1z REPORT §P1z-4/§P1z-5 (amendment table)
+cat /tmp/ssx3-host-lease (absent) + tee p1aa-waits.log (start line)
+git fetch fork ssx3 (2caf17c..c41efce: P1y + rebased I7b); diff --stat 2655264..c41efce (P1y 1-file only)
+git stash push -- <generated runner>; git rebase fork/ssx3 (skipped dup 2655264, clean); git stash pop
+grep OVF/max-validation dependents in ps2xTest/src (none: valid-only creates, no OVF assertions)
+# Step 1 (A3 test first, BEFORE receipts on the unfixed tree)
+(edit_file: P1v test -> P1aa test, same tc.Run, +52/-3)
+find $R -name '._*' -delete (ExFAT sidecars)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests -j4 (exit 0)
+ps2x_tests CWD $R > /tmp/p1aa-before.log (427/426/1, P1aa face, OVF + wedge)
+# Step 1 (A1+A2 fix, AFTER receipts)
+(edit_file: createSemaphore clamp delete + store-as-is; signalSemaphore OVF block delete)
+grep effectiveMax (gone); grep KE_SEMA_OVF (constexpr :45 only)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests -j4 (exit 0)
+ps2x_tests CWD $R > /tmp/p1aa-after.log (427/427/0, rc=0; drops 16 -> 12)
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner -j4 (exit 0)
+shasum -a 256 ps2EntryRunner (ae8e7b3d)
+git add <2 NAMED lib/test files>; git commit -m "Fix: ..." (three trailers) -> f26f273
+git fetch fork ssx3; git pull --rebase fork ssx3 (refused: unstaged generated runner file)
+git push fork ssx3 (c41efce..f26f273 fast-forward)
+(write /tmp/p1aa-boot1.py + /tmp/p1aa-boot2.py; diffs vs p1w-boot1.py = docstring + LOG only)
+# Step 2 (lease protocol + boot 1)
+lease absent x2; pgrep -x (exit 1); shasum fresh; git log (f26f273); ls ISO + ELF
+printf 'P1aa\n' > /tmp/ssx3-host-lease (01:54:39Z) + >> p1aa-waits.log
+python3 /tmp/p1aa-boot1.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 443852 B)
+# Step 2 (boot 2: steady-state repro)
+cat lease (P1aa); pgrep -x (exit 1)
+python3 /tmp/p1aa-boot2.py (CWD $W/P1/run, 90 s, SIGTERM rc=-15, 435497 B)
+rm -f /tmp/ssx3-host-lease (01:58:03Z); ls (absent); pgrep -x (exit 1); + >> p1aa-waits.log
+# Step 2 (log analysis, lease already released)
+(write /tmp/p1aa-ladder.py; same-script rungs x3: boot1 + boot2 + P24-boot1)
+[drop] census (6x one site, :53-58 same lines); per-block thread table; handshake balances
+driver-entry bytes; watch (1 line :49); 0x425cf0 17/17 + sole ra; GS/GIF/CD/SIF/dormant group-bys
+# Step 3 (this report; lease already released)
+(edit_file append Part 25)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1aa] ..." (two trailers; NO push there)
+```
+
+Env delta boots vs boot-p1w-1: none (drops ride the default-on
+channel; script diff = docstring + LOG only). Source delta:
+`EeScheduler.cpp` (9+/28−) + 1 test (52+/3−).
+
+## P25-5. What I could not do
+
+- Fix the kernel PollSema returns-`-1` vs fork `KE_SEMA_ZERO` (`-419`)
+  divergence (P1z-7 observed-not-fixed; a separate brief owns it) —
+  untouched per the brief.
+- Attribute the 6 `dispatchSyscallOverride` drops (P24's args gap,
+  unchanged) or correct the `ed387c7` message count ("180" vs 179):
+  both pre-existing, out of the amendment's named files.
+- Explain the ~0.3–0.4× throughput vs P24 beyond the contention note
+  (§P25-2b): no profiling run; relations/shapes/parks all
+  identical, so not pursued.
+- Run a 3rd boot (max 2 used; ladder + repro both closed).
+- Session wall time ≈ 01:48–02:02Z (~15 min), inside the 4 h box.
+
+---
+
