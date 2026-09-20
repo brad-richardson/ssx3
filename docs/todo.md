@@ -5,6 +5,21 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **T3 read (09-20) — PASS, 22-IRX inventory done, §13 inputs
+      tabled:** all 22 extracted+sized+md5'd; origin Sony 18 / EA
+      3 / Logitech 1; SND path: SNDDRV 41imp/0exp/serves sid
+      0x534E44+cid 0 (pure server), SDRDRV 47/6/serves
+      0x80000701+calls 0x80000704 (EE-side), MSIFRPC = RPC
+      transport (3 cids, 0 sids), LIBSD 19/34 (no RPC);
+      HEADLINE: USBKB serves sid 0x80000211 (the §11 unclaimed
+      RPC — server named); SND cid 0-vs-1 tabled both ways, not
+      adjudicated. Verified: commit 2 files (REPORT.md
+      untouched), 22 scratch files, sizes+2 md5s, origin
+      strings, symtab anchor, CSV 22 rows, ISO mtime old, fork
+      head still `e483d8d`. Sid→site disassembly agent-attested
+      (method symtab-validated on SNDDRV). 11 min of ~1 h.
+      Next: M19 launched in freed pane; P1ae trigger gains the
+      USBKB mapping. Ledger row added.
 - [ ] **P1af read (09-20) — PASS, 394ED0 park GONE, main RUNNING, no
       new park:** SPR normal-mode DMA fix (FROM+TO, fork `e483d8d`
       +142/-0, pushed 0/0): probe 20k lines 0 CYCLE@ both boots;
@@ -34,8 +49,8 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** p1ag (Part 30 long-boot 4th-signal proof, 4h) · t1 (park snapshot + ladder_diff, 4h) · t3 (IRX inventory, lease-free, ~1h).
-- [ ] **Queue:** M19 (endpoint-direction split, offline — M18 gap 1) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park: P1ad successor if SIF-shaped, else sid=0x80000211 RPC or later) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
+- [ ] **Live panes:** p1ag (Part 30 long-boot 4th-signal proof, 4h) · t1 (park snapshot + ladder_diff, 4h) · m19 (endpoint-direction split, offline, 4h).
+- [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
 - [ ] **Plan of record for 120 fps (September 17 evening):**
