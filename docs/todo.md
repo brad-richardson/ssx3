@@ -5,6 +5,24 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P13 launched (event-driven, p12 wait fired):** analyzer
+      silent-fold triage — read-only audit of analyzer files
+      beyond `elf_analyzer.cpp` (P24's boundary item) + `[drop]`
+      patch spec (implementation deferred). Reuses P12 pane.
+- [ ] **P12 read (09-20) — PASS, unknown ids settled to -1:**
+      kernel re-derived (all 5 workers funnel to shared `-1`;
+      0 `-408`/`-419` immediates in KERNEL); blast radius: 0 host
+      branchers, 311 guest sites censused (305 agnostic, 6
+      conditional on requested-id≡-1, unseen since p1u), 1 stale
+      test updated; `da6a2d5` (5 files +61/-13, pushed): all 5
+      paths → `KE_ERROR`, 4 dead consts swept, P12 test added;
+      suite 431→432/430/2→432/432/0; 0 boots (16-boot census 0 —
+      unreachable); P10 L92's "73/73" validity sentence corrected
+      (wrong address `0x423de8`; true `0x423de0` — CONFIRMED by
+      me). Verified: pushed, BIOS sha + 5/5 miss words, census
+      109/86/20/73/23 + wrong-addr 0, logs, suite RE-RUN BY ME
+      432/432/0, census spot 0×3, stale P1t 1,387,579, waits,
+      scope. Next: P13 (analyzer triage). Ledger row added.
 - [ ] **P12 launched (event-driven, p11 wait fired):** settle
       `KE_UNKNOWN_SEMID` (-408) vs kernel -1 (P10-7.3/P11-7.3
       carried divergence: re-derive + blast radius + kernel-first
