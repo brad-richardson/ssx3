@@ -5,6 +5,22 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M17 launched (event-driven, m16 wait fired):** sub-pixel /
+      local motion model — half-pixel bilinear SAD + block matching,
+      offline on the M15/M16 dumps (no harness, no lease). Reuses
+      M16 pane.
+- [ ] **M16 read (09-20) — PASS, residual attributed same-frame:**
+      6-block scan (764 shapes, 4584/4584 ok, all dumps ok, mid/full
+      pairs uniform; attempt-1 240 s timeout honestly kept +
+      sizing rule); all 764 warps (0,0) → synth==blend everywhere;
+      R_0=22815 attributed per draw (top 6525/28.6%, top-3 40.5%,
+      233/437/93, Σpos 81.6%); bottom-HUD draws identified
+      (bottom-band-exclusive); spanning top-10 corroborates
+      (same 3 heads, overestimates rank-1). Verified: header shas,
+      waits (0/pair/annotation), probe + attempt-1, dumps, analyzer
+      rows, loo guard/search/R_0/hist/pool/dist + top row,
+      PNG sizes, carrier1 VIEWED (green god-ray shafts + rider —
+      matches). Next: M17 (sub-pixel model). Ledger row added.
 - [ ] **P13 launched (event-driven, p12 wait fired):** analyzer
       silent-fold triage — read-only audit of analyzer files
       beyond `elf_analyzer.cpp` (P24's boundary item) + `[drop]`
