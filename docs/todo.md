@@ -1570,6 +1570,20 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] **P13 read (09-20) — PASS, analyzer triage + patch spec:**
+      28 findings (F1–F27 + X1–X3): F1 synthetic-NOP swallows
+      ADDIU sp (1× reached); F2 JAL-merge widens 347 fns (316/316
+      replica, 315 overlaps); F3 4 inert selectors; F4 S32
+      narrowing at 4,205 sites; translator/detector/scanner/config
+      arms with receipts; reviewed-clean section keeps the audit
+      total; ranked 18-site `[drop]` spec + 4 exclusion rules +
+      implementation sketch. Verified: zero fork writes, receipts
+      15 files, F1 (next-word/jr/no-JAL + live-tree JR-without-delay
+      emission — report's filename suffix typo `0x14a130` noted,
+      substance holds), F2 replica + 9097 ranges, F3 TOML row,
+      F4 2179, F7 Sep-18 mtime, spec anchors (syntheticDelaySlot
+      else + emitDropTo), scope. Next: T1 (first free pane per
+      queue). Ledger row added.
 - [x] **P1ad read (09-20) — PASS, SPR no-data self-loop
       attributed:** `5001830` (+143 probe, pushed): 137 fresh
       `0x394ED0` dispatches (one arena, 63 DE8×63 re-inits), cycle
