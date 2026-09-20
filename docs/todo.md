@@ -5,6 +5,12 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M15 launched (user picked host synth demo):** milestone 3 on
+      host — synthesize a true intermediate frame from the proven
+      camera seam, measure synth-vs-truth (bytes, distributions,
+      residual carriers, screenshots). Reuses M14 pane. Route
+      criteria doc still queued (needs first frame for the
+      comparison); Odin port follows a successful demo.
 - [ ] **P9 read (09-20) — PASS, shim retired, ladder-identical:**
       `4326926` (+2/-47: CSV row→2, CD.cpp -46 exact inverse of
       `58c9144`); recomp +1/+1/+1/0 errors, slot 757428 → child,
