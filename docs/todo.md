@@ -7,7 +7,7 @@ the build or commit that closed them.
 
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** p1ad (Part 28 new-park diagnosis, 4h) · p13 (analyzer triage + patch spec, 4h) · m17 (sub-pixel model offline, 4h).
+- [ ] **Live panes:** p1af (Part 29 SPR DMA fix, 4h) · p13 (analyzer triage + patch spec, 4h) · m17 (sub-pixel model offline, 4h).
 - [ ] **Queue:** T1 (park snapshot + SIF tally + ladder_diff — first free pane) · T3 (IRX inventory, lease-free — second free pane) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park: P1ad successor if SIF-shaped, else sid=0x80000211 RPC or later) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
@@ -1570,6 +1570,23 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] **P1ad read (09-20) — PASS, SPR no-data self-loop
+      attributed:** `5001830` (+143 probe, pushed): 137 fresh
+      `0x394ED0` dispatches (one arena, 63 DE8×63 re-inits), cycle
+      `0x85aabc→self` (slot-3 arithmetic exact) from n=111, n=136
+      stuck forever; P27's 15,989 = 137 fresh + ~15.5k slices;
+      root cause: zero SPR transfer emulation (STR auto-clears
+      on CHCR read) so re-inits never re-zero buckets; sema-30
+      chain mapped (3 sig/4 wait, main-gated); pre-boot
+      circularity proof (checkpoint/slice/resume reads); fix =
+      SPR normal-mode DMA (+TO co-fix) — P1ad titled it P1ae,
+      RENAMED P1af (P1ae is the standing SIF-peer brief).
+      Verified: pushed, probe 137 + n=136/n=0 lines, slot math,
+      SPR gap 0 files + auto-clear + VIF section, trace
+      15576/63/63/113 ×2 boots, census 6, sid RPCs, creates 37,
+      LOG 19145, GS 96, CD 810, suite RE-RUN BY ME 431/431/0,
+      waits 6 lines (3 M16 waits — the split-lease case), scope.
+      Next: P1af (SPR fix). Ledger row added.
 - [x] **M17 launched (event-driven, m16 wait fired):** sub-pixel /
       local motion model — half-pixel bilinear SAD + block matching,
       offline on the M15/M16 dumps (no harness, no lease). Reuses
