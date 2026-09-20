@@ -1,0 +1,926 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ D=/home/brad/pcsx2-t4
++ E=/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ REF=/home/brad/pcsx2-t4/t27-ref-title.ppm
++ CD=/home/brad/pcsx2-t4/t27-cropdiff.py
++ LOG=/home/brad/pcsx2-t4/t27-poll.log
++ TITLE_MEAN_MAX=2.0
++ TITLE_P99_MAX=10
++ STATIC_MEAN_MAX=1.0
++ :
++ stamp
++ date -u
+Sun Sep 20 22:38:18 UTC 2026
+++ cut -d. -f1 /proc/uptime
+UPTIME:41
++ echo UPTIME:41
++ pkill Xvfb
++ true
++ sleep 2
++ pgrep -a Xvfb
++ true
++ sleep 4
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ pgrep -a Xvfb
+461 Xvfb :99 -screen 0 1280x1024x24
++ xdotool getdisplaygeometry
+1280 1024
+total 7047424
+drwxr-xr-x  2 brad brad       4096 Sep 20 18:38 .
+drwxr-xr-x 17 brad brad       4096 Sep 20 10:08 ..
+-rw-r--r--  1 brad brad  528683584 Sep 20 10:24 emulog-pre-t17-20260920T150727Z.txt
+-rw-r--r--  1 brad brad  125924723 Sep 20 11:10 emulog-pre-t17-20260920T151753Z.txt
+-rw-r--r--  1 brad brad  117669919 Sep 20 11:18 emulog-pre-t17auto-20260920T152548Z.txt
+-rw-r--r--  1 brad brad  535682684 Sep 20 11:31 emulog-pre-t17b-20260920T153248Z.txt
+-rw-r--r--  1 brad brad  223035641 Sep 20 11:36 emulog-pre-t17c-20260920T153703Z.txt
+-rw-r--r--  1 brad brad  540313630 Sep 20 11:42 emulog-pre-t19-20260920T161129Z.txt
+-rw-r--r--  1 brad brad  555405357 Sep 20 12:17 emulog-pre-t21-20260920T181117Z.txt
+-rw-r--r--  1 brad brad  567984708 Sep 20 14:17 emulog-pre-t23-20260920T191402Z.txt
+-rw-r--r--  1 brad brad  949510490 Sep 20 16:20 emulog-pre-t25-20260920T202407Z.txt
+-rw-r--r--  1 brad brad  589666091 Sep 20 15:20 emulog-pre-t25nvm-20260920T201813Z.txt
+-rw-r--r--  1 brad brad 2482598052 Sep 20 16:29 emulog-pre-t27-20260920T223824Z.txt
+++ date -u +%Y%m%dT%H%M%SZ
++ TS=20260920T223824Z
++ '[' -f /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt ']'
++ mv /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t27-20260920T223824Z.txt
++ ls -la /home/brad/pcsx2-t4/dat/PCSX2/logs/
++ rm -f /home/brad/pcsx2-t4/pcsx2.pid
+++ date -u +%s
++ T_BOOT=1789943904
+++ cut -d. -f1 /proc/uptime
+T_BOOT_WALL:1789943904 T_BOOT_UPTIME:47
+PID:476
++ echo 'T_BOOT_WALL:1789943904 T_BOOT_UPTIME:47'
++ echo 476
++ echo PID:476
++ sleep 90
++ nohup /home/brad/pcsx2-t4/pcsx2/build/bin/pcsx2-qt -nogui -slowboot -turbo -datapath /home/brad/pcsx2-t4/dat -logfile /home/brad/pcsx2-t4/logs/boot-t27.log -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ pgrep -f pcsx2-qt
+++ xdotool search --onlyvisible --name 'SSX 3'
+WID:2097159
++ WID=2097159
++ echo WID:2097159
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM
+Sun Sep 20 22:39:55 UTC 2026
++ plog 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ echo 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ snap t27-start
++ N=t27-start
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-start.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-start.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-start.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-start.ppm
++ ls -la /home/brad/pcsx2-t4/t27-start.ppm /home/brad/pcsx2-t4/t27-start.jpg
+-rw-r--r-- 1 brad brad   53792 Sep 20 18:39 /home/brad/pcsx2-t4/t27-start.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:39 /home/brad/pcsx2-t4/t27-start.ppm
++ read SM SP
+++ score_band /home/brad/pcsx2-t4/t27-start.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-start.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+++ date -u +%s
+START_SCORE mean= p99= MENU_T+:91
++ plog 'START_SCORE mean= p99= MENU_T+:91'
++ echo 'START_SCORE mean= p99= MENU_T+:91'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ MENU_LIKE=0
++ for A in 1 2 3
+ATTEMPT_1 BEGIN MENU_T+:91
+Sun Sep 20 22:39:55 UTC 2026
+++ date -u +%s
++ plog 'ATTEMPT_1 BEGIN MENU_T+:91'
++ echo 'ATTEMPT_1 BEGIN MENU_T+:91'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ pgrep -f pcsx2-qt
++ snap t27-a1-now
++ N=t27-a1-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-now.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-now.ppm /home/brad/pcsx2-t4/t27-a1-now.jpg
+-rw-r--r-- 1 brad brad   53844 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-now.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-now.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-now.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_1 now score mean= p99=
++ plog 'ATTEMPT_1 now score mean= p99='
++ echo 'ATTEMPT_1 now score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ awk -v m= -v p= -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
+ATTEMPT_1 TITLE-ALREADY-DETECTED (no Cross needed)
++ plog 'ATTEMPT_1 TITLE-ALREADY-DETECTED (no Cross needed)'
++ echo 'ATTEMPT_1 TITLE-ALREADY-DETECTED (no Cross needed)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ cp /home/brad/pcsx2-t4/t27-a1-now.ppm /home/brad/pcsx2-t4/t27-a1-pre.ppm
++ cp /home/brad/pcsx2-t4/t27-a1-now.jpg /home/brad/pcsx2-t4/t27-a1-pre.jpg
++ press Return A1_START
++ KEY=Return
++ LAB=A1_START
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+A1_START_KEYDOWN_WALL:1789943995.325085882 UPTIME:137 MENU_T+:91
+++ date -u +%s
++ plog 'A1_START_KEYDOWN_WALL:1789943995.325085882 UPTIME:137 MENU_T+:91'
++ echo 'A1_START_KEYDOWN_WALL:1789943995.325085882 UPTIME:137 MENU_T+:91'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Return
+A1_START_HELD_WALL:1789943995.343099528 UPTIME:137
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A1_START_HELD_WALL:1789943995.343099528 UPTIME:137'
++ echo 'A1_START_HELD_WALL:1789943995.343099528 UPTIME:137'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 0.5
++ xdotool keyup Return
+A1_START_KEYUP_WALL:1789943995.859861971 UPTIME:138 MENU_T+:91
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_START_KEYUP_WALL:1789943995.859861971 UPTIME:138 MENU_T+:91'
++ echo 'A1_START_KEYUP_WALL:1789943995.859861971 UPTIME:138 MENU_T+:91'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ DETECTED=1
++ sleep 3
+Sun Sep 20 22:39:58 UTC 2026
++ snap t27-a1-post3
++ N=t27-a1-post3
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-post3.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-post3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-post3.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-post3.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-post3.ppm /home/brad/pcsx2-t4/t27-a1-post3.jpg
+-rw-r--r-- 1 brad brad   58437 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-post3.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-post3.ppm
++ read M3 P3
+++ score_band /home/brad/pcsx2-t4/t27-a1-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-post3.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_1 post+3 score mean= p99= MENU_T+:94
+++ date -u +%s
++ plog 'ATTEMPT_1 post+3 score mean= p99= MENU_T+:94'
++ echo 'ATTEMPT_1 post+3 score mean= p99= MENU_T+:94'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 5
+Sun Sep 20 22:40:03 UTC 2026
++ snap t27-a1-post8
++ N=t27-a1-post8
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-post8.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-post8.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-post8.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-post8.ppm
+-rw-r--r-- 1 brad brad   58453 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post8.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post8.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-post8.ppm /home/brad/pcsx2-t4/t27-a1-post8.jpg
++ read M8 P8
+++ score_band /home/brad/pcsx2-t4/t27-a1-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-post8.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_1 post+8 score mean= p99=
++ plog 'ATTEMPT_1 post+8 score mean= p99='
++ echo 'ATTEMPT_1 post+8 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 7
+Sun Sep 20 22:40:11 UTC 2026
++ snap t27-a1-post15
++ N=t27-a1-post15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-post15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-post15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-post15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-post15.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-post15.ppm /home/brad/pcsx2-t4/t27-a1-post15.jpg
+-rw-r--r-- 1 brad brad   58147 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post15.ppm
++ read M15 P15
+++ score_band /home/brad/pcsx2-t4/t27-a1-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-post15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_1 post+15 score mean= p99=
++ plog 'ATTEMPT_1 post+15 score mean= p99='
++ echo 'ATTEMPT_1 post+15 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 10
++ snap t27-a1-post25
++ N=t27-a1-post25
++ date -u
+Sun Sep 20 22:40:21 UTC 2026
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-post25.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-post25.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-post25.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-post25.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-post25.ppm /home/brad/pcsx2-t4/t27-a1-post25.jpg
+-rw-r--r-- 1 brad brad   58102 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post25.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post25.ppm
++ read M25 P25
+++ score_band /home/brad/pcsx2-t4/t27-a1-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-post25.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ plog 'ATTEMPT_1 post+25 score mean= p99='
++ echo 'ATTEMPT_1 post+25 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 post+25 score mean= p99=
+++ score_whole /home/brad/pcsx2-t4/t27-a1-post8.ppm /home/brad/pcsx2-t4/t27-a1-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-post8.ppm /home/brad/pcsx2-t4/t27-a1-post15.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ W815=
+++ score_whole /home/brad/pcsx2-t4/t27-a1-post15.ppm /home/brad/pcsx2-t4/t27-a1-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-post15.ppm /home/brad/pcsx2-t4/t27-a1-post25.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_1 whole815= whole1525=
++ W1525=
++ plog 'ATTEMPT_1 whole815= whole1525='
++ echo 'ATTEMPT_1 whole815= whole1525='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ awk -v m= -v p= -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_1 outcome: no-menu (title/attract cycling continues)'
++ echo 'ATTEMPT_1 outcome: no-menu (title/attract cycling continues)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 outcome: no-menu (title/attract cycling continues)
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_2 BEGIN MENU_T+:117'
++ echo 'ATTEMPT_2 BEGIN MENU_T+:117'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 BEGIN MENU_T+:117
+Sun Sep 20 22:40:21 UTC 2026
++ pgrep -f pcsx2-qt
++ snap t27-a2-now
++ N=t27-a2-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-now.ppm
+-rw-r--r-- 1 brad brad   53889 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-now.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-now.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-now.ppm /home/brad/pcsx2-t4/t27-a2-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-now.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ plog 'ATTEMPT_2 now score mean= p99='
++ echo 'ATTEMPT_2 now score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 now score mean= p99=
++ is_title
++ awk -v m= -v p= -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_2 TITLE-ALREADY-DETECTED (no Cross needed)'
++ echo 'ATTEMPT_2 TITLE-ALREADY-DETECTED (no Cross needed)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 TITLE-ALREADY-DETECTED (no Cross needed)
++ cp /home/brad/pcsx2-t4/t27-a2-now.ppm /home/brad/pcsx2-t4/t27-a2-pre.ppm
++ cp /home/brad/pcsx2-t4/t27-a2-now.jpg /home/brad/pcsx2-t4/t27-a2-pre.jpg
++ press Return A2_START
++ KEY=Return
++ LAB=A2_START
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+A2_START_KEYDOWN_WALL:1789944021.623751052 UPTIME:163 MENU_T+:117
+++ date -u +%s
++ plog 'A2_START_KEYDOWN_WALL:1789944021.623751052 UPTIME:163 MENU_T+:117'
++ echo 'A2_START_KEYDOWN_WALL:1789944021.623751052 UPTIME:163 MENU_T+:117'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Return
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A2_START_HELD_WALL:1789944021.641922738 UPTIME:163'
++ echo 'A2_START_HELD_WALL:1789944021.641922738 UPTIME:163'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+A2_START_HELD_WALL:1789944021.641922738 UPTIME:163
++ sleep 0.5
++ xdotool keyup Return
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A2_START_KEYUP_WALL:1789944022.159281160 UPTIME:164 MENU_T+:118'
++ echo 'A2_START_KEYUP_WALL:1789944022.159281160 UPTIME:164 MENU_T+:118'
+A2_START_KEYUP_WALL:1789944022.159281160 UPTIME:164 MENU_T+:118
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ DETECTED=1
++ sleep 3
+Sun Sep 20 22:40:25 UTC 2026
++ snap t27-a2-post3
++ N=t27-a2-post3
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-post3.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-post3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-post3.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-post3.ppm
+-rw-r--r-- 1 brad brad   58037 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post3.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post3.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-post3.ppm /home/brad/pcsx2-t4/t27-a2-post3.jpg
++ read M3 P3
+++ score_band /home/brad/pcsx2-t4/t27-a2-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-post3.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+++ date -u +%s
++ plog 'ATTEMPT_2 post+3 score mean= p99= MENU_T+:121'
+ATTEMPT_2 post+3 score mean= p99= MENU_T+:121
++ echo 'ATTEMPT_2 post+3 score mean= p99= MENU_T+:121'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 5
++ snap t27-a2-post8
++ N=t27-a2-post8
++ date -u
+Sun Sep 20 22:40:30 UTC 2026
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-post8.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-post8.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-post8.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-post8.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-post8.ppm /home/brad/pcsx2-t4/t27-a2-post8.jpg
+-rw-r--r-- 1 brad brad   58315 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post8.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post8.ppm
++ read M8 P8
+++ score_band /home/brad/pcsx2-t4/t27-a2-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-post8.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_2 post+8 score mean= p99=
++ plog 'ATTEMPT_2 post+8 score mean= p99='
++ echo 'ATTEMPT_2 post+8 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 7
+Sun Sep 20 22:40:37 UTC 2026
++ snap t27-a2-post15
++ N=t27-a2-post15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-post15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-post15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-post15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-post15.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-post15.ppm /home/brad/pcsx2-t4/t27-a2-post15.jpg
+-rw-r--r-- 1 brad brad   44516 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post15.ppm
++ read M15 P15
+++ score_band /home/brad/pcsx2-t4/t27-a2-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-post15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ plog 'ATTEMPT_2 post+15 score mean= p99='
++ echo 'ATTEMPT_2 post+15 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 post+15 score mean= p99=
++ sleep 10
+Sun Sep 20 22:40:47 UTC 2026
++ snap t27-a2-post25
++ N=t27-a2-post25
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-post25.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-post25.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-post25.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-post25.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-post25.ppm /home/brad/pcsx2-t4/t27-a2-post25.jpg
+-rw-r--r-- 1 brad brad   90204 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post25.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post25.ppm
++ read M25 P25
+++ score_band /home/brad/pcsx2-t4/t27-a2-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-post25.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_2 post+25 score mean= p99=
++ plog 'ATTEMPT_2 post+25 score mean= p99='
++ echo 'ATTEMPT_2 post+25 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+++ score_whole /home/brad/pcsx2-t4/t27-a2-post8.ppm /home/brad/pcsx2-t4/t27-a2-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-post8.ppm /home/brad/pcsx2-t4/t27-a2-post15.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ W815=
+++ score_whole /home/brad/pcsx2-t4/t27-a2-post15.ppm /home/brad/pcsx2-t4/t27-a2-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-post15.ppm /home/brad/pcsx2-t4/t27-a2-post25.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+ATTEMPT_2 whole815= whole1525=
+ATTEMPT_2 outcome: no-menu (title/attract cycling continues)
+ATTEMPT_3 BEGIN MENU_T+:143
+Sun Sep 20 22:40:47 UTC 2026
+-rw-r--r-- 1 brad brad   85343 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-now.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-now.ppm
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ W1525=
++ plog 'ATTEMPT_2 whole815= whole1525='
++ echo 'ATTEMPT_2 whole815= whole1525='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ awk -v m= -v p= -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_2 outcome: no-menu (title/attract cycling continues)'
++ echo 'ATTEMPT_2 outcome: no-menu (title/attract cycling continues)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_3 BEGIN MENU_T+:143'
++ echo 'ATTEMPT_3 BEGIN MENU_T+:143'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ pgrep -f pcsx2-qt
++ snap t27-a3-now
++ N=t27-a3-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-now.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-now.ppm /home/brad/pcsx2-t4/t27-a3-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-now.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_3 now score mean= p99=
++ plog 'ATTEMPT_3 now score mean= p99='
++ echo 'ATTEMPT_3 now score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ awk -v m= -v p= -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_3 TITLE-ALREADY-DETECTED (no Cross needed)'
++ echo 'ATTEMPT_3 TITLE-ALREADY-DETECTED (no Cross needed)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 TITLE-ALREADY-DETECTED (no Cross needed)
++ cp /home/brad/pcsx2-t4/t27-a3-now.ppm /home/brad/pcsx2-t4/t27-a3-pre.ppm
+A3_START_KEYDOWN_WALL:1789944047.917873168 UPTIME:190 MENU_T+:143
++ cp /home/brad/pcsx2-t4/t27-a3-now.jpg /home/brad/pcsx2-t4/t27-a3-pre.jpg
++ press Return A3_START
++ KEY=Return
++ LAB=A3_START
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A3_START_KEYDOWN_WALL:1789944047.917873168 UPTIME:190 MENU_T+:143'
++ echo 'A3_START_KEYDOWN_WALL:1789944047.917873168 UPTIME:190 MENU_T+:143'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Return
+A3_START_HELD_WALL:1789944047.936563503 UPTIME:190
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A3_START_HELD_WALL:1789944047.936563503 UPTIME:190'
++ echo 'A3_START_HELD_WALL:1789944047.936563503 UPTIME:190'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 0.5
++ xdotool keyup Return
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+A3_START_KEYUP_WALL:1789944048.453751462 UPTIME:190 MENU_T+:144
+++ date -u +%s
++ plog 'A3_START_KEYUP_WALL:1789944048.453751462 UPTIME:190 MENU_T+:144'
++ echo 'A3_START_KEYUP_WALL:1789944048.453751462 UPTIME:190 MENU_T+:144'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ DETECTED=1
++ sleep 3
+Sun Sep 20 22:40:51 UTC 2026
+-rw-r--r-- 1 brad brad   58314 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post3.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post3.ppm
++ snap t27-a3-post3
++ N=t27-a3-post3
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-post3.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-post3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-post3.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-post3.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-post3.ppm /home/brad/pcsx2-t4/t27-a3-post3.jpg
++ read M3 P3
+++ score_band /home/brad/pcsx2-t4/t27-a3-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-post3.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+++ date -u +%s
+ATTEMPT_3 post+3 score mean= p99= MENU_T+:147
++ plog 'ATTEMPT_3 post+3 score mean= p99= MENU_T+:147'
++ echo 'ATTEMPT_3 post+3 score mean= p99= MENU_T+:147'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 5
+Sun Sep 20 22:40:56 UTC 2026
++ snap t27-a3-post8
++ N=t27-a3-post8
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-post8.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-post8.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-post8.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-post8.ppm
+-rw-r--r-- 1 brad brad   58656 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post8.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post8.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-post8.ppm /home/brad/pcsx2-t4/t27-a3-post8.jpg
++ read M8 P8
+++ score_band /home/brad/pcsx2-t4/t27-a3-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-post8.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+ATTEMPT_3 post+8 score mean= p99=
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ plog 'ATTEMPT_3 post+8 score mean= p99='
++ echo 'ATTEMPT_3 post+8 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 7
+Sun Sep 20 22:41:03 UTC 2026
++ snap t27-a3-post15
++ N=t27-a3-post15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-post15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-post15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-post15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-post15.ppm
+-rw-r--r-- 1 brad brad   44799 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post15.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-post15.ppm /home/brad/pcsx2-t4/t27-a3-post15.jpg
++ read M15 P15
+++ score_band /home/brad/pcsx2-t4/t27-a3-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-post15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_3 post+15 score mean= p99=
++ plog 'ATTEMPT_3 post+15 score mean= p99='
++ echo 'ATTEMPT_3 post+15 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 10
+Sun Sep 20 22:41:13 UTC 2026
+-rw-r--r-- 1 brad brad   90204 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post25.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post25.ppm
++ snap t27-a3-post25
++ N=t27-a3-post25
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-post25.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-post25.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-post25.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-post25.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-post25.ppm /home/brad/pcsx2-t4/t27-a3-post25.jpg
++ read M25 P25
+++ score_band /home/brad/pcsx2-t4/t27-a3-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-post25.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ plog 'ATTEMPT_3 post+25 score mean= p99='
++ echo 'ATTEMPT_3 post+25 score mean= p99='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 post+25 score mean= p99=
+++ score_whole /home/brad/pcsx2-t4/t27-a3-post8.ppm /home/brad/pcsx2-t4/t27-a3-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-post8.ppm /home/brad/pcsx2-t4/t27-a3-post15.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
++ W815=
+++ score_whole /home/brad/pcsx2-t4/t27-a3-post15.ppm /home/brad/pcsx2-t4/t27-a3-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-post15.ppm /home/brad/pcsx2-t4/t27-a3-post25.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 98, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 63, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 47, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 37, in load_ppm
+    raise ValueError("need maxval 255, got %d" % depth)
+ValueError: need maxval 255, got 65535
+ATTEMPT_3 whole815= whole1525=
++ W1525=
++ plog 'ATTEMPT_3 whole815= whole1525='
++ echo 'ATTEMPT_3 whole815= whole1525='
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ awk -v m= -v p= -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_3 outcome: no-menu (title/attract cycling continues)'
++ echo 'ATTEMPT_3 outcome: no-menu (title/attract cycling continues)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 outcome: no-menu (title/attract cycling continues)
+-rw-r--r-- 1 brad brad 1194941104 Sep 20 18:41 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+-rw-r--r-- 1 brad brad      53844 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-now.jpg
+-rw-r--r-- 1 brad brad      58147 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post15.jpg
+-rw-r--r-- 1 brad brad      58102 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post25.jpg
+-rw-r--r-- 1 brad brad      58437 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-post3.jpg
+-rw-r--r-- 1 brad brad      58453 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post8.jpg
+-rw-r--r-- 1 brad brad      53844 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-pre.jpg
+-rw-r--r-- 1 brad brad      53889 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-now.jpg
+-rw-r--r-- 1 brad brad      44516 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post15.jpg
+-rw-r--r-- 1 brad brad      90204 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post25.jpg
+-rw-r--r-- 1 brad brad      58037 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post3.jpg
+-rw-r--r-- 1 brad brad      58315 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post8.jpg
+-rw-r--r-- 1 brad brad      53889 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-pre.jpg
+-rw-r--r-- 1 brad brad      85343 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-now.jpg
+-rw-r--r-- 1 brad brad      44799 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post15.jpg
+-rw-r--r-- 1 brad brad      90204 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post25.jpg
+-rw-r--r-- 1 brad brad      58314 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post3.jpg
+-rw-r--r-- 1 brad brad      58656 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post8.jpg
+-rw-r--r-- 1 brad brad      85343 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-pre.jpg
+-rw-r--r-- 1 brad brad      53792 Sep 20 18:39 /home/brad/pcsx2-t4/t27-start.jpg
++ '[' 0 -eq 1 ']'
++ ls -la /home/brad/pcsx2-t4/t27-a1-now.jpg /home/brad/pcsx2-t4/t27-a1-post15.jpg /home/brad/pcsx2-t4/t27-a1-post25.jpg /home/brad/pcsx2-t4/t27-a1-post3.jpg /home/brad/pcsx2-t4/t27-a1-post8.jpg /home/brad/pcsx2-t4/t27-a1-pre.jpg /home/brad/pcsx2-t4/t27-a2-now.jpg /home/brad/pcsx2-t4/t27-a2-post15.jpg /home/brad/pcsx2-t4/t27-a2-post25.jpg /home/brad/pcsx2-t4/t27-a2-post3.jpg /home/brad/pcsx2-t4/t27-a2-post8.jpg /home/brad/pcsx2-t4/t27-a2-pre.jpg /home/brad/pcsx2-t4/t27-a3-now.jpg /home/brad/pcsx2-t4/t27-a3-post15.jpg /home/brad/pcsx2-t4/t27-a3-post25.jpg /home/brad/pcsx2-t4/t27-a3-post3.jpg /home/brad/pcsx2-t4/t27-a3-post8.jpg /home/brad/pcsx2-t4/t27-a3-pre.jpg /home/brad/pcsx2-t4/t27-start.jpg /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+++ cat /home/brad/pcsx2-t4/pcsx2.pid
++ kill 476
++ sleep 10
++ pgrep -a pcsx2-qt
+Sun Sep 20 22:41:24 UTC 2026
++ true
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
+UPTIME:226
+T27_DONE
++ echo UPTIME:226
++ echo T27_DONE

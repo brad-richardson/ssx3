@@ -1,0 +1,2755 @@
+Sun Sep 20 22:46:48 UTC 2026
+UPTIME:104
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ D=/home/brad/pcsx2-t4
++ E=/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ REF=/home/brad/pcsx2-t4/t27-ref-title.ppm
++ CD=/home/brad/pcsx2-t4/t27-cropdiff.py
++ LOG=/home/brad/pcsx2-t4/t27-poll.log
++ TITLE_MEAN_MAX=2.0
++ TITLE_P99_MAX=10
++ STATIC_MEAN_MAX=1.0
++ :
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
++ echo UPTIME:104
++ pkill Xvfb
++ true
++ sleep 2
++ pgrep -a Xvfb
++ true
++ sleep 4
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ pgrep -a Xvfb
+332 Xvfb :99 -screen 0 1280x1024x24
++ xdotool getdisplaygeometry
+1280 1024
+++ date -u +%Y%m%dT%H%M%SZ
++ TS=20260920T224654Z
++ '[' -f /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt ']'
++ mv /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t27-20260920T224654Z.txt
++ ls -la /home/brad/pcsx2-t4/dat/PCSX2/logs/
+total 8214364
+drwxr-xr-x  2 brad brad       4096 Sep 20 18:46 .
+drwxr-xr-x 17 brad brad       4096 Sep 20 10:08 ..
+-rw-r--r--  1 brad brad  528683584 Sep 20 10:24 emulog-pre-t17-20260920T150727Z.txt
+-rw-r--r--  1 brad brad  125924723 Sep 20 11:10 emulog-pre-t17-20260920T151753Z.txt
+-rw-r--r--  1 brad brad  117669919 Sep 20 11:18 emulog-pre-t17auto-20260920T152548Z.txt
+-rw-r--r--  1 brad brad  535682684 Sep 20 11:31 emulog-pre-t17b-20260920T153248Z.txt
+-rw-r--r--  1 brad brad  223035641 Sep 20 11:36 emulog-pre-t17c-20260920T153703Z.txt
+-rw-r--r--  1 brad brad  540313630 Sep 20 11:42 emulog-pre-t19-20260920T161129Z.txt
+-rw-r--r--  1 brad brad  555405357 Sep 20 12:17 emulog-pre-t21-20260920T181117Z.txt
+-rw-r--r--  1 brad brad  567984708 Sep 20 14:17 emulog-pre-t23-20260920T191402Z.txt
+-rw-r--r--  1 brad brad  949510490 Sep 20 16:20 emulog-pre-t25-20260920T202407Z.txt
+-rw-r--r--  1 brad brad  589666091 Sep 20 15:20 emulog-pre-t25nvm-20260920T201813Z.txt
+-rw-r--r--  1 brad brad 2482598052 Sep 20 16:29 emulog-pre-t27-20260920T223824Z.txt
+-rw-r--r--  1 brad brad 1194941663 Sep 20 18:41 emulog-pre-t27-20260920T224654Z.txt
++ rm -f /home/brad/pcsx2-t4/pcsx2.pid
+++ date -u +%s
+T_BOOT_WALL:1789944414 T_BOOT_UPTIME:110
+PID:348
++ T_BOOT=1789944414
+++ cut -d. -f1 /proc/uptime
++ echo 'T_BOOT_WALL:1789944414 T_BOOT_UPTIME:110'
++ echo 348
++ nohup /home/brad/pcsx2-t4/pcsx2/build/bin/pcsx2-qt -nogui -slowboot -turbo -datapath /home/brad/pcsx2-t4/dat -logfile /home/brad/pcsx2-t4/logs/boot-t27.log -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ echo PID:348
++ sleep 90
++ pgrep -f pcsx2-qt
+++ xdotool search --onlyvisible --name 'SSX 3'
+WID:2097159
++ WID=2097159
++ echo WID:2097159
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM
+SELF_TEST mean=0.0000 p99=0
++ plog 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ echo 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ read SELF_M SELF_P
+++ score_band /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_TEST mean=0.0000 p99=0'
++ echo 'SELF_TEST mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title 0.0000 0
++ is_num 0.0000
++ case "$1" in
++ return 0
++ is_num 0
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v p=0 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
+++ score_whole /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+SELF_WHOLE=0.0000
+Sun Sep 20 22:48:24 UTC 2026
+-rw-r--r-- 1 brad brad   58047 Sep 20 18:48 /home/brad/pcsx2-t4/t27-start.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-start.ppm
++ SELF_W=0.0000
++ plog SELF_WHOLE=0.0000
++ echo SELF_WHOLE=0.0000
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_static 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ snap t27-start
++ N=t27-start
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-start.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-start.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-start.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-start.ppm
++ ls -la /home/brad/pcsx2-t4/t27-start.ppm /home/brad/pcsx2-t4/t27-start.jpg
++ read SM SP
+++ score_band /home/brad/pcsx2-t4/t27-start.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-start.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+START_SCORE mean=20.9962 p99=130 MENU_T+:91
+ATTEMPT_1 BEGIN MENU_T+:91
+++ date -u +%s
++ plog 'START_SCORE mean=20.9962 p99=130 MENU_T+:91'
++ echo 'START_SCORE mean=20.9962 p99=130 MENU_T+:91'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ MENU_LIKE=0
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_1 BEGIN MENU_T+:91'
++ echo 'ATTEMPT_1 BEGIN MENU_T+:91'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ pgrep -f pcsx2-qt
++ snap t27-a1-now
+Sun Sep 20 22:48:25 UTC 2026
+-rw-r--r-- 1 brad brad   58396 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-now.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-now.ppm
++ N=t27-a1-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-now.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-now.ppm /home/brad/pcsx2-t4/t27-a1-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-now.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+ATTEMPT_1 now score mean=17.6449 p99=150
++ plog 'ATTEMPT_1 now score mean=17.6449 p99=150'
++ echo 'ATTEMPT_1 now score mean=17.6449 p99=150'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title 17.6449 150
++ is_num 17.6449
++ case "$1" in
++ return 0
++ is_num 150
++ case "$1" in
++ return 0
++ awk -v m=17.6449 -v p=150 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_1 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_1 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 on attract (non-title) -> Cross attract-skip
++ press K A1_CROSS
++ KEY=K
++ LAB=A1_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
+A1_CROSS_KEYDOWN_WALL:1789944506.343550700 UPTIME:202 MENU_T+:92
++ plog 'A1_CROSS_KEYDOWN_WALL:1789944506.343550700 UPTIME:202 MENU_T+:92'
++ echo 'A1_CROSS_KEYDOWN_WALL:1789944506.343550700 UPTIME:202 MENU_T+:92'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+A1_CROSS_HELD_WALL:1789944506.362629425 UPTIME:202
++ plog 'A1_CROSS_HELD_WALL:1789944506.362629425 UPTIME:202'
++ echo 'A1_CROSS_HELD_WALL:1789944506.362629425 UPTIME:202'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 0.5
++ xdotool keyup K
+A1_CROSS_KEYUP_WALL:1789944506.880014823 UPTIME:203 MENU_T+:92
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYUP_WALL:1789944506.880014823 UPTIME:203 MENU_T+:92'
++ echo 'A1_CROSS_KEYUP_WALL:1789944506.880014823 UPTIME:203 MENU_T+:92'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:28 UTC 2026
++ snap t27-a1-poll01
++ N=t27-a1-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll01.ppm
+-rw-r--r-- 1 brad brad   58339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll01.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll01.ppm /home/brad/pcsx2-t4/t27-a1-poll01.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll01.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll01 score mean= p99= MENU_T+:95'
++ echo 'ATTEMPT_1 pollt27-a1-poll01 score mean= p99= MENU_T+:95'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 pollt27-a1-poll01 score mean= p99= MENU_T+:95
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:31 UTC 2026
++ snap t27-a1-poll02
++ N=t27-a1-poll02
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll02.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll02.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll02.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll02.ppm
+-rw-r--r-- 1 brad brad   58580 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll02.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll02.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll02.ppm /home/brad/pcsx2-t4/t27-a1-poll02.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll02.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll02.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll02.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll02 score mean= p99= MENU_T+:97'
++ echo 'ATTEMPT_1 pollt27-a1-poll02 score mean= p99= MENU_T+:97'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 pollt27-a1-poll02 score mean= p99= MENU_T+:97
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:33 UTC 2026
++ snap t27-a1-poll03
++ N=t27-a1-poll03
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll03.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll03.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll03.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll03.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll03.ppm /home/brad/pcsx2-t4/t27-a1-poll03.jpg
+-rw-r--r-- 1 brad brad   59097 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll03.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll03.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll03.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll03.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll03.ppm'
+ATTEMPT_1 pollt27-a1-poll03 score mean= p99= MENU_T+:99
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll03 score mean= p99= MENU_T+:99'
++ echo 'ATTEMPT_1 pollt27-a1-poll03 score mean= p99= MENU_T+:99'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:35 UTC 2026
++ snap t27-a1-poll04
++ N=t27-a1-poll04
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll04.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll04.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll04.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll04.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll04.ppm /home/brad/pcsx2-t4/t27-a1-poll04.jpg
+-rw-r--r-- 1 brad brad   58263 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll04.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll04.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll04.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll04.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll04.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll04 score mean= p99= MENU_T+:101'
++ echo 'ATTEMPT_1 pollt27-a1-poll04 score mean= p99= MENU_T+:101'
+ATTEMPT_1 pollt27-a1-poll04 score mean= p99= MENU_T+:101
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t27-a1-poll05
++ N=t27-a1-poll05
++ date -u
+Sun Sep 20 22:48:37 UTC 2026
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll05.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll05.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll05.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll05.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll05.ppm /home/brad/pcsx2-t4/t27-a1-poll05.jpg
+-rw-r--r-- 1 brad brad   58081 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll05.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll05.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll05.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll05.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll05.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll05 score mean= p99= MENU_T+:103'
++ echo 'ATTEMPT_1 pollt27-a1-poll05 score mean= p99= MENU_T+:103'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 pollt27-a1-poll05 score mean= p99= MENU_T+:103
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:39 UTC 2026
++ snap t27-a1-poll06
++ N=t27-a1-poll06
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll06.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll06.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll06.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll06.ppm
+-rw-r--r-- 1 brad brad   58307 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll06.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll06.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll06.ppm /home/brad/pcsx2-t4/t27-a1-poll06.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll06.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll06.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+ATTEMPT_1 pollt27-a1-poll06 score mean= p99= MENU_T+:105
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll06.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll06 score mean= p99= MENU_T+:105'
++ echo 'ATTEMPT_1 pollt27-a1-poll06 score mean= p99= MENU_T+:105'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:41 UTC 2026
++ snap t27-a1-poll07
++ N=t27-a1-poll07
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll07.xwd
+-rw-r--r-- 1 brad brad   58196 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll07.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll07.ppm
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll07.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll07.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll07.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll07.ppm /home/brad/pcsx2-t4/t27-a1-poll07.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll07.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll07.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll07.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll07 score mean= p99= MENU_T+:107'
+ATTEMPT_1 pollt27-a1-poll07 score mean= p99= MENU_T+:107
++ echo 'ATTEMPT_1 pollt27-a1-poll07 score mean= p99= MENU_T+:107'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:43 UTC 2026
+-rw-r--r-- 1 brad brad   58275 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll08.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll08.ppm
++ snap t27-a1-poll08
++ N=t27-a1-poll08
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll08.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll08.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll08.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll08.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll08.ppm /home/brad/pcsx2-t4/t27-a1-poll08.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll08.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll08.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll08.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll08 score mean= p99= MENU_T+:109'
+ATTEMPT_1 pollt27-a1-poll08 score mean= p99= MENU_T+:109
++ echo 'ATTEMPT_1 pollt27-a1-poll08 score mean= p99= MENU_T+:109'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:45 UTC 2026
+-rw-r--r-- 1 brad brad   60599 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll09.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll09.ppm
++ snap t27-a1-poll09
++ N=t27-a1-poll09
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll09.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll09.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll09.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll09.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll09.ppm /home/brad/pcsx2-t4/t27-a1-poll09.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll09.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll09.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll09.ppm'
+ATTEMPT_1 pollt27-a1-poll09 score mean= p99= MENU_T+:112
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll09 score mean= p99= MENU_T+:112'
++ echo 'ATTEMPT_1 pollt27-a1-poll09 score mean= p99= MENU_T+:112'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:48 UTC 2026
++ snap t27-a1-poll10
++ N=t27-a1-poll10
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll10.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll10.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll10.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll10.ppm
+-rw-r--r-- 1 brad brad   56356 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll10.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll10.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll10.ppm /home/brad/pcsx2-t4/t27-a1-poll10.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll10.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll10.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll10.ppm'
+++ date -u +%s
+ATTEMPT_1 pollt27-a1-poll10 score mean= p99= MENU_T+:114
++ plog 'ATTEMPT_1 pollt27-a1-poll10 score mean= p99= MENU_T+:114'
++ echo 'ATTEMPT_1 pollt27-a1-poll10 score mean= p99= MENU_T+:114'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:50 UTC 2026
++ snap t27-a1-poll11
++ N=t27-a1-poll11
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll11.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll11.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll11.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll11.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll11.ppm /home/brad/pcsx2-t4/t27-a1-poll11.jpg
+-rw-r--r-- 1 brad brad   59940 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll11.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll11.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll11.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll11.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll11.ppm'
+ATTEMPT_1 pollt27-a1-poll11 score mean= p99= MENU_T+:116
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll11 score mean= p99= MENU_T+:116'
++ echo 'ATTEMPT_1 pollt27-a1-poll11 score mean= p99= MENU_T+:116'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:52 UTC 2026
++ snap t27-a1-poll12
++ N=t27-a1-poll12
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll12.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll12.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll12.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll12.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll12.ppm /home/brad/pcsx2-t4/t27-a1-poll12.jpg
+-rw-r--r-- 1 brad brad   59055 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll12.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll12.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll12.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll12.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll12.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll12 score mean= p99= MENU_T+:118'
++ echo 'ATTEMPT_1 pollt27-a1-poll12 score mean= p99= MENU_T+:118'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 pollt27-a1-poll12 score mean= p99= MENU_T+:118
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:54 UTC 2026
++ snap t27-a1-poll13
++ N=t27-a1-poll13
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll13.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll13.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll13.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll13.ppm
+-rw-r--r-- 1 brad brad   89678 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll13.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll13.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll13.ppm /home/brad/pcsx2-t4/t27-a1-poll13.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll13.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll13.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll13.ppm'
+ATTEMPT_1 pollt27-a1-poll13 score mean= p99= MENU_T+:120
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll13 score mean= p99= MENU_T+:120'
++ echo 'ATTEMPT_1 pollt27-a1-poll13 score mean= p99= MENU_T+:120'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:56 UTC 2026
++ snap t27-a1-poll14
++ N=t27-a1-poll14
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll14.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll14.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll14.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll14.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll14.ppm /home/brad/pcsx2-t4/t27-a1-poll14.jpg
+-rw-r--r-- 1 brad brad   29538 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll14.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll14.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll14.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll14.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll14.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll14 score mean= p99= MENU_T+:122'
++ echo 'ATTEMPT_1 pollt27-a1-poll14 score mean= p99= MENU_T+:122'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 pollt27-a1-poll14 score mean= p99= MENU_T+:122
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:48:58 UTC 2026
++ snap t27-a1-poll15
++ N=t27-a1-poll15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll15.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll15.ppm /home/brad/pcsx2-t4/t27-a1-poll15.jpg
+-rw-r--r-- 1 brad brad   67110 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll15.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll15.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll15 score mean= p99= MENU_T+:124'
++ echo 'ATTEMPT_1 pollt27-a1-poll15 score mean= p99= MENU_T+:124'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 pollt27-a1-poll15 score mean= p99= MENU_T+:124
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:00 UTC 2026
++ snap t27-a1-poll16
++ N=t27-a1-poll16
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll16.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll16.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll16.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll16.ppm
+-rw-r--r-- 1 brad brad   55334 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll16.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll16.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll16.ppm /home/brad/pcsx2-t4/t27-a1-poll16.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll16.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll16.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll16.ppm'
+ATTEMPT_1 pollt27-a1-poll16 score mean= p99= MENU_T+:126
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll16 score mean= p99= MENU_T+:126'
++ echo 'ATTEMPT_1 pollt27-a1-poll16 score mean= p99= MENU_T+:126'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t27-a1-poll17
++ N=t27-a1-poll17
++ date -u
+Sun Sep 20 22:49:02 UTC 2026
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll17.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll17.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll17.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll17.ppm
+-rw-r--r-- 1 brad brad   66737 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll17.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll17.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll17.ppm /home/brad/pcsx2-t4/t27-a1-poll17.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll17.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll17.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll17.ppm'
+ATTEMPT_1 pollt27-a1-poll17 score mean= p99= MENU_T+:129
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll17 score mean= p99= MENU_T+:129'
++ echo 'ATTEMPT_1 pollt27-a1-poll17 score mean= p99= MENU_T+:129'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:05 UTC 2026
++ snap t27-a1-poll18
++ N=t27-a1-poll18
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a1-poll18.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a1-poll18.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a1-poll18.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a1-poll18.ppm
+-rw-r--r-- 1 brad brad   63143 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll18.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll18.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a1-poll18.ppm /home/brad/pcsx2-t4/t27-a1-poll18.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll18.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll18.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a1-pollt27-a1-poll18.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_1 pollt27-a1-poll18 score mean= p99= MENU_T+:131'
+ATTEMPT_1 pollt27-a1-poll18 score mean= p99= MENU_T+:131
++ echo 'ATTEMPT_1 pollt27-a1-poll18 score mean= p99= MENU_T+:131'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_1 NO-TITLE-IN-WINDOW (outcome: no-title)
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ '[' 0 -eq 0 ']'
++ plog 'ATTEMPT_1 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ echo 'ATTEMPT_1 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ continue
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_2 BEGIN MENU_T+:131'
++ echo 'ATTEMPT_2 BEGIN MENU_T+:131'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 BEGIN MENU_T+:131
++ pgrep -f pcsx2-qt
+Sun Sep 20 22:49:05 UTC 2026
++ snap t27-a2-now
++ N=t27-a2-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-now.ppm
+-rw-r--r-- 1 brad brad   63622 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-now.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-now.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-now.ppm /home/brad/pcsx2-t4/t27-a2-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-now.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+ATTEMPT_2 now score mean=38.1344 p99=181
+ATTEMPT_2 on attract (non-title) -> Cross attract-skip
+A2_CROSS_KEYDOWN_WALL:1789944545.908237365 UPTIME:242 MENU_T+:131
++ plog 'ATTEMPT_2 now score mean=38.1344 p99=181'
++ echo 'ATTEMPT_2 now score mean=38.1344 p99=181'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title 38.1344 181
++ is_num 38.1344
++ case "$1" in
++ return 0
++ is_num 181
++ case "$1" in
++ return 0
++ awk -v m=38.1344 -v p=181 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_2 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_2 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ press K A2_CROSS
++ KEY=K
++ LAB=A2_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A2_CROSS_KEYDOWN_WALL:1789944545.908237365 UPTIME:242 MENU_T+:131'
++ echo 'A2_CROSS_KEYDOWN_WALL:1789944545.908237365 UPTIME:242 MENU_T+:131'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+A2_CROSS_HELD_WALL:1789944545.927336817 UPTIME:242
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A2_CROSS_HELD_WALL:1789944545.927336817 UPTIME:242'
++ echo 'A2_CROSS_HELD_WALL:1789944545.927336817 UPTIME:242'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A2_CROSS_KEYUP_WALL:1789944546.444274066 UPTIME:242 MENU_T+:132'
++ echo 'A2_CROSS_KEYUP_WALL:1789944546.444274066 UPTIME:242 MENU_T+:132'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+A2_CROSS_KEYUP_WALL:1789944546.444274066 UPTIME:242 MENU_T+:132
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:08 UTC 2026
+-rw-r--r-- 1 brad brad   58424 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll01.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll01.ppm
++ snap t27-a2-poll01
++ N=t27-a2-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll01.ppm /home/brad/pcsx2-t4/t27-a2-poll01.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll01.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll01 score mean= p99= MENU_T+:134'
++ echo 'ATTEMPT_2 pollt27-a2-poll01 score mean= p99= MENU_T+:134'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 pollt27-a2-poll01 score mean= p99= MENU_T+:134
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:10 UTC 2026
++ snap t27-a2-poll02
++ N=t27-a2-poll02
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll02.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll02.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll02.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll02.ppm
+-rw-r--r-- 1 brad brad   58420 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll02.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll02.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll02.ppm /home/brad/pcsx2-t4/t27-a2-poll02.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll02.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll02.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll02.ppm'
+ATTEMPT_2 pollt27-a2-poll02 score mean= p99= MENU_T+:136
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll02 score mean= p99= MENU_T+:136'
++ echo 'ATTEMPT_2 pollt27-a2-poll02 score mean= p99= MENU_T+:136'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:12 UTC 2026
++ snap t27-a2-poll03
++ N=t27-a2-poll03
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll03.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll03.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll03.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll03.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll03.ppm /home/brad/pcsx2-t4/t27-a2-poll03.jpg
+-rw-r--r-- 1 brad brad   58521 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll03.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll03.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll03.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll03.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll03.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll03 score mean= p99= MENU_T+:138'
+ATTEMPT_2 pollt27-a2-poll03 score mean= p99= MENU_T+:138
++ echo 'ATTEMPT_2 pollt27-a2-poll03 score mean= p99= MENU_T+:138'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:14 UTC 2026
++ snap t27-a2-poll04
++ N=t27-a2-poll04
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll04.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll04.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll04.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll04.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll04.ppm /home/brad/pcsx2-t4/t27-a2-poll04.jpg
+-rw-r--r-- 1 brad brad   58194 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll04.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll04.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll04.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll04.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll04.ppm'
+ATTEMPT_2 pollt27-a2-poll04 score mean= p99= MENU_T+:140
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll04 score mean= p99= MENU_T+:140'
++ echo 'ATTEMPT_2 pollt27-a2-poll04 score mean= p99= MENU_T+:140'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:16 UTC 2026
++ snap t27-a2-poll05
++ N=t27-a2-poll05
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll05.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll05.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll05.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll05.ppm
+-rw-r--r-- 1 brad brad   58390 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll05.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll05.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll05.ppm /home/brad/pcsx2-t4/t27-a2-poll05.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll05.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll05.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll05.ppm'
+ATTEMPT_2 pollt27-a2-poll05 score mean= p99= MENU_T+:143
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll05 score mean= p99= MENU_T+:143'
++ echo 'ATTEMPT_2 pollt27-a2-poll05 score mean= p99= MENU_T+:143'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:19 UTC 2026
++ snap t27-a2-poll06
++ N=t27-a2-poll06
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll06.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll06.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll06.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll06.ppm
+-rw-r--r-- 1 brad brad   58041 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll06.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll06.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll06.ppm /home/brad/pcsx2-t4/t27-a2-poll06.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll06.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll06.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll06.ppm'
+ATTEMPT_2 pollt27-a2-poll06 score mean= p99= MENU_T+:145
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll06 score mean= p99= MENU_T+:145'
++ echo 'ATTEMPT_2 pollt27-a2-poll06 score mean= p99= MENU_T+:145'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:21 UTC 2026
++ snap t27-a2-poll07
++ N=t27-a2-poll07
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll07.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll07.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll07.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll07.ppm
+-rw-r--r-- 1 brad brad   58215 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll07.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll07.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll07.ppm /home/brad/pcsx2-t4/t27-a2-poll07.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll07.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll07.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll07.ppm'
+ATTEMPT_2 pollt27-a2-poll07 score mean= p99= MENU_T+:147
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll07 score mean= p99= MENU_T+:147'
++ echo 'ATTEMPT_2 pollt27-a2-poll07 score mean= p99= MENU_T+:147'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:23 UTC 2026
+-rw-r--r-- 1 brad brad   42252 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll08.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll08.ppm
++ snap t27-a2-poll08
++ N=t27-a2-poll08
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll08.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll08.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll08.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll08.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll08.ppm /home/brad/pcsx2-t4/t27-a2-poll08.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll08.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll08.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll08.ppm'
+ATTEMPT_2 pollt27-a2-poll08 score mean= p99= MENU_T+:149
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll08 score mean= p99= MENU_T+:149'
++ echo 'ATTEMPT_2 pollt27-a2-poll08 score mean= p99= MENU_T+:149'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:25 UTC 2026
++ snap t27-a2-poll09
++ N=t27-a2-poll09
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll09.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll09.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll09.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll09.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll09.ppm /home/brad/pcsx2-t4/t27-a2-poll09.jpg
+-rw-r--r-- 1 brad brad   57987 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll09.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll09.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll09.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll09.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll09.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll09 score mean= p99= MENU_T+:151'
++ echo 'ATTEMPT_2 pollt27-a2-poll09 score mean= p99= MENU_T+:151'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 pollt27-a2-poll09 score mean= p99= MENU_T+:151
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:27 UTC 2026
++ snap t27-a2-poll10
++ N=t27-a2-poll10
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll10.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll10.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll10.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll10.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll10.ppm /home/brad/pcsx2-t4/t27-a2-poll10.jpg
+-rw-r--r-- 1 brad brad   63102 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll10.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll10.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll10.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll10.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll10.ppm'
+ATTEMPT_2 pollt27-a2-poll10 score mean= p99= MENU_T+:153
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll10 score mean= p99= MENU_T+:153'
++ echo 'ATTEMPT_2 pollt27-a2-poll10 score mean= p99= MENU_T+:153'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:29 UTC 2026
++ snap t27-a2-poll11
++ N=t27-a2-poll11
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll11.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll11.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll11.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll11.ppm
+-rw-r--r-- 1 brad brad   55889 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll11.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll11.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll11.ppm /home/brad/pcsx2-t4/t27-a2-poll11.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll11.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll11.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll11.ppm'
+++ date -u +%s
+ATTEMPT_2 pollt27-a2-poll11 score mean= p99= MENU_T+:155
++ plog 'ATTEMPT_2 pollt27-a2-poll11 score mean= p99= MENU_T+:155'
++ echo 'ATTEMPT_2 pollt27-a2-poll11 score mean= p99= MENU_T+:155'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:31 UTC 2026
++ snap t27-a2-poll12
++ N=t27-a2-poll12
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll12.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll12.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll12.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll12.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll12.ppm /home/brad/pcsx2-t4/t27-a2-poll12.jpg
+-rw-r--r-- 1 brad brad   91307 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll12.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll12.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll12.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll12.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll12.ppm'
+++ date -u +%s
+ATTEMPT_2 pollt27-a2-poll12 score mean= p99= MENU_T+:157
++ plog 'ATTEMPT_2 pollt27-a2-poll12 score mean= p99= MENU_T+:157'
++ echo 'ATTEMPT_2 pollt27-a2-poll12 score mean= p99= MENU_T+:157'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:33 UTC 2026
++ snap t27-a2-poll13
++ N=t27-a2-poll13
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll13.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll13.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll13.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll13.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll13.ppm /home/brad/pcsx2-t4/t27-a2-poll13.jpg
+-rw-r--r-- 1 brad brad   31011 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll13.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll13.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll13.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll13.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll13.ppm'
+ATTEMPT_2 pollt27-a2-poll13 score mean= p99= MENU_T+:160
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll13 score mean= p99= MENU_T+:160'
++ echo 'ATTEMPT_2 pollt27-a2-poll13 score mean= p99= MENU_T+:160'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:36 UTC 2026
++ snap t27-a2-poll14
++ N=t27-a2-poll14
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll14.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll14.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll14.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll14.ppm
+-rw-r--r-- 1 brad brad   66470 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll14.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll14.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll14.ppm /home/brad/pcsx2-t4/t27-a2-poll14.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll14.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll14.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+ATTEMPT_2 pollt27-a2-poll14 score mean= p99= MENU_T+:162
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll14.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll14 score mean= p99= MENU_T+:162'
++ echo 'ATTEMPT_2 pollt27-a2-poll14 score mean= p99= MENU_T+:162'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:38 UTC 2026
++ snap t27-a2-poll15
++ N=t27-a2-poll15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll15.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll15.ppm /home/brad/pcsx2-t4/t27-a2-poll15.jpg
+-rw-r--r-- 1 brad brad   57055 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll15.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll15.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+ATTEMPT_2 pollt27-a2-poll15 score mean= p99= MENU_T+:164
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll15.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll15 score mean= p99= MENU_T+:164'
++ echo 'ATTEMPT_2 pollt27-a2-poll15 score mean= p99= MENU_T+:164'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:40 UTC 2026
++ snap t27-a2-poll16
++ N=t27-a2-poll16
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll16.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll16.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll16.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll16.ppm
+-rw-r--r-- 1 brad brad   64906 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll16.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll16.ppm
+ATTEMPT_2 pollt27-a2-poll16 score mean= p99= MENU_T+:166
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll16.ppm /home/brad/pcsx2-t4/t27-a2-poll16.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll16.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll16.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll16.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll16 score mean= p99= MENU_T+:166'
++ echo 'ATTEMPT_2 pollt27-a2-poll16 score mean= p99= MENU_T+:166'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:42 UTC 2026
++ snap t27-a2-poll17
++ N=t27-a2-poll17
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll17.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll17.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
+-rw-r--r-- 1 brad brad   58645 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll17.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll17.ppm
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll17.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll17.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll17.ppm /home/brad/pcsx2-t4/t27-a2-poll17.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll17.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll17.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll17.ppm'
+ATTEMPT_2 pollt27-a2-poll17 score mean= p99= MENU_T+:168
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll17 score mean= p99= MENU_T+:168'
++ echo 'ATTEMPT_2 pollt27-a2-poll17 score mean= p99= MENU_T+:168'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:44 UTC 2026
+-rw-r--r-- 1 brad brad   55479 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll18.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll18.ppm
++ snap t27-a2-poll18
++ N=t27-a2-poll18
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a2-poll18.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a2-poll18.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a2-poll18.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a2-poll18.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a2-poll18.ppm /home/brad/pcsx2-t4/t27-a2-poll18.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll18.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll18.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a2-pollt27-a2-poll18.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_2 pollt27-a2-poll18 score mean= p99= MENU_T+:170'
++ echo 'ATTEMPT_2 pollt27-a2-poll18 score mean= p99= MENU_T+:170'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_2 pollt27-a2-poll18 score mean= p99= MENU_T+:170
+ATTEMPT_2 NO-TITLE-IN-WINDOW (outcome: no-title)
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ '[' 0 -eq 0 ']'
++ plog 'ATTEMPT_2 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ echo 'ATTEMPT_2 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ continue
+ATTEMPT_3 BEGIN MENU_T+:170
+Sun Sep 20 22:49:44 UTC 2026
+-rw-r--r-- 1 brad brad   46266 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-now.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-now.ppm
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_3 BEGIN MENU_T+:170'
++ echo 'ATTEMPT_3 BEGIN MENU_T+:170'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ pgrep -f pcsx2-qt
++ snap t27-a3-now
++ N=t27-a3-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-now.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-now.ppm /home/brad/pcsx2-t4/t27-a3-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-now.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_3 now score mean=12.7617 p99=107'
++ echo 'ATTEMPT_3 now score mean=12.7617 p99=107'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 now score mean=12.7617 p99=107
+ATTEMPT_3 on attract (non-title) -> Cross attract-skip
+A3_CROSS_KEYDOWN_WALL:1789944585.488993818 UPTIME:281 MENU_T+:171
++ is_title 12.7617 107
++ is_num 12.7617
++ case "$1" in
++ return 0
++ is_num 107
++ case "$1" in
++ return 0
++ awk -v m=12.7617 -v p=107 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_3 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_3 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ press K A3_CROSS
++ KEY=K
++ LAB=A3_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A3_CROSS_KEYDOWN_WALL:1789944585.488993818 UPTIME:281 MENU_T+:171'
++ echo 'A3_CROSS_KEYDOWN_WALL:1789944585.488993818 UPTIME:281 MENU_T+:171'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+A3_CROSS_HELD_WALL:1789944585.507281281 UPTIME:281
++ plog 'A3_CROSS_HELD_WALL:1789944585.507281281 UPTIME:281'
++ echo 'A3_CROSS_HELD_WALL:1789944585.507281281 UPTIME:281'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A3_CROSS_KEYUP_WALL:1789944586.024769164 UPTIME:282 MENU_T+:172'
++ echo 'A3_CROSS_KEYUP_WALL:1789944586.024769164 UPTIME:282 MENU_T+:172'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+A3_CROSS_KEYUP_WALL:1789944586.024769164 UPTIME:282 MENU_T+:172
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:48 UTC 2026
++ snap t27-a3-poll01
++ N=t27-a3-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll01.ppm /home/brad/pcsx2-t4/t27-a3-poll01.jpg
+-rw-r--r-- 1 brad brad   58130 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll01.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll01.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll01.ppm'
+++ date -u +%s
+ATTEMPT_3 pollt27-a3-poll01 score mean= p99= MENU_T+:174
++ plog 'ATTEMPT_3 pollt27-a3-poll01 score mean= p99= MENU_T+:174'
++ echo 'ATTEMPT_3 pollt27-a3-poll01 score mean= p99= MENU_T+:174'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:50 UTC 2026
+-rw-r--r-- 1 brad brad   58300 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll02.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll02.ppm
++ snap t27-a3-poll02
++ N=t27-a3-poll02
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll02.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll02.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll02.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll02.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll02.ppm /home/brad/pcsx2-t4/t27-a3-poll02.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll02.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll02.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll02.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll02 score mean= p99= MENU_T+:176'
++ echo 'ATTEMPT_3 pollt27-a3-poll02 score mean= p99= MENU_T+:176'
+ATTEMPT_3 pollt27-a3-poll02 score mean= p99= MENU_T+:176
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:52 UTC 2026
++ snap t27-a3-poll03
++ N=t27-a3-poll03
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll03.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll03.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll03.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll03.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll03.ppm /home/brad/pcsx2-t4/t27-a3-poll03.jpg
+-rw-r--r-- 1 brad brad   58719 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll03.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll03.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll03.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll03.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll03.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll03 score mean= p99= MENU_T+:178'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ echo 'ATTEMPT_3 pollt27-a3-poll03 score mean= p99= MENU_T+:178'
+ATTEMPT_3 pollt27-a3-poll03 score mean= p99= MENU_T+:178
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:54 UTC 2026
++ snap t27-a3-poll04
++ N=t27-a3-poll04
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll04.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll04.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll04.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll04.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll04.ppm /home/brad/pcsx2-t4/t27-a3-poll04.jpg
+-rw-r--r-- 1 brad brad   58472 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll04.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll04.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll04.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll04.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll04.ppm'
+ATTEMPT_3 pollt27-a3-poll04 score mean= p99= MENU_T+:180
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll04 score mean= p99= MENU_T+:180'
++ echo 'ATTEMPT_3 pollt27-a3-poll04 score mean= p99= MENU_T+:180'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:49:56 UTC 2026
++ snap t27-a3-poll05
++ N=t27-a3-poll05
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll05.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll05.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll05.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll05.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll05.ppm /home/brad/pcsx2-t4/t27-a3-poll05.jpg
+-rw-r--r-- 1 brad brad   58419 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll05.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll05.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll05.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll05.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll05.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll05 score mean= p99= MENU_T+:182'
++ echo 'ATTEMPT_3 pollt27-a3-poll05 score mean= p99= MENU_T+:182'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll05 score mean= p99= MENU_T+:182
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t27-a3-poll06
++ N=t27-a3-poll06
++ date -u
+Sun Sep 20 22:49:58 UTC 2026
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll06.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll06.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll06.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll06.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll06.ppm /home/brad/pcsx2-t4/t27-a3-poll06.jpg
+-rw-r--r-- 1 brad brad   58327 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll06.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll06.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll06.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll06.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+ATTEMPT_3 pollt27-a3-poll06 score mean= p99= MENU_T+:184
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll06.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll06 score mean= p99= MENU_T+:184'
++ echo 'ATTEMPT_3 pollt27-a3-poll06 score mean= p99= MENU_T+:184'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:00 UTC 2026
++ snap t27-a3-poll07
++ N=t27-a3-poll07
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll07.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll07.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll07.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll07.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll07.ppm /home/brad/pcsx2-t4/t27-a3-poll07.jpg
+-rw-r--r-- 1 brad brad   58314 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll07.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll07.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll07.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll07.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll07.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll07 score mean= p99= MENU_T+:186'
++ echo 'ATTEMPT_3 pollt27-a3-poll07 score mean= p99= MENU_T+:186'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll07 score mean= p99= MENU_T+:186
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:02 UTC 2026
++ snap t27-a3-poll08
++ N=t27-a3-poll08
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll08.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll08.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll08.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll08.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll08.ppm /home/brad/pcsx2-t4/t27-a3-poll08.jpg
+-rw-r--r-- 1 brad brad   45182 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll08.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll08.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll08.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll08.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll08.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll08 score mean= p99= MENU_T+:189'
++ echo 'ATTEMPT_3 pollt27-a3-poll08 score mean= p99= MENU_T+:189'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll08 score mean= p99= MENU_T+:189
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:05 UTC 2026
++ snap t27-a3-poll09
++ N=t27-a3-poll09
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll09.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll09.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll09.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll09.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll09.ppm /home/brad/pcsx2-t4/t27-a3-poll09.jpg
+-rw-r--r-- 1 brad brad   57564 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll09.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll09.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll09.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll09.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll09.ppm'
+++ date -u +%s
+ATTEMPT_3 pollt27-a3-poll09 score mean= p99= MENU_T+:191
++ plog 'ATTEMPT_3 pollt27-a3-poll09 score mean= p99= MENU_T+:191'
++ echo 'ATTEMPT_3 pollt27-a3-poll09 score mean= p99= MENU_T+:191'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:07 UTC 2026
++ snap t27-a3-poll10
++ N=t27-a3-poll10
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll10.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll10.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll10.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll10.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll10.ppm /home/brad/pcsx2-t4/t27-a3-poll10.jpg
+-rw-r--r-- 1 brad brad   63483 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll10.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll10.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll10.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll10.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll10.ppm'
+++ date -u +%s
+ATTEMPT_3 pollt27-a3-poll10 score mean= p99= MENU_T+:193
++ plog 'ATTEMPT_3 pollt27-a3-poll10 score mean= p99= MENU_T+:193'
++ echo 'ATTEMPT_3 pollt27-a3-poll10 score mean= p99= MENU_T+:193'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:09 UTC 2026
++ snap t27-a3-poll11
++ N=t27-a3-poll11
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll11.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll11.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll11.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll11.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll11.ppm /home/brad/pcsx2-t4/t27-a3-poll11.jpg
+-rw-r--r-- 1 brad brad   54691 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll11.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll11.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll11.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll11.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll11.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll11 score mean= p99= MENU_T+:195'
++ echo 'ATTEMPT_3 pollt27-a3-poll11 score mean= p99= MENU_T+:195'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll11 score mean= p99= MENU_T+:195
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:11 UTC 2026
+-rw-r--r-- 1 brad brad   92084 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll12.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll12.ppm
++ snap t27-a3-poll12
++ N=t27-a3-poll12
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll12.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll12.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll12.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll12.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll12.ppm /home/brad/pcsx2-t4/t27-a3-poll12.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll12.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll12.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll12.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll12 score mean= p99= MENU_T+:197'
+ATTEMPT_3 pollt27-a3-poll12 score mean= p99= MENU_T+:197
++ echo 'ATTEMPT_3 pollt27-a3-poll12 score mean= p99= MENU_T+:197'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:13 UTC 2026
++ snap t27-a3-poll13
++ N=t27-a3-poll13
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll13.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll13.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll13.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll13.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll13.ppm /home/brad/pcsx2-t4/t27-a3-poll13.jpg
+-rw-r--r-- 1 brad brad   30840 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll13.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll13.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll13.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll13.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll13.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll13 score mean= p99= MENU_T+:199'
++ echo 'ATTEMPT_3 pollt27-a3-poll13 score mean= p99= MENU_T+:199'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll13 score mean= p99= MENU_T+:199
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:15 UTC 2026
++ snap t27-a3-poll14
++ N=t27-a3-poll14
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll14.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll14.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll14.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll14.ppm
+-rw-r--r-- 1 brad brad   65523 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll14.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll14.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll14.ppm /home/brad/pcsx2-t4/t27-a3-poll14.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll14.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll14.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll14.ppm'
+++ date -u +%s
+ATTEMPT_3 pollt27-a3-poll14 score mean= p99= MENU_T+:201
++ plog 'ATTEMPT_3 pollt27-a3-poll14 score mean= p99= MENU_T+:201'
++ echo 'ATTEMPT_3 pollt27-a3-poll14 score mean= p99= MENU_T+:201'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:17 UTC 2026
+-rw-r--r-- 1 brad brad   56783 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll15.ppm
++ snap t27-a3-poll15
++ N=t27-a3-poll15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll15.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll15.ppm /home/brad/pcsx2-t4/t27-a3-poll15.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll15.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll15.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll15 score mean= p99= MENU_T+:203'
++ echo 'ATTEMPT_3 pollt27-a3-poll15 score mean= p99= MENU_T+:203'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll15 score mean= p99= MENU_T+:203
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:19 UTC 2026
+-rw-r--r-- 1 brad brad   64101 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll16.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll16.ppm
++ snap t27-a3-poll16
++ N=t27-a3-poll16
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll16.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll16.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll16.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll16.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll16.ppm /home/brad/pcsx2-t4/t27-a3-poll16.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll16.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll16.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll16.ppm'
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll16 score mean= p99= MENU_T+:206'
++ echo 'ATTEMPT_3 pollt27-a3-poll16 score mean= p99= MENU_T+:206'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
+ATTEMPT_3 pollt27-a3-poll16 score mean= p99= MENU_T+:206
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:22 UTC 2026
++ snap t27-a3-poll17
++ N=t27-a3-poll17
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll17.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll17.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll17.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll17.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll17.ppm /home/brad/pcsx2-t4/t27-a3-poll17.jpg
+-rw-r--r-- 1 brad brad   44459 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll17.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll17.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll17.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll17.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll17.ppm'
+++ date -u +%s
+ATTEMPT_3 pollt27-a3-poll17 score mean= p99= MENU_T+:208
++ plog 'ATTEMPT_3 pollt27-a3-poll17 score mean= p99= MENU_T+:208'
++ echo 'ATTEMPT_3 pollt27-a3-poll17 score mean= p99= MENU_T+:208'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
+Sun Sep 20 22:50:24 UTC 2026
++ snap t27-a3-poll18
++ N=t27-a3-poll18
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t27-a3-poll18.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t27-a3-poll18.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t27-a3-poll18.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t27-a3-poll18.ppm
++ ls -la /home/brad/pcsx2-t4/t27-a3-poll18.ppm /home/brad/pcsx2-t4/t27-a3-poll18.jpg
+-rw-r--r-- 1 brad brad   56468 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll18.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll18.ppm
++ read M P
+++ score_band /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll18.ppm
+++ python3 /home/brad/pcsx2-t4/t27-cropdiff.py /home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll18.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+Traceback (most recent call last):
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 109, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 74, in main
+    (wc, hc), pc = load(cand)
+                   ^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 58, in load
+    return load_ppm(path)
+           ^^^^^^^^^^^^^^
+  File "/home/brad/pcsx2-t4/t27-cropdiff.py", line 24, in load_ppm
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/brad/pcsx2-t4/t27-a3-pollt27-a3-poll18.ppm'
+ATTEMPT_3 pollt27-a3-poll18 score mean= p99= MENU_T+:210
+ATTEMPT_3 NO-TITLE-IN-WINDOW (outcome: no-title)
+++ date -u +%s
++ plog 'ATTEMPT_3 pollt27-a3-poll18 score mean= p99= MENU_T+:210'
++ echo 'ATTEMPT_3 pollt27-a3-poll18 score mean= p99= MENU_T+:210'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ is_title
++ is_num ''
++ case "$1" in
++ return 1
++ return 1
++ '[' 0 -eq 0 ']'
++ plog 'ATTEMPT_3 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ echo 'ATTEMPT_3 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ tee -a /home/brad/pcsx2-t4/t27-poll.log
++ continue
++ '[' 0 -eq 1 ']'
++ ls -la /home/brad/pcsx2-t4/t27-a1-now.jpg /home/brad/pcsx2-t4/t27-a1-poll01.jpg /home/brad/pcsx2-t4/t27-a1-poll02.jpg /home/brad/pcsx2-t4/t27-a1-poll03.jpg /home/brad/pcsx2-t4/t27-a1-poll04.jpg /home/brad/pcsx2-t4/t27-a1-poll05.jpg /home/brad/pcsx2-t4/t27-a1-poll06.jpg /home/brad/pcsx2-t4/t27-a1-poll07.jpg /home/brad/pcsx2-t4/t27-a1-poll08.jpg /home/brad/pcsx2-t4/t27-a1-poll09.jpg /home/brad/pcsx2-t4/t27-a1-poll10.jpg /home/brad/pcsx2-t4/t27-a1-poll11.jpg /home/brad/pcsx2-t4/t27-a1-poll12.jpg /home/brad/pcsx2-t4/t27-a1-poll13.jpg /home/brad/pcsx2-t4/t27-a1-poll14.jpg /home/brad/pcsx2-t4/t27-a1-poll15.jpg /home/brad/pcsx2-t4/t27-a1-poll16.jpg /home/brad/pcsx2-t4/t27-a1-poll17.jpg /home/brad/pcsx2-t4/t27-a1-poll18.jpg /home/brad/pcsx2-t4/t27-a1-post15.jpg /home/brad/pcsx2-t4/t27-a1-post25.jpg /home/brad/pcsx2-t4/t27-a1-post3.jpg /home/brad/pcsx2-t4/t27-a1-post8.jpg /home/brad/pcsx2-t4/t27-a1-pre.jpg /home/brad/pcsx2-t4/t27-a2-now.jpg /home/brad/pcsx2-t4/t27-a2-poll01.jpg /home/brad/pcsx2-t4/t27-a2-poll02.jpg /home/brad/pcsx2-t4/t27-a2-poll03.jpg /home/brad/pcsx2-t4/t27-a2-poll04.jpg /home/brad/pcsx2-t4/t27-a2-poll05.jpg /home/brad/pcsx2-t4/t27-a2-poll06.jpg /home/brad/pcsx2-t4/t27-a2-poll07.jpg /home/brad/pcsx2-t4/t27-a2-poll08.jpg /home/brad/pcsx2-t4/t27-a2-poll09.jpg /home/brad/pcsx2-t4/t27-a2-poll10.jpg /home/brad/pcsx2-t4/t27-a2-poll11.jpg /home/brad/pcsx2-t4/t27-a2-poll12.jpg /home/brad/pcsx2-t4/t27-a2-poll13.jpg /home/brad/pcsx2-t4/t27-a2-poll14.jpg /home/brad/pcsx2-t4/t27-a2-poll15.jpg /home/brad/pcsx2-t4/t27-a2-poll16.jpg /home/brad/pcsx2-t4/t27-a2-poll17.jpg /home/brad/pcsx2-t4/t27-a2-poll18.jpg /home/brad/pcsx2-t4/t27-a2-post15.jpg /home/brad/pcsx2-t4/t27-a2-post25.jpg /home/brad/pcsx2-t4/t27-a2-post3.jpg /home/brad/pcsx2-t4/t27-a2-post8.jpg /home/brad/pcsx2-t4/t27-a2-pre.jpg /home/brad/pcsx2-t4/t27-a3-now.jpg /home/brad/pcsx2-t4/t27-a3-poll01.jpg /home/brad/pcsx2-t4/t27-a3-poll02.jpg /home/brad/pcsx2-t4/t27-a3-poll03.jpg /home/brad/pcsx2-t4/t27-a3-poll04.jpg /home/brad/pcsx2-t4/t27-a3-poll05.jpg /home/brad/pcsx2-t4/t27-a3-poll06.jpg /home/brad/pcsx2-t4/t27-a3-poll07.jpg /home/brad/pcsx2-t4/t27-a3-poll08.jpg /home/brad/pcsx2-t4/t27-a3-poll09.jpg /home/brad/pcsx2-t4/t27-a3-poll10.jpg /home/brad/pcsx2-t4/t27-a3-poll11.jpg /home/brad/pcsx2-t4/t27-a3-poll12.jpg /home/brad/pcsx2-t4/t27-a3-poll13.jpg /home/brad/pcsx2-t4/t27-a3-poll14.jpg /home/brad/pcsx2-t4/t27-a3-poll15.jpg /home/brad/pcsx2-t4/t27-a3-poll16.jpg /home/brad/pcsx2-t4/t27-a3-poll17.jpg /home/brad/pcsx2-t4/t27-a3-poll18.jpg /home/brad/pcsx2-t4/t27-a3-post15.jpg /home/brad/pcsx2-t4/t27-a3-post25.jpg /home/brad/pcsx2-t4/t27-a3-post3.jpg /home/brad/pcsx2-t4/t27-a3-post8.jpg /home/brad/pcsx2-t4/t27-a3-pre.jpg /home/brad/pcsx2-t4/t27-start.jpg /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+-rw-r--r-- 1 brad brad 1516776101 Sep 20 18:50 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+-rw-r--r-- 1 brad brad      58396 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-now.jpg
+-rw-r--r-- 1 brad brad      58339 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll01.jpg
+-rw-r--r-- 1 brad brad      58580 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll02.jpg
+-rw-r--r-- 1 brad brad      59097 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll03.jpg
+-rw-r--r-- 1 brad brad      58263 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll04.jpg
+-rw-r--r-- 1 brad brad      58081 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll05.jpg
+-rw-r--r-- 1 brad brad      58307 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll06.jpg
+-rw-r--r-- 1 brad brad      58196 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll07.jpg
+-rw-r--r-- 1 brad brad      58275 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll08.jpg
+-rw-r--r-- 1 brad brad      60599 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll09.jpg
+-rw-r--r-- 1 brad brad      56356 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll10.jpg
+-rw-r--r-- 1 brad brad      59940 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll11.jpg
+-rw-r--r-- 1 brad brad      59055 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll12.jpg
+-rw-r--r-- 1 brad brad      89678 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll13.jpg
+-rw-r--r-- 1 brad brad      29538 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll14.jpg
+-rw-r--r-- 1 brad brad      67110 Sep 20 18:48 /home/brad/pcsx2-t4/t27-a1-poll15.jpg
+-rw-r--r-- 1 brad brad      55334 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll16.jpg
+-rw-r--r-- 1 brad brad      66737 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll17.jpg
+-rw-r--r-- 1 brad brad      63143 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a1-poll18.jpg
+-rw-r--r-- 1 brad brad      58147 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post15.jpg
+-rw-r--r-- 1 brad brad      58102 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post25.jpg
+-rw-r--r-- 1 brad brad      58437 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-post3.jpg
+-rw-r--r-- 1 brad brad      58453 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a1-post8.jpg
+-rw-r--r-- 1 brad brad      53844 Sep 20 18:39 /home/brad/pcsx2-t4/t27-a1-pre.jpg
+-rw-r--r-- 1 brad brad      63622 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-now.jpg
+-rw-r--r-- 1 brad brad      58424 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll01.jpg
+-rw-r--r-- 1 brad brad      58420 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll02.jpg
+-rw-r--r-- 1 brad brad      58521 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll03.jpg
+-rw-r--r-- 1 brad brad      58194 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll04.jpg
+-rw-r--r-- 1 brad brad      58390 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll05.jpg
+-rw-r--r-- 1 brad brad      58041 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll06.jpg
+-rw-r--r-- 1 brad brad      58215 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll07.jpg
+-rw-r--r-- 1 brad brad      42252 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll08.jpg
+-rw-r--r-- 1 brad brad      57987 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll09.jpg
+-rw-r--r-- 1 brad brad      63102 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll10.jpg
+-rw-r--r-- 1 brad brad      55889 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll11.jpg
+-rw-r--r-- 1 brad brad      91307 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll12.jpg
+-rw-r--r-- 1 brad brad      31011 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll13.jpg
+-rw-r--r-- 1 brad brad      66470 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll14.jpg
+-rw-r--r-- 1 brad brad      57055 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll15.jpg
+-rw-r--r-- 1 brad brad      64906 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll16.jpg
+-rw-r--r-- 1 brad brad      58645 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll17.jpg
+-rw-r--r-- 1 brad brad      55479 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a2-poll18.jpg
+-rw-r--r-- 1 brad brad      44516 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post15.jpg
+-rw-r--r-- 1 brad brad      90204 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post25.jpg
+-rw-r--r-- 1 brad brad      58037 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post3.jpg
+-rw-r--r-- 1 brad brad      58315 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-post8.jpg
+-rw-r--r-- 1 brad brad      53889 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a2-pre.jpg
+-rw-r--r-- 1 brad brad      46266 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-now.jpg
+-rw-r--r-- 1 brad brad      58130 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll01.jpg
+-rw-r--r-- 1 brad brad      58300 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll02.jpg
+-rw-r--r-- 1 brad brad      58719 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll03.jpg
+-rw-r--r-- 1 brad brad      58472 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll04.jpg
+-rw-r--r-- 1 brad brad      58419 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll05.jpg
+-rw-r--r-- 1 brad brad      58327 Sep 20 18:49 /home/brad/pcsx2-t4/t27-a3-poll06.jpg
+-rw-r--r-- 1 brad brad      58314 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll07.jpg
+-rw-r--r-- 1 brad brad      45182 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll08.jpg
+-rw-r--r-- 1 brad brad      57564 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll09.jpg
+-rw-r--r-- 1 brad brad      63483 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll10.jpg
+-rw-r--r-- 1 brad brad      54691 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll11.jpg
+-rw-r--r-- 1 brad brad      92084 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll12.jpg
+-rw-r--r-- 1 brad brad      30840 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll13.jpg
+-rw-r--r-- 1 brad brad      65523 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll14.jpg
+-rw-r--r-- 1 brad brad      56783 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll15.jpg
+-rw-r--r-- 1 brad brad      64101 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll16.jpg
+-rw-r--r-- 1 brad brad      44459 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll17.jpg
+-rw-r--r-- 1 brad brad      56468 Sep 20 18:50 /home/brad/pcsx2-t4/t27-a3-poll18.jpg
+-rw-r--r-- 1 brad brad      44799 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post15.jpg
+-rw-r--r-- 1 brad brad      90204 Sep 20 18:41 /home/brad/pcsx2-t4/t27-a3-post25.jpg
+-rw-r--r-- 1 brad brad      58314 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post3.jpg
+-rw-r--r-- 1 brad brad      58656 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-post8.jpg
+-rw-r--r-- 1 brad brad      85343 Sep 20 18:40 /home/brad/pcsx2-t4/t27-a3-pre.jpg
+-rw-r--r-- 1 brad brad      58047 Sep 20 18:48 /home/brad/pcsx2-t4/t27-start.jpg
+++ cat /home/brad/pcsx2-t4/pcsx2.pid
++ kill 348
++ sleep 10
+Sun Sep 20 22:50:34 UTC 2026
+UPTIME:330
+T27_DONE
++ pgrep -a pcsx2-qt
++ true
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
++ echo UPTIME:330
++ echo T27_DONE
