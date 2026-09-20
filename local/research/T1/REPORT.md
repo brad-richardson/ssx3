@@ -229,5 +229,5 @@ commits on `e483d8d` (proof binary = worktree equivalent).
   window's gap (SAMPLED/TOL_OK/STALE by rule, never hidden).
 - `sched.-1` (11,131 invocation schedules) is emitter-only:
   invocation threads never print `[diag:thread]`.
-- Session wall time ≈ 05:05–06:05Z (~3 h incl. build/configure,
+- Session wall time 04:53–05:43Z (≈50 min incl. build/configure,
   one 5-min P1ag wait, and the void-boot rebuild), inside the 4 h box.
