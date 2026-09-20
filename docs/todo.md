@@ -5,6 +5,29 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **Frontier review 09-19 read (orchestrator):**
+      `docs/research/review-2026-09-19-progress.md` (8-park boot
+      ladder, SYNCTASK 10-brief post-mortem, 23-commit fork
+      inventory, 10 recs + 8 branch decisions). Queued: no-silent-drops
+      tooling, PCSX2 ref trace, CSV home, game-expects-X rule +
+      kernel-CreateSema check, movies stub default, flaky test (now
+      seen flipping AFAIL↔GsSyncV again on this tree), I-lane park
+      after first launch, route criteria. **User decision mirrored:**
+      no upstream submission until the user proves the route and reads
+      the code. Steering answers asked 09-19 evening; P-lane follow-up
+      held for them (default: P1w diagnoses 0x52BE04).
+- [ ] **P1v read (09-19) — PASS, THE FIX WORKS, new stall found:**
+      `8d10619` (+46/-2, exact-0→binary): F2 pair returns 28/29, -1
+      waits 257,125→0; thread 3 runs (sch≠0 all 17 blocks, consumed
+      id-30 twice); thread 1 genuinely blocks (323 F6 waits / 322 F7
+      wakes); old outer loop exited (phase → `sub_316F00`); new stall
+      = thread-3 poll on never-written `0x52BE04` (~2.2M/block,
+      boot-2 watch shows loader-init line only). I6's `bdae295`
+      landed on top and carried the push. Verified: +46/-2 pushed,
+      LOG 7852/7915, F2 verbatim ×2, -1 census 0, 0x425cf0 17/17,
+      :630 park / :636 wake, binary `52f766a5`, tests re-run by me
+      (426/425/1 — AFAIL face, the documented flip), lease released,
+      worktree clean. Next: P1w HELD for steering. Ledger row added.
 - [ ] **I5 read (09-19) — PASS, install blocked on missing bundle
       id:** `simctl install` exit 13 (IXErrorDomain, Missing bundle
       ID); Info.plist has 19 keys, zero `CFBundleIdentifier`; no
