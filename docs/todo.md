@@ -5,6 +5,21 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M57 read (09-20) — PASS, far dec-3 unique vs nulls, m15 owns all off-mode:**
+      Seat-6: far dec-3 vs nulls 9/9/9/9/5 (H6 met — the
+      two off-9 seats are the two m15 sites; carrier/701
+      6/6 none/out, at-peak 1 far + 1 null); tail-Y hists
+      s0 92/102 + m15 75/134 + shared 67/69 + pooled
+      167/236 dec-9 (H1–H3 met); dec-3 pooled rank 2 at
+      19/236, s0/shared n=0; c343 pooled 5/6 vs null-4
+      14/30 (|diff| 0.3667, H7 met); m15 null-col frames 0
+      dec-9 (313/314/311) vs s0 14/17. H4 not (far dec-3,
+      expected). Control green; re-run 43/43; PNG 527 B
+      rule-met (H6); 0 B explained, 102 stands. Verified:
+      hist sums 102/134/69/236, shares to 4dp, H7 diff,
+      col counts, null-5 vs M56, fnvs, 1889+/0−, ahead
+      (no push). ~0.1 h. Next: M58 (m15 off-mode mass,
+      offline) in freed pane. Ledger row added.
 - [ ] **M56 read (09-20) — PASS, 289 alone at d=262, c343 only far column:**
       289 site reproduces exactly (|δ| 15, s0 noncell, gaps
       −32/0, band 1, dec 3, streak 343, carrier-none,
