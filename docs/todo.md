@@ -5,6 +5,44 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M52 read (09-20) — PASS, residuals agree 14/65, disjoint from δ 6:**
+      H5 6/65 + peaks 5/8 byte-exact (profiles + xmatch +
+      hump + xshape lines); 6 δ-agrees at d_s0 6/2/1/1/0/0
+      + d_m15 6/3/2/7/6/262 (5/6 in peak-disagreeing cols);
+      residuals agree 14/65 (+17 near), per-column
+      3/4/1/2/1/2/1/0, overlap with δ-agrees 0; 7/7
+      d_m15==0 res-agree vs 5/8 at d_s0==0. H6 met only
+      (2/8−1/26 = 0.2115); H1–H5/H7 not. 51/65 stand.
+      (Gap row 5's "M26 gap 1 open" is wrong — M51 closed
+      it.) Verified: baselines, H5 6/65, res 14/65, canon
+      identical, C-P1 pass, PNG 102706 B, mtimes clean.
+      ~0.1 h. Next: M53 (plateau peaks, M26 gap 3) in freed
+      pane. Ledger row added.
+- [ ] **T15 read (09-20) — PASS, NO post-241 event to 2400s cap (drain holds):**
+      1 boot (lease 10:12:07–10:53:54Z, 2507 s, zero contention);
+      exit invariant reproduced @ b235 (218 @2461202, N =
+      72176/72176 third count, last lines identical, ramp +
+      chunks + constants exact); 235 blocks past exit to b476:
+      main DORMANT ×237, stubs residue-13 ×236 (same 13),
+      31-drain 71,762 iters (0/31 every post block, never
+      idle), dma/gif frozen 160 pairs @ T13-exact counters,
+      guest events 0, sema-30 4w/3s (t3 never releases);
+      post trace 2,462,182 lines, same 113 funcs, 0 post-only,
+      empty EOF stack; rate flat ~60 (NO dip/surge — fifth
+      shape) → ~30.2 proxy; dormant/inv 2.06–2.12 (never
+      2.0000). Deviations tabled: preamble 887/603 (third
+      pair), b238 = 189 (1-block shift), b239 5/296 vs
+      117/298, t3 transient pc. (P1ai Part 32 unread —
+      landed mid-boot; generic watches used.) Verified:
+      log 2857096 L / 602908868 B, trace 187727172 L /
+      6659595180 B, invariant line, park tail, TSVs (477:
+      b235 = 218, 211×2/189×3, 13×236; 267: 160 frozen @
+      2669132/72181), N 72176/72176, post arithmetic,
+      31 143940/143939 (drain 71762), sema-30 7, binary
+      sha, fork HEAD unmoved + zero commits, lease absent,
+      1 boot, ahead (no push). ~1.2 h. Next: P1aj
+      (drain-termination diagnosis, no boot) in freed pane.
+      Ledger row added.
 - [ ] **M51 read (09-20) — PASS, drift tabled, low-drift keeps nothing:**
       16/16 TRI fits + 18/16 same-frame + 4/68 + 2/65
       cross-frame exact (colhits + errvalues exact); peaks
@@ -740,7 +778,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t15 (run past exit, analyzing) · m52 (peak residuals, offline, 4h). Held for the T15-directed follow-up: t1D + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree). P1ae still queued (no SIF-shaped park — SIF silent).
+- [ ] **Live panes:** p1aj (drain-termination diagnosis, no boot, 4h) · m53 (plateau peaks, offline, 4h). Held for the P1aj-directed experiment: t1D + t19. Poll queue's "T1 first" is stale — T1 already ran + passed; T3 closed (two agents agree). P1ae still queued (no SIF-shaped park — SIF silent).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
