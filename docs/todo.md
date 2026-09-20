@@ -5,6 +5,16 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P7 + P8 launched 09-19 (user: stub movies, parallelize
+      pad/sound):** P7 (movie disc survey + HLE completion stub,
+      build-verified, runtime firing deferred) reuses P1x pane; P8
+      (pad/sound API surface + fork inventory + host backends,
+      read-only, menu-ordered work list) reuses P1z pane. **User
+      decision:** stub intro movies to reach menu work first (decoder
+      revisited after frames). Implementation briefs wait for runtime
+      contact (P1w census + ladder). Upstream stance unchanged:
+      someday, after the route is proved — commits stay
+      upstream-shaped meanwhile.
 - [ ] **I7 launched 09-19 (poll, launch authority):** UIKit-entry
       wiring (I6 gap 1) reuses I6 pane. Rec-#9 tension noted: parking
       now would strand the lane on a crashing no-window binary, and
