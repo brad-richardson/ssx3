@@ -5,6 +5,41 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M56 read (09-20) — PASS, 289 alone at d=262, c343 only far column:**
+      289 site reproduces exactly (|δ| 15, s0 noncell, gaps
+      −32/0, band 1, dec 3, streak 343, carrier-none,
+      701-out; TRI p=289, QUAD res +0, hole 28–288); census
+      over s0+m15 tail-Y: 1 far pooled (d≥100), null-5 max
+      d=16 (246-row margin), 221 non-far + 14 singletons;
+      33-col table (c343 only); hole bulk 1/8 all |δ|=1;
+      H1–H4/H6–H7 met, H5 not (dec 3 vs dec-9 mode —
+      honest negative); control green; re-run identical;
+      0 B explained, 102 stands. Verified: baselines
+      13418/22815 + fnvs vs M55, 4 files 1875+/0−, no PNG,
+      ahead (no push). ~0.1 h. Next: M57 (far vs null-5
+      decile seats, offline) in freed pane. Ledger row added.
+- [ ] **P1aj read (09-20) — PASS, drain is VBLANK-paced fixed point, E1/E2/E3 spec'd:**
+      Part 33 (416 lines, append-only): W1–W12 reconciled (9
+      covered-silent, W4/W10 absent-here, W11 would-fire);
+      M1–M10 closed (M4/M5/M8-full here); invariants 8
+      reproduced + 2 deviated-as-expected; drain = 1 iter/
+      VBLANK from iter 2 (71 chunks fixed: 15 funcs, 34.29
+      L/iter, 3E4AF0 gaps {6,7}, sema-31 fixed point);
+      4 INTC handlers + t4 pump leg inputs tabled (4
+      monotonic ≥2.2-yr, 2 periodic, rest fixed); 13-row
+      terminator table (T1/T2 end by starvation/exit, T4/T10
+      latent, rest cannot); park-break census (t4 sole LIVE,
+      S1/S2/S3 missing signals with code paths, halt-split
+      tightened 9.1–74.1% + trio exact); E1/E2/E3 spec with
+      bound math (~430k iters @7200 s) + lease table. New:
+      block-N covers window N−1 (P32-8 skew dissolves).
+      Verified: dormant line, W4 = 1, trio adjacent, status-5
+      ×237 all id-1, 29 72178/72178, b239 11 lines + last
+      @2494022, residue rows byte-exact (610×3+305×10,
+      598×3+299×10), 5-func zeros FULL boot, post 362DE8 0,
+      CD @7175, drain arithmetic, append-only (416+/0−),
+      fork unmoved, ahead (no push). ~1 h. Next: T16 (E1
+      longer boot, lease) in freed pane. Ledger row added.
 - [ ] **M55 read (09-20) — PASS, drift tabled, low-drift keeps 0 again:**
       16/16 medians + 12/65 + 13/68 + 0/68 + 1/65 + nears
       14/14 + 2/4 M25-exact (fallbacks 27/20, no empties);
