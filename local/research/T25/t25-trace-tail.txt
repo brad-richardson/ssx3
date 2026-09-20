@@ -1,0 +1,2000 @@
+[  331.5047] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5047] Bios    :  thevent.010: WaitEventFlag (12e821d, 1002, 1, 1e7758)
+[  331.5047] Bios    :  intrman.023: QueryIntrContext (12e821d, 1002, 1, 1e7758)
+[  331.5047] Bios    :  intrman.017: CpuSuspendIntr (1e76e0, 1002, 1, 1e7758)
+[  331.5047] Bios    :   sifman.008: sceSifDmaStat (bf710002, 3, 0, 509e3a5)
+[  331.5047] Bios    :  intrman.017: CpuSuspendIntr (1f0260, 0, 0, e20)
+[  331.5047] Bios    :   sifman.007: sceSifSetDma (4f290, 2, 0, e20)
+[  331.5047] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 61680, bcr = 20, tadr = 1bf3c
+[  331.5047] SIF     : SIF0 DMA start...
+[  331.5047] SIF     :   SIF + 4 = 4 (pos=16)
+[  331.5047] SIF     : SIF0 IOP Tag: madr=4f390, tadr=1bf4c, counter=20 (00000020_0004F390) Junk 0
+[  331.5047] SIF     :   SIF - 4 = 0 (pos=16)
+[  331.5047] SIF     : SIF0 EE read tag: 10000008 5c0080 8004faa0 20
+[  331.5047] SIF     : SIF0 EE dest chain tag madr:005C0080 qwc:0008 id:1 irq:0(005C0080_10000008)
+[  331.5047] SIF     : Write IOP to Fifo: +++++++++++ 20 of 20
+[  331.5048] SIF     :   SIF + 32 = 32 (pos=48)
+[  331.5048] SIF     : Write Fifo to EE: ----------- 20 of 20
+[  331.5048] SIF     :   SIF - 32 = 0 (pos=48)
+[  331.5048] SIF     :   SIF + 4 = 4 (pos=52)
+[  331.5048] SIF     : SIF0 IOP Tag: madr=4faa0, tadr=1bf5c, counter=20 (00000020_8004FAA0) Junk 0
+[  331.5048] SIF     :   SIF - 4 = 0 (pos=52)
+[  331.5048] SIF     : SIF0 EE read tag: 10000008 5c0280 34d24 200
+[  331.5048] SIF     : SIF0 EE dest chain tag madr:005C0280 qwc:0008 id:1 irq:0(005C0280_10000008)
+[  331.5048] SIF     : Write IOP to Fifo: +++++++++++ 20 of 20
+[  331.5048] SIF     :   SIF + 32 = 32 (pos=84)
+[  331.5048] SIF     : Write Fifo to EE: ----------- 20 of 20
+[  331.5048] SIF     :   SIF - 32 = 0 (pos=84)
+[  331.5048] SIF     : Sif0: End IOP
+[  331.5048] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 4faa0)
+[  331.5048] Bios    :  sio2man.060:  (95b2, bf801528, 1bf3c, 4faa0)
+[  331.5048] Bios    :  thevent.006: SetEventFlag (12eea1b, 1, 0, 4faa0)
+[  331.5048] Bios    :  intrman.023: QueryIntrContext (12eea1b, 1, 0, 4faa0)
+[  331.5048] Bios    :  intrman.017: CpuSuspendIntr (1f0280, 1, 0, 4faa0)
+[  331.5048] Bios    :  intrman.018: CpuResumeIntr (1, 97670, 170, e)
+[  331.5048] Bios    :  thevent.010: WaitEventFlag (12eea1b, 80, 10, 0)
+[  331.5048] Bios    :  intrman.023: QueryIntrContext (12eea1b, 80, 10, 0)
+[  331.5048] Bios    :  intrman.017: CpuSuspendIntr (1f0288, 80, 10, 0)
+[  331.5048] Bios    :  thevent.008: ClearEventFlag (12eea1b, fffffffe, 0, dd1c8de)
+[  331.5048] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5048] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=18, attr=12, dest=8f0, src=512b80
+[  331.5048] Bios    :  intrman.023: QueryIntrContext (12eea1b, fffffffe, 0, dd1c8de)
+[  331.5048] Bios    :  intrman.017: CpuSuspendIntr (1ef1e0, fffffffe, 0, dd1c8de)
+[  331.5048] Bios    :  intrman.018: CpuResumeIntr (1, 97750, 0, dd1c8de)
+[  331.5048] SIF     : dmaSIF1 chcr = 184, madr = 513470, qwc  = 0, tadr = 21420
+[  331.5048] SIF     : SIF1 DMA start...
+[  331.5048] SIF     : Sif1: ProcessEETag
+[  331.5048] SIF     : REF 30000008
+[  331.5048] SIF     : Sif 1: Write EE to Fifo
+[  331.5048] SIF     :   SIF + 32 = 32 (pos=80)
+[  331.5048] SIF     :   SIF - 4 = 28 (pos=52)
+[  331.5048] SIF     : SIF 1 IOP: dest chain tag madr:00061CF4 wc:023C id:0 irq:0
+[  331.5048] SIF     : Sif1: ProcessEETag
+[  331.5048] SIF     : REFE 00000088
+[  331.5048] SIF     : Sif1: Write Fifo to IOP
+[  331.5048] SIF     : Sif 1 IOP doing transfer 001C to 00061CF4
+[  331.5048] SIF     :   SIF - 28 = 0 (pos=80)
+[  331.5048] SIF     : Sif 1: Write EE to Fifo
+[  331.5048] SIF     :   SIF + 128 = 128 (pos=80)
+[  331.5048] SIF     : Sif1: Write Fifo to IOP
+[  331.5048] SIF     : Sif 1 IOP doing transfer 0080 to 00061D64
+[  331.5048] SIF     :   SIF - 128 = 0 (pos=80)
+[  331.5048] SIF     : Sif 1: Write EE to Fifo
+[  331.5048] SIF     :   SIF + 128 = 128 (pos=80)
+[  331.5048] SIF     : Sif1: Write Fifo to IOP
+[  331.5048] SIF     : Sif 1 IOP doing transfer 0080 to 00061F64
+[  331.5048] SIF     :   SIF - 128 = 0 (pos=80)
+[  331.5048] SIF     : Sif 1: Write EE to Fifo
+[  331.5048] SIF     :   SIF + 128 = 128 (pos=80)
+[  331.5048] SIF     : Sif1: Write Fifo to IOP
+[  331.5048] SIF     : Sif 1 IOP doing transfer 0080 to 00062164
+[  331.5048] SIF     :   SIF - 128 = 0 (pos=80)
+[  331.5048] SIF     : Sif 1: Write EE to Fifo
+[  331.5048] SIF     :   SIF + 128 = 128 (pos=80)
+[  331.5048] SIF     : Sif1: Write Fifo to IOP
+[  331.5048] SIF     : Sif 1 IOP doing transfer 0080 to 00062364
+[  331.5048] SIF     :   SIF - 128 = 0 (pos=80)
+[  331.5048] SIF     : Sif 1: Write EE to Fifo
+[  331.5048] SIF     :   SIF + 32 = 32 (pos=112)
+[  331.5048] SIF     : Sif1: Write Fifo to IOP
+[  331.5048] SIF     : Sif 1 IOP doing transfer 0020 to 00062564
+[  331.5048] SIF     :   SIF - 32 = 0 (pos=112)
+[  331.5048] SIF     : Sif 1: End EE
+[  331.5048] Bios    : Bios call: GetThreadId (2f)
+[  331.5048] Bios    : Bios call: SignalSema (42)
+[  331.5048] Bios    : Bios call: WaitSema (44)
+[  331.5049] Bios    :  thevent.006: SetEventFlag (12eea1b, 80, 15, 4f498)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12eea1b, 80, 15, 4f498)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1ef218, 80, 15, 4f498)
+[  331.5049] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5049] Bios    :  thevent.010: WaitEventFlag (12eea1b, 1100, 1, 1ef228)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12eea1b, 1100, 1, 1ef228)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1ef1b0, 1100, 1, 1ef228)
+[  331.5049] Bios    :  thevent.006: SetEventFlag (12e821d, 2, 0, 7b8a0d3)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12e821d, 2, 0, 7b8a0d3)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1f0280, 2, 0, 7b8a0d3)
+[  331.5049] Bios    :  intrman.018: CpuResumeIntr (1, 97330, 170, e)
+[  331.5049] Bios    :  thevent.010: WaitEventFlag (12e821d, 80, 10, 0)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12e821d, 80, 10, 0)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1f0288, 80, 10, 0)
+[  331.5049] Bios    :  thevent.008: ClearEventFlag (12e821d, fffffffd, 0, dd1d2bf)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12e821d, fffffffd, 0, dd1d2bf)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1e76e8, fffffffd, 0, dd1d2bf)
+[  331.5049] Bios    :  intrman.018: CpuResumeIntr (1, 97410, 0, dd1d2bf)
+[  331.5049] Bios    :  thevent.006: SetEventFlag (12e821d, 80, 5, 4fba8)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12e821d, 80, 5, 4fba8)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1e7720, 80, 5, 4fba8)
+[  331.5049] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5049] Bios    :  thevent.010: WaitEventFlag (12e821d, 1100, 1, 1e7730)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12e821d, 1100, 1, 1e7730)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1e76b8, 1100, 1, 1e7730)
+[  331.5049] Bios    :  thevent.010: WaitEventFlag (12f0c19, 1004, 1, 1f0290)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (12f0c19, 1004, 1, 1f0290)
+[  331.5049] Bios    :  intrman.017: CpuSuspendIntr (1f0218, 1004, 1, 1f0290)
+[  331.5049] Bios    : Bios call: iSignalSema (43)
+[  331.5049] Bios    :  thevent.007: iSetEventFlag (25dd05, 4, 80000000, 1395c)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (25dd05, 4, 80000000, 1395c)
+[  331.5049] Bios    : Bios call: RFU005 (5)
+[  331.5049] Bios    : Bios call: RFU005 (5)
+[  331.5049] Bios    :  thevent.007: iSetEventFlag (25dd05, 8, 80000000, 1395c)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (25dd05, 8, 80000000, 1395c)
+[  331.5049] Bios    :  thevent.009: iClearEventFlag (25dd05, fffffff9, 80000000, 1395c)
+[  331.5049] Bios    :  intrman.023: QueryIntrContext (25dd05, fffffff9, 80000000, 1395c)
+[  331.5049] Bios    : Bios call: SignalSema (42)
+[  331.5049] Bios    : Bios call: WaitSema (44)
+[  331.5049] Bios    : Bios call: PollSema (45)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: WaitSema (44)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: WaitSema (44)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: SignalSema (42)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: WaitSema (44)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: SignalSema (42)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: SignalSema (42)
+[  331.5049] Bios    : Bios call: GetThreadId (2f)
+[  331.5049] Bios    : Bios call: WaitSema (44)
+[  331.5050] Bios    : Bios call: GetThreadId (2f)
+[  331.5050] Bios    : Bios call: SignalSema (42)
+[  331.5084] Bios    :   thbase.026: iWakeupThread (711a23, 0, 0, 0)
+[  331.5084] Bios    :  intrman.023: QueryIntrContext (711a23, 0, 0, 0)
+[  331.5084] Bios    :    libsd.020: sceSdBlockTransStatus (0, 0, 4, c9b863b1)
+[  331.5084] Bios    :   thbase.025: WakeupThread (712821, 0, 106c00, 106c00)
+[  331.5084] Bios    :  intrman.023: QueryIntrContext (712821, 0, 106c00, 106c00)
+[  331.5084] Bios    :  intrman.017: CpuSuspendIntr (1f1ea8, 0, 106c00, 106c00)
+[  331.5084] Bios    :  intrman.018: CpuResumeIntr (1, 38940, 78, f)
+[  331.5084] Bios    :   thbase.024: SleepThread (1, 38940, 78, f)
+[  331.5084] Bios    :  intrman.023: QueryIntrContext (1, 38940, 78, f)
+[  331.5084] Bios    :  intrman.017: CpuSuspendIntr (1f1eb0, 38940, 78, f)
+[  331.5085] Bios    :   thbase.034: GetSystemTime (1f33a0, ac000000, 0, 27426a1)
+[  331.5085] Bios    :  intrman.014:  (115f8, 1f33a0, 0, 27426a1)
+[  331.5085] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 0, 27426a1, 27426a1)
+[  331.5085] Bios    :   thbase.040: SysClock2USec (1f33a0, 1f33ac, 1f33b0, 27426a1)
+[  331.5085] Bios    :   sifcmd.020: sceSifGetNextRequest (68000, 0, f4240, 1f33b0)
+[  331.5085] Bios    :  intrman.017: CpuSuspendIntr (1f3370, 0, f4240, 1f33b0)
+[  331.5085] Bios    :  intrman.018: CpuResumeIntr (1, 0, f4240, 1f33b0)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2240, 0, ffffffff, 625e4)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2242, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2244, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2246, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2248, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (224a, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (224c, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (224e, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2250, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2252, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2254, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2256, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2258, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (225a, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (225c, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (225e, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2260, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2262, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2264, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2266, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (2268, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (226a, 0, 0, 500a)
+[  331.5085] Bios    :    libsd.010: sceSdGetAddr (226c, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (226e, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2241, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2243, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2245, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2247, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2249, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (224b, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (224d, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (224f, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2251, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2253, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2255, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2257, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2259, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (225b, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (225d, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (225f, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2261, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2263, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2265, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2267, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (2269, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (226b, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (226d, 0, 0, 500a)
+[  331.5086] Bios    :    libsd.010: sceSdGetAddr (226f, 0, 0, 500a)
+[  331.5086] Bios    :  sysclib.014: memset (108c00, 0, 400, 800)
+[  331.5086] Bios    :  sysclib.014: memset (109400, 0, 400, 800)
+[  331.5088] Bios    : Bios call: RFU005 (5)
+[  331.5089] Bios    :   sifman.008: sceSifDmaStat (bf730002, 107c00, ffffd70f, 108ffc)
+[  331.5089] Bios    :   sifcmd.012: sceSifSendCmd (1, 61660, 20, 619c8)
+[  331.5089] Bios    :  intrman.017: CpuSuspendIntr (1f3338, 240, 61660, 20)
+[  331.5089] Bios    :   sifman.007: sceSifSetDma (1f3318, 2, 61660, 20)
+[  331.5089] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 4fb20, bcr = 20, tadr = 1c13c
+[  331.5089] SIF     : SIF0 DMA start...
+[  331.5089] SIF     :   SIF + 4 = 4 (pos=88)
+[  331.5089] SIF     : SIF0 IOP Tag: madr=619c8, tadr=1c14c, counter=90 (00000090_000619C8) Junk 0
+[  331.5089] SIF     :   SIF - 4 = 0 (pos=88)
+[  331.5089] SIF     : SIF0 EE read tag: 10000024 50b740 80061660 8
+[  331.5089] SIF     : SIF0 EE dest chain tag madr:0050B740 qwc:0024 id:1 irq:0(0050B740_10000024)
+[  331.5089] SIF     : Write IOP to Fifo: +++++++++++ 80 of 90
+[  331.5089] SIF     :   SIF + 128 = 128 (pos=88)
+[  331.5089] SIF     : Write Fifo to EE: ----------- 80 of 90
+[  331.5089] SIF     :   SIF - 128 = 0 (pos=88)
+[  331.5089] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5089] SIF     :   SIF + 16 = 16 (pos=104)
+[  331.5089] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5089] SIF     :   SIF - 16 = 0 (pos=104)
+[  331.5089] SIF     :   SIF + 4 = 4 (pos=108)
+[  331.5089] SIF     : SIF0 IOP Tag: madr=61660, tadr=1c15c, counter=8 (00000008_80061660) Junk 0
+[  331.5089] SIF     :   SIF - 4 = 0 (pos=108)
+[  331.5089] SIF     : SIF0 EE read tag: 90000002 52bc00 34d24 200
+[  331.5089] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0002 id:1 irq:1(0052BC00_90000002)
+[  331.5089] SIF     : Write IOP to Fifo: +++++++++++ 8 of 8
+[  331.5089] SIF     :   SIF + 8 = 8 (pos=116)
+[  331.5089] SIF     : Write Fifo to EE: ----------- 8 of 8
+[  331.5089] SIF     :   SIF - 8 = 0 (pos=116)
+[  331.5089] SIF     : Sif0: End IOP
+[  331.5089] SIF     : Sif0: End EE
+[  331.5089] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 61660)
+[  331.5089] Bios    :   thbase.034: GetSystemTime (1f33a0, bf801528, 1c13c, 61660)
+[  331.5089] Bios    :  intrman.014:  (115f8, 1f33a0, 1c13c, 61660)
+[  331.5089] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 1c13c, 61660, 61660)
+[  331.5089] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5089] SIF     : dmaSIF0 chcr = 184, madr = 52bc20, qwc  = 0, tadr = 0
+[  331.5089] SIF     : SIF0 DMA start...
+[  331.5089] Bios    : Bios call: iSignalSema (43)
+[  331.5089] Bios    : Bios call: RFU005 (5)
+[  331.5089] Bios    : Bios call: GetThreadId (2f)
+[  331.5089] Bios    : Bios call: WaitSema (44)
+[  331.5089] Bios    : Bios call: GetThreadId (2f)
+[  331.5090] Bios    : Bios call: GetThreadId (2f)
+[  331.5090] Bios    :   thbase.040: SysClock2USec (1f33a0, 1f33b4, 1f33b8, 61660)
+[  331.5090] Bios    : Bios call: GetThreadId (2f)
+[  331.5090] Bios    : Bios call: GetThreadId (2f)
+[  331.5090] Bios    :   thbase.024: SleepThread (b6bd, 2f9, a0f45, 1f33b8)
+[  331.5090] Bios    :  intrman.023: QueryIntrContext (b6bd, 2f9, a0f45, 1f33b8)
+[  331.5090] Bios    :  intrman.017: CpuSuspendIntr (1f3378, 2f9, a0f45, 1f33b8)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: WaitSema (44)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: SignalSema (42)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: WaitSema (44)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: SignalSema (42)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: WaitSema (44)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: SignalSema (42)
+[  331.5091] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5091] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=18, attr=12, dest=8f0, src=512b80
+[  331.5091] SIF     : dmaSIF1 chcr = 184, madr = 513470, qwc  = 0, tadr = 21440
+[  331.5091] SIF     : SIF1 DMA start...
+[  331.5091] SIF     : Sif1: ProcessEETag
+[  331.5091] SIF     : REF 30000008
+[  331.5091] SIF     : Sif 1: Write EE to Fifo
+[  331.5091] SIF     :   SIF + 32 = 32 (pos=16)
+[  331.5091] SIF     :   SIF - 4 = 28 (pos=116)
+[  331.5091] SIF     : SIF 1 IOP: dest chain tag madr:00061CF4 wc:023C id:0 irq:0
+[  331.5091] SIF     : Sif1: ProcessEETag
+[  331.5091] SIF     : REFE 00000088
+[  331.5091] SIF     : Sif1: Write Fifo to IOP
+[  331.5091] SIF     : Sif 1 IOP doing transfer 001C to 00061CF4
+[  331.5091] SIF     :   SIF - 28 = 0 (pos=16)
+[  331.5091] SIF     : Sif 1: Write EE to Fifo
+[  331.5091] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5091] SIF     : Sif1: Write Fifo to IOP
+[  331.5091] SIF     : Sif 1 IOP doing transfer 0080 to 00061D64
+[  331.5091] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5091] SIF     : Sif 1: Write EE to Fifo
+[  331.5091] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5091] SIF     : Sif1: Write Fifo to IOP
+[  331.5091] SIF     : Sif 1 IOP doing transfer 0080 to 00061F64
+[  331.5091] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5091] SIF     : Sif 1: Write EE to Fifo
+[  331.5091] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5091] SIF     : Sif1: Write Fifo to IOP
+[  331.5091] SIF     : Sif 1 IOP doing transfer 0080 to 00062164
+[  331.5091] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5091] SIF     : Sif 1: Write EE to Fifo
+[  331.5091] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5091] SIF     : Sif1: Write Fifo to IOP
+[  331.5091] SIF     : Sif 1 IOP doing transfer 0080 to 00062364
+[  331.5091] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5091] SIF     : Sif 1: Write EE to Fifo
+[  331.5091] SIF     :   SIF + 32 = 32 (pos=48)
+[  331.5091] SIF     : Sif1: Write Fifo to IOP
+[  331.5091] SIF     : Sif 1 IOP doing transfer 0020 to 00062564
+[  331.5091] SIF     :   SIF - 32 = 0 (pos=48)
+[  331.5091] SIF     : Sif 1: End EE
+[  331.5091] Bios    : Bios call: GetThreadId (2f)
+[  331.5091] Bios    : Bios call: SignalSema (42)
+[  331.5091] Bios    : Bios call: WaitSema (44)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: WaitSema (44)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: SignalSema (42)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: WaitSema (44)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: SignalSema (42)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: WaitSema (44)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: GetThreadId (2f)
+[  331.5114] Bios    : Bios call: SignalSema (42)
+[  331.5114] Bios    :  thevent.007: iSetEventFlag (12f0c19, 1, 80000000, 138a4)
+[  331.5114] Bios    :  intrman.023: QueryIntrContext (12f0c19, 1, 80000000, 138a4)
+[  331.5115] Bios    : Bios call: RFU005 (5)
+[  331.5115] Bios    : Bios call: RFU005 (5)
+[  331.5115] Bios    :  thevent.007: iSetEventFlag (25dd05, 1, a0, 14)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (25dd05, 1, a0, 14)
+[  331.5115] Bios    :  thevent.007: iSetEventFlag (25dd05, 2, a0, 14)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (25dd05, 2, a0, 14)
+[  331.5115] Bios    :  thevent.009: iClearEventFlag (25dd05, fffffff6, a0, 14)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (25dd05, fffffff6, a0, 14)
+[  331.5115] Bios    :  thevent.008: ClearEventFlag (12f0c19, fffffffe, 4, c9bd99fb)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (12f0c19, fffffffe, 4, c9bd99fb)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f0a40, fffffffe, 4, c9bd99fb)
+[  331.5115] Bios    :  intrman.018: CpuResumeIntr (1, 97860, 4, c9bd99fb)
+[  331.5115] Bios    :  sio2man.046:  (1, 97860, 4, c9bd99fb)
+[  331.5115] Bios    :  thevent.006: SetEventFlag (716717, 1, 4, c9bd99fb)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, 1, 4, c9bd99fb)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f0a68, 1, 4, c9bd99fb)
+[  331.5115] Bios    :  thevent.008: ClearEventFlag (716717, fffffffe, 0, af3b960)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, fffffffe, 0, af3b960)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f6388, fffffffe, 0, af3b960)
+[  331.5115] Bios    :  intrman.018: CpuResumeIntr (1, 38b38, 0, af3b960)
+[  331.5115] Bios    :  thevent.006: SetEventFlag (716717, 2, 0, af3b960)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, 2, 0, af3b960)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f6378, 2, 0, af3b960)
+[  331.5115] Bios    :  intrman.018: CpuResumeIntr (1, 2, 0, af3b960)
+[  331.5115] Bios    :  thevent.010: WaitEventFlag (716717, 1400, 1, 1f63d0)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, 1400, 1, 1f63d0)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f6380, 1400, 1, 1f63d0)
+[  331.5115] Bios    :  thevent.010: WaitEventFlag (716717, 2, 0, 0)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, 2, 0, 0)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f0a70, 2, 0, 0)
+[  331.5115] Bios    :  intrman.018: CpuResumeIntr (1, 2, 38b38, 0)
+[  331.5115] Bios    :  thevent.008: ClearEventFlag (716717, fffffffd, 38b38, 0)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, fffffffd, 38b38, 0)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f0a78, fffffffd, 38b38, 0)
+[  331.5115] Bios    :  intrman.018: CpuResumeIntr (1, 38b38, 38b38, 0)
+[  331.5115] Bios    :  sio2man.057:  (505c8, 1, 38b38, 0)
+[  331.5115] Bios    :  sio2man.011:  (0, 1, 1, 0)
+[  331.5115] Bios    :  sio2man.051:  (50530, 4, 50601, 5)
+[  331.5115] Bios    :  thevent.006: SetEventFlag (716717, 400, 50601, 5)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, 400, 50601, 5)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f0a38, 400, 50601, 5)
+[  331.5115] Bios    :  thevent.008: ClearEventFlag (716717, fffffbff, 0, af3bb92)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, fffffbff, 0, af3bb92)
+[  331.5115] Bios    :  intrman.017: CpuSuspendIntr (1f6388, fffffbff, 0, af3bb92)
+[  331.5115] Bios    :  intrman.018: CpuResumeIntr (1, 38b38, 0, af3bb92)
+[  331.5115] Bios    :  thevent.007: iSetEventFlag (716717, 2000, 80000000, 469b4)
+[  331.5115] Bios    :  intrman.023: QueryIntrContext (716717, 2000, 80000000, 469b4)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: WaitSema (44)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: SignalSema (42)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: WaitSema (44)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: SignalSema (42)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: WaitSema (44)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: SignalSema (42)
+[  331.5116] Bios    :  thevent.007: iSetEventFlag (716717, 2000, 80000000, 469b4)
+[  331.5116] Bios    :  intrman.023: QueryIntrContext (716717, 2000, 80000000, 469b4)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: WaitSema (44)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: SignalSema (42)
+[  331.5116] Bios    :  thevent.010: WaitEventFlag (716717, 2000, 0, 0)
+[  331.5116] Bios    :  intrman.023: QueryIntrContext (716717, 2000, 0, 0)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    :  intrman.017: CpuSuspendIntr (1f6380, 2000, 0, 0)
+[  331.5116] Bios    : Bios call: WaitSema (44)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    : Bios call: GetThreadId (2f)
+[  331.5116] Bios    :  intrman.018: CpuResumeIntr (1, 2000, 38b38, 0)
+[  331.5116] Bios    : Bios call: SignalSema (42)
+[  331.5116] Bios    :  thevent.008: ClearEventFlag (716717, ffffdfff, 38b38, 0)
+[  331.5116] Bios    :  intrman.023: QueryIntrContext (716717, ffffdfff, 38b38, 0)
+[  331.5116] Bios    :  intrman.017: CpuSuspendIntr (1f6388, ffffdfff, 38b38, 0)
+[  331.5116] Bios    : Bios call: SignalSema (42)
+[  331.5116] Bios    :  intrman.018: CpuResumeIntr (1, 38b38, 38b38, 0)
+[  331.5116] Bios    : Bios call: PollSema (45)
+[  331.5116] Bios    : Bios call: ReferThreadStatus (30)
+[  331.5116] Bios    : Bios call: CreateSema (40)
+[  331.5116] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5116] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=520000, attr=0, dest=40, src=2052be80
+[  331.5116] SIF     : dmaSIF1 chcr = 184, madr = 513470, qwc  = 0, tadr = 21460
+[  331.5116] SIF     : SIF1 DMA start...
+[  331.5116] SIF     : Sif1: ProcessEETag
+[  331.5116] SIF     : REFE 00000005
+[  331.5116] SIF     : Sif 1: Write EE to Fifo
+[  331.5116] SIF     :   SIF + 20 = 20 (pos=68)
+[  331.5116] SIF     :   SIF - 4 = 16 (pos=52)
+[  331.5116] SIF     : SIF 1 IOP: dest chain tag madr:0001E2C0 wc:0010 id:4 irq:1
+[  331.5116] SIF     : Sif 1: End EE
+[  331.5116] SIF     : Sif1: Write Fifo to IOP
+[  331.5116] SIF     : Sif 1 IOP doing transfer 0010 to 0001E2C0
+[  331.5116] SIF     :   SIF - 16 = 0 (pos=68)
+[  331.5116] SIF     : Sif 1: End IOP
+[  331.5116] Bios    : Bios call: WaitSema (44)
+[  331.5117] Bios    : Bios call: GetThreadId (2f)
+[  331.5117] Bios    : Bios call: WaitSema (44)
+[  331.5117] Bios    : Bios call: GetThreadId (2f)
+[  331.5117] Bios    : Bios call: GetThreadId (2f)
+[  331.5117] Bios    : Bios call: SignalSema (42)
+[  331.5117] Bios    :   sifman.006: sceSifSetDChain (1e300, 5e98, 10, 1e2c0)
+[  331.5117] SIF     : IOP: dmaSIF1 chcr = 41000300, madr = 1e300, bcr = 20
+[  331.5117] SIF     : SIF1 DMA start...
+[  331.5117] Bios    :   thbase.026: iWakeupThread (71a413, 3ddf8, a, 5e58)
+[  331.5117] Bios    :  intrman.023: QueryIntrContext (71a413, 3ddf8, a, 5e58)
+[  331.5117] Bios    :  thevent.006: SetEventFlag (716717, 800, 38b38, 0)
+[  331.5118] Bios    :  intrman.023: QueryIntrContext (716717, 800, 38b38, 0)
+[  331.5118] Bios    :  intrman.017: CpuSuspendIntr (1f6378, 800, 38b38, 0)
+[  331.5118] Bios    :  intrman.018: CpuResumeIntr (1, 800, 38b38, 0)
+[  331.5118] Bios    :  thevent.010: WaitEventFlag (716717, 1400, 1, 1f63d0)
+[  331.5118] Bios    :  intrman.023: QueryIntrContext (716717, 1400, 1, 1f63d0)
+[  331.5118] Bios    :  intrman.017: CpuSuspendIntr (1f6380, 1400, 1, 1f63d0)
+[  331.5119] Bios    :  thevent.010: WaitEventFlag (716717, 800, 0, 0)
+[  331.5119] Bios    :  intrman.023: QueryIntrContext (716717, 800, 0, 0)
+[  331.5119] Bios    :  intrman.017: CpuSuspendIntr (1f0a40, 800, 0, 0)
+[  331.5119] Bios    :  intrman.018: CpuResumeIntr (1, 800, 38b38, 0)
+[  331.5119] Bios    :  thevent.008: ClearEventFlag (716717, fffff7ff, 38b38, 0)
+[  331.5119] Bios    :  intrman.023: QueryIntrContext (716717, fffff7ff, 38b38, 0)
+[  331.5119] Bios    :  intrman.017: CpuSuspendIntr (1f0a48, fffff7ff, 38b38, 0)
+[  331.5119] Bios    :  intrman.018: CpuResumeIntr (1, 38b38, 38b38, 0)
+[  331.5120] Bios    :  sio2man.057:  (505c8, 1, 0, 15)
+[  331.5120] Bios    :  sio2man.052:  (505d8, 1, 1, 15)
+[  331.5121] Bios    :  thevent.006: SetEventFlag (716717, 1000, 1, 15)
+[  331.5121] Bios    :  intrman.023: QueryIntrContext (716717, 1000, 1, 15)
+[  331.5121] Bios    :  intrman.017: CpuSuspendIntr (1f0a68, 1000, 1, 15)
+[  331.5121] Bios    :  thevent.008: ClearEventFlag (716717, ffffefff, 0, af3c2b1)
+[  331.5121] Bios    :  intrman.023: QueryIntrContext (716717, ffffefff, 0, af3c2b1)
+[  331.5121] Bios    :  intrman.017: CpuSuspendIntr (1f6388, ffffefff, 0, af3c2b1)
+[  331.5121] Bios    :  intrman.018: CpuResumeIntr (1, 38b38, 0, af3c2b1)
+[  331.5121] Bios    :  thevent.010: WaitEventFlag (716717, 4155, 1, 1f63d0)
+[  331.5121] Bios    :  intrman.023: QueryIntrContext (716717, 4155, 1, 1f63d0)
+[  331.5121] Bios    :  intrman.017: CpuSuspendIntr (1f6380, 4155, 1, 1f63d0)
+[  331.5122] Bios    :  thevent.006: SetEventFlag (12f0c19, 4, 0, 9081b0e)
+[  331.5122] Bios    :  intrman.023: QueryIntrContext (12f0c19, 4, 0, 9081b0e)
+[  331.5122] Bios    :  intrman.017: CpuSuspendIntr (1f0aa0, 4, 0, 9081b0e)
+[  331.5122] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5122] Bios    :  thevent.010: WaitEventFlag (12f0c19, 1001, 1, 1f0ab0)
+[  331.5122] Bios    :  intrman.023: QueryIntrContext (12f0c19, 1001, 1, 1f0ab0)
+[  331.5122] Bios    :  intrman.017: CpuSuspendIntr (1f0a38, 1001, 1, 1f0ab0)
+[  331.5123] Bios    :  thevent.008: ClearEventFlag (12f0c19, fffffffb, 0, af3c8ca)
+[  331.5123] Bios    :  intrman.023: QueryIntrContext (12f0c19, fffffffb, 0, af3c8ca)
+[  331.5123] Bios    :  intrman.017: CpuSuspendIntr (1f0220, fffffffb, 0, af3c8ca)
+[  331.5123] Bios    :  intrman.018: CpuResumeIntr (1, 97860, 0, af3c8ca)
+[  331.5123] Bios    :  thevent.006: SetEventFlag (12eea1b, 100, 0, af3c8ca)
+[  331.5123] Bios    :  intrman.023: QueryIntrContext (12eea1b, 100, 0, af3c8ca)
+[  331.5123] Bios    :  intrman.017: CpuSuspendIntr (1f0280, 100, 0, af3c8ca)
+[  331.5123] Bios    :  intrman.018: CpuResumeIntr (1, 97670, 170, e)
+[  331.5124] Bios    :  thevent.010: WaitEventFlag (12eea1b, 200, 10, 0)
+[  331.5124] Bios    :  intrman.023: QueryIntrContext (12eea1b, 200, 10, 0)
+[  331.5124] Bios    :  intrman.017: CpuSuspendIntr (1f0288, 200, 10, 0)
+[  331.5124] Bios    :  thevent.008: ClearEventFlag (12eea1b, fffffeff, 0, dd1d95e)
+[  331.5124] Bios    :  intrman.023: QueryIntrContext (12eea1b, fffffeff, 0, dd1d95e)
+[  331.5124] Bios    :  intrman.017: CpuSuspendIntr (1ef1b8, fffffeff, 0, dd1d95e)
+[  331.5124] Bios    :  intrman.018: CpuResumeIntr (1, 97750, 0, dd1d95e)
+[  331.5125] Bios    :  thevent.006: SetEventFlag (12eea1b, 200, 15, 4f4b8)
+[  331.5125] Bios    :  intrman.023: QueryIntrContext (12eea1b, 200, 15, 4f4b8)
+[  331.5125] Bios    :  intrman.017: CpuSuspendIntr (1ef218, 200, 15, 4f4b8)
+[  331.5125] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5126] Bios    :  thevent.010: WaitEventFlag (12eea1b, 1001, 1, 1ef250)
+[  331.5126] Bios    :  intrman.023: QueryIntrContext (12eea1b, 1001, 1, 1ef250)
+[  331.5126] Bios    :  intrman.017: CpuSuspendIntr (1ef1d8, 1001, 1, 1ef250)
+[  331.5127] Bios    :  thevent.006: SetEventFlag (12e821d, 100, 0, 7b8a8a0)
+[  331.5127] Bios    :  intrman.023: QueryIntrContext (12e821d, 100, 0, 7b8a8a0)
+[  331.5127] Bios    :  intrman.017: CpuSuspendIntr (1f0280, 100, 0, 7b8a8a0)
+[  331.5127] Bios    :  intrman.018: CpuResumeIntr (1, 97330, 170, e)
+[  331.5127] Bios    :  thevent.010: WaitEventFlag (12e821d, 200, 10, 0)
+[  331.5127] Bios    :  intrman.023: QueryIntrContext (12e821d, 200, 10, 0)
+[  331.5127] Bios    :  intrman.017: CpuSuspendIntr (1f0288, 200, 10, 0)
+[  331.5128] Bios    :  thevent.008: ClearEventFlag (12e821d, fffffeff, 0, dd1dcde)
+[  331.5128] Bios    :  intrman.023: QueryIntrContext (12e821d, fffffeff, 0, dd1dcde)
+[  331.5128] Bios    :  intrman.017: CpuSuspendIntr (1e76c0, fffffeff, 0, dd1dcde)
+[  331.5128] Bios    :  intrman.018: CpuResumeIntr (1, 97410, 0, dd1dcde)
+[  331.5128] Bios    :  thevent.006: SetEventFlag (12e821d, 200, 0, dd1dcde)
+[  331.5128] Bios    :  intrman.023: QueryIntrContext (12e821d, 200, 0, dd1dcde)
+[  331.5128] Bios    :  intrman.017: CpuSuspendIntr (1e7720, 200, 0, dd1dcde)
+[  331.5128] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5128] Bios    :  thevent.010: WaitEventFlag (12e821d, 1002, 1, 1e7758)
+[  331.5128] Bios    :  intrman.023: QueryIntrContext (12e821d, 1002, 1, 1e7758)
+[  331.5128] Bios    :  intrman.017: CpuSuspendIntr (1e76e0, 1002, 1, 1e7758)
+[  331.5129] Bios    :   sifman.008: sceSifDmaStat (bf740002, 3, 0, 509ec38)
+[  331.5130] Bios    :  intrman.017: CpuSuspendIntr (1f0260, 0, 0, e20)
+[  331.5131] Bios    :   sifman.007: sceSifSetDma (4f290, 2, 0, e20)
+[  331.5131] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 61680, bcr = 20, tadr = 1bf3c
+[  331.5131] SIF     : SIF0 DMA start...
+[  331.5131] SIF     :   SIF + 4 = 4 (pos=120)
+[  331.5131] SIF     : SIF0 IOP Tag: madr=4f390, tadr=1bf4c, counter=20 (00000020_0004F390) Junk 0
+[  331.5131] SIF     :   SIF - 4 = 0 (pos=120)
+[  331.5131] SIF     : SIF0 EE read tag: 10000008 5c0100 8004faa0 20
+[  331.5131] SIF     : SIF0 EE dest chain tag madr:005C0100 qwc:0008 id:1 irq:0(005C0100_10000008)
+[  331.5131] SIF     : Write IOP to Fifo: +++++++++++ 20 of 20
+[  331.5131] SIF     :   SIF + 32 = 32 (pos=24)
+[  331.5131] SIF     : Write Fifo to EE: ----------- 20 of 20
+[  331.5131] SIF     :   SIF - 32 = 0 (pos=24)
+[  331.5131] SIF     :   SIF + 4 = 4 (pos=28)
+[  331.5131] SIF     : SIF0 IOP Tag: madr=4faa0, tadr=1bf5c, counter=20 (00000020_8004FAA0) Junk 0
+[  331.5131] SIF     :   SIF - 4 = 0 (pos=28)
+[  331.5131] SIF     : SIF0 EE read tag: 10000008 5c0300 34d24 200
+[  331.5131] SIF     : SIF0 EE dest chain tag madr:005C0300 qwc:0008 id:1 irq:0(005C0300_10000008)
+[  331.5131] SIF     : Write IOP to Fifo: +++++++++++ 20 of 20
+[  331.5131] SIF     :   SIF + 32 = 32 (pos=60)
+[  331.5131] SIF     : Write Fifo to EE: ----------- 20 of 20
+[  331.5131] SIF     :   SIF - 32 = 0 (pos=60)
+[  331.5131] SIF     : Sif0: End IOP
+[  331.5131] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 4faa0)
+[  331.5132] Bios    :  thevent.006: SetEventFlag (12eea1b, 1, 0, 4faa0)
+[  331.5132] Bios    :  intrman.023: QueryIntrContext (12eea1b, 1, 0, 4faa0)
+[  331.5132] Bios    :  intrman.017: CpuSuspendIntr (1f0280, 1, 0, 4faa0)
+[  331.5132] Bios    :  intrman.018: CpuResumeIntr (1, 97670, 170, e)
+[  331.5132] Bios    :  thevent.010: WaitEventFlag (12eea1b, 80, 10, 0)
+[  331.5132] Bios    :  intrman.023: QueryIntrContext (12eea1b, 80, 10, 0)
+[  331.5132] Bios    :  intrman.017: CpuSuspendIntr (1f0288, 80, 10, 0)
+[  331.5133] Bios    :  thevent.008: ClearEventFlag (12eea1b, fffffffe, 0, dd1e06d)
+[  331.5133] Bios    :  intrman.023: QueryIntrContext (12eea1b, fffffffe, 0, dd1e06d)
+[  331.5133] Bios    :  intrman.017: CpuSuspendIntr (1ef1e0, fffffffe, 0, dd1e06d)
+[  331.5133] Bios    :  intrman.018: CpuResumeIntr (1, 97750, 0, dd1e06d)
+[  331.5136] Bios    :  thevent.006: SetEventFlag (12eea1b, 80, 15, 4f498)
+[  331.5136] Bios    :  intrman.023: QueryIntrContext (12eea1b, 80, 15, 4f498)
+[  331.5136] Bios    :  intrman.017: CpuSuspendIntr (1ef218, 80, 15, 4f498)
+[  331.5136] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5136] Bios    :  thevent.010: WaitEventFlag (12eea1b, 1100, 1, 1ef228)
+[  331.5136] Bios    :  intrman.023: QueryIntrContext (12eea1b, 1100, 1, 1ef228)
+[  331.5136] Bios    :  intrman.017: CpuSuspendIntr (1ef1b0, 1100, 1, 1ef228)
+[  331.5137] Bios    :  thevent.006: SetEventFlag (12e821d, 2, 0, 7b8adfc)
+[  331.5137] Bios    :  intrman.023: QueryIntrContext (12e821d, 2, 0, 7b8adfc)
+[  331.5137] Bios    :  intrman.017: CpuSuspendIntr (1f0280, 2, 0, 7b8adfc)
+[  331.5138] Bios    :  intrman.018: CpuResumeIntr (1, 97330, 170, e)
+[  331.5138] Bios    :  thevent.010: WaitEventFlag (12e821d, 80, 10, 0)
+[  331.5138] Bios    :  intrman.023: QueryIntrContext (12e821d, 80, 10, 0)
+[  331.5138] Bios    :  intrman.017: CpuSuspendIntr (1f0288, 80, 10, 0)
+[  331.5138] Bios    :  thevent.008: ClearEventFlag (12e821d, fffffffd, 0, dd1ea45)
+[  331.5138] Bios    :  intrman.023: QueryIntrContext (12e821d, fffffffd, 0, dd1ea45)
+[  331.5138] Bios    :  intrman.017: CpuSuspendIntr (1e76e8, fffffffd, 0, dd1ea45)
+[  331.5138] Bios    :  intrman.018: CpuResumeIntr (1, 97410, 0, dd1ea45)
+[  331.5139] Bios    :  thevent.006: SetEventFlag (12e821d, 80, 5, 4fba8)
+[  331.5139] Bios    :  intrman.023: QueryIntrContext (12e821d, 80, 5, 4fba8)
+[  331.5139] Bios    :  intrman.017: CpuSuspendIntr (1e7720, 80, 5, 4fba8)
+[  331.5139] Bios    :  intrman.018: CpuResumeIntr (1, 97780, 170, e)
+[  331.5139] Bios    :  thevent.010: WaitEventFlag (12e821d, 1100, 1, 1e7730)
+[  331.5139] Bios    :  intrman.023: QueryIntrContext (12e821d, 1100, 1, 1e7730)
+[  331.5139] Bios    :  intrman.017: CpuSuspendIntr (1e76b8, 1100, 1, 1e7730)
+[  331.5140] Bios    :  thevent.010: WaitEventFlag (12f0c19, 1004, 1, 1f0290)
+[  331.5140] Bios    :  intrman.023: QueryIntrContext (12f0c19, 1004, 1, 1f0290)
+[  331.5140] Bios    :  intrman.017: CpuSuspendIntr (1f0218, 1004, 1, 1f0290)
+[  331.5141] Bios    :  intrman.017: CpuSuspendIntr (1fa588, ac000000, 0, dd1ee35)
+[  331.5141] Bios    :  intrman.018: CpuResumeIntr (1, ac000000, 0, dd1ee35)
+[  331.5141] Bios    :  cdvdman.008: sceCdGetError (3e448, 0, 3e040, dd1ee35)
+[  331.5141] Bios    :  intrman.017: CpuSuspendIntr (1fa580, 38621, 3e040, dd1ee35)
+[  331.5141] Bios    :  intrman.018: CpuResumeIntr (1, 0, 3e040, dd1ee35)
+[  331.5141] Bios    :  intrman.017: CpuSuspendIntr (1fa4f8, 4, 1f530, 40)
+[  331.5141] Bios    :   sifman.007: sceSifSetDma (1fa4d8, 2, 1f530, 40)
+[  331.5141] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 4fb20, bcr = 20, tadr = 1c13c
+[  331.5141] SIF     : SIF0 DMA start...
+[  331.5141] SIF     :   SIF + 4 = 4 (pos=64)
+[  331.5141] SIF     : SIF0 IOP Tag: madr=3e040, tadr=1c14c, counter=1 (00000001_0003E040) Junk 3
+[  331.5141] SIF     :   SIF - 4 = 0 (pos=64)
+[  331.5141] SIF     : SIF0 EE read tag: 10000001 452800 8001f530 10
+[  331.5141] SIF     : SIF0 EE dest chain tag madr:00452800 qwc:0001 id:1 irq:0(00452800_10000001)
+[  331.5141] SIF     : Write IOP to Fifo: +++++++++++ 1 of 1
+[  331.5141] SIF     :   SIF + 1 = 1 (pos=65)
+[  331.5141] SIF     : Writing Junk 3
+[  331.5141] SIF     :   SIF + 3 = 4 Junk (pos=68)
+[  331.5141] SIF     :   SIF + 4 = 8 (pos=72)
+[  331.5141] SIF     : SIF0 IOP Tag: madr=1f530, tadr=1c15c, counter=10 (00000010_8001F530) Junk 0
+[  331.5141] SIF     : Write Fifo to EE: ----------- 4 of 4
+[  331.5141] SIF     :   SIF - 4 = 4 (pos=68)
+[  331.5142] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5142] SIF     :   SIF + 16 = 20 (pos=88)
+[  331.5142] SIF     :   SIF - 4 = 16 (pos=72)
+[  331.5142] SIF     : SIF0 EE read tag: 90000004 52bc00 34d24 200
+[  331.5142] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0004 id:1 irq:1(0052BC00_90000004)
+[  331.5142] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5142] SIF     :   SIF - 16 = 0 (pos=88)
+[  331.5142] SIF     : Sif0: End IOP
+[  331.5142] SIF     : Sif0: End EE
+[  331.5142] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 1f530)
+[  331.5142] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5142] SIF     : dmaSIF0 chcr = 184, madr = 52bc40, qwc  = 0, tadr = 0
+[  331.5142] SIF     : SIF0 DMA start...
+[  331.5142] Bios    : Bios call: iSignalSema (43)
+[  331.5142] Bios    : Bios call: RFU005 (5)
+[  331.5142] Bios    : Bios call: DeleteSema (41)
+[  331.5142] Bios    : Bios call: SignalSema (42)
+[  331.5142] Bios    : Bios call: PollSema (45)
+[  331.5142] Bios    : Bios call: ReferThreadStatus (30)
+[  331.5142] Bios    : Bios call: CreateSema (40)
+[  331.5142] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5142] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=184, attr=0, dest=40, src=2052be80
+[  331.5142] SIF     : dmaSIF1 chcr = 184, madr = 21cd0, qwc  = 0, tadr = 21470
+[  331.5142] SIF     : SIF1 DMA start...
+[  331.5142] SIF     : Sif1: ProcessEETag
+[  331.5142] SIF     : REFE 00000005
+[  331.5142] SIF     : Sif 1: Write EE to Fifo
+[  331.5142] SIF     :   SIF + 20 = 20 (pos=88)
+[  331.5142] SIF     :   SIF - 4 = 16 (pos=72)
+[  331.5142] SIF     : SIF 1 IOP: dest chain tag madr:0001E2C0 wc:0010 id:4 irq:1
+[  331.5142] SIF     : Sif 1: End EE
+[  331.5142] SIF     : Sif1: Write Fifo to IOP
+[  331.5142] SIF     : Sif 1 IOP doing transfer 0010 to 0001E2C0
+[  331.5142] SIF     :   SIF - 16 = 0 (pos=88)
+[  331.5142] SIF     : Sif 1: End IOP
+[  331.5142] Bios    : Bios call: WaitSema (44)
+[  331.5143] Bios    :   sifman.006: sceSifSetDChain (1e300, 5e98, 10, 1e2c0)
+[  331.5143] SIF     : IOP: dmaSIF1 chcr = 41000300, madr = 1e300, bcr = 20
+[  331.5143] SIF     : SIF1 DMA start...
+[  331.5143] Bios    :   thbase.026: iWakeupThread (719615, 3dde0, a, 5e58)
+[  331.5143] Bios    :  intrman.023: QueryIntrContext (719615, 3dde0, a, 5e58)
+[  331.5143] Bios    :  intrman.017: CpuSuspendIntr (1fa588, bf801528, 1c13c, 1f530)
+[  331.5144] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 1f530)
+[  331.5144] Bios    :   thbase.024: SleepThread (1, bf801528, 1c13c, 1f530)
+[  331.5144] Bios    :  intrman.023: QueryIntrContext (1, bf801528, 1c13c, 1f530)
+[  331.5144] Bios    :  intrman.017: CpuSuspendIntr (1fa590, bf801528, 1c13c, 1f530)
+[  331.5145] Bios    :  intrman.017: CpuSuspendIntr (1f8c88, ac000000, 0, 3a24db6)
+[  331.5145] Bios    :  intrman.018: CpuResumeIntr (1, ac000000, 0, 3a24db6)
+[  331.5145] Bios    :  cdvdman.050: _sceCdSC (fffffff6, 1f8c48, 0, 3a24db6)
+[  331.5145] Bios    :  thevent.010: WaitEventFlag (71e211, 1, 10, 1f8c08)
+[  331.5145] Bios    :  intrman.023: QueryIntrContext (71e211, 1, 10, 1f8c08)
+[  331.5145] Bios    :  intrman.017: CpuSuspendIntr (1f8bd8, 1, 10, 1f8c08)
+[  331.5145] Bios    :  intrman.018: CpuResumeIntr (1, 1, 38f10, 1f8c08)
+[  331.5145] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5145] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5145] CDVD    : cdvdRead05(NReady) 4c
+[  331.5145] Bios    :  cdvdman.050: _sceCdSC (fffffffd, 1f8c00, 38f10, 1f8c08)
+[  331.5145] Bios    :  cdvdman.050: _sceCdSC (fffffff4, 1f8c00, 38f10, 1f8c08)
+[  331.5145] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5145] Bios    :  cdvdman.050: _sceCdSC (fffffff6, 1f8c30, 38f10, 1f8c08)
+[  331.5146] Bios    :  thevent.006: SetEventFlag (71e211, 1, 38f10, 1f8c08)
+[  331.5146] Bios    :  intrman.023: QueryIntrContext (71e211, 1, 38f10, 1f8c08)
+[  331.5146] Bios    :  intrman.017: CpuSuspendIntr (1f8bd0, 1, 38f10, 1f8c08)
+[  331.5146] Bios    :  intrman.018: CpuResumeIntr (1, 1, 38f10, 1f8c08)
+[  331.5146] Bios    :  intrman.017: CpuSuspendIntr (1f8c80, 0, 38f10, 1f8c08)
+[  331.5146] Bios    :  intrman.018: CpuResumeIntr (1, 0, 38f10, 1f8c08)
+[  331.5146] Bios    :  intrman.017: CpuSuspendIntr (1f8bf8, 4, 1f530, 40)
+[  331.5146] Bios    :   sifman.007: sceSifSetDma (1f8bd8, 2, 1f530, 40)
+[  331.5146] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 1f570, bcr = 20, tadr = 1bf3c
+[  331.5146] SIF     : SIF0 DMA start...
+[  331.5146] SIF     :   SIF + 4 = 4 (pos=92)
+[  331.5146] SIF     : SIF0 IOP Tag: madr=3e000, tadr=1bf4c, counter=1 (00000001_0003E000) Junk 3
+[  331.5146] SIF     :   SIF - 4 = 0 (pos=92)
+[  331.5146] SIF     : SIF0 EE read tag: 10000001 451680 8001f530 10
+[  331.5146] SIF     : SIF0 EE dest chain tag madr:00451680 qwc:0001 id:1 irq:0(00451680_10000001)
+[  331.5146] SIF     : Write IOP to Fifo: +++++++++++ 1 of 1
+[  331.5146] SIF     :   SIF + 1 = 1 (pos=93)
+[  331.5146] SIF     : Writing Junk 3
+[  331.5146] SIF     :   SIF + 3 = 4 Junk (pos=96)
+[  331.5146] SIF     :   SIF + 4 = 8 (pos=100)
+[  331.5146] SIF     : SIF0 IOP Tag: madr=1f530, tadr=1bf5c, counter=10 (00000010_8001F530) Junk 0
+[  331.5146] SIF     : Write Fifo to EE: ----------- 4 of 4
+[  331.5146] SIF     :   SIF - 4 = 4 (pos=96)
+[  331.5146] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5146] SIF     :   SIF + 16 = 20 (pos=116)
+[  331.5146] SIF     :   SIF - 4 = 16 (pos=100)
+[  331.5146] SIF     : SIF0 EE read tag: 90000004 52bc00 34d24 200
+[  331.5146] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0004 id:1 irq:1(0052BC00_90000004)
+[  331.5146] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5146] SIF     :   SIF - 16 = 0 (pos=116)
+[  331.5146] SIF     : Sif0: End IOP
+[  331.5146] SIF     : Sif0: End EE
+[  331.5146] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 1f530)
+[  331.5146] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5146] SIF     : dmaSIF0 chcr = 184, madr = 52bc40, qwc  = 0, tadr = 0
+[  331.5146] SIF     : SIF0 DMA start...
+[  331.5146] Bios    : Bios call: iSignalSema (43)
+[  331.5146] Bios    : Bios call: RFU005 (5)
+[  331.5146] Bios    : Bios call: DeleteSema (41)
+[  331.5147] Bios    : Bios call: SignalSema (42)
+[  331.5147] Bios    : Bios call: PollSema (45)
+[  331.5147] Bios    : Bios call: ReferThreadStatus (30)
+[  331.5147] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5147] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=1, size=0, attr=0, dest=2052be80, src=40
+[  331.5147] Bios    :  intrman.017: CpuSuspendIntr (1f8c88, bf801528, 1bf3c, 1f530)
+[  331.5147] SIF     : dmaSIF1 chcr = 184, madr = 21d50, qwc  = 0, tadr = 21480
+[  331.5147] SIF     : SIF1 DMA start...
+[  331.5147] SIF     : Sif1: ProcessEETag
+[  331.5147] SIF     : REF 30000003
+[  331.5147] SIF     : Sif 1: Write EE to Fifo
+[  331.5147] SIF     :   SIF + 12 = 12 (pos=100)
+[  331.5147] SIF     :   SIF - 4 = 8 (pos=92)
+[  331.5147] SIF     : SIF 1 IOP: dest chain tag madr:0003E858 wc:0008 id:0 irq:0
+[  331.5147] SIF     : Sif1: ProcessEETag
+[  331.5147] SIF     : REFE 00000005
+[  331.5147] SIF     : Sif1: Write Fifo to IOP
+[  331.5147] SIF     : Sif 1 IOP doing transfer 0008 to 0003E858
+[  331.5147] SIF     :   SIF - 8 = 0 (pos=100)
+[  331.5147] SIF     : Sif 1: Write EE to Fifo
+[  331.5147] SIF     :   SIF + 20 = 20 (pos=120)
+[  331.5147] SIF     :   SIF - 4 = 16 (pos=104)
+[  331.5147] SIF     : SIF 1 IOP: dest chain tag madr:0001E2C0 wc:0010 id:4 irq:1
+[  331.5147] SIF     : Sif 1: End EE
+[  331.5147] SIF     : Sif1: Write Fifo to IOP
+[  331.5147] SIF     : Sif 1 IOP doing transfer 0010 to 0001E2C0
+[  331.5147] SIF     :   SIF - 16 = 0 (pos=120)
+[  331.5147] SIF     : Sif 1: End IOP
+[  331.5147] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 1f530)
+[  331.5147] Bios    : Bios call: WaitSema (44)
+[  331.5148] Bios    :   sifman.006: sceSifSetDChain (1e300, 5e98, 10, 1e2c0)
+[  331.5148] SIF     : IOP: dmaSIF1 chcr = 41000300, madr = 1e300, bcr = 20
+[  331.5148] SIF     : SIF1 DMA start...
+[  331.5148] Bios    :   thbase.026: iWakeupThread (719615, 3dde0, a, 5e58)
+[  331.5148] Bios    :  intrman.023: QueryIntrContext (719615, 3dde0, a, 5e58)
+[  331.5148] Bios    :   thbase.024: SleepThread (1, bf801528, 1bf3c, 1f530)
+[  331.5148] Bios    :  intrman.023: QueryIntrContext (1, bf801528, 1bf3c, 1f530)
+[  331.5148] Bios    :  intrman.017: CpuSuspendIntr (1f8c90, bf801528, 1bf3c, 1f530)
+[  331.5148] Bios    :  intrman.018: CpuResumeIntr (1, 38cb0, 1bf3c, 1f530)
+[  331.5148] Bios    :  intrman.017: CpuSuspendIntr (1f8c88, 38cb0, 1bf3c, 1f530)
+[  331.5148] Bios    :  intrman.018: CpuResumeIntr (1, 38cb0, 1bf3c, 1f530)
+[  331.5148] Bios    :  cdvdman.050: _sceCdSC (fffffff6, 1f8c48, 18, 1f530)
+[  331.5149] Bios    :  thevent.010: WaitEventFlag (71e211, 1, 10, 1f8c08)
+[  331.5149] Bios    :  intrman.023: QueryIntrContext (71e211, 1, 10, 1f8c08)
+[  331.5149] Bios    :  intrman.017: CpuSuspendIntr (1f8bd8, 1, 10, 1f8c08)
+[  331.5149] Bios    :  intrman.018: CpuResumeIntr (1, 1, 38f10, 1f8c08)
+[  331.5149] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5149] Bios    :  cdvdman.050: _sceCdSC (fffffffc, 1f8c30, 38f10, 1f8c08)
+[  331.5149] Bios    :  cdvdman.050: _sceCdSC (ffffffea, 1f8bc0, 3e000, 1)
+[  331.5149] Bios    :  intrman.023: QueryIntrContext (ffffffea, 1f8bc0, 3e000, 1)
+[  331.5149] Bios    :  thevent.011: PollEventFlag (71f40b, 1, 10, 1f8b30)
+[  331.5149] Bios    :  intrman.023: QueryIntrContext (71f40b, 1, 10, 1f8b30)
+[  331.5149] Bios    :  intrman.017: CpuSuspendIntr (1f8af8, 1, 10, 1f8b30)
+[  331.5149] Bios    :  intrman.018: CpuResumeIntr (1, 1, 10, 1f8b30)
+[  331.5149] CDVD    : cdvdRead0B(Status Sticky): 1e
+[  331.5149] CDVD    : cdvdRead0A(Status) a
+[  331.5149] CDVD    : cdvdRead0B(Status Sticky): 1e
+[  331.5149] Bios    :  intrman.023: QueryIntrContext (71f40b, 1, 10, 1f8b30)
+[  331.5149] Bios    :  thevent.006: SetEventFlag (71f40b, 1, 10, 1f8b30)
+[  331.5149] Bios    :  intrman.023: QueryIntrContext (71f40b, 1, 10, 1f8b30)
+[  331.5150] Bios    :  intrman.017: CpuSuspendIntr (1f8ad0, 1, 10, 1f8b30)
+[  331.5150] Bios    :  intrman.018: CpuResumeIntr (1, 1, 10, 1f8b30)
+[  331.5150] Bios    :  cdvdman.050: _sceCdSC (ffffffe9, 1f8bc4, 10, 1f8b30)
+[  331.5150] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5150] Bios    :  intrman.023: QueryIntrContext (14b555, 1f8bc4, 10, 1f8b30)
+[  331.5150] Bios    :  thevent.011: PollEventFlag (71f40b, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  intrman.023: QueryIntrContext (71f40b, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  intrman.017: CpuSuspendIntr (1f8ab0, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  intrman.018: CpuResumeIntr (1, 1, 10, 1f8ae8)
+[  331.5150] CDVD    : cdvdRead0B(Status Sticky): 1e
+[  331.5150] CDVD    : cdvdRead0A(Status) a
+[  331.5150] CDVD    : cdvdRead0B(Status Sticky): 1e
+[  331.5150] Bios    :  intrman.023: QueryIntrContext (71f40b, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  thevent.006: SetEventFlag (71f40b, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  intrman.023: QueryIntrContext (71f40b, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  intrman.017: CpuSuspendIntr (1f8a88, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  intrman.018: CpuResumeIntr (1, 1, 10, 1f8ae8)
+[  331.5150] Bios    :  cdvdman.050: _sceCdSC (fffffff1, 1f8b30, 3dcd0, 1)
+[  331.5151] Bios    :  intrman.017: CpuSuspendIntr (1f8b34, 1f8b30, 3dcd0, 1)
+[  331.5151] Bios    :  cdvdman.063: _sceCdRV (14b555, 10, 33cf8, 3dcd0)
+[  331.5151] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5151] Bios    :  thevent.011: PollEventFlag (71ee0d, 1, 10, 1f8ae8)
+[  331.5151] Bios    :  intrman.023: QueryIntrContext (71ee0d, 1, 10, 1f8ae8)
+[  331.5151] Bios    :  intrman.017: CpuSuspendIntr (1f8a88, 1, 10, 1f8ae8)
+[  331.5151] Bios    :  intrman.018: CpuResumeIntr (0, 1, 10, 1f8ae8)
+[  331.5151] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5151] CDVD    : cdvdRead05(NReady) 4c
+[  331.5151] Bios    :  dmacman.009:  (3, 1f8ad8, b, e)
+[  331.5151] Bios    :  dmacman.008:  (3, 0, 10, 33cf8)
+[  331.5151] Bios    :  dmacman.009:  (3, 0, 10, 33cf8)
+[  331.5151] Bios    :  intrman.023: QueryIntrContext (71fa09, ffffffdf, 10, 33cf8)
+[  331.5151] Bios    :  thevent.008: ClearEventFlag (71fa09, ffffffdf, 10, 33cf8)
+[  331.5151] Bios    :  intrman.023: QueryIntrContext (71fa09, ffffffdf, 10, 33cf8)
+[  331.5151] Bios    :  intrman.017: CpuSuspendIntr (1f8a18, ffffffdf, 10, 33cf8)
+[  331.5151] Bios    :  intrman.018: CpuResumeIntr (0, 38fd0, 10, 33cf8)
+[  331.5151] Bios    :  intrman.006: EnableIntr (23, 38fd0, 10, 33cf8)
+[  331.5152] CDVD    : cdvdWrite06(HowTo) 8c
+[  331.5152] Bios    :  dmacman.004:  (3, 33cf8, bf801574, 880000)
+[  331.5152] Bios    :  dmacman.006:  (3, 158000c, 158, 880000)
+[  331.5152] Bios    :  dmacman.008:  (3, 41000200, 158, 880000)
+[  331.5152] CDVD    : *** DMA 3 *** 41000200 addr = 33cf8 size = 158000c
+[  331.5152] Bios    :  dmacman.009:  (3, 41000200, 158, 880000)
+[  331.5152] CDVD    : cdvdRead0F(Disc Type) Engaged 14
+[  331.5152] Bios    :   thbase.020: GetThreadId (3, 1, 158, 880000)
+[  331.5152] Bios    :  intrman.023: QueryIntrContext (3, 1, 158, 880000)
+[  331.5152] Bios    :  intrman.023: QueryIntrContext (1f8a58, 1, 158, 880000)
+[  331.5152] Bios    :  thevent.008: ClearEventFlag (71fa09, fffffffe, 158, 880000)
+[  331.5152] Bios    :  intrman.023: QueryIntrContext (71fa09, fffffffe, 158, 880000)
+[  331.5152] Bios    :  intrman.017: CpuSuspendIntr (1f8a58, fffffffe, 158, 880000)
+[  331.5152] Bios    :  intrman.018: CpuResumeIntr (0, 38fd0, 158, 880000)
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 55
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) b5
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 14
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 0
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 10
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 0
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 0
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 0
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 0
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 83
+[  331.5152] CDVD    : cdvdWrite05(NDataIn) 0
+[  331.5152] CDVD    : cdvdWrite04: NCMD CdReadDVDV (8) (ParamP = b)
+[  331.5152] CDVD    : DvdRead > startSector=1357141, seekTo=1357141 nSectors=16, RetryCnt=100, Speed=4x(CAV), ReadMode=3(0) SpindleCtrl=83
+[  331.5152] CDVD    : CdSeek Begin > Contiguous block without seek - delta=0 sectors
+[  331.5152] CDVD    : cdvdRead04(NCMD) 8
+[  331.5152] Bios    :  intrman.023: QueryIntrContext (71ee0d, 1, 158, 880000)
+[  331.5152] Bios    :  thevent.006: SetEventFlag (71ee0d, 1, 158, 880000)
+[  331.5153] Bios    :  intrman.023: QueryIntrContext (71ee0d, 1, 158, 880000)
+[  331.5153] Bios    :  intrman.017: CpuSuspendIntr (1f8a60, 1, 158, 880000)
+[  331.5153] Bios    :  intrman.018: CpuResumeIntr (0, 1, 158, 880000)
+[  331.5153] Bios    :  intrman.018: CpuResumeIntr (1, 1, 158, 880000)
+[  331.5153] Bios    :   thbase.035: SetAlarm (3dd18, 398f8, 3dd18, 880000)
+[  331.5153] Bios    :  intrman.023: QueryIntrContext (3dd18, 398f8, 3dd18, 880000)
+[  331.5153] Bios    :  intrman.017: CpuSuspendIntr (1f8af0, 398f8, 3dd18, 880000)
+[  331.5153] Bios    :  intrman.014:  (115f8, 1f8ae8, 3dd18, 880000)
+[  331.5153] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 3dd18, 880000, 880000)
+[  331.5153] Bios    :  intrman.014:  (115f8, 1f8ae8, 5, 12c40)
+[  331.5153] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 5, 12c40, 12c40)
+[  331.5154] Bios    :  timrman.011: SetTimerCompare (6bf8014a, 7d907e93, bf88a, 0)
+[  331.5154] Bios    :  intrman.018: CpuResumeIntr (1, 7d907e93, bf88a, 0)
+[  331.5154] Bios    :  cdvdman.011: sceCdSync (20, 7d907e93, bf88a, 0)
+[  331.5154] Bios    :  thevent.010: WaitEventFlag (71fa09, 21, 1, 1f8b00)
+[  331.5154] Bios    :  intrman.023: QueryIntrContext (71fa09, 21, 1, 1f8b00)
+[  331.5154] Bios    :  intrman.017: CpuSuspendIntr (1f8aa8, 21, 1, 1f8b00)
+[  331.5155] CDVD    : SECTOR 1357141 (BCR 158;c)
+[  331.5156] CDVD    : SECTOR 1357142 (BCR 12d;c)
+[  331.5156] CDVD    : SECTOR 1357143 (BCR 102;c)
+[  331.5157] Bios    :  thevent.007: iSetEventFlag (25dd05, 4, 80000000, 1395c)
+[  331.5157] Bios    :  intrman.023: QueryIntrContext (25dd05, 4, 80000000, 1395c)
+[  331.5157] Bios    :  thevent.007: iSetEventFlag (25dd05, 8, 80000000, 1395c)
+[  331.5157] Bios    :  intrman.023: QueryIntrContext (25dd05, 8, 80000000, 1395c)
+[  331.5157] Bios    :  thevent.009: iClearEventFlag (25dd05, fffffff9, 80000000, 1395c)
+[  331.5157] Bios    :  intrman.023: QueryIntrContext (25dd05, fffffff9, 80000000, 1395c)
+[  331.5157] Bios    : Bios call: iSignalSema (43)
+[  331.5157] Bios    : Bios call: RFU005 (5)
+[  331.5157] Bios    : Bios call: RFU005 (5)
+[  331.5157] CDVD    : Buffering sector
+[  331.5157] Bios    : Bios call: WaitSema (44)
+[  331.5157] CDVD    : SECTOR 1357144 (BCR d7;c)
+[  331.5157] CDVD    : SECTOR 1357145 (BCR ac;c)
+[  331.5158] CDVD    : SECTOR 1357146 (BCR 81;c)
+[  331.5158] CDVD    : Buffering sector
+[  331.5158] Bios    : Bios call: WaitSema (44)
+[  331.5158] Bios    : Bios call: SignalSema (42)
+[  331.5158] CDVD    : SECTOR 1357147 (BCR 56;c)
+[  331.5158] Bios    : Bios call: SignalSema (42)
+[  331.5158] Bios    : Bios call: WaitSema (44)
+[  331.5158] Bios    : Bios call: SignalSema (42)
+[  331.5158] Bios    : Bios call: WaitSema (44)
+[  331.5159] Bios    : Bios call: iSignalSema (43)
+[  331.5159] Bios    : Bios call: RFU005 (5)
+[  331.5159] Bios    : Bios call: WaitSema (44)
+[  331.5159] Bios    : Bios call: SignalSema (42)
+[  331.5159] Bios    : Bios call: WaitSema (44)
+[  331.5159] Bios    : Bios call: GetThreadId (2f)
+[  331.5159] Bios    : Bios call: WaitSema (44)
+[  331.5160] Bios    : Bios call: GetThreadId (2f)
+[  331.5160] Bios    : Bios call: SignalSema (42)
+[  331.5162] CDVD    : SECTOR 1357148 (BCR 2b;c)
+[  331.5162] Bios    :  thevent.007: iSetEventFlag (71fa09, 20, 1, 4ad8)
+[  331.5162] Bios    :  intrman.023: QueryIntrContext (71fa09, 20, 1, 4ad8)
+[  331.5163] Bios    :  thevent.013: ReferEventFlagStatus (71fa09, 1f8ae0, 4, c9c0e24a)
+[  331.5163] Bios    :  intrman.023: QueryIntrContext (71fa09, 1f8ae0, 4, c9c0e24a)
+[  331.5163] Bios    :  intrman.017: CpuSuspendIntr (1f8ab0, 1f8ae0, 4, c9c0e24a)
+[  331.5163] Bios    :  intrman.018: CpuResumeIntr (1, 1f8ae0, 4, c9c0e24a)
+[  331.5163] Bios    :  cdvdman.008: sceCdGetError (1, 1f8ae0, 4, c9c0e24a)
+[  331.5163] Bios    :  intrman.017: CpuSuspendIntr (1f8b34, 0, 0, 20)
+[  331.5163] Bios    :   sifman.007: sceSifSetDma (3dbc0, 8, 0, 20)
+[  331.5164] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 1f570, bcr = 20, tadr = 1c13c
+[  331.5164] SIF     : SIF0 DMA start...
+[  331.5164] SIF     :   SIF + 4 = 4 (pos=120)
+[  331.5164] SIF     : SIF0 IOP Tag: madr=33d04, tadr=1c14c, counter=200 (00000200_00033D04) Junk 0
+[  331.5164] SIF     :   SIF - 4 = 0 (pos=120)
+[  331.5164] SIF     : SIF0 EE read tag: 10000080 d62500 34514 200
+[  331.5164] SIF     : SIF0 EE dest chain tag madr:00D62500 qwc:0080 id:1 irq:0(00D62500_10000080)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=120)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=120)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=120)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=120)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=120)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=120)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=120)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=120)
+[  331.5164] SIF     :   SIF + 4 = 4 (pos=124)
+[  331.5164] SIF     : SIF0 IOP Tag: madr=34514, tadr=1c15c, counter=200 (00000200_00034514) Junk 0
+[  331.5164] SIF     :   SIF - 4 = 0 (pos=124)
+[  331.5164] SIF     : SIF0 EE read tag: 10000080 d62d00 34d24 200
+[  331.5164] SIF     : SIF0 EE dest chain tag madr:00D62D00 qwc:0080 id:1 irq:0(00D62D00_10000080)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=124)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=124)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=124)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=124)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=124)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=124)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=124)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=124)
+[  331.5164] SIF     :   SIF + 4 = 4 (pos=0)
+[  331.5164] SIF     : SIF0 IOP Tag: madr=34d24, tadr=1c16c, counter=200 (00000200_00034D24) Junk 0
+[  331.5164] SIF     :   SIF - 4 = 0 (pos=0)
+[  331.5164] SIF     : SIF0 EE read tag: 10000080 d63500 35534 200
+[  331.5164] SIF     : SIF0 EE dest chain tag madr:00D63500 qwc:0080 id:1 irq:0(00D63500_10000080)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=0)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=0)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=0)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=0)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=0)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=0)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=0)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5164] SIF     :   SIF - 128 = 0 (pos=0)
+[  331.5164] SIF     :   SIF + 4 = 4 (pos=4)
+[  331.5164] SIF     : SIF0 IOP Tag: madr=35534, tadr=1c17c, counter=200 (00000200_00035534) Junk 0
+[  331.5164] SIF     :   SIF - 4 = 0 (pos=4)
+[  331.5164] SIF     : SIF0 EE read tag: 10000080 d63d00 35d44 200
+[  331.5164] SIF     : SIF0 EE dest chain tag madr:00D63D00 qwc:0080 id:1 irq:0(00D63D00_10000080)
+[  331.5164] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5164] SIF     :   SIF + 128 = 128 (pos=4)
+[  331.5164] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=4)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=4)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=4)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=4)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=4)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=4)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=4)
+[  331.5165] SIF     :   SIF + 4 = 4 (pos=8)
+[  331.5165] SIF     : SIF0 IOP Tag: madr=35d44, tadr=1c18c, counter=200 (00000200_00035D44) Junk 0
+[  331.5165] SIF     :   SIF - 4 = 0 (pos=8)
+[  331.5165] SIF     : SIF0 EE read tag: 10000080 d64500 36554 200
+[  331.5165] SIF     : SIF0 EE dest chain tag madr:00D64500 qwc:0080 id:1 irq:0(00D64500_10000080)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=8)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=8)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=8)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=8)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=8)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=8)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=8)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=8)
+[  331.5165] SIF     :   SIF + 4 = 4 (pos=12)
+[  331.5165] SIF     : SIF0 IOP Tag: madr=36554, tadr=1c19c, counter=200 (00000200_00036554) Junk 0
+[  331.5165] SIF     :   SIF - 4 = 0 (pos=12)
+[  331.5165] SIF     : SIF0 EE read tag: 10000080 d64d00 36d64 200
+[  331.5165] SIF     : SIF0 EE dest chain tag madr:00D64D00 qwc:0080 id:1 irq:0(00D64D00_10000080)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5165] SIF     :   SIF + 128 = 128 (pos=12)
+[  331.5165] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5165] SIF     :   SIF - 128 = 0 (pos=12)
+[  331.5165] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=12)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=12)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=12)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=12)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=12)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=12)
+[  331.5166] SIF     :   SIF + 4 = 4 (pos=16)
+[  331.5166] SIF     : SIF0 IOP Tag: madr=36d64, tadr=1c1ac, counter=200 (00000200_00036D64) Junk 0
+[  331.5166] SIF     :   SIF - 4 = 0 (pos=16)
+[  331.5166] SIF     : SIF0 EE read tag: 10000080 d65500 80037574 200
+[  331.5166] SIF     : SIF0 EE dest chain tag madr:00D65500 qwc:0080 id:1 irq:0(00D65500_10000080)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=16)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=16)
+[  331.5166] SIF     :   SIF + 4 = 4 (pos=20)
+[  331.5166] SIF     : SIF0 IOP Tag: madr=37574, tadr=1c1bc, counter=200 (00000200_80037574) Junk 0
+[  331.5166] SIF     :   SIF - 4 = 0 (pos=20)
+[  331.5166] SIF     : SIF0 EE read tag: 10000080 d65d00 0 0
+[  331.5166] SIF     : SIF0 EE dest chain tag madr:00D65D00 qwc:0080 id:1 irq:0(00D65D00_10000080)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=20)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=20)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=20)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=20)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=20)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=20)
+[  331.5166] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5166] SIF     :   SIF + 128 = 128 (pos=20)
+[  331.5166] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5166] SIF     :   SIF - 128 = 0 (pos=20)
+[  331.5166] SIF     : Sif0: End IOP
+[  331.5166] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 37574)
+[  331.5166] Bios    :   sifman.008: sceSifDmaStat (bf790008, bf801528, 1c13c, 37574)
+[  331.5166] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5166] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5166] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5166] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5167] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5168] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5169] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5170] Bios    :   sifman.008: sceSifDmaStat (bf790008, 1bf30, 1c13c, 37574)
+[  331.5170] Bios    :  intrman.017: CpuSuspendIntr (1f8b34, 1bf30, 1c13c, 37574)
+[  331.5170] Bios    :  thevent.008: ClearEventFlag (71fa09, ffffffdf, 1c13c, 37574)
+[  331.5170] Bios    :  intrman.023: QueryIntrContext (71fa09, ffffffdf, 1c13c, 37574)
+[  331.5170] Bios    :  intrman.017: CpuSuspendIntr (1f8af8, ffffffdf, 1c13c, 37574)
+[  331.5170] Bios    :  intrman.018: CpuResumeIntr (0, 38fd0, 1c13c, 37574)
+[  331.5170] Bios    :  dmacman.008:  (3, 0, 1c13c, 37574)
+[  331.5170] Bios    :  dmacman.009:  (3, 0, 1c13c, 37574)
+[  331.5170] Bios    :  dmacman.004:  (3, 33cf8, 1c13c, 37574)
+[  331.5170] Bios    :  dmacman.006:  (3, 158000c, 1c13c, 37574)
+[  331.5170] Bios    :  dmacman.008:  (3, 41000200, 1c13c, 37574)
+[  331.5171] CDVD    : *** DMA 3 *** 41000200 addr = 33cf8 size = 158000c
+[  331.5171] Bios    :  dmacman.009:  (3, 41000200, 1c13c, 37574)
+[  331.5171] Bios    :   sifman.007: sceSifSetDma (3dce8, 1, 1c13c, 37574)
+[  331.5171] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 37d74, bcr = 20, tadr = 1bf3c
+[  331.5171] SIF     : SIF0 DMA start...
+[  331.5171] SIF     :   SIF + 4 = 4 (pos=24)
+[  331.5171] SIF     : SIF0 IOP Tag: madr=3dfe8, tadr=1bf4c, counter=1 (00000001_8003DFE8) Junk 3
+[  331.5171] SIF     :   SIF - 4 = 0 (pos=24)
+[  331.5171] SIF     : SIF0 EE read tag: 10000001 4527c0 8001f530 10
+[  331.5171] SIF     : SIF0 EE dest chain tag madr:004527C0 qwc:0001 id:1 irq:0(004527C0_10000001)
+[  331.5171] SIF     : Write IOP to Fifo: +++++++++++ 1 of 1
+[  331.5171] SIF     :   SIF + 1 = 1 (pos=25)
+[  331.5171] SIF     : Writing Junk 3
+[  331.5171] SIF     :   SIF + 3 = 4 Junk (pos=28)
+[  331.5171] SIF     : Sif0: End IOP
+[  331.5171] SIF     : Write Fifo to EE: ----------- 4 of 4
+[  331.5171] SIF     :   SIF - 4 = 0 (pos=28)
+[  331.5171] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 3dfe8)
+[  331.5172] Bios    :  cdvdman.011: sceCdSync (20, bf801528, 1bf3c, 3dfe8)
+[  331.5172] Bios    :  thevent.010: WaitEventFlag (71fa09, 21, 1, 1f8b00)
+[  331.5172] Bios    :  intrman.023: QueryIntrContext (71fa09, 21, 1, 1f8b00)
+[  331.5172] Bios    :  intrman.017: CpuSuspendIntr (1f8aa8, 21, 1, 1f8b00)
+[  331.5172] CDVD    : SECTOR 1357149 (BCR 158;c)
+[  331.5174] CDVD    : Buffering sector
+[  331.5175] CDVD    : SECTOR 1357150 (BCR 12d;c)
+[  331.5176] Bios    : Bios call: RFU005 (5)
+[  331.5177] CDVD    : SECTOR 1357151 (BCR 102;c)
+[  331.5177] CDVD    : SECTOR 1357152 (BCR d7;c)
+[  331.5177] Bios    : Bios call: WaitSema (44)
+[  331.5177] Bios    : Bios call: SignalSema (42)
+[  331.5177] Bios    : Bios call: SignalSema (42)
+[  331.5177] Bios    : Bios call: WaitSema (44)
+[  331.5177] Bios    : Bios call: SignalSema (42)
+[  331.5177] Bios    : Bios call: WaitSema (44)
+[  331.5177] CDVD    : Buffering sector
+[  331.5178] Bios    : Bios call: WaitSema (44)
+[  331.5178] CDVD    : SECTOR 1357153 (BCR ac;c)
+[  331.5178] CDVD    : SECTOR 1357154 (BCR 81;c)
+[  331.5178] CDVD    : SECTOR 1357155 (BCR 56;c)
+[  331.5178] CDVD    : Buffering sector
+[  331.5178] CDVD    : SECTOR 1357156 (BCR 2b;c)
+[  331.5178] CDVD    : cdvdRead06(Error) 0
+[  331.5178] CDVD    : cdvdRead08(IntrReason) 1
+[  331.5178] CDVD    : cdvdRead05(NReady) 4c
+[  331.5178] CDVD    : cdvdWrite08(IntrReason) = ACK(1)
+[  331.5178] CDVD    : cdvdRead08(IntrReason) 0
+[  331.5178] CDVD    : cdvdWrite08(IntrReason) = ACK(2)
+[  331.5178] Bios    :  thevent.014: iReferEventFlagStatus (71fa09, 5ee0, 80000000, 296f4)
+[  331.5178] Bios    :  intrman.023: QueryIntrContext (71fa09, 5ee0, 80000000, 296f4)
+[  331.5178] Bios    :  thevent.007: iSetEventFlag (71fa09, 20, 1, 4ad8)
+[  331.5178] Bios    :  intrman.023: QueryIntrContext (71fa09, 20, 1, 4ad8)
+[  331.5178] Bios    :  thevent.007: iSetEventFlag (71fa09, 29, 0, 11)
+[  331.5178] Bios    :  intrman.023: QueryIntrContext (71fa09, 29, 0, 11)
+[  331.5178] Bios    :  intrman.007: DisableIntr (23, 5e90, 0, 11)
+[  331.5178] CDVD    : cdvdRead13(Speed) 12
+[  331.5178] Bios    :  thevent.013: ReferEventFlagStatus (71fa09, 1f8ae0, 4, c9c1a2cc)
+[  331.5178] Bios    :  intrman.023: QueryIntrContext (71fa09, 1f8ae0, 4, c9c1a2cc)
+[  331.5178] Bios    :  intrman.017: CpuSuspendIntr (1f8ab0, 1f8ae0, 4, c9c1a2cc)
+[  331.5178] Bios    :  intrman.018: CpuResumeIntr (1, 1f8ae0, 4, c9c1a2cc)
+[  331.5178] Bios    :  cdvdman.008: sceCdGetError (1, 1f8ae0, 4, c9c1a2cc)
+[  331.5178] Bios    :  intrman.017: CpuSuspendIntr (1f8b34, 0, 0, 20)
+[  331.5178] Bios    :   sifman.007: sceSifSetDma (3dbc0, 8, 0, 20)
+[  331.5178] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 3dfec, bcr = 20, tadr = 1c13c
+[  331.5178] SIF     : SIF0 DMA start...
+[  331.5178] SIF     :   SIF + 4 = 4 (pos=32)
+[  331.5178] SIF     : SIF0 IOP Tag: madr=33d04, tadr=1c14c, counter=200 (00000200_00033D04) Junk 0
+[  331.5178] SIF     :   SIF - 4 = 0 (pos=32)
+[  331.5178] SIF     : SIF0 EE read tag: 10000080 d66500 34514 200
+[  331.5179] SIF     : SIF0 EE dest chain tag madr:00D66500 qwc:0080 id:1 irq:0(00D66500_10000080)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=32)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=32)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=32)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=32)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=32)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=32)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=32)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=32)
+[  331.5179] SIF     :   SIF + 4 = 4 (pos=36)
+[  331.5179] SIF     : SIF0 IOP Tag: madr=34514, tadr=1c15c, counter=200 (00000200_00034514) Junk 0
+[  331.5179] SIF     :   SIF - 4 = 0 (pos=36)
+[  331.5179] SIF     : SIF0 EE read tag: 10000080 d66d00 34d24 200
+[  331.5179] SIF     : SIF0 EE dest chain tag madr:00D66D00 qwc:0080 id:1 irq:0(00D66D00_10000080)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=36)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=36)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=36)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=36)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=36)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=36)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=36)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=36)
+[  331.5179] SIF     :   SIF + 4 = 4 (pos=40)
+[  331.5179] SIF     : SIF0 IOP Tag: madr=34d24, tadr=1c16c, counter=200 (00000200_00034D24) Junk 0
+[  331.5179] SIF     :   SIF - 4 = 0 (pos=40)
+[  331.5179] SIF     : SIF0 EE read tag: 10000080 d67500 35534 200
+[  331.5179] SIF     : SIF0 EE dest chain tag madr:00D67500 qwc:0080 id:1 irq:0(00D67500_10000080)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=40)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=40)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=40)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=40)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=40)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=40)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=40)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=40)
+[  331.5179] SIF     :   SIF + 4 = 4 (pos=44)
+[  331.5179] SIF     : SIF0 IOP Tag: madr=35534, tadr=1c17c, counter=200 (00000200_00035534) Junk 0
+[  331.5179] SIF     :   SIF - 4 = 0 (pos=44)
+[  331.5179] SIF     : SIF0 EE read tag: 10000080 d67d00 35d44 200
+[  331.5179] SIF     : SIF0 EE dest chain tag madr:00D67D00 qwc:0080 id:1 irq:0(00D67D00_10000080)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5179] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5179] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5179] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5179] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5180] SIF     :   SIF + 4 = 4 (pos=48)
+[  331.5180] SIF     : SIF0 IOP Tag: madr=35d44, tadr=1c18c, counter=200 (00000200_00035D44) Junk 0
+[  331.5180] SIF     :   SIF - 4 = 0 (pos=48)
+[  331.5180] SIF     : SIF0 EE read tag: 10000080 d68500 36554 200
+[  331.5180] SIF     : SIF0 EE dest chain tag madr:00D68500 qwc:0080 id:1 irq:0(00D68500_10000080)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=48)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=48)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=48)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=48)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=48)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=48)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=48)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=48)
+[  331.5180] SIF     :   SIF + 4 = 4 (pos=52)
+[  331.5180] SIF     : SIF0 IOP Tag: madr=36554, tadr=1c19c, counter=200 (00000200_00036554) Junk 0
+[  331.5180] SIF     :   SIF - 4 = 0 (pos=52)
+[  331.5180] SIF     : SIF0 EE read tag: 10000080 d68d00 36d64 200
+[  331.5180] SIF     : SIF0 EE dest chain tag madr:00D68D00 qwc:0080 id:1 irq:0(00D68D00_10000080)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=52)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=52)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=52)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=52)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=52)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=52)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=52)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=52)
+[  331.5180] SIF     :   SIF + 4 = 4 (pos=56)
+[  331.5180] SIF     : SIF0 IOP Tag: madr=36d64, tadr=1c1ac, counter=200 (00000200_00036D64) Junk 0
+[  331.5180] SIF     :   SIF - 4 = 0 (pos=56)
+[  331.5180] SIF     : SIF0 EE read tag: 10000080 d69500 80037574 200
+[  331.5180] SIF     : SIF0 EE dest chain tag madr:00D69500 qwc:0080 id:1 irq:0(00D69500_10000080)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=56)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=56)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=56)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=56)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=56)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=56)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=56)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=56)
+[  331.5180] SIF     :   SIF + 4 = 4 (pos=60)
+[  331.5180] SIF     : SIF0 IOP Tag: madr=37574, tadr=1c1bc, counter=200 (00000200_80037574) Junk 0
+[  331.5180] SIF     :   SIF - 4 = 0 (pos=60)
+[  331.5180] SIF     : SIF0 EE read tag: 10000080 d69d00 0 0
+[  331.5180] SIF     : SIF0 EE dest chain tag madr:00D69D00 qwc:0080 id:1 irq:0(00D69D00_10000080)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 200
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=60)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 200
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=60)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 180
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=60)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 180
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=60)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 100
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=60)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 100
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=60)
+[  331.5180] SIF     : Write IOP to Fifo: +++++++++++ 80 of 80
+[  331.5180] SIF     :   SIF + 128 = 128 (pos=60)
+[  331.5180] SIF     : Write Fifo to EE: ----------- 80 of 80
+[  331.5180] SIF     :   SIF - 128 = 0 (pos=60)
+[  331.5180] SIF     : Sif0: End IOP
+[  331.5181] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, bf801528, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5181] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7b0008, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :  intrman.017: CpuSuspendIntr (1f8b34, 1bf30, 1c13c, 37574)
+[  331.5182] Bios    :  intrman.007: DisableIntr (23, 1f8b38, 1c13c, 37574)
+[  331.5182] Bios    :  intrman.018: CpuResumeIntr (1, 80000, bf8010f4, 1)
+[  331.5182] Bios    :  cdvdman.011: sceCdSync (5, 80000, bf8010f4, 1)
+[  331.5182] Bios    :   thbase.037: CancelAlarm (398f8, 3dd18, bf8010f4, 1)
+[  331.5182] Bios    :  intrman.023: QueryIntrContext (398f8, 3dd18, bf8010f4, 1)
+[  331.5182] Bios    :  intrman.017: CpuSuspendIntr (1f8af8, 3dd18, bf8010f4, 1)
+[  331.5182] Bios    :  intrman.018: CpuResumeIntr (1, 12f70, bf8010f4, 1)
+[  331.5182] Bios    :  cdvdman.008: sceCdGetError (1, 12f70, bf8010f4, 1)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (0, 38621, bf8010f4, 1)
+[  331.5182] Bios    :  intrman.017: CpuSuspendIntr (1f8bc8, 38621, bf8010f4, 1)
+[  331.5182] Bios    :   sifman.007: sceSifSetDma (3dce8, 1, bf8010f4, 1)
+[  331.5182] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 37d74, bcr = 20, tadr = 1bf3c
+[  331.5182] SIF     : SIF0 DMA start...
+[  331.5182] SIF     :   SIF + 4 = 4 (pos=64)
+[  331.5182] SIF     : SIF0 IOP Tag: madr=3dfe8, tadr=1bf4c, counter=1 (00000001_8003DFE8) Junk 3
+[  331.5182] SIF     :   SIF - 4 = 0 (pos=64)
+[  331.5182] SIF     : SIF0 EE read tag: 10000001 4527c0 8001f530 10
+[  331.5182] SIF     : SIF0 EE dest chain tag madr:004527C0 qwc:0001 id:1 irq:0(004527C0_10000001)
+[  331.5182] SIF     : Write IOP to Fifo: +++++++++++ 1 of 1
+[  331.5182] SIF     :   SIF + 1 = 1 (pos=65)
+[  331.5182] SIF     : Writing Junk 3
+[  331.5182] SIF     :   SIF + 3 = 4 Junk (pos=68)
+[  331.5182] SIF     : Sif0: End IOP
+[  331.5182] SIF     : Write Fifo to EE: ----------- 4 of 4
+[  331.5182] SIF     :   SIF - 4 = 0 (pos=68)
+[  331.5182] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 3dfe8)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7c0001, bf801528, 1bf3c, 3dfe8)
+[  331.5182] Bios    :  intrman.017: CpuSuspendIntr (1f8bc8, 452700, 1bf3c, 3dfe8)
+[  331.5182] Bios    :   sifman.007: sceSifSetDma (3dcd8, 1, 1bf3c, 3dfe8)
+[  331.5182] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 3dfec, bcr = 20, tadr = 1c13c
+[  331.5182] SIF     : SIF0 DMA start...
+[  331.5182] SIF     :   SIF + 4 = 4 (pos=72)
+[  331.5182] SIF     : SIF0 IOP Tag: madr=3dd50, tadr=1c14c, counter=24 (00000024_8003DD50) Junk 0
+[  331.5182] SIF     :   SIF - 4 = 0 (pos=72)
+[  331.5182] SIF     : SIF0 EE read tag: 10000009 452700 34514 200
+[  331.5182] SIF     : SIF0 EE dest chain tag madr:00452700 qwc:0009 id:1 irq:0(00452700_10000009)
+[  331.5182] SIF     : Write IOP to Fifo: +++++++++++ 24 of 24
+[  331.5182] SIF     :   SIF + 36 = 36 (pos=108)
+[  331.5182] SIF     : Write Fifo to EE: ----------- 24 of 24
+[  331.5182] SIF     :   SIF - 36 = 0 (pos=108)
+[  331.5182] SIF     : Sif0: End IOP
+[  331.5182] Bios    :   sifman.007: sceSifSetDma (3dce8, 1, 1c13c, 3dd50)
+[  331.5182] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 3dde0, bcr = 20, tadr = 1bf3c
+[  331.5182] SIF     : SIF0 DMA start...
+[  331.5182] SIF     :   SIF + 4 = 4 (pos=112)
+[  331.5182] SIF     : SIF0 IOP Tag: madr=3dfe8, tadr=1bf4c, counter=1 (00000001_8003DFE8) Junk 3
+[  331.5182] SIF     :   SIF - 4 = 0 (pos=112)
+[  331.5182] SIF     : SIF0 EE read tag: 10000001 4527c0 8001f530 10
+[  331.5182] SIF     : SIF0 EE dest chain tag madr:004527C0 qwc:0001 id:1 irq:0(004527C0_10000001)
+[  331.5182] SIF     : Write IOP to Fifo: +++++++++++ 1 of 1
+[  331.5182] SIF     :   SIF + 1 = 1 (pos=113)
+[  331.5182] SIF     : Writing Junk 3
+[  331.5182] SIF     :   SIF + 3 = 4 Junk (pos=116)
+[  331.5182] SIF     : Sif0: End IOP
+[  331.5182] SIF     : Write Fifo to EE: ----------- 4 of 4
+[  331.5182] SIF     :   SIF - 4 = 0 (pos=116)
+[  331.5182] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 3dfe8)
+[  331.5182] Bios    :   sifman.008: sceSifDmaStat (bf7d0001, bf801528, 1bf3c, 3dfe8)
+[  331.5182] Bios    :  cdvdman.050: _sceCdSC (fffffff6, 1f8c30, 1bf3c, 3dfe8)
+[  331.5182] Bios    :  thevent.006: SetEventFlag (71e211, 1, 1bf3c, 3dfe8)
+[  331.5182] Bios    :  intrman.023: QueryIntrContext (71e211, 1, 1bf3c, 3dfe8)
+[  331.5182] Bios    :  intrman.017: CpuSuspendIntr (1f8bd0, 1, 1bf3c, 3dfe8)
+[  331.5183] Bios    :  intrman.018: CpuResumeIntr (1, 1, 1bf3c, 3dfe8)
+[  331.5183] Bios    :  intrman.017: CpuSuspendIntr (1f8c80, 0, 1bf3c, 3dfe8)
+[  331.5183] Bios    :  intrman.018: CpuResumeIntr (1, 0, 1bf3c, 3dfe8)
+[  331.5183] Bios    :  intrman.017: CpuSuspendIntr (1f8bf8, 0, 1f530, 40)
+[  331.5183] Bios    :   sifman.007: sceSifSetDma (1f8bd8, 1, 1f530, 40)
+[  331.5183] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 3dfec, bcr = 20, tadr = 1c13c
+[  331.5183] SIF     : SIF0 DMA start...
+[  331.5183] SIF     :   SIF + 4 = 4 (pos=120)
+[  331.5183] SIF     : SIF0 IOP Tag: madr=1f530, tadr=1c14c, counter=10 (00000010_8001F530) Junk 0
+[  331.5183] SIF     :   SIF - 4 = 0 (pos=120)
+[  331.5183] SIF     : SIF0 EE read tag: 90000004 52bc00 34514 200
+[  331.5183] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0004 id:1 irq:1(0052BC00_90000004)
+[  331.5183] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5183] SIF     :   SIF + 16 = 16 (pos=8)
+[  331.5183] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5183] SIF     :   SIF - 16 = 0 (pos=8)
+[  331.5183] SIF     : Sif0: End IOP
+[  331.5183] SIF     : Sif0: End EE
+[  331.5183] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 1f530)
+[  331.5183] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5183] SIF     : dmaSIF0 chcr = 184, madr = 52bc40, qwc  = 0, tadr = 0
+[  331.5183] SIF     : SIF0 DMA start...
+[  331.5183] Bios    : Bios call: iSignalSema (43)
+[  331.5183] Bios    : Bios call: iSignalSema (43)
+[  331.5183] Bios    : Bios call: RFU005 (5)
+[  331.5183] Bios    : Bios call: iSignalSema (43)
+[  331.5183] Bios    : Bios call: WaitSema (44)
+[  331.5183] Bios    : Bios call: PollSema (45)
+[  331.5183] Bios    : Bios call: ReferThreadStatus (30)
+[  331.5183] Bios    : Bios call: CreateSema (40)
+[  331.5183] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5183] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=520000, attr=0, dest=40, src=2052be80
+[  331.5183] SIF     : dmaSIF1 chcr = 184, madr = 21e50, qwc  = 0, tadr = 214a0
+[  331.5184] SIF     : SIF1 DMA start...
+[  331.5184] SIF     : Sif1: ProcessEETag
+[  331.5184] SIF     : REFE 00000005
+[  331.5184] SIF     : Sif 1: Write EE to Fifo
+[  331.5184] SIF     :   SIF + 20 = 20 (pos=12)
+[  331.5184] SIF     :   SIF - 4 = 16 (pos=124)
+[  331.5184] SIF     : SIF 1 IOP: dest chain tag madr:0001E2C0 wc:0010 id:4 irq:1
+[  331.5184] SIF     : Sif 1: End EE
+[  331.5184] SIF     : Sif1: Write Fifo to IOP
+[  331.5184] SIF     : Sif 1 IOP doing transfer 0010 to 0001E2C0
+[  331.5184] SIF     :   SIF - 16 = 0 (pos=12)
+[  331.5184] SIF     : Sif 1: End IOP
+[  331.5184] Bios    : Bios call: WaitSema (44)
+[  331.5184] Bios    :   sifman.006: sceSifSetDChain (1e300, 5e98, 10, 1e2c0)
+[  331.5184] SIF     : IOP: dmaSIF1 chcr = 41000300, madr = 1e300, bcr = 20
+[  331.5184] SIF     : SIF1 DMA start...
+[  331.5184] Bios    :   thbase.026: iWakeupThread (71a413, 3ddf8, a, 5e58)
+[  331.5184] Bios    :  intrman.023: QueryIntrContext (71a413, 3ddf8, a, 5e58)
+[  331.5184] Bios    :  intrman.017: CpuSuspendIntr (1f8c88, bf801528, 1c13c, 1f530)
+[  331.5184] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 1f530)
+[  331.5184] Bios    :   thbase.024: SleepThread (1, bf801528, 1c13c, 1f530)
+[  331.5184] Bios    :  intrman.023: QueryIntrContext (1, bf801528, 1c13c, 1f530)
+[  331.5184] Bios    :  intrman.017: CpuSuspendIntr (1f8c90, bf801528, 1c13c, 1f530)
+[  331.5184] Bios    :  intrman.017: CpuSuspendIntr (1fa588, ac000000, 0, 117253c6)
+[  331.5184] Bios    :  intrman.018: CpuResumeIntr (1, ac000000, 0, 117253c6)
+[  331.5184] Bios    :  cdvdman.008: sceCdGetError (3e448, 0, 3e040, 117253c6)
+[  331.5184] Bios    :  intrman.017: CpuSuspendIntr (1fa580, 38621, 3e040, 117253c6)
+[  331.5184] Bios    :  intrman.018: CpuResumeIntr (1, 0, 3e040, 117253c6)
+[  331.5184] Bios    :  intrman.017: CpuSuspendIntr (1fa4f8, 4, 1f530, 40)
+[  331.5184] Bios    :   sifman.007: sceSifSetDma (1fa4d8, 2, 1f530, 40)
+[  331.5184] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 1f570, bcr = 20, tadr = 1bf3c
+[  331.5184] SIF     : SIF0 DMA start...
+[  331.5184] SIF     :   SIF + 4 = 4 (pos=12)
+[  331.5184] SIF     : SIF0 IOP Tag: madr=3e040, tadr=1bf4c, counter=1 (00000001_0003E040) Junk 3
+[  331.5184] SIF     :   SIF - 4 = 0 (pos=12)
+[  331.5184] SIF     : SIF0 EE read tag: 10000001 452800 8001f530 10
+[  331.5184] SIF     : SIF0 EE dest chain tag madr:00452800 qwc:0001 id:1 irq:0(00452800_10000001)
+[  331.5184] SIF     : Write IOP to Fifo: +++++++++++ 1 of 1
+[  331.5184] SIF     :   SIF + 1 = 1 (pos=13)
+[  331.5184] SIF     : Writing Junk 3
+[  331.5184] SIF     :   SIF + 3 = 4 Junk (pos=16)
+[  331.5184] SIF     :   SIF + 4 = 8 (pos=20)
+[  331.5184] SIF     : SIF0 IOP Tag: madr=1f530, tadr=1bf5c, counter=10 (00000010_8001F530) Junk 0
+[  331.5184] SIF     : Write Fifo to EE: ----------- 4 of 4
+[  331.5184] SIF     :   SIF - 4 = 4 (pos=16)
+[  331.5184] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5184] SIF     :   SIF + 16 = 20 (pos=36)
+[  331.5184] SIF     :   SIF - 4 = 16 (pos=20)
+[  331.5184] SIF     : SIF0 EE read tag: 90000004 52bc00 34d24 200
+[  331.5184] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0004 id:1 irq:1(0052BC00_90000004)
+[  331.5184] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5184] SIF     :   SIF - 16 = 0 (pos=36)
+[  331.5184] SIF     : Sif0: End IOP
+[  331.5184] SIF     : Sif0: End EE
+[  331.5184] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 1f530)
+[  331.5184] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5184] SIF     : dmaSIF0 chcr = 184, madr = 52bc40, qwc  = 0, tadr = 0
+[  331.5184] SIF     : SIF0 DMA start...
+[  331.5184] Bios    : Bios call: iSignalSema (43)
+[  331.5184] Bios    : Bios call: RFU005 (5)
+[  331.5184] Bios    : Bios call: DeleteSema (41)
+[  331.5185] Bios    : Bios call: SignalSema (42)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: WaitSema (44)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: SignalSema (42)
+[  331.5185] Bios    :  intrman.017: CpuSuspendIntr (1fa588, bf801528, 1bf3c, 1f530)
+[  331.5185] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 1f530)
+[  331.5185] Bios    :   thbase.024: SleepThread (1, bf801528, 1bf3c, 1f530)
+[  331.5185] Bios    :  intrman.023: QueryIntrContext (1, bf801528, 1bf3c, 1f530)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    :  intrman.017: CpuSuspendIntr (1fa590, bf801528, 1bf3c, 1f530)
+[  331.5185] Bios    : Bios call: WaitSema (44)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: SignalSema (42)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: WaitSema (44)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: SignalSema (42)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: WaitSema (44)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: GetThreadId (2f)
+[  331.5185] Bios    : Bios call: SignalSema (42)
+[  331.5185] Bios    : Bios call: WaitSema (44)
+[  331.5185] CDVD    : Buffering sector
+[  331.5185] Bios    :   thbase.026: iWakeupThread (711a23, 0, 0, 1)
+[  331.5185] Bios    :  intrman.023: QueryIntrContext (711a23, 0, 0, 1)
+[  331.5185] Bios    :    libsd.020: sceSdBlockTransStatus (0, 0, 4, c9c25136)
+[  331.5185] Bios    :   thbase.025: WakeupThread (712821, 1, 107400, 107400)
+[  331.5185] Bios    :  intrman.023: QueryIntrContext (712821, 1, 107400, 107400)
+[  331.5185] Bios    :  intrman.017: CpuSuspendIntr (1f1ea8, 1, 107400, 107400)
+[  331.5185] Bios    :  intrman.018: CpuResumeIntr (1, 38940, 78, f)
+[  331.5185] Bios    :   thbase.024: SleepThread (1, 38940, 78, f)
+[  331.5185] Bios    :  intrman.023: QueryIntrContext (1, 38940, 78, f)
+[  331.5185] Bios    :  intrman.017: CpuSuspendIntr (1f1eb0, 38940, 78, f)
+[  331.5185] Bios    :   thbase.034: GetSystemTime (1f33a0, ac000000, 0, 274294e)
+[  331.5185] Bios    :  intrman.014:  (115f8, 1f33a0, 0, 274294e)
+[  331.5185] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 0, 274294e, 274294e)
+[  331.5185] Bios    :   thbase.040: SysClock2USec (1f33a0, 1f33ac, 1f33b0, 274294e)
+[  331.5185] Bios    :   sifcmd.020: sceSifGetNextRequest (68000, 0, f4240, 1f33b0)
+[  331.5185] Bios    :  intrman.017: CpuSuspendIntr (1f3370, 0, f4240, 1f33b0)
+[  331.5185] Bios    :  intrman.018: CpuResumeIntr (1, 0, f4240, 1f33b0)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2240, 0, ffffffff, 625e4)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2242, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2244, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2246, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2248, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (224a, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (224c, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (224e, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2250, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2252, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2254, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2256, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2258, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (225a, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (225c, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (225e, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2260, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2262, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2264, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2266, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2268, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (226a, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (226c, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (226e, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2241, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2243, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2245, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2247, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2249, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (224b, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (224d, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (224f, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2251, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2253, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2255, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2257, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2259, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (225b, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (225d, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (225f, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2261, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2263, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2265, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2267, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (2269, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (226b, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (226d, 0, 0, 500a)
+[  331.5186] Bios    :    libsd.010: sceSdGetAddr (226f, 0, 0, 500a)
+[  331.5186] Bios    :  sysclib.014: memset (108c00, 0, 400, 0)
+[  331.5186] Bios    :  sysclib.014: memset (109400, 0, 400, 0)
+[  331.5186] CDVD    : Buffering sector
+[  331.5186] Bios    :   sifman.008: sceSifDmaStat (bf750002, 107400, fffffb98, 108ffc)
+[  331.5186] Bios    :   sifcmd.012: sceSifSendCmd (1, 61660, 20, 619c8)
+[  331.5186] Bios    :  intrman.017: CpuSuspendIntr (1f3338, 240, 61660, 20)
+[  331.5187] Bios    :   sifman.007: sceSifSetDma (1f3318, 2, 61660, 20)
+[  331.5187] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 1f570, bcr = 20, tadr = 1c13c
+[  331.5187] SIF     : SIF0 DMA start...
+[  331.5187] SIF     :   SIF + 4 = 4 (pos=40)
+[  331.5187] SIF     : SIF0 IOP Tag: madr=619c8, tadr=1c14c, counter=90 (00000090_000619C8) Junk 0
+[  331.5187] SIF     :   SIF - 4 = 0 (pos=40)
+[  331.5187] SIF     : SIF0 EE read tag: 10000024 50b740 80061660 8
+[  331.5187] SIF     : SIF0 EE dest chain tag madr:0050B740 qwc:0024 id:1 irq:0(0050B740_10000024)
+[  331.5187] SIF     : Write IOP to Fifo: +++++++++++ 80 of 90
+[  331.5187] SIF     :   SIF + 128 = 128 (pos=40)
+[  331.5187] SIF     : Write Fifo to EE: ----------- 80 of 90
+[  331.5187] SIF     :   SIF - 128 = 0 (pos=40)
+[  331.5187] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5187] SIF     :   SIF + 16 = 16 (pos=56)
+[  331.5187] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5187] SIF     :   SIF - 16 = 0 (pos=56)
+[  331.5187] SIF     :   SIF + 4 = 4 (pos=60)
+[  331.5187] SIF     : SIF0 IOP Tag: madr=61660, tadr=1c15c, counter=8 (00000008_80061660) Junk 0
+[  331.5187] SIF     :   SIF - 4 = 0 (pos=60)
+[  331.5187] SIF     : SIF0 EE read tag: 90000002 52bc00 34d24 200
+[  331.5187] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0002 id:1 irq:1(0052BC00_90000002)
+[  331.5187] SIF     : Write IOP to Fifo: +++++++++++ 8 of 8
+[  331.5187] SIF     :   SIF + 8 = 8 (pos=68)
+[  331.5187] SIF     : Write Fifo to EE: ----------- 8 of 8
+[  331.5187] SIF     :   SIF - 8 = 0 (pos=68)
+[  331.5187] SIF     : Sif0: End IOP
+[  331.5187] SIF     : Sif0: End EE
+[  331.5187] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1c13c, 61660)
+[  331.5187] Bios    :   thbase.034: GetSystemTime (1f33a0, bf801528, 1c13c, 61660)
+[  331.5187] Bios    :  intrman.014:  (115f8, 1f33a0, 1c13c, 61660)
+[  331.5187] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 1c13c, 61660, 61660)
+[  331.5187] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5187] SIF     : dmaSIF0 chcr = 184, madr = 52bc20, qwc  = 0, tadr = 0
+[  331.5187] SIF     : SIF0 DMA start...
+[  331.5187] Bios    : Bios call: iSignalSema (43)
+[  331.5187] Bios    : Bios call: RFU005 (5)
+[  331.5187] Bios    : Bios call: GetThreadId (2f)
+[  331.5187] Bios    : Bios call: WaitSema (44)
+[  331.5187] Bios    : Bios call: GetThreadId (2f)
+[  331.5187] Bios    :   thbase.040: SysClock2USec (1f33a0, 1f33b4, 1f33b8, 61660)
+[  331.5187] Bios    : Bios call: GetThreadId (2f)
+[  331.5187] Bios    : Bios call: GetThreadId (2f)
+[  331.5187] Bios    : Bios call: GetThreadId (2f)
+[  331.5187] Bios    :   thbase.024: SleepThread (b9b6, 2f9, a38f0, 1f33b8)
+[  331.5187] Bios    :  intrman.023: QueryIntrContext (b9b6, 2f9, a38f0, 1f33b8)
+[  331.5187] Bios    :  intrman.017: CpuSuspendIntr (1f3378, 2f9, a38f0, 1f33b8)
+[  331.5188] CDVD    : Buffering sector
+[  331.5188] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5188] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=18, attr=12, dest=8f0, src=512b80
+[  331.5188] SIF     : dmaSIF1 chcr = 184, madr = 21ed0, qwc  = 0, tadr = 214b0
+[  331.5188] SIF     : SIF1 DMA start...
+[  331.5188] SIF     : Sif1: ProcessEETag
+[  331.5189] SIF     : REF 30000008
+[  331.5189] SIF     : Sif 1: Write EE to Fifo
+[  331.5189] SIF     :   SIF + 32 = 32 (pos=44)
+[  331.5189] SIF     :   SIF - 4 = 28 (pos=16)
+[  331.5189] SIF     : SIF 1 IOP: dest chain tag madr:00061CF4 wc:023C id:0 irq:0
+[  331.5189] SIF     : Sif1: ProcessEETag
+[  331.5189] SIF     : REFE 00000088
+[  331.5189] SIF     : Sif1: Write Fifo to IOP
+[  331.5189] SIF     : Sif 1 IOP doing transfer 001C to 00061CF4
+[  331.5189] SIF     :   SIF - 28 = 0 (pos=44)
+[  331.5189] SIF     : Sif 1: Write EE to Fifo
+[  331.5189] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5189] SIF     : Sif1: Write Fifo to IOP
+[  331.5189] SIF     : Sif 1 IOP doing transfer 0080 to 00061D64
+[  331.5189] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5189] SIF     : Sif 1: Write EE to Fifo
+[  331.5189] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5189] SIF     : Sif1: Write Fifo to IOP
+[  331.5189] SIF     : Sif 1 IOP doing transfer 0080 to 00061F64
+[  331.5189] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5189] SIF     : Sif 1: Write EE to Fifo
+[  331.5189] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5189] SIF     : Sif1: Write Fifo to IOP
+[  331.5189] SIF     : Sif 1 IOP doing transfer 0080 to 00062164
+[  331.5189] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5189] SIF     : Sif 1: Write EE to Fifo
+[  331.5189] SIF     :   SIF + 128 = 128 (pos=44)
+[  331.5189] SIF     : Sif1: Write Fifo to IOP
+[  331.5189] SIF     : Sif 1 IOP doing transfer 0080 to 00062364
+[  331.5189] SIF     :   SIF - 128 = 0 (pos=44)
+[  331.5189] SIF     : Sif 1: Write EE to Fifo
+[  331.5189] SIF     :   SIF + 32 = 32 (pos=76)
+[  331.5189] SIF     : Sif1: Write Fifo to IOP
+[  331.5189] SIF     : Sif 1 IOP doing transfer 0020 to 00062564
+[  331.5189] SIF     :   SIF - 32 = 0 (pos=76)
+[  331.5189] SIF     : Sif 1: End EE
+[  331.5189] Bios    : Bios call: GetThreadId (2f)
+[  331.5189] Bios    : Bios call: SignalSema (42)
+[  331.5189] Bios    : Bios call: WaitSema (44)
+[  331.5189] CDVD    : Buffering sector
+[  331.5189] CDVD    : Buffering sector
+[  331.5189] CDVD    : Buffering sector
+[  331.5190] CDVD    : Buffering sector
+[  331.5190] CDVD    : Buffering sector
+[  331.5190] CDVD    : Buffering sector
+[  331.5190] CDVD    : Buffering sector
+[  331.5190] CDVD    : Buffering sector
+[  331.5190] Bios    : Bios call: RFU005 (5)
+[  331.5192] Bios    :   thbase.026: iWakeupThread (711a23, 0, 0, 0)
+[  331.5192] Bios    :  intrman.023: QueryIntrContext (711a23, 0, 0, 0)
+[  331.5192] Bios    :    libsd.020: sceSdBlockTransStatus (0, 0, 4, c9c26f84)
+[  331.5192] Bios    :   thbase.025: WakeupThread (712821, 0, 106c00, 106c00)
+[  331.5192] Bios    :  intrman.023: QueryIntrContext (712821, 0, 106c00, 106c00)
+[  331.5192] Bios    :  intrman.017: CpuSuspendIntr (1f1ea8, 0, 106c00, 106c00)
+[  331.5192] Bios    :  intrman.018: CpuResumeIntr (1, 38940, 78, f)
+[  331.5192] Bios    :   thbase.024: SleepThread (1, 38940, 78, f)
+[  331.5192] Bios    :  intrman.023: QueryIntrContext (1, 38940, 78, f)
+[  331.5192] Bios    :  intrman.017: CpuSuspendIntr (1f1eb0, 38940, 78, f)
+[  331.5192] Bios    :   thbase.034: GetSystemTime (1f33a0, ac000000, 0, 2742bfb)
+[  331.5192] Bios    :  intrman.014:  (115f8, 1f33a0, 0, 2742bfb)
+[  331.5192] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 0, 2742bfb, 2742bfb)
+[  331.5192] Bios    :   thbase.040: SysClock2USec (1f33a0, 1f33ac, 1f33b0, 2742bfb)
+[  331.5192] Bios    :   sifcmd.020: sceSifGetNextRequest (68000, 0, f4240, 1f33b0)
+[  331.5192] Bios    :  intrman.017: CpuSuspendIntr (1f3370, 0, f4240, 1f33b0)
+[  331.5192] Bios    :  intrman.018: CpuResumeIntr (1, 0, f4240, 1f33b0)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2240, 0, ffffffff, 625e4)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2242, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2244, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2246, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2248, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (224a, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (224c, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (224e, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2250, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2252, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2254, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2256, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2258, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (225a, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (225c, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (225e, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2260, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2262, 0, 0, 500a)
+[  331.5192] Bios    :    libsd.010: sceSdGetAddr (2264, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2266, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2268, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (226a, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (226c, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (226e, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2241, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2243, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2245, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2247, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2249, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (224b, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (224d, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (224f, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2251, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2253, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2255, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2257, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2259, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (225b, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (225d, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (225f, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2261, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2263, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2265, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2267, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (2269, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (226b, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (226d, 0, 0, 500a)
+[  331.5193] Bios    :    libsd.010: sceSdGetAddr (226f, 0, 0, 500a)
+[  331.5193] Bios    :  sysclib.014: memset (108c00, 0, 400, 800)
+[  331.5193] Bios    :  sysclib.014: memset (109400, 0, 400, 800)
+[  331.5193] Bios    :   sifman.008: sceSifDmaStat (bf810002, 107c00, fffffaf6, 108ffc)
+[  331.5193] Bios    :   sifcmd.012: sceSifSendCmd (1, 61660, 20, 619c8)
+[  331.5193] Bios    :  intrman.017: CpuSuspendIntr (1f3338, 240, 61660, 20)
+[  331.5193] Bios    :   sifman.007: sceSifSetDma (1f3318, 2, 61660, 20)
+[  331.5193] SIF     : IOP: dmaSIF0 chcr = 1000701, madr = 61680, bcr = 20, tadr = 1bf3c
+[  331.5193] SIF     : SIF0 DMA start...
+[  331.5193] SIF     :   SIF + 4 = 4 (pos=72)
+[  331.5193] SIF     : SIF0 IOP Tag: madr=619c8, tadr=1bf4c, counter=90 (00000090_000619C8) Junk 0
+[  331.5193] SIF     :   SIF - 4 = 0 (pos=72)
+[  331.5193] SIF     : SIF0 EE read tag: 10000024 50b740 80061660 8
+[  331.5193] SIF     : SIF0 EE dest chain tag madr:0050B740 qwc:0024 id:1 irq:0(0050B740_10000024)
+[  331.5193] SIF     : Write IOP to Fifo: +++++++++++ 80 of 90
+[  331.5193] SIF     :   SIF + 128 = 128 (pos=72)
+[  331.5193] SIF     : Write Fifo to EE: ----------- 80 of 90
+[  331.5193] SIF     :   SIF - 128 = 0 (pos=72)
+[  331.5193] SIF     : Write IOP to Fifo: +++++++++++ 10 of 10
+[  331.5193] SIF     :   SIF + 16 = 16 (pos=88)
+[  331.5193] SIF     : Write Fifo to EE: ----------- 10 of 10
+[  331.5193] SIF     :   SIF - 16 = 0 (pos=88)
+[  331.5193] SIF     :   SIF + 4 = 4 (pos=92)
+[  331.5193] SIF     : SIF0 IOP Tag: madr=61660, tadr=1bf5c, counter=8 (00000008_80061660) Junk 0
+[  331.5193] SIF     :   SIF - 4 = 0 (pos=92)
+[  331.5193] SIF     : SIF0 EE read tag: 90000002 52bc00 34d24 200
+[  331.5193] SIF     : SIF0 EE dest chain tag madr:0052BC00 qwc:0002 id:1 irq:1(0052BC00_90000002)
+[  331.5193] SIF     : Write IOP to Fifo: +++++++++++ 8 of 8
+[  331.5193] SIF     :   SIF + 8 = 8 (pos=100)
+[  331.5193] SIF     : Write Fifo to EE: ----------- 8 of 8
+[  331.5194] SIF     :   SIF - 8 = 0 (pos=100)
+[  331.5194] SIF     : Sif0: End IOP
+[  331.5194] SIF     : Sif0: End EE
+[  331.5194] Bios    :  intrman.018: CpuResumeIntr (1, bf801528, 1bf3c, 61660)
+[  331.5194] Bios    :   thbase.034: GetSystemTime (1f33a0, bf801528, 1bf3c, 61660)
+[  331.5194] Bios    :  intrman.014:  (115f8, 1f33a0, 1bf3c, 61660)
+[  331.5194] Bios    :  timrman.010: GetTimerCounter (6bf8014a, 1bf3c, 61660, 61660)
+[  331.5194] Bios    : Bios call: sceSifSetDChain_isceSifSetDChain (78)
+[  331.5194] SIF     : dmaSIF0 chcr = 184, madr = 52bc20, qwc  = 0, tadr = 0
+[  331.5194] SIF     : SIF0 DMA start...
+[  331.5194] Bios    : Bios call: iSignalSema (43)
+[  331.5194] Bios    : Bios call: RFU005 (5)
+[  331.5194] Bios    : Bios call: GetThreadId (2f)
+[  331.5194] Bios    : Bios call: WaitSema (44)
+[  331.5194] Bios    : Bios call: GetThreadId (2f)
+[  331.5194] Bios    :   thbase.040: SysClock2USec (1f33a0, 1f33b4, 1f33b8, 61660)
+[  331.5194] Bios    : Bios call: GetThreadId (2f)
+[  331.5194] Bios    : Bios call: GetThreadId (2f)
+[  331.5194] Bios    : Bios call: GetThreadId (2f)
+[  331.5194] Bios    :   thbase.024: SleepThread (bcb0, 2fa, a629a, 1f33b8)
+[  331.5194] Bios    :  intrman.023: QueryIntrContext (bcb0, 2fa, a629a, 1f33b8)
+[  331.5194] Bios    :  intrman.017: CpuSuspendIntr (1f3378, 2fa, a629a, 1f33b8)
+[  331.5195] Bios    : Bios call: sceSifSetDma_isceSifSetDma (77)
+[  331.5195] Bios    : bios_sceSifSetDma_isceSifSetDma: n_transfer=0, size=18, attr=12, dest=8f0, src=512b80
+[  331.5195] SIF     : dmaSIF1 chcr = 184, madr = 513470, qwc  = 0, tadr = 214d0
+[  331.5195] SIF     : SIF1 DMA start...
+[  331.5195] SIF     : Sif1: ProcessEETag
+[  331.5195] SIF     : REF 30000008
+[  331.5195] SIF     : Sif 1: Write EE to Fifo
+[  331.5195] SIF     :   SIF + 32 = 32 (pos=108)
+[  331.5195] SIF     :   SIF - 4 = 28 (pos=80)
+[  331.5195] SIF     : SIF 1 IOP: dest chain tag madr:00061CF4 wc:023C id:0 irq:0
+[  331.5195] SIF     : Sif1: ProcessEETag
+[  331.5195] SIF     : REFE 00000088
+[  331.5195] SIF     : Sif1: Write Fifo to IOP
+[  331.5195] SIF     : Sif 1 IOP doing transfer 001C to 00061CF4
+[  331.5195] SIF     :   SIF - 28 = 0 (pos=108)
+[  331.5195] SIF     : Sif 1: Write EE to Fifo
+[  331.5195] SIF     :   SIF + 128 = 128 (pos=108)
+[  331.5195] SIF     : Sif1: Write Fifo to IOP
+[  331.5195] SIF     : Sif 1 IOP doing transfer 0080 to 00061D64
+[  331.5195] SIF     :   SIF - 128 = 0 (pos=108)
+[  331.5195] SIF     : Sif 1: Write EE to Fifo
+[  331.5195] SIF     :   SIF + 128 = 128 (pos=108)
+[  331.5195] SIF     : Sif1: Write Fifo to IOP
+[  331.5195] SIF     : Sif 1 IOP doing transfer 0080 to 00061F64
+[  331.5195] SIF     :   SIF - 128 = 0 (pos=108)
+[  331.5195] SIF     : Sif 1: Write EE to Fifo
+[  331.5195] SIF     :   SIF + 128 = 128 (pos=108)
+[  331.5195] SIF     : Sif1: Write Fifo to IOP
+[  331.5195] SIF     : Sif 1 IOP doing transfer 0080 to 00062164
+[  331.5195] SIF     :   SIF - 128 = 0 (pos=108)
+[  331.5195] SIF     : Sif 1: Write EE to Fifo
+[  331.5195] SIF     :   SIF + 128 = 128 (pos=108)
+[  331.5195] SIF     : Sif1: Write Fifo to IOP
+[  331.5195] SIF     : Sif 1 IOP doing transfer 0080 to 00062364
+[  331.5195] SIF     :   SIF - 128 = 0 (pos=108)
+[  331.5195] SIF     : Sif 1: Write EE to Fifo
+[  331.5195] SIF     :   SIF + 32 = 32 (pos=12)
+[  331.5195] SIF     : Sif1: Write Fifo to IOP
+[  331.5195] SIF     : Sif 1 IOP doing transfer 0020 to 00062564
+[  331.5195] SIF     :   SIF - 32 = 0 (pos=12)
+[  331.5195] SIF     : Sif 1: End EE
+[  331.5195] Bios    : Bios call: GetThreadId (2f)
+[  331.5195] Bios    : Bios call: SignalSema (42)
+[  331.5195] Bios    : Bios call: WaitSema (44)
+[  331.5196] (VMManager) Pausing...
+[  331.5204] cubeb_pulse.c:1131:Cubeb stream (0x7f2b38e5d8b0) stopped successfully.
+[  331.5207] Add 331 seconds play time to SLUS-20772 -> now 2784
+[  331.5677] cubeb_pulse.c:1131:Cubeb stream (0x7f2b38e5d8b0) stopped successfully.
+[  331.5679] cubeb_pulse.c:1082:Cubeb stream (0x7f2b38e5d8b0) destroyed successfully.
+[  331.5694] DEV9: DEV9close
+[  331.5821] Unloading EGL.
+[  331.5822] DEV9: DEV9shutdown
+[  331.5828] NVRAM has not changed, not writing to disk.
+[  331.5867] Releasing host memory for virtual systems...
