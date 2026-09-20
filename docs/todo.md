@@ -5,6 +5,55 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **T16 read (09-20) — PASS, E1 = third absence window (no break to 7200 s):**
+      Exit @b235 reproduced (tail one block shorter, residue
+      from b240); 1188 blocks past b241: 12 watches + 2
+      gated extras ALL silent — main dormant ×1191, stub-13
+      ×1190, drain 359,748 iters (Δ31−29, markers 359,749),
+      freeze 887 pairs @2669132/72181, CD/SIF/GS/RPC 0,
+      sema-30 4w/3s, t3 never releases; N = 72,176 exact
+      (20N/19N−1338, ramp 0–74, steady 20/19, caller 3N);
+      3E4AF0 gaps {6,7} only (52,697); halt trio adjacent
+      +0/+1/+2 @97.85% w238; chunk-0 T15-exact, chunks
+      1–358 fixed point, final 28-line cut; wall T15-class
+      flat ~60 → ~30.2; deviations disclosed (preamble
+      T11-repeat, NULL-head −1, singleton-58, chunk-71 +2,
+      t3 pc). Verified: byte sizes, TSV rows 1430/994,
+      arithmetic (359748, 5.01×, pc sum 1430), fork
+      unmoved, lease removed, ahead (no push). ~2.8 h.
+      Next: P1ak (long-window diagnosis, no boot) in freed
+      pane. Ledger row added.
+- [ ] **T4 read (09-20) — PASS scoped, Devel built, trace to language menu:**
+      Devel v2.9.75 on bytesize WSL2 (deps ~11.5 min, build
+      902/902 ~2.3 min, DEVBUILD ×495, recompilers proven);
+      SSX3 (SLUS-20772, CRC 08FFF00D) unattended 336 s →
+      language-select park: 7,483,481-line / 529 MB trace
+      (EE.Bios 899,875/42 names + IOP.Bios 5,095,286/103 +
+      SIF 915,373 + cdvd/hw 437,690 + other 135,257;
+      22,580 vblanks); drain NOT reached (needs pad input
+      — G1); ExecPS2 ×2, SIF storm 260,846, menu sema
+      storm; format notes + epoch anchor for Brief 2.
+      Verified: channel sum exact, census EE/IOP counts,
+      SSD copy bytes, BIOS/ISO shas vs P1x/P1z, 676+/0−,
+      no lease, ahead (no push). ~2 h. Next: T17 (G1 pad
+      automation + deeper capture) in freed pane; Brief 2
+      aligner queues after. Ledger row added.
+- [ ] **M59 read (09-20) — PASS, c312 lone split col, null-4 13/0, dec-9 off dec-1 cols:**
+      10 bins M58-exact; all-pos bins 1/5/7 (n 12/2/2 —
+      dec-1 only all-pos @n≥10); 12 sites M58-exact
+      (7 cols — brief said 8, agent correctly tabled my
+      miscount); columns 16 all-pos + 10 all-neg + c312
+      split 13/10 (sum +130 verified) + 6 s0-only; null-4
+      13/0 (H5 not — honest negative); named 59 pos vs 10
+      neg (341/342/343); dec-9/dec-8/dec-6 fully off dec-1
+      cols (0/75, 0/5, 0/1); mode-9 splits 7 pos/5 neg
+      (mode ≠ sign); r316 narrowed (δ+11 dec-7, M58 gap 1
+      nearly closed). Control green; re-run 30/30; PNG 456
+      B rule-met (H3); 0 B explained, 102 stands. Verified:
+      bin table, 12 sites, col sums = 134 (98/36), c312
+      arithmetic, modes, fnvs, 2274+/0−, ahead (no push).
+      ~0.3 h. Next: M60 (c312 unanimity, offline) in freed
+      pane. Ledger row added.
 - [ ] **M58 read (09-20) — PASS, 51 on 13 cols led by c312×22, dec-1 all-positive:**
       Hist-4 M57-exact; site-51: 0:13/1:12/3:19/4:5/5:2,
       pooled δ +454 (pos 35/neg 16); dec-1 12/12 positive
