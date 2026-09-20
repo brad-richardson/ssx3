@@ -7,7 +7,7 @@ the build or commit that closed them.
 
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** p1af (Part 29 SPR DMA fix, 4h) · p13 (analyzer triage + patch spec, 4h) · m17 (sub-pixel model offline, 4h).
+- [ ] **Live panes:** p1af (Part 29 SPR DMA fix, 4h) · t1 (park snapshot + ladder_diff, 4h) · m18 (remainder character offline, 4h).
 - [ ] **Queue:** T1 (park snapshot + SIF tally + ladder_diff — first free pane) · T3 (IRX inventory, lease-free — second free pane) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park: P1ad successor if SIF-shaped, else sid=0x80000211 RPC or later) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
@@ -1570,6 +1570,18 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] **M17 read (09-20) — PASS, rigid falsified, remainder
+      stands:** global half-pel explains 0/22815 B on 764/764
+      shapes (+ m15; minima sharp ≥2.2×); 16×16 block matching
+      improves estimation SAD 8–10% but WIDENS the residual
+      (s0 22815→48261, m15 13418→23064 — rejected as overfit);
+      positive controls recover all 4 synthetic shifts
+      (estimators work); determinism re-run identical; remainder
+      22815 B non-translational (93.6% |d|=1). Verified: input
+      shas, m17.txt (grids/rows/vectors), controls, G-dup sha,
+      4 synths, no-write mtimes, PNGs, field-B VIEWED (vectors
+      densest at bottom — matches). Next: M18 (remainder
+      character). Ledger row added.
 - [x] **P13 read (09-20) — PASS, analyzer triage + patch spec:**
       28 findings (F1–F27 + X1–X3): F1 synthetic-NOP swallows
       ADDIU sp (1× reached); F2 JAL-merge widens 347 fns (316/316
