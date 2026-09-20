@@ -5,6 +5,32 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **T11 read (09-20) — PASS, 600 s cap, N > 29,469, no exit:**
+      all 5 post-phase signatures absent over the full window;
+      29,469/29,469 + 588,042/588,042 + 558,573/558,573 exact
+      trace balance; modal cycle 29,393/29,468 + FRR
+      ×29,469 + 20/19 constancy (28 chunks) + stubs 222
+      ×117 + sema-30 4w/3s; wall rate 64→36/s smooth decay,
+      all guest ratios fixed; deviations tabled (stub
+      preamble @b2, probe +1, t3 transient, EOF slot 8);
+      1 of 2 boots, lease 07:29–07:39Z zero waits, binary
+      sha == P1ag's, zero fork changes. Verified: exact log
+      + trace sizes, sema count + last line, stub values,
+      probe 20k/0 CYCLE, full-trace awk balance, lease
+      absent, fork HEAD unmoved. ~55 min. Next: T13
+      (1800 s run) launched in freed pane. Ledger row added.
+- [ ] **M33 read (09-20) — PASS, M29 gap 2 cluster attributed:**
+      117 B @ J 0.7520 (inter 94, union 125): 22 priv 1
+      near / 14 far / 7 non-cell, 8 miss 2/2/4; 21/22
+      priv band-1 (H4 met); privates span 14 comps max 4
+      (H5 not met); miss d1 share 0.7500 all ≤2, priv
+      17/22 dmin ≥5; all 30 outside named columns (every
+      named site shared); 0 carrier bytes; 39 s9 comps vs
+      25 s0; 2 union comps interleave 2+2; 0 B explained.
+      Verified: baselines, sets + splits, canon identical,
+      control exact, PNG size (rule-met), mtimes clean.
+      ~0.1 h. Next: M34 (unnamed-column scan) launched in
+      freed pane. Ledger row added.
 - [ ] **M32 read (09-20) — PASS, M31 gap 1 admissions bracketed:**
       K=1 gate sha-identical to M31; movers 8/9/10/10 +
       cells 13/14/15/15 at K=233/234/366/367; admissions
@@ -376,7 +402,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** t11 (run-to-exit empirical N, 1×≤600s, 4h) · t12 (dev build config, 4h) · m33 (shape-9 cluster, offline, 4h).
+- [ ] **Live panes:** t13 (run-to-exit at 1800s, 4h) · t12 (dev build config, 4h) · m34 (unnamed-column scan, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
