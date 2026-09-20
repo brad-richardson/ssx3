@@ -5,6 +5,27 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1ad launched (event-driven, p1ac wait fired):** diagnose the
+      NEW park — main-thread `sub_00394ED0` list-walk
+      (bounded-vs-circular via guest-memory trace) + thread-3
+      sema-30 chain + outer loop above `362DE8`; name the fix
+      brief. NOT the BIND sketch (refuted). Reuses held P9 pane,
+      Part 28.
+- [ ] **P1ac read (09-20) — PASS, handshake fix works, BIND
+      refuted:** `6447d8b` (gate + hunk + 3 tests) + `45da174`
+      (args ride-along) pushed `4326926..45da174`; poll collapses
+      (cf0 0 blocks, getter 1/1, poller 1/1, receipt + same-bytes
+      send); thread 3 past `0x2290E8` (4 new semas, RPC-client
+      waits, parks sema-30 ra `0x31aca4`); main RUNNING in
+      `394ED0` list-walk (15,989 balanced calls, dma/gif frozen);
+      thread 6 born (WAIT 36); CD 42→810, SIF 18→21, GS exact;
+      BIND refuted ×3 (SendCmd exactly 1, zero `0x40b`,
+      `40B400` 0/0); census now attributed (`0x5b` from
+      `0x42cbb8`, handler `0x80075000`). Verified: both commits +
+      hunk/ride shapes, receipt/send lines, cf0 zero, census 6 +
+      args, creates 37/0, handshakes 65/65 + 4/3, T1/T3/T6 rows,
+      SendCmd×1, zero-40B, suite RE-RUN BY ME 431/431/0, waits,
+      scope. Next: P1ad (new park). Ledger row added.
 - [ ] **M15 launched (user picked host synth demo):** milestone 3 on
       host — synthesize a true intermediate frame from the proven
       camera seam, measure synth-vs-truth (bytes, distributions,
