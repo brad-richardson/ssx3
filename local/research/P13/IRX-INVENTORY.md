@@ -12,8 +12,13 @@ Peer-owned `REPORT.md` untouched. Methods at the end; machine-readable mirror:
 - Count: **22** `DATA/MODULES/*.IRX` (matches brief).
 - Sample re-measure: SNDDRV 96,016 ✓, MSIFRPC 7,377 ✓, PADMAN 43,813 ✓, SDRDRV 8,065 ✓.
 - `file(1)`: all 22 = `ELF 32-bit LSB PlayStation 2 IOP module, MIPS, MIPS-I version 1 (SYSV)`.
-- All retain ELF section headers + `R_MIPS_32`-only relocs; SNDDRV also retains
-  `.mdebug` + 364-entry `.symtab` (used as cross-check, §5).
+- All retain ELF section headers; reloc types in every module are
+  `{R_MIPS_32, R_MIPS_26, R_MIPS_HI16, R_MIPS_LO16}` (2,4,5,6 — not 32-only).
+- `.mdebug`+`.symtab`+`.strtab` retained by the 3 EA modules only (all
+  Sony/Logitech modules stripped to 1 null sym): SNDDRV 364 syms, DRTYSCKF 468
+  syms, VOIPF 120 syms (SNDDRV symtab used as cross-check, §5).
+- Rerun: re-extracted to `/tmp/t3-irx/t3-rerun/` (first extraction at
+  `/tmp/t3-irx/DATA/` left untouched); all sizes/MD5s/entries identical.
 
 | File | Bytes | MD5 | Module (`.iopmod`) | Mod ver | Entry |
 | --- | ---: | --- | --- | --- | --- |
@@ -65,7 +70,7 @@ Peer-owned `REPORT.md` untouched. Methods at the end; machine-readable mirror:
 | PPPOE.IRX | Sony | module v1.92 (TCP/IP family), `pppoe.c` |
 | SPDUART.IRX | Sony | `Version 2.1.0`, module `INET_SPEED_UART_driver` |
 | NETCNF.IRX | Sony | `# <Sony Computer Entertainment Inc.>`, `sceNetCnf…` diagnostics |
-| DEV9.IRX | Sony | `dev9: CXD9566/CXD9611…driver start` (Sony HW ids); no build stamp in strings |
+| DEV9.IRX | Sony | `PsIIDEV9    2710` + `dev9: CXD9566/CXD9611…driver start` (Sony HW ids) |
 
 Tally: Sony 18, EA 3, Logitech 1.
 
@@ -79,15 +84,15 @@ by disassembly incl. jal delay slots. `exports` = `lib vV: slots(live)`.
 
 | Rank | IRX | N imp | Imports (lib n) | Exports | RPC-S (serve) | RPC-C / CMD |
 | --- | --- | ---: | --- | --- | --- | --- |
-| S1 | SNDDRV | 41 | libsd 12, sysmem 3, intrman 2, loadcore 1, sifcmd 9, sifman 1, sysclib 4, thbase 9 | — none — | 0x534E44 `SND` @0x9310 → 0x8bf0 | CMD cid 0 @0x8ff8 → 0x8ba0 |
+| S1 | SNDDRV | 41 | libsd 12, sysmem 3, intrman 2, loadcore 1, sifcmd 9, sifman 1, sysclib 4, thbase 9 | — none — | 0x534E44 `SND` @0x9310 → 0x8bf0 | CMD cid 0 @0x8ff8 → 0x8ba0; SEND cid 1 @0x911c,@0x9188 |
 | S2 | SDRDRV | 47 | libsd 26, intrman 2, loadcore 1, sifcmd 6, stdio 1, sysclib 3, thbase 8 | sdrdrv v1.1: 6 slots, live 1–5 | 0x80000701 @0x3cc → 0x410 | bind 0x80000704 @0xe34; call fno 0 @0xce0 (client 0x19f0, 64 B) |
-| S3 | MSIFRPC | 25 | sysmem 3, loadcore 1, intrman 2, stdio 1, sifcmd 4, sifman 1, thbase 10, thmsgbx 3 | msifrpc v1.1: 22 slots, live {4,17} | — | CMD 0x80000019 @0x100 → 0x298; 0x8000001a @0x118 → 0x510; 0x8000001d @0x130 → 0x3c4 |
+| S3 | MSIFRPC | 25 | sysmem 3, loadcore 1, intrman 2, stdio 1, sifcmd 4, sifman 1, thbase 10, thmsgbx 3 | msifrpc v1.1: 22 slots, live {4,17} | — | CMD 0x80000019 @0x100 → 0x298; 0x8000001a @0x118 → 0x510; 0x8000001d @0x130 → 0x3c4; SEND 0x80000001 @0x164; 0x80000018 @0xa14,@0xc80,@0xf9c |
 | S4 | LIBSD | 19 | intrman 7, loadcore 2, sifman 2, sysclib 1, thevent 7 | libsd v1.5: 34 slots (0–33), all live | — | — |
 | I1 | PADMAN | 38 | sysmem 1, loadcore 1, intrman 2, stdio 1, sio2man 7, thbase 7, thevent 6, sifman 4, sifcmd 4, vblank 2, sysclib 3 | padman v2.3: 18 slots, all live | 0x80000100 @0x7604 → 0x7414; 0x80000101 @0x76c8 → 0x7624 | — |
 | R01 | DEV9 | 16 | stdio 1, loadcore 2, thbase 1, thsemap 3, ioman 2, dmacman 2, intrman 5 | dev9 v1.7: 14 slots (0–13), all live | — | — |
-| R02 | DRTYSCKF | 59 | inet 13, netcnf 3, inetctl 5, sysmem 2, intrman 2, sifcmd 3, sifman 2, stdio 1, sysclib 13, thbase 10, thsemap 5 | — none — | — | CMD cid 1 @0x1998 → 0x17b8 |
+| R02 | DRTYSCKF | 59 | inet 13, netcnf 3, inetctl 5, sysmem 2, intrman 2, sifcmd 3, sifman 2, stdio 1, sysclib 13, thbase 10, thsemap 5 | — none — | — | CMD cid 1 @0x1998 → 0x17b8 (param s0+0x1840; SetCmdBuffer buf s0+0x17c0 @0x18e0) |
 | R03 | INET | 40 | sysmem 2, intrman 2, loadcore 2, stdio 1, sysclib 9, thbase 13, thevent 5, thsemap 4, cdvdman 1, modload 1 | inet v1.1: 47 slots, live 30; netdev v1.1: 24 slots, live 16 | — | — |
-| R04 | INETCTL | 49 | inet 12, netcnf 3, loadcore 2, stdio 1, sysclib 8, thbase 9, thevent 5, thsemap 4, sysmem 2, intrman 2, modload 1 | inetctl v1.1: 20 slots, live 12 | — | — |
+| R04 | INETCTL | 49 | inet 12, netcnf 3, loadcore 2, stdio 1, sysclib 8, thbase 9, thevent 5, thsemap 4, sysmem 2, intrman 2, modload 1 | inetctl v1.1: 20 slots, live 11 (0,4–13; dummy 0x3c08 ×9) | — | — |
 | R05 | LGAUD | 34 | usbd 9, sysmem 2, intrman 2, loadcore 2, modload 2, sifcmd 4, stdio 1, sysclib 4, thbase 4, thsemap 4 | lgaud v1.8: 23 slots (0–22), all live | 0x50494C42 `BLIP` @0x171c → 0x173c | — |
 | R06 | LIBNET | 45 | msifrpc 2, inet 20, inetctl 7, intrman 2, loadcore 2, sifcmd 1, stdio 1, sysclib 1, thbase 5, thsemap 4 | Libnet v1.1: 4 slots (0–3 only, no fns ≥4) | — | — (MSIF client: MInitRpc+MEntryLoop) |
 | R07 | MCMAN | 33 | loadcore 2, intrman 2, sio2man 5, sysclib 8, stdio 1, thbase 3, thsemap 5, modload 1, ioman 2, secrman 3, cdvdman 1 | mcman v2.7: 62 slots, live 48 | — | — |
@@ -95,7 +100,7 @@ by disassembly incl. jal delay slots. `exports` = `lib vV: slots(live)`.
 | R09 | NETCNF | 43 | sysmem 2, loadcore 2, intrman 2, thbase 1, thsemap 4, sysclib 14, ioman 16, stdio 1, cdvdman 1 | netcnf v1.32: 24 slots (0–23), all live | — | — |
 | R10 | PPP | 43 | netdev 10, intrman 2, loadcore 2, sysclib 9, thbase 10, thevent 5, thsemap 4, modload 1 | modem v1.1: 24 slots, live 0–5 | — | — |
 | R11 | PPPOE | 39 | modem 2, netdev 10, sysclib 7, thbase 8, thevent 5, thsemap 4, intrman 2, modload 1 | — none — | — | — |
-| R12 | SIO2MAN | 28 | loadcore 1, intrman 6, stdio 1, dmacman 5, thbase 3, thevent 5, thsemap 4, sysclib 3 | sio2man v2.4: 64 slots, live 62 (0,27 NULL) | — | — |
+| R12 | SIO2MAN | 28 | loadcore 1, intrman 6, stdio 1, dmacman 5, thbase 3, thevent 5, thsemap 4, sysclib 3 | sio2man v2.4: 64 slots, live 62 (4,27 NULL; slot 0 = 0x634 entry, live) | — | — |
 | R13 | SMAP | 42 | netdev 7, dev9 7, intrman 2, stdio 1, sysclib 6, thbase 9, thevent 5, modload 3, loadcore 2 | smap v1.1: 4 slots (0–3 only) | — | — |
 | R14 | SPDUART | 40 | modem 2, netdev 1, dev9 4, intrman 2, loadcore 2, stdio 1, sysclib 9, thbase 10, thevent 5, ioman 3, modload 1 | spduart v1.1: 4 slots (0–3 only) | — | — |
 | R15 | USBD | 28 | sysmem 2, loadcore 2, intrman 6, stdio 1, thbase 6, thevent 5, thsemap 4, sysclib 2 | usbd v1.1: 19 slots (0–18), all live | — | — |
@@ -138,11 +143,17 @@ Full imports (funcno = name; stub vaddr in parens; symtab-confirmed, §5):
   40 SysClock2USec
 
 RPC sids registered: one — **0x534E44** (`SND`) @0x9310 → handler 0x8bf0
-(`SNDIOP_dispatchrpc` per symtab); SifRpcData* stack-built (a0 unresolved).
+(`SNDIOP_dispatchrpc` per symtab), queue a3 = s1+0x5bf8. SifRpcData* a0 =
+s1+0x6410 (s1-relative incoming pointer, not stack; not statically
+meaningful). Direction served: EE→IOP.
 RPC sids called: none (no BindRpc/CallRpc imports; no client call sites).
-SIF cmd handlers: one — **cid 0** @0x8ff8 → handler 0x8ba0 (`SNDIOP_cmdhandler`
-per symtab), param 0xad70. NOTE: cid comes from the jal delay slot
-(`move a0,zero` at 0x8ffc); the pre-slot `lui/addiu a0` builds 0xad78.
+SIF cmd handlers served: one — **cid 0** @0x8ff8 → handler 0x8ba0
+(`SNDIOP_cmdhandler` per symtab), param 0xad70. NOTE: cid comes from the jal
+delay slot (`move a0,zero` at 0x8ffc); the pre-slot `lui/addiu a0` builds
+0xad78 (SetCmdBuffer's buffer, §13's "cid 1" is the *send* side, next line).
+SIF cmds sent (IOP→EE): **cid 1** at two `SendCmd` sites — @0x911c
+(a2 size 0x20) and @0x9188 (a1 0xad30, a2 size 0x20); both set
+`addiu a0,zero,1` immediately before (0x90d0, 0x913c).
 
 Strings (RPC/commands/versions/EA internals): no numeric sid/cid strings; RPC
 surface is immediate-built (`lui a1,0x53; ori a1,0x4e44`). Version handshake is
@@ -152,9 +163,10 @@ LOADED SNDDRV.IRX VER %i.%02i.%02i. …`; `*** SND LIBRARY ABORTED *** %s`;
 `SNDfxinitbus - … FILTER NOT SUPPORTED ON IOP …` (×4: LOW PASS FIR8, HIGH PASS,
 BAND PASS, RESONANCE); `Failed to start main IOP thread.`; `Failed to start SPU
 thread.`; EA src paths `ps2/sndiop.c`, `ps2/sdxa16ciop.c`, `ps2/supxaf*.c`,
-`mix/…` (23 files), `cmn/…` (4 files).
+`mix/…` (24 unique paths, 28 `.mdebug` lines), `cmn/…` (4 files).
 
-Surface line: **41 imports / 0 exports / 1 sid served + 1 cmd cid (0 client)**.
+Surface line: **41 imports / 0 exports / 1 sid served (EE→IOP) + cmd cid 0
+served + cmd cid 1 sent ×2 sites (IOP→EE), 0 RPC client**.
 
 ### 4b. SDRDRV.IRX — Sony `sdr_driver` v4.1
 
@@ -193,7 +205,7 @@ Strings: `SDR driver version 4.0.1 (C) SCEI`; `PsIIsdrdrv  2700`;
 ` Exit rsd_main `; `SDR callback thread created`.
 
 Surface line: **47 imports / 6 export slots (5 live: sdrdrv 1–5) /
-1 sid served + 1 sid called (fno 0)**.
+1 sid served (EE→IOP: 0x80000701) + 1 sid called (IOP→EE: 0x80000704, fno 0)**.
 
 ### 4c. MSIFRPC.IRX — Sony `IOP_MSIF_rpc_interface` v2.5
 
@@ -212,9 +224,11 @@ Full imports:
   22 ReferThreadStatus, 24 SleepThread, 26 iWakeupThread, 33 DelayThread
 - thmsgbx (v1.1): 4 CreateMbx, 7 iSendMbx, 8 ReceiveMbx
 
-RPC sids registered/called: none. SIF cmd handlers: three —
+RPC sids registered/called: none. SIF cmd handlers served: three —
 **cid 0x80000019** @0x100 → 0x298; **cid 0x8000001a** @0x118 → 0x510;
 **cid 0x8000001d** @0x130 → 0x3c4 (queue/param 0x2380 all three).
+SIF cmds sent (IOP→EE): **0x80000001** @0x164 (a2 size 0x18);
+**0x80000018** @0xa14, @0xc80, @0xf9c (a2 size 0x40 each).
 Exports `msifrpc` v1.1: 22 slots, live only idx 4 (sceSifMInitRpc) and
 idx 17 (sceSifMEntryLoop); rest dummy 0x1060; idx 16 (MTermRpc slot) is dummy.
 
@@ -223,7 +237,7 @@ failed.`; `AllocSysMemory/CreateMbx/ReceiveMbx/StartThread… failed.`;
 `sceSifMEntryLoop`; `PsIImsifrpc 2700`.
 
 Surface line: **25 imports / 22 export slots (2 live: msifrpc 4,17) /
-0 sids + 3 cmd cids**.
+0 sids + 3 cmd cids served + 2 cmd cids sent (0x80000001 ×1, 0x80000018 ×3)**.
 
 ### 4d. LIBSD.IRX — Sony `Sound_Device_Library` v3.3
 
@@ -264,6 +278,14 @@ Surface line: **19 imports / 34 live exports (libsd 0–33) / 0 sids**.
   sifcmd:17), both RPC handlers (`SNDIOP_dispatchrpc@0x8bf0`,
   `SNDIOP_cmdhandler@0x8ba0`), and `start@0x9244`.
 - sid mnemonics: 0x534E44 = `SND`, 0x50494C42 = `BLIP` (LE byte order).
+- Rerun (independent, same brief): fresh extract to `/tmp/t3-irx/t3-rerun/`;
+  per-word capstone MIPS disassembly (robust to export tables at vaddr 0,
+  which truncate linear disassembly — that hid MCSERV's sites in rerun v1);
+  64-insn lui/ori/addiu/move resolution incl. jal delay slot; s-reg/gp
+  sources kept symbolic (`s1+0x6410`); every site hand-verified against the
+  printed window. funcno→name mappings (§4/§6) carried from the PCSX2 table
+  cited above; all funcnos + counts re-verified, names spot-checked on the
+  SND path only.
 - No boots, no harness, no fork changes, no adb, no leases; ISO read-only;
   scratch in `/tmp/t3-irx/` only.
 
@@ -371,11 +393,15 @@ Surface line: **19 imports / 34 live exports (libsd 0–33) / 0 sids**.
    0x80000704 BindRpc), not by immediate — no CallRpc encodes its sid.
 3. No on-disc server for sid 0x80000704 (SDRDRV's peer is EE-side); likewise
    the EE-side clients of every §3 server sid are out of T3 scope.
-4. RegisterRpc arg0 (SifRpcData*) is stack-built at SNDDRV/SDRDRV/LGAUD/VOIPF
-   sites (addresses not statically meaningful); static structs used at MCSERV
-   (0x3718), PADMAN (0x976c/0x984c), USBKB (0x20ac).
-5. SNDDRV AddCmdHandler cid = 0 comes from the jal delay slot (verified
-   disassembly); §13's note says "cid 1" — tabled side by side, not adjudicated.
+4. RegisterRpc arg0 (SifRpcData*): stack-built at SDRDRV/LGAUD/VOIPF
+   (sp+0x38), s1-relative at SNDDRV (s1+0x6410, incoming pointer — not
+   stack, still not statically meaningful); static structs at MCSERV
+   (0x3718), PADMAN (s0+0x18 = 0x976c/0x984c), USBKB (s0+0x18 = 0x20ac).
+5. SNDDRV serves SIF cmd cid 0 (@0x8ff8, cid from the jal delay slot
+   `move a0,zero`) and SENDS SIF cmd cid 1 (@0x911c and @0x9188, each
+   preceded immediately by `addiu a0,zero,1` at 0x90d0/0x913c). §13's
+   "cmd handler cid 1" matches the send direction; the EE-side handler
+   of cid 1 is out of T3 scope.
 6. Module version (`.iopmod`) ≠ library interface version (export table):
    e.g. LIBSD mod v3.3 / lib v1.5, MSIFRPC mod v2.5 / lib v1.1, NETCNF mod
    v1.20 / lib v1.32, SIO2MAN mod v3.0 / lib v2.4, MCMAN mod v2.34 / lib v2.7.
@@ -391,6 +417,38 @@ Surface line: **19 imports / 34 live exports (libsd 0–33) / 0 sids**.
 10. PADMAN imports `sdrdrv`? No — verified: nothing on disc imports sdrdrv,
     mcserv, or padman; nothing on disc serves 0x80000704. (Absence claims from
     exhaustive import-table + RegisterRpc-site scans above.)
+11. Indirect calls: DRTYSCKF (48 jalr), SNDDRV (29), PADMAN (14), MSIFRPC (1),
+    SDRDRV (1) use `jalr`; LGAUD/LIBNET/MCSERV/USBKB/VOIPF have none. Zero
+    jalr sites resolve to a sifcmd stub within a 24-insn const window, so
+    the direct-jal census above is complete against address-materializing
+    callers; a stub address loaded via `lw` from a table would escape this
+    check (no such table observed).
+12. DRTYSCKF (468 syms) and VOIPF (120 syms) retain `.symtab`/`.mdebug`
+    (rerun finding; SNDDRV's was already used). Unmined: handler names for
+    VOIPF 0x890 / DRTYSCKF 0x17b8 and own-symbol names for the 14 unnamed
+    `lgaud` imports — input for a disassembler brief, not re-scanned here.
+13. PADMAN embeds the string ` SDR driver error: invalid priority %d`,
+    also present in SDRDRV. Shared-source artefact or common-helper copy;
+    recorded, not investigated.
+
+## 8. Rerun verification log (second agent, same brief)
+
+| Check | Result |
+| --- | --- |
+| ISO bytes / file count / all 22 sizes / all 22 MD5s / `file(1)` | match |
+| Module name / version / entry ×22 (`.iopmod` + ELF header parse) | match |
+| N imports + per-lib counts + full funcno lists ×22 | match incl. §6 |
+| Export lib / version / slot count ×18 tables (5 modules none) | match |
+| Export live sets | match except INETCTL 11 (was 12) and SIO2MAN NULLs {4,27} (was {0,27}) |
+| RPC-S sid + call pc + handler ×8 sites (7 modules) | match (MCSERV confirmed after disasm fix) |
+| RPC-C sid + client struct + fno (SDRDRV) | match (client 0x19f0, fno 0, 64 B) |
+| CMD cids served (SNDDRV, MSIFRPC ×3, DRTYSCKF) | match |
+| SND `SendCmd` cid 1 ×2, MSIF `SendCmd` ×4 | new (§3–§4) |
+| SNDDRV symtab 364 + handler/stub names | match |
+| Origin calls + stamps | match except DEV9 stamp `PsIIDEV9 2710` added |
+| Reloc types | corrected: {32,26,HI16,LO16}, not 32-only |
+| Symbol retention | corrected: 3 EA modules, not SNDDRV-only |
+| `jalr`-hidden RPC sites | none found (see gap 11) |
 
 ---
 T3 static brief. No leases taken, no boots, no fork changes, no adb. Evidence
