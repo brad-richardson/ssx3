@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps.
-- [ ] **Live panes:** rc1 (route criteria doc, 4h) · t25 (NVM-verify + scripted path, bytesize, 6h) · t26 (writer-watch boot, P-lane lease, 4h) · r1 (pc-tagged reference, bytesize, 2h) · mf1 (MetalFX spike s1, GameCube track, 6h, new pane) · a1-pane HELD (no A-successor before R1).
-- [ ] **Queue:** R1 routes all (TBD by its 3 outcomes; NO A-series successor before R1) · item-3 trampoline fix (iff R1 shows faithful path) · OD1 Odin readiness (after RC1) · E3 conditional (R1-state-dependency OR writer-watch-neither) · E2b/E2c HELD · P1ae (due iff writer is SIF/RPC-delivered) · I8 audio-wall repro (iPad wifi confirmed; iPhone when user confirms; needs a free pane) · G-lane (first game frames) · mini day-one.
+- [ ] **Live panes:** k1 (item-3 trampoline fix, fork + P-lane lease, 6h) · t27 (press-on-title within dwell, bytesize, 4h) · od1 (Odin port readiness, synth path, 4h).
+- [ ] **Queue:** E3 shape with frontier (T26 neither-condition met; purpose to confirm — prompted this poll) · A-lane CLOSED (R1 outcome 2 settled the paradox) · P1ae CLOSED (writer init-only, not SIF) · E2b/E2c HELD · I8 audio-wall repro (iPad build this poll; iPhone when user confirms broader feedback) · G-lane (first game frames; MF1-s2 parked behind GX motion vectors) · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,101 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T26 read (09-20) — PASS, writer named: 11 init-only pcs, 0 in-window, routes to E3:**
+      One 240 s leased boot (BOUND=wall, SIGTERM el=241 s, lease held 250 s,
+      zero waits) with 83 watch windows emits 6,245,425 watch lines; block
+      `0x501420..0x501437`: 17 writes from 11 pcs ALL at log lines 49–275
+      (loader zero-init ×3, `sub_00393048` ×2, `sub_003691F8` 9 pcs ×12),
+      ZERO in the 14,423-invocation buildup window — init-constant; s1 flags
+      (steady `0x70001C00`) all flips complete by line ~27k, 0 in-window;
+      routing SIF-no (writers precede line-3706 handshake) / CD-no (guest
+      stores, sync CD) → neither-condition met, E3. Epoch blocks 0–47 (b0
+      962 +1 vs T24, b1 497 exact, 222×46), pc= 100.0000%, format-check
+      exit 0. Open: G1 (1-skip vs 4-nonzero needs within-VBLANK order).
+      Verified: TRACE/LOG/PLOG/park sizes + FULL shas ×4, epoch/proof/
+      liveness/watch miners, 648+/0−, lease absent, zero fork commits.
+      Reference-state row: n/a (runtime-side question, no reference
+      stream). ~40 min. Next: E3 shape via frontier (hand-back prompt
+      this poll). Ledger row added.
+- [x] **MF1 read (09-20) — PASS, MetalFX session 1: 3 devices, exact-motion interior bit-exact, 1.3–5.3 ms GPU:**
+      Isolated harness only (404 files, ALL under `local/research/MF1/`,
+      zero tracked modifications); Metal 3 `MTLFXFrameInterpolator` runs on
+      Mac M4 + iPhone A18 Pro + iPad M2 over WiFi (both `supportsFrameInterp`,
+      trial app untouched, fresh `mf1probe` bundle); drive rule: no reset +
+      2 establishing encodes, interpolation from 3rd encode. Quality exact:
+      interior MAE 0.0 bit-exact all devices/resolutions, band 0.7–2.4,
+      static 0.0, HUD 0.0 both UI paths; zero/uniform motion fail (interior
+      89–96 at 32 px/frame); OUT bytes IDENTICAL cross-device (exact).
+      Cost med: iPhone 2.20@528/3.41@720, iPad 2.96/4.42, Mac
+      1.29–2.21/2.5–3.9/5.34@1080p; submit 0.02–0.06 ms; latency 16.67 ms
+      structural + GPU terms, composite/present unmeasured. Gaps G1–G10
+      (GX motion vectors open, no sustained pass). Verified: scope (0
+      non-MF1 paths), byte-equality RE-RUN BY ME (True/True), tail sha
+      recomputed exact (`bfcafbb6…`), metrics spot (interior 0.0 / band
+      2.3138 / all 0.2856), device receipts + DONE markers. Reference-state
+      row: n/a (synthetic scene). ~45 min. Next: session 2 parked (needs
+      GX motion vectors first; G-lane owns that). Ledger row added.
+- [x] **T25 read (09-20) — PASS, NVM skip to attract, title 3×, first menu unreached (dwell):**
+      Build reused bit-identical; Phase 1 fresh no-input boot
+      SKIPS to attract (T+90 halfpipe + T+120 Riggs card,
+      NVM da021d2a untouched, 397 vblanks all ≤90 frozen,
+      ×15 mode changes, 18 LoadStartModule, 368
+      sceCdApplySCmd2 = 397−29); laptop .nvm located
+      (914d2d7c, byte-identical to bytesize inputs) NOT
+      copied (SKIPPED → 1b N/A); Phase 2 script drove
+      attract → TITLE 3× (P1 Cross 532.9 ms, P2 Start 533.0
+      ms first Start use; +10 s after both presses + once
+      spontaneous; region-identical p99 0) but attract
+      reclaims in 10–80 s so no press acted on title —
+      first menu unreached, chain ends cycling; 2.48 GB
+      bytesize-only trace + 950 MB SSD Phase-1 copy;
+      WSL 7 flaps + first kernel restart (clean NIC
+      teardown/start, cause unknown; 3/3 traces re-verified
+      post-reboot); 1200 s cap unexercised (≤6 min
+      precaution). Verified: SSD bytes, 10 snap sizes,
+      laptop .nvm sha, ExecPS2 re-grepped, holds re-timed,
+      census heads, 7629+/0−, no lease. ~23 min. Next: T27
+      (press-on-title within dwell) in freed pane. Ledger
+      row added. Reference-state row: the trace IS the
+      reference (game reaches each park).
+- [x] **R1 read (09-20) — PASS after tail restore, paradox SETTLED: game installs patches on hardware:**
+      Separate pc-tagged binary (one-line diff verified,
+      T4 binary/tree re-verified pristine 3×); NVM-carried
+      Settings-completed boots the REAL GAME (rider page /
+      night race): 5 ExecPS2s both runs (pcs/a0 tabled),
+      SLUS reload EntryPoint 0x00100008; installer fires
+      (74)=18/(5b)=12/(5a)=3 IDENTICAL both modes (pcs
+      42c2f8/42c768/42cbc8, a0-seq 5a/5b/54–59 verbatim =
+      A0 runtime); ONLY (64) differs (0 vs 18164 =
+      recompiler logging skip); loader-stage ev1–10 names
+      agree T4/T23/R1A (ev3 A-vs-B differ = (64)-insertion,
+      B ev5 ≡ A ev3); game-entry g1–g30 all names+pcs+a0
+      identical (B inserts 2 dropped (64)s); +8 pc
+      convention joined at 5 sites; routing: outcome 2
+      MATCHES (path faithful → item-3 trampoline fix),
+      outcome 1 row-matches with causes tabled (G1-a args
+      in-report), outcome 3 no-residual; T4/T23 zeros close
+      on boot-path (2 ExecPS2 setup park, no game pcs).
+      Verified: sizes, 5/5 ExecPS2s, 18/12/3/0-18164 counts,
+      a0-seq, anchors, game-entry lines, patch diff, T4
+      pristine re-checked, format-check re-run, lease never
+      touched, 20099+/0− + restore. Reference-state row:
+      BOTH (the reference, game-booted). ~35 min. Next:
+      item-3 trampoline fix brief in freed pane. Ledger row
+      added.
+- [x] **RC1 read (09-20) — PASS, criteria doc with sourced GameCube column, PS2 blank, no verdict:**
+      `docs/route-criteria.md` (152 lines): B1–B8 budget + C1–C5
+      correctness + W-G1–14/W-P1–10 work tables, every GameCube
+      cell with pointer, every PS2 cell BLANK with its filling
+      receipt; decision-point table defers to the comparison
+      point (frontier-authored read); NetherSX2 numbers
+      explicitly excluded (not static-recomp). Sourcing report:
+      17 sources with lines, 3 spot-verifications re-derivable.
+      Verified: D6/S2/third-arm/plan-gate/blended counts
+      re-grepped, SV1–SV3 shapes, no verdict language (one
+      "makes no route recommendation" disclaimer), 244+/0−.
+      Reference-state row: n/a (docs). ~1 h. Next: OD1 in
+      freed pane. Ledger row added.
 - [x] **A1 read (09-20) — PASS, fork at 3rd event both windows, segment has zero reads/branches:**
       P1 opening events 1–26 reproduced (8×74+6×5b+1×5a+2×64
       in 9–25, 26th FlushCache); P2 zeros re-derived proper

@@ -626,3 +626,27 @@ ASSESSMENT. Tooling from Part 2 all landed and is paying: T1 snapshot, T5 analyz
 8. HYGIENE: (a) The fork clone has AppleDouble sidecars inside .git (`.git/._index`, `.git/objects/pack/._pack-*.idx`); every git command prints "non-monotonic index" errors. Run `find "$R/.git" -name '._*' -delete` once and export COPYFILE_DISABLE=1 in every brief that touches the SSD. (b) Now section is in good shape now — keep the one-line-per-pane discipline. (c) Truncated-tail rule (F3 §21.1) adopted: `tail -3 REPORT.md` in every receipt.
 
 WHAT TO KEEP DOING: event-driven launches; re-running suites yourself before a gate; kernel-first with the BIOS as source; hardware-faithful fixes like P1af; the trace-aligner discipline (F7 was the right call). Upstreaming stays off every list.
+
+---
+
+# Part 4 hand-back (2026-09-20, orchestrator → frontier pane wN:p1B)
+
+Decision-by-decision status against the Part 4 steering read:
+
+| # | Decision | Action taken | Receipt | Status |
+|---|---|---|---|---|
+| 1 | R1 pc-tagged reference next; no A-successor before R1 | R1 briefed, ran, gated PASS | `2b068a0` + restore `963f081`; outcome 2 (installer fires identically both modes, only (64) differs → runtime path faithful) | LANDED → K1 briefed this poll |
+| 2 | Name the 0x501420 writer with watch + pc= | T26 briefed, ran, gated PASS | `10ed930`; 11 init-only pcs, 0 in-window → neither-condition met | LANDED → E3 shape question below |
+| 3 | Kernel installer waits for R1; trampoline fix iff faithful | Held (no early brief); R1 outcome 2 | K1 brief `local/muse/prompts/K1.md` this poll per the specified HLE shape | BRIEFED |
+| 4 | Stop M microscopy; one ledger row; RC1 then Odin readiness | M-lane closed (`1ff1542`); RC1 gated PASS | `6e3c5ac`; OD1 brief `local/muse/prompts/OD1.md` this poll | RC1 LANDED → OD1 BRIEFED |
+| 5 | Frontier-authored reads; prompt this pane at fixed points | Adopted in Live rules; this hand-back + E3 question is the mechanism | `docs/todo.md` Live rules | ACTIVE |
+| 6 | No boot >600 s without frontier ok; progress caps | Adopted in Live rules; T26 ran 240 s BOUND=wall | `local/research/T26/liveness.txt` | ACTIVE |
+| 7 | Bytesize: NVM-verify then one scripted-path brief | T25 gated PASS (skip → attract; title 3×; menu unreached, dwell ≤10–80 s) | `7c8a68c`; T27 brief `local/muse/prompts/T27.md` this poll | LANDED → T27 BRIEFED |
+| 8 | Hygiene: fork .git sidecars + COPYFILE_DISABLE + tail receipts | Fork `.git` sidecar count re-checked: 0; COPYFILE_DISABLE in all briefs; tail receipts gated | this poll | DONE |
+
+E3 shape question (decision 2 follow-up): T26's neither-condition is met, but
+its G1 (1-skip vs 4-nonzero) suggests the remaining puzzle is within-VBLANK
+read/write order, not the writer E3 was conceived to find. Is E3 still due,
+and with what shape — within-VBLANK order probe, host-clear audit, or parked
+behind K1? If no answer within one poll, E3 proceeds PROVISIONAL capped at one
+brief per decision 5.
