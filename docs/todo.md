@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes, before any diagnosis brief on a state the reference does not enter (F3 4th trigger) · drain question CLOSED (F3 rec 11: no E1/P1ak-class brief) · gate reads carry a reference-state row (F3 rec 16) · briefs require tail-3 receipts; boot scripts get progress caps (F3 rec 17).
-- [ ] **Live panes:** m62 (gap-13 interval, offline, 4h) · t21 (3rd ✕ at Time Zone, bytesize, 6h) · t22 (aligner projection + pc=, no boots, 4h) · a0 (name the divergence, static, 2h) · e2a (pad stimulus boot, P-lane lease, 6h).
-- [ ] **Queue:** A1 (kernel-true scanner, after A0) · E3 probe (conditional on A1) · E2b/E2c HELD (F3 rec 15) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
+- [ ] **Live panes:** m63 (head-bulk neighborhood, offline, 4h) · t23 (4th ✕ at DST, bytesize, 6h) · t24 (pc= boot proof + site split, P-lane lease, 4h) · a1 (G1 resolution, dynamic reads, 4h) · e2a-pane HELD for A1's successor.
+- [ ] **Queue:** A1-successor (scanner iff G1 finds a branch; else E3-conditional) · E3 probe (conditional on A1) · E2b/E2c HELD (F3 rec 15; E2a null was first) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,115 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E2a read (09-20) — PASS, first stimulus null: delivered + latched, NO response to cap:**
+      Fork 282ce92 (+227 Pad.cpp): fired reads-gated @
+      reads=204,356 wall=1702 s logline 2,646,552 (b338,
+      fire+1 first padread, ports 0+1, 0x00/extremes —
+      delivery proven); pre-arming T16-exact (exit b235
+      shape, N 72,176/72,176 first/last exact, singletons,
+      chunk-71 +2, ramp, residue); post-fire 41,678 iters:
+      NO response on R1–R7 + 12 E1 + 2 gated (residue 13/0
+      diff, no new target, 326EB0/iter 2.0 exact, 0 post
+      PortOpens, gaps {6,7}, bands hold); G1 void honestly
+      tabled (GETSTATE-NEWRA hookless in linked binary —
+      fire line getstate=0 corroborates; binary since
+      superseded by T22's relink so strings unrecheckable);
+      deviations disclosed (b241 edge −1, preamble 973/491
+      6th datum, pre-b0 37/37, in-phase 29/31 balanced).
+      Nits: fire 24.2% reads 24.7% (75/304); PADPAIR monitor
+      phrasing opaque (integers close: 143,394=2×71,697).
+      Verified: byte sizes, FIRED line, padread ×48,
+      padstim ×13, fire+1 delivery bytes, format-check
+      4,021,628 zeros re-run, fork log, lease removed,
+      1106+/0−. Reference-state row: drain (game never in
+      it; stimulus experiment, F3-advised). ~2.7 h. Next:
+      pane HELD for A1's successor (E2b/E2c held, E3
+      conditional on A1). Ledger row added.
+- [x] **A0 read (09-20) — PASS with errata, 8-number override table + hash decode + storm issuers:**
+      Table (i): unconditional entry→installer path (no
+      branch); installer = 8 SetSyscall + 6 GetEntry (5
+      v0=-1 passthroughs + 1) + 1 Copy + 2 FlushCache with
+      ELF word sources; effective table 0x54–0x5B (8
+      distinct — corrects F3's ≤7); 0x42D100 mid-function
+      (CSV 0 rows — verified); 2nd patch block skipped
+      (gate beqz taken); 5 wrapper sites liveness-tabled;
+      locator = mark/scan/converge/publish ([0x455230] is
+      the signal, v0 discarded); G1 reference paradox
+      tabled (blocks A1's premise — nothing branches).
+      Table (ii): 256-bucket lookup-or-insert full decode
+      (bucket t2+0x674A0 via lui/ori — verified in disasm;
+      16 B key + 0x18 stride; move-to-front; insert-never-
+      fails); 20 lookups/invocation with hash + halfword
+      checks; exit = return + unwind (no enclosing branch);
+      0x501420 writer open (G2). Table (iii): GetThreadId
+      single wrapper (F3 grep-miss explained: uppercase
+      0x2F — verified) + 21 sites/15 files (reconciled);
+      FlushCache 23 sites/18 files (reconciled); hot_pc
+      counts+ras exact; override-join: no storm through
+      wrappers. Errata (citations only): CSV row 9234 →
+      8209/8210; BRE-literal receipt pattern (numbers
+      re-grepped proper: ref 0/0, (2f)=2); tail-3 missing.
+      Verified: wrapper line, site/file counts, hot_pc,
+      CSV rows, ref zeros, bucket immediates, 403+/0−.
+      Reference-state row: static (both states read). ~2 h.
+      Next: A1 (loader/HLE-setup comparison) in freed pane.
+      Ledger row added.
+- [x] **T22 read (09-20) — PASS, projection + milestones reproduce §19, pc= harness-proven:**
+      Aligner gains --drop-names/--project shared (15 names
+      pinned)/--milestones; selftest 35/35; default output
+      byte-identical to T18 (verified EMPTY with full flags
+      — my first rerun omitted --locate/--census, not their
+      error); projected 899,713→2,317 / 781,372→148, k=2
+      same events; all 10 §19 rows reproduced modulo 3
+      tabled blind spots + 1 unisolable sema pair (+47 ref
+      milestones on t17c); selftest catch disclosed+pinned
+      (t12-mile-censusfull, FAIL-before/PASS-after); pc=
+      field env-gated default-off (harness: off-diff EMPTY,
+      200/200 on-lines, empty=off, parser exit 0); fork
+      6359fb6 +22/−6; build exit 0 (AppleDouble glob fail
+      → sidecars removed → green; 0 compiler warnings);
+      boot proof honestly deferred (G1). Verified: selftest
+      re-run ALL PASS, projection counts + k=2 re-run
+      exact, fork stat, 6449+/23−. Reference-state row: n/a
+      (tooling). ~0.5 h. Next: T22's pane → A1? No — A1
+      takes a0's pane; this pane → fixed-point script (F3
+      rec 17). Ledger row added.
+- [x] **T21 read (09-20) — PASS, 3rd ✕ to Daylight Savings Time park, chain reproduces:**
+      Build reused bit-identical; park-1 bit-identical (snap
+      sha b6ca1aa9 full, ExecPS2/SIF/vblank lines exact,
+      vblanks@park 6,102 −6 pace-disclosed); press-1 535.4
+      ms → User Prefs (region mean 0.10/p99 0); press-2
+      534.4 ms → Time Zone (region mean 0.02/p99 0); press-3
+      534.5 ms → NEW DST/Standard park by +5 s, held to
+      T+370 (6-snap series); t21 trace 8,037,470 lines /
+      568 MB (EE 950,148/42 + IOP 5,484,275/103 + SIF
+      985,149 + cdvd 472,113 + ~146k other untabled —
+      same minor as T19); 24,357 vblanks; format-identical
+      (2 SIF pos values); WSL 6 flaps around run (F3 rec 18
+      honored: full dmesg + event-log captured, zero Win
+      entries, kill-to-remount = time-to-next-wsl-use).
+      Verified: snap sha, SSD bytes, ExecPS2 re-grepped
+      exact, holds re-timed, 685+/0−, no lease. ~12 min.
+      Next: T23 (4th ✕ at DST) in freed pane. Ledger row
+      added. Reference-state row: the trace IS the
+      reference (game reaches each park).
+- [x] **M62 read (09-20) — PASS, interval head bulk pair, decspan 3 both, hole recheck True/True:**
+      4 flanks M61-exact; 48/48 probes (2 with δ): m15 c311
+      2 bulk (323:+3/d0, 324:+1/d0 at head) + 10 noncell vs
+      m15 c312 12 noncell, s0 24 noncell; decile drift
+      d0:5/d3:6/d4:1 vs d0:4/d1:1/d3:7 (decspan 3 both,
+      sequences verified); s0 deciles identical (shared
+      plane); hole join: gap-13 m15-c311 bulkshare 0.1667
+      vs c343 m15 0.0038, 0 tail all 8 rows; c343 recheck
+      True/True with signs. H1–H7 ALL met. Control green
+      (|δ|-convention fix disclosed); re-run 70/70; PNG 492
+      B rule-met (2-vs-0); 0 B explained, 102 stands. Minor:
+      tail-3 receipt missing from REPORT (brief-required;
+      report itself complete). Verified: flanks vs M61,
+      dec hists, drift runs, hole counts, fnvs, 2707+/0−.
+      Reference-state row: n/a (offline frames). ~0.3 h.
+      Next: M63 (head-bulk neighborhood, offline) in freed
+      pane. Ledger row added.
 - [x] **F3 read (09-20) — PASS, Part 3 adopted: drain closed as non-park, A0/A1 ranked first:**
       155-line Part 3 (append-only): F1 drain ≠ park (t4
       VBLANK pad loop, healthy background); F2 park = main's
