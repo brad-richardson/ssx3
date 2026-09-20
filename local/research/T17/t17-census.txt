@@ -1,0 +1,218 @@
+lines=7648547 ts_span=0.1271..340.9779
+ee_syscalls=914791 distinct=42
+EE    260846 sceSifGetReg (7a)
+EE    208555 WaitSema (44)
+EE    161865 SignalSema (42)
+EE     70132 iSignalSema (43)
+EE     69210 iReferSemaStatus (48)
+EE     47119 RFU005 (5)
+EE     46554 PollSema (45)
+EE     46158 iPollSema (46)
+EE       981 sceSifSetDma_isceSifSetDma (77)
+EE       967 CreateSema (40)
+EE       960 sceSifSetDChain_isceSifSetDChain (78)
+EE       951 DeleteSema (41)
+EE       396 ReferThreadStatus (30)
+EE        17 sceSifDmaStat_isceSifDmaStat (76)
+EE        11 sceSifSetReg (79)
+EE        10 CreateThread (20)
+EE        10 StartThread (22)
+EE         5 SleepThread (32)
+EE         3 RFU060 (3c)
+EE         3 RFU061 (3d)
+EE         3 AddDmacHandler (12)
+EE         3 _EnableDmac (16)
+EE         3 Deci2Call (7c)
+EE         2 _DisableDmac (17)
+EE         2 RemoveDmacHandler (13)
+EE         2 ExecPS2 (7)
+EE         2 GetThreadId (2f)
+EE         2 EndOfHeap (3e)
+EE         2 AddIntcHandler (10)
+EE         2 _EnableIntc (14)
+EE         2 GsGetIMR_iGsPutIMR (71)
+EE         2 SetGsCrt (2)
+EE         2 WakeupThread (33)
+EE         1 sceSifStopDma (6b)
+EE         1 ExitDeleteThread (24)
+EE         1 SetOsdConfigParam (4a)
+EE         1 GetOsdConfigParam (4b)
+EE         1 GetOsdConfigParam2 (6f)
+EE         1 SetOsdConfigParam2 (6e)
+EE         1 CancelWakeupThread (35)
+EE         1 SetGsVParam (4f)
+EE         1 ChangeThreadPriority (29)
+iop_calls=5211292 distinct=103
+IOP  1322147 intrman.023: QueryIntrContext
+IOP  1177790 intrman.017: CpuSuspendIntr
+IOP   798224 intrman.018: CpuResumeIntr
+IOP   452000 timrman.010: GetTimerCounter
+IOP   374615 thevent.010: WaitEventFlag
+IOP   325377 thevent.006: SetEventFlag
+IOP   280701 thevent.008: ClearEventFlag
+IOP   168557 thevent.007: iSetEventFlag
+IOP    47272 sifman.007: sceSifSetDma
+IOP    46276 thevent.009: iClearEventFlag
+IOP    31344 sifman.008: sceSifDmaStat
+IOP    24572 thbase.024: SleepThread
+IOP    24549 thbase.026: iWakeupThread
+IOP    24096 timrman.008: GetTimerStatus
+IOP    23500 thevent.011: PollEventFlag
+IOP    23107 vblank.004: WaitVblankStart
+IOP    23106 thevent.013: ReferEventFlagStatus
+IOP    23078 cdvdman.112: sceCdApplySCmd2
+IOP     6217 sysclib.014: memset
+IOP     2884 thbase.022: ReferThreadStatus
+IOP     1439 heaplib.006: AllocHeapMemory
+IOP     1300 sysmem.004: AllocSysMemory
+IOP     1152 sysmem.005: FreeSysMemory
+IOP     1127 thbase.004: CreateThread
+IOP     1080 thbase.005: DeleteThread
+IOP     1080 heaplib.007: FreeHeapMemory
+IOP      964 sifman.006: sceSifSetDChain
+IOP      844 timrman.011: SetTimerCompare
+IOP      398 thbase.006: StartThread
+IOP      385 cdvdman.024: sceCdReadClock
+IOP      361 thbase.008: ExitThread
+IOP      196 thevent.004: CreateEventFlag
+IOP      131 sysclib.012: memcpy
+IOP      128 ioman.006: read
+IOP       93 ioman.007: write
+IOP       85 stdio.004: printf
+IOP       85 sysclib.018: prnt
+IOP       80 loadcore.006: RegisterLibraryEntries
+IOP       78 sysclib.008: look_ctype_table
+IOP       74 loadcore.005: FlushDcache
+IOP       61 sysmem.010: QueryBlockSize
+IOP       59 sysclib.022: strcmp
+IOP       38 loadcore.012: QueryBootMode
+IOP       30 intrman.006: EnableIntr
+IOP       29 intrman.004: RegisterIntrHandler
+IOP       29 intrman.009: CpuEnableIntr
+IOP       27 sifcmd.017: sceSifRegisterRpc
+IOP       25 thbase.041: GetSystemStatusFlag
+IOP       24 sysclib.025: index
+IOP       24 sysclib.030: strncpy
+IOP       24 sysclib.036: strtol
+IOP       24 thsemap.008: WaitSema
+IOP       23 thbase.020: GetThreadId
+IOP       22 cdvdman.029: sceCdApplySCmd
+IOP       22 thbase.035: SetAlarm
+IOP       22 thsemap.007: iSignalSema
+IOP       21 sifcmd.019: sceSifSetRpcQueue
+IOP       21 sifcmd.022: sceSifRpcLoop
+IOP       20 sifman.029: sceSifCheckInit
+IOP       20 ioman.008: lseek
+IOP       18 sifcmd.014: sceSifInitRpc
+IOP       18 ioman.004: open
+IOP       18 intrman.005: ReleaseIntrHandler
+IOP       16 ioman.005: close
+IOP       14 thsemap.004: CreateSema
+IOP       13 loadcore.004: FlushIcache
+IOP        9 sysmem.006: QueryMemSize
+IOP        9 thbase.033: DelayThread
+IOP        8 timrman.016: GetHardTimerIntrCode
+IOP        8 ioman.021: DelDrv
+IOP        8 ioman.020: AddDrv
+IOP        7 timrman.007: SetTimerMode
+IOP        6 excepman.004: RegisterExceptionHandler
+IOP        6 sysclib.017: bzero
+IOP        6 sysclib.027: strlen
+IOP        6 intrman.008: CpuDisableIntr
+IOP        6 intrman.007: DisableIntr
+IOP        5 sysmem.009: QueryBlockTopAddress
+IOP        5 cdvdman.050: _sceCdSC
+IOP        4 timrman.004: AllocHardTimer
+IOP        4 sifman.005: sceSifInit
+IOP        3 excepman.005: RegisterPriorityExceptionHandler
+IOP        3 loadcore.010: RegisterNonAutoLinkEntries
+IOP        3 heaplib.004: CreateHeap
+IOP        3 timrman.009: SetTimerCounter
+IOP        3 thbase.014: ChangeThreadPriority
+IOP        2 cdvdman.047: _sceGetFsvRbuf
+IOP        2 sifcmd.004: sceSifInitCmd
+IOP        2 sifcmd.010: sceSifAddCmdHandler
+IOP        2 sysmem.014: Kprintf
+IOP        2 timrman.005: ReferHardTimer
+IOP        2 sysclib.029: strncmp
+IOP        2 vblank.008: RegisterVblankHandler
+IOP        2 modload.007: LoadStartModule
+IOP        2 thsemap.006: SignalSema
+IOP        1 sysclib.026: rindex
+IOP        1 modload.004: ReBootStart
+IOP        1 sifman.002: shutdown
+IOP        1 cdvdman.004: sceCdInit
+IOP        1 sysclib.023: strcpy
+IOP        1 sysclib.032: strrchr
+IOP        1 cdvdman.049: _sceCdstm1Cb
+IOP        1 cdvdman.064: _sceCdRM
+sif_lines=936164 cdvd_lines=447901
+SIF_SAMP 138615 [    0.8193] SIF     : dmaSIF0 chcr = 184, madr = 0, qwc  = 0, tadr = 0
+SIF_SAMP 138616 [    0.8193] SIF     : SIF0 DMA start...
+SIF_SAMP 138621 [    0.8194] SIF     : IOP: dmaSIF1 chcr = 41000300, madr = 0, bcr = 20
+CDVD_SAMP 6 [    0.1323] Opening CDVD...
+CDVD_SAMP 13 [    0.1330]  * CDVD Disk Open: DVD, Single layer or unknown:
+CDVD_SAMP 20 [    0.1346] cdvdLoadElf(): 'cdrom0:\SLUS_207.72;1' -> 'SLUS_207.72' in ISO.
+MARK BIOS Found 2 [    0.1275] BIOS Found: USA     v02.00(14/06/2004)  Console 20040614-100909
+MARK cdvdLoadElf 20 [    0.1346] cdvdLoadElf(): 'cdrom0:\SLUS_207.72;1' -> 'SLUS_207.72' in ISO.
+MARK Initializing Elf 21 [    0.1384] Initializing Elf: 3890784 bytes
+MARK ELF Loading 138643 [    0.8199] ELF Loading: , Game CRC = 00000000, EntryPoint = 0xFFFFFFFF
+MARK Recompiler Reset 37 [    0.1656] EE/iR5900 Recompiler Reset
+MARK Recompiler reset 38 [    0.1931] iR3000A Recompiler reset.
+MARK mVU Reset 39 [    0.2006] mVU Reset
+MARK Opening GS 51 [    0.3399] Opening GS...
+MARK Disc changed 24 [    0.1637] Disc changed to SSX 3 (USA).iso.
+MARK McdSlot 34 [    0.1653] McdSlot 0 [File]: Mcd001.ps2 [8 MB, UNFORMATTED]
+MARK patches.zip 31 [    0.1646] OSD [PatchesZipOpenWarning]: Failed to open patches.zip. Built-in game patches are not available.
+MARK GameDB:  22 [    0.1386] GameDB: Has not been initialized yet, initializing...
+MARK Closing GS NONE
+MARK Suspending NONE
+MARK Shutting down NONE
+MARK ERROR NONE
+MARK Error NONE
+MARK Failed to 31 [    0.1646] OSD [PatchesZipOpenWarning]: Failed to open patches.zip. Built-in game patches are not available.
+MARK Tearing down NONE
+MARK VSync 456475 [    1.4862] UpdateVSyncRate: Mode Changed to DVD NTSC.
+MARK present NONE
+--- first 15 EE names by appearance ---
+EE_FIRST 138641 RFU060 (3c)
+EE_FIRST 138642 RFU061 (3d)
+EE_FIRST 138783 AddDmacHandler (12)
+EE_FIRST 138784 _EnableDmac (16)
+EE_FIRST 138785 sceSifGetReg (7a)
+EE_FIRST 138917 sceSifSetReg (79)
+EE_FIRST 138920 sceSifSetDma_isceSifSetDma (77)
+EE_FIRST 138999 sceSifSetDChain_isceSifSetDChain (78)
+EE_FIRST 139002 RFU005 (5)
+EE_FIRST 139005 CreateSema (40)
+EE_FIRST 139021 WaitSema (44)
+EE_FIRST 139042 iSignalSema (43)
+EE_FIRST 139044 DeleteSema (41)
+EE_FIRST 142362 _DisableDmac (17)
+EE_FIRST 142368 RemoveDmacHandler (13)
+--- last 25 lines ---
+TAIL [  340.8893] Bios    :  intrman.023: QueryIntrContext (232305, fffffff9, 80000000, 1235c)
+TAIL [  340.8897] Bios    : Bios call: SignalSema (42)
+TAIL [  340.8897] Bios    : Bios call: WaitSema (44)
+TAIL [  340.8897] Bios    : Bios call: WaitSema (44)
+TAIL [  340.8897] Bios    : Bios call: SignalSema (42)
+TAIL [  340.8897] Bios    : Bios call: WaitSema (44)
+TAIL [  340.8898] Bios    :  timrman.008: GetTimerStatus (2fe00444, ffffffff, 80000000, 85de0)
+TAIL [  340.8898] Bios    :  timrman.010: GetTimerCounter (2fe00444, ffffffff, 80000000, 85de0)
+TAIL [  340.8898] Bios    :   thbase.026: iWakeupThread (7bd92d, ffffffff, 80000000, 85de0)
+TAIL [  340.8898] Bios    :  intrman.023: QueryIntrContext (7bd92d, ffffffff, 80000000, 85de0)
+TAIL [  340.8899] Bios    :  timrman.010: GetTimerCounter (2fe00528, 11ea8, 3f8, 1f)
+TAIL [  340.8899] Bios    :   thbase.024: SleepThread (10000, 0, 3, 2f00a1fc)
+TAIL [  340.8899] Bios    :  intrman.023: QueryIntrContext (10000, 0, 3, 2f00a1fc)
+TAIL [  340.8899] Bios    :  intrman.017: CpuSuspendIntr (1ea9b8, 0, 3, 2f00a1fc)
+TAIL [  340.8899] Bios    :  timrman.010: GetTimerCounter (2fe00528, 7f, 1, 3)
+TAIL [  340.9039] (VMManager) Pausing...
+TAIL [  340.9338] cubeb_pulse.c:1131:Cubeb stream (0x7fdde8e5d7b0) stopped successfully.
+TAIL [  340.9340] Add 340 seconds play time to SLUS-20772 -> now 1255
+TAIL [  340.9653] cubeb_pulse.c:1131:Cubeb stream (0x7fdde8e5d7b0) stopped successfully.
+TAIL [  340.9655] cubeb_pulse.c:1082:Cubeb stream (0x7fdde8e5d7b0) destroyed successfully.
+TAIL [  340.9662] DEV9: DEV9close
+TAIL [  340.9750] Unloading EGL.
+TAIL [  340.9752] DEV9: DEV9shutdown
+TAIL [  340.9753] NVRAM has not changed, not writing to disk.
+TAIL [  340.9779] Releasing host memory for virtual systems...
