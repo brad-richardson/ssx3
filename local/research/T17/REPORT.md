@@ -191,5 +191,52 @@ ssh bytesize "wsl bash /home/brad/pcsx2-t4/t17c-auto.sh"                  # t17c
 ssh bytesize "wsl cp /home/brad/pcsx2-t4/t17*.jpg /mnt/c/Users/bradr/pcsx2-t4/"
 scp "bytesize:pcsx2-t4/t17a-*.jpg" local/research/T17/ ; shasum -a 256 …
 # (same for t17b-*, t17c-*, t17-census.txt, t17-samples.txt)
-# trace analysis + arch
-...[truncated 2747 chars]
+# trace analysis + arch (t17c emulog, read-only streaming)
+ssh bytesize "wsl bash /home/brad/pcsx2-t4/t17-analyze.sh"                   # sha, wc -l, markers, tail, census+samples via t4 scripts
+ssh bytesize "wsl bash /home/brad/pcsx2-t4/t17-vcount.sh"                   # robust vblank counts at log ≤90/100/110/340
+ssh bytesize "wsl sha256sum …/logs/emulog-pre-t17b-…txt ; wsl wc -l …"      # t17a trace id
+ssh bytesize "wsl sha256sum …/logs/emulog-pre-t17c-…txt ; wsl wc -l …"      # t17b trace id
+ssh bytesize "wsl sed -n 417152p\;2000000p\;4000000p\;6000000p\;7648000p …/logs/emulog.txt"  # monotonicity spot-check
+# full-trace retrieval to SSD (540 MB < 1 GB, so a home copy exists AND the bytesize original stays)
+ssh bytesize "wsl cp …/logs/emulog.txt /mnt/c/Users/bradr/pcsx2-t4/emulog-t17c.txt"
+ssh bytesize "wsl sha256sum /mnt/c/Users/bradr/pcsx2-t4/emulog-t17c.txt"    # 4f61ea83… (staging match)
+scp "bytesize:pcsx2-t4/emulog-t17c.txt" "/Volumes/Extreme SSD/ps2x-t4/emulog-t17c.txt"
+shasum -a 256 "/Volumes/Extreme SSD/ps2x-t4/emulog-t17c.txt"                # 4f61ea83… (match)
+# local mining on the SSD copy
+grep -c/-n "UpdateVSyncRate" …/emulog-t17c.txt                              # 1 (DVD NTSC throughout)
+bash -c 'diff <(sed … T4/samples.txt) <(sed … T17/t17-samples.txt)'         # format check (see §T17-2)
+# teardown + report
+ssh bytesize "wsl pkill Xvfb" ; ssh bytesize "wsl pgrep -a Xvfb"            # (empty: clean)
+ssh bytesize "wsl pgrep -a pcsx2-qt"                                        # (empty: clean)
+# write REPORT.md; rm byte-identical middle t17a snaps (kept on bytesize+staging)
+git add -f local/research/T17/<25 files by name>                            # sibling untracked file left alone
+git commit -m "[T17] …" -m "…" -m "Orchestrated-By: Muse Code"              # NO push
+```
+
+## T17-4. Gap rows
+
+| # | Gap | Detail |
+|---|---|---|
+| G1 | Next-input proposal (User Prefs park) | Boot fresh to the language park (park by ≤75 s), single 534 ms K hold → User Prefs, then a second single 534 ms K hold to confirm English; screenshot-verify the next screen (memcard prompt, title, or menu). Each screen needs its own single input; map per-screen inputs one at a time, never blind multi-presses. Long-term: bisect the hold threshold (G4) so routine presses can be short + reliable |
+| G2 | WSL userland killer unidentified | ~17 silent Ubuntu terminate+reboot cycles 15:05:45–15:20:24 UTC killed two runs; kernel never rebooted (btime constant), no OOM, no event-log entries, no cron/timer/scheduled-task cause found, no sibling files or processes identified. Quiet 15:21–15:48. A follower that hits flapping again should: prefer single-shot unattended scripts (no think-gaps), keep runs ≤6 min, preserve emulogs before every boot, and re-check `dmesg` + init age before trusting any background process |
+| G3 | wevtutil timestamps render local-as-Z | `wevtutil … /f:text` prints `…T11:05:44…Z` for what is 11:05:44 EDT (15:05:44 UTC); WSL `date -u` itself verified correct against laptop true time. A follower correlating Windows events with WSL/dmesg time must add 4 h to wevtutil stamps, not subtract from WSL's |
+| G4 | Hold threshold unmapped | ~18 ms tap = no effect; 534 ms hold = registers. The minimum reliable hold (and whether it varies with frame rate) is unknown — bisect between those bounds before building longer input scripts |
+| G5 | Caption blink breaks byte-compare | The `Select language.` caption is present in some User Prefs snaps (+15/+30/+120/+240) and absent in others (+5/+60); the spinner also animates. Screen-change detection must use perceptual/region comparison, never whole-file sha |
+| G6 | Game printfs still off | `EnableEEConsole/EnableIOPConsole=false` carried from T4 (defaults kept); EE `sysPrintOut` + IOP stdout absent. A rerun with both `=true` would add game-side strings |
+| G7 | Tap-run + control-run traces bytesize-only | t17a (535,682,684 B) and t17b (223,035,641 B) full traces were never copied home (shas + sizes tabled in §T17-2); only the t17c trace has an SSD copy. Retrieve via the §T17-3 staging recipe if needed |
+| G8 | Session wall | ~45 min active of the 6 h box; zero lease waits (no lease exists for T17) |
+
+## Evidence files
+
+`REPORT.md` (this file), `t17-census.txt` (t17c channel census + markers),
+`t17-samples.txt` (EE/SIF/CDVD-hw samples, format-checked vs T4),
+`t17-early.jpg` (first park sighting, boot-2), `t17a-park.jpg` +
+`t17a-post240.jpg` (tap no-op bookends), `t17b-park.jpg` +
+`t17b-paused.jpg` (Paused OSD) + `t17b-resumed.jpg` (pause control),
+`t17c-park.jpg` + `t17c-post5/15/30/60/120/240.jpg` (the epoch series),
+scripts `t17-boot.sh`, `t17-snap.sh`, `t17-windows.sh`, `t17-press.sh`
+(untried `--window` candidate), `t17-auto.sh`, `t17b-auto.sh`,
+`t17c-auto.sh`, `t17-analyze.sh`, `t17-vcount.sh`. Full t17c trace:
+`/Volumes/Extreme SSD/ps2x-t4/emulog-t17c.txt` (540,313,630 B, sha
+`4f61ea83…38749`, NOT in git) + bytesize original
+`/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt` (same).
