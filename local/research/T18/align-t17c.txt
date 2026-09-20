@@ -1,0 +1,25 @@
+ref: /Volumes/Extreme SSD/ps2x-t4/emulog-t17c.txt
+  file_lines=7648547 events=914791 skipped=6733756
+rt:  /Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-t18-on.txt
+  file_lines=781372 events=781372 skipped=0
+--- anchor ---
+ref_after: name=ExecPS2 occ=2 total_hits=2 -> HIT ev:162 file:142465
+rt_start: none requested -> ev:0
+--- name-table ---
+compared=781372 name_mismatches=0
+--- divergence ---
+k=2 (agreement run before it: 2 events)
+ref: AddDmacHandler (12) @file:142536 ev:164
+rt:  CreateSema (40) @file:3 ev:2
+--- context (+-5) ---
+    k=0 ref=RFU060 (3c) @file:142534 ev:162 rt=RFU060 (3c) @file:1 ev:0
+    k=1 ref=RFU061 (3d) @file:142535 ev:163 rt=RFU061 (3d) @file:2 ev:1
+>>> k=2 ref=AddDmacHandler (12) @file:142536 ev:164 rt=CreateSema (40) @file:3 ev:2
+    k=3 ref=_EnableDmac (16) @file:142537 ev:165 rt=CreateSema (40) @file:4 ev:3
+    k=4 ref=sceSifGetReg (7a) @file:142538 ev:166 rt=GetOsdConfigParam (4b) @file:5 ev:4
+    k=5 ref=sceSifSetDma_isceSifSetDma (77) @file:142539 ev:167 rt=SetOsdConfigParam (4a) @file:6 ev:5
+    k=6 ref=sceSifGetReg (7a) @file:142554 ev:168 rt=GetOsdConfigParam (4b) @file:7 ev:6
+    k=7 ref=_DisableDmac (17) @file:142555 ev:169 rt=SetOsdConfigParam (4a) @file:8 ev:7
+result: DIVERGENCE
+--- locate ---
+rt opening 20-shingle NOT FOUND in ref post-start window

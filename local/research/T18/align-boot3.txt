@@ -1,0 +1,74 @@
+ref: /Volumes/Extreme SSD/ps2x-t4/emulog-boot3.txt
+  file_lines=7483481 events=899875 skipped=6583606
+rt:  /Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-t18-on.txt
+  file_lines=781372 events=781372 skipped=0
+--- anchor ---
+ref_after: name=ExecPS2 occ=2 total_hits=2 -> HIT ev:162 file:142465
+rt_start: none requested -> ev:0
+--- name-table ---
+compared=781372 name_mismatches=0
+--- divergence ---
+k=2 (agreement run before it: 2 events)
+ref: AddDmacHandler (12) @file:142536 ev:164
+rt:  CreateSema (40) @file:3 ev:2
+--- context (+-5) ---
+    k=0 ref=RFU060 (3c) @file:142534 ev:162 rt=RFU060 (3c) @file:1 ev:0
+    k=1 ref=RFU061 (3d) @file:142535 ev:163 rt=RFU061 (3d) @file:2 ev:1
+>>> k=2 ref=AddDmacHandler (12) @file:142536 ev:164 rt=CreateSema (40) @file:3 ev:2
+    k=3 ref=_EnableDmac (16) @file:142537 ev:165 rt=CreateSema (40) @file:4 ev:3
+    k=4 ref=sceSifGetReg (7a) @file:142538 ev:166 rt=GetOsdConfigParam (4b) @file:5 ev:4
+    k=5 ref=sceSifSetDma_isceSifSetDma (77) @file:142539 ev:167 rt=SetOsdConfigParam (4a) @file:6 ev:5
+    k=6 ref=sceSifGetReg (7a) @file:142554 ev:168 rt=GetOsdConfigParam (4b) @file:7 ev:6
+    k=7 ref=_DisableDmac (17) @file:142555 ev:169 rt=SetOsdConfigParam (4a) @file:8 ev:7
+result: DIVERGENCE
+--- locate ---
+rt opening 20-shingle NOT FOUND in ref post-start window
+--- census (post-start) ---
+name                                            ref         rt
+sceSifGetReg                                 260722          0
+WaitSema                                     203790     231157
+SignalSema                                   158167     187698
+iSignalSema                                   68529      43453
+iReferSemaStatus                              67629          0
+RFU005                                        46042          0
+PollSema                                      45491      14350
+iPollSema                                     45104          0
+sceSifSetDma_isceSifSetDma                      957          0
+CreateSema                                      945         37
+sceSifSetDChain_isceSifSetDChain                937          0
+DeleteSema                                      929         21
+ReferThreadStatus                               387          1
+sceSifDmaStat_isceSifDmaStat                     17          0
+CreateThread                                     10          5
+StartThread                                      10          5
+sceSifSetReg                                      8          0
+SleepThread                                       5          1
+Deci2Call                                         3          0
+AddDmacHandler                                    2          1
+_EnableDmac                                       2          1
+GetThreadId                                       2     290210
+EndOfHeap                                         2          3
+AddIntcHandler                                    2          6
+_EnableIntc                                       2          6
+GsGetIMR_iGsPutIMR                                2          0
+SetGsCrt                                          2          0
+WakeupThread                                      2          0
+RFU060                                            1          1
+RFU061                                            1          1
+_DisableDmac                                      1          1
+RemoveDmacHandler                                 1          0
+sceSifStopDma                                     1          0
+ExitDeleteThread                                  1          0
+SetOsdConfigParam                                 1          2
+GetOsdConfigParam                                 1          9
+GetOsdConfigParam2                                1          3
+SetOsdConfigParam2                                1          0
+CancelWakeupThread                                1          0
+SetGsVParam                                       1          0
+ChangeThreadPriority                              1          3
+FlushCache                                        0      14356
+RFU252                                            0         21
+RFU116                                            0          8
+RFU091_GetEntryAddress                            0          6
+_DisableIntc                                      0          5
+RFU090_iReferEventFlagStatus                      0          1
