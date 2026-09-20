@@ -8956,3 +8956,297 @@ WATCH. Source delta: none (0 fork commits, 0 fork edits).
 - Run a 3rd boot (max 2 used; census + silence + ladder all closed).
 - Session wall time ≈ 02:43–03:35Z (~55 min), inside the 4 h box.
 
+## Part 27 (P1ac): FIX — SIF ready-handshake completed host-side (`sregs[1]=1`); the `0x425cf0` poll collapses to a single getter call, thread 3 advances to a sema-30 wait, main parks in `sub_00394ED0`; the BIND prediction is refuted
+
+Brief `local/muse/prompts/P1ac.md`. FIX brief: 2 fork commits + 2
+boots. Tables, no verdicts. Stale-reading guard: Part 26 §P26-3 (the
+attribution + this fix's exact spec), §P26-1f (poller sequence),
+§P26-1h (host audit), §P26-2 (ladder baseline).
+`W=/Volumes/Extreme SSD/ps2recomp-spike`, `R=$W/PS2Recomp` (fork,
+branch `ssx3`), `O=$W/P1/output`,
+`LOG=$W/P1/run/boot-p1ac-1.log`, `LOG2=$W/P1/run/boot-p1ac-2.log`.
+File:line refs below are `$R`-relative unless noted. Every cited
+guest word re-read from `SLUS_207.72` with the corrected segment map
+(fileoff = vaddr − `0x100000` + `0x1000`); one decode pass with the
+`+0x1000` missing was caught against the recompiled file and redone.
+
+## P27-0. Lease record
+
+| Event | Value |
+|---|---|
+| Lease at session start | Absent; no polls needed |
+| Waits log | `$W/P1/run/p1ac-waits.log` (3 lines: start, claim, release) |
+| Pre-claim checks (03:34:06Z) | Absent verified twice; `pgrep -x` exit 1; binary `5878ad69` (P1ac build); ISO 3005415424 B + ELF 3890784 B present |
+| Claim | `printf 'P1ac\n' > /tmp/ssx3-host-lease` 03:34:10Z, immediately before boot 1 |
+| Boot 1 | 90 s foreground, SIGTERM rc=-15, LOG 19,150 lines, 2,643,773 B |
+| Boot 2 | 90 s foreground, SIGTERM rc=-15, LOG2 19,281 lines, 2,667,056 B |
+| Release | 03:37:28Z, right after boot 2 (analysis needs no lease); verified absent; `pgrep -x` exit 1 |
+| `adb` | Not used |
+
+## P27-1. Diff + BEFORE/AFTER + tests
+
+### a. Changed files + commit split (recorded)
+
+| File | Delta | Commit |
+|---|---|---|
+| `ps2xRuntime/src/lib/Kernel/Syscalls/RPC.cpp` | +63 (gate + descriptor + handshake hunk + test reset) | `6447d8b` (fix + test, one commit) |
+| `ps2xTest/src/ps2_runtime_kernel_tests.cpp` | +86 (3 focused tests) | `6447d8b` (with the fix it pins) |
+| `ps2xRuntime/src/lib/Kernel/Syscalls/System.cpp` | +3/−1 (ride-along) | `45da174` (second commit — my call per the brief) |
+
+Named `git add` only; the pre-existing worktree mod to the generated
+`ps2xRuntime/src/runner/register_functions.cpp` was never staged,
+committed, or touched. No `._*` in source dirs (purged after edits;
+sidecars observed only under `.git/`).
+
+### b. Handshake hunk shape (§P26-3c, implemented exactly)
+
+| Item | Value |
+|---|---|
+| Gate | `ps2_game_overrides` descriptor `ssx3-sif-handshake`, elfName `SLUS_207.72`, entry `0x00100008`, crc32 0 (don't-care); sets a process-wide atomic at `loadELF` time |
+| Site | `sceSifSendCmd`, after the extra-copy block, before the log-cap block |
+| Condition | gate set AND `cid==0x80000001` AND guest packet word[4]==1 (range-checked via `getEeGuestStruct`, `packetSize>=20`, overflow guard) |
+| Write | u32 `1` to guest `0x52BE04` via `getMemPtr`+`memcpy` (bypass channel — emits no watch line, noted) |
+| Receipt | `[sif-handshake] sregs[1]=1` on stderr, capped at 5 (file's `logCount` convention) |
+| Return | Stays 1 (untouched) |
+| Test hook | `resetSsx3SifHandshakeForTesting()` in `RPC.cpp`, TU-local forward declaration in the test (the `resetSifState` precedent in `ps2_runtime.cpp:34`) |
+
+### c. Ride-along (`System.cpp:441`)
+
+`emitDrop("syscall/dispatchSyscallOverride", "KE_ERROR")` gains a
+third arg, `syscall=0x%x handler=0x%x` from the in-scope
+`syscallNumber`+`handler` (64-byte stack buffer, the `:415` style).
+Format-only; `setReturnS32(ctx, KE_ERROR)` + `return true` unchanged.
+
+### d. BEFORE/AFTER receipts
+
+| # | Receipt | BEFORE (P26 logs) | AFTER (P1ac boots) |
+|---|---|---|---|
+| 1 | `[drop]` census | 6× `[drop] syscall/dispatchSyscallOverride KE_ERROR -` (`:69-74` boot-p1ab-1) | 6× `... KE_ERROR syscall=0x5b handler=0x80075000` (`:68-73` LOG, `:69-74` LOG2 — +1-line shift in boot 2 from an early `[frame:upload]` line) |
+| 2 | Census correlation | `[diag:syscall] id=0x5b count=6 first=0x42cbb8 last=0x42cbb8` | Same line, same values (both boots) |
+| 3 | Handshake receipt | 0 in both P26 logs | 1× `[sif-handshake] sregs[1]=1` (`:1049` LOG, `:1054` LOG2), immediately before the SendCmd line |
+| 4 | SendCmd line | 1× `cid=0x80000001 packet=0x528800 psize=0x18 extra=0x4a29f0` (`:1047`) | Same bytes (`:1050` LOG, `:1055` LOG2) |
+| 5 | Override apply (new) | Absent | `[game_overrides] applying 'ssx3-sif-handshake'` + `applied 1 matching override(s)` (`:48`, merged-line) |
+| 6 | SendCmd call total | 1 line (< 5 cap) | 1 line (< 5 cap) → exactly one `sceSifSendCmd` call all boot, both boots |
+
+Row 1 closes the P26-5 open item: the 6 drops are `GetEntryAddress`
+(`0x5B`) from `pc=0x42cbb8` whose game-installed override handler is
+`0x80075000` (kernel address, no recompiled entry — hence the drop).
+Early-init only (`:68-73`, handshake at `:1049`).
+
+### e. Suite (stays all-green, no other face)
+
+| Run | Binary (sha256, 8) | Tree | Total / Passed / Failed |
+|---|---|---|---|
+| BEFORE | `bfe534e9` (`ps2x_tests`) | `69bb1ff` + 4 foreign worktree mods (P9 `CD.cpp`+sweep, P11 sif-test — both uncommitted at the time) | 428 / 428 / 0 |
+| AFTER | `daf0b63f` (`ps2x_tests`) | `4326926` + my 3 files (P9 `4326926` + P11 `bfa0213` committed mid-session, before my build) | 431 / 431 / 0 |
+
+The +3 are the new `PS2RuntimeKernel` sub-cases, all passing by name:
+`SIF handshake stays off without the SSX3 override (P1ac gate)`,
+`SIF handshake writes sregs[1]=1 for SSX3 SET_SREG(1,1) (P1ac)`,
+`SIF handshake ignores other cids and sreg slots (P1ac)`. Each resets
+the gate first and last (order-independent). CWD `$R` for both runs
+(the `instructions.h` lookup note, §P2-6). No existing test changed
+result.
+
+## P27-2. Boots + poll-exit proof + new park
+
+Env = p1ab-boot scripts verbatim except LOG names (`PS2X_DIAG_SEMA`
++ `CREATE` + `S0`, drops ON, WATCH = 16 sregs addrs + `0x450de4`).
+CWD `$W/P1/run` both boots. Boot binary `5878ad69` (P27-3).
+
+### a. Poll-exit proof rows
+
+| # | Proof | Boot 1 | Boot 2 |
+|---|---|---|---|
+| 1 | Receipt + send | `:1049` receipt, `:1050` same-bytes SendCmd | `:1054` receipt, `:1055` same-bytes SendCmd |
+| 2 | Stub `0x425cf0` blocks | 0/17 (was 17/17 sole-ra) | 0/17 |
+| 3 | Getter trace (`sub_00425CF0`) | — (trace is boot 2's) | 1 enter / 1 exit — a single read saw `1` |
+| 4 | Poller trace (`sub_0040B130`) | — | 1 / 1 — entered and returned |
+| 5 | Thread-3 pc | 17/17 WAIT @`0x423de8` (sema 30) | 17/17 WAIT @`0x423de8` (sema 30) |
+| 6 | sregs watch | 16 loader lines (`:49-64`, `pc=0x10012c`), 0 post-init | 16 + 0 (same) |
+
+Rows 1+3: the host write lands synchronously inside step-4 `SendCmd`,
+before the step-5 poll's first read — hence exactly one getter call.
+Row 6 is the predicted bypass silence (proof is rows 1–5, not the
+watch). Trace = `$W/P1/run/ps2_log.txt` (boot 2's, 109,497,883 B).
+
+### b. Thread 3 advanced past `0x2290E8` (downstream-only executions)
+
+The `beqz`-to-self poll at `0x40b1d0` has no other exit; every row
+below is reachable only past it (`0x2290e0: jal 0x40b130` returns to
+`0x2290e8: lw a0,0xda4(gp)` — the config path):
+
+| # | Row (boot 1; boot 2 same unless noted) |
+|---|---|
+| 1 | 4 new semaphores from tid=3 (ret=34..37; P26 ended at ret=33): ra `0x40c0c0` (`jal 0x423DA0` ret in `sub_0040C028`), `0x3c3344`, `0x3c1e04`, `0x3e56c4` |
+| 2 | `0x40Cxx` RPC-client waits (no park): sema 34 from ra `0x40c314` (`jal 0x423DE0` ret) and ra `0x40c85c` (`jal 0x423DE0` ret; the following `jal 0x40c8c0` is a local call, not SendCmd) |
+| 3 | 1 unhandled host RPC: `[IOP/RPC trace:unhandled] sid=0x80000211 rpc=0x1 pc=0x40c34c` via `jal sceSifCallRpc@0x00426D18` (TOML:163) at `0x40c344` |
+| 4 | Park: WAIT sema 30 @`0x423de8`, ra=`0x31aca4` (`jal 0x423DE0` ret in `sub_0031AAF0`); w30=4/s30=3, signals from tid=1 ra=`0x31acf4` (`jal 0x423DC0` ret); ends parked |
+| 5 | Supporting: 1 dormant trace passes `0x228a0c` (thread-init region) |
+
+### c. New park catalogue
+
+| Thread | State (17/17 blocks, both boots) |
+|---|---|
+| 1 (main, entry `0x100008`) | RUNNING 14/17 (boot1: 7+7; boot2: 9+7) inside `sub_00394ED0` @`0x394f08`/`0x394f3c`, ra=`0x363240` (`jal 0x394ED0` ret at `0x363238` in `sub_00362DE8`); leaf = 4-word memcmp (`0x394f18-30`) + list-walk retry (`bnez *(a2+0x14) -> 0x394f08` @`0x394f7c`); trace 15,989/15,989 balanced (repeat-called, returns each call); `dma`/`gif` frozen at 1166/65 on all 19–20 ticks |
+| 2 / 5 | Unchanged parks: WAIT 26 / 32 @`0x423de8` |
+| 3 | WAIT 30 (row §P27-2b#4) |
+| 4 | sema-31 INTC pump: waits ra=`0x31ac30`, signals `inInt=1` ra=`0x31abf8` (`jal 0x423DD0` ret); w31/s31 = 5287/5286 (boot1), 5349/5348 (boot2), balanced |
+| 6 (new, entry `0x3c19a8`) | WAIT 36 @`0x423de8` |
+
+| Traffic | Boot 1 | Boot 2 |
+|---|---|---|
+| `sceSifSendCmd` calls | Exactly 1 (the handshake; §P27-1d#6) | Exactly 1 |
+| SIF module loads | 21 (+3: `DRTYSCKF`/`LGAUD`/`VOIPF.IRX`, ids 19–21) | 21, same |
+| CD `lbn=` reads | 810 (`0x10`→`0x4311f`, first/last byte-identical across boots) | 810 |
+| `_request_end` (`0x40B2D0`) trace | — | 0 / 0 (still never dispatched) |
+| Presented frame / FATAL / crash | None / 0 / 0 | None / 0 / 0 |
+
+Stub profile: 57 distinct targets (vs the single-target P26 spin);
+top counts are one-block transients (`0x41ea18` 953,379 ×1 block);
+steady-state targets (`0x326eb0`, `0x3ffbc0`, `0x3ffa58`, …) run
+~10k over 16 blocks each.
+
+### d. BIND prediction (§P26-3c): REFUTED, with line receipts
+
+| Predicted sub-row | Observed | Status |
+|---|---|---|
+| Game's BIND sends raw `SendCmd(0x19)` | SendCmd called exactly once all boot (the SET_SREG); no `cid=0x19` line (cap is 5, only 1 line exists) | REFUTED |
+| Park at `WaitSema($s2)` `0x40B55C` | Zero `0x40b` bytes anywhere in either log; thread 3 parks at ra `0x31aca4` on sema 30 | REFUTED |
+| `sub_0040B400` reached | Trace 0 / 0 | REFUTED |
+
+Nuance (not a partial pass): the game's `0x40Cxx` RPC-client code DID
+run (sema-34 create, two waits, one `sceSifCallRpc` via the Sony stub
+at `0x426D18`) — the game used the host RPC path, not a raw-SendCmd
+BIND, then moved on. `_request_end` remains undispatched (0/0), so an
+HLE-RPC-completion stall of the predicted *shape* may still lie ahead;
+it is not the observed park.
+
+### e. Ladder vs P26-boot1 (one table)
+
+P26-boot1: 7,827 lines / 1,049,583 B / 17 stub blocks.
+
+| Rung | P26-boot1 | P1ac-boot1 | P1ac-boot2 |
+|---|---|---|---|
+| Lines / bytes | 7,827 / 1,049,583 | 19,150 / 2,643,773 | 19,281 / 2,667,056 |
+| Stub / thread blocks | 17 / 17 | 17 / 17 | 17 / 17 |
+| Thread-1 | WAIT 29 @`0x423de8` ×17 | RUNNING @`0x394f08`/`0x394f3c` ×14 (+1 WAIT, 2 transients) | RUNNING ×16 (+1 WAIT) |
+| Thread-3 | running, `0x40b1d0`/`0x425cf0` | WAIT 30 @`0x423de8` ×17 | WAIT 30 ×17 |
+| Thread-2/4/5 | parked 26/31/32 | same ids/pcs; t4 sch ~300 steady | same |
+| Thread-6 | Absent (5 threads) | WAIT 36 (6 threads) | same |
+| 29-handshake w/s | 321 / 320 | 65 / 65 | 65 / 65 |
+| 30-handshake w/s | 2 / 2 | 4 / 3 (ends parked) | 4 / 3 |
+| 31-handshake w/s | 321 / 320 | 5287 / 5286 (INTC pump) | 5349 / 5348 |
+| Creates / `-1` waits | 33 / 0 | 37 / 0 (+34..37, all tid=3) | 37 / 0 |
+| Driver-entry | 1 line | 98 lines (driver re-entered; later lines carry the `0x618520` sp) | 98 lines |
+| `[drop]` census | 6× same site, no args | 6× same site + `syscall=0x5b handler=0x80075000` | 6× same + args |
+| SendCmd | 1× SET_SREG line | 1× same bytes + 1× handshake receipt | same |
+| `0x425cf0` spin | 17/17 sole ra, 36.1M total | 0 blocks; trace getter 1/1 | 0 blocks |
+| GS kicks / copy / gif / drawing=1 | 96 / 64 / 48 / 96 | 96 / 64 / 48 / 96 (exact) | exact |
+| `run:tick` | 7 ticks, pc `0x40b1d0`-family, dma climbing to 5568 | 19 ticks, pc `0x394f08`-family, dma/gif frozen 1166/65 | 20 ticks, same freeze |
+| CD `lbn=` / SIF loads | 42 / 18 | 810 / 21 | 810 / 21 |
+| Dormant / start-thread | 65 / 4 | 121 / 5 | 126 / 5 |
+| Missing / `No exact` | 1 / 0 (byte-identical JALR `0x2322d4→0x395730`) | 1 / 0, same bytes | same |
+| Presented frame | None | None | None |
+| Crash / FATAL | 0 / 0 | 0 / 0 | 0 / 0 |
+
+Attribution note: the baseline binary (`ae8e7b3d`, `f26f273` tree)
+predates P9/P10/P11; the P1ac binary (`5878ad69`) contains all four
+change-sets. The poll-exit rows (receipt, getter 1/1, poller 1/1,
+`0x425cf0` 0 blocks, thread-3 migration) are mechanism-exclusive to
+P1ac — only this change writes `sregs[1]`. Downstream volume rows (CD
+810, dormant counts, `0x3e3ad8` ×770/boot) are joint with P9's
+CD-callback change (`4326926`; `sub_003E3AD8` file present in `O`),
+which is live in this binary.
+
+## P27-3. Binaries and commits
+
+| Item | Value |
+|---|---|
+| BEFORE `ps2x_tests` | sha256 `bfe534e9…` (full: `bfe534e92924766a3cfba0c117080285831181b85eb2bf1666fd4cbaeeebb311`), built Sep 19 23:14 from `69bb1ff` + 4 foreign worktree mods |
+| BEFORE `ps2EntryRunner` | sha256 `950675bb…` (full: `950675bb75585a9ec1fb2f56c906df25293ed669728094b31382190ef2b94d20`) |
+| AFTER `ps2x_tests` | sha256 `daf0b63f…` (full: `daf0b63fb7d6133cd1ffdbccc0d719e64a610e5eca86158019536888f7b7eab4`), built from `4326926` + my 3 files |
+| AFTER `ps2EntryRunner` | sha256 `5878ad69…` (full: `5878ad6969b79759a19c218471a9479e02a97f319969f454b592d9ab257bae04`) — both boot binary and pre-claim check |
+| Build | `cmake --build /tmp/p1-link/runtime --target ps2x_tests ps2EntryRunner -j4`, exit 0, 8 steps; 1 `ld` duplicate-library warning (`ps2xRecomp/libps2_recomp_lib.a`, observed as-is) |
+| Build flags (cache) | Release, `PS2X_ENABLE_RUNTIME_LOGS=ON`, `PS2X_ENABLE_AGRESSIVE_LOGS=ON`, `PS2X_BUILD_TEST=ON`, Ninja |
+| Fork commit 1 | `6447d8b` Fix: complete the SSX3 SIF ready-handshake in `sceSifSendCmd` (P1ac) — `RPC.cpp` + test |
+| Fork commit 2 | `45da174` Diag: attribute `dispatchSyscallOverride` drops with syscall+handler (P1ac ride-along) — `System.cpp` |
+| Push | `git push fork ssx3` → `4326926..45da174`, exit 0; `HEAD...fork/ssx3` = 0/0 after |
+| Pull --rebase | Refused: pre-existing unstaged generated `runner/register_functions.cpp` (not mine; never touched). `fetch` + `rev-list` showed behind 0 (nothing to replay), so the push integrated no foreign history; no foreign rebase conflict occurred |
+| Concurrent commits | `bfa0213` (P11 test 1-liner) + `4326926` (P9 CD-shim removal + CSV split) landed mid-session, before my build; both are in the boot binary (P27-2e attribution note) |
+
+## P27-4. Exact commands
+
+From `$R` (fork) unless noted; `$W=/Volumes/Extreme SSD/ps2recomp-spike`,
+`LOG`/`LOG2` as above:
+
+```
+# Step 0 (context reads; lease-free)
+re-read REPORT Part 26 (full) + brief local/muse/prompts/P1ac.md
+cat /tmp/ssx3-host-lease (absent); git -C $R status/log/remote/branch
+git -C $R diff --stat (4 foreign worktree mods at session start)
+read Syscalls/RPC.cpp sceSifSendCmd :972-1002 + System.cpp :422-461
+read game_overrides.h/games_database.h + game_overrides.cpp + builtin_profiles.cpp
+read ps2_log.h emitDrop + MiniTest.h + RPC.h + ps2_syscalls.h declarations
+# Step 1 (BEFORE receipts; lease-free)
+shasum -a 256 /tmp/p1-link/runtime/ps2xTest/ps2x_tests /tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner
+cd $R && /tmp/p1-link/runtime/ps2xTest/ps2x_tests | tail (428/428/0)
+grep P26 logs: 6 census lines :69-74, sif-handshake count 0/0, SendCmd :1047
+# Step 1 (implement; lease-free)
+edit RPC.cpp (include + gate/descriptor/reset + SendCmd hunk)
+edit System.cpp (:441 emitDrop args)
+edit ps2xTest/src/ps2_runtime_kernel_tests.cpp (include + forward decl + 3 tests)
+find $R ... -name "._*" -delete (source dirs); git diff verify (mine only)
+(mid-session: HEAD moved 69bb1ff -> bfa0213 -> 4326926, P11+P9; verified
+ my 3 files untouched by them, diffs intact)
+cmake --build /tmp/p1-link/runtime --target ps2x_tests ps2EntryRunner -j4 (exit 0)
+shasum both binaries (daf0b63f / 5878ad69)
+cd $R && ps2x_tests (431/431/0) + by-name handshake grep (3/3 pass)
+sed /tmp/p1ab-boot{1,2}.py -> /tmp/p1ac-boot{1,2}.py (docstring + LOG only)
+# Step 2 (boots; lease P1ac held 03:34:10Z-03:37:28Z only)
+pre-claim checks (lease absent x2; pgrep exit 1; shasum 5878ad69; ISO + ELF sizes)
+printf 'P1ac' > lease + >> p1ac-waits.log; python3 /tmp/p1ac-boot1.py (90 s, SIGTERM rc=-15)
+spot greps (receipt/census/override/cf0); cat lease (P1ac); pgrep (exit 1)
+python3 /tmp/p1ac-boot2.py (90 s, SIGTERM rc=-15)
+>> p1ac-waits.log (release line); rm lease; verify absent; pgrep exit 1
+# Step 2 (analysis, lease released)
+(write /tmp/p1ac-ladder.py; same-pattern rungs x3: P26-boot1 + both P1ac boots)
+(write /tmp/p1ac-park.py: thread pcs, stub profile, BIND rows, SIF loads)
+(write /tmp/p1ac-steady.py: stub sums, t1 pcs, frames, CD, creates)
+(write /tmp/p1ac-decode.py: ELF windows + CSV ranges; +0x1000 map fix, rerun)
+reads: $O/sub_0031AAF0 + sub_00394ED0 + sub_00362DE8 + sub_0040C028-family +
+  sub_00426D18 + TOML 426 map; ps2_log.txt enter/exit greps (6 functions)
+# Step 3 (fork commits + push; lease released)
+git add RPC.cpp + kernel_tests; verify staged; commit 6447d8b (trailer)
+git add System.cpp; verify staged diff; commit 45da174 (trailer)
+git fetch fork; rev-list HEAD...fork/ssx3 (2/0); pull --rebase (refused, dirty
+  generated file — recorded §P27-3); git push fork ssx3 (4326926..45da174)
+# Step 3 (this report; lease released)
+(edit_file append Part 27 in 3 chunks + 2 row fixes)
+git -C /Users/bradrichardson/dev/ssx3 add -f local/research/P1/REPORT.md
+git -C /Users/bradrichardson/dev/ssx3 commit -m "[P1ac] ..." (trailer; NO push there)
+```
+
+Env delta boots vs boot-p1ab-1: none (scripts differ only in docstring
++ LOG name). Source delta: my 2 fork commits on `4326926` (+ the
+P9/P11 confounders, §P27-3).
+
+## P27-5. What I could not do
+
+- Name the IOP announcer (carried from §P26-5; the fix confirms the
+  contract — one-shot nonzero unblocks the thread past `0x2290E8` —
+  without the module name).
+- Decide bounded-vs-circular for the new main-thread park (the
+  `sub_00394ED0` list-walk: 15,989 balanced calls, frozen dma/gif —
+  needs a guest-memory trace over the walked list; follow-up brief
+  material, with the sema-30 thread-3 park as its second row).
+- Identify the outer loop above `sub_00362DE8` (the repeat driver for
+  the 16k calls) — same follow-up.
+- Decode the `0x3C45C0` `SendCmd` cid and the `0x1C`/`0x1D` arm
+  semantics (carried from §P26-5, untouched).
+- Run a 3rd boot (max 2 used; poll-exit + park + ladder all closed).
+- Re-baseline the ladder against a P9/P10/P11-only binary (the
+  mechanism-exclusive rows don't need it; the joint volume rows are
+  marked as such in §P27-2e).
+- Session wall time ≈ 03:05–03:50Z (~45 min), inside the 4 h box.
+
