@@ -1,0 +1,188 @@
+LOAD off=0x1000 va=0x100000 filesz=0x3a4bf4
+STR b'data\\movies\\thx.mpc' off=0x3622d0 va=0x4612d0
+STR b'data\\movies\\st3xsell.mpc' off=0x3611b8 va=0x4601b8
+STR b'data\\movies\\nfsxsell.mpc' off=0x361178 va=0x460178
+STR b'data\\movies\\nflxsell.mpc' off=0x361198 va=0x460198
+STR b'data\\movies\\intro.mpc' off=0x362308 va=0x461308
+STR b'data\\movies\\intro_dj.mpc' off=0x3622e8 va=0x4612e8
+STR b'data\\movies\\eabig.mpc' off=0x3622b8 va=0x4612b8
+STR b'data/movies/EBC3ws.mpc' off=0x383790 va=0x482790
+STR b'data/movies/EBC3.mpc' off=0x3836f0 va=0x4826f0
+STR b'data/movies/DBC2ws.mpc' off=0x383778 va=0x482778
+STR b'data/movies/DBC2.mpc' off=0x3836d8 va=0x4826d8
+STR b'data/movies/ABC1ws.mpc' off=0x383760 va=0x482760
+STR b'data/movies/ABC1.mpc' off=0x3836c0 va=0x4826c0
+STR b'MoviePlayer' off=0x362320 va=0x461320
+STR b'RCMP::mpegbuff' off=0x3963f0 va=0x4953f0
+STR b'PsIIlibmpeg 2700' off=0x3541b8 va=0x4531b8
+STR b'[MPEG ERROR]%s' off=0x398ce8 va=0x497ce8
+GP not found in entry fn
+
+== 4 lui-based string refs ==
+ref use@0x1a27f8 lui@0x1a27f0 str=b'MoviePlayer' fn=sub_001A1CE8
+ref use@0x1d23ec lui@0x1d23e4 str=b'MoviePlayer' fn=sub_001D22F0
+ref use@0x3b0ea4 lui@0x3b0e9c str=b'RCMP::mpegbuff' fn=sub_003B0B40
+ref use@0x40346c lui@0x403464 str=b'[MPEG ERROR]%s' fn=sub_00403460
+
+== 4 movie-referencing functions ==
+sub_001A1CE8 0x1a1ce8..0x1a2b00 size=0xe18
+sub_001D22F0 0x1d22f0..0x1d2598 size=0x2a8
+sub_003B0B40 0x3b0b40..0x3b0fb8 size=0x478
+sub_00403460 0x403460..0x403470 size=0x10
+
+== per-movie-function census: jal targets + syscalls + HW-lui ==
+--- sub_001A1CE8 (0x1a1ce8..0x1a2b00)
+    0x1a1cf4: jal 0x1956f8 -> sub_001956F8
+    0x1a1d10: jal 0x263660 -> sub_00263660
+    0x1a1d20: jal 0x263998 -> sub_00263998
+    0x1a1d80: jal 0x2639b0 -> sub_002639B0
+    0x1a1d94: jal 0x263678 -> sub_00263678
+    0x1a1da0: jal 0x1957d0 -> sub_001957D0
+    0x1a1dd8: jal 0x14dc80 -> sub_0014DC80
+    0x1a1de4: jal 0x14de28 -> sub_0014DE28
+    0x1a1dec: jal 0x14dc80 -> sub_0014DC80
+    0x1a1df8: jal 0x14de28 -> sub_0014DE28
+    0x1a1e00: jal 0x14dc80 -> sub_0014DC80
+    0x1a1e0c: jal 0x14de28 -> sub_0014DE28
+    0x1a1e20: jal 0x3e6448 -> sub_003E6448
+    0x1a1e3c: jal 0x14de68 -> sub_0014DE68
+    0x1a1e44: jal 0x369ff8 -> sub_00369FF8
+    0x1a1e50: jal 0x195e58 -> sub_00195E58
+    0x1a1e90: jal 0x1a0648 -> sub_001A0648
+    0x1a1ee0: jal 0x317530 -> sub_00317530
+    0x1a1ef4: jal 0x317550 -> sub_00317550
+    0x1a1efc: jal 0x14dc80 -> sub_0014DC80
+    0x1a1f08: jal 0x14dd58 -> sub_0014DD58
+    0x1a1f14: jal 0x14bd78 -> sub_0014BD78
+    0x1a1f1c: jal 0x14af10 -> sub_0014AF10
+    0x1a1f28: jal 0x195be0 -> sub_00195BE0
+    0x1a1f3c: jal 0x317550 -> sub_00317550
+    0x1a1f94: jal 0x397c40 -> sub_00397C40
+    0x1a1fa8: jal 0x317550 -> sub_00317550
+    0x1a1fb0: jal 0x1a2b00 -> sub_001A2B00
+    0x1a1fb8: jal 0x19ce68 -> sub_0019CE68
+    0x1a1fc0: jal 0x1a0498 -> sub_001A0498
+    0x1a2040: jal 0x317550 -> sub_00317550
+    0x1a2058: jal 0x317d70 -> sub_00317D70
+    0x1a2098: jal 0x317d70 -> sub_00317D70
+    0x1a20a4: jal 0x1a0720 -> sub_001A0720
+    0x1a20c4: jal 0x317d70 -> sub_00317D70
+    0x1a20cc: jal 0x1a2e20 -> sub_001A2E20
+    0x1a20fc: jal 0x38acd0 -> sub_0038ACD0
+    0x1a2104: jal 0x28b180 -> sub_0028B180
+    0x1a210c: jal 0x285fb0 -> sub_00285FB0
+    0x1a2134: jal 0x231cf0 -> sub_00231CF0
+    0x1a215c: jal 0x253418 -> sub_00253418
+    0x1a2174: jal 0x1a06b0 -> sub_001A06B0
+    0x1a21b8: jal 0x1a2bc0 -> sub_001A2BC0
+    0x1a21c0: jal 0x1a04c8 -> sub_001A04C8
+    0x1a21c8: jal 0x19cf40 -> sub_0019CF40
+    0x1a21d4: jal 0x38adb0 -> sub_0038ADB0
+    0x1a21e4: jal 0x28b180 -> sub_0028B180
+    0x1a21ec: jal 0x286200 -> sub_00286200
+    0x1a2260: jal 0x231d60 -> sub_00231D60
+    0x1a2298: jal 0x253890 -> sub_00253890
+    0x1a26f8: jal 0x398018 -> sub_00398018
+    0x1a2700: jal 0x1a0598 -> sub_001A0598
+    0x1a2744: jal 0x397df8 -> sub_00397DF8
+    0x1a2764: jal 0x28b180 -> sub_0028B180
+    0x1a2774: jal 0x285bf8 -> sub_00285BF8
+    0x1a27d4: jal 0x231d18 -> sub_00231D18
+    0x1a2800: jal 0x317d70 -> sub_00317D70
+    0x1a2808: jal 0x2533c8 -> sub_002533C8
+    0x1a2810: jal 0x28b180 -> sub_0028B180
+    0x1a2818: jal 0x2b3a70 -> sub_002B3A70
+    0x1a2820: jal 0x253390 -> sub_00253390
+    0x1a2890: jal 0x14dc80 -> sub_0014DC80
+    0x1a289c: jal 0x14dd58 -> sub_0014DD58
+    0x1a28bc: jal 0x28b180 -> sub_0028B180
+    0x1a28c4: jal 0x289de0 -> sub_00289DE0
+    0x1a2934: jal 0x2534a8 -> sub_002534A8
+    0x1a293c: jal 0x253860 -> sub_00253860
+    0x1a296c: jal 0x253938 -> sub_00253938
+    0x1a29b4: jal 0x320c48 -> sub_00320C48
+    0x1a29c8: jal 0x320c48 -> sub_00320C48
+    0x1a2a08: jal 0x253418 -> sub_00253418
+    0x1a2a28: jal 0x28b180 -> sub_0028B180
+    0x1a2a30: jal 0x2b3a98 -> sub_002B3A98
+    0x1a2a50: jal 0x398038 -> sub_00398038
+    0x1a2a7c: jal 0x19d250 -> sub_0019D250
+    0x1a2a84: jal 0x1a0608 -> sub_001A0608
+    0x1a2a9c: jal 0x1a39f0 -> sub_001A39F0
+    0x1a2ab4: jal 0x263828 -> sub_00263828
+    0x1a2ac4: jal 0x263cf0 -> sub_00263CF0
+    0x1a2ad8: jal 0x25ac50 -> sub_0025AC50
+--- sub_001D22F0 (0x1d22f0..0x1d2598)
+    0x1d2310: jal 0x39e318 -> sub_0039E318
+    0x1d2354: jal 0x253390 -> sub_00253390
+    0x1d23ac: jal 0x253418 -> sub_00253418
+    0x1d23c4: jal 0x39e390 -> sub_0039E390
+    0x1d2400: jal 0x317d70 -> sub_00317D70
+    0x1d2408: jal 0x2533c8 -> sub_002533C8
+    0x1d2414: jal 0x1d25e8 -> sub_001D25E8
+    0x1d244c: jal 0x253418 -> sub_00253418
+    0x1d2488: jal 0x253890 -> sub_00253890
+    0x1d2490: jal 0x39e6b8 -> sub_0039E6B8
+    0x1d24c4: jal 0x253938 -> sub_00253938
+    0x1d24f4: jal 0x1d2638 -> sub_001D2638
+    0x1d24fc: jal 0x39e510 -> sub_0039E510
+--- sub_003B0B40 (0x3b0b40..0x3b0fb8)
+    0x3b0b68: jal 0x3b06b0 -> sub_003B06B0
+    0x3b0b9c: jal 0x3e6574 -> sub_003E6574
+    0x3b0c10: jal 0x3b06f8 -> sub_003B06F8
+    0x3b0c2c: jal 0x4029d0 -> sub_004029D0  [libmpeg-region]
+    0x3b0cec: jal 0x3b1228 -> sub_003B1228
+    0x3b0cf4: jal 0x3b13d8 -> sub_003B13D8
+    0x3b0e68: jal 0x3b07f8 -> sub_003B07F8
+    0x3b0f1c: jal 0x402708 -> sub_00402708  [libmpeg-region]
+    0x3b0f4c: jal 0x4027b8 -> sub_004027B8  [libmpeg-region]
+    0x3b0f64: jal 0x402c08 -> sub_00402C08  [libmpeg-region]
+--- sub_00403460 (0x403460..0x403470)
+
+== callers of TOML-wired libmpeg entries ==
+libmpeg 0x402708: 1 jal callers
+    caller jal@0x3b0f1c in sub_003B0B40
+libmpeg 0x4027b8: 1 jal callers
+    caller jal@0x3b0f4c in sub_003B0B40
+libmpeg 0x4029d0: 1 jal callers
+    caller jal@0x3b0c2c in sub_003B0B40
+libmpeg 0x402a10: 1 jal callers
+    caller jal@0x3b1020 in sub_003B0FB8
+libmpeg 0x402a58: 0 jal callers
+libmpeg 0x402aa0: 0 jal callers
+libmpeg 0x402b18: 0 jal callers
+libmpeg 0x402b58: 1 jal callers
+    caller jal@0x40292c in sub_004027B8
+libmpeg 0x402bb0: 1 jal callers
+    caller jal@0x402934 in sub_004027B8
+libmpeg 0x402c08: 1 jal callers
+    caller jal@0x3b0f64 in sub_003B0B40
+libmpeg 0x403240: 2 jal callers
+    caller jal@0x402ec0 in sub_00402E10
+    caller jal@0x403174 in sub_004030E0
+libmpeg 0x402c30: 12 jal callers
+    caller jal@0x402c90 in sub_00402C80
+    caller jal@0x4034d8 in sub_004034A8
+    caller jal@0x403afc in sub_00403AD0
+    caller jal@0x403b90 in sub_00403AD0
+    caller jal@0x405c10 in sub_00405B70
+    caller jal@0x405d50 in sub_00405B70
+    caller jal@0x405d70 in sub_00405B70
+    caller jal@0x4075e8 in sub_00407520
+    caller jal@0x408c34 in sub_00408B80
+    caller jal@0x408f1c in sub_00408DF0
+    caller jal@0x4090c8 in sub_00409088
+    caller jal@0x4092e4 in sub_00409088
+libmpeg 0x402c80: 9 jal callers
+    caller jal@0x403004 in sub_00402F80
+    caller jal@0x403210 in sub_004030E0
+    caller jal@0x406e8c in sub_00406E20
+    caller jal@0x406f34 in sub_00406EC8
+    caller jal@0x406fd8 in sub_00406F78
+    caller jal@0x407068 in sub_00406F78
+    caller jal@0x407160 in sub_004070F0
+    caller jal@0x407250 in sub_004071F8
+    caller jal@0x407344 in sub_004072E8
+libmpeg 0x405b48: 2 jal callers
+    caller jal@0x40334c in sub_00403338
+    caller jal@0x403bdc in sub_00403BB0

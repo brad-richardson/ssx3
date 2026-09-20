@@ -1,0 +1,1191 @@
+== TOML stub region boundaries (first of each prefix run) ==
+  0x002b9100 DPRINT
+  0x002c26d0 fiprintf
+  0x003194a8 fiprintf
+  0x003d1658 DPRINT
+  0x003d1690 DPRINT
+  0x003dc9f8 fiprintf
+  0x003e5d30 fiprintf
+  0x003fd910 sceGsResetGraph
+  0x003fdab0 sceGsResetPath
+  0x003fdb18 sceGsSyncPath
+  0x003fde30 WaitDma
+  0x003fdea0 WatchDma
+  0x003fdf28 CheckAddress
+  0x003fdf50 memclr
+  0x003fdf88 sceDmaGetChan
+  0x003fdfb0 sceDmaReset
+  0x003fe090 sceDmaPutEnv
+  0x003fe268 sceDmaGetEnv
+  0x003fe2b8 sceDmaSend
+  0x003fe320 sceDmaSendN
+  0x003fe398 sceDmaSendI
+  0x003fe410 sceDmaRecv
+  0x003fe458 sceDmaRecvN
+  0x003fe4d8 sceDmaRecvI
+  0x003fe558 sceDmaSync
+  0x003fe590 sceDmaWatch
+  0x003fe5c8 sceDmaPause
+  0x003fe6a8 sceDevVu0Pause
+  0x003fe758 sceDevVu0PutDBit
+  0x003fe788 sceDevVu0PutTBit
+  0x003fe7d8 sceDevVu0Sync
+  0x003fe838 sceDevVu0GetCnd
+  0x003fe998 sceDevVu0PutCnd
+  0x003feb08 sceVuCheckBusy
+  0x003feb38 sceVu0MemWriteQ
+  0x003feb78 sceVu0MemReadQ
+  0x003febd8 sceDevVu1Pause
+  0x003fec88 sceDevVu1PutDBit
+  0x003fecb8 sceDevVu1PutTBit
+  0x003fed08 sceDevVu1Sync
+  0x003fed60 sceDevVu1GetTpc
+  0x003fed88 sceDevVu1GetCnd
+  0x003fef18 sceDevVu1PutCnd
+  0x003ff060 sceDevVif0Reset
+  0x003ff088 sceDevVif0Pause
+  0x003ff0f0 sceDevVif0Continue
+  0x003ff130 sceDevVif0PutErr
+  0x003ff160 sceDevVif0Sync
+  0x003ff1b0 sceDevVif0GetCnd
+  0x003ff330 sceDevVif0PutFifo
+  0x003ff390 _send_to_iop
+  0x003ff4a8 scePadInit
+  0x003ff5e8 scePadInit2
+  0x003ff688 scePadEnd
+  0x003ff708 scePadPortOpen
+  0x003ff8f0 scePadPortClose
+  0x003ff9a8 scePadGetDmaStr
+  0x003ffa08 scePadGetFrameCount
+  0x003ffa58 scePadRead
+  0x003ffbc0 scePadGetState
+  0x003ffc38 scePadStateIntToStr
+  0x003ffc70 scePadSetReqState
+  0x003ffcd8 scePadGetReqState
+  0x003ffd60 scePadInfoAct
+  0x003ffe80 scePadInfoComb
+  0x003fffa0 scePadInfoMode
+  0x004000d8 scePadSetMainMode
+  0x00400190 scePadSetActDirect
+  0x00400250 scePadSetActAlign
+  0x00400328 scePadGetButtonMask
+  0x004003e0 scePadSetButtonInfo
+  0x00400490 scePadInfoPressMode
+  0x004004f0 scePadEnterPressMode
+  0x00400548 scePadExitPressMode
+  0x004005a0 scePadSetVrefParam
+  0x00400670 scePadGetPortMax
+  0x004006d8 scePadGetSlotMax
+  0x00400740 scePadGetModVersion
+  0x004007a8 scePadSetWarningLevel
+  0x00400838 sceCdDelayThread
+  0x004008a0 sceCdCallback
+  0x00400a78 sceCdInitEeCB
+  0x00400b48 _sceCd_cd_read_intr
+  0x00400c00 cmd_sem_init
+  0x00400cb8 cdvd_exit
+  0x00400d58 sceCdPOffCallback
+  0x00400dd8 _sceCd_Poff_Intr
+  0x00400e30 PowerOffCB
+  0x00400ea8 sceCdLayerSearchFile
+  0x00401350 sceCdNcmdDiskReady
+  0x004013e8 sceCdSync
+  0x00401488 sceCdSyncS
+  0x00401668 _sceCdSC
+  0x00401718 sceCdInit
+  0x00401bf0 sceCdDiskReady
+  0x00401df8 sceCdRead
+  0x00401fd8 sceCdGetToc
+  0x00402268 sceCdGetDiskType
+  0x00402300 sceCdGetError
+  0x00402398 sceCdPowerOff
+  0x00402450 sceCdMmode
+  0x00402520 sceCdReadClock
+  0x00402618 sceCdTrayReq
+  0x00402708 sceMpegInit
+  0x004027b8 sceMpegCreate
+  0x004029d0 sceMpegAddBs
+  0x00402a10 sceMpegGetPicture
+  0x00402a58 sceMpegGetPictureRAW8
+  0x00402aa0 sceMpegGetPictureRAW8xy
+  0x00402b18 sceMpegGetDecodeMode
+  0x00402b58 sceMpegReset
+  0x00402bb0 sceMpegClearRefBuff
+  0x00402c08 sceMpegAddCallback
+  0x00402c30 _dispatchMpegCallback
+  0x00402c80 _dispatchMpegCbNodata
+  0x00402e10 _getpic
+  0x00402f80 _decodeOrSkipFrame
+  0x00403098 _decodeOrSkip
+  0x004030e0 _decodeOrSkipField
+  0x00403240 _sceMpegFlush
+  0x004032b8 _lastFrame
+  0x00403338 _clearOnce
+  0x00403398 _clearEach
+  0x00403470 _Error1
+  0x004034a8 _Error
+  0x00403500 _sendDataToIPU
+  0x00403600 _RefImageInit
+  0x00403620 _sequenceHeader
+  0x00403748 _initSeq
+  0x004039f0 _initRefImages
+  0x00403ad0 _setDefaultQM
+  0x00403bb0 _sequenceExtension
+  0x00403ce0 _sequenceDisplayExtension
+  0x00403e00 _motionComp0
+  0x00404050 _getAllRefs
+  0x00404758 _getRef0
+  0x00404b78 _doMC
+  0x00404d98 _rix_000
+  0x00404e10 _ri0_000
+  0x00404ea8 _rix_001
+  0x00404f60 _ri0_001
+  0x00405030 _rix_010
+  0x004050e0 _ri0_010
+  0x00405198 _rix_011
+  0x00405290 _ri0_011
+  0x00405390 _rix_100
+  0x00405430 _ri0_100
+  0x004054e0 _rix_101
+  0x004055c0 _ri0_101
+  0x004056a8 _rix_110
+  0x00405780 _ri0_110
+  0x00405850 _rix_111
+  0x00405970 _ri0_111
+  0x00405a88 _copyAddRefImage
+  0x00405ae8 _copyRefImage
+  0x00405b48 _ipuSetMPEG1
+  0x00405b70 _waitBdecOut
+  0x00405e30 _dualPrimeVector
+  0x00405fb8 _mbAddressIncrement
+  0x004060c8 _pictureData0
+  0x004061e8 _sliceA0
+  0x00406318 _slice0
+  0x00406510 _skipMB0
+  0x004065d0 _decMB0
+  0x00406b00 _motionVectors
+  0x00406ca0 _motionVector
+  0x00406df0 _sendIpuCommand
+  0x00406e20 _waitIpuIdle
+  0x00406ec8 _waitIpuIdle64
+  0x00406f78 _ipuVdec
+  0x004070f0 _peepBit
+  0x004071f8 _flushBuf
+  0x004072e8 _nextBit
+  0x00407438 _nextStartCode
+  0x004074b8 _sliceB
+  0x00407520 _nextHeader
+  0x00407630 _pictureHeader
+  0x004076f8 _extensionAndUserData
+  0x00407820 _pictureCodingExtension
+  0x00407a10 _extrainfo
+  0x00407a58 _updateTempTackData
+  0x00407ad0 _groupOfPicturesHeader
+  0x00407b70 _quantMatrixExtension
+  0x00407c38 _pictureDisplayExtension
+  0x00407d30 _copyrightExtension
+  0x00407dc0 _decPicture
+  0x00407e90 _outputFrame
+  0x00407f20 _updateRefImage
+  0x004081d8 _isOutSizeOK
+  0x00408278 _cpr8
+  0x00408508 _markOutput
+  0x00408530 _getPtsDtsFlags
+  0x004086c0 _dispRefImage
+  0x004087d0 _dispRefImageField
+  0x00408988 dmaRefImage
+  0x00408af8 receiveDataFromIPU
+  0x00408b80 _doCSC
+  0x00408ca8 _ch3dmaCSC
+  0x00408df0 _doCSC2
+  0x00408fb0 _ch4dma
+  0x00409088 _csc_storeRefImage
+  0x00409310 setD3_CHCR
+  0x00409388 setD4_CHCR
+  0x00409400 sceIpuStopDMA
+  0x004094e8 sceIpuRestartDMA
+  0x00409638 sceIpuSync
+  0x004096a0 setD4_CHCR
+  0x00409708 sceIpuInit
+  0x00409940 sceMcInit
+  0x00409b10 sceMcEnd
+  0x00409b60 _lmcGetClientPtr
+  0x00409b90 sceMcChangeThreadPriority
+  0x00409c48 sceMcGetSlotMax
+  0x00409d10 sceMcOpen
+  0x00409e38 sceMcMkdir
+  0x00409e70 sceMcClose
+  0x00409f28 sceMcSeek
+  0x0040a000 mceIntrReadFixAlign
+  0x0040a090 sceMcRead
+  0x0040a1a8 sceMcWrite
+  0x0040a328 mcDelayThread
+  0x0040a360 sceMcSync
+  0x0040a440 mceGetInfoApdx
+  0x0040a498 sceMcGetInfo
+  0x0040a618 sceMcUdCheckNewCard
+  0x0040a688 sceMcGetDir
+  0x0040a7d0 mceStorePwd
+  0x0040a858 sceMcChdir
+  0x0040a998 sceMcFormat
+  0x0040aa68 sceMcDelete
+  0x0040ab80 sceMcFlush
+  0x0040ac38 sceMcSetFileInfo
+  0x0040ae00 sceMcRename
+  0x0040af58 sceMcUnformat
+  0x0040b028 sceMcGetEntSpace
+  0x0040b130 sceSifMInitRpc
+  0x0040b2d0 _request_end
+  0x0040b3d8 sceSifMBindRpc
+  0x0040b400 sceSifMBindRpcParam
+  0x0040b5b0 sceSifMUnBindRpc
+  0x0040b6d0 sceSifMCallRpc
+  0x0040b938 GetRomName
+  0x0040b9a8 IsT10K
+  0x0040b9e8 sceScfGetLanguage
+  0x0040ba68 sceScfGetAspect
+  0x0040baa8 sceScfGetSpdif
+  0x0040bae8 sceScfGetTimeZone
+  0x0040bb38 sceScfGetDateNotation
+  0x0040bba0 sceScfGetSummerTime
+  0x0040bc08 sceScfGetTimeNotation
+  0x0040bc70 tobcd
+  0x0040bca0 frombcd
+  0x0040bd90 adddate
+  0x0040be48 subdate
+  0x0040bef0 addhour
+  0x0040bf20 subhour
+  0x0040bf48 AdjustTime
+  0x0040bfe0 sceScfGetLocalTimefromRTC
+  0x0040c028 sceUsbKbInit
+  0x0040c220 sceUsbKbEnd
+  0x0040c2e8 sceUsbKbGetInfo
+  0x0040c390 sceUsbKbRead
+  0x0040c470 sceUsbKbGetLocation
+  0x0040c550 sceUsbKbSetLEDStatus
+  0x0040c628 sceUsbKbSetLEDMode
+  0x0040c728 sceUsbKbSetRepeat
+  0x0040c770 sceUsbKbSetCodeType
+  0x0040c7c0 sceUsbKbSetArrangement
+  0x0040c810 sceUsbKbSync
+  0x0040c8c0 SetResult
+  0x0040c928 SetResult_GetInfo
+  0x0040c980 SetResult_Read
+  0x0040cef8 SetResult_GetLocation
+  0x0040cf88 vblank_e_handler
+  0x0040d010 clear_repbuf
+  0x0040d040 push_repbuf
+  0x0040d0b0 pop_repbuf
+  0x0040d118 cnv_keycode
+  0x0040d268 sceUsbKbCnvRawCode
+  0x0040d3c0 cnv_keypad
+  0x0040d430 sceUsbKbSetReadMode
+  0x0040d4a0 sceUsbKbClearRbuf
+  0x0040d588 tanf
+  0x0040d610 log
+  0x0040d758 expf
+  0x0040d8d0 fmodf
+  0x0040da10 logf
+  0x0040db58 __ieee754_log
+  0x0040e048 __ieee754_expf
+  0x0040e300 __ieee754_fmodf
+  0x0040e550 __ieee754_logf
+  0x0040e878 __ieee754_rem_pio2f
+  0x0040ec58 __kernel_rem_pio2f
+  0x0040f5a8 __kernel_tanf
+  0x0040f878 matherr
+  0x0040f8e8 floorf
+  0x0040fcb0 __divdi3
+  0x004103b0 __terminate
+  0x004103d8 __throw_type_match
+  0x00410410 new_eh_context
+  0x00410490 __get_eh_info
+  0x004104b8 eh_context_initialize
+  0x004104e0 eh_context_static
+  0x00410548 __get_dynamic_handler_chain
+  0x00410570 __sjthrow
+  0x004106e8 __sjpopnthrow
+  0x00410800 __eh_rtime_match
+  0x00410858 old_find_exception_handler
+  0x00410930 find_exception_handler
+  0x00410a78 get_reg_addr
+  0x00410b00 copy_reg
+  0x00410b80 next_stack_level
+  0x00410c18 throw_helper
+  0x00410f48 __throw
+  0x00411128 __rethrow
+  0x00411310 exit
+  0x00411340 __fixunssfdi
+  0x00411438 __floatdidf
+  0x004114d0 __muldi3
+  0x00411538 __udivdi3
+  0x00411b08 __pack_d
+  0x00411c38 __unpack_d
+  0x00411cd8 _fpadd_parts
+  0x00411f18 dpadd
+  0x00411f70 dpsub
+  0x00411fd8 dpmul
+  0x00412280 dpdiv
+  0x004123e8 __fpcmp_parts_d
+  0x00412500 dpcmp
+  0x00412550 litodp
+  0x00412608 dptoli
+  0x004126a0 dptoul
+  0x00412740 __negdf2
+  0x00412778 __make_dp
+  0x004127a8 dptofp
+  0x00412860 __cp_exception_info
+  0x004128a8 __start_cp_handler
+  0x004128e0 __eh_alloc
+  0x00412928 __cplus_type_matcher
+  0x00412998 __cp_push_exception
+  0x00412a28 __cp_pop_exception
+  0x00412af0 __uncatch_exception
+  0x00412b20 __check_eh_spec
+  0x00412dd8 uncaught_exception__Fv
+  0x00412e10 what__C9exception
+  0x00412f58 __pack_f
+  0x00413068 __unpack_f
+  0x004130f8 _fpadd_parts
+  0x00413330 fpadd
+  0x00413388 fpsub
+  0x004133f0 fpmul
+  0x004135e8 fpdiv
+  0x00413748 __fpcmp_parts_f
+  0x00413860 fpcmp
+  0x004138b0 sitofp
+  0x00413968 fptosi
+  0x004139f8 fptoui
+  0x00413a90 __negsf2
+  0x00413ac8 __make_fp
+  0x00413af8 fptodp
+  0x00413b38 decode_uleb128
+  0x00413b80 decode_sleb128
+  0x00413bd0 fde_merge
+  0x00413cd0 end_fde_sort
+  0x00413f38 count_fdes
+  0x00413f80 add_fdes
+  0x00414008 frame_init
+  0x00414148 find_fde
+  0x00414230 extract_cie_info
+  0x00414338 execute_cfa_insn
+  0x004146d0 __register_frame_info
+  0x00414728 __register_frame_info_table
+  0x00414780 __deregister_frame_info
+  0x00414818 __frame_state_for
+  0x004149f0 fde_split
+  0x00414b98 __eq__C9type_infoRC9type_info
+  0x00414bd8 __rtti_class
+  0x00414c40 dcast__C16__user_type_infoRC9type_infoiPvPC9type_infoT3
+  0x00414c70 dcast__C14__si_type_infoRC9type_infoiPvPC9type_infoT3
+  0x00414d08 dcast__C17__class_type_infoRC9type_infoiPvPC9type_infoT3
+  0x00415238 before__C9type_infoRC9type_info
+  0x00415260 __throw_type_match_rtti
+  0x00415728 __is_pointer__FPv
+  0x00415798 __rtti_attr
+  0x00415840 __dynamic_cast
+  0x00415fc8 memcmp
+  0x0041605c memcpy
+  0x0041610c memmove
+  0x00416210 memset
+  0x004187c0 atoi
+  0x0041acc0 strrchr
+  0x0041ff40 std
+  0x00420830 _hi0bits
+  0x004208b8 _lo0bits
+  0x00420e28 __mcmp
+  0x00424230 VSync
+  0x004242c0 VSync2
+  0x00424368 write
+  0x004243e8 read
+  0x004244a0 sbrk
+  0x00424578 kill
+  0x004245f0 _sceSDC
+  0x00424730 _sceIDC
+  0x00424aa0 topThread
+  0x00424b78 InitThread
+  0x00424c50 iWakeupThread
+  0x00424ce8 iRotateThreadReadyQueue
+  0x00424d68 iSuspendThread
+  0x00424e28 QueuePeekWriteDone
+  0x00424e68 QueuePeekReadDone
+  0x00424ea8 sceTtyHandler
+  0x00425040 sceTtyWrite
+  0x00425190 sceTtyRead
+  0x00425260 sceTtyInit
+  0x00425320 kputchar
+  0x00425358 deci2Putchar
+  0x00425408 serialPutchar
+  0x00425440 ftoi
+  0x004254d0 printfloat
+  0x00425638 _printf
+  0x00425c28 kprintf
+  0x00425c60 scePrintf
+  0x00425d38 sceSifInitCmd
+  0x00425fb8 sceSifExitCmd
+  0x00426020 sceSifAddCmdHandler
+  0x00426050 sceSifRemoveCmdHandler
+  0x00426078 _sceSifSendCmd
+  0x004261b0 sceSifSendCmd
+  0x004261f0 isceSifSendCmd
+  0x00426230 _sceSifCmdIntrHdlr
+  0x00426358 sceSifWriteBackDCache
+  0x00426408 sceSifInitRpc
+  0x00426698 _sceRpcGetFPacket
+  0x004266c8 _sceRpcGetFPacket2
+  0x00426708 _request_end
+  0x004267c0 _alarm_rdata
+  0x00426820 _request_rdata
+  0x004268f0 sceSifGetOtherData
+  0x00426a48 _search_svdata
+  0x00426a98 _request_bind
+  0x00426b48 sceSifBindRpc
+  0x00426c88 _request_call
+  0x00426d18 sceSifCallRpc
+  0x00426f08 sceSifCheckStatRpc
+  0x00426f48 sceSifSetRpcQueue
+  0x00426fe0 sceSifRegisterRpc
+  0x004270b0 sceSifRemoveRpc
+  0x00427148 sceSifRemoveRpcQueue
+  0x004271d8 sceSifGetNextRequest
+  0x00427230 sceSifExecRequest
+  0x004273f8 sceSifRpcLoop
+  0x00427438 _sceFsIobSemaMK
+  0x00427498 new_iob
+  0x00427520 get_iob
+  0x00427590 _sceFs_Rcv_Intr
+  0x00427938 _sceFsSemInit
+  0x00427988 _sceFsWaitS
+  0x004279c8 scePowerOffHandler
+  0x00427a60 _sceFs_Poff_Intr
+  0x00427a90 sceFsInit
+  0x00427d28 sceFsReset
+  0x00427d60 sceOpen
+  0x00427fe8 sceClose
+  0x00428168 sceLseek
+  0x004283a0 sceRead
+  0x00428600 sceWrite
+  0x004288c0 sceIoctl
+  0x00428c38 sceIoctl2
+  0x00428e18 _sceCallCode
+  0x00428fe0 sceMkdir
+  0x004291b0 sceFormat
+  0x00429420 sceAddDrv
+  0x00429560 sceDopen
+  0x00429628 sceDclose
+  0x00429790 sceDread
+  0x004298e8 sceGetstat
+  0x00429a88 sceChstat
+  0x00429cc8 sceRename
+  0x00429ed8 sceSync
+  0x0042a070 sceMount
+  0x0042a300 sceLseek64
+  0x0042a538 sceDevctl
+  0x0042a770 sceSymlink
+  0x0042a950 sceReadlink
+  0x0042ab18 sceSifInitIopHeap
+  0x0042aba0 sceSifAllocIopHeap
+  0x0042ac10 sceSifAllocSysMemory
+  0x0042ad28 sceSifLoadIopHeap
+  0x0042ae18 sceSifQueryMemSize
+  0x0042ae88 sceSifQueryMaxFreeMemSize
+  0x0042aef8 sceSifQueryTotalFreeMemSize
+  0x0042af68 sceSifQueryBlockTopAddress
+  0x0042afe8 sceSifQueryBlockSize
+  0x0042b068 _lf_bind
+  0x0042b1f8 sceSifLoadFileReset
+  0x0042b230 _sceSifLoadModuleBuffer
+  0x0042b438 sceSifStopModule
+  0x0042b640 sceSifUnloadModule
+  0x0042b6d0 sceSifSearchModuleByName
+  0x0042b770 sceSifSearchModuleByAddress
+  0x0042b840 _sceSifLoadModule
+  0x0042baa8 _sceSifLoadElfPart
+  0x0042bbd0 sceSifLoadElf
+  0x0042bbf8 sceSifGetIopAddr
+  0x0042bce8 sceSifSetIopAddr
+  0x0042bdc8 sceSifResetIop
+  0x0042bf08 sceSifIsAliveIop
+  0x0042bf30 sceSifSyncIop
+  0x0042bf68 sceSifRebootIop
+  0x0042c078 DIntr
+  0x0042c0d8 supplement_crt0
+  0x0042c130 kCopy
+  0x0042c168 kFindAddress
+  0x0042c1b8 GetSystemCallEntry
+  0x0042c1f0 InitSystemCallTableAddress
+  0x0042c300 _InitSys
+  0x0042c360 kCopy
+  0x0042c3a8 PatchIsNeeded
+  0x0042c410 InitExecPS2
+  0x0042c4d0 kCopy
+  0x0042c510 SetArg
+  0x0042c630 ExecPS2
+  0x0042c6a0 LoadExecPS2
+  0x0042c710 ExecOSD
+  0x0042c780 kCopy
+  0x0042c7c8 InitAlarm
+  0x0042c8a0 sceDeci2Open
+  0x0042c8e8 sceDeci2Close
+  0x0042c910 sceDeci2ReqSend
+  0x0042c940 sceDeci2Poll
+  0x0042c968 sceDeci2ExRecv
+  0x0042c9a0 sceDeci2ExSend
+  0x0042c9d8 sceDeci2ExReqSend
+  0x0042ca08 sceDeci2ExLock
+  0x0042ca30 sceDeci2ExUnLock
+  0x0042ca58 kputs
+  0x0042ca80 SetTLBHandler
+  0x0042cae0 SetDebugHandler
+  0x0042cb78 kCopy
+  0x0042cbd0 InitTLBFunctions
+  0x0042ccc8 SetTLBEntry
+  0x0042cd58 InitTLB
+  0x0042cd98 InitTLB32MB
+  0x0042cfc0 _kTLBException
+  0x0042d100 _kExitTLBHandler
+  0x0042d200 _kDebugException
+  0x0042d320 __fixdfdi
+  0x0042d380 __fixunsdfdi
+  0x0042d470 __moddi3
+  0x0042dad8 __umoddi3
+
+== pointer scan: words equal to movie-path VAs ==
+ptr@0x441128 -> b'data\\movies\\nfsxsell.mpc' in_fn=None ctx[0045fc58 0045fc70 00460178 00460198 004601b8]
+ptr@0x44112c -> b'data\\movies\\nflxsell.mpc' in_fn=None ctx[0045fc70 00460178 00460198 004601b8 00000000]
+ptr@0x441130 -> b'data\\movies\\st3xsell.mpc' in_fn=None ctx[00460178 00460198 004601b8 00000000 00460210]
+ptr@0x441248 -> b'data\\movies\\eabig.mpc' in_fn=None ctx[004a1900 004a1908 004612b8 004612d0 004612e8]
+ptr@0x44124c -> b'data\\movies\\thx.mpc' in_fn=None ctx[004a1908 004612b8 004612d0 004612e8 00461308]
+ptr@0x441250 -> b'data\\movies\\intro_dj.mpc' in_fn=None ctx[004612b8 004612d0 004612e8 00461308 004613d8]
+ptr@0x441254 -> b'data\\movies\\intro.mpc' in_fn=None ctx[004612d0 004612e8 00461308 004613d8 004613e8]
+ptr@0x482708 -> b'data/movies/ABC1.mpc' in_fn=None ctx[63706d2e 00000000 004826c0 00000001 00000001]
+ptr@0x482724 -> b'data/movies/DBC2.mpc' in_fn=None ctx[00000000 ffffffff 004826d8 00000001 00000001]
+ptr@0x482740 -> b'data/movies/EBC3.mpc' in_fn=None ctx[00000000 ffffffff 004826f0 00000001 00000001]
+ptr@0x4827a8 -> b'data/movies/ABC1ws.mpc' in_fn=None ctx[6d2e7377 00006370 00482760 00000001 00000001]
+ptr@0x4827c4 -> b'data/movies/DBC2ws.mpc' in_fn=None ctx[00000000 ffffffff 00482778 00000001 00000001]
+ptr@0x4827e0 -> b'data/movies/EBC3ws.mpc' in_fn=None ctx[00000000 ffffffff 00482790 00000001 00000001]
+
+== lui $gp (rt=28) anywhere ==
+  lui gp @0x445b94 imm=0x093e
+  lui gp @0x445c9c imm=0x02b0
+  lui gp @0x445cd0 imm=0x4b90
+  lui gp @0x44c730 imm=0x8f06
+  lui gp @0x44c9c8 imm=0x7926
+  lui gp @0x44ca38 imm=0x7926
+  lui gp @0x44cd44 imm=0xb268
+  lui gp @0x44d278 imm=0xade1
+  lui gp @0x44d93c imm=0x9870
+  lui gp @0x44dd08 imm=0x1bfc
+  lui gp @0x476a0c imm=0xed91
+(total shown 11)
+
+== CSV functions in 0x3b0000..0x3b3000 ==
+sub_003B0340 0x3b0340..0x3b03a8 size=0x68
+sub_003B03A8 0x3b03a8..0x3b03b0 size=0x8
+sub_003B03B0 0x3b03b0..0x3b03b8 size=0x8
+sub_003B03B8 0x3b03b8..0x3b03c0 size=0x8
+sub_003B03C0 0x3b03c0..0x3b03c8 size=0x8
+sub_003B03C8 0x3b03c8..0x3b03d0 size=0x8
+sub_003B03D0 0x3b03d0..0x3b03d8 size=0x8
+sub_003B03D8 0x3b03d8..0x3b03e0 size=0x8
+sub_003B03E0 0x3b03e0..0x3b03e8 size=0x8
+sub_003B03E8 0x3b03e8..0x3b03f0 size=0x8
+sub_003B03F0 0x3b03f0..0x3b03f8 size=0x8
+sub_003B03F8 0x3b03f8..0x3b0400 size=0x8
+sub_003B0400 0x3b0400..0x3b0408 size=0x8
+sub_003B0408 0x3b0408..0x3b0410 size=0x8
+sub_003B0410 0x3b0410..0x3b0430 size=0x20
+sub_003B0430 0x3b0430..0x3b04f8 size=0xc8
+sub_003B04F8 0x3b04f8..0x3b0538 size=0x40
+sub_003B0538 0x3b0538..0x3b0580 size=0x48
+sub_003B0580 0x3b0580..0x3b05c0 size=0x40
+sub_003B05C0 0x3b05c0..0x3b0600 size=0x40
+sub_003B0600 0x3b0600..0x3b0680 size=0x80
+sub_003B0680 0x3b0680..0x3b06b0 size=0x30
+sub_003B06B0 0x3b06b0..0x3b06f8 size=0x48
+sub_003B06F8 0x3b06f8..0x3b0720 size=0x28
+sub_003B0720 0x3b0720..0x3b0738 size=0x18
+sub_003B0738 0x3b0738..0x3b0758 size=0x20
+sub_003B0758 0x3b0758..0x3b0770 size=0x18
+sub_003B0770 0x3b0770..0x3b07b8 size=0x48
+sub_003B07B8 0x3b07b8..0x3b07d8 size=0x20
+sub_003B07D8 0x3b07d8..0x3b07f8 size=0x20
+sub_003B07F8 0x3b07f8..0x3b08e0 size=0xe8
+sub_003B08E0 0x3b08e0..0x3b0948 size=0x68
+sub_003B0948 0x3b0948..0x3b0b40 size=0x1f8
+sub_003B0B40 0x3b0b40..0x3b0fb8 size=0x478
+sub_003B0FB8 0x3b0fb8..0x3b10d0 size=0x118
+sub_003B10D0 0x3b10d0..0x3b11a0 size=0xd0
+sub_003B11A0 0x3b11a0..0x3b11e8 size=0x48
+sub_003B11E8 0x3b11e8..0x3b11f0 size=0x8
+sub_003B11F0 0x3b11f0..0x3b1228 size=0x38
+sub_003B1228 0x3b1228..0x3b1258 size=0x30
+sub_003B1258 0x3b1258..0x3b1270 size=0x18
+sub_003B1270 0x3b1270..0x3b1290 size=0x20
+sub_003B1290 0x3b1290..0x3b1300 size=0x70
+sub_003B1300 0x3b1300..0x3b1340 size=0x40
+sub_003B1340 0x3b1340..0x3b13a8 size=0x68
+sub_003B13A8 0x3b13a8..0x3b13d8 size=0x30
+sub_003B13D8 0x3b13d8..0x3b1498 size=0xc0
+sub_003B1498 0x3b1498..0x3b14f0 size=0x58
+sub_003B14F0 0x3b14f0..0x3b16e0 size=0x1f0
+sub_003B16E0 0x3b16e0..0x3b17a8 size=0xc8
+sub_003B17A8 0x3b17a8..0x3b1988 size=0x1e0
+sub_003B1988 0x3b1988..0x3b1ab0 size=0x128
+sub_003B1AB0 0x3b1ab0..0x3b1cc0 size=0x210
+sub_003B1CC0 0x3b1cc0..0x3b1d58 size=0x98
+sub_003B1D58 0x3b1d58..0x3b1ee0 size=0x188
+sub_003B1EE0 0x3b1ee0..0x3b1fc8 size=0xe8
+sub_003B1FC8 0x3b1fc8..0x3b20b8 size=0xf0
+sub_003B20B8 0x3b20b8..0x3b2230 size=0x178
+sub_003B2230 0x3b2230..0x3b22f8 size=0xc8
+sub_003B22F8 0x3b22f8..0x3b2318 size=0x20
+sub_003B2318 0x3b2318..0x3b2360 size=0x48
+sub_003B2360 0x3b2360..0x3b2380 size=0x20
+sub_003B2380 0x3b2380..0x3b23a0 size=0x20
+sub_003B23A0 0x3b23a0..0x3b2440 size=0xa0
+sub_003B2440 0x3b2440..0x3b2528 size=0xe8
+sub_003B2528 0x3b2528..0x3b2558 size=0x30
+sub_003B2558 0x3b2558..0x3b2688 size=0x130
+sub_003B2688 0x3b2688..0x3b26b8 size=0x30
+sub_003B26B8 0x3b26b8..0x3b27c8 size=0x110
+sub_003B27C8 0x3b27c8..0x3b2a68 size=0x2a0
+sub_003B2A68 0x3b2a68..0x3b2b68 size=0x100
+sub_003B2B68 0x3b2b68..0x3b2b90 size=0x28
+sub_003B2B90 0x3b2b90..0x3b2e78 size=0x2e8
+sub_003B2E78 0x3b2e78..0x3b3308 size=0x490
+
+== JAL census per cluster function ==
+--- sub_003B0340 (0x3b0340..0x3b03a8)
+    (no jal)
+--- sub_003B03A8 (0x3b03a8..0x3b03b0)
+    (no jal)
+--- sub_003B03B0 (0x3b03b0..0x3b03b8)
+    (no jal)
+--- sub_003B03B8 (0x3b03b8..0x3b03c0)
+    (no jal)
+--- sub_003B03C0 (0x3b03c0..0x3b03c8)
+    (no jal)
+--- sub_003B03C8 (0x3b03c8..0x3b03d0)
+    (no jal)
+--- sub_003B03D0 (0x3b03d0..0x3b03d8)
+    (no jal)
+--- sub_003B03D8 (0x3b03d8..0x3b03e0)
+    (no jal)
+--- sub_003B03E0 (0x3b03e0..0x3b03e8)
+    (no jal)
+--- sub_003B03E8 (0x3b03e8..0x3b03f0)
+    (no jal)
+--- sub_003B03F0 (0x3b03f0..0x3b03f8)
+    (no jal)
+--- sub_003B03F8 (0x3b03f8..0x3b0400)
+    (no jal)
+--- sub_003B0400 (0x3b0400..0x3b0408)
+    (no jal)
+--- sub_003B0408 (0x3b0408..0x3b0410)
+    (no jal)
+--- sub_003B0410 (0x3b0410..0x3b0430)
+    (no jal)
+--- sub_003B0430 (0x3b0430..0x3b04f8)
+    0x3b0454: jal 0x3b0738 sub_003B0738 [cluster]
+    0x3b04c0: jal 0x3b0538 sub_003B0538 [cluster]
+--- sub_003B04F8 (0x3b04f8..0x3b0538)
+    (no jal)
+--- sub_003B0538 (0x3b0538..0x3b0580)
+    (no jal)
+--- sub_003B0580 (0x3b0580..0x3b05c0)
+    (no jal)
+--- sub_003B05C0 (0x3b05c0..0x3b0600)
+    (no jal)
+--- sub_003B0600 (0x3b0600..0x3b0680)
+    (no jal)
+--- sub_003B0680 (0x3b0680..0x3b06b0)
+    (no jal)
+--- sub_003B06B0 (0x3b06b0..0x3b06f8)
+    (no jal)
+--- sub_003B06F8 (0x3b06f8..0x3b0720)
+    (no jal)
+--- sub_003B0720 (0x3b0720..0x3b0738)
+    (no jal)
+--- sub_003B0738 (0x3b0738..0x3b0758)
+    (no jal)
+--- sub_003B0758 (0x3b0758..0x3b0770)
+    (no jal)
+--- sub_003B0770 (0x3b0770..0x3b07b8)
+    0x3b0788: jal 0x3b0410 sub_003B0410 [cluster]
+--- sub_003B07B8 (0x3b07b8..0x3b07d8)
+    0x3b07c4: jal 0x3b0770 sub_003B0770 [cluster]
+--- sub_003B07D8 (0x3b07d8..0x3b07f8)
+    0x3b07e4: jal 0x3b0770 sub_003B0770 [cluster]
+--- sub_003B07F8 (0x3b07f8..0x3b08e0)
+    0x3b0850: jal 0x3b2a68 sub_003B2A68 [cluster]
+    0x3b085c: jal 0x3b3d40 sub_003B3D40
+    0x3b08ac: jal 0x3e6448 sub_003E6448
+--- sub_003B08E0 (0x3b08e0..0x3b0948)
+    0x3b0900: jal 0x3b2b68 sub_003B2B68 [cluster]
+--- sub_003B0948 (0x3b0948..0x3b0b40)
+    0x3b0a54: jal 0x3b08e0 sub_003B08E0 [cluster]
+    0x3b0aa4: jal 0x3b08e0 sub_003B08E0 [cluster]
+    0x3b0b28: jal 0x3b0b40 sub_003B0B40 [cluster]
+--- sub_003B0B40 (0x3b0b40..0x3b0fb8)
+    0x3b0b68: jal 0x3b06b0 sub_003B06B0 [cluster]
+    0x3b0b9c: jal 0x3e6574 sub_003E6574
+    0x3b0c10: jal 0x3b06f8 sub_003B06F8 [cluster]
+    0x3b0c2c: jal 0x4029d0 sceMpegAddBs [libmpeg]
+    0x3b0cec: jal 0x3b1228 sub_003B1228 [cluster]
+    0x3b0cf4: jal 0x3b13d8 sub_003B13D8 [cluster]
+    0x3b0e68: jal 0x3b07f8 sub_003B07F8 [cluster]
+    0x3b0f1c: jal 0x402708 sceMpegInit [libmpeg]
+    0x3b0f4c: jal 0x4027b8 sceMpegCreate [libmpeg]
+    0x3b0f64: jal 0x402c08 sceMpegAddCallback [libmpeg]
+--- sub_003B0FB8 (0x3b0fb8..0x3b10d0)
+    0x3b0fc8: jal 0x3b10d0 sub_003B10D0 [cluster]
+    0x3b1020: jal 0x402a10 sceMpegGetPicture [libmpeg]
+    0x3b108c: jal 0x402b38 sub_00402B38 [libmpeg]
+    0x3b109c: jal 0x3b0fb8 sub_003B0FB8 [cluster]
+--- sub_003B10D0 (0x3b10d0..0x3b11a0)
+    (no jal)
+--- sub_003B11A0 (0x3b11a0..0x3b11e8)
+    0x3b11d0: jal 0x3b0948 sub_003B0948 [cluster]
+--- sub_003B11E8 (0x3b11e8..0x3b11f0)
+    (no jal)
+--- sub_003B11F0 (0x3b11f0..0x3b1228)
+    (no jal)
+--- sub_003B1228 (0x3b1228..0x3b1258)
+    0x3b1244: jal 0x3b1290 sub_003B1290 [cluster]
+--- sub_003B1258 (0x3b1258..0x3b1270)
+    (no jal)
+--- sub_003B1270 (0x3b1270..0x3b1290)
+    0x3b1278: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B1290 (0x3b1290..0x3b1300)
+    (no jal)
+--- sub_003B1300 (0x3b1300..0x3b1340)
+    0x3b1310: jal 0x3b1258 sub_003B1258 [cluster]
+    0x3b131c: jal 0x3b1290 sub_003B1290 [cluster]
+--- sub_003B1340 (0x3b1340..0x3b13a8)
+    (no jal)
+--- sub_003B13A8 (0x3b13a8..0x3b13d8)
+    0x3b13b4: jal 0x3b1258 sub_003B1258 [cluster]
+    0x3b13bc: jal 0x3b1340 sub_003B1340 [cluster]
+--- sub_003B13D8 (0x3b13d8..0x3b1498)
+    0x3b1400: jal 0x3b1498 sub_003B1498 [cluster]
+    0x3b1408: jal 0x3b13a8 sub_003B13A8 [cluster]
+    0x3b144c: jal 0x3b14f0 sub_003B14F0 [cluster]
+    0x3b145c: jal 0x3b16e0 sub_003B16E0 [cluster]
+    0x3b146c: jal 0x3b17a8 sub_003B17A8 [cluster]
+--- sub_003B1498 (0x3b1498..0x3b14f0)
+    0x3b14b4: jal 0x3b1290 sub_003B1290 [cluster]
+    0x3b14c8: jal 0x3b1290 sub_003B1290 [cluster]
+    0x3b14d0: jal 0x3b1258 sub_003B1258 [cluster]
+--- sub_003B14F0 (0x3b14f0..0x3b16e0)
+    0x3b150c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b151c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b152c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b153c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b154c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1560: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b1568: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1578: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1588: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b15a8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b160c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1630: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b16bc: jal 0x3b1988 sub_003B1988 [cluster]
+--- sub_003B16E0 (0x3b16e0..0x3b17a8)
+    0x3b171c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b172c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b173c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1750: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b1758: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1768: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1778: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1788: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1794: jal 0x3b1988 sub_003B1988 [cluster]
+--- sub_003B17A8 (0x3b17a8..0x3b1988)
+    0x3b17c4: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b17d4: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b17e0: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1800: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1810: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1830: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1840: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1850: jal 0x3b2318 sub_003B2318 [cluster]
+    0x3b1858: jal 0x3b1988 sub_003B1988 [cluster]
+    0x3b1860: jal 0x3b2440 sub_003B2440 [cluster]
+    0x3b18b0: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b18d8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b18e8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1928: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1938: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1948: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1950: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1958: jal 0x3b2318 sub_003B2318 [cluster]
+--- sub_003B1988 (0x3b1988..0x3b1ab0)
+    0x3b1990: jal 0x3b1498 sub_003B1498 [cluster]
+    0x3b19ac: jal 0x3b1340 sub_003B1340 [cluster]
+    0x3b19b4: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b19e4: jal 0x3b1ab0 sub_003B1AB0 [cluster]
+    0x3b19f4: jal 0x3b1cc0 sub_003B1CC0 [cluster]
+    0x3b1a04: jal 0x3b1d58 sub_003B1D58 [cluster]
+    0x3b1a14: jal 0x3b1ee0 sub_003B1EE0 [cluster]
+    0x3b1a24: jal 0x3b1fc8 sub_003B1FC8 [cluster]
+    0x3b1a34: jal 0x3b20b8 sub_003B20B8 [cluster]
+    0x3b1a44: jal 0x3b2230 sub_003B2230 [cluster]
+    0x3b1a54: jal 0x3b22f8 sub_003B22F8 [cluster]
+    0x3b1a64: jal 0x3b23a0 sub_003B23A0 [cluster]
+    0x3b1a74: jal 0x3b1340 sub_003B1340 [cluster]
+    0x3b1a7c: jal 0x3b2380 sub_003B2380 [cluster]
+    0x3b1a84: jal 0x3b1258 sub_003B1258 [cluster]
+--- sub_003B1AB0 (0x3b1ab0..0x3b1cc0)
+    0x3b1af4: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b00: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b10: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b20: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b2c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b38: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b48: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b1b50: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b5c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b6c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1b78: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B1CC0 (0x3b1cc0..0x3b1d58)
+    0x3b1cc8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1cd8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1cec: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1cfc: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1d0c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1d1c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1d30: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b1d38: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B1D58 (0x3b1d58..0x3b1ee0)
+    0x3b1d74: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1d98: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1dcc: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1df0: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1e24: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1e48: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1e74: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1e98: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B1EE0 (0x3b1ee0..0x3b1fc8)
+    0x3b1ef0: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f04: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f28: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f3c: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b1f44: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f54: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f64: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f74: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1f84: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b1fac: jal 0x3b11e8 sub_003B11E8 [cluster]
+--- sub_003B1FC8 (0x3b1fc8..0x3b20b8)
+    0x3b2064: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2070: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b207c: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2088: jal 0x3b2360 sub_003B2360 [cluster]
+--- sub_003B20B8 (0x3b20b8..0x3b2230)
+    0x3b20cc: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b20e0: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b20ec: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b20f8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2104: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2114: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2124: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2134: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2144: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2154: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2164: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2174: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2184: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2194: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b21a4: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b21b4: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b21c8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b21d8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b21e8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b21f8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2208: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B2230 (0x3b2230..0x3b22f8)
+    0x3b2248: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b225c: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b2264: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b228c: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b2294: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b22b8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b22c8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b22d8: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B22F8 (0x3b22f8..0x3b2318)
+    0x3b2304: jal 0x3b11e8 sub_003B11E8 [cluster]
+--- sub_003B2318 (0x3b2318..0x3b2360)
+    0x3b2330: jal 0x3b1290 sub_003B1290 [cluster]
+    0x3b2338: jal 0x3b1270 sub_003B1270 [cluster]
+--- sub_003B2360 (0x3b2360..0x3b2380)
+    0x3b2368: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B2380 (0x3b2380..0x3b23a0)
+    0x3b2388: jal 0x3b1498 sub_003B1498 [cluster]
+--- sub_003B23A0 (0x3b23a0..0x3b2440)
+    0x3b23a8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b23b8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b23c8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b23d8: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b23e4: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b23ec: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b2400: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b2408: jal 0x3b1300 sub_003B1300 [cluster]
+    0x3b241c: jal 0x3b2360 sub_003B2360 [cluster]
+    0x3b2424: jal 0x3b1300 sub_003B1300 [cluster]
+--- sub_003B2440 (0x3b2440..0x3b2528)
+    (no jal)
+--- sub_003B2528 (0x3b2528..0x3b2558)
+    0x3b2534: jal 0x3b3da8 sub_003B3DA8
+    0x3b2540: jal 0x3b39d8 sub_003B39D8
+--- sub_003B2558 (0x3b2558..0x3b2688)
+    0x3b2584: jal 0x3b2528 sub_003B2528 [cluster]
+    0x3b25d8: jal 0x3b3da8 sub_003B3DA8
+--- sub_003B2688 (0x3b2688..0x3b26b8)
+    (no jal)
+--- sub_003B26B8 (0x3b26b8..0x3b27c8)
+    0x3b26fc: jal 0x3b2528 sub_003B2528 [cluster]
+    0x3b2714: jal 0x3b2558 sub_003B2558 [cluster]
+    0x3b274c: jal 0x3b2688 sub_003B2688 [cluster]
+--- sub_003B27C8 (0x3b27c8..0x3b2a68)
+    0x3b281c: jal 0x3b3da8 sub_003B3DA8
+    0x3b2830: jal 0x3e6448 sub_003E6448
+    0x3b286c: jal 0x3b2558 sub_003B2558 [cluster]
+    0x3b288c: jal 0x3b2688 sub_003B2688 [cluster]
+    0x3b2898: jal 0x3b38b8 sub_003B38B8
+    0x3b28d8: jal 0x3e6448 sub_003E6448
+    0x3b297c: jal 0x3e6448 sub_003E6448
+    0x3b29d0: jal 0x3e6448 sub_003E6448
+    0x3b2a10: jal 0x3e6448 sub_003E6448
+--- sub_003B2A68 (0x3b2a68..0x3b2b68)
+    0x3b2ab8: jal 0x3b26b8 sub_003B26B8 [cluster]
+    0x3b2ae0: jal 0x417828 sub_00417828
+    0x3b2b2c: jal 0x3b27c8 sub_003B27C8 [cluster]
+--- sub_003B2B68 (0x3b2b68..0x3b2b90)
+    (no jal)
+--- sub_003B2B90 (0x3b2b90..0x3b2e78)
+    (no jal)
+--- sub_003B2E78 (0x3b2e78..0x3b3308)
+    (no jal)
+
+== callers INTO cluster 0x3b0000..0x3b3000 ==
+target 0x3b0340 (sub_003B0340): 2 callers
+    jal@0x3af15c in sub_003AEFA8
+    jal@0x3afa2c in sub_003AF670
+target 0x3b03a8 (sub_003B03A8): 2 callers
+    jal@0x3af1a0 in sub_003AEFA8
+    jal@0x3aff94 in sub_003AF670
+target 0x3b03b0 (sub_003B03B0): 2 callers
+    jal@0x3af1b0 in sub_003AEFA8
+    jal@0x3afff8 in sub_003AF670
+target 0x3b03b8 (sub_003B03B8): 2 callers
+    jal@0x3af1c0 in sub_003AEFA8
+    jal@0x3afda0 in sub_003AF670
+target 0x3b03c0 (sub_003B03C0): 2 callers
+    jal@0x3af1d0 in sub_003AEFA8
+    jal@0x3afe04 in sub_003AF670
+target 0x3b03c8 (sub_003B03C8): 2 callers
+    jal@0x3af1e4 in sub_003AEFA8
+    jal@0x3afd3c in sub_003AF670
+target 0x3b03d0 (sub_003B03D0): 2 callers
+    jal@0x3af17c in sub_003AEFA8
+    jal@0x3afcd4 in sub_003AF670
+target 0x3b03d8 (sub_003B03D8): 2 callers
+    jal@0x3afe38 in sub_003AF670
+    jal@0x3afe68 in sub_003AF670
+target 0x3b03e0 (sub_003B03E0): 2 callers
+    jal@0x3afe9c in sub_003AF670
+    jal@0x3afecc in sub_003AF670
+target 0x3b03e8 (sub_003B03E8): 1 callers
+    jal@0x3aff30 in sub_003AF670
+target 0x3b03f0 (sub_003B03F0): 1 callers
+    jal@0x3b005c in sub_003AF670
+target 0x3b03f8 (sub_003B03F8): 1 callers
+    jal@0x3b00c0 in sub_003AF670
+target 0x3b0400 (sub_003B0400): 1 callers
+    jal@0x3b0124 in sub_003AF670
+target 0x3b0408 (sub_003B0408): 1 callers
+    jal@0x3b0188 in sub_003AF670
+target 0x3b0410 (sub_003B0410): 1 callers
+    jal@0x3b0788 in sub_003B0770
+target 0x3b0430 (sub_003B0430): 1 callers
+    jal@0x3ae5e0 in sub_003AE450
+target 0x3b04f8 (sub_003B04F8): 1 callers
+    jal@0x3aec44 in sub_003AEAD0
+target 0x3b0538 (sub_003B0538): 2 callers
+    jal@0x3aec54 in sub_003AEAD0
+    jal@0x3b04c0 in sub_003B0430
+target 0x3b0580 (sub_003B0580): 1 callers
+    jal@0x3ae6f4 in sub_003AE6C8
+target 0x3b05c0 (sub_003B05C0): 1 callers
+    jal@0x3ae79c in sub_003AE780
+target 0x3b0600 (sub_003B0600): 2 callers
+    jal@0x3ae5f0 in sub_003AE450
+    jal@0x3ae6e8 in sub_003AE6C8
+target 0x3b0680 (sub_003B0680): 3 callers
+    jal@0x253650 in sub_002535F8
+    jal@0x254878 in sub_00254410
+    jal@0x254e00 in sub_002548D0
+target 0x3b06b0 (sub_003B06B0): 1 callers
+    jal@0x3b0b68 in sub_003B0B40
+target 0x3b06f8 (sub_003B06F8): 1 callers
+    jal@0x3b0c10 in sub_003B0B40
+target 0x3b0720 (sub_003B0720): 1 callers
+    jal@0x3aeb9c in sub_003AEAD0
+target 0x3b0738 (sub_003B0738): 1 callers
+    jal@0x3b0454 in sub_003B0430
+target 0x3b0758 (sub_003B0758): 1 callers
+    jal@0x3ae5b8 in sub_003AE450
+target 0x3b0770 (sub_003B0770): 2 callers
+    jal@0x3b07c4 in sub_003B07B8
+    jal@0x3b07e4 in sub_003B07D8
+target 0x3b07f8 (sub_003B07F8): 2 callers
+    jal@0x3b0e68 in sub_003B0B40
+    jal@0x42e070 in ?
+target 0x3b08e0 (sub_003B08E0): 2 callers
+    jal@0x3b0a54 in sub_003B0948
+    jal@0x3b0aa4 in sub_003B0948
+target 0x3b0948 (sub_003B0948): 1 callers
+    jal@0x3b11d0 in sub_003B11A0
+target 0x3b0b40 (sub_003B0B40): 1 callers
+    jal@0x3b0b28 in sub_003B0948
+target 0x3b0fb8 (sub_003B0FB8): 1 callers
+    jal@0x3b109c in sub_003B0FB8
+target 0x3b10d0 (sub_003B10D0): 1 callers
+    jal@0x3b0fc8 in sub_003B0FB8
+target 0x3b11a0 (sub_003B11A0): 1 callers
+    jal@0x3aec34 in sub_003AEAD0
+target 0x3b11e8 (sub_003B11E8): 2 callers
+    jal@0x3b1fac in sub_003B1EE0
+    jal@0x3b2304 in sub_003B22F8
+target 0x3b11f0 (sub_003B11F0): 1 callers
+    jal@0x3aeb64 in sub_003AEAD0
+target 0x3b1228 (sub_003B1228): 1 callers
+    jal@0x3b0cec in sub_003B0B40
+target 0x3b1258 (sub_003B1258): 4 callers
+    jal@0x3b1310 in sub_003B1300
+    jal@0x3b13b4 in sub_003B13A8
+    jal@0x3b14d0 in sub_003B1498
+    jal@0x3b1a84 in sub_003B1988
+target 0x3b1270 (sub_003B1270): 1 callers
+    jal@0x3b2338 in sub_003B2318
+target 0x3b1290 (sub_003B1290): 5 callers
+    jal@0x3b1244 in sub_003B1228
+    jal@0x3b131c in sub_003B1300
+    jal@0x3b14b4 in sub_003B1498
+    jal@0x3b14c8 in sub_003B1498
+    jal@0x3b2330 in sub_003B2318
+target 0x3b1300 (sub_003B1300): 104 callers
+    jal@0x3b1278 in sub_003B1270
+    jal@0x3b150c in sub_003B14F0
+    jal@0x3b151c in sub_003B14F0
+    jal@0x3b152c in sub_003B14F0
+    jal@0x3b153c in sub_003B14F0
+    jal@0x3b154c in sub_003B14F0
+    jal@0x3b1568 in sub_003B14F0
+    jal@0x3b1578 in sub_003B14F0
+    jal@0x3b1588 in sub_003B14F0
+    jal@0x3b15a8 in sub_003B14F0
+    jal@0x3b160c in sub_003B14F0
+    jal@0x3b1630 in sub_003B14F0
+    jal@0x3b171c in sub_003B16E0
+    jal@0x3b172c in sub_003B16E0
+    jal@0x3b173c in sub_003B16E0
+    jal@0x3b1758 in sub_003B16E0
+    jal@0x3b1768 in sub_003B16E0
+    jal@0x3b1778 in sub_003B16E0
+    jal@0x3b1788 in sub_003B16E0
+    jal@0x3b17c4 in sub_003B17A8
+    jal@0x3b17d4 in sub_003B17A8
+    jal@0x3b17e0 in sub_003B17A8
+    jal@0x3b1800 in sub_003B17A8
+    jal@0x3b1810 in sub_003B17A8
+    jal@0x3b1830 in sub_003B17A8
+    jal@0x3b1840 in sub_003B17A8
+    jal@0x3b18b0 in sub_003B17A8
+    jal@0x3b18d8 in sub_003B17A8
+    jal@0x3b18e8 in sub_003B17A8
+    jal@0x3b1928 in sub_003B17A8
+target 0x3b1340 (sub_003B1340): 3 callers
+    jal@0x3b13bc in sub_003B13A8
+    jal@0x3b19ac in sub_003B1988
+    jal@0x3b1a74 in sub_003B1988
+target 0x3b13a8 (sub_003B13A8): 1 callers
+    jal@0x3b1408 in sub_003B13D8
+target 0x3b13d8 (sub_003B13D8): 1 callers
+    jal@0x3b0cf4 in sub_003B0B40
+target 0x3b1498 (sub_003B1498): 3 callers
+    jal@0x3b1400 in sub_003B13D8
+    jal@0x3b1990 in sub_003B1988
+    jal@0x3b2388 in sub_003B2380
+target 0x3b14f0 (sub_003B14F0): 1 callers
+    jal@0x3b144c in sub_003B13D8
+target 0x3b16e0 (sub_003B16E0): 1 callers
+    jal@0x3b145c in sub_003B13D8
+target 0x3b17a8 (sub_003B17A8): 1 callers
+    jal@0x3b146c in sub_003B13D8
+target 0x3b1988 (sub_003B1988): 3 callers
+    jal@0x3b16bc in sub_003B14F0
+    jal@0x3b1794 in sub_003B16E0
+    jal@0x3b1858 in sub_003B17A8
+target 0x3b1ab0 (sub_003B1AB0): 1 callers
+    jal@0x3b19e4 in sub_003B1988
+target 0x3b1cc0 (sub_003B1CC0): 1 callers
+    jal@0x3b19f4 in sub_003B1988
+target 0x3b1d58 (sub_003B1D58): 1 callers
+    jal@0x3b1a04 in sub_003B1988
+target 0x3b1ee0 (sub_003B1EE0): 1 callers
+    jal@0x3b1a14 in sub_003B1988
+target 0x3b1fc8 (sub_003B1FC8): 1 callers
+    jal@0x3b1a24 in sub_003B1988
+target 0x3b20b8 (sub_003B20B8): 1 callers
+    jal@0x3b1a34 in sub_003B1988
+target 0x3b2230 (sub_003B2230): 1 callers
+    jal@0x3b1a44 in sub_003B1988
+target 0x3b22f8 (sub_003B22F8): 1 callers
+    jal@0x3b1a54 in sub_003B1988
+target 0x3b2318 (sub_003B2318): 2 callers
+    jal@0x3b1850 in sub_003B17A8
+    jal@0x3b1958 in sub_003B17A8
+target 0x3b2360 (sub_003B2360): 12 callers
+    jal@0x3b1560 in sub_003B14F0
+    jal@0x3b1750 in sub_003B16E0
+    jal@0x3b1b48 in sub_003B1AB0
+    jal@0x3b1d30 in sub_003B1CC0
+    jal@0x3b1f3c in sub_003B1EE0
+    jal@0x3b2070 in sub_003B1FC8
+    jal@0x3b2088 in sub_003B1FC8
+    jal@0x3b225c in sub_003B2230
+    jal@0x3b228c in sub_003B2230
+    jal@0x3b23e4 in sub_003B23A0
+    jal@0x3b2400 in sub_003B23A0
+    jal@0x3b241c in sub_003B23A0
+target 0x3b2380 (sub_003B2380): 1 callers
+    jal@0x3b1a7c in sub_003B1988
+target 0x3b23a0 (sub_003B23A0): 1 callers
+    jal@0x3b1a64 in sub_003B1988
+target 0x3b2440 (sub_003B2440): 1 callers
+    jal@0x3b1860 in sub_003B17A8
+target 0x3b2528 (sub_003B2528): 2 callers
+    jal@0x3b2584 in sub_003B2558
+    jal@0x3b26fc in sub_003B26B8
+target 0x3b2558 (sub_003B2558): 2 callers
+    jal@0x3b2714 in sub_003B26B8
+    jal@0x3b286c in sub_003B27C8
+target 0x3b2688 (sub_003B2688): 2 callers
+    jal@0x3b274c in sub_003B26B8
+    jal@0x3b288c in sub_003B27C8
+target 0x3b26b8 (sub_003B26B8): 1 callers
+    jal@0x3b2ab8 in sub_003B2A68
+target 0x3b27c8 (sub_003B27C8): 1 callers
+    jal@0x3b2b2c in sub_003B2A68
+target 0x3b2a68 (sub_003B2A68): 1 callers
+    jal@0x3b0850 in sub_003B07F8
+target 0x3b2b68 (sub_003B2B68): 1 callers
+    jal@0x3b0900 in sub_003B08E0
+target 0x3b2b90 (sub_003B2B90): 1 callers
+    jal@0x3b3460 in sub_003B33B0
+target 0x3b2e78 (sub_003B2E78): 3 callers
+    jal@0x3b344c in sub_003B33B0
+    jal@0x3b34bc in sub_003B33B0
+    jal@0x3b351c in sub_003B33B0
