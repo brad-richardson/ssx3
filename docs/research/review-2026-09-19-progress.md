@@ -281,3 +281,169 @@ decision recorded at the top.
 - Throughput gate and G6 numbers: ledger rows "PS2 throughput gate" and
   "ps2xGS release numbers (G6)".
 - Lane states tonight: `herdr agent list`; `herdr agent read p1v|m14|i5`.
+
+---
+
+# Part 2 — Follow-up read, 09-20 00:10 (after the steering answers)
+
+Frontier direction read at the fixed point the steering answers set
+("after each behavior fix"): P1ac was a behavior fix, so this is that
+read. Covers 09-19 20:00 → 09-20 00:07. Standing decision unchanged:
+upstreaming is off every list until the user has proved the route out
+and read the code.
+
+## 10. Outcome since the steering doc
+
+| Since 20:00 | |
+|---|---|
+| Briefs launched / passed | 20 / 18 (P12, P1ad, M16 running at 00:07) |
+| Ladder rungs cleared | 2 (WaitSema(-1) spin → SIF `sregs[1]` poll → current) |
+| Current park | main RUNNING in `sub_00394ED0` list-walk (15,989 balanced calls); thread 3 WAIT sema-30; thread 6 WAIT 36 |
+| Suite | 431/431/0 (flaky GsSyncV/AFAIL pair fixed in P1y: stale floor since `6046260`) |
+| Fork commits | 14 (`8d10619`..`45da174`); shim retired `4326926`; config tracked `5b5ac3d`; drop census `ed387c7` (180 sites, default-on, `PS2X_DROP_SILENCE` kill switch) |
+| Orchestrator | 13 prompts, 197 tool batches, 17 references to this doc; launches went event-driven (wait fires → next brief) |
+
+Recommendation status (§7 numbering):
+
+| # | Recommendation | Status |
+|---|---|---|
+| 1 | Frontier reads at fixed points | Adopted; fixed points recorded in `docs/todo.md` (7f66bb1). This Part is the first such read. |
+| 2 | No-silent-drops brief | Done (P1w). Paid off in one brief: 6 census lines made `0x52BE04` attributable to the SIF layer (P1ab). |
+| 3 | PCSX2 reference trace | Blocked (P1x): app is x86_64-only, no Rosetta, Release build compiles trace channels out. User deferred to the Mac mini. See §11 — P1x did not consider the bytesize box. |
+| 4 | Track CSV, replace shim | Done (P1w, P9). Ladder byte-identical `:600-630` with the split. |
+| 5 | Hardware-first with quirks | Kernel side working: P1z disassembled `CreateSema@0x800049b8`, refuted the P1v clamp-1 rule, P1aa applied store-as-is; P10 settled PollSema miss to -1. Quirks side drifted into C++ (see §12 concern 1). |
+| 6 | Movie stub | Done, unwired (P7, `e235c4b`), wire when the boot reaches the movie table. |
+| 7 | Flaky test | Done (P1y). Root cause was a stale expectation, not a race. |
+| 8 | Don't reopen GS decision | Held. G lane quiet. |
+| 9 | Bundle ID then park I lane | I6 fixed the identifier; I7 got a first window and stopped at a miniaudio CoreAudio wall. Parked as planned. |
+| 10 | Route-comparison criteria | Queued behind first frame; user picked the host synth demo (M15/M16) meanwhile. |
+
+## 11. Concerns
+
+1. **The SIF fix is the CD-shim pattern again.** `6447d8b` writes guest
+   `0x52BE04` from inside `sceSifSendCmd`, gated by
+   `PS2_REGISTER_GAME_OVERRIDE("ssx3-sif-handshake", "SLUS_207.72", …)`.
+   It unblocked the ladder and is well tested, but it hard-codes one
+   game's `.bss` word in runtime source. The hardware-faithful shape is
+   a *virtual IOP SIF peer*: when the EE sends `SET_SREG` /
+   `INIT_CMD` (cid `0x80000001` / `0x80000002`), the peer queues the
+   IOP's reply command and delivers it by dispatching the guest's own
+   sifcmd system-handler for `SET_SREG` (the handler table lives in the
+   guest's `sif_cmd_data`, whose address the HLE learns at
+   `sceSifInitCmd`/`SetCmdBuffer`). The write then lands wherever *that
+   game* keeps `sregs`, with no address in host code. Thread 3 is
+   already at RPC-client waits and one unhandled host RPC
+   (`sid=0x80000211`, P27-2c row 3), so the next SIF-shaped park is
+   close. **That park gets the generic peer, not a second address
+   poke.** Reference implementations: DobieStation `src/core/sif.cpp`
+   (on the SSD at `dobiestation-q4`), ps2sdk `iop/system/sifcmd` server
+   side, Play! `Iop_SifCmd.cpp`.
+2. **Kernel-truth sweeps are crowding out ladder work.** P10 found all
+   23 guest consumers of the poll-miss value indifferent to it. P12 is a
+   4 h box on the unknown-sema-id code (-408) with no boot-path consumer
+   yet. Rule: settle a divergence kernel-first *when the census shows it
+   firing on the boot path*; otherwise batch the open ones into a single
+   sweep brief after first frame. Kernel truth is still the standard; the
+   scheduling is what changes.
+3. **`docs/todo.md` Now is a log again.** Each gate read is a 15-line
+   paragraph; muse's working memory is that file. Move a read to Done
+   the moment its successor brief launches; keep one line per live pane
+   in Now.
+4. **One host lease, six panes.** P1ad's brief says "M15 holds the lease,
+   poll patiently"; every P-lane report carries a waits log. P-lane boots
+   are ≤90 s and affect only the throughput columns of the ladder. Split
+   into `ssx3-host-lease` (M lane, needs a quiet host) and a P-lane lease
+   that P briefs share, marking throughput columns "contended". The mini
+   doubles capacity anyway when it arrives.
+5. **PCSX2 path, corrected.** The Mac mini is arm64 too, so it inherits
+   PCSX2's "Apple Silicon has no EE/VU/IOP recompilers, very slow" warning
+   (P1x-5 path 1). The `bytesize` box (ssh over Tailscale, Windows x86_64,
+   RTX 4070, WSL2 Ubuntu) can build a native Devel PCSX2 with full
+   recompilers and all trace channels today, over ssh, with WSLg or the
+   Windows console as the display. P1x did not survey it. This is the
+   cheapest path to the reference trace and it needs no user action on
+   this laptop.
+
+## 12. Tooling to build (priority order)
+
+| # | Harness | Why now | Brief shape |
+|---|---|---|---|
+| T1 | **Park snapshot** (`PS2X_DIAG_PARK=1`): on SIGTERM/timeout the runtime writes one JSON + one table: per-thread state (pc, ra chain, wait object), semaphore table with waiter/signaller pc histograms, hot-pc histogram, `[drop]` census, SIF/RPC tally, GS counters | P1ab, P1ac, P1ad each rebuild this by hand from 19k-line logs (P1ab ≈ 2 h). It is the diagnosis brief's whole first hour. | Runtime, 1 brief, lease-free build + 1 proof boot. Then `tools/ladder_diff.py` comparing two snapshots so "ladder-identical" proofs (P9, P11) stop being manual. |
+| T2 | **SIF/RPC census table**: every `sceSifLoadModule`/`BindRpc`/`CallRpc`/`SendCmd` with sid, fno, payload size, thread, and claimed/unclaimed by host | The trace lines exist; the table does not. It is the input to the IOP decision (§13) and the next SIF park. | Post-processor over the existing `[IOP/RPC trace]` lines, or a runtime tally in T1. |
+| T3 | **IRX inventory** (static, lease-free, ~1 h): extract all 22 `DATA/MODULES/*.IRX` from the ISO (`bsdtar -xf`), table imports (IOP kernel libs), exports, registered RPC sids (`sceSifRegisterRpc` immediates), version strings | Decides HLE-vs-LLE for sound with data. Sample done tonight: `SNDDRV.IRX` 96,016 B = EA's own SND library (`ps2/sndiop.c`), imports only intrman, libsd, loadcore, sifcmd, sifman, sysclib, sysmem, thbase. `MSIFRPC.IRX` 7,377 B; `PADMAN.IRX` 43,813 B; `SDRDRV.IRX` 8,065 B. | Muse, no fork changes, evidence dir `local/research/P13/`. |
+| T4 | **PCSX2 Devel on bytesize + first-divergence aligner** between its `EE.Bios` syscall trace and a runtime trace emitted in the same format | The highest-leverage harness from §7 rec 3, still unbuilt. Every park so far was "what would the kernel/IOP have done here"; a reference trace answers that in minutes. | Brief 1: build Devel PCSX2 on bytesize (WSL2 cmake or VS), boot SSX3 to the park's epoch, capture trace. Brief 2: runtime trace channel + `tools/trace_align.py`. |
+| T5 | **Analyzer rule: materialized `.text` pointers are function entries**: extend the LUI+ORI/ADDIU fold (`f2149e7`) so any folded constant inside `.text` becomes a split | Would have prevented the `0x3E3AD8` mid-function callback park outright (10 briefs) and closes the class. N64Recomp does this. | Analyzer, 1 brief; prove with `recomp` counts and a ladder-identical boot. |
+| T6 | **Build cache check**: clean build is 511 s; the generated `register_functions.cpp` is 398k lines | Every brief rebuilds. Measure incremental time; if >3 min, add ccache and split the generated output into N files for parallel compile. | Measurement first, one brief only if it bites. |
+
+## 13. External codebases not yet used
+
+- **Play!** (jpd002/Play-, BSD-2, not on the SSD; cited once in the
+  project, for a GS CSR bit). It is the only mature codebase with the
+  same design as this runtime: HLE EE kernel (`PS2OS.cpp`: CreateSema,
+  WaitSema, PollSema, thread scheduling, alarms) plus an interpreted IOP
+  whose kernel modules are HLE'd (`Iop_Thbase`, `Iop_SifMan`,
+  `Iop_SifCmd`, `Iop_LibSd`, `Iop_PadMan`, `Iop_McServ`, `Iop_Cdvdfsv`,
+  `Iop_LoadCore`, `Iop_Sysmem`). Use it as the second source in every
+  kernel-truth brief (BIOS disassembly stays the first), and as the
+  reference for the IOP model below. Clone to the SSD.
+- **The IOP decision (branching, not yet due).** EA's SND protocol between
+  the EE `Snd::System` and `SNDDRV.IRX` (SIF RPC sid `0x534E44` + cmd
+  handler cid 1) is proprietary; HLE-ing sound means reversing both
+  sides. Three routes: (a) HLE EA's protocol; (b) Play!'s route: run the
+  disc's IRX in an R3000 interpreter with the eight imported kernel libs
+  HLE'd (DobieStation's `src/core/iop/` is a clean small interpreter,
+  already on the SSD); (c) static-recompile the IRX: the IOP is the PS1
+  CPU, and `psxrecomp` (SSD, `q3-siblings/`) already has an R3000
+  emitter; IRX are relocatable ELFs so a relocation + import-stub pass is
+  needed. **Not needed before first frame**: the unclaimed-sid fallback
+  lets `CallRpc` return. Do T3 now so the decision is one brief away when
+  a sound-shaped park appears.
+- **DobieStation `sif.cpp`** (SSD): the reference for the generic
+  EE↔IOP SIF peer in §11 concern 1 — how the IOP answers `INIT_CMD`
+  and `SET_SREG`, SIF0/SIF1 register semantics.
+- **UnleashedRecomp mid-asm hooks** (SSD, `q3-siblings/UnleashedRecomp`):
+  address-specific host code is declared in the game's config TOML, not
+  in runtime source. The two SSX3 overrides now in C++ (`Ssx3Movie.cpp`,
+  the SIF handshake) fit that model in `games/ssx3/ssx3.toml`, which
+  keeps the runtime upstream-shaped and makes the quirks list auditable.
+- **N64Recomp** (SSD): treats every address referenced by a `lui/addiu`
+  pair or a data pointer as a function entry (T5 above).
+- **PPSSPP** (not cited anywhere): HLE kernel that charges cycles per
+  syscall (`hleDelayResult`, `hleEatCycles`) and advances guest time
+  inside waits. The runtime has no notion of syscall time. The moment a
+  park turns out to be a timed busy-wait, that is the template.
+- **PCSX2 GS dumps** (`.gs`): PCSX2 can dump the GS packet stream and
+  its regression runner replays them. An SSX3 menu/first-frame dump from
+  bytesize would give ps2xGS a ground-truth capture before the recomp
+  reaches it. Depends on T4.
+- `fork-survey/trulio2-iop` carries no IOP changes (HEAD is upstream
+  `78ecbae`); nothing to borrow there.
+
+## 14. Branching decisions added
+
+| Decision | When | Recommendation |
+|---|---|---|
+| Generic SIF peer vs per-address pokes | Next SIF-shaped park (likely P1ad's successor or the `0x80000211` RPC) | Generic peer, dispatched through the guest's handler table. |
+| IOP model for sound (HLE protocol / interpret IRX / recompile IRX) | First sound-shaped park after first frame | Run T3 now; lean Play!-route (b) unless T3 shows the SND RPC surface is tiny. |
+| PCSX2 reference on bytesize vs Mac mini | Now (user call: bytesize needs nothing on this laptop) | bytesize; the mini is arm64 and slow for PCSX2. |
+| Kernel-truth sweep scheduling | Now | Census-gated; batch the rest post first frame. |
+| Lease split P/M | Now | Split; low risk. |
+
+## 15. Evidence for Part 2
+
+- ssx3 commits `1b1cc7e..5ebce5f` (44); steering answers `7f66bb1`
+  (`docs/todo.md`); user decisions `2c09937` (P1x → mini), `99857d8`.
+- Fork `git log origin/main..HEAD` (SSD clone, branch `ssx3`);
+  `git show 6447d8b` (SIF handshake), `ed387c7` (census), `4326926`
+  (shim retired), `f26f273` (kernel-true sema).
+- REPORT Parts 23–27 (`local/research/P1/REPORT.md:7536-9120`);
+  `local/research/P1x/REPORT.md` §P1x-5 (paths ranked, no bytesize row);
+  `local/research/P8/REPORT.md` rows 65–66, 86, 121–122 (IRX list,
+  sid `0x534E44`, unclaimed fallback).
+- IRX facts: `bsdtar -tvf "SSX 3 (USA).iso" | grep IRX` (22 modules under
+  `DATA/MODULES`); extracted SNDDRV/MSIFRPC/PADMAN/SDRDRV and read import
+  library names with `strings`.
+- Orchestrator session `2026/09/18/01a0b709-…`: 7,847 records since 20:00,
+  13 `runtime.user_intent.accepted`, 197 `tool_batch.effect.started`.
+- Pane states at 00:07: `herdr agent list` (p12, p1ad, m16 working; p1ac,
+  i7 done; wN:p3 orchestrator idle).

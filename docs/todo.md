@@ -5,1048 +5,12 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] **M17 launched (event-driven, m16 wait fired):** sub-pixel /
-      local motion model — half-pixel bilinear SAD + block matching,
-      offline on the M15/M16 dumps (no harness, no lease). Reuses
-      M16 pane.
-- [ ] **M16 read (09-20) — PASS, residual attributed same-frame:**
-      6-block scan (764 shapes, 4584/4584 ok, all dumps ok, mid/full
-      pairs uniform; attempt-1 240 s timeout honestly kept +
-      sizing rule); all 764 warps (0,0) → synth==blend everywhere;
-      R_0=22815 attributed per draw (top 6525/28.6%, top-3 40.5%,
-      233/437/93, Σpos 81.6%); bottom-HUD draws identified
-      (bottom-band-exclusive); spanning top-10 corroborates
-      (same 3 heads, overestimates rank-1). Verified: header shas,
-      waits (0/pair/annotation), probe + attempt-1, dumps, analyzer
-      rows, loo guard/search/R_0/hist/pool/dist + top row,
-      PNG sizes, carrier1 VIEWED (green god-ray shafts + rider —
-      matches). Next: M17 (sub-pixel model). Ledger row added.
-- [ ] **P13 launched (event-driven, p12 wait fired):** analyzer
-      silent-fold triage — read-only audit of analyzer files
-      beyond `elf_analyzer.cpp` (P24's boundary item) + `[drop]`
-      patch spec (implementation deferred). Reuses P12 pane.
-- [ ] **P12 read (09-20) — PASS, unknown ids settled to -1:**
-      kernel re-derived (all 5 workers funnel to shared `-1`;
-      0 `-408`/`-419` immediates in KERNEL); blast radius: 0 host
-      branchers, 311 guest sites censused (305 agnostic, 6
-      conditional on requested-id≡-1, unseen since p1u), 1 stale
-      test updated; `da6a2d5` (5 files +61/-13, pushed): all 5
-      paths → `KE_ERROR`, 4 dead consts swept, P12 test added;
-      suite 431→432/430/2→432/432/0; 0 boots (16-boot census 0 —
-      unreachable); P10 L92's "73/73" validity sentence corrected
-      (wrong address `0x423de8`; true `0x423de0` — CONFIRMED by
-      me). Verified: pushed, BIOS sha + 5/5 miss words, census
-      109/86/20/73/23 + wrong-addr 0, logs, suite RE-RUN BY ME
-      432/432/0, census spot 0×3, stale P1t 1,387,579, waits,
-      scope. Next: P13 (analyzer triage). Ledger row added.
-- [ ] **P12 launched (event-driven, p11 wait fired):** settle
-      `KE_UNKNOWN_SEMID` (-408) vs kernel -1 (P10-7.3/P11-7.3
-      carried divergence: re-derive + blast radius + kernel-first
-      fix) with the dead `-419` constexpr sweep as ride-along.
-      Reuses P11 pane.
-- [ ] **P11 read (09-20) — PASS, SIF closed + ladder confirmed:**
-      `bfa0213` (+2/-1: constexpr + `:949` retitle, pushed); suite
-      428/427/1 → 428/428/0; pre-split regen matches P1w counts
-      exactly; binary receipts all held pre-boot (32,658,243 B, 8
-      refs, log opts ON); 2 healthy boots ladder vs the triggered
-      post-split baseline with zero shape delta (×1.11 throughput,
-      within variance; epoch `:600-630` identical —
-      shim≡split on the wire); transitive P10-7.1 prediction
-      confirmed. Verified: diff lines, suite logs, output 9276
-      files, binary sha, LOG 7740, epoch diff clean, :614
-      callback, 33/0, census 6, 317/316, GS 96, watch/driver,
-      waits 6 lines, scope. Next: P12 (-408 divergence). Ledger
-      row added.
-- [ ] **M16 launched (event-driven, m15 wait fired):** same-frame
-      per-draw residual attribution — warp leave-one-out scan
-      (3-phase capture × per-draw shapes + offline warp per
-      shape). Reuses M15 pane.
-- [ ] **M15 read (09-20) — PASS, synth measured vs truth:** 3-phase
-      capture (v0 99×0 + r0, mid +0.05 50×17255, full +0.1 50×24858,
-      all identical); warp method chosen pre-run (mid-matrix
-      re-render correctly rejected as 0-by-construction); masked
-      SAD minimum genuinely (0,0) sharp 4.1× → synth==blend
-      (fnv); residual 13418 B (2.34%, 87% |d|=1), static 95.67%
-      exact; arm-B 791-shape guide (top 7.2%, own frame,
-      caveated); 4 PNGs 497999 B. Verified: header shas,
-      waits (0 waits/2 pairs), probe sizes+sha, dumps 5×573440,
-      analyzer rows (17255/24858/refhash/21599), synth
-      (13418/66599/fnv/dx0dy0), PNG sizes, diffmap VIEWED (red on
-      edges, sky/snow clean — matches). Next: M16 (gap-1
-      attribution). Ledger row added.
-- [ ] **P1ad launched (event-driven, p1ac wait fired):** diagnose the
-      NEW park — main-thread `sub_00394ED0` list-walk
-      (bounded-vs-circular via guest-memory trace) + thread-3
-      sema-30 chain + outer loop above `362DE8`; name the fix
-      brief. NOT the BIND sketch (refuted). Reuses held P9 pane,
-      Part 28.
-- [ ] **P1ac read (09-20) — PASS, handshake fix works, BIND
-      refuted:** `6447d8b` (gate + hunk + 3 tests) + `45da174`
-      (args ride-along) pushed `4326926..45da174`; poll collapses
-      (cf0 0 blocks, getter 1/1, poller 1/1, receipt + same-bytes
-      send); thread 3 past `0x2290E8` (4 new semas, RPC-client
-      waits, parks sema-30 ra `0x31aca4`); main RUNNING in
-      `394ED0` list-walk (15,989 balanced calls, dma/gif frozen);
-      thread 6 born (WAIT 36); CD 42→810, SIF 18→21, GS exact;
-      BIND refuted ×3 (SendCmd exactly 1, zero `0x40b`,
-      `40B400` 0/0); census now attributed (`0x5b` from
-      `0x42cbb8`, handler `0x80075000`). Verified: both commits +
-      hunk/ride shapes, receipt/send lines, cf0 zero, census 6 +
-      args, creates 37/0, handshakes 65/65 + 4/3, T1/T3/T6 rows,
-      SendCmd×1, zero-40B, suite RE-RUN BY ME 431/431/0, waits,
-      scope. Next: P1ad (new park). Ledger row added.
-- [ ] **M15 launched (user picked host synth demo):** milestone 3 on
-      host — synthesize a true intermediate frame from the proven
-      camera seam, measure synth-vs-truth (bytes, distributions,
-      residual carriers, screenshots). Reuses M14 pane. Route
-      criteria doc still queued (needs first frame for the
-      comparison); Odin port follows a successful demo.
-- [ ] **P9 read (09-20) — PASS, shim retired, ladder-identical:**
-      `4326926` (+2/-47: CSV row→2, CD.cpp -46 exact inverse of
-      `58c9144`); recomp +1/+1/+1/0 errors, slot 757428 → child,
-      `0x3e3af0` remapped; suite 428/428/0 (transient
-      P10-without-P11 window honestly walked); 2 boots reproduce
-      P25 exactly (:600-630 byte-identical, :612-614 dispatch,
-      :625 driver bytes, 33/0, census 6, watch 1, GS 96/64/48/96;
-      ×2.0 throughput = contention, LOG1-vs-LOG2 ×1.5 proves
-      variance); findings: parent untruncated
-      (merge-keeps-largest-end, dead slice unreachable) +
-      stderr-interleave forensics closed. Verified: pushed on
-      `bfa0213`, CSV rows, shim 0 refs, boundary 5/5, recomp
-      counts + slot, epoch diff clean, trio/driver/rungs, suite
-      LOG 428/428/0 + my re-run 431/431/0 on current tree (P1ac
-      WIP +3, green), waits, scope. Next: pane HELD for P1ad
-      (pending P1ac's BIND confirm). Ledger row added.
-- [ ] **P1ac launched (event-driven, p1ab wait fired):** SIF
-      ready-handshake completion (§P26-3c: SSX3-gated SET_SREG(1)
-      → `sregs[1]=1` + receipt line in `sceSifSendCmd`) + the
-      override-args one-liner ride-along; 2 proof boots expect the
-      poll to exit and thread 3 to advance past `0x2290E8`. Reuses
-      P1ab pane, Part 27.
-- [ ] **P1ab read (09-20) — PASS, stall attributed to missing IOP
-      SIF peer:** `0x52BE04` = `sregs[1]` (.bss, shape-matched to
-      ps2sdk `sifcmd.c`); setter has 0 callers (JAL/word/lui
-      sweeps), no guest store can form the address, all 32 slots
-      silent post-init across 2 boots; poller sends
-      `SET_SREG(1,1)` then spins; host audit: SendCmd no-op,
-      handler map write-only (4 refs), zero SIF0 emulation;
-      candidates 1–5 excluded, #6 (IOP reply via EE set_sreg)
-      attributed with responder narrowed (MSIFRPC/LIBNET pair);
-      fix brief P1ac + P1ad sketch named; P25's "Missing 0"
-      corrected (counting convention). Verified: bss/gp/JAL
-      arithmetic, sweeps (getter 2 @ exact VAs, setter/base2 0),
-      ps2sdk lines, mailbox shapes, LOG 7827/6945, census 6 +
-      0x5b×6 correlation, send bytes, watch 16/16 init-only,
-      17/17 poll + setter 0, creates 33/0, handshake 321/320,
-      waits, zero fork commits, scope. Next: P1ac (fix). Ledger
-      row added.
-- [ ] **P11 launched (event-driven, p10 wait fired):** SIF `:949`
-      one-liner (`-419`→`-1`) + ladder-confirmation boots with a
-      size-checked game image (the check P10 missed is a receipt
-      here) reuses P10 pane. Baseline: P25-boot1, or post-split
-      ladder if P9 has landed (brief states which).
-- [ ] **P10 read (09-20) — PASS, PollSema settled to -1 (ladder
-      carried):** kernel re-derived (table slots + `blez`→shared
-      `jr`/`-1` pair, no -419 in KERNEL — CONFIRMED); blast radius:
-      0 host branchers, 23/23 guest consumers value-agnostic (F6
-      beq-drain + id-compares + sign tests), 1 stale SIF expectation
-      out of scope; `69bb1ff` (+41/-1, pushed): miss → `KE_ERROR` +
-      new test; BEFORE/AFTER 428/427/1 (P10 face) → 428/427/1 (SIF
-      face); both boots burned on game-less binary (438 B stub +
-      missed log opts — diagnosed, patch exonerated ×5, recipe
-      recorded). Verified: pushed, BIOS sha + 3/3 words (true-word
-      convention — my first compare used byte order, redone), JAL
-      census 23/23 on the TRUE word (report prose has a nibble typo
-      `9F7C`/`8F7C` — analysis used the right value), F6 drain
-      decode, suite RE-RUN BY ME 428/427/1 SIF face, 152-line stall
-      logs, waits, scope. Next: P11 (SIF one-liner + ladder
-      confirm). Ledger row added.
-- [ ] **P1ab + P9 + P10 launched (event-driven, waits fired):**
-      P1ab (0x52BE04 diagnosis with census in hand, Part 26) reuses
-      P1aa pane; P9 (shim→CSV-split at 0x3E3AD8 + ladder-identical
-      proof) reuses P7 pane; P10 (PollSema -1/-419 divergence,
-      kernel-first per §7.5) reuses P8 pane. All disjoint fork
-      files; lease serializes ≤6 boots.
-- [ ] **P8 read (09-20) — PASS, pad/sound surface fully mapped:**
-      15/28 libpad calls from one wrapper region (args dynamic);
-      zero sceSd*/libsd evidence — EA drives SNDDRV via SIF/RPC
-      (`BindRpc sid=0x534E44`, `AddCmdHandler cid=1`); fork: pad
-      implemented incl. host backends (rumble no-op), SIF transport
-      fake-OK, SSX3/net SIDs unclaimed→silent fallback, ~90
-      unreachable `sceSd*` crash-stubs; menu-ordered work list
-      (items 1–4 menu, 5–6 gameplay) + JALR caveat. Verified: ELF
-      md5/bytes, zero pad/sd strings, IRX names, `lui/ori` pair =
-      `0x534E44` + `jal BindRpc` (my first grep missed the split
-      immediate — re-derived), 90 TODO_NAMED, sid gate, TSV rows,
-      drift-note content, zero fork commits. Next: none until
-      runtime contact (list banked). Ledger row added.
-- [ ] **P7 read (09-20) — PASS, movies surveyed + stub landed:**
-      14 `.mpc` (MPEG-2 ES at off 8 in `MPCh` framing, video-only per
-      ffprobe); boot order eabig→thx→intro_dj→intro from table
-      `0x441248` (all 4 slots read in `sub_001A1CE8`); playback chain
-      sequencer→RCMP cluster→libmpeg (`Init/Create/AddBs/AddCallback`
-      + `GetPicture` only); `e235c4b` (2 files +203, unwired —
-      recipe recorded, first-firing grep line given);
-      build-verify + 13/13 harness + suite green; runtime honestly
-      unverified. Verified: pushed (fork HEAD), 14 files, BOOT2,
-      magic+seqhdr, 3/3 string VAs, boot table exact, harness PASS,
-      suite RE-RUN BY ME 427/427/0. Next: none until ladder contact
-      (decoder gaps banked). Ledger row added.
-- [ ] **P1aa read (09-20) — PASS, kernel-true amendment applied:**
-      `f26f273` (+61/-31: clamp deleted, max stored as-is, OVF block
-      deleted, test updated + 2-signal window test); BEFORE proves
-      the wedge (426/1: `maxCount`=1, OVF fires, 2nd wait parks +
-      throws), AFTER all green; boots park on 0x52BE04 identical
-      (33/0, 86/85 handshake, census 6 same lines, GS/CD/SIF exact;
-      ~0.35× throughput = contention); no `effmax`/`KE_SEMA_OVF`
-      emissions remain. Verified: pushed, removed-lines grep,
-      `effectiveMax` gone, LOG 3507/3459, census 6, -1 waits 0,
-      creates 33, watch line, handshake 86/85, waits 3 lines,
-      before/after logs. Next: P1ab (0x52BE04 diagnosis). Ledger
-      row added.
-- [ ] **P1x-path decision 09-20 (user): DEFER Devel build to the Mac
-      mini** (RAM + CPU headroom). Approach banked: APFS sparsebundle
-      on the SSD (symlinks/perms), aqtinstall Qt to SSD prefix,
-      TMPDIR into workspace — zero new internal-disk footprint.
-      Joins the mini day-one list (with S1 + P-lane builds/boots).
-      Trace stays parked; 0x52BE04 diagnosis goes first with the
-      `[drop]` census.
-- [ ] **P1aa launched (immediate poll, user: don't wait):** P1v
-      amendment (P1z A1–A3: store max as-is, delete OVF block,
-      update + extend test) reuses P1w pane; ≤2 lease-gated boots
-      prove the ladder still reaches 0x52BE04. Frontier note:
-      semantics already settled by kernel evidence per §7.5 — no
-      muse semantics judgment in this brief. I-lane parked; M15 +
-      P1x-path still queued-for-user. p1y finishing, p7/p8 working.
-- [ ] **I7 read (09-19/20) — PASS, FIRST WINDOW + audio wall:**
-      `9c7b028` (SDL2main link + rename, pushed) then scene trap
-      (SIGTRAP before SDL_main) → miniprobe A/B proof (1.3 MB
-      repro, manifest fixes) → `2655264` (manifest template; carried
-      up by orchestrator as `c41efce` after I7's push was blocked —
-      gap 3 closed); build2: SDL video OK, GL ES 2.0 + shaders +
-      font, window photographed (black, foreground, viewed by me);
-      next wall: miniaudio CoreAudio RPC-timeout abort in
-      `InitAudioDevice` (loadELF still unreached; probe C exonerates
-      sim audio). Verified: `9c7b028` pushed, `c41efce` on
-      `fork/ssx3`, manifest+id+bytes, nm (SDL_main/UIKitRunApp/local
-      _main/LC_MAIN), 296, launch6 43 lines + GL lines, crash 4
-      markers + RPC line, probes B/C clean, screenshot viewed, sim
-      Shutdown. Next: I-LANE PARKED (first-launch receipt complete;
-      audio wall queued for unpark). Ledger row added.
-- [ ] **P1y read (09-19/20) — PASS, suite green 427/427/0:** 10/10
-      repro on GsSyncV face (2 bit-identical clean builds);
-      isolation (alone/subset/suite identical — no order
-      dependence); root cause = stale test (`0x01F00000` floor from
-      `f4309cd`, pool moved to `[0x80000,0x100000)` by `6046260`,
-      assertion never updated); fix pins both bounds (+5/-1,
-      `2caf17c` pushed); after: 5× 426/426/0 + 5× 427/427/0 on
-      rebased tree; AFAIL face unreproduced (shared-incremental-build
-      hypothesis, honestly unresolved). Verified: one-file push, -S
-      history, pool bounds in source, repro log 426, suite RE-RUN BY
-      ME 427/427/0. Next: none (lane item closed). Ledger row added.
-- [ ] **P1w read (09-19/20) — PASS, config tracked + census live:**
-      `5b5ac3d` (TOML+CSV 2 files +10897; TOML also untracked —
-      4-hunk absolutization, no loader change; recomp end-to-end
-      identical: 9274 map, 4/4 shas); `ed387c7` (179-site `[drop]`
-      census, default-on, `PS2X_DROP_SILENCE` switch, 12 exclusion
-      rules); boots park on 0x52BE04 with a 6-line census (all
-      `dispatchSyscallOverride` KE_ERROR :53-58, args gap noted);
-      kill-switch proven (boot2: 0 lines); ladder check identical
-      (33/0 creates, handshake balanced, GS/CD/SIF exact; ~0.8×
-      throughput = P1x contention, recorded). Verified: both
-      commits pushed, CSV cmp clean, LOG 6588/6133, 6-line census
-      verbatim, boot2 zero, binary `156f493b`, lease released, site
-      grep ≈179 + helper/test. Next: P1aa (P1v amendment). Ledger
-      row added.
-- [ ] **P7 + P8 launched 09-19 (user: stub movies, parallelize
-      pad/sound):** P7 (movie disc survey + HLE completion stub,
-      build-verified, runtime firing deferred) reuses P1x pane; P8
-      (pad/sound API surface + fork inventory + host backends,
-      read-only, menu-ordered work list) reuses P1z pane. **User
-      decision:** stub intro movies to reach menu work first (decoder
-      revisited after frames). Implementation briefs wait for runtime
-      contact (P1w census + ladder). Upstream stance unchanged:
-      someday, after the route is proved — commits stay
-      upstream-shaped meanwhile.
-- [ ] **I7 launched 09-19 (poll, launch authority):** UIKit-entry
-      wiring (I6 gap 1) reuses I6 pane. Rec-#9 tension noted: parking
-      now would strand the lane on a crashing no-window binary, and
-      the phone changes nothing about UIKit entry — I7 completes the
-      first-launch receipt (first window), park after. Queued-for-user:
-      M15 scope, P1x path (Devel build vs Rosetta), P1z amendment
-      after P1w (+frontier trigger). p1w/p1y still working (final
-      steps).
-- [ ] **I6 read (09-19) — PASS, install fixed, main runs, SDL wall
-      found:** `bdae295` one-hunk (GUI identifier, desktop-inert)
-      pushed first-try (carried P-lane `8d10619` up); rebuild
-      120264208 B, symbols/linkage reproduce I5 + identifier; install
-      exit 0, listapps provisioned; no-arg launch clean-fatals on
-      missing ELF path (main ran); argv probe reaches `InitWindow` →
-      SDL video fails → SEGV in `rlLoadTexture` (ips captured, stack
-      to main); no window; harness lessons (ExFAT EPERM →
-      --console+redirect; exit-0-despite-crash) as standing rules.
-      Verified: one-hunk pushed (P1w `5b5ac3d` now on top), bundle id
-      + bytes, console sizes, SDL line, crash 4 markers, 292, sim
-      Shutdown. Next: I7 (UIKit entry). Ledger row added.
-- [ ] **P1z read (09-19) — PASS, kernel settles it: P1v AMENDED:**
-      stock CreateSema @`0x800049b8` (table `0x80014f40[0x40]`): only
-      -1 paths are freelist-empty + init<0; max stored as-is, never
-      read by signal/wait/poll (Refer-only) → no OVF possible on the
-      EE path; verdict: success CONFIRMED, clamp-1→store-as-is
-      AMENDED, OVF-check→delete AMENDED (exact A1–A3 spelled, no edit
-      made); bonus divergence noted (PollSema -1 vs fork -419).
-      Verified: BIOS pristine (sha = P1x's independent hash), 9/9
-      words re-derived (my first pass had a 0x100 hex slip — caught
-      by the receipt mismatch, redone), 0 branches in success
-      stretch, SSD receipts, commit scope. Next: amendment brief
-      AFTER P1w lands (same file) + frontier-read trigger flagged.
-      Ledger row added.
-- [ ] **P1x read (09-19) — PASS, negative result with receipts +
-      cheapest path:** trace unproducible: B1 x86_64-only APP + no
-      Rosetta (Bad CPU type rc=1, no oahd), B2 Release compiles all
-      trace channels out (DEVBUILD gate `Debug.h:216-220`, only
-      Debug/Devel define it), B3 -nogui still needs a display
-      (QtHost main/show lines); full CLI/channel survey + §P23-2d
-      fill-in map with gap rows (thread-table/sch + stub-histogram
-      unmappable — no channels) + ranked path (arm64 Devel, or
-      Rosetta + x86_64 Devel) + unexecuted capture recipe; inputs
-      hashed in `$W/P1/ref`. Verified: B1/B2/B3 reproduced from
-      source+exec, BIOS sha matches P1z's, ref dir + BLOCKED marker,
-      commit scope 1 file, no fork contact. Next: QUEUED-FOR-USER
-      (downloads + Qt build + GUI session, or Rosetta restore).
-      Ledger row added.
-- [ ] **M14 read (09-19) — PASS, camera-delta payoff + drawscan
-      carriers:** step 2: slot-0 +0.1 moves 53636/573440 B identically
-      on 100/100 delta replays vs the rendered ref (pristine 99×0 +
-      r0 127103); step 3 autoscan (2P+2D, 644 shapes, 643 spans ok):
-      one draw carries 8293 B (19%), next 1714, 229+/333 zero/81
-      negative (worst −990), 619/644 uniform (25 spread ≤10 B); det3
-      exact-fit attempt honestly kept (kref=0, 573× share inflation →
-      motivated the re-run). Verified: header shas (`40533e4d`
-      committed, `b09643b1` M13), waits (3 waits/4 pairs never
-      forced), probe bytes exact ×4, analyzer det2 (53636/refhash/
-      gt0-100) + det4 (44087). Next: M15 QUEUED-FOR-USER
-      (milestone-3 scope). Ledger row added.
-- [ ] **P1y + P1z launched 09-19 (beyond 4 panes, user lifted the
-      cap — CPU/Odin is the only budget):** P1y (flaky AFAIL↔GsSyncV
-      fix, own SSD build dir, no lease) in new tab t1C; P1z (EE kernel
-      CreateSema disassembly settles P1v rule, read-only) in new tab
-      t1D. Six agents live: p1w/p1x/p1y/p1z/m14/i6, none on Odin.
-- [ ] **Steering answers 09-19 (user picked all recommendations):**
-      tooling-first (P1w = no-silent-drops + CSV tracking, P1x = PCSX2
-      ref trace in parallel); CSV → fork branch; frontier direction
-      reads at fixed points (after each behavior fix, park survives 3
-      briefs, before semantics changes — the 09-19 review counts as
-      the P1v-landing read). P1w reuses P1v pane, P1x reuses G6 pane.
-      Queued behind them: 0x52BE04 diagnosis (with census+trace in
-      hand), kernel-CreateSema check, flaky test to next free pane,
-      shim→split after CSV lands, movies stub default, I-lane park
-      after first launch, route criteria at M14+first-frame.
-- [ ] **Frontier review 09-19 read (orchestrator):**
-      `docs/research/review-2026-09-19-progress.md` (8-park boot
-      ladder, SYNCTASK 10-brief post-mortem, 23-commit fork
-      inventory, 10 recs + 8 branch decisions). Queued: no-silent-drops
-      tooling, PCSX2 ref trace, CSV home, game-expects-X rule +
-      kernel-CreateSema check, movies stub default, flaky test (now
-      seen flipping AFAIL↔GsSyncV again on this tree), I-lane park
-      after first launch, route criteria. **User decision mirrored:**
-      no upstream submission until the user proves the route and reads
-      the code. Steering answers asked 09-19 evening; P-lane follow-up
-      held for them (default: P1w diagnoses 0x52BE04).
-- [ ] **P1v read (09-19) — PASS, THE FIX WORKS, new stall found:**
-      `8d10619` (+46/-2, exact-0→binary): F2 pair returns 28/29, -1
-      waits 257,125→0; thread 3 runs (sch≠0 all 17 blocks, consumed
-      id-30 twice); thread 1 genuinely blocks (323 F6 waits / 322 F7
-      wakes); old outer loop exited (phase → `sub_316F00`); new stall
-      = thread-3 poll on never-written `0x52BE04` (~2.2M/block,
-      boot-2 watch shows loader-init line only). I6's `bdae295`
-      landed on top and carried the push. Verified: +46/-2 pushed,
-      LOG 7852/7915, F2 verbatim ×2, -1 census 0, 0x425cf0 17/17,
-      :630 park / :636 wake, binary `52f766a5`, tests re-run by me
-      (426/425/1 — AFAIL face, the documented flip), lease released,
-      worktree clean. Next: P1w HELD for steering. Ledger row added.
-- [ ] **I5 read (09-19) — PASS, install blocked on missing bundle
-      id:** `simctl install` exit 13 (IXErrorDomain, Missing bundle
-      ID); Info.plist has 19 keys, zero `CFBundleIdentifier`; no
-      launch attempted per stop rule (no window, no crash, no logs —
-      screenshot absence reasoned); static entry table:
-      `_main`+`_SDL_Init`+`_InitWindow` present, SDL2main still
-      unlinked (292 SDL symbols, matches I4), adhoc sig,
-      `main.cpp:167` argv→loadELF, fork CMake sets no bundle id; 4 gap
-      rows with exact next briefs (gap 1 = I6). Verified:
-      install.log verbatim, plist grep 0 + 3 keys, nm 3 lines + 292,
-      codesign adhoc/19, otool head, trailer, sim Shutdown, 44K
-      evidence. Next: I6 (bundle-id fix + rebuild + re-measure).
-      Ledger row added.
-- [ ] **I4 read (09-19) — PASS, simulator binary BUILT:** SDL2
-      2.32.10 static arm64 (2.1 MB, 266/266) → raylib 5.5-SDL-ES2
-      arm64 (ObjC-mode retry; linkprobe proved compile-scoped `-x`)
-      → 2 fork commits (+12 iOS-SDL select, +7 ObjC mode), pushed,
-      desktop-proof (`no work to do`, tests 424/425 same failure) →
-      runtime configure exit 0 (G1/G3 gone) → Release BUILD
-      SUCCEEDED: 120 MB arm64 `.app` (292 SDL symbols, InitWindow +
-      SDL_Init, SDL framework linkage). Debug config stalls in -O0
-      codegen on the 32 MB unity TU (terminated, receipted). .app
-      never launched (I5). Verified: both diffs, all 3 products
-      (bytes/arch/symbols), linkage set, no sims booted, internal
-      disk still 41G (25G scratch on SSD). Ledger row added.
-- [ ] **M13 read (09-19) — PASS, slot-36 partitioned + per-draw scan
-      works:** slot-36 windows on one frame (3001 / 890 / 3001
-      fail-closed-verbatim / 1553-1561 24-25-uniform) → shares
-      2111/0/1440; drawscan: 31 shapes, one draw carries 884 B, five
-      31–221 B, three negative (-1/-6/-3), eighteen exactly 0, every
-      shape uniform; pre-fix det3 attempt honestly kept
-      (delta-armed-all bug + exit -5). Verified: header shas,
-      analyzer rows, guard receipts, window/shape rows + refhashes,
-      3/3 hashes, lease log (0 waits). Ledger row added.
-- [ ] **P1u read (09-19) — PASS, `-1` attributed to zero-max
-      CreateSema:** F2 ctor table + full field layout; sole writer
-      #2 store; dynamic census (33 creates, exactly the 2 zero-param
-      fail with -1, singleton `s0` 257,125×); game expects zero-max
-      to succeed (host-parity gap, not guest bug); thread-3
-      flag-clearer starved by the no-block spin (prio 100 beats 101).
-      Verified: 33 lines + F2 4 verbatim, s0 singleton, `de7ff17`
-      +51/-7 pushed, host rule in source, ELF 6/6, binary fresh.
-      Next: P1v (the max_count validation decision). Ledger row added.
-- [ ] **P1v + M14 + I5 launched (09-19, standing order):** P1v
-      (FIX: zero-max CreateSema parity from real-PS2 evidence + ≤2
-      boots) reuses P1u pane; M14 (camera-delta true delta +
-      drawscan carriers) reuses M13 pane; I5 (first Simulator
-      launch: install/run/window-or-crash) reuses I4 pane. Remaining
-      queue: `sceGsSyncVCallback` test fix (fork, after P1v).
-- [ ] **Standing order (09-19, user): keep queueing follow-ups without
-      asking unless input is needed.** Holds: publishes/pushes in ssx3
-      (never), external submits. (I-lane hold lifted: SDL path chosen.)
-      Polls now carry launch authority too (cron recreated 09-19 —
-      no more idle lanes between user check-ins).
-- [ ] **I4 launched (09-19, user picked SDL path):** SDL2 for
-      iphonesimulator + raylib-SDL build + fork CMake integration +
-      runtime configure/build attempt. Reuses I3 pane. Standing-order
-      hold on I-lane lifted for C.
-- [ ] **P1u + M13 launched (09-19, standing order):** P1u (attribute
-      the `-1` sema slot: struct + writers + loop intent, ≤2 boots)
-      reuses P1t pane; M13 (slot-36 same-frame partition + time-boxed
-      per-draw depth attempt) reuses M12 pane. Remaining queue:
-      `sceGsSyncVCallback` test fix (fork, after P1u).
-- [ ] **P1t read (09-19) — PASS, THE FIX WORKS, new stall found:**
-      `58c9144` (+46, pc-keyed shim, yields to future splits):
-      callback body ran (1 `ra=0x3e3af0` line), worker consumed,
-      passed G6, issued site #9, driver ran; entry-0 cycled 0→1→0
-      (SET @ `0x3de468`, CLEAR @ `0x3e6518`); thread 1 left the park
-      (cycles `0x3e5980`/`0x31a278`/others) and now spins on
-      `WaitSema(-1)` (1.39M `KE_UNKNOWN_SEMID`, `sub_0031A6B8` —
-      slot writer unattributed, next brief owns it); before/after
-      dispatch receipts prove no leakage (old `-1`-less loop gone is
-      the intended effect). Tests 424/425 before/after identical
-      (GsSyncV — and the AFAIL↔GsSyncV flip across builds is now
-      documented 2nd-order weirdness). Verified: line counts,
-      signal line, epoch, -1 census (1387579+24+57 interleave),
-      entry-0 lines, +46 pushed, binary sha, tests re-run by me
-      (424/425, GsSyncV named). Next: P1u (the `-1` stall). Ledger
-      row added.
-- [ ] **I3 read (09-19) — PASS, raylib decision fully tabled:** A:
-      no release/master has an iOS backend (PR #3880 closed
-      unmerged); 6.0 breaks itemized, project uses 0 changed APIs;
-      B: `ghera/raylib-iOS` prior art (789-line backend + ANGLE
-      packaging) sized with file table; C: SDL probe configures
-      (C2 exit 0) + TU probes (rcore clean, raudio needs ObjC);
-      G7 touch gap persists under B/C. No verdict given, as
-      briefed. Verified: 6.0 enum/platforms, rlImGui tag, 789 lines,
-      C2 log, syntax logs, 26 SDL files, fork untouched by I3, disk
-      41G. DECISION OWED (orchestrator → user): upgrade / fork-patch
-      / SDL. Ledger row added.
-- [ ] **M12 read (09-19) — PASS, same-frame partition measured:**
-      4 windows × 25/25 uniform on one frame (70584 / 2572 / 33377 /
-      34105); removed shares 68012 / 37207 / 36479 with the honest
-      non-additivity (105219 vs 70584) tabulated; slot-36 indexed
-      decode on 2 frames (pos 0/0, Tex1 254/92, Tex2-indexed 0) +
-      own true deltas (1372/1827 B); per-draw depth restated open
-      (no header hook, re-verified). Verified: header shas,
-      analyzer rows, window rows verbatim, 6 refhashes, 3/3 hashes,
-      lease log (0 waits). Ledger row added.
-- [ ] **P1t + M12 + I3 launched (09-19, user go-ahead):** P1t (FIX:
-      mid-label invocation dispatch, first behavior fix + ≤2 boots)
-      reuses P1s pane; M12 (same-frame partition via alternating NOP
-      streams + slot-36 indexed decode) reuses M11 pane; I3 (raylib
-      decision spike: upgrade/fork-patch/SDL evidence, read-only, no
-      verdict) reuses I2 pane. Remaining queue: `sceGsSyncVCallback`
-      test fix (fork, after P1t).
-- [ ] **M11 read (09-19) — PASS, partitions measured:** slot-36 delta
-      moves 501 B on 100/100 (texcoord stage excluded); `pnmtxidx`
-      decoded (49–118 exposed draws/frame, cross-checked vs M9);
-      indexed-only arm 498 B + shared-only arm 72719 B surviving;
-      NOPTEXT arm 44470 B surviving (texture epochs cancel by
-      restore). Honest frame-confounded caveat throughout (each arm
-      its own frame — same-frame partition open). Verified: header
-      shas, analyzer rows, ref2 rows + all 4 refhashes, 6/6 hashes,
-      lease log (0 waits). Ledger row added.
-- [ ] **I2 read (09-19) — PASS, CMake fixes land, raylib wall stands:**
-      3 commits (G4 BUNDLE DESTINATION +17/-5, G6 FFmpeg-iOS-OFF,
-      G5 ARM-inference + FATAL guard), pushed; desktop-proof
-      (cmake_install byte-identical `790994cb`, build green, tests
-      424/425 same pre-existing failure — which independently re-names
-      the queued test fix); probe A hits G1 (enum rejects iOS),
-      probe B passes G4/G6 and dies on G3 (OPENGL_LIBRARY NOTFOUND);
-      raylib untouched per scope. One disclosed nit: desktop build
-      compiled with P1s's then-uncommitted edit present (CMake-only
-      fixes unaffected). Verified: 3 diffs, sha, 4 log lines, no sims
-      booted, scratch 196K. Next: I3 = the raylib decision (needs a
-      scope call: upgrade / fork-patch / SDL switch). Ledger row added.
-- [ ] **P1s read (09-19) — PASS, callback body never dispatched:**
-      signal path intact (no callback guard anywhere — identical wake
-      decision both paths); the CD callback invocation is attached
-      then SILENTLY dropped (`hasFunction(0x3e3ad8)` false, mid-label,
-      pc zeroed, popped, no trace); signal census complete (1360×29
-      from `0x31abf0`, pump 66×4 + 8×5 thread-site only, pump-i 0,
-      callback site 0); pump semas named. So sema-26 "non-delivery" =
-      non-dispatch: the fix is a table entry / mid-label invocation
-      rule, not scheduler wake logic. Next: P1t (fix brief).
-      Verified: 2917 sema lines, 3-line record verbatim, absences,
-      census incl. 66+8 split, CSV absence, fork pushed. Ledger row added.
-- [ ] **P1s + M11 + I2 launched (09-19, user go-ahead):** P1s (sema-26
-      delivery mechanism: signal/wait paths + `Diag:` commit + ≤2
-      boots) reuses P1r pane; M11 (slot-36 delta + indexed partition
-      + NOPTEXT share) reuses M10 pane; I2 (fork CMake fixes G4/G6/G5
-      + configure/build attempt, raylib wall out of scope) reuses I1
-      pane. Note: P1s + I2 share the fork tree (different files;
-      both briefed pull --rebase-and-retry-once on push reject).
-      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1s).
-- [ ] **I1 read (09-19) — PASS, spike correctly FAILED with receipted
-      gaps:** pinned raylib 5.5 has NO iOS backend (enum rejects iOS,
-      no `rcore_ios`, bundled GLFW/RGFW iOS-free); configure dies on
-      the fork `install()` missing BUNDLE DESTINATION (all 4 attempts,
-      2 generators — needs a fork CMake edit, out of spike scope);
-      sse2neon fixed by toolchain v2; FFmpeg host dylibs can't link
-      iOS (mirror Android OFF); touch input nowhere (runtime +
-      rlImGui). 7 gaps (3 dep-code sharing one root, 3 config, 1
-      platform). Constraints obeyed: runtimes unchanged, fork
-      untouched, scratch 112K, heavy dirs on SSD, disk still 42G
-      free. Verified: enum/platforms, install line, error in log,
-      SSD dirs, runtimes, disk. Next: I2 needs fork write access.
-      Ledger row added.
-- [ ] **M10 read (09-19) — PASS, zero-pixel mystery SOLVED:** order
-      excluded (0/689 consuming draws before first covering load),
-      matrices live (11/11 siblings bit-identical, live==snap),
-      visibility excluded (96–99% in-range, 0 culled) — and the
-      pixel-compare audit proves M7/M8/M9 "0 pixels" measured the
-      skip-to-VRAM uninit pattern, not rendered output (det5/det6
-      NOP-all contrast 0/200 vs 200/200). True-delta arm: slot-0
-      delta moves 32954/573440 bytes on 100/100 replays vs rendered
-      pristine ref. Open: per-draw depth, indexed-path partition,
-      texture-mediated share, slot-36 delta. Verified: header shas,
-      analyzer rows, ref2 event verbatim, 7/7 hashes, lease log (0
-      waits). Ledger row added.
-- [ ] **P1r read (09-19) — PASS, signal-during-park ORDER proven:**
-      worker wakes once on 3E4648's signal, passes G1/G2/G3/G5,
-      issues the CD read, re-parks at G0 BEFORE the callback's
-      signal (:433→:434); site #9 never reached, G6 never evaluated;
-      site #7 never armed (topbyte-1 path A). Poll registration
-      (`0x3e33b0` via table + `jalr`) + worker-thread trigger closed
-      statically; 77 ELF words machine-checked. Delivery mechanism
-      stays out of scope — but it is now THE critical-path item (P1s
-      should take sema-26 delivery; nothing else unblocks FILESYS).
-      Verified: 57 watches + epoch lines verbatim, thread-2 sch,
-      ELF spot, P6 802 lines, fork untouched, waits log (M10
-      deference). Ledger row added.
-- [ ] **P1r launched (09-19):** CD-completion→W1 gap — worker path
-      gates + poll registration + lost-wake candidates statically,
-      minimal watch set dynamically (≤2 boots). Reuses P1q pane.
-      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1r).
-- [ ] **P1q read (09-19) — PASS, entry 0 never queued + slot-reuse
-      decoded:** entry 0 fills (id `0x900001`, prio `0x64`) but takes
-      `3DDAC0` path B (no device match — `+0x24` never written, never
-      enqueued, `+0x2C` stays 0); full 12-word entry layout + 7
-      allocators + 5 dequeue predicates + nibble→case dispatch (jump
-      table 9/9 ELF) + all 10 W1 sites tabled; entry-1 "re-select" is
-      slot reuse (cleared, re-alloc'd nibble 4/id 3, selected for a CD
-      read whose callback fires but never reaches W1 — the chain
-      breaks at CD→W1, poll-vs-lost-wake open). Verified: 38 watch
-      lines + key lines verbatim, jump table, ELF spot, P6 row, fork
-      untouched, lease clean. Next: P1r. Ledger row added.
-- [ ] **I1 launched (09-19, user go-ahead):** iOS spike — dep
-      inventory + platform surface + configure/build attempts for
-      iphonesimulator arm64, gaps as fix-classed rows, no fixes.
-      Read-only in fork, no lease, no device. Reuses P6 pane. First
-      agent on `--reasoning-effort max`. Constraints (user, steered
-      mid-run): ONLY the installed iOS 27.0 runtime + existing
-      devices, never download runtimes; internal disk 42 GB free —
-      scratch in `/tmp/ps2x-ios-spike`, >500 MB to SSD, never touch
-      other agents' build dirs.
-- [ ] **P1q + M10 launched (09-19):** P1q (why entry 0 is never
-      selected/completed: entry contents + ExecCommand selection +
-      completion trigger, ≤2 boots) reuses P1p pane; M10
-      (discriminating instruments: hit/draw order + full matrices +
-      render-target/occlusion) reuses M9 pane. G-lane resting.
-      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1q).
-- [ ] **M9 read (09-19) — PASS, residue narrowed hard:** VAT+texgen
-      closed (M8's 1346-draw Tex2 reach corrected to 21 shared+enabled;
-      slot-0 shared-pos reach 664–800); upload timing EXCLUDED
-      (snapshots hold perturbed values 200/200, dirty flags fire);
-      shadow copy EXCLUDED; yet 21 Tex2 + 800 Pos draws consume
-      perturbed matrices with 0/200 pixels differing. Residue: hit/draw
-      order, full-matrix values, render-target/occlusion, texcoord
-      stage — discriminating instruments specified, not built (M10).
-      Verified: header sha, analyzer rows, xform_stats ×2 verbatim,
-      4/4 hashes, lease log (1 P1p wait). Ledger row added.
-- [ ] **G6 read (09-19) — PASS, -O2 collapses the delta:** Release
-      (-O3) CTest 12/12 green, no fixes; cpu median 15.8→0.36 ms —
-      the G4 fast-path advantage vanishes (all backends ~0.35–0.55,
-      within noise); -O0 columns re-measured in-session and match
-      G4/G5; PR prep file written with verified figures, nothing
-      submitted, no network writes. Verified: ninja flags, CTest
-      re-run, spot timing both exact, PR.md base rev, CMakeLists +
-      upstream untouched by G6, pushed. Implication recorded: CPU
-      backend at release is sub-ms on synthetics — GPU urgency
-      question reopens on game-sized frames. Ledger row added.
-- [ ] **P1p read (09-19) — PASS, entry-0 flag never set:** table base
-      `0x5e0080` + current-entry transitions (entry 1 / null, never
-      entry 0) learned; entry-0+8 = `0x5e0088` watched: exactly ONE
-      hit, an init-time zeroing `sd` @ `0x3e64d0` (memset loop in
-      `sub_003E6448`); W1/W2/W3 all silent across the boot. So the
-      SYNCTASK wait never exits because entry 0 is never completed —
-      current entry is entry 1. Next: P1q (why is entry 0 never
-      selected/completed?). Verified: 9 + 1 watch lines verbatim,
-      counts, ELF 3/3, P6 absence, fork untouched, lease clean.
-      Ledger row added.
-- [ ] **G6 launched (09-19, user go-ahead):** Release-build numbers
-      (-O2 CTest + timing tables on all four backends vs -O0) +
-      upstream PR prep (`upstream-patches/PR.md`, verified figures,
-      NO submit). Reuses G5 pane. 4h box, no lease.
-- [ ] **P1p + M9 launched (09-19, user go-ahead):** P1p (which flag
-      writer fires for entry 0: table-addrs boot + writer-catch boot,
-      max 2) reuses P1o pane; M9 (VAT/texgen closure + upload-timing
-      survival test + PosNormal-path delta) reuses M8 pane. G-lane
-      RESTING (G1 still gated; upstream submission needs an explicit
-      publish call). Remaining queue: `sceGsSyncVCallback` test fix
-      (fork, after P1p).
-- [ ] **M8 read (09-19) — PASS, propagation scoped, mechanism open:**
-      baseline reproduces M7; slot census on 3 frames (slot 0 read +
-      796–906 PosNormal draws — NOT unused, deepening M7's puzzle;
-      7-way all-draws tie at 36/39/42/45/48/51/60); slot-36 delta
-      (53 hits/replay, Tex2-only) moves zero pixels → re-scoped per
-      the clause to "seam writes don't reach rendering"; projection
-      UNREACHABLE (2 seam call sites, regs branch has none,
-      regcalls=0/514k, 11 proj writes all via regs path). Honest
-      gaps: VAT/indexed-vs-shared split, per-draw texgen enablement
-      undecided. Next: M9 (upload-timing/shadow-copy mechanism + a
-      PosNormal-path delta). Verified: header sha, analyzer rows,
-      xform_stats verbatim ×2, 4/4 hashes, lease log (1 P1n wait).
-      Ledger row added.
-- [ ] **G5 read (09-19) — PASS, spikes are real patches:** 3 files
-      (6/5/4 hunks, 4376/4893/4638 B), each dry-run clean solo on my
-      own scratch copy; proof target (`patched-cpu`, build-time
-      apply, submodule pristine) identity-exact on 102/102 with G4's
-      timings reproduced (0.55 standard, 6.1 multi); CTest 12/12
-      (11 old + patched-identity). Patches inherit G3/G4 caveats,
-      disclosed; not submitted upstream. Verified: hunks/bytes,
-      dry-runs, submodule rev, smoke replay, CTest re-run, pushed.
-      Ledger row added.
-- [ ] **P1o read (09-19) — PASS, caller saga CLOSED + writers named:**
-      true-frame watch lands exactly 1 hit each (`0x900001` @
-      `0x3dd1e0`, `0x3ded88` @ `0x3dd214`, sp `0x1fffe00`) with the
-      probe line byte-identical to p1n; parked `$a0` top byte `0x00`
-      → entry 0; static hunt names ONE `0x519AD8` writer (`0x3dccfc`,
-      table from `systemInit`-called allocator) + THREE flag writers
-      (W1 `0x3de468` = P6 `iFILESYS_CommandCompleteCallback`, W2
-      `0x3dd83c` = 1, W3 `0x3ddd30` = −2) with full exclusion census
-      + 14 ELF words, all machine-checked (standing rule obeyed —
-      paste block present); brief's slot formula corrected (stride
-      `0x10`, not +8·slot). Open: which writer fires for entry 0 at
-      runtime (receipt designed: watch `0x519AD8`+`0x519AD4`). Lease
-      exemplary (deferred to M8, never forced). Verified: lines
-      :687–:689 verbatim, counts, ELF 6/6 spot, P6 :735, fork
-      untouched, waits log. Next: P1p. Ledger row added.
-- [ ] **P1o + G5 launched (09-19):** P1o (true-frame watch confirm +
-      driver-flag writer hunt, ≤2 boots; carries the new standing
-      rule: machine-check every hand hex) reuses P1n pane; G5 (port
-      CLUT/RMW/Present spikes to real upstream patches + proof
-      target) reuses G4 pane. M8 still working. Remaining queue:
-      `sceGsSyncVCallback` test fix (fork, after P1o).
-- [ ] **G4 read (09-19) — PASS, Present fast path lands:** profile
-      (sample + instrumentation) attributes single-shot ~16 ms to
-      vector fill-construct/teardown (~96% Present); `[G4-PRESENT]`
-      bulk scratch buffers cut median_ms 15.8→0.55 on standard
-      captures (6.1/3.2 on multi/field paths — temp destroys
-      disclosed as remaining); identity exact on 102/102; CTest
-      11/11 (no new tests — spike-identity pins it); captures
-      unchanged (md5s match G3). Verified: +67/-7 one file,
-      upstream/strict/factory untouched, CTest re-run, timing
-      reproduced (15.539 vs 0.550, both exact), pushed. Caveat: all
-      -O0 libc++ observations. Ledger row added.
-- [ ] **P1n read (09-19) — PASS, caller NAMED + slip found:** probe
-      (`e73e36a`, pushed) fires exactly once: fresh caller `0x3ded80`
-      (#6, `sub_003DED50`), entry sp `0x1fffe80`, true frame
-      `0x1fffe00`/`0x1fffe10`; other 4037 enters are scheduler-loop
-      resumes (prologue skipped, bypass dispatch — probe blind by
-      construction). ROOT CAUSE of the 3-brief saga: P13-3 hex slip
-      (`0x1fffd80+0x80` written as `0x1ffe000`, true `0x1fffe00`) —
-      "audited correct" twice. Ladder unchanged (16/1 park, 0
-      missing, gs counts equal); tests 424/425 same failure. Verified:
-      probe line verbatim, trace 4038, +37 one file, binary sha,
-      fork pushed, lease clean (M8 untouched). Next: P1o. Lesson:
-      machine-check all hand hex (added to runbook boilerplate).
-      Ledger row added.
-- [ ] **Hourly agent poll (09-19, user call):** cron `ssx3-hourly`
-      (`17 * * * *`) checks P1n/G4/M8 states every hour — done →
-      gate-read commits per repo convention; blocked → read dialog,
-      report, do NOT answer it; working past box → flag overtime.
-      No new-agent launches from the poll; report only. (A background
-      `herdr agent wait` only signals completion and can't detect
-      stuck — the hourly check is the stuck-agent cover.)
-- [ ] **P1n + G4 + M8 launched (09-19):** P1n (driver-entry sp/ra
-      probe, `Diag:` commit + rebuild + one boot — names the live
-      caller) reuses P1m pane; G4 (profile + one fast path,
-      identity-proven) reuses G3 pane; M8 (delta propagation: slot
-      census + second-slot delta + projection reachability) reuses M7
-      pane. Remaining queue: `sceGsSyncVCallback` test fix (fork,
-      after P1n). Monitoring note: orchestrator does NOT watch
-      between user check-ins — all three prior agents finished
-      unnoticed; user check-in is the actual monitoring loop (waits
-      only run inside active turns).
-- [ ] **M7 read (09-19) — PASS, item 3 mostly done, one open
-      question:** baseline reproduces M6; all three M6 gaps closed
-      (det=0 matches suppressed shape except `pediff` 0/+2,
-      replay_disabled continuation clean, mid-Trigger flip DIRECTLY
-      observed: `trig_imx` 1/1, `dimx` once at replay 0, `dframe` +1
-      ×200 — M6's elimination upgraded to observation); no-op parity
-      holds with `trig_imx` 0/0 as the negative control; camera delta
-      (+0.1 posmtx0 tx) applies 152×/replay yet 0/200 frames differ by
-      any byte, no drift, guest/event state clean. OPEN: why zero
-      pixel diff (slot unused? seam overwritten pre-use?) — agent
-      quantified honestly but didn't pursue; that's M8. Verified:
-      header sha, analyzer rows reproduced, xform_stats verbatim,
-      6/6 hashes, flip counters, lease log. Ledger row added.
-- [ ] **G3 read (09-19) — PASS, present pinned + both TODOs spiked:**
-      4 new captures (102 total, 719 MB under the 800 cap) pin the
-      `fbp==0` fallback (black→context[0], nonblack→0, multi→first
-      nonblack, empty→0); `spike` fork backend (cpu/strict/upstream
-      untouched) carries CLUT-cache + RMW-lookup spikes, both
-      identity-exact on all 102; timing deltas recorded as observed
-      (CLUT ~15–20% submit savings on paletted captures, RMW up to
-      ~40% on fbmsk); CTest 11/11. Honest limits: CLUT memo assumes
-      no mid-batch footprint writes; RMW CT32-only; strict+spike
-      uncombined. Verified: md5s, factory reg, old-98 byte-identical
-      (md5 lists differ ONLY by the 4 added lines), CTest 11/11
-      re-run, pushed. Ledger row added.
-- [ ] **P1m read (09-19) — PASS, miss mechanism found, Step 2
-      skipped legitimately:** 17-path coverage audit proves driver
-      `sw`/`sd` emit on fires-paths (P12 sd-theory excluded BY
-      SOURCE); p1l-only 72.3M-line trace: driver entered 3940×/
-      exited 3939× (~44/s, per-period), 0 stub hits explained
-      (checkpointed depth-0 dispatch uncounted); 7 of 8 direct-jal
-      candidates NEVER entered, 8th wrote elsewhere → frame-elsewhere
-      mechanism; live caller unknown (depth-0, no guest parent);
-      next receipt designed (driver-entry sp/ra probe, both dispatch
-      paths). Verified: trace 72,315,942 lines, 3940/3939, candidate
-      0/0/0/0/0/2/0/0, overlap line verbatim, driver :39/:78,
-      138 FAST files, 11 refs, fork untouched, no p1m boot. Next:
-      P1n implements the probe. Ledger row added.
-- [ ] **P1m + G3 launched (09-19):** P1m (miss-mechanism diagnosis, no
-      fix — watchpoint coverage audit + driver-entry census + frame
-      table, one boot max) reuses the P1l pane (`wN:t1A` → P1m); G3
-      (Present-heuristic tests + CLUT/RMW spikes, identity-proven)
-      reuses the G2 pane (`wN:t17` → G3). All three lanes full (P1m
-      fork, G3 ps2xGS, M7 ssx3); lease shared P1m↔M7. Remaining queue:
-      `sceGsSyncVCallback` test fix (after P1m), G4 perf (after G3).
-- [ ] **G2 read (09-19) — PASS, harness proven sensitive:** 20 new
-      captures (98 total, +105 MB, 691 MB under the 700 cap), `strict`
-      backend wrapping cpu and honoring all 7 G0-§9 fields; cross table
-      14 flipped rows ALL field-mapped (incl. 2 old G0 captures) and 84
-      exact; G0 `blend-colclamp` no-flip honestly explained (no
-      overflow); census decodes everything new; CTest 9/9 incl. 3 new
-      sensitivity gates. Caveat recorded: strict's honored semantics
-      are plausible-but-unverified (aa1 halving, LOD=min, SCANMSK
-      restore, post-blend dither — agent disclosed all) — a test
-      instrument, not a hardware reference. Verified: files, factory
-      reg, cpu/upstream untouched since G0, 98 captures, ssx3 copy
-      identical, CTest 9/9 re-run, pushed (`origin/main` == HEAD).
-      Ledger row added.
-- [ ] **P1l read (09-19) — PASS, missing target gone, park holds:**
-      4 splits (CSV 9270→9274, recompile 9092→9096, 0/0), boot shows 0
-      missing-target lines; thread 1 still in driver/SYNCTASK
-      (`0x3e5980` ×14 + `0x3e5440` ×3); outer-caller receipt missed
-      AGAIN on both `sw` and `sd` addrs (addrs audited arithmetically
-      correct — now a miss-*mechanism* question, 8 candidates stand);
-      first `[gs:kick]` lines ever (66) correctly attributed to
-      aggressive-logging visibility (old binary had it off), not guest
-      change; ~4× wall-clock rate vs p1k open (no host-load record);
-      tests 424/425 same pre-existing failure (re-proven without stash:
-      no tracked source changed + runner symbols absent from test
-      binary). Verified: log counts/census/callback/threads/csv/splits/
-      ELF spot/regs/binary sha/fork untouched+up-to-date. Next: P1m.
-      Ledger row added.
-- [ ] **M7 launched (09-19, `local/muse/prompts/M7.md`):** milestone 2
-      item 3 — pose interpolation + camera delta on the `g_transform`
-      seam inside the M6 context. Step 1 closes M6's three unordered
-      runs (det=0, replay_disabled, direct flip observation); steps 2–3
-      no-op parity then camera delta vs the S2 honesty gate. Desktop,
-      lease-shared with P1l. Agent in freed M6 pane (`wN:t16` → M7).
-      Deferred queue behind live agents: `sceGsSyncVCallback` test fix
-      (fork tree, after P1l), G3 (ps2xGS tree, after G2).
-- [ ] **M6 read (09-19) — PASS, milestone 2 item 2 done:** scoped bus
-      (`dafter_live` 0/0, `dpend` 0/0, queue never grows — in-stream
-      flush points still drain); `dframe` frozen 0/0 with replay-local
-      counter; M5's +1 driver NAMED (`ImmediateSwap` `Present.cpp:235`
-      re-armed by the `VideoConfig` after-frame listener mid-Trigger —
-      file:line + trigger + 11-listener elimination, honestly noted as
-      code-path-plus-elimination, no direct flip observation); guard
-      proven by negative control (`record_flag_set` pre-replay-0, 0
-      rows, `done` stands, bus restored on break path); continuation
-      hash identical ×5 (comparison skipped, seams differ). Verified:
-      header shas, guard event verbatim, analyzer rows reproduced,
-      5/5 hashes, lease log incl. battery hold obeyed. No push. Ledger
-      row added.
-- [ ] **G2 launched (09-19, `local/muse/prompts/G2.md`):** harness
-      sensitivity — `strict` second backend honoring all G0-§9-ignored
-      fields + mip-chain/TEX1/paired-isolation captures; sensitivity +
-      specificity tables prove the diff table catches real differences
-      on synthetics alone. No lease, no emulator. Agent in renamed P5
-      pane (`wN:t17` → G2).
-- [ ] **G-series reordered (09-19, user call — harness must not block
-      on first frame):** G1 (game captures + pad scripts + real census)
-      stays queued, gated on first presented frame. G2 (sensitivity,
-      this row) runs now. Probable sequence after: G3 = Present
-      `fbp==0` heuristic tests + CLUT-cache/RMW-lookup upstream TODO
-      spikes (both validated by identity replay); G4 = CPU-backend perf
-      profile + one fast-path spike (Unleashed-style batching
-      candidate); then G1 the moment P-series delivers frames.
-- [ ] **Resume recipe (09-19, learned from this restart):** track
-      agents must start with `herdr agent start <name> --kind muse
-      --pane <id> -- --yolo` — bare `muse` stops at approval dialogs
-      (M6 proved it on an SSD touch). If a pane sits at `~`, cd it to
-      ssx3 before starting (avoids the workspace-trust dialog).
-      Effort (09-19, user call): append `--reasoning-effort max`
-      (not xhigh) to all new agent starts; running agents stay as-is.
-- [ ] **P1l launched (09-19, `local/muse/prompts/P1l.md`):** split
-      `0x395cf0` + 3 unsplit siblings (`0x395c70` already split —
-      verify only), regen + rebuild + `ps2xTest` (re-prove the 1
-      pre-existing failure), one ≤90 s boot with `+w4 0x1ffe000`
-      outer-caller receipt. Splits + ladder only; driver-flag writer,
-      sema-26, and any park fix out of scope. Fresh agent in the
-      freed P1k pane (`wN:p1A`).
-- [ ] **RECOVERED 09-19 — `/Volumes/Extreme SSD` writable again
-      after restart (write test passed). Herdr panes wiped by the
-      restart: P5/P1j/P6/P1k agents gone but all four tracks already
-      committed + gate-read — no resume needed. M6 released (MacBook
-      on AC, 65% charging — battery-hold condition met). P1l briefs
-      fresh agent in the freed P1k pane.
-- [ ] **P1k read UPGRADED 09-19 — PASS, all deferred receipts
-      verified post-recovery:** 33,038 lines / 3,052,064 B; thread-1
-      census 15/1/1; threads 2/4/5 sema-parked 26/29/30
-      (sched 0/~300/0); watch 32,077 lines, widths 32050/25/2;
-      fills/del/sema lines verbatim; 15× w16 zeros, 0× `0x3dd214`;
-      stub top-3 identical to p1j; `0x15` ×4 / `0x17` ×1; ELF 11/11
-      + sha1 `77114dfd`; fork `8fad69e` + pre-existing M, no strays,
-      lease absent. NUANCE: sibling `0x395c70` already HAS a split
-      file + reg line (P1l splits only the other three + `0x395cf0`).
-      Original 09-18 23:20 conditional read:** park = `SYNCTASK_run` queue drained by a driver flag
-      (`*(entry+8)`, writer unknown); slots 0–1 fire ~600×/5 s
-      (fills traced to `systemInit` + `sub_003E3020`, third filler
-      del'd pre-fire); outer caller narrowed to 8 wrappers (one is
-      P6 `ASYNCFILE_release`) — `sd`-path watch miss documented with
-      next receipt (`w4 0x1ffe000`); `0x395cf0` = unsplit frameless
-      leaf (split-class fix, 4 siblings); first CD callback signals
-      sema 26 yet T2 never wakes (completion unobservable — no finish
-      line exists); `0x15`/`0x17` = one-shot disables. Verified
-      repo-locally: 14/14 P6 names verbatim + both absences. SSD
-      counts/ELF/fork UNVERIFIED (volume failed mid-brief; agent
-      marked NOT RE-CHECKED honestly). Nit: report says "23:05 UTC",
-      means EDT. Recovery + re-verification done 09-19; P1l
-      launched below. Ledger row updated (flag lifted).
-- [ ] **P6 read (09-18 23:00) — PASS, thin but honest:** 801-row
-      addr→name CSV (names only, longest line 86 chars — license rule
-      held); only 6.67% sweep coverage and ALL 11 ladder addrs UNNAMED
-      (decomp is early: 6 split files, 390 stubs). Real wins anyway:
-      `main` at `0x31af80`, GS-wait caller reached from the
-      `cSSXApp` constructor row (verified `jal`), sweep vindicated
-      (100% JAL recall, 0 splits in 106 tight pairs — merges only),
-      sweep dup found (`0x42c1f0` lines 9229–9230 — KNOWN ISSUE, do
-      not touch mid-ladder; dedup at next CSV regen), tooling theft
-      table. Verified: rev, license absence, sha1, 749 symbols, CSV
-      rows, dup lines, caller JAL. P1k already instructed to use the
-      CSV if present. Ledger row added.
-- [ ] **P1k launched (09-18 22:45, `local/muse/prompts/P1k.md`):**
-      diagnose the `0x3e5980` 16-slot dispatch-loop park (slot
-      contents, filler, exit condition) + name the outer caller of
-      `sub_003DD1D8` + analyze missing target `0x395cf0` + first CD
-      callback + syscalls `0x15`/`0x17`; uses P6 names if landed. No
-      fix. Lease free.
-- [ ] **P1j read (09-18 22:45) — PASS, CSR park cleared, ladder
-      jumps:** bits 15:14 identified as FIFO (DobieStation + PCSX2 +
-      gsKit + Play!, all cited); fix `8fad69e` (init EMPTY + force
-      read-only on guest writes, +43/-7, cheat row documented)
-      pushed to fork `ssx3`; boot 1 runs thread 1 to `0x3e5980` with
-      FIRST `[cd:callback]` fire, thread 5, syscalls `0x15`/`0x17`,
-      1 new missing target (JALR `0x3760d0→0x395cf0`). Tests 424/425
-      with the 1 failure proven pre-existing (stash A/B). Verified:
-      fork push, hunks, both FIFO cites verbatim, boot pcs/counts.
-      Queued (not launched): `sceGsSyncVCallback` stack-pool test
-      fix. Next: P1k. Ledger row added.
-- [ ] **P6 launched (09-18 22:35, `local/muse/prompts/P6.md`):** mine
-      ssxdecomp/ssx3 (PS2 SLUS_207.72 matching decomp, SAME sha1 as
-      our ELF, 433 src files, NO license → names/addresses/facts
-      only, never bodies): addr→name CSV joined against our 9,270-row
-      sweep, ladder-function naming, boot/park structure, boundary
-      truth sample, tooling theft. Read-only.
-- [ ] **Monitoring switched to event waits (09-18 22:30, user
-      call):** `herdr agent wait --until done,blocked --timeout
-      <box>` replaces sleep-polls — done → check `[ID]` commit →
-      gate read; blocked → read dialog; timeout → stuck/overtime →
-      read + redirect. No agent cooperation needed (no
-      agent→orchestrator message primitive exists; waits observe
-      lifecycle server-side). Artifact proof unchanged: the commit,
-      never the status label.
-- [ ] **P5 read (09-18 22:30) — PASS, 32 borrowable rows:** Xenon
-      ordinal-HLE (weak-link override, addr→name map, BL-sweep,
-      gap-fill Analyse, offline switch TOML); psprecomp HLE work-list
-      census + miss-log + zero-ring + entry trace + self-test;
-      N64 CreateStatic + jump-table discovery + patch/hook system;
-      UnleashedRecomp API-level GPU HLE (no capture stream) +
-      render-thread split + shader-hash tables; xboxrecomp MIT,
-      ordinal-switch HLE + coverage audit + NV2A census/executor —
-      but NO SSX3-Xbox specifics (titles are Burnout 3/Halo).
-      Verified: xbox MIT, psprecomp + N64 quotes verbatim, P5's
-      "zero SSX matches" is substance-true (one English-word
-      "tricky" false positive it should have named — nit).
-      No push. Ledger row added.
-- [ ] **P1j launched (09-18 22:05, `local/muse/prompts/P1j.md`):**
-      identify GS CSR bits 15:14 from public sources (DobieStation /
-      PCSX2 GS / PS2 docs, all cited), implement the minimal producer
-      for the `0x4000` exit state, rebuild, one boot for the ladder.
-- [ ] **P1i read (09-18 22:00) — PASS, strong partial-negative:** no
-      producer for CSR bits 15:14 exists anywhere (exhaustive `csr`
-      grep: writers touch {0,1,13} + init-0 + guest merge only);
-      consumer is dynamic `READ64` (not TOML); vsync/present/timer
-      paths all CSR-free for these bits. Bits honestly recorded as
-      unidentified-from-tree (no-guess rule held). 10 min, no boot,
-      push rule obeyed. Verified: TOML absence, generated line,
-      `0xC000` absence, ELF words (in report). Next: P1j. Ledger row
-      added.
-- [ ] **P5 redirect (09-18 22:05):** +Q6 sp00nznet/xboxrecomp (OG
-      Xbox, SSX 3 runs on it): license read first (author's reo was
-      unlicensed — idea-level only if so), Xbox kernel-HLE approach,
-      any SSX3-Xbox-specific workarounds, NV2A GPU approach vs
-      ps2xGS. Quota note: user nearly out of muse free credits —
-      no new launches after P1j until confirmed; P5 running lean
-      solo, M6 runs held (battery).
-- [ ] **P5 launched (09-18 22:00, `local/muse/prompts/P5.md`):** mine
-      360/N64/PSP recomp tooling — XenonRecomp ordinal-HLE stub
-      generation/tracing, N64+Xenon indirect-branch/function tooling,
-      UnleashedRecomp GPU capture/replay vs the ps2xGS plan, patch
-      systems vs our TOML stubs, recompiler testing patterns (which
-      test catches the next LUI+ORI fold?). Read-only, battery-light.
-- [ ] **M6 launched (09-18 21:50, `local/muse/prompts/M6.md`):**
-      host-replay milestone 2 item 2 (S2 Part 4 items 2–4): scoped
-      `after_frame_event` suppression + `FrameCount`/frame-aging
-      semantics + the `dframe` +1 driver chase + fail-closed
-      `g_record_fifo_data` guard, on M5's header, desktop only.
-      HOLD 21:55: MacBook untethered (battery 80%) — M6 finishes Step 1,
-      then holds all runs until back on power (battery + thermal-noise
-      protection); prep work continues. P1i unaffected. Odin unplugged:
-      no track needs the device, no blockers. PARKED 23:05: M6 finished
-      all run-free prep (Step 1 receipts verified, analyzer tested vs
-      synthetic guard-stop, negctrl table scaffolded in REPORT) — only
-      the m6-negctrl run + table fill + commit remain. Event wait
-      terminated as pointless while parked; re-arm on release.
-- [ ] **P1i launched (09-18 21:50, `local/muse/prompts/P1i.md`):**
-      diagnose the GS CSR park at `0x375d10`
-      (`(CSR&0xC000)!=0x4000` spin) from the closed boot-p1h-1 log +
-      ELF + sources; no fix. One ≤90 s boot only if the log cannot
-      name the missing producer. Lease is free.
-- [ ] **M5 read (09-18 21:45) — PASS, milestone 2 item 1 done:**
-      200/200 + `done` on all runs; `xfb_equal=200/200` (range
-      `0x004dc660`, 573440 B); counters fail-closed (`dpend` 0/0,
-      `pediff`/`vidiff` 0/0 det=1, no `record_flag_set`);
-      `xfb_equal_scratch=200/200` + `live_xfb_untouched=1`;
-      continuation skipped per brief (seam fc 8121 vs 8142). Verified:
-      probe row counts + receipts by independent parse, S2-sha
-      handling, vendor untouched (pre-existing Sep 10–17 uncommitted
-      hunks are not M5's), lease discipline. Notes: brief's pinned S2
-      sha was stale (M5 recorded both, used on-disk); `#define
-      private` promotion is header-local and layout-safe; one "Sync
-      snaps" failure in scrollback never surfaced in the report
-      (receipts all landed — watch item). Next: M6. Ledger row added.
-- [ ] **P1h read (09-18 21:45) — PASS, ladder advances past the MMIO
-      park:** analyzer fix `f2149e7` (ORI/ADDIU low-half fold, 1 file
-      +28) pushed to fork `ssx3`; 245/273 `[mmio]` entries corrected
-      (4 remaining folds proven genuine); regen recompiled clean;
-      boot 1 runs thread 1 to `0x375d10` (all 35 blocks, frame popped,
-      via `0x375a94`). New park recorded: GS CSR spin at `0x375d10`.
-      P1h obeyed the hardened push rule (ssx3 commit local-only).
-      Verified: fork push, TOML, recomp lines, boot log, park ELF
-      words + branch arithmetic. Next: P1i. Ledger row added.
-- [ ] **P4 read (09-18 21:45) — PASS, fork diffs mined with bodies:**
-      M1/M2/M7/M10/M12 full diffs; bt3's dynamic MMIO dispatch
-      (immunity-by-construction alternative to P1h), sync-CD + tick
-      pump, GPU/async-kick architecture; sm2/halogen/drakengard/reo
-      boot learnings; Q4 EeScheduler delivery point for
-      message-not-nesting; 20-row borrowable table (S1–S20) with
-      license re-cites. Gaps honest (depth-1 clones hide 7 revs).
-      Verified: bt3 MMIO + sync-CD bodies, M1 dispatch + STR bodies.
-      Findings feed P1i/P1j scoping. Ledger row added.
-- [ ] **P4 launched (09-18 21:25, `local/muse/prompts/P4.md`):** closes
-      P3's admitted gap (per-fork diff bodies): reads the M1–M14 diffs
-      from the existing `fork-survey/` clones, diffs working
-      bt3-recomp against our fork (boot/MMIO/GPU/CD), boot learnings
-      from sm2/halogen/drakengard/reo, and the EeScheduler delivery
-      point for message-not-nesting. Read-only, fully parallel to
-      M5/P1h. README gained a "Legal notes for contributors" section.
-- [ ] **P1h launched (09-18 21:15, `local/muse/prompts/P1h.md`):**
-      fix the analyzer's LUI-only MMIO detector (read the ORI/ADDIU
-      low half), regenerate + audit all 273 `[mmio]` entries, rebuild,
-      one boot for the ladder. Builds any time, boots yield the lease
-      to M5. Push rule hardened again: `git push` only inside the fork
-      clone, never in ssx3 (P1g pushed origin despite the fork-only
-      rule, rationalized in P8-0 — content benign).
-- [ ] **P1g read (09-18 21:10) — PASS, park fully diagnosed:** the
-      `0x391330` spin is a recompiler bug, not game logic: the MMIO
-      detector folds LUI+ORI accesses to the page base, so the VIF0
-      DMA kick + STR poll both hit `m_ioRegisters[0x10000000]` (stuck
-      `0x104`). Verified: ELF words, TOML folds, recomp `:164`,
-      detector source, both memory-path gates, branch arithmetic.
-      249/273 `[mmio]` entries fold the same way (7 proven). No boot
-      needed. Next: P1h. Ledger row added.
-- [ ] **P2 read (09-18 21:10) — PASS, strong negative result:** PCSX2
-      (`1275b25a`) runs the real BIOS and HLEs almost nothing on the
-      EE, so it contains no handler/alarm/CD/RPC stack behavior to
-      borrow — P1f's direction stands uncontradicted. One real
-      tension: `EENULL`/`EELOAD` live inside P1f's borrowed
-      `[0x80000,0x100000)` on real hardware (no BIOS here, and the
-      SSX3 ELF doesn't touch the range, so no action). Verified: rev,
-      enum, EELOAD lines. Ledger row added.
-- [ ] **P3 read (09-18 21:10) — PASS with follow-up queued:** 133
-      forks / 50 PRs enumerated; bt3-recomp (GPL-3, playable, GPU
-      path) is the most relevant downstream; N64ModernRuntime's
-      message-not-nesting is the architectural alternative; fork
-      LICENSE files are near-uniformly GPL-3 (M1–M14 snippets
-      borrowable); PSXRecomp is PolyForm Noncommercial (unusable).
-      Gap: per-fork diff bodies didn't survive (clones persist under
-      `fork-survey/` for a P4 follow-up if needed — not launched;
-      MMIO fix is the priority). Verified: bt3, N64MR, 2 licenses.
-      Ledger row added.
-- [ ] **P1g launched (09-18 20:45, `local/muse/prompts/P1g.md`):**
-      diagnose the post-fix park at `0x391330` (`sub_003912A8`, pc
-      stable but `scheduled` advancing) from the closed boot-2 log +
-      ELF disasm; no fix. One ≤90 s boot only if the log cannot name
-      the wait object, yielding the host lease to M5. Ledger row added.
-- [ ] **P1f read (09-18 20:40) — ra-slot writer caught, fix VERIFIED:**
-      boot 1b watch on `0x1ffff00` caught 32,682 writes, all but 153
-      from the INTC handler prologue zeroing thread 1's frame; fix
-      `6046260` (sp=0 + reserved stacks in `[0x80000,0x100000)`)
-      pushed to fork `ssx3`; boot 2 shows 165/0 handler writes and
-      thread 1 `Running` at `0x391330` with threads 3+4 new. Part 7
-      appended, `[P1f]` 6e90355. Process note: P1f pushed ssx3
-      `origin/main` too though the brief said fork only — content was
-      benign (briefs, todo, report) but future briefs now say
-      fork-remote-only. Next: P1g.
-- [ ] **P2 + P3 launched (09-18 20:30, `local/muse/prompts/P2.md`,
-      P3.md):** two read-only P-branch research angles alongside P1f's
-      fix — P2 reads PCSX2 source (EE INTC/alarm/CD/async stacks) for
-      a reference comparison + patch sketch, P3 surveys PS2Recomp
-      forks, independent PS2 static recomps, sibling recomps and
-      readable dynamic emus for borrowable prior art + license
-      verdicts. Neither builds, boots, edits the fork, or takes a
-      lease, so both run fully parallel to P1f and M5.
+- [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
+- [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
+- [ ] **Live panes:** p1ad (Part 28 new-park diagnosis, 4h) · p13 (analyzer triage + patch spec, 4h) · m17 (sub-pixel model offline, 4h).
+- [ ] **Queue:** T1 (park snapshot + SIF tally + ladder_diff — first free pane) · T3 (IRX inventory, lease-free — second free pane) · P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park: P1ad successor if SIF-shaped, else sid=0x80000211 RPC or later) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
+- [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
+
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -2606,6 +1570,1048 @@ the build or commit that closed them.
 
 ## Done
 
+- [x] **M17 launched (event-driven, m16 wait fired):** sub-pixel /
+      local motion model — half-pixel bilinear SAD + block matching,
+      offline on the M15/M16 dumps (no harness, no lease). Reuses
+      M16 pane.
+- [x] **M16 read (09-20) — PASS, residual attributed same-frame:**
+      6-block scan (764 shapes, 4584/4584 ok, all dumps ok, mid/full
+      pairs uniform; attempt-1 240 s timeout honestly kept +
+      sizing rule); all 764 warps (0,0) → synth==blend everywhere;
+      R_0=22815 attributed per draw (top 6525/28.6%, top-3 40.5%,
+      233/437/93, Σpos 81.6%); bottom-HUD draws identified
+      (bottom-band-exclusive); spanning top-10 corroborates
+      (same 3 heads, overestimates rank-1). Verified: header shas,
+      waits (0/pair/annotation), probe + attempt-1, dumps, analyzer
+      rows, loo guard/search/R_0/hist/pool/dist + top row,
+      PNG sizes, carrier1 VIEWED (green god-ray shafts + rider —
+      matches). Next: M17 (sub-pixel model). Ledger row added.
+- [x] **P13 launched (event-driven, p12 wait fired):** analyzer
+      silent-fold triage — read-only audit of analyzer files
+      beyond `elf_analyzer.cpp` (P24's boundary item) + `[drop]`
+      patch spec (implementation deferred). Reuses P12 pane.
+- [x] **P12 read (09-20) — PASS, unknown ids settled to -1:**
+      kernel re-derived (all 5 workers funnel to shared `-1`;
+      0 `-408`/`-419` immediates in KERNEL); blast radius: 0 host
+      branchers, 311 guest sites censused (305 agnostic, 6
+      conditional on requested-id≡-1, unseen since p1u), 1 stale
+      test updated; `da6a2d5` (5 files +61/-13, pushed): all 5
+      paths → `KE_ERROR`, 4 dead consts swept, P12 test added;
+      suite 431→432/430/2→432/432/0; 0 boots (16-boot census 0 —
+      unreachable); P10 L92's "73/73" validity sentence corrected
+      (wrong address `0x423de8`; true `0x423de0` — CONFIRMED by
+      me). Verified: pushed, BIOS sha + 5/5 miss words, census
+      109/86/20/73/23 + wrong-addr 0, logs, suite RE-RUN BY ME
+      432/432/0, census spot 0×3, stale P1t 1,387,579, waits,
+      scope. Next: P13 (analyzer triage). Ledger row added.
+- [x] **P12 launched (event-driven, p11 wait fired):** settle
+      `KE_UNKNOWN_SEMID` (-408) vs kernel -1 (P10-7.3/P11-7.3
+      carried divergence: re-derive + blast radius + kernel-first
+      fix) with the dead `-419` constexpr sweep as ride-along.
+      Reuses P11 pane.
+- [x] **P11 read (09-20) — PASS, SIF closed + ladder confirmed:**
+      `bfa0213` (+2/-1: constexpr + `:949` retitle, pushed); suite
+      428/427/1 → 428/428/0; pre-split regen matches P1w counts
+      exactly; binary receipts all held pre-boot (32,658,243 B, 8
+      refs, log opts ON); 2 healthy boots ladder vs the triggered
+      post-split baseline with zero shape delta (×1.11 throughput,
+      within variance; epoch `:600-630` identical —
+      shim≡split on the wire); transitive P10-7.1 prediction
+      confirmed. Verified: diff lines, suite logs, output 9276
+      files, binary sha, LOG 7740, epoch diff clean, :614
+      callback, 33/0, census 6, 317/316, GS 96, watch/driver,
+      waits 6 lines, scope. Next: P12 (-408 divergence). Ledger
+      row added.
+- [x] **M16 launched (event-driven, m15 wait fired):** same-frame
+      per-draw residual attribution — warp leave-one-out scan
+      (3-phase capture × per-draw shapes + offline warp per
+      shape). Reuses M15 pane.
+- [x] **M15 read (09-20) — PASS, synth measured vs truth:** 3-phase
+      capture (v0 99×0 + r0, mid +0.05 50×17255, full +0.1 50×24858,
+      all identical); warp method chosen pre-run (mid-matrix
+      re-render correctly rejected as 0-by-construction); masked
+      SAD minimum genuinely (0,0) sharp 4.1× → synth==blend
+      (fnv); residual 13418 B (2.34%, 87% |d|=1), static 95.67%
+      exact; arm-B 791-shape guide (top 7.2%, own frame,
+      caveated); 4 PNGs 497999 B. Verified: header shas,
+      waits (0 waits/2 pairs), probe sizes+sha, dumps 5×573440,
+      analyzer rows (17255/24858/refhash/21599), synth
+      (13418/66599/fnv/dx0dy0), PNG sizes, diffmap VIEWED (red on
+      edges, sky/snow clean — matches). Next: M16 (gap-1
+      attribution). Ledger row added.
+- [x] **P1ad launched (event-driven, p1ac wait fired):** diagnose the
+      NEW park — main-thread `sub_00394ED0` list-walk
+      (bounded-vs-circular via guest-memory trace) + thread-3
+      sema-30 chain + outer loop above `362DE8`; name the fix
+      brief. NOT the BIND sketch (refuted). Reuses held P9 pane,
+      Part 28.
+- [x] **P1ac read (09-20) — PASS, handshake fix works, BIND
+      refuted:** `6447d8b` (gate + hunk + 3 tests) + `45da174`
+      (args ride-along) pushed `4326926..45da174`; poll collapses
+      (cf0 0 blocks, getter 1/1, poller 1/1, receipt + same-bytes
+      send); thread 3 past `0x2290E8` (4 new semas, RPC-client
+      waits, parks sema-30 ra `0x31aca4`); main RUNNING in
+      `394ED0` list-walk (15,989 balanced calls, dma/gif frozen);
+      thread 6 born (WAIT 36); CD 42→810, SIF 18→21, GS exact;
+      BIND refuted ×3 (SendCmd exactly 1, zero `0x40b`,
+      `40B400` 0/0); census now attributed (`0x5b` from
+      `0x42cbb8`, handler `0x80075000`). Verified: both commits +
+      hunk/ride shapes, receipt/send lines, cf0 zero, census 6 +
+      args, creates 37/0, handshakes 65/65 + 4/3, T1/T3/T6 rows,
+      SendCmd×1, zero-40B, suite RE-RUN BY ME 431/431/0, waits,
+      scope. Next: P1ad (new park). Ledger row added.
+- [x] **M15 launched (user picked host synth demo):** milestone 3 on
+      host — synthesize a true intermediate frame from the proven
+      camera seam, measure synth-vs-truth (bytes, distributions,
+      residual carriers, screenshots). Reuses M14 pane. Route
+      criteria doc still queued (needs first frame for the
+      comparison); Odin port follows a successful demo.
+- [x] **P9 read (09-20) — PASS, shim retired, ladder-identical:**
+      `4326926` (+2/-47: CSV row→2, CD.cpp -46 exact inverse of
+      `58c9144`); recomp +1/+1/+1/0 errors, slot 757428 → child,
+      `0x3e3af0` remapped; suite 428/428/0 (transient
+      P10-without-P11 window honestly walked); 2 boots reproduce
+      P25 exactly (:600-630 byte-identical, :612-614 dispatch,
+      :625 driver bytes, 33/0, census 6, watch 1, GS 96/64/48/96;
+      ×2.0 throughput = contention, LOG1-vs-LOG2 ×1.5 proves
+      variance); findings: parent untruncated
+      (merge-keeps-largest-end, dead slice unreachable) +
+      stderr-interleave forensics closed. Verified: pushed on
+      `bfa0213`, CSV rows, shim 0 refs, boundary 5/5, recomp
+      counts + slot, epoch diff clean, trio/driver/rungs, suite
+      LOG 428/428/0 + my re-run 431/431/0 on current tree (P1ac
+      WIP +3, green), waits, scope. Next: pane HELD for P1ad
+      (pending P1ac's BIND confirm). Ledger row added.
+- [x] **P1ac launched (event-driven, p1ab wait fired):** SIF
+      ready-handshake completion (§P26-3c: SSX3-gated SET_SREG(1)
+      → `sregs[1]=1` + receipt line in `sceSifSendCmd`) + the
+      override-args one-liner ride-along; 2 proof boots expect the
+      poll to exit and thread 3 to advance past `0x2290E8`. Reuses
+      P1ab pane, Part 27.
+- [x] **P1ab read (09-20) — PASS, stall attributed to missing IOP
+      SIF peer:** `0x52BE04` = `sregs[1]` (.bss, shape-matched to
+      ps2sdk `sifcmd.c`); setter has 0 callers (JAL/word/lui
+      sweeps), no guest store can form the address, all 32 slots
+      silent post-init across 2 boots; poller sends
+      `SET_SREG(1,1)` then spins; host audit: SendCmd no-op,
+      handler map write-only (4 refs), zero SIF0 emulation;
+      candidates 1–5 excluded, #6 (IOP reply via EE set_sreg)
+      attributed with responder narrowed (MSIFRPC/LIBNET pair);
+      fix brief P1ac + P1ad sketch named; P25's "Missing 0"
+      corrected (counting convention). Verified: bss/gp/JAL
+      arithmetic, sweeps (getter 2 @ exact VAs, setter/base2 0),
+      ps2sdk lines, mailbox shapes, LOG 7827/6945, census 6 +
+      0x5b×6 correlation, send bytes, watch 16/16 init-only,
+      17/17 poll + setter 0, creates 33/0, handshake 321/320,
+      waits, zero fork commits, scope. Next: P1ac (fix). Ledger
+      row added.
+- [x] **P11 launched (event-driven, p10 wait fired):** SIF `:949`
+      one-liner (`-419`→`-1`) + ladder-confirmation boots with a
+      size-checked game image (the check P10 missed is a receipt
+      here) reuses P10 pane. Baseline: P25-boot1, or post-split
+      ladder if P9 has landed (brief states which).
+- [x] **P10 read (09-20) — PASS, PollSema settled to -1 (ladder
+      carried):** kernel re-derived (table slots + `blez`→shared
+      `jr`/`-1` pair, no -419 in KERNEL — CONFIRMED); blast radius:
+      0 host branchers, 23/23 guest consumers value-agnostic (F6
+      beq-drain + id-compares + sign tests), 1 stale SIF expectation
+      out of scope; `69bb1ff` (+41/-1, pushed): miss → `KE_ERROR` +
+      new test; BEFORE/AFTER 428/427/1 (P10 face) → 428/427/1 (SIF
+      face); both boots burned on game-less binary (438 B stub +
+      missed log opts — diagnosed, patch exonerated ×5, recipe
+      recorded). Verified: pushed, BIOS sha + 3/3 words (true-word
+      convention — my first compare used byte order, redone), JAL
+      census 23/23 on the TRUE word (report prose has a nibble typo
+      `9F7C`/`8F7C` — analysis used the right value), F6 drain
+      decode, suite RE-RUN BY ME 428/427/1 SIF face, 152-line stall
+      logs, waits, scope. Next: P11 (SIF one-liner + ladder
+      confirm). Ledger row added.
+- [x] **P1ab + P9 + P10 launched (event-driven, waits fired):**
+      P1ab (0x52BE04 diagnosis with census in hand, Part 26) reuses
+      P1aa pane; P9 (shim→CSV-split at 0x3E3AD8 + ladder-identical
+      proof) reuses P7 pane; P10 (PollSema -1/-419 divergence,
+      kernel-first per §7.5) reuses P8 pane. All disjoint fork
+      files; lease serializes ≤6 boots.
+- [x] **P8 read (09-20) — PASS, pad/sound surface fully mapped:**
+      15/28 libpad calls from one wrapper region (args dynamic);
+      zero sceSd*/libsd evidence — EA drives SNDDRV via SIF/RPC
+      (`BindRpc sid=0x534E44`, `AddCmdHandler cid=1`); fork: pad
+      implemented incl. host backends (rumble no-op), SIF transport
+      fake-OK, SSX3/net SIDs unclaimed→silent fallback, ~90
+      unreachable `sceSd*` crash-stubs; menu-ordered work list
+      (items 1–4 menu, 5–6 gameplay) + JALR caveat. Verified: ELF
+      md5/bytes, zero pad/sd strings, IRX names, `lui/ori` pair =
+      `0x534E44` + `jal BindRpc` (my first grep missed the split
+      immediate — re-derived), 90 TODO_NAMED, sid gate, TSV rows,
+      drift-note content, zero fork commits. Next: none until
+      runtime contact (list banked). Ledger row added.
+- [x] **P7 read (09-20) — PASS, movies surveyed + stub landed:**
+      14 `.mpc` (MPEG-2 ES at off 8 in `MPCh` framing, video-only per
+      ffprobe); boot order eabig→thx→intro_dj→intro from table
+      `0x441248` (all 4 slots read in `sub_001A1CE8`); playback chain
+      sequencer→RCMP cluster→libmpeg (`Init/Create/AddBs/AddCallback`
+      + `GetPicture` only); `e235c4b` (2 files +203, unwired —
+      recipe recorded, first-firing grep line given);
+      build-verify + 13/13 harness + suite green; runtime honestly
+      unverified. Verified: pushed (fork HEAD), 14 files, BOOT2,
+      magic+seqhdr, 3/3 string VAs, boot table exact, harness PASS,
+      suite RE-RUN BY ME 427/427/0. Next: none until ladder contact
+      (decoder gaps banked). Ledger row added.
+- [x] **P1aa read (09-20) — PASS, kernel-true amendment applied:**
+      `f26f273` (+61/-31: clamp deleted, max stored as-is, OVF block
+      deleted, test updated + 2-signal window test); BEFORE proves
+      the wedge (426/1: `maxCount`=1, OVF fires, 2nd wait parks +
+      throws), AFTER all green; boots park on 0x52BE04 identical
+      (33/0, 86/85 handshake, census 6 same lines, GS/CD/SIF exact;
+      ~0.35× throughput = contention); no `effmax`/`KE_SEMA_OVF`
+      emissions remain. Verified: pushed, removed-lines grep,
+      `effectiveMax` gone, LOG 3507/3459, census 6, -1 waits 0,
+      creates 33, watch line, handshake 86/85, waits 3 lines,
+      before/after logs. Next: P1ab (0x52BE04 diagnosis). Ledger
+      row added.
+- [x] **P1x-path decision 09-20 (user): DEFER Devel build to the Mac
+      mini** (RAM + CPU headroom). Approach banked: APFS sparsebundle
+      on the SSD (symlinks/perms), aqtinstall Qt to SSD prefix,
+      TMPDIR into workspace — zero new internal-disk footprint.
+      Joins the mini day-one list (with S1 + P-lane builds/boots).
+      Trace stays parked; 0x52BE04 diagnosis goes first with the
+      `[drop]` census.
+- [x] **P1aa launched (immediate poll, user: don't wait):** P1v
+      amendment (P1z A1–A3: store max as-is, delete OVF block,
+      update + extend test) reuses P1w pane; ≤2 lease-gated boots
+      prove the ladder still reaches 0x52BE04. Frontier note:
+      semantics already settled by kernel evidence per §7.5 — no
+      muse semantics judgment in this brief. I-lane parked; M15 +
+      P1x-path still queued-for-user. p1y finishing, p7/p8 working.
+- [x] **I7 read (09-19/20) — PASS, FIRST WINDOW + audio wall:**
+      `9c7b028` (SDL2main link + rename, pushed) then scene trap
+      (SIGTRAP before SDL_main) → miniprobe A/B proof (1.3 MB
+      repro, manifest fixes) → `2655264` (manifest template; carried
+      up by orchestrator as `c41efce` after I7's push was blocked —
+      gap 3 closed); build2: SDL video OK, GL ES 2.0 + shaders +
+      font, window photographed (black, foreground, viewed by me);
+      next wall: miniaudio CoreAudio RPC-timeout abort in
+      `InitAudioDevice` (loadELF still unreached; probe C exonerates
+      sim audio). Verified: `9c7b028` pushed, `c41efce` on
+      `fork/ssx3`, manifest+id+bytes, nm (SDL_main/UIKitRunApp/local
+      _main/LC_MAIN), 296, launch6 43 lines + GL lines, crash 4
+      markers + RPC line, probes B/C clean, screenshot viewed, sim
+      Shutdown. Next: I-LANE PARKED (first-launch receipt complete;
+      audio wall queued for unpark). Ledger row added.
+- [x] **P1y read (09-19/20) — PASS, suite green 427/427/0:** 10/10
+      repro on GsSyncV face (2 bit-identical clean builds);
+      isolation (alone/subset/suite identical — no order
+      dependence); root cause = stale test (`0x01F00000` floor from
+      `f4309cd`, pool moved to `[0x80000,0x100000)` by `6046260`,
+      assertion never updated); fix pins both bounds (+5/-1,
+      `2caf17c` pushed); after: 5× 426/426/0 + 5× 427/427/0 on
+      rebased tree; AFAIL face unreproduced (shared-incremental-build
+      hypothesis, honestly unresolved). Verified: one-file push, -S
+      history, pool bounds in source, repro log 426, suite RE-RUN BY
+      ME 427/427/0. Next: none (lane item closed). Ledger row added.
+- [x] **P1w read (09-19/20) — PASS, config tracked + census live:**
+      `5b5ac3d` (TOML+CSV 2 files +10897; TOML also untracked —
+      4-hunk absolutization, no loader change; recomp end-to-end
+      identical: 9274 map, 4/4 shas); `ed387c7` (179-site `[drop]`
+      census, default-on, `PS2X_DROP_SILENCE` switch, 12 exclusion
+      rules); boots park on 0x52BE04 with a 6-line census (all
+      `dispatchSyscallOverride` KE_ERROR :53-58, args gap noted);
+      kill-switch proven (boot2: 0 lines); ladder check identical
+      (33/0 creates, handshake balanced, GS/CD/SIF exact; ~0.8×
+      throughput = P1x contention, recorded). Verified: both
+      commits pushed, CSV cmp clean, LOG 6588/6133, 6-line census
+      verbatim, boot2 zero, binary `156f493b`, lease released, site
+      grep ≈179 + helper/test. Next: P1aa (P1v amendment). Ledger
+      row added.
+- [x] **P7 + P8 launched 09-19 (user: stub movies, parallelize
+      pad/sound):** P7 (movie disc survey + HLE completion stub,
+      build-verified, runtime firing deferred) reuses P1x pane; P8
+      (pad/sound API surface + fork inventory + host backends,
+      read-only, menu-ordered work list) reuses P1z pane. **User
+      decision:** stub intro movies to reach menu work first (decoder
+      revisited after frames). Implementation briefs wait for runtime
+      contact (P1w census + ladder). Upstream stance unchanged:
+      someday, after the route is proved — commits stay
+      upstream-shaped meanwhile.
+- [x] **I7 launched 09-19 (poll, launch authority):** UIKit-entry
+      wiring (I6 gap 1) reuses I6 pane. Rec-#9 tension noted: parking
+      now would strand the lane on a crashing no-window binary, and
+      the phone changes nothing about UIKit entry — I7 completes the
+      first-launch receipt (first window), park after. Queued-for-user:
+      M15 scope, P1x path (Devel build vs Rosetta), P1z amendment
+      after P1w (+frontier trigger). p1w/p1y still working (final
+      steps).
+- [x] **I6 read (09-19) — PASS, install fixed, main runs, SDL wall
+      found:** `bdae295` one-hunk (GUI identifier, desktop-inert)
+      pushed first-try (carried P-lane `8d10619` up); rebuild
+      120264208 B, symbols/linkage reproduce I5 + identifier; install
+      exit 0, listapps provisioned; no-arg launch clean-fatals on
+      missing ELF path (main ran); argv probe reaches `InitWindow` →
+      SDL video fails → SEGV in `rlLoadTexture` (ips captured, stack
+      to main); no window; harness lessons (ExFAT EPERM →
+      --console+redirect; exit-0-despite-crash) as standing rules.
+      Verified: one-hunk pushed (P1w `5b5ac3d` now on top), bundle id
+      + bytes, console sizes, SDL line, crash 4 markers, 292, sim
+      Shutdown. Next: I7 (UIKit entry). Ledger row added.
+- [x] **P1z read (09-19) — PASS, kernel settles it: P1v AMENDED:**
+      stock CreateSema @`0x800049b8` (table `0x80014f40[0x40]`): only
+      -1 paths are freelist-empty + init<0; max stored as-is, never
+      read by signal/wait/poll (Refer-only) → no OVF possible on the
+      EE path; verdict: success CONFIRMED, clamp-1→store-as-is
+      AMENDED, OVF-check→delete AMENDED (exact A1–A3 spelled, no edit
+      made); bonus divergence noted (PollSema -1 vs fork -419).
+      Verified: BIOS pristine (sha = P1x's independent hash), 9/9
+      words re-derived (my first pass had a 0x100 hex slip — caught
+      by the receipt mismatch, redone), 0 branches in success
+      stretch, SSD receipts, commit scope. Next: amendment brief
+      AFTER P1w lands (same file) + frontier-read trigger flagged.
+      Ledger row added.
+- [x] **P1x read (09-19) — PASS, negative result with receipts +
+      cheapest path:** trace unproducible: B1 x86_64-only APP + no
+      Rosetta (Bad CPU type rc=1, no oahd), B2 Release compiles all
+      trace channels out (DEVBUILD gate `Debug.h:216-220`, only
+      Debug/Devel define it), B3 -nogui still needs a display
+      (QtHost main/show lines); full CLI/channel survey + §P23-2d
+      fill-in map with gap rows (thread-table/sch + stub-histogram
+      unmappable — no channels) + ranked path (arm64 Devel, or
+      Rosetta + x86_64 Devel) + unexecuted capture recipe; inputs
+      hashed in `$W/P1/ref`. Verified: B1/B2/B3 reproduced from
+      source+exec, BIOS sha matches P1z's, ref dir + BLOCKED marker,
+      commit scope 1 file, no fork contact. Next: QUEUED-FOR-USER
+      (downloads + Qt build + GUI session, or Rosetta restore).
+      Ledger row added.
+- [x] **M14 read (09-19) — PASS, camera-delta payoff + drawscan
+      carriers:** step 2: slot-0 +0.1 moves 53636/573440 B identically
+      on 100/100 delta replays vs the rendered ref (pristine 99×0 +
+      r0 127103); step 3 autoscan (2P+2D, 644 shapes, 643 spans ok):
+      one draw carries 8293 B (19%), next 1714, 229+/333 zero/81
+      negative (worst −990), 619/644 uniform (25 spread ≤10 B); det3
+      exact-fit attempt honestly kept (kref=0, 573× share inflation →
+      motivated the re-run). Verified: header shas (`40533e4d`
+      committed, `b09643b1` M13), waits (3 waits/4 pairs never
+      forced), probe bytes exact ×4, analyzer det2 (53636/refhash/
+      gt0-100) + det4 (44087). Next: M15 QUEUED-FOR-USER
+      (milestone-3 scope). Ledger row added.
+- [x] **P1y + P1z launched 09-19 (beyond 4 panes, user lifted the
+      cap — CPU/Odin is the only budget):** P1y (flaky AFAIL↔GsSyncV
+      fix, own SSD build dir, no lease) in new tab t1C; P1z (EE kernel
+      CreateSema disassembly settles P1v rule, read-only) in new tab
+      t1D. Six agents live: p1w/p1x/p1y/p1z/m14/i6, none on Odin.
+- [x] **Steering answers 09-19 (user picked all recommendations):**
+      tooling-first (P1w = no-silent-drops + CSV tracking, P1x = PCSX2
+      ref trace in parallel); CSV → fork branch; frontier direction
+      reads at fixed points (after each behavior fix, park survives 3
+      briefs, before semantics changes — the 09-19 review counts as
+      the P1v-landing read). P1w reuses P1v pane, P1x reuses G6 pane.
+      Queued behind them: 0x52BE04 diagnosis (with census+trace in
+      hand), kernel-CreateSema check, flaky test to next free pane,
+      shim→split after CSV lands, movies stub default, I-lane park
+      after first launch, route criteria at M14+first-frame.
+- [x] **Frontier review 09-19 read (orchestrator):**
+      `docs/research/review-2026-09-19-progress.md` (8-park boot
+      ladder, SYNCTASK 10-brief post-mortem, 23-commit fork
+      inventory, 10 recs + 8 branch decisions). Queued: no-silent-drops
+      tooling, PCSX2 ref trace, CSV home, game-expects-X rule +
+      kernel-CreateSema check, movies stub default, flaky test (now
+      seen flipping AFAIL↔GsSyncV again on this tree), I-lane park
+      after first launch, route criteria. **User decision mirrored:**
+      no upstream submission until the user proves the route and reads
+      the code. Steering answers asked 09-19 evening; P-lane follow-up
+      held for them (default: P1w diagnoses 0x52BE04).
+- [x] **P1v read (09-19) — PASS, THE FIX WORKS, new stall found:**
+      `8d10619` (+46/-2, exact-0→binary): F2 pair returns 28/29, -1
+      waits 257,125→0; thread 3 runs (sch≠0 all 17 blocks, consumed
+      id-30 twice); thread 1 genuinely blocks (323 F6 waits / 322 F7
+      wakes); old outer loop exited (phase → `sub_316F00`); new stall
+      = thread-3 poll on never-written `0x52BE04` (~2.2M/block,
+      boot-2 watch shows loader-init line only). I6's `bdae295`
+      landed on top and carried the push. Verified: +46/-2 pushed,
+      LOG 7852/7915, F2 verbatim ×2, -1 census 0, 0x425cf0 17/17,
+      :630 park / :636 wake, binary `52f766a5`, tests re-run by me
+      (426/425/1 — AFAIL face, the documented flip), lease released,
+      worktree clean. Next: P1w HELD for steering. Ledger row added.
+- [x] **I5 read (09-19) — PASS, install blocked on missing bundle
+      id:** `simctl install` exit 13 (IXErrorDomain, Missing bundle
+      ID); Info.plist has 19 keys, zero `CFBundleIdentifier`; no
+      launch attempted per stop rule (no window, no crash, no logs —
+      screenshot absence reasoned); static entry table:
+      `_main`+`_SDL_Init`+`_InitWindow` present, SDL2main still
+      unlinked (292 SDL symbols, matches I4), adhoc sig,
+      `main.cpp:167` argv→loadELF, fork CMake sets no bundle id; 4 gap
+      rows with exact next briefs (gap 1 = I6). Verified:
+      install.log verbatim, plist grep 0 + 3 keys, nm 3 lines + 292,
+      codesign adhoc/19, otool head, trailer, sim Shutdown, 44K
+      evidence. Next: I6 (bundle-id fix + rebuild + re-measure).
+      Ledger row added.
+- [x] **I4 read (09-19) — PASS, simulator binary BUILT:** SDL2
+      2.32.10 static arm64 (2.1 MB, 266/266) → raylib 5.5-SDL-ES2
+      arm64 (ObjC-mode retry; linkprobe proved compile-scoped `-x`)
+      → 2 fork commits (+12 iOS-SDL select, +7 ObjC mode), pushed,
+      desktop-proof (`no work to do`, tests 424/425 same failure) →
+      runtime configure exit 0 (G1/G3 gone) → Release BUILD
+      SUCCEEDED: 120 MB arm64 `.app` (292 SDL symbols, InitWindow +
+      SDL_Init, SDL framework linkage). Debug config stalls in -O0
+      codegen on the 32 MB unity TU (terminated, receipted). .app
+      never launched (I5). Verified: both diffs, all 3 products
+      (bytes/arch/symbols), linkage set, no sims booted, internal
+      disk still 41G (25G scratch on SSD). Ledger row added.
+- [x] **M13 read (09-19) — PASS, slot-36 partitioned + per-draw scan
+      works:** slot-36 windows on one frame (3001 / 890 / 3001
+      fail-closed-verbatim / 1553-1561 24-25-uniform) → shares
+      2111/0/1440; drawscan: 31 shapes, one draw carries 884 B, five
+      31–221 B, three negative (-1/-6/-3), eighteen exactly 0, every
+      shape uniform; pre-fix det3 attempt honestly kept
+      (delta-armed-all bug + exit -5). Verified: header shas,
+      analyzer rows, guard receipts, window/shape rows + refhashes,
+      3/3 hashes, lease log (0 waits). Ledger row added.
+- [x] **P1u read (09-19) — PASS, `-1` attributed to zero-max
+      CreateSema:** F2 ctor table + full field layout; sole writer
+      #2 store; dynamic census (33 creates, exactly the 2 zero-param
+      fail with -1, singleton `s0` 257,125×); game expects zero-max
+      to succeed (host-parity gap, not guest bug); thread-3
+      flag-clearer starved by the no-block spin (prio 100 beats 101).
+      Verified: 33 lines + F2 4 verbatim, s0 singleton, `de7ff17`
+      +51/-7 pushed, host rule in source, ELF 6/6, binary fresh.
+      Next: P1v (the max_count validation decision). Ledger row added.
+- [x] **P1v + M14 + I5 launched (09-19, standing order):** P1v
+      (FIX: zero-max CreateSema parity from real-PS2 evidence + ≤2
+      boots) reuses P1u pane; M14 (camera-delta true delta +
+      drawscan carriers) reuses M13 pane; I5 (first Simulator
+      launch: install/run/window-or-crash) reuses I4 pane. Remaining
+      queue: `sceGsSyncVCallback` test fix (fork, after P1v).
+- [x] **Standing order (09-19, user): keep queueing follow-ups without
+      asking unless input is needed.** Holds: publishes/pushes in ssx3
+      (never), external submits. (I-lane hold lifted: SDL path chosen.)
+      Polls now carry launch authority too (cron recreated 09-19 —
+      no more idle lanes between user check-ins).
+- [x] **I4 launched (09-19, user picked SDL path):** SDL2 for
+      iphonesimulator + raylib-SDL build + fork CMake integration +
+      runtime configure/build attempt. Reuses I3 pane. Standing-order
+      hold on I-lane lifted for C.
+- [x] **P1u + M13 launched (09-19, standing order):** P1u (attribute
+      the `-1` sema slot: struct + writers + loop intent, ≤2 boots)
+      reuses P1t pane; M13 (slot-36 same-frame partition + time-boxed
+      per-draw depth attempt) reuses M12 pane. Remaining queue:
+      `sceGsSyncVCallback` test fix (fork, after P1u).
+- [x] **P1t read (09-19) — PASS, THE FIX WORKS, new stall found:**
+      `58c9144` (+46, pc-keyed shim, yields to future splits):
+      callback body ran (1 `ra=0x3e3af0` line), worker consumed,
+      passed G6, issued site #9, driver ran; entry-0 cycled 0→1→0
+      (SET @ `0x3de468`, CLEAR @ `0x3e6518`); thread 1 left the park
+      (cycles `0x3e5980`/`0x31a278`/others) and now spins on
+      `WaitSema(-1)` (1.39M `KE_UNKNOWN_SEMID`, `sub_0031A6B8` —
+      slot writer unattributed, next brief owns it); before/after
+      dispatch receipts prove no leakage (old `-1`-less loop gone is
+      the intended effect). Tests 424/425 before/after identical
+      (GsSyncV — and the AFAIL↔GsSyncV flip across builds is now
+      documented 2nd-order weirdness). Verified: line counts,
+      signal line, epoch, -1 census (1387579+24+57 interleave),
+      entry-0 lines, +46 pushed, binary sha, tests re-run by me
+      (424/425, GsSyncV named). Next: P1u (the `-1` stall). Ledger
+      row added.
+- [x] **I3 read (09-19) — PASS, raylib decision fully tabled:** A:
+      no release/master has an iOS backend (PR #3880 closed
+      unmerged); 6.0 breaks itemized, project uses 0 changed APIs;
+      B: `ghera/raylib-iOS` prior art (789-line backend + ANGLE
+      packaging) sized with file table; C: SDL probe configures
+      (C2 exit 0) + TU probes (rcore clean, raudio needs ObjC);
+      G7 touch gap persists under B/C. No verdict given, as
+      briefed. Verified: 6.0 enum/platforms, rlImGui tag, 789 lines,
+      C2 log, syntax logs, 26 SDL files, fork untouched by I3, disk
+      41G. DECISION OWED (orchestrator → user): upgrade / fork-patch
+      / SDL. Ledger row added.
+- [x] **M12 read (09-19) — PASS, same-frame partition measured:**
+      4 windows × 25/25 uniform on one frame (70584 / 2572 / 33377 /
+      34105); removed shares 68012 / 37207 / 36479 with the honest
+      non-additivity (105219 vs 70584) tabulated; slot-36 indexed
+      decode on 2 frames (pos 0/0, Tex1 254/92, Tex2-indexed 0) +
+      own true deltas (1372/1827 B); per-draw depth restated open
+      (no header hook, re-verified). Verified: header shas,
+      analyzer rows, window rows verbatim, 6 refhashes, 3/3 hashes,
+      lease log (0 waits). Ledger row added.
+- [x] **P1t + M12 + I3 launched (09-19, user go-ahead):** P1t (FIX:
+      mid-label invocation dispatch, first behavior fix + ≤2 boots)
+      reuses P1s pane; M12 (same-frame partition via alternating NOP
+      streams + slot-36 indexed decode) reuses M11 pane; I3 (raylib
+      decision spike: upgrade/fork-patch/SDL evidence, read-only, no
+      verdict) reuses I2 pane. Remaining queue: `sceGsSyncVCallback`
+      test fix (fork, after P1t).
+- [x] **M11 read (09-19) — PASS, partitions measured:** slot-36 delta
+      moves 501 B on 100/100 (texcoord stage excluded); `pnmtxidx`
+      decoded (49–118 exposed draws/frame, cross-checked vs M9);
+      indexed-only arm 498 B + shared-only arm 72719 B surviving;
+      NOPTEXT arm 44470 B surviving (texture epochs cancel by
+      restore). Honest frame-confounded caveat throughout (each arm
+      its own frame — same-frame partition open). Verified: header
+      shas, analyzer rows, ref2 rows + all 4 refhashes, 6/6 hashes,
+      lease log (0 waits). Ledger row added.
+- [x] **I2 read (09-19) — PASS, CMake fixes land, raylib wall stands:**
+      3 commits (G4 BUNDLE DESTINATION +17/-5, G6 FFmpeg-iOS-OFF,
+      G5 ARM-inference + FATAL guard), pushed; desktop-proof
+      (cmake_install byte-identical `790994cb`, build green, tests
+      424/425 same pre-existing failure — which independently re-names
+      the queued test fix); probe A hits G1 (enum rejects iOS),
+      probe B passes G4/G6 and dies on G3 (OPENGL_LIBRARY NOTFOUND);
+      raylib untouched per scope. One disclosed nit: desktop build
+      compiled with P1s's then-uncommitted edit present (CMake-only
+      fixes unaffected). Verified: 3 diffs, sha, 4 log lines, no sims
+      booted, scratch 196K. Next: I3 = the raylib decision (needs a
+      scope call: upgrade / fork-patch / SDL switch). Ledger row added.
+- [x] **P1s read (09-19) — PASS, callback body never dispatched:**
+      signal path intact (no callback guard anywhere — identical wake
+      decision both paths); the CD callback invocation is attached
+      then SILENTLY dropped (`hasFunction(0x3e3ad8)` false, mid-label,
+      pc zeroed, popped, no trace); signal census complete (1360×29
+      from `0x31abf0`, pump 66×4 + 8×5 thread-site only, pump-i 0,
+      callback site 0); pump semas named. So sema-26 "non-delivery" =
+      non-dispatch: the fix is a table entry / mid-label invocation
+      rule, not scheduler wake logic. Next: P1t (fix brief).
+      Verified: 2917 sema lines, 3-line record verbatim, absences,
+      census incl. 66+8 split, CSV absence, fork pushed. Ledger row added.
+- [x] **P1s + M11 + I2 launched (09-19, user go-ahead):** P1s (sema-26
+      delivery mechanism: signal/wait paths + `Diag:` commit + ≤2
+      boots) reuses P1r pane; M11 (slot-36 delta + indexed partition
+      + NOPTEXT share) reuses M10 pane; I2 (fork CMake fixes G4/G6/G5
+      + configure/build attempt, raylib wall out of scope) reuses I1
+      pane. Note: P1s + I2 share the fork tree (different files;
+      both briefed pull --rebase-and-retry-once on push reject).
+      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1s).
+- [x] **I1 read (09-19) — PASS, spike correctly FAILED with receipted
+      gaps:** pinned raylib 5.5 has NO iOS backend (enum rejects iOS,
+      no `rcore_ios`, bundled GLFW/RGFW iOS-free); configure dies on
+      the fork `install()` missing BUNDLE DESTINATION (all 4 attempts,
+      2 generators — needs a fork CMake edit, out of spike scope);
+      sse2neon fixed by toolchain v2; FFmpeg host dylibs can't link
+      iOS (mirror Android OFF); touch input nowhere (runtime +
+      rlImGui). 7 gaps (3 dep-code sharing one root, 3 config, 1
+      platform). Constraints obeyed: runtimes unchanged, fork
+      untouched, scratch 112K, heavy dirs on SSD, disk still 42G
+      free. Verified: enum/platforms, install line, error in log,
+      SSD dirs, runtimes, disk. Next: I2 needs fork write access.
+      Ledger row added.
+- [x] **M10 read (09-19) — PASS, zero-pixel mystery SOLVED:** order
+      excluded (0/689 consuming draws before first covering load),
+      matrices live (11/11 siblings bit-identical, live==snap),
+      visibility excluded (96–99% in-range, 0 culled) — and the
+      pixel-compare audit proves M7/M8/M9 "0 pixels" measured the
+      skip-to-VRAM uninit pattern, not rendered output (det5/det6
+      NOP-all contrast 0/200 vs 200/200). True-delta arm: slot-0
+      delta moves 32954/573440 bytes on 100/100 replays vs rendered
+      pristine ref. Open: per-draw depth, indexed-path partition,
+      texture-mediated share, slot-36 delta. Verified: header shas,
+      analyzer rows, ref2 event verbatim, 7/7 hashes, lease log (0
+      waits). Ledger row added.
+- [x] **P1r read (09-19) — PASS, signal-during-park ORDER proven:**
+      worker wakes once on 3E4648's signal, passes G1/G2/G3/G5,
+      issues the CD read, re-parks at G0 BEFORE the callback's
+      signal (:433→:434); site #9 never reached, G6 never evaluated;
+      site #7 never armed (topbyte-1 path A). Poll registration
+      (`0x3e33b0` via table + `jalr`) + worker-thread trigger closed
+      statically; 77 ELF words machine-checked. Delivery mechanism
+      stays out of scope — but it is now THE critical-path item (P1s
+      should take sema-26 delivery; nothing else unblocks FILESYS).
+      Verified: 57 watches + epoch lines verbatim, thread-2 sch,
+      ELF spot, P6 802 lines, fork untouched, waits log (M10
+      deference). Ledger row added.
+- [x] **P1r launched (09-19):** CD-completion→W1 gap — worker path
+      gates + poll registration + lost-wake candidates statically,
+      minimal watch set dynamically (≤2 boots). Reuses P1q pane.
+      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1r).
+- [x] **P1q read (09-19) — PASS, entry 0 never queued + slot-reuse
+      decoded:** entry 0 fills (id `0x900001`, prio `0x64`) but takes
+      `3DDAC0` path B (no device match — `+0x24` never written, never
+      enqueued, `+0x2C` stays 0); full 12-word entry layout + 7
+      allocators + 5 dequeue predicates + nibble→case dispatch (jump
+      table 9/9 ELF) + all 10 W1 sites tabled; entry-1 "re-select" is
+      slot reuse (cleared, re-alloc'd nibble 4/id 3, selected for a CD
+      read whose callback fires but never reaches W1 — the chain
+      breaks at CD→W1, poll-vs-lost-wake open). Verified: 38 watch
+      lines + key lines verbatim, jump table, ELF spot, P6 row, fork
+      untouched, lease clean. Next: P1r. Ledger row added.
+- [x] **I1 launched (09-19, user go-ahead):** iOS spike — dep
+      inventory + platform surface + configure/build attempts for
+      iphonesimulator arm64, gaps as fix-classed rows, no fixes.
+      Read-only in fork, no lease, no device. Reuses P6 pane. First
+      agent on `--reasoning-effort max`. Constraints (user, steered
+      mid-run): ONLY the installed iOS 27.0 runtime + existing
+      devices, never download runtimes; internal disk 42 GB free —
+      scratch in `/tmp/ps2x-ios-spike`, >500 MB to SSD, never touch
+      other agents' build dirs.
+- [x] **P1q + M10 launched (09-19):** P1q (why entry 0 is never
+      selected/completed: entry contents + ExecCommand selection +
+      completion trigger, ≤2 boots) reuses P1p pane; M10
+      (discriminating instruments: hit/draw order + full matrices +
+      render-target/occlusion) reuses M9 pane. G-lane resting.
+      Remaining queue: `sceGsSyncVCallback` test fix (fork, after P1q).
+- [x] **M9 read (09-19) — PASS, residue narrowed hard:** VAT+texgen
+      closed (M8's 1346-draw Tex2 reach corrected to 21 shared+enabled;
+      slot-0 shared-pos reach 664–800); upload timing EXCLUDED
+      (snapshots hold perturbed values 200/200, dirty flags fire);
+      shadow copy EXCLUDED; yet 21 Tex2 + 800 Pos draws consume
+      perturbed matrices with 0/200 pixels differing. Residue: hit/draw
+      order, full-matrix values, render-target/occlusion, texcoord
+      stage — discriminating instruments specified, not built (M10).
+      Verified: header sha, analyzer rows, xform_stats ×2 verbatim,
+      4/4 hashes, lease log (1 P1p wait). Ledger row added.
+- [x] **G6 read (09-19) — PASS, -O2 collapses the delta:** Release
+      (-O3) CTest 12/12 green, no fixes; cpu median 15.8→0.36 ms —
+      the G4 fast-path advantage vanishes (all backends ~0.35–0.55,
+      within noise); -O0 columns re-measured in-session and match
+      G4/G5; PR prep file written with verified figures, nothing
+      submitted, no network writes. Verified: ninja flags, CTest
+      re-run, spot timing both exact, PR.md base rev, CMakeLists +
+      upstream untouched by G6, pushed. Implication recorded: CPU
+      backend at release is sub-ms on synthetics — GPU urgency
+      question reopens on game-sized frames. Ledger row added.
+- [x] **P1p read (09-19) — PASS, entry-0 flag never set:** table base
+      `0x5e0080` + current-entry transitions (entry 1 / null, never
+      entry 0) learned; entry-0+8 = `0x5e0088` watched: exactly ONE
+      hit, an init-time zeroing `sd` @ `0x3e64d0` (memset loop in
+      `sub_003E6448`); W1/W2/W3 all silent across the boot. So the
+      SYNCTASK wait never exits because entry 0 is never completed —
+      current entry is entry 1. Next: P1q (why is entry 0 never
+      selected/completed?). Verified: 9 + 1 watch lines verbatim,
+      counts, ELF 3/3, P6 absence, fork untouched, lease clean.
+      Ledger row added.
+- [x] **G6 launched (09-19, user go-ahead):** Release-build numbers
+      (-O2 CTest + timing tables on all four backends vs -O0) +
+      upstream PR prep (`upstream-patches/PR.md`, verified figures,
+      NO submit). Reuses G5 pane. 4h box, no lease.
+- [x] **P1p + M9 launched (09-19, user go-ahead):** P1p (which flag
+      writer fires for entry 0: table-addrs boot + writer-catch boot,
+      max 2) reuses P1o pane; M9 (VAT/texgen closure + upload-timing
+      survival test + PosNormal-path delta) reuses M8 pane. G-lane
+      RESTING (G1 still gated; upstream submission needs an explicit
+      publish call). Remaining queue: `sceGsSyncVCallback` test fix
+      (fork, after P1p).
+- [x] **M8 read (09-19) — PASS, propagation scoped, mechanism open:**
+      baseline reproduces M7; slot census on 3 frames (slot 0 read +
+      796–906 PosNormal draws — NOT unused, deepening M7's puzzle;
+      7-way all-draws tie at 36/39/42/45/48/51/60); slot-36 delta
+      (53 hits/replay, Tex2-only) moves zero pixels → re-scoped per
+      the clause to "seam writes don't reach rendering"; projection
+      UNREACHABLE (2 seam call sites, regs branch has none,
+      regcalls=0/514k, 11 proj writes all via regs path). Honest
+      gaps: VAT/indexed-vs-shared split, per-draw texgen enablement
+      undecided. Next: M9 (upload-timing/shadow-copy mechanism + a
+      PosNormal-path delta). Verified: header sha, analyzer rows,
+      xform_stats verbatim ×2, 4/4 hashes, lease log (1 P1n wait).
+      Ledger row added.
+- [x] **G5 read (09-19) — PASS, spikes are real patches:** 3 files
+      (6/5/4 hunks, 4376/4893/4638 B), each dry-run clean solo on my
+      own scratch copy; proof target (`patched-cpu`, build-time
+      apply, submodule pristine) identity-exact on 102/102 with G4's
+      timings reproduced (0.55 standard, 6.1 multi); CTest 12/12
+      (11 old + patched-identity). Patches inherit G3/G4 caveats,
+      disclosed; not submitted upstream. Verified: hunks/bytes,
+      dry-runs, submodule rev, smoke replay, CTest re-run, pushed.
+      Ledger row added.
+- [x] **P1o read (09-19) — PASS, caller saga CLOSED + writers named:**
+      true-frame watch lands exactly 1 hit each (`0x900001` @
+      `0x3dd1e0`, `0x3ded88` @ `0x3dd214`, sp `0x1fffe00`) with the
+      probe line byte-identical to p1n; parked `$a0` top byte `0x00`
+      → entry 0; static hunt names ONE `0x519AD8` writer (`0x3dccfc`,
+      table from `systemInit`-called allocator) + THREE flag writers
+      (W1 `0x3de468` = P6 `iFILESYS_CommandCompleteCallback`, W2
+      `0x3dd83c` = 1, W3 `0x3ddd30` = −2) with full exclusion census
+      + 14 ELF words, all machine-checked (standing rule obeyed —
+      paste block present); brief's slot formula corrected (stride
+      `0x10`, not +8·slot). Open: which writer fires for entry 0 at
+      runtime (receipt designed: watch `0x519AD8`+`0x519AD4`). Lease
+      exemplary (deferred to M8, never forced). Verified: lines
+      :687–:689 verbatim, counts, ELF 6/6 spot, P6 :735, fork
+      untouched, waits log. Next: P1p. Ledger row added.
+- [x] **P1o + G5 launched (09-19):** P1o (true-frame watch confirm +
+      driver-flag writer hunt, ≤2 boots; carries the new standing
+      rule: machine-check every hand hex) reuses P1n pane; G5 (port
+      CLUT/RMW/Present spikes to real upstream patches + proof
+      target) reuses G4 pane. M8 still working. Remaining queue:
+      `sceGsSyncVCallback` test fix (fork, after P1o).
+- [x] **G4 read (09-19) — PASS, Present fast path lands:** profile
+      (sample + instrumentation) attributes single-shot ~16 ms to
+      vector fill-construct/teardown (~96% Present); `[G4-PRESENT]`
+      bulk scratch buffers cut median_ms 15.8→0.55 on standard
+      captures (6.1/3.2 on multi/field paths — temp destroys
+      disclosed as remaining); identity exact on 102/102; CTest
+      11/11 (no new tests — spike-identity pins it); captures
+      unchanged (md5s match G3). Verified: +67/-7 one file,
+      upstream/strict/factory untouched, CTest re-run, timing
+      reproduced (15.539 vs 0.550, both exact), pushed. Caveat: all
+      -O0 libc++ observations. Ledger row added.
+- [x] **P1n read (09-19) — PASS, caller NAMED + slip found:** probe
+      (`e73e36a`, pushed) fires exactly once: fresh caller `0x3ded80`
+      (#6, `sub_003DED50`), entry sp `0x1fffe80`, true frame
+      `0x1fffe00`/`0x1fffe10`; other 4037 enters are scheduler-loop
+      resumes (prologue skipped, bypass dispatch — probe blind by
+      construction). ROOT CAUSE of the 3-brief saga: P13-3 hex slip
+      (`0x1fffd80+0x80` written as `0x1ffe000`, true `0x1fffe00`) —
+      "audited correct" twice. Ladder unchanged (16/1 park, 0
+      missing, gs counts equal); tests 424/425 same failure. Verified:
+      probe line verbatim, trace 4038, +37 one file, binary sha,
+      fork pushed, lease clean (M8 untouched). Next: P1o. Lesson:
+      machine-check all hand hex (added to runbook boilerplate).
+      Ledger row added.
+- [x] **Hourly agent poll (09-19, user call):** cron `ssx3-hourly`
+      (`17 * * * *`) checks P1n/G4/M8 states every hour — done →
+      gate-read commits per repo convention; blocked → read dialog,
+      report, do NOT answer it; working past box → flag overtime.
+      No new-agent launches from the poll; report only. (A background
+      `herdr agent wait` only signals completion and can't detect
+      stuck — the hourly check is the stuck-agent cover.)
+- [x] **P1n + G4 + M8 launched (09-19):** P1n (driver-entry sp/ra
+      probe, `Diag:` commit + rebuild + one boot — names the live
+      caller) reuses P1m pane; G4 (profile + one fast path,
+      identity-proven) reuses G3 pane; M8 (delta propagation: slot
+      census + second-slot delta + projection reachability) reuses M7
+      pane. Remaining queue: `sceGsSyncVCallback` test fix (fork,
+      after P1n). Monitoring note: orchestrator does NOT watch
+      between user check-ins — all three prior agents finished
+      unnoticed; user check-in is the actual monitoring loop (waits
+      only run inside active turns).
+- [x] **M7 read (09-19) — PASS, item 3 mostly done, one open
+      question:** baseline reproduces M6; all three M6 gaps closed
+      (det=0 matches suppressed shape except `pediff` 0/+2,
+      replay_disabled continuation clean, mid-Trigger flip DIRECTLY
+      observed: `trig_imx` 1/1, `dimx` once at replay 0, `dframe` +1
+      ×200 — M6's elimination upgraded to observation); no-op parity
+      holds with `trig_imx` 0/0 as the negative control; camera delta
+      (+0.1 posmtx0 tx) applies 152×/replay yet 0/200 frames differ by
+      any byte, no drift, guest/event state clean. OPEN: why zero
+      pixel diff (slot unused? seam overwritten pre-use?) — agent
+      quantified honestly but didn't pursue; that's M8. Verified:
+      header sha, analyzer rows reproduced, xform_stats verbatim,
+      6/6 hashes, flip counters, lease log. Ledger row added.
+- [x] **G3 read (09-19) — PASS, present pinned + both TODOs spiked:**
+      4 new captures (102 total, 719 MB under the 800 cap) pin the
+      `fbp==0` fallback (black→context[0], nonblack→0, multi→first
+      nonblack, empty→0); `spike` fork backend (cpu/strict/upstream
+      untouched) carries CLUT-cache + RMW-lookup spikes, both
+      identity-exact on all 102; timing deltas recorded as observed
+      (CLUT ~15–20% submit savings on paletted captures, RMW up to
+      ~40% on fbmsk); CTest 11/11. Honest limits: CLUT memo assumes
+      no mid-batch footprint writes; RMW CT32-only; strict+spike
+      uncombined. Verified: md5s, factory reg, old-98 byte-identical
+      (md5 lists differ ONLY by the 4 added lines), CTest 11/11
+      re-run, pushed. Ledger row added.
+- [x] **P1m read (09-19) — PASS, miss mechanism found, Step 2
+      skipped legitimately:** 17-path coverage audit proves driver
+      `sw`/`sd` emit on fires-paths (P12 sd-theory excluded BY
+      SOURCE); p1l-only 72.3M-line trace: driver entered 3940×/
+      exited 3939× (~44/s, per-period), 0 stub hits explained
+      (checkpointed depth-0 dispatch uncounted); 7 of 8 direct-jal
+      candidates NEVER entered, 8th wrote elsewhere → frame-elsewhere
+      mechanism; live caller unknown (depth-0, no guest parent);
+      next receipt designed (driver-entry sp/ra probe, both dispatch
+      paths). Verified: trace 72,315,942 lines, 3940/3939, candidate
+      0/0/0/0/0/2/0/0, overlap line verbatim, driver :39/:78,
+      138 FAST files, 11 refs, fork untouched, no p1m boot. Next:
+      P1n implements the probe. Ledger row added.
+- [x] **P1m + G3 launched (09-19):** P1m (miss-mechanism diagnosis, no
+      fix — watchpoint coverage audit + driver-entry census + frame
+      table, one boot max) reuses the P1l pane (`wN:t1A` → P1m); G3
+      (Present-heuristic tests + CLUT/RMW spikes, identity-proven)
+      reuses the G2 pane (`wN:t17` → G3). All three lanes full (P1m
+      fork, G3 ps2xGS, M7 ssx3); lease shared P1m↔M7. Remaining queue:
+      `sceGsSyncVCallback` test fix (after P1m), G4 perf (after G3).
+- [x] **G2 read (09-19) — PASS, harness proven sensitive:** 20 new
+      captures (98 total, +105 MB, 691 MB under the 700 cap), `strict`
+      backend wrapping cpu and honoring all 7 G0-§9 fields; cross table
+      14 flipped rows ALL field-mapped (incl. 2 old G0 captures) and 84
+      exact; G0 `blend-colclamp` no-flip honestly explained (no
+      overflow); census decodes everything new; CTest 9/9 incl. 3 new
+      sensitivity gates. Caveat recorded: strict's honored semantics
+      are plausible-but-unverified (aa1 halving, LOD=min, SCANMSK
+      restore, post-blend dither — agent disclosed all) — a test
+      instrument, not a hardware reference. Verified: files, factory
+      reg, cpu/upstream untouched since G0, 98 captures, ssx3 copy
+      identical, CTest 9/9 re-run, pushed (`origin/main` == HEAD).
+      Ledger row added.
+- [x] **P1l read (09-19) — PASS, missing target gone, park holds:**
+      4 splits (CSV 9270→9274, recompile 9092→9096, 0/0), boot shows 0
+      missing-target lines; thread 1 still in driver/SYNCTASK
+      (`0x3e5980` ×14 + `0x3e5440` ×3); outer-caller receipt missed
+      AGAIN on both `sw` and `sd` addrs (addrs audited arithmetically
+      correct — now a miss-*mechanism* question, 8 candidates stand);
+      first `[gs:kick]` lines ever (66) correctly attributed to
+      aggressive-logging visibility (old binary had it off), not guest
+      change; ~4× wall-clock rate vs p1k open (no host-load record);
+      tests 424/425 same pre-existing failure (re-proven without stash:
+      no tracked source changed + runner symbols absent from test
+      binary). Verified: log counts/census/callback/threads/csv/splits/
+      ELF spot/regs/binary sha/fork untouched+up-to-date. Next: P1m.
+      Ledger row added.
+- [x] **M7 launched (09-19, `local/muse/prompts/M7.md`):** milestone 2
+      item 3 — pose interpolation + camera delta on the `g_transform`
+      seam inside the M6 context. Step 1 closes M6's three unordered
+      runs (det=0, replay_disabled, direct flip observation); steps 2–3
+      no-op parity then camera delta vs the S2 honesty gate. Desktop,
+      lease-shared with P1l. Agent in freed M6 pane (`wN:t16` → M7).
+      Deferred queue behind live agents: `sceGsSyncVCallback` test fix
+      (fork tree, after P1l), G3 (ps2xGS tree, after G2).
+- [x] **M6 read (09-19) — PASS, milestone 2 item 2 done:** scoped bus
+      (`dafter_live` 0/0, `dpend` 0/0, queue never grows — in-stream
+      flush points still drain); `dframe` frozen 0/0 with replay-local
+      counter; M5's +1 driver NAMED (`ImmediateSwap` `Present.cpp:235`
+      re-armed by the `VideoConfig` after-frame listener mid-Trigger —
+      file:line + trigger + 11-listener elimination, honestly noted as
+      code-path-plus-elimination, no direct flip observation); guard
+      proven by negative control (`record_flag_set` pre-replay-0, 0
+      rows, `done` stands, bus restored on break path); continuation
+      hash identical ×5 (comparison skipped, seams differ). Verified:
+      header shas, guard event verbatim, analyzer rows reproduced,
+      5/5 hashes, lease log incl. battery hold obeyed. No push. Ledger
+      row added.
+- [x] **G2 launched (09-19, `local/muse/prompts/G2.md`):** harness
+      sensitivity — `strict` second backend honoring all G0-§9-ignored
+      fields + mip-chain/TEX1/paired-isolation captures; sensitivity +
+      specificity tables prove the diff table catches real differences
+      on synthetics alone. No lease, no emulator. Agent in renamed P5
+      pane (`wN:t17` → G2).
+- [x] **G-series reordered (09-19, user call — harness must not block
+      on first frame):** G1 (game captures + pad scripts + real census)
+      stays queued, gated on first presented frame. G2 (sensitivity,
+      this row) runs now. Probable sequence after: G3 = Present
+      `fbp==0` heuristic tests + CLUT-cache/RMW-lookup upstream TODO
+      spikes (both validated by identity replay); G4 = CPU-backend perf
+      profile + one fast-path spike (Unleashed-style batching
+      candidate); then G1 the moment P-series delivers frames.
+- [x] **Resume recipe (09-19, learned from this restart):** track
+      agents must start with `herdr agent start <name> --kind muse
+      --pane <id> -- --yolo` — bare `muse` stops at approval dialogs
+      (M6 proved it on an SSD touch). If a pane sits at `~`, cd it to
+      ssx3 before starting (avoids the workspace-trust dialog).
+      Effort (09-19, user call): append `--reasoning-effort max`
+      (not xhigh) to all new agent starts; running agents stay as-is.
+- [x] **P1l launched (09-19, `local/muse/prompts/P1l.md`):** split
+      `0x395cf0` + 3 unsplit siblings (`0x395c70` already split —
+      verify only), regen + rebuild + `ps2xTest` (re-prove the 1
+      pre-existing failure), one ≤90 s boot with `+w4 0x1ffe000`
+      outer-caller receipt. Splits + ladder only; driver-flag writer,
+      sema-26, and any park fix out of scope. Fresh agent in the
+      freed P1k pane (`wN:p1A`).
+- [x] **RECOVERED 09-19 — `/Volumes/Extreme SSD` writable again
+      after restart (write test passed). Herdr panes wiped by the
+      restart: P5/P1j/P6/P1k agents gone but all four tracks already
+      committed + gate-read — no resume needed. M6 released (MacBook
+      on AC, 65% charging — battery-hold condition met). P1l briefs
+      fresh agent in the freed P1k pane.
+- [x] **P1k read UPGRADED 09-19 — PASS, all deferred receipts
+      verified post-recovery:** 33,038 lines / 3,052,064 B; thread-1
+      census 15/1/1; threads 2/4/5 sema-parked 26/29/30
+      (sched 0/~300/0); watch 32,077 lines, widths 32050/25/2;
+      fills/del/sema lines verbatim; 15× w16 zeros, 0× `0x3dd214`;
+      stub top-3 identical to p1j; `0x15` ×4 / `0x17` ×1; ELF 11/11
+      + sha1 `77114dfd`; fork `8fad69e` + pre-existing M, no strays,
+      lease absent. NUANCE: sibling `0x395c70` already HAS a split
+      file + reg line (P1l splits only the other three + `0x395cf0`).
+      Original 09-18 23:20 conditional read:** park = `SYNCTASK_run` queue drained by a driver flag
+      (`*(entry+8)`, writer unknown); slots 0–1 fire ~600×/5 s
+      (fills traced to `systemInit` + `sub_003E3020`, third filler
+      del'd pre-fire); outer caller narrowed to 8 wrappers (one is
+      P6 `ASYNCFILE_release`) — `sd`-path watch miss documented with
+      next receipt (`w4 0x1ffe000`); `0x395cf0` = unsplit frameless
+      leaf (split-class fix, 4 siblings); first CD callback signals
+      sema 26 yet T2 never wakes (completion unobservable — no finish
+      line exists); `0x15`/`0x17` = one-shot disables. Verified
+      repo-locally: 14/14 P6 names verbatim + both absences. SSD
+      counts/ELF/fork UNVERIFIED (volume failed mid-brief; agent
+      marked NOT RE-CHECKED honestly). Nit: report says "23:05 UTC",
+      means EDT. Recovery + re-verification done 09-19; P1l
+      launched below. Ledger row updated (flag lifted).
+- [x] **P6 read (09-18 23:00) — PASS, thin but honest:** 801-row
+      addr→name CSV (names only, longest line 86 chars — license rule
+      held); only 6.67% sweep coverage and ALL 11 ladder addrs UNNAMED
+      (decomp is early: 6 split files, 390 stubs). Real wins anyway:
+      `main` at `0x31af80`, GS-wait caller reached from the
+      `cSSXApp` constructor row (verified `jal`), sweep vindicated
+      (100% JAL recall, 0 splits in 106 tight pairs — merges only),
+      sweep dup found (`0x42c1f0` lines 9229–9230 — KNOWN ISSUE, do
+      not touch mid-ladder; dedup at next CSV regen), tooling theft
+      table. Verified: rev, license absence, sha1, 749 symbols, CSV
+      rows, dup lines, caller JAL. P1k already instructed to use the
+      CSV if present. Ledger row added.
+- [x] **P1k launched (09-18 22:45, `local/muse/prompts/P1k.md`):**
+      diagnose the `0x3e5980` 16-slot dispatch-loop park (slot
+      contents, filler, exit condition) + name the outer caller of
+      `sub_003DD1D8` + analyze missing target `0x395cf0` + first CD
+      callback + syscalls `0x15`/`0x17`; uses P6 names if landed. No
+      fix. Lease free.
+- [x] **P1j read (09-18 22:45) — PASS, CSR park cleared, ladder
+      jumps:** bits 15:14 identified as FIFO (DobieStation + PCSX2 +
+      gsKit + Play!, all cited); fix `8fad69e` (init EMPTY + force
+      read-only on guest writes, +43/-7, cheat row documented)
+      pushed to fork `ssx3`; boot 1 runs thread 1 to `0x3e5980` with
+      FIRST `[cd:callback]` fire, thread 5, syscalls `0x15`/`0x17`,
+      1 new missing target (JALR `0x3760d0→0x395cf0`). Tests 424/425
+      with the 1 failure proven pre-existing (stash A/B). Verified:
+      fork push, hunks, both FIFO cites verbatim, boot pcs/counts.
+      Queued (not launched): `sceGsSyncVCallback` stack-pool test
+      fix. Next: P1k. Ledger row added.
+- [x] **P6 launched (09-18 22:35, `local/muse/prompts/P6.md`):** mine
+      ssxdecomp/ssx3 (PS2 SLUS_207.72 matching decomp, SAME sha1 as
+      our ELF, 433 src files, NO license → names/addresses/facts
+      only, never bodies): addr→name CSV joined against our 9,270-row
+      sweep, ladder-function naming, boot/park structure, boundary
+      truth sample, tooling theft. Read-only.
+- [x] **Monitoring switched to event waits (09-18 22:30, user
+      call):** `herdr agent wait --until done,blocked --timeout
+      <box>` replaces sleep-polls — done → check `[ID]` commit →
+      gate read; blocked → read dialog; timeout → stuck/overtime →
+      read + redirect. No agent cooperation needed (no
+      agent→orchestrator message primitive exists; waits observe
+      lifecycle server-side). Artifact proof unchanged: the commit,
+      never the status label.
+- [x] **P5 read (09-18 22:30) — PASS, 32 borrowable rows:** Xenon
+      ordinal-HLE (weak-link override, addr→name map, BL-sweep,
+      gap-fill Analyse, offline switch TOML); psprecomp HLE work-list
+      census + miss-log + zero-ring + entry trace + self-test;
+      N64 CreateStatic + jump-table discovery + patch/hook system;
+      UnleashedRecomp API-level GPU HLE (no capture stream) +
+      render-thread split + shader-hash tables; xboxrecomp MIT,
+      ordinal-switch HLE + coverage audit + NV2A census/executor —
+      but NO SSX3-Xbox specifics (titles are Burnout 3/Halo).
+      Verified: xbox MIT, psprecomp + N64 quotes verbatim, P5's
+      "zero SSX matches" is substance-true (one English-word
+      "tricky" false positive it should have named — nit).
+      No push. Ledger row added.
+- [x] **P1j launched (09-18 22:05, `local/muse/prompts/P1j.md`):**
+      identify GS CSR bits 15:14 from public sources (DobieStation /
+      PCSX2 GS / PS2 docs, all cited), implement the minimal producer
+      for the `0x4000` exit state, rebuild, one boot for the ladder.
+- [x] **P1i read (09-18 22:00) — PASS, strong partial-negative:** no
+      producer for CSR bits 15:14 exists anywhere (exhaustive `csr`
+      grep: writers touch {0,1,13} + init-0 + guest merge only);
+      consumer is dynamic `READ64` (not TOML); vsync/present/timer
+      paths all CSR-free for these bits. Bits honestly recorded as
+      unidentified-from-tree (no-guess rule held). 10 min, no boot,
+      push rule obeyed. Verified: TOML absence, generated line,
+      `0xC000` absence, ELF words (in report). Next: P1j. Ledger row
+      added.
+- [x] **P5 redirect (09-18 22:05):** +Q6 sp00nznet/xboxrecomp (OG
+      Xbox, SSX 3 runs on it): license read first (author's reo was
+      unlicensed — idea-level only if so), Xbox kernel-HLE approach,
+      any SSX3-Xbox-specific workarounds, NV2A GPU approach vs
+      ps2xGS. Quota note: user nearly out of muse free credits —
+      no new launches after P1j until confirmed; P5 running lean
+      solo, M6 runs held (battery).
+- [x] **P5 launched (09-18 22:00, `local/muse/prompts/P5.md`):** mine
+      360/N64/PSP recomp tooling — XenonRecomp ordinal-HLE stub
+      generation/tracing, N64+Xenon indirect-branch/function tooling,
+      UnleashedRecomp GPU capture/replay vs the ps2xGS plan, patch
+      systems vs our TOML stubs, recompiler testing patterns (which
+      test catches the next LUI+ORI fold?). Read-only, battery-light.
+- [x] **M6 launched (09-18 21:50, `local/muse/prompts/M6.md`):**
+      host-replay milestone 2 item 2 (S2 Part 4 items 2–4): scoped
+      `after_frame_event` suppression + `FrameCount`/frame-aging
+      semantics + the `dframe` +1 driver chase + fail-closed
+      `g_record_fifo_data` guard, on M5's header, desktop only.
+      HOLD 21:55: MacBook untethered (battery 80%) — M6 finishes Step 1,
+      then holds all runs until back on power (battery + thermal-noise
+      protection); prep work continues. P1i unaffected. Odin unplugged:
+      no track needs the device, no blockers. PARKED 23:05: M6 finished
+      all run-free prep (Step 1 receipts verified, analyzer tested vs
+      synthetic guard-stop, negctrl table scaffolded in REPORT) — only
+      the m6-negctrl run + table fill + commit remain. Event wait
+      terminated as pointless while parked; re-arm on release.
+- [x] **P1i launched (09-18 21:50, `local/muse/prompts/P1i.md`):**
+      diagnose the GS CSR park at `0x375d10`
+      (`(CSR&0xC000)!=0x4000` spin) from the closed boot-p1h-1 log +
+      ELF + sources; no fix. One ≤90 s boot only if the log cannot
+      name the missing producer. Lease is free.
+- [x] **M5 read (09-18 21:45) — PASS, milestone 2 item 1 done:**
+      200/200 + `done` on all runs; `xfb_equal=200/200` (range
+      `0x004dc660`, 573440 B); counters fail-closed (`dpend` 0/0,
+      `pediff`/`vidiff` 0/0 det=1, no `record_flag_set`);
+      `xfb_equal_scratch=200/200` + `live_xfb_untouched=1`;
+      continuation skipped per brief (seam fc 8121 vs 8142). Verified:
+      probe row counts + receipts by independent parse, S2-sha
+      handling, vendor untouched (pre-existing Sep 10–17 uncommitted
+      hunks are not M5's), lease discipline. Notes: brief's pinned S2
+      sha was stale (M5 recorded both, used on-disk); `#define
+      private` promotion is header-local and layout-safe; one "Sync
+      snaps" failure in scrollback never surfaced in the report
+      (receipts all landed — watch item). Next: M6. Ledger row added.
+- [x] **P1h read (09-18 21:45) — PASS, ladder advances past the MMIO
+      park:** analyzer fix `f2149e7` (ORI/ADDIU low-half fold, 1 file
+      +28) pushed to fork `ssx3`; 245/273 `[mmio]` entries corrected
+      (4 remaining folds proven genuine); regen recompiled clean;
+      boot 1 runs thread 1 to `0x375d10` (all 35 blocks, frame popped,
+      via `0x375a94`). New park recorded: GS CSR spin at `0x375d10`.
+      P1h obeyed the hardened push rule (ssx3 commit local-only).
+      Verified: fork push, TOML, recomp lines, boot log, park ELF
+      words + branch arithmetic. Next: P1i. Ledger row added.
+- [x] **P4 read (09-18 21:45) — PASS, fork diffs mined with bodies:**
+      M1/M2/M7/M10/M12 full diffs; bt3's dynamic MMIO dispatch
+      (immunity-by-construction alternative to P1h), sync-CD + tick
+      pump, GPU/async-kick architecture; sm2/halogen/drakengard/reo
+      boot learnings; Q4 EeScheduler delivery point for
+      message-not-nesting; 20-row borrowable table (S1–S20) with
+      license re-cites. Gaps honest (depth-1 clones hide 7 revs).
+      Verified: bt3 MMIO + sync-CD bodies, M1 dispatch + STR bodies.
+      Findings feed P1i/P1j scoping. Ledger row added.
+- [x] **P4 launched (09-18 21:25, `local/muse/prompts/P4.md`):** closes
+      P3's admitted gap (per-fork diff bodies): reads the M1–M14 diffs
+      from the existing `fork-survey/` clones, diffs working
+      bt3-recomp against our fork (boot/MMIO/GPU/CD), boot learnings
+      from sm2/halogen/drakengard/reo, and the EeScheduler delivery
+      point for message-not-nesting. Read-only, fully parallel to
+      M5/P1h. README gained a "Legal notes for contributors" section.
+- [x] **P1h launched (09-18 21:15, `local/muse/prompts/P1h.md`):**
+      fix the analyzer's LUI-only MMIO detector (read the ORI/ADDIU
+      low half), regenerate + audit all 273 `[mmio]` entries, rebuild,
+      one boot for the ladder. Builds any time, boots yield the lease
+      to M5. Push rule hardened again: `git push` only inside the fork
+      clone, never in ssx3 (P1g pushed origin despite the fork-only
+      rule, rationalized in P8-0 — content benign).
+- [x] **P1g read (09-18 21:10) — PASS, park fully diagnosed:** the
+      `0x391330` spin is a recompiler bug, not game logic: the MMIO
+      detector folds LUI+ORI accesses to the page base, so the VIF0
+      DMA kick + STR poll both hit `m_ioRegisters[0x10000000]` (stuck
+      `0x104`). Verified: ELF words, TOML folds, recomp `:164`,
+      detector source, both memory-path gates, branch arithmetic.
+      249/273 `[mmio]` entries fold the same way (7 proven). No boot
+      needed. Next: P1h. Ledger row added.
+- [x] **P2 read (09-18 21:10) — PASS, strong negative result:** PCSX2
+      (`1275b25a`) runs the real BIOS and HLEs almost nothing on the
+      EE, so it contains no handler/alarm/CD/RPC stack behavior to
+      borrow — P1f's direction stands uncontradicted. One real
+      tension: `EENULL`/`EELOAD` live inside P1f's borrowed
+      `[0x80000,0x100000)` on real hardware (no BIOS here, and the
+      SSX3 ELF doesn't touch the range, so no action). Verified: rev,
+      enum, EELOAD lines. Ledger row added.
+- [x] **P3 read (09-18 21:10) — PASS with follow-up queued:** 133
+      forks / 50 PRs enumerated; bt3-recomp (GPL-3, playable, GPU
+      path) is the most relevant downstream; N64ModernRuntime's
+      message-not-nesting is the architectural alternative; fork
+      LICENSE files are near-uniformly GPL-3 (M1–M14 snippets
+      borrowable); PSXRecomp is PolyForm Noncommercial (unusable).
+      Gap: per-fork diff bodies didn't survive (clones persist under
+      `fork-survey/` for a P4 follow-up if needed — not launched;
+      MMIO fix is the priority). Verified: bt3, N64MR, 2 licenses.
+      Ledger row added.
+- [x] **P1g launched (09-18 20:45, `local/muse/prompts/P1g.md`):**
+      diagnose the post-fix park at `0x391330` (`sub_003912A8`, pc
+      stable but `scheduled` advancing) from the closed boot-2 log +
+      ELF disasm; no fix. One ≤90 s boot only if the log cannot name
+      the wait object, yielding the host lease to M5. Ledger row added.
+- [x] **P1f read (09-18 20:40) — ra-slot writer caught, fix VERIFIED:**
+      boot 1b watch on `0x1ffff00` caught 32,682 writes, all but 153
+      from the INTC handler prologue zeroing thread 1's frame; fix
+      `6046260` (sp=0 + reserved stacks in `[0x80000,0x100000)`)
+      pushed to fork `ssx3`; boot 2 shows 165/0 handler writes and
+      thread 1 `Running` at `0x391330` with threads 3+4 new. Part 7
+      appended, `[P1f]` 6e90355. Process note: P1f pushed ssx3
+      `origin/main` too though the brief said fork only — content was
+      benign (briefs, todo, report) but future briefs now say
+      fork-remote-only. Next: P1g.
+- [x] **P2 + P3 launched (09-18 20:30, `local/muse/prompts/P2.md`,
+      P3.md):** two read-only P-branch research angles alongside P1f's
+      fix — P2 reads PCSX2 source (EE INTC/alarm/CD/async stacks) for
+      a reference comparison + patch sketch, P3 surveys PS2Recomp
+      forks, independent PS2 static recomps, sibling recomps and
+      readable dynamic emus for borrowable prior art + license
+      verdicts. Neither builds, boots, edits the fork, or takes a
+      lease, so both run fully parallel to P1f and M5.
 - [x] 2026-09-17 Odin affinity (23c5b86): --affinity emu/video pin flag
       + 5 tests. Pinned tail 1.578×→1.974× (+25%), 18.52→14.93 ms/frame;
       load dip 0.70→1.15 (+64%); lows →0.94+; prio nil; cpu0 control
