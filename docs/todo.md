@@ -5,6 +5,49 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **P1ab + P9 + P10 launched (event-driven, waits fired):**
+      P1ab (0x52BE04 diagnosis with census in hand, Part 26) reuses
+      P1aa pane; P9 (shim→CSV-split at 0x3E3AD8 + ladder-identical
+      proof) reuses P7 pane; P10 (PollSema -1/-419 divergence,
+      kernel-first per §7.5) reuses P8 pane. All disjoint fork
+      files; lease serializes ≤6 boots.
+- [ ] **P8 read (09-20) — PASS, pad/sound surface fully mapped:**
+      15/28 libpad calls from one wrapper region (args dynamic);
+      zero sceSd*/libsd evidence — EA drives SNDDRV via SIF/RPC
+      (`BindRpc sid=0x534E44`, `AddCmdHandler cid=1`); fork: pad
+      implemented incl. host backends (rumble no-op), SIF transport
+      fake-OK, SSX3/net SIDs unclaimed→silent fallback, ~90
+      unreachable `sceSd*` crash-stubs; menu-ordered work list
+      (items 1–4 menu, 5–6 gameplay) + JALR caveat. Verified: ELF
+      md5/bytes, zero pad/sd strings, IRX names, `lui/ori` pair =
+      `0x534E44` + `jal BindRpc` (my first grep missed the split
+      immediate — re-derived), 90 TODO_NAMED, sid gate, TSV rows,
+      drift-note content, zero fork commits. Next: none until
+      runtime contact (list banked). Ledger row added.
+- [ ] **P7 read (09-20) — PASS, movies surveyed + stub landed:**
+      14 `.mpc` (MPEG-2 ES at off 8 in `MPCh` framing, video-only per
+      ffprobe); boot order eabig→thx→intro_dj→intro from table
+      `0x441248` (all 4 slots read in `sub_001A1CE8`); playback chain
+      sequencer→RCMP cluster→libmpeg (`Init/Create/AddBs/AddCallback`
+      + `GetPicture` only); `e235c4b` (2 files +203, unwired —
+      recipe recorded, first-firing grep line given);
+      build-verify + 13/13 harness + suite green; runtime honestly
+      unverified. Verified: pushed (fork HEAD), 14 files, BOOT2,
+      magic+seqhdr, 3/3 string VAs, boot table exact, harness PASS,
+      suite RE-RUN BY ME 427/427/0. Next: none until ladder contact
+      (decoder gaps banked). Ledger row added.
+- [ ] **P1aa read (09-20) — PASS, kernel-true amendment applied:**
+      `f26f273` (+61/-31: clamp deleted, max stored as-is, OVF block
+      deleted, test updated + 2-signal window test); BEFORE proves
+      the wedge (426/1: `maxCount`=1, OVF fires, 2nd wait parks +
+      throws), AFTER all green; boots park on 0x52BE04 identical
+      (33/0, 86/85 handshake, census 6 same lines, GS/CD/SIF exact;
+      ~0.35× throughput = contention); no `effmax`/`KE_SEMA_OVF`
+      emissions remain. Verified: pushed, removed-lines grep,
+      `effectiveMax` gone, LOG 3507/3459, census 6, -1 waits 0,
+      creates 33, watch line, handshake 86/85, waits 3 lines,
+      before/after logs. Next: P1ab (0x52BE04 diagnosis). Ledger
+      row added.
 - [ ] **P1x-path decision 09-20 (user): DEFER Devel build to the Mac
       mini** (RAM + CPU headroom). Approach banked: APFS sparsebundle
       on the SSD (symlinks/perms), aqtinstall Qt to SSD prefix,
