@@ -667,5 +667,14 @@ above. M34 gap 1 / shape-9 cells worked in M35.)
    pins per-site values + joins only).
 3. No s2/s3/s700 cell-7 count pins: no prior report lists
    them, so they read as measured (2469/2484/2605) with d!=0
-   guarded rather than count-guard
-...[truncated 423 chars]
+   guarded rather than count-guarded.
+4. No explanation: values are attributed per shape per cell,
+   no rule; 0 B explained.
+5. Desktop only; no device work. NEVER `git push` in ssx3
+   (this commit is local-only by rule).
+
+## Files
+
+Committed under `local/research/M36/`: `DESIGN.md`, `m36.py`,
+`control.py`, `m36-valuemap-s0700.png` (88753 B, rule-met),
+`REPORT.md` (this file).
