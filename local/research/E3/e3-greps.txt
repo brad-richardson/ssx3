@@ -1,0 +1,60 @@
+E3 grep receipts (read-only; all SSD steps ran with export COPYFILE_DISABLE=1).
+R = /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp @ 6359fb6 + working-tree diffs (E3-0 rec 3).
+RUN = /Volumes/Extreme SSD/ps2recomp-spike/P1/run.
+
+§1 Watch-fire sites (ps2DiagWatchReport|diagWatchEmit counts; E3-0 rec 4)
+  Stubs/SIF.cpp:0  Stubs/CD.cpp:0  Stubs/DMA.cpp:0  Stubs/FileIO.cpp:0
+  Kernel/EeScheduler.cpp:2  (lines 1998, 2720 = ps2DiagWatchReportDirect)
+  ps2_memory.cpp:0
+  Kernel/ tree otherwise: 0 (full-tree grep returned only the 2 EeScheduler hits)
+
+§2 SPR CHCR stores (10 sites; /tmp/e3_spr_stores.txt)
+  sub_00371D10:153 SPR_TO 0x100 | sub_00371DD8:155 SPR_FROM 0x100
+  sub_003BC968:134 TO 0x100 | sub_003BCA28:134 FROM 0x100
+  sub_003C4978:134 TO 0x100 | sub_003C4A38:134 FROM 0x100
+  sub_00403398:106 TO $zero (NO) | sub_00408278:358 TO 0x101 + :476 FROM 0x100
+  sub_00408988:299 TO 0x105 mode1 (NO)
+  16 files reference SPR bases; 382760 reads only (:898,942 Load32 poll).
+
+§3 SPR callers L1 (11 files) -> L2 (16 files, incl 362DE8/362CC8)
+  L1: 38F4F8->371D10; 38F598->371DD8; 38F708->371D10; 38F738->371DD8;
+       3BD220->3BC968+3BCA28; 3BE6E0->3BC968 x4; 3BF0F0->3BC968 x4;
+       3C09B8->3C4A38; 3C0A60->3C4978; 4086C0->408278; 4087D0->408278
+  L2: 362DE8->38F4F8 x2; 362CC8->38F738 x2; 365F68->38F708; 365FA8->38F738;
+       3666F8->38F738; 36A428->38F598; 38CA70/38CE20/38D968->38F708;
+       38F4F8->38F598; 38F668->38F598; 3BE6E0->3BD220; 3C1638->3C09B8+3C0A60;
+       4032B8/407E90->4086C0+4087D0; 3BF0F0->3BD220+3BE6E0
+
+§4 Trampoline map + caller-file counts (func_ refs in 9,262 runner files)
+  426078 SendCmd:1 | 4261B0 SendCmd:8 | 4268F0 GetOtherData:0 | 426D18 CallRpc:20
+  3FF708 PadPortOpen:2 | 3FFA58 PadRead:2 (callers 326DF0,326EB0)
+  41605C memcpy:48 | 41610C memmove:15 | 416210 memset:175
+  3FE268 DmaGetEnv:0 | 3FE2B8 DmaSend:0 | 3FE320 DmaSendN:0
+  401DF8 CdRead:3 | 402520 CdReadClock:2 | 401FD8 CdGetToc:1 | 4027B8 MpegCreate:1
+  402618 CdTrayReq bound (callers uncounted G8)
+  42BBD0 SifLoadElf | 42BAA8 SifLoadElfPart | 42B840/42B230 LoadModule(Buffer)
+  No window-func direct LibC use: 362DE8/363490/376938/362CC8 x func_41605C/41610C/416210 = 0.
+
+§5 Binding-absence receipts (DEAD rows)
+  "SifSetDma" in runner: 0 refs (B1). "sceVu0|sceVpu0": 0 refs (E8).
+  No trampoline: sceCdStRead, sceCdIntToPos, sceGsExecStoreImage,
+  sceGsSetDefDrawEnv, mbtowc_r (E5,E6,E11,C4,C6).
+  Dispatcher.cpp "RomName|ThreadTLS": 0 (D11,D12).
+  Audio/System/TTY/Deci2/IPU/Ssx3Movie stubs: 0 getMemPtr + 0 getEeGuestStruct (E12).
+  ps2_stubs::sceSifSendCmd callers: 0 (B4; live = RPC.cpp:1060 via 426078/4261B0).
+  vu/ + gs/ dirs: 0 m_rdram/m_scratchpad refs (A6). ps2_pad/audio/vag: 0 guest ptrs.
+
+§6 T26 trace census (syscalls-t26-on.txt, 785,356 lines)
+  (73):0 (30):1 [line 212 t=1.38s] (47):0 (4b):9 [lines 5-238 init]
+  (56):0 (57):0 (59):0 (5a):1 (2f):291690 (64):14429 (74):8 [lines 9-24 init]
+
+§7 Boot-log + park counts
+  boot-t26-1.log: [sif-handshake] x2; SendCmd x1.
+  park-snapshot.txt: line 105 pc=0x371dd8 n=431302 ra=0x38f758;
+    line 106 pc=0x38f460 n=301496; line 111 pc=0x38f598 n=272650.
+  Trampoline pcs (426078/4261b0/426d18/3ffa58/41605c/416210/pad 326xxx): absent (expected: tiny fns unsampled).
+
+§8 K1 working-tree diff stat (untouched by E3)
+  Syscalls/System.cpp +9 (K1 hook); ps2_runtime.cpp +102 (frame-dump);
+  runner/register_functions.cpp +398779/-5 (regenerated, foreign);
+  ps2xTest/...kernel_tests.cpp +188; ?? Syscalls/Ssx3CopiedPayload.cpp (untracked).
