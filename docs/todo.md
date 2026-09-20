@@ -5,6 +5,34 @@ the build or commit that closed them.
 
 ## Now
 
+- [ ] **M21 read (09-20) — PASS after report restore (first commit
+      truncated at line 269, restored from the complete receipt
+      in `1542d4d`):** 518/764 shapes byte-identical static maps
+      (median Jaccard 1.0; 700 @ 0.0747, 694 @ 0.6565); m15
+      disjoint (92/1476, J 0.0245); ε ±1 on 98.9%/96.8%
+      (chroma all-±1); 71.3%/82.5% at d=1 of a moved edge; U&V
+      co-residual 16.0×/21.6× independence; HUD union 103/463
+      s0-Y (22.2%); no static-site rule shrinks anything.
+      Verified: baselines, cell-6 counts exact, EFB ratio,
+      canon identical, ε hist, HUD + synth rows vs receipt,
+      2/2 controls, PNG size. ~0.2 h + restore. Next: M22
+      (interior far-tail) launched in freed pane. Ledger row
+      added.
+- [ ] **P1ah read (09-20) — PASS, no progress indicator exists:**
+      per-invocation work EXACTLY constant inv 75–13106 (20×
+      394ED0 + 19× 395000 + 2534 lines, 12 identical chunks,
+      0 bad by orchestrator streaming re-parse); single caller
+      `0x363490` 13108/13108; ramp inv 0–74 (162 calls,
+      lockstep with probe total→0x14 @ n=162);
+      blocks-49–50 step is uniform 3–5× wall scaling with all
+      guest ratios fixed; probe total saturates n=162 (slope
+      0); CD/SIF/GS/RPC silent since ≤block 2. Deciding receipt
+      specified: driver-loop (i,N) @ 0x36356c, owner T1
+      emitter. Verified: full-trace re-parse (caller,
+      per-inv counts, ramp, 100% enter/exit), probe
+      changepoints exact, silence last-lines, no boots, no
+      fork changes. ~15 min. Next: T7 (the (i,N) receipt)
+      launched in freed pane. Ledger row added.
 - [ ] **T1 read (09-20) — PASS, snapshot tooling landed + proven:**
       2 fork commits pushed 0/0 (emitter `aae2d12` 7 files
       +1183/-0, `ladder_diff` `a611702`); proof boot wrote the
@@ -104,7 +132,7 @@ the build or commit that closed them.
       T3 took the freed pane. Ledger row added.
 - [ ] **USER DECISION (frontier Part 2 §11.5/§14): PCSX2 Devel on bytesize vs Mac mini:** bytesize (ssh/Tailscale, Win x86_64, RTX 4070, WSL2) builds native Devel with full recompilers + trace channels today, nothing needed on this laptop; the mini is arm64 (slow PCSX2). Supersedes the mini-deferral. NOT launched — awaiting your call. (T4 briefs when decided.)
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P1ad nudged 09-20; P throughput columns marked contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads: after each behavior fix, park survives 3 briefs, before semantics changes.
-- [ ] **Live panes:** p1ah (Part 31 hash-phase work census, no boot, 4h) · t5 (analyzer text-pointer rule, 4h) · m21 (static-site mechanism, offline, 4h).
+- [ ] **Live panes:** t7 (driver-loop (i,N) emitter receipt, 4h) · t5 (analyzer text-pointer rule, 4h) · m22 (interior far-tail, offline, 4h).
 - [ ] **Queue:** P1ae (generic virtual-IOP SIF peer — on next SIF-shaped park; T3: sid 0x80000211 = USBKB, SND sids 0x534E44/0x80000701 mapped) · route criteria (at first frame) · Odin port (after host demo + named interface) · I-lane unpark (phone return; audio wall queued) · G-lane (first game frames) · mini day-one (S1, P builds/boots).
 - [ ] **Frontier Part 2 actioned (00:10 read):** recs 1 adopted · 2/4/6/7 done · 3 blocked→bytesize decision (Now) · 5 kernel-side done, quirks→P1ae generic-peer rule · 8 held · 9 done+parked · 10 queued · concerns→lease split (rule), sweep gate (rule), todo moved (done), SIF peer (P1ae queued), bytesize (decision line). Full table in review Part 2 §10.
 
