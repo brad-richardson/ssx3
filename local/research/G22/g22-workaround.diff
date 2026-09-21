@@ -1,0 +1,26 @@
+diff --git a/gs/gs_renderer.cpp b/gs/gs_renderer.cpp
+index dbe032d..2a5b7d0 100644
+--- a/gs/gs_renderer.cpp
++++ b/gs/gs_renderer.cpp
+@@ -3485,6 +3485,21 @@ uint32_t GSRenderer::update_palette_cache(const PaletteUploadDescriptor &desc)
+ 
+ void GSRenderer::dispatch_texture_analysis(Vulkan::CommandBuffer &cmd, const RenderPass &rp)
+ {
++	// G22 local workaround (not upstream): skip the sampler_feedback
++	// dispatch entirely when PGS_SKIP_SAMPLER_FEEDBACK=1. The per-texture
++	// indirect-dispatch args stay at their qword-cleared zeros, so the
++	// consuming upload dispatches launch zero workgroups: in-bounds, no
++	// new hazards, rendering delta only (sparse-uploaded texels missing).
++	static bool skip_sampler_feedback = [] {
++		const char *env = getenv("PGS_SKIP_SAMPLER_FEEDBACK");
++		bool skip = env && strcmp(env, "1") == 0;
++		if (skip)
++			LOGI("G22: skipping sampler_feedback dispatch (workaround).\n");
++		return skip;
++	}();
++	if (skip_sampler_feedback)
++		return;
++
+ 	cmd.set_program(shaders.sampler_feedback);
+ 	memcpy(cmd.allocate_typed_constant_data<TextureAnalysis>(1, 0, texture_analysis.size()),
+ 	       texture_analysis.data(),
