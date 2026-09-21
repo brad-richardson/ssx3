@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t33 (Cross on Snow Jam → next screen, bytesize, 4h) · g14 (Odin on-device rich-dump replay, ps2xGS + adb, 6h) · frontier (E8 E-lane lead: guest progression toward menu, fork + P-lane lease) · i11 (0x395730 entry fix + base move + re-probe, worktree, 6h).
+- [ ] **Live panes:** t33 (Cross on Snow Jam → next screen, bytesize, 4h) · g15 (instrumented O1 catch + minimal fix + re-run, ps2xGS + adb, 6h) · frontier (E8 E-lane lead: guest progression toward menu, fork + P-lane lease) · i11 (0x395730 entry fix + base move + re-probe, worktree, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,25 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G14 read (09-21) — PASS(Blocked): Android build + on-device init gate PASS; replay SIGSEGVs in Granite trim() before dump open:**
+      NDK build exit 0 (265 MB aarch64, system libs only; 3 ANDROID-gated
+      cmake shims for AGDK-absent configure + logcat link). ONE bounded
+      Odin run: Vulkan on Adreno 830 (API 1.3.284), project's own init gate
+      PASSES (slab 1792 MiB / 268 MiB per-flush, 0 gate-fail lines —
+      G7-OPEN init leg now SUPPORTED), then SIGSEGV <1 s in Granite
+      `CommandPool::trim()` (fault addr 0x380, table null + pool live) via
+      init → set_super_sampling_rate → invalidate → wait_idle → trim,
+      BEFORE dump open (0 frames, 0 PPMs). Static audit: state
+      unconstructionable in-tree → debugger needed. Score N/A (no pixels,
+      honestly empty). Verified: tombstone (SIGSEGV + trim()+48 + addr
+      0x380), logcat (0 Running frame, slab pair, 0 gate-fail; 26 lines vs
+      report's 25 — one-line delta, immaterial), stdout (139, same-second),
+      binary size exact, diff RERUN BY ME (oracles ALL OK + SCORE N/A),
+      ps2xGS [G14] in sync with origin/main, device clean (`mg/` only),
+      shims ANDROID-gated, ssx3 mirror 5 files. Accepted: addr2line mapping
+      + static audit (in-evidence). Reference-state row: G13 oracles.
+      ~1 h. Next: G15 instrumented run (watchpoint/HWASan) + minimal fix +
+      clean re-run (G14 §3). Ledger row added.
 - [x] **T32 read (09-21) — PASS, Cross on Race → Select Event, stable 133 s:**
       Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
       T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
