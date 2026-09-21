@@ -1,0 +1,8 @@
+[TRANSCTIBED from tool output — the worktree-add stdout was not redirected to a file at run time]
+$ git -C "$FORK" worktree add --detach "$W/fork-wt" ffdf58c
+Preparing worktree (detached HEAD ffdf58c)
+HEAD is now at ffdf58c SSX3: restore the exact card busy-query entry
+(exit 0; `._pack-*.idx` non-monotonic noise lines filtered, owner's tree)
+$ find "$WT" -name '._*' | wc -l   # before purge: 330
+$ find "$WT" -name '._*' -delete   # after purge: 0
+$ git -C "$WT" status --short      # clean (no output)
