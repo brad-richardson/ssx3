@@ -1,0 +1,92 @@
+===== _sceSifCmdIntrHdlr@0x426230 owner sub_004261F0 [0x4261f0-0x426358) off=+0x40 =====
+-- owner entry:
+  0x4261f0: 0x00c0102d  (undecodable)
+  0x4261f4: 0x00e0182d  (undecodable)
+  0x4261f8: 0x0100582d  (undecodable)
+  0x4261fc: 0x27bdfff0  addiu $sp, $sp, -0x10
+-- selector context (sel-8 .. sel+32):
+  0x426228: 0x27bd0010  addiu $sp, $sp, 0x10
+  0x42622c: 0x00000000  nop
+  0x426230: 0x27bdff70  addiu $sp, $sp, -0x90 <== SELECTOR
+  0x426234: 0xffb00070  (undecodable)
+  0x426238: 0xffbf0080  (undecodable)
+  0x42623c: 0x0c10b030  jal 0x42c0c0
+  0x426240: 0x00000000  nop
+  0x426244: 0x3c030053  lui $v1, 0x53
+  0x426248: 0x8c67bcd8  lw $a3, -0x4328($v1)
+  0x42624c: 0x2470bcd8  addiu $s0, $v1, -0x4328
+  0x426250: 0x90e20000  lbu $v0, ($a3)
+-- JAL-to-selector: 0 []
+-- T5-materializations of selector: 2 ['0x425ea8/lui+low', '0x425eb4/lui+low']
+-- other mid-function JAL targets in owner: 0
+-- JAL-to-owner-start 0x4261f0: 3 ['0x3c459c', '0x4267e8', '0x4268b0']
+
+===== sceSifLoadIopHeap@0x42ad28 owner sub_0042AD08 [0x42ad08-0x42b068) off=+0x20 =====
+-- owner entry:
+  0x42ad08: 0x27bdfff0  addiu $sp, $sp, -0x10
+  0x42ad0c: 0xffbf0000  (undecodable)
+  0x42ad10: 0x0c10ab24  jal 0x42ac90
+  0x42ad14: 0x00000000  nop
+-- selector context (sel-8 .. sel+32):
+  0x42ad20: 0x27bd0010  addiu $sp, $sp, 0x10
+  0x42ad24: 0x00000000  nop
+  0x42ad28: 0x3c020045  lui $v0, 0x45 <== SELECTOR
+  0x42ad2c: 0x27bdffd0  addiu $sp, $sp, -0x30
+  0x42ad30: 0x8c435224  lw $v1, 0x5224($v0)
+  0x42ad34: 0x0080302d  (undecodable)
+  0x42ad38: 0xffbf0020  (undecodable)
+  0x42ad3c: 0x04610003  bgez $v1, 0x42ad4c
+  0x42ad40: 0xffb00010  (undecodable)
+  0x42ad44: 0x10000030  b 0x42ae08
+  0x42ad48: 0x0000102d  (undecodable)
+-- JAL-to-selector: 0 []
+-- T5-materializations of selector: 0 []
+-- other mid-function JAL targets in owner: 0
+-- JAL-to-owner-start 0x42ad08: 2 ['0x3c238c', '0x3c4d88']
+
+===== sceSifLoadFileReset@0x42b1f8 owner sub_0042B168 [0x42b168-0x42b230) off=+0x90 =====
+-- owner entry:
+  0x42b168: 0x27bdffb0  addiu $sp, $sp, -0x50
+  0x42b16c: 0x3c020045  lui $v0, 0x45
+  0x42b170: 0xffb30030  (undecodable)
+  0x42b174: 0x3c030053  lui $v1, 0x53
+-- selector context (sel-8 .. sel+32):
+  0x42b1f0: 0x27bd0050  addiu $sp, $sp, 0x50
+  0x42b1f4: 0x00000000  nop
+  0x42b1f8: 0x27bdfff0  addiu $sp, $sp, -0x10 <== SELECTOR
+  0x42b1fc: 0x3c020045  lui $v0, 0x45
+  0x42b200: 0x2403ffff  addiu $v1, $zero, -1
+  0x42b204: 0x3c040053  lui $a0, 0x53
+  0x42b208: 0xffbf0000  (undecodable)
+  0x42b20c: 0x2484f2a8  addiu $a0, $a0, -0xd58
+  0x42b210: 0xac435228  sw $v1, 0x5228($v0)
+  0x42b214: 0x0000282d  (undecodable)
+  0x42b218: 0x0c105884  jal 0x416210
+-- JAL-to-selector: 0 []
+-- T5-materializations of selector: 0 []
+-- other mid-function JAL targets in owner: 0
+-- JAL-to-owner-start 0x42b168: 7 ['0x42b270', '0x42b478', '0x42b660', '0x42b6ec', '0x42b790', '0x42b880', '0x42bae0']
+
+===== InitTLB@0x42cd58 owner sub_0042CCB8 [0x42ccb8-0x42cd98) off=+0xa0 =====
+-- owner entry:
+  0x42ccb8: 0x24030056  addiu $v1, $zero, 0x56
+  0x42ccbc: 0x0000000c  syscall
+  0x42ccc0: 0x03e00008  jr $ra
+  0x42ccc4: 0x00000000  nop
+-- selector context (sel-8 .. sel+32):
+  0x42cd50: 0x03e00008  jr $ra
+  0x42cd54: 0x00000000  nop
+  0x42cd58: 0x27bdfff0  addiu $sp, $sp, -0x10 <== SELECTOR
+  0x42cd5c: 0xffbf0000  (undecodable)
+  0x42cd60: 0x0c109080  jal 0x424200
+  0x42cd64: 0x00000000  nop
+  0x42cd68: 0x3c030200  lui $v1, 0x200
+  0x42cd6c: 0x14430005  bne $v0, $v1, 0x42cd84
+  0x42cd70: 0x00000000  nop
+  0x42cd74: 0x0c10b366  jal 0x42cd98
+  0x42cd78: 0x00000000  nop
+-- JAL-to-selector: 0 []
+-- T5-materializations of selector: 0 []
+-- other mid-function JAL targets in owner: 0
+-- JAL-to-owner-start 0x42ccb8: 5 ['0x42cce4', '0x42ce38', '0x42cea0', '0x42cf18', '0x42cf5c']
+
