@@ -1567,6 +1567,51 @@ the build or commit that closed them.
       (todo amendment + ledger fix); T45 brief pins the REPORT-derived
       series. ~1 h. Next: T45 re-drive QUEUED (spawn when audio
       recovers; null-sink held as fallback). Ledger row added.
+- [x] **E22 read (09-21) — PASS(Done), first opus worker clean: stdbuf-free boot closes the parser gap (ONE 9 µs call + 66.896 s silence), C1 eliminated on evidence, X sharpened to mechanism + missing rule; fix gate STOPPED**
+      Checkpoint re-verified (fork triple `3adc0478`, 9,457/1,725,
+      458/458 ×2 with the REUSED dylib by copy + re-sha, E15/E16/prior/
+      R1–R6) → tooling rename (9 pure + receipt verifier identity with
+      E21-spellings protected, 5 intentionally changed incl. stdbuf
+      drop + assertion) → ONE guarded boot e22a (direct exec, wall
+      75.46 s rc0): parser dir 0 files → 2,196 B events + 5,040 B
+      input with real `_Exit` footer (argv hypothesis HELD) → per-call
+      timing (ONE call, 5040/5040/0, 0 sends/receives/frames/errors,
+      backend 1/0/0, 4/4 bindings; payload FNV == E18's, first64
+      byte-identical; real 5,040 B retained first-ever) → X hunt over
+      closed surface (C1 proven inert: AddBs seq 6397/6398 pre-park
+      6401 same thread/tick + no-latch scan + 0 mpeg-complete/6401;
+      C3/C5/C6/C7/C8/C9 closed; C2a/C4 live) → fix gate STOP (two
+      candidates + two unobserved rules). Verified: tail-sha+bytes,
+      fork, suite 458/458 re-run BOTH modes, dylib/harness shas
+      (E21-E1 carried right), payload FNV/sha recomputed, 9 µs +
+      66.896 s arithmetic, E7 primary (6401/tick4507/park), argv
+      (direct + assertion fields), C1 seqs + 0 completes + scheduler
+      source, C5/setAlarm + surface-closure greps, lease absent,
+      1 boot, 0 fork commits. No errata. ~1 h. Next: E23
+      (complete-feed cadence reference → trigger/bound by comparison).
+      Ledger row added.
+- [x] **G31 read (09-21) — PASS(Done), (b1)/(b2) resolves (b1): promotion provably off, VRAM sampler mis-samples stale source as cleared on Adreno**
+      Task-1 statics proved promotion unengageable (flag false,
+      `set_hacks` uncalled, register/fill dead, lookup null, renderer
+      nulling inert, VRAM path always taken) + pre-registered regs +
+      region FNVs (B `eea04488…`, A live; DH shift corrected 895→447)
+      → ONE in-`vsync()` state hunk (+65/−0) + ONE build exit 0
+      [458/458] (265,851,416 B `c91719a0…`, `c180f320…`) +
+      verify-then-push NO gap + ONE run exit 0 (16/16 state + 16/16
+      bytes + 512 vpage + 10 ladder + load line, `Done!` last, 0 new
+      tombstone): p1null ×16 (`nprom=0/hack=0`), B == load ×16,
+      A live + 8/8 pass-determinism, ladder == G29 ×10, vpage 512/512
+      == G30. (b2) refuted structurally (no promoted image exists).
+      Verified: logcat 2360/16/16/512/10/1 + all values, vpage diff
+      IDENTICAL, B-FNV RECOMPUTED exact, determinism 8/8, promo
+      statics (default + zero callers), hunk shape + G22 match, G31 +
+      G28 binaries INTACT (still no 10th recurrence), device clean,
+      tail intact. G31-E1 (self-filed): 10 PPMs lost to a pull-glob
+      error before cleanup — ladder-P1 substitution is exact (P1 bytes
+      == file bytes, deterministic encoder, G28–G30 sha unanimity);
+      no score re-run possible; retry correctly unspent. ~1 h. Next:
+      G32 (sample_quad[0] unit probe with controlled patterns, NOT
+      adoption). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
