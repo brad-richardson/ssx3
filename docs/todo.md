@@ -1288,6 +1288,27 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
+      ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
+      LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
+      `2e946006…`, `strings` ×1/×2/×0) + verify-then-push (4 matching
+      reads incl. on-device) + ONE with-flag run: exit 134, receipt :29
+      (`=1, =0, =0`), 18 frames / Total-time last, crasher 0×, 8/8
+      success-yes, 0 writes; tombstone_20 = SIGABRT Scudo
+      `0x200007c3a87bc30`, 16-frame O6 stack, 16 ms post-Total-time,
+      BuildId == binary; warm-pass `img=`=0 ×8 (feedback writes GONE)
+      with all other counters line-identical to G24. Verified: hunk
+      block == committed diff (modulo one trailing context line),
+      G22 HUNK_MATCH, logcat (1793, :29 exact, 18 frames, 8 yes,
+      crasher 0, Total-time last), tombstone (signal/addr/16 frames/
+      O6 chain/BuildId/timing), img= census (13 zero + 3 cold residue),
+      score re-run (N/A), device `mg/`-only, tail intact. ERRATUM: #13
+      is `main::$_10(ScanoutResult)` (lambda) — no literal
+      `save_scanout_ppm` symbol in the stack; attribution stands on the
+      ScanoutResult arg + wait_idle + timing + 0 writes. ZERO-DAMAGE:
+      G26 binary re-zeroed 100% post-report (tested copy proven good by
+      tombstone BuildId + staging match). ~35 min. Next: G27 scoped
+      sanitizer (name O6's writer). Ledger row added.
 - [x] **E17 read (09-21) — PASS(Done), 5 I-rows ABSORBED as fork MAP `e63f1616` (PUSHED by worker, remote agrees): predicted CSV `7c827add` exact, regen rc0, full regression green, 1/1 probe closed with real footers; MPEG still fail-before, fix now unblocked:**
       Re-verified all 5 rows (bytes/slices/owners) + 5 fail-befores
       re-run (with an honest parser adaptation: E14's binding=null claim
