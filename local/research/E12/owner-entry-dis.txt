@@ -1,0 +1,18 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+002c63e8 24a2270f addiu       $v0, $a1, 0x270F
+002c63ec 03e00008 jr          $ra
+002c63f0 2c422706 sltiu       $v0, $v0, 0x2706
+002c63f4 00000000 nop
+002c63f8 27bdff90 addiu       $sp, $sp, -0x70
+002c63fc 7fb00060 sq          $s0, 0x60($sp)
+002c6400 03a0202d daddu       $a0, $sp, $zero
+002c6404 00a0802d daddu       $s0, $a1, $zero
+002c6408 7fb30030 sq          $s3, 0x30($sp)
+002c640c 3c05004a lui         $a1, 0x4A
+002c6410 7fb20040 sq          $s2, 0x40($sp)
+002c6414 7fb10050 sq          $s1, 0x50($sp)
+002c6418 00c0982d daddu       $s3, $a2, $zero
+002c641c ffbf0020 sd          $ra, 0x20($sp)
+002c6420 0c0b0950 jal         func_2C2540
+002c6424 24a53970 addiu       $a1, $a1, 0x3970
+# E12 STATIC TAIL COMPLETE

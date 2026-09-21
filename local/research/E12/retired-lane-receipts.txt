@@ -1,0 +1,63 @@
+## local/research/T1/REPORT.md
+# T1 report — Park snapshot (PS2X_DIAG_PARK=1) + SIF/RPC tally + ladder_diff
+
+Brief `local/muse/prompts/T1.md`. TOOLING brief: 2 fork commits
+(emitter + unit tests, then the diff tool) + 1 proof boot + 1 void boot
+(root-caused below). Tables, no verdicts. Stale-reading guard: P1
+REPORT Part 28 (the 19k-line hand rebuild this automates) + Part 24
+§P24-1f/g (drop-census conventions reused: site×reason grouping, args
+stay log-only, census counts printed lines).
+
+`R=/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp` (fork, branch
+`ssx3`), `W=/Volumes/Extreme SSD/ps2recomp-spike`, `RUN=$W/P1/run`.
+Base `e483d8d` (P1af SPR DMA fix — landed + pushed mid-session at
+01:07 EDT, after my build dir was configured; my worktree build is
+`e483d8d` + T1 files only). Peer lanes concurrent; shared only the
+
+- Emitter-vs-emitter ladder: needs two proof boots; the box allows one
+  (+ the void). D1 (emitter-vs-miner) and D2 (miner-vs-miner) cover the
+  tool's verdict paths instead; the first two-emitter diff falls to the
+  next park brief.
+- In-runtime `PS2X_DIAG_PARK_TIMEOUT_MS` path: implemented, never fired
+  (unset in proof). One line could force it in a future boot.
+- Guest-stack walk for the ra chain: the chain is live `$ra` +
+  invocation pcs only (shallow by design; documented in the schema).
+- Miner blind tail: the final partial block/tick (≤5 s) never prints,
+  so live-thread status, pump counts, and tick rows carry the last
+  window's gap (SAMPLED/TOL_OK/STALE by rule, never hidden).
+- `sched.-1` (11,131 invocation schedules) is emitter-only:
+  invocation threads never print `[diag:thread]`.
+- Session wall time 04:53–05:43Z (≈50 min incl. build/configure,
+  one 5-min P1ag wait, and the void-boot rebuild), inside the 4 h box.
+## local/research/T5/REPORT.md
+# T5 report — Analyzer rule: materialized `.text` pointers are function entries
+
+Brief `local/muse/prompts/T5.md`. TOOLING brief: 1 fork commit
+(rule + unit tests) + 2 proof boots (max used) + first emitter-vs-emitter
+ladder. Tables, no verdicts. Stale-reading guard: review Part 2 §12 row
+T5 + `local/research/T1/REPORT.md` (emitter + `ladder_diff`) re-read;
+the brief's "P1 Part 11" resolves to the Part 21 §P21-1 receipt (table
+below) plus P9 §P9-1a (boundary re-derivation this rule automates).
+
+`R=/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp` (fork, branch
+`ssx3`), `W=/Volumes/Extreme SSD/ps2recomp-spike`, `RUN=$W/P1/run`.
+Peer lanes concurrent; shared only the fork remote.
+
+Headline receipts: +172 splits (predicted set == actual set, `diff`
+Row 2: real-site JAL target (`jal` at `0x3E3FB4`, delay ADDIU at `0x3E3FB8`).
+
+Receipt paths: `$W/P1/run/boot-t5-base.log`,
+`$W/P1/run/boot-t5-rule.log`, `$W/P1/run/t5-waits.log`,
+`/tmp/t5-suite-before.log`, `/tmp/t5-suite-after.log`,
+`/tmp/t5-recomp-old.log`, `/tmp/t5-recomp-new.log`,
+`/tmp/t5-boot-base.py`, `/tmp/t5-boot-rule.py`, `/tmp/t5-census.py`,
+`/tmp/t5-predicted.txt`, `/tmp/t5-old.toml`, `/tmp/t5-new.toml`,
+`local/research/T5/{REPORT.md,D.txt,splits.txt,park-snapshot-base.json,park-snapshot-rule.json}`.
+
+## T5-10. What I could not do
+
+- Re-sample the SIGTERM phase (gap 1): 2/2 boots used; lease released.
+- Run a 3rd boot (max 2 used; D + ladder both closed).
+- Session wall ≈05:50–06:35Z (≈45 min incl. 4 builds + census + 2 boots),
+  inside the 4 h box.
+# E12 RETIRED LANE RECEIPTS TAIL COMPLETE

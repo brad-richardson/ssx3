@@ -1,0 +1,75 @@
+diff --git a/games/ssx3/ssx3-functions.sweep.csv b/games/ssx3/ssx3-functions.sweep.csv
+index 8814e67..d26fde9 100644
+--- a/games/ssx3/ssx3-functions.sweep.csv
++++ b/games/ssx3/ssx3-functions.sweep.csv
+@@ -5091,6 +5091,7 @@ sub_002C5230,0x2c5230,0x2c5250,0x20
+ sub_002C5250,0x2c5250,0x2c5278,0x28
+ sub_002C5278,0x2c5278,0x2c52d8,0x60
+ sub_002C52D8,0x2c52d8,0x2c5320,0x48
++sub_002C5300,0x2c5300,0x2c5320,0x20
+ sub_002C5320,0x2c5320,0x2c5338,0x18
+ sub_002C5338,0x2c5338,0x2c53b0,0x78
+ sub_002C53B0,0x2c53b0,0x2c53c8,0x18
+diff --git a/ps2xRuntime/include/ps2_e7.h b/ps2xRuntime/include/ps2_e7.h
+index 8d56410..4d9634a 100644
+--- a/ps2xRuntime/include/ps2_e7.h
++++ b/ps2xRuntime/include/ps2_e7.h
+@@ -143,25 +143,25 @@ inline void cardWrite(uint64_t tick, const uint8_t *ram, uint32_t address,
+     const uint32_t ui=cardUi().load();
+     const uint32_t off=address-mc;
+     if ((mc && (off==0u || off==4u || off==0xcu || off==0x10u || off==0x40u || off==0x4cu || off==0x184u || off==0x198u)) ||
+-        (ui && address==ui+0x338u) || (address>=0x4a3938u && address<=0x4a3944u))
++        (ui && (address==ui+0x338u || address==ui+0x344u || address==ui+0x424u)) || (address>=0x4a3938u && address<=0x4a3944u))
+         event(tick,"mc-write","MC=0x%x UI=0x%x addr=0x%x width=%u value=0x%llx pc=0x%x thread=%d",
+               mc,ui,address,width,static_cast<unsigned long long>(lo),pc,thread);
+ }
+ inline bool cardTarget(uint32_t target)
+ {
+-    return target==0x2c5140u || target==0x2c5358u || target==0x2c4480u || target==0x2c48c0u ||
++    return target==0x2c5300u || target==0x2c5140u || target==0x2c5358u || target==0x2c4480u || target==0x2c48c0u ||
+            target==0x2c4980u || target==0x2c50e0u || target==0x40a498u || target==0x40a360u;
+ }
+ inline void cardCall(uint64_t tick, const char *phase, const uint8_t *ram,
+-                     uint32_t target, uint32_t source, uint32_t entryA0,
++                     uint32_t target, uint32_t source, uint32_t entryA0, uint32_t entryA1,
+                      uint32_t pc, uint32_t v0, uint32_t a1, uint32_t a2,
+                      uint32_t a3, uint32_t sp, uint32_t ra, int thread)
+ {
+     if (!enabled() || tick > 603u || !ram || !cardTarget(target)) return;
+-    const uint32_t mc=(target==0x2c5140u || target==0x2c5358u) ? entryA0 : cardObject().load();
++    const uint32_t mc=(target==0x2c5300u || target==0x2c5140u || target==0x2c5358u) ? entryA0 : cardObject().load();
+     const uint32_t ui=cardUi().load(); const bool safe=cardAddress(mc);
+-    event(tick,phase,"target=0x%x source=0x%x a0=0x%x a1=0x%x a2=0x%x a3=0x%x pc=0x%x v0=0x%x sp=0x%x ra=0x%x thread=%d MC=0x%x constructor=0x%x VT=0x%x state=%u outstanding=%u port=%u activePort=%u command=%u UI=0x%x pending=%u slot0=%d slot1=%d info=%u,%u,%u,%u",
+-          target,source,entryA0,a1,a2,a3,pc,v0,sp,ra,thread,mc,cardObject().load(),
++    event(tick,phase,"target=0x%x source=0x%x a0=0x%x a1=0x%x a1Now=0x%x a2=0x%x a3=0x%x pc=0x%x v0=0x%x sp=0x%x ra=0x%x thread=%d MC=0x%x constructor=0x%x VT=0x%x state=%u outstanding=%u port=%u activePort=%u command=%u UI=0x%x pending=%u slot0=%d slot1=%d info=%u,%u,%u,%u",
++          target,source,entryA0,entryA1,a1,a2,a3,pc,v0,sp,ra,thread,mc,cardObject().load(),
+           safe?word(ram,mc):0u,safe?word(ram,mc+4u):0u,safe?word(ram,mc+0x40u):0u,
+           safe?word(ram,mc+0xcu):0u,safe?word(ram,mc+0x10u):0u,safe?word(ram,mc+0x4cu):0u,
+           ui,cardAddress(ui)?word(ram,ui+0x338u):0u,
+diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
+index de5d62e..b55b0a9 100644
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -1681,7 +1681,7 @@ void PS2Runtime::reportMissingFunction(uint8_t *rdram,
+     // E11: retain inputs to the already-reached sibling residual; no dispatch or result change.
+     if (ps2_e7::enabled() && targetPc == 0x2c5358u)
+         ps2_e7::cardCall(m_memory.gs().vsyncTick.load(), "mc-missing", rdram,
+-            targetPc, sourcePc, getRegU32(ctx,4), ctx->pc, getRegU32(ctx,2),
++            targetPc, sourcePc, getRegU32(ctx,4), getRegU32(ctx,5), ctx->pc, getRegU32(ctx,2),
+             getRegU32(ctx,5), getRegU32(ctx,6), getRegU32(ctx,7),
+             getRegU32(ctx,29), getRegU32(ctx,31),
+             g_diagWatchThreadId.load(std::memory_order_relaxed));
+@@ -2156,10 +2156,12 @@ bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
+     // Observation only, sharing the existing E7 window and byte budgets.
+     const bool cardObservation = ps2_e7::enabled() && ps2_e7::cardTarget(targetPc);
+     const uint32_t cardA0 = cardObservation ? getRegU32(ctx, 4) : 0u;
++    // E12: retain original port across predicate execution (observation only).
++    const uint32_t cardA1 = cardObservation ? getRegU32(ctx, 5) : 0u;
+     auto noteCardCall = [&](const char *phase) {
+         if (cardObservation)
+             ps2_e7::cardCall(m_memory.gs().vsyncTick.load(), phase, rdram,
+-                targetPc, sourcePc, cardA0, ctx->pc, getRegU32(ctx, 2),
++                targetPc, sourcePc, cardA0, cardA1, ctx->pc, getRegU32(ctx, 2),
+                 getRegU32(ctx, 5), getRegU32(ctx, 6), getRegU32(ctx, 7),
+                 getRegU32(ctx, 29), getRegU32(ctx, 31),
+                 g_diagWatchThreadId.load(std::memory_order_relaxed));

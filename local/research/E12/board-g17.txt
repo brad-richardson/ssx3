@@ -1,0 +1,100 @@
+   7 +import lldb
+   8 +
+   9 +
+  10 +def _frame_sym(frame):
+  11 +    try:
+  12 +        if frame.GetSymbol().IsValid():
+  13 +            return frame.GetSymbol().GetName() or ""
+  14 +    except Exception:
+  15 +        pass
+  16 +    return ""
+  17 +
+  18 +
+  19 +def _line_of(frame):
+  20 +    try:
+  … 141 more lines
+
+◆ Wrote /tmp/g17-a.lldb (+28) · ctrl+o
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g17walk.py
+   3 +target create /tmp/g17-symbols
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --file command_buffer.cpp --line 3505
+   6 +breakpoint modify --condition '(vk_set == 0) || (upda
+      te_template == 0)' 1
+   7 +continue
+   8 +g17_triage
+   9 +continue
+  10 +g17_triage
+  11 +continue
+  12 +g17_triage
+  13 +continue
+  14 +g17_triage
+  15 +continue
+  16 +g17_triage
+  17 +continue
+  18 +g17_triage
+  19 +continue
+  20 +g17_triage
+  … 8 more lines
+
+◆ Ran 7 commands · Stage G17 dir on … · +6 ✓ · 28s · ctrl+o
+
+◆ Wrote /tmp/g17-run-lldb.py (+20)
+   1 +#!/usr/bin/env python3
+   2 +"""G17: run Apple lldb batch with a host-side watchdo
+      g (macOS has no timeout).
+   3 +
+   4 +Usage: g17-run-lldb.py <lldb-batch> <logfile> [watchd
+      og-sec default 1500]
+   5 +Exit: lldb's exit, or 124 on watchdog fire (log notes
+       the fire).
+   6 +"""
+   7 +import subprocess
+   8 +import sys
+   9 +
+  10 +batch, logfile = sys.argv[1], sys.argv[2]
+  11 +watch = int(sys.argv[3]) if len(sys.argv) > 3 else 15
+      00
+  12 +with open(logfile, "w") as f:
+  13 +    try:
+  14 +        p = subprocess.run(["lldb", "-b", "-s", batch
+      ],
+  15 +                           stdout=f, stderr=subproces
+      s.STDOUT, timeout=watch)
+  16 +        print("G17-RUNNER lldb exit=%d" % p.returncod
+      e, file=f)
+  17 +        sys.exit(p.returncode)
+  18 +    except subprocess.TimeoutExpired:
+  19 +        print("G17-RUNNER WATCHDOG-FIRE after %ds" %
+      watch, file=f)
+  20 +        sys.exit(124)
+
+◆ Ran DEV=622c49b1; G17DIR=/data/local/tmp/g17; a… — failed
+  └ unmanaged shell backgrounding is not allowed; use bash
+    session_id polling instead — and this host is macOS, wh
+    … 2 more lines
+     must keep running after your final answer, say so and
+    ask how to proceed
+
+◆ Ran command · Forward port and snaps… · ✓ · 0.1s · ctrl+o
+
+◆ Backgrounded · Start lldb-server gdbserve… · 12s · ctrl+o
+
+◆ Finished · Start lldb-server gdbserver stub… · ✓ · ctrl+o
+
+◆ Ran 2 commands · Summarize run 1 … · +1 ✓ · 7.1s · ctrl+o
+
+◇ Thinking (6m 45s · esc to interrupt)
+  Reconciling the mask against BRK encoding to explain why
+
+  ✓ Pin verify + caps declare + SSD ps2x-g17 setup
+  ◆ Push binary+dump+lldb-server to /data/local/tmp/g17, s…
+  ◇ Bounded lldb run 1: break at :3505, capture descriptor…
+  ◇ Retry run 2 only if O1/O3 fires; pull tombstones/logca…
+  ◇ Device cleanup (dir + forward), scanout score, report …
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ssx3 · YOLO

@@ -1,0 +1,92 @@
+{
+  "utc": "2026-09-21T10:31:46.875563+00:00",
+  "lease_absent": true,
+  "scratch_absent": true,
+  "pgrep": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "df": {
+    "argv": [
+      "df",
+      "-k",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem   1024-blocks       Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk4s1  1953471488 1658771456 294700032    85%       1        0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   239362496  207039744   4482700    98% 1871161 44827000    4%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "fork_head": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "9da21ff8aeb9529368b32d91b0eec6a82ba79344\n",
+    "stderr": ""
+  },
+  "fork_status": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": " M ps2xRuntime/src/runner/register_functions.cpp\n?? ps2_log.txt\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "staged": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "diff",
+      "--cached",
+      "--name-only"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "remote": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "ls-remote",
+      "fork",
+      "refs/heads/ssx3"
+    ],
+    "rc": 0,
+    "stdout": "9da21ff8aeb9529368b32d91b0eec6a82ba79344\trefs/heads/ssx3\n",
+    "stderr": ""
+  },
+  "binaries": [
+    {
+      "path": "/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "sha256": "97b8dc25fe315eb7b68a9fd83879fb4d9ef2a9ab1a71dd1283f724846220260c",
+      "bytes": 163437168
+    },
+    {
+      "path": "/tmp/p1-link/runtime/ps2xTest/ps2x_tests",
+      "sha256": "cfdbf44635af5402b49d8623169e2d16677a59841b2a80dc9ca9eac81b7573f5",
+      "bytes": 5624840
+    }
+  ],
+  "protected_checkpoint_present": true,
+  "owned_tooltmp_remaining": [],
+  "boot_count": 1,
+  "no_ssx3_push": true
+}

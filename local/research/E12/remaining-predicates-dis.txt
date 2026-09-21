@@ -1,0 +1,52 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+002c6700 03e00008 jr          $ra
+002c6704 24020001 addiu       $v0, $zero, 0x1
+002c6708 03e00008 jr          $ra
+002c670c 24020001 addiu       $v0, $zero, 0x1
+002c6710 03e00008 jr          $ra
+002c6714 24020001 addiu       $v0, $zero, 0x1
+002c6718 27bdfff0 addiu       $sp, $sp, -0x10
+002c671c ffbf0000 sd          $ra, 0x0($sp)
+002c6720 8c830000 lw          $v1, 0x0($a0)
+002c6724 8c85000c lw          $a1, 0xC($a0)
+002c6728 846601e8 lh          $a2, 0x1E8($v1)
+002c672c 8c6201ec lw          $v0, 0x1EC($v1)
+002c6730 0040f809 jalr        $v0
+002c6734 00862021 addu        $a0, $a0, $a2
+002c6738 dfbf0000 ld          $ra, 0x0($sp)
+002c673c 03e00008 jr          $ra
+002c6740 27bd0010 addiu       $sp, $sp, 0x10
+002c6744 00000000 nop
+002c6748 03e00008 jr          $ra
+002c674c 24024000 addiu       $v0, $zero, 0x4000
+002c6750 03e00008 jr          $ra
+002c6754 2402ffff addiu       $v0, $zero, -0x1
+002c6758 24a303ff addiu       $v1, $a1, 0x3FF
+002c675c 2402ffff addiu       $v0, $zero, -0x1
+002c6760 0043102a slt         $v0, $v0, $v1
+002c6764 24a507fe addiu       $a1, $a1, 0x7FE
+002c6768 0062280b movn        $a1, $v1, $v0
+002c676c 00052a83 sra         $a1, $a1, 10
+002c6770 03e00008 jr          $ra
+002c6774 24a2004d addiu       $v0, $a1, 0x4D
+002c6778 27bdfff0 addiu       $sp, $sp, -0x10
+002c677c ffbf0000 sd          $ra, 0x0($sp)
+002c6780 8c830000 lw          $v1, 0x0($a0)
+002c6784 8c850024 lw          $a1, 0x24($a0)
+002c6788 846600b0 lh          $a2, 0xB0($v1)
+002c678c 8c6200b4 lw          $v0, 0xB4($v1)
+002c6790 0040f809 jalr        $v0
+002c6794 00862021 addu        $a0, $a0, $a2
+002c6798 dfbf0000 ld          $ra, 0x0($sp)
+002c679c 03e00008 jr          $ra
+002c67a0 27bd0010 addiu       $sp, $sp, 0x10
+002c67a4 00000000 nop
+002c67a8 03e00008 jr          $ra
+002c67ac 0000102d daddu       $v0, $zero, $zero
+002c67b0 27bdfff0 addiu       $sp, $sp, -0x10
+002c67b4 ffbf0000 sd          $ra, 0x0($sp)
+002c67b8 8c830000 lw          $v1, 0x0($a0)
+002c67bc 8c85000c lw          $a1, 0xC($a0)
+002c67c0 84660190 lh          $a2, 0x190($v1)
+002c67c4 8c620194 lw          $v0, 0x194($v1)
+# E12 STATIC TAIL COMPLETE

@@ -1,0 +1,53 @@
+{
+  "phase": "entry",
+  "utc": "2026-09-21T09:50:55.225584+00:00",
+  "caps": {
+    "logical": 1073741824,
+    "allocated": 1342177280,
+    "output_guard": 134217728,
+    "free_floor": 2147483648,
+    "free_guard": 268435456,
+    "wall_s": 1200,
+    "wall_guard_s": 15,
+    "log": 16777216,
+    "log_guard": 1048576,
+    "poll_s": 0.25
+  },
+  "df_before": {
+    "argv": [
+      "df",
+      "-h",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk4s1   1.8Ti   1.5Ti   288Gi    85%       1     0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   228Gi   198Gi   3.9Gi    99%    1.9M   41M    4%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "free_before": 4186992640,
+  "source_diff": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "diff",
+      "b6252bb..HEAD",
+      "--",
+      "ps2xRecomp",
+      "ps2xAnalyzer"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "argv": [
+    "/Volumes/Extreme SSD/ps2x-i10/host-recomp/ps2xRecomp/ps2_recomp",
+    "/Users/bradrichardson/dev/ssx3/local/research/E12/entry-used.toml"
+  ],
+  "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+  "tool_sha": "511791795c16649e69706725c412408acc8d35fda68c4d83a3229eae6bda0763",
+  "elf_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+  "csv_sha": "41024f83a9e95408a48dbb91336db52b88f0b6fc7335a91eb6719479679f363d",
+  "config_sha": "ad34847f8e3c094bc7097daa37faa904f0bbfeeb12a4d5388b051c93a09a33bf",
+  "canonical_sha": "2f2ae5432b91f873f053045cfa29d9c1d4e3d8e5a941f5693eea720f26daaf1c"
+}

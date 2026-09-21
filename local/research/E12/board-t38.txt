@@ -1,0 +1,100 @@
+        300 ms keydown — SAME
+  853 -                  # input class as T36, unchanged) o
+       n live gameplay, with a
+  854 -                  # PRE-nudge pair (noise floor, no
+       input between) + DENSE
+  855 -                  # post-nudge series (1 s cadence x
+        10 s). HUD + rider
+  856 -                  # tracking read off viewed snaps p
+       ost-hoc local.
+  851 +                  # T38 hold: ONE 1 s D-pad Left HOL
+       D (Left = Keyboard/Left,
+  852 +                  # PCSX2.ini:576; xdotool key Left;
+        single keydown, sleep 1,
+  853 +                  # keyup — brief-authorized new inp
+       ut class, the ONLY input
+  854 +                  # change vs T36/T37) on live gamep
+       lay, with a PRE-hold
+  855 +                  # pair (noise floor, no input betw
+       een) + DENSE post-hold
+  856 +                  # series (1 s cadence x 10 s). HUD
+        + rider tracking read
+  857 +                  # off viewed snaps post-hoc local.
+
+◆ Edited local/research/T38/t38-auto.sh (+2 −2)
+  870 -                  press_nudge Left "NUDGE_LEFT"
+  871 -                  # dense post-nudge series: 1 s cad
+       ence x 10 s, each scored
+  870 +                  press_hold Left "HOLD_LEFT"
+  871 +                  # dense post-hold series: 1 s cade
+       nce x 10 s, each scored
+
+◆ Ran command · Verify no leftover T37… · ✓ · 0.1s · ctrl+o
+
+◆ Edited local/research/T38/t38-auto.sh (+1 −1)
+  845 -                  plog "LIVE-LIKE (departed + non-pa
+       nel + motion x2) -> pre-nudge snap + ONE steering nu
+       dge"
+  845 +                  plog "LIVE-LIKE (departed + non-pa
+       nel + motion x2) -> pre-hold snap + ONE steering hol
+       d"
+
+◆ Edited local/research/T38/t38-auto.sh (+1 −1)
+  848 -                  plog "NO-LIVE-PARK (X chain not li
+       ve gameplay; no nudge pressed)"
+  848 +                  plog "NO-LIVE-PARK (X chain not li
+       ve gameplay; no hold pressed)"
+
+  Read 2 files · ctrl+o
+
+◆ Wrote local/research/T38/t38-track.py (+99) · ctrl+o
+   1 +#!/usr/bin/env python3
+   2 +"""T38 rider-pixel tracker (frozen pre-run).
+   3 +
+   4 +T37's RDC + SCPS(+-40) unchanged (comparability), plu
+      s the two cheap T37
+   5 +recipe refinements:
+   6 +
+   7 +  RDC validity gate: VALID iff 200 <= npix <= 6000 (r
+      ider-scale band;
+   8 +      T37 calibration: valid snaps npix 1299-3786, mi
+      xed 8595-12177,
+   9 +      flooded >= 18624; T36 npre rider-clean 2462). G
+      ated-out snaps print
+  10 +      tag INVALID and their cx/cy must not be used fo
+      r deltas.
+  11 +  SCPS wide window: SCPS120 = same normalized-xcorr c
+      olumn-profile shift
+  12 +      over lag in [-120,+120] (T37 railed +-40 nearly
+       every step incl. the
+  13 +      no-input pre-pair gap at ~3 s exposure gaps und
+      er turbo).
+  14 +
+  15 +Game area x[0,647] y[24,511] of the 1280x1024 snap (T
+      36 npre bbox).
+  16 +RDC: centroid (px, 0.1) of dark pixels (luminance < 8
+      0) inside rider ROI
+  17 +x[150,540] y[100,460]. SCPS band: rows y[380,460], co
+      ls x[150,540].
+  18 +
+  19 +Noise floor: |M(pre2) - M(pre1)| over the no-input pr
+      e-hold pair gap.
+  20 +Deterministic: identical bytes in -> identical number
+      s out (no RNG).
+  … 79 more lines
+
+◆ Ran 19 commands · Remote PPM self… · +18 ✓ · 23s · ctrl+o
+
+◈ Running · Run T38 … — running (4m 53s · esc to interrupt)
+└ Mon Sep 21 09:42:48 UTC 2… (ctrl+b to send to background)
+
+  ✓ Freeze T38 method + copy/adapt scripts (1s hold)
+  ✓ Pre-run checks on bytesize (receipts table)
+  ◆ Stage scripts + run live race + 1s hold
+  ◇ Fetch + post-hoc HUD/tracking scoring
+  ◇ Trace/WSL/NVM closeout + REPORT + commit
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ssx3 · YOLO

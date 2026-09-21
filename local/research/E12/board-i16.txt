@@ -1,0 +1,100 @@
+  `0x2c52d8–0x2c5320`, head after `jr $ra` @`0x2c52f4`/ds
+  `0x2c52f8`/nop
+  @`0x2c52fc`, tail `jr $ra` @`0x2c5318` → return, ends
+  `0x2c5320`, observed
+  bounds `0x2c5300–0x2c5320`, caller `jalr $v0` @`0x242150`
+  with table-loaded
+  target — `$v0` delta vs priors' `$v1`, 0 register
+  refs/case/file; gap 1 =
+  this brief). This brief executes I15's ONE next action —
+  the same 1-line
+  class as I11–I15. Reuse I15's worktree shape + device
+  toolchain +
+  provision/install/ISO+env mechanism — table every delta.
+
+  ## Facts you start from
+
+  - Target: Brad's iPad, iPad Air 11-inch (M2), UDID
+  `00008112-001224302184A01E` (`xcrun devicectl list
+  devices` to
+  re-confirm). The I15 app is STILL INSTALLED — plain
+  `install` overwrites
+  (closed 7× now). No fresh prompt needed for iPad
+  installs. Confirm the
+  iPad's state before installing (user sessions reported,
+  not killed).
+  - BASE: create a SEPARATE fork worktree on the SSD at
+  CURRENT `fork/ssx3`
+  HEAD (table the hash — the E-lane may have advanced past
+  `ffdf58c`;
+  NEVER move it yourself).
+  - COORDINATION (read carefully — the E-lane converged on
+  the SAME gap):
+  E11's outcome (ii) parked `0x2c5300` as the E-lane's next
+  single-entry
+  repair, and a concurrent E12 brief repairs it fork-side.
+  TWO cases:
+  (a) if `fork/ssx3` HEAD already contains the `0x2c5300`
+  row when you pin
+  (check the CSV at HEAD BEFORE writing anything): do NOT
+  write your own
+  row — PORT E12's row as part of your base (table the E12
+  commit + row
+  bytes) and proceed to codegen; (b) otherwise port I15's 7
+  local commits
+  (plist, CMake wiring,
+  `0x395730`/`0x14f2a8`/`0x156750`/`0x243a80`/
+  `0x3a0158` rows — cherry-pick if clean, else re-apply by
+  hand + table
+  the merged diff) and write the `0x2c5300` row yourself
+  (I15's observed
+  row `sub_002C5300,0x2c5300,0x2c5320,0x20` — RE-VERIFY the
+  `jr $ra`
+  @`0x2c5318` bounds from the emitted slice BEFORE writing
+  the row; table
+  the verification). Either way the probe target is the
+  same: PAST
+  `0x2c5300`. Check whether the E-lane owns the shared
+  clone before
+  touching it (one `worktree add` + read-only inspection
+  only, I15 shape).
+  - The task: re-run host `ps2_recomp`, re-link
+  `ps2_game_objects`
+  (`-DPS2X_GAME_CODEGEN_DIR`), rebuild the device runtime,
+  install over
+  the I15 app, and re-probe with the ISO+env recipe. One
+  gap per brief: if
+  a SECOND new wall appears, table it as the next gap — do
+… output capped
+
+  Read local/research/I15/REPORT.md
+
+◆ Ran 2 commands · Check HEAD CSV f… · +1 ✓ · 1.4s · ctrl+o
+
+◆ Read skill git · built-in · 4 KB
+
+◆ Ran 8 commands · Chec… · ✗ 1 failed · +6 ✓ · 26s · ctrl+o
+
+◆ Edited /Volumes/Extreme SSD/ps2x-i16/fork-wt/games/ssx3/s
+sx3-functions.sweep.csv (+1 −0)
+  5096  sub_002C52D8,0x2c52d8,0x2c5320,0x48
+  5097 +sub_002C5300,0x2c5300,0x2c5320,0x20
+  5098  sub_002C5320,0x2c5320,0x2c5338,0x18
+
+◆ Ran 6 commands · Non-p… · ✗ 1 failed · +4 ✓ · 3m · ctrl+o
+
+◇ Running command · Con… — running (53s · esc to interrupt)
+└ … +2 lines
+  Homebrew clang version 23.1.1
+  Target: arm64-apple-darwin27.0.0
+  WT sidecars pre-config:  … (ctrl+b to send to background)
+
+  ✓ Task 1: pin fork HEAD, check E12 row, worktree + entry
+  ◆ Task 1: host codegen + device link
+  ◇ Task 2: install + re-probe on iPad
+  ◇ Task 3: diagnose + report + commit
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ssx3 · YOLO
