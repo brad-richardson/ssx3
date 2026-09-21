@@ -1,0 +1,303 @@
+--- /dev/null
++++ b/ps2xRuntime/include/ps2_e7.h
+@@ -0,0 +1,137 @@
++// E7 bounded observation of the SSX3 fixed-buffer copy join.
++// PS2X_E7_DIR gates every tap; no guest state, packet, or scheduling writes.
++// Separate byte budgets reserve the 599..603 boundary even if boot is noisy.
++#pragma once
++#include <cstdarg>
++#include <cstdint>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <mutex>
++
++namespace ps2_e7
++{
++inline constexpr uint64_t kBootBytes = 4u * 1024u * 1024u;
++inline constexpr uint64_t kWindowBytes = 1u * 1024u * 1024u;
++inline constexpr uint64_t kPacketBytes = 512u * 1024u;
++inline bool window(uint64_t tick) { return tick >= 599u && tick <= 603u; }
++inline const char *directory()
++{
++    static const char *dir = [] { const char *p = std::getenv("PS2X_E7_DIR"); return p && *p ? p : nullptr; }();
++    return dir;
++}
++inline bool enabled() { return directory() != nullptr; }
++struct Budget
++{
++    uint64_t boot = 0, boundary = 0;
++    bool bootTruncated = false, boundaryTruncated = false;
++    bool admit(uint64_t bytes, bool inWindow)
++    {
++        uint64_t &used = inWindow ? boundary : boot;
++        bool &truncated = inWindow ? boundaryTruncated : bootTruncated;
++        const uint64_t limit = inWindow ? kWindowBytes : kBootBytes;
++        if (bytes > limit - used) { truncated = true; return false; }
++        used += bytes;
++        return true;
++    }
++};
++struct Sink
++{
++    std::mutex mutex;
++    FILE *file = nullptr;
++    Budget budget;
++    uint64_t seq = 0, packetBytes = 0, packets = 0;
++    bool opened = false, finished = false, packetTruncated = false;
++};
++inline Sink &sink() { static Sink s; return s; }
++inline uint64_t hash(const uint8_t *data, uint32_t size)
++{
++    uint64_t h = 14695981039346656037ull;
++    for (uint32_t i = 0; i < size; ++i) { h ^= data[i]; h *= 1099511628211ull; }
++    return h;
++}
++inline void event(uint64_t tick, const char *kind, const char *fmt, ...)
++{
++    if (!enabled()) return;
++    Sink &s = sink();
++    std::lock_guard<std::mutex> lock(s.mutex);
++    if (!s.opened)
++    {
++        s.opened = true;
++        char path[1024];
++        std::snprintf(path, sizeof(path), "%s/e7-events.txt", directory());
++        s.file = std::fopen(path, "w");
++        if (s.file) std::fprintf(s.file, "# E7 observation only; ticks 0..603; boundary 599..603; byte caps boot=%llu boundary=%llu packets=%llu\n",
++            static_cast<unsigned long long>(kBootBytes), static_cast<unsigned long long>(kWindowBytes), static_cast<unsigned long long>(kPacketBytes));
++    }
++    if (!s.file || s.finished) return;
++    if (tick > 603u)
++    {
++        std::fprintf(s.file, "# E7 COMPLETE tick=%llu events=%llu bootBytes=%llu boundaryBytes=%llu packetBytes=%llu bootTruncated=%d boundaryTruncated=%d packetTruncated=%d\n",
++            static_cast<unsigned long long>(tick), static_cast<unsigned long long>(s.seq),
++            static_cast<unsigned long long>(s.budget.boot), static_cast<unsigned long long>(s.budget.boundary),
++            static_cast<unsigned long long>(s.packetBytes), s.budget.bootTruncated, s.budget.boundaryTruncated, s.packetTruncated);
++        std::fflush(s.file); s.finished = true; return;
++    }
++    char body[768];
++    va_list args; va_start(args, fmt);
++    const int length = std::vsnprintf(body, sizeof(body), fmt, args);
++    va_end(args);
++    if (length < 0 || static_cast<size_t>(length) >= sizeof(body))
++    {
++        if (window(tick)) s.budget.boundaryTruncated = true; else s.budget.bootTruncated = true;
++        return;
++    }
++    char row[1024];
++    const int n = std::snprintf(row, sizeof(row), "seq=%llu tick=%llu kind=%s %s\n",
++        static_cast<unsigned long long>(s.seq + 1u), static_cast<unsigned long long>(tick), kind, body);
++    if (n < 0 || static_cast<size_t>(n) >= sizeof(row) || !s.budget.admit(static_cast<uint64_t>(n), window(tick))) return;
++    ++s.seq;
++    std::fwrite(row, 1, static_cast<size_t>(n), s.file); std::fflush(s.file);
++}
++inline void packet(uint64_t tick, const char *kind, const uint8_t *data, uint32_t size,
++                   bool masked = false, size_t queued = 0u, uint32_t source = 0u)
++{
++    if (!enabled() || tick > 603u || !data || size < 16u) return;
++    uint64_t tag = 0;
++    std::memcpy(&tag, data, sizeof(tag));
++    if (std::strcmp(kind, "gs-enter") == 0 && !window(tick) &&
++        tag != 0x100000000000000bull && tag != 0x1000000000008010ull) return;
++    const uint64_t digest = hash(data, size);
++    event(tick, kind, "bytes=%u fnv64=0x%llx tag=0x%llx mask=%u queued=%zu source=0x%x",
++          size, static_cast<unsigned long long>(digest), static_cast<unsigned long long>(tag), masked, queued, source);
++    if (source != 0x004ffcc0u || !window(tick)) return;
++    Sink &s = sink();
++    std::lock_guard<std::mutex> lock(s.mutex);
++    if (size > kPacketBytes - s.packetBytes) { s.packetTruncated = true; return; }
++    char path[1024];
++    std::snprintf(path, sizeof(path), "%s/e7-copy-tick%llu-%llu.bin", directory(),
++        static_cast<unsigned long long>(tick), static_cast<unsigned long long>(++s.packets));
++    FILE *f = std::fopen(path, "wb");
++    if (!f) { s.packetTruncated = true; return; }
++    const size_t written = std::fwrite(data, 1, size, f);
++    std::fclose(f); s.packetBytes += written;
++    if (written != size) s.packetTruncated = true;
++}
++inline uint32_t word(const uint8_t *ram, uint32_t address)
++{
++    uint32_t value; std::memcpy(&value, ram + address, sizeof(value)); return value;
++}
++inline void fields(uint64_t tick, const uint8_t *ram, uint32_t address, uint32_t width,
++                   uint64_t lo, uint64_t hi, uint32_t pc, int thread)
++{
++    if (!enabled() || !ram) return;
++    const uint32_t s = word(ram, 0x4a289cu);
++    if (address == 0x4a289cu)
++        event(tick, "singleton", "addr=0x%x width=%u value=0x%llx pc=0x%x thread=%d oldS=0x%x",
++              address, width, static_cast<unsigned long long>(lo), pc, thread, s);
++    if (!s || s > 0x02000000u - 0x75e0u) return;
++    const uint32_t off = address - s;
++    if (off != 0xf44u && off != 0x59e8u && off != 0x5a74u && off != 0x5a78u &&
++        off != 0x5a7cu && off != 0x5a84u && off != 0x5a88u) return;
++    event(tick, "field-before", "S=0x%x off=0x%x width=%u lo=0x%llx hi=0x%llx pc=0x%x thread=%d C=%u G=%u M=%u A=%u B=%u P=%u D=%u",
++          s, off, width, static_cast<unsigned long long>(lo), static_cast<unsigned long long>(hi), pc, thread,
++          word(ram,s+0x5a74u),word(ram,s+0xf44u),word(ram,s+0x59e8u),word(ram,s+0x5a78u),
++          word(ram,s+0x5a7cu),word(ram,s+0x5a84u),word(ram,s+0x5a88u));
++}
++} // namespace ps2_e7
+--- a/ps2xRuntime/src/lib/ps2_memory.cpp
++++ b/ps2xRuntime/src/lib/ps2_memory.cpp
+@@ -1,5 +1,6 @@
+ #include "runtime/ps2_memory.h"
+ #include "ps2_e3.h"
++#include "ps2_e7.h"
+ #include "runtime/ps2_address.h"
+ #include "runtime/gs/gs_frontend.h"
+ #include "ps2_log.h"
+@@ -1082,6 +1083,8 @@
+ 
+ void PS2Memory::write128(uint32_t address, __m128i value)
+ {
++    if (address == 0x10005000u && ps2_e7::enabled())
++        ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-before", "mask=%u queued=%zu", m_path3Masked, m_path3MaskedFifo.size());
+     if (address & 15)
+     {
+         throw std::runtime_error("Unaligned 128-bit write at address: 0x" + std::to_string(address));
+@@ -1125,6 +1128,8 @@
+         write64(address, lo);
+         write64(address + 8, hi);
+     }
++    if (address == 0x10005000u && ps2_e7::enabled())
++        ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-after", "mask=%u queued=%zu", m_path3Masked, m_path3MaskedFifo.size());
+ }
+ 
+ bool PS2Memory::writeIORegister(uint32_t address, uint32_t value)
+@@ -1305,6 +1310,8 @@
+             const uint32_t channelBase = address & 0xFFFFFF00;
+             const uint32_t madr = m_ioRegisters[channelBase + 0x10];
+             const uint32_t qwc = m_ioRegisters[channelBase + 0x20];
++            if (channelBase == 0x1000A000u && ps2_e7::enabled())
++                ps2_e7::event(gs_regs.vsyncTick.load(), "gif-start", "madr=0x%x qwc=%u chcr=0x%x mask=%u queued=%zu", madr, qwc, value, m_path3Masked, m_path3MaskedFifo.size());
+             m_dmaStartCount.fetch_add(1, std::memory_order_relaxed);
+ 
+             if ((channelBase == 0x1000A000u || channelBase == 0x10009000u || channelBase == 0x10008000u) &&
+@@ -1725,6 +1732,7 @@
+                         break;
+                     m_seenGifCopy = true;
+                     m_gifCopyCount.fetch_add(1, std::memory_order_relaxed);
++                    ps2_e7::packet(gs_regs.vsyncTick.load(), "gif-dma", m_rdram + srcPhys, chunk, m_path3Masked, m_path3MaskedFifo.size(), srcPhys);
+                     submitGifPacket(GifPathId::Path3, m_rdram + srcPhys, chunk, false);
+                     bytesLeft -= chunk;
+                     srcPhys += chunk;
+@@ -1879,6 +1887,8 @@
+         queueCompletedDmacCause(2u);
+         m_ioRegisters[GIF_CHANNEL + 0x00] &= ~0x100u;
+         m_ioRegisters[GIF_CHANNEL + 0x20] = 0;
++        if (ps2_e7::enabled())
++            ps2_e7::event(gs_regs.vsyncTick.load(), "gif-complete", "mask=%u queued=%zu str=0 qwc=0", m_path3Masked, m_path3MaskedFifo.size());
+     }
+     if (hadVif0)
+     {
+@@ -1926,7 +1936,10 @@
+     for (const auto &packet : m_path3MaskedFifo)
+     {
+         if (packet.size() >= 16u)
++        {
++            ps2_e7::packet(gs_regs.vsyncTick.load(), "path3-flush", packet.data(), static_cast<uint32_t>(packet.size()), m_path3Masked, m_path3MaskedFifo.size());
+             emit(packet.data(), static_cast<uint32_t>(packet.size()));
++        }
+     }
+     m_path3MaskedFifo.clear();
+ 
+@@ -1941,6 +1954,7 @@
+ 
+     if (pathId == GifPathId::Path3)
+     {
++        ps2_e7::packet(gs_regs.vsyncTick.load(), m_path3Masked ? "path3-queue" : "path3-send", data, sizeBytes, m_path3Masked, m_path3MaskedFifo.size());
+         if (m_path3Masked)
+         {
+             m_path3MaskedFifo.emplace_back(data, data + sizeBytes);
+--- a/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
++++ b/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
+@@ -1,6 +1,7 @@
+ // Based on Blackline Interactive implementation
+ #include "runtime/ps2_memory.h"
+ #include <cstring>
++#include "ps2_e7.h"
+ 
+ enum VIFCmd : uint8_t
+ {
+@@ -354,6 +355,8 @@
+             // VIF command docs: MSKPATH3 uses IMMEDIATE bit 15.
+             const bool wasMasked = m_path3Masked;
+             m_path3Masked = (imm & 0x8000u) != 0u;
++            if (ps2_e7::enabled())
++                ps2_e7::event(gs_regs.vsyncTick.load(), "vif-mask", "cmd=0x%x offset=%u was=%u now=%u queued=%zu", cmd, pos - 4u, wasMasked, m_path3Masked, m_path3MaskedFifo.size());
+             if (wasMasked && !m_path3Masked)
+                 flushMaskedPath3Packets();
+             continue;
+--- a/ps2xRuntime/src/lib/gs/gs_frontend.cpp
++++ b/ps2xRuntime/src/lib/gs/gs_frontend.cpp
+@@ -1,4 +1,5 @@
+ #include "runtime/gs/gs_frontend.h"
++#include "ps2_e7.h"
+ #include "runtime/gs/gs_cpu_backend.h"
+ #include "ps2_e4.h"
+ #include "ps2_log.h"
+@@ -651,6 +652,7 @@
+     if (!data || sizeBytes < 16 || !m_backend)
+         return;
+ 
++    ps2_e7::packet(m_privRegs ? m_privRegs->vsyncTick.load() : 0u, "gs-enter", data, sizeBytes);
+     if (tryProcessNativeImageUploadPacket(data, sizeBytes))
+         return;
+ 
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -7,6 +7,7 @@
+ #include "game_overrides.h"
+ #include "ps2_runtime_macros.h"
+ #include "runtime/gs/gs_frontend.h"
++#include "ps2_e7.h"
+ #include "runtime/ee_scheduler.h"
+ #include "ThreadNaming.h"
+ #include "Kernel/Stubs/Audio.h"
+@@ -1371,6 +1372,8 @@
+     const uint32_t sp = ctx != nullptr ? getRegU32(ctx, 29) : 0u;
+     const int tid = g_diagWatchThreadId.load(std::memory_order_relaxed);
+     diagWatchEmit(writeAddr, width, valueLo, valueHi, pc, tid, ra, sp);
++    if (ps2_e7::enabled() && runtime != nullptr)
++        ps2_e7::fields(runtime->memory().gs().vsyncTick.load(), rdram, writeAddr, width, valueLo, valueHi, pc, tid);
+     if (ps2_e3::armed() && ps2_e3::storeOverlaps(writeAddr, width))
+     {
+         uint64_t oldLo = 0u;
+@@ -2904,6 +2907,8 @@
+     }
+     try
+     {
++        if (vaddr == 0x10005000u && ps2_e7::enabled())
++            ps2_e7::event(m_memory.gs().vsyncTick.load(), "cpu-fifo", "pc=0x%x ra=0x%x lo=0x%llx hi=0x%llx mask=%u", ctx ? ctx->pc : 0u, ctx ? getRegU32(ctx,31) : 0u, static_cast<unsigned long long>(_parts[0]), static_cast<unsigned long long>(_parts[1]), m_memory.isPath3Masked());
+         m_memory.write128(vaddr, value);
+     }
+     catch (const std::exception &)
+--- a/ps2xTest/src/ps2_memory_tests.cpp
++++ b/ps2xTest/src/ps2_memory_tests.cpp
+@@ -1,4 +1,5 @@
+ #include "MiniTest.h"
++#include "ps2_e7.h"
+ #include "runtime/ps2_memory.h"
+ #include "runtime/gs/gs_frontend.h"
+ #include "runtime/gs/ps2_gs_psmct32.h"
+@@ -847,6 +848,19 @@
+             t.Equals(mem.vif1_regs.tops, 0x30u, "DBF=0 should restore TOPS to BASE");
+         });
+ 
++        tc.Run("E7 byte budget reserves the boundary after boot exhaustion", [](TestCase &t)
++        {
++            ps2_e7::Budget b;
++            t.IsTrue(b.admit(ps2_e7::kBootBytes, false), "exact boot limit fits");
++            t.IsFalse(b.admit(1u, false), "boot overflow is refused");
++            t.IsTrue(b.bootTruncated, "boot overflow is explicit");
++            t.IsTrue(b.admit(ps2_e7::kWindowBytes, true), "boundary remains available");
++            t.IsFalse(b.admit(1u, true), "boundary overflow is refused");
++            t.IsTrue(b.boundaryTruncated, "boundary overflow is explicit");
++            t.IsTrue(ps2_e7::window(599u) && ps2_e7::window(603u), "adjacent boundaries included");
++            t.IsFalse(ps2_e7::window(598u) || ps2_e7::window(604u), "window does not leak");
++        });
++
+         tc.Run("VIF MSKPATH3 uses immediate bit15", [](TestCase &t)
+         {
+             PS2Memory mem;

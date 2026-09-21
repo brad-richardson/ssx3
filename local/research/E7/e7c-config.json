@@ -1,0 +1,72 @@
+{
+  "label": "e7c",
+  "argv": [
+    "stdbuf",
+    "-o0",
+    "-e0",
+    "/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72"
+  ],
+  "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run",
+  "caps": {
+    "wall_s": 600,
+    "terminate_reserve_s": 15,
+    "progress_lines": 1000000,
+    "boot_log": 838860800,
+    "trace": 67108864,
+    "function_log": 536870912,
+    "e4_dir": 12582912,
+    "park_dir": 33554432,
+    "frames_dir": 33554432,
+    "e7_dir": 8388608,
+    "aggregate": 1073741824,
+    "poll_s": 0.25,
+    "grace_s": 10
+  },
+  "watch_addresses": [
+    "0x4a289c",
+    "0x12000000",
+    "0x12000020",
+    "0x12000070",
+    "0x12000080",
+    "0x12000090",
+    "0x120000a0",
+    "0x120000e0",
+    "0x6214d8",
+    "0x6214dc",
+    "0x6214e4",
+    "0x6214e8",
+    "0x6214d4",
+    "0x61c9a4",
+    "0x621448",
+    "0x10005000",
+    "0x1000a000",
+    "0x1000a010",
+    "0x1000a020"
+  ],
+  "s": 6404704,
+  "env": {
+    "PS2X_CD_IMAGE": "/Volumes/Extreme SSD/ps2recomp-spike/SSX 3 (USA).iso",
+    "PS2X_DIAG_PERIOD_MS": "5000",
+    "PS2X_DIAG_PARK": "1",
+    "PS2X_DIAG_PARK_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e7c-1",
+    "PS2X_TRACE_SYSCALLS": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-e7c-on.txt",
+    "PS2X_TRACE_SYSCALLS_PC": "1",
+    "PS2X_FRAME_DUMP_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e7c-1",
+    "PS2X_E4_ARM_TICK": "600",
+    "PS2X_E4_FREEZE_TICK": "601",
+    "PS2X_E4_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e7c-1",
+    "PS2X_DIAG_WATCH": "0x4a289c,0x12000000,0x12000020,0x12000070,0x12000080,0x12000090,0x120000a0,0x120000e0,0x6214d8,0x6214dc,0x6214e4,0x6214e8,0x6214d4,0x61c9a4,0x621448,0x10005000,0x1000a000,0x1000a010,0x1000a020",
+    "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e7c-join"
+  },
+  "removed_inherited_keys": [],
+  "paths": {
+    "boot_log": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e7c-1.log",
+    "trace": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-e7c-on.txt",
+    "function_log": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/ps2_log.txt",
+    "e4_dir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e7c-1",
+    "park_dir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e7c-1",
+    "frames_dir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e7c-1",
+    "e7_dir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e7c-join"
+  }
+}

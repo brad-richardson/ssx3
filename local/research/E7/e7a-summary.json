@@ -1,0 +1,192 @@
+{
+  "label": "e7a",
+  "raw_bytes": 3473537,
+  "raw_sha256": "ba34ef9ef00da16504c2289444a7637f9e8bf952e259a317227cb95a145d812a",
+  "raw_lines": 16694,
+  "result": {
+    "label": "e7a",
+    "claim_utc": "2026-09-21T04:21:10.400496+00:00",
+    "bound": "span",
+    "pid": 73100,
+    "boot_utc": "2026-09-21T04:21:10.406407+00:00",
+    "bind": {
+      "elapsed_s": 21.938,
+      "trace_lines": 73594,
+      "bytes": {
+        "boot_log": 3466991,
+        "trace": 4402630,
+        "function_log": 207920888,
+        "e4_dir": 8483975,
+        "park_dir": 0,
+        "frames_dir": 118272,
+        "aggregate": 224392756
+      }
+    },
+    "span_complete_s": 11.552884166012518,
+    "signal_utc": "2026-09-21T04:21:32.367779+00:00",
+    "rc": 0,
+    "process_end_utc": "2026-09-21T04:21:32.954970+00:00",
+    "elapsed_s": 22.55449525002041,
+    "release_utc": "2026-09-21T04:21:32.971398+00:00"
+  },
+  "watch_markers": 11198,
+  "parsed_watch": 11184,
+  "damaged_watch_lines": 14,
+  "armed_line": 8605,
+  "frozen_line": 8622,
+  "singleton": [
+    {
+      "line": 186,
+      "addr": 4860060,
+      "width": 4,
+      "value": 6404704,
+      "pc": 2255228,
+      "thread": 1,
+      "ra": 2255224,
+      "sp": 33554160
+    }
+  ],
+  "raw_display_values": {
+    "PMODE": {
+      "0xff20": 1,
+      "0xff21": 1242
+    },
+    "SMODE2": {
+      "0x1": 2486
+    },
+    "DISPFB1": {
+      "0x9070": 2485
+    },
+    "DISPLAY1": {
+      "0x1bfa0002032281": 2481
+    },
+    "DISPFB2": {},
+    "DISPLAY2": {},
+    "BGCOLOR": {
+      "0x0": 2487
+    }
+  },
+  "boundary_watch": [
+    {
+      "line": 8608,
+      "addr": 301989888,
+      "width": 8,
+      "value": 65313,
+      "pc": 3681452,
+      "thread": 5,
+      "ra": 3680292,
+      "sp": 6431696
+    },
+    {
+      "line": 8609,
+      "addr": 301989920,
+      "width": 8,
+      "value": 1,
+      "pc": 3681488,
+      "thread": 5,
+      "ra": 3680292,
+      "sp": 6431696
+    },
+    {
+      "line": 8610,
+      "addr": 301989920,
+      "width": 8,
+      "value": 1,
+      "pc": 3681488,
+      "thread": 5,
+      "ra": 3680292,
+      "sp": 6431696
+    },
+    {
+      "line": 8611,
+      "addr": 301990000,
+      "width": 8,
+      "value": 36976,
+      "pc": 3681520,
+      "thread": 5,
+      "ra": 3680292,
+      "sp": 6431696
+    },
+    {
+      "line": 8612,
+      "addr": 301990000,
+      "width": 8,
+      "value": 36976,
+      "pc": 3681520,
+      "thread": 5,
+      "ra": 3680292,
+      "sp": 6431696
+    },
+    {
+      "line": 8613,
+      "addr": 301990016,
+      "width": 8,
+      "value": 7874702311891585,
+      "pc": 3681884,
+      "thread": 5,
+      "ra": 3681816,
+      "sp": 6431696
+    },
+    {
+      "line": 8614,
+      "addr": 301990016,
+      "width": 8,
+      "value": 7874702311891585,
+      "pc": 3681884,
+      "thread": 5,
+      "ra": 3681816,
+      "sp": 6431696
+    },
+    {
+      "line": 8615,
+      "addr": 301990112,
+      "width": 8,
+      "value": 0,
+      "pc": 3681904,
+      "thread": 5,
+      "ra": 3681816,
+      "sp": 6431696
+    },
+    {
+      "line": 8616,
+      "addr": 301990112,
+      "width": 8,
+      "value": 0,
+      "pc": 3681904,
+      "thread": 5,
+      "ra": 3681816,
+      "sp": 6431696
+    }
+  ],
+  "damaged_boundary_lines": [],
+  "display_bursts_grouped": 1244,
+  "display_pc_ra": {
+    "('0x382cf0', '0x37c160', 1)": 1,
+    "('0x382cf0', '0x382824', 5)": 1243
+  },
+  "history_headers": [
+    "# E4 history arm=600 freeze=601 entries=227",
+    "# census tick=600 draws=122 fbp0=122",
+    "# coverage firstSeq=1 firstTick=600 lastSeq=227 lastTick=600"
+  ],
+  "history_kinds": {
+    "gif": 46,
+    "reg": 59,
+    "draw": 122
+  },
+  "draw_fbps": {
+    "0": 122
+  },
+  "frame2_events": 0,
+  "present_sha256": "f6e08a9d85893051acd5c528093ee4fcb77888a31d91ed830ef998618901bc3f",
+  "present": [
+    "# E4 present-inputs tick=601",
+    "priv pmode=0xff21 smode2=0x1 dispfb1=0x9070 display1=0x1bfa0002032281 dispfb2=0x1400 display2=0x1bf27f00000000 bgcolor=0x0 csr=0x4008",
+    "ctx0 frame=0,8,0x0 scissor=0,0,511,447 tex0=3712,4,0x1b test=0x5100d alpha=0x44 zbuf=224,0x31,0",
+    "ctx1 frame=0,8,0x0 scissor=0,0,511,447 tex0=0,0,0x0 test=0x71005 alpha=0x44 zbuf=224,0x31,1",
+    "preferred has=0 src=0,0,0x0 destFbp=0",
+    "host has=1 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 lastDisplayBaseBytes=0x0",
+    "transfer dir=3 total=0 copied=16 at=7,1 pending=0",
+    "vram armBytes=4194304 armFnv=0xf840592f freezeBytes=4194304 freezeFnv=0xf840592f"
+  ]
+}

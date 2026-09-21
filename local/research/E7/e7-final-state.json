@@ -1,0 +1,85 @@
+{
+  "utc": "2026-09-21T05:07:12.899869+00:00",
+  "lease_absent": true,
+  "0": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "4acc59ffebc99561ea2b4fe8e1aa1bebbc3075f2\n",
+    "stderr": ""
+  },
+  "1": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "refs/remotes/fork/ssx3"
+    ],
+    "rc": 0,
+    "stdout": "4acc59ffebc99561ea2b4fe8e1aa1bebbc3075f2\n",
+    "stderr": ""
+  },
+  "2": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": " M ps2xRuntime/src/runner/register_functions.cpp\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "3": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "remote",
+      "-v"
+    ],
+    "rc": 0,
+    "stdout": "fork\thttps://github.com/brad-richardson/PS2Recomp.git (fetch)\nfork\thttps://github.com/brad-richardson/PS2Recomp.git (push)\norigin\thttps://github.com/ran-j/PS2Recomp.git (fetch)\norigin\thttps://github.com/ran-j/PS2Recomp.git (push)\n",
+    "stderr": ""
+  },
+  "4": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "ls-remote",
+      "fork",
+      "refs/heads/ssx3"
+    ],
+    "rc": 0,
+    "stdout": "4acc59ffebc99561ea2b4fe8e1aa1bebbc3075f2\trefs/heads/ssx3\n",
+    "stderr": ""
+  },
+  "5": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "6": {
+    "argv": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}

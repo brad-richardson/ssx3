@@ -1,0 +1,223 @@
+## ps2xRuntime/src/lib/ps2_memory.cpp sha256=030631c5d675a2057ce84a24cffe0fe796847c1a174b9745605fcafee473f90b lines=1071..1120
+1071:                 markVU0CodeModified();
+1072:             else if (vuMem == m_vu1Code)
+1073:                 markVU1CodeModified();
+1074:             return;
+1075:         }
+1076:     }
+1077:     if (isIoRegister(physAddr))
+1078:     {
+1079:         write32(address, (uint32_t)value);
+1080:         write32(address + 4, (uint32_t)(value >> 32));
+1081:     }
+1082: }
+1083: 
+1084: void PS2Memory::write128(uint32_t address, __m128i value)
+1085: {
+1086:     if (address == 0x10005000u && ps2_e7::enabled())
+1087:         ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-before", "mask=%u queued=%zu", m_path3Masked, m_path3MaskedFifo.size());
+1088:     if (address & 15)
+1089:     {
+1090:         throw std::runtime_error("Unaligned 128-bit write at address: 0x" + std::to_string(address));
+1091:     }
+1092: 
+1093:     const bool scratch = isScratchpad(address);
+1094:     uint32_t physAddr = translateAddress(address);
+1095: 
+1096:     // The VIF1 FIFO occupies EE I/O page 0x05. A CPU quadword is one
+1097:     // ordered VIF input transaction; splitting it into register writes
+1098:     // loses commands such as MSKPATH3. Translate aliases before decoding.
+1099:     // This handles complete SQ writes; narrower store behavior is unchanged.
+1100:     if ((physAddr & 0xfffff000u) == 0x10005000u)
+1101:     {
+1102:         alignas(16) uint8_t packet[16];
+1103:         _mm_storeu_si128(reinterpret_cast<__m128i *>(packet), value);
+1104:         processVIF1Data(packet, sizeof(packet));
+1105:         if (ps2_e7::enabled())
+1106:             ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-after", "mask=%u queued=%zu route=interpreter", m_path3Masked, m_path3MaskedFifo.size());
+1107:         return;
+1108:     }
+1109: 
+1110:     if (scratch)
+1111:     {
+1112:         inRange(physAddr, sizeof(__m128i), PS2_SCRATCHPAD_SIZE, "write128 scratchpad", address);
+1113:         _mm_storeu_si128(reinterpret_cast<__m128i *>(&m_scratchpad[physAddr]), value);
+1114:     }
+1115:     else if (physAddr < PS2_RAM_SIZE)
+1116:     {
+1117:         markModified(address, 16);
+1118:         inRange(physAddr, sizeof(__m128i), PS2_RAM_SIZE, "write128 rdram", address);
+1119:         _mm_storeu_si128(reinterpret_cast<__m128i *>(&m_rdram[physAddr]), value);
+1120:     }
+
+## ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp sha256=8410afccbe754df6a117c01e316fd0c6534fe452e4aa7068941b7e873c564128 lines=418..447
+418:     GSSmode2State decodeSMode2(uint64_t smode2)
+419:     {
+420:         return {(smode2 & 0x1ull) != 0ull, ((smode2 >> 1) & 0x1ull) != 0ull};
+421:     }
+422: 
+423:     void applyFieldPresentation(std::vector<uint8_t> &pixels, uint32_t width, uint32_t height, bool oddField)
+424:     {
+425:         if (pixels.empty() || width == 0u || height < 2u)
+426:             return;
+427:         const std::vector<uint8_t> source = pixels;
+428:         for (uint32_t y = 0; y < height; ++y)
+429:         {
+430:             uint32_t sourceY = ((y >> 1u) << 1u) + (oddField ? 1u : 0u);
+431:             if (sourceY >= height)
+432:                 sourceY = height - 1u;
+433:             std::memcpy(pixels.data() + y * kHostFrameWidth * 4u,
+434:                         source.data() + sourceY * kHostFrameWidth * 4u,
+435:                         width * 4u);
+436:         }
+437:     }
+438: 
+439:     void normalizePresentationAlpha(std::vector<uint8_t> &pixels, uint32_t width, uint32_t height)
+440:     {
+441:         for (uint32_t y = 0; y < height; ++y)
+442:         {
+443:             uint8_t *row = pixels.data() + y * kHostFrameWidth * 4u;
+444:             for (uint32_t x = 0; x < width; ++x)
+445:                 row[x * 4u + 3u] = 255u;
+446:         }
+447:     }
+
+## ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp sha256=8410afccbe754df6a117c01e316fd0c6534fe452e4aa7068941b7e873c564128 lines=1774..1795
+1774: PresentationFrame GSCpuBackend::PresentFromLocalMemory(const GSPresentationRequest &request)
+1775: {
+1776:     PresentationFrame result{};
+1777:     const GSPmodeState pmode = decodePmode(request.pmode);
+1778:     const GSSmode2State smode2 = decodeSMode2(request.smode2);
+1779:     const bool fieldMode = smode2.interlaced && !smode2.frameMode;
+1780:     const bool oddField = (request.vsyncTick & 1ull) != 0ull;
+1781:     const GSFrameReg displayFrame1 = decodeDisplayFrame(request.dispfb1);
+1782:     const GSFrameReg displayFrame2 = decodeDisplayFrame(request.dispfb2);
+1783:     const GSDisplayReadOrigin origin1 = decodeDisplayReadOrigin(request.dispfb1);
+1784:     const GSDisplayReadOrigin origin2 = decodeDisplayReadOrigin(request.dispfb2);
+1785:     uint32_t width1 = 0u, height1 = 0u, width2 = 0u, height2 = 0u;
+1786:     decodeDisplaySize(request.display1, width1, height1);
+1787:     decodeDisplaySize(request.display2, width2, height2);
+1788:     const bool valid1 = pmode.enableCrt1 && hasDisplaySetup(request.display1, displayFrame1);
+1789:     const bool valid2 = pmode.enableCrt2 && hasDisplaySetup(request.display2, displayFrame2);
+1790:     if (!valid1 && !valid2)
+1791:         return result;
+1792: 
+1793:     auto copySource = [&](const GSFrameReg &displayFrame,
+1794:                           const GSDisplayReadOrigin &origin,
+1795:                           uint32_t width,
+
+## ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp sha256=8410afccbe754df6a117c01e316fd0c6534fe452e4aa7068941b7e873c564128 lines=1880..1894
+1880: 
+1881:     const GSFrameReg &displayFrame = valid1 ? displayFrame1 : displayFrame2;
+1882:     const GSDisplayReadOrigin &origin = valid1 ? origin1 : origin2;
+1883:     result.width = valid1 ? width1 : width2;
+1884:     result.height = valid1 ? height1 : height2;
+1885:     GSFrameReg selected = displayFrame;
+1886:     if (!copySource(displayFrame, origin, result.width, result.height, true, false, selected, result.pixels, result.usedPreferred))
+1887:         return {};
+1888:     if (fieldMode)
+1889:         applyFieldPresentation(result.pixels, result.width, result.height, oddField);
+1890:     normalizePresentationAlpha(result.pixels, result.width, result.height);
+1891:     result.displayFbp = displayFrame.fbp;
+1892:     result.sourceFbp = selected.fbp;
+1893:     return result;
+1894: }
+
+## ps2xTest/src/ps2_memory_tests.cpp sha256=3f031ddb997dcb7063a859d4be2c5450f1f3f77a979cc005d4125996505e641f lines=846..940
+846:             mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&mscntCmd), sizeof(mscntCmd));
+847:             t.IsTrue((mem.vif1_regs.stat & (1u << 7)) == 0u, "MSCNT should toggle DBF again");
+848:             t.Equals(mem.vif1_regs.tops, 0x30u, "DBF=0 should restore TOPS to BASE");
+849:         });
+850: 
+851:         tc.Run("E7 byte budget reserves the boundary after boot exhaustion", [](TestCase &t)
+852:         {
+853:             ps2_e7::Budget b;
+854:             t.IsTrue(b.admit(ps2_e7::kBootBytes, false), "exact boot limit fits");
+855:             t.IsFalse(b.admit(1u, false), "boot overflow is refused");
+856:             t.IsTrue(b.bootTruncated, "boot overflow is explicit");
+857:             t.IsTrue(b.admit(ps2_e7::kWindowBytes, true), "boundary remains available");
+858:             t.IsFalse(b.admit(1u, true), "boundary overflow is refused");
+859:             t.IsTrue(b.boundaryTruncated, "boundary overflow is explicit");
+860:             t.IsTrue(ps2_e7::window(599u) && ps2_e7::window(603u), "adjacent boundaries included");
+861:             t.IsFalse(ps2_e7::window(598u) || ps2_e7::window(604u), "window does not leak");
+862:         });
+863: 
+864:         tc.Run("CPU VIF1 quadword FIFO consumes commands in word order", [](TestCase &t)
+865:         {
+866:             PS2Memory mem;
+867:             t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
+868:             const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
+869:             const uint32_t clearMask = makeVifCmd(0x06u, 0u, 0u);
+870:             mem.write128(0x10005000u, _mm_set_epi32(0, 0, 0, static_cast<int>(setMask)));
+871:             t.IsTrue(mem.isPath3Masked(), "CPU SQ should reach MSKPATH3, not inert MMIO storage");
+872:             const uint32_t markA = makeVifCmd(0x07u, 0u, 0x1234u);
+873:             const uint32_t markB = makeVifCmd(0x07u, 0u, 0x5678u);
+874:             mem.write128(0x10005000u, _mm_set_epi32(static_cast<int>(markB), static_cast<int>(clearMask), static_cast<int>(markA), static_cast<int>(setMask)));
+875:             t.IsFalse(mem.isPath3Masked(), "later command in the same quadword should clear the mask");
+876:             t.Equals(mem.vif1_regs.mark, 0x5678u, "all four command words should run in FIFO order");
+877:         });
+878: 
+879:         tc.Run("CPU VIF1 unmask flushes PATH3 before following normal GIF DMA once", [](TestCase &t)
+880:         {
+881:             PS2Memory mem;
+882:             t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
+883:             std::vector<std::vector<uint8_t>> captured;
+884:             mem.setGifPacketCallback([&](const uint8_t *data, uint32_t bytes)
+885:             {
+886:                 captured.emplace_back(data, data + bytes);
+887:             });
+888:             const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
+889:             const uint32_t clearMask = makeVifCmd(0x06u, 0u, 0u);
+890:             const std::vector<uint8_t> a(16u, 0x11u), b(16u, 0x22u), c(16u, 0x33u);
+891:             // Same prior condition as E7b: a decoded stream has masked PATH3.
+892:             mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&setMask), sizeof(setMask));
+893:             mem.submitGifPacket(GifPathId::Path3, a.data(), static_cast<uint32_t>(a.size()));
+894:             mem.submitGifPacket(GifPathId::Path3, b.data(), static_cast<uint32_t>(b.size()));
+895:             t.Equals(captured.size(), size_t(0), "prior PATH3 packets should be retained while masked");
+896:             mem.write128(0x10005000u, _mm_set_epi32(0, 0, 0, static_cast<int>(clearMask)));
+897:             t.IsFalse(mem.isPath3Masked(), "CPU unmask should clear the interpreted-stream mask");
+898:             t.Equals(captured.size(), size_t(2), "CPU unmask should flush both older packets");
+899:             if (captured.size() == 2u)
+900:                 t.IsTrue(captured[0] == a && captured[1] == b, "older packets should preserve FIFO order");
+901:             mem.write128(0x10005000u, _mm_set_epi32(0, 0, 0, static_cast<int>(clearMask)));
+902:             t.Equals(captured.size(), size_t(2), "repeated unmask must not replay retained packets");
+903:             mem.write128(0x2000u, _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data())));
+904:             mem.write32(0x1000a010u, 0x2000u);
+905:             mem.write32(0x1000a020u, 1u);
+906:             mem.write32(0x1000a000u, 0x101u);
+907:             t.Equals(captured.size(), size_t(3), "following normal GIF DMA should deliver after the flush");
+908:             if (captured.size() == 3u)
+909:                 t.IsTrue(captured[0] == a && captured[1] == b && captured[2] == c, "CPU and DMA ingress must preserve packet order");
+910:             t.Equals(mem.read32(0x1000a020u), 0u, "normal DMA should finish with QWC zero");
+911:         });
+912: 
+913:         tc.Run("CPU VIF1 quadword FIFO uses its full page and translated aliases", [](TestCase &t)
+914:         {
+915:             PS2Memory mem;
+916:             t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
+917:             const __m128i mask = _mm_set_epi32(0, 0, 0, static_cast<int>(makeVifCmd(0x06u, 0u, 0x8000u)));
+918:             const __m128i clear = _mm_set_epi32(0, 0, 0, static_cast<int>(makeVifCmd(0x06u, 0u, 0u)));
+919:             for (const uint32_t address : {0x10005000u, 0x10005ff0u, 0x90005020u, 0xb0005030u})
+920:             {
+921:                 mem.write128(address, mask);
+922:                 t.IsTrue(mem.isPath3Masked(), "VIF1 page mirrors and KSEG aliases should feed one FIFO");
+923:                 mem.write128(address, clear);
+924:                 t.IsFalse(mem.isPath3Masked(), "mirror unmask should feed the same VIF1 state");
+925:             }
+926:             mem.write128(0x30004000u, mask);
+927:             t.Equals(mem.read32(0x4000u), makeVifCmd(0x06u, 0u, 0x8000u), "ordinary RAM aliases remain memory writes");
+928:             t.IsFalse(mem.isPath3Masked(), "RAM contents must not be decoded as FIFO commands");
+929:             mem.write128(0x10006000u, mask);
+930:             t.IsFalse(mem.isPath3Masked(), "neighboring GIF FIFO page must not route to VIF1");
+931:             mem.write64(0x12000070u, 0x9070u);
+932:             t.Equals(mem.gs().dispfb1, uint64_t(0x9070u), "display MMIO retains its existing behavior");
+933:         });
+934: 
+935:         tc.Run("VIF MSKPATH3 uses immediate bit15", [](TestCase &t)
+936:         {
+937:             PS2Memory mem;
+938:             t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
+939: 
+940:             const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
+
+# E7 SOURCE RECEIPT TAIL COMPLETE; fork 4acc59ffebc99561ea2b4fe8e1aa1bebbc3075f2
