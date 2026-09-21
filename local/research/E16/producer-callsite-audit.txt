@@ -1,0 +1,37 @@
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:452:    if (!fallback && ps2_e7::aligned() && ps2_e7::window(tick) && s_alignedKeep < 4u)
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:455:        ps2_e7::event(tick,"e15-present","upload=%llu width=%u height=%u D=%u source=%u fnv32=0x%x smode2=0x%llx pmode=0x%llx",
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:698:    ps2_e15::closure(m_memory.gs().vsyncTick.load());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:699:    ps2_e7::shutdown(m_memory.gs().vsyncTick.load());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:1388:    if (ps2_e7::enabled() && runtime != nullptr)
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:1389:        ps2_e7::fields(runtime->memory().gs().vsyncTick.load(), rdram, writeAddr, width, valueLo, valueHi, pc, tid);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:1695:    if (ps2_e7::enabled() && targetPc == 0x2c5358u)
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:1696:        ps2_e7::cardCall(m_memory.gs().vsyncTick.load(), "mc-missing", rdram,
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:2170:    const bool cardObservation = ps2_e7::enabled() && ps2_e7::cardTarget(targetPc, sourcePc);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:2176:            ps2_e7::cardCall(m_memory.gs().vsyncTick.load(), phase, rdram,
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:2183:    ps2_e15::Trace mpegTrace("branch",m_memory.gs().vsyncTick.load(),rdram,ctx,targetPc,sourcePc,
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:2949:        if (vaddr == 0x10005000u && ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp:2950:            ps2_e7::event(m_memory.gs().vsyncTick.load(), "cpu-fifo", "pc=0x%x ra=0x%x lo=0x%llx hi=0x%llx mask=%u", ctx ? ctx->pc : 0u, ctx ? getRegU32(ctx,31) : 0u, static_cast<unsigned long long>(_parts[0]), static_cast<unsigned long long>(_parts[1]), m_memory.isPath3Masked());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp:358:            if (ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp:359:                ps2_e7::event(gs_regs.vsyncTick.load(), "vif-mask", "cmd=0x%x offset=%u was=%u now=%u queued=%zu", cmd, pos - 4u, wasMasked, m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1086:    if (address == 0x10005000u && ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1087:        ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-before", "mask=%u queued=%zu", m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1105:        if (ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1106:            ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-after", "mask=%u queued=%zu route=interpreter", m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1145:    if (address == 0x10005000u && ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1146:        ps2_e7::event(gs_regs.vsyncTick.load(), "fifo-after", "mask=%u queued=%zu", m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1327:            if (channelBase == 0x1000A000u && ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1328:                ps2_e7::event(gs_regs.vsyncTick.load(), "gif-start", "madr=0x%x qwc=%u chcr=0x%x mask=%u queued=%zu", madr, qwc, value, m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1749:                    ps2_e7::packet(gs_regs.vsyncTick.load(), "gif-dma", m_rdram + srcPhys, chunk, m_path3Masked, m_path3MaskedFifo.size(), srcPhys);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1904:        if (ps2_e7::enabled())
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1905:            ps2_e7::event(gs_regs.vsyncTick.load(), "gif-complete", "mask=%u queued=%zu str=0 qwc=0", m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1954:            ps2_e7::packet(gs_regs.vsyncTick.load(), "path3-flush", packet.data(), static_cast<uint32_t>(packet.size()), m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp:1971:        ps2_e7::packet(gs_regs.vsyncTick.load(), m_path3Masked ? "path3-queue" : "path3-send", data, sizeBytes, m_path3Masked, m_path3MaskedFifo.size());
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:764:            ps2_e15::Trace mpegTrace("scheduler",m_vsyncTick,m_rdram,&context,context.pc,0u,m_currentThreadId);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:1749:    ps2_e15::selection(m_vsyncTick,"queue",invocation.context.pc,&invocation.context,m_currentThreadId);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:1758:    ps2_e15::selection(m_vsyncTick,"direct",invocation.context.pc,&invocation.context,m_currentThreadId);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:1779:        ps2_e15::selection(m_vsyncTick,"sequence",it->context.pc,&it->context,m_currentThreadId);
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2096:    if (ps2_e15::enabled() && type==1u)
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2097:        ps2_e7::event(m_vsyncTick,"mpeg-complete","type=%u token=0x%llx result=%d matched=%zu thread=%d",
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2113:    if (ps2_e15::enabled() && reason==EeWaitReason::Mpeg)
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2116:        ps2_e7::event(m_vsyncTick,"mpeg-wait","type=%u token=0x%llx thread=%d pc=0x%x ra=0x%x sp=0x%x reason=%u",
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/gs/gs_frontend.cpp:655:    ps2_e7::packet(m_privRegs ? m_privRegs->vsyncTick.load() : 0u, "gs-enter", data, sizeBytes);

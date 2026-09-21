@@ -1,0 +1,12 @@
+[E16] Close diagnostic observations at runtime run exit
+
+OBSERVATION: emit the existing E15 closure and E7 shutdown after the
+game thread joins and final host diagnostic producers finish. Preserve
+the idempotent destructor fallback for callers that do not use run().
+
+The actual-linked non-title fixture fails before and passes after this
+change with identical fixture objects; main, MPEG, and generated sources
+are unchanged. Suite 452/452 and prior bindings pass; both MPEG delivery
+cases retain their expected fail-before result.
+
+Orchestrated-By: Muse Code

@@ -1,0 +1,35 @@
+{
+  "utc": "2026-09-21T16:40:21.373354+00:00",
+  "binary": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/before/binding-test",
+    "bytes": 165122640,
+    "allocated": 165675008,
+    "sha256": "d9e49efdef2b676d185a9062436bd6c6d2639b1a8302af68f14cf9ab60f0bcd5"
+  },
+  "label": "closure-before",
+  "cases": [
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/before/binding-test",
+        "quiescent"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/closure-before/quiescent",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-tooltmp/closure-fail-before/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/closure-before/quiescent"
+      },
+      "elapsed_s": 2.1851685410001664,
+      "stdout_bytes": 2993,
+      "scratch_peak_allocated": 0,
+      "mode": "quiescent",
+      "rc": 1,
+      "tap_bytes": 953,
+      "tap_tail": [
+        "seq=3 tick=17 kind=mpeg-call id=2 route=branch target=0x402c08 source=0x100040 a0=0x150000 a1=0x1 a2=0x100070 a3=0x15f000 t0=0x0 sp=0x1fffff0 ra=0x100050 thread=-999 callback=0 cbType=0 cbWordReadable=0",
+        "seq=4 tick=17 kind=mpeg-return id=2 route=branch target=0x402c08 entryA0=0x150000 pc=0x100050 v0=0x1 sp=0x1fffff0 ra=0x100050 suppliedRA=0x100050 thread=-999 callback=0",
+        "seq=5 tick=17 kind=e16-final-producer guestFinished=1 guestCalls=1"
+      ]
+    }
+  ]
+}

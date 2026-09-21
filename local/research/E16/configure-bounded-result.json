@@ -1,0 +1,67 @@
+{
+  "label": "configure",
+  "utc": "2026-09-21T16:21:40.153939+00:00",
+  "argv": [
+    "cmake",
+    "-S",
+    "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+    "-B",
+    "/tmp/p1-link/runtime",
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang",
+    "-DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++",
+    "-DCMAKE_OSX_ARCHITECTURES=arm64",
+    "-DPS2X_BUILD_STUDIO=OFF",
+    "-DPS2X_BUILD_RUNTIME=ON",
+    "-DPS2X_BUILD_TEST=ON",
+    "-DPS2X_ENABLE_RUNTIME_LOGS=ON",
+    "-DPS2X_ENABLE_AGRESSIVE_LOGS=ON",
+    "-DPS2X_ENABLE_IOP_RPC_TRACE=ON",
+    "-DPS2X_STRICT_RETURN_DIAGNOSTICS=OFF",
+    "-DPS2X_ENABLE_FFMPEG=ON"
+  ],
+  "cwd": "/Users/bradrichardson/dev/ssx3",
+  "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-tooltmp/configure",
+  "before": {
+    "utc": "2026-09-21T16:21:40.155669+00:00",
+    "internal_free": 16262389760,
+    "internal_allocated": 2363392,
+    "build_allocated": 0,
+    "evidence_allocated": 2363392,
+    "ssd_free": 252461449216,
+    "ssd_allocated": 0,
+    "ssd_paths": []
+  },
+  "caps": {
+    "wall": 1800,
+    "wall_reserve": 15,
+    "stdout": 16777216,
+    "stdout_reserve": 1048576,
+    "tmp": 8589934592,
+    "tmp_reserve": 536870912,
+    "fixtures": 1073741824,
+    "fixture_reserve": 67108864,
+    "poll_s": 0.25
+  },
+  "rc": 0,
+  "elapsed_s": 123.90982675000032,
+  "bound": null,
+  "after": {
+    "utc": "2026-09-21T16:23:44.139268+00:00",
+    "internal_free": 15005466624,
+    "internal_allocated": 1262469120,
+    "build_allocated": 1260032000,
+    "evidence_allocated": 2437120,
+    "ssd_free": 249676431360,
+    "ssd_allocated": 5242880,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-tooltmp"
+    ]
+  },
+  "stdout_seen": 31187,
+  "stdout_kept": 31187,
+  "stdout_truncated": false,
+  "temporary_allocated": 3145728
+}

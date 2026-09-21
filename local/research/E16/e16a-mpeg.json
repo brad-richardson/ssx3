@@ -1,0 +1,281 @@
+{
+  "dynamic_mpeg": "0x587b30",
+  "create": [
+    {
+      "call": {
+        "seq": 6402,
+        "tick": 249,
+        "kind": "mpeg-call",
+        "id": 3,
+        "route": "branch",
+        "target": 4204472,
+        "source": 3870540,
+        "a0": 5798704,
+        "a1": 18763456,
+        "a2": 1038188,
+        "a3": 14656328,
+        "t0": 49,
+        "sp": 33553472,
+        "ra": 3870548,
+        "thread": 1,
+        "callback": 0,
+        "cbType": 0,
+        "cbWordReadable": 0
+      },
+      "exit": {
+        "seq": 6403,
+        "tick": 249,
+        "kind": "mpeg-return",
+        "id": 3,
+        "route": "branch",
+        "target": 4204472,
+        "entryA0": 5798704,
+        "pc": 3870548,
+        "v0": 18763736,
+        "sp": 33553472,
+        "ra": 3870548,
+        "suppliedRA": 3870548,
+        "thread": 1,
+        "callback": 0
+      }
+    }
+  ],
+  "registration": [
+    {
+      "call": {
+        "seq": 6404,
+        "tick": 249,
+        "kind": "mpeg-call",
+        "id": 4,
+        "route": "branch",
+        "target": 4205576,
+        "source": 3870564,
+        "a0": 5798704,
+        "a1": 1,
+        "a2": 3869456,
+        "a3": 5798656,
+        "t0": 49,
+        "sp": 33553472,
+        "ra": 3870572,
+        "thread": 1,
+        "callback": 0,
+        "cbType": 0,
+        "cbWordReadable": 0
+      },
+      "exit": {
+        "seq": 6405,
+        "tick": 249,
+        "kind": "mpeg-return",
+        "id": 4,
+        "route": "branch",
+        "target": 4205576,
+        "entryA0": 5798704,
+        "pc": 3870572,
+        "v0": 1,
+        "sp": 33553472,
+        "ra": 3870572,
+        "suppliedRA": 3870572,
+        "thread": 1,
+        "callback": 0
+      }
+    }
+  ],
+  "request": [
+    {
+      "call": {
+        "seq": 6407,
+        "tick": 249,
+        "kind": "mpeg-call",
+        "id": 5,
+        "route": "branch",
+        "target": 4205072,
+        "source": 3870752,
+        "a0": 5798704,
+        "a1": 17845632,
+        "a2": 896,
+        "a3": 1,
+        "t0": 1,
+        "sp": 33553760,
+        "ra": 3870760,
+        "thread": 1,
+        "callback": 0,
+        "cbType": 0,
+        "cbWordReadable": 0
+      },
+      "exit": {
+        "seq": 6410,
+        "tick": 249,
+        "kind": "mpeg-unwind",
+        "id": 5,
+        "route": "branch",
+        "target": 4205072,
+        "entryA0": 5798704,
+        "pc": 3870760,
+        "v0": 14336,
+        "sp": 33553760,
+        "ra": 3870760,
+        "suppliedRA": 3870760,
+        "thread": 1,
+        "callback": 0
+      }
+    }
+  ],
+  "wait": [
+    {
+      "seq": 6409,
+      "tick": 249,
+      "kind": "mpeg-wait",
+      "type": 1,
+      "token": 5798704,
+      "thread": 1,
+      "pc": 3870760,
+      "ra": 3870760,
+      "sp": 33553760,
+      "reason": 6
+    }
+  ],
+  "existing_private_state_receipt": [
+    {
+      "line": 10461,
+      "text": "[MPEG:GetPicture] waiting for frames, mpeg=0x587b30 ended=0 failed=0 sawInput=0"
+    }
+  ],
+  "target_dispatch_counts": {
+    "0x3b0c58": 1,
+    "0x402708": 1,
+    "0x4027b8": 1,
+    "0x402c08": 1,
+    "0x402a10": 1
+  },
+  "selection_events": [],
+  "request_registration_shadows": [
+    {
+      "seq": 6408,
+      "tick": 249,
+      "kind": "mpeg-request-registration",
+      "id": 5,
+      "mpeg": 5798704,
+      "type": 1,
+      "func": 3869456,
+      "userdata": 5798656,
+      "handle": 1,
+      "source": "observed-API-args"
+    }
+  ],
+  "eligibility": {
+    "api_type": 1,
+    "api_function": "0x3b0b10",
+    "api_userdata": "0x587b00",
+    "current_implementation_stream_flag": false,
+    "existing_private_selector_requires_stream": true,
+    "evidence": "unchanged MPEG.cpp: API storage and selector source; private map selection is not directly tapped"
+  },
+  "actual_callback_dispatches": 0,
+  "callback_returns": [],
+  "valid_no_input_returns": 0,
+  "add_bs_dispatches": 0,
+  "input_events": [],
+  "completion_events": [],
+  "lifetime": [
+    {
+      "call": {
+        "seq": 6400,
+        "tick": 249,
+        "kind": "mpeg-call",
+        "id": 2,
+        "route": "branch",
+        "target": 4204296,
+        "source": 3870492,
+        "a0": 805306368,
+        "a1": 14656336,
+        "a2": 48,
+        "a3": 14656328,
+        "t0": 49,
+        "sp": 33553472,
+        "ra": 3870500,
+        "thread": 1,
+        "callback": 0,
+        "cbType": 0,
+        "cbWordReadable": 0
+      },
+      "exit": {
+        "seq": 6401,
+        "tick": 249,
+        "kind": "mpeg-return",
+        "id": 2,
+        "route": "branch",
+        "target": 4204296,
+        "entryA0": 805306368,
+        "pc": 3870500,
+        "v0": 0,
+        "sp": 33553472,
+        "ra": 3870500,
+        "suppliedRA": 3870500,
+        "thread": 1,
+        "callback": 0
+      }
+    },
+    {
+      "call": {
+        "seq": 6402,
+        "tick": 249,
+        "kind": "mpeg-call",
+        "id": 3,
+        "route": "branch",
+        "target": 4204472,
+        "source": 3870540,
+        "a0": 5798704,
+        "a1": 18763456,
+        "a2": 1038188,
+        "a3": 14656328,
+        "t0": 49,
+        "sp": 33553472,
+        "ra": 3870548,
+        "thread": 1,
+        "callback": 0,
+        "cbType": 0,
+        "cbWordReadable": 0
+      },
+      "exit": {
+        "seq": 6403,
+        "tick": 249,
+        "kind": "mpeg-return",
+        "id": 3,
+        "route": "branch",
+        "target": 4204472,
+        "entryA0": 5798704,
+        "pc": 3870548,
+        "v0": 18763736,
+        "sp": 33553472,
+        "ra": 3870548,
+        "suppliedRA": 3870548,
+        "thread": 1,
+        "callback": 0
+      }
+    }
+  ],
+  "main_thread": {
+    "id": 1,
+    "status": 2,
+    "status_name": "Waiting",
+    "wait_reason": 6,
+    "wait_reason_name": "Mpeg",
+    "wait_id": 0,
+    "pc": "0x3b1028",
+    "ra": "0x3b1028",
+    "sp": "0x1fffd60",
+    "entry": "0x100008",
+    "priority": 100,
+    "scheduled": 8255,
+    "chain": [
+      "0x3b1028"
+    ]
+  },
+  "source_shutdown_complete": true,
+  "private_queue_reading": "empty implied by the pinned GetPicture wait branch; sawInput/end/fail from existing runtime log; no new private MPEG accessor",
+  "limits": [
+    "Selection inside the private callback map is not tapped; eligibility follows the pinned selector source. Scheduler selection and target dispatch are independently observed.",
+    "No actual callback means no guest source/input/decoder/completion behavior was exercised. Zero valid-no-input returns is absence of such returns, not an observed no-input outcome.",
+    "Real run-exit source footers are required; observed pairs and independent logs do not substitute for them."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "first": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 3,
+    "stderr": "sysmon request failed with error: sysmond service not found\npgrep: Cannot get process list\n",
+    "environment": "workspace sandbox"
+  },
+  "retry": {
+    "action": "same read-only closed-cap audit with process-list access",
+    "rc": 0,
+    "pgrep_rc": 1
+  },
+  "title_boots_added": 0,
+  "source_changes": 0
+}
