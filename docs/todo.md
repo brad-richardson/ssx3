@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t32 (Cross on Race → next screen, bytesize, 4h) · g13 (rich post-loading dual replay, calibrated labels, ps2xGS + bytesize, 6h) · frontier (E7 E-lane lead: copy/FIFO-first through to meaningful frame, fork + P-lane lease) · i10 (SSX3 codegen + link + overwrite re-probe, worktree, 6h).
+- [ ] **Live panes:** t33 (Cross on Snow Jam → next screen, bytesize, 4h) · g14 (Odin on-device rich-dump replay, ps2xGS + adb, 6h) · frontier (E8 E-lane lead: guest progression toward menu, fork + P-lane lease) · i11 (0x395730 entry fix + base move + re-probe, worktree, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,76 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T32 read (09-21) — PASS, Cross on Race → Select Event, stable 133 s:**
+      Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
+      T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
+      (TITLE poll01, Start ≤1.0 s, Menu Cross @T+139.04, Zoe Cross @T+179.26,
+      Continue Cross @T+207.91, Peak Cross @T+237.25, SM park 0.035–0.062/
+      p99 0) → Race Cross 537.4 ms @T+266.01 (pre = SM Race-highlighted,
+      vs-sm 0.0349/0 PIL, viewed) → Select Event (Snow Jam highlighted,
+      `Race` course-map panel) by +1 s, 12 snaps / 133 s (pairwise
+      ≤0.064/p99 ≤1; vs-SM ~0.53 — shared background, content read off
+      viewed snaps). Mid-session H5→H6 restart between pre-checks and R1
+      (not by worker); 7 flaps all outside window (1 H5 + 3 pre + 3 post
+      H6); full dmesg, 0 in-window restarts. EE 52 / IOP 155 sets identical
+      to T31 R1; 5 chain frames bit-identical to T30's run. Verified: RACE
+      keydown/keyup walls exact, T32_DONE in stdout, head/tail 2000/2000,
+      flap counts 1/6, a1-post15 full-sha EQUAL to T30's. ~35 min. Next:
+      T33 Cross on Snow Jam (T32 G1, with the small-hop gate warning).
+      Ledger row added.
+- [x] **G13 read (09-21) — PASS, scene-scale agreement; emulator leg CLOSED:**
+      Rate-trigger capture at live vsync#1608 (loading determinism receipt
+      reproduces G8 EXACTLY), 11.5 MB / 8-vsync dump (4,585 transfers, 6.0 MB
+      GIF, ~98 draws/vsync — flash-transition workload at 33× draws / 300×
+      traffic). Capture-vs-replay DRAW/RASTER sequences tuple-identical
+      (785/777); paraLLEl records composite-112 before scene-0 every iterate
+      with 96-texture order = PCSX2 window#0; 7 corrected pairs all within
+      ±2 LSB (le2 = 1.0, PSNR 49–61); (4,5)/(6,7) identity on both sides;
+      k=0 black both sides (cleared initial block-0). No batching divergence
+      anywhere. Verified: ps2xGS [G13] in sync with origin/main, dump sha
+      `154d9d85`, trace counts 785/777/8/8, diff table RERUN BY ME exact
+      (all 7 rows + PPM/PNG self-tables), census rerun (4585/6012448,
+      leftover 0), capture 1562 lines, markers receipt, SSD files. Accepted:
+      96-texture tuple order + flush stats (session-only + scripts
+      in-evidence). Reference-state row: G12 labels/method. ~4 h. Next: G14
+      Odin on-device replay of the rich dump (G13 §5). Ledger row added.
+- [x] **I10 read (09-21) — PASS, game objects linked; I9 wall gone; CD wall fixed by config; NEW wall = 0x395730 indirect-target gap:**
+      Worktree @ `b6252bb`+`3006a07`+`3d2e22d` (local, 0 pushes — E-lane
+      mutating). Host `ps2_recomp` pin-built → codegen exit 0 (9,449 files,
+      398,953 assignments, entry = slot 0); `ps2_game_objects` static lib
+      linked (121 MB binary, 9445 text syms); overwrite installs ×2 exit 0
+      (I9 gap 3 closed twice); R1/R2: missing 0 / idle 0, K1 installs +
+      syscalls, texture IDs 3–4, guest spins on `sceCdRead` LBN 0x10 ×1737;
+      Task 3 ISO+env fix → R3: cdread 0, 12 IRX from `cdrom0:`, SIF
+      handshake, NEW wall = IndirectCall JALR `0x2322d4`→`0x395730` (1×,
+      mid-function of emitted `sub_003956E8`, no CSV entry — recompiler
+      boundary gap, fork-code class). AOT suffices (JIT stays out).
+      Verified: R1/R3 console keys (1737/0/0, IDs 3–4, 12 IRX paths, JALR
+      verbatim, RPC ×4), dedup diff 20 lines, install URLs distinct + ≠
+      I9's, worktree HEAD + clean, binary size/sha/nm exact (9445), ISO sha
+      + CD001, gap (no file, no CSV), app on iPad, screenshot viewed
+      (foreground, black). Reference-state row: I9 probe fate. Next: I11
+      entry fix + base move to `4acc59f` + re-probe (I10 gap 1). Ledger row
+      added.
+- [x] **E7 read (09-21) — PASS, H-FIFO fix reaches the MEANINGFUL FRAME:**
+      Copy/FIFO-first reframe executed. E7a: S=`0x61ba60` via singleton
+      factory store (heap determinism cross-checked). E7b: 561 calls,
+      H-pair holds, G=0/M=1 throughout, burst 558 = tick 600 joined to E5;
+      H-FIFO forcing receipt (CPU SQ unmask lost, mask stuck 1, copy queued
+      481→482, zero GS delivery ×5 ticks). Fix: +14 `write128` FIFO aperture
+      → interpreter + 3 regressions (fail-before 449/3, pass-after 452/452).
+      E7c: 5/5 boundary copies consumed, draws 122→155 (17 to fbp112), D
+      0→12,358 px, host 12,398, latest RGBA = predicted even field
+      byte-for-byte; D = P(x+1,y+1) with zero differing pixels. Parking:
+      M=1 is fixed-pair copy mode (nothing clears it), guest re-fires every
+      call, raster/Present closed. Verified: BOTH frame PNGs VIEWED BY ME
+      (identical memory-card-check text), packet sha `79f3582f`, join-receipt
+      seqs (10235–10244 verbatim shape), suite logs, 3 tests in fork, fix in
+      HEAD source, VRAM content sha `532288fd`, host PNG sha `548e60a2`, D
+      count 12,358 exact, fork `8480800`+`4acc59f` pushed (ls-remote), only
+      pre-existing M, lease absent + pgrep 1, 3/4 boots. Evidence 43 MB
+      committed. Reference-state row: E4/E5/E6 + EF (all reconciled). Next:
+      E8 guest progression (frontier). Ledger row added.
 - [x] **T31 read (09-21) — PASS, Cross on Peak 1 → Select Mode, stable 132 s:**
       Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
       T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
