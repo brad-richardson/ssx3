@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator).
-- [ ] **Live panes:** i8 (audio-wall device repro, fork worktree + iPhone, 6h) · mf2 (MF app-option map + toggle prototype, 6h) · ac1 (0x12C alarm-contract validation, read-only, 3h) · g10 (same-boundary dual replay, ps2xGS + bytesize, 6h) · t29 (Cross on Zoe → next screen, bytesize, 4h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
+- [ ] **Live panes:** i8 (audio-wall device repro, fork worktree + iPhone, 6h) · ac1 (0x12C alarm-contract validation, read-only, 3h) · g10 (same-boundary dual replay, ps2xGS + bytesize, 6h) · t29 (Cross on Zoe → next screen, bytesize, 4h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series (after G9 unblocks geometry) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 audio fix (after I8 diagnosis) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,28 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **MF2 read (09-20) — PASS, MF app-option map + bypassed toggle prototype (launch-only flag, zero frame effect):**
+      Smoothing template mapped hops 1–17 (flag → trial config → plumbing →
+      switch → effect; pacing gate reused unchanged). MF map: I1 pre-present
+      insertion target via the iOS diagnostic source-copy seam (no vendor
+      edits); motion options M0–M3b (M2 full export = MF1 G1 blocker; M3b
+      zero viable only where exactly static); UI decision = separate
+      `uiTexture` primary (world-motion smear risk), comp fallback for static;
+      perf model (MF terms vs 8.33 ms slot + 16.67 ms structural; likely
+      misses at phone drawables; F1–F5 flip conditions; different bottleneck
+      than smoothing CPU extras). Prototype: `--metalfx` → `-ssxMetalFX` →
+      `launch.json` + `metalfx_option` + ONE `metalfx_stage` (bypassed) at
+      first present; counted no-op behind one atomic; NO trial kind (would
+      leak into non-F predicates); no synthetic demo (would re-prove MF1).
+      Verified: scope (4 evidence + 4 named tracked files, diff reviewed:
+      additive-only, off path = 1 atomic load), pytest RE-RUN BY ME (29 + 89
+      exact), header syntax clean, App.mm.o receipt genuine (.o newer than
+      sources; my TU re-run blocked by PRE-EXISTING vendor-git issue —
+      ScmRevGen `^master` missing, unrelated to MF2), map line spots, MF1
+      number spot, tail receipt. Runtime/sim/device runs tabled as recipes
+      (not run — in-box, honest). Reference-state row: n/a (greenfield
+      option). ~40 min. Next: MF3 (sim receipts + pre-present stage). Ledger
+      row added.
 - [x] **T28 read (09-20) — PASS, Single Event Cross: Select Character (Zoe) reached, stable 127 s:**
       Bit-identical T4 build reused; new menu ref PPM from T27 stab1 (whole
       gate < 2.0; menu-menu ≤0.09, title 14.13, attract 18.70). ONE single-shot
