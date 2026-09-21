@@ -1,0 +1,1581 @@
+# EF standalone static receipts; no boots, builds, emulator writes, or fresh traces
+ssx3_HEAD d12366565486872ff114e01fff2f30350b597dcd
+fork_HEAD a13b66a540514544007c121e7220b02846e1275d
+ELF /Volumes/Extreme SSD/ps2recomp-spike/P1/SLUS_207.72 bytes 3890784 sha256 1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+All disassembly annotations below have ELF-matching OUT words; ranges end exclusive.
+
+## R1 committed E4/E5 census and kept tails
+SOURCE local/research/E4/REPORT.md bytes 21094 sha256 e8073de70bd9e151a42061c7070e40262171483edcd8dd66ea0868bde6d387e4
+Tail receipt: REPORT.md §§0–9 complete; e4-boot1.py + e4-mine.py +
+e4-history.txt (228 ev) + e4-present.txt + e4-samples.txt (E1-caveated) +
+e4-vram-{arm,freeze}.bin.gz (sha 77eb48d9… both) + e4-{disp1,fbp0}.png +
+upload-latest.png/.txt + e4-liveness.log in-evidence (13 files).
+Fork: `a13b66a` pushed fork ssx3 (`b34b481..a13b66a`; 4 files, +649:
+ps2_e4.h new + EeScheduler + gs_frontend + gs_tests;
+register_functions.cpp untouched). Evidence
+`[E4]` committed, unpushed (orchestrator pushes). Lease verified absent
+at close. Branch: (c) — drawn to fbp0, display reads black fbp112.
+SOURCE local/research/E4/e4-history.txt bytes 73695 sha256 e0d23c811cfe4715ac19398a85e6462e2ded78a6ae56c7a390f301e39e1973ef
+# E4 history arm=600 freeze=601 entries=228
+# census tick=600 draws=122 fbp0=122
+# coverage firstSeq=1 firstTick=600 lastSeq=228 lastTick=600
+kinds {'present': 1, 'gif': 46, 'reg': 59, 'draw': 122}
+register_counts {'0x42': 3, '0x4e': 6, '0x47': 6, '0x43': 3, '0x4f': 6, '0x48': 6, '0x40': 3, '0x41': 3, '0x6': 2, '0x0': 19, '0x4c': 1, '0x18': 1}
+draw_fbps {'0': 122}
+gif_tags(size,nloop,flg,nreg) {'144,8,0,1': 3, '128,7,0,1': 2, '48,2,0,1': 2, '304,1,1,2': 2, '304,8,1,4': 2, '144,1,1,2': 5, '144,3,1,4': 5, '592,1,1,2': 2, '592,17,1,4': 2, '112,1,1,2': 4, '112,2,1,4': 4, '656,1,1,2': 1, '656,19,1,4': 1, '240,1,1,2': 2, '240,6,1,4': 2, '400,1,1,2': 1, '400,11,1,4': 1, '208,1,1,2': 1, '208,5,1,4': 1, '208,4,0,3': 1, '96,5,0,1': 1, '80,4,0,1': 1}
+TAIL [e4:ev] seq=228 tick=600 frame=0 kind=reg prim=4 tme=1 abe=1 fst=0 ctxt=0 fbp=0 fbw=8 psm=0x0 fbmsk=0x0 zbp=224 zpsm=0x31 zmask=0 tex0=3712,4,0x1b,8,8,1,0,10756,0x0 scissor=0,0,511,447 test=0x5100d alpha=0x44 verts=0 x=0..0 y=0..0 z=0..0 a=0..0 gif=0,0,0,0 reg=0x48:0x71005 trx=3,0 present=0,0,0x0,0
+SOURCE local/research/E4/e4-present.txt bytes 610 sha256 f6e08a9d85893051acd5c528093ee4fcb77888a31d91ed830ef998618901bc3f
+# E4 present-inputs tick=601
+priv pmode=0xff21 smode2=0x1 dispfb1=0x9070 display1=0x1bfa0002032281 dispfb2=0x1400 display2=0x1bf27f00000000 bgcolor=0x0 csr=0x4008
+ctx0 frame=0,8,0x0 scissor=0,0,511,447 tex0=3712,4,0x1b test=0x5100d alpha=0x44 zbuf=224,0x31,0
+ctx1 frame=0,8,0x0 scissor=0,0,511,447 tex0=0,0,0x0 test=0x71005 alpha=0x44 zbuf=224,0x31,1
+preferred has=0 src=0,0,0x0 destFbp=0
+host has=1 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 lastDisplayBaseBytes=0x0
+transfer dir=3 total=0 copied=16 at=7,1 pending=0
+vram armBytes=4194304 armFnv=0xf840592f freezeBytes=4194304 freezeFnv=0xf840592f
+SOURCE local/research/E5/REPORT.md bytes 24963 sha256 21b78fdc531ddfc8e4fb1bf38509a2493b47376dc6b90cb70ae6db68bf5ba6d9
+Tail receipt: REPORT.md §§0–9 complete; e5-boot1.py + e5-mine.py +
+e5-watch-series.txt (7,329 deduped / 13,171 raw) + e5-history.txt (227 ev)
++ e5-present.txt (= E4 byte-identical) + e5-samples.txt + e5-flip-dis.txt +
+upload-latest.png/.txt (tick 1508, black 112/112) + e5-liveness.log
+in-evidence (11 files incl. REPORT). VRAM bins NOT duplicated (sha `77eb48d9…` both =
+E4 canonicals). Fork: NO commit (zero diff; binary `e21ab707…` reused).
+Evidence `[E5]` committed, unpushed (orchestrator pushes). Lease verified
+absent at close. Outcome: (i) via J2 — display re-assert runs per-frame,
+`S+0x5a88` stuck at 112; next: source-trace S + its advance logic.
+SOURCE local/research/E5/e5-history.txt bytes 73388 sha256 90d8ff858c6a4d5cef1db581d8c03436280da0a486bce5921c6d42232c04e62b
+# E4 history arm=600 freeze=601 entries=227
+# census tick=600 draws=122 fbp0=122
+# coverage firstSeq=1 firstTick=600 lastSeq=227 lastTick=600
+kinds {'gif': 46, 'reg': 59, 'draw': 122}
+register_counts {'0x42': 3, '0x4e': 6, '0x47': 6, '0x43': 3, '0x4f': 6, '0x48': 6, '0x40': 3, '0x41': 3, '0x6': 2, '0x0': 19, '0x4c': 1, '0x18': 1}
+draw_fbps {'0': 122}
+gif_tags(size,nloop,flg,nreg) {'144,8,0,1': 3, '128,7,0,1': 2, '48,2,0,1': 2, '304,1,1,2': 2, '304,8,1,4': 2, '144,1,1,2': 5, '144,3,1,4': 5, '592,1,1,2': 2, '592,17,1,4': 2, '112,1,1,2': 4, '112,2,1,4': 4, '656,1,1,2': 1, '656,19,1,4': 1, '240,1,1,2': 2, '240,6,1,4': 2, '400,1,1,2': 1, '400,11,1,4': 1, '208,1,1,2': 1, '208,5,1,4': 1, '208,4,0,3': 1, '96,5,0,1': 1, '80,4,0,1': 1}
+TAIL [e4:ev] seq=227 tick=600 frame=0 kind=reg prim=4 tme=1 abe=1 fst=0 ctxt=0 fbp=0 fbw=8 psm=0x0 fbmsk=0x0 zbp=224 zpsm=0x31 zmask=0 tex0=3712,4,0x1b,8,8,1,0,10756,0x0 scissor=0,0,511,447 test=0x5100d alpha=0x44 verts=0 x=0..0 y=0..0 z=0..0 a=0..0 gif=0,0,0,0 reg=0x48:0x71005 trx=3,0 present=0,0,0x0,0
+SOURCE local/research/E5/e5-present.txt bytes 610 sha256 f6e08a9d85893051acd5c528093ee4fcb77888a31d91ed830ef998618901bc3f
+# E4 present-inputs tick=601
+priv pmode=0xff21 smode2=0x1 dispfb1=0x9070 display1=0x1bfa0002032281 dispfb2=0x1400 display2=0x1bf27f00000000 bgcolor=0x0 csr=0x4008
+ctx0 frame=0,8,0x0 scissor=0,0,511,447 tex0=3712,4,0x1b test=0x5100d alpha=0x44 zbuf=224,0x31,0
+ctx1 frame=0,8,0x0 scissor=0,0,511,447 tex0=0,0,0x0 test=0x71005 alpha=0x44 zbuf=224,0x31,1
+preferred has=0 src=0,0,0x0 destFbp=0
+host has=1 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 lastDisplayBaseBytes=0x0
+transfer dir=3 total=0 copied=16 at=7,1 pending=0
+vram armBytes=4194304 armFnv=0xf840592f freezeBytes=4194304 freezeFnv=0xf840592f
+SOURCE local/research/E5/e5-watch-series.txt rows 7329 sha256 ecfe6b7c691c8de563e7c8a0258098b369ee4f77644f70976559e4d9e4352312
+BGCOLOR count 1466 values {'0x0': 1466} pc/thread/ra {'0x382e70/1/0x382e18': 1, '0x382e70/5/0x382e18': 1465}
+DISPFB1 count 1466 values {'0x9070': 1466} pc/thread/ra {'0x382cf0/1/0x37c160': 1, '0x382cf0/5/0x382824': 1465}
+DISPLAY1 count 1466 values {'0x1bfa0002032281': 1466} pc/thread/ra {'0x382e5c/1/0x382e18': 1, '0x382e5c/5/0x382e18': 1465}
+PMODE count 1465 values {'0xff20': 1, '0xff21': 1464} pc/thread/ra {'0x382cac/1/0x37c160': 1, '0x382cac/5/0x382824': 1464}
+SMODE2 count 1466 values {'0x1': 1466} pc/thread/ra {'0x382cd0/1/0x37c160': 1, '0x382cd0/5/0x382824': 1465}
+HEAD [['208', '38', 'PMODE', '8', '0xff20', '0x382cac', '1', '0x37c160', 'x1'], ['209', '38', 'SMODE2', '8', '0x1', '0x382cd0', '1', '0x37c160', 'x2'], ['211', '38', 'DISPFB1', '8', '0x9070', '0x382cf0', '1', '0x37c160', 'x2'], ['213', '38', 'DISPLAY1', '8', '0x1bfa0002032281', '0x382e5c', '1', '0x382e18', 'x2'], ['215', '38', 'BGCOLOR', '8', '0x0', '0x382e70', '1', '0x382e18', 'x2']]
+TAIL [['19908', '1500', 'PMODE', '8', '0xff21', '0x382cac', '5', '0x382824', 'x1'], ['19909', '1500', 'SMODE2', '8', '0x1', '0x382cd0', '5', '0x382824', 'x2'], ['19911', '1500', 'DISPFB1', '8', '0x9070', '0x382cf0', '5', '0x382824', 'x2'], ['19913', '1500', 'DISPLAY1', '8', '0x1bfa0002032281', '0x382e5c', '5', '0x382e18', 'x2'], ['19915', '1500', 'BGCOLOR', '8', '0x0', '0x382e70', '5', '0x382e18', 'x2']]
+
+## R2 committed runtime joins; older boots, not a same-boot E5 S watch
+SOURCE local/research/T1/park-snapshot.json sha256 c042bc5e770e5723d9906b7ad3ac25069837e98855d82943bdea5760f01b9f3f
+thread5 {'id': 5, 'status': 0, 'status_name': 'Running', 'wait_reason': 0, 'wait_reason_name': 'None', 'wait_id': 0, 'pc': '0x423de8', 'ra': '0x382ae8', 'sp': '0x622480', 'entry': '0x382740', 'priority': 5, 'scheduled': 10586, 'chain': ['0x382ae8']}
+S = sp + 0x10 + 0xb0 - 0x1000 - 0x5ae0 = 0x61ba60
+hot_pc {'pc': '0x382688', 'count': 10584, 'first_ra': '0x38266c', 'last_ra': '0x38266c'}
+hot_pc {'pc': '0x3825f8', 'count': 5294, 'first_ra': '0x3825dc', 'last_ra': '0x3825dc'}
+hot_pc {'pc': '0x382af0', 'count': 5293, 'first_ra': '0x37c160', 'last_ra': '0x382824'}
+hot_pc {'pc': '0x371940', 'count': 5293, 'first_ra': '0x383740', 'last_ra': '0x383740'}
+hot_pc {'pc': '0x375a40', 'count': 1, 'first_ra': '0x226990', 'last_ra': '0x226990'}
+hot_pc {'pc': '0x37bd98', 'count': 1, 'first_ra': '0x376540', 'last_ra': '0x376540'}
+hot_pc {'pc': '0x382760', 'count': 1, 'first_ra': '0x382750', 'last_ra': '0x382750'}
+hot_pc {'pc': '0x395288', 'count': 1, 'first_ra': '0x375a30', 'last_ra': '0x375a30'}
+hot_pc {'pc': '0x375a08', 'count': 1, 'first_ra': '0x226978', 'last_ra': '0x226978'}
+hot_pc {'pc': '0x3691f8', 'count': 1, 'first_ra': '0x39529c', 'last_ra': '0x39529c'}
+SOURCE local/research/T5/park-snapshot-base.json sha256 4a995699fda7a218f59165c1813bdfb3f6b2cd165f4d9b9284b3670e91aaa224
+thread5 {'id': 5, 'status': 1, 'status_name': 'Ready', 'wait_reason': 0, 'wait_reason_name': 'None', 'wait_id': 0, 'pc': '0x423de8', 'ra': '0x3827e0', 'sp': '0x622480', 'entry': '0x382740', 'priority': 5, 'scheduled': 10558, 'chain': ['0x3827e0']}
+S = sp + 0x10 + 0xb0 - 0x1000 - 0x5ae0 = 0x61ba60
+hot_pc {'pc': '0x382688', 'count': 10558, 'first_ra': '0x38266c', 'last_ra': '0x38266c'}
+hot_pc {'pc': '0x3825f8', 'count': 5281, 'first_ra': '0x3825dc', 'last_ra': '0x3825dc'}
+hot_pc {'pc': '0x371940', 'count': 5279, 'first_ra': '0x383740', 'last_ra': '0x383740'}
+hot_pc {'pc': '0x382af0', 'count': 5279, 'first_ra': '0x37c160', 'last_ra': '0x382824'}
+hot_pc {'pc': '0x375a40', 'count': 1, 'first_ra': '0x226990', 'last_ra': '0x226990'}
+hot_pc {'pc': '0x37bd98', 'count': 1, 'first_ra': '0x376540', 'last_ra': '0x376540'}
+hot_pc {'pc': '0x382760', 'count': 1, 'first_ra': '0x382750', 'last_ra': '0x382750'}
+hot_pc {'pc': '0x395288', 'count': 1, 'first_ra': '0x375a30', 'last_ra': '0x375a30'}
+hot_pc {'pc': '0x375a08', 'count': 1, 'first_ra': '0x226978', 'last_ra': '0x226978'}
+hot_pc {'pc': '0x3691f8', 'count': 1, 'first_ra': '0x39529c', 'last_ra': '0x39529c'}
+SOURCE local/research/T12/park-snapshot-dev.json sha256 aee3eba2b275368438f44d96b406eed18914214b3d8fd8b4f4aab332a152c300
+thread5 {'id': 5, 'status': 2, 'status_name': 'Waiting', 'wait_reason': 2, 'wait_reason_name': 'Semaphore', 'wait_id': 32, 'pc': '0x423de8', 'ra': '0x3827e0', 'sp': '0x622480', 'entry': '0x382740', 'priority': 5, 'scheduled': 10594, 'chain': ['0x3827e0']}
+S = sp + 0x10 + 0xb0 - 0x1000 - 0x5ae0 = 0x61ba60
+hot_pc {'pc': '0x382688', 'count': 10594, 'first_ra': '0x38266c', 'last_ra': '0x38266c'}
+hot_pc {'pc': '0x3825f8', 'count': 5298, 'first_ra': '0x3825dc', 'last_ra': '0x3825dc'}
+hot_pc {'pc': '0x371940', 'count': 5297, 'first_ra': '0x383740', 'last_ra': '0x383740'}
+hot_pc {'pc': '0x382af0', 'count': 5297, 'first_ra': '0x37c160', 'last_ra': '0x382824'}
+hot_pc {'pc': '0x375a40', 'count': 1, 'first_ra': '0x226990', 'last_ra': '0x226990'}
+hot_pc {'pc': '0x37bd98', 'count': 1, 'first_ra': '0x376540', 'last_ra': '0x376540'}
+hot_pc {'pc': '0x382760', 'count': 1, 'first_ra': '0x382750', 'last_ra': '0x382750'}
+hot_pc {'pc': '0x395288', 'count': 1, 'first_ra': '0x375a30', 'last_ra': '0x375a30'}
+hot_pc {'pc': '0x375a08', 'count': 1, 'first_ra': '0x226978', 'last_ra': '0x226978'}
+hot_pc {'pc': '0x3691f8', 'count': 1, 'first_ra': '0x39529c', 'last_ra': '0x39529c'}
+SOURCE local/research/T12/park-snapshot-rel.json sha256 1d1662cb0dff6e10e421e4092c5027b66d4a854f232d896643737e7c5fe723aa
+thread5 {'id': 5, 'status': 2, 'status_name': 'Waiting', 'wait_reason': 2, 'wait_reason_name': 'Semaphore', 'wait_id': 32, 'pc': '0x423de8', 'ra': '0x3827e0', 'sp': '0x622480', 'entry': '0x382740', 'priority': 5, 'scheduled': 10484, 'chain': ['0x3827e0']}
+S = sp + 0x10 + 0xb0 - 0x1000 - 0x5ae0 = 0x61ba60
+hot_pc {'pc': '0x382688', 'count': 10484, 'first_ra': '0x38266c', 'last_ra': '0x38266c'}
+hot_pc {'pc': '0x3825f8', 'count': 5243, 'first_ra': '0x3825dc', 'last_ra': '0x3825dc'}
+hot_pc {'pc': '0x371940', 'count': 5242, 'first_ra': '0x383740', 'last_ra': '0x383740'}
+hot_pc {'pc': '0x382af0', 'count': 5242, 'first_ra': '0x37c160', 'last_ra': '0x382824'}
+hot_pc {'pc': '0x375a40', 'count': 1, 'first_ra': '0x226990', 'last_ra': '0x226990'}
+hot_pc {'pc': '0x37bd98', 'count': 1, 'first_ra': '0x376540', 'last_ra': '0x376540'}
+hot_pc {'pc': '0x382760', 'count': 1, 'first_ra': '0x382750', 'last_ra': '0x382750'}
+hot_pc {'pc': '0x395288', 'count': 1, 'first_ra': '0x375a30', 'last_ra': '0x375a30'}
+hot_pc {'pc': '0x375a08', 'count': 1, 'first_ra': '0x226978', 'last_ra': '0x226978'}
+hot_pc {'pc': '0x3691f8', 'count': 1, 'first_ra': '0x39529c', 'last_ra': '0x39529c'}
+SOURCE local/research/P1/REPORT.md sha256 9524afd047acc9c906f54a4727cfb3f679d306311592deab7659a4f92fc7f51d
+line 4166: | Loads | `$v0` = object-table dispatch: `*( *( $s2+0x10D8 ) + 0x12C )`; target `0x395cf0` is a data-seated code pointer (vtable-style slot), reached with `a0=0x61ba60` (=`$s0`, readable, all-zero first 16 B) |
+
+## R3 immediate/displacement census over the ELF executable sections
+00100928 b6020f44 sdr         $v0, 0xF44($s0)
+00100960 b6070f44 sdr         $a3, 0xF44($s0)
+001009c0 b6070f44 sdr         $a3, 0xF44($s0)
+00100a38 b6050f44 sdr         $a1, 0xF44($s0)
+00100ebc b6020f44 sdr         $v0, 0xF44($s0)
+00100ef0 b6070f44 sdr         $a3, 0xF44($s0)
+00100f4c b6060f44 sdr         $a2, 0xF44($s0)
+00101278 b6020f44 sdr         $v0, 0xF44($s0)
+001012ac b6070f44 sdr         $a3, 0xF44($s0)
+001012d4 b6070f44 sdr         $a3, 0xF44($s0)
+00108f34 b6040f44 sdr         $a0, 0xF44($s0)
+0010a948 b6230f44 sdr         $v1, 0xF44($s1)
+0010aa24 86030f44 lh          $v1, 0xF44($s0)
+0010aa2c 86030f44 lh          $v1, 0xF44($s0)
+0014405c b4820f44 sdr         $v0, 0xF44($a0)
+0021661c 248459e8 addiu       $a0, $a0, 0x59E8
+0021697c 24845a88 addiu       $a0, $a0, 0x5A88
+00216bec 248459e8 addiu       $a0, $a0, 0x59E8
+00216f50 24845a88 addiu       $a0, $a0, 0x5A88
+0027a950 ac650f44 sw          $a1, 0xF44($v1)
+002947c4 265059e8 addiu       $s0, $s2, 0x59E8
+0029487c 8c6259e8 lw          $v0, 0x59E8($v1)
+00294890 ac4659e8 sw          $a2, 0x59E8($v0)
+002f9e70 e4550f44 swc1        $f21, 0xF44($v0)
+00369370 ae400f44 sw          $zero, 0xF44($s2)
+0036ad5c 8eb05a84 lw          $s0, 0x5A84($s5)
+0036b224 8ef35a84 lw          $s3, 0x5A84($s7)
+0036b4d4 8ef05a84 lw          $s0, 0x5A84($s7)
+0036b6a4 8ed25a84 lw          $s2, 0x5A84($s6)
+0036b8c4 8ed05a84 lw          $s0, 0x5A84($s6)
+0036c91c 8e635a84 lw          $v1, 0x5A84($s3)
+00375fbc ae5159e8 sw          $s1, 0x59E8($s2)
+0037be38 ae205a74 sw          $zero, 0x5A74($s1)
+0037c004 ae225a78 sw          $v0, 0x5A78($s1)
+0037c018 ae225a7c sw          $v0, 0x5A7C($s1)
+0037c054 8e255a78 lw          $a1, 0x5A78($s1)
+0037c090 8e255a7c lw          $a1, 0x5A7C($s1)
+0037cd54 8fd35a88 lw          $s3, 0x5A88($fp)
+0037d050 afc40f44 sw          $a0, 0xF44($fp)
+0037d4c4 9dc35a84 lwu         $v1, 0x5A84($t6)
+0037d708 9d225a84 lwu         $v0, 0x5A84($t1)
+00382b20 8f225a74 lw          $v0, 0x5A74($t9)
+00382b24 8f230f44 lw          $v1, 0xF44($t9)
+00382b30 af245a74 sw          $a0, 0x5A74($t9)
+00382b38 af200f44 sw          $zero, 0xF44($t9)
+00382b3c 8f2259e8 lw          $v0, 0x59E8($t9)
+00382b44 8f225a78 lw          $v0, 0x5A78($t9)
+00382b50 8f225a78 lw          $v0, 0x5A78($t9)
+00382b54 8f225a7c lw          $v0, 0x5A7C($t9)
+00382b5c 8f235a78 lw          $v1, 0x5A78($t9)
+00382b60 8f235a7c lw          $v1, 0x5A7C($t9)
+00382b64 af225a84 sw          $v0, 0x5A84($t9)
+00382b68 af235a88 sw          $v1, 0x5A88($t9)
+00382cd8 9f225a88 lwu         $v0, 0x5A88($t9)
+00382e78 8f2259e8 lw          $v0, 0x59E8($t9)
+00382ebc 9f225a88 lwu         $v0, 0x5A88($t9)
+00382f04 8f225a84 lw          $v0, 0x5A84($t9)
+003833dc 9f245a84 lwu         $a0, 0x5A84($t9)
+00383424 9f225a84 lwu         $v0, 0x5A84($t9)
+003837c0 8e265a84 lw          $a2, 0x5A84($s1)
+00387010 8f225a84 lw          $v0, 0x5A84($t9)
+00390638 8e625a84 lw          $v0, 0x5A84($s3)
+00390b0c 8e705a84 lw          $s0, 0x5A84($s3)
+003946e0 ac820f44 sw          $v0, 0xF44($a0)
+00395514 8c825a74 lw          $v0, 0x5A74($a0)
+0039551c 8c825a84 lw          $v0, 0x5A84($a0)
+0039554c 8c825a88 lw          $v0, 0x5A88($a0)
+00395570 ac8259e8 sw          $v0, 0x59E8($a0)
+0039557c ac8059e8 sw          $zero, 0x59E8($a0)
+stores with immediate spans overlapping +5a88..+5a8b: ['00382b68 af235a88 sw          $v1, 0x5A88($t9)']
+Scope: same-base immediate forms; generic pointer writes, bulk zero/copy, and rebased aliases remain separate obligations.
+
+## R4 S allocation, constructors, publications, thread binding
+RANGE 0x22696c..0x226990
+0022696c 8fa20000 lw          $v0, 0x0($sp)
+00226970 0c0dd682 jal         func_375A08
+00226974 af82f7b0 sw          $v0, -0x850($gp)
+00226978 8c4310d8 lw          $v1, 0x10D8($v0)
+0022697c af82f7ac sw          $v0, -0x854($gp)
+00226980 84640010 lh          $a0, 0x10($v1)
+00226984 8c650014 lw          $a1, 0x14($v1)
+00226988 00a0f809 jalr        $a1
+0022698c 00442021 addu        $a0, $v0, $a0
+RANGE 0x375a08..0x375a4c
+00375a08 27bdfff0 addiu       $sp, $sp, -0x10
+00375a0c 3c050049 lui         $a1, 0x49
+00375a10 ffbf0000 sd          $ra, 0x0($sp)
+00375a14 24a52878 addiu       $a1, $a1, 0x2878
+00375a18 0000302d daddu       $a2, $zero, $zero
+00375a1c 0000382d daddu       $a3, $zero, $zero
+00375a20 0c0c5f5c jal         func_317D70
+00375a24 240475e0 addiu       $a0, $zero, 0x75E0
+00375a28 0c0e54a2 jal         func_395288
+00375a2c 0040202d daddu       $a0, $v0, $zero
+00375a30 dfbf0000 ld          $ra, 0x0($sp)
+00375a34 03e00008 jr          $ra
+00375a38 27bd0010 addiu       $sp, $sp, 0x10
+00375a3c 00000000 nop
+00375a40 27bdfea0 addiu       $sp, $sp, -0x160
+00375a44 7fb20120 sq          $s2, 0x120($sp)
+00375a48 0080902d daddu       $s2, $a0, $zero
+RANGE 0x395288..0x3952b0
+00395288 27bdffe0 addiu       $sp, $sp, -0x20
+0039528c 7fb00010 sq          $s0, 0x10($sp)
+00395290 ffbf0000 sd          $ra, 0x0($sp)
+00395294 0c0da47e jal         func_3691F8
+00395298 0080802d daddu       $s0, $a0, $zero
+0039529c 3c020049 lui         $v0, 0x49
+003952a0 2404ffff addiu       $a0, $zero, -0x1
+003952a4 24423260 addiu       $v0, $v0, 0x3260
+003952a8 2403000b addiu       $v1, $zero, 0xB
+003952ac ae0210d8 sw          $v0, 0x10D8($s0)
+RANGE 0x3691f8..0x369218
+003691f8 27bdff50 addiu       $sp, $sp, -0xB0
+003691fc 3c020049 lui         $v0, 0x49
+00369200 7fb20080 sq          $s2, 0x80($sp)
+00369204 24423950 addiu       $v0, $v0, 0x3950
+00369208 0080902d daddu       $s2, $a0, $zero
+0036920c 7fb30070 sq          $s3, 0x70($sp)
+00369210 26440f50 addiu       $a0, $s2, 0xF50
+00369214 26430f00 addiu       $v1, $s2, 0xF00
+RANGE 0x369368..0x36937c
+00369368 24020001 addiu       $v0, $zero, 0x1
+0036936c 2403ffff addiu       $v1, $zero, -0x1
+00369370 ae400f44 sw          $zero, 0xF44($s2)
+00369374 3c02004a lui         $v0, 0x4A
+00369378 af922a90 sw          $s2, 0x2A90($gp)
+RANGE 0x375c1c..0x375c20
+00375c1c 26545ae0 addiu       $s4, $s2, 0x5AE0
+RANGE 0x375d2c..0x375e48
+00375d2c ae405a8c sw          $zero, 0x5A8C($s2)
+00375d30 2402ffff addiu       $v0, $zero, -0x1
+00375d34 ae405a90 sw          $zero, 0x5A90($s2)
+00375d38 24110001 addiu       $s1, $zero, 0x1
+00375d3c ae405a94 sw          $zero, 0x5A94($s2)
+00375d40 03a0202d daddu       $a0, $sp, $zero
+00375d44 ae425a98 sw          $v0, 0x5A98($s2)
+00375d48 0000282d daddu       $a1, $zero, $zero
+00375d4c ae515aa4 sw          $s1, 0x5AA4($s2)
+00375d50 24060018 addiu       $a2, $zero, 0x18
+00375d54 ae515ab8 sw          $s1, 0x5AB8($s2)
+00375d58 24100010 addiu       $s0, $zero, 0x10
+00375d5c 0c105884 jal         func_416210
+00375d60 ae405abc sw          $zero, 0x5ABC($s2)
+00375d64 03a0202d daddu       $a0, $sp, $zero
+00375d68 afb00004 sw          $s0, 0x4($sp)
+00375d6c 0c108f68 jal         func_423DA0
+00375d70 afa00008 sw          $zero, 0x8($sp)
+00375d74 ae425ac8 sw          $v0, 0x5AC8($s2)
+00375d78 03a0202d daddu       $a0, $sp, $zero
+00375d7c afb10004 sw          $s1, 0x4($sp)
+00375d80 0c108f68 jal         func_423DA0
+00375d84 afb10008 sw          $s1, 0x8($sp)
+00375d88 0000282d daddu       $a1, $zero, $zero
+00375d8c 24060030 addiu       $a2, $zero, 0x30
+00375d90 0260202d daddu       $a0, $s3, $zero
+00375d94 0c105884 jal         func_416210
+00375d98 ae425acc sw          $v0, 0x5ACC($s2)
+00375d9c 24021000 addiu       $v0, $zero, 0x1000
+00375da0 3c030038 lui         $v1, 0x38
+00375da4 afa2002c sw          $v0, 0x2C($sp)
+00375da8 24632740 addiu       $v1, $v1, 0x2740
+00375dac 24050005 addiu       $a1, $zero, 0x5
+00375db0 3c02004a lui         $v0, 0x4A
+00375db4 244230f0 addiu       $v0, $v0, 0x30F0
+00375db8 afb00020 sw          $s0, 0x20($sp)
+00375dbc 0260202d daddu       $a0, $s3, $zero
+00375dc0 afa30024 sw          $v1, 0x24($sp)
+00375dc4 afa50038 sw          $a1, 0x38($sp)
+00375dc8 afa50034 sw          $a1, 0x34($sp)
+00375dcc afb40028 sw          $s4, 0x28($sp)
+00375dd0 afa20030 sw          $v0, 0x30($sp)
+00375dd4 afa0003c sw          $zero, 0x3C($sp)
+00375dd8 0c108ee8 jal         func_423BA0
+00375ddc afa00040 sw          $zero, 0x40($sp)
+00375de0 24040002 addiu       $a0, $zero, 0x2
+00375de4 0c109220 jal         func_424880
+00375de8 ae425ad0 sw          $v0, 0x5AD0($s2)
+00375dec 3c050038 lui         $a1, 0x38
+00375df0 0000302d daddu       $a2, $zero, $zero
+00375df4 24a525c0 addiu       $a1, $a1, 0x25C0
+00375df8 0240382d daddu       $a3, $s2, $zero
+00375dfc 0c108ea4 jal         func_423A90
+00375e00 24040002 addiu       $a0, $zero, 0x2
+00375e04 24040002 addiu       $a0, $zero, 0x2
+00375e08 0c10923a jal         func_4248E8
+00375e0c ae425ac0 sw          $v0, 0x5AC0($s2)
+00375e10 0c109254 jal         func_424950
+00375e14 24040001 addiu       $a0, $zero, 0x1
+00375e18 3c050038 lui         $a1, 0x38
+00375e1c 0000302d daddu       $a2, $zero, $zero
+00375e20 0240382d daddu       $a3, $s2, $zero
+00375e24 24a52650 addiu       $a1, $a1, 0x2650
+00375e28 0c108eb0 jal         func_423AC0
+00375e2c 24040001 addiu       $a0, $zero, 0x1
+00375e30 24040001 addiu       $a0, $zero, 0x1
+00375e34 0c10926e jal         func_4249B8
+00375e38 ae425ac4 sw          $v0, 0x5AC4($s2)
+00375e3c 8e445ad0 lw          $a0, 0x5AD0($s2)
+00375e40 0c108ef0 jal         func_423BC0
+00375e44 0240282d daddu       $a1, $s2, $zero
+RANGE 0x375fb0..0x375fd8
+00375fb0 3c013f80 lui         $at, 0x3F80
+00375fb4 44810000 mtc1        $at, $f0
+00375fb8 02a0282d daddu       $a1, $s5, $zero
+00375fbc ae5159e8 sw          $s1, 0x59E8($s2)
+00375fc0 0240202d daddu       $a0, $s2, $zero
+00375fc4 e7a00098 swc1        $f0, 0x98($sp)
+00375fc8 e7a00090 swc1        $f0, 0x90($sp)
+00375fcc e7a00094 swc1        $f0, 0x94($sp)
+00375fd0 0c0df15c jal         func_37C570
+00375fd4 e64059fc swc1        $f0, 0x59FC($s2)
+RANGE 0x382740..0x38277c
+00382740 27bdfff0 addiu       $sp, $sp, -0x10
+00382744 ffbf0000 sd          $ra, 0x0($sp)
+00382748 0c0e09d8 jal         func_382760
+0038274c 00000000 nop
+00382750 dfbf0000 ld          $ra, 0x0($sp)
+00382754 03e00008 jr          $ra
+00382758 27bd0010 addiu       $sp, $sp, 0x10
+0038275c 00000000 nop
+00382760 27bdff50 addiu       $sp, $sp, -0xB0
+00382764 7fb000a0 sq          $s0, 0xA0($sp)
+00382768 0080802d daddu       $s0, $a0, $zero
+0038276c 7fb10090 sq          $s1, 0x90($sp)
+00382770 7fb20080 sq          $s2, 0x80($sp)
+00382774 26025a90 addiu       $v0, $s0, 0x5A90
+00382778 7fb30070 sq          $s3, 0x70($sp)
+
+## R5 configuration allocations and field writers
+RANGE 0x37bd98..0x37be50
+0037bd98 27bdff50 addiu       $sp, $sp, -0xB0
+0037bd9c 7fb000a0 sq          $s0, 0xA0($sp)
+0037bda0 7fb10090 sq          $s1, 0x90($sp)
+0037bda4 00a0802d daddu       $s0, $a1, $zero
+0037bda8 7fb30070 sq          $s3, 0x70($sp)
+0037bdac 0080882d daddu       $s1, $a0, $zero
+0037bdb0 7fb40060 sq          $s4, 0x60($sp)
+0037bdb4 0140982d daddu       $s3, $t2, $zero
+0037bdb8 7fbe0020 sq          $fp, 0x20($sp)
+0037bdbc 0160a02d daddu       $s4, $t3, $zero
+0037bdc0 87a200b0 lh          $v0, 0xB0($sp)
+0037bdc4 00c0f02d daddu       $fp, $a2, $zero
+0037bdc8 7fb20080 sq          $s2, 0x80($sp)
+0037bdcc 7fb50050 sq          $s5, 0x50($sp)
+0037bdd0 0260282d daddu       $a1, $s3, $zero
+0037bdd4 7fb60040 sq          $s6, 0x40($sp)
+0037bdd8 0280302d daddu       $a2, $s4, $zero
+0037bddc 7fb70030 sq          $s7, 0x30($sp)
+0037bde0 00e0b02d daddu       $s6, $a3, $zero
+0037bde4 ffbf0010 sd          $ra, 0x10($sp)
+0037bde8 0100b82d daddu       $s7, $t0, $zero
+0037bdec afa90000 sw          $t1, 0x0($sp)
+0037bdf0 afa20004 sw          $v0, 0x4($sp)
+0037bdf4 87b500b8 lh          $s5, 0xB8($sp)
+0037bdf8 0c0def4e jal         func_37BD38
+0037bdfc 87b200c0 lh          $s2, 0xC0($sp)
+0037be00 54400003 bnel        $v0, $zero, . + 4 + (0x3 << 2) ; target=0x37be10
+0037be04 ae3e5a58 sw          $fp, 0x5A58($s1)
+0037be08 100000d6 b           . + 4 + (0xD6 << 2) ; target=0x37c164
+0037be0c 0000102d daddu       $v0, $zero, $zero
+0037be10 24020002 addiu       $v0, $zero, 0x2
+0037be14 ae365a30 sw          $s6, 0x5A30($s1)
+0037be18 24030180 addiu       $v1, $zero, 0x180
+0037be1c ae375a34 sw          $s7, 0x5A34($s1)
+0037be20 ae335a3c sw          $s3, 0x5A3C($s1)
+0037be24 8fa40000 lw          $a0, 0x0($sp)
+0037be28 ae345a40 sw          $s4, 0x5A40($s1)
+0037be2c ae245a38 sw          $a0, 0x5A38($s1)
+0037be30 a6355a44 sh          $s5, 0x5A44($s1)
+0037be34 a6325a46 sh          $s2, 0x5A46($s1)
+0037be38 ae205a74 sw          $zero, 0x5A74($s1)
+0037be3c ae305a54 sw          $s0, 0x5A54($s1)
+0037be40 a6225a48 sh          $v0, 0x5A48($s1)
+0037be44 8fa200c8 lw          $v0, 0xC8($sp)
+0037be48 ae205a60 sw          $zero, 0x5A60($s1)
+0037be4c 12030013 beq         $s0, $v1, . + 4 + (0x13 << 2) ; target=0x37be9c
+RANGE 0x37bfec..0x37c040
+0037bfec 8e255a6c lw          $a1, 0x5A6C($s1)
+0037bff0 0200202d daddu       $a0, $s0, $zero
+0037bff4 0c0d9cf6 jal         func_3673D8
+0037bff8 00052b40 sll         $a1, $a1, 13
+0037bffc 8e255a68 lw          $a1, 0x5A68($s1)
+0037c000 0200202d daddu       $a0, $s0, $zero
+0037c004 ae225a78 sw          $v0, 0x5A78($s1)
+0037c008 0c0d9cf6 jal         func_3673D8
+0037c00c 00052b40 sll         $a1, $a1, 13
+0037c010 8e255a70 lw          $a1, 0x5A70($s1)
+0037c014 0200202d daddu       $a0, $s0, $zero
+0037c018 ae225a7c sw          $v0, 0x5A7C($s1)
+0037c01c 0c0d9cf6 jal         func_3673D8
+0037c020 00052b40 sll         $a1, $a1, 13
+0037c024 0040282d daddu       $a1, $v0, $zero
+0037c028 de235a38 ld          $v1, 0x5A38($s1)
+0037c02c 24020001 addiu       $v0, $zero, 0x1
+0037c030 0002103c dsll32      $v0, $v0, 0
+0037c034 34420001 ori         $v0, $v0, 0x1
+0037c038 1462000c bne         $v1, $v0, . + 4 + (0xC << 2) ; target=0x37c06c
+0037c03c ae255a80 sw          $a1, 0x5A80($s1)
+RANGE 0x37c150..0x37c164
+0037c150 0220202d daddu       $a0, $s1, $zero
+0037c154 0000282d daddu       $a1, $zero, $zero
+0037c158 0c0e0abc jal         func_382AF0
+0037c15c 24060001 addiu       $a2, $zero, 0x1
+0037c160 24020001 addiu       $v0, $zero, 0x1
+RANGE 0x382af0..0x382b74
+00382af0 27bdff50 addiu       $sp, $sp, -0xB0
+00382af4 0080c82d daddu       $t9, $a0, $zero
+00382af8 7fb000a0 sq          $s0, 0xA0($sp)
+00382afc 7fb10090 sq          $s1, 0x90($sp)
+00382b00 7fb20080 sq          $s2, 0x80($sp)
+00382b04 7fb30070 sq          $s3, 0x70($sp)
+00382b08 7fb40060 sq          $s4, 0x60($sp)
+00382b0c 7fb50050 sq          $s5, 0x50($sp)
+00382b10 7fb60040 sq          $s6, 0x40($sp)
+00382b14 7fb70030 sq          $s7, 0x30($sp)
+00382b18 7fbe0020 sq          $fp, 0x20($sp)
+00382b1c ffbf0010 sd          $ra, 0x10($sp)
+00382b20 8f225a74 lw          $v0, 0x5A74($t9)
+00382b24 8f230f44 lw          $v1, 0xF44($t9)
+00382b28 24440001 addiu       $a0, $v0, 0x1
+00382b2c 10600003 beqz        $v1, . + 4 + (0x3 << 2) ; target=0x382b3c
+00382b30 af245a74 sw          $a0, 0x5A74($t9)
+00382b34 1000000d b           . + 4 + (0xD << 2) ; target=0x382b6c
+00382b38 af200f44 sw          $zero, 0xF44($t9)
+00382b3c 8f2259e8 lw          $v0, 0x59E8($t9)
+00382b40 54400007 bnel        $v0, $zero, . + 4 + (0x7 << 2) ; target=0x382b60
+00382b44 8f225a78 lw          $v0, 0x5A78($t9)
+00382b48 30820001 andi        $v0, $a0, 0x1
+00382b4c 54400004 bnel        $v0, $zero, . + 4 + (0x4 << 2) ; target=0x382b60
+00382b50 8f225a78 lw          $v0, 0x5A78($t9)
+00382b54 8f225a7c lw          $v0, 0x5A7C($t9)
+00382b58 10000002 b           . + 4 + (0x2 << 2) ; target=0x382b64
+00382b5c 8f235a78 lw          $v1, 0x5A78($t9)
+00382b60 8f235a7c lw          $v1, 0x5A7C($t9)
+00382b64 af225a84 sw          $v0, 0x5A84($t9)
+00382b68 af235a88 sw          $v1, 0x5A88($t9)
+00382b6c 3c031000 lui         $v1, 0x1000
+00382b70 0005283c dsll32      $a1, $a1, 0
+RANGE 0x382cb0..0x382cf4
+00382cb0 3c051200 lui         $a1, 0x1200
+00382cb4 34a50020 ori         $a1, $a1, 0x20
+00382cb8 3c061200 lui         $a2, 0x1200
+00382cbc 87235a46 lh          $v1, 0x5A46($t9)
+00382cc0 34c60070 ori         $a2, $a2, 0x70
+00382cc4 87225a44 lh          $v0, 0x5A44($t9)
+00382cc8 00031878 dsll        $v1, $v1, 1
+00382ccc 00431025 or          $v0, $v0, $v1
+00382cd0 fca20000 sd          $v0, 0x0($a1)
+00382cd4 9f235a5c lwu         $v1, 0x5A5C($t9)
+00382cd8 9f225a88 lwu         $v0, 0x5A88($t9)
+00382cdc 9f245a38 lwu         $a0, 0x5A38($t9)
+00382ce0 00031a78 dsll        $v1, $v1, 9
+00382ce4 00431025 or          $v0, $v0, $v1
+00382ce8 000423f8 dsll        $a0, $a0, 15
+00382cec 00441025 or          $v0, $v0, $a0
+00382cf0 fcc20000 sd          $v0, 0x0($a2)
+RANGE 0x395510..0x395580
+00395510 03e00008 jr          $ra
+00395514 8c825a74 lw          $v0, 0x5A74($a0)
+00395518 03e00008 jr          $ra
+0039551c 8c825a84 lw          $v0, 0x5A84($a0)
+00395520 03e00008 jr          $ra
+00395524 8c825a80 lw          $v0, 0x5A80($a0)
+00395528 03e00008 jr          $ra
+0039552c 8c825a3c lw          $v0, 0x5A3C($a0)
+00395530 03e00008 jr          $ra
+00395534 8c825a40 lw          $v0, 0x5A40($a0)
+00395538 03e00008 jr          $ra
+0039553c 8c8218f4 lw          $v0, 0x18F4($a0)
+00395540 03e00008 jr          $ra
+00395544 ac855ab8 sw          $a1, 0x5AB8($a0)
+00395548 03e00008 jr          $ra
+0039554c 8c825a88 lw          $v0, 0x5A88($a0)
+00395550 03e00008 jr          $ra
+00395554 8c825a5c lw          $v0, 0x5A5C($a0)
+00395558 03e00008 jr          $ra
+0039555c 8c825a50 lw          $v0, 0x5A50($a0)
+00395560 03e00008 jr          $ra
+00395564 8c825a3c lw          $v0, 0x5A3C($a0)
+00395568 24020001 addiu       $v0, $zero, 0x1
+0039556c 03e00008 jr          $ra
+00395570 ac8259e8 sw          $v0, 0x59E8($a0)
+00395574 00000000 nop
+00395578 03e00008 jr          $ra
+0039557c ac8059e8 sw          $zero, 0x59E8($a0)
+RANGE 0x3946d8..0x3946e8
+003946d8 24020001 addiu       $v0, $zero, 0x1
+003946dc 03e00008 jr          $ra
+003946e0 ac820f44 sw          $v0, 0xF44($a0)
+003946e4 00000000 nop
+RANGE 0x37d040..0x37d060
+0037d040 8fc25a00 lw          $v0, 0x5A00($fp)
+0037d044 24040001 addiu       $a0, $zero, 0x1
+0037d048 8fc30e84 lw          $v1, 0xE84($fp)
+0037d04c 24420010 addiu       $v0, $v0, 0x10
+0037d050 afc40f44 sw          $a0, 0xF44($fp)
+0037d054 2463ffec addiu       $v1, $v1, -0x14
+0037d058 afc25a00 sw          $v0, 0x5A00($fp)
+0037d05c afc30e84 sw          $v1, 0xE84($fp)
+
+## R6 worker and IRQ state-machine joins
+RANGE 0x377b1c..0x377b70
+00377b1c 0c108f78 jal         func_423DE0
+00377b20 8e645acc lw          $a0, 0x5ACC($s3)
+00377b24 8e645a10 lw          $a0, 0x5A10($s3)
+00377b28 26635a90 addiu       $v1, $s3, 0x5A90
+00377b2c 8fa50010 lw          $a1, 0x10($sp)
+00377b30 24070002 addiu       $a3, $zero, 0x2
+00377b34 ae645aa4 sw          $a0, 0x5AA4($s3)
+00377b38 8e625aa4 lw          $v0, 0x5AA4($s3)
+00377b3c 8fa60014 lw          $a2, 0x14($sp)
+00377b40 00021080 sll         $v0, $v0, 2
+00377b44 ae655aac sw          $a1, 0x5AAC($s3)
+00377b48 00621821 addu        $v1, $v1, $v0
+00377b4c ae665ab4 sw          $a2, 0x5AB4($s3)
+00377b50 ae715aa8 sw          $s1, 0x5AA8($s3)
+00377b54 ae725ab0 sw          $s2, 0x5AB0($s3)
+00377b58 ac670000 sw          $a3, 0x0($v1)
+00377b5c 0c108f70 jal         func_423DC0
+00377b60 8e645acc lw          $a0, 0x5ACC($s3)
+00377b64 0c108f70 jal         func_423DC0
+00377b68 8e645ac8 lw          $a0, 0x5AC8($s3)
+00377b6c 8e635a10 lw          $v1, 0x5A10($s3)
+RANGE 0x3825c0..0x3826e0
+003825c0 27bdfff0 addiu       $sp, $sp, -0x10
+003825c4 24020002 addiu       $v0, $zero, 0x2
+003825c8 10820002 beq         $a0, $v0, . + 4 + (0x2 << 2) ; target=0x3825d4
+003825cc ffbf0000 sd          $ra, 0x0($sp)
+003825d0 0000000d break       0
+003825d4 0c0e097e jal         func_3825F8
+003825d8 00a0202d daddu       $a0, $a1, $zero
+003825dc 0000000f sync
+003825e0 42000038 ei
+003825e4 dfbf0000 ld          $ra, 0x0($sp)
+003825e8 24020001 addiu       $v0, $zero, 0x1
+003825ec 03e00008 jr          $ra
+003825f0 27bd0010 addiu       $sp, $sp, 0x10
+003825f4 00000000 nop
+003825f8 27bdfff0 addiu       $sp, $sp, -0x10
+003825fc 0080282d daddu       $a1, $a0, $zero
+00382600 ffbf0000 sd          $ra, 0x0($sp)
+00382604 24020004 addiu       $v0, $zero, 0x4
+00382608 8ca35abc lw          $v1, 0x5ABC($a1)
+0038260c 8ca45a8c lw          $a0, 0x5A8C($a1)
+00382610 24630001 addiu       $v1, $v1, 0x1
+00382614 1482000a bne         $a0, $v0, . + 4 + (0xA << 2) ; target=0x382640
+00382618 aca35abc sw          $v1, 0x5ABC($a1)
+0038261c 8ca25ab8 lw          $v0, 0x5AB8($a1)
+00382620 0062102a slt         $v0, $v1, $v0
+00382624 14400007 bnez        $v0, . + 4 + (0x7 << 2) ; target=0x382644
+00382628 dfbf0000 ld          $ra, 0x0($sp)
+0038262c 24020005 addiu       $v0, $zero, 0x5
+00382630 8ca45ac8 lw          $a0, 0x5AC8($a1)
+00382634 aca25a8c sw          $v0, 0x5A8C($a1)
+00382638 0c108f74 jal         func_423DD0
+0038263c aca05abc sw          $zero, 0x5ABC($a1)
+00382640 dfbf0000 ld          $ra, 0x0($sp)
+00382644 03e00008 jr          $ra
+00382648 27bd0010 addiu       $sp, $sp, 0x10
+0038264c 00000000 nop
+00382650 27bdfff0 addiu       $sp, $sp, -0x10
+00382654 24020001 addiu       $v0, $zero, 0x1
+00382658 10820002 beq         $a0, $v0, . + 4 + (0x2 << 2) ; target=0x382664
+0038265c ffbf0000 sd          $ra, 0x0($sp)
+00382660 0000000d break       0
+00382664 0c0e09a2 jal         func_382688
+00382668 00a0202d daddu       $a0, $a1, $zero
+0038266c 0000000f sync
+00382670 42000038 ei
+00382674 dfbf0000 ld          $ra, 0x0($sp)
+00382678 24020001 addiu       $v0, $zero, 0x1
+0038267c 03e00008 jr          $ra
+00382680 27bd0010 addiu       $sp, $sp, 0x10
+00382684 00000000 nop
+00382688 27bdfff0 addiu       $sp, $sp, -0x10
+0038268c 0080282d daddu       $a1, $a0, $zero
+00382690 ffbf0000 sd          $ra, 0x0($sp)
+00382694 24030001 addiu       $v1, $zero, 0x1
+00382698 8ca25a8c lw          $v0, 0x5A8C($a1)
+0038269c 14430007 bne         $v0, $v1, . + 4 + (0x7 << 2) ; target=0x3826bc
+003826a0 24020002 addiu       $v0, $zero, 0x2
+003826a4 8ca45ac8 lw          $a0, 0x5AC8($a1)
+003826a8 aca25a8c sw          $v0, 0x5A8C($a1)
+003826ac 0c108f74 jal         func_423DD0
+003826b0 00000000 nop
+003826b4 10000008 b           . + 4 + (0x8 << 2) ; target=0x3826d8
+003826b8 dfbf0000 ld          $ra, 0x0($sp)
+003826bc 8ca35a8c lw          $v1, 0x5A8C($a1)
+003826c0 24020003 addiu       $v0, $zero, 0x3
+003826c4 14620004 bne         $v1, $v0, . + 4 + (0x4 << 2) ; target=0x3826d8
+003826c8 dfbf0000 ld          $ra, 0x0($sp)
+003826cc 24020004 addiu       $v0, $zero, 0x4
+003826d0 aca25a8c sw          $v0, 0x5A8C($a1)
+003826d4 dfbf0000 ld          $ra, 0x0($sp)
+003826d8 03e00008 jr          $ra
+003826dc 27bd0010 addiu       $sp, $sp, 0x10
+RANGE 0x3827d8..0x382858
+003827d8 0c108f78 jal         func_423DE0
+003827dc 8e045ac8 lw          $a0, 0x5AC8($s0)
+003827e0 0c108f78 jal         func_423DE0
+003827e4 8e045acc lw          $a0, 0x5ACC($s0)
+003827e8 8e035a8c lw          $v1, 0x5A8C($s0)
+003827ec 24020005 addiu       $v0, $zero, 0x5
+003827f0 1462000c bne         $v1, $v0, . + 4 + (0xC << 2) ; target=0x382824
+003827f4 00000000 nop
+003827f8 8e025a98 lw          $v0, 0x5A98($s0)
+003827fc 0200202d daddu       $a0, $s0, $zero
+00382800 8fa30000 lw          $v1, 0x0($sp)
+00382804 24050001 addiu       $a1, $zero, 0x1
+00382808 00021080 sll         $v0, $v0, 2
+0038280c 0000302d daddu       $a2, $zero, $zero
+00382810 00621021 addu        $v0, $v1, $v0
+00382814 ac400000 sw          $zero, 0x0($v0)
+00382818 ae005a8c sw          $zero, 0x5A8C($s0)
+0038281c 0c0e0abc jal         func_382AF0
+00382820 00000000 nop
+00382824 8e025a8c lw          $v0, 0x5A8C($s0)
+00382828 1440007b bnez        $v0, . + 4 + (0x7B << 2) ; target=0x382a18
+0038282c 00000000 nop
+00382830 8e025aa4 lw          $v0, 0x5AA4($s0)
+00382834 26065a90 addiu       $a2, $s0, 0x5A90
+00382838 8fa30000 lw          $v1, 0x0($sp)
+0038283c 00021080 sll         $v0, $v0, 2
+00382840 00621021 addu        $v0, $v1, $v0
+00382844 8c430000 lw          $v1, 0x0($v0)
+00382848 24020002 addiu       $v0, $zero, 0x2
+0038284c 14620072 bne         $v1, $v0, . + 4 + (0x72 << 2) ; target=0x382a18
+00382850 00000000 nop
+00382854 8e220000 lw          $v0, 0x0($s1)
+RANGE 0x3828fc..0x382938
+003828fc 8e035aa4 lw          $v1, 0x5AA4($s0)
+00382900 24050001 addiu       $a1, $zero, 0x1
+00382904 0000202d daddu       $a0, $zero, $zero
+00382908 ae035a98 sw          $v1, 0x5A98($s0)
+0038290c 24030003 addiu       $v1, $zero, 0x3
+00382910 8e025a98 lw          $v0, 0x5A98($s0)
+00382914 00021080 sll         $v0, $v0, 2
+00382918 00c21021 addu        $v0, $a2, $v0
+0038291c ac430000 sw          $v1, 0x0($v0)
+00382920 ae055a8c sw          $a1, 0x5A8C($s0)
+00382924 8e025aac lw          $v0, 0x5AAC($s0)
+00382928 8e035ab4 lw          $v1, 0x5AB4($s0)
+0038292c ae025a9c sw          $v0, 0x5A9C($s0)
+00382930 0c109008 jal         func_424020
+00382934 ae035aa0 sw          $v1, 0x5AA0($s0)
+RANGE 0x382974..0x382a18
+00382974 3c030045 lui         $v1, 0x45
+00382978 2463b9c0 addiu       $v1, $v1, -0x4640
+0038297c 78620000 lq          $v0, 0x0($v1)
+00382980 7fc20000 sq          $v0, 0x0($fp)
+00382984 24020004 addiu       $v0, $zero, 0x4
+00382988 aee20000 sw          $v0, 0x0($s7)
+0038298c 8e620000 lw          $v0, 0x0($s3)
+00382990 00521024 and         $v0, $v0, $s2
+00382994 1040000b beqz        $v0, . + 4 + (0xB << 2) ; target=0x3829c4
+00382998 3c041000 lui         $a0, 0x1000
+0038299c 3c031f00 lui         $v1, 0x1F00
+003829a0 34843c00 ori         $a0, $a0, 0x3C00
+003829a4 34630003 ori         $v1, $v1, 0x3
+003829a8 8c820000 lw          $v0, 0x0($a0)
+003829ac 00431024 and         $v0, $v0, $v1
+003829b0 00000000 nop
+003829b4 00000000 nop
+003829b8 00000000 nop
+003829bc 1440fffa bnez        $v0, . + 4 + (-0x6 << 2) ; target=0x3829a8
+003829c0 00000000 nop
+003829c4 3c031200 lui         $v1, 0x1200
+003829c8 8e055ab0 lw          $a1, 0x5AB0($s0)
+003829cc 34631000 ori         $v1, $v1, 0x1000
+003829d0 24044000 addiu       $a0, $zero, 0x4000
+003829d4 00000000 nop
+003829d8 dc620000 ld          $v0, 0x0($v1)
+003829dc 3042c000 andi        $v0, $v0, 0xC000
+003829e0 00000000 nop
+003829e4 00000000 nop
+003829e8 00000000 nop
+003829ec 1444fffa bne         $v0, $a0, . + 4 + (-0x6 << 2) ; target=0x3829d8
+003829f0 00000000 nop
+003829f4 aec50000 sw          $a1, 0x0($s6)
+003829f8 24030105 addiu       $v1, $zero, 0x105
+003829fc aea30000 sw          $v1, 0x0($s5)
+00382a00 8e025aa8 lw          $v0, 0x5AA8($s0)
+00382a04 ae820000 sw          $v0, 0x0($s4)
+00382a08 24020185 addiu       $v0, $zero, 0x185
+00382a0c ae220000 sw          $v0, 0x0($s1)
+00382a10 10000033 b           . + 4 + (0x33 << 2) ; target=0x382ae0
+00382a14 00000000 nop
+RANGE 0x382a18..0x382a54
+00382a18 8e025a8c lw          $v0, 0x5A8C($s0)
+00382a1c 24030002 addiu       $v1, $zero, 0x2
+00382a20 1443002f bne         $v0, $v1, . + 4 + (0x2F << 2) ; target=0x382ae0
+00382a24 00000000 nop
+00382a28 8e026d0c lw          $v0, 0x6D0C($s0)
+00382a2c 10400004 beqz        $v0, . + 4 + (0x4 << 2) ; target=0x382a40
+00382a30 3c030045 lui         $v1, 0x45
+00382a34 0040f809 jalr        $v0
+00382a38 8e046d10 lw          $a0, 0x6D10($s0)
+00382a3c 3c030045 lui         $v1, 0x45
+00382a40 2463b9c0 addiu       $v1, $v1, -0x4640
+00382a44 78620000 lq          $v0, 0x0($v1)
+00382a48 7fc20000 sq          $v0, 0x0($fp)
+00382a4c 24020004 addiu       $v0, $zero, 0x4
+00382a50 aee20000 sw          $v0, 0x0($s7)
+RANGE 0x382abc..0x382af0
+00382abc aec50000 sw          $a1, 0x0($s6)
+00382ac0 24030105 addiu       $v1, $zero, 0x105
+00382ac4 aea30000 sw          $v1, 0x0($s5)
+00382ac8 24020003 addiu       $v0, $zero, 0x3
+00382acc ae025a8c sw          $v0, 0x5A8C($s0)
+00382ad0 24030185 addiu       $v1, $zero, 0x185
+00382ad4 8e025a9c lw          $v0, 0x5A9C($s0)
+00382ad8 ae820000 sw          $v0, 0x0($s4)
+00382adc ae230000 sw          $v1, 0x0($s1)
+00382ae0 0c108f70 jal         func_423DC0
+00382ae4 8e045acc lw          $a0, 0x5ACC($s0)
+00382ae8 1000ff3b b           . + 4 + (-0xC5 << 2) ; target=0x3827d8
+00382aec 00000000 nop
+
+## R7 copy packet, unconditional FRAME_2 signature, submission and VIF unmask
+RANGE 0x382e64..0x382f60
+00382e64 3c030050 lui         $v1, 0x50
+00382e68 344200e0 ori         $v0, $v0, 0xE0
+00382e6c 2464fcc0 addiu       $a0, $v1, -0x340
+00382e70 fc400000 sd          $zero, 0x0($v0)
+00382e74 3c033000 lui         $v1, 0x3000
+00382e78 8f2259e8 lw          $v0, 0x59E8($t9)
+00382e7c 1040014a beqz        $v0, . + 4 + (0x14A << 2) ; target=0x3833a8
+00382e80 0083f025 or          $fp, $a0, $v1
+00382e84 3c021000 lui         $v0, 0x1000
+00382e88 0002103c dsll32      $v0, $v0, 0
+00382e8c 3442000b ori         $v0, $v0, 0xB
+00382e90 2403000e addiu       $v1, $zero, 0xE
+00382e94 ffc20000 sd          $v0, 0x0($fp)
+00382e98 3408ff00 ori         $t0, $zero, 0xFF00
+00382e9c 0008443c dsll32      $t0, $t0, 16
+00382ea0 ffc30008 sd          $v1, 0x8($fp)
+00382ea4 2405004c addiu       $a1, $zero, 0x4C
+00382ea8 24060061 addiu       $a2, $zero, 0x61
+00382eac 24070014 addiu       $a3, $zero, 0x14
+00382eb0 9f235a5c lwu         $v1, 0x5A5C($t9)
+00382eb4 340b9a00 ori         $t3, $zero, 0x9A00
+00382eb8 000b5cb8 dsll        $t3, $t3, 18
+00382ebc 9f225a88 lwu         $v0, 0x5A88($t9)
+00382ec0 24090006 addiu       $t1, $zero, 0x6
+00382ec4 9f245a38 lwu         $a0, 0x5A38($t9)
+00382ec8 00031c38 dsll        $v1, $v1, 16
+00382ecc 00431025 or          $v0, $v0, $v1
+00382ed0 ffc50018 sd          $a1, 0x18($fp)
+00382ed4 00042638 dsll        $a0, $a0, 24
+00382ed8 ffc60020 sd          $a2, 0x20($fp)
+00382edc 00441025 or          $v0, $v0, $a0
+00382ee0 ffc70028 sd          $a3, 0x28($fp)
+00382ee4 00481025 or          $v0, $v0, $t0
+00382ee8 24050080 addiu       $a1, $zero, 0x80
+00382eec 0005283c dsll32      $a1, $a1, 0
+00382ef0 34a50064 ori         $a1, $a1, 0x64
+00382ef4 ffc20010 sd          $v0, 0x10($fp)
+00382ef8 24060042 addiu       $a2, $zero, 0x42
+00382efc 24070005 addiu       $a3, $zero, 0x5
+00382f00 24080008 addiu       $t0, $zero, 0x8
+00382f04 8f225a84 lw          $v0, 0x5A84($t9)
+00382f08 240a0040 addiu       $t2, $zero, 0x40
+00382f0c 9f245a50 lwu         $a0, 0x5A50($t9)
+00382f10 240c0041 addiu       $t4, $zero, 0x41
+00382f14 00021140 sll         $v0, $v0, 5
+00382f18 9f235a3c lwu         $v1, 0x5A3C($t9)
+00382f1c 0002103c dsll32      $v0, $v0, 0
+00382f20 000423b8 dsll        $a0, $a0, 14
+00382f24 0002103e dsrl32      $v0, $v0, 0
+00382f28 00031d38 dsll        $v1, $v1, 20
+00382f2c 00441025 or          $v0, $v0, $a0
+00382f30 ffc90038 sd          $t1, 0x38($fp)
+00382f34 00431025 or          $v0, $v0, $v1
+00382f38 ffc50040 sd          $a1, 0x40($fp)
+00382f3c 004b1025 or          $v0, $v0, $t3
+00382f40 ffc60048 sd          $a2, 0x48($fp)
+00382f44 ffc70050 sd          $a3, 0x50($fp)
+00382f48 24040800 addiu       $a0, $zero, 0x800
+00382f4c ffc80058 sd          $t0, 0x58($fp)
+00382f50 24050018 addiu       $a1, $zero, 0x18
+00382f54 ffc20030 sd          $v0, 0x30($fp)
+00382f58 340b8000 ori         $t3, $zero, 0x8000
+00382f5c 000b5c78 dsll        $t3, $t3, 17
+RANGE 0x383250..0x3832d4
+00383250 24025353 addiu       $v0, $zero, 0x5353
+00383254 00031900 sll         $v1, $v1, 4
+00383258 00042100 sll         $a0, $a0, 4
+0038325c ffc500e0 sd          $a1, 0xE0($fp)
+00383260 014c4821 addu        $t1, $t2, $t4
+00383264 ffc200e8 sd          $v0, 0xE8($fp)
+00383268 24630008 addiu       $v1, $v1, 0x8
+0038326c 00e42021 addu        $a0, $a3, $a0
+00383270 0100802d daddu       $s0, $t0, $zero
+00383274 010b5021 addu        $t2, $t0, $t3
+00383278 18c00016 blez        $a2, . + 4 + (0x16 << 2) ; target=0x3832d4
+0038327c 27de00f0 addiu       $fp, $fp, 0xF0
+00383280 00e0102d daddu       $v0, $a3, $zero
+00383284 00027438 dsll        $t6, $v0, 16
+00383288 00036c38 dsll        $t5, $v1, 16
+0038328c 00046438 dsll        $t4, $a0, 16
+00383290 00c0382d daddu       $a3, $a2, $zero
+00383294 3c0f0008 lui         $t7, 0x8
+00383298 25240200 addiu       $a0, $t1, 0x200
+0038329c 010f1025 or          $v0, $t0, $t7
+003832a0 012e1825 or          $v1, $t1, $t6
+003832a4 014d2825 or          $a1, $t2, $t5
+003832a8 008c3025 or          $a2, $a0, $t4
+003832ac ffc20000 sd          $v0, 0x0($fp)
+003832b0 ffc30008 sd          $v1, 0x8($fp)
+003832b4 0080482d daddu       $t1, $a0, $zero
+003832b8 ffc50010 sd          $a1, 0x10($fp)
+003832bc 010b4021 addu        $t0, $t0, $t3
+003832c0 ffc60018 sd          $a2, 0x18($fp)
+003832c4 014b5021 addu        $t2, $t2, $t3
+003832c8 24e7ffff addiu       $a3, $a3, -0x1
+003832cc 14e0fff2 bnez        $a3, . + 4 + (-0xE << 2) ; target=0x383298
+003832d0 27de0020 addiu       $fp, $fp, 0x20
+RANGE 0x3833a8..0x383458
+003833a8 2417000e addiu       $s7, $zero, 0xE
+003833ac 3c021000 lui         $v0, 0x1000
+003833b0 0002103c dsll32      $v0, $v0, 0
+003833b4 34428010 ori         $v0, $v0, 0x8010
+003833b8 ffc20000 sd          $v0, 0x0($fp)
+003833bc 2405004c addiu       $a1, $zero, 0x4C
+003833c0 ffd70008 sd          $s7, 0x8($fp)
+003833c4 3409ff00 ori         $t1, $zero, 0xFF00
+003833c8 00094c3c dsll32      $t1, $t1, 16
+003833cc 2407004d addiu       $a3, $zero, 0x4D
+003833d0 240a004e addiu       $t2, $zero, 0x4E
+003833d4 9f225a50 lwu         $v0, 0x5A50($t9)
+003833d8 240b004f addiu       $t3, $zero, 0x4F
+003833dc 9f245a84 lwu         $a0, 0x5A84($t9)
+003833e0 24060800 addiu       $a2, $zero, 0x800
+003833e4 9f235a3c lwu         $v1, 0x5A3C($t9)
+003833e8 00021438 dsll        $v0, $v0, 16
+003833ec 00822025 or          $a0, $a0, $v0
+003833f0 ffc50018 sd          $a1, 0x18($fp)
+003833f4 00031e38 dsll        $v1, $v1, 24
+003833f8 24050018 addiu       $a1, $zero, 0x18
+003833fc 00832025 or          $a0, $a0, $v1
+00383400 240c0019 addiu       $t4, $zero, 0x19
+00383404 ffc40010 sd          $a0, 0x10($fp)
+00383408 2411004a addiu       $s1, $zero, 0x4A
+0038340c 2412004b addiu       $s2, $zero, 0x4B
+00383410 24130080 addiu       $s3, $zero, 0x80
+00383414 0013983c dsll32      $s3, $s3, 0
+00383418 36730080 ori         $s3, $s3, 0x80
+0038341c 9f235a50 lwu         $v1, 0x5A50($t9)
+00383420 2416003b addiu       $s6, $zero, 0x3B
+00383424 9f225a84 lwu         $v0, 0x5A84($t9)
+00383428 24080001 addiu       $t0, $zero, 0x1
+0038342c 9f245a3c lwu         $a0, 0x5A3C($t9)
+00383430 00031c38 dsll        $v1, $v1, 16
+00383434 00431025 or          $v0, $v0, $v1
+00383438 ffc70028 sd          $a3, 0x28($fp)
+0038343c 00042638 dsll        $a0, $a0, 24
+00383440 24070046 addiu       $a3, $zero, 0x46
+00383444 00441025 or          $v0, $v0, $a0
+00383448 240d001a addiu       $t5, $zero, 0x1A
+0038344c 00491025 or          $v0, $v0, $t1
+00383450 24040045 addiu       $a0, $zero, 0x45
+00383454 ffc20020 sd          $v0, 0x20($fp)
+RANGE 0x383578..0x383588
+00383578 ffc000e0 sd          $zero, 0xE0($fp)
+0038357c ffc000f0 sd          $zero, 0xF0($fp)
+00383580 ffc00100 sd          $zero, 0x100($fp)
+00383584 27de0110 addiu       $fp, $fp, 0x110
+RANGE 0x383674..0x383694
+00383674 3c080050 lui         $t0, 0x50
+00383678 ffc40000 sd          $a0, 0x0($fp)
+0038367c 24090040 addiu       $t1, $zero, 0x40
+00383680 ffc20008 sd          $v0, 0x8($fp)
+00383684 2504fcc0 addiu       $a0, $t0, -0x340
+00383688 240a0041 addiu       $t2, $zero, 0x41
+0038368c 3c050fff lui         $a1, 0xFFF
+00383690 97225900 lhu         $v0, 0x5900($t9)
+RANGE 0x383724..0x383770
+00383724 27de0030 addiu       $fp, $fp, 0x30
+00383728 03c52824 and         $a1, $fp, $a1
+0038372c 00a42823 subu        $a1, $a1, $a0
+00383730 0000000f sync
+00383734 00052902 srl         $a1, $a1, 4
+00383738 0c0dc650 jal         func_371940
+0038373c 24060006 addiu       $a2, $zero, 0x6
+00383740 7bb000a0 lq          $s0, 0xA0($sp)
+00383744 7bb10090 lq          $s1, 0x90($sp)
+00383748 7bb20080 lq          $s2, 0x80($sp)
+0038374c 7bb30070 lq          $s3, 0x70($sp)
+00383750 7bb40060 lq          $s4, 0x60($sp)
+00383754 7bb50050 lq          $s5, 0x50($sp)
+00383758 7bb60040 lq          $s6, 0x40($sp)
+0038375c 7bb70030 lq          $s7, 0x30($sp)
+00383760 7bbe0020 lq          $fp, 0x20($sp)
+00383764 dfbf0010 ld          $ra, 0x10($sp)
+00383768 03e00008 jr          $ra
+0038376c 27bd00b0 addiu       $sp, $sp, 0xB0
+RANGE 0x371940..0x371a54
+00371940 0080382d daddu       $a3, $a0, $zero
+00371944 00a0402d daddu       $t0, $a1, $zero
+00371948 30c20004 andi        $v0, $a2, 0x4
+0037194c 1040000f beqz        $v0, . + 4 + (0xF << 2) ; target=0x37198c
+00371950 3c040045 lui         $a0, 0x45
+00371954 3c031000 lui         $v1, 0x1000
+00371958 3463a000 ori         $v1, $v1, 0xA000
+0037195c 8c620000 lw          $v0, 0x0($v1)
+00371960 30420100 andi        $v0, $v0, 0x100
+00371964 10400009 beqz        $v0, . + 4 + (0x9 << 2) ; target=0x37198c
+00371968 3c031000 lui         $v1, 0x1000
+0037196c 3463a000 ori         $v1, $v1, 0xA000
+00371970 8c620000 lw          $v0, 0x0($v1)
+00371974 30420100 andi        $v0, $v0, 0x100
+00371978 00000000 nop
+0037197c 00000000 nop
+00371980 00000000 nop
+00371984 1440fffa bnez        $v0, . + 4 + (-0x6 << 2) ; target=0x371970
+00371988 00000000 nop
+0037198c 2482b430 addiu       $v0, $a0, -0x4BD0
+00371990 3c031000 lui         $v1, 0x1000
+00371994 78450000 lq          $a1, 0x0($v0)
+00371998 34635000 ori         $v1, $v1, 0x5000
+0037199c 3c041000 lui         $a0, 0x1000
+003719a0 3c026fff lui         $v0, 0x6FFF
+003719a4 7c650000 sq          $a1, 0x0($v1)
+003719a8 34843010 ori         $a0, $a0, 0x3010
+003719ac 24030004 addiu       $v1, $zero, 0x4
+003719b0 3442ffff ori         $v0, $v0, 0xFFFF
+003719b4 ac830000 sw          $v1, 0x0($a0)
+003719b8 0047102b sltu        $v0, $v0, $a3
+003719bc 10400008 beqz        $v0, . + 4 + (0x8 << 2) ; target=0x3719e0
+003719c0 30e23ff0 andi        $v0, $a3, 0x3FF0
+003719c4 3c031000 lui         $v1, 0x1000
+003719c8 3c048000 lui         $a0, 0x8000
+003719cc 3463a010 ori         $v1, $v1, 0xA010
+003719d0 00441025 or          $v0, $v0, $a0
+003719d4 ac620000 sw          $v0, 0x0($v1)
+003719d8 10000005 b           . + 4 + (0x5 << 2) ; target=0x3719f0
+003719dc 3c021000 lui         $v0, 0x1000
+003719e0 3c021000 lui         $v0, 0x1000
+003719e4 3442a010 ori         $v0, $v0, 0xA010
+003719e8 ac470000 sw          $a3, 0x0($v0)
+003719ec 3c021000 lui         $v0, 0x1000
+003719f0 3c041000 lui         $a0, 0x1000
+003719f4 3442a020 ori         $v0, $v0, 0xA020
+003719f8 3484a000 ori         $a0, $a0, 0xA000
+003719fc ac480000 sw          $t0, 0x0($v0)
+00371a00 24030101 addiu       $v1, $zero, 0x101
+00371a04 ac830000 sw          $v1, 0x0($a0)
+00371a08 30c20002 andi        $v0, $a2, 0x2
+00371a0c 1040000f beqz        $v0, . + 4 + (0xF << 2) ; target=0x371a4c
+00371a10 00000000 nop
+00371a14 3c021001 lui         $v0, 0x1001
+00371a18 8c42a000 lw          $v0, -0x6000($v0)
+00371a1c 30420100 andi        $v0, $v0, 0x100
+00371a20 1040000a beqz        $v0, . + 4 + (0xA << 2) ; target=0x371a4c
+00371a24 3c031000 lui         $v1, 0x1000
+00371a28 3463a000 ori         $v1, $v1, 0xA000
+00371a2c 00000000 nop
+00371a30 8c620000 lw          $v0, 0x0($v1)
+00371a34 30420100 andi        $v0, $v0, 0x100
+00371a38 00000000 nop
+00371a3c 00000000 nop
+00371a40 00000000 nop
+00371a44 1440fffa bnez        $v0, . + 4 + (-0x6 << 2) ; target=0x371a30
+00371a48 00000000 nop
+00371a4c 03e00008 jr          $ra
+00371a50 00000000 nop
+
+## R8 unrelated literal matches and alternate caller
+RANGE 0x216978..0x216988
+00216978 3c040047 lui         $a0, 0x47
+0021697c 24845a88 addiu       $a0, $a0, 0x5A88
+00216980 0c0c5d9c jal         func_317670
+00216984 afa20010 sw          $v0, 0x10($sp)
+RANGE 0x216f4c..0x216f5c
+00216f4c 3c040047 lui         $a0, 0x47
+00216f50 24845a88 addiu       $a0, $a0, 0x5A88
+00216f54 0c0c5d9c jal         func_317670
+00216f58 afa20010 sw          $v0, 0x10($sp)
+RANGE 0x294860..0x29489c
+00294860 28a20006 slti        $v0, $a1, 0x6
+00294864 14400003 bnez        $v0, . + 4 + (0x3 << 2) ; target=0x294874
+00294868 00051880 sll         $v1, $a1, 2
+0029486c 03e00008 jr          $ra
+00294870 0000102d daddu       $v0, $zero, $zero
+00294874 00831821 addu        $v1, $a0, $v1
+00294878 03e00008 jr          $ra
+0029487c 8c6259e8 lw          $v0, 0x59E8($v1)
+00294880 28a20006 slti        $v0, $a1, 0x6
+00294884 10400003 beqz        $v0, . + 4 + (0x3 << 2) ; target=0x294894
+00294888 00051080 sll         $v0, $a1, 2
+0029488c 00821021 addu        $v0, $a0, $v0
+00294890 ac4659e8 sw          $a2, 0x59E8($v0)
+00294894 03e00008 jr          $ra
+00294898 00000000 nop
+RANGE 0x3960e8..0x396100
+003960e8 27bdfff0 addiu       $sp, $sp, -0x10
+003960ec ffbf0000 sd          $ra, 0x0($sp)
+003960f0 0c0e0abc jal         func_382AF0
+003960f4 24060001 addiu       $a2, $zero, 0x1
+003960f8 dfbf0000 ld          $ra, 0x0($sp)
+003960fc 03e00008 jr          $ra
+
+## R9 ELF data: VIF mask/unmask command blocks, vtable, publication slots
+0044b430 0x06000000
+0044b434 0x00000000
+0044b438 0x00000000
+0044b43c 0x00000000
+0044b9c0 0x06008000
+0044b9c4 0x00000000
+0044b9c8 0x00000000
+0044b9cc 0x00000000
+0044b3d0 0x00000000
+0044b3d4 0x00000000
+0044b3d8 0x00000000
+0044b3dc 0x06008000
+00493260 0x00000000
+00493264 0x00000000
+00493268 0x00000000
+0049326c 0x00395268
+00493270 0x00000000
+00493274 0x00375a40
+004a289c 0x00000000
+004a5b80 BSS/unmapped
+
+## R10 emulator source slices; static fix-design inputs, no execution
+SOURCE ps2xRuntime/src/lib/ps2_runtime.cpp sha256 598ef6617397b9ee45e80d16580888eb2246bbdb694cef3a903ab28475270696
+2896: void PS2Runtime::Store128(uint8_t *rdram, R5900Context *ctx, uint32_t vaddr, __m128i value)
+2897: {
+2898:     alignas(16) uint64_t _parts[2];
+2899:     _mm_storeu_si128(reinterpret_cast<__m128i *>(_parts), value);
+2900:     ps2TraceGuestWrite(rdram, vaddr, 16u, _parts[0], _parts[1], "WRITE128", ctx);
+2901:     if (ps2DiagWatchEnabled())
+2902:     {
+2903:         diagWatchReportImpl(rdram, vaddr, 16u, _parts[0], _parts[1], ctx, this, 1u);
+2904:     }
+2905:     try
+2906:     {
+2907:         m_memory.write128(vaddr, value);
+2908:     }
+2909:     catch (const std::exception &)
+2910:     {
+2911:         SignalException(ctx, EXCEPTION_ADDRESS_ERROR_STORE);
+2912:     }
+2913: }
+SOURCE ps2xRuntime/src/lib/ps2_memory.cpp sha256 1f6cc25fe7bf72825e6b2011b7abbfe6ad300b5903fe649c809db4038ef765ea
+588: uint32_t PS2Memory::translateAddress(uint32_t virtualAddress)
+589: {
+590:     if (isScratchpad(virtualAddress))
+591:     {
+592:         return ps2ScratchpadOffset(virtualAddress);
+593:     }
+594: 
+595:     // EE uncached aliases of main RAM (per PS2 memory map):
+596:     //   0x20000000-0x3FFFFFFF -> 32MB mirror of RDRAM
+597:     // This includes the accelerated window rooted at 0x30100000.
+598:     if (Ps2IsUncachedRamMirrorAddress(virtualAddress))
+599:     {
+600:         return virtualAddress & PS2_RAM_MASK;
+601:     }
+602: 
+603:     // KSEG0/KSEG1 direct-mapped window.
+604:     if (Ps2IsKseg01Address(virtualAddress))
+605:     {
+606:         return Ps2DirectMappedPhysicalAddress(virtualAddress);
+607:     }
+608: 
+609:     // In this runtime, low segments are treated as physical-style addresses already.
+610:     if (virtualAddress < 0x80000000)
+1083: void PS2Memory::write128(uint32_t address, __m128i value)
+1084: {
+1085:     if (address & 15)
+1086:     {
+1087:         throw std::runtime_error("Unaligned 128-bit write at address: 0x" + std::to_string(address));
+1088:     }
+1089: 
+1090:     const bool scratch = isScratchpad(address);
+1091:     uint32_t physAddr = translateAddress(address);
+1092: 
+1093:     if (scratch)
+1094:     {
+1095:         inRange(physAddr, sizeof(__m128i), PS2_SCRATCHPAD_SIZE, "write128 scratchpad", address);
+1096:         _mm_storeu_si128(reinterpret_cast<__m128i *>(&m_scratchpad[physAddr]), value);
+1097:     }
+1098:     else if (physAddr < PS2_RAM_SIZE)
+1099:     {
+1100:         markModified(address, 16);
+1101:         inRange(physAddr, sizeof(__m128i), PS2_RAM_SIZE, "write128 rdram", address);
+1102:         _mm_storeu_si128(reinterpret_cast<__m128i *>(&m_rdram[physAddr]), value);
+1103:     }
+1104:     else
+1105:     {
+1106:         uint32_t vuOffset = 0;
+1107:         uint32_t vuLimit = 0;
+1108:         if (uint8_t *vuMem = mapVuMemory(physAddr, sizeof(__m128i), vuOffset, vuLimit))
+1109:         {
+1110:             inRange(vuOffset, sizeof(__m128i), vuLimit, "write128 vu", address);
+1111:             _mm_storeu_si128(reinterpret_cast<__m128i *>(vuMem + vuOffset), value);
+1112:             if (vuMem == m_vu0Code)
+1113:                 markVU0CodeModified();
+1114:             else if (vuMem == m_vu1Code)
+1115:                 markVU1CodeModified();
+1116:             return;
+1117:         }
+1118:     }
+1119:     if (isIoRegister(physAddr))
+1120:     {
+1121:         // Non-RAM 128-bit stores are modeled as two 64-bit stores.
+1122:         uint64_t lo = _mm_extract_epi64(value, 0);
+1123:         uint64_t hi = _mm_extract_epi64(value, 1);
+1124: 
+1125:         write64(address, lo);
+1126:         write64(address + 8, hi);
+1127:     }
+1128: }
+1129: 
+1130: bool PS2Memory::writeIORegister(uint32_t address, uint32_t value)
+1216:         uint32_t next = (current & ~((0x3FFu) | (0x3FFu << 16) | (1u << 31)));
+1217:         next |= status | (mask << 16);
+1218:         if ((status & mask) != 0u)
+1219:             next |= (1u << 31);
+1220:         m_ioRegisters[address] = next;
+1221:         return true;
+1222:     }
+1223: 
+1224:     m_ioRegisters[address] = value;
+1225: 
+1226:     if (address >= 0x10003C00u && address < 0x10003E00u)
+1227:     {
+1228:         m_vifWriteCount.fetch_add(1, std::memory_order_relaxed);
+1229: 
+1230:         switch (address)
+1231:         {
+1232:         case 0x10003C10u:     // VIF1_FBRST
+1233:             if (value & 0x1u) // RST
+1234:             {
+1235:                 std::memset(&vif1_regs, 0, sizeof(vif1_regs));
+1236:                 m_vif1PendingPath2ImageQwc = 0u;
+1237:                 m_vif1PendingPath2DirectHl = false;
+1238:             }
+1239:             if (value & 0x8u) // STC
+1240:             {
+1241:                 vif1_regs.stat &= ~((1u << 8) | (1u << 9) | (1u << 10) | (1u << 11) | (1u << 12) | (1u << 13));
+1242:             }
+1243:             break;
+1244:         case 0x10003C30u:
+1245:             vif1_regs.mark = value & 0xFFFFu;
+1246:             vif1_regs.stat &= ~(1u << 6); // clear MRK flag on CPU write
+1247:             break;
+1248:         case 0x10003C40u:
+1249:             vif1_regs.cycle = value & 0xFFFFu;
+1250:             break;
+1251:         case 0x10003C50u:
+1252:             vif1_regs.mode = value & 0x3u;
+1253:             break;
+1254:         case 0x10003C60u:
+1255:             vif1_regs.num = value & 0xFFu;
+1294:     if (address >= 0x10008000 && address < 0x1000F000)
+1295:     {
+1296:         if ((address & 0xFF) == 0x00 && (value & 0x100))
+1297:         {
+1298:             const auto dctrlIt = m_ioRegisters.find(0x1000E000u);
+1299:             const bool dmacEnabled = (dctrlIt == m_ioRegisters.end()) || ((dctrlIt->second & 0x1u) != 0u);
+1300:             if (!dmacEnabled)
+1301:             {
+1302:                 return true;
+1303:             }
+1304: 
+1305:             const uint32_t channelBase = address & 0xFFFFFF00;
+1306:             const uint32_t madr = m_ioRegisters[channelBase + 0x10];
+1307:             const uint32_t qwc = m_ioRegisters[channelBase + 0x20];
+1308:             m_dmaStartCount.fetch_add(1, std::memory_order_relaxed);
+1309: 
+1310:             if ((channelBase == 0x1000A000u || channelBase == 0x10009000u || channelBase == 0x10008000u) &&
+1311:                 (m_gsVRAM || channelBase == 0x10008000u))
+1312:             {
+1313:                 auto enqueueTransfer = [&](uint32_t srcAddr, uint32_t qwCount)
+1314:                 {
+1315:                     if (qwCount == 0)
+1316:                         return;
+1317:                     const bool scratch = isScratchpad(srcAddr);
+1318:                     PendingTransfer pt;
+1319:                     pt.fromScratchpad = scratch;
+1320:                     pt.srcAddr = srcAddr;
+1321:                     pt.qwc = qwCount;
+1322:                     if (channelBase == 0x1000A000u)
+1323:                         m_pendingGifTransfers.push_back(pt);
+1324:                     else if (channelBase == 0x10009000u)
+1325:                         m_pendingVif1Transfers.push_back(pt);
+1326:                     else if (channelBase == 0x10008000u)
+1327:                         m_pendingVif0Transfers.push_back(pt);
+1328:                 };
+1329: 
+1330:                 uint32_t chcr = value;
+1331:                 uint32_t mode = (chcr >> 2) & 0x3;
+1332: 
+1333:                 if (mode == 0 && qwc > 0)
+1334:                 {
+1335:                     enqueueTransfer(madr, qwc);
+1336:                 }
+1337:                 else if (mode == 1)
+1561: 
+1562:                 const bool autoProcessTransfers =
+1563:                     (channelBase == 0x1000A000u) ? (m_gifPacketCallback || m_gifArbiter != nullptr) : true;
+1564:                 if (autoProcessTransfers)
+1565:                 {
+1566:                     processPendingTransfers();
+1567:                 }
+1568:             }
+1836:                 {
+1837:                     if (srcPhys >= PS2_RAM_SIZE)
+1838:                         srcPhys = 0;
+1839:                     uint32_t chunk = bytesLeft;
+1840:                     if (srcPhys + chunk > PS2_RAM_SIZE)
+1841:                         chunk = PS2_RAM_SIZE - srcPhys;
+1842:                     if (chunk == 0)
+1843:                         break;
+1844:                     processVIF1Data(srcPhys, chunk);
+1845:                     bytesLeft -= chunk;
+1846:                     srcPhys += chunk;
+1847:                 }
+1848:             }
+1849:         }
+1850:     }
+1851:     m_pendingVif1Transfers.clear();
+1852: 
+1853:     if (m_gifArbiter)
+1854:         m_gifArbiter->drain();
+1855: 
+1856:     static constexpr uint32_t GIF_CHANNEL = 0x1000A000;
+1857:     static constexpr uint32_t VIF0_CHANNEL = 0x10008000;
+1858:     static constexpr uint32_t VIF1_CHANNEL = 0x10009000;
+1859:     static constexpr uint32_t D_STAT = 0x1000E010u;
+1860: 
+1861:     auto raiseDStatChannel = [&](uint32_t channelBit)
+1862:     {
+1863:         uint32_t dstat = m_ioRegisters.count(D_STAT) ? m_ioRegisters[D_STAT] : 0u;
+1864:         dstat |= (1u << channelBit);
+1865: 
+1866:         const uint32_t status = dstat & 0x3FFu;
+1867:         const uint32_t mask = (dstat >> 16) & 0x3FFu;
+1868:         if ((status & mask) != 0u)
+1869:             dstat |= (1u << 31);
+1870:         else
+1871:             dstat &= ~(1u << 31);
+1872: 
+1873:         m_ioRegisters[D_STAT] = dstat;
+1874:     };
+1875: 
+1876:     if (hadGif)
+1877:     {
+1878:         raiseDStatChannel(2u); // GIF channel
+1879:         queueCompletedDmacCause(2u);
+1880:         m_ioRegisters[GIF_CHANNEL + 0x00] &= ~0x100u;
+1881:         m_ioRegisters[GIF_CHANNEL + 0x20] = 0;
+1882:     }
+1883:     if (hadVif0)
+1884:     {
+1885:         raiseDStatChannel(0u); // VIF0 channel
+1886:         queueCompletedDmacCause(0u);
+1887:         m_ioRegisters[VIF0_CHANNEL + 0x00] &= ~0x100u;
+1888:         m_ioRegisters[VIF0_CHANNEL + 0x20] = 0;
+1889:     }
+1890:     if (hadVif1)
+1891:     {
+1892:         raiseDStatChannel(1u); // VIF1 channel
+1893:         queueCompletedDmacCause(1u);
+1894:         m_ioRegisters[VIF1_CHANNEL + 0x00] &= ~0x100u;
+1895:         m_ioRegisters[VIF1_CHANNEL + 0x20] = 0;
+1896:     }
+1897: }
+1898: 
+1913: void PS2Memory::flushMaskedPath3Packets(bool drainImmediately)
+1914: {
+1915:     if (m_path3Masked || m_path3MaskedFifo.empty())
+1916:         return;
+1917: 
+1918:     auto emit = [&](const uint8_t *packetData, uint32_t packetSize)
+1919:     {
+1920:         if (m_gifArbiter)
+1921:             m_gifArbiter->submit(GifPathId::Path3, packetData, packetSize, false);
+1922:         else if (m_gifPacketCallback)
+1923:             m_gifPacketCallback(packetData, packetSize);
+1924:     };
+1925: 
+1926:     for (const auto &packet : m_path3MaskedFifo)
+1927:     {
+1928:         if (packet.size() >= 16u)
+1929:             emit(packet.data(), static_cast<uint32_t>(packet.size()));
+1930:     }
+1931:     m_path3MaskedFifo.clear();
+1932: 
+1933:     if (m_gifArbiter && drainImmediately)
+1934:         m_gifArbiter->drain();
+1935: }
+1936: 
+1937: void PS2Memory::submitGifPacket(GifPathId pathId, const uint8_t *data, uint32_t sizeBytes, bool drainImmediately, bool path2DirectHl)
+1938: {
+1939:     if (!data || sizeBytes < 16)
+1940:         return;
+1941: 
+1942:     if (pathId == GifPathId::Path3)
+1943:     {
+1944:         if (m_path3Masked)
+1945:         {
+1946:             m_path3MaskedFifo.emplace_back(data, data + sizeBytes);
+1947:             return;
+1948:         }
+1949:         flushMaskedPath3Packets(false);
+1950:     }
+1951: 
+1952:     if (m_gifArbiter)
+1953:         m_gifArbiter->submit(pathId, data, sizeBytes, path2DirectHl);
+1954:     else if (m_gifPacketCallback)
+1955:         m_gifPacketCallback(data, sizeBytes);
+1956: 
+1957:     if (m_gifArbiter && drainImmediately)
+1958:         m_gifArbiter->drain();
+1959: }
+SOURCE ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp sha256 caf9373bc2ee65807b0e824691f9559f19d8a7df4e9ac786c83b6fbc3f228c27
+250: void PS2Memory::processVIF1Data(uint32_t srcPhys, uint32_t sizeBytes)
+251: {
+252:     if (sizeBytes == 0u || srcPhys >= PS2_RAM_SIZE)
+253:         return;
+254: 
+255:     const uint64_t requestedEnd = static_cast<uint64_t>(srcPhys) + static_cast<uint64_t>(sizeBytes);
+256:     if (requestedEnd > static_cast<uint64_t>(PS2_RAM_SIZE))
+257:         sizeBytes = PS2_RAM_SIZE - srcPhys;
+258: 
+259:     processVIF1Data(m_rdram + srcPhys, sizeBytes);
+260: }
+261: 
+262: void PS2Memory::processVIF1Data(const uint8_t *data, uint32_t sizeBytes)
+263: {
+264:     if (sizeBytes == 0u)
+265:         return;
+266: 
+267:     uint32_t pos = 0;
+268: 
+269:     while (pos + 4 <= sizeBytes)
+270:     {
+271:         if (m_vif1PendingPath2ImageQwc != 0u)
+272:         {
+273:             const uint32_t availableQw = (sizeBytes - pos) / 16u;
+351:         }
+352:         else if (opcode == VIF_MSKPATH3)
+353:         {
+354:             // VIF command docs: MSKPATH3 uses IMMEDIATE bit 15.
+355:             const bool wasMasked = m_path3Masked;
+356:             m_path3Masked = (imm & 0x8000u) != 0u;
+357:             if (wasMasked && !m_path3Masked)
+358:                 flushMaskedPath3Packets();
+359:             continue;
+360:         }
+361:         else if (opcode == VIF_MARK)
+362:         {
+SOURCE ps2xRuntime/src/lib/gs/gs_frontend.cpp sha256 16ca9661ac731b37ead9ed09d372e30e170a197ff4d3c2d59a347b5fa3430c00
+375: void GS::recordRegisterDebugEventUnlocked(uint8_t regAddr, uint64_t value)
+376: {
+377:     if (m_debugHistoryPaused)
+378:     {
+379:         return;
+380:     }
+381: 
+382:     switch (regAddr)
+383:     {
+384:     case GS_REG_PRIM:
+385:     case GS_REG_TEX0_1:
+386:     case GS_REG_TEX0_2:
+387:     case GS_REG_TEX2_1:
+388:     case GS_REG_TEX2_2:
+389:     case GS_REG_TEXA:
+390:     case GS_REG_TEXCLUT:
+391:     case GS_REG_FRAME_1:
+392:     case GS_REG_FRAME_2:
+393:     case GS_REG_ZBUF_1:
+394:     case GS_REG_ZBUF_2:
+395:     case GS_REG_ALPHA_1:
+396:     case GS_REG_ALPHA_2:
+397:     case GS_REG_TEST_1:
+398:     case GS_REG_TEST_2:
+399:     case GS_REG_SCISSOR_1:
+400:     case GS_REG_SCISSOR_2:
+401:     case GS_REG_XYOFFSET_1:
+402:     case GS_REG_XYOFFSET_2:
+403:     case GS_REG_BITBLTBUF:
+404:     case GS_REG_TRXPOS:
+405:     case GS_REG_TRXREG:
+406:     case GS_REG_TRXDIR:
+407:         break;
+679: 
+680:     uint32_t offset = 0;
+681:     while (offset + 16 <= sizeBytes)
+682:     {
+683:         uint64_t tagLo = loadLE64(data + offset);
+684:         uint64_t tagHi = loadLE64(data + offset + 8);
+685:         offset += 16;
+686: 
+687:         m_curQ = 1.0f;
+688: 
+689:         uint32_t nloop = static_cast<uint32_t>(tagLo & 0x7FFF);
+690:         uint8_t flg = static_cast<uint8_t>((tagLo >> 58) & 0x3);
+691:         uint32_t nreg = static_cast<uint32_t>((tagLo >> 60) & 0xF);
+692:         if (nreg == 0)
+693:             nreg = 16;
+694: 
+695:         recordGifTagDebugEventUnlocked(sizeBytes, nloop, flg, nreg);
+696: 
+697:         bool pre = ((tagLo >> 46) & 1) != 0;
+698:         if (pre)
+699:         {
+700:             writeRegisterUnlocked(GS_REG_PRIM, (tagLo >> 47) & 0x7FF);
+701:         }
+702: 
+703:         uint8_t regs[16];
+704:         for (uint32_t i = 0; i < nreg; ++i)
+705:             regs[i] = static_cast<uint8_t>((tagHi >> (i * 4)) & 0xF);
+706: 
+707:         if (flg == GIF_FMT_PACKED)
+708:         {
+709:             for (uint32_t loop = 0; loop < nloop; ++loop)
+710:             {
+711:                 for (uint32_t r = 0; r < nreg; ++r)
+712:                 {
+713:                     if (offset + 16 > sizeBytes)
+714:                         return;
+715:                     uint64_t lo = loadLE64(data + offset);
+716:                     uint64_t hi = loadLE64(data + offset + 8);
+717:                     offset += 16;
+718:                     writeRegisterPacked(regs[r], lo, hi);
+719:                 }
+720:             }
+721:         }
+722:         else if (flg == GIF_FMT_REGLIST)
+723:         {
+724:             for (uint32_t loop = 0; loop < nloop; ++loop)
+725:             {
+726:                 for (uint32_t r = 0; r < nreg; ++r)
+727:                 {
+728:                     if (offset + 8 > sizeBytes)
+729:                         return;
+730:                     writeRegisterUnlocked(regs[r], loadLE64(data + offset));
+731:                     offset += 8;
+732:                 }
+733:             }
+734:             if ((nloop * nreg) & 1)
+735:                 offset += 8;
+736:         }
+737:         else if (flg == GIF_FMT_IMAGE)
+738:         {
+739:             uint32_t imageBytes = nloop * 16;
+740:             if (offset + imageBytes > sizeBytes)
+741:                 imageBytes = sizeBytes - offset;
+742:             processImageData(data + offset, imageBytes);
+743:             offset += imageBytes;
+744:         }
+745:     }
+746: }
+747: 
+748: bool GS::processNativePackedGIFPacket(const uint8_t *data, uint32_t sizeBytes)
+749: {
+1532:     default:
+1533:         break;
+1534:     }
+1535: 
+1536:     recordRegisterDebugEventUnlocked(regAddr, value);
+1537: }
+1538: 
+SOURCE ps2xRuntime/src/lib/Kernel/EeScheduler.cpp sha256 64d8964c4207bb499c51166effa76459f7ecd37099eb977bba469f802630ee95
+964:     target->context = R5900Context{};
+965:     target->context.pc = target->entry;
+966:     target->arg = arg;
+967:     target->suspendCount = 0;
+968:     target->wakeupCount = 0;
+969:     target->wait = {};
+970:     SET_GPR_U32(&target->context, 4, arg);
+971:     SET_GPR_U32(&target->context, 28, target->gp != 0u ? target->gp : getRegU32(&caller, 28));
+972:     const uint32_t stackTop = target->stack != 0u
+973:                                   ? (target->stack + target->stackSize) & ~0xFu
+974:                                   : getRegU32(&caller, 29);
+975:     SET_GPR_U32(&target->context, 29, stackTop);
+976:     SET_GPR_U32(&target->context, 31, 0u);
+977:     if (diagPeriodMs() != 0u)
+978:     {
+979:         std::cerr << "[diag:start-thread] id=" << id
+980:                   << " func=0x" << std::hex << target->entry
+981:                   << " stack=0x" << target->stack
+982:                   << " stack_size=0x" << target->stackSize
+983:                   << " gp=0x" << target->gp << std::dec
+984:                   << " priority=" << target->initialPriority
+985:                   << " attr=0x" << std::hex << target->attr << std::dec
+986:                   << " initial_sp=0x" << std::hex << stackTop << std::dec << std::endl;
+SOURCE ps2xTest/src/ps2_memory_tests.cpp sha256 84e16173c961b16647a965cc3586af531b9f3712b21a2ddd0851f23f5c391323
+850:         tc.Run("VIF MSKPATH3 uses immediate bit15", [](TestCase &t)
+851:         {
+852:             PS2Memory mem;
+853:             t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
+854: 
+855:             const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
+856:             mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&setMask), sizeof(setMask));
+857:             t.IsTrue(mem.isPath3Masked(), "MSKPATH3 with imm bit15 set should enable PATH3 mask");
+858: 
+859:             const uint32_t clearMask = makeVifCmd(0x06u, 0u, 0x0000u);
+860:             mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&clearMask), sizeof(clearMask));
+861:             t.IsFalse(mem.isPath3Masked(), "MSKPATH3 with imm bit15 clear should disable PATH3 mask");
+862:         });
+863: 
+864:         tc.Run("PATH3 mask queues packets until unmask", [](TestCase &t)
+865:         {
+866:             PS2Memory mem;
+867:             t.IsTrue(mem.initialize(), "PS2Memory initialize should succeed");
+868: 
+869:             std::vector<std::vector<uint8_t>> captured;
+870:             mem.setGifPacketCallback([&](const uint8_t *data, uint32_t sizeBytes)
+871:             {
+872:                 captured.emplace_back(data, data + sizeBytes);
+873:             });
+874: 
+875:             std::vector<uint8_t> packetA(16u);
+876:             std::vector<uint8_t> packetB(16u);
+877:             for (uint32_t i = 0; i < 16u; ++i)
+878:             {
+879:                 packetA[i] = static_cast<uint8_t>(0x10u + i);
+880:                 packetB[i] = static_cast<uint8_t>(0x40u + i);
+881:             }
+882: 
+883:             const uint32_t setMask = makeVifCmd(0x06u, 0u, 0x8000u);
+884:             mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&setMask), sizeof(setMask));
+885:             t.IsTrue(mem.isPath3Masked(), "PATH3 mask should be enabled");
+886: 
+887:             mem.submitGifPacket(GifPathId::Path3, packetA.data(), static_cast<uint32_t>(packetA.size()));
+888:             mem.submitGifPacket(GifPathId::Path3, packetB.data(), static_cast<uint32_t>(packetB.size()));
+889:             t.Equals(captured.size(), static_cast<size_t>(0u), "masked PATH3 packets should be queued, not dropped/emitted");
+890: 
+891:             const uint32_t clearMask = makeVifCmd(0x06u, 0u, 0x0000u);
+892:             mem.processVIF1Data(reinterpret_cast<const uint8_t *>(&clearMask), sizeof(clearMask));
+893: 
+894:             t.Equals(captured.size(), static_cast<size_t>(2u), "unmask should flush queued PATH3 packets");
+895:             bool firstOk = true;
+896:             bool secondOk = true;
+897:             for (uint32_t i = 0; i < 16u; ++i)
+898:             {
+899:                 if (captured[0][i] != static_cast<uint8_t>(0x10u + i))
+900:                     firstOk = false;
+
+## R11 verified OUT vs runner identities
+sub_00382AF0_0x382af0.cpp OUT_sha256 70d9a3359526fe636aae9df298a580b1cd4c4fdd45fc921e3d66e960acdffeef runner_sha256 70d9a3359526fe636aae9df298a580b1cd4c4fdd45fc921e3d66e960acdffeef identical True
+sub_00382760_0x382760.cpp OUT_sha256 fa45cae693a0e8919f6e7329d6a749dfb5b61491157a09c1d059b026b0a7a007 runner_sha256 fa45cae693a0e8919f6e7329d6a749dfb5b61491157a09c1d059b026b0a7a007 identical True
+sub_00371940_0x371940.cpp OUT_sha256 9b88106d89ee5f0ecd22eabcd96775cf3c8bf8783056232ccbfb3ed90bb79ef3 runner_sha256 9b88106d89ee5f0ecd22eabcd96775cf3c8bf8783056232ccbfb3ed90bb79ef3 identical True
+sub_00375A08_0x375a08.cpp OUT_sha256 0182d1ef2ee2f6e45a7bdc845622fee4615f9d035bec1145a34d0c3c6aaf48ce runner_sha256 0182d1ef2ee2f6e45a7bdc845622fee4615f9d035bec1145a34d0c3c6aaf48ce identical True
+
+# EF RECEIPTS TAIL COMPLETE: R1-R11; no new dynamic observations

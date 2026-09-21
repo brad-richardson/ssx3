@@ -1,0 +1,186 @@
+# EF handover supplement: E6 landed; independent trace work stopped
+E6_commit 57e1afb10e41565ea7c4b44ad003f99f453a4b26
+E6_REPORT bytes 27897 lines 414 sha256 75c5aeffafab5c70de23aa7890d3feab6f66644b0633c8635c387dc51852913d
+## H1 E6 decision and complete tail
+312: DECISION: allocation + join + gate all named statically ⇒ **NO boot runs**
+313: (brief §Phase-1 rule). E6's single boot could at most learn S's address
+314: (one word) — it cannot take the S-relative value series (watch addrs need
+315: S upfront, fixed at boot), so it cannot close the values question; burning
+316: it buys nothing the finding needs. The values question goes to E7 with the
+317: exact recipe below (two 1-boot briefs: locate-S, then value-series).
+318: 
+319: E7 probe recipe (exact; zero-code, existing interfaces only):
+320: - E7a (1 boot ≤600 s, same caps/shape as E5): `PS2X_DIAG_WATCH=0x4a289c`
+321:   (+ E5 display set for the join) → the factory store's `value=` field IS
+322:   S's runtime address (heap determinism ⇒ stable across boots; verify by
+323:   the teardown-null absence + display series re-match).
+324: - E7b (1 boot, addrs computed as S+off): `PS2X_DIAG_WATCH=S+0x5a78,
+325:   S+0x5a7c,S+0x5a84,S+0x5a88,S+0x5a74,S+0x0f44,S+0x59e8` at 600→601 (+ boot
+326:   window free, as in E5) → slot values (H-pair test), G-sequence at display
+327:   calls (fp-user-rate inference: skip-vs-pick per burst), M-confirm (=1?),
+328:   counter rate. Miner: join vs `e5-watch-series.txt` by burst count.
+329: - Reachability residual for E7 (only if values surprise): pointer-chase
+330:   dispatch to M3/G4 (all DIRECT refs ruled out §2d/§2e; scan recipe:
+331:   `jalr` sites whose target reg traces to a `0x3955xx`/`0x3946xx` load —
+332:   state as open, §8 G5).
+333: 
+334: ## 5. Capture record
+335: 
+336: No Phase-2 capture (decision §4). Boots used: 0/1. Lease never claimed
+350: display re-assert, MMIO path, gate/mode logic, and Present all execute
+351: faithfully; the stuck select is guest state): run the §4 E7a+E7b value
+352: series to confirm slot values (H-pair), the G-sequence, and M=1 — then the
+353: parking question is answerable (what SHOULD clear M / re-fire the blit).
+354: No SIF/CD promotion (nothing names that dependency); no raster/Present fix
+355: follows (faithful, two boundaries). Guest-gate parking evidence: G2 (fp-user
+356: sets G unconditionally) + G5 (boot/UI sets G) + G4/M3 unreached — tabled
+357: above, not verdicts.
+358: 
+359: ## 7. Exact commands (abridged; scratch in /tmp, canonicals in-evidence)
+360: 
+361: Setup: `mkdir local/research/E6`; ELF md5 both copies
+362: `9e64f3df…`; fork HEAD `a13b66a` + status (pre-existing generated `M`
+363: only) re-verified at commit; ssx3 HEAD `d123665`.
+364: Scans (all whole-LOAD-segment, `/tmp/e6-scan.py`): `--imm`
+365: {`0x5a88`,`0x5a78`,`0x5a7c`,`0x5a84`,`0x5a74`,`0x0f44`,`0x59e8`,`0xf7ac`}
+406: Tail receipt: REPORT.md §§0–8 complete; e6-dis-slices.txt (1036 ln) +
+407: e6-dis-slices2.txt (282 ln) + e6-scans.txt (153 ln) + e6-sfield-map.txt
+408: (502 ln) + e6-bringup-dis.txt (382 ln) + e6-tables.txt (128 ln) +
+409: REPORT.md in-evidence (7 files incl. REPORT). Fork: NO commit (zero diff).
+410: Evidence `[E6]` committed, unpushed (orchestrator pushes). Lease verified
+411: absent at close. Outcome: (i) via J2a-fixed — M=1 boot-forced fixed pick
+412: of PAIR-B=112; next: E7a+E7b value series (§4 recipe).
+413: 
+414: 
+
+## H2 CPU store-width descent supplement
+SOURCE /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp sha256 1f6cc25fe7bf72825e6b2011b7abbfe6ad300b5903fe649c809db4038ef765ea
+967: void PS2Memory::write32(uint32_t address, uint32_t value)
+968: {
+969:     if (address & 3)
+970:     {
+971:         throw std::runtime_error("Unaligned 32-bit write at address: 0x" + std::to_string(address));
+972:     }
+973: 
+974:     if (isGsPrivReg(address))
+975:     {
+976:         uint32_t off = address & 7;
+977:         const uint32_t regOff = (address - PS2_GS_PRIV_REG_BASE) & ~0x7u;
+978:         if (regOff == kGsCsrRegOffset)
+979:         {
+980:             // CSR: bits 0..1 of the low dword are write-one-to-clear status bits.
+981:             // Done as a single atomic RMW -- see writeCsrHalf's comment.
+982:             writeCsrHalf(gs_regs.csr, off, value);
+983:         }
+984:         else if (uint64_t *reg = gsRegPtr(gs_regs, address))
+985:         {
+986:             uint64_t mask = 0xFFFFFFFFULL << (off * 8);
+987:             uint64_t newVal = (*reg & ~mask) | ((uint64_t)value << (off * 8));
+988:             *reg = newVal;
+989:         }
+990:         return;
+991:     }
+992: 
+993:     const bool scratch = isScratchpad(address);
+994:     uint32_t physAddr = translateAddress(address);
+995: 
+996:     if (scratch)
+997:     {
+998:         storeScalar<uint32_t>(m_scratchpad, physAddr, PS2_SCRATCHPAD_SIZE, value, "write32 scratchpad", address);
+999:     }
+1000:     else if (physAddr < PS2_RAM_SIZE)
+1001:     {
+1002:         // Check if this might be code modification
+1003:         markModified(address, 4);
+1004: 
+1005:         storeScalar<uint32_t>(m_rdram, physAddr, PS2_RAM_SIZE, value, "write32 rdram", address);
+1006:     }
+1007:     else
+1008:     {
+1009:         uint32_t vuOffset = 0;
+1010:         uint32_t vuLimit = 0;
+1011:         if (uint8_t *vuMem = mapVuMemory(physAddr, sizeof(uint32_t), vuOffset, vuLimit))
+1012:         {
+1013:             storeScalar<uint32_t>(vuMem, vuOffset, vuLimit, value, "write32 vu", address);
+1014:             if (vuMem == m_vu0Code)
+1015:                 markVU0CodeModified();
+1016:             else if (vuMem == m_vu1Code)
+1017:                 markVU1CodeModified();
+1018:             return;
+1019:         }
+1020:     }
+1021:     if (isIoRegister(physAddr))
+1022:     {
+1023:         writeIORegister(physAddr, value);
+1024:     }
+1025: }
+1026: 
+1027: void PS2Memory::write64(uint32_t address, uint64_t value)
+1028: {
+1029:     if (address & 7)
+1030:     {
+1031:         throw std::runtime_error("Unaligned 64-bit write at address: 0x" + std::to_string(address));
+1032:     }
+1033: 
+1034:     if (isGsPrivReg(address))
+1035:     {
+1036:         const uint32_t regOff = (address - PS2_GS_PRIV_REG_BASE) & ~0x7u;
+1037:         if (regOff == kGsCsrRegOffset)
+1038:         {
+1039:             // CSR: bits 0..1 are write-one-to-clear status bits. Done as a single
+1040:             // atomic RMW -- see writeCsrFull's comment.
+1041:             writeCsrFull(gs_regs.csr, value);
+1042:         }
+1043:         else if (uint64_t *reg = gsRegPtr(gs_regs, address))
+1044:         {
+1045:             *reg = value;
+1046:         }
+1047:         return;
+1048:     }
+1049: 
+1050:     const bool scratch = isScratchpad(address);
+1051:     uint32_t physAddr = translateAddress(address);
+1052: 
+1053:     if (scratch)
+1054:     {
+1055:         storeScalar<uint64_t>(m_scratchpad, physAddr, PS2_SCRATCHPAD_SIZE, value, "write64 scratchpad", address);
+1056:     }
+1057:     else if (physAddr < PS2_RAM_SIZE)
+1058:     {
+1059:         markModified(address, 8);
+1060:         storeScalar<uint64_t>(m_rdram, physAddr, PS2_RAM_SIZE, value, "write64 rdram", address);
+1061:     }
+1062:     else
+1063:     {
+1064:         uint32_t vuOffset = 0;
+1065:         uint32_t vuLimit = 0;
+1066:         if (uint8_t *vuMem = mapVuMemory(physAddr, sizeof(uint64_t), vuOffset, vuLimit))
+1067:         {
+1068:             storeScalar<uint64_t>(vuMem, vuOffset, vuLimit, value, "write64 vu", address);
+1069:             if (vuMem == m_vu0Code)
+1070:                 markVU0CodeModified();
+1071:             else if (vuMem == m_vu1Code)
+1072:                 markVU1CodeModified();
+1073:             return;
+1074:         }
+1075:     }
+1076:     if (isIoRegister(physAddr))
+1077:     {
+1078:         write32(address, (uint32_t)value);
+1079:         write32(address + 4, (uint32_t)(value >> 32));
+1080:     }
+1081: }
+1082: 
+
+## H3 library/header references: every textual processVIF1Data and FIFO-address hit
+ps2xRuntime/src/lib/ps2_memory.cpp:1800:             processVIF1Data(p.chainData.data(), static_cast<uint32_t>(p.chainData.size()));
+ps2xRuntime/src/lib/ps2_memory.cpp:1827:                     processVIF1Data(m_scratchpad + srcPhys, chunk);
+ps2xRuntime/src/lib/ps2_memory.cpp:1844:                     processVIF1Data(srcPhys, chunk);
+ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp:250: void PS2Memory::processVIF1Data(uint32_t srcPhys, uint32_t sizeBytes)
+ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp:259:     processVIF1Data(m_rdram + srcPhys, sizeBytes);
+ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp:262: void PS2Memory::processVIF1Data(const uint8_t *data, uint32_t sizeBytes)
+ps2xRuntime/include/runtime/ps2_memory.h:344:     void processVIF1Data(uint32_t srcPhysAddr, uint32_t sizeBytes);
+ps2xRuntime/include/runtime/ps2_memory.h:345:     void processVIF1Data(const uint8_t *data, uint32_t sizeBytes);
+Scope: textual references supplement the write-path source audit; not a whole-program semantic proof.
+
+# EF HANDOVER TAIL COMPLETE: H1-H3; zero new runtime observations
