@@ -1,0 +1,153 @@
+# E6 canonical scan receipts (exhaustive whole-LOAD-segment scans unless noted)
+# scan imm16==0x5a88 over LOAD vaddr 0x00100000+955133w
+0x0021697c: w=0x24845a88 op=0x09  base=$a0 rt=$a0 :: 885a8424   addiu      $a0, $a0, 0x5a88
+0x00216f50: w=0x24845a88 op=0x09  base=$a0 rt=$a0 :: 885a8424   addiu      $a0, $a0, 0x5a88
+0x00316a7c: w=0x0c0c5a88 op=0x03  base=$zero rt=$t4 :: 885a0c0c   jal        0x316a20
+0x00316aa0: w=0x0c0c5a88 op=0x03  base=$zero rt=$t4 :: 885a0c0c   jal        0x316a20
+0x00316b04: w=0x0c0c5a88 op=0x03  base=$zero rt=$t4 :: 885a0c0c   jal        0x316a20
+0x0037cd54: w=0x8fd35a88 LOAD     base=$s8 rt=$s3 :: 885ad38f   lw         $s3, 0x5a88($fp)
+0x00382b68: w=0xaf235a88 STORE    base=$t9 rt=$v1 :: 885a23af   sw         $v1, 0x5a88($t9)
+0x00382cd8: w=0x9f225a88 LOAD     base=$t9 rt=$v0 :: 885a229f   lwu        $v0, 0x5a88($t9)
+0x00382ebc: w=0x9f225a88 LOAD     base=$t9 rt=$v0 :: 885a229f   lwu        $v0, 0x5a88($t9)
+0x0039554c: w=0x8c825a88 LOAD     base=$a0 rt=$v0 :: 885a828c   lw         $v0, 0x5a88($a0)
+# total_hits=10
+
+# scan imm16==0x5a78 over LOAD vaddr 0x00100000+955133w
+0x0037c004: w=0xae225a78 STORE    base=$s1 rt=$v0 :: 785a22ae   sw         $v0, 0x5a78($s1)
+0x0037c054: w=0x8e255a78 LOAD     base=$s1 rt=$a1 :: 785a258e   lw         $a1, 0x5a78($s1)
+0x00382b44: w=0x8f225a78 LOAD     base=$t9 rt=$v0 :: 785a228f   lw         $v0, 0x5a78($t9)
+0x00382b50: w=0x8f225a78 LOAD     base=$t9 rt=$v0 :: 785a228f   lw         $v0, 0x5a78($t9)
+0x00382b5c: w=0x8f235a78 LOAD     base=$t9 rt=$v1 :: 785a238f   lw         $v1, 0x5a78($t9)
+0x004543c4: w=0x00415a78 op=0x00  base=$v0 rt=$at :: ???
+# total_hits=6
+
+# scan imm16==0x5a7c over LOAD vaddr 0x00100000+955133w
+0x002af9f8: w=0x0c0f5a7c op=0x03  base=$zero rt=$t7 :: 7c5a0f0c   jal        0x3d69f0
+0x0037c018: w=0xae225a7c STORE    base=$s1 rt=$v0 :: 7c5a22ae   sw         $v0, 0x5a7c($s1)
+0x0037c090: w=0x8e255a7c LOAD     base=$s1 rt=$a1 :: 7c5a258e   lw         $a1, 0x5a7c($s1)
+0x00382b54: w=0x8f225a7c LOAD     base=$t9 rt=$v0 :: 7c5a228f   lw         $v0, 0x5a7c($t9)
+0x00382b60: w=0x8f235a7c LOAD     base=$t9 rt=$v1 :: 7c5a238f   lw         $v1, 0x5a7c($t9)
+# total_hits=5
+
+# scan imm16==0x5a84 over LOAD vaddr 0x00100000+955133w
+0x001d01c8: w=0x0c055a84 op=0x03  base=$zero rt=$a1 :: 845a050c   jal        0x156a10
+0x0036ad5c: w=0x8eb05a84 LOAD     base=$s5 rt=$s0 :: 845ab08e   lw         $s0, 0x5a84($s5)
+0x0036b224: w=0x8ef35a84 LOAD     base=$s7 rt=$s3 :: 845af38e   lw         $s3, 0x5a84($s7)
+0x0036b4d4: w=0x8ef05a84 LOAD     base=$s7 rt=$s0 :: 845af08e   lw         $s0, 0x5a84($s7)
+0x0036b6a4: w=0x8ed25a84 LOAD     base=$s6 rt=$s2 :: 845ad28e   lw         $s2, 0x5a84($s6)
+0x0036b8c4: w=0x8ed05a84 LOAD     base=$s6 rt=$s0 :: 845ad08e   lw         $s0, 0x5a84($s6)
+0x0036c91c: w=0x8e635a84 LOAD     base=$s3 rt=$v1 :: 845a638e   lw         $v1, 0x5a84($s3)
+0x0037d4c4: w=0x9dc35a84 LOAD     base=$t6 rt=$v1 :: 845ac39d   lwu        $v1, 0x5a84($t6)
+0x0037d708: w=0x9d225a84 LOAD     base=$t1 rt=$v0 :: 845a229d   lwu        $v0, 0x5a84($t1)
+0x00382b64: w=0xaf225a84 STORE    base=$t9 rt=$v0 :: 845a22af   sw         $v0, 0x5a84($t9)
+0x00382f04: w=0x8f225a84 LOAD     base=$t9 rt=$v0 :: 845a228f   lw         $v0, 0x5a84($t9)
+0x003833dc: w=0x9f245a84 LOAD     base=$t9 rt=$a0 :: 845a249f   lwu        $a0, 0x5a84($t9)
+0x00383424: w=0x9f225a84 LOAD     base=$t9 rt=$v0 :: 845a229f   lwu        $v0, 0x5a84($t9)
+0x003837c0: w=0x8e265a84 LOAD     base=$s1 rt=$a2 :: 845a268e   lw         $a2, 0x5a84($s1)
+0x00387010: w=0x8f225a84 LOAD     base=$t9 rt=$v0 :: 845a228f   lw         $v0, 0x5a84($t9)
+0x00390638: w=0x8e625a84 LOAD     base=$s3 rt=$v0 :: 845a628e   lw         $v0, 0x5a84($s3)
+0x00390b0c: w=0x8e705a84 LOAD     base=$s3 rt=$s0 :: 845a708e   lw         $s0, 0x5a84($s3)
+0x0039551c: w=0x8c825a84 LOAD     base=$a0 rt=$v0 :: 845a828c   lw         $v0, 0x5a84($a0)
+# total_hits=18
+
+# scan imm16==0x5a74 over LOAD vaddr 0x00100000+955133w
+0x0037be38: w=0xae205a74 STORE    base=$s1 rt=$zero :: 745a20ae   sw         $zero, 0x5a74($s1)
+0x00382b20: w=0x8f225a74 LOAD     base=$t9 rt=$v0 :: 745a228f   lw         $v0, 0x5a74($t9)
+0x00382b30: w=0xaf245a74 STORE    base=$t9 rt=$a0 :: 745a24af   sw         $a0, 0x5a74($t9)
+0x00395514: w=0x8c825a74 LOAD     base=$a0 rt=$v0 :: 745a828c   lw         $v0, 0x5a74($a0)
+# total_hits=4
+
+# scan imm16==0x0f44 over LOAD vaddr 0x00100000+955133w
+0x00100928: w=0xb6020f44 STORE    base=$s0 rt=$v0 :: 440f02b6   sdr        $v0, 0xf44($s0)
+0x00100960: w=0xb6070f44 STORE    base=$s0 rt=$a3 :: 440f07b6   sdr        $a3, 0xf44($s0)
+0x001009c0: w=0xb6070f44 STORE    base=$s0 rt=$a3 :: 440f07b6   sdr        $a3, 0xf44($s0)
+0x00100a38: w=0xb6050f44 STORE    base=$s0 rt=$a1 :: 440f05b6   sdr        $a1, 0xf44($s0)
+0x00100ebc: w=0xb6020f44 STORE    base=$s0 rt=$v0 :: 440f02b6   sdr        $v0, 0xf44($s0)
+0x00100ef0: w=0xb6070f44 STORE    base=$s0 rt=$a3 :: 440f07b6   sdr        $a3, 0xf44($s0)
+0x00100f4c: w=0xb6060f44 STORE    base=$s0 rt=$a2 :: 440f06b6   sdr        $a2, 0xf44($s0)
+0x00101278: w=0xb6020f44 STORE    base=$s0 rt=$v0 :: 440f02b6   sdr        $v0, 0xf44($s0)
+0x001012ac: w=0xb6070f44 STORE    base=$s0 rt=$a3 :: 440f07b6   sdr        $a3, 0xf44($s0)
+0x001012d4: w=0xb6070f44 STORE    base=$s0 rt=$a3 :: 440f07b6   sdr        $a3, 0xf44($s0)
+0x00108f34: w=0xb6040f44 STORE    base=$s0 rt=$a0 :: 440f04b6   sdr        $a0, 0xf44($s0)
+0x0010a948: w=0xb6230f44 STORE    base=$s1 rt=$v1 :: 440f23b6   sdr        $v1, 0xf44($s1)
+0x0010aa24: w=0x86030f44 LOAD     base=$s0 rt=$v1 :: 440f0386   lh         $v1, 0xf44($s0)
+0x0010aa2c: w=0x86030f44 LOAD     base=$s0 rt=$v1 :: 440f0386   lh         $v1, 0xf44($s0)
+0x0014405c: w=0xb4820f44 STORE    base=$a0 rt=$v0 :: 440f82b4   sdr        $v0, 0xf44($a0)
+0x0027a950: w=0xac650f44 STORE    base=$v1 rt=$a1 :: 440f65ac   sw         $a1, 0xf44($v1)
+0x002f9e70: w=0xe4550f44 STORE    base=$v0 rt=$s5 :: 440f55e4   swc1       $f21, 0xf44($v0)
+0x00369370: w=0xae400f44 STORE    base=$s2 rt=$zero :: 440f40ae   sw         $zero, 0xf44($s2)
+0x0037d050: w=0xafc40f44 STORE    base=$s8 rt=$a0 :: 440fc4af   sw         $a0, 0xf44($fp)
+0x00382b24: w=0x8f230f44 LOAD     base=$t9 rt=$v1 :: 440f238f   lw         $v1, 0xf44($t9)
+0x00382b38: w=0xaf200f44 STORE    base=$t9 rt=$zero :: 440f20af   sw         $zero, 0xf44($t9)
+0x003946e0: w=0xac820f44 STORE    base=$a0 rt=$v0 :: 440f82ac   sw         $v0, 0xf44($a0)
+# total_hits=22
+
+# scan imm16==0x59e8 over LOAD vaddr 0x00100000+955133w
+0x0021661c: w=0x248459e8 op=0x09  base=$a0 rt=$a0 :: e8598424   addiu      $a0, $a0, 0x59e8
+0x00216bec: w=0x248459e8 op=0x09  base=$a0 rt=$a0 :: e8598424   addiu      $a0, $a0, 0x59e8
+0x002947c4: w=0x265059e8 op=0x09  base=$s2 rt=$s0 :: e8595026   addiu      $s0, $s2, 0x59e8
+0x0029487c: w=0x8c6259e8 LOAD     base=$v1 rt=$v0 :: e859628c   lw         $v0, 0x59e8($v1)
+0x00294890: w=0xac4659e8 STORE    base=$v0 rt=$a2 :: e85946ac   sw         $a2, 0x59e8($v0)
+0x00375fbc: w=0xae5159e8 STORE    base=$s2 rt=$s1 :: e85951ae   sw         $s1, 0x59e8($s2)
+0x00382b3c: w=0x8f2259e8 LOAD     base=$t9 rt=$v0 :: e859228f   lw         $v0, 0x59e8($t9)
+0x00382e78: w=0x8f2259e8 LOAD     base=$t9 rt=$v0 :: e859228f   lw         $v0, 0x59e8($t9)
+0x00395570: w=0xac8259e8 STORE    base=$a0 rt=$v0 :: e85982ac   sw         $v0, 0x59e8($a0)
+0x0039557c: w=0xac8059e8 STORE    base=$a0 rt=$zero :: e85980ac   sw         $zero, 0x59e8($a0)
+# total_hits=10
+
+# scan JAL to 0x00382af0
+0x0037c158: w=0x0c0e0abc jal 0x00382af0 (ra=0x0037c160)
+0x0038281c: w=0x0c0e0abc jal 0x00382af0 (ra=0x00382824)
+0x003960f0: w=0x0c0e0abc jal 0x00382af0 (ra=0x003960f8)
+# total_jal_hits=3
+
+# scan JAL to 0x0037bd98
+0x00376538: w=0x0c0def66 jal 0x0037bd98 (ra=0x00376540)
+# total_jal_hits=1
+
+# scan JAL to 0x00382760
+0x00382748: w=0x0c0e09d8 jal 0x00382760 (ra=0x00382750)
+# total_jal_hits=1
+
+# scan JAL to 0x0037cc98
+# total_jal_hits=0
+
+# scan JAL to 0x003960e8
+# total_jal_hits=0
+
+# scan JAL to 0x003764c0
+# total_jal_hits=0
+
+# scan JAL to 0x00382740
+# total_jal_hits=0
+
+# scan JAL to 0x00375a08
+0x00226970: w=0x0c0dd682 jal 0x00375a08 (ra=0x00226978)
+# total_jal_hits=1
+
+# scan JAL to 0x00385290
+# total_jal_hits=0
+
+# scan JAL to 0x00395288
+0x00375a28: w=0x0c0e54a2 jal 0x00395288 (ra=0x00375a30)
+# total_jal_hits=1
+
+# scan JAL to 0x00385260
+0x003852c8: w=0x0c0e1498 jal 0x00385260 (ra=0x003852d0)
+# total_jal_hits=1
+
+# scan JAL to 0x00395568
+# total_jal_hits=0
+
+# scan JAL to 0x00395578
+# total_jal_hits=0
+
+# scan JAL to 0x00395548
+# total_jal_hits=0
+
+# scan JAL to 0x003946d8
+# total_jal_hits=0
+
+# scan JAL to 0x00226900
+# total_jal_hits=0
+
