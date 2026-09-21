@@ -1,0 +1,883 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ D=/home/brad/pcsx2-t4
++ E=/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ REF=/home/brad/pcsx2-t4/t27-ref-title.ppm
++ REFMENU=/home/brad/pcsx2-t4/t28-ref-menu.ppm
++ REFSC=/home/brad/pcsx2-t4/t29-ref-sc.ppm
++ REFZC=/home/brad/pcsx2-t4/t30-ref-zc.ppm
++ REFSP=/home/brad/pcsx2-t4/t31-ref-sp.ppm
++ REFSM=/home/brad/pcsx2-t4/t32-ref-sm.ppm
++ REFSE=/home/brad/pcsx2-t4/t33-ref-se.ppm
++ REFMR=/home/brad/pcsx2-t4/t34-ref-mr.ppm
++ REFPP=/home/brad/pcsx2-t4/t35-ref-panel.ppm
++ CD=/home/brad/pcsx2-t4/t44-cropdiff.py
++ LOG=/home/brad/pcsx2-t4/t44-poll.log
++ TITLE_MEAN_MAX=2.0
++ TITLE_P99_MAX=10
++ STATIC_MEAN_MAX=1.0
++ MENU_MEAN_MAX=2.0
++ NONMENU_MEAN_MIN=5.0
++ NONSC_MEAN_MIN=5.0
++ NONZC_MEAN_MIN=5.0
++ NONSP_MEAN_MIN=5.0
++ NONSE_MEAN_MIN=5.0
++ NONMR_MEAN_MIN=5.0
++ NONPP_MEAN_MIN=5.0
++ DEPART_MEAN_MIN=5.0
++ SETAG_MEAN_MAX=5.0
++ SETAG_BOX=40,415,330,450
++ :
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
++ echo UPTIME:108
++ pkill Xvfb
++ true
++ sleep 2
++ pgrep -a Xvfb
++ true
++ sleep 4
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ pgrep -a Xvfb
++ xdotool getdisplaygeometry
+++ date -u +%Y%m%dT%H%M%SZ
++ TS=20260921T215827Z
++ '[' -f /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt ']'
++ mv /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t44-20260921T215827Z.txt
++ ls -la /home/brad/pcsx2-t4/dat/PCSX2/logs/
++ rm -f /home/brad/pcsx2-t4/pcsx2.pid
+++ date -u +%s
++ T_BOOT=1790027907
+++ cut -d. -f1 /proc/uptime
++ echo 'T_BOOT_WALL:1790027907 T_BOOT_UPTIME:114'
++ echo 647
++ echo PID:647
++ nohup /home/brad/pcsx2-t4/pcsx2/build/bin/pcsx2-qt -nogui -slowboot -turbo -datapath /home/brad/pcsx2-t4/dat -logfile /home/brad/pcsx2-t4/logs/boot-t44.log -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ sleep 90
++ pgrep -f pcsx2-qt
+++ xdotool search --onlyvisible --name 'SSX 3'
++ WID=2097159
++ echo WID:2097159
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
++ plog 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ echo 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t28-ref-menu.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
++ plog 'REFMENU_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFMENU_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t29-ref-sc.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
++ plog 'REFSC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t30-ref-zc.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
++ plog 'REFZC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFZC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t31-ref-sp.ppm /home/brad/pcsx2-t4/t31-ref-sp.ppm 0,0,1280,1024
++ plog 'REFSP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t32-ref-sm.ppm /home/brad/pcsx2-t4/t32-ref-sm.ppm 0,0,1280,1024
++ plog 'REFSM_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSM_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 0,0,1280,1024
++ plog 'REFSE_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSE_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 40,415,330,450
++ plog 'REFSETAG_CHECK:mean=0.0000 p99=0 max=0 npix=10150 mode=PPM'
++ echo 'REFSETAG_CHECK:mean=0.0000 p99=0 max=0 npix=10150 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t34-ref-mr.ppm /home/brad/pcsx2-t4/t34-ref-mr.ppm 0,0,1280,1024
++ plog 'REFMR_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFMR_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t35-ref-panel.ppm /home/brad/pcsx2-t4/t35-ref-panel.ppm 0,0,1280,1024
++ plog 'REFPP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFPP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ read SELF_M SELF_P
+++ score_band /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_TEST mean=0.0000 p99=0'
++ echo 'SELF_TEST mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_title 0.0000 0
++ is_num 0.0000
++ case "$1" in
++ return 0
++ is_num 0
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v p=0 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
+++ score_whole /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ SELF_W=0.0000
++ plog SELF_WHOLE=0.0000
++ echo SELF_WHOLE=0.0000
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_static 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ read SELF_MM SELF_MP
+++ score_menu /home/brad/pcsx2-t4/t28-ref-menu.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t28-ref-menu.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_MENU mean=0.0000 p99=0'
++ echo 'SELF_MENU mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_SM SELF_SP
+++ score_sc /home/brad/pcsx2-t4/t29-ref-sc.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t29-ref-sc.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SC mean=0.0000 p99=0'
++ echo 'SELF_SC mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_ZM SELF_ZP
+++ score_zc /home/brad/pcsx2-t4/t30-ref-zc.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t30-ref-zc.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
++ plog 'SELF_ZC mean=0.0000 p99=0'
++ echo 'SELF_ZC mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_PM SELF_PP
+++ score_sp /home/brad/pcsx2-t4/t31-ref-sp.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t31-ref-sp.ppm /home/brad/pcsx2-t4/t31-ref-sp.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SP mean=0.0000 p99=0'
++ echo 'SELF_SP mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_XM SELF_XP
+++ score_sm /home/brad/pcsx2-t4/t32-ref-sm.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t32-ref-sm.ppm /home/brad/pcsx2-t4/t32-ref-sm.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SM mean=0.0000 p99=0'
++ echo 'SELF_SM mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_EM SELF_EP
+++ score_se /home/brad/pcsx2-t4/t33-ref-se.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SE mean=0.0000 p99=0'
++ echo 'SELF_SE mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_TM SELF_TP
+++ score_setag /home/brad/pcsx2-t4/t33-ref-se.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 40,415,330,450
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SETAG mean=0.0000 p99=0'
++ echo 'SELF_SETAG mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_setag 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=5.0 'BEGIN{exit !(m<mm)}'
++ read SELF_RM SELF_RP
+++ score_mr /home/brad/pcsx2-t4/t34-ref-mr.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t34-ref-mr.ppm /home/brad/pcsx2-t4/t34-ref-mr.ppm 0,0,1280,1024
++ plog 'SELF_MR mean=0.0000 p99=0'
++ echo 'SELF_MR mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_PM SELF_PP
+++ score_pp /home/brad/pcsx2-t4/t35-ref-panel.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t35-ref-panel.ppm /home/brad/pcsx2-t4/t35-ref-panel.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_PP mean=0.0000 p99=0'
++ echo 'SELF_PP mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ snap t44-start
++ local N=t44-start
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-start.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-start.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-start.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-start.ppm
++ ls -la /home/brad/pcsx2-t4/t44-start.ppm /home/brad/pcsx2-t4/t44-start.jpg
++ read SM SP
+++ score_band /home/brad/pcsx2-t4/t44-start.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-start.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'START_SCORE mean=11.9612 p99=142 MENU_T+:97'
++ echo 'START_SCORE mean=11.9612 p99=142 MENU_T+:97'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ MENU_LIKE=0
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_1 BEGIN MENU_T+:97'
++ echo 'ATTEMPT_1 BEGIN MENU_T+:97'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ pgrep -f pcsx2-qt
++ snap t44-a1-now
++ local N=t44-a1-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-a1-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-a1-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-a1-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-a1-now.ppm
++ ls -la /home/brad/pcsx2-t4/t44-a1-now.ppm /home/brad/pcsx2-t4/t44-a1-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t44-a1-now.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_1 now score mean=11.8076 p99=123'
++ echo 'ATTEMPT_1 now score mean=11.8076 p99=123'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_title 11.8076 123
++ is_num 11.8076
++ case "$1" in
++ return 0
++ is_num 123
++ case "$1" in
++ return 0
++ awk -v m=11.8076 -v p=123 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_1 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_1 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ press K A1_CROSS
++ local KEY=K
++ local LAB=A1_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYDOWN_WALL:1790028005.644876942 UPTIME:212 MENU_T+:98'
++ echo 'A1_CROSS_KEYDOWN_WALL:1790028005.644876942 UPTIME:212 MENU_T+:98'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A1_CROSS_HELD_WALL:1790028005.662544497 UPTIME:212'
++ echo 'A1_CROSS_HELD_WALL:1790028005.662544497 UPTIME:212'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYUP_WALL:1790028006.178497024 UPTIME:213 MENU_T+:99'
++ echo 'A1_CROSS_KEYUP_WALL:1790028006.178497024 UPTIME:213 MENU_T+:99'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t44-a1-poll01
++ local N=t44-a1-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-a1-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-a1-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-a1-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-a1-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t44-a1-poll01.ppm /home/brad/pcsx2-t4/t44-a1-poll01.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t44-a1-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll01 score mean=0.4379 p99=5 MENU_T+:101'
++ echo 'ATTEMPT_1 poll01 score mean=0.4379 p99=5 MENU_T+:101'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_title 0.4379 5
++ is_num 0.4379
++ case "$1" in
++ return 0
++ is_num 5
++ case "$1" in
++ return 0
++ awk -v m=0.4379 -v p=5 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_1 TITLE-DETECTED at poll01'
++ echo 'ATTEMPT_1 TITLE-DETECTED at poll01'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ cp /home/brad/pcsx2-t4/t44-a1-poll01.ppm /home/brad/pcsx2-t4/t44-a1-pre.ppm
++ cp /home/brad/pcsx2-t4/t44-a1-poll01.jpg /home/brad/pcsx2-t4/t44-a1-pre.jpg
++ press Return A1_START
++ local KEY=Return
++ local LAB=A1_START
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_START_KEYDOWN_WALL:1790028008.919972444 UPTIME:216 MENU_T+:101'
++ echo 'A1_START_KEYDOWN_WALL:1790028008.919972444 UPTIME:216 MENU_T+:101'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Return
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A1_START_HELD_WALL:1790028008.937887834 UPTIME:216'
++ echo 'A1_START_HELD_WALL:1790028008.937887834 UPTIME:216'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 0.5
++ xdotool keyup Return
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_START_KEYUP_WALL:1790028009.454336141 UPTIME:216 MENU_T+:102'
++ echo 'A1_START_KEYUP_WALL:1790028009.454336141 UPTIME:216 MENU_T+:102'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ DETECTED=1
++ break
++ '[' 1 -eq 0 ']'
++ sleep 3
++ snap t44-a1-post3
++ local N=t44-a1-post3
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-a1-post3.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-a1-post3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-a1-post3.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-a1-post3.ppm
++ ls -la /home/brad/pcsx2-t4/t44-a1-post3.ppm /home/brad/pcsx2-t4/t44-a1-post3.jpg
++ read M3 P3
+++ score_band /home/brad/pcsx2-t4/t44-a1-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post3.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 post+3 score mean=16.3033 p99=139 MENU_T+:106'
++ echo 'ATTEMPT_1 post+3 score mean=16.3033 p99=139 MENU_T+:106'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 5
++ snap t44-a1-post8
++ local N=t44-a1-post8
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-a1-post8.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-a1-post8.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-a1-post8.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-a1-post8.ppm
++ ls -la /home/brad/pcsx2-t4/t44-a1-post8.ppm /home/brad/pcsx2-t4/t44-a1-post8.jpg
++ read M8 P8
+++ score_band /home/brad/pcsx2-t4/t44-a1-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post8.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_1 post+8 score mean=16.2637 p99=139'
++ echo 'ATTEMPT_1 post+8 score mean=16.2637 p99=139'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 7
++ snap t44-a1-post15
++ local N=t44-a1-post15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-a1-post15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-a1-post15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-a1-post15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-a1-post15.ppm
++ ls -la /home/brad/pcsx2-t4/t44-a1-post15.ppm /home/brad/pcsx2-t4/t44-a1-post15.jpg
++ read M15 P15
+++ score_band /home/brad/pcsx2-t4/t44-a1-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_1 post+15 score mean=16.2634 p99=139'
++ echo 'ATTEMPT_1 post+15 score mean=16.2634 p99=139'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 10
++ snap t44-a1-post25
++ local N=t44-a1-post25
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-a1-post25.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-a1-post25.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-a1-post25.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-a1-post25.ppm
++ ls -la /home/brad/pcsx2-t4/t44-a1-post25.ppm /home/brad/pcsx2-t4/t44-a1-post25.jpg
++ read M25 P25
+++ score_band /home/brad/pcsx2-t4/t44-a1-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post25.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_1 post+25 score mean=16.2369 p99=139'
++ echo 'ATTEMPT_1 post+25 score mean=16.2369 p99=139'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ score_whole /home/brad/pcsx2-t4/t44-a1-post8.ppm /home/brad/pcsx2-t4/t44-a1-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post8.ppm /home/brad/pcsx2-t4/t44-a1-post15.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ W815=0.0179
+++ score_whole /home/brad/pcsx2-t4/t44-a1-post15.ppm /home/brad/pcsx2-t4/t44-a1-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post15.ppm /home/brad/pcsx2-t4/t44-a1-post25.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ W1525=0.0393
++ plog 'ATTEMPT_1 whole815=0.0179 whole1525=0.0393'
++ echo 'ATTEMPT_1 whole815=0.0179 whole1525=0.0393'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ read MM25 MP25
+++ score_menu /home/brad/pcsx2-t4/t44-a1-post25.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-a1-post25.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_1 post25-vs-menu mean=0.3063 p99=5'
++ echo 'ATTEMPT_1 post25-vs-menu mean=0.3063 p99=5'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ is_title 16.2637 139
++ is_num 16.2637
++ case "$1" in
++ return 0
++ is_num 139
++ case "$1" in
++ return 0
++ awk -v m=16.2637 -v p=139 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ is_title 16.2634 139
++ is_num 16.2634
++ case "$1" in
++ return 0
++ is_num 139
++ case "$1" in
++ return 0
++ awk -v m=16.2634 -v p=139 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ is_title 16.2369 139
++ is_num 16.2369
++ case "$1" in
++ return 0
++ is_num 139
++ case "$1" in
++ return 0
++ awk -v m=16.2369 -v p=139 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ is_static 0.0179
++ is_num 0.0179
++ case "$1" in
++ return 0
++ awk -v m=0.0179 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ is_static 0.0393
++ is_num 0.0393
++ case "$1" in
++ return 0
++ awk -v m=0.0393 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ plog 'ATTEMPT_1 MENU-LIKE (non-title + static) -> park for menu Cross'
++ echo 'ATTEMPT_1 MENU-LIKE (non-title + static) -> park for menu Cross'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ MENU_LIKE=1
++ break
++ '[' 1 -eq 1 ']'
++ sleep 5
++ snap t44-menupre
++ local N=t44-menupre
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-menupre.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-menupre.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-menupre.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-menupre.ppm
++ ls -la /home/brad/pcsx2-t4/t44-menupre.ppm /home/brad/pcsx2-t4/t44-menupre.jpg
++ read MMP MMP_P
+++ score_menu /home/brad/pcsx2-t4/t44-menupre.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-menupre.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'MENUPRE vs-menu mean=0.3009 p99=5 MENU_T+:140'
++ echo 'MENUPRE vs-menu mean=0.3009 p99=5 MENU_T+:140'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ read MPT MPT_P
+++ score_band /home/brad/pcsx2-t4/t44-menupre.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-menupre.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'MENUPRE vs-title mean=16.2652 p99=139'
++ echo 'MENUPRE vs-title mean=16.2652 p99=139'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ press K MENU_CROSS
++ local KEY=K
++ local LAB=MENU_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'MENU_CROSS_KEYDOWN_WALL:1790028048.101395015 UPTIME:255 MENU_T+:141'
++ echo 'MENU_CROSS_KEYDOWN_WALL:1790028048.101395015 UPTIME:255 MENU_T+:141'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'MENU_CROSS_HELD_WALL:1790028048.119355203 UPTIME:255'
++ echo 'MENU_CROSS_HELD_WALL:1790028048.119355203 UPTIME:255'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'MENU_CROSS_KEYUP_WALL:1790028048.635768893 UPTIME:255 MENU_T+:141'
++ echo 'MENU_CROSS_KEYUP_WALL:1790028048.635768893 UPTIME:255 MENU_T+:141'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 1
++ snap t44-mc-post1
++ local N=t44-mc-post1
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-mc-post1.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-mc-post1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-mc-post1.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-mc-post1.ppm
++ ls -la /home/brad/pcsx2-t4/t44-mc-post1.ppm /home/brad/pcsx2-t4/t44-mc-post1.jpg
++ read M1 P1
+++ score_band /home/brad/pcsx2-t4/t44-mc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post1.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MM1 MP1
+++ score_menu /home/brad/pcsx2-t4/t44-mc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post1.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MS1 MSP1
+++ score_sc /home/brad/pcsx2-t4/t44-mc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post1.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'MC post+1 titleband mean=12.5352 p99=164 vs-menu mean=10.2123 p99=105 vs-sc mean=0.4182 p99=7 MENU_T+:145'
++ echo 'MC post+1 titleband mean=12.5352 p99=164 vs-menu mean=10.2123 p99=105 vs-sc mean=0.4182 p99=7 MENU_T+:145'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 2
++ snap t44-mc-post3
++ local N=t44-mc-post3
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-mc-post3.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-mc-post3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-mc-post3.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-mc-post3.ppm
++ ls -la /home/brad/pcsx2-t4/t44-mc-post3.ppm /home/brad/pcsx2-t4/t44-mc-post3.jpg
++ read M3 P3
+++ score_band /home/brad/pcsx2-t4/t44-mc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post3.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MM3 MP3
+++ score_menu /home/brad/pcsx2-t4/t44-mc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post3.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MS3 MSP3
+++ score_sc /home/brad/pcsx2-t4/t44-mc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post3.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'MC post+3 titleband mean=12.5352 p99=164 vs-menu mean=10.1967 p99=105 vs-sc mean=0.3996 p99=6'
++ echo 'MC post+3 titleband mean=12.5352 p99=164 vs-menu mean=10.1967 p99=105 vs-sc mean=0.3996 p99=6'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 5
++ snap t44-mc-post8
++ local N=t44-mc-post8
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-mc-post8.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-mc-post8.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-mc-post8.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-mc-post8.ppm
++ ls -la /home/brad/pcsx2-t4/t44-mc-post8.ppm /home/brad/pcsx2-t4/t44-mc-post8.jpg
++ read M8 P8
+++ score_band /home/brad/pcsx2-t4/t44-mc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post8.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MM8 MP8
+++ score_menu /home/brad/pcsx2-t4/t44-mc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post8.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MS8 MSP8
+++ score_sc /home/brad/pcsx2-t4/t44-mc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post8.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'MC post+8 titleband mean=12.5681 p99=164 vs-menu mean=10.2178 p99=106 vs-sc mean=0.6152 p99=9'
++ echo 'MC post+8 titleband mean=12.5681 p99=164 vs-menu mean=10.2178 p99=106 vs-sc mean=0.6152 p99=9'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 7
++ snap t44-mc-post15
++ local N=t44-mc-post15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-mc-post15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-mc-post15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-mc-post15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-mc-post15.ppm
++ ls -la /home/brad/pcsx2-t4/t44-mc-post15.ppm /home/brad/pcsx2-t4/t44-mc-post15.jpg
++ read M15 P15
+++ score_band /home/brad/pcsx2-t4/t44-mc-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MM15 MP15
+++ score_menu /home/brad/pcsx2-t4/t44-mc-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post15.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read MS15 MSP15
+++ score_sc /home/brad/pcsx2-t4/t44-mc-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post15.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'MC post+15 titleband mean=12.5518 p99=164 vs-menu mean=10.2241 p99=106 vs-sc mean=0.4523 p99=7'
++ echo 'MC post+15 titleband mean=12.5518 p99=164 vs-menu mean=10.2241 p99=106 vs-sc mean=0.4523 p99=7'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ score_whole /home/brad/pcsx2-t4/t44-menupre.ppm /home/brad/pcsx2-t4/t44-mc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-menupre.ppm /home/brad/pcsx2-t4/t44-mc-post1.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ H_PRE1=10.1176
+++ score_whole /home/brad/pcsx2-t4/t44-mc-post1.ppm /home/brad/pcsx2-t4/t44-mc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post1.ppm /home/brad/pcsx2-t4/t44-mc-post3.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ H_13=0.0277
+++ score_whole /home/brad/pcsx2-t4/t44-mc-post3.ppm /home/brad/pcsx2-t4/t44-mc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post3.ppm /home/brad/pcsx2-t4/t44-mc-post8.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ H_38=0.2485
+++ score_whole /home/brad/pcsx2-t4/t44-mc-post8.ppm /home/brad/pcsx2-t4/t44-mc-post15.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-mc-post8.ppm /home/brad/pcsx2-t4/t44-mc-post15.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ H_815=0.2914
++ plog 'MC hops whole: pre-post1=10.1176 p1-p3=0.0277 p3-p8=0.2485 p8-p15=0.2914'
++ echo 'MC hops whole: pre-post1=10.1176 p1-p3=0.0277 p3-p8=0.2485 p8-p15=0.2914'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ SC_LIKE=0
++ is_nonmenu 10.2241
++ is_num 10.2241
++ case "$1" in
++ return 0
++ awk -v m=10.2241 -v mm=5.0 'BEGIN{exit !(m>mm)}'
++ is_static 0.2485
++ is_num 0.2485
++ case "$1" in
++ return 0
++ awk -v m=0.2485 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ is_static 0.2914
++ is_num 0.2914
++ case "$1" in
++ return 0
++ awk -v m=0.2914 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ plog 'SC-LIKE (non-menu + static) -> park for Zoe Cross'
++ echo 'SC-LIKE (non-menu + static) -> park for Zoe Cross'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ SC_LIKE=1
++ '[' 1 -eq 1 ']'
++ sleep 5
++ snap t44-scpre
++ local N=t44-scpre
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-scpre.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-scpre.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-scpre.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-scpre.ppm
++ ls -la /home/brad/pcsx2-t4/t44-scpre.ppm /home/brad/pcsx2-t4/t44-scpre.jpg
++ read SCP SCP_P
+++ score_sc /home/brad/pcsx2-t4/t44-scpre.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-scpre.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'SCPRE vs-sc mean=0.4438 p99=7 MENU_T+:179'
++ echo 'SCPRE vs-sc mean=0.4438 p99=7 MENU_T+:179'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ read SMP SMP_P
+++ score_menu /home/brad/pcsx2-t4/t44-scpre.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-scpre.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SCPRE vs-menu mean=10.2279 p99=105'
++ echo 'SCPRE vs-menu mean=10.2279 p99=105'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ read SPT SPT_P
+++ score_band /home/brad/pcsx2-t4/t44-scpre.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-scpre.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SCPRE vs-title mean=12.5345 p99=164'
++ echo 'SCPRE vs-title mean=12.5345 p99=164'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ press K ZOE_CROSS
++ local KEY=K
++ local LAB=ZOE_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'ZOE_CROSS_KEYDOWN_WALL:1790028088.304376977 UPTIME:295 MENU_T+:181'
++ echo 'ZOE_CROSS_KEYDOWN_WALL:1790028088.304376977 UPTIME:295 MENU_T+:181'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'ZOE_CROSS_HELD_WALL:1790028088.321884881 UPTIME:295'
++ echo 'ZOE_CROSS_HELD_WALL:1790028088.321884881 UPTIME:295'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'ZOE_CROSS_KEYUP_WALL:1790028088.838355214 UPTIME:296 MENU_T+:181'
++ echo 'ZOE_CROSS_KEYUP_WALL:1790028088.838355214 UPTIME:296 MENU_T+:181'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 1
++ snap t44-zc-post1
++ local N=t44-zc-post1
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-zc-post1.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-zc-post1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-zc-post1.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-zc-post1.ppm
++ ls -la /home/brad/pcsx2-t4/t44-zc-post1.ppm /home/brad/pcsx2-t4/t44-zc-post1.jpg
++ read Z1 ZP1
+++ score_band /home/brad/pcsx2-t4/t44-zc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post1.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read ZS1 ZSP1
+++ score_sc /home/brad/pcsx2-t4/t44-zc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post1.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read ZZ1 ZZP1
+++ score_zc /home/brad/pcsx2-t4/t44-zc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post1.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ZC post+1 titleband mean=15.7368 p99=124 vs-sc mean=7.8594 p99=112 vs-zc mean=1.8755 p99=82 MENU_T+:185'
++ echo 'ZC post+1 titleband mean=15.7368 p99=124 vs-sc mean=7.8594 p99=112 vs-zc mean=1.8755 p99=82 MENU_T+:185'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 2
++ snap t44-zc-post3
++ local N=t44-zc-post3
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-zc-post3.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-zc-post3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-zc-post3.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-zc-post3.ppm
++ ls -la /home/brad/pcsx2-t4/t44-zc-post3.ppm /home/brad/pcsx2-t4/t44-zc-post3.jpg
++ read Z3 ZP3
+++ score_band /home/brad/pcsx2-t4/t44-zc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post3.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read ZS3 ZSP3
+++ score_sc /home/brad/pcsx2-t4/t44-zc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post3.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read ZZ3 ZZP3
+++ score_zc /home/brad/pcsx2-t4/t44-zc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post3.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ZC post+3 titleband mean=15.8278 p99=128 vs-sc mean=7.3617 p99=100 vs-zc mean=0.5203 p99=10'
++ echo 'ZC post+3 titleband mean=15.8278 p99=128 vs-sc mean=7.3617 p99=100 vs-zc mean=0.5203 p99=10'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ sleep 5
++ snap t44-zc-post8
++ local N=t44-zc-post8
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t44-zc-post8.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t44-zc-post8.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t44-zc-post8.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t44-zc-post8.ppm
++ ls -la /home/brad/pcsx2-t4/t44-zc-post8.ppm /home/brad/pcsx2-t4/t44-zc-post8.jpg
++ read Z8 ZP8
+++ score_band /home/brad/pcsx2-t4/t44-zc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post8.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read ZS8 ZSP8
+++ score_sc /home/brad/pcsx2-t4/t44-zc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post8.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ read ZZ8 ZZP8
+++ score_zc /home/brad/pcsx2-t4/t44-zc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post8.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ZC post+8 titleband mean=16.0309 p99=128 vs-sc mean=7.2688 p99=100 vs-zc mean=0.4260 p99=7'
++ echo 'ZC post+8 titleband mean=16.0309 p99=128 vs-sc mean=7.2688 p99=100 vs-zc mean=0.4260 p99=7'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
+++ score_whole /home/brad/pcsx2-t4/t44-scpre.ppm /home/brad/pcsx2-t4/t44-zc-post1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-scpre.ppm /home/brad/pcsx2-t4/t44-zc-post1.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ ZH_PRE1=7.8218
+++ score_whole /home/brad/pcsx2-t4/t44-zc-post1.ppm /home/brad/pcsx2-t4/t44-zc-post3.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post1.ppm /home/brad/pcsx2-t4/t44-zc-post3.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ ZH_13=1.7110
+++ score_whole /home/brad/pcsx2-t4/t44-zc-post3.ppm /home/brad/pcsx2-t4/t44-zc-post8.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t44-zc-post3.ppm /home/brad/pcsx2-t4/t44-zc-post8.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ ZH_38=0.2556
++ plog 'ZC hops whole: pre-post1=7.8218 p1-p3=1.7110 p3-p8=0.2556'
++ echo 'ZC hops whole: pre-post1=7.8218 p1-p3=1.7110 p3-p8=0.2556'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ ZC_LIKE=0
++ is_departed 7.8218
++ is_num 7.8218
++ case "$1" in
++ return 0
++ awk -v m=7.8218 -v mm=5.0 'BEGIN{exit !(m>mm)}'
++ is_nonsc 7.2688
++ is_num 7.2688
++ case "$1" in
++ return 0
++ awk -v m=7.2688 -v mm=5.0 'BEGIN{exit !(m>mm)}'
++ is_static 1.7110
++ is_num 1.7110
++ case "$1" in
++ return 0
++ awk -v m=1.7110 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ plog 'NO-ZC-PARK (SC->ZC chain did not park; no Continue Cross pressed)'
++ echo 'NO-ZC-PARK (SC->ZC chain did not park; no Continue Cross pressed)'
++ tee -a /home/brad/pcsx2-t4/t44-poll.log
++ '[' 0 -eq 1 ']'
++ ls -la /home/brad/pcsx2-t4/t44-a1-now.jpg /home/brad/pcsx2-t4/t44-a1-poll01.jpg /home/brad/pcsx2-t4/t44-a1-post15.jpg /home/brad/pcsx2-t4/t44-a1-post25.jpg /home/brad/pcsx2-t4/t44-a1-post3.jpg /home/brad/pcsx2-t4/t44-a1-post8.jpg /home/brad/pcsx2-t4/t44-a1-pre.jpg /home/brad/pcsx2-t4/t44-mc-post1.jpg /home/brad/pcsx2-t4/t44-mc-post15.jpg /home/brad/pcsx2-t4/t44-mc-post3.jpg /home/brad/pcsx2-t4/t44-mc-post8.jpg /home/brad/pcsx2-t4/t44-menupre.jpg /home/brad/pcsx2-t4/t44-scpre.jpg /home/brad/pcsx2-t4/t44-start.jpg /home/brad/pcsx2-t4/t44-zc-post1.jpg /home/brad/pcsx2-t4/t44-zc-post3.jpg /home/brad/pcsx2-t4/t44-zc-post8.jpg /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+++ cat /home/brad/pcsx2-t4/pcsx2.pid
++ kill 647
++ sleep 10
++ pgrep -a pcsx2-qt
++ true
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
++ echo UPTIME:326
++ echo T44_DONE
