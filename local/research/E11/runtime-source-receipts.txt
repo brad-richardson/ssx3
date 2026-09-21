@@ -1,0 +1,392 @@
+## ps2xRuntime/src/lib/GS/gs_cpu_backend.cpp SHA256=8410afccbe754df6a117c01e316fd0c6534fe452e4aa7068941b7e873c564128
+974     const auto &ctx = state.context;
+975     const auto &tex = ctx.tex0;
+976 
+977     const int texW = state.textureWidth;
+978     const int texH = state.textureHeight;
+979     const uint64_t clamp = ctx.clamp;
+980     const uint8_t wrapU = static_cast<uint8_t>(clamp & 0x3u);
+981     const uint8_t wrapV = static_cast<uint8_t>((clamp >> 2) & 0x3u);
+982     const uint16_t minU = static_cast<uint16_t>((clamp >> 4) & 0x3FFu);
+983     const uint16_t maxU = static_cast<uint16_t>((clamp >> 14) & 0x3FFu);
+984     const uint16_t minV = static_cast<uint16_t>((clamp >> 24) & 0x3FFu);
+985     const uint16_t maxV = static_cast<uint16_t>((clamp >> 34) & 0x3FFu);
+986 
+987     float texUf, texVf;
+988     if (state.prim.fst)
+989     {
+990         texUf = static_cast<float>(u) / 16.0f;
+991         texVf = static_cast<float>(v) / 16.0f;
+992     }
+993     else
+994     {
+995         const float invQ = 1.0f / fabsQ(q);
+996         texUf = s * invQ * static_cast<float>(texW);
+997         texVf = t * invQ * static_cast<float>(texH);
+998     }
+999 
+1000     auto samplePoint = [&](int sampleU, int sampleV) -> uint32_t
+1001     {
+1002         sampleU = wrapTextureCoordinate(sampleU, texW, wrapU, minU, maxU);
+1003         sampleV = wrapTextureCoordinate(sampleV, texH, wrapV, minV, maxV);
+1004 
+1005         u32 out = ReadVramUnlocked(tex.psm, tex.tbp0, tex.tbw, sampleU, sampleV);
+1006 
+1007         switch (tex.psm)
+1008         {
+1009         case GS_PSM_CT32:
+1010         case GS_PSM_Z32:
+1011         case GS_PSM_CT24:
+1012         case GS_PSM_Z24:
+1013             return applyTexa(state.texa, tex.psm, out);
+1014         case GS_PSM_CT16:
+1015         case GS_PSM_CT16S:
+1016         case GS_PSM_Z16:
+1017         case GS_PSM_Z16S:
+1018             return applyTexa(state.texa, tex.psm, Rgba5551ToRgba8888(out));
+1019         case GS_PSM_T8:
+1020         case GS_PSM_T8H:
+1021         case GS_PSM_T4:
+1022         case GS_PSM_T4HL:
+1023         case GS_PSM_T4HH:
+1024             return LookupCLUT(state, static_cast<u8>(out), tex.cbp, tex.cpsm, tex.csm, tex.csa, tex.psm);
+1025         }
+1026 
+1027         return 0xFFFF00FFu;
+1028     };
+1029 
+1030     if (!state.linearFilter)
+1031     {
+1032         return samplePoint(static_cast<int>(texUf), static_cast<int>(texVf));
+1033     }
+1034 
+1035     const float sampleU = texUf - 0.5f;
+1036     const float sampleV = texVf - 0.5f;
+1037     const int u0 = static_cast<int>(std::floor(sampleU));
+1038     const int v0 = static_cast<int>(std::floor(sampleV));
+1039     const int u1 = u0 + 1;
+1040     const int v1 = v0 + 1;
+1041     const float fx = sampleU - static_cast<float>(u0);
+1042     const float fy = sampleV - static_cast<float>(v0);
+1043 
+1044     const uint32_t c00 = samplePoint(u0, v0);
+1076 void GSCpuBackend::DrawSprite(const GSPrimitiveBatch &batch)
+1077 {
+1078     const GSDrawState &state = batch.state;
+1079     const GSVertex &v0 = batch.vertices[0];
+1080     const GSVertex &v1 = batch.vertices[1];
+1081     const auto &ctx = state.context;
+1082 
+1083     int ofx = ctx.xyoffset.ofx >> 4;
+1084     int ofy = ctx.xyoffset.ofy >> 4;
+1085 
+1086     int x0 = static_cast<int>(v0.x) - ofx;
+1087     int y0 = static_cast<int>(v0.y) - ofy;
+1088     int x1 = static_cast<int>(v1.x) - ofx;
+1089     int y1 = static_cast<int>(v1.y) - ofy;
+1090     u32 z1 = static_cast<u32>(v1.z);
+1091 
+1092     if (x0 > x1)
+1093         std::swap(x0, x1);
+1094     if (y0 > y1)
+1095         std::swap(y0, y1);
+1096 
+1097     const int unclippedX0 = x0;
+1098     const int unclippedY0 = y0;
+1099     const int spanX = std::max(1, x1 - x0);
+1100     const int spanY = std::max(1, y1 - y0);
+1101     const int unclippedX1 = unclippedX0 + spanX - 1;
+1102     const int unclippedY1 = unclippedY0 + spanY - 1;
+1103 
+1104     // If the sprite rectangle is fully outside scissor, nothing should render.
+1105     if (unclippedX1 < ctx.scissor.x0 || unclippedX0 > ctx.scissor.x1 ||
+1106         unclippedY1 < ctx.scissor.y0 || unclippedY0 > ctx.scissor.y1)
+1107         return;
+1108 
+1109     const int drawX0 = clampInt(unclippedX0, ctx.scissor.x0, ctx.scissor.x1);
+1110     const int drawY0 = clampInt(unclippedY0, ctx.scissor.y0, ctx.scissor.y1);
+1111     const int drawX1 = clampInt(unclippedX1, ctx.scissor.x0, ctx.scissor.x1);
+1112     const int drawY1 = clampInt(unclippedY1, ctx.scissor.y0, ctx.scissor.y1);
+1113 
+1114     const uint64_t alphaReg = ctx.alpha;
+1115     const uint8_t alphaMode = static_cast<uint8_t>(alphaReg & 0xFFu);
+1116     const uint8_t alphaFix = static_cast<uint8_t>((alphaReg >> 32) & 0xFFu);
+1117 
+1118     uint8_t r = v1.r, g = v1.g, b = v1.b, a = v1.a;
+1119 
+1120     if (state.prim.tme)
+1121     {
+1122         const auto &tex = ctx.tex0;
+1123         const int texW = state.textureWidth;
+1124         const int texH = state.textureHeight;
+1125 
+1126         float u0f, v0f, u1f, v1f;
+1127         if (state.prim.fst)
+1128         {
+1129             u0f = static_cast<float>(v0.u >> 4);
+1130             v0f = static_cast<float>(v0.v >> 4);
+1131             u1f = static_cast<float>(v1.u >> 4);
+1132             v1f = static_cast<float>(v1.v >> 4);
+1133         }
+1134         else
+1135         {
+1136             const float q0 = fabsQ(v0.q);
+1137             const float q1 = fabsQ(v1.q);
+1138             u0f = (v0.s / q0) * static_cast<float>(texW);
+1139             v0f = (v0.t / q0) * static_cast<float>(texH);
+1140             u1f = (v1.s / q1) * static_cast<float>(texW);
+1141             v1f = (v1.t / q1) * static_cast<float>(texH);
+1142         }
+1143 
+1144         float spriteW = static_cast<float>(spanX);
+1145         float spriteH = static_cast<float>(spanY);
+1146         if (spriteW < 1.0f)
+1147             spriteW = 1.0f;
+1148         if (spriteH < 1.0f)
+1149             spriteH = 1.0f;
+1150 
+1151         for (int y = drawY0; y <= drawY1; ++y)
+1152         {
+1153             float ty = (static_cast<float>(y - unclippedY0) + 0.5f) / spriteH;
+1154             float texVf = v0f + (v1f - v0f) * ty;
+1155 
+1156             for (int x = drawX0; x <= drawX1; ++x)
+1157             {
+1158                 float tx = (static_cast<float>(x - unclippedX0) + 0.5f) / spriteW;
+1159                 float texUf = u0f + (u1f - u0f) * tx;
+1160                 uint32_t texel = 0xFFFF00FFu;
+1161                 if (state.prim.fst)
+1162                 {
+1163                     const int fixedU = static_cast<int>((texUf * 16.0f) + 0.5f);
+1164                     const int fixedV = static_cast<int>((texVf * 16.0f) + 0.5f);
+1165                     const uint16_t sampleU = static_cast<uint16_t>(clampInt(fixedU, 0, 0xFFFF));
+1166                     const uint16_t sampleV = static_cast<uint16_t>(clampInt(fixedV, 0, 0xFFFF));
+1167                     texel = SampleTexture(state, 0.0f, 0.0f, 1.0f, sampleU, sampleV);
+1168                 }
+1169                 else
+1170                 {
+1171                     texel = SampleTexture(state, texUf / static_cast<float>(texW), texVf / static_cast<float>(texH), 1.0f, 0u, 0u);
+1172                 }
+1173 
+1174                 uint8_t tr = static_cast<uint8_t>(texel & 0xFF);
+1175                 uint8_t tg = static_cast<uint8_t>((texel >> 8) & 0xFF);
+## ps2xRuntime/src/lib/ps2_runtime.cpp SHA256=7153694d63eb2c1890ec5cd86bd1165444a9eadfb262cc11783cc1a0083aa5b2
+2030                                      const char *debugName)
+2031 {
+2032     ctx->pc = targetPc;
+2033     const bool isCall = (kind == GuestBranchKind::DirectCall || kind == GuestBranchKind::IndirectCall);
+2034 
+2035     // Every inter-function transfer is also a deterministic EE safe point.
+2036     // Backward edges inside generated functions use eeCheckpointDue(), while
+2037     // this charge bounds straight-line call chains that have no local loop.
+2038     if (m_eeScheduler && m_eeScheduler->checkpointDue(EeScheduler::kGuestDispatchCycles))
+2039     {
+2040         // P1n driver-entry probe (P14-1d): checkpoint path.
+2041         if (targetPc == 0x3DD1D8u && diagDriverProbeEnabled())
+2042         {
+2043             const uint32_t sp = (ctx != nullptr) ? getRegU32(ctx, 29) : 0u;
+2044             const uint32_t ra = (ctx != nullptr) ? getRegU32(ctx, 31) : 0u;
+2045             diagDriverEntryEmit(sp, ra, sourcePc, true);
+2046         }
+2047         return false;
+2048     }
+2049 
+2050     if (!isCall)
+2051     {
+2052         if (!hasFunction(targetPc))
+2053         {
+2054             reportMissingFunction(rdram, ctx, targetPc, sourcePc, kind, debugName);
+2055         }
+2056 
+2057         ctx->pc = targetPc;
+2058         return false;
+2059     }
+2060 
+2061     if (!hasFunction(targetPc))
+2062     {
+2063         reportMissingFunction(rdram, ctx, targetPc, sourcePc, kind, debugName);
+2064 
+2065         const MissingFunctionPolicy policy = missingFunctionPolicy();
+2066 
+2067         if (policy == MissingFunctionPolicy::SkipCallDebug && isCall)
+2068         {
+2069             ctx->pc = fallthroughPc;
+2070             return true;
+2071         }
+2072 
+2073         if (policy == MissingFunctionPolicy::ContinueToTarget)
+2074         {
+2075             ctx->pc = targetPc;
+2076             return true;
+2077         }
+2078 
+2079         return false;
+2080     }
+2081 
+2082     // P1c HLE stub/call histogram at the register_functions.cpp binding
+2083     // lookup (lookupFunction below resolves the guest call target to the
+2084     // registered host function). Counts per call target with first/last $ra.
+2085     static uint64_t s_diagCallTick = 0;
+## ps2xRuntime/include/ps2_runtime.h SHA256=d9a6f2264265d02ff1319ef796f024a7a607c76e4486fac31844ad640a05f0d5
+334     {
+335         // Strict mode for tests/CI: log the bad target and request the runtime to stop.
+336         Stop = 0,
+337 
+338         // Debug mode: log once, leave ctx->pc on the bad target, and let the caller unwind.
+339         ContinueToTarget = 1,
+340 
+341         // Debug mode: same as ContinueToTarget, but triggers a debugger break once on MSVC.
+342         BreakOnce = 2,
+343 
+344         // Escape hatch only: skip missing calls by returning to fallthrough (it can hide guest bugs)
+345         SkipCallDebug = 3,
+346     };
+## ps2xRuntime/src/lib/Kernel/Stubs/MemoryCard.cpp SHA256=eea4c547bdb54b23d12bdea538005e4e20d804a90df03e962b39b0aaefb8faa9
+865     void sceMcGetInfo(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+866     {
+867         const int32_t port = static_cast<int32_t>(getRegU32(ctx, 4));
+868         const int32_t slot = static_cast<int32_t>(getRegU32(ctx, 5));
+869         const uint32_t typePtr = getRegU32(ctx, 6);
+870         const uint32_t freePtr = getRegU32(ctx, 7);
+871         const uint32_t formatPtr = getRegU32(ctx, 8);
+872 
+873         int32_t cardType = 0;
+874         int32_t freeBlocks = 0;
+875         int32_t format = kMcUnformatted;
+876         int32_t result = kMcResultNoEntry;
+877 
+878         {
+879             std::lock_guard<std::mutex> lock(g_mcStateMutex);
+880             if (isValidMcPortSlot(port, slot))
+881             {
+882                 McPortState &state = g_mcPorts[static_cast<size_t>(port)];
+883                 cardType = kMcTypePs2;
+884                 freeBlocks = state.formatted ? kMcFreeClusters : 0;
+885                 format = state.formatted ? kMcFormatted : kMcUnformatted;
+886                 result = state.formatted ? kMcResultSucceed : kMcResultNoFormat;
+887             }
+888 
+889             setMcCommandResultLocked(kMcCmdGetInfo, result);
+890         }
+891 
+892         if (typePtr != 0u)
+893         {
+894             if (uint8_t *out = getMemPtr(rdram, typePtr))
+895             {
+896                 ps2_e3::Tap e3t = ps2_e3::tapBegin(rdram, typePtr, sizeof(cardType)); // E3b R3c
+897                 std::memcpy(out, &cardType, sizeof(cardType));
+898                 ps2_e3::tapEnd(std::move(e3t), "mc-getinfo", rdram, "f=type");
+899             }
+900         }
+901         if (freePtr != 0u)
+902         {
+903             if (uint8_t *out = getMemPtr(rdram, freePtr))
+904             {
+905                 ps2_e3::Tap e3t = ps2_e3::tapBegin(rdram, freePtr, sizeof(freeBlocks)); // E3b R3c
+906                 std::memcpy(out, &freeBlocks, sizeof(freeBlocks));
+907                 ps2_e3::tapEnd(std::move(e3t), "mc-getinfo", rdram, "f=free");
+908             }
+909         }
+910         if (formatPtr != 0u)
+911         {
+912             if (uint8_t *out = getMemPtr(rdram, formatPtr))
+913             {
+914                 ps2_e3::Tap e3t = ps2_e3::tapBegin(rdram, formatPtr, sizeof(format)); // E3b R3c
+915                 std::memcpy(out, &format, sizeof(format));
+916                 ps2_e3::tapEnd(std::move(e3t), "mc-getinfo", rdram, "f=format");
+917             }
+918         }
+919 
+920         RUNTIME_LOG("[MC] GetInfo port=" << port << " type=" << cardType
+921                                          << " free=" << freeBlocks << " format=" << format
+922                                          << " result=" << result);
+923         setReturnS32(ctx, 0);
+924     }
+925 
+1211     void sceMcSync(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+1212     {
+1213         const uint32_t cmdPtr = getRegU32(ctx, 5);
+1214         const uint32_t resultPtr = getRegU32(ctx, 6);
+1215         int32_t cmd = 0;
+1216         int32_t result = 0;
+1217         bool hadPending = false;
+1218         {
+1219             std::lock_guard<std::mutex> lock(g_mcStateMutex);
+1220             hadPending = g_mcCommandPending;
+1221             g_mcCommandPending = false;
+1222             cmd = g_mcLastCmd;
+1223             result = g_mcLastResult;
+1224         }
+1225 
+1226         // libmc semantics: -1 means no async operation was executing; games rely
+1227         // on it to tell idle polling apart from command completion.
+1228         if (!hadPending)
+1229         {
+1230             ps2_log::emitDrop("stub/sceMcSync", "error");
+1231             setReturnS32(ctx, -1);
+1232             return;
+1233         }
+1234 
+1235         RUNTIME_LOG("[MC] Sync cmd=" << cmd << " result=" << result);
+1236 
+1237         if (cmdPtr != 0u)
+1238         {
+1239             if (uint8_t *out = getMemPtr(rdram, cmdPtr))
+1240             {
+1241                 ps2_e3::Tap e3t = ps2_e3::tapBegin(rdram, cmdPtr, sizeof(cmd)); // E3b R3c
+1242                 std::memcpy(out, &cmd, sizeof(cmd));
+1243                 ps2_e3::tapEnd(std::move(e3t), "mc-sync", rdram, "f=cmd");
+1244             }
+1245         }
+1246         if (resultPtr != 0u)
+1247         {
+1248             if (uint8_t *out = getMemPtr(rdram, resultPtr))
+1249             {
+1250                 ps2_e3::Tap e3t = ps2_e3::tapBegin(rdram, resultPtr, sizeof(result)); // E3b R3c
+1251                 std::memcpy(out, &result, sizeof(result));
+1252                 ps2_e3::tapEnd(std::move(e3t), "mc-sync", rdram, "f=result");
+1253             }
+1254         }
+1255 
+1256         // 1 = command finished in this runtime's immediate model.
+1257         setReturnS32(ctx, 1);
+1258     }
+1259 
+1260     void sceMcUnformat(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+# E11 RUNTIME SOURCE TAIL COMPLETE
+## ps2xRuntime/src/lib/ps2_runtime.cpp SHA256=7153694d63eb2c1890ec5cd86bd1165444a9eadfb262cc11783cc1a0083aa5b2
+3256         m_debugUiShutdownCallback(*this, m_debugUiUserData);
+3257         m_debugUiInitialized = false;
+3258     }
+3259     UnloadTexture(frameTex);
+3260     CloseWindow();
+3261 
+3262     RUNTIME_LOG("[run] exiting loop");
+3263 }
+## ps2xRuntime/include/ps2_log.h SHA256=566c30a656697f69d1c89e9293d541f3689bf9bdf914c9195468a49575ebc1e0
+190 
+191 inline void emitDrop(const std::string &site, const std::string &reason, const std::string &args = "")
+192 {
+193     emitDropTo(std::cerr, site, reason, args);
+194 }
+195 }
+196 
+197 #if PS2_RUNTIME_LOGS || AGRESSIVE_LOGS
+198 #define RUNTIME_LOG(x)                                                                                                  \
+199     do                                                                                                                  \
+200     {                                                                                                                   \
+201         std::ostringstream _ps2_runtime_log_stream;                                                                     \
+202         _ps2_runtime_log_stream << x;                                                                                   \
+203         const std::string _ps2_runtime_log_text = _ps2_runtime_log_stream.str();                                        \
+204         if (_ps2_runtime_log_text.empty())                                                                            \
+205         {                                                                                                               \
+206             std::cout.flush();                                                                                          \
+207         }                                                                                                               \
+208         else                                                                                                            \
+209         {                                                                                                               \
+210             std::cout << _ps2_runtime_log_text;                                                                         \
+211             ps2_log::append_runtime_log_text(_ps2_runtime_log_text);                                                    \
+212         }                                                                                                               \
+213     } while (0)
+214 #else
+# E11 RUNTIME SHUTDOWN TAIL COMPLETE

@@ -1,0 +1,84 @@
+{
+  "utc": "2026-09-21T08:43:13.726153+00:00",
+  "lease_absent": true,
+  "scratch_absent": true,
+  "active_checkpoint_exists": true,
+  "runner": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "fork_head": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "ffdf58c4ee3b95bc6dd8779a0baeed0b23afe19b\n",
+    "stderr": ""
+  },
+  "fork_remote_ref": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "refs/remotes/fork/ssx3"
+    ],
+    "rc": 0,
+    "stdout": "ffdf58c4ee3b95bc6dd8779a0baeed0b23afe19b\n",
+    "stderr": ""
+  },
+  "fork_status": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": " M ps2xRuntime/src/runner/register_functions.cpp\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "fork_named_files": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "diff-tree",
+      "--no-commit-id",
+      "--name-only",
+      "-r",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "games/ssx3/ssx3-functions.sweep.csv\nps2xRuntime/include/ps2_e7.h\nps2xRuntime/src/lib/ps2_runtime.cpp\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "df": {
+    "argv": [
+      "df",
+      "-k",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem   1024-blocks       Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk4s1  1953471488 1624131584 329339904    84%       1        0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   239362496  206917596   4604848    98% 1901233 46048480    4%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "internal_free": 4715364352,
+  "wait_log": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e11-waits.log",
+    "sha256": "b559e11165a540e8b766ba55a8d2fc0a309c3277909467e54d66187b07af0c05",
+    "text": "E11A CLAIM 2026-09-21T08:16:34.181304+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}\nE11A RELEASE 2026-09-21T08:17:49.764954+00:00 bound=wall rc=0\n"
+  }
+}

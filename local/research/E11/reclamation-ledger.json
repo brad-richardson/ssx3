@@ -1,0 +1,45 @@
+{
+  "trees": [
+    {
+      "path": "/private/tmp/p10-link",
+      "ownership_proved": true,
+      "lsof_before_rc": 1,
+      "lsof_recheck_rc": 1,
+      "allocated_files_removed": 1500246016,
+      "files_removed": 8832,
+      "free_before": 3132948480,
+      "free_after": 4636819456,
+      "timestamp": "2026-09-21T07:50:17.291793+00:00",
+      "end": "2026-09-21T07:50:18.203559+00:00"
+    },
+    {
+      "path": "/private/tmp/p11-link",
+      "ownership_proved": true,
+      "lsof_before_rc": 1,
+      "lsof_recheck_rc": 1,
+      "allocated_files_removed": 1761443840,
+      "files_removed": 7328,
+      "free_before": 1453240320,
+      "free_after": 3217694720,
+      "timestamp": "2026-09-21T08:02:13.199132+00:00",
+      "end": "2026-09-21T08:02:15.167985+00:00"
+    },
+    {
+      "path": "/private/tmp/p12-link",
+      "ownership_proved": true,
+      "lsof_before_rc": 1,
+      "lsof_recheck_rc": 1,
+      "allocated_files_removed": 1309143040,
+      "files_removed": 6739,
+      "free_before": 3211194368,
+      "free_after": 4523212800,
+      "timestamp": "2026-09-21T08:03:16.920719+00:00",
+      "end": "2026-09-21T08:03:18.984779+00:00"
+    }
+  ],
+  "allocated_files_removed": 4570832896,
+  "protected_p1_exists": true,
+  "scratch_absent": true,
+  "fresh_free": 4505600000,
+  "scope_note": "p10 removed before query admission. Build-time free-space regression required continuing with p11 then p12 under the same ownership/oldest-first guards; each target crossing stopped removal."
+}

@@ -1,0 +1,301 @@
+muse --yolo
+
+ps2xGS on  main via △ v4.4.3
+❯ muse --yolo
+
+  Muse Code 1.3.0
+
+  Model set to muse-spark-1.3-contributor
+  ⎿  Your content, including inter-session messages, may be
+     used for product improvement.
+
+❯ # G15 — Catch O1's null-write live: instrumented
+  on-device run + minimal fix + clean re-run
+
+  You are muse in a herdr panel whose working directory is
+  `/Users/bradrichardson/dev/ps2xGS`. Runbook: follow the
+  steps, produce
+  the receipts, **hand back tables + hypothesis +
+  next-action recommendation,
+  no verdicts.** Read first: `docs/reports/G14.md` (all —
+  O1: Granite
+  `CommandPool::trim()` null-`table` SIGSEGV at
+  `command_pool.cpp:171`
+  (`ldr x9,[x9,#0x380]`, fault addr 0x380, pool live),
+  reached via
+  `GSInterface::init → set_super_sampling_rate →
+  invalidate_super_sampling_state → wait_idle →
+  trim_command_pools` BEFORE
+  dump open; static audit says live-pool + null-table is
+  unconstructionable
+  in-tree; §3 ONE next action = this brief) + G13 §3c
+  (oracle table) as
+  needed. This brief executes G14's §3. Init is PROVEN — do
+  not re-litigate
+  it; the only unknown is the null-write site.
+
+  ## Facts you start from
+
+  - The task: catch the null-write live with ONE
+  instrumented bounded
+  on-device run — lldb watchpoint on the faulting pool's
+  `table` slot
+  (preferred: names the write-site directly) or an HWASan
+  build (fallback
+  if the lldb path is blocked — table the choice with the
+  forcing
+  receipt) — then apply the MINIMAL fix the watchpoint
+  names + ONE clean
+  re-run scored by `g14-diff.py` against the G13 oracles.
+  Odin: device
+  `622c49b1` (re-confirm via `adb devices`).
+  - Experiment contract (required): hypothesis = the
+  instrumented run names
+  the exact write-site of the null `table` slot; observable
+  = watchpoint
+  / sanitizer backtrace + fixed-run exit + pulled scanouts
+  + per-pair diff
+  table vs G13 oracles; alternatives = (a) write-site named
+  + minimal fix
+  + clean re-run scored → table + ONE next action (adoption
+  input);
+  (b) write-site named but fix is NOT minimal (framework
+  corruption,
+  driver bug) → table + recipe, stop (no renderer changes,
+  no heroics);
+  (c) instrumentation blocked → table the exact obstacle +
+  recipe, stop.
+  Stop: TWO bounded device runs max (instrumented +
+  verification) — no
+  tuning loop, no renderer changes, no new dumps.
+  - The leading fix candidate (UNTESTED, G14's — not a
+  verdict): a
+  `table == nullptr` guard in `trim()`/`begin()`/dtor
+  mirroring the
+  existing pool guard, ONLY if the write-site proves an
+  init-order edge
+  rather than corruption. If corruption: stop at (b) with
+  the evidence.
+  - No P-lane contention: no recomp boots/builds, no P-lane
+  lease, no fork
+  writes. `adb` in `/data/local/tmp/g15/` ONLY (never
+  `mg/`); remove bulky
+  device-side artifacts after retrieval. Reuse the G14
+  Android build dir +
+  binary if it still verifies (sha `c4cd63b4…`); HWASan
+  rebuild (if chosen)
+  is a second build dir or a tabled rebuild — never clobber
+  the G14 binary
+  before the choice receipt exists. Byte caps declared up
+  front, SSD reuse,
+  nothing new on `/`.
+… output capped
+
+  Read docs/reports/G14.md
+
+◆ Ran 3 commands · Check SSD dirs a… · +2 ✓ · 0.8s · ctrl+o
+
+◆ Backgrounded · Verify G14 binary and clon… · 10s · ctrl+o
+
+◆ Ran command · Check lldb-server prese… · ✓ · 10s · ctrl+o
+
+  (↓ to view terminals)
+
+◆ Finished · Verify G14 binary and clone state · ✓ · ctrl+o
+
+◆ Ran 30 commands · ✗ 2 failed · +28 ✓ · 29s · ctrl+o
+
+◆ Wrote /tmp/g15walk.py (+131) · ctrl+o
+   1 +"""G15 lldb helpers: pool census + watchpoint plant.
+      No expr compilation (DWARF-only)."""
+   2 +import lldb
+   3 +
+   4 +
+   5 +def _types(target, name):
+   6 +    lst = target.FindTypes(name)
+   7 +    if lst.GetSize() == 0:
+   8 +        return None
+   9 +    return lst.GetTypeAtIndex(0)
+  10 +
+  11 +
+  12 +def _field_offset(typ, name):
+  13 +    for i in range(typ.GetNumberOfFields()):
+  14 +        f = typ.GetFieldAtIndex(i)
+  15 +        if f.GetName() == name:
+  16 +            return f.GetOffsetInBytes()
+  17 +    return None
+  18 +
+  19 +
+  20 +def _read_ptr(process, addr):
+  … 111 more lines
+
+◆ Wrote /tmp/g15-a.lldb (+10)
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g15walk.py
+   3 +target create --remote-file /data/local/tmp/g15/paral
+      lel-gs-replayer "/Volumes/Extreme SSD/parallel-gs-g14
+      -android-build/tools/parallel-gs-replayer"
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --name Vulkan::CommandPool::trim
+   6 +breakpoint modify --condition this->table == 0 1
+   7 +process launch -- /data/local/tmp/g15/g13-dump.gs --i
+      terations 2
+   8 +bt 12
+   9 +g15_find_pool
+  10 +quit
+
+◆ Backgrounded · Start lldb-server gdbserve… · 20s · ctrl+o
+
+◆ Ran 9 commands · Check what the c… · +8 ✓ · 9.1s · ctrl+o
+
+◆ Wrote /tmp/g15-a.lldb (+10)
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g15walk.py
+   3 +target create --remote-file /data/local/tmp/g15/paral
+      lel-gs-replayer /tmp/g15-symbols
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --name Vulkan::CommandPool::trim
+   6 +breakpoint modify --condition this->table == 0 1
+   7 +process launch -- /data/local/tmp/g15/g13-dump.gs --i
+      terations 2
+   8 +bt 12
+   9 +g15_find_pool
+  10 +quit
+
+◆ Ran command · Run lldb batch A censu… · ✓ · 0.7s · ctrl+o
+
+◆ Finished · Start lldb-server gd… · ⊘ · cancelled · ctrl+o
+
+◆ Ran 5 commands · ✗ 1 failed · +4 ✓ · 1.4s · ctrl+o
+
+◆ Worked for 15m 49s · 2:04 AM
+
+❯ Orchestrator nudge: your pane has been idle at the prompt
+  since ~02:04 with no committed G15 evidence (no
+  local/research/G15/ in ssx3, no G15 commit in ps2xGS).
+  Continue the G15 brief now: finish the lldb batch A
+  census (write-site of the table-nulling CommandPool), run
+  the HWASan batch if needed, land the minimal fix + Odin
+  replay proof, write the REPORT, and commit evidence. If
+  you are truly blocked (Odin/device access, lldb-server,
+  symbols), table the blocker and STOP with a recipe — do
+  not sit idle. Report back what you did.
+
+◆ Ran 3 commands · Read O2 crash ca… · +2 ✓ · 1.8s · ctrl+o
+
+◆ Wrote /tmp/g15-a.lldb (+10)
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g15walk.py
+   3 +target create /tmp/g15-symbols
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --name Vulkan::CommandPool::trim
+   6 +breakpoint modify --condition this->table == 0 1
+   7 +continue
+   8 +bt 12
+   9 +g15_find_pool
+  10 +quit
+
+◆ Backgrounded · Start stub with program pr… · 25s · ctrl+o
+
+◆ Ran command · Verify forward and ent… · ✗ · 3.4s · ctrl+o
+
+◆ Finished · Start stub with program pre-laun… · ✓ · ctrl+o
+
+◆ Ran 2 commands · Verify no stray … · +1 ✓ · 1.6s · ctrl+o
+
+◆ Wrote /tmp/g15-a.lldb (+10)
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g15walk.py
+   3 +target create /tmp/g15-symbols
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --name Vulkan::CommandPool::trim
+   6 +breakpoint modify --condition 'this->table == 0' 1
+   7 +continue
+   8 +bt 12
+   9 +g15_find_pool
+  10 +quit
+
+◆ Backgrounded · Restart stub with program … · 25s · ctrl+o
+
+◆ Finished · Restart stub with program pre-la… · ✓ · ctrl+o
+
+◆ Ran 2 commands · Confirm renderdo… · +1 ✓ · 9.2s · ctrl+o
+
+◆ Wrote /tmp/g15-a.lldb (+13)
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g15walk.py
+   3 +target create /tmp/g15-symbols
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --name Vulkan::CommandPool::trim
+   6 +breakpoint modify --condition 'this->table == 0' 1
+   7 +continue
+   8 +bt 12
+   9 +g15_find_pool
+  10 +continue
+  11 +bt 12
+  12 +register read
+  13 +quit
+
+◆ Backgrounded · Restart stub with program … · 25s · ctrl+o
+
+◆ Finished · Restart stub with program pre-la… · ✓ · ctrl+o
+
+◆ Ran command · Run lldb batch A to cr… · ✓ · 7.6s · ctrl+o
+
+◆ Wrote /tmp/g15walk.py (+180) · ctrl+o
+   1 +"""G15 lldb helpers: stop triage (LOGE-trap skip, tri
+      m census, crash capture)
+   2 ++ watchpoint plant. DWARF-only, no expr compilation."
+      ""
+   3 +import lldb
+   4 +
+   5 +
+   6 +def _types(target, name):
+   7 +    lst = target.FindTypes(name)
+   8 +    if lst.GetSize() == 0:
+   9 +        return None
+  10 +    return lst.GetTypeAtIndex(0)
+  11 +
+  12 +
+  13 +def _field_offset(typ, name):
+  14 +    for i in range(typ.GetNumberOfFields()):
+  15 +        f = typ.GetFieldAtIndex(i)
+  16 +        if f.GetName() == name:
+  17 +            return f.GetOffsetInBytes()
+  18 +    return None
+  19 +
+  20 +
+  … 160 more lines
+
+◆ Wrote /tmp/g15-a.lldb (+17)
+   1 +settings set auto-confirm true
+   2 +command script import /tmp/g15walk.py
+   3 +target create /tmp/g15-symbols
+   4 +gdb-remote localhost:5041
+   5 +breakpoint set --name Vulkan::CommandPool::trim
+   6 +breakpoint modify --condition 'this->table == 0' 1
+   7 +continue
+   8 +g15_triage
+   9 +continue
+  10 +g15_triage
+  11 +continue
+  12 +g15_triage
+  13 +continue
+  14 +g15_triage
+  15 +continue
+  16 +g15_triage
+  17 +quit
+
+◆ Backgrounded · Restart stub with program … · 25s · ctrl+o
+
+◆ Finished · Restart stub with program pre-la… · ✓ · ctrl+o
+
+◆ Ran command · Run lldb batch A with … · ✓ · 7.7s · ctrl+o
+
+◇ Thinking (7m 39s · esc to interrupt)
+  Connecting the crash to a driver abort during trim called
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ps2xGS · YOLO

@@ -1,0 +1,28 @@
+## boot_log; complete newline=False
+[frame:dump] seq=993 tick=1875 size=512x448 fbp=112/112 fallback=0 fnv1a=96a6875d
+INFO: TEXTURE: [ID 4] Unloaded texture data from VRAM (GPU)
+INFO: TEXTURE: [ID 3] Unloaded texture data from VRAM (GPU)
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+INFO: SHADER: [ID 3] Default shader unloaded successfully
+INFO: TEXTURE: [ID 1] Default texture unloaded successfully
+INFO: Window closed successfully
+[run] exiting loop
+## trace; complete newline=True
+[ 73.5972] Bios    : Bios call: SignalSema (42) pc=0x423dc8
+[ 73.5972] Bios    : Bios call: SignalSema (42) pc=0x423dc8
+[ 73.5973] Bios    : Bios call: WaitSema (44) pc=0x423de8
+[ 73.5974] Bios    : Bios call: FlushCache (64) pc=0x424028
+[ 73.6023] Bios    : Bios call: iSignalSema (43) pc=0x423dd8
+[ 73.6023] Bios    : Bios call: SignalSema (42) pc=0x423dc8
+[ 73.6023] Bios    : Bios call: WaitSema (44) pc=0x423de8
+[ 73.6023] Bios    : Bios call: WaitSema (44) pc=0x423de8
+## function_log; complete newline=True
+>> sub_00423DC0_0x423dc0 enter
+<< sub_00423DC0_0x423dc0 exit
+>> sub_00382760_0x382760 enter
+	>> sub_00423DE0_0x423de0 enter
+	<< sub_00423DE0_0x423de0 exit
+	>> sub_00423DE0_0x423de0 enter
+	<< sub_00423DE0_0x423de0 exit
+<< sub_00382760_0x382760 exit
+# E11 RAW TAILS COMPLETE

@@ -1,0 +1,50 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+002d37d0 03e00008 jr          $ra
+002d37d4 0000102d daddu       $v0, $zero, $zero
+002d37d8 03e00008 jr          $ra
+002d37dc 8c82000c lw          $v0, 0xC($a0)
+002d37e0 27bdfff0 addiu       $sp, $sp, -0x10
+002d37e4 ffbf0000 sd          $ra, 0x0($sp)
+002d37e8 8c830000 lw          $v1, 0x0($a0)
+002d37ec 8c85000c lw          $a1, 0xC($a0)
+002d37f0 84660180 lh          $a2, 0x180($v1)
+002d37f4 8c620184 lw          $v0, 0x184($v1)
+002d37f8 0040f809 jalr        $v0
+002d37fc 00862021 addu        $a0, $a0, $a2
+002d3800 dfbf0000 ld          $ra, 0x0($sp)
+002d3804 03e00008 jr          $ra
+002d3808 27bd0010 addiu       $sp, $sp, 0x10
+002d380c 00000000 nop
+002d3810 27bdfff0 addiu       $sp, $sp, -0x10
+002d3814 ffbf0000 sd          $ra, 0x0($sp)
+002d3818 8c830000 lw          $v1, 0x0($a0)
+002d381c 8c85000c lw          $a1, 0xC($a0)
+002d3820 846601a0 lh          $a2, 0x1A0($v1)
+002d3824 8c6201a4 lw          $v0, 0x1A4($v1)
+002d3828 0040f809 jalr        $v0
+002d382c 00862021 addu        $a0, $a0, $a2
+002d3830 dfbf0000 ld          $ra, 0x0($sp)
+002d3834 03e00008 jr          $ra
+002d3838 27bd0010 addiu       $sp, $sp, 0x10
+002d383c 00000000 nop
+002d3840 27bdffc0 addiu       $sp, $sp, -0x40
+002d3844 7fb00030 sq          $s0, 0x30($sp)
+002d3848 7fb10020 sq          $s1, 0x20($sp)
+002d384c 0080802d daddu       $s0, $a0, $zero
+002d3850 7fb20010 sq          $s2, 0x10($sp)
+002d3854 00a0882d daddu       $s1, $a1, $zero
+002d3858 ffbf0000 sd          $ra, 0x0($sp)
+002d385c 0000902d daddu       $s2, $zero, $zero
+002d3860 8e030000 lw          $v1, 0x0($s0)
+002d3864 84640180 lh          $a0, 0x180($v1)
+002d3868 8c620184 lw          $v0, 0x184($v1)
+002d386c 0040f809 jalr        $v0
+002d3870 02042021 addu        $a0, $s0, $a0
+002d3874 14400018 bnez        $v0, . + 4 + (0x18 << 2) ; target=0x2d38d8
+002d3878 0240102d daddu       $v0, $s2, $zero
+002d387c 8e030000 lw          $v1, 0x0($s0)
+002d3880 0220282d daddu       $a1, $s1, $zero
+002d3884 84640190 lh          $a0, 0x190($v1)
+002d3888 8c620194 lw          $v0, 0x194($v1)
+002d388c 0040f809 jalr        $v0
+# E11 STATIC TAIL COMPLETE
