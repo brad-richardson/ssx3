@@ -1,0 +1,97 @@
+{
+  "tree": "/private/tmp/t12-dev-link",
+  "utc": "2026-09-21T12:03:37.732623+00:00",
+  "before_free": 1562484736,
+  "df_before": {
+    "argv": [
+      "df",
+      "-k",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem   1024-blocks       Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk4s1  1953471488 1699701760 253769728    88%       1        0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   239362496  209996580   1525864   100% 1856909 15258640   11%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "target": 4026531840,
+  "admission": 3489660928,
+  "live_agents": [
+    {
+      "pane_id": "wE:p2",
+      "name": null,
+      "agent_status": "done",
+      "cwd": "/Users/bradrichardson/dev/zone2",
+      "foreground_cwd": "/Users/bradrichardson/dev/zone2"
+    },
+    {
+      "pane_id": "wN:p1B",
+      "name": null,
+      "agent_status": "idle",
+      "cwd": "/Users/bradrichardson/dev/ssx3",
+      "foreground_cwd": "/Users/bradrichardson/dev/ssx3"
+    },
+    {
+      "pane_id": "wN:p3",
+      "name": null,
+      "agent_status": "idle",
+      "cwd": "/Users/bradrichardson/dev/ssx3",
+      "foreground_cwd": "/Users/bradrichardson/dev/ssx3"
+    },
+    {
+      "pane_id": "wY:p1",
+      "name": "e14",
+      "agent_status": "working",
+      "cwd": "/Users/bradrichardson/dev/ssx3",
+      "foreground_cwd": "/Users/bradrichardson/dev/ssx3"
+    },
+    {
+      "pane_id": "w1Q:p1",
+      "name": "t40",
+      "agent_status": "working",
+      "cwd": "/Users/bradrichardson/dev/ssx3",
+      "foreground_cwd": "/Users/bradrichardson/dev/ssx3"
+    },
+    {
+      "pane_id": "w1R:p1",
+      "name": "i18",
+      "agent_status": "working",
+      "cwd": "/Users/bradrichardson/dev/ssx3",
+      "foreground_cwd": "/Users/bradrichardson/dev/ssx3"
+    },
+    {
+      "pane_id": "w1T:p1",
+      "name": "g20",
+      "agent_status": "working",
+      "cwd": "/Users/bradrichardson/dev/ssx3",
+      "foreground_cwd": "/Users/bradrichardson/dev/ssx3"
+    }
+  ],
+  "board_claims": [],
+  "peer_claim_files": {},
+  "retired_lane_receipt": "docs/todo.md:3202\n- [x] **T12 read (09-20) \u2014 PASS, dev config proven behavior-clean:**\n      fork `7eed783` (+10/-0, pushed 0/0): `PS2X_DEV_NO_THINLTO`\n      default-OFF, runner chain only; Release link line\n      byte-identical 20,294 B + cache +1 OFF line + Release\n      binary BIT-identical to T6's (full sha match); full\n      rel 710 s / dev 559 s (link 390.6\u21920.5 s); dev cell\n      (a) 5.9 s (vs 315 s), (c) 7.2 s; suite 439/439/0\n      BOTH (faces identical); D exit 0 (1059/245/0/0, no\n      divergence rows); T13 cross-SIGTERM handled by the\n      book (sample discarded, clean rebuild). Verified:\n      stat/push, linklines, cache diff, binary shas, suite\n      reruns both, D rerun identical, log sizes, park\n      lines, drops identical, hot-pc from snapshots,\n      cell-a log, lease absent. Next: T14 (dev cell-b)\n      launched in freed pane. Ledger row added.\n- [x] **M36 read (09-20) \u2014 PASS after tail restore (marker at\n      line 671, restored in `e2c4a96`):** 2/3/700 k 6/7/8\n      exact, FULL TSV byte-identical; 24 extras 14 near /\n\n| Build dirs | `/tmp/t12-link/runtime` (Release), `/tmp/t12-dev-link/runtime` (dev), `/tmp/t12-nocommit` (configure-only base @HEAD \u2014 no T12 change), `/tmp/t12-base` (detached worktree @`935a4eb` + rsynced `runner/`, T1 precedent) |\n| Dev cache line | `PS2X_DEV_NO_THINLTO:BOOL=ON` in `/tmp/t12-dev-link/` only |\n| `/tmp/t12-dev-link/runtime` (dev, attempt 1 \u2014 discarded, \u00a7T12-7) | 75.2 s | 0 |\n| `/tmp/t12-dev-link/runtime` (dev, clean reconfigure after wipe) | 76.6 s | 0 |\ncmake -S $R -B /tmp/t12-dev-link/runtime -G Ninja <T1 flags> -DPS2X_DEV_NO_THINLTO=ON  # 75.2 s\ncmake --build /tmp/t12-dev-link/runtime --target ps2x_tests ps2EntryRunner -j4    # SIGTERM'd@317 by T13 pkill; wiped; reconfigured 76.6 s; rebuilt 558.6 s, exit 0\ncd $R && /tmp/t12-dev-link/runtime/ps2xTest/ps2x_tests                    # 439/439/0 rc=0\ntouch $R/ps2xRuntime/src/lib/ps2_runtime.cpp; cmake --build /tmp/t12-dev-link/... # (a) 5.9 s\ntouch $R/ps2xTest/src/ps2_memory_tests.cpp; cmake --build /tmp/t12-dev-link/...   # (c) 7.2 s\n`/tmp/t12-link/`, `/tmp/t12-dev-link/`, `/tmp/t12-nocommit/`,\n",
+  "cache_identity": [
+    "CMAKE_PROJECT_NAME:STATIC=PS2RetroX",
+    "CMAKE_CACHEFILE_DIR:INTERNAL=/tmp/t12-dev-link/runtime",
+    "CMAKE_HOME_DIRECTORY:INTERNAL=/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp"
+  ],
+  "tree_size": {
+    "files": 7328,
+    "logical": 1637050728,
+    "allocated": 1656139776,
+    "file_symlinks": 0
+  },
+  "lsof": {
+    "argv": [
+      "/usr/sbin/lsof",
+      "-nP",
+      "+D",
+      "/private/tmp/t12-dev-link"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "ownership_proved": true,
+  "probe_complete_utc": "2026-09-21T12:03:38.166566+00:00"
+}
+# E14 RECLAMATION TAIL COMPLETE probe t12-dev-link

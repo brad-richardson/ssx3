@@ -1,0 +1,30 @@
+docs/todo.md:3202
+- [x] **T12 read (09-20) — PASS, dev config proven behavior-clean:**
+      fork `7eed783` (+10/-0, pushed 0/0): `PS2X_DEV_NO_THINLTO`
+      default-OFF, runner chain only; Release link line
+      byte-identical 20,294 B + cache +1 OFF line + Release
+      binary BIT-identical to T6's (full sha match); full
+      rel 710 s / dev 559 s (link 390.6→0.5 s); dev cell
+      (a) 5.9 s (vs 315 s), (c) 7.2 s; suite 439/439/0
+      BOTH (faces identical); D exit 0 (1059/245/0/0, no
+      divergence rows); T13 cross-SIGTERM handled by the
+      book (sample discarded, clean rebuild). Verified:
+      stat/push, linklines, cache diff, binary shas, suite
+      reruns both, D rerun identical, log sizes, park
+      lines, drops identical, hot-pc from snapshots,
+      cell-a log, lease absent. Next: T14 (dev cell-b)
+      launched in freed pane. Ledger row added.
+- [x] **M36 read (09-20) — PASS after tail restore (marker at
+      line 671, restored in `e2c4a96`):** 2/3/700 k 6/7/8
+      exact, FULL TSV byte-identical; 24 extras 14 near /
+
+| Build dirs | `/tmp/t12-link/runtime` (Release), `/tmp/t12-dev-link/runtime` (dev), `/tmp/t12-nocommit` (configure-only base @HEAD — no T12 change), `/tmp/t12-base` (detached worktree @`935a4eb` + rsynced `runner/`, T1 precedent) |
+| Dev cache line | `PS2X_DEV_NO_THINLTO:BOOL=ON` in `/tmp/t12-dev-link/` only |
+| `/tmp/t12-dev-link/runtime` (dev, attempt 1 — discarded, §T12-7) | 75.2 s | 0 |
+| `/tmp/t12-dev-link/runtime` (dev, clean reconfigure after wipe) | 76.6 s | 0 |
+cmake -S $R -B /tmp/t12-dev-link/runtime -G Ninja <T1 flags> -DPS2X_DEV_NO_THINLTO=ON  # 75.2 s
+cmake --build /tmp/t12-dev-link/runtime --target ps2x_tests ps2EntryRunner -j4    # SIGTERM'd@317 by T13 pkill; wiped; reconfigured 76.6 s; rebuilt 558.6 s, exit 0
+cd $R && /tmp/t12-dev-link/runtime/ps2xTest/ps2x_tests                    # 439/439/0 rc=0
+touch $R/ps2xRuntime/src/lib/ps2_runtime.cpp; cmake --build /tmp/t12-dev-link/... # (a) 5.9 s
+touch $R/ps2xTest/src/ps2_memory_tests.cpp; cmake --build /tmp/t12-dev-link/...   # (c) 7.2 s
+`/tmp/t12-link/`, `/tmp/t12-dev-link/`, `/tmp/t12-nocommit/`,

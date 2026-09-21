@@ -1,0 +1,35 @@
+{
+  "binding": {
+    "argv": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e13-binding-tests/entry/binding-test",
+      "present"
+    ],
+    "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+    "rc": 0,
+    "tail": [
+      "LEAF port=1 selected=0 other=1 v0=1 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "CONSUMER actual-binding=_Z21sub_00241B20_0x241b20PhP12R5900ContextP10PS2Runtime entry=0x241c48 input=0x1 flags=0x13 bit3=0 stopCalls=1 ram32MiB-unchanged=1",
+      "LEAF port=1 selected=-10002 other=0 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "LEAF port=1 selected=-8 other=0 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "LEAF port=1 selected=-6 other=0 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "LEAF port=1 selected=1 other=0 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "E13 ACTUAL BINDING TEST COMPLETE success=1 boot=0"
+    ]
+  },
+  "suite": {
+    "argv": [
+      "/tmp/p1-link/runtime/ps2xTest/ps2x_tests"
+    ],
+    "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+    "rc": 0,
+    "tail": [
+      "[sceSifSetDma:CALL] pc=0x0 ra=0x0 list=0x21000 count=2",
+      "[sceSifSetDma:DESC] i=0 src=0x21100 dst=0x21200 size=0x8 attr=0x0 pc=0x0 ra=0x0",
+      "[sceSifSetDma:DESC] i=1 src=0x21300 dst=0xe0000100 size=0x8 attr=0x0 pc=0x0 ra=0x0",
+      "sceSifSetDma failed dmat=0x21000 count=0x2",
+      "[IOP/RPC trace:unhandled] sid=0x20000133 rpc=0x99 pc=0x0 ra=0x0 send=0x2a400/12 recv=0x2a500/12 sendBytes=[A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 AA AB] loadedModules=[]",
+      "[IOP/RPC trace:unhandled] sid=0x20000111 rpc=0x55 pc=0x0 ra=0x0 send=0x22500/16 recv=0x22600/16 sendBytes=[50 51 52 53 54 55 56 57 58 59 5A 5B 5C 5D 5E 5F] loadedModules=[]",
+      "[VU1 reserved upper] cycle=0 pc=0x0 instruction=0x30"
+    ]
+  }
+}
