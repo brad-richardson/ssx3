@@ -1325,6 +1325,9 @@ the build or commit that closed them.
       sidecar, FNV RECOMPUTED BY ME (`fd889dc5` exact), suite RE-RUN BY ME
       443/443/0, lease absent, 561+/0−. Reference-state row: R1A game epoch
       (post-ExecPS2:5). ~1 h. Next: E3b frame capture (same park ⇒ due).
+      Scoped debt (frontier follow-up): CRC=0+memcmp is a copy-integrity gate,
+      not a known-payload fingerprint; A1–A4 dormant-helper approximations
+      unvalidated — neither diverts E3b.
       Ledger row added.
 - [x] **T27 read (09-20) — PASS, press-on-title within dwell: Main Menu reached, stable 91 s:**
       Bit-identical T4 build reused; PPM text-band detector (band < 2.0 +

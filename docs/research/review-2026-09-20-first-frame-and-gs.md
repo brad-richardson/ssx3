@@ -1,14 +1,61 @@
 # PS2 recomp progress, evidence, and next steps — 2026-09-20
 
-Prepared for Brad and the Muse orchestrator. Priority: a verified SSX 3 recomp frame, then the PS2 GS GPU path. This is a review and steering document; no implementation changes, builds, boots, clones, or cleanup were performed. It supplements, and where explicitly stated corrects, the [September 19 review and Part 4 hand-back](review-2026-09-19-progress.md).
+Prepared for Brad and the Muse orchestrator. Priority: a verified SSX 3 recomp frame, then the PS2 GS GPU path. This is a review and steering document; the reviewer performed no implementation changes, builds, boots, clones, or cleanup. It supplements, and where explicitly stated corrects, the [September 19 review and Part 4 hand-back](review-2026-09-19-progress.md). Updated after orchestrator poll `f3fd739`: the decisions and follow-up below supersede the initial experiment recommendations preserved later in this document.
 
 ## Decisions to make now
 
-1. **Continue K1, with a corrected contract.** The copied `0x80075000` payload is a TLB helper lookup. Its six observed results include a **data address**, so a general “return an original syscall trampoline” fix is insufficient. The exact table and acceptance criteria are below. This correction was sent to Muse through Herdr while K1 was active.
-2. **Park E3 boots behind K1; do the bounded host-write audit now.** T26 excludes watched guest stores during its window, not all writes. If the same park survives K1, E3 should resolve read/write order within one or two guest frames, including scratchpad DMA, rather than repeat a long writer census.
-3. **Capture the next runtime framebuffer and inspect it.** Existing T26 logs already show successful 512×448 uploads and substantial GS activity. There is still no visually verified recomp frame in the reviewed evidence. Those are different claims, with different next actions.
-4. **Give paraLLEl-GS a bounded adoption test before committing to a new renderer.** Its raw interface and shaders are substantially closer to the desired GPU work than the broad recomp surveys. First verify actual initialization and a short SSX GS dump replay on the intended devices. This can proceed without a recomp first frame when it does not contend with K1.
-5. **Reduce experiment size and interpretation latency.** The tools built since the last review are useful. The next gain comes from using them to answer one causal question per run and promptly changing the hypothesis when evidence contradicts it.
+1. **Finish E3b as the first-frame critical path.** K1 fixed the six lookup results and removed the observed drops, but the park survived. Capture actual reads, branches, object identity, and intervening writes for one complete invocation, expanding only as needed to two guest frames. Close the generated `FAST_WRITE` coverage gap identified below before interpreting zero writes.
+2. **Make no new behavior change until that evidence identifies one.** An SPR transfer or reused scratchpad address is not itself a defect. Keep scanner retirement, broader TLB emulation, SIF implementation, and alarm changes behind evidence of a reached, violated contract.
+3. **Keep the first-frame milestone open.** The settled framebuffer is verified black. The first successful upload has matching hash evidence, but its PNG was not retained. Preserve the first successful image on an already-needed run; do not launch another boot just for it.
+4. **Finish G8 before choosing a GS implementation.** Mac initialization passed; Odin capability queries passed. The G7 dump had no GIF transfers. G8 needs actual draw work and a comparison at the same frame/field and CRTC geometry. Use the candidate's existing statistics before building new instrumentation.
+5. **Keep P13b bounded and account for allocated disk space.** Validate the four unmatched selectors against the current build. Reuse existing trees: G7's roughly 0.60 GB of source consumed about 29 GB on ExFAT. Maintain one PS2 mutator/runner and keep other work subordinate to first frame.
+
+## Follow-up at poll f3fd739
+
+The new batch supports the selected E3b/G8/P13b work. Its PASS labels describe completed experiments and artifact checks; they do not establish a recomp first frame, correct rendering of drawn content, or an Odin renderer port. I read the gate rows, reports, current briefs, and relevant raw implementation, and visually inspected the retained K1 images. I did not repeat the orchestrator's test suite or boots.
+
+| Result | What is established | Remaining limit / decision |
+| --- | --- | --- |
+| K1 | All five code addresses and the data address returned; six observed dispatch drops removed; no poison installs; 443 tests reported passing and independently rerun by the orchestrator. | Same park. Helpers were not exercised; their implemented TLB success behavior includes explicit assumptions. Accept the reached lookup correction, not a complete TLB equivalence claim. |
+| P0 images | Retained settled upload is opaque black at 512×448; retained initial fallback is magenta. I inspected both. | First successful upload was not saved separately: `fd889dc5` is a hash proxy. The report's own G4 states the gap. First frame remains unmet. |
+| E3 | Concrete in-window SPR paths and numerous host-writer bypasses found. | Its universal guest-store coverage claim is also too broad: generated `FAST_WRITE` stores bypass the watcher. E3b must cover or exclude those paths explicitly. |
+| G7 | Mac executes the project's initialization; Mac and Odin each satisfy the ten queried requirements. An eight-vsync, zero-transfer dump replays cleanly. | No draw-core validation. Odin has not executed the project's initialization or replay. No usable game-frame performance measurement yet. |
+| T27 | The PCSX2 reference reaches Main Menu with a title-timed Start and remains there for 91 seconds. | Useful repeatable reference capture point; this is not recomp progress. Prefer reusing it over another input sweep when a stable drawn GS capture is needed. |
+| OD1 | Device readiness, interfaces, dependencies, gaps, and a run checklist are documented. | Readiness is not a device performance result. The M15 device arm remains secondary to the PS2 critical path. |
+
+Sources: [K1 report](../../local/research/K1/REPORT.md), [E3 report](../../local/research/E3/REPORT.md), [G7 report](../../local/research/G7/REPORT.md), [T27 report](../../local/research/T27/REPORT.md), [OD1 report](../../local/research/OD1/REPORT.md), and [orchestrator gate reads](../todo.md). Active contracts: [E3b](../../local/muse/prompts/E3b.md), [G8](../../local/muse/prompts/G8.md), [P13b](../../local/muse/prompts/P13b.md).
+
+### Corrections needed before interpreting the next captures
+
+**E3b's negative evidence needs a complete observation boundary.** `ps2xRecomp/src/lib/instruction_translator.cpp:42–63` emits constant-address stores as `ps2TraceGuestWrite` followed by `FAST_WRITE*`. At the K1 revision, `ps2_runtime.h:237` makes that trace hook a no-op, and `Ps2FastWrite*` in `ps2_runtime_macros.h` writes memory without the diagnostic watcher. The generated store at guest PC `0x42CC88` to `0x456538` is a concrete example, already acknowledged in K1's report. This example is outside E3's watched target and is not evidence of an in-window culprit; it disproves the claim that every generated guest store is observed. Either instrument relevant emitted fast stores or show their destination ranges cannot intersect the captured targets. Do not require a wholesale generator rewrite for this experiment.
+
+The E3b record should also distinguish RAM aliases from scratchpad offsets, split DMA intervals at the runtime's RAM/SPR wrap boundaries, and avoid counting the macro plus `Store*` reports as two writes. Read values should come from the actual loaded operands. Emit intact records with one sequence domain, entry/exit markers, and a completeness/dropped-record receipt. A byte cap reached halfway through an invocation yields partial evidence, not a no-writer finding. The raw SPR loop at `ps2_memory.cpp:1569–1625` already supplies the exact chunk boundaries for overlap checks.
+
+**The generic drop snapshot is still affected by silencing.** At fork `b6252bb`, `ps2_log.h:178–188` returns from `emitDropTo` on `dropsMuted()` before calling `recordDropCensus`. Therefore K1's “snapshot independent of PS2X_DROP_SILENCE” claim is incorrect. The new K1 lookup/helper counters are separate; they do not change that generic mechanism. The retained [K1 boot script](../../local/research/K1/k1-boot1.py) explicitly removes `PS2X_DROP_SILENCE`, so the observed six-to-zero result remains supported for that run. Correct the claim and retain the environment receipt; no repeat K1 boot is warranted just for this wording. The earlier recommendation to count semantic failures before suppressing their messages remains open.
+
+**G8 needs drawing and temporal alignment, not merely a nonzero Transfer count.** A GS dump Transfer packet can carry register setup or image data; the parser's `has_transfer` flag only says it delivered bytes to `gif_transfer`. Use the existing `GSInterface::consume_flush_stats()` API: `FlushStats` already exposes `num_primitives`, `num_render_passes`, palette updates, and copies. `GSRenderer::flush_rendering` and its caller update the render-pass and primitive counters. A positive raster-work receipt plus inspected game content is a much stronger gate than Transfer > 0, without inventing a new tracing subsystem.
+
+The G7 local PPM hook exports the **last** vsync result, while the reference PNG was taken when the dump **started**. Black images concealed this difference. G8 must compare the same field/frame, account for the parser's progressive/anti-blur defaults and reference deinterlacing, and justify the CRTC crop or coordinate mapping. A large diff from misaligned samples is not a renderer failure. If alignment cannot be established within the current run, report rendering viability and leave pixel accuracy open. The native defaults remain useful as a viability configuration; do not start a tuning loop to make mismatched samples agree.
+
+The library also already has `GSOptions::timestamps` and `get_accumulated_timestamps(TimestampType)`. They are a reuse candidate for a later performance question, not measured results. The current CLI's host-wall loop accounting is not GPU timing, and lack of a calibrated host/GPU time domain alone does not establish that ordinary GPU interval queries are unavailable. Validate the actual timestamp path and queue support before adding a profiler or claiming a timing limit.
+
+**K1 has a narrower identity guard than its name suggests.** The override matches ELF basename and entry, with CRC selector zero, then compares copied bytes with their current source. This checks copy integrity, not identity against a known payload fingerprint; equal altered source/destination bytes would pass. Bind the equivalent to a known executable/payload identity before broadening reuse. The dormant helpers' A1–A4 assumptions also need validation if reached. Neither issue justifies diverting the current E3b run into a new TLB project. Likewise, absence of syscalls from `42C510` is not proof that this syscall-free data consumer never executes; keep its liveness qualified.
+
+### What each E3b outcome should change
+
+| Observation | Recommended next action |
+| --- | --- |
+| Correctly ordered SPR copies or object reuse explain four retained flags versus one actual skip | Close the apparent contradiction as an observation/identity issue. Trace the earliest still-unsatisfied progress condition to its producer; do not change SPR merely because it writes these bytes. |
+| A specific transfer has wrong source, destination, length, wrap, or completion order relative to the required guest contract | Isolate that discrepancy, validate a small reproducer, then make one targeted behavior change and check the park/frame. |
+| The actual loaded value and recorded branch disagree | Check operand capture, call-site attribution, translation, and delay-slot handling before modifying the scheduler or guest data. |
+| A complete capture has no relevant mutations and the reads agree with the actual branches | Discard the writer hypothesis for that captured invocation. Follow the unmet condition upstream; avoid another writer census of the same span. |
+| Coverage is incomplete, the trigger misses the intended object, or rows are truncated/interleaved | Repair the named observation gap and repeat only the bounded capture. Do not promote missing evidence into a semantic fix. |
+
+The next behavior change is still **none justified yet**. Keep scanner retirement and alarm-contract work queued unless a reached consumer or missed completion makes one relevant. For G8, meaningful Mac rendering would justify the next bounded Odin project-init/replay check or a concrete GIF-interface adapter study, chosen by the actual blocker. Failed alignment calls for alignment repair; failed raster execution calls for a minimized captured case. Neither calls for a fresh renderer or another broad prior-art sweep.
+
+**Storage follow-through:** G7 recorded 598,811,713 apparent source bytes but roughly 29 GB allocated across 26,000 files on ExFAT. Its source cap was expressed in apparent bytes. Future caps must include allocated bytes/free-space delta and count nested dependencies. Reuse the existing source/build; consider a quota-limited APFS build area only as a separately justified storage change. No cleanup, clone, or filesystem change was performed for this review.
+
+These corrections were submitted through Herdr to the verified Muse orchestrator `wN:p3` during this follow-up. Muse confirmed they were relayed to E3b/G8 before capture, incorporated into the briefs and live rules, and pushed as `bf934b2`; K1 report wording was assigned a correction without another boot. The completed document path and existing paraLLEl statistics/timing API pointers accompany the final hand-back. The remaining sections preserve the initial review's reasoning, source pins, and acceptance contracts; their pre-K1 timing is historical.
 
 ## What has actually advanced
 
@@ -16,11 +63,11 @@ The first-frame effort has made real progress. It has crossed failures in CD cal
 
 | Area | Supported progress | Limit on the conclusion |
 | --- | --- | --- |
-| PS2 runtime | Successive boot parks cleared; later boots execute a stable main loop with heavy GIF/GS activity. | No reviewed artifact establishes a recognizable recomp-rendered SSX screen. Clearing the six K1 drops is not yet demonstrated to unblock that screen. |
-| Reference | R1 gets through BIOS setup and reaches SSX in both PCSX2 EE modes. | PCSX2 is a software reference, not a physical-hardware observation. Earlier BIOS epochs cannot serve as SSX traces. |
+| PS2 runtime | Successive boot parks cleared; later boots execute a stable main loop with heavy GIF/GS activity. K1 removes the six lookup drops. | K1 leaves the same park and a black framebuffer; no recognizable recomp-rendered SSX screen is established. |
+| Reference | R1 gets through BIOS setup and reaches SSX in both PCSX2 EE modes; T27 reaches a stable Main Menu. | PCSX2 is a software reference, not a physical-hardware observation. Earlier BIOS epochs cannot serve as SSX traces. |
 | Iteration | T12/T14 show approximately 315 s → 5.9 s for the relevant runtime-only incremental build after disabling development ThinLTO. | A shared-header rebuild still took 640.9 s. Do not quote 5.9 s as the cost of arbitrary changes. |
 | Observability | Park snapshots, syscall attribution/alignment, entry discovery, and watchpoints exist and have been exercised. | Watchpoint coverage, trace epoch, suppression settings, and retained state must accompany each interpretation. |
-| GS harness | G6 and the separate ps2xGS tree provide 102 synthetic captures, CPU regression checks, and useful sensitivity tests. | There is no implemented GPU backend in the reviewed tree. Its “strict” backend is not an independent correctness oracle. |
+| GS harness | G6 provides 102 synthetic captures; G7 separately validates paraLLEl initialization on Mac and target capability queries. | No integrated GPU backend or drawn-content validation yet. The harness's “strict” backend is not an independent correctness oracle. |
 | Other work | The GameCube, iOS/iPad, input, and device lanes have produced independent results. | Their completion counts do not measure PS2 first-frame progress. Keep their resource use subordinate to this priority. |
 
 Evidence: [P1](../../local/research/P1/REPORT.md), [T12](../../local/research/T12/REPORT.md), [T14](../../local/research/T14/REPORT.md), [T22](../../local/research/T22/REPORT.md), [T26](../../local/research/T26/REPORT.md), [R1](../../local/research/R1/REPORT.md), [G6](../../local/research/G6/REPORT.md), and the fork sources named below. These are results of earlier workers, not experiments repeated for this review.
@@ -72,7 +119,7 @@ In particular, the reference's `SetSyscall(0x12C, …)` has a timer-3 interrupt 
 
 ## E3 disposition: audit now, order probe only if the park survives
 
-**Answer to the hand-back: E3 remains conditional. Its next boot is parked behind K1.** A short read-only audit of host scratchpad and relevant buffer writers is useful immediately.
+**Initial answer to the Part 4 hand-back:** E3's next boot was parked behind K1, with a short read-only host-write audit proceeding first. **Poll `f3fd739` satisfies the condition:** the audit is complete and K1 leaves the same park, so E3b is now due under the corrected coverage requirements above.
 
 T26 is a strong negative result for its actual observation mechanism: the fixed block's watched guest writes were initialization-only, and watched flag rewrites did not change their values in the selected window. But its own coverage row states that host `memcpy`, DMA, and SIF blits bypass the guest WRITE-macro watcher. Therefore “neither SIF nor CD can write this state” and “immutable state” exceed what it establishes.
 
@@ -80,7 +127,7 @@ The source gives a concrete missing observation surface: `ps2_memory.cpp` around
 
 T26 G1 is the discriminating question: the trace implies one skipped record per invocation, while the retained/watched record state appears to contain four nonzero flags. A final snapshot and aggregate call counts cannot resolve what each load saw.
 
-If K1 reaches the same park, the next E3 should record one complete invocation, expanding to at most one or two guest frames when needed:
+The accepted E3b scope is one complete invocation, expanding to at most one or two guest frames when needed:
 
 | Record | Required information | What it distinguishes |
 | --- | --- | --- |
@@ -97,7 +144,7 @@ T26's retained snapshot reports 3,505,928 kicks, 3,477,164 drawing kicks, 402,43
 
 In `ps2_runtime.cpp:379–455`, `UploadFrame` emits that diagnostic on the successful `copyLatchedHostPresentationFrame` path. The fallback magenta placeholder follows the failure path. This establishes that the GS produced a presentable buffer; it does not establish recognizable or correct game pixels. The zero `gs_writes` field in the same snapshot is therefore not evidence of zero graphics activity.
 
-The cheapest useful next artifact is a small number of framebuffer images with their frame number, dimensions, display registers, source FBP, hash, and whether the fallback path was used. Save these on the next authorized K1 run, preferably at the first upload and at the settled park. Inspect the actual images. Nonuniform pixel counts help triage but are not a correctness verdict.
+The initial recommendation was to retain first-upload and settled images with frame number, dimensions, display registers, source FBP, hash, and fallback status. K1 now supplies the settled image and initial fallback; the first successful upload has only hash evidence. See the follow-up above. Nonuniform pixel counts help triage but are not a correctness verdict.
 
 Call the first-frame milestone met when a recognizable SSX logo, title, menu, or scene is captured from the recomp path, with enough state to reproduce it. Record subsequent frame hashes for continuity; do not demand that a static logo animate. Identify any behavior-changing HLE/stimulus settings used. A rendered buffer and a verified game frame should be separate milestones.
 
@@ -180,19 +227,19 @@ No deletion is proposed as an action in this review. For subsequent storage work
 
 ## Recommended next hand-back
 
-The next useful report should answer five questions in order:
+The orchestrator answered the original five questions at poll `f3fd739`. The next useful report should answer these:
 
-1. Does K1 now return the five actual copied-code addresses and the data address, and what consumes them?
-2. What do the first uploaded and parked framebuffers visibly contain?
-3. Did the park change? If it did not, which actual flag values did the loop read, with what intervening host/guest writes?
-4. Can the pinned paraLLEl-GS initialize and replay the selected SSX dump on each tested target, and what blocks the others?
-5. What is the one next behavior change justified by that evidence?
+1. Is E3b's captured invocation complete, and which write paths are observed versus excluded by evidence?
+2. Which exact read values, record identities, branches, and intervening writes explain one skip versus four apparently nonzero flags? Does that explanation reveal a defect or just resolve the measurement discrepancy?
+3. What is the earliest remaining unmet progress condition, and which producer or completion should satisfy it? Name the one behavior change justified by evidence, or the one missing observation if none is justified.
+4. Does G8 execute raster work, what does its output visibly contain, and is the comparison aligned to the same field/frame and CRTC geometry? Keep Odin capability, project initialization, replay, accuracy, and timing as separate results.
+5. Did P13b find a reached unmatched selector with a concrete consequence? Promote only such a finding into the first-frame work.
 
 That is sufficient to steer the next batch. More long-running censuses or broad candidate rankings should need a specific unanswered question.
 
 ## Evidence boundaries and reproducibility
 
-The SSX tree was initially reviewed at `963f081` and advanced through the user's `f88ec08` hand-back to `a1a4b731d33a8c64680f5acefa84bc2c0a069e74` while other agents worked. The runtime source snapshot was `6359fb625e5651b53c696aadb6bc44ece88cb560`; ps2xGS was `14a1974bf33895c5ad325d77508cddead0af8ace`. K1 was active, not completed, during this review. Line numbers refer to the inspected versions and can move.
+The SSX tree was initially reviewed at `963f081` and advanced through the user's `f88ec08` hand-back to `a1a4b731d33a8c64680f5acefa84bc2c0a069e74` while other agents worked. The initial runtime snapshot was `6359fb625e5651b53c696aadb6bc44ece88cb560`; ps2xGS was `14a1974bf33895c5ad325d77508cddead0af8ace`. K1 was active during that initial review. This follow-up reads SSX at `f3fd73985b7c6644022fc8061fc533ed374bbb4c`, K1 runtime at `b6252bbc0f25e195f9650943149bfb38c83829d4`, and G7's existing paraLLEl clone at the unchanged pin below, including its local screenshot hook. E3b/G8/P13b results were not yet available. Line numbers refer to inspected versions and can move.
 
 Local source/evidence roots:
 
