@@ -1,0 +1,37 @@
+# G21 minimal-repro run instructions (NOT executed in G21 — no device work)
+
+Package dir (SSD): /Volumes/Extreme SSD/ps2x-g21/
+  g21-minrepro            arm64 Android binary, 13,792 B,
+                          sha256 7fcd59f5f9d51b0a3fd8dfc87c5f5329390b479f033b3d3cf84531629ea05137
+                          BuildID 3341438c7671d7096008f6f82d8227aa8462c105
+  g21-sampler-feedback.spv  crashing shader, 20,196 B,
+                          sha256 b0a09fa039c1d9f9b4fc02b613233e9f051937d38be42e3761834df06aa96ea1
+  g21-minrepro.c          source (MIT)
+  g21-build.sh            exact host rebuild recipe (NDK r30, API 35)
+  g21-build.log           build receipt (exit 0, zero warnings)
+
+## Device run (lab device Odin3; needs a user with adb access)
+
+  adb -s 622c49b1 shell 'rm -rf /data/local/tmp/g21 && mkdir -p /data/local/tmp/g21'
+  adb -s 622c49b1 push g21-minrepro g21-sampler-feedback.spv /data/local/tmp/g21/
+  adb -s 622c49b1 shell 'cd /data/local/tmp/g21 && sha256sum g21-minrepro g21-sampler-feedback.spv'
+     # expect 7fcd59f5... / b0a09fa0... (match host)
+  adb -s 622c49b1 shell 'cd /data/local/tmp/g21 && ./g21-minrepro; echo RUN_EXIT=$?'
+
+## Expected
+
+- On Adreno 830 / driver 512.800.58: process dies with SIGSEGV after
+  "calling vkCreateComputePipelines ..." (no "SURVIVED" line); a new
+  tombstone names libllvm-qgl.so BuildId 28a2407f... at pc +0x472fc0
+  under vkCreateComputePipelines+1224. RUN_EXIT=139.
+- On drivers that compile the shader: "SURVIVED: vkCreateComputePipelines
+  -> 0", RUN_EXIT=0.
+
+## After the run
+
+  adb -s 622c49b1 shell 'ls -lt /data/tombstones/ | head -3'
+  adb -s 622c49b1 pull /data/tombstones/tombstone_NN ps2x-g21-run/
+  adb -s 622c49b1 shell 'rm -rf /data/local/tmp/g21'
+
+Then: attach the new tombstone to the filing; if SURVIVED, the minimal
+repro does NOT reproduce (report back: order-dependence or missing input).
