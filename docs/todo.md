@@ -1288,6 +1288,24 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G24 read (09-21) — PASS(Done, SPLIT verdict), plumbing WORKS (delivery receipted, O4 absent, full loop) but NEW pre-write wall O6 fires (Scudo in first scanout readback, 0 scanouts, N/A); POST-RUN ZERO-DAMAGE on the binary (100% zeros, run evidence stands per precedent):**
+      ONE hunk (+5/−1, unconditional + LOGI) + build exit 0 (265,840,424 B,
+      `562a0bcf…`, `c7f68343…`) + ONE flag run: exit 134, delivery receipt
+      :29 (`disable_sampler_feedback=1, use_rdoc=0`), 18 frames / 2 passes /
+      Total-time last, crasher 0×, 8/8 `success: yes`, 0 scanout writes;
+      tombstone_18 = SIGABRT Scudo `0x2000079eb4d2130` in `save_scanout_ppm
+      → wait_idle → DescriptorSetAllocator::clear → vkDestroyDescriptorPool`
+      16 ms post-Total-time (O6: site+phase match no existing number; writer
+      unnamed); O5 never reached; ride-along (`feedback_render_target`)
+      honestly tabled. Verified: hunk block == committed diff, logcat (1793
+      lines, :29 exact, 18 frames, 8 yes, crasher 0, 0 writes), tombstone
+      (signal/addr/stack/BuildId == good binary, timing), score re-run
+      (N/A), device `mg/`-only, tail intact. ZERO-DAMAGE: on-disk binary
+      now `fc62d01a…`, 100.0000 zero fraction, mtime frozen (G18 class, 3rd
+      recurrence — tested binary proven good by tombstone BuildId; G22
+      binary intact). ERRATUM: `used ~X h` placeholder left in (actual
+      ~22 min — box unaffected). ~45 min. Next: G25 separation (REBUILD
+      bit-identical first, then same binary WITHOUT flag). Ledger row added.
 - [x] **T41 read (09-21) — PASS, finish complete: T41-1…T41-8 in T40's shapes + SSD trace stream VERIFIED (size+sha+slices); hold hop OFF-rail uncorrelated at ≈0.57 s (SCPS40 +29 @ 0.02), SCPS120 resolve lost (+119 @ 0.37 weak), RDC still floods (11/12):**
       No new run — everything from bytesize originals or committed
       evidence, zero drift on all pins/refs/slices. R4: FULL CHAIN (61
