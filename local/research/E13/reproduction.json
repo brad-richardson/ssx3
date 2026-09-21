@@ -1,0 +1,106 @@
+{
+  "steps": [
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_observation_audit.py"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 OBSERVATION AUDIT TAIL COMPLETE; raw remains unchanged"
+      ]
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_mine.py",
+        "a"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 MINER TAIL COMPLETE /Users/bradrichardson/dev/ssx3/local/research/E13/e13a-summary.json"
+      ]
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_card.py",
+        "a"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 CARD TAIL COMPLETE"
+      ]
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_progress.py",
+        "a"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 PROGRESSION MINER TAIL COMPLETE"
+      ]
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_frame.py",
+        "a"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 FRAME TAIL COMPLETE"
+      ]
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_join.py"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 JOIN TAIL COMPLETE; absent footer/content retained as explicit limits"
+      ]
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_residual.py"
+      ],
+      "rc": 0,
+      "tail": [
+        "# E13 RESIDUAL TAIL COMPLETE"
+      ]
+    }
+  ],
+  "before": {
+    "e13a-summary.json": "252d13a5cf917a71170d02a07695395a0098688297b6c935761c291ab09dca0d",
+    "e13a-card.json": "df37e98d3cfedafc28a22a3ab77fdc86cc7cce5075a474619fac49fd34e29d06",
+    "e13a-progress.json": "60cd783cf7071511c81a6dd969cb1580170e5ee29358a84ed0101e0890fb594d",
+    "e13a-frame.json": "123f7b3b4ac2f44923b01c7c4606e35a6d7c25d3f555a435029a863bf9e6d9af",
+    "e13a-join.json": "457396646be2b504341b731432e4d1e429d55af3c13cd45497bf4fec4319a480",
+    "e13a-copy-content-join.json": "ac6b728593f82e724d79bece92104adb3dee4a64a86351518e25afd3af6f501a",
+    "e13a-residual-join.json": "3a20895e38c5d0975a8aa2878fdc853084ed9d9ef5e327de658421b9c56301b4",
+    "e13a-observation-closure.json": "70fd56799bedfc2a7ea2ff67bc5a545084c6e365090ced17f30b82698d7e2554"
+  },
+  "after": {
+    "e13a-summary.json": "252d13a5cf917a71170d02a07695395a0098688297b6c935761c291ab09dca0d",
+    "e13a-card.json": "df37e98d3cfedafc28a22a3ab77fdc86cc7cce5075a474619fac49fd34e29d06",
+    "e13a-progress.json": "60cd783cf7071511c81a6dd969cb1580170e5ee29358a84ed0101e0890fb594d",
+    "e13a-frame.json": "123f7b3b4ac2f44923b01c7c4606e35a6d7c25d3f555a435029a863bf9e6d9af",
+    "e13a-join.json": "457396646be2b504341b731432e4d1e429d55af3c13cd45497bf4fec4319a480",
+    "e13a-copy-content-join.json": "ac6b728593f82e724d79bece92104adb3dee4a64a86351518e25afd3af6f501a",
+    "e13a-residual-join.json": "3a20895e38c5d0975a8aa2878fdc853084ed9d9ef5e327de658421b9c56301b4",
+    "e13a-observation-closure.json": "70fd56799bedfc2a7ea2ff67bc5a545084c6e365090ced17f30b82698d7e2554"
+  },
+  "all_identical": true
+}

@@ -1,0 +1,46 @@
+- [x] **T6 read (09-20) — PASS, ThinLTO link owns the wall, fix
+      correctly declined:** full 472 s (link 330 s serial
+      tail); incremental (a) 315 s (link 312.8 s = 99.3%),
+      (b) 658 s clean (link 396.7 s = 60.3%; 844 s
+      contended), (c) 8 s, (d) 0 s; sccache ON-but-NOTFOUND;
+      290 unity batches (giant TU 6.9–14.2 s — not the
+      miss). Bite met but NEITHER allowed fix applies
+      (ccache can't move link time; split can't shrink 313
+      MB link input) — zero fork changes with the numbers
+      tabled, contention handled by the book (waited 4 min,
+      clean rerun). Verified: log line counts, cell-a 5
+      edges + 314 s link, ninja-log refs, IPO line, HEAD
+      unmoved, zero commits, no boots, lease absent. Next:
+      T12 (dev build config, gap 4) launched in freed pane.
+      Ledger row added.
+- [x] **M30 read (09-20) — PASS, M29 gap 1 window tested:** exact
+      census reproduced (bad=0 all 764, 15/15 standings);
+      K=2/5/10 row-identical (3 TSVs byte-identical md5):
+      8 movers / 13 cells (9 + 22 un-moved, 0 newly moving,
+      0 flips); off-span exactly the 3 far extras (no 4th
+      in 764); standings 7/1/5 (extra-only 3→1, assigned +
+      no-cand untouched); join still+below 3→4 (9 joins
+# E13 RETIRED T6 RECEIPT TAIL COMPLETE
+- [x] **T12 read (09-20) — PASS, dev config proven behavior-clean:**
+      fork `7eed783` (+10/-0, pushed 0/0): `PS2X_DEV_NO_THINLTO`
+      default-OFF, runner chain only; Release link line
+      byte-identical 20,294 B + cache +1 OFF line + Release
+      binary BIT-identical to T6's (full sha match); full
+      rel 710 s / dev 559 s (link 390.6→0.5 s); dev cell
+      (a) 5.9 s (vs 315 s), (c) 7.2 s; suite 439/439/0
+      BOTH (faces identical); D exit 0 (1059/245/0/0, no
+      divergence rows); T13 cross-SIGTERM handled by the
+      book (sample discarded, clean rebuild). Verified:
+      stat/push, linklines, cache diff, binary shas, suite
+      reruns both, D rerun identical, log sizes, park
+      lines, drops identical, hot-pc from snapshots,
+      cell-a log, lease absent. Next: T14 (dev cell-b)
+      launched in freed pane. Ledger row added.
+- [x] **M36 read (09-20) — PASS after tail restore (marker at
+      line 671, restored in `e2c4a96`):** 2/3/700 k 6/7/8
+      exact, FULL TSV byte-identical; 24 extras 14 near /
+      0 far / 10 noncell (c54 10/10 bulk |δ| 8) + 10
+      missings 0/0/10; 23/24 band-1 (H4 all 3 shapes);
+      missings 7/10 ++, extras 4/24 ++ (s700 15/15 −−);
+      700 headliner (c54/c299/c311/c313/c314/c332/c620
+# E13 RETIRED T12 RECEIPT TAIL COMPLETE

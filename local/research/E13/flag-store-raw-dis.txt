@@ -1,0 +1,28 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+00241cd8 27bdffe0 addiu       $sp, $sp, -0x20
+00241cdc 7fb00010 sq          $s0, 0x10($sp)
+00241ce0 ffbf0000 sd          $ra, 0x0($sp)
+00241ce4 0c0906c8 jal         func_241B20
+00241ce8 0080802d daddu       $s0, $a0, $zero
+00241cec 0040202d daddu       $a0, $v0, $zero
+00241cf0 8e030440 lw          $v1, 0x440($s0)
+00241cf4 8e02043c lw          $v0, 0x43C($s0)
+00241cf8 00441026 xor         $v0, $v0, $a0
+00241cfc 10600003 beqz        $v1, . + 4 + (0x3 << 2) ; target=0x241d0c
+00241d00 0002102b sltu        $v0, $zero, $v0
+00241d04 50400009 beql        $v0, $zero, . + 4 + (0x9 << 2) ; target=0x241d2c
+00241d08 0000102d daddu       $v0, $zero, $zero
+00241d0c 10400005 beqz        $v0, . + 4 + (0x5 << 2) ; target=0x241d24
+00241d10 ae04043c sw          $a0, 0x43C($s0)
+00241d14 8e0200b0 lw          $v0, 0xB0($s0)
+00241d18 0040f809 jalr        $v0
+00241d1c 00000000 nop
+00241d20 ae020440 sw          $v0, 0x440($s0)
+00241d24 8e020440 lw          $v0, 0x440($s0)
+00241d28 38420001 xori        $v0, $v0, 0x1
+00241d2c 7bb00010 lq          $s0, 0x10($sp)
+00241d30 dfbf0000 ld          $ra, 0x0($sp)
+00241d34 03e00008 jr          $ra
+00241d38 27bd0020 addiu       $sp, $sp, 0x20
+00241d3c 00000000 nop
+# E13 STATIC TAIL COMPLETE

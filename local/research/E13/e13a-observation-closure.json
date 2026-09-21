@@ -1,0 +1,151 @@
+{
+  "raw_sha256": "3e0add64704c4ae81726c3c1d19b108b7fee266c09951742a36dd511f148225d",
+  "raw_bytes": 1042729,
+  "events": 6339,
+  "complete_newline": true,
+  "contiguous_sequences": true,
+  "first": {
+    "seq": 1,
+    "tick": 41,
+    "kind": "singleton",
+    "addr": 4860060,
+    "width": 4,
+    "value": 6404704,
+    "pc": 2255228,
+    "thread": 1,
+    "oldS": 0
+  },
+  "last": {
+    "seq": 6339,
+    "tick": 248,
+    "kind": "mc-write",
+    "MC": 12079520,
+    "UI": 12077648,
+    "addr": 12079512,
+    "width": 4,
+    "old": 4705240,
+    "value": 4705240,
+    "pc": 2368728,
+    "thread": 1
+  },
+  "footer_present": false,
+  "footer_reason": "Footer is emitted only on a subsequent event(tick>603), not on shutdown. The source went quiet at tick248; no later event invokes that branch.",
+  "boot_event_bytes": 1042618,
+  "boot_budget": 4194304,
+  "boundary_events": 0,
+  "packet_files": 0,
+  "source_sizes_constant_after_s": 15,
+  "observed_through_s": 75.192,
+  "max_format_body_bytes": 549,
+  "formats": [
+    {
+      "file": "ps2_e7.h",
+      "line": 102,
+      "format": "bytes=%u fnv64=0x%llx tag=0x%llx mask=%u queued=%zu source=0x%x",
+      "worst_body_bytes": 134
+    },
+    {
+      "file": "ps2_e7.h",
+      "line": 132,
+      "format": "MC=0x%x addr=0x%x width=%u value=0x%llx pc=0x%x thread=%d",
+      "worst_body_bytes": 108
+    },
+    {
+      "file": "ps2_e7.h",
+      "line": 139,
+      "format": "UI=0x%x addr=0x%x value=0x%llx MC=0x%x guard=%u pc=0x%x thread=%d",
+      "worst_body_bytes": 122
+    },
+    {
+      "file": "ps2_e7.h",
+      "line": 147,
+      "format": "MC=0x%x UI=0x%x addr=0x%x width=%u old=0x%x value=0x%llx pc=0x%x thread=%d",
+      "worst_body_bytes": 137
+    },
+    {
+      "file": "ps2_e7.h",
+      "line": 170,
+      "format": "target=0x%x source=0x%x a0=0x%x a1=0x%x a1Now=0x%x a2=0x%x a3=0x%x pc=0x%x v0=0x%x sp=0x%x ra=0x%x thread=%d MC=0x%x constructor=0x%x VT=0x%x state=%u outstanding=%u port=%u activePort=%u command=%u UI=0x%x pending=%u slot0=%d slot1=%d info=%u,%u,%u,%u uiFlags=0x%x uiState=%u uiMode=%u uiRoute=0x%x uiRouteTarget=0x%x",
+      "worst_body_bytes": 549
+    },
+    {
+      "file": "ps2_e7.h",
+      "line": 188,
+      "format": "addr=0x%x width=%u value=0x%llx pc=0x%x thread=%d oldS=0x%x",
+      "worst_body_bytes": 110
+    },
+    {
+      "file": "ps2_e7.h",
+      "line": 194,
+      "format": "S=0x%x off=0x%x width=%u lo=0x%llx hi=0x%llx pc=0x%x thread=%d C=%u G=%u M=%u A=%u B=%u P=%u D=%u",
+      "worst_body_bytes": 220
+    },
+    {
+      "file": "ps2_runtime.cpp",
+      "line": 2934,
+      "format": "pc=0x%x ra=0x%x lo=0x%llx hi=0x%llx mask=%u",
+      "worst_body_bytes": 95
+    },
+    {
+      "file": "ps2_memory.cpp",
+      "line": 1087,
+      "format": "mask=%u queued=%zu",
+      "worst_body_bytes": 43
+    },
+    {
+      "file": "ps2_memory.cpp",
+      "line": 1106,
+      "format": "mask=%u queued=%zu route=interpreter",
+      "worst_body_bytes": 61
+    },
+    {
+      "file": "ps2_memory.cpp",
+      "line": 1146,
+      "format": "mask=%u queued=%zu",
+      "worst_body_bytes": 43
+    },
+    {
+      "file": "ps2_memory.cpp",
+      "line": 1328,
+      "format": "madr=0x%x qwc=%u chcr=0x%x mask=%u queued=%zu",
+      "worst_body_bytes": 90
+    },
+    {
+      "file": "ps2_memory.cpp",
+      "line": 1905,
+      "format": "mask=%u queued=%zu str=0 qwc=0",
+      "worst_body_bytes": 55
+    },
+    {
+      "file": "ps2_vif1_interpreter.cpp",
+      "line": 359,
+      "format": "cmd=0x%x offset=%u was=%u now=%u queued=%zu",
+      "worst_body_bytes": 90
+    }
+  ],
+  "sources": [
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_e7.h",
+      "retained": "observation-sources/ps2_e7.h.gz",
+      "sha256": "9e4be7e3b3434cb05d2aafc01e55e95ba0c8c7572a23376fbffc857b9be7f0b9"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp",
+      "retained": "observation-sources/ps2_runtime.cpp.gz",
+      "sha256": "408d1fb32089ab0701f6f7033dbdf1f77c269784e5bceb01d3c1f7cd86aeae25"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp",
+      "retained": "observation-sources/ps2_memory.cpp.gz",
+      "sha256": "030631c5d675a2057ce84a24cffe0fe796847c1a174b9745605fcafee473f90b"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp",
+      "retained": "observation-sources/ps2_vif1_interpreter.cpp.gz",
+      "sha256": "13a833def17495322807bcf31459c0b738cf225e93dcea815212838e8632e2c4"
+    }
+  ],
+  "interpretation": "Closed, contiguous observed prefix with balanced call exits and no byte/format-cap mechanism triggered; no artificial runtime footer and no claim of a live copy at tick600.",
+  "late_history": "one Present and zero draws",
+  "function_trace_balanced": true
+}

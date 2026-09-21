@@ -1,0 +1,6644 @@
+{
+  "label": "e13a",
+  "raw_bytes": 9724311,
+  "raw_sha256": "e71c62ed4249fb53dd92c22e05b234859d4feaee2b2fcc77fcf115fafcc40dca",
+  "raw_lines": 23201,
+  "result": {
+    "label": "e13a",
+    "claim_utc": "2026-09-21T11:14:31.659925+00:00",
+    "bound": "wall",
+    "ssd_free_before": 274285461504,
+    "pid": 59408,
+    "boot_utc": "2026-09-21T11:14:31.667593+00:00",
+    "bind": {
+      "elapsed_s": 75.192,
+      "trace_lines": 54775,
+      "bytes": {
+        "boot_log": 9718915,
+        "trace": 3436888,
+        "function_log": 127768180,
+        "e4_dir": 8410488,
+        "park_dir": 0,
+        "frames_dir": 138464,
+        "e7_dir": 1046825,
+        "aggregate": 150519760
+      },
+      "allocated": {
+        "boot_log": 10485760,
+        "trace": 4194304,
+        "function_log": 127926272,
+        "e4_dir": 16777216,
+        "park_dir": 0,
+        "frames_dir": 29360128,
+        "e7_dir": 2097152,
+        "aggregate": 190840832
+      },
+      "ssd_free": 274090426368,
+      "ssd_free_delta": 195035136
+    },
+    "span_complete_s": 11.977895374991931,
+    "signal_utc": "2026-09-21T11:15:46.863121+00:00",
+    "rc": 0,
+    "process_end_utc": "2026-09-21T11:15:47.115128+00:00",
+    "elapsed_s": 75.45480266699451,
+    "release_utc": "2026-09-21T11:15:47.122221+00:00"
+  },
+  "watch_markers": 6647,
+  "parsed_watch": 6646,
+  "damaged_watch_lines": 1,
+  "armed_line": 11265,
+  "frozen_line": 11319,
+  "singleton": [
+    {
+      "line": 229,
+      "addr": 4860060,
+      "width": 4,
+      "value": 6404704,
+      "pc": 2255228,
+      "thread": 1,
+      "ra": 2255224,
+      "sp": 33554160
+    }
+  ],
+  "raw_display_values": {
+    "PMODE": {
+      "0xff20": 1,
+      "0xff21": 205
+    },
+    "SMODE2": {
+      "0x1": 411
+    },
+    "DISPFB1": {
+      "0x9070": 412
+    },
+    "DISPLAY1": {
+      "0x1bfa0002032281": 412
+    },
+    "DISPFB2": {},
+    "DISPLAY2": {},
+    "BGCOLOR": {
+      "0x0": 412
+    }
+  },
+  "boundary_watch": [],
+  "damaged_boundary_lines": [],
+  "display_bursts_grouped": 206,
+  "display_pc_ra": {
+    "('0x382cf0', '0x37c160', 1)": 1,
+    "('0x382cf0', '0x382824', 5)": 205
+  },
+  "history_headers": [
+    "# E4 history arm=600 freeze=601 entries=1",
+    "# coverage firstSeq=1 firstTick=600 lastSeq=1 lastTick=600",
+    "[e4:ev] seq=1 tick=600 frame=0 kind=present prim=6 tme=0 abe=0 fst=0 ctxt=0 fbp=0 fbw=8 psm=0x0 fbmsk=0x0 zbp=224 zpsm=0x31 zmask=0 tex0=0,8,0x0,10,9,0,0,0,0x0 scissor=0,0,511,447 test=0x500ad alpha=0x8000000064 verts=0 x=0..0 y=0..0 z=0..0 a=0..0 gif=0,0,0,0 reg=0x0:0x0 trx=3,0 present=112,112,512x448,0"
+  ],
+  "history_kinds": {
+    "present": 1
+  },
+  "draw_fbps": {},
+  "frame2_events": 0,
+  "present_sha256": "e2d74ec7c233fb889fac935fd74f62657ba1989216af716c9a48c518ccb79ce5",
+  "present": [
+    "# E4 present-inputs tick=601",
+    "priv pmode=0xff21 smode2=0x1 dispfb1=0x9070 display1=0x1bfa0002032281 dispfb2=0x1400 display2=0x1bf27f00000000 bgcolor=0x0 csr=0x4008",
+    "ctx0 frame=0,8,0x0 scissor=0,0,511,447 tex0=0,8,0x0 test=0x500ad alpha=0x8000000064 zbuf=224,0x31,0",
+    "ctx1 frame=0,8,0x0 scissor=0,0,511,447 tex0=0,0,0x0 test=0x71005 alpha=0x44 zbuf=224,0x31,0",
+    "preferred has=0 src=0,0,0x0 destFbp=0",
+    "host has=1 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 lastDisplayBaseBytes=0x0",
+    "transfer dir=3 total=0 copied=16 at=7,1 pending=0",
+    "vram armBytes=4194304 armFnv=0x3d279790 freezeBytes=4194304 freezeFnv=0x3d279790"
+  ],
+  "tap_tail": "seq=6339 tick=248 kind=mc-write MC=0xb851a0 UI=0xb84a50 addr=0xb85198 width=4 old=0x47cbd8 value=0x47cbd8 pc=0x2424d8 thread=1",
+  "observation_closure": {
+    "raw_sha256": "3e0add64704c4ae81726c3c1d19b108b7fee266c09951742a36dd511f148225d",
+    "raw_bytes": 1042729,
+    "events": 6339,
+    "complete_newline": true,
+    "contiguous_sequences": true,
+    "first": {
+      "seq": 1,
+      "tick": 41,
+      "kind": "singleton",
+      "addr": 4860060,
+      "width": 4,
+      "value": 6404704,
+      "pc": 2255228,
+      "thread": 1,
+      "oldS": 0
+    },
+    "last": {
+      "seq": 6339,
+      "tick": 248,
+      "kind": "mc-write",
+      "MC": 12079520,
+      "UI": 12077648,
+      "addr": 12079512,
+      "width": 4,
+      "old": 4705240,
+      "value": 4705240,
+      "pc": 2368728,
+      "thread": 1
+    },
+    "footer_present": false,
+    "footer_reason": "Footer is emitted only on a subsequent event(tick>603), not on shutdown. The source went quiet at tick248; no later event invokes that branch.",
+    "boot_event_bytes": 1042618,
+    "boot_budget": 4194304,
+    "boundary_events": 0,
+    "packet_files": 0,
+    "source_sizes_constant_after_s": 15,
+    "observed_through_s": 75.192,
+    "max_format_body_bytes": 549,
+    "formats": [
+      {
+        "file": "ps2_e7.h",
+        "line": 102,
+        "format": "bytes=%u fnv64=0x%llx tag=0x%llx mask=%u queued=%zu source=0x%x",
+        "worst_body_bytes": 134
+      },
+      {
+        "file": "ps2_e7.h",
+        "line": 132,
+        "format": "MC=0x%x addr=0x%x width=%u value=0x%llx pc=0x%x thread=%d",
+        "worst_body_bytes": 108
+      },
+      {
+        "file": "ps2_e7.h",
+        "line": 139,
+        "format": "UI=0x%x addr=0x%x value=0x%llx MC=0x%x guard=%u pc=0x%x thread=%d",
+        "worst_body_bytes": 122
+      },
+      {
+        "file": "ps2_e7.h",
+        "line": 147,
+        "format": "MC=0x%x UI=0x%x addr=0x%x width=%u old=0x%x value=0x%llx pc=0x%x thread=%d",
+        "worst_body_bytes": 137
+      },
+      {
+        "file": "ps2_e7.h",
+        "line": 170,
+        "format": "target=0x%x source=0x%x a0=0x%x a1=0x%x a1Now=0x%x a2=0x%x a3=0x%x pc=0x%x v0=0x%x sp=0x%x ra=0x%x thread=%d MC=0x%x constructor=0x%x VT=0x%x state=%u outstanding=%u port=%u activePort=%u command=%u UI=0x%x pending=%u slot0=%d slot1=%d info=%u,%u,%u,%u uiFlags=0x%x uiState=%u uiMode=%u uiRoute=0x%x uiRouteTarget=0x%x",
+        "worst_body_bytes": 549
+      },
+      {
+        "file": "ps2_e7.h",
+        "line": 188,
+        "format": "addr=0x%x width=%u value=0x%llx pc=0x%x thread=%d oldS=0x%x",
+        "worst_body_bytes": 110
+      },
+      {
+        "file": "ps2_e7.h",
+        "line": 194,
+        "format": "S=0x%x off=0x%x width=%u lo=0x%llx hi=0x%llx pc=0x%x thread=%d C=%u G=%u M=%u A=%u B=%u P=%u D=%u",
+        "worst_body_bytes": 220
+      },
+      {
+        "file": "ps2_runtime.cpp",
+        "line": 2934,
+        "format": "pc=0x%x ra=0x%x lo=0x%llx hi=0x%llx mask=%u",
+        "worst_body_bytes": 95
+      },
+      {
+        "file": "ps2_memory.cpp",
+        "line": 1087,
+        "format": "mask=%u queued=%zu",
+        "worst_body_bytes": 43
+      },
+      {
+        "file": "ps2_memory.cpp",
+        "line": 1106,
+        "format": "mask=%u queued=%zu route=interpreter",
+        "worst_body_bytes": 61
+      },
+      {
+        "file": "ps2_memory.cpp",
+        "line": 1146,
+        "format": "mask=%u queued=%zu",
+        "worst_body_bytes": 43
+      },
+      {
+        "file": "ps2_memory.cpp",
+        "line": 1328,
+        "format": "madr=0x%x qwc=%u chcr=0x%x mask=%u queued=%zu",
+        "worst_body_bytes": 90
+      },
+      {
+        "file": "ps2_memory.cpp",
+        "line": 1905,
+        "format": "mask=%u queued=%zu str=0 qwc=0",
+        "worst_body_bytes": 55
+      },
+      {
+        "file": "ps2_vif1_interpreter.cpp",
+        "line": 359,
+        "format": "cmd=0x%x offset=%u was=%u now=%u queued=%zu",
+        "worst_body_bytes": 90
+      }
+    ],
+    "sources": [
+      {
+        "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_e7.h",
+        "retained": "observation-sources/ps2_e7.h.gz",
+        "sha256": "9e4be7e3b3434cb05d2aafc01e55e95ba0c8c7572a23376fbffc857b9be7f0b9"
+      },
+      {
+        "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp",
+        "retained": "observation-sources/ps2_runtime.cpp.gz",
+        "sha256": "408d1fb32089ab0701f6f7033dbdf1f77c269784e5bceb01d3c1f7cd86aeae25"
+      },
+      {
+        "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_memory.cpp",
+        "retained": "observation-sources/ps2_memory.cpp.gz",
+        "sha256": "030631c5d675a2057ce84a24cffe0fe796847c1a174b9745605fcafee473f90b"
+      },
+      {
+        "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp",
+        "retained": "observation-sources/ps2_vif1_interpreter.cpp.gz",
+        "sha256": "13a833def17495322807bcf31459c0b738cf225e93dcea815212838e8632e2c4"
+      }
+    ],
+    "interpretation": "Closed, contiguous observed prefix with balanced call exits and no byte/format-cap mechanism triggered; no artificial runtime footer and no claim of a live copy at tick600.",
+    "late_history": "one Present and zero draws",
+    "function_trace_balanced": true
+  },
+  "tap_kinds": {
+    "singleton": 1,
+    "field-before": 622,
+    "gif-start": 617,
+    "gif-dma": 207,
+    "path3-send": 207,
+    "gif-complete": 210,
+    "cpu-fifo": 616,
+    "fifo-before": 616,
+    "vif-mask": 628,
+    "fifo-after": 616,
+    "gs-enter": 206,
+    "path3-queue": 3,
+    "path3-flush": 3,
+    "mc-call": 781,
+    "mc-return": 781,
+    "mc-constructor": 1,
+    "mc-write": 223,
+    "mc-ui-pointer": 1
+  },
+  "counter": {
+    "n": 206,
+    "first": {
+      "seq": 10,
+      "tick": 41,
+      "kind": "field-before",
+      "S": 6404704,
+      "off": 23156,
+      "width": 4,
+      "lo": 1,
+      "hi": 0,
+      "pc": 3681072,
+      "thread": 1,
+      "C": 0,
+      "G": 0,
+      "M": 1,
+      "A": 0,
+      "B": 112,
+      "P": 0,
+      "D": 0
+    },
+    "last": {
+      "seq": 6317,
+      "tick": 248,
+      "kind": "field-before",
+      "S": 6404704,
+      "off": 23156,
+      "width": 4,
+      "lo": 206,
+      "hi": 0,
+      "pc": 3681072,
+      "thread": 5,
+      "C": 205,
+      "G": 0,
+      "M": 1,
+      "A": 0,
+      "B": 112,
+      "P": 0,
+      "D": 112
+    },
+    "continuous": true,
+    "pre_matches": true,
+    "M": {
+      "1": 206
+    },
+    "G": {
+      "0": 206
+    },
+    "pairs": {
+      "(0, 112, 0, 112)": 205
+    }
+  },
+  "gate_writers": {},
+  "mode_writers": [
+    {
+      "seq": 2,
+      "tick": 41,
+      "kind": "field-before",
+      "S": 6404704,
+      "off": 23016,
+      "width": 4,
+      "lo": 1,
+      "hi": 0,
+      "pc": 3628988,
+      "thread": 1,
+      "C": 0,
+      "G": 0,
+      "M": 0,
+      "A": 0,
+      "B": 0,
+      "P": 0,
+      "D": 0
+    }
+  ],
+  "mask_events": [
+    {
+      "seq": 15,
+      "tick": 41,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 0,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 24,
+      "tick": 43,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 29,
+      "tick": 43,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 396,
+      "was": 1,
+      "now": 0,
+      "queued": 1
+    },
+    {
+      "seq": 31,
+      "tick": 43,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 796,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 32,
+      "tick": 43,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 940,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 33,
+      "tick": 43,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 1340,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 36,
+      "tick": 43,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 44,
+      "tick": 44,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 53,
+      "tick": 44,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 58,
+      "tick": 44,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 66,
+      "tick": 45,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 75,
+      "tick": 45,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 80,
+      "tick": 45,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 88,
+      "tick": 46,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 97,
+      "tick": 46,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 102,
+      "tick": 46,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 110,
+      "tick": 47,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 119,
+      "tick": 47,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 124,
+      "tick": 47,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 132,
+      "tick": 48,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 141,
+      "tick": 48,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 146,
+      "tick": 48,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 154,
+      "tick": 49,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 163,
+      "tick": 49,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 168,
+      "tick": 49,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 176,
+      "tick": 50,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 185,
+      "tick": 50,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 190,
+      "tick": 50,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 198,
+      "tick": 51,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 207,
+      "tick": 51,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 212,
+      "tick": 51,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 220,
+      "tick": 52,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 229,
+      "tick": 52,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 234,
+      "tick": 52,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 242,
+      "tick": 53,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 251,
+      "tick": 53,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 256,
+      "tick": 53,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 264,
+      "tick": 54,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 273,
+      "tick": 54,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 278,
+      "tick": 54,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 286,
+      "tick": 55,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 295,
+      "tick": 55,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 300,
+      "tick": 55,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 308,
+      "tick": 56,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 317,
+      "tick": 56,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 322,
+      "tick": 56,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 330,
+      "tick": 57,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 339,
+      "tick": 57,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 344,
+      "tick": 57,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 352,
+      "tick": 58,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 361,
+      "tick": 58,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 366,
+      "tick": 58,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 374,
+      "tick": 59,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 383,
+      "tick": 59,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 388,
+      "tick": 59,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 396,
+      "tick": 60,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 405,
+      "tick": 60,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 410,
+      "tick": 60,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 418,
+      "tick": 61,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 427,
+      "tick": 61,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 432,
+      "tick": 61,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 440,
+      "tick": 62,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 449,
+      "tick": 62,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 454,
+      "tick": 62,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 462,
+      "tick": 63,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 471,
+      "tick": 63,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 476,
+      "tick": 63,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 484,
+      "tick": 64,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 493,
+      "tick": 64,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 498,
+      "tick": 64,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 506,
+      "tick": 65,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 515,
+      "tick": 65,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 520,
+      "tick": 65,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 528,
+      "tick": 66,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 537,
+      "tick": 66,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 542,
+      "tick": 66,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 550,
+      "tick": 67,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 559,
+      "tick": 67,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 564,
+      "tick": 67,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 572,
+      "tick": 68,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 581,
+      "tick": 68,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 586,
+      "tick": 68,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 594,
+      "tick": 69,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 603,
+      "tick": 69,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 608,
+      "tick": 69,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 616,
+      "tick": 70,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 625,
+      "tick": 70,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 630,
+      "tick": 70,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 638,
+      "tick": 71,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 647,
+      "tick": 71,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 652,
+      "tick": 71,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 660,
+      "tick": 72,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 669,
+      "tick": 72,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 674,
+      "tick": 72,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 682,
+      "tick": 73,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 691,
+      "tick": 73,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 696,
+      "tick": 73,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 704,
+      "tick": 74,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 713,
+      "tick": 74,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 718,
+      "tick": 74,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 726,
+      "tick": 75,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 735,
+      "tick": 75,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 740,
+      "tick": 75,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 748,
+      "tick": 76,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 757,
+      "tick": 76,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 762,
+      "tick": 76,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 770,
+      "tick": 77,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 779,
+      "tick": 77,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 784,
+      "tick": 77,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 792,
+      "tick": 78,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 801,
+      "tick": 78,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 806,
+      "tick": 78,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 814,
+      "tick": 79,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 823,
+      "tick": 79,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 828,
+      "tick": 79,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 836,
+      "tick": 80,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 845,
+      "tick": 80,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 850,
+      "tick": 80,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 877,
+      "tick": 81,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 886,
+      "tick": 81,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 891,
+      "tick": 81,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 899,
+      "tick": 82,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 908,
+      "tick": 82,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 913,
+      "tick": 82,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 921,
+      "tick": 83,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 930,
+      "tick": 83,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 935,
+      "tick": 83,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 943,
+      "tick": 84,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 952,
+      "tick": 84,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 957,
+      "tick": 84,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 965,
+      "tick": 85,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 974,
+      "tick": 85,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 979,
+      "tick": 85,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 987,
+      "tick": 86,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 996,
+      "tick": 86,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1001,
+      "tick": 86,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1009,
+      "tick": 87,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1018,
+      "tick": 87,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1023,
+      "tick": 87,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1031,
+      "tick": 88,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1040,
+      "tick": 88,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1045,
+      "tick": 88,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1053,
+      "tick": 89,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1062,
+      "tick": 89,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1067,
+      "tick": 89,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1075,
+      "tick": 90,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1084,
+      "tick": 90,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1089,
+      "tick": 90,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1097,
+      "tick": 91,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1106,
+      "tick": 91,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1111,
+      "tick": 91,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1119,
+      "tick": 92,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1128,
+      "tick": 92,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1133,
+      "tick": 92,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1141,
+      "tick": 93,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1150,
+      "tick": 93,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1155,
+      "tick": 93,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1163,
+      "tick": 94,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1172,
+      "tick": 94,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1177,
+      "tick": 94,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1185,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1194,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1199,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 16676,
+      "was": 1,
+      "now": 0,
+      "queued": 1
+    },
+    {
+      "seq": 1201,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 17076,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1202,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 17220,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1203,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 17620,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1206,
+      "tick": 95,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1214,
+      "tick": 96,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1223,
+      "tick": 96,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1228,
+      "tick": 96,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1236,
+      "tick": 97,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1245,
+      "tick": 97,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1250,
+      "tick": 97,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1258,
+      "tick": 98,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1267,
+      "tick": 98,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1272,
+      "tick": 98,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1280,
+      "tick": 99,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1289,
+      "tick": 99,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1294,
+      "tick": 99,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1302,
+      "tick": 100,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1311,
+      "tick": 100,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1316,
+      "tick": 100,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1324,
+      "tick": 101,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1333,
+      "tick": 101,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1338,
+      "tick": 101,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1346,
+      "tick": 102,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1355,
+      "tick": 102,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1360,
+      "tick": 102,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1368,
+      "tick": 103,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1377,
+      "tick": 103,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1382,
+      "tick": 103,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1390,
+      "tick": 104,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1399,
+      "tick": 104,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1404,
+      "tick": 104,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1412,
+      "tick": 105,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1421,
+      "tick": 105,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1426,
+      "tick": 105,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1434,
+      "tick": 106,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1443,
+      "tick": 106,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1448,
+      "tick": 106,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1456,
+      "tick": 107,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1465,
+      "tick": 107,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1470,
+      "tick": 107,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1478,
+      "tick": 108,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1487,
+      "tick": 108,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1492,
+      "tick": 108,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1500,
+      "tick": 109,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1509,
+      "tick": 109,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1514,
+      "tick": 109,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1522,
+      "tick": 110,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1531,
+      "tick": 110,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1536,
+      "tick": 110,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1544,
+      "tick": 111,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1553,
+      "tick": 111,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1558,
+      "tick": 111,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1566,
+      "tick": 112,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1575,
+      "tick": 112,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1580,
+      "tick": 112,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1588,
+      "tick": 113,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1597,
+      "tick": 113,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1602,
+      "tick": 113,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1610,
+      "tick": 114,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1619,
+      "tick": 114,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1624,
+      "tick": 114,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1632,
+      "tick": 115,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1641,
+      "tick": 115,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1646,
+      "tick": 115,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1654,
+      "tick": 116,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1663,
+      "tick": 116,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1668,
+      "tick": 116,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1676,
+      "tick": 117,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1685,
+      "tick": 117,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1690,
+      "tick": 117,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1698,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1813,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1818,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 444,
+      "was": 1,
+      "now": 0,
+      "queued": 1
+    },
+    {
+      "seq": 1820,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 844,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1821,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 988,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1822,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 1388,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1825,
+      "tick": 118,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1833,
+      "tick": 119,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1870,
+      "tick": 119,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1875,
+      "tick": 119,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1883,
+      "tick": 120,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1932,
+      "tick": 120,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1937,
+      "tick": 120,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1945,
+      "tick": 121,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 1971,
+      "tick": 121,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1976,
+      "tick": 121,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 1984,
+      "tick": 122,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2009,
+      "tick": 122,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2014,
+      "tick": 122,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2022,
+      "tick": 123,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2051,
+      "tick": 123,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2056,
+      "tick": 123,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2064,
+      "tick": 124,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2118,
+      "tick": 124,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2123,
+      "tick": 124,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2131,
+      "tick": 125,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2157,
+      "tick": 125,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2162,
+      "tick": 125,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2170,
+      "tick": 126,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2195,
+      "tick": 126,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2200,
+      "tick": 126,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2208,
+      "tick": 127,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2237,
+      "tick": 127,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2242,
+      "tick": 127,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2250,
+      "tick": 128,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2304,
+      "tick": 128,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2309,
+      "tick": 128,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2317,
+      "tick": 129,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2343,
+      "tick": 129,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2348,
+      "tick": 129,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2356,
+      "tick": 130,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2381,
+      "tick": 130,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2386,
+      "tick": 130,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2394,
+      "tick": 131,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2423,
+      "tick": 131,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2428,
+      "tick": 131,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2436,
+      "tick": 132,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2470,
+      "tick": 132,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2475,
+      "tick": 132,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2483,
+      "tick": 133,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2502,
+      "tick": 133,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2507,
+      "tick": 133,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2515,
+      "tick": 134,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2534,
+      "tick": 134,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2539,
+      "tick": 134,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2547,
+      "tick": 135,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2566,
+      "tick": 135,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2571,
+      "tick": 135,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2579,
+      "tick": 136,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2598,
+      "tick": 136,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2603,
+      "tick": 136,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2611,
+      "tick": 137,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2630,
+      "tick": 137,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2635,
+      "tick": 137,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2643,
+      "tick": 138,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2662,
+      "tick": 138,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2667,
+      "tick": 138,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2675,
+      "tick": 139,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2694,
+      "tick": 139,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2699,
+      "tick": 139,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2707,
+      "tick": 140,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2726,
+      "tick": 140,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2731,
+      "tick": 140,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2739,
+      "tick": 141,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2758,
+      "tick": 141,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2763,
+      "tick": 141,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2771,
+      "tick": 142,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2790,
+      "tick": 142,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2795,
+      "tick": 142,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2803,
+      "tick": 143,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2822,
+      "tick": 143,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2827,
+      "tick": 143,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2835,
+      "tick": 144,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2854,
+      "tick": 144,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2859,
+      "tick": 144,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2867,
+      "tick": 145,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2886,
+      "tick": 145,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2891,
+      "tick": 145,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2899,
+      "tick": 146,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2918,
+      "tick": 146,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2923,
+      "tick": 146,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2931,
+      "tick": 147,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2950,
+      "tick": 147,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2955,
+      "tick": 147,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2963,
+      "tick": 148,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 2982,
+      "tick": 148,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2987,
+      "tick": 148,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 2995,
+      "tick": 149,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3014,
+      "tick": 149,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3019,
+      "tick": 149,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3027,
+      "tick": 150,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3046,
+      "tick": 150,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3051,
+      "tick": 150,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3059,
+      "tick": 151,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3078,
+      "tick": 151,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3083,
+      "tick": 151,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3091,
+      "tick": 152,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3110,
+      "tick": 152,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3115,
+      "tick": 152,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3123,
+      "tick": 153,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3142,
+      "tick": 153,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3147,
+      "tick": 153,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3155,
+      "tick": 154,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3174,
+      "tick": 154,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3179,
+      "tick": 154,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3187,
+      "tick": 155,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3206,
+      "tick": 155,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3211,
+      "tick": 155,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3219,
+      "tick": 156,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3238,
+      "tick": 156,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3243,
+      "tick": 156,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3251,
+      "tick": 157,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3270,
+      "tick": 157,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3275,
+      "tick": 157,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3283,
+      "tick": 158,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3302,
+      "tick": 158,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3307,
+      "tick": 158,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3315,
+      "tick": 159,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3334,
+      "tick": 159,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3339,
+      "tick": 159,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3347,
+      "tick": 160,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3366,
+      "tick": 160,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3371,
+      "tick": 160,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3379,
+      "tick": 161,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3398,
+      "tick": 161,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3403,
+      "tick": 161,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3411,
+      "tick": 162,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3430,
+      "tick": 162,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3435,
+      "tick": 162,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3443,
+      "tick": 163,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3462,
+      "tick": 163,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3467,
+      "tick": 163,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3475,
+      "tick": 164,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3494,
+      "tick": 164,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3499,
+      "tick": 164,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3507,
+      "tick": 165,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3526,
+      "tick": 165,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3531,
+      "tick": 165,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3539,
+      "tick": 166,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3558,
+      "tick": 166,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3563,
+      "tick": 166,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3571,
+      "tick": 167,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3590,
+      "tick": 167,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3595,
+      "tick": 167,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3603,
+      "tick": 168,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3622,
+      "tick": 168,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3627,
+      "tick": 168,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3635,
+      "tick": 169,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3654,
+      "tick": 169,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3659,
+      "tick": 169,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3667,
+      "tick": 170,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3686,
+      "tick": 170,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3691,
+      "tick": 170,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3699,
+      "tick": 171,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3718,
+      "tick": 171,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3723,
+      "tick": 171,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3731,
+      "tick": 172,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3750,
+      "tick": 172,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3755,
+      "tick": 172,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3763,
+      "tick": 173,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3782,
+      "tick": 173,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3787,
+      "tick": 173,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3795,
+      "tick": 174,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3814,
+      "tick": 174,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3819,
+      "tick": 174,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3827,
+      "tick": 175,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3846,
+      "tick": 175,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3851,
+      "tick": 175,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3859,
+      "tick": 176,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3878,
+      "tick": 176,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3883,
+      "tick": 176,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3891,
+      "tick": 177,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3910,
+      "tick": 177,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3915,
+      "tick": 177,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3923,
+      "tick": 178,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3942,
+      "tick": 178,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3947,
+      "tick": 178,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3955,
+      "tick": 179,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 3974,
+      "tick": 179,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3979,
+      "tick": 179,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 3987,
+      "tick": 180,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4006,
+      "tick": 180,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4011,
+      "tick": 180,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4019,
+      "tick": 181,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4038,
+      "tick": 181,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4043,
+      "tick": 181,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4051,
+      "tick": 182,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4070,
+      "tick": 182,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4075,
+      "tick": 182,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4083,
+      "tick": 183,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4102,
+      "tick": 183,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4107,
+      "tick": 183,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4115,
+      "tick": 184,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4134,
+      "tick": 184,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4139,
+      "tick": 184,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4147,
+      "tick": 185,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4166,
+      "tick": 185,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4171,
+      "tick": 185,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4179,
+      "tick": 186,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4198,
+      "tick": 186,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4203,
+      "tick": 186,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4211,
+      "tick": 187,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4230,
+      "tick": 187,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4235,
+      "tick": 187,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4243,
+      "tick": 188,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4262,
+      "tick": 188,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4267,
+      "tick": 188,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4275,
+      "tick": 189,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4294,
+      "tick": 189,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4299,
+      "tick": 189,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4307,
+      "tick": 190,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4326,
+      "tick": 190,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4331,
+      "tick": 190,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4339,
+      "tick": 191,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4358,
+      "tick": 191,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4363,
+      "tick": 191,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4371,
+      "tick": 192,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4390,
+      "tick": 192,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4395,
+      "tick": 192,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4403,
+      "tick": 193,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4422,
+      "tick": 193,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4427,
+      "tick": 193,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4435,
+      "tick": 194,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4454,
+      "tick": 194,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4459,
+      "tick": 194,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4467,
+      "tick": 195,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4486,
+      "tick": 195,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4491,
+      "tick": 195,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4499,
+      "tick": 196,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4518,
+      "tick": 196,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4523,
+      "tick": 196,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4531,
+      "tick": 197,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4550,
+      "tick": 197,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4555,
+      "tick": 197,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4563,
+      "tick": 198,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4582,
+      "tick": 198,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4587,
+      "tick": 198,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4595,
+      "tick": 199,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4614,
+      "tick": 199,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4619,
+      "tick": 199,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4627,
+      "tick": 200,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4646,
+      "tick": 200,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4651,
+      "tick": 200,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4659,
+      "tick": 201,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4678,
+      "tick": 201,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4683,
+      "tick": 201,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4691,
+      "tick": 202,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4710,
+      "tick": 202,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4715,
+      "tick": 202,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4723,
+      "tick": 203,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4742,
+      "tick": 203,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4747,
+      "tick": 203,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4755,
+      "tick": 204,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4774,
+      "tick": 204,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4779,
+      "tick": 204,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4787,
+      "tick": 205,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4806,
+      "tick": 205,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4811,
+      "tick": 205,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4819,
+      "tick": 206,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4838,
+      "tick": 206,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4843,
+      "tick": 206,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4851,
+      "tick": 207,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4870,
+      "tick": 207,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4875,
+      "tick": 207,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4883,
+      "tick": 208,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4902,
+      "tick": 208,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4907,
+      "tick": 208,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4915,
+      "tick": 209,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4934,
+      "tick": 209,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4939,
+      "tick": 209,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4947,
+      "tick": 210,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4966,
+      "tick": 210,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4971,
+      "tick": 210,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 4979,
+      "tick": 211,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 4998,
+      "tick": 211,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5003,
+      "tick": 211,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5011,
+      "tick": 212,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5030,
+      "tick": 212,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5035,
+      "tick": 212,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5043,
+      "tick": 213,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5062,
+      "tick": 213,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5067,
+      "tick": 213,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5075,
+      "tick": 214,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5094,
+      "tick": 214,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5099,
+      "tick": 214,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5107,
+      "tick": 215,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5126,
+      "tick": 215,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5131,
+      "tick": 215,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5139,
+      "tick": 216,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5158,
+      "tick": 216,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5163,
+      "tick": 216,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5171,
+      "tick": 217,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5190,
+      "tick": 217,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5195,
+      "tick": 217,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5203,
+      "tick": 218,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5222,
+      "tick": 218,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5227,
+      "tick": 218,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5235,
+      "tick": 219,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5254,
+      "tick": 219,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5259,
+      "tick": 219,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5267,
+      "tick": 220,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5286,
+      "tick": 220,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5291,
+      "tick": 220,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5299,
+      "tick": 221,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5318,
+      "tick": 221,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5323,
+      "tick": 221,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5331,
+      "tick": 222,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5350,
+      "tick": 222,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5355,
+      "tick": 222,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5363,
+      "tick": 223,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5406,
+      "tick": 223,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5411,
+      "tick": 223,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5419,
+      "tick": 224,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5462,
+      "tick": 224,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5467,
+      "tick": 224,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5475,
+      "tick": 225,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5530,
+      "tick": 225,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5535,
+      "tick": 225,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5543,
+      "tick": 226,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5584,
+      "tick": 226,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5589,
+      "tick": 226,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5597,
+      "tick": 227,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5637,
+      "tick": 227,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5642,
+      "tick": 227,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5650,
+      "tick": 228,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5694,
+      "tick": 228,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5699,
+      "tick": 228,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5707,
+      "tick": 229,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5750,
+      "tick": 229,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5755,
+      "tick": 229,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5763,
+      "tick": 230,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5799,
+      "tick": 230,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5804,
+      "tick": 230,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5812,
+      "tick": 231,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5829,
+      "tick": 231,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5834,
+      "tick": 231,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5842,
+      "tick": 232,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5859,
+      "tick": 232,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5864,
+      "tick": 232,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5872,
+      "tick": 233,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5889,
+      "tick": 233,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5894,
+      "tick": 233,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5902,
+      "tick": 234,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5919,
+      "tick": 234,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5924,
+      "tick": 234,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5932,
+      "tick": 235,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5949,
+      "tick": 235,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5954,
+      "tick": 235,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5962,
+      "tick": 236,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 5979,
+      "tick": 236,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5984,
+      "tick": 236,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 5992,
+      "tick": 237,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6009,
+      "tick": 237,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6014,
+      "tick": 237,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6022,
+      "tick": 238,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6039,
+      "tick": 238,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6044,
+      "tick": 238,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6052,
+      "tick": 239,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6069,
+      "tick": 239,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6074,
+      "tick": 239,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6082,
+      "tick": 240,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6099,
+      "tick": 240,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6104,
+      "tick": 240,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6112,
+      "tick": 241,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6129,
+      "tick": 241,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6134,
+      "tick": 241,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6142,
+      "tick": 242,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6159,
+      "tick": 242,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6164,
+      "tick": 242,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6172,
+      "tick": 243,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6189,
+      "tick": 243,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6194,
+      "tick": 243,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6202,
+      "tick": 244,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6219,
+      "tick": 244,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6224,
+      "tick": 244,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6232,
+      "tick": 245,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6249,
+      "tick": 245,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6254,
+      "tick": 245,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6262,
+      "tick": 246,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6279,
+      "tick": 246,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6284,
+      "tick": 246,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6292,
+      "tick": 247,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    },
+    {
+      "seq": 6309,
+      "tick": 247,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 0,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6314,
+      "tick": 247,
+      "kind": "vif-mask",
+      "cmd": 100696064,
+      "offset": 0,
+      "was": 1,
+      "now": 1,
+      "queued": 0
+    },
+    {
+      "seq": 6322,
+      "tick": 248,
+      "kind": "vif-mask",
+      "cmd": 100663296,
+      "offset": 0,
+      "was": 1,
+      "now": 0,
+      "queued": 0
+    }
+  ],
+  "boundary_events": [],
+  "tick600_kinds": {},
+  "tick600_copy": [],
+  "tick600_copy_gs_matches": [],
+  "packets": []
+}

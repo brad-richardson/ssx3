@@ -1,0 +1,180 @@
+      valid at
+  12 +`flush_descriptor_set():3505`, fault `0xf0` at driver
+       `ldr w8, [x2, #0xf0]`;
+  13 +`:3504 VK_ASSERT` compiled out; three candidates open
+      ). No new dumps (kept).
+  14 +
+  15 +Machine: same as G8–G17 (Apple M4, macOS 27.0 — no ne
+      w installs) +
+  16 +Odin3 (`622c49b1`, Android 15). Pins: paraLLEl-GS
+  17 +`3a66c1976170cbc2cb53a3593fabbc7c4b2ccfbd` + G14 S1–S
+      3 shims + G11/G8+G10
+  18 +hunks (re-verified §2a; the ONLY delta is the G18 fix
+       hunk, §2d) / rich dump
+  19 +sha `154d9d85…` (re-verified host-side AND on-device)
+       / G14 binary
+  20 +`c4cd63b4…` (pre-fix baseline — G14 build dir untouch
+      ed; the fix rebuilds
+  … 65 more lines
+
+◆ Edited local/research/G18/REPORT.md (+88 −0) · ctrl+o
+   85  one device run.
+   86 +
+   87 +## 2. Task 1 — static cause + minimal fix + rebuild
+       (no device yet)
+   88 +
+   89 +### 2a. Pin verification (pre-work — G17 §2a reprodu
+       ced + fix-hunk delta)
+   90 +
+   91 +| item | observed |
+   92 +| --- | --- |
+   93 +| SSD clone HEAD | `3a66c1976170cbc2cb53a3593fabbc7c
+       4b2ccfbd` (== pin) |
+   94 +| tree status (pre-fix) | `M CMakeLists.txt` (S1) +
+       `m Granite` (S2) + `M tools/CMakeLists.txt` (S3) + `
+       M gs/gs_interface.cpp` (G11) + `M tools/gs_dump_repl
+       ayer.cpp` (G8+G10) + ExFAT `._` sidecars — G17 §2a e
+       xactly |
+   95 +| tree status (post-fix) | SAME + fix hunk in `Grani
+       te/vulkan/shader.cpp` ONLY (Granite diff: `applicati
+       on/platforms/CMakeLists.txt` S2 + `util/timer.cpp` G
+       7 + `vulkan/shader.cpp` G18 — §2d) |
+   96 +| Granite rev | `16e7395f6a48` (== pin; fix is uncom
+       mitted, same standing as G14 shims) |
+   97 +| rich dump (host) | 11,537,377 B, sha `154d9d8577a2
+       10fb794b29a048ee2cf08053f87fe220bb2bf975933a02ad7e32
+       ` full-match (device re-verified §2e) |
+   98 +| G14 binary (baseline) | 265,837,472 B, sha `c4cd63
+       b4859ee72480abce6790904f41aa95374eaec3bd39395bb94a42
+       d79db7` (G14 build dir untouched) |
+   99 +| device | `622c49b1`, Odin3, Android 15; `/data` 28
+        G free; `/data/local/tmp/` == `mg/` only at start;
+       newest tombstone pre-run `_11` 04:19 (rotation noted
+        §0) |
+  100 +| driver | Adreno (TM) 830, API 1.3.284, Driver 512.
+       800.58 (logcat §2f; == G14–G17) |
+  101 +| OS oracle `cmd gpu vkjson` | `VK_EXT_descriptor_bu
+       ffer` PRESENT; `VK_EXT_descriptor_heap` count 0 (hea
+       p variant eliminated at the OS level too) |
+  102 +| NDK / cmake | r30 `30.0.16248370` (re-confirmed);
+       G14 recipe reused verbatim (§2e) |
+  103 +
+  104 +### 2b. Static reads — the three candidates (all rea
+       ds read-only, pre-fix)
+  … 69 more lines
+
+◆ Edited local/research/G18/REPORT.md (+141 −0) · ctrl+o
+  173  | build dir | 4,482,048 KiB (cap 6 GB ✓); G14 dir ==
+        4,480,000 KiB (untouched ✓) |
+  174 +
+  175 +## 3. Task 2 — bounded on-device re-run + score (Odi
+       n)
+  176 +
+  177 +### 3a. Re-run table (ONE run — retry not used, §3c)
+  178 +
+  179 +| item | observed |
+  180 +| --- | --- |
+  181 +| staging | `/data/local/tmp/g18/` ONLY; dump + G18
+       binary pushed; on-device shas FULL-match host (`154d
+       9d85…` / `a62d8a2b…`); logcat cleared, Granite empty
+        before |
+  182 +| command | `timeout -s KILL 280 ./parallel-gs-repla
+       yer /data/local/tmp/g18/g13-dump.gs --iterations 2`
+       (G14 shape verbatim) |
+  183 +| exit / wall | **139** (SIGSEGV) / <1 s wall (same-
+       second `date` stamps; logcat spans 16.085→16.278, ~2
+       00 ms) |
+  184 +| logcat | 36 lines: init + extension list (incl. `V
+       K_EXT_descriptor_buffer`, no heap) + `Running frame`
+        + G11/G10 first-draw lines + TWO `Stalled compile (
+       compute, …success: yes)` (`502d5366ce6695c1`, then `
+       b7109780b562b0fe`); 0 "Failed to create descriptor u
+       pdate template" |
+  185 +| progress vs G17 r3 (O2) | r3's logcat ENDS at the
+       first stalled compile (`502d…`) — the O2 death site
+       (first-draw texture-upload `dispatch_indirect`); G18
+        continues PAST it (G11 `record prims=17…` + second
+       stalled compile) |
+  186 +| fate | NOT O2 (no fault-`0xf0`, §3b); NOT O1 (O1 =
+        SIGSEGV `0x380` null-`table` @ `trim():171` in init
+        — G15; this is fault-`0x0` in the driver compiler,
+       post-first-draw); NOT O3 (O3 = SIGABRT @ `trim():173
+       `) → NEW signature, tabled **O4** |
+  187 +| device outputs | 0 scanouts (dir == inputs only);
+       tombstone_12 written 06:51 (pulled, §3b); device dir
+        removed after (`mg/` only ✓) |
+  188 +
+  189 +### 3b. Tombstone_12 triage (pid 20749 — O4 naming)
+  190 +
+  191 +| slot | fact |
+  192 +| --- | --- |
+  … 122 more lines
+
+◆ Edited local/research/G18/REPORT.md (+1 −1)
+  203 -O4 determinism-vs-lottery stays single-sample (gap §
+       5.3) |
+  203 +O4 determinism-vs-lottery stays single-sample (gap §
+       7.2) |
+
+◆ Ran 3 commands · Tail receipt of … · +2 ✓ · 1.7s · ctrl+o
+
+◆ G18 done. Hypothesis SUPPORTED: cause named statically,
+  one-hunk fix passes O2's exact site, run exposes a new
+  wall (O4).
+
+  Cause (named, heap/init path):
+  PipelineLayout::init_legacy gates
+  create_update_templates() on the RAW
+  descriptor_buffer_features.descriptorBuffer bit (
+  /Volumes/Extreme%20SSD/parallel-gs-g7/Granite/vulkan/shad
+  er.cpp:531), while CommandBuffer selects the
+  descriptor-buffer flush path on the DERIVED
+  supports_descriptor_buffer flag (
+  /Volumes/Extreme%20SSD/parallel-gs-g7/Granite/vulkan/comm
+  and_buffer.cpp:108, suitability at
+  /Volumes/Extreme%20SSD/parallel-gs-g7/Granite/vulkan/cont
+  ext.cpp:2279). On Odin3's Adreno 830: raw=true (extension
+  enabled, all logcats) but derived=false (Generic cmd took
+  legacy path) → zero templates created → null slot to the
+  driver. Mask-skip eliminated (dispatch loop proves set 0
+  ∈ mask); runtime-nulled eliminated (no writers besides
+  init/create/dtor).
+
+  Fix (one hunk, create-the-template): gate creation on
+  supports_descriptor_buffer instead of the raw bit.
+  Bit-identical on healthy devices; bites only in the
+  broken config. Skip-the-call and assert-and-early-out
+  tabled and rejected.
+
+  Rebuild: exit 0, [458/458], binary a62d8a2b… (265,837,472
+  B), new SSD dir untouched-G14.
+
+  Re-run (one bounded run, exit 139): reached first draw
+  and PASSED O2's site — main thread progressed past the
+  first-draw texture-upload dispatch_indirect (O2's 4/4
+  death site) to dispatch_triangle_setup; no 0xf0 fault.
+  Then died on NEW signature O4: SIGSEGV fault 0x0 in
+  libllvm-qgl.so inside vkCreateComputePipelines, async
+  worker tid 20753, main concurrently in the same call. Not
+  O1/O2/O3. Retry and lldb both tabled NO (contract
+  conditions not met; tombstone fully classifies). Score:
+  oracles ALL OK, 0 scanouts → N/A.
+
+  ONE next action: O4-triage brief — re-run the SAME G18
+  binary with PGS_SKIP_COMPILATION_TASKS=1 (
+  /Volumes/Extreme%20SSD/parallel-gs-g7/Granite/vulkan/shad
+  er.cpp:459). O4 vanishes → async/concurrent-path issue;
+  persists on sync compile → Adreno compiler bug on one
+  shader. No rebuild needed.
+
+  Evidence: ps2xGS 8f27036 [G18] pushed; ssx3 cbe8c4f [G18]
+  (local/research/G18/ REPORT + fix diff) NOT pushed.
+  Device clean (mg/ only), all byte caps met, prior SSD
+  dirs 0-growth.
+
+◆ Worked for 14m 29s · 6:55 AM
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯ Ctrl+B sends the selected task to the background queue
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ssx3 · YOLO

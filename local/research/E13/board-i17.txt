@@ -1,0 +1,143 @@
+muse --yolo
+
+ssx3 on  main
+❯ muse --yolo
+
+  Muse Code 1.3.0
+
+  Model set to muse-spark-1.3-contributor
+  ⎿  Your content, including inter-session messages, may be
+     used for product improvement.
+
+❯ # I17 — Close the 0x2c5358 indirect-target gap at the E12
+  base (deduplicate E12's row), re-codegen, re-link,
+  re-probe on iPad
+
+  You are muse in a herdr panel in
+  `/Users/bradrichardson/dev/ssx3`. **Tables,
+  no verdicts.** Read `local/research/I16/REPORT.md` first
+  (all of it: base
+  stayed `ffdf58c` (case (b) — no E12 commit existed) + 7
+  ports + 1-line CSV
+  entry closed `0x2c5300` (`0x2c5300` executes mid-trace
+  with successors
+  `→ 0x2c67a8 → 0x2d3928 → …`), guest reaches a STRICTLY
+  LATER wall: indirect
+  JALR `0x2d3828 → 0x2c5358` (mid-function of emitted
+  `sub_002C5338`
+  `0x2c5338–0x2c53b0`, head after `jr $ra` @`0x2c534c`/ds
+  `0x2c5350`/nop
+  @`0x2c5354`, INTERNAL branches + tail `jr $ra`
+  @`0x2c53a0`/`0x2c53a8` →
+  return, ends `0x2c53b0`, observed bounds
+  `0x2c5358–0x2c53b0`, caller `jalr
+  $v0` @`0x2d3828` with record+offset table load, 0
+  register refs/case/file;
+  gap 1 = this brief). This brief executes I16's ONE next
+  action — the same
+  1-line class as I11–I16. Reuse I16's worktree shape +
+  device toolchain +
+  provision/install/ISO+env mechanism — table every delta.
+
+  ## Facts you start from
+
+  - Target: Brad's iPad, iPad Air 11-inch (M2), UDID
+  `00008112-001224302184A01E` (`xcrun devicectl list
+  devices` to
+  re-confirm). The I16 app is STILL INSTALLED — plain
+  `install` overwrites
+  (closed 8× now). No fresh prompt needed for iPad
+  installs. Confirm the
+  iPad's state before installing (user sessions reported,
+  not killed).
+  - BASE: create a SEPARATE fork worktree on the SSD at
+  CURRENT `fork/ssx3`
+  HEAD (table the hash — expect `9da21ff` or later; NEVER
+  move it
+  yourself). The E12 row HAS now landed fork-side —
+  DEDUPLICATE, don't
+  duplicate: verify E12's `0x2c5300` row bytes at HEAD
+  (expect
+  `sub_002C5300,0x2c5300,0x2c5320,0x20`, byte-identical to
+  I16's `b07f738`
+  row), then port I16's 7 non-`0x2c5300` commits (plist,
+  CMake wiring,
+  `0x395730`/`0x14f2a8`/`0x156750`/`0x243a80`/`0x3a0158`
+  rows —
+  cherry-pick if clean, else re-apply by hand + table the
+  merged diff)
+  and SKIP porting I16's `0x2c5300` row (already in base —
+  table the
+  dedupe explicitly with both shas). Check whether the
+  E-lane owns the
+  shared clone before touching it (one `worktree add` +
+  read-only
+  inspection only, I16 shape).
+  - The task: add the missing function entry for `0x2c5358`
+  (I16's observed
+  row `sub_002C5358,0x2c5358,0x2c53b0,0x58` — RE-VERIFY the
+  internal
+  branches + `jr $ra` @`0x2c53a0`/`0x2c53a8` bounds from
+  the emitted slice
+  BEFORE writing the row; table the verification), then
+  re-run host
+  `ps2_recomp`, re-link `ps2_game_objects`
+  (`-DPS2X_GAME_CODEGEN_DIR`),
+  rebuild the device runtime, install over the I16 app, and
+  re-probe with
+  the ISO+env recipe. One gap per brief: if a SECOND new
+  wall appears,
+  table it as the next gap — do not close it here.
+  - Success bars (tabled, not verdicts): E12-row dedupe
+… output capped
+
+  Read local/research/I16/REPORT.md
+
+◆ Ran 9 commands · Verify port pat… ✗ · +8 ✓ · 17s · ctrl+o
+
+◆ Read skill git · built-in · 4 KB
+
+◆ Ran 2 commands · Re-verify 0x2c53… · +1 ✓ · 0.4s · ctrl+o
+
+  Read /Volumes/Extreme SSD/ps2x-i16/codegen-output/sub_002
+C5338_0x2c5338.cpp
+
+◆ Ran 2 commands · Verify tiling, z… · +1 ✓ · 6.1s · ctrl+o
+
+◆ Edited /Volumes/Extreme SSD/ps2x-i17/fork-wt/games/ssx3/s
+sx3-functions.sweep.csv (+1 −0)
+  5099  sub_002C5338,0x2c5338,0x2c53b0,0x78
+  5100 +sub_002C5358,0x2c5358,0x2c53b0,0x58
+  5101  sub_002C53B0,0x2c53b0,0x2c53c8,0x18
+
+◆ Ran 10 commands · Conf… · ✗ 3 failed · +6 ✓ · 4m · ctrl+o
+
+◆ Backgrounded · Build device Release with g… · 5m · ctrl+o
+
+  (↓ to view terminals)
+
+◆ Backgrounded · Pre-verify ISO bytes and s… · 10s · ctrl+o
+
+◆ Finished · Pre-verify ISO bytes and signing… · ✓ · ctrl+o
+
+◆ Finished · Pre-verify ISO bytes and signing… · ✓ · ctrl+o
+
+◆ Finished · Build device Release with game o… · ✓ · ctrl+o
+
+◆ Ran 7 commands · Overwrite-install … · +6 ✓ · 2m · ctrl+o
+
+◇ Running command · Lau… — running (57s · esc to interrupt)
+└ (ctrl+b to send to background)
+
+  ✓ Recon: pin fork/ssx3 HEAD, verify E12 row, check E-lan…
+  ✓ Worktree + port I16's 7 non-0x2c5300 commits, dedupe 0…
+  ✓ Re-verify 0x2c5358 bounds, write CSV row, local commit
+  ✓ Host ps2_recomp re-run + entry census
+  ✓ Configure + Release build with game objects
+  ◆ iPad state + overwrite install + argv re-probe
+  +1 more
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ssx3 · YOLO

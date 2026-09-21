@@ -1,0 +1,180 @@
+◆ Edited /tmp/t39-stage/t39-auto.sh (+1 −1)
+  843 -                  plog "LIVE-LIKE (departed + non-pa
+       nel + motion x2) -> pre-hold snap + ONE steering hol
+       d"
+  843 +                  plog "LIVE-LIKE (departed + non-pa
+       nel + motion x2) -> pre-sham pair + sham window + de
+       nse series"
+
+◆ Edited /tmp/t39-stage/t39-auto.sh (+1 −1)
+  846 -                  plog "NO-LIVE-PARK (X chain not li
+       ve gameplay; no hold pressed)"
+  846 +                  plog "NO-LIVE-PARK (X chain not li
+       ve gameplay; no sham run)"
+
+◆ Ran 10 commands · Capture dmesg o… · +9 ✓ · 7.2s · ctrl+o
+
+◆ Backgrounded · Run T39 control chain singl… · 5m · ctrl+o
+
+  (↓ to view terminals)
+
+◆ Wrote local/research/T39/REPORT.md (+51) · ctrl+o
+   1 +# T39 report — no-hold control run at a matched race
+      phase: dense series with NO input (bytesize, no lease
+      )
+   2 +
+   3 +Brief: T39 (T38's G1(a): no-hold control). Tables, no
+       verdicts. One boot
+   4 +ran on bytesize (R1: chain reproduced to live gamepla
+      y, sham window with
+   5 +NO input at a matched race phase, PRE-sham pair + DEN
+      SE 10-snap post-sham
+   6 +series mapped with rider-pixel tracking + T38 refinem
+      ents); laptop-side
+   7 +work was ssh/scp + local reads/analysis only. Time bo
+      x 4 h.
+   8 +
+   9 +Stale-reading guard: `local/research/T38/REPORT.md` (
+      all of it: R1
+  10 +reproduced the chain to LIVE gameplay, ONE 1037.3 ms
+      D-pad Left HOLD
+  11 +@T+504.54 on a live race (pre-pair 00:01:25 2ND/6 40%
+       / 00:01:31 2ND/6 44%),
+  12 +dense 10-snap post-hold series to 00:02:12 6TH/6 58%
+      with NO separable hold
+  13 +response — position decays 2ND→6TH distributed post-h
+      old with no
+  14 +hold-coincident step, RDC gated out 10/12, SCPS120 st
+      ill rails ±120 on 7/11
+  15 +hops incl. the no-input pre-pair gap and the hold hop
+      ; race clock ~1.4× wall
+  16 +under turbo; G1 proposes (a) no-hold control, (b) sub
+      -second exposures —
+  17 +this brief takes option (a)). This brief executes T38
+      's G1(a).
+  18 +
+  19 +Experiment contract (up front): hypothesis — the posi
+      tion decay, SCPS
+  20 +rail-class shifts, and RDC validity floods observed i
+      n T36 (tap), T37
+  … 31 more lines
+
+◆ Edited local/research/T39/REPORT.md (+34 −0) · ctrl+o
+  51  on VM-H26/H27 before R1):
+  52 +
+  53 +| Item | T4 value | T39 observed | Match |
+  54 +|---|---|---|---|
+  55 +| Binary sha256 | `6719f5d6…ee327` | `6719f5d6ba5ac6c
+      2c26a5954b12b837d0ff8d8e95ee6a83ed6b7b542cedee327` |
+      yes |
+  56 +| Binary size | 130929856 B | 130929856 B | yes |
+  57 +| Tree rev | `9056c08349…95af` | `9056c08349cc29ad02a
+      6d1a3a4133259019195af` | yes |
+  58 +| Tree status | clean | clean (empty `status --short`
+      ) | yes |
+  59 +| Inputs | ISO 3005415424 B + BIOS trio | same paths,
+       same sizes (ISO 3005415424, .bin 4194304, .mec 4, .n
+      vm 1024) | yes |
+  60 +| NVM pre-run | `da021d2a…` mtime Sep 20 15:20 | `da0
+      21d2a3d4b4e43182c240cb368986ae6b4cdf5f034e2e9afea0cb2
+      d865a961`, mtime Sep 20 15:20 | yes |
+  61 +| Pad binding (Cross) | `Cross = Keyboard/K` | `PCSX2
+      .ini:579` unchanged | yes |
+  62 +| Steering binding | — | no steering input issued thi
+      s session (no binding read needed; sham issues no xdo
+      tool) | n/a |
+  63 +| Title ref present | — | `t27-ref-title.ppm` sha `b9
+      64856a…e94f59a` reproduces T27 | yes |
+  64 +| Menu ref present | — | `t28-ref-menu.ppm` sha `8f34
+      385f…ae76` reproduces T28 | yes |
+  65 +| SC ref present | — | `t29-ref-sc.ppm` sha `dd7e4716
+      …2c06e55` reproduces T29 | yes |
+  66 +| ZC ref present | — | `t30-ref-zc.ppm` sha `212b0970
+      …f79f722` reproduces T30 | yes |
+  67 +| SP ref present | — | `t31-ref-sp.ppm` sha `1a8b1ed9
+      …d22b40` reproduces T31 | yes |
+  68 +| SM ref present | — | `t32-ref-sm.ppm` sha `e724021c
+      …92845c2` reproduces T32 | yes |
+  69 +| SE ref present | — | `t33-ref-se.ppm` sha `4baec4bc
+      …bedd889d` reproduces T33 | yes |
+  70 +| MR ref present | — | `t34-ref-mr.ppm` sha `069b1113
+      …64d373` reproduces T34 | yes |
+  … 15 more lines
+
+◆ Edited local/research/T39/REPORT.md (+105 −0) · ctrl+o
+   85  | Series span | 10 snaps over +26 s wall / +41 s rac
+       e | same cadence, same span |
+   86 +
+   87 +Box changes on bytesize (all recorded for reproduce-
+       from-scratch):
+   88 +
+   89 +| Change | Value |
+   90 +|---|---|
+   91 +| `/tmp/.X11-unix` | tmpfs `mode=1777` mounted over
+       WSL's dir (as root, T4 recipe) ×2 (once on VM-H26, o
+       nce on VM-H27 after a mid-staging restart — only the
+        H27 mount was live at R1) |
+   92 +| Xvfb | `:99 -screen 0 1280x1024x24`, started detac
+       hed by the script (`pkill` + `setsid nohup`) |
+   93 +| Dirs/files created | `/home/brad/pcsx2-t4/t39-{aut
+       o,analyze,vcount,cropdiff}.sh/.py`, `t39-{r1-census,
+       samples}.txt` (via analyze), `t39-*.jpg/.ppm/.log`,
+       `…/logs/emulog-pre-t39-*.txt` (rotation chain, see t
+       race table), `boot-t39.log/.stdout`, `C:\Users\bradr
+       \pcsx2-t4\t39*` staging |
+   94 +| Untouched | `.wslconfig`, BIOS/ISO inputs, `PCSX2.
+       ini` (no edits), live NVM (`da021d2a…`, mtime Sep 20
+        15:20) |
+   95 +| VM restarts (not by me) | pre-run section below; Z
+       ERO in-window (see WSL session log) |
+   96 +
+   97 +Script receipts (frozen BEFORE the run):
+   98 +
+   99 +| Item | Value |
+  100 +|---|---|
+  101 +| `t39-cropdiff.py` | byte-identical to T38's (`cmp`
+        clean), sha `ac114212…0826a53` |
+  102 +| `t39-track.py` | byte-identical to T38's (`cmp` cl
+       ean), sha `58afa004…91c108` (T38's frozen value) |
+  103 +| `t39-vcount.sh` | byte-identical to T38's (`cmp` c
+       lean), sha `105cd092…39107d76` |
+  104 +| `t39-analyze.sh` | differs only in output names (`
+       t39-census/samples`), sha `f91f9472…e2ab33d` |
+  … 86 more lines
+
+◆ Ran 2 commands · Stage batch scor… · +1 ✓ · 0.3s · ctrl+o
+
+◆ T39 R1 is running on bytesize (single-shot t39-auto.sh, ~
+  9–10 min wall). Pre-run state:
+
+  • Build/inputs/NVM/pad-binding/refs all reproduce T4–T38
+    values; live trace pre-run = T38 R1 (1180c368…).
+  • Two pre-session VM restarts (H25→H26→H27, not by me);
+    run VM is H27 (btime …331, 0 AcceptAsync pre-run).
+  • t39-auto.sh frozen: T38 copy + renames + sham_window (1
+    s sleep, zero xdotool) replacing press_hold;
+    cropdiff/track/vcount byte-identical to T38's.
+  • Phase-match targets tabled in the report draft (
+    local/research/T39/REPORT.md §§T39-0/1).
+
+  I'll proceed with dmesg/event-log capture, fetches, and
+  analysis when the run ssh returns.
+
+◆ Finished · Run T39 control chain single-shot · ✓ · ctrl+o
+
+◆ Ran 11 commands · Rename fetches t… · +10 ✓ · 1m · ctrl+o
+
+  Read 32 files · ctrl+o
+
+◆ Ran 13 commands · Confirm batch m… · +12 ✓ · 31s · ctrl+o
+
+  Read local/research/T39/t39r1-poll.log
+
+◆ Ran 17 commands · Count LoadStart… · +16 ✓ · 19s · ctrl+o
+
+◈ Thinking (13m 05s · esc to interrupt)
+
+── Voice input (⌥ + v to start) ───────────────────────────
+❯
+───────────────────────────────────────────────────────────
+  muse-spark-1.3-contributor · max · ~/dev/ssx3 · YOLO

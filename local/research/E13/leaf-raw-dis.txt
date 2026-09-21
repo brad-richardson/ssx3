@@ -1,0 +1,24 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+002c5358 24020014 addiu       $v0, $zero, 0x14
+002c535c 2403fff9 addiu       $v1, $zero, -0x7
+002c5360 00a23018 mult        $a2, $a1, $v0
+002c5364 00c42021 addu        $a0, $a2, $a0
+002c5368 8c840184 lw          $a0, 0x184($a0)
+002c536c 1083000c beq         $a0, $v1, . + 4 + (0xC << 2) ; target=0x2c53a0
+002c5370 2882fffa slti        $v0, $a0, -0x6
+002c5374 10400005 beqz        $v0, . + 4 + (0x5 << 2) ; target=0x2c538c
+002c5378 2402d8ef addiu       $v0, $zero, -0x2711
+002c537c 10820008 beq         $a0, $v0, . + 4 + (0x8 << 2) ; target=0x2c53a0
+002c5380 0000102d daddu       $v0, $zero, $zero
+002c5384 10000008 b           . + 4 + (0x8 << 2) ; target=0x2c53a8
+002c5388 00000000 nop
+002c538c 1c800006 bgtz        $a0, . + 4 + (0x6 << 2) ; target=0x2c53a8
+002c5390 0000102d daddu       $v0, $zero, $zero
+002c5394 2882fffb slti        $v0, $a0, -0x5
+002c5398 14400003 bnez        $v0, . + 4 + (0x3 << 2) ; target=0x2c53a8
+002c539c 0000102d daddu       $v0, $zero, $zero
+002c53a0 03e00008 jr          $ra
+002c53a4 24020001 addiu       $v0, $zero, 0x1
+002c53a8 03e00008 jr          $ra
+002c53ac 00000000 nop
+# E13 STATIC TAIL COMPLETE

@@ -1,0 +1,47 @@
+{
+  "files": [
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_e7.h",
+      "before": "9435d2be8c73890f48460366e719af9b376b3cfb08fb37481e52a5e207e21010",
+      "after": "9e4be7e3b3434cb05d2aafc01e55e95ba0c8c7572a23376fbffc857b9be7f0b9",
+      "sidecar_preexisting": false,
+      "removed_created_sidecar": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp",
+      "before": "09f431877d14425d3e48a9ac9025707441989d337a3e0f0d431f0a0df738619d",
+      "after": "408d1fb32089ab0701f6f7033dbdf1f77c269784e5bceb01d3c1f7cd86aeae25",
+      "sidecar_preexisting": false,
+      "removed_created_sidecar": true
+    }
+  ],
+  "window": "existing E7 tick<=603 byte caps",
+  "new_targets": [
+    "0x2d3810",
+    "0x241b20",
+    "0x241cd8",
+    "0x23e540",
+    "0x23eb50",
+    "0x23cf38",
+    "0x23d570"
+  ],
+  "route_sources": [
+    "0x23eb68",
+    "0x23e7e4",
+    "0x23e800",
+    "0x23e528"
+  ],
+  "ui_offsets": [
+    "0x43c",
+    "0x440",
+    "0x130",
+    "0xb8",
+    "0x748"
+  ],
+  "preserved_original_arguments": [
+    "a0",
+    "a1"
+  ],
+  "behavior": "read-only",
+  "consumer": "actual wrapper return + flag-calculator return + old/new UI flag store"
+}

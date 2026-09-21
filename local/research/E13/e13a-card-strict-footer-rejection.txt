@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_card.py", line 76, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_card.py", line 11, in main
+    events,tail=tap(RUN/f'{label}-join/e7-events.txt')
+                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_mine.py", line 40, in tap
+    assert tail.startswith('# E7 COMPLETE'), 'missing tap completion'
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: missing tap completion

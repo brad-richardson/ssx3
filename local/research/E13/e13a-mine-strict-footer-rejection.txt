@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_mine.py", line 153, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_mine.py", line 117, in main
+    events,tail=tap(path)
+                ~~~^^^^^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E13/e13_mine.py", line 40, in tap
+    assert tail.startswith('# E7 COMPLETE'), 'missing tap completion'
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: missing tap completion

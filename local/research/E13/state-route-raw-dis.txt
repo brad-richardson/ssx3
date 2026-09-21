@@ -1,0 +1,14 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+0023eb50 27bdfff0 addiu       $sp, $sp, -0x10
+0023eb54 24050004 addiu       $a1, $zero, 0x4
+0023eb58 ffbf0000 sd          $ra, 0x0($sp)
+0023eb5c 8c820748 lw          $v0, 0x748($a0)
+0023eb60 84430008 lh          $v1, 0x8($v0)
+0023eb64 8c46000c lw          $a2, 0xC($v0)
+0023eb68 00c0f809 jalr        $a2
+0023eb6c 00832021 addu        $a0, $a0, $v1
+0023eb70 dfbf0000 ld          $ra, 0x0($sp)
+0023eb74 03e00008 jr          $ra
+0023eb78 27bd0010 addiu       $sp, $sp, 0x10
+0023eb7c 00000000 nop
+# E13 STATIC TAIL COMPLETE

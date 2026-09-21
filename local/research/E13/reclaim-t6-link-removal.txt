@@ -1,0 +1,44 @@
+{
+  "tree": "/private/tmp/t6-link",
+  "utc": "2026-09-21T11:05:52.876936+00:00",
+  "lsof_recheck": {
+    "argv": [
+      "/usr/sbin/lsof",
+      "-nP",
+      "+D",
+      "/private/tmp/t6-link"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "df_before": {
+    "argv": [
+      "df",
+      "-k",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem   1024-blocks       Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk4s1  1953471488 1683158016 270313472    87%       1        0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   239362496  210244068   1278376   100% 1872267 12783760   13%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "free_before": 1309057024,
+  "removed": true,
+  "free_after": 3084447744,
+  "df_after": {
+    "argv": [
+      "df",
+      "-k",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem   1024-blocks       Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk4s1  1953471488 1683223552 270247936    87%       1        0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   239362496  208510296   3012148    99% 1863860 30121480    6%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "end_utc": "2026-09-21T11:05:55.442342+00:00",
+  "reclaimed_free_delta": 1775390720,
+  "target_met": false
+}
+# E13 RECLAMATION TAIL COMPLETE remove t6-link

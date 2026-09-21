@@ -1,0 +1,26 @@
+{
+  "absent": {
+    "rc": 0,
+    "expected_rc": 0,
+    "bytes": 2693,
+    "tail": [
+      "PREDICATE port=1 selected=0 other=-10002 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "PREDICATE port=1 selected=-10002 other=-10002 v0=1 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "CONSUMER actual-binding=_Z21sub_00241B20_0x241b20PhP12R5900ContextP10PS2Runtime entry=0x241c48 input=0x2c5358 flags=0x1b bit3=8 stopCalls=1 ram32MiB-unchanged=1",
+      "LEAF hasFunction=0 expected=0",
+      "E13 ACTUAL BINDING TEST COMPLETE success=1 boot=0"
+    ]
+  },
+  "present": {
+    "rc": 1,
+    "expected_rc": 1,
+    "bytes": 2704,
+    "tail": [
+      "PREDICATE port=1 selected=-7 other=0 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "PREDICATE port=1 selected=0 other=-10002 v0=0 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "PREDICATE port=1 selected=-10002 other=-10002 v0=1 pc=0xf00000 sp=0x100000 saved128=1 ram32MiB-unchanged=1 GetInfoSyncCalls=0",
+      "CONSUMER actual-binding=_Z21sub_00241B20_0x241b20PhP12R5900ContextP10PS2Runtime entry=0x241c48 input=0x2c5358 flags=0x1b bit3=8 stopCalls=1 ram32MiB-unchanged=1",
+      "LEAF hasFunction=0 expected=1"
+    ]
+  }
+}
