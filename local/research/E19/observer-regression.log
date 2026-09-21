@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E19/e19_observer_regression.py", line 8, in <module>
+    suite('observer')
+    ~~~~~^^^^^^^^^^^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E19/e19_validate.py", line 43, in suite
+    assert rc==0 and f'Total Tests: {count}' in txt and 'Failed: 0' in txt,record
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'argv': ['/tmp/e18-mpeg-link/runtime/ps2xTest/ps2x_tests'], 'cwd': '/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp', 'env': {'TMPDIR': '/Users/bradrichardson/dev/ssx3/local/research/E19/.suite-observer/', 'DYLD_INSERT_LIBRARIES': '/Users/bradrichardson/dev/ssx3/local/research/E19/parser/e19-parser-observer.dylib', 'PS2X_E19_PARSER_DIR': '/Users/bradrichardson/dev/ssx3/local/research/E19/.suite-observer/parser-observer'}, 'elapsed_s': 2.956708959001844, 'stdout_bytes': 65091, 'scratch_peak_allocated': 8830976, 'rc': -11, 'remaining_allocated': 8830976, 'test': {'path': '/tmp/e18-mpeg-link/runtime/ps2xTest/ps2x_tests', 'bytes': 5695128, 'allocated': 5697536, 'sha256': '2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0'}, 'scratch_cap': 33554432}

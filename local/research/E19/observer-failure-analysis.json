@@ -1,0 +1,21 @@
+{
+  "utc": "2026-09-21T20:10:03.907804+00:00",
+  "suite_rc": -11,
+  "last_named_case": "E18 R3",
+  "source_footer_present": false,
+  "final_newline": true,
+  "event_lines": 18828,
+  "event_kinds": {
+    "observer-open": 1,
+    "parse-enter": 18827
+  },
+  "first_event": "seq=1 ns=1000 tid=999929 kind=observer-open pid=94908 schema=1 textCap=12582912 payloadCap=2097152",
+  "last_event": "seq=18828 ns=2696295000 tid=999929 kind=parse-enter call=18827 parser=0x78d9088000 codec=0x78d908c000 size=240 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=2097152 kept=0 fnv64=0x54b07fc845a0494d first64=000001b301001013ffffe018000001b5148a00010000000001b80008004000000100000ffff8000001b58ffff341800000010113f214a52f99bf7080000001b3",
+  "retained_input_bytes": 2097152,
+  "payload_limit": 2097152,
+  "zero_kept_enters": 10088,
+  "inference": "Repeated observed_parse stack frames plus repeated parse-enter/no parse-return demonstrate recursion in the new observer forwarding path. No host-parser packet result is established.",
+  "threshold_eligible": false,
+  "closure_eligible": false,
+  "boot_eligible": false
+}

@@ -1,0 +1,46 @@
+{
+  "utc": "2026-09-21T20:03:28.442500+00:00",
+  "commands": [
+    [
+      "/opt/homebrew/opt/llvm/bin/clang",
+      "-dynamiclib",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-I/opt/homebrew/Cellar/ffmpeg/9.0.1_1/include",
+      "/Users/bradrichardson/dev/ssx3/local/research/E19/e19_parser_observer.c",
+      "-L/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib",
+      "-lavcodec",
+      "-lavutil",
+      "-o",
+      "/Users/bradrichardson/dev/ssx3/local/research/E19/parser/e19-parser-observer.dylib"
+    ],
+    [
+      "/opt/homebrew/Cellar/ffmpeg/9.0.1_1/bin/ffmpeg",
+      "-hide_banner",
+      "-nostdin",
+      "-loglevel",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      "color=c=black:s=800x448:r=30000/1001",
+      "-frames:v",
+      "8",
+      "-c:v",
+      "mpeg2video",
+      "-threads",
+      "1",
+      "-g",
+      "12",
+      "-bf",
+      "0",
+      "-q:v",
+      "2",
+      "-f",
+      "mpeg2video",
+      "/Users/bradrichardson/dev/ssx3/local/research/E19/parser/authored-black.m2v"
+    ]
+  ],
+  "parallelism": "one compiler, then one encoder thread; no Ninja or regeneration"
+}
