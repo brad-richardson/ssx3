@@ -1,0 +1,205 @@
+{
+  "label": "e22a",
+  "utc": "2026-09-21T23:08:49.875899+00:00",
+  "caps": {
+    "wall_s": 90,
+    "terminate_reserve_s": 15,
+    "progress_lines": 1000000,
+    "source_window_end": 603,
+    "boot_log": 268435456,
+    "trace": 100663296,
+    "function_log": 1073741824,
+    "e4_dir": 12582912,
+    "park_dir": 33554432,
+    "frames_dir": 33554432,
+    "e7_dir": 8388608,
+    "parser_dir": 16777216,
+    "aggregate": 1610612736,
+    "poll_s": 0.25,
+    "grace_s": 10
+  },
+  "allocated_caps": {
+    "boot_log": 268435456,
+    "trace": 100663296,
+    "function_log": 1073741824,
+    "e4_dir": 67108864,
+    "park_dir": 134217728,
+    "frames_dir": 67108864,
+    "e7_dir": 67108864,
+    "parser_dir": 67108864,
+    "aggregate": 1610612736
+  },
+  "lease_absent": true,
+  "runner_check": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "fork_head": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\n",
+    "stderr": ""
+  },
+  "fork_status": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": "?? ps2_log.txt\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "build_manifest": {
+    "utc": "2026-09-21T23:08:44.042394+00:00",
+    "fork_head": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "fork_status": "?? ps2_log.txt\n",
+    "test_count": 458,
+    "bin_size": 163529696,
+    "bin_sha": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+    "test_size": 5695128,
+    "test_sha": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0"
+  },
+  "files": [
+    {
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "bytes": 163529696,
+      "sha256": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22"
+    },
+    {
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xTest/ps2x_tests",
+      "bytes": 5695128,
+      "sha256": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/SSX 3 (USA).iso",
+      "bytes": 3005415424
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72",
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/SLUS_207.72",
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc"
+    },
+    {
+      "path": "/Users/bradrichardson/dev/ssx3/local/research/E22/parser/e21-parser-observer.dylib",
+      "bytes": 52472,
+      "sha256": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be"
+    }
+  ],
+  "space": {
+    "argv": [
+      "df",
+      "-h",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk4s1   1.8Ti   1.7Ti   168Gi    91%       1     0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   228Gi   197Gi   6.0Gi    98%    1.8M   63M    3%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "resource_admission": {
+    "utc": "2026-09-21T23:08:50.168719+00:00",
+    "internal_free": 6413393920,
+    "internal_allocated": 3928064,
+    "build_allocated": 0,
+    "codegen_allocated": 0,
+    "evidence_allocated": 3928064,
+    "ssd_free": 180169474048,
+    "ssd_allocated": 196083712,
+    "ssd_owned_paths_allocated": 196083712,
+    "fork_positive_growth": 0,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e22-fixtures",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e22-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e22-fixtures",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e22-tooltmp"
+    ]
+  },
+  "wait_tails": {
+    "e21-waits.log": [
+      "E21A CLAIM 2026-09-21T22:09:34.292954+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"parser_dir\": 16777216, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"source_window_end\": 603, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E21A RELEASE 2026-09-21T22:10:50.150737+00:00 bound=wall rc=0"
+    ],
+    "e18-waits.log": [
+      "E18A CLAIM 2026-09-21T19:26:16.086324+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"observation_tick_stop\": 540, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"source_window_end\": 603, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E18A RELEASE 2026-09-21T19:27:31.534922+00:00 bound=wall rc=0"
+    ],
+    "e17-waits.log": [
+      "E17A CLAIM 2026-09-21T18:02:16.276797+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E17A RELEASE 2026-09-21T18:03:32.879920+00:00 bound=wall rc=0"
+    ],
+    "e16-waits.log": [
+      "E16A CLAIM 2026-09-21T17:01:30.687907+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E16A RELEASE 2026-09-21T17:02:46.454561+00:00 bound=wall rc=0"
+    ],
+    "e15-waits.log": [
+      "E15A CLAIM 2026-09-21T13:32:26.679162+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E15A RELEASE 2026-09-21T13:33:42.117085+00:00 bound=wall rc=0"
+    ],
+    "e13-waits.log": [
+      "E13A CLAIM 2026-09-21T11:14:31.613636+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E13A RELEASE 2026-09-21T11:15:47.122221+00:00 bound=wall rc=0"
+    ],
+    "e12-waits.log": [
+      "E12A CLAIM 2026-09-21T10:15:59.027690+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E12A RELEASE 2026-09-21T10:17:14.558066+00:00 bound=wall rc=0"
+    ],
+    "e11-waits.log": [
+      "E11A CLAIM 2026-09-21T08:16:34.181304+00:00 preflight=green caps={\"aggregate\": 1610612736, \"boot_log\": 268435456, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 1073741824, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 100663296, \"wall_s\": 90}",
+      "E11A RELEASE 2026-09-21T08:17:49.764954+00:00 bound=wall rc=0"
+    ]
+  },
+  "aligner": {
+    "argv": [
+      "/Users/bradrichardson/.pyenv/versions/3.12.12/bin/python3",
+      "-B",
+      "tools/trace_align.py",
+      "--selftest"
+    ],
+    "rc": 0,
+    "stdout": "selftest t1-identical-exit0: PASS rc=0\nselftest t1-identical-run5: PASS \nselftest t2-grafted-exit1: PASS rc=1\nselftest t2-grafted-k3: PASS \nselftest t2-grafted-names: PASS \nselftest t3-anchor-exit0: PASS rc=0\nselftest t3-anchor-hit: PASS \nselftest t3-anchor-run2: PASS \nselftest t4-miss-exit2: PASS rc=2\nselftest t4-miss-table: PASS \nselftest t5-aliasname-exit0: PASS rc=0\nselftest t5-aliasname-row: PASS \n/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/tmppis2vqtg/a1.txt: events=5 bad_hex=0 bad_ts_prefix=0 ts_regressions=0\n/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/tmppis2vqtg/bad.txt:1: missing PCSX2 ts prefix: Bios call: WaitSema (44)\n/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/tmppis2vqtg/bad.txt: events=1 bad_hex=0 bad_ts_prefix=1 ts_regressions=0\nselftest t6-format-good: PASS rc=0\nselftest t6-format-bad: PASS rc=2\nselftest t7-locate: PASS \nselftest t8-short-exit0: PASS rc=0\nselftest t8-short-bound: PASS \nselftest t9-drop-exit1: PASS rc=1\nselftest t9-drop-k1: PASS \nselftest t9-drop-table: PASS \nselftest t9-drop-projcounts: PASS \nselftest t10-shared-exit1: PASS rc=1\nselftest t10-shared-k1: PASS \nselftest t10-shared-table: PASS \nselftest t11-unknown-exit1: PASS rc=1\nselftest t11-unknown-k2: PASS \nselftest t11-unknown-row: PASS \nselftest t12-mile-exit1: PASS rc=1\nselftest t12-mile-ref: PASS \nselftest t12-mile-rt: PASS \nselftest t12-mile-stamps: PASS \nselftest t12-mile-pumpgone: PASS \nselftest t12-mile-censusfull: PASS \nselftest t13-badproject-exit2: PASS rc=2\nselftest t13-badproject-msg: PASS \nselftest: ALL PASS\n",
+    "stderr": ""
+  },
+  "suite": {
+    "rc": 0,
+    "tail": [
+      "\u001b[33m  [Run]: \u001b[0mdecodes load/store flags \u001b[32m  [Passed]\u001b[0m",
+      "",
+      "========================================",
+      "Total Tests: 458",
+      "Passed: 458",
+      "Failed: 0",
+      "========================================"
+    ]
+  },
+  "runner_recheck": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "preflight_complete_utc": "2026-09-21T23:08:51.207404+00:00"
+}

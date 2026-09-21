@@ -1,0 +1,39 @@
+seq=1 ns=1000 tid=1786961 kind=observer-open pid=77623 schema=2 proof=0 textCap=12582912 payloadCap=2097152
+seq=2 ns=343000 tid=1786961 kind=binding api=av_parser_parse2 method=direct-import original=0x10ad375f8 replacement=0x10983cc74 next=0x10983cc74 explicit=0x10983cc74 nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib symbol=av_parser_parse2
+seq=3 ns=374000 tid=1786961 kind=binding api=avcodec_send_packet method=direct-import original=0x10aaf972c replacement=0x10983d0f0 next=0x10983d0f0 explicit=0x10983d0f0 nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib symbol=avcodec_send_packet
+seq=4 ns=400000 tid=1786961 kind=binding api=avcodec_receive_frame method=direct-import original=0x10aa520d8 replacement=0x10983d2d0 next=0x10983d2d0 explicit=0x10983d2d0 nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib symbol=avcodec_receive_frame
+seq=5 ns=415000 tid=1786961 kind=binding api=_Exit method=direct-import original=0x18cd8923c replacement=0x10983d4bc next=0x10983d4bc explicit=0x10983d4bc nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/usr/lib/system/libsystem_c.dylib symbol=_Exit
+seq=6 ns=524213000 tid=1786961 kind=parse-enter call=1 parser=0x77ef050000 codec=0x77ef11c000 size=240 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=0 kept=240 fnv64=0x54b07fc845a0494d first64=000001b301001013ffffe018000001b5148a00010000000001b80008004000000100000ffff8000001b58ffff341800000010113f214a52f99bf7080000001b3
+seq=7 ns=524223000 tid=1786961 kind=parse-return call=1 used=60 packetSize=60 consumed=60 packets=1 packetFNV64=0xf098f2a98d0aa2d7
+seq=8 ns=524227000 tid=1786961 kind=send-enter call=1 codec=0x77ef11c000 size=60 eof=0
+seq=9 ns=524278000 tid=1786961 kind=send-return call=1 rc=0
+seq=10 ns=524284000 tid=1786961 kind=receive-return call=1 codec=0x77ef11c000 rc=-35 width=0 height=0 frames=0
+seq=11 ns=524291000 tid=1786961 kind=parse-enter call=2 parser=0x77ef050000 codec=0x77ef11c000 size=180 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=240 kept=180 fnv64=0xaf3a065ebc16bc03 first64=000001b301001013ffffe018000001b5148a00010000000001b8000800c000000100000ffff8000001b58ffff341800000010113f214a52f99bf7080000001b3
+seq=12 ns=524294000 tid=1786961 kind=parse-return call=2 used=60 packetSize=60 consumed=120 packets=2 packetFNV64=0xeb861b6f31ca1457
+seq=13 ns=524297000 tid=1786961 kind=send-enter call=2 codec=0x77ef11c000 size=60 eof=0
+seq=14 ns=524305000 tid=1786961 kind=send-return call=2 rc=0
+seq=15 ns=524308000 tid=1786961 kind=receive-return call=2 codec=0x77ef11c000 rc=0 width=16 height=16 frames=1
+seq=16 ns=524534000 tid=1786961 kind=receive-return call=3 codec=0x77ef11c000 rc=-35 width=0 height=0 frames=1
+seq=17 ns=524545000 tid=1786961 kind=parse-enter call=3 parser=0x77ef050000 codec=0x77ef11c000 size=120 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=420 kept=120 fnv64=0x30315ad3667b37b1 first64=000001b301001013ffffe018000001b5148a00010000000001b80008014000000100000ffff8000001b58ffff341800000010113f214a52f99bf7080000001b3
+seq=18 ns=524549000 tid=1786961 kind=parse-return call=3 used=60 packetSize=60 consumed=180 packets=3 packetFNV64=0x662a741c1428f6ca
+seq=19 ns=524552000 tid=1786961 kind=send-enter call=3 codec=0x77ef11c000 size=60 eof=0
+seq=20 ns=524560000 tid=1786961 kind=send-return call=3 rc=0
+seq=21 ns=524563000 tid=1786961 kind=receive-return call=4 codec=0x77ef11c000 rc=0 width=16 height=16 frames=2
+seq=22 ns=524566000 tid=1786961 kind=receive-return call=5 codec=0x77ef11c000 rc=-35 width=0 height=0 frames=2
+seq=23 ns=524572000 tid=1786961 kind=parse-enter call=4 parser=0x77ef050000 codec=0x77ef11c000 size=60 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=540 kept=60 fnv64=0x492788829927e54a first64=000001b301001013ffffe018000001b5148a00010000000001b8000801c000000100000ffff8000001b58ffff341800000010113f214a52f99bf7080
+seq=24 ns=524583000 tid=1786961 kind=parse-return call=4 used=60 packetSize=0 consumed=240 packets=3 packetFNV64=0x0000000000000000
+seq=25 ns=544986000 tid=1786961 kind=parse-enter call=5 parser=0x77ef050000 codec=0x77ef11c000 size=8 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=600 kept=8 fnv64=0x2e14870e1f31f198 first64=000001b31400f013
+seq=26 ns=544991000 tid=1786961 kind=parse-return call=5 used=8 packetSize=0 consumed=248 packets=3 packetFNV64=0x0000000000000000
+seq=27 ns=545014000 tid=1786961 kind=parse-enter call=6 parser=0x77ef050000 codec=0x77ef11c000 size=0 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=608 kept=0 fnv64=0x0000000000000000 first64=
+seq=28 ns=545019000 tid=1786961 kind=parse-return call=6 used=0 packetSize=8 consumed=248 packets=4 packetFNV64=0x2e14870e1f31f198
+seq=29 ns=545023000 tid=1786961 kind=send-enter call=4 codec=0x77ef11c000 size=8 eof=0
+seq=30 ns=545027000 tid=1786961 kind=send-return call=4 rc=0
+seq=31 ns=545031000 tid=1786961 kind=receive-return call=6 codec=0x77ef11c000 rc=-35 width=0 height=0 frames=2
+seq=32 ns=545035000 tid=1786961 kind=send-enter call=5 codec=0x77ef11c000 size=0 eof=1
+seq=33 ns=545038000 tid=1786961 kind=send-return call=5 rc=0
+seq=34 ns=545041000 tid=1786961 kind=receive-return call=7 codec=0x77ef11c000 rc=-541478725 width=0 height=0 frames=2
+seq=35 ns=545076000 tid=1786961 kind=parse-enter call=7 parser=0x77ef050000 codec=0x77ef11c000 size=8 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=608 kept=8 fnv64=0x2e14870e1f31f198 first64=000001b31400f013
+seq=36 ns=545079000 tid=1786961 kind=parse-return call=7 used=8 packetSize=0 consumed=256 packets=4 packetFNV64=0x0000000000000000
+seq=37 ns=545103000 tid=1786961 kind=parse-enter call=8 parser=0x77ef050000 codec=0x77ef11c000 size=8 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=616 kept=8 fnv64=0x2e14870e1f31f198 first64=000001b31400f013
+seq=38 ns=545107000 tid=1786961 kind=parse-return call=8 used=8 packetSize=0 consumed=264 packets=4 packetFNV64=0x0000000000000000
+# E21 PARSER CLOSURE source=API-interposer reason=_Exit rc=0 ns=1015034000 events=38 parseCalls=8 offered=624 consumed=264 packets=4 packetBytes=188 sendCalls=5 sendEof=1 receiveCalls=7 frames=2 errors=0 returned=20 pending=0 textTruncated=0 payloadTruncated=0 ioErrors=0 eventBytes=6203 payloadBytes=624 backendParse=8 backendSend=5 backendReceive=7 bindingChecks=4 recursionGuards=0 proof=0

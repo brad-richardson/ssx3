@@ -1,0 +1,34 @@
+{
+  "utc": "2026-09-21T23:15:05.485697+00:00",
+  "decision": "STOP \u2014 X named",
+  "rule": "implement ONLY if the diagnosis isolates ONE edge with a minimal ABI-preserving change + its own fail-before + full regression; policy invention excluded",
+  "isolated_to_one_edge": false,
+  "candidates_enumerated": 9,
+  "candidates_closed": [
+    "C1 AddBs-wake broadening (proven inert: ordering + no-latch completeExternalWait)",
+    "C3 multi-callback loop (1 registration)",
+    "C5 timer/vsync re-poll (no timeout, no alarm use, 0 cross-file refs)",
+    "C6 guest retry (parked, scheduled=0 for 12 samples)",
+    "C7 EOF/streamEnded (ended=0; firing it fabricates EOF)",
+    "C8 demux/flush (never dispatched)",
+    "C9 delete/reset (aborts, not demand)"
+  ],
+  "candidates_remaining": [
+    "C2a release-then-re-request (MPEG.cpp:1757-1760 + 2484)",
+    "C4 pre-park re-request (MPEG.cpp:2496-2513)"
+  ],
+  "why_stop": "Both remaining candidates need the SAME two unobserved rules: (1) the re-ask trigger point and (2) the loop bound / stop condition. Choosing either invents a demand policy the firmware behavior is unknown for \u2014 explicitly excluded by the brief.",
+  "X": "The edge from \"parser holds accepted bytes but emitted no packet\" back to the registered type-1 producer, PLUS its termination rule. Mechanism reachable (C2a/C4); rule missing.",
+  "new_in_e22": [
+    "per-call parser observation inside the title window (e21a gap closed)",
+    "C1 eliminated by call ordering + completeExternalWait no-latch semantics",
+    "full 5,040 B real payload retained and byte-identical to E18",
+    "runtime proven live (thread 4 scheduled ~300x/5s) during 60s of MPEG silence"
+  ],
+  "fail_before_written": false,
+  "fork_source_edits": 0,
+  "fork_commits": 0,
+  "fork_pushes": 0,
+  "fork_head": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+  "fork_status": "?? ps2_log.txt\n"
+}

@@ -1,0 +1,97 @@
+{
+  "utc": "2026-09-21T23:10:06.774694+00:00",
+  "label": "e22a",
+  "bound": "wall",
+  "rc": 0,
+  "e7_events": 6401,
+  "e7_footer": true,
+  "parser": {
+    "closed": true,
+    "footer": {
+      "source": "API-interposer",
+      "reason": "_Exit",
+      "rc": 0,
+      "ns": 75405554000,
+      "events": 7,
+      "parseCalls": 1,
+      "offered": 5040,
+      "consumed": 5040,
+      "packets": 0,
+      "packetBytes": 0,
+      "sendCalls": 0,
+      "sendEof": 0,
+      "receiveCalls": 0,
+      "frames": 0,
+      "errors": 0,
+      "returned": 1,
+      "pending": 0,
+      "textTruncated": 0,
+      "payloadTruncated": 0,
+      "ioErrors": 0,
+      "eventBytes": 1803,
+      "payloadBytes": 5040,
+      "backendParse": 1,
+      "backendSend": 0,
+      "backendReceive": 0,
+      "bindingChecks": 4,
+      "recursionGuards": 0,
+      "proof": 0
+    },
+    "marks": [],
+    "first_packet": null,
+    "threads": [
+      1788771
+    ],
+    "first_parse_ns": 8509239000,
+    "last_parse_ns": 8509239000,
+    "parse_span_ns": 0,
+    "bindings": [
+      {
+        "api": "av_parser_parse2",
+        "valid": 1,
+        "nextIsReplacement": 1
+      },
+      {
+        "api": "avcodec_send_packet",
+        "valid": 1,
+        "nextIsReplacement": 1
+      },
+      {
+        "api": "avcodec_receive_frame",
+        "valid": 1,
+        "nextIsReplacement": 1
+      },
+      {
+        "api": "_Exit",
+        "valid": 1,
+        "nextIsReplacement": 1
+      }
+    ],
+    "timeline_calls": 1
+  },
+  "demand": [
+    {
+      "mpeg": "0x587b30",
+      "registrations": 1,
+      "callbacks": 1,
+      "add_bs_calls": 1,
+      "requested_bytes": 5040,
+      "returned_add_bs_bytes": 5040,
+      "completion_events": 0,
+      "waits": 1
+    }
+  ],
+  "targets": {
+    "0x3b06b0": 1,
+    "0x3b06f8": 1,
+    "0x3b0b10": 1,
+    "0x3b0b40": 1,
+    "0x3b0c58": 1,
+    "0x402708": 1,
+    "0x4027b8": 1,
+    "0x4029d0": 1,
+    "0x402a10": 1,
+    "0x402c08": 1
+  },
+  "boot": 1
+}

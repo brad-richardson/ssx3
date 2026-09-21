@@ -1,0 +1,50 @@
+{
+  "ordering": {
+    "addbs_input_seq": 6397,
+    "addbs_return_seq": 6398,
+    "park_seq": 6401,
+    "last_event_seq": 6401,
+    "addbs_precedes_park": true,
+    "same_tick": true,
+    "tick": 249,
+    "addbs_thread": 1,
+    "park_thread": 1,
+    "note": "AddBs runs on the SAME thread that later parks; at AddBs time no thread is in the Mpeg wait."
+  },
+  "complete_external_wait": {
+    "mpeg_complete_events": 0,
+    "semantics": "EeScheduler.cpp completeExternalWait scans currently-Waiting threads only; no latch, no pending-completion queue",
+    "consequence": "a wake raised before the park matches 0 threads and is lost"
+  },
+  "parser_single_call": {
+    "parse_calls": 1,
+    "enter_ns": 8509239000,
+    "return_ns": 8509248000,
+    "duration_ns": 9000,
+    "offered": 5040,
+    "used": 5040,
+    "packet_size": 0,
+    "send_calls": 0,
+    "receive_calls": 0,
+    "frames": 0,
+    "errors": 0,
+    "observer_close_ns": 75405554000,
+    "silence_after_parse_ns": 66896306000,
+    "silence_after_parse_s": 66.896,
+    "backend_1to1": [
+      1,
+      0,
+      0
+    ],
+    "bindings_valid": 4,
+    "recursion_guards": 0
+  },
+  "boot": {
+    "bound": "wall",
+    "rc": 0,
+    "elapsed_s": 75.463,
+    "e7_events": 6401,
+    "mpeg_events": 27,
+    "mpeg_calls": 10
+  }
+}
