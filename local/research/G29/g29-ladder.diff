@@ -1,0 +1,104 @@
+--- a/tools/gs_dump_replayer.cpp
++++ b/tools/gs_dump_replayer.cpp
+@@ -156,3 +156,101 @@ save_scanout_ppm (G29: readback-vs-render ladder + VRAM checksum)
+ 		auto *shot_pixels = static_cast<const uint8_t *>(
+ 				device.map_host_buffer(*shot_readback, MEMORY_ACCESS_READ_BIT));
++
++		// G29 local diagnostic (not upstream): readback-vs-render ladder. P1
++		// (above) is the original CachedHost readback. P2 re-reads the same
++		// image through a coherent Host buffer (names a CachedHost-map zero);
++		// P3 re-reads through a coherent Host buffer behind a full-mask
++		// barrier (names a GPU-visibility zero). Checksums + nonzero counts go
++		// to logcat only; files still carry P1 bytes. A once-only VRAM
++		// checksum (direct mapped read, no image copy) proves/disproves
++		// upload+raster landing upstream of scanout.
++		auto g29_checksum = [](const uint8_t *px, size_t n, uint64_t *fnv, size_t *nz) {
++			uint64_t h = 1469598103934665603ull;
++			size_t c = 0;
++			for (size_t i = 0; i < n; i++)
++			{
++				h ^= px[i];
++				h *= 1099511628211ull;
++				c += px[i] != 0;
++			}
++			*fnv = h;
++			*nz = c;
++		};
++		{
++			size_t shot_n = size_t(shot.image->get_width()) * shot.image->get_height() * 4;
++			uint64_t p1_fnv = 0, p2_fnv = 0, p3_fnv = 0;
++			size_t p1_nz = 0, p2_nz = 0, p3_nz = 0;
++			g29_checksum(shot_pixels, shot_n, &p1_fnv, &p1_nz);
++			for (int pass = 2; pass <= 3; pass++)
++			{
++				BufferHandle alt_readback;
++				const uint8_t *alt_pixels = nullptr;
++				{
++					auto cmd = device.request_command_buffer();
++					if (pass == 2)
++					{
++						cmd->image_barrier(*shot.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++						                   VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++						                   VK_PIPELINE_STAGE_2_COPY_BIT, VK_ACCESS_2_TRANSFER_READ_BIT,
++						                   VK_PIPELINE_STAGE_2_COPY_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
++					}
++					else
++					{
++						cmd->image_barrier(*shot.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++						                   VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++						                   VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
++						                   VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_SHADER_WRITE_BIT |
++						                   VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
++						                   VK_PIPELINE_STAGE_2_COPY_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
++					}
++					BufferCreateInfo alt_bufinfo = {};
++					alt_bufinfo.size = shot_n;
++					alt_bufinfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
++					alt_bufinfo.domain = BufferDomain::Host;
++					alt_readback = device.create_buffer(alt_bufinfo);
++					cmd->copy_image_to_buffer(*alt_readback, *shot.image, 0, {},
++					                          { shot.image->get_width(), shot.image->get_height(), 1 },
++					                          0, 0, { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 });
++					cmd->barrier(VK_PIPELINE_STAGE_2_COPY_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
++					             VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_READ_BIT);
++					device.submit(cmd);
++					device.wait_idle();
++				}
++				if (alt_readback)
++				{
++					alt_pixels = static_cast<const uint8_t *>(
++							device.map_host_buffer(*alt_readback, MEMORY_ACCESS_READ_BIT));
++				}
++				if (alt_pixels)
++				{
++					if (pass == 2)
++						g29_checksum(alt_pixels, shot_n, &p2_fnv, &p2_nz);
++					else
++						g29_checksum(alt_pixels, shot_n, &p3_fnv, &p3_nz);
++				}
++			}
++			LOGI("G29: ladder %s P1 fnv=%016llx nz=%llu P2 fnv=%016llx nz=%llu P3 fnv=%016llx nz=%llu (n=%llu).\n",
++			     tag, (unsigned long long)p1_fnv, (unsigned long long)p1_nz,
++			     (unsigned long long)p2_fnv, (unsigned long long)p2_nz,
++			     (unsigned long long)p3_fnv, (unsigned long long)p3_nz, (unsigned long long)shot_n);
++			static bool g29_vram_done = false;
++			if (!g29_vram_done)
++			{
++				g29_vram_done = true;
++				size_t vram_n = opts.vram_size;
++				const uint8_t *vram = static_cast<const uint8_t *>(iface.map_vram_read(0, vram_n));
++				if (vram)
++				{
++					uint64_t v_fnv = 0;
++					size_t v_nz = 0;
++					g29_checksum(vram, vram_n, &v_fnv, &v_nz);
++					LOGI("G29: vram fnv=%016llx nz=%llu (n=%llu).\n",
++					     (unsigned long long)v_fnv, (unsigned long long)v_nz, (unsigned long long)vram_n);
++				}
++				else
++				{
++					LOGI("G29: vram map failed.\n");
++				}
++			}
++		}
+ 		unsigned shot_w = shot.image->get_width(), shot_h = shot.image->get_height();
