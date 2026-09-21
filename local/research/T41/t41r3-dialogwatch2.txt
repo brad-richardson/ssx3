@@ -1,0 +1,30 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ ROUNDS=40
+++ seq 1 40
++ for i in $(seq 1 $ROUNDS)
+++ date -u +%s.%N
+ROUND:1 1789999816.154788187
++ echo 'ROUND:1 1789999816.154788187'
+++ xdotool search --onlyvisible --name '.*'
++ IDS='511
+2097159
+2097162'
++ '[' -z '511
+2097159
+2097162' ']'
++ for W in $IDS
+++ xdotool getwindowname 511
+WIN:511:
+DISMISS:511:
++ N=
++ echo WIN:511:
++ case "$N" in
++ echo DISMISS:511:
++ xdotool key --window 511 Return
+XGetInputFocus returned the focused window of 1. This is likely a bug in the X server.
+XGetInputFocus returned the focused window of 1. This is likely a bug in the X server.
+DISMISSED
++ echo DISMISSED
++ exit 0
