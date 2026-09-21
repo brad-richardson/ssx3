@@ -431,6 +431,8 @@ def launch(args):
         flags.append("-ssxDispatchSamples")
     if getattr(args,"audio_dump",False):
         flags.append("-ssxAudioDump")
+    if getattr(args,"metalfx",False):
+        flags.append("-ssxMetalFX")
     if args.simulator:
         command(["xcrun", "simctl", "launch", "--terminate-running-process", args.device, BUNDLE, *flags])
         return
@@ -526,8 +528,10 @@ def main():
                         help="Launch-only native dispatch-site sampling (diagnostic overhead)")
     parser.add_argument("--audio-dump", action="store_true",
                         help="Launch-only DSP/DTK pushed-sample WAV dump (diagnostic storage)")
+    parser.add_argument("--metalfx", action="store_true",
+                        help="Launch-only MetalFX interpolation option (prototype stage is present but bypassed until motion exists)")
     args = parser.parse_args()
-    for flag in ("cpu_thread", "single_core", "fast_disc", "dispatch_samples", "audio_dump"):
+    for flag in ("cpu_thread", "single_core", "fast_disc", "dispatch_samples", "audio_dump", "metalfx"):
         if getattr(args, flag) and args.command != "launch":
             parser.error(f"--{flag.replace('_', '-')} applies only to launch")
     if (args.debug_main_menu or args.normal_boot) and args.command!="launch":

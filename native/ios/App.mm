@@ -28,6 +28,7 @@
 #import "SessionDiagnostics.h"
 #include "SessionPause.h"
 #include "../diagnostics/trial_control.h"
+#include "../diagnostics/metalfx_stage.h"
 #include "../diagnostics/startup_skip.h"
 #include "../diagnostics/callback_timer.h"
 #include "dolphin_runtime_internal.hpp"
@@ -211,6 +212,7 @@ static void RuntimeLog(Common::Log::LogLevel, Common::Log::LogType, const char* 
   BOOL _bootCheckpointInFlight;
   BOOL _memoryCard;       // emulated card present
   BOOL _dispatchSamples;  // launch-only dispatch-site sampling (diagnostic overhead)
+  BOOL _metalFXEnabled;   // launch-only MetalFX interpolation option (bypassed stage until motion exists)
   StartupBoot::AdvanceInput _startupInput;
   int _startupPhaseLogged;
   BOOL _sequenceFromMainMenu;
@@ -344,6 +346,8 @@ static void SSXLaunchTrace(NSString* step) {
   [NSUserDefaults.standardUserDefaults registerDefaults:@{@"SSXFastDisc":@NO}];
   _fastDiscForced=[launchArgs containsObject:@"-ssxFastDisc"];
   _dispatchSamples=[launchArgs containsObject:@"-ssxDispatchSamples"];
+  _metalFXEnabled=[launchArgs containsObject:@"-ssxMetalFX"];
+  NativeMetalFX::enabled.store(_metalFXEnabled);
   _audioDump=[launchArgs containsObject:@"-ssxAudioDump"];
   _simulatorNullAudio=NO;
 #if TARGET_OS_SIMULATOR
@@ -771,7 +775,7 @@ static void SSXLaunchTrace(NSString* step) {
     @"supportsBCTextureCompression":@([self supportsBlockCompression]),
     @"cpuJIT":@NO, @"executableAllocationGuard":@YES, @"vertexLoader":@"software",
     @"renderScale":@(_internalScale), @"cpuThread":@(_cpuThread), @"fastDiscSpeed":@(_fastDisc),
-    @"dispatchSamples":@(_dispatchSamples), @"automated":@(_sequence!=nil),
+    @"dispatchSamples":@(_dispatchSamples), @"metalFX":@(_metalFXEnabled), @"automated":@(_sequence!=nil),
     @"cardReadSpeedup":@(_cardSpeedup), @"memoryCard":@(_memoryCard),
     @"audioEnabled":@(!_simulatorNullAudio), @"audioBackend":@(audioBackend),
     @"audioDump":@(_audioDump),
@@ -788,6 +792,7 @@ static void SSXLaunchTrace(NSString* step) {
   [metadata addEntriesFromDictionary:[self outputDetails]];
   [[NSJSONSerialization dataWithJSONObject:metadata options:NSJSONWritingPrettyPrinted error:nil]
     writeToFile:[_report stringByAppendingPathComponent:@"launch.json"] atomically:YES];
+  [self logSessionEvent:@"metalfx_option" details:@{@"enabled":@(_metalFXEnabled), @"mode":@"bypassed"}];
   const int internalScale=_internalScale;
   const BOOL debugMainMenu=_debugMainMenu;
   std::thread([self,game,user,descriptor,internalScale,debugMainMenu] {
@@ -896,6 +901,10 @@ static void SSXLaunchTrace(NSString* step) {
         // Present() has now updated the aspect-correct source suggestion. Copy
         // it on the renderer thread; UIKit reads no renderer-owned pointers.
         if (!g_presenter || info.reason==PresentInfo::PresentReason::VideoInterfaceDuplicate) return;
+        // MF2 prototype: the interpolator stage is present but bypassed until
+        // motion exists. Announce once; MF3 moves this call site pre-present.
+        if (NativeMetalFX::enabled.load() && NativeMetalFX::NotePresentBypassed())
+          SSXSessionEvent(@"metalfx_stage", @{@"mode":@"bypassed"});
         const auto [width,height]=g_presenter->GetSuggestedWindowSize();
         const auto& target=g_presenter->GetTargetRectangle();
         const auto& perf=Core::System::GetInstance().GetPerfMetrics();

@@ -1,0 +1,9 @@
+$ ls -lT App.mm.o App.mm metalfx_stage.h
+-rw-r--r--@ 1 bradrichardson  staff  376232 Sep 20 22:41:18 2026 local/native/ios-device/CMakeFiles/SSXNative.dir/App.mm.o
+-rw-r--r--@ 1 bradrichardson  staff     992 Sep 20 22:40:16 2026 native/diagnostics/metalfx_stage.h
+-rw-r--r--@ 1 bradrichardson  staff  102223 Sep 20 22:40:31 2026 native/ios/App.mm
+
+$ ninja -j2 CMakeFiles/SSXNative.dir/App.mm.o (re-run after successful compile)
+[1/2] cd /Users/bradrichardson/dev/ssx3/local/native/ios-device/moderngekko/vendor/dolphin && /opt/homebrew/bin/cmake -DPROJECT_SOURCE_DIR=/Users/bradrichardson/dev/ssx3/third_party/ModernGekko/vendor/dolphin -DPROJECT_BINARY_DIR=/Users/bradrichardson/dev/ssx3/local/native/ios-device/moderngekko/vendor/dolphin -DDISTRIBUTOR=ModernGekko -DDOLPHIN_DEFAULT_UPDATE_TRACK= -DGIT_FOUND=TRUE -DGIT_EXECUTABLE=/usr/bin/git -DDOLPHIN_WC_REVISION= -DDOLPHIN_WC_DESCRIBE= -DDOLPHIN_WC_BRANCH= -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 -P /Users/bradrichardson/dev/ssx3/third_party/ModernGekko/vendor/dolphin/CMake/ScmRevGen.cmake
+fatal: bad revision '^master'
+exit=0
