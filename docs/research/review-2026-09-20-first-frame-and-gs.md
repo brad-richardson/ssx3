@@ -1,16 +1,83 @@
 # PS2 recomp progress, evidence, and next steps — 2026-09-20
 
-Prepared for Brad and the Muse orchestrator. Priority: a verified SSX 3 recomp frame, then the PS2 GS GPU path. This is a review and steering document; the reviewer performed no implementation changes, builds, boots, clones, or cleanup. It supplements, and where explicitly stated corrects, the [September 19 review and Part 4 hand-back](review-2026-09-19-progress.md). Updated after orchestrator poll `f3fd739`: the decisions and follow-up below supersede the initial experiment recommendations preserved later in this document.
+Prepared for Brad and the Muse orchestrator. Priority: a verified SSX 3 recomp frame, then the PS2 GS GPU path. This is a review and steering document; the reviewer performed no implementation changes, builds, boots, clones, or cleanup. It supplements, and where explicitly stated corrects, the [September 19 review and Part 4 hand-back](review-2026-09-19-progress.md). Updated after orchestrator poll `57487ca`, including the G9 report that became available during review. The current decisions and newest follow-up supersede the earlier recommendations preserved below.
 
 ## Decisions to make now
 
-1. **Finish E3b as the first-frame critical path.** K1 fixed the six lookup results and removed the observed drops, but the park survived. Capture actual reads, branches, object identity, and intervening writes for one complete invocation, expanding only as needed to two guest frames. Close the generated `FAST_WRITE` coverage gap identified below before interpreting zero writes.
-2. **Make no new behavior change until that evidence identifies one.** An SPR transfer or reused scratchpad address is not itself a defect. Keep scanner retirement, broader TLB emulation, SIF implementation, and alarm changes behind evidence of a reached, violated contract.
-3. **Keep the first-frame milestone open.** The settled framebuffer is verified black. The first successful upload has matching hash evidence, but its PNG was not retained. Preserve the first successful image on an already-needed run; do not launch another boot just for it.
-4. **Finish G8 before choosing a GS implementation.** Mac initialization passed; Odin capability queries passed. The G7 dump had no GIF transfers. G8 needs actual draw work and a comparison at the same frame/field and CRTC geometry. Use the candidate's existing statistics before building new instrumentation.
-5. **Keep P13b bounded and account for allocated disk space.** Validate the four unmatched selectors against the current build. Reuse existing trees: G7's roughly 0.60 GB of source consumed about 29 GB on ExFAT. Maintain one PS2 mutator/runner and keep other work subordinate to first frame.
+1. **Close T26 G1.** E3b explains the one-skip/four-nonzero discrepancy as different stages of scratchpad reuse. E3b G3 (`0x501420` purpose) stays dormant unless a named progress condition depends on it. No SPR, SIF, CD, or scheduler fix follows from this capture; P1ae remains unjustified.
+2. **Make the next first-frame experiment locate where visible rendering stops.** The current runtime has substantial GS activity and a black output. Reuse its existing GS history, state snapshots, and presentation capture to distinguish missing useful commands, rasterization, and presentation. Do not assume the correctly paced hash work is an asynchronous-load wait.
+3. **Keep first frame open, with the image-retention gap now closed.** E3b retained the first two successful upload images; they are identical and black. AC1 can finish its bounded read-only contract audit, but implementation needs a reached violation connected to progress.
+4. **Use the existing G8 dump for an aligned comparison.** Mac raster work and a visible loading icon are established. G9 explains the width difference as screenshot aspect correction. Compare the same dump boundary at native geometry; correct the newly identified warm-up counter contamination first. Odin initialization/replay and scene-scale performance remain open.
+5. **Preserve the guest SIF handler at the next necessary regeneration.** Remove the `0x426230` stub selector from the canonical and actually used configurations before regeneration, then preflight the changed bindings. Do not create an HLE for the dormant TODO. Keep one PS2 mutator/runner and budget allocated disk space across all outputs and dependencies.
+
+## Follow-up at poll 57487ca
+
+I read E3b, P13b, G8, the newly available G9 report, the active AC1/G9 briefs, the live gate rows, and the relevant runtime/generator/replayer code. I independently checked the small E3b row file and retained first-upload image; I did not rerun tests, boots, or GS replays. The runtime source read was `b34b4818e2c4a75f625d2063bcc43f9fa988fdbd`. The paraLLEl pin remains unchanged, with the local G8 hook inspected as part of the evidence.
+
+### E3b closes the discrepancy, within its observation scope
+
+**Confirmed: close T26 G1.** The 1,042 retained rows account for all 1,080 issued sequence values with no duplicates or gaps, including the 40 separately reserved entry sequences. Each of the two sampled invocations has 19 calls and one skip. The skipped record is consistently k19, with `+0x10=0xffff` and `+0x1e=1`; the SPR-TO plant supplies these values before the checks. Later copies and guest stores reuse the same scratchpad, leaving T26's four nonzero values at k0–3 after those records were checked. This explains the old snapshot/count mismatch without changing guest behavior. [E3b report](../../local/research/E3b/REPORT.md), [retained rows](../../local/research/E3b/e3b-rows.txt).
+
+Two qualifications belong in the closure record, without another boot:
+
+- R1 reads memory at the `394ED0` call boundary and infers the checks from write ordering and the subsequent `395000` dispatch. It does not directly record the load-result register or branch predicate. The captured caller is `0x363238`, so the corresponding load/branch is `0x363258/0x36325c`, not the earlier analogous `0x362f84/0x362f88` path named in the probe comment. The complete write ordering, correct object identity, and observed call pattern support this closure; describe it as bracketed evidence.
+- “H_A + H_C” means a normal SPR producer plus later snapshot residue. The original hypotheses mix writer existence with a fault diagnosis and use “neither” inconsistently. State the observed lifecycle directly. The two steady invocations do not prove every SPR/SIF path correct, and E3b's scheduler-direct boundary caveat remains documented. Neither caveat justifies reopening the explained flag discrepancy.
+
+**E3b G3 stays dormant.** No standalone search for the purpose of `0x501420`, and no further steady-state writer census. Reopen it only when a specific consumer, comparison, or missing output establishes its causal relevance. This is distinct from closing T26 G1 and from claiming SIF globally correct. The old asynchronous-load interpretation in the September 19 review was provisional and is no longer a sound basis for the next implementation.
+
+The first-success retention request is also complete. `upload-16.png` and `upload-17.png` are byte-identical; I inspected the first, which is black. Its sidecar records tick 53, 512×448, display/source FBP 112, PMODE `0xff21`, SMODE2 `1`, and hash `fd889dc5`. First frame remains unmet. [First-success sidecar](../../local/research/E3b/upload-16.txt).
+
+### First-frame successor: find the first missing rendering result
+
+E3b's park contains **403,224 GS kicks, including 399,892 with drawing enabled**, while its successful upload is black. K1 independently reported millions of kicks over its longer run. In raw `gs_frontend.cpp:1532–1589`, the kick counter increments before checking that enough vertices exist and before calling `Submit`; it is not a pixel-write counter. This gives a concrete question: **does useful nonblack content reach the active display buffer, and if so where does it disappear?** It does not yet identify a renderer defect or prove that game initialization is complete.
+
+Reuse what is already present at this revision:
+
+| Existing mechanism | Use in the next bounded observation | Limit to retain |
+| --- | --- | --- |
+| `GS::getDebugSnapshot()` / `getDebugHistory()` in `runtime/gs/gs_frontend.h` | Join GIF, draw, transfer, and present events with tick/sequence, framebuffer, texture, scissor, test, alpha, and vertex bounds. | History defaults to paused and has only 512 entries. Explicitly arm it and account for overwritten entries; a terminal tail is not a complete frame. |
+| Draw events emitted after `m_backend->Submit(batch)` | Distinguish submitted batches from vertex kicks; locate one candidate visible batch and its destination. | Submission still does not prove surviving pixels. Existing history omits full color/texture contents, so it cannot alone prove intended nonblack output. |
+| Backend `SnapshotVram` / `ReadVram`, plus `Present` and the existing P0 image capture | Compare the relevant draw/display surface with the returned presentation pixels at one named boundary. | Synchronize and decode the actual format/base units; raw VRAM byte differences can be unrelated texture or offscreen writes. |
+
+**Recommended experiment:** first inspect existing receipts for this boundary, then use one bounded P-lane capture only if the missing observation requires it. Start with one complete steady frame, expanding to a second field/frame only for display latching. Preserve the pertinent submitted batch/state, relevant surface contents, and final presentation image. Add only the missing observation at these existing interfaces; avoid a new global tracer, wholesale regeneration, or a GPU backend swap. Keep semantics unchanged and cap all log streams together by bytes as well as wall time.
+
+| Discriminating result | What should happen next |
+| --- | --- |
+| Useful nonblack content exists in the selected display surface but the returned image is black | Follow presentation selection, address/format decoding, field handling, and PMODE composition. |
+| A candidate visible batch is submitted, but its destination gains no expected pixels | Minimize that batch and inspect clipping, alpha/depth tests, masks, textures, and CPU rasterization against its actual state. A clear or correctly rejected draw is not a bug. |
+| Useful content is drawn elsewhere and never selected for display | Follow the producer's buffer/flip contract and actual display-register writes. |
+| There are only clears, empty/clipped work, or no useful batches | Follow the reached producer branch or missing completion that prevents content generation. Promote AC1/SIF/CD only if that dependency names it. |
+| Observation is truncated or formats/boundaries cannot be aligned | Repair that specific measurement gap; no semantic fix follows. |
+
+This is the next first-frame priority. AC1 may finish its current read-only comparison in parallel; a dormant alarm difference does not outrank a reached output-path failure. MF2, I8, T28, and device work stay subordinate in build, host, and storage use. Keep the long drain question closed.
+
+### P13b: resolve a future binding hazard without adding dormant HLE
+
+Choose **remove `_sceSifCmdIntrHdlr@0x426230` from `stubs` before the next needed regeneration**, preserving guest translation. I checked T5's materialized-entry split, the current owner's exact dispatch case, stub emission, and `SIF.cpp`'s `TODO_NAMED` handler. These support P13b's predicted guest-code-to-TODO regression. No current failure is established: the trace census found no witnessed use, and its own G4 notes that silent body execution lacks complete block coverage. [P13b report](../../local/research/P13b/REPORT.md).
+
+Maintain the no-regeneration hold until that config disposition and preflight are complete. At the next necessary regen, pin the actual generator binary/source and CSV/TOML inputs, compare changed entries and stub bindings, verify `0x426230` resolves to generated guest code, and preserve a rollback path before replacing the linked output. The predicted 172 new splits are approximate, not an acceptance total. Do not rebuild now merely to make that number exact. The other three unmatched selectors remain deferred; wiring their canned-success HLEs would require contract validation, not just making selector counts agree.
+
+### G8/G9: real raster progress, with a newly verified counter error
+
+The loading icon establishes useful Mac renderer progress beyond G7's black, zero-transfer replay. G9 explains the image widths: both internal surfaces derive to **512×448**; the reference screenshot applies 4:3 aspect correction, yielding `floor(448×4/3)=597`. There is no reason to search for a 597-wide CRTC setting. [G8 report](../../local/research/G8/REPORT.md), [G9 report](../../local/research/G9/REPORT.md).
+
+**The G8 per-vsync statistics are contaminated by the cold pass.** The local replayer hook calls `consume_flush_stats()` once before replay and then only inside `if (g8_last_pass)`. `parser.restart()` does not reset these counters. `GSRenderer::consume_flush_stats()` copies and clears `total_stats` at `gs_renderer.cpp:1256–1261`. The retained log's first row therefore includes all eight cold-pass vsyncs plus the first warmed vsync. Its `306 primitives / 18 passes / 9 palettes` is not first-frame work; the reported `544 / 32 / 16` totals span both passes. The uniform later rows are consistent with 34 primitives, two passes, and one palette per vsync, or 272/16/8 per pass; separate per-pass totals need a correctly reset receipt. This correction preserves the positive drawing result and removes the apparent first-frame workload spike. It needs no new game capture.
+
+**Width correction alone will not align the comparison.** G8's reference PNG precedes dump vsync #0; the candidate FIRST image follows it. G9's suggested `ScreenshotSize=2` recapture fixes aspect but leaves that temporal mismatch. Prefer replaying the existing G8 dump through the pinned PCSX2 reference and paraLLEl, capturing the same packet/vsync ordinal and field at native geometry. Bound the series to the existing eight vsyncs, record cold versus warmed pass, reset statistics per pass, and preserve image contents at the named boundary. Compare deinterlacing/field treatment explicitly. A renderer drawing to one surface while displaying another is not explained by primitive counts alone.
+
+PCSX2 already documents a GS dump runner and image-comparison workflow, including a software renderer option. Check the pinned tree/build for that facility or its existing dump playback path before adding capture machinery or rebuilding dependencies. The current documentation is a tooling pointer, not proof that the installed pinned binary exposes every option. [Official GS Dump Runner documentation](https://pcsx2.net/docs/advanced/gsdumprunner/). If a new reference run is necessary, combine native geometry and same-boundary snapshots in that single run; avoid an aspect-only boot followed by a timing-only boot.
+
+Retain whole-image differences and inspect the loading-icon region: G8's 99.74% FIRST-versus-LAST equality is dominated by black background and is not cross-renderer accuracy. A richer menu/scene capture follows a working comparison method. Odin project initialization/replay, representative GPU timing, and integration remain separate gates; no new renderer adoption decision follows from the loading icon alone.
+
+### Delivery and process consequence
+
+The closure, selector disposition, and replay correction were delivered through Herdr to verified Muse orchestrator `wN:p3`. Muse confirmed incorporation and push as `634dbd5`, including G9 redirection and the G8 gate/ledger erratum. The final document hand-back adds the concrete first-frame output-path experiment and existing GS history APIs. Review work changed only this document; other agents' concurrent application/test edits were left untouched.
+
+The recurring acceleration lesson is to review the observation boundary before another run. E3b resolved a supposed state contradiction; G9 resolved a supposed renderer-width disagreement; raw replay code exposed misleading statistics. Let workers close or replace a falsified premise without completing its remaining sweep. Preserve short, discriminating captures and stop when the result selects the next action.
 
 ## Follow-up at poll f3fd739
+
+Historical checkpoint: E3b/G8/P13b were still pending here. Their status and the proposed next actions are superseded above.
 
 The new batch supports the selected E3b/G8/P13b work. Its PASS labels describe completed experiments and artifact checks; they do not establish a recomp first frame, correct rendering of drawn content, or an Odin renderer port. I read the gate rows, reports, current briefs, and relevant raw implementation, and visually inspected the retained K1 images. I did not repeat the orchestrator's test suite or boots.
 
@@ -67,7 +134,7 @@ The first-frame effort has made real progress. It has crossed failures in CD cal
 | Reference | R1 gets through BIOS setup and reaches SSX in both PCSX2 EE modes; T27 reaches a stable Main Menu. | PCSX2 is a software reference, not a physical-hardware observation. Earlier BIOS epochs cannot serve as SSX traces. |
 | Iteration | T12/T14 show approximately 315 s → 5.9 s for the relevant runtime-only incremental build after disabling development ThinLTO. | A shared-header rebuild still took 640.9 s. Do not quote 5.9 s as the cost of arbitrary changes. |
 | Observability | Park snapshots, syscall attribution/alignment, entry discovery, and watchpoints exist and have been exercised. | Watchpoint coverage, trace epoch, suppression settings, and retained state must accompany each interpretation. |
-| GS harness | G6 provides 102 synthetic captures; G7 separately validates paraLLEl initialization on Mac and target capability queries. | No integrated GPU backend or drawn-content validation yet. The harness's “strict” backend is not an independent correctness oracle. |
+| GS harness | G6 provides 102 synthetic captures; G7 validates paraLLEl initialization on Mac and target capability queries; G8 visibly renders a loading icon. | No integrated GPU backend, aligned pixel-accuracy result, or representative scene-performance measurement. G8 counter accounting is corrected above. The harness's “strict” backend is not an independent correctness oracle. |
 | Other work | The GameCube, iOS/iPad, input, and device lanes have produced independent results. | Their completion counts do not measure PS2 first-frame progress. Keep their resource use subordinate to this priority. |
 
 Evidence: [P1](../../local/research/P1/REPORT.md), [T12](../../local/research/T12/REPORT.md), [T14](../../local/research/T14/REPORT.md), [T22](../../local/research/T22/REPORT.md), [T26](../../local/research/T26/REPORT.md), [R1](../../local/research/R1/REPORT.md), [G6](../../local/research/G6/REPORT.md), and the fork sources named below. These are results of earlier workers, not experiments repeated for this review.
@@ -217,7 +284,7 @@ Do not reopen the closed GameCube M16–M63 residual investigation or commission
 
 ## Disk and logging: immediate savings without deleting anything
 
-At the final filesystem check, the internal data volume had about **20 GiB free**, and the external SSD about **495 GiB free**. This review kept remote source reads in memory and streamed history/log selections. The only authored artifact is this document.
+At the initial review's filesystem check, the internal data volume had about **20 GiB free**, and the external SSD about **495 GiB free**. The later G9 receipt reports **15 GiB / 459 GiB** respectively; storage figures are dated observations, not current reservations. This review kept remote source reads in memory and streamed history/log selections. The only authored artifact is this document.
 
 T26 retained 705,357,230 bytes of boot log, 46,963,370 bytes of syscall trace, and 1,394,136,084 bytes of function log: **2,146,456,684 bytes for roughly four minutes**, before any additional duplicate retained copy. At that rate, repeated runs generate roughly 32 GB/hour. There is little value in collecting another full run once its signature has stabilized.
 
@@ -227,19 +294,19 @@ No deletion is proposed as an action in this review. For subsequent storage work
 
 ## Recommended next hand-back
 
-The orchestrator answered the original five questions at poll `f3fd739`. The next useful report should answer these:
+Poll `57487ca` answered the E3b and selector questions; G9 subsequently explained the screenshot width. The next useful report should answer these:
 
-1. Is E3b's captured invocation complete, and which write paths are observed versus excluded by evidence?
-2. Which exact read values, record identities, branches, and intervening writes explain one skip versus four apparently nonzero flags? Does that explanation reveal a defect or just resolve the measurement discrepancy?
-3. What is the earliest remaining unmet progress condition, and which producer or completion should satisfy it? Name the one behavior change justified by evidence, or the one missing observation if none is justified.
-4. Does G8 execute raster work, what does its output visibly contain, and is the comparison aligned to the same field/frame and CRTC geometry? Keep Odin capability, project initialization, replay, accuracy, and timing as separate results.
-5. Did P13b find a reached unmatched selector with a concrete consequence? Promote only such a finding into the first-frame work.
+1. At which boundary does expected visible content stop: guest/GIF production, submitted batch, framebuffer pixels, or presentation? Give one reached state/batch/surface with a complete observation window.
+2. Does that finding justify one behavior change, or is one specific observation still missing? Keep T26 G1 closed and E3b G3 dormant unless new causal evidence changes their scope.
+3. Do PCSX2 and paraLLEl produce comparable native images at the same dump packet/vsync/field? Report the first differing boundary, reset per-pass counters, and qualify the first-black observation without using the pre-#0 screenshot as a #0 oracle.
+4. Did AC1 identify a reached alarm-contract violation that controls the blocked progress condition? A static difference or syscall-count difference alone does not justify an implementation.
+5. If regeneration becomes necessary, was the `0x426230` selector removed from the actual inputs, and did the generated binding remain guest code? Otherwise leave the hold and disposition recorded; no regeneration solely for this review.
 
 That is sufficient to steer the next batch. More long-running censuses or broad candidate rankings should need a specific unanswered question.
 
 ## Evidence boundaries and reproducibility
 
-The SSX tree was initially reviewed at `963f081` and advanced through the user's `f88ec08` hand-back to `a1a4b731d33a8c64680f5acefa84bc2c0a069e74` while other agents worked. The initial runtime snapshot was `6359fb625e5651b53c696aadb6bc44ece88cb560`; ps2xGS was `14a1974bf33895c5ad325d77508cddead0af8ace`. K1 was active during that initial review. This follow-up reads SSX at `f3fd73985b7c6644022fc8061fc533ed374bbb4c`, K1 runtime at `b6252bbc0f25e195f9650943149bfb38c83829d4`, and G7's existing paraLLEl clone at the unchanged pin below, including its local screenshot hook. E3b/G8/P13b results were not yet available. Line numbers refer to inspected versions and can move.
+The SSX tree was initially reviewed at `963f081` and advanced through the user's `f88ec08` hand-back to `a1a4b731d33a8c64680f5acefa84bc2c0a069e74` while other agents worked. The initial runtime snapshot was `6359fb625e5651b53c696aadb6bc44ece88cb560`; ps2xGS was `14a1974bf33895c5ad325d77508cddead0af8ace`. K1 was active during that initial review. The first follow-up read SSX at `f3fd73985b7c6644022fc8061fc533ed374bbb4c` and K1 runtime at `b6252bbc0f25e195f9650943149bfb38c83829d4`, before E3b/G8/P13b results existed. The latest follow-up started at SSX `57487ca86139ba3e86cd013f16a6ae42ac609013` and runtime `b34b4818e2c4a75f625d2063bcc43f9fa988fdbd`, reading those results and G9 as it became available. The existing paraLLEl clone remains at `3a66c1976170cbc2cb53a3593fabbc7c4b2ccfbd`; its local G8 hook was inspected separately. Muse incorporated the latest steering in `634dbd5` during review. Line numbers refer to inspected versions and can move.
 
 Local source/evidence roots:
 
