@@ -1,0 +1,52 @@
+### outer clone (parallel-gs-g7): CMakeLists.txt (S1) + tools/CMakeLists.txt (S3)
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 980583d..46e9846 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -50,7 +50,13 @@ else()
+     set(GRANITE_VULKAN_SYSTEM_HANDLES ON CACHE BOOL "" FORCE)
+     set(GRANITE_SHADER_COMPILER_OPTIMIZE ON CACHE BOOL "" FORCE)
+     set(GRANITE_SHIPPING OFF CACHE BOOL "" FORCE)
+-    set(GRANITE_PLATFORM "SDL" CACHE STRING "" FORCE)
++    # G14 local experiment shim (not upstream): offline tools need no window
++    # system; null avoids the Android GameActivity path (no AGDK on host).
++    if (ANDROID)
++        set(GRANITE_PLATFORM "null" CACHE STRING "" FORCE)
++    else()
++        set(GRANITE_PLATFORM "SDL" CACHE STRING "" FORCE)
++    endif()
+ endif()
+ 
+ add_subdirectory(Granite EXCLUDE_FROM_ALL)
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index 293511f..0f59d92 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -5,6 +5,11 @@
+ 
+ add_granite_offline_tool(parallel-gs-replayer gs_dump_replayer.cpp)
+ target_link_libraries(parallel-gs-replayer PRIVATE parallel-gs parallel-gs-dump)
++# G14 local experiment shim (not upstream): Granite logging on Android uses
++# __android_log_print (logcat tag "Granite"); link liblog.
++if (ANDROID)
++    target_link_libraries(parallel-gs-replayer PRIVATE log)
++endif()
+ 
+ add_granite_application(parallel-gs-stream gs_stream_replayer.cpp)
+ target_link_libraries(parallel-gs-stream PRIVATE parallel-gs parallel-gs-dump analog-video)
+
+### Granite submodule: application/platforms/CMakeLists.txt (S2)
+diff --git a/application/platforms/CMakeLists.txt b/application/platforms/CMakeLists.txt
+index 4460133..63254bb 100644
+--- a/application/platforms/CMakeLists.txt
++++ b/application/platforms/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ # Must be static due to Granite::application_create() feedback.
+ 
+-if (ANDROID)
++# G14 local experiment shim (not upstream): honor an explicit null/headless
++# platform on Android so offline tools configure without AGDK.
++if (ANDROID AND NOT (${GRANITE_PLATFORM} MATCHES "null|headless"))
+     add_granite_internal_static_lib(granite-platform application_android.cpp)
+     find_package(game-activity REQUIRED CONFIG)
+     find_package(games-controller REQUIRED CONFIG)
