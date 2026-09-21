@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator).
-- [ ] **Live panes:** e3b (1–2 frame order capture, fork + P-lane lease, 6h) · g9 (geometry-alignment probe, ps2xGS, 4h) · t28 (Single Event Cross → submenu, bytesize, 4h) · i8 (audio-wall device repro, fork worktree + iPhone, 6h).
-- [ ] **Queue:** NO regen before 0x426230 disposition (P13b: drop selector or implement HLE first) · per-vsync scanout series (after G9 unblocks geometry) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · 0x12C alarm-contract brief (K1 G7) · P1ae still unjustified (SIF not eliminated) · I9 audio fix (after I8 diagnosis) · G-lane (strict = sensitivity surrogate; MF1-s2 parked) · E2b/E2c HELD · mini day-one.
+- [ ] **Live panes:** g9 (geometry-alignment probe, ps2xGS, 4h) · t28 (Single Event Cross → submenu, bytesize, 4h) · i8 (audio-wall device repro, fork worktree + iPhone, 6h).
+- [ ] **Queue:** G1 closure proposed by E3b (structural skip; frontier to confirm) · G3 0x501420 purpose (open iff frontier names it) · NO regen before 0x426230 disposition (P13b: drop selector or implement HLE first) · per-vsync scanout series (after G9 unblocks geometry) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · 0x12C alarm-contract brief (K1 G7) · P1ae still unjustified (SIF not eliminated) · I9 audio fix (after I8 diagnosis) · G-lane (strict = sensitivity surrogate; MF1-s2 parked) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,28 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E3b read (09-20/21) — PASS, order capture: 1-vs-4 RESOLVED (structural skip + post-read residue), E3-4 rows 1–7 answered:**
+      G0 verified (same park post-K1); FAST coverage closed statically (0 FAST
+      literals in 0x501400–0x50144F, scratchpad structurally Store-path,
+      Font.cpp FAST unwired); taps R1–R4 + shared seq + binds (lib-only fork
+      `b34b481`, pushed fork remote; suite 443→445, 2 new). ONE boot BOUND=span
+      31 s (all other caps untouched; lease 31 s, zero waits): 1042 rows, 0
+      torn, 0 suppressed, seq accounting exact (1040+40=1080). Order per frame:
+      SPR-TO plants all flags → 20 reads (19 call + k19 skip; terminator
+      a2=0x26/+0x10=0xffff; every pre-trio == plant afters) → stale guest
+      writes → overwrite k8–19 → post-read rewrites (k0–3 → T26's exact
+      4-nonzero: 0x5000/0x8000s, read-time 0). R2: 432 solo (all scratchpad,
+      0 RAM, 0 FAST); R3: 4 spr-to only (aliases normalized, wrapped-split,
+      deduped); R4: nbases=1, drift=0. E3-4: SPR overlap YES (to only),
+      0x501420 NO, reads see planted values, 1-vs-4 = lifecycle stages, only
+      the 4 spr-to in-window, no foreign reuse, post-K1 SAME. First-success
+      PNGs captured (upload-16/17 byte-identical, K1 missed). Verdict: H_A+H_C
+      CONFIRMED, H_B/H_D falsified; skip STRUCTURAL (no anomaly); proposes
+      CLOSE G1, no SIF/CD/scheduler fixes (G3 open iff frontier names it).
+      Verified: scope (0 outside), fork+remote, suite RE-RUN BY ME 445/445/0,
+      artifacts (sizes/span/lease), rows 1042 + sha, PNG pair + FNV RECOMPUTED
+      BY ME (`fd889dc5` exact). Reference-state row: K1 park + T26 watch (by
+      reference). ~50 min. Next: frontier confirms G1 closure. Ledger row added.
 - [x] **G8 read (09-20) — PASS, post-first-draw replay: (i) SUPPORTED, (ii) NOT SUPPORTED (geometry + first-black gaps):**
       Draw-aware trigger (Transfer counter at GSState.cpp:3526-29, K=500
       post-first-nonzero, ExecPS2≥5 armed): dump at vsync#1076 (169 vsyncs =
