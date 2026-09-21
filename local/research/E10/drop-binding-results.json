@@ -1,0 +1,17 @@
+{
+  "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e10-binding-tests/drop/binding-test",
+  "size": 165065200,
+  "sha256": "6fe978804cd63cbac35155d40b623eb73e1eecbd939ca9ddacf1b4fa258736d4",
+  "runs": [
+    {
+      "mode": "absent",
+      "rc": 0,
+      "output": "DROP actual-binding=_Z21sub_00426230_0x426230PhP12R5900ContextP10PS2Runtime pc=0xf00000 sp=0x100000 v0=0 s0-preserved=1 normal-return=1\nQUERY hasFunction=0 expected=0\nE10 ACTUAL BINDING TEST COMPLETE success=1 boot=0\n"
+    },
+    {
+      "mode": "present",
+      "rc": 1,
+      "output": "E10 ACTUAL BINDING TEST FAILURE: query entry presence differs\nDROP actual-binding=_Z21sub_00426230_0x426230PhP12R5900ContextP10PS2Runtime pc=0xf00000 sp=0x100000 v0=0 s0-preserved=1 normal-return=1\nQUERY hasFunction=0 expected=1\n"
+    }
+  ]
+}

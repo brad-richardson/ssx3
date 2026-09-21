@@ -1,0 +1,30 @@
+Foreground command transcript, captured from the tool result (2026-09-21):
+
+export COPYFILE_DISABLE=1
+set -e
+python3 -B local/research/E10/e10_add_entry.py > local/research/E10/query-map-edit.txt
+python3 -B local/research/E10/e10_generate.py entry > local/research/E10/entry-generation-driver.txt
+python3 -B local/research/E10/e10_install.py entry > local/research/E10/entry-installation-driver.txt
+python3 -B local/research/E10/e10_observe.py > local/research/E10/observation-install.txt
+cmake --build /tmp/p1-link/runtime --target ps2EntryRunner ps2x_tests -j4 > local/research/E10/entry-build.log 2>&1
+
+Exit code: 1. set -e stopped at e10_generate.py's admission assertion.
+The installer, observation extension and build commands were not reached.
+
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E10/e10_generate.py", line 73, in <module>
+    if __name__=='__main__':main()
+  File "/Users/bradrichardson/dev/ssx3/local/research/E10/e10_generate.py", line 17, in main
+    assert rec['free_before']>=GIB+caps['free_floor']+caps['free_guard'],rec
+AssertionError: phase=entry; utc=2026-09-21T07:27:10.768704+00:00;
+free_before=3240579072; required=1073741824+2147483648+268435456=3489660928.
+
+df -h at rejection:
+Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on
+/dev/disk4s1   1.8Ti   1.5Ti   353Gi    82%       1     0  100%   /Volumes/Extreme SSD
+/dev/disk3s5   228Gi   199Gi   3.0Gi    99%    1.9M   32M    6%   /System/Volumes/Data
+
+The structured failure values are retained in entry-admission-failure.json.
+The script asserted before writing entry-admission.json, deriving entry-used.toml,
+or spawning the generator. entry-generation-driver.txt is consequently empty.
+E10 ENTRY ADMISSION TAIL COMPLETE: no query generation or boot.
