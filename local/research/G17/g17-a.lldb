@@ -1,0 +1,28 @@
+settings set auto-confirm true
+command script import /tmp/g17walk.py
+target create /tmp/g17-symbols
+gdb-remote localhost:5041
+breakpoint set --file command_buffer.cpp --line 3505
+breakpoint modify --condition '(vk_set == 0) || (update_template == 0)' 1
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+continue
+g17_triage
+process kill
+quit
