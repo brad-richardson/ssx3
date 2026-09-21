@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t33 (Cross on Snow Jam → next screen, bytesize, 4h) · g15 (instrumented O1 catch + minimal fix + re-run, ps2xGS + adb, 6h) · frontier (E8 E-lane lead: guest progression toward menu, fork + P-lane lease) · i11 (0x395730 entry fix + base move + re-probe, worktree, 6h).
-- [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
+- [ ] **Live panes:** t34 (Cross on Continue → next screen, bytesize, 4h) · g15 (instrumented O1 catch + minimal fix + re-run, ps2xGS + adb, 6h) · frontier (E9 E-lane lead: DROP + preflight + 0x2c5140 entry, fork + P-lane lease) · i12 (0x14f2a8 entry fix + re-codegen + re-probe, worktree, 6h).
+- [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · E9 executes 0x426230 DROP + preflight + first authorized regen (0x2c5140 entry, frontier; disposition: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,60 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T33 read (09-21) — PASS, Cross on Snow Jam → My Rules, stable 128 s (2 runs):**
+      Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
+      T4; NVM `da021d2a` untouched). R1 reproduced the SE park but NO-SE-PARKed
+      on a TRUE park (remote TAG-crop 2.6271 vs PIL 0.009–0.012 — ~270×
+      remote-vs-PIL inflation on the text-dense crop from JPEG ringing; whole
+      frame only ~9×; honestly tabled as a gate misfire, new G12 lesson). R2
+      (widened bar 5.0, SM side ~14): chain reproduced (TITLE poll01, Start
+      ≤1.0 s, Menu @T+139.92, Zoe @T+179.89, Continue @T+208.65, Peak
+      @T+237.37, Race @T+266.71, SE park ≤0.066) → Snow Jam Cross 536.4 ms
+      @T+297.80 (pre = SE Snow Jam-highlighted, viewed) → My Rules
+      (Continue highlighted) by +1 s, 12 snaps / 128 s (pairwise
+      0.013–0.201/p99 ≤3 — snowflake drift, widest arrival yet; vs-SE
+      ~10.6, vs-SC ~5.6 nearest). R1 full dmesg (0 in-window flaps); R2
+      effects-verified (exit 0 + T33_DONE + clean tail + coherent
+      artifacts; window dmesg lost to post-run restart — sequencing gap
+      honestly tabled). EE 52 / IOP 155 sets identical to T32 R1. Verified:
+      SNOWJAM walls exact, T33_DONE in both stdouts, NO-SE-PARK in R1 +
+      SE-LIKE in R2 logs, head/tail 2000/2000, flaps 0/2/0, R1 a1-post15
+      full-sha = T32's. ~95 min. Next: T34 Cross on Continue (T33 G1).
+      Ledger row added.
+- [x] **E8 read (09-21) — PASS, outcome (ii): card-check wait = absent 0x2c5140 busy-query entry (no fix, regen-gated):**
+      Two boots (lease-clean, caps unhit, suite 452/452 both). E8a: guest
+      runs, port-select + UI poll reach the same missing target. E8b: 1251
+      attempts at `0x2c5140` (2× port-selection + 1249× UI poll), all with
+      the identical object (vtable `0x486f78`, state 0, silent-flag path);
+      runtime returns true without executing; callers take busy branches —
+      the wait is missing-target, not a value. Copy fix intact (burst 558 =
+      tick 600, D 12358, Present exact, VRAM = E7c). Body emitted but
+      entry-less (would wrongly start `0x2c50e0`); no fix per no-regen
+      (E7-scope note honored); NEXT-BRIEF.md carries the exact recipe
+      (DROP prerequisite + entry + truth table + guarded verification).
+      Verified: 1251/1249 counts from the raw boot log, suites 452/452 ×2,
+      missing-query record shape, fork HEAD still `4acc59f` + only
+      pre-existing M, lease absent + pgrep 1, 2/4 boots. Accepted: noisy
+      DAMAGE audits + static gap proofs (in-evidence). Evidence 74 MB
+      committed. Reference-state row: E7 join (re-matched). Next: E9 DROP +
+      preflight + entry repair (frontier; regen authorized under the
+      disposition). Ledger row added.
+- [x] **I11 read (09-21) — PASS, 0x395730 closed (count 0, executes); NEW wall = 0x14f2a8 same class:**
+      Worktree @ `4acc59f` + cherry-picks (`8fc0c14`, `89d1126`) + 1-line CSV
+      entry `af0a508` (local, 0 pushes — E-lane mutating). Gap layer decided
+      by forcing receipts (merged functions, computed caller, direct-edge-only
+      discovery, merge-safe). Host codegen re-run exit 0 (+1 function, slot
+      677322, non-perturbation shas match); device Release WITH game objects
+      exit 0 first try (121 MB, 9446 syms, new entry `T`); overwrite install
+      exit 0 on live occupant (68 s, new URL); probe: `0x395730` 0 refs,
+      K1/textures/12 IRX/SIF identical prefix, NEW wall = IndirectCall JALR
+      `0x14f660 → 0x14f2a8` (1×, mid-function, 0 register refs — same class);
+      4 RPC sids identical; 1 cpu spin report (action none, filed as gap 6).
+      Verified: console keys (0 count, JALR verbatim, IRX/RPC/idle), binary
+      size/sha/nm exact (9446 + new T), worktree log + clean + CSV row,
+      codegen file + slot, install URL, ips bug_type 202, screenshot viewed
+      (foreground, black). Reference-state row: I10 R3 fate. Next: I12
+      `0x14f2a8` entry + re-codegen + re-probe (I11 gap 1). Ledger row added.
 - [x] **G14 read (09-21) — PASS(Blocked): Android build + on-device init gate PASS; replay SIGSEGVs in Granite trim() before dump open:**
       NDK build exit 0 (265 MB aarch64, system libs only; 3 ANDROID-gated
       cmake shims for AGDK-absent configure + logcat link). ONE bounded
