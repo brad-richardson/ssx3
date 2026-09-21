@@ -1288,6 +1288,68 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G18 read (09-21) — PASS, static cause NAMED (raw-vs-derived descriptor-buffer gate); one-hunk fix passes O2's site; NEW wall O4 in Adreno compiler (ERRATUM: host binary sha):**
+      Static reads name the heap/init path: `init_legacy` gates template
+      creation on the RAW `descriptorBuffer` bit (`shader.cpp:531`) while
+      the flush path uses the DERIVED `supports_descriptor_buffer`
+      (`command_buffer.cpp:108` + `context.cpp:2279-2284`) — on Odin3 raw
+      true + derived false ⇒ no templates ever created, zero-init null
+      slot reached the driver; mask-skip + runtime-nulled eliminated with
+      receipts. One-hunk derived-gate fix (skip/assert shapes rejected).
+      Rebuild exit 0; bounded re-run exit 139 PASSED O2's exact site (main
+      past the first-draw texture-upload dispatch to
+      `dispatch_triangle_setup`, no `0xf0` fault) then died on NEW wall O4:
+      SIGSEGV fault `0x0` in `libllvm-qgl.so` inside
+      `vkCreateComputePipelines`, async worker, main concurrently in the
+      same call. Score: oracles 8/8, 0 scanouts, N/A. ERRATUM: on-disk
+      binary now reads `c568dc23…`, matching NEITHER the report's
+      `a62d8a2b…` NOR the tombstone build-id `0b01b274…` (post-run tree
+      mutation, unknown cause — G15's anomaly class); run evidence stands
+      via tombstone + logcat + behavioral proof (passed O2's 4/4 death
+      site); G19 must rebuild-verify before the knob run. Verified: fix
+      hunk in tree, logcat 36 lines + 2 stalled compiles, tombstone O4
+      signature, device clean, oracle re-run (N/A), pins, ps2xGS commit.
+      ~1 h. Next: G19 O4 discriminator (`PGS_SKIP_COMPILATION_TASKS=1`).
+      Ledger row added.
+- [x] **I17 read (09-21) — PASS, 0x2c5358 closed at the E12 base (E12-row dedupe); I16 wall GONE with NO successor wall — guest runs 90 s silent (map-entry line done, observability next):**
+      Base MOVED to `9da21ff` (E-lane +1) + E12's `0x2c5300` row DEDUPED
+      (byte-identical hunk, `b07f738` skipped, count re-verified 1) + 7
+      ports (content-identical) + 1-line CSV `32d37e7` (local, clean, 0
+      pushes — E-lane mutating; their uncommitted tree holds the
+      byte-identical `0x2c5358` row — convergence again). Codegen exit 0
+      in 3m15s (+1 fn, slot 464084, exactly 1 register line, +0 resumable).
+      Device build exit 0 first try in 14m28s (121,225,416 B, 7e12163c,
+      9454 syms, new T). Overwrite install exit 0 in 68 s (9th). Probe:
+      `0x2c5358`/`0x2d3828` 0 refs, `guest-branch` 0 lines of ANY kind —
+      normalized dedup diff I16→I17 = exactly the wall line deleted, 0
+      additions; guest alive the full 90 s (exit 2, PID 4314) with a
+      byte-identical event prefix; NO successor wall named; `ee:idle` 0, 4
+      RPC sids identical, NO new `.ips` (5 priors — two briefs running) +
+      black screenshot. Verified: console keys + normalized diff re-run by
+      orchestrator, binary, worktree, codegen, install URL, crashlog,
+      screenshot viewed. ~60 min. Next: I18 observability brief (tap guest
+      pc past `0x2c5358` to NAME the next layer — new class, local taps).
+      Ledger row added.
+- [x] **T39 read (09-21) — PASS, no-hold control at matched phase: decay/rails/floods WITHOUT any input match the input runs' class (control distribution + recipe):**
+      Bit-identical T4 build reused (all receipts reproduce). ONE single-shot
+      run: chain reproduced (ENTER Cross 536.4 ms @T+327.11 → load 18%→98%
+      →cinematic→panel by +15, stable 79 s) → XCROSS 536.6 ms @T+432.42 →
+      countdown `2` → LIVE → LIVE-LIKE gate → PRE-sham pair (00:01:24 4TH/6
+      36% / 00:01:29 4TH/6 38%, no input) → SHAM 1003.7 ms wall gap @T+504.62
+      (ZERO xdotool — phase-matched to T38's hold within −2 s clock / −6 pp;
+      mid-pack vs lead-pack by AI lottery) → dense 10 snaps to 00:02:10
+      6TH/6 55%: 4 position swaps + decay 4TH→6TH distributed, progress
+      36→55% monotonic, clock +41 s (~1.4×), speed excursions + `FS Rail`
+      score event @d7 distributed, RDC gated out 9/12, SCPS40 rails 5/11,
+      SCPS120 rails 4/11 incl. the pre-pair gap AND the sham hop — the
+      control-vs-input table shows the same behavior class as T36's tap,
+      T37's tap, and T38's hold. 4 frames bit-identical to T38 (a1-post15
+      now 5-run identical, + a1-post25, sj-post1/8); EE 52 / IOP 155 sets
+      identical; exact flaps 0/0/0/1 (0 in-window; ZERO event-log entries
+      in-window). Verified: sham walls exact, T39_DONE, LIVE-LIKE, zero
+      keydown/keyup after XCROSS, head/tail 2000/2000, identities, flap
+      lines + positions, trace size+sha. ~105 min. Next: T40 sub-second
+      exposures (post-hoc scoring — T39 G1). Ledger row added.
 - [x] **E12 read (09-21) — PASS(ii), exact card predicate 0x2c5300 restored; caller advances, no UI+0x344 clear; remaining 0x2c5358 low-bit wall parked:**
       Checkpoint re-verified (9,450 names, registry/runner SHAs, suite
       452/452, fail-before `hasFunction(0x2c5300)=false`). Reclaimed 4
