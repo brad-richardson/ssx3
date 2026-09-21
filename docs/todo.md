@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t31 (Cross on Peak 1 → next screen, bytesize, 4h) · g12 (PCSX2-side draw-order trace, ps2xGS + bytesize, 6h) · e6 (source-trace S + S+0x5a88 writers, fork + P-lane lease, 6h) · i10 (SSX3 codegen + link + overwrite re-probe, worktree, 6h) · frontier (EF E-lane prep, read-only, 6h).
+- [ ] **Live panes:** t31 (Cross on Peak 1 → next screen, bytesize, 4h) · g12 (PCSX2-side draw-order trace, ps2xGS + bytesize, 6h) · frontier (E7 E-lane lead: S value series + parking answer, fork + P-lane lease, 6h) · i10 (SSX3 codegen + link + overwrite re-probe, worktree, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,28 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E6 read (09-21) — PASS, outcome (i) via J2a-fixed: M=1 boot-forced fixed pick of PAIR-B=112 (static, no boot):**
+      Full static naming: S = `PS2GraphicsMan` heap object (0x75e0 B,
+      factory `0x375a08`←`0x226970`, pointer global `0x4a289c`, vtable
+      `0x493208`); `S+0x5a88` writers exhaustive = sole W1 `0x382b68`;
+      advance decoded (§2c truth table: pick iff G=0; M≠0 → fixed PAIR-B;
+      parity path the only 112→other route); M=1 boot-forced (M1
+      fall-through, 8/8 local branches; no static clearer — M3
+      triple-zero unreached); G writers closed (G2 unconditional set,
+      G3 per-call clear); PAIR slots init-only; producer flow
+      (THIRD+SHADOW) + steady state machine + fp-user J2b-carrier role
+      receipted. Forced: M=1 ⇒ fixed pick of slot=112 ⇒ stuck; J2a-gated
+      demoted; J2b open as alternate join. NO boot per brief rule (values
+      need S upfront — E7a+E7b recipe §4). Verified: ELF md5 `9e64f3df`,
+      advance head 8 insns verbatim + W1/M1/G2/R1 anchors (independent
+      disassembly), arena cstr + vtable slots `0x375a40`/`0x3764c0`
+      (correct segment mapping — my first naive read missed +0x1000, then
+      confirmed), receipt line counts 382/1036/282/153/502/128, fork HEAD
+      still a13b66a + only pre-existing M, lease absent + pgrep 1.
+      Accepted: scan exhaustiveness + fall-through proof (in-evidence
+      slices/audits). Reference-state row: E5 series (values + PCs +
+      rates re-used as join keys). ~4.3 h. Next: E7a+E7b value series
+      (frontier executes, E6 §4). Ledger row added.
 - [x] **I9 read (09-21) — PASS, real ELF reaches run() on iPad; NEW wall = Dormant-at-entry on empty function table:**
       Worktree @ `b6252bb` + `3006a07` topic checkout (0 new commits, 0
       pushes); toolchain byte-identical to I8; SDL2 prebuilt reused;
