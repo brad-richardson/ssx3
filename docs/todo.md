@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator).
-- [ ] **Live panes:** i8 (audio-wall device repro, fork worktree + iPhone, 6h) · ac1 (0x12C alarm-contract validation, read-only, 3h) · g10 (same-boundary dual replay, ps2xGS + bytesize, 6h) · t29 (Cross on Zoe → next screen, bytesize, 4h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
-- [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series (after G9 unblocks geometry) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 audio fix (after I8 diagnosis) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
+- [ ] **Live panes:** ac1 (0x12C alarm-contract validation, read-only, 3h) · g10 (same-boundary dual replay, ps2xGS + bytesize, 6h) · t29 (Cross on Zoe → next screen, bytesize, 4h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
+- [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series (after G9 unblocks geometry) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 boot REAL ELF on device (loadELF runs; ship guest binary) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,31 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **I8 read (09-20) — PASS, audio wall is SIM-ONLY: device slice green, miniaudio OK, loadELF runs on iPhone:**
+      Separate worktree @ pinned `b6252bb` (clean: I7 content by ancestry,
+      E3b WIP excluded) + 1 commit `3006a07` (CFBundleName plist fix — install-1
+      failed CoreDeviceError 3000 on empty key; plist-refresh learning: build-dir
+      copy refreshes at configure only), pushed to fork topic branch (no touch
+      of E3b's line). Device toolchain (5 deltas tabled) + SDL2 iphoneos
+      prebuilt (266/266, deprecation-only warnings; ExFAT sidecar purge
+      learning) + runtime Release `-jobs 2` (BUILD SUCCEEDED, 1.8 GB tree).
+      Binary: 2944712 B arm64, LC_BUILD_VERSION iOS device, SDL2main entry
+      proof, 296 SDL symbols ≡ I7, unsigned by design. Provisioned (XC wildcard,
+      dev identity) + installed (exit 0, no force) on iPhone 16 Pro Max (WiFi;
+      user sessions untouched; only own PIDs signaled). 4 launches: no-arg =
+      I7 clean fatal; argv probe = GL complete (A18 Pro) + AUDIO initialized
+      (miniaudio/CoreAudio 48 kHz) + loadELF RAN (probe-path fail) + orderly
+      teardown + idle (no crash, no .ips; B2 byte-identical modulo IDs);
+      screenshots = black window post-teardown. Diagnosis: failing layer = sim
+      audio-server bridge below miniaudio (probe C + device both clear app +
+      miniaudio; session-management blanket theory REFUTED — 100 AVAudioSession
+      hits). Verdict H-c; ONE next action: boot a REAL ELF on device (gap 4).
+      Verified: scope (0 outside), worktree + pin + topic push (ls-remote),
+      shared-clone discipline (current WIP is E4's), app STILL on phone,
+      console (64 lines + key lines), binary size + sha, toolchain deltas,
+      tail sha RECOMPUTED exact, screenshot + SDL sizes. Reference-state row:
+      I7 sim behavior (same-vs-new table). ~45 min. Next: I9 real-ELF boot;
+      3006a07 cherry-pick when lane quiet. Ledger row added.
 - [x] **MF2 read (09-20) — PASS, MF app-option map + bypassed toggle prototype (launch-only flag, zero frame effect):**
       Smoothing template mapped hops 1–17 (flag → trial config → plumbing →
       switch → effect; pacing gate reused unchanged). MF map: I1 pre-present
