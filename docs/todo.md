@@ -1288,6 +1288,27 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T42 read (09-21) — PASS, ROI retune PROVEN on gating (9/12 gated + rider-locked hold pair, control floods 11/12 again) but motion NOT solved (crash in hold hop, in-band bias, single-sample floor); CONTROL-COLUMN erratum (values unreliable, gates verified):**
+      ONE retune (smaller ROI, threshold/gate frozen) tabled + calibrated
+      on static snaps BEFORE the run (11/11 non-wall VALID, wall gated,
+      margins 5.7×/1.53×/2.1×; held-out T40 8/12 vs frozen 2/12).
+      R1/R2 cubeb-modal NO-PARKs (audio-block forensics + corrected
+      parallel protocol); R3 exit 0 (FULL CHAIN 61 snaps → LIVE 5TH/6 →
+      ONE 1036.5 ms hold @T+502.49 → 10×≈0.575 s blind series; same
+      cadence to the ms): retuned 9/12 gated (3 correct flood-gates),
+      gated hold pair YES (npre2→d-post1, on→borderline-on), SCPS40 4/11
+      (hold +13@0.23 off-rail), SCPS120 2/11 (hold +120@0.60 RAIL —
+      unresolved here); d5/d9 in-band biases quantified; C: 11 G
+      (2 GB/run drain — watch). Verified: stream (size+sha+slices),
+      hold walls (1036.5 ms from full-precision log — table rounds),
+      poll 168 + T42_DONE, retuned tool EXACT on 3/3 sampled snaps,
+      control gates 12/12 (11 INVALID + npre2 VALID), SCPS hold hop
+      exact both tools, census, forensics files, tail intact. ERRATA:
+      control-column VALUES unreliable (10/12 npix/centroids drift vs
+      committed tool — gates unaffected, brief question unaffected);
+      T41's frozen-sha citation wrong (actual `58afa004…`, both files —
+      identity holds). ~1.5 h. Next: T43 accumulation (on→on pairs +
+      gradient static). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
