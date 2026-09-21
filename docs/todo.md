@@ -1288,6 +1288,28 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **EF read (09-21) — PASS, frontier prep: independent S-trace + H-FIFO candidate gap + E7 reframe (read-only):**
+      Independent receipt bundle (R1–R11, pre-E6) + handover supplement
+      (H1–H3): S-trace agrees with E6 (factory/global/vtable/advance truth
+      table); ADDS historical S=`0x61ba60` join (4 thread-stack snapshots +
+      P1 a0 record), copy-tail trace (`0x382af0` tail builds P→D packet,
+      submits via `0x371940`, CPU unmask SQ @`0x3719a4` → `0x10005000`),
+      H-FIFO hypothesis (VIF1 FIFO CPU ingress missing: write128 splits
+      with no FIFO ingestion; masked PATH3 queued, never delivered — with
+      explicit falsifier), fix-design matrix (6 candidates), 12 challenged
+      premises, E7 reframe (copy/FIFO-first, field values as guard).
+      Verified: copy-gate anchors verbatim (lw M + beqz→0x3833a8), raw word
+      @0x3719a4 = opcode 0x1F SQ (my ac1_dis.py mis-decodes SQ as `ext` —
+      tool gap noted; surrounding lui/ori consistent with 0x10005000),
+      S arithmetic = 0x61ba60 + P1:4166 a0 record, present sha `f6e08a9d`,
+      write128→write64×2 fall-through + masked-PATH3 branch + MSKPATH3
+      semantics in-fork, zero 0x10005000/0x5000 literals in ps2_memory.cpp,
+      0x371940 hot-pc counts = table, miner RERUN BY ME (dis + imm match),
+      COMPLETE markers both bundles, fork HEAD still a13b66a + only
+      pre-existing M, lease absent + pgrep 1. Accepted: brief's commit
+      conflict resolved by handover instruction (commit made, no push).
+      Reference-state row: E4/E5/E6 (EF reconciles all three). ~1 h. Next:
+      E7 executes (frontier, copy/FIFO-first approved). Ledger row added.
 - [x] **E6 read (09-21) — PASS, outcome (i) via J2a-fixed: M=1 boot-forced fixed pick of PAIR-B=112 (static, no boot):**
       Full static naming: S = `PS2GraphicsMan` heap object (0x75e0 B,
       factory `0x375a08`←`0x226970`, pointer global `0x4a289c`, vtable
