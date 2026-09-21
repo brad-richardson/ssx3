@@ -5,8 +5,8 @@ the build or commit that closed them.
 
 ## Now
 
-- [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS force-install iPad + Odin, iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t31 (Cross on Peak 1 → next screen, bytesize, 4h) · g12 (PCSX2-side draw-order trace, ps2xGS + bytesize, 6h) · e6 (source-trace S + S+0x5a88 writers, fork + P-lane lease, 6h) · i9 (real-ELF boot on iPad, worktree + force-install, 6h) · frontier (EF E-lane prep, read-only, 6h).
+- [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
+- [ ] **Live panes:** t31 (Cross on Peak 1 → next screen, bytesize, 4h) · g12 (PCSX2-side draw-order trace, ps2xGS + bytesize, 6h) · e6 (source-trace S + S+0x5a88 writers, fork + P-lane lease, 6h) · i10 (SSX3 codegen + link + overwrite re-probe, worktree, 6h) · frontier (EF E-lane prep, read-only, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,28 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **I9 read (09-21) — PASS, real ELF reaches run() on iPad; NEW wall = Dormant-at-entry on empty function table:**
+      Worktree @ `b6252bb` + `3006a07` topic checkout (0 new commits, 0
+      pushes); toolchain byte-identical to I8; SDL2 prebuilt reused;
+      Release build exit 0, binary BYTE-IDENTICAL to I8 (2944712 B).
+      Real `SLUS_207.72` shipped as bundle resource; argv probe:
+      `Using argv boot path` → M2 GPU + miniaudio OK → K1 arm fires →
+      `run()` entered → scheduler dispatches entry `0x100008` →
+      `missing-target` (DirectJump, codeRegion=yes) → thread Dormant →
+      `[ee:idle]` forever; run loop alive (black frames, ~57 DPI/s); no
+      `.ips`; deterministic ×2 launches. Diagnosis: table empty BY
+      CONSTRUCTION (`registerFunction` callerless, stub table, RECOMP=OFF,
+      no fallback path). POLICY CORRECTION (I9 gap 3): `--force-install`
+      does NOT exist in this `devicectl` (exit 64) — plain install is the
+      mechanism; overwrite-on-occupied untested (I10 tests it). Verified:
+      k1×1 + missing-target×1 (verbatim shape) + ee:idle×2 + 0 open-fails
+      in 3483-line console, R1/R2 dedup diff = 14 noise-only lines,
+      toolchain diff clean, ELF sha `1b49d05c` = P1 record, worktree clean
+      @3006a07, registerFunction decl/def-only + 6-line stub in-worktree,
+      app STILL on iPad, screenshot viewed (foreground, black). Accepted:
+      install exit 0 + profile coverage (logs). Reference-state row: I8
+      probe fate (same-vs-new table). ~1 h. Next: I10 host codegen + link
+      + overwrite re-probe (I9 gap 1). Ledger row added.
 - [x] **T30 read (09-21) — PASS, Cross on Continue → Select Peak, stable 131 s:**
       Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
       T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
