@@ -1288,6 +1288,24 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G23 read (09-21) — PASS(Done), upstream flag REFUTED on both halves with the exact mechanism named (RenderDoc-gated no-op): run 1 O3 lottery (retry spent), run 2 textbook O4, 0 scanouts, O5 never reached:**
+      ZERO hunks/builds, 2/2 runs. Run 1: exit 134 O3 (`trim` init, 23-line
+      logcat, tombstone_16 — brief's exact retry condition). Run 2 (same
+      command): exit 139 O4 (48-line logcat == G20's shape: precompilation
+      :25, `Failed to load RenderDoc` :28, dangling `7463`/`c61f` pre-create
+      :48; tombstone_17: 43-frame driver-compile stack through
+      `dispatch_texture_analysis`). Mechanism (static, HEAD-identical):
+      the ONLY `set_debug_mode` call (`:101`) sits inside `if (use_rdoc)`
+      (`:98-103`) while siblings call it unconditionally — parsed flag never
+      delivered, interface keeps default false. Score N/A (oracles 8/8, 0
+      PPMs). Verified: gate source (sole call, HEAD shape, siblings,
+      setter copy, consumers), both logcats (line counts + keyed lines +
+      census), both tombstones (signals/addrs exact, 43 crashing frames,
+      BuildIDs == binary, driver `28a2407f` == G22's O4), device `mg/`-only
+      now, score re-run (N/A), report tail intact. Resolves the G22 gate
+      erratum (HEAD :33/:55 vs worktree :36/:58 = G8/G10-hunk drift, both
+      right). ~40 min. Next: G24 plumbing brief (unconditional
+      `set_debug_mode` + rebuild + re-run + pixel-diff). Ledger row added.
 - [x] **E15 read (09-21) — PASS(iii-shaped), MPEG request/delivery probe with original-ELF ABI receipt; measurement-incomplete ONLY on shutdown footers (main `_Exit` bypass honestly tabled, no synthesized footer):**
       Fork `67c0a632` (pushed, 5 observation files, MPEG.cpp/h untouched);
       actual-wrapper fail-befores (no-input + input both rc1, selection/
