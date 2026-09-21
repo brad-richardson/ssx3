@@ -1447,6 +1447,50 @@ the build or commit that closed them.
       spawned in parallel. Share mirror verified current (names + sizes +
       t43r1 head/tail shas) — restart-safe. Fleet: e21 + t44 + g29 + i22
       working, t43 retired idle.
+- [x] **G29 read (09-21) — PASS(Done), black localized to RENDER path: readback exonerated 3 ways (P1=P2=P3 uniform (0,0,0,128)), circuits emit VRAM cleared pattern**
+      Task-1 forensics excluded every code-level zero source on both paths
+      (G10/G11/mac-parity, vsync labels, zero pixel telemetry ever, chain
+      walks) but couldn't discriminate → ONE ladder hunk (+98 in
+      `save_scanout_ppm`: P1/P2/P3 checksums + once VRAM checksum) + ONE
+      build exit 0 [458/458] (265,846,144 B +5,040, `79e6f4d2…`,
+      BuildID `662ab626…`) + verify-then-push NO gap + ONE run exit 0
+      (~1 s, `Done!` last, 0 success-no, ZERO new tombstone): all 10
+      ladders P1=P2=P3 FNV `aa2fa32572450383` nz=229,376 = uniform
+      RGB-black half-alpha; VRAM 1,184,729 nonzero (load-confounded);
+      priv regs force OPAQUE merge blit (ALP=`0xff`) ⇒ scanout == circuit1
+      == cleared pattern `00 00 00 80`; score table = G27/G28 exactly
+      (black files reproduced). Verified: logcat 1816/10/1 + values,
+      FNV proof RECOMPUTED both branches exact, PPMs 10×688,143 +
+      `99418f1b…`, cmp IDENTICAL ×10 vs G28, score re-run exact,
+      priv-reg re-run exact ×8, G22 HUNK_MATCH, G28 binary INTACT
+      (`450471e2…`), device clean (mg-only, newest _23), tail intact.
+      ERRATA: G29-E1 ladder "FNV-1a" basis truncated (…5603 vs …56037 —
+      proofs hold, label imprecise); G29-E2 destruction progressive
+      (report-time `e353aabf…` mid-destruction → now 100% zeros
+      `7c8593bd…`, 0 nonzero of 265,846,144 B — 8th recurrence, 7th
+      persistent; run validity unaffected). ~1 h. Next: G30
+      VRAM/circuit-content split (NOT adoption). Ledger row added.
+- [x] **I22 read (09-21) — PASS(Done), Cause-B feasibility CLOSED: minimal FFmpeg 7.1.1 subset builds+links bare for iOS arm64 (+1.2 MB, LGPL-2.1), stub inventory + parity checklist tabled — shape decision is owner's**
+      Time-boxed spike (~35 min of 2 h cap): tarball (11,019,500 B,
+      `73398439…`) → iOS configure exit 0 (LGPL 2.1+, mpeg2video+
+      mpegvideo+swscale only, no asm/nasm) → `make -j2` exit 0 (19.3 s,
+      0 errors) → 3 arm64 archives (677,720+926,952+895,632 B) → bare
+      full-20-API link exit 0 (Mach-O arm64, 1,258,152 B, zero
+      frameworks, +1.23 MB ≈1% of app) → host-subset decode of E18's
+      240 B vector reproduces R3 counts (parsed240/packets3+1/frames2+2)
+      with ONE characterized pixel drift (R 252 vs 254, 7.1-vs-9.0
+      rounding, flags-independent). Stub inventory S1–S4/W1–W5/T1–T8
+      (wake already wired T3; retry S3 silences W4), parity P1–P10,
+      recommendation A/B/C with handoff Q1 quoted. Verified by
+      INDEPENDENT re-run: fresh /tmp extract → iOS configure exit 0 →
+      bare link exit 0 (1,258,152 B EXACT) → host configure/build exit 0
+      → decode counts + RGBA sha `0a8d7973…` EXACT; archives sizes/arch/
+      symbols, build-log 0 errors, tail-sha exact, S1 lines, fork
+      `3adc0478` + remote unmoved, P1 receipt, undef 732 + VT refs,
+      iPad live (PID 4679 still running). NIT: W final 27M vs claimed
+      31M (ExFAT du variance; caps fine). Zero fork commits, zero
+      device writes. ~1 h. Next: Cause-B implementation brief BLOCKED
+      on owner (shape A/B/C + version pin). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
