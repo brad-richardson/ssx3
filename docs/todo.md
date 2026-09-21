@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator).
-- [ ] **Live panes:** ac1 (0x12C alarm-contract validation, read-only, 3h) · g10 (same-boundary dual replay, ps2xGS + bytesize, 6h) · t29 (Cross on Zoe → next screen, bytesize, 4h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
-- [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series (after G9 unblocks geometry) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 boot REAL ELF on device (loadELF runs; ship guest binary) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
+- [ ] **Live panes:** t30 (Cross on Continue → next screen, bytesize, 4h) · g11 (per-vsync scanout series, ps2xGS + bytesize, 6h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
+- [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 boot REAL ELF on device (loadELF runs; ship guest binary) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,54 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T29 read (09-21) — PASS, Cross on Zoe → Setup Character, stable 132 s:**
+      Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
+      T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
+      (TITLE poll01 band-frozen, Start ≤0.73 s, Menu Cross @T+136.19 → Select
+      Character by +1 s, 5 park snaps vs-stab6 0.06–0.25/p99 1–4) → Zoe Cross
+      537.9 ms @T+176.26 (pre = SC Zoe-selected, vs-sc 0.1670/3 PIL, viewed)
+      → Setup Character (Zoe, Continue highlighted, tagline `Continue to peak
+      selection.`) by +1 s, 12 snaps / 132 s (pairwise 0.077–0.32/p99 2–8;
+      vs-SC ~7.2, vs-menu ~6.9, vs-title ~15.8). 9 WSL flaps, ZERO in run
+      window [210,531] (direct dmesg coverage, no restart; T27 §4 exceeded).
+      EE 52 / IOP 155 name sets identical to T28 R1 (arrival adds no new API).
+      Verified: ZOE_CROSS keydown/keyup walls exact, T29_DONE in stdout ×2,
+      head/tail 2000/2000, a1-post15 full-sha EQUAL to T28 (`4c56f815…cc44565`,
+      3rd run), 41 files committed. Reference-state row: T28 park (arrival
+      band + spread). ~16 min. Next: T30 Cross on Continue (T29 G1). Ledger
+      row added.
+- [x] **G10 read (09-21) — PASS, same-boundary dual replay: 7 exact pairs, k=0 black-vs-icon is paraLLEl-side scanout:**
+      Frontier redirect executed (G9 §4 superseded). Pinned reference CAN
+      replay (pcsx2-gsrunner, every doc facility verified in-tree; sw →
+      vulkan-on-llvmpipe by verified device failure; geometry
+      renderer-independent). 8-scanout series + FIRST-vs-REF diffs at exact
+      512×448: k=0 black-vs-icon (PSNR 32 dB) — first-black lag is
+      paraLLEl-side scanout (its vsync#0 ran 34 prims), not dump content;
+      k=1..6 icon-vs-icon (PSNR 44.6–47.5, exact ≥0.9974; PNG leads PPM
+      ~60–80 px/step, one-field-offset candidate OPEN). Per-pass reset: cold
+      272 / warmed 272; G8's 544 + first=306 reconcile EXACTLY; frontier
+      decomposition confirmed. Post-vsync#7 has no PCSX2 file
+      (final-present race, recipe tabled). Verified: 7 PNGs 512×448 (PIL),
+      vsync0 all-black + sha `99418f1b` = G8 FIRST, vsync6 569 nonblack =
+      report, ps2xGS [G10] committed + in sync with origin/main, ssx3 mirror
+      7 files. Accepted: PSNR/exact_frac + flush series (session-only logs).
+      Reference-state row: G8 FIRST/LAST bytes reproduced exactly. ~2.5 h.
+      Next: G11 per-vsync scanout series (G10 §4). Ledger row added.
+- [x] **AC1 read (09-21) — PASS, 0x12 alarm/timer/INTC contract validated (read-only); K1-G7 RETIRED:**
+      Guest InitAlarm fully decoded (54 insns, 8/6/2 SetSyscall/
+      GetEntryAddress/Copy shape, 0x740 B payload + 0x28 B stub; T3 ISR via
+      the SetSyscall(0x12C) INT12 trick per Play!). HLE collapse preserves FC
+      set→fire for a2-only handlers (K1 21 set → ≥20 fired; R1A 379→379;
+      tick 64 µs vs 63.56 µs = 0.7%). 13-row contract: C1 EQUIVALENT;
+      C2/C4/C6 transient-none; FE/FD swap (C7a) + cancel race (C10) + INT12
+      (C8) LATENT (zero issuers both sides); INTC order identical minus
+      phase-late cause-3 re-add. ACCEPT bar met → K1-G7 retired (downstream
+      effect tabled, none in-window). 0x583 KEEPS CMPE set
+      (CLKS=3,CUE,CMPE,EQUF). Verified: ac1_dis.py rerun (54 insns, guard lw
+      @0x10001810), HLE InitAlarm KE_OK-only (Sync.cpp:399-402), fork branch
+      ssx3 + sole `M` file predates brief (Sep 19 generated code, not AC1's).
+      Re-open trigger: (fe)/(fd)/(ff) ever observed. Reference-state row: K1
+      §K1-10/§K1-13-G7. ~2.5 h. Ledger row added.
 - [x] **I8 read (09-20) — PASS, audio wall is SIM-ONLY: device slice green, miniaudio OK, loadELF runs on iPhone:**
       Separate worktree @ pinned `b6252bb` (clean: I7 content by ancestry,
       E3b WIP excluded) + 1 commit `3006a07` (CFBundleName plist fix — install-1
