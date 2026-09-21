@@ -1288,6 +1288,37 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **I13 read (09-21) — PASS, 0x156750 closed (count 0, strictly past); NEW wall = 0x243a80 same class:**
+      Base MOVED to `be0c9ee` (E-lane landed E9, static) + cherry-picks
+      (`c075ee0`, `8cffcb3`, `18f16df`, `9b29ba2`, byte-identical) + 1-line CSV
+      `6166d1a` (local, clean, 0 pushes — E-lane mutating). Codegen exit 0
+      (+1 fn, slot 88530, E9 DROP active — 0 sceSifCmdIntrHdlr in stubs.h).
+      Device build exit 0 (121,208,256 B, f5f088fa, 9449 syms, new T).
+      Overwrite install exit 0. Probe 424 s: `0x156750` count 0 — executed and
+      strictly past; NEW wall JALR `0x317054 → 0x243a80` (mid-function of
+      emitted `sub_00243A40`, head after jr @`0x243a74`, tail jr @`0x243aa8`,
+      caller `jalr $v1` @`0x317054` vtable-loaded, 0 register refs);
+      `ee:idle` 0, 4 RPC sids identical, bug_type 202 walk-spin + black-
+      screen screenshot. Verified: console keys, binary, worktree, codegen,
+      install URL, ips, screenshot viewed. ~4 h. Next: I14 closes 0x243a80
+      (I13 gap 1, same 1-line class). Ledger row added.
+- [x] **T35 read (09-21) — PASS, Cross on X Continue → countdown 2 → LIVE Snow Jam gameplay (flap counts correct):**
+      Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
+      T4; NVM `da021d2a` untouched). Pre-run already at pre-race panel (NVM
+      persisted T34): Start-then-return, re-walk Zoe→Peak→Race→Snow Jam→
+      MR→ENTER Cross 534.9 ms @T+326.78 → load 17%→91%→black→race intro→
+      pre-race panel (stable 63 s, 6 stab snaps 0.027–0.561). ONE Cross
+      537.9 ms @T+432.05 (pre = panel, viewed) → countdown `2` at +0.4 s →
+      LIVE gameplay from +4 s: race clock advances 00:00:00→00:02:52, rider
+      visibly descends + changes course (4TH/6, 84% progress, 4330 pts by
+      +130 s) with ZERO further input (clock ~1.3× wall under turbo; all 66 X
+      pairs 7.97–20.23 — live gameplay is never static). EE 52 / IOP 155 sets
+      identical to T34 (racing adds no new API). T34 lesson applied: exact
+      flap counts (0/1/2/4 across H13/H14/H14-post/H15, H14 @32.29 pre +
+      @655.26 post — 0 in window). Verified: walls exact, T35_DONE, PP-LIKE
+      legs, head/tail 2000/2000, zc-post3 + rc-post1 full-sha = T34's, flap
+      lines. ~2.5 h. Next: T36 first steering nudge (T35 G1 steering half,
+      HUD-gated). Ledger row added.
 - [x] **T34 read (09-21) — PASS, Cross on Continue → game load → race intro → pre-race panel (ERRATUM: flap counts):**
       Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
       T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
