@@ -1288,6 +1288,26 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E18 read (09-21) — PASS(Done), MPEG caller delivery LANDED (fork `3adc0478`, pushed): fixtures flipped rc1→rc0, 458/458, 5,040 bytes via AddBs — then CORRECT STOP at the parser edge (parsed 5,040, packets/frames/completions 0, main still at `0x3b1028`, no second fix):**
+      Ownership audit FIRST (queued path fails parked-caller → sync
+      HleCall chosen, tabled both ways). Fix: selector + collect-under-
+      mutex/dispatch-after-unlock + GetPicture-entry trigger + delete/
+      reset invalidation (MPEG.cpp +189/−3, tests +284, 2 files only);
+      R1–R6 (incl. R3 authored-I-frame decode → FRAME16×16 rc0).
+      AppleDouble compiler-log overrun handled reversibly (sidecars
+      retained, 0 bytes deleted). 1/1 boot 75.4 s (lease ok, caps
+      closed, 6,401 contiguous events, real footers tick4446
+      10=9+1/pending0, E7 counts match): dynamic joins (MPEG `0x587b30`,
+      type1, `0x3b0b10`/`0x4029d0` once, bytes5036→5040, FNV
+      `d2a9588f…`, first64 incl. `000001b3` + `Encoded with MPEG`),
+      graphics aligned (206/206, 7,103 px, 0 mismatches); parser
+      parsed5040/packets0/frames0/`decoderFailed=0`, completions 0.
+      Verified: fork scope/parent/remote + runner/suite sizes+shas
+      EXACT + suite INDEPENDENTLY re-run 458/458 + fixture sha EXACT +
+      events contiguity + footers exact + delivery join (5040/FNV/
+      header) from evidence JSON + lease/pgrep + sidecars retained.
+      ~1 h. Next: E19 input→packet diagnosis (frontier in place) +
+      I21 S9 device re-probe (I-lane wakes). Ledger row added.
 - [x] **T42 read (09-21) — PASS, ROI retune PROVEN on gating (9/12 gated + rider-locked hold pair, control floods 11/12 again) but motion NOT solved (crash in hold hop, in-band bias, single-sample floor); CONTROL-COLUMN erratum (values unreliable, gates verified):**
       ONE retune (smaller ROI, threshold/gate frozen) tabled + calibrated
       on static snaps BEFORE the run (11/11 non-wall VALID, wall gated,
