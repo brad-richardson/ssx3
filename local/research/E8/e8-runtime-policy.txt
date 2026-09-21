@@ -1,0 +1,257 @@
+
+# /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h SHA256=d9a6f2264265d02ff1319ef796f024a7a607c76e4486fac31844ad640a05f0d5 lines=333..346
+333:     enum class MissingFunctionPolicy : uint32_t
+334:     {
+335:         // Strict mode for tests/CI: log the bad target and request the runtime to stop.
+336:         Stop = 0,
+337: 
+338:         // Debug mode: log once, leave ctx->pc on the bad target, and let the caller unwind.
+339:         ContinueToTarget = 1,
+340: 
+341:         // Debug mode: same as ContinueToTarget, but triggers a debugger break once on MSVC.
+342:         BreakOnce = 2,
+343: 
+344:         // Escape hatch only: skip missing calls by returning to fallthrough (it can hide guest bugs)
+345:         SkipCallDebug = 3,
+346:     };
+
+# /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp SHA256=ae5a0e16273bf53e8535dff0058cf86807b206b681d7776ccb34d626cb1a0ac9 lines=1421..1426
+1421: bool PS2Runtime::hasFunction(uint32_t address) const
+1422: {
+1423:     uint32_t slot = 0u;
+1424:     return generatedFunctionTableSlot(address, slot) && g_ps2RecompiledFunctionTable[slot] != nullptr;
+1425: }
+1426: 
+
+# /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp SHA256=ae5a0e16273bf53e8535dff0058cf86807b206b681d7776ccb34d626cb1a0ac9 lines=1674..1684
+1674: void PS2Runtime::reportMissingFunction(uint8_t *rdram,
+1675:                                        R5900Context *ctx,
+1676:                                        uint32_t targetPc,
+1677:                                        uint32_t sourcePc,
+1678:                                        GuestBranchKind kind,
+1679:                                        const char *debugName)
+1680: {
+1681:     const MissingFunctionPolicy policy = missingFunctionPolicy();
+1682:     const bool firstReport = !m_missingFunctionReported.exchange(true, std::memory_order_acq_rel);
+1683:     const bool shouldPrint = firstReport || diagReportAll();
+1684: 
+
+# /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp SHA256=ae5a0e16273bf53e8535dff0058cf86807b206b681d7776ccb34d626cb1a0ac9 lines=1808..1829
+1808:         static std::mutex s_missingFunctionLogMutex;
+1809:         {
+1810:             std::lock_guard<std::mutex> lock(s_missingFunctionLogMutex);
+1811:             std::cerr << oss.str() << std::endl;
+1812:         }
+1813:     }
+1814: 
+1815:     if (firstReport && policy == MissingFunctionPolicy::BreakOnce)
+1816:     {
+1817: #if defined(_MSC_VER)
+1818:         __debugbreak();
+1819: #endif // TODO others breakpoints
+1820:     }
+1821: 
+1822:     if (ctx)
+1823:     {
+1824:         ctx->pc = targetPc;
+1825:     }
+1826: 
+1827:     if (policy == MissingFunctionPolicy::Stop)
+1828:     {
+1829:         requestStop();
+
+# /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp SHA256=ae5a0e16273bf53e8535dff0058cf86807b206b681d7776ccb34d626cb1a0ac9 lines=2017..2080
+2017: bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
+2018:                                      R5900Context *ctx,
+2019:                                      uint32_t targetPc,
+2020:                                      uint32_t sourcePc,
+2021:                                      uint32_t fallthroughPc,
+2022:                                      GuestBranchKind kind,
+2023:                                      const char *debugName)
+2024: {
+2025:     ctx->pc = targetPc;
+2026:     const bool isCall = (kind == GuestBranchKind::DirectCall || kind == GuestBranchKind::IndirectCall);
+2027: 
+2028:     // Every inter-function transfer is also a deterministic EE safe point.
+2029:     // Backward edges inside generated functions use eeCheckpointDue(), while
+2030:     // this charge bounds straight-line call chains that have no local loop.
+2031:     if (m_eeScheduler && m_eeScheduler->checkpointDue(EeScheduler::kGuestDispatchCycles))
+2032:     {
+2033:         // P1n driver-entry probe (P14-1d): checkpoint path.
+2034:         if (targetPc == 0x3DD1D8u && diagDriverProbeEnabled())
+2035:         {
+2036:             const uint32_t sp = (ctx != nullptr) ? getRegU32(ctx, 29) : 0u;
+2037:             const uint32_t ra = (ctx != nullptr) ? getRegU32(ctx, 31) : 0u;
+2038:             diagDriverEntryEmit(sp, ra, sourcePc, true);
+2039:         }
+2040:         return false;
+2041:     }
+2042: 
+2043:     if (!isCall)
+2044:     {
+2045:         if (!hasFunction(targetPc))
+2046:         {
+2047:             reportMissingFunction(rdram, ctx, targetPc, sourcePc, kind, debugName);
+2048:         }
+2049: 
+2050:         ctx->pc = targetPc;
+2051:         return false;
+2052:     }
+2053: 
+2054:     if (!hasFunction(targetPc))
+2055:     {
+2056:         reportMissingFunction(rdram, ctx, targetPc, sourcePc, kind, debugName);
+2057: 
+2058:         const MissingFunctionPolicy policy = missingFunctionPolicy();
+2059: 
+2060:         if (policy == MissingFunctionPolicy::SkipCallDebug && isCall)
+2061:         {
+2062:             ctx->pc = fallthroughPc;
+2063:             return true;
+2064:         }
+2065: 
+2066:         if (policy == MissingFunctionPolicy::ContinueToTarget)
+2067:         {
+2068:             ctx->pc = targetPc;
+2069:             return true;
+2070:         }
+2071: 
+2072:         return false;
+2073:     }
+2074: 
+2075:     // P1c HLE stub/call histogram at the register_functions.cpp binding
+2076:     // lookup (lookupFunction below resolves the guest call target to the
+2077:     // registered host function). Counts per call target with first/last $ra.
+2078:     static uint64_t s_diagCallTick = 0;
+2079:     ++s_diagCallTick;
+2080:     // T1: cumulative hot-pc tally, always on (the P1c map above is
+
+# Generated caller (read only) /Volumes/Extreme SSD/ps2recomp-spike/P1/output/sub_002C4410_0x2c4410.cpp SHA256=21fa97c0d71539b1075b57132401a477c08b76dbadd2d416972efe17f314ef63
+479: label_2c44a8:
+480:     // 0x2c44a8: 0x40f809  jalr        $v0
+481: label_2c44ac:
+482:     if (ctx->pc == 0x2C44ACu) {
+483:         ctx->pc = 0x2C44ACu;
+484:         ctx->in_delay_slot = true;
+485:         ctx->branch_pc = 0x2C44A8u;
+486:         // 0x2c44ac: 0x2042021  addu        $a0, $s0, $a0 (Delay Slot)
+487:         SET_GPR_S32(ctx, 4, (int32_t)ADD32(GPR_U32(ctx, 16), GPR_U32(ctx, 4)));
+488:         ctx->in_delay_slot = false;
+489:         ctx->pc = 0x2C44B0u;
+490:         goto label_2c44b0;
+491:     }
+492:     ctx->pc = 0x2C44A8u;
+493:     {
+494:         const uint32_t jumpTarget = GPR_U32(ctx, 2);
+495:         SET_GPR_U32(ctx, 31, 0x2C44B0u);
+496:         ctx->pc = 0x2C44ACu;
+497:         ctx->in_delay_slot = true;
+498:         ctx->branch_pc = 0x2C44A8u;
+499:         // 0x2c44ac: 0x2042021  addu        $a0, $s0, $a0 (Delay Slot)
+500:         SET_GPR_S32(ctx, 4, (int32_t)ADD32(GPR_U32(ctx, 16), GPR_U32(ctx, 4)));
+501:         ctx->in_delay_slot = false;
+502:         ctx->pc = jumpTarget;
+503:         if (!runtime->dispatchGuestBranch(rdram, ctx, jumpTarget, 0x2C44A8u, 0x2C44B0u, PS2Runtime::GuestBranchKind::IndirectCall, "JALR")) {
+504:             return;
+505:         }
+506:     }
+507:     ctx->pc = 0x2C44B0u;
+508: label_2c44b0:
+509:     // 0x2c44b0: 0x54400006  bnel        $v0, $zero, . + 4 + (0x6 << 2)
+510: label_2c44b4:
+511:     if (ctx->pc == 0x2C44B4u) {
+512:         ctx->pc = 0x2C44B4u;
+513:         ctx->in_delay_slot = true;
+514:         ctx->branch_pc = 0x2C44B0u;
+515:         // 0x2c44b4: 0x7bb00020  lq          $s0, 0x20($sp) (Delay Slot)
+516:         SET_GPR_VEC(ctx, 16, READ128(ADD32(GPR_U32(ctx, 29), 32)));
+517:         ctx->in_delay_slot = false;
+518:         ctx->pc = 0x2C44B8u;
+519:         goto label_2c44b8;
+520:     }
+521:     ctx->pc = 0x2C44B0u;
+522:     {
+523:         const bool branch_taken_0x2c44b0 = (GPR_U64(ctx, 2) != GPR_U64(ctx, 0));
+524:         if (branch_taken_0x2c44b0) {
+525:             ctx->pc = 0x2C44B4u;
+526:             ctx->in_delay_slot = true;
+527:             ctx->branch_pc = 0x2C44B0u;
+528:             // 0x2c44b4: 0x7bb00020  lq          $s0, 0x20($sp) (Delay Slot)
+529:             SET_GPR_VEC(ctx, 16, READ128(ADD32(GPR_U32(ctx, 29), 32)));
+530:             ctx->in_delay_slot = false;
+531:             ctx->pc = 0x2C44CCu;
+532:             goto label_2c44cc;
+533:         }
+534:     }
+535:     ctx->pc = 0x2C44B8u;
+536: label_2c44b8:
+537:     // 0x2c44b8: 0xae110010  sw          $s1, 0x10($s0)
+538:     ctx->pc = 0x2c44b8u;
+539:     WRITE32(ADD32(GPR_U32(ctx, 16), 16), GPR_U32(ctx, 17));
+540: label_2c44bc:
+541:     // 0x2c44bc: 0x200202d  daddu       $a0, $s0, $zero
+
+# Generated query owner (read only) /Volumes/Extreme SSD/ps2recomp-spike/P1/output/sub_002C50E0_0x2c50e0.cpp SHA256=e634ccb4fe18b19aa02d0afb60d9795a4726b6827ec0778679fd2f6ee8c6f151
+15: // Address: 0x2c50e0 - 0x2c51d0
+16: void sub_002C50E0_0x2c50e0(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {
+17: #ifdef PS2_FUNCTION_LOG_TRACKER
+18:     PS_LOG_ENTRY("sub_002C50E0_0x2c50e0");
+19: #endif
+20: 
+21:     switch (ctx->pc) {
+22:         case 0x2c5118u: goto label_2c5118;
+23:         default: break;
+24:     }
+25: 
+26:     ctx->pc = 0x2c50e0u;
+27: 
+28:     // 0x2c50e0: 0x27bdffe0  addiu       $sp, $sp, -0x20
+103:         const uint32_t jumpTarget = GPR_U32(ctx, 31);
+104:         ctx->pc = 0x2C5138u;
+105:         ctx->in_delay_slot = true;
+106:         ctx->branch_pc = 0x2C5134u;
+107:         // 0x2c5138: 0x27bd0020  addiu       $sp, $sp, 0x20 (Delay Slot)
+108:         SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 32));
+109:         ctx->in_delay_slot = false;
+110:         ctx->pc = jumpTarget;
+111:         #if defined(PS2X_STRICT_RETURN_DIAGNOSTICS) && PS2X_STRICT_RETURN_DIAGNOSTICS
+112:         (void)runtime->dispatchGuestBranch(rdram, ctx, jumpTarget, 0x2C5134u, 0u, PS2Runtime::GuestBranchKind::Return, "JR $ra");
+113:         return;
+114:         #else
+115:         ctx->pc = jumpTarget;
+116:         return;
+117:         #endif
+118:     }
+119:     ctx->pc = 0x2C513Cu;
+120:     // 0x2c513c: 0x0  nop
+121:     ctx->pc = 0x2c513cu;
+122:     // NOP
+123:     // 0x2c5140: 0x8c820004  lw          $v0, 0x4($a0)
+124:     ctx->pc = 0x2c5140u;
+125:     SET_GPR_S32(ctx, 2, (int32_t)READ32(ADD32(GPR_U32(ctx, 4), 4)));
+126:     // 0x2c5144: 0x14400004  bnez        $v0, . + 4 + (0x4 << 2)
+127:     ctx->pc = 0x2C5144u;
+128:     {
+129:         const bool branch_taken_0x2c5144 = (GPR_U64(ctx, 2) != GPR_U64(ctx, 0));
+130:         if (branch_taken_0x2c5144) {
+131:             ctx->pc = 0x2C5158u;
+132:             goto label_2c5158;
+133:         }
+134:     }
+135:     ctx->pc = 0x2C514Cu;
+136:     // 0x2c514c: 0x8c820040  lw          $v0, 0x40($a0)
+137:     ctx->pc = 0x2c514cu;
+138:     SET_GPR_S32(ctx, 2, (int32_t)READ32(ADD32(GPR_U32(ctx, 4), 64)));
+139:     // 0x2c5150: 0x10400003  beqz        $v0, . + 4 + (0x3 << 2)
+140:     ctx->pc = 0x2C5150u;
+141:     {
+142:         const bool branch_taken_0x2c5150 = (GPR_U64(ctx, 2) == GPR_U64(ctx, 0));
+143:         if (branch_taken_0x2c5150) {
+144:             ctx->pc = 0x2C5160u;
+145:             goto label_2c5160;
+146:         }
+147:     }
+148:     ctx->pc = 0x2C5158u;
+149: label_2c5158:
+
+# E8 RUNTIME POLICY TAIL COMPLETE

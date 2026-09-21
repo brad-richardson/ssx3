@@ -1,0 +1,161 @@
+park snapshot (emitter, schema ps2x-park-snapshot/1)
+threads (6):
+  id=1 Running wait=None:0 pc=0x423dc8 ra=0x39b72c sp=0x1fffe00 entry=0x100008 pri=100 sched=2671 chain=[0x39b72c]
+  id=2 Waiting wait=Semaphore:26 pc=0x423de8 ra=0x3e3c20 sp=0x51ec20 entry=0x3e3be0 pri=12 sched=86 chain=[0x3e3c20]
+  id=3 Waiting wait=Semaphore:30 pc=0x423de8 ra=0x31aca4 sp=0x6188a0 entry=0x31ac60 pri=101 sched=149 chain=[0x31aca4]
+  id=4 Waiting wait=Semaphore:31 pc=0x423de8 ra=0x31ac30 sp=0x6088a0 entry=0x31ac08 pri=99 sched=1325 chain=[0x31ac30]
+  id=5 Waiting wait=Semaphore:32 pc=0x423de8 ra=0x3827e0 sp=0x622480 entry=0x382740 pri=5 sched=2645 chain=[0x3827e0]
+  id=6 Waiting wait=Semaphore:36 pc=0x423de8 ra=0x3c19f0 sp=0x512aa0 entry=0x3c19a8 pri=6 sched=1 chain=[0x3c19f0]
+semaphores (16):
+  id=1 count=1 max=1 init=1 waiters=0
+  id=2 count=1 max=1 init=1 waiters=0
+  id=3 count=1 max=1 init=1 waiters=0
+  id=4 count=1 max=1 init=1 waiters=0
+  id=5 count=1 max=1 init=1 waiters=0
+  id=26 count=0 max=32 init=0 waiters=1
+  id=27 count=1 max=1 init=1 waiters=0
+  id=28 count=0 max=0 init=0 waiters=0
+  id=29 count=0 max=0 init=0 waiters=0
+  id=30 count=0 max=1024 init=0 waiters=1
+  id=31 count=0 max=1024 init=0 waiters=1
+  id=32 count=0 max=16 init=0 waiters=1
+  id=33 count=1 max=1 init=1 waiters=0
+  id=35 count=1 max=20 init=1 waiters=0
+  id=36 count=0 max=1 init=0 waiters=1
+  id=37 count=1 max=1 init=1 waiters=0
+sema waits:
+  id=1 pc=0x423de8 n=2
+  id=4 pc=0x423de8 n=8232
+  id=5 pc=0x423de8 n=794
+  id=6 pc=0x423de8 n=1
+  id=7 pc=0x423de8 n=1
+  id=8 pc=0x423de8 n=1
+  id=9 pc=0x423de8 n=1
+  id=10 pc=0x423de8 n=1
+  id=11 pc=0x423de8 n=1
+  id=12 pc=0x423de8 n=1
+  id=13 pc=0x423de8 n=1
+  id=14 pc=0x423de8 n=1
+  id=15 pc=0x423de8 n=1
+  id=16 pc=0x423de8 n=1
+  id=17 pc=0x423de8 n=1
+  id=18 pc=0x423de8 n=1
+  id=19 pc=0x423de8 n=1
+  id=20 pc=0x423de8 n=1
+  id=21 pc=0x423de8 n=1
+  id=22 pc=0x423de8 n=1
+  id=23 pc=0x423de8 n=1
+  id=24 pc=0x423de8 n=1
+  id=25 pc=0x423de8 n=1
+  id=26 pc=0x423de8 n=471
+  id=29 pc=0x423de8 n=1324
+  id=30 pc=0x423de8 n=4
+  id=31 pc=0x423de8 n=1325
+  id=32 pc=0x423de8 n=3967
+  id=33 pc=0x423de8 n=5288
+  id=34 pc=0x423de8 n=2
+  id=35 pc=0x423de8 n=1312
+  id=36 pc=0x423de8 n=1
+sema signals:
+  id=1 pc=0x423dc8 n=2
+  id=4 pc=0x423dc8 n=8232
+  id=5 pc=0x423dc8 n=794
+  id=6 pc=0x423dd8 n=1
+  id=7 pc=0x423dd8 n=1
+  id=8 pc=0x423dd8 n=1
+  id=9 pc=0x423dd8 n=1
+  id=10 pc=0x423dd8 n=1
+  id=11 pc=0x423dd8 n=1
+  id=12 pc=0x423dd8 n=1
+  id=13 pc=0x423dd8 n=1
+  id=14 pc=0x423dd8 n=1
+  id=15 pc=0x423dd8 n=1
+  id=16 pc=0x423dd8 n=1
+  id=17 pc=0x423dd8 n=1
+  id=18 pc=0x423dd8 n=1
+  id=19 pc=0x423dd8 n=1
+  id=20 pc=0x423dd8 n=1
+  id=21 pc=0x423dd8 n=1
+  id=22 pc=0x423dd8 n=1
+  id=23 pc=0x423dd8 n=1
+  id=24 pc=0x423dd8 n=1
+  id=25 pc=0x423dd8 n=1
+  id=26 pc=0x423dc8 n=85
+  id=26 pc=0x423dd8 n=385
+  id=29 pc=0x423dc8 n=1324
+  id=30 pc=0x423dc8 n=3
+  id=31 pc=0x423dd8 n=1324
+  id=32 pc=0x423dc8 n=1322
+  id=32 pc=0x423dd8 n=2644
+  id=33 pc=0x423dc8 n=5288
+  id=34 pc=0x423dc8 n=1
+  id=34 pc=0x423dd8 n=1
+  id=35 pc=0x423dc8 n=1312
+hot pc (top 30 of 1188):
+  pc=0x41ea18 n=953380 first_ra=0x41aac0 last_ra=0x41aae8
+  pc=0x41aa88 n=192588 first_ra=0x322aec last_ra=0x2b0204
+  pc=0x392c60 n=171113 first_ra=0x3a0df0 last_ra=0x3a0df0
+  pc=0x325260 n=99920 first_ra=0x325590 last_ra=0x325f10
+  pc=0x416810 n=63269 first_ra=0x318308 last_ra=0x2c5544
+  pc=0x3252f8 n=59952 first_ra=0x3252d8 last_ra=0x3252d8
+  pc=0x411c38 n=54129 first_ra=0x412520 last_ra=0x412530
+  pc=0x3252e8 n=39968 first_ra=0x325578 last_ra=0x32550c
+  pc=0x325250 n=39968 first_ra=0x321130 last_ra=0x321130
+  pc=0x325450 n=39968 first_ra=0x321158 last_ra=0x321158
+  pc=0x320c48 n=39968 first_ra=0x180324 last_ra=0x180450
+  pc=0x321108 n=39968 first_ra=0x320c60 last_ra=0x320c60
+  pc=0x371dd8 n=38312 first_ra=0x38f758 last_ra=0x38f61c
+  pc=0x423c90 n=29710 first_ra=0x3e5028 last_ra=0x3e5774
+  pc=0x38f460 n=26412 first_ra=0x38f524 last_ra=0x3790b4
+  pc=0x2a78e0 n=25328 first_ra=0x2a7adc last_ra=0x2a798c
+  pc=0x362978 n=25120 first_ra=0x36340c last_ra=0x36340c
+  pc=0x394ed0 n=25120 first_ra=0x363240 last_ra=0x363240
+  pc=0x326478 n=24756 first_ra=0x3260ec last_ra=0x3262d0
+  pc=0x395000 n=23798 first_ra=0x3632e4 last_ra=0x3632e4
+  pc=0x38f598 n=23768 first_ra=0x38f698 last_ra=0x38f698
+  pc=0x38f668 n=23768 first_ra=0x3688b8 last_ra=0x379780
+  pc=0x39feb8 n=23753 first_ra=0x398cc8 last_ra=0x3a0ab8
+  pc=0x326360 n=22835 first_ra=0x32633c last_ra=0x3262b0
+  pc=0x423de0 n=22742 first_ra=0x418ce0 last_ra=0x3e5738
+  pc=0x411b08 n=22674 first_ra=0x412798 last_ra=0x4125fc
+  pc=0x379028 n=22482 first_ra=0x391f90 last_ra=0x391f90
+  pc=0x3921f0 n=22482 first_ra=0x3a0a64 last_ra=0x3a0a64
+  pc=0x391e30 n=22482 first_ra=0x3a0af4 last_ra=0x3a0af4
+  pc=0x397718 n=20422 first_ra=0x39f0bc last_ra=0x39f0bc
+drops (0):
+sif/rpc (30 events, overflow=0):
+  bind unclaimed n=4
+  call unclaimed n=4
+  load claimed n=21
+  sendcmd claimed n=1
+  op=load sid=0x1 fno=0x0 send=0 recv=0 tid=1 claimed path=cdrom0:\DATA\MODULES\SIO2MAN.IRX;1
+  op=load sid=0x2 fno=0x0 send=0 recv=0 tid=1 claimed path=cdrom0:\DATA\MODULES\PADMAN.IRX;1
+  op=load sid=0x3 fno=0x0 send=0 recv=0 tid=1 claimed path=cdrom0:\DATA\MODULES\LIBSD.IRX;1
+  op=load sid=0x4 fno=0x0 send=0 recv=0 tid=1 claimed path=cdrom0:\DATA\MODULES\SNDDRV.IRX;1
+  op=load sid=0x5 fno=0x0 send=0 recv=0 tid=1 claimed path=cdrom0:\DATA\MODULES\MCMAN.IRX;1
+  op=load sid=0x6 fno=0x0 send=0 recv=0 tid=1 claimed path=cdrom0:\DATA\MODULES\MCSERV.IRX;1
+  op=load sid=0x7 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\USBD.IRX;1
+  op=load sid=0x8 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\USBKB.IRX;1
+  op=load sid=0x9 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\DEV9.IRX;1
+  op=bind sid=0x80000006 fno=0x0 send=0 recv=0 tid=3 unclaimed
+  op=call sid=0x80000006 fno=0xff send=0 recv=4 tid=3 unclaimed
+  op=load sid=0xa fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\INET.IRX;1
+  op=load sid=0xb fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\NETCNF.IRX;1
+  op=load sid=0xc fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\INETCTL.IRX;1
+  op=load sid=0xd fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\SMAP.IRX;1
+  op=load sid=0xe fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\PPP.IRX;1
+  op=load sid=0xf fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\SPDUART.IRX;1
+  op=load sid=0x10 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\PPPOE.IRX;1
+  op=load sid=0x11 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\MSIFRPC.IRX;1
+  op=load sid=0x12 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\LIBNET.IRX;1
+  op=sendcmd sid=0x80000001 fno=0x0 send=24 recv=0 tid=3 claimed
+  op=load sid=0x13 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\DRTYSCKF.IRX;1
+  op=load sid=0x14 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\LGAUD.IRX;1
+  op=load sid=0x15 fno=0x0 send=0 recv=0 tid=3 claimed path=cdrom0:\DATA\MODULES\VOIPF.IRX;1
+  op=bind sid=0x237 fno=0x0 send=0 recv=0 tid=3 unclaimed
+  op=call sid=0x237 fno=0x0 send=128 recv=128 tid=3 unclaimed
+  op=bind sid=0x80000211 fno=0x0 send=0 recv=0 tid=3 unclaimed
+  op=call sid=0x80000211 fno=0x1 send=16 recv=144 tid=3 unclaimed
+  op=bind sid=0x534e44 fno=0x0 send=0 recv=0 tid=3 unclaimed
+  op=call sid=0x534e44 fno=0x0 send=20 recv=0 tid=3 unclaimed
+gs: kicks=392072 drawing=389506 gif=36899 copy=48800 dma=47571 gifcpy=1327 gsw=0 vif=2

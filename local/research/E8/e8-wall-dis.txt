@@ -1,0 +1,403 @@
+# E8 static wall; ELF /Volumes/Extreme SSD/ps2recomp-spike/P1/SLUS_207.72; bytes=3890784 sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+
+## card object factory: [0x2c22c8,0x2c22fc)
+002c22c8 27bdfff0 addiu       $sp, $sp, -0x10
+002c22cc 3c050048 lui         $a1, 0x48
+002c22d0 ffbf0000 sd          $ra, 0x0($sp)
+002c22d4 24a55ff0 addiu       $a1, $a1, 0x5FF0
+002c22d8 24060100 addiu       $a2, $zero, 0x100
+002c22dc 0000382d daddu       $a3, $zero, $zero
+002c22e0 0c0c5f5c jal         func_317D70
+002c22e4 24041500 addiu       $a0, $zero, 0x1500
+002c22e8 0c0b0fea jal         func_2C3FA8
+002c22ec 0040202d daddu       $a0, $v0, $zero
+002c22f0 dfbf0000 ld          $ra, 0x0($sp)
+002c22f4 03e00008 jr          $ra
+002c22f8 27bd0010 addiu       $sp, $sp, 0x10
+
+## constructor and initial state/outstanding fields: [0x2c3fa8,0x2c40a0)
+002c3fa8 27bdffe0 addiu       $sp, $sp, -0x20
+002c3fac 3c020048 lui         $v0, 0x48
+002c3fb0 7fb00010 sq          $s0, 0x10($sp)
+002c3fb4 24426f78 addiu       $v0, $v0, 0x6F78
+002c3fb8 ffbf0000 sd          $ra, 0x0($sp)
+002c3fbc 0080802d daddu       $s0, $a0, $zero
+002c3fc0 0c0b1014 jal         func_2C4050
+002c3fc4 ae020000 sw          $v0, 0x0($s0)
+002c3fc8 0200102d daddu       $v0, $s0, $zero
+002c3fcc dfbf0000 ld          $ra, 0x0($sp)
+002c3fd0 7bb00010 lq          $s0, 0x10($sp)
+002c3fd4 03e00008 jr          $ra
+002c3fd8 27bd0020 addiu       $sp, $sp, 0x20
+002c3fdc 00000000 nop
+002c3fe0 27bdffd0 addiu       $sp, $sp, -0x30
+002c3fe4 3c020048 lui         $v0, 0x48
+002c3fe8 7fb00020 sq          $s0, 0x20($sp)
+002c3fec 24426f78 addiu       $v0, $v0, 0x6F78
+002c3ff0 7fb10010 sq          $s1, 0x10($sp)
+002c3ff4 0080802d daddu       $s0, $a0, $zero
+002c3ff8 ffbf0000 sd          $ra, 0x0($sp)
+002c3ffc 00a0882d daddu       $s1, $a1, $zero
+002c4000 0c0b18d8 jal         func_2C6360
+002c4004 ae020000 sw          $v0, 0x0($s0)
+002c4008 8e040030 lw          $a0, 0x30($s0)
+002c400c 10800004 beqz        $a0, . + 4 + (0x4 << 2) ; target=0x2c4020
+002c4010 3c020048 lui         $v0, 0x48
+002c4014 0c0948ea jal         func_2523A8
+002c4018 00000000 nop
+002c401c 3c020048 lui         $v0, 0x48
+002c4020 32230001 andi        $v1, $s1, 0x1
+002c4024 244271e8 addiu       $v0, $v0, 0x71E8
+002c4028 10600003 beqz        $v1, . + 4 + (0x3 << 2) ; target=0x2c4038
+002c402c ae020000 sw          $v0, 0x0($s0)
+002c4030 0c0c5f94 jal         func_317E50
+002c4034 0200202d daddu       $a0, $s0, $zero
+002c4038 7bb00020 lq          $s0, 0x20($sp)
+002c403c 7bb10010 lq          $s1, 0x10($sp)
+002c4040 dfbf0000 ld          $ra, 0x0($sp)
+002c4044 03e00008 jr          $ra
+002c4048 27bd0030 addiu       $sp, $sp, 0x30
+002c404c 00000000 nop
+002c4050 27bdffe0 addiu       $sp, $sp, -0x20
+002c4054 2402001c addiu       $v0, $zero, 0x1C
+002c4058 7fb00010 sq          $s0, 0x10($sp)
+002c405c 2403ffff addiu       $v1, $zero, -0x1
+002c4060 0080802d daddu       $s0, $a0, $zero
+002c4064 ffbf0000 sd          $ra, 0x0($sp)
+002c4068 ae020008 sw          $v0, 0x8($s0)
+002c406c 260400b9 addiu       $a0, $s0, 0xB9
+002c4070 ae000004 sw          $zero, 0x4($s0)
+002c4074 24020006 addiu       $v0, $zero, 0x6
+002c4078 ae00000c sw          $zero, 0xC($s0)
+002c407c 0000282d daddu       $a1, $zero, $zero
+002c4080 ae000010 sw          $zero, 0x10($s0)
+002c4084 24060040 addiu       $a2, $zero, 0x40
+002c4088 ae000040 sw          $zero, 0x40($s0)
+002c408c ae00004c sw          $zero, 0x4C($s0)
+002c4090 af800848 sw          $zero, 0x848($gp)
+002c4094 af80084c sw          $zero, 0x84C($gp)
+002c4098 af800850 sw          $zero, 0x850($gp)
+002c409c ae030038 sw          $v1, 0x38($s0)
+
+## UI launch request: [0x241380,0x2413fc)
+00241380 27bdffd0 addiu       $sp, $sp, -0x30
+00241384 2402ffff addiu       $v0, $zero, -0x1
+00241388 7fb00020 sq          $s0, 0x20($sp)
+0024138c 0000282d daddu       $a1, $zero, $zero
+00241390 7fb10010 sq          $s1, 0x10($sp)
+00241394 0080802d daddu       $s0, $a0, $zero
+00241398 ffbf0000 sd          $ra, 0x0($sp)
+0024139c 24110001 addiu       $s1, $zero, 0x1
+002413a0 ae110340 sw          $s1, 0x340($s0)
+002413a4 ae0000dc sw          $zero, 0xDC($s0)
+002413a8 ae00042c sw          $zero, 0x42C($s0)
+002413ac ae0000f8 sw          $zero, 0xF8($s0)
+002413b0 ae020444 sw          $v0, 0x444($s0)
+002413b4 ae020430 sw          $v0, 0x430($s0)
+002413b8 0c08fec6 jal         func_23FB18
+002413bc ae0200fc sw          $v0, 0xFC($s0)
+002413c0 0c08feb8 jal         func_23FAE0
+002413c4 0200202d daddu       $a0, $s0, $zero
+002413c8 24020002 addiu       $v0, $zero, 0x2
+002413cc ae110338 sw          $s1, 0x338($s0)
+002413d0 ae020130 sw          $v0, 0x130($s0)
+002413d4 8e050434 lw          $a1, 0x434($s0)
+002413d8 8ca20000 lw          $v0, 0x0($a1)
+002413dc 84440018 lh          $a0, 0x18($v0)
+002413e0 8c43001c lw          $v1, 0x1C($v0)
+002413e4 0060f809 jalr        $v1
+002413e8 00a42021 addu        $a0, $a1, $a0
+002413ec 7bb00020 lq          $s0, 0x20($sp)
+002413f0 7bb10010 lq          $s1, 0x10($sp)
+002413f4 dfbf0000 ld          $ra, 0x0($sp)
+002413f8 03e00008 jr          $ra
+
+## UI selection to virtual port selector: [0x23fae0,0x23fb54)
+0023fae0 27bdfff0 addiu       $sp, $sp, -0x10
+0023fae4 ffbf0000 sd          $ra, 0x0($sp)
+0023fae8 8c830428 lw          $v1, 0x428($a0)
+0023faec 8c820444 lw          $v0, 0x444($a0)
+0023faf0 10430004 beq         $v0, $v1, . + 4 + (0x4 << 2) ; target=0x23fb04
+0023faf4 00000000 nop
+0023faf8 ac830444 sw          $v1, 0x444($a0)
+0023fafc ac80043c sw          $zero, 0x43C($a0)
+0023fb00 ac800440 sw          $zero, 0x440($a0)
+0023fb04 0c08fec8 jal         func_23FB20
+0023fb08 8c850428 lw          $a1, 0x428($a0)
+0023fb0c dfbf0000 ld          $ra, 0x0($sp)
+0023fb10 03e00008 jr          $ra
+0023fb14 27bd0010 addiu       $sp, $sp, 0x10
+0023fb18 03e00008 jr          $ra
+0023fb1c ac850428 sw          $a1, 0x428($a0)
+0023fb20 27bdfff0 addiu       $sp, $sp, -0x10
+0023fb24 00a0182d daddu       $v1, $a1, $zero
+0023fb28 ffbf0000 sd          $ra, 0x0($sp)
+0023fb2c ac83042c sw          $v1, 0x42C($a0)
+0023fb30 8c860434 lw          $a2, 0x434($a0)
+0023fb34 8cc20000 lw          $v0, 0x0($a2)
+0023fb38 84440028 lh          $a0, 0x28($v0)
+0023fb3c 8c43002c lw          $v1, 0x2C($v0)
+0023fb40 0060f809 jalr        $v1
+0023fb44 00c42021 addu        $a0, $a2, $a0
+0023fb48 dfbf0000 ld          $ra, 0x0($sp)
+0023fb4c 03e00008 jr          $ra
+0023fb50 27bd0010 addiu       $sp, $sp, 0x10
+
+## port selector to missing busy query: [0x2c4480,0x2c44dc)
+002c4480 27bdffd0 addiu       $sp, $sp, -0x30
+002c4484 7fb00020 sq          $s0, 0x20($sp)
+002c4488 7fb10010 sq          $s1, 0x10($sp)
+002c448c 0080802d daddu       $s0, $a0, $zero
+002c4490 ffbf0000 sd          $ra, 0x0($sp)
+002c4494 00a0882d daddu       $s1, $a1, $zero
+002c4498 ae11000c sw          $s1, 0xC($s0)
+002c449c 8e030000 lw          $v1, 0x0($s0)
+002c44a0 84640058 lh          $a0, 0x58($v1)
+002c44a4 8c62005c lw          $v0, 0x5C($v1)
+002c44a8 0040f809 jalr        $v0
+002c44ac 02042021 addu        $a0, $s0, $a0
+002c44b0 54400006 bnel        $v0, $zero, . + 4 + (0x6 << 2) ; target=0x2c44cc
+002c44b4 7bb00020 lq          $s0, 0x20($sp)
+002c44b8 ae110010 sw          $s1, 0x10($s0)
+002c44bc 0200202d daddu       $a0, $s0, $zero
+002c44c0 0c0b1230 jal         func_2C48C0
+002c44c4 24050003 addiu       $a1, $zero, 0x3
+002c44c8 7bb00020 lq          $s0, 0x20($sp)
+002c44cc 7bb10010 lq          $s1, 0x10($sp)
+002c44d0 dfbf0000 ld          $ra, 0x0($sp)
+002c44d4 03e00008 jr          $ra
+002c44d8 27bd0030 addiu       $sp, $sp, 0x30
+
+## intended busy query: [0x2c5140,0x2c5168)
+002c5140 8c820004 lw          $v0, 0x4($a0)
+002c5144 14400004 bnez        $v0, . + 4 + (0x4 << 2) ; target=0x2c5158
+002c5148 00000000 nop
+002c514c 8c820040 lw          $v0, 0x40($a0)
+002c5150 10400003 beqz        $v0, . + 4 + (0x3 << 2) ; target=0x2c5160
+002c5154 00000000 nop
+002c5158 03e00008 jr          $ra
+002c515c 24020001 addiu       $v0, $zero, 0x1
+002c5160 03e00008 jr          $ra
+002c5164 0000102d daddu       $v0, $zero, $zero
+
+## UI update and busy gate: [0x23d660,0x23d6f4)
+0023d660 27bdffe0 addiu       $sp, $sp, -0x20
+0023d664 7fb00010 sq          $s0, 0x10($sp)
+0023d668 ffbf0000 sd          $ra, 0x0($sp)
+0023d66c 0080802d daddu       $s0, $a0, $zero
+0023d670 8e050434 lw          $a1, 0x434($s0)
+0023d674 8ca20000 lw          $v0, 0x0($a1)
+0023d678 84440018 lh          $a0, 0x18($v0)
+0023d67c 8c43001c lw          $v1, 0x1C($v0)
+0023d680 0060f809 jalr        $v1
+0023d684 00a42021 addu        $a0, $a1, $a0
+0023d688 8e020338 lw          $v0, 0x338($s0)
+0023d68c 5040000b beql        $v0, $zero, . + 4 + (0xB << 2) ; target=0x23d6bc
+0023d690 8e030424 lw          $v1, 0x424($s0)
+0023d694 8e050434 lw          $a1, 0x434($s0)
+0023d698 8ca30000 lw          $v1, 0x0($a1)
+0023d69c 84640058 lh          $a0, 0x58($v1)
+0023d6a0 8c62005c lw          $v0, 0x5C($v1)
+0023d6a4 0040f809 jalr        $v0
+0023d6a8 00a42021 addu        $a0, $a1, $a0
+0023d6ac 5440003a bnel        $v0, $zero, . + 4 + (0x3A << 2) ; target=0x23d798
+0023d6b0 7bb00010 lq          $s0, 0x10($sp)
+0023d6b4 ae000338 sw          $zero, 0x338($s0)
+0023d6b8 8e030424 lw          $v1, 0x424($s0)
+0023d6bc 2402ffff addiu       $v0, $zero, -0x1
+0023d6c0 54620005 bnel        $v1, $v0, . + 4 + (0x5 << 2) ; target=0x23d6d8
+0023d6c4 8e050434 lw          $a1, 0x434($s0)
+0023d6c8 0c0906b0 jal         func_241AC0
+0023d6cc 0200202d daddu       $a0, $s0, $zero
+0023d6d0 ae020424 sw          $v0, 0x424($s0)
+0023d6d4 8e050434 lw          $a1, 0x434($s0)
+0023d6d8 8ca30000 lw          $v1, 0x0($a1)
+0023d6dc 84640058 lh          $a0, 0x58($v1)
+0023d6e0 8c62005c lw          $v0, 0x5C($v1)
+0023d6e4 0040f809 jalr        $v0
+0023d6e8 00a42021 addu        $a0, $a1, $a0
+0023d6ec 54400018 bnel        $v0, $zero, . + 4 + (0x18 << 2) ; target=0x23d750
+0023d6f0 8e030130 lw          $v1, 0x130($s0)
+
+## state setter and fallback GetInfo: [0x2c48c0,0x2c490c)
+002c48c0 27bdff60 addiu       $sp, $sp, -0xA0
+002c48c4 24a3ffff addiu       $v1, $a1, -0x1
+002c48c8 7fb20070 sq          $s2, 0x70($sp)
+002c48cc 2c62004e sltiu       $v0, $v1, 0x4E
+002c48d0 7fb00090 sq          $s0, 0x90($sp)
+002c48d4 0080902d daddu       $s2, $a0, $zero
+002c48d8 7fb10080 sq          $s1, 0x80($sp)
+002c48dc 7fb30060 sq          $s3, 0x60($sp)
+002c48e0 7fb40050 sq          $s4, 0x50($sp)
+002c48e4 ffbf0040 sd          $ra, 0x40($sp)
+002c48e8 104001f0 beqz        $v0, . + 4 + (0x1F0 << 2) ; target=0x2c50ac
+002c48ec ae450004 sw          $a1, 0x4($s2)
+002c48f0 3c020048 lui         $v0, 0x48
+002c48f4 00031880 sll         $v1, $v1, 2
+002c48f8 244260c0 addiu       $v0, $v0, 0x60C0
+002c48fc 00621821 addu        $v1, $v1, $v0
+002c4900 8c640000 lw          $a0, 0x0($v1)
+002c4904 00800008 jr          $a0
+002c4908 00000000 nop
+
+## state3 request entry: [0x2c4980,0x2c4990)
+002c4980 0c0b1438 jal         func_2C50E0
+002c4984 0240202d daddu       $a0, $s2, $zero
+002c4988 100001ce b           . + 4 + (0x1CE << 2) ; target=0x2c50c4
+002c498c 7bb00090 lq          $s0, 0x90($sp)
+
+## state setter default: [0x2c50ac,0x2c513c)
+002c50ac 8e420040 lw          $v0, 0x40($s2)
+002c50b0 14400004 bnez        $v0, . + 4 + (0x4 << 2) ; target=0x2c50c4
+002c50b4 7bb00090 lq          $s0, 0x90($sp)
+002c50b8 0c0b1438 jal         func_2C50E0
+002c50bc 0240202d daddu       $a0, $s2, $zero
+002c50c0 7bb00090 lq          $s0, 0x90($sp)
+002c50c4 7bb10080 lq          $s1, 0x80($sp)
+002c50c8 7bb20070 lq          $s2, 0x70($sp)
+002c50cc 7bb30060 lq          $s3, 0x60($sp)
+002c50d0 7bb40050 lq          $s4, 0x50($sp)
+002c50d4 dfbf0040 ld          $ra, 0x40($sp)
+002c50d8 03e00008 jr          $ra
+002c50dc 27bd00a0 addiu       $sp, $sp, 0xA0
+002c50e0 27bdffe0 addiu       $sp, $sp, -0x20
+002c50e4 af800848 sw          $zero, 0x848($gp)
+002c50e8 7fb00010 sq          $s0, 0x10($sp)
+002c50ec 0000282d daddu       $a1, $zero, $zero
+002c50f0 ffbf0000 sd          $ra, 0x0($sp)
+002c50f4 0080802d daddu       $s0, $a0, $zero
+002c50f8 ae000020 sw          $zero, 0x20($s0)
+002c50fc 27860848 addiu       $a2, $gp, 0x848
+002c5100 8e04000c lw          $a0, 0xC($s0)
+002c5104 2787084c addiu       $a3, $gp, 0x84C
+002c5108 27880854 addiu       $t0, $gp, 0x854
+002c510c af800854 sw          $zero, 0x854($gp)
+002c5110 0c102926 jal         func_40A498
+002c5114 af80084c sw          $zero, 0x84C($gp)
+002c5118 2c430001 sltiu       $v1, $v0, 0x1
+002c511c dfbf0000 ld          $ra, 0x0($sp)
+002c5120 24020005 addiu       $v0, $zero, 0x5
+002c5124 ae030040 sw          $v1, 0x40($s0)
+002c5128 ae02004c sw          $v0, 0x4C($s0)
+002c512c 7bb00010 lq          $s0, 0x10($sp)
+002c5130 0060102d daddu       $v0, $v1, $zero
+002c5134 03e00008 jr          $ra
+002c5138 27bd0020 addiu       $sp, $sp, 0x20
+
+## update state0 dispatch: [0x2c58ec,0x2c5914)
+002c58ec 0040282d daddu       $a1, $v0, $zero
+002c58f0 2c42004f sltiu       $v0, $v0, 0x4F
+002c58f4 104001df beqz        $v0, . + 4 + (0x1DF << 2) ; target=0x2c6074
+002c58f8 3c020048 lui         $v0, 0x48
+002c58fc 00051880 sll         $v1, $a1, 2
+002c5900 24426350 addiu       $v0, $v0, 0x6350
+002c5904 00621821 addu        $v1, $v1, $v0
+002c5908 8c640000 lw          $a0, 0x0($v1)
+002c590c 00800008 jr          $a0
+002c5910 00000000 nop
+
+## update idle tail: [0x2c6070,0x2c6128)
+002c6070 ae200004 sw          $zero, 0x4($s1)
+002c6074 8e25000c lw          $a1, 0xC($s1)
+002c6078 0c0b1474 jal         func_2C51D0
+002c607c 0220202d daddu       $a0, $s1, $zero
+002c6080 2403fff6 addiu       $v1, $zero, -0xA
+002c6084 10430007 beq         $v0, $v1, . + 4 + (0x7 << 2) ; target=0x2c60a4
+002c6088 00000000 nop
+002c608c 8e25000c lw          $a1, 0xC($s1)
+002c6090 0c0b1474 jal         func_2C51D0
+002c6094 0220202d daddu       $a0, $s1, $zero
+002c6098 2403ffff addiu       $v1, $zero, -0x1
+002c609c 54430004 bnel        $v0, $v1, . + 4 + (0x4 << 2) ; target=0x2c60b0
+002c60a0 8e25000c lw          $a1, 0xC($s1)
+002c60a4 0c0b1494 jal         func_2C5250
+002c60a8 0220202d daddu       $a0, $s1, $zero
+002c60ac 8e25000c lw          $a1, 0xC($s1)
+002c60b0 0c0b1474 jal         func_2C51D0
+002c60b4 0220202d daddu       $a0, $s1, $zero
+002c60b8 2403fff6 addiu       $v1, $zero, -0xA
+002c60bc 10430007 beq         $v0, $v1, . + 4 + (0x7 << 2) ; target=0x2c60dc
+002c60c0 00000000 nop
+002c60c4 8e25000c lw          $a1, 0xC($s1)
+002c60c8 0c0b1474 jal         func_2C51D0
+002c60cc 0220202d daddu       $a0, $s1, $zero
+002c60d0 2403fffe addiu       $v1, $zero, -0x2
+002c60d4 54430004 bnel        $v0, $v1, . + 4 + (0x4 << 2) ; target=0x2c60e8
+002c60d8 8e220004 lw          $v0, 0x4($s1)
+002c60dc 0c0b149e jal         func_2C5278
+002c60e0 0220202d daddu       $a0, $s1, $zero
+002c60e4 8e220004 lw          $v0, 0x4($s1)
+002c60e8 10400003 beqz        $v0, . + 4 + (0x3 << 2) ; target=0x2c60f8
+002c60ec 0220202d daddu       $a0, $s1, $zero
+002c60f0 0c0b1230 jal         func_2C48C0
+002c60f4 0000282d daddu       $a1, $zero, $zero
+002c60f8 7bb000a0 lq          $s0, 0xA0($sp)
+002c60fc 7bb10090 lq          $s1, 0x90($sp)
+002c6100 7bb20080 lq          $s2, 0x80($sp)
+002c6104 7bb30070 lq          $s3, 0x70($sp)
+002c6108 7bb40060 lq          $s4, 0x60($sp)
+002c610c 7bb50050 lq          $s5, 0x50($sp)
+002c6110 7bb60040 lq          $s6, 0x40($sp)
+002c6114 7bb70030 lq          $s7, 0x30($sp)
+002c6118 7bbe0020 lq          $fp, 0x20($sp)
+002c611c dfbf0010 ld          $ra, 0x10($sp)
+002c6120 03e00008 jr          $ra
+002c6124 27bd00b0 addiu       $sp, $sp, 0xB0
+
+## separately observed sibling query: [0x2c5358,0x2c5390)
+002c5358 24020014 addiu       $v0, $zero, 0x14
+002c535c 2403fff9 addiu       $v1, $zero, -0x7
+002c5360 00a23018 mult        $a2, $a1, $v0
+002c5364 00c42021 addu        $a0, $a2, $a0
+002c5368 8c840184 lw          $a0, 0x184($a0)
+002c536c 1083000c beq         $a0, $v1, . + 4 + (0xC << 2) ; target=0x2c53a0
+002c5370 2882fffa slti        $v0, $a0, -0x6
+002c5374 10400005 beqz        $v0, . + 4 + (0x5 << 2) ; target=0x2c538c
+002c5378 2402d8ef addiu       $v0, $zero, -0x2711
+002c537c 10820008 beq         $a0, $v0, . + 4 + (0x8 << 2) ; target=0x2c53a0
+002c5380 0000102d daddu       $v0, $zero, $zero
+002c5384 10000008 b           . + 4 + (0x8 << 2) ; target=0x2c53a8
+002c5388 00000000 nop
+002c538c 1c800006 bgtz        $a0, . + 4 + (0x6 << 2) ; target=0x2c53a8
+
+## sibling virtual caller: [0x2d3810,0x2d383c)
+002d3810 27bdfff0 addiu       $sp, $sp, -0x10
+002d3814 ffbf0000 sd          $ra, 0x0($sp)
+002d3818 8c830000 lw          $v1, 0x0($a0)
+002d381c 8c85000c lw          $a1, 0xC($a0)
+002d3820 846601a0 lh          $a2, 0x1A0($v1)
+002d3824 8c6201a4 lw          $v0, 0x1A4($v1)
+002d3828 0040f809 jalr        $v0
+002d382c 00862021 addu        $a0, $a0, $a2
+002d3830 dfbf0000 ld          $ra, 0x0($sp)
+002d3834 03e00008 jr          $ra
+002d3838 27bd0010 addiu       $sp, $sp, 0x10
+
+## Pointer and jump-table words
+00486f94 -> 002c55d8
+00486fa4 -> 002c4480
+00486fd4 -> 002c5140
+0048711c -> 002c5358
+00486350 -> 002c6074
+004860c8 -> 002c4980
+
+## Active generated binding inventory (read only)
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp sha256=05836f4b155793834c82f37364bc3cb2d56f1a5dbf6b2c91f765a7493352bf3d bytes=32658325
+0x2c50e0 bindings=1
+  245749: g_ps2RecompiledFunctionTable[463926] = sub_002C50E0_0x2c50e0; // 0x2c50e0
+0x2c5118 bindings=1
+  245750: g_ps2RecompiledFunctionTable[463940] = sub_002C50E0_0x2c50e0; // 0x2c5118
+0x2c5140 bindings=0
+0x2c5358 bindings=0
+0x2c55d8 bindings=1
+  245860: g_ps2RecompiledFunctionTable[464244] = sub_002C5570_0x2c5570; // 0x2c55d8
+0x426230 bindings=1
+  397742: g_ps2RecompiledFunctionTable[825482] = sub_004261F0_0x4261f0; // 0x426230
+
+OUT target 0x2c5140; owner=(2904288, 2904528, 'sub_002C50E0'); sub_002C50E0_0x2c50e0.cpp sha256=e634ccb4fe18b19aa02d0afb60d9795a4726b6827ec0778679fd2f6ee8c6f151
+entry_case=False entry_label=False instruction_present=True
+
+OUT target 0x2c5358; owner=(2904864, 2905032, 'sub_002C5320'); sub_002C5320_0x2c5320.cpp sha256=2b29c5c8ca7eb1419c30208a4c121bc25e240a06016cfc3d33ea17b26ca48ad6
+entry_case=False entry_label=False instruction_present=True
+
+# E8 STATIC WALL TAIL COMPLETE; all ranges end-exclusive; no source mutated

@@ -1,0 +1,185 @@
+{
+  "label": "e8a",
+  "utc": "2026-09-21T05:29:50.266847+00:00",
+  "caps": {
+    "wall_s": 600,
+    "terminate_reserve_s": 15,
+    "progress_lines": 1000000,
+    "boot_log": 268435456,
+    "trace": 100663296,
+    "function_log": 1073741824,
+    "e4_dir": 12582912,
+    "park_dir": 33554432,
+    "frames_dir": 33554432,
+    "e7_dir": 8388608,
+    "aggregate": 1342177280,
+    "poll_s": 0.25,
+    "grace_s": 10
+  },
+  "lease_absent": true,
+  "runner_check": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "fork_head": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "4acc59ffebc99561ea2b4fe8e1aa1bebbc3075f2\n",
+    "stderr": ""
+  },
+  "fork_status": {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": " M ps2xRuntime/src/runner/register_functions.cpp\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "build_manifest": {
+    "fork_head": "4acc59ffebc99561ea2b4fe8e1aa1bebbc3075f2",
+    "bin_sha": "4f02b144a8de09622f66aa81533097d5b7777eaf63ffab3abe80f8e73fafa290",
+    "bin_size": 161313936,
+    "test_sha": "9a93097032fd668084c96a6d25caa158a2ce9349ae8a788baf0d701e094f52bf",
+    "test_size": 5624728,
+    "test_count": 452
+  },
+  "files": [
+    {
+      "path": "/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "bytes": 161313936,
+      "sha256": "4f02b144a8de09622f66aa81533097d5b7777eaf63ffab3abe80f8e73fafa290"
+    },
+    {
+      "path": "/tmp/p1-link/runtime/ps2xTest/ps2x_tests",
+      "bytes": 5624728,
+      "sha256": "9a93097032fd668084c96a6d25caa158a2ce9349ae8a788baf0d701e094f52bf"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/SSX 3 (USA).iso",
+      "bytes": 3005415424
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72",
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/SLUS_207.72",
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc"
+    }
+  ],
+  "space": {
+    "argv": [
+      "df",
+      "-h",
+      "/Volumes/Extreme SSD/ps2recomp-spike",
+      "/private/tmp"
+    ],
+    "rc": 0,
+    "stdout": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk4s1   1.8Ti   1.4Ti   418Gi    78%       1     0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   228Gi   191Gi    11Gi    95%    1.9M  114M    2%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "wait_tails": {
+    "e7-waits.log": [
+      "E7B CLAIM 2026-09-21T04:39:40.877390+00:00 preflight=green caps={\"aggregate\": 1073741824, \"boot_log\": 838860800, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 536870912, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 67108864, \"wall_s\": 600}",
+      "E7B RELEASE 2026-09-21T04:40:06.704707+00:00 bound=span rc=0",
+      "E7C CLAIM 2026-09-21T04:58:49.571499+00:00 preflight=green caps={\"aggregate\": 1073741824, \"boot_log\": 838860800, \"e4_dir\": 12582912, \"e7_dir\": 8388608, \"frames_dir\": 33554432, \"function_log\": 536870912, \"grace_s\": 10, \"park_dir\": 33554432, \"poll_s\": 0.25, \"progress_lines\": 1000000, \"terminate_reserve_s\": 15, \"trace\": 67108864, \"wall_s\": 600}",
+      "E7C RELEASE 2026-09-21T04:59:32.021234+00:00 bound=span rc=0"
+    ],
+    "e5-waits.log": [
+      "E5 CLAIM 2026-09-21T03:32:50Z (pre-claim: lease absent; pgrep 1; bin e21ab707 160817056B rebuild-noop; ISO 3005415424 + ELF 3890784; SSD 452Gi + int 14Gi; suite 448/448/0 fork-root; k1/e3b/e4-waits released; caps wall600s/1Mlines/800MB/12MB)",
+      "E5 RELEASE 2026-09-21T03:33:24Z (boot-1: BOUND=span SIGTERM el=25s rc=0, trace 85690 lines at last poll, 1/1 boots used; verified absent, pgrep 1)"
+    ],
+    "e4-waits.log": [
+      "E4 CLAIM 2026-09-21T03:04:32Z (pre-claim: lease absent, pgrep 1, sha e21ab707 160817056B E4-taps, suite 448/448/0, ISO 3005415424 + ELF 3890784, SSD 454Gi free, k1/e3b-waits tails=released, selftest ALL PASS; caps wall=600s progress=1000000lines bytes=838860800LOG + E4=12582912 + span-marker; env lean PARK+TRACE_PC+FRAME_DUMP+E4_ARM=600_FREEZE=601)",
+      "E4 RELEASE 2026-09-21T03:05:05Z (boot-1: BOUND=span SIGTERM el=25s rc=0, trace 81532 lines at last poll, 1/1 boots used; verified absent, pgrep 1)"
+    ],
+    "e3b-waits.log": [
+      "E3B CLAIM 2026-09-21T02:11:14Z (pre-claim: lease absent, pgrep 1, sha 607a3399c09ea306 160795872B E3b-taps+per-path-keeps, suite 445/445/0, ISO 3005415424 + ELF 3890784, SSD 459Gi free, t26/k1-waits tails=released; caps wall=600s progress=1000000lines bytes=838860800LOG + E3_BYTES=8388608 + span-marker; env T26-83-WATCH + TRACE_PC + 394ED0 + PARK + FRAME_DUMP + E3_INV=1000_S1BASE=0x70001C00)",
+      "E3B RELEASE 2026-09-21T02:11:54Z (boot-1: BOUND=span SIGTERM el=31s rc=0, trace 98650 lines at last poll, 1/1 boots used; verified absent, pgrep 1)"
+    ],
+    "k1-waits.log": [
+      "K1 CLAIM 2026-09-20T23:03:57Z (pre-claim: lease absent, pgrep 1, sha 72b2cfc5 163483200B K1-fix, k1-strings x5 + FRAME_DUMP_DIR x1, ISO 3005415424 + ELF 3890784 both paths, 465Gi free SSD, selftest 35/35 ALL PASS, t26-waits tail=released; caps wall=240s progress=1000000lines event-count T24-precedent; env T26-verbatim + WATCH=5windows-payload + FRAME_DUMP_DIR)",
+      "K1 RELEASE 2026-09-20T23:08:08Z (boot-1: 240s wall cap, SIGTERM el=242s rc=0 BOUND=wall, trace 783005 lines at last poll, 1/1 boots used; verified absent, pgrep 1)"
+    ],
+    "t26-waits.log": [
+      "T26 CLAIM 2026-09-20T20:22:40Z (pre-claim: lease absent, pgrep 1, sha 7f155f4c 163464560B = T24 no-rebuild, watch: strings WATCHx1 + nm ps2DiagWatchEnabled(T), pc-linkage: strings both-literals + nm traceChannelEmit(T) + otool bl+prologue, ISO 3005415424 + ELF 3890784, 496Gi free, selftest 35/35 ALL PASS, t24/t20/e2a-waits tails=released; caps wall=240s progress=1000000lines event-count T24-precedent; env TRACE_SYSCALLS=path + TRACE_SYSCALLS_PC=1 + WATCH=83windows)",
+      "T26 RELEASE 2026-09-20T20:26:50Z (boot-1: 240s wall cap, SIGTERM el=241s rc=0 BOUND=wall script-exit=241, trace 785254 lines at last poll, 1/1 boots used; verified absent, pgrep 1)"
+    ],
+    "t24-waits.log": [
+      "T24 CLAIM 2026-09-20T19:14:44Z (pre-claim: lease absent, pgrep 1, sha 7f155f4c 163464560B = T22 no-rebuild, pc-linkage: strings both-literals + nm traceChannelEmit(u32,u32) + otool call+gate, ISO 3005415424 + ELF 3890784, 499Gi free, selftest 35/35, t20/e2a-waits tails=released; caps wall=600s progress=2000000lines; env TRACE_SYSCALLS=path + TRACE_SYSCALLS_PC=1)",
+      "T24 RELEASE 2026-09-20T19:25:00Z (boot-1: 600s wall cap, SIGTERM el=605s rc=0 BOUND=wall script-exit=241, trace 1959058+ lines at last poll, 1/1 boots used; verified absent, pgrep 1)"
+    ],
+    "e2a-waits.log": [
+      "E2a WAIT 2026-09-20T17:05:39Z (lease=T20; runner alive)",
+      "E2a WAIT 2026-09-20T17:10:34Z (lease=T20; runner alive; near T20 3600s cap)",
+      "E2a CLAIM 2026-09-20T17:14:47Z (pre-claim: lease absent, pgrep 1, sha 2ac14260 163464496B, ISO 3005415424 + ELF 3890784, 506Gi free; t20-waits tail=released 17:14:25Z; arm AFTER=204356 WALLMIN=1450s flip=btns:0xFFFF-0x0000+lx/ly/rx/ry:0x80-0x00/0x00/0xFF/0xFF; T18 channel ON)",
+      "E2a RELEASE 2026-09-20T17:57:06Z (boot-1: 2400s cap, SIGTERM rc=0, script exit 241; monitor exit 10, NO trigger; stim FIRED reads=204356 wall=1702s block=338; 1/2 boots used)"
+    ]
+  },
+  "sidecars_outside_git": {
+    "argv": [
+      "rg",
+      "--files",
+      "--hidden",
+      "-g",
+      "._*",
+      "-g",
+      "!.git"
+    ],
+    "rc": 0,
+    "stdout": "ps2xTest/src/._ps2_memory_tests.cpp\nps2xRuntime/src/lib/._ps2_memory.cpp\nps2xRuntime/src/lib/._ps2_vif1_interpreter.cpp\nps2xRuntime/src/lib/._ps2_runtime.cpp\nps2xRuntime/src/lib/gs/._gs_frontend.cpp\nps2xRuntime/include/._ps2_log.h\nps2xRuntime/include/._ps2_e7.h\n",
+    "stderr": ""
+  },
+  "aligner": {
+    "argv": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "-B",
+      "tools/trace_align.py",
+      "--selftest"
+    ],
+    "rc": 0,
+    "stdout": "selftest t1-identical-exit0: PASS rc=0\nselftest t1-identical-run5: PASS \nselftest t2-grafted-exit1: PASS rc=1\nselftest t2-grafted-k3: PASS \nselftest t2-grafted-names: PASS \nselftest t3-anchor-exit0: PASS rc=0\nselftest t3-anchor-hit: PASS \nselftest t3-anchor-run2: PASS \nselftest t4-miss-exit2: PASS rc=2\nselftest t4-miss-table: PASS \nselftest t5-aliasname-exit0: PASS rc=0\nselftest t5-aliasname-row: PASS \n/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/tmpmswe05n2/a1.txt: events=5 bad_hex=0 bad_ts_prefix=0 ts_regressions=0\n/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/tmpmswe05n2/bad.txt:1: missing PCSX2 ts prefix: Bios call: WaitSema (44)\n/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/tmpmswe05n2/bad.txt: events=1 bad_hex=0 bad_ts_prefix=1 ts_regressions=0\nselftest t6-format-good: PASS rc=0\nselftest t6-format-bad: PASS rc=2\nselftest t7-locate: PASS \nselftest t8-short-exit0: PASS rc=0\nselftest t8-short-bound: PASS \nselftest t9-drop-exit1: PASS rc=1\nselftest t9-drop-k1: PASS \nselftest t9-drop-table: PASS \nselftest t9-drop-projcounts: PASS \nselftest t10-shared-exit1: PASS rc=1\nselftest t10-shared-k1: PASS \nselftest t10-shared-table: PASS \nselftest t11-unknown-exit1: PASS rc=1\nselftest t11-unknown-k2: PASS \nselftest t11-unknown-row: PASS \nselftest t12-mile-exit1: PASS rc=1\nselftest t12-mile-ref: PASS \nselftest t12-mile-rt: PASS \nselftest t12-mile-stamps: PASS \nselftest t12-mile-pumpgone: PASS \nselftest t12-mile-censusfull: PASS \nselftest t13-badproject-exit2: PASS rc=2\nselftest t13-badproject-msg: PASS \nselftest: ALL PASS\n",
+    "stderr": ""
+  },
+  "suite": {
+    "rc": 0,
+    "tail": [
+      "\u001b[33m  [Run]: \u001b[0mdecodes load/store flags \u001b[32m  [Passed]\u001b[0m",
+      "",
+      "========================================",
+      "Total Tests: 452",
+      "Passed: 452",
+      "Failed: 0",
+      "========================================"
+    ]
+  },
+  "runner_recheck": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "preflight_complete_utc": "2026-09-21T05:29:51.823931+00:00"
+}

@@ -1,0 +1,120 @@
+{
+  "caps": [
+    {
+      "label": "e8a",
+      "wall": 182.44896770900232,
+      "bound": "function_log_bytes",
+      "closed_bytes": {
+        "boot_log": 52588530,
+        "trace": 35210106,
+        "function_log": 1066559552,
+        "e4_dir": 8482987,
+        "e7_dir": 1097880,
+        "frames_dir": 129164,
+        "park_dir": 119099,
+        "aggregate": 1164187318
+      },
+      "release": "2026-09-21T05:32:54.395025+00:00"
+    },
+    {
+      "label": "e8b",
+      "wall": 45.29167958299513,
+      "bound": "wall",
+      "closed_bytes": {
+        "boot_log": 11755499,
+        "trace": 4665516,
+        "function_log": 215112920,
+        "e4_dir": 8483001,
+        "e7_dir": 1097880,
+        "frames_dir": 83619,
+        "park_dir": 118825,
+        "aggregate": 241317260
+      },
+      "release": "2026-09-21T05:45:15.042953+00:00"
+    }
+  ],
+  "canonical_payloads_verified": 38,
+  "miner_runs": [
+    {
+      "script": "e8_mine.py",
+      "args": [
+        "a"
+      ],
+      "rc": 0,
+      "tail": "# E8 MINER TAIL COMPLETE /Users/bradrichardson/dev/ssx3/local/research/E8/e8a-summary.json"
+    },
+    {
+      "script": "e8_mine.py",
+      "args": [
+        "b"
+      ],
+      "rc": 0,
+      "tail": "# E8 MINER TAIL COMPLETE /Users/bradrichardson/dev/ssx3/local/research/E8/e8b-summary.json"
+    },
+    {
+      "script": "e8_frame.py",
+      "args": [
+        "a"
+      ],
+      "rc": 0,
+      "tail": "# E8 FRAME TAIL COMPLETE"
+    },
+    {
+      "script": "e8_frame.py",
+      "args": [
+        "b"
+      ],
+      "rc": 0,
+      "tail": "# E8 FRAME TAIL COMPLETE"
+    },
+    {
+      "script": "e8_progress.py",
+      "args": [
+        "a"
+      ],
+      "rc": 0,
+      "tail": "# E8 PROGRESSION MINER TAIL COMPLETE"
+    },
+    {
+      "script": "e8_progress.py",
+      "args": [
+        "b"
+      ],
+      "rc": 0,
+      "tail": "# E8 PROGRESSION MINER TAIL COMPLETE"
+    },
+    {
+      "script": "e8_wall.py",
+      "args": [],
+      "rc": 0,
+      "tail": "# E8 WALL MINER TAIL COMPLETE"
+    },
+    {
+      "script": "e8_join.py",
+      "args": [],
+      "rc": 0,
+      "tail": "# E8 JOIN TAIL COMPLETE: both guarded S series; 5/5 copies per boot; D=12358; exact field Present; complete missing-query records; coverage wall only"
+    }
+  ],
+  "byte_identical_derived_files": {
+    "e8a-summary.json": "196e5382a106c3384d10fcd1401d767d406c52d7b7a21ba354b84c1dc9dd52e5",
+    "e8a-frame.json": "26cdd361c31cd272832e776e44fdd01b48899340f9ca157b4845b06d0888699b",
+    "e8a-progress.json": "d011bcf5d232bfbf3347f30dd58c2ba4c153f713746d66807047e4a15be08b85",
+    "e8a-function-census.json": "27cb6e1497584d082c418a77f0f9b8a2f10fe0ae36812e18339119c40d10db0a",
+    "e8a-watch-series.txt": "2e992586437f6eb88a910cdd5754d728be28087f9f163e9103fc5d4f19134050",
+    "e8a-burst-series.txt": "84e207f2ef006122837eb8591cfb25c19f8b73f1090e54ea7ef55e05945713ed",
+    "e8a-missing-query.txt": "7842822e179fdda2c53a8ca42c4a409ab6d54430a788bcf4f9b5a226c40fdce5",
+    "e8a-progress-lines.txt": "b98659c072e505194c4a111a12349c0d808b5dd36f8de81d709d13314289a9f7",
+    "e8b-summary.json": "914d888f635f80d88c7493f7b75df8d5cd98c36b919174397f5c625868e122f7",
+    "e8b-frame.json": "bed671b708f3069d85196fe5f1fe90e5ca89c544e5fa4d50267ac0dbad931e9d",
+    "e8b-progress.json": "830c5e2ea79935ab6b745bf501297eb9e892ce9be1346a87a8fdbf9a1506c373",
+    "e8b-function-census.json": "7bbc182123aa30aad5188ef2c81c734ce42c5755b4da091bd810f569ea4736a0",
+    "e8b-watch-series.txt": "248bb55b752019c6d6e30d6c184e202c379aae2640aec6763555c27026954da4",
+    "e8b-burst-series.txt": "e24920196b94b8853d0c4289ed606404e0ceb0e717f3329a398d0ec8869ce183",
+    "e8b-missing-query.txt": "689d8f672e00c1eb36e1c43e56a0f930182c96cf2845ba3dd32a82123ea433ca",
+    "e8b-progress-lines.txt": "e410b75741c7f7b7c66ef382656cfa3c4e972bfa766edfee880b424120e9e2f6",
+    "e8-wall-dis.txt": "81251ce4e17972a934a89acb0181956c7cdfb4a6510cae2fcada57ef2c299ae0",
+    "e8-runtime-policy.txt": "d0c6554638e7c9eae90fddb7d998824d752d887aaf12dfa952488f3d408672bd",
+    "e8-join.txt": "497a6c57e6c47a2bd954ed2cc3e09a7609262f152a5d99d4db18114e8f2efa27"
+  }
+}
