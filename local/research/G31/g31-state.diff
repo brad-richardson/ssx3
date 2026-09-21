@@ -1,0 +1,76 @@
+diff --git a/gs/gs_interface.cpp b/gs/gs_interface.cpp
+index ea00016..321eb98 100644
+--- a/gs/gs_interface.cpp
++++ b/gs/gs_interface.cpp
+@@ -4685,6 +4724,71 @@ ScanoutResult GSInterface::vsync(const VSyncInfo &info_)
+ 	auto result = renderer.vsync(priv_registers, info,
+ 	                             sampling_rate_x_log2, sampling_rate_y_log2,
+ 								 promoted1, promoted2);
++	{
++		// G31 local diagnostic (not upstream): in-vsync() (b1)/(b2) split
++		// probe. Promotion is statically OFF for this run (Hacks defaults
++		// false + set_hacks() uncalled anywhere), so promoted1/2 are
++		// predicted null on all 16 vsyncs; this dump confirms on-device
++		// and captures the DISPFB1-region VRAM bytes at sample time.
++		// Region B (FBP112 pages 112..223) is predicted == load (no
++		// writer ever touches it, G30); region A (FBP0) is the
++		// live-write control. FNV-1a reuses the SAME truncated basis as
++		// G29/G30 (G29-E1). Read-only: one host map + wait AFTER the
++		// vsync's own submission (no reordering); promotion identity is
++		// logged but no GPU readback is attempted (a present promoted
++		// image routes to OTHER/stop regardless -- checksum deferred).
++		static unsigned g31_seq = 0;
++		unsigned g31_p1null = promoted1 == nullptr ? 1 : 0;
++		unsigned g31_p1w = g31_p1null ? 0 : promoted1->get_width();
++		unsigned g31_p1h = g31_p1null ? 0 : promoted1->get_height();
++		unsigned g31_p1l = g31_p1null ? 0 : (unsigned)promoted1->get_create_info().layers;
++		unsigned g31_p1f = g31_p1null ? 0 : (unsigned)promoted1->get_format();
++		unsigned g31_p2null = promoted2 == nullptr ? 1 : 0;
++		LOGI("G31: state seq=%u EN1=%u EN2=%u DISPFB1=%u/%u/%u/%u/%u DSP1=%u/%u/%u/%u/%u/%u SM=%u/%u/%u nprom=%u hack=%d p1null=%u p1=%ux%ux%ux%u p2null=%u phase=%u.\n",
++		     g31_seq,
++		     (unsigned)priv_registers.pmode.EN1, (unsigned)priv_registers.pmode.EN2,
++		     (unsigned)priv_registers.dispfb1.FBP, (unsigned)priv_registers.dispfb1.FBW,
++		     (unsigned)priv_registers.dispfb1.PSM, (unsigned)priv_registers.dispfb1.DBX,
++		     (unsigned)priv_registers.dispfb1.DBY,
++		     (unsigned)priv_registers.display1.DW, (unsigned)priv_registers.display1.DH,
++		     (unsigned)priv_registers.display1.MAGH, (unsigned)priv_registers.display1.MAGV,
++		     (unsigned)priv_registers.display1.DX, (unsigned)priv_registers.display1.DY,
++		     (unsigned)priv_registers.smode1.CMOD, (unsigned)priv_registers.smode2.INT,
++		     (unsigned)priv_registers.smode2.FFMD,
++		     num_promoted_backbuffers, int(hacks.backbuffer_promotion),
++		     g31_p1null, g31_p1w, g31_p1h, g31_p1l, g31_p1f, g31_p2null, info.phase);
++		const size_t g31_n = 224 * 8192;
++		const size_t g31_half = 917504;
++		const uint8_t *g31_vram = static_cast<const uint8_t *>(map_vram_read(0, g31_n));
++		if (g31_vram)
++		{
++			uint64_t g31_fa = 1469598103934665603ull;
++			uint64_t g31_fb = 1469598103934665603ull;
++			size_t g31_za = 0;
++			size_t g31_zb = 0;
++			for (size_t g31_i = 0; g31_i < g31_half; g31_i++)
++			{
++				g31_fa ^= g31_vram[g31_i];
++				g31_fa *= 1099511628211ull;
++				g31_za += g31_vram[g31_i] != 0;
++				g31_fb ^= g31_vram[g31_half + g31_i];
++				g31_fb *= 1099511628211ull;
++				g31_zb += g31_vram[g31_half + g31_i] != 0;
++			}
++			LOGI("G31: bytes seq=%u A fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x B fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x.\n",
++			     g31_seq, (unsigned long long)g31_fa, (unsigned)g31_za,
++			     g31_vram[0], g31_vram[1], g31_vram[2], g31_vram[3],
++			     g31_vram[4], g31_vram[5], g31_vram[6], g31_vram[7],
++			     (unsigned long long)g31_fb, (unsigned)g31_zb,
++			     g31_vram[g31_half], g31_vram[g31_half + 1], g31_vram[g31_half + 2], g31_vram[g31_half + 3],
++			     g31_vram[g31_half + 4], g31_vram[g31_half + 5], g31_vram[g31_half + 6], g31_vram[g31_half + 7]);
++		}
++		else
++		{
++			LOGI("G31: bytes seq=%u map failed.\n", g31_seq);
++		}
++		g31_seq++;
++	}
+ 
+ 	if (hacks.backbuffer_promotion && result.image)
+ 	{
