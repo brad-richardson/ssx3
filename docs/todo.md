@@ -1288,6 +1288,25 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G25 read (09-21) — PASS(Done, SPLIT verdict), rebuild bit-identical CONFIRMED but no-flag run returns O4 at first draw (separation UNRESOLVED — O6 site never reached); bidirectional A/B confirms flag efficacy; rebuilt binary ZERO-DESTROYED again within minutes (4th recurrence):**
+      Damage confirm (size/mtime-frozen/sha/magic/100% zeros/scope 611
+      files) + relink-only rebuild exit 0 (`[1/1]`, ~5 s) reproducing
+      265,840,424 B + `562a0bcf…` + `c7f68343…` + ELF + `strings` ×1/×2
+      EXACT (4 lifetime reads). ONE no-flag run: exit 139, 49-line logcat
+      (= G23r2's 48 + the `=0` receipt :29), 1 frame / pass 0 only, 2
+      `success: yes`, dangling `7463`/`c61f` last line; tombstone_19 =
+      SEGV 0x0, 43-frame driver-compile stack via `dispatch_texture_
+      analysis`, BuildId == rebuild, Scudo 0×. Score N/A (oracles 8/8,
+      0 PPMs); O5 unobserved. Verified: logcat (49 lines, :29 `=0`
+      exact, 1 frame, 2 yes, dangling crasher), tombstone (signal/addr/
+      stack/BuildId/Scudo-absent), score re-run (N/A), device `mg/`-only,
+      tail intact. ZERO-DAMAGE RECURRENCE: rebuilt binary re-zeroed
+      100% within ~minutes of the worker's intact report-time re-sha
+      (tested copy proven good by tombstone BuildId + staging match —
+      run evidence stands; G22 intact). New standing rule: verify-then-
+      push with NO gap + re-verify immediately pre-run. ~30 min. Next:
+      G26 narrower hunk (flag-only delivery + rebuild + with-flag run).
+      Ledger row added.
 - [x] **E16 read (09-21) — PASS(Done), checkpoint rebuilt byte-identical + run-exit closure repaired (fail-before→pass-after forced) + 1/1 probe closed with REAL footers (6,410 contiguous events, pending/truncation zero); MPEG unchanged, absorb queued next:**
       Rebuilt from fork `67c0a632` (9,452 names, runner/suite byte-identical
       to E15, 452/452, SSD fixture reused). Repair: 6 lines in
