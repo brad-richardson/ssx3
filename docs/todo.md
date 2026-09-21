@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator).
-- [ ] **Live panes:** t30 (Cross on Continue → next screen, bytesize, 4h) · g11 (per-vsync scanout series, ps2xGS + bytesize, 6h) · e4 (first-missing-visible-result locator, fork + P-lane lease, 6h).
+- [ ] **Live panes:** t30 (Cross on Continue → next screen, bytesize, 4h) · g11 (per-vsync scanout series, ps2xGS + bytesize, 6h) · e5 (branch-c flip-contract follow-up, fork + P-lane lease, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 boot REAL ELF on device (loadELF runs; ship guest binary) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,25 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E4 read (09-21) — PASS, branch (c): steady draws → fbp0 (icon), display reads black fbp112:**
+      Phase-1 survey (no branch selectable from K1/E3b receipts: R10–R14
+      missing; R4b early blit INTO fbp112 noted) → ONE 25 s span-bounded
+      capture (tick 600→601, BOUND=span, all caps unhit). Steady join: 122
+      draws ALL fbp=0 (120 textured sprites, real bounds, nonzero textures)
+      → fbp0 holds 12,563 rgb px icon; DISPFB1 = fbp112 (CRT1-only PMODE
+      0xff21, preferred=0) → fbp112 rgbNz=0 BLACK; returned image black
+      (`fd889dc5`); VRAM byte-identical arm→freeze. Classification (c):
+      production genuine, wrong buffer; Present faithful; H0 falsified.
+      Taps: `ps2_e4.h` + 2 hooks + 3 tests (lib-only, env-gated, semantics
+      unchanged); E1 misaddress repaired miner-side. Verified: fbp0 thumb
+      777 nonblack/10 colors (viewed: structured content), disp1 0 nonblack
+      (viewed black), VRAM shas equal `77eb48d9`, history 228 entries all
+      tick 600 + census 122 fbp0=122, fork `a13b66a` 4 files +649 + pushed
+      (ls-remote fork ssx3), register_functions.cpp untouched, lease absent
+      + pgrep 1. Accepted: suite 448/448/0 (attested), texture T4/T8H full
+      decode (G3). Reference-state row: E3b park + K1 P0. ~3 h. Next: E5
+      producer/flip contract + display-reg writes (E4 §7, G1). Ledger row
+      added.
 - [x] **T29 read (09-21) — PASS, Cross on Zoe → Setup Character, stable 132 s:**
       Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
       T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
