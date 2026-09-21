@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS force-install iPad + Odin, iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t30 (Cross on Continue → next screen, bytesize, 4h) · g11 (per-vsync scanout series, ps2xGS + bytesize, 6h) · e5 (branch-c flip-contract follow-up, fork + P-lane lease, 6h) · i9 (real-ELF boot on iPad, worktree + force-install, 6h).
+- [ ] **Live panes:** t30 (Cross on Continue → next screen, bytesize, 4h) · g11 (per-vsync scanout series, ps2xGS + bytesize, 6h) · e6 (source-trace S + S+0x5a88 writers, fork + P-lane lease, 6h) · i9 (real-ELF boot on iPad, worktree + force-install, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,25 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E5 read (09-21) — PASS, outcome (i) via J2: per-frame display re-assert runs, S+0x5a88 stuck at 112:**
+      Phase-1 inventory (W1–W5 paths; HLE W3/W4 zero-call ×3 boots; `gsw=`
+      vacuous; boot burst bounded ~40→49; J1/J2 unsplittable = THE gap) →
+      ONE 25 s capture (existing P1f watch, ZERO fork diff, binary reused).
+      Series: 1,465 same-value 5-write bursts whole-run (~59/s); exactly one
+      in 600→601; DISPFB1 1,466/1,466 = 0x9070; PMODE 1,464× 0xff21 + 1×
+      0xff20 (boot only); PCs 0x382cac–0x382e70, entry 0x382af0, steady
+      thread 5; values from config struct S (`$t9:=$a0:=$s0`), FBP var @
+      S+0x5a88 = 112 stuck. J2: display-update RUNS, re-selects fbp112 while
+      production targets fbp0. Verified: DISPFB1/PMODE censuses exact,
+      DISPFB1 pc/thread (1× boot t1 + 1,465× t5), e5-present = E4
+      byte-identical, history 227 + census 122 fbp0=122, GIF 0x59–0x5c reg
+      writes 0 in both windows (my one grep hit = value-field false positive,
+      identical in E4), fork HEAD still a13b66a + only pre-existing M, lease
+      absent + pgrep 1. Accepted: suite 448/448/0 (attested), $t9
+      provenance disassembly (in-evidence). Reference-state row: E4
+      boundary (T5 + VRAM + history all re-match). ~2.5 h. Next: E6
+      source-trace S + S+0x5a88 writers + advance logic (E5 §7, G6). Ledger
+      row added.
 - [x] **E4 read (09-21) — PASS, branch (c): steady draws → fbp0 (icon), display reads black fbp112:**
       Phase-1 survey (no branch selectable from K1/E3b receipts: R10–R14
       missing; R4b early blit INTO fbp112 noted) → ONE 25 s span-bounded
