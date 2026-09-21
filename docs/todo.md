@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS force-install iPad + Odin, iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t30 (Cross on Continue → next screen, bytesize, 4h) · g11 (per-vsync scanout series, ps2xGS + bytesize, 6h) · e6 (source-trace S + S+0x5a88 writers, fork + P-lane lease, 6h) · i9 (real-ELF boot on iPad, worktree + force-install, 6h).
+- [ ] **Live panes:** t31 (Cross on Peak 1 → next screen, bytesize, 4h) · g12 (PCSX2-side draw-order trace, ps2xGS + bytesize, 6h) · e6 (source-trace S + S+0x5a88 writers, fork + P-lane lease, 6h) · i9 (real-ELF boot on iPad, worktree + force-install, 6h) · frontier (EF E-lane prep, read-only, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,42 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T30 read (09-21) — PASS, Cross on Continue → Select Peak, stable 131 s:**
+      Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
+      T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
+      (TITLE poll01 band-frozen, Start ≤0.73 s, Menu Cross @T+137.48, Zoe
+      Cross @T+177.39, 3 park snaps vs-stab6 0.17–0.29/p99 4–7) → Continue
+      Cross 535.7 ms @T+206.24 (pre = ZC Zoe+Continue, vs-zc 0.2315/6 PIL,
+      viewed) → Select Peak (Peak 1 highlighted, Peak 2–3 locked) by +1 s,
+      12 snaps / 131 s (pairwise 0.019–0.10/p99 0–1 — tightest arrival yet;
+      vs-ZC ~9.4, vs-menu ~10.4, vs-SC ~11.4, vs-title ~23.1). Post-run VM
+      restart (H2→H3) killed dmesg coverage → T27 §4 effects-verified path
+      (exit 0 + T30_DONE + monotonic 136→487 + zero in-window boundaries +
+      clean tail @341.07); 6 flaps all outside window. EE 52 / IOP 155 sets
+      identical to T29 R1. Verified: CONT_CROSS keydown/keyup walls exact,
+      T30_DONE in stdout ×2, head/tail 2000/2000, a1-post15 full-sha EQUAL
+      to T29 (4th run), a1-post3 sha12 EQUAL (2nd run), flap counts 1/3/2.
+      Reference-state row: T29 park. ~27 min. Next: T31 Cross on Peak 1
+      (T30 G1). Ledger row added.
+- [x] **G11 read (09-21) — PASS, first-black localized to recording order in the vsync flush:**
+      G10 §4 executed on the existing dump. Cross-k matrix (8 PPM × 7 PNG):
+      shifted diagonal PPM#(k+1)≈PNG#(k+1) wins EVERY row by ~20 dB
+      (62.8–64.6 vs 44–47) — systematic one-vsync presentation lag.
+      Per-vsync priv decode: DISPFB1 FBP=112 constant (no flip). H1–H4
+      log-only instrumentation (2 rebuilds, behavior-preserved: 10/10 PPM
+      shas = G10): each vsync = composite A (17 prims, FBP=112∘TBP=0,
+      mid-stream FRAME-switch hazard flush) recorded BEFORE sprite B (17
+      prims, FBP=0, inside `flush()`) — single submit runs composite before
+      sprite, WAR-ordered vs previous vsync; #0 composites cleared initial
+      VRAM → black, no second cause. Killed with receipts: DISPFB flip,
+      consume lag, field selection, backbuffer promotion, barrier races,
+      upload/batch deferral. OPEN (other half): how PCSX2 achieves
+      sprite-first-effective. Verified: full 56-cell matrix RERUN BY ME
+      exact (all cells + nonblack counts), G11 10/10 PPM shas = G10's 8 +
+      FIRST/LAST, ps2xGS [G11] committed + in sync with origin/main, ssx3
+      mirror 8 files. Accepted: batch tables + priv decode (session-only
+      logs + scripts in-evidence). Reference-state row: G10 pairs/oracle.
+      ~2 h. Next: G12 PCSX2-side draw-order trace (G11 §4). Ledger row added.
 - [x] **E5 read (09-21) — PASS, outcome (i) via J2: per-frame display re-assert runs, S+0x5a88 stuck at 112:**
       Phase-1 inventory (W1–W5 paths; HLE W3/W4 zero-call ×3 boots; `gsw=`
       vacuous; boot burst bounded ~40→49; J1/J2 unsplittable = THE gap) →
