@@ -1,0 +1,67 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ ROUNDS=40
+++ seq 1 40
++ for i in $(seq 1 $ROUNDS)
+ROUND:1 1790020233.925017166
+++ date -u +%s.%N
++ echo 'ROUND:1 1790020233.925017166'
+++ xdotool search --onlyvisible --name '.*'
++ IDS='511
+2097159
+2097162'
++ '[' -z '511
+2097159
+2097162' ']'
++ for W in $IDS
+++ xdotool getwindowname 511
++ N=
+++ xdotool getwindowgeometry --shell 511
+++ grep -E '^(WIDTH|HEIGHT)='
++ eval 'WIDTH=1280
+HEIGHT=1024'
+WIN:511::1280x1024
+SKIP-ROOT:511
+++ WIDTH=1280
+++ HEIGHT=1024
++ echo WIN:511::1280x1024
++ case "$N" in
++ '[' 1280x1024 = 1280x1024 ']'
++ echo SKIP-ROOT:511
++ continue
++ for W in $IDS
+++ xdotool getwindowname 2097159
++ N='SSX 3 [Devel]'
+++ xdotool getwindowgeometry --shell 2097159
+++ grep -E '^(WIDTH|HEIGHT)='
++ eval 'WIDTH=640
+HEIGHT=480'
+WIN:2097159:SSX 3 [Devel]:640x480
+++ WIDTH=640
+++ HEIGHT=480
+SKIP-GAME:2097159
++ echo 'WIN:2097159:SSX 3 [Devel]:640x480'
++ case "$N" in
++ echo SKIP-GAME:2097159
++ continue
++ for W in $IDS
+++ xdotool getwindowname 2097162
++ N=pcsx2-qt
+++ xdotool getwindowgeometry --shell 2097162
+++ grep -E '^(WIDTH|HEIGHT)='
+WIN:2097162:pcsx2-qt:640x480
+DISMISS:2097162:pcsx2-qt
++ eval 'WIDTH=640
+HEIGHT=480'
+++ WIDTH=640
+++ HEIGHT=480
++ echo WIN:2097162:pcsx2-qt:640x480
++ case "$N" in
++ '[' 640x480 = 1280x1024 ']'
++ echo DISMISS:2097162:pcsx2-qt
++ xdotool windowfocus --sync 2097162
++ xdotool key --window 2097162 Return
+DISMISSED-EXIT
++ echo DISMISSED-EXIT
++ exit 0
