@@ -1288,6 +1288,43 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G19 read (09-21) — PASS, sha erratum RESOLVED (as-found was all-zero damage; rebuild bit-identical); O4 PERSISTS on main sync compile (async eliminated ⇒ Adreno compiler bug):**
+      As-found `c568dc23…` proven = sha256 of 265,837,472 zero bytes
+      (content all-zero, objects/archives intact — link-output-only
+      post-run damage); authorized rebuild reproduces `a62d8a2b…` +
+      build-id `0b01b274…` BIT-FOR-BIT (link deterministic — strongest
+      rebuild receipt). Knob run exit 139 (knob-fired LOGI + first draw +
+      same two stalled compiles): O4 persists — SEGV fault `0x0` in
+      `libllvm-qgl.so` @ `vkCreateComputePipelines+1224`, now on MAIN
+      (pid==tid 5883) via `dispatch_texture_analysis`, with NO async
+      worker (zero async mentions, waiter-only second thread) ⇒ sync-path
+      Adreno compiler bug on a specific compute pipeline (minimizing facts
+      tabled; shader hash + SPIR-V still missing). Score: oracles 8/8, 0
+      scanouts, N/A. Verified: binary sha + ELF magic, logcat lines/knob/
+      compiles, tombstone pid/tid/fault/async-absence/stack/build-id/
+      waiter, device clean, oracle re-run (N/A), pins, ps2xGS commit.
+      ~0.5 h. Next: G20 capture-first O4 minimize (logging-only build
+      names the pipeline + SPIR-V, assemble filing package). Ledger row
+      added.
+- [x] **E13 read (09-21) — PASS(ii), exact 0x2c5358 leaf restored; 142 pairs, state 3→6→29; parked at MPEG picture wait (no input):**
+      Checkpoint re-verified (9,451 names, registry/runner SHAs, suite
+      452/452, fail-before `hasFunction(0x2c5358)=false`). No reclamation
+      needed (4.46 GB pre-edit + pre-spawn). CSV sha `0c608574…` matches
+      E12's prediction exactly. I17 cross-check: byte-identical row,
+      derived-before-compare; 5 device-only rows named for the absorb.
+      Regen rc=0, install 3 files, leaf truth table 24/24 (both ports +
+      indexing) + preservation + consumer 3 (stale 8 vs exact 0, both
+      ports) + regression (predicate-14, query-4, DROP, suite 452/0). ONE
+      guarded boot (75.2 s, lease released): 142 leaf pairs (141 + 1),
+      6 flag chains, UI+0x130 3→6→29, 781/781 card calls close; first
+      remaining wall = MPEG `GetPicture` wait (`sawInput=0`, main parked
+      @`0x3b1028`, callback `0x3b0b10`/`0x3b0b40`/`AddBs` zero dispatches,
+      `stream=false` candidate — runtime class, not map). Fork `83fb4d60`
+      pushed. Verified: fork/push/stat, CSV sha, admission JSONs, binding
+      slot 464084, truth table 24 cases, suite, boot caps, card JSON,
+      MPEG line, lease absent, reclamation (t6/t12 gone). ~40 min. Next:
+      E14 absorbs the 5 I-rows (user-authorized merge vehicle); E15 owns
+      the MPEG probe (E13 NEXT-BRIEF, no stacking). Ledger row added.
 - [x] **G18 read (09-21) — PASS, static cause NAMED (raw-vs-derived descriptor-buffer gate); one-hunk fix passes O2's site; NEW wall O4 in Adreno compiler (ERRATUM: host binary sha):**
       Static reads name the heap/init path: `init_legacy` gates template
       creation on the RAW `descriptorBuffer` bit (`shader.cpp:531`) while
