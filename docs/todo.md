@@ -1288,6 +1288,29 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G27 read (09-21) — PASS(Done), WRITER NAMED with a closed 5-link proof (stride-0 slab + unguarded branch + driver 64-B write); 10 scanouts WROTE + `Done!` (first scored run since G22 — black); binary zero-destroyed 6th time (run evidence stands):**
+      HWASan chosen + trivial-probe proven (clean exit 0 + fault-mode
+      report) + ONE build exit 0 (289,112,232 B, `6387d2f3…`,
+      `52977886…`, 164 symbols) + verify-then-push (3 pre-run matches
+      + 4/4 on-device) + ONE with-flag run: exit 134, sanitizer FIRED
+      (`allocation-tail-overwritten`, size-72, full alloc+free stacks,
+      heap-buffer-overflow in-granule — Scudo REPLACED); victim alloc
+      through `gs_interface.cpp:1725` (between flag gates), free in
+      post-`Done!` Device teardown; 10 black PPMs + `Done!` last; O4
+      absent (4th straight). Proof: 72=64+0+8 (stride-0 slab) +
+      `init()` early-`true` ignored + guard asymmetry + on-device
+      `MISMATCH=1` + 64-B driver write @`:1448` (payload = descriptor
+      bytes 8..15, 48-B neighbor smash = Scudo mechanism). Verified:
+      ALL FIVE LINKS re-derived from source (slab/fallback/init/use/
+      sibling/guards/flag-gates), stderr (8,050 B, 84 lines, first +
+      SUMMARY exact), logcat (1804, :29, `Done!` last, 10 wrote, 18
+      frames, 8 yes, crasher 0), PPMs (10×688,143 all-zero), score
+      re-run (k-rows exact), tombstone (SIGABRT, HWASan msg, BuildId
+      FULL, Scudo 0), vkprobe REBUILT + RE-RUN live (`MISMATCH=1`
+      exact), hunks intact + zero new edits, device `mg/`-only, tail
+      intact. ZERO-DAMAGE 6th (post-run; tested copy proven good).
+      ~50 min. Next: G28 writer fix (guard `:1424` + exit-0 run).
+      Ledger row added.
 - [x] **E18 read (09-21) — PASS(Done), MPEG caller delivery LANDED (fork `3adc0478`, pushed): fixtures flipped rc1→rc0, 458/458, 5,040 bytes via AddBs — then CORRECT STOP at the parser edge (parsed 5,040, packets/frames/completions 0, main still at `0x3b1028`, no second fix):**
       Ownership audit FIRST (queued path fails parked-caller → sync
       HleCall chosen, tabled both ways). Fix: selector + collect-under-
