@@ -1,0 +1,14 @@
+[E18] Deliver non-stream MPEG input callbacks on the caller
+
+Select registered non-stream callbacks for the observed GetPicture input
+request, preserving caller thread/stack and registration order. Dispatch
+outside the MPEG lock with word0-only data and discard callback v0.
+Invalidate pending delivery on deletion/reset and release callback data
+on completion. Add six scheduler-driven regression cases.
+
+Validation: 458/458; prior bindings and closure cases; actual-wrapper
+no-input/input rc1-to-rc0. One guarded host probe delivered 5040 bytes;
+parser output remained zero and GetPicture stayed in its typed wait.
+The next input/progress dependency is reserved for a separate brief.
+
+Orchestrated-By: Muse Code

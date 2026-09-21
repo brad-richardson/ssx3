@@ -1,0 +1,142 @@
+# ELF sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc bytes=3890784
+00407520 27bdff60 addiu       $sp, $sp, -0xA0
+00407524 ffb60080 sd          $s6, 0x80($sp)
+00407528 ffb50070 sd          $s5, 0x70($sp)
+0040752c 24160005 addiu       $s6, $zero, 0x5
+00407530 ffb40060 sd          $s4, 0x60($sp)
+00407534 241501b3 addiu       $s5, $zero, 0x1B3
+00407538 ffb30050 sd          $s3, 0x50($sp)
+0040753c 24140100 addiu       $s4, $zero, 0x100
+00407540 ffb20040 sd          $s2, 0x40($sp)
+00407544 241301b7 addiu       $s3, $zero, 0x1B7
+00407548 ffb10030 sd          $s1, 0x30($sp)
+0040754c 241201b8 addiu       $s2, $zero, 0x1B8
+00407550 ffb00020 sd          $s0, 0x20($sp)
+00407554 2411ffff addiu       $s1, $zero, -0x1
+00407558 ffbf0090 sd          $ra, 0x90($sp)
+0040755c 0080802d daddu       $s0, $a0, $zero
+00407560 0c101d0e jal         func_407438
+00407564 0200202d daddu       $a0, $s0, $zero
+00407568 0200202d daddu       $a0, $s0, $zero
+0040756c 0c101cba jal         func_4072E8
+00407570 24050020 addiu       $a1, $zero, 0x20
+00407574 0040182d daddu       $v1, $v0, $zero
+00407578 1075000d beq         $v1, $s5, . + 4 + (0xD << 2) ; target=0x4075b0
+0040757c 2c6201b4 sltiu       $v0, $v1, 0x1B4
+00407580 10400005 beqz        $v0, . + 4 + (0x5 << 2) ; target=0x407598
+00407584 00000000 nop
+00407588 10740011 beq         $v1, $s4, . + 4 + (0x11 << 2) ; target=0x4075d0
+0040758c 00000000 nop
+00407590 1000fff3 b           . + 4 + (-0xD << 2) ; target=0x407560
+00407594 00000000 nop
+00407598 1073001a beq         $v1, $s3, . + 4 + (0x1A << 2) ; target=0x407604
+0040759c 0000102d daddu       $v0, $zero, $zero
+004075a0 10720007 beq         $v1, $s2, . + 4 + (0x7 << 2) ; target=0x4075c0
+004075a4 00000000 nop
+004075a8 1000ffed b           . + 4 + (-0x13 << 2) ; target=0x407560
+004075ac 00000000 nop
+004075b0 0c100d88 jal         func_403620
+004075b4 0200202d daddu       $a0, $s0, $zero
+004075b8 1000ffe9 b           . + 4 + (-0x17 << 2) ; target=0x407560
+004075bc 00000000 nop
+004075c0 0c101eb4 jal         func_407AD0
+004075c4 0200202d daddu       $a0, $s0, $zero
+004075c8 1000ffe5 b           . + 4 + (-0x1B << 2) ; target=0x407560
+004075cc 00000000 nop
+004075d0 0c101d8c jal         func_407630
+004075d4 0200202d daddu       $a0, $s0, $zero
+004075d8 8e040858 lw          $a0, 0x858($s0)
+004075dc 03a0282d daddu       $a1, $sp, $zero
+004075e0 afb60000 sw          $s6, 0x0($sp)
+004075e4 ffb10010 sd          $s1, 0x10($sp)
+004075e8 0c100b0c jal         func_402C30
+004075ec ffb10008 sd          $s1, 0x8($sp)
+004075f0 dfa20010 ld          $v0, 0x10($sp)
+004075f4 dfa30008 ld          $v1, 0x8($sp)
+004075f8 fe020830 sd          $v0, 0x830($s0)
+004075fc fe030828 sd          $v1, 0x828($s0)
+00407600 8e020150 lw          $v0, 0x150($s0)
+00407604 dfbf0090 ld          $ra, 0x90($sp)
+00407608 dfb60080 ld          $s6, 0x80($sp)
+0040760c dfb50070 ld          $s5, 0x70($sp)
+00407610 dfb40060 ld          $s4, 0x60($sp)
+00407614 dfb30050 ld          $s3, 0x50($sp)
+00407618 dfb20040 ld          $s2, 0x40($sp)
+0040761c dfb10030 ld          $s1, 0x30($sp)
+00407620 dfb00020 ld          $s0, 0x20($sp)
+00407624 03e00008 jr          $ra
+00407628 27bd00a0 addiu       $sp, $sp, 0xA0
+0040762c 00000000 nop
+00407630 27bdffd0 addiu       $sp, $sp, -0x30
+00407634 2405000a addiu       $a1, $zero, 0xA
+00407638 ffb00000 sd          $s0, 0x0($sp)
+0040763c ffb10010 sd          $s1, 0x10($sp)
+00407640 ffbf0020 sd          $ra, 0x20($sp)
+00407644 0c101cba jal         func_4072E8
+00407648 0080802d daddu       $s0, $a0, $zero
+0040764c 0040882d daddu       $s1, $v0, $zero
+00407650 0200202d daddu       $a0, $s0, $zero
+00407654 0c101cba jal         func_4072E8
+00407658 24050003 addiu       $a1, $zero, 0x3
+0040765c ae020150 sw          $v0, 0x150($s0)
+00407660 0200202d daddu       $a0, $s0, $zero
+00407664 0c101cba jal         func_4072E8
+00407668 24050010 addiu       $a1, $zero, 0x10
+0040766c 8e030150 lw          $v1, 0x150($s0)
+00407670 2462fffe addiu       $v0, $v1, -0x2
+00407674 2c420002 sltiu       $v0, $v0, 0x2
+00407678 10400009 beqz        $v0, . + 4 + (0x9 << 2) ; target=0x4076a0
+0040767c 0200202d daddu       $a0, $s0, $zero
+00407680 0c101cba jal         func_4072E8
+00407684 24050001 addiu       $a1, $zero, 0x1
+00407688 ae020154 sw          $v0, 0x154($s0)
+0040768c 0200202d daddu       $a0, $s0, $zero
+00407690 0c101cba jal         func_4072E8
+00407694 24050003 addiu       $a1, $zero, 0x3
+00407698 ae020158 sw          $v0, 0x158($s0)
+0040769c 8e030150 lw          $v1, 0x150($s0)
+004076a0 24020003 addiu       $v0, $zero, 0x3
+004076a4 14620008 bne         $v1, $v0, . + 4 + (0x8 << 2) ; target=0x4076c8
+004076a8 0200202d daddu       $a0, $s0, $zero
+004076ac 0c101cba jal         func_4072E8
+004076b0 24050001 addiu       $a1, $zero, 0x1
+004076b4 ae02015c sw          $v0, 0x15C($s0)
+004076b8 0200202d daddu       $a0, $s0, $zero
+004076bc 0c101cba jal         func_4072E8
+004076c0 24050003 addiu       $a1, $zero, 0x3
+004076c4 ae020160 sw          $v0, 0x160($s0)
+004076c8 0c101e84 jal         func_407A10
+004076cc 0200202d daddu       $a0, $s0, $zero
+004076d0 0c101dbe jal         func_4076F8
+004076d4 0200202d daddu       $a0, $s0, $zero
+004076d8 0200202d daddu       $a0, $s0, $zero
+004076dc 0220282d daddu       $a1, $s1, $zero
+004076e0 dfbf0020 ld          $ra, 0x20($sp)
+004076e4 dfb10010 ld          $s1, 0x10($sp)
+004076e8 dfb00000 ld          $s0, 0x0($sp)
+004076ec 08101e96 j           func_407A58
+004076f0 27bd0030 addiu       $sp, $sp, 0x30
+004076f4 00000000 nop
+004076f8 27bdff80 addiu       $sp, $sp, -0x80
+004076fc 3c020049 lui         $v0, 0x49
+00407700 ffb00030 sd          $s0, 0x30($sp)
+00407704 ffb30060 sd          $s3, 0x60($sp)
+00407708 0080802d daddu       $s0, $a0, $zero
+0040770c ffb20050 sd          $s2, 0x50($sp)
+00407710 ffb10040 sd          $s1, 0x40($sp)
+00407714 241301b2 addiu       $s3, $zero, 0x1B2
+00407718 ffbf0070 sd          $ra, 0x70($sp)
+0040771c 241101b5 addiu       $s1, $zero, 0x1B5
+00407720 24477fe0 addiu       $a3, $v0, 0x7FE0
+00407724 68e30007 ldl         $v1, 0x7($a3)
+00407728 6ce30000 ldr         $v1, 0x0($a3)
+0040772c 68e5000f ldl         $a1, 0xF($a3)
+00407730 6ce50008 ldr         $a1, 0x8($a3)
+00407734 68e60017 ldl         $a2, 0x17($a3)
+00407738 6ce60010 ldr         $a2, 0x10($a3)
+0040773c b3a30007 sdl         $v1, 0x7($sp)
+00407740 b7a30000 sdr         $v1, 0x0($sp)
+00407744 b3a5000f sdl         $a1, 0xF($sp)
+00407748 b7a50008 sdr         $a1, 0x8($sp)
+0040774c b3a60017 sdl         $a2, 0x17($sp)
+# E15 STATIC TAIL COMPLETE

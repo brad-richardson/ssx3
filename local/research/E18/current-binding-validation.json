@@ -1,0 +1,132 @@
+{
+  "utc": "2026-09-21T19:23:37.132847+00:00",
+  "binary": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+    "bytes": 165183488,
+    "allocated": 165675008,
+    "sha256": "42d9f4f373265f5f40ea29920db6149e9043f5afbd65d2d576ea9477d6587326"
+  },
+  "label": "current-binding",
+  "cases": [
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+        "prior"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/current-binding/prior",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-binding/"
+      },
+      "elapsed_s": 1.1740438340002584,
+      "stdout_bytes": 5781,
+      "scratch_peak_allocated": 0,
+      "mode": "prior",
+      "rc": 0,
+      "tap_bytes": 0,
+      "tap_tail": [],
+      "leaf": 24,
+      "consumer": 3,
+      "predicate": 14,
+      "query": 4,
+      "drop": true
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+        "no-input"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/current-binding/no-input",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-binding/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/current-binding/no-input"
+      },
+      "elapsed_s": 0.03127150000000256,
+      "stdout_bytes": 1203,
+      "scratch_peak_allocated": 0,
+      "mode": "no-input",
+      "rc": 0,
+      "tap_bytes": 2447,
+      "tap_tail": [
+        "seq=12 tick=0 kind=mpeg-wait type=1 token=0x150000 thread=1 pc=0x100050 ra=0x100050 sp=0x1e00000 reason=6",
+        "# E15 CLOSURE tick=0 calls=4 returned=3 unwound=1 pending=0 selections=1 invocations=1 registrations=1 registrationTruncated=0",
+        "# E7 SHUTDOWN tick=0 events=12 bootBytes=1986 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615"
+      ],
+      "closure": {
+        "tick": 0,
+        "calls": 4,
+        "returned": 3,
+        "unwound": 1,
+        "pending": 0,
+        "selections": 1,
+        "invocations": 1,
+        "registrations": 1,
+        "registrationTruncated": 0
+      },
+      "shutdown": {
+        "tick": 0,
+        "events": 12,
+        "bootBytes": 1986,
+        "boundaryBytes": 0,
+        "packetBytes": 0,
+        "packetFiles": 0,
+        "bootTruncated": 0,
+        "boundaryTruncated": 0,
+        "packetTruncated": 0,
+        "windowComplete": 0,
+        "aligned": 0,
+        "arm": 18446744073709551615
+      },
+      "source_count_match": true
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+        "input"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/current-binding/input",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-binding/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/current-binding/input"
+      },
+      "elapsed_s": 0.03178712499902758,
+      "stdout_bytes": 1266,
+      "scratch_peak_allocated": 0,
+      "mode": "input",
+      "rc": 0,
+      "tap_bytes": 2967,
+      "tap_tail": [
+        "seq=15 tick=0 kind=mpeg-wait type=1 token=0x150000 thread=1 pc=0x100050 ra=0x100050 sp=0x1e00000 reason=6",
+        "# E15 CLOSURE tick=0 calls=5 returned=4 unwound=1 pending=0 selections=1 invocations=1 registrations=1 registrationTruncated=0",
+        "# E7 SHUTDOWN tick=0 events=15 bootBytes=2506 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615"
+      ],
+      "closure": {
+        "tick": 0,
+        "calls": 5,
+        "returned": 4,
+        "unwound": 1,
+        "pending": 0,
+        "selections": 1,
+        "invocations": 1,
+        "registrations": 1,
+        "registrationTruncated": 0
+      },
+      "shutdown": {
+        "tick": 0,
+        "events": 15,
+        "bootBytes": 2506,
+        "boundaryBytes": 0,
+        "packetBytes": 0,
+        "packetFiles": 0,
+        "bootTruncated": 0,
+        "boundaryTruncated": 0,
+        "packetTruncated": 0,
+        "windowComplete": 0,
+        "aligned": 0,
+        "arm": 18446744073709551615
+      },
+      "source_count_match": true
+    }
+  ]
+}

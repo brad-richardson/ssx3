@@ -1,0 +1,1020 @@
+{
+  "utc": "2026-09-21T18:49:44.756198+00:00",
+  "sources": [
+    {
+      "file": "ps2xRuntime/src/lib/Kernel/EeScheduler.cpp",
+      "sha256": "875b992739c34ffb9cdec2e81116fb7cd56b1e213ce25e05a68584a9ef8dd1c6",
+      "excerpts": [
+        {
+          "line": 575,
+          "text": "            {"
+        },
+        {
+          "line": 576,
+          "text": "                makeRunning(*next);"
+        },
+        {
+          "line": 577,
+          "text": "                ps2_park::tallySched(next->id);"
+        },
+        {
+          "line": 578,
+          "text": "                if (diagPeriod != 0u)"
+        },
+        {
+          "line": 579,
+          "text": "                {"
+        },
+        {
+          "line": 580,
+          "text": "                    ++g_diagSchedCounts[next->id];"
+        },
+        {
+          "line": 581,
+          "text": "                }"
+        },
+        {
+          "line": 582,
+          "text": "            }"
+        },
+        {
+          "line": 583,
+          "text": "            else"
+        },
+        {
+          "line": 584,
+          "text": "            {"
+        },
+        {
+          "line": 585,
+          "text": "                GuestThread *owner = &acquireInvocationThread();"
+        },
+        {
+          "line": 586,
+          "text": "                GuestInvocation invocation = std::move(m_pendingInvocations.front());"
+        },
+        {
+          "line": 587,
+          "text": "                m_pendingInvocations.pop_front();"
+        },
+        {
+          "line": 588,
+          "text": "                ps2_park::tallySched(owner->id);"
+        },
+        {
+          "line": 589,
+          "text": "                if (diagPeriod != 0u)"
+        },
+        {
+          "line": 590,
+          "text": "                {"
+        },
+        {
+          "line": 591,
+          "text": "                    ++g_diagSchedCounts[owner->id];"
+        },
+        {
+          "line": 592,
+          "text": "                    if (isCdCallbackDiagTag(invocation.tag))"
+        },
+        {
+          "line": 593,
+          "text": "                    {"
+        },
+        {
+          "line": 594,
+          "text": "                        std::cerr << \"[cd:callback] start func=\" << (invocation.tag & 0xFFFFFFFFu)"
+        },
+        {
+          "line": 595,
+          "text": "                                  << \" cb=0x\" << std::hex << invocation.context.pc << std::dec << std::endl;"
+        },
+        {
+          "line": 596,
+          "text": "                    }"
+        },
+        {
+          "line": 597,
+          "text": "                }"
+        },
+        {
+          "line": 598,
+          "text": "                owner->status = EeThreadStatus::Running;"
+        },
+        {
+          "line": 599,
+          "text": "                m_currentThreadId = owner->id;"
+        },
+        {
+          "line": 600,
+          "text": "                renewTimeSlice();"
+        },
+        {
+          "line": 601,
+          "text": "                if (getRegU32(&invocation.context, 29) == 0u)"
+        },
+        {
+          "line": 602,
+          "text": "                {"
+        },
+        {
+          "line": 603,
+          "text": "                    SET_GPR_U32(&invocation.context, 29, invocationStackTop());"
+        },
+        {
+          "line": 604,
+          "text": "                }"
+        },
+        {
+          "line": 605,
+          "text": "                owner->invocations.push_back(std::move(invocation));"
+        },
+        {
+          "line": 606,
+          "text": "            }"
+        },
+        {
+          "line": 607,
+          "text": "        }"
+        },
+        {
+          "line": 608,
+          "text": ""
+        },
+        {
+          "line": 642,
+          "text": "        m_runtime.m_debugGp.store(getRegU32(&context, 28), std::memory_order_relaxed);"
+        },
+        {
+          "line": 643,
+          "text": ""
+        },
+        {
+          "line": 644,
+          "text": "        if (context.pc == 0u)"
+        },
+        {
+          "line": 645,
+          "text": "        {"
+        },
+        {
+          "line": 646,
+          "text": "            if (!running->invocations.empty())"
+        },
+        {
+          "line": 647,
+          "text": "            {"
+        },
+        {
+          "line": 648,
+          "text": "                GuestInvocation completed = std::move(running->invocations.back());"
+        },
+        {
+          "line": 649,
+          "text": "                running->invocations.pop_back();"
+        },
+        {
+          "line": 650,
+          "text": "                if (completed.onComplete)"
+        },
+        {
+          "line": 651,
+          "text": "                {"
+        },
+        {
+          "line": 652,
+          "text": "                    try"
+        },
+        {
+          "line": 653,
+          "text": "                    {"
+        },
+        {
+          "line": 654,
+          "text": "                        completed.onComplete(completed.context, running->activeContext());"
+        },
+        {
+          "line": 655,
+          "text": "                    }"
+        },
+        {
+          "line": 656,
+          "text": "                    catch (const EeDispatcherTransfer &)"
+        },
+        {
+          "line": 657,
+          "text": "                    {"
+        },
+        {
+          "line": 658,
+          "text": "                    }"
+        },
+        {
+          "line": 659,
+          "text": "                }"
+        },
+        {
+          "line": 660,
+          "text": "                continue;"
+        },
+        {
+          "line": 680,
+          "text": "            makeDormant(*running);"
+        },
+        {
+          "line": 681,
+          "text": "            m_currentThreadId = 0;"
+        },
+        {
+          "line": 682,
+          "text": "            continue;"
+        },
+        {
+          "line": 683,
+          "text": "        }"
+        },
+        {
+          "line": 684,
+          "text": ""
+        },
+        {
+          "line": 685,
+          "text": "        if (!m_pendingInvocations.empty())"
+        },
+        {
+          "line": 686,
+          "text": "        {"
+        },
+        {
+          "line": 687,
+          "text": "            GuestInvocation invocation = std::move(m_pendingInvocations.front());"
+        },
+        {
+          "line": 688,
+          "text": "            m_pendingInvocations.pop_front();"
+        },
+        {
+          "line": 689,
+          "text": "            if (diagPeriod != 0u && isCdCallbackDiagTag(invocation.tag))"
+        },
+        {
+          "line": 690,
+          "text": "            {"
+        },
+        {
+          "line": 691,
+          "text": "                std::cerr << \"[cd:callback] start func=\" << (invocation.tag & 0xFFFFFFFFu)"
+        },
+        {
+          "line": 692,
+          "text": "                          << \" cb=0x\" << std::hex << invocation.context.pc << std::dec << std::endl;"
+        },
+        {
+          "line": 693,
+          "text": "            }"
+        },
+        {
+          "line": 694,
+          "text": "            if (getRegU32(&invocation.context, 29) == 0u)"
+        },
+        {
+          "line": 695,
+          "text": "            {"
+        },
+        {
+          "line": 696,
+          "text": "                SET_GPR_U32(&invocation.context, 29, invocationStackTop());"
+        },
+        {
+          "line": 697,
+          "text": "            }"
+        },
+        {
+          "line": 698,
+          "text": "            running->invocations.push_back(std::move(invocation));"
+        },
+        {
+          "line": 699,
+          "text": "            continue;"
+        },
+        {
+          "line": 700,
+          "text": "        }"
+        },
+        {
+          "line": 1746,
+          "text": "void EeScheduler::queueInvocation(GuestInvocation invocation)"
+        },
+        {
+          "line": 1747,
+          "text": "{"
+        },
+        {
+          "line": 1748,
+          "text": "    assertExecutor();"
+        },
+        {
+          "line": 1749,
+          "text": "    ps2_e15::selection(m_vsyncTick,\"queue\",invocation.context.pc,&invocation.context,m_currentThreadId);"
+        },
+        {
+          "line": 1750,
+          "text": "    invocation.sequence = ++m_invocationSequence;"
+        },
+        {
+          "line": 1751,
+          "text": "    m_pendingInvocations.push_back(std::move(invocation));"
+        },
+        {
+          "line": 1752,
+          "text": "    m_checkpointPending.store(true, std::memory_order_release);"
+        },
+        {
+          "line": 1753,
+          "text": "}"
+        },
+        {
+          "line": 1754,
+          "text": ""
+        },
+        {
+          "line": 1755,
+          "text": "[[noreturn]] void EeScheduler::invokeCurrent(GuestInvocation invocation)"
+        },
+        {
+          "line": 1756,
+          "text": "{"
+        },
+        {
+          "line": 1757,
+          "text": "    assertExecutor();"
+        },
+        {
+          "line": 1758,
+          "text": "    ps2_e15::selection(m_vsyncTick,\"direct\",invocation.context.pc,&invocation.context,m_currentThreadId);"
+        },
+        {
+          "line": 1759,
+          "text": "    GuestThread *owner = currentThread();"
+        },
+        {
+          "line": 1760,
+          "text": "    assert(owner != nullptr);"
+        },
+        {
+          "line": 1761,
+          "text": "    if (getRegU32(&invocation.context, 29) == 0u)"
+        },
+        {
+          "line": 1762,
+          "text": "    {"
+        },
+        {
+          "line": 1763,
+          "text": "        SET_GPR_U32(&invocation.context, 29, invocationStackTop());"
+        },
+        {
+          "line": 1764,
+          "text": "    }"
+        },
+        {
+          "line": 1765,
+          "text": "    invocation.sequence = ++m_invocationSequence;"
+        },
+        {
+          "line": 1766,
+          "text": "    owner->invocations.push_back(std::move(invocation));"
+        },
+        {
+          "line": 1767,
+          "text": "    publishSnapshot();"
+        },
+        {
+          "line": 1768,
+          "text": "    throw EeDispatcherTransfer{};"
+        },
+        {
+          "line": 1769,
+          "text": "}"
+        },
+        {
+          "line": 1770,
+          "text": ""
+        },
+        {
+          "line": 1771,
+          "text": "[[noreturn]] void EeScheduler::invokeCurrentSequence(std::vector<GuestInvocation> invocations)"
+        },
+        {
+          "line": 1772,
+          "text": "{"
+        },
+        {
+          "line": 1773,
+          "text": "    assertExecutor();"
+        },
+        {
+          "line": 1774,
+          "text": "    GuestThread *owner = currentThread();"
+        },
+        {
+          "line": 1775,
+          "text": "    assert(owner != nullptr);"
+        },
+        {
+          "line": 1776,
+          "text": "    assert(!invocations.empty());"
+        },
+        {
+          "line": 1777,
+          "text": "    for (auto it = invocations.rbegin(); it != invocations.rend(); ++it)"
+        },
+        {
+          "line": 1778,
+          "text": "    {"
+        },
+        {
+          "line": 1779,
+          "text": "        ps2_e15::selection(m_vsyncTick,\"sequence\",it->context.pc,&it->context,m_currentThreadId);"
+        },
+        {
+          "line": 1780,
+          "text": "        if (getRegU32(&it->context, 29) == 0u)"
+        },
+        {
+          "line": 1781,
+          "text": "        {"
+        },
+        {
+          "line": 1782,
+          "text": "            SET_GPR_U32(&it->context, 29, invocationStackTop());"
+        },
+        {
+          "line": 1783,
+          "text": "        }"
+        },
+        {
+          "line": 1784,
+          "text": "        it->sequence = ++m_invocationSequence;"
+        },
+        {
+          "line": 1785,
+          "text": "        owner->invocations.push_back(std::move(*it));"
+        },
+        {
+          "line": 1786,
+          "text": "    }"
+        },
+        {
+          "line": 1787,
+          "text": "    publishSnapshot();"
+        },
+        {
+          "line": 1788,
+          "text": "    throw EeDispatcherTransfer{};"
+        },
+        {
+          "line": 1789,
+          "text": "}"
+        },
+        {
+          "line": 2293,
+          "text": "GuestThread &EeScheduler::acquireInvocationThread()"
+        },
+        {
+          "line": 2294,
+          "text": "{"
+        },
+        {
+          "line": 2295,
+          "text": "    for (auto &[id, candidate] : m_threads)"
+        },
+        {
+          "line": 2296,
+          "text": "    {"
+        },
+        {
+          "line": 2297,
+          "text": "        if (id < 0 && candidate.status == EeThreadStatus::Dormant && candidate.invocations.empty())"
+        },
+        {
+          "line": 2298,
+          "text": "        {"
+        },
+        {
+          "line": 2299,
+          "text": "            return candidate;"
+        },
+        {
+          "line": 2300,
+          "text": "        }"
+        },
+        {
+          "line": 2301,
+          "text": "    }"
+        },
+        {
+          "line": 2302,
+          "text": ""
+        },
+        {
+          "line": 2303,
+          "text": "    GuestThread dispatcher{};"
+        },
+        {
+          "line": 2304,
+          "text": "    dispatcher.id = m_nextInvocationThreadId--;"
+        },
+        {
+          "line": 2305,
+          "text": "    dispatcher.initialPriority = 0;"
+        },
+        {
+          "line": 2306,
+          "text": "    dispatcher.currentPriority = 0;"
+        },
+        {
+          "line": 2307,
+          "text": "    dispatcher.status = EeThreadStatus::Dormant;"
+        },
+        {
+          "line": 2308,
+          "text": "    return m_threads.emplace(dispatcher.id, std::move(dispatcher)).first->second;"
+        },
+        {
+          "line": 2309,
+          "text": "}"
+        }
+      ]
+    },
+    {
+      "file": "ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp",
+      "sha256": "949894dcebfa0c3a632381a80944a7dfe2db57223971adce7207ccaa881989b8",
+      "excerpts": [
+        {
+          "line": 1141,
+          "text": "        std::vector<MpegRegisteredCallback> matchingStreamCallbacks(uint32_t mpegAddr, uint32_t streamType)"
+        },
+        {
+          "line": 1142,
+          "text": "        {"
+        },
+        {
+          "line": 1143,
+          "text": "            std::vector<MpegRegisteredCallback> out;"
+        },
+        {
+          "line": 1144,
+          "text": "            auto it = g_mpeg_stub_state.callbacksByMpeg.find(mpegAddr);"
+        },
+        {
+          "line": 1145,
+          "text": "            if (it == g_mpeg_stub_state.callbacksByMpeg.end())"
+        },
+        {
+          "line": 1146,
+          "text": "            {"
+        },
+        {
+          "line": 1147,
+          "text": "                return out;"
+        },
+        {
+          "line": 1148,
+          "text": "            }"
+        },
+        {
+          "line": 1149,
+          "text": ""
+        },
+        {
+          "line": 1150,
+          "text": "            for (const MpegRegisteredCallback &callback : it->second)"
+        },
+        {
+          "line": 1151,
+          "text": "            {"
+        },
+        {
+          "line": 1152,
+          "text": "                if (callback.stream && callback.type == streamType)"
+        },
+        {
+          "line": 1153,
+          "text": "                {"
+        },
+        {
+          "line": 1154,
+          "text": "                    out.push_back(callback);"
+        },
+        {
+          "line": 1155,
+          "text": "                }"
+        },
+        {
+          "line": 1156,
+          "text": "            }"
+        },
+        {
+          "line": 1157,
+          "text": "            return out;"
+        },
+        {
+          "line": 1158,
+          "text": "        }"
+        },
+        {
+          "line": 1591,
+          "text": "        void dispatchGuestStreamCallback(uint8_t *rdram,"
+        },
+        {
+          "line": 1592,
+          "text": "                                         R5900Context *callerCtx,"
+        },
+        {
+          "line": 1593,
+          "text": "                                         PS2Runtime *runtime,"
+        },
+        {
+          "line": 1594,
+          "text": "                                         const MpegStreamCallbackEvent &event,"
+        },
+        {
+          "line": 1595,
+          "text": "                                         const MpegRegisteredCallback &callback)"
+        },
+        {
+          "line": 1596,
+          "text": "        {"
+        },
+        {
+          "line": 1597,
+          "text": "            if (!rdram || !callerCtx || !runtime || callback.func == 0u || !runtime->hasFunction(callback.func))"
+        },
+        {
+          "line": 1598,
+          "text": "            {"
+        },
+        {
+          "line": 1599,
+          "text": "                return;"
+        },
+        {
+          "line": 1600,
+          "text": "            }"
+        },
+        {
+          "line": 1601,
+          "text": ""
+        },
+        {
+          "line": 1602,
+          "text": "            const uint32_t cbDataAddr = runtime->guestMalloc(kMpegCallbackDataSize, 16u);"
+        },
+        {
+          "line": 1603,
+          "text": "            if (cbDataAddr == 0u)"
+        },
+        {
+          "line": 1604,
+          "text": "            {"
+        },
+        {
+          "line": 1605,
+          "text": "                return;"
+        },
+        {
+          "line": 1606,
+          "text": "            }"
+        },
+        {
+          "line": 1607,
+          "text": "            if (!writeMpegCallbackData(rdram, cbDataAddr, event))"
+        },
+        {
+          "line": 1608,
+          "text": "            {"
+        },
+        {
+          "line": 1609,
+          "text": "                runtime->guestFree(cbDataAddr);"
+        },
+        {
+          "line": 1610,
+          "text": "                return;"
+        },
+        {
+          "line": 1611,
+          "text": "            }"
+        },
+        {
+          "line": 1612,
+          "text": ""
+        },
+        {
+          "line": 1613,
+          "text": "            R5900Context callbackCtx = *callerCtx;"
+        },
+        {
+          "line": 1614,
+          "text": "            SET_GPR_U32(&callbackCtx, 4, event.mpegAddr);"
+        },
+        {
+          "line": 1615,
+          "text": "            SET_GPR_U32(&callbackCtx, 5, cbDataAddr);"
+        },
+        {
+          "line": 1616,
+          "text": "            SET_GPR_U32(&callbackCtx, 6, callback.data);"
+        },
+        {
+          "line": 1617,
+          "text": "            SET_GPR_U32(&callbackCtx, 7, 0u);"
+        },
+        {
+          "line": 1618,
+          "text": "            SET_GPR_U32(&callbackCtx, 29, 0u);"
+        },
+        {
+          "line": 1619,
+          "text": "            SET_GPR_U32(&callbackCtx, 31, 0u);"
+        },
+        {
+          "line": 1620,
+          "text": "            callbackCtx.pc = callback.func;"
+        },
+        {
+          "line": 1621,
+          "text": ""
+        },
+        {
+          "line": 1622,
+          "text": "            GuestInvocation invocation{};"
+        },
+        {
+          "line": 1623,
+          "text": "            invocation.kind = GuestInvocationKind::RpcCallback;"
+        },
+        {
+          "line": 1624,
+          "text": "            invocation.context = callbackCtx;"
+        },
+        {
+          "line": 1625,
+          "text": "            invocation.onComplete = [runtime, cbDataAddr](const R5900Context &, R5900Context &)"
+        },
+        {
+          "line": 1626,
+          "text": "            {"
+        },
+        {
+          "line": 1627,
+          "text": "                runtime->guestFree(cbDataAddr);"
+        },
+        {
+          "line": 1628,
+          "text": "            };"
+        },
+        {
+          "line": 1629,
+          "text": "            runtime->eeScheduler().queueInvocation(std::move(invocation));"
+        },
+        {
+          "line": 1630,
+          "text": "        }"
+        },
+        {
+          "line": 2306,
+          "text": "    void sceMpegGetPicture(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)"
+        },
+        {
+          "line": 2307,
+          "text": "    {"
+        },
+        {
+          "line": 2308,
+          "text": "        const uint32_t mpegAddr = getRegU32(ctx, 4);"
+        },
+        {
+          "line": 2309,
+          "text": "        const uint32_t imageAddr = getRegU32(ctx, 5);"
+        },
+        {
+          "line": 2310,
+          "text": "        uint32_t width = kStubMovieWidth;"
+        },
+        {
+          "line": 2311,
+          "text": "        uint32_t height = kStubMovieHeight;"
+        },
+        {
+          "line": 2312,
+          "text": "        uint32_t frameCount = 0u;"
+        },
+        {
+          "line": 2313,
+          "text": "        bool haveFrame = false;"
+        },
+        {
+          "line": 2314,
+          "text": "        MpegDecodedFrame frame;"
+        },
+        {
+          "line": 2315,
+          "text": "        {"
+        },
+        {
+          "line": 2316,
+          "text": "            std::unique_lock<std::mutex> lock(g_mpeg_stub_mutex);"
+        },
+        {
+          "line": 2317,
+          "text": "            MpegPlaybackState &playback = getPlaybackState(mpegAddr);"
+        },
+        {
+          "line": 2318,
+          "text": "            if (playback.decodedFrames.empty() &&"
+        },
+        {
+          "line": 2319,
+          "text": "                !g_mpeg_stub_state.currentCdStreamEofSeen &&"
+        },
+        {
+          "line": 2320,
+          "text": "                !playback.streamEnded &&"
+        },
+        {
+          "line": 2321,
+          "text": "                !playback.decoderFailed)"
+        },
+        {
+          "line": 2322,
+          "text": "            {"
+        },
+        {
+          "line": 2323,
+          "text": "                if (g_mpeg_stub_state.getPictureWaitTraceCount < 32u)"
+        },
+        {
+          "line": 2324,
+          "text": "                {"
+        },
+        {
+          "line": 2325,
+          "text": "                    PS2_IF_AGRESSIVE_LOGS({"
+        },
+        {
+          "line": 2326,
+          "text": "                        std::cerr << \"[MPEG:GetPicture] waiting for frames, mpeg=0x\" << std::hex << mpegAddr"
+        },
+        {
+          "line": 2327,
+          "text": "                                  << std::dec << \" ended=\" << playback.streamEnded"
+        },
+        {
+          "line": 2328,
+          "text": "                                  << \" failed=\" << playback.decoderFailed"
+        },
+        {
+          "line": 2329,
+          "text": "                                  << \" sawInput=\" << playback.sawInput << std::endl;"
+        },
+        {
+          "line": 2330,
+          "text": "                    });"
+        },
+        {
+          "line": 2331,
+          "text": "                    ++g_mpeg_stub_state.getPictureWaitTraceCount;"
+        },
+        {
+          "line": 2332,
+          "text": "                }"
+        },
+        {
+          "line": 2333,
+          "text": "                lock.unlock();"
+        },
+        {
+          "line": 2334,
+          "text": "                runtime->eeScheduler().waitExternal("
+        },
+        {
+          "line": 2335,
+          "text": "                    EeWaitReason::Mpeg,"
+        },
+        {
+          "line": 2336,
+          "text": "                    kMpegPictureWaitType,"
+        },
+        {
+          "line": 2337,
+          "text": "                    mpegAddr,"
+        },
+        {
+          "line": 2338,
+          "text": "                    [rdram, runtime](R5900Context &resumeContext)"
+        },
+        {
+          "line": 2339,
+          "text": "                    {"
+        },
+        {
+          "line": 2340,
+          "text": "                        if (static_cast<int32_t>(getRegU32(&resumeContext, 2)) < 0)"
+        },
+        {
+          "line": 2341,
+          "text": "                        {"
+        },
+        {
+          "line": 2342,
+          "text": "                            return;"
+        },
+        {
+          "line": 2343,
+          "text": "                        }"
+        },
+        {
+          "line": 2344,
+          "text": "                        sceMpegGetPicture(rdram, &resumeContext, runtime);"
+        },
+        {
+          "line": 2345,
+          "text": "                    });"
+        },
+        {
+          "line": 2346,
+          "text": "            }"
+        },
+        {
+          "line": 2347,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "file": "ps2xRuntime/src/runner/sub_00402A10_0x402a10.cpp",
+      "sha256": "feabccbe1d6244cac5e7ee152fb96b98e036508fb0d29861cb5f40c8b6f14d48",
+      "excerpts": [
+        {
+          "line": 1,
+          "text": "#include \"ps2_runtime.h\""
+        },
+        {
+          "line": 2,
+          "text": "#include \"ps2_syscalls.h\""
+        },
+        {
+          "line": 3,
+          "text": "#include \"ps2_stubs.h\""
+        },
+        {
+          "line": 4,
+          "text": "#ifdef _DEBUG"
+        },
+        {
+          "line": 5,
+          "text": "#include \"ps2_log.h\""
+        },
+        {
+          "line": 6,
+          "text": "#endif"
+        },
+        {
+          "line": 7,
+          "text": ""
+        },
+        {
+          "line": 8,
+          "text": "void sub_00402A10_0x402a10(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {"
+        },
+        {
+          "line": 9,
+          "text": "#ifdef _DEBUG"
+        },
+        {
+          "line": 10,
+          "text": "    PS_LOG_ENTRY(\"sub_00402A10_0x402a10\");"
+        },
+        {
+          "line": 11,
+          "text": "#endif"
+        },
+        {
+          "line": 12,
+          "text": "    ctx->pc = getRegU32(ctx, 31);"
+        },
+        {
+          "line": 13,
+          "text": "    ps2_stubs::sceMpegGetPicture(rdram, ctx, runtime); "
+        },
+        {
+          "line": 14,
+          "text": "}"
+        }
+      ]
+    }
+  ],
+  "decision": "Synchronous current-owner HleCall; queue/RpcCallback does not preserve the required thread and stack in all request states."
+}

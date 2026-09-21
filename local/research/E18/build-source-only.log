@@ -1,0 +1,548 @@
+ninja: Entering directory `/tmp/e18-mpeg-link/runtime'
+[0/2] Re-checking globbed directories...
+-- GLOB mismatch!
+The following files were removed:
+  -/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/Stubs/._MPEG.cpp
+[1/2] Re-running CMake...
+-- ARM target detected, fetching sse2neon
+-- macOS ARM64 - using default compiler flags
+CMake Warning (deprecated) at /tmp/e18-mpeg-link/runtime/_deps/toml11-src/CMakeLists.txt:25 (cmake_policy):
+  The OLD behavior for policy CMP0127 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- {fmt} version: 12.1.0
+-- Build type: Release
+-- Building dwarfgen    ... OFF
+-- Building dwarfexample... OFF
+-- Building api tests   ... 
+-- HAVE_UINTPTR_T 1: uintptr_t defined in stdint.h... YES
+-- uintptr_t value considered NO 
+-- HAVE_INTPTR_T 1: intptr_t defined in stdint.h... YES
+-- intptr_t value considered NO 
+-- ENABLE_DECOMPRESSION : ON
+-- Found libzstd           : TRUE
+-- Found zlib              : TRUE
+-- Build with zlib and zstd: TRUE
+-- CMAKE_SIZEOF_VOID_P ... : 8
+-- Compiler warning options... NO
+-- Install prefix ... /usr/local
+> Enabling optimization for: ps2_recomp_lib
+> Enabling optimization for: ps2_recomp
+-- sccache not found; continuing without compiler launcher
+-- Populating raylib
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/e18-mpeg-link/runtime/_deps/raylib-subbuild
+[0/7] Performing update step for 'raylib-populate'
+-- Already at requested tag: 5.5
+[1/7] No patch step for 'raylib-populate'
+[3/7] No configure step for 'raylib-populate'
+[4/7] No build step for 'raylib-populate'
+[5/7] No install step for 'raylib-populate'
+[6/7] No test step for 'raylib-populate'
+[7/7] Completed 'raylib-populate'
+CMake Warning (deprecated) at /tmp/e18-mpeg-link/runtime/_deps/raylib-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Testing if -Werror=pointer-arith can be used -- compiles
+-- Testing if -Werror=implicit-function-declaration can be used -- compiles
+-- Testing if -fno-strict-aliasing can be used -- compiles
+-- Using raylib's GLFW
+-- Including Cocoa support
+CMake Warning (author) at /tmp/e18-mpeg-link/runtime/_deps/raylib-src/cmake/LibraryConfigurations.cmake:22 (MESSAGE):
+  OpenGL is deprecated starting with macOS 10.14 (Mojave)!
+Call Stack (most recent call first):
+  /tmp/e18-mpeg-link/runtime/_deps/raylib-src/src/CMakeLists.txt:49 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated build type: Release
+-- Compiling with the flags:
+--   PLATFORM=PLATFORM_DESKTOP
+--   GRAPHICS=GRAPHICS_API_OPENGL_33
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui) is deprecated, call
+  FetchContent_MakeAvailable(imgui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(imgui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:122 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating imgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/e18-mpeg-link/runtime/_deps/imgui-subbuild
+[0/7] Performing update step for 'imgui-populate'
+-- Already at requested tag: v1.92.7-docking
+[1/7] No patch step for 'imgui-populate'
+[3/7] No configure step for 'imgui-populate'
+[4/7] No build step for 'imgui-populate'
+[5/7] No install step for 'imgui-populate'
+[6/7] No test step for 'imgui-populate'
+[7/7] Completed 'imgui-populate'
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(rlImGui) is deprecated, call
+  FetchContent_MakeAvailable(rlImGui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(rlImGui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:145 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating rlimgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/e18-mpeg-link/runtime/_deps/rlimgui-subbuild
+[0/7] Performing update step for 'rlimgui-populate'
+-- Already at requested tag: Raylib_5_5
+[1/7] No patch step for 'rlimgui-populate'
+[3/7] No configure step for 'rlimgui-populate'
+[4/7] No build step for 'rlimgui-populate'
+[5/7] No install step for 'rlimgui-populate'
+[6/7] No test step for 'rlimgui-populate'
+[7/7] Completed 'rlimgui-populate'
+> Enabling optimization for: ps2_runtime
+> Enabling optimization for: ps2EntryRunner
+-- Using the multi-header code from /tmp/e18-mpeg-link/runtime/_deps/nlohmann_json-src/include/
+> Enabling optimization for: ps2_analyzer_lib
+> Enabling optimization for: ps2_analyzer
+> Enabling optimization for: ps2_test_lib
+> Enabling optimization for: ps2x_tests
+-- Configuring done (3.5s)
+-- Generating done (2.1s)
+-- Build files have been written to: /tmp/e18-mpeg-link/runtime
+[0/4] Re-checking globbed directories...
+[1/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/RPC.cpp.o
+[2/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/Pad.cpp.o
+[3/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/SIF.cpp.o
+[4/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/Ssx3Movie.cpp.o
+[5/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/System.cpp.o
+[6/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/TTY.cpp.o
+[7/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/Unimplemented.cpp.o
+[8/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/VU.cpp.o
+[9/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/Deci2.cpp.o
+[10/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/Dispatcher.cpp.o
+[11/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/FileIO.cpp.o
+[12/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/Interrupt.cpp.o
+[13/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/Ssx3CopiedPayload.cpp.o
+[14/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/RPC.cpp.o
+[15/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/Sync.cpp.o
+[16/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/System.cpp.o
+[17/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/TraceChannel.cpp.o
+[18/351] Linking C static library _deps/raylib-build/raylib/libraylib.a
+[19/351] Building CXX object ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Syscalls/Thread.cpp.o
+[20/351] Building CXX object ps2xAnalyzer/CMakeFiles/ps2_analyzer_lib.dir/src/analysis_passes.cpp.o
+[21/351] Building CXX object ps2xAnalyzer/CMakeFiles/ps2_analyzer_lib.dir/src/elf_analysis_context.cpp.o
+[22/351] Building CXX object ps2xAnalyzer/CMakeFiles/ps2_analyzer_lib.dir/src/function_classifier.cpp.o
+[23/351] Building CXX object ps2xAnalyzer/CMakeFiles/ps2_analyzer_lib.dir/src/elf_analyzer.cpp.o
+[24/351] Building CXX object ps2xAnalyzer/CMakeFiles/ps2_analyzer_lib.dir/src/toml_generator.cpp.o
+[25/351] Linking CXX static library ps2xRuntime/libimgui.a
+[26/351] Building CXX object ps2xRuntime/CMakeFiles/rlImGui.dir/__/_deps/rlimgui-src/rlImGui.cpp.o
+[27/351] Building CXX object ps2xAnalyzer/CMakeFiles/ps2_analyzer_lib.dir/src/sce_symbol_scanner.cpp.o
+[28/351] Linking CXX static library ps2xRuntime/libps2_runtime.a
+[29/351] Linking CXX static library ps2xAnalyzer/libps2_analyzer_lib.a
+[30/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/cmake_pch.hxx.pch
+[31/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/r5900_decoder_tests.cpp.o
+[32/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/elf_analyzer_tests.cpp.o
+[33/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/code_generator_tests.cpp.o
+[34/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/pad_input_tests.cpp.o
+[35/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_runtime_io_tests.cpp.o
+[36/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_runtime_interrupt_tests.cpp.o
+[37/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_runtime_kernel_tests.cpp.o
+[38/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_vu1_tests.cpp.o
+[39/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_memory_tests.cpp.o
+[40/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_vu_tests.cpp.o
+[41/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_iop_tests.cpp.o
+[42/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_gs_tests.cpp.o
+In file included from /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xTest/src/ps2_gs_tests.cpp:9:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:67:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
+   67 |                 switch (psm)
+      |                         ^~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:91:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
+   91 |                 switch (psm)
+      |                         ^~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:168:11: warning: 9 enumeration values not handled in switch: 'C32', 'C24', 'C16'... [-Wswitch]
+  168 |                 switch (psm)
+      |                         ^~~
+3 warnings generated.
+[43/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_sif_rpc_tests.cpp.o
+[44/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_sif_dma_tests.cpp.o
+[45/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_recompiler_tests.cpp.o
+[46/351] Linking CXX static library ps2xRuntime/librlImGui.a
+[47/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_runtime_expansion_tests.cpp.o
+[48/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_294_cxx.cxx.o
+[49/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_293_cxx.cxx.o
+[50/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_295_cxx.cxx.o
+[51/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_291_cxx.cxx.o
+[52/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_292_cxx.cxx.o
+[53/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_290_cxx.cxx.o
+[54/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_289_cxx.cxx.o
+[55/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_287_cxx.cxx.o
+[56/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_288_cxx.cxx.o
+[57/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_285_cxx.cxx.o
+[58/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_284_cxx.cxx.o
+[59/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_286_cxx.cxx.o
+[60/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_283_cxx.cxx.o
+[61/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_282_cxx.cxx.o
+[62/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_281_cxx.cxx.o
+[63/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_280_cxx.cxx.o
+[64/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_278_cxx.cxx.o
+[65/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_279_cxx.cxx.o
+[66/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_277_cxx.cxx.o
+[67/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_275_cxx.cxx.o
+[68/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_276_cxx.cxx.o
+[69/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_274_cxx.cxx.o
+[70/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_273_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_273_cxx.cxx:31:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_003FE818_0x3fe818.cpp:37:38: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+   37 |         {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                      ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[71/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_272_cxx.cxx.o
+[72/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_271_cxx.cxx.o
+[73/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_270_cxx.cxx.o
+[74/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_268_cxx.cxx.o
+[75/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_269_cxx.cxx.o
+[76/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_267_cxx.cxx.o
+[77/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_266_cxx.cxx.o
+[78/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_265_cxx.cxx.o
+[79/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_264_cxx.cxx.o
+[80/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_263_cxx.cxx.o
+[81/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_261_cxx.cxx.o
+[82/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_262_cxx.cxx.o
+[83/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_260_cxx.cxx.o
+[84/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_259_cxx.cxx.o
+[85/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_258_cxx.cxx.o
+[86/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_257_cxx.cxx.o
+[87/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_256_cxx.cxx.o
+[88/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_255_cxx.cxx.o
+[89/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_253_cxx.cxx.o
+[90/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_254_cxx.cxx.o
+[91/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_252_cxx.cxx.o
+[92/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_251_cxx.cxx.o
+[93/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_250_cxx.cxx.o
+[94/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_249_cxx.cxx.o
+[95/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_248_cxx.cxx.o
+[96/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_247_cxx.cxx.o
+[97/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_246_cxx.cxx.o
+[98/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_245_cxx.cxx.o
+[99/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_244_cxx.cxx.o
+[100/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_243_cxx.cxx.o
+[101/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_242_cxx.cxx.o
+[102/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_241_cxx.cxx.o
+[103/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_240_cxx.cxx.o
+[104/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_239_cxx.cxx.o
+[105/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_238_cxx.cxx.o
+[106/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_237_cxx.cxx.o
+[107/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_236_cxx.cxx.o
+[108/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_235_cxx.cxx.o
+[109/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_234_cxx.cxx.o
+[110/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_233_cxx.cxx.o
+[111/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_232_cxx.cxx.o
+[112/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_230_cxx.cxx.o
+[113/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_229_cxx.cxx.o
+[114/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_231_cxx.cxx.o
+[115/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_228_cxx.cxx.o
+[116/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_226_cxx.cxx.o
+[117/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_227_cxx.cxx.o
+[118/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_225_cxx.cxx.o
+[119/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_224_cxx.cxx.o
+[120/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_223_cxx.cxx.o
+[121/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_222_cxx.cxx.o
+[122/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_220_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_220_cxx.cxx:70:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_00391418_0x391418.cpp:91:34: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+   91 |     {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                  ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[123/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_221_cxx.cxx.o
+[124/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_219_cxx.cxx.o
+[125/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_218_cxx.cxx.o
+[126/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_217_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_217_cxx.cxx:4:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_0037DE88_0x37de88.cpp:61:34: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+   61 |     {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                  ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[127/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_216_cxx.cxx.o
+[128/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_215_cxx.cxx.o
+[129/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_213_cxx.cxx.o
+[130/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_212_cxx.cxx.o
+[131/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_214_cxx.cxx.o
+[132/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_211_cxx.cxx.o
+[133/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_210_cxx.cxx.o
+[134/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_208_cxx.cxx.o
+[135/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_209_cxx.cxx.o
+[136/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_207_cxx.cxx.o
+[137/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_206_cxx.cxx.o
+[138/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_205_cxx.cxx.o
+[139/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_204_cxx.cxx.o
+[140/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_203_cxx.cxx.o
+[141/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_202_cxx.cxx.o
+[142/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_200_cxx.cxx.o
+[143/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_201_cxx.cxx.o
+[144/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_199_cxx.cxx.o
+[145/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_197_cxx.cxx.o
+[146/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_198_cxx.cxx.o
+[147/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_196_cxx.cxx.o
+[148/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_194_cxx.cxx.o
+[149/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_195_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_195_cxx.cxx:97:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_0032B6A8_0x32b6a8.cpp:55:34: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+   55 |     {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                  ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[150/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_192_cxx.cxx.o
+[151/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_193_cxx.cxx.o
+[152/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_191_cxx.cxx.o
+[153/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_190_cxx.cxx.o
+[154/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_189_cxx.cxx.o
+[155/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_187_cxx.cxx.o
+[156/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_188_cxx.cxx.o
+[157/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_185_cxx.cxx.o
+[158/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_186_cxx.cxx.o
+[159/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_184_cxx.cxx.o
+[160/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_182_cxx.cxx.o
+[161/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_183_cxx.cxx.o
+[162/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_181_cxx.cxx.o
+[163/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_180_cxx.cxx.o
+[164/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_179_cxx.cxx.o
+[165/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_177_cxx.cxx.o
+[166/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_176_cxx.cxx.o
+[167/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_175_cxx.cxx.o
+[168/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_174_cxx.cxx.o
+[169/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_173_cxx.cxx.o
+[170/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_172_cxx.cxx.o
+[171/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_171_cxx.cxx.o
+[172/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_170_cxx.cxx.o
+[173/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_178_cxx.cxx.o
+[174/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_169_cxx.cxx.o
+[175/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_168_cxx.cxx.o
+[176/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_166_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_166_cxx.cxx:97:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_002D2058_0x2d2058.cpp:129:34: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+  129 |     {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                  ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[177/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_167_cxx.cxx.o
+[178/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_165_cxx.cxx.o
+[179/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_164_cxx.cxx.o
+[180/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_163_cxx.cxx.o
+[181/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_162_cxx.cxx.o
+[182/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_161_cxx.cxx.o
+[183/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_159_cxx.cxx.o
+[184/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_158_cxx.cxx.o
+[185/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_160_cxx.cxx.o
+[186/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_156_cxx.cxx.o
+[187/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_155_cxx.cxx.o
+[188/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_157_cxx.cxx.o
+[189/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_154_cxx.cxx.o
+[190/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_153_cxx.cxx.o
+[191/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_152_cxx.cxx.o
+[192/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_151_cxx.cxx.o
+[193/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_150_cxx.cxx.o
+[194/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_149_cxx.cxx.o
+[195/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_148_cxx.cxx.o
+[196/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_147_cxx.cxx.o
+[197/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_146_cxx.cxx.o
+[198/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_145_cxx.cxx.o
+[199/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_143_cxx.cxx.o
+[200/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_144_cxx.cxx.o
+[201/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_141_cxx.cxx.o
+[202/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_142_cxx.cxx.o
+[203/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_140_cxx.cxx.o
+[204/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_139_cxx.cxx.o
+[205/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_138_cxx.cxx.o
+[206/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_137_cxx.cxx.o
+[207/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_135_cxx.cxx.o
+[208/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_136_cxx.cxx.o
+[209/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_134_cxx.cxx.o
+[210/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_133_cxx.cxx.o
+[211/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_132_cxx.cxx.o
+[212/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_131_cxx.cxx.o
+[213/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_130_cxx.cxx.o
+[214/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_129_cxx.cxx.o
+[215/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_128_cxx.cxx.o
+[216/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_127_cxx.cxx.o
+[217/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_125_cxx.cxx.o
+[218/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_126_cxx.cxx.o
+[219/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_124_cxx.cxx.o
+[220/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_123_cxx.cxx.o
+[221/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_121_cxx.cxx.o
+[222/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_122_cxx.cxx.o
+[223/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_120_cxx.cxx.o
+[224/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_119_cxx.cxx.o
+[225/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_118_cxx.cxx.o
+[226/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_117_cxx.cxx.o
+[227/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_116_cxx.cxx.o
+[228/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_115_cxx.cxx.o
+[229/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_114_cxx.cxx.o
+[230/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_113_cxx.cxx.o
+[231/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_112_cxx.cxx.o
+[232/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_111_cxx.cxx.o
+[233/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_110_cxx.cxx.o
+[234/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_109_cxx.cxx.o
+[235/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_108_cxx.cxx.o
+[236/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_107_cxx.cxx.o
+[237/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_106_cxx.cxx.o
+[238/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_105_cxx.cxx.o
+[239/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_104_cxx.cxx.o
+[240/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_103_cxx.cxx.o
+[241/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_101_cxx.cxx.o
+[242/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_102_cxx.cxx.o
+[243/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_99_cxx.cxx.o
+[244/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_100_cxx.cxx.o
+[245/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_98_cxx.cxx.o
+[246/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_97_cxx.cxx.o
+[247/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_96_cxx.cxx.o
+[248/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_95_cxx.cxx.o
+[249/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_93_cxx.cxx.o
+[250/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_92_cxx.cxx.o
+[251/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_94_cxx.cxx.o
+[252/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_91_cxx.cxx.o
+[253/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_90_cxx.cxx.o
+[254/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_88_cxx.cxx.o
+[255/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_87_cxx.cxx.o
+[256/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_89_cxx.cxx.o
+[257/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_85_cxx.cxx.o
+[258/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_86_cxx.cxx.o
+[259/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_83_cxx.cxx.o
+[260/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_84_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_84_cxx.cxx:22:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_0022A830_0x22a830.cpp:550:34: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+  550 |     {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                  ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[261/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_81_cxx.cxx.o
+[262/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_80_cxx.cxx.o
+[263/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_82_cxx.cxx.o
+[264/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_78_cxx.cxx.o
+[265/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_79_cxx.cxx.o
+[266/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_77_cxx.cxx.o
+[267/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_75_cxx.cxx.o
+[268/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_76_cxx.cxx.o
+[269/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_73_cxx.cxx.o
+[270/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_72_cxx.cxx.o
+[271/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_71_cxx.cxx.o
+[272/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_70_cxx.cxx.o
+[273/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_69_cxx.cxx.o
+[274/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_68_cxx.cxx.o
+[275/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_67_cxx.cxx.o
+[276/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_66_cxx.cxx.o
+[277/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_74_cxx.cxx.o
+[278/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_65_cxx.cxx.o
+[279/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_64_cxx.cxx.o
+[280/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_63_cxx.cxx.o
+[281/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_62_cxx.cxx.o
+[282/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_61_cxx.cxx.o
+[283/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_60_cxx.cxx.o
+[284/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_59_cxx.cxx.o
+[285/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_58_cxx.cxx.o
+[286/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_57_cxx.cxx.o
+[287/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_56_cxx.cxx.o
+[288/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_55_cxx.cxx.o
+[289/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_54_cxx.cxx.o
+[290/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_53_cxx.cxx.o
+[291/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_52_cxx.cxx.o
+[292/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_51_cxx.cxx.o
+[293/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_50_cxx.cxx.o
+[294/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_49_cxx.cxx.o
+[295/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_48_cxx.cxx.o
+[296/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_47_cxx.cxx.o
+[297/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_46_cxx.cxx.o
+[298/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_45_cxx.cxx.o
+[299/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_44_cxx.cxx.o
+[300/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_43_cxx.cxx.o
+[301/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_42_cxx.cxx.o
+[302/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_40_cxx.cxx.o
+[303/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_41_cxx.cxx.o
+[304/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_39_cxx.cxx.o
+[305/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_38_cxx.cxx.o
+[306/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_37_cxx.cxx.o
+[307/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_36_cxx.cxx.o
+[308/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_34_cxx.cxx.o
+[309/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_35_cxx.cxx.o
+[310/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_33_cxx.cxx.o
+[311/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_31_cxx.cxx.o
+[312/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_32_cxx.cxx.o
+[313/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_30_cxx.cxx.o
+[314/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_29_cxx.cxx.o
+[315/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_28_cxx.cxx.o
+[316/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_27_cxx.cxx.o
+[317/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_26_cxx.cxx.o
+[318/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_25_cxx.cxx.o
+[319/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_24_cxx.cxx.o
+[320/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_23_cxx.cxx.o
+[321/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_22_cxx.cxx.o
+[322/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_21_cxx.cxx.o
+[323/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_19_cxx.cxx.o
+[324/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_20_cxx.cxx.o
+[325/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_17_cxx.cxx.o
+[326/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_18_cxx.cxx.o
+[327/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_15_cxx.cxx.o
+[328/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_16_cxx.cxx.o
+[329/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_14_cxx.cxx.o
+[330/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_13_cxx.cxx.o
+[331/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_11_cxx.cxx.o
+In file included from /tmp/e18-mpeg-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_11_cxx.cxx:16:
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_00122278_0x122278.cpp:786:34: warning: array index 27 is past the end of the array (that has type 'uint16_t[16]' (aka 'unsigned short[16]')) [-Warray-bounds]
+  786 |     {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      |                                  ^       ~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime.h:72:5: note: array 'vi' declared here
+   72 |     uint16_t vi[16];          // VU0 vector integer registers
+      |     ^
+1 warning generated.
+[332/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_12_cxx.cxx.o
+[333/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_10_cxx.cxx.o
+[334/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_8_cxx.cxx.o
+[335/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_9_cxx.cxx.o
+[336/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_7_cxx.cxx.o
+[337/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_6_cxx.cxx.o
+[338/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_5_cxx.cxx.o
+[339/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_3_cxx.cxx.o
+[340/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_4_cxx.cxx.o
+[341/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_1_cxx.cxx.o
+[342/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_2_cxx.cxx.o
+[343/351] Building CXX object ps2xTest/CMakeFiles/ps2_test_function_table.dir/src/test_function_table.cpp.o
+[344/351] Linking CXX static library ps2xTest/libps2_test_lib.a
+[345/351] Building CXX object ps2xTest/CMakeFiles/ps2x_tests.dir/src/main.cpp.o
+[346/351] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o
+[347/351] Linking CXX executable ps2xTest/ps2x_tests
+ld: warning: ignoring duplicate libraries: 'ps2xRecomp/libps2_recomp_lib.a'
+[348/351] Linking CXX executable ps2xRuntime/ps2EntryRunner

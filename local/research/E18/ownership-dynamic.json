@@ -1,0 +1,62 @@
+{
+  "utc": "2026-09-21T18:47:07.257939+00:00",
+  "binary": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/before/binding-test",
+    "bytes": 165177424,
+    "allocated": 165675008,
+    "sha256": "60fcf58e7de3e4e52eacbea9d1cbfcb066b20c8ba93ad96af1b84b7768d87b5a"
+  },
+  "cases": [
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/before/binding-test",
+        "ownership-queued-ready"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/ownership-queued-ready",
+      "env": {
+        "TMPDIR": "/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/"
+      },
+      "elapsed_s": 1.081115332999616,
+      "stdout_bytes": 226,
+      "scratch_peak_allocated": 0,
+      "rc": 0,
+      "receipt": [
+        "OWNERSHIP mode=ownership-queued-ready callerTid=1 callbackTid=1 callerSP=0x1e00000 callbackSP=0xffff0 sameThread=1 sameStack=0 args=1 saved128=1 callbacks=1 completions=1 resumes=1"
+      ]
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/before/binding-test",
+        "ownership-queued-park"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/ownership-queued-park",
+      "env": {
+        "TMPDIR": "/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/"
+      },
+      "elapsed_s": 0.024766374999671825,
+      "stdout_bytes": 226,
+      "scratch_peak_allocated": 0,
+      "rc": 0,
+      "receipt": [
+        "OWNERSHIP mode=ownership-queued-park callerTid=1 callbackTid=-1 callerSP=0x1e00000 callbackSP=0xffff0 sameThread=0 sameStack=0 args=1 saved128=1 callbacks=1 completions=1 resumes=1"
+      ]
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/before/binding-test",
+        "ownership-current"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/ownership-current",
+      "env": {
+        "TMPDIR": "/var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/T/"
+      },
+      "elapsed_s": 0.07662345799872128,
+      "stdout_bytes": 223,
+      "scratch_peak_allocated": 0,
+      "rc": 0,
+      "receipt": [
+        "OWNERSHIP mode=ownership-current callerTid=1 callbackTid=1 callerSP=0x1e00000 callbackSP=0x1e00000 sameThread=1 sameStack=1 args=1 saved128=1 callbacks=1 completions=1 resumes=1"
+      ]
+    }
+  ]
+}

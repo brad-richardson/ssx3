@@ -1,0 +1,26 @@
+  [Run]: MPEG non-stream R1 delivers in registration order on the caller [MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:GetPicture] waiting for frames, mpeg=0x127000 ended=0 failed=0 sawInput=0
+  [Passed]
+  [Run]: MPEG non-stream R2 re-enters AddBs without holding the MPEG lock [MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:feedES] #0 size=16 first4=000001b7 decoderFailed=0 waitSeq=1
+[MPEG:GetPicture] waiting for frames, mpeg=0x127000 ended=0 failed=0 sawInput=1
+  [Passed]
+  [Run]: MPEG non-stream R3 resumes GetPicture after delivered input decodes [MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:feedES] #0 size=240 first4=000001b3 decoderFailed=0 waitSeq=1
+[MPEG:feed] inSize=240 parsed=240 packets=3 newFrames=2 totalFrames=2
+[MPEG:GetPicture:FRAME] mpeg=0x127000 generation=1 frame=0 queued=1 size=16x16
+  [Passed]
+  [Run]: MPEG non-stream R4 ignores valid-no-input callback return values [MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:GetPicture] waiting for frames, mpeg=0x127000 ended=0 failed=0 sawInput=0
+[MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:GetPicture] waiting for frames, mpeg=0x127000 ended=0 failed=0 sawInput=0
+[MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:GetPicture] waiting for frames, mpeg=0x127000 ended=0 failed=0 sawInput=0
+  [Passed]
+  [Run]: MPEG non-stream R5 invalidates pending callbacks on delete and reset [MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:CdStreamStart] generation=1 reopened=0
+  [Passed]
+  [Run]: MPEG non-stream R6 leaves stream callbacks to the existing Demux path [MPEG:CdStreamStart] generation=1 reopened=0
+[MPEG:GetPicture] waiting for frames, mpeg=0x127000 ended=0 failed=0 sawInput=0
+  [Passed]
+# E18 R1-R6 TAIL COMPLETE

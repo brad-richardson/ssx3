@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/ffmpeg",
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-f",
+    "lavfi",
+    "-i",
+    "color=c=red:s=16x16:r=25",
+    "-frames:v",
+    "4",
+    "-c:v",
+    "mpeg2video",
+    "-threads",
+    "1",
+    "-g",
+    "1",
+    "-bf",
+    "0",
+    "-f",
+    "mpeg2video",
+    "local/research/E18/regression-frames.m2v"
+  ],
+  "rc": 0,
+  "bytes": 240,
+  "sha256": "25c353b5c9e9ab82495511bf21f4b45bff1c3c2b1af62bffd3ddfcb72b018deb",
+  "decoded_frames": 4,
+  "decoded_rgba_bytes": 4096,
+  "decoded_sha256": "a2256d49b6c0df6a06c3d15aa850ce1c242ad1aefce76170e6fde82cc2dc1fd9",
+  "purpose": "Small authored MPEG-2 test input, no PS2 generated-code regeneration"
+}

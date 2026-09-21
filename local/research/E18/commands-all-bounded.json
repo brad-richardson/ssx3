@@ -1,0 +1,187 @@
+[
+  {
+    "label": "baseline-suite",
+    "utc": "2026-09-21T18:40:52.017158+00:00",
+    "argv": [
+      "python3",
+      "-B",
+      "local/research/E18/e18_validate.py",
+      "baseline",
+      "suite"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/baseline-suite"
+  },
+  {
+    "label": "baseline-closure",
+    "utc": "2026-09-21T18:40:52.997229+00:00",
+    "argv": [
+      "python3",
+      "-B",
+      "local/research/E18/e18_validate.py",
+      "baseline-closure",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/after/binding-test",
+      "after"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/baseline-closure"
+  },
+  {
+    "label": "baseline-prior",
+    "utc": "2026-09-21T18:40:55.386241+00:00",
+    "argv": [
+      "python3",
+      "-B",
+      "local/research/E18/e18_validate.py",
+      "baseline-prior",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/after/binding-test",
+      "prior"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/baseline-prior"
+  },
+  {
+    "label": "ownership-link",
+    "utc": "2026-09-21T18:44:12.616165+00:00",
+    "argv": [
+      "python3",
+      "-B",
+      "local/research/E18/e18_link_test.py",
+      "before"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 1200,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/ownership-link"
+  },
+  {
+    "label": "configure",
+    "utc": "2026-09-21T19:03:20.343086+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_configure.py"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 1800,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/configure"
+  },
+  {
+    "label": "build",
+    "utc": "2026-09-21T19:05:06.926427+00:00",
+    "argv": [
+      "ninja",
+      "-C",
+      "/tmp/e18-mpeg-link/runtime",
+      "-j2",
+      "ps2EntryRunner",
+      "ps2x_tests"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 7200,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/build"
+  },
+  {
+    "label": "build-source-only",
+    "utc": "2026-09-21T19:07:53.189947+00:00",
+    "argv": [
+      "ninja",
+      "-C",
+      "/tmp/e18-mpeg-link/runtime",
+      "-j2",
+      "ps2EntryRunner",
+      "ps2x_tests"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 7200,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/build-source-only"
+  },
+  {
+    "label": "current-suite",
+    "utc": "2026-09-21T19:16:28.758754+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_validate.py",
+      "current",
+      "suite"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 180,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-suite"
+  },
+  {
+    "label": "current-fixture-link",
+    "utc": "2026-09-21T19:18:10.841893+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_link_test.py",
+      "after"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 1200,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-fixture-link"
+  },
+  {
+    "label": "current-binding",
+    "utc": "2026-09-21T19:23:36.839174+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_validate.py",
+      "current-binding",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+      "prior"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-binding"
+  },
+  {
+    "label": "current-closure",
+    "utc": "2026-09-21T19:24:10.721754+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_validate.py",
+      "current-closure",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+      "closure"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-closure"
+  },
+  {
+    "label": "current-extra",
+    "utc": "2026-09-21T19:25:08.294854+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_extra.py"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/current-extra"
+  },
+  {
+    "label": "boot-analysis",
+    "utc": "2026-09-21T19:29:16.149685+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_analyze.py"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/boot-analysis"
+  },
+  {
+    "label": "retention",
+    "utc": "2026-09-21T19:30:37.706441+00:00",
+    "argv": [
+      "python3",
+      "local/research/E18/e18_retain.py",
+      "a"
+    ],
+    "cwd": "/Users/bradrichardson/dev/ssx3",
+    "wall": 300,
+    "tmpdir": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-tooltmp/retention"
+  }
+]
