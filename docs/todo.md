@@ -1288,6 +1288,70 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E11 read (09-21) — PASS(ii), exact busy-query 0x2c5140 restored; 321 call/return pairs, full card + Present joins; next gap 0x2c5300 parked:**
+      DROP checkpoint re-verified (9,449 names, registry/runner SHAs, suite
+      452/452, fail-before). Reclaimed 3 retired /tmp trees (p10/p11/p12,
+      per-tree ownership proofs; `/tmp/p1-link` + DerivedData protected);
+      fresh admission passed BEFORE csv edit (4.64 GB vs 3.49 GB req) +
+      rechecked pre-spawn (build-time free dip honestly recorded). Query
+      regen rc=0 (slot 463950), install 3 files, actual-binding truth table
+      all 4 cases exact. ONE guarded boot (75.5 s, lease released): 321/321
+      query pairs, GetInfo/Sync complete, UI pending clear, packet→GS→D→
+      Present join complete (0 RGB diffs, new "No memory card" message
+      viewed). First remaining gap: `0x242150 → 0x2c5300` (branch-changing
+      at observed status 0; `0x2c5358` 113 misses match branch sense, kept
+      OUT). Fork `ffdf58c` pushed. Verified: fork/push/stat, admission
+      JSONs, binding slot, truth table, suite, boot result, card join,
+      residual line, lease/scratch absent. ~35 min. Next: E12 restores
+      0x2c5300 fork-side (E11 NEXT-BRIEF, authorized). Ledger row added.
+- [x] **G16 read (09-21) — PASS, mac-host ASan+UBSan run CLEAN to exit 0: app-side heap writer eliminated, bug is Android-specific:**
+      ASan build exit 0 ([457/458], 213,618,296 B, ae404762, 68,339
+      `__asan` + 16 `__ubsan` syms, ONE shared runtime via uniform
+      Homebrew toolchain). ONE bounded run: exit 0 in 4.0 s, 18/18
+      `Running frame` lines, 10 scanouts, ZERO sanitizer output across the
+      complete 1,741-line stderr (only 13 known-benign Granite/Metal
+      notes). Score: oracles 8/8 AND all 7 same-boundary pairs
+      pixel-IDENTICAL (exact 1.0000, PSNR inf; k=0 sha matches too) — the
+      ASan build reproduces G13 bit-for-bit while reporting nothing. No
+      fix per stop rule (nothing app-side to fix). Verified: binary
+      size/sha/syms/runtime, stderr lines/frames/sanitizer-absence/Done
+      tail, PPM count, oracle re-run by orchestrator (7/7 identical),
+      pins, ps2xGS commit. ~1 h. Next: G17 O2-argument debugger run
+      (name the bad descriptor input at `:3505`, package Adreno repro).
+      Ledger row added.
+- [x] **I15 read (09-21) — PASS, 0x3a0158 closed (count 0, executes — incl. E-lane's 0x2c5140 3×); NEW wall = 0x2c5300 same class (converged with E11):**
+      Base MOVED to `ffdf58c` (E-lane +1: `0x2c5140` row + E11 card taps;
+      recompiler untouched) + 6 ports (content-identical) + 1-line CSV
+      `00e8433` (local, clean, 0 pushes — E-lane mutating). Codegen exit 0
+      in 3m12s (+2 fns: slots 688212 + 463950, register diff exactly 2
+      lines). Device build exit 0 first try in 8m04s (121,225,168 B,
+      2517ff01, 9452 syms, both new Ts). Overwrite install exit 0 in 68 s
+      (7th). Probe: `0x3a0158` 0 refs — resolves (slot 688212), E-lane's
+      `0x2c5140` executes 3× in the new trace; guest parks at STRICTLY
+      LATER wall JALR `0x242150 → 0x2c5300` (mid-function `sub_002C52D8`,
+      caller via `$v0` — delta vs priors' `$v1`, 0 refs); `ee:idle` 0, 4
+      RPC sids identical, bug_type 202 spin (PID 4255) + black screenshot.
+      Verified: console keys, binary, worktree, codegen, install URL, ips,
+      screenshot viewed, fork remote. ~85 min. Next: I16 closes 0x2c5300
+      (ports E12's fork row if landed, else own row — coordination
+      briefed). Ledger row added.
+- [x] **T37 read (09-21) — PASS, dense 10-snap series + rider tracking: tap response NOT separated (noise-floor-ruled non-effect + recipe):**
+      Bit-identical T4 build reused (all receipts reproduce). ONE single-shot
+      run: chain reproduced (ENTER Cross 535.8 ms @T+327.36 → load 17%→97%
+      →cinematic→panel by +15, stable 79 s) → XCROSS 538.7 ms @T+432.53 →
+      countdown `2` → LIVE → LIVE-LIKE gate → PRE-nudge pair (00:01:26
+      2ND/6 40% / 00:01:31 3RD/6 42%, no input) → ONE Left tap 338.2 ms
+      @T+505.09 → dense 10 snaps to 00:02:11 3RD/6 60%: position 2ND↔3RD
+      swaps occur WITH and WITHOUT the tap (pre-pair swapped too), RDC
+      validity-flooded 6/12, SCPS rails ±40 nearly every step incl. the
+      no-input gap — no tap-coincident kink exceeds the noise floor on any
+      metric. 2 frames bit-identical to T36 (a1-post8, a1-post15 — now
+      3-run identical); EE 52 / IOP 155 sets identical; exact flaps
+      0/0/0/1 (0 in-window; 2× in-window Volsnap ID 33 effects-verified:
+      C: housekeeping, zero Hyper-V). Verified: nudge walls exact,
+      T37_DONE, LIVE-LIKE, head/tail 2000/2000, identities, flap lines,
+      Volsnap lines, trace size+sha. ~70 min. Next: T38 1 s hold variant
+      (T37 G1(a)). Ledger row added.
 - [x] **G15 read (09-21) — PASS, instrumented on-device runs: O1 flaky 1/6, O3 = PROVEN scudo heap corruption, HWASan silent, writer unnamed (honest negative, stop with recipe):**
       Same G14 bytes (deterministic relink reproduces `c4cd63b4…` after an
       unexplained pre-relink mismatch, tabled not claimed). 6 crash launches
