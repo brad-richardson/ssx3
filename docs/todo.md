@@ -1288,6 +1288,29 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **I21 read (09-21) — PASS(Done), S9 re-probe: delivery LANDS on device (dispatch chain + stub `feed()` entered) but main still parked (stub enqueues nothing) — first post-delivery device wall NAMED (no on-device decode); G1 closed by orch (re-sha match); DPI-residual erratum:**
+      Dedupe 5/5 byte-identical (skipped — probe tests fork rows);
+      worktree @`3adc0478` + 3 content-identical ports + ONE 7-line
+      CMake wiring extension (verified build-config-only: drops exactly
+      the 5 in-tree `sub_*.cpp`, "dropped 5" in configure log); codegen
+      SKIPPED with cause (CSV + ELF + lib byte-identical); device
+      REBUILD exit 0 (18m08s, 121,249,160 B `989b2c2a…`, 9454 syms, all
+      6 key entries, tap + stub strings) + OVERWRITE reinstall exit 0
+      (76.7s, 11th clean); ONE 90 s probe exit 2 alive (PID 4669,
+      45,697 lines / 17.1 MB): stub warning ×1 @15163 (FIRST fed
+      header), AddBs ×6 in callback→producer→release→AddBs order,
+      main `0x3b1028` all 5 blocks, creators 39/39 (transcript
+      identical modulo headers), sema splits held, frames frozen,
+      screenshot black. Verified: fork/remote unmoved, lib size+sha,
+      full-log lines/size/sha (G1 CLOSED), delivery lines (warning
+      line EXACT + AddBs count), creators normalized-identical, sema26
+      (737/735+1-spliced — splice line confirmed), main park ×5,
+      frames frozen, screenshot viewed, tail-sha EXACT. ERRATUM: DPI
+      residual +274 wrong — direct census gives +181 (bridge off by
+      93; no verdict affected; the worker flagged it derived). iPad
+      now: 1 `ps2` (known relauncher pattern) + app installed. ~1 h.
+      Next: I22 Cause-B feasibility (buildability + stub inventory,
+      no behavior change). Ledger row added.
 - [x] **G28 read (09-21) — PASS(Done), writer fix VERIFIED end to end: ONE Granite guard hunk → exit 0, `Done!`, 10 scanouts, ZERO tombstone; O5/O6 gone (single-writer family); black persists byte-identical (separate trait); "7th zero-damage" RECLASSIFIED transient (binary intact):**
       Hunk (guard `:1424` on `supports_…` + once-LOGI, 18+/1-, submodule
       worktree, UNCOMMITTED — diff text committed) + build exit 0
