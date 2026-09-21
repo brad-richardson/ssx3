@@ -1,0 +1,74 @@
+{
+  "utc": "2026-09-21T20:37:32.307189+00:00",
+  "before": {
+    "utc": "2026-09-21T20:37:32.643457+00:00",
+    "internal_free": 6656163840,
+    "internal_allocated": 3579904,
+    "build_allocated": 0,
+    "codegen_allocated": 0,
+    "evidence_allocated": 3579904,
+    "ssd_free": 190484316160,
+    "ssd_allocated": 0,
+    "ssd_owned_paths_allocated": 0,
+    "fork_positive_growth": 0,
+    "ssd_paths": []
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "rev-parse",
+        "HEAD",
+        "refs/remotes/fork/ssx3"
+      ],
+      "rc": 0,
+      "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\n3adc0478b6d2260acdd28a249466f2eef9a20176\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "ls-remote",
+        "fork",
+        "refs/heads/ssx3"
+      ],
+      "rc": 0,
+      "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\trefs/heads/ssx3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "status",
+        "--short"
+      ],
+      "rc": 0,
+      "stdout": "?? ps2_log.txt\n",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+    }
+  ],
+  "completed_utc": "2026-09-21T20:37:46.534974+00:00",
+  "generated_names": 9457,
+  "protected_files": 1725,
+  "hashes_equal": true,
+  "after": {
+    "utc": "2026-09-21T20:37:46.617169+00:00",
+    "internal_free": 6655692800,
+    "internal_allocated": 3579904,
+    "build_allocated": 0,
+    "codegen_allocated": 0,
+    "evidence_allocated": 3579904,
+    "ssd_free": 190484316160,
+    "ssd_allocated": 0,
+    "ssd_owned_paths_allocated": 0,
+    "fork_positive_growth": 0,
+    "ssd_paths": []
+  },
+  "baseline_previously_launched": false
+}

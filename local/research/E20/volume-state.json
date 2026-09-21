@@ -1,0 +1,33 @@
+{
+  "utc": "2026-09-21T20:36:42.701782+00:00",
+  "commands": [
+    {
+      "argv": [
+        "ls",
+        "-la",
+        "/Volumes"
+      ],
+      "rc": 0,
+      "stdout": "total 2080\ndrwxr-xr-x   6 root            wheel      192 Sep 21 16:34 .\ndrwxr-xr-x  23 root            wheel      736 Sep  3 06:34 ..\ndrwx------   1 bradrichardson  staff  1048576 Dec 31  1969 Extreme SSD\nlrwxr-xr-x   1 root            wheel        1 Sep 21 10:56 Macintosh HD -> /\ndrwxr-xr-x@  4 root            wheel      128 Sep 14 16:58 Recovery\ndrwx------   1 bradrichardson  staff    16384 Sep 21 15:43 share\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "mount"
+      ],
+      "rc": 0,
+      "stdout": "/dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)\ndevfs on /dev (devfs, local, nobrowse)\n/dev/disk3s6 on /System/Volumes/VM (apfs, local, noexec, journaled, noatime, nobrowse)\n/dev/disk3s2 on /System/Volumes/Preboot (apfs, local, journaled, nobrowse)\n/dev/disk3s4 on /System/Volumes/Update (apfs, local, journaled, nobrowse)\n/dev/disk1s2 on /System/Volumes/xarts (apfs, local, noexec, journaled, noatime, nobrowse)\n/dev/disk1s1 on /System/Volumes/iSCPreboot (apfs, local, journaled, nobrowse)\n/dev/disk1s3 on /System/Volumes/Hardware (apfs, local, journaled, nobrowse)\n/dev/disk3s5 on /System/Volumes/Data (apfs, local, journaled, nobrowse, protect, root data)\nmap auto_home on /System/Volumes/Data/home (autofs, automounted, nobrowse)\n/dev/disk3s3 on /Volumes/Recovery (apfs, local, journaled, nobrowse)\n//brad@192.168.1.92/share on /Volumes/share (smbfs, nodev, nosuid, mounted by bradrichardson)\n/dev/disk6s1 on /private/var/run/com.apple.security.cryptexd/mnt/com.apple.WatchOS.SimulatorRuntime-v24.18.362.0.R1s0o9 (apfs, sealed, local, read-only, journaled, nobrowse)\n/dev/disk8s1 on /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.ExKS5L (apfs, sealed, local, read-only, journaled, nobrowse)\ndevices -- file:///Users/bradrichardson/Library/Containers/com.apple.CoreDevice.CoreDeviceService/Data/ on /Users/bradrichardson/Library/Developer/CoreDevice/DeviceFS (devicefs, local, nodev, nosuid, noowners, noatime, quarantine, nobrowse, fskit, mounted by bradrichardson)\n/dev/disk4s1 on /Volumes/Extreme SSD (exfat, local, nodev, nosuid, noowners, noatime, fskit)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "diskutil",
+        "list",
+        "external"
+      ],
+      "rc": 0,
+      "stdout": "/dev/disk4 (external, physical):\n   #:                       TYPE NAME                    SIZE       IDENTIFIER\n   0:      GUID_partition_scheme                        *2.0 TB     disk4\n   1:       Microsoft Basic Data Extreme SSD             2.0 TB     disk4s1\n\n/dev/disk5 (disk image):\n   #:                       TYPE NAME                    SIZE       IDENTIFIER\n   0:      GUID_partition_scheme                        +9.3 GB     disk5\n   1:                 Apple_APFS Container disk6         9.3 GB     disk5s1\n\n/dev/disk6 (synthesized):\n   #:                       TYPE NAME                    SIZE       IDENTIFIER\n   0:      APFS Container Scheme -                      +9.3 GB     disk6\n                                 Physical Store disk5s1\n   1:                APFS Volume WatchOS 27.0 Simulator  9.0 GB     disk6s1\n\n/dev/disk7 (disk image):\n   #:                       TYPE NAME                    SIZE       IDENTIFIER\n   0:      GUID_partition_scheme                        +18.6 GB    disk7\n   1:                 Apple_APFS Container disk8         18.6 GB    disk7s1\n\n/dev/disk8 (synthesized):\n   #:                       TYPE NAME                    SIZE       IDENTIFIER\n   0:      APFS Container Scheme -                      +18.6 GB    disk8\n                                 Physical Store disk7s1\n   1:                APFS Volume iOS 27.0 Simulator      18.0 GB    disk8s1\n\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+# E7 observation only; ticks 0..603; boundary 599..603 unless E15 aligned trigger; byte caps boot=4194304 boundary=1048576 packets=524288
+seq=1 tick=17 kind=mpeg-call id=1 route=branch target=0x4027b8 source=0x100040 a0=0x150000 a1=0x160000 a2=0x10000 a3=0x0 t0=0x0 sp=0x1fffff0 ra=0x100050 thread=-999 callback=0 cbType=0 cbWordReadable=0
+seq=2 tick=17 kind=mpeg-return id=1 route=branch target=0x4027b8 entryA0=0x150000 pc=0x100050 v0=0x160118 sp=0x1fffff0 ra=0x100050 suppliedRA=0x100050 thread=-999 callback=0
+seq=3 tick=17 kind=mpeg-call id=2 route=branch target=0x402c08 source=0x100040 a0=0x150000 a1=0x1 a2=0x100070 a3=0x15f000 t0=0x0 sp=0x1fffff0 ra=0x100050 thread=-999 callback=0 cbType=0 cbWordReadable=0
+seq=4 tick=17 kind=mpeg-return id=2 route=branch target=0x402c08 entryA0=0x150000 pc=0x100050 v0=0x1 sp=0x1fffff0 ra=0x100050 suppliedRA=0x100050 thread=-999 callback=0
+seq=5 tick=17 kind=e16-final-producer guestFinished=1 guestCalls=1
+# E15 CLOSURE tick=17 calls=2 returned=2 unwound=0 pending=0 selections=0 invocations=0 registrations=1 registrationTruncated=0
+# E7 SHUTDOWN tick=17 events=5 bootBytes=815 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615

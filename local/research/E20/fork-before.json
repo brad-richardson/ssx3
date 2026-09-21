@@ -1,0 +1,43 @@
+{
+  "utc": "2026-09-21T20:25:31.949527+00:00",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "rev-parse",
+        "HEAD",
+        "refs/remotes/fork/ssx3"
+      ],
+      "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\n3adc0478b6d2260acdd28a249466f2eef9a20176\n",
+      "stderr": "",
+      "rc": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "ls-remote",
+        "fork",
+        "refs/heads/ssx3"
+      ],
+      "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\trefs/heads/ssx3\n",
+      "stderr": "",
+      "rc": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "status",
+        "--short"
+      ],
+      "stdout": "?? ps2_log.txt\n",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n",
+      "rc": 0
+    }
+  ]
+}
