@@ -1,0 +1,19 @@
+diff --git a/vulkan/shader.cpp b/vulkan/shader.cpp
+index 13b9dcb..77c2ea9 100644
+--- a/vulkan/shader.cpp
++++ b/vulkan/shader.cpp
+@@ -528,7 +528,13 @@ void PipelineLayout::init_legacy(const ImmutableSamplerBank *immutable_samplers)
+ 	device->register_pipeline_layout(pipe_layout, get_hash(), info);
+ #endif
+ 
+-	if (!device->get_device_features().descriptor_buffer_features.descriptorBuffer)
++	// G18 local experiment fix: gate template creation on the derived
++	// supports_descriptor_buffer flag (the same predicate CommandBuffer uses
++	// to select the descriptor-buffer flush path), not the raw feature bit.
++	// When the raw bit is set but Granite declines descriptor buffers
++	// (context.cpp suitability conditions), the legacy flush path needs
++	// these templates; skipping them passes NULL to the driver (O2).
++	if (!device->get_device_features().supports_descriptor_buffer)
+ 		create_update_templates();
+ }
+ 
