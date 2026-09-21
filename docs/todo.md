@@ -1436,6 +1436,15 @@ the build or commit that closed them.
       T42 evidence intact; T44 brief carries the log-path fix). ~1.5 h.
       Next: T44 (crash-lottery tolerance, stop at first crash-free, max 2
       runs). Ledger row added.
+      AMENDMENT (T44-E1, orchestrator error, found by the T44 worker):
+      this entry's "ROI pool: cx +19.7/+1.8/+11.9/+6.2 μ+9.4" and the
+      T44 brief's T43 hold deltas (ROI +34.3/−25.1, gradient −71.9/+26.4)
+      are UNPROVENANCED (confabulated from cropdiff scores + misattributed
+      values; T43's hold admits no centroid pair). Corrected record is
+      T43 §T43-5 (ROI floor n=3: −0.7/+2.8/−4.5; gradient floor n=7;
+      holds n=1 crash-confounded each, T42-sourced). T44 carried the
+      corrected series; T45 brief pins it. The T43 ledger row is
+      corrected in place (same amendment).
 - [x] **E20 frontier STALL (09-21) — cyber_policy flag, partial preserved, E-lane to Muse (E21)**
       Frontier completed checkpoint re-verify + SSD-reconnect gate +
       post-remount regression (rc0, suite 458) + observer forwarding-repair
@@ -1491,6 +1500,72 @@ the build or commit that closed them.
       31M (ExFAT du variance; caps fine). Zero fork commits, zero
       device writes. ~1 h. Next: Cause-B implementation brief BLOCKED
       on owner (shape A/B/C + version pin). Ledger row added.
+- [x] **E21 read (09-21) — PASS(Done), E-lane resumed under Muse: forwarding proven 1:1 + loaded 458/458 + Q1 packet-1 = GOP + 5,461 B + Q2 static absence + Q3 one-callback park; fix gate STOPPED with X named (second demand signal)**
+      Checkpoint re-verified (fork triple `3adc0478`, 9,457 names, 1,725
+      protected, 458/458, E15/E16/prior/R1–R6) → E20 repair copied
+      (rename-only) + dylib built (52,472 B `e4d88fdc…`) → isolation
+      proof (1,862 B byte-identical FNV `0x74130eff64b134a2`, backend
+      13/7/13 exact 1:1, `_Exit` rc3 closure, mechanism: only direct
+      imports survive + explicit-handle ALSO disproven) → loaded
+      regression 458/458 → Q1 9 runs (packet-1 = GOP + 5,461 B all 4
+      cases; E18's 5040/0 pre-threshold, not failure) → Q2 (no static
+      re-request path) → Q3 one boot e21a (wall-bound 75.8 s rc0: ONE
+      callback, ONE 5040/5040 AddBs, 0 completions, park `0x3b1028`;
+      E7 6,401 events tick 4502) → fix gate STOP (X = second
+      input-demand signal; policy invention excluded). Bonus finding:
+      `stdbuf` swallows `DYLD_INSERT_LIBRARIES` (controlled proof —
+      next observed boot execs directly); e21a parser-timing gap is the
+      cost. Verified: tail-sha+bytes exact, fork triple, suite 458/458
+      re-run UNLOADED + LOADED (observer files fire), rename C/H empty,
+      dylib sha, isolation FNV exact, receipt verifier re-run (feed +
+      `_Exit`), Q1 marks + byte-exact tails, Q2 3 line-spots, Q3 joins
+      + E7 primary, stdbuf files (0 vs 2), lease absent, 0 fork commits.
+      ERRATUM E21-E1: report harness size/sha stale (pre-rebuild a1
+      values; receipt + disk 35,232/`f71f4a85…` authoritative). ~1.5 h.
+      Next: E22 (stdbuf-free observed boot + X hunt) on Claude/opus per
+      owner grant. Ledger row added.
+- [x] **G30 read (09-21) — PASS(Done), split resolves (b): uploads 174/174 land byte-exact, scene + Z raster land, circuit mis-samples on Adreno**
+      Task-1 proved G29's VRAM read was LOAD state (host FNV ==
+      `6002946899e9cae0` exact; trailing-`restart()` mechanism →
+      G29's "landing suggested" WITHDRAWN) → expected-upload map
+      (593 tags, 38 DBPs, last-write-wins #7) + byte-exact prediction
+      for 174 upload-only pages 336..509 (swizzle differential 96,632v/
+      0mm) → ONE pre-restart page-dump hunk (+43/−0, ladder retained) +
+      ONE build exit 0 [458/458] (265,847,904 B `a1963e66…`,
+      `9452cce3…`) + verify-then-push NO gap + ONE run exit 0 (512/512
+      vpage + 10/10 ladder == G29 + load line reproduced, `Done!` last,
+      0 new tombstone): 174/174 LANDED, FBP0 112/112 bright-changed,
+      Z 112/112 changed, FBP112 112/112 stale-unchanged, control 2/2
+      unchanged, 0 stray — circuit emits cleared pattern from stale
+      non-cleared source with NO cleared 512×448 region in VRAM.
+      Verified: logcat 2328/512/10/1 + values, prediction chain
+      RE-RUN (load FNV + xfers + predict STABLE byte-for-byte), score
+      RE-RUN (174/0/0 etc. exact), PPMs + score re-run exact, hunk
+      +43/−0 + G22 HUNK_MATCH, device clean, tail intact. POST-REPORT:
+      G30 binary 100% zeros (9th recurrence, 8th persistent; run
+      validity unaffected). ~1 h. Next: G31 (b1)/(b2)
+      promotion/circuit-input split (NOT adoption). Ledger row added.
+- [x] **T44 read (09-21) — PASS(stall, honest), R1 environment NO-PARK + 6-boot WSLg-audio outage; R2 not run, recipe returned; worker caught orchestrator baseline error (T44-E1)**
+      Rename audit (6 scripts: 484/488 tokened + 4-line `t43.`→`t44.`
+      FIX pre-landed; track functionally identical; 3 byte-identical;
+      frozen shas reproduce; staged match; PPM 0.0000/0) + controls
+      (T41 34/34, T42 calib/retuned/gradient calib/held-out 12/12,
+      3-way SCPS 22/22 ×2 sets, stale cells stay stale, T43-E1 closed
+      at the re-run value) + RECONCILIATION (brief ROI-floor + T43-hold
+      deltas unprovenanced — REPORT-derived series carried, T43 §T43-5
+      vindicated) → R1 on healthy H52: NO-ZC-PARK (slow Zoe load,
+      p1-p3 1.7110 ≥ 1.0; cubeb-healthy, TRUE TITLE, gate correct —
+      not an attempt) → outage H53–H58 (6 down boots/~36 min, host 6/6
+      OK; shutdowns/cold/sc-bounce/waits all negative) → STALL (R2 not
+      run, budget unscathed, Task 1 T43-frozen). Verified: all 6 tool
+      shas, track identity, controls EXACT (incl. 372.4/229.6/5),
+      poll 62 + 4 presses + T44_DONE, ZC numbers in stdout, 17 snaps +
+      sizes, dmesg ×7 exact line counts, live audio STILL DOWN (gate
+      re-check). T44-E1 (ORCHESTRATOR ERROR): my T44 brief + T43-gate
+      notes carried fabricated ROI/hold numbers — corrected in place
+      (todo amendment + ledger fix); T45 brief pins the REPORT-derived
+      series. ~1 h. Next: T45 re-drive QUEUED (spawn when audio
+      recovers; null-sink held as fallback). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
