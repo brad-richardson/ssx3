@@ -1,0 +1,207 @@
+{"app_name":"ps2EntryRunner","timestamp":"2026-09-21 02:39:11.00 -0400","slice_uuid":"F409E4ED-2922-322F-B68E-EFEBB77DD339","bundleID":"org.ps2x.ps2entryrunner","duration_ms":"93901","share_with_app_devs":1,"is_first_party":0,"bug_type":"202","os_version":"iPhone OS 27.0 (24A437)","roots_installed":0,"name":"ps2EntryRunner","incident_id":"D4953BC0-20B2-461C-99CB-4391474F64D3"}
+Date/Time:        2026-09-21 02:37:36.300 -0400
+End time:         2026-09-21 02:39:10.202 -0400
+OS Version:       iPhone OS 27.0 (Build 24A437)
+Architecture:     arm64e
+Report Version:   73
+Incident Identifier: D4953BC0-20B2-461C-99CB-4391474F64D3
+Share With Devs:  Yes
+
+Data Source:      Microstackshots
+Shared Cache:     C5791824-5A18-3632-BDE0-A0D340C98B58 slid base address 0x18127c000
+
+Command:          ps2EntryRunner
+Path:             /private/var/containers/Bundle/Application/431AAEF1-7E07-4A26-83F5-8B126B42371B/ps2EntryRunner.app/ps2EntryRunner
+Identifier:       org.ps2x.ps2entryrunner
+Is First Party:   No
+Beta Identifier:  2CBA8647-0C4A-4BF6-AC6D-ED8BDDCA2843
+Resource Coalition: 3455
+Architecture:     arm64
+PID:              4181
+
+Event:            cpu usage
+Action taken:     none
+CPU:              90 seconds cpu time over 94 seconds (96% cpu average), exceeding limit of 50% cpu over 180 seconds
+CPU limit:        90s
+Limit duration:   180s
+CPU used:         90s
+CPU duration:     94s
+Duration:         93.90s
+Duration Sampled: 91.00s (event starts 2.31s before samples, event ends 0.59s after samples)
+Steps:            32 (10 gigacycles/step, 5 samples lost)
+
+Hardware model:   iPad14,9
+Active cpus:      8
+Memory size:      7.46 GB
+HW page size:     16384
+VM page size:     16384
+
+Models:           UNKNOWN
+
+OS Cryptex File Extents: 7
+
+Heaviest stack for the target process:
+  27  ??? (libsystem_pthread.dylib + 2332) [0x1817b691c]
+  27  ??? (libsystem_pthread.dylib + 16440) [0x1817ba038]
+  27  ??? (ps2EntryRunner + 809988) [0x102a11c04]
+  27  ??? (ps2EntryRunner + 149768) [0x102970908]
+  24  ??? (ps2EntryRunner + 47239868) [0x1056592bc]
+  24  ??? (ps2EntryRunner + 786292) [0x102a0bf74]
+  24  ??? (ps2EntryRunner + 47304216) [0x105668e18]
+  24  ??? (ps2EntryRunner + 786292) [0x102a0bf74]
+  24  ??? (ps2EntryRunner + 44660556) [0x1053e374c]
+  24  ??? (ps2EntryRunner + 793136) [0x102a0da30]
+  24  ??? (ps2EntryRunner + 738824) [0x102a00608]
+  24  ??? (ps2EntryRunner + 748580) [0x102a02c24]
+  24  ??? (ps2EntryRunner + 697700) [0x1029f6564]
+  22  ??? (ps2EntryRunner + 689824) [0x1029f46a0]
+  22  ??? (ps2EntryRunner + 691748) [0x1029f4e24]
+  22  ??? (ps2EntryRunner + 694844) [0x1029f5a3c]
+  22  ??? (ps2EntryRunner + 659044) [0x1029ece64]
+  18  ??? (ps2EntryRunner + 661044) [0x1029ed634]
+  11  ??? (ps2EntryRunner + 666280) [0x1029eeaa8]
+  6   ??? (ps2EntryRunner + 666804) [0x1029eecb4]
+
+
+Powerstats for:   ps2EntryRunner [4181]
+UUID:             F409E4ED-2922-322F-B68E-EFEBB77DD339
+Path:             /private/var/containers/Bundle/Application/431AAEF1-7E07-4A26-83F5-8B126B42371B/ps2EntryRunner.app/ps2EntryRunner
+Identifier:       org.ps2x.ps2entryrunner
+Is First Party:   No
+Beta Identifier:  2CBA8647-0C4A-4BF6-AC6D-ED8BDDCA2843
+Resource Coalition: 32 samples 3455
+Architecture:     arm64
+Footprint:        89.83 MB
+Pageins:          1 pages
+Start time:       2026-09-21 02:37:38.609 -0400
+End time:         2026-09-21 02:39:09.610 -0400
+Num samples:      32 (100%)
+Energy:           118.15 mWh
+Num threads:      3
+Primary state:    14 samples Frontmost App, Non-Suppressed, User mode, Effective Thread QoS Default, Requested Thread QoS Default, Override Thread QoS Unspecified, p-core
+User Activity:    0 samples Idle, 32 samples Active
+Power Source:     0 samples on Battery, 32 samples on AC
+  27  ??? (libsystem_pthread.dylib + 2332) [0x1817b691c]
+    27  ??? (libsystem_pthread.dylib + 16440) [0x1817ba038]
+      27  ??? (ps2EntryRunner + 809988) [0x102a11c04]
+        27  ??? (ps2EntryRunner + 149768) [0x102970908]
+          24  ??? (ps2EntryRunner + 47239868) [0x1056592bc]
+            24  ??? (ps2EntryRunner + 786292) [0x102a0bf74]
+              24  ??? (ps2EntryRunner + 47304216) [0x105668e18]
+                24  ??? (ps2EntryRunner + 786292) [0x102a0bf74]
+                  24  ??? (ps2EntryRunner + 44660556) [0x1053e374c]
+                    24  ??? (ps2EntryRunner + 793136) [0x102a0da30]
+                      24  ??? (ps2EntryRunner + 738824) [0x102a00608]
+                        24  ??? (ps2EntryRunner + 748580) [0x102a02c24]
+                          24  ??? (ps2EntryRunner + 697700) [0x1029f6564]
+                            22  ??? (ps2EntryRunner + 689824) [0x1029f46a0]
+                              22  ??? (ps2EntryRunner + 691748) [0x1029f4e24]
+                                22  ??? (ps2EntryRunner + 694844) [0x1029f5a3c]
+                                  22  ??? (ps2EntryRunner + 659044) [0x1029ece64]
+                                    18  ??? (ps2EntryRunner + 661044) [0x1029ed634]
+                                      11  ??? (ps2EntryRunner + 666280) [0x1029eeaa8]
+                                        6   ??? (ps2EntryRunner + 666804) [0x1029eecb4]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 706000) [0x1029f85d0]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 678496) [0x1029f1a60]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 666972) [0x1029eed5c]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 666832) [0x1029eecd0]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 666776) [0x1029eec98]
+                                          1   <Effective Thread QoS User Interactive>
+                                      3   ??? (ps2EntryRunner + 666260) [0x1029eea94]
+                                        1   ??? (ps2EntryRunner + 667156) [0x1029eee14]
+                                        1   ??? (ps2EntryRunner + 666844) [0x1029eecdc]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 666688) [0x1029eec40]
+                                      2   ??? (ps2EntryRunner + 666300) [0x1029eeabc]
+                                        1   ??? (ps2EntryRunner + 666928) [0x1029eed30]
+                                          1   <Effective Thread QoS User Interactive>
+                                        1   ??? (ps2EntryRunner + 666768) [0x1029eec90]
+                                      1   ??? (ps2EntryRunner + 666108) [0x1029ee9fc]
+                                      1   ??? (ps2EntryRunner + 666080) [0x1029ee9e0]
+                                        1   <Effective Thread QoS User Interactive>
+                                    4   ??? (ps2EntryRunner + 661152) [0x1029ed6a0]
+                                      1   ??? (ps2EntryRunner + 705148) [0x1029f827c]
+                                      1   ??? (ps2EntryRunner + 679156) [0x1029f1cf4]
+                                        1   <Effective Thread QoS User Interactive>
+                                      1   ??? (ps2EntryRunner + 665152) [0x1029ee640]
+                                      1   ??? (ps2EntryRunner + 664136) [0x1029ee248]
+                            2   ??? (ps2EntryRunner + 689672) [0x1029f4608]
+                              2   ??? (ps2EntryRunner + 691748) [0x1029f4e24]
+                                2   ??? (ps2EntryRunner + 694844) [0x1029f5a3c]
+                                  2   ??? (ps2EntryRunner + 659044) [0x1029ece64]
+                                    2   ??? (ps2EntryRunner + 660616) [0x1029ed488]
+                                      1   ??? (ps2EntryRunner + 665232) [0x1029ee690]
+                                      1   ??? (ps2EntryRunner + 665308) [0x1029ee6dc]
+                                        1   ??? (ps2EntryRunner + 659736) [0x1029ed118]
+                                          1   <Effective Thread QoS User Interactive>
+          2   ??? (ps2EntryRunner + 47246900) [0x10565ae34]
+            2   ??? (ps2EntryRunner + 793136) [0x102a0da30]
+              2   ??? (ps2EntryRunner + 738824) [0x102a00608]
+                2   ??? (ps2EntryRunner + 748300) [0x102a02b0c]
+                  2   ??? (ps2EntryRunner + 813000) [0x102a127c8]
+                    2   ??? (ps2EntryRunner + 750976) [0x102a03580]
+                      2   ??? (ps2EntryRunner + 697700) [0x1029f6564]
+                        2   ??? (ps2EntryRunner + 689824) [0x1029f46a0]
+                          2   ??? (ps2EntryRunner + 691748) [0x1029f4e24]
+                            2   ??? (ps2EntryRunner + 694844) [0x1029f5a3c]
+                              2   ??? (ps2EntryRunner + 659044) [0x1029ece64]
+                                2   ??? (ps2EntryRunner + 661044) [0x1029ed634]
+                                  1   ??? (ps2EntryRunner + 666480) [0x1029eeb70]
+                                    1   <Effective Thread QoS User Interactive>
+                                  1   ??? (ps2EntryRunner + 666260) [0x1029eea94]
+                                    1   ??? (ps2EntryRunner + 667136) [0x1029eee00]
+                                      1   <Effective Thread QoS User Interactive>
+          1   ??? (ps2EntryRunner + 30773724) [0x1046a51dc]
+            1   ??? (ps2EntryRunner + 786292) [0x102a0bf74]
+              1   ??? (ps2EntryRunner + 66647028) [0x1068db3f4]
+                1   ??? (ps2EntryRunner + 789284) [0x102a0cb24]
+                  1   ??? (ps2EntryRunner + 479968) [0x1029c12e0]
+                    1   ??? (ps2EntryRunner + 185052) [0x1029792dc]
+                      1   ??? (ps2EntryRunner + 105834728) [0x108e3a8e8]
+                        1   ??? (libc++abi.dylib + 8044) [0x2c108ef6c]
+                          1   ??? (libunwind.dylib + 9820) [0x2c309c65c]
+                            1   ??? (libc++abi.dylib + 6568) [0x2c108e9a8]
+                              1   ??? (libc++abi.dylib + 9656) [0x2c108f5b8]
+  4   ??? (dyld + 21944) [0x1817035b8]
+    4   ??? (ps2EntryRunner + 105793880) [0x108e30958]
+      4   ??? (UIKitCore + 762316) [0x185b901cc]
+        4   ??? (GraphicsServices + 3876) [0x22bcc7f24]
+          4   ??? (CoreFoundation + 243700) [0x1818b27f4]
+            4   ??? (CoreFoundation + 239976) [0x1818b1968]
+              4   ??? (CoreFoundation + 524316) [0x1818f701c]
+                4   ??? (CoreFoundation + 525120) [0x1818f7340]
+                  4   ??? (CoreFoundation + 526992) [0x1818f7a90]
+                    4   ??? (Foundation + 1509296) [0x181eca7b0]
+                      4   ??? (ps2EntryRunner + 105797268) [0x108e31694]
+                        4   ??? (ps2EntryRunner + 34604) [0x10295472c]
+                          3   ??? (ps2EntryRunner + 796260) [0x102a0e664]
+                            3   ??? (ps2EntryRunner + 687588) [0x1029f3de4]
+                              2   ??? (ps2EntryRunner + 675036) [0x1029f0cdc]
+                                2   ??? (ps2EntryRunner + 677232) [0x1029f1570]
+                                  1   ??? (ps2EntryRunner + 673324) [0x1029f062c]
+                                    1   <Effective Thread QoS User Interactive, Requested Thread QoS User Interactive>
+                                  1   ??? (ps2EntryRunner + 673160) [0x1029f0588]
+                                    1   <Effective Thread QoS User Interactive, Requested Thread QoS User Interactive>
+                              1   ??? (ps2EntryRunner + 675328) [0x1029f0e00]
+                                1   <Effective Thread QoS User Interactive, Requested Thread QoS User Interactive>
+                          1   ??? (libsystem_platform.dylib + 4180) [0x18d5f4054]
+                            1   <Effective Thread QoS User Interactive, Requested Thread QoS User Interactive>
+  1   ??? (libsystem_pthread.dylib + 2312) [0x1817b6908]
+    1   <Kernel mode, Effective Thread QoS User Interactive, Requested Thread QoS User Interactive>
+
+  Binary Images:
+           0x10294c000 -                ???  org.ps2x.ps2entryrunner  <F409E4ED-2922-322F-B68E-EFEBB77DD339>  /private/var/containers/Bundle/Application/431AAEF1-7E07-4A26-83F5-8B126B42371B/ps2EntryRunner.app/ps2EntryRunner
+           0x1816fe000 -        0x1817b5737  dyld                     <D3F59B02-EE07-371B-B091-3F150A078ED8>  /usr/lib/dyld
+           0x1817b6000 -        0x1817c2247  libsystem_pthread.dylib  <694C772A-A9F8-3AC0-9417-7C304043A771>  /usr/lib/system/libsystem_pthread.dylib
+           0x181877000 -        0x181d59777  CoreFoundation           <9426FC9A-B36C-3096-B836-D17D6744A75B>  /System/Library/Frameworks/CoreFoundation.framework/CoreFoundation
+           0x181d5a000 -        0x182e90153  Foundation               <C041F1D0-5EF1-30A3-BF96-830976173B56>  /System/Library/Frameworks/Foundation.framework/Foundation
+           0x185ad6000 -        0x187b0c937  UIKitCore                <AAC84A00-13AB-3B06-B622-A4E676971EB8>  /System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore
+           0x18d5f3000 -        0x18d5fb67f  libsystem_platform.dylib <39AE6F2B-B6BA-3116-9D5B-F97A6D41FF20>  /usr/lib/system/libsystem_platform.dylib
+           0x22bcc7000 -        0x22bcceea3  GraphicsServices         <D0170165-A973-3DBB-86EA-8EB7D0EA9ACB>  /System/Library/PrivateFrameworks/GraphicsServices.framework/GraphicsServices
+           0x2c108d000 -        0x2c10a6c17  libc++abi.dylib          <3DCED231-83FD-3E80-B36A-1D0A6B66CC1F>  /usr/lib/libc++abi.dylib
+           0x2c309a000 -        0x2c30a3c2f  libunwind.dylib          <6AF83E8B-B9D6-3B60-9A39-F0A71891CDA8>  /usr/lib/system/libunwind.dylib
