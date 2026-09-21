@@ -1410,6 +1410,32 @@ the build or commit that closed them.
       T41's frozen-sha citation wrong (actual `58afa004…`, both files —
       identity holds). ~1.5 h. Next: T43 accumulation (on→on pairs +
       gradient static). Ledger row added.
+- [x] **T43 read (09-21) — PASS, accumulation banks despite crash-freeze (ROI pool 4 / gradient pool 10, holds crash-confounded n=1, T42 stale cells independently confirmed)
+      Gradient static test tabled + calibrated pre-run (GRAD_MIN 60, band
+      500–3000, sweep g0–g80; fixes smooth intruders d5/d9-class, NOT
+      textured d3-trunk hole, does NOT gate floods; held-out T41 12/12
+      consistent both directions). R1 exit 0 (FULL CHAIN 61 snaps → LIVE
+      4TH/6 → ONE 1037.2 ms hold @T+509.43 → 10×≈0.575 s blind series;
+      npre2 snow whiteout 7.2 cropdiff): hold hop UNGATED (ROI +34.3/−25.1
+      borderline, gradient −71.9/+26.4 off-rider, SCPS40 −40@−0.75 /
+      SCPS120 −120@−0.05); dense 4 on→on banks 5 (ROI pool: cx +19.7/+1.8/
+      +11.9/+6.2 μ+9.4; gradient pool 10, |Δcx|<=35); 1 on→off vetoes 3
+      (lock-QA discipline); d7 dual-gated intruder; T42's stale frozen/
+      middle cells reproduced as stale (same bytes+tools → same NEW values
+      — my T42-gate numbers match the re-score table exactly). Verified:
+      stream (2789610604 B + b8a27b83 + slices), hold walls (1037.2 ms
+      exact), poll 168 + T43_DONE, tool shas (2e532a2d/ac114212/105cd092),
+      T41/T42 untouched (58afa004/a951f782), LIVE gradient EXACT on R1
+      d-post1 + T42 d-post5, ROI EXACT on R1 d-post1, 3-way SCPS hold hop
+      bit-identical, census 52/155 + top rows, 61 snaps + sizes, NVM
+      full-sha continuity (da021d2a…865a961, mtime Sep 20 15:20). ERRATA:
+      T43-E1 npre2 gradient centroid row (343.5/189.2 vs live 372.4/229.6,
+      npix=5 both, INVALID both — excluded either way); T43-E2 NVM
+      post-run receipt first-16 only (gate closed via live full-sha).
+      Out-of-band: R1's boot logs overwrote T42's ON-BOX copies (committed
+      T42 evidence intact; T44 brief carries the log-path fix). ~1.5 h.
+      Next: T44 (crash-lottery tolerance, stop at first crash-free, max 2
+      runs). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
