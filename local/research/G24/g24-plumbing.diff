@@ -1,0 +1,14 @@
+@@ -93,9 +96,12 @@ int main(int argc, char **argv)
+ 		return EXIT_FAILURE;
+ 
+ 	bool use_rdoc = Device::init_renderdoc_capture();
++	// G24 local plumbing (not upstream): deliver debug_mode unconditionally
++	// (sibling replayers do the same); the rdoc gate made the flag a no-op.
++	iface.set_debug_mode(debug_mode);
++	LOGI("G24: debug_mode delivered (disable_sampler_feedback=%d, use_rdoc=%d).\n", int(debug_mode.disable_sampler_feedback), int(use_rdoc));
+ 	if (use_rdoc)
+ 	{
+-		iface.set_debug_mode(debug_mode);
+ 		device.begin_renderdoc_capture();
+ 	}
+ 

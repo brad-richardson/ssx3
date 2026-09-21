@@ -1,0 +1,10 @@
+[1/2] Building CXX object tools/CMakeFiles/parallel-gs-replayer.dir/gs_dump_replayer.cpp.o
+In file included from /Volumes/Extreme SSD/parallel-gs-g7/tools/gs_dump_replayer.cpp:9:
+/Volumes/Extreme SSD/parallel-gs-g7/dump/gs_dump_parser.hpp:49:45: warning: declaration shadows a field of 'ParallelGS::GSDumpParser' [-Wshadow]
+   49 |         struct FileDeleter { void operator()(FILE *file) { if (file) fclose(file); } };
+      |                                                    ^
+/Volumes/Extreme SSD/parallel-gs-g7/dump/gs_dump_parser.hpp:51:37: note: previous declaration is here
+   51 |         std::unique_ptr<FILE, FileDeleter> file;
+      |                                            ^
+1 warning generated.
+[2/2] Linking CXX executable tools/parallel-gs-replayer
