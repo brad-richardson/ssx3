@@ -1,0 +1,9 @@
+[transcribed from tool output, labeled; non-monotonic sidecar noise lines omitted]
+$ git -C "$FORK" worktree add --detach "$W/fork-wt" 9da21ff
+Preparing worktree (detached HEAD 9da21ff)
+HEAD is now at 9da21ff SSX3: restore the exact card status predicate
+exit=0
+$ find "$WT" -name "._*" | wc -l
+     330
+$ find "$WT" -name "._*" -delete; git -C "$WT" status --short
+(clean)

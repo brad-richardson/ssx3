@@ -1,0 +1,15 @@
+[transcribed from tool output, labeled]
+--- first ls (sleep 10 after probe; also checks for late I16 filing) ---
+$ xcrun devicectl device info files --device "$P" --timeout 60 --domain-type systemCrashLogs --domain-identifier ps2x-i17 -s ps2EntryRunner --no-recurse
+5 files:
+ps2EntryRunner.cpu_resource-2026-09-21-015423.ips   15 KB   9/21/26, 1:54 AM   (I11's)
+ps2EntryRunner.cpu_resource-2026-09-21-023911.ips   14 KB   9/21/26, 2:39 AM   (I12's)
+ps2EntryRunner.cpu_resource-2026-09-21-032937.ips   12 KB   9/21/26, 3:29 AM   (I13's)
+ps2EntryRunner.cpu_resource-2026-09-21-040134.ips   13 KB   9/21/26, 4:01 AM   (I14's)
+ps2EntryRunner.cpu_resource-2026-09-21-050020.ips   13 KB   9/21/26, 5:00 AM   (I15's)
+=> NO new .ips for I17; NO late filing for I16 (still 5, all priors')
+--- second ls (post-terminate PID 4314 + sleep 15) ---
+$ xcrun devicectl device process terminate --device "$P" --timeout 30 --pid 4314
+Sent signal to terminate process sent to pid 4314
+$ (same files ls)
+5 files, identical list (all priors') => still NO new .ips for I17
