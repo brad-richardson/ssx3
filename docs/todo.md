@@ -6,7 +6,7 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t31 (Cross on Peak 1 → next screen, bytesize, 4h) · g12 (PCSX2-side draw-order trace, ps2xGS + bytesize, 6h) · frontier (E7 E-lane lead: S value series + parking answer, fork + P-lane lease, 6h) · i10 (SSX3 codegen + link + overwrite re-probe, worktree, 6h).
+- [ ] **Live panes:** t32 (Cross on Race → next screen, bytesize, 4h) · g13 (rich post-loading dual replay, calibrated labels, ps2xGS + bytesize, 6h) · frontier (E7 E-lane lead: copy/FIFO-first through to meaningful frame, fork + P-lane lease) · i10 (SSX3 codegen + link + overwrite re-probe, worktree, 6h).
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · NO regen until 0x426230 DROP dispositioned + preflighted (frontier: DROP from canonical + used config, preserve guest translation, no new HLE) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
@@ -1288,6 +1288,46 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T31 read (09-21) — PASS, Cross on Peak 1 → Select Mode, stable 132 s:**
+      Bit-identical T4 build reused (sha/size/rev/status/pad/NVM all reproduce
+      T4; NVM `da021d2a` untouched). ONE single-shot run: chain reproduced
+      (TITLE poll01 band-frozen, Start ≤1.0 s, Menu Cross @T+138.11, Zoe
+      Cross @T+178.02, Continue Cross @T+206.68, 4 park snaps vs-stab6
+      0.005–0.077/p99 0) → Peak Cross 535.8 ms @T+235.37 (pre = SP Peak 1,
+      vs-sp 0.0767/0 PIL, viewed) → Select Mode (Race highlighted /
+      Freestyle) by +1 s, 12 snaps / 132 s (pairwise 0.014–0.066/p99 ≤1;
+      vs-SP ~5.2, vs-ZC ~10.1, vs-menu ~10.9, vs-SC ~11.8, vs-title ~26.3).
+      Full dmesg coverage, 0 restarts, ZERO in-window flaps (7 total: 5 pre
+      + 2 post); run 381 s (21 s over guidance — tabled, covered). EE 52 /
+      IOP 155 sets identical to T30 R1. Bit-identity streaks end (a1-post15
+      4 runs, a1-post3 2 runs — by sha). Verified: PEAK_CROSS keydown/keyup
+      walls exact, T31_DONE in stdout ×2, head/tail 2000/2000, flap counts
+      0/7, a1-post15 pair 0.0006/0 mine vs 0.0004/0 report (magnitude
+      agreement; streak-end is by sha either way), menupre full-sha = T29's
+      (frozen variant, no claim attached). Reference-state row: T30 park.
+      ~22 min. Next: T32 Cross on Race (T31 G1). Ledger row added.
+- [x] **G12 read (09-21) — PASS, file N = present#(N+1): the G8–G11 lag was a labeling artifact:**
+      G11 §4 executed with inversion: per-HW-draw FBP/TBP log + present
+      markers (ONE log-only patch, behavior-preserved: 7/7 PNG md5s + HWSTAT
+      = G10) show PCSX2 executing composite-before-own-sprite in EVERY
+      window, content-identical to paraLLEl (window#0 = C(0) + non-rasterizing
+      U(0); windows#1–7 = lagged S(k−1) + C(k) + U(k)). 88/88 transfers
+      decoded: zero TRX anywhere, C=17/U=16/S=1 = 34/vsync exactly; block-0
+      initial cleared; presents never skipped, captures synchronous — so
+      present#0 is black on PCSX2 too, and file N = present#(N+1) via
+      Main-counter FIFO lag (snapshot named from Main's counter, synced by a
+      lambda queued AFTER each VSync packet). Corrected mapping (file N ↔
+      post-vsync#N) turns the G11 matrix into same-boundary agreement at
+      every step (63–65 dB diagonal). G11 mechanism observations all stand;
+      only the file↔boundary premise falls. Verified: 7/7 PNG md5s = G10,
+      trace counts 23/15/8/8/0 exact, window#0 lines + s_n gaps verbatim,
+      transfers + vram0 RERUN BY ME (shapes, zero-TRX grep, cleared units,
+      atlas 695), Main.cpp:85/:245/:905 + replayer :393–:401 FIFO order
+      (read-only bytesize greps), ps2xGS [G12] committed + in sync with
+      origin/main, ssx3 mirror 5 files. Accepted: file0-absence mechanism
+      (inferred, §7.1), U skip site (open micro-point). Reference-state row:
+      G10 pairs + G11 matrix (both re-anchored). ~3.5 h. Next: G13 rich
+      post-loading dual replay, lag line retired (G12 §4). Ledger row added.
 - [x] **EF read (09-21) — PASS, frontier prep: independent S-trace + H-FIFO candidate gap + E7 reframe (read-only):**
       Independent receipt bundle (R1–R11, pre-E6) + handover supplement
       (H1–H3): S-trace agrees with E6 (factory/global/vtable/advance truth
