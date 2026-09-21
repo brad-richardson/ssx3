@@ -1,0 +1,39 @@
+[Transcribed from tool output 2026-09-21 ~04:40 -0400; `._pack-*.idx` noise lines elided.]
+
+$ git -C "$WT" -c user.name="muse-i15" -c user.email="i15@local" cherry-pick 19166a7 aa0cb47 b559a40 bb3dfe3 834f2cc ed378c8
+[detached HEAD ab443f6] Bundle: set CFBundleName so devicectl installs the device .app (I8)
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+[detached HEAD c3a6df1] Runtime: optional PS2X_GAME_CODEGEN_DIR game-objects static lib (I10)
+ 1 file changed, 22 insertions(+)
+Auto-merging games/ssx3/ssx3-functions.sweep.csv
+[detached HEAD a0f86bf] SSX3 map: add missing function entry 0x395730 (I11)
+ 1 file changed, 1 insertion(+)
+error: Your local changes to the following files would be overwritten by merge:
+	games/ssx3/ssx3-functions.sweep.csv
+
+(3/6 applied; attempt 1 aborted on the 4th with the same transient dirty-tree
+complaint I14 saw. Tree verified clean via `status --short` (empty).)
+
+$ git -C "$WT" status --short     # empty = clean
+$ git -C "$WT" cherry-pick --quit # sequencer end
+$ git -C "$WT" -c user.name="muse-i15" -c user.email="i15@local" cherry-pick bb3dfe3
+Auto-merging games/ssx3/ssx3-functions.sweep.csv
+[detached HEAD 6fca9df] SSX3 map: add missing function entry 0x14f2a8 (I12)
+$ git -C "$WT" -c user.name="muse-i15" -c user.email="i15@local" cherry-pick 834f2cc
+Auto-merging games/ssx3/ssx3-functions.sweep.csv
+[detached HEAD bbd5ab2] SSX3 map: add missing function entry 0x156750 (I13)
+$ git -C "$WT" -c user.name="muse-i15" -c user.email="i15@local" cherry-pick ed378c8
+Auto-merging games/ssx3/ssx3-functions.sweep.csv
+[detached HEAD ab830e4] SSX3 map: add missing function entry 0x243a80 (I14)
+
+$ git -C "$WT" log --oneline -8
+ab830e4 SSX3 map: add missing function entry 0x243a80 (I14)
+bbd5ab2 SSX3 map: add missing function entry 0x156750 (I13)
+6fca9df SSX3 map: add missing function entry 0x14f2a8 (I12)
+a0f86bf SSX3 map: add missing function entry 0x395730 (I11)
+c3a6df1 Runtime: optional PS2X_GAME_CODEGEN_DIR game-objects static lib (I10)
+ab443f6 Bundle: set CFBundleName so devicectl installs the device .app (I8)
+ffdf58c SSX3: restore the exact card busy-query entry
+be0c9ee [E9] Drop the unimplemented SIF command handler selector
+
+$ git -C "$WT" status --short     # empty = clean

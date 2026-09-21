@@ -1,0 +1,12 @@
+[Transcribed from tool output 2026-09-21 ~04:40 -0400; `._pack-*.idx` noise lines elided, labeled where they occurred.]
+
+$ git -C "$FORK" worktree add --detach "$W/fork-wt" ffdf58c4ee3b95bc6dd8779a0baeed0b23afe19b
+Preparing worktree (detached HEAD ffdf58c)
+Updating files: 100% (269/269), done.
+HEAD is now at ffdf58c SSX3: restore the exact card busy-query entry
+
+(exit 0; `non-monotonic index ... ._pack-66cfe....idx` noise on stderr, cosmetic — owner's tree.)
+
+$ find "$W/fork-wt" -name "._*" | wc -l
+     330
+$ find "$W/fork-wt" -name "._*" -delete   # 330 -> 0
