@@ -1288,6 +1288,23 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E19 read (09-21) — PASS(iii-shaped HONEST STOP), parser interposer recursed at E18 R3 (SIGSEGV) and the any-red rule closed work: checkpoint complete, zero boots/edits/commits, Q1/Q2/Q3 unopened, NEXT-BRIEF names the exact repair:**
+      Checkpoint re-verified (fork `3adc0478` triple-agreed, 9,457
+      names, 458/458 in 1.437 s, E15 rc0s, E16 closure6, prior
+      bindings, absorbed entries, ownership controls; 1,725 protected
+      hashes unchanged). Q1 prep only (E18 first64 retained, authored
+      8-frame encode 7,369 B, 5 cases tabled-unmeasured, observer
+      dylib 51,912 B compiled). Observer-loaded suite: rc−11/SIGSEGV
+      @2.957 s in E18 R3 (`feedES size=240`); ips = `EXC_BAD_ACCESS`
+      stack-guard + `observed_parse` frames; 18,828 rows = 1 open +
+      18,827 enters + ZERO returns (recursion proven, `RTLD_NEXT`
+      assumption false); payload cap hit, no closure footer (capture
+      ineligible, honestly retained). Owned linker SIGTERMed by PGID
+      (receipted, nothing else signaled). Verified: fork HEAD/remote
+      untouched + status clean, E18 binaries intact, crash ips +
+      row counts EXACT, no boot files + lease absent, tail-sha
+      recomputed EXACT. ~30 min. Next: E20 forwarding repair + resume
+      Q1→Q2→Q3 (frontier in place). Ledger row added.
 - [x] **G27 read (09-21) — PASS(Done), WRITER NAMED with a closed 5-link proof (stride-0 slab + unguarded branch + driver 64-B write); 10 scanouts WROTE + `Done!` (first scored run since G22 — black); binary zero-destroyed 6th time (run evidence stands):**
       HWASan chosen + trivial-probe proven (clean exit 0 + fault-mode
       report) + ONE build exit 0 (289,112,232 B, `6387d2f3…`,
