@@ -1288,6 +1288,65 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G20 read (09-21) — PASS, crashing pipeline NAMED (sampler_feedback 7463dfd379df2855 + SPIR-V, hash chain closed by orchestrator); Adreno filing package COMPLETE (+ zero-fill recurrence note):**
+      Logging-only +18/−0 hunk (no-mutation proof) in `build_compute_pipeline`
+      @:1198; build exit 0 (265,838,568 B, `8d5079cc…`, build-id `a8402ce0…`).
+      Capture run exit 139 re-triages O4 identically (fault `0x0` @
+      `+0x472fc0`/`+1224`, main pid==tid 11868 from
+      `dispatch_texture_analysis+824`, 0 async mentions — instrumentation did
+      NOT perturb) and names the crasher: pipeline `7463dfd379df2855` /
+      program `62cacea0…` / shader `c61f1a81…` (0 specs), LAST pre-create line
+      with no post line; host bank match = `sampler_feedback.comp` (5049
+      words, SPIR-V sha `b0a09fa0…`). Filing package complete (device/driver/
+      build-ids/repro/fault/shader + extraction recipe); oracles 8/8, 0
+      scanouts, N/A. NOTE: G18 binary zero-fill RECURRED on disk (`c568dc23…`
+      again, post-G20-check — standing hygiene: always re-sha before push;
+      G20's own binary + evidence unaffected). Verified: hunk bytes +
+      G18-match, both binaries, logcat 48 lines + 3 pre-create groups,
+      SPIR-V bytes/sha/magic, tombstone pid/tid/fault/async-absence/stack/
+      build-id, device clean, oracle re-run (N/A), ps2xGS commit, PLUS
+      orchestrator's independent FNV-1-over-words replication (`c61f1a81…`
+      exact). ~1 h. Next: G21 filing draft + standalone repro (NO submission
+      — user's call). Ledger row added.
+- [x] **I18 read (09-21) — PASS, taps live; next layer NAMED = EE-kernel MPEG/sema wait starvation (converges with E13's MPEG wall device-side):**
+      Base MOVED to `83fb4d6` (E-lane +1) + `0x2c5358` DEDUPED (byte-identical,
+      `32d37e7` skipped, merged CSV byte-identical to I17's) + 7 ports
+      (content-identical) + ONE 14-line tap commit `16e1b9a` (local, clean, 0
+      pushes). Codegen SKIPPED (0 runs — map unchanged, C17 reused read-only;
+      lib sha `f356aaa7…` byte-identical to I17's). Device build exit 0 in
+      7m14s (121,225,416 B — SAME size as I17, `ad9f6b3c`, 9454 syms, new T,
+      `diag:frame` string 1×). Overwrite install exit 0 in 111.7 s (10th).
+      Probe (`PS2X_DIAG_PERIOD_MS=15000`): taps PROVE liveness (5 frame + 5
+      threads + 30 thread + stubs/syscalls/cd lines at 15 s cadence;
+      `guest-branch`/`missing-target` still 0) and NAME H-c: 6/6 threads
+      `status=Waiting` frozen pcs ×5 blocks — main in `sceMpegGetPicture`
+      @`0x3b1028` (Mpeg wait, 0 frames, 7 wake sites unfired), workers in
+      `WaitSema` @`0x423de8` (semas 26/30/32/36), thread 4's vsync pump
+      (900/15 s) the ONLY execution; vsync 60/s but ALL GS/DMA counters
+      frozen since boot; CD reads+callbacks ALL in first ~15 s then silence.
+      NO new `.ips` (5 priors — three briefs running) + black screenshot.
+      Verified: tap lines + thread rows + frame blocks, binary, lib shas,
+      worktree, install URL, crashlog, screenshot viewed. ~90 min. Next:
+      I19 sema census + feeder audit + fix PROPOSAL (no implementation —
+      E-lane owns the fix decision). Ledger row added.
+- [x] **E14 read (09-21) — PASS(iii), 5 I-rows verified + 5 fail-befores; absorb STOPS at fresh APFS admission (272 MB short, zero eligible trees left):**
+      Checkpoint re-verified (9,452 names, registry/runner SHAs, suite 452/452,
+      prior fixtures green; `0x2c5300`/`0x2c5358` confirmed at HEAD, not
+      re-added). 5 fail-befores recorded (absent rc0 / present rc1 per row).
+      Per-row bytes + bounds ALL verify (owner bytes = I-lane bytes, slices
+      match ELF, return PCs in-bounds; predicted CSV `7c827add…` = I17's full
+      CSV exactly). Fresh admission 1.57 GB vs 3.49 GB req → reclaimed the
+      SOLE eligible tree (`t12-dev-link`, 1.66 GB, full ownership proofs) →
+      post-reclamation 3,217,489,920 B STILL short by 272,171,008 B (809 MB
+      vs headroom target) → STOP with 0 CSV edits / 0 regen / 0 commits / 0
+      boots, lease never claimed, fork stays `83fb4d60`. NO eligible
+      `/tmp/*-link` trees remain (only protected `/tmp/p1-link`) — the absorb
+      is verified-ready but CANNOT execute without external space recovery.
+      Verified: fork/remote/CSV unchanged, admission JSONs + shortfall math,
+      fail-before fixture, 5-row verification file, reclamation (t12-dev-link
+      gone), lease absent, predicted-CSV cross-check. ~15 min. Next: absorb
+      retry when space recovers (E14 NEXT-BRIEF recipe); E15 owns the MPEG
+      probe (no regen — executable now). Ledger row added.
 - [x] **G19 read (09-21) — PASS, sha erratum RESOLVED (as-found was all-zero damage; rebuild bit-identical); O4 PERSISTS on main sync compile (async eliminated ⇒ Adreno compiler bug):**
       As-found `c568dc23…` proven = sha256 of 265,837,472 zero bytes
       (content all-zero, objects/archives intact — link-output-only
