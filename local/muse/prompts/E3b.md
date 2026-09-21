@@ -72,3 +72,17 @@ discrepancy this capture resolves).
 suite record, lease record, R1–R4 tables, E3-4 answers, exact commands,
 gaps. Commit fork first (pushed fork remote), then evidence (`[E3b]`),
 remove the lease if held, stop.
+
+## Frontier evidence correction (same poll — applies before capture, also sent to the worker)
+
+- E3's "every guest store fires" is FALSE for generated constant-address
+  FAST_WRITE stores (genFastWrite → no-op trace hook + unwatched
+  Ps2FastWrite*; concrete case: generated `42CC88 → FAST_WRITE32(0x456538)`).
+  Cover relevant emitted FAST stores or prove target disjointness; zero R2
+  rows alone cannot exclude them.
+- Overlap tests: normalize RAM/KSEG aliases + SPR offsets, split wrapped DMA
+  intervals, dedupe WRITE*/Store* double reports.
+- Negative results require capture-complete + dropped/interleaved-row status.
+- FIRST-SUCCESS ADDENDUM (no separate boot): enable PS2X_FRAME_DUMP_DIR on
+  the capture boot, implement K1 G4 per-path keeps, capture the first-success
+  PNG (K1-9 sidecar shape).
