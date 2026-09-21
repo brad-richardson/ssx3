@@ -1,0 +1,48 @@
+--- a/tools/gs_dump_replayer.cpp
++++ b/tools/gs_dump_replayer.cpp
+@@ pre-restart VRAM page dump (G30: post-run content probe, last pass only)
++
++		// G30 local diagnostic (not upstream): post-run VRAM content probe.
++		// G29's VRAM checksum read LOAD state (this loop's trailing
++		// restart() below reloads all 4 MB before G29's post-loop read --
++		// host load FNV matches G29's line byte-exact). This dump runs
++		// BEFORE the reload, on the last pass only: per-8KB-page FNV-1a
++		// (SAME truncated basis as G29, G29-E1) + nonzero count + first 8
++		// bytes, to logcat only. Read-only; images/regs untouched (adds
++		// <1 s inside the timed region -- expect inflated ms/VBlank).
++		if (g8_last_pass)
++		{
++			auto g30_checksum = [](const uint8_t *px, size_t n, uint64_t *fnv, size_t *nz) {
++				uint64_t h = 1469598103934665603ull;
++				size_t c = 0;
++				for (size_t i = 0; i < n; i++)
++				{
++					h ^= px[i];
++					h *= 1099511628211ull;
++					c += px[i] != 0;
++				}
++				*fnv = h;
++				*nz = c;
++			};
++			size_t g30_n = opts.vram_size;
++			const uint8_t *g30_vram = static_cast<const uint8_t *>(iface.map_vram_read(0, g30_n));
++			if (g30_vram)
++			{
++				for (size_t g30_p = 0; g30_p < g30_n / 8192; g30_p++)
++				{
++					const uint8_t *pg = g30_vram + g30_p * 8192;
++					uint64_t f = 0;
++					size_t z = 0;
++					g30_checksum(pg, 8192, &f, &z);
++					LOGI("G30: vpage pass=%u page=%03u fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x.\n",
++					     iterations, (unsigned)g30_p, (unsigned long long)f, (unsigned)z,
++					     pg[0], pg[1], pg[2], pg[3], pg[4], pg[5], pg[6], pg[7]);
++				}
++			}
++			else
++			{
++				LOGI("G30: vram map failed.\n");
++			}
++		}
+ 
+ 		if (!parser.restart())
