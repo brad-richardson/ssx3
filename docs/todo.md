@@ -1288,6 +1288,24 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **I20 read (09-21) — PASS, E15-ABI agreement (A1–A13, ZERO disagreements) + 39/39 creator census + fix-ready spec S1–S10 (zero commits, zero code changed):**
+      Base MOVED `83fb4d6`→`67c0a632` with cause (MPEG.cpp/MPEG.h/Sync.cpp/
+      tests byte-identical, so I19 `M:` pins carry; `S:` re-pinned +3).
+      Agreement: 9 agree + E15-closes-G2/G3 (A3/A4) + constraint-carry A5 +
+      split A11 + host-only A12; P1–P3 ALL receipted. ONE config-only probe
+      (CREATE gate added, exit 2 alive PID 4511): all 39 creators named
+      (wait-set five: 26/30/31/32 tid-1 boot, 36 tid-3 boot, all init=0);
+      steady state re-confirmed (drift tabled: id-31 −396 wall variance,
+      id-5 +1/id-29 −1, t4 861-walk). Spec S1–S10 E15-bound (word0-only
+      cbData, v0 discarded, ownership-audit-gated dispatch, type-1-only
+      trigger, S7 stop rule) + handoff (E16 MUST land first). NO new `.ips`
+      (still 5 priors, 5 briefs). Verified: 39 create lines + wait-five
+      creators (every field), extract sizes, tripwires 0/0, gate ancestor,
+      4-files-clean, A3/A4 pins, tail-receipt sha recomputed EXACT,
+      screenshot viewed (foreground, black), iPad 0-ps2 now + app kept.
+      ~50 min. Next: HELD — I-lane idle by design until E16 lands and the
+      E-lane MPEG brief consumes S1–S10 (re-probe per S9 then). Ledger row
+      added.
 - [x] **G23 read (09-21) — PASS(Done), upstream flag REFUTED on both halves with the exact mechanism named (RenderDoc-gated no-op): run 1 O3 lottery (retry spent), run 2 textbook O4, 0 scanouts, O5 never reached:**
       ZERO hunks/builds, 2/2 runs. Run 1: exit 134 O3 (`trim` init, 23-line
       logcat, tombstone_16 — brief's exact retry condition). Run 2 (same
