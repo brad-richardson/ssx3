@@ -6,8 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there).
-- [ ] **Live panes:** k1 (TLB-payload fix + framebuffer capture, fork + P-lane lease, 6h) · t27 (press-on-title within dwell, bytesize, 4h) · od1 (Odin port readiness, synth path, 4h) · e3 (SPR/DMA/host-write audit, read-only, no boots, 4h) · g7 (paraLLEl-GS adoption check, ps2xGS + bytesize, 6h).
-- [ ] **Queue:** E3 boots PARKED behind K1 (follow-up = 1–2 guest frames if same park remains) · P1ae NOT justified yet; SIF NOT eliminated (T26 excludes watched guest stores only; host/SIF/DMA bypass admitted) · P13 selector check (4 unmatched; boot-relevant first) · next hand-back answers 5 frontier Qs (K1 returns+consumers; framebuffers; park?; paraLLEl gate; one next change) · A-lane CLOSED · E2b/E2c HELD · I8 (iPad build this poll; iPhone on broader feedback) · G-lane (strict backend = sensitivity surrogate, not oracle; real-workload check before full backend; MF1-s2 parked behind GX motion) · mini day-one.
+- [ ] **Live panes:** e3b (1–2 frame order capture, fork + P-lane lease, 6h) · g8 (post-draw replay, ps2xGS + bytesize, 6h) · p13b (selector validation, read-only, 3h).
+- [ ] **Queue:** M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · T28 submenu mapping (T27 G1; Single Event Cross from menu park) · K1 ret0-retirement (needs convergence boot) · 0x12C alarm-contract brief (K1 G7; validate replacement, not counts) · P1ae still unjustified (SIF not eliminated) · I8 (iPad on-device; iPhone on broader feedback) · G-lane (strict = sensitivity surrogate; MF1-s2 parked behind GX motion) · E2b/E2c HELD · mini day-one.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
       [docs/plan-120fps-2026-09-17.md](plan-120fps-2026-09-17.md) — owner-held
       gates, muse briefs D1/M1 launched, M2/M3/M4/D2/D3/D4 queued, S1/S2 gated.
@@ -1288,6 +1288,86 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G7 read (09-20) — PASS, paraLLEl adoption gate: 10/10 Mac + Odin caps; replay clean but zero-transfer:**
+      Pinned `3a66c197` (+Granite MIT): Mac/MoltenVK own-init PASS (slab lines,
+      M4 API 1.4.357) + 10/10 vulkaninfo oracle (shared-mem exactly 32 KiB);
+      Odin3 10/10 via 9.6 KB NDK probe (pushed/run/removed; on-device init
+      OPEN + recipe). One 5.5 MB v9 SSX dump (bytes verified both sides;
+      game-entry+60): packet census EOF-exact 8 Vsync/8 PrivRegs/0 transfers —
+      replay exit 0, 640×448 black == black ref exact, 3.08 ms host-wall/unit
+      (no isolated GPU time — tabled), heap 327/328 MiB stable. Supported WITH
+      content caveat: exercised init + state + scanout, NOT the draw core
+      (run-end park jpg proves the game renders; window was pre-first-draw).
+      Hygiene: byte caps tracked, SSD clone/build, / 20→19 GiB (brew tools
+      only), zero third-party code copied, license receipts tabled. Verified:
+      clone rev, dump size + sha, replayer binary, SPDX headers, ps2xGS commit
+      (text-only, pushed) + ssx3 mirror scope (0 outside). Reference-state row:
+      PCSX2 aligned screenshot + header shot. ~30 min. Next: G8 post-first-draw
+      replay. Ledger row added.
+- [x] **K1 read (09-20) — PASS, payload equivalent: 6 drops → 0, same park, P0 black frame verified:**
+      Provenance-checked HLE equivalent (game-override gate + guest
+      copy-integrity memcmp, no game bytes in runtime): all six lookups
+      payload-exact incl. `03→80075330` data; 8 installs, no −1;
+      `[0x456538]` −1 → data addr (static chain proof); helpers unreached
+      both paths (stand by, self-reporting); drops 6 → 0 in BOTH boot log
+      and snapshot (silencing-independent); suite 439/439/0 → 443/443/0
+      (4 new cases); 1 boot BOUND=wall 242 s, lease 251 s, zero waits.
+      Park SAME (threads/semaphores/hot-pc/missing-target/stubs/uploads
+      identical; counters ≤0.3%); P0 settled = uniform black, FNV `fd889dc5`
+      + inspected PNG (milestone not met, not promised); R1A game-epoch
+      comparison identical shape (alarm/locator absences = decided HLE
+      collapses). Fork `fc75f70`+`b6252bb` (pushed fork remote only, no
+      generated sources); ret0 HELD; ps2sdk NOT copied (AFL); TheTharin not
+      adopted. Verified: fork commits + remote + clean tree, boot artifacts
+      (sizes/drops/lookups), syscalls 783250, snapshot drops [], PNG sizes +
+      sidecar, FNV RECOMPUTED BY ME (`fd889dc5` exact), suite RE-RUN BY ME
+      443/443/0, lease absent, 561+/0−. Reference-state row: R1A game epoch
+      (post-ExecPS2:5). ~1 h. Next: E3b frame capture (same park ⇒ due).
+      Ledger row added.
+- [x] **T27 read (09-20) — PASS, press-on-title within dwell: Main Menu reached, stable 91 s:**
+      Bit-identical T4 build reused; PPM text-band detector (band < 2.0 +
+      p99 ≤ 10; title-title ≤0.44/6, attract ≥12.73/107); R1 blind (16-bit
+      PPM bug → 3 Starts on attract, title 3/3 by +3 s); R2 unscored (global-N
+      bug → 3 Crosses + 54 polls; post-hoc dwell 15–17 s); R3 detected TITLE
+      at poll01 (0.4331/6) + Start ≤0.73 s after exposure → Main Menu by +3 s,
+      N=10 snaps over 91 s (pairwise ≤0.0862/p99 ≤2; Single Event highlighted).
+      6 WSL flaps + 3 VM restarts, all runs exit 0 in flap-free windows (R3
+      effects-verified); NVM untouched; R3-only `sceSdGetParam` ×412 (IOP
+      155); traces 3.9 GB SSD + sha-verified. Verified: scope (0 outside),
+      snap sizes + shas, bit-identities (R1start≡T25, a2≡a3 post25), 54 polls,
+      SSD sizes ×3, slice sha + 2000+2000 lines, detector RE-RUN BY ME
+      (0.0586/1/36 exact). Reference-state row: the trace IS the reference
+      (menu reached). ~40 min. Next: G1 submenu mapping (T28-class). Ledger
+      row added.
+- [x] **E3 read (09-20) — PASS, host-write audit: SPR engine window-reachable, T26 zero cannot exclude 11 bypass groups:**
+      Static audit, 0 boots/leases/runs: watch boundary verified in source
+      (guest macros fire pre-special; host fires IFF Direct — exactly 2 sites);
+      SPR_FROM/SPR_TO memcpy (A1/A2) guest-triggerable, MADR/SADR/QWC dynamic,
+      8 const-CHCR sites, reachable INSIDE the window loop
+      (362DE8→38F4F8→371D10, 362CC8→38F738→371DD8); T26's own snapshot shows
+      431k SPR_FROM + ~301k SPR_TO-path firings, all watch-invisible. 30+
+      arb-pointer RDRAM writers (SIF/RPC/IOP, CD/file, LibC); fixed-address +
+      unbound classes excluded with barriers. Exclusion table: CAN exclude
+      guest stores + 4 Direct paths; CANNOT exclude N-1–N-11. Follow-up recipe
+      adopts frontier record table verbatim (R1–R4, shared seq domain, ≤2-frame
+      + byte caps, no flag forcing) + E3-4 settling map. Verified: SPR lines,
+      Direct sites ×2, dead tramps (0/0 refs in 9262 files), T26 census spots
+      ((73)×0, (30)×1), park rows (431302/301496/272650), scope 399+/0−.
+      Reference-state row: n/a (static audit). ~35 min. Next: E3b boots (same
+      park ⇒ due). Ledger row added.
+- [x] **OD1 read (09-20) — PASS, Odin readiness doc: 20-entry interface, 15-check device-run list, Odin live on USB:**
+      Part 4 dec 4b readiness half (no device run): E1–E20 entry table (every
+      row file+line or OPEN ×7: build driver, env enablement, dump pull,
+      geometry assert, Vulkan, XFB geometry, bionic portability), B1–B6 buffer
+      shapes, F1–F8 flags, T1–T4 toolchains (device VK stale, EGL runnable),
+      D1–D12 deps (all present), G1–G9 here→Odin gaps, K1–K15 checklist with
+      exact bars + landing slots (B1/C1/C5/B8 refs or TABLED-method).
+      Reachability: Odin3 USB `622c49b1`, 100%/full, 41.8 °C idle, 29 GB free,
+      lease absent, game/template/module/movie present; SSD ODIN_SERIAL stale
+      (S2-era WiFi). Verified: scope (1 file), M15 header sha `910163fa…`,
+      S1 line refs, route-criteria/M15 line counts, S20 compile DB + libvideo
+      finds (no vulkan), adb presence now. Reference-state row: n/a (readiness
+      doc). ~25 min. Next: M15-on-Odin arm brief (O1–O3). Ledger row added.
 - [x] **T26 read (09-20) — PASS, writer named: 11 init-only pcs, 0 in-window, routes to E3:**
       One 240 s leased boot (BOUND=wall, SIGTERM el=241 s, lease held 250 s,
       zero waits) with 83 watch windows emits 6,245,425 watch lines; block
