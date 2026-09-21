@@ -1,0 +1,92 @@
+seq=1 ns=1000 tid=1510914 kind=observer-open pid=55755 schema=2 proof=1 textCap=12582912 payloadCap=2097152
+seq=2 ns=365000 tid=1510914 kind=binding api=av_parser_parse2 method=direct-import original=0x1017335f8 replacement=0x100568c74 next=0x100568c74 explicit=0x100568c74 nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib symbol=av_parser_parse2
+seq=3 ns=390000 tid=1510914 kind=binding api=avcodec_send_packet method=direct-import original=0x1014f572c replacement=0x1005690f0 next=0x1005690f0 explicit=0x1005690f0 nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib symbol=avcodec_send_packet
+seq=4 ns=407000 tid=1510914 kind=binding api=avcodec_receive_frame method=direct-import original=0x10144e0d8 replacement=0x1005692d0 next=0x1005692d0 explicit=0x1005692d0 nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib symbol=avcodec_receive_frame
+seq=5 ns=418000 tid=1510914 kind=binding api=_Exit method=direct-import original=0x18cd8923c replacement=0x1005694bc next=0x1005694bc explicit=0x1005694bc nextIsReplacement=1 explicitIsReplacement=1 valid=1 image=/usr/lib/system/libsystem_c.dylib symbol=_Exit
+seq=6 ns=1994000 tid=1510914 kind=parse-enter call=1 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=0 payloadOffset=0 kept=1000 fnv64=0x93672cab5244a0eb first64=000001b33201c014ffffe018000001b5146a00010000000001b80008004000000100000ffff8000001b58ffff341800000010113f87d29488b94a5222e529488
+seq=7 ns=1998000 tid=1510914 kind=backend-enter api=parse call=1 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f67a0 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=0
+seq=8 ns=2005000 tid=1510914 kind=parse-return call=1 used=1000 packetSize=0 consumed=1000 packets=0 packetFNV64=0x0000000000000000
+seq=9 ns=2017000 tid=1510914 kind=parse-enter call=2 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=1000 payloadOffset=1000 kept=1000 fnv64=0x769ab69f91a1b409 first64=222e529488b94a5222e529488b94a522200000010613f87d29488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488
+seq=10 ns=2019000 tid=1510914 kind=backend-enter api=parse call=2 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f6b88 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=1000
+seq=11 ns=2023000 tid=1510914 kind=parse-return call=2 used=1000 packetSize=0 consumed=2000 packets=0 packetFNV64=0x0000000000000000
+seq=12 ns=2030000 tid=1510914 kind=parse-enter call=3 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=2000 payloadOffset=2000 kept=1000 fnv64=0x3a9ed84cb52a153f first64=2e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488
+seq=13 ns=2032000 tid=1510914 kind=backend-enter api=parse call=3 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f6f70 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=2000
+seq=14 ns=2035000 tid=1510914 kind=parse-return call=3 used=1000 packetSize=0 consumed=3000 packets=0 packetFNV64=0x0000000000000000
+seq=15 ns=2042000 tid=1510914 kind=parse-enter call=4 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=3000 payloadOffset=3000 kept=1000 fnv64=0x67c82f0fa959b98a first64=2e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488
+seq=16 ns=2044000 tid=1510914 kind=backend-enter api=parse call=4 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f7358 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=3000
+seq=17 ns=2046000 tid=1510914 kind=parse-return call=4 used=1000 packetSize=0 consumed=4000 packets=0 packetFNV64=0x0000000000000000
+seq=18 ns=2053000 tid=1510914 kind=parse-enter call=5 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=4000 payloadOffset=4000 kept=1000 fnv64=0xd2658cce74b39861 first64=2e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488
+seq=19 ns=2055000 tid=1510914 kind=backend-enter api=parse call=5 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f7740 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=4000
+seq=20 ns=2058000 tid=1510914 kind=parse-return call=5 used=1000 packetSize=0 consumed=5000 packets=0 packetFNV64=0x0000000000000000
+seq=21 ns=2065000 tid=1510914 kind=parse-enter call=6 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=5000 payloadOffset=5000 kept=1000 fnv64=0x7c020617dec7a4f3 first64=2e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488b94a5222e529488
+seq=22 ns=2067000 tid=1510914 kind=backend-enter api=parse call=6 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f7b28 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=5000
+seq=23 ns=2079000 tid=1510914 kind=parse-return call=6 used=479 packetSize=5479 consumed=5479 packets=1 packetFNV64=0xb0a2d8b7677b0ba9
+seq=24 ns=2093000 tid=1510914 kind=send-enter call=1 codec=0x7b1b014000 size=5479 eof=0
+seq=25 ns=2095000 tid=1510914 kind=backend-enter api=send call=1 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=26 ns=2357000 tid=1510914 kind=send-return call=1 rc=0
+seq=27 ns=2361000 tid=1510914 kind=backend-enter api=receive call=1 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=28 ns=2363000 tid=1510914 kind=receive-return call=1 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=0
+seq=29 ns=2371000 tid=1510914 kind=parse-enter call=7 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=5479 payloadOffset=6000 kept=1000 fnv64=0xcddebab7a2cfb186 first64=000001000057fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=30 ns=2373000 tid=1510914 kind=backend-enter api=parse call=7 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f7d07 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=5479
+seq=31 ns=2376000 tid=1510914 kind=parse-return call=7 used=270 packetSize=270 consumed=5749 packets=2 packetFNV64=0x07a3b8479f4b4a91
+seq=32 ns=2379000 tid=1510914 kind=send-enter call=2 codec=0x7b1b014000 size=270 eof=0
+seq=33 ns=2381000 tid=1510914 kind=backend-enter api=send call=2 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=34 ns=2472000 tid=1510914 kind=send-return call=2 rc=0
+seq=35 ns=2475000 tid=1510914 kind=backend-enter api=receive call=2 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=36 ns=2477000 tid=1510914 kind=receive-return call=2 codec=0x7b1b014000 rc=0 width=800 height=448 frames=1
+seq=37 ns=3137000 tid=1510914 kind=backend-enter api=receive call=3 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=38 ns=3140000 tid=1510914 kind=receive-return call=3 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=1
+seq=39 ns=3147000 tid=1510914 kind=parse-enter call=8 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=5749 payloadOffset=7000 kept=1000 fnv64=0x7ac6744eb3d2a1a7 first64=000001000097fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=40 ns=3148000 tid=1510914 kind=backend-enter api=parse call=8 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f7e15 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=5749
+seq=41 ns=3150000 tid=1510914 kind=parse-return call=8 used=270 packetSize=270 consumed=6019 packets=3 packetFNV64=0xca6fe18783e15c51
+seq=42 ns=3153000 tid=1510914 kind=send-enter call=3 codec=0x7b1b014000 size=270 eof=0
+seq=43 ns=3154000 tid=1510914 kind=backend-enter api=send call=3 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=44 ns=3267000 tid=1510914 kind=send-return call=3 rc=0
+seq=45 ns=3270000 tid=1510914 kind=backend-enter api=receive call=4 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=46 ns=3272000 tid=1510914 kind=receive-return call=4 codec=0x7b1b014000 rc=0 width=800 height=448 frames=2
+seq=47 ns=3900000 tid=1510914 kind=backend-enter api=receive call=5 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=48 ns=3902000 tid=1510914 kind=receive-return call=5 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=2
+seq=49 ns=3909000 tid=1510914 kind=parse-enter call=9 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=6019 payloadOffset=8000 kept=1000 fnv64=0xd18188aa442b0472 first64=0000010000d7fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=50 ns=3911000 tid=1510914 kind=backend-enter api=parse call=9 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f7f23 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=6019
+seq=51 ns=3914000 tid=1510914 kind=parse-return call=9 used=270 packetSize=270 consumed=6289 packets=4 packetFNV64=0xc539c12dd3cc4e11
+seq=52 ns=3917000 tid=1510914 kind=send-enter call=4 codec=0x7b1b014000 size=270 eof=0
+seq=53 ns=3918000 tid=1510914 kind=backend-enter api=send call=4 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=54 ns=3958000 tid=1510914 kind=send-return call=4 rc=0
+seq=55 ns=3960000 tid=1510914 kind=backend-enter api=receive call=6 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=56 ns=3962000 tid=1510914 kind=receive-return call=6 codec=0x7b1b014000 rc=0 width=800 height=448 frames=3
+seq=57 ns=4624000 tid=1510914 kind=backend-enter api=receive call=7 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=58 ns=4626000 tid=1510914 kind=receive-return call=7 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=3
+seq=59 ns=4633000 tid=1510914 kind=parse-enter call=10 parser=0x7b1ac14000 codec=0x7b1b014000 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=6289 payloadOffset=9000 kept=1000 fnv64=0x6b7f1002fb4680ab first64=000001000117fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=60 ns=4635000 tid=1510914 kind=backend-enter api=parse call=10 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f8031 size=1000 pts=-9223372036854775808 dts=-9223372036854775808 pos=6289
+seq=61 ns=4638000 tid=1510914 kind=parse-return call=10 used=270 packetSize=270 consumed=6559 packets=5 packetFNV64=0x0b4b59a01bdb770c
+seq=62 ns=4641000 tid=1510914 kind=send-enter call=5 codec=0x7b1b014000 size=270 eof=0
+seq=63 ns=4642000 tid=1510914 kind=backend-enter api=send call=5 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=64 ns=4682000 tid=1510914 kind=send-return call=5 rc=0
+seq=65 ns=4685000 tid=1510914 kind=backend-enter api=receive call=8 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=66 ns=4686000 tid=1510914 kind=receive-return call=8 codec=0x7b1b014000 rc=0 width=800 height=448 frames=4
+seq=67 ns=5346000 tid=1510914 kind=backend-enter api=receive call=9 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=68 ns=5349000 tid=1510914 kind=receive-return call=9 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=4
+seq=69 ns=5356000 tid=1510914 kind=parse-enter call=11 parser=0x7b1ac14000 codec=0x7b1b014000 size=810 pts=-9223372036854775808 dts=-9223372036854775808 pos=6559 payloadOffset=10000 kept=810 fnv64=0xe6d4e8b0482edbe8 first64=000001000157fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=70 ns=5358000 tid=1510914 kind=backend-enter api=parse call=11 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f813f size=810 pts=-9223372036854775808 dts=-9223372036854775808 pos=6559
+seq=71 ns=5361000 tid=1510914 kind=parse-return call=11 used=270 packetSize=270 consumed=6829 packets=6 packetFNV64=0x19709db92854554c
+seq=72 ns=5363000 tid=1510914 kind=send-enter call=6 codec=0x7b1b014000 size=270 eof=0
+seq=73 ns=5365000 tid=1510914 kind=backend-enter api=send call=6 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=74 ns=5405000 tid=1510914 kind=send-return call=6 rc=0
+seq=75 ns=5407000 tid=1510914 kind=backend-enter api=receive call=10 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=76 ns=5409000 tid=1510914 kind=receive-return call=10 codec=0x7b1b014000 rc=0 width=800 height=448 frames=5
+seq=77 ns=6068000 tid=1510914 kind=backend-enter api=receive call=11 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=78 ns=6070000 tid=1510914 kind=receive-return call=11 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=5
+seq=79 ns=6077000 tid=1510914 kind=parse-enter call=12 parser=0x7b1ac14000 codec=0x7b1b014000 size=540 pts=-9223372036854775808 dts=-9223372036854775808 pos=6829 payloadOffset=10810 kept=540 fnv64=0x1538399e69ea2eb9 first64=000001000197fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=80 ns=6079000 tid=1510914 kind=backend-enter api=parse call=12 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f824d size=540 pts=-9223372036854775808 dts=-9223372036854775808 pos=6829
+seq=81 ns=6081000 tid=1510914 kind=parse-return call=12 used=270 packetSize=270 consumed=7099 packets=7 packetFNV64=0x959d0d5068cfd78c
+seq=82 ns=6084000 tid=1510914 kind=send-enter call=7 codec=0x7b1b014000 size=270 eof=0
+seq=83 ns=6085000 tid=1510914 kind=backend-enter api=send call=7 function=0x1014f572c codec=0x7b1b014000 packet=0x7b1ac181c0
+seq=84 ns=6125000 tid=1510914 kind=send-return call=7 rc=0
+seq=85 ns=6127000 tid=1510914 kind=backend-enter api=receive call=12 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=86 ns=6129000 tid=1510914 kind=receive-return call=12 codec=0x7b1b014000 rc=0 width=800 height=448 frames=6
+seq=87 ns=6795000 tid=1510914 kind=backend-enter api=receive call=13 function=0x10144e0d8 codec=0x7b1b014000 frame=0x7b1b03c1c0
+seq=88 ns=6797000 tid=1510914 kind=receive-return call=13 codec=0x7b1b014000 rc=-35 width=0 height=0 frames=6
+seq=89 ns=6803000 tid=1510914 kind=parse-enter call=13 parser=0x7b1ac14000 codec=0x7b1b014000 size=270 pts=-9223372036854775808 dts=-9223372036854775808 pos=7099 payloadOffset=11350 kept=270 fnv64=0xf578f2fd16a4a1cc first64=0000010001d7fffb80000001b5811ff34180000001011270100b9c000001021270100b9c000001031270100b9c000001041270100b9c000001051270100b9c00
+seq=90 ns=6804000 tid=1510914 kind=backend-enter api=parse call=13 function=0x1017335f8 parser=0x7b1ac14000 codec=0x7b1b014000 output=0x16f8b2608 outputSize=0x16f8b2604 input=0x1039f835b size=270 pts=-9223372036854775808 dts=-9223372036854775808 pos=7099
+seq=91 ns=6806000 tid=1510914 kind=parse-return call=13 used=270 packetSize=0 consumed=7369 packets=7 packetFNV64=0x0000000000000000
+# E21 PARSER CLOSURE source=API-interposer reason=destructor rc=0 ns=7154000 events=91 parseCalls=13 offered=11620 consumed=7369 packets=7 packetBytes=7099 sendCalls=7 sendEof=0 receiveCalls=13 frames=6 errors=0 returned=33 pending=0 textTruncated=0 payloadTruncated=0 ioErrors=0 eventBytes=15945 payloadBytes=11620 backendParse=13 backendSend=7 backendReceive=13 bindingChecks=4 recursionGuards=0 proof=1

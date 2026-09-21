@@ -1,0 +1,265 @@
+{
+  "utc": "2026-09-21T21:59:24.423681+00:00",
+  "harness": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+    "bytes": 35232,
+    "allocated": 36864,
+    "sha256": "f71f4a85f280d25c029778bcbed227dc18196d1c51be9be17b1becb925eda727"
+  },
+  "observer": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib",
+    "bytes": 52472,
+    "allocated": 53248,
+    "sha256": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be"
+  },
+  "incoming": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/authored-black.m2v",
+    "bytes": 7369,
+    "allocated": 8192,
+    "sha256": "e4bb4aef871015610870786622dc577b52e14d1e0eee6c4761f535926aba8c39"
+  },
+  "feed": {
+    "plain_bytes": 1862,
+    "loaded_bytes": 1862,
+    "identical": true,
+    "fnv64": "0x74130eff64b134a2",
+    "footer": {
+      "source": "API-interposer",
+      "reason": "destructor",
+      "rc": 0,
+      "ns": 7154000,
+      "events": 91,
+      "parseCalls": 13,
+      "offered": 11620,
+      "consumed": 7369,
+      "packets": 7,
+      "packetBytes": 7099,
+      "sendCalls": 7,
+      "sendEof": 0,
+      "receiveCalls": 13,
+      "frames": 6,
+      "errors": 0,
+      "returned": 33,
+      "pending": 0,
+      "textTruncated": 0,
+      "payloadTruncated": 0,
+      "ioErrors": 0,
+      "eventBytes": 15945,
+      "payloadBytes": 11620,
+      "backendParse": 13,
+      "backendSend": 7,
+      "backendReceive": 13,
+      "bindingChecks": 4,
+      "recursionGuards": 0,
+      "proof": 1
+    }
+  },
+  "exit": {
+    "plain_rc": 3,
+    "loaded_rc": 3,
+    "footer": {
+      "source": "API-interposer",
+      "reason": "_Exit",
+      "rc": 3,
+      "ns": 539000,
+      "events": 7,
+      "parseCalls": 1,
+      "offered": 64,
+      "consumed": 64,
+      "packets": 0,
+      "packetBytes": 0,
+      "sendCalls": 0,
+      "sendEof": 0,
+      "receiveCalls": 0,
+      "frames": 0,
+      "errors": 0,
+      "returned": 1,
+      "pending": 0,
+      "textTruncated": 0,
+      "payloadTruncated": 0,
+      "ioErrors": 0,
+      "eventBytes": 1787,
+      "payloadBytes": 64,
+      "backendParse": 1,
+      "backendSend": 0,
+      "backendReceive": 0,
+      "bindingChecks": 4,
+      "recursionGuards": 0,
+      "proof": 0
+    }
+  },
+  "addrs": {
+    "plain": "addrsImage=/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test\naddr api=av_parser_parse2 direct=0x101bb35f8 directImage=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib next=0x101bb35f8 nextIsDirect=1 explicit=0x101bb35f8 explicitIsDirect=1\naddr api=avcodec_send_packet direct=0x10197572c directImage=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib next=0x10197572c nextIsDirect=1 explicit=0x10197572c explicitIsDirect=1\naddr api=avcodec_receive_frame direct=0x1018ce0d8 directImage=/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib next=0x1018ce0d8 nextIsDirect=1 explicit=0x1018ce0d8 explicitIsDirect=1\naddr api=_Exit direct=0x18cd8923c directImage=/usr/lib/system/libsystem_c.dylib next=0x18cd8923c nextIsDirect=1 explicit=0x18cd8923c explicitIsDirect=1\nADDRS TAIL COMPLETE\n",
+    "loaded": "addrsImage=/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test\naddr api=av_parser_parse2 direct=0x100c64c74 directImage=/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib next=0x100c64c74 nextIsDirect=1 explicit=0x0 explicitIsDirect=0\naddr api=avcodec_send_packet direct=0x100c650f0 directImage=/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib next=0x100c650f0 nextIsDirect=1 explicit=0x0 explicitIsDirect=0\naddr api=avcodec_receive_frame direct=0x100c652d0 directImage=/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib next=0x100c652d0 nextIsDirect=1 explicit=0x0 explicitIsDirect=0\naddr api=_Exit direct=0x100c654bc directImage=/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib next=0x100c654bc nextIsDirect=1 explicit=0x0 explicitIsDirect=0\nADDRS TAIL COMPLETE\n",
+    "observer_bindings": [
+      {
+        "api": "av_parser_parse2",
+        "nextIsReplacement": 1,
+        "explicitIsReplacement": 1,
+        "valid": 1,
+        "image": "/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib",
+        "symbol": "av_parser_parse2"
+      },
+      {
+        "api": "avcodec_send_packet",
+        "nextIsReplacement": 1,
+        "explicitIsReplacement": 1,
+        "valid": 1,
+        "image": "/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib",
+        "symbol": "avcodec_send_packet"
+      },
+      {
+        "api": "avcodec_receive_frame",
+        "nextIsReplacement": 1,
+        "explicitIsReplacement": 1,
+        "valid": 1,
+        "image": "/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib/libavcodec.63.1.101.dylib",
+        "symbol": "avcodec_receive_frame"
+      },
+      {
+        "api": "_Exit",
+        "nextIsReplacement": 1,
+        "explicitIsReplacement": 1,
+        "valid": 1,
+        "image": "/usr/lib/system/libsystem_c.dylib",
+        "symbol": "_Exit"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "argv": [
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+        "feed",
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/authored-black.m2v",
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/feed-plain/result.txt"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/feed-plain",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp/isolation-proof2/"
+      },
+      "elapsed_s": 0.1707590829973924,
+      "stdout_bytes": 0,
+      "scratch_peak_allocated": 0,
+      "name": "feed-plain",
+      "rc": 0,
+      "loaded": false,
+      "proof": false
+    },
+    {
+      "argv": [
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+        "feed",
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/authored-black.m2v",
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/feed-loaded/result.txt"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/feed-loaded",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp/isolation-proof2/",
+        "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib",
+        "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/feed-loaded/parser-observer",
+        "PS2X_E21_PROOF": "1"
+      },
+      "elapsed_s": 0.05391670799872372,
+      "stdout_bytes": 0,
+      "scratch_peak_allocated": 0,
+      "name": "feed-loaded",
+      "rc": 0,
+      "loaded": true,
+      "proof": true
+    },
+    {
+      "argv": [
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+        "exitcode",
+        "3"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/exit-plain",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp/isolation-proof2/"
+      },
+      "elapsed_s": 0.020106084000872215,
+      "stdout_bytes": 0,
+      "scratch_peak_allocated": 0,
+      "name": "exit-plain",
+      "rc": 3,
+      "loaded": false,
+      "proof": false
+    },
+    {
+      "argv": [
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+        "exitcode",
+        "3"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/exit-loaded",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp/isolation-proof2/",
+        "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib",
+        "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/exit-loaded/parser-observer"
+      },
+      "elapsed_s": 0.031139958002313506,
+      "stdout_bytes": 0,
+      "scratch_peak_allocated": 0,
+      "name": "exit-loaded",
+      "rc": 3,
+      "loaded": true,
+      "proof": false
+    },
+    {
+      "argv": [
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+        "addrs"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/addrs-plain",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp/isolation-proof2/"
+      },
+      "elapsed_s": 0.01763237500199466,
+      "stdout_bytes": 852,
+      "scratch_peak_allocated": 0,
+      "name": "addrs-plain",
+      "rc": 0,
+      "loaded": false,
+      "proof": false
+    },
+    {
+      "argv": [
+        "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test",
+        "addrs"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/addrs-loaded",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp/isolation-proof2/",
+        "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib",
+        "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures/isolation/a2/addrs-loaded/parser-observer"
+      },
+      "elapsed_s": 0.030360832999576814,
+      "stdout_bytes": 920,
+      "scratch_peak_allocated": 0,
+      "name": "addrs-loaded",
+      "rc": 0,
+      "loaded": true,
+      "proof": false
+    }
+  ],
+  "boot": 0,
+  "resources": {
+    "utc": "2026-09-21T21:59:24.509577+00:00",
+    "internal_free": 6493192192,
+    "internal_allocated": 3870720,
+    "build_allocated": 0,
+    "codegen_allocated": 0,
+    "evidence_allocated": 3870720,
+    "ssd_free": 178785353728,
+    "ssd_allocated": 156237824,
+    "ssd_owned_paths_allocated": 156237824,
+    "fork_positive_growth": 0,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e21-fixtures",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e21-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-fixtures",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e21-tooltmp"
+    ]
+  }
+}

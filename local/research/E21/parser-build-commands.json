@@ -1,0 +1,34 @@
+{
+  "utc": "2026-09-21T21:59:22.498970+00:00",
+  "commands": [
+    [
+      "/opt/homebrew/opt/llvm/bin/clang",
+      "-dynamiclib",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-I/opt/homebrew/Cellar/ffmpeg/9.0.1_1/include",
+      "/Users/bradrichardson/dev/ssx3/local/research/E21/e21_parser_observer.c",
+      "-L/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib",
+      "-lavcodec",
+      "-lavutil",
+      "-o",
+      "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-parser-observer.dylib"
+    ],
+    [
+      "/opt/homebrew/opt/llvm/bin/clang",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-I/opt/homebrew/Cellar/ffmpeg/9.0.1_1/include",
+      "/Users/bradrichardson/dev/ssx3/local/research/E21/e21_isolation_test.c",
+      "-L/opt/homebrew/Cellar/ffmpeg/9.0.1_1/lib",
+      "-lavcodec",
+      "-lavutil",
+      "-lavformat",
+      "-o",
+      "/Users/bradrichardson/dev/ssx3/local/research/E21/parser/e21-isolation-test"
+    ]
+  ],
+  "parallelism": "one compiler at a time; no Ninja or regeneration"
+}
