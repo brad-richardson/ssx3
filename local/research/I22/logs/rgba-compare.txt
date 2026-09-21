@@ -1,0 +1,8 @@
+# RGBA byte comparison: minimal-7.1.1 probe vs full-9.0.1 CLI (both 4096B, 4x 16x16 RGBA).
+cli reproduce cmd: ffmpeg -hide_banner -loglevel error -i local/research/E18/regression-frames.m2v -f rawvideo -pix_fmt rgba /tmp/i22-cli-rgba.bin
+cli rc=0 ; sha a2256d49b6c0df6a06c3d15aa850ce1c242ad1aefce76170e6fde82cc2dc1fd9 (= E18 provenance)
+probe sha: 0a8d7973010e8dcd03b9ab5c6e365c13e2da7ff3b297c202b7cbed69e4404653
+differing bytes: 1024/4096 (R channel of every pixel)
+cli uniq: 0->2048, 254->1024, 255->1024
+probe uniq: 0->2048, 252->1024, 255->1024
+cli + bilinear (-sws_flags bilinear): 0->2048, 254->1024, 255->1024 (unchanged => drift is version, not flags)

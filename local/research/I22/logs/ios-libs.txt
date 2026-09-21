@@ -1,0 +1,11 @@
+# iOS arm64 minimal-subset archives (preserved at /Volumes/Extreme SSD/ps2x-i22/libs-ios/).
+-rwx------  677720 libavcodec.a   (Non-fat file: arm64)
+-rwx------  926952 libavutil.a    (Non-fat file: arm64)
+-rwx------  895632 libswscale.a   (Non-fat file: arm64)
+libavcodec/mpeg12dec.o: Mach-O 64-bit object arm64
+nm: 49 global "T _avcodec*" ; _ff_mpeg2video_decoder defined ; _ff_mpegvideo_parser defined
+# Link receipts (xcrun -sdk iphoneos clang -arch arm64 -mios-version-min=17.0 -Os -Wl,-dead_strip, bare, no frameworks):
+link exit=0 (smoke test)      : Mach-O 64-bit executable arm64, 1117048 B
+full-surface link exit=0 (linkfull.c, all 20 MPEG.cpp-used APIs): Mach-O 64-bit executable arm64, 1258152 B
+baseline (empty main)                                    : 32944 B ; __TEXT 983040 vs 32768 (smoke)
+tarball: ffmpeg-7.1.1.tar.xz 11019500 B sha256 733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1

@@ -1,0 +1,23 @@
+# Transcribed decode-probe runs (minimal 7.1.1 host subset vs E18 regression-frames.m2v, 240B).
+# Probe mirrors MPEG.cpp feed/receive/convert + flush (see decode.c in this dir).
+--- run A: feed loop only, codec drain, NO parser flush ---
+[swscaler @ 0x78c6800000] No accelerated colorspace conversion found from yuv420p to rgba.
+frame0 16x16 fmt=0
+frame1 16x16 fmt=0
+frame2 16x16 fmt=0 (drain)
+in=240 parsed=240 packets=3 frames=3 rgba=3072
+decode exit=0
+a35b6649c902049e94bfd48210382e078416a4e14bcc6cc33831ac04197604d1  /tmp/i22-rgba.bin
+--- run B1: parser flush added (mirrors MPEG.cpp flush()) ---
+exit=139 (SIGSEGV), no stdout (buffered output lost). Single occurrence; NOT reproduced after.
+--- run B2: same binary under lldb ---
+frame0 16x16 fmt=0
+frame1 16x16 fmt=0
+frame2 16x16 fmt=0 (drain)
+frame3 16x16 fmt=0 (drain)
+in=240 parsed=240 packets=4 frames=4 rgba=4096
+exit=0
+--- runs B3-B7: same binary, direct, 5x ---
+in=240 parsed=240 packets=4 frames=4 rgba=4096 ; exit=0 (x5, all identical)
+0a8d7973010e8dcd03b9ab5c6e365c13e2da7ff3b297c202b7cbed69e4404653  (x6 incl. lldb run)
+E18 expects (CLI full-9.0.1): a2256d49b6c0df6a06c3d15aa850ce1c242ad1aefce76170e6fde82cc2dc1fd9
