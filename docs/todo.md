@@ -1288,6 +1288,79 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E12 read (09-21) — PASS(ii), exact card predicate 0x2c5300 restored; caller advances, no UI+0x344 clear; remaining 0x2c5358 low-bit wall parked:**
+      Checkpoint re-verified (9,450 names, registry/runner SHAs, suite
+      452/452, fail-before `hasFunction(0x2c5300)=false`). Reclaimed 4
+      retired /tmp trees (t1/t5/t5-base/t5-rule, 6.5 GB, per-tree proofs;
+      `/tmp/p1-link` + DerivedData protected); fresh admission passed
+      BEFORE csv edit (4.19 GB vs 3.49 GB req) + rechecked pre-spawn. CSV
+      sha `41024f83…` matches E11's prediction exactly. Regen rc=0 (slot
+      464062), install 3 files, actual-binding truth table 14/14 cases
+      (both ports + indexing proof). ONE guarded boot (75.4 s, lease
+      released): both live `0x2c5300` calls return 0 for status 0, caller
+      proceeds past `0x242158` with ZERO `0x2421b4` clears, 321/321 query
+      pairs, Present join complete (display PNG byte-identical to E11's).
+      Remaining: `0x2d3828 → 0x2c5358` (113 misses; reached low-bit consumer
+      `((v0^1)&1)<<3`: stale contributes 8, exact-1 contributes 0 —
+      E11's branch-sense comparison corrected). Fork `9da21ff` pushed.
+      Verified: fork/push/stat, CSV sha, admission JSONs, binding slot,
+      truth table, suite, boot result, residual line, no-clear grep,
+      lease absent. ~40 min. Next: E13 restores 0x2c5358 (E12 NEXT-BRIEF,
+      authorized) + I17 converges device-side. Ledger row added.
+- [x] **G17 read (09-21) — PASS, O2-argument debugger run NAMES update_template=nullptr at :3505; fault 0xf0 at driver ldr x2+0xf0 (fix-brief input, not a filing):**
+      Run 3 (the one retry; run 2 drew O3, run 1 harness-invalid trap-skip
+      mask bug fixed in-session): `:3505` conditional breakpoint FIRED —
+      DWARF frame variables read `set = 0`, `vk_set =
+      0xb400007ef64c89d0` (VALID), **`update_template = nullptr`** (THE BAD
+      INPUT); on `continue`, SIGSEGV fault `0xf0` at driver `ldr w8, [x2,
+      #0xf0]` with crash-time `x1 == vk_set` (exact match) and `x2 == 0`.
+      `pData` valid; ONLY the template is null. `:3504 VK_ASSERT` compiled
+      out; NO "Failed to create descriptor update template" in ANY logcat
+      (G17 + all 3 G15 — creation-failed ELIMINATED). 4/4 first-draw
+      launches die at O2 (deterministic past the init-trim lottery).
+      App-side invalid usage → minimal-fix brief next, Adreno filing queued
+      as fallback. Verified: r3 naming + crash lines, r2 SIGABRT, LOGE
+      0-counts, device clean, oracle re-run (N/A), pins, ps2xGS commit.
+      ~1.2 h. Next: G18 minimal fix (static cause + guard + on-device
+      re-run for O2 + score). Ledger row added.
+- [x] **I16 read (09-21) — PASS, 0x2c5300 closed (executes mid-trace); NEW wall = 0x2c5358 same class (internal-branch delta):**
+      Case (b): NO E12 commit at HEAD when pinned (`ffdf58c` stayed;
+      E-lane's uncommitted tree independently holds the BYTE-IDENTICAL row
+      — convergence confirmed) + 7 ports (content-identical) + 1-line CSV
+      `b07f738` (local, clean, 0 pushes — E-lane mutating). Codegen exit 0
+      in 3m33s (+1 fn, slot 464062, exactly 1 register line; +0 resumable —
+      straight-line function). Device build exit 0 first try in 8m22s
+      (121,225,288 B, 3c43c3e0, 9453 syms, new T). Overwrite install exit 0
+      in 72 s (8th). Probe: `0x2c5300` executes MID-TRACE with successors
+      (`→ 0x2c67a8 → 0x2d3928 → …` — same continuation E12's boot shows);
+      guest parks at STRICTLY LATER wall JALR `0x2d3828 → 0x2c5358`
+      (mid-function `sub_002C5338`, INTERNAL branches, tail jr
+      @`0x2c53a0`/`0x2c53a8`, caller `jalr $v0`, 0 refs); `ee:idle` 0, 4
+      RPC sids identical, NO new `.ips` (delta vs I11–I15 — next brief's
+      first `ls` checks late filing) + black screenshot. Verified: console
+      keys + mid-trace context, binary, worktree, codegen, install URL,
+      crashlog check, screenshot viewed, E12 row bytes. ~100 min. Next:
+      I17 closes 0x2c5358 at the `9da21ff` base (dedupes E12's row).
+      Ledger row added.
+- [x] **T38 read (09-21) — PASS, ONE 1 s D-pad Left hold on the live race: no separable hold response (gated-tracking non-effect + recipe):**
+      Bit-identical T4 build reused (all receipts reproduce; ZERO mid-session
+      restarts this session). ONE single-shot run: chain reproduced (ENTER
+      Cross 535.6 ms @T+327.20 → load 18%→98%→cinematic→panel by +15,
+      stable 79 s) → XCROSS 536.7 ms @T+432.24 → countdown `2` (+0.2 s) →
+      LIVE → LIVE-LIKE gate → PRE-hold pair (00:01:25 2ND/6 40% /
+      00:01:31 2ND/6 44%, no input) → ONE Left hold 1037.3 ms @T+504.54 →
+      dense 10 snaps to 00:02:12 6TH/6 58%: hold hop itself 2ND→2ND (no
+      step), position decays 2ND→6TH distributed post-hold, progress/clock
+      monotonic (~1.4×), speed excursions + `RECOVER` distributed, score
+      flat 300; RDC gated OUT 10/12, SCPS120 STILL rails ±120 on 7/11 hops
+      incl. the no-input gap and the hold hop — no hold-coincident kink
+      over the noise floor on any metric. 3 frames bit-identical to T37
+      (a1-poll01, a1-post3, a1-post15 — now 4-run identical); EE 52 / IOP
+      155 sets identical; exact flaps 0/1/1 (0 in-window; ZERO event-log
+      entries in-window). Verified: hold walls exact, T38_DONE, LIVE-LIKE,
+      head/tail 2000/2000, identities, flap lines + positions, trace
+      size+sha. ~105 min. Next: T39 no-hold control at matched phase (T38
+      G1(a)). Ledger row added.
 - [x] **E11 read (09-21) — PASS(ii), exact busy-query 0x2c5140 restored; 321 call/return pairs, full card + Present joins; next gap 0x2c5300 parked:**
       DROP checkpoint re-verified (9,449 names, registry/runner SHAs, suite
       452/452, fail-before). Reclaimed 3 retired /tmp trees (p10/p11/p12,
