@@ -1288,6 +1288,24 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E16 read (09-21) — PASS(Done), checkpoint rebuilt byte-identical + run-exit closure repaired (fail-before→pass-after forced) + 1/1 probe closed with REAL footers (6,410 contiguous events, pending/truncation zero); MPEG unchanged, absorb queued next:**
+      Rebuilt from fork `67c0a632` (9,452 names, runner/suite byte-identical
+      to E15, 452/452, SSD fixture reused). Repair: 6 lines in
+      `ps2_runtime.cpp` (closure+shutdown after join, destructor fallback
+      kept) as fork `784f2b3e` (1 file, parent `67c0a632`); actual-linked
+      non-title fixture rc1→rc0 + fallback/idempotence/window/disabled
+      cases, state preserved; 296 unity objects unchanged. Probe: 1/1 boot
+      75.7 s (lease ok, caps closed) — dynamic joins (S/MC/UI, MPEG
+      Create→type1→wait @`0x3b1028`, 0 dispatches), guarded UI3→6 graphics
+      (1696 B copy → GS → D → Present exact), REAL footers (E15: 5/4/1/0;
+      E7: 6410 events, all truncation 0); MPEG cases still rc1 fail-before.
+      Verified: fork commit (scope/content/parent/MPEG-blob-identical),
+      runner + suite + fixture sizes/shas EXACT, suite INDEPENDENTLY
+      re-run 452/452, events file sha + 1…6410 contiguity + both footers
+      exact, lease absent + pgrep rc1. Orchestrator pushed the fork commit
+      (worker left it local per no-push boundary; remote now `784f2b3e`).
+      ~1 h. Next: E17 absorb retry (frontier in place, E-track). Ledger
+      row added.
 - [x] **G24 read (09-21) — PASS(Done, SPLIT verdict), plumbing WORKS (delivery receipted, O4 absent, full loop) but NEW pre-write wall O6 fires (Scudo in first scanout readback, 0 scanouts, N/A); POST-RUN ZERO-DAMAGE on the binary (100% zeros, run evidence stands per precedent):**
       ONE hunk (+5/−1, unconditional + LOGI) + build exit 0 (265,840,424 B,
       `562a0bcf…`, `c7f68343…`) + ONE flag run: exit 134, delivery receipt
