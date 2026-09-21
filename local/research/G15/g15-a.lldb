@@ -1,0 +1,18 @@
+settings set auto-confirm true
+command script import /tmp/g15walk.py
+target create /tmp/g15-symbols
+gdb-remote localhost:5041
+breakpoint set --name Vulkan::CommandPool::trim
+breakpoint modify --condition 'this->table == 0' 1
+continue
+g15_triage
+continue
+g15_triage
+continue
+g15_triage
+continue
+g15_triage
+continue
+g15_triage
+process kill
+quit
