@@ -1,0 +1,13 @@
+{
+  "reason": "The new parser incorrectly required lookupFunction to return null. E14 raw logs and unchanged current source both return a diagnostic fallback for an absent registry slot.",
+  "first_absent_rc": 0,
+  "hasFunction": 0,
+  "source_changes": 0,
+  "csv_changes": 0,
+  "correction": "Require actual registry absence, missing-exact diagnostic, and paired rc0/rc1 expectations; do not invoke fallback.",
+  "original_receipts": [
+    "presence-first-attempt.json",
+    "before-0x14f2a8-check-absent.txt",
+    "e14-raw-14f2a8-check-absent.txt"
+  ]
+}

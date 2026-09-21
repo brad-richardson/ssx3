@@ -1,0 +1,325 @@
+{
+  "utc": "2026-09-21T18:13:26.163108+00:00",
+  "resources": {
+    "utc": "2026-09-21T18:13:25.371511+00:00",
+    "internal_free": 11938250752,
+    "internal_allocated": 2185027584,
+    "build_allocated": 1872957440,
+    "codegen_allocated": 286650368,
+    "evidence_allocated": 25419776,
+    "ssd_free": 236837666816,
+    "ssd_allocated": 859832320,
+    "ssd_owned_paths_allocated": 816840704,
+    "fork_positive_growth": 42991616,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e17-fixtures",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e17-install-metadata",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e17-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-install-metadata",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._boot-e17a-1.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e17-waits.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e17a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e17a-join",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._frames-e17a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._park-e17a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._ps2_log-e17a-1.txt",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._syscalls-e17a-on.txt",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e17a-1.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e17-waits.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e17a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e17a-join",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e17a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e17a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/ps2_log-e17a-1.txt",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-e17a-on.txt"
+    ]
+  },
+  "fork_head": "e63f1616320d12c3f213899af6fba03fee3eafb2",
+  "remote_agreement": true,
+  "fork_commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "rev-parse",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "e63f1616320d12c3f213899af6fba03fee3eafb2\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "ls-remote",
+        "fork",
+        "refs/heads/ssx3"
+      ],
+      "rc": 0,
+      "stdout": "e63f1616320d12c3f213899af6fba03fee3eafb2\trefs/heads/ssx3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "diff",
+        "--cached",
+        "--name-only"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "diff",
+        "--name-only"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "status",
+        "--short"
+      ],
+      "rc": 0,
+      "stdout": "?? ps2_log.txt\n",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        "e63f1616320d12c3f213899af6fba03fee3eafb2"
+      ],
+      "rc": 0,
+      "stdout": "games/ssx3/ssx3-functions.sweep.csv\nps2xRuntime/src/runner/ps2_recompiled_functions.h\nps2xRuntime/src/runner/register_functions.cpp\nps2xRuntime/src/runner/sub_0014F2A8_0x14f2a8.cpp\nps2xRuntime/src/runner/sub_00156750_0x156750.cpp\nps2xRuntime/src/runner/sub_00243A80_0x243a80.cpp\nps2xRuntime/src/runner/sub_00395730_0x395730.cpp\nps2xRuntime/src/runner/sub_003A0158_0x3a0158.cpp\n",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "show",
+        "-s",
+        "--format=%B",
+        "e63f1616320d12c3f213899af6fba03fee3eafb2"
+      ],
+      "rc": 0,
+      "stdout": "[E17] Absorb five verified I-lane map entries\n\nAdd exact rows at 0x14f2a8, 0x156750, 0x243a80, 0x395730, and 0x3a0158.\nRetain existing query/predicate/leaf rows and stage the matching generated\nentries, declarations, and registry. No runtime or MPEG behavior edits.\n\nOrchestrated-By: Muse Code\n\n",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+    }
+  ],
+  "fork_status": "?? ps2_log.txt\n",
+  "fork_index_empty": true,
+  "named_files": [
+    "games/ssx3/ssx3-functions.sweep.csv",
+    "ps2xRuntime/src/runner/ps2_recompiled_functions.h",
+    "ps2xRuntime/src/runner/register_functions.cpp",
+    "ps2xRuntime/src/runner/sub_0014F2A8_0x14f2a8.cpp",
+    "ps2xRuntime/src/runner/sub_00156750_0x156750.cpp",
+    "ps2xRuntime/src/runner/sub_00243A80_0x243a80.cpp",
+    "ps2xRuntime/src/runner/sub_00395730_0x395730.cpp",
+    "ps2xRuntime/src/runner/sub_003A0158_0x3a0158.cpp"
+  ],
+  "generated_names": 9457,
+  "protected_build_files": 554,
+  "protected_build_unchanged": true,
+  "main_runtime_mpeg_unchanged": true,
+  "title_boots": 1,
+  "lease_absent": true,
+  "pgrep_rc": 1,
+  "runner": {
+    "path": "/tmp/e17-map-link/runtime/ps2xRuntime/ps2EntryRunner",
+    "bytes": 163490704,
+    "allocated": 163491840,
+    "sha256": "530ab6c6b5aa6f9159c6e59f7a3b8d01f682d5a50272b33f37182b621867dad8"
+  },
+  "suite": {
+    "path": "/tmp/e17-map-link/runtime/ps2xTest/ps2x_tests",
+    "bytes": 5643528,
+    "allocated": 5644288,
+    "sha256": "939cc64fc376f70bb81295f511eb76fe028524f85387d13577a50d0a6cf8a8dc"
+  },
+  "fixture": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/after/binding-test",
+    "bytes": 165157552,
+    "allocated": 165675008,
+    "sha256": "3d6bb6bbbffa201389e14650ba346696a0d9a372e5e60743f0e2b73a9635b401"
+  },
+  "retention": {
+    "original_files": 29,
+    "canonical_files": 25,
+    "canonical_bytes": 3570462,
+    "canonical_hashes_verified": true,
+    "ssd_originals_reverified": true
+  },
+  "source_shutdown": {
+    "events": 6386,
+    "footer": {
+      "tick": 4492,
+      "events": 6386,
+      "bootBytes": 1019105,
+      "boundaryBytes": 29747,
+      "packetBytes": 3392,
+      "packetFiles": 2,
+      "bootTruncated": 0,
+      "boundaryTruncated": 0,
+      "packetTruncated": 0,
+      "windowComplete": 0,
+      "aligned": 1,
+      "arm": 226
+    },
+    "complete": true
+  },
+  "bounded_tools": [
+    {
+      "label": "baseline-closure",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 2.1598594160004723
+    },
+    {
+      "label": "baseline-link",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 152.17862637500002
+    },
+    {
+      "label": "baseline-prior",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 0.41502991699962877
+    },
+    {
+      "label": "baseline-suite",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 0.8361757080001553
+    },
+    {
+      "label": "boot-analysis",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 3.579121500000838
+    },
+    {
+      "label": "build",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 669.3556069589995
+    },
+    {
+      "label": "canonical-replay",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 4.886195125000086
+    },
+    {
+      "label": "configure",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 73.91003987500153
+    },
+    {
+      "label": "current-binding",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 1.5783716250007274
+    },
+    {
+      "label": "current-closure",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 3.45706783300011
+    },
+    {
+      "label": "current-link",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 324.03400433299976
+    },
+    {
+      "label": "current-suite",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 2.183329583000159
+    },
+    {
+      "label": "five-fail-before",
+      "rc": 1,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 1.2659602500007168
+    },
+    {
+      "label": "five-fail-before-complete",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 1.083225082998979
+    },
+    {
+      "label": "five-present",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 3.929176792000362
+    },
+    {
+      "label": "fork-map-commit",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 6.535265374999653
+    },
+    {
+      "label": "generation",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 3.7939942499997414
+    },
+    {
+      "label": "retention",
+      "rc": 0,
+      "bound": null,
+      "stdout_truncated": false,
+      "elapsed_s": 1.649053291999735
+    }
+  ],
+  "main_repo_pushed": false
+}

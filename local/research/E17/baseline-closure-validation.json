@@ -1,0 +1,244 @@
+{
+  "utc": "2026-09-21T17:36:07.149781+00:00",
+  "binary": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+    "bytes": 165122752,
+    "allocated": 165675008,
+    "sha256": "2089be52f52e1a6001cae902f78cc177b32669a46d8f96b70ff67d95bc45c94f"
+  },
+  "label": "baseline-closure",
+  "cases": [
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+        "quiescent"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/quiescent",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp/baseline-closure/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/quiescent"
+      },
+      "elapsed_s": 0.4518019170009211,
+      "stdout_bytes": 2988,
+      "scratch_peak_allocated": 0,
+      "mode": "quiescent",
+      "rc": 0,
+      "tap_bytes": 1276,
+      "tap_tail": [
+        "seq=5 tick=17 kind=e16-final-producer guestFinished=1 guestCalls=1",
+        "# E15 CLOSURE tick=17 calls=2 returned=2 unwound=0 pending=0 selections=0 invocations=0 registrations=1 registrationTruncated=0",
+        "# E7 SHUTDOWN tick=17 events=5 bootBytes=815 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615"
+      ],
+      "closure": {
+        "tick": 17,
+        "calls": 2,
+        "returned": 2,
+        "unwound": 0,
+        "pending": 0,
+        "selections": 0,
+        "invocations": 0,
+        "registrations": 1,
+        "registrationTruncated": 0
+      },
+      "shutdown": {
+        "tick": 17,
+        "events": 5,
+        "bootBytes": 815,
+        "boundaryBytes": 0,
+        "packetBytes": 0,
+        "packetFiles": 0,
+        "bootTruncated": 0,
+        "boundaryTruncated": 0,
+        "packetTruncated": 0,
+        "windowComplete": 0,
+        "aligned": 0,
+        "arm": 18446744073709551615
+      },
+      "source_count_match": true
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+        "idempotent"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/idempotent",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp/baseline-closure/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/idempotent"
+      },
+      "elapsed_s": 0.41680758300026355,
+      "stdout_bytes": 3085,
+      "scratch_peak_allocated": 0,
+      "mode": "idempotent",
+      "rc": 0,
+      "tap_bytes": 1276,
+      "tap_tail": [
+        "seq=5 tick=17 kind=e16-final-producer guestFinished=1 guestCalls=1",
+        "# E15 CLOSURE tick=17 calls=2 returned=2 unwound=0 pending=0 selections=0 invocations=0 registrations=1 registrationTruncated=0",
+        "# E7 SHUTDOWN tick=17 events=5 bootBytes=815 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615"
+      ],
+      "closure": {
+        "tick": 17,
+        "calls": 2,
+        "returned": 2,
+        "unwound": 0,
+        "pending": 0,
+        "selections": 0,
+        "invocations": 0,
+        "registrations": 1,
+        "registrationTruncated": 0
+      },
+      "shutdown": {
+        "tick": 17,
+        "events": 5,
+        "bootBytes": 815,
+        "boundaryBytes": 0,
+        "packetBytes": 0,
+        "packetFiles": 0,
+        "bootTruncated": 0,
+        "boundaryTruncated": 0,
+        "packetTruncated": 0,
+        "windowComplete": 0,
+        "aligned": 0,
+        "arm": 18446744073709551615
+      },
+      "source_count_match": true
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+        "window-complete"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/window-complete",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp/baseline-closure/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/window-complete"
+      },
+      "elapsed_s": 0.35712554099882254,
+      "stdout_bytes": 3000,
+      "scratch_peak_allocated": 0,
+      "mode": "window-complete",
+      "rc": 0,
+      "tap_bytes": 1341,
+      "tap_tail": [
+        "# E7 COMPLETE tick=604 events=4 bootBytes=748 boundaryBytes=0 packetBytes=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0",
+        "# E15 CLOSURE tick=604 calls=2 returned=2 unwound=0 pending=0 selections=0 invocations=0 registrations=1 registrationTruncated=0",
+        "# E7 SHUTDOWN tick=604 events=4 bootBytes=748 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=1 aligned=0 arm=18446744073709551615"
+      ],
+      "closure": {
+        "tick": 604,
+        "calls": 2,
+        "returned": 2,
+        "unwound": 0,
+        "pending": 0,
+        "selections": 0,
+        "invocations": 0,
+        "registrations": 1,
+        "registrationTruncated": 0
+      },
+      "shutdown": {
+        "tick": 604,
+        "events": 4,
+        "bootBytes": 748,
+        "boundaryBytes": 0,
+        "packetBytes": 0,
+        "packetFiles": 0,
+        "bootTruncated": 0,
+        "boundaryTruncated": 0,
+        "packetTruncated": 0,
+        "windowComplete": 1,
+        "aligned": 0,
+        "arm": 18446744073709551615
+      },
+      "source_count_match": true
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+        "disabled"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/disabled",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp/baseline-closure/"
+      },
+      "elapsed_s": 0.3339909999995143,
+      "stdout_bytes": 2981,
+      "scratch_peak_allocated": 0,
+      "mode": "disabled",
+      "rc": 0,
+      "tap_bytes": 0,
+      "tap_tail": []
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+        "unopened"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/unopened",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp/baseline-closure/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/unopened"
+      },
+      "elapsed_s": 0.32076129200140713,
+      "stdout_bytes": 2981,
+      "scratch_peak_allocated": 0,
+      "mode": "unopened",
+      "rc": 0,
+      "tap_bytes": 0,
+      "tap_tail": []
+    },
+    {
+      "argv": [
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/e16-fixtures/after/binding-test",
+        "fallback-error"
+      ],
+      "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/fallback-error",
+      "env": {
+        "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-tooltmp/baseline-closure/",
+        "PS2X_E15_TRACE": "1",
+        "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e17-fixtures/baseline-closure/fallback-error"
+      },
+      "elapsed_s": 0.02908762500010198,
+      "stdout_bytes": 150,
+      "scratch_peak_allocated": 0,
+      "mode": "fallback-error",
+      "rc": 0,
+      "tap_bytes": 857,
+      "tap_tail": [
+        "seq=2 tick=0 kind=mpeg-return id=1 route=fixture-error-setup target=0x4027b8 entryA0=0x150000 pc=0xf00000 v0=0x160118 sp=0x100000 ra=0xf00000 suppliedRA=0xf00000 thread=1 callback=0",
+        "# E15 CLOSURE tick=0 calls=1 returned=1 unwound=0 pending=0 selections=0 invocations=0 registrations=0 registrationTruncated=0",
+        "# E7 SHUTDOWN tick=0 events=2 bootBytes=398 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615"
+      ],
+      "closure": {
+        "tick": 0,
+        "calls": 1,
+        "returned": 1,
+        "unwound": 0,
+        "pending": 0,
+        "selections": 0,
+        "invocations": 0,
+        "registrations": 0,
+        "registrationTruncated": 0
+      },
+      "shutdown": {
+        "tick": 0,
+        "events": 2,
+        "bootBytes": 398,
+        "boundaryBytes": 0,
+        "packetBytes": 0,
+        "packetFiles": 0,
+        "bootTruncated": 0,
+        "boundaryTruncated": 0,
+        "packetTruncated": 0,
+        "windowComplete": 0,
+        "aligned": 0,
+        "arm": 18446744073709551615
+      },
+      "source_count_match": true
+    }
+  ]
+}

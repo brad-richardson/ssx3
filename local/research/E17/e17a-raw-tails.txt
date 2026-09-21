@@ -1,0 +1,28 @@
+## boot_log; complete newline=False
+Game thread returned. PC=0x31ac30 RA=0x3b1028
+INFO: TEXTURE: [ID 4] Unloaded texture data from VRAM (GPU)
+INFO: TEXTURE: [ID 3] Unloaded texture data from VRAM (GPU)
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+INFO: SHADER: [ID 3] Default shader unloaded successfully
+INFO: TEXTURE: [ID 1] Default texture unloaded successfully
+INFO: Window closed successfully
+[run] exiting loop
+## trace; complete newline=True
+[ 74.8162] Bios    : Bios call: iSignalSema (43) pc=0x423dd8
+[ 74.8163] Bios    : Bios call: WaitSema (44) pc=0x423de8
+[ 74.8532] Bios    : Bios call: iSignalSema (43) pc=0x423dd8
+[ 74.8533] Bios    : Bios call: WaitSema (44) pc=0x423de8
+[ 74.8534] Bios    : Bios call: iSignalSema (43) pc=0x423dd8
+[ 74.8534] Bios    : Bios call: WaitSema (44) pc=0x423de8
+[ 74.8662] Bios    : Bios call: iSignalSema (43) pc=0x423dd8
+[ 74.8663] Bios    : Bios call: WaitSema (44) pc=0x423de8
+## function_log; complete newline=True
+			<< sub_00227F58_0x227f58 exit
+			>> sub_0031A6B8_0x31a6b8 enter
+			<< sub_0031A6B8_0x31a6b8 exit
+		<< sub_00317348_0x317348 exit
+	<< sub_00317500_0x317500 exit
+	>> sub_00423DE0_0x423de0 enter
+	<< sub_00423DE0_0x423de0 exit
+<< sub_0031AC08_0x31ac08 exit
+# E17 RAW TAILS COMPLETE

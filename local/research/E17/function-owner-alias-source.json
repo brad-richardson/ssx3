@@ -1,0 +1,347 @@
+{
+  "sources": [
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_003B0B40_0x3b0b40.cpp",
+      "sha256": "9cf7081f68e8e3c77f903c69cb4ad02542bf8ed78887807c610a1f555aa52e97",
+      "bytes": 80215,
+      "excerpts": [
+        {
+          "line": 14,
+          "text": "// Function: sub_003B0B40"
+        },
+        {
+          "line": 15,
+          "text": "// Address: 0x3b0b40 - 0x3b0fb8"
+        },
+        {
+          "line": 16,
+          "text": "void sub_003B0B40_0x3b0b40(uint8_t* rdram, R5900Context* ctx, PS2Runtime *runtime) {"
+        },
+        {
+          "line": 17,
+          "text": "#ifdef PS2_FUNCTION_LOG_TRACKER"
+        },
+        {
+          "line": 18,
+          "text": "    PS_LOG_ENTRY(\"sub_003B0B40_0x3b0b40\");"
+        },
+        {
+          "line": 19,
+          "text": "#endif"
+        },
+        {
+          "line": 20,
+          "text": ""
+        },
+        {
+          "line": 21,
+          "text": "    switch (ctx->pc) {"
+        },
+        {
+          "line": 22,
+          "text": "        case 0x3b0b40u: goto label_3b0b40;"
+        },
+        {
+          "line": 23,
+          "text": "        case 0x3b0b44u: goto label_3b0b44;"
+        },
+        {
+          "line": 24,
+          "text": "        case 0x3b0b48u: goto label_3b0b48;"
+        },
+        {
+          "line": 88,
+          "text": "        case 0x3b0c48u: goto label_3b0c48;"
+        },
+        {
+          "line": 89,
+          "text": "        case 0x3b0c4cu: goto label_3b0c4c;"
+        },
+        {
+          "line": 90,
+          "text": "        case 0x3b0c50u: goto label_3b0c50;"
+        },
+        {
+          "line": 91,
+          "text": "        case 0x3b0c54u: goto label_3b0c54;"
+        },
+        {
+          "line": 92,
+          "text": "        case 0x3b0c58u: goto label_3b0c58;"
+        },
+        {
+          "line": 93,
+          "text": "        case 0x3b0c5cu: goto label_3b0c5c;"
+        },
+        {
+          "line": 94,
+          "text": "        case 0x3b0c60u: goto label_3b0c60;"
+        },
+        {
+          "line": 95,
+          "text": "        case 0x3b0c64u: goto label_3b0c64;"
+        },
+        {
+          "line": 96,
+          "text": "        case 0x3b0c68u: goto label_3b0c68;"
+        },
+        {
+          "line": 806,
+          "text": "    ctx->pc = 0x3B0C54u;"
+        },
+        {
+          "line": 807,
+          "text": "label_3b0c54:"
+        },
+        {
+          "line": 808,
+          "text": "    // 0x3b0c54: 0x0  nop"
+        },
+        {
+          "line": 809,
+          "text": "    ctx->pc = 0x3b0c54u;"
+        },
+        {
+          "line": 810,
+          "text": "    // NOP"
+        },
+        {
+          "line": 811,
+          "text": "label_3b0c58:"
+        },
+        {
+          "line": 812,
+          "text": "    // 0x3b0c58: 0x27bdff50  addiu       $sp, $sp, -0xB0"
+        },
+        {
+          "line": 813,
+          "text": "    ctx->pc = 0x3b0c58u;"
+        },
+        {
+          "line": 814,
+          "text": "    SET_GPR_S32(ctx, 29, (int32_t)ADD32(GPR_U32(ctx, 29), 4294967120));"
+        },
+        {
+          "line": 815,
+          "text": "label_3b0c5c:"
+        },
+        {
+          "line": 816,
+          "text": "    // 0x3b0c5c: 0x7fb20080  sq          $s2, 0x80($sp)"
+        },
+        {
+          "line": 817,
+          "text": "    ctx->pc = 0x3b0c5cu;"
+        },
+        {
+          "line": 818,
+          "text": "    WRITE128(ADD32(GPR_U32(ctx, 29), 128), GPR_VEC(ctx, 18));"
+        },
+        {
+          "line": 819,
+          "text": "label_3b0c60:"
+        },
+        {
+          "line": 820,
+          "text": "    // 0x3b0c60: 0x7fb30070  sq          $s3, 0x70($sp)"
+        },
+        {
+          "line": 821,
+          "text": "    ctx->pc = 0x3b0c60u;"
+        },
+        {
+          "line": 822,
+          "text": "    WRITE128(ADD32(GPR_U32(ctx, 29), 112), GPR_VEC(ctx, 19));"
+        },
+        {
+          "line": 823,
+          "text": "label_3b0c64:"
+        },
+        {
+          "line": 824,
+          "text": "    // 0x3b0c64: 0x80902d  daddu       $s2, $a0, $zero"
+        }
+      ],
+      "retained": "sources/sub_003B0B40_0x3b0b40.cpp.gz"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_003B04F8_0x3b04f8.cpp",
+      "sha256": "bafbfa5ac19cb990b385d3091fe693f5a22b3a01a0f77128e2c20dcb115be9c8",
+      "bytes": 5421,
+      "excerpts": [
+        {
+          "line": 73,
+          "text": "    ctx->pc = 0x3b0514u;"
+        },
+        {
+          "line": 74,
+          "text": "    SET_GPR_S32(ctx, 3, (int32_t)READ32(ADD32(GPR_U32(ctx, 4), 0)));"
+        },
+        {
+          "line": 75,
+          "text": "label_3b0518:"
+        },
+        {
+          "line": 76,
+          "text": "    // 0x3b0518: 0x84670010  lh          $a3, 0x10($v1)"
+        },
+        {
+          "line": 77,
+          "text": "    ctx->pc = 0x3b0518u;"
+        },
+        {
+          "line": 78,
+          "text": "    SET_GPR_S32(ctx, 7, (int16_t)READ16(ADD32(GPR_U32(ctx, 3), 16)));"
+        },
+        {
+          "line": 79,
+          "text": "label_3b051c:"
+        },
+        {
+          "line": 80,
+          "text": "    // 0x3b051c: 0x8c620014  lw          $v0, 0x14($v1)"
+        },
+        {
+          "line": 81,
+          "text": "    ctx->pc = 0x3b051cu;"
+        },
+        {
+          "line": 82,
+          "text": "    SET_GPR_S32(ctx, 2, (int32_t)READ32(ADD32(GPR_U32(ctx, 3), 20)));"
+        },
+        {
+          "line": 83,
+          "text": "label_3b0520:"
+        },
+        {
+          "line": 84,
+          "text": "    // 0x3b0520: 0x40f809  jalr        $v0"
+        },
+        {
+          "line": 85,
+          "text": "label_3b0524:"
+        },
+        {
+          "line": 86,
+          "text": "    if (ctx->pc == 0x3B0524u) {"
+        },
+        {
+          "line": 87,
+          "text": "        ctx->pc = 0x3B0524u;"
+        },
+        {
+          "line": 88,
+          "text": "        ctx->in_delay_slot = true;"
+        },
+        {
+          "line": 89,
+          "text": "        ctx->branch_pc = 0x3B0520u;"
+        },
+        {
+          "line": 90,
+          "text": "        // 0x3b0524: 0x872021  addu        $a0, $a0, $a3 (Delay Slot)"
+        },
+        {
+          "line": 91,
+          "text": "        SET_GPR_S32(ctx, 4, (int32_t)ADD32(GPR_U32(ctx, 4), GPR_U32(ctx, 7)));"
+        },
+        {
+          "line": 92,
+          "text": "        ctx->in_delay_slot = false;"
+        },
+        {
+          "line": 93,
+          "text": "        ctx->pc = 0x3B0528u;"
+        },
+        {
+          "line": 94,
+          "text": "        goto label_3b0528;"
+        },
+        {
+          "line": 95,
+          "text": "    }"
+        },
+        {
+          "line": 96,
+          "text": "    ctx->pc = 0x3B0520u;"
+        },
+        {
+          "line": 97,
+          "text": "    {"
+        },
+        {
+          "line": 98,
+          "text": "        const uint32_t jumpTarget = GPR_U32(ctx, 2);"
+        },
+        {
+          "line": 99,
+          "text": "        SET_GPR_U32(ctx, 31, 0x3B0528u);"
+        },
+        {
+          "line": 100,
+          "text": "        ctx->pc = 0x3B0524u;"
+        },
+        {
+          "line": 101,
+          "text": "        ctx->in_delay_slot = true;"
+        },
+        {
+          "line": 102,
+          "text": "        ctx->branch_pc = 0x3B0520u;"
+        },
+        {
+          "line": 103,
+          "text": "        // 0x3b0524: 0x872021  addu        $a0, $a0, $a3 (Delay Slot)"
+        },
+        {
+          "line": 104,
+          "text": "        SET_GPR_S32(ctx, 4, (int32_t)ADD32(GPR_U32(ctx, 4), GPR_U32(ctx, 7)));"
+        },
+        {
+          "line": 105,
+          "text": "        ctx->in_delay_slot = false;"
+        },
+        {
+          "line": 106,
+          "text": "        ctx->pc = jumpTarget;"
+        },
+        {
+          "line": 107,
+          "text": "        if (!runtime->dispatchGuestBranch(rdram, ctx, jumpTarget, 0x3B0520u, 0x3B0528u, PS2Runtime::GuestBranchKind::IndirectCall, \"JALR\")) {"
+        },
+        {
+          "line": 108,
+          "text": "            return;"
+        },
+        {
+          "line": 109,
+          "text": "        }"
+        },
+        {
+          "line": 110,
+          "text": "    }"
+        }
+      ],
+      "retained": "sources/sub_003B04F8_0x3b04f8.cpp.gz"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp",
+      "sha256": "564acae2ec8658e06d10d344f4143a61d868f67da13bf8fd0afd54ad2cc6655b",
+      "bytes": 32674881,
+      "excerpts": [
+        {
+          "line": 368365,
+          "text": "        g_ps2RecompiledFunctionTable[705230] = sub_003B0B40_0x3b0b40; // 0x3b0b40"
+        },
+        {
+          "line": 368435,
+          "text": "        g_ps2RecompiledFunctionTable[705300] = sub_003B0B40_0x3b0b40; // 0x3b0c58"
+        }
+      ],
+      "retained": "sources/register_functions.cpp.gz"
+    }
+  ],
+  "scope": "E17 current source excerpts and full compressed snapshots; exact callback dispatch remains separate from owner labels.",
+  "originating_excerpt_utc": "2026-09-21T17:11:59.572717+00:00",
+  "utc": "2026-09-21T18:11:30.360730+00:00"
+}

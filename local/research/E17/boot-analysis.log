@@ -1,0 +1,102 @@
+{
+  "utc": "2026-09-21T18:07:47.736606+00:00",
+  "results": [
+    {
+      "script": "e17_mine.py",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E17/e17_mine.py"
+      ],
+      "rc": 0,
+      "log": "e17_mine-analysis.txt",
+      "tail": [
+        "MPEG 0x587b30 registration/request joined; callback selections/dispatch/AddBs=0; typed wait 0x3b1028",
+        "aligned 226 227 packets 2 copies consumed 206 uploads 2 pixel join True",
+        "observed events 6386 paired scopes 5 source closure {'tick': 4492, 'calls': 5, 'returned': 4, 'unwound': 1, 'pending': 0, 'selections': 0, 'invocations': 0, 'registrations': 1, 'registrationTruncated': 0} shutdown {'tick': 4492, 'events': 6386, 'bootBytes': 1019105, 'boundaryBytes': 29747, 'packetBytes': 3392, 'packetFiles': 2, 'bootTruncated': 0, 'boundaryTruncated': 0, 'packetTruncated': 0, 'windowComplete': 0, 'aligned': 1, 'arm': 226}",
+        "# E17 JOIN MINER TAIL COMPLETE"
+      ]
+    },
+    {
+      "script": "e17_card.py",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E17/e17_card.py",
+        "a"
+      ],
+      "rc": 0,
+      "log": "e17_card-analysis.txt",
+      "tail": [
+        "e17a queries 375 objects ['0xb851a0'] targets {'0x23d570': 11, '0x2c4480': 4, '0x2c5140': 375, '0x2c48c0': 25, '0x2c50e0': 14, '0x40a498': 14, '0x40a360': 18, '0x23cf38': 15, '0x2c5300': 8, '0x2d3810': 141, '0x2c5358': 142, '0x23e540': 2, '0x241cd8': 6, '0x241b20': 6}",
+        "# E17 CARD TAIL COMPLETE"
+      ]
+    },
+    {
+      "script": "e17_lifetime.py",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E17/e17_lifetime.py"
+      ],
+      "rc": 0,
+      "log": "e17_lifetime-analysis.txt",
+      "tail": [
+        "dynamic lifetimes 1 guarded card events 1050 alignments 1",
+        "# E17 LIFETIME TAIL COMPLETE \u2014 post-reuse stores remain raw"
+      ]
+    },
+    {
+      "script": "e17_progress.py",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "/Users/bradrichardson/dev/ssx3/local/research/E17/e17_progress.py",
+        "a"
+      ],
+      "rc": 0,
+      "log": "e17_progress-analysis.txt",
+      "tail": [
+        "e17a missing markers 0 parsed 0 damaged 0 card query 0 function lines 3608880 distinct 1327",
+        "# E17 PROGRESSION MINER TAIL COMPLETE"
+      ]
+    }
+  ],
+  "all_miners_rc0": true,
+  "new_row_trace_receipts": [
+    {
+      "pc": "0x14f2a8",
+      "function_name": "sub_0014F2A8_0x14f2a8",
+      "owner_entries": 4,
+      "missing_records": 0
+    },
+    {
+      "pc": "0x156750",
+      "function_name": "sub_00156750_0x156750",
+      "owner_entries": 1,
+      "missing_records": 0
+    },
+    {
+      "pc": "0x243a80",
+      "function_name": "sub_00243A80_0x243a80",
+      "owner_entries": 1,
+      "missing_records": 0
+    },
+    {
+      "pc": "0x395730",
+      "function_name": "sub_00395730_0x395730",
+      "owner_entries": 204,
+      "missing_records": 0
+    },
+    {
+      "pc": "0x3a0158",
+      "function_name": "sub_003A0158_0x3a0158",
+      "owner_entries": 6,
+      "missing_records": 0
+    }
+  ],
+  "gaps": [],
+  "title_boots": 1,
+  "no_second_boot": true
+}
+# E17 BOOT ANALYSIS TAIL COMPLETE

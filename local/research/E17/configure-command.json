@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+    "-B",
+    "/tmp/e17-map-link/runtime",
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang",
+    "-DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++",
+    "-DCMAKE_OSX_ARCHITECTURES=arm64",
+    "-DPS2X_BUILD_STUDIO=OFF",
+    "-DPS2X_BUILD_RUNTIME=ON",
+    "-DPS2X_BUILD_TEST=ON",
+    "-DPS2X_ENABLE_RUNTIME_LOGS=ON",
+    "-DPS2X_ENABLE_AGRESSIVE_LOGS=ON",
+    "-DPS2X_ENABLE_IOP_RPC_TRACE=ON",
+    "-DPS2X_STRICT_RETURN_DIAGNOSTICS=OFF",
+    "-DPS2X_ENABLE_FFMPEG=ON"
+  ],
+  "source": "E16 exact flags; only build directory differs",
+  "jobs": 2
+}

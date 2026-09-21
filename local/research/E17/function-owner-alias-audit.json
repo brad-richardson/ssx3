@@ -1,0 +1,89 @@
+{
+  "function_lines": 3608880,
+  "counts": {
+    "sub_003B0B40_0x3b0b40": 1,
+    "sub_003B0B10_0x3b0b10": 0,
+    "sub_004029D0_0x4029d0": 0
+  },
+  "owner_occurrences": [
+    {
+      "line": 3455219,
+      "kind": "enter",
+      "parents": [
+        "sub_001A1CE8_0x1a1ce8",
+        "sub_00253860_0x253860",
+        "sub_002536C8_0x2536c8",
+        "sub_003AE450_0x3ae450",
+        "sub_003B0600_0x3b0600",
+        "sub_003AECB8_0x3aecb8",
+        "sub_003AEAD0_0x3aead0",
+        "sub_003B04F8_0x3b04f8"
+      ]
+    },
+    {
+      "line": 3456118,
+      "kind": "exit",
+      "parents": [
+        "sub_001A1CE8_0x1a1ce8",
+        "sub_00253860_0x253860",
+        "sub_002536C8_0x2536c8",
+        "sub_003AE450_0x3ae450",
+        "sub_003B0600_0x3b0600",
+        "sub_003AECB8_0x3aecb8",
+        "sub_003AEAD0_0x3aead0",
+        "sub_003B04F8_0x3b04f8"
+      ]
+    }
+  ],
+  "setup_call": {
+    "seq": 6375,
+    "tick": 249,
+    "kind": "mpeg-call",
+    "id": 1,
+    "route": "branch",
+    "target": 3869784,
+    "source": 3867936,
+    "a0": 5798656,
+    "a1": 5539776,
+    "a2": 5539840,
+    "a3": 0,
+    "t0": 25,
+    "sp": 33553648,
+    "ra": 3867944,
+    "thread": 1,
+    "callback": 0,
+    "cbType": 0,
+    "cbWordReadable": 0
+  },
+  "setup_return": {
+    "seq": 6382,
+    "tick": 249,
+    "kind": "mpeg-return",
+    "id": 1,
+    "route": "branch",
+    "target": 3869784,
+    "entryA0": 5798656,
+    "pc": 3867944,
+    "v0": 2,
+    "sp": 33553648,
+    "ra": 3867944,
+    "suppliedRA": 3867944,
+    "thread": 1,
+    "callback": 0
+  },
+  "registry_rows": [
+    {
+      "line": 368365,
+      "text": "        g_ps2RecompiledFunctionTable[705230] = sub_003B0B40_0x3b0b40; // 0x3b0b40"
+    },
+    {
+      "line": 368435,
+      "text": "        g_ps2RecompiledFunctionTable[705300] = sub_003B0B40_0x3b0b40; // 0x3b0c58"
+    }
+  ],
+  "exact_callback_dispatches": 0,
+  "exact_helper_dispatches": 0,
+  "add_bs_dispatches": 0,
+  "interpretation": "Owner logging precedes its entry-PC switch. The one owner label is the observed 0x3b0c58 setup entry, not an exact 0x3b0b40 callback helper dispatch.",
+  "scope": "Source excerpts, exact dispatch rows, and complete balanced function census; no callback inferred from an owner label."
+}

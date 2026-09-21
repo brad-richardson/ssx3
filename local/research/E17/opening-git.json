@@ -1,0 +1,63 @@
+[
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "rev-parse",
+      "HEAD",
+      "refs/remotes/fork/ssx3"
+    ],
+    "rc": 0,
+    "stdout": "784f2b3e668ffa7a238936be415dc2e03d6c283c\n784f2b3e668ffa7a238936be415dc2e03d6c283c\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "ls-remote",
+      "fork",
+      "refs/heads/ssx3"
+    ],
+    "rc": 0,
+    "stdout": "784f2b3e668ffa7a238936be415dc2e03d6c283c\trefs/heads/ssx3\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": " M ps2xRuntime/src/runner/register_functions.cpp\n?? ps2_log.txt\n",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "ls-files",
+      "ps2xRuntime/src/runner",
+      "ps2xRuntime/include/ps2_recompiled_functions.h"
+    ],
+    "rc": 0,
+    "stdout": "ps2xRuntime/src/runner/register_functions.cpp\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
