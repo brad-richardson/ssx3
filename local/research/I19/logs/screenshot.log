@@ -1,0 +1,6 @@
+probe PID: 4387 (same bundle UUID 33603E5F-978B-4D3D-A06B-6270872BC82A as I18's install; pre-launch occupant PID 4365 reaped BY the launch via --terminate-existing)
+capture: xcrun devicectl device capture screenshot --device P --timeout 60 --destination /tmp/i19-shot1.png
+result: Screenshot saved to: /tmp/i19-shot1.png / Dimensions: 2360x1640 pixels
+staging: mv /tmp/i19-shot1.png W/logs/i19-shot1.png (ExFAT owner/group warning only, file landed byte-complete: 2012769 B)
+content: app window foreground, status bar names ps2EntryRunner, full-black content (viewed from the landed copy)
+cleanup: process terminate --pid 4387 ("Sent signal to terminate process sent to pid 4387"); post-cleanup ps2 grep = 0

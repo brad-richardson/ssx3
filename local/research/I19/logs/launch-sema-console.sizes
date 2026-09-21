@@ -1,0 +1,5 @@
+full console: 45764 lines, 17191533 bytes, sha256 a4d7bfcd2ad0b1200950acbf6f1a4d141c04b16c66c4acb79ea6083899cb2d97 (W/logs/launch-sema-console.log, SSD only — over cap)
+dedup (no DPI, no dormant): 24975 lines, 3399271 bytes, sha256 04ade266029ee5f008209b1a67de197a273bf9bb91e66f44589a0a214858cdab (W/logs/launch-sema-dedup.log, SSD only)
+line classes (full log): [diag:sema] 22395 (11200 wait + 11195 signal) / [diag:dormant] 15676 / DPI-warning 5157 / [diag:cd] 1103 / [cd:callback] 1062 / [diag:stacks] 130 / [diag:stub] 82 / [diag:thread] 30 / [diag:syscall] 28 / [diag:threads] 5 / [diag:syscalls] 5 / [diag:stubs] 5 / [diag:frame] 5 / guest-branch+missing-target 0 / [diag:sema-create] 0 / without-FFmpeg 0 / mpeg (any case) 0 / sceCdSt 0
+sema per-id full-log waits/signals: 26: 737/736 / 30: 5/4 / 31: 5306/5306 (incl. 1+1 DPI-truncated lines) / 32: 616/615 / 36: 1/0
+evidence extracts: diag-extract 2660 lines 184150 B / sema-extract 11847 lines 1609531 B / frame 5 lines / dormant-samples 13 lines

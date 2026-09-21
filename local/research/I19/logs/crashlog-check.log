@@ -1,0 +1,22 @@
+### CHECK 1 (post-launch, after sleep 10; also checks for late I18 filing)
+5 files:
+Name                                                URL Resources        Size    Modification date
+-------------------------------------------------   ------------------   -----   -----------------
+ps2EntryRunner.cpu_resource-2026-09-21-015423.ips   Writable, Readable   15 KB   9/21/26, 1:54 AM
+ps2EntryRunner.cpu_resource-2026-09-21-023911.ips   Writable, Readable   14 KB   9/21/26, 2:39 AM
+ps2EntryRunner.cpu_resource-2026-09-21-032937.ips   Writable, Readable   13 KB   9/21/26, 3:29 AM
+ps2EntryRunner.cpu_resource-2026-09-21-040134.ips   Writable, Readable   13 KB   9/21/26, 4:01 AM
+ps2EntryRunner.cpu_resource-2026-09-21-050020.ips   Writable, Readable   13 KB   9/21/26, 5:00 AM
+
+### CHECK 2 (post-terminate PID 4387, after sleep 15)
+5 files:
+Name                                                URL Resources        Size    Modification date
+-------------------------------------------------   ------------------   -----   -----------------
+ps2EntryRunner.cpu_resource-2026-09-21-015423.ips   Writable, Readable   15 KB   9/21/26, 1:54 AM
+ps2EntryRunner.cpu_resource-2026-09-21-023911.ips   Writable, Readable   14 KB   9/21/26, 2:39 AM
+ps2EntryRunner.cpu_resource-2026-09-21-032937.ips   Writable, Readable   12 KB   9/21/26, 3:29 AM
+ps2EntryRunner.cpu_resource-2026-09-21-040134.ips   Writable, Readable   13 KB   9/21/26, 4:01 AM
+ps2EntryRunner.cpu_resource-2026-09-21-050020.ips   Writable, Readable   13 KB   9/21/26, 5:00 AM
+
+Reading: identical file sets at both checks, all 5 priors' (I11-I15 spin reports, 01:54-05:00 AM) — NO new .ips for I19 AND no late filing for I18 (four briefs running).
+Domain args: --domain-type systemCrashLogs --domain-identifier ps2x-i19 -s ps2EntryRunner --no-recurse, --timeout 60.
