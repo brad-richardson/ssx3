@@ -1288,6 +1288,23 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E17 read (09-21) — PASS(Done), 5 I-rows ABSORBED as fork MAP `e63f1616` (PUSHED by worker, remote agrees): predicted CSV `7c827add` exact, regen rc0, full regression green, 1/1 probe closed with real footers; MPEG still fail-before, fix now unblocked:**
+      Re-verified all 5 rows (bytes/slices/owners) + 5 fail-befores
+      re-run (with an honest parser adaptation: E14's binding=null claim
+      corrected to diagnostic-fallback + hasFunction=0, all pairs re-run
+      pre-mutation). CSV +5 sorted lines (removal recreates baseline);
+      regen rc0 (9,457 files, 5 new + 2 registry, slots exact + 2
+      verified I12 interior resumes, no shift); regression (suite 452/452
+      + all fixtures + E16 closure green + E15 MPEG still rc1); 1/1 boot
+      76.5 s (lease ok, caps closed, 6,386 contiguous events, footers
+      tick4492 pending/truncation 0, joins complete, absorbed entries
+      execute — `0x395730`: 204). Verified: MAP scope (8 files, parent,
+      zero handwritten) + all 5 rows at EXACT dedupe lines/bytes + CSV
+      `7c827add` + runner/suite/fixture sizes+shas EXACT + suite
+      INDEPENDENTLY re-run 452/452 + events contiguity + footers exact +
+      lease/pgrep + remote agreement. ~1 h. Next: E18 MPEG completion
+      fix (frontier in place, E-track; consumes I20 S1–S10). Ledger row
+      added.
 - [x] **G25 read (09-21) — PASS(Done, SPLIT verdict), rebuild bit-identical CONFIRMED but no-flag run returns O4 at first draw (separation UNRESOLVED — O6 site never reached); bidirectional A/B confirms flag efficacy; rebuilt binary ZERO-DESTROYED again within minutes (4th recurrence):**
       Damage confirm (size/mtime-frozen/sha/magic/100% zeros/scope 611
       files) + relink-only rebuild exit 0 (`[1/1]`, ~5 s) reproducing
