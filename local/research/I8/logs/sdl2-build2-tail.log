@@ -1,0 +1,30 @@
+ 1855 |     if ([mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v2] || [mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v2]) {
+      |                                       ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLDevice.h:139:29: note: 'MTLFeatureSet' has been explicitly marked deprecated here
+  139 | typedef NS_ENUM(NSUInteger, MTLFeatureSet)
+      |                             ^
+/Volumes/Extreme SSD/ps2x-i8/SDL/src/render/metal/SDL_render_metal.m:1855:20: warning: 'supportsFeatureSet:' is deprecated: first deprecated in iOS 16.0 - Use supportsFamily instead [-Wdeprecated-declarations]
+ 1855 |     if ([mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v2] || [mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v2]) {
+      |                    ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLDevice.h:801:1: note: 'supportsFeatureSet:' has been explicitly marked deprecated here
+  801 | - (BOOL)supportsFeatureSet:(MTLFeatureSet)featureSet API_DEPRECATED("Use supportsFamily instead", macos(10.11, 13.0), ios(8.0, 16.0), tvos(9.0, 16.0));
+      | ^
+/Volumes/Extreme SSD/ps2x-i8/SDL/src/render/metal/SDL_render_metal.m:1855:105: warning: 'MTLFeatureSet_iOS_GPUFamily1_v2' is deprecated: first deprecated in iOS 16.0 - Use MTLGPUFamily instead [-Wdeprecated-declarations]
+ 1855 |     if ([mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v2] || [mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v2]) {
+      |                                                                                                         ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLDevice.h:139:29: note: 'MTLFeatureSet' has been explicitly marked deprecated here
+  139 | typedef NS_ENUM(NSUInteger, MTLFeatureSet)
+      |                             ^
+/Volumes/Extreme SSD/ps2x-i8/SDL/src/render/metal/SDL_render_metal.m:1855:86: warning: 'supportsFeatureSet:' is deprecated: first deprecated in iOS 16.0 - Use supportsFamily instead [-Wdeprecated-declarations]
+ 1855 |     if ([mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v2] || [mtldevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v2]) {
+      |                                                                                      ^
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLDevice.h:801:1: note: 'supportsFeatureSet:' has been explicitly marked deprecated here
+  801 | - (BOOL)supportsFeatureSet:(MTLFeatureSet)featureSet API_DEPRECATED("Use supportsFamily instead", macos(10.11, 13.0), ios(8.0, 16.0), tvos(9.0, 16.0));
+      | ^
+8 warnings generated.
+[261/266] Building C object CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_sysmutex.c.o
+[262/266] Building C object CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_systls.c.o
+[263/266] Building C object CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_syscond.c.o
+[264/266] Building C object CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_syssem.c.o
+[265/266] Linking C static library libSDL2main.a
+[266/266] Linking C static library libSDL2.a
