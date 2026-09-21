@@ -1,0 +1,132 @@
+{
+  "utc": "2026-09-21T13:47:20.600728+00:00",
+  "removed_duplicate_receipts": [
+    {
+      "original": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/actual/input/e7-events.txt",
+      "canonical": "actual-input-events.txt",
+      "sha256": "350e44cc3750357d8d5ebad045114e17a0a6e0b0c9e851951b3b6698e6ccd7e6"
+    },
+    {
+      "original": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/actual/no-input/e7-events.txt",
+      "canonical": "actual-no-input-events.txt",
+      "sha256": "350e44cc3750357d8d5ebad045114e17a0a6e0b0c9e851951b3b6698e6ccd7e6"
+    },
+    {
+      "original": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/final/input/e7-events.txt",
+      "canonical": "final-input-events.txt",
+      "sha256": "e227b7009a5d8708bed0930a3bbec55440d41ce9ecf35421c930b47594cfb101"
+    },
+    {
+      "original": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/final/no-input/e7-events.txt",
+      "canonical": "final-no-input-events.txt",
+      "sha256": "e227b7009a5d8708bed0930a3bbec55440d41ce9ecf35421c930b47594cfb101"
+    }
+  ],
+  "sampled_peaks": {
+    "internal_growth": {
+      "source": "build-bounded-result.json:after",
+      "internal_free": 3189460992,
+      "internal_growth": 193581056,
+      "ssd_free": 256264634368,
+      "ssd_allocated": 3145728
+    },
+    "ssd_allocated": {
+      "source": "retention-liveness.jsonl:1",
+      "elapsed_s": 0.05402379098813981,
+      "tmp_allocated": 2097152,
+      "fixture_allocated": 186646528,
+      "log_bytes": 0,
+      "internal_free": 11418611712,
+      "internal_growth": 8376320,
+      "ssd_free": 254366711808,
+      "ssd_allocated": 380633088
+    },
+    "tmp_allocated": {
+      "source": "build-bounded-result.json:bound",
+      "reason": "log",
+      "elapsed_s": 13.478306166012771,
+      "tmp_allocated": 2097152,
+      "fixture_allocated": 0,
+      "log_bytes": 45969536,
+      "internal_free": 3337830400,
+      "internal_growth": 59035648,
+      "ssd_free": 256264634368,
+      "ssd_allocated": 3145728
+    },
+    "fixture_allocated": {
+      "source": "retention-liveness.jsonl:1",
+      "elapsed_s": 0.05402379098813981,
+      "tmp_allocated": 2097152,
+      "fixture_allocated": 186646528,
+      "log_bytes": 0,
+      "internal_free": 11418611712,
+      "internal_growth": 8376320,
+      "ssd_free": 254366711808,
+      "ssd_allocated": 380633088
+    },
+    "log_bytes": {
+      "source": "build-bounded-result.json:bound",
+      "reason": "log",
+      "elapsed_s": 13.478306166012771,
+      "tmp_allocated": 2097152,
+      "fixture_allocated": 0,
+      "log_bytes": 45969536,
+      "internal_free": 3337830400,
+      "internal_growth": 59035648,
+      "ssd_free": 256264634368,
+      "ssd_allocated": 3145728
+    }
+  },
+  "sampled_internal_floor": {
+    "source": "build-bounded-result.json:after",
+    "internal_free": 3189460992,
+    "internal_growth": 193581056,
+    "ssd_free": 256264634368,
+    "ssd_allocated": 3145728
+  },
+  "final_resources": {
+    "internal_free": 11395301376,
+    "internal_growth": 11853824,
+    "ssd_free": 254557552640,
+    "ssd_allocated": 173015040
+  },
+  "broad_ssd_boot_sample_omission": "Shared ps2_log.txt excluded from e15-* glob; boot-specific logical/allocated cap counted it throughout",
+  "corrected_binding_ssd_allocated": 385875968,
+  "conservative_whole_boot_ssd_bound": 1805647872,
+  "tool_log_cap_failure": {
+    "cap": 16777216,
+    "closed_raw": 192334611,
+    "overshoot": 175557395,
+    "canonical": "build.log.gz",
+    "evidence_component_reservation": 134217728,
+    "component_also_exceeded": true,
+    "total_internal_growth_after_failure": 193581056,
+    "total_internal_reservation": 536870912,
+    "repair": "Hard bounded stdout pipe, same budgets; own AppleDouble compiler input removed with ownership receipt"
+  },
+  "no_reclamation": true,
+  "no_generated_rebuild": true,
+  "boot_count": 1,
+  "lease_absent": true,
+  "pgrep_rc": 1,
+  "fork_head": "67c0a632d44cad8c0e47b4e2c0ee3782b22fd467",
+  "fork_status": " M ps2xRuntime/src/runner/register_functions.cpp\n?? ps2_log.txt\n",
+  "files": [
+    {
+      "path": "/tmp/p1-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "bytes": 163456240,
+      "sha256": "7544d4ebde5d501e450f473c0d81073cc312d48335fa03dfbb7c76eafaf2f599"
+    },
+    {
+      "path": "/tmp/p1-link/runtime/ps2xTest/ps2x_tests",
+      "bytes": 5643528,
+      "sha256": "8ba90048da7804a3dd278f172efbeb92d968ca89fd4ac9209b243e3d15c5a2eb"
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/entry/binding-test",
+      "bytes": 165103200,
+      "sha256": "b0aefc016c69a0dd693093828bda828a1c7f9eaf36c17a38bb757763642321f2"
+    }
+  ],
+  "df": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk4s1   1.8Ti   1.6Ti   237Gi    88%       1     0  100%   /Volumes/Extreme SSD\n/dev/disk3s5   228Gi   191Gi    11Gi    95%    1.8M  111M    2%   /System/Volumes/Data\n"
+}

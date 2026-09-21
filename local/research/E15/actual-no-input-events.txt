@@ -1,0 +1,11 @@
+# E7 observation only; ticks 0..603; boundary 599..603; byte caps boot=4194304 boundary=1048576 packets=524288
+seq=1 tick=0 kind=mpeg-call id=1 route=fixture-setup target=0x4027b8 source=0x100040 a0=0x150000 a1=0x160000 a2=0x10000 a3=0x4328 t0=0x4329 sp=0x100000 ra=0x1f00100 thread=1 callback=0 cbType=0 cbWordReadable=0
+seq=2 tick=0 kind=mpeg-return id=1 route=fixture-setup target=0x4027b8 entryA0=0x150000 pc=0x1f00100 v0=0x160118 sp=0x100000 ra=0x1f00100 suppliedRA=0x1f00100 thread=1 callback=0
+seq=3 tick=0 kind=mpeg-call id=2 route=fixture-setup target=0x402c08 source=0x100040 a0=0x150000 a1=0x1 a2=0x100070 a3=0x15f000 t0=0x4329 sp=0x100000 ra=0x1f00100 thread=1 callback=0 cbType=0 cbWordReadable=0
+seq=4 tick=0 kind=mpeg-return id=2 route=fixture-setup target=0x402c08 entryA0=0x150000 pc=0x1f00100 v0=0x1 sp=0x100000 ra=0x1f00100 suppliedRA=0x1f00100 thread=1 callback=0
+seq=5 tick=0 kind=mpeg-call id=3 route=branch target=0x402a10 source=0x100040 a0=0x150000 a1=0x200000 a2=0x0 a3=0x4328 t0=0x4329 sp=0x1e00000 ra=0x100050 thread=-999 callback=0 cbType=0 cbWordReadable=0
+seq=6 tick=0 kind=mpeg-request-registration id=3 mpeg=0x150000 type=1 func=0x100070 userdata=0x15f000 handle=1 source=observed-API-args
+seq=7 tick=0 kind=mpeg-wait type=1 token=0x150000 thread=1 pc=0x100050 ra=0x100050 sp=0x1e00000 reason=6
+seq=8 tick=0 kind=mpeg-unwind id=3 route=branch target=0x402a10 entryA0=0x150000 pc=0x100050 v0=0x4323 sp=0x1e00000 ra=0x100050 suppliedRA=0x100050 thread=-999 callback=0
+# E15 CLOSURE tick=0 calls=3 returned=2 unwound=1 pending=0 selections=0 invocations=0 registrations=1 registrationTruncated=0
+# E7 SHUTDOWN tick=0 events=8 bootBytes=1388 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615

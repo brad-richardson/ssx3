@@ -1,0 +1,356 @@
+diff --git a/ps2xRuntime/include/ps2_e15.h b/ps2xRuntime/include/ps2_e15.h
+new file mode 100644
+index 0000000..325c948
+--- /dev/null
++++ b/ps2xRuntime/include/ps2_e15.h
+@@ -0,0 +1,115 @@
++// E15 read-only MPEG call/scheduler observations. No MPEG implementation edits.
++// PS2X_E15_TRACE=1 AND PS2X_E7_DIR gate all work and share bounded E7 output.
++#pragma once
++#include "ps2_e7.h"
++#include "ps2_runtime_macros.h"
++#include <array>
++
++namespace ps2_e15 {
++inline bool enabled() {
++    static const bool yes=[] { const char *p=std::getenv("PS2X_E15_TRACE"); return p && std::strcmp(p,"1")==0; }();
++    return yes && ps2_e7::enabled();
++}
++struct Registration { uint32_t mpeg=0,type=0,func=0,data=0,handle=0; };
++struct State {
++    std::mutex mutex;
++    std::array<Registration,16> registrations{};
++    uint64_t calls=0,returned=0,unwound=0,pending=0,selections=0,invocations=0;
++    size_t registered=0; bool registrationTruncated=false;
++};
++inline State &state() { static State s; return s; }
++inline bool address(uint32_t a,uint32_t n) { return a && n<=0x2000000u && a<=0x2000000u-n; }
++inline bool callback(uint32_t pc) {
++    State &s=state(); std::lock_guard<std::mutex> lock(s.mutex);
++    for(size_t i=0;i<s.registered;++i) if(s.registrations[i].func==pc && pc) return true;
++    return false;
++}
++inline bool target(uint32_t pc) {
++    return pc==0x402708u || pc==0x4027b8u || pc==0x4029c8u || pc==0x4029d0u ||
++           pc==0x402a10u || pc==0x402a58u || pc==0x402aa0u || pc==0x402b58u ||
++           pc==0x402c08u || pc==0x3b0b10u || pc==0x3b0b40u || pc==0x3b06b0u ||
++           pc==0x3b06f8u || pc==0x3b0c58u || callback(pc);
++}
++inline void selection(uint64_t tick,const char *route,uint32_t pc,const R5900Context *c,int thread) {
++    if(!enabled() || !callback(pc)) return;
++    { auto &s=state(); std::lock_guard<std::mutex> lock(s.mutex); ++s.selections; }
++    ps2_e7::event(tick,"mpeg-selected","route=%s target=0x%x a0=0x%x a1=0x%x a2=0x%x ra=0x%x sp=0x%x thread=%d",
++        route,pc,getRegU32(c,4),getRegU32(c,5),getRegU32(c,6),getRegU32(c,31),getRegU32(c,29),thread);
++}
++struct Trace {
++    bool active=false,isCallback=false,done=false;
++    uint64_t id=0,tick=0;
++    const char *route=nullptr;
++    const uint8_t *ram=nullptr;
++    const R5900Context *ctx=nullptr;
++    uint32_t pc=0,source=0,a[5]{},sp=0,ra=0;
++    int thread=0;
++    Trace(const char *r,uint64_t t,const uint8_t *mem,const R5900Context *c,uint32_t p,uint32_t src,int tid)
++        :tick(t),route(r),ram(mem),ctx(c),pc(p),source(src),thread(tid) {
++        if(!enabled() || !target(pc)) return;
++        active=true;isCallback=callback(pc);
++        for(unsigned i=0;i<5;++i) a[i]=getRegU32(c,4+i);
++        sp=getRegU32(c,29);ra=getRegU32(c,31);
++        {auto &s=state();std::lock_guard<std::mutex> lock(s.mutex);id=++s.calls;++s.pending;if(isCallback)++s.invocations;}
++        ps2_e7::event(tick,"mpeg-call","id=%llu route=%s target=0x%x source=0x%x a0=0x%x a1=0x%x a2=0x%x a3=0x%x t0=0x%x sp=0x%x ra=0x%x thread=%d callback=%u cbType=%u cbWordReadable=%u",
++            static_cast<unsigned long long>(id),route,pc,source,a[0],a[1],a[2],a[3],a[4],sp,ra,thread,isCallback,
++            isCallback&&ram&&address(a[1],4)?ps2_e7::word(ram,a[1]):0u,isCallback&&ram&&address(a[1],4));
++        if(pc==0x402a10u) {
++            auto &s=state();std::lock_guard<std::mutex> lock(s.mutex);
++            for(size_t i=0;i<s.registered;++i) {
++                const auto &v=s.registrations[i];if(v.mpeg!=a[0])continue;
++                ps2_e7::event(tick,"mpeg-request-registration","id=%llu mpeg=0x%x type=%u func=0x%x userdata=0x%x handle=%u source=observed-API-args",
++                    static_cast<unsigned long long>(id),v.mpeg,v.type,v.func,v.data,v.handle);
++            }
++        }
++        if((isCallback || pc==0x3b0b40u) && ram) {
++            const uint32_t u=isCallback?a[2]:a[0];
++            bool guard=false;
++            {auto &s=state();std::lock_guard<std::mutex> lock(s.mutex);for(size_t i=0;i<s.registered;++i)guard|=s.registrations[i].data==u;}
++            if(guard && address(u,0x80u)) ps2_e7::event(tick,"mpeg-producer","id=%llu userdata=0x%x registrationGuard=1 sourceObject=0x%x buffer78=0x%x buffer7c=0x%x",
++                static_cast<unsigned long long>(id),u,ps2_e7::word(ram,u+0x28u),ps2_e7::word(ram,u+0x78u),ps2_e7::word(ram,u+0x7cu));
++        }
++        if(pc==0x4029d0u && ram) {
++            const uint32_t n=a[2]<65536u?a[2]:65536u;
++            const bool safe=address(a[1],n);
++            char first[129]{};const uint32_t retained=safe?(n<64u?n:64u):0u;
++            for(uint32_t i=0;i<retained;++i)std::snprintf(first+i*2u,3,"%02x",ram[a[1]+i]);
++            ps2_e7::event(tick,"mpeg-input","id=%llu mpeg=0x%x buffer=0x%x requested=%u hashed=%u safe=%u fnv64=0x%llx retainedHex=%s",
++                static_cast<unsigned long long>(id),a[0],a[1],a[2],safe?n:0u,safe,
++                static_cast<unsigned long long>(safe?ps2_e7::hash(ram+a[1],n):0u),first);
++        }
++    }
++    void end(uint64_t t,bool unwind) {
++        if(!active || done)return;
++        done=true;
++        if(!unwind && pc==0x402c08u) {
++            auto &s=state();std::lock_guard<std::mutex> lock(s.mutex);
++            if(s.registered<s.registrations.size())s.registrations[s.registered++]={a[0],a[1],a[2],a[3],getRegU32(ctx,2)};
++            else s.registrationTruncated=true;
++        }
++        {auto &s=state();std::lock_guard<std::mutex> lock(s.mutex);--s.pending;if(unwind)++s.unwound;else ++s.returned;}
++        ps2_e7::event(t,unwind?"mpeg-unwind":"mpeg-return","id=%llu route=%s target=0x%x entryA0=0x%x pc=0x%x v0=0x%x sp=0x%x ra=0x%x suppliedRA=0x%x thread=%d callback=%u",
++            static_cast<unsigned long long>(id),route,pc,a[0],ctx->pc,getRegU32(ctx,2),getRegU32(ctx,29),getRegU32(ctx,31),ra,thread,isCallback);
++        if(!unwind && pc==0x3b06b0u && ram) {
++            const uint32_t p=getRegU32(ctx,2);const bool safe=address(p,12);
++            ps2_e7::event(t,"mpeg-source-result","id=%llu descriptor=0x%x safe=%u data=0x%x bytes=%u",
++                static_cast<unsigned long long>(id),p,safe,safe?ps2_e7::word(ram,p+4u):0u,safe?ps2_e7::word(ram,p+8u):0u);
++        }
++    }
++    void finish(uint64_t t){end(t,false);}
++    ~Trace(){end(tick,true);}
++};
++inline void closure(uint64_t tick) {
++    if(!enabled())return;
++    auto &s=state();std::lock_guard<std::mutex> lock(s.mutex);
++    // Direct footer remains available even after the normal E7 tick-window closes.
++    auto &out=ps2_e7::sink();std::lock_guard<std::mutex> outputLock(out.mutex);
++    if(out.file && !out.closed) {
++        std::fprintf(out.file,"# E15 CLOSURE tick=%llu calls=%llu returned=%llu unwound=%llu pending=%llu selections=%llu invocations=%llu registrations=%zu registrationTruncated=%u\n",
++            static_cast<unsigned long long>(tick),static_cast<unsigned long long>(s.calls),static_cast<unsigned long long>(s.returned),
++            static_cast<unsigned long long>(s.unwound),static_cast<unsigned long long>(s.pending),
++            static_cast<unsigned long long>(s.selections),static_cast<unsigned long long>(s.invocations),s.registered,s.registrationTruncated);
++        std::fflush(out.file);
++    }
++}
++} // namespace ps2_e15
+diff --git a/ps2xRuntime/include/ps2_e4.h b/ps2xRuntime/include/ps2_e4.h
+index 80e3d8e..762bd5d 100644
+--- a/ps2xRuntime/include/ps2_e4.h
++++ b/ps2xRuntime/include/ps2_e4.h
+@@ -14,6 +14,7 @@
+ // no draw/present/scheduler behavior touched.
+ #pragma once
+ 
++#include "ps2_e7.h"
+ #include "runtime/gs/gs_frontend.h"
+ #include "runtime/ps2_memory.h"
+ 
+@@ -65,6 +66,7 @@ inline bool parseU64(const char *text, uint64_t &out)
+ 
+ inline uint64_t armTickRaw()
+ {
++    if (ps2_e7::aligned()) return ps2_e7::alignedArm().load();
+     static const uint64_t tick = [] {
+         uint64_t parsed = kNoTick;
+         if (!parseU64(std::getenv("PS2X_E4_ARM_TICK"), parsed))
+@@ -87,6 +89,7 @@ inline const char *outDirRaw()
+ 
+ inline uint64_t freezeTickRaw()
+ {
++    if (ps2_e7::aligned()) { const auto a=armTickRaw(); return a==kNoTick ? kNoTick : a+1u; }
+     static const uint64_t tick = [] {
+         uint64_t parsed = kNoTick;
+         if (parseU64(std::getenv("PS2X_E4_FREEZE_TICK"), parsed))
+diff --git a/ps2xRuntime/include/ps2_e7.h b/ps2xRuntime/include/ps2_e7.h
+index 7d6880f..d37e739 100644
+--- a/ps2xRuntime/include/ps2_e7.h
++++ b/ps2xRuntime/include/ps2_e7.h
+@@ -15,7 +15,13 @@ namespace ps2_e7
+ inline constexpr uint64_t kBootBytes = 4u * 1024u * 1024u;
+ inline constexpr uint64_t kWindowBytes = 1u * 1024u * 1024u;
+ inline constexpr uint64_t kPacketBytes = 512u * 1024u;
+-inline bool window(uint64_t tick) { return tick >= 599u && tick <= 603u; }
++// E15 opt-in alignment uses only diagnostic atomics; no guest writes.
++inline bool aligned() { static const bool yes = [] { const char *p=std::getenv("PS2X_E15_ALIGN"); return p && std::strcmp(p,"1")==0; }(); return yes; }
++inline std::atomic<uint64_t> &alignedArm() { static std::atomic<uint64_t> value{UINT64_MAX}; return value; }
++inline bool window(uint64_t tick) {
++    const uint64_t a=alignedArm().load();
++    return aligned() ? (a!=UINT64_MAX && tick>=a && tick<=a+1u) : (tick>=599u && tick<=603u);
++}
+ inline const char *directory()
+ {
+     static const char *dir = [] { const char *p = std::getenv("PS2X_E7_DIR"); return p && *p ? p : nullptr; }();
+@@ -42,7 +48,7 @@ struct Sink
+     FILE *file = nullptr;
+     Budget budget;
+     uint64_t seq = 0, packetBytes = 0, packets = 0;
+-    bool opened = false, finished = false, packetTruncated = false;
++    bool opened = false, finished = false, closed = false, packetTruncated = false;
+ };
+ inline Sink &sink() { static Sink s; return s; }
+ inline uint64_t hash(const uint8_t *data, uint32_t size)
+@@ -62,10 +68,10 @@ inline void event(uint64_t tick, const char *kind, const char *fmt, ...)
+         char path[1024];
+         std::snprintf(path, sizeof(path), "%s/e7-events.txt", directory());
+         s.file = std::fopen(path, "w");
+-        if (s.file) std::fprintf(s.file, "# E7 observation only; ticks 0..603; boundary 599..603; byte caps boot=%llu boundary=%llu packets=%llu\n",
++        if (s.file) std::fprintf(s.file, "# E7 observation only; ticks 0..603; boundary 599..603 unless E15 aligned trigger; byte caps boot=%llu boundary=%llu packets=%llu\n",
+             static_cast<unsigned long long>(kBootBytes), static_cast<unsigned long long>(kWindowBytes), static_cast<unsigned long long>(kPacketBytes));
+     }
+-    if (!s.file || s.finished) return;
++    if (!s.file || s.finished || s.closed) return;
+     if (tick > 603u)
+     {
+         std::fprintf(s.file, "# E7 COMPLETE tick=%llu events=%llu bootBytes=%llu boundaryBytes=%llu packetBytes=%llu bootTruncated=%d boundaryTruncated=%d packetTruncated=%d\n",
+@@ -90,6 +96,19 @@ inline void event(uint64_t tick, const char *kind, const char *fmt, ...)
+     ++s.seq;
+     std::fwrite(row, 1, static_cast<size_t>(n), s.file); std::fflush(s.file);
+ }
++inline void shutdown(uint64_t tick)
++{
++    if (!enabled()) return;
++    Sink &s=sink(); std::lock_guard<std::mutex> lock(s.mutex);
++    if (!s.file || s.closed) return;
++    std::fprintf(s.file,"# E7 SHUTDOWN tick=%llu events=%llu bootBytes=%llu boundaryBytes=%llu packetBytes=%llu packetFiles=%llu bootTruncated=%d boundaryTruncated=%d packetTruncated=%d windowComplete=%d aligned=%d arm=%llu\n",
++        static_cast<unsigned long long>(tick),static_cast<unsigned long long>(s.seq),
++        static_cast<unsigned long long>(s.budget.boot),static_cast<unsigned long long>(s.budget.boundary),
++        static_cast<unsigned long long>(s.packetBytes),static_cast<unsigned long long>(s.packets),
++        s.budget.bootTruncated,s.budget.boundaryTruncated,s.packetTruncated,s.finished,aligned(),
++        static_cast<unsigned long long>(alignedArm().load()));
++    std::fflush(s.file); std::fclose(s.file); s.file=nullptr; s.closed=true;
++}
+ inline void packet(uint64_t tick, const char *kind, const uint8_t *data, uint32_t size,
+                    bool masked = false, size_t queued = 0u, uint32_t source = 0u)
+ {
+@@ -104,7 +123,7 @@ inline void packet(uint64_t tick, const char *kind, const uint8_t *data, uint32_
+     if (source != 0x004ffcc0u || !window(tick)) return;
+     Sink &s = sink();
+     std::lock_guard<std::mutex> lock(s.mutex);
+-    if (size > kPacketBytes - s.packetBytes) { s.packetTruncated = true; return; }
++    if (size > kPacketBytes - s.packetBytes || (aligned() && s.packets>=16u)) { s.packetTruncated = true; return; }
+     char path[1024];
+     std::snprintf(path, sizeof(path), "%s/e7-copy-tick%llu-%llu.bin", directory(),
+         static_cast<unsigned long long>(tick), static_cast<unsigned long long>(++s.packets));
+@@ -141,6 +160,15 @@ inline void cardWrite(uint64_t tick, const uint8_t *ram, uint32_t address,
+               lo==mc && cardAddress(mc) && word(ram,mc)==0x486f78u,pc,thread);
+     }
+     const uint32_t ui=cardUi().load();
++    if (aligned() && ui && cardAddress(ui) && cardAddress(mc) && word(ram,mc)==0x486f78u &&
++        word(ram,ui+0x434u)==mc && address==ui+0x130u && width==4u &&
++        word(ram,address)==3u && lo==6u)
++    {
++        uint64_t unset=UINT64_MAX;
++        if (alignedArm().compare_exchange_strong(unset,tick+1u))
++            event(tick,"e15-align","UI=0x%x MC=0x%x old=3 new=6 pc=0x%x arm=%llu freeze=%llu guard=1",
++                ui,mc,pc,static_cast<unsigned long long>(tick+1u),static_cast<unsigned long long>(tick+2u));
++    }
+     const uint32_t off=address-mc;
+     if ((mc && (off==0u || off==4u || off==0xcu || off==0x10u || off==0x40u || off==0x4cu || off==0x184u || off==0x198u)) ||
+         (ui && (address==ui+0x338u || address==ui+0x344u || address==ui+0x424u || address==ui+0x43cu || address==ui+0x440u || address==ui+0x130u || address==ui+0xb8u || address==ui+0x748u)) || (address>=0x4a3938u && address<=0x4a3944u))
+diff --git a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+index acd4991..8d7cc1c 100644
+--- a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
++++ b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+@@ -1,6 +1,7 @@
+ #include "runtime/ee_scheduler.h"
+ #include "ps2_e3.h"
+ #include "ps2_e4.h"
++#include "ps2_e15.h"
+ 
+ #include "ps2_log.h"
+ #include "ps2_park_snapshot.h"
+@@ -760,7 +761,9 @@ void EeScheduler::run()
+             {
+                 ps2_e3::noteThread(m_currentThreadId);
+             }
++            ps2_e15::Trace mpegTrace("scheduler",m_vsyncTick,m_rdram,&context,context.pc,0u,m_currentThreadId);
+             function(m_rdram, &context, &m_runtime);
++            mpegTrace.finish(m_vsyncTick);
+             m_guestExecuting.store(false, std::memory_order_release);
+             m_insideInterrupt = false;
+         }
+@@ -1743,6 +1746,7 @@ int EeScheduler::cancelAlarm(int id)
+ void EeScheduler::queueInvocation(GuestInvocation invocation)
+ {
+     assertExecutor();
++    ps2_e15::selection(m_vsyncTick,"queue",invocation.context.pc,&invocation.context,m_currentThreadId);
+     invocation.sequence = ++m_invocationSequence;
+     m_pendingInvocations.push_back(std::move(invocation));
+     m_checkpointPending.store(true, std::memory_order_release);
+@@ -1751,6 +1755,7 @@ void EeScheduler::queueInvocation(GuestInvocation invocation)
+ [[noreturn]] void EeScheduler::invokeCurrent(GuestInvocation invocation)
+ {
+     assertExecutor();
++    ps2_e15::selection(m_vsyncTick,"direct",invocation.context.pc,&invocation.context,m_currentThreadId);
+     GuestThread *owner = currentThread();
+     assert(owner != nullptr);
+     if (getRegU32(&invocation.context, 29) == 0u)
+@@ -1771,6 +1776,7 @@ void EeScheduler::queueInvocation(GuestInvocation invocation)
+     assert(!invocations.empty());
+     for (auto it = invocations.rbegin(); it != invocations.rend(); ++it)
+     {
++        ps2_e15::selection(m_vsyncTick,"sequence",it->context.pc,&it->context,m_currentThreadId);
+         if (getRegU32(&it->context, 29) == 0u)
+         {
+             SET_GPR_U32(&it->context, 29, invocationStackTop());
+@@ -2087,6 +2093,9 @@ void EeScheduler::completeExternalWait(uint32_t type, uint64_t token, int result
+         }
+     }
+     std::sort(completed.begin(), completed.end());
++    if (ps2_e15::enabled() && type==1u)
++        ps2_e7::event(m_vsyncTick,"mpeg-complete","type=%u token=0x%llx result=%d matched=%zu thread=%d",
++            type,static_cast<unsigned long long>(token),result,completed.size(),m_currentThreadId);
+     for (const int id : completed)
+     {
+         GuestThread *waiter = thread(id);
+@@ -2101,6 +2110,13 @@ void EeScheduler::completeExternalWait(uint32_t type, uint64_t token, int result
+                                             uint64_t token,
+                                             std::function<void(R5900Context &)> completion)
+ {
++    if (ps2_e15::enabled() && reason==EeWaitReason::Mpeg)
++    {
++        const auto *c=currentContext();
++        ps2_e7::event(m_vsyncTick,"mpeg-wait","type=%u token=0x%llx thread=%d pc=0x%x ra=0x%x sp=0x%x reason=%u",
++            type,static_cast<unsigned long long>(token),m_currentThreadId,c?c->pc:0u,
++            c?getRegU32(c,31):0u,c?getRegU32(c,29):0u,static_cast<unsigned>(reason));
++    }
+     EeWaitState wait{reason, EeExternalWait{type, token}, std::move(completion)};
+     blockCurrent(std::move(wait));
+ }
+diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
+index 398abc1..f5a8238 100644
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -8,6 +8,7 @@
+ #include "ps2_runtime_macros.h"
+ #include "runtime/gs/gs_frontend.h"
+ #include "ps2_e7.h"
++#include "ps2_e15.h"
+ #include "runtime/ee_scheduler.h"
+ #include "ThreadNaming.h"
+ #include "Kernel/Stubs/Audio.h"
+@@ -444,7 +445,17 @@ void dumpPresentationFrame(const uint8_t *rgba,
+     // success PNGs AND first two fallback PNGs (global seq still numbers).
+     static uint64_t s_successKeep = 0u;
+     static uint64_t s_fallbackKeep = 0u;
+-    const bool keep = fallback ? (s_fallbackKeep++ < 2u) : (s_successKeep++ < 2u);
++    bool keep = fallback ? (s_fallbackKeep++ < 2u) : (s_successKeep++ < 2u);
++    // E15: preserve actual host uploads in the same dynamically armed interval.
++    // Four additional image/metadata pairs maximum; observation only.
++    static uint32_t s_alignedKeep = 0u;
++    if (!fallback && ps2_e7::aligned() && ps2_e7::window(tick) && s_alignedKeep < 4u)
++    {
++        ++s_alignedKeep; keep = true;
++        ps2_e7::event(tick,"e15-present","upload=%llu width=%u height=%u D=%u source=%u fnv32=0x%x smode2=0x%llx pmode=0x%llx",
++            static_cast<unsigned long long>(seq),width,height,displayFbp,sourceFbp,hash,
++            static_cast<unsigned long long>(smode2),static_cast<unsigned long long>(pmode));
++    }
+     if (keep)
+     {
+         std::snprintf(pngPath, sizeof(pngPath), "%s/%s-%llu.png", dir, fallback ? "fallback" : "upload",
+@@ -684,6 +695,8 @@ PS2Runtime::~PS2Runtime()
+     {
+         std::cerr << "[~PS2Runtime] cleanup exception: unknown" << std::endl;
+     }
++    ps2_e15::closure(m_memory.gs().vsyncTick.load());
++    ps2_e7::shutdown(m_memory.gs().vsyncTick.load());
+ }
+ 
+ void PS2Runtime::setIopPluginSearchPaths(std::vector<std::filesystem::path> paths)
+@@ -2167,7 +2180,10 @@ bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
+                 g_diagWatchThreadId.load(std::memory_order_relaxed));
+     };
+     noteCardCall("mc-call");
++    ps2_e15::Trace mpegTrace("branch",m_memory.gs().vsyncTick.load(),rdram,ctx,targetPc,sourcePc,
++                            g_diagWatchThreadId.load(std::memory_order_relaxed));
+     targetFn(rdram, ctx, this);
++    mpegTrace.finish(m_memory.gs().vsyncTick.load());
+     noteCardCall("mc-return");
+ 
+     if (isStopRequested() || ctx->pc == 0u)

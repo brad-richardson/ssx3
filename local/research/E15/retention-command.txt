@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_bounded.py", line 76, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_bounded.py", line 52, in main
+    row=dict(elapsed_s=time.monotonic()-t0,tmp_allocated=size(folder),fixture_allocated=size(W/'P1/e15-binding-tests'),log_bytes=log.stat().st_size,**sample())
+                                                                                                                                                      ~~~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_bounded.py", line 19, in sample
+    def sample():return dict(internal_free=shutil.disk_usage('/private/tmp').free,internal_growth=growth(),ssd_free=shutil.disk_usage(W).free,ssd_allocated=ssd_usage())
+                                                                                                                                                            ~~~~~~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_bounded.py", line 18, in ssd_usage
+    return sum(size(p) if p.is_dir() else p.stat().st_blocks*512 for p in paths if not p.name.startswith('._'))
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_bounded.py", line 18, in <genexpr>
+    return sum(size(p) if p.is_dir() else p.stat().st_blocks*512 for p in paths if not p.name.startswith('._'))
+                                          ~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 654, in stat
+    return os.stat(self, follow_symlinks=follow_symlinks)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e15a-1'

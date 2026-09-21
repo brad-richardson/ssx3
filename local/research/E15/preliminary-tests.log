@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_validate.py", line 36, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_validate.py", line 17, in main
+    taps=(dest/'e7-events.txt').read_text();(E/f'{label}-{mode}-events.txt').write_text(taps)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/preliminary/no-input/e7-events.txt'

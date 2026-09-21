@@ -1,0 +1,43 @@
+error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx
+error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx
+error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx
+error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx
+{
+  "main_sha256": "9a7ea63e8afe61581a8fb13622c13a1cecc6d0a1fa28f3e3e453e6ab0a1d7f94",
+  "main_same_as_baseline": true,
+  "sites": [
+    {
+      "line": 209,
+      "text": "PS2Runtime runtime;"
+    },
+    {
+      "line": 252,
+      "text": "runtime.run();"
+    },
+    {
+      "line": 259,
+      "text": "std::_Exit(0);"
+    },
+    {
+      "line": 272,
+      "text": "std::_Exit(1);"
+    }
+  ],
+  "fork_observation_commit": "67c0a632d44cad8c0e47b4e2c0ee3782b22fd467",
+  "boot_event_bytes": 1051798,
+  "boot_event_sha256": "a3c223ce13746f4d30f21092c398b31988b6148d20c73a1b414fccc6be2fd92b",
+  "last_event": "seq=6410 tick=249 kind=mpeg-unwind id=5 route=branch target=0x402a10 entryA0=0x587b30 pc=0x3b1028 v0=0x3800 sp=0x1fffd60 ra=0x3b1028 suppliedRA=0x3b1028 thread=1 callback=0",
+  "strict_closure_failure": "Required runtime shutdown footers absent",
+  "destructor_hook": "ps2xRuntime/src/lib/ps2_runtime.cpp:698-699",
+  "fixture_footers": "final-no-input-events.txt and final-input-events.txt: both destructor-scope fixtures have real source footers",
+  "explanation": "Normal runner main calls std::_Exit(0) after runtime.run(); the automatic runtime destructor is bypassed. Its E15 closure hooks are therefore unreachable on this boot exit path.",
+  "unavailable": [
+    "final E15 counters",
+    "final pending count",
+    "registrationTruncated flag",
+    "E7 final byte counters and truncation flags"
+  ],
+  "limits": "Observed sequence continuity and pairs, explicit E4 span completion, rc=0, pgrep=1 and lease release do not replace missing source counters.",
+  "next_measurement": "Emit idempotent closure from the handwritten runtime run() exit after gameThread.join(), before control reaches main _Exit; retain destructor fallback. Test the real run-exit closure path, including quiescence and duplicate closure, before any separately authorized boot. No MPEG change or generated-TU rebuild required."
+}
+# E15 EXIT AUDIT TAIL COMPLETE: source closure absent, not synthesized

@@ -1,0 +1,11 @@
+    bool keep = fallback ? (s_fallbackKeep++ < 2u) : (s_successKeep++ < 2u);
+    // E15: preserve actual host uploads in the same dynamically armed interval.
+    // Four additional image/metadata pairs maximum; observation only.
+    static uint32_t s_alignedKeep = 0u;
+    if (!fallback && ps2_e7::aligned() && ps2_e7::window(tick) && s_alignedKeep < 4u)
+    {
+        ++s_alignedKeep; keep = true;
+        ps2_e7::event(tick,"e15-present","upload=%llu width=%u height=%u D=%u source=%u fnv32=0x%x smode2=0x%llx pmode=0x%llx",
+            static_cast<unsigned long long>(seq),width,height,displayFbp,sourceFbp,hash,
+            static_cast<unsigned long long>(smode2),static_cast<unsigned long long>(pmode));
+    }

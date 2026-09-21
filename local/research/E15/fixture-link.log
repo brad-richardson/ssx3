@@ -1,0 +1,54 @@
+/Users/bradrichardson/dev/ssx3/local/research/E15/e15_binding_test.cpp:46:14: error: member reference type 'R5900Context' is not a pointer; did you mean to use '.'?
+   46 |         m.pc,GPR_U32(&requestContext,31),GPR_U32(&m,29),static_cast<unsigned>(main->wait.reason),static_cast<unsigned>(main->status),saved,ramSame,calls,noInputReturns,addBsCalls,delivered,resumes);
+      |              ^        ~~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:750:107: note: expanded from macro 'GPR_U32'
+  750 | #define GPR_U32(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0U : static_cast<uint32_t>(PS2_EXTRACT_EPI32_0(ctx_ptr->r[reg_idx])))
+      |                                                                                                    ~~~~~~~^
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:80:49: note: expanded from macro 'PS2_EXTRACT_EPI32_0'
+   80 | #define PS2_EXTRACT_EPI32_0(v) Ps2ExtractEpi32((v), 0)
+      |                                                 ^
+/Users/bradrichardson/dev/ssx3/local/research/E15/e15_binding_test.cpp:46:14: error: no matching function for call to 'Ps2ExtractEpi32'
+   46 |         m.pc,GPR_U32(&requestContext,31),GPR_U32(&m,29),static_cast<unsigned>(main->wait.reason),static_cast<unsigned>(main->status),saved,ramSame,calls,noInputReturns,addBsCalls,delivered,resumes);
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:750:80: note: expanded from macro 'GPR_U32'
+  750 | #define GPR_U32(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0U : static_cast<uint32_t>(PS2_EXTRACT_EPI32_0(ctx_ptr->r[reg_idx])))
+      |                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:80:32: note: expanded from macro 'PS2_EXTRACT_EPI32_0'
+   80 | #define PS2_EXTRACT_EPI32_0(v) Ps2ExtractEpi32((v), 0)
+      |                                ^~~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:17:23: note: candidate function not viable: no known conversion from '__m128i *' (aka 'int64x2_t *') to '__m128i' (aka 'int64x2_t') for 1st argument; dereference the argument with *
+   17 | static inline int32_t Ps2ExtractEpi32(__m128i v, int index)
+      |                       ^               ~~~~~~~~~
+/Users/bradrichardson/dev/ssx3/local/research/E15/e15_binding_test.cpp:46:42: error: member reference type 'const R5900Context' is not a pointer; did you mean to use '.'?
+   46 |         m.pc,GPR_U32(&requestContext,31),GPR_U32(&m,29),static_cast<unsigned>(main->wait.reason),static_cast<unsigned>(main->status),saved,ramSame,calls,noInputReturns,addBsCalls,delivered,resumes);
+      |                                          ^        ~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:750:107: note: expanded from macro 'GPR_U32'
+  750 | #define GPR_U32(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0U : static_cast<uint32_t>(PS2_EXTRACT_EPI32_0(ctx_ptr->r[reg_idx])))
+      |                                                                                                    ~~~~~~~^
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:80:49: note: expanded from macro 'PS2_EXTRACT_EPI32_0'
+   80 | #define PS2_EXTRACT_EPI32_0(v) Ps2ExtractEpi32((v), 0)
+      |                                                 ^
+/Users/bradrichardson/dev/ssx3/local/research/E15/e15_binding_test.cpp:46:42: error: no matching function for call to 'Ps2ExtractEpi32'
+   46 |         m.pc,GPR_U32(&requestContext,31),GPR_U32(&m,29),static_cast<unsigned>(main->wait.reason),static_cast<unsigned>(main->status),saved,ramSame,calls,noInputReturns,addBsCalls,delivered,resumes);
+      |                                          ^~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:750:80: note: expanded from macro 'GPR_U32'
+  750 | #define GPR_U32(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0U : static_cast<uint32_t>(PS2_EXTRACT_EPI32_0(ctx_ptr->r[reg_idx])))
+      |                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:80:32: note: expanded from macro 'PS2_EXTRACT_EPI32_0'
+   80 | #define PS2_EXTRACT_EPI32_0(v) Ps2ExtractEpi32((v), 0)
+      |                                ^~~~~~~~~~~~~~~
+/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_runtime_macros.h:17:23: note: candidate function not viable: no known conversion from 'const __m128i *' (aka 'const int64x2_t *') to '__m128i' (aka 'int64x2_t') for 1st argument; dereference the argument with *
+   17 | static inline int32_t Ps2ExtractEpi32(__m128i v, int index)
+      |                       ^               ~~~~~~~~~
+4 errors generated.
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_link_test.py", line 28, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_link_test.py", line 26, in main
+    for cmd in [out,link]: subprocess.run(cmd,cwd=B,check=True)
+                           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/opt/homebrew/opt/llvm/bin/clang++', '-DAGRESSIVE_LOGS=1', '-DGRAPHICS_API_OPENGL_33', '-DPLATFORM_DESKTOP', '-DPS2X_ENABLE_DEBUG_UI=1', '-DPS2X_ENABLE_IOP_RPC_TRACE=1', '-DPS2X_IOP_ENABLE_PLUGINS=0', '-DPS2_FUNCTION_LOG_TRACKER=1', '-DPS2_RUNTIME_LOGS=1', '-DUSE_SSE2NEON', '-I/tmp/p1-link/runtime/_deps/sse2neon-src', '-I/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include', '-I/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel', '-I/tmp/p1-link/runtime/_deps/raylib-src/src', '-I/tmp/p1-link/runtime/_deps/raylib-src/src/external/glfw/include', '-I/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xIOP/include', '-I/tmp/p1-link/runtime/_deps/rlimgui-src', '-I/tmp/p1-link/runtime/_deps/imgui-src', '-isystem', '/opt/homebrew/Cellar/ffmpeg/9.0.1_1/include', '-O3', '-DNDEBUG', '-std=gnu++20', '-flto=thin', '-arch', 'arm64', '-Winvalid-pch', '-Xclang', '-include-pch', '-Xclang', '/tmp/p1-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/cmake_pch.hxx.pch', '-Xclang', '-include', '-Xclang', '/tmp/p1-link/runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/cmake_pch.hxx', '-c', '/Users/bradrichardson/dev/ssx3/local/research/E15/e15_binding_test.cpp', '-o', '/Volumes/Extreme SSD/ps2recomp-spike/P1/e15-binding-tests/entry/test.o']' returned non-zero exit status 1.

@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_mine.py", line 122, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_mine.py", line 25, in main
+    data=read_capture(RUN/f'{LABEL}-join/e7-events.txt');events,tail=tap(RUN/f'{LABEL}-join/e7-events.txt')
+                                                                     ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E15/e15_closed_events.py", line 15, in tap
+    assert lines[-1].startswith('# E7 SHUTDOWN') and lines[-2].startswith('# E15 CLOSURE')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
