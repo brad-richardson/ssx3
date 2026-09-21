@@ -1288,6 +1288,24 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G28 read (09-21) — PASS(Done), writer fix VERIFIED end to end: ONE Granite guard hunk → exit 0, `Done!`, 10 scanouts, ZERO tombstone; O5/O6 gone (single-writer family); black persists byte-identical (separate trait); "7th zero-damage" RECLASSIFIED transient (binary intact):**
+      Hunk (guard `:1424` on `supports_…` + once-LOGI, 18+/1-, submodule
+      worktree, UNCOMMITTED — diff text committed) + build exit 0
+      `[458/458]` NEW dir (265,841,104 B, `450471e2…`, `53af7a56…`) +
+      verify-then-push (3 pre-run matches + on-device FULL, no gap) +
+      ONE flag run: exit 0 (~1 s), `G28:` receipt ×1 (`supports=0,
+      feature=1` — guard engaged), `G26:` ×1, 18 frames, 8/8 yes,
+      crasher 0×, 10 writes, `Done!` last; 10 PPMs pure black,
+      byte-identical to G27 (`cmp`); O4 absent (4 legs). Verified:
+      hunk HUNK_MATCH + Granite 5-file state, logcat (1805 = G27+1,
+      :24 exact, `Done!` last, 10/18/8/0), PPMs (10×688,143 all-zero
+      + `cmp` identical), score re-run (k-rows exact), tombstones
+      (newest STILL _23 — exit 0 independently confirmed), device
+      `mg/`-only, tail intact. RECLASSIFICATION: binary reads
+      `450471e2…` + ELF + build-id FULL on 2/2 orch re-reads — the
+      report-time zero read was TRANSIENT (G21 class, plausibly the
+      16:26 USB reset); binary AVAILABLE for reference. ~40 min. Next:
+      G29 black-scanout diagnosis (readback vs render). Ledger row added.
 - [x] **E19 read (09-21) — PASS(iii-shaped HONEST STOP), parser interposer recursed at E18 R3 (SIGSEGV) and the any-red rule closed work: checkpoint complete, zero boots/edits/commits, Q1/Q2/Q3 unopened, NEXT-BRIEF names the exact repair:**
       Checkpoint re-verified (fork `3adc0478` triple-agreed, 9,457
       names, 458/458 in 1.437 s, E15 rc0s, E16 closure6, prior
