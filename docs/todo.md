@@ -1288,6 +1288,23 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **T41 read (09-21) — PASS, finish complete: T41-1…T41-8 in T40's shapes + SSD trace stream VERIFIED (size+sha+slices); hold hop OFF-rail uncorrelated at ≈0.57 s (SCPS40 +29 @ 0.02), SCPS120 resolve lost (+119 @ 0.37 weak), RDC still floods (11/12):**
+      No new run — everything from bytesize originals or committed
+      evidence, zero drift on all pins/refs/slices. R4: FULL CHAIN (61
+      snaps) + ONE 1038.4 ms hold @T+503.19 on live 2ND/6 (45/46%) +
+      10×≈0.57 s blind series to 00:01:40 49% (d10 wall crash + RECOVER);
+      RDC 11/12 gated (d-post5 singleton — gated-pair verdict NO); SCPS40
+      4/11; SCPS120 1/11; dense hops 6.36–17.47; EE 52 / IOP 155
+      set-identical; flaps 0 in-window all 4 runs. R1/R2 cubeb-modal
+      NO-PARKs + R3 game-side NO-SP-PARK with full forensics (+ MARK ERROR
+      pair, sceSdGetParam absence correlate). Recipe: ROI/gate retune
+      (T40-G1 second arm) at the SAME cadence. Verified: stream size +
+      full sha EXACT + head/tail slice shas match committed, hold
+      arithmetic 1038.4 ms, T41_DONE ×1, poll 168, track frozen
+      (sha == T40's), 81 JPGs (62 R4), census lines/span/counts, eventlog
+      pre==postr1, R4 AcceptAsync single boot-phase line, T40 baseline
+      values, tail receipt intact. ~1 h. Next: T42 ROI retune (same hold,
+      same cadence). Ledger row added.
 - [x] **I20 read (09-21) — PASS, E15-ABI agreement (A1–A13, ZERO disagreements) + 39/39 creator census + fix-ready spec S1–S10 (zero commits, zero code changed):**
       Base MOVED `83fb4d6`→`67c0a632` with cause (MPEG.cpp/MPEG.h/Sync.cpp/
       tests byte-identical, so I19 `M:` pins carry; `S:` re-pinned +3).
