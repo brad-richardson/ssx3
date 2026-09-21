@@ -1,0 +1,415 @@
+-- The C compiler identification is Clang 23.1.1
+-- The CXX compiler identification is Clang 23.1.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- ARM target detected, fetching sse2neon
+-- macOS ARM64 - using default compiler flags
+CMake Warning (deprecated) at /Volumes/Extreme SSD/ps2x-i4/raylib-5.5/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Performing Test COMPILER_HAS_THOSE_TOGGLES
+-- Performing Test COMPILER_HAS_THOSE_TOGGLES - Success
+-- Testing if -Werror=pointer-arith can be used -- compiles
+-- Testing if -Werror=implicit-function-declaration can be used -- compiles
+-- Testing if -fno-strict-aliasing can be used -- compiles
+-- Using external GLFW
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated config types: Release
+-- Compiling with the flags:
+--   PLATFORM=PLATFORM_DESKTOP_SDL
+--   GRAPHICS=GRAPHICS_API_OPENGL_ES2
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui) is deprecated, call
+  FetchContent_MakeAvailable(imgui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(imgui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:123 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating imgui
+-- Configuring done (0.9s)
+-- Generating done (0.6s)
+-- Build files have been written to: /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project imgui-populate.xcodeproj build -configuration Debug -parallelizeTargets -hideShellScriptEnvironment -target ALL_BUILD
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'ALL_BUILD' in project 'imgui-populate'
+        ➜ Explicit dependency on target 'imgui-populate' in project 'imgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'imgui-populate'
+    Target 'imgui-populate' in project 'imgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'imgui-populate'
+    Target 'ZERO_CHECK' in project 'imgui-populate' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+Build description signature: dc55d1dded9f9cdee84181bab1b9617b
+Build description path: /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/XCBuildData/dc55d1dded9f9cdee84181bab1b9617b.xcbuilddata
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build
+
+CreateBuildDirectory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/SwiftExplicitPrecompiledModules
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/ExplicitPrecompiledModules
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/Debug
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/Debug
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/SharedPrecompiledHeaders
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/SharedPrecompiledHeaders
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-87F8BBB365C4D92FA5C36A32.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-87F8BBB365C4D92FA5C36A32.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-D66AFCF7195A39690C02B260.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-D66AFCF7195A39690C02B260.sh
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/EagerLinkingTBDs/Debug
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/imgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/EagerLinkingTBDs/Debug
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-972C0A7D6D9D519A9B6DBEF5.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-972C0A7D6D9D519A9B6DBEF5.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AF4BAE30F56EE17188B1916B.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AF4BAE30F56EE17188B1916B.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-DFE29703A1E7A1F239E01534.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-DFE29703A1E7A1F239E01534.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-6054E2E80E18B668A3725E45.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-6054E2E80E18B668A3725E45.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5A5D60D2EC262CE11EC307BF.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5A5D60D2EC262CE11EC307BF.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5566A9CA1D33EF94ADF965DB.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5566A9CA1D33EF94ADF965DB.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-3C91CE64E29BCAE0DF25E188.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-3C91CE64E29BCAE0DF25E188.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-28ADECC01F4AC69FC9C0B302.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-28ADECC01F4AC69FC9C0B302.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-1AE0643F8130A86187D9D151.sh (in target 'ZERO_CHECK' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-1AE0643F8130A86187D9D151.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-EECA1AC32C5719BC05E2DEED.sh (in target 'ALL_BUILD' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-EECA1AC32C5719BC05E2DEED.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-1AE0643F8130A86187D9D151.sh (in target 'ZERO_CHECK' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ZERO_CHECK.build/Script-1AE0643F8130A86187D9D151.sh
+make: `/Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/CMakeFiles/cmake.check_cache' is up to date.
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-mkdir /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-972C0A7D6D9D519A9B6DBEF5.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-972C0A7D6D9D519A9B6DBEF5.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-download /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-28ADECC01F4AC69FC9C0B302.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-28ADECC01F4AC69FC9C0B302.sh
+Cloning into 'imgui-src'...
+error: non-monotonic index .git/objects/pack/._pack-39ec666c5197d4a9ff05d30eb3795900e6f41cbd.idx
+error: non-monotonic index .git/objects/pack/._pack-39ec666c5197d4a9ff05d30eb3795900e6f41cbd.idx
+HEAD is now at b1bcb12 Merge branch 'master' into docking
+Command PhaseScriptExecution emitted errors but did not return a nonzero exit code to indicate failure
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-update /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-87F8BBB365C4D92FA5C36A32.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-87F8BBB365C4D92FA5C36A32.sh
+-- Already at requested tag: v1.92.7-docking
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-patch /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-3C91CE64E29BCAE0DF25E188.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-3C91CE64E29BCAE0DF25E188.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-configure /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-D66AFCF7195A39690C02B260.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-D66AFCF7195A39690C02B260.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-build /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5566A9CA1D33EF94ADF965DB.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5566A9CA1D33EF94ADF965DB.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-install /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AF4BAE30F56EE17188B1916B.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-AF4BAE30F56EE17188B1916B.sh
+
+PhaseScriptExecution Generate\ imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-test /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-6054E2E80E18B668A3725E45.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-6054E2E80E18B668A3725E45.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-complete /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-DFE29703A1E7A1F239E01534.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-DFE29703A1E7A1F239E01534.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/imgui-populate /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5A5D60D2EC262CE11EC307BF.sh (in target 'imgui-populate' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/imgui-populate.build/Script-5A5D60D2EC262CE11EC307BF.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/ALL_BUILD /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-EECA1AC32C5719BC05E2DEED.sh (in target 'ALL_BUILD' from project 'imgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/imgui-populate.build/Debug/ALL_BUILD.build/Script-EECA1AC32C5719BC05E2DEED.sh
+Build all projects
+
+PruneExplicitPrecompiledModules /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/imgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+note: Run script build phase 'Generate CMakeFiles/imgui-populate' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-update' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate imgui-populate-prefix/src/imgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-patch' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/imgui-populate-complete' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'imgui-populate' from project 'imgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'imgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'imgui-populate')
+** BUILD SUCCEEDED **
+
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(rlImGui) is deprecated, call
+  FetchContent_MakeAvailable(rlImGui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(rlImGui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:146 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating rlimgui
+-- Configuring done (0.6s)
+-- Generating done (0.5s)
+-- Build files have been written to: /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project rlimgui-populate.xcodeproj build -configuration Debug -parallelizeTargets -hideShellScriptEnvironment -target ALL_BUILD
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'ALL_BUILD' in project 'rlimgui-populate'
+        ➜ Explicit dependency on target 'rlimgui-populate' in project 'rlimgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'rlimgui-populate'
+    Target 'rlimgui-populate' in project 'rlimgui-populate'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'rlimgui-populate'
+    Target 'ZERO_CHECK' in project 'rlimgui-populate' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+Build description signature: c77dffc6604ce51a11f8d4a068c56c0c
+Build description path: /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/XCBuildData/c77dffc6604ce51a11f8d4a068c56c0c.xcbuilddata
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build
+
+CreateBuildDirectory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /var/folders/zg/v8fr50g11gg5xcmmsr57zzq00000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/CompilationCache.noindex
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/SwiftExplicitPrecompiledModules
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/Debug
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/Debug
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/SharedPrecompiledHeaders
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/SharedPrecompiledHeaders
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/ExplicitPrecompiledModules
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/ExplicitPrecompiledModules
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E1F1892453EFE746B072A7FC.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E1F1892453EFE746B072A7FC.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D3DBFE2A59FF7204CBCDC9A4.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D3DBFE2A59FF7204CBCDC9A4.sh
+
+CreateBuildDirectory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/EagerLinkingTBDs/Debug
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/rlimgui-populate.xcodeproj
+    builtin-create-build-directory /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/EagerLinkingTBDs/Debug
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E40254F83B62ABE6E8D94A2E.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E40254F83B62ABE6E8D94A2E.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C923F7B95C63D86ACCD3491F.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C923F7B95C63D86ACCD3491F.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-DF4F318E347BA3C3487FF8D5.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-DF4F318E347BA3C3487FF8D5.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C403F5BBFB9BC3EE849178D2.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C403F5BBFB9BC3EE849178D2.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-A38BB5AD9EE5E0283FE1238B.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-A38BB5AD9EE5E0283FE1238B.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8C2DC0174EC5C22ECF1BD7F2.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8C2DC0174EC5C22ECF1BD7F2.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9BF669A11415C813D7A57708.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9BF669A11415C813D7A57708.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-3BC68CBDB3990F4A24380103.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-3BC68CBDB3990F4A24380103.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-F0C4F8097517DBB01148AFA3.sh (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-F0C4F8097517DBB01148AFA3.sh
+
+WriteAuxiliaryFile /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-BBFE41AB07757CFE469DD4FA.sh (in target 'ALL_BUILD' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    write-file /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-BBFE41AB07757CFE469DD4FA.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-F0C4F8097517DBB01148AFA3.sh (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ZERO_CHECK.build/Script-F0C4F8097517DBB01148AFA3.sh
+make: `/Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/CMakeFiles/cmake.check_cache' is up to date.
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-mkdir /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9BF669A11415C813D7A57708.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-9BF669A11415C813D7A57708.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-download /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-DF4F318E347BA3C3487FF8D5.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-DF4F318E347BA3C3487FF8D5.sh
+Cloning into 'rlimgui-src'...
+error: non-monotonic index .git/objects/pack/._pack-907f41e02a69b2781e20040a69ba8dece28b3913.idx
+error: non-monotonic index .git/objects/pack/._pack-907f41e02a69b2781e20040a69ba8dece28b3913.idx
+HEAD is now at 118221c Update headings in README.md for consistency
+Command PhaseScriptExecution emitted errors but did not return a nonzero exit code to indicate failure
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-update /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-3BC68CBDB3990F4A24380103.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-3BC68CBDB3990F4A24380103.sh
+-- Already at requested tag: Raylib_5_5
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-patch /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E1F1892453EFE746B072A7FC.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E1F1892453EFE746B072A7FC.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-configure /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-A38BB5AD9EE5E0283FE1238B.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-A38BB5AD9EE5E0283FE1238B.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-build /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8C2DC0174EC5C22ECF1BD7F2.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-8C2DC0174EC5C22ECF1BD7F2.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-install /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D3DBFE2A59FF7204CBCDC9A4.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-D3DBFE2A59FF7204CBCDC9A4.sh
+
+PhaseScriptExecution Generate\ rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-test /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E40254F83B62ABE6E8D94A2E.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-E40254F83B62ABE6E8D94A2E.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-complete /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C923F7B95C63D86ACCD3491F.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C923F7B95C63D86ACCD3491F.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/rlimgui-populate /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C403F5BBFB9BC3EE849178D2.sh (in target 'rlimgui-populate' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/rlimgui-populate.build/Script-C403F5BBFB9BC3EE849178D2.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/ALL_BUILD /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-BBFE41AB07757CFE469DD4FA.sh (in target 'ALL_BUILD' from project 'rlimgui-populate')
+    cd /Volumes/Extreme\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/rlimgui-populate.build/Debug/ALL_BUILD.build/Script-BBFE41AB07757CFE469DD4FA.sh
+Build all projects
+
+PruneExplicitPrecompiledModules /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device/_deps/rlimgui-subbuild/build/SwiftExplicitPrecompiledModules
+
+note: Run script build phase 'Generate CMakeFiles/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-complete' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-update' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate rlimgui-populate-prefix/src/rlimgui-populate-stamp/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/rlimgui-populate-patch' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/rlimgui-populate' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'rlimgui-populate' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'rlimgui-populate')
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'rlimgui-populate')
+** BUILD SUCCEEDED **
+
+-- FFmpeg disabled; MPEG video decode falls back to stub frames
+-- PS2X: game objects: 9447 sources from /Volumes/Extreme SSD/ps2x-i10/codegen-output
+-- Configuring done (49.7s)
+-- Generating done (18.0s)
+-- Build files have been written to: /Volumes/Extreme SSD/ps2x-i10/ios-runtime-device
