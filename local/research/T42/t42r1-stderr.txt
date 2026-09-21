@@ -1,0 +1,1975 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ D=/home/brad/pcsx2-t4
++ E=/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ REF=/home/brad/pcsx2-t4/t27-ref-title.ppm
++ REFMENU=/home/brad/pcsx2-t4/t28-ref-menu.ppm
++ REFSC=/home/brad/pcsx2-t4/t29-ref-sc.ppm
++ REFZC=/home/brad/pcsx2-t4/t30-ref-zc.ppm
++ REFSP=/home/brad/pcsx2-t4/t31-ref-sp.ppm
++ REFSM=/home/brad/pcsx2-t4/t32-ref-sm.ppm
++ REFSE=/home/brad/pcsx2-t4/t33-ref-se.ppm
++ REFMR=/home/brad/pcsx2-t4/t34-ref-mr.ppm
++ REFPP=/home/brad/pcsx2-t4/t35-ref-panel.ppm
++ CD=/home/brad/pcsx2-t4/t42-cropdiff.py
++ LOG=/home/brad/pcsx2-t4/t42-poll.log
++ TITLE_MEAN_MAX=2.0
++ TITLE_P99_MAX=10
++ STATIC_MEAN_MAX=1.0
++ MENU_MEAN_MAX=2.0
++ NONMENU_MEAN_MIN=5.0
++ NONSC_MEAN_MIN=5.0
++ NONZC_MEAN_MIN=5.0
++ NONSP_MEAN_MIN=5.0
++ NONSE_MEAN_MIN=5.0
++ NONMR_MEAN_MIN=5.0
++ NONPP_MEAN_MIN=5.0
++ DEPART_MEAN_MIN=5.0
++ SETAG_MEAN_MAX=5.0
++ SETAG_BOX=40,415,330,450
++ :
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
++ echo UPTIME:234
++ pkill Xvfb
++ true
++ sleep 2
++ pgrep -a Xvfb
++ true
++ sleep 4
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ pgrep -a Xvfb
++ xdotool getdisplaygeometry
+++ date -u +%Y%m%dT%H%M%SZ
++ TS=20260921T180807Z
++ '[' -f /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt ']'
++ mv /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t42-20260921T180807Z.txt
++ ls -la /home/brad/pcsx2-t4/dat/PCSX2/logs/
++ rm -f /home/brad/pcsx2-t4/pcsx2.pid
+++ date -u +%s
++ T_BOOT=1790014087
+++ cut -d. -f1 /proc/uptime
++ echo 'T_BOOT_WALL:1790014087 T_BOOT_UPTIME:240'
++ echo 349
++ nohup /home/brad/pcsx2-t4/pcsx2/build/bin/pcsx2-qt -nogui -slowboot -turbo -datapath /home/brad/pcsx2-t4/dat -logfile /home/brad/pcsx2-t4/logs/boot-t42.log -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ echo PID:349
++ sleep 90
++ pgrep -f pcsx2-qt
+++ xdotool search --onlyvisible --name 'SSX 3'
++ WID=2097159
++ echo WID:2097159
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
++ plog 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ echo 'REF_CHECK:mean=0.0000 p99=0 max=0 npix=224000 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t28-ref-menu.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
++ plog 'REFMENU_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFMENU_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t29-ref-sc.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
++ plog 'REFSC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t30-ref-zc.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
++ plog 'REFZC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFZC_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t31-ref-sp.ppm /home/brad/pcsx2-t4/t31-ref-sp.ppm 0,0,1280,1024
++ plog 'REFSP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t32-ref-sm.ppm /home/brad/pcsx2-t4/t32-ref-sm.ppm 0,0,1280,1024
++ plog 'REFSM_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSM_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 0,0,1280,1024
++ plog 'REFSE_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFSE_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 40,415,330,450
++ plog 'REFSETAG_CHECK:mean=0.0000 p99=0 max=0 npix=10150 mode=PPM'
++ echo 'REFSETAG_CHECK:mean=0.0000 p99=0 max=0 npix=10150 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t34-ref-mr.ppm /home/brad/pcsx2-t4/t34-ref-mr.ppm 0,0,1280,1024
++ plog 'REFMR_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFMR_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t35-ref-panel.ppm /home/brad/pcsx2-t4/t35-ref-panel.ppm 0,0,1280,1024
++ plog 'REFPP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ echo 'REFPP_CHECK:mean=0.0000 p99=0 max=0 npix=1310720 mode=PPM'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ read SELF_M SELF_P
+++ score_band /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_TEST mean=0.0000 p99=0'
++ echo 'SELF_TEST mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 0.0000 0
++ is_num 0.0000
++ case "$1" in
++ return 0
++ is_num 0
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v p=0 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
+++ score_whole /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t27-ref-title.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ SELF_W=0.0000
++ plog SELF_WHOLE=0.0000
++ echo SELF_WHOLE=0.0000
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_static 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ read SELF_MM SELF_MP
+++ score_menu /home/brad/pcsx2-t4/t28-ref-menu.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t28-ref-menu.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_MENU mean=0.0000 p99=0'
++ echo 'SELF_MENU mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_SM SELF_SP
+++ score_sc /home/brad/pcsx2-t4/t29-ref-sc.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t29-ref-sc.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SC mean=0.0000 p99=0'
++ echo 'SELF_SC mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_ZM SELF_ZP
+++ score_zc /home/brad/pcsx2-t4/t30-ref-zc.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t30-ref-zc.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_ZC mean=0.0000 p99=0'
++ echo 'SELF_ZC mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_PM SELF_PP
+++ score_sp /home/brad/pcsx2-t4/t31-ref-sp.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t31-ref-sp.ppm /home/brad/pcsx2-t4/t31-ref-sp.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SP mean=0.0000 p99=0'
++ echo 'SELF_SP mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_XM SELF_XP
+++ score_sm /home/brad/pcsx2-t4/t32-ref-sm.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t32-ref-sm.ppm /home/brad/pcsx2-t4/t32-ref-sm.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SM mean=0.0000 p99=0'
++ echo 'SELF_SM mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_EM SELF_EP
+++ score_se /home/brad/pcsx2-t4/t33-ref-se.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SE mean=0.0000 p99=0'
++ echo 'SELF_SE mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_TM SELF_TP
+++ score_setag /home/brad/pcsx2-t4/t33-ref-se.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t33-ref-se.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 40,415,330,450
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_SETAG mean=0.0000 p99=0'
++ echo 'SELF_SETAG mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_setag 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=5.0 'BEGIN{exit !(m<mm)}'
++ read SELF_RM SELF_RP
+++ score_mr /home/brad/pcsx2-t4/t34-ref-mr.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t34-ref-mr.ppm /home/brad/pcsx2-t4/t34-ref-mr.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_MR mean=0.0000 p99=0'
++ echo 'SELF_MR mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ read SELF_PM SELF_PP
+++ score_pp /home/brad/pcsx2-t4/t35-ref-panel.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t35-ref-panel.ppm /home/brad/pcsx2-t4/t35-ref-panel.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SELF_PP mean=0.0000 p99=0'
++ echo 'SELF_PP mean=0.0000 p99=0'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_menu 0.0000
++ is_num 0.0000
++ case "$1" in
++ return 0
++ awk -v m=0.0000 -v mm=2.0 'BEGIN{exit !(m<mm)}'
++ snap t42-start
++ local N=t42-start
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-start.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-start.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-start.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-start.ppm
++ ls -la /home/brad/pcsx2-t4/t42-start.ppm /home/brad/pcsx2-t4/t42-start.jpg
++ read SM SP
+++ score_band /home/brad/pcsx2-t4/t42-start.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-start.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'START_SCORE mean=42.1794 p99=192 MENU_T+:98'
++ echo 'START_SCORE mean=42.1794 p99=192 MENU_T+:98'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ MENU_LIKE=0
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_1 BEGIN MENU_T+:98'
++ echo 'ATTEMPT_1 BEGIN MENU_T+:98'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ pgrep -f pcsx2-qt
++ snap t42-a1-now
++ local N=t42-a1-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-now.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-now.ppm /home/brad/pcsx2-t4/t42-a1-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-now.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_1 now score mean=30.5644 p99=153'
++ echo 'ATTEMPT_1 now score mean=30.5644 p99=153'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 30.5644 153
++ is_num 30.5644
++ case "$1" in
++ return 0
++ is_num 153
++ case "$1" in
++ return 0
++ awk -v m=30.5644 -v p=153 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_1 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_1 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ press K A1_CROSS
++ local KEY=K
++ local LAB=A1_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYDOWN_WALL:1790014185.989481145 UPTIME:338 MENU_T+:98'
++ echo 'A1_CROSS_KEYDOWN_WALL:1790014185.989481145 UPTIME:338 MENU_T+:98'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A1_CROSS_HELD_WALL:1790014186.007702643 UPTIME:338'
++ echo 'A1_CROSS_HELD_WALL:1790014186.007702643 UPTIME:338'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYUP_WALL:1790014186.525030624 UPTIME:338 MENU_T+:99'
++ echo 'A1_CROSS_KEYUP_WALL:1790014186.525030624 UPTIME:338 MENU_T+:99'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll01
++ local N=t42-a1-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll01.ppm /home/brad/pcsx2-t4/t42-a1-poll01.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll01 score mean=27.5169 p99=147 MENU_T+:102'
++ echo 'ATTEMPT_1 poll01 score mean=27.5169 p99=147 MENU_T+:102'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 27.5169 147
++ is_num 27.5169
++ case "$1" in
++ return 0
++ is_num 147
++ case "$1" in
++ return 0
++ awk -v m=27.5169 -v p=147 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll02
++ local N=t42-a1-poll02
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll02.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll02.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll02.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll02.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll02.ppm /home/brad/pcsx2-t4/t42-a1-poll02.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll02.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll02.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll02 score mean=32.8406 p99=182 MENU_T+:105'
++ echo 'ATTEMPT_1 poll02 score mean=32.8406 p99=182 MENU_T+:105'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 32.8406 182
++ is_num 32.8406
++ case "$1" in
++ return 0
++ is_num 182
++ case "$1" in
++ return 0
++ awk -v m=32.8406 -v p=182 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll03
++ local N=t42-a1-poll03
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll03.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll03.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll03.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll03.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll03.ppm /home/brad/pcsx2-t4/t42-a1-poll03.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll03.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll03.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll03 score mean=39.8571 p99=185 MENU_T+:107'
++ echo 'ATTEMPT_1 poll03 score mean=39.8571 p99=185 MENU_T+:107'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 39.8571 185
++ is_num 39.8571
++ case "$1" in
++ return 0
++ is_num 185
++ case "$1" in
++ return 0
++ awk -v m=39.8571 -v p=185 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll04
++ local N=t42-a1-poll04
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll04.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll04.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll04.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll04.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll04.ppm /home/brad/pcsx2-t4/t42-a1-poll04.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll04.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll04.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll04 score mean=39.4237 p99=189 MENU_T+:110'
++ echo 'ATTEMPT_1 poll04 score mean=39.4237 p99=189 MENU_T+:110'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 39.4237 189
++ is_num 39.4237
++ case "$1" in
++ return 0
++ is_num 189
++ case "$1" in
++ return 0
++ awk -v m=39.4237 -v p=189 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll05
++ local N=t42-a1-poll05
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll05.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll05.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll05.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll05.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll05.ppm /home/brad/pcsx2-t4/t42-a1-poll05.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll05.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll05.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll05 score mean=35.4592 p99=206 MENU_T+:113'
++ echo 'ATTEMPT_1 poll05 score mean=35.4592 p99=206 MENU_T+:113'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 35.4592 206
++ is_num 35.4592
++ case "$1" in
++ return 0
++ is_num 206
++ case "$1" in
++ return 0
++ awk -v m=35.4592 -v p=206 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll06
++ local N=t42-a1-poll06
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll06.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll06.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll06.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll06.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll06.ppm /home/brad/pcsx2-t4/t42-a1-poll06.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll06.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll06.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll06 score mean=25.2327 p99=160 MENU_T+:115'
++ echo 'ATTEMPT_1 poll06 score mean=25.2327 p99=160 MENU_T+:115'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 25.2327 160
++ is_num 25.2327
++ case "$1" in
++ return 0
++ is_num 160
++ case "$1" in
++ return 0
++ awk -v m=25.2327 -v p=160 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll07
++ local N=t42-a1-poll07
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll07.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll07.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll07.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll07.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll07.ppm /home/brad/pcsx2-t4/t42-a1-poll07.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll07.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll07.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll07 score mean=30.6817 p99=175 MENU_T+:118'
++ echo 'ATTEMPT_1 poll07 score mean=30.6817 p99=175 MENU_T+:118'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 30.6817 175
++ is_num 30.6817
++ case "$1" in
++ return 0
++ is_num 175
++ case "$1" in
++ return 0
++ awk -v m=30.6817 -v p=175 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll08
++ local N=t42-a1-poll08
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll08.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll08.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll08.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll08.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll08.ppm /home/brad/pcsx2-t4/t42-a1-poll08.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll08.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll08.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll08 score mean=27.2968 p99=160 MENU_T+:121'
++ echo 'ATTEMPT_1 poll08 score mean=27.2968 p99=160 MENU_T+:121'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 27.2968 160
++ is_num 27.2968
++ case "$1" in
++ return 0
++ is_num 160
++ case "$1" in
++ return 0
++ awk -v m=27.2968 -v p=160 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll09
++ local N=t42-a1-poll09
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll09.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll09.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll09.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll09.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll09.ppm /home/brad/pcsx2-t4/t42-a1-poll09.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll09.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll09.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll09 score mean=28.3519 p99=156 MENU_T+:124'
++ echo 'ATTEMPT_1 poll09 score mean=28.3519 p99=156 MENU_T+:124'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 28.3519 156
++ is_num 28.3519
++ case "$1" in
++ return 0
++ is_num 156
++ case "$1" in
++ return 0
++ awk -v m=28.3519 -v p=156 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll10
++ local N=t42-a1-poll10
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll10.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll10.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll10.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll10.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll10.ppm /home/brad/pcsx2-t4/t42-a1-poll10.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll10.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll10.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll10 score mean=42.2535 p99=220 MENU_T+:126'
++ echo 'ATTEMPT_1 poll10 score mean=42.2535 p99=220 MENU_T+:126'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 42.2535 220
++ is_num 42.2535
++ case "$1" in
++ return 0
++ is_num 220
++ case "$1" in
++ return 0
++ awk -v m=42.2535 -v p=220 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll11
++ local N=t42-a1-poll11
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll11.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll11.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll11.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll11.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll11.ppm /home/brad/pcsx2-t4/t42-a1-poll11.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll11.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll11.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll11 score mean=41.2642 p99=220 MENU_T+:129'
++ echo 'ATTEMPT_1 poll11 score mean=41.2642 p99=220 MENU_T+:129'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 41.2642 220
++ is_num 41.2642
++ case "$1" in
++ return 0
++ is_num 220
++ case "$1" in
++ return 0
++ awk -v m=41.2642 -v p=220 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll12
++ local N=t42-a1-poll12
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll12.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll12.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll12.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll12.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll12.ppm /home/brad/pcsx2-t4/t42-a1-poll12.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll12.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll12.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll12 score mean=16.7906 p99=151 MENU_T+:132'
++ echo 'ATTEMPT_1 poll12 score mean=16.7906 p99=151 MENU_T+:132'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 16.7906 151
++ is_num 16.7906
++ case "$1" in
++ return 0
++ is_num 151
++ case "$1" in
++ return 0
++ awk -v m=16.7906 -v p=151 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll13
++ local N=t42-a1-poll13
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll13.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll13.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll13.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll13.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll13.ppm /home/brad/pcsx2-t4/t42-a1-poll13.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll13.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll13.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll13 score mean=16.6677 p99=147 MENU_T+:135'
++ echo 'ATTEMPT_1 poll13 score mean=16.6677 p99=147 MENU_T+:135'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 16.6677 147
++ is_num 16.6677
++ case "$1" in
++ return 0
++ is_num 147
++ case "$1" in
++ return 0
++ awk -v m=16.6677 -v p=147 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll14
++ local N=t42-a1-poll14
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll14.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll14.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll14.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll14.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll14.ppm /home/brad/pcsx2-t4/t42-a1-poll14.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll14.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll14.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll14 score mean=16.6116 p99=147 MENU_T+:137'
++ echo 'ATTEMPT_1 poll14 score mean=16.6116 p99=147 MENU_T+:137'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 16.6116 147
++ is_num 16.6116
++ case "$1" in
++ return 0
++ is_num 147
++ case "$1" in
++ return 0
++ awk -v m=16.6116 -v p=147 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll15
++ local N=t42-a1-poll15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll15.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll15.ppm /home/brad/pcsx2-t4/t42-a1-poll15.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll15.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll15 score mean=16.6012 p99=147 MENU_T+:140'
++ echo 'ATTEMPT_1 poll15 score mean=16.6012 p99=147 MENU_T+:140'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 16.6012 147
++ is_num 16.6012
++ case "$1" in
++ return 0
++ is_num 147
++ case "$1" in
++ return 0
++ awk -v m=16.6012 -v p=147 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll16
++ local N=t42-a1-poll16
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll16.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll16.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll16.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll16.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll16.ppm /home/brad/pcsx2-t4/t42-a1-poll16.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll16.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll16.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll16 score mean=16.6331 p99=147 MENU_T+:143'
++ echo 'ATTEMPT_1 poll16 score mean=16.6331 p99=147 MENU_T+:143'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 16.6331 147
++ is_num 16.6331
++ case "$1" in
++ return 0
++ is_num 147
++ case "$1" in
++ return 0
++ awk -v m=16.6331 -v p=147 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll17
++ local N=t42-a1-poll17
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll17.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll17.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll17.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll17.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll17.ppm /home/brad/pcsx2-t4/t42-a1-poll17.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll17.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll17.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_1 poll17 score mean=16.6012 p99=147 MENU_T+:146'
++ echo 'ATTEMPT_1 poll17 score mean=16.6012 p99=147 MENU_T+:146'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 16.6012 147
++ is_num 16.6012
++ case "$1" in
++ return 0
++ is_num 147
++ case "$1" in
++ return 0
++ awk -v m=16.6012 -v p=147 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a1-poll18
++ local N=t42-a1-poll18
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a1-poll18.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a1-poll18.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a1-poll18.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a1-poll18.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a1-poll18.ppm /home/brad/pcsx2-t4/t42-a1-poll18.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a1-poll18.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a1-poll18.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ date -u +%s
++ plog 'ATTEMPT_1 poll18 score mean=25.2817 p99=168 MENU_T+:148'
++ echo 'ATTEMPT_1 poll18 score mean=25.2817 p99=168 MENU_T+:148'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 25.2817 168
++ is_num 25.2817
++ case "$1" in
++ return 0
++ is_num 168
++ case "$1" in
++ return 0
++ awk -v m=25.2817 -v p=168 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ '[' 0 -eq 0 ']'
++ plog 'ATTEMPT_1 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ echo 'ATTEMPT_1 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ continue
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_2 BEGIN MENU_T+:148'
++ echo 'ATTEMPT_2 BEGIN MENU_T+:148'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ pgrep -f pcsx2-qt
++ snap t42-a2-now
++ local N=t42-a2-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-now.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-now.ppm /home/brad/pcsx2-t4/t42-a2-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-now.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_2 now score mean=26.8035 p99=163'
++ echo 'ATTEMPT_2 now score mean=26.8035 p99=163'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 26.8035 163
++ is_num 26.8035
++ case "$1" in
++ return 0
++ is_num 163
++ case "$1" in
++ return 0
++ awk -v m=26.8035 -v p=163 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_2 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_2 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ press K A2_CROSS
++ local KEY=K
++ local LAB=A2_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A2_CROSS_KEYDOWN_WALL:1790014236.537312941 UPTIME:388 MENU_T+:149'
++ echo 'A2_CROSS_KEYDOWN_WALL:1790014236.537312941 UPTIME:388 MENU_T+:149'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A2_CROSS_HELD_WALL:1790014236.555344590 UPTIME:388'
++ echo 'A2_CROSS_HELD_WALL:1790014236.555344590 UPTIME:388'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A2_CROSS_KEYUP_WALL:1790014237.072311121 UPTIME:389 MENU_T+:150'
++ echo 'A2_CROSS_KEYUP_WALL:1790014237.072311121 UPTIME:389 MENU_T+:150'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll01
++ local N=t42-a2-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll01.ppm /home/brad/pcsx2-t4/t42-a2-poll01.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll01 score mean=24.7773 p99=156 MENU_T+:152'
++ echo 'ATTEMPT_2 poll01 score mean=24.7773 p99=156 MENU_T+:152'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 24.7773 156
++ is_num 24.7773
++ case "$1" in
++ return 0
++ is_num 156
++ case "$1" in
++ return 0
++ awk -v m=24.7773 -v p=156 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll02
++ local N=t42-a2-poll02
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll02.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll02.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll02.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll02.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll02.ppm /home/brad/pcsx2-t4/t42-a2-poll02.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll02.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll02.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll02 score mean=41.3232 p99=219 MENU_T+:155'
++ echo 'ATTEMPT_2 poll02 score mean=41.3232 p99=219 MENU_T+:155'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 41.3232 219
++ is_num 41.3232
++ case "$1" in
++ return 0
++ is_num 219
++ case "$1" in
++ return 0
++ awk -v m=41.3232 -v p=219 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll03
++ local N=t42-a2-poll03
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll03.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll03.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll03.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll03.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll03.ppm /home/brad/pcsx2-t4/t42-a2-poll03.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll03.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll03.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll03 score mean=31.5371 p99=170 MENU_T+:158'
++ echo 'ATTEMPT_2 poll03 score mean=31.5371 p99=170 MENU_T+:158'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 31.5371 170
++ is_num 31.5371
++ case "$1" in
++ return 0
++ is_num 170
++ case "$1" in
++ return 0
++ awk -v m=31.5371 -v p=170 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll04
++ local N=t42-a2-poll04
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll04.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll04.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll04.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll04.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll04.ppm /home/brad/pcsx2-t4/t42-a2-poll04.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll04.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll04.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll04 score mean=24.3975 p99=166 MENU_T+:161'
++ echo 'ATTEMPT_2 poll04 score mean=24.3975 p99=166 MENU_T+:161'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 24.3975 166
++ is_num 24.3975
++ case "$1" in
++ return 0
++ is_num 166
++ case "$1" in
++ return 0
++ awk -v m=24.3975 -v p=166 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll05
++ local N=t42-a2-poll05
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll05.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll05.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll05.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll05.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll05.ppm /home/brad/pcsx2-t4/t42-a2-poll05.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll05.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll05.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll05 score mean=40.6578 p99=221 MENU_T+:163'
++ echo 'ATTEMPT_2 poll05 score mean=40.6578 p99=221 MENU_T+:163'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 40.6578 221
++ is_num 40.6578
++ case "$1" in
++ return 0
++ is_num 221
++ case "$1" in
++ return 0
++ awk -v m=40.6578 -v p=221 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll06
++ local N=t42-a2-poll06
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll06.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll06.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll06.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll06.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll06.ppm /home/brad/pcsx2-t4/t42-a2-poll06.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll06.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll06.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll06 score mean=31.1938 p99=185 MENU_T+:166'
++ echo 'ATTEMPT_2 poll06 score mean=31.1938 p99=185 MENU_T+:166'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 31.1938 185
++ is_num 31.1938
++ case "$1" in
++ return 0
++ is_num 185
++ case "$1" in
++ return 0
++ awk -v m=31.1938 -v p=185 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll07
++ local N=t42-a2-poll07
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll07.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll07.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll07.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll07.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll07.ppm /home/brad/pcsx2-t4/t42-a2-poll07.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll07.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll07.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll07 score mean=41.8967 p99=185 MENU_T+:169'
++ echo 'ATTEMPT_2 poll07 score mean=41.8967 p99=185 MENU_T+:169'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 41.8967 185
++ is_num 41.8967
++ case "$1" in
++ return 0
++ is_num 185
++ case "$1" in
++ return 0
++ awk -v m=41.8967 -v p=185 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll08
++ local N=t42-a2-poll08
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll08.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll08.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll08.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll08.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll08.ppm /home/brad/pcsx2-t4/t42-a2-poll08.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll08.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll08.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll08 score mean=28.8466 p99=178 MENU_T+:171'
++ echo 'ATTEMPT_2 poll08 score mean=28.8466 p99=178 MENU_T+:171'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 28.8466 178
++ is_num 28.8466
++ case "$1" in
++ return 0
++ is_num 178
++ case "$1" in
++ return 0
++ awk -v m=28.8466 -v p=178 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll09
++ local N=t42-a2-poll09
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll09.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll09.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll09.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll09.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll09.ppm /home/brad/pcsx2-t4/t42-a2-poll09.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll09.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll09.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll09 score mean=40.6756 p99=218 MENU_T+:174'
++ echo 'ATTEMPT_2 poll09 score mean=40.6756 p99=218 MENU_T+:174'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 40.6756 218
++ is_num 40.6756
++ case "$1" in
++ return 0
++ is_num 218
++ case "$1" in
++ return 0
++ awk -v m=40.6756 -v p=218 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll10
++ local N=t42-a2-poll10
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll10.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll10.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll10.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll10.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll10.ppm /home/brad/pcsx2-t4/t42-a2-poll10.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll10.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll10.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll10 score mean=24.5882 p99=155 MENU_T+:177'
++ echo 'ATTEMPT_2 poll10 score mean=24.5882 p99=155 MENU_T+:177'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 24.5882 155
++ is_num 24.5882
++ case "$1" in
++ return 0
++ is_num 155
++ case "$1" in
++ return 0
++ awk -v m=24.5882 -v p=155 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll11
++ local N=t42-a2-poll11
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll11.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll11.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll11.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll11.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll11.ppm /home/brad/pcsx2-t4/t42-a2-poll11.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll11.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll11.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll11 score mean=23.4219 p99=173 MENU_T+:180'
++ echo 'ATTEMPT_2 poll11 score mean=23.4219 p99=173 MENU_T+:180'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 23.4219 173
++ is_num 23.4219
++ case "$1" in
++ return 0
++ is_num 173
++ case "$1" in
++ return 0
++ awk -v m=23.4219 -v p=173 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll12
++ local N=t42-a2-poll12
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll12.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll12.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll12.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll12.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll12.ppm /home/brad/pcsx2-t4/t42-a2-poll12.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll12.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll12.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll12 score mean=36.6153 p99=174 MENU_T+:182'
++ echo 'ATTEMPT_2 poll12 score mean=36.6153 p99=174 MENU_T+:182'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 36.6153 174
++ is_num 36.6153
++ case "$1" in
++ return 0
++ is_num 174
++ case "$1" in
++ return 0
++ awk -v m=36.6153 -v p=174 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll13
++ local N=t42-a2-poll13
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll13.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll13.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll13.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll13.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll13.ppm /home/brad/pcsx2-t4/t42-a2-poll13.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll13.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll13.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll13 score mean=38.0245 p99=189 MENU_T+:185'
++ echo 'ATTEMPT_2 poll13 score mean=38.0245 p99=189 MENU_T+:185'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 38.0245 189
++ is_num 38.0245
++ case "$1" in
++ return 0
++ is_num 189
++ case "$1" in
++ return 0
++ awk -v m=38.0245 -v p=189 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll14
++ local N=t42-a2-poll14
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll14.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll14.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll14.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll14.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll14.ppm /home/brad/pcsx2-t4/t42-a2-poll14.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll14.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll14.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll14 score mean=46.8271 p99=216 MENU_T+:188'
++ echo 'ATTEMPT_2 poll14 score mean=46.8271 p99=216 MENU_T+:188'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 46.8271 216
++ is_num 46.8271
++ case "$1" in
++ return 0
++ is_num 216
++ case "$1" in
++ return 0
++ awk -v m=46.8271 -v p=216 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll15
++ local N=t42-a2-poll15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll15.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll15.ppm /home/brad/pcsx2-t4/t42-a2-poll15.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll15.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll15 score mean=32.8216 p99=162 MENU_T+:191'
++ echo 'ATTEMPT_2 poll15 score mean=32.8216 p99=162 MENU_T+:191'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 32.8216 162
++ is_num 32.8216
++ case "$1" in
++ return 0
++ is_num 162
++ case "$1" in
++ return 0
++ awk -v m=32.8216 -v p=162 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll16
++ local N=t42-a2-poll16
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll16.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll16.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll16.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll16.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll16.ppm /home/brad/pcsx2-t4/t42-a2-poll16.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll16.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll16.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll16 score mean=32.9077 p99=184 MENU_T+:193'
++ echo 'ATTEMPT_2 poll16 score mean=32.9077 p99=184 MENU_T+:193'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 32.9077 184
++ is_num 32.9077
++ case "$1" in
++ return 0
++ is_num 184
++ case "$1" in
++ return 0
++ awk -v m=32.9077 -v p=184 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll17
++ local N=t42-a2-poll17
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll17.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll17.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll17.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll17.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll17.ppm /home/brad/pcsx2-t4/t42-a2-poll17.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll17.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll17.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll17 score mean=33.7891 p99=200 MENU_T+:196'
++ echo 'ATTEMPT_2 poll17 score mean=33.7891 p99=200 MENU_T+:196'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 33.7891 200
++ is_num 33.7891
++ case "$1" in
++ return 0
++ is_num 200
++ case "$1" in
++ return 0
++ awk -v m=33.7891 -v p=200 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a2-poll18
++ local N=t42-a2-poll18
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a2-poll18.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a2-poll18.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a2-poll18.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a2-poll18.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a2-poll18.ppm /home/brad/pcsx2-t4/t42-a2-poll18.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a2-poll18.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a2-poll18.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_2 poll18 score mean=33.0529 p99=171 MENU_T+:199'
++ echo 'ATTEMPT_2 poll18 score mean=33.0529 p99=171 MENU_T+:199'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 33.0529 171
++ is_num 33.0529
++ case "$1" in
++ return 0
++ is_num 171
++ case "$1" in
++ return 0
++ awk -v m=33.0529 -v p=171 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ '[' 0 -eq 0 ']'
++ plog 'ATTEMPT_2 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ echo 'ATTEMPT_2 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ continue
++ for A in 1 2 3
+++ date -u +%s
++ plog 'ATTEMPT_3 BEGIN MENU_T+:199'
++ echo 'ATTEMPT_3 BEGIN MENU_T+:199'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ pgrep -f pcsx2-qt
++ snap t42-a3-now
++ local N=t42-a3-now
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-now.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-now.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-now.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-now.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-now.ppm /home/brad/pcsx2-t4/t42-a3-now.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-now.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-now.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ATTEMPT_3 now score mean=28.1919 p99=157'
++ echo 'ATTEMPT_3 now score mean=28.1919 p99=157'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 28.1919 157
++ is_num 28.1919
++ case "$1" in
++ return 0
++ is_num 157
++ case "$1" in
++ return 0
++ awk -v m=28.1919 -v p=157 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'ATTEMPT_3 on attract (non-title) -> Cross attract-skip'
++ echo 'ATTEMPT_3 on attract (non-title) -> Cross attract-skip'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ press K A3_CROSS
++ local KEY=K
++ local LAB=A3_CROSS
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A3_CROSS_KEYDOWN_WALL:1790014287.157578047 UPTIME:439 MENU_T+:200'
++ echo 'A3_CROSS_KEYDOWN_WALL:1790014287.157578047 UPTIME:439 MENU_T+:200'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
++ plog 'A3_CROSS_HELD_WALL:1790014287.176584321 UPTIME:439'
++ echo 'A3_CROSS_HELD_WALL:1790014287.176584321 UPTIME:439'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A3_CROSS_KEYUP_WALL:1790014287.693698524 UPTIME:439 MENU_T+:200'
++ echo 'A3_CROSS_KEYUP_WALL:1790014287.693698524 UPTIME:439 MENU_T+:200'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ DETECTED=0
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll01
++ local N=t42-a3-poll01
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll01.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll01.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll01.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll01.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll01.ppm /home/brad/pcsx2-t4/t42-a3-poll01.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll01.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll01.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll01 score mean=28.8368 p99=174 MENU_T+:203'
++ echo 'ATTEMPT_3 poll01 score mean=28.8368 p99=174 MENU_T+:203'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 28.8368 174
++ is_num 28.8368
++ case "$1" in
++ return 0
++ is_num 174
++ case "$1" in
++ return 0
++ awk -v m=28.8368 -v p=174 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll02
++ local N=t42-a3-poll02
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll02.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll02.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll02.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll02.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll02.ppm /home/brad/pcsx2-t4/t42-a3-poll02.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll02.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll02.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll02 score mean=24.9065 p99=179 MENU_T+:206'
++ echo 'ATTEMPT_3 poll02 score mean=24.9065 p99=179 MENU_T+:206'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 24.9065 179
++ is_num 24.9065
++ case "$1" in
++ return 0
++ is_num 179
++ case "$1" in
++ return 0
++ awk -v m=24.9065 -v p=179 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll03
++ local N=t42-a3-poll03
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll03.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll03.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll03.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll03.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll03.ppm /home/brad/pcsx2-t4/t42-a3-poll03.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll03.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll03.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll03 score mean=32.9246 p99=157 MENU_T+:208'
++ echo 'ATTEMPT_3 poll03 score mean=32.9246 p99=157 MENU_T+:208'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 32.9246 157
++ is_num 32.9246
++ case "$1" in
++ return 0
++ is_num 157
++ case "$1" in
++ return 0
++ awk -v m=32.9246 -v p=157 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll04
++ local N=t42-a3-poll04
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll04.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll04.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll04.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll04.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll04.ppm /home/brad/pcsx2-t4/t42-a3-poll04.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll04.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll04.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll04 score mean=37.1520 p99=186 MENU_T+:211'
++ echo 'ATTEMPT_3 poll04 score mean=37.1520 p99=186 MENU_T+:211'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 37.1520 186
++ is_num 37.1520
++ case "$1" in
++ return 0
++ is_num 186
++ case "$1" in
++ return 0
++ awk -v m=37.1520 -v p=186 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll05
++ local N=t42-a3-poll05
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll05.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll05.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll05.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll05.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll05.ppm /home/brad/pcsx2-t4/t42-a3-poll05.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll05.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll05.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll05 score mean=34.0812 p99=153 MENU_T+:214'
++ echo 'ATTEMPT_3 poll05 score mean=34.0812 p99=153 MENU_T+:214'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 34.0812 153
++ is_num 34.0812
++ case "$1" in
++ return 0
++ is_num 153
++ case "$1" in
++ return 0
++ awk -v m=34.0812 -v p=153 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll06
++ local N=t42-a3-poll06
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll06.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll06.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll06.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll06.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll06.ppm /home/brad/pcsx2-t4/t42-a3-poll06.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll06.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll06.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ date -u +%s
++ plog 'ATTEMPT_3 poll06 score mean=32.6264 p99=168 MENU_T+:217'
++ echo 'ATTEMPT_3 poll06 score mean=32.6264 p99=168 MENU_T+:217'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 32.6264 168
++ is_num 32.6264
++ case "$1" in
++ return 0
++ is_num 168
++ case "$1" in
++ return 0
++ awk -v m=32.6264 -v p=168 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll07
++ local N=t42-a3-poll07
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll07.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll07.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll07.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll07.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll07.ppm /home/brad/pcsx2-t4/t42-a3-poll07.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll07.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll07.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll07 score mean=30.5660 p99=159 MENU_T+:219'
++ echo 'ATTEMPT_3 poll07 score mean=30.5660 p99=159 MENU_T+:219'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 30.5660 159
++ is_num 30.5660
++ case "$1" in
++ return 0
++ is_num 159
++ case "$1" in
++ return 0
++ awk -v m=30.5660 -v p=159 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll08
++ local N=t42-a3-poll08
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll08.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll08.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll08.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll08.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll08.ppm /home/brad/pcsx2-t4/t42-a3-poll08.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll08.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll08.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll08 score mean=30.7083 p99=161 MENU_T+:222'
++ echo 'ATTEMPT_3 poll08 score mean=30.7083 p99=161 MENU_T+:222'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 30.7083 161
++ is_num 30.7083
++ case "$1" in
++ return 0
++ is_num 161
++ case "$1" in
++ return 0
++ awk -v m=30.7083 -v p=161 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll09
++ local N=t42-a3-poll09
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll09.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll09.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll09.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll09.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll09.ppm /home/brad/pcsx2-t4/t42-a3-poll09.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll09.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll09.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll09 score mean=44.7910 p99=207 MENU_T+:225'
++ echo 'ATTEMPT_3 poll09 score mean=44.7910 p99=207 MENU_T+:225'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 44.7910 207
++ is_num 44.7910
++ case "$1" in
++ return 0
++ is_num 207
++ case "$1" in
++ return 0
++ awk -v m=44.7910 -v p=207 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll10
++ local N=t42-a3-poll10
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll10.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll10.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll10.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll10.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll10.ppm /home/brad/pcsx2-t4/t42-a3-poll10.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll10.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll10.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll10 score mean=31.4969 p99=169 MENU_T+:228'
++ echo 'ATTEMPT_3 poll10 score mean=31.4969 p99=169 MENU_T+:228'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 31.4969 169
++ is_num 31.4969
++ case "$1" in
++ return 0
++ is_num 169
++ case "$1" in
++ return 0
++ awk -v m=31.4969 -v p=169 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll11
++ local N=t42-a3-poll11
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll11.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll11.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll11.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll11.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll11.ppm /home/brad/pcsx2-t4/t42-a3-poll11.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll11.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll11.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll11 score mean=34.9086 p99=192 MENU_T+:230'
++ echo 'ATTEMPT_3 poll11 score mean=34.9086 p99=192 MENU_T+:230'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 34.9086 192
++ is_num 34.9086
++ case "$1" in
++ return 0
++ is_num 192
++ case "$1" in
++ return 0
++ awk -v m=34.9086 -v p=192 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll12
++ local N=t42-a3-poll12
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll12.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll12.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll12.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll12.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll12.ppm /home/brad/pcsx2-t4/t42-a3-poll12.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll12.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll12.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll12 score mean=29.3799 p99=154 MENU_T+:233'
++ echo 'ATTEMPT_3 poll12 score mean=29.3799 p99=154 MENU_T+:233'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 29.3799 154
++ is_num 29.3799
++ case "$1" in
++ return 0
++ is_num 154
++ case "$1" in
++ return 0
++ awk -v m=29.3799 -v p=154 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll13
++ local N=t42-a3-poll13
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll13.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll13.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll13.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll13.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll13.ppm /home/brad/pcsx2-t4/t42-a3-poll13.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll13.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll13.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll13 score mean=38.4982 p99=174 MENU_T+:236'
++ echo 'ATTEMPT_3 poll13 score mean=38.4982 p99=174 MENU_T+:236'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 38.4982 174
++ is_num 38.4982
++ case "$1" in
++ return 0
++ is_num 174
++ case "$1" in
++ return 0
++ awk -v m=38.4982 -v p=174 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll14
++ local N=t42-a3-poll14
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll14.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll14.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll14.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll14.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll14.ppm /home/brad/pcsx2-t4/t42-a3-poll14.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll14.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll14.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll14 score mean=28.2641 p99=175 MENU_T+:239'
++ echo 'ATTEMPT_3 poll14 score mean=28.2641 p99=175 MENU_T+:239'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 28.2641 175
++ is_num 28.2641
++ case "$1" in
++ return 0
++ is_num 175
++ case "$1" in
++ return 0
++ awk -v m=28.2641 -v p=175 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll15
++ local N=t42-a3-poll15
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll15.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll15.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll15.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll15.ppm /home/brad/pcsx2-t4/t42-a3-poll15.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll15.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll15.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll15 score mean=32.2949 p99=167 MENU_T+:241'
++ echo 'ATTEMPT_3 poll15 score mean=32.2949 p99=167 MENU_T+:241'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 32.2949 167
++ is_num 32.2949
++ case "$1" in
++ return 0
++ is_num 167
++ case "$1" in
++ return 0
++ awk -v m=32.2949 -v p=167 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll16
++ local N=t42-a3-poll16
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll16.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll16.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll16.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll16.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll16.ppm /home/brad/pcsx2-t4/t42-a3-poll16.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll16.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll16.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll16 score mean=30.5347 p99=172 MENU_T+:244'
++ echo 'ATTEMPT_3 poll16 score mean=30.5347 p99=172 MENU_T+:244'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 30.5347 172
++ is_num 30.5347
++ case "$1" in
++ return 0
++ is_num 172
++ case "$1" in
++ return 0
++ awk -v m=30.5347 -v p=172 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll17
++ local N=t42-a3-poll17
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll17.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll17.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll17.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll17.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll17.ppm /home/brad/pcsx2-t4/t42-a3-poll17.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll17.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll17.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll17 score mean=29.5545 p99=157 MENU_T+:247'
++ echo 'ATTEMPT_3 poll17 score mean=29.5545 p99=157 MENU_T+:247'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 29.5545 157
++ is_num 29.5545
++ case "$1" in
++ return 0
++ is_num 157
++ case "$1" in
++ return 0
++ awk -v m=29.5545 -v p=157 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ for N in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
++ sleep 2
++ snap t42-a3-poll18
++ local N=t42-a3-poll18
++ date -u
++ xwd -root -out /home/brad/pcsx2-t4/t42-a3-poll18.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42-a3-poll18.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42-a3-poll18.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42-a3-poll18.ppm
++ ls -la /home/brad/pcsx2-t4/t42-a3-poll18.ppm /home/brad/pcsx2-t4/t42-a3-poll18.jpg
++ read M P
+++ score_band /home/brad/pcsx2-t4/t42-a3-poll18.ppm
+++ python3 /home/brad/pcsx2-t4/t42-cropdiff.py /home/brad/pcsx2-t4/t42-a3-poll18.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'ATTEMPT_3 poll18 score mean=40.2876 p99=212 MENU_T+:250'
++ echo 'ATTEMPT_3 poll18 score mean=40.2876 p99=212 MENU_T+:250'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ is_title 40.2876 212
++ is_num 40.2876
++ case "$1" in
++ return 0
++ is_num 212
++ case "$1" in
++ return 0
++ awk -v m=40.2876 -v p=212 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ '[' 0 -eq 0 ']'
++ plog 'ATTEMPT_3 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ echo 'ATTEMPT_3 NO-TITLE-IN-WINDOW (outcome: no-title)'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ continue
++ '[' 0 -eq 1 ']'
++ plog 'NO-PARK (menu-like gate never fired in <=3 attempts; no menu Cross pressed)'
++ echo 'NO-PARK (menu-like gate never fired in <=3 attempts; no menu Cross pressed)'
++ tee -a /home/brad/pcsx2-t4/t42-poll.log
++ ls -la /home/brad/pcsx2-t4/t42-a1-now.jpg /home/brad/pcsx2-t4/t42-a1-poll01.jpg /home/brad/pcsx2-t4/t42-a1-poll02.jpg /home/brad/pcsx2-t4/t42-a1-poll03.jpg /home/brad/pcsx2-t4/t42-a1-poll04.jpg /home/brad/pcsx2-t4/t42-a1-poll05.jpg /home/brad/pcsx2-t4/t42-a1-poll06.jpg /home/brad/pcsx2-t4/t42-a1-poll07.jpg /home/brad/pcsx2-t4/t42-a1-poll08.jpg /home/brad/pcsx2-t4/t42-a1-poll09.jpg /home/brad/pcsx2-t4/t42-a1-poll10.jpg /home/brad/pcsx2-t4/t42-a1-poll11.jpg /home/brad/pcsx2-t4/t42-a1-poll12.jpg /home/brad/pcsx2-t4/t42-a1-poll13.jpg /home/brad/pcsx2-t4/t42-a1-poll14.jpg /home/brad/pcsx2-t4/t42-a1-poll15.jpg /home/brad/pcsx2-t4/t42-a1-poll16.jpg /home/brad/pcsx2-t4/t42-a1-poll17.jpg /home/brad/pcsx2-t4/t42-a1-poll18.jpg /home/brad/pcsx2-t4/t42-a2-now.jpg /home/brad/pcsx2-t4/t42-a2-poll01.jpg /home/brad/pcsx2-t4/t42-a2-poll02.jpg /home/brad/pcsx2-t4/t42-a2-poll03.jpg /home/brad/pcsx2-t4/t42-a2-poll04.jpg /home/brad/pcsx2-t4/t42-a2-poll05.jpg /home/brad/pcsx2-t4/t42-a2-poll06.jpg /home/brad/pcsx2-t4/t42-a2-poll07.jpg /home/brad/pcsx2-t4/t42-a2-poll08.jpg /home/brad/pcsx2-t4/t42-a2-poll09.jpg /home/brad/pcsx2-t4/t42-a2-poll10.jpg /home/brad/pcsx2-t4/t42-a2-poll11.jpg /home/brad/pcsx2-t4/t42-a2-poll12.jpg /home/brad/pcsx2-t4/t42-a2-poll13.jpg /home/brad/pcsx2-t4/t42-a2-poll14.jpg /home/brad/pcsx2-t4/t42-a2-poll15.jpg /home/brad/pcsx2-t4/t42-a2-poll16.jpg /home/brad/pcsx2-t4/t42-a2-poll17.jpg /home/brad/pcsx2-t4/t42-a2-poll18.jpg /home/brad/pcsx2-t4/t42-a3-now.jpg /home/brad/pcsx2-t4/t42-a3-poll01.jpg /home/brad/pcsx2-t4/t42-a3-poll02.jpg /home/brad/pcsx2-t4/t42-a3-poll03.jpg /home/brad/pcsx2-t4/t42-a3-poll04.jpg /home/brad/pcsx2-t4/t42-a3-poll05.jpg /home/brad/pcsx2-t4/t42-a3-poll06.jpg /home/brad/pcsx2-t4/t42-a3-poll07.jpg /home/brad/pcsx2-t4/t42-a3-poll08.jpg /home/brad/pcsx2-t4/t42-a3-poll09.jpg /home/brad/pcsx2-t4/t42-a3-poll10.jpg /home/brad/pcsx2-t4/t42-a3-poll11.jpg /home/brad/pcsx2-t4/t42-a3-poll12.jpg /home/brad/pcsx2-t4/t42-a3-poll13.jpg /home/brad/pcsx2-t4/t42-a3-poll14.jpg /home/brad/pcsx2-t4/t42-a3-poll15.jpg /home/brad/pcsx2-t4/t42-a3-poll16.jpg /home/brad/pcsx2-t4/t42-a3-poll17.jpg /home/brad/pcsx2-t4/t42-a3-poll18.jpg /home/brad/pcsx2-t4/t42-start.jpg /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+++ cat /home/brad/pcsx2-t4/pcsx2.pid
++ kill 349
++ sleep 10
++ pgrep -a pcsx2-qt
++ true
++ stamp
++ date -u
+++ cut -d. -f1 /proc/uptime
++ echo UPTIME:499
++ echo T42_DONE

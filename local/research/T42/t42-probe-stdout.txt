@@ -1,0 +1,120 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ D=/home/brad/pcsx2-t4
++ E=/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ cp /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t42-probe.txt
++ ls -la /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t42-probe.txt
+-rw-r--r-- 1 brad brad 2745300674 Sep 21 14:04 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog-pre-t42-probe.txt
++ pkill Xvfb
++ true
++ sleep 2
++ sleep 2
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ pgrep -a Xvfb
+353 Xvfb :99 -screen 0 1280x1024x24
++ date -u
+Mon Sep 21 18:04:24 UTC 2026
+PCBOOT:359
++ echo PCBOOT:359
++ sleep 25
++ nohup /home/brad/pcsx2-t4/pcsx2/build/bin/pcsx2-qt -nogui -slowboot -turbo -datapath /home/brad/pcsx2-t4/dat -logfile /home/brad/pcsx2-t4/logs/boot-t42probe.log -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ date -u
+Mon Sep 21 18:04:49 UTC 2026
++ xwd -root -out /home/brad/pcsx2-t4/t42probe1.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42probe1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42probe1.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42probe1.ppm
+-rw-r--r-- 1 brad brad   30007 Sep 21 14:04 /home/brad/pcsx2-t4/t42probe1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 21 14:04 /home/brad/pcsx2-t4/t42probe1.ppm
++ ls -la /home/brad/pcsx2-t4/t42probe1.ppm /home/brad/pcsx2-t4/t42probe1.jpg
+++ xdotool search --onlyvisible --name '.*'
+PROBE_IDS:511
+2097159
+2097176
+2097162
+PROBE_WIN:511::1280x1024
+PROBE_SKIP_ROOT:511
+PROBE_WIN:2097159:SSX 3 [Devel]:640x480
+PROBE_SKIP_GAME:2097159
+PROBE_WIN:2097176:Error:500x100
++ IDS='511
+2097159
+2097176
+2097162'
++ echo 'PROBE_IDS:511
+2097159
+2097176
+2097162'
++ for W in $IDS
+++ xdotool getwindowname 511
++ N=
+++ xdotool getwindowgeometry --shell 511
+++ grep -E '^(WIDTH|HEIGHT)='
++ eval 'WIDTH=1280
+HEIGHT=1024'
+++ WIDTH=1280
+++ HEIGHT=1024
++ echo PROBE_WIN:511::1280x1024
++ case "$N" in
++ '[' 1280x1024 = 1280x1024 ']'
++ echo PROBE_SKIP_ROOT:511
++ continue
++ for W in $IDS
+++ xdotool getwindowname 2097159
++ N='SSX 3 [Devel]'
+++ xdotool getwindowgeometry --shell 2097159
+++ grep -E '^(WIDTH|HEIGHT)='
++ eval 'WIDTH=640
+HEIGHT=480'
+++ WIDTH=640
+++ HEIGHT=480
++ echo 'PROBE_WIN:2097159:SSX 3 [Devel]:640x480'
++ case "$N" in
++ echo PROBE_SKIP_GAME:2097159
++ continue
++ for W in $IDS
+++ xdotool getwindowname 2097176
++ N=Error
+++ xdotool getwindowgeometry --shell 2097176
+++ grep -E '^(WIDTH|HEIGHT)='
++ eval 'WIDTH=500
+HEIGHT=100'
+++ WIDTH=500
+++ HEIGHT=100
+PROBE_DISMISS:2097176:Error
++ echo PROBE_WIN:2097176:Error:500x100
++ case "$N" in
++ '[' 500x100 = 1280x1024 ']'
++ echo PROBE_DISMISS:2097176:Error
++ xdotool windowfocus --sync 2097176
++ xdotool key --window 2097176 Return
+PROBE_KEY_FAILED
+PROBE_DISMISSED_ONE
+X Error of failed request:  BadWindow (invalid Window parameter)
+  Major opcode of failed request:  25 (X_SendEvent)
+  Resource id in failed request:  0x200018
+  Serial number of failed request:  27
+  Current serial number in output stream:  27
++ echo PROBE_KEY_FAILED
++ echo PROBE_DISMISSED_ONE
++ break
++ sleep 3
+-rw-r--r-- 1 brad brad   21267 Sep 21 14:04 /home/brad/pcsx2-t4/t42probe2.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 21 14:04 /home/brad/pcsx2-t4/t42probe2.ppm
++ xwd -root -out /home/brad/pcsx2-t4/t42probe2.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t42probe2.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t42probe2.xwd
++ pnmtojpeg -quality=80 /home/brad/pcsx2-t4/t42probe2.ppm
++ ls -la /home/brad/pcsx2-t4/t42probe2.ppm /home/brad/pcsx2-t4/t42probe2.jpg
++ pkill -f pcsx2-qt
++ sleep 5
+PROBE_PCSX2_DEAD
+T42_PROBE_DONE
++ pgrep -a pcsx2-qt
++ echo PROBE_PCSX2_DEAD
++ echo T42_PROBE_DONE
