@@ -1,0 +1,29 @@
+diff --git a/vulkan/command_buffer.cpp b/vulkan/command_buffer.cpp
+index 9f2534d..16599ce 100644
+--- a/vulkan/command_buffer.cpp
++++ b/vulkan/command_buffer.cpp
+@@ -1195,6 +1195,24 @@ Pipeline CommandBuffer::build_compute_pipeline(Device *device, const DeferredPip
+ 		info.pNext = &robustness;
+ 	}
+ 
++	// G20 capture: log the compute pipeline identity BEFORE create_pipeline, so the
++	// crashing pipeline (which never reaches log_compile_time) is named in logcat.
++	// Logging-only: reads of already-computed locals/const-ref fields + LOGI; no
++	// pipeline-creation input is written, reordered, or skipped.
++	LOGI("G20 pre-create (compute, %016llx): program %016llx, shader %016llx, specs %u, robust %u, subgroup %u.\n",
++	     static_cast<unsigned long long>(compile.hash),
++	     static_cast<unsigned long long>(compile.program->get_hash()),
++	     static_cast<unsigned long long>(shader.get_hash()),
++	     spec_info.mapEntryCount,
++	     compile.static_state.state.robustness,
++	     compile.static_state.state.subgroup_control_size);
++	for (uint32_t g20_spec = 0; g20_spec < spec_info.mapEntryCount; g20_spec++)
++	{
++		LOGI("G20 pre-create spec %016llx: id %u = %08x.\n",
++		     static_cast<unsigned long long>(compile.hash),
++		     spec_entries[g20_spec].constantID, spec_constants[g20_spec]);
++	}
++
+ 	auto start_ts = Util::get_current_time_nsecs();
+ 	VkResult vr = device->pipeline_binary_cache.create_pipeline(&info, compile.cache, &compute_pipeline);
+ 	auto end_ts = Util::get_current_time_nsecs();
