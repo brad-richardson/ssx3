@@ -1436,6 +1436,17 @@ the build or commit that closed them.
       T42 evidence intact; T44 brief carries the log-path fix). ~1.5 h.
       Next: T44 (crash-lottery tolerance, stop at first crash-free, max 2
       runs). Ledger row added.
+- [x] **E20 frontier STALL (09-21) — cyber_policy flag, partial preserved, E-lane to Muse (E21)**
+      Frontier completed checkpoint re-verify + SSD-reconnect gate +
+      post-remount regression (rc0, suite 458) + observer forwarding-repair
+      edit, then its turn was killed by a frontier `cyber_policy` content
+      flag at 16:44 EDT (weekly quota 16% left — a policy block, not quota).
+      Partial committed UNGATED as `51d786c` ([E20], 98 paths); frontier pane
+      closed per user call. E21 (Muse) resumes: re-verify, prove 1:1
+      forwarding in isolation, loaded regression, Q1→Q2→Q3. T44 (Muse)
+      spawned in parallel. Share mirror verified current (names + sizes +
+      t43r1 head/tail shas) — restart-safe. Fleet: e21 + t44 + g29 + i22
+      working, t43 retired idle.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
