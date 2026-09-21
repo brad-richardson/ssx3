@@ -1288,6 +1288,70 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G21 read (09-21) — PASS, S3d re-verified 30/32 + 2 corrections (B confirmed; A SUPERSEDED — zero-reads are TRANSIENT, both binaries re-read original shas); SPIR-V valid; minrepro built UNTESTED; draft complete, unsubmitted:**
+      30 CONFIRMED + 2 NOT-RECEIPTED (kept out of/hedged in the draft) + full
+      S3c re-derivation (all three FNV hashes match). Correction B VERIFIED
+      (G18 pc `…2a5fe8` worker + main in `triangle_setup` vs G19/G20 pc
+      `…472fc0` main — deterministic pair is G19+G20; draft states the
+      corrected form). Correction A SUPERSEDED by orchestrator re-read: both
+      binaries now read their ORIGINAL shas (`a62d8a2b…` + `8d5079cc…`, ELF
+      magic, original mtimes) — the zero-reads are TRANSIENT read-path
+      artifacts (ExFAT suspected), not storage damage; standing hygiene
+      (re-sha at push time + on-device match) REMAINS the guard. SPIR-V
+      `spirv-val` clean (independently re-run rc=0); crasher is the ONLY one
+      with PhysicalStorageBuffer64 + barriers + LocalSize 256 (correlation,
+      not trigger — no over-claim). Minrepro built host-side (13,792 B,
+      `7fcd59f5…`, UNTESTED tabled honestly). Draft complete (162 lines, S9
+      blank-for-user), NOT submitted — no upstream contact per standing
+      order. Verified: S3d sample, correction pcs, binary shas + magic,
+      minrepro identity, draft shape, pins, ps2xGS commit. ~1 h. Next: HELD
+      for the user's file-vs-workaround decision (G-lane idle one round by
+      design, not stalled). Ledger row added.
+- [x] **I19 read (09-21) — PASS, DIAG_SEMA census (26/30/31/32/36 signalers × sites × timing) + feeder audit + completion-fix PROPOSAL (zero commits, zero code changed):**
+      NO build/install (config-only relaunch of the installed I18 app with
+      `PS2X_DIAG_SEMA=1` added; worktree @`83fb4d6`, 0 ports, 0 commits,
+      status clean). Probe 90 s (exit 2 alive, PID 4387): 22,395 `[diag:sema]`
+      lines name signalers (26: boot-only wakers 2/3/1; 30: 5×t3 waits / 4×t1
+      signals, boot-only; 31: 5306/5306 vsync `-1` pump full-run; 32: 616/615
+      mixed wakers, boot-only; 36: 1 park, 0 signals in 90 s); creators NOT
+      observed (exact obstacle: separate `PS2X_DIAG_SEMA_CREATE` env, unset —
+      H-b). I18 steady state re-confirmed byte-identical (all FIVE frame lines
+      readable this time, counters frozen). Audit with file/line receipts:
+      non-stream callbacks have ZERO readers (only selecting reader requires
+      `stream=true`; dispatch only from Demux ×2); guest is the ONLY feeder
+      via its undelivered callback; device decoder is the no-FFmpeg STUB
+      (`feed()` → false, silent retry); `decoderFailed` never true (3 hits,
+      all false); CD EOF comes ONLY from the St path the guest never enters
+      (`sceCdSt` 0). Proposal F1–F10 (generic MPEG.cpp fix, no PC special
+      case, T1–T6 regressions, P1–P3 preconditions on E15). NO new `.ips`
+      (5 priors — four briefs running) + black screenshot. Verified: extract
+      line counts, full-console counts ×7, per-id waits/signals (id-31 ±1 =
+      disclosed DPI truncation), worktree clean, audit greps ×3, crashlog,
+      screenshot viewed. ~75 min. Next: HELD for E15's ABI receipt (fix
+      brief needs P1–P3; I-lane idle one round by design). Ledger row added.
+- [x] **T40 read (09-21) — PASS, blind sub-second series: FIRST resolved input hop (SCPS120 +49 @ 0.79); R1 C:-full wedge properly discarded + C: fix (pre-run gate now):**
+      Bit-identical T4 build reused (all receipts reproduce). R1 DISCARDED as
+      environment failure (C: 1.4 GB → 116 KB wedge at T+185 in ZC hops,
+      25+ min stall; full forensics + recovery: service restart + cleared 20
+      stale emulog transfer copies ~30 GB, C: → 29.1 GB; owner's installs/
+      Docker/Temp untouched; T27 §4 honored). R2 exit 0: chain reproduced
+      (ENTER Cross 536.1 ms @T+329.15 → load 17%→97%→cinematic→panel by +15,
+      stable 80 s) → XCROSS 537.7 ms @T+434.98 → countdown `2` → LIVE →
+      LIVE-LIKE gate → pre-pair (00:01:28 6TH/6 36% / 00:01:29 6TH/6 36%, no
+      input) → ONE Left hold 1038.0 ms @T+503.09 → blind 10 snaps at ≈1.07 s
+      exposures (ns-stamped, post-hoc scored) to 00:01:46 6TH/6 41%:
+      SCPS120 railing drops 7/11 → 3/11 with the HOLD HOP RESOLVED (+49 @
+      0.79) and the pre-pair gap resolved (−38 @ 0.55); SCPS40 still rails
+      the hold hop (4/11); RDC gated out 10/12 (no gated pair straddles);
+      HUD flat (6TH throughout, back-of-pack; progress/clock monotonic
+      ~1.5×; two slow wall corners @d1 16 MPH + @d6–d7 `RECOVER`). ZERO
+      bit-identical frames (shimmer breaks the 5-run streak — nearest
+      a1-post15 0.0007/0). EE 52 / IOP 155 sets identical; exact flaps
+      0/0/1/0 (1×[614.65] post-window; ZERO event-log entries in-window).
+      Verified: hold walls exact, T40_DONE, LIVE-LIKE, head/tail 2000/2000,
+      poll 168 lines, flap lines + positions, R1 wedge files, trace
+      size+sha. ~2 h. Next: T41 `sleep 0.5` blind cadence (T40 G1 first
+      arm). Ledger row added.
 - [x] **G20 read (09-21) — PASS, crashing pipeline NAMED (sampler_feedback 7463dfd379df2855 + SPIR-V, hash chain closed by orchestrator); Adreno filing package COMPLETE (+ zero-fill recurrence note):**
       Logging-only +18/−0 hunk (no-mutation proof) in `build_compute_pipeline`
       @:1198; build exit 0 (265,838,568 B, `8d5079cc…`, build-id `a8402ce0…`).
