@@ -1288,6 +1288,46 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **E15 read (09-21) — PASS(iii-shaped), MPEG request/delivery probe with original-ELF ABI receipt; measurement-incomplete ONLY on shutdown footers (main `_Exit` bypass honestly tabled, no synthesized footer):**
+      Fork `67c0a632` (pushed, 5 observation files, MPEG.cpp/h untouched);
+      actual-wrapper fail-befores (no-input + input both rc1, selection/
+      invocation/no-input/delivery distinguished, no manual callback calls);
+      ONE guarded boot 75.4 s (lease ok, caps closed): type-1 request joined
+      (Create/register/GetPicture-wait @`0x3b1028`, 0 dispatches), UI 3→6
+      @tick225 arms aligned graphics (1696 B copy → GS → D=112 → Present
+      odd-field exact, card-check message), footer ABSENT (strict miner
+      fails, `source_shutdown_complete=false`, partial callers opt-in).
+      Cross-lane: I19's device gap converges (same non-stream selection
+      gap); FFmpeg-ON host vs OFF-device split tabled. Verified: fork
+      commit (5 files exact + remote `fork/ssx3` agrees over network),
+      diff scope (MPEG untouched), register_functions dirt predates E15
+      (inherited, untouched), SSD fixture binary (165,103,200 B +
+      `b0aefc01…` exact), internal JSONs consistent. CAVEATS (restart):
+      runner/suite binaries unrecheckable (`/tmp/p1-link` wiped — E16
+      rebuilds from fork); SSD run dir absent per retention receipts
+      (round-trip verified, canonical committed). ~1 h. Next: E16 closure
+      repair + guarded probe (frontier, E-track); absorb queued E17.
+      Ledger row added.
+- [x] **G22 read (09-21) — PASS(Done), skip-gate removes O4 (4-leg proof) + full completion + `Done!`; NEW post-run wall O5 named; behavior change TOTAL (all-black, quantified); upstream flag found UNTESTED:**
+      ONE hunk (+15/−0, knob `PGS_SKIP_SAMPLER_FEEDBACK`) + rebuild exit 0
+      (265,840,344 B, `5e1f7827…`, BuildID `c2dc902b…`) + ONE bounded knob
+      run: exit 134 (NOT 139), crasher 0×, 9/9 compiles succeed, death 37 ms
+      post-`Done!` with 0 driver frames; tombstone_15 = SIGABRT Scudo
+      `corrupted chunk header @0x200007f59a19ef0` in
+      `main ← Device::~Device ← PerFrame ← CommandPool` teardown (writer
+      UNNAMED — needs instrumented brief, tabled O5); 10 scanouts pure
+      black (k=1..7 all-0.0000, means 0,0,0 — causation proof, degenerate
+      rendering fix). Upstream `--disable-sampler-feedback` observed in
+      HEAD (full-upload fallback). Verified: 10 PPMs (688,143 B each,
+      all-zero re-censused), logcat (1810 lines, `Done!` last @10:11:24.240,
+      knob ×1, crasher 0×, 9 success-yes, 18 Running-frame), tombstone
+      (signal/message exact, replayer BuildID == binary ×2, O5 frames),
+      binary sha (4th matching re-sha, no zero-fill) + build-id, hunk
+      HUNK_MATCH vs committed diff, clone tree == G20 §2a + hunk, flag
+      lines (ERRATUM: usage/handler observed :36/:58 vs cited :33/:55 —
+      substance confirmed, `gs_interface.hpp:143` exact). ~1 h. Next: G23
+      upstream-flag validation (NO rebuild — binary ships it). Ledger row
+      added.
 - [x] **G21 read (09-21) — PASS, S3d re-verified 30/32 + 2 corrections (B confirmed; A SUPERSEDED — zero-reads are TRANSIENT, both binaries re-read original shas); SPIR-V valid; minrepro built UNTESTED; draft complete, unsubmitted:**
       30 CONFIRMED + 2 NOT-RECEIPTED (kept out of/hedged in the draft) + full
       S3c re-derivation (all three FNV hashes match). Correction B VERIFIED
