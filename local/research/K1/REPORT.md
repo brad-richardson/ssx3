@@ -48,7 +48,7 @@ suite 439/439/0 → 443/443/0.
 |---|---|---|
 | 1 | Frontier correction (same poll as brief) | R1 proves game patch installation under PCSX2, not hardware/physical parity — claimed only as shown; R1-only scanner `0x83` + `0x42C758` installer tabled (K1-10); the 6 drops are the copied-code path `0x5B→0x80075000` (built-in fix insufficient) — fix addresses it; expanded acceptance rows tabled (K1-11) |
 | 2 | Second refinement (before implementation) | `0x80075000` is a six-entry TLB-payload lookup (table at dst `0x80075300`), not original handlers — verified verbatim from ELF words (K1-3); index 3 = data `_kExecArg`, not code — preserved as data; ps2sdk corroboration is AFL-2.0 — not copied; A0 event-flag labels for 54–59 misleading — not relied on; generic trampolines CANNOT satisfy all six — NOT built (scope change from brief Task 1.1, recorded here); `0x42C758` absence explained by `InitAlarm@0x42C7C8` HLE stub — semantics compared, not counts (K1-10); full findings doc: ARRIVED (see 3), no OPEN row needed |
-| 3 | Third input + `docs/research/review-2026-09-20-first-frame-and-gs.md` (read lines 1–204 before finalizing) | P0 framebuffer capture implemented + inspected (K1-9); ONE boot default held (K1-7); semantic counters independent of `PS2X_DROP_SILENCE` (`[k1]` stderr lines + snapshot census — K1-2/K1-8); ACTUAL baseline reported (439/439/0, not the brief's 427 — K1-6); no frame promised (causal link unestablished — K1-11/K1-13); TheTharin mechanics-only pointer considered, not adopted (K1-0/K1-2); E3 parked behind K1 (noted, no action); ret0 retired ONLY with convergence evidence — held (K1-2) |
+| 3 | Third input + `docs/research/review-2026-09-20-first-frame-and-gs.md` (read lines 1–204 before finalizing) | P0 framebuffer capture implemented; settled PNG inspected, first-success hash-only (K1-9, amendment A1); ONE boot default held (K1-7); K1-specific counters independent of `PS2X_DROP_SILENCE` (`[k1]` stderr direct, no mute check) while snapshot `drops[]` is env-qualified (amendment A1 — K1-8/K1-11); ACTUAL baseline reported (439/439/0, not the brief's 427 — K1-6); no frame promised (causal link unestablished — K1-11/K1-13); TheTharin mechanics-only pointer considered, not adopted (K1-0/K1-2); E3 parked behind K1 (noted, no action); ret0 retired ONLY with convergence evidence — held (K1-2) |
 
 ## K1-2. Fix table (files + lines touched)
 
@@ -180,18 +180,29 @@ Artifacts (SSD canonical copies, referenced not duplicated):
 `syscalls-k1-on.txt` (783,250 events),
 `park-k1-1/park-snapshot.{json,txt}`, `frames-k1-1/` (K1-9).
 
-### Drops + installs + lookups (semantic counters, silencing-independent)
+### Drops + installs + lookups (`[k1]` counters silencing-independent; `drops[]` env-qualified — amendment A1)
 
 | Row | Before (T18/T26) | After (K1 boot-1) |
 |---|---|---|
 | `[drop]` census (boot log) | 6 (`syscall/dispatchSyscallOverride KE_ERROR syscall=0x5b handler=0x80075000`) | 0 |
-| Snapshot `drops[]` (independent of `PS2X_DROP_SILENCE`) | `[{dispatchSyscallOverride, KE_ERROR, 6}]` | `[]` |
+| Snapshot `drops[]` (observed with muting OFF — note below) | `[{dispatchSyscallOverride, KE_ERROR, 6}]` | `[]` |
 | `[k1] lookup#1–6` | n/a (quirk absent) | `55→80075038, 56→800750C8, 57→80075108, 58→80075158, 59→800751A8, 03→80075330` — payload-exact, in installer order |
 | `[k1] install#1–8` | n/a (no install log) | `5A→42CB78, 5B→80075000, 54→42D100, 55→80075038, 56→800750C8, 57→80075108, 58→80075158, 59→800751A8` — no `-1` |
 | Installed handlers `0x55–0x59` | `0xFFFFFFFF` ×5 (drop residue) | payload code addresses ×5 |
 | `[0x456538]` | `-1` | `0x80075330` (chain proof — K1-4) |
 | `[k1] helper#` | n/a | 0 (equivalents stand by, untripped) |
 | `[k1] provenance-FAIL#` | n/a | 0 (memcmp passed) |
+
+Env note (amendment A1): generic `drops[]` is NOT silencing-independent
+— `ps2_log.h:183` returns on `dropsMuted()` BEFORE `recordDropCensus`
+(`:188`), and the header comment (`:142–144`) states the census equals
+the visible lines. The `drops[]` 6→0 stands as OBSERVED, qualified by
+the boot env receipt: `PS2X_DROP_SILENCE` was unset
+(`k1-boot1.py:50` pops it; boot output prints
+`PS2X_DROP_SILENCE=<unset>`). The K1-specific counters (`[k1]`
+armed/install/lookup/helper/provenance lines) ARE independent: direct
+`std::cerr`, zero references to `dropsMuted`/`ps2_log`/`emitDrop` in
+`Ssx3CopiedPayload.cpp` (verified by grep).
 
 ### Event census (trace; T26 → K1, both 240 s wall-bound, pc-tagged)
 
@@ -253,7 +264,7 @@ hash-lost. Spliced sizes: 50 success-sized, 72 cut before size, 9
 corrupted-size. Net: 3,465/3,496+ success lines share `fd889dc5`
 (96%+); 162 lines unattributable (stated, not dropped).
 
-Image inspection (viewed, not just counted):
+Image inspection — the two kept PNGs viewed (first-success hash-only; MISSED row below):
 
 | Image | Content | Distinct RGBA | Reading |
 |---|---|---|---|
@@ -299,8 +310,8 @@ PCSX2 prints `pc=`/`a0=` WITHOUT `0x` (R1 one-line patch).
 | Preserve the data result + subsequent reads/writes; do NOT manufacture a syscall-3 executable | key 3 → `0x80075330` as data; `(03)` issued 0×; `_kExecArg` writes 0 (guest-macro); consumers 3 disproven + 1 open-but-silent | CLOSED (open consumer bounded — K1-4) |
 | Cover reached copied helper entries + required original-text entries incl. scanner; dormant-by-statement allowed | helpers `0x55–0x59`: equivalents serve validation; unreached both paths (0 counts) — dormant, stated; scanner `0x42C130/68`: entries exist, intentionally dormant (ret0 held) — stated with pre-evidence | CLOSED as stated-dormant |
 | Retire scanner ret0 ONLY with convergence evidence | NOT retired (no convergence evidence yet); marker cross-check unit-tested; successor question | HELD (this row is the hold) |
-| Show installed table + six returns + no −1 + first downstream use; count failures independent of silencing | `[k1] install#1–8` (no −1); six returns; downstream = none observed (K1-4); snapshot `drops[]` 6→0 + `[k1]` stderr (both silencing-independent) | CLOSED |
-| Run current relevant tests, report ACTUAL baseline; one bounded boot + framebuffer + park signature; second boot needs new question | baseline 439/439/0; post 443/443/0; 1 boot BOUND=wall; P0 captured+inspected; park identical; boot 2 unused (no new question) | CLOSED |
+| Show installed table + six returns + no −1 + first downstream use; count failures independent of silencing | `[k1] install#1–8` (no −1); six returns; downstream = none observed (K1-4); snapshot `drops[]` 6→0 (env-qualified: silencing unset, `k1-boot1.py:50`) + `[k1]` stderr (silencing-independent: direct cerr, no mute check) | CLOSED |
+| Run current relevant tests, report ACTUAL baseline; one bounded boot + framebuffer + park signature; second boot needs new question | baseline 439/439/0; post 443/443/0; 1 boot BOUND=wall; settled captured+inspected, first-success hash-only (K1-9/G4); park identical; boot 2 unused (no new question) | CLOSED |
 | Do NOT promise the frame (A0: 0x54–59 uncalled; causal link unestablished) | park SAME after fix; settled frame black; no frame claimed anywhere in this report | HELD (no promise made) |
 | Original-handler chaining (correction-1 blanket requirement) | SUPERSEDED by findings doc ("This supersedes the blanket original-handler chaining requirement…"): payload helpers are terminal implementations, not wrappers; no chaining exists to validate | SUPERSEDED (pointer recorded) |
 
@@ -377,10 +388,20 @@ artifacts referenced by path (not duplicated): `RUN/boot-k1-1.log`
 `RUN/park-k1-1/`, `RUN/frames-k1-1/`, `RUN/k1-waits.log` (2 lines),
 `/tmp/k1-r1a-game.txt` (R1A slice; regenerable via K1-12 command).
 
+## Amendment A1 (wording corrections, no rebuild/reboot)
+
+Frontier wording corrections, verified against source before amending:
+
+| # | Correction | Verification | Sections touched |
+|---|---|---|---|
+| 1 | Snapshot `drops[]` is NOT silencing-independent | `ps2_log.h:183` returns on `dropsMuted()` before `recordDropCensus` (`:188`); header comment `:142–144` ("census equals the visible lines") | K1-1 row 3, K1-8 header + snapshot row + new env note, K1-11 |
+| 1b | `drops[]`=0 stands as observed, env-qualified | `k1-boot1.py:50` pops `PS2X_DROP_SILENCE`; boot output prints `PS2X_DROP_SILENCE=<unset>`; `[k1]` lines verified mute-check-free by grep (zero `dropsMuted`/`ps2_log`/`emitDrop` refs) | K1-8 env note, K1-11 |
+| 2 | Only the settled frame was inspected; first-success is hash-only | `upload-latest.png` + `fallback-0.png` viewed via image read; no first-success PNG exists (numbered keeps consumed by seq 0–1 fallbacks — K1-9 G4 row, unchanged) | K1-1 row 3, K1-9 inspection header, K1-11 |
+
 ## Tail receipt
 
-Report written in 4 chunks (`write_file` + 3 `edit_file` appends);
-tail verified intact:
+Report written in 4 chunks (`write_file` + 3 `edit_file` appends) +
+amendment A1 (6 edits); tail verified intact:
 
 ```text
 $ tail -3 local/research/K1/REPORT.md
