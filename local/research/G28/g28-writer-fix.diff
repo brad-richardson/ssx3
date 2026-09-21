@@ -1,0 +1,37 @@
+diff --git a/vulkan/memory_allocator.cpp b/vulkan/memory_allocator.cpp
+index f272816..39c6a4b 100644
+--- a/vulkan/memory_allocator.cpp
++++ b/vulkan/memory_allocator.cpp
+@@ -1421,7 +1421,13 @@ bool DescriptorBufferAllocator::create_image_view(const VkImageViewCreateInfo &i
+ 			copy_storage_image(resource_heap.mapped + view.input_attachment_feedback.heap_index * desc_size, view.input_attachment_feedback.ptr);
+ 		}
+ 	}
+-	else if (device->get_device_features().descriptor_buffer_features.descriptorBuffer &&
++	// G28 local fix (not upstream): only take the descriptorBuffer branch when
++	// the slabs were actually initialized. init() early-returns (leaving
++	// stride-0 slabs) unless supports_descriptor_buffer_or_heap is set, so a
++	// device with the raw feature on but supports off (Adreno 830) would run
++	// vkGetDescriptorEXT through aliased slots and smash the heap (G27).
++	else if (device->get_device_features().supports_descriptor_buffer_or_heap &&
++	         device->get_device_features().descriptor_buffer_features.descriptorBuffer &&
+ 	         need_image_view_object)
+ 	{
+ 		VkDescriptorImageInfo image_info = {};
+@@ -1463,6 +1469,17 @@ bool DescriptorBufferAllocator::create_image_view(const VkImageViewCreateInfo &i
+ 			                         props.inputAttachmentDescriptorSize, view.input_attachment_feedback.ptr);
+ 		}
+ 	}
++	else if (need_image_view_object &&
++	         device->get_device_features().descriptor_buffer_features.descriptorBuffer)
++	{
++		// G28 receipt: the new guard above skipped the branch (supports == 0).
++		static bool g28_skip_logged = false;
++		if (!g28_skip_logged)
++		{
++			g28_skip_logged = true;
++			LOGI("G28: create_image_view descriptorBuffer branch skipped (supports=0, feature=1).\n");
++		}
++	}
+ 
+ 	return true;
+ }
