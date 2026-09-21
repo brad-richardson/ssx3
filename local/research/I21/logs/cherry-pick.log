@@ -1,0 +1,45 @@
+# I21 worktree-add + cherry-pick transcript (transcribed from tool output, labeled)
+# FORK=/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp  W=/Volumes/Extreme SSD/ps2x-i21
+
+$ git -C "$FORK" worktree add --detach "$W/fork-wt" 3adc0478
+error: non-monotonic index /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/.git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx
+HEAD is now at 3adc047 [E18] Deliver non-stream MPEG input callbacks on the caller
+# (cosmetic stderr noise from owner's-tree AppleDouble pack idx; exit 0, outputs unaffected)
+
+$ find "$W/fork-wt" -name "._*" | wc -l
+     337
+$ find "$W/fork-wt" -name "._*" -delete   # 337 -> 0
+
+# DEDUPE: 5 CSV-row ports SKIPPED (all byte-identical to fork rows @3adc0478):
+#   SKIP 7714a85 (I11 0x395730) == fork line 7012
+#   SKIP a3bbabf (I12 0x14f2a8) == fork line 873
+#   SKIP 6a37c90 (I13 0x156750) == fork line 1022
+#   SKIP b9bcfe6 (I14 0x243a80) == fork line 2943
+#   SKIP fe017b2 (I15 0x3a0158) == fork line 7176
+
+$ git -C "$WT" -c user.name="muse-i21" -c user.email="i21@local" cherry-pick 46d12d34ee52ab784ede18b87c4c55255a6a1a9d
+[detached HEAD 3ae0570] Bundle: set CFBundleName so devicectl installs the device .app (I8)
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+$ git -C "$WT" -c user.name="muse-i21" -c user.email="i21@local" cherry-pick 6a58c9e
+[detached HEAD 842340c] Runtime: optional PS2X_GAME_CODEGEN_DIR game-objects static lib (I10)
+ 1 file changed, 22 insertions(+)
+
+$ git -C "$WT" -c user.name="muse-i21" -c user.email="i21@local" cherry-pick 16e1b9a50530d1c230f7aaba3a6502711f7c58d1
+Auto-merging ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+[detached HEAD 3564273] I18 tap: frame/GS line on the P1c periodic console sampler
+ 1 file changed, 14 insertions(+)
+# (clean first try each; NO transient dirty-tree abort this brief)
+
+$ git -C "$WT" add ps2xRuntime/CMakeLists.txt
+$ git -C "$WT" -c user.name="muse-i21" -c user.email="i21@local" commit -m "I21 wiring: drop in-tree sub_*.cpp when PS2X_GAME_CODEGEN_DIR is set (E17 landed 5 in-tree game objects duplicating the lib)"
+[detached HEAD 751a50f] I21 wiring: drop in-tree sub_*.cpp when PS2X_GAME_CODEGEN_DIR is set (E17 landed 5 in-tree game objects duplicating the lib)
+ 1 file changed, 7 insertions(+)
+
+# Final worktree stack (full SHAs):
+#   751a50f5c2d647d7e6bdcc89abaa2be6edbead60 (I21 wiring extension, local)
+#   35642733ce79115e44049c00d22f7467b6a98975 (= I18 16e1b9a tap, content-identical)
+#   842340c37a4e5454893a604557d314f715159695 (= I18 6a58c9e cmake, content-identical)
+#   3ae05709fa469e20685c8f26d2038dd5d654d6c0 (= I18 46d12d3 plist, content-identical)
+#   3adc0478b6d2260acdd28a249466f2eef9a20176 [E18] base (fork/ssx3, pushed)
+# status clean; 0 pushes (E-lane owns the fork; zero fork commits)
