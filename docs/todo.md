@@ -1288,6 +1288,57 @@ the build or commit that closed them.
 ## Done
 
 
+- [x] **G15 read (09-21) — PASS, instrumented on-device runs: O1 flaky 1/6, O3 = PROVEN scudo heap corruption, HWASan silent, writer unnamed (honest negative, stop with recipe):**
+      Same G14 bytes (deterministic relink reproduces `c4cd63b4…` after an
+      unexplained pre-relink mismatch, tabled not claimed). 6 crash launches
+      classified: O1 1/6 (cond-bp `table==0` fired 0/5 debugger launches —
+      never a victim to plant the watchpoint on), O3 2/6 (pid 29193 caught
+      LIVE: full 20-pool census, faulting `f=0,i=2` TRANSFER with every
+      app-side input sane, `Scudo ERROR: corrupted chunk header at
+      0x200007ea68423b0` ~150 ms pre-abort), O2 3/6 modal incl. under HWASan
+      (SIGSEGV fault 0xf0, Adreno `vkUpdateDescriptorSetWithTemplate`).
+      MTE-sync naming BLOCKED (prctl rc=-1). HWASan build (289 MB, 164
+      `__hwasan` syms) ran SILENT, exit 139 <1 s. No minimal fix exists for
+      an unnamed writer → no fix, no clean re-run (correct per stop rule);
+      oracles 8/8, 0 scanouts, SCORE N/A. Verified: retrieval files,
+      scudo line, tombstone signals/faults, hwasan syms + silence, O3
+      census, oracle re-run by orchestrator (N/A), pins, device clean.
+      ~3 h. Next: G16 mac-host ASan run (G15 §3 — names-or-eliminates the
+      writer at zero device cost). Ledger row added.
+- [x] **T36 read (09-21) — PASS, ONE 300 ms D-pad Left tap on the live race: no separable HUD effect at 1/3/8/15/25/40 s sampling (bounded non-effect + recipe):**
+      Bit-identical T4 build reused (sha/size/rev/status/pad incl. D-pad +
+      stick bindings/NVM `da021d2a` all reproduce). ONE single-shot run:
+      chain reproduced (TITLE poll01, Start, menu→…→MR→ENTER Cross 536.0 ms
+      @T+327.77 → load 18%→97%→cinematic→pre-race panel by +15, stable 78 s)
+      → XCROSS 538.1 ms @T+432.85 → countdown `2` (+0.6 s) → LIVE gameplay
+      → LIVE-LIKE proxy gate → ONE Left tap 338.6 ms @T+500.82 on live race
+      00:01:18 6TH/6 30% → +40 s tail to 00:02:29 6TH/6 59%: position
+      constant, progress/clock monotonic (~1.35× turbo), speed/score
+      excursions distributed, no discontinuity at the tap; isolation limit
+      (no same-seed control) + recipe tabled. 4 frames bit-identical to T35
+      R1 (a1-post15, rc-post1/3, mr-post1 — rc-post1 now 3-run identical);
+      EE 52 / IOP 155 sets identical to T35; exact flaps 0/1/1/1 (0
+      in-window). Verified: nudge walls exact, T36_DONE, LIVE-LIKE, head/
+      tail 2000/2000, identities, flap lines + positions, trace size+sha.
+      ~40 min. Next: T37 dense 1 s × 10 s sampling + rider-pixel tracking
+      (T36 G1(a)). Ledger row added.
+- [x] **I14 read (09-21) — PASS, 0x243a80 closed (count 0, executes); NEW wall = 0x3a0158 same class:**
+      NO base move (E-lane still `be0c9ee`, `ls-remote` confirms) + 5
+      cherry-picks (patches byte-identical) + 1-line CSV `ed378c8` (local,
+      clean, 0 pushes — E-lane mutating). Bounds re-verified from the
+      emitted slice before the row. Codegen exit 0 in 3m14s (+1 fn, slot
+      331422, exactly 1 added register line, no re-homes; warnings 3712
+      identical). Device build exit 0 first try in 8m43s (121,208,384 B,
+      a3406ad2, 9450 syms, new T, SDL count identical). Overwrite install
+      exit 0 in 70 s (6th clean overwrite, live occupant reaped BY the
+      install). Probe: `0x243a80` 0 refs — resolves to emitted
+      `sub_00243A80` (slot 331422); guest reaches STRICTLY LATER wall JALR
+      `0x39cd74 → 0x3a0158` (mid-function `sub_003A0048`, head after jr
+      @`0x3a014c`/nop, tail jr @`0x3a0284`/nop, 0 refs); `ee:idle` 0, 4 RPC
+      sids byte-identical, bug_type 202 walk-spin (PID 4223) + black-screen
+      screenshot. Verified: console keys, binary, worktree, codegen,
+      install URL, ips, screenshot viewed. ~60 min. Next: I15 closes
+      0x3a0158 (I14 gap 1, same 1-line class). Ledger row added.
 - [x] **E10 read (09-21) — PASS(iii), DROP preflight complete; query regen stopped at fresh APFS admission (249 MB short):**
       DROP-only regen finished normally on APFS (exit 0, 9,446 fns, installed
       manifest exact — incl. E9 coverage correction: 2 headers live in
