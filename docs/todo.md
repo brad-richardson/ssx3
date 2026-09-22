@@ -21,7 +21,13 @@ with measured budgets, then 120 Hz simulation.
       is in chunk 2, which is never requested. Fix: `e30-fix.diff`
       (re-dispatch while decoder-accepted bytes flow without frames, cap
       4096 rounds). Regression: `e30-regression.diff` (R7–R11, suite → 464).
-- [ ] **E32 fold** (brief written, launches when E31 closes): fold the
+- [x] **Fork history scrubbed (09-22):** `[E17]` had pushed generated guest
+      code (full `register_functions.cpp`, `ps2_recompiled_functions.h`, 5
+      `sub_*.cpp`) to public `fork/ssx3`. Rewrote 19 commits across 6
+      branches (only those 7 paths changed); Brad ran the force-push with
+      leases. `ssx3` `3adc0478` → `3d4feed`. No fork ref reaches `e63f161`.
+      Old SHAs stay fetchable on GitHub until its GC.
+- [ ] **E32 fold** (brief written, launches when E31 closes; base = scrubbed `3d4feed`): fold the
       bypass + pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name` and the
       branchless I10–I21 commits onto fork `ssx3`; suite + 2 boots; push
       `ssx3` fast-forward. Backups pushed 09-22 as `fork/archive/*` +

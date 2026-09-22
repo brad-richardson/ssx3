@@ -6,7 +6,7 @@ Updated 2026-09-22 evening.
 
 | Lane | State | Pinned rev | Next action | Blocker / lease |
 | --- | --- | --- | --- | --- |
-| E (PS2 runtime) | **E29 PASS: title screen reached** (bypass flag on). E31 running (title → menu → race); E30 PASS (fix + regression as diffs) | fork `3adc0478`; bypass `e29-movie-bypass` @ `e5ce086d` (local) | Gate E31 → next blocker or race; E32 fold → E33 apply E30's fix | P-lane lease + fork (E31) |
+| E (PS2 runtime) | **E29 PASS: title screen reached** (bypass flag on). E31 running (title → menu → race); E30 PASS (fix + regression as diffs) | fork `ssx3` @ `3d4feed` (scrubbed; was `3adc0478`); bypass `e29-movie-bypass` @ `ee39b9f` | Gate E31 → next blocker or race; E32 fold → E33 apply E30's fix | P-lane lease + fork (E31) |
 | G (GS composite) | G40 PASS: F2 execution-loss (masked PSM1 composite writes vanish on Adreno). G41 running (canary + one fix) | clone `3a66c19` + G26/G28 + G40 wall | Gate G41 | Odin (G41) |
 | N (Android) | N1 PASS (scaffold audit). N2 running on bytesize | fork `3adc0478` (clean clone) | Gate N2 → N4 FFmpeg / N5 launch | bytesize (N2) |
 | T (PCSX2 reference) | T46 PASS | bytesize WSL | T47 after N2 releases bytesize | shares bytesize with N |

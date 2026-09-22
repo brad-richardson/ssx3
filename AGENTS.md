@@ -96,7 +96,11 @@ splitting.
   push; the orchestrator pushes `main` when the tree is clean. Check
   `git log -1` before committing because several lanes commit to `main`.
   Generated guest code, game data and binaries are never committed or
-  pushed anywhere public. The fork's `ssx3` branch holds plain commits;
+  pushed anywhere public. On the fork this means nothing under
+  `ps2xRuntime/src/runner/` may differ from upstream (`git diff --stat
+  14b1e5cb <branch> -- ps2xRuntime/src/runner` must be empty before any
+  push). Generated sources live outside the repo via
+  `PS2X_GAME_CODEGEN_DIR`. Never `git add -f` inside the fork. The fork's `ssx3` branch holds plain commits;
   experiment branches stay local unless the orchestrator says otherwise.
 - **One live PS2 runtime mutator** (the E lane owns the fork checkout and
   the P-lane lease). E and G own distinct files. N ports what it needs on
