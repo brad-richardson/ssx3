@@ -7,7 +7,7 @@ the build or commit that closed them.
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
 - [ ] **Product direction (Brad, 09-22 progress review):** next milestone = STOCK SSX 3 GAMEPLAY through our PS2 static recomp runtime ON ODIN. NetherSX2 is reference-only. Eventual goal still 120 Hz, ideally TRUE 120 Hz SIMULATION. Dev-only startup-movie bypass APPROVED (optional, labeled; faithful movie correctness proceeds separately). Milestones: native stock race → stock recomp gameplay on Odin → 120 Hz baseline → true 120 Hz sim. See `docs/research/review-2026-09-22-progress-and-parallelization.md`.
-- [ ] **Live panes (09-22 11:30):** e28 (E27 guest-half confirmation boot, opus, P-lane lease) · g38-next (A→B composite comparison; G37 gated, alpha-only successor DECLINED) · t46 (healthy R3 series, bytesize audio recovered) · s76 review done (report filed, see above). G-lane REDIRECTED per review: G30/G31 mis-sampling WITHDRAWN (see amendments); G32/G34–G37 are positive controls. I-lane parked (G2 needs E-lane X); GC/enhancement reserve.
+- [ ] **Live panes (09-22 12:00):** e29-next (bounded dev-only movie bypass, opus, branch+build+≤2 boots) · g38 (A→B composite comparison, redirected lane) · v1 (storage audit+manifest+smoke) · n1-next (Android prep audit, read-only). E28/T46/G37 gated. I-lane parked (G2 needs E-lane X); T47 queued (healthy series continues); GC/enhancement reserve.
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · E10 completes DROP regen on APFS scratch + 0x2c5140 entry (frontier; E9 applied DROP as be0c9ee, parked regen at ExFAT cap — renewed authorization) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Queued (owner 09-21):** Turnip-contrast G probe — sideload Mesa Turnip (adrenotools-style wrap; community precedent incl. Mesa 26.x on Odin 3) and re-run the replayer to test whether the (b) circuit mis-sample reproduces off the proprietary driver. Schedule after the (b1)/(b2) split closes, not before.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
@@ -2005,6 +2005,62 @@ the build or commit that closed them.
       Mac-vs-Odin FIRST-composite-pass comparison (A→B boundary,
       no injection); Adreno filing content must be REWRITTEN
       (still held, owner call). Ledger row added.
+- [x] **E28 read (09-22) — PASS(guest half closed): kind-1 slot derived statically as 0xd486ec (unique 64-aligned ctx0 = 0xd48300) and CONFIRMED by the guest's own store; P1–P4 all confirm on ONE e28a boot; queue is 431,840 bytes (30× floor); X now entirely host-side**
+      Mission 0 path (a) (4 reads/pin, 107.5 s apart, + E25
+      corroboration) + preflight 5/5 twice + e26a captures re-sha'd
+      before mining + E27-pin upgrade (19/19 committed) → Mission 1
+      (STRM ctor layout run backwards: slot_offset 0x3ec, header
+      0x40c, ctx0 in [0xd482f4, 0xd48334) unique multiple 0xd48300,
+      forward check = 0xd48740; call site 0x3ae1b0 (2,3,2) by log
+      + kind-2 measurement; align floor read from source; mask
+      −0x40; 59 receipts ×2 passes; 4 consumers) → watch change
+      (230 exact prefix + 13-entry window tier, 6/6 proof) → boot
+      fidelity 14/14 → ONE boot rc 0 wall 75.419 s 243 entries
+      (lease 8.93 ms) → P1 CONFIRM (head 2 stores → 0xd49b14;
+      bytes 30 → 431,840; 0 after) · P2 CONFIRM change-half (1
+      store 0x100381c; value unobservable-as-designed; 551 CD/0
+      after) · P3 CONFIRM (0xd49b14 never written) · P4 CONFIRM
+      (×1/×1 true counts) → controls (28 publishes + 1 head store;
+      dead-mark; free reproduced 3rd; feed 4th identical; 6804
+      emissions 0 post-park/feed; 6 torn carried-tier; park
+      snapshot; cost 4th point: 243 in 8.835 s FASTER than 230) →
+      fix STOP (4 edges; stall not on guest side). Verified:
+      tail-sha, fork, pins, rc/wall/243, lease pair, capture shas,
+      ALL arithmetic identities re-derived, ctor/call-site/align/
+      mask/jal×3 instructions, every key line verbatim, ALL counts
+      re-implemented (incl. kind-1-only 28/1 split), 100 distinct
+      addrs, feed sha, watch prefix proof, fix file. E28-E1 (rename
+      rewrites real paths — carry-audit now standing) + CHANGE 2
+      ACCEPTED (prefix proof stronger). Next: E29 (bounded
+      dev-only movie bypass to menu/race, isolated branch+build;
+      faithful fix is E30). Ledger row added.
+- [x] **T46 read (09-22) — PASS(healthy R3): audio-healthy H62 first boot; crash-free hold banked (FIRST clean hold-step sample under BOTH trackers); late d9d10 wall crash honestly excluded; variant stays quarantined; NO R4**
+      Audio gate FIRST (H62 demand-boot: socket @up42 + @up151,
+      PULSE_SERVER default, pactl 35/35 RDPSink, user daemon EMPTY,
+      cubeb 8/0/0 live sink-input, v2a R3-pattern + game-only;
+      holder held H62 all run, 0 restarts) → pins (binary/tree/
+      inputs/NVM/bindings/refs/snaps/trace/space/staged 5/5 →
+      scripts reused, zero t46-* copies) → gap discipline (T45
+      shas verified before overwrite) → R3 (T44_DONE exit 0: TRUE
+      TITLE first-attempt, ZC +1 s, full chain, 10 presses +
+      ONE 1036.1 ms Left hold @T+499.69, dense 10; poll 168
+      exact) → HUD (pre-pair 00:01:23/5TH/37%; hold 51→27
+      upright, no contact/banner/RECOVER; d9d10 49→26 tumble +
+      spray + RECOVER) → tracking (control 3/12, ROI 8/12,
+      gradient 9/12; SCPS 3-way 22/22; lock-QA: hold on→on both,
+      d9d10 ROI auto-flood + gradient crash-excluded) →
+      distributions (ROI floor 3→6, gradient 7→12, hold-step 1→2
+      FIRST CLEAN both) → trace (2.68 GB sha MATCH on SSD;
+      NVM unchanged; vcount 397; dmesg/eventlog byte-identical).
+      Verified: audio primaries, 427/2551/168 logs, T44_DONE,
+      11/11 keys, dmesg/eventlog cmps, NVM file, 5 snap sizes,
+      ROI tracker RE-RUN 3/3 exact (+SCPS), gradient RE-RUN 2/2
+      exact, census header, trace size+sha (single read — link
+      rule noted), d-post10/d-post1 VIEWED (crash + RECOVER /
+      clean hold), T42 baseline lines, hold walls, cubeb 8 in
+      trace. No-R4 correct per contract (hold clean). Next: T47
+      (continue healthy series; crash-lottery read 3/4 hold-
+      window crashes at this phase). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
