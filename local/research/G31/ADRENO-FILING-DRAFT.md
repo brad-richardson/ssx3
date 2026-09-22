@@ -3,7 +3,7 @@
 Target: Qualcomm Developer Network forums (Adreno GPU SDK), per the
 Vulkan-Errata driver-id directory. To be posted by the owner from
 their account. All claims below are receipted in
-`local/research/G28/`–`G31/` (gate-verified by an independent second
+`local/research/G28/`–`G32/` (gate-verified by an independent second
 read); binaries/dump/logs available on request.
 
 ---
@@ -27,8 +27,10 @@ A compute/circuit sampling stage reads a display framebuffer region
 (FBP=112, FBW=8, PSM=1, 512×448 output) and emits a UNIFORM cleared
 pattern (`00 00 00 80` per pixel) on all 10 output images, while the
 addressed VRAM source provably holds stale (non-cleared, non-uniform)
-bytes at every sample time. The sampler's full input state is pinned
-and logged (`DISPFB=112/8/1/0/0`, `DISP=2560/447/4/0/641/50`,
+bytes at every sample time — BUT emits its source byte-exactly when
+the sampled pages are host-committed (map-write + flush + barrier)
+before each sample. The sampler's full input state is pinned and
+logged (`DISPFB=112/8/1/0/0`, `DISP=2560/447/4/0/641/50`,
 `super_samples=1`, `vram_size-1` spec); backbuffer promotion is
 provably OFF both structurally (flag default `false`, setter uncalled
 anywhere, register/lookup dead) and on-device (16/16 null promotion
@@ -54,17 +56,31 @@ bounded run, verify-then-push, zero new tombstones)**
    cleared. No cleared 512×448 region exists anywhere in the 4 MiB
    VRAM image, so the emitted pattern matches no readable source.
 
+4. Host-committed pattern probe: with a two-zone controlled pattern
+   (address-echo words + constant, zero zero-RGB words) written +
+   committed before every sample, the circuit emits the pattern
+   EXACTLY — 10/10 outputs byte-identical to a host swizzle-model
+   render (sha-unanimous), 229,376/229,376 pixels in-set, 0 zero-RGB.
+   Same sampler path, same regs/knobs as experiment 3. Addressing,
+   decode, and descriptor fault are all refuted; the remaining split
+   is ordering/coherency (the commit/barrier fixed it) vs
+   content-dependent fault (the pattern content fixed it) — our next
+   experiment is a write-back control (same sync, stale bytes
+   re-written) to close it.
+
 **Question**
 
-Is this a known behavior/limitation of the Adreno sampling path under
-these conditions (specific format/tiling/sampler combination), or does
-it look like a driver bug? We can provide the replayer binary, the GS
-dump, per-page checksums, and the exact sampler/push-constant state.
-Happy to run any additional diagnostics you suggest (we have not yet
-tested the freedreno/Turnip path — currently queued as our contrast
-experiment).
+Is the stale-without-commit → cleared behavior a known
+ordering/coherency expectation on the Adreno sampling path (i.e. is a
+host commit/barrier required for content written this way to be
+visible to the sampler), or does it look like a driver bug? We can
+provide the replayer binary, the GS dump, per-page checksums, and the
+exact sampler/push-constant state. Happy to run any additional
+diagnostics you suggest (we have not yet tested the freedreno/Turnip
+path — currently queued as our contrast experiment).
 
 ---
 
-*Orchestrator note: keep this draft in sync if G32 localizes further
-(addressing vs decode vs descriptor). Do not post without owner review.*
+*Orchestrator note: synced with G32 (ordering/coherency reframe) on
+09-21. G33 (write-back control) may upgrade the question again — check
+before posting if G33 has landed. Do not post without owner review.*
