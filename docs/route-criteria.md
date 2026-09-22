@@ -1,5 +1,17 @@
 # Route-comparison criteria: host replay vs PS2 recomp for 120 Hz
 
+Steering 09-22 (Brad, progress review): the milestone is STOCK SSX 3
+GAMEPLAY through our PS2 static recomp runtime ON ODIN; the eventual
+goal is 120 Hz, ideally TRUE 120 Hz SIMULATION (not merely 120
+presents — physics/timer/input/animation/audio at ~2× stock cadence,
+pacing measured independently). The "either 60 or 120 Hz simulation"
+reading below is superseded; the "Neither has happened" snapshot is
+stale (PS2 has visible UI + a located movie stall; NetherSX2 is
+reference-only). Tables retained as GameCube-side evidence; PS2
+column fills from the new milestones (native stock race → Odin
+gameplay → 120 Hz baseline → true sim). See
+`docs/research/review-2026-09-22-progress-and-parallelization.md`.
+
 Source mandate: Part 1 §7 rec 10
 (`docs/research/review-2026-09-19-progress.md:247-251`): write the
 criteria NOW against measured numbers; decide nothing. Part 4

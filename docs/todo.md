@@ -6,7 +6,8 @@ the build or commit that closed them.
 ## Now
 
 - [ ] **Live rules:** standing order (queue follow-ups, no ask unless input needed) · push at each poll when tree clean (user 09-20; never force/rewrite) · leases: `/tmp/ssx3-host-lease` = M lane, `/tmp/ssx3-p-lane-lease` = shared P lane (P throughput contended) · kernel-truth sweeps fire only when the census shows the divergence on the boot path (rest batch post-first-frame) · frontier reads are FRONTIER-AUTHORED (Part 4 dec 5: at a fixed point prompt wN:p1B with --wait before the successor; muse drafts tables only; no-answer-in-one-poll → PROVISIONAL, one brief cap) · boot budget: no boot >600 s without frontier ok + progress caps on every boot script (Part 4 dec 6) · drain question CLOSED (no E1/P1ak-class brief) · M microscopy CLOSED (no per-shape/per-column brief unless it answers a named route criterion) · gate reads carry a reference-state row · briefs require tail-3 receipts + COPYFILE_DISABLE=1 on SSD steps · experiment contract every brief (hypothesis/observable/alternatives/stop + how each outcome changes next action) · semantic counters independent of silenced diagnostics · byte caps (ALLOCATED bytes / free-space delta — ExFAT) + bounded rings on all runs (no multi-GB retention; compress closed logs; one canonical copy; no new broad clone, reuse trees) · reuse T1/T5/T12/T22 tools, no duplicates · worker challenges contradicted premises + recommends next action with tables · small clones ok on SSD only (internal volume ~20 GiB free; nothing huge there) · workers may spawn subagents for read-only fan-out only (edits/builds/boots/commits stay single-threaded in the main worker) · workers may read peer panes, never prompt/steer peers except when the brief names it (coordination flows through the orchestrator) · installs: ALWAYS install even-if-present on iPad + Odin (plain `install` — `--force-install` does NOT exist in devicectl, I9 gap 3; overwrite-on-occupied re-tested by I10), iPhone install always ok (user may background if busy — never urgent).
-- [ ] **Live panes:** t35 (Cross on X Continue → countdown/gameplay, bytesize, 4h) · g15 (instrumented O1 catch + minimal fix + re-run, ps2xGS + adb, 6h) · frontier (E10 E-lane lead: APFS regen completion + query repair, fork + P-lane lease) · i13 (0x156750 entry fix + re-codegen + re-probe, worktree, 6h).
+- [ ] **Product direction (Brad, 09-22 progress review):** next milestone = STOCK SSX 3 GAMEPLAY through our PS2 static recomp runtime ON ODIN. NetherSX2 is reference-only. Eventual goal still 120 Hz, ideally TRUE 120 Hz SIMULATION. Dev-only startup-movie bypass APPROVED (optional, labeled; faithful movie correctness proceeds separately). Milestones: native stock race → stock recomp gameplay on Odin → 120 Hz baseline → true 120 Hz sim. See `docs/research/review-2026-09-22-progress-and-parallelization.md`.
+- [ ] **Live panes (09-22 11:30):** e28 (E27 guest-half confirmation boot, opus, P-lane lease) · g38-next (A→B composite comparison; G37 gated, alpha-only successor DECLINED) · t46 (healthy R3 series, bytesize audio recovered) · s76 review done (report filed, see above). G-lane REDIRECTED per review: G30/G31 mis-sampling WITHDRAWN (see amendments); G32/G34–G37 are positive controls. I-lane parked (G2 needs E-lane X); GC/enhancement reserve.
 - [ ] **Queue:** G1 CLOSED (frontier confirmed: SPR plants + guest rewrites explain 1-vs-4; no SPR/SIF/CD/scheduler fix) · G3 DORMANT (no standalone 0x501420 search; only if a named progress condition consumes it) · E10 completes DROP regen on APFS scratch + 0x2c5140 entry (frontier; E9 applied DROP as be0c9ee, parked regen at ExFAT cap — renewed authorization) · per-vsync scanout series LAUNCHED as G11 (G10 §4) · rich post-loading dump (after comparison method unblocked) · M15-on-Odin arm (OD1 O1–O3; needs device lease + trial build) · K1 ret0-retirement (needs convergence boot) · P1ae still unjustified (SIF not eliminated) · I9 LAUNCHED on iPad (real-ELF boot, force-install per standing policy) · 3006a07 → fork/ssx3 cherry-pick (when no fork mutator active) · G-lane (strict = sensitivity surrogate; MF1-s2 parked; MF3 full integration after MF2 map) · E2b/E2c HELD · mini day-one.
 - [ ] **Queued (owner 09-21):** Turnip-contrast G probe — sideload Mesa Turnip (adrenotools-style wrap; community precedent incl. Mesa 26.x on Odin 3) and re-run the replayer to test whether the (b) circuit mis-sample reproduces off the proprietary driver. Schedule after the (b1)/(b2) split closes, not before.
 - [ ] **Plan of record for 120 fps (September 17 evening):**
@@ -1546,6 +1547,14 @@ the build or commit that closed them.
       G30 binary 100% zeros (9th recurrence, 8th persistent; run
       validity unaffected). ~1 h. Next: G31 (b1)/(b2)
       promotion/circuit-input split (NOT adoption). Ledger row added.
+      AMENDMENT (09-22, progress review, Brad-confirmed): the
+      "circuit mis-samples" INFERENCE is WITHDRAWN — G33 proved B's
+      nonzero bytes are ALL alpha (0/229376 nonzero-RGB) and the
+      frag source (`sample_circuit.frag:52-70`, git-object-verified)
+      replaces alpha with 0x80 on the PSMCT24 path, so cleared
+      output from stale B is CORRECT behavior. What stands: 174/174
+      uploads, FBP0 changed, Z changed, FBP112 stale-unchanged —
+      the A→B divergence now under test in G38.
 - [x] **T44 read (09-21) — PASS(stall, honest), R1 environment NO-PARK + 6-boot WSLg-audio outage; R2 not run, recipe returned; worker caught orchestrator baseline error (T44-E1)**
       Rename audit (6 scripts: 484/488 tokened + 4-line `t43.`→`t44.`
       FIX pre-landed; track functionally identical; 3 byte-identical;
@@ -1612,6 +1621,13 @@ the build or commit that closed them.
       no score re-run possible; retry correctly unspent. ~1 h. Next:
       G32 (sample_quad[0] unit probe with controlled patterns, NOT
       adoption). Ledger row added.
+      AMENDMENT (09-22, progress review, Brad-confirmed): (b1)
+      "sampler mis-samples stale source as cleared" WITHDRAWN for
+      the reason in the G30 amendment (stale B is zero-RGB; cleared
+      is the correct render). What stands: promotion provably off,
+      VRAM path always taken, region FNVs, 8/8 determinism. G32/
+      G34–G37 reclassified as positive content-sampling controls,
+      not fault evidence.
 - [x] **E23 read (09-21) — PASS(Done), cadence reference: producer fires ONCE on every path; C2a/C4 KILLED, X moves upstream (guest never refills); fix gate STOPPED**
       Checkpoint re-verified (fork triple `3adc0478`, 9,457/1,725,
       458/458 ×2 loaded/unloaded, E15/E16/prior/R1–R6) + tooling rename
@@ -1962,6 +1978,33 @@ the build or commit that closed them.
       Next: G37 minimum-content threshold wall (shrunken tag, same
       raw legs); filing content upgrades again, still held. Ledger
       row added.
+- [x] **G37 read (09-22) — PASS(ANY(1) on contract): 1-word RGB tag renders EXACTLY one pixel at (0,0); higher-threshold refuted 0/10 — reclassified per progress review as a positive sampling control; §4 alpha-only successor DECLINED (non-discriminator), lane REDIRECTED to the A→B composite divergence**
+      Task-1 statics (threshold candidates T1 single-word CHOSEN
+      over T2/T3/T4 + shrunken tag word 0 page 112 + P1/P2/P3
+      premises + every scalar via reused renderer + 6-row matrix
+      with 7 triage rules, zero device contact) → ONE hunk (+56/−0,
+      G36 +59 excised same edit) + ONE build exit 0 [458/458]
+      (265,853,016 B 97c33955, 722427ed) + verify-then-push NO gap
+      + ONE run exit 0: 16/16 writeback 13bd6843/149724 + 16/16
+      state == G31 + 16/16 bytes (B1 shrunken ×16, A == G31) + 512
+      vpage (page-112 eb42866d/698 + 511 == G31) + 10/10 ladder
+      debe0cda/229379 + vram control + 10/10 scanouts 34697c14
+      (white-set {(0,0)}) + Done! last + 0 new tombstone. Verified:
+      logcat counts/values exact, PPMs 10× 688143 unanimous FULL
+      34697c14, census whites==[0] re-implemented, LIVE oracle cmp
+      identical, predictor RE-RUN all-pass, mirror 13/13, hunk
+      56+/0- single @@, clone HEAD + markers + 160 arithmetic,
+      tombstones clean. Open: G37 binary corrupt at gate
+      (e2ed9fd8/0000, size right, 16th recurrence — worker's reads
+      + on-device pre-date, validity stands). ORCH REDIRECT
+      (progress review, Brad-confirmed): §4 alpha-only successor
+      DECLINED — frag source replaces alpha with 0x80, so exact-
+      alpha-only ≡ cleared (verified: sha 850c1764, git-object-
+      equal); G30/G31 mis-sampling interpretation WITHDRAWN (see
+      amendments); G32/G34–G37 are positive controls. Next: G38
+      Mac-vs-Odin FIRST-composite-pass comparison (A→B boundary,
+      no injection); Adreno filing content must be REWRITTEN
+      (still held, owner call). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
