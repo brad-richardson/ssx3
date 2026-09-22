@@ -1,0 +1,88 @@
+{
+  "utc": "2026-09-22T16:12:46.534137+00:00",
+  "carried_unchanged": [
+    "e29_boot_fidelity.py",
+    "e29_bounded.py",
+    "e29_capture.py",
+    "e29_carry_audit.py",
+    "e29_close.py",
+    "e29_closed_events.py",
+    "e29_fork_gate.py",
+    "e29_instrument.py",
+    "e29_io.py",
+    "e29_mine.py",
+    "e29_parser_receipt.py",
+    "e29_patch.py",
+    "e29_pins.py",
+    "e29_prepare_probe.py",
+    "e29_readiness.py",
+    "e29_restore.py",
+    "e29_restore_gate.py",
+    "e29_tail.py",
+    "e29_validate.py"
+  ],
+  "intentional_changes": [
+    {
+      "id": "CHANGE 1",
+      "file": "e29_common.py",
+      "what": "The bypass build dir moves to a NEW SSD dir (`e29-movie-bypass-build`). The mainline /tmp/e18-mpeg-link tree is pinned, never built into, never deleted. Adds MAINLINE_RUNNER/MAINLINE_SUITE and BYPASS_RUNNER/BYPASS_SUITE.",
+      "why": "The brief: internal cannot hold two trees (floor rule) and forbids a /tmp build outright.",
+      "idempotent": true
+    },
+    {
+      "id": "CHANGE 2",
+      "file": "e29_common.py",
+      "what": "IRES 3 GiB -> 512 MiB; adds BUILD_CAP 6 GB and SSD_CAP 16 GB.",
+      "why": "The brief's byte caps. E28's 3 GiB was sized for an internal tree this lane does not create. FLOOR and GUARD stay 2 GiB + 0.5 GiB, untouched.",
+      "idempotent": true
+    },
+    {
+      "id": "CHANGE 3",
+      "file": "e29_common.py",
+      "what": "sample()/bound()/admission() charge the NEW SSD build dir and every NEW e29-* path to the SSD caps; the internal figure now covers evidence only. bound() gains an ssd_build_dir_cap check.",
+      "why": "Without it the lane would charge an SSD build against the internal reservation and admit wrongly.",
+      "idempotent": true
+    },
+    {
+      "id": "CHANGE 4",
+      "file": "e29_open.py",
+      "what": "Docstring and receipt note corrected: E29 DOES mutate the fork worktree (exactly twice) and DOES build. The allocation baseline now MEASURES the permitted growth instead of asserting zero.",
+      "why": "The carried text was E22-E28's read-only posture and would have been false on its face here.",
+      "idempotent": true
+    }
+  ],
+  "written_fresh": [
+    "e29_bootstrap_rename.py",
+    "e29_mechanism.py",
+    "e29_prereg.py"
+  ],
+  "rename_bootstrap": "e29_rename.py, produced and FIXPOINT-proved by e29_bootstrap_rename.py",
+  "diffs": "tooling-diff.md",
+  "shas": {
+    "e29_boot_fidelity.py": "38e69cc2c75d8058a476258cb60f0ad89c8fc66e65a90ee11d6902937521fba2",
+    "e29_bootstrap_rename.py": "40d4b3ca965bcbde0ebebcc7f9d2161c1f1b19152667bd1a24eac05c5d372b1e",
+    "e29_bounded.py": "df5ebd018e9f8e1af0824557f5e486ab267e9fb2ce855fec8b080ca0784f4411",
+    "e29_capture.py": "a55f515209fb6be17bb7e622ed29ec77bd55ffdac8c5d422bf37c12514476a78",
+    "e29_carry_audit.py": "6dae811327556baafe7dabb49732bc8e78a1232dac7c8a14c4ef109a6b22b285",
+    "e29_close.py": "a47673c4e2fe5368a0d447c3ccfa60f5dbed9ee0d871044e028ac76836f0f815",
+    "e29_closed_events.py": "ce5bc07e115fe8f2f909b62990c6e2f8357b16afbb0dfce61c2b184489011c45",
+    "e29_common.py": "d3f733b69ac08f5f402ede3f5626d69867aa26c95ced86c94bff07ee660c5fdb",
+    "e29_fork_gate.py": "95312901cade35aef7e55ef35868640b8741c115db008673696d2734d8d953ac",
+    "e29_instrument.py": "cda14edd2dd48b4bfac24361b8cd339bbe4f49b94823e93eaedf40700973cbf7",
+    "e29_io.py": "57a018d86f0287630a8f6a6244eb68250906d83b1b42d1cacd13c449cd966435",
+    "e29_mechanism.py": "2b7d786224a9f8432ee46efd3f787b03672987e912e29ccd3735f985ba6db834",
+    "e29_mine.py": "c72229bbbee2d8a3d26b84fa6c78e1be3cc9f871a445950e45c2881836f406ac",
+    "e29_open.py": "662b4d4ee095f382e4a75a6ab7d42ad15747d96b9947d138624005260acdc663",
+    "e29_parser_receipt.py": "c8e66bca3c16398cc34bf55458dbd3842f2edc7b4b5309c1799b6a218ee57354",
+    "e29_patch.py": "3709ea4cd2fa2266c136667b58eeed58d1072f398def3f8539984b6f2c583564",
+    "e29_pins.py": "7728659dabc756cd65088570dcb590f23f809af6a1c5237f2bda7d1c6dd9d920",
+    "e29_prepare_probe.py": "b116757a160437e3ddfa300bb189399e0debd785b1a4d0e4ff3b4bf6dd5e327f",
+    "e29_prereg.py": "ad9370969209c0f5ea06cc08b0932ae1288baa1409b9d1b8c23b6b38794a79a0",
+    "e29_readiness.py": "4267f538df6a0412ad74ceeaac87b602a0dbd52d3559e3f7bfcc50ddd75a0329",
+    "e29_rename.py": "fde875b77c4ba51fd8e580c8792e7816fabf8656e3689e191486f68e9095b6b0",
+    "e29_restore.py": "4bf36a29ae20e98976f83dd980ece3c052c1a43e89ebb7ce5f2ba88f544b635f",
+    "e29_restore_gate.py": "9ce66298cc553760d95d11937cb0fe2ad8a9c1bda364d87d1c8303be4d598838",
+    "e29_tail.py": "57361d2ad6a22f7a9b85ad682cd7e632b9611b3da216df7c87d1932edd5faa77",
+    "e29_validate.py": "68593ccbd781998b93fd1c3de1632b40046ead999c1473480addf329e81389ec"
+  }
+}

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/Users/bradrichardson/dev/ssx3/local/research/E29/e29_bounded.py", line 47, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/Users/bradrichardson/dev/ssx3/local/research/E29/e29_bounded.py", line 12, in main
+    folder.mkdir(parents=True,exist_ok=False)
+  File "/Users/bradrichardson/.pyenv/versions/3.12.12/lib/python3.12/pathlib.py", line 1311, in mkdir
+    os.mkdir(self, mode)
+FileExistsError: [Errno 17] File exists: '/Volumes/Extreme SSD/ps2recomp-spike/P1/e29-tooltmp/build'

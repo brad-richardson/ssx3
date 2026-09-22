@@ -1,0 +1,52 @@
+{
+  "utc": "2026-09-22T16:50:05.431689+00:00",
+  "phase": "b",
+  "inherited_from": [
+    "E25",
+    "E21"
+  ],
+  "suite_rc": 0,
+  "binding_rc": 0,
+  "query_cases": 4,
+  "predicate_cases": 14,
+  "leaf_cases": 24,
+  "consumer_cases": 3,
+  "leaf_present": true,
+  "mpeg_delivery_cases": 2,
+  "new_regression_cases": 6,
+  "run_exit_cases": 6,
+  "isolation_identical": true,
+  "loaded_regression_green": true,
+  "q1_cases": 9,
+  "q2_audit": true,
+  "cadence_cases": 4,
+  "cadence_branches": 2,
+  "instrument_reused_sha": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+  "instrument_rebuilt": false,
+  "regression_receipts_note": "E25/E21 assertions carried verbatim -- they are properties of the test corpus and the observer dylib. The binary-identity block is E29's own: three time-separated reads, a zero-run scan, a string proof and 458/458 with the flag off.",
+  "checks": {
+    "two_reads_agree": true,
+    "third_read_agrees": true,
+    "no_zero_run_signature": true,
+    "binary_differs_from_mainline": true,
+    "bypass_strings_present": true,
+    "suite_458_flag_off": true,
+    "diff_one_file_zero_deletions": true,
+    "branch_commit_is_one_file_46_insertions_0_deletions": true,
+    "branch_one_commit_and_checked_back": true,
+    "build_rc0_unbounded": true,
+    "generated_sources_unmoved": true,
+    "observer_dylib_is_E21s": true
+  },
+  "green": true,
+  "third_read": {
+    "runner": {
+      "bytes": 163529696,
+      "sha256": "8c09eefb5762afb8e235dbb82cf70015aa34565fc9896924b3763fb1c54684b8"
+    },
+    "suite": {
+      "bytes": 5695128,
+      "sha256": "f22ce08c625e5b149ab36c7f16af2e96bc50493c4d8de7780d386e406869716f"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+"""E29 open: fork allocation baseline + initial admission against the contract.
+
+E29 builds nothing and edits nothing in the fork. The allocation baseline is
+taken anyway so the lane's "fork growth 0" claim at close is MEASURED rather
+than assumed -- the same discipline E25 used.
+"""
+from e29_common import *
+
+assert os.environ.get('COPYFILE_DISABLE') == '1'
+
+allocated = {}
+for root in [R/'.git', R/'ps2xRuntime/src/lib/Kernel/Stubs', R/'ps2xTest/src']:
+    for p in [root, *root.rglob('*')]:
+        try: allocated[str(p)] = p.lstat().st_blocks*512
+        except FileNotFoundError: pass
+save('fork-allocation-before.json', dict(utc=utc(), allocated=allocated, paths=len(allocated)))
+
+s = sample()
+admission(s)
+save('admission-open.json', dict(utc=utc(), reservation_internal=IRES,
+                                 reservation_ssd=16*G, floor=2*G, guard=512*M,
+                                 sample=s, bound=bound(s),
+                                 internal_free_required=2*G+512*M+max(0, IRES-s['internal_allocated']),
+                                 ssd_free_required=2*G+512*M+max(0, 16*G-s['ssd_allocated']),
+                                 note=('internal_allocated is dominated by the 1.77 GB E18 build tree E25 '
+                                       'rebuilt bit-identically; E29 runs no build step, so the 3 GiB '
+                                       'reservation is declared and not consumed.')))
+print('fork allocation paths', len(allocated))
+print('internal free', s['internal_free'], 'required', 2*G+512*M+max(0, IRES-s['internal_allocated']))
+print('ssd free', s['ssd_free'], 'required', 2*G+512*M+max(0, 16*G-s['ssd_allocated']))
+print('bound', bound(s))
+print('# E29 OPEN TAIL COMPLETE')

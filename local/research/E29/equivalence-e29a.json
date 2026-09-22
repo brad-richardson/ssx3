@@ -1,0 +1,129 @@
+{
+  "utc": "2026-09-22T16:49:46.962114+00:00",
+  "label": "e29a",
+  "bar_source": "pre-registration-pass-1.json (written before the branch was cut)",
+  "rows": [
+    {
+      "row": "[MPEG:GetPicture] waiting count",
+      "expect": 1,
+      "got": 1,
+      "pass_": true
+    },
+    {
+      "row": "[MPEG:feedES] count",
+      "expect": 1,
+      "got": 1,
+      "pass_": true
+    },
+    {
+      "row": "[MPEG:feed] count",
+      "expect": 1,
+      "got": 1,
+      "pass_": true
+    },
+    {
+      "row": "[MPEG:GetPicture:FRAME] count",
+      "expect": 0,
+      "got": 0,
+      "pass_": true
+    },
+    {
+      "row": "[MPEG:DEV-SKIP-MOVIE] count (flag OFF => 0)",
+      "expect": 0,
+      "got": 0,
+      "pass_": true
+    },
+    {
+      "row": "park thread 1 pc/ra/wait",
+      "expect": "wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028",
+      "got": "wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028",
+      "pass_": true
+    },
+    {
+      "row": "park chain",
+      "expect": "[0x3b1028]",
+      "got": true,
+      "pass_": true
+    },
+    {
+      "row": "feed vector bytes",
+      "expect": 5040,
+      "got": 5040,
+      "pass_": true
+    },
+    {
+      "row": "feed vector sha256",
+      "expect": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "got": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "pass_": true
+    },
+    {
+      "row": "parser closure parseCalls",
+      "expect": "1",
+      "got": "1",
+      "pass_": true
+    },
+    {
+      "row": "parser closure offered",
+      "expect": "5040",
+      "got": "5040",
+      "pass_": true
+    },
+    {
+      "row": "parser closure consumed",
+      "expect": "5040",
+      "got": "5040",
+      "pass_": true
+    },
+    {
+      "row": "parser closure packets",
+      "expect": "0",
+      "got": "0",
+      "pass_": true
+    },
+    {
+      "row": "parser closure frames",
+      "expect": "0",
+      "got": "0",
+      "pass_": true
+    },
+    {
+      "row": "parser closure errors",
+      "expect": "0",
+      "got": "0",
+      "pass_": true
+    },
+    {
+      "row": "parser closure pending",
+      "expect": "0",
+      "got": "0",
+      "pass_": true
+    },
+    {
+      "row": "queue head 0xd486f8 last value",
+      "expect": "0xd49b14",
+      "got": "0xd49b14",
+      "pass_": true
+    },
+    {
+      "row": "queue bytes 0xd486f4 last value",
+      "expect": "0x696e0",
+      "got": "0x696e0",
+      "pass_": true
+    },
+    {
+      "row": "watch vector entries",
+      "expect": 243,
+      "got": 243,
+      "pass_": true
+    },
+    {
+      "row": "flag absent from boot env",
+      "expect": null,
+      "got": null,
+      "pass_": true
+    }
+  ],
+  "green": true,
+  "verdict": "EQUIVALENT to e28a on every pre-registered row"
+}

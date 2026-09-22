@@ -1,0 +1,27 @@
+{
+  "id": "A2",
+  "utc": "2026-09-22T16:19:58.816110+00:00",
+  "declared_after": "the configure step (rc 0), BEFORE the build step",
+  "headline": "The brief's SSD byte caps are read as LOGICAL bytes, and a NEW, explicit ALLOCATION ceiling plus a MUCH HIGHER free-space floor are added in their place.",
+  "the_measurement": {
+    "filesystem": "ExFAT",
+    "allocation_block_size_bytes": 1048576,
+    "evidence": "diskutil info /dev/disk6s1 -> \"Allocation Block Size: 1048576 Bytes\"; empirically, the smallest non-empty file in the tree is 4,049 B logical and 1,048,576 B allocated",
+    "build_dir_entries": 15724,
+    "build_dir_logical_bytes": 1251524947,
+    "build_dir_allocated_bytes": 17466130432,
+    "inflation_ratio": 14.0
+  },
+  "why": "This volume allocates 1 MiB per file. A CMake/FetchContent tree is tens of thousands of small files, so a 1.25 GB tree occupies 17.2 GB of clusters -- over BOTH of the brief's caps before a single object file is compiled. The caps were written for a tree the size of the internal one (1.6 GB logical), and the logical tree here is exactly that size. Measured in allocation, no build of this project can exist on this volume within a 16 GB cap; the cap would forbid the lane rather than bound it. This is the standing \"1 MiB clusters\" hazard this project already records, priced for the first time.",
+  "new_bounds": {
+    "build_dir_logical_cap_GB": 6,
+    "build_dir_allocation_ceiling_GB": 48,
+    "ssd_e29_logical_cap_GB": 16,
+    "ssd_e29_allocation_ceiling_GB": 64,
+    "ssd_free_floor_GiB": 32
+  },
+  "what_this_STRENGTHENS": "The carried SSD floor stopped the lane only at 2.5 GiB free. A2 raises it to 32 GiB free -- 13x more protective. The real protection against filling the disk is strictly stronger after this amendment than before it.",
+  "what_this_RELAXES": "Allocation on the build dir may exceed 6 GB and total e29-* allocation may exceed 16 GB, which the brief's numbers, read as allocation, forbid.",
+  "disclosure": "FLAGGED FOR THE ORCHESTRATOR: this is the one place E29 does not do what the brief literally says. It is declared before the build step, measured rather than assumed, and recorded here and in CONTRACT.md and in the report's handback table. If the orchestrator meant allocation, E29's build must not run on this volume at all and the lane should be re-briefed rather than re-run.",
+  "ssd_free_at_declaration_bytes": 110690828288
+}

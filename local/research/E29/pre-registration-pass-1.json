@@ -1,0 +1,147 @@
+{
+  "utc": "2026-09-22T16:10:53.230710+00:00",
+  "pass_id": "1",
+  "lane": "E29",
+  "registered_before": [
+    "branch cut",
+    "any build",
+    "any lease",
+    "any boot"
+  ],
+  "captures": {
+    "boot": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e28a-1.log",
+      "bytes": 13272194,
+      "sha256": "21d702c5dc3058d1c326f97a9d0592312304b38513a0491c26ac53f4f812889f",
+      "E28_committed_sha256": "21d702c5dc3058d1c326f97a9d0592312304b38513a0491c26ac53f4f812889f",
+      "equals_E28_committed_pin": true
+    },
+    "feed": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e28a-parser/parser-input.bin",
+      "bytes": 5040,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "E28_committed_sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "equals_E28_committed_pin": true
+    }
+  },
+  "equivalence_bar": {
+    "park_counter_GetPicture_wait": {
+      "expect": 1,
+      "got": 1,
+      "exact_line": "[MPEG:GetPicture] waiting for frames, mpeg=0x587b30 ended=0 failed=0 sawInput=1",
+      "at_log_line": 22876
+    },
+    "park_counter_feedES": {
+      "expect": 1,
+      "got": 1,
+      "exact_line": "[MPEG:feedES] #0 size=5040 first4=000001b3 decoderFailed=0 waitSeq=1",
+      "at_log_line": 22874
+    },
+    "feed_line": {
+      "expect": 1,
+      "got": 1,
+      "exact_line": "[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0"
+    },
+    "GetPicture_FRAME": {
+      "expect": 0,
+      "got": 0
+    },
+    "park_thread1": {
+      "expect": "Waiting wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028",
+      "exact_line": "id=1 Waiting wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028 sp=0x1fffd60 entry=0x100008 pri=100 sched=8255 chain=[0x3b1028]",
+      "pc": "0x3b1028",
+      "ra": "0x3b1028",
+      "wait": "Mpeg:0",
+      "chain": "[0x3b1028]"
+    },
+    "feed_vector": {
+      "bytes": 5040,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "first4": "000001b3",
+      "fnv64": "0xd2a9588f0e0fd358",
+      "equals_E22_E23_E24_E26_E28_pin": true
+    },
+    "parser_closure": {
+      "parseCalls": "1",
+      "offered": "5040",
+      "consumed": "5040",
+      "packets": "0",
+      "frames": "0",
+      "errors": "0",
+      "pending": "0"
+    },
+    "queue_head_last_value": {
+      "address": "0xd486f8",
+      "expect": "0xd49b14",
+      "note": "E28 P1: 2 stores in the whole run, 0 after the feed"
+    },
+    "queue_bytes_last_value": {
+      "address": "0xd486f4",
+      "expect": "0x696e0",
+      "decimal": 431840,
+      "note": "E28 P1: 30 stores, settles after the dequeue"
+    },
+    "watch_vector_entries": {
+      "expect": 243,
+      "note": "E28 vector carried UNCHANGED this lane"
+    }
+  },
+  "bar_computable_and_green": true,
+  "checkpoint": {
+    "C1_movie_sequencing_exited": {
+      "necessary": true,
+      "observables": [
+        "boot log: \"[MPEG:DEV-SKIP-MOVIE]\" count >= 1  (the flag fired; e28a: 0)",
+        "boot log: \"[MPEG:GetPicture] waiting\" count == 0  (the park never happens; e28a: 1)",
+        "park snapshot: thread id=1 is NOT \"Waiting wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028\""
+      ]
+    },
+    "C2_left_the_terminal_13_stub_loop": {
+      "is_the_reachability_claim": true,
+      "e28a_final_block": "[diag:stubs] block=13 distinct=13 period_ms=5000",
+      "e28a_final_distinct": 13,
+      "e28a_final_target_set": [
+        "0x227f58",
+        "0x317348",
+        "0x317500",
+        "0x317520",
+        "0x31aac8",
+        "0x31abd0",
+        "0x326b88",
+        "0x326eb0",
+        "0x3825f8",
+        "0x3ffa58",
+        "0x3ffbc0",
+        "0x423dd0",
+        "0x423de0"
+      ],
+      "observables": [
+        "the FINAL [diag:stubs] block reports distinct > 13, OR",
+        "its target set is NOT a subset of the 13 addresses listed above"
+      ]
+    },
+    "C3_menu_or_race_rendering": {
+      "e28a_display_configs": [
+        "[frame:upload] displayFbp=112 sourceFbp=112 size=512x448 preferred=0"
+      ],
+      "e28a_frame_upload_lines": 1,
+      "e28a_last_frame_dump": "[frame:dump] seq=1806 tick=4485 size=512x448 fbp=112/112 fallback=0 fnv1a=fd889dc5",
+      "e28a_frame_dump_lines": 1788,
+      "observables": [
+        "at least one [frame:upload] line whose displayFbp/sourceFbp/size differs from the ONE configuration e28a ever produced (listed above) -- the line prints past its 128 cap precisely when that configuration changes",
+        "and/or a [frame:dump] size= other than 512x448"
+      ]
+    }
+  },
+  "limits": [
+    "1. It cannot show the faithful movie path works. Flag-ON skips the movie; it does not play it. Any picture the flag-ON run shows is writeBlankMpegFrame output, not decoded video. Ordinary-boot/movie fidelity stays OPEN.",
+    "2. It cannot show WHY the host stalls. streamEnded is set by fiat above the wait guard; the nonStreamDeliveries latch E27 named is neither exercised nor disproved. E30's question is untouched by this lane.",
+    "3. It cannot show the guest re-ask loop would ever have terminated on its own. The bypass changes WHICH exit that loop takes.",
+    "4. It cannot bound how far past movie sequencing the title gets. If a second blocker lies beyond it, E29 records the next reached blocker as a PARTIAL RESULT, which the review names as a result and not a failure.",
+    "5. Flag-OFF equivalence is measured at ONE terminal state on ONE title boot. It is not a fidelity proof for any other path. The 458-test suite is the only broad flag-off evidence this lane produces.",
+    "6. [gs:prim] caps at 64 and [gs:kick] caps at 96, and e28a sits EXACTLY at both caps. Neither can discriminate menu/race rendering. Named before the run so no reader mistakes a capped counter for a result. C3 uses [frame:upload], which prints past its cap whenever the display configuration changes.",
+    "7. It says nothing about Odin/Android: this is a macOS arm64 host build.",
+    "8. If the flag-ON run parks elsewhere, E29 reports the NEW park. The bypass's own observable (C1) is independent of whatever happens after it.",
+    "9. [MPEG:DEV-SKIP-MOVIE] is inside PS2_IF_AGRESSIVE_LOGS, so it is visible only because the build carries -DPS2X_ENABLE_AGRESSIVE_LOGS=ON, exactly as every other [MPEG:*] marker this bar relies on."
+  ]
+}

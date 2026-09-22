@@ -1,0 +1,131 @@
+{
+  "utc": "2026-09-22T16:13:01.774319+00:00",
+  "pass_id": "2",
+  "mission": "1 -- mechanism, static",
+  "file": "ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp",
+  "bytes": 110191,
+  "lines": 2784,
+  "sha256_on_disk": "f83ed02e21eba7cbbcecf8443740b13f8ee07ecdb77991da571fef38404ef600",
+  "sha256_git_object": "f83ed02e21eba7cbbcecf8443740b13f8ee07ecdb77991da571fef38404ef600",
+  "git_rc": 0,
+  "corroborated_by_git_object": true,
+  "anchors": {
+    "getMpegPicture_decl": [
+      27,
+      2447
+    ],
+    "dispatch_guard": [
+      2467
+    ],
+    "dispatch_guard_2": [
+      2468
+    ],
+    "wait_block_lock": [
+      2496
+    ],
+    "wait_playback_ref": [
+      1934,
+      2011,
+      2038,
+      2259,
+      2342,
+      2466,
+      2497,
+      2667,
+      2708
+    ],
+    "wait_guard_l1": [
+      2498
+    ],
+    "wait_guard_l2": [
+      1496,
+      2468,
+      2499
+    ],
+    "wait_guard_l3": [
+      2468,
+      2500
+    ],
+    "wait_guard_l4": [
+      2468,
+      2501
+    ],
+    "getpicture_trace": [
+      2503
+    ],
+    "getpicture_trace_str": [
+      2506
+    ],
+    "waitExternal": [
+      2514
+    ],
+    "wait_reason": [
+      2515
+    ],
+    "wait_type": [
+      1231,
+      1999,
+      2023,
+      2058,
+      2239,
+      2285,
+      2291,
+      2378,
+      2384,
+      2516
+    ],
+    "lambda_captures_delivery": [
+      2518,
+      2554
+    ],
+    "oncomplete_reentry": [
+      1760
+    ],
+    "latch_comment": [
+      531
+    ],
+    "state_streamEnded": [
+      499
+    ],
+    "state_isEndTraceCount": [
+      561
+    ],
+    "reset_isEndTraceCount": [
+      1911,
+      1953
+    ],
+    "real_setter_finish": [
+      1455
+    ],
+    "real_setter_progend": [
+      1301
+    ]
+  },
+  "anchors_found": 22,
+  "anchors_missing": 0,
+  "trace_caps": {
+    "gs_prim_cap_64": {
+      "path": "ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp",
+      "line": 644,
+      "text": "if (primitiveIndex < 64u)"
+    },
+    "gs_kick_cap_96": {
+      "path": "ps2xRuntime/src/lib/gs/gs_frontend.cpp",
+      "line": 1546,
+      "text": "the [gs:kick] line below caps at 96"
+    },
+    "frame_upload_cap_128_or_change": {
+      "path": "ps2xRuntime/src/lib/ps2_runtime.cpp",
+      "line": 546,
+      "text": "if (s_uploadDebugCount < 128u ||"
+    },
+    "getpicture_wait_cap_32": {
+      "path": "ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp",
+      "line": 2503,
+      "text": "if (g_mpeg_stub_state.getPictureWaitTraceCount < 32u)"
+    }
+  },
+  "flag": "PS2X_SKIP_MOVIE",
+  "flag_name_is_new": true,
+  "distinct_PS2X_env_names_in_runtime": 23
+}

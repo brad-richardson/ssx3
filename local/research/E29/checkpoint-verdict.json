@@ -1,0 +1,167 @@
+{
+  "utc": "2026-09-22T16:59:05.799138+00:00",
+  "a": {
+    "label": "e29a",
+    "log_lines": 47598,
+    "dev_skip": 0,
+    "getpic_wait": 1,
+    "feedes": 1,
+    "frames_served": 0,
+    "thread1": "id=1 Waiting wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028 sp=0x1fffd60 entry=0x100008 pri=100 sched=8255 chain=[0x3b1028]",
+    "final_block": "[diag:stubs] block=14 distinct=13 period_ms=5000",
+    "final_distinct": 13,
+    "final_top30_targets": [
+      "0x227f58",
+      "0x317348",
+      "0x317500",
+      "0x317520",
+      "0x31aac8",
+      "0x31abd0",
+      "0x326b88",
+      "0x326eb0",
+      "0x3825f8",
+      "0x3ffa58",
+      "0x3ffbc0",
+      "0x423dd0",
+      "0x423de0"
+    ],
+    "display_configs": [
+      "[frame:upload] displayFbp=112 sourceFbp=112 size=512x448 preferred=0"
+    ],
+    "distinct_frame_contents": 42,
+    "frame_dumps": 1880,
+    "torn_frame_dump_lines": 2,
+    "last_frames": [
+      "fd889dc5",
+      "fd889dc5",
+      "fd889dc5",
+      "fd889dc5",
+      "fd889dc5"
+    ]
+  },
+  "b": {
+    "label": "e29b",
+    "log_lines": 133620,
+    "dev_skip": 3,
+    "getpic_wait": 0,
+    "feedes": 3,
+    "frames_served": 0,
+    "thread1": "id=1 Ready wait=None:0 pc=0x423dc8 ra=0x377b6c sp=0x1fffdb0 entry=0x100008 pri=100 sched=10744 chain=[0x377b6c]",
+    "final_block": "[diag:stubs] block=14 distinct=251 period_ms=5000",
+    "final_distinct": 251,
+    "final_top30_targets": [
+      "0x2abb80",
+      "0x31be50",
+      "0x320c48",
+      "0x321108",
+      "0x325250",
+      "0x325260",
+      "0x3252e8",
+      "0x3252f8",
+      "0x325450",
+      "0x362978",
+      "0x371dd8",
+      "0x379860",
+      "0x38f460",
+      "0x38f598",
+      "0x38f668",
+      "0x394ed0",
+      "0x395000",
+      "0x3971c8",
+      "0x397278",
+      "0x3974b0",
+      "0x3975e0",
+      "0x397718",
+      "0x397840",
+      "0x398a78",
+      "0x39feb8",
+      "0x3a0000",
+      "0x3a0048",
+      "0x3a4c90",
+      "0x411b08",
+      "0x411c38"
+    ],
+    "display_configs": [
+      "[frame:upload] displayFbp=112 sourceFbp=112 size=512x448 preferred=0"
+    ],
+    "distinct_frame_contents": 1135,
+    "frame_dumps": 1262,
+    "torn_frame_dump_lines": 1,
+    "last_frames": [
+      "4fa524f9",
+      "fcc63439",
+      "16097dc1",
+      "e1060f09",
+      "4ebacc95"
+    ]
+  },
+  "checkpoints": [
+    {
+      "name": "C1 -- movie sequencing exited",
+      "necessary": true,
+      "rows": [
+        {
+          "obs": "[MPEG:DEV-SKIP-MOVIE] >= 1",
+          "e29a": 0,
+          "e29b": 3,
+          "pass_": true
+        },
+        {
+          "obs": "[MPEG:GetPicture] waiting == 0",
+          "e29a": 1,
+          "e29b": 0,
+          "pass_": true
+        },
+        {
+          "obs": "thread 1 NOT parked on Mpeg:0 pc=0x3b1028",
+          "e29a": "id=1 Waiting wait=Mpeg:0 pc=0x3b1028 ra=0x3b1028 sp=0x1fffd60 entry=0x100008 pri=100 sched=8255 chain=[0x3b1028]",
+          "e29b": "id=1 Ready wait=None:0 pc=0x423dc8 ra=0x377b6c sp=0x1fffdb0 entry=0x100008 pri=100 sched=10744 chain=[0x377b6c]",
+          "pass_": true
+        }
+      ],
+      "met": true
+    },
+    {
+      "name": "C2 -- left e28a's terminal 13-stub loop (THE REACHABILITY CLAIM)",
+      "rows": [
+        {
+          "obs": "final [diag:stubs] distinct > 13",
+          "e29a": 13,
+          "e29b": 251,
+          "pass_": true
+        },
+        {
+          "obs": "final top-30 target set NOT a subset of e28a's 13",
+          "e29a": [],
+          "e29b": 30,
+          "pass_": true
+        }
+      ],
+      "met": true
+    },
+    {
+      "name": "C3 -- menu/race rendering, AS PRE-REGISTERED",
+      "rows": [
+        {
+          "obs": "a [frame:upload] display configuration e28a never produced",
+          "e29a": [
+            "[frame:upload] displayFbp=112 sourceFbp=112 size=512x448 preferred=0"
+          ],
+          "e29b": [
+            "[frame:upload] displayFbp=112 sourceFbp=112 size=512x448 preferred=0"
+          ],
+          "pass_": false
+        },
+        {
+          "obs": "a [frame:dump] size other than 512x448 (non-fallback)",
+          "e29a": "512x448 only (+ the 18 boot fallbacks at 640x512)",
+          "e29b": "512x448 only (+ the 19 boot fallbacks at 640x512)",
+          "pass_": false
+        }
+      ],
+      "met": false,
+      "why_it_missed": "The pre-registered proxy was WRONG, and is recorded as a miss rather than swapped out. SSX 3's front end renders at the SAME 512x448 framebuffer (fbp=112) the movie used, so a display-configuration change was never going to signal it. What DID change is frame CONTENT: e28a produced 42 distinct non-fallback frames and then froze on one forever; e29b produced 1135 and was still changing at the wall."
+    }
+  ],
+  "verdict": "C1 MET, C2 MET, C3 MISSED-AS-WRITTEN"
+}

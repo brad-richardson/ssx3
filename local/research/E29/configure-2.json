@@ -1,0 +1,77 @@
+{
+  "utc": "2026-09-22T16:23:07.013530+00:00",
+  "argv": [
+    "cmake",
+    "-S",
+    "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+    "-B",
+    "/Volumes/Extreme SSD/ps2recomp-spike/e29-movie-bypass-build",
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang",
+    "-DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++",
+    "-DCMAKE_OSX_ARCHITECTURES=arm64",
+    "-DPS2X_BUILD_STUDIO=OFF",
+    "-DPS2X_BUILD_RUNTIME=ON",
+    "-DPS2X_BUILD_TEST=ON",
+    "-DPS2X_ENABLE_RUNTIME_LOGS=ON",
+    "-DPS2X_ENABLE_AGRESSIVE_LOGS=ON",
+    "-DPS2X_ENABLE_IOP_RPC_TRACE=ON",
+    "-DPS2X_STRICT_RETURN_DIAGNOSTICS=OFF",
+    "-DPS2X_ENABLE_FFMPEG=ON"
+  ],
+  "recipe_source": "E18/configure-command.json (asserted == literal)",
+  "only_difference": {
+    "flag": "-B",
+    "e18": "/tmp/e18-mpeg-link/runtime",
+    "e29": "/Volumes/Extreme SSD/ps2recomp-spike/e29-movie-bypass-build",
+    "why": "internal cannot hold two trees; brief forbids a /tmp build"
+  },
+  "rc": 0,
+  "elapsed_s": 19.8,
+  "stdout_bytes": 3012,
+  "stderr_bytes": 3058,
+  "jobs": 2,
+  "sample_before": {
+    "utc": "2026-09-22T16:22:44.852621+00:00",
+    "internal_free": 3121897472,
+    "internal_allocated": 2977792,
+    "codegen_allocated": 0,
+    "evidence_allocated": 2977792,
+    "build_allocated": 17470324736,
+    "build_logical": 1251533288,
+    "ssd_logical": 1251549752,
+    "ssd_free": 110681391104,
+    "ssd_allocated": 17485004800,
+    "ssd_owned_paths_allocated": 17477664768,
+    "fork_positive_growth": 7340032,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/._e29-movie-bypass-build",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e29-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e29-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/e29-movie-bypass-build"
+    ]
+  },
+  "sample_after": {
+    "utc": "2026-09-22T16:23:06.585116+00:00",
+    "internal_free": 3121127424,
+    "internal_allocated": 2985984,
+    "codegen_allocated": 0,
+    "evidence_allocated": 2985984,
+    "build_allocated": 17468227584,
+    "build_logical": 1251394885,
+    "ssd_logical": 1251411349,
+    "ssd_free": 110683488256,
+    "ssd_allocated": 17482907648,
+    "ssd_owned_paths_allocated": 17475567616,
+    "fork_positive_growth": 7340032,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/._e29-movie-bypass-build",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/._e29-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/e29-tooltmp",
+      "/Volumes/Extreme SSD/ps2recomp-spike/e29-movie-bypass-build"
+    ]
+  },
+  "bound_after": null
+}

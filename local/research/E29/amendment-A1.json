@@ -1,0 +1,22 @@
+{
+  "id": "A1",
+  "utc": "2026-09-22T16:16:03.992387+00:00",
+  "declared_before": "the configure step; no build byte had been written",
+  "what": "Internal delta cap IRES: 512 MB -> 32 MiB, AND the bound() trip threshold for it changed from the absolute `IRES-128*M` to the scaling `IRES*3//4`.",
+  "unchanged": [
+    "FLOOR 2 GiB",
+    "GUARD 0.5 GiB",
+    "SSD build-dir cap 6 GB",
+    "SSD total cap 16 GB"
+  ],
+  "why": "The carried admission() reserves the FULL remaining internal cap as free headroom above the floor -- E28 semantics, where IRES sized an INTERNAL BUILD TREE. E29 runs no internal build: the bypass tree, every boot log and every capture go to the SSD. Its only internal writes are the text evidence directory and the 52 KB observer dylib carried by cp -p. Measured comparison: E28 evidence 980 KB, E26 evidence 856 KB, E29 so far 552 KB. A 32 MiB delta is ~30x the largest comparable lane.",
+  "measured": {
+    "E28_evidence_KiB": 980,
+    "E26_evidence_KiB": 856,
+    "E29_evidence_KiB_at_amendment": 552,
+    "observer_dylib_KiB": 52
+  },
+  "what_this_does_NOT_do": "It does not lower the floor. bound() still stops the lane the moment internal_free reaches 2 GiB + 0.5 GiB, which is the check that actually protects the machine.",
+  "observed_pressure": "Internal free fell 3.10 -> 2.91 -> 2.78 GiB during this lane from activity OUTSIDE it (the volume sits at 99%). Named because it is the reason the carried reservation tripped, and because it is a standing risk to any later boot: if it reaches the floor, the lane tables and stops.",
+  "second_half": "The carried trip `IRES-128*M` assumes IRES >> 128 MiB. Right-sizing the cap made it NEGATIVE, so it fired unconditionally -- a right-sized cap would have stopped the lane on an arithmetic artefact rather than on a real bound. The threshold now scales: trip when 75% of the cap is used (24 MiB of 32 MiB). This is part of the SAME amendment and is recorded because it changes when the lane stops, not only where it builds."
+}

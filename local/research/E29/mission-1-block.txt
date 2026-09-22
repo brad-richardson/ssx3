@@ -1,0 +1,94 @@
+# E29 Mission 1 — the bypass block, drafted BEFORE the branch was cut.
+# Applied verbatim in Mission 2. Four hunks, one file:
+#   ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp   (3adc0478, sha256 f83ed02e…ef600)
+# Anchors are the line numbers `e29_mechanism.py` grepped out of that file.
+
+=== HUNK 1 — the flag. INSERT after line 569 (`MpegStubState g_mpeg_stub_state;`) ===
+
+        // DEV-ONLY startup-movie bypass (PS2X_SKIP_MOVIE=1). Default OFF: the
+        // value must be exactly "1"; absent, "0", "true" or empty all leave the
+        // faithful movie path untouched. Development bring-up scaffolding, NOT
+        // a fix — see local/research/E29. Faithful movie correctness is E30.
+        bool devSkipMovie()
+        {
+            static const bool skip = [] {
+                if (const char *env = std::getenv("PS2X_SKIP_MOVIE"))
+                {
+                    return env[0] == '1' && env[1] == '\0';
+                }
+                return false;
+            }();
+            return skip;
+        }
+
+=== HUNK 2 — the trace counter. INSERT after line 561 (`uint32_t isEndTraceCount = 0u;`) ===
+
+            uint32_t devSkipMovieTraceCount = 0u;
+
+=== HUNK 3 — the two resets. INSERT after EACH `g_mpeg_stub_state.isEndTraceCount = 0u;`
+              (lines 1911 and 1953), at that site's own indentation ===
+
+            g_mpeg_stub_state.devSkipMovieTraceCount = 0u;   (site 1, line 1911)
+        g_mpeg_stub_state.devSkipMovieTraceCount = 0u;       (site 2, line 1953)
+
+=== HUNK 4 — the bypass. INSERT between line 2497 (`MpegPlaybackState &playback =
+              getPlaybackState(mpegAddr);`) and line 2498 (`if (playback.decodedFrames.empty() &&`) ===
+
+            // DEV-ONLY (PS2X_SKIP_MOVIE=1) startup-movie bypass. NOT a fix, and
+            // not on any default path. Bounded to ONE thing: thread 1 does not
+            // PARK in the picture wait below. Everything before this point — the
+            // non-stream delivery, the producer dispatch, the guest's
+            // sceMpegAddBs, the parser feed — runs exactly as it does with the
+            // flag off. Marking the playback ended puts the state machine in the
+            // same state finishPlaybackStream() and the program-end path already
+            // produce, so the guest takes its OWN end-of-stream exit (the RCMP
+            // player's counter-bounded re-ask loop at guest 0x3b1050) instead of
+            // blocking on a picture this runtime cannot yet deliver. The decoder
+            // is deliberately NOT flushed: the bypass synthesizes no frames.
+            if (devSkipMovie() && playback.decodedFrames.empty() && !playback.streamEnded)
+            {
+                playback.streamEnded = true;
+                playback.cdStreamGeneration = g_mpeg_stub_state.cdStreamGeneration;
+                if (g_mpeg_stub_state.devSkipMovieTraceCount < 32u)
+                {
+                    PS2_IF_AGRESSIVE_LOGS({
+                        std::cerr << "[MPEG:DEV-SKIP-MOVIE] bypass armed (PS2X_SKIP_MOVIE=1), mpeg=0x"
+                                  << std::hex << mpegAddr << std::dec
+                                  << " n=" << (g_mpeg_stub_state.devSkipMovieTraceCount + 1u)
+                                  << " requestInput=" << requestInput
+                                  << " sawInput=" << playback.sawInput
+                                  << " served=" << playback.picturesServed << std::endl;
+                    });
+                    ++g_mpeg_stub_state.devSkipMovieTraceCount;
+                }
+            }
+
+=== WHY THIS POINT AND NO OTHER ===
+
+E27 named the host latch and E28 closed the guest half. The park is produced by
+exactly one statement — `waitExternal(EeWaitReason::Mpeg, kMpegPictureWaitType,
+…)` at MPEG.cpp:2514 — reached only through the four-term guard at 2498–2501.
+Of those four terms, `!playback.streamEnded` is the ONLY one that (a) the host
+already sets on two real paths (`finishPlaybackStream` :1459 and the
+kMpegProgramEnd path :1303), (b) the guest's own player already handles, and
+(c) does not require inventing a state the runtime cannot otherwise be in.
+Setting it at the top of the wait block — AFTER the producer dispatch at 2489 —
+is what makes the bypass BOUNDED: the flag-on run reproduces the faithful run
+byte-for-byte up to and including the 5,040-byte parser feed, and diverges only
+at the park.
+
+Rejected alternatives, and why:
+  * Wire P7's `ssx3MoviePlayComplete` via ps2_call_list.h + ssx3.toml. Needs a
+    RE-RECOMP of the 9,454 generated guest sources; the brief permits exactly
+    two worktree mutations and regeneration is not one of them. P7 also says
+    its hook address is not runtime-validated, and E27/E28 have since located
+    the real call path precisely.
+  * Suppress the `nonStreamDeliveries` latch (erase the key / skip the weak_ptr).
+    That is a candidate FIX for E30's question, not a bypass. It would burn the
+    E30 experiment on an unmeasured guess and is out of scope by the brief.
+  * Return a synthetic decoded frame. "Replace arbitrary waits with success",
+    explicitly ruled out by the review. It would also make the flag-on run
+    uninformative about what lies past the park.
+  * Flush the decoder when the flag arms (`flushDecoderIfEnded`). Could emit a
+    frame from the 5,040 partial bytes and change picturesServed; enlarges the
+    blast radius for no reachability gain.

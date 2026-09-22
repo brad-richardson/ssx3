@@ -1,0 +1,25 @@
+{
+  "utc": "2026-09-22T16:12:26.086427+00:00",
+  "reservation_internal": 536870912,
+  "reservation_ssd": 17179869184,
+  "build_dir_cap": 6442450944,
+  "floor": 2147483648,
+  "guard": 536870912,
+  "sample": {
+    "utc": "2026-09-22T16:12:26.085711+00:00",
+    "internal_free": 3335983104,
+    "internal_allocated": 434176,
+    "codegen_allocated": 0,
+    "evidence_allocated": 434176,
+    "build_allocated": 0,
+    "ssd_free": 128176881664,
+    "ssd_allocated": 0,
+    "ssd_owned_paths_allocated": 0,
+    "fork_positive_growth": 0,
+    "ssd_paths": []
+  },
+  "bound": null,
+  "internal_free_required": 3220791296,
+  "ssd_free_required": 19864223744,
+  "note": "E29 CHANGE 2/3: internal_allocated now covers EVIDENCE ONLY -- the 1.6 GB mainline E18 tree at /tmp/e18-mpeg-link is pinned, not owned, and is neither rebuilt nor deleted. The bypass build is charged to the SSD caps (build dir <= 6 GB, all e29-* <= 16 GB)."
+}

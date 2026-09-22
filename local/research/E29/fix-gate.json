@@ -1,0 +1,41 @@
+{
+  "utc": "2026-09-22T17:00:10.078549+00:00",
+  "decision": "NOT APPLICABLE",
+  "why": "The brief sets it so: the bypass is SCAFFOLDING, not a fix. E29 demonstrates no edge, proposes no candidate, and kills none. The gate file exists so the record says that explicitly rather than leaving a fix gate unanswered.",
+  "candidates_still_killed": {
+    "E23": [
+      "C2a",
+      "C4"
+    ],
+    "E22": [
+      "C1",
+      "C3",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ],
+    "note": "E29 re-proposes none of them and re-opens none of them."
+  },
+  "what_E29_does_NOT_claim": [
+    "It does not claim the movie path is fixed. Three movies were SKIPPED, not played.",
+    "It does not claim to know why the host stalls: streamEnded is set by fiat above the wait guard, so the nonStreamDeliveries latch E27 named is neither exercised nor disproved.",
+    "It does not claim menu/race was reached. The pre-registered C3 bar MISSED. What the boot reached is the TITLE SCREEN, read off the frame capture."
+  ],
+  "E30_handoff": {
+    "headline": "E29 converts E27/E28's static diagnosis into a measured cost: the single waitExternal at MPEG.cpp:2514 is the ONLY thing between the current park and a rendered, live SSX 3 title screen. Nothing else in the boot chain had to change -- one env-gated block, 46 inserted lines, zero deletions.",
+    "what_the_faithful_fix_must_reproduce_WITHOUT_the_flag": [
+      "1. getMpegPicture must RETURN to the guest instead of parking thread 1 forever. Measured: with the park suppressed, thread 1 goes from \"Waiting wait=Mpeg:0 pc=0x3b1028\" to \"Ready\", the boot log grows from 46,906 lines to 133,619, and the HLE stub surface goes from 13 distinct entry points to 251.",
+      "2. It must do so per movie, repeatedly. e29b shows the sequencer running THREE movies (feeds of 5,040 / 5,008 / 5,008 B), each arming the bypass exactly once (n=1), because sceMpegCreate resets the playback state between them. A fix that works once and latches is not enough.",
+      "3. It must keep the five tests the flag breaks GREEN: MPEG non-stream R1, R2, R4, R6 and \"sceMpegGetPicture waits for new decoder output instead of duplicating the last frame\". Those five are the measured regression bar -- with PS2X_SKIP_MOVIE=1 the suite is 453/458, with it off 458/458.",
+      "4. It must deliver actual pictures. Across all three movies the parser reports parseCalls=3 offered=15056 consumed=15056 packets=0 frames=0 errors=0 pending=0: every byte was consumed and NOT ONE packet completed. The bypass steps around that; a faithful fix cannot. This is the same zero-packet result E22-E28 saw on one chunk, now reproduced on three independent movies."
+    ],
+    "what_E29_hands_E30_that_it_did_not_have": [
+      "A binary and a branch (e29-movie-bypass @ e5ce086d, one commit on 3adc0478) that reach the title screen, so a candidate fix can be A/B-ed against a KNOWN-REACHABLE downstream state instead of against a black screen.",
+      "The measurement that the post-movie chain is healthy: 251 distinct HLE stubs, 1,135 distinct frame contents, still changing at the wall. Whatever is wrong is in the movie delivery, not behind it.",
+      "A cheap, decisive A/B harness: the SAME binary with one env var, so any downstream difference is attributable to the wait and nothing else."
+    ],
+    "the_next_question_E29_could_not_answer": "Whether the title screen is polling the pad. It CANNOT be read from this boot: the [diag:stub] histogram caps at 30 rows of 251 distinct targets, and the [padread] marker only prints when a button is actually pressed, which never happened in a headless run. The runtime already has PS2X_PAD_STIM_AFTER / PS2X_PAD_STIM_WALLMIN for exactly this. One boot with START injected would settle whether \"Press START button\" is live -- and that is a brief to write, not a claim to make here."
+  }
+}

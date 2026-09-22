@@ -1,0 +1,27 @@
+[E29] DEV-ONLY startup-movie bypass behind PS2X_SKIP_MOVIE (default OFF)
+
+Development bring-up scaffolding for the native gameplay path. NOT a fix, and
+NOT on any default path: with PS2X_SKIP_MOVIE unset the faithful movie path is
+byte-for-byte what it was at 3adc0478, and the full 458-test suite is 458/458.
+
+One env-gated block in getMpegPicture, above the four-term guard that reaches
+waitExternal(EeWaitReason::Mpeg, kMpegPictureWaitType, ...). E27 named that
+latch and E28 closed the guest half; the bypass suspends only the PARK, after
+the producer dispatch and the guest's own sceMpegAddBs feed, so a flag-on run
+reproduces the faithful run up to and including the 5,040-byte parser feed and
+diverges only where the title would otherwise stop forever. Marking the
+playback ended puts the state machine in the state finishPlaybackStream() and
+the program-end path already produce, so the guest takes its OWN end-of-stream
+exit rather than blocking. The decoder is deliberately not flushed: the bypass
+synthesizes no frames.
+
+With the flag ON, five of the project's own tests fail by construction -- the
+MPEG non-stream R1/R2/R4/R6 contract tests and "sceMpegGetPicture waits for new
+decoder output instead of duplicating the last frame". That is the measured
+reason this is a flag and not a change: those five are the regression bar the
+faithful fix (E30) must hold WITHOUT one.
+
+Branch is local-only. Never merge, never push.
+
+Orchestrated-By: Muse Code
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>

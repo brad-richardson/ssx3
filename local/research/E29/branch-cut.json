@@ -1,0 +1,43 @@
+{
+  "utc": "2026-09-22T16:13:27.059968+00:00",
+  "branch": "e29-movie-bypass",
+  "fork_point": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+  "checkout_utc": "2026-09-22T16:13:26.910361+00:00",
+  "checkback_utc": null,
+  "before": {
+    "utc": "2026-09-22T16:13:26.840431+00:00",
+    "head": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "ref": "ssx3",
+    "status": "?? ps2_log.txt\n",
+    "branch_exists": false
+  },
+  "after": {
+    "utc": "2026-09-22T16:13:26.987381+00:00",
+    "head": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "ref": "e29-movie-bypass",
+    "status": "?? ps2_log.txt\n",
+    "tree": "c685b522c3d6bc5830a9008497f44a04673c220f",
+    "mpeg_sha": "f83ed02e21eba7cbbcecf8443740b13f8ee07ecdb77991da571fef38404ef600"
+  },
+  "checks": {
+    "branch_name_exact": true,
+    "fork_point_is_base": true,
+    "tree_unmoved": true,
+    "mpeg_unmoved": true,
+    "status_unchanged": true,
+    "worktree_is_the_main_fork_worktree": true
+  },
+  "green": true,
+  "command": {
+    "argv": [
+      "checkout",
+      "-b",
+      "e29-movie-bypass",
+      "3adc0478b6d2260acdd28a249466f2eef9a20176"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nSwitched to a new branch 'e29-movie-bypass'\n"
+  },
+  "why_in_place": "a separate worktree/clone would lack the gitignored generated guest sources; re-recomp is not a permitted mutation"
+}
