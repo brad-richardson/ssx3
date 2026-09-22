@@ -18,13 +18,14 @@ with measured budgets, then 120 Hz simulation.
       menu → stock race start and advancing; owns fork + P-lane lease.
 - [ ] **E30 (running, read-only):** why 15,056 consumed bytes complete zero
       packets; two-chunk regression + one fix as diffs (E27/E29 inputs).
-- [ ] E32: apply E30's regression + fix, suite, A/B boot vs E29's title
-      screen with the flag off. Runs after E31 releases the fork.
-- [ ] Fold onto fork `ssx3` (one E worker, after E31): bypass (flag off),
-      pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name`, and the
-      branchless I10–I21 commits (`3d2e22d`/`eb3fb16` codegen dir, I11–I17
-      map entries, `751a50f`/`193451a` drop ext). Push needs Brad's
-      permission (blocked by the classifier 09-22).
+- [ ] **E32 fold** (brief written, launches when E31 closes): fold the
+      bypass + pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name` and the
+      branchless I10–I21 commits onto fork `ssx3`; suite + 2 boots; push
+      `ssx3` fast-forward. Backups pushed 09-22 as `fork/archive/*` +
+      `fork/e29-movie-bypass`. After the orchestrator verifies, delete the
+      folded branches locally and on `fork` (Brad authorized 09-22).
+- [ ] E33: apply E30's regression + fix on `ssx3`, suite, A/B boot vs the
+      bypass title screen with the flag off.
 - [ ] Android handoffs from N1 (E owns the edits): H1 adopt
       `PS2X_GAME_CODEGEN_DIR`, H4 no-env `cdImage` derivation, H3 merge
       the C3/C5 MPEG vector diagnostics from `i23-ffmpeg-ios`, H2 an
