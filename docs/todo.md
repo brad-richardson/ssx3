@@ -12,18 +12,19 @@ with measured budgets, then 120 Hz simulation.
 
 ## E — PS2 runtime (fork `ssx3` @ `3adc0478`)
 
-- [ ] **E29 (running):** dev-only movie bypass `PS2X_SKIP_MOVIE` on local
-      branch `e29-movie-bypass`; Boot 1 flag-off equivalence, Boot 2
-      flag-on to the menu/race checkpoint. Last Opus worker; E30 onward
-      is muse.
-- [ ] **E30:** faithful MPEG fix: an authored two-chunk host regression
-      (first callback supplies bytes but no complete packet, second chunk
-      queued), with empty input, end-of-stream, cancel/reset and callback
-      ownership covered. Then one candidate continuation fix and one boot.
-      Must keep E18's ABI and callback semantics. Inputs: E27 §2a/3,
-      E28 (guest half closed, stall is host-side).
-- [ ] After E29: drive the bypass from menu to a stock race start, or
-      record the next blocker precisely.
+- [x] **E29 PASS (09-22):** dev-only bypass reaches the rendered SSX 3
+      title screen. Branch `e29-movie-bypass` @ `e5ce086d`, local.
+- [ ] **E31 (running):** scripted pad input on the bypass build, title →
+      menu → stock race start and advancing; owns fork + P-lane lease.
+- [ ] **E30 (running, read-only):** why 15,056 consumed bytes complete zero
+      packets; two-chunk regression + one fix as diffs (E27/E29 inputs).
+- [ ] E32: apply E30's regression + fix, suite, A/B boot vs E29's title
+      screen with the flag off. Runs after E31 releases the fork.
+- [ ] Fold onto fork `ssx3` (one E worker, after E31): bypass (flag off),
+      pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name`, and the
+      branchless I10–I21 commits (`3d2e22d`/`eb3fb16` codegen dir, I11–I17
+      map entries, `751a50f`/`193451a` drop ext). Push needs Brad's
+      permission (blocked by the classifier 09-22).
 - [ ] Android handoffs from N1 (E owns the edits): H1 adopt
       `PS2X_GAME_CODEGEN_DIR`, H4 no-env `cdImage` derivation, H3 merge
       the C3/C5 MPEG vector diagnostics from `i23-ffmpeg-ios`, H2 an
