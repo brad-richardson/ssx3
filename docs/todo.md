@@ -2061,6 +2061,35 @@ the build or commit that closed them.
       trace. No-R4 correct per contract (hold clean). Next: T47
       (continue healthy series; crash-lottery read 3/4 hold-
       window crashes at this phase). Ledger row added.
+- [x] **G38 read (09-22) — PASS(rule 4, decisive): FIRST difference at boundary 1 — Mac-B shows composite#1's alpha-masked blit LANDED (840cd308/699122) while Odin-B stays at load; fault downstream of submission, upstream of sampling (F1/F2/F3 queued)**
+      Task-1 statics (first composite pass pinned to packet #0 —
+      G30 gap 3 closed; 16 matched boundaries with receipts; F0 +
+      F1–F4 with per-observable predictions incl. seq0
+      non-discrimination caveat; 8-rule matrix; zero contact) →
+      excision ONLY (G37 +56 removed, worktree == G31 source, 0
+      new hunks) → ONE Mac build exit 0 [458/458] (51,898,120 B
+      321e8582, Mach-O) + G31 Odin binary REUSED (7 reads) →
+      M0 VOIDED (non-recipe env, 0-B pair, root-caused) → M1 +
+      O1 exit 0 same shape: 16/16 CPU-alignment identical (rule 1
+      never fires) · A byte-exact ×16 (rule 7 clean) · B==load
+      both at seq0/8 (rule 3 empirical) · Mac≠load/Odin==load
+      seq1–7/9–15 with FIRST at seq=1 (rule 4 FIRES) · vpage
+      delta exactly pages 112..223 · Mac black→content (1-frame
+      lag end to end) vs Odin 10/10 black · fresh-Odin ==
+      committed-G31 (excision non-perturbation). F0-Mac CONFIRMED
+      (blit, alpha-masked), F0-Odin REFUTED, F4 refuted-outside-A.
+      Verified: both binaries intact (8th G31 read), log counts
+      both legs, B seq1 lines, Odin load ×16, scanouts (Mac
+      pattern + Odin unanimous black), A ×16 re-compared, seq0
+      head (blit mechanism holds), state 16/16 diff-clean, vpage
+      diff = exactly 112 lines on 112..223, mirror 28/28, M0 pair,
+      excision 104 + markers, tombstones clean, G31-vs-fresh
+      corroboration. PROCESS NOTE: aaf9ea6 landed mid-gate and
+      stacked under orch 228b2f5 — pushed before this read
+      (completion monitor filter was wrong-format; fixed +
+      re-armed; orch now checks git log before every commit).
+      Next: G39 (G26+G28 regression/adoption gate — adoption must
+      not wait); sub-vsync F1/F2/F3 wall is G40. Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
