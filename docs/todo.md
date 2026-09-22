@@ -53,10 +53,15 @@ with measured budgets, then 120 Hz simulation.
       Odin right after the flush, even read behind a barrier. F1/F3
       refuted. The one CPU-side difference is the O4m texture-cache hash
       (`5a15…` vs `20dc…`); content-neutral.
-- [ ] **G41 (running):** masked-write canary (PSM0/1 × FBMSK 0/ff000000 +
-      the composite's full state) on scratch pages, hash-input breakdown,
-      then ONE fix if a single condition is named. Fallbacks: binning
-      readback or the Turnip driver contrast.
+- [x] **G41 PASS (09-22):** masked-write theory refuted: C2–C5 (incl.
+      masked PSM1 and the composite's exact state) land byte-exact on the
+      Odin. Only a plain PSM0 fill (C1) is lost, so B's loss depends on
+      pass context (scale/target), not draw state. The O4m hash
+      difference is garbage in padding (closed).
+- [ ] **G42 (running):** Mesa Turnip contrast (same binary, loader swap).
+      B lands under Turnip = proprietary-driver fault → bundle Turnip.
+      Still lost = our pipeline → G41's C1-triage / B-scale / B-target
+      wall, then one fix.
 - [ ] Commit G26 + G28 in the clone after the storage cutover (G39
       decision: carried diffs until then), with a clean rebuild and G39's
       R1/R2 shapes re-run as proof.
@@ -64,8 +69,6 @@ with measured budgets, then 120 Hz simulation.
       hunk adoption queued. O1 writer naming still open.
 - [ ] Then integrate the GS backend with the PS2 runtime (the standalone
       replay is not the product path).
-- [ ] Turnip contrast probe (sideload Mesa Turnip, re-run the replayer):
-      after the F-split closes, only if the fault looks driver-side.
 - [ ] Adreno filing: paused (Brad, 09-22). Any rewrite drops the
       withdrawn sampling inference.
 
