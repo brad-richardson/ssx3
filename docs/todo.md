@@ -1832,6 +1832,69 @@ the build or commit that closed them.
       re-probe rides after a live-path change. Ledger row added.
       MIGRATION: console + both RGBA bins mirrored to share
       ps2x-i24/logs (verified).
+- [x] **E26 read (09-22) — PASS(decided): e24a boot spent ONCE (e26a, proved identical); post-park SILENT 0/6725 watch emissions; X(a) answered (terminating start code already in RAM 48 B away — guest stops one CHUNK short); X(b) confirmed dynamically (sema-36 1 event, signaller 0/3.6M, ra exact); mutual-wait reading tabled, fix STOP**
+      Mission 0 restore path (a) (in place, 2 passes × 2 reads 152 s
+      apart + E25 corroboration) + preflight 5/5 twice zero re-pinned
+      → boot-fidelity proof 14/14 (driver byte-identical under rename,
+      watch-set sha-equal, 230 vector element-equal, caps/argv/lease
+      identical, label e26a declared) → ONE boot rc 0 wall 75.568 s
+      (span-complete 9.524 s, 230 entries, lease 8 ms release) → feed
+      3rd reproduction cde8a830 → 0 post-park emissions (last 22786,
+      park 22790, +65 s/24,463 lines nothing) → Objective 1a CLOSED
+      (successor 1 write ever = boot init; free-list stride 0x40
+      bonus) → X(a) in bytes (32,768 B CD read; MPCh 5036/SCHl 40/
+      MPCh 14364; fed = 5028 ES + 12 pad; next payload 00000100 at
+      0xd49b1c; guest pre-tagged both length fields) → X(b) dynamic
+      (sema36 exactly the wait, ra 0x3c19f0 == static prediction;
+      signaller/delete/create 0; owner 4379; dormant trace puts owner
+      on MPEG path) → E24 branches all decided (H2 refuted as stated:
+      post-park ONLY sema-31 alive 4192/4188, thread 1 zero sema ops)
+      → cost refit (3rd point: slope 0.0063 not 0.0863, 14×
+      shallower; 630-entry cover ~12.8 s affordable) → fix STOP (4
+      edges, none isolated). Verified: tail-sha, pins, watch-set sha,
+      fidelity, rc/wall/230, lease pair + absent now, all 4 capture
+      shas, key lines verbatim, silence RE-IMPLEMENTED (6735/0/
+      22786), start-code writes 0, successor + free-list, sema36
+      strict 1, post-park id census [31] + strict arithmetic closes
+      (8390 − 10 torn), signaller 0 + owner 4379 (enter/exit pairs),
+      dormant tail exact, cost arithmetic, fix file, fork clean.
+      ADJUDICATIONS: tooling CHANGE 1 ACCEPTED (gate reads E25's
+      green receipts, all assertions verbatim, red-flag replaced by
+      OWN restore receipt = stronger, fresh 458 in preflight);
+      worker ISO bytes ACCEPTED via corroboration — orch re-read
+      BLOCKED by persistent link corruption (13th recurrence: 4+
+      reads over 45+ min return plausible-wrong bytes, and SAME
+      offset returns DIFFERENT bytes by read pattern — definitive
+      read-path proof; truth pinned by log payload line 22338 +
+      valid downstream parse); dormant citation "22792" is the
+      22791–22797 block (content exact). Next: E27 (chunk-walk
+      static autopsy from pc 0x3dff8c, NO boot). Ledger row added.
+- [x] **G35 read (09-22) — PASS(refined-H2 WINS, decisive): tag renders EXACTLY with NO commit (B1 unanimous — uncommitted stores persist); H1-barrier refuted 0/10 — content suffices, the commit is not the fix**
+      Task-1 statics (commit-less shape A + P1/P2-B1-B2/P3 premise
+      rows with pre-registered verdict meanings + barrier anatomy +
+      every scalar + REAL predictor re-run + 6-row matrix, zero
+      device contact) → ONE hunk (+54/−0, G34 +55 excised same edit,
+      end_vram_write absent asserted) + ONE build exit 0 [458/458]
+      (265,853,184 B f3a33f7c, 132df20b) + verify-then-push NO gap +
+      ONE run exit 0: 16/16 writeback tagged c039a1d1/150057 + 16/16
+      state == G31 + 16/16 bytes (B1 tagged ×16, B2 0/16, A == G31)
+      + 512 vpage (112 oracle + 400 == G31) + 10/10 ladder 86ad7b88/
+      229712 + vram control + 10/10 scanouts d19e6beb (112 whites
+      in-set) + Done! last + 0 new tombstone. Verified: logcat
+      counts/values exact + stale-B 0, PPMs 10× 688143 unanimous
+      FULL d19e6beb, census 112/112 re-implemented, LIVE oracle cmp
+      identical, predictor RE-RUN all-pass (retro-verifies G34
+      model), mirror 13/13, hunk 54+/0- single @@ + no-commit,
+      clone HEAD + markers + 158 arithmetic, tombstones clean.
+      ADJUDICATIONS: §2a2 proceed RATIFIED (surviving /tmp used as
+      cross-check only, committed scalars kept authority — deleting
+      corroboration would be perverse); G35 binary fully ZEROED at
+      gate (14th recurrence: first-2MB 0 nonzero, magic 0000, mtime
+      frozen, worker's 5 reads + on-device pre-date — validity
+      stands per precedent; clear-check at poll end). Next: G36
+      barrier-vs-content wall (raw-access placement, no map_write/
+      no commit: pure-refined-H2→visible vs H1-as-barrier→cleared);
+      filing content upgrades again, still held. Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
