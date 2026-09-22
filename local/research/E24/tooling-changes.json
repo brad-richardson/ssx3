@@ -1,0 +1,36 @@
+{
+  "note": "intentional changes on top of the pure hex-safe rename",
+  "count": 6,
+  "changes": [
+    {
+      "file": "e24_validate.py",
+      "removed": "def suite(label):\n    scratch=E/('.suite-'+label);scratch.mkdir(exist_ok=False)",
+      "added": "def suite(label):\n    # E24 CHANGE 1: the suite binary lives in a PROTECTED build tree that the\n    # host restart wiped (`env-audit.json`). A missing suite is a BLOCKED gate\n    # with its receipt, never a silent skip and never a re-point at another\n    # build -- the 458 counts and the E18 R1-R6 text are properties of THAT\n    # binary. Callers record the returned row and stop.\n    binary=B/'ps2xTest/ps2x_tests'\n    if not binary.exists():\n        row=dict(label=label,status='BLOCKED',binary=str(binary),present=False,\n                 reason='protected build tree absent after host restart')\n        save(label+'-suite.json',row)\n        print('SUITE',label,'BLOCKED (binary absent)')\n        return None,'',row\n    scratch=E/('.suite-'+label);scratch.mkdir(exist_ok=False)"
+    },
+    {
+      "file": "e24_baseline.py",
+      "removed": "suite('checkpoint')\n",
+      "added": "suite_rc,suite_txt,suite_row=suite('checkpoint')\n# E24 CHANGE 2: the 458-test suite is BLOCKED (binary wiped with the protected\n# build tree). The fixture half below still runs on the SSD-resident, sha-equal\n# `binding-test`, so the behavior checkpoint is reported as what it IS:\n# fixture gates VERIFIED, suite gate BLOCKED.\n"
+    },
+    {
+      "file": "e24_baseline.py",
+      "removed": "save('checkpoint-complete.json',dict(utc=utc(),suite=458,closure_cases=6",
+      "added": "save('checkpoint-complete.json',dict(utc=utc(),suite=None,suite_status=suite_row.get('status','BLOCKED'),suite_receipt=suite_row,closure_cases=6"
+    },
+    {
+      "file": "e24_observer_regression.py",
+      "removed": "rows=[]\nfor directory in [E/'.suite-observer/parser-observer',",
+      "added": "rows=[]\n# E24 CHANGE 3: the suite's own observer dir is BLOCKED with the suite binary.\n# In E23 the suite was the ONLY loaded run that reached the parser, so the\n# parser-reach receipt moves to the surviving E23 cadence fixture, which drives\n# the R3 payload through the actual title wrappers (`e24_cadence.py`). The\n# fixture closures below still carry real `# E21 PARSER CLOSURE` footers.\nfor directory in ["
+    },
+    {
+      "file": "e24_observer_regression.py",
+      "removed": "assert rows[0]['footer']['parseCalls']>0\n",
+      "added": "assert all(r['footer']['bindingChecks']==4 for r in rows),'loaded bindings not 4/4'\n"
+    },
+    {
+      "file": "e24_observer_regression.py",
+      "removed": "save('observer-regression.json',dict(utc=utc(),suite=458,",
+      "added": "save('observer-regression.json',dict(utc=utc(),suite=None,suite_status='BLOCKED',parser_reach_moved_to='e24_cadence.py',"
+    }
+  ]
+}

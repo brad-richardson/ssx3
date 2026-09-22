@@ -1,0 +1,390 @@
+{
+  "utc": "2026-09-22T11:38:44.841401+00:00",
+  "SCOPE": "mined from RETAINED e23a artifacts (E23 boot). NOT an E24 boot; E24 checkpoint is RED and no boot was spent.",
+  "artifacts": {
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e23a-1.log": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e23a-1.log",
+      "bytes": 9531648,
+      "allocated": 10485760,
+      "sha256": "0b1154d2aeced8d85e2483db3479530fb94c29251a112f77726d3e3478e4c6eb"
+    },
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e23a-1/park-snapshot.json": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e23a-1/park-snapshot.json",
+      "bytes": 136745,
+      "allocated": 1048576,
+      "sha256": "325743b7a7d24dca349440659b34fd79b32678ab76b03734ef6825997f5de553"
+    },
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e23a-1/park-snapshot.txt": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e23a-1/park-snapshot.txt",
+      "bytes": 7620,
+      "allocated": 1048576,
+      "sha256": "d962f8f7fe79118f978ac2766dca1b80b9b88f1938e8446f17713b882355d3b0"
+    }
+  },
+  "objective_1b": {
+    "thread": 4,
+    "entry": "0x31ac08",
+    "priority": 99,
+    "park_wait_id": 31,
+    "park_wait_ra": "0x31ac30",
+    "scheduled_total_at_park": 4467,
+    "sema31_waits_total": 4467,
+    "sema31_signals_total": 4466,
+    "scheduled_equals_sema31_waits": true,
+    "per_sample_scheduled": [
+      25,
+      542,
+      300,
+      300,
+      302,
+      302,
+      300,
+      302,
+      301,
+      301,
+      302,
+      302,
+      302,
+      300
+    ],
+    "wait_ids_seen_in_samples": [
+      31
+    ],
+    "producer_watch_windows_touched_after_park": 0,
+    "conclusion_kind": "wait/signal round trips on semaphore 31, not memory traffic in any watched producer/source window",
+    "limit": "attribution is to the SEMAPHORE round trip. What thread 4 TOUCHES between wake and re-wait is outside every watched window and outside the E7 tap; the extended watch set + PS2X_DIAG_SEMA is what would name it."
+  },
+  "objective_2": {
+    "blocked_threads": [
+      {
+        "thread": 2,
+        "entry": "0x3e3be0",
+        "priority": 12,
+        "scheduled": 206,
+        "park_pc": "0x423de8",
+        "park_ra": "0x3e3c20",
+        "sp": "0x51ec20",
+        "wait_id": 26,
+        "sema_count": 0,
+        "sema_max": 32,
+        "sema_init": 0,
+        "sema_waiters": 1,
+        "creator_tid": 1,
+        "creator_ra": "0x3e43c4",
+        "waits_total": 737,
+        "signals_total": 736,
+        "signal_kinds": {
+          "SignalSema": 205,
+          "iSignalSema": 531
+        },
+        "deficit": 1,
+        "ever_signalled": true
+      },
+      {
+        "thread": 3,
+        "entry": "0x31ac60",
+        "priority": 101,
+        "scheduled": 260,
+        "park_pc": "0x423de8",
+        "park_ra": "0x31aca4",
+        "sp": "0x6188a0",
+        "wait_id": 30,
+        "sema_count": 0,
+        "sema_max": 1024,
+        "sema_init": 0,
+        "sema_waiters": 1,
+        "creator_tid": 1,
+        "creator_ra": "0x31a7c8",
+        "waits_total": 5,
+        "signals_total": 4,
+        "signal_kinds": {
+          "SignalSema": 4
+        },
+        "deficit": 1,
+        "ever_signalled": true
+      },
+      {
+        "thread": 4,
+        "entry": "0x31ac08",
+        "priority": 99,
+        "scheduled": 4467,
+        "park_pc": "0x423de8",
+        "park_ra": "0x31ac30",
+        "sp": "0x6088a0",
+        "wait_id": 31,
+        "sema_count": 0,
+        "sema_max": 1024,
+        "sema_init": 0,
+        "sema_waiters": 1,
+        "creator_tid": 1,
+        "creator_ra": "0x31a858",
+        "waits_total": 4467,
+        "signals_total": 4466,
+        "signal_kinds": {
+          "iSignalSema": 4466
+        },
+        "deficit": 1,
+        "ever_signalled": true
+      },
+      {
+        "thread": 5,
+        "entry": "0x382740",
+        "priority": 5,
+        "scheduled": 411,
+        "park_pc": "0x423de8",
+        "park_ra": "0x3827e0",
+        "sp": "0x622480",
+        "wait_id": 32,
+        "sema_count": 0,
+        "sema_max": 16,
+        "sema_init": 0,
+        "sema_waiters": 1,
+        "creator_tid": 1,
+        "creator_ra": "0x375d74",
+        "waits_total": 616,
+        "signals_total": 615,
+        "signal_kinds": {
+          "SignalSema": 205,
+          "iSignalSema": 410
+        },
+        "deficit": 1,
+        "ever_signalled": true
+      },
+      {
+        "thread": 6,
+        "entry": "0x3c19a8",
+        "priority": 6,
+        "scheduled": 1,
+        "park_pc": "0x423de8",
+        "park_ra": "0x3c19f0",
+        "sp": "0x512aa0",
+        "wait_id": 36,
+        "sema_count": 0,
+        "sema_max": 1,
+        "sema_init": 0,
+        "sema_waiters": 1,
+        "creator_tid": 3,
+        "creator_ra": "0x3c1e04",
+        "waits_total": 1,
+        "signals_total": 0,
+        "signal_kinds": {},
+        "deficit": 1,
+        "ever_signalled": false
+      }
+    ],
+    "corrected_wait_id_set": [
+      26,
+      30,
+      31,
+      32,
+      36
+    ],
+    "e23_report_said": "26/30/32/36",
+    "correction": "thread 4 waits on semaphore 31, which E23 REPORT and NEXT-BRIEF both omitted; the real set is 26/30/31/32/36",
+    "never_signalled": [
+      36
+    ],
+    "all_deficits_one": true,
+    "signaller_identity": "BLOCKED: the always-on park tally records the SYSCALL STUB pc (0x423dc8 SignalSema / 0x423dd8 iSignalSema), not the calling ra. Only PS2X_DIAG_SEMA=1 emits the waker ra per signal, and that needs the boot this lane could not spend."
+  },
+  "mpeg_thread": {
+    "id": 1,
+    "status": 2,
+    "status_name": "Waiting",
+    "wait_reason": 6,
+    "wait_reason_name": "Mpeg",
+    "wait_id": 0,
+    "pc": "0x3b1028",
+    "ra": "0x3b1028",
+    "sp": "0x1fffd60",
+    "entry": "0x100008",
+    "priority": 100,
+    "scheduled": 8255,
+    "chain": [
+      "0x3b1028"
+    ]
+  },
+  "gs_counters": "gs: kicks=43708 drawing=43356 gif=2795 copy=4655 dma=4542 gifcpy=210 gsw=0 vif=2",
+  "all_semaphores": [
+    {
+      "id": 1,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 2,
+      "signals": 2,
+      "creator_ra": "0x42c0fc"
+    },
+    {
+      "id": 2,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 0,
+      "signals": 0,
+      "creator_ra": "0x42c10c"
+    },
+    {
+      "id": 3,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 0,
+      "signals": 0,
+      "creator_ra": "0x3e56c4"
+    },
+    {
+      "id": 4,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 1793,
+      "signals": 1793,
+      "creator_ra": "0x3e56c4"
+    },
+    {
+      "id": 5,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 1412,
+      "signals": 1412,
+      "creator_ra": "0x3e56c4"
+    },
+    {
+      "id": 26,
+      "count": 0,
+      "max": 32,
+      "init": 0,
+      "waiters": 1,
+      "waits": 737,
+      "signals": 736,
+      "creator_ra": "0x3e43c4"
+    },
+    {
+      "id": 27,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 0,
+      "signals": 0,
+      "creator_ra": "0x3e56c4"
+    },
+    {
+      "id": 28,
+      "count": 0,
+      "max": 0,
+      "init": 0,
+      "waiters": 0,
+      "waits": 0,
+      "signals": 0,
+      "creator_ra": "0x31a780"
+    },
+    {
+      "id": 29,
+      "count": 0,
+      "max": 0,
+      "init": 0,
+      "waiters": 0,
+      "waits": 207,
+      "signals": 207,
+      "creator_ra": "0x31a7a0"
+    },
+    {
+      "id": 30,
+      "count": 0,
+      "max": 1024,
+      "init": 0,
+      "waiters": 1,
+      "waits": 5,
+      "signals": 4,
+      "creator_ra": "0x31a7c8"
+    },
+    {
+      "id": 31,
+      "count": 0,
+      "max": 1024,
+      "init": 0,
+      "waiters": 1,
+      "waits": 4467,
+      "signals": 4466,
+      "creator_ra": "0x31a858"
+    },
+    {
+      "id": 32,
+      "count": 0,
+      "max": 16,
+      "init": 0,
+      "waiters": 1,
+      "waits": 616,
+      "signals": 615,
+      "creator_ra": "0x375d74"
+    },
+    {
+      "id": 33,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 820,
+      "signals": 820,
+      "creator_ra": "0x375d88"
+    },
+    {
+      "id": 35,
+      "count": 1,
+      "max": 20,
+      "init": 1,
+      "waiters": 0,
+      "waits": 202,
+      "signals": 202,
+      "creator_ra": "0x3c3344"
+    },
+    {
+      "id": 36,
+      "count": 0,
+      "max": 1,
+      "init": 0,
+      "waiters": 1,
+      "waits": 1,
+      "signals": 0,
+      "creator_ra": "0x3c1e04"
+    },
+    {
+      "id": 37,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 0,
+      "signals": 0,
+      "creator_ra": "0x3e56c4"
+    },
+    {
+      "id": 38,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 0,
+      "signals": 0,
+      "creator_ra": "0x3e56c4"
+    },
+    {
+      "id": 39,
+      "count": 1,
+      "max": 1,
+      "init": 1,
+      "waiters": 0,
+      "waits": 80,
+      "signals": 80,
+      "creator_ra": "0x3e56c4"
+    }
+  ]
+}

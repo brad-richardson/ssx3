@@ -1,0 +1,155 @@
+{
+  "utc": "2026-09-22T11:36:56.667404+00:00",
+  "objective": "I23 H2 relay: title movie dims if derivable",
+  "method": "static parse of the ALREADY-RETAINED 5,040 B; no boot, nothing extra burned",
+  "payload_identity": {
+    "E22": {
+      "present": true,
+      "bytes": 5040,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "fnv64": "0xd2a9588f0e0fd358",
+      "first4": "000001b3"
+    },
+    "E23": {
+      "present": true,
+      "bytes": 5040,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "fnv64": "0xd2a9588f0e0fd358",
+      "first4": "000001b3",
+      "byte_identical_to_first": true
+    },
+    "e23a run dir": {
+      "present": true,
+      "bytes": 5040,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "fnv64": "0xd2a9588f0e0fd358",
+      "first4": "000001b3",
+      "byte_identical_to_first": true
+    }
+  },
+  "payload_bytes": 5040,
+  "payload_sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+  "payload_fnv64": "0xd2a9588f0e0fd358",
+  "derivable": true,
+  "derived_from": "sequence_header_code 0x000001b3 at offset 0 + sequence_extension 0x000001b5 id=1",
+  "dims": {
+    "width": 512,
+    "height": 448
+  },
+  "stream_kind": "MPEG-2 (sequence_extension present)",
+  "sequence_header": {
+    "horizontal_size_value": 512,
+    "vertical_size_value": 448,
+    "aspect_ratio_information": 1,
+    "frame_rate_code": 4,
+    "bit_rate_value": 9591,
+    "marker_bit": 1,
+    "vbv_buffer_size_value": 112,
+    "constrained_parameters_flag": 0,
+    "load_intra_quantiser_matrix": 0,
+    "load_non_intra_quantiser_matrix": 0
+  },
+  "aspect_ratio": "square samples (1:1)",
+  "frame_rate": "30000/1001 (29.97)",
+  "bit_rate_bps": 3836400,
+  "chroma_format": "4:2:0",
+  "progressive_sequence": 1,
+  "extensions": {
+    "sequence_extension": {
+      "offset": 12,
+      "profile_and_level_indication": 72,
+      "progressive_sequence": 1,
+      "chroma_format": 1,
+      "horizontal_size_extension": 0,
+      "vertical_size_extension": 0,
+      "bit_rate_extension": 0,
+      "marker_bit": 1,
+      "vbv_buffer_size_extension": 0,
+      "low_delay": 0,
+      "frame_rate_extension_n": 0,
+      "frame_rate_extension_d": 0
+    },
+    "sequence_display_extension": {
+      "offset": 22,
+      "video_format": 0,
+      "colour_description": 1,
+      "colour_primaries": 5,
+      "transfer_characteristics": 5,
+      "matrix_coefficients": 4,
+      "display_horizontal_size": 512,
+      "marker_bit": 1,
+      "display_vertical_size": 448
+    }
+  },
+  "start_code_census": {
+    "sequence_header_code": 1,
+    "extension_start_code": 3,
+    "user_data_start_code": 1,
+    "group_start_code": 1,
+    "picture_start_code": 1,
+    "slice_start_code": 28
+  },
+  "start_codes_first": [
+    {
+      "offset": 0,
+      "code": "0xb3",
+      "name": "sequence_header_code"
+    },
+    {
+      "offset": 12,
+      "code": "0xb5",
+      "name": "extension_start_code"
+    },
+    {
+      "offset": 22,
+      "code": "0xb5",
+      "name": "extension_start_code"
+    },
+    {
+      "offset": 34,
+      "code": "0xb2",
+      "name": "user_data_start_code"
+    },
+    {
+      "offset": 68,
+      "code": "0xb8",
+      "name": "group_start_code"
+    },
+    {
+      "offset": 76,
+      "code": "0x0",
+      "name": "picture_start_code"
+    },
+    {
+      "offset": 84,
+      "code": "0xb5",
+      "name": "extension_start_code"
+    },
+    {
+      "offset": 93,
+      "code": "0x1",
+      "name": "slice"
+    },
+    {
+      "offset": 270,
+      "code": "0x2",
+      "name": "slice"
+    },
+    {
+      "offset": 447,
+      "code": "0x3",
+      "name": "slice"
+    },
+    {
+      "offset": 623,
+      "code": "0x4",
+      "name": "slice"
+    },
+    {
+      "offset": 800,
+      "code": "0x5",
+      "name": "slice"
+    }
+  ],
+  "start_codes_total": 35
+}

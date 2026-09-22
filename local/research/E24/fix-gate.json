@@ -1,0 +1,28 @@
+{
+  "utc": "2026-09-22T11:44:56.060417+00:00",
+  "gate": "implement ONLY if the diagnosis isolates ONE edge with a minimal ABI-preserving change + its own fail-before + full regression",
+  "decision": "STOP",
+  "reasons": [
+    "The checkpoint is RED (three protected build trees wiped by the host restart). The brief forbids a boot on red, so objective 1a has no new measurement and E23's named residual stays open.",
+    "A fix could not be regression-tested at all: the 458-test suite binary is gone with the build tree, and a fail-before cannot be demonstrated without a runner.",
+    "Nothing E24 DID measure isolates one edge. The two findings that advance the diagnosis -- the feed is a structurally complete picture missing only its terminating start code, and semaphore 36's unique signaller never executes -- both sit upstream of the MPEG demand edge, which E23 already closed."
+  ],
+  "mutations": {
+    "fork_source_edits": 0,
+    "fork_commits": 0,
+    "pushes": 0,
+    "regeneration": 0,
+    "relink": 0,
+    "observer_rebuilds": 0,
+    "title_boots": 0,
+    "lease_claims": 0
+  },
+  "edges_demonstrated": [
+    "The 5,040 B the guest handed over is ONE structurally complete picture: sequence header + sequence/display extensions + user data + GOP + picture header + 28 contiguous slices (vpos 1..28 = exactly 448/16 macroblock rows), the final slice the same 176 B as the modal slice, then 15 zero-stuffing bytes and NO terminating start code.",
+    "Semaphore 36 has exactly ONE signaller in the whole 9,457-file image (iSignalSema at 0x3c15c0) and that function has ZERO entries in the 127 MB e23a function log -- it never executed.",
+    "Thread 4's wakes are sema-31 wait/signal round trips (scheduled 4,467 == sema-31 waits 4,467), driven by 4,466 interrupt-context signals; they touch no watched producer/source window.",
+    "The blocked wait-id set is 26/30/31/32/36 -- E23 omitted 31."
+  ],
+  "isolated_to_one_edge": false,
+  "x_status": "X stays upstream of the MPEG demand edge, and E24 sharpens it: the deficit at the parser is a TERMINATING START CODE, not thousands of bytes of picture data. Why does the guest stop one start code short?"
+}

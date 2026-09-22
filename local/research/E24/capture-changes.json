@@ -1,0 +1,26 @@
+{
+  "note": "intentional changes to the renamed boot driver",
+  "count": 4,
+  "changes": [
+    {
+      "file": "e24_capture.py",
+      "removed": "PRODUCER = [0x548800, 0x548804, 0x548808,   # source descriptor head / data / bytes\n            0x5487c0,                        # source object passed to 0x3b06b0 / 0x3b06f8\n            0x587b28, 0x587b78, 0x587b7c,    # producer block +0x28 sourceObject, +0x78/+0x7c buffers\n            0xdc8340]                        # staging buffer AddBs read its 5,040 B from",
+      "added": "# E24 CHANGE 2: the TIERED extended watch set (BOOT-DESIGN.md, watch-set.json).\n# E23 watched 8 producer/source words and NAMED the gap: the descriptor head\n# advanced 0x548800 = 0x548880 and that successor node was unwatched, so its\n# post-park silence was vacuous. This covers the whole descriptor node array,\n# both buffers, and the bytes just past the delivered region -- 230 entries\n# against e23a's 37, sized by the cost model because diagWatchEmit scans the\n# whole vector on EVERY guest store.\n_WATCH_SET = json.loads((Path(__file__).resolve().parent / 'watch-set.json').read_text())\nPRODUCER = [0x5487c0, 0x587b28, 0x587b78, 0x587b7c]   # carried singles, not in any tier\nfor _tier in _WATCH_SET['tiers']:\n    PRODUCER.extend(_tier['addrs'])\nassert len(PRODUCER) == _WATCH_SET['new_entries'] + _WATCH_SET['carried_producer_singles'], len(PRODUCER)"
+    },
+    {
+      "file": "e24_capture.py",
+      "removed": "    record['files'] = []\n    for path, size, expected in [",
+      "added": "    # E24 CHANGE 1: PRESENCE first. e23a's driver went straight to .stat() and\n    # would raise FileNotFoundError deep inside the loop; E24 opened to exactly\n    # that situation (all three protected build trees wiped by a host restart)\n    # and a boot driver must refuse it as a named gate, before the lease.\n    record['presence'] = {}\n    for path in (BIN, TEST, ELF, W / 'P1/SLUS_207.72', W / 'SSX 3 (USA).iso',\n                 EVIDENCE / 'parser/e21-parser-observer.dylib'):\n        record['presence'][str(path)] = path.exists()\n    absent = sorted(k for k, v in record['presence'].items() if not v)\n    if absent:\n        raise RuntimeError('required binaries absent; E24 tables and stops '\n                           'without claiming the lease: ' + '; '.join(absent))\n    record['files'] = []\n    for path, size, expected in ["
+    },
+    {
+      "file": "e24_capture.py",
+      "removed": "    env.update(PS2X_CD_IMAGE=str(W/'SSX 3 (USA).iso'),PS2X_DIAG_PERIOD_MS='5000',\n               PS2X_DIAG_SEMA_CREATE='1',",
+      "added": "    # E24 CHANGE 3: PS2X_DIAG_SEMA / _S0 are already compiled into the proven\n    # runner (EeScheduler.cpp:156,168) and print nothing when unset, so this\n    # needs no rebuild and no fork edit. They are the ONLY source of the waker\n    # `ra` per signal -- the always-on park tally records the syscall stub pc\n    # (0x423dc8 / 0x423dd8), which cannot name a caller. Objective 2.\n    env.update(PS2X_CD_IMAGE=str(W/'SSX 3 (USA).iso'),PS2X_DIAG_PERIOD_MS='5000',\n               PS2X_DIAG_SEMA='1',PS2X_DIAG_SEMA_S0='1',\n               PS2X_DIAG_SEMA_CREATE='1',"
+    },
+    {
+      "file": "e24_capture.py",
+      "removed": "            result['rc']=p.returncode\n            result['process_end_utc']=utc()",
+      "added": "            result['rc']=p.returncode\n            # E24 CHANGE 4: record span-complete on EVERY path, not only when a\n            # bound fires, so the next lane can refit the watch-count cost model\n            # in BOOT-DESIGN.md against a third data point.\n            result.setdefault('span_complete_s',span_at)\n            result['watch_entries']=len(config['watch_addresses'])\n            result['process_end_utc']=utc()"
+    }
+  ]
+}

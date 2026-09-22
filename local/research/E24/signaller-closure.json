@@ -1,0 +1,80 @@
+{
+  "utc": "2026-09-22T11:41:50.169659+00:00",
+  "SCOPE": "static enumeration over all 9,457 generated sources, cross-checked against the RETAINED e23a function log. Not an E24 boot.",
+  "semaphore": 36,
+  "id_slot": "0x1AA4",
+  "id_slot_store": "0x3c1e08  sw $v0, 0x1AA4($s0)  (the CreateSema return; diag:sema-create ret=36 tid=3 ra=0x3c1e04)",
+  "enumeration_closed": true,
+  "closure_argument": "the id is written to the slot once and every read of the slot loads it straight into $a0; no copy to another location exists, so the sites below are all of them",
+  "total_slot_instructions": 4,
+  "sites": [
+    {
+      "addr": "0x3c15c0",
+      "op": "lw",
+      "reg": "a0",
+      "text": "0x3c15c0: 0x8c441aa4  lw          $a0, 0x1AA4($v0)",
+      "owner": "sub_003C1298_0x3c1298.cpp",
+      "stub": "0x423DD0",
+      "stub_name": "iSignalSema (syscall -0x43)",
+      "role": "iSignalSema (syscall -0x43)",
+      "owner_function_log_entries": 0,
+      "owner_ever_executed": false
+    },
+    {
+      "addr": "0x3c19ec",
+      "op": "lw",
+      "reg": "a0",
+      "text": "0x3c19ec: 0x8e241aa4  lw          $a0, 0x1AA4($s1)",
+      "owner": "sub_003C1980_0x3c1980.cpp",
+      "stub": "0x423DE0",
+      "stub_name": "WaitSema (syscall 0x44)",
+      "role": "WaitSema (syscall 0x44)",
+      "owner_function_log_entries": 8884,
+      "owner_ever_executed": true
+    },
+    {
+      "addr": "0x3c1e08",
+      "op": "sw",
+      "reg": "v0",
+      "text": "0x3c1e08: 0xae021aa4  sw          $v0, 0x1AA4($s0)",
+      "role": "store of the CreateSema result"
+    },
+    {
+      "addr": "0x3c2378",
+      "op": "lw",
+      "reg": "a0",
+      "text": "0x3c2378: 0x8c441aa4  lw          $a0, 0x1AA4($v0)",
+      "owner": "sub_003C2268_0x3c2268.cpp",
+      "stub": "0x423DB0",
+      "stub_name": "DeleteSema (syscall 0x41)",
+      "role": "DeleteSema (syscall 0x41)",
+      "owner_function_log_entries": 0,
+      "owner_ever_executed": false
+    }
+  ],
+  "signaller_count": 1,
+  "signallers": [
+    {
+      "addr": "0x3c15c0",
+      "owner": "sub_003C1298_0x3c1298.cpp",
+      "stub": "iSignalSema (syscall -0x43)",
+      "ever_executed": false,
+      "function_log_entries": 0
+    }
+  ],
+  "waiters": [
+    {
+      "addr": "0x3c19ec",
+      "owner": "sub_003C1980_0x3c1980.cpp",
+      "stub": "WaitSema (syscall 0x44)"
+    }
+  ],
+  "function_log": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/ps2_log-e23a-1.txt",
+    "bytes": 127146978,
+    "allocated": 127926272,
+    "sha256": "d86e57525d1a095ecc02adea9d42ef748225e535ec6c8482941f616dfe545b5f"
+  },
+  "thread6_park_ra": "0x3c19f0",
+  "waiter_matches_thread6_park_ra": true
+}
