@@ -16,16 +16,22 @@ with measured budgets, then 120 Hz simulation.
       title screen. Branch `e29-movie-bypass` @ `e5ce086d`, local.
 - [ ] **E31 (running):** scripted pad input on the bypass build, title →
       menu → stock race start and advancing; owns fork + P-lane lease.
-- [ ] **E30 (running, read-only):** why 15,056 consumed bytes complete zero
-      packets; two-chunk regression + one fix as diffs (E27/E29 inputs).
+- [x] **E30 PASS (09-22, design):** zero packets = correct parser + host
+      latch. Each 5,040 B chunk is one unterminated picture; the terminator
+      is in chunk 2, which is never requested. Fix: `e30-fix.diff`
+      (re-dispatch while decoder-accepted bytes flow without frames, cap
+      4096 rounds). Regression: `e30-regression.diff` (R7–R11, suite → 464).
 - [ ] **E32 fold** (brief written, launches when E31 closes): fold the
       bypass + pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name` and the
       branchless I10–I21 commits onto fork `ssx3`; suite + 2 boots; push
       `ssx3` fast-forward. Backups pushed 09-22 as `fork/archive/*` +
       `fork/e29-movie-bypass`. After the orchestrator verifies, delete the
       folded branches locally and on `fork` (Brad authorized 09-22).
-- [ ] E33: apply E30's regression + fix on `ssx3`, suite, A/B boot vs the
-      bypass title screen with the flag off.
+- [ ] E33: apply E30's two diffs on `ssx3` after E32, then 464/464, then an A/B
+      boot with the flag off vs the bypass title screen (`e32-handoff.md`).
+      Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
+      the 4097 cap before parking (E30 residual 3). Mid-movie CD refill
+      still can't wake a dry park (residual 2).
 - [ ] Android handoffs from N1 (E owns the edits): H1 adopt
       `PS2X_GAME_CODEGEN_DIR`, H4 no-env `cdImage` derivation, H3 merge
       the C3/C5 MPEG vector diagnostics from `i23-ffmpeg-ios`, H2 an
