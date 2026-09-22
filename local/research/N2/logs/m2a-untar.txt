@@ -1,0 +1,38 @@
+=== M2a1: copy tarball to ext4 + verify ===
+-rwxr-xr-x 1 brad brad 273988608 Sep 22 13:39 /home/brad/n2/c17-codegen.tar
+/home/brad/n2/c17-codegen.tar: OK
+=== M2a2: untar ===
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+codegen-output
+=== M2a3: census ===
+cpp=9455
+h=2
+total=9457
+cpp_bytes=265956572
+=== M2a4: header shas ===
+e2fa11e82b7342f4c29b0223c664081d3d3de0de267fc2f2568d9cf68fe160e0  /home/brad/n2/c17-codegen/codegen-output/ps2_recompiled_functions.h
+dbeee2f5361d81cd5295885d3a57e8acf42b885d0a948cc2cf59bc340a6a726b  /home/brad/n2/c17-codegen/codegen-output/ps2_recompiled_stubs.h
+/home/brad/n2/c17-codegen/codegen-output/ps2_recompiled_functions.h: OK
+/home/brad/n2/c17-codegen/codegen-output/ps2_recompiled_stubs.h: OK
+=== M2a5: non-sub_ cpp files ===
+_request_rdata_0x426820_0x426820.cpp
+sceIoctl2_0x428c38_0x428c38.cpp
+register_functions.cpp
+_request_call_0x426c88_0x426c88.cpp
+sceDevVif0PutErr_0x3ff130_0x3ff130.cpp
+InitSystemCallTableAddress_0x42c1f0_0x42c1f0.cpp
+sceMcUdCheckNewCard_0x40a618_0x40a618.cpp
+_sceCd_cd_read_intr_0x400b48_0x400b48.cpp
+_lmcGetClientPtr_0x409b60_0x409b60.cpp
+iSuspendThread_0x424d68_0x424d68.cpp
+_request_end_0x426708_0x426708.cpp
+_alarm_rdata_0x4267c0_0x4267c0.cpp
+sceDevVif0Continue_0x3ff0f0_0x3ff0f0.cpp
+sceDevVif0Pause_0x3ff088_0x3ff088.cpp
+=== M2a6: register_functions + functions.cpp identity ===
+ls: cannot access '/home/brad/n2/c17-codegen/codegen-output/ps2_recompiled_functions.cpp': No such file or directory
+-rwx------ 1 brad brad 32674881 Sep 21 06:45 /home/brad/n2/c17-codegen/codegen-output/register_functions.cpp
+564acae2ec8658e06d10d344f4143a61d868f67da13bf8fd0afd54ad2cc6655b  /home/brad/n2/c17-codegen/codegen-output/register_functions.cpp
+564acae2ec8658e06d10d344f4143a61d868f67da13bf8fd0afd54ad2cc6655b  /home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp
+=== M2a7: sub_ definition census (per-file ^void sub_ / sub_.*( decls) ===
+9441

@@ -1,0 +1,280 @@
+Starting a Gradle Daemon, 1 busy Daemon could not be reused, use --status for details
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:configureCMakeRelWithDebInfo[arm64-v8a]-2
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:buildCMakeRelWithDebInfo[arm64-v8a][ps2EntryRunner]-2
+C/C++: ninja: Entering directory `/home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a'
+C/C++: : && /home/brad/n2/toolchain/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android28 --sysroot=/home/brad/n2/toolchain/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot -fPIC -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -frtti -fexceptions  -march=armv8-a+fp+simd+crypto+crc -O2 -g -DNDEBUG  -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  -Wl,--gc-sections   -Wl,--undefined=ANativeActivity_onCreate -shared -Wl,-soname,libps2EntryRunner.so -o ../../../../build/intermediates/cxx/RelWithDebInfo/4q6b3c5v/obj/arm64-v8a/libps2EntryRunner.so ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o  ps2xRuntime/libps2_runtime.a  _deps/raylib-build/raylib/libraylib.a  -lm  -lEGL  -lGLESv2  -lOpenSLES  -latomic  -lc  -llog  -landroid  ps2xIOP/libps2_iop.a  -latomic -lm && :
+C/C++: ld.lld: error: undefined symbol: sub_00100008_0x100008(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:15 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:15)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:15 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:15)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_001001C8_0x1001c8(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:22 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:22)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:22 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:22)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_001001D8_0x1001d8(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:24 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:24)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:24 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:24)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00104110_0x104110(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1851 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1851)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1851 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1851)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00104238_0x104238(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1855 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1855)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1855 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1855)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00103480_0x103480(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1415 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1415)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1415 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1415)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00101688_0x101688(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1200 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1200)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1200 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1200)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00104C80_0x104c80(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1929 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1929)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1929 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1929)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00104D68_0x104d68(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1939 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1939)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1939 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1939)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00104D50_0x104d50(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1938 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1938)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1938 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1938)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_0010F560_0x10f560(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:8899 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8899)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:8899 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8899)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_0010F2D8_0x10f2d8(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:8781 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8781)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:8781 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8781)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_001001D0_0x1001d0(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:23 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:23)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:23 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:23)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00100204_0x100204(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:26 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:26)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:26 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:26)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00100610_0x100610(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:207 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:207)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:207 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:207)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00100218_0x100218(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:27 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:27)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:27 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:27)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00100348_0x100348(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:29 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:29)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:29 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:29)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00100680_0x100680(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:208 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:208)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:208 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:208)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00101310_0x101310(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1012 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1012)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1012 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1012)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: undefined symbol: sub_00101728_0x101728(unsigned char*, R5900Context*, PS2Runtime*)
+C/C++: >>> referenced by register_functions.cpp:1204 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1204)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: >>> referenced by register_functions.cpp:1204 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1204)
+C/C++: >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+C/C++: ld.lld: error: too many errors emitted, stopping now (use --error-limit=0 to see all errors)
+C/C++: clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+C/C++: ninja: build stopped: subcommand failed.
+
+> Task :app:buildCMakeRelWithDebInfo[arm64-v8a][ps2EntryRunner]-2 FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:buildCMakeRelWithDebInfo[arm64-v8a][ps2EntryRunner]-2'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `/home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a'
+  [0/2] Re-checking globbed directories...
+  [1/2] Building CXX object ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o
+  [2/2] Linking CXX shared library ../../../../build/intermediates/cxx/RelWithDebInfo/4q6b3c5v/obj/arm64-v8a/libps2EntryRunner.so
+  FAILED: ../../../../build/intermediates/cxx/RelWithDebInfo/4q6b3c5v/obj/arm64-v8a/libps2EntryRunner.so 
+  : && /home/brad/n2/toolchain/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android28 --sysroot=/home/brad/n2/toolchain/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot -fPIC -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -frtti -fexceptions  -march=armv8-a+fp+simd+crypto+crc -O2 -g -DNDEBUG  -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  -Wl,--gc-sections   -Wl,--undefined=ANativeActivity_onCreate -shared -Wl,-soname,libps2EntryRunner.so -o ../../../../build/intermediates/cxx/RelWithDebInfo/4q6b3c5v/obj/arm64-v8a/libps2EntryRunner.so ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o  ps2xRuntime/libps2_runtime.a  _deps/raylib-build/raylib/libraylib.a  -lm  -lEGL  -lGLESv2  -lOpenSLES  -latomic  -lc  -llog  -landroid  ps2xIOP/libps2_iop.a  -latomic -lm && :
+  ld.lld: error: undefined symbol: sub_00100008_0x100008(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:15 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:15)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:15 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:15)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_001001C8_0x1001c8(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:22 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:22)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:22 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:22)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_001001D8_0x1001d8(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:24 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:24)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:24 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:24)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00104110_0x104110(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1851 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1851)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1851 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1851)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00104238_0x104238(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1855 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1855)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1855 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1855)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00103480_0x103480(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1415 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1415)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1415 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1415)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00101688_0x101688(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1200 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1200)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1200 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1200)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00104C80_0x104c80(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1929 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1929)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1929 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1929)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00104D68_0x104d68(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1939 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1939)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1939 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1939)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00104D50_0x104d50(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1938 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1938)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1938 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1938)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_0010F560_0x10f560(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:8899 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8899)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:8899 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8899)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_0010F2D8_0x10f2d8(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:8781 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8781)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:8781 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:8781)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_001001D0_0x1001d0(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:23 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:23)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:23 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:23)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00100204_0x100204(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:26 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:26)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:26 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:26)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00100610_0x100610(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:207 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:207)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:207 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:207)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00100218_0x100218(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:27 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:27)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:27 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:27)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00100348_0x100348(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:29 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:29)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:29 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:29)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00100680_0x100680(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:208 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:208)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:208 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:208)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00101310_0x101310(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1012 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1012)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1012 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1012)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: undefined symbol: sub_00101728_0x101728(unsigned char*, R5900Context*, PS2Runtime*)
+  >>> referenced by register_functions.cpp:1204 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1204)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  >>> referenced by register_functions.cpp:1204 (/home/brad/n2/PS2Recomp/ps2xRuntime/src/runner/register_functions.cpp:1204)
+  >>>               ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o:((anonymous namespace)::GeneratedFunctionTableInitializer::GeneratedFunctionTableInitializer())
+  
+  ld.lld: error: too many errors emitted, stopping now (use --error-limit=0 to see all errors)
+  clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+  ninja: build stopped: subcommand failed.
+  
+  C++ build system [build] failed while executing:
+      /home/brad/n2/toolchain/android-sdk/cmake/3.22.1/bin/ninja \
+        -C \
+        /home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a \
+        ps2EntryRunner
+    from /home/brad/n2/PS2Recomp/android/app
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 18m 20s
+19 actionable tasks: 4 executed, 15 up-to-date

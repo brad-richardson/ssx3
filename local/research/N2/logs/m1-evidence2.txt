@@ -1,0 +1,35 @@
+=== H1: configure lines in build1 log (fresh configure) ===
+0
+0
+=== H2: undefined sub_* (mangled-aware) across runner unity objects ===
+/home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o
+U-sub: 9436 DEFINED-sub: 5 <- /home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/Unity/unity_0_cxx.cxx.o
+=== H3: distinct undefined sub_ symbols (demangled sample) ===
+9436
+_Z21sub_00100008_0x100008PhP12R5900ContextP10PS2Runtime
+_Z21sub_001001C8_0x1001c8PhP12R5900ContextP10PS2Runtime
+_Z21sub_001001D0_0x1001d0PhP12R5900ContextP10PS2Runtime
+=== H4: entry chain per object ===
+--- /home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a/_deps/raylib-build/raylib/CMakeFiles/raylib.dir/rcore.c.o
+                 U ANativeActivity_finish
+                 U ANativeActivity_setWindowFlags
+0000000000000000 T android_main
+--- /home/brad/n2/PS2Recomp/android/app/.cxx/RelWithDebInfo/4q6b3c5v/arm64-v8a/_deps/raylib-build/raylib/CMakeFiles/raylib.dir/home/brad/n2/toolchain/android-sdk/ndk/28.2.13676358/sources/android/native_app_glue/android_native_app_glue.c.o
+0000000000000000 T ANativeActivity_onCreate
+                 U android_main
+--- runner main (defines main?):
+0000000000000000 T main
+=== H5: FetchContent pins ===
+c1ab645ca298a2801097931d1079b10ff7eb9df8
+92f6de174717aef09033ad21568d5bb9e5470404
+repository='https://github.com/raysan5/raylib.git'
+module=''
+tag='origin'
+repository='https://github.com/DLTcollab/sse2neon.git'
+module=''
+tag='origin'
+=== H6: clean no-artifact proof ===
+so_count=0
+apk_count=0
+=== H7: ld error count in build1c ===
+40

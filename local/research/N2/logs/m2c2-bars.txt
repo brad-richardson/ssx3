@@ -1,0 +1,34 @@
+=== R1: defined sub_ demangled, non-game-shape names ===
+nongame_count=13
+std::__ndk1::__thread_struct::__make_ready_at_thread_exit(std::__ndk1::__assoc_sub_state*)
+std::__ndk1::__assoc_sub_state::__sub_wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+std::__ndk1::__assoc_sub_state::__make_ready()
+std::__ndk1::__assoc_sub_state::set_exception(std::exception_ptr)
+std::__ndk1::__assoc_sub_state::__on_zero_shared()
+std::__ndk1::__assoc_sub_state::set_value_at_thread_exit()
+std::__ndk1::__assoc_sub_state::set_exception_at_thread_exit(std::exception_ptr)
+std::__ndk1::__assoc_sub_state::copy()
+std::__ndk1::__assoc_sub_state::wait()
+std::__ndk1::__assoc_sub_state::__execute()
+std::__ndk1::__assoc_sub_state::set_value()
+std::__ndk1::future<void>::future(std::__ndk1::__assoc_sub_state*)
+std::__ndk1::future<void>::future(std::__ndk1::__assoc_sub_state*)
+--- game-shape defined count:
+9441
+=== R2: distinct game-shape defined (dedup check) ===
+distinct_gameshape=9441
+=== R3: configure lines anywhere under .cxx/intermediates ===
+/home/brad/n2/PS2Recomp/android/app/build/intermediates/cxx/RelWithDebInfo/282v703p/logs/arm64-v8a/configure_stdout.txt
+/home/brad/n2/PS2Recomp/android/app/build/intermediates/cxx/RelWithDebInfo/282v703p/logs/x86_64/configure_stdout.txt
+=== R4: APK listing ===
+          56 META-INF/com/android/build/gradle/app-metadata.properties
+          46 META-INF/version-control-info.textproto
+         520 classes.dex
+   134125832 lib/arm64-v8a/libps2EntryRunner.so
+   136800168 lib/x86_64/libps2EntryRunner.so
+        2348 AndroidManifest.xml
+          40 resources.arsc
+=== R5: x86_64 file ===
+/home/brad/n2/PS2Recomp/android/app/build/intermediates/cxx/RelWithDebInfo/282v703p/obj/x86_64/libps2EntryRunner.so: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=58bfc4d99412943d19f27ad1cca4416348600fa2, with debug_info, not stripped
+=== R6: merged vs stripped identity (arm64) ===
+ac8292325e411482ef461216a5521950b0575e994de2bad1551d1ddc6a962fc5  /home/brad/n2/PS2Recomp/android/app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/arm64-v8a/libps2EntryRunner.so
