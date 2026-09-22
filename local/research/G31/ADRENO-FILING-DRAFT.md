@@ -68,6 +68,15 @@ bounded run, verify-then-push, zero new tombstones)**
    experiment is a write-back control (same sync, stale bytes
    re-written) to close it.
 
+5. Write-back control (VOID, honestly): re-committing the identical
+   stale bytes with the same per-vsync sync changed nothing (all
+   outputs still black, all controls identical) — but a byte census
+   shows the stale source has ZERO nonzero-RGB words, so
+   "stale-correct" and "cleared" are the SAME bytes and the control
+   cannot split the hypotheses. The write-back MECHANISM is proven
+   (16/16 commits land, zero drift). The discriminating experiment
+   (same sync + sparse nonzero-RGB tag) is queued next.
+
 **Question**
 
 Is the stale-without-commit → cleared behavior a known
@@ -81,6 +90,6 @@ path — currently queued as our contrast experiment).
 
 ---
 
-*Orchestrator note: synced with G32 (ordering/coherency reframe) on
-09-21. G33 (write-back control) may upgrade the question again — check
-before posting if G33 has landed. Do not post without owner review.*
+*Orchestrator note: synced with G33 (VOID control + write-back
+integrity) on 09-22 — READY TO POST at the owner's call. G34 (tagged
+control) may upgrade the question again; re-sync if it lands first.*

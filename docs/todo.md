@@ -1700,6 +1700,62 @@ the build or commit that closed them.
       (gate closed via live + trace; T46 brief mandates committed
       primaries). ~1.5 h. Next: T46 healthy R3 QUEUED (audio still
       down). Ledger row added.
+- [x] **E24 read (09-22) — PASS(RED-close, honest): restart wiped /tmp protected builds (1,725/1,725), no boot spent per the brief's own rule; everything else executed (dims 512×448, picture-complete-minus-terminator, sema ledger, signaller closure)**
+      RED verified (links absent, /tmp fresh-dated, fork triple +
+      status, fixtures + dylib re-sha, authorization false ×3,
+      preclaim stop, no boot-attempt, no lease claim, no boot log,
+      no snapshots, evacuated predates, DerivedData probes-only) →
+      cadence reference RE-ESTABLISHED on the surviving E23 fixture
+      (4/4 + controls, H1 not a binary/day artifact) → Objective 3
+      CLOSED (512×448 MPEG-2 MP@ML 4:2:0 29.97 + full stream/colour
+      rows from the retained 5,040 B) → picture finding (35 codes,
+      28 contiguous slices, tail 5024+15, NO terminator after final
+      slice: ONE complete picture missing its terminating start
+      code) → Objective 1b CLOSED (thread-4 wakes == sema-31 round
+      trips, interrupt-driven) → Objective 2 mined (ledger
+      all-deficits-1; sema-36 sole signaller never executes;
+      symptom-question honestly unanswered) → 230-entry boot FULLY
+      DESIGNED (pre-registered, costed, gated, patched driver) +
+      fix gate STOP. Verified: fork/status/fixtures/dylib, no-boot
+      proofs, cadence shape, dims + FULL picture census
+      RE-IMPLEMENTED exact, ledger from the PRIMARY snapshot
+      (tallies + interrupt-context + ra cross-checks), signaller
+      closure (4 unique PCs + function-log 0/0 + jal shape),
+      watch-set 230 + tiers, rename proof, manifest 9457. ERRATA:
+      E24-E1 self-filed (blocked set omits 31 — primary confirms
+      31); E24-E2 gate (tail receipt STALE: 23711/3d641aeb actual
+      vs 23899/b5296556 claimed — post-receipt edit); E24-E3 gate
+      (slice-length prose: FOUR 177s not two, slice28 191 raw /
+      176 to-last-nonzero — JSON receipt correct, finding intact).
+      ~2 h. Next: E25 (rebuild + re-baseline, NO boot — the
+      re-baselining decision is the orchestrator's); E26 spends
+      the designed e24a boot. Ledger row added.
+- [x] **G33 read (09-22) — PASS(VOID-BLACK, honest): stale-correct ≡ cleared by byte census (0/229376 nonzero-RGB), so H1/H2 unsplittable; write-back integrity proven (16 commits, zero drift)**
+      Task-1 design (W1 shape + barrier parity + named H1/H2 bytes +
+      matrix + hunk spec) → Task-2 predictor CENSUS (stale B
+      0/229376 nonzero-RGB; H1 render == cleared ladder + PPM ==
+      G29 black ×10 cmp; G32 self-check exact; swizzle bijective)
+      → ONE hunk (+51/−0, G32 excised same edit) + ONE build exit 0
+      [458/458] (265,853,048 B `7e0ea803…`, `8a89ed2c…`) +
+      verify-then-push NO gap + ONE run exit 0 (16 writeback temp
+      == stale + 16 state + 16 bytes + 512 vpage + 10 ladder
+      cleared + load line, `Done!` last, 0 new tombstone): 16/16
+      temp == stale, B == stale ×16, vpage 512/512 == G31, 10/10
+      black-exact by explicit list. Verified: predictor RE-RUN
+      (all scalars + VOID-CHECK), stale-B census RE-IMPLEMENTED
+      (0/149721), logcat 2376/16/16/16/512/10/1 + values, vpage/
+      bytes/state diffs IDENTICAL vs G31, PPMs 10/10 == G29,
+      hunk shape + arithmetic (155=134−30+51) + G32-excised + G22
+      match, device clean. DRIVE ADJUDICATION: G29/G30/G32 now
+      read their BUILD shas (mtimes frozen) — ALL prior
+      "destructions" RECLASSIFIED as read-path artifacts of the
+      dying link (G29-E2's "progressive" was progressive LINK
+      death; all run-validity stands); G33's binary shows a NEW
+      stable localized mutation (7e0ea803→d1238552, mtime frozen,
+      ELF+markers intact) — flash-level suspect, run validity
+      unaffected (5 matching reads + on-device pre-date it).
+      ~1.5 h. Next: G34 (tagged write-back, NOT adoption); mirror
+      G-receipts to share (drive distrusted). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
