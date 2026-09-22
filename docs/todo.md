@@ -21,8 +21,12 @@ with measured budgets, then 120 Hz simulation.
 - [ ] Stray PS2 button glyphs/D-pad/L1-R1 boxes in the top-left and
       bottom-left corners (Brad sees them on the Odin; E31's Mac Select
       Character dump has them inside the 512×448 guest framebuffer).
-      Suspect off-screen UI sprites wrapping in the CPU GS (scissor/XYOFFSET/
-      coordinate wrap). T47's PCSX2 frames decide; then a small GS fix brief.
+      Brad (09-22): sprite sheets aren't cropped properly, so the wrong atlas
+      cell is shown. The CPU backend has REGION_CLAMP (`gs_cpu_backend.cpp`
+      :115, :982). Check the V path, inclusive MAX bounds, sprite UV
+      fixed-point at cell edges, TEX0 TBP/stale upload, CLUT CSA slice
+      (upstream `feature/iop-emulator` reworks CLUT). T47's PCSX2 frames
+      confirm; then a small GS fix brief (E lane owns the fork).
 - [ ] If 99% is a hang: diff the recomp's loading-window trace against
       T47's PCSX2 trace (SIF RPC IDs, sound driver/libsd, CD reads).
       Likely next piece: an SSX 3 sound-driver module in the IOP layer
