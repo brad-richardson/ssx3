@@ -130,6 +130,10 @@ splitting.
 - **Devices:** always `install` (even if present) on the Odin and iPad;
   iPhone installs are fine but never urgent. After an Odin reboot the PIN
   must be entered once before APKs launch (adb-shell binaries still work).
+  Before every APK launch, check the Odin isn't on its lockscreen
+  (`dumpsys window policy`: `KeyguardServiceDelegate showing=false`): a
+  locked device pauses the app within seconds and the run is void. Ask Brad
+  to unlock it. Force-stop the app when a lane is done with the device.
 - **Ask, don't queue silently:** any decision waiting on Brad, or a
   device/hands-on need that would unblock work, is reported as a
   blocker right away.
