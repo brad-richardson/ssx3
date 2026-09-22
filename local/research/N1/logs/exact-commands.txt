@@ -1,0 +1,37 @@
+N1 exact fork/SSD commands (all read-only; every fork content read names 3adc0478).
+FORK="/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp"; export COPYFILE_DISABLE=1.
+
+git -C "$FORK" rev-parse 3adc0478
+git -C "$FORK" status --short
+git -C "$FORK" rev-parse --abbrev-ref HEAD; git -C "$FORK" rev-parse HEAD
+git -C "$FORK" ls-tree -r --name-only 3adc0478 | grep -i android
+git -C "$FORK" ls-tree -r --name-only 3adc0478 | grep -iE "ios|apple|xcode"
+git -C "$FORK" ls-tree --name-only 3adc0478
+git -C "$FORK" show 3adc0478:"$f" | wc -c / shasum -a 256   # per cited file, x2 passes
+git -C "$FORK" show 3adc0478:android/README.md (+ 6 siblings, main.cpp, CMake x4 parts)
+git -C "$FORK" ls-tree -r --name-only 3adc0478 | grep -iE "cmake|toolchain|\.gradle"
+git -C "$FORK" grep -n -i "android" 3adc0478 -- CMakeLists.txt '*/CMakeLists.txt' 'android/*' 'ps2xRuntime/*'
+git -C "$FORK" grep -n "game_objects|ps2_game|recompiled_functions|recompiled_stubs" 3adc0478
+git -C "$FORK" ls-tree -r --name-only 3adc0478 -- games [= 2 files]
+git -C "$FORK" ls-tree -r --name-only 3adc0478 -- ps2xRuntime/src ps2xRuntime/include
+git -C "$FORK" ls-tree -r --name-only 3adc0478 -- ps2xRuntime/src/runner [= 7 files]
+git -C "$FORK" grep -n "ANativeActivity_onCreate|android_main|NativeActivity" 3adc0478 [= 2 hits, 0 defs]
+git -C "$FORK" grep -n 'std::getenv|::getenv|"PS2X_' 3adc0478 -- 'ps2xRuntime/*' 'ps2xIOP/*' 'ps2xRecomp/*' 'tools/*'
+git -C "$FORK" grep -n "MPEG_VECTOR|FEED_TRACE|MPEG_FEED" 3adc0478 [= empty]
+git -C "$FORK" grep -n "IoPaths|cdImage|struct Io" 3adc0478 -- 'ps2xRuntime/include/*' 'ps2xRuntime/src/lib/ps2_runtime.cpp'
+git -C "$FORK" show 3adc0478:ps2xRuntime/src/runner/register_functions.cpp | grep -c ... / distinct sub_ [= 398961 / 9441, x2]
+git -C "$FORK" rev-parse 193451a / eb3fb16 / aa73dbc [= all resolve]
+git -C "$FORK" show eb3fb16[3...] (+ 193451a game block, 696a968 C1 block)
+git -C "$FORK" ls-tree -r 3adc0478 -- android [= 7 blobs]
+git -C "$FORK" grep -ln "toolchain" 3adc0478 [= Vita-only + comments]
+git -C "$FORK" ls-tree -r --name-only 3adc0478 -- tools [= 2 files]
+git -C "$FORK" grep -n "cdImage" / "mcRoot|create_director" 3adc0478 -- 'ps2xRuntime/*'
+git -C "$FORK" grep -n "game objects:|ps2_game_objects|GAME_SOURCES" 3adc0478 [= empty at ref]
+ls/du/find-stat on /Volumes/Extreme SSD/ps2x-i17/codegen-output (read-only census)
+ls -la "/Volumes/Extreme SSD/" + ps2recomp-spike/ (mount check)
+ssx3-side (safe: E29 touches the fork, not ssx3): read I23/I24/E25 REPORTs,
+  grep PS2X_GAME_CODEGEN_DIR= in local/research/I17-I21, head tools/android_trial.py.
+
+Never run: adb (any form), *gradle*, cmake/ninja/clang builds, devicectl,
+installer/boot/lease commands, fork checkout/branch/worktree/add/commit/push,
+any write to /Volumes/Extreme SSD, any deletion.

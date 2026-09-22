@@ -1,0 +1,13 @@
+N1 ref pin.
+Fork: /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp
+rev-parse 3adc0478 = 3adc0478b6d2260acdd28a249466f2eef9a20176
+rev-parse HEAD = 3adc0478b6d2260acdd28a249466f2eef9a20176 (branch ssx3, N1 open)
+status --short = exactly `?? ps2_log.txt` (pre-existing, untouched)
+Read rule: every fork content read named the ref
+  (`git show 3adc0478:path`, `git grep -n ... 3adc0478 -- ...`,
+  `git ls-tree -r 3adc0478`). Zero fork worktree content reads, so an E29
+  mid-lane checkout cannot disturb N1 evidence. Other fork commands used
+  (read-only): rev-parse, status. No fetch/checkout/branch/worktree/add/commit/push.
+Note: stderr shows `non-monotonic index .git/objects/pack/._pack-*.idx`
+  (AppleDouble sidecars in the pack dir); stdout correct, exit 0. N1 did
+  NOT purge (zero deletions, read-only).

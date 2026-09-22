@@ -1,0 +1,48 @@
+N1 env inventory @3adc0478: every std::getenv("PS2X_*") site in
+ps2xRuntime/* + ps2xIOP/* + ps2xRecomp/* (git grep, truncated to 220 cols in
+the live read; full lines verified at the ref).
+
+BOOT-PATH (Mission 2 P1-P2):
+ps2xRuntime/src/main.cpp:242: PS2X_CD_IMAGE (ISO override; empty default)
+(+ PS2X_DEFAULT_BOOT_ELF is a COMPILE define, not env: main.cpp:163-175,
+ps2xRuntime/CMakeLists.txt:160-165,518-521)
+
+DIAGNOSTICS (Mission 2 P5):
+ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:101: PS2X_DIAG_PERIOD_MS
+ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:159: PS2X_DIAG_SEMA
+ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:171: PS2X_DIAG_SEMA_S0
+ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp:50: PS2X_DIAG_PERIOD_MS
+ps2xRuntime/src/lib/Kernel/Syscalls/Dispatcher.cpp:15: PS2X_DIAG_PERIOD_MS
+ps2xRuntime/src/lib/Kernel/Syscalls/Sync.cpp:19: PS2X_DIAG_SEMA_CREATE
+ps2xRuntime/include/ps2_e3.h:368: PS2X_DIAG_WATCH
+ps2xRuntime/src/lib/ps2_runtime.cpp:1169: PS2X_DIAG_PERIOD_MS
+ps2xRuntime/src/lib/ps2_runtime.cpp:1267: PS2X_DIAG_WATCH
+ps2xRuntime/src/lib/ps2_runtime.cpp:1519: PS2X_DIAG_REPORT_ALL
+ps2xRuntime/src/lib/ps2_runtime.cpp:1533: PS2X_DIAG_DRIVER_PROBE
+ps2xRuntime/src/lib/ps2_runtime.cpp:1558: PS2X_DIAG_394ED0
+ps2xRuntime/include/ps2_park_snapshot.h:52: PS2X_DIAG_PARK
+ps2xRuntime/include/ps2_park_snapshot.h:64: PS2X_DIAG_PARK_TIMEOUT_MS
+ps2xRuntime/include/ps2_park_snapshot.h:83: PS2X_DIAG_PARK_DIR
+
+CENSUS / CAPTURE (Mission 2 P6-P7):
+ps2xRuntime/include/ps2_log.h:129: PS2X_DROP_SILENCE (non-empty mutes; default census ON)
+ps2xRuntime/src/lib/ps2_runtime.cpp:395: PS2X_FRAME_DUMP_DIR
+ps2xRuntime/src/lib/Kernel/Syscalls/TraceChannel.cpp:79: PS2X_TRACE_SYSCALLS
+ps2xRuntime/src/lib/Kernel/Syscalls/TraceChannel.cpp:84: PS2X_TRACE_SYSCALLS_PC
+ps2xRuntime/include/ps2_e15.h:10: PS2X_E15_TRACE
+ps2xRuntime/include/ps2_e7.h:19: PS2X_E15_ALIGN
+ps2xRuntime/include/ps2_e7.h:27: PS2X_E7_DIR
+ps2xRuntime/include/ps2_e3.h:63: PS2X_E3_INV
+ps2xRuntime/include/ps2_e3.h:89: PS2X_E3_S1BASE
+ps2xRuntime/include/ps2_e3.h:105: PS2X_E3_BYTES
+ps2xRuntime/include/ps2_e4.h:72: PS2X_E4_ARM_TICK
+ps2xRuntime/include/ps2_e4.h:84: PS2X_E4_DIR
+ps2xRuntime/include/ps2_e4.h:95: PS2X_E4_FREEZE_TICK
+ps2xRuntime/src/lib/Kernel/Stubs/Pad.cpp:119: PS2X_PAD_STIM_AFTER
+ps2xRuntime/src/lib/Kernel/Stubs/Pad.cpp:120: PS2X_PAD_STIM_WALLMIN
+
+ABSENT at 3adc0478 (grep-empty; Mission 2 P8):
+PS2X_MPEG_VECTOR_PATH, PS2X_MPEG_FEED_TRACE (live only on i23-ffmpeg-ios @aa73dbc)
+
+All of the above are unsettable from a NativeActivity launch: first-launch
+behavior = every default above. See REPORT Mission 2 path table + H4/H7.

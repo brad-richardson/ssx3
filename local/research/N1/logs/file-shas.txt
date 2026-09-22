@@ -1,0 +1,34 @@
+N1 file shas @3adc0478 (fork /Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp).
+Two full passes (A = first reads, B = verification re-reads); every row matched.
+Method per file per pass: `git -C "$FORK" show 3adc0478:"$f" | wc -c` and `| shasum -a 256`.
+
+bytes sha256 path
+1164 7627a149f632b0c69835f0428e4b229f8a559c43ce5dae83c358f0170f9bdcf6 android/README.md
+953 4f2fcad4daaf633c56d7b92e1cc6df216ec8ef7d50b9664b49c36a13a1e10e3e android/app/src/main/AndroidManifest.xml
+1588 ba3c0a7d7214fec50ae4b911f3c0bedb32c4ad8b12c242a0dbb011208205c845 android/app/build.gradle
+73 36d655a9067d39892bba80896925f12e70f6b0d7481fe914ec6a61bbbde967cb android/build.gradle
+263 2f4f5b2d5b58af92d12119a82755f326d1d48b6b55ae3aa5a284d882853b183f android/settings.gradle
+133 94ee6207d5bc664e1d7fbb1970ea2984e4c394ba6bb0a2e53d0da96520fd4b4e android/gradle.properties
+250 3d91f0932da99885c41e9dc4e85c9f9a2d3bfef4f0ad87473014dc0827a94884 android/gradle/wrapper/gradle-wrapper.properties
+99 8783cb5f690e03679dbcbf9004335fc8ab05f0f8524e8744c4b635a1a9325a7a ps2xRuntime/src/lib/ps2_android_runtime.cpp
+4221 7a4f64e274e78b7732fcace5a15d13a4ab78f4631c337d789979b584e124b4a2 CMakeLists.txt
+23746 42ea0e164f7d43dd43c1f70c3f7dc30c90dbf721cc397cc45dcc6d384e9554a0 ps2xRuntime/CMakeLists.txt
+9215 9a7ea63e8afe61581a8fb13622c13a1cecc6d0a1fa28f3e3e453e6ab0a1d7f94 ps2xRuntime/src/main.cpp
+32674881 564acae2ec8658e06d10d344f4143a61d868f67da13bf8fd0afd54ad2cc6655b ps2xRuntime/src/runner/register_functions.cpp
+794469 e2fa11e82b7342f4c29b0223c664081d3d3de0de267fc2f2568d9cf68fe160e0 ps2xRuntime/src/runner/ps2_recompiled_functions.h
+56644 2f2ae5432b91f873f053045cfa29d9c1d4e3d8e5a941f5693eea720f26daaf1c games/ssx3/ssx3.toml
+336944 7c827add09aeea837e25f6048007ab91e65eb4b5f7a98f8fb4f448b606cfb9ba games/ssx3/ssx3-functions.sweep.csv
+60369 bce13ab04a0979228c563f052051116ed2217579076fe1d5f6a262f7389d8558 ps2xRuntime/src/lib/Kernel/Stubs/Helpers/Support.h
+55664 eea4c547bdb54b23d12bdea538005e4e20d804a90df03e962b39b0aaefb8faa9 ps2xRuntime/src/lib/Kernel/Stubs/MemoryCard.cpp
+43050 80a6acc0e1abc38227609b35a9d594314210527008a99f0255e3a396ca94aa0d ps2xRuntime/src/lib/Kernel/Stubs/CD.cpp
+1902 c13e69fa93d05d31a3138dea815b51880c01bda344f2a33a1c1cc16b039566b3 ps2xRuntime/ios/Info.plist
+21421 d9a6f2264265d02ff1319ef796f024a7a607c76e4486fac31844ad640a05f0d5 ps2xRuntime/include/ps2_runtime.h
+111556 b2c269a4c8bf54beaccafa371366fd0d33a13976812ff18086e896027a703260 ps2xRuntime/src/lib/ps2_runtime.cpp
+9347 566c30a656697f69d1c89e9293d541f3689bf9bdf914c9195468a49575ebc1e0 ps2xRuntime/include/ps2_log.h
+
+Pass A/B: MATCH on all 22 rows (both bytes and sha).
+Named lane commits also resolved (read-only rev-parse, content quoted in REPORT):
+193451a = 193451a7040c42adbc60ae3ac34e78198c96cc4a (I23 stack)
+eb3fb16 = eb3fb1636db953545f3e2794ac26b5542f8f80c2 (I10 PS2X_GAME_CODEGEN_DIR)
+aa73dbc = aa73dbc33c26486f097fb7287cce15f6f60e6c75 (i23-ffmpeg-ios tip, C5)
+696a968 = 696a9681ac4c4b3e5f0881f20bd916b74bc2c728 (I23 C1 iOS FFmpeg block)
