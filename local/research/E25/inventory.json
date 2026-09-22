@@ -1,0 +1,440 @@
+{
+  "utc": "2026-09-22T12:06:50.468967+00:00",
+  "trigger": "host restart between E23 close 2026-09-22T00:23:30Z and E24 open 2026-09-22T11:31:22Z; E25 opens 2026-09-22T12:03:15Z with the loss unchanged",
+  "protected_build_trees": [
+    {
+      "path": "/tmp/p1-link/runtime",
+      "present": false,
+      "allocated": 0
+    },
+    {
+      "path": "/tmp/e17-map-link/runtime",
+      "present": false,
+      "allocated": 0
+    },
+    {
+      "path": "/tmp/e18-mpeg-link/runtime",
+      "present": false,
+      "allocated": 0
+    }
+  ],
+  "protected_files_manifest": 1725,
+  "protected_files_present": 0,
+  "protected_files_missing": 1725,
+  "protected_missing_bytes": 1578996782,
+  "protected_by_tree": [
+    {
+      "tree": "//tmp/e17-map-link",
+      "files": 575,
+      "bytes": 526234570,
+      "present": 0,
+      "missing": 575,
+      "missing_bytes": 526234570,
+      "sha_equal": 0,
+      "sha_differ": 0
+    },
+    {
+      "tree": "//tmp/e18-mpeg-link",
+      "files": 575,
+      "bytes": 526573522,
+      "present": 0,
+      "missing": 575,
+      "missing_bytes": 526573522,
+      "sha_equal": 0,
+      "sha_differ": 0
+    },
+    {
+      "tree": "//tmp/p1-link",
+      "files": 575,
+      "bytes": 526188690,
+      "present": 0,
+      "missing": 575,
+      "missing_bytes": 526188690,
+      "sha_equal": 0,
+      "sha_differ": 0
+    }
+  ],
+  "e24_section1_carried": {
+    "e24_protected_files_manifest": 1725,
+    "e24_protected_files_present": 0,
+    "e24_protected_files_missing": 1725,
+    "e24_protected_missing_bytes": 1578996782,
+    "e24_missing_by_tree": {
+      "//tmp/p1-link": {
+        "files": 575,
+        "bytes": 526188690
+      },
+      "//tmp/e17-map-link": {
+        "files": 575,
+        "bytes": 526234570
+      },
+      "//tmp/e18-mpeg-link": {
+        "files": 575,
+        "bytes": 526573522
+      }
+    },
+    "e25_agrees_with_e24": true
+  },
+  "key_binaries": {
+    "runner": {
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "expected_bytes": 163529696,
+      "expected_sha": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "present": false
+    },
+    "suite": {
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xTest/ps2x_tests",
+      "expected_bytes": 5695128,
+      "expected_sha": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "present": false
+    },
+    "fixture": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e18-fixtures/after/binding-test",
+      "expected_bytes": 165183488,
+      "expected_sha": "42d9f4f373265f5f40ea29920db6149e9043f5afbd65d2d576ea9477d6587326",
+      "present": true,
+      "actual_bytes": 165183488,
+      "actual_sha": "42d9f4f373265f5f40ea29920db6149e9043f5afbd65d2d576ea9477d6587326",
+      "sha_equal": true
+    },
+    "cadence_fixture": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/complete/binding-test",
+      "expected_bytes": 165202160,
+      "expected_sha": "3136f3ca734aece4ad9c24e3820bc3c5dc5ce229639218be14beb579fd4279a2",
+      "present": true,
+      "actual_bytes": 165202160,
+      "actual_sha": "3136f3ca734aece4ad9c24e3820bc3c5dc5ce229639218be14beb579fd4279a2",
+      "sha_equal": true
+    }
+  },
+  "instrument": {
+    "source": "/Users/bradrichardson/dev/ssx3/local/research/E24/parser/e21-parser-observer.dylib",
+    "present": true,
+    "expected_sha": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+    "expected_bytes": 52472,
+    "actual_bytes": 52472,
+    "actual_sha": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+    "sha_equal": true
+  },
+  "generated_names": 9457,
+  "generated_expected": 9457,
+  "generated_all_hashes_match": true,
+  "e18_sources": 21,
+  "e18_sources_all_equal": true,
+  "e18_sources_detail": [
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/games/ssx3/ssx3.toml",
+      "bytes": 56644,
+      "allocated": 1048576,
+      "sha256": "2f2ae5432b91f873f053045cfa29d9c1d4e3d8e5a941f5693eea720f26daaf1c",
+      "present": true,
+      "expected_sha": "2f2ae5432b91f873f053045cfa29d9c1d4e3d8e5a941f5693eea720f26daaf1c",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/ssx3.toml",
+      "bytes": 56285,
+      "allocated": 1048576,
+      "sha256": "5a5fa6f64600f51168ad34832845d2a979ee8e15196b6a1b753bbf60b479a60c",
+      "present": true,
+      "expected_sha": "5a5fa6f64600f51168ad34832845d2a979ee8e15196b6a1b753bbf60b479a60c",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/games/ssx3/ssx3-functions.sweep.csv",
+      "bytes": 336944,
+      "allocated": 1048576,
+      "sha256": "7c827add09aeea837e25f6048007ab91e65eb4b5f7a98f8fb4f448b606cfb9ba",
+      "present": true,
+      "expected_sha": "7c827add09aeea837e25f6048007ab91e65eb4b5f7a98f8fb4f448b606cfb9ba",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/ssx3-functions.sweep.csv",
+      "bytes": 336619,
+      "allocated": 1048576,
+      "sha256": "6d231e815672e79feefbd049c4380151b96f5a682422719108e708ed7e11b5f8",
+      "present": true,
+      "expected_sha": "6d231e815672e79feefbd049c4380151b96f5a682422719108e708ed7e11b5f8",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.h",
+      "bytes": 2479,
+      "allocated": 1048576,
+      "sha256": "d414d295f3bf9756ae5d91a7554fc1a36ac2a00ebab9b95d2dc95da45b135b25",
+      "present": true,
+      "expected_sha": "d414d295f3bf9756ae5d91a7554fc1a36ac2a00ebab9b95d2dc95da45b135b25",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_003B0B10_0x3b0b10.cpp",
+      "bytes": 3207,
+      "allocated": 1048576,
+      "sha256": "c754a2213e1872490573cd576ba3a4f130d12c48b0de0265a5780efc325993a5",
+      "present": true,
+      "expected_sha": "c754a2213e1872490573cd576ba3a4f130d12c48b0de0265a5780efc325993a5",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_003B0B40_0x3b0b40.cpp",
+      "bytes": 80215,
+      "allocated": 1048576,
+      "sha256": "9cf7081f68e8e3c77f903c69cb4ad02542bf8ed78887807c610a1f555aa52e97",
+      "present": true,
+      "expected_sha": "9cf7081f68e8e3c77f903c69cb4ad02542bf8ed78887807c610a1f555aa52e97",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_003B0FB8_0x3b0fb8.cpp",
+      "bytes": 22917,
+      "allocated": 1048576,
+      "sha256": "0e4f333e6761ccb0a3ff7982e7d2924bf1e94d61fa098a9bfeebe59a1462d3f8",
+      "present": true,
+      "expected_sha": "0e4f333e6761ccb0a3ff7982e7d2924bf1e94d61fa098a9bfeebe59a1462d3f8",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_00402C08_0x402c08.cpp",
+      "bytes": 359,
+      "allocated": 1048576,
+      "sha256": "5bdade85a35159f05d907e923089083e3e3d109c86f05d814e523b1324eb04e1",
+      "present": true,
+      "expected_sha": "5bdade85a35159f05d907e923089083e3e3d109c86f05d814e523b1324eb04e1",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_004029D0_0x4029d0.cpp",
+      "bytes": 353,
+      "allocated": 1048576,
+      "sha256": "664f34b4f9069f9a1b62be7197deec49ef8671d062ede298b852b88f89ba355c",
+      "present": true,
+      "expected_sha": "664f34b4f9069f9a1b62be7197deec49ef8671d062ede298b852b88f89ba355c",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/runner/sub_00402A10_0x402a10.cpp",
+      "bytes": 358,
+      "allocated": 1048576,
+      "sha256": "feabccbe1d6244cac5e7ee152fb96b98e036508fb0d29861cb5f40c8b6f14d48",
+      "present": true,
+      "expected_sha": "feabccbe1d6244cac5e7ee152fb96b98e036508fb0d29861cb5f40c8b6f14d48",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_park_snapshot.h",
+      "bytes": 21828,
+      "allocated": 1048576,
+      "sha256": "dfb44d0ca243b53a21f43f9ea18329d90c7b3d73cb275a6020f299493292b088",
+      "present": true,
+      "expected_sha": "dfb44d0ca243b53a21f43f9ea18329d90c7b3d73cb275a6020f299493292b088",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_e4.h",
+      "bytes": 21089,
+      "allocated": 1048576,
+      "sha256": "69c319f38b9e1a4bc87156cf9cd370c75f524ba730d86ebb37558f00e05187e8",
+      "present": true,
+      "expected_sha": "69c319f38b9e1a4bc87156cf9cd370c75f524ba730d86ebb37558f00e05187e8",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_e7.h",
+      "bytes": 12869,
+      "allocated": 1048576,
+      "sha256": "939f664111a9be8a45cb18239399d803beae261695f5b249fe831bf59b4b230c",
+      "present": true,
+      "expected_sha": "939f664111a9be8a45cb18239399d803beae261695f5b249fe831bf59b4b230c",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/ps2_e15.h",
+      "bytes": 6966,
+      "allocated": 1048576,
+      "sha256": "8730cb90b4ca872a065e641b13db02a3c6cf4f85c3926d4f0333e90bab789f86",
+      "present": true,
+      "expected_sha": "8730cb90b4ca872a065e641b13db02a3c6cf4f85c3926d4f0333e90bab789f86",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp",
+      "bytes": 111556,
+      "allocated": 1048576,
+      "sha256": "b2c269a4c8bf54beaccafa371366fd0d33a13976812ff18086e896027a703260",
+      "present": true,
+      "expected_sha": "b2c269a4c8bf54beaccafa371366fd0d33a13976812ff18086e896027a703260",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp",
+      "bytes": 101744,
+      "allocated": 1048576,
+      "sha256": "875b992739c34ffb9cdec2e81116fb7cd56b1e213ce25e05a68584a9ef8dd1c6",
+      "present": true,
+      "expected_sha": "875b992739c34ffb9cdec2e81116fb7cd56b1e213ce25e05a68584a9ef8dd1c6",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/main.cpp",
+      "bytes": 9215,
+      "allocated": 1048576,
+      "sha256": "9a7ea63e8afe61581a8fb13622c13a1cecc6d0a1fa28f3e3e453e6ab0a1d7f94",
+      "present": true,
+      "expected_sha": "9a7ea63e8afe61581a8fb13622c13a1cecc6d0a1fa28f3e3e453e6ab0a1d7f94",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/include/runtime/ee_scheduler.h",
+      "bytes": 13692,
+      "allocated": 1048576,
+      "sha256": "f225a8ff92a2ce2cdcfa52f5a4e370570d935b8723377389bb3685ca4800a378",
+      "present": true,
+      "expected_sha": "f225a8ff92a2ce2cdcfa52f5a4e370570d935b8723377389bb3685ca4800a378",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp",
+      "bytes": 110191,
+      "allocated": 1048576,
+      "sha256": "f83ed02e21eba7cbbcecf8443740b13f8ee07ecdb77991da571fef38404ef600",
+      "present": true,
+      "expected_sha": "f83ed02e21eba7cbbcecf8443740b13f8ee07ecdb77991da571fef38404ef600",
+      "sha_equal": true
+    },
+    {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp/ps2xTest/src/ps2_runtime_expansion_tests.cpp",
+      "bytes": 83857,
+      "allocated": 1048576,
+      "sha256": "1fbcb8f84f9798470973f8a876d1c262f669e4de2ecf6ed7fd4490f065d78be0",
+      "present": true,
+      "expected_sha": "1fbcb8f84f9798470973f8a876d1c262f669e4de2ecf6ed7fd4490f065d78be0",
+      "sha_equal": true
+    }
+  ],
+  "retained_title_artifacts": {
+    "boot-e23a-1.log": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e23a-1.log",
+      "bytes": 9531648,
+      "allocated": 10485760,
+      "sha256": "0b1154d2aeced8d85e2483db3479530fb94c29251a112f77726d3e3478e4c6eb",
+      "present": true
+    },
+    "syscalls-e23a-on.txt": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-e23a-on.txt",
+      "bytes": 3447257,
+      "allocated": 4194304,
+      "sha256": "f834672cdf82731344af32b6013cc7f66208727579e15b4791178f2d53d8d812",
+      "present": true
+    },
+    "park-e23a-1/park-snapshot.json": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e23a-1/park-snapshot.json",
+      "bytes": 136745,
+      "allocated": 1048576,
+      "sha256": "325743b7a7d24dca349440659b34fd79b32678ab76b03734ef6825997f5de553",
+      "present": true
+    },
+    "e23a-join/e7-events.txt": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e23a-join/e7-events.txt",
+      "bytes": 1051969,
+      "allocated": 2097152,
+      "sha256": "e913985cfa1b34df5db5041aa7de754fca96d7aa00e01ff1dfb1f150da985863",
+      "present": true
+    },
+    "e23a-parser/parser-events.txt": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e23a-parser/parser-events.txt",
+      "bytes": 2199,
+      "allocated": 1048576,
+      "sha256": "68f2a50af9148e37aa7fc02467d4e51879b4b270f4d89e58fe1f9b7fd3fa7d28",
+      "present": true
+    },
+    "e23a-parser/parser-input.bin": {
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e23a-parser/parser-input.bin",
+      "bytes": 5040,
+      "allocated": 1048576,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "present": true
+    },
+    "E23 observed/parser-input.bin": {
+      "path": "/Users/bradrichardson/dev/ssx3/local/research/E23/observed/parser-input.bin",
+      "bytes": 5040,
+      "allocated": 8192,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "present": true
+    },
+    "E24 observed/parser-input.bin": {
+      "path": "/Users/bradrichardson/dev/ssx3/local/research/E24/observed/parser-input.bin",
+      "bytes": 5040,
+      "allocated": 8192,
+      "sha256": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "present": true
+    }
+  },
+  "lease_present": false,
+  "runner_processes": {
+    "argv": [
+      "pgrep",
+      "-x",
+      "ps2EntryRunner"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "tmp_entries": [
+    "__pycache__",
+    "cc-socks",
+    "claude-501",
+    "claude-mcp-browser-bridge-bradrichardson",
+    "codex-browser-use",
+    "drivefs_ipc.501",
+    "drivefs_ipc.501_shell",
+    "e24-gate-census.py",
+    "g33-build.log",
+    "g33-build.sh",
+    "g33-expected-flip.ppm",
+    "g33-expected.ppm",
+    "g33-full.diff",
+    "g33-g22check.diff",
+    "g33-hk.txt",
+    "g33-hk1.txt",
+    "g33-hk2.txt",
+    "g33-hk3.txt",
+    "g33-hk4.txt",
+    "g33-hk5.txt",
+    "g33-hk6.txt",
+    "g33-hunk.py",
+    "g33-predict.py",
+    "g33-run.sh",
+    "g33-score.py",
+    "g33-stub.cpp",
+    "g33-void-check.ppm",
+    "g34-build.log",
+    "g34-build.sh",
+    "g34-expected.ppm",
+    "g34-hunk.py",
+    "g34-oracles.py",
+    "g34-predict.py",
+    "g34-run.sh",
+    "g34-stub.cpp",
+    "g34-vpage-stale.txt",
+    "g34-vpage.txt",
+    "g34-whites.txt",
+    "powerlog",
+    "ps2x-i24",
+    "zeb_def_ipc_5053"
+  ],
+  "resources": {
+    "utc": "2026-09-22T12:06:50.476353+00:00",
+    "internal_free": 7279988736,
+    "internal_allocated": 98304,
+    "build_allocated": 0,
+    "codegen_allocated": 0,
+    "evidence_allocated": 98304,
+    "ssd_free": 149543714816,
+    "ssd_allocated": 0,
+    "ssd_owned_paths_allocated": 0,
+    "fork_positive_growth": 0,
+    "ssd_paths": []
+  }
+}

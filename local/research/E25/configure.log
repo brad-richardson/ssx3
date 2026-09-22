@@ -1,0 +1,223 @@
+-- The C compiler identification is Clang 23.1.1
+-- The CXX compiler identification is Clang 23.1.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/homebrew/opt/llvm/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/homebrew/opt/llvm/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- ARM target detected, fetching sse2neon
+-- macOS ARM64 - using default compiler flags
+CMake Warning (deprecated) at /tmp/e18-mpeg-link/runtime/_deps/toml11-src/CMakeLists.txt:25 (cmake_policy):
+  The OLD behavior for policy CMP0127 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Performing Test TOML11_COMPILER_SUPPORTS_WALL
+-- Performing Test TOML11_COMPILER_SUPPORTS_WALL - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WEXTRA
+-- Performing Test TOML11_COMPILER_SUPPORTS_WEXTRA - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WPEDANTIC
+-- Performing Test TOML11_COMPILER_SUPPORTS_WPEDANTIC - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WERROR
+-- Performing Test TOML11_COMPILER_SUPPORTS_WERROR - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSIGN_CONVERSION
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSIGN_CONVERSION - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WCONVERSION
+-- Performing Test TOML11_COMPILER_SUPPORTS_WCONVERSION - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_COND
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_COND - Failed
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_BRANCHES
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_BRANCHES - Failed
+-- Performing Test TOML11_COMPILER_SUPPORTS_WLOGICAL_OP
+-- Performing Test TOML11_COMPILER_SUPPORTS_WLOGICAL_OP - Failed
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDOUBLE_PROMOTION
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDOUBLE_PROMOTION - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WRANGE_LOOP_ANALYSIS
+-- Performing Test TOML11_COMPILER_SUPPORTS_WRANGE_LOOP_ANALYSIS - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WUNDEF
+-- Performing Test TOML11_COMPILER_SUPPORTS_WUNDEF - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSHADOW
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSHADOW - Success
+-- {fmt} version: 12.1.0
+-- Build type: Release
+-- Performing Test HAS_NULLPTR_WARNING
+-- Performing Test HAS_NULLPTR_WARNING - Success
+-- Building dwarfgen    ... OFF
+-- Building dwarfexample... OFF
+-- Building api tests   ... 
+-- Looking for unistd.h
+-- Looking for unistd.h - found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for malloc.h
+-- Looking for malloc.h - not found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for inttypes.h
+-- Looking for inttypes.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Looking for fcntl.h
+-- Looking for fcntl.h - found
+-- Looking for sys/stat.h
+-- Looking for sys/stat.h - found
+-- Looking for stdafx.h
+-- Looking for stdafx.h - not found
+-- Looking for sys/mman.h
+-- Looking for sys/mman.h - found
+-- Performing Test HAVE_UINTPTR_T
+-- Performing Test HAVE_UINTPTR_T - Success
+-- Performing Test HAVE_INTPTR_T
+-- Performing Test HAVE_INTPTR_T - Success
+-- Performing Test HAVE_FULL_MMAP
+-- Performing Test HAVE_FULL_MMAP - Success
+-- HAVE_UINTPTR_T 1: uintptr_t defined in stdint.h... YES
+-- uintptr_t value considered NO 
+-- HAVE_INTPTR_T 1: intptr_t defined in stdint.h... YES
+-- intptr_t value considered NO 
+-- ENABLE_DECOMPRESSION : ON
+-- Found ZLIB: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libz.tbd (found version "1.2.12")
+-- Found zstd: /opt/homebrew/lib/libzstd.dylib (found version "1.5.7")
+-- Found libzstd           : TRUE
+-- Found zlib              : TRUE
+-- Build with zlib and zstd: TRUE
+-- CMAKE_SIZEOF_VOID_P ... : 8
+-- Compiler warning options... NO
+-- Install prefix ... /usr/local
+> Enabling optimization for: ps2_recomp_lib
+> Enabling optimization for: ps2_recomp
+-- sccache not found; continuing without compiler launcher
+-- Populating raylib
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/e18-mpeg-link/runtime/_deps/raylib-subbuild
+[1/9] Creating directories for 'raylib-populate'
+[1/9] Performing download step (git clone) for 'raylib-populate'
+Cloning into 'raylib-src'...
+remote: Enumerating objects: 61396, done.        
+remote: Counting objects:   0% (1/23053)        remote: Counting objects:   1% (231/23053)        remote: Counting objects:   2% (462/23053)        remote: Counting objects:   3% (692/23053)        remote: Counting objects:   4% (923/23053)        remote: Counting objects:   5% (1153/23053)        remote: Counting objects:   6% (1384/23053)        remote: Counting objects:   7% (1614/23053)        remote: Counting objects:   8% (1845/23053)        remote: Counting objects:   9% (2075/23053)        remote: Counting objects:  10% (2306/23053)        remote: Counting objects:  11% (2536/23053)        remote: Counting objects:  12% (2767/23053)        remote: Counting objects:  13% (2997/23053)        remote: Counting objects:  14% (3228/23053)        remote: Counting objects:  15% (3458/23053)        remote: Counting objects:  16% (3689/23053)        remote: Counting objects:  17% (3920/23053)        remote: Counting objects:  18% (4150/23053)        remote: Counting objects:  19% (4381/23053)        remote: Counting objects:  20% (4611/23053)        remote: Counting objects:  21% (4842/23053)        remote: Counting objects:  22% (5072/23053)        remote: Counting objects:  23% (5303/23053)        remote: Counting objects:  24% (5533/23053)        remote: Counting objects:  25% (5764/23053)        remote: Counting objects:  26% (5994/23053)        remote: Counting objects:  27% (6225/23053)        remote: Counting objects:  28% (6455/23053)        remote: Counting objects:  29% (6686/23053)        remote: Counting objects:  30% (6916/23053)        remote: Counting objects:  31% (7147/23053)        remote: Counting objects:  32% (7377/23053)        remote: Counting objects:  33% (7608/23053)        remote: Counting objects:  34% (7839/23053)        remote: Counting objects:  35% (8069/23053)        remote: Counting objects:  36% (8300/23053)        remote: Counting objects:  37% (8530/23053)        remote: Counting objects:  38% (8761/23053)        remote: Counting objects:  39% (8991/23053)        remote: Counting objects:  40% (9222/23053)        remote: Counting objects:  41% (9452/23053)        remote: Counting objects:  42% (9683/23053)        remote: Counting objects:  43% (9913/23053)        remote: Counting objects:  44% (10144/23053)        remote: Counting objects:  45% (10374/23053)        remote: Counting objects:  46% (10605/23053)        remote: Counting objects:  47% (10835/23053)        remote: Counting objects:  48% (11066/23053)        remote: Counting objects:  49% (11296/23053)        remote: Counting objects:  50% (11527/23053)        remote: Counting objects:  51% (11758/23053)        remote: Counting objects:  52% (11988/23053)        remote: Counting objects:  53% (12219/23053)        remote: Counting objects:  54% (12449/23053)        remote: Counting objects:  55% (12680/23053)        remote: Counting objects:  56% (12910/23053)        remote: Counting objects:  57% (13141/23053)        remote: Counting objects:  58% (13371/23053)        remote: Counting objects:  59% (13602/23053)        remote: Counting objects:  60% (13832/23053)        remote: Counting objects:  61% (14063/23053)        remote: Counting objects:  62% (14293/23053)        remote: Counting objects:  63% (14524/23053)        remote: Counting objects:  64% (14754/23053)        remote: Counting objects:  65% (14985/23053)        remote: Counting objects:  66% (15215/23053)        remote: Counting objects:  67% (15446/23053)        remote: Counting objects:  68% (15677/23053)        remote: Counting objects:  69% (15907/23053)        remote: Counting objects:  70% (16138/23053)        remote: Counting objects:  71% (16368/23053)        remote: Counting objects:  72% (16599/23053)        remote: Counting objects:  73% (16829/23053)        remote: Counting objects:  74% (17060/23053)        remote: Counting objects:  75% (17290/23053)        remote: Counting objects:  76% (17521/23053)        remote: Counting objects:  77% (17751/23053)        remote: Counting objects:  78% (17982/23053)        remote: Counting objects:  79% (18212/23053)        remote: Counting objects:  80% (18443/23053)        remote: Counting objects:  81% (18673/23053)        remote: Counting objects:  82% (18904/23053)        remote: Counting objects:  83% (19134/23053)        remote: Counting objects:  84% (19365/23053)        remote: Counting objects:  85% (19596/23053)        remote: Counting objects:  86% (19826/23053)        remote: Counting objects:  87% (20057/23053)        remote: Counting objects:  88% (20287/23053)        remote: Counting objects:  89% (20518/23053)        remote: Counting objects:  90% (20748/23053)        remote: Counting objects:  91% (20979/23053)        remote: Counting objects:  92% (21209/23053)        remote: Counting objects:  93% (21440/23053)        remote: Counting objects:  94% (21670/23053)        remote: Counting objects:  95% (21901/23053)        remote: Counting objects:  96% (22131/23053)        remote: Counting objects:  97% (22362/23053)        remote: Counting objects:  98% (22592/23053)        remote: Counting objects:  99% (22823/23053)        remote: Counting objects: 100% (23053/23053)        remote: Counting objects: 100% (23053/23053), done.        
+remote: Compressing objects:   0% (1/1293)        remote: Compressing objects:   1% (13/1293)        remote: Compressing objects:   2% (26/1293)        remote: Compressing objects:   3% (39/1293)        remote: Compressing objects:   4% (52/1293)        remote: Compressing objects:   5% (65/1293)        remote: Compressing objects:   6% (78/1293)        remote: Compressing objects:   7% (91/1293)        remote: Compressing objects:   8% (104/1293)        remote: Compressing objects:   9% (117/1293)        remote: Compressing objects:  10% (130/1293)        remote: Compressing objects:  11% (143/1293)        remote: Compressing objects:  12% (156/1293)        remote: Compressing objects:  13% (169/1293)        remote: Compressing objects:  14% (182/1293)        remote: Compressing objects:  15% (194/1293)        remote: Compressing objects:  16% (207/1293)        remote: Compressing objects:  17% (220/1293)        remote: Compressing objects:  18% (233/1293)        remote: Compressing objects:  19% (246/1293)        remote: Compressing objects:  20% (259/1293)        remote: Compressing objects:  21% (272/1293)        remote: Compressing objects:  22% (285/1293)        remote: Compressing objects:  23% (298/1293)        remote: Compressing objects:  24% (311/1293)        remote: Compressing objects:  25% (324/1293)        remote: Compressing objects:  26% (337/1293)        remote: Compressing objects:  27% (350/1293)        remote: Compressing objects:  28% (363/1293)        remote: Compressing objects:  29% (375/1293)        remote: Compressing objects:  30% (388/1293)        remote: Compressing objects:  31% (401/1293)        remote: Compressing objects:  32% (414/1293)        remote: Compressing objects:  33% (427/1293)        remote: Compressing objects:  34% (440/1293)        remote: Compressing objects:  35% (453/1293)        remote: Compressing objects:  36% (466/1293)        remote: Compressing objects:  37% (479/1293)        remote: Compressing objects:  38% (492/1293)        remote: Compressing objects:  39% (505/1293)        remote: Compressing objects:  40% (518/1293)        remote: Compressing objects:  41% (531/1293)        remote: Compressing objects:  42% (544/1293)        remote: Compressing objects:  43% (556/1293)        remote: Compressing objects:  44% (569/1293)        remote: Compressing objects:  45% (582/1293)        remote: Compressing objects:  45% (583/1293)        remote: Compressing objects:  46% (595/1293)        remote: Compressing objects:  47% (608/1293)        remote: Compressing objects:  48% (621/1293)        remote: Compressing objects:  49% (634/1293)        remote: Compressing objects:  50% (647/1293)        remote: Compressing objects:  51% (660/1293)        remote: Compressing objects:  52% (673/1293)        remote: Compressing objects:  53% (686/1293)        remote: Compressing objects:  54% (699/1293)        remote: Compressing objects:  55% (712/1293)        remote: Compressing objects:  56% (725/1293)        remote: Compressing objects:  57% (738/1293)        remote: Compressing objects:  58% (750/1293)        remote: Compressing objects:  59% (763/1293)        remote: Compressing objects:  60% (776/1293)        remote: Compressing objects:  61% (789/1293)        remote: Compressing objects:  62% (802/1293)        remote: Compressing objects:  63% (815/1293)        remote: Compressing objects:  64% (828/1293)        remote: Compressing objects:  65% (841/1293)        remote: Compressing objects:  66% (854/1293)        remote: Compressing objects:  67% (867/1293)        remote: Compressing objects:  68% (880/1293)        remote: Compressing objects:  69% (893/1293)        remote: Compressing objects:  70% (906/1293)        remote: Compressing objects:  71% (919/1293)        remote: Compressing objects:  72% (931/1293)        remote: Compressing objects:  73% (944/1293)        remote: Compressing objects:  74% (957/1293)        remote: Compressing objects:  75% (970/1293)        remote: Compressing objects:  76% (983/1293)        remote: Compressing objects:  77% (996/1293)        remote: Compressing objects:  78% (1009/1293)        remote: Compressing objects:  79% (1022/1293)        remote: Compressing objects:  80% (1035/1293)        remote: Compressing objects:  81% (1048/1293)        remote: Compressing objects:  82% (1061/1293)        remote: Compressing objects:  83% (1074/1293)        remote: Compressing objects:  84% (1087/1293)        remote: Compressing objects:  85% (1100/1293)        remote: Compressing objects:  86% (1112/1293)        remote: Compressing objects:  87% (1125/1293)        remote: Compressing objects:  88% (1138/1293)        remote: Compressing objects:  89% (1151/1293)        remote: Compressing objects:  90% (1164/1293)        remote: Compressing objects:  91% (1177/1293)        remote: Compressing objects:  92% (1190/1293)        remote: Compressing objects:  93% (1203/1293)        remote: Compressing objects:  94% (1216/1293)        remote: Compressing objects:  95% (1229/1293)        remote: Compressing objects:  96% (1242/1293)        remote: Compressing objects:  97% (1255/1293)        remote: Compressing objects:  98% (1268/1293)        remote: Compressing objects:  99% (1281/1293)        remote: Compressing objects: 100% (1293/1293)        remote: Compressing objects: 100% (1293/1293), done.        
+Receiving objects:   0% (1/61396)Receiving objects:   1% (614/61396)Receiving objects:   2% (1228/61396)Receiving objects:   3% (1842/61396)Receiving objects:   4% (2456/61396)Receiving objects:   5% (3070/61396)Receiving objects:   6% (3684/61396)Receiving objects:   7% (4298/61396)Receiving objects:   8% (4912/61396)Receiving objects:   9% (5526/61396)Receiving objects:  10% (6140/61396)Receiving objects:  11% (6754/61396)Receiving objects:  12% (7368/61396)Receiving objects:  13% (7982/61396)Receiving objects:  14% (8596/61396)Receiving objects:  15% (9210/61396)Receiving objects:  16% (9824/61396), 13.16 MiB | 26.30 MiB/sReceiving objects:  16% (10083/61396), 30.14 MiB | 30.11 MiB/sReceiving objects:  17% (10438/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  18% (11052/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  19% (11666/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  20% (12280/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  21% (12894/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  22% (13508/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  23% (14122/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  24% (14736/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  25% (15349/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  26% (15963/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  27% (16577/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  28% (17191/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  29% (17805/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  30% (18419/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  31% (19033/61396), 47.75 MiB | 31.80 MiB/sReceiving objects:  31% (19288/61396), 65.93 MiB | 32.95 MiB/sReceiving objects:  32% (19647/61396), 65.93 MiB | 32.95 MiB/sReceiving objects:  33% (20261/61396), 65.93 MiB | 32.95 MiB/sReceiving objects:  34% (20875/61396), 65.93 MiB | 32.95 MiB/sReceiving objects:  35% (21489/61396), 65.93 MiB | 32.95 MiB/sReceiving objects:  35% (21978/61396), 85.09 MiB | 34.02 MiB/sReceiving objects:  36% (22103/61396), 103.76 MiB | 34.57 MiB/sReceiving objects:  36% (22206/61396), 133.71 MiB | 33.38 MiB/sReceiving objects:  37% (22717/61396), 133.71 MiB | 33.38 MiB/sReceiving objects:  37% (23053/61396), 148.72 MiB | 33.01 MiB/sReceiving objects:  38% (23331/61396), 163.92 MiB | 33.47 MiB/sReceiving objects:  39% (23945/61396), 163.92 MiB | 33.47 MiB/sReceiving objects:  39% (24436/61396), 195.44 MiB | 32.80 MiB/sReceiving objects:  40% (24559/61396), 195.44 MiB | 32.80 MiB/sReceiving objects:  41% (25173/61396), 195.44 MiB | 32.80 MiB/sReceiving objects:  42% (25787/61396), 195.44 MiB | 32.80 MiB/sReceiving objects:  43% (26401/61396), 195.44 MiB | 32.80 MiB/sReceiving objects:  44% (27015/61396), 211.50 MiB | 32.33 MiB/sReceiving objects:  44% (27587/61396), 226.20 MiB | 31.32 MiB/sReceiving objects:  45% (27629/61396), 238.04 MiB | 29.79 MiB/sReceiving objects:  46% (28243/61396), 238.04 MiB | 29.79 MiB/sReceiving objects:  47% (28857/61396), 238.04 MiB | 29.79 MiB/sReceiving objects:  47% (29197/61396), 250.55 MiB | 29.14 MiB/sReceiving objects:  48% (29471/61396), 250.55 MiB | 29.14 MiB/sReceiving objects:  49% (30085/61396), 263.65 MiB | 28.85 MiB/sReceiving objects:  50% (30698/61396), 263.65 MiB | 28.85 MiB/sReceiving objects:  50% (30851/61396), 263.65 MiB | 28.85 MiB/sReceiving objects:  50% (30925/61396), 303.86 MiB | 27.64 MiB/sReceiving objects:  51% (31312/61396), 318.08 MiB | 27.22 MiB/sReceiving objects:  52% (31926/61396), 318.08 MiB | 27.22 MiB/sReceiving objects:  52% (31960/61396), 318.08 MiB | 27.22 MiB/sReceiving objects:  53% (32540/61396), 347.22 MiB | 26.85 MiB/sReceiving objects:  54% (33154/61396), 347.22 MiB | 26.85 MiB/sReceiving objects:  55% (33768/61396), 347.22 MiB | 26.85 MiB/sReceiving objects:  56% (34382/61396), 347.22 MiB | 26.85 MiB/sReceiving objects:  56% (34503/61396), 347.22 MiB | 26.85 MiB/sReceiving objects:  57% (34996/61396), 347.22 MiB | 26.85 MiB/sReceiving objects:  58% (35610/61396), 362.71 MiB | 27.67 MiB/sReceiving objects:  59% (36224/61396), 362.71 MiB | 27.67 MiB/sReceiving objects:  60% (36838/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  61% (37452/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  62% (38066/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  63% (38680/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  64% (39294/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  65% (39908/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  66% (40522/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  67% (41136/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  68% (41750/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  69% (42364/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  70% (42978/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  71% (43592/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  72% (44206/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  73% (44820/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  74% (45434/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  75% (46047/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  76% (46661/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  77% (47275/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  78% (47889/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  79% (48503/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  80% (49117/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  81% (49731/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  82% (50345/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  83% (50959/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  84% (51573/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  85% (52187/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  86% (52801/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  87% (53415/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  88% (54029/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  88% (54051/61396), 378.50 MiB | 28.40 MiB/sReceiving objects:  89% (54643/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  90% (55257/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  91% (55871/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  92% (56485/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  93% (57099/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  94% (57713/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  95% (58327/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  96% (58941/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  97% (59555/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  98% (60169/61396), 394.36 MiB | 29.01 MiB/sReceiving objects:  99% (60783/61396), 394.36 MiB | 29.01 MiB/sremote: Total 61396 (delta 22304), reused 21763 (delta 21760), pack-reused 38343 (from 1)        
+Receiving objects: 100% (61396/61396), 394.36 MiB | 29.01 MiB/sReceiving objects: 100% (61396/61396), 408.55 MiB | 30.35 MiB/s, done.
+Resolving deltas:   0% (0/45686)Resolving deltas:   1% (457/45686)Resolving deltas:   2% (914/45686)Resolving deltas:   3% (1371/45686)Resolving deltas:   4% (1828/45686)Resolving deltas:   5% (2285/45686)Resolving deltas:   6% (2742/45686)Resolving deltas:   7% (3199/45686)Resolving deltas:   8% (3656/45686)Resolving deltas:   9% (4112/45686)Resolving deltas:  10% (4571/45686)Resolving deltas:  11% (5026/45686)Resolving deltas:  12% (5483/45686)Resolving deltas:  13% (5940/45686)Resolving deltas:  14% (6397/45686)Resolving deltas:  15% (6853/45686)Resolving deltas:  16% (7310/45686)Resolving deltas:  17% (7767/45686)Resolving deltas:  18% (8225/45686)Resolving deltas:  19% (8681/45686)Resolving deltas:  20% (9138/45686)Resolving deltas:  21% (9595/45686)Resolving deltas:  22% (10052/45686)Resolving deltas:  23% (10508/45686)Resolving deltas:  24% (10965/45686)Resolving deltas:  25% (11422/45686)Resolving deltas:  26% (11879/45686)Resolving deltas:  27% (12336/45686)Resolving deltas:  28% (12793/45686)Resolving deltas:  29% (13249/45686)Resolving deltas:  30% (13706/45686)Resolving deltas:  31% (14163/45686)Resolving deltas:  32% (14620/45686)Resolving deltas:  33% (15077/45686)Resolving deltas:  34% (15534/45686)Resolving deltas:  35% (15991/45686)Resolving deltas:  36% (16447/45686)Resolving deltas:  37% (16905/45686)Resolving deltas:  38% (17361/45686)Resolving deltas:  39% (17819/45686)Resolving deltas:  40% (18275/45686)Resolving deltas:  41% (18732/45686)Resolving deltas:  42% (19189/45686)Resolving deltas:  43% (19645/45686)Resolving deltas:  44% (20102/45686)Resolving deltas:  45% (20559/45686)Resolving deltas:  46% (21016/45686)Resolving deltas:  47% (21473/45686)Resolving deltas:  48% (21930/45686)Resolving deltas:  49% (22387/45686)Resolving deltas:  50% (22843/45686)Resolving deltas:  51% (23300/45686)Resolving deltas:  52% (23757/45686)Resolving deltas:  53% (24214/45686)Resolving deltas:  54% (24671/45686)Resolving deltas:  55% (25128/45686)Resolving deltas:  56% (25585/45686)Resolving deltas:  57% (26042/45686)Resolving deltas:  58% (26498/45686)Resolving deltas:  59% (26955/45686)Resolving deltas:  60% (27413/45686)Resolving deltas:  61% (27869/45686)Resolving deltas:  62% (28328/45686)Resolving deltas:  63% (28783/45686)Resolving deltas:  64% (29240/45686)Resolving deltas:  65% (29696/45686)Resolving deltas:  66% (30154/45686)Resolving deltas:  67% (30610/45686)Resolving deltas:  68% (31067/45686)Resolving deltas:  69% (31524/45686)Resolving deltas:  70% (31981/45686)Resolving deltas:  71% (32438/45686)Resolving deltas:  72% (32894/45686)Resolving deltas:  73% (33351/45686)Resolving deltas:  74% (33808/45686)Resolving deltas:  75% (34265/45686)Resolving deltas:  76% (34722/45686)Resolving deltas:  77% (35179/45686)Resolving deltas:  78% (35636/45686)Resolving deltas:  79% (36092/45686)Resolving deltas:  80% (36550/45686)Resolving deltas:  81% (37006/45686)Resolving deltas:  82% (37463/45686)Resolving deltas:  83% (37920/45686)Resolving deltas:  84% (38377/45686)Resolving deltas:  85% (38834/45686)Resolving deltas:  86% (39290/45686)Resolving deltas:  87% (39750/45686)Resolving deltas:  88% (40204/45686)Resolving deltas:  89% (40661/45686)Resolving deltas:  90% (41118/45686)Resolving deltas:  91% (41575/45686)Resolving deltas:  92% (42032/45686)Resolving deltas:  93% (42488/45686)Resolving deltas:  94% (42945/45686)Resolving deltas:  95% (43402/45686)Resolving deltas:  96% (43859/45686)Resolving deltas:  97% (44316/45686)Resolving deltas:  98% (44773/45686)Resolving deltas:  99% (45232/45686)Resolving deltas: 100% (45686/45686)Resolving deltas: 100% (45686/45686), done.
+HEAD is now at c1ab645c Update HISTORY.md
+[2/9] Performing update step for 'raylib-populate'
+-- Already at requested tag: 5.5
+[3/9] No patch step for 'raylib-populate'
+[5/9] No configure step for 'raylib-populate'
+[6/9] No build step for 'raylib-populate'
+[7/9] No install step for 'raylib-populate'
+[8/9] No test step for 'raylib-populate'
+[9/9] Completed 'raylib-populate'
+CMake Warning (deprecated) at /tmp/e18-mpeg-link/runtime/_deps/raylib-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Performing Test COMPILER_HAS_THOSE_TOGGLES
+-- Performing Test COMPILER_HAS_THOSE_TOGGLES - Success
+-- Testing if -Werror=pointer-arith can be used -- compiles
+-- Testing if -Werror=implicit-function-declaration can be used -- compiles
+-- Testing if -fno-strict-aliasing can be used -- compiles
+-- Using raylib's GLFW
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Including Cocoa support
+CMake Warning (author) at /tmp/e18-mpeg-link/runtime/_deps/raylib-src/cmake/LibraryConfigurations.cmake:22 (MESSAGE):
+  OpenGL is deprecated starting with macOS 10.14 (Mojave)!
+Call Stack (most recent call first):
+  /tmp/e18-mpeg-link/runtime/_deps/raylib-src/src/CMakeLists.txt:49 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated build type: Release
+-- Compiling with the flags:
+--   PLATFORM=PLATFORM_DESKTOP
+--   GRAPHICS=GRAPHICS_API_OPENGL_33
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui) is deprecated, call
+  FetchContent_MakeAvailable(imgui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(imgui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:122 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating imgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/e18-mpeg-link/runtime/_deps/imgui-subbuild
+[1/9] Creating directories for 'imgui-populate'
+[1/9] Performing download step (git clone) for 'imgui-populate'
+Cloning into 'imgui-src'...
+HEAD is now at b1bcb12 Merge branch 'master' into docking
+[2/9] Performing update step for 'imgui-populate'
+-- Already at requested tag: v1.92.7-docking
+[3/9] No patch step for 'imgui-populate'
+[5/9] No configure step for 'imgui-populate'
+[6/9] No build step for 'imgui-populate'
+[7/9] No install step for 'imgui-populate'
+[8/9] No test step for 'imgui-populate'
+[9/9] Completed 'imgui-populate'
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(rlImGui) is deprecated, call
+  FetchContent_MakeAvailable(rlImGui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(rlImGui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:145 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating rlimgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/e18-mpeg-link/runtime/_deps/rlimgui-subbuild
+[1/9] Creating directories for 'rlimgui-populate'
+[1/9] Performing download step (git clone) for 'rlimgui-populate'
+Cloning into 'rlimgui-src'...
+HEAD is now at 118221c Update headings in README.md for consistency
+[2/9] Performing update step for 'rlimgui-populate'
+-- Already at requested tag: Raylib_5_5
+[3/9] No patch step for 'rlimgui-populate'
+[5/9] No configure step for 'rlimgui-populate'
+[6/9] No build step for 'rlimgui-populate'
+[7/9] No install step for 'rlimgui-populate'
+[8/9] No test step for 'rlimgui-populate'
+[9/9] Completed 'rlimgui-populate'
+-- Found PkgConfig: /opt/homebrew/bin/pkg-config (found version "3.0.7")
+-- Checking for modules 'libavcodec;libavformat;libavutil;libswresample;libswscale'
+--   Found libavcodec, version 63.1.101
+--   Found libavformat, version 63.1.101
+--   Found libavutil, version 61.1.101
+--   Found libswresample, version 7.1.101
+--   Found libswscale, version 10.1.101
+> Enabling optimization for: ps2_runtime
+> Enabling optimization for: ps2EntryRunner
+-- Using the multi-header code from /tmp/e18-mpeg-link/runtime/_deps/nlohmann_json-src/include/
+> Enabling optimization for: ps2_analyzer_lib
+> Enabling optimization for: ps2_analyzer
+> Enabling optimization for: ps2_test_lib
+> Enabling optimization for: ps2x_tests
+-- Configuring done (69.5s)
+-- Generating done (2.5s)
+-- Build files have been written to: /tmp/e18-mpeg-link/runtime

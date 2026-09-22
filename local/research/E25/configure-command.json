@@ -1,0 +1,53 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+    "-B",
+    "/tmp/e18-mpeg-link/runtime",
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang",
+    "-DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++",
+    "-DCMAKE_OSX_ARCHITECTURES=arm64",
+    "-DPS2X_BUILD_STUDIO=OFF",
+    "-DPS2X_BUILD_RUNTIME=ON",
+    "-DPS2X_BUILD_TEST=ON",
+    "-DPS2X_ENABLE_RUNTIME_LOGS=ON",
+    "-DPS2X_ENABLE_AGRESSIVE_LOGS=ON",
+    "-DPS2X_ENABLE_IOP_RPC_TRACE=ON",
+    "-DPS2X_STRICT_RETURN_DIAGNOSTICS=OFF",
+    "-DPS2X_ENABLE_FFMPEG=ON"
+  ],
+  "jobs": 2,
+  "source": "byte-equal to local/research/E18/configure-command.json; E18 recipe, E18 build directory",
+  "e18_receipt": {
+    "argv": [
+      "cmake",
+      "-S",
+      "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+      "-B",
+      "/tmp/e18-mpeg-link/runtime",
+      "-G",
+      "Ninja",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang",
+      "-DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++",
+      "-DCMAKE_OSX_ARCHITECTURES=arm64",
+      "-DPS2X_BUILD_STUDIO=OFF",
+      "-DPS2X_BUILD_RUNTIME=ON",
+      "-DPS2X_BUILD_TEST=ON",
+      "-DPS2X_ENABLE_RUNTIME_LOGS=ON",
+      "-DPS2X_ENABLE_AGRESSIVE_LOGS=ON",
+      "-DPS2X_ENABLE_IOP_RPC_TRACE=ON",
+      "-DPS2X_STRICT_RETURN_DIAGNOSTICS=OFF",
+      "-DPS2X_ENABLE_FFMPEG=ON"
+    ],
+    "source": "Exact E17 flags with a fresh E18 build directory; no code generator",
+    "jobs": 2
+  },
+  "argv_equal_e18": true,
+  "fresh_build_dir": true,
+  "utc": "2026-09-22T12:08:18.836045+00:00"
+}

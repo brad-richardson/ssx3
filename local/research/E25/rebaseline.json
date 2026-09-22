@@ -1,0 +1,299 @@
+{
+  "utc": "2026-09-22T12:26:24.583652+00:00",
+  "rows": [
+    {
+      "pin": "fork HEAD / refs/remotes/fork/ssx3 / ls-remote",
+      "old": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+      "new": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+      "status": "MATCH",
+      "cause": "unchanged; E25 made no fork commit"
+    },
+    {
+      "pin": "fork `status --short`",
+      "old": "?? ps2_log.txt",
+      "new": "?? ps2_log.txt",
+      "status": "MATCH",
+      "cause": "unchanged"
+    },
+    {
+      "pin": "9,457 generated .cpp/.h names+SHA256",
+      "old": "9457 / all match",
+      "new": "9457 / all match",
+      "status": "MATCH",
+      "cause": "source tree untouched"
+    },
+    {
+      "pin": "21 E18 input/behaviour source SHA256",
+      "old": "21 / all equal",
+      "new": "21 / all equal",
+      "status": "MATCH",
+      "cause": "source tree untouched"
+    },
+    {
+      "pin": "1,725 protected build hashes (3 trees)",
+      "old": "1725 present / all equal",
+      "new": "567 identical + 8 differing + 0 missing of the 575 rebuilt; 1150 in the two trees E25 did NOT rebuild",
+      "status": "DELTA",
+      "cause": "one tree rebuilt (internal cap 3 GiB, and only this tree holds the runner+suite); the other two are historical build trees for P1 and E17"
+    },
+    {
+      "pin": "runner bytes",
+      "old": 163529696,
+      "new": 163529696,
+      "status": "MATCH",
+      "cause": "byte-size reproduced exactly"
+    },
+    {
+      "pin": "runner SHA256",
+      "old": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "new": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "suite bytes",
+      "old": 5695128,
+      "new": 5695128,
+      "status": "MATCH",
+      "cause": "byte-size reproduced exactly"
+    },
+    {
+      "pin": "suite SHA256",
+      "old": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "new": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "E18 fixture binary SHA256",
+      "old": "42d9f4f373265f5f40ea29920db6149e9043f5afbd65d2d576ea9477d6587326",
+      "new": "42d9f4f373265f5f40ea29920db6149e9043f5afbd65d2d576ea9477d6587326",
+      "status": "MATCH",
+      "cause": "survived; reused by copy + re-sha"
+    },
+    {
+      "pin": "E18 fixture binary bytes",
+      "old": 165183488,
+      "new": 165183488,
+      "status": "MATCH",
+      "cause": "survived; not rebuilt"
+    },
+    {
+      "pin": "E23 cadence fixture binary SHA256",
+      "old": "3136f3ca734aece4ad9c24e3820bc3c5dc5ce229639218be14beb579fd4279a2",
+      "new": "3136f3ca734aece4ad9c24e3820bc3c5dc5ce229639218be14beb579fd4279a2",
+      "status": "MATCH",
+      "cause": "survived; reused by copy + re-sha"
+    },
+    {
+      "pin": "E23 cadence fixture binary bytes",
+      "old": 165202160,
+      "new": 165202160,
+      "status": "MATCH",
+      "cause": "survived; not rebuilt"
+    },
+    {
+      "pin": "observer dylib SHA256",
+      "old": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+      "new": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+      "status": "MATCH",
+      "cause": "reused, never rebuilt"
+    },
+    {
+      "pin": "observer dylib bytes",
+      "old": 52472,
+      "new": 52472,
+      "status": "MATCH",
+      "cause": "reused, never rebuilt"
+    },
+    {
+      "pin": "full suite (unloaded) totals",
+      "old": {
+        "Total Tests": 458,
+        "Passed": 458,
+        "Failed": 0
+      },
+      "new": {
+        "Total Tests": 458,
+        "Passed": 458,
+        "Failed": 0
+      },
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "full suite (unloaded) transcript",
+      "old": "1137 lines / 458 runs",
+      "new": "identical; 8 raw lines differ, all inside the 8 masked lane-scratch spans, residual 0",
+      "status": "MATCH*",
+      "cause": "FREE FIELD: the four mc0 tests echo their own TMPDIR scratch path, which carries the lane directory name and a monotonic-clock nonce"
+    },
+    {
+      "pin": "E18 R1-R6 lines (unloaded)",
+      "old": "6 present",
+      "new": "6 present",
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "full suite (observer-LOADED) totals",
+      "old": {
+        "Total Tests": 458,
+        "Passed": 458,
+        "Failed": 0
+      },
+      "new": {
+        "Total Tests": 458,
+        "Passed": 458,
+        "Failed": 0
+      },
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "full suite (observer-LOADED) transcript",
+      "old": "1137 lines / 458 runs",
+      "new": "identical; 8 raw lines differ, all inside the 8 masked lane-scratch spans, residual 0",
+      "status": "MATCH*",
+      "cause": "FREE FIELD: the four mc0 tests echo their own TMPDIR scratch path, which carries the lane directory name and a monotonic-clock nonce"
+    },
+    {
+      "pin": "E18 R1-R6 lines (observer-LOADED)",
+      "old": "6 present",
+      "new": "6 present",
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "prior actual bindings",
+      "old": [
+        24,
+        3,
+        14,
+        4,
+        "DROP"
+      ],
+      "new": [
+        24,
+        3,
+        14,
+        4,
+        "DROP"
+      ],
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "E15 no-input / input rc",
+      "old": [
+        0,
+        0
+      ],
+      "new": [
+        0,
+        0
+      ],
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "E16 closure modes",
+      "old": 6,
+      "new": 6,
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "absorbed entries (5 presence + 3 ownership)",
+      "old": 8,
+      "new": 8,
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "observer-LOADED closures receipt-verified",
+      "old": 10,
+      "new": 10,
+      "status": "MATCH",
+      "cause": ""
+    },
+    {
+      "pin": "toolchain (clang / cmake / pkg-config / 5 ffmpeg modules)",
+      "old": "E18 configure.log + P1 REPORT",
+      "new": "drift-free",
+      "status": "MATCH",
+      "cause": "compiler ids, cmake, pkg-config and all five ffmpeg module versions equal"
+    },
+    {
+      "pin": "configure log (substantive lines)",
+      "old": "214 lines",
+      "new": "identical",
+      "status": "MATCH",
+      "cause": "git transfer progress dropped; elapsed seconds and ninja counters masked"
+    },
+    {
+      "pin": "FetchContent dependency HEADs (raylib / imgui / rlImGui)",
+      "old": "E18 three HEADs",
+      "new": "identical",
+      "status": "MATCH",
+      "cause": "same tags 5.5 / v1.92.7-docking / Raylib_5_5"
+    },
+    {
+      "pin": "build graph edges",
+      "old": "23 E18-only",
+      "new": "0 E25-only",
+      "status": "MATCH",
+      "cause": "E18 ran one extra compile edge (its own AppleDouble sidecar) plus 22 FetchContent sub-steps and a re-configure; E25 ran nothing E18 did not"
+    },
+    {
+      "pin": "the 8 pins that changed -- cause",
+      "old": "575 pinned files",
+      "new": "567 identical / 7 archives / 1 pch",
+      "status": "MATCH*",
+      "cause": "ar member timestamps: every archive that did NOT reproduce carries dates written by THIS build; every archive that DID carries deterministic (0) or frozen vendor dates -- no exception. All 552 .o objects reproduced bit-for-bit, and each differing archive holds exactly those objects. Rebuild nondeterminism, not toolchain drift and not a path change."
+    },
+    {
+      "pin": "regression receipts, field by field (observer footers + fixtures + absorbed)",
+      "old": "E23 receipts",
+      "new": "all sections match",
+      "status": "MATCH*",
+      "cause": "FREE FIELDS: observer `ns` (wall clock) and `eventBytes` (event-text length, which carries the lane path)"
+    },
+    {
+      "pin": "complete-feed cadence control (60/120/180/240)",
+      "old": "E23 + E24 reference",
+      "new": "all four match",
+      "status": "MATCH",
+      "cause": "carried control beyond mission 3; runs on the SURVIVING fixture, not the rebuild"
+    },
+    {
+      "pin": "durability snapshot (new)",
+      "old": "none existed",
+      "new": "tar 7342 members + 2 standalone binaries, all re-read verified",
+      "status": "MATCH",
+      "cause": "restore procedure tabled, not exercised"
+    }
+  ],
+  "pins": 34,
+  "matched": 29,
+  "matched_modulo_declared_free_field": 4,
+  "deltas": 1,
+  "blocked": 0,
+  "starred_pins": [
+    "full suite (unloaded) transcript",
+    "full suite (observer-LOADED) transcript",
+    "the 8 pins that changed -- cause",
+    "regression receipts, field by field (observer footers + fixtures + absorbed)"
+  ],
+  "delta_pins": [
+    "1,725 protected build hashes (3 trees)"
+  ],
+  "blocked_pins": [],
+  "status_key": {
+    "MATCH": "old == new",
+    "MATCH*": "matches once a NAMED, declared free field is set aside",
+    "DELTA": "differs for a reason that is not a declared free field",
+    "BLOCKED": "not obtainable in this lane"
+  },
+  "decision": "NOT MADE HERE -- orchestrator gates this table"
+}

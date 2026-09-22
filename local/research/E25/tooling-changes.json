@@ -1,0 +1,54 @@
+{
+  "utc": "2026-09-22T12:22:20.157137+00:00",
+  "source_lane": "E24",
+  "pure_renames": "rename-proof-hexsafe.json (9 files, all proofs empty)",
+  "intentional_changes": [
+    {
+      "file": "e25_baseline.py",
+      "why": "restore the 458-test unloaded suite gate",
+      "status": "APPLIED",
+      "applied": true,
+      "before_bytes": 1809,
+      "after_bytes": 1902,
+      "diff": "--- e25_baseline.py (E24 shape)\n+++ e25_baseline.py (E25)\n@@ -0,0 +1,4 @@\n+# E25 CHANGE 1 (reverts E24 CHANGE 2): the suite binary was REBUILT by this\n+# lane, so the 458-test gate runs again instead of reporting BLOCKED. The\n+# presence short-circuit in e25_validate.suite() is kept -- it is the gate\n+# that would catch a failed rebuild -- but it is no longer expected to fire.\n@@ -2,4 +6 @@\n-# E25 CHANGE 2: the 458-test suite is BLOCKED (binary wiped with the protected\n-# build tree). The fixture half below still runs on the SSD-resident, sha-equal\n-# `binding-test`, so the behavior checkpoint is reported as what it IS:\n-# fixture gates VERIFIED, suite gate BLOCKED.\n+assert suite_rc==0 and suite_row.get('status')!='BLOCKED',suite_row"
+    },
+    {
+      "file": "e25_baseline.py",
+      "why": "record the restored suite count in the checkpoint receipt",
+      "status": "APPLIED",
+      "applied": true,
+      "before_bytes": 1902,
+      "after_bytes": 1874,
+      "diff": "--- e25_baseline.py (E24 shape)\n+++ e25_baseline.py (E25)\n@@ -1 +1 @@\n-save('checkpoint-complete.json',dict(utc=utc(),suite=None,suite_status=suite_row.get('status','BLOCKED'),suite_receipt=suite_row,\n+save('checkpoint-complete.json',dict(utc=utc(),suite=458,suite_status='PASS',suite_receipt=suite_row,"
+    },
+    {
+      "file": "e25_observer_regression.py",
+      "why": "assert the observer-LOADED suite ran rather than short-circuiting",
+      "status": "APPLIED",
+      "applied": true,
+      "before_bytes": 2732,
+      "after_bytes": 2829,
+      "diff": "--- e25_observer_regression.py (E24 shape)\n+++ e25_observer_regression.py (E25)\n@@ -1 +1,2 @@\n-suite('observer')\n+suite_rc,suite_txt,suite_row=suite('observer')\n+assert suite_rc==0 and suite_row.get('status')!='BLOCKED',suite_row"
+    },
+    {
+      "file": "e25_observer_regression.py",
+      "why": "restore the suite's own observer directory as the parser-reach receipt",
+      "status": "APPLIED",
+      "applied": true,
+      "before_bytes": 2829,
+      "after_bytes": 2780,
+      "diff": "--- e25_observer_regression.py (E24 shape)\n+++ e25_observer_regression.py (E25)\n@@ -1,6 +1,6 @@\n-# E25 CHANGE 3: the suite's own observer dir is BLOCKED with the suite binary.\n-# In E23 the suite was the ONLY loaded run that reached the parser, so the\n-# parser-reach receipt moves to the surviving E23 cadence fixture, which drives\n-# the R3 payload through the actual title wrappers (`e25_cadence.py`). The\n-# fixture closures below still carry real `# E21 PARSER CLOSURE` footers.\n-for directory in [*sorted((P/'e25-fixtures/observer-bindings').glob('*/parser-observer')),\n+# E25 CHANGE 2 (reverts E24 CHANGE 3): with the suite rebuilt, the suite's own\n+# observer directory is once more the loaded run that REACHES the parser, so it\n+# leads the closure list exactly as it did in E23 and the parser-reach receipt\n+# returns here from the cadence fixture.\n+for directory in [E/'.suite-observer/parser-observer',\n+                  *sorted((P/'e25-fixtures/observer-bindings').glob('*/parser-observer')),"
+    },
+    {
+      "file": "e25_observer_regression.py",
+      "why": "restore E23 parser-reach assertion and the loaded suite count",
+      "status": "APPLIED",
+      "applied": true,
+      "before_bytes": 2780,
+      "after_bytes": 2858,
+      "diff": "--- e25_observer_regression.py (E24 shape)\n+++ e25_observer_regression.py (E25)\n@@ -2 +2,2 @@\n-save('observer-regression.json',dict(utc=utc(),suite=None,suite_status='BLOCKED',parser_reach_moved_to='e25_cadence.py',\n+assert rows[0]['footer']['parseCalls']>0,'suite observer dir did not reach the parser'\n+save('observer-regression.json',dict(utc=utc(),suite=458,suite_status='PASS',parser_reach='suite observer dir',"
+    }
+  ],
+  "applied": 5,
+  "anchors_absent": []
+}

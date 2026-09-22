@@ -1,0 +1,71 @@
+{
+  "utc": "2026-09-22T12:23:28.323272+00:00",
+  "label": "observer",
+  "old": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E23/observer-suite.txt",
+    "lines": 1137,
+    "runs": 458,
+    "totals": {
+      "Total Tests": 458,
+      "Passed": 458,
+      "Failed": 0
+    }
+  },
+  "new": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E25/observer-suite.txt",
+    "lines": 1137,
+    "runs": 458,
+    "totals": {
+      "Total Tests": 458,
+      "Passed": 458,
+      "Failed": 0
+    }
+  },
+  "transcript_identical": false,
+  "transcript_identical_scratch_masked": true,
+  "masked_spans": {
+    "old": 8,
+    "new": 8
+  },
+  "masked_diff_removed": [],
+  "masked_diff_added": [],
+  "masked_diff_line_count": 0,
+  "run_names_identical": false,
+  "totals_identical": true,
+  "r1_r6_present_old": 6,
+  "r1_r6_present_new": 6,
+  "r1_r6_identical": true,
+  "r1_r6_lines": [
+    "  [Run]: MPEG non-stream R1 delivers in registration order on the caller [MPEG:CdStreamStart] generation=1 reopened=0",
+    "  [Run]: MPEG non-stream R2 re-enters AddBs without holding the MPEG lock [MPEG:CdStreamStart] generation=1 reopened=0",
+    "  [Run]: MPEG non-stream R3 resumes GetPicture after delivered input decodes [MPEG:CdStreamStart] generation=1 reopened=0",
+    "  [Run]: MPEG non-stream R4 ignores valid-no-input callback return values [MPEG:CdStreamStart] generation=1 reopened=0",
+    "  [Run]: MPEG non-stream R5 invalidates pending callbacks on delete and reset [MPEG:CdStreamStart] generation=1 reopened=0",
+    "  [Run]: MPEG non-stream R6 leaves stream callbacks to the existing Demux path [MPEG:CdStreamStart] generation=1 reopened=0"
+  ],
+  "names_only_in_old": [
+    "mc0 directory creation fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867599710166/mcroot/SAVEDATA'",
+    "mc0 file read operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867601496625/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867601496625/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867601496625/mcroot/SAVEDATA/test.txt' flags=0x1 mode='r+b'",
+    "mc0 file write operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867603526125/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867603526125/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'",
+    "mc0 paths isolated from cdRoot fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867605550250/mcroot/ISOLATED'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867605550250/mcroot/ISOLATED/test.txt' flags=0x602 mode='w+b'"
+  ],
+  "names_only_in_new": [
+    "mc0 directory creation fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718314483458/mcroot/SAVEDATA'",
+    "mc0 file read operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718315968041/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718315968041/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718315968041/mcroot/SAVEDATA/test.txt' flags=0x1 mode='r+b'",
+    "mc0 file write operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718317643291/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718317643291/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'",
+    "mc0 paths isolated from cdRoot fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718319167875/mcroot/ISOLATED'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718319167875/mcroot/ISOLATED/test.txt' flags=0x602 mode='w+b'"
+  ],
+  "diff_removed": [
+    "  [Run]: mc0 directory creation fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867599710166/mcroot/SAVEDATA'  [Passed]",
+    "  [Run]: mc0 file read operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867601496625/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867601496625/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867601496625/mcroot/SAVEDATA/test.txt' flags=0x1 mode='r+b'  [Passed]",
+    "  [Run]: mc0 file write operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867603526125/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867603526125/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'  [Passed]",
+    "  [Run]: mc0 paths isolated from cdRoot fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867605550250/mcroot/ISOLATED'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E23/.suite-observer/ps2recomp-mc0-32867605550250/mcroot/ISOLATED/test.txt' flags=0x602 mode='w+b'  [Passed]"
+  ],
+  "diff_added": [
+    "  [Run]: mc0 directory creation fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718314483458/mcroot/SAVEDATA'  [Passed]",
+    "  [Run]: mc0 file read operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718315968041/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718315968041/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718315968041/mcroot/SAVEDATA/test.txt' flags=0x1 mode='r+b'  [Passed]",
+    "  [Run]: mc0 file write operations fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718317643291/mcroot/SAVEDATA'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718317643291/mcroot/SAVEDATA/test.txt' flags=0x602 mode='w+b'  [Passed]",
+    "  [Run]: mc0 paths isolated from cdRoot fioMkdir: Created directory '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718319167875/mcroot/ISOLATED'fioOpen: '/Users/bradrichardson/dev/ssx3/local/research/E25/.suite-observer/ps2recomp-mc0-36718319167875/mcroot/ISOLATED/test.txt' flags=0x602 mode='w+b'  [Passed]"
+  ],
+  "diff_line_count": 8
+}

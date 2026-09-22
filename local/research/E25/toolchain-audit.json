@@ -1,0 +1,215 @@
+{
+  "utc": "2026-09-22T12:07:49.472799+00:00",
+  "expected_source": "E18 configure.log (compiler ids, pkg-config, ffmpeg module versions) + P1/REPORT.md (cmake version); ninja version was not recorded by any prior lane",
+  "expected": {
+    "c_compiler_id": "Clang 23.1.1",
+    "cxx_compiler_id": "Clang 23.1.1",
+    "cmake": "cmake version 4.4.3",
+    "pkg_config": "3.0.7",
+    "libavcodec": "63.1.101",
+    "libavformat": "63.1.101",
+    "libavutil": "61.1.101",
+    "libswresample": "7.1.101",
+    "libswscale": "10.1.101",
+    "c_compiler_path": "/opt/homebrew/opt/llvm/bin/clang",
+    "cxx_compiler_path": "/opt/homebrew/opt/llvm/bin/clang++"
+  },
+  "actual": {
+    "clang": {
+      "argv": [
+        "/opt/homebrew/opt/llvm/bin/clang",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "Homebrew clang version 23.1.1\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /opt/homebrew/Cellar/llvm/23.1.1/bin\nConfiguration file: /opt/homebrew/Cellar/llvm/23.1.1/etc/clang/arm64-apple-darwin27.cfg",
+      "stderr": "",
+      "present": true
+    },
+    "clangxx": {
+      "argv": [
+        "/opt/homebrew/opt/llvm/bin/clang++",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "Homebrew clang version 23.1.1\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /opt/homebrew/Cellar/llvm/23.1.1/bin\nConfiguration file: /opt/homebrew/Cellar/llvm/23.1.1/etc/clang/arm64-apple-darwin27.cfg",
+      "stderr": "",
+      "present": true
+    },
+    "cmake": {
+      "argv": [
+        "cmake",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "cmake version 4.4.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+      "stderr": "",
+      "present": true
+    },
+    "ninja": {
+      "argv": [
+        "ninja",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "1.13.2",
+      "stderr": "",
+      "present": true
+    },
+    "pkg_config": {
+      "argv": [
+        "pkg-config",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "3.0.7",
+      "stderr": "",
+      "present": true
+    },
+    "ld_lld": {
+      "argv": [
+        "/opt/homebrew/opt/llvm/bin/lld",
+        "-flavor",
+        "darwin",
+        "--version"
+      ],
+      "rc": null,
+      "stdout": "",
+      "stderr": "[Errno 2] No such file or directory: '/opt/homebrew/opt/llvm/bin/lld'",
+      "present": false
+    },
+    "ld_system": {
+      "argv": [
+        "ld",
+        "-v"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": "@(#)PROGRAM:ld PROJECT:ld-27037.1\nBUILD 21:17:51 Aug 25 2026\nconfigured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main\nLTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)\nTAPI support using: Apple TAPI version 21.0.0 (tapi-2100.3.8.1)",
+      "present": true
+    },
+    "xcode": {
+      "argv": [
+        "xcodebuild",
+        "-version"
+      ],
+      "rc": 0,
+      "stdout": "Xcode 27.0\nBuild version 27A266a",
+      "stderr": "",
+      "present": true
+    },
+    "uname": {
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "rc": 0,
+      "stdout": "Darwin brads.macbook.air.lan 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:02:57 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T8132 arm64",
+      "stderr": "",
+      "present": true
+    },
+    "libavcodec": {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "libavcodec"
+      ],
+      "rc": 0,
+      "stdout": "63.1.101",
+      "stderr": "",
+      "present": true
+    },
+    "libavformat": {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "libavformat"
+      ],
+      "rc": 0,
+      "stdout": "63.1.101",
+      "stderr": "",
+      "present": true
+    },
+    "libavutil": {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "libavutil"
+      ],
+      "rc": 0,
+      "stdout": "61.1.101",
+      "stderr": "",
+      "present": true
+    },
+    "libswresample": {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "libswresample"
+      ],
+      "rc": 0,
+      "stdout": "7.1.101",
+      "stderr": "",
+      "present": true
+    },
+    "libswscale": {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "libswscale"
+      ],
+      "rc": 0,
+      "stdout": "10.1.101",
+      "stderr": "",
+      "present": true
+    }
+  },
+  "comparison": {
+    "clang_version": {
+      "match": true,
+      "actual": "Homebrew clang version 23.1.1"
+    },
+    "clangxx_version": {
+      "match": true,
+      "actual": "Homebrew clang version 23.1.1"
+    },
+    "cmake_version": {
+      "match": true,
+      "actual": "cmake version 4.4.3"
+    },
+    "pkg_config_version": {
+      "match": true,
+      "actual": "3.0.7"
+    },
+    "libavcodec": {
+      "match": true,
+      "actual": "63.1.101"
+    },
+    "libavformat": {
+      "match": true,
+      "actual": "63.1.101"
+    },
+    "libavutil": {
+      "match": true,
+      "actual": "61.1.101"
+    },
+    "libswresample": {
+      "match": true,
+      "actual": "7.1.101"
+    },
+    "libswscale": {
+      "match": true,
+      "actual": "10.1.101"
+    },
+    "c_compiler_path_exists": {
+      "match": true,
+      "actual": "/opt/homebrew/opt/llvm/bin/clang"
+    },
+    "cxx_compiler_path_exists": {
+      "match": true,
+      "actual": "/opt/homebrew/opt/llvm/bin/clang++"
+    }
+  },
+  "drift": [],
+  "drift_free": true,
+  "ninja_version_unrecorded_upstream": "1.13.2"
+}

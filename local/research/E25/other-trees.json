@@ -1,0 +1,97 @@
+{
+  "utc": "2026-09-22T12:27:31.710685+00:00",
+  "reproducible": {
+    "question": "would a build at 3adc0478 reproduce p1-link / e17-map-link?",
+    "comparison": {
+      "//tmp/p1-link": {
+        "files": 575,
+        "shared_paths": 575,
+        "only_here": [],
+        "only_here_count": 0,
+        "sha_equal_to_e18_tree": 239,
+        "sha_differs_from_e18_tree": 336,
+        "differing_sample": [
+          "runtime/_deps/fmt-build/libfmt.a",
+          "runtime/_deps/libdwarf-build/src/lib/libdwarf/libdwarf.a",
+          "runtime/_deps/raylib-build/raylib/libraylib.a",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-C/bin/CMakeFiles/boo.dir/main.c.o",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-C/bin/CMakeFiles/foo.dir/foo.c.o",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-C/bin/libfoo.a",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/main.cpp.o",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/foo.cpp.o"
+        ]
+      },
+      "//tmp/e17-map-link": {
+        "files": 575,
+        "shared_paths": 575,
+        "only_here": [],
+        "only_here_count": 0,
+        "sha_equal_to_e18_tree": 239,
+        "sha_differs_from_e18_tree": 336,
+        "differing_sample": [
+          "runtime/_deps/fmt-build/libfmt.a",
+          "runtime/_deps/libdwarf-build/src/lib/libdwarf/libdwarf.a",
+          "runtime/_deps/raylib-build/raylib/libraylib.a",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-C/bin/CMakeFiles/boo.dir/main.c.o",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-C/bin/CMakeFiles/foo.dir/foo.c.o",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-C/bin/libfoo.a",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir/main.cpp.o",
+          "runtime/ps2xAnalyzer/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir/foo.cpp.o"
+        ]
+      }
+    },
+    "differing_by_kind": {
+      "//tmp/p1-link": {
+        "objects": 552,
+        "archives": 20,
+        "other": [
+          "runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/cmake_pch.hxx.pch",
+          "runtime/ps2xRuntime/ps2EntryRunner",
+          "runtime/ps2xTest/ps2x_tests"
+        ]
+      },
+      "//tmp/e17-map-link": {
+        "objects": 552,
+        "archives": 20,
+        "other": [
+          "runtime/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/cmake_pch.hxx.pch",
+          "runtime/ps2xRuntime/ps2EntryRunner",
+          "runtime/ps2xTest/ps2x_tests"
+        ]
+      }
+    },
+    "source_state_probe": {
+      "runtime/ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/Stubs/MPEG.cpp.o": {
+        "//tmp/p1-link": "fa9cb0f87d90244602520eeb3604f26a82c6bfe8708f3c5d22ee6584c47bfa33",
+        "//tmp/e17-map-link": "fa9cb0f87d90244602520eeb3604f26a82c6bfe8708f3c5d22ee6584c47bfa33",
+        "//tmp/e18-mpeg-link": "8c6df38812faf700ff4ecfb45849ffe34a2b7724a5df95aeda5f25d584c88246",
+        "older_trees_agree_with_each_other": true,
+        "and_both_differ_from_e18_tree": true
+      },
+      "runtime/ps2xTest/CMakeFiles/ps2_test_lib.dir/src/ps2_runtime_expansion_tests.cpp.o": {
+        "//tmp/p1-link": "916f8f2d9db560b3e8da13bf7e1a79ac5b1a75aeabfd472f7fe6bcf6ac60ba77",
+        "//tmp/e17-map-link": "916f8f2d9db560b3e8da13bf7e1a79ac5b1a75aeabfd472f7fe6bcf6ac60ba77",
+        "//tmp/e18-mpeg-link": "b8eafc3d8d45003143582c0f792f311900ebfdf652d503554b778cacaba61d1f",
+        "older_trees_agree_with_each_other": true,
+        "and_both_differ_from_e18_tree": true
+      }
+    },
+    "probe_conclusive": true,
+    "finding": "No. All 575 relative paths are shared, but 336 hashes differ in each, and the two objects E18 commit 3adc0478 actually changed -- MPEG.cpp.o and ps2_runtime_expansion_tests.cpp.o -- are IDENTICAL between p1-link and e17-map-link and DIFFERENT in the E18 tree. Both are therefore pre-E18 output. A build at 3adc0478 would reproduce the E18 tree again under another directory name; it cannot reproduce their pins."
+  },
+  "cost": {
+    "measured_one_tree_seconds": 603.2,
+    "measured_one_tree_allocated": 1766981632,
+    "two_more_trees_seconds": 1206.5,
+    "two_more_trees_allocated": 3533963264,
+    "internal_reservation": 3221225472,
+    "internal_allocated_now": 1770405888,
+    "internal_free_now": 5731348480,
+    "floor_plus_guard": 2684354560,
+    "headroom_before_floor": 3046993920,
+    "two_more_trees_fit_under_reservation": false,
+    "two_more_trees_fit_above_floor": false
+  },
+  "conclusion": "Not rebuilt, for two independent reasons, both measured: they are not reproducible at the pinned fork, and two more trees would need 3,533,963,264 B against a 3,221,225,472 B internal reservation.",
+  "what_is_lost_with_them": "The P1 and E17 build trees. No E15-E23 receipt was taken on either runner: E23 booted, and E18/E21/E22/E23 measured, the e18-mpeg-link binaries, which E25 reproduced bit-for-bit."
+}
