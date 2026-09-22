@@ -1,0 +1,714 @@
+diff --git a/gs/gs_interface.cpp b/gs/gs_interface.cpp
+index ea00016..5eeba74 100644
+--- a/gs/gs_interface.cpp
++++ b/gs/gs_interface.cpp
+@@ -9,9 +9,77 @@
+ #include "shaders/swizzle_utils.h"
+ #include "muglm/muglm_impl.hpp"
+ #include "gs_registers_debug.hpp"
++#include <cstdlib> // G40: std::getenv
+ 
+ namespace ParallelGS
+ {
++// G40 local diagnostic (not upstream): sub-vsync A->B observation wall at
++// boundary 1 (composite-flush ordinal 1 == pass 0, vsync #1, phase 0).
++// Env-gated (PGS_G40_WALL=1), default silent, observation-only: kick/tex
++// counters + LOGI + VRAM/staging reads + ONE forced submit+wait per probe
++// firing (composite ordinals {0,1}; ordinal 0 is the load-control).
++// Unset: one cached getenv branch per hook, zero lines, zero submits.
++static bool g40_enabled()
++{
++	static bool en = std::getenv("PGS_G40_WALL") != nullptr;
++	return en;
++}
++static unsigned g40_next_flush_ord = 0;
++static unsigned g40_next_comp_ord = 0;
++static bool g40_busy = false;
++static unsigned g40_k_seen = 0;
++static unsigned g40_k_adc = 0;
++static unsigned g40_k_deg = 0;
++static unsigned g40_k_bb = 0;
++static unsigned g40_k_fuse = 0;
++static unsigned g40_k_acc = 0;
++static unsigned g40_tex_reuse = 0;
++static bool g40_tex_created = false;
++static uint64_t g40_tex_hash = 0;
++static unsigned g40_tex_tbp0 = 0;
++static unsigned g40_tex_tbw = 0;
++static unsigned g40_tex_psm = 0;
++static unsigned g40_tex_levels = 0;
++static unsigned g40_tex_samples = 0;
++static bool g40_tex_longterm = false;
++static bool g40_last_valid = false;
++static unsigned g40_last_ford = 0;
++static uint64_t g40_last_f = 0;
++static uint32_t g40_last_z = 0;
++static uint8_t g40_last_head[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
++static void g40_fnv(const uint8_t *p, size_t n, uint64_t &fnv, uint32_t &nz)
++{
++	fnv = 1469598103934665603ull; // G29-E1 truncated basis (comparability)
++	nz = 0;
++	for (size_t i = 0; i < n; i++)
++	{
++		fnv ^= p[i];
++		fnv *= 1099511628211ull;
++		nz += p[i] != 0;
++	}
++}
++static const char *g40_reason_str(FlushReason r)
++{
++	switch (r)
++	{
++	case FlushReason::FBPointer:
++		return "FBPointer";
++	case FlushReason::Overflow:
++		return "Overflow";
++	case FlushReason::TextureHazard:
++		return "TextureHazard";
++	case FlushReason::CopyHazard:
++		return "CopyHazard";
++	case FlushReason::SubmissionFlush:
++		return "SubmissionFlush";
++	case FlushReason::PressureFlush:
++		return "PressureFlush";
++	case FlushReason::HostAccess:
++		return "HostAccess";
++	default:
++		return "?";
++	}
++}
+ GSInterface::GSInterface()
+ 	: tracker(*this), renderer(tracker)
+ {
+@@ -132,6 +200,42 @@ static bool write_mask_is_16bit_channel_slice(uint32_t psm, uint32_t color_mask)
+ 
+ void GSInterface::flush_render_pass(FlushReason reason)
+ {
++	// G40 wall entry: snapshot only (no map: a pre-read would recurse into
++	// mark_submission_timeline and consume the pending prims in an inner
++	// flush. O2 pre-bytes come from the O2x post-flush chain, see end.).
++	// Inner (recursive) calls see g40_busy and skip all G40 work.
++	bool g40_outer = !g40_busy && g40_enabled();
++	unsigned g40_ford = 0;
++	bool g40_is_comp = false;
++	int g40_cord = -1;
++	unsigned g40_entry_prims = 0;
++	Vulkan::ImageHandle g40_tex_hold;
++	uint32_t g40_tex_w = 0;
++	uint32_t g40_tex_h = 0;
++	if (g40_outer)
++	{
++		g40_ford = g40_next_flush_ord++;
++		g40_entry_prims = render_pass.primitive_count;
++		if (render_pass.primitive_count)
++		{
++			for (uint32_t g40_i = 0; g40_i < render_pass.num_instances; g40_i++)
++			{
++				if (render_pass.instances[g40_i].frame.desc.FBP == 112)
++					g40_is_comp = true;
++			}
++		}
++		if (g40_is_comp)
++		{
++			g40_busy = true;
++			g40_cord = int(g40_next_comp_ord++);
++			if (!render_pass.held_images.empty() && !render_pass.tex_infos.empty() && render_pass.held_images[0])
++			{
++				g40_tex_hold = render_pass.held_images[0];
++				g40_tex_w = render_pass.held_images[0]->get_width();
++				g40_tex_h = render_pass.held_images[0]->get_height();
++			}
++		}
++	}
+ 	ParallelGS::RenderPass rp = {};
+ 
+ 	if (render_pass.primitive_count)
+@@ -298,6 +402,22 @@ void GSInterface::flush_render_pass(FlushReason reason)
+ 		rp.flush_reason = reason;
+ 		//////
+ 
++		{
++			// G11b local experiment hook (not upstream): recorded-batch identity.
++			LOGI("G11: record prims=%u inst=%u tex=%u tex0=%u\n", rp.num_primitives,
++			     rp.num_instances, rp.num_textures, (unsigned)render_pass.tex0_infos.size());
++			for (uint32_t g11_i = 0; g11_i < rp.num_instances; g11_i++)
++				LOGI("G11:   inst %u FRAME FBP=%u FBW=%u PSM=%u\n", g11_i,
++				     (unsigned)rp.instances[g11_i].fb.frame.desc.FBP,
++				     (unsigned)rp.instances[g11_i].fb.frame.desc.FBW,
++				     (unsigned)rp.instances[g11_i].fb.frame.desc.PSM);
++			for (uint32_t g11_j = 0; g11_j < render_pass.tex0_infos.size(); g11_j++)
++				LOGI("G11:   tex %u TBP0=%u TBW=%u TPSM=%u CBP=%u\n", g11_j,
++				     (unsigned)render_pass.tex0_infos[g11_j].TBP0,
++				     (unsigned)render_pass.tex0_infos[g11_j].TBW,
++				     (unsigned)render_pass.tex0_infos[g11_j].PSM,
++				     (unsigned)render_pass.tex0_infos[g11_j].CBP);
++		}
+ 		renderer.flush_rendering(rp);
+ 
+ 		// Need to call this after flush rendering to ensure that the images
+@@ -348,6 +468,153 @@ void GSInterface::flush_render_pass(FlushReason reason)
+ 	render_pass.positions = renderer.get_reserved_vertex_positions();
+ 	render_pass.attributes = renderer.get_reserved_vertex_attributes();
+ 	render_pass.prim = renderer.get_reserved_primitive_attributes();
++	if (g40_outer) // G40 wall end: O1/O5/O4m every flush, O3/O3b/O4 at cord {0,1}
++	{
++		LOGI("G40: O1 ford=%u cord=%d prims=%u submitted=%u inst=%u tex=%u seen=%u adc=%u deg=%u bb=%u fuse=%u acc=%u.\n",
++		     g40_ford, g40_cord, g40_entry_prims, (unsigned)rp.num_primitives,
++		     (unsigned)rp.num_instances, (unsigned)rp.num_textures,
++		     g40_k_seen, g40_k_adc, g40_k_deg, g40_k_bb, g40_k_fuse, g40_k_acc);
++		g40_k_seen = 0;
++		g40_k_adc = 0;
++		g40_k_deg = 0;
++		g40_k_bb = 0;
++		g40_k_fuse = 0;
++		g40_k_acc = 0;
++		if (g40_is_comp)
++		{
++			LOGI("G40: O5 ford=%u cord=%d reason=%s label=%u states=%u tex=%u fbmode=%u tilelog2=%u.\n",
++			     g40_ford, g40_cord, g40_reason_str(reason), (unsigned)rp.label_key,
++			     (unsigned)rp.num_states, (unsigned)rp.num_textures, (unsigned)rp.feedback_mode,
++			     (unsigned)rp.coarse_tile_size_log2);
++			for (uint32_t g40_i = 0; g40_i < rp.num_instances; g40_i++)
++			{
++				LOGI("G40: O5 ford=%u cord=%d inst=%u FBP=%u FBW=%u PSM=%u FBMSK=%08x ZBP=%u ZMSK=%u opq=%08x chshuf=%u zsens=%u zwr=%u ssx=%u ssy=%u base=%u,%u ctiles=%ux%u.\n",
++				     g40_ford, g40_cord, g40_i,
++				     (unsigned)rp.instances[g40_i].fb.frame.desc.FBP,
++				     (unsigned)rp.instances[g40_i].fb.frame.desc.FBW,
++				     (unsigned)rp.instances[g40_i].fb.frame.desc.PSM,
++				     (unsigned)rp.instances[g40_i].fb.frame.desc.FBMSK,
++				     (unsigned)rp.instances[g40_i].fb.z.desc.ZBP,
++				     (unsigned)rp.instances[g40_i].fb.z.desc.ZMSK,
++				     (unsigned)rp.instances[g40_i].opaque_fbmask,
++				     (unsigned)rp.instances[g40_i].channel_shuffle,
++				     (unsigned)rp.instances[g40_i].z_sensitive,
++				     (unsigned)rp.instances[g40_i].z_write,
++				     (unsigned)rp.instances[g40_i].sampling_rate_x_log2,
++				     (unsigned)rp.instances[g40_i].sampling_rate_y_log2,
++				     (unsigned)rp.instances[g40_i].base_x, (unsigned)rp.instances[g40_i].base_y,
++				     (unsigned)rp.instances[g40_i].coarse_tiles_width,
++				     (unsigned)rp.instances[g40_i].coarse_tiles_height);
++			}
++			LOGI("G40: O4m ford=%u cord=%d texdims=%ux%u created=%u longterm=%u tbp0=%u tbw=%u psm=%u lv=%u smp=%u reuse=%u hash=%016llx.\n",
++			     g40_ford, g40_cord, g40_tex_w, g40_tex_h,
++			     (unsigned)g40_tex_created, (unsigned)g40_tex_longterm,
++			     g40_tex_tbp0, g40_tex_tbw, g40_tex_psm, g40_tex_levels, g40_tex_samples,
++			     g40_tex_reuse, (unsigned long long)g40_tex_hash);
++			g40_tex_reuse = 0;
++			if (g40_cord == 0 || g40_cord == 1)
++			{
++				// G40 O2: literal pre-composite B from the O2x chain (B is
++				// untouched between flushes: scenes are single-inst FBP0
++				// (G11) and vpage excludes 112..223 except via composite).
++				if (g40_last_valid)
++				{
++					LOGI("G40: O2 ford=%u cord=%d B pre-fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x srcford=%u.\n",
++					     g40_ford, g40_cord, (unsigned long long)g40_last_f, (unsigned)g40_last_z,
++					     g40_last_head[0], g40_last_head[1], g40_last_head[2], g40_last_head[3],
++					     g40_last_head[4], g40_last_head[5], g40_last_head[6], g40_last_head[7],
++					     g40_last_ford);
++				}
++				else
++				{
++					LOGI("G40: O2 ford=%u cord=%d B pre=load (no prior flush; eea04488c453e75b/149721 receipted).\n",
++					     g40_ford, g40_cord);
++				}
++				// G40 probe: record GPU-side copies, force full submit + wait,
++				// then read host B (O3), gpu B (O3b) and texture bytes (O4).
++				bool g40_rec = renderer.g40_record_probes(g40_tex_hold.get(), g40_tex_w, g40_tex_h);
++				uint64_t g40_tl = tracker.mark_submission_timeline(FlushReason::HostAccess);
++				renderer.flush_submit(g40_tl);
++				renderer.wait_timeline(g40_tl);
++				{
++					const size_t g40_base = 112 * 8192;
++					const size_t g40_n = 112 * 8192;
++					const uint8_t *g40_vram = static_cast<const uint8_t *>(map_vram_read(g40_base, g40_n));
++					if (g40_vram)
++					{
++						uint64_t g40_f = 0;
++						uint32_t g40_z = 0;
++						g40_fnv(g40_vram, g40_n, g40_f, g40_z);
++						LOGI("G40: O3 ford=%u cord=%d rec=%u B post-fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x.\n",
++						     g40_ford, g40_cord, (unsigned)g40_rec,
++						     (unsigned long long)g40_f, (unsigned)g40_z,
++						     g40_vram[0], g40_vram[1], g40_vram[2], g40_vram[3],
++						     g40_vram[4], g40_vram[5], g40_vram[6], g40_vram[7]);
++					}
++					else
++					{
++						LOGI("G40: O3 ford=%u cord=%d rec=%u map failed.\n",
++						     g40_ford, g40_cord, (unsigned)g40_rec);
++					}
++				}
++				{
++					uint64_t g40_tfnv = 0;
++					uint64_t g40_gfnv = 0;
++					uint32_t g40_tnz = 0;
++					uint32_t g40_gnz = 0;
++					uint8_t g40_thead[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
++					uint8_t g40_ghead[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
++					bool g40_fin = renderer.g40_finish_probes(g40_tfnv, g40_tnz, g40_thead,
++					                                          g40_gfnv, g40_gnz, g40_ghead);
++					LOGI("G40: O3b ford=%u cord=%d fin=%u gpuB-fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x.\n",
++					     g40_ford, g40_cord, (unsigned)g40_fin,
++					     (unsigned long long)g40_gfnv, (unsigned)g40_gnz,
++					     g40_ghead[0], g40_ghead[1], g40_ghead[2], g40_ghead[3],
++					     g40_ghead[4], g40_ghead[5], g40_ghead[6], g40_ghead[7]);
++					LOGI("G40: O4 ford=%u cord=%d fin=%u tex-fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x dims=%ux%u.\n",
++					     g40_ford, g40_cord, (unsigned)g40_fin,
++					     (unsigned long long)g40_tfnv, (unsigned)g40_tnz,
++					     g40_thead[0], g40_thead[1], g40_thead[2], g40_thead[3],
++					     g40_thead[4], g40_thead[5], g40_thead[6], g40_thead[7],
++					     g40_tex_w, g40_tex_h);
++				}
++			}
++			g40_busy = false;
++		}
++		else if (g40_entry_prims > 0)
++		{
++			// G40 O2x: inter-flush B at scene-flush end (safe: prims reset;
++			// busy-guarded against recursion). Pure read expected (A-only
++			// work leaves no B writes pending); the bytes self-report.
++			g40_busy = true;
++			{
++				const size_t g40_base = 112 * 8192;
++				const size_t g40_n = 112 * 8192;
++				const uint8_t *g40_vram = static_cast<const uint8_t *>(map_vram_read(g40_base, g40_n));
++				if (g40_vram)
++				{
++					uint64_t g40_f = 0;
++					uint32_t g40_z = 0;
++					g40_fnv(g40_vram, g40_n, g40_f, g40_z);
++					g40_last_valid = true;
++					g40_last_ford = g40_ford;
++					g40_last_f = g40_f;
++					g40_last_z = g40_z;
++					for (unsigned g40_b = 0; g40_b < 8; g40_b++)
++						g40_last_head[g40_b] = g40_vram[g40_b];
++					LOGI("G40: O2x ford=%u B postflush-fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x.\n",
++					     g40_ford, (unsigned long long)g40_f, (unsigned)g40_z,
++					     g40_vram[0], g40_vram[1], g40_vram[2], g40_vram[3],
++					     g40_vram[4], g40_vram[5], g40_vram[6], g40_vram[7]);
++				}
++				else
++				{
++					LOGI("G40: O2x ford=%u map failed.\n", g40_ford);
++				}
++			}
++			g40_busy = false;
++		}
++	}
+ }
+ 
+ void GSInterface::flush(PageTrackerFlushFlags flags, FlushReason reason)
+@@ -1257,6 +1524,8 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+ 	{
+ 		assert(state_tracker.last_texture_index != UINT32_MAX);
+ 		assert(state_tracker.last_texture_index_valid_at_texflush == state_tracker.texflush_counter);
++		if (g40_enabled()) // G40 O4m
++			g40_tex_reuse++;
+ 		return state_tracker.last_texture_index;
+ 	}
+ 
+@@ -1661,14 +1930,19 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+ 		state_tracker.last_texture_index_valid_at_texflush = state_tracker.texflush_counter;
+ 		if (cached_index && cached_index->valid)
+ 			cached_index->valid_at_texflush = state_tracker.texflush_counter;
++		if (g40_enabled()) // G40 O4m
++			g40_tex_reuse++;
+ 		return state_tracker.last_texture_index;
+ 	}
+ 
+ 	uint32_t texture_index;
++	bool g40_tex_made = false; // G40 O4
+ 
+ 	if (cached_index && cached_index->valid)
+ 	{
+ 		texture_index = cached_index->index;
++		if (g40_enabled()) // G40 O4m
++			g40_tex_reuse++;
+ 	}
+ 	else
+ 	{
+@@ -1707,6 +1981,7 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+ 			TRACE("CACHE IMAGE", desc);
+ 			desc.hash = hasher.get();
+ 			image = renderer.create_cached_texture(desc);
++			g40_tex_made = true; // G40 O4
+ 
+ 			// Long-term references can persist across render passes, and intended for normal resource textures.
+ 			// They will generally be invalidated when it's overwritten by a copy or FB write.
+@@ -1804,6 +2079,17 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+ 		render_pass.held_images.push_back(std::move(image));
+ 	}
+ 
++	if (g40_enabled()) // G40 O4: full-resolve snapshot (first use of a texture per pass)
++	{
++		g40_tex_created = g40_tex_made;
++		g40_tex_hash = hasher.get();
++		g40_tex_tbp0 = desc.tex0.desc.TBP0;
++		g40_tex_tbw = desc.tex0.desc.TBW;
++		g40_tex_psm = desc.tex0.desc.PSM;
++		g40_tex_levels = desc.rect.levels;
++		g40_tex_samples = desc.samples;
++		g40_tex_longterm = long_term_cache_texture;
++	}
+ 	state_tracker.last_texture_descriptor = desc;
+ 	state_tracker.last_texture_index = texture_index;
+ 	state_tracker.last_texture_index_valid_at_texflush = state_tracker.texflush_counter;
+@@ -2573,6 +2859,8 @@ void GSInterface::drawing_kick_append()
+ 	// Check for degenerate BB. Can happen if primitive is clipped away completely by scissor.
+ 	if (bb.z < bb.x || bb.w < bb.y)
+ 	{
++		if (g40_enabled()) // G40 O1
++			g40_k_bb++;
+ 		TRACE("Degenerate BB", bb);
+ 		return;
+ 	}
+@@ -2604,6 +2892,8 @@ void GSInterface::drawing_kick_append()
+ 			         (render_pass.last_triangle_parallelogram_order.x << STATE_PARALLELOGRAM_PROVOKING_OFFSET);
+ 
+ 			render_pass.last_triangle_is_parallelogram_candidate = false;
++			if (g40_enabled()) // G40 O1
++				g40_k_fuse++;
+ 			TRACE("Promote Parallelogram", DummyBits{});
+ 			return;
+ 		}
+@@ -2786,6 +3076,8 @@ void GSInterface::drawing_kick_append()
+ 
+ 		if (bb.z < bb.x)
+ 		{
++			if (g40_enabled()) // G40 O1
++				g40_k_bb++;
+ 			TRACE("Degenerate BB", bb);
+ 			return;
+ 		}
+@@ -2835,6 +3127,8 @@ void GSInterface::drawing_kick_append()
+ 	memcpy(render_pass.positions + 3 * render_pass.primitive_count, pos, sizeof(pos));
+ 	memcpy(render_pass.attributes + 3 * render_pass.primitive_count, attr, sizeof(attr));
+ 	render_pass.primitive_count++;
++	if (g40_enabled()) // G40 O1
++		g40_k_acc++;
+ 	// Commit this here as well. Need to do it after flushing state, since that may reset any tracking state.
+ 	render_pass.last_triangle_is_parallelogram_candidate = is_parallelogram_candidate;
+ 	if (render_pass.current_primitive_is_channel_shuffle)
+@@ -2872,12 +3166,21 @@ void GSInterface::drawing_kick_primitive(bool adc)
+ 	if (vertex_queue.count < num_vertices)
+ 		return;
+ 
++	if (g40_enabled()) // G40 O1	
++	{
++		g40_k_seen++;
++		g40_k_adc += adc ? 1 : 0;
++	}
+ 	if (!adc)
+ 	{
+ 		if (!draw_is_degenerate())
+ 			drawing_kick_append<list_primitive, fan_primitive, quad, num_vertices>();
+ 		else
++		{
++			if (g40_enabled()) // G40 O1
++				g40_k_deg++;
+ 			TRACE("Degenerate Draw", DummyBits{});
++		}
+ 	}
+ 
+ 	// We seem to do queue maintenance regardless after a vertex kick.
+@@ -3896,6 +4199,15 @@ void GSInterface::update_internal_register(uint64_t &reg, uint64_t value, StateD
+ 
+ void GSInterface::a_d_FRAME_1(uint64_t payload)
+ {
++	// G11 local experiment hook (not upstream): draw-target identity.
++	if (registers.ctx[0].frame.bits != payload)
++	{
++		Reg64<FRAMEBits> g11_f;
++		g11_f.bits = payload;
++		LOGI("G11: FRAME_1 FBP=%u FBW=%u PSM=%u FBMSK=%08x\n",
++		     (unsigned)g11_f.desc.FBP, (unsigned)g11_f.desc.FBW,
++		     (unsigned)g11_f.desc.PSM, (unsigned)g11_f.desc.FBMSK);
++	}
+ 	update_internal_register(registers.ctx[0].frame.bits, payload,
+ 	                         STATE_DIRTY_DEGENERATE_BIT | STATE_DIRTY_FEEDBACK_BIT |
+ 	                         STATE_DIRTY_TEX_BIT | STATE_DIRTY_FB_BIT |
+@@ -3905,6 +4217,15 @@ void GSInterface::a_d_FRAME_1(uint64_t payload)
+ 
+ void GSInterface::a_d_FRAME_2(uint64_t payload)
+ {
++	// G11 local experiment hook (not upstream): draw-target identity.
++	if (registers.ctx[1].frame.bits != payload)
++	{
++		Reg64<FRAMEBits> g11_f;
++		g11_f.bits = payload;
++		LOGI("G11: FRAME_2 FBP=%u FBW=%u PSM=%u FBMSK=%08x\n",
++		     (unsigned)g11_f.desc.FBP, (unsigned)g11_f.desc.FBW,
++		     (unsigned)g11_f.desc.PSM, (unsigned)g11_f.desc.FBMSK);
++	}
+ 	update_internal_register(registers.ctx[1].frame.bits, payload,
+ 	                         STATE_DIRTY_DEGENERATE_BIT | STATE_DIRTY_FEEDBACK_BIT |
+ 	                         STATE_DIRTY_TEX_BIT | STATE_DIRTY_FB_BIT |
+@@ -4266,6 +4587,11 @@ const void *GSInterface::map_vram_read(size_t offset, size_t size)
+ 
+ void GSInterface::flush()
+ {
++	// G11 local experiment hook (not upstream): read-only accumulator
++	// census at submit time. Log-only; no behavior change.
++	LOGI("G11: flush() acc prims=%u instances=%u states=%u tex=%u\n",
++	     render_pass.primitive_count, render_pass.num_instances,
++	     (unsigned)render_pass.state_vectors.size(), (unsigned)render_pass.tex_infos.size());
+ 	flush_pending_transfer(true);
+ 	uint64_t value = tracker.mark_submission_timeline();
+ 	renderer.flush_submit(value);
+@@ -4685,6 +5011,71 @@ ScanoutResult GSInterface::vsync(const VSyncInfo &info_)
+ 	auto result = renderer.vsync(priv_registers, info,
+ 	                             sampling_rate_x_log2, sampling_rate_y_log2,
+ 								 promoted1, promoted2);
++	{
++		// G31 local diagnostic (not upstream): in-vsync() (b1)/(b2) split
++		// probe. Promotion is statically OFF for this run (Hacks defaults
++		// false + set_hacks() uncalled anywhere), so promoted1/2 are
++		// predicted null on all 16 vsyncs; this dump confirms on-device
++		// and captures the DISPFB1-region VRAM bytes at sample time.
++		// Region B (FBP112 pages 112..223) is predicted == load (no
++		// writer ever touches it, G30); region A (FBP0) is the
++		// live-write control. FNV-1a reuses the SAME truncated basis as
++		// G29/G30 (G29-E1). Read-only: one host map + wait AFTER the
++		// vsync's own submission (no reordering); promotion identity is
++		// logged but no GPU readback is attempted (a present promoted
++		// image routes to OTHER/stop regardless -- checksum deferred).
++		static unsigned g31_seq = 0;
++		unsigned g31_p1null = promoted1 == nullptr ? 1 : 0;
++		unsigned g31_p1w = g31_p1null ? 0 : promoted1->get_width();
++		unsigned g31_p1h = g31_p1null ? 0 : promoted1->get_height();
++		unsigned g31_p1l = g31_p1null ? 0 : (unsigned)promoted1->get_create_info().layers;
++		unsigned g31_p1f = g31_p1null ? 0 : (unsigned)promoted1->get_format();
++		unsigned g31_p2null = promoted2 == nullptr ? 1 : 0;
++		LOGI("G31: state seq=%u EN1=%u EN2=%u DISPFB1=%u/%u/%u/%u/%u DSP1=%u/%u/%u/%u/%u/%u SM=%u/%u/%u nprom=%u hack=%d p1null=%u p1=%ux%ux%ux%u p2null=%u phase=%u.\n",
++		     g31_seq,
++		     (unsigned)priv_registers.pmode.EN1, (unsigned)priv_registers.pmode.EN2,
++		     (unsigned)priv_registers.dispfb1.FBP, (unsigned)priv_registers.dispfb1.FBW,
++		     (unsigned)priv_registers.dispfb1.PSM, (unsigned)priv_registers.dispfb1.DBX,
++		     (unsigned)priv_registers.dispfb1.DBY,
++		     (unsigned)priv_registers.display1.DW, (unsigned)priv_registers.display1.DH,
++		     (unsigned)priv_registers.display1.MAGH, (unsigned)priv_registers.display1.MAGV,
++		     (unsigned)priv_registers.display1.DX, (unsigned)priv_registers.display1.DY,
++		     (unsigned)priv_registers.smode1.CMOD, (unsigned)priv_registers.smode2.INT,
++		     (unsigned)priv_registers.smode2.FFMD,
++		     num_promoted_backbuffers, int(hacks.backbuffer_promotion),
++		     g31_p1null, g31_p1w, g31_p1h, g31_p1l, g31_p1f, g31_p2null, info.phase);
++		const size_t g31_n = 224 * 8192;
++		const size_t g31_half = 917504;
++		const uint8_t *g31_vram = static_cast<const uint8_t *>(map_vram_read(0, g31_n));
++		if (g31_vram)
++		{
++			uint64_t g31_fa = 1469598103934665603ull;
++			uint64_t g31_fb = 1469598103934665603ull;
++			size_t g31_za = 0;
++			size_t g31_zb = 0;
++			for (size_t g31_i = 0; g31_i < g31_half; g31_i++)
++			{
++				g31_fa ^= g31_vram[g31_i];
++				g31_fa *= 1099511628211ull;
++				g31_za += g31_vram[g31_i] != 0;
++				g31_fb ^= g31_vram[g31_half + g31_i];
++				g31_fb *= 1099511628211ull;
++				g31_zb += g31_vram[g31_half + g31_i] != 0;
++			}
++			LOGI("G31: bytes seq=%u A fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x B fnv=%016llx nz=%u head=%02x%02x%02x%02x%02x%02x%02x%02x.\n",
++			     g31_seq, (unsigned long long)g31_fa, (unsigned)g31_za,
++			     g31_vram[0], g31_vram[1], g31_vram[2], g31_vram[3],
++			     g31_vram[4], g31_vram[5], g31_vram[6], g31_vram[7],
++			     (unsigned long long)g31_fb, (unsigned)g31_zb,
++			     g31_vram[g31_half], g31_vram[g31_half + 1], g31_vram[g31_half + 2], g31_vram[g31_half + 3],
++			     g31_vram[g31_half + 4], g31_vram[g31_half + 5], g31_vram[g31_half + 6], g31_vram[g31_half + 7]);
++		}
++		else
++		{
++			LOGI("G31: bytes seq=%u map failed.\n", g31_seq);
++		}
++		g31_seq++;
++	}
+ 
+ 	if (hacks.backbuffer_promotion && result.image)
+ 	{
+diff --git a/gs/gs_renderer.cpp b/gs/gs_renderer.cpp
+index dbe032d..9e11499 100644
+--- a/gs/gs_renderer.cpp
++++ b/gs/gs_renderer.cpp
+@@ -1588,6 +1588,124 @@ void GSRenderer::flush_host_vram_copy(const uint32_t *block_indices, uint32_t nu
+ 	check_flush_stats();
+ }
+ 
++static void g40_fnv_hash(const uint8_t *p, size_t n, uint64_t &fnv, uint32_t &nz, uint8_t head[8])
++{
++	fnv = 1469598103934665603ull; // G29-E1 truncated basis (comparability)
++	nz = 0;
++	for (size_t i = 0; i < n; i++)
++	{
++		fnv ^= p[i];
++		fnv *= 1099511628211ull;
++		nz += p[i] != 0;
++	}
++	for (unsigned i = 0; i < 8 && i < n; i++)
++		head[i] = p[i];
++}
++
++bool GSRenderer::g40_record_probes(const Vulkan::Image *tex_image, uint32_t tex_w, uint32_t tex_h)
++{
++	if (!device || !direct_cmd)
++		return false;
++	auto &cmd = *direct_cmd;
++	g40_tex_pvalid = false;
++	g40_tex_pw = 0;
++	g40_tex_ph = 0;
++
++	// Order vs all prior storage/transfer writes (shading wrote gpu-B earlier in this stream).
++	cmd.barrier(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT,
++	            VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
++	            VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
++
++	// Probe 1: gpu-side B pages (112..223) -> staging.
++	{
++		Vulkan::BufferCreateInfo info = {};
++		info.size = VkDeviceSize(112) * VkDeviceSize(PageSize);
++		info.domain = Vulkan::BufferDomain::CachedHost;
++		info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
++		g40_gpu_staging = device->create_buffer(info);
++		if (!g40_gpu_staging)
++			return false;
++		// NOTE: not copy_blocks (it copies VRAM offset -> same offset, but the
++		// staging buffer is compact: B pages land at staging offset 0).
++		cmd.begin_region("g40-gpuB");
++		cmd.copy_buffer(*g40_gpu_staging, 0, *buffers.gpu,
++		                VkDeviceSize(112) * VkDeviceSize(PageSize),
++		                VkDeviceSize(112) * VkDeviceSize(PageSize));
++		cmd.end_region();
++	}
++
++	// Probe 2: composite texture image (level/layer 0) -> staging.
++	if (tex_image && tex_w && tex_h)
++	{
++		VkDeviceSize n = VkDeviceSize(tex_w) * VkDeviceSize(tex_h) * 4;
++		Vulkan::BufferCreateInfo info = {};
++		info.size = n;
++		info.domain = Vulkan::BufferDomain::CachedHost;
++		info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
++		g40_tex_staging = device->create_buffer(info);
++		if (!g40_tex_staging)
++			return false;
++		cmd.begin_region("g40-tex");
++		cmd.image_barrier(*tex_image, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++		                  VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
++		                  VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
++		VkImageSubresourceLayers sub = {};
++		sub.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
++		sub.mipLevel = 0;
++		sub.baseArrayLayer = 0;
++		sub.layerCount = 1;
++		VkOffset3D off = {};
++		VkExtent3D ext = { tex_w, tex_h, 1 };
++		cmd.copy_image_to_buffer(*g40_tex_staging, *tex_image, 0, off, ext, 0, 0, sub);
++		cmd.image_barrier(*tex_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
++		                  VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT,
++		                  VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT);
++		cmd.end_region();
++		g40_tex_pw = tex_w;
++		g40_tex_ph = tex_h;
++		g40_tex_pvalid = true;
++	}
++
++	// Make staging writes visible to host reads after the wait.
++	cmd.barrier(VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
++	            VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_READ_BIT);
++	return true;
++}
++
++bool GSRenderer::g40_finish_probes(uint64_t &tex_fnv, uint32_t &tex_nz, uint8_t tex_head[8],
++                                   uint64_t &gpu_fnv, uint32_t &gpu_nz, uint8_t gpu_head[8])
++{
++	tex_fnv = 0;
++	tex_nz = 0;
++	gpu_fnv = 0;
++	gpu_nz = 0;
++	for (unsigned i = 0; i < 8; i++)
++		tex_head[i] = gpu_head[i] = 0;
++	if (!device || !g40_gpu_staging)
++	{
++		LOGE("G40: gpu staging missing.\n");
++		return false;
++	}
++	auto *gpu = static_cast<const uint8_t *>(device->map_host_buffer(*g40_gpu_staging, Vulkan::MEMORY_ACCESS_READ_BIT));
++	if (!gpu)
++	{
++		LOGE("G40: gpu staging map failed.\n");
++		return false;
++	}
++	g40_fnv_hash(gpu, size_t(112) * PageSize, gpu_fnv, gpu_nz, gpu_head);
++	if (g40_tex_pvalid && g40_tex_staging)
++	{
++		auto *tex = static_cast<const uint8_t *>(device->map_host_buffer(*g40_tex_staging, Vulkan::MEMORY_ACCESS_READ_BIT));
++		if (!tex)
++		{
++			LOGE("G40: tex staging map failed.\n");
++			return false;
++		}
++		g40_fnv_hash(tex, size_t(g40_tex_pw) * size_t(g40_tex_ph) * 4, tex_fnv, tex_nz, tex_head);
++	}
++	return true;
++}
++
+ void GSRenderer::flush_readback(const uint32_t *page_indices, uint32_t num_indices)
+ {
+ 	if (buffers.gpu == buffers.cpu)
+@@ -3485,6 +3603,21 @@ uint32_t GSRenderer::update_palette_cache(const PaletteUploadDescriptor &desc)
+ 
+ void GSRenderer::dispatch_texture_analysis(Vulkan::CommandBuffer &cmd, const RenderPass &rp)
+ {
++	// G22 local workaround (not upstream): skip the sampler_feedback
++	// dispatch entirely when PGS_SKIP_SAMPLER_FEEDBACK=1. The per-texture
++	// indirect-dispatch args stay at their qword-cleared zeros, so the
++	// consuming upload dispatches launch zero workgroups: in-bounds, no
++	// new hazards, rendering delta only (sparse-uploaded texels missing).
++	static bool skip_sampler_feedback = [] {
++		const char *env = getenv("PGS_SKIP_SAMPLER_FEEDBACK");
++		bool skip = env && strcmp(env, "1") == 0;
++		if (skip)
++			LOGI("G22: skipping sampler_feedback dispatch (workaround).\n");
++		return skip;
++	}();
++	if (skip_sampler_feedback)
++		return;
++
+ 	cmd.set_program(shaders.sampler_feedback);
+ 	memcpy(cmd.allocate_typed_constant_data<TextureAnalysis>(1, 0, texture_analysis.size()),
+ 	       texture_analysis.data(),
+diff --git a/gs/gs_renderer.hpp b/gs/gs_renderer.hpp
+index d9acc50..3ce0d5d 100644
+--- a/gs/gs_renderer.hpp
++++ b/gs/gs_renderer.hpp
+@@ -292,6 +292,14 @@ public:
+ 	// Readback stage.
+ 	void flush_readback(const uint32_t *page_indices, uint32_t num_indices);
+ 
++	// G40 wall (env-gated PGS_G40_WALL; called only when enabled).
++	// Record GPU-side probe copies into the open direct command buffer,
++	// then map staging and hash bytes after the caller's submit+wait.
++	// Observation-only: transfer copies + barriers; texture layout restored.
++	bool g40_record_probes(const Vulkan::Image *tex_image, uint32_t tex_w, uint32_t tex_h);
++	bool g40_finish_probes(uint64_t &tex_fnv, uint32_t &tex_nz, uint8_t tex_head[8],
++	                       uint64_t &gpu_fnv, uint32_t &gpu_nz, uint8_t gpu_head[8]);
++
+ 	// Submit to GPU and signal when done.
+ 	void flush_submit(uint64_t timeline);
+ 
+@@ -331,6 +339,12 @@ private:
+ 	Vulkan::CommandBufferHandle clear_cmd;
+ 	Vulkan::CommandBufferHandle heuristic_cmd;
+ 	Vulkan::CommandBufferHandle binning_cmd;
++	// G40 wall probe staging (one-shot per firing; reassigned only after GPU wait).
++	Vulkan::BufferHandle g40_tex_staging;
++	Vulkan::BufferHandle g40_gpu_staging;
++	uint32_t g40_tex_pw = 0;
++	uint32_t g40_tex_ph = 0;
++	bool g40_tex_pvalid = false;
+ 	uint32_t vram_size = 0;
+ 	uint32_t next_clut_instance = 0;
+ 	uint32_t base_clut_instance = 0;
