@@ -93,8 +93,8 @@ with measured budgets, then 120 Hz simulation.
       (d) GPU-resident presentation.
 - [ ] paraLLEl-GS patch stack home: forks created 09-22
       (`brad-richardson/parallel-gs`, `brad-richardson/Granite`). Backup
-      `wip/ssx3-snapshot` via `snapshot_pgs.sh` (Brad runs it; the classifier
-      blocks it for me). After G42: fix-only commits (G26, G28, plus Turnip
+      `wip/ssx3-snapshot` pushed 09-22 (parallel-gs `faf6400`, Granite
+      `aaeee97`; uncurated, fixes + diagnostics). After G42: fix-only commits (G26, G28, plus Turnip
       loading if adopted) on branch `ssx3` in both forks; diagnostics stay
       env-gated or on wip.
 - [ ] Adreno filing: paused (Brad, 09-22). Any rewrite drops the
