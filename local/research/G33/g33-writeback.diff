@@ -1,0 +1,58 @@
+diff --git a/gs/gs_interface.cpp b/gs/gs_interface.cpp
+index ea00016..1f3b181 100644
+--- a/gs/gs_interface.cpp
++++ b/gs/gs_interface.cpp
+@@ -4684,2 +4723,53 @@ ScanoutResult GSInterface::vsync(const VSyncInfo &info_)
+ 
++	{
++		// G33 local diagnostic (not upstream): H1-vs-H2 write-back control.
++		// Re-writes the SAME stale bytes through G32's sync structure:
++		// map-read region B (pages 112..223) into a static temp, then
++		// map-write temp back + commit, BEFORE this vsync's sample.
++		// Write leg is call-identical to G32's (same base/n/rect/site),
++		// so any output change vs G31 isolates to the commit/barrier.
++		// NOTE (predictor finding): stale B holds 0/229376 nonzero-RGB
++		// words, so stale-correct renders byte-identical to cleared
++		// (ladder aa2fa32572450383, black scanouts) -- the H1/H2 split
++		// is void for this control; this run proves write-back integrity
++		// (temp==stale at write time) + detects both-refuted (non-black).
++		const size_t g33_base = 112 * 8192;
++		const size_t g33_n = 112 * 8192;
++		static uint32_t g33_temp[(112 * 8192) / 4];
++		const uint32_t *g33_src = static_cast<const uint32_t *>(map_vram_read(g33_base, g33_n));
++		if (g33_src)
++		{
++			for (size_t g33_i = 0; g33_i < g33_n / 4; g33_i++)
++			{
++				g33_temp[g33_i] = g33_src[g33_i];
++			}
++			uint64_t g33_f = 1469598103934665603ull;
++			size_t g33_z = 0;
++			const uint8_t *g33_tb = reinterpret_cast<const uint8_t *>(g33_temp);
++			for (size_t g33_i = 0; g33_i < g33_n; g33_i++)
++			{
++				g33_f ^= g33_tb[g33_i];
++				g33_f *= 1099511628211ull;
++				g33_z += g33_tb[g33_i] != 0;
++			}
++			uint32_t *g33_dst = static_cast<uint32_t *>(map_vram_write(g33_base, g33_n));
++			if (g33_dst)
++			{
++				for (size_t g33_i = 0; g33_i < g33_n / 4; g33_i++)
++				{
++					g33_dst[g33_i] = g33_temp[g33_i];
++				}
++				end_vram_write(g33_base, g33_n);
++				LOGI("G33: writeback base=%u n=%u fnv=%016llx nz=%u.\n", (unsigned)g33_base, (unsigned)g33_n, (unsigned long long)g33_f, (unsigned)g33_z);
++			}
++			else
++			{
++				LOGI("G33: writeback write-map failed.\n");
++			}
++		}
++		else
++		{
++			LOGI("G33: writeback read-map failed.\n");
++		}
++	}
+ 	auto result = renderer.vsync(priv_registers, info,
