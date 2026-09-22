@@ -1,0 +1,30 @@
+"""E27 fix gate. The brief sets it to STOP before the lane starts: diagnose and
+table, never patch. This records the decision with its inputs rather than
+asserting it, exactly as E26 did."""
+from e27_common import *
+out = dict(
+  utc=utc(), lane='E27', gate='fix', decision='STOP',
+  declared_by='the E27 brief ("Fix gate stays STOP (diagnose + table, never patch)")',
+  demonstrated_edges=[
+    'The chunk-list walker is sub_003DFED0; the top byte of chunk+4 is the kind tag it '
+    'writes on publish and sub_003E12E0 strips on dequeue -- an occupancy bit, not a '
+    'visited counter.',
+    'sceMpegGetPicture has exactly ONE call site in all 9,454 generated sources, and that '
+    'call site sits inside a counter-bounded re-ask loop (sub_003B1050, branch 0x3b10ac).',
+    'The host suppresses a second producer dispatch through '
+    'g_mpeg_stub_state.nonStreamDeliveries, whose shared_ptr is owned by the resume '
+    'continuation stored in the parked thread\'s own EeWaitState.',
+    'After the single feed, thread 1 executes nothing: 151,020 further function-log lines '
+    'contain 16 distinct symbols, all one timer cycle, none of them MPEG or stream.',
+  ],
+  isolated_to_one_edge=False,
+  why='Four edges, and the load-bearing one is a HOST lifetime question (who owns the '
+      'delivery shared_ptr while a picture wait is outstanding), which is an ABI-adjacent '
+      'change to the preserved E18 contract. E27 ran no boot, so it has no fail-before, no '
+      'regression and no suite run; a fix needs all three plus exactly one edge.',
+  mutations=dict(fork_source_edits=0, fork_commits=0, pushes=0, builds=0, boots=0,
+                 lease_claims=0, deletions=0),
+)
+save('fix-gate.json', out)
+print(json.dumps(out, indent=2))
+print('# E27 FIX GATE TAIL COMPLETE decision=STOP')

@@ -1,0 +1,91 @@
+{
+  "utc": "2026-09-22T14:22:42.610329+00:00",
+  "question": "Name the function that walked the chunk list and tagged the two length fields from pc=0x3dff8c / ra=0x3dff90, and say what it does AFTER tagging.",
+  "walker": {
+    "symbol": "sub_003DFED0",
+    "file": "ps2xRuntime/src/runner/sub_003DFED0_0x3dfed0.cpp",
+    "guest_range": "0x3dfed0 - 0x3e00d4",
+    "tag_store_line": 257,
+    "tag_store_addr": "0x3dff8c",
+    "tag_store_text": "0x3dff8c: 0xae420004  sw $v0, 0x4($s2)   (delay slot of `jal func_3E5700` at 0x3dff88)",
+    "why_ra_is_pc_plus_4": "the store is in the DELAY SLOT of the jal at 0x3dff88, so $ra = 0x3dff90 is that jal's return address, not a caller frame. The generated file carries `case 0x3dff90u: goto label_3dff90;` at line 26, which is the same return address.",
+    "tagged_value": "$v0 = $s1 | ($s5 << 24)  (0x3dff84 `or $v0, $s1, $v0`, with $v0 = $s5<<24 computed at 0x3dff3c)",
+    "s1": "the chunk TOTAL length, loaded at 0x3e006c `lw $s1, 0x4($s2)`",
+    "s2": "the CURRENT CHUNK HEADER pointer, loaded at 0x3e0058 `lw $s2, 0x54($s0)` -- i.e. the walk cursor lives at ctx0+0x54",
+    "s5": "the return of func_3DFE88, the chunk-KIND lookup",
+    "matches_capture": {
+      "line_22351": {
+        "addr": "0xd49af0",
+        "value": "0x02000028",
+        "chunk": "SCHl header 0xd49aec, total 40 = 0x28",
+        "kind": 2
+      },
+      "line_22354": {
+        "addr": "0xd49b18",
+        "value": "0x0100381c",
+        "chunk": "MPCh header 0xd49b14, total 14364 = 0x381c",
+        "kind": 1
+      },
+      "arithmetic": "(kind << 24) | total  reproduces both words exactly"
+    }
+  },
+  "classifier": {
+    "symbol": "sub_003DFE88",
+    "file": "ps2xRuntime/src/runner/sub_003DFE88_0x3dfe88.cpp",
+    "guest_range": "0x3dfe88 - 0x3dfecc",
+    "pseudocode": [
+      "magic = *chunk                       (0x3dfe94 lw $a1, 0x0($a1))",
+      "n = state->[0x20]; if (n <= 0) return -2",
+      "tbl = state->[0x1C]                  ; 12-byte rows {mask, match, kind}",
+      "for i in 0..n-1:",
+      "    if ((magic & tbl[i].mask) == tbl[i].match) return tbl[i].kind  (0x3dfeb8 lw $v0, 0x8($a0))",
+      "return -2                             (0x3dfecc addiu $v0, $zero, -0x2)"
+    ],
+    "meaning": "the top byte is the registered chunk KIND from a {mask,match,kind} table, not a free-running visited counter"
+  },
+  "what_the_top_byte_means": {
+    "written_by": "sub_003DFED0 at 0x3dff8c (and re-written 64-byte-aligned at 0x3e003c)",
+    "read_by_producer": "sub_003DFED0 at 0x3e0074 `and $v0, $s1, 0xFF000000`: a chunk whose length field still carries a nonzero top byte is treated as STILL QUEUED, and the walker overwrites it with an 8-byte sentinel stub (0x3e0084 len=8, 0x3e008c magic=$s6->[0x11c]) and then STOPS (0x3e0044: magic == sentinel -> return 1)",
+    "read_by_consumer": "sub_003E12E0 at 0x3e132c `and $s1, $v1, 0x00FFFFFF` then 0x3e1330 `sw $s1, 0x4($s2)`: the dequeue STRIPS the kind byte and writes the plain size back",
+    "verdict": "the top byte is an OCCUPANCY bit carrying the kind: set when the walker publishes the chunk, cleared when the consumer dequeues it. It is the producer/consumer handshake of a single-buffer ring, stored in the chunk header itself."
+  },
+  "what_it_does_after_tagging": [
+    "0x3dff88  jal func_3E5700($s0+4)          -- take the stream lock (the tag store IS its delay slot)",
+    "0x3dff90  $s4 = ($s6->[4] == 4)           -- the stream-state guard",
+    "0x3dffa4  slot = ctx0->[0x24] + ($s5<<4) - 0x10   -- the PER-KIND queue slot, 16 bytes",
+    "0x3dffb4  slot->[8] += $s1                -- publish: add this chunk to the kind byte count",
+    "0x3dffc4  if (slot->[8] == $s1) slot->[0xC] = $s2  -- first entry: set the head",
+    "0x3dffdc  ctx0->[0x4C] += $s1             -- outstanding-byte accounting",
+    "0x3dffe8  ctx0->[0x54] += $s1             -- ADVANCE THE CURSOR past this chunk",
+    "0x3dfff4  if it crossed ctx0->[0x44] clear ctx0->[0x48]",
+    "0x3dfff8  jal func_3E5760                 -- release the lock",
+    "0x3e0040  loop back to 0x3e0058 unless magic == sentinel"
+  ],
+  "loop_exits": [
+    "fewer than 8 bytes between cursor and ctx0->[0x58] (0x3e0064) -> return 0",
+    "chunk body not fully resident: ctx0->[0x58] < cursor + len (0x3e00a0) -> return 0",
+    "chunk magic == sentinel $s6->[0x11c] (0x3e0044) -> return 1",
+    "stream state $s6->[4] == 4 (0x3e0000) -> re-tag 64-byte-aligned and return 0"
+  ],
+  "who_calls_the_walker": {
+    "symbol": "sub_003E0170",
+    "file": "ps2xRuntime/src/runner/sub_003E0170_0x3e0170.cpp",
+    "call_site": "0x3e01ec  jal func_3DFED0",
+    "what_it_is": "the READ-COMPLETION path: it adds the delivered byte count to ctx0->[0x170] (0x3e01e8) and to ctx0->[0x58] (the data end, 0x3e01f0) and only then runs the walker",
+    "consequence": "the walker is driven by DATA ARRIVAL, never by consumption. Nothing on the consume path re-enters it."
+  },
+  "where_the_tagged_chunk_goes": [
+    "sub_003DFED0  publishes it into the per-kind slot at ctx0->[0x24] + (kind-1)*16",
+    "sub_003E12E0  dequeues the head (slot->[0xC]), STRIPS the kind byte, decrements slot->[8], and walks forward to the next chunk whose tag matches slot->[4] (the kind)",
+    "sub_003AEAD0  wraps the dequeued chunk in a 3-word descriptor {+0 header, +4 payload = header+8, +8 total length} and stages it in the source object's one-slot pushback at 0x5487c0",
+    "sub_003B06B0  pops that one slot (0x3b06c4 `sw $zero, 0x0($v0)`)",
+    "sub_003B0B40  memcpy(dst=self->[0x7C], src=desc->[4], n=desc->[8]-8), zero-pads to ((total+7) & ~0xF), then sceMpegAddBs(mpeg, dst, that size)"
+  ],
+  "the_5040_derived_statically": {
+    "total": 5036,
+    "es_bytes": "$s0 = total - 8 = 5028   (0x3b0b94 addiu $s0, $s0, -0x8)",
+    "fed_size": "$s2 = (total + 7) & ~0xF = 5040   (0x3b0b90 / 0x3b0b98 with $v1 = -0x10)",
+    "pad": "the loop at 0x3b0bb8-0x3b0bd0 zero-fills from offset 5028 up to $s2 + 0x10; the first 12 of those zeros are inside the 5040 that is fed",
+    "agrees_with": "E24 and E26 measured 5028 ES + 12 zero pad = 5040 from the bytes; the source produces exactly that arithmetic"
+  }
+}

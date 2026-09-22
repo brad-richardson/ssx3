@@ -1,0 +1,69 @@
+{
+  "utc": "2026-09-22T14:29:03.339743+00:00",
+  "lane": "E27",
+  "pin_passes": {
+    "pass1_utc": "2026-09-22T14:19:13.513702+00:00",
+    "pass2_utc": "2026-09-22T14:26:48.842018+00:00",
+    "separation_seconds": 455.328316,
+    "files": 19,
+    "mismatches": [],
+    "all_equal": true
+  },
+  "independent_corroboration": {
+    "git_tracked_equal": true,
+    "git_tracked": [
+      "MPEG.cpp"
+    ],
+    "captures_equal_committed_pins": true,
+    "captures": [
+      "ps2_log-e26a-1.txt",
+      "boot-e26a-1.log"
+    ],
+    "no_corroboration_available": [
+      "sub_003DFED0_0x3dfed0.cpp",
+      "sub_003DFE88_0x3dfe88.cpp",
+      "sub_003E0170_0x3e0170.cpp",
+      "sub_003DFC48_0x3dfc48.cpp",
+      "sub_003DFBD0_0x3dfbd0.cpp",
+      "sub_003E12E0_0x3e12e0.cpp",
+      "sub_003E13E8_0x3e13e8.cpp",
+      "sub_003AEAD0_0x3aead0.cpp",
+      "sub_003B06B0_0x3b06b0.cpp",
+      "sub_003B06F8_0x3b06f8.cpp",
+      "sub_003B0B10_0x3b0b10.cpp",
+      "sub_003B0B40_0x3b0b40.cpp",
+      "sub_003B0FB8_0x3b0fb8.cpp",
+      "sub_00402A10_0x402a10.cpp",
+      "sub_004029D0_0x4029d0.cpp",
+      "sub_00402B38_0x402b38.cpp"
+    ],
+    "why": "ps2xRuntime/src/runner is .gitignore(d) at .gitignore:21, so the generated guest sources have no content-addressed copy anywhere; two matching reads separated in time is the only check available and that is stated, not hidden."
+  },
+  "budget": {
+    "internal_bytes": 138764,
+    "internal_allocated": 188416,
+    "cap_bytes": 536870912,
+    "within_cap": true,
+    "ssd_scratch_created": 0,
+    "deletions": 0
+  },
+  "launches": {
+    "boots": 0,
+    "lease_claims": 0,
+    "probe_claims": 0,
+    "builds": 0,
+    "relinks": 0,
+    "capture_driver_runs": 0,
+    "suite_runs": 0,
+    "stdbuf_uses": 0
+  },
+  "fork": {
+    "base": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "gate_open": "fork-gate.json",
+    "gate_close": "fork-gate-close.json",
+    "source_edits": 0,
+    "commits": 0,
+    "pushes": 0
+  },
+  "ssd_mounted_at_close": true
+}

@@ -1,0 +1,87 @@
+{
+  "utc": "2026-09-22T14:22:42.610745+00:00",
+  "question": "Is there a code path by which the guest COULD re-ask, or is the one-shot structural?",
+  "headline": "The guest re-ask is NOT one-shot -- it is one backward branch away, and the chunk it would get is already the head of the queue. What is structural is the HOST-side suppression, and it is held alive by the wait it is blocking.",
+  "the_guest_re_ask_path": {
+    "exists": true,
+    "function": "sub_003B1050 (guest fn 0x3b1050, inside sub_003B0FB8_0x3b0fb8.cpp)",
+    "branch": "0x3b10ac  bnez $v1, -> 0x3b1070",
+    "condition": "(unsigned)self->[0x10] < $s1, i.e. pictures served so far < pictures requested",
+    "trigger": "the ONLY thing it needs is for the `jal func_402A10` at 0x3b1020 to RETURN. Nothing else. No register, no callback, no semaphore.",
+    "what_it_would_get": {
+      "next_chunk": "0xd49b14, the second MPCh",
+      "why": "sub_003E12E0 already advanced the kind-1 slot head to it when it dequeued chunk0: 0x3e1360 `$a2 = $s2 + $s1` = 0xd48740 + 5036 = 0xd49aec (SCHl, tag 0x02 != kind 1) then the 0x3e1384 walk adds 0x28 to reach 0xd49b14, whose tag 0x0100381c matches (slot->[4] << 24) = 0x01000000, so 0x3e13c8 `sw $a2, 0xC($t1)` parks the head THERE",
+      "consequence": "the terminating start code E26 found at 0xd49b1c is the payload of the chunk the queue head is ALREADY pointing at. The guest is one func_3E12E0 call from it."
+    },
+    "second_guest_path": "if the queue were empty instead, sub_003B0B40 0x3b0b7c takes the 0x3b0bdc branch and feeds 16 bytes of 00 00 01 B7 (sequence_end_code) on its own."
+  },
+  "the_structural_one_shot": {
+    "where": "the HOST, not the guest",
+    "construct": "g_mpeg_stub_state.nonStreamDeliveries[(mpegAddr << 32) | 1], a weak_ptr<MpegNonStreamDelivery>",
+    "mechanism": [
+      "1. GetPicture (requestInput=true) finds the key empty, creates the delivery and dispatches the guest producer once (MPEG.cpp:2464-2493).",
+      "2. The producer feeds one chunk and returns; onComplete re-enters getMpegPicture with requestInput=FALSE (MPEG.cpp:1760).",
+      "3. decodedFrames is empty, so getMpegPicture calls waitExternal with a resume lambda that CAPTURES the delivery shared_ptr by value (MPEG.cpp:2514-2526).",
+      "4. EeScheduler::waitExternal moves that std::function into the blocked thread's EeWaitState (EeScheduler.cpp:2120), so the shared_ptr outlives the call.",
+      "5. pending.lock() therefore stays non-null for the whole park, so any further GetPicture -- the resume path or a fresh guest call -- takes the `!delivery` == false branch and dispatches no producer."
+    ],
+    "verdict": "the suppressing token is owned by the wait it suppresses. It is not a mutual wait between two parties; it is a single party holding the key to its own door."
+  },
+  "every_wake_site_enumerated": [
+    {
+      "site": "sceMpegAddBs -> completeExternalWait (MPEG.cpp:2058)",
+      "condition": "decodedFrames grew, or streamEnded, or decoderFailed",
+      "reachable": "only from sub_003B0B40, only from the producer callback -> circular",
+      "status": "EXCLUDED (and in this run wakePictureWaiter was false: 0 new frames)"
+    },
+    {
+      "site": "notifyMpegCdStreamEof (MPEG.cpp:1999)",
+      "condition": "CD stream EOF",
+      "reachable": "driven by thread 1's CD stream reads",
+      "status": "EXCLUDED; 0 CdStreamEof lines"
+    },
+    {
+      "site": "sceMpegFlush (MPEG.cpp:2023)",
+      "condition": "guest call",
+      "reachable": "thread 1",
+      "status": "EXCLUDED"
+    },
+    {
+      "site": "sceMpegDelete (MPEG.cpp:2239) + invalidateNonStreamDeliveries (2235)",
+      "condition": "guest call",
+      "reachable": "thread 1",
+      "status": "EXCLUDED"
+    },
+    {
+      "site": "sceMpegCreate -> invalidateNonStreamDeliveries (MPEG.cpp:2165)",
+      "condition": "guest call",
+      "reachable": "thread 1",
+      "status": "EXCLUDED"
+    },
+    {
+      "site": "sceMpegReset -> invalidateNonStreamDeliveries (MPEG.cpp:2718)",
+      "condition": "guest call",
+      "reachable": "thread 1",
+      "status": "EXCLUDED"
+    },
+    {
+      "site": "sceMpegDemuxPss / PssRing (MPEG.cpp:2285/2291/2378/2384)",
+      "condition": "the PSS path",
+      "reachable": "this title uses the ES path; 0 demux lines",
+      "status": "EXCLUDED"
+    },
+    {
+      "site": "a timeout on the Mpeg wait",
+      "condition": "none",
+      "reachable": "waitExternal takes no timeout argument",
+      "status": "EXCLUDED BY CONSTRUCTION"
+    }
+  ],
+  "which_leg_of_the_mutual_wait_breaks": {
+    "leg_1": "one GetPicture feeds exactly one chunk -- HOLDS, and E27 names both halves: guest-side sub_003B0B40 is straight-line with one pop and one AddBs; host-side the nonStreamDeliveries latch permits one producer dispatch per live request.",
+    "leg_2": "GetPicture does not return until a frame appears -- HOLDS: getMpegPicture calls waitExternal whenever decodedFrames is empty and no EOF/end/failure is set.",
+    "leg_3": "the parser cannot emit until the next start code -- E24/E26's bytes; E27 did not re-test it.",
+    "the_unstated_leg": "\"...and so each side is waiting for the other\". THIS is the leg that breaks. The guest is not waiting for anything it could not do: it holds the next chunk at the head of its own queue and a live loop branch to ask for it. It is BLOCKED INSIDE the host call, and the host call is holding the token that stops the guest being asked. The symmetry E26 tabled is not there."
+  },
+  "what_E28_would_observe": "A dynamic capture cannot add much on the guest side -- the static case is closed -- so the one thing worth a boot is the HOST side, and it needs no new guest instrumentation. Arm a watch on the kind-1 queue slot (ctx0->[0x24]+0: the byte count at +8 and the head at +0xC) and on the chunk header 0xd49b14/0xd49b18, and log, from inside MPEG.cpp, every entry to getMpegPicture with its requestInput flag and the result of pending.lock(), plus every completeExternalWait(kMpegPictureWaitType, ...) call with its caller. The prediction E27 makes, which that capture would confirm or kill in one boot: the slot head reads 0xd49b14 with a byte count of at least 14,364 from the moment of the feed onward and never changes; 0xd49b18 still reads 0x0100381c at the park; getMpegPicture is entered exactly twice (requestInput=true then false) and pending.lock() is non-null on the second; and completeExternalWait for the picture wait is called zero times after the feed. That is E28 s brief to write, not E27 s -- named here in one paragraph and designed nowhere."
+}
