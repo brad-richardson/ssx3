@@ -1,0 +1,163 @@
+--- a/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp
++++ b/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp
+@@ -495,6 +495,9 @@
+             uint32_t decodeMode = 0u;
+             uint32_t imageBufferAddr = 0u;
+             bool sawInput = false;
++            // Bytes handed to the FFmpeg decoder (post sequence-header gate).
++            // Monotonic input-progress signal for non-stream re-request (E30).
++            uint64_t decoderBytesFed = 0u;
+             bool sawSequenceEnd = false;
+             bool streamEnded = false;
+             bool decoderFailed = false;
+@@ -542,6 +545,8 @@
+             uint32_t callbackEntry = 0u;
+             uint64_t tag = 0u;
+             bool cancelled = false;
++            uint64_t bytesFedAtStart = 0u;
++            uint32_t redispatchCount = 0u;
+         };
+ 
+         struct MpegStubState
+@@ -581,6 +586,10 @@
+         constexpr uint8_t kMpegPrivateStream1 = 0xBDu;
+         constexpr size_t kStartCodeNotFound = std::numeric_limits<size_t>::max();
+         constexpr uint32_t kMpegCallbackDataSize = 0x20u;
++        // Hang-stop: bounds consecutive no-frame re-requests against a
++        // pathological trickling producer. Real movies need tens of rounds;
++        // a dry producer parks on the first one regardless of this cap.
++        constexpr uint32_t kMaxNonStreamRedispatches = 4096u;
+ 
+         uint64_t mpegPictureIntervalQ32(uint8_t frameRateCode, uint8_t frameRateExtensionN = 0u, uint8_t frameRateExtensionD = 0u)
+         {
+@@ -1123,6 +1132,7 @@
+                 playback.decoder = std::make_unique<MpegFfmpegDecoder>();
+             }
+ 
++            playback.decoderBytesFed += size;
+             if (!playback.decoder->feed(data, size, playback.decodedFrames, pts90k, dts90k))
+             {
+                 playback.decoder.reset();
+@@ -1705,6 +1715,21 @@
+             };
+             runtime->eeScheduler().queueInvocation(std::move(invocation));
+         }
++
++        // A non-stream delivery whose callbacks all ran but whose input grew
++        // no frame must not latch the input request shut: the title's first
++        // chunk holds an unterminated final picture (E30), so exactly one
++        // dispatch per GetPicture parks with zero packets and the producer is
++        // never asked for the bytes that would complete one. Either dispatches
++        // a fresh delivery (which throws via the scheduler transfer) or
++        // returns, in which case the caller continues this request without
++        // re-triggering it. Re-dispatch requires fresh decoder bytes since
++        // this delivery started; a dry producer parks, and a hang-stop count
++        // bounds a pathological trickle. Never synthesizes frames or EOF.
++        void redispatchNonStreamInputIfStarved(uint8_t *rdram,
++                                               R5900Context *ctx,
++                                               PS2Runtime *runtime,
++                                               const std::shared_ptr<MpegNonStreamDelivery> &delivery);
+ 
+         void dispatchGuestNonStreamCallback(uint8_t *rdram,
+                                             R5900Context *callerCtx,
+@@ -1755,14 +1780,91 @@
+                         return;
+                     }
+                     // Callback v0 is deliberately ignored. Preserve registration
+-                    // order, then continue this request without re-triggering it.
++                    // order. dispatchGuestNonStreamCallback returns only when no
++                    // callbacks remain; a starved request then re-dispatches for
++                    // more input, else continue without re-triggering it.
+                     dispatchGuestNonStreamCallback(rdram, &parent, delivery);
++                    redispatchNonStreamInputIfStarved(rdram, &parent, runtime, delivery);
+                     getMpegPicture(rdram, &parent, runtime, false);
+                 };
+                 runtime->eeScheduler().invokeCurrent(std::move(invocation));
+             }
+         }
+ 
++        void redispatchNonStreamInputIfStarved(uint8_t *rdram,
++                                               R5900Context *ctx,
++                                               PS2Runtime *runtime,
++                                               const std::shared_ptr<MpegNonStreamDelivery> &delivery)
++        {
++            std::unique_lock<std::mutex> lock(g_mpeg_stub_mutex);
++            const auto playbackIt = g_mpeg_stub_state.playbackByMpeg.find(delivery->mpegAddr);
++            if (playbackIt == g_mpeg_stub_state.playbackByMpeg.end())
++            {
++                return;
++            }
++            MpegPlaybackState &playback = playbackIt->second;
++            const bool wakeable = !playback.decodedFrames.empty() ||
++                                  g_mpeg_stub_state.currentCdStreamEofSeen ||
++                                  playback.streamEnded ||
++                                  playback.decoderFailed;
++            const uint64_t fedNow = playback.decoderBytesFed;
++            const bool inputFlowed = fedNow != delivery->bytesFedAtStart;
++            // The exhausted delivery must not suppress a future request: drop
++            // its latch token whether or not a fresh one is issued.
++            const uint64_t key = nonStreamDeliveryKey(delivery->mpegAddr, delivery->type);
++            const auto pendingIt = g_mpeg_stub_state.nonStreamDeliveries.find(key);
++            if (pendingIt != g_mpeg_stub_state.nonStreamDeliveries.end() &&
++                pendingIt->second.lock() == delivery)
++            {
++                g_mpeg_stub_state.nonStreamDeliveries.erase(pendingIt);
++            }
++            if (wakeable || !inputFlowed || delivery->redispatchCount >= kMaxNonStreamRedispatches)
++            {
++                return;
++            }
++            auto callbacks = matchingNonStreamCallbacks(delivery->mpegAddr, delivery->type);
++            if (callbacks.empty())
++            {
++                return;
++            }
++            static uint32_t s_redispatchLogCount = 0u;
++            const bool shouldLog = (s_redispatchLogCount < 32u);
++            if (shouldLog)
++            {
++                ++s_redispatchLogCount;
++            }
++            auto fresh = std::make_shared<MpegNonStreamDelivery>();
++            fresh->runtime = runtime;
++            fresh->mpegAddr = delivery->mpegAddr;
++            fresh->type = delivery->type;
++            fresh->ownerThread = delivery->ownerThread;
++            fresh->callbacks = std::move(callbacks);
++            fresh->bytesFedAtStart = fedNow;
++            fresh->redispatchCount = delivery->redispatchCount + 1u;
++            g_mpeg_stub_state.nonStreamDeliveries[key] = fresh;
++            lock.unlock();
++            if (shouldLog)
++            {
++                PS2_IF_AGRESSIVE_LOGS({
++                    std::cerr << "[MPEG:nonstream-redispatch] mpeg=0x" << std::hex << fresh->mpegAddr
++                              << std::dec << " round=" << fresh->redispatchCount
++                              << " fedNow=" << fedNow << std::endl;
++                });
++            }
++            dispatchGuestNonStreamCallback(rdram, ctx, fresh);
++            // All fresh callbacks were skipped (null or unbound): dispatch
++            // throws when it dispatches anything, so reaching here means the
++            // just-issued token would latch with no producer running. Drop it
++            // and let the caller continue the request.
++            lock.lock();
++            const auto freshIt = g_mpeg_stub_state.nonStreamDeliveries.find(key);
++            if (freshIt != g_mpeg_stub_state.nonStreamDeliveries.end() &&
++                freshIt->second.lock() == fresh)
++            {
++                g_mpeg_stub_state.nonStreamDeliveries.erase(freshIt);
++            }
++        }
++
+         void dispatchStreamCallbacks(uint8_t *rdram,
+                                      R5900Context *ctx,
+                                      PS2Runtime *runtime,
+@@ -2474,6 +2576,7 @@
+                     delivery->runtime = runtime;
+                     delivery->mpegAddr = mpegAddr;
+                     delivery->type = inputRequestType;
++                    delivery->bytesFedAtStart = playback.decoderBytesFed;
+                     delivery->callbacks = std::move(callbacks);
+                     pending = delivery;
+                     dispatchInput = true;

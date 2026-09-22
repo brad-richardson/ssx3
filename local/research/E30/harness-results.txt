@@ -1,0 +1,35 @@
+== versions ==
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+Target: arm64-apple-darwin27.0.0
+63.1.101
+61.1.101
+10.1.101
+== H1-H4 ==
+vector bytes=5040
+[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0
+RESULT H1 ok=1 chunks=1 frames=0
+[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0
+[MPEG:feed] inSize=68 parsed=68 packets=1 newFrames=0 totalFrames=0
+RESULT H2a ok=1 chunks=2 frames=0
+[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0
+[MPEG:feed] inSize=140 parsed=140 packets=1 newFrames=0 totalFrames=0
+RESULT H2b ok=1 chunks=2 frames=0
+[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0
+RESULT H3 ok=1 chunks=1 frames=1 first=512x448
+[MPEG:feed] inSize=2500 parsed=2500 packets=0 newFrames=0 totalFrames=0
+[MPEG:feed] inSize=2540 parsed=2540 packets=0 newFrames=0 totalFrames=0
+RESULT H4 ok=1 chunks=2 frames=0
+== H5-H6 ==
+[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0
+[MPEG:feed] inSize=68 parsed=68 packets=1 newFrames=0 totalFrames=0
+RESULT H5 ok=1 frames=1 [512x448 fnv=35ef864cdd920383]
+[MPEG:feed] inSize=5040 parsed=5040 packets=0 newFrames=0 totalFrames=0
+RESULT H6 frames=1 [512x448 fnv=35ef864cdd920383]
+== R7/R9-design ==
+[MPEG:feed] inSize=60 parsed=60 packets=0 newFrames=0 totalFrames=0
+[MPEG:feed] inSize=180 parsed=180 packets=3 newFrames=2 totalFrames=2
+RESULT R7-design chunk1frames=0 totalframes=2 first=16x16
+[MPEG:feed] inSize=60 parsed=60 packets=0 newFrames=0 totalFrames=0
+RESULT R9-design frames=1 first=16x16
+[MPEG:feed] inSize=16 parsed=16 packets=4 newFrames=0 totalFrames=0
+RESULT R2-control ok=1 frames=0

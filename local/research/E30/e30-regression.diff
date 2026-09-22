@@ -1,0 +1,283 @@
+--- a/ps2xTest/src/ps2_runtime_expansion_tests.cpp
++++ b/ps2xTest/src/ps2_runtime_expansion_tests.cpp
+@@ -295,6 +295,9 @@
+     constexpr uint32_t kNonStreamInput = 0x00126000u;
+     constexpr uint32_t kNonStreamHeap = 0x00800000u;
+     constexpr uint32_t kNonStreamStack = 0x01E00000u;
++    constexpr uint32_t kNonStreamEofObserver = 0x00125550u;
++    constexpr uint32_t kNonStreamCreateScratch = 0x00128000u;
++    constexpr uint32_t kNonStreamTrickle = 0x00129000u;
+ 
+     struct NonStreamProbe
+     {
+@@ -315,6 +318,17 @@
+         bool pendingAtTeardown = false;
+         bool setup = true;
+         uint32_t width = 0u, height = 0u, pixel = 0u;
++        // E30 two-chunk extension. Empty chunks + zero flags reproduce the
++        // legacy feedBytes path exactly; R1-R6 never set these.
++        std::vector<std::pair<unsigned, unsigned>> chunks;
++        size_t nextChunk = 0u;
++        unsigned trickleBytes = 0u;
++        int selfTeardown = 0; // 1: delete; 2: reset, once chunks are exhausted.
++        bool teardownDone = false;
++        bool eofFromObserver = false;
++        bool eofPosted = false;
++        int movies = 1;
++        int moviesDone = 0;
+     };
+     NonStreamProbe gNonStream;
+ 
+@@ -367,6 +381,36 @@
+             ps2_stubs::sceMpegAddBs(rdram, ctx, runtime);
+             gNonStream.copied += ::getRegU32(ctx, 2);
+         }
++        else if (!gNonStream.chunks.empty() || gNonStream.trickleBytes != 0u ||
++                 gNonStream.selfTeardown != 0)
++        {
++            if (gNonStream.nextChunk < gNonStream.chunks.size())
++            {
++                const auto chunk = gNonStream.chunks[gNonStream.nextChunk++];
++                setRegU32(*ctx, 4, kNonStreamHandle);
++                setRegU32(*ctx, 5, kNonStreamInput + chunk.first);
++                setRegU32(*ctx, 6, chunk.second);
++                ps2_stubs::sceMpegAddBs(rdram, ctx, runtime);
++                gNonStream.copied += ::getRegU32(ctx, 2);
++            }
++            else if (gNonStream.trickleBytes != 0u)
++            {
++                setRegU32(*ctx, 4, kNonStreamHandle);
++                setRegU32(*ctx, 5, kNonStreamTrickle);
++                setRegU32(*ctx, 6, gNonStream.trickleBytes);
++                ps2_stubs::sceMpegAddBs(rdram, ctx, runtime);
++                gNonStream.copied += ::getRegU32(ctx, 2);
++            }
++            else if (gNonStream.selfTeardown != 0 && !gNonStream.teardownDone)
++            {
++                gNonStream.teardownDone = true;
++                setRegU32(*ctx, 4, kNonStreamHandle);
++                if (gNonStream.selfTeardown == 1)
++                    ps2_stubs::sceMpegDelete(rdram, ctx, runtime);
++                else
++                    ps2_stubs::sceMpegReset(rdram, ctx, runtime);
++            }
++        }
+         // A callback's scratch context cannot replace the suspended caller.
+         ctx->r[16] = _mm_set_epi64x(0x1122334455667788LL, 0x8877665544332211ULL);
+         setRegU32(*ctx, 2, gNonStream.callbackResult);
+@@ -382,6 +426,24 @@
+         gNonStream.height = Ps2FastRead32(rdram, kNonStreamHandle + 4u);
+         gNonStream.pixel = Ps2FastRead32(rdram, kNonStreamImage);
+         nonStreamCheckFreed(runtime);
++        if (gNonStream.movies == 2 && gNonStream.moviesDone == 0)
++        {
++            // E30 R11: sceMpegCreate must re-arm the input request so the next
++            // movie runs its own delivery pair (E29 saw 3 movies per title).
++            ++gNonStream.moviesDone;
++            gNonStream.nextChunk = 0u;
++            R5900Context create{};
++            setRegU32(create, 4, kNonStreamHandle);
++            setRegU32(create, 5, kNonStreamCreateScratch);
++            setRegU32(create, 6, 0x800u);
++            ps2_stubs::sceMpegCreate(rdram, &create, runtime);
++            setRegU32(*ctx, 4, kNonStreamHandle);
++            setRegU32(*ctx, 5, kNonStreamImage);
++            setRegU32(*ctx, 31, kNonStreamResume);
++            ctx->pc = kNonStreamResume;
++            ps2_stubs::sceMpegGetPicture(rdram, ctx, runtime);
++            return;
++        }
+         ctx->pc = 0u;
+         runtime->requestStop();
+     }
+@@ -396,6 +458,19 @@
+         runtime->requestStop();
+     }
+ 
++    // E30 R9: posts CD-stream EOF if and only if the main thread is parked
++    // in the picture wait, so the EOF cannot land before the partial feed.
++    void nonStreamEofObserver(uint8_t *, R5900Context *ctx, PS2Runtime *runtime)
++    {
++        const GuestThread *owner = runtime->eeScheduler().thread(1);
++        if (owner && owner->wait.reason == EeWaitReason::Mpeg)
++        {
++            gNonStream.eofPosted = true;
++            ps2_stubs::notifyMpegCdStreamEof(runtime);
++        }
++        ctx->pc = 0u;
++    }
++
+     void nonStreamTeardown(uint8_t *rdram, R5900Context *ctx, PS2Runtime *runtime)
+     {
+         const GuestThread *owner = runtime->eeScheduler().thread(1);
+@@ -502,6 +577,84 @@
+             const int deleter = ee.createThread(EeThreadCreateParams{0u, kNonStreamDelete, 0u, 0u, 0u, 10, 0u});
+             gNonStream.setup &= deleter > 1 && ee.startThread(deleter, 0u, mainContext, false) == 0;
+         }
++        ee.run();
++        return gNonStream;
++    }
++
++    // E30 two-chunk runner. runNonStreamProbe is untouched; this variant stages
++    // the full authored fixture and lets the producer serve offset/length
++    // chunks per dispatch, trickle filler, tear itself down, take EOF from the
++    // observer, or run a second movie behind sceMpegCreate.
++    NonStreamProbe runNonStreamChunkProbe(std::vector<std::pair<unsigned, unsigned>> chunks,
++                                          unsigned trickleBytes = 0u,
++                                          int selfTeardown = 0,
++                                          bool eofFromObserver = false,
++                                          int movies = 1)
++    {
++        PS2Runtime runtime;
++        std::vector<uint8_t> rdram(PS2_RAM_SIZE, 0u);
++        ps2_stubs::resetMpegStubState();
++        ps2_stubs::notifyMpegCdStreamStart();
++        runtime.configureGuestHeap(kNonStreamHeap, kNonStreamHeap + 0x10000u);
++        std::memset(rdram.data() + kNonStreamHeap, 0xA5, 64u);
++        gNonStream = NonStreamProbe{};
++        gNonStream.chunks = std::move(chunks);
++        gNonStream.trickleBytes = trickleBytes;
++        gNonStream.selfTeardown = selfTeardown;
++        gNonStream.eofFromObserver = eofFromObserver;
++        gNonStream.movies = movies;
++        for (auto entry : {std::pair<uint32_t, PS2Runtime::RecompiledFunction>{kNonStreamMain, nonStreamMain},
++                           {kNonStreamResume, nonStreamResume}, {kNonStreamCallback, nonStreamCallback},
++                           {kNonStreamObserver, nonStreamObserve}, {kNonStreamDelete, nonStreamTeardown},
++                           {kNonStreamEofObserver, nonStreamEofObserver}})
++            gNonStream.setup &= runtime.registerFunction(entry.first, entry.second);
++
++        // Same four authored 16x16 red MPEG-2 I-frames as runNonStreamProbe
++        // (byte-identical copy; R3 and R7 passing together cross-checks it),
++        // always staged so chunk offsets address real packet boundaries:
++        // sequence headers at 0/60/120/180, one 60-byte frame each.
++        static constexpr uint8_t inputFrames[] = {
++            0x00u, 0x00u, 0x01u, 0xB3u, 0x01u, 0x00u, 0x10u, 0x13u, 0xFFu, 0xFFu, 0xE0u, 0x18u,
++            0x00u, 0x00u, 0x01u, 0xB5u, 0x14u, 0x8Au, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u,
++            0x01u, 0xB8u, 0x00u, 0x08u, 0x00u, 0x40u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x0Fu,
++            0xFFu, 0xF8u, 0x00u, 0x00u, 0x01u, 0xB5u, 0x8Fu, 0xFFu, 0xF3u, 0x41u, 0x80u, 0x00u,
++            0x00u, 0x01u, 0x01u, 0x13u, 0xF2u, 0x14u, 0xA5u, 0x2Fu, 0x99u, 0xBFu, 0x70u, 0x80u,
++            0x00u, 0x00u, 0x01u, 0xB3u, 0x01u, 0x00u, 0x10u, 0x13u, 0xFFu, 0xFFu, 0xE0u, 0x18u,
++            0x00u, 0x00u, 0x01u, 0xB5u, 0x14u, 0x8Au, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u,
++            0x01u, 0xB8u, 0x00u, 0x08u, 0x00u, 0xC0u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x0Fu,
++            0xFFu, 0xF8u, 0x00u, 0x00u, 0x01u, 0xB5u, 0x8Fu, 0xFFu, 0xF3u, 0x41u, 0x80u, 0x00u,
++            0x00u, 0x01u, 0x01u, 0x13u, 0xF2u, 0x14u, 0xA5u, 0x2Fu, 0x99u, 0xBFu, 0x70u, 0x80u,
++            0x00u, 0x00u, 0x01u, 0xB3u, 0x01u, 0x00u, 0x10u, 0x13u, 0xFFu, 0xFFu, 0xE0u, 0x18u,
++            0x00u, 0x00u, 0x01u, 0xB5u, 0x14u, 0x8Au, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u,
++            0x01u, 0xB8u, 0x00u, 0x08u, 0x01u, 0x40u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x0Fu,
++            0xFFu, 0xF8u, 0x00u, 0x00u, 0x01u, 0xB5u, 0x8Fu, 0xFFu, 0xF3u, 0x41u, 0x80u, 0x00u,
++            0x00u, 0x01u, 0x01u, 0x13u, 0xF2u, 0x14u, 0xA5u, 0x2Fu, 0x99u, 0xBFu, 0x70u, 0x80u,
++            0x00u, 0x00u, 0x01u, 0xB3u, 0x01u, 0x00u, 0x10u, 0x13u, 0xFFu, 0xFFu, 0xE0u, 0x18u,
++            0x00u, 0x00u, 0x01u, 0xB5u, 0x14u, 0x8Au, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u,
++            0x01u, 0xB8u, 0x00u, 0x08u, 0x01u, 0xC0u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x0Fu,
++            0xFFu, 0xF8u, 0x00u, 0x00u, 0x01u, 0xB5u, 0x8Fu, 0xFFu, 0xF3u, 0x41u, 0x80u, 0x00u,
++            0x00u, 0x01u, 0x01u, 0x13u, 0xF2u, 0x14u, 0xA5u, 0x2Fu, 0x99u, 0xBFu, 0x70u, 0x80u,
++        };
++        static_assert(sizeof(inputFrames) == 240u, "R7-R11 chunk offsets assume four 60-byte frames");
++        std::memcpy(rdram.data() + kNonStreamInput, inputFrames, sizeof(inputFrames));
++
++        R5900Context registration{};
++        setRegU32(registration, 4, kNonStreamHandle);
++        setRegU32(registration, 5, 1u);
++        setRegU32(registration, 6, kNonStreamCallback);
++        setRegU32(registration, 7, 11u);
++        ps2_stubs::sceMpegAddCallback(rdram.data(), &registration, &runtime);
++
++        R5900Context mainContext{};
++        mainContext.pc = kNonStreamMain;
++        for (int reg : {16, 17, 18, 19, 20, 21, 22, 23, 28, 30})
++            mainContext.r[reg] = _mm_set_epi64x(0x1234567800000000LL + reg, 0x7654321000000000LL + reg);
++        setRegU32(mainContext, 29, kNonStreamStack);
++        EeScheduler &ee = runtime.eeScheduler();
++        ee.reset(rdram.data(), mainContext);
++        const uint32_t observerPc = eofFromObserver ? kNonStreamEofObserver : kNonStreamObserver;
++        const int observer = ee.createThread(EeThreadCreateParams{0u, observerPc, 0u, 0u, 0u, 30, 0u});
++        gNonStream.setup &= observer > 1 && ee.startThread(observer, 0u, mainContext, false) == 0;
+         ee.run();
+         return gNonStream;
+     }
+@@ -1067,8 +1220,85 @@
+             t.IsTrue(p.setup && p.delivered.empty(), "GetPicture must not select a stream callback with the same type");
+             t.IsTrue(p.blocked && p.resumed == 0u && p.saved, "an unmatched input request must retain its typed wait");
+             // The existing Demux video/audio/EOF/reset/create stream test stays unchanged.
++        });
++
++        // E30 faithful-MPEG regression. E29 measured that the DEV-ONLY bypass
++        // breaks exactly five MPEG tests; the faithful fix must hold all five
++        // green with no flag: "MPEG non-stream R1 delivers in registration
++        // order on the caller", "MPEG non-stream R2 re-enters AddBs without
++        // holding the MPEG lock", "MPEG non-stream R4 ignores valid-no-input
++        // callback return values", "MPEG non-stream R6 leaves stream callbacks
++        // to the existing Demux path", and "sceMpegGetPicture waits for new
++        // decoder output instead of duplicating the last frame".
++        tc.Run("MPEG non-stream R7 re-requests input when the first chunk completes no packet", [](TestCase &t)
++        {
++            const auto p = runNonStreamChunkProbe({{0u, 60u}, {60u, 180u}});
++            t.IsTrue(p.setup, "fixture entries and observer must bind");
++            t.IsTrue(p.delivered == std::vector<uint32_t>{11u, 11u}, "one input callback per delivery, exactly two deliveries");
++            t.Equals(p.copied, 240u, "both chunks must reach the decoder");
++            t.Equals(p.resumed, 1u, "GetPicture must resume its caller exactly once");
++            t.Equals(p.result, 0, "the resumed picture request should succeed");
++            t.IsTrue(p.width == 16u && p.height == 16u && p.pixel != 0u, "a decoded 16x16 picture must reach guest memory");
++            t.IsTrue(p.ownership && p.saved && p.freed, "re-request must preserve ownership and release callback data");
++        });
++
++        tc.Run("MPEG non-stream R8 parks after empty input without retrying", [](TestCase &t)
++        {
++            for (const auto &chunks : {std::vector<std::pair<unsigned, unsigned>>{{0u, 0u}},
++                                       std::vector<std::pair<unsigned, unsigned>>{}})
++            {
++                const auto p = runNonStreamChunkProbe(chunks);
++                t.IsTrue(p.setup && p.delivered == std::vector<uint32_t>{11u}, "a dry producer must be asked exactly once");
++                t.Equals(p.copied, 0u, "empty input must copy zero bytes");
++                t.IsTrue(p.blocked && p.resumed == 0u, "no input and no frame must leave the typed wait parked");
++                t.IsTrue(p.saved && p.freed, "dry return must restore its parent and release cbData");
++            }
++        });
++
++        tc.Run("MPEG non-stream R8b stops re-requesting a trickling producer at the hang-stop", [](TestCase &t)
++        {
++            const auto p = runNonStreamChunkProbe({{0u, 60u}}, 16u);
++            t.IsTrue(p.setup, "fixture entries and observer must bind");
++            t.Equals(p.delivered.size(), 4097u, "one initial dispatch plus exactly 4096 re-requests");
++            t.Equals(p.copied, 60u + 4096u * 16u, "every round must feed before the stop");
++            t.IsTrue(p.blocked && p.resumed == 0u, "the hang-stop must park rather than spin forever");
++        });
++
++        tc.Run("MPEG non-stream R9 delivers the held frame when EOF flushes a partial feed", [](TestCase &t)
++        {
++            const auto p = runNonStreamChunkProbe({{0u, 60u}}, 0u, 0, true);
++            t.IsTrue(p.setup && p.eofPosted, "EOF must post only after the partial feed parks");
++            t.IsTrue(p.delivered == std::vector<uint32_t>{11u, 11u}, "one chunk, one dry re-request, then EOF");
++            t.Equals(p.copied, 60u, "only the first chunk carries bytes");
++            t.Equals(p.resumed, 1u, "EOF completion must resume GetPicture exactly once");
++            t.Equals(p.result, 0, "the resumed picture request should succeed");
++            t.IsTrue(p.width == 16u && p.height == 16u && p.pixel != 0u, "the flushed 16x16 picture must reach guest memory");
+         });
+ 
++        tc.Run("MPEG non-stream R10 delete and reset during a re-dispatched delivery cancel once", [](TestCase &t)
++        {
++            for (int teardown : {1, 2})
++            {
++                const auto p = runNonStreamChunkProbe({{0u, 60u}}, 0u, teardown);
++                t.IsTrue(p.setup, "fixture entries and observer must bind");
++                t.IsTrue(p.delivered == std::vector<uint32_t>{11u, 11u}, "teardown must run on the second dispatch, with no third");
++                t.Equals(p.resumed, 1u, "teardown must resume the suspended GetPicture caller");
++                t.Equals(p.result, -425, "cancelled request must return KE_WAIT_DELETE");
++                t.IsTrue(p.saved && p.freed, "cancellation must preserve its parent and release cbData in onComplete");
++            }
++        });
++
++        tc.Run("MPEG non-stream R11 re-arms per movie after sceMpegCreate", [](TestCase &t)
++        {
++            const auto p = runNonStreamChunkProbe({{0u, 60u}, {60u, 180u}}, 0u, 0, false, 2);
++            t.IsTrue(p.setup, "fixture entries and observer must bind");
++            t.IsTrue(p.delivered == std::vector<uint32_t>{11u, 11u, 11u, 11u}, "each movie must run its own two-chunk delivery pair");
++            t.Equals(p.copied, 480u, "both movies must feed both chunks");
++            t.Equals(p.resumed, 2u, "each movie must resume its GetPicture exactly once");
++            t.Equals(p.result, 0, "the resumed picture requests should succeed");
++            t.IsTrue(p.width == 16u && p.height == 16u && p.pixel != 0u, "a decoded 16x16 picture must reach guest memory");
++        });
++
+         tc.Run("sceSdRemote isolates voice transfers from block streaming state", [](TestCase &t)
+         {
+             std::vector<uint8_t> rdram(PS2_RAM_SIZE, 0u);
