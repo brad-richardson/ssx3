@@ -1756,6 +1756,82 @@ the build or commit that closed them.
       unaffected (5 matching reads + on-device pre-date it).
       ~1.5 h. Next: G34 (tagged write-back, NOT adoption); mirror
       G-receipts to share (drive distrusted). Ledger row added.
+      AMENDMENT (09-22, post-gate): G33's binary re-reads its BUILD sha
+      (`7e0ea803…`) — the `d1238552…` value was transient read corruption
+      (stable ~10 min across 4 reads, then cleared), NOT a flash-level
+      mutation. The "flash suspect" verdict is WITHDRAWN: every
+      zero-destroyer event to date is now transient link/controller
+      corruption (zeros or plausible-wrong bytes, always clearing).
+      Standing rule adopted: lane-critical SSD bytes need 2+ matching
+      reads separated in time (or independent corroboration) before
+      entering a gate; single-read SSD evidence is suspect.
+- [x] **E25 read (09-22) — PASS(H1, bit-identical): rebuilt runner + suite from 3adc0478 on E18's exact recipe are BYTE-IDENTICAL to the lost pins — no re-baseline needed; 8 moving pins measured (ar timestamps + PCH), other two trees proven pre-E18 output**
+      Fork gate FIRST (triple 3adc0478, status exactly ?? ps2_log.txt)
+      → loss re-inventoried (1725/1725, agrees E24 exactly) → configure
+      (argv == E18's, rc 0, 72.5 s, log line-identical, dep HEADs
+      unmoved) → ONE ninja (rc 0, 530.8 s, 543/543, 0 E25-only edges)
+      → runner 163,529,696 B e462e448 + suite 5,695,128 B 2152e5ad
+      IDENTICAL → 567/575 pins identical, all 552 .o exact → suite
+      458/458 unloaded + loaded, 10/10 observer closures, E18 R1–R6,
+      prior 24/3/14/4/DROP, cadence 4/4 field-exact → snapshot tar to
+      SSD (1,762,803,200 B 9ded8065, 7342-file manifest, untested
+      restore) → fix gate N/A, 0 boots/leases/edits/deletions.
+      Verified: tail-sha, binaries 2× each, fork, argv equality, suite
+      RE-RUN 458/458 (bare-run 1 fail = orch wrong-cwd, VU0 test needs
+      fork root), pins.json scale, live MPEG.cpp.o 8c6df388 vs E23's
+      p1/e17 fa9cb0f8 ×2, ar dates (fmt this-build vs glfw frozen),
+      PCH size, tar re-sha, ELF re-sha, DIAG_SEMA ×3 in runner.
+      ORCH DECISION: re-baseline table ACCEPTED — the 1725-pin is
+      CLOSED as superseded by the 575 rebuilt-tree pins + snapshot
+      (no E15–E23 receipt ever touched p1/e17 runners); E26 spends
+      E24's e24a boot UNCHANGED. MIGRATION: mini restores via
+      share e25-restore/ binaries (mirrored + verified) or 10-min
+      rebuild per E25 recipe. Ledger row added.
+- [x] **G34 read (09-22) — PASS(H1 WINS, decisive): sparse 112-word tag OR-masked pre-commit renders EXACTLY (10/10 ladders + 10/10 scanouts == pre-registered tag model); H2 refuted 0/10 — the commit/barrier fixed sampling, not content**
+      Task-1 statics (tag shape A + mask site + W1 barrier parity +
+      every scalar pre-registered + REAL G33 predictor reuse +
+      independent port cross-check + 5-row matrix) → ONE hunk (+55/−0,
+      G33 +51 excised same edit) + ONE build exit 0 [458/458]
+      (265,853,192 B 2b101dde, c696a76a) + verify-then-push NO gap +
+      ONE run exit 0: 16/16 writeback tagged c039a1d1/150057 + 16/16
+      state == G31 + 16/16 bytes (B tagged, A == G31) + 512 vpage
+      (112 oracle + 400 == G31) + 10/10 ladder 86ad7b88/229712 +
+      vram restart control + 10/10 scanouts d19e6beb (112 whites
+      in-set, 0 extras) + Done! last + 0 new tombstone. Verified:
+      logcat counts/values exact, PPMs 10× 688143 unanimous FULL
+      d19e6beb, pixel census 112/112 re-implemented, binary re-sha +
+      ELF, mirror 13/13, hunk 55+/0- single @@, clone HEAD + marker
+      counts + diff arithmetic 159 = 155−51+55. ADJUDICATIONS: §2a2
+      proceed-decision RATIFIED (stop rule protects the validity
+      chain; G33 binary outside it; brief priced the mismatch);
+      G33-binary morph CLOSED as 12th read-artifact recurrence
+      (46028004 ×11 → 7e0ea803 BUILD sha, mtime frozen all day —
+      third transient value; flash hypothesis dead). Next: G35
+      commit-necessity wall (same tag, NO end_vram_write:
+      H1-barrier→cleared vs refined-H2→tag-visible); Adreno filing
+      content upgrades again, still held. Ledger row added.
+- [x] **I24 read (09-22) — PASS(P4 H-a): V3 5040 B decodes with STRUCTURAL identity on host-7.1.1 AND device — feed-hold + drain-serve both sides, ONE 512×448 frame RGBA-byte-identical (048b41af); title-path hold reproduced 3rd time**
+      Vector lock (3 copies 5040 B cde8a830, FNV/first4 equal +
+      independent re-parse: dims/census/vpos/FOUR 177s per E24-E3/
+      slice28/tail/NO terminator) → host anchor on EXISTING prefix
+      (5× verbatim + 3× split: feed parsed=5040 packets=0 frames=0
+      + flush +1, sha 048b41af, uniform orange) → device reuse gate
+      (binary 122458696 edb3eadc + lib f356aaa7 identical → NO
+      rebuild) → stage/sign/install (13th overwrite → F05E490A) →
+      ONE V3 probe (PID 5108 exit 2 alive, 45611 lines): vector
+      lines input-FNV exact + feed-hold field-exact + flush +1 +
+      frame0 512×448 + FNV/slices exact → RGBA retrieved cmp-clean
+      vs host → P4 7/7 EXACT → cheap P2b/P9b/P5/P7 unchanged →
+      0 fork commits, branch unneeded. Verified: tail-sha, 3-copy
+      lock, fork + i23-ffmpeg-ios unmoved + no i24 branch, prefix
+      shas, BOTH harnesses rebuilt from committed source and RE-RUN
+      (verbatim + split counts + sha exact), console lines/sha +
+      vector/title lines, device==host cmp, binary/lib re-sha,
+      W 9.6G untouched. Next: I-lane PARKED — G1 closed, G2 needs
+      E-lane X (live path never flushes), G3/G4 E-lane owned;
+      re-probe rides after a live-path change. Ledger row added.
+      MIGRATION: console + both RGBA bins mirrored to share
+      ps2x-i24/logs (verified).
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
