@@ -1869,6 +1869,11 @@ the build or commit that closed them.
       valid downstream parse); dormant citation "22792" is the
       22791–22797 block (content exact). Next: E27 (chunk-walk
       static autopsy from pc 0x3dff8c, NO boot). Ledger row added.
+      AMENDMENT (09-22, E27 gate): E26's byte-cap sizes (boot log
+      13,315,314 / function log 127,058,902) disagree with the
+      pinned files (13,355,448 / 127,074,085) while SHAs match —
+      cap accounting sampled mid-write; files are right, result
+      intact, not corruption.
 - [x] **G35 read (09-22) — PASS(refined-H2 WINS, decisive): tag renders EXACTLY with NO commit (B1 unanimous — uncommitted stores persist); H1-barrier refuted 0/10 — content suffices, the commit is not the fix**
       Task-1 statics (commit-less shape A + P1/P2-B1-B2/P3 premise
       rows with pre-registered verdict meanings + barrier anatomy +
@@ -1895,6 +1900,68 @@ the build or commit that closed them.
       barrier-vs-content wall (raw-access placement, no map_write/
       no commit: pure-refined-H2→visible vs H1-as-barrier→cleared);
       filing content upgrades again, still held. Ledger row added.
+- [x] **E27 read (09-22) — PASS(closed static): walker = sub_003DFED0 (tag = delay-slot store, kind-carrying occupancy bit); GetPicture ONE call site inside counter-bounded re-ask loop; once-mechanism = host weak_ptr latch owned by its own wait; re-ask one branch away, next chunk already queue head — mutual-wait symmetry BROKEN**
+      Mission 1 (walker line 257 = sw delay slot of jal 0x3dff88 →
+      ra = pc+4 explained; tag = len | kind<<24, both anchor words
+      derived; cursor ctx0+0x54; classifier = table + -2; strip at
+      dequeue; sentinel-stub + terminate; post-tag = lock/publish/
+      advance/loop, never feeds; caller = read-completion only;
+      5-step route with 6 watch receipts; 5040 derived from source
+      (5036−8, (5036+7)&~0xF, 12-pad loop); untagged descriptor
+      explained) → Mission 2a (ONE GetPicture site sub_003B0FB8
+      0x3b1020/ra 0x3b1028 == park pc; caller straight-line; loop
+      one level up sub_003B1050 bnez 0x3b10ac; goto-trap named;
+      AddBs one site; host latch nonStreamDeliveries + re-entry
+      false + "One caller-owned request" + lambda captures
+      delivery + EeWaitState owns it; B701 end-code path named) →
+      Mission 2b (feed frame 3456124–3456136 dissected; 8 legs
+      16/56/29/2/1/1/0 + silent thunks, zero disagreements) →
+      post-feed tail (151,020 lines, 16 symbols, 4195 timer iters,
+      DCFD0 0; sema-36 "shared function" DOWNGRADED to timer
+      traffic) → Mission 3 (re-ask = branch 0x3b10ac, trigger =
+      jal return; head already 0xd49b14 via 0x3e1360/0x3e1384/
+      0x3e13c8; queue-empty exit feeds end-code; latch 5-step;
+      wake sites enumerated + disposed; leg 4 of mutual-wait
+      BROKEN — one party holding its own key) → fix STOP. Verified:
+      tail-sha, fork, both logs size+sha (= E27's sizes, E26's
+      pins), MPEG.cpp size+sha+git-object-equal, ALL host lines
+      verbatim (531/1760/2464-81/2514-26/Ee2120), walker lines
+      26+257, call-site grep 1/1 over ALL 9457 (16 non-sub clean),
+      all 4 addiu sites excluded (incl. unreported −0x2A10),
+      branch target arithmetic, goto lines, classifier −2, strip
+      pair, 5040 lines, feed-frame lines, all 7 leg counts +
+      0-after, tail 16-set + 4195 + silent thunks, boot counters
+      1/1/1/0/0/0/0, park pc, caller triple, 19/19 pins 455 s,
+      .gitignore:21, no-boot proofs. NITS: "9,454 sources" prose
+      vs true 9,457 (unreceipted −3, enumeration unaffected);
+      follow-up commit ac6570b (call-site tightening) is good
+      practice, tail recomputed. Next: E28 (guest-half
+      confirmation boot, EXISTING binary, queue-slot watches; host
+      logging is E29). Ledger row added.
+- [x] **G36 read (09-22) — PASS(pure-refined-H2 WINS, decisive): tag renders EXACTLY with ZERO write-path ordering ops (raw begin, no flush/wait/commit); H1-as-barrier refuted 0/10 — CPU stores alone suffice**
+      Task-1 statics (raw-access shape A + P1/P2-B1-B2/P3 premises
+      + barrier anatomy (begin = same mapping minus prologue;
+      read-side barriers named as retained) + every scalar + REAL
+      predictor re-run + 6-row matrix, zero device contact) → ONE
+      hunk (+59/−0, G35 +54 excised same edit, 6 skips asserted
+      absent) + ONE build exit 0 [458/458] (265,853,160 B
+      4e68911d, 384d6429) + verify-then-push NO gap + ONE run exit
+      0: 16/16 writeback tagged c039a1d1/150057 + 16/16 state ==
+      G31 + 16/16 bytes (B1 tagged ×16, B2 0/16, A == G31) + 512
+      vpage (112 oracle + 400 == G31) + 10/10 ladder 86ad7b88/
+      229712 + vram control + 10/10 scanouts d19e6beb (112 whites
+      in-set) + Done! last + 0 new tombstone. Verified: logcat
+      counts/values exact + stale-B 0, PPMs 10× 688143 unanimous
+      FULL d19e6beb, census 112/112 re-implemented, LIVE oracle cmp
+      identical, predictor RE-RUN all-pass, mirror 13/13, hunk
+      59+/0- single @@ + skips absent + raw call, clone HEAD +
+      markers + 163 arithmetic, tombstones clean. Open: G36 binary
+      reads CORRUPT at gate (6430dbe8/0000, size right, 15th
+      recurrence — worker's 4 reads + on-device pre-date, validity
+      stands; clear-check at poll end); G35 binary still zeroed.
+      Next: G37 minimum-content threshold wall (shrunken tag, same
+      raw legs); filing content upgrades again, still held. Ledger
+      row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
