@@ -14,8 +14,14 @@ with measured budgets, then 120 Hz simulation.
 
 - [x] **E29 PASS (09-22):** dev-only bypass reaches the rendered SSX 3
       title screen. Branch `e29-movie-bypass` @ `e5ce086d`, local.
-- [ ] **E31 (running):** scripted pad input on the bypass build, title →
-      menu → stock race start and advancing; owns fork + P-lane lease.
+- [ ] **E31 (running):** scripted pad input on the bypass build. Reached
+      title → main menu → Select Character → Select Event/Mode → **Snow
+      Jam race loading screen at 99%** (`e31h`, 596 s wall, rider Zoe).
+      Now checking hang vs slowness with a no-aggressive-logs build.
+- [ ] If 99% is a hang: diff the recomp's loading-window trace against
+      T47's PCSX2 trace (SIF RPC IDs, sound driver/libsd, CD reads).
+      Likely next piece: an SSX 3 sound-driver module in the IOP layer
+      (no handler exists today; `Audio.cpp` covers libsd transfers only).
 - [x] **E30 PASS (09-22, design):** zero packets = correct parser + host
       latch. Each 5,040 B chunk is one unterminated picture; the terminator
       is in chunk 2, which is never requested. Fix: `e30-fix.diff`
@@ -67,8 +73,14 @@ with measured budgets, then 120 Hz simulation.
       R1/R2 shapes re-run as proof.
 - [ ] G22 env-gated sampler-feedback workaround needs its own gate. G18
       hunk adoption queued. O1 writer naming still open.
-- [ ] Then integrate the GS backend with the PS2 runtime (the standalone
-      replay is not the product path).
+- [ ] **GB1 (running, read-only):** runtime ↔ GPU GS bridge design at the
+      GIF/register seam: GS thread + packet queue, CPU backend as the
+      reference behind the same interface, GPU-resident presentation (no
+      per-frame readback/re-upload), upstream `feature/iop-emulator`
+      check, costed build plan (Mac/MoltenVK first).
+- [ ] Give the paraLLEl-GS patch stack (~1.4k uncommitted lines on the
+      SSD) a durable git home: a branch pushed to a fork (needs Brad's OK)
+      or commits in `ps2xGS`.
 - [ ] Adreno filing: paused (Brad, 09-22). Any rewrite drops the
       withdrawn sampling inference.
 
@@ -119,6 +131,16 @@ with measured budgets, then 120 Hz simulation.
 - [ ] Mac internal disk ~3 GB free: keep builds on the SSD or bytesize.
 
 ## Cross-lane
+
+- [ ] **PF1 (running):** clean performance baseline, diagnostics compiled
+      out: Odin (N3 APK, simpleperf) now, Mac release build after E31.
+      Decides whether GS/VU1/present move off the main thread before more
+      features land.
+- [ ] Static read: how SSX 3 steps its simulation (per-vsync constants vs
+      measured dt). Shapes the 120 Hz timing design (VBlank is fixed at
+      16667 µs and the loop is capped at `SetTargetFPS(60)`). Low priority.
+- [ ] Save states for the recomp runtime (global/static state is the
+      obstacle). Would cut ~10 min boots to the loading screen. Queue.
 
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation
       preference, and drop its stale work-queue snapshot.

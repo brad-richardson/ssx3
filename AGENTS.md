@@ -117,6 +117,10 @@ splitting.
   Tar small-file trees instead of `mv`. Link large NDK outputs on APFS,
   then copy and re-hash. Mirror receipts to the share tier. The Mac's
   internal disk is nearly full, so big builds go to the SSD or bytesize.
+- **Speed numbers** come only from builds with diagnostics compiled out
+  (no runtime/aggressive logs, frame dumps, function traces or watch
+  sets), and are stated as guest vsyncs per wall second ÷ 59.94. Numbers
+  from diagnostic builds are labelled as such and never quoted as speed.
 - **Evidence:** text in git; bounded logs (rings, compress closed logs,
   one canonical copy); reuse existing tools (T1/T5/T12/T22 trackers)
   rather than copying them.
