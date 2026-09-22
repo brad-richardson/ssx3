@@ -1676,6 +1676,30 @@ the build or commit that closed them.
       installed (relaunched occupant PID 4790 — standing pattern).
       ~1.5 h. Next: V3-dims relay rides E24 (bytes already retained);
       I24 (V3-vector probe) queues behind it. Ledger row added.
+- [x] **T45 read (09-21) — PASS, null-sink variant runs live to a crash-confounded hold (T43-R1 class); variant distributions quarantined, healthy series untouched; brief's one-run cap honored**
+      Audio gate (H59/H60 down + 7-min wait = 8th consecutive down,
+      ~2h40m, post-reboot) → variant setup (pulseaudio 16.1, user
+      daemon, auto_null, one-env launch, ZERO script edits — T44
+      scripts reused, staged shas 5/5) → R2-variant exit 0 (TRUE
+      TITLE first-attempt, full chain, XCROSS T+436.90, ONE Left
+      hold T+504.95 ×1682.9 ms VM-lagged, dense 10; cubeb 8/0/0
+      pulse-negotiated with live sink-input; v2a R3-pattern, no
+      modal) → hold tree-crash (22→2 MPH, ungated all three) +
+      pre-pair ungated NON-crash (18→22 MPH) → lock-QA montaged:
+      ROI 8/12, gradient 9/12, control 1/12; variant ROI no-input
+      n=1 on→on, gradient n=8 on→on (2 recovery-adjacent), hold n=0.
+      Verified: share stream (2679800948 B + sha + slices), poll 168
+      + 22 KEY + T44_DONE + hold 1682.9 ms exact, 61 snaps + sizes,
+      census 52/155 + tops (sceSifGetReg 1260327 identical), cubeb 8
+      lines + timestamps EXACT + 0 errors in-trace, Vblank 397/LE90
+      exact, vcount re-run, live scoring EXACT (d-post5 ROI+gradient,
+      d-post10 3-way), 3-way SCPS hold hop bit-identical, R1 logs
+      (T44 gap closed), NVM full-sha continuity (live + mtime),
+      pulseaudio live dpkg, zero t45 scripts, frozen shas. NOTE
+      T45-N1: post-run NVM/sink-input/launch-env report-text-only
+      (gate closed via live + trace; T46 brief mandates committed
+      primaries). ~1.5 h. Next: T46 healthy R3 QUEUED (audio still
+      down). Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
