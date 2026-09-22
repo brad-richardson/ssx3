@@ -1,0 +1,61 @@
+diff --git a/gs/gs_interface.cpp b/gs/gs_interface.cpp
+index ea00016..19d949f 100644
+--- a/gs/gs_interface.cpp
++++ b/gs/gs_interface.cpp
+@@ -4684,2 +4723,56 @@ ScanoutResult GSInterface::vsync(const VSyncInfo &info_)
+ 
++	{
++		// G35 local diagnostic (not upstream): commit-necessity wall.
++		// Same W1 legs as G34 (map-read region B, pages 112..223, into
++		// a static temp, same sparse tag OR-masked pre-write: word 0 of
++		// each of the 112 pages |= 0x00FFFFFF; map-write the tagged temp
++		// back BEFORE this vsync's sample), but SKIPS end_vram_write --
++		// no commit (no end_host_write_vram_access, no commit_host_write).
++		// Receipt checksums the TAGGED temp (host-side, commit-independent);
++		// G31-B + G30 vpage witness what the read leg sees sans commit.
++		// H1-barrier predicts output stays cleared (aa2fa32572450383);
++		// refined-H2 predicts tag-visible (86ad7b887e140383, 112 whites).
++		// G34's committed block is excised by this same edit (lossless).
++		const size_t g35_base = 112 * 8192;
++		const size_t g35_n = 112 * 8192;
++		static uint32_t g35_temp[(112 * 8192) / 4];
++		const uint32_t *g35_src = static_cast<const uint32_t *>(map_vram_read(g35_base, g35_n));
++		if (g35_src)
++		{
++			for (size_t g35_i = 0; g35_i < g35_n / 4; g35_i++)
++			{
++				g35_temp[g35_i] = g35_src[g35_i];
++			}
++			for (size_t g35_p = 0; g35_p < 112; g35_p++)
++			{
++				g35_temp[g35_p * 2048] |= 0x00ffffffu;
++			}
++			uint64_t g35_f = 1469598103934665603ull;
++			size_t g35_z = 0;
++			const uint8_t *g35_tb = reinterpret_cast<const uint8_t *>(g35_temp);
++			for (size_t g35_i = 0; g35_i < g35_n; g35_i++)
++			{
++				g35_f ^= g35_tb[g35_i];
++				g35_f *= 1099511628211ull;
++				g35_z += g35_tb[g35_i] != 0;
++			}
++			uint32_t *g35_dst = static_cast<uint32_t *>(map_vram_write(g35_base, g35_n));
++			if (g35_dst)
++			{
++				for (size_t g35_i = 0; g35_i < g35_n / 4; g35_i++)
++				{
++					g35_dst[g35_i] = g35_temp[g35_i];
++				}
++				LOGI("G35: writeback base=%u n=%u fnv=%016llx nz=%u.\n", (unsigned)g35_base, (unsigned)g35_n, (unsigned long long)g35_f, (unsigned)g35_z);
++			}
++			else
++			{
++				LOGI("G35: writeback write-map failed.\n");
++			}
++		}
++		else
++		{
++			LOGI("G35: writeback read-map failed.\n");
++		}
++	}
+ 	auto result = renderer.vsync(priv_registers, info,
