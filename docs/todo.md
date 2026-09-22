@@ -76,9 +76,16 @@ with measured budgets, then 120 Hz simulation.
       full-title link with the codegen-dir port is green: APK 270,957,997 B
       `21a9230c…`, 9,441/9,441 `sub_*` defined, 0 undefined. Entry chain:
       NDK glue → raylib `android_main` → `main`. Gate exception accepted.
-- [ ] **N3 (running):** env-file shim (`ps2x.env` → setenv, covers
-      H4/H7/dev flags) + bypass on `n2-android`, arm64-only APK, install,
-      stage ELF + ISO, launch on the Odin to the title screen.
+- [x] **N3 PASS (09-22): first PS2-recomp boot on the Odin reaches the
+      animating stock title screen** (dev bypass, CPU GS, FFmpeg off).
+      arm64 APK `69a79e29…` 134 MB; `ps2x.env` shim (+216 lines,
+      Android-only) sets the CD image and dev flags; ELF + ISO staged and
+      verified; title at t+20 s, 0 crashes over 5 min; ~21 guest frames/s
+      with frame dumping on. Local branch `n2-android` @ `619d48a`.
+- [ ] N4 (after E31): pad-script launch on the Odin to menus/race; a clean
+      speed read with frame dumping off; fix PNG frame export on Android
+      (raylib FILEIO); arm64 packaging stays. Watch: cpu-1 ~104 °C, and
+      the battery was draining (62 → 59 %) during the run.
 - [ ] N4: Android FFmpeg prefix + ON build + host vector parity.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
