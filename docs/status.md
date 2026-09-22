@@ -10,7 +10,7 @@ Updated 2026-09-22 evening.
 | G (GS composite) | G41 PASS: masking refuted, B-loss depends on pass context. G42 running: Mesa Turnip contrast | clone `3a66c19` + G26/G28 + G40/G41 hunks | Gate G42 → bundle Turnip or pipeline fix | Odin (G42) |
 | N (Android) | **N3 PASS: SSX 3 title screen boots natively on the Odin** (recomp, dev bypass, CPU GS) | bytesize `n2-android` @ `619d48a` (local) | N4 menus/race + clean speed read (after E31) | Odin lease |
 | T (PCSX2 reference) | T47 running: reference frames for the front-end screens the recomp reaches | bytesize WSL | Gate T47 | bytesize (T47) |
-| Perf / GS bridge | PF1 running (clean baseline, Odin now, Mac after E31); GB1 running (bridge design, read-only) | fork `ssx3` @ `3d4feed` | Gate both → threading + integration plan | Odin lease (PF1) |
+| Perf / GS bridge | PF1 running (clean baseline, Odin now, Mac after E31); GB1 PASS (bridge design: queue at the GIF arbiter, CPU backend as reference) | fork `ssx3` @ `3d4feed` | Gate both → threading + integration plan | Odin lease (PF1) |
 | V (storage) | V1 PASS (audit ×2, manifest, smoke, cutover list) | — | Mac mini cutover | **Brad: mini not set up** |
 | I (iOS) | Parked | `i23-ffmpeg-ios` @ `aa73dbc` | Re-probe after E30 | needs E change |
 | GameCube | Reserve (`docs/reserve.md`) | — | none | — |

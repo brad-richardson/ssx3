@@ -77,11 +77,20 @@ with measured budgets, then 120 Hz simulation.
       R1/R2 shapes re-run as proof.
 - [ ] G22 env-gated sampler-feedback workaround needs its own gate. G18
       hunk adoption queued. O1 writer naming still open.
-- [ ] **GB1 (running, read-only):** runtime ↔ GPU GS bridge design at the
-      GIF/register seam: GS thread + packet queue, CPU backend as the
-      reference behind the same interface, GPU-resident presentation (no
-      per-frame readback/re-upload), upstream `feature/iop-emulator`
-      check, costed build plan (Mac/MoltenVK first).
+- [x] **GB1 PASS (09-22): bridge design** (`local/research/GB1/DESIGN.md`).
+      Queue above tag decode at `submitGifPacket`/`GifArbiter`; commands
+      gif_packet/reg_write/priv_write/upload_image_native/present/reset;
+      sync = finish fence + FIFO/VRAM RPCs; CSR/vsyncTick stay atomics; the
+      unmodified CPU backend is the byte-exact reference on the GS thread;
+      upstream `feature/iop-emulator` doesn't move the seam (carry
+      `LoadClut`, source GIF_STAT FQC from ring depth).
+      Adapter authorship (gap 5): after E32, generated code is out of
+      tree, so the fork can have multiple worktrees. G authors the
+      paraLLEl adapter on its own fork branch; E folds into `ssx3`.
+- [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
+      thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
+      and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
+      (d) GPU-resident presentation.
 - [ ] paraLLEl-GS patch stack home: forks created 09-22
       (`brad-richardson/parallel-gs`, `brad-richardson/Granite`). Backup
       `wip/ssx3-snapshot` via `snapshot_pgs.sh` (Brad runs it; the classifier
