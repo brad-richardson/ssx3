@@ -1,0 +1,142 @@
+{
+  "manifest": "V1 pinned restore manifest",
+  "utc_draft": "2026-09-22T15:50:00+00:00",
+  "v1_head": "252bb344a765",
+  "v1_reverification": "PASS 2026-09-22T16:13Z: 7610/7610 stable across 19.3-21.0 min gaps; 7539 pin-matches; 5 pin-mismatches all resolved (3 gated G artifacts persist + t43r1 1-char REPORT-tail typo); 0 cross-copy disagreements; 40/40 committed slices; smoke PASS (see AUDIT.md, SMOKE.md)",
+  "path_params": {
+    "THIS_SSD": "/Volumes/Extreme SSD",
+    "THIS_SHARE": "/Volumes/share/ssx3",
+    "THIS_LIVE": "/tmp/e18-mpeg-link/runtime",
+    "MINI_SSD": "<mini-ssd-mount>",
+    "MINI_SHARE": "<mini-share-mount>",
+    "MINI_LIVE": "/tmp/e18-mpeg-link/runtime"
+  },
+  "rules": [
+    "COPYFILE_DISABLE=1 on every SSD step; never hash ._ sidecars",
+    "Every restored byte: 2+ matching reads separated in time + pin check",
+    "Refuse to overwrite a live tree (test ! -e first); restore into NEW paths only",
+    "Order: 1 repo, 2 share, 3 SSD, 4 rebuild fallbacks"
+  ],
+  "step1_repo": {
+    "ssx3": {
+      "url": "https://github.com/brad-richardson/ssx3.git",
+      "head": "252bb344a765",
+      "note": "V1-verified HEAD (pins re-extracted here; [G39] tip). Any later orch HEAD works if v1_pins.json literals still verify.",
+      "verify": ["git -C <dest> rev-parse HEAD  # expect 252bb344a765 (or re-verify pins at tip)"]
+    },
+    "fork_ps2recomp": {
+      "checkout_proof_ref": "refs/heads/ssx3",
+      "ref_value": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+      "remote": "fork (https://github.com/brad-richardson/PS2Recomp.git)",
+      "remote_branch": "refs/heads/ssx3",
+      "note": "Pin the REF, not HEAD: E29 checks out a local branch mid-lane, so HEAD moves; refs/heads/ssx3 is the checkout-proof value (V1 fork-ref.json: HEAD=ref=tracking=ls-remote all 3adc0478 at 16:01Z; remote DEFAULT HEAD is 14b1e5cb and is NOT the E-lane line).",
+      "worktree_clean": "?? ps2_log.txt",
+      "verify": ["git -C <fork> rev-parse refs/heads/ssx3 refs/remotes/fork/ssx3  # both 3adc0478…",
+                 "git -C <fork> ls-remote fork ssx3  # 3adc0478…",
+                 "git -C <fork> status --short  # exactly '?? ps2_log.txt'"]
+    },
+    "clone_parallel_gs": {
+      "head": "3a66c1976170cbc2cb53a3593fabbc7c4b2ccfbd",
+      "note": "G-lane hunks live uncommitted in the worktree; next lane excises/applies per its brief",
+      "verify": ["git -C <clone> rev-parse HEAD  # expect 3a66c197…"]
+    },
+    "in_git_payloads": {
+      "observer_dylib": {"path": "local/research/E25/parser/e21-parser-observer.dylib",
+                         "bytes": 52472, "sha_prefix": "e4d88fdc",
+                         "verify": ["git cat-file -p HEAD:local/research/E25/parser/e21-parser-observer.dylib | shasum -a 256  # e4d88fdc…"]},
+      "feed_vector": {"path": "local/research/E24/observed/parser-input.bin",
+                      "bytes": 5040, "sha_prefix": "cde8a830",
+                      "verify": ["shasum -a 256 local/research/E24/observed/parser-input.bin  # cde8a830…"]},
+      "live_manifest": {"path": "local/research/E25/snapshot-manifest.json", "files": 7342},
+      "pins": {"path": "local/research/V1/v1_pins.json"}
+    }
+  },
+  "step2_share_restores": {
+    "e25_binaries": {
+      "files": [
+        {"name": "ps2EntryRunner", "bytes": 163529696,
+         "sha256": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+         "src": "<SHARE>/e25-restore/ps2EntryRunner", "dst": "<LIVE>/ps2xRuntime/ps2EntryRunner"},
+        {"name": "ps2x_tests", "bytes": 5695128,
+         "sha256": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+         "src": "<SHARE>/e25-restore/ps2x_tests", "dst": "<LIVE>/ps2xTest/ps2x_tests"}
+      ],
+      "verify": ["shasum -a 256 <src>  # twice, separated; expect pin",
+                 "cp -p <src> <dst>; shasum -a 256 <dst>; cmp <src> <dst>"]
+    },
+    "g_receipt_mirrors": {
+      "lanes": [33, 34, 35, 36, 37], "files_each": 13,
+      "scanout_pins": {"33": "99418f1b…", "34/35/36": "d19e6beb…", "37": "34697c14… (full in v1_pins.json)"},
+      "ppm_bytes_each": 688143,
+      "note": "logcat/run-stdout/stderr have NO committed pins: restore by copy + SSD↔share cmp only",
+      "verify": ["per-file shasum vs v1_pins.json (PPMs) + cmp (logs)"]
+    },
+    "i24_logs": {
+      "files": ["launch-v3-console.log (17085609 B, 1806a480…)", "v3-rgba-host-7.1.1.bin (917504 B, 048b41af…)", "v3-rgba-device.bin (917504 B, 048b41af…)"],
+      "verify": ["shasum -a 256 <file>  # twice; full shas in v1_pins.json"]
+    },
+    "t4_traces": {
+      "files": 41, "bytes_total": 67540530901,
+      "pins": "v1_pins.json t4_share/* (22 FULL + 22 PARTIAL + 1 SIZE-only + 3 UNPINNED pre-t42)",
+      "spot_verify": ["shasum -a 256 <file>  # vs pin where pinned",
+                      "cmp <(head -c <len> <file>) <(git show HEAD:<slice>)  # committed slices, 19 files"]
+    }
+  },
+  "step3_ssd_restores": {
+    "full_tree_tar": {
+      "src": "<SSD>/ps2recomp-spike/P1/e25-snapshot/e18-mpeg-link.tar",
+      "bytes": 1762803200, "sha256": "9ded806562f1cc150b81040afd24588089fd4bc1f1cbffb7190bc2badb161d10",
+      "members_files": 7342,
+      "procedure": "E25 RESTORE.md full-tree section verbatim (refuse-if-live, pre-verify, tar -C /tmp -xf, manifest loop)",
+      "verify": ["shasum -a 256 <tar>  # twice; expect 9ded8065…", "tar -tf <tar> | wc -l  # 8408 total, 7342 files",
+                 "manifest loop over local/research/E25/snapshot-manifest.json  # 7342/7342"]
+    },
+    "g13_dump": {
+      "src": "<SSD>/ps2x-g13/g13-dump.gs", "bytes": 11537377,
+      "sha256": "154d9d8577a210fb794b29a048ee2cf08053f87fe220bb2bf975933a02ad7e32",
+      "note": "SOLE-COPY on the corrupt path: copy + re-sha twice + cmp; moves FIRST at cutover",
+      "verify": ["shasum -a 256 <dump>  # twice, separated; expect 154d9d85…"]
+    },
+    "g_binaries_in_place": {
+      "paths": ["<SSD>/parallel-gs-g33..37-android-build/tools/parallel-gs-replayer"],
+      "note": "No restore: re-verify in place (size+sha+BuildID in v1_pins.json); rebuildable from clone+hunks",
+      "verify": ["stat -f %z + shasum -a 256  # twice vs pins", "llvm-readelf --notes  # BuildID vs pin"]
+    },
+    "e_boot_inputs": {
+      "elf_copies": ["<SSD>/ps2recomp-spike/P1/SLUS_207.72", "<SSD>/ps2recomp-spike/P1/cd/SLUS_207.72",
+                     "<SSD>/ps2x-i24/signed-app/ps2EntryRunner.app/SLUS_207.72"],
+      "elf_bytes": 3890784, "elf_sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "iso_copies": ["<SSD>/ps2recomp-spike/SSX 3 (USA).iso", "<SSD>/ps2x-i24/signed-app/ps2EntryRunner.app/SSX3.iso"],
+      "iso_bytes": 3005415424, "iso_sha256": "3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5",
+      "verify": ["shasum -a 256 <copy>  # twice; all copies agree + match pin"]
+    }
+  },
+  "step4_rebuild_fallbacks": {
+    "E_runtime": {
+      "recipe": "local/research/E25/configure-command.json + ninja -C /tmp/e18-mpeg-link/runtime -j2 ps2EntryRunner ps2x_tests",
+      "measured_walls": {"configure_s": 72.5, "build_s": 530.8, "source": "E25 REPORT (Tier-1)"},
+      "expect": {"runner": "e462e448…", "suite": "2152e5ad… (bit-identical, H1)"}
+    },
+    "G_replayer": {
+      "recipe": "local/research/G37/g37-build.sh (configure + cmake --build --target parallel-gs-replayer -j2)",
+      "measured_walls": "UNMEASURED in G33–G37 receipts (lane totals ~1–1.5 h bound it loosely); record wall at next G build",
+      "expect": "size+sha+BuildID per the lane's own hunk (NOT reusable across lanes)"
+    },
+    "I_ios": {
+      "recipe": "I23 build (see I23 REPORT); I24 reused without rebuild",
+      "measured_walls": "UNMEASURED in I24 (reuse-only lane); W tree stays byte-identical until next I probe",
+      "expect": "122458696 B edb3eadc… (prefix/tail/size pin only — full sha never committed)"
+    },
+    "T_traces": {
+      "recipe": "NONE from fork: origin is bytesize WSL runs; share mirror (41/41) is the backup",
+      "measured_walls": "n/a"
+    }
+  },
+  "untested_remainder": [
+    "Full-tree tar extract (needs deleting the live tree — forbidden; E25 untested, V1 untested)",
+    "G rebuild wall + I rebuild wall (never measured in lane receipts)",
+    "3 pre-t42 files: no committed pins (V1 agreement+stability only)",
+    "G logcat/stdout/stderr bytes: no committed pins (agreement only)",
+    "W tree beyond binary+lib (9.6 GB, reuse-only; next I probe re-verifies)"
+  ]
+}
