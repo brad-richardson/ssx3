@@ -42,10 +42,15 @@ with measured budgets, then 120 Hz simulation.
 
 ## G — GS composite / GPU backend (paraLLEl-GS `3a66c19` + carried G26/G28)
 
-- [ ] **G40 (running):** sub-vsync A→B wall at boundary 1 on the Odin
-      splits F1 rejected draw / F2 write-back lost / F3 stale read, then
-      one candidate fix if a single mechanism shows up. Acceptance: Odin-B
-      equals Mac-B `840cd308…` and the scanouts show content.
+- [x] **G40 PASS (09-22): F2 execution-loss.** Composite prims 17/17
+      accepted, texture input byte-exact cross-GPU, yet B unwritten on
+      Odin right after the flush, even read behind a barrier. F1/F3
+      refuted. The one CPU-side difference is the O4m texture-cache hash
+      (`5a15…` vs `20dc…`); content-neutral.
+- [ ] **G41 (running):** masked-write canary (PSM0/1 × FBMSK 0/ff000000 +
+      the composite's full state) on scratch pages, hash-input breakdown,
+      then ONE fix if a single condition is named. Fallbacks: binning
+      readback or the Turnip driver contrast.
 - [ ] Commit G26 + G28 in the clone after the storage cutover (G39
       decision: carried diffs until then), with a clean rebuild and G39's
       R1/R2 shapes re-run as proof.
