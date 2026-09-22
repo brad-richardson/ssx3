@@ -1,0 +1,66 @@
+{
+  "utc": "2026-09-22T15:18:03.822492+00:00",
+  "before": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E26/watch-set.json",
+    "sha256": "a37a5eb0328c48c92f26eb37b7f7bfca893ead9bbbe750c0d7131e6314945204",
+    "tiers": 6,
+    "new_entries": 197,
+    "total_entries": 230,
+    "producer_vector": 201
+  },
+  "after": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E28/watch-set.json",
+    "sha256": "797fdee8e89d6112d3098ebe910c19290ddd2dcfe5a687b218ff6271f12f0d91",
+    "tiers": 7,
+    "new_entries": 210,
+    "total_entries": 243,
+    "producer_vector": 214
+  },
+  "appended_tier": {
+    "name": "kind-1 queue slot (+ chunk 0 header)",
+    "lo": "0xd486e0",
+    "hi": "0xd48748",
+    "stride": 8,
+    "entries": 13,
+    "why": "E27 named the kind-1 slot as ctx0->[0x24]+0 but had no guest address for it. E28 Mission 1 derives it: the STRM constructor sub_003E06D8 computes the slot array base and then the DATA REGION BASE from it, and E26 measured that data base in bytes (sceCdRead buf=0xd48740). Running the identity backwards over the allocator's 64-byte alignment floor (sub_00253AD0) gives ctx0=0xd48300 uniquely, so the kind-1 slot is 0xd486ec: owner +0, kind +4, bytes +8, head +0xC. This tier covers the whole window the slot array could occupy at ANY alignment, so the boot MEASURES the address. It is extended down to 0xd48740 so chunk 0's header -- E27's named blind spot, where sub_003E12E0 strips the tag in the same breath as it advances the head -- is visible.",
+    "guarantee": "complete: every byte of [0xd486e0, 0xd48748) is inside a watched 8-byte window",
+    "p_meaning": {
+      "p1_bytes": "0xd486f4",
+      "p1_head": "0xd486f8",
+      "p1": "slot+8 (byte count) and slot+0xC (head) carry P1; both receive GUEST STORES (walker 0x3dffc0/0x3dffc4, dequeue 0x3e134c/0x3e13c8), so P1 is observable",
+      "owner": "0xd486ec",
+      "kind": "0xd486f0",
+      "control": "slot+0 is written once at construction with ctx0 itself (0x3e0914), which independently confirms the address if it emits",
+      "chunk0_header": "0xd48740 magic / 0xd48744 tagged length -- E27 named 0xd48744 as outside every E24 tier, so chunk 0's own tag store was never observable"
+    }
+  },
+  "appended_addrs": [
+    "0xd486e0",
+    "0xd486e8",
+    "0xd486f0",
+    "0xd486f8",
+    "0xd48700",
+    "0xd48708",
+    "0xd48710",
+    "0xd48718",
+    "0xd48720",
+    "0xd48728",
+    "0xd48730",
+    "0xd48738",
+    "0xd48740"
+  ],
+  "checks": {
+    "carried_tiers_identical_element_for_element": true,
+    "only_expected_keys_differ": true,
+    "keys_that_differ": [
+      "new_entries",
+      "tiers",
+      "total_entries"
+    ],
+    "e26_vector_is_an_exact_prefix": true,
+    "no_duplicate_addresses": true,
+    "new_tier_disjoint_from_carried": true,
+    "all_four_slot_fields_covered": true
+  },
+  "green": true
+}

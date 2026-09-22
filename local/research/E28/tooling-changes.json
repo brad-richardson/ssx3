@@ -1,0 +1,141 @@
+{
+  "utc": "2026-09-22T15:26:00.548120+00:00",
+  "changes": [
+    {
+      "file": "e28_rename.py",
+      "name": "CHANGE 1 -- protect E25's readiness receipt from the lane rename",
+      "why": "E25 named its readiness receipt `e26-readiness.json` -- it wrote the readiness for the lane that followed it. That is a REAL PATH on disk, not a lane token, and the mechanical e26->e28 carry rewrote `e28_restore_gate.py`'s reference to `E25/e28-readiness.json`, which does not exist: the Mission 0 restore gate would have died on FileNotFoundError. This is exactly the errata E23-E1 class of bug one directory over -- the rename proof is blind to it, because the normalized diff maps both lane tokens to one placeholder and the file is SUPPOSED to change there. The token is added to PROTECTED, and `e28_carry_audit.py` now resolves EVERY cross-lane path literal in every carried tool so the class is caught, not just this instance.",
+      "pairs": 1,
+      "pair_states": [
+        {
+          "state": "already applied",
+          "before_len": 53,
+          "after_len": 732
+        }
+      ],
+      "wrote": false,
+      "bytes_before": 6304,
+      "bytes_after": 6304,
+      "sha_after": "2c9dcba5912045fee44154d28187052657a4d966f52bc928c50c4823e337e48e"
+    },
+    {
+      "file": "e28_boot_fidelity.py",
+      "name": "CHANGE 2 -- the watch set is the ONE declared difference, so prove it instead of SHA-ing it",
+      "why": "E24's fidelity proof asserts the watch set is SHA-equal to E24's, which is right for a lane that changes nothing. E28's brief permits exactly one intentional change -- the watch set -- and requires before/after receipts, so a SHA equality is the one check that CANNOT be carried unchanged. It is replaced by a STRONGER statement, not a weaker one: E24's 230-entry vector must be carried verbatim, unreordered, and appear as an EXACT PREFIX of E28's, with the 13 new entries appended last and disjoint from everything carried. Not one other assertion in the tool is removed, softened or skipped, and the driver itself is still required to be byte-identical under the rename.",
+      "pairs": 6,
+      "pair_states": [
+        {
+          "state": "applied now",
+          "before_len": 78,
+          "after_len": 230
+        },
+        {
+          "state": "applied now",
+          "before_len": 74,
+          "after_len": 718
+        },
+        {
+          "state": "applied now",
+          "before_len": 201,
+          "after_len": 359
+        },
+        {
+          "state": "applied now",
+          "before_len": 137,
+          "after_len": 369
+        },
+        {
+          "state": "applied now",
+          "before_len": 278,
+          "after_len": 289
+        },
+        {
+          "state": "applied now",
+          "before_len": 258,
+          "after_len": 446
+        }
+      ],
+      "wrote": true,
+      "bytes_before": 7163,
+      "bytes_after": 8548,
+      "sha_after": "3ef15658b85bb33ca36a66eab036576712443d393e46e8b540a7d6925acaca53"
+    },
+    {
+      "file": "e28_close.py",
+      "name": "CHANGE 4 -- refit on every measured point, not just the stale two in watch-set.json",
+      "why": "E24's cost-model block inside `watch-set.json` carries only the e22a and e23a calibration points, because it was written before either of the big-vector boots existed. E26 then MEASURED a third point (230 entries, 9.524 s) and committed it in `E26/cost-model-refit.json`. Refitting from the stale two-point list would silently throw E26's measurement away and report a three-point fit that is really two-plus-one. The calibration list is taken from the prior lane's committed refit receipt instead, so E28's fit is four-point. Nothing else in the refit moves, and the receipt records both fits.",
+      "pairs": 1,
+      "pair_states": [
+        {
+          "state": "applied now",
+          "before_len": 137,
+          "after_len": 437
+        }
+      ],
+      "wrote": true,
+      "bytes_before": 6882,
+      "bytes_after": 7182,
+      "sha_after": "0d454d1d5b316c9703283bf248ec00337e68aabb95355fb97ce25bb792e6ef67"
+    },
+    {
+      "file": "e28_close.py",
+      "name": "CHANGE 3 -- measure this lane's release latency instead of carrying E26's number",
+      "why": "E26's close tool writes `release_latency_ms=8` and `needed_sigkill=False` as LITERALS into its own final audit. Those were E26's measurements, and carried unchanged into E28 they would report E26's boot in E28's audit. Both are computed from this lane's own `e28a-result.json` instead. Nothing else in the tool moves.",
+      "pairs": 1,
+      "pair_states": [
+        {
+          "state": "applied now",
+          "before_len": 60,
+          "after_len": 333
+        }
+      ],
+      "wrote": true,
+      "bytes_before": 7182,
+      "bytes_after": 7455,
+      "sha_after": "15c345205eecca5586ccde6353f6042f4f1587e84b728d520e1b70e2a9830a3d"
+    }
+  ],
+  "written_fresh": [
+    {
+      "file": "e28_fixgate.py",
+      "why": "E26's fix gate reads E26's OWN mission receipts (x-a-startcode.json, x-b-sema36.json, objective-1a.json, watch-ledger.json) -- E26's questions, not E28's. Carried mechanically it would read files this lane never produces. Written fresh against E28's own receipts and NOT claimed as a carry; it is therefore absent from rename-proof-hexsafe.json by design. E27 set the precedent with e27_common.py.",
+      "gate_decision_unchanged": "STOP"
+    },
+    {
+      "file": "e28_common.py",
+      "why": "the lane common, written fresh exactly as E26 wrote its own"
+    },
+    {
+      "file": "e28_bootstrap_rename.py",
+      "why": "one-off: e26_rename.py hardcodes its own destination token and cannot rename itself"
+    },
+    {
+      "file": "e28_carry_audit.py",
+      "why": "new check for the rename-induced dangling-path class that CHANGE 1 instantiates"
+    },
+    {
+      "file": "e28_slot.py",
+      "why": "Mission 1 has no prior-lane equivalent"
+    },
+    {
+      "file": "e28_watchset.py",
+      "why": "the one permitted driver-behaviour change, with before/after receipts"
+    },
+    {
+      "file": "e28_prereg.py",
+      "why": "pre-registration of the armed set and the P1-P4 pass/fail bytes"
+    },
+    {
+      "file": "e28_verdict.py",
+      "why": "Mission 2 grading, against the pre-registered rows only"
+    }
+  ],
+  "capture_driver_unchanged": {
+    "file": "e28_capture.py",
+    "statement": "byte-identical to E26's under the hex-safe rename; proved in boot-fidelity.json",
+    "why": "the watch set lives in watch-set.json, which the driver loads, so changing it needs no driver edit"
+  },
+  "fork_source_edits": 0,
+  "fork_commits": 0,
+  "pushes": 0
+}

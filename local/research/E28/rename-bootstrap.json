@@ -1,0 +1,80 @@
+{
+  "tool": "e28_bootstrap_rename.py",
+  "why": "e26_rename.py hardcodes its own destination token and cannot rename itself",
+  "algorithm": "E26 rename_text/normalize, imported from e26_rename.py, destination parameterised",
+  "hex_rule": "runs of >=16 hex chars masked before rename",
+  "protected_tokens": [
+    "PS2X_E21_PARSER_DIR",
+    "PS2X_E21_PROOF",
+    "# E21 PARSER CLOSURE",
+    "e21-parser-observer.dylib",
+    "e21_parser_observer.h",
+    "e23-fixtures/complete",
+    "# E23 COMPLETE FEED FIXTURE TAIL COMPLETE",
+    "e18-fixtures/after",
+    "/tmp/e18-mpeg-link/runtime",
+    "P1/e25-snapshot",
+    "e18-mpeg-link.tar"
+  ],
+  "file": {
+    "source_lane": "E26",
+    "src": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_rename.py",
+    "dst": "/Users/bradrichardson/dev/ssx3/local/research/E28/e28_rename.py",
+    "src_bytes": 5625,
+    "dst_bytes": 5625,
+    "hex_runs_masked": 0,
+    "hex_runs_src": 0,
+    "hex_runs_dst": 0,
+    "hex_runs_equal": true,
+    "protected_counts": {
+      "PS2X_E21_PARSER_DIR": {
+        "src": 1,
+        "dst": 1
+      },
+      "PS2X_E21_PROOF": {
+        "src": 1,
+        "dst": 1
+      },
+      "# E21 PARSER CLOSURE": {
+        "src": 1,
+        "dst": 1
+      },
+      "e21-parser-observer.dylib": {
+        "src": 1,
+        "dst": 1
+      },
+      "e21_parser_observer.h": {
+        "src": 1,
+        "dst": 1
+      },
+      "e23-fixtures/complete": {
+        "src": 1,
+        "dst": 1
+      },
+      "# E23 COMPLETE FEED FIXTURE TAIL COMPLETE": {
+        "src": 1,
+        "dst": 1
+      },
+      "e18-fixtures/after": {
+        "src": 1,
+        "dst": 1
+      },
+      "/tmp/e18-mpeg-link/runtime": {
+        "src": 1,
+        "dst": 1
+      },
+      "P1/e25-snapshot": {
+        "src": 1,
+        "dst": 1
+      },
+      "e18-mpeg-link.tar": {
+        "src": 1,
+        "dst": 1
+      }
+    },
+    "protected_preserved": true,
+    "normalized_diff_empty": true,
+    "fixpoint_reproduces_itself": true,
+    "destination_token_carried": true
+  }
+}

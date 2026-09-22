@@ -1,0 +1,104 @@
+{
+  "utc": "2026-09-22T15:03:43.359390+00:00",
+  "boot_argv": [
+    "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72"
+  ],
+  "capture_preflight_gate": [
+    {
+      "item": "runner",
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "present": true,
+      "bytes": 163529696,
+      "sha256": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "size_ok": true,
+      "sha_ok": true
+    },
+    {
+      "item": "suite",
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xTest/ps2x_tests",
+      "present": true,
+      "bytes": 5695128,
+      "sha256": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "size_ok": true,
+      "sha_ok": true
+    },
+    {
+      "item": "ELF (cd)",
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72",
+      "present": true,
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "size_ok": true,
+      "sha_ok": true
+    },
+    {
+      "item": "ELF (P1)",
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/SLUS_207.72",
+      "present": true,
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "size_ok": true,
+      "sha_ok": true
+    },
+    {
+      "item": "observer dylib",
+      "path": "/Users/bradrichardson/dev/ssx3/local/research/E28/parser/e21-parser-observer.dylib",
+      "present": true,
+      "bytes": 52472,
+      "sha256": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+      "size_ok": true,
+      "sha_ok": true
+    }
+  ],
+  "checks": [
+    {
+      "check": "E23 boot argv[0] exists at its exact path",
+      "ok": true,
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner"
+    },
+    {
+      "check": "E23 boot argv[1] exists at its exact path",
+      "ok": true,
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72"
+    },
+    {
+      "check": "rebuilt runner IS the binary E23 booted (sha)",
+      "ok": true,
+      "sha256": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "e23_sha": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22"
+    },
+    {
+      "check": "E24 capture preflight hash gate passes on all five pins",
+      "ok": true,
+      "pins": 5
+    },
+    {
+      "check": "PS2X_DIAG_SEMA present in EeScheduler.cpp at 3adc0478",
+      "ok": true,
+      "PS2X_DIAG_SEMA": 4,
+      "PS2X_DIAG_SEMA_S0": 2
+    },
+    {
+      "check": "PS2X_DIAG_SEMA compiled into the rebuilt runner",
+      "ok": true,
+      "PS2X_DIAG_SEMA": 3,
+      "PS2X_DIAG_SEMA_S0": 1,
+      "PS2X_DIAG_PERIOD_MS": 2
+    },
+    {
+      "check": "lease absent",
+      "ok": true
+    },
+    {
+      "check": "no runner process",
+      "ok": true
+    },
+    {
+      "check": "no boot-attempt.json written by E28",
+      "ok": true
+    }
+  ],
+  "all_green": true,
+  "note": "E28 spends no boot and claims no lease. These are read-only checks of what E28 inherits. Because the rebuilt runner is byte-identical to the binary E23 booted, every property E15-E23 measured on that binary transfers by identity rather than by re-measurement."
+}

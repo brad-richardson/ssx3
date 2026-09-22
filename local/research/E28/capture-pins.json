@@ -1,0 +1,37 @@
+{
+  "utc": "2026-09-22T15:27:21.127676+00:00",
+  "rule": "two reads separated in time, standing SSD rule",
+  "rows": [
+    {
+      "file": "boot-e28a-1.log",
+      "bytes": 13272194,
+      "pass1": "21d702c5dc3058d1c326f97a9d0592312304b38513a0491c26ac53f4f812889f",
+      "pass2": "21d702c5dc3058d1c326f97a9d0592312304b38513a0491c26ac53f4f812889f",
+      "agree": true
+    },
+    {
+      "file": "ps2_log-e28a-1.txt",
+      "bytes": 127121563,
+      "pass1": "bb987c8f31e375dcf292a02d3507842476f2a2661febf8241512185b699f9790",
+      "pass2": "bb987c8f31e375dcf292a02d3507842476f2a2661febf8241512185b699f9790",
+      "agree": true
+    },
+    {
+      "file": "syscalls-e28a-on.txt",
+      "bytes": 3444639,
+      "pass1": "a3f4b88b273cec43eef727f35f3c21ba31fbb1b4e6d023b29bb9efb2e6a7a0ef",
+      "pass2": "a3f4b88b273cec43eef727f35f3c21ba31fbb1b4e6d023b29bb9efb2e6a7a0ef",
+      "agree": true
+    },
+    {
+      "file": "parser-input.bin",
+      "bytes": 5040,
+      "pass1": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "pass2": "cde8a830265592be927d28ec78c26a27567ce046a7ac161698759e742a1c875a",
+      "agree": true
+    }
+  ],
+  "all_agree": true,
+  "parser_input_equals_E22_E23_E24_E26_pin": true,
+  "note": "the 5,040 B feed vector is referenced by SHA, never duplicated into the repo"
+}

@@ -1,0 +1,148 @@
+{
+  "utc": "2026-09-22T15:05:30.991391+00:00",
+  "green": true,
+  "restore_path": "(a) VERIFIED IN PLACE",
+  "restore_path_pass2": "(a) VERIFIED IN PLACE",
+  "passes": [
+    "restore-pass-1.json",
+    "restore-pass-2.json"
+  ],
+  "readiness_passes": [
+    "readiness-pass-1.json",
+    "readiness-pass-2.json"
+  ],
+  "separation_seconds": 107.5,
+  "pins": [
+    {
+      "item": "runner",
+      "on_ssd": false,
+      "bytes": 163529696,
+      "reads": 4,
+      "distinct_values": 1,
+      "all_reads_agree": true,
+      "matches_pin": true,
+      "expected_sha": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "pass1_utc": "2026-09-22T15:03:42.706803+00:00",
+      "pass2_utc": "2026-09-22T15:05:30.225970+00:00",
+      "corroborated_by_E25": true
+    },
+    {
+      "item": "suite",
+      "on_ssd": false,
+      "bytes": 5695128,
+      "reads": 4,
+      "distinct_values": 1,
+      "all_reads_agree": true,
+      "matches_pin": true,
+      "expected_sha": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "pass1_utc": "2026-09-22T15:03:42.706803+00:00",
+      "pass2_utc": "2026-09-22T15:05:30.225970+00:00",
+      "corroborated_by_E25": true
+    },
+    {
+      "item": "ELF (cd)",
+      "on_ssd": true,
+      "bytes": 3890784,
+      "reads": 4,
+      "distinct_values": 1,
+      "all_reads_agree": true,
+      "matches_pin": true,
+      "expected_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "pass1_utc": "2026-09-22T15:03:42.706803+00:00",
+      "pass2_utc": "2026-09-22T15:05:30.225970+00:00",
+      "corroborated_by_E25": true
+    },
+    {
+      "item": "ELF (P1)",
+      "on_ssd": true,
+      "bytes": 3890784,
+      "reads": 4,
+      "distinct_values": 1,
+      "all_reads_agree": true,
+      "matches_pin": true,
+      "expected_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "pass1_utc": "2026-09-22T15:03:42.706803+00:00",
+      "pass2_utc": "2026-09-22T15:05:30.225970+00:00",
+      "corroborated_by_E25": true
+    },
+    {
+      "item": "ISO",
+      "check": "size only",
+      "on_ssd": true,
+      "bytes": 3005415424,
+      "pass1": 3005415424,
+      "pass2": 3005415424,
+      "agree": true,
+      "reads": 2,
+      "corroborated_by_E25": null
+    }
+  ],
+  "capture_preflight_gate": [
+    {
+      "item": "runner",
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+      "bytes": 163529696,
+      "sha256": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "pass1_sha": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "pass2_sha": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+      "passes_agree": true,
+      "size_ok": true,
+      "sha_ok": true,
+      "repinned": false
+    },
+    {
+      "item": "suite",
+      "path": "/tmp/e18-mpeg-link/runtime/ps2xTest/ps2x_tests",
+      "bytes": 5695128,
+      "sha256": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "pass1_sha": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "pass2_sha": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+      "passes_agree": true,
+      "size_ok": true,
+      "sha_ok": true,
+      "repinned": false
+    },
+    {
+      "item": "ELF (cd)",
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72",
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "pass1_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "pass2_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "passes_agree": true,
+      "size_ok": true,
+      "sha_ok": true,
+      "repinned": false
+    },
+    {
+      "item": "ELF (P1)",
+      "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/SLUS_207.72",
+      "bytes": 3890784,
+      "sha256": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "pass1_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "pass2_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "passes_agree": true,
+      "size_ok": true,
+      "sha_ok": true,
+      "repinned": false
+    },
+    {
+      "item": "observer dylib",
+      "path": "/Users/bradrichardson/dev/ssx3/local/research/E28/parser/e21-parser-observer.dylib",
+      "bytes": 52472,
+      "sha256": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+      "pass1_sha": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+      "pass2_sha": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be",
+      "passes_agree": true,
+      "size_ok": true,
+      "sha_ok": true,
+      "repinned": false
+    }
+  ],
+  "pins_checked": 5,
+  "repinned_count": 0,
+  "ssd_rule": "2+ matching reads separated in time, plus independent corroboration from E25's own earlier hashing of the same bytes",
+  "ssd_mount_stable": true,
+  "rebuild_needed": false,
+  "share_restore_needed": false
+}

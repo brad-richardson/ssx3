@@ -1,0 +1,50 @@
+{
+  "utc": "2026-09-22T15:25:34.418639+00:00",
+  "gate": "STOP",
+  "gate_source": "the E28 brief sets it, as E24/E26/E27 did before it",
+  "honored_as_written": true,
+  "written_fresh": true,
+  "demonstrated_edges": [
+    {
+      "n": 1,
+      "edge": "The kind-1 queue slot has a guest address, derived statically and then confirmed by the guest itself",
+      "receipt": "derived 0xd486ec from the STRM constructor's own layout arithmetic (ctx0+0x3ec) run backwards through the data-region base E26 measured (0xd48740) over the allocator's 64-byte alignment floor; the guest then stored ctx0 = 0xd48300 into slot+0 at boot-log line 22329, pc 0x3e0914 -- the derived value, written by the machine. mission-1-slot.json, mission-2-verdicts.json",
+      "demonstrated": true
+    },
+    {
+      "n": 2,
+      "edge": "The kind-1 head is parked on the chunk E27 named, and never moves again",
+      "receipt": "head 0xd486f8: 2 stores in the whole run -- line 22376 = 0xd48740 (walker first publish, pc 0x3dffc4), line 22820 = 0xd49b14 (dequeue head advance, pc 0x3e13c8); 0 stores after the feed",
+      "demonstrated": true
+    },
+    {
+      "n": 3,
+      "edge": "The queue the guest is sitting on is not one chunk deep, it is 431,840 bytes deep",
+      "receipt": "bytes 0xd486f4: 30 stores; the count climbs to 0x6aa8c = 436,876 over 28 walker publishes and the single dequeue takes 0x13ac = 5,036 back off, leaving 0x696e0 = 431,840 bytes still queued at the park -- 30x E27's predicted floor of 14,364",
+      "demonstrated": true
+    },
+    {
+      "n": 4,
+      "edge": "E27's whole guest-half prediction set survives a fresh boot, and the post-park silence reproduces on a bigger vector",
+      "receipt": "P1-P4 all CONFIRM (P2's value-half unobservable-as-designed); 6804 emissions across 243 armed entries, 0 post-park and 0 post-feed, last at line 22872 against a feed at 22874 and a park at 22876, with 24031 log lines still to run",
+      "demonstrated": true
+    }
+  ],
+  "edge_count": 4,
+  "isolated_to_one_edge": false,
+  "why_not": "Four edges are demonstrated and they are not the same edge: one is an address derivation, one is a queue head, one is a queue depth, one is a whole prediction set reproducing. A fix needs exactly ONE edge plus its own fail-before and full regression; E28 has none of those and was not asked to build them.",
+  "why_a_fix_would_be_premature_anyway": "Every edge E28 demonstrates is on the GUEST side, and the guest side is not where the stall lives. E27 located the one-shot in the host: a shared_ptr held by the very wait it blocks. E28 confirms the guest is healthy -- it has the chunk, it has the queue, it has the branch -- which makes the host the only remaining place to look, and looking there needs MPEG.cpp instrumentation that is E29's lane, not this one.",
+  "decision": "STOP -- diagnose and table, never patch",
+  "mutations": {
+    "fork_source_edits": 0,
+    "fork_commits": 0,
+    "pushes": 0,
+    "regenerations": 0,
+    "builds": 0,
+    "relinks": 0,
+    "observer_rebuilds": 0,
+    "deletions": 0
+  },
+  "candidates_still_killed": "C2a and C4 (E23); C1, C3, C5-C9 (E22). E28 re-confirms the reference they were killed against by identity -- the runner it booted is the binary E23 and E26 booted -- and re-proposes none of them.",
+  "x_after_E28": "X is no longer \"why does the guest stop one chunk short\". It does not stop one chunk short: it holds 431,840 bytes in a queue whose head is parked on exactly the chunk it needs, and a live backward branch at 0x3b10ac that would ask for it the moment the host call returns. X is now entirely host-side: why does getMpegPicture never return, and is the delivery shared_ptr that suppresses the producer really still alive at the park? That is one MPEG.cpp log line away and it is E29's."
+}

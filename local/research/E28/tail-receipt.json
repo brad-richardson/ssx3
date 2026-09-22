@@ -1,0 +1,13 @@
+{
+  "utc": "2026-09-22T15:30:44.942834+00:00",
+  "file": "/Users/bradrichardson/dev/ssx3/local/research/E28/REPORT.md",
+  "convention": "sha256 of every line ABOVE the \"| Tail receipt | Value |\" header",
+  "prefix_lines": 167,
+  "prefix_bytes": 31920,
+  "sha256": "7ffb5aacbe9611756ba884663887b202b506f37a86f0d5ca641ae83d389e8e62",
+  "total_lines": 172,
+  "reverified_after_write": true,
+  "reverified_sha256": "7ffb5aacbe9611756ba884663887b202b506f37a86f0d5ca641ae83d389e8e62",
+  "errata": "E24-E2 -- the receipt is recomputed AFTER the last edit, and the row it writes is outside the hashed range so writing it cannot stale it",
+  "verify_command": "python3 -c \"import hashlib;L=open('local/research/E28/REPORT.md').read().splitlines(keepends=True);i=next(n for n,l in enumerate(L) if l.startswith('| Tail receipt | Value |'));print(hashlib.sha256(''.join(L[:i]).encode()).hexdigest())\""
+}

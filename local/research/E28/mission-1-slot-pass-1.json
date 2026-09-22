@@ -1,0 +1,539 @@
+{
+  "utc": "2026-09-22T15:17:10.135025+00:00",
+  "mission": "E28 Mission 1 -- pin the kind-1 queue slot guest address",
+  "sources": [
+    {
+      "file": "sub_00253AD0_0x253ad0.cpp",
+      "bytes": 2866,
+      "sha_read_a": "5768b9b36c3c6364db52fe55d7928d6a61ad7a4a7a978a9e90e43f4a9444db91",
+      "sha_read_b": "5768b9b36c3c6364db52fe55d7928d6a61ad7a4a7a978a9e90e43f4a9444db91",
+      "reads_agree": true,
+      "e27_committed_pin": null,
+      "equals_e27_committed_pin": null
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "bytes": 89737,
+      "sha_read_a": "ce202d1abd2cb2256e8eca7103ca9357caacbf6d77bbd98a6289919912ae5376",
+      "sha_read_b": "ce202d1abd2cb2256e8eca7103ca9357caacbf6d77bbd98a6289919912ae5376",
+      "reads_agree": true,
+      "e27_committed_pin": null,
+      "equals_e27_committed_pin": null
+    },
+    {
+      "file": "sub_003AEAD0_0x3aead0.cpp",
+      "bytes": 41351,
+      "sha_read_a": "82d5d06f55b567922c86a370fcda8fcf3a25fdd7e6ce6077a3938180c115b756",
+      "sha_read_b": "82d5d06f55b567922c86a370fcda8fcf3a25fdd7e6ce6077a3938180c115b756",
+      "reads_agree": true,
+      "e27_committed_pin": "82d5d06f55b567922c86a370fcda8fcf3a25fdd7e6ce6077a3938180c115b756",
+      "equals_e27_committed_pin": true
+    },
+    {
+      "file": "sub_003DFBD0_0x3dfbd0.cpp",
+      "bytes": 4677,
+      "sha_read_a": "0c8a4e0ec700a1bfa8505a4963d4b4c1111d23c2af05f920ba7044ba5fd4c564",
+      "sha_read_b": "0c8a4e0ec700a1bfa8505a4963d4b4c1111d23c2af05f920ba7044ba5fd4c564",
+      "reads_agree": true,
+      "e27_committed_pin": "0c8a4e0ec700a1bfa8505a4963d4b4c1111d23c2af05f920ba7044ba5fd4c564",
+      "equals_e27_committed_pin": true
+    },
+    {
+      "file": "sub_003DFED0_0x3dfed0.cpp",
+      "bytes": 36194,
+      "sha_read_a": "05f6330bf6410d2e80ed05808b62bd506d8324f917f11c11b453ab0f15813670",
+      "sha_read_b": "05f6330bf6410d2e80ed05808b62bd506d8324f917f11c11b453ab0f15813670",
+      "reads_agree": true,
+      "e27_committed_pin": "05f6330bf6410d2e80ed05808b62bd506d8324f917f11c11b453ab0f15813670",
+      "equals_e27_committed_pin": true
+    },
+    {
+      "file": "sub_003E06B0_0x3e06b0.cpp",
+      "bytes": 2754,
+      "sha_read_a": "7e7558a46cd1df15b82c37be9e6ee4cabdda4e3433e9d037f418bcfd76103876",
+      "sha_read_b": "7e7558a46cd1df15b82c37be9e6ee4cabdda4e3433e9d037f418bcfd76103876",
+      "reads_agree": true,
+      "e27_committed_pin": null,
+      "equals_e27_committed_pin": null
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "bytes": 32287,
+      "sha_read_a": "b681d7c6a0f5d92ff252d8731c95a93078f874a3b04839c44c7b4ee00017bed7",
+      "sha_read_b": "b681d7c6a0f5d92ff252d8731c95a93078f874a3b04839c44c7b4ee00017bed7",
+      "reads_agree": true,
+      "e27_committed_pin": null,
+      "equals_e27_committed_pin": null
+    },
+    {
+      "file": "sub_003E0BF8_0x3e0bf8.cpp",
+      "bytes": 9152,
+      "sha_read_a": "8aa2cf4ab7669f583bf6f8ea4f9fea2054749b3cdd7a35eb9e76e4844f21d153",
+      "sha_read_b": "8aa2cf4ab7669f583bf6f8ea4f9fea2054749b3cdd7a35eb9e76e4844f21d153",
+      "reads_agree": true,
+      "e27_committed_pin": null,
+      "equals_e27_committed_pin": null
+    },
+    {
+      "file": "sub_003E12E0_0x3e12e0.cpp",
+      "bytes": 14421,
+      "sha_read_a": "6dca2cc31a793b5ac4f8b48f72cad2e0b6599db79ec820421ffd68ce58a154ce",
+      "sha_read_b": "6dca2cc31a793b5ac4f8b48f72cad2e0b6599db79ec820421ffd68ce58a154ce",
+      "reads_agree": true,
+      "e27_committed_pin": "6dca2cc31a793b5ac4f8b48f72cad2e0b6599db79ec820421ffd68ce58a154ce",
+      "equals_e27_committed_pin": true
+    }
+  ],
+  "receipts": [
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e06e4: 0x80882d  daddu       $s1, $a0, $zero",
+      "gives": "n1   = $a0",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e06ec: 0xa0902d  daddu       $s2, $a1, $zero",
+      "gives": "n2   = $a1",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e06f4: 0xc0982d  daddu       $s3, $a2, $zero",
+      "gives": "nKinds = $a2",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e06fc: 0xe0802d  daddu       $s0, $a3, $zero",
+      "gives": "ctx0 = $a3 (the allocation)",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0768: 0xae020000  sw          $v0, 0x0($s0)",
+      "gives": "[ctx0+0] = 'STRM'",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e076c: 0x24020124  addiu       $v0, $zero, 0x124",
+      "gives": "record stride 0x124",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0770: 0x26060180  addiu       $a2, $s0, 0x180",
+      "gives": "array base = ctx0 + 0x180",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0774: 0x2221818  mult        $v1, $s1, $v0",
+      "gives": "$v1 = n1 * 0x124",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0778: 0x2408ffc0  addiu       $t0, $zero, -0x40",
+      "gives": "align mask ~0x3F",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e077c: 0x131100  sll         $v0, $s3, 4",
+      "gives": "$v0 = nKinds * 16",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0794: 0x665821  addu        $t3, $v1, $a2",
+      "gives": "$t3 = ctx0+0x180+n1*0x124",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e079c: 0x2403000c  addiu       $v1, $zero, 0xC",
+      "gives": "table row stride 0xC",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07a0: 0xae130028  sw          $s3, 0x28($s0)",
+      "gives": "[ctx0+0x28] = nKinds",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07a4: 0x2432018  mult        $a0, $s2, $v1",
+      "gives": "$a0 = n2 * 0xC",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07b8: 0x8b1821  addu        $v1, $a0, $t3",
+      "gives": "$v1 = SLOT ARRAY BASE",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07c0: 0x621021  addu        $v0, $v1, $v0",
+      "gives": "$v0 = slots_end",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07c8: 0x481024  and         $v0, $v0, $t0",
+      "gives": "$v0 &= ~0x3F",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07d0: 0x24420040  addiu       $v0, $v0, 0x40",
+      "gives": "$v0 = DATA REGION BASE",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e07e8: 0xae020054  sw          $v0, 0x54($s0)",
+      "gives": "[ctx0+0x54] = cursor = data base",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0800: 0xae0b001c  sw          $t3, 0x1C($s0)",
+      "gives": "[ctx0+0x1C] = classifier table",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0808: 0xae030024  sw          $v1, 0x24($s0)",
+      "gives": "[ctx0+0x24] = SLOT ARRAY BASE",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e08f4: 0x282d  daddu       $a1, $zero, $zero",
+      "gives": "slot init loop index starts at 0",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0914: 0xac700000  sw          $s0, 0x0($v1)",
+      "gives": "slot->[0] = ctx0 (OWNER)",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e090c: 0xac600008  sw          $zero, 0x8($v1)",
+      "gives": "slot->[8] = 0 (bytes)",
+      "present": true
+    },
+    {
+      "file": "sub_003E06D8_0x3e06d8.cpp",
+      "instruction": "0x3e0920: 0x8e020024  lw          $v0, 0x24($s0)",
+      "gives": "RETURNS ctx0->[0x24]",
+      "present": true
+    },
+    {
+      "file": "sub_003E06B0_0x3e06b0.cpp",
+      "instruction": "0x3e06b0: 0x2402000c  addiu       $v0, $zero, 0xC",
+      "gives": "header: 0xC",
+      "present": true
+    },
+    {
+      "file": "sub_003E06B0_0x3e06b0.cpp",
+      "instruction": "0x3e06b4: 0x24030124  addiu       $v1, $zero, 0x124",
+      "gives": "header: 0x124",
+      "present": true
+    },
+    {
+      "file": "sub_003E06B0_0x3e06b0.cpp",
+      "instruction": "0x3e06bc: 0x63100  sll         $a2, $a2, 4",
+      "gives": "header: nKinds*16",
+      "present": true
+    },
+    {
+      "file": "sub_003E06B0_0x3e06b0.cpp",
+      "instruction": "0x3e06c4: 0x24a50180  addiu       $a1, $a1, 0x180",
+      "gives": "header: +0x180",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae188: 0x302d  daddu       $a2, $zero, $zero",
+      "gives": "alloc alignment arg = 0",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae190: 0x40f809  jalr        $v0",
+      "gives": "the allocation",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae194: 0x382d  daddu       $a3, $zero, $zero",
+      "gives": "delay slot clobbers $a3, NOT $a2",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae1a4: 0x24060002  addiu       $a2, $zero, 0x2",
+      "gives": "nKinds = 2",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae1a8: 0x24040002  addiu       $a0, $zero, 0x2",
+      "gives": "n1 = 2",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae1ac: 0x24050003  addiu       $a1, $zero, 0x3",
+      "gives": "n2 = 3",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae1b0: 0xc0f81b6  jal         func_3E06D8",
+      "gives": "the STRM constructor",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae1b4: 0xae420004  sw          $v0, 0x4($s2)",
+      "gives": "movie->[4] = the allocation",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae1c4: 0xae420030  sw          $v0, 0x30($s2)",
+      "gives": "movie->[0x30] = ctx0->[0x24]",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae008: 0xc0f81b6  jal         func_3E06D8",
+      "gives": "site A",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae024: 0xc0f81b6  jal         func_3E06D8",
+      "gives": "site B, straight-line after A",
+      "present": true
+    },
+    {
+      "file": "sub_003ADEC8_0x3adec8.cpp",
+      "instruction": "0x3ae004: 0x24060001  addiu       $a2, $zero, 0x1",
+      "gives": "sites A/B: nKinds = 1",
+      "present": true
+    },
+    {
+      "file": "sub_00253AD0_0x253ad0.cpp",
+      "instruction": "0x253ad0: 0x2402003f  addiu       $v0, $zero, 0x3F",
+      "gives": "align floor test",
+      "present": true
+    },
+    {
+      "file": "sub_00253AD0_0x253ad0.cpp",
+      "instruction": "0x253ad8: 0x24030040  addiu       $v1, $zero, 0x40",
+      "gives": "align floor value",
+      "present": true
+    },
+    {
+      "file": "sub_00253AD0_0x253ad0.cpp",
+      "instruction": "0x253adc: 0x46102a  slt         $v0, $v0, $a2",
+      "gives": "0x3F < align ?",
+      "present": true
+    },
+    {
+      "file": "sub_00253AD0_0x253ad0.cpp",
+      "instruction": "0x253ae8: 0x62300a  movz        $a2, $v1, $v0",
+      "gives": "if not, align = 0x40",
+      "present": true
+    },
+    {
+      "file": "sub_003DFED0_0x3dfed0.cpp",
+      "instruction": "0x3dffa4: 0x8e020024  lw          $v0, 0x24($s0)",
+      "gives": "walker: slot array",
+      "present": true
+    },
+    {
+      "file": "sub_003DFED0_0x3dfed0.cpp",
+      "instruction": "0x3dffa8: 0x151900  sll         $v1, $s5, 4",
+      "gives": "walker: kind*16",
+      "present": true
+    },
+    {
+      "file": "sub_003DFED0_0x3dfed0.cpp",
+      "instruction": "0x3dffac: 0x2463fff0  addiu       $v1, $v1, -0x10",
+      "gives": "walker: -16",
+      "present": true
+    },
+    {
+      "file": "sub_003DFED0_0x3dfed0.cpp",
+      "instruction": "0x3dffc0: 0xac440008  sw          $a0, 0x8($v0)",
+      "gives": "STORE slot+8  (bytes += len)",
+      "present": true
+    },
+    {
+      "file": "sub_003DFED0_0x3dfed0.cpp",
+      "instruction": "0x3dffc4: 0xac52000c  sw          $s2, 0xC($v0)",
+      "gives": "STORE slot+0xC (head = cur)",
+      "present": true
+    },
+    {
+      "file": "sub_003E12E0_0x3e12e0.cpp",
+      "instruction": "0x3e1330: 0xae510004  sw          $s1, 0x4($s2)",
+      "gives": "STORE chunk+4 (tag stripped)",
+      "present": true
+    },
+    {
+      "file": "sub_003E12E0_0x3e12e0.cpp",
+      "instruction": "0x3e134c: 0xac500008  sw          $s0, 0x8($v0)",
+      "gives": "STORE slot+8  (bytes -= len)",
+      "present": true
+    },
+    {
+      "file": "sub_003E12E0_0x3e12e0.cpp",
+      "instruction": "0x3e13c8: 0xad26000c  sw          $a2, 0xC($t1)",
+      "gives": "STORE slot+0xC (head advance)",
+      "present": true
+    },
+    {
+      "file": "sub_003AEAD0_0x3aead0.cpp",
+      "instruction": "0x3aeb14: 0x8c920030  lw          $s2, 0x30($a0)",
+      "gives": "source->[0x30] = the slot",
+      "present": true
+    },
+    {
+      "file": "sub_003AEAD0_0x3aead0.cpp",
+      "instruction": "0x3aeb20: 0xc0f84b8  jal         func_3E12E0",
+      "gives": "dequeue(slot)",
+      "present": true
+    },
+    {
+      "file": "sub_003DFBD0_0x3dfbd0.cpp",
+      "instruction": "0x3dfbd4: 0x8c870000  lw          $a3, 0x0($a0)",
+      "gives": "resolver: ctx0 = slot->[0]",
+      "present": true
+    },
+    {
+      "file": "sub_003DFBD0_0x3dfbd0.cpp",
+      "instruction": "0x3dfbe0: 0x3c024d52  lui         $v0, 0x4D52",
+      "gives": "resolver: 'STRM' check",
+      "present": true
+    },
+    {
+      "file": "sub_003E0BF8_0x3e0bf8.cpp",
+      "instruction": "0x3e0c3c: 0x8c630024  lw          $v1, 0x24($v1)",
+      "gives": "accessor: slot array",
+      "present": true
+    },
+    {
+      "file": "sub_003E0BF8_0x3e0bf8.cpp",
+      "instruction": "0x3e0c40: 0x2442fff0  addiu       $v0, $v0, -0x10",
+      "gives": "accessor: -16",
+      "present": true
+    }
+  ],
+  "receipts_missing": 0,
+  "log": {
+    "counts": {
+      "sub_003E06D8": 3,
+      "sub_003ADEC8": 2,
+      "sub_003B7450": 3,
+      "sub_003AEAD0": 1,
+      "sub_003E12E0": 1
+    },
+    "strm_constructions": [
+      {
+        "line": 2682697,
+        "parent": "sub_003B7450_0x3b7450"
+      },
+      {
+        "line": 3240060,
+        "parent": "sub_003B7450_0x3b7450"
+      },
+      {
+        "line": 3451714,
+        "parent": "sub_003ADEC8_0x3adec8"
+      }
+    ],
+    "under_movie_open": [
+      {
+        "line": 3451714,
+        "parent": "sub_003ADEC8_0x3adec8"
+      }
+    ],
+    "note": "sub_003ADEC8 made exactly ONE call to the STRM constructor. Sites A (0x3ae008) and B (0x3ae024) are STRAIGHT-LINE consecutive -- no branch between 0x3ae008 and 0x3ae024 -- so reaching A forces B and would give TWO calls. One call therefore means the site at 0x3ae1b0."
+  },
+  "independent_corroboration_of_the_site": {
+    "fact": "E26 measured a kind-2 tag: 0x02000028 stored at 0xd49af0, boot-log line 22351",
+    "why": "the walker publishes into ctx0->[0x24] + kind*16 - 16 and the classifier can only return a kind the table carries. Sites A/B pass nKinds=1 (0x3ae004); a kind-2 chunk is impossible there. Only the 0x3ae1b0 site (nKinds=2, 0x3ae1a4) can produce it. The call site is therefore fixed by MEASURED BYTES as well as by the log.",
+    "tag_kind1": "0x0100381c at 0xd49b18, boot-log line 22354",
+    "tag_kind2": "0x02000028 at 0xd49af0, boot-log line 22351"
+  },
+  "arithmetic": {
+    "n1": 2,
+    "n2": 3,
+    "nkinds": 2,
+    "slot_array_offset": "0x3ec",
+    "header_size": "0x40c",
+    "header_size_via_func_3E06B0": "0x40c",
+    "two_functions_agree": true,
+    "identity": "data_base = ((ctx0 + header) & ~0x3F) + 0x40",
+    "data_base": "0xd48740",
+    "data_base_receipt": "E26 boot log 22336: sceCdRead lbn=0x13ba33 sectors=16 buf=0xd48740",
+    "ctx0_window": [
+      "0xd482f4",
+      "0xd48334"
+    ],
+    "alignment": "0x40",
+    "alignment_receipt": "sub_00253AD0 0x253ad0-0x253ae8 floors the alignment argument at 0x40; the call at 0x3ae188 passes 0",
+    "candidates": [
+      "0xd48300"
+    ],
+    "unique": true
+  },
+  "result": {
+    "derived": true,
+    "ctx0": "0xd48300",
+    "kind1_slot": "0xd486ec",
+    "kind2_slot": "0xd486fc",
+    "fields": {
+      "owner": "0xd486ec",
+      "kind": "0xd486f0",
+      "bytes": "0xd486f4",
+      "head": "0xd486f8"
+    },
+    "check_data_base": "0xd48740",
+    "check_passes": true
+  },
+  "armed_window": {
+    "lo": "0xd486e0",
+    "hi": "0xd48740",
+    "why": "the tier covers EVERY position the slot array could occupy if the 64-byte alignment were wrong -- 4-byte granularity over the whole ctx0 window -- so the capture MEASURES the address rather than assuming it. If the stores land on 0xd486ec the derivation is confirmed; if they land elsewhere inside the window the capture names the true address and the alignment step is the thing that was wrong.",
+    "alignment_free_candidates_4B": [
+      "0xd486e0",
+      "0xd486e4",
+      "0xd486e8",
+      "0xd486ec",
+      "0xd486f0",
+      "0xd486f4",
+      "0xd486f8",
+      "0xd486fc",
+      "0xd48700",
+      "0xd48704",
+      "0xd48708",
+      "0xd4870c",
+      "0xd48710",
+      "0xd48714",
+      "0xd48718",
+      "0xd4871c"
+    ]
+  }
+}
