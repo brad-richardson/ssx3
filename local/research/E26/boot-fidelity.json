@@ -1,0 +1,293 @@
+{
+  "utc": "2026-09-22T13:14:54.423664+00:00",
+  "all_green": true,
+  "checks": [
+    {
+      "check": "E26 driver == E24 driver under the hex-safe rename, byte for byte",
+      "ok": true,
+      "src_bytes": 18158,
+      "dst_bytes": 18158,
+      "byte_equal": true
+    },
+    {
+      "check": "watch-set.json SHA-equal to E24's",
+      "ok": true,
+      "e24_sha": "a37a5eb0328c48c92f26eb37b7f7bfca893ead9bbbe750c0d7131e6314945204",
+      "e26_sha": "a37a5eb0328c48c92f26eb37b7f7bfca893ead9bbbe750c0d7131e6314945204"
+    },
+    {
+      "check": "every tier declares the entry count it actually carries",
+      "ok": true,
+      "tiers": [
+        {
+          "tier": "descriptor node array",
+          "lo": "0x548800",
+          "hi": "0x548a00",
+          "stride": 8,
+          "entries": 64,
+          "addrs": 64,
+          "entries_match": true
+        },
+        {
+          "tier": "data region head",
+          "lo": "0xd48748",
+          "hi": "0xd48848",
+          "stride": 8,
+          "entries": 32,
+          "addrs": 32,
+          "entries_match": true
+        },
+        {
+          "tier": "data region stride sample",
+          "lo": "0xd48848",
+          "hi": "0xd49a74",
+          "stride": 128,
+          "entries": 37,
+          "addrs": 37,
+          "entries_match": true
+        },
+        {
+          "tier": "data region tail",
+          "lo": "0xd49a74",
+          "hi": "0xd49af4",
+          "stride": 8,
+          "entries": 16,
+          "addrs": 16,
+          "entries_match": true
+        },
+        {
+          "tier": "past-end extension",
+          "lo": "0xd49af4",
+          "hi": "0xd49b74",
+          "stride": 8,
+          "entries": 16,
+          "addrs": 16,
+          "entries_match": true
+        },
+        {
+          "tier": "staging buffer",
+          "lo": "0xdc8340",
+          "hi": "0xdc8440",
+          "stride": 8,
+          "entries": 32,
+          "addrs": 32,
+          "entries_match": true
+        }
+      ]
+    },
+    {
+      "check": "total is E24's 230 new entries against e23a's 37",
+      "ok": true,
+      "total_entries": 230,
+      "e23a": 37,
+      "new_entries": 197,
+      "carried_singles": 4,
+      "carried_non_producer": 29
+    },
+    {
+      "check": "capture window (CAPS) identical",
+      "ok": true,
+      "caps": {
+        "wall_s": 90,
+        "terminate_reserve_s": 15,
+        "progress_lines": 1000000,
+        "source_window_end": 603,
+        "boot_log": 268435456,
+        "trace": 100663296,
+        "function_log": 1073741824,
+        "e4_dir": 12582912,
+        "park_dir": 33554432,
+        "frames_dir": 33554432,
+        "e7_dir": 8388608,
+        "parser_dir": 16777216,
+        "aggregate": 1610612736,
+        "poll_s": 0.25,
+        "grace_s": 10
+      }
+    },
+    {
+      "check": "allocated caps identical",
+      "ok": true
+    },
+    {
+      "check": "watch address list identical, entry for entry, in order",
+      "ok": true,
+      "entries": 201
+    },
+    {
+      "check": "display/offset watch tiers identical",
+      "ok": true
+    },
+    {
+      "check": "ELF pin identical",
+      "ok": true,
+      "elf_sha": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc"
+    },
+    {
+      "check": "boot argv identical",
+      "ok": true,
+      "argv": [
+        "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+        "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72"
+      ]
+    },
+    {
+      "check": "lease path identical (one P-lane lease, shared with every prior lane)",
+      "ok": true,
+      "lease": "/tmp/ssx3-p-lane-lease"
+    },
+    {
+      "check": "full watch vector = 197 tiered + 4 singles + 29 carried = E24's 230, no duplicates",
+      "ok": true,
+      "total": 230,
+      "unique": 230,
+      "declared_total": 230,
+      "tiered": 197,
+      "carried_producer_singles": 4,
+      "carried_non_producer": 29,
+      "e23a_total": 37
+    },
+    {
+      "check": "lane wait log is E26-spelled (new lane log, not E24's)",
+      "ok": true,
+      "waits": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26-waits.log"
+    },
+    {
+      "check": "evidence directory is E26's",
+      "ok": true,
+      "evidence": "/Users/bradrichardson/dev/ssx3/local/research/E26"
+    }
+  ],
+  "label": {
+    "designed_as": "e24a",
+    "spent_as": "e26a",
+    "declared_in": "CONTRACT.md, before the run",
+    "reason": "label-derived output names are not scientific content -- e22a and e23a already differed in exactly this way; the rename is what keeps the driver's refuse-to-overwrite asserts meaningful and this lane's SSD byte accounting (e26-*, *e26*) honest",
+    "label_derived_env_values": [
+      "PS2X_DIAG_PARK_DIR",
+      "PS2X_TRACE_SYSCALLS",
+      "PS2X_E4_DIR",
+      "PS2X_E21_PARSER_DIR",
+      "PS2X_E7_DIR",
+      "PS2X_FRAME_DUMP_DIR"
+    ]
+  },
+  "watch_set": {
+    "sha256": "a37a5eb0328c48c92f26eb37b7f7bfca893ead9bbbe750c0d7131e6314945204",
+    "tiers": [
+      {
+        "tier": "descriptor node array",
+        "lo": "0x548800",
+        "hi": "0x548a00",
+        "stride": 8,
+        "entries": 64,
+        "addrs": 64,
+        "entries_match": true
+      },
+      {
+        "tier": "data region head",
+        "lo": "0xd48748",
+        "hi": "0xd48848",
+        "stride": 8,
+        "entries": 32,
+        "addrs": 32,
+        "entries_match": true
+      },
+      {
+        "tier": "data region stride sample",
+        "lo": "0xd48848",
+        "hi": "0xd49a74",
+        "stride": 128,
+        "entries": 37,
+        "addrs": 37,
+        "entries_match": true
+      },
+      {
+        "tier": "data region tail",
+        "lo": "0xd49a74",
+        "hi": "0xd49af4",
+        "stride": 8,
+        "entries": 16,
+        "addrs": 16,
+        "entries_match": true
+      },
+      {
+        "tier": "past-end extension",
+        "lo": "0xd49af4",
+        "hi": "0xd49b74",
+        "stride": 8,
+        "entries": 16,
+        "addrs": 16,
+        "entries_match": true
+      },
+      {
+        "tier": "staging buffer",
+        "lo": "0xdc8340",
+        "hi": "0xdc8440",
+        "stride": 8,
+        "entries": 32,
+        "addrs": 32,
+        "entries_match": true
+      }
+    ],
+    "total_entries": 230,
+    "full_vector": 230,
+    "cost_model": {
+      "calibration": [
+        {
+          "boot": "e22a",
+          "watches": 29,
+          "span_complete_s": 7.61
+        },
+        {
+          "boot": "e23a",
+          "watches": 37,
+          "span_complete_s": 8.3
+        }
+      ],
+      "form": "T_span_complete = base + k * watch_entries",
+      "k_seconds_per_entry": 0.08625,
+      "base_seconds": 5.109,
+      "predicted_span_complete_s": 24.9,
+      "wall_s": 90,
+      "sigterm_at_s": 75,
+      "predicted_post_park_window_s": 50.1,
+      "e23a_post_park_window_s": 66.0,
+      "caveat": "a two-point fit on two runs, so the slope is indicative, not measured. It is used only to SIZE the list conservatively; the driver records the actual span-complete time so the next lane can refit.",
+      "why_not_full_cover": "full 8-byte cover of the 5,036 B body would be 630 entries; the same fit predicts span-complete at ~64 s, leaving ~11 s of post-park window instead of ~50 s."
+    }
+  },
+  "caps": {
+    "wall_s": 90,
+    "terminate_reserve_s": 15,
+    "progress_lines": 1000000,
+    "source_window_end": 603,
+    "boot_log": 268435456,
+    "trace": 100663296,
+    "function_log": 1073741824,
+    "e4_dir": 12582912,
+    "park_dir": 33554432,
+    "frames_dir": 33554432,
+    "e7_dir": 8388608,
+    "parser_dir": 16777216,
+    "aggregate": 1610612736,
+    "poll_s": 0.25,
+    "grace_s": 10
+  },
+  "allocated_caps": {
+    "boot_log": 268435456,
+    "trace": 100663296,
+    "function_log": 1073741824,
+    "e4_dir": 67108864,
+    "park_dir": 134217728,
+    "frames_dir": 67108864,
+    "e7_dir": 67108864,
+    "parser_dir": 67108864,
+    "aggregate": 1610612736
+  },
+  "argv": [
+    "/tmp/e18-mpeg-link/runtime/ps2xRuntime/ps2EntryRunner",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/cd/SLUS_207.72"
+  ],
+  "verdict": "the boot E26 spends is E24's designed boot: the driver is byte-identical under the mechanical rename, the watch set is SHA-identical, and the caps, argv and watch vector compare equal element for element"
+}

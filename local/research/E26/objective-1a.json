@@ -1,0 +1,53 @@
+{
+  "utc": "2026-09-22T13:28:59.784867+00:00",
+  "question": "does the SUCCESSOR descriptor node at 0x548880 move post-park?",
+  "e23_residual": "E23 saw the head advance 0x548800 = 0x548880 and did NOT watch the successor node",
+  "successor_hits": 1,
+  "successor_hits_post_park": 0,
+  "successor_events": [
+    {
+      "line": 96,
+      "addr": 5539968,
+      "width": 4,
+      "value": "0x5488c0",
+      "pc": "0x3201a8",
+      "thread": 1,
+      "ra": "0x319db8",
+      "sp": "0x1ffff20",
+      "post_park": false
+    }
+  ],
+  "head_advance": [
+    {
+      "line": 94,
+      "value": "0x548840",
+      "pc": "0x3201a8",
+      "ra": "0x319db8"
+    },
+    {
+      "line": 22742,
+      "value": "0x0",
+      "pc": "0x3b0730",
+      "ra": "0x3aeba4"
+    },
+    {
+      "line": 22744,
+      "value": "0xd48740",
+      "pc": "0x3aebb0",
+      "ra": "0x3aeba4"
+    },
+    {
+      "line": 22786,
+      "value": "0x548880",
+      "pc": "0x3204c4",
+      "ra": "0x319ffc"
+    }
+  ],
+  "node_array_entries": 64,
+  "node_array_entries_hit": 11,
+  "node_array_post_park_hits": 0,
+  "free_list_stride": 64,
+  "free_list_note": "lines 93-101 initialise the array as a linked free list at 0x40 stride (0x5487c0 -> 0x548800 -> 0x548840 -> 0x548880 -> ... -> 0x548a00), so the 64-entry tier covers EIGHT nodes, not the four E24 sized it for -- the coverage is better than designed, not worse",
+  "verdict": "H0 -- the successor node does NOT move post-park. Its only write in the whole run is the boot-time free-list initialisation.",
+  "e23_verdict_status": "SURVIVES a watch set six times larger; E23 named residual CLOSED"
+}

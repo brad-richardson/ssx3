@@ -1,0 +1,49 @@
+{
+  "utc": "2026-09-22T13:27:47.272970+00:00",
+  "gate": "STOP",
+  "gate_source": "E24 set it to STOP and designed the boot around it",
+  "honored_as_written": true,
+  "demonstrated_edges": [
+    {
+      "n": 1,
+      "edge": "The terminating start code is already in guest RAM, 48 B past the fed data",
+      "receipt": "guest 0xd49b1c, first4 00000100, delivered by the same 16-sector CD read at lbn 0x13ba33; chunk-map.json",
+      "demonstrated": true
+    },
+    {
+      "n": 2,
+      "edge": "Nothing in the 230-entry watch set moves after the park",
+      "receipt": "6725 emissions, 0 post-park; last at line 22786, park at 22790, 24463 log lines and ~65 s of run remaining; watch-ledger.json",
+      "demonstrated": true
+    },
+    {
+      "n": 3,
+      "edge": "Semaphore 36's sole signaller never runs, now confirmed dynamically",
+      "receipt": "sema 36 has 1 event in the whole run (the wait, ra 0x3c19f0 = E24's predicted 0x3c19f0); sub_003C1298 entries 0 in 3,607,246 function-log lines; x-b-sema36.json",
+      "demonstrated": true
+    },
+    {
+      "n": 4,
+      "edge": "E23's named residual -- the successor descriptor node -- is CLOSED",
+      "receipt": "0x548880 has 1 write in the whole run, the boot-time free-list init, 0 post-park; objective-1a.json",
+      "demonstrated": true
+    }
+  ],
+  "edge_count": 4,
+  "isolated_to_one_edge": false,
+  "why_not": "Four edges are demonstrated, not one, and they are not the same edge: two are about the MPEG feed, one is about a semaphore chain with no proven dependency on it, and one closes a prior lane's residual. A fix needs exactly ONE edge plus its own fail-before and full regression; E26 has none of those and was not asked to build them.",
+  "decision": "STOP -- diagnose and table, never patch",
+  "mutations": {
+    "fork_source_edits": 0,
+    "fork_commits": 0,
+    "pushes": 0,
+    "regenerations": 0,
+    "builds": 0,
+    "relinks": 0,
+    "observer_rebuilds": 0,
+    "deletions": 0
+  },
+  "candidates_still_killed": "C2a and C4 (E23); C1, C3, C5-C9 (E22). E26 re-confirms the reference they were killed against by identity -- the runner it booted is the binary E23 booted -- and re-proposes none of them.",
+  "x_after_E26": "X moves from \"why does the guest stop one start code short?\" to \"why does the guest stop one CHUNK short of feeding, when the chunk it needs is already in RAM 48 bytes away and it has already walked to its header?\" -- and, still separately, why semaphore 36's only signaller never runs.",
+  "note": "Recorded with its receipt rather than asserted or skipped."
+}

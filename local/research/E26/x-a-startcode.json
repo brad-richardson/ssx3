@@ -1,0 +1,95 @@
+{
+  "utc": "2026-09-22T13:28:59.793294+00:00",
+  "question": "(a) where does the guest's final start-code write land relative to the feed the parser consumed (timing + bytes)?",
+  "answer_headline": "The guest never writes a terminating start code at all. It does not have to: the start code was already in guest RAM, 48 bytes past the end of the data it fed, delivered by the SAME CD read. The guest stops one CHUNK short of FEEDING, not one start code short of writing.",
+  "start_code_valued_writes": 0,
+  "watch_emissions": 6725,
+  "watch_emissions_post_park": 0,
+  "last_watch_emission_line": 22786,
+  "last_watch_emission": {
+    "line": 22786,
+    "addr": 5539840,
+    "width": 4,
+    "value": "0x548880",
+    "pc": "0x3204c4",
+    "thread": 1,
+    "ra": "0x319ffc",
+    "sp": "0x1fffc30",
+    "post_park": false
+  },
+  "timing": {
+    "last_guest_write_to_any_watched_address_line": 22786,
+    "feed_line": 22788,
+    "park_line": 22790,
+    "lines_between_last_write_and_feed": 2,
+    "boot_log_lines_after_park": 24463,
+    "span_complete_s": 9.523638333001145,
+    "parse_enter_ns": 9485297000,
+    "parser_exit_ns": 74466393000,
+    "post_park_seconds": 64.98
+  },
+  "bytes": {
+    "cd_read": {
+      "lbn": "0x13ba33",
+      "sectors": 16,
+      "bytes": 32768,
+      "buf": "0xd48740"
+    },
+    "chunk0": {
+      "magic": "MPCh",
+      "total": 5036,
+      "es_bytes": 5028,
+      "guest_payload": "0xd48748"
+    },
+    "fed_bytes": 5040,
+    "fed_first4": "000001b3",
+    "fed_equals_es": true,
+    "pad_bytes": 12,
+    "pad_all_zero": true,
+    "pad_reason": "zero padding to the next 16-byte multiple (5028 -> 5040)",
+    "last_nonzero_offset": 5024,
+    "e24_measured_last_nonzero": 5024,
+    "agrees_with_E24": true,
+    "next_chunk": {
+      "magic": "MPCh",
+      "blob_offset": 5076,
+      "header_guest_addr": "0xd49b14",
+      "payload_guest_addr": "0xd49b1c",
+      "payload_first4": "00000100",
+      "is_start_code": true,
+      "es_bytes": 14356,
+      "gap_bytes_from_end_of_fed_es": 48
+    },
+    "terminating_start_code_guest_addr": "0xd49b1c",
+    "inside_E24_past_end_tier": true,
+    "past_end_tier": "0xd49af4-0xd49b73, 16 entries at stride 8 -- complete cover"
+  },
+  "guest_had_already_walked_to_it": [
+    {
+      "line": 22351,
+      "addr": 13933296,
+      "width": 4,
+      "value": "0x2000028",
+      "pc": "0x3dff8c",
+      "thread": 1,
+      "ra": "0x3dff90",
+      "sp": "0x1fffb40",
+      "post_park": false
+    },
+    {
+      "line": 22354,
+      "addr": 13933336,
+      "width": 4,
+      "value": "0x100381c",
+      "pc": "0x3dff8c",
+      "thread": 1,
+      "ra": "0x3dff90",
+      "sp": "0x1fffb40",
+      "post_park": false
+    }
+  ],
+  "guest_walk_reading": "At boot-log lines 22,351 and 22,354 -- BEFORE the feed -- thread 1 stores 0x02000028 at 0xd49af0 and 0x0100381c at 0xd49b18. Those two addresses are the length fields of the SCHl chunk (total 40 = 0x28) and of the NEXT MPCh chunk (total 14,364 = 0x381c). The low 24 bits are the lengths the ISO already holds; only the top byte changes (0x02, 0x01). The guest had therefore already walked the chunk list past the picture it fed.",
+  "named_limit": "`diagWatchEmit` fires on GUEST STORES only. The picture payload itself arrives by host-side CD DMA straight into guest RAM (only 7 of the 37 body stride samples ever emit, all from one 128-bit guest copy loop), so \"no start-code-valued write\" is a statement about guest stores, not about every byte that reaches the buffer. It does not weaken the post-park result: the descriptor writes ARE guest stores and they are fully visible, and the past-end tier covers the start code's address byte for byte.",
+  "reading": "E23 measured that the producer fires exactly once per GetPicture on every path (H1, re-confirmed by E24 and E25). One GetPicture therefore feeds exactly one chunk, and GetPicture does not return until a frame appears. The host parser cannot emit a frame until it sees the next start code, and the next start code is in the chunk that the next feed would carry. That is a mutual wait. This is the READING the capture supports; it is tabled, not acted on -- the fix gate is STOP.",
+  "what_the_capture_cannot_settle": "Whether the title would ever re-ask given more wall time. This capture bounds it at 65 s of total silence after the park, which is a bound, not a proof of never."
+}

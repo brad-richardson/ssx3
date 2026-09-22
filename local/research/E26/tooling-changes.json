@@ -1,0 +1,26 @@
+{
+  "utc": "2026-09-22T13:13:47.090598+00:00",
+  "changes": [
+    {
+      "file": "e26_prepare_probe.py",
+      "change": "CHANGE 1 -- gate against E25's fresh receipts, not E24's red ones",
+      "why": "E24's probe gate reads its regression receipts out of its OWN lane directory. Those receipts are RED: they were taken when the host restart had wiped the runner and the suite, so E24's `checkpoint.json` carries red=true and E24 never wrote a `checkpoint-complete.json`, a `cadence.json` or an `observer-regression.json` at all. E25 then re-ran that IDENTICAL chain green -- 458/458 unloaded, 458/458 observer-loaded, 10/10 closures, the four-point cadence reference, the prior bindings and the absorbed controls -- on binaries that are BYTE-IDENTICAL to the pins, and the orchestrator gated it. E26 therefore evaluates E24's assertions, UNCHANGED IN CONTENT, against E25's receipts. Not one assertion is removed, softened or skipped; only the directory they read from moves. The driver's own preflight still runs the full 458-test suite FRESH before the atomic claim.",
+      "pairs": 8,
+      "applied": 0,
+      "already_applied": 8,
+      "idempotent": true
+    },
+    {
+      "file": "e26_prepare_probe.py",
+      "change": "CHANGE 2 -- record the gate provenance in the manifests",
+      "why": "The two manifests the capture driver reads are the boot's authorization record. They now SAY which lane each gate was measured in, so a later reader cannot mistake an inherited receipt for one E26 took itself.",
+      "pairs": 1,
+      "applied": 0,
+      "already_applied": 1,
+      "idempotent": true
+    }
+  ],
+  "total_changes": 2,
+  "total_pairs": 9,
+  "note": "Each pair asserts BEFORE or AFTER is present; a second run is a no-op."
+}

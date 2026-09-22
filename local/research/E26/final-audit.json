@@ -1,0 +1,128 @@
+{
+  "utc": "2026-09-22T13:27:48.276660+00:00",
+  "green": true,
+  "checks": {
+    "fork_triple_agree": true,
+    "binaries_unmoved": true,
+    "lease_absent": true,
+    "no_runner_process": true,
+    "boots_spent_is_one": true,
+    "boot_attempt_written_once": true,
+    "lease_released_cleanly": true,
+    "no_sigkill": true,
+    "fork_growth_zero": true,
+    "within_internal_reservation": true,
+    "within_ssd_reservation": true,
+    "floors_clear": true,
+    "no_bound_tripped": true,
+    "ssd_still_mounted": true
+  },
+  "fork": {
+    "head": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "ref": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "ls_remote": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+    "status_short": "?? ps2_log.txt\n",
+    "status_stderr_preexisting": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+  },
+  "binaries": {
+    "runner": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+    "suite": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0"
+  },
+  "pins": {
+    "runner": "e462e4482fbf5b3fe0902e793f9d677e51c56b220022bca619305f1f69967e22",
+    "suite": "2152e5ad53f19741788aa3051e26184a9c5e831857114ce74407f199de5f04c0",
+    "ELF (cd)": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+    "ELF (P1)": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc"
+  },
+  "boot": {
+    "label": "e26a",
+    "claim_utc": "2026-09-22T13:16:16.336019+00:00",
+    "boot_utc": "2026-09-22T13:16:16.341634+00:00",
+    "pid": 46217,
+    "bound": "wall",
+    "rc": 0,
+    "elapsed_s": 75.568,
+    "span_complete_s": 9.524,
+    "watch_entries": 230,
+    "signal_utc": "2026-09-22T13:17:31.788464+00:00",
+    "process_end_utc": "2026-09-22T13:17:31.903615+00:00",
+    "release_utc": "2026-09-22T13:17:31.911657+00:00",
+    "release_latency_ms": 8,
+    "needed_sigkill": false
+  },
+  "probes": {
+    "title_boots_spent": 1,
+    "title_boots_allowed": 1,
+    "lease_claims": 1,
+    "lease_releases": 1
+  },
+  "mutations": {
+    "fork_source_edits": 0,
+    "fork_commits": 0,
+    "pushes": 0,
+    "regenerations": 0,
+    "builds": 0,
+    "configures": 0,
+    "relinks": 0,
+    "observer_rebuilds": 0,
+    "deletions": 0,
+    "reclaims": 0
+  },
+  "artifacts": [
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._boot-e26a-1.log",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26a-1",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26a-join",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26a-parser",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._frames-e26a-1",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._park-e26a-1",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._ps2_log-e26a-1.txt",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._syscalls-e26a-on.txt",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e26a-1.log",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26a-1",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26a-join",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26a-parser",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e26a-1",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e26a-1",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/ps2_log-e26a-1.txt",
+    "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-e26a-on.txt"
+  ],
+  "resources": {
+    "utc": "2026-09-22T13:27:48.129625+00:00",
+    "internal_free": 4580569088,
+    "internal_allocated": 1767751680,
+    "build_allocated": 1766981632,
+    "codegen_allocated": 0,
+    "evidence_allocated": 770048,
+    "ssd_free": 139149180928,
+    "ssd_allocated": 227540992,
+    "ssd_owned_paths_allocated": 227540992,
+    "fork_positive_growth": 0,
+    "ssd_paths": [
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._boot-e26a-1.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26-waits.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26a-join",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._e26a-parser",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._frames-e26a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._park-e26a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._ps2_log-e26a-1.txt",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/._syscalls-e26a-on.txt",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/boot-e26a-1.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26-waits.log",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26a-join",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/e26a-parser",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e26a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/park-e26a-1",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/ps2_log-e26a-1.txt",
+      "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/syscalls-e26a-on.txt"
+    ]
+  },
+  "bound": null,
+  "reservations": {
+    "internal": 3221225472,
+    "ssd": 17179869184,
+    "floor": 2147483648,
+    "guard": 536870912
+  }
+}

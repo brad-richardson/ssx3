@@ -1,0 +1,222 @@
+{
+  "tool": "e26_rename.py",
+  "source_lanes": [
+    "E24",
+    "E25"
+  ],
+  "protected_tokens": [
+    "PS2X_E21_PARSER_DIR",
+    "PS2X_E21_PROOF",
+    "# E21 PARSER CLOSURE",
+    "e21-parser-observer.dylib",
+    "e21_parser_observer.h",
+    "e23-fixtures/complete",
+    "# E23 COMPLETE FEED FIXTURE TAIL COMPLETE",
+    "e18-fixtures/after",
+    "/tmp/e18-mpeg-link/runtime",
+    "P1/e25-snapshot",
+    "e18-mpeg-link.tar"
+  ],
+  "hex_rule": "runs of >=16 hex chars masked before rename",
+  "files": [
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_io.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_io.py",
+      "src_bytes": 672,
+      "dst_bytes": 672,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {},
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_closed_events.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_closed_events.py",
+      "src_bytes": 2145,
+      "dst_bytes": 2145,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {},
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_parser_receipt.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_parser_receipt.py",
+      "src_bytes": 2818,
+      "dst_bytes": 2818,
+      "hex_runs_masked": 1,
+      "hex_runs_src": 1,
+      "hex_runs_dst": 1,
+      "hex_runs_equal": true,
+      "protected_counts": {
+        "# E21 PARSER CLOSURE": {
+          "src": 2,
+          "dst": 2
+        }
+      },
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_mine.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_mine.py",
+      "src_bytes": 4509,
+      "dst_bytes": 4509,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {},
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_validate.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_validate.py",
+      "src_bytes": 7622,
+      "dst_bytes": 7622,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {
+        "PS2X_E21_PARSER_DIR": {
+          "src": 1,
+          "dst": 1
+        }
+      },
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_bounded.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_bounded.py",
+      "src_bytes": 3508,
+      "dst_bytes": 3508,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {},
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_instrument.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_instrument.py",
+      "src_bytes": 875,
+      "dst_bytes": 875,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {
+        "e21-parser-observer.dylib": {
+          "src": 2,
+          "dst": 2
+        }
+      },
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_tail.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_tail.py",
+      "src_bytes": 2587,
+      "dst_bytes": 2587,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {},
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E25",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E25/e25_e26_readiness.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_readiness.py",
+      "src_bytes": 4134,
+      "dst_bytes": 4134,
+      "hex_runs_masked": 1,
+      "hex_runs_src": 1,
+      "hex_runs_dst": 1,
+      "hex_runs_equal": true,
+      "protected_counts": {
+        "e21-parser-observer.dylib": {
+          "src": 1,
+          "dst": 1
+        },
+        "/tmp/e18-mpeg-link/runtime": {
+          "src": 1,
+          "dst": 1
+        }
+      },
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E24",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E24/e24_capture.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_capture.py",
+      "src_bytes": 18158,
+      "dst_bytes": 18158,
+      "hex_runs_masked": 1,
+      "hex_runs_src": 1,
+      "hex_runs_dst": 1,
+      "hex_runs_equal": true,
+      "protected_counts": {
+        "PS2X_E21_PARSER_DIR": {
+          "src": 1,
+          "dst": 1
+        },
+        "e21-parser-observer.dylib": {
+          "src": 3,
+          "dst": 3
+        },
+        "/tmp/e18-mpeg-link/runtime": {
+          "src": 2,
+          "dst": 2
+        }
+      },
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    },
+    {
+      "source_lane": "E24",
+      "src": "/Users/bradrichardson/dev/ssx3/local/research/E24/e24_prepare_probe.py",
+      "dst": "/Users/bradrichardson/dev/ssx3/local/research/E26/e26_prepare_probe.py",
+      "src_bytes": 4461,
+      "dst_bytes": 4461,
+      "hex_runs_masked": 0,
+      "hex_runs_src": 0,
+      "hex_runs_dst": 0,
+      "hex_runs_equal": true,
+      "protected_counts": {
+        "e21-parser-observer.dylib": {
+          "src": 1,
+          "dst": 1
+        }
+      },
+      "protected_preserved": true,
+      "normalized_diff_empty": true
+    }
+  ],
+  "all_normalized_diffs_empty": true,
+  "all_hex_runs_equal": true,
+  "all_protected_preserved": true
+}

@@ -1,0 +1,42 @@
+{
+  "utc": "2026-09-22T13:27:47.356279+00:00",
+  "old": {
+    "k_seconds_per_entry": 0.08625,
+    "base_seconds": 5.109,
+    "predicted_span_complete_s": 24.9,
+    "predicted_post_park_window_s": 50.1,
+    "fit_on": "two points, e22a and e23a"
+  },
+  "points": [
+    {
+      "boot": "e22a",
+      "watches": 29,
+      "span_complete_s": 7.61
+    },
+    {
+      "boot": "e23a",
+      "watches": 37,
+      "span_complete_s": 8.3
+    },
+    {
+      "boot": "e26a",
+      "watches": 230,
+      "span_complete_s": 9.524
+    }
+  ],
+  "measured": {
+    "watches": 230,
+    "span_complete_s": 9.524,
+    "predicted": 24.9,
+    "over_prediction_s": 15.38,
+    "over_prediction_factor": 2.61
+  },
+  "refit_three_point": {
+    "k_seconds_per_entry": 0.00806,
+    "base_seconds": 7.683
+  },
+  "slope_e23a_to_e26a": 0.00634,
+  "finding": "The two-point fit over-predicted by a factor of 2.6. Adding 193 watch entries cost 1.22 s of span-complete, a slope of 0.0063 s/entry -- 14x shallower than the 0.0863 s/entry the e22a->e23a pair implied. That pair differed by only 8 entries, so its slope was dominated by run-to-run variation, not by watch count.",
+  "consequence": "The residual E24 declared -- an isolated write shorter than 121 B inside the sampled body span -- was paid for a scan cost that is not there. On this measurement a FULL 630-entry 8-byte cover of the body would have cost about 12.8 s of span-complete, not the ~64 s the old model predicted, and would have left roughly 65 s of post-park window. A later lane that wants the residual closed can afford it. E26 does not re-spend a boot to prove that; it tables the number.",
+  "caveat": "three points, still a small fit; the driver keeps recording span-complete on every path"
+}

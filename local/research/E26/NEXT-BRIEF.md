@@ -1,0 +1,66 @@
+| Handoff | Required boundary |
+|---|---|
+| Base | Fork `3adc0478b6d2260acdd28a249466f2eef9a20176` unchanged and remote-agreed at open **and** close. E26 made zero fork source edits, zero fork commits, zero pushes, zero builds. |
+| Probe count | E26 spent **1/1** title boots and **1/1** lease claims. A later brief requires its own fresh admission, T13, lease and caps. |
+| Instrument | Verified **in place** — restore path **(a)**, no rebuild, no share-tier restore. Runner `e462e448…67e22` (163,529,696 B) and suite `2152e5ad…f04c0` (5,695,128 B) still standing at `/tmp/e18-mpeg-link/runtime`, re-hashed five times across the lane, all equal. **This tree is still on `/tmp` and a host restart still wipes it.** E25's snapshot at `P1/e25-snapshot` and the 10-minute rebuild from `3adc0478` both remain untested-but-available. |
+| Machine | The Mac-mini migration the E26 brief anticipated **did not happen**. This ran on `brads.macbook.air.lan`. |
+
+| **The boot was spent. What it returned.** | Receipt |
+|---|---|
+| Fate | `e26a`, PID 46217, rc **0**, bound **`wall`** at 75.568 s, span-complete **9.524 s**, 230 watch entries, no SIGKILL, lease released **8.042 ms** after process end, post-release `pgrep` rc 1. |
+| Fidelity, proved before the lease | E24's `e24_capture.py` under the same hex-safe rename equals E26's driver **byte for byte**; `watch-set.json` SHA-equal; the 230-address vector compared element for element; `CAPS`/`ALLOCATED_CAPS` identical; argv identical. 14/14 in `boot-fidelity.json`. The boot E24 designed as `e24a` was spent as **`e26a`** — declared in `CONTRACT.md` before the run, because label-derived output names are what keep the driver's refuse-to-overwrite asserts and this lane's byte accounting honest. |
+| **Objective 1a — CLOSED. Do not re-ask it.** | The successor descriptor node `0x548880` has **exactly one write in the entire run**: boot-log line 96, value `0x5488c0`, the boot-time free-list initialisation. **Zero post-park.** E23's KILLED verdict survives a watch set 6.2× larger. `objective-1a.json`. |
+| **Post-park silence, complete** | **0 of 6,725 watch emissions** land after the park, across all 230 entries and all six tiers. The last emission is boot-log line **22,786**, four lines *before* the park at 22,790, with **24,463 further lines and 65.0 s** still to run. `watch-ledger.json`. |
+| Bonus: the node array is bigger than E24 sized it | The array initialises as a linked free list at **`0x40`** stride, not `0x80`, so the 64-entry tier covers **eight** nodes, not four. Coverage better than designed. |
+| The feed, third reproduction | 5,040 B, SHA256 `cde8a830…2a1c875a`, FNV64 `0xd2a9588f0e0fd358`, first4 `000001b3`, `parseCalls=1 consumed=5040 packets=0 frames=0 errors=0 pending=0` — byte-identical to E22's, E23's and E24's. |
+
+| **X (a) — ANSWERED. Carry this; it replaces E24's framing.** | Receipt |
+|---|---|
+| E24's framing | "The feed is one structurally complete picture missing only its terminating start code — **why does the guest stop one start code short?**" |
+| **E26's answer** | **The guest writes no terminating start code because it does not need to. The start code is already in guest RAM, 48 bytes past the end of the data it fed, put there by the same CD read.** |
+| How the feed arrives | `sceCdRead lbn=0x13ba33 sectors=16 buf=0xd48740` (boot-log line 22,336) — **32,768 B of host CD DMA straight into guest RAM**. First eight bytes `4d504368 ac130000` = magic **`MPCh`**, length **5,036**. |
+| Chunk format | Length field = **total bytes INCLUDING the 8-byte header**. Confirmed on five consecutive chunks: `MPCh` 5036 → `SCHl` 40 → `MPCh` 14364 → `SCCl` 12 → `MPCh` 5732. ISO read twice, reads equal. `chunk-map.json`. |
+| What was fed | ES payload = 5,036 − 8 = **5,028 B**, zero-padded **12 B** to **5,040** (next 16-byte multiple). Last non-zero byte at **5,024** — **exactly E24's measurement**, reached by a different method. |
+| **Where the start code is** | Next `MPCh` header at guest **`0xd49b14`**, its ES payload at guest **`0xd49b1c`**, first four bytes **`00 00 01 00`** — a picture start code. **48 bytes past the fed data**, inside the same 32,768 B already resident, and **inside E24's past-end extension tier** (`0xd49af4`-`0xd49b73`). E24 aimed that tier correctly. |
+| **The guest had already walked to it** | Lines 22,351 / 22,354, *before* the feed: thread 1 stores `0x02000028` at `0xd49af0` and `0x0100381c` at `0xd49b18` — the **length fields** of the `SCHl` (40) and next-`MPCh` (14,364) chunks, low 24 bits matching the ISO, only the top byte changed (`0x02`, `0x01`). The chunk list was parsed past the picture before it was fed. |
+| **X, restated for the next lane** | *Why does the guest stop one **CHUNK** short of feeding, when the chunk it needs is already resident and already parsed?* |
+| The reading, tabled not acted on | E23 measured (E24/E25 re-confirmed) that the producer fires **exactly once per `GetPicture`**. One `GetPicture` feeds one chunk and does not return until a frame appears; the parser cannot emit a frame until it sees the next start code; that start code is in the chunk the next feed would carry. **A mutual wait.** Consistent with every measurement here. It is a reading — the fix gate is STOP and E26 did not act on it. |
+| **Named limit — carry it** | `diagWatchEmit` fires on **guest stores only**. Only 7 of 37 body stride samples ever emit; the payload arrives by host DMA. So "no start-code-valued write" bounds **guest stores**, not every byte reaching the buffer. It does not weaken the post-park result — descriptor writes *are* guest stores and are fully visible, and the past-end tier covers the start code's address byte for byte. |
+| What this capture cannot settle | Whether the title would ever re-ask given more wall time. Bounded at **65 s** of total post-park silence. A bound is not a proof of never. |
+
+| **X (b) — ANSWERED and now DYNAMIC** | Receipt |
+|---|---|
+| Sema 36 in the whole run | **Exactly one `[diag:sema]` line** of the 20,574 parsed (20,597 present): the **wait**, boot-log line 5,917, `waker=6 parked=1 waiters=0->1 result=park`. **Signals: 0.** Raw `grep` agrees with the parser; **no torn line mentions id 36**. |
+| **The `ra` E24 could not obtain** | Observed waiter `ra` = **`0x3c19f0`** — exactly what E24's static 4-instruction closure predicted from `0x3c19ec lw $a0` → `WaitSema`. The always-on park tally could only record the stub pc `0x423de8`. **Objective 2's missing half is delivered.** |
+| The signaller | `sub_003C1298` (owner of `0x3c15c0` → `iSignalSema`, the unique signaller in all 9,457 generated sources): **0 entries in 3,607,246 function-log lines.** `sub_003C2268` (delete) and `sub_003C1E00` (create-store) likewise **0**. E24's static enumeration confirmed dynamically on a second boot. |
+| **NEW — the first structural link between the two chains** | The WaitSema(36) owner `sub_003C1980` runs **4,379 times**, and the `[diag:dormant]` trace taken **at the MPEG park** (line 22,792) ends `… 0x402a10 GetPicture → 0x3b0b10 → 0x3b0b40 → 0x3b06b0 → … → 0x4029d0 AddBs → 0x3e4db8 → 0x3825c0 → 0x3825f8 → 0x3c1980`. E24 recorded that **nothing** linked the MPEG and sema-36 chains in either direction. |
+| **What it does NOT show — do not over-read this** | That the sema-36 **branch** is on that path. Thread 6 was scheduled once and waited once; thread 1 entered the owner without reaching `0x3c19ec`. The chains share a **function**, not a proven **dependency**. E26 deliberately does not upgrade it. Any lane that wants to must measure it. |
+
+| **Branch H2 refuted as stated — and the replacement is more useful** | Receipt |
+|---|---|
+| E24 expected | signallers for 26/30/31/32 firing post-park → "those four are live idle workers". |
+| **Measured** | Post-park the **only** semaphore with any activity is **31**: **4,192** waits (all `waker=4`) and **4,188** signals (all `waker=-1`, interrupt context, every one of the id's 4,396 signals from `ra=0x31abf8`). **26, 30, 32 and 36 do nothing post-park. Thread 1 performs zero semaphore operations post-park.** |
+| Reading | The guest does not idle-tick after the park. It goes **silent except for one interrupt-driven timer loop** — which is E24's objective 1b, now confirmed dynamically with the caller `ra`. |
+| Ledger caveat | Per-id tallies are instrument counts carrying **23 torn lines** (concurrent writes on the same fd), which is why small deficits here (26 → 2, 31 → 4) differ from e23a's "every deficit exactly 1". The structural results do not depend on the tallies. `sema-ledger.json`. |
+
+| **The cost model is wrong and the residual is affordable** | Receipt |
+|---|---|
+| Three points | e22a 29 → 7.61 s · e23a 37 → 8.30 s · **e26a 230 → 9.524 s**. |
+| The over-prediction | E24's two-point fit predicted **24.9 s**; measured **9.524 s** — **over by 15.4 s, a factor of 2.6**. |
+| The real slope | 193 extra entries cost **1.22 s** → **0.0063 s/entry**, **14× shallower** than the 0.0863 the e22a→e23a pair implied. That pair differed by only 8 entries; its slope was run-to-run variation. Three-point fit: `k = 0.00806`, `base = 7.683`. |
+| **Consequence** | A **full 630-entry 8-byte cover** of the body costs about **12.8 s** of span-complete on this measurement, not ~64 s, leaving roughly **65 s** of post-park window. **The residual E24 declared — an isolated write shorter than 121 B inside the sampled body span — is affordable to close.** E26 did not spend a second boot to do it. `cost-model-refit.json`. |
+| Honest caveat | Three points is still a small fit. The driver records span-complete on every path, so a fourth point is free. |
+
+| What a next lane should and should not do | Boundary |
+|---|---|
+| **Do not re-ask** | Objective 1a (closed by measurement). Whether the feed, descriptor array, past-end or staging buffer move post-park (zero, across 230 entries). Whether sema 36's signaller runs (zero, twice, statically and dynamically). The candidates C1, C3, C5–C9 (E22) and C2a, C4 (E23) stay KILLED — E26 re-confirms their reference by identity. |
+| **The live question** | Why the guest stops one **chunk** short of feeding. The next natural instrument is the **guest side of the chunk walk**: the code at `pc=0x3dff8c` that tagged `0xd49af0` and `0xd49b18`, and whatever consumes those tags. That is a static question first — it needs **no boot** — and should be asked statically before any boot is spent. |
+| If a boot is wanted anyway | It is now affordable to arm the **full 630-entry** body cover *and* extend the past-end tier to cover the next chunk's whole header and first slice, within the same 90 s wall. Use the refitted `k`. |
+| Fix authority | **None inferred.** E26 isolated **four** edges, not one, and has no fail-before and no regression for any of them. A fix still needs exactly one demonstrated edge plus its own fail-before and full regression. |
+| ABI carry | Caller-owned synchronous delivery, word0-only cbData, `v0` discarded, valid-no-input waits, no guest invocation under the MPEG mutex, delete/reset cancellation, stream behavior unchanged. Preserved by construction and by binary identity. |
+| Protected state | **No reclaim authorized and none performed.** E21's, E22's, E23's, E24's and E25's retained paths untouched. E26 owns 227,540,992 B on the SSD across its `e26a-*` run artifacts. |
+| Errata carried | E21-E1, E23-E1, E23-E2, E24-E1, E24-E2, E24-E3 unchanged. **E26 adds none.** |
+| Source receipts | `REPORT.md`, `CONTRACT.md`, `fork-gate.json`, `restore-pass-1.json`, `restore-pass-2.json`, `restore-gate.json`, `readiness-pass-1.json`, `readiness-pass-2.json`, `e26-readiness.json`, `boot-fidelity.json`, `entry-preflight.json`, `e26a-build.json`, `e26a-config.json`, `e26a-preflight.json`, `e26a-result.json`, `boot-attempt.json`, `watch-ledger.json`, `objective-1a.json`, `x-a-startcode.json`, `x-b-sema36.json`, `sema-ledger.json`, `chunk-map.json`, `cost-model-refit.json`, `rename-proof-hexsafe.json`, `tooling-changes.json`, `tooling-diff.md`, `instrument-reuse.json`, `admission-open.json`, `fix-gate.json`, `final-audit.json`, `tail-receipt.json`, `observed/`. |
+
+| E26 NEXT-BRIEF TAIL COMPLETE | The instrument was verified in place, the five-pin gate passed 5/5 with zero re-pinning, and E24's designed boot was spent **once** and in full fidelity — proved byte-identical under the rename before the lease was claimed. Post-park, **all 230 watched addresses are silent**, so objective 1a is closed and E23's named residual with it. X (a) is answered in bytes: the terminating start code `00 00 01 00` is already in guest RAM at **`0xd49b1c`**, **48 B** past the fed data, inside the same CD read, in an `MPCh` chunk whose header the guest had already walked to and tagged — the guest stops one **chunk** short of feeding, not one start code short of writing. X (b) is confirmed dynamically with the waker `ra` E24 could not obtain: semaphore 36 has one event in the whole run and its unique signaller never executes. E24's cost model over-predicted by 2.6×, so the residual it traded away is affordable. Four edges demonstrated, none isolated, fix gate **STOP**. 1/1 boots, 0 fork edits/commits/pushes, 0 deletions, 0 new errata. |
+|---|---|

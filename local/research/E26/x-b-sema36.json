@@ -1,0 +1,49 @@
+{
+  "utc": "2026-09-22T13:29:03.147135+00:00",
+  "question": "(b) does semaphore 36's sole signaller appear anywhere in the capture?",
+  "answer_headline": "NO. Confirmed dynamically, on a fresh 75 s boot, with the waker `ra` E24 could not obtain: semaphore 36 has exactly ONE event in the whole run -- thread 6's wait -- and its unique signaller has ZERO entries in a 3,607,246-line function log.",
+  "sema36_events": [
+    {
+      "line": 5917,
+      "op": "wait",
+      "id": 36,
+      "waker": 6,
+      "pc": "0x423de8",
+      "ra": "0x3c19f0",
+      "inInt": 0,
+      "post_park": false,
+      "text": "[diag:sema] op=wait id=36 count=0->0 parked=1 waker=6 pc=0x423de8 ra=0x3c19f0 inInt=0 waiters=0->1 result=park"
+    }
+  ],
+  "sema36_event_count": 1,
+  "sema36_waits": 1,
+  "sema36_signals": 0,
+  "waiter_ra_observed": "0x3c19f0",
+  "waiter_ra_predicted_by_E24": "0x3c19f0",
+  "waiter_ra_matches": true,
+  "function_log": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/run/ps2_log-e26a-1.txt",
+    "lines": 3607246,
+    "owner_entries": {
+      "sub_003C1980": 4379,
+      "sub_003C1298": 0,
+      "sub_003C2268": 0,
+      "sub_003C1E00": 0
+    },
+    "owners": {
+      "sub_003C1980": "WaitSema(36) owner, 0x3c19ec, returns to 0x3c19f0",
+      "sub_003C1298": "iSignalSema(36) owner, 0x3c15c0 -- the SOLE signaller",
+      "sub_003C2268": "DeleteSema(36) owner, 0x3c2378",
+      "sub_003C1E00": "CreateSema ret=36 store site owner, 0x3c1e08"
+    }
+  },
+  "signaller_entries": 0,
+  "verdict": "E24's static enumeration is CONFIRMED dynamically. The only code that can ever wake thread 6 never executed, on a second independent boot.",
+  "new_observation": {
+    "what": "the WaitSema(36) owner sub_003C1980 runs 4,379 times, but takes the WaitSema(36) branch once",
+    "where": "boot-log line 22,792, the [diag:dormant] trace taken AT the MPEG park",
+    "chain": "... 0x402a10 GetPicture -> 0x3b0b10 guest callback -> 0x3b0b40 helper -> 0x3b06b0 source -> ... -> 0x4029d0 AddBs -> 0x3e4db8 -> 0x3825c0 -> 0x3825f8 -> 0x3c1980",
+    "why_it_matters": "E24 recorded that NOTHING in the retained evidence linked the MPEG chain and the semaphore-36 chain in either direction. This capture puts sub_003C1980 -- the function that OWNS the WaitSema(36) site -- on the MPEG delivery path, entered immediately after AddBs.",
+    "what_it_does_NOT_show": "that the sema-36 branch is on that path. Thread 6 was scheduled once and waited once; thread 1 entered the owner without reaching 0x3c19ec. The two chains share a FUNCTION, which is weaker than sharing a dependency, and this lane does not upgrade it."
+  }
+}

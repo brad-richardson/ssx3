@@ -1,0 +1,31 @@
+[diag:sema] op=wait id=5 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=5
+[diag:sema] op=signal id=5 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=5
+[diag:sema] op=wait id=5 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=5
+[diag:sema] op=signal id=5 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=5
+[diag:sema] op=signal id=26 count=0->0 waiters=1->0 waker=1 pc=0x423dc8 ra=0x3e48b8 inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=2 tStatus=2 tSusp=0 tWaitReason=2 tWaitId=26 result=26
+INFO: FILEIO: [/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e26a-1/upload-latest.png] File saved successfully
+[diag:cd] sceCdRead lbn=0x13ba33 sectors=16 buf=0xd48740 ret=0x3e3b8c
+INFO: FILEIO: [/Volumes/Extreme SSD/ps2recomp-spike/P1/run/frames-e26a-1/upload-latest.png] Image exported successfully
+[diag:cd] sceCdRead payload lbn=0x13ba33 buf=0xd48740 bytes=4d504368ac130000
+[cd:callback] queued func=1 cb=0x3e3ad8
+[cd:callback] start func=1 cb=0x3e3ad8
+[diag:sema] op=signal id=26 count=0->1 waiters=0->0 waker=2 pc=0x423dd8 ra=0x3e3af0 inInt=1 iSafe=1 invKind=0 invDepth=1 cbFunc=4344434200000001 target=- tStatus=-1 tSusp=-1 result=26
+[diag:sema] op=wait id=26 count=1->0 parked=0 waker=2 pc=0x423de8 ra=0x3e3c20 inInt=0 result=26
+[diag:sema] op=wait id=5 count=1->0 parked=0 waker=2 pc=0x423de8 ra=0x3e5738 inInt=0 result=5
+[diag:sema] op=signal id=5 count=0->1 waiters=0->0 waker=2 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=5
+[diag:sema] op=wait id=26 count=0->0 parked=1 waker=2 pc=0x423de8 ra=0x3e3c20 inInt=0 waiters=0->1 result=park
+[frame:dump] seq=143 tick=248 size=512x448 fbp=112/112 fallback=0 fnv1a=fd889dc5
+[diag:sema] op=wait id=5 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=5
+[diag:sema] op=signal id=5 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=5
+[diag:sema] op=wait id=39 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=39
+[diag:sema] op=signal id=39 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=39
+[diag:watch] addr=0xd49af0 width=4 value=0x2000028 pc=0x3dff8c thread=1 ra=0x3dff90 sp=0x1fffb40
+[diag:sema] op=wait id=39 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=39
+[diag:sema] op=signal id=39 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=39
+[diag:watch] addr=0xd49b18 width=4 value=0x100381c pc=0x3dff8c thread=1 ra=0x3dff90 sp=0x1fffb40
+[diag:sema] op=wait id=39 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=39
+[diag:sema] op=signal id=39 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=39
+[diag:sema] op=wait id=39 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=39
+[diag:sema] op=signal id=39 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=39
+[diag:sema] op=wait id=39 count=1->0 parked=0 waker=1 pc=0x423de8 ra=0x3e5738 inInt=0 result=39
+[diag:sema] op=signal id=39 count=0->1 waiters=0->0 waker=1 pc=0x423dc8 ra=0x3e57bc inInt=0 iSafe=0 invKind=-1 invDepth=0 cbFunc=0 target=- tStatus=-1 tSusp=-1 result=39

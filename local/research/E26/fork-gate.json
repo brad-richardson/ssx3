@@ -1,0 +1,60 @@
+{
+  "utc": "2026-09-22T13:11:07.701821+00:00",
+  "gate": "fork triple-agree",
+  "expected": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+  "head": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+  "remote_ref": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+  "ls_remote": "3adc0478b6d2260acdd28a249466f2eef9a20176",
+  "status_short": "?? ps2_log.txt\n",
+  "status_stderr_preexisting": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n",
+  "checks": {
+    "head_rc0": true,
+    "remote_rc0": true,
+    "status_rc0": true,
+    "head_equals_base": true,
+    "ref_equals_base": true,
+    "ls_remote_equals_base": true,
+    "worktree_clean_as_pinned": true
+  },
+  "green": true,
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "rev-parse",
+        "HEAD",
+        "refs/remotes/fork/ssx3"
+      ],
+      "rc": 0,
+      "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\n3adc0478b6d2260acdd28a249466f2eef9a20176\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "ls-remote",
+        "fork",
+        "refs/heads/ssx3"
+      ],
+      "rc": 0,
+      "stdout": "3adc0478b6d2260acdd28a249466f2eef9a20176\trefs/heads/ssx3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Volumes/Extreme SSD/ps2recomp-spike/PS2Recomp",
+        "status",
+        "--short"
+      ],
+      "rc": 0,
+      "stdout": "?? ps2_log.txt\n",
+      "stderr": "error: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\nerror: non-monotonic index .git/objects/pack/._pack-66cfeae386ca99bf65f2cbea68322205a1368bb8.idx\n"
+    }
+  ]
+}
