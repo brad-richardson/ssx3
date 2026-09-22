@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# G38: the ONE budgeted Mac run (M1), SAME shape as the Odin leg.
+# Full G7 recipe env (G7 REPORT §6:255): VK_ICD_FILENAMES +
+# DYLD_LIBRARY_PATH=/opt/homebrew/lib (M0 omitted the latter and exited
+# silent-1 in init_loader; voided with receipts — see REPORT §3d0).
+set -u
+export COPYFILE_DISABLE=1
+SSD="/Volumes/Extreme SSD"
+BIN="$SSD/parallel-gs-g38-mac-build/tools/parallel-gs-replayer"
+D="$SSD/ps2x-g38/g38-dump.gs"
+export VK_ICD_FILENAMES=/opt/homebrew/etc/vulkan/icd.d/MoltenVK_icd.json
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib
+shasum -a 256 "$BIN" | cut -c1-16
+shasum -a 256 "$D" | cut -c1-16
+date +%s
+PGS_SKIP_COMPILATION_TASKS=1 "$BIN" "$D" --iterations 2 --disable-sampler-feedback \
+  > "$SSD/ps2x-g38/g38-mac-stdout.txt" 2> "$SSD/ps2x-g38/g38-mac-stderr.txt"
+echo "RUN_EXIT:$?"
+date +%s
+ls -la "$SSD/ps2x-g38/"
