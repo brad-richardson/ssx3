@@ -93,9 +93,10 @@ with measured budgets, then 120 Hz simulation.
 
 ## T — PCSX2 reference traces (bytesize)
 
-- [ ] T47: continue the healthy series (hold-step samples under both
-      trackers; hold-window crash lottery at 3/4). Starts when N3 finishes
-      its bytesize build (they share the box).
+- [ ] **T47 (running):** PCSX2 reference frames for title / main menu /
+      Select Character / Select Event, using E31's input sequence, diffed
+      against the recomp frames (character-select glitches). Then one
+      healthy-series run if time allows.
 - [ ] Keep T tied to named E/G questions (reference captures for
       menu/race timing once E reaches them).
 

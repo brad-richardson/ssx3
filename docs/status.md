@@ -9,7 +9,7 @@ Updated 2026-09-22 evening.
 | E (PS2 runtime) | **E29 PASS: title screen reached** (bypass flag on). E31 running (title → menu → race); E30 PASS (fix + regression as diffs) | fork `ssx3` @ `3d4feed` (scrubbed; was `3adc0478`); bypass `e29-movie-bypass` @ `ee39b9f` | Gate E31 → next blocker or race; E32 fold → E33 apply E30's fix | P-lane lease + fork (E31) |
 | G (GS composite) | G40 PASS: F2 execution-loss (masked PSM1 composite writes vanish on Adreno). G41 running (canary + one fix) | clone `3a66c19` + G26/G28 + G40 wall | Gate G41 | Odin (G41) |
 | N (Android) | **N3 PASS: SSX 3 title screen boots natively on the Odin** (recomp, dev bypass, CPU GS) | bytesize `n2-android` @ `619d48a` (local) | N4 menus/race + clean speed read (after E31) | Odin lease |
-| T (PCSX2 reference) | T46 PASS | bytesize WSL | T47 after N3's bytesize build | shares bytesize with N |
+| T (PCSX2 reference) | T47 running: reference frames for the front-end screens the recomp reaches | bytesize WSL | Gate T47 | bytesize (T47) |
 | V (storage) | V1 PASS (audit ×2, manifest, smoke, cutover list) | — | Mac mini cutover | **Brad: mini not set up** |
 | I (iOS) | Parked | `i23-ffmpeg-ios` @ `aa73dbc` | Re-probe after E30 | needs E change |
 | GameCube | Reserve (`docs/reserve.md`) | — | none | — |
