@@ -71,19 +71,24 @@ with measured budgets, then 120 Hz simulation.
 
 ## N — Android app (Odin)
 
-- [ ] **N2 (running, on bytesize):** stub `ps2EntryRunner` APK via the
-      fork's Gradle build (bars B1–B6), then the full-title link with a
-      local `PS2X_GAME_CODEGEN_DIR` port. No device.
+- [x] **N2 PASS (09-22):** first Android build. The stub link can't
+      work at the old pin (E17's in-tree table is the full table); the
+      full-title link with the codegen-dir port is green: APK 270,957,997 B
+      `21a9230c…`, 9,441/9,441 `sub_*` defined, 0 undefined. Entry chain:
+      NDK glue → raylib `android_main` → `main`. Gate exception accepted.
+- [ ] **N3 (running):** env-file shim (`ps2x.env` → setenv, covers
+      H4/H7/dev flags) + bypass on `n2-android`, arm64-only APK, install,
+      stage ELF + ISO, launch on the Odin to the title screen.
 - [ ] N4: Android FFmpeg prefix + ON build + host vector parity.
-- [ ] N5: install + stock-title launch to a named checkpoint on the Odin
-      (needs H4/H5, ELF + ISO staging, logcat `ps2x` tag confirmed, input
-      overlay H8).
+- [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
+      codegen dir); the env shim goes onto `ssx3` through E. Input: pad
+      script now, touch/controller H8 later.
 
 ## T — PCSX2 reference traces (bytesize)
 
 - [ ] T47: continue the healthy series (hold-step samples under both
-      trackers; hold-window crash lottery at 3/4). Queued behind N2
-      because they share bytesize.
+      trackers; hold-window crash lottery at 3/4). Starts when N3 finishes
+      its bytesize build (they share the box).
 - [ ] Keep T tied to named E/G questions (reference captures for
       menu/race timing once E reaches them).
 
