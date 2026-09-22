@@ -1,0 +1,9 @@
+# I23 iPad pre-state (read-only devicectl with explicit --timeout; transcribed from command output)
+list devices --timeout 30: Brad's iPad 00008112-001224302184A01E available (paired), iPad14,9 (iPhone + 4 shutdown simulators also listed, untouched)
+apps --timeout 60 | grep -iE "ps2|MF1":
+  MF1Probe         com.bradrichardson.mf1probe      0.1       1
+  ps2EntryRunner   org.ps2x.ps2entryrunner
+processes --timeout 60 | grep -i ps2 (1 match, recon AND pre-install):
+  4679   /private/var/containers/Bundle/Application/AAA5E829-B0A3-4698-A46E-CB2785CE9EAD/ps2EntryRunner.app/ps2EntryRunner
+  (= I21's install UUID AAA5E829, still running = I22's baseline exactly; 8th brief with a relaunched occupant; untouched until the authorized overwrite-install)
+lockState: not separately re-checked this brief (install exit 0 is the receipt)

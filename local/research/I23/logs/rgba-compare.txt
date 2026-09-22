@@ -1,0 +1,8 @@
+# I23 P10 byte-parity: device-retrieved RGBA vs host-7.1.1 RGBA (cmp + shas)
+V1 host: len=4096 fnv64=0f0e27e5c1328325 sha256=0a8d7973010e8dcd03b9ab5c6e365c13e2da7ff3b297c202b7cbed69e4404653 first64/last64=fc0000ff x16
+V1 device (retrieved tmp/i23-vector-rgba.bin): len=4096 fnv64=0f0e27e5c1328325 sha256=0a8d7973010e8dcd03b9ab5c6e365c13e2da7ff3b297c202b7cbed69e4404653
+V1 cmp: RGBA-BYTE-IDENTICAL (exit 0)
+V1 console-format note: device printed fnv64=f0e27e5c1328325 (std::hex suppresses the leading zero of 0x0f0e27e5c1328325); retrieved-file FNV (zero-padded) matches host exactly — same value, two formats.
+V4 host: len=2457600 fnv64=6010883bd7f92325 sha256=68b1753f8fb04f6a20951996dd3a460e6b41fd8d2a7b788269aed437020db0d0 first64/last64=0000fdff x16
+V4 device (retrieved, same container path after probe 2): cmp V4-RGBA-BYTE-IDENTICAL (exit 0); console fnv64=6010883bd7f92325 matches host exactly
+Cross-version context (unchanged from I22): brew-9.0.1 V1 RGBA sha a2256d49 (R=254); 7.1.1 V1 RGBA sha 0a8d7973 (R=252). The 7.1.x pin removes the drift: host-7.1.1 == device-7.1.1 byte-exact.

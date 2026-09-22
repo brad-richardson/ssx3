@@ -1,0 +1,30 @@
+
+Ld /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app/ps2EntryRunner normal (in target 'ps2EntryRunner' from project 'PS2RetroX')
+    cd /Volumes/Extreme\ SSD/ps2x-i23/fork-wt
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -Xlinker -reproducible -target arm64-apple-ios27.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -O3 -Xlinker -no_warn_duplicate_libraries -L/Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/build/EagerLinkingTBDs/Release-iphoneos -L/Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos -F/Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/build/EagerLinkingTBDs/Release-iphoneos -F/Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos -filelist /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/build/ps2EntryRunner.build/Release-iphoneos/Objects-normal/arm64/ps2EntryRunner.LinkFileList -Xlinker -dead_strip -Xlinker -dependency_info -Xlinker /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/build/ps2EntryRunner.build/Release-iphoneos/Objects-normal/arm64/ps2EntryRunner_dependency_info.dat -Wl,-search_paths_first -Wl,-headerpad_max_install_names /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/libps2_runtime.a /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/libps2_game_objects.a /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/librlImGui.a /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/libimgui.a /Volumes/Extreme\ SSD/ps2x-i8/sdl2-ios-device/lib/libSDL2main.a /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/libps2_runtime.a /Volumes/Extreme\ SSD/ps2x-i23/ffmpeg-ios-7.1.1/lib/libavcodec.a /Volumes/Extreme\ SSD/ps2x-i23/ffmpeg-ios-7.1.1/lib/libavutil.a /Volumes/Extreme\ SSD/ps2x-i23/ffmpeg-ios-7.1.1/lib/libswscale.a /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xIOP/Release-iphoneos/libps2_iop.a /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/_deps/raylib-build/raylib/Release-iphoneos/libraylib.a /Volumes/Extreme\ SSD/ps2x-i8/sdl2-ios-device/lib/libSDL2.a -lm -lpthread -framework CoreVideo -framework CoreAudio -framework AudioToolbox -framework AVFoundation -framework CoreBluetooth -framework CoreGraphics -framework Coremotion -framework Foundation -Xlinker -weak_framework -Xlinker GameController -framework Metal -framework OpenGLES -framework QuartzCore -framework UIKit -Xlinker -weak_framework -Xlinker CoreHaptics -o /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app/ps2EntryRunner
+
+RegisterExecutionPolicyException /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app (in target 'ps2EntryRunner' from project 'PS2RetroX')
+    cd /Volumes/Extreme\ SSD/ps2x-i23/fork-wt
+    builtin-RegisterExecutionPolicyException /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app
+
+Validate /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app (in target 'ps2EntryRunner' from project 'PS2RetroX')
+    cd /Volumes/Extreme\ SSD/ps2x-i23/fork-wt
+    builtin-validationUtility /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app (in target 'ps2EntryRunner' from project 'PS2RetroX')
+    cd /Volumes/Extreme\ SSD/ps2x-i23/fork-wt
+    /usr/bin/touch -c /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/ps2xRuntime/Release-iphoneos/ps2EntryRunner.app
+
+PhaseScriptExecution Generate\ CMakeFiles/ALL_BUILD /Volumes/Extreme\ SSD/ps2x-i23/ios-runtime-device/build/PS2RetroX.build/Release-iphoneos/ALL_BUILD.build/Script-99A04707322B1AF3D28A5164.sh (in target 'ALL_BUILD' from project 'PS2RetroX')
+    cd /Volumes/Extreme\ SSD/ps2x-i23/fork-wt
+    /bin/sh -c /Volumes/Extreme\\\ SSD/ps2x-i23/ios-runtime-device/build/PS2RetroX.build/Release-iphoneos/ALL_BUILD.build/Script-99A04707322B1AF3D28A5164.sh
+Build all projects
+
+PruneExplicitPrecompiledModules /Volumes/Extreme SSD/ps2x-i23/ios-runtime-device/build/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Volumes/Extreme SSD/ps2x-i23/ios-runtime-device/build/ExplicitPrecompiledModules
+
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'PS2RetroX')
+note: Run script build phase 'Generate CMakeFiles/ALL_BUILD' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ALL_BUILD' from project 'PS2RetroX')
+** BUILD SUCCEEDED **
+

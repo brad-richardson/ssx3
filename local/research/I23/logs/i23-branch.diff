@@ -1,0 +1,310 @@
+diff --git a/ps2xRuntime/CMakeLists.txt b/ps2xRuntime/CMakeLists.txt
+index 01198be..5fbc95b 100644
+--- a/ps2xRuntime/CMakeLists.txt
++++ b/ps2xRuntime/CMakeLists.txt
+@@ -268,7 +268,7 @@ else()
+     endif()
+ endif()
+ 
+-if(PS2X_IS_ANDROID OR PS2X_IS_IOS)
++if(PS2X_IS_ANDROID)
+     set(PS2X_ENABLE_FFMPEG_DEFAULT OFF)
+ else()
+     set(PS2X_ENABLE_FFMPEG_DEFAULT ON)
+@@ -364,6 +364,43 @@ elseif(WIN32)
+         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CopyFfmpegDlls.cmake"
+         CACHE INTERNAL
+         "Script used to stage FFmpeg runtime DLLs beside executables")
++elseif(PS2X_IS_IOS)
++    # I23: minimal FFmpeg 7.1.x subset for iOS, built outside the repo from
++    # the I22 spike recipe (static arm64 archives + `make install` headers).
++    # Only the three libraries MPEG.cpp calls are wired (avformat/swresample
++    # are linked on other platforms but never referenced by MPEG.cpp).
++    set(PS2X_FFMPEG_IOS_ROOT "" CACHE PATH
++        "Prefix of a locally-built minimal FFmpeg 7.1.x for iOS (lib/libav*.a + include/). Recipe: ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md")
++    if(NOT PS2X_FFMPEG_IOS_ROOT)
++        message(FATAL_ERROR
++            "PS2X_ENABLE_FFMPEG=ON for iOS requires -DPS2X_FFMPEG_IOS_ROOT=<prefix> "
++            "pointing at a locally-built minimal FFmpeg 7.1.x (lib/libavcodec.a, lib/libavutil.a, "
++            "lib/libswscale.a + include/). Recipe: ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md")
++    endif()
++
++    set(PS2X_FFMPEG_IOS_INCLUDE_DIR "${PS2X_FFMPEG_IOS_ROOT}/include")
++    set(PS2X_FFMPEG_IOS_LIB_DIR "${PS2X_FFMPEG_IOS_ROOT}/lib")
++    foreach(_ps2x_ffmpeg_ios_lib avcodec avutil swscale)
++        if(NOT EXISTS "${PS2X_FFMPEG_IOS_LIB_DIR}/lib${_ps2x_ffmpeg_ios_lib}.a")
++            message(FATAL_ERROR
++                "PS2X_FFMPEG_IOS_ROOT is missing lib/lib${_ps2x_ffmpeg_ios_lib}.a "
++                "(prefix: ${PS2X_FFMPEG_IOS_ROOT}). Rebuild the prefix per ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md")
++        endif()
++        if(NOT TARGET ffmpeg_${_ps2x_ffmpeg_ios_lib})
++            add_library(ffmpeg_${_ps2x_ffmpeg_ios_lib} STATIC IMPORTED GLOBAL)
++            set_target_properties(ffmpeg_${_ps2x_ffmpeg_ios_lib} PROPERTIES
++                IMPORTED_LOCATION "${PS2X_FFMPEG_IOS_LIB_DIR}/lib${_ps2x_ffmpeg_ios_lib}.a"
++                INTERFACE_INCLUDE_DIRECTORIES "${PS2X_FFMPEG_IOS_INCLUDE_DIR}"
++            )
++        endif()
++    endforeach()
++
++    add_library(ffmpeg INTERFACE)
++    target_link_libraries(ffmpeg INTERFACE
++        ffmpeg_avcodec
++        ffmpeg_avutil
++        ffmpeg_swscale
++    )
+ else()
+     find_package(PkgConfig REQUIRED)
+     pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET GLOBAL
+diff --git a/ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md b/ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md
+new file mode 100644
+index 0000000..b58c708
+--- /dev/null
++++ b/ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md
+@@ -0,0 +1,55 @@
++# FFmpeg 7.1.x for iOS (I23) — build recipe, license notice, provision pointer
++
++## What this is
++
++The iOS target links a minimal FFmpeg 7.1.x subset as three static
++archives (see the `elseif(PS2X_IS_IOS)` block in
++`ps2xRuntime/CMakeLists.txt`, configured via
++`-DPS2X_FFMPEG_IOS_ROOT=<prefix>`):
++
++- `lib/libavcodec.a` — MPEG-1/2 video decoder (`mpeg2video`) + parser (`mpegvideo`)
++- `lib/libavutil.a`
++- `lib/libswscale.a`
++- `include/` — matching public + generated (`avconfig.h`, `ffversion.h`) headers
++
++`avformat`/`swresample` are NOT wired: `MPEG.cpp` calls no symbol from
++either (verified by grep at integration time; re-check if the includes grow).
++
++## Build recipe (reproduces the prefix)
++
++Source: `https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz`
++sha256 `733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1`
++
++```sh
++SDK=$(xcrun --sdk iphoneos --show-sdk-path)
++./configure --target-os=darwin --arch=aarch64 --cpu=generic --enable-cross-compile \
++  --cc="xcrun -sdk iphoneos clang" --sysroot="$SDK" \
++  --extra-cflags="-arch arm64 -mios-version-min=17.0 -isysroot $SDK -Os" \
++  --extra-ldflags="-arch arm64 -mios-version-min=17.0 -isysroot $SDK" \
++  --disable-everything --disable-programs --disable-doc --disable-avdevice --disable-avfilter \
++  --disable-avformat --disable-swresample --disable-network --disable-iconv --disable-bzlib \
++  --disable-lzma --disable-zlib --enable-decoder=mpeg2video --enable-parser=mpegvideo \
++  --enable-swscale --disable-asm --enable-static --disable-shared --disable-debug \
++  --prefix="$PREFIX"
++make -j2 && make install
++```
++
++Reference build: configure exit 0, `make -j2` exit 0 with 0 `error:`
++lines, all three archives `arm64`, bare link of the exact `MPEG.cpp`
++API surface exit 0 with zero extra frameworks.
++
++## License notice (fact, not advice)
++
++- This subset configures as `License: LGPL version 2.1 or later`.
++- Components are native LGPL decoders/parsers/scaler/utils; the build
++  enables no GPL component and no external library.
++- Static LGPL code ships inside the app binary. The static-link
++  relink/provision obligations and the host-side version pin
++  (7.1.x both sides) are tracked in the I23 evidence, not here.
++
++## Relink provision artifact (pointer)
++
++Compliance fulfillment (object files / written offer + this notice) is
++the owner's call at distribution time. Retained for that purpose: the
++three archives, the `make install` prefix, and this recipe. Nothing
++else in this directory carries redistribution obligations.
+diff --git a/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp b/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp
+index 1dbaaa6..cfc5e83 100644
+--- a/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp
++++ b/ps2xRuntime/src/lib/Kernel/Stubs/MPEG.cpp
+@@ -17,6 +17,8 @@ extern "C"
+ }
+ #endif
+ 
++#include <cstdio>
++#include <cstdlib>
+ #include <deque>
+ #include <memory>
+ 
+@@ -38,6 +40,8 @@ namespace ps2_stubs
+         };
+ 
+ #if PS2X_HAS_FFMPEG
++        // I23: env-gated vector diagnostic (defined after MpegFfmpegDecoder).
++        void maybeRunMpegVectorDiagnostic();
+         std::string ffmpegErrorString(int err)
+         {
+             std::array<char, AV_ERROR_MAX_STRING_SIZE> buffer{};
+@@ -81,6 +85,10 @@ namespace ps2_stubs
+                     return true;
+                 }
+ 
++                // I23: once-per-process vector check on first real input (no-op unless
++                // PS2X_MPEG_VECTOR_PATH is set; decodes through an isolated instance).
++                maybeRunMpegVectorDiagnostic();
++
+                 if (!ensureInitialized())
+                 {
+                     return false;
+@@ -157,6 +165,24 @@ namespace ps2_stubs
+                     });
+                 }
+ 
++                // I23: env-gated feed trace (observable WITHOUT AGRESSIVE_LOGS —
++                // the AGRESSIVE build also forces the per-call flushed file tracker
++                // into all game objects, so surgical tracing stays available standalone).
++                static uint32_t s_feedTraceCount = 0u;
++                static int s_feedTraceOn = -1;
++                if (s_feedTraceOn < 0)
++                {
++                    const char *traceEnv = std::getenv("PS2X_MPEG_FEED_TRACE");
++                    s_feedTraceOn = (traceEnv != nullptr && *traceEnv != '\0') ? 1 : 0;
++                }
++                if (s_feedTraceOn && s_feedTraceCount < 32u)
++                {
++                    ++s_feedTraceCount;
++                    std::cerr << "[MPEG:feed-trace] inSize=" << size << " parsed=" << totalParsed
++                              << " packets=" << totalPacketsSent << " newFrames=" << (frames.size() - framesBefore)
++                              << " totalFrames=" << frames.size() << std::endl;
++                }
++
+                 return true;
+             }
+ 
+@@ -446,6 +472,133 @@ namespace ps2_stubs
+             bool m_initialized = false;
+             bool m_drained = false;
+         };
++
++        // I23: env-gated MPEG vector diagnostic. When PS2X_MPEG_VECTOR_PATH
++        // names a readable file, its bytes are decoded once through an
++        // ISOLATED MpegFfmpegDecoder (never the playback queue — no guest
++        // state is touched) and the counters + RGBA digest are printed to
++        // stderr UNGATED (observable without AGRESSIVE_LOGS). Default (env
++        // unset): zero behavior change. The isolated feed/flush also emit
++        // the standard capped [MPEG:feed] line when AGRESSIVE_LOGS is on.
++        uint64_t mpegVectorFnv1a64(const uint8_t *data, size_t size)
++        {
++            uint64_t hash = 0xcbf29ce484222325ull;
++            for (size_t i = 0; i < size; ++i)
++            {
++                hash ^= static_cast<uint64_t>(data[i]);
++                hash *= 0x100000001b3ull;
++            }
++            return hash;
++        }
++
++        void maybeRunMpegVectorDiagnostic()
++        {
++            static bool s_vectorRan = false;
++            if (s_vectorRan)
++            {
++                return;
++            }
++            // Set before running: the isolated feed() below re-enters here.
++            s_vectorRan = true;
++            const char *path = std::getenv("PS2X_MPEG_VECTOR_PATH");
++            if (path == nullptr || *path == '\0')
++            {
++                return;
++            }
++            FILE *file = std::fopen(path, "rb");
++            if (file == nullptr)
++            {
++                std::cerr << "[MPEG:vector] error: cannot open " << path << std::endl;
++                return;
++            }
++            std::vector<uint8_t> bytes;
++            uint8_t chunk[4096];
++            size_t got = 0;
++            while ((got = std::fread(chunk, 1, sizeof(chunk), file)) > 0)
++            {
++                bytes.insert(bytes.end(), chunk, chunk + got);
++            }
++            std::fclose(file);
++            const uint64_t inputFnv = mpegVectorFnv1a64(bytes.data(), bytes.size());
++            std::cerr << "[MPEG:vector] path=" << path << " inSize=" << bytes.size() << " inputFnv64=" << std::hex
++                      << inputFnv << std::dec << std::endl;
++
++            MpegFfmpegDecoder probe;
++            std::deque<MpegDecodedFrame> frames;
++            const bool feedOk = probe.feed(bytes.data(), bytes.size(), frames);
++            const size_t afterFeed = frames.size();
++            std::cerr << "[MPEG:vector] feed: ok=" << feedOk << " newFrames=" << afterFeed << std::endl;
++            const bool flushOk = probe.flush(frames);
++            std::cerr << "[MPEG:vector] flush: ok=" << flushOk << " newFrames=" << (frames.size() - afterFeed)
++                      << " totalFrames=" << frames.size() << std::endl;
++
++            size_t rgbaTotal = 0;
++            for (const auto &frame : frames)
++            {
++                rgbaTotal += frame.rgba.size();
++            }
++            uint64_t rgbaFnv = 0xcbf29ce484222325ull;
++            for (const auto &frame : frames)
++            {
++                for (uint8_t b : frame.rgba)
++                {
++                    rgbaFnv ^= static_cast<uint64_t>(b);
++                    rgbaFnv *= 0x100000001b3ull;
++                }
++            }
++            size_t shown = 0;
++            for (const auto &frame : frames)
++            {
++                if (shown >= 8)
++                {
++                    break;
++                }
++                std::cerr << "[MPEG:vector] frame" << shown << " " << frame.width << "x" << frame.height
++                          << " rgba=" << frame.rgba.size() << std::endl;
++                ++shown;
++            }
++            std::vector<uint8_t> flat;
++            flat.reserve(rgbaTotal);
++            for (const auto &frame : frames)
++            {
++                flat.insert(flat.end(), frame.rgba.begin(), frame.rgba.end());
++            }
++            char firstHex[129] = {};
++            char lastHex[129] = {};
++            const size_t headLen = std::min<size_t>(64, flat.size());
++            for (size_t i = 0; i < headLen; ++i)
++            {
++                std::snprintf(firstHex + i * 2, 3, "%02x", flat[i]);
++            }
++            const size_t tailStart = flat.size() > 64 ? flat.size() - 64 : 0;
++            for (size_t i = tailStart; i < flat.size(); ++i)
++            {
++                std::snprintf(lastHex + (i - tailStart) * 2, 3, "%02x", flat[i]);
++            }
++            std::cerr << "[MPEG:vector] rgba=" << rgbaTotal << " fnv64=" << std::hex << rgbaFnv << std::dec
++                      << " first64=" << firstHex << " last64=" << lastHex << std::endl;
++
++            const char *tmpDir = std::getenv("TMPDIR");
++            if (tmpDir != nullptr && *tmpDir != '\0' && !flat.empty())
++            {
++                std::string outPath = std::string(tmpDir) + "/i23-vector-rgba.bin";
++                FILE *out = std::fopen(outPath.c_str(), "wb");
++                if (out != nullptr)
++                {
++                    std::fwrite(flat.data(), 1, flat.size(), out);
++                    std::fclose(out);
++                    std::cerr << "[MPEG:vector] wrote=" << outPath << " bytes=" << flat.size() << std::endl;
++                }
++                else
++                {
++                    std::cerr << "[MPEG:vector] wrote=none (open failed)" << std::endl;
++                }
++            }
++            else
++            {
++                std::cerr << "[MPEG:vector] wrote=none (no TMPDIR or empty)" << std::endl;
++            }
++        }
+ #else
+         // TODO
+         class MpegFfmpegDecoder
