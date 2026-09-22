@@ -1,0 +1,41 @@
+{
+  "utc": "2026-09-22T00:24:12.276070+00:00",
+  "lane": "E23",
+  "demonstrated_edges": [
+    "The complete-feed path fires the type-1 producer EXACTLY ONCE per GetPicture on all four sweep points (60/120/180/240 B), serving and stalling alike. No multi-round demand cadence exists on any observed path.",
+    "The only post-dispatch re-entry into getMpegPicture is the onComplete continuation at MPEG.cpp:2484 (C2a's site); it runs on both branches. C4's site (:2496-2513) is reached only on branches that stall.",
+    "The three loops in the path are bounded by registration-list exhaustion, offered-buffer exhaustion, and decodedFrames non-emptiness. None is a demand-round bound; no round counter exists.",
+    "completeExternalWait IS raised on the served branch and matches ZERO waiters (mpeg-complete matched=0): the wake edge is inert even when the bytes suffice. The onComplete retry is the only mechanism that has ever delivered a picture.",
+    "In the title boot, 29 guest writes reached the producer/source windows, all before the park; 0 in the 66 s after it, while a guest thread remained scheduled ~300x per 5 s and DMA/GIF counters stayed frozen."
+  ],
+  "isolated_to_one_edge": false,
+  "why": "The trigger point transfers (C2a's site already runs on the title) but the bound does not: the complete path stops because decodedFrames stops being empty, a gate the title never closes. The only non-invented extra bound, 'the producer supplied no new bytes', was measured and would fire on the second round with no frame produced - the boot shows the guest source is not refilled while the caller is parked. Implementing C2a or C4 would therefore add a demand policy that provably cannot produce a picture.",
+  "gate_decision": "STOP with X named and moved upstream",
+  "x_before": "The edge from 'parser holds accepted bytes but emitted no packet' back to the registered type-1 producer, plus its termination rule (E22).",
+  "x_after": "The missing bytes are not obtainable at the demand edge at all. X moves upstream of MPEG: why does the guest hand over exactly 5,040 B and then leave every thread waiting (thread 1 on Mpeg, threads 2-6 on semaphores 26/30/32/36) with DMA and GIF frozen? The next dependency is the producer's own source, not the host's demand policy.",
+  "policy_invention_required": true,
+  "policy_invention_excluded": true,
+  "fabricated_frames": 0,
+  "fabricated_eof": 0,
+  "fork_source_edits": 0,
+  "fork_commits": 0,
+  "pushes": 0,
+  "title_boots": 1,
+  "lease_claims": 1,
+  "boot_bound": "wall",
+  "boot_rc": 0,
+  "candidates_closed_by_E22_not_reproposed": [
+    "C1",
+    "C3",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "C9"
+  ],
+  "candidates_now_killed": [
+    "C2a",
+    "C4"
+  ],
+  "residual_named": "The descriptor head advanced to 0x548880 at boot-log line 10168 and that successor node was not in the watched set; its silence is vacuous. Follow-up: watch 0x548880-0x5488ff and the 0xd48748+ data region."
+}

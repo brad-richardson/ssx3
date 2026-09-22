@@ -1,0 +1,28 @@
+--- e23_common.py (before A1)
++++ e23_common.py (after A1)
+@@ -12,6 +12,11 @@
+ M = 1024**2
+ G = 1024**3
+ BASE_SHA = '3adc0478b6d2260acdd28a249466f2eef9a20176'
++# CONTRACT AMENDMENT A1 (2026-09-22T00:14Z, see AMENDMENT-A1.md): the internal
++# reservation drops 3 GiB -> 512 MiB. The FLOOR and GUARD are unchanged; only
++# the unused pre-booked headroom shrinks, because E23's one build step (the
++# fixture link) is done and every remaining step writes to the SSD.
++IRES = 512*M
+ 
+ def utc(): return datetime.datetime.now(datetime.timezone.utc).isoformat()
+ def sha(p):
+@@ -56,11 +61,11 @@
+                 ssd_paths=[str(p) for p in sorted(set(paths)) if p.exists()])
+ def bound(s):
+     if OUT.exists(): return 'unexpected_codegen'
+-    if s['internal_allocated'] >= 3*G-256*M: return 'internal_allocation'
++    if s['internal_allocated'] >= IRES-128*M: return 'internal_allocation'
+     if s['internal_free'] <= 2*G+512*M: return 'internal_floor'
+     if s['ssd_allocated'] >= 16*G-512*M: return 'ssd_allocation'
+     if s['ssd_free'] <= 2*G+512*M: return 'ssd_floor'
+ def admission(s):
+     assert not bound(s), s
+-    assert s['internal_free'] >= 2*G+512*M+max(0,3*G-s['internal_allocated']), s
++    assert s['internal_free'] >= 2*G+512*M+max(0,IRES-s['internal_allocated']), s
+     assert s['ssd_free'] >= 2*G+512*M+max(0,16*G-s['ssd_allocated']), s

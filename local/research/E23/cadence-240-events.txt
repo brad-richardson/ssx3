@@ -1,0 +1,18 @@
+# E7 observation only; ticks 0..603; boundary 599..603 unless E15 aligned trigger; byte caps boot=4194304 boundary=1048576 packets=524288
+seq=1 tick=0 kind=mpeg-call id=1 route=fixture-setup target=0x4027b8 source=0x100040 a0=0x150000 a1=0x160000 a2=0x10000 a3=0x4328 t0=0x4329 sp=0x100000 ra=0x1f00100 thread=1 callback=0 cbType=0 cbWordReadable=0
+seq=2 tick=0 kind=mpeg-return id=1 route=fixture-setup target=0x4027b8 entryA0=0x150000 pc=0x1f00100 v0=0x160118 sp=0x100000 ra=0x1f00100 suppliedRA=0x1f00100 thread=1 callback=0
+seq=3 tick=0 kind=mpeg-call id=2 route=fixture-setup target=0x402c08 source=0x100040 a0=0x150000 a1=0x1 a2=0x100070 a3=0x15f000 t0=0x4329 sp=0x100000 ra=0x1f00100 thread=1 callback=0 cbType=0 cbWordReadable=0
+seq=4 tick=0 kind=mpeg-return id=2 route=fixture-setup target=0x402c08 entryA0=0x150000 pc=0x1f00100 v0=0x1 sp=0x100000 ra=0x1f00100 suppliedRA=0x1f00100 thread=1 callback=0
+seq=5 tick=0 kind=mpeg-call id=3 route=branch target=0x402a10 source=0x100040 a0=0x150000 a1=0x200000 a2=0x0 a3=0x4328 t0=0x4329 sp=0x1e00000 ra=0x100050 thread=-999 callback=0 cbType=0 cbWordReadable=0
+seq=6 tick=0 kind=mpeg-request-registration id=3 mpeg=0x150000 type=1 func=0x100070 userdata=0x15f000 handle=1 source=observed-API-args
+seq=7 tick=0 kind=mpeg-selected route=direct target=0x100070 a0=0x150000 a1=0x100600 a2=0x15f000 ra=0x0 sp=0x1e00000 thread=1
+seq=8 tick=0 kind=mpeg-unwind id=3 route=branch target=0x402a10 entryA0=0x150000 pc=0x100050 v0=0x4323 sp=0x1e00000 ra=0x100050 suppliedRA=0x100050 thread=-999 callback=0
+seq=9 tick=0 kind=mpeg-call id=4 route=scheduler target=0x100070 source=0x0 a0=0x150000 a1=0x100600 a2=0x15f000 a3=0x4328 t0=0x4329 sp=0x1e00000 ra=0x0 thread=1 callback=1 cbType=1 cbWordReadable=1
+seq=10 tick=0 kind=mpeg-producer id=4 userdata=0x15f000 registrationGuard=1 sourceObject=0x0 buffer78=0x0 buffer7c=0x0
+seq=11 tick=0 kind=mpeg-call id=5 route=branch target=0x4029d0 source=0x100040 a0=0x150000 a1=0x15f100 a2=0xf0 a3=0x4328 t0=0x4329 sp=0x1e00000 ra=0x0 thread=-999 callback=0 cbType=0 cbWordReadable=0
+seq=12 tick=0 kind=mpeg-input id=5 mpeg=0x150000 buffer=0x15f100 requested=240 hashed=240 safe=1 fnv64=0x54b07fc845a0494d retainedHex=000001b301001013ffffe018000001b5148a00010000000001b80008004000000100000ffff8000001b58ffff341800000010113f214a52f99bf7080000001b3
+seq=13 tick=0 kind=mpeg-complete type=1 token=0x150000 result=0 matched=0 thread=1
+seq=14 tick=0 kind=mpeg-return id=5 route=branch target=0x4029d0 entryA0=0x150000 pc=0x0 v0=0xf0 sp=0x1e00000 ra=0x0 suppliedRA=0x0 thread=-999 callback=0
+seq=15 tick=0 kind=mpeg-return id=4 route=scheduler target=0x100070 entryA0=0x150000 pc=0x0 v0=0x0 sp=0x1e00000 ra=0x0 suppliedRA=0x0 thread=1 callback=1
+# E15 CLOSURE tick=0 calls=5 returned=4 unwound=1 pending=0 selections=1 invocations=1 registrations=1 registrationTruncated=0
+# E7 SHUTDOWN tick=0 events=15 bootBytes=2581 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615

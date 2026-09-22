@@ -1,0 +1,37 @@
+{
+  "checked": [
+    "e23_common.py",
+    "e23_io.py",
+    "e23_bounded.py",
+    "e23_checkpoint.py",
+    "e23_baseline.py",
+    "e23_validate.py",
+    "e23_parser_receipt.py",
+    "e23_closed_events.py",
+    "e23_observer_regression.py",
+    "e23_prepare_probe.py",
+    "e23_capture.py"
+  ],
+  "findings": [
+    {
+      "file": "e23_capture.py",
+      "original_hex": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "present": false,
+      "nearest": [
+        "1b49d05ca2793922180851b9e1ce9ae2391d61a7863565ac4e71f12e967af7bc"
+      ]
+    }
+  ],
+  "repaired": [
+    {
+      "file": "e23_capture.py",
+      "symbol": "ELF_SHA",
+      "corrupted": "1b49d05ca2793922180851b9e1ce9ae2391d61a7863565ac4e71f12e967af7bc",
+      "restored": "1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc",
+      "cause": "the mechanical E22->E23 rename rewrote the substring 'e22' INSIDE the title ELF digest",
+      "caught_by": "e23_capture.py preflight file-hash gate, before the atomic lease claim",
+      "boot_spent": false
+    }
+  ],
+  "post_repair_missing": []
+}

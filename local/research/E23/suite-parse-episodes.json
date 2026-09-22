@@ -1,0 +1,330 @@
+{
+  "footer": {
+    "source": "API-interposer",
+    "reason": "_Exit",
+    "rc": 0,
+    "ns": 899136000,
+    "events": 38,
+    "parseCalls": 8,
+    "offered": 624,
+    "consumed": 264,
+    "packets": 4,
+    "packetBytes": 188,
+    "sendCalls": 5,
+    "sendEof": 1,
+    "receiveCalls": 7,
+    "frames": 2,
+    "errors": 0,
+    "returned": 20,
+    "pending": 0,
+    "textTruncated": 0,
+    "payloadTruncated": 0,
+    "ioErrors": 0,
+    "eventBytes": 6199,
+    "payloadBytes": 624,
+    "backendParse": 8,
+    "backendSend": 5,
+    "backendReceive": 7,
+    "bindingChecks": 4,
+    "recursionGuards": 0,
+    "proof": 0
+  },
+  "episodes": [
+    {
+      "feedBytes": 240,
+      "startOffset": 0,
+      "calls": [
+        {
+          "call": 1,
+          "offered": 240,
+          "offset": 0,
+          "fnv64": "0x54b07fc845a0494d",
+          "used": 60,
+          "packetSize": 60,
+          "cumulativeConsumed": 60,
+          "packetsAfter": 1,
+          "receives": [
+            {
+              "rc": -35,
+              "width": 0,
+              "height": 0,
+              "framesAfter": 0
+            }
+          ]
+        },
+        {
+          "call": 2,
+          "offered": 180,
+          "offset": 240,
+          "fnv64": "0xaf3a065ebc16bc03",
+          "used": 60,
+          "packetSize": 60,
+          "cumulativeConsumed": 120,
+          "packetsAfter": 2,
+          "receives": [
+            {
+              "rc": 0,
+              "width": 16,
+              "height": 16,
+              "framesAfter": 1
+            },
+            {
+              "rc": -35,
+              "width": 0,
+              "height": 0,
+              "framesAfter": 1
+            }
+          ]
+        },
+        {
+          "call": 3,
+          "offered": 120,
+          "offset": 420,
+          "fnv64": "0x30315ad3667b37b1",
+          "used": 60,
+          "packetSize": 60,
+          "cumulativeConsumed": 180,
+          "packetsAfter": 3,
+          "receives": [
+            {
+              "rc": 0,
+              "width": 16,
+              "height": 16,
+              "framesAfter": 2
+            },
+            {
+              "rc": -35,
+              "width": 0,
+              "height": 0,
+              "framesAfter": 2
+            }
+          ]
+        },
+        {
+          "call": 4,
+          "offered": 60,
+          "offset": 540,
+          "fnv64": "0x492788829927e54a",
+          "used": 60,
+          "packetSize": 0,
+          "cumulativeConsumed": 240,
+          "packetsAfter": 3
+        }
+      ],
+      "packets": 3,
+      "frames": 2,
+      "sends": 3,
+      "receives": 5,
+      "eofSends": 0,
+      "parseCalls": 4,
+      "consumed": 240
+    },
+    {
+      "feedBytes": 8,
+      "startOffset": 600,
+      "calls": [
+        {
+          "call": 5,
+          "offered": 8,
+          "offset": 600,
+          "fnv64": "0x2e14870e1f31f198",
+          "used": 8,
+          "packetSize": 0,
+          "cumulativeConsumed": 248,
+          "packetsAfter": 3
+        },
+        {
+          "call": 6,
+          "offered": 0,
+          "offset": 608,
+          "fnv64": "0x0",
+          "used": 0,
+          "packetSize": 8,
+          "cumulativeConsumed": 248,
+          "packetsAfter": 4,
+          "receives": [
+            {
+              "rc": -35,
+              "width": 0,
+              "height": 0,
+              "framesAfter": 2
+            },
+            {
+              "rc": -541478725,
+              "width": 0,
+              "height": 0,
+              "framesAfter": 2
+            }
+          ]
+        }
+      ],
+      "packets": 1,
+      "frames": 0,
+      "sends": 2,
+      "receives": 2,
+      "eofSends": 1,
+      "parseCalls": 2,
+      "consumed": 8
+    },
+    {
+      "feedBytes": 8,
+      "startOffset": 608,
+      "calls": [
+        {
+          "call": 7,
+          "offered": 8,
+          "offset": 608,
+          "fnv64": "0x2e14870e1f31f198",
+          "used": 8,
+          "packetSize": 0,
+          "cumulativeConsumed": 256,
+          "packetsAfter": 4
+        }
+      ],
+      "packets": 0,
+      "frames": 0,
+      "sends": 0,
+      "receives": 0,
+      "eofSends": 0,
+      "parseCalls": 1,
+      "consumed": 8
+    },
+    {
+      "feedBytes": 8,
+      "startOffset": 616,
+      "calls": [
+        {
+          "call": 8,
+          "offered": 8,
+          "offset": 616,
+          "fnv64": "0x2e14870e1f31f198",
+          "used": 8,
+          "packetSize": 0,
+          "cumulativeConsumed": 264,
+          "packetsAfter": 4
+        }
+      ],
+      "packets": 0,
+      "frames": 0,
+      "sends": 0,
+      "receives": 0,
+      "eofSends": 0,
+      "parseCalls": 1,
+      "consumed": 8
+    }
+  ],
+  "order": [
+    [
+      "parse-enter",
+      1
+    ],
+    [
+      "parse-return",
+      1
+    ],
+    [
+      "send",
+      1
+    ],
+    [
+      "receive",
+      1
+    ],
+    [
+      "parse-enter",
+      2
+    ],
+    [
+      "parse-return",
+      2
+    ],
+    [
+      "send",
+      2
+    ],
+    [
+      "receive",
+      2
+    ],
+    [
+      "receive",
+      3
+    ],
+    [
+      "parse-enter",
+      3
+    ],
+    [
+      "parse-return",
+      3
+    ],
+    [
+      "send",
+      3
+    ],
+    [
+      "receive",
+      4
+    ],
+    [
+      "receive",
+      5
+    ],
+    [
+      "parse-enter",
+      4
+    ],
+    [
+      "parse-return",
+      4
+    ],
+    [
+      "parse-enter",
+      5
+    ],
+    [
+      "parse-return",
+      5
+    ],
+    [
+      "parse-enter",
+      6
+    ],
+    [
+      "parse-return",
+      6
+    ],
+    [
+      "send",
+      4
+    ],
+    [
+      "receive",
+      6
+    ],
+    [
+      "send",
+      5
+    ],
+    [
+      "receive",
+      7
+    ],
+    [
+      "parse-enter",
+      7
+    ],
+    [
+      "parse-return",
+      7
+    ],
+    [
+      "parse-enter",
+      8
+    ],
+    [
+      "parse-return",
+      8
+    ]
+  ]
+}

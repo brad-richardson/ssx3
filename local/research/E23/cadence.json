@@ -1,0 +1,1471 @@
+{
+  "utc": "2026-09-22T00:16:08.784207+00:00",
+  "binary": {
+    "path": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/complete/binding-test",
+    "bytes": 165202160,
+    "allocated": 165675008,
+    "sha256": "3136f3ca734aece4ad9c24e3820bc3c5dc5ce229639218be14beb579fd4279a2"
+  },
+  "observer": {
+    "path": "/Users/bradrichardson/dev/ssx3/local/research/E23/parser/e21-parser-observer.dylib",
+    "bytes": 52472,
+    "allocated": 53248,
+    "sha256": "e4d88fdc6740449893d5a96c112fae6ce3f19135bad8a309d140d45bbf38e6be"
+  },
+  "rows": [
+    {
+      "feedBytes": 60,
+      "rc": 0,
+      "outcome": "STALLED",
+      "stdout": {
+        "feedBytes": 60,
+        "selections": 1,
+        "invocations": 1,
+        "callbackCalls": 1,
+        "AddBsCalls": 1,
+        "deliveredBytes": 60,
+        "resumes": 0,
+        "resumeV0": 0,
+        "parked": 1,
+        "observations": 1,
+        "width": 0,
+        "height": 0,
+        "pixel": 0
+      },
+      "cadence": {
+        "footer": "# E7 SHUTDOWN tick=0 events=15 bootBytes=2594 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615",
+        "kind_counts": {
+          "mpeg-call": 5,
+          "mpeg-return": 4,
+          "mpeg-request-registration": 1,
+          "mpeg-selected": 1,
+          "mpeg-unwind": 1,
+          "mpeg-producer": 1,
+          "mpeg-input": 1,
+          "mpeg-wait": 1
+        },
+        "producerFirings": 1,
+        "addBs": 1,
+        "completions": 0,
+        "completionsMatched": 0,
+        "parks": 1
+      },
+      "sequence": [
+        {
+          "seq": 1,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 2,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x160118",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 3,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 4,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x1",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 5,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 6,
+          "tick": 0,
+          "kind": "mpeg-request-registration",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 7,
+          "tick": 0,
+          "kind": "mpeg-selected",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 8,
+          "tick": 0,
+          "kind": "mpeg-unwind",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x4323",
+          "pc": "0x100050"
+        },
+        {
+          "seq": 9,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 10,
+          "tick": 0,
+          "kind": "mpeg-producer",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 11,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 12,
+          "tick": 0,
+          "kind": "mpeg-input",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": 60,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 13,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x3c",
+          "pc": "0x0"
+        },
+        {
+          "seq": 14,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": "0x0",
+          "pc": "0x0"
+        },
+        {
+          "seq": 15,
+          "tick": 0,
+          "kind": "mpeg-wait",
+          "thread": 1,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": "0x100050"
+        }
+      ],
+      "parser": {
+        "footer": {
+          "source": "API-interposer",
+          "reason": "destructor",
+          "rc": 0,
+          "ns": 25271000,
+          "events": 7,
+          "parseCalls": 1,
+          "offered": 60,
+          "consumed": 60,
+          "packets": 0,
+          "packetBytes": 0,
+          "sendCalls": 0,
+          "sendEof": 0,
+          "receiveCalls": 0,
+          "frames": 0,
+          "errors": 0,
+          "returned": 1,
+          "pending": 0,
+          "textTruncated": 0,
+          "payloadTruncated": 0,
+          "ioErrors": 0,
+          "eventBytes": 1790,
+          "payloadBytes": 60,
+          "backendParse": 1,
+          "backendSend": 0,
+          "backendReceive": 0,
+          "bindingChecks": 4,
+          "recursionGuards": 0,
+          "proof": 0
+        },
+        "episodes": [
+          {
+            "feedBytes": 60,
+            "startOffset": 0,
+            "calls": [
+              {
+                "call": 1,
+                "offered": 60,
+                "offset": 0,
+                "fnv64": "0xf098f2a98d0aa2d7",
+                "used": 60,
+                "packetSize": 0,
+                "cumulativeConsumed": 60,
+                "packetsAfter": 0
+              }
+            ],
+            "packets": 0,
+            "frames": 0,
+            "sends": 0,
+            "receives": 0,
+            "eofSends": 0,
+            "parseCalls": 1,
+            "consumed": 60
+          }
+        ],
+        "order": [
+          [
+            "parse-enter",
+            1
+          ],
+          [
+            "parse-return",
+            1
+          ]
+        ]
+      },
+      "run": {
+        "argv": [
+          "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/complete/binding-test",
+          "complete",
+          "60"
+        ],
+        "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/60",
+        "env": {
+          "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-tooltmp/cadence/",
+          "PS2X_E15_TRACE": "1",
+          "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/60",
+          "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E23/parser/e21-parser-observer.dylib",
+          "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/60/parser-observer"
+        },
+        "elapsed_s": 0.074611542004277,
+        "stdout_bytes": 1273,
+        "scratch_peak_allocated": 0
+      }
+    },
+    {
+      "feedBytes": 120,
+      "rc": 0,
+      "outcome": "STALLED",
+      "stdout": {
+        "feedBytes": 120,
+        "selections": 1,
+        "invocations": 1,
+        "callbackCalls": 1,
+        "AddBsCalls": 1,
+        "deliveredBytes": 120,
+        "resumes": 0,
+        "resumeV0": 0,
+        "parked": 1,
+        "observations": 1,
+        "width": 0,
+        "height": 0,
+        "pixel": 0
+      },
+      "cadence": {
+        "footer": "# E7 SHUTDOWN tick=0 events=15 bootBytes=2604 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615",
+        "kind_counts": {
+          "mpeg-call": 5,
+          "mpeg-return": 4,
+          "mpeg-request-registration": 1,
+          "mpeg-selected": 1,
+          "mpeg-unwind": 1,
+          "mpeg-producer": 1,
+          "mpeg-input": 1,
+          "mpeg-wait": 1
+        },
+        "producerFirings": 1,
+        "addBs": 1,
+        "completions": 0,
+        "completionsMatched": 0,
+        "parks": 1
+      },
+      "sequence": [
+        {
+          "seq": 1,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 2,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x160118",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 3,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 4,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x1",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 5,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 6,
+          "tick": 0,
+          "kind": "mpeg-request-registration",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 7,
+          "tick": 0,
+          "kind": "mpeg-selected",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 8,
+          "tick": 0,
+          "kind": "mpeg-unwind",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x4323",
+          "pc": "0x100050"
+        },
+        {
+          "seq": 9,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 10,
+          "tick": 0,
+          "kind": "mpeg-producer",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 11,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 12,
+          "tick": 0,
+          "kind": "mpeg-input",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": 120,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 13,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x78",
+          "pc": "0x0"
+        },
+        {
+          "seq": 14,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": "0x0",
+          "pc": "0x0"
+        },
+        {
+          "seq": 15,
+          "tick": 0,
+          "kind": "mpeg-wait",
+          "thread": 1,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": "0x100050"
+        }
+      ],
+      "parser": {
+        "footer": {
+          "source": "API-interposer",
+          "reason": "destructor",
+          "rc": 0,
+          "ns": 55050000,
+          "events": 12,
+          "parseCalls": 2,
+          "offered": 180,
+          "consumed": 120,
+          "packets": 1,
+          "packetBytes": 60,
+          "sendCalls": 1,
+          "sendEof": 0,
+          "receiveCalls": 1,
+          "frames": 0,
+          "errors": 0,
+          "returned": 4,
+          "pending": 0,
+          "textTruncated": 0,
+          "payloadTruncated": 0,
+          "ioErrors": 0,
+          "eventBytes": 2522,
+          "payloadBytes": 180,
+          "backendParse": 2,
+          "backendSend": 1,
+          "backendReceive": 1,
+          "bindingChecks": 4,
+          "recursionGuards": 0,
+          "proof": 0
+        },
+        "episodes": [
+          {
+            "feedBytes": 120,
+            "startOffset": 0,
+            "calls": [
+              {
+                "call": 1,
+                "offered": 120,
+                "offset": 0,
+                "fnv64": "0x25bd27ea8a9c5ae1",
+                "used": 60,
+                "packetSize": 60,
+                "cumulativeConsumed": 60,
+                "packetsAfter": 1,
+                "receives": [
+                  {
+                    "rc": -35,
+                    "width": 0,
+                    "height": 0,
+                    "framesAfter": 0
+                  }
+                ]
+              },
+              {
+                "call": 2,
+                "offered": 60,
+                "offset": 120,
+                "fnv64": "0xeb861b6f31ca1457",
+                "used": 60,
+                "packetSize": 0,
+                "cumulativeConsumed": 120,
+                "packetsAfter": 1
+              }
+            ],
+            "packets": 1,
+            "frames": 0,
+            "sends": 1,
+            "receives": 1,
+            "eofSends": 0,
+            "parseCalls": 2,
+            "consumed": 120
+          }
+        ],
+        "order": [
+          [
+            "parse-enter",
+            1
+          ],
+          [
+            "parse-return",
+            1
+          ],
+          [
+            "send",
+            1
+          ],
+          [
+            "receive",
+            1
+          ],
+          [
+            "parse-enter",
+            2
+          ],
+          [
+            "parse-return",
+            2
+          ]
+        ]
+      },
+      "run": {
+        "argv": [
+          "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/complete/binding-test",
+          "complete",
+          "120"
+        ],
+        "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/120",
+        "env": {
+          "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-tooltmp/cadence/",
+          "PS2X_E15_TRACE": "1",
+          "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/120",
+          "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E23/parser/e21-parser-observer.dylib",
+          "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/120/parser-observer"
+        },
+        "elapsed_s": 0.14579720800247742,
+        "stdout_bytes": 1281,
+        "scratch_peak_allocated": 0
+      }
+    },
+    {
+      "feedBytes": 180,
+      "rc": 0,
+      "outcome": "SERVED",
+      "stdout": {
+        "feedBytes": 180,
+        "selections": 1,
+        "invocations": 1,
+        "callbackCalls": 1,
+        "AddBsCalls": 1,
+        "deliveredBytes": 180,
+        "resumes": 1,
+        "resumeV0": 0,
+        "parked": 0,
+        "observations": 0,
+        "width": 16,
+        "height": 16,
+        "pixel": 2147483902
+      },
+      "cadence": {
+        "footer": "# E7 SHUTDOWN tick=0 events=15 bootBytes=2581 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615",
+        "kind_counts": {
+          "mpeg-call": 5,
+          "mpeg-return": 4,
+          "mpeg-request-registration": 1,
+          "mpeg-selected": 1,
+          "mpeg-unwind": 1,
+          "mpeg-producer": 1,
+          "mpeg-input": 1,
+          "mpeg-complete": 1
+        },
+        "producerFirings": 1,
+        "addBs": 1,
+        "completions": 1,
+        "completionsMatched": 0,
+        "parks": 0
+      },
+      "sequence": [
+        {
+          "seq": 1,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 2,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x160118",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 3,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 4,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x1",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 5,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 6,
+          "tick": 0,
+          "kind": "mpeg-request-registration",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 7,
+          "tick": 0,
+          "kind": "mpeg-selected",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 8,
+          "tick": 0,
+          "kind": "mpeg-unwind",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x4323",
+          "pc": "0x100050"
+        },
+        {
+          "seq": 9,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 10,
+          "tick": 0,
+          "kind": "mpeg-producer",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 11,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 12,
+          "tick": 0,
+          "kind": "mpeg-input",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": 180,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 13,
+          "tick": 0,
+          "kind": "mpeg-complete",
+          "thread": 1,
+          "target": null,
+          "callback": null,
+          "matched": 0,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 14,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0xb4",
+          "pc": "0x0"
+        },
+        {
+          "seq": 15,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": "0x0",
+          "pc": "0x0"
+        }
+      ],
+      "parser": {
+        "footer": {
+          "source": "API-interposer",
+          "reason": "destructor",
+          "rc": 0,
+          "ns": 7910000,
+          "events": 18,
+          "parseCalls": 3,
+          "offered": 360,
+          "consumed": 180,
+          "packets": 2,
+          "packetBytes": 120,
+          "sendCalls": 2,
+          "sendEof": 0,
+          "receiveCalls": 3,
+          "frames": 1,
+          "errors": 0,
+          "returned": 8,
+          "pending": 0,
+          "textTruncated": 0,
+          "payloadTruncated": 0,
+          "ioErrors": 0,
+          "eventBytes": 3357,
+          "payloadBytes": 360,
+          "backendParse": 3,
+          "backendSend": 2,
+          "backendReceive": 3,
+          "bindingChecks": 4,
+          "recursionGuards": 0,
+          "proof": 0
+        },
+        "episodes": [
+          {
+            "feedBytes": 180,
+            "startOffset": 0,
+            "calls": [
+              {
+                "call": 1,
+                "offered": 180,
+                "offset": 0,
+                "fnv64": "0x3b0d1dff70f298ae",
+                "used": 60,
+                "packetSize": 60,
+                "cumulativeConsumed": 60,
+                "packetsAfter": 1,
+                "receives": [
+                  {
+                    "rc": -35,
+                    "width": 0,
+                    "height": 0,
+                    "framesAfter": 0
+                  }
+                ]
+              },
+              {
+                "call": 2,
+                "offered": 120,
+                "offset": 180,
+                "fnv64": "0x1f727855d2eb39bc",
+                "used": 60,
+                "packetSize": 60,
+                "cumulativeConsumed": 120,
+                "packetsAfter": 2,
+                "receives": [
+                  {
+                    "rc": 0,
+                    "width": 16,
+                    "height": 16,
+                    "framesAfter": 1
+                  },
+                  {
+                    "rc": -35,
+                    "width": 0,
+                    "height": 0,
+                    "framesAfter": 1
+                  }
+                ]
+              },
+              {
+                "call": 3,
+                "offered": 60,
+                "offset": 300,
+                "fnv64": "0x662a741c1428f6ca",
+                "used": 60,
+                "packetSize": 0,
+                "cumulativeConsumed": 180,
+                "packetsAfter": 2
+              }
+            ],
+            "packets": 2,
+            "frames": 1,
+            "sends": 2,
+            "receives": 3,
+            "eofSends": 0,
+            "parseCalls": 3,
+            "consumed": 180
+          }
+        ],
+        "order": [
+          [
+            "parse-enter",
+            1
+          ],
+          [
+            "parse-return",
+            1
+          ],
+          [
+            "send",
+            1
+          ],
+          [
+            "receive",
+            1
+          ],
+          [
+            "parse-enter",
+            2
+          ],
+          [
+            "parse-return",
+            2
+          ],
+          [
+            "send",
+            2
+          ],
+          [
+            "receive",
+            2
+          ],
+          [
+            "receive",
+            3
+          ],
+          [
+            "parse-enter",
+            3
+          ],
+          [
+            "parse-return",
+            3
+          ]
+        ]
+      },
+      "run": {
+        "argv": [
+          "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/complete/binding-test",
+          "complete",
+          "180"
+        ],
+        "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/180",
+        "env": {
+          "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-tooltmp/cadence/",
+          "PS2X_E15_TRACE": "1",
+          "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/180",
+          "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E23/parser/e21-parser-observer.dylib",
+          "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/180/parser-observer"
+        },
+        "elapsed_s": 0.03858100000070408,
+        "stdout_bytes": 1206,
+        "scratch_peak_allocated": 0
+      }
+    },
+    {
+      "feedBytes": 240,
+      "rc": 0,
+      "outcome": "SERVED",
+      "stdout": {
+        "feedBytes": 240,
+        "selections": 1,
+        "invocations": 1,
+        "callbackCalls": 1,
+        "AddBsCalls": 1,
+        "deliveredBytes": 240,
+        "resumes": 1,
+        "resumeV0": 0,
+        "parked": 0,
+        "observations": 0,
+        "width": 16,
+        "height": 16,
+        "pixel": 2147483902
+      },
+      "cadence": {
+        "footer": "# E7 SHUTDOWN tick=0 events=15 bootBytes=2581 boundaryBytes=0 packetBytes=0 packetFiles=0 bootTruncated=0 boundaryTruncated=0 packetTruncated=0 windowComplete=0 aligned=0 arm=18446744073709551615",
+        "kind_counts": {
+          "mpeg-call": 5,
+          "mpeg-return": 4,
+          "mpeg-request-registration": 1,
+          "mpeg-selected": 1,
+          "mpeg-unwind": 1,
+          "mpeg-producer": 1,
+          "mpeg-input": 1,
+          "mpeg-complete": 1
+        },
+        "producerFirings": 1,
+        "addBs": 1,
+        "completions": 1,
+        "completionsMatched": 0,
+        "parks": 0
+      },
+      "sequence": [
+        {
+          "seq": 1,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 2,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x4027b8",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x160118",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 3,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 4,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x402c08",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x1",
+          "pc": "0x1f00100"
+        },
+        {
+          "seq": 5,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 6,
+          "tick": 0,
+          "kind": "mpeg-request-registration",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 7,
+          "tick": 0,
+          "kind": "mpeg-selected",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 8,
+          "tick": 0,
+          "kind": "mpeg-unwind",
+          "thread": -999,
+          "target": "0x402a10",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0x4323",
+          "pc": "0x100050"
+        },
+        {
+          "seq": 9,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 10,
+          "tick": 0,
+          "kind": "mpeg-producer",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 11,
+          "tick": 0,
+          "kind": "mpeg-call",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 12,
+          "tick": 0,
+          "kind": "mpeg-input",
+          "thread": null,
+          "target": null,
+          "callback": null,
+          "matched": null,
+          "requested": 240,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 13,
+          "tick": 0,
+          "kind": "mpeg-complete",
+          "thread": 1,
+          "target": null,
+          "callback": null,
+          "matched": 0,
+          "requested": null,
+          "v0": null,
+          "pc": null
+        },
+        {
+          "seq": 14,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": -999,
+          "target": "0x4029d0",
+          "callback": 0,
+          "matched": null,
+          "requested": null,
+          "v0": "0xf0",
+          "pc": "0x0"
+        },
+        {
+          "seq": 15,
+          "tick": 0,
+          "kind": "mpeg-return",
+          "thread": 1,
+          "target": "0x100070",
+          "callback": 1,
+          "matched": null,
+          "requested": null,
+          "v0": "0x0",
+          "pc": "0x0"
+        }
+      ],
+      "parser": {
+        "footer": {
+          "source": "API-interposer",
+          "reason": "destructor",
+          "rc": 0,
+          "ns": 58353000,
+          "events": 24,
+          "parseCalls": 4,
+          "offered": 600,
+          "consumed": 240,
+          "packets": 3,
+          "packetBytes": 180,
+          "sendCalls": 3,
+          "sendEof": 0,
+          "receiveCalls": 5,
+          "frames": 2,
+          "errors": 0,
+          "returned": 12,
+          "pending": 0,
+          "textTruncated": 0,
+          "payloadTruncated": 0,
+          "ioErrors": 0,
+          "eventBytes": 4200,
+          "payloadBytes": 600,
+          "backendParse": 4,
+          "backendSend": 3,
+          "backendReceive": 5,
+          "bindingChecks": 4,
+          "recursionGuards": 0,
+          "proof": 0
+        },
+        "episodes": [
+          {
+            "feedBytes": 240,
+            "startOffset": 0,
+            "calls": [
+              {
+                "call": 1,
+                "offered": 240,
+                "offset": 0,
+                "fnv64": "0x54b07fc845a0494d",
+                "used": 60,
+                "packetSize": 60,
+                "cumulativeConsumed": 60,
+                "packetsAfter": 1,
+                "receives": [
+                  {
+                    "rc": -35,
+                    "width": 0,
+                    "height": 0,
+                    "framesAfter": 0
+                  }
+                ]
+              },
+              {
+                "call": 2,
+                "offered": 180,
+                "offset": 240,
+                "fnv64": "0xaf3a065ebc16bc03",
+                "used": 60,
+                "packetSize": 60,
+                "cumulativeConsumed": 120,
+                "packetsAfter": 2,
+                "receives": [
+                  {
+                    "rc": 0,
+                    "width": 16,
+                    "height": 16,
+                    "framesAfter": 1
+                  },
+                  {
+                    "rc": -35,
+                    "width": 0,
+                    "height": 0,
+                    "framesAfter": 1
+                  }
+                ]
+              },
+              {
+                "call": 3,
+                "offered": 120,
+                "offset": 420,
+                "fnv64": "0x30315ad3667b37b1",
+                "used": 60,
+                "packetSize": 60,
+                "cumulativeConsumed": 180,
+                "packetsAfter": 3,
+                "receives": [
+                  {
+                    "rc": 0,
+                    "width": 16,
+                    "height": 16,
+                    "framesAfter": 2
+                  },
+                  {
+                    "rc": -35,
+                    "width": 0,
+                    "height": 0,
+                    "framesAfter": 2
+                  }
+                ]
+              },
+              {
+                "call": 4,
+                "offered": 60,
+                "offset": 540,
+                "fnv64": "0x492788829927e54a",
+                "used": 60,
+                "packetSize": 0,
+                "cumulativeConsumed": 240,
+                "packetsAfter": 3
+              }
+            ],
+            "packets": 3,
+            "frames": 2,
+            "sends": 3,
+            "receives": 5,
+            "eofSends": 0,
+            "parseCalls": 4,
+            "consumed": 240
+          }
+        ],
+        "order": [
+          [
+            "parse-enter",
+            1
+          ],
+          [
+            "parse-return",
+            1
+          ],
+          [
+            "send",
+            1
+          ],
+          [
+            "receive",
+            1
+          ],
+          [
+            "parse-enter",
+            2
+          ],
+          [
+            "parse-return",
+            2
+          ],
+          [
+            "send",
+            2
+          ],
+          [
+            "receive",
+            2
+          ],
+          [
+            "receive",
+            3
+          ],
+          [
+            "parse-enter",
+            3
+          ],
+          [
+            "parse-return",
+            3
+          ],
+          [
+            "send",
+            3
+          ],
+          [
+            "receive",
+            4
+          ],
+          [
+            "receive",
+            5
+          ],
+          [
+            "parse-enter",
+            4
+          ],
+          [
+            "parse-return",
+            4
+          ]
+        ]
+      },
+      "run": {
+        "argv": [
+          "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/complete/binding-test",
+          "complete",
+          "240"
+        ],
+        "cwd": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/240",
+        "env": {
+          "TMPDIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-tooltmp/cadence/",
+          "PS2X_E15_TRACE": "1",
+          "PS2X_E7_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/240",
+          "DYLD_INSERT_LIBRARIES": "/Users/bradrichardson/dev/ssx3/local/research/E23/parser/e21-parser-observer.dylib",
+          "PS2X_E21_PARSER_DIR": "/Volumes/Extreme SSD/ps2recomp-spike/P1/e23-fixtures/cadence/240/parser-observer"
+        },
+        "elapsed_s": 0.15075691699894378,
+        "stdout_bytes": 1206,
+        "scratch_peak_allocated": 0
+      }
+    }
+  ]
+}
