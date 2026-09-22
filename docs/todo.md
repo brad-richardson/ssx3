@@ -1612,6 +1612,70 @@ the build or commit that closed them.
       no score re-run possible; retry correctly unspent. ~1 h. Next:
       G32 (sample_quad[0] unit probe with controlled patterns, NOT
       adoption). Ledger row added.
+- [x] **E23 read (09-21) — PASS(Done), cadence reference: producer fires ONCE on every path; C2a/C4 KILLED, X moves upstream (guest never refills); fix gate STOPPED**
+      Checkpoint re-verified (fork triple `3adc0478`, 9,457/1,725,
+      458/458 ×2 loaded/unloaded, E15/E16/prior/R1–R6) + tooling rename
+      (8 pure hex-safe + 3 changed + 7 new) → R3-shape cadence sweep on
+      the ACTUAL title wrappers (60/120 STALLED, 180/240 SERVED,
+      producerFirings=1 ALL FOUR; 240B 4 calls/3 packets/2 frames ==
+      E18 R3; 60-vs-240 identical through seq 12; served-branch
+      mpeg-complete matched=0 — wake inert even when raised) → three
+      bounds tabled (dispatch/registration, feed-loop drain, picture
+      wait; NO round counter exists) → C4 killed (site never visited
+      on serving paths) + trigger transfers/bound doesn't → ONE guarded
+      boot e23a (wall 75.75 s rc0): 29 pre-park source writes (E18
+      values, thread-3 staging @9447) + 0 post-park over 12,113 lines,
+      guest alive (thread 4 ~300 wakes), 6 threads waiting, DMA/GIF
+      frozen → transfer KILLED (re-ask would fetch nothing) with the
+      0x548880 successor named as residual. Verified: tail-sha+bytes,
+      fork, suite re-runs, dylib re-sha, E1 repair + hex-audit +
+      preclaim receipt, 4 taps (cases/divergence/C1-control/FNV),
+      bound sources, boot joins + watch primaries + thread states +
+      DMA freeze. ERRATA: E23-E1 self-found/repaired in-lane (hex
+      rename corruption, caught pre-lease); E23-E2 gate nit (`:2469`/
+      `:2496` cited vs `:2467`/`:2498` actual). ~1.5 h. Next: E24
+      (0x548880 residual + semaphore-wait follow + V3-dims relay).
+      Ledger row added.
+- [x] **G32 read (09-21) — PASS(Done), CORRECT: sampler reads EXACTLY under host-committed pattern (10/10 byte-exact vs model); mechanism reframes to ordering/coherency (H1 vs H2 open)**
+      Task-1 statics (two-zone E+C pattern, zero zero-RGB words, pinned
+      inputs, pre-registered FNVs + host swizzle oracle, 5-row matrix;
+      swizzle audit 229376/229376 bijective) → ONE pre-vsync injection
+      hunk (+30/−0) + ONE build exit 0 [458/458] (265,852,240 B
+      `35288fd0…`, `eb6bfa53…`) + verify-then-push NO gap + ONE run
+      exit 0 (16 inject + 16 state + 16 bytes + 512 vpage + 10 ladder +
+      load line, `Done!` last, 0 new tombstone): B == pattern ×16,
+      ladder == expected `9dd120bc…` ×10, scanouts byte-identical to
+      the model (sha `1390410c…` 11-way), 229376/229376 in-set,
+      const 114688, zero-RGB 0; ADDRESSING/DECODE/DESCRIPTOR all
+      refuted; scanouts pulled by explicit list (G31-E1 applied).
+      Verified: logcat 2376/16/16/16/512/10/1 + values, pattern-B FNV
+      RECOMPUTED exact, scanout census exact, B-pages 112/112
+      recomputed, non-B 400/400 == G31, A 16/16 == G31, hunk shape +
+      G22 match, G31/G28 INTACT, device clean, tail intact.
+      POST-REPORT: G32 binary MID-DESTRUCTION (941,730 nonzero —
+      10th recurrence, caught in progress; validity unaffected). ~1 h.
+      Next: G33 (write-back control H1-vs-H2, NOT adoption). Ledger
+      row added.
+- [x] **I23 read (09-21) — PASS(H-d), Cause-B shape A INTEGRATED + PROVEN: 7.1.1 links in-app and executes on device (V1/V4 byte-exact vs host); title holds host-agreeing, wall is now the input shape (V3)**
+      Prefixes rebuilt (iOS + host 7.1.1, exits 0, archives sizes/arch
+      + symbols IDENTICAL vs I22) + host anchors (7× V1 exact incl.
+      `0a8d7973…`, V4 authored + 8/8 exact) → branch `i23-ffmpeg-ios`
+      (C1 CMake +37, C2 one-line flip, C3 +135 isolated diagnostic, C4
+      LGPL notice, C5 +18 feed trace; pushed, `ssx3` unmoved) +
+      AGRESSIVE autopsy (built +9.3MB tracker, REJECTED with cause) →
+      final build exit 0 (+1.15MB, lib byte-identical `f356aaa7…`,
+      in-app FFmpeg syms proven) → overwrite-install (12th) → V1
+      probe (P1 field-exact, 4 frames, RGBA `0a8d7973…` cmp-clean) +
+      V4 probe (8 frames, 2.4MB cmp-clean) + title 5040/0/0 ×2 probes
+      + Census III (2 receipted drifts, rest identical). P1/P2a/P3acc/
+      P8lay/P9a/P10 PASS; P2b/P9b/P5/P7 NOT OBSERVED (cause tabled);
+      P4 precondition outstanding (V3); P6/P8 partial. Verified: tail,
+      remote/branch/5-commits/diffs, prefixes, host anchor RE-RUN
+      exact, consoles 45701/45531 + lines, retrieved RGBAs == host,
+      binary size/sha, lib sha, nm syms, aggressive binary, iPad
+      installed (relaunched occupant PID 4790 — standing pattern).
+      ~1.5 h. Next: V3-dims relay rides E24 (bytes already retained);
+      I24 (V3-vector probe) queues behind it. Ledger row added.
 - [x] **G26 read (09-21) — PASS(Done), separation TERMINATES: narrower hunk delivers ONLY the flag (receipted + behaviorally proven) and O6 persists byte-identically (flag path IMPLICATED, ride-along EXONERATED); binary zero-destroyed AGAIN post-report (5th recurrence, run evidence stands):**
       ONE hunk (REPLACE supersede, +8/−1 vs HEAD, field surgery + swapped
       LOGI) + build exit 0 in NEW dir (265,840,408 B, `81141181…`,
