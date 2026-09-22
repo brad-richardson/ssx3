@@ -78,8 +78,10 @@ with measured budgets, then 120 Hz simulation.
 
 - [ ] Mac mini cutover per `local/research/V1/CUTOVER.md`. Blocked:
       the mini isn't set up (Brad). Waits for active leases.
-- [ ] V1 follow-ups: mirror `emulog-t46r3.txt` to the share; prune 2 stale
-      ssx3 worktrees and 7 stale fork worktrees (confirm the list first).
+- [x] Pruned 2 stale ssx3 + 7 stale fork worktree entries (09-22, dirs were
+      already gone). Keep the SSD `ps2x-i*/fork-wt` worktrees: they are
+      the only refs holding the branchless I10–I21 commits until the fold.
+- [ ] V1 follow-up: mirror `emulog-t46r3.txt` to the share.
 - [ ] Mac internal disk ~3 GB free: keep builds on the SSD or bytesize.
 
 ## Cross-lane
