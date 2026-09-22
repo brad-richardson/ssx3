@@ -14,6 +14,9 @@ untracked `local/AGENTS.local.md`; read it too when it exists.
   the stock update rate at normal wall-clock speed). Faster emulation,
   duplicated presents and frame interpolation are different outcomes and
   are reported as such.
+- On the Odin, shipping **Mesa Turnip** with the app (adrenotools-style)
+  is acceptable (Brad, 09-22). This is Brad's own project built in the
+  open, not a store product.
 - NetherSX2 and PCSX2 are references and performance comparisons, not
   deliverables.
 - A **dev-only startup-movie bypass** is approved (`PS2X_SKIP_MOVIE`,

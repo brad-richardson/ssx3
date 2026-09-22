@@ -33,6 +33,10 @@ with measured budgets, then 120 Hz simulation.
       branches (only those 7 paths changed); Brad ran the force-push with
       leases. `ssx3` `3adc0478` → `3d4feed`. No fork ref reaches `e63f161`.
       Old SHAs stay fetchable on GitHub until its GC.
+- [ ] **Recomp image jitter (Brad, 09-22) = field bob.** `SMODE2=0x1`,
+      full 448-line buffer, and the CPU backend shows even/odd lines
+      doubled, alternating per vsync (224/224 identical line pairs in
+      every dump). Fix `PS2X_DEINTERLACE=weave` (default) is folded into E32.
 - [ ] **E32 fold** (brief written, launches when E31 closes; base = scrubbed `3d4feed`): fold the
       bypass + pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name` and the
       branchless I10–I21 commits onto fork `ssx3`; suite + 2 boots; push
@@ -78,9 +82,12 @@ with measured budgets, then 120 Hz simulation.
       reference behind the same interface, GPU-resident presentation (no
       per-frame readback/re-upload), upstream `feature/iop-emulator`
       check, costed build plan (Mac/MoltenVK first).
-- [ ] Give the paraLLEl-GS patch stack (~1.4k uncommitted lines on the
-      SSD) a durable git home: a branch pushed to a fork (needs Brad's OK)
-      or commits in `ps2xGS`.
+- [ ] paraLLEl-GS patch stack home: forks created 09-22
+      (`brad-richardson/parallel-gs`, `brad-richardson/Granite`). Backup
+      `wip/ssx3-snapshot` via `snapshot_pgs.sh` (Brad runs it; the classifier
+      blocks it for me). After G42: fix-only commits (G26, G28, plus Turnip
+      loading if adopted) on branch `ssx3` in both forks; diagnostics stay
+      env-gated or on wip.
 - [ ] Adreno filing: paused (Brad, 09-22). Any rewrite drops the
       withdrawn sampling inference.
 
