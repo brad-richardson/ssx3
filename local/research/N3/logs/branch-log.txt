@@ -1,0 +1,15 @@
+619d48a [N3-local] Package arm64-v8a only for the Odin install build (n2-android only, never push)
+6ec61ee [N3-local] Android env-file shim plus parser unit test (n2-android only, never push)
+b003c8a [E31] DEV-ONLY scripted pad input behind PS2X_PAD_SCRIPT (default OFF)
+8c04667 [E29] DEV-ONLY startup-movie bypass behind PS2X_SKIP_MOVIE (default OFF)
+695b96e [N2-local] H1 port: PS2X_GAME_CODEGEN_DIR game-objects lib + in-tree drop (n2-android only, never push)
+3adc047 [E18] Deliver non-stream MPEG input callbacks on the caller
+
+Cherry-pick sources (origin/e29-movie-bypass after fetch):
+ee39b9f14fe28185b498f8d107f1de7fd4b0d990 [E31] pad script -> b003c8a (clean)
+194133cc5fa848f5f101dac1287686eebe934f29 [E29] bypass -> 8c04667 (clean)
+
+Ref hygiene: local ssx3 = 3adc0478b6d2260acdd28a249466f2eef9a20176 (unmoved);
+origin/ssx3 = 3d4feed67b8d46cdf2d4f479aafb38ce24dbb6ab (scrubbed remote, fetch only).
+Working tree: clean except N2's untracked android/gradlew* + gradle-wrapper.jar.
+Zero pushes (branch local-only, per brief).

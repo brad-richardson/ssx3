@@ -1,0 +1,20 @@
+g++ -std=c++17 -Wall -Wextra -I ps2xTest/include -I ps2xRuntime/include ps2xTest/src/ps2_android_env_tests.cpp /tmp/n3-suitemain.cpp -o /tmp/n3-suitetest
+COMPILE_EXIT=0 (zero warnings)
+
+[Suite]: Ps2AndroidEnv
+  [Run]: env file parser accepts keys, skips comments and blanks   [Passed]
+  [Run]: env file parser handles CRLF line endings   [Passed]
+  [Run]: env file parser splits at the first equals and ignores malformed lines   [Passed]
+  [Run]: env file path follows the boot ELF directory   [Passed]
+
+========================================
+Total Tests: 4
+Passed: 4
+Failed: 0
+========================================
+RUN_EXIT=0
+
+(Real test TU + real MiniTest harness, host g++ on bytesize. Full 465-test suite build NOT attempted:
+WSL restarted twice mid-mission; Linux host build is unproven ground. Wiring name-checked instead:
+ps2xTest/CMakeLists.txt:50 -> existing file; main.cpp:9 decl + :32 call match TU:8 definition.)
+Standalone vector check (envcheck.cpp, same vectors, -Wall -Wextra): N3-ENVCHECK-ALL-PASS.

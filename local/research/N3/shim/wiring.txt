@@ -1,0 +1,6 @@
+Wiring (3 lines, local branch only):
+1. ps2xTest/CMakeLists.txt:50: `    src/ps2_android_env_tests.cpp` (after pad_input_tests.cpp:49)
+2. ps2xTest/src/main.cpp:9: `void register_ps2_android_env_tests();` (after pad decl)
+3. ps2xTest/src/main.cpp:32: `    register_ps2_android_env_tests();` (after pad call)
+Definition: ps2xTest/src/ps2_android_env_tests.cpp:8 `void register_ps2_android_env_tests()`.
+Name-checked on bytesize (grep): decl, call, def all identical; CMakeLists target file exists (3761 B).

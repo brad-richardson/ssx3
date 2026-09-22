@@ -1,0 +1,22 @@
+llvm-nm present: yes (NDK r28c llvm toolchain)
+obj .so: 905591144 B (same file as build3-bars.txt)
+
+strings(SKIP):
+PS2X_SKIP_MOVIE
+AKEYCODE_MEDIA_SKIP_BACKWARD
+AKEYCODE_MEDIA_SKIP_FORWARD
+DEVSKIP_COUNT=0
+strings(ps2x.env):
+ps2x.env: set
+ps2x.env: not found at
+ps2x.env
+/ps2x.env
+
+nm -g game census (corrected patterns):
+T_SUB_NONASSOC=9441
+DISTINCT_GAME_SUB=9441
+(undefined sub_ = 0 from build3-bars UNDEF_SUB_STAR with U-pattern, re-confirmed 0)
+
+source check: [MPEG:DEV-SKIP-MOVIE] present 1x in MPEG.cpp:2534 inside PS2_IF_AGRESSIVE_LOGS({...});
+gate = #if AGRESSIVE_LOGS (ps2_log.h) <- option PS2X_ENABLE_AGRESSIVE_LOGS default OFF (ps2xRuntime/CMakeLists.txt:16).
+Release/APK builds compile the marker (and [MPEG:feed*], [MPEG:GetPicture], [frame:upload], [diag:stubs]) out.
