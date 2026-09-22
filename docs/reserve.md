@@ -60,3 +60,15 @@ Numbers: `docs/numbers-ledger.md`.
 ## Housekeeping carried here
 
 - `fsck_exfat` the SSD at a quiet time (L415), superseded in practice by the V-lane storage cutover.
+
+## Where the local GameCube data went (2026-09-22)
+
+To free laptop space, the GameCube ISO copies (`local/game/GXBE69-original.iso`,
+`gxbe69-stock`, `gc-gari-009`), `local/native/ios-device`, `~/.cache/dolrecomp`
+and the untracked files of the GameCube-lane research folders (M*, MF*, S*, D*,
+perf-batch2, fastfp-ab, fcmp, float-opt-module, aloha, idle-ab, course-redirect,
+mask-sample, fifo-ab, startup) were archived to
+`/Volumes/share/ssx3/laptop-evacuated-0922/gc-reserve.tar` (41,673 files,
+8,769,167,360 B, sha256 `35bbe988a6c62e13…`, manifest alongside) and removed
+locally. Git-tracked evidence stayed in place. Restore with
+`tar -xf gc-reserve.tar -C ~/dev/ssx3` (the `home-cache/` prefix goes to `~/.cache`).
