@@ -6,10 +6,13 @@ evidence, not guidance.
 
 ## Current plans (follow these)
 
-- `todo.md` — the living working list; most recent first per section.
-- `plan-120fps-2026-09-17.md` — 120 fps plan of record with owner-held gates.
-- `plan-gs-gpu-backend-2026-09-18.md` — GPU GS backend plan and staged loop.
-- `impl-plan-2026-09-15.md` — course-scripting shipping path and work order.
+- `../AGENTS.md` — product direction, roles, brief contract, standing rules.
+- `status.md` — the compact lane board.
+- `todo.md` — open work per lane (short; history in `archive/todo-2026-09-22.md`).
+- `research/review-2026-09-22-progress-and-parallelization.md` — latest review and track plan.
+- `plan-gs-gpu-backend-2026-09-18.md` — GPU GS backend plan (partly stale: the G lane now uses paraLLEl-GS).
+- `reserve.md` — parked GameCube/Dolphin work (not scheduled).
+- `plan-120fps-2026-09-17.md`, `impl-plan-2026-09-15.md` — GameCube-route plans, in reserve.
 - `asset-policy.md` — shipped-assets rule; supersedes the remaster rollout.
 
 ## Gate ledger (quote this, not the docs)
