@@ -1,0 +1,56 @@
+Tue Sep 22 15:31:12 UTC 2026
+-rw-r--r-- 1 brad brad 2682545633 Sep 22 11:29 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ D=/home/brad/pcsx2-t4
++ E=/home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ date -u
++ ls -la /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ sha256sum /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+19c1b583304500581f61db20605befff333d2d262c847a997606cde20364ae84  /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ wc -l /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+41969842 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+--- markers ---
++ echo '--- markers ---'
++ grep -m1 -n 'BIOS Found' /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+2:[    0.1240] BIOS Found: USA     v02.00(14/06/2004)  Console 20040614-100909
++ grep -m2 -n ExecPS2 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+142330:[    0.8189] Bios    : Bios call: ExecPS2 (7)
+142426:[    0.8464] Bios    : Bios call: ExecPS2 (7)
++ grep -m1 -n ReBootStart /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+142725:[    0.8569] Bios    :  modload.004: ReBootStart (1ad28, 0, 1c, 1fe5cc)
++ grep -m1 -n sceCdInit /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+405620:[    1.1544] Bios    :  cdvdman.004: sceCdInit (1, 48eb8, 4, 0)
++ grep -m2 -n LoadStartModule /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+417245:[    1.1819] Bios    :  modload.007: LoadStartModule (1d8c8, 0, 1d9c4, 1dac4)
+417510:[    1.1836] Bios    :  modload.007: LoadStartModule (1d8c8, 0, 1d9c4, 1dac4)
++ grep -m1 -n UpdateVSyncRate /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+456189:[    1.4637] UpdateVSyncRate: Mode Changed to DVD NTSC.
++ grep -c UpdateVSyncRate /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+15
++ grep -m1 -n WaitVblankStart /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+417043:[    1.1810] Bios    :   vblank.004: WaitVblankStart (0, 0, 0, 0)
++ grep -c WaitVblankStart /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+397
+138747:[    0.8018] Bios    : Bios call: sceSifGetReg (7a)
++ grep -m1 -n sceSifGetReg /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ grep -c ERROR /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
+0
+--- tail ---
+[  505.9636] DEV9: DEV9close
+[  505.9864] Unloading EGL.
+[  505.9872] DEV9: DEV9shutdown
+[  505.9880] NVRAM has not changed, not writing to disk.
+[  505.9957] Releasing host memory for virtual systems...
+--- census + samples (T4 scripts) ---
++ true
++ echo '--- tail ---'
++ tail -n 5 /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt
++ echo '--- census + samples (T4 scripts) ---'
++ python3 /home/brad/pcsx2-t4/t4-census.py /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/t44-census.txt
+wrote /home/brad/pcsx2-t4/t44-census.txt lines=41969842
++ python3 /home/brad/pcsx2-t4/t4-sample.py /home/brad/pcsx2-t4/dat/PCSX2/logs/emulog.txt /home/brad/pcsx2-t4/t44-samples.txt
+wrote /home/brad/pcsx2-t4/t44-samples.txt lines=41969842
+-rw-r--r-- 1 brad brad 11702 Sep 22 11:32 /home/brad/pcsx2-t4/t44-census.txt
+-rw-r--r-- 1 brad brad  5844 Sep 22 11:32 /home/brad/pcsx2-t4/t44-samples.txt
+Tue Sep 22 15:32:34 UTC 2026
++ ls -la /home/brad/pcsx2-t4/t44-census.txt /home/brad/pcsx2-t4/t44-samples.txt
++ date -u
