@@ -18,6 +18,11 @@ with measured budgets, then 120 Hz simulation.
       title → main menu → Select Character → Select Event/Mode → **Snow
       Jam race loading screen at 99%** (`e31h`, 596 s wall, rider Zoe).
       Now checking hang vs slowness with a no-aggressive-logs build.
+- [ ] Stray PS2 button glyphs/D-pad/L1-R1 boxes in the top-left and
+      bottom-left corners (Brad sees them on the Odin; E31's Mac Select
+      Character dump has them inside the 512×448 guest framebuffer).
+      Suspect off-screen UI sprites wrapping in the CPU GS (scissor/XYOFFSET/
+      coordinate wrap). T47's PCSX2 frames decide; then a small GS fix brief.
 - [ ] If 99% is a hang: diff the recomp's loading-window trace against
       T47's PCSX2 trace (SIF RPC IDs, sound driver/libsd, CD reads).
       Likely next piece: an SSX 3 sound-driver module in the IOP layer
@@ -113,6 +118,10 @@ with measured budgets, then 120 Hz simulation.
       Android-only) sets the CD image and dev flags; ELF + ISO staged and
       verified; title at t+20 s, 0 crashes over 5 min; ~21 guest frames/s
       with frame dumping on. Local branch `n2-android` @ `619d48a`.
+- [ ] Manifest: `android:showWhenLocked="true"` + `android:turnScreenOn="true"`
+      on the NativeActivity so runs work while the Odin stays locked (Brad
+      keeps his PIN lock; 09-22). First unlock after a reboot is still
+      required (credential-encrypted storage). Goes into the next N build.
 - [ ] N4 (after E31): pad-script launch on the Odin to menus/race; a clean
       speed read with frame dumping off; fix PNG frame export on Android
       (raylib FILEIO); arm64 packaging stays. Watch: cpu-1 ~104 °C, and
