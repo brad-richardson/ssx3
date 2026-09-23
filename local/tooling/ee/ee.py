@@ -171,7 +171,7 @@ def cmd_func(args):
     elif a in ex:
         print(f"{a:#x} is an extra_function_starts entry (resume entry of its owner)")
     elif rows:
-        print(f"{a:#x} is an interior address (not a start); an indirect call here needs extra_function_starts")
+        print(f"{a:#x} is an interior address, not a function start (only if something CALLS it does it need an extra_function_starts entry)")
 
 
 def elf_data_refs(a):
