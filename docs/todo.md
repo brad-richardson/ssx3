@@ -398,6 +398,16 @@ with measured budgets, then 120 Hz simulation.
       Adapter authorship (gap 5): after E32, generated code is out of
       tree, so the fork can have multiple worktrees. G authors the
       paraLLEl adapter on its own fork branch; E folds into `ssx3`.
+- [x] **GB2 (09-23, 3994985): step (a) built, fork `gb2-gs-queue` `c937929`**
+      (not pushed; merges cleanly onto `ssx3`). `PS2X_GS_QUEUE=1`: GS thread
+      + bounded FIFO + RPC fences. Byte-exact vs direct on synthetic streams
+      and a 256-packet captured stream; 576/576. Its live-present boot A/B
+      fails (84%), but the queue-off null control fails too (87%): live
+      presents are torn at wall-clock-racy cut points, so that gate was
+      unusable (orchestrator's gate design error). Guest trajectory is
+      identical (park/semaphore histories exact). Queue-on presents are
+      sparser (433 vs ~1320 over the same ticks); that goes to step (d).
+      **Part 2 running:** a quiescent VRAM-hash gate at fixed ticks.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
