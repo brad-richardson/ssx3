@@ -147,7 +147,8 @@ with measured budgets, then 120 Hz simulation.
 - [x] **E39 PASS (09-23):** `PS2X_VIF_MPG_LOG` (491/491, fork `0e9b5d0`):
       37,596 MPGs in vsyncs 0–1377, all copied, no drop path fires; every
       `addr=0` upload carries our `LQI` at slot 2.
-- [ ] **Missing per-frame DMA pass (orchestrator, 09-23, from T50 + a read of
+- [x] ~~Missing per-frame DMA pass~~ **refuted by E40 Part 6** (fork `338ad99`): the recomp kicks both sites every vsync, its VIF1-end handler drives the state 5→0→1→2→3→4 like PCSX2; the second chain's CALLs simply point at uploader `0x435bd0` instead of `0x434990`. **E40 Part 7:** whole-boot write watch on those CALL tags' ADDR words (0x63b994/0x63bbe4/0x63bea4/0x63c134 …) to catch the chain builder and its table index. Original note:
+      (orchestrator, 09-23, from T50 + a read of
       `sub_00382760`):** PCSX2 uploads microcode from two uploaders per frame
       (`0x435bd0` ×4 and `0x434990` ×2) and kicks from two paths in the render
       DMA thread (ra `0x382938` and `0x3827e8`); the recomp only ever takes the
