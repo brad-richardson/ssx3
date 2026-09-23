@@ -2,16 +2,16 @@
 
 Milestone: stock SSX 3 gameplay through our PS2 static recomp runtime on Odin.
 Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`.
-Updated 2026-09-22 evening.
+Updated 2026-09-22 ~21:00 on the **Mac mini** (host of record; laptop retired, still the bytesize jump host).
 
 | Lane | State | Pinned rev | Next action | Blocker / lease |
 | --- | --- | --- | --- | --- |
-| E (PS2 runtime) | E31 running: **Snow Jam loading screen at 99%** (Mac, bypass + pad script); E30 PASS (fix + regression as diffs) | fork `ssx3` @ `3d4feed` (scrubbed; was `3adc0478`); bypass `e29-movie-bypass` @ `ee39b9f` | Gate E31 → next blocker or race; E32 fold → E33 apply E30's fix | P-lane lease + fork (E31) |
-| G (GS composite) | G41 PASS: masking refuted, B-loss depends on pass context. G42 running: Mesa Turnip contrast | clone `3a66c19` + G26/G28 + G40/G41 hunks | Gate G42 → bundle Turnip or pipeline fix | Odin (G42) |
-| N (Android) | **N3 PASS: SSX 3 title screen boots natively on the Odin** (recomp, dev bypass, CPU GS) | bytesize `n2-android` @ `619d48a` (local) | N4 menus/race + clean speed read (after E31) | Odin lease |
-| T (PCSX2 reference) | T47 running: reference frames for the front-end screens the recomp reaches | bytesize WSL | Gate T47 | bytesize (T47) |
-| Perf / GS bridge | PF1 running (clean baseline, Odin now, Mac after E31); GB1 PASS (bridge design: queue at the GIF arbiter, CPU backend as reference) | fork `ssx3` @ `3d4feed` | Gate both → threading + integration plan | Odin lease (PF1) |
-| V (storage) | V1 PASS (audit ×2, manifest, smoke, cutover list) | — | Mac mini cutover | **Brad: mini not set up** |
+| E (PS2 runtime) | **E31: stock race runs on the Mac** (Happiness Rival: HUD, timer 00:00:03 → 00:00:04); Snow Jam stalls at 99%. E31 close-out (paper) + **E32 fold running on the mini's internal disk** | fork `ssx3` @ `3d4feed`; bypass + pad script `fork/e29-movie-bypass` @ `ee39b9f` | Gate E31, E32 → E33 apply E30's fix; Snow Jam stall diagnosis after T47 | P-lane lease (E32) |
+| G (GS composite) | G41 PASS. G42 resumed on the mini: Mesa Turnip contrast, Odin runs now | clone `3a66c19` + G26/G28 + G40/G41 hunks (SSD `parallel-gs-g7`) | Gate G42 → bundle Turnip or pipeline fix | Odin (G42 first) |
+| N (Android) | N3 PASS: title screen natively on the Odin | bytesize `n2-android` @ `619d48a` (local) | N4 after PF1's Odin race attempt: showWhenLocked, PNG export, clean build | bytesize via laptop jump |
+| T (PCSX2 reference) | T47 close-out (REPORT + SHA read-2; captures and loading timeline done) | bytesize WSL | Gate T47 | none |
+| Perf / GS bridge | PF1 resumed: Odin title baseline done (21.5 guest vsyncs/s = 0.36×, GameThread 99%); launch 6 = **first Odin race attempt** (Happiness, 900 s cap). Mac mission moved to a post-E32 brief | N3 APK `69a79e29…` | Gate PF1 → GS bridge step (a) | Odin after G42 |
+| V (storage) | **Mini is up** (smoke 458/458 at 19:13). V2 running: SSD inventory for a cleanup pass (read-only) | — | Orchestrator deletes from V2's table; Brad decides NOT-SSX3 rows | Brad: Tailscale on the mini |
 | I (iOS) | Parked | `i23-ffmpeg-ios` @ `aa73dbc` | Re-probe after E30 | needs E change |
 | GameCube | Reserve (`docs/reserve.md`) | — | none | — |
 
