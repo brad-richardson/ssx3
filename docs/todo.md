@@ -496,6 +496,20 @@ with measured budgets, then 120 Hz simulation.
       - Recommendation: fence before every guest load in the GS priv range.
       - Part 7 validates it: 2 queue-on boots must match queue-off and each
         other.
+      **Part 7 (564d18f), lane PARKED at step (a):**
+      - With the full-priv drain, queue-on is **guest-timeline-identical
+        to queue-off** (144,591/144,591 packets, 5,017/5,017 priv reads)
+        and **deterministic** (the two on-boots are bit-identical).
+        Present rate is back to off-level.
+      - VRAM still differs. Mechanism: direct guest priv STORES
+        (`write32` → `gsRegs` on the game thread) bypass the queue while
+        packet A+D writes run late on the worker, so the rasterizer sees
+        a different register order.
+      - **Next (Opus, when picked up):** route direct priv stores through
+        the worker in stream, then re-run VQ (expect 26/26).
+      - Open: which pre-tick-80 wall-racy input picks the attractor when
+        there's no drain (pinning / IOP-MPEG audit).
+      - All code is on `gb2-gs-queue` `c5fd6f3` (not pushed).
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
