@@ -284,9 +284,12 @@ with measured budgets, then 120 Hz simulation.
 - [ ] **Pad script keyed on guest vsyncs** (`PS2X_PAD_SCRIPT_CLOCK=vsync`)
       so one script replays the same on Mac and Odin. Goes into the E33
       instrumentation brief; then N4 carries it to the Odin.
-- [ ] Static read: how SSX 3 steps its simulation (per-vsync constants vs
-      measured dt). Shapes the 120 Hz timing design (VBlank is fixed at
-      16667 µs and the loop is capped at `SetTargetFPS(60)`). Low priority.
+- [x] **X2 (local Qwen, 09-22): PARTIAL.** Confirmed the counted step loop at
+      0x317184 (`$s1++` per `func_317328` call vs limit `state+0x20`, in
+      `sub_00316F00`), matching the published patch site; its "WaitVSync"
+      sites are SetSyscall (0x74) and its "VU microcode" is EE code
+      (`local/research/X2/ORCH-CORRECTIONS.md`). Next: runtime read of the
+      per-frame iteration count and `state+0x20` (E lane, after E33).
 - [ ] Save states for the recomp runtime (global/static state is the
       obstacle). Would cut ~10 min boots to the loading screen. Queue.
 
