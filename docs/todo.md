@@ -44,7 +44,7 @@ with measured budgets, then 120 Hz simulation.
       stalls at 99% (live loop, no CD reads, no park). Odin reuse string: E31
       REPORT §e31l. Guest speed varies a lot (title 23 ticks/s, 3D menus
       1–3 fps with the software GS).
-- [ ] **Sprite/texture addressing as a common cause (Brad, 09-22, re-flagged):**
+- [x] **Sprite/texture addressing (Brad, 09-22) → answered by G44 for the menu: the stray sprites come from the game's draw stream, not GS cropping (both GS backends agree; PCSX2 differs).** Original note:
       wrong sprite-sheet cell selection/cropping may explain many graphics
       faults, possibly the missing rider too: SSX 3 renders some content to
       an offscreen buffer and composites it as a textured sprite (G13:
@@ -188,10 +188,19 @@ with measured budgets, then 120 Hz simulation.
 - [ ] N lane: bundle `libvulkan_freedreno.so` (Turnip v36, `717812c3…`) in
       the APK and load it through G43's HMI hook when the GPU GS lands on
       Android (GB1 step c).
-- [ ] **G44 (Part 3 running: diagnostic SMODE1=NTSC+ANALOG override in the shadow only; S3 showed LC=0 also blocks):** shadow path builds and renders in-process
-      (470/470, branch `g44-parallel-shadow` @ `460e438`, not pushed) but 0 frame
-      pairs: the recomp's SMODE1 reads 0 (`CMOD=0 LC=0`, `SMODE2.INT=1`), which
-      paraLLEl scanout rejects. S3 validates the NTSC-geometry workaround.
+- [x] **G44 PASS (09-23, Part 3): paraLLEl shadow works inside the recomp**
+      (branch `g44-parallel-shadow` `460e438`+`8c45d1f`+`6cfede4`, 471/471, not
+      pushed) with a diagnostic `PS2X_GS_SHADOW_FORCE_SMODE1=ntsc` override:
+      200/200 scanouts, feeds in lockstep (53 dB on a fade after a 1–2 px crop
+      shift). **H4 answered for the menu (orchestrator viewed `side-1190.png`
+      vs `t47-shot-menu.png`):** CPU and paraLLEl draw the same frame,
+      including the ghost controller diagram, button icons, R1/L1 boxes, D-pad
+      and floating shard quads, and both lack PCSX2's 3D mountain backdrop and
+      snowflakes. So the "sprite sheet" glitches are draws the game emits
+      (upstream of the GS: VU1/VIF, same area as the missing rider), not CPU
+      backend sprite cropping. Side note: PCSX2 greys out Multi Play/Online;
+      the recomp shows them enabled (network/multitap state differs).
+      Select Character pairs not captured (cap filled at tick 1199).
 - [ ] **E lane: `SetGsCrt` (syscall 0x02) HLE should program SMODE1/SMODE2
       like the real kernel** (NTSC/PAL, interlace, field/frame). Today SMODE1
       stays 0, which blocks any real scanout backend (G44) and may matter for
