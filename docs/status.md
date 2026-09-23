@@ -8,10 +8,10 @@ Updated 2026-09-22 ~21:00 on the **Mac mini** (host of record; laptop retired, s
 | --- | --- | --- | --- | --- |
 | E (PS2 runtime) | **E32 PASS**: one primary branch, `fork/ssx3` @ `e57b5f8` (bypass, pad script, codegen dir, weave deinterlace). **E33 running**: 3D instrumentation (VU1 budget, per-path draws) + vsync-keyed pad script | fork `ssx3` @ `e57b5f8`, checkout `~/dev/PS2Recomp` | Gate E33 → budget fix or GS-side hunt; E34 apply E30's fix | P-lane lease (E33) |
 | G (GS composite) | **G43 PASS: Turnip renders the scene (PSNR 70–78 dB vs Mac); proprietary driver at fault → bundle Turnip.** G44 running: paraLLEl in shadow mode inside the recomp (Mac) | paraLLEl working copy `~/dev/ssx3-work/G43/parallel-gs` (= `wip/ssx3-snapshot` + G43 hunk) | Gate G44 → GS bridge (a)/(b) | P-lane lease shared with E33 |
-| N (Android) | **N4 PASS**: APK on the folded fork, profileable, lock-screen-safe; first Odin profile: title GS-bound, Select Character VU1-bound (0.2 vsyncs/s) | bytesize `n2-android` = `e57b5f8` + 4 local commits | N5 Odin race with E33's vsync pad clock | bytesize via laptop jump; Odin lease |
+| N (Android) | **N4 PASS**: APK on the folded fork, profileable, lock-screen-safe; first Odin profile: title GS-bound, Select Character VU1-bound (0.2 vsyncs/s) | bytesize `n2-android` = `e57b5f8` + 4 local commits | N5 Odin race with E33's vsync pad clock | Odin lease |
 | T (PCSX2 reference) | **T47 PASS**: reference frames show the recomp misses 3D models and draws wrong sprite cells | bytesize WSL | T48: PCSX2 GS dumps for the 3D gap (drafting) | none |
 | Perf / GS bridge | **PF1 PASS**: Odin 0.36–0.43× in title/menus, GameThread saturated; no Odin race yet (script desync) | N3 APK `69a79e29…` | Mac clean baseline after E32; profileable APK for symbols (N) | — |
-| V (storage) | Mini is up. SSD tier-1 cleanup done (free 27 → 369 GB); tier 2 (parked I-lane dirs) now unblocked by the fold | — | Brad decides the GameCube-reserve and personal folders | Brad: Tailscale on the mini |
+| V (storage) | Mini is up. SSD tier-1 cleanup done (free 27 → 369 GB); tier 2 (parked I-lane dirs) now unblocked by the fold | — | Brad decides the GameCube-reserve and personal folders | — |
 | I (iOS) | Parked | `i23-ffmpeg-ios` @ `aa73dbc` | Re-probe after E30 | needs E change |
 | GameCube | Reserve (`docs/reserve.md`) | — | none | — |
 
