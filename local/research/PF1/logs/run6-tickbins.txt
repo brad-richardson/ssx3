@@ -1,0 +1,27 @@
+# PF1 launch 6 — guest tick rate per wall minute (from [frame:dump] tick= in logcat6.txt)
+# t0 = 2026-09-23T00:49:05Z (am start, pid 22528). Device clock = UTC-4.
+# min 0-4: NO dump lines — system USB dialog covered the app, present suppressed,
+#   guest advanced silently (tick 0 -> 6116 unseen). Rates below are tick-gated dumps.
+# min 5: dialog dismissed ~t+330 (BACK), dumps resume t+358.
+# Screens viewed: t+360 Select Event (Snow Jam highlighted), t+490 Select Event
+#   (Happiness highlighted), t+730 My Rules, t+900 My Rules.
+min  0 (t+  0- 59s): n=    1 tick 0->0         (only seq=0 at boot; presents suppressed)
+min  1 (t+ 60-119s): n=    0 (suppressed)
+min  2 (t+120-179s): n=    0 (suppressed)
+min  3 (t+180-239s): n=    0 (suppressed)
+min  4 (t+240-299s): n=    0 (suppressed)
+min  5 (t+300-359s): n=   59 tick 6116->6174  rate=1.0/s   (heavy 3D menu? screen unseen)
+min  6 (t+360-419s): n= 1265 tick 6175->7441  rate=21.1/s  (Select Event)
+min  7 (t+420-479s): n= 1254 tick 7442->8695  rate=20.9/s  (menus)
+min  8 (t+480-539s): n= 1391 tick 8696->10086 rate=23.2/s  (Select Event, Happiness @t+490)
+min  9 (t+540-599s): n= 1523 tick 10087->11609 rate=25.4/s (event confirm -> My Rules)
+min 10 (t+600-659s): n= 1498 tick 11610->13107 rate=24.9/s (My Rules, no input left)
+min 11 (t+660-719s): n= 1524 tick 13108->14631 rate=25.4/s (My Rules)
+min 12 (t+720-779s): n= 1505 tick 14632->16136 rate=25.1/s (My Rules, viewed t+730)
+min 13 (t+780-839s): n= 1536 tick 16137->17672 rate=25.6/s (My Rules)
+min 14 (t+840-899s): n= 1501 tick 17673->19173 rate=25.0/s (My Rules)
+min 15 (t+900-959s): n= 1533 tick 19174->20706 rate=25.5/s (My Rules, viewed t+900)
+min 16 (t+960-1019s): n= 180 tick 20707->20886 rate=3.0/s  (tail: force-stop @t+908)
+# Derived: unfocused guest 0->6116 over ~330 s = ~18.5/s (title + early menus, present off).
+# Focused guest 6116->20886 over ~578 s = 25.5/s = 42.6% of 59.94 (menus + My Rules).
+# Full-run average 20886/908 = 23.0/s = 38.4% of real time (includes unfocused period).

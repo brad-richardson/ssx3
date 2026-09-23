@@ -1,0 +1,14 @@
+# PF1 launch 6 — thread CPU + thermal + battery (pid 22528)
+# top -H mid-run (~t+430, Select Event phase):
+#   GameThread  TID 22573  R  100% inst, TIME+ 7:08  (23 threads total, 2 running)
+#   main (com.ps2x.runner) TID 22549  R 50.0% inst, TIME+ 0:37
+# top -H end-run (~t+855, My Rules phase):
+#   GameThread  R  100% inst, TIME+ 13:11.82  => 791 s CPU / ~855 s wall = ~92.5%
+#   (main thread line not captured in end snapshot; mid-run total 37 s / ~430 s = ~8.6%)
+# App total steady thirds previously ~111.8% (runs 1-2); launch 6 same shape.
+# Thermal (max zone): 103900 pre/during/end (sustained 103.9 C hottest zone).
+#   runner-up zones 93800 / 91900 / 83700. Same band as runs 1-2 (80-104 C osc).
+# Battery: 95% (claim, charging, AC) -> 93% (mid) -> 92% (end). status=3 (charging)
+#   throughout: charger cannot keep up with sustained load (discharges while charging).
+# CPU-ms per guest frame (GameThread, My Rules ~25.5 ticks/s @ ~92.5%): ~36 ms.
+#   Title (runs 1-2, 21.5 ticks/s @ 99.3%): ~46 ms.
