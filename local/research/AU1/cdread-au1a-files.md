@@ -1,0 +1,64 @@
+| File | Reads | Sectors | MiB | First vsync | Last vsync | Modes |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `(no file)` | 19 | 19 | 0.04 | 2 | 38 | sceCdRead 19 |
+| `/DATA/UI/MAPGFX.BIG` | 67 | 67 | 0.13 | 41 | 1868 | sceCdRead 67 |
+| `/DATA/AUDIO/MUSIC.BIG` | 3 | 3 | 0.01 | 53 | 53 | sceCdRead 3 |
+| `/DATA/AUDIO/MUSIC2.BIG` | 61 | 337 | 0.66 | 53 | 7092 | sceCdRead 61 |
+| `/DATA/AUDIO/AUDIO.BIG` | 11 | 40 | 0.08 | 53 | 4009 | sceCdRead 11 |
+| `/DATA/AUDIO/SPEECH.BIG` | 19 | 107 | 0.21 | 53 | 1402 | sceCdRead 19 |
+| `/DATA/SCRIPTS/SCDAT.BIG` | 19 | 21 | 0.04 | 53 | 4016 | sceCdRead 19 |
+| `/DATA/CHAR/MDLPS2.BIG` | 118 | 296 | 0.58 | 53 | 4019 | sceCdRead 118 |
+| `/DATA/CHAR/MOBYTXP.BIG` | 3 | 13 | 0.03 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/KAORITXP.BIG` | 3 | 11 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/ALLEGTXP.BIG` | 3 | 12 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/MACTXP.BIG` | 16 | 69 | 0.13 | 53 | 4021 | sceCdRead 16 |
+| `/DATA/CHAR/ZOETXP.BIG` | 75 | 128 | 0.25 | 53 | 3995 | sceCdRead 75 |
+| `/DATA/CHAR/GRIFFTXP.BIG` | 3 | 10 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/ELISETXP.BIG` | 3 | 10 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/NATETXP.BIG` | 3 | 9 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/PSYMOTXP.BIG` | 3 | 10 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/VIGGOTXP.BIG` | 3 | 11 | 0.02 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CHAR/OTHERTXP.BIG` | 5 | 5 | 0.01 | 53 | 4021 | sceCdRead 5 |
+| `/DATA/CHAR/RWRDPS2.BIG` | 3 | 6 | 0.01 | 53 | 53 | sceCdRead 3 |
+| `/DATA/CONFIG/INPUT.MAP` | 2 | 7 | 0.01 | 53 | 53 | sceCdRead 2 |
+| `/DATA/CONFIG/INPUT2.MAP` | 2 | 7 | 0.01 | 55 | 55 | sceCdRead 2 |
+| `/DATA/FONTS/FEFONT.SFN` | 3 | 29 | 0.06 | 57 | 57 | sceCdRead 3 |
+| `/DATA/FONTS/HUDFONT.SFN` | 2 | 8 | 0.02 | 57 | 57 | sceCdRead 2 |
+| `/DATA/CHAR/BOLTPS2.DAT` | 270 | 270 | 0.53 | 57 | 57 | sceCdRead 270 |
+| `/DATA/BE/RWRDPS2.DAT` | 2 | 13 | 0.03 | 57 | 57 | sceCdRead 2 |
+| `/DATA/BE/CHARDB.DBL` | 1 | 1 | 0.00 | 57 | 57 | sceCdRead 1 |
+| `/DATA/LOCALE/CMNAMER.LOC` | 5 | 56 | 0.11 | 65 | 65 | sceCdRead 5 |
+| `/DATA/CONFIG/MUSIC.INF` | 11 | 11 | 0.02 | 65 | 65 | sceCdRead 11 |
+| `/DATA/CONFIG/PLAYLIST.INF` | 1 | 1 | 0.00 | 65 | 65 | sceCdRead 1 |
+| `/DATA/CONFIG/MIX.INF` | 1 | 1 | 0.00 | 66 | 66 | sceCdRead 1 |
+| `/DATA/AUDIO/ENGLISH.BIG` | 4 | 17 | 0.03 | 66 | 77 | sceCdRead 4 |
+| `/DATA/CONFIG/SPEECH.INF` | 1 | 1 | 0.00 | 66 | 66 | sceCdRead 1 |
+| `/DATA/CONFIG/WATRIG.ADL` | 2 | 2 | 0.00 | 78 | 78 | sceCdRead 2 |
+| `/DATA/UI/SU.LUI` | 2 | 3 | 0.01 | 80 | 80 | sceCdRead 2 |
+| `/DATA/UI/SU_1.SSH` | 6 | 66 | 0.13 | 80 | 80 | sceCdRead 6 |
+| `/DATA/TEXTURES/PARTICLE.SSH` | 14 | 192 | 0.38 | 230 | 3984 | sceCdRead 14 |
+| `/DATA/LOCALE/FEAMER.LOC` | 3 | 30 | 0.06 | 230 | 230 | sceCdRead 3 |
+| `/DATA/LOCALE/CRAMER.LOC` | 3 | 22 | 0.04 | 230 | 230 | sceCdRead 3 |
+| `/DATA/LOCALE/TOSAMER.LOC` | 4 | 46 | 0.09 | 230 | 230 | sceCdRead 4 |
+| `/DATA/UI/FE.LUI` | 15 | 220 | 0.43 | 230 | 230 | sceCdRead 15 |
+| `/DATA/UI/FE_1.SSH` | 63 | 980 | 1.91 | 230 | 230 | sceCdRead 63 |
+| `/DATA/CHAR/ANM.BIG` | 86 | 639 | 1.25 | 230 | 3985 | sceCdRead 86 |
+| `/DATA/WORLDS/IRR.DAT` | 4 | 8 | 0.02 | 233 | 3912 | sceCdRead 4 |
+| `/DATA/MOVIES/EABIG.MPC` | 15 | 240 | 0.47 | 249 | 249 | sceCdRead 15 |
+| `/DATA/MOVIES/THX.MPC` | 15 | 240 | 0.47 | 252 | 252 | sceCdRead 15 |
+| `/DATA/MOVIES/INTRO_DJ.MPC` | 16 | 256 | 0.50 | 255 | 257 | sceCdRead 16 |
+| `/DATA/UI/GL.LUI` | 3 | 18 | 0.04 | 3907 | 3907 | sceCdRead 3 |
+| `/DATA/UI/GL_1.SSH` | 14 | 196 | 0.38 | 3907 | 3907 | sceCdRead 14 |
+| `/DATA/UI/COURSPIC.BIG` | 35 | 35 | 0.07 | 3907 | 3907 | sceCdRead 35 |
+| `/DATA/LOCALE/OVAMER.LOC` | 3 | 33 | 0.06 | 3911 | 3911 | sceCdRead 3 |
+| `/DATA/FONTS/DEBUGFNT.SFN` | 2 | 5 | 0.01 | 3911 | 3911 | sceCdRead 2 |
+| `/DATA/TEXTURES/CRWD.SSH` | 6 | 66 | 0.13 | 3912 | 3912 | sceCdRead 6 |
+| `/DATA/WORLDS/BAM.BIG` | 134 | 2114 | 4.13 | 3912 | 4049 | sceCdRead 134 |
+| `/DATA/TEXTURES/EFFECTS.SSH` | 7 | 96 | 0.19 | 3984 | 3984 | sceCdRead 7 |
+| `/DATA/FONTS/MENU.SSH` | 2 | 9 | 0.02 | 4003 | 4003 | sceCdRead 2 |
+| `/DATA/CONFIG/CROWD.INF` | 1 | 1 | 0.00 | 4004 | 4004 | sceCdRead 1 |
+| `/DATA/AUDIO/GRNT_AI.BNK` | 3 | 27 | 0.05 | 4016 | 4016 | sceCdRead 3 |
+| `/DATA/UI/OV.LUI` | 14 | 209 | 0.41 | 4016 | 4016 | sceCdRead 14 |
+| `/DATA/UI/OV_1.SSH` | 16 | 237 | 0.46 | 4016 | 4016 | sceCdRead 16 |
+
+non-read lines: {'plant': 1019}

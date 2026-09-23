@@ -1,0 +1,38 @@
+== SNDDRV.IRX (96016 B)
+  import libsd    v0x0105 fns=[4, 5, 6, 7, 9, 10, 11, 17, 18, 20, 23, 26]
+  import sysmem   v0x0101 fns=[4, 5, 14]
+  import intrman  v0x0102 fns=[17, 18]
+  import loadcore v0x0103 fns=[5]
+  import sifcmd   v0x0101 fns=[4, 8, 10, 12, 13, 17, 19, 20, 21]
+  import sifman   v0x0101 fns=[8]
+  import sysclib  v0x0103 fns=[8, 14, 19, 27]
+  import thbase   v0x0102 fns=[4, 6, 20, 24, 25, 26, 33, 34, 40]
+== LIBSD.IRX (28557 B)
+  import intrman  v0x0102 fns=[4, 5, 6, 7, 17, 18, 23]
+  import loadcore v0x0103 fns=[5, 6]
+  import sifman   v0x0101 fns=[7, 8]
+  import sysclib  v0x0103 fns=[17]
+  import thevent  v0x0101 fns=[4, 5, 6, 7, 8, 9, 10]
+  export libsd    v0x0105
+== LGAUD.IRX (45109 B)
+  import usbd     v0x0101 fns=[4, 5, 6, 7, 8, 9, 10, 11, 18]
+  import sysmem   v0x0101 fns=[4, 5]
+  import intrman  v0x0102 fns=[17, 18]
+  import loadcore v0x0103 fns=[6, 7]
+  import modload  v0x0106 fns=[17, 18]
+  import sifcmd   v0x0101 fns=[14, 17, 19, 22]
+  import stdio    v0x0103 fns=[4]
+  import sysclib  v0x0103 fns=[7, 14, 27, 36]
+  import thbase   v0x0102 fns=[4, 6, 9, 20]
+  import thsemap  v0x0101 fns=[4, 5, 6, 8]
+  export lgaud    v0x0108
+== VOIPF.IRX (16105 B)
+  import lgaud    v0x0108 fns=[4, 5, 6, 7, 8, 11, 12, 13, 14, 16, 17, 18, 19, 20]
+  import inet     v0x0101 fns=[6, 7, 8, 11, 12, 13, 15, 24, 25]
+  import intrman  v0x0102 fns=[8, 9]
+  import sifcmd   v0x0101 fns=[14, 17, 19, 22]
+  import sifman   v0x0101 fns=[7]
+  import stdio    v0x0103 fns=[4]
+  import sysclib  v0x0103 fns=[11, 14, 36]
+  import thbase   v0x0102 fns=[4, 6, 33]
+  import vblank   v0x0101 fns=[4, 6]
