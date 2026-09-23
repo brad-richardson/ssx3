@@ -147,6 +147,17 @@ with measured budgets, then 120 Hz simulation.
 - [x] **E39 PASS (09-23):** `PS2X_VIF_MPG_LOG` (491/491, fork `0e9b5d0`):
       37,596 MPGs in vsyncs 0–1377, all copied, no drop path fires; every
       `addr=0` upload carries our `LQI` at slot 2.
+- [ ] **Missing per-frame DMA pass (orchestrator, 09-23, from T50 + a read of
+      `sub_00382760`):** PCSX2 uploads microcode from two uploaders per frame
+      (`0x435bd0` ×4 and `0x434990` ×2) and kicks from two paths in the render
+      DMA thread (ra `0x382938` and `0x3827e8`); the recomp only ever takes the
+      first. The thread's state word `*(0x61ba60+0x5A8C)` (EE `0x6214EC`): 0 →
+      kick pass 1 and set 1; non-zero (≠5) on wake → kick pass 2. In the recomp
+      the thread always wakes with state 0, so pass 2 (microcode set A + its
+      MSCALs) never runs and those MSCALs execute set B's code. Suspect: the
+      interrupt/completion model (DMA-end/GS handler that advances the state
+      and signals the sema). **T51 (PCSX2) running; recomp side = E40 Part 6
+      after Part 5.** T50 PASS (3d89659).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
