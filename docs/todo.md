@@ -727,6 +727,9 @@ with measured budgets, then 120 Hz simulation.
   - Open: physical X/Y button positions (N6 §5, 2-minute hands-on test for
     Brad). Analog L2/R2 axes are unmapped by design (digital keys drive
     them).
+- [ ] **N5 running (09-23 evening, Opus):** `n2-android` rebased onto
+      `eac6cba` + E45 `310b30f`, canonical codegen, dumps-off APK, Odin
+      speed through the race, simpleperf in the race.
 - [ ] N5: Odin race with E33's vsync-keyed pad script (after E33), plus a
       dumps-off build for a quotable speed number.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
