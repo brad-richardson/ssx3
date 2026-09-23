@@ -454,6 +454,7 @@ t0/tw0 (needs a relaxed appx filter); the 0x30 setter pc
 ## Receipts
 
 - Fork rev: `571579e` (pushed `a932aff..571579e`, `git ls-remote fork ssx3` = `571579e…`).
+- Part-4 fork rev: `e52b6bf` (pushed `943d609..e52b6bf`, runner-dir gate clean).
 - Runner SHAs ×2: A `2ddd59ec27cee4ab6c76953368568ff952787bba`
   (uncommitted spw-only tree); B `1580db6a353f7290ff098e4ebd38758b600d8bab`;
   C `dec5464a77ae1e2ec250f6b44722a0adba30520b`.
