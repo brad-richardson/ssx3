@@ -73,8 +73,7 @@ with measured budgets, then 120 Hz simulation.
       verified: remote head, runner check, and all 15 side branches
       content-contained in `ssx3` (`git cherry` + file compare for the
       map/tap rows).
-- [ ] **Prune the 15 folded fork branches** (auto mode blocked the remote
-      delete; Brad to run or allow): `git -C ~/dev/PS2Recomp push fork
+- [x] **Pruned the 15 folded fork branches** (Brad approved 09-22); fork heads now `main`, `ssx3`, `feature/iop-emulator`. Was: `git -C ~/dev/PS2Recomp push fork
       --delete e29-movie-bypass i23-ffmpeg-ios i8-device-bundle-name
       archive/i10-codegen-dir archive/i10-codegen-dir-alt archive/i11-map …
       archive/i17-map archive/i18-tap archive/i21-drop-a archive/i21-drop-b`.
@@ -110,8 +109,24 @@ with measured budgets, then 120 Hz simulation.
       instead of 136. The driver question is still open. The system control
       replicated G41-O1 **except C1 landed** (run variance or hunk perturbation,
       unseparated).
-- [ ] **G43 (running):** struct fix + Turnip rerun + C1 repeat; G lane moves
-      to internal (`~/dev/ssx3-work/G43`), NDK r30 onto the mini.
+- [x] **G43 PASS (09-22): Turnip renders.** With the HAL layout fixed,
+      Turnip (Mesa, API 1.4.359) initializes in the shell replayer; B lands
+      with full coverage and the scanouts match the Mac to PSNR 70–78 dB
+      (vsync0/first bit-identical; orchestrator compared by eye and PSNR),
+      while the proprietary driver's scanouts stay blank and its canary
+      losses vary run to run (G41 C1, G42 none, G43 C1+C4). **Verdict:
+      proprietary Adreno driver fault; bundle Turnip** (Brad approved
+      shipping Turnip). Sub-LSB differences vs Mac are accepted, not chased.
+- [ ] N lane: bundle `libvulkan_freedreno.so` (Turnip v36, `717812c3…`) in
+      the APK and load it through G43's HMI hook when the GPU GS lands on
+      Android (GB1 step c).
+- [ ] **G44 (running):** paraLLEl-GS in shadow mode inside the recomp on
+      the Mac (G-owned fork branch `g44-parallel-shadow`), per-vsync
+      compare vs the CPU backend at title/menu/Select Character; also the
+      H2 cross-check for the missing 3D.
+- [ ] parallel-gs / Granite forks: fix-only `ssx3` branches (G26, G28, the
+      G42/G43 Turnip HAL loader) once G44 settles the adapter's needs;
+      pushing needs Brad's OK.
 - [ ] Commit G26 + G28 in the clone after the storage cutover (G39
       decision: carried diffs until then), with a clean rebuild and G39's
       R1/R2 shapes re-run as proof.
@@ -199,7 +214,8 @@ with measured budgets, then 120 Hz simulation.
       already gone). Keep the SSD `ps2x-i*/fork-wt` worktrees: they are
       the only refs holding the branchless I10–I21 commits until the fold.
 - [x] **V2 PASS (09-22): SSD inventory** (`local/research/V2/INVENTORY.md`).
-- [ ] **SSD cleanup tier 1 (awaiting Brad's approval to delete):** 59 entries in
+- [x] **SSD cleanup tier 1 done (Brad approved 09-22):** 99 deletions, 0 failures, free 27 → 369 GB (`local/research/V2/delete-tier1.log`).
+      Was: 59 entries in
       `local/research/V2/delete-tier1.txt` (closed build trees, public
       clones, stale closed-lane scratch, `ps2x-p1y` whose commits are on
       `fork/archive/*`) plus the 40 `ps2x-t4` logs that the share holds at the
