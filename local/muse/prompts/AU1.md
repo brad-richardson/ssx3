@@ -1,0 +1,61 @@
+# AU1 — Sound: scope what SSX 3 needs and the routes to audible audio (read-mostly scoping)
+
+You are a worker in a herdr pane in the ssx3 repo (`~/dev/ssx3`, Mac mini).
+Follow `~/dev/AGENTS.md`. **Tables + receipts; recommend, the orchestrator
+decides.** Read first:
+- `AGENTS.md`;
+- `local/AGENTS.local.md` (the `ee-*` helpers; cite the repo, not the web,
+  for PS2/SSX 3 facts);
+- `docs/todo.md` (the E-lane Snow Jam notes: "no handler exists today;
+  `Audio.cpp` covers libsd transfers only");
+- `local/research/T47/REPORT.md` and `local/research/X1/ORCH-CORRECTIONS.md`.
+
+## Why
+
+The route now reaches a rendered race, and nobody has touched audio. For a
+real run on the Odin and iPhone we need sound: menu music, the in-race
+EA Radio stream (the HUD shows it), and SFX.
+
+## Questions (answer with evidence)
+
+1. **What the game loads on the IOP:** every IRX module
+   (`SifLoadModule` paths or names from the boot log and the ISO), and
+   every SIF RPC server ID the EE binds, with call counts from one
+   current Mac boot to the race. Which ones are sound (libsd/libsnd2,
+   EA's own sound driver, streaming/ADPCM, MPEG audio for the movies)?
+2. **How the runtime handles each today:** stubbed, HLE, or missing
+   (`ps2xRuntime/src/lib/Kernel/…`, `Audio.cpp`, `ps2xIOP/`). What does the
+   guest get back, and is any audio produced at all? Is there an audio
+   device path through raylib/SDL?
+3. **Data:** where sound banks and music streams live on the ISO (file
+   names, formats: VAG/ADPCM, EA's formats), and how they're read (CD
+   streaming via the IOP).
+4. **Routes, with a cost estimate for each:**
+   - (a) HLE the game's sound-driver RPC interface on the EE side, plus a
+     host mixer: decode ADPCM and play the streams and SFX through SDL
+     audio;
+   - (b) LLE: run the real IOP sound modules on an IOP emulator (upstream
+     PS2Recomp `feature/iop-emulator`? What state is it in? Read only; no
+     upstream contact) plus an SPU2 core;
+   - (c) a hybrid: real driver logic via a small IOP emulation plus an
+     SPU2 port.
+
+   Include what each route needs for accuracy vs effort, and Odin/iOS
+   performance concerns.
+5. **The smallest audible first milestone:** e.g. the menu music stream
+   only. What's the shortest path to it?
+
+## Budgets
+
+Read-mostly. ≤1 Mac boot (one slot, E33 or I26's fast route, logs on)
+for the module and RPC census. 4 h, cap 2 GB. No code changes except an
+env-gated census tap if one doesn't already exist (the
+`PS2X_TRACE_SYSCALLS` and SIF RPC logging may already cover it).
+
+## Deliverable
+
+`local/research/AU1/REPORT.md`: the module/RPC table, the runtime status
+table, the data table, the route comparison, and the first-milestone
+proposal. `[AU1]` commit (`git add -f local/research/AU1
+local/muse/prompts/AU1.md`, `git log -1` first, trailer `Orchestrated-By:
+Claude Code`).

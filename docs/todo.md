@@ -819,7 +819,7 @@ with measured budgets, then 120 Hz simulation.
 
 ## A — audio (new 09-23)
 
-- [ ] **A1 (Opus, scoping):** the IOP module and SIF RPC census, the
+- [ ] **AU1 (Opus, scoping):** the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
       the smallest audible milestone.
