@@ -500,3 +500,177 @@ comment). (1) points elsewhere ⟹ **STOP, no validation boots.**
   --snap 10.0 --script "<E33 route>" --pklog` and `--label gb2f ... --pklog
   --gs-queue 1`; compare = `gb2_pkdiff.py boot-gb2e-1.log boot-gb2f-1.log`
   (exit 1, first divergence idx 352 as above).
+
+## 12. Part 4 — A2-pklog null + byte decode (orchestrator amendment)
+
+Brief: (1) one more queue-OFF boot with `--pklog` (does off/off differ
+at idx 352?); (2) for whichever pair differs, capture BYTES of idx 352
+(and 361, 370), decode the differing qwords, and if possible name the
+guest builder (VIF1 DMA source + store pc via a one-word watch). Plus
+fix the concurrent-cerr tearing. Max 3 boots. Stay on the GB2 worktree
+and current codegen dir (E46 regenerating).
+
+### 12.1 What was built (one build, runtime `1234451`)
+
+- Tearing fix: all pk/csr lines go to `./ps2_pklog.txt` (per-boot cwd)
+  under the existing mutex; stderr keeps one `[pklog] writing to ...`
+  line. Formats unchanged.
+- `PS2X_PKCAP=<idx,...>`: dumps `[pkbytes] idx= tick= len= src=
+  base= data=<hex>` (bytes capped at 4 KiB) for listed packets.
+- Source-base classify: each submit site calls
+  `ps2_pk::setBases(m_rdram, ..., m_scratchpad, ...)`; capture reports
+  `base=rdram+0xPHYS | spad+0xOFF | other`.
+- No new watch code: the prescribed one-word store watch already exists
+  (`PS2X_DIAG_WATCH=<addr,...>` → `[diag:watch] addr= width= value=
+  pc= thread= ra= sp=`, covering fast WRITE* macros and Store* paths).
+  Boot wrapper gained `--pkcap`/`--watch`, pklog rotation
+  (`pklog-<label>-1.txt` + bytes/lines in the result JSON) and a 512 MB
+  pklog cap. New offline decoder `gb2_pktdecode.py` (GIF-tag walk +
+  A+D decode; self-tested on synthetic data).
+- Suites 576/576 flags-unset and 576/576 queue-capture, from the
+  worktree root (a 575/576 run from the wrong cwd was the CWD-dependent
+  `instructions.h` test, green on rerun). Runner SHA-256
+  `245bbaedc15733974b0afc7bd3b6c33d09ebe8c71ea8b92d63cbe159b1efa371`
+  (one read; non-device binary).
+- Codegen dir stable across all 3 boots: 9457 files, newest
+  `register_functions.cpp` @1790012496 (Sep 21 13:41 — E46 had not
+  regenerated yet; same codegen as Part 3's E/F).
+
+### 12.2 Boots (3/3 + 1 void)
+
+| Boot | Env | Result |
+|---|---|---|
+| gb2g-try1 (VOID) | off + pklog + pkcap | rc -11 after 2 s: JetKVM display asleep → GLFW `InitWindow` null-GL-proc segfault (`.ips` receipt). No emulation. Woke with `caffeinate -u`, retried same label |
+| gb2g (boot 1) | off + pklog + pkcap 352,361,370 | rc 0, wall 120 s, slot 1. pklog 7.7 MB / 149,611 lines: 144,591 `[pk]`, 5,017 `[csr]`, 3 `[pkbytes]`, 0 bad lines, no TRUNCATED |
+| gb2h (boot 2) | on + pklog + pkcap 352,361,370 | rc 0, wall, slot 1. pklog 7.7 MB / 150,024 lines, 144,996 `[pk]`, 3 captures, 0 bad lines |
+| gb2i (boot 3) | on + pklog + pkcap 352,361,370 (H-repeat; see §12.6) | rc 0, wall, slot 1. pklog 7.8 MB / 152,026 lines, 146,970 `[pk]`, 3 captures, 0 bad lines |
+
+### 12.3 (1) Null HOLDS — off/off deterministic, queue causes 352
+
+E (Part-3 `boot-gb2e-1.log`) vs G (`pklog-gb2g-1.txt`): 144,405/144,405
+mutually-parsed packets identical (tick+fnv+len; src where unclobbered).
+The 42 apparent mismatches and 186 parse gaps are all E-side tear
+artifacts (proven: tick/fnv/len identical, `src=` clobbered by
+interleaved raylib `FILEIO:` lines, e.g. idx 3390/4393).
+
+| idx | E (off) | G (off) |
+|---|---|---|
+| 352 | tick=80 fnv=85d9d4e9 len=64 src=2 | identical |
+| 361 | tick=81 fnv=e674152f len=64 src=2 | identical |
+| 370 | tick=82 fnv=b8fa4a72 len=64 src=2 | identical |
+
+### 12.4 (2) Bytes: no differing pair at 352/361/370 — the question vacates
+
+`gb2_pktdecode.py pklog-gb2g pklog-gb2h 352 361 370`: **0 differing
+qwords at all three** (H-vs-I likewise 0). The packets are REGLIST
+`NLOOP=1 EOP=1 NREG=6 [PRIM,ST,RGBAQ,XYZ2,ST,XYZ2]` textured-sprite
+packets. Ticks shift by one (G 80/81/82 vs H 79/80/81) but bytes match.
+All three report `base=other`: the VIF1 DIRECT chunks come from
+heap-assembled DMA chains (`ps2_memory.cpp:2035` `p.chainData`; the 16 B
+stack feeder at :1197 is excluded by size), so there is no RDRAM word to
+watch — the one-word watch is impossible for this pair (see §12.6).
+(The chains carry `p.srcSpans` via E40's pay-map: a follow-up can thread
+chain-offset→RDRAM into the capture instead of rebuilding it.)
+
+What the tear-free logs show INSTEAD (the actual queue-vs-direct
+structure):
+
+**Systematic −1-tick phase shift.** G-vs-H first row-divergence is idx 0
+(same content `fnv=3af1a56c len=128 src=3`, tick 40 vs 39). Shift
+histogram (G tick − H tick): {0: 11,861, 1: 132,485, 2: 122, 3: 1,
+4: 122}. The queue guest runs ~1 vsync ahead of the counter.
+
+**First genuine CSR read differs (FIELD bit).** pc `0x375d10`,
+addr `0x12001000`: G `tick=40 value=0x4000`, H/I `tick=39
+value=0x6000` — the difference is CSR bit 13 (FIELD), consistent with
+the phase shift. All following ~2,300 CSR reads are ordinal-locked (same
+4-pc rotation `0x382c30/0x3828e0/0x3829d8/0x382aa0`, one per tick) with
+phase-flipped values (`0x4008` even / `0x6008` odd).
+
+**Content identical to idx 49,792, then deterministic Path1 divergence.**
+G-vs-H first content (tick-insensitive) divergence: idx 49,793 (tick
+G621/H620, XGkick len-208). Both sides keep evolving after (~6,800
+distinct Path1 fnvs each — not a freeze). No new CSR trigger at 620:
+FIELD differs throughout; the guest ignores it for 49,792 packets and
+something (non-CSR observation or accumulated phase) amplifies there.
+Trigger unknown — follow-up work.
+
+**F is the outlier: stale replay + novel content.** F's idx 352
+(`fnv=888f9292`, clean line) is a byte-identical replay of the idx-190
+packet (tick 62); the fresh content (`85d9d4e9`) appears ZERO times in
+F. From 361 on, F's per-tick packets are NOVEL (fnv not found in G;
++9 series 352, 361, 370, ... then ~128k content diffs). Neighbors
+348–351/353–356 match G exactly: single-packet substitution, alignment
+preserved. The logged fnv is computed at submit from the passed bytes,
+so the staleness was in the submitted VIF1-chain bytes, not in the
+queue worker.
+
+**H == I bit-for-bit.** 144,996/144,996 full rows identical (tick+fnv+
+len+src); same 49,793 content divergence; I ran longer (tick 1307 vs
+1300). On this binary the queue path is deterministic; F (older
+logging build, same codegen + queue code) hit a different outcome → the
+queue path has a timing-sensitive race with a rare early-divergence
+tail (1 F-like in 3 on-boots; caveat: logging-build timing differs, and
+the tail rate is unsized).
+
+**Presents decouple (mechanism hint).** Host frame uploads (raylib
+FILEIO lines) per 120 s wall: E=1279, G=1285 (off) vs F=367, H=388,
+I=397 (on) — same direction as Part 2 (1320 off vs 433 on). The guest
+submits MORE packets per wall on-queue (H 144,996 > G 144,591) while
+the host presents ~3× FEWER frames per guest tick: the guest outruns
+present/vsync coupling, consistent with the −1 phase shift.
+
+### 12.5 Part 3 correction (retract "zero genuine CSR reads")
+
+E/F's csr lines are SCRATCHPAD hits only (`0x70001000/70001004/
+70001080/70001084`; 13,639/13,649 lines, ZERO `0x12001000`), while G/H/I
+(fixed matcher) show only `0x12001000` (~5,020 genuine reads/boot).
+Timeline: E/F booted 13:35/13:37 from the pre-commit tree (binary
+`efaa4ecf`, buggy matcher — see §11.5's own receipt); the matcher fix
+was committed in `b975930` (13:44; verified fixed in that tree) and is
+in `1234451`. The Part-3 "over-match" model was wrong: the boot matcher
+never matched true CSR, so "zero genuine CSR reads" was a false
+negative. Corrected: genuine CSR reads DO precede the divergence
+(first: pc `0x375d10` @tick 39/40) and their values DO differ (FIELD).
+Orchestrator's prime suspect (deviation #2 / GB1 §2c completion
+visibility) is rehabilitated; the env-gated CSR-drain fix is back on
+the table for a future brief — NOT validated here.
+
+### 12.6 Deviations and gaps
+
+- Boot 3 = on-side H-repeat, not the brief's watch boot: with G/H bytes
+  identical and `base=other`, there is no differing word and no RDRAM
+  addr — the watch is impossible. The repeat discriminated H-typical
+  (deterministic phase shift) from F-typical (early stale replay):
+  I == H, so F is the tail. `PS2X_DIAG_WATCH` stands by for the
+  follow-up that has an addr (no new watch code needed).
+- gb2g attempt 1 void (display asleep, §12.2); same-label retry.
+- Gaps: F's first-CSR value unknowable (buggy-matcher log, no budget to
+  re-run that binary); 49,793 amplification trigger unknown; F-tail rate
+  unsized (needs an N-run on-side study); VIF1 RDRAM source unmapped for
+  chain-fed streams (`srcSpans` handoff noted in §12.4).
+- Presents direction: Part 2's "433 vs 1320" = on vs off per ~1360
+  guest ticks (§9: A/off 1320, B/on 433); Part 4 FILEIO counts agree.
+
+### 12.7 Recommended next (orchestrator decides)
+
+1. Root-cause the −1 phase shift (guest–vsync coupling on the queue
+   path; presents decoupling is the lead symptom) — E/G lane.
+2. Validate the CSR-drain fix (GB1 §2c rehabilitated by §12.5): one
+   on+drain boot; pass = first-read FIELD matches off-side.
+3. Size the F-tail: N on-side repeats on one binary (spontaneous early
+   stale replay? or logging-timing-only?).
+4. Thread E40 `srcSpans` into `[pkbytes]` so chain-fed packets map to
+   RDRAM sources for `PS2X_DIAG_WATCH`.
+
+### 12.8 Part 4 receipts
+
+- Build: 1 (`cmake --build build -j4`, rc 0); suites 576/576 ×2.
+- Boots: 3/3 (gb2g, gb2h, gb2i) + 1 void (display asleep), slot 1,
+  PIDs tracked, released cleanly. No boot over 600 s.
+- Disk: `local/tooling/disk_budget.sh` → 37.1/200 GB (208 Gi free).
+- Exact commands: boots = `gb2_boot.py --label gb2{g,h,i} --wall 120
+  --snap 10.0 --script "<E33 route>" --pklog --pkcap 352,361,370`
+  (+ `--gs-queue 1` for h/i); null = full-parse join E-vs-G (not the
+  indel-diff, which trips on E's torn gaps); decode =
+  `gb2_pktdecode.py pklog-gb2g-1.txt pklog-gb2h-1.txt 352 361 370`.

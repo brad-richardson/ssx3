@@ -46,6 +46,7 @@ CAPS = {
     "function_log": 5 * 1024 * 1024 * 1024,
     "frames_dir": 256 * 1024 * 1024,
     "park_dir": 64 * 1024 * 1024,
+    "pklog": 512 * 1024 * 1024,
 }
 
 
@@ -70,6 +71,8 @@ def main():
     ap.add_argument("--gs-queue", default=None, help="PS2X_GS_QUEUE value (omit = unset)")
     ap.add_argument("--vq", action="store_true", help="set PS2X_VQ=1 (quiescent gate)")
     ap.add_argument("--pklog", action="store_true", help="set PS2X_PKLOG=1 (packet+CSR log)")
+    ap.add_argument("--pkcap", default=None, help="PS2X_PKCAP value (packet idx byte capture)")
+    ap.add_argument("--watch", default=None, help="PS2X_DIAG_WATCH value (one-word store watch)")
     ap.add_argument("--csr-drain", action="store_true",
                     help="set PS2X_GS_CSR_DRAIN=1 (drain-on-CSR-load fix)")
     ap.add_argument("--capture-dir", default=None, help="PS2X_GS_CAPTURE_DIR value")
@@ -124,6 +127,14 @@ def main():
         env["PS2X_PKLOG"] = "1"
     else:
         env.pop("PS2X_PKLOG", None)
+    if args.pkcap is not None:
+        env["PS2X_PKCAP"] = args.pkcap
+    else:
+        env.pop("PS2X_PKCAP", None)
+    if args.watch is not None:
+        env["PS2X_DIAG_WATCH"] = args.watch
+    else:
+        env.pop("PS2X_DIAG_WATCH", None)
     if args.csr_drain:
         env["PS2X_GS_CSR_DRAIN"] = "1"
     else:
@@ -200,6 +211,9 @@ def main():
                 fblog = os.path.join(boot_cwd, "ps2_log.txt")
                 if os.path.exists(fblog) and os.path.getsize(fblog) > CAPS["function_log"]:
                     over = "function_log"
+                pkblog = os.path.join(boot_cwd, "ps2_pklog.txt")
+                if os.path.exists(pkblog) and os.path.getsize(pkblog) > CAPS["pklog"]:
+                    over = "pklog"
                 if dir_bytes(frames_dir) > CAPS["frames_dir"]:
                     over = "frames_dir"
                 if os.path.isdir(park_dir) and dir_bytes(park_dir) > CAPS["park_dir"]:
@@ -229,12 +243,31 @@ def main():
         print(f"WARN: rotate failed: {e}", file=sys.stderr)
         fbrot = fblog
 
+    pkblog = os.path.join(boot_cwd, "ps2_pklog.txt")
+    pkrot = os.path.join(RUN, f"pklog-{label}-1.txt")
+    pklog_lines = 0
+    try:
+        if os.path.exists(pkblog):
+            os.rename(pkblog, pkrot)
+    except OSError as e:
+        print(f"WARN: pklog rotate failed: {e}", file=sys.stderr)
+        pkrot = pkblog
+    if os.path.exists(pkrot):
+        try:
+            with open(pkrot, "rb") as pf:
+                pklog_lines = sum(1 for _ in pf)
+        except OSError:
+            pass
+
     lease.release(slot)
     result = {"label": label, "rc": rc, "bound": bound, "runner": runner,
               "elapsed_s": round(elapsed, 3), "slot": slot,
               "boot_log": boot_log,
               "boot_log_bytes": os.path.getsize(boot_log) if os.path.exists(boot_log) else 0,
               "function_log": fbrot if os.path.exists(fbrot) else None,
+              "pklog": pkrot if os.path.exists(pkrot) else None,
+              "pklog_bytes": os.path.getsize(pkrot) if os.path.exists(pkrot) else 0,
+              "pklog_lines": pklog_lines,
               "frames_dir": frames_dir, "park_dir": park_dir,
               "sample": sample_file,
               "gs_queue": env.get("PS2X_GS_QUEUE", "(unset)"),
