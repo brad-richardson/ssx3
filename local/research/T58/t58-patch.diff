@@ -1,0 +1,1204 @@
+diff --git a/pcsx2/FPU.cpp b/pcsx2/FPU.cpp
+index 89d050453..d3d99712d 100644
+--- a/pcsx2/FPU.cpp
++++ b/pcsx2/FPU.cpp
+@@ -3,6 +3,12 @@
+ 
+ #include "Common.h"
+ 
++// T53: folded-mirror ADDR-word watch includes/externs (log-only).
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++extern std::atomic<int> g_t48_vsync; // T53: defined in GS.cpp (T48 vsync mirror).
++
+ #include <cmath>
+ 
+ // Helper Macros
+@@ -156,6 +162,7 @@ bool checkDivideByZero(u32& xReg, u32 yDivisorReg, u32 zDividendReg, u32 cFlagsT
+       intDoBranch( _BranchTarget_ );            \
+    } else cpuRegs.pc += 4;
+ 
++void t58_store_watch(u32 vaddr, u32 size); // T58: global def in R5900OpcodeImpl.cpp.
+ namespace R5900 {
+ namespace Interpreter {
+ namespace OpcodeImpl {
+@@ -395,11 +402,195 @@ void LWC1() {
+ 	fpuRegs.fpr[_Rt_].UL = memRead32(addr);
+ }
+ 
++
++// T53: folded-mirror ADDR-word write watch (log-only; addresses from /tmp/t53-watch).
++#define T53W_MAXA 16
++static u32 g_t53w_addr[T53W_MAXA];
++static u32 g_t53w_naddr = 0;
++static u32 g_t53w_hits[T53W_MAXA];
++static bool g_t53w_armed = false;
++static u32 g_t53w_arm_ctr = 0;
++static bool t53w_arm()
++{
++	if (g_t53w_armed) return true;
++	if ((++g_t53w_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t53wf = fopen("/tmp/t53-watch", "r");
++	if (!t53wf) return false;
++	char t53line[64];
++	while (g_t53w_naddr < T53W_MAXA && fgets(t53line, sizeof(t53line), t53wf))
++	{
++		u32 a = (u32)strtoul(t53line, nullptr, 0);
++		if (a == 0) continue;
++		g_t53w_addr[g_t53w_naddr] = (a & 0x0fffffff) & ~3u; // T53: fold 0x00/0x20/0x30/0x80 mirrors (E41).
++		g_t53w_hits[g_t53w_naddr] = 0;
++		g_t53w_naddr++;
++	}
++	fclose(t53wf);
++	g_t53w_armed = true;
++	Console.WriteLn("T53W_ARMED naddr=%u", g_t53w_naddr);
++	return true;
++}
++// EE store overlapping a watched ADDR word (post-write word + 28 GPRs, first 64 per address per TU).
++static void t53w_watch(u32 vaddr, u32 size)
++{
++	if (!t53w_arm()) return;
++	u32 pbase = vaddr & 0x0fffffff; // T53: fold mirrors (E41); T51's 0x1fffffff missed 0x2/0x3 mirrors.
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	int t53_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	for (u32 i = 0; i < g_t53w_naddr; i++)
++	{
++		u32 w = g_t53w_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t53w_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T53W_CAP vsync=%d addr=0x%x", t53_vs, w);
++			continue;
++		}
++		Console.WriteLn("tagaddrwrite vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x tu=swc1",
++			t53_vs, w, memRead32(w), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++			cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++			cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++			cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++			cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++			cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++			cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++			cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	}
++}
++
++// T54: mirror-folded record-word producer watch (log-only; addresses from /tmp/t54-watch).
++#define T54W_MAXA 64
++static u32 g_t54w_addr[T54W_MAXA];
++static u32 g_t54w_naddr = 0;
++static u32 g_t54w_hits[T54W_MAXA];
++static bool g_t54w_armed = false;
++static u32 g_t54w_arm_ctr = 0;
++static bool t54w_arm()
++{
++	if (g_t54w_armed) return true;
++	if ((++g_t54w_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t54wf = fopen("/tmp/t54-watch", "r");
++	if (!t54wf) return false;
++	char t54line[64];
++	while (g_t54w_naddr < T54W_MAXA && fgets(t54line, sizeof(t54line), t54wf))
++	{
++		u32 a = (u32)strtoul(t54line, nullptr, 0);
++		if (a == 0) continue;
++		g_t54w_addr[g_t54w_naddr] = (a & 0x0fffffff) & ~3u; // T54: fold 0x00/0x20/0x30/0x80 mirrors (E41/T53).
++		g_t54w_hits[g_t54w_naddr] = 0;
++		g_t54w_naddr++;
++	}
++	fclose(t54wf);
++	g_t54w_armed = true;
++	Console.WriteLn("T54W_ARMED naddr=%u", g_t54w_naddr);
++	return true;
++}
++// EE store overlapping a watched record word (post-write word + 24 GPRs, first 64 per address per TU).
++static void t54w_watch(u32 vaddr, u32 size)
++{
++	if (!t54w_arm()) return;
++	u32 pbase = vaddr & 0x0fffffff; // T54: fold mirrors (E41/T53).
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	int t54_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	for (u32 i = 0; i < g_t54w_naddr; i++)
++	{
++		u32 w = g_t54w_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t54w_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T54W_CAP vsync=%d addr=0x%x", t54_vs, w);
++			continue;
++		}
++		Console.WriteLn("dprod vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x tu=swc1",
++			t54_vs, w, memRead32(w), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++			cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++			cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++			cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++			cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++			cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++			cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++			cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	}
++}
++
++// T56: scratchpad item writer watch (log-only; 8 fixed words + /tmp/t56-watch2 file addrs).
++static const u32 g_t56_fixed[8] = {0x70000000u, 0x70000004u, 0x70000008u, 0x7000000cu, 0x70000500u, 0x70000504u, 0x70000508u, 0x7000050cu};
++static u32 g_t56_hits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
++#define T56W2_MAXA 64
++static u32 g_t56w2_addr[T56W2_MAXA];
++static u32 g_t56w2_hits[T56W2_MAXA];
++static u32 g_t56w2_naddr = 0;
++static bool g_t56w2_armed = false;
++static u32 g_t56w2_arm_ctr = 0;
++static bool t56w2_arm()
++{
++	if (g_t56w2_armed) return true;
++	if ((++g_t56w2_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t56wf = fopen("/tmp/t56-watch2", "r");
++	if (!t56wf) return false;
++	char t56line[64];
++	while (g_t56w2_naddr < T56W2_MAXA && fgets(t56line, sizeof(t56line), t56wf))
++	{
++		u32 a = (u32)strtoul(t56line, nullptr, 0);
++		if (a == 0) continue;
++		g_t56w2_addr[g_t56w2_naddr] = a & ~3u;
++		g_t56w2_hits[g_t56w2_naddr] = 0;
++		g_t56w2_naddr++;
++	}
++	fclose(t56wf);
++	g_t56w2_armed = true;
++	Console.WriteLn("T56W_ARMED naddr=%u", g_t56w2_naddr);
++	return true;
++}
++static void t56_emit(u32 w, u32 val, const char* via)
++{
++	int t56_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	Console.WriteLn("spw vsync=%d addr=0x%x value=0x%x via=%s pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		t56_vs, w, val, via, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0], cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0], cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0], cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0], cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0], cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0], cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++static void t56_watch(u32 vaddr, u32 size, const char* via)
++{
++	u32 lo = vaddr;
++	u32 hi = vaddr + size;
++	for (u32 i = 0; i < 8; i++)
++	{
++		u32 w = g_t56_fixed[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t56_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++			continue;
++		}
++		t56_emit(w, memRead32(w), via);
++	}
++	if (!t56w2_arm()) return;
++	for (u32 i = 0; i < g_t56w2_naddr; i++)
++	{
++		u32 w = g_t56w2_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t56w2_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++			continue;
++		}
++		t56_emit(w, memRead32(w), via);
++	}
++}
+ void SWC1() {
+ 	u32 addr;
+ 	addr = cpuRegs.GPR.r[_Rs_].UL[0] + (s16)(cpuRegs.code & 0xffff);	// force sign extension to 32bit
+ 	if (addr & 0x00000003) { Console.Error( "FPU (SWC1 Opcode): Invalid Unaligned Memory Address" ); return; }  // Should signal an exception?
+ 	memWrite32(addr, fpuRegs.fpr[_Rt_].UL);
++	t53w_watch(addr, 4); // T53: ADDR-word watch (log-only).
++	t54w_watch(addr, 4); // T54: record-word producer watch (log-only).
++	t56_watch(addr, 4, "swc1"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr, 4); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ } } }
+diff --git a/pcsx2/IPU/IPUdma.cpp b/pcsx2/IPU/IPUdma.cpp
+index 1c508c7f7..9f65cf2b5 100644
+--- a/pcsx2/IPU/IPUdma.cpp
++++ b/pcsx2/IPU/IPUdma.cpp
+@@ -23,6 +23,7 @@ bool SaveStateBase::ipuDmaFreeze()
+ 	return IsOkay();
+ }
+ 
++void t58_dma_watch(u32 base, const u8* host, u32 bytes, const char* via, u32 src); // T58: defined in R5900OpcodeImpl.cpp.
+ static __fi int IPU1chain() {
+ 
+ 	int totalqwc = 0;
+@@ -177,6 +178,7 @@ void IPU0dma()
+ 
+ 	readsize = std::min(ipu0ch.qwc, (u32)ipuRegs.ctrl.OFC);
+ 	ipu_fifo.out.read(pMem, readsize);
++	t58_dma_watch(ipu0ch.madr, (const u8*)pMem, (u32)(readsize << 4), "dma-ch3", 0); // T58: IPU-from writer watch (log-only).
+ 
+ 	ipu0ch.madr += readsize << 4;
+ 	ipu0ch.qwc -= readsize;
+diff --git a/pcsx2/R5900OpcodeImpl.cpp b/pcsx2/R5900OpcodeImpl.cpp
+index fecebece9..3af847260 100644
+--- a/pcsx2/R5900OpcodeImpl.cpp
++++ b/pcsx2/R5900OpcodeImpl.cpp
+@@ -245,6 +245,427 @@ static int __Deci2Call(int call, u32 *addr)
+ 	return 0;
+ }
+ 
++#include <atomic>
++
++// T50: srcread watch on the two 16-byte microcode source windows (log-only; EE interp only).
++
++// T51: render-DMA state-machine trace (log-only; EE interp stores + sema syscalls).
++#include <atomic>
++#include <cstdio>
++extern std::atomic<int> g_t48_vsync; // T51: defined in GS.cpp (T48 vsync mirror).
++extern std::atomic<bool> g_t48_window; // T51: defined in GS.cpp (T48 window flag).
++extern std::atomic<int> g_t49_winstart; // T51: defined in GS.cpp (T49 winstart mirror).
++std::atomic<int> g_t51e_winstart{-1}; // T51: first gated vsync (this TU).
++std::atomic<bool> g_t51e_armed{false};
++std::atomic<bool> g_t51e_free{false};
++std::atomic<u32> g_t51e_arm_ctr{0};
++std::atomic<u32> g_t51e_n_st{0};
++std::atomic<u32> g_t51e_n_sema{0};
++std::atomic<int> g_t51e_semaid_vs{-1};
++
++// T51w: whole-boot ADDR-word write watch (log-only; addresses from /tmp/t51-watch).
++#include <cstdlib>
++#define T51W_MAXA 16
++static u32 g_t51w_addr[T51W_MAXA];
++static u32 g_t51w_naddr = 0;
++static u32 g_t51w_hits[T51W_MAXA];
++static bool g_t51w_armed = false;
++static u32 g_t51w_arm_ctr = 0;
++static bool t51w_arm()
++{
++	if (g_t51w_armed) return true;
++	if ((++g_t51w_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t51wf = fopen("/tmp/t53-watch", "r"); // T53: 8-word watch file.
++	if (!t51wf) return false;
++	char t51line[64];
++	while (g_t51w_naddr < T51W_MAXA && fgets(t51line, sizeof(t51line), t51wf))
++	{
++		u32 a = (u32)strtoul(t51line, nullptr, 0);
++		if (a == 0) continue;
++		g_t51w_addr[g_t51w_naddr] = (a & 0x0fffffff) & ~3u; // T53: fold mirrors (E41).
++		g_t51w_hits[g_t51w_naddr] = 0;
++		g_t51w_naddr++;
++	}
++	fclose(t51wf);
++	g_t51w_armed = true;
++	Console.WriteLn("T53W_ARMED naddr=%u", g_t51w_naddr); // T53.
++	return true;
++}
++// EE store overlapping a watched ADDR word (post-write word + 28 GPRs, first 64 per address).
++
++// T54: mirror-folded record-word producer watch (log-only; addresses from /tmp/t54-watch).
++#define T54W_MAXA 64
++static u32 g_t54w_addr[T54W_MAXA];
++static u32 g_t54w_naddr = 0;
++static u32 g_t54w_hits[T54W_MAXA];
++static bool g_t54w_armed = false;
++static u32 g_t54w_arm_ctr = 0;
++static bool t54w_arm()
++{
++	if (g_t54w_armed) return true;
++	if ((++g_t54w_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t54wf = fopen("/tmp/t54-watch", "r");
++	if (!t54wf) return false;
++	char t54line[64];
++	while (g_t54w_naddr < T54W_MAXA && fgets(t54line, sizeof(t54line), t54wf))
++	{
++		u32 a = (u32)strtoul(t54line, nullptr, 0);
++		if (a == 0) continue;
++		g_t54w_addr[g_t54w_naddr] = (a & 0x0fffffff) & ~3u; // T54: fold 0x00/0x20/0x30/0x80 mirrors (E41/T53).
++		g_t54w_hits[g_t54w_naddr] = 0;
++		g_t54w_naddr++;
++	}
++	fclose(t54wf);
++	g_t54w_armed = true;
++	Console.WriteLn("T54W_ARMED naddr=%u", g_t54w_naddr);
++	return true;
++}
++// EE store overlapping a watched record word (post-write word + 24 GPRs, first 64 per address per TU).
++static void t54w_watch(u32 vaddr, u32 size)
++{
++	if (!t54w_arm()) return;
++	u32 pbase = vaddr & 0x0fffffff; // T54: fold mirrors (E41/T53).
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	int t54_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	for (u32 i = 0; i < g_t54w_naddr; i++)
++	{
++		u32 w = g_t54w_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t54w_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T54W_CAP vsync=%d addr=0x%x", t54_vs, w);
++			continue;
++		}
++		Console.WriteLn("dprod vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x tu=ri",
++			t54_vs, w, memRead32(w), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++			cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++			cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++			cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++			cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++			cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++			cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++			cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	}
++}
++
++// T56: scratchpad item writer watch (log-only; 8 fixed words + /tmp/t56-watch2 file addrs).
++static const u32 g_t56_fixed[8] = {0x70000000u, 0x70000004u, 0x70000008u, 0x7000000cu, 0x70000500u, 0x70000504u, 0x70000508u, 0x7000050cu};
++static u32 g_t56_hits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
++#define T56W2_MAXA 64
++static u32 g_t56w2_addr[T56W2_MAXA];
++static u32 g_t56w2_hits[T56W2_MAXA];
++static u32 g_t56w2_naddr = 0;
++static bool g_t56w2_armed = false;
++static u32 g_t56w2_arm_ctr = 0;
++static bool t56w2_arm()
++{
++	if (g_t56w2_armed) return true;
++	if ((++g_t56w2_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t56wf = fopen("/tmp/t56-watch2", "r");
++	if (!t56wf) return false;
++	char t56line[64];
++	while (g_t56w2_naddr < T56W2_MAXA && fgets(t56line, sizeof(t56line), t56wf))
++	{
++		u32 a = (u32)strtoul(t56line, nullptr, 0);
++		if (a == 0) continue;
++		g_t56w2_addr[g_t56w2_naddr] = a & ~3u;
++		g_t56w2_hits[g_t56w2_naddr] = 0;
++		g_t56w2_naddr++;
++	}
++	fclose(t56wf);
++	g_t56w2_armed = true;
++	Console.WriteLn("T56W_ARMED naddr=%u", g_t56w2_naddr);
++	return true;
++}
++static void t56_emit(u32 w, u32 val, const char* via)
++{
++	int t56_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	Console.WriteLn("spw vsync=%d addr=0x%x value=0x%x via=%s pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		t56_vs, w, val, via, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0], cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0], cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0], cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0], cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0], cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0], cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++
++// T58: EE staging-buffer writer watch (log-only; 8 words + DMA paths).
++#include <atomic>
++extern std::atomic<int> g_t48_vsync; // T58: defined in GS.cpp (T48 vsync mirror).
++static const u32 g_t58_off[8] = {0x809670u, 0x809674u, 0x809678u, 0x80967cu, 0x809b70u, 0x809b74u, 0x809b78u, 0x809b7cu};
++static u32 g_t58_hits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
++struct t58_last { bool dirty; u32 val; char via[12]; u32 pc; u32 ra; };
++static t58_last g_t58_last[8] = {};
++static int g_t58_last_vs = -1;
++static u32 g_t58_last_n = 0;
++static bool g_t58_last_cap = false;
++#define T58_MAXLAST 400
++static void t58_flush(int vs)
++{
++	for (int i = 0; i < 8; i++)
++	{
++		if (!g_t58_last[i].dirty) continue;
++		if (g_t58_last_n >= T58_MAXLAST)
++		{
++			if (!g_t58_last_cap) { g_t58_last_cap = true; Console.WriteLn("T58_CAPLAST vsync=%d", vs); }
++			return;
++		}
++		g_t58_last_n++;
++		Console.WriteLn("ebwlast vsync=%d addr=0x%x value=0x%x via=%s pc=0x%x ra=0x%x", vs, g_t58_off[i], g_t58_last[i].val, g_t58_last[i].via, g_t58_last[i].pc, g_t58_last[i].ra);
++	}
++}
++static void t58_emit(int i, u32 val, const char* via, u32 src)
++{
++	u32 w = g_t58_off[i];
++	u32 k = g_t58_hits[i]++;
++	if (k >= 64)
++	{
++		if (k == 64) Console.WriteLn("T58_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++		return;
++	}
++	int vs = g_t48_vsync.load(std::memory_order_relaxed);
++	if (g_t58_last_vs < 0) g_t58_last_vs = vs;
++	if (vs != g_t58_last_vs) { t58_flush(g_t58_last_vs); for (int j = 0; j < 8; j++) g_t58_last[j].dirty = false; g_t58_last_vs = vs; }
++	Console.WriteLn("ebw vsync=%d addr=0x%x value=0x%x via=%s src=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		vs, w, val, via, src, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0], cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0], cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0], cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0], cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0], cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0], cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	g_t58_last[i].dirty = true; g_t58_last[i].val = val;
++	snprintf(g_t58_last[i].via, sizeof(g_t58_last[i].via), "%s", via);
++	g_t58_last[i].pc = cpuRegs.pc; g_t58_last[i].ra = cpuRegs.GPR.r[31].UL[0];
++}
++void t58_store_watch(u32 vaddr, u32 size)
++{
++	u32 lo = vaddr & 0x1fffffffu;
++	u32 hi = lo + size;
++	for (int i = 0; i < 8; i++)
++	{
++		u32 w = g_t58_off[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		t58_emit(i, memRead32(vaddr + (w - lo)), "store", 0);
++	}
++}
++void t58_dma_watch(u32 base, const u8* host, u32 bytes, const char* via, u32 src)
++{
++	u32 end = base + bytes;
++	for (int i = 0; i < 8; i++)
++	{
++		u32 w = g_t58_off[i];
++		if (w + 4 <= base || w >= end) continue;
++		u32 o = w - base;
++		u32 v = (u32)host[o] | ((u32)host[o + 1] << 8) | ((u32)host[o + 2] << 16) | ((u32)host[o + 3] << 24);
++		t58_emit(i, v, via, src);
++	}
++}
++static void t56_watch(u32 vaddr, u32 size, const char* via)
++{
++	u32 lo = vaddr;
++	u32 hi = vaddr + size;
++	for (u32 i = 0; i < 8; i++)
++	{
++		u32 w = g_t56_fixed[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t56_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++			continue;
++		}
++		t56_emit(w, memRead32(w), via);
++	}
++	if (!t56w2_arm()) return;
++	for (u32 i = 0; i < g_t56w2_naddr; i++)
++	{
++		u32 w = g_t56w2_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t56w2_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++			continue;
++		}
++		t56_emit(w, memRead32(w), via);
++	}
++}
++static void t51w_watch(u32 vaddr, u32 size)
++{
++	if (!t51w_arm()) return;
++	u32 pbase = vaddr & 0x0fffffff; // T53: fold 0x00/0x20/0x30/0x80 mirrors (E41).
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	int t51_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	for (u32 i = 0; i < g_t51w_naddr; i++)
++	{
++		u32 w = g_t51w_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t51w_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T53W_CAP vsync=%d addr=0x%x", t51_vs, w); // T53.
++			continue;
++		}
++		Console.WriteLn("tagaddrwrite vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x tu=ri",
++			t51_vs, w, memRead32(w), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++			cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++			cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++			cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++			cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++			cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++			cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++			cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	}
++}
++static bool t51e_arm_free()
++{
++	if (!g_t51e_armed.load(std::memory_order_relaxed))
++	{
++		if ((g_t51e_arm_ctr.fetch_add(1, std::memory_order_relaxed) & 1023) != 0) return false;
++		FILE* t51af = fopen("/tmp/t51-arm", "r");
++		if (!t51af) return false;
++		fclose(t51af);
++		g_t51e_armed.store(true, std::memory_order_relaxed);
++	}
++	if (!g_t51e_free.load(std::memory_order_relaxed))
++	{
++		FILE* t51ff = fopen("/tmp/t51-free", "r");
++		if (!t51ff)
++		{
++			if (!g_t48_window.load(std::memory_order_relaxed)) return false;
++			int t51_ws = g_t49_winstart.load(std::memory_order_relaxed);
++			int t51_vs = g_t48_vsync.load(std::memory_order_relaxed);
++			if (!(t51_ws >= 0 && t51_vs >= t51_ws)) return false;
++		}
++		else
++		{
++			fclose(t51ff);
++			g_t51e_free.store(true, std::memory_order_relaxed);
++		}
++	}
++	int t51_exp = -1;
++	int t51_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	if (g_t51e_winstart.compare_exchange_strong(t51_exp, t51_vs, std::memory_order_relaxed))
++		Console.WriteLn("T51_WINDOW tu=ee vsync=%d", t51_vs);
++	return true;
++}
++// Open only for the first 5 gated vsyncs.
++static bool t51e_gate()
++{
++	if (!t51e_arm_free()) return false;
++	int t51_ws = g_t51e_winstart.load(std::memory_order_relaxed);
++	int t51_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	return t51_ws >= 0 && t51_vs >= t51_ws && t51_vs <= t51_ws + 4;
++}
++// EE store overlapping the render-DMA struct window 0x6214E0-0x621520 (post-write words).
++static void t51e_store_watch(u32 vaddr, u32 size)
++{
++	if (!t51e_gate()) return;
++	u32 pbase = vaddr & 0x1fffffff;
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	if (hi <= 0x6214e0 || lo >= 0x621521) return;
++	u32 lane0 = lo & ~3u;
++	if (lane0 < 0x6214e0) lane0 = 0x6214e0;
++	u32 laneN = (hi + 3) & ~3u;
++	if (laneN > 0x621524) laneN = 0x621524;
++	int t51_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	int t51_intc = cpuRegs.CP0.n.Status.b.EXL ? 1 : 0;
++	for (u32 lane = lane0; lane < laneN; lane += 4)
++	{
++		u32 k = g_t51e_n_st.fetch_add(1, std::memory_order_relaxed);
++		if (k == 4000) { Console.WriteLn("T51_ST_CAP vsync=%d", t51_vs); return; }
++		if (k > 4000) return;
++		Console.WriteLn("st vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x intc=%d",
++			t51_vs, lane, memRead32(lane), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], t51_intc);
++	}
++}
++// SignalSema/iSignalSema/WaitSema/PollSema at SYSCALL entry (they run the real BIOS).
++static void t51e_syscall_watch(u8 call)
++{
++	const char* t51cn = nullptr;
++	if (call == 0x42) t51cn = "SignalSema";
++	else if (call == 0x43) t51cn = "iSignalSema";
++	else if (call == 0x44) t51cn = "WaitSema";
++	else if (call == 0x45) t51cn = "PollSema";
++	else return;
++	if (!t51e_gate()) return;
++	u32 k = g_t51e_n_sema.fetch_add(1, std::memory_order_relaxed);
++	int t51_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	if (k == 512) { Console.WriteLn("T51_SEMA_CAP vsync=%d", t51_vs); return; }
++	if (k > 512) return;
++	u32 t51a0 = cpuRegs.GPR.n.a0.UL[0];
++	u32 t51w28 = memRead32(0x621508);
++	u32 t51w2c = memRead32(0x62150c);
++	u32 t51w4c = memRead32(0x62152c);
++	if (g_t51e_semaid_vs.load(std::memory_order_relaxed) != t51_vs)
++	{
++		g_t51e_semaid_vs.store(t51_vs, std::memory_order_relaxed);
++		Console.WriteLn("semaid vsync=%d w28=0x%x w2c=0x%x w4c=0x%x", t51_vs, t51w28, t51w2c, t51w4c);
++	}
++	const char* t51m = nullptr;
++	if (t51a0 == t51w28) t51m = "+0x28";
++	else if (t51a0 == t51w2c) t51m = "+0x2c";
++	else if (t51a0 == t51w4c) t51m = "+0x4c";
++	else return;
++	Console.WriteLn("sema vsync=%d pc=0x%x ra=0x%x call=%s id=%u m=%s",
++		t51_vs, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], t51cn, t51a0, t51m);
++}
++#include <cstdio>
++extern std::atomic<int> g_t48_vsync; // T50: defined in GS.cpp (T48 vsync mirror).
++extern std::atomic<bool> g_t48_window; // T50: defined in GS.cpp (T48 window flag).
++extern std::atomic<int> g_t49_winstart; // T50: defined in GS.cpp (T49 winstart mirror).
++bool g_t50_armed = false;
++bool g_t50_free = false; // T50b: /tmp/t50-free fallback (statefile boots, no dump winstart).
++u32 g_t50_arm_ctr = 0;
++u32 g_t50_hits0 = 0; // region 0 (EE 0x004349b8..0x004349c7) lines logged.
++u32 g_t50_hits1 = 0; // region 1 (EE 0x00435bf8..0x00435c07) lines logged.
++static bool t50_gate()
++{
++	if (!g_t50_armed)
++	{
++		if ((++g_t50_arm_ctr & 1023) != 0) return false;
++		FILE* t50af = fopen("/tmp/t50-arm", "r");
++		if (!t50af) return false;
++		fclose(t50af);
++		g_t50_armed = true;
++	}
++	if (!g_t50_free)
++	{
++		FILE* t50ff = fopen("/tmp/t50-free", "r");
++		if (t50ff) { fclose(t50ff); g_t50_free = true; }
++	}
++	if (!g_t50_free && !g_t48_window.load(std::memory_order_relaxed)) return false;
++	int t50_ws = g_t49_winstart.load(std::memory_order_relaxed);
++	int t50_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	return t50_ws >= 0 && t50_vs >= t50_ws;
++}
++// Log EE interp loads overlapping the two 16-byte source windows (first 64 hits per region).
++void t50_read_watch(u32 vaddr, u32 size)
++{
++	if (!t50_gate()) return;
++	u32 pbase = vaddr & 0x1fffffff;
++	u32 lo = pbase & ~(size - 1);
++	int region = -1;
++	if (lo + size > 0x004349b8 && lo < 0x004349c8) region = 0;
++	else if (lo + size > 0x00435bf8 && lo < 0x00435c08) region = 1;
++	else if (pbase >= 0x004349b8 && pbase < 0x004349c8) region = 0;
++	else if (pbase >= 0x00435bf8 && pbase < 0x00435c08) region = 1;
++	else return;
++	u32* cnt = (region == 0) ? &g_t50_hits0 : &g_t50_hits1;
++	if (*cnt >= 64)
++		return;
++	(*cnt)++;
++	if (*cnt == 64)
++		Console.WriteLn("T50_SRCREAD_FULL region=%d vsync=%d", region, g_t48_vsync.load(std::memory_order_relaxed));
++	Console.WriteLn("srcread vsync=%d addr=0x%x size=%u pc=0x%x ra=0x%x fn=- a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		g_t48_vsync.load(std::memory_order_relaxed), lo, size, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++		cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++		cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++		cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++		cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++		cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++		cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++		cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++
++// G7: counts ExecPS2 syscalls (global scope); the GS thread auto-queues one
++// 5-frame GS dump 60 vsyncs after the 5th (game entry). One-shot capture aid.
++std::atomic<int> g_g7_execps2_count{0};
++
+ namespace R5900 {
+ namespace Interpreter {
+ namespace OpcodeImpl {
+@@ -599,6 +1020,7 @@ void LW()
+ 	u32 temp = memRead32(addr);
+ 
+ 	if (!_Rt_) return;
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].SD[0] = (s32)temp;
+ 
+ 	// Force event test on EE counter read to improve read + interrupt syncing. Namely ESPN Games.
+@@ -619,6 +1041,7 @@ void LWU()
+ 	u32 temp = memRead32(addr);
+ 
+ 	if (!_Rt_) return;
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].UD[0] = temp;
+ }
+ 
+@@ -637,6 +1060,7 @@ void LWL()
+ 	if (!_Rt_) return;
+ 
+ 	// ensure the compiler does correct sign extension into 64 bits by using s32
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].SD[0] =	(s32)((cpuRegs.GPR.r[_Rt_].UL[0] & LWL_MASK[shift]) |
+ 								(mem << LWL_SHIFT[shift]));
+ 
+@@ -661,6 +1085,7 @@ void LWR()
+ 	if (!_Rt_) return;
+ 
+ 	// Use unsigned math here, and conditionally sign extend below, when needed.
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	mem = (cpuRegs.GPR.r[_Rt_].UL[0] & LWR_MASK[shift]) | (mem >> LWR_SHIFT[shift]);
+ 
+ 	if( shift == 0 )
+@@ -705,6 +1130,7 @@ void LD()
+ 		RaiseAddressError(addr, false);
+ 
+ 	cpuRegs.GPR.r[_Rt_].UD[0] = memRead64(addr);
++	t50_read_watch(addr, 8); // T50: srcread watch (log-only).
+ }
+ 
+ static const u64 LDL_MASK[8] =
+@@ -728,6 +1154,7 @@ void LDL()
+ 	u64 mem = memRead64(addr & ~7);
+ 
+ 	if( !_Rt_ ) return;
++	t50_read_watch(addr, 8); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].UD[0] =	(cpuRegs.GPR.r[_Rt_].UD[0] & LDL_MASK[shift]) |
+ 								(mem << LDL_SHIFT[shift]);
+ }
+@@ -740,6 +1167,7 @@ void LDR()
+ 	u64 mem = memRead64(addr & ~7);
+ 
+ 	if (!_Rt_) return;
++	t50_read_watch(addr, 8); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].UD[0] =	(cpuRegs.GPR.r[_Rt_].UD[0] & LDR_MASK[shift]) |
+ 								(mem >> LDR_SHIFT[shift]);
+ }
+@@ -751,12 +1179,18 @@ void LQ()
+ 
+ 	u32 addr = cpuRegs.GPR.r[_Rs_].UL[0] + _Imm_;
+ 	memRead128(addr & ~0xf, (u128*)gpr_GetWritePtr(_Rt_));
++	t50_read_watch(addr, 16); // T50: srcread watch (log-only).
+ }
+ 
+ void SB()
+ {
+ 	u32 addr = cpuRegs.GPR.r[_Rs_].UL[0] + _Imm_;
+ 	memWrite8(addr, cpuRegs.GPR.r[_Rt_].UC[0]);
++	t51e_store_watch(addr, 1); // T51: struct-window store watch (log-only).
++	t51w_watch(addr, 1); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr, 1); // T54: record-word producer watch (log-only).
++	t56_watch(addr, 1, "sb"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr, 1); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ void SH()
+@@ -767,6 +1201,11 @@ void SH()
+ 		RaiseAddressError(addr, true);
+ 
+ 	memWrite16(addr, cpuRegs.GPR.r[_Rt_].US[0]);
++	t51e_store_watch(addr, 2); // T51: struct-window store watch (log-only).
++	t51w_watch(addr, 2); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr, 2); // T54: record-word producer watch (log-only).
++	t56_watch(addr, 2, "sh"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr, 2); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ void SW()
+@@ -777,6 +1216,11 @@ void SW()
+ 		RaiseAddressError(addr, true);
+ 
+   memWrite32(addr, cpuRegs.GPR.r[_Rt_].UL[0]);
++  t51e_store_watch(addr, 4); // T51: struct-window store watch (log-only).
++  t51w_watch(addr, 4); // T51w: ADDR-word watch (log-only).
++  t54w_watch(addr, 4); // T54: record-word producer watch (log-only).
++  t56_watch(addr, 4, "sw"); // T56: scratchpad writer watch (log-only).
++  t58_store_watch(addr, 4); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ static const u32 SWL_MASK[4] = { 0xffffff00, 0xffff0000, 0xff000000, 0x00000000 };
+@@ -795,6 +1239,12 @@ void SWL()
+ 		(cpuRegs.GPR.r[_Rt_].UL[0] >> SWL_SHIFT[shift]) |
+ 		(mem & SWL_MASK[shift])
+ 	);
++	t51e_store_watch(addr & ~3, 4); // T51: struct-window store watch (log-only).
++	t51w_watch(addr & ~3, 4); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr & ~3, 4); // T54: record-word producer watch (log-only).
++	t56_watch(addr & ~3, 4, "swl"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr & ~3, 4); // T58: EE staging-buffer writer watch (log-only).
++
+ 
+ 	/*
+ 	Mem = 1234.  Reg = abcd
+@@ -815,6 +1265,12 @@ void SWR() {
+ 		(cpuRegs.GPR.r[_Rt_].UL[0] << SWR_SHIFT[shift]) |
+ 		(mem & SWR_MASK[shift])
+ 	);
++	t51e_store_watch(addr & ~3, 4); // T51: struct-window store watch (log-only).
++	t51w_watch(addr & ~3, 4); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr & ~3, 4); // T54: record-word producer watch (log-only).
++	t56_watch(addr & ~3, 4, "swr"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr & ~3, 4); // T58: EE staging-buffer writer watch (log-only).
++
+ 
+ 	/*
+ 	Mem = 1234.  Reg = abcd
+@@ -834,6 +1290,11 @@ void SD()
+ 		RaiseAddressError(addr, true);
+ 
+     memWrite64(addr,cpuRegs.GPR.r[_Rt_].UD[0]);
++    t51e_store_watch(addr, 8); // T51: struct-window store watch (log-only).
++    t51w_watch(addr, 8); // T51w: ADDR-word watch (log-only).
++    t54w_watch(addr, 8); // T54: record-word producer watch (log-only).
++    t56_watch(addr, 8, "sd"); // T56: scratchpad writer watch (log-only).
++    t58_store_watch(addr, 8); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ static const u64 SDL_MASK[8] =
+@@ -856,6 +1317,11 @@ void SDL()
+ 	mem = (cpuRegs.GPR.r[_Rt_].UD[0] >> SDL_SHIFT[shift]) |
+ 		  (mem & SDL_MASK[shift]);
+ 	memWrite64(addr & ~7, mem);
++	t51e_store_watch(addr & ~7, 8); // T51: struct-window store watch (log-only).
++	t51w_watch(addr & ~7, 8); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr & ~7, 8); // T54: record-word producer watch (log-only).
++	t56_watch(addr & ~7, 8, "sdl"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr & ~7, 8); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ 
+@@ -867,6 +1333,11 @@ void SDR()
+ 	mem = (cpuRegs.GPR.r[_Rt_].UD[0] << SDR_SHIFT[shift]) |
+ 		  (mem & SDR_MASK[shift]);
+ 	memWrite64(addr & ~7, mem );
++	t51e_store_watch(addr & ~7, 8); // T51: struct-window store watch (log-only).
++	t51w_watch(addr & ~7, 8); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr & ~7, 8); // T54: record-word producer watch (log-only).
++	t56_watch(addr & ~7, 8, "sdr"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr & ~7, 8); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ void SQ()
+@@ -876,6 +1347,11 @@ void SQ()
+ 
+ 	u32 addr = cpuRegs.GPR.r[_Rs_].UL[0] + _Imm_;
+ 	memWrite128(addr & ~0xf, cpuRegs.GPR.r[_Rt_].UQ);
++	t51e_store_watch(addr & ~0xf, 16); // T51: struct-window store watch (log-only).
++	t51w_watch(addr & ~0xf, 16); // T51w: ADDR-word watch (log-only).
++	t54w_watch(addr & ~0xf, 16); // T54: record-word producer watch (log-only).
++	t56_watch(addr & ~0xf, 16, "sq"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr & ~0xf, 16); // T58: EE staging-buffer writer watch (log-only).
+ }
+ 
+ /*********************************************************
+@@ -914,7 +1390,8 @@ void SYSCALL()
+ 	else
+ 		call = cpuRegs.GPR.n.v1.UC[0];
+ 
+-	BIOS_LOG("Bios call: %s (%x)", R5900::bios[call], call);
++	BIOS_LOG("Bios call: %s (%x) pc=%x a0=%x", R5900::bios[call], call, cpuRegs.pc, cpuRegs.GPR.n.a0.UL[0]);
++	t51e_syscall_watch(call); // T51: sema syscall watch (log-only).
+ 
+ 
+ 	switch (static_cast<Syscall>(call))
+@@ -981,6 +1458,7 @@ void SYSCALL()
+ 		break;
+ 		case Syscall::ExecPS2:
+ 		{
++			g_g7_execps2_count.fetch_add(1, std::memory_order_relaxed);
+ 			if (DebugInterface::getPauseOnEntry())
+ 			{
+ 				CBreakPoints::AddBreakPoint(BREAKPOINT_EE, cpuRegs.GPR.n.a0.UL[0], true);
+diff --git a/pcsx2/SPR.cpp b/pcsx2/SPR.cpp
+index f45f09610..d23cdb41a 100644
+--- a/pcsx2/SPR.cpp
++++ b/pcsx2/SPR.cpp
+@@ -6,11 +6,43 @@
+ #include "SPR.h"
+ #include "VUmicro.h"
+ #include "MTVU.h"
++#include <atomic>
++extern std::atomic<int> g_t48_vsync; // T56: defined in GS.cpp (T48 vsync mirror).
+ 
+ static bool spr0finished = false;
+ static bool spr1finished = false;
+ static u32 mfifotransferred = 0; // FIXME: Remove next time someone bumps savestates, no longer required.
+ 
++
++// T56: toSPR (channel 9) scratchpad writer watch (log-only; same 8 fixed words).
++void t58_dma_watch(u32 base, const u8* host, u32 bytes, const char* via, u32 src); // T58: defined in R5900OpcodeImpl.cpp.
++static const u32 g_t56s_fixed[8] = {0x70000000u, 0x70000004u, 0x70000008u, 0x7000000cu, 0x70000500u, 0x70000504u, 0x70000508u, 0x7000050cu};
++static u32 g_t56s_hits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
++static void t56s_emit(u32 w, u32 val, const char* via, u32 srcmadr)
++{
++	int t56_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	Console.WriteLn("spw vsync=%d addr=0x%x value=0x%x via=%s src=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		t56_vs, w, val, via, srcmadr, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0], cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0], cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0], cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0], cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0], cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0], cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++static void t56_spr_watch(u32 sadr, u32 bytes, u32 madr)
++{
++	u32 end = sadr + bytes;
++	for (u32 i = 0; i < 8; i++)
++	{
++		u32 off = g_t56s_fixed[i] - 0x70000000u;
++		u32 srcmadr;
++		if (off >= sadr && off < end) srcmadr = madr + (off - sadr);
++		else if (end > 0x4000u && off < (end & 0x3fffu)) srcmadr = madr + (0x4000u - sadr) + off; // wrapped transfer
++		else continue;
++		u32 k = g_t56s_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), g_t56s_fixed[i]);
++			continue;
++		}
++		t56s_emit(g_t56s_fixed[i], psSu32(off), "spr-dma", srcmadr);
++	}
++}
+ static void TestClearVUs(u32 madr, u32 qwc, bool isWrite)
+ {
+ 	if (madr >= 0x11000000 && (madr < 0x11010000))
+@@ -139,6 +171,7 @@ int  _SPR0chain()
+ 		// the cycle delay out of the way before the end.
+ 		partialqwc = std::min(spr0ch.qwc, 0x400 - ((spr0ch.sadr & 0x3fff) >> 4));
+ 		memcpy_from_spr((u8*)pMem, spr0ch.sadr, partialqwc*16);
++		t58_dma_watch(spr0ch.madr, (const u8*)pMem, (u32)(partialqwc*16), "spr-from", spr0ch.sadr); // T58: fromSPR writer watch (log-only).
+ 
+ 		// Clear VU mem also!
+ 		TestClearVUs(spr0ch.madr, partialqwc, true);
+@@ -203,6 +236,7 @@ void _SPR0interleave()
+ 				// Clear VU mem also!
+ 				TestClearVUs(spr0ch.madr, spr0ch.qwc, true);
+ 				memcpy_from_spr((u8*)pMem, spr0ch.sadr, spr0ch.qwc*16);
++				t58_dma_watch(spr0ch.madr, (const u8*)pMem, (u32)(spr0ch.qwc*16), "spr-from", spr0ch.sadr); // T58: fromSPR writer watch (log-only).
+ 				break;
+  		}
+ 		spr0ch.sadr += spr0ch.qwc * 16;
+@@ -353,6 +387,7 @@ __fi static void SPR1transfer(const void* data, int qwc)
+ 	}
+ 
+ 	memcpy_to_spr(spr1ch.sadr, (u8*)data, qwc*16);
++	t56_spr_watch(spr1ch.sadr, (u32)(qwc*16), spr1ch.madr); // T56: toSPR writer watch (log-only).
+ 	spr1ch.sadr += qwc * 16;
+ 	spr1ch.sadr &= 0x3FFF; // Limited to 16K
+ }
+@@ -405,6 +440,7 @@ void _SPR1interleave()
+ 		qwc -= spr1ch.qwc;
+ 		pMem = SPRdmaGetAddr(spr1ch.madr, false);
+ 		memcpy_to_spr(spr1ch.sadr, (u8*)pMem, spr1ch.qwc*16);
++		t56_spr_watch(spr1ch.sadr, spr1ch.qwc*16, spr1ch.madr); // T56: toSPR interleave writer watch (log-only).
+ 		spr1ch.sadr += spr1ch.qwc * 16;
+ 		spr1ch.sadr &= 0x3FFF; // Limited to 16K
+ 		spr1ch.madr += (sqwc + spr1ch.qwc) * 16;
+diff --git a/pcsx2/Sif0.cpp b/pcsx2/Sif0.cpp
+index ef096b492..a51d7973a 100644
+--- a/pcsx2/Sif0.cpp
++++ b/pcsx2/Sif0.cpp
+@@ -21,6 +21,7 @@ static __fi void Sif0Init()
+ }
+ 
+ // Write from Fifo to EE.
++void t58_dma_watch(u32 base, const u8* host, u32 bytes, const char* via, u32 src); // T58: defined in R5900OpcodeImpl.cpp.
+ static __fi bool WriteFifoToEE()
+ {
+ 	const int readSize = std::min((s32)sif0ch.qwc, sif0.fifo.size >> 2);
+@@ -38,6 +39,7 @@ static __fi bool WriteFifoToEE()
+ 	}
+ 
+ 	sif0.fifo.read((u32*)ptag, readSize << 2);
++	t58_dma_watch(sif0ch.madr, (const u8*)ptag, (u32)(readSize << 4), "sif0", 0); // T58: SIF0 writer watch (log-only).
+ 
+ 	// Clearing handled by vtlb memory protection and manual blocks.
+ 	//Cpu->Clear(sif0ch.madr, readSize*4);
+diff --git a/pcsx2/VU0.cpp b/pcsx2/VU0.cpp
+index fb54b4688..effa5d638 100644
+--- a/pcsx2/VU0.cpp
++++ b/pcsx2/VU0.cpp
+@@ -11,6 +11,12 @@
+ 
+ #include "Common.h"
+ 
++// T53: folded-mirror ADDR-word watch includes/externs (log-only).
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++extern std::atomic<int> g_t48_vsync; // T53: defined in GS.cpp (T48 vsync mirror).
++
+ #include <cmath>
+ 
+ #include "R5900OpcodeTables.h"
+@@ -87,6 +93,7 @@ void _vu0FinishMicro() { _vu0run(0, 1, 0); } // Runs VU0 Micro Until E-Bit End
+ void vu0Finish()	   { _vu0run(0, 0, 0); } // Runs VU0 Micro Until E-Bit End (doesn't stall EE)
+ void vu0Sync()		   { _vu0run(0, 0, 1); } // Runs VU0 until it catches up
+ 
++void t58_store_watch(u32 vaddr, u32 size); // T58: global def in R5900OpcodeImpl.cpp.
+ namespace R5900 {
+ namespace Interpreter{
+ namespace OpcodeImpl
+@@ -105,10 +112,194 @@ namespace OpcodeImpl
+ 	// Asadr.Changed
+ 	//TODO: check this
+ 	// HUH why ? doesn't make any sense ...
++
++// T53: folded-mirror ADDR-word write watch (log-only; addresses from /tmp/t53-watch).
++#define T53W_MAXA 16
++static u32 g_t53w_addr[T53W_MAXA];
++static u32 g_t53w_naddr = 0;
++static u32 g_t53w_hits[T53W_MAXA];
++static bool g_t53w_armed = false;
++static u32 g_t53w_arm_ctr = 0;
++static bool t53w_arm()
++{
++	if (g_t53w_armed) return true;
++	if ((++g_t53w_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t53wf = fopen("/tmp/t53-watch", "r");
++	if (!t53wf) return false;
++	char t53line[64];
++	while (g_t53w_naddr < T53W_MAXA && fgets(t53line, sizeof(t53line), t53wf))
++	{
++		u32 a = (u32)strtoul(t53line, nullptr, 0);
++		if (a == 0) continue;
++		g_t53w_addr[g_t53w_naddr] = (a & 0x0fffffff) & ~3u; // T53: fold 0x00/0x20/0x30/0x80 mirrors (E41).
++		g_t53w_hits[g_t53w_naddr] = 0;
++		g_t53w_naddr++;
++	}
++	fclose(t53wf);
++	g_t53w_armed = true;
++	Console.WriteLn("T53W_ARMED naddr=%u", g_t53w_naddr);
++	return true;
++}
++// EE store overlapping a watched ADDR word (post-write word + 28 GPRs, first 64 per address per TU).
++static void t53w_watch(u32 vaddr, u32 size)
++{
++	if (!t53w_arm()) return;
++	u32 pbase = vaddr & 0x0fffffff; // T53: fold mirrors (E41); T51's 0x1fffffff missed 0x2/0x3 mirrors.
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	int t53_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	for (u32 i = 0; i < g_t53w_naddr; i++)
++	{
++		u32 w = g_t53w_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t53w_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T53W_CAP vsync=%d addr=0x%x", t53_vs, w);
++			continue;
++		}
++		Console.WriteLn("tagaddrwrite vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x tu=sqc2",
++			t53_vs, w, memRead32(w), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++			cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++			cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++			cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++			cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++			cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++			cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++			cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	}
++}
++
++// T54: mirror-folded record-word producer watch (log-only; addresses from /tmp/t54-watch).
++#define T54W_MAXA 64
++static u32 g_t54w_addr[T54W_MAXA];
++static u32 g_t54w_naddr = 0;
++static u32 g_t54w_hits[T54W_MAXA];
++static bool g_t54w_armed = false;
++static u32 g_t54w_arm_ctr = 0;
++static bool t54w_arm()
++{
++	if (g_t54w_armed) return true;
++	if ((++g_t54w_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t54wf = fopen("/tmp/t54-watch", "r");
++	if (!t54wf) return false;
++	char t54line[64];
++	while (g_t54w_naddr < T54W_MAXA && fgets(t54line, sizeof(t54line), t54wf))
++	{
++		u32 a = (u32)strtoul(t54line, nullptr, 0);
++		if (a == 0) continue;
++		g_t54w_addr[g_t54w_naddr] = (a & 0x0fffffff) & ~3u; // T54: fold 0x00/0x20/0x30/0x80 mirrors (E41/T53).
++		g_t54w_hits[g_t54w_naddr] = 0;
++		g_t54w_naddr++;
++	}
++	fclose(t54wf);
++	g_t54w_armed = true;
++	Console.WriteLn("T54W_ARMED naddr=%u", g_t54w_naddr);
++	return true;
++}
++// EE store overlapping a watched record word (post-write word + 24 GPRs, first 64 per address per TU).
++static void t54w_watch(u32 vaddr, u32 size)
++{
++	if (!t54w_arm()) return;
++	u32 pbase = vaddr & 0x0fffffff; // T54: fold mirrors (E41/T53).
++	u32 lo = pbase;
++	u32 hi = pbase + size;
++	int t54_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	for (u32 i = 0; i < g_t54w_naddr; i++)
++	{
++		u32 w = g_t54w_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t54w_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T54W_CAP vsync=%d addr=0x%x", t54_vs, w);
++			continue;
++		}
++		Console.WriteLn("dprod vsync=%d addr=0x%x value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x tu=sqc2",
++			t54_vs, w, memRead32(w), cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++			cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++			cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++			cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++			cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++			cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++			cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++			cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++	}
++}
++
++// T56: scratchpad item writer watch (log-only; 8 fixed words + /tmp/t56-watch2 file addrs).
++static const u32 g_t56_fixed[8] = {0x70000000u, 0x70000004u, 0x70000008u, 0x7000000cu, 0x70000500u, 0x70000504u, 0x70000508u, 0x7000050cu};
++static u32 g_t56_hits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
++#define T56W2_MAXA 64
++static u32 g_t56w2_addr[T56W2_MAXA];
++static u32 g_t56w2_hits[T56W2_MAXA];
++static u32 g_t56w2_naddr = 0;
++static bool g_t56w2_armed = false;
++static u32 g_t56w2_arm_ctr = 0;
++static bool t56w2_arm()
++{
++	if (g_t56w2_armed) return true;
++	if ((++g_t56w2_arm_ctr & 1023) != 0) return false; // EE interp thread only.
++	FILE* t56wf = fopen("/tmp/t56-watch2", "r");
++	if (!t56wf) return false;
++	char t56line[64];
++	while (g_t56w2_naddr < T56W2_MAXA && fgets(t56line, sizeof(t56line), t56wf))
++	{
++		u32 a = (u32)strtoul(t56line, nullptr, 0);
++		if (a == 0) continue;
++		g_t56w2_addr[g_t56w2_naddr] = a & ~3u;
++		g_t56w2_hits[g_t56w2_naddr] = 0;
++		g_t56w2_naddr++;
++	}
++	fclose(t56wf);
++	g_t56w2_armed = true;
++	Console.WriteLn("T56W_ARMED naddr=%u", g_t56w2_naddr);
++	return true;
++}
++static void t56_emit(u32 w, u32 val, const char* via)
++{
++	int t56_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	Console.WriteLn("spw vsync=%d addr=0x%x value=0x%x via=%s pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		t56_vs, w, val, via, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0], cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0], cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0], cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0], cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0], cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0], cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0], cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++static void t56_watch(u32 vaddr, u32 size, const char* via)
++{
++	u32 lo = vaddr;
++	u32 hi = vaddr + size;
++	for (u32 i = 0; i < 8; i++)
++	{
++		u32 w = g_t56_fixed[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t56_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++			continue;
++		}
++		t56_emit(w, memRead32(w), via);
++	}
++	if (!t56w2_arm()) return;
++	for (u32 i = 0; i < g_t56w2_naddr; i++)
++	{
++		u32 w = g_t56w2_addr[i];
++		if (w + 4 <= lo || w >= hi) continue;
++		u32 k = g_t56w2_hits[i]++;
++		if (k >= 64)
++		{
++			if (k == 64) Console.WriteLn("T56_CAP vsync=%d addr=0x%x", g_t48_vsync.load(std::memory_order_relaxed), w);
++			continue;
++		}
++		t56_emit(w, memRead32(w), via);
++	}
++}
+ 	void SQC2() {
+ 		vu0Sync();
+ 		u32 addr = _Imm_ + cpuRegs.GPR.r[_Rs_].UL[0];
+ 		memWrite128(addr, VU0.VF[_Ft_].UQ);
++		t53w_watch(addr, 16); // T53: ADDR-word watch (log-only).
++		t54w_watch(addr, 16); // T54: record-word producer watch (log-only).
++		t56_watch(addr, 16, "sqc2"); // T56: scratchpad writer watch (log-only).
++	t58_store_watch(addr, 16); // T58: EE staging-buffer writer watch (log-only).
+ 	}
+ }}}
+ 
+diff --git a/pcsx2/sif2.cpp b/pcsx2/sif2.cpp
+index 6411cc430..0bd1d591d 100644
+--- a/pcsx2/sif2.cpp
++++ b/pcsx2/sif2.cpp
+@@ -47,6 +47,7 @@ __fi bool ReadFifoSingleWord()
+ }
+ 
+ // Write from Fifo to EE.
++void t58_dma_watch(u32 base, const u8* host, u32 bytes, const char* via, u32 src); // T58: defined in R5900OpcodeImpl.cpp.
+ static __fi bool WriteFifoToEE()
+ {
+ 	const int readSize = std::min((s32)sif2dma.qwc, sif2.fifo.size >> 2);
+@@ -64,6 +65,7 @@ static __fi bool WriteFifoToEE()
+ 	}
+ 
+ 	sif2.fifo.read((u32*)ptag, readSize << 2);
++	t58_dma_watch(sif2dma.madr, (const u8*)ptag, (u32)(readSize << 4), "dma-ch7", 0); // T58: SIF2 writer watch (log-only).
+ 
+ 	// Clearing handled by vtlb memory protection and manual blocks.
+ 	//Cpu->Clear(sif2dma.madr, readSize*4);
