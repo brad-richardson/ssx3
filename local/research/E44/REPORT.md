@@ -340,6 +340,117 @@ names are unresolved for inline stores in this tap version.)
   (menu assets 43–260, later assets 1300+). Next lane: boot the
   post-Boot-D tree over 0–1400.
 
+## Part-4 (ONE boot: append/template watch + T60–T63 parity streams)
+
+Boot E (e44e, wall 540 s, elapsed 540.16, bound=wall, rc 0, tick
+reach **6180**): E33 route script, window 1255–1450, extras = the 8
+EE words, `PS2X_E44_APPEND=1`. Slot 2 via `p_lane_lease.py`
+(peers=[42832], GB2 in slot 1), own-PID kill (driver Popen handle),
+lease released. Trace 7,282,688 B, SHA
+`3fbeb23b8a727948c7dafa5b973aef2e2fbcd485` (two matching reads),
+in-repo copy `local/research/E44/e44-e44e.txt`, analyzer extended
+with the `tw` section. Fold fix + T60 model (raw ra, post-increment
+count, T60-exact grammars verified byte-identical by unit test)
+applied before boot.
+
+Stream census: app 300 (1255–1266) / tpl 300 (1255–1259+1264–1288)
+/ tplrearm 0 / tplm 0 / appsum 3000 (117–3125) / apc 165096
+(41–6177, 3.4M stores) / appx 300 (1270–1572) / v1b0 200 (0–53) /
+tw 2000 (40–191) / spw 1024 (16 words × 64) / ebwlast 400 /
+spwlast 40.
+
+### Table 9 — appx verdict (most important)
+
+| site | trigger | runs? | rows | t0 | tw0 | count (v1) | ra |
+|---|---|---|---|---|---|---|---|
+| 0 (0x3797EC) | 0x3797E8 | yes | 170, 1270–1572 | 0x61c8fc const | 0xc const (mode 3) | 1–77 (38 distinct) | 0x379780 const |
+| 1 (0x37AD44) | 0x37AD40 | yes, from 1273 | 130, 1273–1438 | 0x61c910 const | 0x30 const (mode 3) | all 1 | 0x37a958 const |
+| 2 (0x37B474) | 0x37B470 | yes, from 1273 (apc 0x37b488–ac) | 0 | unobserved | unobserved | never ≤ 1 in-window (shared/continued counter) | — |
+
+Const words: site 0 (0x1414294, 0x2a0, 0, 0xffff05dd);
+site 1 (0x814884, 0x2a0, 0, 0x6040676). Item 0 at SC comes from
+site 1 at count 1 (T62 parity on the count; tw0=0x30 here vs
+T62's 0x1b0 — the divergence, at template level). Site 2 does 4
+full copies + 5 tail-only (+0x1C/+0x1E) touches per vsync
+(0x37b488 count=4, 0x37b4ac count=9).
+
+### Table 10 — apc census (62 pcs, 7 loops + memset, 3.4M stores)
+
+| cluster | first vsync | per-pc total |
+|---|---|---|
+| 0x378148–68 (9) | 43 | 55 |
+| 0x379800–20 (9, site-0 stores) | 117 | 81,154 |
+| 0x379b44–68 (9, T59 pcs; 0x379b58 is a branch, no store) | 94 | 247,724 |
+| 0x37a204–24 (9) | 256 | ~49,294 |
+| 0x37ad58–74 (7, site-1 stores; 0x37ad70 is a branch) | 1273 | 650 |
+| 0x37b488–ac (9, site-2 stores) | 1273 | 520 (quad) / 1170 (tail pair) |
+| 0x37d628–4c (9) | 43 | 211 |
+| 0x394d90 (memset-ish) | 41 | 128 |
+
+SC appenders (sites 1+2) come online at 1273 (~10 ticks after
+E33's 1260–1263 transition — route-script drift).
+
+### Table 11 — tw template-1 (0x61c910) history
+
+- `0 → 0xc` @94, store64 pc 0x399670 (sub_00398A60, ra 0x398cc8)
+  — INIT (with tw1=0x1414294, tw2 0x80→0x2a0 @0x3996c8,
+  tw4=0xffff05df @0x399680).
+- MENU churn 94–191: `→0xcc` @0x3798d4 (ra 0x3996e0),
+  `→0xc` @0x379b9c (ra 0x379ac8). 195 rows, only 0xc/0xcc.
+- `0x30` first sampled at 1273 (appx) → setter in (191,1273],
+  UNOBSERVED (tw cap burned at 191 by MENU churn ~10/vsync).
+- tw address spread: 0x61c900×730, 0x61c90c×374, 0x61c904×276,
+  0x61c8fc×219, 0x61c918×195, 0x61c910×195, rest ~10.
+
+### Table 12 — tpl parity with T60 Table 2
+
+Same 10-write cycle, same setters at −4 pc (E44 pc = the store
+insn; T60 pc = +4/next): tw0 `0x0`@0x1a2614, `0xc`@0x397fc0,
+`0xcc`@0x379c24; tw1 `0xb00294`@0x1a2610+0x397e28,
+`0xb0d294`@0x1a26cc, `0xf00294`@0x397f54, `0x1700294`@0x397f74,
+`0x1400294`@0x397f84, `0x1414294`@0x397f98. 30/vsync.
+Silence 1260–1263 (entry transition — template quiet). T60's
+ra=pc note resolved: their pc == our ra (next-insn convention).
+
+### Misses + lessons
+
+- tplm=0 (1255–1450): no exact-mode-6 tw0 change in-window.
+  (Validates the amendment-2 filter: the old 0x3C0 mask would
+  have flooded on the 0xcc churn.)
+- appsum (117–3125): site-0 38→39 appends/vsync at 1273; hist
+  m∈{0,3} only. No mode 6 at site 0 across 3000 vsyncs (cap hit
+  at 3125; later boot uncovered).
+- v1b0 (0–53, burned): all pointer-pattern false positives
+  (0x364ce8 stack 0x1fffdb0 ×33, heap ptrs). Lesson: a value
+  watch needs a window or addr scope (T61 take note).
+- tw cap (40–191): missed the 0x30 setter. Round-2 proposal:
+  addr-scoped 0x61c910 + window 1000–1300 (~2 changes/vsync →
+  2000 lines ≈ 1000 vsyncs).
+- Fold-fix proof: `spw … addr=0x30809670 value=0x0000000c
+  via=fast`; per-addr analysis keyed by UCAB spellings;
+  ebwlast canonical addrs with UCAB values.
+- spwlast 40 (1255–1278): item-0 walk DMA records (Boot-D
+  format).
+
+### Line grammars (T61/T62/T63 diffing)
+
+app/tpl/tplrearm: T60-exact. appx:
+`appx vsync=%llu site=%d count=%u t0=0x%x tw0..tw4 ra`
+(site 0=0x3797EC, 1=0x37AD44, 2=0x37B474; count=v1
+post-increment). tplm:
+`tplm vsync addr tw0old tw0new tw1old tw1new pc ra fn` + 14
+regs. appsum: `appsum vsync n_app n_tpl mode_hist=m:count,…|-`
+(m=(tw0>>6)&0xF over site-0 appends; n_tpl = tpl-watch word
+changes). apc: `apc vsync pc count` (uncapped). v1b0:
+`v1b0 vsync addr lane value pc ra fn` + 14 regs. tw:
+`tw vsync addr old new via pc ra fn` + 14 regs (addr
+canonical; via=store8/16/32/64/128).
+
+Open cross-lane questions: T62's 0x1b0-from-K+66 vs our
+0x30-at-SC (when does PCSX2's template-1 diverge?); site-2
+t0/tw0 (needs a relaxed appx filter); the 0x30 setter pc
+(needs round 2).
+
 ## Receipts
 
 - Fork rev: `571579e` (pushed `a932aff..571579e`, `git ls-remote fork ssx3` = `571579e…`).

@@ -27,11 +27,15 @@ b.CDDIR = os.path.join(WORK, "E32-inputs", "cd", "SLUS_207.72")
 b.ISO = os.path.join(WORK, "E32-inputs", "SSX 3 (USA).iso")
 
 import argparse
+import json
+import subprocess
 
 pre = argparse.ArgumentParser(add_help=False)
 pre.add_argument("--spw-from", type=str, default=None)
 pre.add_argument("--spw-to", type=str, default=None)
 pre.add_argument("--extra", type=str, default=None)
+pre.add_argument("--append", action="store_true",
+                 help="set PS2X_E44_APPEND=1 (Part 4 append/template watch)")
 known, rest = pre.parse_known_args()
 sys.argv = [sys.argv[0]] + rest
 
@@ -60,6 +64,8 @@ if known.spw_to is not None:
     BASE["PS2X_E44_TO"] = known.spw_to
 if known.extra is not None:
     BASE["PS2X_E44_EXTRA"] = known.extra
+if known.append:
+    BASE["PS2X_E44_APPEND"] = "1"
 if "--script" in sys.argv or any(a.startswith("--script=") for a in sys.argv):
     BASE["PS2X_SKIP_MOVIE"] = "1"
 b.BASE_ENV = BASE
@@ -68,4 +74,32 @@ os.makedirs(b.RUN, exist_ok=True)
 if "--no-stim" not in sys.argv:
     sys.argv.append("--no-stim")
 
-sys.exit(b.main())
+# Two-slot regime: claim via p_lane_lease.py (first free slot), point
+# the driver at that lease path, and excuse already-running other-slot
+# runners from the alive-check. The driver releases the lease file at
+# end; our release() then no-ops.
+sys.path.insert(0, os.path.join(REPO, "local/tooling"))
+from p_lane_lease import SLOTS, claim, release
+
+if "--help" in sys.argv or "-h" in sys.argv:
+    sys.exit(b.main())
+slot = claim(label if label else "e44x")
+if slot is None:
+    print("REFUSE: no free boot slot (p_lane_lease.py status)", file=sys.stderr)
+    sys.exit(2)
+b.LEASE = SLOTS[slot]
+pp = subprocess.run(["pgrep", "-x", "ps2EntryRunner"],
+                    capture_output=True, text=True)
+peers = [x for x in pp.stdout.split() if x.strip().isdigit()] \
+    if pp.returncode == 0 else []
+os.environ["P_LANE_PEER_PIDS"] = ",".join(peers)
+os.environ["P_LANE_HOLD"] = "1"
+print(json.dumps({"event": "slot", "slot": slot, "peers": peers}),
+      flush=True)
+
+rc = 99
+try:
+    rc = b.main()
+finally:
+    release(slot)
+sys.exit(rc)

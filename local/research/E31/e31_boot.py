@@ -70,14 +70,26 @@ def main():
     os.makedirs(snap_dir, exist_ok=True)
     os.makedirs(park_dir, exist_ok=True)  # park writer does not create dirs
 
-    # Pre-claim checks.
-    if os.path.exists(LEASE):
+    # Pre-claim checks. P_LANE_HOLD=1 means the caller pre-claimed via
+    # p_lane_lease.py and holds LEASE already: skip the exists-refuse
+    # (our own claim), re-stamp it below, release at end as usual.
+    if os.environ.get("P_LANE_HOLD", "") != "1" and os.path.exists(LEASE):
         print(f"REFUSE: lease held: {open(LEASE).read()!r}", file=sys.stderr)
         return 2
+    # Two-slot regime (p_lane_lease.py): P_LANE_PEER_PIDS lists
+    # comma-separated PIDs of other-slot runners that do not block
+    # this boot. Refuse only on unknown runners. LEASE itself may be
+    # overridden by the caller (b.LEASE) to the claimed slot path.
+    peers = set()
+    for tok in os.environ.get("P_LANE_PEER_PIDS", "").split(","):
+        tok = tok.strip()
+        if tok.isdigit():
+            peers.add(tok)
     p = subprocess.run(["pgrep", "-x", "ps2EntryRunner"],
                        capture_output=True, text=True)
-    if p.returncode == 0:
-        print(f"REFUSE: runner alive: {p.stdout!r}", file=sys.stderr)
+    alive = set(p.stdout.split()) - peers if p.returncode == 0 else set()
+    if alive:
+        print(f"REFUSE: runner alive: {sorted(alive)!r}", file=sys.stderr)
         return 2
     for path in (runner, CDDIR, ISO):
         if not os.path.exists(path):
