@@ -12,6 +12,18 @@ with measured budgets, then 120 Hz simulation.
 
 ## E — PS2 runtime (fork `ssx3` @ `e57b5f8`)
 
+- [ ] **Parallel spikes started 09-23 (Brad: "start all four"):**
+  - **GB2**: GS queue, step (a), on fork branch `gb2-gs-queue`, byte-exact A/B.
+  - **N6**: Odin built-in controller → PS2 pad.
+  - **E45**: VU1 `long double` → `double`. It's quad soft-float on arm64
+    Android but plain double on the Mac, so the Odin would compute what the
+    Mac already does. Validated with an Odin bench.
+  - **X3** (local Qwen, dense): map the 120 Hz loop/timestep.
+
+  Mini boots now have two lease slots (`local/tooling/p_lane_lease.py`).
+  Proposed, awaiting Brad: bradflix (x86_64, 14 cores, 62 GB) as the
+  Android build host, which frees bytesize for PCSX2.
+
 - [ ] **VU1 speed (top performance item, 09-22, N4):** on the Odin Select
       Character runs at ~0.2 guest vsyncs/s with the VU1 interpreter at 94.8%
       of samples, much of it quad-precision soft-float (`__addtf3`,
