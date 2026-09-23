@@ -677,6 +677,23 @@ with measured budgets, then 120 Hz simulation.
       - Open: which pre-tick-80 wall-racy input picks the attractor when
         there's no drain (pinning / IOP-MPEG audit).
       - All code is on `gb2-gs-queue` `c5fd6f3` (not pushed).
+- [x] **GB3 Part 1 (09-23, ec4f75a): stop-rule hit, but a real finding.**
+      Fork `gb3-gs` `574354a` (local): priv stores go in-stream (unit test
+      proves order; the negative control fails), and the priv-load fence is
+      on by default when queued; 606/606. **SetGsCrt:** SSX 3 never makes
+      syscall 0x02, so the `sceGsResetGraph` HLE stub now applies NTSC
+      SMODE1 `0x740814504` (it matches the G13 PCSX2 dump). The CPU
+      presenter is unchanged (26/26 and 80/80 hashes). VQ still fails 0/26,
+      but packet 0 (the ResetGraph packet) already lands at tick 40 ± 1
+      across boots, before any GS work. Queue-off boots hit the same
+      attractors: GB2's baseline C was a +1 boot. **Gate read:**
+      free-running VQ is retired as a queue gate. The CPU backend's VRAM is
+      a pure function of the stream, so GB4 gates on capture + replay
+      (direct vs queue vs paraLLEl). The ±1 timeline race is E55's
+      (determinism mode; GB3 §0 has the host-paced idle-wait hypothesis).
+      Fold SetGsCrt + queue into `ssx3` after GB4 Part 1 passes.
+- [ ] **GB4 (Codex Luna):** capture/replay harness, queue gate by replay,
+      then paraLLEl live on the Mac via replay PSNR and one live boot.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
