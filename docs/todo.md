@@ -332,6 +332,22 @@ with measured budgets, then 120 Hz simulation.
       128 lines, so SIGTERM drops the tail. **E48 early:** `0x548840` is a
       movie-codec picture node used only during startup movies. So the
       breaker may be an artifact of `PS2X_SKIP_MOVIE`.
+      **E48 PASS (147193e): breaker explained; the glyph hypothesis is
+      refuted.**
+      - `0x548840` is the single pool node of the startup-movie codec
+        (`PS2_SONY_CODEC_INTERNAL`, vtable `0x456850`).
+      - The guest ends a movie when `0x402b38` reads a nonzero
+        `[[mpeg+0x40]+0]`, but the MPEG HLE only ever writes 0 there.
+      - Today the skipped release leaks the node, the 2nd alloc returns 0,
+        and that ends each bypassed movie (two bugs cancelling out).
+      - With the release enabled, movie 1 plays blank frames forever
+        (2,493 cycles in 120 s) → black.
+      - The unlink is clean. The stray glyphs are NOT this node (present
+        with no codec activity), so they're still open.
+      - E46's "3→2→1→0" corrected: it's 3 × `1→0`, one per movie.
+      **Next: E49**: the MPEG HLE writes the end word, plus
+      `0x3b1140` in `extra_function_starts`, validated against E48's
+      predicted observables (runs after E47's race rerun).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
