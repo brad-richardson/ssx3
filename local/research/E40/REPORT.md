@@ -152,6 +152,87 @@ git push fork ssx3  # 0e9b5d0..9b82d35 (runner-dir gate empty)
 (`<route>` = E33 vsync string, as in E38/E39. `e40_analyze.py` parses
 both line kinds; run against a future non-empty SRC trace.)
 
+## Part-2 — guest READ watch on the microcode source heads (approved follow-up)
+
+### Change
+
+Fork `~/dev/PS2Recomp`, branch `ssx3`:
+
+| Commit | Subject |
+|---|---|
+| `99b5fd8` | [E40] Part-2: guest READ watch on microcode source heads (srcread) |
+
+Base `9b82d35`. Pushed `9b82d35..99b5fd8` (first attempt rejected with
+GitHub `Internal Server Error`; retry succeeded; `git ls-remote fork
+ssx3` = `99b5fd8…`); runner-dir gate `git diff --stat 14b1e5cb ssx3 --
+ps2xRuntime/src/runner` empty. Suite **503/503** flags-unset from the
+fork root (499 + 4 new `Ps2MpgSrcTrace` read tests).
+
+Diff: `ps2_mpg_src_trace.h` gains fixed regions `0x435BF8`/`0x4349B8`
+(16 B each), `noteRead`/`noteReadCtx` (`srcread vsync=<n>
+addr=0x<read addr> size=<n> pc=0x<…> ra=0x<…> fn=<…> a0..a3 v0 v1
+t0..t9 s0..s7`, low 32 bits hex), first-64-hits-per-region in-window
+(out-of-window reads consume nothing), shared 2000-line cap.
+`ps2_runtime_macros.h`: all five `READ*` macros forward behind
+`readArmed()` plus a lock-free address pre-filter (loads are hotter
+than stores). **Caught in unit test:** `__func__` inside the READ
+expression-lambda is `operator()`, not the host function — fixed with a
+lambda init-capture (`ps2xE40Fn = __func__`, evaluated in the enclosing
+scope); the macro-tap test asserts the real host name. WRITE taps
+(`do…while`, no lambda) were already correct. Reads bypassing the
+macros: inlined constant-address `FAST_READ*(0x…)` sequences (691
+`FAST_READ32(0x…)` sites vs 124,223 macro `READ32(` uses) — and a
+codegen-wide check confirms **zero** dynamic direct `Ps2FastRead*`
+calls, so every register-addressed guest load passes the tap. The two
+watched heads appear as immediates nowhere in codegen (Part-1 search),
+so a constant-address load of exactly these words does not exist
+either: the watch has no blind spot for EE CPU loads.
+
+Tests (4 new, all pass): off-by-default; exact `srcread` format incl.
+s0–s7; 64-hit cap per region with independence (64+3 lines) and
+window non-consumption; `READ32` macro-tap end-to-end (value returned
++ host fn name).
+
+### Boot e40c (Part-2 Boot A; Mac mini, E32-build @ `99b5fd8`, runner SHA
+`2db28375…9a4407` two matching reads, E33 route, wall 300, snap 30,
+SRC 1000–1400 + MPG control 1000–1400, rc 0 wall-bound 301.5 s, tick
+~1376, lease released)
+
+- **SRC trace: 0 lines (no file). Zero EE CPU loads overlapped either
+  16-byte source region in vsyncs 1000–1378.**
+- Control `vif-mpg-e40c.txt` (copied in-repo, SHA
+  `0287e537…a4687ad80`): **12,148 lines on disk, ALL `copied`**, vsync
+  1000–1378; dest=0 signature unchanged (`fnv=6a82dc60`,
+  `slot2=81d26b7c`, 1,519 lines).
+- The tap is unit-proven incl. host-fn capture, env reaches the runner
+  (control logged), and no load path bypasses the macros — so the
+  microcode bytes reach the VIF interpreter purely via DMA-engine reads
+  (host-side memcpys), never via EE loads of these heads, in this window.
+
+### Source-pointer formation table (reading fn + caller via ra)
+
+| Reading function | Caller (via ra) | Pointer formed as | Index source | Index value at read |
+|---|---|---|---|---|
+| *(none — zero `srcread` hits)* | — | — | — | — |
+
+No storing function either (Part-1 `tagwrite` still empty: no REF tags
+⇒ no armed watches). Named inputs for the next step instead of a
+verdict: 12,148/12,148 copied control MPGs 1000–1378; SRC + mpgsrc
+silence under identical conditions; no source-head immediates in
+codegen; no dynamic fast-read bypass. The source address is handed to
+the DMA engine without EE code touching these words — the remaining
+suspects are MADR/CHCR/TADR register writes and CNT-tagged chains
+(T50 covers the PCSX2 side).
+
+Bytes: E40-run 26 MB total (3 boots); internal total 27.5/200 GB
+cap. Part-2 spend: builds as needed, 1 boot, 0 retries.
+
+```
+cmake --build ~/dev/ssx3-work/E32-build -j8   # fork ssx3 @ 99b5fd8
+env -u PS2X_SKIP_MOVIE -u PS2X_PAD_SCRIPT ~/dev/ssx3-work/E32-build/ps2xTest/ps2x_tests  # 503/503
+python3 local/research/E40/e40_boot.py --label e40c --wall 300 --snap 30 --src-from 1000 --src-to 1400 --mpg-from 1000 --mpg-to 1400 --script "<route>"
+```
+
 ## Recommendation (orchestrator decides)
 
 The REF-addr question as briefed is unanswerable from this window: the
