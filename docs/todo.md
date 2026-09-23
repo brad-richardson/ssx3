@@ -159,6 +159,14 @@ with measured budgets, then 120 Hz simulation.
       interrupt/completion model (DMA-end/GS handler that advances the state
       and signals the sema). **T51 (PCSX2) running; recomp side = E40 Part 6
       after Part 5.** T50 PASS (3d89659).
+- [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
+      PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
+      `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
+      chains lack; both share the 4 CALLs → `0x435bd0`; chain arenas sit at
+      different heap addresses (PCSX2 TADR 0x63c560/0x63ca70 vs recomp
+      0x63b8a0/0x63bdb0); no post-load writes on either side (baked at scene
+      build). Lead: assets that never load (ties to the Snow Jam CD-read stop).
+      **T52 (PCSX2 CD-read log boot → SC) running**; recomp side after E40 Part 7.
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
