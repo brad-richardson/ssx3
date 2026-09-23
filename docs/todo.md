@@ -795,6 +795,19 @@ with measured budgets, then 120 Hz simulation.
       6. a pink screen for ~1 s at startup (= the `MAGENTA` no-frame
          placeholder, `ps2_runtime.cpp:535`).
 
+      **G46 PASS (464bebf):**
+      - Items 3–9 (sprite-sheet atlas cells, striped "snowflake" quads,
+        ghost LEVEL/icons, glyph bars, controller diagram): all three
+        renderers (CPU, paraLLEl, PCSX2 gsrunner) draw them from our
+        stream, and PCSX2's own run doesn't, so they're **upstream: wrong
+        texture-page contents** (E51 streaming → E53/E54).
+      - **Fonts = host presentation** (POINT filter at a ×2.95 non-integer
+        scale + 8:7 instead of 4:3) → added to I26.
+      - One CPU-backend bug fixed: a triangle fill rule (a shared-edge
+        double blend made a dotted diagonal seam). `g46-gs` `104dd7f` +
+        test; to fold into `ssx3`.
+      - Tool: a `.gs` converter for PCSX2 gsrunner replay of our streams
+        (`local/research/G46/g46_rec2gs.py`).
       → **I26** (items 4, 5 and 6) and **G46** (items 1–3: replay our GS
       stream through paraLLEl/PCSX2 to classify each artifact as backend,
       upstream or authentic).
