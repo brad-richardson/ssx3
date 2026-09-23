@@ -155,9 +155,10 @@ with measured budgets, then 120 Hz simulation.
       (paired):** E40 Part 1 PASS (09-23, fork `9b82d35`): **zero** REF tags carry
       these MPGs (12,160 flowed inline) and neither address is a code constant:
       the game copies microcode from the library into packet buffers with EE
-      code. Part 2 (E40) + redirected T50: a guest **read** watch on the
-      library words at 0x435bf8 / 0x4349b8 (reading function, pointer math,
-      index source) on both sides.
+      code. Part 2 PASS (fork `99b5fd8`, 503/503): **zero** EE loads of the library
+      heads, so the bytes reach VIF only via DMA. Part 3 (E40) + T50
+      redirect #2: per dest-0 MPG, the EE source address of its payload, plus
+      a store watch on D1_CHCR/MADR/QWC/TADR (fn, pc, regs) on both sides.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
