@@ -144,8 +144,16 @@ with measured budgets, then 120 Hz simulation.
       MPG we don't apply**. The VIF1 MPG handler has three silent drop paths
       vs PCSX2 (imm ≥ 2048 dropped instead of masked; payload past the buffer
       end dropped, no carry-over; clip instead of wrap).
-- [ ] **E39 (running):** MPG outcome log over menus → Select Character, then
-      one fix matching PCSX2 and Select Character/race boots.
+- [x] **E39 PASS (09-23):** `PS2X_VIF_MPG_LOG` (491/491, fork `0e9b5d0`):
+      37,596 MPGs in vsyncs 0–1377, all copied, no drop path fires; every
+      `addr=0` upload carries our `LQI` at slot 2.
+- [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
+      addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
+      0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
+      in the same microcode library. So the game computes a different source
+      offset: game state or a mis-recompiled EE instruction. **E40 + T50
+      (running, paired):** log REF-tag source addrs + a write watch on the tag's
+      addr word (storing function, computing registers) on both sides.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
