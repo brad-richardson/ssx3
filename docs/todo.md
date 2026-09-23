@@ -480,6 +480,14 @@ with measured budgets, then 120 Hz simulation.
       - One queue-on boot in three showed a stale VIF1 packet replay
         (a race; open).
       - Part 5: validate `PS2X_GS_CSR_DRAIN=1` with the VQ gate.
+      **Part 5 (58119f0) FAIL.**
+      - CSR-drain doesn't restore queue-off VRAM (26/26 mismatch, both
+        boots), and the two drain boots disagree with each other.
+      - Byte decode: the differing qword is one fade alpha byte, lagging
+        exactly one tick. So the queue shifts the guest's view of time
+        through a non-CSR channel.
+      - Part 6 (code read): where does guest-visible time couple to GS
+        work in the direct path? Then park at step (a).
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
