@@ -758,9 +758,25 @@ with measured budgets, then 120 Hz simulation.
 
 ## I — iOS recomp
 
-- [ ] **Frontier review round 2 (Fable, read-only, 09-23 evening):**
-      remaining silent-defect classes, nondeterminism sources, and the plan
-      to the milestone. Running as an orchestrator subagent.
+- [x] **Frontier review round 2 (Fable, 09-23):**
+      `docs/research/review-2026-09-23-frontier-2.md`. Top items:
+      1. the `log@0x40D610` stub uses the float ABI for a double routine →
+         TEX1 K = 0x801 (verified);
+      2. the VU1 EFU table is shifted (ERSQRT runs as ESIN in the hot
+         vertex loop; verified);
+      3. ~4,045 interior prologues are unregistered (858
+         data-referenced), and the missing-target policy can't fail;
+      4. COP0 Count is frozen;
+      5. PINTEH has the wrong lanes;
+      6. **the RNG is seeded from host time via `sceCdReadClock`**, which
+         causes the run-to-run divergence;
+      7. CSR isn't W1C and VSINT/FIELD are clobbered;
+      8. a VIF1 DIR=0 readback is parsed as VIFcodes;
+      9. the FPCR scope.
+
+      Plan: E53 (+ items 1–2 added) → **E54** semantics batch 2 → **E55**
+      determinism mode + hash tap → **E56** function-boundary closure
+      (auto interior prologues, `stop` policy) → N7 Odin → E57 VU1 speed.
 - [ ] **Brad's iPhone check-in feedback (09-23 evening, Select Mode/Peak
       screenshots):**
       1. fonts look off (kerning);
