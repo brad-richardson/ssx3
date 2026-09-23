@@ -290,6 +290,22 @@ with measured budgets, then 120 Hz simulation.
       **Fix: E46**, which makes the census targets real entries, regenerates
       codegen into a new dir, then validates the rider at SC and 3D in the
       race.
+      **E46 PASS, partial (65b1c00):**
+      - Mechanism: `extra_function_starts` in `ssx3.toml` → resume entries
+        (same path as direct-call interior targets). An empty-list regen is
+        byte-identical; 591/591.
+      - **`0x396b40` alone: item-0 w0 = `0x1b0` (297/297), menus render,
+        and the Happiness race is reached with a live HUD. The race world
+        is still dark.**
+      - The census has 18 targets. All 18 at once → black at tick 246; the
+        breaker is among the first firers (`0x3b1140/0x14e130/0x144928/
+        0x30db90`).
+      - A new target, `0x32f8b0`, appears once `0x396b40` runs. There's no
+        SC still yet.
+      - The static data-pointer scan found 1686 hits and none of the census
+        targets.
+      - Part 2: bisect the breaker (4 boots on both slots), then all-but-
+        breaker + snaps at SC, then the race.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
