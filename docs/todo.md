@@ -758,6 +758,9 @@ with measured budgets, then 120 Hz simulation.
 
 ## I — iOS recomp
 
+- [ ] **Frontier review round 2 (Fable, read-only, 09-23 evening):**
+      remaining silent-defect classes, nondeterminism sources, and the plan
+      to the milestone. Running as an orchestrator subagent.
 - [ ] **Brad's iPhone check-in feedback (09-23 evening, Select Mode/Peak
       screenshots):**
       1. fonts look off (kerning);
@@ -813,6 +816,13 @@ with measured budgets, then 120 Hz simulation.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
+
+## A — audio (new 09-23)
+
+- [ ] **A1 (Opus, scoping):** the IOP module and SIF RPC census, the
+      runtime's current handling, the sound data on the ISO, and the routes
+      (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
+      the smallest audible milestone.
 
 ## V — storage and hosts
 
