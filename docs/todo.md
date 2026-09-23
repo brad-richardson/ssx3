@@ -44,6 +44,19 @@ with measured budgets, then 120 Hz simulation.
       stalls at 99% (live loop, no CD reads, no park). Odin reuse string: E31
       REPORT §e31l. Guest speed varies a lot (title 23 ticks/s, 3D menus
       1–3 fps with the software GS).
+- [ ] **Sprite/texture addressing as a common cause (Brad, 09-22, re-flagged):**
+      wrong sprite-sheet cell selection/cropping may explain many graphics
+      faults, possibly the missing rider too: SSX 3 renders some content to
+      an offscreen buffer and composites it as a textured sprite (G13:
+      composite-112 before the scene), so a wrong TBP/UV/CLAMP/CLUT on that
+      composite would drop the rider. Treat as **H4** next to E33's H1–H3.
+      Discriminators already running: G44 (paraLLEl fed the same stream:
+      right cells ⇒ CPU-backend texture/sprite bug; same wrong cells ⇒ wrong
+      TEX0/uploads upstream) and T48 (PCSX2 per-draw TBP0/PRIM tuples at
+      Select Character). Next: E35 brief after G44 + T48: per-draw sprite
+      TEX0 (TBP0/TBW/PSM/CBP/CSA), UV range, CLAMP/REGION bounds at Select
+      Character vs T48, walked for the "3" logo, arrows, corner glyphs and
+      the rider composite; one fix if a single mechanism shows.
 - [ ] Stray PS2 button glyphs/D-pad/L1-R1 boxes in the top-left and
       bottom-left corners (Brad sees them on the Odin; E31's Mac Select
       Character dump has them inside the 512×448 guest framebuffer).
