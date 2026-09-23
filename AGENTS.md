@@ -53,23 +53,26 @@ movie path), **V** storage/restore.
   `docs/status.md`, `docs/todo.md` and `docs/numbers-ledger.md`. It
   checks in on panes at least hourly, nudges stuck workers, and pushes
   `main` when the tree is clean.
-- **Workers (muse)** execute one brief each in their own herdr pane. They
-  hand back tables and receipts plus a recommended next action; they don't
-  declare verdicts beyond what the brief asks. All implementation is muse
-  (Brad, 2026-09-22). No Opus/reasoning-class workers unless Brad asks (exception: the Opus-medium fallback below once muse runs out).
+- **Workers** (muse, local Qwen via opencode, or a fallback; see Worker
+  routing below) execute one brief each in their own herdr pane. They hand
+  back tables and receipts plus a recommended next action; they don't
+  declare verdicts beyond what the brief asks. No Opus workers except as
+  the quota fallback or when Brad asks.
 - Workers never edit `docs/status.md`, `docs/todo.md`, the ledger or
   plans. They may read other panes but never prompt them; coordination
   goes through the orchestrator. Subagents are fine for read-only
   fan-out; edits, builds, boots and commits stay in the main worker.
 
-**Fallback worker (Brad, 2026-09-22):** when muse's subscription runs
-out, workers become **Claude Opus at medium effort** in the same herdr
-panes, under the same brief contract and rules (the orchestrator still
-owns judgment): `herdr agent start <id> --kind claude --pane <pane>
---timeout 120000 -- --model opus --effort medium` (permission mode: Brad
-to confirm). Commits then carry `Orchestrated-By: Claude Code` instead of
-the Muse trailer. A local Qwen worker on the mini is being considered;
-not in use yet.
+**Worker routing (Brad, 2026-09-22; source of truth `~/CLAUDE.md`):**
+quick tasks (< ~5 min) the orchestrator does itself; longer low-reasoning
+work (mechanical edits, installs, runs, data gathering) goes to **local
+Qwen via opencode** (`--kind opencode`; not configured on the mini yet:
+`~/.config/opencode/opencode.json` is missing, so muse covers it until then);
+longer high-reasoning work goes to **muse**. Fallbacks when a quota is gone:
+Claude Opus (`--kind claude`) or GPT Sol via Codex (`--kind codex -- -m
+gpt-6-sol`). Same brief contract and rules for every worker kind; the
+commit trailer names the worker (`Orchestrated-By: Muse Code` / `opencode`
+/ `Claude Code` / `Codex`).
 
 herdr recipe: `herdr tab create --workspace wN --cwd ~/dev/ssx3 --label
 <ID>` → `herdr agent start <id> --kind muse --pane <pane> --timeout
