@@ -26,6 +26,8 @@ b.ISO = os.path.join(WORK, "E32-inputs", "SSX 3 (USA).iso")
 ap = argparse.ArgumentParser()
 ap.add_argument("--sfrom", default="0")
 ap.add_argument("--sto", default="18446744073709551615")
+ap.add_argument("--force-smode1", default="",
+                help="G44 Part-3 DIAGNOSTIC-ONLY: PS2X_GS_SHADOW_FORCE_SMODE1 value")
 known, rest = ap.parse_known_args()
 sys.argv = [sys.argv[0]] + rest
 
@@ -43,6 +45,8 @@ BASE["PS2X_GS_SHADOW"] = "parallel"
 BASE["GRANITE_VULKAN_LIBRARY"] = "/opt/homebrew/lib/libvulkan.1.dylib"
 BASE["PS2X_GS_SHADOW_FROM"] = known.sfrom
 BASE["PS2X_GS_SHADOW_TO"] = known.sto
+if known.force_smode1:
+    BASE["PS2X_GS_SHADOW_FORCE_SMODE1"] = known.force_smode1
 b.BASE_ENV = BASE
 
 label = ""

@@ -13,7 +13,11 @@ wrong LC assumption; the corrected condition is committed but
 no paraLLEl frame was ever read back, so neither H1 (CPU backend fault) nor
 H2 (upstream fault) is discriminated.
 
-Verdict after Part-2 S3: **TABLED** (see §6).
+Verdict after Part-3 S4: **SHADOW WORKS** (with the diagnostic SMODE1
+override) — 200/200 scanouts recovered, same scenes on both backends (§5).
+Zoe/Select-Character pairs were NOT captured (cap filled before select);
+the rider question stays open. Fork commits `460e438` + `8c45d1f` +
+`6cfede4` (no push).
 
 ## 1. Pins and receipts
 
@@ -34,8 +38,9 @@ Verdict after Part-2 S3: **TABLED** (see §6).
 - Runner SHAs: S1 binary `4e01e7f3…` (1 read, superseded); S2 binary
   `b8a694c5…` (1 read, superseded); post-S2 binary `25bd6450…` (2 matching
   reads, superseded unbooted); S3/Part-2 binary `3402f272…` (2 matching
-  reads, pre+post S3). Suite binary `8db3d488…` (1 read); suite 470/470
-  after every adapter edit (logs `/tmp/g44-suite*.log`).
+  reads, pre+post S3). S4/Part-3 binary `e81ba740…` (2 matching reads,
+  pre+post S4). Suite binary `8db3d488…` (1 read); suite 471/471 after every
+  adapter edit (463 E32 + 8 G44; logs `/tmp/g44-suite*.log`).
 - Suite from fork root, all flags unset: **470/470** (463 E32 + 7 new G44).
 - `git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner` empty (verified
   post-commit).
@@ -86,46 +91,59 @@ Common: `PS2X_SKIP_MOVIE=1`, pad script
 | S1 g44s1 | 152 s / 150 s, rc 0 wall-bound | 800–1200, cap 200 | 116 → ~1340 | Main Menu (Single Event) + Select Character (Zoe) | init ok; 400 `vsync()` calls (ticks 800–1199), ALL null; `no scanout image` |
 | S2 g44s2 | 302 s / 300 s, rc 0 wall-bound | 1050–1400, cap 200 | 235 → ~1160+ | Select Character (Zoe) settled | init ok; ~110 `vsync()` calls, ALL null with `CMOD=0 LC=0 INT=1 FFMD=0` |
 | S3 g44s3 (Part-2) | 301 s / 300 s, rc 0 wall-bound | 1000–1400, cap 200 | 276 → ~1916 | Select Character (Zoe) settled (`snap-0301.18s.png`) | init ok; workaround FIRED every eligible tick, ALL still null; counters: 219008 packets fed, 0 reg writes, 1800 presents, 0 pairs (`shadow-g44s3/shadow-stats.txt`) |
+| S4 g44s4 (Part-3) | 303 s / 300 s, rc 0 wall-bound | 1000–1400 + `FORCE_SMODE1=ntsc`, cap 200 | 275 → ~1900+ | Select Character (Zoe) settled on CPU (`snap-0301.25s.png`) — but OUTSIDE the pair window | `FORCE_SMODE1 active` logged; **200/200 scanouts recovered**: 172370 packets fed, 0 reg writes, 1440 presents, 200 pairs (`shadow-g44s4/`: 200× cpu/par/side PNG + `pairs.csv` + stats) |
 
 Screens: `frames-g44s1-1/snap/snap-0042.11s.png` (Main Menu),
 `snap-0082.21s.png` + `snap-0152.38s.png` (Select Character, Zoe);
 `frames-g44s2-1/snap/snap-0300.72s.png` (Select Character, Zoe). Riders are
 flat white silhouettes on the CPU backend (E33's area, unchanged).
 
-## 5. Per-screen compare table
+## 5. S4 per-screen compare (200 pairs, ticks 1000–1199)
 
-| Screen | Pairs | PSNR | Diff px | BBox | Side-by-side |
-| --- | --- | --- | --- | --- | --- |
-| Title | 0 | — | — | — | — |
-| Main Menu | 0 | — | — | — | — |
-| Select Character (Zoe) | 0 | — | — | — | — |
+Pair window covered title → menu only (cap filled at tick 1199; select sits
+at ~1450+). All pairs 512×448 both sides, bbox full-frame throughout.
 
-No pairs exist because scanout never produced an image (§0). Rendering-side
-evidence that the feed is alive (S1, 400/400 identical setup lines):
-`EN1=1 EN2=0 DISPFB1=112/8/1/0/0 DSP1=2560/447/4/0/641/50 SM=0/1/0`, B-region
-(DISPFB1 pages) `nz=769022` with per-frame-varying fnv (animated display
-content), A-region fnv changing seq-to-seq (live writes). CPU presents
-512×448 from the same `fbp=112` (`upload-*.txt fnv` varies per tick).
+| Screen (ticks, eyed) | Pairs | Base PSNR | Diff px (of 229376) | After ±2px shift search |
+| --- | --- | --- | --- | --- |
+| Title (~1000–1035; `side-1010.png`) | ~35 | ~18.1 | ~183k (80%) | 26.6 dB @ (+2,+2) |
+| Transition fade (~1025; `side-1025.png`) | ~3 | ~23.8 | 35k (15%) | **53.0 dB** @ (+1,+1), mad 0.20 |
+| Main Menu (~1040–1199; `side-1040/1190/1199.png`) | ~160 | ~18.2 | ~160k (70%) | 26.8 dB @ (+2,+1) |
+| Select Character (Zoe) | 0 | — | — | — |
 
-## 6. Verdict: TABLED (Part-2 stop rule — scanouts still null, no T47 compare)
+Aggregate: mean diff 161882 px (70.6%), mean PSNR 18.75 dB, no phase split
+(even 18.72 / odd 18.79 — deinterlace stable). Element checklist on
+`side-1190.png` (menu): orange '3' logo, header, 5 items + highlight,
+description text, floating quads, R1/L1 boxes, bottom hints, snowflakes —
+**all present on both backends, same layout**. Amplitude histogram (scratch
+`/tmp/g44-diff.cpp`, raylib, NOT committed): tick 1190 has 31% exact,
+74% ≤2 LSB, 88% ≤16 — i.e. the gap is a global ~1–2px translation (scanout
+crop convention; we pass `crtc_offsets=false`) plus low-amplitude
+implementation noise, not content. The transition fade lands both backends
+in lockstep (53 dB after shift) — the feeds are synchronized per-vsync.
 
-S3 fired the corrected workaround on every eligible tick and every retry
-returned null. Forcing `CMOD=NTSC` is **insufficient**: the NTSC branch also
-requires `LC==ANALOG(32)`, and the game programs `LC=0` — the mode falls
-through to `Unknown video format` regardless of CMOD. No paraLLEl frame has
-ever been read back, so there is nothing to compare against the T47 PCSX2
-refs (`/Volumes/Extreme SSD/ps2x-t47/` untouched); the Zoe/H1-vs-H2 question
-is still open.
+T47 PCSX2 refs (`/Volumes/Extreme SSD/ps2x-t47/`, read-only): the '3' logo
+matches across CPU/para/PCSX2. The floating quads, bottom-left icon cluster
+and R1/L1 boxes appear on BOTH recomp backends but NOT on `t47-shot-menu`
+— a recomp-vs-PCSX2 difference upstream of the GS (game state/timing or
+VU1/VIF: E33's area), not a CPU-vs-paraLLEl difference. Title snowflake
+blobs likewise agree backend-to-backend. **Zoe/3D-rider: unanswered** — no
+Select-Character pairs exist; S4 reached select on CPU only.
 
-Handoff to the E lane per orchestrator routing: the `SetGsCrt` HLE should
-program SMODE1 like the real kernel (NTSC+ANALOG 480i for the menu path),
-which fixes the root cause for both the shadow and any future presenting
-backend. G44 needs no further boots until that lands; the retry-as-NTSC
-workaround stays in the adapter as the scanout-side complement (it will
-fire successfully once SMODE1 carries a mapped mode). Precise E-lane
-observable: G31 `SM=` fields should read `2/1/0` (or `2/x/x`) after the
-fix; the shadow's `workaround fired (scanout recovered)` line is the
-acceptance signal.
+## 6. Verdict: SHADOW WORKS with the diagnostic override; Zoe still open
+
+Part-3 recovered all 200 scanouts. Partial H1/H2 signal: for title + menu,
+paraLLEl fed the same GIF stream draws the same picture as the CPU backend
+(same elements, same layout, 26–53 dB after compensating a ~1–2px scanout
+crop offset) — no missing content on either side, so the recomp-vs-PCSX2
+extras (floating quads, corner cluster) sit upstream of the GS. The missing-
+3D-rider question is NOT answered: the cap filled before Select Character.
+
+Recommended next action (orchestrator decides): one S5 boot on this head
+with window 1300–1700 (cap 200 covers select at ~1450+), same script, to
+capture Select-Character pairs and answer Zoe plainly. No code changes
+needed. The E-lane `SetGsCrt`→SMODE1 fix remains the real root-cause fix
+(it retires the diagnostic override); G31 `SM=` should read `2/x/x` after
+it lands. No T47 writes were made (refs read-only).
 
 ## 7. Gaps (stated plainly)
 
