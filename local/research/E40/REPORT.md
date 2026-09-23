@@ -580,3 +580,115 @@ alternating set) plus current wides, `kMaxDmLines` raised past
 heap has been address-stable across e40d/e/f). The first
 `arenastore`/`uploadload` hits there name the storing function
 and its table load directly.
+
+## Part-6 — render-DMA-thread state sequence (Boot e40g)
+
+Tracer rev `338ad99` (fork `ssx3`, ff-pushed `052c16b..338ad99`;
+runner rebuilt, SHA noted in boot log): default-off T51-mirror
+watches — `st` (guest stores to `0x6214E0–0x62151F` with
+scheduler-mirrored `intc`), `sema` (Signal/iSignal/Wait/PollSema
+filtered on live RAM at `0x62150C`/`0x621508`), `irq` (every queued
+guest handler dispatch), plus existing `dmareg` kicks — one file,
+execution order. Suite green `525/525` twice. No sub-caps (5-vsync
+window); global cap bounds.
+
+### Boot e40g (Part-6 Boot A; E33 route, wall 300, snap 30, SRC
+1300–1304 + MPG control 1300–1304, default arenas, rc 0 wall-bound
+302.2 s, final frame tick 1377 `fnv1a=129073fb` = e40e exactly,
+lease released)
+
+- SRC `mpg-src-e40g.txt` (copied in-repo, SHA
+  `740a57d5…affcd3`): **109 `st`, 0 `sema`, 29 `irq`**,
+  20 `dmareg`, 18 `mpgpay`, 1704 `ctag` (first 2 kicks),
+  0 arenastore/uploadload. Total 1879 (no cap cut).
+- Control `vif-mpg-e40g.txt` (copied in-repo, SHA
+  `5a97d752…d20a17`): 128 lines; dest-0 signature unchanged
+  (`fnv=6a82dc60 slot2=81d26b7c`).
+- `mpgpay`: 4/vsync (2 @1304 edge), ALL `src=0x00435bf8
+  num=0`. **`0x434990` appears 0× anywhere in the file.**
+
+### Table 7 — per-vsync sequence (identical all 5 vsyncs)
+
+| # | line |
+|---|---|
+| 1–2 | `irq` INTC cause `0x2` → `0x3c1980`, then → `0x3825c0` |
+| 3 | `irq` timer `0xa` → `0x3e4db8` |
+| 4 | `irq` INTC cause `0x3` → `0x31a490` |
+| 5–6 | `irq` VIF1-end (cause `0x1`, ch 1) → `0x382650`, **×2** (1304: ×1, window edge) |
+| 7–12 | `st` state word `0x6214EC` = **5 → 0 → 1 → 2 → 3 → 4** (writers below) |
+| 13+ | `st` chain heads `0x621508`/`0x62150C` (sub_0x377b24, values below) |
+| 14+ | `dmareg` kick site 1 (ra `0x382938`) + kick site 2 (ra `0x3827e8`) |
+
+### Table 8 — state-word writers (`0x6214EC`)
+
+| value | pc | fn | ra | intc |
+|---|---|---|---|---|
+| 5 | `0x382634` | sub_0x3825f8 | `0x3825dc` | 1 |
+| 0 | `0x382818` | sub_0x382760 | `0x3827e8` | 0 |
+| 1 | `0x382920` | sub_0x382760 | `0x3827e8` | 0 |
+| 2 | `0x3826a8` | sub_0x382688 | `0x38266c` | 1 |
+| 3 | `0x382acc` | sub_0x382760 | `0x3827e8` | 0 |
+| 4 | `0x3826d0` | sub_0x382688 | `0x38266c` | 1 |
+
+The `intc` mirror works: handler-context writers (`0x3825f8`/
+`0x382688`, reached from the VIF1-end handler `0x382650`) flag 1;
+thread-context writers (`0x382760`) flag 0.
+
+### Table 9 — kicks (both sites fire every vsync)
+
+| vsync | site 1 (ra `0x382938`, pc `0x382a04`) | site 2 (ra `0x3827e8`, pc `0x382ad8`) |
+|---|---|---|
+| 1300/1302/1304 | TADR `0x63b8a0` = *(0x621508) | TADR `0x63bdb0` = *(0x62150C) |
+| 1301/1303 | TADR `0x708520` = *(0x621508) | TADR `0x708a30` = *(0x62150C) |
+
+Chain-head words `0x621508`/`0x62150C` are rewritten per vsync by
+`sub_00377b24` (pc `0x377b50`/`0x377b44`), alternating the
+`0x63b8`/`0x7085` sets.
+
+### Findings (two premises corrected)
+
+1. **The recomp kicks from BOTH sites every vsync** (ra
+   `0x382938` and ra `0x3827e8`) — the "recomp only ever kicks
+   with ra `0x382938`" premise is contradicted in this window.
+   The missing pass-2 is NOT the kick: both chains' CALLs point
+   at `0x435bd0`, and no `0x434990` upload occurs. The divergence
+   is the uploader CHOICE in the second chain, not the kick path.
+2. **The runtime HAS VIF1 DMAC-end dispatch**: `ps2_memory.cpp`
+   queues cause 1 at VIF1 completion (`queueCompletedDmacCause`
+   sites for ch 0/1/2/SPR exist), drained via
+   `drainCompletedDmacHandlers` → `dispatchIrq(true, 1)` →
+   handler `0x382650` (9× in-window). INTC dispatch exists via
+   `dispatchIrq(false, …)` (timer/alarm/VSync sites).
+3. **The briefed sema words are wrong**: the thread waits on
+   `*(s0+0x5AC8)` = `0x621528` and `*(s0+0x5ACC)` = `0x62152C`
+   (`lw a0` in the delay slots @`0x3827dc`/`0x3827e4`, `jal
+   func_423DE0`), both outside the `st` range and not the watched
+   ids — hence `sema = 0`. Worse, `0x621508`/`0x62150C` hold
+   **chain-head pointers** in this scene (rewritten per vsync,
+   Table 9), not sema ids — the id filter could never match.
+   Correct targets: range extended to `0x62152C`, ids from
+   `0x621528`/`0x62152C`.
+
+### Gaps / notes
+
+- Whether the thread takes the `state == 5 → func_382AF0` branch
+  is not logged (state is set to 5 each vsync; no call trace).
+- `iPollSema` not hooked (brief named 4 calls); 8/16-bit stores
+  not tapped (documented); `st`/`sema`/`irq` carry no GPR dump
+  (brief-literal, T51-parity).
+- Part-6 spend: builds + 1 fork commit/ff-push, 1 boot,
+  0 retries. Command: `python3 local/research/E40/e40_boot.py
+  --label e40g --wall 300 --snap 30 --src-from 1300 --src-to
+  1304 --mpg-from 1300 --mpg-to 1304 --script "<E33 route>"`
+  (PS2X_MPG_SRC_ARENAS unset).
+
+## Recommendation (orchestrator decides)
+
+The uploader-choice hunt moves to the chain CONTENTS: both
+settled chains CALL `0x435bd0`; find who writes the second
+chain's CALL ADDR (pre-1150 build, `0x6f`/`0x62` sets) and what
+table entry selects `0x435bd0` over `0x434990`. Suggested next
+lane (1 boot): corrected `st` range through `0x62152C` + sema-id
+filter on `0x621528`/`0x62152C`, window on the build (pre-1150
+bracket from Part-5), keeping this binary. Keep the Part-6
+tracer (fix the two offsets when next touched).
