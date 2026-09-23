@@ -692,3 +692,82 @@ lane (1 boot): corrected `st` range through `0x62152C` + sema-id
 filter on `0x621528`/`0x62152C`, window on the build (pre-1150
 bracket from Part-5), keeping this binary. Keep the Part-6
 tracer (fix the two offsets when next touched).
+
+## Part-7 — whole-boot builder catch (Boot e40h)
+
+Tracer rev `9840542` (fork `ssx3`, ff-pushed `338ad99..9840542`;
+runner rebuilt 07:00): `tagaddrwrite` watch on CALL ADDR words
+(env `PS2X_MPG_SRC_TAGADDRS`, defaults `0x63b994,0x63bbe4,
+0x63bea4,0x63c134`), 64 hits/word, any value, with `srcload`
+attribution to the most recent uploader-valued load; file cap
+2000/8000→40000 (whole-boot line budget ≈ 24K). Suite green
+`529/529` twice. No MPG control file this boot (SRC carries
+mpgpay/dmareg; route identity already 3×-established).
+
+### Boot e40h (Part-7 Boot A; E33 route, wall 300, snap 30, SRC
+0–1300, TAGADDRS = the four 0x63b8 words, default arenas, rc 0
+wall-bound 302.3 s, final frame tick 1376 `fnv1a=129073fb` =
+e40e/e40g exactly, lease released)
+
+- SRC `mpg-src-e40h.txt` (copied in-repo, SHA
+  `683c30b1…943e14`): **0 `tagaddrwrite`**, 0 arenastore,
+  0 uploadload, 27590 `st`, 7556 `irq`, 4385 `mpgpay` (ALL
+  `src=0x00435bf8`, vsync 100–1299), 256 `dmareg` (own cap,
+  vsync ≤105), 21 `ctag` (first 2 kicks, boot menus), 0 sema.
+  File total 39808/40000 — full window covered, no cap cut.
+- State word `0x6214EC` written 7516× (per-frame 5→0→1→2→3→4
+  cycling confirmed whole-boot).
+
+### Finding (the builder does not EE-store in-boot)
+
+The four ADDR words were **never EE-stored over the entire boot**
+(0–1299, window essentially full), yet their chains kick all boot
+(`mpgpay src=0x435bf8` from vsync 100). Corroborating zeros:
+arenastore = 0 (no `0x43xxxx` store into either default arena all
+boot) and uploadload = 0 (no in-boot load returned `0x435bd0`
+or `0x434990–0x4349b8` anywhere). Joint reading: the CALL ADDRs
+are **not EE-written in-boot at all** — they arrive in RAM via a
+path that bypasses the WRITE/READ macros (loaded image data, or a
+C++ DMA/memcpy from it), i.e. the uploader choice is baked into
+(game or template) data, not computed per frame/scene by a
+table/index/stride mechanism in traced execution. The DYNAMIC
+part is chain SELECTION (Part-6: TADR struct, per-frame heads).
+The briefed table (storing function + caller + table base/index/
+stride/value) is therefore unfillable — there is no storing
+function in the traced execution to read.
+
+### Residual gaps (stated plainly)
+
+- **ADDRESS mirrors not folded**: `isTagWatched`/`isArenaWatched`
+  compare raw addresses, so stores via the uncached alias
+  (`0x263B994` etc.) would miss. Mitigating: observed TADR kicks
+  and all `st` struct writes use the cached (top-nibble-0) alias,
+  so the builder likely does too — but unproven. Fold addresses
+  next rev.
+- Env delivery post-hoc unverified (no env echo); moot for
+  coverage here (env list = defaults).
+- `0x7085` CALL offsets still unknown (no ctag data); its ADDR
+  words were never watched. `0x6f`/`0x62` loading-set builds also
+  outside arenastore defaults.
+- Whether the data is truly static-image vs DMA-copied template
+  is undecided from this boot (both bypass macros identically).
+
+### Spend
+
+Builds + 1 fork commit/ff-push, 1 boot, 0 retries. Command:
+`PS2X_MPG_SRC_TAGADDRS="0x63b994,0x63bbe4,0x63bea4,0x63c134"
+python3 local/research/E40/e40_boot.py --label e40h --wall 300
+--snap 30 --src-from 0 --src-to 1300 --script "<E33 route>"`
+(no ARENAS, no MPG control).
+
+## Recommendation (orchestrator decides)
+
+E40's uploader-ADDR hunt has converged on a negative with a
+precise boundary: no EE load/store of the uploader anywhere in
+0–1299 (three independent watches). Next lane options: (a) fold
+address mirrors and re-run the word watch to close the uncached
+gap; (b) trace the IMAGE path — which CD/ELF load populates
+`0x63b800–0x63c400` (IOP/SIF/load-address logging); (c) declare
+the ADDR static and move the divergence hunt fully to chain
+SELECTION vs PCSX2's pass-2 content (T51 side). Keep the Part-7
+tracer as-is for (a).
