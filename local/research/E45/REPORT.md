@@ -125,7 +125,8 @@ One fork commit on branch `e45-vu-double`: `310b30f` (parent `ssx3 @ 571579e`),
 text in `logs/fork-diff.txt`. Since it touches only
 `ps2xRuntime/include/runtime/ps2_vu1.h` + `ps2xRuntime/src/lib/vu/ps2_vu1_core.cpp`
 (no Android files), N can `git cherry-pick 310b30f` onto `n2-android` (or merge
-the branch) with no conflicts expected against N4's tree. Default build is the
+the branch) — verified to apply cleanly onto `e57b5f8` (n2-android's base) in
+a scratch worktree, then removed. Default build is the
 new behavior; `-DPS2X_VU_WIDE_QUAD=1` restores quad for any A/B.
 
 ## Recommendation (orchestrator decides)
