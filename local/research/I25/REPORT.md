@@ -1,83 +1,175 @@
-# I25 — iOS parity build on Brad's iPhone: STOPPED at provisioning (Brad blocker)
+# I25 — iOS at parity with Android: installed on Brad's iPhone, validated on the Simulator
 
 - Date: 2026-09-23. Brief: `local/muse/prompts/I25.md`. Worker: Claude (Opus pane).
-- Read: `AGENTS.md`, `local/AGENTS.local.md`, `local/research/I23/REPORT.md`
-  (+ the I21/I8 recipe sections it defers to), `local/research/N6/REPORT.md`,
-  `local/research/N4/REPORT.md`, E33/E49 route string, the `n2-android`
-  env-shim commit `322e55b` on bytesize (read-only).
-- **Outcome: stop rule hit.** The mini has no provisioning profile that
-  covers `org.ps2x.ps2entryrunner` on the iPhone, and Xcode can't make one
-  because it has no signed-in account. Nothing was built, signed, or
-  installed. Budget used: 0 builds, 0 installs, ~40 min.
-- **Second stop condition, also hit:** the SSD iOS prefixes the brief
-  names (`/Volumes/Extreme SSD/ps2x-i23/`, plus I8's SDL2 and I4's raylib
-  dirs) are gone. V2 tier-2 deleted them (`local/research/V2/delete-tier2.txt`
-  rows `ps2x-i23`, `ps2x-i8`, `ps2x-i4`). They can be rebuilt from the
-  recorded recipes (FFmpeg: `ps2xRuntime/cmake/iOS-FFmpeg-7.1.1.md`; SDL2
-  `release-2.32.10`: I8 REPORT §Task 1), so this doesn't need Brad. It
-  does add about 15 minutes to the rebuild.
+- Orchestrator amendments during the run:
+  1. Keep working through the provisioning block.
+  2. Unblocked with I23's wildcard profile `f0793278-…`, copied from the
+     laptop by the orchestrator.
+  3. **Brad's rule:** the iPhone is build and install only. All launch,
+     test and screenshot work moves to the Simulator first, then the iPad.
+     This overrides the brief's validation section.
+- **Headline:** the current build (fork `i25-ios` = E49 `b48b502` + 2
+  commits, codegen `codegen-ssx3-e49`) is **installed on Brad's iPhone**
+  (install only, not launched).
+  - On the iOS 27 Simulator it plays itself with no controller: title →
+    main menu → Select Character (the 3D rider is drawn) → Happiness race.
+    The HUD is live and the timer advances 00:00:11 → 00:00:19.
+  - The 3D course renders near-black. That's the same known caveat as the
+    Mac (E31/E50 lane), not something iOS-specific.
+  - Turning the Settings switch off stops the auto-route at "Press START
+    button".
+- Found and fixed on the way: **no iOS lane had ever shown a rendered
+  frame.** SDL 2.32 creates its `UIWindow` without a `UIWindowScene`. iOS 27
+  requires the scene manifest (I7), so the window was never displayed.
+  Frame dumps showed the guest drawing menus while the screen stayed black.
+- Budget: 4 device builds and 4 Simulator builds, mostly incremental (a full
+  build takes ~12 min at `-jobs 8`, `nice -n 10`). 5 Simulator runs (lease
+  slot each), ~1.5 h of 5 h. Disk: `~/dev/ssx3-work/I25` is 11 GB logical
+  (the staged ISOs are APFS clones), plus 3.2 GB in the Simulator container.
+  Cap 15 GB; `disk_budget.sh` reads 61.8 / 200 GB.
 
-## Blocker for Brad (exact messages)
+## Diff summary (fork `~/dev/ssx3-work/I25/PS2Recomp`, local branch `i25-ios`, not pushed)
 
-| Check | Result |
+| Commit | What |
 |---|---|
-| Signing identity | Present: `295EFB42… "Apple Development: Brad Richardson (E4R78PLLKY)"` (`logs/devices-identities.txt`) |
-| iPhone | `Brad’s iPhone 00008140-0002505001F3001C available (paired)`, iPhone 16 Pro Max (iPhone17,2) |
-| I23's wildcard profile `f0793278-…` | **Not on the mini.** `~/Library/MobileDevice/Provisioning Profiles/` doesn't exist. Nothing matches `f0793278*` under `~` or in the SSD transfer tars. It was a laptop file. |
-| Profiles on the mini (`~/Library/Developer/Xcode/UserData/Provisioning Profiles/`) | 4 profiles, none usable: `com.bradrichardson.zone2` dev (iPhone listed), `com.bradrichardson.zone2.watch` dev (iPhone listed), and two App Store profiles (zone2, zone5; no devices). None matches `org.ps2x.ps2entryrunner` or `*`. Re-signing as zone2 would overwrite Brad's zone2 app, so that's rejected. |
-| Xcode automatic provisioning (throwaway project, bundle id `org.ps2x.ps2entryrunner`, team `LQ3V7772Q2`, `-allowProvisioningUpdates`) | `error: No Accounts: Add a new account in Accounts settings.` and `error: No profiles for 'org.ps2x.ps2entryrunner' were found: Xcode couldn't find any iOS App Development provisioning profiles matching 'org.ps2x.ps2entryrunner'.` → `** BUILD FAILED **` (`logs/provprobe-xcodebuild.log`) |
-| Permission denial (reported as the rules require) | A search of the mini for an App Store Connect API key (a second way to provision without an Xcode login) was denied by the Claude Code auto-mode classifier ("Credential Exploration"). I didn't retry it or try another route. |
+| `39a8266` | `ps2_env_file.h`:<br>- `ps2x.env` parser (N3's format)<br>- `${BUNDLE}`/`${DOCUMENTS}` expansion<br>- layer merge where keys set by the launcher win<br>- 3 host tests<br>`ps2_ios_runtime` (iOS only):<br>- reads `<bundle>/ps2x.env`, then `<Documents>/ps2x.env`<br>- Settings.bundle `autoRoute` switch; off clears `PS2X_PAD_SCRIPT`<br>- creates the `mc0`/`mc1` dirs<br>- SDL hints: accelerometer is not a joystick; landscape only<br>`main.cpp`:<br>- `PS2X_BOOT_ELF` when launched without argv (iOS)<br>- `PS2X_MC_ROOT` override (the bundle is read-only)<br>`ps2_pad.cpp` (iOS): first ready gamepad; keyboard and gamepad combined (N6)<br>`ps2_runtime.cpp`: `PS2X_VSYNC_RATE_LOG=1` diagnostic line, off by default<br>`Info.plist`:<br>- landscape only<br>- `UILaunchScreen` (without it iOS uses legacy screen-size mode)<br>- full screen, no status bar<br>- Documents visible in the Files app<br>- display name "SSX3 PS2X" |
+| `666642f` | Attach SDL's `UIWindow` to the connected window scene. `ps2_ios_runtime` becomes `.mm`. Retried each frame until the scene connects.<br>Forward every UIKit window-size change to raylib (covers rotation).<br>Exclude the imgui debug panel on iOS, as on Android (it covered the screen).<br>`SetTraceLogLevel(LOG_ERROR)` on iOS: raylib's `EndDrawing` warned from `GetWindowScaleDPI()` ~60×/s. Console volume fell from 450 KB to 8 KB per 100 s. |
 
-**Either of these unblocks it (Brad, about 1 minute):**
-1. Sign in on the mini: Xcode → Settings → Accounts → add the Apple ID
-   for team LQ3V7772Q2. The next run then gets a team profile for
-   `org.ps2x.ps2entryrunner` from the same throwaway project
-   (`logs/provprobe-CMakeLists.txt` + `xcodebuild … -allowProvisioningUpdates`).
-2. Or copy I23's wildcard profile `f0793278-*.mobileprovision` from the
-   laptop into `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`
-   on the mini, if the laptop still has it and it hasn't expired.
+- 12 files, +527 −3 (`logs/i25-ios-branch.diff`).
+- Desktop and Android behaviour is unchanged: the iOS code is behind
+  `PS2X_IOS`, and the new env variables do nothing when unset.
+- Host suite 595/595 at the final HEAD (`logs/host-tests-summary.txt`).
+- `git diff b48b502 HEAD -- ps2xRuntime/src/runner` is empty.
 
-## State left behind
+## Parity table (Android → iOS)
 
-| Item | State |
+| # | Item | iOS state | Evidence |
+|---|---|---|---|
+| 1 | Env file (`ps2x.env`) | **Done.** Bundle file gives the defaults; `Documents/ps2x.env` overrides them; `devicectl`/`simctl` launch env overrides both. Sets `PS2X_BOOT_ELF`, `PS2X_CD_IMAGE`, `PS2X_MC_ROOT`, `PS2X_SKIP_MOVIE=1`, `PS2X_DEINTERLACE=weave`, `PS2X_PAD_SCRIPT` and `PS2X_PAD_SCRIPT_CLOCK=vsync`. Starts from the home screen with no Mac attached (no argv). | `logs/sim-run-d-console.log`: 7 `[ios-env] set` lines, `launcher kept PS2X_VSYNC_RATE_LOG`, `Using PS2X_BOOT_ELF boot path` |
+| 2 | Check-in mode (no controller) | **Done, on by default.** E33 route, `armed n=13 clock=vsync`. All 13 presses fired on their guest-ms anchors (`i=0 now=10360ms` … `i=11 now=122522ms`). Race HUD at t≈285 s. Off: iOS Settings → SSX3 PS2X → Auto-route. | Run D (below) and run E (`[ios-env] Settings: Auto-route off -> PS2X_PAD_SCRIPT cleared`; title waits) |
+| 3 | Controller | **Code done, not tested by hand.** SDL's MFi `GameController` path is linked (weak; `otool -L`). raylib opens pads at init and on hotplug. The accelerometer-joystick hint is off, so a Bluetooth pad isn't pushed past index 0, and the first ready pad is used. The script is applied on top of pad state (`Pad.cpp:875-896`), so it takes precedence when set. No pad was paired to the Simulator or the iPad. | Gap G1 |
+| 4 | Fit 512×448 in landscape | **Done.** Window 874×402 (landscape) after the scene attach. The present keeps the aspect ratio (`min` scale), with the image centred and pillarboxed (black bars at the sides). Drawn at 1× (points), then upscaled by the system. | Shots 2–5; `[ios-window] window=874x402 drawable=874x402` |
+| 5 | No PNG dumps by default | **Done.** The bundle env doesn't set `PS2X_FRAME_DUMP_DIR`. | `logs/sim-run-d-console.log` (no `frame:dump`) |
+| — | Memory card | Writable `Documents/mc0` and `Documents/mc1`, matching the Mac's empty `cd/mc0` state. The route behaved the same as on the Mac (no card dialog). | Run D |
+
+## Validation
+
+| Target | Result |
 |---|---|
-| Fork worktree | `~/dev/ssx3-work/I25/PS2Recomp`, new local branch `i25-ios` at `b48b502` (= `ssx3`, E49). 0 commits, tree clean. `~/dev/PS2Recomp` untouched. |
-| Scratch | Throwaway provisioning project in the session scratchpad only (~1 MB). No other bytes written. |
-| Device | Untouched (no install, no launch). |
-| Disk | `disk_budget.sh`: 51.2 GB of 200 GB before starting. I25 added ~0. |
+| **Brad's iPhone** (`00008140-…`, iPhone 16 Pro Max, iOS 27) | **Installed, not launched** (Brad's rule). Final install 18:09. Bundle `org.ps2x.ps2entryrunner`, team `LQ3V7772Q2`, profile `f0793278-db43-413c-9260-f120dc740845` (wildcard, expires 2027-09-16), identity `295EFB42…`, I9 entitlements.<br>Signed binary `65dad256…` (read twice, both match); unsigned build output `c521827d…`, 357,203,640 B. ISO `3c2f8eb1…` (read twice, both match), ELF from `E32-inputs/cd`. `logs/install-iphone.log`. It's the only iOS build on the phone; it replaced an older `ps2EntryRunner`. |
+| iOS 27 Simulator (iPhone 18 Pro `7662ACD6-…`) | Runs A–E below. The Simulator build is a separate binary (`iphonesimulator` prefixes, same source and codegen). |
+| iPad (`00008112-…`) | Installed (same signed bundle). Launch refused while locked: `Unable to launch org.ps2x.ps2entryrunner because the device was not, or could not be, unlocked` (`logs/ipad-launch-attempt.log`). Tried once, not retried, as the brief says. |
 
-## Design ready for the resume (from the code reads; not built yet)
-
-Every change is iOS-gated (`TARGET_OS_IPHONE` / `PS2X_IS_IOS`), so the
-desktop and Android builds don't change.
-
-| Parity item | Planned change (file) | Basis |
+| Run | Setup | Result |
 |---|---|---|
-| 1. Env shim | New iOS loader that runs first in `main()` (`src/main.cpp` + a small header modelled on N3's `ps2_android_env.h` parser). It reads `<bundle>/ps2x.env`, then `<HOME>/Documents/ps2x.env` (which overrides the bundle file). It expands `${BUNDLE}` and `${DOCUMENTS}` (the bundle's container UUID changes on every install). Keys already set in the launch environment win, so `devicectl -e` still overrides. When there's no `argv[1]` (home-screen launch), the boot ELF comes from `PS2X_BOOT_ELF`. The bundled file sets `PS2X_BOOT_ELF=${BUNDLE}/SLUS_207.72`, `PS2X_CD_IMAGE=${BUNDLE}/SSX3.iso`, `PS2X_SKIP_MOVIE=1`, `PS2X_DEINTERLACE=weave` and the pad script. | `main.cpp` reads only `argv[1]` and `PS2X_CD_IMAGE`; Android's version is `322e55b` |
-| Memory card | New `PS2X_MC_ROOT` env override, pointed at `${DOCUMENTS}/mc0` (created at startup). The default `mcRoot` is `<elf dir>/mc0`, which is inside the read-only bundle on iOS. The Mac route runs with an empty, writable `cd/mc0`, so the route needs the same card state. | `ps2_runtime.cpp:347-350,1157-1178`; `E32-inputs/cd/mc0` is empty |
-| 2. Check-in mode | Bundled `PS2X_PAD_SCRIPT` = the E33 route (`10350:start:2500,…,113340:down:20000`) with `PS2X_PAD_SCRIPT_CLOCK=vsync`, so it runs title → Select Character → Happiness race (E46b/E49 reached the race HUD). Switch-off: a `Settings.bundle` toggle ("Auto-route"; iOS Settings → ps2EntryRunner), read with `CFPreferencesCopyAppValue`. It's on when unset. When it's off, the loader unsets `PS2X_PAD_SCRIPT`. A `Documents/ps2x.env` with `PS2X_PAD_SCRIPT=` (empty) also turns it off. | `Pad.cpp:538-553` (an empty value disarms the script) |
-| 3. Controller | raylib's SDL backend already opens GameControllers at init and on hotplug (`rcore_desktop_sdl.c:1598-1620,1906-1915`). Two iOS fixes: (a) set `SDL_HINT_ACCELEROMETER_AS_JOYSTICK=0` before init. SDL on iOS lists the accelerometer as joystick 0 by default, which pushes a Bluetooth pad to index 1, and `ps2_pad.cpp` reads index 0 only. (b) In `ps2_pad.cpp`, use the first available gamepad and combine keyboard and gamepad input, as N6 does. The script still applies on top of the backend state (`Pad.cpp:875-896`), so it takes precedence when set. | N6 diff (`logs/n2-android-diff.txt`) |
-| 4. Landscape fit | Info.plist: add `UISupportedInterfaceOrientations` (both landscape orientations), `UILaunchScreen` (without it, iOS runs the app in legacy screen-size mode), `UIStatusBarHidden`, `UIRequiresFullScreen`, `UIFileSharingEnabled` and `LSSupportsOpeningDocumentsInPlace` (so `ps2x.env` can be edited in the Files app). Also set `SDL_HINT_ORIENTATIONS`. After `InitWindow`, push one `SDL_WINDOWEVENT_SIZE_CHANGED` with the real window size: UIKit sizes the window itself, and raylib otherwise keeps its requested 960×720. The present already letterboxes with `min(sw/512, sh/448)` (`ps2_runtime.cpp:3346-3361`). | raylib only updates its screen size on a resize event (`:1436-1446`) |
-| 5. No PNG dumps | Nothing to change: dumps only happen when `PS2X_FRAME_DUMP_DIR` is set (`ps2_runtime.cpp:399`), and the bundled env doesn't set it. | — |
-| Rate readout | An env-gated line (off by default) in the present loop, `PS2X_VSYNC_RATE_LOG=1`, printing `vsyncTick` per 5 s of wall time. It's for a labelled diagnostic rate over `devicectl --console`. | — |
+| A | First Simulator build, 123 s | Env and route worked; guest reached menus by tick. **Screen all black.** raylib warnings ~450 KB per 100 s. |
+| B | Diagnostic (`PS2X_FRAME_DUMP_DIR`), 82 s | Guest frame at tick 2342 = "Select Mode" menu, drawn correctly. Screen black at the same moment → the fault is in the present path (`shots/sim-0-*`). |
+| C | Scene-attach fix, 101 s | `attached to window scene`, window 874×402. Game visible, but the imgui debug panel covered it. |
+| **D** | Final build, 326 s (stopped after the race advanced) | Main menu at 20 s; **Select Character with Zoe's 3D model at 40 s**; menus through Select Event; **race HUD 1ST/2, 00:00:11, 3% at 285 s; 00:00:19, 4% at 326 s**. |
+| E | Settings `autoRoute=NO`, 61 s | Script cleared; title holds at "Press START button"; the setting was reset after the run. |
 
-Build plan once unblocked. Everything goes under `~/dev/ssx3-work/I25/`
-(internal disk), about 9 GB with the ISO staged once.
-1. FFmpeg 7.1.1 iOS prefix, using the fork's recipe.
-2. SDL2 `release-2.32.10` iphoneos static build, using the I8 recipe.
-3. raylib 5.5 source from `E46-build/_deps/raylib-src`.
-4. `cmake -G Xcode` with the I9 toolchain,
-   `-DPS2X_GAME_CODEGEN_DIR=~/dev/ssx3-work/codegen-ssx3-e49`, FFmpeg on,
-   aggressive and runtime logs off.
-5. Stage the ELF, the ISO (sha `3c2f8eb1…` checked twice), `ps2x.env` and
-   `Settings.bundle`.
-6. Embed the profile, sign with `codesign` and I9's entitlements, run
-   `devicectl install`, launch, take screenshots.
+**Guest rate, DIAGNOSTIC only.** This is the iOS Simulator on the Mac mini
+(M5 Pro), using the Simulator's "Apple Software Renderer" GLES2, with the
+rate-log line on. It is not a device number and not a speed number.
 
-The whole sequence goes into `build-install.sh`.
+| Phase | Rate |
+|---|---|
+| Menus (ticks 1500–7100, 36 samples) | 30.6 vsync/s = 0.51× of 59.94 |
+| Race (ticks 7150+, 19 samples) | 11.5 vsync/s = 0.19× of 59.94 |
+
+## Screenshots (`shots/`, downscaled JPEG; originals `~/dev/ssx3-work/I25/run-*`)
+
+| File | What | Original sha256 |
+|---|---|---|
+| `sim-0-screen-black-before-scene-fix.jpg` + `sim-0-guest-dump-black-screen-diag.jpg` | Run B: black screen while the guest draws "Select Mode" | — |
+| `sim-1-title-autoroute-off.jpg` | Run E: title, "Press START button" (Auto-route off) | `3e73ed55…` |
+| `sim-2-main-menu.jpg` | Run D t=20 s: Main Menu, landscape, pillarboxed | `229a67ff…` |
+| `sim-3-select-character.jpg` | Run D t=40 s: Select Character, Zoe's 3D model drawn | `3fcdbee1…` |
+| `sim-4-race-t11.jpg` | Run D t=285 s: race HUD 1ST/2, 00:00:11, 49 MPH, 3% | `914f477d…` |
+| `sim-5-race-t19.jpg` | Run D t=326 s: 00:00:19, 4% (the race advances); 3D course near-black (known caveat) | `870084d1…` |
+
+## Build recipe (mini), one script: `local/research/I25/build-install.sh`
+
+```sh
+local/research/I25/build-install.sh                  # iPhone: prefixes configure build stage sign install
+TARGET=sim local/research/I25/build-install.sh       # Simulator: prefixes configure build stage sim_install
+LABEL=x WALL=600 local/research/I25/sim-run.sh       # Simulator run: lease slot, shots every 20 s, cap, release
+local/research/I25/build-install.sh ipad_install ipad_launch ipad_shot   # iPad test (unlocked iPad)
+```
+
+- `prefixes`: FFmpeg 7.1.1 (sha `73398439…` checked; fork recipe
+  `iOS-FFmpeg-7.1.1.md`) and SDL2 `release-2.32.10` (`5d24957`, I8 recipe),
+  built for `iphoneos` or `iphonesimulator` under `~/dev/ssx3-work/I25/`.
+  About 1 minute each.
+- `configure`: Xcode generator, I9 device toolchain or I1 v2 Simulator
+  toolchain, FFmpeg on, aggressive and runtime logs off, raylib 5.5 from
+  `E46-build/_deps`, `PS2X_GAME_CODEGEN_DIR=codegen-ssx3-e49`.
+- `build`: waits until no other `clang++`/`ninja` is running, then
+  `nice -n 10`, `-jobs 8`.
+- `stage`: app + ELF + ISO (APFS clone, sha read twice) + `ps2x.env` +
+  `Settings.bundle`, mode 0644.
+- `sign`: finds a profile matching the bundle id or the team wildcard that
+  lists the iPhone, embeds it, `codesign` with I9 entitlements, `--verify
+  --strict`.
+- `guard_not_iphone` stops the iPhone UDID from being used by any
+  launch or screenshot stage.
+- Toolchains and entitlements are copied next to the script.
+- The bundled defaults are in `ps2x.env`.
+
+## How to use it (for Brad)
+
+1. On the iPhone, open **SSX3 PS2X**. With no controller it plays itself:
+   title → Select Character → a Happiness race (about 5 minutes on the
+   Mac's Simulator; phone speed not yet measured).
+2. Hold the phone in landscape. The picture is centred with black bars at
+   the sides.
+3. To play yourself: iPhone **Settings → SSX3 PS2X → Auto-route off**, then
+   swipe the app away and reopen it. Pair a controller (Xbox, PS or MFi)
+   in Bluetooth settings first.
+4. To change other options, put a `ps2x.env` in **Files → On My iPhone →
+   SSX3 PS2X**. Its lines override the built-in ones; for example,
+   `PS2X_PAD_SCRIPT=` with nothing after it also turns the auto-route off.
+5. Known on every platform: the 3D course is almost black during the race
+   (the E-lane is on it), and speed is well under full.
+
+## Gaps
+
+| # | Gap | Next step |
+|---|---|---|
+| G1 | Controller not tested by hand on iOS (nothing paired to the Simulator or iPad) | Brad pairs a pad to the iPad or iPhone, Auto-route off, presses START and cross at the title (N6 §5 shape) |
+| G2 | No real-hardware run of the final device binary. The iPad was locked, and the iPhone is install-only. Scene attach, GPU present and device rate are checked on the Simulator only. | One iPad run when unlocked: `ipad_install ipad_launch` + `LABEL=… ipad_shot` |
+| G3 | The interlace stutter can't be judged from stills. Weave is set as on Android. | Screen recording on the iPad |
+| G4 | Screen auto-lock during a long unattended check-in not verified on a device. SDL disables the idle timer by default; unmeasured. | Same iPad run |
+| G5 | The Settings switch needs a full relaunch (iOS keeps the app suspended) | Documented in how-to step 3 |
+| G6 | Audio: `InitAudioDevice` no longer aborts on the Simulator (I7's wall), but sound output wasn't checked | Listen during the iPad run |
 
 ## Recommendation (the orchestrator decides)
 
-Ask Brad for option 1 (Xcode account sign-in on the mini). It's a one-time
-step, and it makes future iOS briefs self-sufficient. Then re-issue I25 as
-is. The design above is the plan of record for the code changes.
+1. Accept. The iPhone has a check-in build that needs nothing from Brad,
+   and the Simulator shows the full route.
+2. When the iPad is unlocked, one short iPad run closes G2–G4 and G6 on
+   real hardware.
+3. The scene-attach fix and the debug-panel exclusion are general to any
+   iOS 27 build. They are candidates for `ssx3` once E agrees (E owns the
+   fork; `i25-ios` stays local).
+
+## Receipts
+
+- `logs/`:
+  - build tails
+  - install logs (iPhone, iPad)
+  - iPad launch refusal
+  - run D/E consoles + progress
+  - run A console head
+  - host test summary
+  - `i25-ios-branch.diff`/`-log.txt`
+  - the earlier provisioning-block receipts (`provprobe-*`, `devices-identities.txt`)
+- `shots/` (7 JPEGs, ~300 KB).
+- Work tree `~/dev/ssx3-work/I25/`:
+  - prefixes
+  - build dirs (for incremental rebuilds)
+  - `staged` / `staged-sim`
+  - `run-*` full-size shots
+  - `host-build`
+- Leases: mini slots claimed and released on every Simulator run; both
+  free at close. Simulator shut down at close.

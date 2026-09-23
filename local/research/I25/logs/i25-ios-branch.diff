@@ -1,0 +1,724 @@
+diff --git a/ps2xRuntime/CMakeLists.txt b/ps2xRuntime/CMakeLists.txt
+index 61a0e09..e99d0de 100644
+--- a/ps2xRuntime/CMakeLists.txt
++++ b/ps2xRuntime/CMakeLists.txt
+@@ -110,7 +110,7 @@ else()
+         target_compile_options(raylib PRIVATE -x objective-c)
+     endif()
+ 
+-    if(PS2X_ENABLE_DEBUG_UI AND NOT PS2X_IS_ANDROID)
++    if(PS2X_ENABLE_DEBUG_UI AND NOT PS2X_IS_ANDROID AND NOT PS2X_IS_IOS)
+         FetchContent_Declare(
+             imgui
+             GIT_REPOSITORY https://github.com/ocornut/imgui.git
+@@ -602,7 +602,8 @@ if(PS2X_GAME_CODEGEN_DIR)
+     target_link_libraries(ps2EntryRunner PRIVATE ps2_game_objects)
+ endif()
+ 
+-if(PS2X_ENABLE_DEBUG_UI AND NOT PS2X_IS_VITA AND NOT PS2X_IS_ANDROID)
++# I25: iOS excluded like Android (the imgui panel covers the phone screen).
++if(PS2X_ENABLE_DEBUG_UI AND NOT PS2X_IS_VITA AND NOT PS2X_IS_ANDROID AND NOT PS2X_IS_IOS)
+     target_sources(ps2EntryRunner PRIVATE
+         src/lib/ps2_debug_panel.cpp
+     )
+@@ -708,6 +709,14 @@ if(PS2X_IS_IOS)
+     # the FATAL_ERROR above. Desktop-inert: PS2X_IS_IOS is OFF on Darwin.
+     find_package(SDL2 REQUIRED)
+     target_link_libraries(ps2EntryRunner PRIVATE SDL2::SDL2main)
++    # I25: iOS startup glue (ps2x.env layers, Settings switch, SDL hints,
++    # window-size sync). PS2X_IOS gates the call sites in main.cpp and
++    # ps2_runtime.cpp; CoreFoundation for CFPreferences. Kept out of unity
++    # batches so its SDL include can't leak into sibling TUs.
++    target_sources(ps2_runtime PRIVATE src/lib/ps2_ios_runtime.mm)
++    set_source_files_properties(src/lib/ps2_ios_runtime.mm PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
++    target_compile_definitions(ps2_runtime PUBLIC PS2X_IOS=1)
++    target_link_libraries(ps2_runtime PRIVATE "-framework CoreFoundation")
+     # I7b: the iOS 27 sim traps in UIKit scene setup before SDL_main runs
+     # when the bundle has no scene manifest (EXC_BREAKPOINT in
+     # __UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption;
+diff --git a/ps2xRuntime/include/ps2_env_file.h b/ps2xRuntime/include/ps2_env_file.h
+new file mode 100644
+index 0000000..e3b23df
+--- /dev/null
++++ b/ps2xRuntime/include/ps2_env_file.h
+@@ -0,0 +1,137 @@
++#pragma once
++// I25: ps2x.env file support (parser, placeholder expansion, layering).
++//
++// Platform-neutral on purpose so the host unit test compiles this header.
++// The iOS loader (ps2xRuntime/src/lib/ps2_ios_runtime.cpp) reads the files
++// and calls setenv; home-screen launches set no environment, so env-driven
++// config (PS2X_CD_IMAGE, PS2X_SKIP_MOVIE, PS2X_PAD_SCRIPT, ...) comes from
++// <bundle>/ps2x.env, overridden by <Documents>/ps2x.env. Same file format
++// as the Android shim on n2-android (N3, 322e55b).
++
++#include <cctype>
++#include <map>
++#include <set>
++#include <string>
++#include <utility>
++#include <vector>
++
++namespace ps2x
++{
++
++namespace env_file_detail
++{
++inline std::string trimAscii(const std::string &s)
++{
++    size_t begin = 0;
++    while (begin < s.size() && std::isspace(static_cast<unsigned char>(s[begin])))
++    {
++        ++begin;
++    }
++    size_t end = s.size();
++    while (end > begin && std::isspace(static_cast<unsigned char>(s[end - 1])))
++    {
++        --end;
++    }
++    return s.substr(begin, end - begin);
++}
++} // namespace env_file_detail
++
++// Parse KEY=VALUE lines. '#' starts a comment line (after optional
++// whitespace); blank lines are skipped. Lines are split at the FIRST '=',
++// so values may contain '='. No quote processing: values are taken
++// literally after trimming surrounding ASCII whitespace. Lines without '='
++// and entries with an empty key are ignored. An empty value is kept (it
++// clears a key set by an earlier layer, e.g. PS2X_PAD_SCRIPT=).
++inline std::vector<std::pair<std::string, std::string>> parseEnvFileContent(const std::string &content)
++{
++    std::vector<std::pair<std::string, std::string>> out;
++    size_t pos = 0;
++    while (pos <= content.size())
++    {
++        size_t eol = content.find_first_of("\r\n", pos);
++        if (eol == std::string::npos)
++        {
++            eol = content.size();
++        }
++        const std::string line = env_file_detail::trimAscii(content.substr(pos, eol - pos));
++        if (!line.empty() && line[0] != '#')
++        {
++            const size_t eq = line.find('=');
++            if (eq != std::string::npos)
++            {
++                const std::string key = env_file_detail::trimAscii(line.substr(0, eq));
++                const std::string value = env_file_detail::trimAscii(line.substr(eq + 1));
++                if (!key.empty())
++                {
++                    out.emplace_back(key, value);
++                }
++            }
++        }
++        if (eol == content.size())
++        {
++            break;
++        }
++        pos = (content[eol] == '\r' && eol + 1 < content.size() && content[eol + 1] == '\n') ? eol + 2 : eol + 1;
++    }
++    return out;
++}
++
++// Replace ${NAME} with vars[NAME]. Unknown names and unterminated "${" are
++// left as written, so a typo shows up verbatim in the logged value.
++inline std::string expandEnvPlaceholders(const std::string &value, const std::map<std::string, std::string> &vars)
++{
++    std::string out;
++    size_t pos = 0;
++    while (pos < value.size())
++    {
++        const size_t open = value.find("${", pos);
++        if (open == std::string::npos)
++        {
++            out.append(value, pos, std::string::npos);
++            break;
++        }
++        const size_t close = value.find('}', open + 2);
++        if (close == std::string::npos)
++        {
++            out.append(value, pos, std::string::npos);
++            break;
++        }
++        out.append(value, pos, open - pos);
++        const auto it = vars.find(value.substr(open + 2, close - open - 2));
++        if (it != vars.end())
++        {
++            out += it->second;
++        }
++        else
++        {
++            out.append(value, open, close - open + 1);
++        }
++        pos = close + 1;
++    }
++    return out;
++}
++
++// Merge env-file layers in order (later layers override earlier ones) and
++// drop keys in `protectedKeys` (already set by the launcher, which wins).
++// Returns the final KEY -> VALUE assignments, placeholders expanded.
++inline std::map<std::string, std::string> mergeEnvLayers(
++    const std::vector<std::vector<std::pair<std::string, std::string>>> &layers,
++    const std::set<std::string> &protectedKeys,
++    const std::map<std::string, std::string> &vars)
++{
++    std::map<std::string, std::string> out;
++    for (const auto &layer : layers)
++    {
++        for (const auto &entry : layer)
++        {
++            if (protectedKeys.count(entry.first) != 0)
++            {
++                continue;
++            }
++            out[entry.first] = expandEnvPlaceholders(entry.second, vars);
++        }
++    }
++    return out;
++}
++
++} // namespace ps2x
+diff --git a/ps2xRuntime/include/ps2_ios_runtime.h b/ps2xRuntime/include/ps2_ios_runtime.h
+new file mode 100644
+index 0000000..4799a1a
+--- /dev/null
++++ b/ps2xRuntime/include/ps2_ios_runtime.h
+@@ -0,0 +1,19 @@
++#pragma once
++// I25: iOS-only startup and window helpers (implemented in
++// src/lib/ps2_ios_runtime.cpp, compiled only when PS2X_IS_IOS).
++
++namespace ps2x::ios
++{
++// Apply <bundle>/ps2x.env then <Documents>/ps2x.env (later wins; keys the
++// launcher already set win over both), expand ${BUNDLE} / ${DOCUMENTS},
++// honour the Settings.bundle "Auto-route" switch, create the memory-card
++// dirs, and set SDL hints (landscape, no accelerometer joystick). Call first
++// thing in main(), before anything reads the environment or starts SDL.
++void prepareEnvironment(const char *argv0);
++
++// Attach SDL's UIWindow to the app's window scene (once it has connected)
++// and forward UIKit's window size to raylib whenever it changes, so the
++// viewport and GetScreenWidth/Height match. Call after InitWindow and once
++// per presented frame (main thread); cheap when nothing changed.
++void syncWindowSize();
++} // namespace ps2x::ios
+diff --git a/ps2xRuntime/ios/Info.plist b/ps2xRuntime/ios/Info.plist
+index 1f26f94..f5c2592 100644
+--- a/ps2xRuntime/ios/Info.plist
++++ b/ps2xRuntime/ios/Info.plist
+@@ -10,6 +10,9 @@
+      I8: CFBundleName set to the executable name (was empty): devicectl
+      install rejects bundles with neither CFBundleName nor
+      CFBundleDisplayName (device wall; simctl did not check).
++     I25: landscape only, UILaunchScreen (without it iOS runs the app in
++     legacy screen-size mode), status bar hidden, full screen, and
++     Documents visible in the Files app (for an overriding ps2x.env).
+      Referenced from the PS2X_IS_IOS block via MACOSX_BUNDLE_INFO_PLIST. -->
+ <plist version="1.0">
+ <dict>
+@@ -41,6 +44,28 @@
+ 	<true/>
+ 	<key>NSHumanReadableCopyright</key>
+ 	<string></string>
++	<key>CFBundleDisplayName</key>
++	<string>SSX3 PS2X</string>
++	<key>UILaunchScreen</key>
++	<dict/>
++	<key>UISupportedInterfaceOrientations</key>
++	<array>
++		<string>UIInterfaceOrientationLandscapeLeft</string>
++		<string>UIInterfaceOrientationLandscapeRight</string>
++	</array>
++	<key>UISupportedInterfaceOrientations~ipad</key>
++	<array>
++		<string>UIInterfaceOrientationLandscapeLeft</string>
++		<string>UIInterfaceOrientationLandscapeRight</string>
++	</array>
++	<key>UIRequiresFullScreen</key>
++	<true/>
++	<key>UIStatusBarHidden</key>
++	<true/>
++	<key>UIFileSharingEnabled</key>
++	<true/>
++	<key>LSSupportsOpeningDocumentsInPlace</key>
++	<true/>
+ 	<key>UIApplicationSceneManifest</key>
+ 	<dict>
+ 		<key>UIApplicationSupportsMultipleScenes</key>
+diff --git a/ps2xRuntime/ios/Settings.bundle/Root.plist b/ps2xRuntime/ios/Settings.bundle/Root.plist
+new file mode 100644
+index 0000000..1423fa4
+--- /dev/null
++++ b/ps2xRuntime/ios/Settings.bundle/Root.plist
+@@ -0,0 +1,31 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<!-- I25: iOS Settings -> SSX3 PS2X. "autoRoute" is read by
++     src/lib/ps2_ios_runtime.cpp (CFPreferences); unset = on. Off clears
++     PS2X_PAD_SCRIPT so a controller drives the game. Copied into the .app
++     at staging (local/research/I25/build-install.sh). -->
++<plist version="1.0">
++<dict>
++	<key>PreferenceSpecifiers</key>
++	<array>
++		<dict>
++			<key>Type</key>
++			<string>PSGroupSpecifier</string>
++			<key>Title</key>
++			<string>Check-in mode</string>
++			<key>FooterText</key>
++			<string>On: the app plays itself from the title to Select Character and a race. Off: use a paired controller. Takes effect the next time the app starts.</string>
++		</dict>
++		<dict>
++			<key>Type</key>
++			<string>PSToggleSwitchSpecifier</string>
++			<key>Title</key>
++			<string>Auto-route</string>
++			<key>Key</key>
++			<string>autoRoute</string>
++			<key>DefaultValue</key>
++			<true/>
++		</dict>
++	</array>
++</dict>
++</plist>
+diff --git a/ps2xRuntime/src/lib/ps2_ios_runtime.mm b/ps2xRuntime/src/lib/ps2_ios_runtime.mm
+new file mode 100644
+index 0000000..20d31b6
+--- /dev/null
++++ b/ps2xRuntime/src/lib/ps2_ios_runtime.mm
+@@ -0,0 +1,174 @@
++// I25: iOS env-file loader + SDL/UIKit glue (Objective-C++). Compiled only
++// for iOS (PS2X_IS_IOS in ps2xRuntime/CMakeLists.txt).
++#include "ps2_ios_runtime.h"
++#include "ps2_env_file.h"
++
++// SDL_MAIN_HANDLED: no main->SDL_main rename here (only main.cpp owns main).
++#define SDL_MAIN_HANDLED
++#include <SDL2/SDL.h>
++#include <SDL2/SDL_syswm.h>
++#import <UIKit/UIKit.h>
++#include <CoreFoundation/CoreFoundation.h>
++
++#include <cstdio>
++#include <cstdlib>
++#include <filesystem>
++#include <fstream>
++#include <sstream>
++
++extern char **environ;
++
++namespace
++{
++std::vector<std::pair<std::string, std::string>> readEnvFile(const std::filesystem::path &path)
++{
++    std::ifstream file(path);
++    if (!file.is_open())
++    {
++        std::fprintf(stderr, "[ios-env] no %s\n", path.c_str());
++        return {};
++    }
++    std::ostringstream content;
++    content << file.rdbuf();
++    std::fprintf(stderr, "[ios-env] read %s\n", path.c_str());
++    return ps2x::parseEnvFileContent(content.str());
++}
++
++// Settings.bundle switch "autoRoute". Unset (Settings never opened) = on.
++bool autoRouteEnabled()
++{
++    Boolean valid = false;
++    const Boolean value = CFPreferencesGetAppBooleanValue(CFSTR("autoRoute"), kCFPreferencesCurrentApplication, &valid);
++    return !valid || value;
++}
++} // namespace
++
++namespace ps2x::ios
++{
++void prepareEnvironment(const char *argv0)
++{
++    std::set<std::string> launcherKeys;
++    for (char **e = environ; e && *e; ++e)
++    {
++        const std::string entry(*e);
++        const size_t eq = entry.find('=');
++        if (eq != std::string::npos && entry.compare(0, 5, "PS2X_") == 0)
++        {
++            launcherKeys.insert(entry.substr(0, eq));
++        }
++    }
++
++    // SDL_GetBasePath is the .app root on iOS (works before SDL_Init).
++    std::filesystem::path bundle = argv0 ? std::filesystem::path(argv0).parent_path() : std::filesystem::path();
++    if (char *base = SDL_GetBasePath())
++    {
++        bundle = std::filesystem::path(base).lexically_normal();
++        if (bundle.filename().empty())
++        {
++            bundle = bundle.parent_path();
++        }
++        SDL_free(base);
++    }
++    const char *home = std::getenv("HOME");
++    const std::filesystem::path documents = home ? std::filesystem::path(home) / "Documents" : std::filesystem::path();
++    const std::map<std::string, std::string> vars{
++        {"BUNDLE", bundle.string()},
++        {"DOCUMENTS", documents.string()},
++    };
++
++    const auto merged = ps2x::mergeEnvLayers(
++        {readEnvFile(bundle / "ps2x.env"), readEnvFile(documents / "ps2x.env")}, launcherKeys, vars);
++    for (const auto &[key, value] : merged)
++    {
++        setenv(key.c_str(), value.c_str(), 1);
++        std::fprintf(stderr, "[ios-env] set %s=%s\n", key.c_str(), value.c_str());
++    }
++    for (const auto &key : launcherKeys)
++    {
++        std::fprintf(stderr, "[ios-env] launcher kept %s\n", key.c_str());
++    }
++
++    if (launcherKeys.count("PS2X_PAD_SCRIPT") == 0 && !autoRouteEnabled())
++    {
++        unsetenv("PS2X_PAD_SCRIPT");
++        std::fprintf(stderr, "[ios-env] Settings: Auto-route off -> PS2X_PAD_SCRIPT cleared\n");
++    }
++
++    if (const char *mc = std::getenv("PS2X_MC_ROOT"); mc && mc[0] != '\0')
++    {
++        // mc1 is the sibling of mc0 (MemoryCard.cpp getMcRootPath).
++        std::error_code ec;
++        const std::filesystem::path mc0(mc);
++        std::filesystem::create_directories(mc0, ec);
++        std::filesystem::create_directories(mc0.parent_path() / "mc1", ec);
++    }
++
++    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
++    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
++}
++
++void syncWindowSize()
++{
++    static bool attached = false;
++    static int lastW = -1;
++    static int lastH = -1;
++    SDL_Window *window = SDL_GL_GetCurrentWindow();
++    if (!window)
++    {
++        return;
++    }
++    if (!attached)
++    {
++        // SDL 2.32 creates its UIWindow without a UIWindowScene. iOS 27
++        // requires the scene manifest (I7), and a scene-less window is
++        // never shown: the guest renders but the screen stays black. Attach
++        // it to the app's window scene; retried each frame until the scene
++        // has connected.
++        SDL_SysWMinfo info;
++        SDL_VERSION(&info.version);
++        if (SDL_GetWindowWMInfo(window, &info) && info.subsystem == SDL_SYSWM_UIKIT && info.info.uikit.window)
++        {
++            UIWindow *uiWindow = info.info.uikit.window;
++            if (uiWindow.windowScene == nil)
++            {
++                for (UIScene *scene in UIApplication.sharedApplication.connectedScenes)
++                {
++                    if ([scene isKindOfClass:[UIWindowScene class]])
++                    {
++                        uiWindow.windowScene = (UIWindowScene *)scene;
++                        [uiWindow makeKeyAndVisible];
++                        break;
++                    }
++                }
++            }
++            attached = uiWindow.windowScene != nil;
++            if (attached)
++            {
++                std::fprintf(stderr, "[ios-window] attached to window scene\n");
++            }
++        }
++    }
++    // raylib only learns the window size from SIZE_CHANGED events, and
++    // UIKit sizes (and rotates) the window itself: forward every change.
++    int w = 0;
++    int h = 0;
++    SDL_GetWindowSize(window, &w, &h);
++    if (w == lastW && h == lastH)
++    {
++        return;
++    }
++    lastW = w;
++    lastH = h;
++    int dw = 0;
++    int dh = 0;
++    SDL_GL_GetDrawableSize(window, &dw, &dh);
++    std::fprintf(stderr, "[ios-window] window=%dx%d drawable=%dx%d\n", w, h, dw, dh);
++    SDL_Event event{};
++    event.type = SDL_WINDOWEVENT;
++    event.window.event = SDL_WINDOWEVENT_SIZE_CHANGED;
++    event.window.windowID = SDL_GetWindowID(window);
++    event.window.data1 = w;
++    event.window.data2 = h;
++    SDL_PushEvent(&event);
++}
++} // namespace ps2x::ios
+diff --git a/ps2xRuntime/src/lib/ps2_pad.cpp b/ps2xRuntime/src/lib/ps2_pad.cpp
+index 8590f14..3ec9bf7 100644
+--- a/ps2xRuntime/src/lib/ps2_pad.cpp
++++ b/ps2xRuntime/src/lib/ps2_pad.cpp
+@@ -38,8 +38,26 @@ bool PSPadBackend::readState(int /*port*/, int /*slot*/, uint8_t *data, size_t s
+     data[4] = data[5] = data[6] = data[7] = kPadStickCenter;
+ 
+     uint16_t btns = 0xFFFFu;
++#if defined(PS2X_IOS)
++    // I25: a Bluetooth pad (MFi/Xbox/PS) need not land at index 0, so take
++    // the first ready one; and union keyboard + gamepad (N6's Android
++    // behaviour), so a hardware keyboard works alongside a controller.
++    int kGamepad = 0;
++    for (int i = 0; i < 4; ++i)
++    {
++        if (IsGamepadAvailable(i))
++        {
++            kGamepad = i;
++            break;
++        }
++    }
++    const bool useGamepad = IsGamepadAvailable(kGamepad);
++    const bool useKeyboard = true;
++#else
+     constexpr int kGamepad = 0;
+     const bool useGamepad = IsGamepadAvailable(kGamepad);
++    const bool useKeyboard = !useGamepad;
++#endif
+     auto clearBit = [&btns](uint16_t mask)
+     { btns &= ~mask; };
+ 
+@@ -87,7 +105,7 @@ bool PSPadBackend::readState(int /*port*/, int /*slot*/, uint8_t *data, size_t s
+         data[4] = static_cast<uint8_t>(128 + rx * 127);
+         data[5] = static_cast<uint8_t>(128 + ry * 127);
+     }
+-    else
++    if (useKeyboard)
+     {
+         if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))
+             clearBit(PAD_UP);
+diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
+index 1f5a285..e6b70ec 100644
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -21,12 +21,16 @@
+ #include "ps2_host_backend.h"
+ #include "ps2_iop_host.h"
+ #include "ps2x/iop/iop_subsystem.h"
++#if defined(PS2X_IOS)
++#include "ps2_ios_runtime.h"
++#endif
+ 
+ #include <iostream>
+ #include <fstream>
+ #include <algorithm>
+ #include <array>
+ #include <cctype>
++#include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
+ #include <limits>
+@@ -841,6 +845,12 @@ bool PS2Runtime::initialize(const char *title)
+ #else
+         SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+         InitWindow(HOST_WINDOW_WIDTH, HOST_WINDOW_HEIGHT, title);
++#if defined(PS2X_IOS)
++        ps2x::ios::syncWindowSize();
++        // raylib's SDL backend warns from GetWindowScaleDPI() on every
++        // EndDrawing on Apple targets (~60 lines/s); keep errors only.
++        SetTraceLogLevel(LOG_ERROR);
++#endif
+         InitAudioDevice();
+         m_audioBackend.setAudioReady(IsAudioDeviceReady());
+ #endif
+@@ -3306,8 +3316,30 @@ void PS2Runtime::run()
+         gameThreadFinished.store(true, std::memory_order_release); });
+ 
+     uint64_t tick = 0;
++    // I25: PS2X_VSYNC_RATE_LOG=1 prints guest vsyncs per wall second every
++    // 5 s (diagnostic; off by default, one getenv at loop start).
++    const bool vsyncRateLog = [] {
++        const char *env = std::getenv("PS2X_VSYNC_RATE_LOG");
++        return env && env[0] == '1';
++    }();
++    auto vsyncRateWall = std::chrono::steady_clock::now();
++    uint64_t vsyncRateTick = m_memory.gs().vsyncTick.load();
+     while (!isStopRequested() && !gameThreadFinished.load(std::memory_order_acquire))
+     {
++        if (vsyncRateLog)
++        {
++            const auto now = std::chrono::steady_clock::now();
++            const double secs = std::chrono::duration<double>(now - vsyncRateWall).count();
++            if (secs >= 5.0)
++            {
++                const uint64_t vt = m_memory.gs().vsyncTick.load();
++                const double rate = static_cast<double>(vt - vsyncRateTick) / secs;
++                std::fprintf(stderr, "[vsync-rate] tick=%llu rate=%.2f/s (%.3fx of 59.94)\n",
++                             static_cast<unsigned long long>(vt), rate, rate / 59.94);
++                vsyncRateWall = now;
++                vsyncRateTick = vt;
++            }
++        }
+         PS2_IF_AGRESSIVE_LOGS({
+             tick++;
+             if ((tick % 120) == 0)
+@@ -3343,6 +3375,9 @@ void PS2Runtime::run()
+         uint32_t presentHeight = DEFAULT_DISPLAY_HEIGHT;
+         UploadFrame(frameTex, this, presentWidth, presentHeight);
+ 
++#if defined(PS2X_IOS)
++        ps2x::ios::syncWindowSize();
++#endif
+         BeginDrawing();
+         ClearBackground(BLACK);
+         const float srcWidth = static_cast<float>(std::max<uint32_t>(1u, presentWidth));
+diff --git a/ps2xRuntime/src/main.cpp b/ps2xRuntime/src/main.cpp
+index abc2f6e..9523136 100644
+--- a/ps2xRuntime/src/main.cpp
++++ b/ps2xRuntime/src/main.cpp
+@@ -23,6 +23,10 @@
+ #include <cstring>
+ #endif
+ 
++#if defined(PS2X_IOS)
++#include "ps2_ios_runtime.h"
++#endif
++
+ #if defined(__APPLE__)
+ #include <TargetConditionals.h>
+ // I7: on iOS, SDL2main provides the real main() (UIKit app delegate +
+@@ -160,6 +164,15 @@ namespace
+             std::cout << "Using argv boot path" << std::endl;
+             return std::filesystem::path(argv[1]);
+         }
++#if defined(PS2X_IOS)
++        // I25: home-screen launches pass no argv; the bundled ps2x.env names
++        // the ELF (PS2X_BOOT_ELF=${BUNDLE}/SLUS_207.72).
++        if (const char *bootElf = std::getenv("PS2X_BOOT_ELF"); bootElf && bootElf[0] != '\0')
++        {
++            std::cout << "Using PS2X_BOOT_ELF boot path" << std::endl;
++            return std::filesystem::path(bootElf);
++        }
++#endif
+ #if defined(PS2X_DEFAULT_BOOT_ELF)
+         std::cout << "Using default boot file" << std::endl;
+         const std::filesystem::path configuredPath = std::filesystem::path(PS2X_DEFAULT_BOOT_ELF);
+@@ -181,6 +194,9 @@ int main(int argc, char *argv[])
+ {
+ #if defined(__ANDROID__)
+     redirectStdioToLogcat();
++#endif
++#if defined(PS2X_IOS)
++    ps2x::ios::prepareEnvironment(argc > 0 ? argv[0] : nullptr);
+ #endif
+     setupTerminateLogger();
+ 
+@@ -249,6 +265,18 @@ int main(int argc, char *argv[])
+             }
+         }
+ 
++        // I25: writable memory-card root (the iOS bundle is read-only, so the
++        // default <elf dir>/mc0 can't be written there). mc1 is its sibling.
++        if (const char *mcRootEnv = std::getenv("PS2X_MC_ROOT"))
++        {
++            if (mcRootEnv[0] != '\0')
++            {
++                PS2Runtime::IoPaths ioPaths = PS2Runtime::getIoPaths();
++                ioPaths.mcRoot = std::filesystem::path(mcRootEnv);
++                PS2Runtime::setIoPaths(ioPaths);
++            }
++        }
++
+         runtime.run();
+ 
+ #ifdef _DEBUG
+diff --git a/ps2xTest/CMakeLists.txt b/ps2xTest/CMakeLists.txt
+index 23a7772..2b54a95 100644
+--- a/ps2xTest/CMakeLists.txt
++++ b/ps2xTest/CMakeLists.txt
+@@ -47,6 +47,7 @@ add_library(ps2_test_lib STATIC
+     src/r5900_decoder_tests.cpp
+     src/elf_analyzer_tests.cpp
+     src/pad_input_tests.cpp
++    src/ps2_env_file_tests.cpp
+     src/ps2_runtime_io_tests.cpp
+     src/ps2_runtime_kernel_tests.cpp
+     src/ps2_runtime_interrupt_tests.cpp
+diff --git a/ps2xTest/src/main.cpp b/ps2xTest/src/main.cpp
+index 14651ef..2b69154 100644
+--- a/ps2xTest/src/main.cpp
++++ b/ps2xTest/src/main.cpp
+@@ -6,6 +6,7 @@ void register_code_generator_tests();
+ void register_r5900_decoder_tests();
+ void register_elf_analyzer_tests();
+ void register_pad_input_tests();
++void register_ps2_env_file_tests();
+ void register_ps2_runtime_io_tests();
+ void register_ps2_runtime_kernel_tests();
+ void register_ps2_runtime_interrupt_tests();
+@@ -36,6 +37,7 @@ int main()
+     register_r5900_decoder_tests();
+     register_elf_analyzer_tests();
+     register_pad_input_tests();
++    register_ps2_env_file_tests();
+     register_ps2_runtime_io_tests();
+     register_ps2_runtime_kernel_tests();
+     register_ps2_runtime_interrupt_tests();
+diff --git a/ps2xTest/src/ps2_env_file_tests.cpp b/ps2xTest/src/ps2_env_file_tests.cpp
+new file mode 100644
+index 0000000..790024c
+--- /dev/null
++++ b/ps2xTest/src/ps2_env_file_tests.cpp
+@@ -0,0 +1,45 @@
++#include "MiniTest.h"
++#include "ps2_env_file.h"
++
++#include <map>
++#include <set>
++#include <string>
++#include <utility>
++#include <vector>
++
++// I25: ps2x.env parser, ${VAR} expansion and layer merge (the iOS loader's
++// pure parts; the file reads + setenv live in ps2_ios_runtime.cpp).
++void register_ps2_env_file_tests()
++{
++    MiniTest::Case("Ps2EnvFile", [](TestCase &tc)
++                   {
++        tc.Run("parses KEY=VALUE, comments, CRLF, first '=' split, empty value", [](TestCase &t)
++               {
++            const auto e = ps2x::parseEnvFileContent(
++                "# comment\r\n  A = 1 \r\n\nB=x=y\nnoequals\n=novalue\nC=\n  # indented comment\nD=last");
++            t.Equals(e.size(), static_cast<size_t>(4), "4 entries");
++            t.IsTrue(e[0] == std::make_pair(std::string("A"), std::string("1")), "trimmed A=1");
++            t.IsTrue(e[1] == std::make_pair(std::string("B"), std::string("x=y")), "split at first '='");
++            t.IsTrue(e[2] == std::make_pair(std::string("C"), std::string()), "empty value kept");
++            t.IsTrue(e[3] == std::make_pair(std::string("D"), std::string("last")), "no trailing newline"); });
++
++        tc.Run("expands known ${VAR}, leaves unknown and unterminated as written", [](TestCase &t)
++               {
++            const std::map<std::string, std::string> vars{{"BUNDLE", "/b/app"}, {"DOCUMENTS", "/h/Documents"}};
++            t.Equals(ps2x::expandEnvPlaceholders("${BUNDLE}/SSX3.iso", vars), std::string("/b/app/SSX3.iso"), "BUNDLE");
++            t.Equals(ps2x::expandEnvPlaceholders("${DOCUMENTS}/mc0:${BUNDLE}", vars), std::string("/h/Documents/mc0:/b/app"), "two");
++            t.Equals(ps2x::expandEnvPlaceholders("${NOPE}/x", vars), std::string("${NOPE}/x"), "unknown kept");
++            t.Equals(ps2x::expandEnvPlaceholders("a${BUNDLE", vars), std::string("a${BUNDLE"), "unterminated kept");
++            t.Equals(ps2x::expandEnvPlaceholders("10350:start:2500", vars), std::string("10350:start:2500"), "plain"); });
++
++        tc.Run("later layers override, launcher keys win, empty clears", [](TestCase &t)
++               {
++            const std::vector<std::vector<std::pair<std::string, std::string>>> layers{
++                {{"PS2X_CD_IMAGE", "${BUNDLE}/SSX3.iso"}, {"PS2X_PAD_SCRIPT", "1:start:1"}, {"PS2X_SKIP_MOVIE", "1"}},
++                {{"PS2X_PAD_SCRIPT", ""}, {"PS2X_SKIP_MOVIE", "0"}}};
++            const auto m = ps2x::mergeEnvLayers(layers, {"PS2X_SKIP_MOVIE"}, {{"BUNDLE", "/b"}});
++            t.Equals(m.size(), static_cast<size_t>(2), "launcher key dropped");
++            t.Equals(m.at("PS2X_CD_IMAGE"), std::string("/b/SSX3.iso"), "expanded");
++            t.Equals(m.at("PS2X_PAD_SCRIPT"), std::string(), "Documents layer clears the script");
++            t.IsTrue(m.count("PS2X_SKIP_MOVIE") == 0, "launcher value untouched"); }); });
++}
