@@ -420,6 +420,27 @@ with measured budgets, then 120 Hz simulation.
       tests, and neither fix alone passes (offline replay). **Orchestrator:
       option 1, A+B (+RSQRT) as one R5900-FPU fix on `ssx3`**, with a regen
       to `codegen-ssx3-e50` and SC + race validation.
+      **E50 Part 3 PASS (2f00b34; fork `eac6cba` PUSHED by orchestrator):
+      THE CAMERA IS FIXED.**
+      - SC camera within 1 ulp of PCSX2; the race meets every T65
+        invariant.
+      - Regen diff = exactly the 36 predicted SQRT.S lines. Suite 597/597.
+      - **The race world now draws:** sky, sun and flare, fog, the terrain
+        surface, rider, trail (`E50/frames/e50f-race-tick8275.png`, sent
+        to Brad).
+      - Still differs from PCSX2:
+        - the terrain is dark/untextured with blue shards;
+        - zero-area prims ~2.3k vs ≤461;
+        - VU1 budget exits 1–2/vsync;
+        - startPCs `0x741/0x2/0x8/0xe0/0x28c` missing, `0x189` extra.
+      - Canonical `codegen-ssx3` = E50 regen (orchestrator swap);
+        `codegen-ssx3-e49` kept until I25 is done.
+      **Next (Opus):**
+      - **E51** (E50 pane): race terrain at a moment matched to T65,
+        covering VU1 budget exits, TEX0/upload census and zero-area
+        sources.
+      - **E52:** a full FPU + COP2-macro semantics audit vs PCSX2, with
+        unit tests and no fixes.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
