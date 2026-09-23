@@ -132,7 +132,16 @@ with measured budgets, then 120 Hz simulation.
       runs first each frame (PCSX2's 0x257 = byte 0x12B8) and sets them,
       (2) VU0 writing VU1's registers via the VU0-data mapping (0x4000+).
       T49 asked to print all 16 VI at entry (and trace 0x257 if it runs first).
-- [ ] **T49 (running):** PCSX2 side of the diff (entry VI line added). full entry trace (VU1 data memory at
+- [x] **T49 PASS (09-23):** PCSX2 entry trace, same format. Healthy entry VI
+      small and stable (vi13 0x03e4); **VU1 code differs**: PCSX2's 0x10 = `B
+      0x258`, 0x40 = `B 0x7d8`; PCSX2 feeds 38 `MPG` uploads per pass window.
+- [ ] **Missing-3D root cause (orchestrator, 09-23): the game's VU1 microcode
+      uploads never land.** The DMA chain walker (`ps2_memory.cpp` ~1527)
+      passes the DMAtag's embedded VIF codes (TTE) only for tag ids
+      1/2/5/6/7; REF/REFS/REFE (3/4/0) drop them, so a REF-carried `MPG` is
+      lost and the microcode bytes are parsed as VIF commands. No CHCR.TTE
+      check anywhere. **E38 (running):** fix + tests + Select Character and
+      race boots.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
