@@ -1,0 +1,301 @@
+diff --git a/pcsx2/GS/GS.cpp b/pcsx2/GS/GS.cpp
+index 0b904eb7b..b13859d42 100644
+--- a/pcsx2/GS/GS.cpp
++++ b/pcsx2/GS/GS.cpp
+@@ -23,6 +23,17 @@
+ #include "GS/Renderers/HW/GSTextureReplacements.h"
+ #include "VMManager.h"
+ 
++#include <atomic>
++
++extern std::atomic<int> g_g7_execps2_count; // G7: defined in R5900OpcodeImpl.cpp.
++std::atomic<int> g_g8_transfer_count{0}; // G8: Transfer-packet counter, incremented on the GS thread in GSState::Transfer.
++std::atomic<int> g_t48_vsync{0}; // T48: vsync mirror, GS writes / EE reads (relaxed; skew <1 vsync).
++std::atomic<bool> g_t48_window{false}; // T48: widened dump-window flag for VU1 gating.
++extern unsigned long long g_t48_pkts[4]; // T48: defined in GSState.cpp, per-index packet counts.
++extern unsigned long long g_t48_bytes[4]; // T48: defined in GSState.cpp, per-index byte counts.
++std::atomic<unsigned long long> g_g13_transfer_bytes{0}; // G13: GIF-byte counter, incremented on the GS thread in GSState::Transfer.
++std::atomic<unsigned long long> g_g13_draw_batches{0}; // G13: prim-flush counter, incremented on the GS thread in GSState::FlushPrim.
++
+ #ifdef ENABLE_OPENGL
+ #include "GS/Renderers/OpenGL/GSDeviceOGL.h"
+ #endif
+@@ -440,6 +451,105 @@ void GSgifTransfer3(u8* mem, u32 size)
+ void GSvsync(u32 field, bool registers_written)
+ {
+ 	// Update this here because we need to check if the pending draw affects the current frame, so our regs need to be updated.
++	// G8: draw-aware one-shot auto GS dump (5 frames). Queues K transfers after
++	// the first non-zero-transfer vsync past game entry (ExecPS2 #5).
++	// G13: fire condition replaced (rate-based scene trigger + fallback below); FIRST_NONZERO kept as determinism receipt.
++	{
++		static int g8_vsync_index = 0;
++		static bool g8_armed = false;
++		static int g8_prev_total = 0;
++		static int g8_first_nonzero_vsync = -1;
++		static int g8_first_nonzero_total = 0;
++		static bool g8_dump_queued = false;
++		static bool t48_queued = false;
++		static bool t48_seen = false;
++		static int t48_winstart = -1;
++		// T48: script-driven dump trigger + per-path lines (log-only).
++		if (!t48_seen)
++		{
++			FILE* t48af = fopen("/tmp/t48-arm", "r");
++			if (t48af) { fclose(t48af); t48_seen = true; }
++		}
++		g_t48_vsync.store(g8_vsync_index, std::memory_order_relaxed);
++		if (t48_seen)
++		{
++			if (!t48_queued && !g8_dump_queued && g_g7_execps2_count.load(std::memory_order_relaxed) >= 5)
++			{
++				FILE* t48qf = fopen("/tmp/t48-dump-now", "r");
++				if (t48qf)
++				{
++					fclose(t48qf);
++					t48_queued = true;
++					g8_dump_queued = true; // T48: suppress the G13 auto-trigger; this window is ours.
++					t48_winstart = g8_vsync_index + 1;
++					Console.WriteLn("T48_DUMP_QUEUED vsync=%d", g8_vsync_index);
++					GSQueueSnapshot(std::string(), 5);
++				}
++			}
++			const bool t48_win = t48_queued && (g8_vsync_index >= t48_winstart - 30) && (g8_vsync_index < t48_winstart + 8);
++			g_t48_window.store(t48_win, std::memory_order_relaxed);
++			Console.WriteLn("T48_PATHS vsync=%d p1_pkts=%llu p1_bytes=%llu p2_pkts=%llu p2_bytes=%llu p3_pkts=%llu p3_bytes=%llu p0_pkts=%llu p0_bytes=%llu",
++				g8_vsync_index, g_t48_pkts[3], g_t48_bytes[3], g_t48_pkts[1], g_t48_bytes[1], g_t48_pkts[2], g_t48_bytes[2], g_t48_pkts[0], g_t48_bytes[0]);
++			g_t48_pkts[0] = g_t48_pkts[1] = g_t48_pkts[2] = g_t48_pkts[3] = 0;
++			g_t48_bytes[0] = g_t48_bytes[1] = g_t48_bytes[2] = g_t48_bytes[3] = 0;
++		}
++		if (!g8_dump_queued && g_g7_execps2_count.load(std::memory_order_relaxed) >= 5)
++		{
++			const int total = g_g8_transfer_count.load(std::memory_order_relaxed);
++			if (!g8_armed)
++			{
++				g8_armed = true;
++				g8_prev_total = total;
++			}
++			else
++			{
++				const int this_vsync = total - g8_prev_total;
++				g8_prev_total = total;
++				if (this_vsync > 0 && g8_first_nonzero_vsync < 0)
++				{
++					g8_first_nonzero_vsync = g8_vsync_index;
++					g8_first_nonzero_total = total;
++					Console.WriteLn("G8_FIRST_NONZERO vsync=%d transfers=%d", g8_vsync_index, total);
++				}
++				// G13: rich-scene trigger (replaces the G8 K=500 fire above).
++				static unsigned long long g13_prev_bytes = 0;
++				static unsigned long long g13_prev_batches = 0;
++				static int g13_hot_streak = 0;
++				static bool g13_prev_init = false;
++				const unsigned long long total_bytes = g_g13_transfer_bytes.load(std::memory_order_relaxed);
++				const unsigned long long total_batches = g_g13_draw_batches.load(std::memory_order_relaxed);
++				if (!g13_prev_init)
++				{
++					g13_prev_bytes = total_bytes;
++					g13_prev_batches = total_batches;
++					g13_prev_init = true;
++				}
++				const unsigned long long this_bytes = total_bytes - g13_prev_bytes;
++				const unsigned long long this_batches = total_batches - g13_prev_batches;
++				g13_prev_bytes = total_bytes;
++				g13_prev_batches = total_batches;
++				if ((g8_vsync_index % 500) == 0)
++					Console.WriteLn("G13_SCAN vsync=%d transfers=%d bytes=%llu batches=%llu", g8_vsync_index, total, total_bytes, total_batches);
++				if (this_batches >= 25 && this_bytes >= 16384)
++					g13_hot_streak++;
++				else
++					g13_hot_streak = 0;
++				if (!t48_seen && g8_vsync_index >= 1200 && g13_hot_streak >= 2)
++				{
++					g8_dump_queued = true;
++					Console.WriteLn("G13_DUMP_QUEUED vsync=%d transfers=%d bytes=%llu batches=%llu streak=%d", g8_vsync_index, total, total_bytes, total_batches, g13_hot_streak);
++					GSQueueSnapshot(std::string(), 5);
++				}
++				else if (!t48_seen && g8_vsync_index >= 5000)
++				{
++					g8_dump_queued = true;
++					Console.WriteLn("G13_DUMP_FALLBACK vsync=%d transfers=%d bytes=%llu batches=%llu", g8_vsync_index, total, total_bytes, total_batches);
++					GSQueueSnapshot(std::string(), 5);
++				}
++			}
++		}
++		g8_vsync_index++;
++	}
+ 	g_gs_renderer->PCRTCDisplays.SetVideoMode(g_gs_renderer->GetVideoMode());
+ 	g_gs_renderer->PCRTCDisplays.EnableDisplays(g_gs_renderer->m_regs->PMODE, g_gs_renderer->m_regs->SMODE2, g_gs_renderer->isReallyInterlaced());
+ 	g_gs_renderer->PCRTCDisplays.SetRects(0, g_gs_renderer->m_regs->DISP[0].DISPLAY, g_gs_renderer->m_regs->DISP[0].DISPFB);
+diff --git a/pcsx2/GS/GSState.cpp b/pcsx2/GS/GSState.cpp
+index 9b048ee4f..067010e57 100644
+--- a/pcsx2/GS/GSState.cpp
++++ b/pcsx2/GS/GSState.cpp
+@@ -18,6 +18,18 @@
+ #include <sstream>
+ #include <iomanip>
+ #include <bit>
++#include <atomic>
++
++extern std::atomic<int> g_g8_transfer_count; // G8: defined in GS.cpp, incremented below on the GS thread.
++extern std::atomic<unsigned long long> g_g13_transfer_bytes; // G13: defined in GS.cpp, incremented below on the GS thread.
++extern std::atomic<unsigned long long> g_g13_draw_batches; // G13: defined in GS.cpp, incremented in FlushPrim on the GS thread.
++// T48: per-path census + per-draw ring (GS thread only; log-only).
++unsigned long long g_t48_pkts[4] = {0, 0, 0, 0};
++unsigned long long g_t48_bytes[4] = {0, 0, 0, 0};
++int g_t48_curpath = -1;
++unsigned long long g_t48_ring_n[4096] = {};
++unsigned g_t48_ring_v[4096] = {};
++int g_t48_ring_p[4096] = {};
+ 
+ u64 GSState::s_n = 0;
+ u64 GSState::s_last_transfer_draw_n = 0;
+@@ -2532,10 +2544,15 @@ void GSState::FlushPrim()
+ 		GSVertexBuff& vtx_buff = *m_vertex;
+ 		GSIndexBuff& idx_buff = *m_index;
+ 		IncDraw();
++		g_g13_draw_batches.fetch_add(1, std::memory_order_relaxed); // G13: draw-batch counter (same site as IncDraw).
+ 
+ 		const u32 head = vtx_buff.head;
+ 		const u32 tail = vtx_buff.tail;
+ 		const u32 next = vtx_buff.next;
++	// T48: per-draw vertex/path ring (log-only; match-checked on the G12_DRAW line).
++	g_t48_ring_n[s_n & 4095] = s_n;
++	g_t48_ring_v[s_n & 4095] = (tail > head) ? (tail - head) : 0;
++	g_t48_ring_p[s_n & 4095] = g_t48_curpath;
+ 		u32 unused = 0;
+ 
+ 		if (tail > head)
+@@ -3358,6 +3375,13 @@ void GSState::Transfer(const u8* mem, u32 size)
+ 	const u8* start = mem;
+ 
+ 	GIFPath& path = m_path[index];
++	// T48: per-path census + current-path stash (log-only; index = PATH-1).
++	if (index >= 0 && index < 4)
++	{
++		g_t48_pkts[index]++;
++		g_t48_bytes[index] += static_cast<unsigned long long>(size) * 16u;
++		g_t48_curpath = (index == 3) ? 1 : (index == 1) ? 2 : (index == 2) ? 3 : 0;
++	}
+ 
+ 	while (size > 0)
+ 	{
+diff --git a/pcsx2/GS/Renderers/HW/GSRendererHW.cpp b/pcsx2/GS/Renderers/HW/GSRendererHW.cpp
+index 9ef9fecfe..ecdc6c48a 100644
+--- a/pcsx2/GS/Renderers/HW/GSRendererHW.cpp
++++ b/pcsx2/GS/Renderers/HW/GSRendererHW.cpp
+@@ -2786,10 +2790,24 @@ void GSRendererHW::Draw()
+ 	m_cached_ctx.TEST = context->TEST;
+ 	m_cached_ctx.FRAME = context->FRAME;
+ 	m_cached_ctx.ZBUF = context->ZBUF;
++	// G12: per-draw order trace (log-only).
++	extern unsigned long long g_t48_ring_n[4096]; // T48: defined in GSState.cpp.
++	extern unsigned g_t48_ring_v[4096];
++	extern int g_t48_ring_p[4096];
++	if (m_dump) // G13: capture runs log draws only inside the dump window (replay binary already built).
++	Console.WriteLn("G12_DRAW n=%llu FBP=%u FBW=%u FPSM=%u TBP0=%u TBW=%u TPSM=%u TME=%u PRIM=%u verts=%u path=%d",
++		static_cast<unsigned long long>(s_n), static_cast<unsigned>(context->FRAME.FBP),
++		static_cast<unsigned>(context->FRAME.FBW), static_cast<unsigned>(context->FRAME.PSM),
++		static_cast<unsigned>(context->TEX0.TBP0), static_cast<unsigned>(context->TEX0.TBW),
++		static_cast<unsigned>(context->TEX0.PSM), static_cast<unsigned>(m_draw_env->PRIM.TME),
++		static_cast<unsigned>(m_draw_env->PRIM.PRIM), (g_t48_ring_n[s_n & 4095] == s_n) ? g_t48_ring_v[s_n & 4095] : 0,
++		(g_t48_ring_n[s_n & 4095] == s_n) ? g_t48_ring_p[s_n & 4095] : -2);
+ 
+ 	if (IsBadFrame())
+ 	{
+ 		GL_INS("HW: Warning skipping a draw call (%lld)", s_n);
++		if (m_dump)
++		Console.WriteLn("G12_SKIP n=%llu reason=badframe", static_cast<unsigned long long>(s_n));
+ 		return;
+ 	}
+ 
+diff --git a/pcsx2/VU1micro.cpp b/pcsx2/VU1micro.cpp
+index 9e969d5e7..de86336c3 100644
+--- a/pcsx2/VU1micro.cpp
++++ b/pcsx2/VU1micro.cpp
+@@ -8,6 +8,16 @@
+ #include <cmath>
+ #include "VUmicro.h"
+ #include "MTVU.h"
++// T48: per-program cycle/xgkick record (log-only; exact under sync VU1 interp, i.e. MTVU off + interpreter).
++u64 g_t48_vu_startcycle = 0;
++u32 g_t48_vu_startpc = 0;
++u64 g_t48_vu_startxg = 0;
++extern u64 g_t48_vu_xg; // T48: defined in VUops.cpp.
++bool g_t48_vu_active = false;
++bool g_t48_vu_win = false;
++static bool g_t48_mode_logged = false;
++extern std::atomic<int> g_t48_vsync;
++extern std::atomic<bool> g_t48_window;
+ 
+ #ifdef PCSX2_DEBUG
+ u32 vudump = 0;
+@@ -70,6 +80,17 @@ void vu1ExecMicro(u32 addr)
+ 	VU0.VI[REG_VPU_STAT].UL &= ~0xFF00;
+ 	VU0.VI[REG_VPU_STAT].UL |=  0x0100;
+ 	if ((s32)addr != -1) VU1.VI[REG_TPC].UL = addr & 0x7FF;
++	// T48: begin program record (a live one closes as aborted).
++	if (!g_t48_mode_logged) { g_t48_mode_logged = true; Console.WriteLn("T48_MODE mtvu=%d", THREAD_VU1 ? 1 : 0); }
++	if (g_t48_vu_active)
++	{
++		if (g_t48_vu_win) Console.WriteLn("T48_VU1 vsync=%d start_pc=0x%x cycles=%llu xgkicks=%llu end=abort", g_t48_vsync.load(std::memory_order_relaxed), g_t48_vu_startpc, VU1.cycle - g_t48_vu_startcycle, g_t48_vu_xg - g_t48_vu_startxg);
++	}
++	g_t48_vu_startpc = VU1.VI[REG_TPC].UL;
++	g_t48_vu_startcycle = VU1.cycle;
++	g_t48_vu_startxg = g_t48_vu_xg;
++	g_t48_vu_active = true;
++	g_t48_vu_win = g_t48_window.load(std::memory_order_relaxed);
+ 
+ 	CpuVU1->SetStartPC(VU1.VI[REG_TPC].UL << 3);
+ 	_vuExecMicroDebug(VU1);
+diff --git a/pcsx2/VU1microInterp.cpp b/pcsx2/VU1microInterp.cpp
+index fde345122..67d28bc91 100644
+--- a/pcsx2/VU1microInterp.cpp
++++ b/pcsx2/VU1microInterp.cpp
+@@ -12,6 +12,14 @@
+ 
+ extern void _vuFlushAll(VURegs* VU);
+ extern void _vuXGKICKFlush(VURegs* VU);
++extern u64 g_t48_vu_startcycle; // T48: defined in VU1micro.cpp.
++extern u32 g_t48_vu_startpc;
++extern u64 g_t48_vu_startxg;
++extern u64 g_t48_vu_xg;
++extern bool g_t48_vu_active;
++extern bool g_t48_vu_win;
++extern std::atomic<int> g_t48_vsync;
++extern std::atomic<bool> g_t48_window;
+ 
+ void _vu1ExecUpper(VURegs* VU, u32* ptr)
+ {
+@@ -189,6 +197,12 @@ static void _vu1Exec(VURegs* VU)
+ 	{
+ 		if (VU->ebit-- == 1)
+ 		{
++			// T48: close program record at the E-bit stop (log-only).
++			if (g_t48_vu_active)
++			{
++				if (g_t48_vu_win) Console.WriteLn("T48_VU1 vsync=%d start_pc=0x%x cycles=%llu xgkicks=%llu end=ebit", g_t48_vsync.load(std::memory_order_relaxed), g_t48_vu_startpc, VU1.cycle - g_t48_vu_startcycle, g_t48_vu_xg - g_t48_vu_startxg);
++				g_t48_vu_active = false;
++			}
+ 			VU->VIBackupCycles = 0;
+ 			_vuFlushAll(VU);
+ 			VU0.VI[REG_VPU_STAT].UL &= ~0x100;
+diff --git a/pcsx2/VUops.cpp b/pcsx2/VUops.cpp
+index f3067e9da..02d52e790 100644
+--- a/pcsx2/VUops.cpp
++++ b/pcsx2/VUops.cpp
+@@ -9,6 +9,7 @@
+ 
+ #include <cmath>
+ u32 laststall = 0;
++u64 g_t48_vu_xg = 0; // T48: XGKICK-instruction counter (log-only; def here, record in VU1micro.cpp).
+ //Lower/Upper instructions can use that..
+ #define _Ft_ ((VU->code >> 16) & 0x1F)  // The rt part of the instruction register
+ #define _Fs_ ((VU->code >> 11) & 0x1F)  // The rd part of the instruction register
+@@ -1908,6 +1909,7 @@ void _vuXGKICKTransfer(s32 cycles, bool flush)
+ 
+ static __ri void _vuXGKICK(VURegs* VU)
+ {
++	g_t48_vu_xg++; // T48: one XGKICK instruction executed (log-only).
+ 	if (VU->xgkickenable)
+ 		_vuXGKICKTransfer(0, true);
+ 
