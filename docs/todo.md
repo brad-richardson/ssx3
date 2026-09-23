@@ -171,8 +171,13 @@ with measured budgets, then 120 Hz simulation.
       display-list data arrives via DMA/host copy from loaded data. **T52 PASS (PCSX2, `3f6df70`):**
       5,836 reads/149 MB boot → SC; the menu → SC transition reads `MDLPS2.BIG`
       (83 sectors, rider models) + `ZOETXP.BIG` (59, Zoe textures) + `MUSIC2.BIG`
-      streaming; SC on screen = music only. **E41 (recomp CD reads + a host-side
-      watch on the DMA write that plants the CALL tags) running.** E40 lane closed (7 parts).
+      streaming; SC on screen = music only. **E41 PASS (fork `7d7bbc6`):**
+      the CALL words are **EE-stored every even vsync** (185 plants, `0x435bd0`,
+      via the fast-write path / an uncached mirror: E40's blind spots), not planted
+      by DMA. Orchestrator: the recomp's `MDLPS2.BIG` + `ZOETXP.BIG` reads equal
+      PCSX2's sector for sector (165/165): **asset loading refuted**. The uploader
+      choice is an EE computation per frame. **E42 (recomp: storing function via
+      host return address) + T53 (PCSX2: mirror-folded store watch) running.** E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
