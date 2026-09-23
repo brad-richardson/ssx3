@@ -266,6 +266,13 @@ with measured budgets, then 120 Hz simulation.
       change-only watch on `0x61c8fc..0x61c94b`) ∥ **E44 Part 4
       amendment 3** (the same watch + `appx`: do the SC appenders run in
       the recomp, and what tw0 do they read?).
+      **T63 (83cf3e0): bounded, not caught.** The template array is runtime
+      BSS: init at vsync 1021 (`0x36927c/0x369534`), then the menu fills
+      template 2 = `{0xc, 0x1414294, 0x1c0, 0, 0xffff0613}`, and during the
+      menu its w0 flips `0xc↔0xcc` (`0x3798d8/0x379ba0/0x399674`). The
+      `0x1b0` write is an EE store in (K−1011, K+104] (no DMA, ever); the
+      cap died on the churn at vsync 6. Next: **T64**, the same run with
+      the churn values excluded and an uncapped per-vsync t2 line.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
