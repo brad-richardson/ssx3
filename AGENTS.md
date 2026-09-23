@@ -56,11 +56,20 @@ movie path), **V** storage/restore.
 - **Workers (muse)** execute one brief each in their own herdr pane. They
   hand back tables and receipts plus a recommended next action; they don't
   declare verdicts beyond what the brief asks. All implementation is muse
-  (Brad, 2026-09-22). No Opus/reasoning-class workers unless Brad asks.
+  (Brad, 2026-09-22). No Opus/reasoning-class workers unless Brad asks (exception: the Opus-medium fallback below once muse runs out).
 - Workers never edit `docs/status.md`, `docs/todo.md`, the ledger or
   plans. They may read other panes but never prompt them; coordination
   goes through the orchestrator. Subagents are fine for read-only
   fan-out; edits, builds, boots and commits stay in the main worker.
+
+**Fallback worker (Brad, 2026-09-22):** when muse's subscription runs
+out, workers become **Claude Opus at medium effort** in the same herdr
+panes, under the same brief contract and rules (the orchestrator still
+owns judgment): `herdr agent start <id> --kind claude --pane <pane>
+--timeout 120000 -- --model opus --effort medium` (permission mode: Brad
+to confirm). Commits then carry `Orchestrated-By: Claude Code` instead of
+the Muse trailer. A local Qwen worker on the mini is being considered;
+not in use yet.
 
 herdr recipe: `herdr tab create --workspace wN --cwd ~/dev/ssx3 --label
 <ID>` → `herdr agent start <id> --kind muse --pane <pane> --timeout
