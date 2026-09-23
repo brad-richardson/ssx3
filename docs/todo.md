@@ -26,10 +26,15 @@ with measured budgets, then 120 Hz simulation.
 
 - [x] **E29 PASS (09-22):** dev-only bypass reaches the rendered SSX 3
       title screen. Branch `e29-movie-bypass` @ `e5ce086d`, local.
-- [ ] **E31 (running):** scripted pad input on the bypass build. Reached
-      title → main menu → Select Character → Select Event/Mode → **Snow
-      Jam race loading screen at 99%** (`e31h`, 596 s wall, rider Zoe).
-      Now checking hang vs slowness with a no-aggressive-logs build.
+- [x] **E31 PASS (09-22): first stock race on the recomp (Mac).**
+      `PS2X_PAD_SCRIPT` (dev-only, 461/461, `fork/e29-movie-bypass` @
+      `ee39b9f`) drives title → menus → Happiness Rival Challenge; the race
+      starts, HUD live, timer 00:00:01 → 00:00:04 (e31l, 584 s). Orchestrator
+      caveat: the 3D world renders near-black (silhouette only, no rider, sky
+      or textures), so this is race *logic*, not a rendered race. Snow Jam
+      stalls at 99% (live loop, no CD reads, no park). Odin reuse string: E31
+      REPORT §e31l. Guest speed varies a lot (title 23 ticks/s, 3D menus
+      1–3 fps with the software GS).
 - [ ] Stray PS2 button glyphs/D-pad/L1-R1 boxes in the top-left and
       bottom-left corners (Brad sees them on the Odin; E31's Mac Select
       Character dump has them inside the 512×448 guest framebuffer).
