@@ -674,3 +674,153 @@ the table for a future brief — NOT validated here.
   (+ `--gs-queue 1` for h/i); null = full-parse join E-vs-G (not the
   indel-diff, which trips on E's torn gaps); decode =
   `gb2_pktdecode.py pklog-gb2g-1.txt pklog-gb2h-1.txt 352 361 370`.
+
+## 13. Part 5 — CSR-drain fix validation (orchestrator amendment)
+
+Brief: validate the env-gated fix (`PS2X_GS_CSR_DRAIN=1`, committed in
+`b975930`, never booted): (a) queue-on + drain + `--vq` + `--pklog`,
+(b) a repeat. Pass = VQ VRAM fnv identical at all 26 ticks vs a fresh
+queue-off `--vq` boot, or Part-2 A if the binary's VQ output is
+unchanged (state which). Report first CSR read vs G, phase histogram,
+first content divergence. Presents/s only if pass. On fail: first
+differing CSR read + first differing packet, then stop. Note the F-type
+stale replay as an open item, don't chase it. Max 3 boots.
+
+**Verdict: FAIL.** Both (a) and (b) mismatch VRAM at all 26 ticks (regs
+26/26 match, same shape as Part-2 B). Worse: (a) and (b) disagree with
+each other from idx 0 — the drain path is nondeterministic, with two
+distinct failure modes (J immediate-behind, K delayed-behind). The
+drain is the wrong tool: it stalls phase backward without restoring
+off-ness, and K proves the content trigger is a NON-CSR channel (K's
+CSR reads match G through tick 246; content diverges at tick 80).
+
+### 13.1 Baseline: Part-2 A (gb2c) is valid — stated per brief
+
+No fresh off boot was run (2/3 boots used). `a77b933..1234451` touches
+6 files, all additions: pklog/capture logging (no guest writes), 4 CSR
+Load hooks (dormant unless PKLOG/DRAIN set; otherwise read-then-log,
+identical semantics), and the drain fast-path (`isQuiescent` skip of a
+proven-no-op Fence — timing-only). VQ code (`ps2_vq.h`, EeScheduler
+hook, submit counters) byte-identical; off-path guest execution is
+single-threaded with no drain calls, so gb2c's 26 VRAM hashes stand.
+(E==G packet-identity independently proves off-path determinism.)
+
+### 13.2 Boots (2/3)
+
+| Boot | Env | Result |
+|---|---|---|
+| gb2j (a) | on + drain + vq + pklog (+pkcap, §13.6) | rc 0, wall 330 s, slot 1. 26 VQ samples, pklog 8.9 MB / 172,536 lines (167,196 pk), max tick 1380 |
+| gb2k (b) | repeat of (a) | rc 0, wall, slot 1. 26 VQ samples, pklog 8.8 MB / 170,089 lines (164,781 pk), max tick 1371 |
+
+Codegen stable (9457 files, newest Sep 21 13:41); display awake; no
+build (binary `1234451`, runner `245bbaed…efa371`).
+
+### 13.3 VQ gate: 26/26 VRAM mismatch, both boots
+
+| tick | C-vram (off) | J-vram | K-vram | regs | J-sub/C-sub | K-sub/C-sub |
+|---|---|---|---|---|---|---|
+| 100 | 43e5391b | 07dd1249 | dc2e1eaa | match ×3 | 534/536 | 545/536 |
+| 150 | 2ebbd68f | 4be23470 | 4be23470 | match ×3 | 1259/1267 | 1276/1267 |
+| … | … | … | … | match ×3 | J ≈ C−114 | mixed |
+| 1350 | 93fac383 | 1c561099 | 72b99954 | match ×3 | 158454/158568 | 158577/158568 |
+
+First mismatch tick 100 in both. J ≠ B ≠ C at tick 100 (B was
+`450b75c9`): the drain reaches a third state, not the off state.
+
+### 13.4 Packet/CSR hand-back (the fail items)
+
+First differing CSR read vs G:
+
+| Boot | csr-idx | pc | G (tick/val) | Boot (tick/val) |
+|---|---|---|---|---|
+| J (a) | 0 | 0x375d10 | 40 / 0x4000 | 41 / 0x6000 (FIELD=1, behind) |
+| K (b) | 822 | 0x3828e0 | 247 / 0x6008 | 246 / 0x4008 (phase-flipped) |
+
+K's csr-idx 0 matches G exactly (tick 40, 0x4000) — the drain "worked"
+for the first read in K's run, yet K still fails. (All K csr addrs are
+`0x12001000`; zero SIGLBLID reads.)
+
+First differing packet vs G (both boots @352, the +9 series):
+
+| idx | G | J | K |
+|---|---|---|---|
+| 352 | tick 80, 85d9d4e9 | tick 81, 888f9292 (F's stale) | tick 80, 888f9292 (F's stale) |
+| 361/370/… | fresh | F's novels (ff624a51/5ee4ec87/…) | F's novels |
+
+Phase ladder (X−G tick, dominant value): H −1 (ahead, G-content to
+49,792); G 0; F +1 (F-content); K +1 (F-content); J +2 (F-content to
+49,555, == F bytes). Full histograms: G−J {−4: 236, −3: 75, −2:
+111,744, −1: 30,341, 0: 2,195}; G−K {−4: 113, −3: 1, −2: 113, −1:
+121,220, 0: 23,135, 1: 9}. J-vs-K differ from idx 0 (164,661 full-row
+diffs): J behind from the first read, K aligned for ~3.4k packets then
+behind-1 (wobbling late). K's content diverges (tick 80) while
+phase-aligned and 166 ticks before its first CSR difference —
+causal direction is content-state → phase-drift, and the trigger is
+not CSR.
+
+### 13.5 Byte decode (the Part-4 (2) question, answered on K/G)
+
+Tags identical at 352/361/370; exactly one differing qword each
+(qw[2], reglist RGBAQ+XYZ2, byte+32 — one alpha byte):
+
+| idx | G word (alpha) | K word (alpha) |
+|---|---|---|
+| 352 | 0x75808080 (0x75) | 0x80808080 (0x80) |
+| 361 | 0x6b808080 (0x6b) | 0x75808080 (0x75) |
+| 370 | 0x60808080 (0x60) | 0x6b808080 (0x6b) |
+
+K's per-tick alpha LAGS G's by exactly one tick (K-361 = G-352 etc.;
+J-352 == K-352, 0 diffs). The "stale replay of idx 190" and the
+"one-tick lag" are the same mechanism (fade plateau 0x80 across ticks
+62–79). Decoder wart fixed: A+D detail now only fires on real A+D regs
+(it misfired on reglist pixel data).
+
+### 13.6 Partial effect + deviations + gaps
+
+- Presents (asked only-if-pass; reporting anyway): `[frame:dump]`
+  counts J=1326, K=1330 ≈ C=1337 (off) vs B=464 (on, no drain). The
+  drain restores off-rate presents while breaking phase the other way —
+  its one positive effect, and evidence the present/vsync coupling is
+  the control surface, not completion visibility.
+- Deviations: (i) `--pkcap 352,361,370` included (logging-only
+  insurance for the fail case; paid off — §13.5 came from it);
+  (ii) wall 330 (drain-stall margin over Part-2's 300; J/K tick rates
+  4.1/s vs G 10.8/s show the stalls are real); (iii) no fresh off
+  baseline (§13.1 states why Part-2 A stands).
+- Gaps: trigger read unknown — must be an UNLOGGED channel (GIF_STAT /
+  VIF_STAT / DMAC_STAT / EE timers / INTC / non-CSR priv regs; guest
+  RAM may diverge before tick 80 with no packet impact; hunt window
+  ticks 40–80). J-vs-K bimodality rate unsized (1 sample each);
+  leading hypothesis is the `isQuiescent` fast-path making the drain
+  itself racy (stall iff queue busy at the read), but drain
+  invocations are unlogged so J-immediate vs K-delayed is unattributed.
+- OPEN ITEM (carried, not chased): F-type stale replay = one-tick alpha
+  lag (§13.5). On-path outcomes now 3 F-state (F, J, K) vs 2 H-state
+  (H, I) across 3 binary/flag combos — timing-race with (at least) two
+  attractors; needs an N-run study, not more GB2 boots.
+
+### 13.7 Recommended next (orchestrator decides)
+
+1. Log the unlogged guest-observable channels (GIF_STAT first: the
+   arbiter drains async on the worker, so APATH/OPH leak worker timing
+   to any polling guest) over ticks 40–80; find the read whose value
+   first differs on F-state runs.
+2. Treat guest/vsync PHASE as the control variable (drain stalls push
+   it behind; the +9-series content follows the F-state, not vice
+   versa). GB1 §2c completion-visibility is the wrong mechanism for
+   this divergence — do not re-validate drain variants.
+3. If the queue route continues: an N-run on-side study on ONE binary
+   to size H-state vs F-state (GB2 has 3+2 across mixed builds).
+
+### 13.8 Part 5 receipts
+
+- Build: 0 (binary `1234451` reused deliberately — same binary as H/I
+  keeps on-path compares clean).
+- Boots: 2/3 (gb2j, gb2k), slot 1, PIDs tracked, released cleanly. No
+  boot over 600 s.
+- Disk: `local/tooling/disk_budget.sh` → 42.2/200 GB (202 Gi free).
+- Exact commands: boots = `gb2_boot.py --label gb2{j,k} --wall 330
+  --snap 10.0 --script "<E33 route>" --gs-queue 1 --csr-drain --vq
+  --pklog --pkcap 352,361,370`; VQ = `gb2_vq.py boot-gb2c-1.log
+  boot-gb2{j,k}-1.log` (rc 1, 26/26 VRAM mismatch); decode =
+  `gb2_pktdecode.py pklog-gb2g-1.txt pklog-gb2k-1.txt 352 361 370`.

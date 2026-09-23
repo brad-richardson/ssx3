@@ -177,9 +177,10 @@ def main():
             print(f"  qw[{off}] role={ra.get(off, '?')}")
             print(f"    A {sa}")
             print(f"    B {sb}")
-            # A+D detail when the role mentions it
+            # A+D detail only when an A+D register is actually present
+            # (reglist data qwords are usually packed-pixel/vertex data).
             role = ra.get(off, "") + rb.get(off, "")
-            if "A+D" in role or "reglist" in role:
+            if "A+D" in role:
                 if va is not None:
                     print(f"    A {ad_decode(va)}")
                 if vb is not None:
