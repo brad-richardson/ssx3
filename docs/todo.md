@@ -257,6 +257,15 @@ with measured budgets, then 120 Hz simulation.
       `0x37b474`). Next: **T62 ∥ E44 Part 4 (amended)**, with an exact
       mode-6 filter, the post-K window, the three copy sites, and an exact
       `0x1b0` value watch.
+      **T62 PASS (15c09f8): two templates.** The SC appenders (`0x37ad44`,
+      `0x37b474`, ra `0x37a958`) copy template 2 at **`0x61c910`** (menu
+      template `0x61c8fc` + 0x14), and its **tw0 = `0x1b0` from the first
+      read (K+66)**. Item 0 at SC comes from `0x37ad44`. No store to either
+      template happens in the post-K window, so template 2's value was
+      written earlier. Next: **T63** (PCSX2, cold boot → MENU → SC,
+      change-only watch on `0x61c8fc..0x61c94b`) ∥ **E44 Part 4
+      amendment 3** (the same watch + `appx`: do the SC appenders run in
+      the recomp, and what tw0 do they read?).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
