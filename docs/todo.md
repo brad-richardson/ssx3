@@ -423,7 +423,15 @@ with measured budgets, then 120 Hz simulation.
       unusable (orchestrator's gate design error). Guest trajectory is
       identical (park/semaphore histories exact). Queue-on presents are
       sparser (433 vs ~1320 over the same ticks); that goes to step (d).
-      **Part 2 running:** a quiescent VRAM-hash gate at fixed ticks.
+      **Part 2 (969019d) FAIL, a real finding.** Quiescent VQ gate: priv
+      regs identical 26/26, but VRAM differs from tick 100. Queue-on
+      submits ~246 extra packets in ticks 0–300, then stays in lockstep.
+      So the guest behaves differently during startup. Suspect: FINISH
+      completes in-stream with no EE wait, and CSR reads aren't sync
+      points (a deviation from GB1 §2c). Queue-on presents/s are 1.53 vs
+      4.42 (2.9× fewer; goes to step (d)). **Part 3:** a packet/CSR-read
+      diff to find the first divergence, then one fix (a CSR/SIGLBLID load
+      drains the queue) + a vq validation.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
