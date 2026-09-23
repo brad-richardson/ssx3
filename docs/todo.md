@@ -168,9 +168,11 @@ with measured budgets, then 120 Hz simulation.
       build). Lead: assets that never load (ties to the Snow Jam CD-read stop).
       E40 Part 7 PASS (fork `9840542`): the recomp's CALL-tag ADDR words are **never
       EE-written in the whole boot** (0 stores, 0 loads of either uploader), so the
-      display-list data arrives via DMA/host copy from loaded data. **T52 (PCSX2 CD
-      reads) + E41 (recomp CD reads + a host-side watch on the DMA write that plants
-      the CALL tags, attributed to its CD read) running.** E40 lane closed (7 parts).
+      display-list data arrives via DMA/host copy from loaded data. **T52 PASS (PCSX2, `3f6df70`):**
+      5,836 reads/149 MB boot → SC; the menu → SC transition reads `MDLPS2.BIG`
+      (83 sectors, rider models) + `ZOETXP.BIG` (59, Zoe textures) + `MUSIC2.BIG`
+      streaming; SC on screen = music only. **E41 (recomp CD reads + a host-side
+      watch on the DMA write that plants the CALL tags) running.** E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
