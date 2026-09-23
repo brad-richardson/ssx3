@@ -190,7 +190,12 @@ with measured budgets, then 120 Hz simulation.
       `func_394ED0` (stores `0x394fdc–0x394fe8`), called **unconditionally** from
       `sub_00362DE8` @`0x362f68` with an 8-bit hash folded from the record's 4
       words. E43 now logs those calls (items, hash, return); **T55** the same on
-      PCSX2. Separates different input items vs a hash (shift/sign) semantics bug. E40 lane closed (7 parts).
+      PCSX2. Separates different input items vs a hash (shift/sign) semantics bug.
+      **T55 PASS (`567331a`):** PCSX2 calls it 224×/vsync = 2 passes over a
+      **112-item table in scratchpad** (`0x70000000–0x70003780`, stride 0x80,
+      `a0=0x8095f0`); items `0x70000000`/`0x70000500` (w0 `0x1b0`) yield the two
+      mode-6 records every vsync. New suspect: how the scratchpad item table is
+      filled (EE stores vs toSPR DMA) in the recomp. E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
