@@ -401,6 +401,13 @@ with measured budgets, then 120 Hz simulation.
       **Next:** E50 Part 2 (the quaternion writer → the first wrong op →
       a unit test → one fix + SC/race validation) ∥ **T66** (PCSX2 value
       and writer at `0x00bc5950`).
+      **T66 PASS (8289688): E50's model confirmed exactly.** In PCSX2,
+      q = (−0,−0,√½,√½), pos (0,200,0,1). It's written once (K+10) by
+      `sq a0,0x30(s0)` at `0x15e0d4` in `sub_0015E050`, from a work struct
+      built from two input vectors and processed by `func_166640(sp,1)` +
+      `func_166F90(sp)` (look-at → matrix → quaternion?). Header +0x0c =
+      π/4. Passed to E50 Part 2 as the bisect target (suspect: sqrt/div in
+      matrix→quat).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
