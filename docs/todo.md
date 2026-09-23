@@ -854,6 +854,21 @@ with measured budgets, then 120 Hz simulation.
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
 
+## W — widescreen (backlog, Brad 09-23)
+
+- [ ] **W1 (after E53; Codex Luna): 16:9 by default.**
+      1. Find how SSX 3 PS2 enables widescreen:
+         - a native options/profile flag, vs a patch (the NetherSX2 Odin
+           gate used a "widescreen patch", see the ledger);
+         - what the GameCube version's enablement changed (`docs/reserve.md`
+           / the archive).
+      2. Enable it by default: a flag default, or a boot-time patch set (not
+         an ELF edit).
+      3. The presenter follows the mode (16:9 when on, 4:3 otherwise;
+         `PS2X_ASPECT` override).
+      4. Validate menus, SC and race on the Mac/Simulator vs PCSX2
+         widescreen; check 2D/HUD stretching.
+
 ## A — audio (new 09-23)
 
 - [x] **AU1 PASS (7f6c09f):** no sound code runs today.
