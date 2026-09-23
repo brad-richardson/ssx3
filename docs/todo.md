@@ -199,9 +199,12 @@ with measured budgets, then 120 Hz simulation.
       **E43 PASS (`f2ced36`):** the recomp's hash is bit-exact (10280/10280); its
       scratchpad items lack w0 `0x1b0`: item `0x70000000` has w0 `0x30` (PCSX2
       `0x1b0` = `0x30 | 6<<6`). The mode-6 bits are never set on that item.
-      Orchestrator: generated LDL/SDL merges checked correct. **E44 + T56: write
-      watch on scratchpad items 0x70000000/0x70000500 (EE stores + SPR DMA) →
-      the writer and the condition that sets mode 6.** E40 lane closed (7 parts).
+      Orchestrator: generated LDL/SDL merges checked correct. **T56 PASS (`4469b04`):** in
+      PCSX2 the mode-6 items are copied into scratchpad each vsync by **toSPR DMA**
+      (pc `0x371d90`, ra `0x38f53c`) from EE `0x809670` / `0x809b70`, whose w0 is
+      already `0x1b0` and is never EE-stored in-window (set at scene/asset build).
+      **E44 (recomp side) running**; next: whole-boot store watch on `0x809670`
+      (w0/+4) on both sides to catch the descriptor builder. E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
