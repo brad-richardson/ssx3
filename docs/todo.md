@@ -137,10 +137,17 @@ with measured budgets, then 120 Hz simulation.
 
 ## T — PCSX2 reference traces (bytesize)
 
-- [ ] **T47 (running):** PCSX2 reference frames for title / main menu /
-      Select Character / Select Event, using E31's input sequence, diffed
-      against the recomp frames (character-select glitches). Then one
-      healthy-series run if time allows.
+- [x] **T47 PASS (09-22):** PCSX2 v2.9.75 reference frames (HW + SW,
+      agree 0.7–1.8) for title → menu → Select Character → Setup → Select
+      Event, diffed against the recomp. Orchestrator read by eye (SC): the
+      recomp **misses the 3D Zoe model**, the big orange "3", the
+      snowflakes and the ◀ ▶ arrows, and draws PS2 button-glyph cells in
+      the TL/BL corners instead: wrong atlas cells plus a missing-3D
+      problem. Select Event shows a blue graphic where PCSX2 has a map
+      photo. Healthy Snow Jam load (T46 R3 trace): ENTER → race in ~109
+      emu-s, one continuous 990-iteration `_sceCdSC` read loop, 1.75 MB
+      SPU voice upload, EE semaphore spin only while CD reads continue.
+      Gaps: LBN and RPC payload IDs not in trace.
 - [ ] Keep T tied to named E/G questions (reference captures for
       menu/race timing once E reaches them).
 
