@@ -241,12 +241,13 @@ with measured budgets, then 120 Hz simulation.
       (a few days), `ps2x-e30`, live lane dirs.
 - [x] **SSD tier 2 done (Brad approved 09-22):** 22 parked I-lane dirs deleted after checking no uncommitted tracked changes and every worktree head's content on folded `ssx3` (map rows ⊆ ssx3 CSV; the pre-scrub generated-code commit is intentionally gone); 15 dangling worktree entries pruned; SSD free 369 → 610 GB.
 - [ ] SSD personal copies look like partial duplicates of the share (takeout parts 1–5 smaller on the SSD, aggiemail 4.6k vs 53k files): Brad to confirm before any delete.
-- [ ] Brad decides: `upstream-review` 232 GB, `ssx3-archive` 190 GB,
-      `android-spike` sources 117 GB + stale work dirs 13 GB (GameCube
-      reserve material), `laptop-evacuated-0918` 28 GB, `glimmer-ize` 18 GB,
-      `bradflix-ps2recomp`; plus his own `brad-google-takeout` 233 GB and
-      `aggiemail` 186 GB.
-- [ ] V1 follow-up: mirror `emulog-t46r3.txt` to the share (still SSD-only).
+- [x] **SSD tier 3 done (Brad approved 09-22):** GameCube reserve material
+      deleted (`upstream-review`, `ssx3-archive`, `android-spike`); D1–D8/M4
+      report text preserved in `local/research/reserve-gc/`. Log:
+      `local/research/V2/delete-tier3.log`. Kept by Brad's call: personal
+      folders (intentional partial duplicates). Not decided:
+      `laptop-evacuated-0918` 28 GB, `glimmer-ize` 18 GB, `bradflix-ps2recomp`.
+- [x] V1 follow-up: `emulog-t46r3.txt` mirrored to `/Volumes/share/ssx3/ps2x-t4/` (09-22; SSD + 2 share reads = `19c1b583…`, the V1 pin).
 - [ ] Mac internal disk ~3 GB free: keep builds on the SSD or bytesize.
 
 ## Cross-lane

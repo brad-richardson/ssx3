@@ -72,3 +72,13 @@ mask-sample, fifo-ab, startup) were archived to
 8,769,167,360 B, sha256 `35bbe988a6c62e13…`, manifest alongside) and removed
 locally. Git-tracked evidence stayed in place. Restore with
 `tar -xf gc-reserve.tar -C ~/dev/ssx3` (the `home-cache/` prefix goes to `~/.cache`).
+
+**SSD reserve data deleted (Brad, 2026-09-22 evening):** "learnings have all
+been recorded and incorporated". Removed from the external SSD:
+`upstream-review` (232 GB: GameCube recomp tooling, ModernGekko/DolRecomp,
+lane sources), `ssx3-archive` (190 GB: the 09-16 GameCube-route archive) and
+`android-spike` (~142 GB: Dolphin Android route sources, work dirs and D/M4
+report dirs). The D1–D8/M4 report text and patches that ledger rows cite were
+copied first to `local/research/reserve-gc/android-spike/`. Log:
+`local/research/V2/delete-tier3.log`. Reviving this route now means
+re-cloning upstreams and rebuilding from the reports.
