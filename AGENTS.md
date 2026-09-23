@@ -145,8 +145,10 @@ splitting.
 - **Evidence:** text in git; bounded logs (rings, compress closed logs,
   one canonical copy); reuse existing tools (T1/T5/T12/T22 trackers)
   rather than copying them.
-- **Devices:** always `install` (even if present) on the Odin and iPad;
-  iPhone installs are fine but never urgent. After an Odin reboot the PIN
+- **Devices:** always `install` (even if present) on the Odin and iPad.
+  **iPhone (Brad, 09-23): build and install only.** Never launch, test,
+  screenshot or drive it unless Brad has asked or approved it for that
+  session. Test iOS builds on the Simulator first, then the iPad. After an Odin reboot the PIN
   must be entered once before APKs launch (adb-shell binaries still work).
   Before every APK launch, check the Odin isn't on its lockscreen
   (`dumpsys window policy`: `KeyguardServiceDelegate showing=false`): a
