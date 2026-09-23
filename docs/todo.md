@@ -348,6 +348,19 @@ with measured budgets, then 120 Hz simulation.
       **Next: E49**: the MPEG HLE writes the end word, plus
       `0x3b1140` in `extra_function_starts`, validated against E48's
       predicted observables (runs after E47's race rerun).
+      **E47 Part 2 PASS (db3e595): race world = geometry off-screen.**
+      - The race issues ~6,500 PATH1 tstrips/vsync.
+      - VU1 is clean: 0 budget exits, all 693 MPG uploads copied.
+      - GS state is sane; color and Z are both empty in the world area, so
+        it isn't a Z/alpha/clear problem.
+      - **The PATH1 xy box is pinned to 1023.5–3071.5 on both axes every
+        vsync** (viewport 1792–2304 × 1824–2272), and every 3D tail draw is
+        off-screen. SC's box is inside the viewport.
+      - Race draw modes are m3 ×9 + m1 ×1 (no mode 6).
+      Hypotheses H1–H4 refuted or unsupported. **Next: E50 (recomp) ∥ T65
+      (PCSX2)**: on/off-screen counts, first-N draw ring, VU1 data-memory
+      matrix dumps at a race world program (plus SC control), and the EE
+      builder of the matrix (VU0 macro / FPU ops suspect).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
