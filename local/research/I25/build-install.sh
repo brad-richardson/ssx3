@@ -17,7 +17,7 @@ TARGET="${TARGET:-device}"
 case "$TARGET" in device) SDKNAME=iphoneos ;; sim) SDKNAME=iphonesimulator ;; *) echo "TARGET=device|sim"; exit 1 ;; esac
 W="${W:-$HOME/dev/ssx3-work/I25}"
 FORK_WT="${FORK_WT:-$W/PS2Recomp}"                 # worktree on local branch i25-ios
-CODEGEN="${CODEGEN:-$HOME/dev/ssx3-work/codegen-ssx3-e49}"
+CODEGEN="${CODEGEN:-$HOME/dev/ssx3-work/codegen-ssx3}"
 ISO="${ISO:-$HOME/dev/ssx3-work/E32-inputs/SSX 3 (USA).iso}"
 ELF="${ELF:-$HOME/dev/ssx3-work/E32-inputs/cd/SLUS_207.72}"
 ISO_SHA=3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5

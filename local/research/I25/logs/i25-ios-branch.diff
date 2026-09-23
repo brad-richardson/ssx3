@@ -640,7 +640,7 @@ index abc2f6e..9523136 100644
  
  #ifdef _DEBUG
 diff --git a/ps2xTest/CMakeLists.txt b/ps2xTest/CMakeLists.txt
-index 23a7772..2b54a95 100644
+index 31f81a1..1d3a968 100644
 --- a/ps2xTest/CMakeLists.txt
 +++ b/ps2xTest/CMakeLists.txt
 @@ -47,6 +47,7 @@ add_library(ps2_test_lib STATIC
@@ -652,7 +652,7 @@ index 23a7772..2b54a95 100644
      src/ps2_runtime_kernel_tests.cpp
      src/ps2_runtime_interrupt_tests.cpp
 diff --git a/ps2xTest/src/main.cpp b/ps2xTest/src/main.cpp
-index 14651ef..2b69154 100644
+index 5b68c5d..0589195 100644
 --- a/ps2xTest/src/main.cpp
 +++ b/ps2xTest/src/main.cpp
 @@ -6,6 +6,7 @@ void register_code_generator_tests();
@@ -663,7 +663,7 @@ index 14651ef..2b69154 100644
  void register_ps2_runtime_io_tests();
  void register_ps2_runtime_kernel_tests();
  void register_ps2_runtime_interrupt_tests();
-@@ -36,6 +37,7 @@ int main()
+@@ -37,6 +38,7 @@ int main()
      register_r5900_decoder_tests();
      register_elf_analyzer_tests();
      register_pad_input_tests();

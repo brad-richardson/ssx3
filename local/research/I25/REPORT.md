@@ -8,8 +8,13 @@
   3. **Brad's rule:** the iPhone is build and install only. All launch,
      test and screenshot work moves to the Simulator first, then the iPad.
      This overrides the brief's validation section.
-- **Headline:** the current build (fork `i25-ios` = E49 `b48b502` + 2
-  commits, codegen `codegen-ssx3-e49`) is **installed on Brad's iPhone**
+- **Part 2 headline (gate PASS, then rebuild):** the iPhone now has the
+  build on E50's fixed tree: fork `i25-ios` = `eac6cba` + 2 commits,
+  codegen `codegen-ssx3`, signed binary `296f73a8…`. It was installed, not
+  launched. On the Simulator the race now draws the world (sky, fog,
+  horizon, terrain surface, rider). Details are in §Part 2 below.
+- **Part 1 headline:** the build then (fork `i25-ios` = E49 `b48b502` + 2
+  commits, codegen `codegen-ssx3-e49`) was **installed on Brad's iPhone**
   (install only, not launched).
   - On the iOS 27 Simulator it plays itself with no controller: title →
     main menu → Select Character (the 3D rider is drawn) → Happiness race.
@@ -27,6 +32,33 @@
   slot each), ~1.5 h of 5 h. Disk: `~/dev/ssx3-work/I25` is 11 GB logical
   (the staged ISOs are APFS clones), plus 3.2 GB in the Simulator container.
   Cap 15 GB; `disk_budget.sh` reads 61.8 / 200 GB.
+
+## Part 2 (2026-09-23 evening): rebuilt on E50's fixed tree
+
+| Item | Result |
+|---|---|
+| Rebase | `i25-ios` rebased onto fork `ssx3` `eac6cba` (E50 FPU fix) with no conflicts. Both test registrations kept in `ps2xTest/src/main.cpp`. Branch is now `eac6cba` + `31d988d` + `8a70aa6` (the same two I25 commits, new SHAs), local only. `git diff eac6cba HEAD -- ps2xRuntime/src/runner` is empty. |
+| Codegen | Canonical `~/dev/ssx3-work/codegen-ssx3` (E50 regen, 9455 sources). `build-install.sh` now points there by default; `codegen-ssx3-e49` is no longer used. |
+| Host suite | 600/600 (E50 added 5 FPU tests) |
+| **iPhone** | **Installed, not launched** (Brad's rule). Signed binary `296f73a8…` (read twice, both match); unsigned build output `83eb97ab…`, 357,236,408 B. Install `0AD77AA2-…` (`logs/install-iphone.log`). |
+| Simulator run F (lease slot 1, stopped at 306 s) | All 13 route presses fired.<br>- Select Character at 40 s: Zoe is now placed correctly on the left; in Part 1 she overlapped the stats panel (E50's camera fix).<br>- Race: **the world draws.** At 00:00:20 there's a cloudy sky, the horizon, a dark untextured terrain surface and the rider with its trail. At 00:00:25 the camera is in fog, with snow shards. The trick score shows "900" at 00:00:12.<br>This matches E50's Mac description (`E50/REPORT.md` §e50f: sky, fog, rider, trail; terrain mostly dark and untextured). The sun and lens flare from E50's 00:00:19 frame aren't in view here; the race moments differ (1ST vs 2ND). Still short of PCSX2's textured slopes, which is E50's open gap and not iOS-specific. |
+| Rate (Simulator on the M5 Pro mini, DIAGNOSTIC, not a speed number) | Menus 41.9 vsync/s = 0.70×. Race 11.7 vsync/s = 0.20×. |
+
+Part 2 shots (`shots/`, downscaled; original sha256 prefix):
+
+| File | What | sha256 |
+|---|---|---|
+| `e50-1-select-character.jpg` | Select Character, Zoe placed correctly | `db1a90ea…` |
+| `e50-2-race-t12.jpg` | Race 00:00:12: sky band, snow shards, trick score "900" | `bcffed02…` |
+| `e50-3-race-t20-sky-terrain-rider.jpg` | Race 00:00:20: sky with clouds, horizon, terrain, rider and trail | `d9b40589…` |
+| `e50-4-race-t25-fog.jpg` | Race 00:00:25: in fog, 72 MPH | `fc903ad2…` |
+
+Receipts: `logs/sim-run-f-e50-console.log`, `logs/sim-run-f-e50-progress.txt`,
+`logs/install-iphone.log` (Part 2 install), `logs/host-tests-summary.txt`
+(600/600), `logs/i25-ios-branch.diff` + `-log.txt` (now against `eac6cba`).
+
+The Part 1 record below is unchanged, except that the how-to and the
+recipe now describe the Part 2 build.
 
 ## Diff summary (fork `~/dev/ssx3-work/I25/PS2Recomp`, local branch `i25-ios`, not pushed)
 
@@ -103,7 +135,7 @@ local/research/I25/build-install.sh ipad_install ipad_launch ipad_shot   # iPad 
   About 1 minute each.
 - `configure`: Xcode generator, I9 device toolchain or I1 v2 Simulator
   toolchain, FFmpeg on, aggressive and runtime logs off, raylib 5.5 from
-  `E46-build/_deps`, `PS2X_GAME_CODEGEN_DIR=codegen-ssx3-e49`.
+  `E46-build/_deps`, `PS2X_GAME_CODEGEN_DIR=codegen-ssx3` (Part 2; Part 1 used `codegen-ssx3-e49`).
 - `build`: waits until no other `clang++`/`ninja` is running, then
   `nice -n 10`, `-jobs 8`.
 - `stage`: app + ELF + ISO (APFS clone, sha read twice) + `ps2x.env` +
@@ -129,8 +161,9 @@ local/research/I25/build-install.sh ipad_install ipad_launch ipad_shot   # iPad 
 4. To change other options, put a `ps2x.env` in **Files → On My iPhone →
    SSX3 PS2X**. Its lines override the built-in ones; for example,
    `PS2X_PAD_SCRIPT=` with nothing after it also turns the auto-route off.
-5. Known on every platform: the 3D course is almost black during the race
-   (the E-lane is on it), and speed is well under full.
+5. Known on every platform: the race now draws the sky, fog and rider, but
+   the snow is still mostly untextured (the E-lane is on it), and speed is
+   well under full.
 
 ## Gaps
 
