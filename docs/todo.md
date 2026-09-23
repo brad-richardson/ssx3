@@ -227,6 +227,16 @@ with measured budgets, then 120 Hz simulation.
       mode 6. Next: **E44 Part 4 ∥ T60**, the same trace on each side
       (`app` at `0x3797ec` + `tpl` changes to the template), to find the
       mode-6 setter.
+      **T60 PASS (d564e16), structural:**
+      - The template is fixed at `0x61c8fc` and cycles every vsync during
+        MENU: tw0 `0xcc→0→0xc→0xcc` (setters `0x1a2618`/`0x397fc4`/
+        `0x379c28`).
+      - Two double-buffered lists (`0x6efd00`/`0x623080`) restart at count 1.
+      - `0x3797ec` appends only counts 1–6 and 37+; other appender pcs
+        exist.
+      - The caps filled during MENU with no `0x1b0` seen. Next: T61 (PCSX2)
+        and E44 Part 4 (recomp), both value-filtered to mode≠0, plus a mode
+        histogram per vsync and an appender pc census.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
