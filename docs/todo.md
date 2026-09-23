@@ -77,10 +77,14 @@ with measured budgets, then 120 Hz simulation.
       Odin. Only a plain PSM0 fill (C1) is lost, so B's loss depends on
       pass context (scale/target), not draw state. The O4m hash
       difference is garbage in padding (closed).
-- [ ] **G42 (running):** Mesa Turnip contrast (same binary, loader swap).
-      B lands under Turnip = proprietary-driver fault → bundle Turnip.
-      Still lost = our pipeline → G41's C1-triage / B-scale / B-target
-      wall, then one fix.
+- [x] **G42 PASS (09-22, table + stop):** Turnip leg failed to start
+      (`HAL has no GetInstanceProcAddr`). Orchestrator root cause: our hunk's
+      `G42HalDevice` omits `hw_device_t.reserved[12]`, so it read offset 40
+      instead of 136. The driver question is still open. The system control
+      replicated G41-O1 **except C1 landed** (run variance or hunk perturbation,
+      unseparated).
+- [ ] **G43 (running):** struct fix + Turnip rerun + C1 repeat; G lane moves
+      to internal (`~/dev/ssx3-work/G43`), NDK r30 onto the mini.
 - [ ] Commit G26 + G28 in the clone after the storage cutover (G39
       decision: carried diffs until then), with a clean rebuild and G39's
       R1/R2 shapes re-run as proof.
