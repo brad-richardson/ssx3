@@ -1,15 +1,15 @@
-# E31 report — title → menu → race loading (Snow Jam stalls at 99%)
+# E31 report — title → menu → STOCK RACE (Happiness Rival starts and advances; Snow Jam stalls at 99%)
 
 Brief `local/muse/prompts/E31.md`. Tables + receipts; the orchestrator decides.
 
 | E31 | Receipt |
 |---|---|
-| Stop point | **Missions 1–3 executed; see e31j/k for the ending.** Mission 1: START is live (guest polls pad, stim delivered) but a latched all-buttons hold never leaves the title. Mission 2: `PS2X_PAD_SCRIPT` implemented, 461/461 green, committed on `e29-movie-bypass`. Scripted presses drive title → main menu → character → setup → peak → mode → event → rules → **race loading**. Mission 3: Snow Jam loading stalls at **99%** (live loop, zero CD reads, zero errors), but the Happiness Rival event loads fully to its pre-race screen — the stall is course/mode-specific, not generic. |
-| Headline | **The stock game is playable through its front end on the E29 bypass build: every menu responds to scripted pad input. Snow Jam (Race) loading stalls at 99%, but Happiness (Rival Challenge) loads completely — e31k attempts the race start there.** |
-| Checkpoint verdict | **Bars 1, 2 MET · Bars 3, 4 TBD by e31k.** |
-| Fork | `e29-movie-bypass` = `96893da` (parent `e5ce086`, grandparent `3adc0478`); **one commit, never merged, never pushed**. Mainline `ssx3` untouched at `3adc0478` (verified at close). Worktree back on `ssx3`, clean except `ps2_log.txt`, at close. |
-| Mutations / launches | 11 boots (a–k), 11 lease claims/releases, 0 pushes, 0 merges. One code change (pad script + tests, 489 insertions / 0 deletions). One extra build dir (`e31-noaggr-build`, flag experiment, kept). |
-| Boots used | **11 of 12** (8 + 4 extended; 600 s wall authorized mid-lane). |
+| Stop point | **Missions 1–3 executed, all four bars MET in e31l.** Mission 1: START is live (guest polls pad, stim delivered) but a latched all-buttons hold never leaves the title. Mission 2: `PS2X_PAD_SCRIPT` implemented, 461/461 green, committed on `e29-movie-bypass`. Scripted presses drive title → main menu → character → setup → peak → mode → event → rules → **race loading**. Mission 3: Snow Jam loading stalls at **99%** (live loop, zero CD reads, zero errors), but the Happiness Rival event loads fully — and in e31l the **stock race starts and its timer advances 00:00:01 → 00:00:04** with scene motion, down-tuck held. |
+| Headline | **First stock race on the E29 bypass build: Happiness (Rival Challenge) loads, the race starts, HUD is live and the timer advances across ≥3 captured frames. Snow Jam (Race) loading still stalls at 99% — course/mode-specific, not generic.** |
+| Checkpoint verdict | **Bars 1, 2, 3, 4 ALL MET (e31l, Happiness Rival Challenge).** |
+| Fork | `e29-movie-bypass` = pre-scrub `96893da` → **scrubbed `ee39b9f`** (parent `e5ce086`, grandparent `3adc0478`; SHA mapping per orchestrator mini-resume; the E31 pad-script code is unchanged by the scrub). **One commit, never merged.** Mainline `ssx3` untouched (ssx3 repo on the mini is at orchestrator commit `8991d8f`, `git status` clean at E31 close). Fork/worktree state NOT re-verified on the mini — E32 owns the fork from the resume point, do-not-touch. |
+| Mutations / launches | 12 boots (a–l), 12 lease claims/releases, 0 pushes, 0 merges. One code change (pad script + tests, 489 insertions / 0 deletions). One extra build dir (`e31-noaggr-build`, flag experiment, kept). |
+| Boots used | **12 of 12** (8 + 4 extended; 600 s wall authorized mid-lane). |
 
 ## Mission 1 — is START live? (e31a, no code change)
 
@@ -28,7 +28,7 @@ Key frame: `frames-e31a-1/snap/snap-0058.42s.png` (title, pre-fire), 183002 B,
 
 ## Mission 2 — pad script + navigation (e31b–e31e)
 
-### The change (commit `96893da` on `e29-movie-bypass` only)
+### The change (commit `96893da` on `e29-movie-bypass` only; post-scrub `ee39b9f`, code identical)
 
 `PS2X_PAD_SCRIPT="t_ms:spec:hold_ms,..."`, DEV-ONLY, default off (unset =
 one relaxed atomic check per read). Each entry presses buttons and/or drives
@@ -98,9 +98,9 @@ function-trace cap (driver cap raised to 5 GiB after).
 | Bar | Receipt |
 |---|---|
 | (1) Menu reached and responding | **MET** — 7 distinct menu screens, all responding (e31b/d/e) |
-| (2) Race loading begins | **MET** — Snow Jam 0→99% (e31f/g/h); Happiness 0→100% (e31j) |
-| (3) Race HUD visible | TBD by e31k (Happiness Rival Challenge pre-race screen reached in e31j) |
-| (4) Timer/position advances ≥3 frames | TBD by e31k |
+| (2) Race loading begins | **MET** — Snow Jam 0→99% (e31f/g/h); Happiness 0→100% (e31j/k/l) |
+| (3) Race HUD visible | **MET (e31l)** — `1ST/2`, timer, SUPER UBER, progress %, EA RADIO popup, RECOVER bar; HUD first seen 00:00:01 @549.74 s (`1a0ee6bd…180f798`, 39337 B) |
+| (4) Timer/position advances ≥3 frames | **MET (e31l)** — 00:00:03 @570.55/572.59/574.64 s → 00:00:04 @578.82/580.91/583.00 s + final, visible scene motion between the re-viewed frames (572.59 :03 vs 578.82 :04: mountain geometry, minimap arrow and progress differ), down-tuck (d-pad down) held throughout |
 
 Snow Jam loading curve (read off PNG % text):
 
@@ -133,6 +133,73 @@ Pinned: Happiness 24% `frames-e31j-1/snap/snap-0298.96s.png`, 86%
 Open confound: Snow Jam = Race-mode event, Happiness = Rival-mode event. The
 stall may be Race-mode-specific (e.g., AI racer init) rather than
 Snow-Jam-specific — Metro-City (Race) would discriminate; no boots spent on it.
+
+## e31k: Happiness loads 100%, but the script runs out on the pre-race fade
+
+e31k = e31j's 10-entry prefix + 3 appended entries (`cross@525`, `cross@560`,
+`down@525` 65 s tuck). rc 0, wall 596.2 s, final tick 6424. All 13 inputs
+delivered per `[padscript]` (i=12 press-only, no release line: wall ended
+596.2 s after its 590 s expiry with no pad read in between printing it).
+
+| Wall | What the frames show |
+|---|---|
+| ~521.7 s | Happiness Backcountry loading **99%** (`9ca1ac56…18a4466`, 174728 B) |
+| ~530.3 s | Loading **100%** (`72669eef…231e813`, 156745 B) — cross@525 (525.0–530.0 s) fires mid-transition, correctly ignored |
+| ~538.8 s | Near-black fade frame (`c4080f20…6e9c92`) — loading → pre-race transition |
+| ~540.9–568.9 s | Pre-race compositing in slowly, still partial @568.96 s (`6577cb17…53ebd`) — cross@560 (560.2–566.9 s) fires mid-fade, **no effect** |
+| ~590.6 s → final | Rival Challenge / Happiness – Race, fully shown, "X Continue" (`401043d9…2904ec`, 56251 B; upload-latest identical, `7e7d2f8a…4d8f82`) |
+
+So e31k died one press short: the pre-race screen takes ~35–45 s to composite
+after loading completes on this slow path, and the last scripted press lands
+inside the fade. Lesson carried into e31l: compress the menu timeline so the
+post-loading presses land on a ready screen.
+
+## e31l: STOCK RACE — all four bars MET (Happiness Rival Challenge)
+
+e31l compresses the menu prefix ~50 s (crosses every 25 s instead of 35 s) and
+appends the race triplet earlier. rc 0, **cap:function_log @583.5 s** (5 GiB
+trace cap; fastest run: **7637 frame ticks**, 13.1/s). All 13 inputs delivered;
+i=12 down-tuck (470 s + 120 s) press-only with no release — down is **held
+through the race start**. Lease released, runner dead (verified on the laptop).
+
+**Exact e31l `PS2X_PAD_SCRIPT` (ODIN-REUSE STRING for PF1/N4):**
+
+```
+25000:start:5000,50000:cross:5000,75000:cross:5000,100000:cross:5000,125000:cross:5000,150000:cross:5000,172000:down:12000,195000:cross:5000,220000:cross:5000,470000:cross:5000,505000:cross:5000,540000:cross:5000,470000:down:120000
+```
+
+(Button names: start/cross/down only, no analog axes. The down-tuck is
+appended last, so its index i=12 sorts after the same-time cross i=9.)
+
+| Wall | Input (delivered) | Screen reached (read off PNG on the mini unless noted) |
+|---|---|---|
+| 0–5 s | — | 3 movies skipped (`[MPEG:DEV-SKIP-MOVIE]` ×3, per laptop) |
+| ~10 s | — | Memory-card check (per laptop) |
+| ~12–25 s | — | Title ("Press START button") |
+| 25–30 s | start 5 s | Main menu (Single Event highlighted, per laptop) |
+| 50–55 s | cross 5 s | Select Character @56.36 s (`3d97c8f7…bdb93a`, 122612 B, re-viewed) |
+| 75–80 s | cross 5 s | Setup Character: Zoe / Continue @100.25 s (`7a152480…9146c7`, 73955 B, re-viewed) |
+| 100–125 s | 2× cross | Select Peak → Select Mode (per laptop; same chain as e31d, ~50 s earlier) |
+| 150–172 s | cross, down 12 s | Select Event → Happiness (down@172–184 moves off Snow Jam, as in e31j) |
+| 195–220 s | 2× cross | My Rules → **race loading #1** @220 s+ |
+| ~458 s | — | Rival Challenge pre-race **fully rendered** (`038152f2…3b053a4`, 60225 B, re-viewed) |
+| 470–475 s | cross + tuck-down | **No effect** — pre-race still shown @470.67 s (`4ade0e59…f2f3ee8`) |
+| 505–510 s | cross | **No effect** — pre-race still shown @510.35 s and @524.82 s |
+| 540–545 s | cross | **Dismisses pre-race** (still shown @541.45 s, race HUD by @549.74 s) |
+| ~545–549 s | (short loader) | Race loading #2 (fast, seconds — no 99% linger) |
+| 549.74 s | tuck held | **HUD: 1ST/2, 00:00:01, 0%**, EA RADIO popup, RECOVER (`1a0ee6bd…80f798`, 39337 B) |
+| 555.96 s | tuck held | HUD 00:00:01, 1% (`429df04b…1baa4e`, 46010 B) |
+| 570.55–574.64 s | tuck held | HUD **00:00:03** (570.55 `04aaf157…8a540`; 572.59 `993cfe87…92b52` re-viewed; 574.64 `27bd26ad…9067`) |
+| 578.82–583.5 s | tuck held | HUD **00:00:04** (578.82 `5f91afee…7125b` re-viewed; 580.91 `de266e7b…3533c`; 583.00 `7ae9cabe…2d2ba3`; final `14146c15…d9ecd`, 38697 B) |
+
+New observation for the next lane: the rendered pre-race screen **ignores
+cross for ~80 s after appearing** (458 s rendered → effective ~540 s in e31l;
+in e31k the fade itself eats the window and the screen is still unready at
+566.9 s). Candidate: a background setup/compute tail after loading (same
+flavor as the Snow Jam 99% stall — the loader pump runs, the last step lags).
+Unresolved whether the gate is time, a background job, or an input-state
+(edge vs level) artifact. Scripts must keep ≥1 insurance cross *after* the
+screen is provably ready, not just rendered.
 
 ## The blocker: SNOW JAM race loading stalls at 99%
 
@@ -186,7 +253,8 @@ E29-dir binary.
 | e31h | `cec1c024` | 596 s | +cross@500/540, down@500 | Loading 99% (stuck 127 s) |
 | e31i | noaggr `ee11b25d` | 596 s | same as e31h | Select Event (freestyle list; chain diverged) |
 | e31j | `cec1c024` | 595 s | down 12 s → Happiness (2 steps, not 1) | Rival Challenge pre-race screen |
-| e31k | `cec1c024` | 595 s | e31j prefix + cross@525/560 + down tuck | TBD |
+| e31k | `cec1c024` | 596 s | e31j prefix + cross@525/560 + down@525 65 s tuck | Loading 100% @530 s, pre-race ready too late — final = pre-race screen (one press short) |
+| e31l | `cec1c024` | 584 s | compressed prefix + cross@470/505/540 + down@470 120 s tuck | **RACE: HUD 00:00:01 @549.74 s → 00:00:04 @final; cap:function_log, 7637 ticks** |
 
 ## Exact commands
 
@@ -200,17 +268,36 @@ env -u PS2X_SKIP_MOVIE -u PS2X_PAD_SCRIPT .../e29-movie-bypass-build/ps2xTest/ps
 python3 local/research/E31/e31_boot.py --label e31b --wall 120 --no-stim --script "30000:start:500,..." --snap 2.0
 # ... e31c–e31h same driver, scripts in boot-results.json; e31i adds --runner .../e31-noaggr-build/...
 # No-aggr build: E18 configure-command.json with -B e31-noaggr-build and PS2X_ENABLE_AGRESSIVE_LOGS=OFF
+# e31k (wall 596; script reconstructed from [padscript] press lines — driver stdout with the --script value was not saved)
+python3 local/research/E31/e31_boot.py --label e31k --wall 596 --no-stim --script "25000:start:5000,60000:cross:5000,95000:cross:5000,130000:cross:5000,165000:cross:5000,200000:cross:5000,225000:down:12000,245000:cross:5000,275000:cross:5000,310000:down:200000,525000:cross:5000,560000:cross:5000,525000:down:65000" --snap 2.0
+# e31l (wall 595, ended cap:function_log @583.5; ODIN-REUSE STRING)
+python3 local/research/E31/e31_boot.py --label e31l --wall 595 --no-stim --script "25000:start:5000,50000:cross:5000,75000:cross:5000,100000:cross:5000,125000:cross:5000,150000:cross:5000,172000:down:12000,195000:cross:5000,220000:cross:5000,470000:cross:5000,505000:cross:5000,540000:cross:5000,470000:down:120000" --snap 2.0
 ```
 
 ## Gaps and recommendation
 
-- The 99% stall is characterized but its gate is unnamed: the next lane needs
-  the address/condition 0x27CEA8's driver waits on (watch the progress value?
-  trace 27CEA8's caller and s2 across the 95→99% boundary on the aggr build,
-  whose function trace is intact).
+- The Snow Jam 99% stall is characterized but its gate is unnamed: the next
+  lane needs the address/condition 0x27CEA8's driver waits on (watch the
+  progress value? trace 27CEA8's caller and s2 across the 95→99% boundary on
+  the aggr build, whose function trace is intact). New related datum: the
+  Happiness pre-race screen also ignores input for ~40–80 s after rendering
+  (e31l: rendered 458 s, effective ~540 s) — a background setup tail of the
+  same flavor, shorter. Metro-City (Race) still discriminates
+  course-vs-mode; no boots spent on it.
 - Guest-speed variance is large and unexplained (title 23 ticks/s, 3D menus
   1–3/s, loading 8–17/s; ±40% boot-to-boot on the same screen). Host-wall
-  scripts must keep ≥5 s holds and ≥25 s spacing.
+  scripts must keep ≥5 s holds and ≥25 s spacing — plus ≥1 insurance cross
+  *after* a screen is provably ready, not just rendered (e31k/e31l).
 - START vs cross at the title: START@30 sometimes inert, sometimes advances
   (readiness race); cross is the reliable title exit. Not investigated further.
-- e31j result: TBD (fills in before commit).
+- Mini-resume provenance notes: e31k/l sections, bar verdicts, and the e31l
+  timeline above were written on the Mac mini from SSD logs/frames (no new
+  boots; fork untouched per resume). Race frames re-viewed on the mini:
+  572.59 (:03), 578.82 (:04), 549.74/555.96 (:01), pre-race 458.21/470.67/
+  501.95/510.35/524.82/541.45, e31k 521.74/530.27/538.77/540.94/568.96/590.64;
+  the rest are laptop reads, SHA-pinned (two matching reads) in
+  `frame-pins.json`. All 12 `PS2X_PAD_SCRIPT` strings reconstructed from
+  `[padscript]` log lines (at/hold/buttons verbatim) in `boot-results.json`.
+- **Recommended next action:** hand the e31l script string + `ee39b9f` build
+  recipe to PF1/N4 for the Odin attempt; open E32 on the 99%-stall gate
+  (0x27CEA8 driver condition) and the pre-race input-ignore window.
