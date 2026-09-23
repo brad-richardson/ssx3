@@ -273,6 +273,23 @@ with measured budgets, then 120 Hz simulation.
       `0x1b0` write is an EE store in (K−1011, K+104] (no DMA, ever); the
       cap died on the churn at vsync 6. Next: **T64**, the same run with
       the churn values excluded and an uncapped per-vsync t2 line.
+      **ROOT CAUSE FOUND (09-23, orchestrator, from T64 7483a82 + E44 Part 4
+      250ba18 + boot log e44e):**
+      - PCSX2 sets template 2's mode 6 through `0x396b40`
+        (`w0=(w0&~0x3C0)|0x180`), called via `jalr` from `0x37a6a0` in
+        `sub_0037A430`; `0x37a6fc` then ORs `0x30` → `0x1b0`.
+      - In the recomp, `0x396b40` isn't in the function table: the Ghidra
+        sweep CSV merged a getter cluster into `sub_00396958`
+        (`0x396958–0x3970f8`).
+      - `dispatchGuestBranch`'s default `ContinueToTarget` policy **silently
+        skips** missing indirect calls. The e44e log shows
+        `missing-target source=0x37a6a0 target=0x396b40` ×1040.
+      - Consequence: template 2 = `0x30` (mode 0) → no mode-6 draw records
+        → no set-A microcode → stuck VU1 → no 3D.
+      - Nine other missing indirect targets exist (`0x30db90` ×25, …).
+      **Fix: E46**, which makes the census targets real entries, regenerates
+      codegen into a new dir, then validates the rider at SC and 3D in the
+      race.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
