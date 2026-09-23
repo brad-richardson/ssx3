@@ -366,3 +366,119 @@ filter; (2) if chains are absent too, tap normal-mode MADR and the FIFO
 site; the chain-builder hunt then becomes a MADR/FIFO-writer hunt, not
 a REF-addr hunt. Keep the E40 tracer (zero measured behavior change,
 in-situ control clean).
+
+## Part-4 — arenastore watch + ctag kick dump (Boot e40e)
+
+Tracer rev `531c09b` (fork `ssx3`, ff-pushed `78ed470..531c09b`;
+runner SHA `86c6be42…0a9d96b`): default-off store watch on chain
+arenas `0x63b800–0x63c400` + `0x708400–0x708d00` with per-lane
+32-bit fold (`& 0x0FFFFFFF`, covers `0x20/0x30/0x80` mirrors) firing
+only for folded values in `0x030000–0x040000`
+(`arenastore vsync=<n> addr=0x<> value=0x<> pc ra fn a0..a3 v0 v1
+t0..t9 s0..s7`, first 256), plus walker `ctag` dump
+(`ctag tag_at=0x<> id=<> qwc=<> addr=0x<> tte=<16hex>`, first 2
+kicks, no line cap). Unit tests added (arena predicate incl.
+`0x30`-mirror fold, wide-store lane extraction, CNT/REF/END walker
+walks with exact `tag_at`/order expectations incl. REF `+16`
+advance); suite green `514/514` twice (one `513/514` flake on an
+intermediate run, clean on both reruns). Live-path confirmed: guest
+SW/SD/SQ lower through the tapped WRITE32/64/128 macros in codegen.
+
+### Boot e40e (Part-4 Boot A; Mac mini, E32-build @ `531c09b`, E33 route, wall 300, snap 30, SRC 1300–1320 + MPG control 1300–1320, rc 0 wall-bound 301.2 s, final frame tick 1377 `fnv1a=129073fb`, lease released)
+
+- SRC `mpg-src-e40e.txt` (copied in-repo, SHA `fa6315f1…ee8f4`):
+  **0 `arenastore`**, **1704 `ctag`**, 82 `mpgpay`, 83 `dmareg`,
+  0 mpgsrc/tagwrite/srcread.
+- Control `vif-mpg-e40e.txt` (copied in-repo, SHA
+  `918ac5a4…db6c7d`): **640/640 `copied`**, vsync 1300–1319;
+  dest-0 signature unchanged (`fnv=6a82dc60 slot2=81d26b7c`,
+  4/vsync) — route-identical to e40d; final-frame SHA differs by
+  wall-clock kill drift only (1377 vs 1366 ticks, same variance
+  class as A/B).
+- `mpgpay`: exactly 4/vsync × 1300–1319 + 2 @1320, ALL
+  `src=0x00435bf8 num=0 mode=chain:6 tag_at=0x00435bd0`.
+
+### Table 2 — chain tags walked (first 2 kicks, 1704 lines)
+
+| id | n | reading |
+|---|---|---|
+| 1 CNT | 571 | inline-payload links |
+| 2 NEXT | 221 | sub-chain links (`addr` = next tag, e.g. `0x6326f0→0x632700`) |
+| 3 REF | 10 | `0x44b140` (qwc 7) + `0x44b200` (qwc 34) |
+| 5 CALL | 450 | 446 sub-chain addrs (`0x62xxxx`, `0xecxxxx–0xf1xxxx`, each ×1) + **`0x435bd0` ×4** |
+| 6 RET | 450 | sub-chain returns + `RET@0x435bd0 qwc=998 tte=0100040420000000` ×4 |
+| 7 END | 2 | 2 top-level chains = the 2 dumped kicks (cap engaged as designed) |
+
+`0x4349b8` appears **0×** in all 1704 tags. The 4 CALL→uploader
+sites (all in `0x63b800–0x63c400`): `0x63b990`, `0x63bbe0`,
+`0x63bea0`, `0x63c130` (arena offsets `0x190/0x3e0/0x6a0/0x930`,
+non-uniform). One contiguous walk covers `0x63b8a0→0x63c130`
+(CNT/CNT/CALL→`0x435bd0`/CNT/REF→`0x44b140`/CNT/
+CALL→`0x632460`/…/CALL→`0x435bd0` ×4 total/REF→`0x44b200`/
+CALL→`0x6325e0`/END/…). **Zero tags walked in
+`0x708400–0x708d00`** (stale Part-3 TADR or out-of-window kick).
+
+### Finding (corrects Part-3's read conclusion)
+
+The Part-3 "rebuilds two chains per frame" wording is wrong for
+this window: **no guest store wrote a `0x43xxxx` word into either
+watched arena during vsync 1300–1320** (0 `arenastore` lines, live
+taps verified), yet the chain is kicked every vsync (4× `mpgpay`
+`src=0x435bf8` per vsync, all 20 vsyncs). The 4 CALL→`0x435bd0`
+words and the REF words are **baked at chain-build time (before
+vsync 1300) and re-kicked per frame, not rewritten per frame**.
+The uploader decision (all-`0x435bd0`, never `0x4349b8`) is a
+scene-setup-time outcome in this window; catching the write needs
+an earlier window (chain build / scene init), not 1300–1320.
+
+### Table 3 — uploader-address formation (codegen read)
+
+No `0x435bd0`/`0x4349b8`/`0x63b800` immediate exists in any of the
+9455 codegen files (hex, lui-half, and decimal searched; only
+opcode/offset false positives) — the builder does **not**
+materialize the uploader address; it loads it. Closest-read
+CALL-tag packet builder: `sub_00367DB8` (`0x367db8–0x367f18`,
+in the `0x36xxxx–0x38xxxx` graphics-library cluster holding 20 of
+22 `lui …,0x5000` CALL-tag builders):
+
+| slot | observed |
+|---|---|
+| table base | caller-supplied pointer in `a0` (address unknown, no immediates) |
+| index | caller-supplied in `a1` |
+| stride | **4** (`sll a1,2`; entry = `base + index*4`; entry pointer `lw entry+8`) |
+| ADDR source | table-entry data (`ld entry+0x38` → bitfield ops → stored words); never an immediate |
+| cursor | `*a2`, advanced `0x60`/packet, written back (`sw a1,0(a2)` in delay slot) |
+| packet | CNT(qwc 5) + payload + CALL(qwc 4) + GIF/VIF words |
+
+Caveat (stated plainly): `sub_00367DB8` stamps CALL **qwc=4**;
+the observed display-chain CALLs are **qwc=0** — same-library
+idiom and strongest candidate read, **not** confirmed as our
+chain's stamper. Index source/value (which caller, which index
+selects `0x435bd0` over `0x4349b8`) is therefore still open; the
+dumping hook to catch it is the `arenastore` watch run against a
+scene-build window.
+
+### Gaps / notes
+
+- `ctag` carries no vsync field — the 2 dumped kicks can't be
+  attributed to specific vsyncs (add `vsync=<n>` next rev).
+- Test-fidelity note (no runtime impact): unit tests built CNT
+  tags with id field 0 (actually REFE); HW CNT = id 1 as the live
+  dump confirms. Tracer prints the raw id; only test labels were
+  off. Rename to REFE-labeled expectations next touch.
+- Part-4 spend: test/rebuild cycles as needed, fork commit +
+  ff-push, 1 boot, 0 retries. Command: `python3
+  local/research/E40/e40_boot.py --label e40e --wall 300 --snap 30
+  --src-from 1300 --src-to 1320 --mpg-from 1300 --mpg-to 1320
+  --script "<E33 route>"`.
+
+## Recommendation (orchestrator decides)
+
+Next lane: re-run the Part-4 binary with the SRC window moved to
+scene/chain-build time (before the first kick of the settled
+scene — find it by scanning `mpgpay`/`dmareg` backwards for the
+first `src=0x435bf8` vsync, then window ~200 vsyncs earlier) and
+read the storing `pc/fn` off the `arenastore` lines; that pc
+identifies the true storing function and its index source/value.
+Keep the E40 tracer as-is (add `vsync` to `ctag` when next
+touched). No per-frame ADDR rewrite exists to chase in 1300–1320.
