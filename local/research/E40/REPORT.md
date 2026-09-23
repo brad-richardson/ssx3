@@ -482,3 +482,101 @@ read the storing `pc/fn` off the `arenastore` lines; that pc
 identifies the true storing function and its index source/value.
 Keep the E40 tracer as-is (add `vsync` to `ctag` when next
 touched). No per-frame ADDR rewrite exists to chase in 1300–1320.
+
+## Part-5 — scene-build window 1150–1300 (Boot e40f)
+
+Tracer revs `4282b16` (env arenas + uploadload) + `052c16b` (file
+cap 2000→8000; pre-existing cap test follows the budget — contract
+change surfaced: the briefed 150-vsync window provably exceeds 2000
+lines: ~1700 ctag + ~8/vsync per-frame + 320 quarries ≈ 3200+).
+Fork `ssx3` ff-pushed twice; runner SHA `86c6be42…` rebuilt 05:49.
+Suite green `520/520` twice. `PS2X_MPG_SRC_ARENAS` passes through
+the boot env untouched (`dict(os.environ)` + BASE).
+
+### Boot e40f (Part-5 Boot A; E33 route, wall 300, snap 30, SRC
+1150–1300 + MPG control 1150–1300, arenas
+`0x600000-0x640000,0x700000-0x720000`, rc 0 wall-bound 302.2 s,
+final frame tick 1374 `fnv1a=f36e507b`, lease released)
+
+- SRC `mpg-src-e40f.txt` (copied in-repo, SHA
+  `32e438c1…3c1dd2`): **0 `arenastore`, 0 `uploadload`**,
+  277 `ctag` (first 2 kicks, 2 ENDs), 578 `mpgpay`, 256 `dmareg`,
+  0 mpgsrc/tagwrite/srcread. File total 1110 (no global-cap cut).
+- `mpgpay`: ALL `src=0x00435bf8 num=0`, spanning vsync
+  1150–1293 — the static-uploader chain is already kicking at
+  window open. **Build is strictly before vsync 1150.**
+- Control `vif-mpg-e40f.txt` (copied in-repo, SHA
+  `0a339958…0de723`): full to vsync 1300.
+
+### Table 4 — per-frame kick alternation (dmareg TADR, 1150–1213)
+
+| vsync parity | TADR pair kicked |
+|---|---|
+| even | `0x6f7f20`, `0x6f83d0` |
+| odd | `0x62b2a0`, `0x62b750` |
+
+Two kicks per vsync, alternating chain sets. **The `0x6fxxxx`
+set was never watched** — outside the Part-4 defaults AND the
+Part-5 ranges (`0x700000` starts above `0x6f83d0`); the `0x62xxxx`
+set was watched and is static (zero stores). Whether the `0x6f`
+set is rebuilt per frame is untested. `dmareg` hit its own
+`kMaxDmLines = 256` cap at vsync 1213 — TADR data truncated there
+(raise next time).
+
+### Table 5 — the kick function (codegen read, confirmed live)
+
+`dmareg` gives `pc=0x00382a04/0x00382a0c ra=0x00382938
+fn=sub_00382760_0x382760` (`0x382760–0x382af0`,
+`codegen-ssx3/sub_00382760_0x382760.cpp`):
+
+| slot | observed |
+|---|---|
+| TADR write | pc `0x382a04`: `sw v0,0(s4)` ← `v0 = lw(s0+0x5AA8)` @ `0x382a00` (s4 = VIF1 TADR `0x10009030`) |
+| CHCR write | pc `0x382a0c`: `sw 0x185,0(s1)` (kick) |
+| MADR / QWC | `MADR = lw(s0+0x5AB0)` @ `0x3829c8` (live `a1=0x7e3000`); QWC const `0x105` |
+| struct | first arg: `daddu s0,a0,zero` @ entry; live `s0=0x61ba60`, so TADR field = `0x671508`, MADR field = `0x671510` |
+| caller | unknown — captured `ra=0x382938` is the inner `jal func_424020` return, not the caller |
+| also per kick | `lq v0,0(0x44B9C0)` @ `0x38297c` (READ128 from the library region; lanes checked live, no uploader match) |
+
+### Table 6 — first-2-kick ctag (277 lines, both 0x6f chains)
+
+All walked tags in `0x6f0xxx–0x6f8xxx`; the 4 CALL→uploader
+sites: `0x6f8010`, `0x6f8260`, `0x6f84c0`, `0x6f8750` (all
+`0x435bd0`; `0x4349b8` 0×). Same 4-site structure as the 0x63b8
+chain. The 0x62 set never got dumped (cap reached on the 0x6f
+pair).
+
+### Finding
+
+The briefed table (storing function + source load) is unfillable
+from this window: **no 0x43xxxx stores into the watched ranges
+and no uploader-valued loads anywhere in 1150–1300**. The chain
+(and its uploader choice) predates vsync 1150. New nearest
+confirmed object: the kick function above — the uploader decision
+now reduces to (a) who writes the `0x6f`/`0x62` chains (before
+1150; the `0x6f` set additionally needs a watched rebuild test),
+and (b) who writes the select struct word `0x671508` per frame.
+
+### Gaps / notes
+
+- Env delivery is unverified post-hoc (no env echo in the boot
+  log); the zero stands under either defaults or wide ranges
+  (wide ⊃ defaults), but next boot should log the effective
+  ranges. `ctag` still lacks vsync attribution (carried over).
+- Part-5 spend: builds + 2 fork commits/ff-pushes, 1 boot,
+  0 retries. Command: `PS2X_MPG_SRC_ARENAS="0x600000-0x640000,
+  0x700000-0x720000" python3 local/research/E40/e40_boot.py
+  --label e40f --wall 300 --snap 30 --src-from 1150 --src-to
+  1300 --mpg-from 1150 --mpg-to 1300 --script "<E33 route>"`.
+
+## Recommendation (orchestrator decides)
+
+Next lane (1 boot): window **before 1150** (find the first
+`src=0x435bf8` vsync with an early-window boot, then bracket the
+build), ranges **covering `0x6f0000–0x700000`** (the unwatched
+alternating set) plus current wides, `kMaxDmLines` raised past
+256, and a one-word store watch on the select struct field
+(`0x671508` = TADR source; verify the struct base reproduces —
+heap has been address-stable across e40d/e/f). The first
+`arenastore`/`uploadload` hits there name the storing function
+and its table load directly.
