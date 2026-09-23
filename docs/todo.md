@@ -135,13 +135,17 @@ with measured budgets, then 120 Hz simulation.
 - [x] **T49 PASS (09-23):** PCSX2 entry trace, same format. Healthy entry VI
       small and stable (vi13 0x03e4); **VU1 code differs**: PCSX2's 0x10 = `B
       0x258`, 0x40 = `B 0x7d8`; PCSX2 feeds 38 `MPG` uploads per pass window.
-- [ ] **Missing-3D root cause (orchestrator, 09-23): the game's VU1 microcode
-      uploads never land.** The DMA chain walker (`ps2_memory.cpp` ~1527)
-      passes the DMAtag's embedded VIF codes (TTE) only for tag ids
-      1/2/5/6/7; REF/REFS/REFE (3/4/0) drop them, so a REF-carried `MPG` is
-      lost and the microcode bytes are parsed as VIF commands. No CHCR.TTE
-      check anywhere. **E38 (running):** fix + tests + Select Character and
-      race boots.
+- [x] **E38 (09-23): TTE fix correct but not the cause.** Walker now honors
+      CHCR.TTE for all tag ids (483/483, fork `7f022ed`); boots unchanged
+      (0x10 still `LQI`, 498 stuck). MPGs do land (16 in the 0x12B8 packet;
+      0x12B8 code matches PCSX2 word for word). Orchestrator follow-up: our
+      `MPG addr=0` payload carries `81d26b7c` at slot 2 = what we run, so the
+      recomp runs what it's given; PCSX2's `B` at slots 2/8 comes from **an
+      MPG we don't apply**. The VIF1 MPG handler has three silent drop paths
+      vs PCSX2 (imm ≥ 2048 dropped instead of masked; payload past the buffer
+      end dropped, no carry-over; clip instead of wrap).
+- [ ] **E39 (running):** MPG outcome log over menus → Select Character, then
+      one fix matching PCSX2 and Select Character/race boots.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
