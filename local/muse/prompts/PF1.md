@@ -66,3 +66,24 @@ always-on diagnostics are worth compiling out, with their measured cost.
 - Evidence `local/research/PF1/` text only (perf reports as text).
   `[PF1]` commit with `Orchestrated-By: Muse Code`, `git add -f`, no push;
   check `git log -1` first. Time box 5 h.
+
+## Mini resume (orchestrator, 2026-09-22 evening) — scope change
+
+You are on the Mac mini now (`~/dev/ssx3`, read `local/AGENTS.local.md`).
+The Odin is on the mini's USB (`622c49b1`). `/tmp/pf1*` was restored.
+
+1. **Wait for G42** to release the Odin lease (it goes first; ~30 min).
+2. **Launch 6 targets the race, not Snow Jam.** E31 got a full stock race
+   on the Mac with **Happiness (Rival Challenge)**; Snow Jam stalls at 99%.
+   Use E31's e31l pad script (see `local/research/E31/REPORT.md`; if E31's
+   close-out hasn't written the exact string yet, rebuild it from e31l's
+   `[padscript] press` lines as you did for e31h). Same clean env as
+   launch 5 otherwise. Wall cap for this launch: **900 s** (orchestrator
+   OK). Measure guest vsyncs/s (tick progression) separately for title,
+   menus, loading and in-race; screencap every ~35 s, and pin the first
+   race-HUD screencap (timer visible) with two SHA reads. This doubles as
+   the first Odin native race attempt, so say plainly whether the race
+   timer advances.
+3. **Mission 2 (Mac release build) is removed from PF1.** It becomes a
+   separate brief on the mini after E32 lands the folded branch.
+4. Then force-stop, release the lease, REPORT.md, `[PF1]` commit.

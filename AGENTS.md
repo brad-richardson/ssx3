@@ -113,13 +113,13 @@ splitting.
   (`/tmp/ssx3-p-lane-lease`). Claim before a run and release after.
 - **Boots:** every boot script has progress caps. No boot over 600 s
   without orchestrator OK.
-- **Storage:** the external SSD is ExFAT (1 MiB clusters, no symlinks) on
-  a link that has returned corrupt reads. Until the storage cutover, any
-  binary that goes to a device, or any pinned input, needs two matching
-  SHA reads separated in time. Set `COPYFILE_DISABLE=1` on SSD writes.
-  Tar small-file trees instead of `mv`. Link large NDK outputs on APFS,
-  then copy and re-hash. Mirror receipts to the share tier. The Mac's
-  internal disk is nearly full, so big builds go to the SSD or bytesize.
+- **Storage:** work on the Mac mini's internal disk, capped at 200 GB
+  across all ssx3 workstreams (`local/tooling/disk_budget.sh`; details in
+  `local/AGENTS.local.md`). The external SSD is ExFAT scratch that
+  randomly disconnects (no data loss): nothing live runs from it. Any
+  binary that goes to a device, or any pinned input, still gets two
+  matching SHA reads before use. Set `COPYFILE_DISABLE=1` on SSD writes.
+  Mirror receipts to the share tier.
 - **Speed numbers** come only from builds with diagnostics compiled out
   (no runtime/aggressive logs, frame dumps, function traces or watch
   sets), and are stated as guest vsyncs per wall second ÷ 59.94. Numbers
