@@ -701,6 +701,12 @@ with measured budgets, then 120 Hz simulation.
       - a one-script rebuild.
 
       Base: fork `b48b502` + `codegen-ssx3-e49`, branch `i25-ios`.
+      **Blocked on Brad (09-23 17:16):** the mini has no provisioning profile
+      for `org.ps2x.ps2entryrunner`, and Xcode has no account ("No Accounts").
+      The fix is Xcode → Settings → Accounts → add the Apple ID for team
+      LQ3V7772Q2. Meanwhile I25 builds the prefixes and code up to signing
+      and polls for the profile. The SSD iOS prefixes were deleted in V2
+      tier 2 and are rebuilt from recipes.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
