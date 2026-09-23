@@ -63,12 +63,22 @@ with measured budgets, then 120 Hz simulation.
       full 448-line buffer, and the CPU backend shows even/odd lines
       doubled, alternating per vsync (224/224 identical line pairs in
       every dump). Fix `PS2X_DEINTERLACE=weave` (default) is folded into E32.
-- [ ] **E32 fold** (brief written, launches when E31 closes; base = scrubbed `3d4feed`): fold the
-      bypass + pad script, `i23-ffmpeg-ios`, `i8-device-bundle-name` and the
-      branchless I10–I21 commits onto fork `ssx3`; suite + 2 boots; push
-      `ssx3` fast-forward. Backups pushed 09-22 as `fork/archive/*` +
-      `fork/e29-movie-bypass`. After the orchestrator verifies, delete the
-      folded branches locally and on `fork` (Brad authorized 09-22).
+- [x] **E32 PASS (09-22): one primary branch.** `fork/ssx3` `3d4feed` →
+      `e57b5f8` (12 commits, ff push): codegen dir (generated code now out of
+      tree at `~/dev/ssx3-work/codegen-ssx3`, 273 MB), drop-in-tree, iOS
+      bundle name + FFmpeg wiring + MPEG diagnostics, `PS2X_SKIP_MOVIE`,
+      `PS2X_PAD_SCRIPT`, `[diag:frame]` tap, `PS2X_DEINTERLACE` (default
+      weave; 0/224 doubled line pairs). Suite 463/463, boot (a) = e28a park,
+      (b) Main Menu → Select Character. Runner-dir check empty. Orchestrator
+      verified: remote head, runner check, and all 15 side branches
+      content-contained in `ssx3` (`git cherry` + file compare for the
+      map/tap rows).
+- [ ] **Prune the 15 folded fork branches** (auto mode blocked the remote
+      delete; Brad to run or allow): `git -C ~/dev/PS2Recomp push fork
+      --delete e29-movie-bypass i23-ffmpeg-ios i8-device-bundle-name
+      archive/i10-codegen-dir archive/i10-codegen-dir-alt archive/i11-map …
+      archive/i17-map archive/i18-tap archive/i21-drop-a archive/i21-drop-b`.
+- [ ] **E33 (running):** 3D instrumentation + vsync pad clock (brief E33).
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
