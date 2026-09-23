@@ -115,10 +115,19 @@ with measured budgets, then 120 Hz simulation.
       to 166/573. **Fix negative:** resuming to the E-bit (16 slices) burns
       17× cycles with byte-identical kicks/draws, Zoe still absent: the
       programs are *stuck*, not long. `03d6549` to be reverted (E36).
-- [ ] **E36 (running):** per-program VU1 trace of the stuck programs (loop
-      body, exit condition, input headers, VIF1 double-buffer state):
-      A runaway counted loop from bad input / B wait on unmodeled flag /
-      C interpreter semantics; one fix if named. Revert `03d6549` first.
+- [x] **E36 PASS (09-22):** reverted `03d6549` (`0d40e2a`); `PS2X_VU1_TRACE`
+      (476/476; pushed `…018f56b`). All 498 stuck programs (8 startPCs, stable
+      every vsync) run one vertex loop 0x418–0x548 whose exit `IBNE vi03,vi13`
+      never meets: vi13 starts thousands past vi03. B (flag wait) and C's
+      branch/delay-slot variants ruled out; A (wild bounds from the setup
+      path) leads, provenance not captured → no fix. Orchestrator correction:
+      T48's PCSX2 startPCs are in 8-byte units, so its 0x0/0x2/0x8/0x73 **are**
+      our 0x0/0x10/0x40/0x398: the same programs finish in ≤2,090 cycles there.
+- [ ] **E37 + T49 (running, paired):** full entry trace (VU1 data memory at
+      MSCAL, the VIF1 commands that fed it, every pair to the loop with VI/VF
+      changes) for startPCs 0x40 and 0x10, recomp (E37) and PCSX2 (T49), same
+      line format; the first differing value names the bug (inputs ⇒ VIF1
+      UNPACK; same inputs, different VI ⇒ an instruction).
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
@@ -244,7 +253,7 @@ with measured budgets, then 120 Hz simulation.
       emu-s, one continuous 990-iteration `_sceCdSC` read loop, 1.75 MB
       SPU voice upload, EE semaphore spin only while CD reads continue.
       Gaps: LBN and RPC payload IDs not in trace.
-- [ ] **T48 (running):** PCSX2 per-draw census by GIF path + VU1 program
+- [x] **T48 PASS (09-22):** 11,591 healthy VU1 programs, 0 over 65,536 (SC max 2,090, race max 23,540); per-draw path tags + dumps at SC and race. Was: PCSX2 per-draw census by GIF path + VU1 program
       cycle lengths + `.gs` dumps at Select Character and race start
       (Happiness). Healthy side for the recomp's missing-3D hypotheses
       H1 VU1 65,536-cycle budget truncation / H2 GS-side / H3 VU1 math.
