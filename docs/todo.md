@@ -124,10 +124,14 @@ with measured budgets, then 120 Hz simulation.
       the Mac (G-owned fork branch `g44-parallel-shadow`), per-vsync
       compare vs the CPU backend at title/menu/Select Character; also the
       H2 cross-check for the missing 3D.
-- [ ] **G45 (running):** fix-only `ssx3` branches for the parallel-gs +
-      Granite forks (G26, G28, Turnip HAL loader); Brad approved the push
-      (09-22); the orchestrator pushes after the gate, to the brad-richardson
-      URLs only (Granite's `origin` is upstream).
+- [x] **G45 PASS (09-22): fix-only fork branches pushed** (Brad approved).
+      `brad-richardson/parallel-gs` `ssx3` @ `3b1ca9e` (from `3a66c19`: G26,
+      Turnip HAL loader + layout fix (env `PGS_G42_TURNIP`, default off),
+      build shims, `.gitmodules` → Granite fork) and `brad-richardson/Granite`
+      `ssx3` @ `46db18a8` (from `16e7395f`: G28 guard, build shims). Proof:
+      Mac F0 10/10 scanout SHAs = G43; Android r30 compiles. Orchestrator
+      re-authored the 5 unpushed commits as Brad (trees identical), verified a
+      fresh recursive clone. G18 shader fix and all diagnostics stay on `wip`.
 - [ ] Commit G26 + G28 in the clone after the storage cutover (G39
       decision: carried diffs until then), with a clean rebuild and G39's
       R1/R2 shapes re-run as proof.
