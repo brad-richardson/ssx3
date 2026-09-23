@@ -441,6 +441,26 @@ with measured budgets, then 120 Hz simulation.
         sources.
       - **E52:** a full FPU + COP2-macro semantics audit vs PCSX2, with
         unit tests and no fixes.
+      **E52 PASS (4856429): the audit found 27 of 30 tests failing on
+      `eac6cba`.**
+      - Structural:
+        - **VSQI (14 sites) has swapped fields and writes EE RAM
+          0x0000–0x3FF0 instead of VU0 data**; VLQI reads EE.
+        - **VCALLMSR (8) reads `vi[27]` out of bounds instead of CMSAR0.**
+        - CTC2 CMSAR1 doesn't start VU1.
+        - VRNEXT never writes ft.
+      - Special values:
+        - DIV.S x/0 → Inf (802 sites; PCSX2 gives ±FMAX);
+        - VDIV/VSQRT/VRSQRT give 0 on edge inputs (479 sites);
+        - VFTOI0 positive overflow gives 0x80000000;
+        - MAX/MIN/C.cond are wrong on edge inputs.
+      - FP model:
+        - clang fuses FPU MADD into `fmadd`;
+        - the EE thread runs IEEE round-to-nearest with no FTZ, where
+          PCSX2 uses RTZ + DAZ/FTZ + Inf/NaN clamps.
+      **Next: E53** (E52 pane): batch 1 covers the structural and
+      special-value fixes, `-ffp-contract=off`, and EE-thread RTZ+FZ
+      (env A/B switch). SC + race validation; G2/G3 clamping deferred.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
