@@ -779,5 +779,15 @@ with measured budgets, then 120 Hz simulation.
 - [ ] Update `docs/plan-gs-gpu-backend-2026-09-18.md` to the paraLLEl-GS
       path the G lane actually uses (it still describes a greenfield
       backend).
+- [x] **X3 PASS (2823cbf, local Qwen dense; orchestrator check in
+      `local/research/X3/ORCH-CORRECTIONS.md`):** 120 Hz loop map.
+      - cAppMan_mainLoop: 16 jals (8 checkHalt), 19 vtable jalrs,
+        4 back-edges.
+      - Counted step loop: `$s1` vs `lw 0x20($s0)`, with the back-edge at
+        0x317190 → 0x317128. The patch-site increment at 0x317184 is the
+        **delay slot of `jal checkHalt`**.
+      - Metro sites clear the frame-skip flag `[*(gp+0x2A74)+0x34]`.
+      The early stalls were the 16k output cap (dev-71 added an 8k
+      thinking budget).
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
