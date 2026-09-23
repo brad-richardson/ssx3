@@ -206,10 +206,16 @@ with measured budgets, then 120 Hz simulation.
 
 ## Cross-lane
 
-- [ ] **PF1 (running):** clean performance baseline, diagnostics compiled
-      out: Odin (N3 APK, simpleperf) now, Mac release build after E31.
-      Decides whether GS/VU1/present move off the main thread before more
-      features land.
+- [x] **PF1 PASS (09-22): Odin clean baseline** (N3 APK, logs off):
+      title 21.5 guest vsyncs/s (0.36×), My Rules 25.5/s (0.43×), 3D menus
+      down to ~1/s; GameThread saturated (36–46 ms per guest frame vs a
+      16.7 ms budget); simpleperf/Perfetto blocked on the user build (needs
+      a profileable APK). Launch 6 (first Odin race attempt) reached My
+      Rules, **no race**: the wall-clock e31l script desyncs because Odin
+      menus run ~280 s slower. Battery drains 3%/15 min on the charger.
+- [ ] **Pad script keyed on guest vsyncs** (`PS2X_PAD_SCRIPT_CLOCK=vsync`)
+      so one script replays the same on Mac and Odin. Goes into the E33
+      instrumentation brief; then N4 carries it to the Odin.
 - [ ] Static read: how SSX 3 steps its simulation (per-vsync constants vs
       measured dt). Shapes the 120 Hz timing design (VBlank is fixed at
       16667 µs and the loop is capped at `SetTargetFPS(60)`). Low priority.
