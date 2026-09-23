@@ -215,6 +215,18 @@ with measured budgets, then 120 Hz simulation.
       (`& 0x1FFFFFFF`) misses UCAB (`0x30000000`) stores, and SSX 3 uses
       UCAB for DMA-bound data. The recomp maps UCAB correctly. **T59**: fix
       the fold, then one MENU→SC capture.
+      **T59 PASS (a9dce3a):** the fill is plain UCAB EE stores every vsync at
+      `0x379804/0x37980c` (ra `0x379780`). End dump: w0 = `0x1b0` in both
+      buffers. **E44 Part 3 (7a582e5):** its "no EE writes after vsync 41"
+      comes from the same fold blind spot (`ps2_e44_trace.h:296`); the CD
+      streaming suspect is dropped. **Orchestrator codegen read:**
+      `sub_00376938@0x379784–0x379820` is a render-list append. Header
+      `*(s2+0x18F0)` = list at `0x8095f0`; item N = `*(s2+0xE84)` template
+      words 0–4 + s4 + packet + a0. So item w0 = the template's w0 at
+      append time, and the recomp's template has mode 0 where PCSX2 has
+      mode 6. Next: **E44 Part 4 ∥ T60**, the same trace on each side
+      (`app` at `0x3797ec` + `tpl` changes to the template), to find the
+      mode-6 setter.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
