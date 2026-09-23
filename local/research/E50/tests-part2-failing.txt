@@ -1,0 +1,17 @@
+635:[Suite]: Ps2FpuSemantics
+636-  [Run]: CVT.W.S truncates toward zero   [Failed]
+637-      - 1.5 -> 1 (EE truncates)
+638-      - -1.5 -> -1
+639-      - 2.7 -> 2
+640-      - -0.7 -> 0
+641-  [Run]: SQRT.S reads ft (0x46050044 = sqrt.s $f1, $f5)   [Failed]
+642-      - SQRT.S must take its operand from ft (f5), got: ctx->f[1] = FPU_SQRT_S(ctx->f[0]);
+643-  [Run]: SQRT.S takes sqrt(|ft|) and keeps signed zero   [Failed]
+644-      - EE SQRT.S of a negative is sqrt(|x|), not NaN
+645-      - tiny negative 1 - sin^2 must not become NaN
+646-  [Run]: guest sincos 0x31be50 at the SC camera yaw (pi/2) gives cos 0   [Failed]
+647-      - sin(pi/2) = 1, got 1.000004
+648-      - cos(pi/2) = 0 (the recomp produced -0.797886 -> camera R + 0.4438 I), got -0.797886
+649-      - cos(-pi/2) = 0, got -0.797886
+650-      - sincos error over [-2pi, 2pi] < 1e-5, got 0.797734
+651-

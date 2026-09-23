@@ -1,0 +1,24 @@
+# E50 Part 2 proposed fix (NOT applied). Two R5900 FPU semantics defects.
+# (A) SQRT.S: operand is ft, result sqrt(|ft|) (PCSX2 FPU.cpp SQRT_S). Generator
+#     change => regenerate codegen (36 of 107 SQRT.S sites have ft != fs).
+# (B) CVT.W.S: truncate toward zero, saturate (PCSX2 FPU.cpp CVT_W). Runtime macro
+#     only => rebuild, no regen (992 sites in 283 files).
+# (RSQRT.S has the same field bug, fd = 1/sqrt(fs) instead of fs/sqrt(ft); SSX 3
+#  has 0 FPU RSQRT.S sites, so it is listed, not needed.)
+--- a/ps2xRecomp/src/lib/fpu_translator.cpp
++++ b/ps2xRecomp/src/lib/fpu_translator.cpp
+@@ case COP1_S_SQRT:
+-                return fmt::format("ctx->f[{}] = FPU_SQRT_S(ctx->f[{}]);", fd, fs);
++                return fmt::format("ctx->f[{}] = FPU_SQRT_S(ctx->f[{}]);", fd, ft);
+--- a/ps2xRuntime/include/ps2_runtime_macros.h
++++ b/ps2xRuntime/include/ps2_runtime_macros.h
+-#define FPU_SQRT_S(a) sqrtf((float)(a))
++#define FPU_SQRT_S(a) ps2FpuSqrtS((float)(a))   /* sqrt(|a|), +/-0 kept */
+-#define FPU_CVT_W_S(a) ((int32_t)nearbyintf((float)(a)))
++#define FPU_CVT_W_S(a) ps2FpuCvtWS((float)(a))  /* trunc, saturate (s32 cast) */
++// inline float ps2FpuSqrtS(float a){ uint32_t u; memcpy(&u,&a,4);
++//   if ((u & 0x7F800000u) == 0) { u &= 0x80000000u; float r; memcpy(&r,&u,4); return r; }
++//   return sqrtf(fabsf(a)); }
++// inline int32_t ps2FpuCvtWS(float a){ uint32_t u; memcpy(&u,&a,4);
++//   if ((u & 0x7F800000u) <= 0x4E800000u) return (int32_t)a;
++//   return (u & 0x80000000u) ? INT32_MIN : INT32_MAX; }

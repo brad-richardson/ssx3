@@ -262,3 +262,119 @@ python3 local/research/E50/e50_analyze.py t65 e50a 1305 1305 blocks > an-e50a-t6
   entry-e50b `1e64b47fa1677dc9`, valwatch-e50c `bfe0c1fb34b2a3e7`.
 - Budget: 3/3 boots, ~2 h of 5 h (16:05–17:05). E50 disk 3.3 GB of 4 GB (build
   3.2 GB). Internal total 51.3 of 200 GB.
+
+---
+
+## Part 2: the quaternion's writer, bisect to the first differing op
+
+Orchestrator gate: max 3 boots; name the writer, follow its inputs to the
+first differing op, unit-test it, and apply ONE fix only if a single
+translation defect is named. **Stopped before any fix: two defects are
+named, and each fixed alone still breaks the camera (table below).** 1 of
+3 boots used.
+
+### Boot e50d (SC, 101 s, rc 0, E50 runner `d457a367…`, slot 1)
+
+`PS2X_DIAG_WATCH=0xbc5950,0xbc5958` plus `PS2X_E50_VALWATCH` on
+`3f0700ef,3f72b864,3f3504f3` over vsyncs 1250–1305
+(`diagwatch-e50d.txt`, `valwatch-e50d.txt`; boot log `266dcfaef6ca78b4`,
+6,842,073 B).
+
+| # | pc | ra | thread | value at 0xbc5950 (x, y, z, w) |
+|---|---|---|---|---|
+| 1–2 | 0x15d6e8 | 0x195728 | 1 | (0, 1, 0, 1): init |
+| 3–4 | 0x15d754 | 0x195784 | 1 | (0, 1, 0, 1) |
+| 5–6 | 0x1a2020 | 0x1a1fc8 | 3 | (0, 1, 0, 1) |
+| 7–8 | **0x15e0d4** | **0x15e0bc** | 1 | **(−0, −0, `3f0700ef`, `3f72b863`) = (0, 0, 0.527358, 0.948126)** |
+| 9–10 | 0x15e0d4 | 0x15e0bc | 1 | same (second setup call, sp 0x1fff8f0) |
+
+(Each write is logged twice because the two watched 8-byte windows both
+overlap the 16-byte `sq`.) The value matches Part 1's prediction to 1 ulp
+(`3f72b864` predicted). T66 (`8289688`) independently puts the same writer
+in PCSX2 (`sq a0, 0x30(s0)` at 0x15e0d4, written once) with
+q = (−0, −0, `3f3504f3`, `3f3504f3`) and pos (0, 200, 0, 1). The
+`3f3504f3` stores in this boot come from `0x30dbd0` (vsync 1264, stack
+0x01fffc50/…5c) and are unrelated to this object.
+
+### The chain (static, `ee-at`/`ee-func`; every step matches T66's)
+
+| Function | Role | Evidence |
+|---|---|---|
+| `sub_0015E050` | sets up the camera object (s0 = 0x00bc5920) from two input vectors (`*a2` → sp+0x20, `*a1` → sp+0x40, w = 1.0), calls `func_166640(sp, 1)`, `func_166F90(sp)`, `func_1673A0(sp+0x390, sp)`, stores pos → +0x20 and **quat → +0x30 at 0x15e0d4**, then runs the same quat→matrix block as `0x15d928` | disassembly 0x15e050–0x15e2a4 |
+| `sub_001673A0` | getter: copies work-struct +0x60 (pos) and +0x70 (quat) | 0x1673a0–0x1673b4 |
+| `sub_00166F90` | builds the rotation from two angles (work +0x54, then +0x50; each `neg.s`), each via **`func_31BE50(&sin, &cos)`** and an axis-angle (Rodrigues) matrix, diagonal = (1−c)·a² + c, off-diagonal ±s; then `func_31B748` → matrix to (pos, quat) | 0x166f90–0x16739c |
+| `sub_0031B748` → `sub_0031B7A8` | matrix → quaternion (Shoemake: w = ½·sqrt(1+trace), q_i = (m_jk − m_kj)·(½/sqrt)) | 0x31b7a8–0x31b9ac |
+| **`sub_0031BE50`** | **sincos**: `q = CVT.W.S(a·2/π ± 0.5)`, x = a − q·π/2, sin(x) = x·P(x²) (degree 9), **cos(x) = SQRT.S(1 − sin²x)**, quadrant swap on q & 3 → *a0 = sin(a), *a1 = cos(a) | 0x31be50–0x31bf5c; constants at gp−0x2ec0 = 0x4a0230: 2/π, π/2, 2.7557e-6, −1.9841e-4, 8.3333e-3, −0.16667 |
+
+The SQRT.S sites in `0x31B7A8` (0x31b7ec `sqrt.s f0,f0`, 0x31b8e0
+`sqrt.s f5,f0`) have ft = fs = 0, so they translate correctly by accident.
+The trace 2.5957 that `0x31B7A8` sees is already in its input matrix.
+
+### The first differing op, and the second
+
+At the SC yaw a = π/2 (header +0x0c = π/4 in T66 is the half-angle of this
+rotation; the recomp's header word was not read in this boot):
+
+| Step (guest pc) | EE semantics (PCSX2 FPU.cpp) | recomp translation | EE value | recomp value |
+|---|---|---|---|---|
+| 0x31be88 `cvt.w.s f1, f1` on 1.5 | `CVT_W`: `(s32)Fs`, saturating = **truncate** | `FPU_CVT_W_S` = `(int32_t)nearbyintf(a)` = **round to nearest even** | q = 1 → x = −4.4e-8 | **q = 2 → x = −π/2** (outside the ±π/4 range the polynomial and quadrant table assume) |
+| 0x31beec `0x46050044` = `sqrt.s $f1, $f5` | `SQRT_S`: sqrt(\|**Ft**\|) = sqrt(\|f5\|), ±0 kept | generator emits `FPU_SQRT_S(ctx->f[fs])` = sqrt(f0) (fs field = 0 in every SQRT.S encoding); `FPU_SQRT_S` = `sqrtf` (NaN on negatives) | sqrt(1 − sin²x) = 1 | **sqrt(f0 = P(x²) = sin(x)/x = 0.63662) = 0.797886** |
+| output (quadrant 1 vs 2) | sin = 1, cos = −0 | | (1, −0) | **(1.0000036, −0.797886)** |
+
+Downstream the numbers follow exactly: Rodrigues about z gives
+[[c, s], [−s, c]] with c = −0.797886, s = 1.0000036. Its trace + 1 = 3.5957,
+so w = ½·√3.5957 = 0.948126 and z = 2·1.0000036·(½/1.8963) = 0.527358,
+i.e. the stored q. `0x15d928` then turns that q into R + 0.4438·I
+(Part 1). Offline replay of `0x31BE50` (float32, ELF constants) under four
+semantics, every 0.001 rad over ±2π:
+
+| Semantics | max \|sin err\| | max \|cos err\| | at π/2 (sin, cos) |
+|---|---|---|---|
+| recomp now (CVT rounds, SQRT reads fs) | 7.98e-01 | 7.98e-01 | (1.0000036, −0.797886), the observed values |
+| fix SQRT.S only (ft, sqrt\|·\|) | 2.22e-03 | 2.67e-03 | (1.0000036, −0.002674): camera dots ~1e-3, still fails T65 |
+| fix CVT.W.S only (truncate) | 2.42e-01 | 2.42e-01 | (1, −0): SC would pass; any race angle with \|x\| ≫ 0 still wrong |
+| both = EE | 4.12e-07 | 2.77e-07 | (1, −0) |
+
+Game-wide reach: `FPU_CVT_W_S` appears at **992 sites in 283 generated
+files**. SQRT.S has 107 sites, **36 with ft ≠ fs** (these read the wrong
+register today). The generator's RSQRT.S has the same field bug
+(1/sqrt(fs) instead of fs/sqrt(ft)), but SSX 3 has no FPU RSQRT.S sites.
+
+### Unit tests (fork `e50-diag` `68d4a52`, `ps2_fpu_semantics_tests.cpp`, copy in this dir)
+
+All 4 fail on the current tree (598 other tests pass; `tests-part2-failing.txt`):
+
+| Test | Result today |
+|---|---|
+| SQRT.S reads ft: decode 0x46050044 → expect `ctx->f[1] = FPU_SQRT_S(ctx->f[5]);` | FAIL: got `FPU_SQRT_S(ctx->f[0])` |
+| SQRT.S takes sqrt(\|ft\|): `FPU_SQRT_S(-4) == 2`, no NaN for −7.4e-6 | FAIL: NaN |
+| CVT.W.S truncates: 1.5→1, −1.5→−1, 2.7→2, −0.7→0 | FAIL: 2, −2, 3, −1 |
+| Guest sincos `0x31be50` replay (runtime macros + the generator's own SQRT.S operand) at a = ±π/2 → sin 1, cos 0; error < 1e-5 over ±2π | FAIL: cos = −0.797886 |
+
+### Decision needed (the orchestrator decides)
+
+Two translation defects, both needed for T65's invariants. Proposed fix
+(not applied; `part2-proposed-fix.diff`):
+
+- **(A) SQRT.S:** a one-line generator change (`fs` → `ft`), plus
+  `FPU_SQRT_S` = sqrt(\|a\|) with ±0 kept. It needs regenerated codegen:
+  either a full regen into an E50-private dir, or an APFS clone of
+  `codegen-ssx3` with the 36 affected lines rewritten and checked against
+  a generator run.
+- **(B) CVT.W.S:** a runtime macro only (truncate + saturate, PCSX2
+  `CVT_W`). No regen, rebuild ~8 min. Touches 992 sites, so it's a wider
+  behaviour change.
+
+Options:
+
+1. **Allow A + B as one "R5900 FPU semantics" fix.** Validation is the 2
+   remaining boots: SC camera block vs T65 invariants, and race T65 counts,
+   startPC census and frame.
+2. **B only.** Predicted: SC passes (cos(π/2) = −0), and the race camera
+   stays wrong wherever \|x\| ≫ 0.
+3. **A only.** Predicted: SC dots ~1e-3, and the race improves but still
+   fails T65.
+
+Recommendation: 1. Neither half alone meets the gate's validation
+criterion, and both are plain field/rounding mismatches against PCSX2's
+FPU.cpp.
