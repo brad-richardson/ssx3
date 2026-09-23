@@ -681,7 +681,19 @@ with measured budgets, then 120 Hz simulation.
 - [ ] Keep T tied to named E/G questions (reference captures for
       menu/race timing once E reaches them).
 
-## I — iOS recomp (parked)
+## I — iOS recomp
+
+- [ ] **I25 (09-23, Brad: iPhone check-in builds):** iOS to parity with
+      Android on Brad's iPhone:
+      - env shim;
+      - an auto-route pad script as the default no-controller check-in
+        mode;
+      - controller union;
+      - aspect-fit landscape;
+      - dumps off;
+      - a one-script rebuild.
+
+      Base: fork `b48b502` + `codegen-ssx3-e49`, branch `i25-ios`.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
