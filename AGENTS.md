@@ -153,7 +153,10 @@ splitting.
   Before every APK launch, check the Odin isn't on its lockscreen
   (`dumpsys window policy`: `KeyguardServiceDelegate showing=false`): a
   locked device pauses the app within seconds and the run is void. Ask Brad
-  to unlock it. Force-stop the app when a lane is done with the device.
+  to unlock it. **Force-stop the app after every run** (`am force-stop`),
+  not only when a lane is done: a running app drains the Odin faster than
+  its charger keeps up (Brad, 09-23). Check `dumpsys battery` (charging,
+  at least 20 %) before each launch.
 - **Ask, don't queue silently:** any decision waiting on Brad, or a
   device/hands-on need that would unblock work, is reported as a
   blocker right away.
