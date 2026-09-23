@@ -26,6 +26,19 @@ SRC = re.compile(
 REGNAMES = ["a0", "a1", "a2", "a3", "v0", "v1",
             "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9",
             "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+PAY = re.compile(
+    r"^mpgpay vsync=(\d+) imm=0 num=(\d+) src=0x([0-9a-f]+) "
+    r"srcmask=0x([0-9a-f]+) mode=(\S+) tag_at=(\S+)$")
+DMR = re.compile(
+    r"^dmareg vsync=(\d+) reg=(CHCR|MADR|QWC|TADR) value=0x([0-9a-f]+) "
+    r"pc=0x([0-9a-f]+) ra=0x([0-9a-f]+) fn=(\S+) "
+    r"a0=(0x[0-9a-f]+) a1=(0x[0-9a-f]+) a2=(0x[0-9a-f]+) a3=(0x[0-9a-f]+) "
+    r"v0=(0x[0-9a-f]+) v1=(0x[0-9a-f]+) "
+    r"t0=(0x[0-9a-f]+) t1=(0x[0-9a-f]+) t2=(0x[0-9a-f]+) t3=(0x[0-9a-f]+) "
+    r"t4=(0x[0-9a-f]+) t5=(0x[0-9a-f]+) t6=(0x[0-9a-f]+) t7=(0x[0-9a-f]+) "
+    r"t8=(0x[0-9a-f]+) t9=(0x[0-9a-f]+) "
+    r"s0=(0x[0-9a-f]+) s1=(0x[0-9a-f]+) s2=(0x[0-9a-f]+) s3=(0x[0-9a-f]+) "
+    r"s4=(0x[0-9a-f]+) s5=(0x[0-9a-f]+) s6=(0x[0-9a-f]+) s7=(0x[0-9a-f]+)$")
 TW = re.compile(
     r"^tagwrite vsync=(\d+) addr=0x([0-9a-f]+) value=0x([0-9a-f]+) "
     r"pc=0x([0-9a-f]+) ra=0x([0-9a-f]+) fn=(\S+) "
@@ -41,6 +54,8 @@ def main():
     mpgs = []
     tws = []
     srcs = []
+    pays = []
+    dmrs = []
     other = 0
     with open(path, errors="replace") as f:
         for line in f:
@@ -57,9 +72,54 @@ def main():
             if r:
                 srcs.append(r.groups())
                 continue
+            p = PAY.match(line)
+            if p:
+                pays.append(p.groups())
+                continue
+            d = DMR.match(line)
+            if d:
+                dmrs.append(d.groups())
+                continue
             if line.strip():
                 other += 1
-    print(f"mpgsrc={len(mpgs)} tagwrite={len(tws)} srcread={len(srcs)} other={other}")
+    print(f"mpgsrc={len(mpgs)} tagwrite={len(tws)} srcread={len(srcs)} "
+          f"mpgpay={len(pays)} dmareg={len(dmrs)} other={other}")
+
+    by_src = defaultdict(list)
+    for g in pays:
+        by_src[(g[2], g[3], g[4], g[5])].append(g)
+    print(f"\ndistinct mpgpay src values: {len(by_src)}")
+    for key in sorted(by_src):
+        rows = by_src[key]
+        vs = sorted(set(int(r[0]) for r in rows))
+        nums = sorted(set(r[1] for r in rows))
+        print(f"src=0x{key[0]} srcmask=0x{key[1]} mode={key[2]} tag_at={key[3]} "
+              f"n={len(rows)} vsync={vs[0]}..{vs[-1]} (n_vs={len(vs)}) "
+              f"num={','.join(nums)}")
+
+    by_reg = defaultdict(list)
+    for g in dmrs:
+        by_reg[g[1]].append(g)
+    print(f"\ndmareg by register: {len(by_reg)}")
+    for reg in sorted(by_reg):
+        rows = by_reg[reg]
+        vs = sorted(set(int(r[0]) for r in rows))
+        vals = sorted(set(r[2] for r in rows))
+        pcs = sorted(set(r[3] for r in rows))
+        fns = sorted(set(r[5] for r in rows))
+        show_vals = vals[:8]
+        print(f"reg={reg} n={len(rows)} "
+              f"vsync={vs[0]}..{vs[-1]} (n_vs={len(vs)}) "
+              f"distinct_values={len(vals)} "
+              f"values={','.join('0x' + v for v in show_vals)}"
+              f"{'...' if len(vals) > 8 else ''} "
+              f"pc={','.join('0x' + p for p in pcs)} "
+              f"fn={','.join(fns)}")
+        first = rows[0]
+        regs = " ".join(f"{REGNAMES[i]}={first[6 + i]}" for i in range(24))
+        print(f"  first: vsync={first[0]} value=0x{first[2]} "
+              f"pc=0x{first[3]} ra=0x{first[4]} fn={first[5]}")
+        print(f"         {regs}")
 
     by_addr = defaultdict(list)
     for g in mpgs:

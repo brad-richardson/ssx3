@@ -233,6 +233,123 @@ env -u PS2X_SKIP_MOVIE -u PS2X_PAD_SCRIPT ~/dev/ssx3-work/E32-build/ps2xTest/ps2
 python3 local/research/E40/e40_boot.py --label e40c --wall 300 --snap 30 --src-from 1000 --src-to 1400 --mpg-from 1000 --mpg-to 1400 --script "<route>"
 ```
 
+## Part-3 — dest-0 payload source + DMA-reg watch (approved follow-up)
+
+### Change
+
+Fork `~/dev/PS2Recomp`, branch `ssx3`:
+
+| Commit | Subject |
+|---|---|
+| `78ed470` | [E40] Part-3: dest-0 MPG payload source (mpgpay) + VIF1 DMA-reg watch |
+
+Base `99b5fd8`. Pushed `99b5fd8..78ed470` (clean); runner-dir gate
+`git diff --stat 14b1e5cb ssx3 -- ps2xRuntime/src/runner` empty. Suite
+**510/510** flags-unset from the fork root (503 + 7 new
+`Ps2MpgSrcTrace` tests: chain/normal/window mpgpay, pay-map lookup,
+isDmareg, dmareg format+cap, WRITE32 macro tap with a real runtime).
+
+Diff: new `ps2_vif_src_span.h` (cycle-free span struct);
+`PendingTransfer.srcSpans`; walker records EE spans per appended range
+(VIF1, only when traced); each VIF1 delivery installs the map around
+`processVIF1Data` (chain spans / MADR-based normal spans / sourceless
+FIFO marker); MPG handler logs `mpgpay vsync=<n> imm=0 num=<n>
+src=0x<raw> srcmask=0x<raw&0x1FFFFFFF> mode=<chain:<id>|normal|fifo>
+tag_at=0x<…>|-` for dest-0 uploads; WRITE8/16/32/64 macros report the
+four VIF1 DMA regs as `dmareg vsync=<n> reg=<CHCR|MADR|QWC|TADR>
+value=0x<low32> pc/ra/fn + a0–s7` (first 256 in-window; generated code
+has no inlined stores to `0x1000xxxx` codegen-wide, so the macros see
+every DMA-reg write; 128-bit stores to 32-bit DMA regs excluded by
+construction). `src` is the payload-byte source (`dataAddr+offset` /
+`srcAddr+pos`, i.e. 4 past the MPG cmd word); join to MADR by `src-4`.
+
+Test-debug notes (expectation fixes only, no runtime change needed):
+`src` includes the 4-byte CMD offset per the brief formula; CNT payload
+is inline after the tag; the drain consumes QWC (re-arm MADR+QWC per
+kick in tests); a dest-0 TTE MPG emits mpgpay too (Part-1 walker test
+now uses slot 4 to stay pure); trailing zero-tag TTE bytes extend chain
+buffers (8+16+8=32).
+
+### Boot e40d (Part-3 Boot A; Mac mini, E32-build @ `78ed470`, runner SHA
+`9b0a71a7…ab4e4b` two matching reads, E33 route, wall 300, snap 30,
+SRC 1300–1320 + MPG control 1300–1320, rc 0 wall-bound 301.1 s, tick
+1366, final frame `5aa169f0…` (route-identical, kill-tick differs from
+A/B), lease released)
+
+- SRC `mpg-src-e40d.txt` (copied in-repo, SHA `c9b16e0a…3d3d`): **78
+  `mpgpay` + 79 `dmareg`** (+1 truncated kill-edge line), 0 mpgsrc / 0
+  tagwrite / 0 srcread as before.
+- Control `vif-mpg-e40d.txt` (copied in-repo, SHA `a77e7f74…612e`):
+  **640/640 `copied`**, vsync 1300–1319; dest-0 signature unchanged
+  (`fnv=6a82dc60 slot2=81d26b7c`, 80 lines = 4/vsync). mpgpay attributes
+  78/80; the shortfall is the SIGTERM edge (1319 has 2/4 + the truncated
+  tail).
+
+### Table 1 — distinct `src` for dest-0 uploads (1300–1319)
+
+| src | srcmask | mode | tag_at | n | vsync | num |
+|---|---|---|---|---|---|---|
+| 0x00435bf8 | 0x00435bf8 | chain:6 | 0x00435bd0 | 78 | 1300–1319 (20) | 0 |
+
+One value. `mode=chain:6` = CALL tag with inline payload
+(`dataAddr = tagAddr+16` in this runtime's walker, matching HW CALL
+semantics): a CALL tag at static `0x435bd0` carries the 2048 B upload
+inline (`src` = payload head = cmd+4). Uncached/KSEG mirrors need no
+separate handling — `srcmask` folds them and the observed raw value is
+already the cached alias. No MADR lines exist (chain mode doesn't use
+MADR); each upload's MADR-equivalent is `src-4`.
+
+### Table 2 — `dmareg` stores (who kicked the chains)
+
+| reg | n | values | fn | pc | ra |
+|---|---|---|---|---|---|
+| CHCR | 39+1 cut | 0x185 (const) | sub_00382760_0x382760 | 0x382a0c, 0x382adc | 0x382938 |
+| TADR | 40 | 0x708520/0x63b8a0 (site 1, alternating) 0x708a30/0x63bdb0 (site 2, alternating) | sub_00382760_0x382760 | 0x382a04 (site 1), 0x382ad8 (site 2) | 0x382938 |
+
+2 kicks/vsync, 4 uploads/vsync, all through CALL@0x435bd0 (each chain
+CALLs the static uploader twice — single `tag_at`, single `src`). No
+MADR/QWC stores: chain mode. s0 = 0x61ba60 on all 40 TADR lines; CHCR
+always 0x185 (STR|CHAIN|TTE|DIR). Site1–site2 stride within a frame:
+0x510; arenas ping-pong per vsync (double-buffered chains).
+
+### Table 3 — address formation (codegen read)
+
+In `sub_00382760_0x382760` (`~/dev/ssx3-work/codegen-ssx3/`):
+
+| Store | Formation | Base | Index × stride | Index source / value at read |
+|---|---|---|---|---|
+| TADR @ 0x382a04 | `lw $v0, 0x5AA8($s0)` → `sw $v0, 0($s4)` | s0 = a0_entry = struct @ 0x61ba60 (constant, all 40 lines) | none at this site (fixed field +0x5AA8) | field content ping-pongs 0x708520↔0x63b8a0 (double-buffer slot; parity flips/vsync) |
+| TADR @ 0x382ad8 | `lw $v0, 0x5A9C($s0)` → `sw $v0, 0($s4)` | same s0 | none (fixed field +0x5A9C) | content ping-pongs 0x708a30↔0x63bdb0 |
+| CHCR @ 0x382a0c/0x382adc | `addiu $v0/$v1, $zero, 0x185` (immediate) | — | — | const 0x185 |
+| ra @ stores | 0x382938 on all 79 lines | — | — | return into sub_382760 itself after `jal func_424020` (syscall trampoline `addiu $v1,$0,0x64; syscall; jr $ra`), flowing into a D_STAT (0x1000D000 bit 0x100) spin-wait, then kick 1, then kick 2 (`jal func_423DC0` after) |
+
+Producer of field +0x5AA8 (single writer codegen-wide):
+`sub_00376938` @ 0x377b50 `sw $s1, 0x5AA8($s3)`, s1 = `*(s3+0x5A00)`
+(loaded @ 0x377b10), in the sequence
+`v1 = (s3+0x5A90) + (*(s3+0x5A10) << 2); *(v1) = 2` (@ 0x377b28–58)
+with the stack-passed index saved at `*(s3+0x5AB4)` — i.e. **base =
+s3+0x5A90, index = MEM[s3+0x5A10], stride ×4**. Read conclusion
+s3 == s0's struct (0x61ba60): sole writer + value flow into the
+reader's ping-pong slots; corroborated by a2 = 0x6214f0 = s0+0x5A90
+(the index-table base) on every TADR line. Index *value* at read: not
+directly captured (a2 then is the reused table base); parity
+alternation ⇒ slot flips each vsync. The +0x5A9C field (site 2) has no
+direct store codegen-wide — likely filled via a computed pointer or a
+sibling sequence not chased (stated gap).
+
+Reconstruction (read conclusion, no verdict): per frame the game
+rebuilds two chains in alternating arenas and kicks each once; both
+chains CALL the static uploader CALL@0x435bd0 twice, which carries the
+num=0 microcode inline from 0x435bf8 (same bytes re-uploaded 4×/vsync;
+E39's dest-0 signature unchanged). Next lanes can key off TADR ∈
+{0x708520, 0x63b8a0, 0x708a30, 0x63bdb0} or the static 0x435bd0/0x435bf8.
+
+Bytes: E40-run 32 MB total (4 boots); internal total 27.5/200 GB cap.
+Part-3 spend: builds as needed, 1 boot, 0 retries. Exact commands as
+Parts 1–2 with `--label e40d --src-from 1300 --src-to 1320 --mpg-from
+1300 --mpg-to 1320`; analyze with `e40_analyze.py` (now parses
+mpgpay/dmareg).
+
 ## Recommendation (orchestrator decides)
 
 The REF-addr question as briefed is unanswerable from this window: the
