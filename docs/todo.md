@@ -10,7 +10,19 @@ read: `docs/archive/todo-2026-09-22.md`. Parked GameCube work:
 Odin (menu → input → stock race advancing). Then Odin native race
 with measured budgets, then 120 Hz simulation.
 
-## E — PS2 runtime (fork `ssx3` @ `3adc0478`)
+## E — PS2 runtime (fork `ssx3` @ `3d4feed`)
+
+- [ ] **Missing 3D (top correctness item, 09-22):** race = HUD over a
+      near-black silhouette; no rider on Select Character. Survey: VU1 is a
+      cycle-stepped interpreter; VIF1 MSCAL/MSCNT gives it a fixed 65,536-
+      cycle budget and **exits silently** when spent
+      (`ps2_runtime.cpp:753-788`, `ps2_vu1_core.cpp:1636,1827`); FLUSH/
+      FLUSHE/FLUSHA are no-ops (`ps2_vif1_interpreter.cpp:370`); no GS
+      stream dump or per-frame draw export exists (only the 512-entry
+      debug-history ring in ImGui). Next E brief after E32: env-gated
+      counters (budget exhaustions, MSCAL count, XGKICK count, per-path
+      draws per frame, file export of the debug ring) + one boot to Select
+      Character; compare against T48. One candidate fix only if H1 shows.
 
 - [x] **E29 PASS (09-22):** dev-only bypass reaches the rendered SSX 3
       title screen. Branch `e29-movie-bypass` @ `e5ce086d`, local.
@@ -152,6 +164,10 @@ with measured budgets, then 120 Hz simulation.
       emu-s, one continuous 990-iteration `_sceCdSC` read loop, 1.75 MB
       SPU voice upload, EE semaphore spin only while CD reads continue.
       Gaps: LBN and RPC payload IDs not in trace.
+- [ ] **T48 (running):** PCSX2 per-draw census by GIF path + VU1 program
+      cycle lengths + `.gs` dumps at Select Character and race start
+      (Happiness). Healthy side for the recomp's missing-3D hypotheses
+      H1 VU1 65,536-cycle budget truncation / H2 GS-side / H3 VU1 math.
 - [ ] Keep T tied to named E/G questions (reference captures for
       menu/race timing once E reaches them).
 
