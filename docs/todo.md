@@ -755,6 +755,20 @@ with measured budgets, then 120 Hz simulation.
 
 ## I — iOS recomp
 
+- [ ] **Brad's iPhone check-in feedback (09-23 evening, Select Mode/Peak
+      screenshots):**
+      1. fonts look off (kerning);
+      2. snowflakes sometimes show a square texture;
+      3. many sprite-sheet artifacts (ghost layers, boxes, stray glyphs);
+      4. the auto-run waits too long (cut ~90%);
+      5. virtual touch controls wanted;
+      6. a pink screen for ~1 s at startup (= the `MAGENTA` no-frame
+         placeholder, `ps2_runtime.cpp:535`).
+
+      → **I26** (items 4, 5 and 6) and **G46** (items 1–3: replay our GS
+      stream through paraLLEl/PCSX2 to classify each artifact as backend,
+      upstream or authentic).
+
 - [ ] **I25 (09-23, Brad: iPhone check-in builds):** iOS to parity with
       Android on Brad's iPhone:
       - env shim;
