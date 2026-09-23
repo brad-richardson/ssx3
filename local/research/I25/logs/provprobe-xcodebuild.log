@@ -1,0 +1,38 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project build/provprobe.xcodeproj -target provprobe -configuration Release -sdk iphoneos -allowProvisioningUpdates -allowProvisioningDeviceRegistration build
+
+Build settings from command line:
+    SDKROOT = iphoneos27.0
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+warning: Building targets in manual order is deprecated - check "Parallelize build for command-line builds" in the project editor, or set DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING in any of the targets in the current build to suppress this warning
+note: Target dependency graph (2 targets)
+    Target 'provprobe' in project 'provprobe'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'provprobe'
+    Target 'ZERO_CHECK' in project 'provprobe' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /opt/homebrew/opt/llvm/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 8ea370f0ff3589b9d210aec80e8734df
+Build description path: /private/tmp/claude-501/-Users-brad-dev-ssx3/c7c2f659-1f6b-43da-b93a-d2c97a23e8a4/scratchpad/provprobe/build/build/XCBuildData/8ea370f0ff3589b9d210aec80e8734df.xcbuilddata
+/tmp/claude-501/-Users-brad-dev-ssx3/c7c2f659-1f6b-43da-b93a-d2c97a23e8a4/scratchpad/provprobe/build/provprobe.xcodeproj: error: No Accounts: Add a new account in Accounts settings. (in target 'provprobe' from project 'provprobe')
+/tmp/claude-501/-Users-brad-dev-ssx3/c7c2f659-1f6b-43da-b93a-d2c97a23e8a4/scratchpad/provprobe/build/provprobe.xcodeproj: error: No profiles for 'org.ps2x.ps2entryrunner' were found: Xcode couldn't find any iOS App Development provisioning profiles matching 'org.ps2x.ps2entryrunner'. (in target 'provprobe' from project 'provprobe')
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'provprobe')
+** BUILD FAILED **
+

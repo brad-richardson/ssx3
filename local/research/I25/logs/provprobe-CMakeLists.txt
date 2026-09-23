@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.20)
+project(provprobe C)
+add_executable(provprobe MACOSX_BUNDLE main.c)
+set_target_properties(provprobe PROPERTIES
+  MACOSX_BUNDLE_GUI_IDENTIFIER org.ps2x.ps2entryrunner
+  XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER org.ps2x.ps2entryrunner
+  XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+  XCODE_ATTRIBUTE_DEVELOPMENT_TEAM LQ3V7772Q2
+  XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
