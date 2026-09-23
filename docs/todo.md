@@ -108,7 +108,17 @@ with measured budgets, then 120 Hz simulation.
       --delete e29-movie-bypass i23-ffmpeg-ios i8-device-bundle-name
       archive/i10-codegen-dir archive/i10-codegen-dir-alt archive/i11-map …
       archive/i17-map archive/i18-tap archive/i21-drop-a archive/i21-drop-b`.
-- [ ] **E33 (running):** 3D instrumentation + vsync pad clock (brief E33).
+- [x] **E33 PASS (09-22):** `PS2X_PAD_SCRIPT_CLOCK=vsync` (route reaches the
+      race on the mini) + `PS2X_GFX_STATS`; suite 472/472; pushed
+      `e57b5f8..03d6549`. **H1 shows:** Select Character 498/583 VU1
+      programs/vsync hit 65,536 cycles with no E-bit, never resumed; race up
+      to 166/573. **Fix negative:** resuming to the E-bit (16 slices) burns
+      17× cycles with byte-identical kicks/draws, Zoe still absent: the
+      programs are *stuck*, not long. `03d6549` to be reverted (E36).
+- [ ] **E36 (running):** per-program VU1 trace of the stuck programs (loop
+      body, exit condition, input headers, VIF1 double-buffer state):
+      A runaway counted loop from bad input / B wait on unmodeled flag /
+      C interpreter semantics; one fix if named. Revert `03d6549` first.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
