@@ -13,7 +13,7 @@ wrong LC assumption; the corrected condition is committed but
 no paraLLEl frame was ever read back, so neither H1 (CPU backend fault) nor
 H2 (upstream fault) is discriminated.
 
-Recommended next action in §6.
+Verdict after Part-2 S3: **TABLED** (see §6).
 
 ## 1. Pins and receipts
 
@@ -32,9 +32,10 @@ Recommended next action in §6.
   `PS2X_GAME_CODEGEN_DIR=~/dev/ssx3-work/codegen-ssx3` (E32 recipe + shadow
   flags). One configure total.
 - Runner SHAs: S1 binary `4e01e7f3…` (1 read, superseded); S2 binary
-  `b8a694c5…` (1 read, superseded); final binary `25bd6450…` (2 matching
-  reads, post-S2 LC-condition edit — **not booted**). Suite binary
-  `8db3d488…` (1 read).
+  `b8a694c5…` (1 read, superseded); post-S2 binary `25bd6450…` (2 matching
+  reads, superseded unbooted); S3/Part-2 binary `3402f272…` (2 matching
+  reads, pre+post S3). Suite binary `8db3d488…` (1 read); suite 470/470
+  after every adapter edit (logs `/tmp/g44-suite*.log`).
 - Suite from fork root, all flags unset: **470/470** (463 E32 + 7 new G44).
 - `git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner` empty (verified
   post-commit).
@@ -84,6 +85,7 @@ Common: `PS2X_SKIP_MOVIE=1`, pad script
 | --- | --- | --- | --- | --- | --- |
 | S1 g44s1 | 152 s / 150 s, rc 0 wall-bound | 800–1200, cap 200 | 116 → ~1340 | Main Menu (Single Event) + Select Character (Zoe) | init ok; 400 `vsync()` calls (ticks 800–1199), ALL null; `no scanout image` |
 | S2 g44s2 | 302 s / 300 s, rc 0 wall-bound | 1050–1400, cap 200 | 235 → ~1160+ | Select Character (Zoe) settled | init ok; ~110 `vsync()` calls, ALL null with `CMOD=0 LC=0 INT=1 FFMD=0` |
+| S3 g44s3 (Part-2) | 301 s / 300 s, rc 0 wall-bound | 1000–1400, cap 200 | 276 → ~1916 | Select Character (Zoe) settled (`snap-0301.18s.png`) | init ok; workaround FIRED every eligible tick, ALL still null; counters: 219008 packets fed, 0 reg writes, 1800 presents, 0 pairs (`shadow-g44s3/shadow-stats.txt`) |
 
 Screens: `frames-g44s1-1/snap/snap-0042.11s.png` (Main Menu),
 `snap-0082.21s.png` + `snap-0152.38s.png` (Select Character, Zoe);
@@ -105,30 +107,35 @@ evidence that the feed is alive (S1, 400/400 identical setup lines):
 content), A-region fnv changing seq-to-seq (live writes). CPU presents
 512×448 from the same `fbp=112` (`upload-*.txt fnv` varies per tick).
 
-## 6. The ONE next action (orchestrator decides)
+## 6. Verdict: TABLED (Part-2 stop rule — scanouts still null, no T47 compare)
 
-**One S3 boot (300 s, same S2 script, window 1000–1400) on the committed
-head.** It validates the corrected workaround condition
-(`CMOD==0 && INT==1 && (LC==0 || LC==32)` → retry as NTSC geometry): expect
-`CMOD … workaround fired (scanout recovered)` lines and the first
-`pairs.csv` rows + side-by-sides answering Zoe. If scanouts stay null, the
-fallback is a no-SKIP boot to movie-park (E32a state) to test the
-hypothesis that SMODE1=0 is a SKIP_MOVIE-path artifact (BIOS/game video
-init skipped): read the G31 `SM=` fields there — NTSC+ANALOG would confirm
-it, and the shadow would likely just work on that path.
+S3 fired the corrected workaround on every eligible tick and every retry
+returned null. Forcing `CMOD=NTSC` is **insufficient**: the NTSC branch also
+requires `LC==ANALOG(32)`, and the game programs `LC=0` — the mode falls
+through to `Unknown video format` regardless of CMOD. No paraLLEl frame has
+ever been read back, so there is nothing to compare against the T47 PCSX2
+refs (`/Volumes/Extreme SSD/ps2x-t47/` untouched); the Zoe/H1-vs-H2 question
+is still open.
+
+Handoff to the E lane per orchestrator routing: the `SetGsCrt` HLE should
+program SMODE1 like the real kernel (NTSC+ANALOG 480i for the menu path),
+which fixes the root cause for both the shadow and any future presenting
+backend. G44 needs no further boots until that lands; the retry-as-NTSC
+workaround stays in the adapter as the scanout-side complement (it will
+fire successfully once SMODE1 carries a mapped mode). Precise E-lane
+observable: G31 `SM=` fields should read `2/1/0` (or `2/x/x`) after the
+fix; the shadow's `workaround fired (scanout recovered)` line is the
+acceptance signal.
 
 ## 7. Gaps (stated plainly)
 
 - Zoe/H1-vs-H2 unanswered: 0 readbacks. The cross-check the brief wanted
   needs S3.
-- The committed workaround condition is UNVALIDATED (no boot budget left:
-  1 configure + 2 boots used; retry clause requires a lease-holder crash,
-  which did not happen).
-- Feed-volume counters (`gifPacketsFed`/`regWritesFed`) are only persisted
-  to `shadow-stats.txt` on pair write — with 0 pairs there is no exact
-  packet count, only the G31 per-vsync VRAM deltas. The adapter should log
-  feed counts periodically regardless of pairs.
-- `presentsSeen` likewise unpersisted with 0 pairs.
+- (Part-2, resolved) The corrected workaround condition is now VALIDATED as
+  insufficient: S3 fired it every eligible tick, all retries null
+  (LC=0 unmapped independent of CMOD). 1 configure + 3 boots used.
+- (Part-2, resolved) Feed counters persist every 60 presents regardless of
+  pairs (fork commit `8c45d1f`): S3 left exact receipts (219008/0/1800/0).
 - FIFO readback (`read_transfer_fifo`, T3/R1) is not mirrored; scanout-only
   compare does not need it, but a future presenting backend will.
 - `GRANITE_VULKAN_LIBRARY` is a mini-specific absolute path in the boot
