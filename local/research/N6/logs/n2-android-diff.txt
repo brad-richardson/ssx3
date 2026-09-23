@@ -1,0 +1,80 @@
+diff --git a/ps2xRuntime/src/lib/ps2_pad.cpp b/ps2xRuntime/src/lib/ps2_pad.cpp
+index 8590f14..dbe465a 100644
+--- a/ps2xRuntime/src/lib/ps2_pad.cpp
++++ b/ps2xRuntime/src/lib/ps2_pad.cpp
+@@ -1,6 +1,10 @@
+ #include "runtime/ps2_pad.h"
+ #include "ps2_host_backend.h"
+ #include <cstring>
++#if defined(__ANDROID__)
++#include <cstdio>
++#include <cstdlib>
++#endif
+ 
+ namespace
+ {
+@@ -40,6 +44,15 @@ bool PSPadBackend::readState(int /*port*/, int /*slot*/, uint8_t *data, size_t s
+     uint16_t btns = 0xFFFFu;
+     constexpr int kGamepad = 0;
+     const bool useGamepad = IsGamepadAvailable(kGamepad);
++#if defined(__ANDROID__)
++    // N6: raylib latches gamepad-0 ready on the first controller event, so a
++    // strict gamepad/keyboard if-else would permanently ignore keyboard state
++    // (including adb-injected keys, which arrive with a keyboard source).
++    // Union both inputs on Android; desktop keeps the old fallback.
++    const bool useKeyboard = true;
++#else
++    const bool useKeyboard = !useGamepad;
++#endif
+     auto clearBit = [&btns](uint16_t mask)
+     { btns &= ~mask; };
+ 
+@@ -87,7 +100,7 @@ bool PSPadBackend::readState(int /*port*/, int /*slot*/, uint8_t *data, size_t s
+         data[4] = static_cast<uint8_t>(128 + rx * 127);
+         data[5] = static_cast<uint8_t>(128 + ry * 127);
+     }
+-    else
++    if (useKeyboard)
+     {
+         if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))
+             clearBit(PAD_UP);
+@@ -121,5 +134,39 @@ bool PSPadBackend::readState(int /*port*/, int /*slot*/, uint8_t *data, size_t s
+ 
+     data[2] = static_cast<uint8_t>(btns & 0xFF);
+     data[3] = static_cast<uint8_t>(btns >> 8);
++#if defined(__ANDROID__)
++    // N6 diagnostic (env-gated, off by default): log the pad word and
++    // analog bytes whenever they change. Proves the controller mapping
++    // per button without depending on game-screen semantics.
++    {
++        static bool logInit = false;
++        static bool logOn = false;
++        static uint16_t lastBtns = 0x0000u; // force one initial line
++        static uint32_t lastSticks = 0x80808080u;
++        static bool lastGp = false;
++        if (!logInit)
++        {
++            logInit = true;
++            const char *env = std::getenv("PS2X_PAD_LOG");
++            logOn = (env && env[0] == '1');
++        }
++        const uint32_t sticks = (static_cast<uint32_t>(data[4]) |
++                                 (static_cast<uint32_t>(data[5]) << 8) |
++                                 (static_cast<uint32_t>(data[6]) << 16) |
++                                 (static_cast<uint32_t>(data[7]) << 24));
++        if (logOn && (btns != lastBtns || sticks != lastSticks ||
++                      useGamepad != lastGp))
++        {
++            lastBtns = btns;
++            lastSticks = sticks;
++            lastGp = useGamepad;
++            std::fprintf(stderr,
++                         "[padlog] gp=%d btns=0x%04x "
++                         "rx=%02x ry=%02x lx=%02x ly=%02x\n",
++                         useGamepad ? 1 : 0, btns, data[4], data[5],
++                         data[6], data[7]);
++        }
++    }
++#endif
+     return true;
+ }

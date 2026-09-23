@@ -1,0 +1,19 @@
+# N6 APK / .so pins (build tree + mini agree; mini read twice)
+# Base N4 APK re-verified before launch 1:
+#   d93b81a72d101b4b61fa54fb66f560b7eb8f91255e579a66df79597e6ee76229  134164820 B
+# Build 1 (n2-android ae210c9, union fix; launches 2-3):
+APK1_SHA=cd4b9330ad4fd807bda180714a2b8996ba718a0c8395466759af48cbf4888efd
+APK1_BYTES=134164884
+SO1_SHA=36bd25a26a1bd61f2b3d4327304749ccdb7e25c8dd8d739b23f59a6c29e451c8
+SO1_BYTES=905606288
+SO1_BUILDID=9779ea396b5be4facc676af895c630e3e93a809d
+# Build 2 (n2-android 65c95d9, union + PS2X_PAD_LOG; launch 4):
+APK2_SHA=134616db21c97caf09622af99edf90afdabe5164dfd785130415f2bd918094c5
+APK2_BYTES=134165236
+SO2_SHA=e6ce8624560a8e02e62dc93e6803b8dd1194e68c103f1321e7f0f681e0dbee64
+SO2_BYTES=905612312
+SO2_BUILDID=91bc4977f374697f5d8224ff1b678729fe60ed85
+# Both builds: UNDEF_SUB_STAR=0, defined sub_* T=9457 (re-probe; the
+# build-script grep ' T sub_' misses mangled _Z...sub_ names, same as N4),
+# STR PS2X_SKIP_MOVIE=1 PS2X_PAD_SCRIPT=2 ps2x.env=4 SLUS_207.72=3 DEINTERLACE=1,
+# aapt: profileable + showWhenLocked + turnScreenOn present.
