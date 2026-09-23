@@ -20,8 +20,10 @@ import e31_boot as b
 
 WORK = os.path.expanduser("~/dev/ssx3-work")
 b.SPIKE = WORK
-b.RUN = os.path.join(WORK, "E46-run")
-b.RUNNER = os.path.join(WORK, "E46-build", "ps2xRuntime", "ps2EntryRunner")
+b.RUN = os.environ.get("E46_RUN_DIR", os.path.join(WORK, "E46-run"))
+b.RUNNER = os.path.join(
+    os.environ.get("E46_BUILD_DIR", os.path.join(WORK, "E46-build")),
+    "ps2xRuntime", "ps2EntryRunner")
 b.CDDIR = os.path.join(WORK, "E32-inputs", "cd", "SLUS_207.72")
 b.ISO = os.path.join(WORK, "E32-inputs", "SSX 3 (USA).iso")
 

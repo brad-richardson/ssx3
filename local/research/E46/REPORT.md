@@ -234,3 +234,147 @@ SC (~tick 1240–1400) fell between snap-0030 (1025) and snap-0060
    remaining entries (watch `0x140bc0`-class + new `0x32f8b0`).
 4. The all-18 codegen (`codegen-ssx3-e46`) and E46-build/E46-run are
    left in place for the bisect lane.
+
+---
+
+## Part 2 — bisect, combined boot, SC rider (orchestrator follow-up)
+
+Budget: up to 6 boots, both mini slots in parallel. Used all 6
+(e46c/d/e/f/g/h). Each bisect config = `0x396b40` + one suspect,
+own codegen dir (`codegen-ssx3-e46<target>`), E33 vsync route.
+
+### (1) Bisect: the breaker is `0x3b1140`
+
+| Boot | Extra vs e46b | Wall/tick | Verdict |
+|---|---|---|---|
+| e46c | `0x3b1140`, runner `4591f446…` | 120 s / 6098 | BLACK (4×9448-B snaps, byte-identical to e46a black); 0 missing (died before others fire) |
+| e46d | `0x14e130`, runner `1763289a…` | 120 s / 3732 | HEALTHY menus; 16 missing (other 16) |
+| e46e | `0x144928`, runner `79d6d9c6…` | 120 s / 3011 | HEALTHY menus; 15 missing (other 15) |
+| e46f | `0x30db90`, runner `37eddc99…` ×2 | 120 s / 3927 | HEALTHY menus; 7 missing |
+
+Correlation is perfect: every config containing `0x3b1140` (e46a,
+e46c) goes black; all five without it are healthy. Bisect runner
+SHAs are single-read (build dirs were reconfigured for the next
+config; e46f's binary survives in E46B-build, hence ×2).
+
+Why calling `0x3b1140` breaks (code-read, no fix — no one-line
+mechanism bug found):
+- The target is a refcount-release: `v0=[a1+16]-1`, store, return
+  if >0, else unlink the node. All 3 calls pass `a1=0x548840`
+  (same node): counts 3→2→1→0+unlink on the third call. Caller
+  (`0x3b0698`, legit vtable call `obj+52`) ignores all outputs, so
+  the only observable delta vs the skip path is the refcount +
+  unlink memory writes.
+- Resume mechanism verified correct by reading, 7 ways: emitted
+  callee body faithful (incl. `movn`, `bgtz`+`sw`-delay, `jr ra`);
+  caller sets `ra=fallthrough` BEFORE dispatch and runs the delay
+  slot; table slot single → correct owner; exactly one switch case;
+  owner prefix skipped is other getters (dead by `jr ra` anyway);
+  `r0` reads guarded; dispatch returns true with `pc=fallthrough`.
+- This is the boot's FIRST previously-skipped call (frames
+  identical through tick 245), so pre-246 guest state is faithful;
+  the corruption vector must be the unlink writes interacting with
+  state our runtime built differently pre-246 (HLE/loader/patch
+  suspects), not a resume defect — the same path carries
+  `0x396b40` (×1000+), `0x14e130`, `0x144928`, `0x30db90` to
+  healthy menus. Recommended next step: PCSX2-side watch on
+  `[0x548840+16]` + node words across the transition (T-lane), or
+  an EE-word watch boot here with only `0x3b1140` in a pre-246
+  window.
+- `0x3b1140` stays OUT of `ssx3.toml` (only exclusion).
+
+### (2) Combined boot e46g: all-but-breaker + `0x32f8b0`
+
+18 entries (`codegen-ssx3-e46g`, `resolved 18 of 18 across 17
+owners`, 18 files differ), runner `a2521d92…` ×2, wall 300, tick
+8951, snap 10 (30 snaps). Missing-target: **only `0x3b1140` ×3** —
+all 18 resolve and no new targets appear on this route. Site-1
+appx 189 rows all `tw0=0x1b0`. SC transition captured at tick 1269
+(no rider yet — appends start ~1273); steady SC missed again
+(next snap tick 1481 = Select Peak). Race reached (tick 7403+):
+HUD live (1ST/2, 00:00:31, 4%, 75 MPH, +5000 STYLE BONUS) but 3D
+world black with faint streaks — same class as E31's own race
+frames (viewed `frames-e31l-1/snap-0583.00s.png`: dark + streaks),
+so no regression and no race-3D fix either.
+
+### SC rider capture (boot e46h, 6th boot)
+
+e46g's snap-10 still bracketed steady SC, while its race portion
+(ticks 7403–8951, same E31-route script and config) already
+answers the step-3 questions, so boot 6 was re-aimed at SC
+steady-state (wall 120, snap 5, same combined runner): **PASS —
+the rider renders.** `e46h-sc-rider.png`: Zoe's 3D model (jacket,
+pants, hair, shoes) at Select Character with stats/silhouettes,
+matching T62's PCSX2 reference layout. e46h missing-target:
+`0x3b1140` ×3 only; site-1 `0x1b0` ×189. Step-2 criterion MET.
+
+### (3) Race: world still dark (from e46g, no 7th boot)
+
+Step 3's questions answered by e46g's race portion (same script +
+config as a dedicated race boot would use; a 7th boot would exceed
+the 6-boot cap): 3D world NOT visible (black + faint streaks,
+E31-class); missing targets remaining: `0x3b1140` ×3 only. Race-3D
+needs a follow-up: either race-time-only resume entries (see
+rescan candidates below) or a downstream draw/GS gap — SC-rider
+pixels prove the menu 3D path end-to-end, the race world path does
+not follow yet.
+
+### Rescan (orchestrator FYI): relaxed data-ref pass
+
+`local/tooling/ee/ee-xref 0x396b40` confirms `.rodata 0x493644 →
+0x396b40` (my strict scan required `jr ra` at A−8; all 18 census
+targets sit behind `[jr ra][?][nop]` with the `jr ra` at A−12).
+New script `local/research/E46/e46_rescan.py`, full output
+`local/research/E46/e46-rescan.txt`: 106,303 data words →
+**1210 hits** (interior, 8-aligned, `word[A−12]==jr ra` and
+`word[A−4]==nop`), **census recall 18/19** (misses only
+`0x30db90`, reached via register computation; `0x140bc0` has 36
+data refs, `0x32f8b0` ← `.rodata 0x48e5a4`). The 1192
+non-census hits are the race-time candidate set — report-only, no
+entries added without a boot, per instructions.
+
+### Part 2 frames (`local/research/E46/frames/`)
+
+| Frame | SHA256 (short) | Shows |
+|---|---|---|
+| `e46h-sc-rider.png` | `78da2e1a…` | SC WITH Zoe 3D rider (step-2 PASS) |
+| `e46g-sc-transition.png` | `83923a13…` | SC at tick 1269, pre-rider |
+| `e46g-race.png` | `f63bf643…` | race HUD live, world dark |
+| `e46c-breaker-black.png` | `6120a759…` | breaker black (≡ e46a black) |
+
+### Part 2 receipts
+
+- Fork `ssx3.toml`: 18 passing entries, byte-identical list to the
+  validated `ssx3-e46g.toml` (modulo machine paths); `0x3b1140`
+  excluded with comment. `codegen-ssx3` untouched (canonical);
+  `codegen-ssx3-e46g` is the validated-next candidate dir.
+- Suite 591/591 re-run on current source (E46B-build binary).
+- Runners: e46g/h `a2521d92…` ×2; e46f `37eddc99…` ×2; e46c/d/e
+  single-read (dirs reconfigured).
+- Traces: e46g `a2ef1819…` (11,456,512 B), e46h `aa4ed5b1…`
+  (4,517,888 B), ×2. Logs: e46g `710dc808…` (10,148,720 B), e46h
+  `d37df89c…` (7,427,619 B), ×2.
+- Slots: waves ran one runner per slot with own run dirs
+  (E46-run/E46B-run) and PID tracking; all leases released; GB2
+  peer excused once (`pgrep_rc: 0` on e46f, PID verified foreign).
+- Boots used: 6/6 (c, d, e, f, g, h). Disk: E46 ≈ 8 GB total
+  (builds ×2 5.8, 7 codegens 1.9, runs + logs 0.2) of 200 GB cap.
+- Deltas to Part 1: `e46_boot.py` gained `E46_RUN_DIR` /
+  `E46_BUILD_DIR` overrides; new `e46_rescan.py` +
+  `e46-rescan.txt`; REPORT appended. No recompiler source changes
+  in Part 2 (toml only).
+
+### Updated recommendation
+
+1. Committed: mechanism + 18 passing entries (this report's
+   appendix commit). `codegen-ssx3` promotion to `-e46g` content
+   is the orchestrator's gate call.
+2. `0x3b1140`: needs the T-lane PCSX2 watch (or EE-word watch
+   boot) before any entry; do not add blind.
+3. Race-3D: next lane picks from the 1192 rescan candidates that
+   fire at race time (needs a race-window missing-target census —
+   currently ZERO missing targets fire in the race, so the gap
+   may be downstream of the function table, not more entries).
+4. Cleanup candidate (orchestrator): `E46B-build/`,
+   `codegen-ssx3-e46{,b,3b1140,14e130,144928,30db90}/`,
+   `E46B-run/` once the gate passes (~4.5 GB).
