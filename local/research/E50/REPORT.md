@@ -378,3 +378,177 @@ Options:
 Recommendation: 1. Neither half alone meets the gate's validation
 criterion, and both are plain field/rounding mismatches against PCSX2's
 FPU.cpp.
+
+---
+
+## Part 3: the R5900 FPU-semantics fix, regen, validation
+
+Orchestrator decision: option 1 (A + B as one fix, plus RSQRT.S), on the
+fork's `ssx3`. **Result:** the camera is fixed in both scenes (it meets
+every T65 invariant) and the race world now draws (sky, sun, fog, terrain,
+rider). **But the race still differs from PCSX2** (terrain largely
+untextured/dark with shard-like fragments; zero-area prims ~15× T65; VU1
+budget exits appear). Per the gate, **the fix is committed on `ssx3`
+(`eac6cba`) but NOT pushed**, and the tables are handed back.
+
+### Fix (fork `~/dev/PS2Recomp`, `ssx3` @ `eac6cba`, parent `b48b502`; not pushed)
+
+| File | Change |
+| --- | --- |
+| `ps2xRecomp/src/lib/fpu_translator.cpp` | SQRT.S emits `FPU_SQRT_S(ctx->f[ft])` (was `fs`); RSQRT.S emits `FPU_RSQRT_S(ctx->f[fs], ctx->f[ft])` (was `1.0f / sqrtf(ctx->f[fs])`) |
+| `ps2xRuntime/include/ps2_runtime_macros.h` | `Ps2FpuSqrtS` = sqrt(\|t\|), ±0/denormal gives a signed zero (PCSX2 `SQRT_S`); `Ps2FpuRsqrtS` = s/sqrt(\|t\|), zero divisor gives ±FMAX by the sign of t (PCSX2 `RSQRT_S`); `FPU_CVT_W_S` = `Ps2FpuCvtWS`, which truncates and saturates when the exponent is past 0x4E8 (PCSX2 `CVT_W`), replacing `nearbyintf` |
+| `ps2xTest/src/ps2_fpu_semantics_tests.cpp` (+ CMake, main) | 5 tests: SQRT.S operand (0x46050044), SQRT.S sqrt(\|x\|) and −0, RSQRT.S operand and semantics (±FMAX), CVT.W.S truncate + saturate, guest sincos `0x31be50` replay at ±π/2 and over ±2π |
+
+Suite on `ssx3` + fix (`E50/build-fix`, from the fork root): **597/597**
+(592 at `b48b502` + 5). Before the fix the four Part-2 tests fail
+(`tests-part2-failing.txt`). The RSQRT.S test can't compile against the old
+tree (no `FPU_RSQRT_S`), and its translation assertion fails on the old
+generator string. Runner dir: `git diff --stat 14b1e5cb eac6cba --
+ps2xRuntime/src/runner` is empty. Diagnostic taps stay off `ssx3` (on
+`e50-diag`; validation used `e50-val` = `eac6cba` + taps `749afb7`,
+`3685507`, all default off).
+
+### Regen and codegen diff
+
+`E50/build-fix/ps2xRecomp/ps2_recomp E50/part3/ssx3-e50.toml` (the fork
+toml with E49's three internal-disk path lines, output
+`~/dev/ssx3-work/codegen-ssx3-e50`): 1.8 s, `resolved 19 of 19 configured
+extra function start(s) across 18 owner function(s)`, 9,457 files.
+
+| Diff vs `codegen-ssx3-e49` | Count |
+| --- | --- |
+| files differing | 30 |
+| changed lines | 36 old → 36 new |
+| lines matching `ctx->f[d] = FPU_SQRT_S(ctx->f[0])` → `…(ctx->f[ft])`, same fd | **36 / 36** |
+| any other change | **0** |
+
+(CVT.W.S and RSQRT.S change in the runtime macro only, so the codegen text
+doesn't change for them.) Full diff: `codegen-e49-vs-e50.diff`.
+
+### Validation build
+
+`E50/build` reconfigured to `PS2X_GAME_CODEGEN_DIR=codegen-ssx3-e50`,
+branch `e50-val`, Release, logs OFF: 10 min 37 s at nice 10 after the
+quiet-host wait (load < 8, no compiler). Runner
+`7d3598614a573e57a149d2a666aa0c69a527e492f4df1ed53bf1cdc5ce64dc8f` ×2.
+Suite on `e50-val`: **603/603**.
+
+### Boot e50e: SC (121 s, rc 0, slot 1)
+
+Camera block of the SC 3D programs vs T65 §5c:
+
+| qw | recomp e50e (x, y, z, w) | PCSX2 T65 §5c | max diff |
+|---|---|---|---|
+| 0x000 | bf093f98 00000000 3380419a 33800000 | bf093f99 00000000 3380419a 33800000 | 1 ulp |
+| 0x001 | b3093f99 00000000 bf804199 bf7fffff | b3093f9a 00000000 bf804199 bf7fffff | 1 ulp |
+| 0x002 | 00000000 3f201f89 00000000 00000000 | 00000000 3f201f88 00000000 00000000 | 1 ulp |
+| 0x003 | 36d6735f 00000000 433e63f0 4347ffff | 36d67360 00000000 433e63ef 4347ffff | 1 ulp |
+| 0x004/5 | 44800000 c4800000 cafffee7 0 / 44fff000 44fff000 4afffee7 0 | same | 0 |
+
+| block | abs col x | abs col y | abs col z | abs col w | x.y | x.w | y.w | y/x | NaN/Inf/den |
+|---|---|---|---|---|---|---|---|---|---|
+| recomp SC e50e (all 9 3D programs) | 0.536127 | 0.625481 | 1.002002 | 1.000000 | 0.00e+00 | 1.65e-15 | 0.00e+00 | 1.1667 | none |
+| PCSX2 SC (T65) | 0.536127 | 0.625481 | 1.002002 | 1.000000 | 0.00e+00 | 1.65e-15 | 0.00e+00 | 1.1667 | none |
+
+The rider renders: `frames/e50e-sc-tick1333.png` shows Zoe with the SC
+background mountains, viewed by eye. SC counts (T65 format, 1300–1310)
+are 611 MSCAL, 5,844 verts, on 4,112–4,114, off 34–38, straddle 16–20,
+zero-area 5–15, ADC 1,294 (`an-e50e-sc-t65.md`). Per-startPC MSCAL is
+unchanged (it matched T65 already).
+
+### Boot e50f: race (450 s, rc 0, slot 1; I25 held slot 2)
+
+Camera (vsync 7605, all 18 3D programs dumped; `an-e50f-t65.md`):
+
+| block | abs col x | abs col y | abs col z | abs col w | x.y | x.w | y.w | y/x | NaN/Inf/den |
+|---|---|---|---|---|---|---|---|---|---|
+| recomp race A (0x44e, 0x459) | 0.266262 | 0.310639 | 1.000067 | 1.000000 | 1.35e-09 | 2.15e-09 | 4.09e-09 | 1.1667 | none |
+| recomp race B (0xd7, 0xf2, 0xfb, 0x134, 0x147, 0x189, 0x22a, 0x0, 0xa, 0x6, 0x73) | 0.266262 | 0.310639 | 1.002002 | 1.000000 | 1.35e-09 | 2.15e-09 | 4.09e-09 | 1.1667 | none |
+| PCSX2 race A / B (T65 §5d) | 0.266262 | 0.310638 | 1.000066 / 1.002002 | 1.000000 | ≤1.6e-09 | ≤3.7e-09 | ≤1.8e-08 | 1.1667 | none |
+
+**Invariants met**, both z variants present, and the 2D programs (0x10,
+0xe, 0x4) carry a 2D matrix as in T65 §5b. Before the fix: |w| 1.2126,
+dots up to 4e-2.
+
+PATH1 counts in T65 definitions (per drawing vsync; 7602 and 7608 draw nothing):
+
+| | mscal | p1 verts | on | off | straddle | zero-area | adc |
+|---|---|---|---|---|---|---|---|
+| recomp e50f 7600–7610 | 765–807 | 29,229–30,817 | 19,001–20,598 | 864–1,441 | 94–149 | **2,229–2,359** | 6,870–7,146 |
+| recomp before fix (e50b) | 191 | 6,196 | 4,810 | 0 | 2 | 49–59 | 936 |
+| PCSX2 T65 26714–26723 | 684–695 starts | 27.5k–28.2k | 16.7k–16.9k | 2.65k–3.06k | 837–912 | 135–162 | 4.7k–4.9k |
+| PCSX2 whole race min / median / max | — | 19,382 / 33,700 / 46,822 | 9,591 / 20,382 / 29,644 | 1,321 / 2,997 / 5,652 | 474 / 719 / 1,453 | 49 / 180 / 461 | 4,298 / 7,822 / 10,497 |
+
+The recomp's on/verts/ADC fall inside PCSX2's whole-race range (the two
+windows are different race moments: the recomp at 00:00:08, T65 at
+00:00:18). **Outside the whole-race range: zero-area (5× PCSX2's max),
+straddle (below PCSX2's min), off (below PCSX2's min).**
+
+Per-startPC census (per vsync) vs T65 §6 (3-vsync sums ÷ 3):
+
+| tpc | recomp MSCAL | PCSX2 starts | recomp PATH1 draws (on/off/str) |
+|---|---|---|---|
+| 0x44e | 198.1 | 120.7 | 4,988 (4780/147/60) |
+| 0x459 | 244.9 | 133.0 | 8,309 (8166/93/49) |
+| 0x10 / 0xe / 0x4 | 46 / 46 / 24 | 46 / 46 / 24 | 0 / 0 / 1,499 |
+| 0x134 / 0x147 | 1.0 / 5.7 | 8 / 3 | 172 / 295 (all off) |
+| 0xd7 / 0xf2 / 0xe0 / 0xfb | 22 / 11.3 / 0 / 2 | 49.7 / 23 / 3 / 5 | 792 / 393 / — / 20 (all off) |
+| 0x741 | **0** | 39 | — |
+| 0x22a / 0x0 / 0xa / 0x6 / 0x73 / 0x2 / 0x8 | 20 / 93 / 16 / 2 / 10 / **0** / **0** | 20 / 81 / 16 / 2 / 11 / 12 / 4 | 0 / 3,068 / 531 / 80 / 434 / — / — |
+| 0x28c / 0x140 | 0 / 1.0 | 3 / 7 | — / 3.9 |
+| 0x257 | 35.7 | 35 | 119 |
+| 0x189 | 13.3 | **not in T65 list** | 467 (172/295/0) |
+| total | 782–807 | ~691 | |
+
+19 programs start now, 5 before the fix. The 2D/HUD programs (0x10,
+0xe, 0x4, 0x22a, 0xa, 0x6, 0x257) match T65 exactly. Scene-dependent
+programs differ; with different race moments this doesn't discriminate
+by itself. Missing vs T65: 0x741, 0x2, 0x8, 0xe0, 0x28c. Extra: 0x189.
+
+**New: VU1 budget exits.** Over 7590–7610, 17 of 19 drawing vsyncs have
+`vu_exhausted` = 1 (whole gfx file: 334 vsyncs at 1, 67 at 2; 0 before
+the fix, E47 H2). vu_maxcyc is 13–18.5k. The program isn't identified
+(`PS2X_VU1_TRACE` was off in this boot).
+
+Frames (viewed by eye; PCSX2 reference `T65/t65-shot-t65a-race.png`):
+- `frames/e50f-race-tick7622.png` (00:00:08) and
+  `frames/e50f-race-tick8275.png` (00:00:19): sky with sun and lens flare,
+  fog, rider, trail and HUD render. Terrain is mostly a dark untextured
+  surface with scattered light-blue shard polygons.
+- PCSX2 at 00:00:18: fully textured snow slopes, trees, rock walls,
+  distant mountains.
+
+### What this establishes (tables only; the orchestrator decides)
+
+| Question | Answer |
+|---|---|
+| Camera matrix fixed? | Yes. SC within 1 ulp of PCSX2; race meets every invariant |
+| Rider still renders at SC? | Yes |
+| Race matches PCSX2? | **No**: terrain texturing/geometry, zero-area prim excess, VU1 budget exits, 5 missing and 1 extra startPC |
+| Suite | 597/597 on `ssx3` + fix; 603/603 on `e50-val` |
+| Pushed? | **No** (gate: push only if both boots pass) |
+
+Recommended next (the orchestrator decides):
+1. The fix stands on its own (defect proven, semantics per PCSX2, regen
+   diff exactly the 36 predicted lines, camera exact), so it can be pushed
+   independently of the remaining race gap. Standing ff-push authorisation
+   applies once the orchestrator OKs it.
+2. New lane for the remaining race gap: `PS2X_VU1_TRACE` census of the
+   budget-exhausted startPCs plus E4 head draws of 0x44e/0x459 (TEX0,
+   zero-area share) at a race moment matched to T65 (00:00:18), and
+   a PCSX2 GS-dump comparison of the terrain draws.
+
+### Part 3 receipts
+
+- In this dir: `ssx3-e50.toml`, `codegen-e49-vs-e50.diff`,
+  `an-e50e-t65.md`, `an-e50e-sc-t65.md`, `an-e50f-t65.md`, `gfx-e50e.txt`,
+  `gfx-e50f-window.txt` (7590–7610), `entry-e50{e,f}.txt.gz`,
+  `frames/e50e-sc-tick1333.png`, `frames/e50f-race-tick7622.png`,
+  `frames/e50f-race-tick8275.png`.
+- `~/dev/ssx3-work/E50/part3/`: `regen.log`, `suite-fix.log` (597/597),
+  `suite-val.log` (603/603), `build-val.log`, `cmake-val.log`.
+- Raw (short SHA-256, bytes): boot-e50e `346e893b4555c2ad` 7,976,308;
+  boot-e50f `84a826d62478d0c1` 9,835,089; gfx-e50f `bdc70ba342c89836`
+  468,867; entry-e50f `968aea2f19bde48a` 4,538,461.
+- Budget: 3/3 Part-2/3 boots (e50d, e50e, e50f). Disk: E50 3.2 GB +
+  codegen-ssx3-e50 0.27 GB; internal total 62.5 of 200 GB.
