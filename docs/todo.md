@@ -405,6 +405,19 @@ with measured budgets, then 120 Hz simulation.
       `ExportImageToMemory` + `ofstream`). First Odin visit to Select
       Character. Profiles: title GS-rasterizer-bound, Select Character
       VU1-bound (see ledger).
+- [x] **N6 PASS (09-23, fdf7958): the Odin controller drives the PS2 pad.**
+  - The raylib Android gamepad path already worked, with a correct mapping
+    (every button, dpad, hat and stick was verified through `PS2X_PAD_LOG`).
+  - One fix, on `n2-android` `65c95d9` (local): Android now reads keyboard
+    and gamepad together. Before, the gamepad latch killed keyboard/adb
+    input after the first controller event.
+  - Injected keys route title → menu → Select Character with no script, and
+    there's no phantom input.
+  - Standard injector: `sendevent` on event8 (gamepad) / event5 (keyboard);
+    `input keyevent BUTTON_*` never reaches the game.
+  - Open: physical X/Y button positions (N6 §5, 2-minute hands-on test for
+    Brad). Analog L2/R2 axes are unmapped by design (digital keys drive
+    them).
 - [ ] N5: Odin race with E33's vsync-keyed pad script (after E33), plus a
       dumps-off build for a quotable speed number.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
