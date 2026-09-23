@@ -152,8 +152,12 @@ with measured budgets, then 120 Hz simulation.
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
       in the same microcode library. So the game computes a different source
       offset: game state or a mis-recompiled EE instruction. **E40 + T50
-      (running, paired):** log REF-tag source addrs + a write watch on the tag's
-      addr word (storing function, computing registers) on both sides.
+      (paired):** E40 Part 1 PASS (09-23, fork `9b82d35`): **zero** REF tags carry
+      these MPGs (12,160 flowed inline) and neither address is a code constant:
+      the game copies microcode from the library into packet buffers with EE
+      code. Part 2 (E40) + redirected T50: a guest **read** watch on the
+      library words at 0x435bf8 / 0x4349b8 (reading function, pointer math,
+      index source) on both sides.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
