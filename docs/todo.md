@@ -173,6 +173,16 @@ with measured budgets, then 120 Hz simulation.
       VU0 call trace with budget hits, 0x809670 watch incl. SPR_FROM) + **T57**
       (PCSX2 VU0 calls + VIF0 census). Dropped assumptions: uploader index as
       root cause, "baked in data", asset loading, VU1 as suspect.
+      **T57 PASS (8416522): healthy PCSX2 runs zero VU0 micro-programs and zero
+      VIF0 words at settled SC (913 vsyncs, hooks proven live); PCSX2 interp has
+      no VU0 cycle budget.** VU0 is not active in the steady state, so the VIF0
+      MSCAL gap / 4096 budget can only matter at scene build (still a fix-later
+      item). **E44 Boot A (67e879c):** recomp item 0 is a multi-producer slot
+      (`sub_00376938` store64s + toSPR from `0x80b270`/`0x80ea70`); window
+      1270–1280 missed the 0x30 stager (cap closed in vsync 1270). Next:
+      E44 Boot B (Part 2 taps) + Boot C (last-writer at the 0x362f68 walk,
+      vsyncs 1355–1400); **T58** (PCSX2 scene-build writer of the
+      `0x809670`/`0x809b70` buffers incl. fromSPR/SIF, from a pre-SC state).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
