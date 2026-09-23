@@ -383,6 +383,24 @@ with measured budgets, then 120 Hz simulation.
         (15 CD reads, then none), the E30 shape → **E34**.
       - To do: promote `codegen-ssx3-e49` (2 files differ) to canonical
         once E50 finishes with the current tree.
+      **E50 PASS (6c84d91): the camera is wrong.**
+      - The recomp's camera block fails T65's invariants in the race
+        (|w| 1.21, dots ~3e-2) and at SC.
+      - At SC the error is exactly **R + 0.4438·I**: the view rotation is
+        wrong and the position is right.
+      - Traced by a value watch to a **wrong quaternion at `0x00bc5950`**
+        (object `0x00bc5920`), read by the quat→matrix routine
+        `sub_0015D928`, whose COP2 translation reads correct. The recomp
+        has q ≈ (0,0,0.527,0.948), |q|² 1.18; expected (0,0,√½,√½).
+      - The race runs only 5 of PCSX2's 22 VU1 startPCs (191 vs ~691
+        MSCAL/vsync) and 4.8k vs 16.7k on-screen prims. That fits culling
+        against a bad camera (untested). SC per-startPC MSCAL counts match
+        PCSX2 exactly.
+      - New dev taps on `e50-diag`: T65-format counts, `PS2X_E4_HEAD`,
+        entry trace `all`, `PS2X_E50_VALWATCH`.
+      **Next:** E50 Part 2 (the quaternion writer → the first wrong op →
+      a unit test → one fix + SC/race validation) ∥ **T66** (PCSX2 value
+      and writer at `0x00bc5950`).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
