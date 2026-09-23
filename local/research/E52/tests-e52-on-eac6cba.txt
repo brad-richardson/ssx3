@@ -1,0 +1,94 @@
+[Suite]: E52FpuCop2Audit
+  [Run]: COP2 CFC2 VI1 zero-extends 16 bits (sanity)   [Passed]
+  [Run]: COP2 CTC2 CMSAR1 (0x48c4f800, 1 site) starts a VU1 microprogram (VU0.cpp CTC2 REG_CMSAR1)   [Failed]
+      - ctc2 to CMSAR1 must start VU1 at the written address; got: ctx->vu0_cmsar1 = GPR_U32(ctx, 4);
+  [Run]: COP2 CTC2/CFC2 R keeps 23 bits (VU0.cpp CTC2/CFC2 REG_R)   [Failed]
+      - ctc2 R=~0 then cfc2: PCSX2 0x007fffff, got 0xffffffff
+  [Run]: COP2 VCALLMSR (0x4a00d839, 8 sites) starts at CMSAR0 (COP2.cpp: vu0ExecMicro(VI[CMSAR0]))   [Failed]
+      - vcallmsr must take its start from CMSAR0 (ctx->vu0_cmsar0); got: {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+      - vcallmsr reads ctx->vi[27], past the 16-entry VI array; got: {     uint16_t instr_index = ctx->vi[27] & 0x1FF;     uint32_t target_byte_addr = (uint32_t)instr_index << 3;     ctx->vu0_pc = target_byte_addr;     runtime->vu0StartMicroProgram(rdram, ctx, target_byte_addr); }
+  [Run]: COP2 VSQI (0x4be1137d, 14 sites) stores vf[fs] to VU0 data at vi[it]*16 (_vuSQI)   [Failed]
+      - vsqi must store vf2 at vi1 and post-increment vi1; got: { uint32_t addr = ((uint32_t)(ctx->vi[2] & 0x3FF)) << 4; __m128i old_val = READ128(addr); __m128 res = _mm_blendv_ps(_mm_castsi128_ps(old_val), ctx->vu0_vf[1], _mm_castsi128_ps(_mm_set_epi32(-1, -1, -1, -1))); WRITE128(addr, _mm_castps_si128(res)); ctx->vi[2] = (ctx->vi[2] + 1) & 0x3FF; }
+      - vsqi must target VU0 data memory, not EE address vi*16 via WRITE128; got: { uint32_t addr = ((uint32_t)(ctx->vi[2] & 0x3FF)) << 4; __m128i old_val = READ128(addr); __m128 res = _mm_blendv_ps(_mm_castsi128_ps(old_val), ctx->vu0_vf[1], _mm_castsi128_ps(_mm_set_epi32(-1, -1, -1, -1))); WRITE128(addr, _mm_castps_si128(res)); ctx->vi[2] = (ctx->vi[2] + 1) & 0x3FF; }
+  [Run]: FPU ADD/SUB/MUL.S round toward zero (PCSX2 FPUFPCR ChopZero)   [Failed]
+      - add.s 1 + 1.5*2^-24: PCSX2 0x3f800000, got 0x3f800001
+      - sub.s 1 - 1.25*2^-24: PCSX2 0x3f7ffffe, got 0x3f7fffff
+      - mul.s (1+2^-23)(1.5+2^-23): PCSX2 0x3fc00002, got 0x3fc00003
+  [Run]: FPU C.EQ/C.LE compare fpuDouble operands (denormal = 0, Inf pattern = FMAX)   [Failed]
+      - c.eq.s(denormal, 0): PCSX2 true
+      - c.le.s(0x7f800000, FMAX): PCSX2 true
+      - c.eq.s(0x7fc00000, same): PCSX2 true
+  [Run]: FPU CVT.S.W rounds toward zero above 2^24   [Failed]
+      - cvt.s.w 16777219: PCSX2 0x4b800001, got 0x4b800002
+      - cvt.s.w 0x7fffffff: PCSX2 0x4effffff, got 0x4f000000
+  [Run]: FPU CVT.W.S / ABS.S / NEG.S match PCSX2 (sanity, E50 fix)   [Passed]
+  [Run]: FPU DIV.S by zero gives +/-FMAX by sign(fs)^sign(ft) (checkDivideByZero)   [Failed]
+      - 1 / +0: PCSX2 +FMAX, got 0x7f800000
+      - 1 / -0: PCSX2 -FMAX, got 0x7f800000
+      - -1 / +0: PCSX2 -FMAX, got 0xff800000
+      - 0 / 0: PCSX2 +FMAX, got 0x7f800000
+      - 1 / denormal: PCSX2 treats the divisor as 0 -> +FMAX, got 0x7f800000
+  [Run]: FPU MADD.S/MADDA.S round the product before the add (no fused multiply-add)   [Failed]
+      - madd.s: PCSX2 +0, got 0x33800000
+      - madda.s: PCSX2 ACC = +0, got 0x33800000
+  [Run]: FPU MAX.S/MIN.S compare as sign-magnitude integers (fp_max/fp_min)   [Failed]
+      - max.s(-0, +0): PCSX2 +0, got 0x80000000
+      - min.s(+0, -0): PCSX2 -0, got 0x00000000
+      - max.s(0xffc00000, 1): PCSX2 1.0 (a negative number), got 0xffc00000
+  [Run]: FPU SQRT.S rounds toward zero (sqrtss under ChopZero)   [Failed]
+      - sqrt.s 5: PCSX2 0x400f1bbc, got 0x400f1bbd
+  [Run]: FPU operands: Inf/NaN patterns read as +/-FMAX, denormals as +/-0 (fpuDouble)   [Failed]
+      - mul.s 0x7f800000 * 0: PCSX2 FMAX*0 = +0, got 0x7fc00000
+      - add.s denormal + -0: PCSX2 +0, got 0x00400000
+  [Run]: FPU results clamp overflow to +/-FMAX (checkOverflow)   [Failed]
+      - add.s FMAX + FMAX: PCSX2 0x7f7fffff, got 0x7f800000
+      - mul.s -FMAX * 2: PCSX2 0xff7fffff, got 0xff800000
+  [Run]: FPU results: denormals flush to signed zero (checkUnderflow)   [Failed]
+      - mul.s 1e-20 * 1e-20: PCSX2 +0, got 0x000116c2
+      - mul.s -1e-20 * 1e-20: PCSX2 -0, got 0x800116c2
+  [Run]: VU0 VADD/VMUL clamp overflow and Inf operands to FMAX (VU_MAC_UPDATE, vuDouble)   [Failed]
+      - vadd FMAX+FMAX: PCSX2 FMAX, got 0x7f800000
+      - vadd 0x7f800000+1: PCSX2 FMAX, got 0x7f800000
+      - vmul 0x7f800000*0: PCSX2 +0, got 0x7fc00000
+  [Run]: VU0 VADD/VMUL round toward zero (VU0FPCR ChopZero)   [Failed]
+      - vadd 1 + 1.5*2^-24: PCSX2 0x3f800000, got 0x3f800001
+      - vmul: PCSX2 0x3fc00002, got 0x3fc00003
+  [Run]: VU0 VCLIPw flag bits: +x=bit0, -x=bit1, ..., against |ft.w| (_vuCLIP)   [Failed]
+      - clip (2,-2,0.5) vs w=1: PCSX2 0x09 (+x, -y), got 0x00000006
+      - clip vs w=-1 uses |w|: PCSX2 0x09, got 0x00000036
+  [Run]: VU0 VDIV (0x4a6303bc, 85 sites): x/0 = +/-FMAX, chop rounding (_vuDIV)   [Failed]
+      - 1 / +0: PCSX2 +FMAX, got 0x00000000
+      - 1 / -0: PCSX2 -FMAX, got 0x00000000
+      - 1 / denormal: PCSX2 +FMAX, got 0x7f800000
+      - 1 / 3: PCSX2 0x3eaaaaaa (chop), got 0x3eaaaaab
+  [Run]: VU0 VFTOI0 saturates by sign (floatToInt)   [Failed]
+      - vftoi0 3e9: PCSX2 0x7fffffff, got 0x80000000
+      - vftoi0 0x7f800000: PCSX2 0x7fffffff, got 0x80000000
+  [Run]: VU0 VITOF0 rounds toward zero above 2^24 (intToFloat)   [Failed]
+      - vitof0 16777219: PCSX2 0x4b800001, got 0x4b800002
+      - vitof0 0x7fffffff: PCSX2 0x4effffff, got 0x4f000000
+      - vitof0 -16777219: PCSX2 0xcb800001, got 0xcb800002
+  [Run]: VU0 VMADDw/VMADDAz: product rounded before the add; chop on the add   [Failed]
+      - vmaddaz.x 1 + 1.5*2^-24: PCSX2 0x3f800000, got 0x3f800001
+  [Run]: VU0 VMAX/VMINI compare as sign-magnitude integers (fp_max/fp_min)   [Failed]
+      - vmax(0xffc00000,1): PCSX2 1.0, got 0xffc00000
+  [Run]: VU0 VMUL flushes denormal results to signed zero (VU_MAC_UPDATE exp 0)   [Failed]
+      - vmul 1e-20^2: PCSX2 +0, got 0x000116c2
+      - vmul -1e-20*1e-20: PCSX2 -0, got 0x800116c2
+  [Run]: VU0 VOPMULA/VOPMSUB lane mapping (sanity)   [Passed]
+  [Run]: VU0 VRINIT/VRNEXT: R = 0x3f800000|23 bits; RNEXT advances the LFSR and writes ft   [Failed]
+      - vrnext.x after rinit 0x12345678: PCSX2 0x3fe8acf1, got 0x00000000
+  [Run]: VU0 VRSQRT (0x4a6403be, 104 sites): Q = fs/sqrt(|ft|), ft = 0 gives +/-FMAX (_vuRSQRT)   [Failed]
+      - 1/sqrt(+0): PCSX2 +FMAX, got 0x00000000
+      - 1/sqrt(-4): PCSX2 0.5 (|ft|), got 0x00000000
+  [Run]: VU0 VRSQRT reads fs (synthetic 0x4a020bbe: Q = vf1.x / sqrt(vf2.x))   [Failed]
+      - 6/sqrt(4): PCSX2 3.0, got 0x3f000000
+  [Run]: VU0 VSQRT (0x4a0403bd, 285 sites): sqrt(|ft|), chop rounding (_vuSQRT)   [Failed]
+      - vsqrt -4: PCSX2 2.0, got 0x00000000
+      - vsqrt 5: PCSX2 0x400f1bbc, got 0x400f1bbd
+
+========================================
+Total Tests: 627
+Passed: 600
+Failed: 27
+========================================
