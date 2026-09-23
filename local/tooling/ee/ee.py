@@ -74,8 +74,11 @@ def build_index():
                         ins[a] = (int(m.group(2), 16), text, ds)
     xref = build_xref(ins)
     data = {"key": key, "ins": ins, "xref": xref}
-    with open(path, "wb") as f:
-        pickle.dump(data, f)
+    try:
+        with open(path, "wb") as f:
+            pickle.dump(data, f)
+    except OSError as e:  # sandboxed workers may not write outside their workspace
+        sys.stderr.write(f"[ee] cache not saved ({e}); continuing in memory\n")
     return data
 
 
