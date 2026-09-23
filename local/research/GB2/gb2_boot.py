@@ -69,6 +69,9 @@ def main():
     ap.add_argument("--script", default=None)
     ap.add_argument("--gs-queue", default=None, help="PS2X_GS_QUEUE value (omit = unset)")
     ap.add_argument("--vq", action="store_true", help="set PS2X_VQ=1 (quiescent gate)")
+    ap.add_argument("--pklog", action="store_true", help="set PS2X_PKLOG=1 (packet+CSR log)")
+    ap.add_argument("--csr-drain", action="store_true",
+                    help="set PS2X_GS_CSR_DRAIN=1 (drain-on-CSR-load fix)")
     ap.add_argument("--capture-dir", default=None, help="PS2X_GS_CAPTURE_DIR value")
     ap.add_argument("--capture-n", default=None, help="PS2X_GS_CAPTURE_N value")
     ap.add_argument("--sample-at", type=float, default=None,
@@ -117,6 +120,14 @@ def main():
         env["PS2X_VQ"] = "1"
     else:
         env.pop("PS2X_VQ", None)
+    if args.pklog:
+        env["PS2X_PKLOG"] = "1"
+    else:
+        env.pop("PS2X_PKLOG", None)
+    if args.csr_drain:
+        env["PS2X_GS_CSR_DRAIN"] = "1"
+    else:
+        env.pop("PS2X_GS_CSR_DRAIN", None)
     if args.capture_dir is not None:
         os.makedirs(args.capture_dir, exist_ok=True)
         env["PS2X_GS_CAPTURE_DIR"] = args.capture_dir

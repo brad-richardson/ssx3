@@ -373,3 +373,130 @@ python3 local/research/GB2/gb2_ab.py boot-gb2a-1.log boot-gb2a2-1.log   # 1267 m
 ```
 
 (`<E33 route>` = the script string in `local/research/E33/REPORT.md` §"Vsync-clock script".)
+
+## 11. Part 3 — packet/CSR bisection (orchestrator amendment)
+
+Max 4 boots: (1) two boots (off/on, to tick 320) logging each submitted
+packet (`pk idx tick fnv len src`) plus each guest GS CSR/SIGLBLID read
+(`csr idx tick value pc`); (2) if a CSR/SIGNAL/FINISH read precedes the
+divergence, ONE candidate fix (drain-on-CSR-load when queued) + ONE vq
+validation pair, else stop and hand back.
+
+**Outcome: (1) points elsewhere — STOPPED per the brief. No CSR read
+precedes (or follows) the divergence; no validation boots run (2/4 used).
+The drain fix is built env-gated but never enabled/booted.**
+
+### 11.1 Change (fork commit `b975930` on `gb2-gs-queue`, no push)
+
+| File | Change |
+| --- | --- |
+| `ps2xRuntime/include/ps2_pk.h` (new) | `PS2X_PKLOG=1` packet + CSR log; `PS2X_GS_CSR_DRAIN=1` fix flag (dev, default off); 2M-line cap + TRUNCATED marker |
+| `ps2_memory.cpp` | 4 call sites: `submitGifPacket` (src=path), masked-flush emit (src=3), native P6 (src=img, setup+image fnv), native P7 (src=packed, verdict-true only) |
+| `ps2_runtime.cpp` | `Load16/32/64/128`: CSR/SIGLBLID branch (drain-if-flagged + log); matcher requires the GS priv range (see bug below) |
+| `gs_worker.h/.cpp`, `gs_frontend.cpp` | `isQuiescent()` + drain fast-path (skip Fence only when queue-empty-and-idle under one mutex — provably a no-op, same guarantee) |
+| `gb2_boot.py` | `--pklog`, `--csr-drain` flags |
+| `gb2_pkdiff.py` (new) | First-divergence finder (idx-aligned + 5-deep indel check), 10-before table, CSR reads before, pcs |
+
+CSR collapse rule (documented deviation from "log each read", forced by
+volume — a tight spin would emit billions): every read is COUNTED (idx),
+a line is emitted only on (pc,addr,value) change; idx gaps are spin
+lengths. Format fields match the brief plus `addr` (CSR vs SIGLBLID half).
+
+**Matcher bug (mine, fixed in `b975930`):** the first cut matched on
+`(vaddr & 0x1FFFFFFF)` physical base alone, which over-matches
+scratchpad `0x70001000/0x70001080` (same physical as CSR/SIGLBLID
+`0x10001000/0x10001080`). All 13.6K raw `csr` lines in the (1) boots are
+scratchpad reads. Corrected analytically by `addr=` filter (below); the
+fix requires the `0x12000000` priv range first, exactly mirroring
+`read32`'s dispatch. The pk log is unaffected.
+
+### 11.2 (1) boots (pristine: pklog on; NO vq, NO csr-drain)
+
+Same binary `efaa4ecf…19421f` (suite 576/576 before boots), E33 route,
+wall 120 (ticks 0–1300 reached; brief asked to tick 320 — superset):
+
+| Boot | Env | Ticks | pk lines | csr lines | Result |
+| --- | --- | --- | --- | --- | --- |
+| gb2e (off) | `--pklog` | 0..1299 | 144,591 | 13,639 | rc 0, wall, no truncation |
+| gb2f (on) | `--gs-queue 1 --pklog` | 0..1300 | 144,759 | 13,649 | rc 0, wall, no truncation |
+
+### 11.3 Handoff per the brief
+
+**First differing packet: idx 352 @ tick 80** — Path2, len 64, same tick,
+same src, different bytes: off fnv `85d9d4e9`, on fnv `888f9292`.
+Single substitution (353 realigns; both sides fully parseable with
+consistent fields — not a torn line; idx 0–351 verified clean+matching).
+
+**10 packets before it (idx 342–351, identical in both boots):**
+
+| idx | tick | fnv | len | src |
+| --- | --- | --- | --- | --- |
+| 342 | 79 | 11346f13 | 48 | 2 |
+| 343 | 79 | 628ef1a1 | 64 | 2 |
+| 344 | 79 | 27fe7be6 | 48 | 2 |
+| 345 | 79 | eb4606c | 80 | 2 |
+| 346 | 79 | 53ef76a6 | 144 | 2 |
+| 347 | 79 | 53ef76a6 | 144 | 2 |
+| 348 | 80 | cc6dd8df | 1696 | 3 |
+| 349 | 80 | 53ef76a6 | 144 | 2 |
+| 350 | 80 | 3dcd5d1 | 80 | 2 |
+| 351 | 80 | 11346f13 | 48 | 2 |
+
+**CSR reads before it: NONE.** After correcting the matcher bug by
+`addr=` filter: **zero genuine guest CSR/SIGLBLID loads in ticks 0–1300
+in either boot** (9,176/9,181 scratchpad lines at `0x70001000/04/80/84`;
+zero at `0x12001000/04/80/84`). Completeness: every vaddr `read32/64`
+routes to CSR passes `isGsPrivReg` (`0x12000000` range), all of which the
+hook matches; `0x12001000` is special (via the IO physical range), so
+recompiled loads route through the hooked `Load32/64` (with pc).
+**Guest pc: N/A** — no CSR reads precede; pk lines carry tick, not pc.
+
+**Further structure (strict-src filter, mutually present idx):** 9
+packets/tick ticks 75–92; the FIRST packet after each VBlank (Path2,
+len 64) differs ticks 80–91 (idx 352–451, every 9th); then a 143-packet
+structural burst idx 467–609 (len/src differ too), realigning at 610.
+Later-stream comparison is corruption-limited: concurrent `cerr` writers
+tear lines (garbage `src` values observed), so only the verified-clean
+prefix and strict-filtered rows are cited.
+
+**Ruled out as mechanisms:** guest CSR/SIGLBLID loads (zero); HLE-direct
+CSR reads (none exist in-tree); GS interrupts (the emulator never asserts
+them — no INTC_STAT channel); GIF_STAT backend-state reads (no callers
+outside GS); the `readIORegister` GS branch (unreachable, per its own
+comment). (1) points elsewhere ⟹ **STOP, no validation boots.**
+
+### 11.4 What the next lane gets
+
+- The divergence is a VIF1-Path2 packet *content* substitution with no
+  preceding completion observation — NOT deviation #2 (FINISH in-stream).
+  That deviation remains untested as a mechanism (it may still matter in
+  phases where CSR spins exist, e.g. E33's `0x375d10` — outside ticks
+  0–1300); the env-gated fix stands by, never booted.
+- First move should be an A2-pklog null: the every-9th periodic
+  substitution could be embedded run-varying bytes (pointer/uninit) that
+  would differ off/off too — 1 boot discriminates queue-vs-noise before
+  any fix work. Second: packet BYTES at idx 352 (capture tap with N>352),
+  and the unlogged channels (VIF/DMAC/GIF STAT loads, timers, CDVD).
+- For step (d): presents/s numbers stand from Part 2 §9.6 (4.42 off vs
+  1.53 on); the drain fast-path (`isQuiescent`) is in place for any
+  future per-read draining.
+
+### 11.5 Part 3 receipts
+
+- Builds: 2 (neither capped): `efaa4ecf` (logging + gated fix; the (1)
+  boot binary) and `93cd2d08` (matcher fix; suite-only, unbooted).
+  Suites 576/576 after both (`/tmp/gb2-suite-p3.log`,
+  `/tmp/gb2-suite-p3b.log`, scratch).
+- Boots: 2/4 (gb2e, gb2f), slot 1, PIDs tracked, released cleanly.
+- SHA gap (minor, stated): boot binary `efaa4ecf` has ONE pre-boot read
+  (rebuilt before a second read was possible); final binary `93cd2d08`
+  one post-build read. Non-device binaries.
+- Disk 36.7/200 GB. `ssx3` tip `e52b6bf` (E44 Part-4, moved during task);
+  `merge-tree` still 0 conflicts; overlap still only `ps2_runtime.cpp`
+  (E44's `loadELF` hunk vs GB2's `syncCoreSubsystems` + Load hooks —
+  disjoint). GB2's `ps2_memory.cpp` additions (4 log call sites) are new
+  overlap surface for E's fold (no textual conflict today).
+- Exact commands: §11.2 boots = `gb2_boot.py --label gb2e --wall 120
+  --snap 10.0 --script "<E33 route>" --pklog` and `--label gb2f ... --pklog
+  --gs-queue 1`; compare = `gb2_pkdiff.py boot-gb2e-1.log boot-gb2f-1.log`
+  (exit 1, first divergence idx 352 as above).
