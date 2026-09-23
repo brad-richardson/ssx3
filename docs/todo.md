@@ -361,6 +361,16 @@ with measured budgets, then 120 Hz simulation.
       (PCSX2)**: on/off-screen counts, first-N draw ring, VU1 data-memory
       matrix dumps at a race world program (plus SC control), and the EE
       builder of the matrix (VU0 macro / FPU ops suspect).
+      **T65 PASS (30f22d0): the pinned box is NOT a symptom.**
+      - PCSX2's race box is also 1023.5–3071.5 (the viewport transform
+        maps NDC ±1 there), and ~13% of healthy race prims are off-screen.
+      - PCSX2 race per vsync: ~16.7k on-screen / 2.9k off / 870 straddle /
+        4.8k ADC / ~27.6k PATH1 verts, vs ~6.5k draws total in the recomp.
+      - The camera (view×proj) sits at VU1 data qw 0–3, with invariants
+        (orthogonal x/y/w, |w| = 1, |x| = 0.266262, |y| = 0.310638 in the
+        race).
+      - E50 redirected to those invariants and to prim-volume/program
+        census diffs.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
