@@ -184,7 +184,13 @@ with measured budgets, then 120 Hz simulation.
       B, so the recomp's render list lacks mode-6 records. **E43 + T54 (draw-record
       census by mode + mode-6 producers) queued/running; E42 PASS (`6dd0c73`): the recomp's
       stamper is the same `sub_00364CD0` mode-3 path (@`0x3651d4`), never the mode-6
-      path. E43 continues in E42's pane.** E40 lane closed (7 parts).
+      path. E43 continues in E42's pane.**
+      **T54 PASS (`16ddf3b`):** PCSX2 walks 6 records/vsync at SC (4 mode-3 w0
+      `0xcc`, 2 mode-6 w0 `0x1b0`); the mode-6 records are written each vsync inside
+      `func_394ED0` (stores `0x394fdc–0x394fe8`), called **unconditionally** from
+      `sub_00362DE8` @`0x362f68` with an 8-bit hash folded from the record's 4
+      words. E43 now logs those calls (items, hash, return); **T55** the same on
+      PCSX2. Separates different input items vs a hash (shift/sign) semantics bug. E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
