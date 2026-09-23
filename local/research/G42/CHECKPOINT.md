@@ -51,3 +51,11 @@
 
 ## Budgets used
 - Mac builds/runs: 1/1. Odin builds/runs: 1/0. Time ~1 h of 5 h box.
+
+## Closed (mini resume, 2026-09-22 ~20:50 EDT)
+- Lease was free; claimed `G42 2026-09-23T00:45:45Z`, ran
+  `g42-run-odin.sh both`, released lease, removed `/data/local/tmp/g42/`.
+- Turnip leg: exit 1, HAL dev has no GetInstanceProcAddr (setup failure,
+  not a verdict). Sys control: exit 0, G41-O1 replicated except C1 LANDED.
+- Receipts mirrored to `/Volumes/share/ssx3/ps2x-g42/`; REPORT.md written.
+- Final budgets: Mac 1/1, Odin builds/runs 1/2, ~2.5 h of 5 h.
