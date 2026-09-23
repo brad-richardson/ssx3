@@ -371,6 +371,18 @@ with measured budgets, then 120 Hz simulation.
         race).
       - E50 redirected to those invariants and to prim-volume/program
         census diffs.
+      **E49 PASS (e5be03a, fork `b48b502` pushed):**
+      - The MPEG HLE writes the `sceMpegIsEnd` word (`[[mpeg+0x40]+0]`,
+        read by `0x402b38`) once the stream has ended with the queue
+        drained. Create clears it (mirroring the stock Create→Reset).
+        `0x3b1140` is enabled (**19** `extra_function_starts`).
+      - Boot A (bypass) meets all 6 E48 observables: menus at t258, rider,
+        race. Zero missing-targets. Suite 592/592; the new test fails on
+        the old runtime.
+      - Faithful path (bypass off): stalls in movie 1's GetPicture wait
+        (15 CD reads, then none), the E30 shape → **E34**.
+      - To do: promote `codegen-ssx3-e49` (2 files differ) to canonical
+        once E50 finishes with the current tree.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
