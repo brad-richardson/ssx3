@@ -1,0 +1,13 @@
+# Orchestrator-verified labels (address<TAB>label<TAB>source). Add a row only
+# when the orchestrator has verified it; workers never edit this file.
+0x00396b40	set_template_mode6: w0 = (w0 & ~0x3C0) | 0x180 on *(a0+0xE84)	E46/T64, orchestrator codegen read 09-23
+0x00376938	render-list appender (menu template copy at 0x3797ec)	T60, orchestrator read 09-23
+0x0037a430	render-list appenders for the SC scene (copy sites 0x37ad44, 0x37b474)	T61/T62, orchestrator read 09-23
+0x00362de8	scratchpad item walker: hashes 112 items at 0x70000000 into draw records	E43/T55
+0x00394ed0	hash insert for draw records (called from 0x362f68)	E43/T55
+0x00363c20	render-list walker (calls 0x364cd0 with mode = (w0 & 0x3C0) >> 6)	E43/T54
+0x00364cd0	draw-record dispatch by mode (jump table at 0x492040)	E42/T54
+0x00382760	render DMA thread (WaitSema at 0x3827e0, state word 0x6214ec)	E40
+0x003629b8	renderer init: builds render-state template records (called once)	orchestrator read 09-23
+0x00375a08	renderer init (creates threads/semas, calls 0x3629b8)	orchestrator read 09-23
+0x00317184	counted step loop increment in cAppMan_mainLoop (published 60 FPS patch site)	X2 + handoff
