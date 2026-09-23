@@ -183,6 +183,17 @@ with measured budgets, then 120 Hz simulation.
       E44 Boot B (Part 2 taps) + Boot C (last-writer at the 0x362f68 walk,
       vsyncs 1355–1400); **T58** (PCSX2 scene-build writer of the
       `0x809670`/`0x809b70` buffers incl. fromSPR/SIF, from a pre-SC state).
+      **E44 Part 2 + Boot C PASS (8e8aa2a, fork 571579e):** zero VIF0 kicks, zero
+      VU0 micro-calls, zero SPR MOD≠0 kicks in the recomp too. **At both walks,
+      the recomp's item 0 is the toSPR copy of EE `0x809670` =
+      `(0x30, 0x814884, 0x2a0, 0)`**; PCSX2 copies the same buffer =
+      `(0x1b0, 0x814884, 0x2a0, ping-pong w3)`. w1/w2 agree; **w0 lacks `0x180`
+      and w3 is static 0.** Correction (orchestrator codegen read):
+      `sub_003629B8` is renderer init (called once from `sub_00375A08@0x375e78`)
+      and its `ori 0x180` stamps word +4 of a render-state template, not item
+      w0. Dropped as a candidate. Next: **E44 Part 3** (whole-boot writer of
+      `0x809670`/`0x809b70`, every path) ∥ **T58** (same buffers, PCSX2 scene
+      build).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
