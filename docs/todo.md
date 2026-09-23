@@ -161,9 +161,13 @@ with measured budgets, then 120 Hz simulation.
       +0x5A9C, double-buffered arenas 0x708520/0x63b8a0, 0x708a30/0x63bdb0,
       CHCR 0x185); each chain CALLs a **static uploader** in the library (RET
       tag @0x435bd0 carrying the microcode inline from 0x435bf8). So the choice
-      is the CALL tag's ADDR the chain builder writes. Part 4 (E40): store
-      watch on arena writes of library addresses + chain tag dump. T50
-      (PCSX2) logs the same mpgpay/dmareg to show which uploader it calls.
+      is the CALL tag's ADDR the chain builder writes. Part 4 (fork `531c09b`): the chain is
+      **baked at scene build** (no arena stores in 1300–1320; same chain with
+      4 CALLs → uploader 0x435bd0 re-kicked each frame; 0x4349b8 never
+      referenced); the builder loads the uploader address from table data
+      (candidate `sub_00367DB8`: base + index×4). Part 5 (E40): arena store +
+      "uploader address load" watch over the scene-build window 1150–1300. T50
+      (PCSX2) logs mpgpay/dmareg to show which uploader it calls.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
