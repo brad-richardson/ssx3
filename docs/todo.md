@@ -159,6 +159,20 @@ with measured budgets, then 120 Hz simulation.
       interrupt/completion model (DMA-end/GS handler that advances the state
       and signals the sema). **T51 (PCSX2) running; recomp side = E40 Part 6
       after Part 5.** T50 PASS (3d89659).
+- [ ] **Independent frontier review (09-23, Fable, read-only) → new lead: VU0.**
+      Reframes the chain: the VU1/microcode links are the *victim*; the rider
+      object's scratchpad item lacks both mode 6 **and** its per-frame packet
+      pointer w3 (recomp `0x30/…/w3=0` vs PCSX2 `0x1b0/…/w3=0x6efd00`), so the
+      object's per-frame build never happens. Orchestrator-verified runtime
+      facts: `processVIF0Data` has **no MSCAL/MSCALF/MSCNT/BASE/OFFSET** branch
+      (unknown opcode → `break`, packet tail lost); `executeVU0Microprogram`
+      runs VU0 with a **4,096-cycle silent budget**; SPR DMA implements normal
+      mode only (chain/interleave kicks copy nothing). Reviewer also flagged:
+      statefile captures (T56) can't prove "baked pre-load"; E38's 0x12B8 entry
+      vi03 already differs. Probes: **E44 Part 2** (VIF0 unknown-opcode census,
+      VU0 call trace with budget hits, 0x809670 watch incl. SPR_FROM) + **T57**
+      (PCSX2 VU0 calls + VIF0 census). Dropped assumptions: uploader index as
+      root cause, "baked in data", asset loading, VU1 as suspect.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
