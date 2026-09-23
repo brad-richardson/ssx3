@@ -488,6 +488,14 @@ with measured budgets, then 120 Hz simulation.
         through a non-CSR channel.
       - Part 6 (code read): where does guest-visible time couple to GS
         work in the direct path? Then park at step (a).
+      **Part 6 (9e29912):**
+      - VBlank is purely cycle-driven in our regime, and GS work charges no
+        cycles. So the divergence enters through a racing guest read of a
+        GS priv register (a non-CSR readback of the aliased `gs_regs`
+        while its writer is still queued).
+      - Recommendation: fence before every guest load in the GS priv range.
+      - Part 7 validates it: 2 queue-on boots must match queue-off and each
+        other.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
