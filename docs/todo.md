@@ -24,6 +24,16 @@ with measured budgets, then 120 Hz simulation.
   Proposed, awaiting Brad: bradflix (x86_64, 14 cores, 62 GB) as the
   Android build host, which frees bytesize for PCSX2.
 
+- [x] **E45 PASS (09-23, 3087c7c/e77e751): VU1 `VuWide=double`.** Fork branch
+      `e45-vu-double` `310b30f` (not pushed); suite 570/570. On the Odin the
+      double build's hash equals the Mac's and equals quad on all 5 bench
+      programs (incl. FLT_MAX/denormal edges), so the change is speed-only:
+      quad costs 1.3–1.8× per FMAC-dense instruction. N4's quad soft-float
+      self share was only ~8–9%, so the game gain is modest. It also covers
+      VU0 macro mode (shared core). To do: fold `310b30f` into `ssx3` after
+      E44 Part 4 pushes; cherry-pick onto `n2-android` for N5's dumps-off APK.
+      Bench used fallback programs, not SSX 3's real microcode (that needs a
+      RAM dump).
 - [ ] **VU1 speed (top performance item, 09-22, N4):** on the Odin Select
       Character runs at ~0.2 guest vsyncs/s with the VU1 interpreter at 94.8%
       of samples, much of it quad-precision soft-float (`__addtf3`,
