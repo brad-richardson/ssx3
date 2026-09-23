@@ -7,7 +7,7 @@ Usage: launch.py --label L1 [--dumps] [--profile-after-tick N] [--wall 600]
 Preconditions (checked, not fixed): lease free or ours, keyguard
 showing=false, battery >= 20 % and charging (override --min-battery).
 """
-import argparse, os, re, subprocess, sys, time, hashlib, json
+import argparse, atexit, os, re, signal, subprocess, sys, time, hashlib, json
 
 D = '622c49b1'
 PKG = 'com.ps2x.runner'
@@ -84,6 +84,16 @@ lcp = subprocess.Popen(['adb', '-s', D, 'logcat', '-v', 'epoch', '-b', 'main', '
                         '-s', 'ps2x', 'raylib', 'DEBUG', 'libc', 'AndroidRuntime'],
                        stdout=lc, stderr=subprocess.STDOUT)
 T0 = time.time()
+
+
+# Rule (Brad, 09-23): force-stop right after EVERY run, including runs that
+# die mid-script, so the charger can keep up.
+def _force_stop():
+    subprocess.run(['adb', '-s', D, 'shell', 'am', 'force-stop', PKG], capture_output=True, timeout=30)
+
+
+atexit.register(_force_stop)
+signal.signal(signal.SIGTERM, lambda *_: sys.exit('SIGTERM'))
 log('AM ' + sh(f'am start -n {PKG}/android.app.NativeActivity').strip().replace('\n', ' | '))
 time.sleep(6)
 sh('input keyevent 4')
