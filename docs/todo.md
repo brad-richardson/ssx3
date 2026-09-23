@@ -819,7 +819,20 @@ with measured budgets, then 120 Hz simulation.
 
 ## A — audio (new 09-23)
 
-- [ ] **AU1 (Opus, scoping):** the IOP module and SIF RPC census, the
+- [x] **AU1 PASS (7f6c09f):** no sound code runs today.
+      - The EE loads SNDDRV.IRX (EA SND, symbols kept) and LIBSD.IRX, and
+        binds SND `0x534E44` (one init RPC, unhandled).
+      - The EE sound thread sleeps on sema 36, waiting for a **SIF cmd-1
+        tick from the IOP that never comes**. The runtime stores
+        `sceSifAddCmdHandler` handlers but never calls them, and
+        `sceSifSendCmd` drops its packets.
+      - The EE still reads `charsel.mus` (menu music) and then stalls.
+      - Routes: (a) HLE SND + host mixer; (b) upstream iop-emulator (no
+        SPU2, stubs sifcmd; not recommended wholesale); (c) run SNDDRV on
+        a small R3000 core + capture libsd AutoDMA.
+      - **AU2 spike running:** the protocol table + a delivered tick,
+        answering whether the music is EE-mixed PCM or IOP-side XA.
+- [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
       the smallest audible milestone.
