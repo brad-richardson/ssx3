@@ -69,7 +69,7 @@ with measured budgets, then 120 Hz simulation.
       `ssx3` fast-forward. Backups pushed 09-22 as `fork/archive/*` +
       `fork/e29-movie-bypass`. After the orchestrator verifies, delete the
       folded branches locally and on `fork` (Brad authorized 09-22).
-- [ ] E33: apply E30's two diffs on `ssx3` after E32, then 464/464, then an A/B
+- [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
       the 4097 cap before parking (E30 residual 3). Mid-movie CD refill
