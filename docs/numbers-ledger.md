@@ -22,6 +22,11 @@ Rules that keep this table honest (perf-review §1+§7):
 
 | Metric | Value | Date | Device / config | How measured |
 | --- | --- | --- | --- | --- |
+| PS2 recomp Odin guest speed, title / My Rules | 21.5 / 25.5 guest vsyncs/s = **0.36× / 0.43×** | 09-22 | Odin 3, N3 APK `69a79e29…` (aggressive logs off, frame-dump txt only), CPU GS, `PS2X_SKIP_MOVIE` | tick-gated `[frame:dump]` progression (PF1 runs 1–2, 6) |
+| PS2 recomp Odin GameThread cost | 36–46 CPU-ms per guest frame (thread ~93–99% busy) | 09-22 | Same | `top -H` TIME+ over wall ÷ ticks (PF1) |
+| PS2 recomp Odin Select Character speed | ~0.2 guest vsyncs/s (**diagnostic build**: PNG encode every present; not a speed number) | 09-22 | Odin 3, N4 APK `d93b81a7…` | tick progression over the settled 60 s (N4 L2) |
+| PS2 recomp Odin CPU profile split | Title: GS CPU rasterizer ~62% of samples (children), PNG dump ~30% (main thread); Select Character: **VU1 interpreter 94.8%** (children; incl. quad-precision soft-float FMAC); guest `sub_*` 0.39% / 0.00% self (**diagnostic build**, shares indicative) | 09-22 | Same N4 APK, simpleperf `--app` 30 s each | `local/research/N4/REPORT.md` profiles 1–2 |
+| PS2 recomp first stock race (Mac) | Happiness Rival: race starts, timer 00:00:01 → 00:00:04; 3D world near-black (logic, not rendering) | 09-22 | Mac (laptop M4), E29 bypass + pad script, aggressive-logs build | E31 e31l frames + orchestrator view |
 | Odin race pace, OGL | 0.83× mean / 0.63× low (~50/~38 fps) | 09-17 | Odin 3, m3-menu verified racing (gate→0:07/49 MPH), dual-core detGPU, idle ON, null audio, speed 10 fixed | 4–5 sample window, `pace-hunt/pace-menu-egl-receipts/` |
 | Odin race pace, Vulkan (true) | 0.73× mean / 0.64× low (~44/~38 fps) | 09-17 | Same, backend-patched DTM | Same, `pace-menu-vk-receipts/` |
 | Odin menu pace | ~1.3–1.4× OGL, ~1.5× VK | 09-17 | Same runs, menu windows | Same receipts |

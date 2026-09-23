@@ -10,8 +10,17 @@ read: `docs/archive/todo-2026-09-22.md`. Parked GameCube work:
 Odin (menu → input → stock race advancing). Then Odin native race
 with measured budgets, then 120 Hz simulation.
 
-## E — PS2 runtime (fork `ssx3` @ `3d4feed`)
+## E — PS2 runtime (fork `ssx3` @ `e57b5f8`)
 
+- [ ] **VU1 speed (top performance item, 09-22, N4):** on the Odin Select
+      Character runs at ~0.2 guest vsyncs/s with the VU1 interpreter at 94.8%
+      of samples, much of it quad-precision soft-float (`__addtf3`,
+      `__extendsftf2`) computing exact FMAC results. SSX 3 has only 7 VU1
+      microprograms / 7,305 instructions (P1 census), so options are (a) a
+      host-float FMAC fast path with PS2 clamping behind a flag, A/B against
+      the exact path; (b) static recompilation of the 7 microprograms, as the
+      EE is. Brief after E33 settles 3D correctness (don't change VU1 math
+      while it's the suspect).
 - [ ] **Missing 3D (top correctness item, 09-22):** race = HUD over a
       near-black silhouette; no rider on Select Character. Survey: VU1 is a
       cycle-stepped interpreter; VIF1 MSCAL/MSCNT gives it a fixed 65,536-
@@ -177,10 +186,15 @@ with measured budgets, then 120 Hz simulation.
       on the NativeActivity so runs work while the Odin stays locked (Brad
       keeps his PIN lock; 09-22). First unlock after a reboot is still
       required (credential-encrypted storage). Goes into the next N build.
-- [ ] **N4 (running):** rebase `n2-android` onto `e57b5f8`; showWhenLocked +
-      turnScreenOn + `<profileable>`; Android PNG frame export; first on-device
-      simpleperf profile (title + Select Character) grouped by component.
-      The race attempt waits for E33's vsync-keyed pad script.
+- [x] **N4 PASS (09-22):** `n2-android` rebased onto `e57b5f8` (+3 local
+      commits + manifest/PNG commit `f9d78da`); APK `d93b81a7…` is
+      profileable (simpleperf works with `--app`, not `-p`), lock-screen-safe,
+      and writes PNG dumps (raylib `fopen` failed on the app dir; now
+      `ExportImageToMemory` + `ofstream`). First Odin visit to Select
+      Character. Profiles: title GS-rasterizer-bound, Select Character
+      VU1-bound (see ledger).
+- [ ] N5: Odin race with E33's vsync-keyed pad script (after E33), plus a
+      dumps-off build for a quotable speed number.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
