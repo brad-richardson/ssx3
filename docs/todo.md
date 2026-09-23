@@ -188,7 +188,20 @@ with measured budgets, then 120 Hz simulation.
 - [x] Pruned 2 stale ssx3 + 7 stale fork worktree entries (09-22, dirs were
       already gone). Keep the SSD `ps2x-i*/fork-wt` worktrees: they are
       the only refs holding the branchless I10–I21 commits until the fold.
-- [ ] V1 follow-up: mirror `emulog-t46r3.txt` to the share.
+- [x] **V2 PASS (09-22): SSD inventory** (`local/research/V2/INVENTORY.md`).
+- [ ] **SSD cleanup tier 1 (awaiting Brad's approval to delete):** 59 entries in
+      `local/research/V2/delete-tier1.txt` (closed build trees, public
+      clones, stale closed-lane scratch, `ps2x-p1y` whose commits are on
+      `fork/archive/*`) plus the 40 `ps2x-t4` logs that the share holds at the
+      same size (never `emulog-t46r3.txt`). ≈ 350 GB. Kept: `mini-transfer-0922`
+      (a few days), `ps2x-e30`, live lane dirs.
+- [ ] Tier 2 after E32 pushes the fold: parked I-lane dirs (~255 GB).
+- [ ] Brad decides: `upstream-review` 232 GB, `ssx3-archive` 190 GB,
+      `android-spike` sources 117 GB + stale work dirs 13 GB (GameCube
+      reserve material), `laptop-evacuated-0918` 28 GB, `glimmer-ize` 18 GB,
+      `bradflix-ps2recomp`; plus his own `brad-google-takeout` 233 GB and
+      `aggiemail` 186 GB.
+- [ ] V1 follow-up: mirror `emulog-t46r3.txt` to the share (still SSD-only).
 - [ ] Mac internal disk ~3 GB free: keep builds on the SSD or bytesize.
 
 ## Cross-lane
