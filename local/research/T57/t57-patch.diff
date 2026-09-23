@@ -1,0 +1,288 @@
+diff --git a/pcsx2/COP2.cpp b/pcsx2/COP2.cpp
+index dc68e3dd1..3cd0fc7ce 100644
+--- a/pcsx2/COP2.cpp
++++ b/pcsx2/COP2.cpp
+@@ -5,6 +5,7 @@
+ 
+ #include "R5900OpcodeTables.h"
+ #include "VUmicro.h"
++void t57_cop2_ctx(); // T57: defined in VU0micro.cpp.
+ 
+ using namespace R5900;
+ using namespace R5900::Interpreter;
+@@ -15,6 +16,7 @@ using namespace R5900::Interpreter;
+ void VCALLMS()
+ {
+ 	_vu0FinishMicro();
++	t57_cop2_ctx(); // T57: COP2 vcallms start (log-only).
+ 	vu0ExecMicro(((cpuRegs.code >> 6) & 0x7FFF));
+ 	//vif0Regs.stat.VEW = false;
+ }
+@@ -22,6 +24,7 @@ void VCALLMS()
+ void VCALLMSR()
+ {
+ 	_vu0FinishMicro();
++	t57_cop2_ctx(); // T57: COP2 vcallmsr start (log-only).
+ 	vu0ExecMicro(VU0.VI[REG_CMSAR0].US[0]);
+ 	//vif0Regs.stat.VEW = false;
+ }
+diff --git a/pcsx2/VU0micro.cpp b/pcsx2/VU0micro.cpp
+index 1e2081d4c..2b94b0d71 100644
+--- a/pcsx2/VU0micro.cpp
++++ b/pcsx2/VU0micro.cpp
+@@ -9,6 +9,136 @@
+ 
+ #include <cmath>
+ 
++// T57: VU0 micro-program start/end watch + VIF0 command census (log-only).
++#include <atomic>
++extern std::atomic<int> g_t48_vsync; // T57: defined in GS.cpp (T48 vsync mirror).
++#define T57_MAXL 2000
++static u32 g_t57_n = 0;
++static bool g_t57_capped = false;
++static bool t57_budget()
++{
++	if (g_t57_n >= T57_MAXL)
++	{
++		if (!g_t57_capped) { g_t57_capped = true; Console.WriteLn("T57_CAP vsync=%d", g_t48_vsync.load(std::memory_order_relaxed)); }
++		return false;
++	}
++	g_t57_n++;
++	return true;
++}
++static const char* t57_opname(u32 cmd) // T57: VIF code names (same table as T49 t49_vif_name).
++{
++	switch (cmd)
++	{
++		case 0x00: return "NOP";
++		case 0x01: return "STCYCL";
++		case 0x02: return "OFFSET";
++		case 0x03: return "BASE";
++		case 0x04: return "ITOP";
++		case 0x05: return "STMOD";
++		case 0x06: return "MSKPATH3";
++		case 0x07: return "MARK";
++		case 0x10: return "FLUSHE";
++		case 0x11: return "FLUSH";
++		case 0x13: return "FLUSHA";
++		case 0x14: return "MSCAL";
++		case 0x15: return "MSCALF";
++		case 0x17: return "MSCNT";
++		case 0x20: return "STMASK";
++		case 0x30: return "STROW";
++		case 0x31: return "STCOL";
++		case 0x4a: return "MPG";
++		case 0x50: return "DIRECT";
++		case 0x51: return "DIRECTHL";
++		default: break;
++	}
++	if (cmd >= 0x60 && cmd <= 0x7f) return "UNPACK";
++	return "NULL";
++}
++static const char* t57_vianame(u32 v)
++{
++	return v == 0 ? "cop2" : (v == 1 ? "vif0" : "unknown");
++}
++static bool g_t57_pend = false;
++static u32 g_t57_pcaller = 0, g_t57_pvia = 9, g_t57_pstart = 0, g_t57_pms = 0;
++static u64 g_t57_pc0 = 0;
++static u32 g_t57_ctx_via = 9, g_t57_ctx_caller = 0, g_t57_ctx_ms = 0;
++static u32 g_t57_noebit = 0; // T57: E-bit stops with nothing pending (pre-window program).
++void t57_cop2_ctx() { g_t57_ctx_via = 0; g_t57_ctx_caller = cpuRegs.pc; g_t57_ctx_ms = 0; }
++void t57_vif0_ctx() { g_t57_ctx_via = 1; g_t57_ctx_caller = cpuRegs.pc; }
++void t57_msop(u32 op) { g_t57_ctx_ms = op; }
++static u32 g_t57c[128] = {0,};
++static int g_t57c_vs = -1;
++static void t57_vif0_flush(int vs)
++{
++	for (u32 c = 0; c < 128; c++)
++	{
++		if (!g_t57c[c]) continue;
++		if (!t57_budget()) return;
++		Console.WriteLn("vif0op vsync=%d op=%s n=%u", vs, t57_opname(c), g_t57c[c]);
++	}
++}
++static void t57_vif0_sync()
++{
++	if (g_t57c_vs < 0) return;
++	int v = g_t48_vsync.load(std::memory_order_relaxed);
++	if (v == g_t57c_vs) return;
++	t57_vif0_flush(g_t57c_vs);
++	for (u32 c = 0; c < 128; c++) g_t57c[c] = 0;
++	g_t57c_vs = v;
++}
++void t57_vif0_count(u32 cmd)
++{
++	int v = g_t48_vsync.load(std::memory_order_relaxed);
++	if (g_t57c_vs < 0) g_t57c_vs = v;
++	if (v != g_t57c_vs) { t57_vif0_flush(g_t57c_vs); for (u32 c = 0; c < 128; c++) g_t57c[c] = 0; g_t57c_vs = v; }
++	if (cmd < 128) g_t57c[cmd]++;
++}
++static void t57_emit(bool abort)
++{
++	if (!t57_budget()) return;
++	t57_vif0_sync(); // T57: flush any stale census vsync before the vu0call line.
++	int vs = g_t48_vsync.load(std::memory_order_relaxed);
++	u32 vi1 = VU0.VI[1].UL, vi2 = VU0.VI[2].UL;
++	unsigned long long cyc = (unsigned long long)(VU0.cycle - g_t57_pc0);
++	const char* via = t57_vianame(g_t57_pvia);
++	bool mark = (g_t57_pvia == 0 && g_t57_pcaller == 0x37deb8);
++	const char* ab = abort ? " end=abort" : "";
++	if (g_t57_pvia == 1)
++		Console.WriteLn("vu0call vsync=%d caller_pc=0x%x via=%s startPC=0x%x cycles=%llu vi1=0x%x vi2=0x%x ms=0x%x%s", vs, g_t57_pcaller, via, g_t57_pstart, cyc, vi1, vi2, g_t57_pms, ab);
++	else if (mark)
++		Console.WriteLn("vu0call vsync=%d caller_pc=0x%x via=%s startPC=0x%x cycles=%llu vi1=0x%x vi2=0x%x mark=sub_0037D968%s", vs, g_t57_pcaller, via, g_t57_pstart, cyc, vi1, vi2, ab);
++	else
++		Console.WriteLn("vu0call vsync=%d caller_pc=0x%x via=%s startPC=0x%x cycles=%llu vi1=0x%x vi2=0x%x%s", vs, g_t57_pcaller, via, g_t57_pstart, cyc, vi1, vi2, ab);
++}
++void t57_entry() // T57: top of vu0ExecMicro - previous program died without E-bit.
++{
++	if (g_t57_pend && !(VU0.VI[REG_VPU_STAT].UL & 1))
++	{
++		t57_emit(true);
++		g_t57_pend = false;
++	}
++}
++void t57_arm() // T57: after the stall-finish, before the new setup clobbers TPC.
++{
++	if (g_t57_pend)
++	{
++		t57_emit(true); // T57: superseded without E-bit (e.g. M-bit-stuck).
++		g_t57_pend = false;
++	}
++	g_t57_pcaller = g_t57_ctx_caller; g_t57_pvia = g_t57_ctx_via; g_t57_pms = g_t57_ctx_ms;
++	g_t57_pstart = (VU0.VI[REG_TPC].UL << 3);
++	g_t57_pc0 = VU0.cycle;
++	g_t57_pend = true;
++	g_t57_ctx_via = 9; g_t57_ctx_caller = 0; g_t57_ctx_ms = 0;
++}
++void t57_vu0_ebit() // T57: E-bit stop in _vu0Exec (VU0 interp only).
++{
++	if (!g_t57_pend) { g_t57_noebit++; return; }
++	t57_emit(false);
++	g_t57_pend = false;
++}
++
++
+ using namespace R5900;
+ 
+ // This is called by the COP2 as per the CTC instruction
+@@ -37,6 +167,7 @@ static __fi void vu0SetMicroFlags(u32* flags, u32 value)
+ }
+ 
+ void vu0ExecMicro(u32 addr) {
++	t57_entry(); // T57: log a previous program that died without E-bit.
+ 	VUM_LOG("vu0ExecMicro %x", addr);
+ 
+ 	if(VU0.VI[REG_VPU_STAT].UL & 0x1) {
+@@ -64,6 +195,7 @@ void vu0ExecMicro(u32 addr) {
+ 	VU0.cycle = cpuRegs.cycle;
+ 	if ((s32)addr != -1) VU0.VI[REG_TPC].UL = addr & 0x1FF;
+ 
++	t57_arm(); // T57: arm the pending-program record (log-only).
+ 	CpuVU0->SetStartPC(VU0.VI[REG_TPC].UL << 3);
+ 	_vuExecMicroDebug(VU0);
+ 	CpuVU0->ExecuteBlock(1);
+diff --git a/pcsx2/VU0microInterp.cpp b/pcsx2/VU0microInterp.cpp
+index 9b7502802..ba549334d 100644
+--- a/pcsx2/VU0microInterp.cpp
++++ b/pcsx2/VU0microInterp.cpp
+@@ -8,6 +8,7 @@
+ #include <cfenv>
+ 
+ extern void _vuFlushAll(VURegs* VU);
++void t57_vu0_ebit(); // T57: defined in VU0micro.cpp.
+ 
+ static void _vu0ExecUpper(VURegs* VU, u32* ptr)
+ {
+@@ -188,6 +189,7 @@ static void _vu0Exec(VURegs* VU)
+ 			_vuFlushAll(VU);
+ 			VU0.VI[REG_VPU_STAT].UL &= ~0x1; /* E flag */
+ 			vif0Regs.stat.VEW = false;
++			t57_vu0_ebit(); // T57: E-bit stop, emit the pending vu0call line (log-only).
+ 		}
+ 	}
+ 
+diff --git a/pcsx2/Vif_Codes.cpp b/pcsx2/Vif_Codes.cpp
+index 6f71cb33f..a85f9bfbe 100644
+--- a/pcsx2/Vif_Codes.cpp
++++ b/pcsx2/Vif_Codes.cpp
+@@ -8,6 +8,10 @@
+ #include "VUmicro.h"
+ #include "Vif_Dma.h"
+ #include "Vif_Dynarec.h"
++extern void t49_vif_mark_fn(); // T49: defined in VU1micro.cpp.
++void t57_vif0_ctx(); // T57: defined in VU0micro.cpp.
++void t57_msop(u32 op); // T57: defined in VU0micro.cpp.
++extern void t50b_mpg(u32 code); // T50b: defined in Vif1_Dma.cpp.
+ 
+ #define vifOp(vifCodeName) _vifT int vifCodeName(int pass, const u32* data)
+ #define pass1 if (pass == 0)
+@@ -39,7 +43,10 @@ __ri void vifExecQueue(int idx)
+ 	GetVifX.queued_program = false;
+ 
+ 	if (!idx)
++	{
++		t57_vif0_ctx(); // T57: VIF0-queued program start (log-only).
+ 		vu0ExecMicro(vif0.queued_pc);
++	}
+ 	else
+ 		vu1ExecMicro(vif1.queued_pc);
+ 
+@@ -384,6 +391,7 @@ vifOp(vifCode_MPG)
+ 		else
+ 		{
+ 			vifX.pass = 1;
++			if (idx == 1) t50b_mpg(vifXRegs.code); // T50b: MPG-imm0 payload source (log-only).
+ 			return 1;
+ 		}
+ 	}
+@@ -430,6 +438,8 @@ vifOp(vifCode_MSCAL)
+ 			return 0;
+ 		}
+ 
++		if (idx == 1) t49_vif_mark_fn(); // T49: packet boundary (log-only).
++		if (!idx) t57_msop(0x14); // T57: MSCAL queued (log-only).
+ 		vuExecMicro(idx, static_cast<u16>(vifXRegs.code), false);
+ 		vifX.cmd = 0;
+ 		vifX.pass = 0;
+@@ -469,6 +479,8 @@ vifOp(vifCode_MSCALF)
+ 			return 0;
+ 		}
+ 
++		if (idx == 1) t49_vif_mark_fn(); // T49: packet boundary (log-only).
++		if (!idx) t57_msop(0x15); // T57: MSCALF queued (log-only).
+ 		vuExecMicro(idx, static_cast<u16>(vifXRegs.code), true);
+ 		vifX.cmd = 0;
+ 		vifX.pass = 0;
+@@ -491,6 +503,8 @@ vifOp(vifCode_MSCNT)
+ 			return 0;
+ 		}
+ 
++		if (idx == 1) t49_vif_mark_fn(); // T49: packet boundary (log-only).
++		if (!idx) t57_msop(0x17); // T57: MSCNT queued (log-only).
+ 		vuExecMicro(idx, -1, false);
+ 		vifX.cmd = 0;
+ 		vifX.pass = 0;
+diff --git a/pcsx2/Vif_Transfer.cpp b/pcsx2/Vif_Transfer.cpp
+index 50ce4fb55..266594992 100644
+--- a/pcsx2/Vif_Transfer.cpp
++++ b/pcsx2/Vif_Transfer.cpp
+@@ -4,6 +4,8 @@
+ #include "Common.h"
+ #include "Vif_Dma.h"
+ #include "Vif_Dynarec.h"
++extern void t49_vif_record(u32 code, const u32* data, u32 avail, u32 cl, u32 wl, u32 mask, u32 tops, u32 itops); // T49: defined in VU1micro.cpp.
++void t57_vif0_count(u32 cmd); // T57: defined in VU0micro.cpp.
+ 
+ //------------------------------------------------------------------
+ // VifCode Transfer Interpreter (Vif0/Vif1)
+@@ -37,6 +39,8 @@ _vifT void vifTransferLoop(u32* &data) {
+ 
+ 
+ 			VIF_LOG("New VifCMD %x tagsize %x irq %d", vifX.cmd, vifX.tag.size, vifX.irq);
++			if (idx == 1) t49_vif_record(data[0], data, pSize, vifXRegs.cycle.cl, vifXRegs.cycle.wl, vifXRegs.mask, vifXRegs.tops, vifXRegs.itops); // T49: record every VIF1 command (log-only).
++			if (idx == 0) t57_vif0_count(vifX.cmd & 0x7f); // T57: VIF0 command census (log-only).
+ 			if (IsDevBuild && TraceLogging.EE.VIFcode.IsActive()) {
+ 				// Pass 2 means "log it"
+ 				vifCmdHandler[idx][vifX.cmd & 0x7f](2, data);
