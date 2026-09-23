@@ -124,9 +124,10 @@ with measured budgets, then 120 Hz simulation.
       the Mac (G-owned fork branch `g44-parallel-shadow`), per-vsync
       compare vs the CPU backend at title/menu/Select Character; also the
       H2 cross-check for the missing 3D.
-- [ ] parallel-gs / Granite forks: fix-only `ssx3` branches (G26, G28, the
-      G42/G43 Turnip HAL loader) once G44 settles the adapter's needs;
-      pushing needs Brad's OK.
+- [ ] **G45 (running):** fix-only `ssx3` branches for the parallel-gs +
+      Granite forks (G26, G28, Turnip HAL loader); Brad approved the push
+      (09-22); the orchestrator pushes after the gate, to the brad-richardson
+      URLs only (Granite's `origin` is upstream).
 - [ ] Commit G26 + G28 in the clone after the storage cutover (G39
       decision: carried diffs until then), with a clean rebuild and G39's
       R1/R2 shapes re-run as proof.
@@ -220,7 +221,8 @@ with measured budgets, then 120 Hz simulation.
       `fork/archive/*`) plus the 40 `ps2x-t4` logs that the share holds at the
       same size (never `emulog-t46r3.txt`). ≈ 350 GB. Kept: `mini-transfer-0922`
       (a few days), `ps2x-e30`, live lane dirs.
-- [ ] Tier 2 after E32 pushes the fold: parked I-lane dirs (~255 GB).
+- [x] **SSD tier 2 done (Brad approved 09-22):** 22 parked I-lane dirs deleted after checking no uncommitted tracked changes and every worktree head's content on folded `ssx3` (map rows ⊆ ssx3 CSV; the pre-scrub generated-code commit is intentionally gone); 15 dangling worktree entries pruned; SSD free 369 → 610 GB.
+- [ ] SSD personal copies look like partial duplicates of the share (takeout parts 1–5 smaller on the SSD, aggiemail 4.6k vs 53k files): Brad to confirm before any delete.
 - [ ] Brad decides: `upstream-review` 232 GB, `ssx3-archive` 190 GB,
       `android-spike` sources 117 GB + stale work dirs 13 GB (GameCube
       reserve material), `laptop-evacuated-0918` 28 GB, `glimmer-ize` 18 GB,
