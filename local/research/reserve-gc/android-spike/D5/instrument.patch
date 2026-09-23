@@ -1,0 +1,158 @@
+=== StaticRecompCore_Run.cpp ===
+--- StaticRecompCore_Run.cpp.d5orig	2026-09-17 22:14:49
++++ StaticRecompCore_Run.cpp	2026-09-18 01:19:25
+@@ -15,6 +15,10 @@
+ #include <cstdio>
+ #include <cstdlib>
+ #include <memory>
++#include <algorithm>
++#include <ctime>
++#include <unordered_map>
++#include <vector>
+ 
+ namespace
+ {
+@@ -51,7 +55,71 @@
+   }
+   return file;
+ }
++}
++
++// D5 TEMPORARY exception attribution (never committed; see D5/instrument.patch).
++namespace D5Exc
++{
++struct Slot
++{
++  u64 count = 0;
++  u64 ns_total = 0;
++  u64 timed = 0;
++  u64 nested = 0;
++};
++// Fixed array indexed by vector>>8: classic vectors land at 0x3..0xF while
++// 0x8000xxxx aliases keep their identity up at 0x8000x.
++constexpr u32 kSlots = 0x80010u;
++Slot g_slots[kSlots];
++u64 g_slot_overflow = 0;
++std::unordered_map<u32, u64> g_pc800;  // faulting srr0, vector 0x800 only
++struct OpenExc
++{
++  bool active = false;
++  u32 slot = 0;
++  u32 fault = 0;
++  u64 t0 = 0;
++};
++OpenExc g_open;
++
++inline u64 NowNs()
++{
++  timespec ts{};
++  clock_gettime(CLOCK_MONOTONIC, &ts);
++  return static_cast<u64>(ts.tv_sec) * 1000000000ull + static_cast<u64>(ts.tv_nsec);
++}
++
++// Top of each dispatch iteration, pre-dispatch guest pc.
++inline void OnDispatchPc(u32 pc)
++{
++  if (!g_open.active || pc != g_open.fault)
++    return;
++  g_open.active = false;
++  Slot& s = g_slots[g_open.slot];
++  s.ns_total += NowNs() - g_open.t0;
++  ++s.timed;
++}
++
++// At the ++m_native_exceptions site: vec is the vector, fault the srr0.
++inline void OnRaise(u32 vec, u32 fault)
++{
++  const u32 slot = vec >> 8;
++  if (slot >= kSlots)
++  {
++    ++g_slot_overflow;
++    return;
++  }
++  if (g_open.active)
++    ++g_slots[g_open.slot].nested;  // superseded before its rfi return
++  g_open.active = true;
++  g_open.slot = slot;
++  g_open.fault = fault;
++  g_open.t0 = NowNs();
++  ++g_slots[slot].count;
++  if (vec == 0x800u)
++    ++g_pc800[fault];
+ }
++}  // namespace D5Exc
+ 
+ void StaticRecompCore::Run()
+ {
+@@ -120,6 +188,7 @@
+           if (m_collect_dispatch_samples && (m_native_dispatches & 4095u) == 0)
+             ++m_dispatch_samples[m_guest.pc];
+           const u32 runtime_dispatch_address = m_guest.pc;
++          D5Exc::OnDispatchPc(runtime_dispatch_address);
+           u32 linked_dispatch_address = runtime_dispatch_address;
+           if (m_has_rel_modules)
+             ResolveNativeAddress(runtime_dispatch_address, &linked_dispatch_address, nullptr);
+@@ -166,6 +235,7 @@
+             m_guest.exception = 0;
+             m_guest.program_exception = 0;
+             ++m_native_exceptions;
++            D5Exc::OnRaise(m_guest.pc, m_guest.srr0);
+           }
+           if ((ppc.Exceptions & SYNC_EXCEPTION_MASK) != 0)
+             break;  // Hook-raised synchronous exception: deliver via Dolphin below.
+@@ -251,3 +321,33 @@
+   system.GetCoreTiming().Advance();
+   system.GetPPCState().downcount -= system.GetInterpreter().SingleStepInner();
+ }
++
++// D5 TEMPORARY exception attribution dump (never committed).
++void StaticRecompCore::DumpExcAttribution()
++{
++  for (u32 i = 0; i < D5Exc::kSlots; ++i)
++  {
++    const D5Exc::Slot& s = D5Exc::g_slots[i];
++    if (s.count == 0 && s.nested == 0)
++      continue;
++    const u64 mean = s.timed ? s.ns_total / s.timed : 0;
++    std::fprintf(stderr, "exc vector=0x%x count=%llu ns_total=%llu ns_mean=%llu nested=%llu\n",
++                 i << 8, static_cast<unsigned long long>(s.count),
++                 static_cast<unsigned long long>(s.ns_total),
++                 static_cast<unsigned long long>(mean),
++                 static_cast<unsigned long long>(s.nested));
++  }
++  if (D5Exc::g_slot_overflow)
++  {
++    std::fprintf(stderr, "exc vector=OVERFLOW count=%llu\n",
++                 static_cast<unsigned long long>(D5Exc::g_slot_overflow));
++  }
++  std::vector<std::pair<u32, u64>> pcs(D5Exc::g_pc800.begin(), D5Exc::g_pc800.end());
++  std::sort(pcs.begin(), pcs.end(),
++            [](const auto& l, const auto& r) { return l.second > r.second; });
++  for (std::size_t i = 0; i < pcs.size() && i < 32; ++i)
++  {
++    std::fprintf(stderr, "exc_pc vector=0x800 pc=0x%08x count=%llu\n", pcs[i].first,
++                 static_cast<unsigned long long>(pcs[i].second));
++  }
++}
+=== StaticRecompCore.cpp ===
+--- StaticRecompCore.cpp.d5orig	2026-09-17 22:14:49
++++ StaticRecompCore.cpp	2026-09-18 01:19:25
+@@ -225,6 +225,7 @@
+                (unsigned long long)m_bursts, (unsigned long long)m_charged_cycles,
+                (unsigned long long)m_hle_returns, (unsigned long long)m_hle_vectors,
+                (unsigned long long)m_hle_rejects);
++  DumpExcAttribution();
+   std::vector<std::pair<u32, u64>> dispatch_samples(m_dispatch_samples.begin(),
+                                                     m_dispatch_samples.end());
+   std::sort(dispatch_samples.begin(), dispatch_samples.end(),
+=== StaticRecompCore.h ===
+--- StaticRecompCore.h.d5orig	2026-09-17 22:14:49
++++ StaticRecompCore.h	2026-09-18 01:19:25
+@@ -47,6 +47,7 @@
+ 
+   void Init() override;
+   void Shutdown() override;
++  static void DumpExcAttribution();  // D5 TEMPORARY (see D5/instrument.patch)
+ 
+   void Run() override;
+   void SingleStep() override;

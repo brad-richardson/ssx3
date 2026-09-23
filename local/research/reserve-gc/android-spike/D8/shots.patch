@@ -1,0 +1,25 @@
+--- /tmp/d8_shots.orig	2026-09-18 09:22:42
++++ src/runtime/dolphin_runtime.cpp	2026-09-18 09:22:48
+@@ -484,8 +484,11 @@
+   std::thread title_thread;
+   std::atomic<bool> stop_title{false};
+   const bool collect_metrics = std::getenv("SSX3_RUNTIME_METRICS") != nullptr;
+-  const bool capture_screenshots = !m_impl->config.headless &&
+-                                  std::getenv("SSX3_SCREENSHOTS") != nullptr;
++  // NOTE(android-egl): headless runs may render (EGL/GLES on the Odin PIE),
++  // so screenshots stay available there when the harness opts in. Desktop
++  // headless runs never set SSX3_SCREENSHOTS, leaving them unchanged.
++  const bool capture_screenshots =
++      std::getenv("SSX3_SCREENSHOTS") != nullptr;
+   // A fixed cadence misses short events: a countdown can fall entirely between
+   // two shots. Keep the 15 s default; allow a run to ask for a finer one.
+   unsigned screenshot_seconds = 15;
+@@ -500,7 +503,7 @@
+     std::fprintf(stderr, "[ssx3-course] request file: %s\n", course_request_file.c_str());
+   }
+   if ((!m_impl->config.headless && m_impl->config.show_fps_in_title) || collect_metrics ||
+-      !course_request_file.empty()) {
++      capture_screenshots || !course_request_file.empty()) {
+     title_thread = std::thread([collect_metrics, capture_screenshots, screenshot_seconds,
+                                 course_request_file, &stop_title] {
+       unsigned seconds = 0;

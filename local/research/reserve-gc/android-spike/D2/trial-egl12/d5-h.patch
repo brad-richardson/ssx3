@@ -1,0 +1,10 @@
+--- a/StaticRecompCore.h
++++ b/StaticRecompCore.h
+@@ -47,6 +47,7 @@
+ 
+   void Init() override;
+   void Shutdown() override;
++  static void DumpExcAttribution();  // D5 TEMPORARY (see D5/instrument.patch)
+ 
+   void Run() override;
+   void SingleStep() override;

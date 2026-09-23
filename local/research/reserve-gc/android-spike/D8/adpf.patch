@@ -1,0 +1,120 @@
+--- a/Source/Core/Core/CoreTiming.cpp
++++ b/Source/Core/Core/CoreTiming.cpp
+@@ -477,12 +477,109 @@
+       m_precision_gpu_timer.SleepUntil(time_point);
+     else
+       std::this_thread::sleep_until(time_point);
++  }
++}
++
++// NOTE(d8-adpf): SSX3_PERF_HINT=1 creates one ADPF hint session for the
++// emulation thread (16.6 ms target) and reports the actual CPU work duration
++// of each throttled frame. libandroid is resolved with dlopen/dlsym so the
++// build gains no new link edge and the code is a no-op where the API or the
++// variable is absent. Throttle runs on the CPU (emulation) thread, so the
++// thread captured at session creation is the emulation thread.
++#if defined(__ANDROID__)
++namespace
++{
++struct Ssx3Adpf
++{
++  void* handle = nullptr;
++  void* session = nullptr;
++  void* (*get_manager)() = nullptr;
++  void* (*create_session)(void*, const std::int32_t*, std::size_t, std::int64_t) = nullptr;
++  int (*report)(void*, std::int64_t) = nullptr;
++  TimePoint frame_begin{};
++  bool begun = false;
++  bool tried = false;
++};
++
++Ssx3Adpf& Ssx3AdpfState()
++{
++  static Ssx3Adpf state;
++  return state;
++}
++
++bool Ssx3PerfHintEnabled()
++{
++  static const bool enabled = [] {
++    const char* value = std::getenv("SSX3_PERF_HINT");
++    return value != nullptr && std::string(value) == "1";
++  }();
++  return enabled;
++}
++
++void Ssx3PerfHintBegin()
++{
++  if (!Ssx3PerfHintEnabled())
++    return;
++  Ssx3Adpf& state = Ssx3AdpfState();
++  if (!state.tried)
++  {
++    state.tried = true;
++    state.handle = ::dlopen("libandroid.so", RTLD_NOW);
++    if (state.handle)
++    {
++      state.get_manager =
++          reinterpret_cast<void* (*)()>(::dlsym(state.handle, "APerformanceHint_getManager"));
++      state.create_session = reinterpret_cast<void* (*)(void*, const std::int32_t*, std::size_t,
++                                                        std::int64_t)>(
++          ::dlsym(state.handle, "APerformanceHint_createSession"));
++      state.report = reinterpret_cast<int (*)(void*, std::int64_t)>(
++          ::dlsym(state.handle, "APerformanceHint_reportActualWorkDuration"));
++    }
++    if (state.get_manager && state.create_session && state.report)
++    {
++      if (void* manager = state.get_manager())
++      {
++        // Throttle runs on the CPU (emulation) thread: one 16.6 ms session.
++        const std::int32_t tid = static_cast<std::int32_t>(::gettid());
++        state.session = state.create_session(manager, &tid, 1, 16666666);
++      }
++    }
++    std::fprintf(stderr, "[ssx3-perf-hint] %s\n",
++                 state.session ? "ADPF session created for emulation thread (16.6 ms target)" :
++                                 "ADPF UNAVAILABLE (no session; running unhinted)");
+   }
++  state.frame_begin = Clock::now();
++  state.begun = true;
+ }
+ 
++void Ssx3PerfHintEnd()
++{
++  if (!Ssx3PerfHintEnabled())
++    return;
++  Ssx3Adpf& state = Ssx3AdpfState();
++  if (!state.begun || !state.session || !state.report)
++    return;
++  state.begun = false;
++  const std::int64_t actual_ns =
++      std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - state.frame_begin)
++          .count();
++  if (actual_ns > 0)
++    state.report(state.session, actual_ns);
++}
++}  // namespace
++#else
++inline void Ssx3PerfHintBegin()
++{
++}
++inline void Ssx3PerfHintEnd()
++{
++}
++#endif
++
+ void CoreTimingManager::Throttle(const s64 target_cycle)
+ {
+   const TimePoint time = Clock::now();
++  Ssx3PerfHintBegin();
+ 
+   const bool already_throttled =
+       m_throttled_after_presentation.exchange(true, std::memory_order_relaxed);
+@@ -538,6 +635,7 @@
+ 
+   UpdateVISkip(time, target_time);
+ 
++  Ssx3PerfHintEnd();
+   SleepUntil(target_time);
+ }
+ 
