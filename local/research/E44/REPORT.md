@@ -163,6 +163,15 @@ logs every chain input (`t1 s2 s3 s4 s5 t3 t4 t5 t6`) at each
 scratchpad store — but no `0x3629B8` store fired in-window, so the
 chain inputs are unobserved.
 
+**Correction (Part 3, codegen-verified, orchestrator-gated):**
+`sub_003629B8 @0x362be4`'s `ori 0x180` feeds `sw` to word **+4** of
+the struct at `*(…)->0xE84` — one of three and/ori pairs on the same
+word (`s2/0x14`, `t1/0x180`, `s3/0x1`), i.e. flag surgery, not the
+item's w0. Sole cross-function call site is `sub_00375A08 @0x375e78`
+(`jal func_3629B8`; the only other reference is fall-through from
+`sub_00362978`), consistent with once-at-renderer-init. **Dropped as
+the w0 candidate.**
+
 ## Gaps / notes (Boot A)
 
 - Low-word caps (64) closed inside vsync 1270: the true
@@ -258,6 +267,79 @@ Boot-C spw (fresh first-64 at 1355): word-0 caps close on
 pointer storms — the slot's heavy reuse is why the readout
 (spwlast), not first-N, was needed.
 
+## Part-3 (ONE boot: whole-boot EE watch + SPR quads + 0x30 origin)
+
+Boot D (e44d, wall 300 s, bound=wall, elapsed 300.85 s, rc 0, tick
+reach **1372** — past the ~1300 Select-Character edge and the
+1301–1354 gap): watched EE `0x809670..0x80967c` +
+`0x809b70..0x809b7c` and SPR `0x70000000..0x7000000c` +
+`0x70000500..0x7000050c`, first-64 spw/word, ebwlast (first 400),
+spwlast (per-word last-writer of the `0x809670` quad). Slot-1 lease
+claimed/released (`lease_released: true`, `pgrep_rc: 1`, own-PID
+check). Yield: **520 spw + 8 ebwlast + 31 complete spwlast** (file
+ends mid-line `spwlast vsync=` with no newline — a 32nd walk dispatch
+(tick ≤1300 per the window gate) left a torn prefix at shutdown (the
+window closed cleanly at tick 1372); its vsync number is
+unrecoverable).
+
+### Table 6 — EE last-writer (ebwlast): the ONLY EE writes in 0–1372
+
+All 8 words identical: `vsync=41 addr=<word> value=0 via=memset
+pc=0x394db8 fn=memset` (a 16 B `memset(0x809670,0,0x10)`-class zero;
+regs: `a0=0x809670 a1=0 a2=0x10`). **Zero EE-writer lines after
+vsync 41 through tick 1372** — EE coverage is complete (1 row/word,
+cap 64 never approached), so no EE write in the whole boot escaped
+the tap set.
+
+### Table 7 — EE `0x809670` content evolution (proven by SPR-side reads)
+
+| vsync | w0 | w1 | w2 | w3 | how we know |
+|---|---|---|---|---|---|
+| 41 | 0 | 0 | 0 | 0 | memset + ebwlast |
+| 43 | 0 | `0x01014294` | `0x3e0` | 0 | spr-dma EE→SPR copies (`0x70000000/04/08/0c`; `0x7000000c` all-zero) |
+| 260–290 | `0x0c` | `0x01414294` | `0x240` | 0 | spwlast, one line per item-0 walk dispatch (≈1/vsync; no item-0 walks 291–1372 although cap 40 and window 0–1300 are not the cause) |
+
+The quad was **rewritten 43→260** (`w0 0→0x0c`, `w1` bit 22 set,
+`w2 0x3e0→0x240`) by a writer that emitted zero lines through the
+full Boot-D tap set (recompiled stores, LibC struct+bulk, SIF, CD
+sync reads, ELF load, fio, rpc, GS image, mem-write, host
+load/store, SPR/DMA). The 0x0c stager is therefore in the gap set.
+
+### Table 8 — SPR quad first writers
+
+| addr | writers (first per via/pc) |
+|---|---|
+| `0x70000000` | zero `store64` @41 (`pc 0x375c10 ra 0x375b74`); spr-dma EE-copy @43; `store128 0x10000006` @43 (`pc 0x3683a4 ra 0x3687d0`); `store64 0x10000010` @94 (`pc 0x379a48 ra 0x37993c`) |
+| `0x70000004` | zero `store64` @41; spr-dma @43; `store64` @94 (`ra 0x37993c`) |
+| `0x70000008` | zero `store64` @41 (`pc 0x375c08`); spr-dma @43; zeroing stores @43/94 |
+| `0x7000000c` | all zero |
+| `0x70000500..0c` | all zero (spr-dma of still-zero EE `0x809b70` @43 + zeroing `store64` @106, `pc 0x3e64c8/d0 ra 0x3640b8`) — the `0x809b70` quad is never staged this boot |
+
+(The `0x10000006/0x10000010` SPR stores are direct-CPU VIF-packet
+staging in scratchpad; pcs given for the codegen join — game fn
+names are unresolved for inline stores in this tap version.)
+
+### Codegen read: final `w0=0x30` writer / where `0x30` comes from
+
+- **No `0x30` sighting in Boot D**: EE untouched 41→1372, SPR
+  records static after 290. The only sighting remains E43's
+  hash-time `0x30` at vsyncs 1355–1400.
+- **Static**: zero `0x30` literals on the writer path; mode-word
+  producers are modeReg assignment sites plus a mode-indexed vessel
+  array (array read verified) — the value is looked up, not
+  materialized, so the stager is a bulk/table copy, not an
+  immediate store.
+- **Unified conclusion**: BOTH the 0x0c stager (43–260, in-window)
+  and the 0x30 stager (post-290, E43 1355–1400) evaded the complete
+  Boot-D tap set. Single remaining hypothesis: one untapped bulk
+  path stages both quads. `sceCdReadChain` / `sceCdReadStreaming` /
+  `sceMcRead` / small GS-state writes got taps **only after Boot D**
+  (implemented, suite-green, never booted); residuals are CD small
+  out-params, TTY/Deci2, Pad small (semantically excluded: no quads)
+  and VU identity (floats only). **Prime suspect: CD streaming**
+  (menu assets 43–260, later assets 1300+). Next lane: boot the
+  post-Boot-D tree over 0–1400.
+
 ## Receipts
 
 - Fork rev: `571579e` (pushed `a932aff..571579e`, `git ls-remote fork ssx3` = `571579e…`).
@@ -271,3 +353,14 @@ pointer storms — the slot's heavy reuse is why the readout
 - Runner-dir gate: `git diff --stat 14b1e5cb ssx3 -- ps2xRuntime/src/runner` empty (verified pre-commit and pre-push).
 - Lease: claimed/released by `e31_boot.py` (result JSON
   `lease_released: true`); no other runner lives (`pgrep_rc: 1`).
+- Boot D: `e44d`, rc 0, wall 300.85 s, tick 1372 (= vsync 1372;
+  1345 ticks / 300 s wall ≈ 4.6 guest-vsync/s on the tap-laden
+  build); trace SHA
+  `52f839618eacfc38f282f8dec9ba0d8fb0ec3628` (two matching reads);
+  in-repo copy `local/research/E44/e44-e44d.txt`; result JSON +
+  `boot-e44d-1.log` in `ssx3-work/E44-run/`. Boot-D runner SHA not
+  captured (binary rebuilt post-boot for the gap taps — gap stated).
+  Slot-1 lease claimed/released, own-PID pgrep check.
+- Suite: 573/573 green on the final tree (run from the fork root;
+  the VU0-macro test reads `instructions.h` via a relative path and
+  fails from any other CWD — environmental, pre-existing).

@@ -18,10 +18,31 @@ REG_FIELDS = ("a0 a1 a2 a3 v0 v1 t0 t1 t2 t3 t4 t5 t6 t7 t8 t9 "
 
 def parse(path):
     rows = []
+    eb = []
+    last = []
     torn = 0
     with open(path, errors="replace") as f:
         for line in f:
             line = line.rstrip("\n")
+            if line.startswith("ebwlast "):
+                parts = line.split()
+                try:
+                    d = {}
+                    for p in parts[1:]:
+                        k, v = p.split("=", 1)
+                        d[k] = v
+                    for k in ("vsync", "addr", "value", "via", "pc",
+                              "ra", "fn"):
+                        if k not in d:
+                            raise ValueError(k)
+                    d["vsync"] = int(d["vsync"])
+                    eb.append(d)
+                except ValueError:
+                    torn += 1
+                continue
+            if line.startswith("spwlast "):
+                last.append(line)
+                continue
             if not line.startswith("spw "):
                 continue
             parts = line.split()
@@ -39,13 +60,23 @@ def parse(path):
                 rows.append(d)
             except ValueError:
                 torn += 1
-    return rows, torn
+    return rows, eb, last, torn
 
 
 def main():
     path = sys.argv[1]
-    rows, torn = parse(path)
-    print(f"file={path} spw_rows={len(rows)} torn={torn}")
+    rows, eb, last, torn = parse(path)
+    print(f"file={path} spw_rows={len(rows)} ebwlast_rows={len(eb)} "
+          f"spwlast_rows={len(last)} torn={torn}")
+    if eb:
+        print("\n## ebwlast (last writer per word per changed vsync)")
+        for r in eb:
+            print(f"  vsync={r['vsync']} addr={r['addr']} value={r['value']} "
+                  f"via={r['via']} pc={r['pc']} ra={r['ra']} fn={r['fn']}")
+    if last:
+        print(f"\n## spwlast ({len(last)} lines)")
+        for line in last[:45]:
+            print(f"  {line[:360]}")
     by_addr = defaultdict(list)
     for r in rows:
         by_addr[r["addr"]].append(r)
