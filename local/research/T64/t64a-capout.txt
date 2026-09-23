@@ -1,0 +1,236 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ T4=/home/brad/pcsx2-t4
++ G=/home/brad/pcsx2-g7
++ BIN=/home/brad/pcsx2-g7/pcsx2/build/bin/pcsx2-qt
++ DAT=/home/brad/pcsx2-g7/dat-t57
++ E=/home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
++ REFSC=/home/brad/pcsx2-t4/t29-ref-sc.ppm
++ CD=/home/brad/pcsx2-t4/t44-cropdiff.py
++ SNAPS=/home/brad/pcsx2-g7/dat-t57/PCSX2/snaps
++ TAG=t64a
++ LOG=/home/brad/pcsx2-t4/t64a-poll.log
++ IDENT_MEAN_MAX=4.0
++ WALL_CAP=590
++ :
++ date -u
+Wed Sep 23 17:13:00 UTC 2026
++ '[' -x /home/brad/pcsx2-g7/pcsx2/build/bin/pcsx2-qt ']'
++ grep -q '^EnableEE = false' /home/brad/pcsx2-g7/dat-t57/PCSX2/inis/PCSX2.ini
++ grep -q '^EnableVU0 = false' /home/brad/pcsx2-g7/dat-t57/PCSX2/inis/PCSX2.ini
++ STATEFILE=/home/brad/pcsx2-g7/t63-menu-state
++ '[' -f /home/brad/pcsx2-g7/t63-menu-state ']'
++ plog STATEFILE=/home/brad/pcsx2-g7/t63-menu-state
++ echo STATEFILE=/home/brad/pcsx2-g7/t63-menu-state
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+STATEFILE=/home/brad/pcsx2-g7/t63-menu-state
++ '[' -f /home/brad/pcsx2-g7/t63-menu-state ']'
++ rm -f /tmp/t48-arm /tmp/t48-dump-now /tmp/t49-arm /tmp/t50-arm /tmp/t50-free /tmp/t51-arm /tmp/t51-free /tmp/t51-watch /tmp/t53-watch /tmp/t54-watch /tmp/t56-watch2 /tmp/t59-dump
++ touch /tmp/t48-arm /tmp/t50-arm /tmp/t51-arm
++ pkill Xvfb
++ true
++ sleep 2
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ sleep 4
++ pgrep -a Xvfb
+433 Xvfb :99 -screen 0 1280x1024x24
+++ date -u +%Y%m%dT%H%M%SZ
++ TS=20260923T171306Z
++ '[' -f /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt ']'
++ mv /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog-pre-t64a-20260923T171306Z.txt
++ rm -f /home/brad/pcsx2-t4/pcsx2-t64a.pid
+++ date -u +%s
++ T_BOOT=1790183586
++ nohup /home/brad/pcsx2-g7/pcsx2/build/bin/pcsx2-qt -nogui -turbo -datapath /home/brad/pcsx2-g7/dat-t57 -logfile /home/brad/pcsx2-t4/logs/boot-t64a.log -statefile /home/brad/pcsx2-g7/t63-menu-state -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ echo 442
++ sleep 45
++ wallcheck
+++ date -u +%s
++ '[' 45 -lt 590 ']'
++ pgrep -f pcsx2-qt
++ touch /tmp/t50-free /tmp/t51-free
+++ date -u +%s.%N
++ plog FREE_GATE_OPEN_WALL:1790183631.171678877
++ echo FREE_GATE_OPEN_WALL:1790183631.171678877
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+FREE_GATE_OPEN_WALL:1790183631.171678877
+++ grep -o 'T48_PATHS vsync=[0-9]*' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ tail -1
+++ grep -o '[0-9]*$'
++ P0=930
++ plog PATHS_AT_START=930
++ echo PATHS_AT_START=930
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+PATHS_AT_START=930
+++ xdotool search --onlyvisible --name 'SSX 3'
++ WID=2097159
+++ date -u +%s.%N
++ T_K=1790183631.188377955
++ press K MENU_CROSS 2
++ local KEY=K
++ local LAB=MENU_CROSS
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 45 -lt 590 ']'
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
++ plog MENU_CROSS_WALL:1790183633.220280091
++ echo MENU_CROSS_WALL:1790183633.220280091
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+MENU_CROSS_WALL:1790183633.220280091
++ plog K_PRESS_T=1790183631.188377955
++ echo K_PRESS_T=1790183631.188377955
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+K_PRESS_T=1790183631.188377955
++ SC_OK=0
++ for TRY in 1 2 3
++ sleep 15
++ wallcheck
+++ date -u +%s
++ '[' 62 -lt 590 ']'
++ snap t64a-sc-t1
++ local N=t64a-sc-t1
++ xwd -root -out /home/brad/pcsx2-t4/t64a-sc-t1.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t64a-sc-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t64a-sc-t1.xwd
++ read M P
+++ score_ref /home/brad/pcsx2-t4/t64a-sc-t1.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t64a-sc-t1.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SC try1 ident mean=0.4376 p99=7'
++ echo 'SC try1 ident mean=0.4376 p99=7'
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+SC try1 ident mean=0.4376 p99=7
++ is_ident 0.4376
++ is_num 0.4376
++ case "$1" in
++ return 0
++ awk -v m=0.4376 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ SC_OK=1
+++ date -u +%s.%N
++ T_SC1=1790183649.896849041
++ plog SC_FIRST_IDENT_T=1790183649.896849041
++ echo SC_FIRST_IDENT_T=1790183649.896849041
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+SC_FIRST_IDENT_T=1790183649.896849041
++ break
++ '[' 1 -eq 1 ']'
++ sleep 15
++ wallcheck
+++ date -u +%s
++ '[' 78 -lt 590 ']'
++ snap t64a-sc-settled
++ local N=t64a-sc-settled
++ xwd -root -out /home/brad/pcsx2-t4/t64a-sc-settled.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t64a-sc-settled.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t64a-sc-settled.xwd
++ read SM SP
+++ score_ref /home/brad/pcsx2-t4/t64a-sc-settled.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t64a-sc-settled.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SC_SETTLED ident mean=0.5907 p99=9'
++ echo 'SC_SETTLED ident mean=0.5907 p99=9'
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+SC_SETTLED ident mean=0.5907 p99=9
++ is_ident 0.5907
++ is_num 0.5907
++ case "$1" in
++ return 0
++ awk -v m=0.5907 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ touch /tmp/t59-dump
+++ date -u +%s.%N
++ plog DUMP_GATE_WALL:1790183665.825369306
++ echo DUMP_GATE_WALL:1790183665.825369306
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+DUMP_GATE_WALL:1790183665.825369306
++ sleep 5
+++ xdotool search --onlyvisible --name 'SSX 3'
++ WID2=2097159
++ xdotool windowfocus --sync 2097159
++ xdotool keydown F8
++ sleep 0.5
++ xdotool keyup F8
++ sleep 2
+++ ls -t /home/brad/pcsx2-g7/dat-t57/PCSX2/snaps
+++ head -n 1
++ NEW='SSX 3_SLUS-20772_20260923131434.png'
++ plog 'GSHOT newest=SSX 3_SLUS-20772_20260923131434.png'
++ echo 'GSHOT newest=SSX 3_SLUS-20772_20260923131434.png'
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+GSHOT newest=SSX 3_SLUS-20772_20260923131434.png
++ cp '/home/brad/pcsx2-g7/dat-t57/PCSX2/snaps/SSX 3_SLUS-20772_20260923131434.png' /home/brad/pcsx2-t4/t64a-shot-sc.png
++ xwd -root -out /home/brad/pcsx2-t4/t64a-loaded.xwd
++ xwdtopnm /home/brad/pcsx2-t4/t64a-loaded.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/pcsx2-t4/t64a-loaded.xwd
++ read LM LP
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/pcsx2-t4/t64a-loaded.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
++ plog 'LOADED vs-sc mean=1.5301 p99=41'
++ echo 'LOADED vs-sc mean=1.5301 p99=41'
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+LOADED vs-sc mean=1.5301 p99=41
+++ grep -o 'T48_PATHS vsync=[0-9]*' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ tail -1
+++ grep -o '[0-9]*$'
++ P1=2536
++ plog PATHS_AT_END=2536
++ echo PATHS_AT_END=2536
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+PATHS_AT_END=2536
+++ grep -c 'app vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'appx vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'axfirst vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'v1b0 vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'tw vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'twbase vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T63_CAP /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c 't2 vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T64_CAP /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T62_CAP /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'appsum vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'apc vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'tpl vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T60_CAP /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T61_CAPSUM /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c 'tplrearm vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c 'ebw vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'ebwend vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'ebwlast vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T58_CAP /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c T58_CAPLAST /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c 'vu0call vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c 'vif0op vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c T57_CAP /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ true
+++ grep -c 'ctag ' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
+++ grep -c 'spw vsync=' /home/brad/pcsx2-g7/dat-t57/PCSX2/logs/emulog.txt
++ plog 'COUNTS app=200 appx=300 axfirst=6 v1b0=200 tw=200 twbase=20 t63cap=0 t2=2543 t64cap=1 t62cap=1 appsum=2545 apc=2546 tpl=200 t60cap=2 capsum=0 tplrearm=0 ebw=512 ebwend=1 ebwlast=248 cap=8 caplast=0 vu0call=0 vif0op=0 t57cap=0 ctag=554 spw=1536'
++ echo 'COUNTS app=200 appx=300 axfirst=6 v1b0=200 tw=200 twbase=20 t63cap=0 t2=2543 t64cap=1 t62cap=1 appsum=2545 apc=2546 tpl=200 t60cap=2 capsum=0 tplrearm=0 ebw=512 ebwend=1 ebwlast=248 cap=8 caplast=0 vu0call=0 vif0op=0 t57cap=0 ctag=554 spw=1536'
++ tee -a /home/brad/pcsx2-t4/t64a-poll.log
+COUNTS app=200 appx=300 axfirst=6 v1b0=200 tw=200 twbase=20 t63cap=0 t2=2543 t64cap=1 t62cap=1 appsum=2545 apc=2546 tpl=200 t60cap=2 capsum=0 tplrearm=0 ebw=512 ebwend=1 ebwlast=248 cap=8 caplast=0 vu0call=0 vif0op=0 t57cap=0 ctag=554 spw=1536
+++ cat /home/brad/pcsx2-t4/pcsx2-t64a.pid
++ kill 442
++ sleep 5
++ pgrep -a pcsx2-qt
++ true
++ date -u
+Wed Sep 23 17:14:42 UTC 2026
+T64_DONE
++ echo T64_DONE
