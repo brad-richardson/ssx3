@@ -206,6 +206,15 @@ with measured budgets, then 120 Hz simulation.
       w0. Dropped as a candidate. Next: **E44 Part 3** (whole-boot writer of
       `0x809670`/`0x809b70`, every path) ∥ **T58** (same buffers, PCSX2 scene
       build).
+      **T58 PASS (be208f8), elimination-grade.** In PCSX2 the rider buffers are
+      zero until the MENU: kernel zeroing, then a game memset (pc `0x41628c`,
+      ra `0x394db8`, a stride-0x80 table at `0x8095f0`). They're full
+      (`0x1b0`) at settled SC, but no hooked path writes them between MENU
+      and SC. There's also no VU0 anywhere from cold boot to settled SC, and
+      VIF0 does only mode setup. Orchestrator reading: T58's fold
+      (`& 0x1FFFFFFF`) misses UCAB (`0x30000000`) stores, and SSX 3 uses
+      UCAB for DMA-bound data. The recomp maps UCAB correctly. **T59**: fix
+      the fold, then one MENU→SC capture.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
