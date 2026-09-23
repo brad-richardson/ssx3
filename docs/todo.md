@@ -182,7 +182,9 @@ with measured budgets, then 120 Hz simulation.
       with mode `a1 = (*(record) & 0x3C0) >> 6`; its 9-entry jump table (@`0x492040`)
       is translated correctly (orchestrator check). Mode 6 → set A, mode 3 → set
       B, so the recomp's render list lacks mode-6 records. **E43 + T54 (draw-record
-      census by mode + mode-6 producers) queued/running; E42 running.** E40 lane closed (7 parts).
+      census by mode + mode-6 producers) queued/running; E42 PASS (`6dd0c73`): the recomp's
+      stamper is the same `sub_00364CD0` mode-3 path (@`0x3651d4`), never the mode-6
+      path. E43 continues in E42's pane.** E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
