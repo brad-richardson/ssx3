@@ -172,11 +172,10 @@ with measured budgets, then 120 Hz simulation.
       on the NativeActivity so runs work while the Odin stays locked (Brad
       keeps his PIN lock; 09-22). First unlock after a reboot is still
       required (credential-encrypted storage). Goes into the next N build.
-- [ ] N4 (after E31): pad-script launch on the Odin to menus/race; a clean
-      speed read with frame dumping off; fix PNG frame export on Android
-      (raylib FILEIO); arm64 packaging stays. Watch: cpu-1 ~104 °C, and
-      the battery was draining (62 → 59 %) during the run.
-- [ ] N4: Android FFmpeg prefix + ON build + host vector parity.
+- [ ] **N4 (running):** rebase `n2-android` onto `e57b5f8`; showWhenLocked +
+      turnScreenOn + `<profileable>`; Android PNG frame export; first on-device
+      simpleperf profile (title + Select Character) grouped by component.
+      The race attempt waits for E33's vsync-keyed pad script.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
