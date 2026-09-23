@@ -63,16 +63,16 @@ movie path), **V** storage/restore.
   goes through the orchestrator. Subagents are fine for read-only
   fan-out; edits, builds, boots and commits stay in the main worker.
 
-**Worker routing (Brad, 2026-09-22; source of truth `~/CLAUDE.md`):**
-quick tasks (< ~5 min) the orchestrator does itself; longer low-reasoning
-work (mechanical edits, installs, runs, data gathering) goes to **local
-Qwen via opencode** (`--kind opencode`; not configured on the mini yet:
-`~/.config/opencode/opencode.json` is missing, so muse covers it until then);
-longer high-reasoning work goes to **muse**. Fallbacks when a quota is gone:
-Claude Opus (`--kind claude`) or GPT Sol via Codex (`--kind codex -- -m
-gpt-6-sol`). Same brief contract and rules for every worker kind; the
-commit trailer names the worker (`Orchestrated-By: Muse Code` / `opencode`
-/ `Claude Code` / `Codex`).
+**Worker routing (Brad, 2026-09-22):** source of truth is
+`~/.config/agents/AGENTS.md` (imported by `~/.claude/CLAUDE.md`), with tiers
+budget / standard / frontier. In short: quick tasks (< ~5 min) the
+orchestrator does itself; longer low-reasoning work (mechanical edits, runs,
+data gathering, read-only code reads) goes to **local Qwen via opencode**
+(`--kind opencode -- --auto`, at most two local workers; machine details and
+permission limits in `local/AGENTS.local.md`); longer high-reasoning work
+goes to **muse**; quota fallbacks move up a tier. Same brief contract and
+rules for every worker kind; the commit trailer names the worker
+(`Orchestrated-By: Muse Code` / `opencode` / `Claude Code` / `Codex`).
 
 herdr recipe: `herdr tab create --workspace wN --cwd ~/dev/ssx3 --label
 <ID>` → `herdr agent start <id> --kind muse --pane <pane> --timeout
