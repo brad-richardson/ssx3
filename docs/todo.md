@@ -323,6 +323,15 @@ with measured budgets, then 120 Hz simulation.
         vs race).
       - **E48:** the breaker (code read + watch boots; hypothesis: the
         skipped release leaves UI nodes drawn = the stray glyphs).
+      **E47 partial (1e78f81):** SC control is healthy and steady: 0
+      budget-exhausted VU1 programs (was 498/583 pre-E46), 611 MSCAL, 5,079
+      draws/vsync, draw modes 3 + 6. The race boot was starved by E48's
+      parallel builds (0.6× tick rate) and ended on the pre-race rules
+      screen. It's rerunning on a quiet host. Tool notes: the gfx-stats
+      `top` field is (FRAME.fbp, PRIM.type); the E43/MPG logs flush every
+      128 lines, so SIGTERM drops the tail. **E48 early:** `0x548840` is a
+      movie-codec picture node used only during startup movies. So the
+      breaker may be an artifact of `PS2X_SKIP_MOVIE`.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
