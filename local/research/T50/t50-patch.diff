@@ -1,0 +1,350 @@
+diff --git a/pcsx2/Dmac.cpp b/pcsx2/Dmac.cpp
+index 1da71e6ec..73b300181 100644
+--- a/pcsx2/Dmac.cpp
++++ b/pcsx2/Dmac.cpp
+@@ -359,6 +359,7 @@ __fi bool dmacWrite32( u32 mem, mem32_t& value )
+ 		}
+ 		allow_write:;
+ 	}
++	{ extern void t50b_dmareg(u32 mem, u32 value); t50b_dmareg(mem, value); } // T50b: D1 reg write watch (log-only).
+ 
+ 	switch(mem) {
+ 
+diff --git a/pcsx2/R5900OpcodeImpl.cpp b/pcsx2/R5900OpcodeImpl.cpp
+index fecebece9..c433687de 100644
+--- a/pcsx2/R5900OpcodeImpl.cpp
++++ b/pcsx2/R5900OpcodeImpl.cpp
+@@ -245,6 +245,71 @@ static int __Deci2Call(int call, u32 *addr)
+ 	return 0;
+ }
+ 
++#include <atomic>
++
++// T50: srcread watch on the two 16-byte microcode source windows (log-only; EE interp only).
++#include <cstdio>
++extern std::atomic<int> g_t48_vsync; // T50: defined in GS.cpp (T48 vsync mirror).
++extern std::atomic<bool> g_t48_window; // T50: defined in GS.cpp (T48 window flag).
++extern std::atomic<int> g_t49_winstart; // T50: defined in GS.cpp (T49 winstart mirror).
++bool g_t50_armed = false;
++bool g_t50_free = false; // T50b: /tmp/t50-free fallback (statefile boots, no dump winstart).
++u32 g_t50_arm_ctr = 0;
++u32 g_t50_hits0 = 0; // region 0 (EE 0x004349b8..0x004349c7) lines logged.
++u32 g_t50_hits1 = 0; // region 1 (EE 0x00435bf8..0x00435c07) lines logged.
++static bool t50_gate()
++{
++	if (!g_t50_armed)
++	{
++		if ((++g_t50_arm_ctr & 1023) != 0) return false;
++		FILE* t50af = fopen("/tmp/t50-arm", "r");
++		if (!t50af) return false;
++		fclose(t50af);
++		g_t50_armed = true;
++	}
++	if (!g_t50_free)
++	{
++		FILE* t50ff = fopen("/tmp/t50-free", "r");
++		if (t50ff) { fclose(t50ff); g_t50_free = true; }
++	}
++	if (!g_t50_free && !g_t48_window.load(std::memory_order_relaxed)) return false;
++	int t50_ws = g_t49_winstart.load(std::memory_order_relaxed);
++	int t50_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	return t50_ws >= 0 && t50_vs >= t50_ws;
++}
++// Log EE interp loads overlapping the two 16-byte source windows (first 64 hits per region).
++void t50_read_watch(u32 vaddr, u32 size)
++{
++	if (!t50_gate()) return;
++	u32 pbase = vaddr & 0x1fffffff;
++	u32 lo = pbase & ~(size - 1);
++	int region = -1;
++	if (lo + size > 0x004349b8 && lo < 0x004349c8) region = 0;
++	else if (lo + size > 0x00435bf8 && lo < 0x00435c08) region = 1;
++	else if (pbase >= 0x004349b8 && pbase < 0x004349c8) region = 0;
++	else if (pbase >= 0x00435bf8 && pbase < 0x00435c08) region = 1;
++	else return;
++	u32* cnt = (region == 0) ? &g_t50_hits0 : &g_t50_hits1;
++	if (*cnt >= 64)
++		return;
++	(*cnt)++;
++	if (*cnt == 64)
++		Console.WriteLn("T50_SRCREAD_FULL region=%d vsync=%d", region, g_t48_vsync.load(std::memory_order_relaxed));
++	Console.WriteLn("srcread vsync=%d addr=0x%x size=%u pc=0x%x ra=0x%x fn=- a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		g_t48_vsync.load(std::memory_order_relaxed), lo, size, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++		cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++		cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++		cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++		cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++		cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++		cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++		cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++
++// G7: counts ExecPS2 syscalls (global scope); the GS thread auto-queues one
++// 5-frame GS dump 60 vsyncs after the 5th (game entry). One-shot capture aid.
++std::atomic<int> g_g7_execps2_count{0};
++
+ namespace R5900 {
+ namespace Interpreter {
+ namespace OpcodeImpl {
+@@ -599,6 +664,7 @@ void LW()
+ 	u32 temp = memRead32(addr);
+ 
+ 	if (!_Rt_) return;
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].SD[0] = (s32)temp;
+ 
+ 	// Force event test on EE counter read to improve read + interrupt syncing. Namely ESPN Games.
+@@ -619,6 +685,7 @@ void LWU()
+ 	u32 temp = memRead32(addr);
+ 
+ 	if (!_Rt_) return;
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].UD[0] = temp;
+ }
+ 
+@@ -637,6 +704,7 @@ void LWL()
+ 	if (!_Rt_) return;
+ 
+ 	// ensure the compiler does correct sign extension into 64 bits by using s32
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].SD[0] =	(s32)((cpuRegs.GPR.r[_Rt_].UL[0] & LWL_MASK[shift]) |
+ 								(mem << LWL_SHIFT[shift]));
+ 
+@@ -661,6 +729,7 @@ void LWR()
+ 	if (!_Rt_) return;
+ 
+ 	// Use unsigned math here, and conditionally sign extend below, when needed.
++	t50_read_watch(addr, 4); // T50: srcread watch (log-only).
+ 	mem = (cpuRegs.GPR.r[_Rt_].UL[0] & LWR_MASK[shift]) | (mem >> LWR_SHIFT[shift]);
+ 
+ 	if( shift == 0 )
+@@ -705,6 +774,7 @@ void LD()
+ 		RaiseAddressError(addr, false);
+ 
+ 	cpuRegs.GPR.r[_Rt_].UD[0] = memRead64(addr);
++	t50_read_watch(addr, 8); // T50: srcread watch (log-only).
+ }
+ 
+ static const u64 LDL_MASK[8] =
+@@ -728,6 +798,7 @@ void LDL()
+ 	u64 mem = memRead64(addr & ~7);
+ 
+ 	if( !_Rt_ ) return;
++	t50_read_watch(addr, 8); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].UD[0] =	(cpuRegs.GPR.r[_Rt_].UD[0] & LDL_MASK[shift]) |
+ 								(mem << LDL_SHIFT[shift]);
+ }
+@@ -740,6 +811,7 @@ void LDR()
+ 	u64 mem = memRead64(addr & ~7);
+ 
+ 	if (!_Rt_) return;
++	t50_read_watch(addr, 8); // T50: srcread watch (log-only).
+ 	cpuRegs.GPR.r[_Rt_].UD[0] =	(cpuRegs.GPR.r[_Rt_].UD[0] & LDR_MASK[shift]) |
+ 								(mem >> LDR_SHIFT[shift]);
+ }
+@@ -751,6 +823,7 @@ void LQ()
+ 
+ 	u32 addr = cpuRegs.GPR.r[_Rs_].UL[0] + _Imm_;
+ 	memRead128(addr & ~0xf, (u128*)gpr_GetWritePtr(_Rt_));
++	t50_read_watch(addr, 16); // T50: srcread watch (log-only).
+ }
+ 
+ void SB()
+@@ -914,7 +987,7 @@ void SYSCALL()
+ 	else
+ 		call = cpuRegs.GPR.n.v1.UC[0];
+ 
+-	BIOS_LOG("Bios call: %s (%x)", R5900::bios[call], call);
++	BIOS_LOG("Bios call: %s (%x) pc=%x a0=%x", R5900::bios[call], call, cpuRegs.pc, cpuRegs.GPR.n.a0.UL[0]);
+ 
+ 
+ 	switch (static_cast<Syscall>(call))
+@@ -981,6 +1054,7 @@ void SYSCALL()
+ 		break;
+ 		case Syscall::ExecPS2:
+ 		{
++			g_g7_execps2_count.fetch_add(1, std::memory_order_relaxed);
+ 			if (DebugInterface::getPauseOnEntry())
+ 			{
+ 				CBreakPoints::AddBreakPoint(BREAKPOINT_EE, cpuRegs.GPR.n.a0.UL[0], true);
+diff --git a/pcsx2/Vif1_Dma.cpp b/pcsx2/Vif1_Dma.cpp
+index c85af2424..aebb284c0 100644
+--- a/pcsx2/Vif1_Dma.cpp
++++ b/pcsx2/Vif1_Dma.cpp
+@@ -9,6 +9,111 @@
+ #include "Vif_Dma.h"
+ #include "Vif_Dynarec.h"
+ 
++// T50b: mpgpay/dmareg trace (log-only).
++#include <atomic>
++#include <cstdio>
++extern std::atomic<int> g_t48_vsync; // T50b: defined in GS.cpp (T48 vsync mirror).
++extern std::atomic<bool> g_t48_window; // T50b: defined in GS.cpp (T48 window flag).
++extern std::atomic<int> g_t49_winstart; // T50b: defined in GS.cpp (T49 winstart mirror).
++bool g_t50b_armed = false;
++bool g_t50b_free = false;
++u32 g_t50b_arm_ctr = 0;
++u32 g_t50b_mpg_n = 0;
++u32 g_t50b_dm_n = 0;
++bool g_t50b_dm_capped = false;
++u32 g_t50b_tag_at = 0;
++u32 g_t50b_tag_id = 0;
++u32 g_t50b_tag_mod = 0;
++bool g_t50b_tag_valid = false;
++static bool t50b_gate()
++{
++	if (!g_t50b_armed)
++	{
++		if ((++g_t50b_arm_ctr & 1023) != 0) return false;
++		FILE* t50af = fopen("/tmp/t50-arm", "r");
++		if (!t50af) return false;
++		fclose(t50af);
++		g_t50b_armed = true;
++	}
++	if (!g_t50b_free)
++	{
++		FILE* t50ff = fopen("/tmp/t50-free", "r");
++		if (t50ff) { fclose(t50ff); g_t50b_free = true; }
++	}
++	if (g_t50b_free) return true;
++	if (!g_t48_window.load(std::memory_order_relaxed)) return false;
++	int t50_ws = g_t49_winstart.load(std::memory_order_relaxed);
++	int t50_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	return t50_ws >= 0 && t50_vs >= t50_ws;
++}
++// Silent per-tag tap (chain + MFIFO drain): remembers the tag being streamed.
++void t50b_tag_tap(u32 tag_at, u32 id, u32 mod)
++{
++	g_t50b_tag_at = tag_at; g_t50b_tag_id = id; g_t50b_tag_mod = mod; g_t50b_tag_valid = true;
++}
++// VIF1 MPG with imm=0 (dest 0): log the DMA fetch pointer at command time.
++void t50b_mpg(u32 code)
++{
++	if ((code & 0xffff) != 0) return; // imm != 0: not a dest-0 upload.
++	if (!t50b_gate()) return;
++	if (g_t50b_mpg_n >= 2000)
++	{
++		if (g_t50b_mpg_n == 2000)
++		{
++			g_t50b_mpg_n++;
++			Console.WriteLn("T50_MPGPAY_CAP vsync=%d", g_t48_vsync.load(std::memory_order_relaxed));
++		}
++		return;
++	}
++	g_t50b_mpg_n++;
++	u32 num = (code >> 16) & 0xff;
++	u32 madr = vif1ch.madr;
++	u32 masked = madr & 0x1fffffff;
++	char mode[16], tagbuf[16];
++	if (vif1ch.chcr.MOD == CHAIN_MODE && g_t50b_tag_valid && g_t50b_tag_mod == CHAIN_MODE)
++	{
++		snprintf(mode, sizeof(mode), "chain:%u", g_t50b_tag_id);
++		snprintf(tagbuf, sizeof(tagbuf), "0x%x", g_t50b_tag_at);
++	}
++	else
++	{
++		snprintf(mode, sizeof(mode), "normal");
++		snprintf(tagbuf, sizeof(tagbuf), "-");
++	}
++	Console.WriteLn("mpgpay vsync=%d imm=0 num=%u src=0x%08x&0x%08x mode=%s tag_at=%s",
++		g_t48_vsync.load(std::memory_order_relaxed), num, madr, masked, mode, tagbuf);
++}
++// EE write to a D1 DMA register (applied writes only; hook sits past the busy-hack).
++void t50b_dmareg(u32 mem, u32 value)
++{
++	const char* rn = nullptr;
++	if (mem == 0x10009000) rn = "D1_CHCR";
++	else if (mem == 0x10009010) rn = "D1_MADR";
++	else if (mem == 0x10009020) rn = "D1_QWC";
++	else if (mem == 0x10009030) rn = "D1_TADR";
++	else return;
++	if (!t50b_gate()) return;
++	if (g_t50b_dm_n >= 256)
++	{
++		if (!g_t50b_dm_capped)
++		{
++			g_t50b_dm_capped = true;
++			Console.WriteLn("T50_DMAREG_CAP vsync=%d", g_t48_vsync.load(std::memory_order_relaxed));
++		}
++		return;
++	}
++	g_t50b_dm_n++;
++	Console.WriteLn("dmareg vsync=%d reg=%s value=0x%x pc=0x%x ra=0x%x a0=%08x a1=%08x a2=%08x a3=%08x v0=%08x v1=%08x t0=%08x t1=%08x t2=%08x t3=%08x t4=%08x t5=%08x t6=%08x t7=%08x t8=%08x t9=%08x s0=%08x s1=%08x s2=%08x s3=%08x s4=%08x s5=%08x s6=%08x s7=%08x",
++		g_t48_vsync.load(std::memory_order_relaxed), rn, value, cpuRegs.pc, cpuRegs.GPR.r[31].UL[0],
++		cpuRegs.GPR.r[4].UL[0], cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[6].UL[0], cpuRegs.GPR.r[7].UL[0],
++		cpuRegs.GPR.r[2].UL[0], cpuRegs.GPR.r[3].UL[0],
++		cpuRegs.GPR.r[8].UL[0], cpuRegs.GPR.r[9].UL[0], cpuRegs.GPR.r[10].UL[0], cpuRegs.GPR.r[11].UL[0],
++		cpuRegs.GPR.r[12].UL[0], cpuRegs.GPR.r[13].UL[0], cpuRegs.GPR.r[14].UL[0], cpuRegs.GPR.r[15].UL[0],
++		cpuRegs.GPR.r[24].UL[0], cpuRegs.GPR.r[25].UL[0],
++		cpuRegs.GPR.r[16].UL[0], cpuRegs.GPR.r[17].UL[0], cpuRegs.GPR.r[18].UL[0], cpuRegs.GPR.r[19].UL[0],
++		cpuRegs.GPR.r[20].UL[0], cpuRegs.GPR.r[21].UL[0], cpuRegs.GPR.r[22].UL[0], cpuRegs.GPR.r[23].UL[0]);
++}
++
+ u32 g_vif1Cycles = 0;
+ 
+ __fi void vif1FLUSH()
+@@ -149,6 +254,7 @@ __fi void vif1SetupTransfer()
+ 
+ 	VIF_LOG("VIF1 Tag %8.8x_%8.8x size=%d, id=%d, madr=%lx, tadr=%lx",
+ 		ptag[1]._u32, ptag[0]._u32, vif1ch.qwc, ptag->ID, vif1ch.madr, vif1ch.tadr);
++	t50b_tag_tap(vif1ch.tadr, ptag->ID, vif1ch.chcr.MOD); // T50b: chain-tag tap (log-only).
+ 
+ 	if (!vif1.done && ((dmacRegs.ctrl.STD == STD_VIF1) && (ptag->ID == TAG_REFS))) // STD == VIF1
+ 	{
+diff --git a/pcsx2/Vif1_MFIFO.cpp b/pcsx2/Vif1_MFIFO.cpp
+index eeaeaaf0b..84447f9b6 100644
+--- a/pcsx2/Vif1_MFIFO.cpp
++++ b/pcsx2/Vif1_MFIFO.cpp
+@@ -236,6 +236,7 @@ void mfifoVIF1transfer()
+ 			ptag[1]._u32, ptag[0]._u32, vif1ch.qwc, ptag->ID, vif1ch.madr, vif1ch.tadr, spr0ch.madr);
+ 
+ 		vif1.done |= hwDmacSrcChainWithStack(vif1ch, ptag->ID);
++		{ extern void t50b_tag_tap(u32 tag_at, u32 id, u32 mod); t50b_tag_tap(vif1ch.tadr, ptag->ID, vif1ch.chcr.MOD); } // T50b: MFIFO-drain chain-tag tap (log-only).
+ 
+ 		mfifoVifMaskMem(ptag->ID);
+ 
+diff --git a/pcsx2/Vif_Codes.cpp b/pcsx2/Vif_Codes.cpp
+index 6f71cb33f..d66cf7557 100644
+--- a/pcsx2/Vif_Codes.cpp
++++ b/pcsx2/Vif_Codes.cpp
+@@ -8,6 +8,8 @@
+ #include "VUmicro.h"
+ #include "Vif_Dma.h"
+ #include "Vif_Dynarec.h"
++extern void t49_vif_mark_fn(); // T49: defined in VU1micro.cpp.
++extern void t50b_mpg(u32 code); // T50b: defined in Vif1_Dma.cpp.
+ 
+ #define vifOp(vifCodeName) _vifT int vifCodeName(int pass, const u32* data)
+ #define pass1 if (pass == 0)
+@@ -384,6 +386,7 @@ vifOp(vifCode_MPG)
+ 		else
+ 		{
+ 			vifX.pass = 1;
++			if (idx == 1) t50b_mpg(vifXRegs.code); // T50b: MPG-imm0 payload source (log-only).
+ 			return 1;
+ 		}
+ 	}
+@@ -430,6 +433,7 @@ vifOp(vifCode_MSCAL)
+ 			return 0;
+ 		}
+ 
++		if (idx == 1) t49_vif_mark_fn(); // T49: packet boundary (log-only).
+ 		vuExecMicro(idx, static_cast<u16>(vifXRegs.code), false);
+ 		vifX.cmd = 0;
+ 		vifX.pass = 0;
+@@ -469,6 +473,7 @@ vifOp(vifCode_MSCALF)
+ 			return 0;
+ 		}
+ 
++		if (idx == 1) t49_vif_mark_fn(); // T49: packet boundary (log-only).
+ 		vuExecMicro(idx, static_cast<u16>(vifXRegs.code), true);
+ 		vifX.cmd = 0;
+ 		vifX.pass = 0;
+@@ -491,6 +496,7 @@ vifOp(vifCode_MSCNT)
+ 			return 0;
+ 		}
+ 
++		if (idx == 1) t49_vif_mark_fn(); // T49: packet boundary (log-only).
+ 		vuExecMicro(idx, -1, false);
+ 		vifX.cmd = 0;
+ 		vifX.pass = 0;
