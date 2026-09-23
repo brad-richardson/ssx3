@@ -115,7 +115,7 @@ splitting.
   `ps2xRuntime/src/runner/` may differ from upstream (`git diff --stat
   14b1e5cb <branch> -- ps2xRuntime/src/runner` must be empty before any
   push). Generated sources live outside the repo via
-  `PS2X_GAME_CODEGEN_DIR`. Never `git add -f` inside the fork. The fork's `ssx3` branch holds plain commits;
+  `PS2X_GAME_CODEGEN_DIR`. Never `git add -f` inside the fork. Fast-forward pushes to the fork's `ssx3` are allowed for workers and the orchestrator (Brad, 09-22), after the runner-dir check. The fork's `ssx3` branch holds plain commits;
   experiment branches stay local unless the orchestrator says otherwise.
 - **One live PS2 runtime mutator** (the E lane owns the fork checkout and
   the P-lane lease). E and G own distinct files. N ports what it needs on
