@@ -727,6 +727,14 @@ with measured budgets, then 120 Hz simulation.
   - Open: physical X/Y button positions (N6 §5, 2-minute hands-on test for
     Brad). Analog L2/R2 axes are unmapped by design (digital keys drive
     them).
+- [ ] **N5 finding (a9fb781): since E40, `eac6cba` compiles the E41/E43/E44/
+      mpg_src watch taps into every guest store macro, with no compile-time
+      guard.** Guest `.text` is 3.2× (358 MB vs 113 MB), and every store
+      gets runtime-checked tap calls. So **no build since E40 can give a
+      clean speed number** (Mac, iOS or Android). Fix:
+      `PS2X_ENABLE_DIAG_TAPS` (off for release/speed builds). N5 is
+      prototyping it as N5-local, then fold it into `ssx3`. It's also the
+      review's "one shared tap library" item.
 - [ ] **N5 running (09-23 evening, Opus):** `n2-android` rebased onto
       `eac6cba` + E45 `310b30f`, canonical codegen, dumps-off APK, Odin
       speed through the race, simpleperf in the race.
