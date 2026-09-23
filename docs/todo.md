@@ -66,6 +66,15 @@ with measured budgets, then 120 Hz simulation.
       fixed-point at cell edges, TEX0 TBP/stale upload, CLUT CSA slice
       (upstream `feature/iop-emulator` reworks CLUT). T47's PCSX2 frames
       confirm; then a small GS fix brief (E lane owns the fork).
+- [x] **X1 (local Qwen, 09-22): PARTIAL.** Caller tables usable as leads;
+      its syscall labels were wrong (0x423DC0 = SignalSema, 0x423DE0 =
+      WaitSema, not Open) and its conclusions are discarded
+      (`local/research/X1/ORCH-CORRECTIONS.md`). Corrected reading: the stall
+      is PCSX2's normal mid-load sema spin that never ends because the
+      recomp's CD read loop stops at ~478 s.
+- [ ] Snow Jam stall, next: why the `_sceCdSC` read loop stops early (after
+      E33 frees the lease): one boot with CD/SIF RPC tracing to the stall,
+      last N CD requests vs T47's healthy sequence.
 - [ ] If 99% is a hang: diff the recomp's loading-window trace against
       T47's PCSX2 trace (SIF RPC IDs, sound driver/libsd, CD reads).
       Likely next piece: an SSX 3 sound-driver module in the IOP layer
