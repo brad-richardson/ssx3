@@ -408,6 +408,18 @@ with measured budgets, then 120 Hz simulation.
       `func_166F90(sp)` (look-at → matrix → quaternion?). Header +0x0c =
       π/4. Passed to E50 Part 2 as the bisect target (suspect: sqrt/div in
       matrix→quat).
+      **E50 Part 2 (655b1aa): two FPU translation defects** in the guest
+      sincos `0x31BE50`:
+      - **CVT.W.S rounds** (`nearbyintf`), where the EE truncates. 992 sites.
+      - **SQRT.S reads `fs`** (always f0), where the EE reads `ft`, and
+        `sqrtf` gives NaN on negatives where the EE takes sqrt|x|. 107
+        sites, 36 with ft≠fs. RSQRT.S has the same field bug (0 SSX 3
+        sites).
+      At π/2 this gives sin/cos = (1.0000036, −0.797886) → q (0,0,0.527,
+      0.948) → R+0.4438·I. It reproduces exactly. There are 4 failing unit
+      tests, and neither fix alone passes (offline replay). **Orchestrator:
+      option 1, A+B (+RSQRT) as one R5900-FPU fix on `ssx3`**, with a regen
+      to `codegen-ssx3-e50` and SC + race validation.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
