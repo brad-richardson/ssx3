@@ -455,6 +455,15 @@ with measured budgets, then 120 Hz simulation.
       64-byte post-VBlank packet whose content differs, every 9th packet
       through tick 91, then a 143-packet burst. Part 4: an off/off pklog
       null, then decode the differing bytes and their builder.
+      **Part 4 (dab78ca):**
+      - Off/off is deterministic. Part 3's "zero CSR reads" was a
+        buggy-matcher false negative (corrected by the worker).
+      - Queue-on runs the guest one tick early: the first CSR read
+        (`0x375d10`) sees a different FIELD bit (`0x6000` vs `0x4000`), and
+        content diverges deterministically at packet 49,793.
+      - One queue-on boot in three showed a stale VIF1 packet replay
+        (a race; open).
+      - Part 5: validate `PS2X_GS_CSR_DRAIN=1` with the VQ gate.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
