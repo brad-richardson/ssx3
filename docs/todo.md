@@ -306,6 +306,23 @@ with measured budgets, then 120 Hz simulation.
         targets.
       - Part 2: bisect the breaker (4 boots on both slots), then all-but-
         breaker + snaps at SC, then the race.
+      **E46 Part 2 PASS (539e6ec, fork `2e21cdc` pushed): THE SELECT
+      CHARACTER RIDER RENDERS** (`local/research/E46/frames/e46h-sc-rider.png`).
+      - 18 boot-proven `extra_function_starts`. The breaker `0x3b1140`
+        (refcount release + unlink of node `0x548840`) is excluded:
+        enabling it blacks the screen at tick 246.
+      - Race reached with gameplay working, but the **world is dark**; only
+        `0x3b1140` ×3 is still missing.
+      - Relaxed rescan: 1210 data-referenced interior candidates (census
+        recall 18/19), report-only.
+      - Codegen swap (orchestrator): `codegen-ssx3` = E46g (canonical);
+        `codegen-ssx3-pre-e46` kept for A/B; breaker repro in
+        `codegen-ssx3-e463b1140`.
+      Next (Opus panes):
+      - **E47:** race-world triage (GFX/VU1/draw-census/MPG, SC control
+        vs race).
+      - **E48:** the breaker (code read + watch boots; hypothesis: the
+        skipped release leaves UI nodes drawn = the stray glyphs).
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
