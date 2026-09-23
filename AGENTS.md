@@ -121,8 +121,10 @@ splitting.
   the P-lane lease). E and G own distinct files. N ports what it needs on
   its own local branch or hands edits to E.
 - **Leases:** one device agent on the Odin at a time
-  (`/data/local/tmp/mg/LEASE`) and one host emulator/boot at a time
-  (`/tmp/ssx3-p-lane-lease`). Claim before a run and release after.
+  (`/data/local/tmp/mg/LEASE`) and one recomp/emulator boot **on the mini**
+  at a time (`/tmp/ssx3-p-lane-lease`). Claim before a run and release
+  after. PCSX2 or builds on bytesize don't take the mini lease; bytesize has
+  its own rule (one heavy job at a time).
 - **Boots:** every boot script has progress caps. No boot over 600 s
   without orchestrator OK.
 - **Storage:** work on the Mac mini's internal disk, capped at 200 GB
