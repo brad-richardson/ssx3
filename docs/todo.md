@@ -176,8 +176,13 @@ with measured budgets, then 120 Hz simulation.
       via the fast-write path / an uncached mirror: E40's blind spots), not planted
       by DMA. Orchestrator: the recomp's `MDLPS2.BIG` + `ZOETXP.BIG` reads equal
       PCSX2's sector for sector (165/165): **asset loading refuted**. The uploader
-      choice is an EE computation per frame. **E42 (recomp: storing function via
-      host return address) + T53 (PCSX2: mirror-folded store watch) running.** E40 lane closed (7 parts).
+      choice is an EE computation per frame. **T53 PASS (`db1697e`):** PCSX2 stamps
+      `0x434990` at pc `0x365994` and `0x435bd0` at pc `0x3651d8`, both inside
+      `sub_00364CD0` called from the render-list walker `sub_00363C20` @`0x363cf4`
+      with mode `a1 = (*(record) & 0x3C0) >> 6`; its 9-entry jump table (@`0x492040`)
+      is translated correctly (orchestrator check). Mode 6 → set A, mode 3 → set
+      B, so the recomp's render list lacks mode-6 records. **E43 + T54 (draw-record
+      census by mode + mode-6 producers) queued/running; E42 running.** E40 lane closed (7 parts).
 - [ ] **Microcode source offset differs (orchestrator, 09-23):** our `MPG
       addr=0` source is EE `0x435bf8` (ELF off `0x336bf8`); PCSX2's slots
       0/2/8 (`B` to the epilogue) sit at EE `0x4349b8`, 0x1240 bytes earlier
