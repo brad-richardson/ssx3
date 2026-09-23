@@ -744,6 +744,19 @@ with measured budgets, then 120 Hz simulation.
       `f0793278-…` (team `*`, expires 2027-09-16, lists the iPhone) copied
       to the mini's `~/Library/Developer/Xcode/UserData/Provisioning
       Profiles/`; SHA matches the laptop.
+      **I25 PASS (dc4d85c): installed on Brad's iPhone (install only).**
+      - The Simulator plays itself: title → SC (rider) → Happiness race
+        (HUD live).
+      - Env shim + Settings.bundle auto-route toggle; controller union;
+        landscape aspect-fit.
+      - Fixed an iOS 27 present-path bug (window-scene attach) and
+        excluded the imgui debug panel.
+      - `build-install.sh` + `sim-run.sh` in `local/research/I25/`.
+      - The iPad is installed, but the launch was refused while locked.
+      - Open: G1 controller by hand, and G2–G4/G6 on real hardware (an iPad
+        run when it's unlocked).
+      - Part 2: rebuild on `eac6cba` (FPU fix) with canonical codegen and
+        reinstall.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
