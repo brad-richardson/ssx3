@@ -247,6 +247,16 @@ with measured budgets, then 120 Hz simulation.
       - The caps filled during MENU with no `0x1b0` seen. Next: T61 (PCSX2)
         and E44 Part 4 (recomp), both value-filtered to mode≠0, plus a mode
         histogram per vsync and an appender pc census.
+      **T61 (22f8123): null, but only because of the filter.** `& 0x3C0`
+      admitted mode 3 (`0xcc`), which filled the cap by vsync 100, before K
+      (1025). The census is still useful: the item area is written by 6
+      appender runs. Two run always; `0x37a208` is MENU-only; three are
+      SC-scene appenders (`0x37ad5c/0x37b48c/0x37b4ac` in `sub_0037A430`,
+      onset right after K-up). Orchestrator codegen read: these use the same
+      template-copy pattern (`*(s0+0xE84)`, copy sites `0x37ad44`/
+      `0x37b474`). Next: **T62 ∥ E44 Part 4 (amended)**, with an exact
+      mode-6 filter, the post-K window, the three copy sites, and an exact
+      `0x1b0` value watch.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
