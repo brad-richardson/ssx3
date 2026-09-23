@@ -68,6 +68,7 @@ def main():
     ap.add_argument("--runner", default=RUNNER)
     ap.add_argument("--script", default=None)
     ap.add_argument("--gs-queue", default=None, help="PS2X_GS_QUEUE value (omit = unset)")
+    ap.add_argument("--vq", action="store_true", help="set PS2X_VQ=1 (quiescent gate)")
     ap.add_argument("--capture-dir", default=None, help="PS2X_GS_CAPTURE_DIR value")
     ap.add_argument("--capture-n", default=None, help="PS2X_GS_CAPTURE_N value")
     ap.add_argument("--sample-at", type=float, default=None,
@@ -112,6 +113,10 @@ def main():
         env["PS2X_GS_QUEUE"] = args.gs_queue
     else:
         env.pop("PS2X_GS_QUEUE", None)
+    if args.vq:
+        env["PS2X_VQ"] = "1"
+    else:
+        env.pop("PS2X_VQ", None)
     if args.capture_dir is not None:
         os.makedirs(args.capture_dir, exist_ok=True)
         env["PS2X_GS_CAPTURE_DIR"] = args.capture_dir

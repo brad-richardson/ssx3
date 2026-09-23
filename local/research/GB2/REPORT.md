@@ -213,7 +213,147 @@ file (GB2 modifies no `ps2_memory.*`). New files (`gs_worker.h/.cpp`,
 3. Step (b) (paraLLEl feed) can build on this queue; no blocker found.
    Fold `gb2-gs-queue` (`c937929`) at E's convenience — merges cleanly.
 
-## 9. Exact commands
+## 9. Part 2 — quiescent gate (orchestrator amendment)
+
+One build, 2 boots (A queue-off, B queue-on, same E33 route, 300 s).
+Game-thread VBlank hook at fixed guest ticks (every 50 from 100 to 1350):
+stop-the-world drain (Fence RPC when queued, no-op when direct), then
+`SnapshotVram` + priv-reg fnv, logged as
+`[vq] tick=<T> vram=<fnv> regs=<fnv> size=<B> sub=<n> reg=<n>`.
+Pass = identical fnv at every matched tick.
+
+### 9.1 Change (fork commit `a77b933` on `gb2-gs-queue`, no push)
+
+| File | Change |
+| --- | --- |
+| `ps2xRuntime/include/ps2_vq.h` (new) | Header-only gate (E4 pattern): `PS2X_VQ=1` arming, tick filter, drain + snapshot + fnv + log |
+| `ps2xRuntime/src/lib/Kernel/EeScheduler.cpp` | +1 include, +1 `ps2_vq::noteVBlank` line after the E4 call in `VBlankStart` (game thread) |
+| `gs_frontend.h/.cpp` | Atomic `submitCount` (executed packets: `processGIFPacket` + direct `uploadImageNative` + direct `processNativePackedGIFPacket`, each counted once at execution) and `regWriteCount` (public `writeRegister`) |
+| `local/research/GB2/gb2_boot.py` | `--vq` flag → `PS2X_VQ=1` |
+| `local/research/GB2/gb2_vq.py` (new) | Compare script: table + first-mismatch tick + packet-index range; exit 0 on pass |
+
+Quiescence: game thread is the only producer, so post-drain every
+submitted command has executed; main-thread presents don't mutate VRAM or
+priv regs. `merge-tree` vs `ssx3` tip (`943d609`, unchanged): still 0
+textual conflicts (E44 touched neither `EeScheduler.cpp` nor `ps2_vq.h`).
+
+### 9.2 Build + suite + boots
+
+- THE one build: `cmake --build build -j4` (all targets), rc 0, 648 edges
+  (header change rebuilt broadly). Suite after: **576/576 flags-unset**,
+  rc 0 (`/tmp/gb2-suite-p2.log`, scratch).
+- Runner `d9a0154c…9226ad7`, 2 matching SHA reads separated by both boots.
+- `[vq] armed` ×1 in both logs. Lease: slot 1, both boots, clean.
+
+| Boot | Env | Ticks | VQ samples | Result |
+| --- | --- | --- | --- | --- |
+| gb2c (A) | queue off + `--vq`, wall 300, rc 0 | 0..~1370 | 26 (100..1350) | Select Character, healthy |
+| gb2d (B) | `--gs-queue 1` + `--vq`, wall 300, rc 0 | 0..~1360 | 26 (100..1350) | Select Character, healthy |
+
+### 9.3 VQ table (all 26 matched ticks)
+
+| tick | off-vram | off-regs | on-vram | on-regs | off-sub | on-sub | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 100 | 43e5391b | 618977f1 | 450b75c9 | 618977f1 | 536 | 558 | MISMATCH |
+| 150 | 2ebbd68f | 3242e903 | 4be23470 | 3242e903 | 1267 | 1301 | MISMATCH |
+| 200 | 2ebbd68f | 45e21e5d | 4be23470 | 45e21e5d | 2117 | 2151 | MISMATCH |
+| 250 | 5aeb6ee1 | 169b8f6f | e16e8f9c | 169b8f6f | 3505 | 3910 | MISMATCH |
+| 300 | 6c0c82ec | c6364d9e | 39aa4b34 | c6364d9e | 10353 | 10597 | MISMATCH |
+| 350 | 769cc32f | 96efbeb0 | 767f4bc9 | 96efbeb0 | 16453 | 16697 | MISMATCH |
+| 400 | 110a252f | 1b0c63ea | 4c80cdf2 | 1b0c63ea | 22553 | 22797 | MISMATCH |
+| 450 | 91d1633c | acaf53c | 4211ceb | acaf53c | 28653 | 28897 | MISMATCH |
+| 500 | f63c8a3a | b7a3c246 | 2820cfce | b7a3c246 | 34753 | 34997 | MISMATCH |
+| 550 | 598f2568 | bd9dce9 | 3ac50ecd | bd9dce9 | 40853 | 41097 | MISMATCH |
+| 600 | ba5b8ba7 | 7fb93997 | b7bad924 | 7fb93997 | 46997 | 47243 | MISMATCH |
+| 650 | 9a5511f4 | f0328355 | f103084d | f0328355 | 53149 | 53395 | MISMATCH |
+| 700 | 6f7ed2c1 | 1c5097f3 | 87fb3005 | 1c5097f3 | 59880 | 60126 | MISMATCH |
+| 750 | 8dd24112 | 8cc9e1b1 | 67391f86 | 8cc9e1b1 | 66330 | 66576 | MISMATCH |
+| 800 | d4493492 | 73e89f64 | cd93da2c | 73e89f64 | 72780 | 73026 | MISMATCH |
+| 850 | fa7333a7 | c55cc8e2 | 3ce6f11 | c55cc8e2 | 79230 | 79476 | MISMATCH |
+| 900 | 397aec3a | 107ffdc0 | ee277246 | 107ffdc0 | 85680 | 85926 | MISMATCH |
+| 950 | e2fda837 | 61f4273e | c48b73b0 | 61f4273e | 92130 | 92376 | MISMATCH |
+| 1000 | d200fe2d | f4d8a42c | 3cc73cbb | f4d8a42c | 98580 | 98826 | MISMATCH |
+| 1050 | 45140d79 | a94ee623 | c9146e2a | a94ee623 | 105030 | 105276 | MISMATCH |
+| 1100 | 3f5af563 | 76a24445 | 8443bee9 | 76a24445 | 111480 | 111726 | MISMATCH |
+| 1150 | 7c38e5d1 | 475bb557 | 61818039 | 475bb557 | 117930 | 118176 | MISMATCH |
+| 1200 | f428ace2 | ca02e9b9 | 2724bceb | ca02e9b9 | 124380 | 124626 | MISMATCH |
+| 1250 | be88d1cd | b9c17b0b | 671c0d12 | b9c17b0b | 131204 | 131450 | MISMATCH |
+| 1300 | f3ea1a52 | 4bcc89d2 | c4ba2732 | 4bcc89d2 | 144468 | 144714 | MISMATCH |
+| 1350 | 93fac383 | 3b8b1b24 | 4efb1645 | 3b8b1b24 | 158568 | 158814 | MISMATCH |
+
+Matched 26, mismatches 26 (all VRAM; **regs identical at all 26**).
+`reg=0` at every sample in both boots (no HLE reg writes on this route
+by tick 1350). `size=4194304` throughout.
+
+### 9.4 Stop-rule receipt (first mismatch)
+
+Per the brief: stop, no tuning, both boots used.
+
+- **First mismatch: tick 100** (the first sample).
+- **Packet index range since previous match: off (0, 536], on (0, 558].**
+- Reg writes at tick: off 0, on 0.
+
+### 9.5 Analysis (why this is NOT a queue-execution defect)
+
+1. **Regs identical at 26/26** ⟹ every priv-reg write the guest can see
+   (EE MMIO, HLE disp env, A+D, SIGNAL/FINISH/LABEL) landed identically.
+   Guest control flow is not diverged.
+2. **Submit deltas lockstep after tick 300.** On−off sub: 22@100,
+   34@150, 34@200, 405@250, 244@300, then constant 244 (600: 246) through
+   1350 — per-window deltas EXACTLY equal for 1000+ ticks (e.g. +6100 both
+   300→550, +6450 both 750→1200, +14100 both 1300→1350). The submitted
+   streams are identical after tick ~300; the divergence window is ticks
+   0–300 (boot/startup).
+3. **Unit determinism (Part 1 §3) proves same-packets ⟹ same-VRAM**,
+   including a 256-packet captured replay. Combined with (1)+(2): the
+   queue executes correctly; the guest *submitted* ~246 extra packets in
+   B during ticks 0–300, and VRAM (cumulative) never reconverges.
+4. Leading hypothesis for the extra submits (same class as Part 1
+   analysis): a timing-dependent guest read during init (single-shot CSR
+   SIGNAL/FINISH poll, timer, or device-status read) observes a different
+   value under async decode than under synchronous decode, and init code
+   submits extra/recovery packets. Steady-state code (tick 300+) uses
+   proper sync, hence the lockstep. The discriminating next step: E7
+   packet-fnv logs in both boots to find the first differing submitted
+   packet (2 boots, not run — budget exhausted).
+
+### 9.6 Presents/sec queue-on vs queue-off (for step d)
+
+From `[frame:dump]` counts over wall in THESE boots (both wall-bound,
+≈302.4 s elapsed):
+
+| Boot | Dumps | Elapsed (s) | Presents/s |
+| --- | --- | --- | --- |
+| A (off) | 1337 | 302.433 | **4.42** |
+| B (on) | 464 | 302.437 | **1.53** |
+
+Queue-on presents **2.9× fewer** (Part 1: 1320 vs 433, same ratio).
+Mechanism: each latch RPC waits for full-burst raster + present on the
+worker, so the main thread presents slower while the game thread runs
+ahead. Step (d) input: the present path needs the GPU-resident swapchain
+(GB1 §3b) — the RPC round-trip + full CPU raster per present does not
+scale.
+
+### 9.7 Part 2 receipts
+
+- Build: 1 (`cmake --build build -j4`, rc 0); suite 576/576 after.
+- Boots: 2/2 (gb2c, gb2d), slot 1, PIDs tracked, released cleanly.
+- Runner SHA `d9a0154c…9226ad7` matched pre/post both boots.
+- Disk 33.5/200 GB. `ssx3` tip unchanged (`943d609`); merge still clean.
+- Exact commands: §9 boots = `gb2_boot.py --label gb2c --wall 300
+  --snap 10.0 --script "<E33 route>" --vq` and `--label gb2d ... --vq
+  --gs-queue 1`; compare = `gb2_vq.py boot-gb2c-1.log boot-gb2d-1.log`
+  (exit 1, first mismatch tick 100 as above).
+
+### 9.8 Recommended next action (orchestrator decides)
+
+1. The queue executes correctly (regs 26/26, lockstep submits after
+   tick 300, unit byte-exactness). The open item is the tick 0–300
+   submit divergence: run the E7 packet-fnv A/B to isolate the first
+   differing submitted packet and the guest read that caused it.
+2. Step (d) takes the presents/sec number (2.9× fewer when queued).
+
+## 10. Exact commands (Part 1)
 
 ```
 git -C ~/dev/PS2Recomp worktree add ~/dev/ssx3-work/GB2/PS2Recomp -b gb2-gs-queue ssx3
