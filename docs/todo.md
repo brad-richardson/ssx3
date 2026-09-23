@@ -156,9 +156,14 @@ with measured budgets, then 120 Hz simulation.
       these MPGs (12,160 flowed inline) and neither address is a code constant:
       the game copies microcode from the library into packet buffers with EE
       code. Part 2 PASS (fork `99b5fd8`, 503/503): **zero** EE loads of the library
-      heads, so the bytes reach VIF only via DMA. Part 3 (E40) + T50
-      redirect #2: per dest-0 MPG, the EE source address of its payload, plus
-      a store watch on D1_CHCR/MADR/QWC/TADR (fn, pc, regs) on both sides.
+      heads, so the bytes reach VIF only via DMA. Part 3 PASS (fork `78ed470`, 510/510): every frame
+      `sub_382760` kicks two chains (TADR from struct 0x61ba60 fields +0x5AA8/
+      +0x5A9C, double-buffered arenas 0x708520/0x63b8a0, 0x708a30/0x63bdb0,
+      CHCR 0x185); each chain CALLs a **static uploader** in the library (RET
+      tag @0x435bd0 carrying the microcode inline from 0x435bf8). So the choice
+      is the CALL tag's ADDR the chain builder writes. Part 4 (E40): store
+      watch on arena writes of library addresses + chain tag dump. T50
+      (PCSX2) logs the same mpgpay/dmareg to show which uploader it calls.
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
