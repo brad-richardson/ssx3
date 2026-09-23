@@ -824,3 +824,119 @@ J-352 == K-352, 0 diffs). The "stale replay of idx 190" and the
   --pklog --pkcap 352,361,370`; VQ = `gb2_vq.py boot-gb2c-1.log
   boot-gb2{j,k}-1.log` (rc 1, 26/26 VRAM mismatch); decode =
   `gb2_pktdecode.py pklog-gb2g-1.txt pklog-gb2k-1.txt 352 361 370`.
+
+## 14. Part 6 — guest-timeline coupling read (code only, no builds/boots)
+
+Question: in the DIRECT path, where does guest-visible time depend on
+where/when GS work runs? All file:line below are pinned at runtime
+`1234451` (`gb2-gs-queue`). Read-only pass (~1 h); nothing built or
+booted.
+
+### 14.1 The timing model (read first — everything follows from it)
+
+- EE cycles are charged ONLY by recompiled code at checkpoints:
+  `checkpointDue` (`EeScheduler.cpp:847-879`, default 32 cy/block-edge,
+  `ee_scheduler.h:262-264`) via `eeCheckpointDue`
+  (`ps2_runtime.cpp:3186`) and per-dispatch 8 cy
+  (`ps2_runtime.cpp:2087`). **GS/GIF/DMA/VIF work charges ZERO cycles
+  in both paths.** `accountCycles` (`EeScheduler.cpp:881-890`) also
+  advances EE timers — timers are deterministic per `m_eeCycle`.
+- Scheduler events are DUAL-CLOCKED: each carries `deadlineCycle` +
+  `hostDeadline`, and fires only when BOTH pass
+  (`EeScheduler.cpp:2563-2566`). If the guest outruns the host clock
+  the game thread SLEEPS in `wait_until(pacingDeadline)`
+  (`EeScheduler.cpp:2550-2554`) — sleeps charge no cycles.
+- VBlank = `VBlankStart` (`EeScheduler.cpp:2618-2678`): `++m_vsyncTick`
+  (:2619), FIELD bit 0x2000 set/cleared on tick parity (:2628-2635),
+  `completeVSync` (:2656, waiters wake with result `(tick-1)&1`),
+  `dispatchIrq(false, 2u)` (:2677). Next VBlank = last deadlines +
+  period (:2597-2604), with `kVBlankPeriod = 16667 us` (:61) and
+  `kVBlankPeriodCycles` (:80).
+- REGIME (measured, Parts 2–5): tick rates run 4–11/s, far below 60/s,
+  so `hostDeadline`s lag wall permanently and are always satisfied:
+  **VBlank is purely cycle-driven (guest-paced)** in every boot so far.
+  Wall-time differences (queue faster, drain slower) move NO guest
+  clock directly — `m_eeCycle` is deterministic per guest path.
+- COROLLARY: the first divergence MUST enter through a guest read whose
+  VALUE depends on worker-vs-game-thread interleaving (a race), causing
+  a guest branch → different charges → `m_eeCycle` diverges → VBlank /
+  FIELD / timers / waits cascade deterministically. Every tick/phase
+  number in Parts 2–5 is downstream of such a read.
+
+### 14.2 Coupling inventory (direct → queue)
+
+RACE = guest-observed value can differ; SAME = identical; EFFECT =
+deterministic consequence of an earlier race.
+
+| # | Point | Direct | Queue | Verdict |
+|---|---|---|---|---|
+| 1 | Cycle charging (`EeScheduler.cpp:881-890`; callers `ps2_runtime.cpp:2087,3186`) | GS/GIF/DMA/VIF charge 0 | 0 (unchanged code path) | SAME — wall speed never moves `m_eeCycle` |
+| 2 | VBlank/event firing (`EeScheduler.cpp:2525-2608`; sleep :2550-2554) | cycle-driven (guest-paced regime) | same mechanics | SAME mechanics; tick COUNT diverges only post-trigger (EFFECT) |
+| 3 | CSR FIELD bit (`EeScheduler.cpp:2628-2635`, game thread) | tick parity | same code | SAME mechanics (EFFECT of tick count) |
+| 4 | CSR SIGNAL/FINISH + SIGLBLID (`gs_frontend.cpp:1757-1793` SIGNAL/LABEL/FINISH writers; readers `ps2_memory.cpp:833-851,881-889` + Load hooks `ps2_runtime.cpp:2906-2990`) | written synchronously during submit, game thread | written async on worker (`processGIFPacket` fork `gs_frontend.cpp:878-891` enqueues, NO fence) | RACE — guest CSR reads catch pre/post-execution values nondeterministically |
+| 5 | Non-CSR priv-reg readback (writers: packet execution via `writeRegisterUnlocked`, `gs_frontend.cpp:1358+`; readers: plain `gsRegPtr` reads, `ps2_memory.cpp:846-851,887-889`; ONE aliased struct, `ps2_runtime.cpp:754` + `gs_frontend.cpp:258-262`, no mirror) | synchronous, game thread | async worker writes vs game-thread plain (non-atomic) reads | RACE — **K's trigger lives here**: K's CSR reads match G through tick 246 while content diverges at tick 80, and every other channel below is excluded |
+| 6 | D_STAT/CHCR/QWC + DMAC IRQ (`ps2_memory.cpp:2112-2155` set post-arbiter-drain; causes consumed `ps2_runtime.cpp:3061` from Store) | set after synchronous raster, same guest point | set at same guest point, raster still queued | SAME values, ORDER-vs-raster differs; guest-visible only via a later (4)/(5) read |
+| 7 | GIF_STAT (`0x10003000`) | unimplemented (falls to `return 0`, `ps2_memory.cpp:873`) | same | CONSTANT both paths — ELIMINATED (corrects §13.7: GIF_STAT goes last, non-CSR priv readback first) |
+| 8 | EE timers / CP0 / INTC / VIF / VU / IOP (`accountCycles` :881-890; VIF/VU on game thread) | deterministic per `m_eeCycle`/guest point | same | SAME (post-divergence cascade is EFFECT) |
+| 9 | VSync waits (`EeScheduler.cpp:2067,2075-2099`) | keyed on game-side `m_vsyncTick` | same | SAME mechanics (EFFECT of tick count) |
+| 10 | Presents / latch (`ps2_runtime.cpp:495-547` main thread; latch `gs_frontend.cpp:754` RPC-fenced) | main thread polls game tick, latches on change | same; fewer latches (ticks outrun poll) | NOT a coupling — game thread NEVER waits on presents (no game-side present/latch reads found); presents/s is pure EFFECT (1337 vs 464 vs 1326 explained by tick rate vs poll rate) |
+| 11 | Worker backpressure (`gs_worker.cpp:44-74`, blocks when full, never drops) | n/a | wall stall, zero cycles charged | NO guest effect in guest-paced regime (hostDeadlines already past) |
+| 12 | GIF arbiter (`ps2_gif_arbiter.cpp:76-125`; drains `ps2_memory.cpp:2115,2185,2203,2227,2278,2476`) | game-thread reorder buffer | identical code, game thread | SAME order — note "drainImmediately" drains the ARBITER into (async) enqueue, it is NOT a worker fence (all paths async on queue, incl. Path1/2) |
+| 13 | CSR FIFO bits (hard-wired EMPTY, `ps2_memory.cpp:178-192`); CSR bit 3 (guest-written, deterministic); IMR (direct syscall touch, `System.cpp:43-80`) | constant / deterministic | same | ELIMINATED (the 0x375d10 FIFO-spin exits immediately in all boots) |
+
+Precision notes: `m_privRegs`/`gs_regs` are one aliased struct (no
+sync lag to blame); `siglblid` and non-CSR regs are plain shared
+(non-atomic) across game/worker threads — a real race, worth atomic
+hygiene alongside any fix, but ordering (below) dominates it.
+
+### 14.3 Synthesis: what the numbers were
+
+- H (−1 from idx 0): the race resolved inside the first 39 ticks, in a
+  packet-invisible spin/branch (pre-submit-0), shifting `m_eeCycle` by
+  ~1 VBlank of charges; G-content thereafter proves the guest then
+  runs the same path on shifted ticks.
+- K/F (+1, F-content from tick 80): trigger read in ticks 40–80 via
+  (5) — a priv-reg readback whose writer was still queued — flipping
+  the per-tick alpha computation one tick stale (§13.5); behind-phase
+  follows because F-state guest work runs slower per tick.
+- J (+2): drain stalls (Fence per CSR read) slow the game thread from
+  the first read AND the (5) trigger fires → both effects.
+- The drain fails because it fences the wrong set (CSR/SIGLBLID only):
+  K's CSR log proves the trigger read is outside that set.
+
+### 14.4 Recommendation (smallest change for timeline identity)
+
+**Not inherently wall-coupled** (in the guest-paced regime that holds
+at 4–11 ticks/s). Smallest sufficient change: extend the existing drain
+hook from CSR/SIGLBLID-only to the FULL GS priv range — Fence
+(`drainQueue`, keeping the `isQuiescent` fast-path,
+`gs_worker.cpp:91`) before every guest Load in `0x12000000+size`
+(`ps2_runtime.cpp:2895-2903` matcher + the 4 Load sites) whenever the
+queue is enabled. Why sufficient: every guest-observable GS value flows
+through game-thread `gs_regs` reads; fencing restores synchronous
+(direct-equivalent) values; execution order is already deterministic
+(FIFO worker); VRAM is guest-unreadable; nothing charges cycles, so
+`m_eeCycle` → VBlank → timers → waits all re-align. Cost: idle reads
+pay one mutex + two loads (fast-path); stalls land exactly where direct
+paid raster time (wall direction is toward-direct). Gate on
+`queueEnabled` (auto); keep an env kill-switch during validation.
+Rejected: cycle-charging (direct charges zero — would diverge, not
+match); per-reg narrowing (only IMR/BUSDIR are guest-write-only —
+marginal); drain-after-every-submit (serializes the queue; debug only).
+Validation (next lane, not GB2): 2 boots, on + full-priv-drain vs gb2c
+VQ 26 ticks; pass = 26/26 VRAM. Hygiene alongside: atomic
+`siglblid`/priv regs (or document fence-coverage).
+
+### 14.5 Receipts and lane close
+
+- 0 builds, 0 boots, read-only (`git status` clean apart from this
+  REPORT; no tree writes outside it). ~1 h of the 1.5 h box.
+- Open items carried (not chased): F-tail N-run sizing (§13.6);
+  trigger-read identification, now narrowed to non-CSR priv readback
+  in ticks 40–80 (a priv-range Load logger — same pattern as the CSR
+  hook — would name the addr/pc in 1 boot); host-paced-corner
+  re-examination if tick rates ever near 60/s.
+- GB2 parked at step (a) per orchestrator: queue determinism
+  characterized (systematic phase + race attractors + trigger channel
+  narrowed), fix direction handed over (§14.4), no code changes made
+  or needed in-lane.
