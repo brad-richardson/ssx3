@@ -940,3 +940,154 @@ VQ 26 ticks; pass = 26/26 VRAM. Hygiene alongside: atomic
   characterized (systematic phase + race attractors + trigger channel
   narrowed), fix direction handed over (§14.4), no code changes made
   or needed in-lane.
+
+## 15. Part 7 — full-priv drain validation (orchestrator amendment, last)
+
+Brief: implement drain-before-every-guest-load in the GS priv range
+when the queue is on (keep `isQuiescent`); atomic siglblid +
+shared non-CSR regs or document why not. Boots: two queue-on + drain
++ `--vq` + `--pklog` (repeat for determinism), plus one queue-off
+`--vq` iff VQ output changed (else reuse C). Pass = both match C at
+all 26 VQ ticks AND match each other packet-for-packet. Report
+presents/s and wall ticks/s on vs off. On fail: first differing priv
+read, then stop. One build, max 3 boots.
+
+**Verdict: SPLIT — VQ-FAIL, guest-timeline PASS, determinism PASS.**
+Both drain boots mismatch VRAM at all 26 ticks (regs match), so the
+pass criterion fails. But L==G 144,591/144,591 packets (tick+content),
+L==G 5,017/5,017 priv reads (zero shift, off-like first read
+restored), and L==M 164,895/164,895 packets + 5,305/5,305 priv reads:
+the drain restored guest-timeline identity AND determinism. The VRAM
+gap has an identified mechanism (§15.4) with a known fix (store
+ordering, next lane). The brief's fail item (first differing priv
+read) VACATES — zero exist — so the mechanism is handed back instead.
+
+### 15.1 What was built (one build, runtime `c5fd6f3`)
+
+- `PS2X_GS_CSR_DRAIN=1` (name kept for wrapper compat; meaning widened,
+  commented) now fences before EVERY guest load in `0x12000000+size`
+  when the queue is on. Matcher `gb2IsCsrOrSiglblid` → range-only
+  `gb2IsGsPrivReg`; `csrDrainEnabled` → `privDrainEnabled`;
+  `noteCsrRead` → `notePrivRead` (`[csr]` line tag kept for tool
+  compat). No wrapper change (`--csr-drain` reused).
+- All 5 Load widths hooked (closes Part-3's Load8 hole). Per-width
+  audit: only read32/read64 serve priv — 8/16/128 drain but DON'T log
+  (their priv values are unserved/zero; logging them would forge
+  evidence — Parts 3–5 Load16/128 priv lines were bogus this way, moot
+  in practice).
+- No-fast-path-hole proof (all guest priv loads flow through the
+  hooks): `Ps2IsSpecialAddress` covers the priv range
+  (`ps2_address.h:49`); constant-MMIO translator path goes slow
+  (`instruction_translator.cpp:91-93`); dynamic `READ*` macros check
+  `isSpecialAddress` (`ps2_runtime_macros.h:384-433`).
+- Atomic siglblid: member → `std::atomic` (CSR precedent), 0x1080
+  excluded from `gsRegPtr`, 6 sibling branches (read32/64, write32/64,
+  IO-read/IO-write), CAS SIGNAL/LABEL masked-RMW, CAS half-merge guest
+  stores, explicit init store, `.load()` debug/VQ readers.
+  Static asserts hold; no struct copies exist (all refs) so the
+  non-copyable member is safe.
+- Why-not for other non-CSR regs (documented per brief): every
+  execution write to them is a BLIND store (no RMW anywhere — the only
+  RMWs in the file are SIGNAL/LABEL/siglblid, now CAS), so cross-thread
+  store-vs-store resolves last-writer-wins on single-copy-atomic
+  aligned words; the fence covers every guest READ (the only
+  timeline-relevant direction); the main-thread present path already
+  raced these regs pre-queue (same pattern, GS-correctness only).
+  Full atomization = `gsRegPtr` redesign for no timeline gain.
+- Suite 576/576 flags-unset and queue-capture from the worktree root.
+  Runner SHA-256 `d785a9d2bb4fcb49018c64cf2879a0c951c4bf1eb98a6cce3903bd3e3ae2ae5e`
+  (one read; non-device binary).
+
+### 15.2 Baseline: C reused, no fresh off boot (2/3 boots used)
+
+VQ output unchanged with queue+flag unset: Load behavior = range check
++ gated log/drain + read (identical semantics); VQ snapshot read-only;
+`.load(relaxed)` same values; off-path single-threaded. (E==G across
+binaries is the empirical precedent.) C (gb2c) stands.
+
+### 15.3 Boots (2/3)
+
+| Boot | Env | Result |
+|---|---|---|
+| gb2l (a) | on + drain + vq + pklog + pkcap | rc 0, wall 330 s, slot 1. 26 VQ, pklog 8.8 MB / 170,203 lines (164,895 pk), max tick 1371 |
+| gb2m (b) | repeat of (a) | rc 0, wall, slot 1. 26 VQ, pklog 8.9 MB (166,869 pk), max tick 1378 |
+
+Codegen stable (9457 files, Sep 21 13:41); display awake; slot 1
+(E46 held slot 2 during gb2m — no interference).
+Deviation (moot, verified): gb2m's command duplicated one script entry
+(`64920:cross:2000` twice). Both copies sit past the reached ticks
+(64920 ms ≈ tick 3891 > 1378 — never fire), and the stim is
+level-based (`Pad.cpp:299-301`: mask while `atMs <= now < atMs+hold`),
+so the duplicate is semantically null. L==M bit-for-bit confirms it.
+
+### 15.4 Results
+
+VQ vs C: 26/26 VRAM mismatch BOTH boots (first tick 100; regs 26/26
+match). J ≠ B ≠ C ≠ L at tick 100 — four distinct VRAM states.
+
+Guest timeline (the pass that matters):
+
+| Compare | Packets (tick+fnv+len+src) | Priv reads (tick+val+pc+addr) | Bytes 352/361/370 |
+|---|---|---|---|
+| L vs G | 144,591/144,591, shift {0: all} | 5,017/5,017, addrs ALL `12001000` | 0 diffs |
+| L vs M | 164,895/164,895 | 5,305/5,305 | 0 diffs at 352 |
+
+First priv read restored off-like: tick 40, `0x4000`, pc `0x375d10`
+in L/M/G alike (J was 41/`0x6000`). The guest NEVER reads a non-CSR
+priv addr in this window (5,305/5,305 CSR) — priv reads are EXHAUSTED
+as trigger candidates, yet K (no full fence) diverged: the choice
+mechanism is narrowed to §15.5's residual.
+
+VRAM-gap mechanism (why VQ fails with identical packets): direct priv
+STORES bypass the queue (`write32` → `gsRegs` on the game thread,
+`ps2_memory.cpp:1048+`) while packet A+D register writes execute LATE
+on the worker — store-vs-execution INTERLEAVING differs from direct
+program order, so raster sees a different register timeline (same
+packets, same FINAL regs per the 26/26 regs match, different VRAM).
+The Load fence cannot fix store order. Known fix (next lane): route
+direct priv stores through the worker as in-stream `RegWrite` commands
+(`GS::writeRegister` already enqueues; the bypass is the raw
+`write32` path) — program order preserved, execution stays async.
+
+Two-level model (the honest summary): attractor CHOICE is wall-racy
+and pre-tick-80 with mechanism UNKNOWN (every logged channel —
+packets, CSR, full priv range, D_STAT/IRQ/timers/VIF/pad points —
+exhausted); WITHIN an attractor execution is deterministic (H==I,
+L==M, E==G; only J/K split). Tally: P3-nodrain F(1); P4-nodrain
+H-state(2); P4-CSRdrain split(1+1); P7-fulldrain G-state(2). The full
+drain makes the G-attractor ~certain (2/2). Leading residual
+hypothesis for the choice input: worker CPU contention perturbing a
+host-threaded input (testable via pinning; IOP/MPEG wall inputs need
+an audit — E==G bounds it to queue-perturbed paths only).
+
+Presents/s (frame:dump/elapsed) and wall ticks/s:
+
+| Boot | dumps | elapsed | presents/s | max tick | ticks/s |
+|---|---|---|---|---|---|
+| C off+vq | 1337 | ~300 (§9.6: 4.42) | 4.42 | ~1370 | ~4.57 |
+| G off+pklog | 1281 | 120 | 10.68 | 1299 | 10.83 |
+| D on+vq | 464 | ~300 (§9.6: 1.53) | 1.53 | ~1360 | ~4.53 |
+| H/I on+pklog | 384/393 | 120 | 3.20/3.28 | 1300/1307 | 10.8/10.9 |
+| J/K CSR-drain | 1326/1330 | 333/331.6 | 3.98/4.01 | 1380/1371 | 4.14/4.13 |
+| L/M full-drain | 1344/1355 | 331.5/331.3 | 4.06/4.09 | 1371/1378 | 4.14/4.16 |
+
+(VQ snapshots cost ~2.4× tick rate (10.8→4.5); drain fences a further
+~9% (4.5→4.15). Drain restores off-rate presents in both variants.)
+
+### 15.5 Gaps and recommended next (orchestrator decides)
+
+- Gaps: attractor-choice wall input unknown (§15.4 residual); C-vs-G
+  never directly compared (different flag sets; inspection + E==G
+  precedent cover it — a same-binary off+vq+pklog boot
+  would close it formally); read8/16/128 priv unserved (pre-existing,
+  path-independent); store-ordering fix unimplemented.
+- Next: (1) route direct priv stores through the worker in-stream,
+  then re-run VQ (expect 26/26 PASS — the remaining gap is exactly
+  this); (2) N-run full-drain study to size G-attractor certainty;
+  (3) choice-input hunt (thread pinning; IOP/MPEG/CDVD wall audit).
+- GB2 LANE CLOSE (7/7 parts): step (a) determinism characterized end
+  to end — systematic phase, race attractors, trigger channels
+  exhausted, guest-timeline identity + determinism demonstrated with
+  the full-priv drain, remaining VRAM gap mechanized with a concrete
+  fix. No GB2 code debt: all lane code committed on `gb2-gs-queue`
+  (`c5fd6f3`), scripts + REPORT on main, nothing pushed.
