@@ -707,6 +707,10 @@ with measured budgets, then 120 Hz simulation.
       LQ3V7772Q2. Meanwhile I25 builds the prefixes and code up to signing
       and polls for the profile. The SSD iOS prefixes were deleted in V2
       tier 2 and are rebuilt from recipes.
+      **Unblocked 17:19 (Brad: copy from the laptop):** wildcard profile
+      `f0793278-…` (team `*`, expires 2027-09-16, lists the iPhone) copied
+      to the mini's `~/Library/Developer/Xcode/UserData/Provisioning
+      Profiles/`; SHA matches the laptop.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
