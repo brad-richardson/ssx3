@@ -449,6 +449,12 @@ with measured budgets, then 120 Hz simulation.
       4.42 (2.9× fewer; goes to step (d)). **Part 3:** a packet/CSR-read
       diff to find the first divergence, then one fix (a CSR/SIGLBLID load
       drains the queue) + a vq validation.
+      **Part 3 (79c17f9): no CSR read precedes the divergence**, so it's not
+      the FINISH/CSR deviation (zero genuine guest CSR loads in ticks
+      0–1300). The first difference is packet idx 352 (tick 80), a Path2
+      64-byte post-VBlank packet whose content differs, every 9th packet
+      through tick 91, then a 143-packet burst. Part 4: an off/off pklog
+      null, then decode the differing bytes and their builder.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
