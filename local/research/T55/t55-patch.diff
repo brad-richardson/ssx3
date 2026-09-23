@@ -1,0 +1,124 @@
+diff --git a/pcsx2/Interpreter.cpp b/pcsx2/Interpreter.cpp
+index 64fc7b092..8189a1431 100644
+--- a/pcsx2/Interpreter.cpp
++++ b/pcsx2/Interpreter.cpp
+@@ -2,6 +2,12 @@
+ // SPDX-License-Identifier: GPL-3.0+
+ 
+ #include "Common.h"
++
++// T54: draw-record census includes/externs (log-only).
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++extern std::atomic<int> g_t48_vsync; // T54: defined in GS.cpp (T48 vsync mirror).
+ #include "R5900OpcodeTables.h"
+ #include "VMManager.h"
+ #include "Elfheader.h"
+@@ -153,6 +159,56 @@ void intCheckMemcheck()
+ 	}
+ }
+ 
++
++// T55: func_394ED0 call inputs from jal @0x362f68 (log-only).
++static bool g_t55_pending = false; // jal seen, awaiting func entry
++static bool g_t55_incall = false; // inside func_394ED0
++static int g_t55_vs = -1;
++static u32 g_t55_tgt = 0, g_t55_a0 = 0, g_t55_s1 = 0;
++static u32 g_t55_w0 = 0, g_t55_w1 = 0, g_t55_w2 = 0, g_t55_w3 = 0;
++static u32 g_t55_hash = 0;
++static bool g_t55_stores = false;
++static u32 g_t55_n = 0; // h394 lines emitted
++static void t55_call(u32 tgt)
++{
++	g_t55_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	g_t55_tgt = tgt;
++	g_t55_pending = true; // snapshot at func entry (post-delay-slot regs)
++}
++static void t55_enter()
++{
++	if (!g_t55_pending) return;
++	g_t55_pending = false;
++	g_t55_a0 = cpuRegs.GPR.r[4].UL[0];
++	g_t55_s1 = cpuRegs.GPR.r[5].UL[0];
++	u32 s1 = g_t55_s1;
++	g_t55_w0 = memRead32(s1);
++	g_t55_w1 = memRead32(s1 + 4);
++	g_t55_w2 = memRead32(s1 + 8);
++	g_t55_w3 = memRead32(s1 + 12);
++	g_t55_hash = cpuRegs.GPR.r[6].UL[0] & 0xffu;
++	g_t55_stores = false;
++	g_t55_incall = true;
++}
++static void t55_mark()
++{
++	if (g_t55_incall) g_t55_stores = true;
++}
++static void t55_ret()
++{
++	if (!g_t55_incall) return;
++	g_t55_incall = false;
++	if (g_t55_n >= 8192)
++	{
++		if (g_t55_n == 8192) Console.WriteLn("T55_CAP vsync=%d", g_t48_vsync.load(std::memory_order_relaxed));
++		g_t55_n++;
++		return;
++	}
++	g_t55_n++;
++	Console.WriteLn("h394 vsync=%d tgt=0x%x a0=0x%x s1=0x%x w0=0x%x w1=0x%x w2=0x%x w3=0x%x hash=0x%x ret=0x%x stores=%u",
++		g_t55_vs, g_t55_tgt, g_t55_a0, g_t55_s1, g_t55_w0, g_t55_w1, g_t55_w2, g_t55_w3,
++		g_t55_hash, cpuRegs.GPR.r[2].UL[0], g_t55_stores ? 1u : 0u);
++}
+ static void execI()
+ {
+ 	// execI is called for every instruction so it must remains as light as possible.
+@@ -172,6 +228,9 @@ static void execI()
+ #endif
+ 
+ 	const u32 pc = cpuRegs.pc;
++	if (pc == 0x362f70) t55_ret(); // T55: func_394ED0 return (log-only; ra of jal @0x362f68).
++	else if (pc == 0x394ed0) t55_enter(); // T55: func entry snapshot (log-only).
++	else if (pc >= 0x394fdc && pc <= 0x394fe8) t55_mark(); // T55: store cluster (log-only).
+ 	// We need to increase the pc before executing the memRead32. An exception could appears
+ 	// and it expects the PC counter to be pre-incremented
+ 	cpuRegs.pc += 4;
+@@ -315,8 +374,39 @@ void J()
+ 	doBranch(_JumpTarget_);
+ }
+ 
++
++// T54: draw-record census at the walker jal (log-only; site pc==0x363cf8 inside JAL).
++static int g_t54_lastvs = -1;
++static u32 g_t54_cnt[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
++static u32 g_t54_seen[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
++static void t54_census(u32 a1, u32 s3)
++{
++	int t54_vs = g_t48_vsync.load(std::memory_order_relaxed);
++	if (t54_vs != g_t54_lastvs)
++	{
++		if (g_t54_lastvs >= 0)
++		{
++			for (u32 m = 0; m < 16; m++)
++			{
++				if (g_t54_cnt[m]) Console.WriteLn("drec vsync=%d mode=%u count=%u", g_t54_lastvs, m, g_t54_cnt[m]);
++			}
++		}
++		for (u32 m = 0; m < 16; m++) { g_t54_cnt[m] = 0; g_t54_seen[m] = 0; }
++		g_t54_lastvs = t54_vs;
++	}
++	u32 t54_mode = a1 & 15u;
++	g_t54_cnt[t54_mode]++;
++	if (g_t54_seen[t54_mode] < 8)
++	{
++		g_t54_seen[t54_mode]++;
++		Console.WriteLn("drecs vsync=%d mode=%u addr=0x%x w0=0x%x w1=0x%x w2=0x%x w3=0x%x",
++			t54_vs, t54_mode, s3, memRead32(s3), memRead32(s3 + 4), memRead32(s3 + 8), memRead32(s3 + 12));
++	}
++}
+ void JAL()
+ {
++	if (cpuRegs.pc == 0x363cf8) t54_census(cpuRegs.GPR.r[5].UL[0], cpuRegs.GPR.r[19].UL[0]);
++	if (cpuRegs.pc == 0x362f6c) t55_call(_JumpTarget_); // T55: func_394ED0 call site (log-only; jal @0x362f68). // T54: walker-jal census (log-only; jal @0x363cf4, a1=mode, s3=record).
+ 	// 0x3563b8 is the start address of the function that invalidate entry in TLB cache
+ 	if (EmuConfig.Gamefixes.GoemonTlbHack) {
+ 		if (_JumpTarget_ == 0x3563b8)
