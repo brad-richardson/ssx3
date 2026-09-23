@@ -188,7 +188,7 @@ with measured budgets, then 120 Hz simulation.
 - [ ] N lane: bundle `libvulkan_freedreno.so` (Turnip v36, `717812c3…`) in
       the APK and load it through G43's HMI hook when the GPU GS lands on
       Android (GB1 step c).
-- [ ] **G44 (Part 2 running):** shadow path builds and renders in-process
+- [ ] **G44 (Part 3 running: diagnostic SMODE1=NTSC+ANALOG override in the shadow only; S3 showed LC=0 also blocks):** shadow path builds and renders in-process
       (470/470, branch `g44-parallel-shadow` @ `460e438`, not pushed) but 0 frame
       pairs: the recomp's SMODE1 reads 0 (`CMOD=0 LC=0`, `SMODE2.INT=1`), which
       paraLLEl scanout rejects. S3 validates the NTSC-geometry workaround.
