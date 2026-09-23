@@ -123,11 +123,16 @@ with measured budgets, then 120 Hz simulation.
       path) leads, provenance not captured → no fix. Orchestrator correction:
       T48's PCSX2 startPCs are in 8-byte units, so its 0x0/0x2/0x8/0x73 **are**
       our 0x0/0x10/0x40/0x398: the same programs finish in ≤2,090 cycles there.
-- [ ] **E37 + T49 (running, paired):** full entry trace (VU1 data memory at
-      MSCAL, the VIF1 commands that fed it, every pair to the loop with VI/VF
-      changes) for startPCs 0x40 and 0x10, recomp (E37) and PCSX2 (T49), same
-      line format; the first differing value names the bug (inputs ⇒ VIF1
-      UNPACK; same inputs, different VI ⇒ an instruction).
+- [x] **E37 PASS (09-23):** `PS2X_VU1_ENTRY_TRACE` (480/480, fork `11725b4`).
+      Neither stuck program (0x10, 0x40) ever writes **vi03** (the loop limit)
+      or initializes vi11/vi13/vi14: only relative bumps from inherited entry
+      values (vi13 0xd549/0xdbb0, vi03 0xC224), wild for row pointers. VU mem
+      reads in the setup all hit zero rows. So the bounds come from VI state
+      set *outside* these programs: candidates (1) another VU1 program that
+      runs first each frame (PCSX2's 0x257 = byte 0x12B8) and sets them,
+      (2) VU0 writing VU1's registers via the VU0-data mapping (0x4000+).
+      T49 asked to print all 16 VI at entry (and trace 0x257 if it runs first).
+- [ ] **T49 (running):** PCSX2 side of the diff (entry VI line added). full entry trace (VU1 data memory at
 - [ ] E34 (after E33): apply E30's two diffs on `ssx3`, then 464/464, then an A/B
       boot with the flag off vs the bypass title screen (`e32-handoff.md`).
       Watch `round=` in boot logs: an empty-queue `sequence_end` spins up to
