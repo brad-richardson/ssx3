@@ -1,0 +1,28 @@
+LEASE_BEFORE=LEASE_FREE E45 done
+E45 2026-09-23T16:10:54Z
+  AC powered: true
+  USB powered: false
+  Wireless powered: false
+  Dock powered: false
+/Users/brad/dev/ssx3-work/E45/bench/e45_odin_double: 1 file pushed, 0 skipped. 522.5 MB/s (6167976 bytes in 0.011s)
+/Users/brad/dev/ssx3-work/E45/bench/e45_odin_quad: 1 file pushed, 0 skipped. 515.4 MB/s (6173144 bytes in 0.011s)
+e267bf7a085e46a9465de332586953921f05afcb56962e2e3d4af2f6dc980a4e  d
+ea0a5639f491d60b63df5cb1918702ad1b431393aa9a928ab972946ffd1a7283  q
+== double ==
+E45 variant=double sizeofVuWide=8 iters=20 loopN=2048
+E45 prog=P0-smoke variant=double iters=20 issued=5 cycles=10 ns_total=138542 ns_per_instr=1385.4 pc_end=0x28 sha=b98a94d029736995603cd9e60e11b4f7e4f0de9a8facfc9f4d49abc6358abf81 OK
+E45 prog=P1-opsweep variant=double iters=20 issued=37 cycles=39 ns_total=399948 ns_per_instr=540.5 pc_end=0x128 sha=d25e6c736d23324a24517458adfee7b3a13e09e44b9df823bd85b74fbd823c2f OK
+E45 prog=P2-special variant=double iters=20 issued=37 cycles=39 ns_total=392188 ns_per_instr=530.0 pc_end=0x128 sha=a7ef0491eb5fd179f8cba5ef7a6e6bd051bfb52b539759a0209f667e2e1a91a8 OK
+E45 prog=P3-fmacloop variant=double iters=20 issued=16394 cycles=32786 ns_total=57595156 ns_per_instr=175.7 pc_end=0x50 sha=f8e260a6a4eda5f2ad6d27885532d85530840f25bf97ab6312706ea2efb57f82 OK
+E45 prog=P4-torture variant=double iters=20 issued=24 cycles=29 ns_total=113125 ns_per_instr=235.7 pc_end=0xc0 sha=9fe4a0dc9f498ebe1c40d70947c4bb72bbb3da605f6b6c969335d88781bee8dd OK
+E45 ALL_OK
+== quad ==
+E45 variant=quad sizeofVuWide=16 iters=20 loopN=2048
+E45 prog=P0-smoke variant=quad iters=20 issued=5 cycles=10 ns_total=138229 ns_per_instr=1382.3 pc_end=0x28 sha=b98a94d029736995603cd9e60e11b4f7e4f0de9a8facfc9f4d49abc6358abf81 OK
+E45 prog=P1-opsweep variant=quad iters=20 issued=37 cycles=39 ns_total=685000 ns_per_instr=925.7 pc_end=0x128 sha=d25e6c736d23324a24517458adfee7b3a13e09e44b9df823bd85b74fbd823c2f OK
+E45 prog=P2-special variant=quad iters=20 issued=37 cycles=39 ns_total=705313 ns_per_instr=953.1 pc_end=0x128 sha=a7ef0491eb5fd179f8cba5ef7a6e6bd051bfb52b539759a0209f667e2e1a91a8 OK
+E45 prog=P3-fmacloop variant=quad iters=20 issued=16394 cycles=32786 ns_total=92316406 ns_per_instr=281.6 pc_end=0x50 sha=f8e260a6a4eda5f2ad6d27885532d85530840f25bf97ab6312706ea2efb57f82 OK
+E45 prog=P4-torture variant=quad iters=20 issued=24 cycles=29 ns_total=146458 ns_per_instr=305.1 pc_end=0xc0 sha=9fe4a0dc9f498ebe1c40d70947c4bb72bbb3da605f6b6c969335d88781bee8dd OK
+E45 ALL_OK
+LEASE_FREE E45 done
+E45_ODIN_DONE
