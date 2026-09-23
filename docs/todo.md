@@ -461,6 +461,18 @@ with measured budgets, then 120 Hz simulation.
       **Next: E53** (E52 pane): batch 1 covers the structural and
       special-value fixes, `-ffp-contract=off`, and EE-thread RTZ+FZ
       (env A/B switch). SC + race validation; G2/G3 clamping deferred.
+      **E51 (a248b6a), handed back to E53:**
+      - The recomp streams ~1 texture IMAGE upload/vsync vs PCSX2's ~73.
+      - Terrain TEX1 K is saturated (0x801) vs PCSX2's per-object K.
+      - Only 4 VU1 programs run.
+      - Lead: the camera's per-object visibility test `sub_0037DE88` runs
+        `vcallmsr` at **0x37deb8** after `ctc2 → CMSAR0`, which is exactly
+        E52's VCALLMSR defect. So visibility is wrong, objects are dropped
+        and textures aren't streamed.
+      - UVs are sane. VU1 budget exits unidentified (none in this window).
+      - **The race is not reproducible run to run at the same tick**
+        (e50f 2ND/19 programs vs e51a 1ST/4 programs at 00:00:19). This is
+        an open determinism concern.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
@@ -777,6 +789,10 @@ with measured budgets, then 120 Hz simulation.
         run when it's unlocked).
       - Part 2: rebuild on `eac6cba` (FPU fix) with canonical codegen and
         reinstall.
+      **I25 Part 2 PASS (7b58fbe):** the iPhone has the `eac6cba` +
+      canonical-codegen build (install only), and the Simulator race draws
+      the world. First iOS lane ever to show rendered frames (the
+      UIWindowScene fix). `codegen-ssx3-e49` deleted.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
