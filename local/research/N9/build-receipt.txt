@@ -1,0 +1,22 @@
+=== configure ===
+cmake -S ~/dev/ssx3-work/N9/PS2Recomp -B ~/dev/ssx3-work/N9/host-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPS2X_BUILD_STUDIO=OFF -DPS2X_ENABLE_DIAG_TAPS=OFF -DPS2X_GS_SHADOW_PARALLEL=ON -DPS2X_PARALLEL_GS_SOURCE_DIR=/Users/brad/dev/ssx3-work/N9/parallel-gs
+RC=0
+-- PS2X: G44 parallel-gs shadow backend ON (standalone, from /Users/brad/dev/ssx3-work/N9/parallel-gs)
+
+=== build ===
+cmake --build ~/dev/ssx3-work/N9/host-build --parallel 8 --target ps2x_tests
+RC=0
+[323/324] Linking CXX executable ps2xTest/ps2x_tests
+ld: warning: ignoring duplicate libraries: 'ps2xRecomp/libps2_recomp_lib.a'
+
+=== suite (from ~/dev/ssx3-work/N9/PS2Recomp) ===
+../host-build/ps2xTest/ps2x_tests
+RC=0
+========================================
+Total Tests: 593
+Passed: 593
+Failed: 0
+========================================
+
+=== runner guard ===
+git diff --stat 14b1e5cb n9-android -- ps2xRuntime/src/runner -> (empty) RC=0
