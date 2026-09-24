@@ -118,27 +118,34 @@ were sampled with tap/address/word match. No OTHER condition (trace
 complete, alignment exact, batch ids match GB7C2). **Overall: B.**
 Candidate A did not yield A, so B/C/D were traced per the brief order
 (`aComplete` stayed false); had A yielded, B/C/D rows would have been
-suppressed.
+suppressed. Note on what B establishes here: the rows show a
+state-supported accepted same-value write (TEST/mask/blend state evaluated
+on the independent old value all permit the write, and old==new is directly
+observed) — not a directly observed changed write (which would require
+new!=old). The write executing versus being skipped with passing state is
+not discriminated by these rows.
 
 ## 5. Perturbation prediction for a future one-pixel OFF/ON test
 
-The measured state makes predictions exact and distinct (no missing state):
+The measured state determines an exact prediction for the measured target
+pixel under a correctly timed poke (no missing state for this pixel):
 
 - Poke: the C1 source word at (343,378) (block-0 addr `000bae74`) to P,
   e.g. `0xDEAD0001` (distinct from every trace word), after packet47176
   completes and before packet47240 opens.
 - Predicted changed: carrier dst (342,377) `0x00353341` → `0x00AD0001`
   (P masked to RGB: `abe=0`, TEST always-passes, `fbmsk` alpha-only, CT24
-  drops alpha; texel = tap0 exactly since fx=fy=0.0000 measured).
-- Predicted unchanged: every other destination word exactly — each dst's
-  texel is exactly its own dst+(1,1) tap at zero blend weight to neighbors
-  (fx=fy=0), so only (342,377) observes the poked pixel.
+  drops alpha; texel = tap0 exactly since fx=fy=0.0000 measured at this
+  pixel).
+- Not predicted: unchangedness of every other destination word. Other
+  pixels whose tap quads include (343,378) were not all measured, so no
+  claim is made about them; the prediction covers the measured target pixel
+  only.
 - Basis: fx=fy=0.0000 measured at the target pixel (texel==tap0 bit-exact),
   open RGB write path measured, no intervening writer (tap words still equal
-  the C1 new words at carrier time). The only uniformity assumption is
-  fx=fy=0 at non-measured pixels, supported by 24 GB7C2 background samples
-  with the same +1/+1 shift; the changed-word prediction itself rests only
-  on the target pixel's own measured state.
+  the C1 new words at carrier time). The 24 GB7C2 background samples with
+  the same +1/+1 shift are supporting context, not a substitute for
+  measuring each potentially affected pixel.
 
 ## 6. Gaps / recommended next action
 
@@ -150,12 +157,14 @@ The measured state makes predictions exact and distinct (no missing state):
   than background rows.
 - Nothing in this run bears on the paraLLEl-GS damage cause (CPU replay only).
 - Recommended next action: run the §5 one-pixel OFF/ON perturbation for
-  candidate A (predicted `00353341`→`00AD0001` at (342,377), all else equal).
-  A match upgrades the CPU transport path from correlational (B) to causal;
-  a mismatch (dst stays `00353341`) would implicate a non-VRAM transport
-  (e.g. a transfer path the CPU backend does not route through this blit)
-  and is equally discriminating. No further passive tracing of this pair is
-  needed.
+  candidate A (predicted `00353341`→`00AD0001` at (342,377) under a
+  correctly timed poke). A match upgrades the CPU transport path from
+  correlational (B) to causal. A mismatch (dst stays `00353341`) is
+  ambiguous on its own: it is equally consistent with a mistimed or
+  misapplied poke, an intervening rewrite of the source or destination, or
+  a different sampling path, and does not by itself implicate a non-VRAM
+  transport — the poke timing/application would have to be verified first.
+  No further passive tracing of this pair is needed.
 
 ## 7. Receipts
 
