@@ -1,0 +1,70 @@
+C/C++: 4 warnings generated.
+C/C++: In file included from /home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/gs/gs_cpu_backend.cpp:7:
+C/C++: /home/brad/n8d5f/PS2Recomp/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:67:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
+C/C++:    67 |                 switch (psm)
+C/C++:       |                         ^~~
+C/C++: /home/brad/n8d5f/PS2Recomp/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:91:11: warning: enumeration value 'Max' not handled in switch [-Wswitch]
+C/C++:    91 |                 switch (psm)
+C/C++:       |                         ^~~
+C/C++: /home/brad/n8d5f/PS2Recomp/ps2xRuntime/include/runtime/gs/ps2_gs_memory.h:168:11: warning: 9 enumeration values not handled in switch: 'C32', 'C24', 'C16'... [-Wswitch]
+C/C++:   168 |                 switch (psm)
+C/C++:       |                         ^~~
+C/C++: 3 warnings generated.
+C/C++: /home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/vu/ps2_vu1_core.cpp:2459:5: warning: 'snprintf' will always be truncated; specified size is 32, but format string expands to at least 44 [-Wformat-truncation]
+C/C++:  2459 |     std::snprintf(num, sizeof(num), " mac=%08x status=%08x clip=%08x",
+C/C++:       |     ^
+C/C++: 1 warning generated.
+C/C++: /home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/Kernel/Syscalls/System.cpp:1099:65: warning: format specifies type 'unsigned int' but the argument has type 'char *' [-Wformat]
+C/C++:  1099 |                     std::snprintf(src, sizeof(src), "src=0x%x", src);
+C/C++:       |                                                            ~~   ^~~
+C/C++:       |                                                            %s
+C/C++: 1 warning generated.
+
+> Task :app:processReleaseManifestForPackage
+
+> Task :app:buildCMakeRelWithDebInfo[arm64-v8a][ps2EntryRunner]-2
+C/C++: /home/brad/n8d5f/parallel-gs/Granite/vulkan/command_buffer.cpp:375:20: warning: unused function 'is_legacy_layout' [-Wunused-function]
+C/C++:   375 | static inline bool is_legacy_layout(VkImageLayout layout)
+C/C++:       |                    ^~~~~~~~~~~~~~~~
+C/C++: 1 warning generated.
+
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:desugarReleaseFileDependencies
+> Task :app:mergeReleaseStartupProfile
+> Task :app:mergeReleaseArtProfile
+> Task :app:mergeExtDexRelease
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :app:collectReleaseDependencies
+> Task :app:mergeReleaseJavaResource
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:processReleaseResources
+> Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:mergeReleaseNativeLibs
+> Task :app:stripReleaseDebugSymbols
+> Task :app:dexBuilderRelease
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:mergeDexRelease
+> Task :app:compileReleaseArtProfile
+> Task :app:optimizeReleaseResources
+> Task :app:extractReleaseNativeSymbolTables
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:mergeReleaseNativeDebugMetadata
+> Task :app:assembleRelease
+
+BUILD SUCCESSFUL in 7m 47s
+48 actionable tasks: 48 executed

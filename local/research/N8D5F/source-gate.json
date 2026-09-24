@@ -1,0 +1,50 @@
+{
+  "files": {
+    "backend": {
+      "path": "/home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp",
+      "sha": [
+        "4e3efc51d8d104ab5d3c537076e85c6cfcd8344c8e6c147de02f5a5015c8f1e5",
+        "4e3efc51d8d104ab5d3c537076e85c6cfcd8344c8e6c147de02f5a5015c8f1e5"
+      ],
+      "bytes": 26060
+    },
+    "header": {
+      "path": "/home/brad/n8d5f/parallel-gs/gs/n8d5_tile_spirv.hpp",
+      "sha": [
+        "19b9ba5fc747d8fcb70d712b86bd5738c64424ceb15c24d4b5ed58219f71bac9",
+        "19b9ba5fc747d8fcb70d712b86bd5738c64424ceb15c24d4b5ed58219f71bac9"
+      ],
+      "bytes": 13972
+    },
+    "writer": {
+      "path": "/home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp",
+      "sha": [
+        "358d726bf39e319b906e7e15407e1bf361cd2cdbdd8e79d4a96b25a9588c3f96",
+        "358d726bf39e319b906e7e15407e1bf361cd2cdbdd8e79d4a96b25a9588c3f96"
+      ],
+      "bytes": 139679
+    },
+    "codegen": {
+      "path": "/home/brad/n8b1/codegen-ssx3/register_functions.cpp",
+      "sha": [
+        "8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3",
+        "8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3"
+      ],
+      "bytes": 32744715
+    }
+  },
+  "source_diff": {
+    "fork": [
+      "Files /home/brad/n8b1/PS2Recomp/ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp and /home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp differ",
+      "Files /home/brad/n8b1/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp and /home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp differ"
+    ],
+    "parallel": [
+      "Only in /home/brad/n8d5f/parallel-gs/gs: n8d5_tile_spirv.hpp"
+    ],
+    "jni": []
+  },
+  "writer_hunk_sha": "64b584851662ae0ddbdf003cca89057b07ac0f0640bcf22d60497865f44fa4ff",
+  "writer_diff": "--- /home/brad/n8b1/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp\t2026-09-24 03:12:17.238754843 -0400\n+++ /home/brad/n8d5f/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp\t2026-09-24 08:04:49.580827276 -0400\n@@ -538,14 +538,38 @@\n             static_cast<unsigned long long>(seq),width,height,displayFbp,sourceFbp,hash,\n             static_cast<unsigned long long>(smode2),static_cast<unsigned long long>(pmode));\n     }\n+    auto writePngBytes = [&img](const char *path) {\n+        int encodedSize = 0;\n+        unsigned char *encoded = ExportImageToMemory(img, \".png\", &encodedSize);\n+        bool ok = encoded && encodedSize > 0;\n+        if (ok)\n+        {\n+            std::ofstream out(path, std::ios::binary);\n+            if (out)\n+            {\n+                out.write(reinterpret_cast<const char *>(encoded), encodedSize);\n+                ok = out.good();\n+            }\n+            else\n+                ok = false;\n+        }\n+        if (encoded)\n+            MemFree(encoded);\n+        if (!ok)\n+        {\n+            static unsigned errors = 0;\n+            if (errors++ < 3u)\n+                std::cerr << \"[frame:dump] PNG write failed path=\" << path << std::endl;\n+        }\n+    };\n     if (keep)\n     {\n         std::snprintf(pngPath, sizeof(pngPath), \"%s/%s-%llu.png\", dir, fallback ? \"fallback\" : \"upload\",\n                       static_cast<unsigned long long>(seq));\n-        ExportImage(img, pngPath);\n+        writePngBytes(pngPath);\n     }\n     std::snprintf(pngPath, sizeof(pngPath), \"%s/%s-latest.png\", dir, fallback ? \"fallback\" : \"upload\");\n-    ExportImage(img, pngPath);\n+    writePngBytes(pngPath);\n     std::snprintf(txtPath, sizeof(txtPath), \"%s/%s-latest.txt\", dir, fallback ? \"fallback\" : \"upload\");\n     if (keep)\n     {\n",
+  "size_bytes": 345753589,
+  "status": "pass"
+}
