@@ -1,0 +1,20 @@
+PASS off_launcher_sha (223fd15ec0aa)
+PASS on_hashes_preserved (2686 B)
+PASS on_ppm_preserved (688143 B)
+PASS off_result_present
+PASS off_replay_ok (summary=['queue', 'parallel', '862958', '11499', '25445', '2050'] replay_ok=['862958', '2050'])
+PASS off_one_install_launch (install=1 launch=1)
+PASS off_no_first_failure (not found)
+PASS off_cleanup_clean
+PASS off_hashes_present (parallel.hashes)
+PASS off_41_rows (41 rows)
+PASS off_exact_ticks (50..2050 step50)
+PASS rows_compared_41x41 (both sides 41 rows, exact ticks)
+INFO first_row_diff tick=850 ON=(850, '00c4eed5', '60a25873', '6e74ea59') OFF=(850, '23589ef3', '60a25873', '9d6d204c')
+INFO classification VOID (differs at 21 ticks ≤2000: [850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1650, 1700, 1750, 1800, 1850, 1900, 1950, 2000])
+PASS off_ppm_present (/Users/brad/dev/ssx3-work/N8D7M12P5D1/vq-002050.ppm 688143 B)
+INFO off_ppm_sha 5e0caca3773096d51595530fe3278cc92ca42b59f590a5c4e0d3e84d05adbea4
+INFO off_ppm_path /Users/brad/dev/ssx3-work/N8D7M12P5D1/vq-002050.ppm
+INFO ppm_differs ON!=OFF
+PASS ppm_compared (diff recorded, not a checker failure)
+VERDICT A
