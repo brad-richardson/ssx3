@@ -1866,10 +1866,16 @@ with measured budgets, then 120 Hz simulation.
       500+100 s maximum active/grace cap; self-check38/38 and
       checker57/57. Script SHA `fa9444a9…85694`. No boot or card query.
       `local/research/E55D14P2A/ORCH-GATE.md`.
-- [ ] **E55D14 Part 2B one empty-card path run:** release only the
-      gated SHA for one Mac boot, view Load game frames, pair five
-      `getdirpath` siblings with status rows and record the post-choice
-      raw/query/pattern/host. Then decide whether a seed can be grounded.
+- [x] **E55D14 Part 2B empty-card path A (`dae3007e`):** one bounded
+      Mac boot viewed Load game selected and its six EMPTY slots;
+      five paired path/status rows include post-choice tick1740 raw
+      `BASLUS-20772-GAM*`, query `/BASLUS-20772-GAM*`, empty parent,
+      same pattern and private mc0 root. Cards stayed empty, no copied
+      bytes or mcRead, checker68/68; no save or speed verdict.
+      `local/research/E55D14P2B/ORCH-GATE.md`.
+- [ ] **E55D15 save-seed design:** use the observed game-save wildcard
+      to identify a known valid save source and its expected card layout;
+      decide a bounded seed/run only after provenance and byte checks.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;

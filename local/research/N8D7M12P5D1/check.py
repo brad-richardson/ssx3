@@ -214,7 +214,59 @@ def c_rows(text, _rep):
     if not m:
         return False
     rc = m.group(1)
-    return 'replay_rows") == 41' in rc or "replay_rows') == 41" in rc
+    count_kept = 'replay_rows") == 41' in rc or "replay_rows') == 41" in rc
+    progress_kept = 'if markers["replay_rows"] != last_rows:' in text
+    return count_kept and progress_kept
+
+
+@check("off_exact_tick_sequence")
+def c_ticks(text, _rep):
+    # Static part: EXPECTED_TICKS is exactly 50..2050 step 50,
+    # replay_markers parses the ordered replay_ticks list, and
+    # replay_complete gates on replay_ticks == list(EXPECTED_TICKS).
+    if "EXPECTED_TICKS = tuple(range(50, 2051, 50))" not in text:
+        return False
+    if '"replay_ticks"' not in text and "['replay_ticks']" not in text \
+            and 'out["replay_ticks"]' not in text:
+        return False
+    m = re.search(r"def replay_complete\(.*?\):(.*?)(?=\ndef )", text, re.S)
+    if not m or "replay_ticks\") == list(EXPECTED_TICKS)" not in m.group(1):
+        return False
+    # Functional part: run the real parser/gate on synthetic logs.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "p5d1_launch_under_check", str(LAUNCH))
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    if tuple(mod.EXPECTED_TICKS) != tuple(range(50, 2051, 50)):
+        return False
+    base = ["GB4_REPLAY_SUMMARY mode=queue backend=parallel packets=862958 "
+            "priv=11499 transfers=25445 markers=2050",
+            "GB4_FRAME tick=2050 backend=parallel pmode=ff21 present=b167a719",
+            "[n8d7m12] replay ok: packets=862958 markers=2050"]
+
+    def rows(ticks):
+        return [f"GB4_REPLAY tick={t} vram=aa priv=bb present=cc"
+                for t in ticks]
+    exact = base + rows(range(50, 2051, 50))
+    if not mod.replay_complete(mod.replay_markers(exact), {}):
+        return False
+    # 41 rows but tick 100 duplicated and tick 2050 missing: the count
+    # gate alone would pass, the exact-sequence gate must fail it.
+    dup_ticks = list(range(50, 2051, 50))
+    dup_ticks[-1] = 100
+    dup = base + rows(dup_ticks)
+    dup_markers = mod.replay_markers(dup)
+    if dup_markers.get("replay_rows") != 41:
+        return False
+    if mod.replay_complete(dup_markers, {}):
+        return False
+    # A missing tick (40 rows) must also fail.
+    short = base + rows([t for t in range(50, 2051, 50) if t != 2050])
+    if mod.replay_complete(mod.replay_markers(short), {}):
+        return False
+    return True
 
 
 @check("ppm_hashes_pull_stays")

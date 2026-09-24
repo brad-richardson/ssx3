@@ -26,8 +26,17 @@ selected/oracle/tile measurement flags caused the sparse ON frame. Part
 | Source base | fork `n8d7m12-app` @ `a608ed1` (Part 2 gate A) |
 | Scratch (outside git, OFF-private) | `~/dev/ssx3-work/N8D7M12P5D1/` |
 | ON launcher SHA (P5A, not reused) | `287140bf370acfb105f1b64347a635822300699150e517e6b912340ae031334e` |
-| OFF launcher SHA | `be8e9956ca51826183cd5ea67a82fb0ea034d7c8a2b08ce48a81a7759846cacd` |
-| Checker result | `check.py --self-check`: **29/29 PASS, verdict A** (`check-result.json`, `check-selfcheck.txt`) |
+| OFF launcher SHA | `223fd15ec0aa45079f44bed7ceffd3e19381d12ac0c51587a0284afb9cd03170` |
+| Checker result | `check.py --self-check`: **30/30 PASS, verdict A** (`check-result.json`, `check-selfcheck.txt`) |
+
+**Correction (narrow gate, no device/run/build):** the first committed
+SHA (`be8e9956…cacd`) checked only `replay_rows == 41`. `replay_complete`
+now requires the exact ordered tick list `50,100,…,2050`
+(`EXPECTED_TICKS`, no duplicates, none missing); the count stays for
+progress tracking only. The checker runs the real parser/gate on
+synthetic logs: exact sequence passes, 41 rows with tick 100 duplicated
+and tick 2050 missing fails, 40 rows fails. This supersedes `be8e9956…`
+for any release; that SHA must not be released.
 
 ON receipts preserved: `local/research/N8D7M12P5A/` (`REPORT.md`,
 `ORCH-GATE.md`, `launch.py`, `check.py`, `check-result.json`,
@@ -62,7 +71,9 @@ Live keys asserted absent in both: `PS2X_GS_CAPTURE*`,
 ## 3. OFF receipt/census acceptance
 
 OFF still requires: `GB4_REPLAY_SUMMARY markers=2050` (parallel),
-**41** `GB4_REPLAY` step-50 rows through tick2050, `GB4_FRAME tick2050`
+the exact ordered `GB4_REPLAY` tick list 50,100,…,2050 through tick2050
+(`EXPECTED_TICKS = tuple(range(50, 2051, 50))`, 41 rows, no duplicates,
+none missing), `GB4_FRAME tick2050`
 tick=2050, `[n8d7m12] replay ok markers=2050`, no `GB4_REPLAY_PARSE_ERROR` /
 `replay failed|rejected` / parallel FATAL / Turnip fail, pull of
 `vq-002050.ppm` + hashes with 2+2 SHA match, and intact cleanup
@@ -76,8 +87,9 @@ parsing. The ported N8D7M6 `tile_vector`/`parse_controls`/`probe`
 parsers are retained verbatim for logging only; `census_gate` is an OFF
 stub that always passes so missing markers cannot fail OFF, and the
 error gate uses replay-marker errors only (`markers["errors"]`), never
-census absence. `replay_complete` additionally requires
-`replay_rows == 41`.
+census absence. `replay_complete` requires `replay_rows == 41` **and**
+`replay_ticks == list(EXPECTED_TICKS)`; the `replay_rows` count is
+retained for progress tracking only.
 
 ## 4. Exact unexecuted command (separate run gate)
 
@@ -100,7 +112,7 @@ install/launch only using the exact reviewed SHA; no device call now.
 | 3 | Serial `local/odin-serial` == `622c49b1`; all adb `-s` | match | stop |
 | 4 | OFF env is ON minus exactly the three flags; live keys absent; unique OFF outputs | §2 | stop, no run |
 | 5 | OFF launcher is a fresh reviewed SHA (P5A SHA not reused) | new gate | stop, no run |
-| 6 | OFF yields SUMMARY (markers=2050, parallel) + 41 rows + `GB4_FRAME tick=2050` + `replay ok markers=2050` + PPM + hashes | §3 | FAIL/void, first error recorded |
+| 6 | OFF yields SUMMARY (markers=2050, parallel) + exact tick list 50,…,2050 + `GB4_FRAME tick=2050` + `replay ok markers=2050` + PPM + hashes | §3 | FAIL/void, first error recorded |
 | 7 | Missing selected/oracle/tile markers never fail OFF | §3 stub + checker | preparation FAIL if checker fails |
 | 8 | Lease claim persists; one `install -r` + one `am start`; BACK once ~6 s | P5A rules kept | stop/cleanup |
 | 9 | 600 s wall, 180 s progress, 16 MiB log, 64 MiB output caps | kept | stop w/ reason |
@@ -110,13 +122,14 @@ install/launch only using the exact reviewed SHA; no device call now.
 
 ## 6. Validation (static only)
 
-`check.py --self-check`: **29/29 PASS, verdict A** (`check-result.json`).
-Launch SHA `be8e9956ca51826183cd5ea67a82fb0ea034d7c8a2b08ce48a81a7759846cacd`.
+`check.py --self-check`: **30/30 PASS, verdict A** (`check-result.json`).
+Launch SHA `223fd15ec0aa45079f44bed7ceffd3e19381d12ac0c51587a0284afb9cd03170`.
 Covers pins,
 serial, OFF env exactness, live-key absence, one-run guard, single
 install/launch, stream protection, env 2+2 preserve/restore, frame
 filename, marker success syntax, OFF census non-requirement, 41-row
-requirement, PPM pull, keyguard blocker, caps, unique OFF outputs,
+requirement, exact tick-sequence gate (static + functional: exact passes,
+duplicated/missing tick fails), PPM pull, keyguard blocker, caps, unique OFF outputs,
 finally cleanup, provisional marking, complete-before-exit +
 wall-clamped 15 s drain, cleanup-failure-fails, no graphics verdict,
 REPORT table, and checker device-freedom. `launch.py` compiles

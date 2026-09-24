@@ -61,6 +61,8 @@ OUTPUT_CAP = 64 * 1024 * 1024
 WALL_CAP = 600
 PROGRESS_CAP = 180
 DRAIN_SECS = 15
+# Exact step-50 tick sequence through tick2050: 50,100,...,2050 (41 rows).
+EXPECTED_TICKS = tuple(range(50, 2051, 50))
 COMPLETE = "first complete tick2050 summary/frame (PROVISIONAL OFF)"
 # Literal (byte-address) control set from N8D7L REPORT, in kOracleControls
 # order (ps2_gs_parallel_backend.cpp). Same as N8D7M6 launch.py. Retained
@@ -399,6 +401,10 @@ def replay_markers(lines):
     ):
         out["errors"] += re.findall(pattern, text)
     out["replay_rows"] = len(re.findall(r"GB4_REPLAY tick=\d+ ", text))
+    # Ordered tick list for the exact-sequence gate: duplicates or
+    # out-of-order rows stay visible here (count alone would miss them).
+    out["replay_ticks"] = [int(m.group(1)) for m in
+                           re.finditer(r"GB4_REPLAY tick=(\d+) ", text)]
     return out
 
 
@@ -416,13 +422,14 @@ def census_gate(p):
 
 
 def replay_complete(markers, p):
-    """OFF complete receipt: replay markers + 41 rows, no census.
+    """OFF complete receipt: replay markers + exact tick sequence, no census.
 
     Requires GB4_REPLAY_SUMMARY (parallel, markers=2050), GB4_FRAME
-    tick=2050, [n8d7m12] replay ok markers=2050, exactly 41 GB4_REPLAY
-    step-50 rows through tick2050, and no replay-marker errors. Never
-    requires selected/oracle/tile markers, control=128/128, or tile
-    vectors; census_gate always passes.
+    tick=2050, [n8d7m12] replay ok markers=2050, the exact ordered
+    GB4_REPLAY tick list 50,100,...,2050 (no duplicates, none missing),
+    and no replay-marker errors. Never requires selected/oracle/tile
+    markers, control=128/128, or tile vectors; census_gate always
+    passes. The replay_rows count is retained for progress tracking only.
     """
     if markers["errors"]:
         return False
@@ -433,6 +440,7 @@ def replay_complete(markers, p):
     _opk, omarkers = markers["replay_ok"]
     return (backend == "parallel" and nmarkers == "2050" and tick == "2050"
             and omarkers == "2050" and markers.get("replay_rows") == 41
+            and markers.get("replay_ticks") == list(EXPECTED_TICKS)
             and census_gate(p))
 
 
