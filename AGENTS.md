@@ -39,7 +39,8 @@ linkage and input → Odin native race → measured budgets → 120 Hz sim.
 | Every quoted number with its status | `docs/numbers-ledger.md` |
 | Worker briefs | `local/muse/prompts/<ID>.md` (committed with `git add -f`) |
 | Worker evidence | `local/research/<ID>/REPORT.md` + text receipts |
-| Latest review | `docs/research/review-2026-09-22-progress-and-parallelization.md` |
+| Orchestrator runbook (loop, worker launchers, gates, lessons) | `docs/orchestration.md`, scripts in `local/tooling/orch/` |
+| Latest review | `docs/research/review-2026-09-23-frontier-2.md` |
 | Parked GameCube work | `docs/reserve.md` |
 
 Lanes: **E** PS2 runtime (PS2Recomp fork, branch `ssx3`), **G** GS
