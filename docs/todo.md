@@ -1320,11 +1320,20 @@ with measured budgets, then 120 Hz simulation.
       corner `0x1BFFF4`. Header bytes match the N8D7F fork. Six sampled
       words cannot classify a full frame; the worker's A/B threshold is
       rejected. No build/run. `local/research/N8D7K/ORCH-GATE.md`.
-- [ ] **N8D7L independent full-frame raw oracle:** on the same tick2050
-      4 MiB snapshot, decode all 512×224 selected PSMCT24 RGB pixels with
-      the fork table oracle, calculate all 448 tile counts, and compare
-      with G43 input/circuit/stage vectors. Literal offsets and a control
-      check the oracle; no six-word or broad-window shortcut.
+- [x] **N8D7L independent full-frame raw oracle PASS (`b5200bf2`, fork
+      `d1ba1d4`):** one Mac build, flag-OFF suite 585/585 and paired OFF/ON
+      replay of the pinned N8D4 stream. Fork-table PSMCT24 oracle matches
+      G43 selected input, circuit and GPU stage across all 448 tiles;
+      64,374 occupied pixels, 300 active tiles. OFF/ON hashes and viewed
+      frame are byte-identical. Static fixture 13/13 checks source/literals;
+      compiled evidence is the replay. Mac calibration only; Odin raw
+      snapshot and cause remain open. `local/research/N8D7L/ORCH-GATE.md`.
+- [ ] **N8D7M independent Odin selected-input oracle:** package the
+      default-OFF N8D7L patch for Android, then run one pinned tick2050
+      Odin capture. Decode the same 4 MiB snapshot across all 512×224
+      selected PSMCT24 RGB pixels with the fork-table oracle, calculate
+      all 448 tile counts and compare with G43 input/circuit/stage vectors.
+      Literal offsets and controls check the oracle; no six-word shortcut.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
