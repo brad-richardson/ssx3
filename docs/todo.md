@@ -1385,6 +1385,16 @@ with measured budgets, then 120 Hz simulation.
       runner-dir diff. **Next: build/sign current fork and install on iPhone
       only; recheck Simulator if build configuration differs.** iPad run
       awaits Brad unlocking it.
+- [x] **I27C PASS for signed iPhone install (ed49b74):** exact folded fork
+      `04f3ace` with runner guard empty, canonical E54F2 codegen and pinned
+      private raylib patch. One fresh optimized iphoneos build succeeded;
+      compiler response contains `-O3 -DNDEBUG` and diagnostic flags are
+      OFF. Staged ELF/ISO and signed arm64 binary passed SHA pairs;
+      `codesign --verify --strict` passed. `devicectl device install app`
+      exited zero on Brad's paired iPhone 16 Pro Max. Signed binary
+      `30bdafdc…2d01b68`; no launch, test, screenshot, iPad action or
+      device-rendering/speed claim. Scratch 3.5 GiB, global 130.6/200 GB.
+      **Next iOS device gate:** install and run on iPad after Brad unlocks it.
 - [x] **W1F2 PASS for Simulator + iPhone install (2fc2242):** restored
       I25's bundled `ps2x.env`/`PS2X_BOOT_ELF` and UIWindowScene wiring
       on the W1F fold, retaining I26 controls and W1 presentation. Fork
