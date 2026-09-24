@@ -1251,11 +1251,20 @@ with measured budgets, then 120 Hz simulation.
       Release build and taps-OFF suite passed 585/585; runner guard empty.
       No replay or device-cause verdict. Gate:
       `local/research/N8D7F/ORCH-GATE.md`.
-- [ ] **N8D7F Mac same-stream calibration:** recheck binary, stream and
-      codegen SHA pairs; claim one mini lease; run pinned N8D4 OFF/ON replay
-      from the private fork. Gate source metadata, controls, three 448-tile
-      vectors, final 896-tile vector and equal final hashes before any Odin
-      package or run. The N8D7D2 synthetic fixture already passed.
+- [x] **N8D7G Mac same-stream calibration PASS (`5baf7f9`):** pinned N8D4
+      OFF/ON replays each exited 0 under one released mini lease. Selected
+      source was nonpromoted, one sample; host input, independent circuit1
+      and GPU stage were exact 448/448, each 300 active. Final sampled/raw
+      were exact 896/896, 567 active; controls 128; present hash `7bf5c012`
+      and viewed frame SHA matched across runs. Orchestrator corrected a
+      checker field-name bug and extended the saved-log gate to 34/34;
+      neither replay was rerun. Mac calibration only, no Odin/cause/speed
+      claim. `local/research/N8D7G/ORCH-GATE.md`.
+- [ ] **N8D7H Android selected-input diagnostic package:** port only the
+      gated N8D7F backend and private G43 delta to isolated Android build
+      source; keep the capture flag default OFF, verify runner-dir/source/
+      binary pins and package before one same-Odin-frame probe. The Mac and
+      Odin GS streams must not be assumed byte-identical.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.

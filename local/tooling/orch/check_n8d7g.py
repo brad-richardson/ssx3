@@ -61,6 +61,16 @@ def main(root):
         check(name + "_final_broad", int(stages["final"]["active"]) >= 500)
         check(name + "_checkerboard", "[n8d5b] control=128 expected=128 PASS" in log)
         check(name + "_no_errors", not re.search(r"\[n8d(?:5b|6a|7f)\].*(?:ERROR|OTHER)|VK_ERROR|pipeline.*(?:error|failed)", log, re.I))
+        final_vectors = {}
+        for kind in ("sampled", "raw"):
+            raw = one(rf"^\[n8d5b\] {kind}_tile_counts=([0-9,]+)$", log, name + " " + kind)
+            values = [int(x) for x in raw.split(",")]
+            check(name + "_" + kind + "_length", len(values) == 896 and all(0 <= x <= 256 for x in values))
+            summary = fields(one(rf"^\[n8d5b\] {kind}_summary tiles=896 .+$", log, name + " " + kind + " summary"))
+            check(name + "_" + kind + "_summary", int(summary["occupied"]) == sum(values)
+                  and int(summary["active"]) == sum(x >= 32 for x in values))
+            final_vectors[kind] = values
+        check(name + "_sampled_raw_equal", final_vectors["sampled"] == final_vectors["raw"])
     check("off_flag_silent", "[n8d7f]" not in off)
     meta = fields(one(r"^\[n8d7f\] tick=2050 .+$", on, "selected metadata"))
     check("selected_metadata", all(meta.get(k) == v for k, v in
