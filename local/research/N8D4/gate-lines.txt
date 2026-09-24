@@ -1,0 +1,26 @@
+[cpu]
+  [Run]: GB4 replays the captured GS command stream and hashes VBlank checkpoints GB4_FRAME tick=2050 backend=cpu pmode=ff21 dispfb1=9070 dispfb2=1400 display_fbp=112 source_fbp=112 preferred=0 present=a1834096
+GB4_REPLAY_SUMMARY mode=direct backend=cpu drop_priv=0 packets=862993 priv=11499 transfers=25485 markers=2050 readbacks=0 clears=0 samples=41 rtz=off rounded_packets=0
+Passed: 585
+Failed: 0
+[parallel]
+GB4_FRAME tick=2050 backend=parallel pmode=ff21 dispfb1=9070 dispfb2=1400 display_fbp=112 source_fbp=112 preferred=0 present=7bf5c012
+GB4_REPLAY_SUMMARY mode=queue backend=parallel drop_priv=0 packets=862993 priv=11499 transfers=25485 markers=2050 readbacks=0 clears=0 samples=41 rtz=off rounded_packets=0
+GB4_PARALLEL_STATS packets=862993 presents=41 null_scanouts=0 unsupported_clears=0 unsupported_vram_io=0 init_ok=1 init_failed=0
+Passed: 585
+Failed: 0
+[odin]
+INSTALL Performing Streamed Install | Success
+LAUNCH Starting: Intent { cmp=com.ps2x.runner/android.app.NativeActivity }
+TRIGGER frame-dump seq=0 host_tick=2050 latest_guest_tick=2024 t=114.3
+STOP frontend dump and capture marker at host_tick=2050
+POSTRUN pid-after=none
+FRAME upload-0.png seq=0 tick=2050 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=4802e0f7 smode2=0x1 pmode=0xff21 sha=a908d4ea94a8ec20c0fb85fe03cdad8fc0fc5d3a6ae67684b9bd0ac220f40a35
+FRAME upload-latest.png seq=0 tick=2050 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=4802e0f7 smode2=0x1 pmode=0xff21 sha=a908d4ea94a8ec20c0fb85fe03cdad8fc0fc5d3a6ae67684b9bd0ac220f40a35
+STAGE n8d3-raw.bin sha=7e724a7de82bf734f147319eb99031841e5351b793074c1c838a17f0f79247fd bytes=917504
+STAGE n8d3-packed.bin sha=7e724a7de82bf734f147319eb99031841e5351b793074c1c838a17f0f79247fd bytes=917504
+STAGE n8d3-stage.txt sha=d1eeb019a55c1d78439e80aa0225213b40b058fe696967bcd7928b9e45d6bb3c bytes=167
+CAPTURE bytes=1100725180 sha=38ace1a3e8e99e1d5d7d24e611dfa9cedd6e6d44a45c800223991401cd93f97d
+CLEANUP pid-after=none
+CLEANUP lease=LEASE_FREE N8D4 done
+CLEANUP launch-to-exit=157.0s

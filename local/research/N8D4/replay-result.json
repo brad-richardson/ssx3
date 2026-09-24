@@ -1,0 +1,67 @@
+{
+  "fork_pin": "ddaee780288adb076ce40050d87969b20bc4bb05",
+  "codegen_register_sha": [
+    "8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3",
+    "8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3"
+  ],
+  "capture_sha": [
+    "38ace1a3e8e99e1d5d7d24e611dfa9cedd6e6d44a45c800223991401cd93f97d",
+    "38ace1a3e8e99e1d5d7d24e611dfa9cedd6e6d44a45c800223991401cd93f97d"
+  ],
+  "commands": {
+    "configure": {
+      "command": [
+        "cmake",
+        "-S",
+        "/Users/brad/dev/ssx3-work/N8D4/PS2Recomp",
+        "-B",
+        "/Users/brad/dev/ssx3-work/N8D4/build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DPS2X_GAME_CODEGEN_DIR=/Users/brad/dev/ssx3-work/codegen-ssx3",
+        "-DPS2X_GS_SHADOW_PARALLEL=ON",
+        "-DPS2X_PARALLEL_GS_SOURCE_DIR=/Users/brad/dev/ssx3-work/G43/parallel-gs",
+        "-DPS2X_ENABLE_RUNTIME_LOGS=OFF",
+        "-DPS2X_ENABLE_AGRESSIVE_LOGS=OFF"
+      ],
+      "seconds": 92.38,
+      "log_bytes": 51163
+    },
+    "build": {
+      "command": [
+        "nice",
+        "-n",
+        "10",
+        "cmake",
+        "--build",
+        "/Users/brad/dev/ssx3-work/N8D4/build",
+        "--target",
+        "ps2x_tests",
+        "-j8"
+      ],
+      "seconds": 18.794,
+      "log_bytes": 47416
+    },
+    "cpu": {
+      "command": [
+        "/Users/brad/dev/ssx3-work/N8D4/build/ps2xTest/ps2x_tests"
+      ],
+      "seconds": 63.059,
+      "log_bytes": 88159
+    },
+    "parallel": {
+      "command": [
+        "/Users/brad/dev/ssx3-work/N8D4/build/ps2xTest/ps2x_tests"
+      ],
+      "seconds": 3.063,
+      "log_bytes": 4800475
+    }
+  },
+  "status": "both replays complete",
+  "binary_sha": [
+    "58e521833878633778ff8176c670a0bf667f679537ab31d6a4c07dc9c27847a7",
+    "58e521833878633778ff8176c670a0bf667f679537ab31d6a4c07dc9c27847a7"
+  ],
+  "scratch_bytes": 2595438310
+}
