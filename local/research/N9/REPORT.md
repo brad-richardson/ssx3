@@ -145,3 +145,105 @@ Gaps: the clean N8X1 diff is compiled here (Mac `ps2x_tests` incl. renderer TU)
 but its wave64 path is Apple-unreachable, so this build doesn't execute the fix
 (N8X1 row 10 same gap); first live run of the default path is Part 2's job.
 No speed numbers (diagnostic build; suite only, no boot).
+
+---
+
+# N9 Part 2 — one APK from pushed tips + live Odin race (worker receipt)
+
+Gate `ORCH-GATE-P1.md` verdict A; pushed tips confirmed before use:
+`parallel-gs ssx3=963cb57` (fresh `--recursive` clone: super `963cb57`,
+Granite `166ba21a` from `brad-richardson/Granite`), `PS2Recomp ssx3=fb11e18`
+(`git ls-remote` + fetch). Battery rule per Brad: AC + level ≥ 20 %, status
+ignored (launch script enforces it). No `PS2X_PGS_*` env anywhere (asserted in
+`launch.py`, re-checked by `check.py`). One `assembleRelease`, one Odin launch,
+no push.
+
+## 7. Inputs (all double-read)
+
+| Input | Pin |
+| --- | --- |
+| parallel-gs fork `ssx3` | fresh clone `963cb57`, Granite `166ba21a`, `.gitmodules` = fork URL, `--recursive` populated |
+| PS2Recomp fork `ssx3` | `fb11e18` (`git archive` export, 327 files; wrapper props `3d91f093…` = external pin) |
+| canonical codegen | 9,457 files; `register_functions.cpp` `8ea8ed43…` ×2 (matches N8B1 pin) |
+| Turnip v36 | `717812c3…` ×2, 14,188,488 B |
+| HAL shim | `1b49d27c…` ×2, 7,112 B |
+| staged aggregate | `22c30bd2…` (34,096 files; codegen bytes 266,831,289 = P6M5 byte-exact) |
+
+Staged bytes verified: N8X1 fix present, G18 present, zero diagnostic-knob
+strings in `gs/`+`tools/`, Turnip backend present in fork. Gate string sets
+were derived from staged sources: 7 present-strings in fb11e18 backend
+sources; 17 absent-strings (replay/diagnostic/`PS2X_PGS_HIER`) verified absent
+from staged fork+parallel sources (`PS2XGSC1` excluded: it is product
+stream-capture code on fb11e18).
+
+## 8. One bytesize build (`/home/brad/n9`)
+
+Preflight: root absent, toolchain + governor present, `HEAVY_JOBS []`, 729G
+free. Transfer: 777,011,200 stream bytes, 6 top-level entries (36,662 benign
+LIBARCHIVE xattr lines condensed per P6M6R precedent). Collector verify pre
+**and** post: `status=match`, aggregate `22c30bd2…`, added/missing/changed
+empty; staged `runner/` holds only the 438 B upstream stub (`cf62c485…`).
+Wrapper pins: gradlew `a3648413…`, jar `49849512…`, props `3d91f093…` (all ×2),
+props equal, no wrapper script/jar in new root.
+
+`build.sh` (the one build): `BUILD SUCCESSFUL in 14m 24s`, 48/48 tasks, zero
+`FAILED`. Compiled inputs: 449 `compile_commands` entries incl. fork
+frontend/worker/parallel-backend + `gs_interface.cpp` + `page_tracker.cpp` +
+Granite `memory_allocator.cpp`; 296 `ps2_game_objects` unity batches incl.
+`register_functions.cpp` + all 9,455 codegen `.cpp`.
+
+APK gate (`apk_gate.py`, RC=0, `status=pass`; `apk_facts.py` 11/11):
+
+| Item | Value |
+| --- | --- |
+| APK | `25711bfe…08152`, 153,703,964 B (×2 WSL, ×2 Mac; new vs P6M6) |
+| runner | `96e61f3b…205c4a`, 139,466,552 B (member ×2 + extracted ×2); Build ID `4426b8b3…26fc1d6` (new vs P6M6) |
+| Turnip / HAL members | `717812c3…` / `1b49d27c…` (pins equal; exact 3-member arm64 set) |
+| strings | 7/7 Turnip/HMI/HAL present; 0/17 replay/diagnostic present |
+| arm64 cache | sole `…/321k3v65/arm64-v8a/CMakeCache.txt`: 6 flags OFF, `SHADOW=ON`, new-root parallel + codegen dirs, `RelWithDebInfo` |
+
+## 9. One Odin launch (I26-FAST vsync route, no knob env)
+
+Preflight: device, lease free, keyguard `showing=false`, battery 90 % status 3
+on AC. Claimed `N9 one-launch`; `adb install -r` Success; installed-APK/ELF/
+ISO SHAs all ×2 match; `mc0` empty; saved orig `ps2x.env` (`176eff84…`);
+pushed N9 env (parallel + Turnip + movie bypass + route + dumps 1840/1950/
+2050); second preflight green. PID 16273, BACK sent for USB dialog.
+
+| Screen | Trigger | SHA | Reading |
+| --- | --- | --- | --- |
+| `menu.png` 1920×1080, nonblack 0.647 | guest tick 1170, t=41.2 s | `09071b72…` (×4) | **Drawn**: Select Event, Snow Jam / Metro-City / Happiness, track map, description; widescreen |
+| `race.png` 1920×1080, nonblack 0.650 | host dump tick 2050, t=117.5 s | `74669f82…` (×4) | **Drawn**: 2ND/2, 00:00:05, snow terrain, rider, HUD, EA Radio card; widescreen |
+
+Host dumps: ticks 1840/1950/2050, 512×448, fbp 112/112, fallback=0,
+fnv1a `1a297d49`/`4a725fa0`/**`4483c15c` — the tick-2050 hash byte-matches
+N8X1's fixed (`off`) run**, so the fork-tip default path reproduces the
+validated bytes with no knob env. No fatal loader/backend/crash line in the
+same-PID log. Force-stop after run (PID gone), `ps2x.env` restored
+(`176eff84…` ×2), lease `LEASE_FREE N9 done`, launch-to-exit 119.2 s (within
+180/240 caps). Fine horizontal stripes visible on both screens (known since
+N8D2, not investigated).
+
+Not black → no stop. No speed claim (frame dumps were on; rate lines are
+diagnostic).
+
+Gaps: host dump PNGs don't exist on this fork rev (only `.txt` sidecars —
+`ps2_runtime.cpp` mentions PNG only in comments since the P6M6-era rev change;
+same gap as N8X1); screen evidence is the device screencaps. `.txt` sidecars
+pulled under a 10 s follow-up lease (`LEASE_FREE N9 sidecars done`).
+
+## 10. Part 2 receipts
+
+Scripts: `preflight.sh`, `transfer.sh`, `source_verify.sh`, `wrapper_pins.sh`,
+`build.sh` (the one build), `compiled_inputs.sh`, `codegen_graph.sh`,
+`apk_gate.py`, `apk_facts.py`, `check.py` (16 rows, verdict A), `launch.py`.
+Outputs: `preflight.txt`, `transfer.txt`, `transfer-bytes.txt`,
+`transfer-tar.err` (empty), `source-verify-pre/post.json{,.err}`,
+`wrapper-pins.txt`, `build.txt`, `compiled-inputs.txt`, `codegen-graph.txt`,
+`apk-gate.json` (+`.err` empty), `apk-facts.json` (+`.err` empty),
+`apk-fetch.err` + `cmake-cache-fetch.err` (empty), `menu.png`, `race.png`,
+`upload-{0,1,latest}.txt`, `ps2x.env`, `result.json`, `driver.log`,
+`logcat-pid.txt`, `check-result.json`. `source-manifest.json` (9.2 MB) stays
+untracked per P6M5 precedent; APK + CMakeCache stay in scratch
+(`~/dev/ssx3-work/N9/`). WSL root `/home/brad/n9` left in place (~8 GB).
+Scratch 4.9 GB of the 20 GB lane cap.
