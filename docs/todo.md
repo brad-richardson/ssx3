@@ -825,12 +825,14 @@ with measured budgets, then 120 Hz simulation.
       The codegen is byte-identical to E53's and promoted (`codegen-ssx3`,
       old kept as `-pre-e58`). Smoke: SC with the rider, race with
       terrain, viewed. Clean Mac speed in the ledger (race 0.13×).
-- [ ] **Fold to `ssx3` after E53 Part 2 (Codex Sol):** `e52-audit` `d3f7508`
-      + E45 `310b30f` + the tap guard (`local/research/N5/logs/tap-guard-6c335e6.diff`;
-      decide the desktop default) + pink `73b8b3a` + G46 fill-rule
-      `104dd7f`; regen + promote the codegen, suite, SC + race smoke on
-      I26-FAST, ff push. Then **N7**: Odin APK on the folded `ssx3` (the
-      textured race on the Odin, VU0-cost check).
+- [x] **N7 (9ac3f29): the Odin runs the fold** (APK `426d2a91`, fork
+      `b9647f5` + N-local). The race world draws as on the Mac (snow slopes,
+      trunks, rider, HUD; no sky). Speed (one run, provisional): menus
+      0.39–0.46×, SC 0.27×, **race 0.076×** (ledger). At 21–38 s the rider
+      reads 0–1 MPH at 2% progress: stuck or crashed? Check it in the
+      next race run. No second run and no simpleperf (the brief's ≥45 s
+      race window is unreachable at 0.076× within 600 s; accepted as is to
+      save quota).
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
