@@ -1656,10 +1656,20 @@ with measured budgets, then 120 Hz simulation.
       tracked fork export lacks Gradle wrapper script/JAR. External
       wrapper pins identified; zero APK/device work. `local/research/
       N8D7M12P6M6R/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 6M6R follow-up:** invoke double-pinned prior WSL
-      Gradle wrapper externally from new project cwd; keep four source
-      roots unchanged, build once, capture compiled-input and artifact
-      pins. No device launch.
+- [x] **N8D7M12 Part 6M6R package A (`f16a14c2`):** one external
+      pinned-wrapper `assembleRelease` (5m34s); source aggregate
+      pre/post equal. Orchestrator double-read Mac APK `da9a41a8…ef262`,
+      3 arm64 members (runner `e5a3302c…1af1`, Build ID `4c9c9d14…fa3`;
+      Turnip/HAL pins unchanged), runner has `PS2X_GS_REPLAY_PKTSEQ` +
+      `GB4_PKTSEQ` grammar (worker gate omitted them), staged fork =
+      `git archive 4fa0df1`. 22/23 P3 strings explained. Runtime lacks
+      E55B2/C2/I27 (default-off/iOS). No install/GPU/speed claim.
+      `local/research/N8D7M12P6M6R/ORCH-GATE-P2.md`.
+- [ ] **N8D7M12 Part 7 PKTSEQ Odin pair:** same APK/stream/env with
+      `PS2X_GS_REPLAY_PKTSEQ=1`, two runs; compare 41 `GB4_PKTSEQ` rows
+      run-vs-run and vs Mac ON (P5F4P2), plus replay rows and PPMs.
+      Equal digests + differing frames → downstream renderer/readback
+      probe; differing digest → delivery investigation.
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
