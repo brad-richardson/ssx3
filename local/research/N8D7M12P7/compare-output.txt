@@ -1,0 +1,77 @@
+shapes:
+  run1.pktseq: rows=41 ticks_ok=True exact41=True
+  run2.pktseq: rows=41 ticks_ok=True exact41=True
+  mac.pktseq: rows=41 ticks_ok=True exact41=True
+  run1.replay: rows=41 ticks_ok=True exact41=True
+  run2.replay: rows=41 ticks_ok=True exact41=True
+  mac.replay: rows=41 ticks_ok=True exact41=True
+
+per-tick table: tick | seq r1==r2 r1==mac r2==mac | cmd r1==r2 r1==mac r2==mac | priv r1==r2 r1==mac r2==mac | vram r1==r2 r1==mac r2==mac | present r1==r2 r1==mac r2==mac  (= equal, X differ, ? missing)
+tick=   50 === === === =XX =XX
+tick=  100 === === === === =XX
+tick=  150 === === === =XX =XX
+tick=  200 === === === =XX =XX
+tick=  250 === === === === =XX
+tick=  300 === === === =XX =XX
+tick=  350 === === === =XX =XX
+tick=  400 === === === =XX =XX
+tick=  450 === === === =XX =XX
+tick=  500 === === === =XX =XX
+tick=  550 === === === =XX =XX
+tick=  600 === === === =XX =XX
+tick=  650 === === === =XX =XX
+tick=  700 === === === =XX =XX
+tick=  750 === === === =XX =XX
+tick=  800 === === === =XX =XX
+tick=  850 === === === XXX XXX
+tick=  900 === === === XXX XXX
+tick=  950 === === === XXX XXX
+tick= 1000 === === === XXX XXX
+tick= 1050 === === === XXX XXX
+tick= 1100 === === === XXX XXX
+tick= 1150 === === === XXX XXX
+tick= 1200 === === === XXX =XX
+tick= 1250 === === === XXX =XX
+tick= 1300 === === === XXX =XX
+tick= 1350 === === === XXX =XX
+tick= 1400 === === === XXX =XX
+tick= 1450 === === === XXX =XX
+tick= 1500 === === === =XX =XX
+tick= 1550 === === === =XX =XX
+tick= 1600 === === === === =XX
+tick= 1650 === === === XXX XXX
+tick= 1700 === === === XXX XXX
+tick= 1750 === === === XXX XXX
+tick= 1800 === === === XXX XXX
+tick= 1850 === === === XXX XXX
+tick= 1900 === === === XXX XXX
+tick= 1950 === === === XXX XXX
+tick= 2000 === === === XXX XXX
+tick= 2050 === === === XXX XXX
+
+summary (equal/41, first differing tick or all-equal):
+  seq      run1==run2: 41/41 first_diff=none
+  seq      run1==mac: 41/41 first_diff=none
+  seq      run2==mac: 41/41 first_diff=none
+  commands run1==run2: 41/41 first_diff=none
+  commands run1==mac: 41/41 first_diff=none
+  commands run2==mac: 41/41 first_diff=none
+  priv     run1==run2: 41/41 first_diff=none
+  priv     run1==mac: 41/41 first_diff=none
+  priv     run2==mac: 41/41 first_diff=none
+  vram     run1==run2: 19/41 first_diff=tick850
+  vram     run1==mac:  3/41 first_diff=tick50
+  vram     run2==mac:  3/41 first_diff=tick50
+  present  run1==run2: 25/41 first_diff=tick850
+  present  run1==mac:  0/41 first_diff=tick50
+  present  run2==mac:  0/41 first_diff=tick50
+
+tick2050 rows:
+  run1: pktseq=('79ee00a3024bfb44', 1737496) replay_priv/vram/present=('6621fe06', '8a80c3fd', '5d5972bc')
+  run2: pktseq=('79ee00a3024bfb44', 1737496) replay_priv/vram/present=('6621fe06', '6c2e01c3', '00883449')
+  mac: pktseq=('79ee00a3024bfb44', 1737496) replay_priv/vram/present=('6621fe06', 'c883a705', 'd19b96fe')
+
+final PPMs:
+  run1: /Users/brad/dev/ssx3-work/N8D7M12P7/run1/vq-002050.ppm bytes=688143 sha=65a544a7603f26aa8f3ab77badb0440b4f0abb44ac81ca81bb777d9a11fe82db
+  run2: /Users/brad/dev/ssx3-work/N8D7M12P7/run2/vq-002050.ppm bytes=688143 sha=d2261c63de5fd274a223f3ba6f2c969a3d7511ea50a0056fac2f05d5099550b6
+  mac: /Users/brad/dev/ssx3-work/N8D7M12P5F4/mac-pktseq/frames/vq-002050.ppm bytes=688143 sha=9490484c50ff604d709c7c429f50af10f8da28ee9c0ccb2c7fde2619a14fce3e

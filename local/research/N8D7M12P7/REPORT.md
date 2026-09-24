@@ -1,9 +1,13 @@
-# N8D7M12 Part 7A — PKTSEQ replay-pair launcher (prepared, unexecuted)
+# N8D7M12 Part 7 — PKTSEQ Odin replay pair (7A launcher + 7B runs)
 
-**State: PREPARED, no device action. No adb command, install, launch,
-lease, build, edit of any source/fork/APK/stream, Mac replay, push,
-board/ledger edit, or upstream contact was executed in this part. Text
-<512 KiB.**
+**State: 7A PREPARED (no device action) then 7B COMPLETE (two Odin
+runs, no retries). 7B: exactly 2 installs and 2 launches of the
+released launcher SHA `5983f315…b934aa` (orchestrator-amended 7A gate,
+`ORCH-GATE-7A.md`). No script/APK/stream/source/fork edit, no Mac
+replay, no push, no board/ledger edit, no upstream contact. Text
+<512 KiB; device output ≤64 MiB per run. Elapsed time is run control
+only, never a speed number. No graphics verdict — evidence rows only,
+reading left to the orchestrator.**
 
 Brief: `local/muse/prompts/N8D7M12P7.md` (Part 7A only). Goal: a
 reviewed-SHA-held `launch.py` for exactly two same-settings diagnostic
@@ -133,6 +137,183 @@ exists.
 
 | Condition | Outcome | Next action |
 | --- | --- | --- |
-| Script/checker ready, no runtime result | **A (this report)** | Orchestrator releases run1/run2 |
+| Script/checker ready, no runtime result | **A (7A part of this report)** | Orchestrator releases run1/run2 |
 | Source/receipt mismatch | B (state smallest fix) | Fix and re-run `check.py` |
 | Permission/resource failure | OTHER | Diagnose scope first |
+
+---
+
+# Part 7B — two PKTSEQ Odin runs + three-way comparison (COMPLETE)
+
+Released commands, from `/Users/brad/dev/ssx3`:
+
+```sh
+python3 -u local/research/N8D7M12P7/launch.py --run run1 --released-sha 5983f315982ea08eb41c8fe0593e57e7b59c272faad7ae516a4300ac78b934aa
+python3 -u local/research/N8D7M12P7/launch.py --run run2 --released-sha 5983f315982ea08eb41c8fe0593e57e7b59c272faad7ae516a4300ac78b934aa
+python3 local/research/N8D7M12P7/compare.py
+```
+
+## 7B.1. Preflight (all PASS before each launch)
+
+| # | Gate | run1 | run2 |
+| --- | --- | --- | --- |
+| 1 | Script SHA == released gated | `5983f315…b934aa` exact | same, re-verified |
+| 2 | No `<run>/result.json`/`driver.log` | scratch empty | `run1/` present, no `run2/` receipt |
+| 3 | Serial | `622c49b1` | `622c49b1` |
+| 4 | Lease free | `LEASE_FREE N8D7M12P5E1 done` | `LEASE_FREE N8D7M12P7 run1 done` |
+| 5 | No app run | `pidof` empty | `pidof` empty |
+| 6 | Battery | 100%, status 3, AC powered (amended gate) | same |
+| 7 | Free | ~23.1 GiB on /data (≥10 GiB) | ~23.1 GiB |
+| 8 | Keyguard | `showing=false` pre-install and pre-start | same |
+| 9 | No simultaneous mini boot/heavy job | P-lane slots 1+2 free; only idle procs (one 0-CPU `devicectl` iOS handle noted, not a mini job) | slot 1 held by this pair, slot 2 free |
+
+P-lane slot 1 claimed before run1, released after run2 (both slots
+free at handback).
+
+## 7B.2. Run receipts (one install + one launch each, no retries)
+
+| Field | run1 | run2 |
+| --- | --- | --- |
+| Launch SHA | `5983f315…b934aa` | same |
+| Lease | `N8D7M12P7 run1 replay` claimed → `LEASE_FREE N8D7M12P7 run1 done` | `N8D7M12P7 run2 replay` claimed → `LEASE_FREE N8D7M12P7 run2 done` |
+| Install | one `adb install -r`, Success; device APK `da9a41a8…e6ef262` ×2 | same |
+| Device stream (verify only) | `f6a78f71…a593` ×2, 1,100,696,462 B | same |
+| Env preserve | `176eff84…cef32d` 2+2 match; replay env `5ad93947…6a8b4dc` | `176eff84…cef32d` 2+2 match; replay env `68a15bdc…5d186b5` |
+| Launch | one `am start`, PID 11967; BACK once ~6 s | one `am start`, PID 12374; BACK once ~6 s |
+| Stop | complete tick2050 receipt, elapsed 13.149 s (control only) | complete tick2050 receipt, elapsed 13.070 s (control only) |
+| Progress | 41 `GB4_REPLAY` rows, ticks 50..2050; no error; no drain path | same |
+| Markers | SUMMARY queue/parallel 862958/11499/25445/2050; FRAME 2050 parallel ff21 `5d5972bc`; `replay ok` 862958/2050 | SUMMARY identical; FRAME present `883449`; `replay ok` identical |
+| PKTSEQ | 41 rows, ticks 50..2050, commands_last=1737496 | same |
+| Caps | logcat gzip 4,125 B (≤16 MiB); PPM+hashes 690,829 B (≤64 MiB) | gzip 4,304 B; PPM+hashes 690,829 B |
+| Postrun | force-stop, PID absent (re-verified after run2: NO_PID) | force-stop, PID absent |
+| Env restore | pre-existing bytes restored, 2+2 match | same |
+| `first_failure` / `cleanup_errors` | `not found` / none | `not found` / none |
+| Verdict | `PROVISIONAL PASS` | `PROVISIONAL PASS` |
+
+## 7B.3. Artifacts (private scratch `~/dev/ssx3-work/N8D7M12P7/`)
+
+| File | SHA-256 (2 device + 2 local) | Size |
+| --- | --- | --- |
+| `run1/vq-002050.ppm` | `65a544a7603f26aa8f3ab77badb0440b4f0abb44ac81ca81bb777d9a11fe82db` | 688,143 B |
+| `run1/parallel.hashes` | `e5b1a34f566360e994f16def5357a3aa3861a276faf3e189ac4df9546426a616` | 2,686 B |
+| `run2/vq-002050.ppm` | `d2261c63de5fd274a223f3ba6f2c969a3d7511ea50a0056fac2f05d5099550b6` | 688,143 B |
+| `run2/parallel.hashes` | `8039561f9ff033b44c514ca30164faa576a3da3573372ed49afc582868009f90` | 2,686 B |
+| Mac ON `vq-002050.ppm` | `9490484c50ff604d709c7c429f50af10f8da28ee9c0ccb2c7fde2619a14fce3e` | 688,143 B |
+
+Absolute PPM paths for orchestrator viewing:
+
+- `/Users/brad/dev/ssx3-work/N8D7M12P7/run1/vq-002050.ppm`
+- `/Users/brad/dev/ssx3-work/N8D7M12P7/run2/vq-002050.ppm`
+- `/Users/brad/dev/ssx3-work/N8D7M12P5F4/mac-pktseq/frames/vq-002050.ppm` (Mac ON control; full SHA matches the P5F4P2 pinned truncation `9490484c…14fce3e`)
+
+## 7B.4. Three-way comparison (`compare.py`, `compare-output.txt`)
+
+All six sides: 41 rows, exact ordered ticks 50..2050. No
+input/preflight/cleanup failure, so the comparison is valid per the
+predeclared rule.
+
+| Field | run1==run2 | run1==mac | run2==mac |
+| --- | --- | --- | --- |
+| PKTSEQ `seq` | **41/41**, no diff | **41/41**, no diff | **41/41**, no diff |
+| PKTSEQ `commands` | **41/41**, no diff | **41/41**, no diff | **41/41**, no diff |
+| `priv` | **41/41**, no diff | **41/41**, no diff | **41/41**, no diff |
+| `vram` | 19/41, first **tick850** | 3/41 (ticks 100, 250, 1600), first tick50 | 3/41, first tick50 |
+| `present` | 25/41, first **tick850** | 0/41, first tick50 | 0/41, first tick50 |
+| PPM | differ | differ | differ |
+
+Matching vram ticks run1==run2 (19): 50–800 (16) + 1500, 1550, 1600.
+Differing present ticks run1==run2 (16): 850–1150 (7) + 1650–2050 (9).
+
+tick2050 rows:
+
+- run1: pktseq `79ee00a3024bfb44`/1737496, `vram=8a80c3fd priv=6621fe06 present=5d5972bc`
+- run2: pktseq `79ee00a3024bfb44`/1737496, `vram=6c2e01c3 priv=6621fe06 present=00883449`
+- mac: pktseq `79ee00a3024bfb44`/1737496, `vram=c883a705 priv=6621fe06 present=d19b96fe`
+
+First-difference example (tick850, oracle-confirmed by grep):
+
+- run1: `vram=96dcc73d priv=60a25873 present=4afe2f42`
+- run2: `vram=61cae10d priv=60a25873 present=03dda521`
+- mac: `vram=5882f9f4 priv=60a25873 present=b0cec9c2`
+
+(tick850 priv `60a25873` is also the value in the old-APK OFF pair and
+the Mac excerpt — guest state identical across APKs and hosts at this
+tick.)
+
+41-row per-tick table (`=` equal, `X` differ; columns per field are
+run1==run2, run1==mac, run2==mac; full text in `compare-output.txt`):
+
+```text
+tick=   50 === === === =XX =XX
+tick=  100 === === === === =XX
+tick=  150 === === === =XX =XX
+tick=  200 === === === =XX =XX
+tick=  250 === === === === =XX
+tick=  300 === === === =XX =XX
+tick=  350 === === === =XX =XX
+tick=  400 === === === =XX =XX
+tick=  450 === === === =XX =XX
+tick=  500 === === === =XX =XX
+tick=  550 === === === =XX =XX
+tick=  600 === === === =XX =XX
+tick=  650 === === === =XX =XX
+tick=  700 === === === =XX =XX
+tick=  750 === === === =XX =XX
+tick=  800 === === === =XX =XX
+tick=  850 === === === XXX XXX
+tick=  900 === === === XXX XXX
+tick=  950 === === === XXX XXX
+tick= 1000 === === === XXX XXX
+tick= 1050 === === === XXX XXX
+tick= 1100 === === === XXX XXX
+tick= 1150 === === === XXX XXX
+tick= 1200 === === === XXX =XX
+tick= 1250 === === === XXX =XX
+tick= 1300 === === === XXX =XX
+tick= 1350 === === === XXX =XX
+tick= 1400 === === === XXX =XX
+tick= 1450 === === === XXX =XX
+tick= 1500 === === === =XX =XX
+tick= 1550 === === === =XX =XX
+tick= 1600 === === === === =XX
+tick= 1650 === === === XXX XXX
+tick= 1700 === === === XXX XXX
+tick= 1750 === === === XXX XXX
+tick= 1800 === === === XXX XXX
+tick= 1850 === === === XXX XXX
+tick= 1900 === === === XXX XXX
+tick= 1950 === === === XXX XXX
+tick= 2000 === === === XXX XXX
+tick= 2050 === === === XXX XXX
+```
+
+(column order: seq, commands, priv, vram, present)
+
+## 7B.5. Predeclared-reading evidence rows (orchestrator decides)
+
+| Predeclared condition | Evidence in this pair |
+| --- | --- |
+| PKTSEQ equal 41/41 across all three while VRAM/present differ | **Condition met**: `seq` and `commands` 41/41 on all three pairs; vram/present differ run-vs-run from tick850 and vs Mac from tick50; all three PPMs differ |
+| PKTSEQ differing between runs or from the Mac | Not observed: no differing tick on any pair |
+| `commands` mismatch with equal `seq` or the reverse | Not observed |
+| Preflight/cleanup failure voids the pair | No failure on either run |
+
+## 7B.6. Gaps / handback
+
+- Frame content unviewed by this worker; PPM paths in §7B.3 for
+  orchestrator viewing.
+- Device stream history after N8D7M6 remains untraced; only current
+  exact bytes gated (two device SHAs per run).
+- `compare.py` parses log order, not names: one priv/vram index swap
+  was caught during writing (Mac-excerpt cross-check) and fixed before
+  any number was quoted; key cells re-verified with `grep`/`shasum`.
+- Budgets: 2 installs, 2 launches, 0 builds; active run time ~13 s
+  per run (control only), well under the 600 s cap.
+- Recommended next action (orchestrator decision): read §7B.5 against
+  the predeclared rule; the pair is complete either way.
+
+Receipts: `REPORT.md` (this file), `compare.py`,
+`compare-output.txt` — commit `[N8D7M12] Part 7B` with
+`Orchestrated-By: Muse Code`, explicit paths only, no push. (`launch.py`
+is the orchestrator-amended release, committed at the 7A gate; the
+7A `check.py` 36/37 read is expected and left untouched.)
