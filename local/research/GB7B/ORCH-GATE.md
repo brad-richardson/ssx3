@@ -1,0 +1,11 @@
+# GB7B orchestrator gate — spatial title-text candidates
+
+Verdict: **PASS as a bounded CPU spatial candidate probe; glyph producer and GS cause remain open.** The evidence narrows the path to off-screen composition feeding full-height display blits. It does not prove which off-screen batch draws a glyph or why paraLLEl output differs.
+
+I read the whole report and 16-row candidate table; verified ssx3 worker commit `46acb963`, private fork commit `09d583a` on `gb4-parallel`, both `Orchestrated-By: opencode` trailers and their file scopes, G43 pin `3a66c197`, two matching capture SHA reads, corrected path sidecar, and empty runner-dir diff. One incremental build and flag-unset suite passed 556/556. The one direct CPU replay through marker 700 passed 556/556; 17,898 logged rows occupy 7,414,101 bytes, under the 20,000-row and 8 MiB caps. No GPU replay, live boot or device action occurred.
+
+I independently parsed the full private TSV: 15,270 candidate rows target `fbp=0`, 2,628 target `fbp=112`; **zero** `fbp=112` rows have a rectangle under 2,000 pixels. I independently computed lower-crop RGB FNVs from the three saved PPMs: `02bfd499` at ticks 300 and 600, `032a9954` at 700, matching the report and GB5D CPU markers. I viewed the tick-300 and tick-700 full frames and lower crops: copyright text is legible at 300; button labels and pad icons are legible at 700. This supports the report's spatial observation, not a specific draw-to-glyph identity. The `fbp=0` T4 atlas batches at ticks 600–699 remain candidates; texel4 fingerprints sample only up to four points and cannot prove a whole glyph.
+
+The new probe is default OFF and leaves the render call path untouched when unset. The ON path samples CPU texture data and is diagnostic only; the observed sampled-frame hashes matched the prior CPU replay. `git show --check 46acb963` found trailing spaces on blank lines in `sizes.txt`; I stripped those receipt-only spaces in this gate. No measured value changed.
+
+Next: one bounded same-stream pixel-change trace across the off-screen T4 atlas batch and following `fbp=112` column blits around the first text appearances. Require source texel and before/after crop evidence before naming a glyph producer. Keep the known CPU/paraLLEl title-image difference as the comparison target; no defect cause is declared here.

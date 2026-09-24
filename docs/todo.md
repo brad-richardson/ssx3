@@ -878,11 +878,19 @@ with measured budgets, then 120 Hz simulation.
       path (`gs_stream_capture.cpp`) and treats same-stream packet equality
       as a null control. No build, replay, device action or GS cause.
       `local/research/GB7A/ORCH-GATE.md`.
-- [ ] **GB7B title-text spatial discriminator:** first identify the
-      title glyph draw(s) at existing markers 300/600/700, then compare
-      bounded per-batch state, source texels and cropped output on the same
-      stream. Pin the G43 source and full capture SHA; stop if the glyph
-      batch cannot be isolated under the byte cap.
+- [x] **GB7B CPU spatial candidate probe PASS (`46acb96`, fork
+      `09d583a`):** one default-OFF probe, one build/suite 556/556 and
+      one CPU replay 556/556 through tick700. The bounded full log has
+      17,898 rows (7.41 MB); zero small `fbp=112` display writes touch
+      the title crops, while T4 glyph-sized batches compose at `fbp=0`
+      and full-height blits carry the result to display. Viewed CPU
+      frames show legible copyright text and button labels. No unique
+      glyph producer or paraLLEl cause proved. Gate:
+      `local/research/GB7B/ORCH-GATE.md`.
+- [ ] **GB7C title-text pixel producer:** one bounded same-stream trace
+      of off-screen T4 batch pixel changes and following display blits
+      around text appearance; require source texel and before/after crop
+      proof before naming a glyph producer.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
