@@ -25,13 +25,17 @@ Method (adapted from E55D4 e55d4_boot.py, read-only source: no fork edit):
   (closed log), probe NOT used in this part. Kill only the recorded PID;
   release the lease even on failure. Pre-boot checks: fork at exact bab6eb3,
   clean worktree, runner-dir guard vs upstream 14b1e5cb, and two matching SHA
-  reads of runner/ISO/ELF/codegen against the pins below. Refuses to start if
-  result.json, boot.log, or the frames dir already exists.
+  reads of runner/ISO/ELF/codegen against the pins below. prepare_lane()
+  refuses reuse BEFORE creating the frames dir (checking after creating
+  would refuse every fresh invocation). Refuses to start if result.json,
+  boot.log, or the frames dir already exists.
 
 Frames: PS2X_FRAME_DUMP_DIR=<lane>/frames; a snapshotter thread copies
   upload-latest.png/.txt into <lane>/frames/snap/ every 1.0 s wall, tagging
   each copy with the latest [det-hash:v1] tick seen in boot.log at copy time
-  (snap-<tick>t-<elapsed>s.{png,txt}). Full-frame PNGs are orchestrator
+  (snap-<tick>t-<elapsed>s.{png,txt}). After tick 1170 first lands, the run
+  waits up to a bounded 120 s grace for a snap PNG tagged >= 1170 to persist
+  (frame_unproven/OTHER if it never does). Full-frame PNGs are orchestrator
   evidence; this script makes no readability claim (check.py cannot either).
 
 Usage: e55d9_boot.py --label M1          (ONE boot only, after release)
@@ -89,12 +93,14 @@ ROUTE = ','.join(
 STOP_TICK = POST_FRAME_TICKS[-1]
 WALL_CAP_S = 500
 PROGRESS_CAP_S = 120
+FRAME_PROOF_GRACE_S = 120
 LOG_CAP_BYTES = 16 * 1024 * 1024
 FRAMES_CAP_BYTES = 2 * 1024 * 1024 * 1024
 SNAP_PERIOD_S = 1.0
 
 HASH_TICK = re.compile(rb'\[det-hash:v1\] tick=(\d+)\b')
 HASH_ERROR_MARKERS = (b'[det-hash] null', b'[det-hash] line cap', b'[det-hash] invalid')
+SNAP_TICK = re.compile(r'snap-(\d+)t-.*\.png')
 
 
 def sha_of(path):
@@ -113,6 +119,45 @@ def existing_outputs(lane):
     """Output paths that already exist (any one blocks a fresh boot)."""
     return [lane / name for name in ('result.json', 'boot.log', 'frames')
             if (lane / name).exists()]
+
+
+def prepare_lane(lane):
+    """Refuse reuse BEFORE creating anything, then create lane + snap dirs.
+
+    Setup order matters: the reuse check must run before the frames dir
+    exists, otherwise every invocation would refuse itself. Returns snap_dir.
+    Raises SystemExit if any prior output exists.
+    """
+    lane = Path(lane)
+    taken = existing_outputs(lane)
+    if taken:
+        raise SystemExit('refusing to reuse %s; exists: %s (at most one boot: M1)'
+                         % (lane, ', '.join(p.name for p in taken)))
+    lane.mkdir(parents=True, exist_ok=True)
+    snap_dir = lane / 'frames' / 'snap'
+    snap_dir.mkdir(parents=True, exist_ok=True)
+    return snap_dir
+
+
+def latest_frame_proof(snap_dir):
+    """Return (tick, filename) of the highest-tick snap PNG, or None.
+
+    The snapshotter tags each copy snap-<tick>t-<elapsed>s.png with the
+    latest det-hash tick at copy time, so a tag >= STOP_TICK proves a
+    full-frame copy persisted after the stop tick was reached.
+    """
+    best = None
+    try:
+        names = os.listdir(snap_dir)
+    except OSError:
+        return None
+    for name in names:
+        m = SNAP_TICK.fullmatch(name)
+        if m:
+            tick = int(m.group(1))
+            if best is None or tick > best[0]:
+                best = (tick, name)
+    return best
 
 
 def dir_bytes(path):
@@ -210,6 +255,44 @@ def route_self_check():
     record('caps_wall_500', WALL_CAP_S == 500, str(WALL_CAP_S))
     record('caps_progress_120', PROGRESS_CAP_S == 120, str(PROGRESS_CAP_S))
     record('caps_log_16mib', LOG_CAP_BYTES == 16 * 1024 * 1024, str(LOG_CAP_BYTES))
+    record('caps_frame_proof_grace_120', FRAME_PROOF_GRACE_S == 120,
+           str(FRAME_PROOF_GRACE_S))
+
+    with tempfile.TemporaryDirectory(prefix='e55d9-lane-self-') as tmp:
+        lane = Path(tmp) / 'M1'
+        snap = prepare_lane(lane)
+        record('lane_setup_fresh_ok', snap.is_dir() and snap == lane / 'frames' / 'snap',
+               str(snap))
+        try:
+            prepare_lane(lane)
+            record('lane_setup_second_refuses', False, 'no refusal raised')
+        except SystemExit as exc:
+            record('lane_setup_second_refuses', 'frames' in str(exc), str(exc)[:120])
+        try:
+            prepare_lane(Path(tmp) / 'M1')
+            record('lane_setup_frames_blocks', False, 'no refusal raised')
+        except SystemExit as exc:
+            record('lane_setup_frames_blocks', 'frames' in str(exc), str(exc)[:120])
+        (lane / 'result.json').write_text('{}')
+        try:
+            prepare_lane(lane)
+            record('lane_setup_result_blocks', False, 'no refusal raised')
+        except SystemExit as exc:
+            record('lane_setup_result_blocks', 'result.json' in str(exc), str(exc)[:120])
+
+    with tempfile.TemporaryDirectory(prefix='e55d9-proof-self-') as tmp:
+        snap = Path(tmp) / 'snap'
+        record('frame_proof_missing_dir', latest_frame_proof(snap) is None)
+        snap.mkdir()
+        record('frame_proof_empty', latest_frame_proof(snap) is None)
+        (snap / 'snap-001169t-00010.00s.png').write_bytes(b'f1')
+        (snap / 'snap-001170t-00011.00s.txt').write_bytes(b't')
+        (snap / 'snap-001171t-00012.00s.png').write_bytes(b'f2')
+        got = latest_frame_proof(snap)
+        record('frame_proof_max_tick', got == (1171, 'snap-001171t-00012.00s.png'),
+               str(got))
+        record('frame_proof_meets_stop', got is not None and got[0] >= STOP_TICK,
+               str(got))
     return 0 if all(ok for _, ok in cases) else 1
 
 
@@ -223,16 +306,10 @@ def main():
     if not args.label:
         ap.error('need --label M1 (or --self-check)')
     lane = WORK / 'run' / args.label
-    lane.mkdir(parents=True, exist_ok=True)
+    snap_dir = prepare_lane(lane)
     log = lane / 'boot.log'
     frames_dir = lane / 'frames'
-    snap_dir = frames_dir / 'snap'
-    snap_dir.mkdir(parents=True, exist_ok=True)
     result_path = lane / 'result.json'
-    taken = existing_outputs(lane)
-    if taken:
-        raise SystemExit('refusing to reuse %s; exists: %s (at most one boot: M1)'
-                         % (lane, ', '.join(p.name for p in taken)))
 
     reads, errors = precheck()
     if errors:
@@ -253,6 +330,7 @@ def main():
     stop_snap = threading.Event()
     result = {'label': args.label, 'stop_tick': STOP_TICK,
               'wall_cap_s': WALL_CAP_S, 'progress_cap_s': PROGRESS_CAP_S,
+              'frame_proof_grace_s': FRAME_PROOF_GRACE_S,
               'log_cap_bytes': LOG_CAP_BYTES, 'frames_cap_bytes': FRAMES_CAP_BYTES,
               'fork_pin': FORK_PIN_SHORT, 'fork_pin_full': FORK_PIN_FULL,
               'runner': str(RUNNER), 'elf': str(ELF), 'iso': str(ISO),
@@ -308,6 +386,8 @@ def main():
             th.start()
             last_tick = 0
             last_progress = t0
+            phase2_start = None
+            frame_proof = None
             bound = None
             try:
                 while True:
@@ -337,9 +417,21 @@ def main():
                     if now - last_progress >= PROGRESS_CAP_S:
                         bound = 'progress_cap'
                         break
-                    if last_tick >= STOP_TICK:
-                        bound = 'target'
-                        break
+                    if phase2_start is None:
+                        if last_tick >= STOP_TICK:
+                            phase2_start = now
+                    else:
+                        # Post-1170 full-frame proof: the 1 s snapshotter may
+                        # not yet have copied F4 when tick 1170 first lands.
+                        # Stop only once a snap PNG tagged >= STOP_TICK is
+                        # persisted; without it the run is OTHER.
+                        frame_proof = latest_frame_proof(snap_dir)
+                        if frame_proof is not None and frame_proof[0] >= STOP_TICK:
+                            bound = 'target'
+                            break
+                        if now - phase2_start >= FRAME_PROOF_GRACE_S:
+                            bound = 'frame_unproven'
+                            break
                     time.sleep(0.5)
             finally:
                 stop_snap.set()
@@ -357,6 +449,10 @@ def main():
             result['bound'] = bound
             result['elapsed_s'] = round(time.monotonic() - t0, 3)
             result['last_hash_tick'] = last_tick
+            result['phase2_extra_s'] = (round(time.monotonic() - phase2_start, 3)
+                                        if phase2_start is not None else 0.0)
+            result['frame_proof'] = ({'tick': frame_proof[0], 'file': frame_proof[1]}
+                                     if frame_proof is not None else None)
             result['log_bytes'] = log.stat().st_size
             result['frames_bytes'] = dir_bytes(frames_dir)
             result['load_end'] = os.getloadavg()

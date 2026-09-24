@@ -1,6 +1,7 @@
 # E55D9 Part 1 — prepared single observed Main Menu navigation boot (NOT run)
 
-Worker: opencode (Muse Spark Contributor Go). Brief: `local/muse/prompts/E55D9.md`.
+Worker: opencode (Muse Spark Contributor Go). Brief: `local/muse/prompts/E55D9.md`
+plus orchestrator pre-gate fixes (lane setup order; post-1170 frame proof).
 Part 1 only: preparation receipts, no boot. **No boot, build, source edit,
 device/card action, push, or board/global config edit occurred in this part.**
 `~/dev/ssx3-work/E55D9/` is reserved for the later released run and was not
@@ -20,9 +21,10 @@ Single Event is evidenced on Main Menu, no save/login screen).
 | ISO (intended) | `~/dev/ssx3-work/E32-inputs/SSX 3 (USA).iso`, two fresh reads, both `3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5` |
 | ELF (intended) | `~/dev/ssx3-work/E32-inputs/cd/SLUS_207.72`, two fresh reads, both `1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc` |
 | Codegen (intended) | `~/dev/ssx3-work/codegen-ssx3/register_functions.cpp`, two fresh reads, both `8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3` |
-| Boot script (prepared, NOT executed) | `local/research/E55D9/e55d9_boot.py`, SHA `eb94810bcc3036bda26bb8ffa16c691f2b8a023135038bb7ec6b98746eb2c032` |
-| Checker | `local/research/E55D9/check.py`, SHA `41f316e6951fd655e3968a8c718e9705b3b5815f385d84776a25f90a107edc46` |
-| Self-checks | `e55d9_boot.py --self-check` 11/11; `check.py` 31/31 PASS (route/limits/pins/discipline; menu UNOBSERVED by design, 0 frames pre-run) |
+| Boot script (prepared, NOT executed) | `local/research/E55D9/e55d9_boot.py`, SHA `c72e58937e69ded0f63b2ffc780d98a4f9a94341cdf05d2dd5d34863310c39f4` (rev 2: pre-gate fixes) |
+| Checker | `local/research/E55D9/check.py`, SHA `4a7c1f33e154872c89ca69056bf4bf7e68b52807158ef3315be5441110c64f4f` |
+| Self-checks | `e55d9_boot.py --self-check` 21/21 (route 8 + caps 4 + lane-setup-order 4 + frame-proof scan 5); `check.py` 33/33 PASS (route/limits/pins/discipline/setup-order/frame-proof-required; menu UNOBSERVED by design, 0 frames pre-run) |
+| Pre-gate fixes (orchestrator-found) | (1) `prepare_lane()` refuses reuse BEFORE creating `frames/snap` (the old order created the dir first, so every fresh `--label M1` would refuse itself); covered by 4 lane-setup self-checks + `src_setup_order_check_before_create`. (2) After tick 1170 first lands, the run waits up to 120 s grace for a snap PNG tagged ≥ 1170 to persist (`frame_proof` recorded in result.json); `frame_unproven` (OTHER) if it never does; covered by 5 frame-proof self-checks + `src_target_requires_frame_proof` |
 | Intended command (after release only) | `python3 local/research/E55D9/e55d9_boot.py --label M1` (at most one boot) |
 | Boots/builds/runs | 0 |
 | Base commit | `079d4427` (checked `git log -1` before commit) |
@@ -59,14 +61,18 @@ unexpected screen.
 
 ## 3. Stop rules and caps
 
-Stop with `bound=target` at tick ≥ 1170; `wall_cap` at 500 s wall;
+Stop with `bound=target` only at tick ≥ 1170 AND a persisted snap PNG tagged
+≥ 1170 (`frame_proof: {tick, file}` recorded in result.json); the 1 s wall
+snapshotter can lag the tick, so up to 120 s grace (`frame_proof_grace_s`)
+is allowed for that copy to land. `frame_unproven` if the grace expires
+without the proof (OTHER). Other stops: `wall_cap` at 500 s wall;
 `progress_cap` at 120 s without tick advance; `log_cap` over 16 MiB closed
 log; `frames_cap` over 2 GiB scratch; `hash_error` on det-hash markers;
 `exit` if the runner exits first. One mini P-lane slot claimed before launch
 and released in `finally`; boot from its own cwd
 (`~/dev/ssx3-work/E55D9/run/M1`, reserved, not created); only the recorded
 PID is terminated/killed (no pkill/pgrep); reuse refused if
-`result.json`/`boot.log`/`frames` exists.
+`result.json`/`boot.log`/`frames` exists (checked before any dir creation).
 
 ## 4. Predeclared A/B/OTHER (judged only after the Part 2 run)
 
@@ -74,7 +80,7 @@ PID is terminated/killed (no pkill/pgrep); reuse refused if
 | --- | --- |
 | A | A clearly readable Main Menu entry list AND a button-by-button transition (within the ≤4 Down pulses, no Cross) to a displayed Options/Save item, each step evidenced by a full frame PNG the orchestrator can view |
 | B | Readable menu frames and all four bounded Down presses executed with no Options/Save/profile entry observed (not proof none exists) |
-| OTHER | Title/Main Menu not reached, any ambiguous/unreadable frame, script/input mismatch, pin/cap/lease failure, unexpected screen, or early stop before F4 without a visibly selected Options/Save item |
+| OTHER | Title/Main Menu not reached, any ambiguous/unreadable frame, script/input mismatch, pin/cap/lease failure, unexpected screen, early stop before F4 without a visibly selected Options/Save item, or `frame_unproven` (tick 1170 reached but no snap PNG tagged ≥ 1170 within 120 s grace) |
 
 Frame images are evidence for orchestrator viewing, not worker-only labels:
 this part makes no readability claim (`check.py` asserts 0 frames pre-run).
@@ -97,4 +103,4 @@ this part makes no readability claim (`check.py` asserts 0 frames pre-run).
 - Card manifest records empty roots only; any game card write during menu nav would appear in `card_final_*` post-run.
 - No speed claim: any elapsed time from the future run is diagnostic only.
 
-**Waiting on orchestrator: review of exact script SHA `eb94810bcc3036bda26bb8ffa16c691f2b8a023135038bb7ec6b98746eb2c032` and explicit Part 2 release. No boot until then.**
+**Waiting on orchestrator: review of exact script SHA `c72e58937e69ded0f63b2ffc780d98a4f9a94341cdf05d2dd5d34863310c39f4` and explicit Part 2 release. No boot until then.**

@@ -62,6 +62,8 @@ def main():
     check('caps_log_16mib', b.LOG_CAP_BYTES == 16 * 1024 * 1024, str(b.LOG_CAP_BYTES))
     check('caps_scratch_frames_le_2gib', b.FRAMES_CAP_BYTES <= 2 * 1024 * 1024 * 1024,
           str(b.FRAMES_CAP_BYTES))
+    check('caps_frame_proof_grace_120', b.FRAME_PROOF_GRACE_S == 120,
+          str(b.FRAME_PROOF_GRACE_S))
     check('pin_fork', b.FORK_PIN_FULL == 'bab6eb382673155ffd756fe8db265964eeff9703',
           b.FORK_PIN_SHORT)
     check('pin_runner',
@@ -87,7 +89,14 @@ def main():
     check('src_no_pad_card_probe', 'PS2X_PAD_CARD_PROBE' not in src, '')
     check('src_no_cross_in_route_source', True, 'covered by route_no_cross')
     check('src_refuses_reuse', 'refusing to reuse' in src, '')
+    check('src_setup_order_check_before_create',
+          src.index('taken = existing_outputs(lane)') < src.index("lane / 'frames' / 'snap'"),
+          'prepare_lane refuses before mkdir frames/snap')
     check('src_single_label', "--label', choices=('M1',)" in src, '')
+    check('src_target_requires_frame_proof',
+          "bound = 'target'" in src and 'frame_proof' in src
+          and 'frame_unproven' in src and 'FRAME_PROOF_GRACE_S' in src,
+          'target only with snap tag >= STOP_TICK; else frame_unproven')
     check('menu_unobserved_no_claim',
           True,
           'UNOBSERVED by design: no frame exists pre-run; A/B/OTHER judged only after Part 2')
