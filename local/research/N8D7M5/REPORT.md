@@ -1,8 +1,9 @@
 # N8D7M5 — executed FBP112 word provenance on the Mac (OpenCode Go)
 
-**State: VALIDATED Mac-only. One incremental Release build, one flag-OFF suite
-(585/585), one OFF + one ON CPU replay through marker2050 on lease slot 1
-(released). No device/Android/iOS action, no push. The orchestrator gates.**
+**State: VALIDATED Mac-only. One Release build in an isolated build dir
+(322 targets), one flag-OFF suite (585/585), one OFF + one ON CPU replay
+through marker2050 on lease slot 1 (released). No device/Android/iOS
+action, no push. The orchestrator gates.**
 
 Fork commit `a8cfefa` (`Orchestrated-By: opencode`); binary
 `d06ff1aa…0b77f`. GB7C5's replay had exited before any clang/ninja or mini
@@ -55,7 +56,7 @@ counters (test-only, static atomics, default-OFF flag) disambiguate:
 a changed word is attributed to whichever of draw/transfer/clear
 advanced during that packet (`draw+transfer` if both).
 
-## 2. Diagnostic design (written, not yet built)
+## 2. Diagnostic design (built from fork `a8cfefa`, validated §5)
 
 - `PS2X_GS_REPLAY_WORDS=0xE0000,0xE0534,…` (≤8 GS-storage byte addrs,
   4-aligned, `<PS2_GS_VRAM_SIZE`); unset/empty = zero behavior change.
@@ -70,7 +71,7 @@ advanced during that packet (`draw+transfer` if both).
 - Emission cap 4096 lines with truncation note (trace ≪8 MiB by
   construction: 6 addrs × finite transitions).
 
-## 3. Candidate addresses (6, three VRAM pages)
+## 3. Candidate addresses (6, four VRAM pages)
 
 All are N8D7L-validated literals (fork-table oracle == G43 input on this
 stream, 448/448; Mac words observed `replay-excerpt.txt:14`). Mac tile
@@ -116,8 +117,9 @@ via both draw and host→local transfer paths, up to tick 2049.
 
 ## 5. Validation (done)
 
-1. Incremental Release build of `ps2x_tests` (`build.log`, 322 targets,
-   exit 0; only warning is ld duplicate-library, also present pre-change).
+1. Release build of `ps2x_tests` in the isolated scratch build dir
+   (`build.log`, 322 targets, exit 0; only warning is ld
+   duplicate-library, also present pre-change).
 2. Flag-OFF suite exit 0, **585/585** (`suite.log`; must run from the fork
    worktree — one unrelated VU0 test reads `instructions.h` by relative path).
 3. OFF control CPU replay (slot 1): `mode=direct backend=cpu`,
@@ -137,13 +139,16 @@ logs/PPMs (few MiB); runner-dir diff vs `14b1e5cb` empty. No speed claim.
 
 ## 6. Gaps / handback
 
-- CPU-vs-parallel backend divergence (consistency info, not a gate): CPU
-  finals at `0xE0534/0xE0040/0xE2000/0xF2000` differ from the N8D7L
-  parallel-snapshot controls in low bytes (e.g. CPU `0x260803` vs parallel
-  `0x00260802` at `0xE0534`); `0xE0000` and `0xF0000` agree exactly. This
-  matches the known CPU-vs-parallel present difference (`a1834096` vs
-  `7bf5c012`). Provenance (which executed packets/ticks/kinds touch each
-  word) is a stream fact and stands; word *values* are backend-specific.
+- CPU-vs-parallel backend divergence (load-bearing for the next gate):
+  only **2/6** CPU final words match the Mac paraLLEl controls byte-equal
+  (`0xE0000` → `0x260803`, `0xF0000` → `0xff230401`); the other four
+  (`0xE0534/0xE0040/0xE2000/0xF2000`) differ in low bytes (e.g. CPU
+  `0x260803` vs parallel `0x00260802` at `0xE0534`). This matches the
+  known CPU-vs-parallel present difference (`a1834096` vs `7bf5c012`).
+  Consequence: a future Odin **word-value** oracle must compare against
+  the **same-stream Mac paraLLEl snapshot**, never against CPU-trace
+  words; the CPU trace proves **packet presence** (which executed
+  packets/ticks/kinds touch each word — a stream fact) only.
 - No parallel-backend word tap exists (would need the bounded drainQueue
   design; not built — CPU-direct needed none).
 - Recommended next action (orchestrator decision): the §4 table supplies
@@ -155,8 +160,10 @@ logs/PPMs (few MiB); runner-dir diff vs `14b1e5cb` empty. No speed claim.
 ## 7. Receipts
 
 - ssx3 (this dir): `REPORT.md`, `check.py`, `check-result.json`,
-  `trace-excerpt.txt` — commit `[N8D7M5]`,
-  `Orchestrated-By: opencode`, no push.
+  `trace-excerpt.txt`, `fork-n8d7m5.patch` — commit `21b3e53f`
+  `[N8D7M5]`, `Orchestrated-By: opencode`, no push. This wording
+  correction is an additional `[N8D7M5]` commit on top (no amend).
 - Scratch `~/dev/ssx3-work/N8D7M5/`: build/suite/replay logs, trace,
   PPMs (not committed).
-- Fork: `[N8D7M5]` commit (3 files, test-only + counters), no push.
+- Fork: `[N8D7M5]` commit `a8cfefa` on branch `n8d7l-oracle`
+  (3 files, test-only + counters), no push.
