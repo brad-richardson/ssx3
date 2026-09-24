@@ -1591,7 +1591,7 @@ with measured budgets, then 120 Hz simulation.
       corrected table passes that checker. `X11B/REPORT.md` is an
       orchestrator audit. Use sparse Qwen for bounded, scripted
       extraction; dense source interpretation is still unproved.
-      **X12 PASS for exact source-line extraction (aa1cc86):** sparse
+      **X12 PASS for exact source-line extraction (5ce779b):** sparse
       Qwen produced seven rows from pinned N8B1 `17e90de`; the
       exact-line checker and orchestrator rerun passed 7/7. It first
       looked in the unrelated old fork checkout and then ran seven
