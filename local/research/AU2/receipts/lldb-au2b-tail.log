@@ -1,0 +1,26 @@
+utfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+(lldb)  memory read --binary --force --outfile /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --append-outfile -c 0x620 $x0+0x512e40
+1568 bytes appended to '/Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin'
+Process 21281 resuming
+Process 21281 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGTERM
+       frame #0: 0x00000001190508d0 ps2EntryRunner`stbi_zlib_compress + 784
+ps2EntryRunner`stbi_zlib_compress:
+->  0x1190508d0 <+784>: ldrb   w0, [x11, x16]
+    0x1190508d4 <+788>: cmp    w17, w0
+    0x1190508d8 <+792>: b.ne   0x119050898               ; <+728>
+    0x1190508dc <+796>: add    x16, x16, #0x1
+Target 0: (ps2EntryRunner) stopped.
