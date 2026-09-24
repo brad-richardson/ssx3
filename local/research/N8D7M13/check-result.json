@@ -1,0 +1,178 @@
+{
+  "brief": "N8D7M13-A",
+  "checks": [
+    {
+      "check": "p7_anchor_unchanged",
+      "pass": true
+    },
+    {
+      "check": "pins_all_unchanged",
+      "pass": true
+    },
+    {
+      "check": "apk_path_and_sizes",
+      "pass": true
+    },
+    {
+      "check": "env_keys_p7_except_step",
+      "pass": true
+    },
+    {
+      "check": "step_value",
+      "pass": true
+    },
+    {
+      "check": "gates_2050_both_rows",
+      "pass": true
+    },
+    {
+      "check": "runid_step1",
+      "pass": true
+    },
+    {
+      "check": "diff_only_allowed_changes",
+      "pass": true
+    },
+    {
+      "check": "serial_from_file_scoped",
+      "pass": true
+    },
+    {
+      "check": "replay_env_keys",
+      "pass": true
+    },
+    {
+      "check": "no_live_capture_or_pad",
+      "pass": true
+    },
+    {
+      "check": "one_run_guard",
+      "pass": true
+    },
+    {
+      "check": "single_install_single_launch",
+      "pass": true
+    },
+    {
+      "check": "stream_never_pushed_or_deleted",
+      "pass": true
+    },
+    {
+      "check": "env_preserve_restore_finally",
+      "pass": true
+    },
+    {
+      "check": "frame_filename_grounded",
+      "pass": true
+    },
+    {
+      "check": "marker_census_syntax",
+      "pass": true
+    },
+    {
+      "check": "keyguard_blocker_no_workaround",
+      "pass": true
+    },
+    {
+      "check": "caps_wall_log_output_progress",
+      "pass": true
+    },
+    {
+      "check": "unique_empty_outputs",
+      "pass": true
+    },
+    {
+      "check": "finally_force_stop_lease",
+      "pass": true
+    },
+    {
+      "check": "provisional_marking",
+      "pass": true
+    },
+    {
+      "check": "complete_before_exit_drain",
+      "pass": true
+    },
+    {
+      "check": "drain_bounded_by_wall",
+      "pass": true
+    },
+    {
+      "check": "control128_numeric_census",
+      "pass": true
+    },
+    {
+      "check": "env_double_sha",
+      "pass": true
+    },
+    {
+      "check": "cleanup_failure_fails",
+      "pass": true
+    },
+    {
+      "check": "no_off_control_claim",
+      "pass": true
+    },
+    {
+      "check": "report_control_and_receipts",
+      "pass": true
+    },
+    {
+      "check": "report_records_launch_sha",
+      "pass": true
+    },
+    {
+      "check": "selftest_paths_precede_device",
+      "pass": true
+    },
+    {
+      "check": "selftest_arg_shape_exits",
+      "pass": true
+    },
+    {
+      "check": "selftest_wrong_sha_exits",
+      "pass": true
+    },
+    {
+      "check": "selftest_one_run_guard",
+      "pass": true
+    },
+    {
+      "check": "selftest_pktseq_parser",
+      "pass": true
+    },
+    {
+      "check": "selftest_replay_parser",
+      "pass": true
+    },
+    {
+      "check": "py_compile_both",
+      "pass": true
+    },
+    {
+      "check": "no_device_calls_in_checker",
+      "pass": true
+    }
+  ],
+  "passed": "38/38",
+  "verdict": "A",
+  "launch_sha": "f70f8ae1cadfa5d3a7f649b8633988222ade8bb1435b473cc301da9d7d0cc99c",
+  "notes": {
+    "diff_changed_lines": 68,
+    "diff_hunks": 13,
+    "diff_replay_consumed": "21/21",
+    "diff_classes_fired": [
+      "gates",
+      "gates_exact",
+      "runid",
+      "step"
+    ],
+    "diff_unmatched": [],
+    "selftest_arg_shape": "rc=1,1,1",
+    "selftest_wrong_sha": "rc=1",
+    "selftest_guard": "rc=1",
+    "selftest_pktseq": "good=True drop=True swap=True dup=True malformed=True empty=True mac_step1_log_none=True",
+    "selftest_replay": "good=True drop=True swap=True dup=True malformed=True empty=True"
+  },
+  "note": "Static gate + no-device self-tests only. No device binary, install, launch, or lease executed."
+}
