@@ -1173,11 +1173,21 @@ with measured budgets, then 120 Hz simulation.
       speed claim. **Next:** map `GSRenderer::vsync` circuit sampling,
       field merge and VRAM input; choose a controlled stage probe, validate
       on Mac, then run one bounded Odin comparison.
-- [ ] **N8D6A Mac scanout-stage probe:** expose circuit1 and merged-before-
-      deinterlace images under a default-OFF diagnostic flag, sample both
-      with the proven tile shader and control, and calibrate on the pinned
-      N8D4 stream. The orchestrator gates the Mac replay before any APK or
-      Odin run. Brief: `local/muse/prompts/N8D6A.md`.
+- [x] **N8D6A Mac scanout-stage probe PASS (a291a7c):** default-OFF
+      diagnostic handles retain circuit1 and merged before deinterlace;
+      one Release build and taps-OFF suite 585/585. One pinned N8D4 stream
+      replay at tick2050/FBP112/PMODE `ff21` measured circuit1 and merged
+      at 512×224, 448 tiles, 64,374 occupied pixels, 300 active, control
+      128 each. Final is 512×448, 896 tiles, 128,292 occupied, 567 active,
+      control 128; sampled/raw final vectors match 896/896. Present hash
+      matches the prior Mac frame viewed by the orchestrator. The new PPM
+      directory was absent; no extra replay. This validates stage sampling
+      on Mac only, with no Odin stage result or speed claim. Receipt:
+      `local/research/N8D6A/orch-replay-excerpt.txt`.
+- [ ] **N8D6B Android package:** transfer only N8D6A's pinned fork backend
+      and private G43 stage changes into a fresh N8D5F-based Android
+      snapshot. One isolated APK build/package gate, then a separate
+      one-run Odin stage probe with circuit/merged/final controls and PNG.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1845,5 +1855,12 @@ with measured budgets, then 120 Hz simulation.
       preserves the raw table and audit. The next local-model trial needs an
       immutable checker boundary; N8D5B's layout repair stays with a
       standard reasoning worker/orchestrator.
+- [x] **X15 dense trial incomplete (orchestrator audit):** the first pane
+      was stopped before its excerpt read when the orchestrator corrected
+      missing source anchors. A second pane read the corrected 11,013-byte
+      excerpt but wrote no early table/report and made no LSP call before
+      stop. No model accuracy or engineering claim; see
+      `local/research/X15/REPORT.md`. A smaller thinking budget is the
+      next local-model tuning variable.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
