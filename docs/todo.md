@@ -1054,7 +1054,18 @@ with measured budgets, then 120 Hz simulation.
       candidate remains local/uncommitted, fork `ssx3` and canonical
       codegen stay at E54D. Revisit with E55 deterministic trace and
       a targeted branch-value probe; do not ship E54E now. Continue
-      E54 with COP0 Count and INTC 5/7.
+      E54 with COP0 Count and INTC 5/7. **E54F1 source audit PASS
+      (3be2747):** pinned PCSX2 Count advances one tick per EE cycle,
+      rebases on MTC0 Count, wraps at 32 bits and increments by one for
+      a same-cycle MFC0. Our four static Count-read PCs yield five
+      generated expressions (one overlapping function); no dynamic
+      reach is proved. The runtime Count field stays frozen despite
+      a shared scheduler cycle clock. The orchestrator checked the
+      pinned source excerpts, generated sites and receipt SHA. Next
+      E54F Part 2: one shared Count clock/epoch with focused value tests
+      and a functional race boot. Keep Compare interrupt policy separate:
+      pinned PCSX2's event-test window is labeled a hack, and its
+      interpreter Compare write differs from our emitted Cause clear.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
