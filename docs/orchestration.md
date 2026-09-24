@@ -221,5 +221,8 @@ The plan-of-record reasoning for E54–E57 is in
   gated.
 - Trusting a Codex pane's model late in the week. Near its quota, one
   pane's footer showed `GPT-6-Luna medium` after launching on Sol, and a
-  prompt to that idle pane never arrived. Check the footer and relaunch a
-  fresh pane rather than re-prompting a stale one.
+  prompt to that idle pane never arrived. This happened twice (AU4 and E58):
+  once a Codex pane finishes a turn, its footer flips to Luna medium and it
+  ignores follow-up prompts. **Continue a Codex lane in a fresh pane**
+  (`launch-codex.sh <ID>C "Lane <ID>, Part N (continuing) …"`) rather than
+  re-prompting the old one.
