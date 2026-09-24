@@ -98,3 +98,47 @@ sandbox. Brad approved escalation for fork git writes and runner boots. The
 validation boot. The 601/601 suite and matching runner SHA remain the gate for
 the resumed boots. The commands and receipts above are retained as the
 diagnosis of the sandbox stall; the validation table will be appended below.
+
+### Escalated validation boot A: `au3a2`
+
+The fork fix is committed on local `au3-snd` as `c19a5d6` (`[AU3]`, trailer
+`Orchestrated-By: Codex`). The report and earlier receipts were committed on
+`ssx3` main as `a337bf9`. No push was attempted. Immediately before this boot,
+both reads of the runner still matched the SHA above, the fork tree was clean,
+and `git diff --stat 14b1e5cb au3-snd -- ps2xRuntime/src/runner` was empty.
+
+`zsh local/research/AU3/au3_boot.sh au3a2 1 540` ran with escalated
+permissions from the start. The E46 harness claimed slot **2** (slot 1 had a
+peer), launched PID **76560**, stopped at the **540.541 s** wall bound with
+runner rc **0**, and released the lease. `PS2X_SOUND=1`, the I26-FAST vsync
+route, and the WAV path were exported by `au3_boot.sh`. The final park
+snapshot was written. The full closed boot log is
+`~/dev/ssx3-work/AU3/run/boot-au3a2-1.log.gz` (1.4 MB compressed); the
+canonical SND log is `~/dev/ssx3-work/AU3/run/snd-au3a2.txt`. Bounded text
+receipts in `receipts/`: `wrap-au3a2.log`, `au3a2-result.json`,
+`au3a2-boot-extract.txt`, `au3a2-snd-extract.txt`,
+`au3a2-snapshots.tsv`, `park-au3a2-snapshot.json`, and `au3a2-sema36.txt`.
+
+| Observable | Boot A result |
+| --- | --- |
+| Game phases | Snapshot at wall 30.01 s / guest tick 969 shows Setup Character (Zoe). Snapshot at wall 60.01 s / guest tick 1823 shows the race HUD at 00:00:01. The race continued to guest tick 10049 at wall 540.15 s. Title, main menu, and Select Character are traversed by the route before the 30 s snapshot; they were not separately captured. |
+| Sound clock | First sampled event `(cycle 324771279, tick 1)`, last `(cycle 49111866831, tick 15510)`. Their delta is exactly **3,145,728 EE cycles per tick**, the configured **93.75 Hz of guest time**. The sampled total divided by full wall duration is **28.69 ticks/wall second**; it includes startup time. Diagnostic data, not a speed number. |
+| Tag buffer / sound thread | Last sampled SND tick reports 15,509 SetDma tag buffers, zero cid-0 / dmq / done. Park snapshot: sema 36 **15,604 signals / 15,605 waits**; sound thread 6 waiting on sema 36, scheduled 15,694 times. |
+| Host stream | Opened at **36 kHz stereo s16**. Wall-minute underrun counts: 1,103,568; 1,365,504; 1,450,344; 1,488,000; 1,625,856; 1,593,600; 1,524,864; 1,572,912; 1,725,648 frames. Every minute reported **0 overflows**. First minute spans title/menus/SC/race; subsequent minutes are race. The nearest SND samples at guest ticks 546 (title), 787 (menu), 907 (SC), 1689 (race) had cumulative underruns 221,376; 336,552; 467,808; 947,112. These are phase samples, not exact per-phase rates. |
+| WAV tap | **Failed:** `~/dev/ssx3-work/AU3/run/au3-host-stream.wav` was not created. No `[snd-output] WAV ...` line occurs at shutdown. No `.m4a` can be converted or listened to. |
+| Boot B / matched-wall comparison | **Not run** after Boot A failed its required WAV tap; the first-failure stop applies. No sound-on/off ratio or starvation verdict is claimed. |
+| Storage / leases | AU3 directory 1.7 GB, 6.3 MB in `run` after compression; internal total 89.9 GB / 200 GB. Both lease slots free after the run. |
+
+The WAV failure has a direct control-flow explanation. The runner creates a
+stack-owned `PS2Runtime` in `ps2xRuntime/src/main.cpp:209` but calls
+`std::_Exit(0)` at line 259 after `runtime.run()`. `_Exit` skips that object's
+destructor. `PS2Runtime::~PS2Runtime` in `ps2_runtime.cpp:665–676` is the
+only observed call to `ps2_snd_audio_output::shutdown()`, and that shutdown
+calls `saveWav()` (`ps2_snd_audio_output.cpp:186–195`). The stream itself was
+active, as its startup and per-minute counters show. No second fix or build
+was attempted after this failed validation step.
+
+**Recommended next action for the orchestrator:** arrange explicit sound
+shutdown before the runner's `_Exit` path (or otherwise ensure its destructor
+runs), then rerun the WAV validation and sound-off comparison. The race did
+start and advance, but audible output and matched-wall cost remain unverified.
