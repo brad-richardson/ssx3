@@ -1502,11 +1502,18 @@ with measured budgets, then 120 Hz simulation.
       numeric controls, handles process exit with bounded drain, and
       verifies env restoration/force-stop/lease cleanup. Script SHA
       `287140bf…1334e`; no device action. `local/research/N8D7M12P5A/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5B one bounded Odin replay:** release only the
-      gated script SHA, install APK, verify installed binary, recheck
-      launch preflight, run the exact stream to tick2050, then gate and
-      view its frame and numeric census. Stop at first mismatch; no
-      speed or graphics-cause claim from one ON run.
+- [x] **N8D7M12 Part 5B offline Odin replay A (`41d279e7`):** one
+      install/launch of the pinned APK and stream reached tick2050 with
+      full numeric controls and intact cleanup. Orchestrator viewed a
+      mostly black Odin PPM versus a much fuller Mac frame. Selected
+      active tiles are 14/448 on Odin versus 300/448 on Mac; all 41
+      sampled priv hashes match, while VRAM matches 3/41 and present
+      0/41. This is a sparse offline device result, not a root-cause or
+      speed verdict. `local/research/N8D7M12P5B/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5C same-APK control design:** define one bounded
+      selected/oracle OFF replay with the same APK/stream/backend and
+      a marker-level comparison. Gate its script and output criteria
+      before any second Odin launch; preserve the ON receipt untouched.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
