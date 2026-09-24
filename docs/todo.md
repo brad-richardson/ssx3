@@ -1760,10 +1760,15 @@ with measured budgets, then 120 Hz simulation.
       Options/Save screen or GetDir/Read reachability is proved. Runner
       stopped, mini slots free, no speed claim.
       `local/research/E55D9/ORCH-GATE-P2.md`.
-- [ ] **E55D10 one-button Options detour:** from a settled Main Menu,
-      press Square once and capture the resulting screen. Only if an
-      Options/Save route is actually displayed should a later card detour
-      and changed-card A/A baseline be designed. Park ExternalWake
+- [x] **E55D10 Part 1 Square-detour script approved (`55f91f88`):**
+      script SHA `03536b0c…4447e3f` has START tick636, one Square at
+      tick820, pre/post full-frame proof, pinned inputs and mini lease.
+      Self-check 25/25, checker 35/35; no boot or screen verdict.
+      `local/research/E55D10/ORCH-GATE-P1.md`.
+- [ ] **E55D10 Part 2 one-button Options detour:** run the exact approved
+      script once from a settled Main Menu and view the resulting screen.
+      Only if Options/Save is actually displayed should a later card
+      detour and changed-card A/A baseline be designed. Park ExternalWake
       policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
