@@ -113,7 +113,7 @@ OTHER), 8 words never stand for the image, and no later tick is used.
 | Q2 | Calibrated CPU/GPU intervals (`write_calibrated_timestamp` in `flush_submit` `:1121-1125` / `:1221-1225`, `wait_timeline` `:1054-1067`) | Host-wall intervals around submit/wait | Observational for wall time | same intervals | same intervals | same intervals | **Insufficient**: EE/host clock, not a GPU write due-date (same error as `post_tick==2050`, N8D7M7 §3 T4) |
 | M | Debug markers/labels (`insert_label`, `gs_renderer.cpp:44-50`; consumed only if `device->consumes_debug_markers()`, e.g. `:4763`, `:3102-3111`) | Record-time annotations, no timing semantics | Observational (ignored by drivers that don't consume them) | same labels | same labels | same labels | **Insufficient**: no completion signal |
 | P | GPU page-write audit (per-page counters/atomics in draw/upload shaders) | Would execute inline with draws | **Intervention**: changes the draw shaders themselves; also has no existing hook (no GPU-side analogue of `WriteVramUnlocked` exists on this path — gap M3) | perturbs the work it claims to witness | same | same | **Rejected**: cannot witness the *original* order; new code, new order |
-| F | Per-flush timeline attribution, fork-log-only (§5 EXP1) | Host submit clock (timeline value per `flush`, `gs_interface.cpp:5161`) correlated with EE tick at Present | Observational (text only, no Vulkan command change) | same log shape | same log shape | same log shape | **Insufficient for execution** (host submits ≠ GPU completion) but settles the queue-order fact: were tick≤2050 draws recorded after the step-8 flush? |
+| F | Per-flush timeline attribution, fork-log-only (§5 EXP1, calibration only) | Host submit clock (timeline value per `flush`, `gs_interface.cpp:5161`) correlated with EE tick at Present | Observational (text only, no Vulkan command change) | same log shape | same log shape | same log shape | **Insufficient for execution** (host submits ≠ GPU completion) and for live ordering (§5: replay serializes a captured stream, L1/L2 drop enqueue-time identity) — replay-plumbing calibration only, not an Odin-cause experiment |
 | L | Post-`wait_idle` extra flush + fresh submit/copy (N8D7M7 T4 S2late) | Extra submit executes work the original Present never ran | **Intervention — rejected** (N8D7M7 REPORT §3): broad fits (ii) late-but-due writes and delayed/missing work equally | broad | broad | sparse | Equal predictions for (i)/(ii) under intervention → cannot award; OTHER |
 | W | 8 control words (`kOracleControls`, backend `:712-724`) | Subset of the S1-mapped bytes | Observational but non-census | — | — | — | **Rejected**: no raw word or 8-word set stands for a 448-tile image (brief §1) |
 | T | later-tick (2052) snapshot | Different vsync; intervening packets | Different Present | — | — | — | **Rejected** (N8D7M4 gate: intervening packets can change content) |
@@ -137,8 +137,10 @@ Equal predictions cannot discriminate.
   with input==oracle 448/448; negative: a draw-free tick — S1 sparse AND G
   sparse) and a full 448-tile snapshot comparison.
 - **B** = source does not expose a sound three-way witness without an
-  implementation experiment or device-specific extension; smallest next
-  *Mac-only* measurement named (§5).
+  implementation experiment or device-specific extension; §5 states that no
+  Mac-only measurement in this design resolves the live Odin ordering
+  question, and recommends a read-only identity-carrying witness design
+  (no build/run) as next.
 - **OTHER** = pin/citation/call-path gap (§5 M1–M5), gate miss (descriptor
   mismatch, `selected_capture_status != 2`, map/decode error,
   intermediate 101–249 active), intervention row (L, P, X1), or
@@ -160,7 +162,7 @@ not A. No Turnip, shader, or barrier cause is declared from static code;
 this checker record cannot prove execution from source strings alone — it
 verifies citations, pins, and table consistency only (see `check.py`).
 
-## 5. Missing links and smallest Mac-only experiment
+## 5. Missing links; no Mac-only measurement resolves live ordering
 
 Explicit gaps (each forces OTHER until closed):
 
@@ -182,9 +184,16 @@ Explicit gaps (each forces OTHER until closed):
 - **M5 (ordering gap):** no source string binds a specific draw's GPU
   completion to before/after the S1 `copy_buffer` in GPU order; timeline
   values are per-flush (L4) and `wait_idle` is whole-device (L5).
+- **M6 (replay gap):** a Mac replay serializes the captured stream through
+  its own EE/GS threading — it does not reproduce the live Odin
+  interleave. Combined with L1/L2 (no enqueue-time tick or packet identity
+  survives into `gif_transfer`), counting records around a Mac Present
+  cannot establish which live tick≤2050 packets missed the original Odin
+  flush, nor distinguish GPU execution. No Mac-only measurement in this
+  design resolves the live ordering question.
 
-Smallest next **Mac-only** measurement (EXP1, fork-only log attribution —
-no device, no Android build, no Vulkan command change):
+EXP1 (replay-plumbing calibration only — Mac-only, fork-only log
+attribution; NOT recommended as the next experiment for the Odin cause):
 
 1. Add a default-OFF, text-only log (new env, e.g.
    `PS2X_N8D7M8_FLUSHLOG=1`; unset/empty = zero behavior change) at two
@@ -199,21 +208,36 @@ no device, no Android build, no Vulkan command change):
    parallel replay of the N8D7M6 stream (one mini P-lane slot, ≤600 s
    each). Require OFF/ON frame hashes equal AND S1 full-448 census equal
    (nonperturbation gate); stop on any inequality.
-3. What it settles: the **queue-order fact** — how many GIF packets were
-   recorded before vs after the tick2050 Present's step-8 flush on the
-   replay path, and the timeline order of draw submits vs the scanout
-   submit. What it cannot settle (stated plainly): GPU execution
-   completion — host submits are not execution (row F), so the (ii)/(iii)
-   split stays unresolved and no Odin package follows from EXP1 alone.
-   After EXP1, the next design is a device-extension question (M4: what
-   Turnip-specific completion query exists), not another copy comparison.
+3. What it calibrates (all that is claimed): replay plumbing — counter
+   sequences around the Mac Present and proof that the logging itself does
+   not perturb the replay census. What it explicitly does NOT settle: which
+   live tick≤2050 packets missed the original Odin step-8 flush (M6: the
+   replay interleave is not the Odin interleave, and L1/L2 drop the
+   enqueue-time identity needed to ask that question), nor GPU execution
+   completion (row F). EXP1 is therefore not the recommended next step for
+   the Odin cause.
+
+Recommended next (read-only, no build/run): a device-extension /
+identity-carrying witness design — paper analysis of carrying packet/tick
+identity from `processGIFPacket` (`gs_frontend.cpp:947-948`) through
+`RawGifPacket` (backend `:897-905`) into `gif_transfer`
+(`gs_interface.cpp:5191+`, decl `gs_interface.hpp:269`) and per-flush
+attribution (`gs_interface.cpp:5161-5162`): exact signature/threading
+changes, default-OFF hook points, byte/sync costs, and whether any
+addition perturbs order (anything that does is labeled intervention up
+front); plus a survey from this source tree of what Turnip completion
+query, if any, could bind a draw's GPU completion to the S1 copy (M4).
+Gate that design before any implementation, Mac experiment, or device
+brief. No Odin package follows from this design.
 
 ## 6. Recommended next action
 
-Gate this design as **B**; if accepted, run the §5 EXP1 Mac-only
-flush-attribution experiment first (fork-only, bounded, nonperturbing).
-Do not cut a device brief from this design: no nonperturbing tap on the
-original Present order separates (ii) from (iii). No push from this worker.
+Gate this design as **B**; recommended next is the §5 read-only
+identity-carrying witness design (no build, run, or device brief).
+Do not run EXP1 as an Odin-cause experiment and do not cut a device brief
+from this design: no nonperturbing tap on the original Present order
+separates (ii) from (iii), and no Mac-only measurement here resolves the
+live ordering question. No push from this worker.
 
 ## 7. Receipts / commands (all read-only, repo root unless noted)
 
