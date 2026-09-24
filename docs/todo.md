@@ -1237,11 +1237,21 @@ with measured budgets, then 120 Hz simulation.
       hashes. Literal FBP112 and wrap offsets matched. The writer and reader
       share `swizzle_PS2`, so this is adapter calibration, not a full address
       or GS-cause proof. `local/research/N8D7D2/ORCH-GATE.md` has commands.
-- [ ] **N8D7E Mac same-stream calibration:** capture the selected circuit1
-      input (GPU VRAM or promoted image), log final promotion/sample state,
-      decode the input on the host, and census circuit1 independently of the
-      existing tile shader. Calibrate on one pinned Mac replay before an Odin
-      build or run; stop on unsupported source/sample/metadata.
+- [x] **N8D7E read-only Mac capture design PASS with corrections (`40e457d`):**
+      Muse Go mapped nine source steps and found callable GPU VRAM and
+      circuit1 image staging-copy APIs. Gate corrected its compact-page
+      suggestion (host decoder needs a contiguous 4 MiB slice), located
+      circuit1 retention in the N8D6A G43 stage patch, and recalculated
+      capture bytes as 5,177,344 (<6 MiB). No replay or device run.
+      `local/research/N8D7E/ORCH-GATE.md`.
+- [ ] **N8D7F Mac same-stream implementation/calibration:** capture the
+      selected circuit1 input, log final promotion/sample state, decode
+      512×224 input on the host, and census circuit1 independently of the
+      tile shader under one default-OFF flag. Use the exact N8D6A stage
+      patch and a full contiguous GPU VRAM slice; stop on raw-circuit early
+      return, unsupported source/sample, missing metadata or any copy error.
+      Run the synthetic fixture and one pinned Mac replay before any Odin
+      package or run.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
