@@ -211,3 +211,7 @@ The plan-of-record reasoning for E54–E57 is in
   the Edit tool.
 - Letting parallel builds starve a timing boot (E47).
 - Reading a pane's `working` status as proof the prompt landed (GB4).
+- Addresses paraphrased into a brief with the wrong meaning. AU4 was told
+  to filter on the DMA source `0x512E40`, which is the tag-1 record
+  *inside* the `0x512B80` buffer, and that cost a build and a capture.
+  Copy each address from its source report together with what it is.
