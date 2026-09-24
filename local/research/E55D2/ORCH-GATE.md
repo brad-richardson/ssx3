@@ -1,0 +1,9 @@
+# E55D2 orchestrator gate — pad/card write probe map
+
+Verdict: **PASS with one scope correction** as a read-only source map. No existing default-OFF hook records every successful 32-byte `scePadRead` buffer and every `sceMcGetDir`/`sceMcRead` guest write in guest read order with a bounded log. This does not establish a deterministic-input policy or a runtime cause.
+
+I read the whole report and eight-row TSV (15,207 bytes combined), verified worker commit `388ff9ed` and its `Orchestrated-By: opencode` trailer, fork source pin `ddaee780288adb076ce40050d87969b20bc4bb05`, and the cited pad/card sites. `Pad.cpp:1237` calls the fill before the E44/E41/E3 hooks and success return; `MemoryCard.cpp:843` copies the 64-byte entries; `MemoryCard.cpp:1095` reads the payload, while its E44 hook is nested under active E3. `ps2TraceGuestRangeWrite` is an empty inline function. Existing E3 rows are selected windows with 8-byte before/after slices and no pad/card ordinal. The TSV meets its structural 5–8-row contract. No build or boot was used for this gate.
+
+Correction: the report says E41 plant-watch pad/card sites emit zero lines "by construction" because its four watched render words never overlap those buffers. The fixed word list proves that E41 cannot provide **general** pad/card coverage; without measured guest buffer addresses it does not prove zero possible overlap. This does not affect the no-complete-hook conclusion.
+
+Next: a single default-OFF, shared-sequence pad/card guest-write tap at the post-fill/write sites, with explicit success and byte-cap semantics. First run A/A with pinned vsync pad and card manifest to measure call counts and compare ordered rows. Only after that null control should pad-B and card-B be run, each stopping on its first family-specific difference. ExternalWake policy stays parked until a production poster appears.

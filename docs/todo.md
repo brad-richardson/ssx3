@@ -1496,10 +1496,19 @@ with measured budgets, then 120 Hz simulation.
       ordering. Pad data enters RDRAM at `scePadRead`; card reads and
       directory entries also enter RDRAM, including host timestamps.
       No boot or determinism claim. `local/research/E55D1/ORCH-GATE.md`.
-- [ ] **E55D2 input isolation:** compare vsync-clocked pad script A/A
-      against wall/live input and empty-card A/A against one controlled
-      card change. Stop at the first differing guest pad or card write;
-      park ExternalWake policy until a production poster is identified.
+- [x] **E55D2 pad/card hook audit PASS with correction (`388ff9ed`):**
+      eight source rows show no existing default-OFF, bounded hook covers
+      every successful 32-byte pad read and card guest write in order.
+      E3 has a narrow arming/window filter; E44 mc-read is nested under
+      E3; the guest-range hook is a no-op. Fixed E41 watch words do not
+      provide general coverage, but zero possible overlap was not proved.
+      No build, boot or determinism claim. `local/research/E55D2/ORCH-GATE.md`.
+- [ ] **E55D3 input write tap and isolation:** add one default-OFF, bounded
+      shared-sequence tap at the pad post-fill and card guest-write sites.
+      First compare pinned vsync-pad/empty-card A/A through race tick 2053;
+      then change one pad or card input at a time and stop at the first
+      differing ordered guest write. Park ExternalWake policy until a
+      production poster is identified.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
