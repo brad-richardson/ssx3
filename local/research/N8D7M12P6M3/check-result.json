@@ -1,0 +1,87 @@
+{
+  "verdict": "A",
+  "rows": [
+    {
+      "check": "snapshot_a_ok",
+      "pass": true,
+      "detail": "}"
+    },
+    {
+      "check": "snapshot_b_ok",
+      "pass": true,
+      "detail": "}"
+    },
+    {
+      "check": "verify_match",
+      "pass": true,
+      "detail": "rc=0"
+    },
+    {
+      "check": "json_deterministic",
+      "pass": true,
+      "detail": "aggregate=27aeddc223b1333ed52ee5f899fed6755a16d7f30a54395e79de8f70ff25345b"
+    },
+    {
+      "check": "aggregate_present",
+      "pass": true,
+      "detail": "27aeddc223b1333ed52ee5f899fed6755a16d7f30a54395e79de8f70ff25345b"
+    },
+    {
+      "check": "exclusions_absent",
+      "pass": true,
+      "detail": "leaked=[]"
+    },
+    {
+      "check": "exclusions_listed",
+      "pass": true,
+      "detail": "{\"codegen\": 1, \"fork\": 1, \"jni\": 1, \"parallel\": 2}"
+    },
+    {
+      "check": "symlink_recorded",
+      "pass": true,
+      "detail": "{\"kind\": \"symlink\", \"path\": \"link_to_readme\", \"scope\": \"fork\", \"sha256\": \"b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5\", \"size\": 9, \"target\": \"README.md\"}"
+    },
+    {
+      "check": "mutate_fails_naming_file",
+      "pass": true,
+      "detail": "rc=1 changed=['codegen:sub_0001.cpp']"
+    },
+    {
+      "check": "add_remove_exact_paths",
+      "pass": true,
+      "detail": "rc=1 added=['fork:ADDED.txt'] missing=['parallel:gs/gs_interface.hpp']"
+    },
+    {
+      "check": "runner_file_fails",
+      "pass": true,
+      "detail": "rc=1 last=}"
+    },
+    {
+      "check": "list_tree_omits_excluded",
+      "pass": true,
+      "detail": "leaked=[] keys=8"
+    },
+    {
+      "check": "excluded_race_does_not_fail",
+      "pass": true,
+      "detail": "aggregate=27aeddc223b1333e"
+    },
+    {
+      "check": "included_race_still_fails",
+      "pass": true,
+      "detail": "SnapshotError: source root changed during snapshot /var/folders/cf/6_sbmh2x75s937h8t62psbxc0000gn/T/p6m2-fixture-iwo5iiuv/fork: added=[] removed=[] changed=['ps2xRuntime/src/lib/gs/gs_frontend.cpp']"
+    },
+    {
+      "check": "two_read_mismatch_handled",
+      "pass": true,
+      "detail": "read_file_twice raises SnapshotError on flip"
+    },
+    {
+      "check": "cap_stops_flood",
+      "pass": true,
+      "detail": "rc=1"
+    }
+  ],
+  "failing": [],
+  "note": "Fixture-only source-snapshot checks; no real-root scan, build, device, or package/GPU verdict."
+}

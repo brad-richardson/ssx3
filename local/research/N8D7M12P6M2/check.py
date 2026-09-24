@@ -150,6 +150,74 @@ def main():
         f"rc={rc} last={out.strip().splitlines()[-1] if out.strip() else ''}")
     (fork / "ps2xRuntime/src/runner/gen.cpp").unlink()
 
+    # P6M3: excluded-cache pre/post walk. list_tree must omit excluded
+    # entries, an excluded cache change racing an included file's two-read
+    # phase must NOT fail the snapshot, and an included-file change in the
+    # same phase must still fail.
+    spec3 = importlib.util.spec_from_file_location("source_manifest_p6m3", str(TOOL))
+    assert spec3 is not None and spec3.loader is not None
+    mod3 = importlib.util.module_from_spec(spec3)
+    spec3.loader.exec_module(mod3)  # type: ignore[union-attr]
+    tree = mod3.list_tree(str(fork))
+    tree_leaked = sorted(k for k in tree
+                         if any(c in k.split("/") for c in mod3.EXCLUDE_NAMES))
+    row("list_tree_omits_excluded",
+        tree_leaked == [] and "build/ignored.o" not in tree and "README.md" in tree,
+        f"leaked={tree_leaked} keys={len(tree)}")
+    roots3 = {"fork": str(fork), "parallel": str(parallel),
+              "codegen": str(codegen), "jni": str(jni)}
+    caps3 = {"max_files": 100000, "max_bytes": 10_000_000_000}
+    excl_victim = fork / "build/ignored.o"
+    excl_orig = excl_victim.read_bytes()
+    orig_read_twice = mod3.read_file_twice
+    raced = {"n": 0}
+
+    def excl_race_read(path, *a, **k):
+        if raced["n"] == 0:
+            raced["n"] += 1
+            excl_victim.write_bytes(excl_orig + b"\n// cache churn\n")
+        return orig_read_twice(path, *a, **k)
+
+    mod3.read_file_twice = excl_race_read  # type: ignore[attr-defined]
+    try:
+        man_race = mod3.build_manifest(roots3, dict(caps3))
+        excl_race_ok = True
+        excl_race_detail = f"aggregate={man_race['aggregate_sha256'][:16]}"
+    except mod3.SnapshotError as e:
+        excl_race_ok = False
+        excl_race_detail = f"SnapshotError: {e}"
+    finally:
+        mod3.read_file_twice = orig_read_twice  # type: ignore[attr-defined]
+        excl_victim.write_bytes(excl_orig)
+    row("excluded_race_does_not_fail", excl_race_ok, excl_race_detail)
+
+    incl_victim = fork / "ps2xRuntime/src/lib/gs/gs_frontend.cpp"
+    incl_orig = incl_victim.read_bytes()
+    raced2 = {"n": 0}
+    orig_read_twice2 = mod3.read_file_twice
+
+    def incl_race_read(path, *a, **k):
+        # Mutate a not-yet-read included file while the first file
+        # (fork README.md) is read: two reads stay consistent, but the
+        # pre/post lstat comparison must still catch it.
+        if raced2["n"] == 0 and str(path).endswith("README.md"):
+            raced2["n"] += 1
+            incl_victim.write_bytes(incl_orig + b"\n// included churn\n")
+        return orig_read_twice2(path, *a, **k)
+
+    mod3.read_file_twice = incl_race_read  # type: ignore[attr-defined]
+    try:
+        mod3.build_manifest(roots3, dict(caps3))
+        incl_race_ok = False
+        incl_race_detail = "snapshot unexpectedly succeeded"
+    except mod3.SnapshotError as e:
+        incl_race_ok = "source root changed during snapshot" in str(e)
+        incl_race_detail = f"SnapshotError: {e}"[:220]
+    finally:
+        mod3.read_file_twice = orig_read_twice2  # type: ignore[attr-defined]
+        incl_victim.write_bytes(incl_orig)
+    row("included_race_still_fails", incl_race_ok, incl_race_detail)
+
     # Two-read mismatch path: feed different bytes on successive opens.
     spec = importlib.util.spec_from_file_location("source_manifest", str(TOOL))
     assert spec is not None and spec.loader is not None

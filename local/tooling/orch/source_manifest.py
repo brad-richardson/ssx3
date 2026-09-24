@@ -104,17 +104,35 @@ def is_excluded(rel_posix):
 
 
 def list_tree(root):
-    """lstat-only listing: {rel_posix: (kind, size, mtime_ns)}; kind in dir/file/link/other."""
+    """lstat-only listing of INCLUDED paths: {rel_posix: (kind, size, mtime_ns)}.
+
+    Excluded names (.git/build/.cxx/.gradle/__pycache__ path components) are
+    pruned before descent and omitted as entries, mirroring scan_scope, so a
+    cache/build change during the scan cannot falsely invalidate the
+    pre/post stability check. Kind in dir/file/link/other. Never follows
+    symlinks; stable ordering via sorted dirnames/filenames.
+    """
     out = {}
     for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
         dirnames.sort()
+        # Prune excluded dirs before descent (in place, so os.walk obeys).
+        kept = []
+        for d in dirnames:
+            full_d = os.path.join(dirpath, d)
+            rel_d = os.path.relpath(full_d, root).replace(os.sep, "/")
+            if is_excluded(rel_d):
+                continue
+            kept.append(d)
+        dirnames[:] = kept
         for name in sorted(filenames + dirnames):
             full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            if is_excluded(rel):
+                continue
             try:
                 st = os.lstat(full)
             except OSError as e:
                 fail(f"unreadable entry {full}: {e}")
-            rel = os.path.relpath(full, root).replace(os.sep, "/")
             if rel.startswith("../") or rel == ".." or os.path.isabs(rel):
                 fail(f"path escapes root {root}: {full}")
             if stat.S_ISDIR(st.st_mode):
