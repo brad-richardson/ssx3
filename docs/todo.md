@@ -967,7 +967,7 @@ with measured budgets, then 120 Hz simulation.
 
 ## W — widescreen (backlog, Brad 09-23)
 
-- [ ] **W1 (after E53; Codex Luna): 16:9 by default.**
+- [ ] **W1 running (Codex Sol, `local/muse/prompts/W1.md`): 16:9 by default.** Lead: on the GC build the game's own Options > Widescreen rendered anamorphic and the host stretched it (old `native/ios/App.mm`).
       1. Find how SSX 3 PS2 enables widescreen:
          - a native options/profile flag, vs a patch (the NetherSX2 Odin
            gate used a "widescreen patch", see the ledger);
