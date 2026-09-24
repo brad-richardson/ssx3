@@ -1,0 +1,41 @@
+commit ea2a10ccb70d58f83326c12b1b351450cbded40d
+Author: Brad Richardson <bradrichardsonmail@gmail.com>
+Date:   Wed Sep 23 19:34:32 2026 -0400
+
+    [AU2] SND spike: PS2X_SND_TICK delivers SNDDRV's cid-1 tick to the EE handler; logs cid-0/SetDma/RPC
+    
+    Dev-only, default off. With PS2X_SND_TICK=<n>, each vblank queues n
+    Interrupt invocations of the cid-1 handler registered via
+    sceSifAddCmdHandler (packet type 0, opt = SNDDRV's tag-buffer IOP
+    address 0xB3C4) and stamps the status serial at the init RPC's status
+    address. cid-0 type-1 (dmqueue) requests are logged, their staged
+    payload dumped, and answered with a type-2 completion. SND-library
+    sceSifSetDma transfers are captured host-side instead of being copied
+    into low EE RDRAM. While on, the 0x426078 (_sceSifSendCmd) entry is
+    parsed with its shifted argument layout. Suite 597/597.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Orchestrated-By: Claude Code
+
+diff --git a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+index 7f5b130..5784e56 100644
+--- a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
++++ b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+@@ -16,6 +16,7 @@
+ #define XXH_INLINE_ALL
+ #include "runtime/third_party/xxhash.h"
+ #endif
++#include "ps2_snd_spike.h"
+ 
+ #include "ps2_log.h"
+ #include "ps2_park_snapshot.h"
+@@ -2848,6 +2849,9 @@ void EeScheduler::processEvent(const EeEvent &event)
+ #if PS2X_ENABLE_DET_HASH_TAP
+         emitDetHashTap();
+ #endif
++        // AU2 spike: IOP SND tick (PS2X_SND_TICK, default off).
++        ps2_snd_spike::onVBlank(m_rdram, m_vsyncTick, [this](GuestInvocation invocation)
++                                { queueInvocation(std::move(invocation)); });
+         break;
+     case EeEventType::ExternalWake:
+         completeExternalWait(event.id, event.value, KE_OK);
