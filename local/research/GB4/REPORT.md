@@ -1,10 +1,11 @@
-# GB4 report — execution stopped before Part 1
+# GB4 report — stopped during source inspection
 
 | Item | Result |
 |---|---|
 | References read | `local/AGENTS.local.md`; all of GB3 report (including §§0, 5, 6, 8); GB2 Part 1 report including the 256-packet captured-stream test template |
-| Required fork worktree | `~/dev/ssx3-work/GB3/PS2Recomp`, branch `gb3-gs` at `574354a`; not created or modified |
-| Stop reason | The worker rule in `~/dev/AGENTS.md` says “Write only inside the folder you were started in.” This session started in `~/dev/ssx3`. GB4 requires worktree, builds, capture and replay under the sibling `~/dev/ssx3-work/GB3`, outside that allowed folder. I stopped before any outside write. |
+| Source fork | `~/dev/PS2Recomp` at `eac6cba` (`ssx3`), clean before GB4 setup |
+| GB4 worktree / branch / starting commit | `~/dev/ssx3-work/GB4/PS2Recomp`, branch `gb4-replay`, based at `574354a` (`[GB3] Part 1b: sceGsResetGraph stub applies SetGsCrt's SMODE effect`) |
+| Build / generated-code inputs | No build run. Canonical codegen dir exists at `~/dev/ssx3-work/codegen-ssx3`; existing GB3 build is at `~/dev/ssx3-work/GB3/build`. |
 | Capture boot / capture size / end tick | Not run |
 | Replay direct vs capture live | Not run |
 | Queue gate (direct, queue, repeat) | Not run |
@@ -13,7 +14,9 @@
 | Runner SHA-256 ×2 | Not found (no runner built) |
 | Runner-dir diff check | Not run |
 | Boots / lease | 0 boots; no lease claimed |
-| Build / new bytes | 0 builds; no worktree or build bytes created |
-| Commands / receipts | Read-only reference commands: `cat ~/dev/AGENTS.md`; `cat AGENTS.md`; `cat local/muse/prompts/GB4.md`; `cat local/AGENTS.local.md`; `cat local/research/GB3/REPORT.md`; `cat local/research/GB2/REPORT.md`; targeted `sed` reads of GB3 §§5–9 and GB2 report sections. No capture/replay commands run. |
+| Storage | Initial `disk_budget.sh`: 80.2/200 GB; 162 GiB free. GB4 cap: 12 GB. |
+| Commands / receipts | Read `git -C ~/dev/PS2Recomp` status/worktree list and confirmed `574354a`; created the GB4 worktree with `git -C ~/dev/PS2Recomp worktree add ~/dev/ssx3-work/GB4/PS2Recomp -b gb4-replay 574354a`. |
 
-The GB4 brief cannot be executed within the worker write boundary given for this session. No recommendation or technical verdict is made.
+## Stop condition
+
+Stopped on the first source-inspection command error as required by `~/dev/AGENTS.md`. The command ran from `/Users/brad/dev/ssx3` with fork-relative paths, so `rg` reported `ps2xRuntime/src/lib/gs: No such file or directory` (and analogous errors for `ps2_memory.cpp`, `EeScheduler.cpp`, and `ps2Test/src`). No source files were edited and no build, boot, or lease was started. The path error is recorded without retrying.
