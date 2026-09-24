@@ -927,6 +927,29 @@ with measured budgets, then 120 Hz simulation.
         a small R3000 core + capture libsd AutoDMA.
       - **AU2 spike running:** the protocol table + a delivered tick,
         answering whether the music is EE-mixed PCM or IOP-side XA.
+- [x] **AU2 PASS (823c613): the music is EE-mixed PCM.** EA SND decodes
+      EA-XA and mixes on the EE (36 kHz stereo). Each tick it hands the IOP
+      384 finished frames in tag 1 of a tag buffer; the IOP only resamples
+      36→48 kHz for the SPU2 AutoDMA. No SPU uploads and no voice records
+      over menus and race start.
+      - A per-vblank spike tick wakes the sound thread (9,228 signals). The
+        menu and race music stream from disc.
+      - A 149 s lldb capture of the mix is continuous music: a beat grid,
+        and a section change at the track switch. Its race-section tempo
+        fingerprint matches `poorleno.mus`.
+      - Real tick rate = 93.75 Hz (the spike's 59.94 ran the sound clock at
+        0.64×).
+      - Latent runtime bug: `_sceSifSendCmd` 0x426078 is bound to the wrong
+        argument layout.
+      - **Incident:** the lldb-attached boot ran ~10.5 min unleased and
+        over the cap (the harness lost the child). Other lanes' timings
+        from ~23:59–00:10Z are suspect. Rule: no debugger attached to
+        harness children.
+      - The capture was sent to Brad to listen to (G1).
+- [ ] **AU3 (Codex Luna):** SND HLE: a tick on the guest cycle clock at
+      93.75 Hz, tag-1 PCM → ring → raylib AudioStream, the `_sceSifSendCmd`
+      binding fix, a WAV tap and an underrun count; Mac first. Then
+      Simulator/Odin.
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
