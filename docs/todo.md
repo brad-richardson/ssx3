@@ -1107,6 +1107,17 @@ with measured budgets, then 120 Hz simulation.
       OTHER. If control passes, sparse/sparse supports a sparse sampled
       image at this point; broad/sparse implicates the current copy/map
       path. No fold or profiling until the device result is gated.
+- [x] **N8D5L Mac log-summary PASS (orchestrator):** Android's stdout
+      redirect reads at most 1,023 characters per logcat record, shorter
+      than the ~2.9 KB N8D5C tile-vector lines. Local fork `ab8155b`
+      adds one short `sampled_summary` and one `raw_summary` line under the
+      existing flag, without changing shader, layout or copy/map behavior.
+      Mac Release build and same-stream replay passed 585/585, control
+      128/128, both summaries 896 tiles/128,292 occupied pixels/567 active
+      tiles, and unchanged sampled/raw 896/896 vector equality and viewed
+      frame SHA. `local/research/N8D5L/REPORT.md` pins the source and
+      compressed log. **N8D5D** may now build the isolated Android APK
+      from this pin; no Odin action until its package gate.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.

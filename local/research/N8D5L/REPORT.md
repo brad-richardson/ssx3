@@ -1,0 +1,13 @@
+# N8D5L — bounded tile summaries for Android logcat
+
+Orchestrator source and Mac gate. The Android app's `ps2xRuntime/src/main.cpp:78-94` forwards stdout/stderr through `fgets` with a 1,024-byte buffer. N8D5C's two tile-vector lines are 2,931 and 2,927 bytes, so each becomes multiple logcat records. The new default-OFF diagnostic emits short summaries after the unchanged vectors. No app build, device action, or speed claim occurred here.
+
+| Gate | Result |
+| --- | --- |
+| Source | New local fork worktree branch `n8d5d-log-summary` from N8D5C `a847d0f`; commit `ab8155bbcbbdd478d17f2cd90a2feff3eb9a865b`, trailer `Orchestrated-By: Codex`. Only `ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp` changed, 15 inserted lines (`git show ab8155b -- ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp`). SHA-256 `4e3efc51d8d104ab5d3c537076e85c6cfcd8344c8e6c147de02f5a5015c8f1e5`. Runner-dir diff against `14b1e5cb` empty. No fork push. |
+| Change | After a mapped GPU buffer and control=128, sum the 896 sampled counts and count tiles with at least 32 occupied pixels; log one `sampled_summary` line. Sum the existing raw mapped tile counts and log one `raw_summary` line. Shader, layout, control, tick/page gate, thresholds, existing vectors, copy/map path and flag-OFF behavior are unchanged. |
+| Mac build | One Release/Ninja `ps2x_tests` build with paraLLEl ON, N8D5B private G43, canonical E54F2 external codegen and diagnostic taps/runtime/aggressive logs OFF. Binary SHA-256 twice `781add43d4e8802c35717d47a4f5e7e3eb2f0a5d4111d95ea93a9c9d532cc228`. |
+| One Mac stream replay | Same pinned N8D4 stream through tick2050/FBP112/PMODE `ff21`/512×448; test suite 585/585. Control 128/128. Both short summary lines report 896 tiles, 128,292 occupied pixels, 567 active tiles. The full sampled/raw vectors still match exactly at 896/896 tiles; each packed vector SHA-256 `1ab2c58d…9705f9d`. Frame PPM SHA `8c85489e…ea25d4d` matches the previously viewed N8D5C frame; no new visual interpretation. No pipeline error. [Bounded replay excerpt](replay-excerpt.txt); full closed log gzip and its raw/compressed SHAs in scratch. |
+| Bounds | Mac scratch 1.4 GiB; global ssx3 internal 135.8/200 GB. No Odin install/launch, Android APK, guest boot, or device verdict. |
+
+Android source release: the Mac summary gate passed. N8D5D may transfer the `ab8155b` backend file and pinned shader header into its isolated WSL snapshot and build one APK. On Odin, a missing control or summary, wrong tick/page/dimensions, or disagreement between summaries and any recovered vector data is OTHER and stops cause interpretation.
