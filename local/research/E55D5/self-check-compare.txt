@@ -1,0 +1,22 @@
+ok identical_prefix verdict=OTHER reason=no_probe_difference
+ok unchanged_no_event verdict=OTHER reason=no_probe_difference
+ok expected_pad_change verdict=PASS reason=pad_b_discriminated
+ok both_first_differences verdict=PASS reason=pad_b_discriminated
+ok earlier_difference verdict=FAIL reason=probe_earlier_difference
+ok wrong_family verdict=FAIL reason=probe_wrong_family
+ok late_difference verdict=FAIL reason=probe_late_difference
+ok metadata_only verdict=FAIL reason=probe_metadata_difference
+ok length_only verdict=FAIL reason=probe_length_difference
+ok hash_without_probe verdict=FAIL reason=hash_without_probe
+ok hash_earlier_than_probe verdict=FAIL reason=hash_earlier_than_probe
+ok truncated_probe verdict=OTHER reason=probe_truncated_A
+ok capped_probe verdict=OTHER reason=probe_cap_A
+ok unproven_flush verdict=OTHER reason=probe_unproven_A
+ok hid_internal_clean flag=False known=1
+ok hid_real_gamepad_flagged ['game_name']
+ok hid_game_usage_flagged ['game_usage']
+ok hid_ambiguous_flagged ['ambiguous_controller']
+ok hid_internal_end_to_end_other no_probe_difference
+ok hid_gamepad_end_to_end_other live_pad_present
+ok hid_legacy_flag_other live_pad_present
+compare_rc=0

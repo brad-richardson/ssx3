@@ -1,0 +1,36 @@
+# E55D5 B1 bounded excerpts (full logs gzipped in scratch run dir)
+
+## B1 boot.log sha256=3cb0c64bef53a4938574f96c14f07f8b94f506eebde13bb76abacbb2fbdfbd83 bytes=374395 hashrows=2057
+HEAD-HASH:
+  [det-hash:v1] tick=1 eeCycle=4915299 rdram=067194272402affe scratch=594edc66332c45ec vu1Data=594edc66332c45ec vu1Code=594edc66332c45ec combined=740e5edd6099793d count=0
+  [det-hash:v1] tick=2 eeCycle=9830598 rdram=02a62ae379003f8d scratch=594edc66332c45ec vu1Data=594edc66332c45ec vu1Code=594edc66332c45ec combined=9512021748bc4a23 count=0
+  [det-hash:v1] tick=3 eeCycle=14745897 rdram=795c31d998ae5347 scratch=594edc66332c45ec vu1Data=594edc66332c45ec vu1Code=594edc66332c45ec combined=aa6ac2663bd1b14e count=0
+TAIL-HASH:
+  [det-hash:v1] tick=2055 eeCycle=10100939474 rdram=143cf8f36bb22455 scratch=3359e42c7ef0c02b vu1Data=47d978dddff0ffe8 vu1Code=f587398bb6fc4651 combined=1cd6e56d2bb35976 count=497161
+  [det-hash:v1] tick=2056 eeCycle=10105854746 rdram=5a9816c901867a35 scratch=3151926b9246abc3 vu1Data=fe9e02bf6818fd8a vu1Code=f587398bb6fc4651 combined=e9f67c7059056f35 count=497946
+  [det-hash:v1] tick=2057 eeCycle=10110770058 rdram=e4a0c4d1ffe9c840 scratch=3151926b9246abc3 vu1Data=fe9e02bf6818fd8a vu1Code=f587398bb6fc4651 combined=0395a7fc973ab530 count=497946
+
+## B1 probe.log sha256=b472dcb53b2d3bf3e2c126a0946bcbdf4a57638131f4c465f14b5d3c9c84f13b bytes=579670 lines=4000 (all pad; no getdir/mcread through tick 2055)
+HEAD-PROBE:
+  pad seq=1 vsync=58 ord=1 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffff80808080000000000000000000000000000000000000000000000000
+  pad seq=2 vsync=58 ord=2 port=1 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffff80808080000000000000000000000000000000000000000000000000
+  pad seq=3 vsync=59 ord=3 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffff80808080000000000000000000000000000000000000000000000000
+TAIL-PROBE:
+  pad seq=3999 vsync=2055 ord=3995 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073bfff80808080000000ff0000000000000000000000000000000000000000
+  pad seq=4000 vsync=2055 ord=3996 port=1 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073bfff80808080000000ff0000000000000000000000000000000000000000
+
+## First differences (A1 baseline vs B1, comparison.json)
+FIRST-PROBE (seq=3909, vsync=2010, pad, port=0, ord=3905):
+  A: pad seq=3909 vsync=2010 ord=3905 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffbf80808080000000000000ff0000000000000000000000000000000000
+  B: pad seq=3909 vsync=2010 ord=3905 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ff7f8080808000000000000000ff00000000000000000000000000000000
+  (metadata identical; exactly the bytes payload differs: ...ffbf... vs ...ff7f...; vsync 2010 in predeclared [2008,2025])
+FIRST-HASH (tick=2011, fields eeCycle/rdram/combined):
+  A: tick=2011 eeCycle=9884666298 rdram=6533946a95ce859a scratch=3d1b06848200606a vu1Data=c221d62e07f0dc97 vu1Code=f587398bb6fc4651 combined=3a3758165cd5ae00 count=470045
+  B: tick=2011 eeCycle=9884666306 rdram=748f358a70a25a79 scratch=3d1b06848200606a vu1Data=c221d62e07f0dc97 vu1Code=f587398bb6fc4651 combined=fd1dd828f7633a36 count=470045
+  (hash diverges one tick after the first differing guest write; not attributed to the pad alone)
+
+## comparison.json
+verdict=PASS reason=pad_b_discriminated; A 2058 rows / B 2057 rows (both complete 1..2053),
+windowed probe 3996/3996 lines, proof_vsync=2055 each side, framing_ok, no truncation,
+no cap, no hash errors, cards empty identical (f9401596…ccb9ce initial and final),
+hid 227 rows sole known-internal AppleANS3CGv2Controller, no flag.
