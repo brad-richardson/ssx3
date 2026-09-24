@@ -1,0 +1,51 @@
+section	field	value	how
+identity	packet_index	5470	independent kind-1 ordinal scan; replay packets counter (zero kind-5)
+identity	tick	259	record header
+identity	embedded_path	1	record bytes (known defect)
+identity	corrected_path	3	paths.txt line `5470 3`
+identity	gif_bytes	1696	size == record_len-14
+identity	record_offset	6673427	scan ftell
+identity	record_len	1710	4 + 9 + 1 + 4 + 1696
+identity	gif_sha256	79f3582fce45dc36a25c454003206a43bbfd001c340a92459a8726fbd0512e31	in-memory sha256 (bytes not committed)
+identity	gif_fnv32	cc6dd8df	replay fnv()
+identity	byte_identical_to_tick950_packet144266	True	SHA match via X5 record_offset 158919448
+identity	prev_packet	5469 tick258 144B	scan
+identity	next_packet	5471 tick259 144B	scan
+tag	tag_count	6	exact 1696-B walk, pre=0 all, no IMAGE
+tag	tag0	PACKED A+D nloop=11	FRAME_1 TEX1_1 TEX0_1 ALPHA_1 CLAMP_1 SCISSOR_1 SCISSOR_2 XYOFFSET_1 ZBUF_1 TEST_1 TEXFLUSH
+tag	tag1	REGLIST PRIM,RGBAQ nloop=1	PRIM=0x11e RGBAQ=0x3f80000080808080
+tag	tag2	REGLIST UV,XYZ2,UV,XYZ2 nloop=17	34 kicks = batches 0-16
+tag	tag3	PACKED A+D nloop=16	FRAME_1/2 ZBUF_1/2 XYOFFSET_1/2 FBA_1/2 TEXA PRMODECONT=1 SCANMSK COLCLAMP DTHE DIMX PABE FOGCOL TEXFLUSH
+tag	tag4	PACKED A+D nloop=36	TEST_1 PRIM=0x06 RGBAQ 32xXYZ2 (batches 17-32, fbp0) TEST_1=0x500ad
+tag	tag5	PACKED A+D nloop=2	SCISSOR_1/2 restore
+batch	draw_batches_total	33	17 (tag2) + 16 (tag4); probe batch = one DrawPrimitive
+batch	batch10_group	tag2 group10 (11th XYZ2 pair)	only batch whose rect contains (342,377)
+batch	batch10_v0	UV=(5120,8) XYZraw=(33784,29176,0)	exact GIF fields
+batch	batch10_v1	UV=(5632,7160) XYZraw=(34296,36328,0)	exact GIF fields
+batch	batch10_rect_unclipped	(319,-1)-(350,445)	DrawSprite ofx/ofy+spans; clipped (319,0)-(350,445) = GB7C4 carrier rect
+state	PRIM	0x11e sprite/TME/FST no-ABE CTXT0	decodePrimRegister; effective via PRMODECONT=1 (pkt5348)
+state	RGBAQ	(128,128,128,128) Q=1.0	MODULATE-white: new_RGB == texel_RGB
+state	TEX0_1	tbp0=0 tbw=8 psm=0(CT32) tw=10 th=9 tcc=0 tfx=0(MODULATE) cbp=0 cpsm/csm/csa/cld=0	in-packet tag0
+state	TEX1_1	0x61 MMAG=1 MMIN=1 linearFilter=true	buildDrawBatch
+state	CLAMP_1	0x5 wrapU=1 wrapV=1 no-op in range	wrapTextureCoordinate
+state	FRAME_1	fbp=112 fbw=8 psm=1(CT24) fbmsk=0xff000000	in-packet tag0
+state	SCISSOR_1	(0,0)-(511,447)	in-packet tag0
+state	XYOFFSET_1	(28672,29184)	in-packet tag0
+state	ZBUF_1	zbp=224 zpsm=Z32 zmask=1 (no Z write)	in-packet tag0
+state	TEST_1	0x30000 ATE=0 pass; ZTE zpass; DATE=0 pass	in-packet tag0
+state	ALPHA_1	0x8000000064	unused (ABE=0)	in-packet tag0
+state	TEXA	0x8000000080	prior pkt5348 (= tag3); ignored for CT32
+state	PABE	0	prior pkt5348 (= tag3); moot (ABE=0)
+state	FBA_1	0	prior pkt5348 (= tag3); moot (CT24)
+state	PRMODECONT	1	prior pkt5348 (= tag3)
+state	DTHE/COLCLAMP/DIMX/SCANMSK	0/1/0x2637405137265140/0	prior pkt5348 (= tag3); no sprite-path effect
+state	FOG/FOGCOL/TEXCLUT/PRMODE	UNKNOWN (never written in prefix; init defaults; unused: FGE=0, CT32, AC=1)	explicit unknown, no render effect on this path
+computed	texUf/texVf at (342,377)	343.5/378.5	DrawSprite tx/ty; equals GB7C4 interpF
+computed	tap_quad	(343,378) (344,378) (343,379) (344,379) fx=0.0000 fy=0.0000	SampleTexture linear; texel = tap0
+computed	tap0_addr	0x000bae74	addrPSMCT32(0,8,343,378)
+computed	dst_addr	0x0019ae38	addrPSMCT32(3584,8,342,377) = GB7C5 watch address
+computed	sampled_texel_RGB	353341	inferred: MODULATE-white path + GB7C5 measured new word dc353341 (backward inference, NOT forward from uploads)
+computed	texel_word_at_0x000bae74_tick259	UNKNOWN (needs VRAM emulation of 483 IMAGE groups + prior draws)	explicit unknown -> verdict B
+prefix	kind_counts_to_5470	kind1=5471 kind2=1349 kind3=483 kind4=259 kind5/6/7=0	scan (matches GB7C5 full-stream audit shape)
+prefix	IMAGE_groups	483 totalling 5101824 B	texture/atlas feed; exact texel producer unidentified
+verdict	outcome	B	writer proved as sampler; glyph-vs-coincidence open; single-pixel scope
