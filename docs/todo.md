@@ -805,7 +805,13 @@ with measured budgets, then 120 Hz simulation.
       back to 113 MB and the full-rebuild peak is 4 GB (was ~10). Host-side
       env-off taps remain (not covered). Branch `n5-android` on bytesize
       (local).
-- [ ] **E58 running (Codex Sol): the fold** (brief `local/muse/prompts/E58.md`).
+- [x] **E58 PASS (f8a1ecf): fold pushed, fork `ssx3` `eac6cba..b9647f5`.**
+      E52 tests + E53 batch 1 + E45 + tap guard (default OFF; tap tests
+      registered only with taps ON) + I26 black fallback + G46 fill rule +
+      the vsync-rate log. Suite 537/537 (taps OFF) and 632/632 (taps ON).
+      The codegen is byte-identical to E53's and promoted (`codegen-ssx3`,
+      old kept as `-pre-e58`). Smoke: SC with the rider, race with
+      terrain, viewed. Clean Mac speed in the ledger (race 0.13×).
 - [ ] **Fold to `ssx3` after E53 Part 2 (Codex Sol):** `e52-audit` `d3f7508`
       + E45 `310b30f` + the tap guard (`local/research/N5/logs/tap-guard-6c335e6.diff`;
       decide the desktop default) + pink `73b8b3a` + G46 fill-rule
