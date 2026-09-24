@@ -10,6 +10,7 @@ generated runner file fails; JSON determinism; two-read mismatch path.
 Writes check-result.json. No real-root scan, no build, no device action.
 """
 import importlib.util
+import hashlib
 import json
 import os
 import subprocess
@@ -217,6 +218,73 @@ def main():
         mod3.read_file_twice = orig_read_twice2  # type: ignore[attr-defined]
         incl_victim.write_bytes(incl_orig)
     row("included_race_still_fails", incl_race_ok, incl_race_detail)
+
+    # P6M4: exact upstream stub permitted; anything else under the runner
+    # dir, or any byte change to the stub, fails on both snapshot and
+    # verify. Runs after the P6M3 rows so their fixture bytes are
+    # unchanged; the stub file is removed afterwards.
+    spec4 = importlib.util.spec_from_file_location("source_manifest_p6m4", str(TOOL))
+    assert spec4 is not None and spec4.loader is not None
+    mod4 = importlib.util.module_from_spec(spec4)
+    spec4.loader.exec_module(mod4)  # type: ignore[union-attr]
+    STUB_REL = "ps2xRuntime/src/runner/register_functions.cpp"
+    STUB_BYTES = (b'#include "ps2_runtime.h"\n'
+                  b'#include "runtime/ps2_memory.h"\n'
+                  b'\n'
+                  b'extern const uint32_t g_ps2RecompiledFunctionTableBase = 0x00000000u;\n'
+                  b'extern const uint32_t g_ps2RecompiledFunctionTableEnd = 0x01000000u;\n'
+                  b'extern const uint32_t g_ps2RecompiledFunctionTableSlotCount = (g_ps2RecompiledFunctionTableEnd - g_ps2RecompiledFunctionTableBase) >> 2;\n'
+                  b'PS2Runtime::RecompiledFunction g_ps2RecompiledFunctionTable[g_ps2RecompiledFunctionTableSlotCount] = {};')
+    row("runner_stub_bytes_match_pinned",
+        len(STUB_BYTES) == mod4.RUNNER_STUB_SIZE
+        and hashlib.sha256(STUB_BYTES).hexdigest() == mod4.RUNNER_STUB_SHA256,
+        f"len={len(STUB_BYTES)} sha={hashlib.sha256(STUB_BYTES).hexdigest()[:16]}")
+    stub_path = fork / STUB_REL
+    write(stub_path, STUB_BYTES)
+    rc, out = run_tool("snapshot", *base, "--out", str(tmp / "stub.json"))
+    stub_entry_ok = False
+    stub_detail = f"rc={rc}"
+    if rc == 0:
+        try:
+            sm = json.loads((tmp / "stub.json").read_text())
+            hits = [e for e in sm["entries"]
+                    if (e["scope"], e["path"]) == ("fork", STUB_REL)]
+            stub_entry_ok = (len(hits) == 1 and hits[0]["kind"] == "file"
+                             and hits[0]["size"] == mod4.RUNNER_STUB_SIZE
+                             and hits[0]["sha256"] == mod4.RUNNER_STUB_SHA256)
+            stub_detail = (f"rc={rc} kind={hits[0]['kind'] if hits else None} "
+                           f"size={hits[0]['size'] if hits else None} "
+                           f"sha={(hits[0]['sha256'][:16] + '…') if hits else None}")
+        except (json.JSONDecodeError, KeyError, OSError) as ex:
+            stub_detail = f"rc={rc} parse-error={ex}"
+    row("runner_stub_snapshot_passes", rc == 0 and stub_entry_ok, stub_detail)
+
+    rc, out = run_tool("verify", "--manifest", str(tmp / "stub.json"), *base)
+    row("runner_stub_verify_matches", rc == 0 and '"status": "match"' in out, f"rc={rc}")
+
+    # Extra generated file alongside the exact stub fails both modes.
+    write(fork / "ps2xRuntime/src/runner/gen.cpp", "// generated\n")
+    rc, out = run_tool("snapshot", *base, "--out", str(tmp / "stub-extra.json"))
+    row("runner_extra_with_stub_snapshot_fails",
+        rc != 0 and "ps2xRuntime/src/runner" in out,
+        f"rc={rc} last={out.strip().splitlines()[-1] if out.strip() else ''}"[:220])
+    rc, out = run_tool("verify", "--manifest", str(tmp / "stub.json"), *base)
+    row("runner_extra_with_stub_verify_fails",
+        rc != 0 and "ps2xRuntime/src/runner" in out,
+        f"rc={rc} last={out.strip().splitlines()[-1] if out.strip() else ''}"[:220])
+    (fork / "ps2xRuntime/src/runner/gen.cpp").unlink()
+
+    # Changed stub bytes fail both modes.
+    stub_path.write_bytes(STUB_BYTES + b"\n// changed\n")
+    rc, out = run_tool("snapshot", *base, "--out", str(tmp / "stub-changed.json"))
+    row("runner_stub_changed_snapshot_fails",
+        rc != 0 and "runner stub changed" in out,
+        f"rc={rc} last={out.strip().splitlines()[-1] if out.strip() else ''}"[:220])
+    rc, out = run_tool("verify", "--manifest", str(tmp / "stub.json"), *base)
+    row("runner_stub_changed_verify_fails",
+        rc != 0 and "runner stub changed" in out,
+        f"rc={rc} last={out.strip().splitlines()[-1] if out.strip() else ''}"[:220])
+    stub_path.unlink()
 
     # Two-read mismatch path: feed different bytes on successive opens.
     spec = importlib.util.spec_from_file_location("source_manifest", str(TOOL))

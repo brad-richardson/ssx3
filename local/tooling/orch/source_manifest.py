@@ -19,10 +19,13 @@ Rules (all enforced, stdlib only):
   * Deterministic walk; scope-relative POSIX paths; size + SHA-256 from TWO
     separate reads per file; symlinks recorded by target, never followed.
   * Fatal errors (nonzero exit): two-read mismatch, unreadable file, path
-    escaping its root, duplicate logical path, any entry under fork
-    ps2xRuntime/src/runner/, source-root change during the snapshot
-    (pre/post lstat listing compared), file-count/byte cap breach, or any
-    non-regular non-symlink entry.
+     escaping its root, duplicate logical path, any entry under fork
+     ps2xRuntime/src/runner/ other than the exact upstream stub
+     ps2xRuntime/src/runner/register_functions.cpp (438 B, SHA-256
+     cf62c485…f068) as a regular file, source-root change during the
+     snapshot
+     (pre/post lstat listing compared), file-count/byte cap breach, or any
+     non-regular non-symlink entry.
   * Excludes ONLY path components named .git (directory or worktree pointer
     file), build, .cxx, .gradle, __pycache__. Exclusion names and skip
     counts are listed in the output; nothing else is ever skipped silently.
@@ -50,6 +53,9 @@ FORMAT = "ssx3-source-manifest-v1"
 SCOPES = ("fork", "parallel", "codegen", "jni")
 EXCLUDE_NAMES = (".git", "build", ".cxx", ".gradle", "__pycache__")
 RUNNER_PREFIX = "ps2xRuntime/src/runner"
+RUNNER_STUB_PATH = "ps2xRuntime/src/runner/register_functions.cpp"
+RUNNER_STUB_SIZE = 438
+RUNNER_STUB_SHA256 = "cf62c485072f07c230e60296b77afd733f130f587955fe608322939ebb87f068"
 CHUNK = 1024 * 1024
 GIT_TRUNC_CHARS = 65536
 GIT_TRUNC_LINES = 200
@@ -279,6 +285,42 @@ def aggregate_sha(entries):
     return h.hexdigest()
 
 
+def check_runner_entries(entries):
+    """Enforce the exact-upstream-stub rule on fork runner entries.
+
+    The private fork tracks one upstream file,
+    ps2xRuntime/src/runner/register_functions.cpp (438 B, SHA-256
+    cf62c485…f068, blob 85cc2e34 at 14b1e5cb and HEAD), identical to
+    upstream. It is permitted as a regular file and stays in the manifest
+    and aggregate; any other runner path, or any byte/kind change to the
+    stub, fails. Byte entries remain authority: Git status is never
+    consulted here, so ignored/untracked generated files still fail.
+    """
+    for e in entries:
+        if e["scope"] != "fork":
+            continue
+        p = e["path"]
+        if p != RUNNER_PREFIX and not p.startswith(RUNNER_PREFIX + "/"):
+            continue
+        if (
+            p == RUNNER_STUB_PATH
+            and e["kind"] == "file"
+            and e["size"] == RUNNER_STUB_SIZE
+            and e["sha256"] == RUNNER_STUB_SHA256
+        ):
+            continue
+        if p == RUNNER_STUB_PATH:
+            fail(
+                "fork runner stub changed (expected regular file "
+                f"size={RUNNER_STUB_SIZE} sha256={RUNNER_STUB_SHA256}): "
+                f"got kind={e['kind']} size={e['size']} sha256={e['sha256']}"
+            )
+        fail(
+            "generated files under fork ps2xRuntime/src/runner/ "
+            f"(saw {e['scope']}:{e['path']})"
+        )
+
+
 def build_manifest(roots, caps):
     caps = dict(caps, files_seen=0, bytes_seen=0)
     all_entries = []
@@ -292,17 +334,7 @@ def build_manifest(roots, caps):
         counts[scope] = {"files": len(entries), "bytes": total}
     all_entries.sort(key=lambda e: (e["scope"], e["path"]))
 
-    runner_hits = [
-        f"{e['scope']}:{e['path']}"
-        for e in all_entries
-        if e["scope"] == "fork"
-        and (e["path"] == RUNNER_PREFIX or e["path"].startswith(RUNNER_PREFIX + "/"))
-    ]
-    if runner_hits:
-        fail(
-            "generated files under fork ps2xRuntime/src/runner/ "
-            f"({len(runner_hits)}): {runner_hits[:5]}"
-        )
+    check_runner_entries(all_entries)
 
     manifest = {
         "format": FORMAT,
@@ -369,17 +401,7 @@ def rescan_for_verify(manifest_path, roots, caps):
         entries, _, _, _ = scan_scope(scope, roots[scope], caps)
         new_entries.extend(entries)
     # Runner check applies on verify too: generated files must fail, not diff.
-    runner_hits = [
-        f"{e['scope']}:{e['path']}"
-        for e in new_entries
-        if e["scope"] == "fork"
-        and (e["path"] == RUNNER_PREFIX or e["path"].startswith(RUNNER_PREFIX + "/"))
-    ]
-    if runner_hits:
-        fail(
-            "generated files under fork ps2xRuntime/src/runner/ "
-            f"({len(runner_hits)}): {runner_hits[:5]}"
-        )
+    check_runner_entries(new_entries)
     new = {(e["scope"], e["path"]): e for e in new_entries}
     added = sorted(f"{s}:{p}" for (s, p) in (set(new) - set(old)))
     missing = sorted(f"{s}:{p}" for (s, p) in (set(old) - set(new)))
