@@ -1,0 +1,11 @@
+  [Run]: VU0 S2 vector ops use rd as source and rt as destination   [Passed]
+  [Run]: VU0 destination MADD and MSUB forms preserve ACC   [Passed]
+  [Run]: VU0 macro mappings cover all S1/S2 enums   [Failed]
+      - instructions.h should be readable from the test working directory
+      - VU0_S1 enum list should not be empty
+      - VU0_S2 enum list should not be empty
+  [Run]: backward BEQ returns to the dispatcher through a resumable loop head   [Passed]
+...
+Total Tests: 585
+Passed: 584
+Failed: 1

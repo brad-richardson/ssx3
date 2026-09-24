@@ -1,0 +1,364 @@
+{
+  "brief": "N8D7M12P5M1",
+  "replay_count": 1,
+  "hashes": {
+    "binary": [
+      "2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5",
+      "2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5"
+    ],
+    "stream": [
+      "f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593",
+      "f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593"
+    ],
+    "off_hashes": "94b433dfcbebc3b7a9fd57e85c8ce049969a1d8314e2d2d0b1a357773a10c290",
+    "off_ppm": "9490484c50ff604d709c7c429f50af10f8da28ee9c0ccb2c7fde2619a14fce3e"
+  },
+  "events": [
+    "SCRIPT_SHA bec9a4c626092b5a2e66a8f1597f90235c1335631aa2f2cba432851de6ecd9f1",
+    "HASH binary 2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5 2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5 (8369016 B)",
+    "HASH stream f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593 f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593 (1100696462 B)",
+    "ON_PINS on hashes + ppm verified (Part 1)",
+    "ENV DIFF on-minus-off removed=['PS2X_N8D5_TILE_CAPTURE', 'PS2X_N8D7F_SELECTED_CAPTURE', 'PS2X_N8D7L_ORACLE'] changed=['PS2X_GS_REPLAY_OUT', 'PS2X_GS_REPLAY_PPM_DIR']",
+    "LEASE claimed slot 1",
+    "RUN binary=ps2x_tests cwd=/Users/brad/dev/ssx3-work/N8D7M12P5M1/mac-off/cwd backend=parallel step=50 ppm_tick=2050",
+    "PID 85548",
+    "CHILD exit_code=1 elapsed=6.1s (control only, not speed)",
+    "STOP no complete 41-row tick2050 receipt",
+    "VERDICT FAIL (provisional)",
+    "ERROR RuntimeError('no complete 41-row tick2050 receipt')",
+    "CLEANUP lease released"
+  ],
+  "verdict": "FAIL",
+  "provisional": true,
+  "first_failure": "no complete 41-row tick2050 receipt",
+  "script_sha": "bec9a4c626092b5a2e66a8f1597f90235c1335631aa2f2cba432851de6ecd9f1",
+  "env_diff": {
+    "removed": [
+      "PS2X_N8D5_TILE_CAPTURE",
+      "PS2X_N8D7F_SELECTED_CAPTURE",
+      "PS2X_N8D7L_ORACLE"
+    ],
+    "changed": [
+      "PS2X_GS_REPLAY_OUT",
+      "PS2X_GS_REPLAY_PPM_DIR"
+    ],
+    "ambient_ps2x_cleared": []
+  },
+  "pid": 85548,
+  "elapsed_s": 6.071,
+  "exit_code": 1,
+  "markers": {
+    "summary": [
+      "queue",
+      "parallel",
+      "862958",
+      "11499",
+      "25445",
+      "2050"
+    ],
+    "frame": [
+      "2050",
+      "parallel",
+      "ff21",
+      "d19b96fe"
+    ],
+    "errors": [
+      "Failed: 1"
+    ],
+    "replay_ticks": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000,
+      1050,
+      1100,
+      1150,
+      1200,
+      1250,
+      1300,
+      1350,
+      1400,
+      1450,
+      1500,
+      1550,
+      1600,
+      1650,
+      1700,
+      1750,
+      1800,
+      1850,
+      1900,
+      1950,
+      2000,
+      2050
+    ]
+  },
+  "row_count": 41,
+  "rows": [
+    [
+      50,
+      "1edcff3d",
+      "af58b6ee",
+      "c5b577f5"
+    ],
+    [
+      100,
+      "89bec0e6",
+      "3d2c63b8",
+      "76d4d036"
+    ],
+    [
+      150,
+      "b80848a5",
+      "cfdb944a",
+      "2e573179"
+    ],
+    [
+      200,
+      "b80848a5",
+      "5daf4114",
+      "2e037793"
+    ],
+    [
+      250,
+      "84b2f278",
+      "2e68b226",
+      "6268116d"
+    ],
+    [
+      300,
+      "6b989d40",
+      "d87f8e0b",
+      "5ab2a7b0"
+    ],
+    [
+      350,
+      "26ccba14",
+      "6b2ebe9d",
+      "5a9afde9"
+    ],
+    [
+      400,
+      "29d48cb6",
+      "f9026b67",
+      "923d51a7"
+    ],
+    [
+      450,
+      "db2977a2",
+      "aab6bc39",
+      "f7f8810e"
+    ],
+    [
+      500,
+      "ad6cbdfe",
+      "578f8943",
+      "aa4a057a"
+    ],
+    [
+      550,
+      "01b98812",
+      "a4cc50c4",
+      "b47b4d85"
+    ],
+    [
+      600,
+      "3ebb2cd2",
+      "945595ba",
+      "4677940d"
+    ],
+    [
+      650,
+      "72db7c6a",
+      "c54f2e20",
+      "b9007a9f"
+    ],
+    [
+      700,
+      "a506bdd2",
+      "f2e2b396",
+      "47a39e60"
+    ],
+    [
+      750,
+      "00cf6273",
+      "23dc4bfc",
+      "f304487a"
+    ],
+    [
+      800,
+      "049e4492",
+      "4eade04d",
+      "c4bd7052"
+    ],
+    [
+      850,
+      "5882f9f4",
+      "60a25873",
+      "b0cec9c2"
+    ],
+    [
+      900,
+      "0915e883",
+      "6f30bda9",
+      "cdd1da00"
+    ],
+    [
+      950,
+      "f1e6df51",
+      "bf2f764f",
+      "c5dd4043"
+    ],
+    [
+      1000,
+      "4d885763",
+      "cdbddb85",
+      "471e6a2a"
+    ],
+    [
+      1050,
+      "afd4ee4a",
+      "7cb03b32",
+      "512f775b"
+    ],
+    [
+      1100,
+      "ce5b6d31",
+      "0a83e7fc",
+      "2874c0b7"
+    ],
+    [
+      1150,
+      "4c7bb4e8",
+      "d9c7e836",
+      "b9b829da"
+    ],
+    [
+      1200,
+      "780fc3fe",
+      "679b9500",
+      "84781b69"
+    ],
+    [
+      1250,
+      "f0de69ce",
+      "1ac556aa",
+      "269ebdde"
+    ],
+    [
+      1300,
+      "dc3ddf00",
+      "a5d7124f",
+      "fe8de692"
+    ],
+    [
+      1350,
+      "2ceb89f4",
+      "5615f249",
+      "25aebdeb"
+    ],
+    [
+      1400,
+      "adf9c213",
+      "02eebf53",
+      "6a9d635f"
+    ],
+    [
+      1450,
+      "0d8f0ea8",
+      "b61880fd",
+      "f45f7e16"
+    ],
+    [
+      1500,
+      "45f533ee",
+      "24e70d87",
+      "88cc0717"
+    ],
+    [
+      1550,
+      "d52947fe",
+      "70ae6430",
+      "f87a85b4"
+    ],
+    [
+      1600,
+      "f6ea80d7",
+      "7f3cc966",
+      "53275bcc"
+    ],
+    [
+      1650,
+      "355dc5fe",
+      "d0b0f2e4",
+      "5ba8fcdb"
+    ],
+    [
+      1700,
+      "eb3ba9f0",
+      "df3f581a",
+      "717d204d"
+    ],
+    [
+      1750,
+      "83e9d76a",
+      "efbe5f68",
+      "6c615447"
+    ],
+    [
+      1800,
+      "b499ea31",
+      "1a8ff3b9",
+      "b5689a27"
+    ],
+    [
+      1850,
+      "0c5a3409",
+      "6c041d37",
+      "974e3088"
+    ],
+    [
+      1900,
+      "ef6751c6",
+      "7a92826d",
+      "ec232b6e"
+    ],
+    [
+      1950,
+      "4c1ddc9d",
+      "8b1189bb",
+      "ede46de3"
+    ],
+    [
+      2000,
+      "703e0170",
+      "999feef1",
+      "caab3246"
+    ],
+    [
+      2050,
+      "c883a705",
+      "6621fe06",
+      "d19b96fe"
+    ]
+  ],
+  "off_ppm_path": "/Users/brad/dev/ssx3-work/N8D7M12P5M1/mac-off/frames/vq-002050.ppm",
+  "stop_reason": "no complete 41-row tick2050 receipt",
+  "provisional_note": "provisional until the orchestrator views vq-002050.ppm and runs the predeclared OFF-vs-ON 41-row and PPM comparison in a separate gate; this control alone does not establish a graphics root cause or speed"
+}

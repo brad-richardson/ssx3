@@ -1,0 +1,13 @@
+SCRIPT_SHA bec9a4c626092b5a2e66a8f1597f90235c1335631aa2f2cba432851de6ecd9f1
+HASH binary 2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5 2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5 (8369016 B)
+HASH stream f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593 f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593 (1100696462 B)
+ON_PINS on hashes + ppm verified (Part 1)
+ENV DIFF on-minus-off removed=['PS2X_N8D5_TILE_CAPTURE', 'PS2X_N8D7F_SELECTED_CAPTURE', 'PS2X_N8D7L_ORACLE'] changed=['PS2X_GS_REPLAY_OUT', 'PS2X_GS_REPLAY_PPM_DIR']
+LEASE claimed slot 1
+RUN binary=ps2x_tests cwd=/Users/brad/dev/ssx3-work/N8D7M12P5M1/mac-off/cwd backend=parallel step=50 ppm_tick=2050
+PID 85548
+CHILD exit_code=1 elapsed=6.1s (control only, not speed)
+STOP no complete 41-row tick2050 receipt
+VERDICT FAIL (provisional)
+ERROR RuntimeError('no complete 41-row tick2050 receipt')
+CLEANUP lease released
