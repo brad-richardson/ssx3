@@ -1366,10 +1366,19 @@ with measured budgets, then 120 Hz simulation.
       absent, lease free. The selected raw snapshot is sparse under both
       decoders; its upstream producer/selection remains open. No speed or
       driver cause claim. `local/research/N8D7M2/ORCH-GATE.md`.
-- [ ] **N8D7M3 same-run raw-VRAM/selection discriminator design:**
-      use bounded packet/source evidence to distinguish an already-sparse
-      selected raw snapshot from a wrong selection/layout or earlier
-      writer before requesting another Odin run.
+- [x] **N8D7M3 raw-VRAM provenance design PARTIAL (`20144020`):**
+      source map identifies presentation selection, 4 MiB copy and host
+      decode paths. Its draw-count threshold does not measure changed
+      pixels; Present-entry pending/last-tick fields do not prove GPU copy
+      order; two nonzero controls do not prove census loss. A broad
+      alternate-base census alone cannot prove intended display selection.
+      No build, replay or Odin action. Do not run the proposed tap as
+      written. `local/research/N8D7M3/ORCH-GATE.md`.
+- [ ] **N8D7M4 direct same-stream provenance design:** use N8D4's
+      captured Odin stream and Mac replay as a controlled reference where
+      possible; identify exact packet/write bytes and snapshot ordering
+      needed to distinguish sparse source, wrong selection and timing
+      before another Odin launch.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
