@@ -1,0 +1,6 @@
+field	value	evidence
+sampled_image_mask	0x00000003	"shader:5 (binding 0 scanout_image) + shader:6 (binding 1 control_image); reflect:920 sets sampled_image_mask |= 1u << binding for non-buffer dims"
+fp_mask	0x00000003	"shader:5 (sampler2D float) + shader:6 (sampler2D float); reflect:923 sets fp_mask |= 1u << binding when basype == SPIRType::BaseType::Float"
+storage_buffer_mask	0x00000004	"shader:7 (binding 2 std430 buffer result); reflect:1010 sets storage_buffer_mask |= 1u << 2"
+push_constant_size	8	"shader:8 (Dimensions { uint width; uint height; } dims = 8 bytes); reflect:1047 uses compiler.get_declared_struct_size — stand-alone build ships 8 but note 16-byte vulkan alignment"
+needs_explicit_layout	true	"reflect:1098 only calls reflect_resource_layout inside #ifdef GRANITE_VULKAN_SPIRV_CROSS; cmake:40 disables SPIRV-CROSS; without it reflect:1102 LOGE"

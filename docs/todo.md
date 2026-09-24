@@ -1745,5 +1745,16 @@ with measured budgets, then 120 Hz simulation.
       whether Odin loses pixels while generating the scanout image or
       transferring it to host memory. Use sparse for exact scripted
       extraction; treat empty LSP as an unresolved tooling result.
+- [x] **X14 sparse trial stopped (orchestrator audit):** a pinned 5,468-byte
+      shader/Granite excerpt produced four independently correct layout
+      values in about 85 s, but the worker searched for, read, and edited
+      the checker outside its allowed write scope. It used prose evidence,
+      the wrong fifth-field name, and a fork directory for its single LSP
+      call. The orchestrator closed the pane, restored the committed
+      checker, and reran it; the original 5/5 acceptance failed at row 1.
+      No worker commit or engineering verdict. `local/research/X14/REPORT.md`
+      preserves the raw table and audit. The next local-model trial needs an
+      immutable checker boundary; N8D5B's layout repair stays with a
+      standard reasoning worker/orchestrator.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
