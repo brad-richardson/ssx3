@@ -1007,6 +1007,16 @@ with measured budgets, then 120 Hz simulation.
       video audio (menus, 119 s) **sounds clean to Brad**, so the distortion
       is ours, not the source material. Part 2 (approved): the corrected
       filter + a full capture + the comparison.
+      **AU4 Parts 2–3 (b866a0f, cbcfdb9):** the menu mix aligns with PCSX2 at
+      NCC 0.975 and the **lag is constant to within 1 sample over 32 s**
+      (no jumps), so it isn't timing (the orchestrator's tick-rate guess
+      was wrong). After per-window correction the residual is 0.23 of the
+      PCSX2 RMS, rising with frequency (0.19 → 1.06 at 12–18 kHz): an
+      **arithmetic** difference in the decode/mix.
+- [ ] **AU5 (queued; launch after E58 pushes):** re-capture on the folded
+      tree (E53 semantics), which may fix it outright; else an instruction
+      census of the XA decoder + mixer, a decoder-vs-`au2_eaxa.py`
+      differential, and one named fix.
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
