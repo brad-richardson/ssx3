@@ -614,9 +614,11 @@ with measured budgets, then 120 Hz simulation.
       shipping Turnip). Sub-LSB differences vs Mac are accepted, not chased.
 - [ ] N lane: bundle `libvulkan_freedreno.so` (Turnip v36, `717812c3…`) in
       the APK and load it through G43's HMI hook when the GPU GS lands on
-      Android (GB1 step c). **N8A queued:** read-only source/packaging map
-      from current fork GPU opt-in through N7's APK to a bundled Turnip;
-      identify any missing loader/ABI edge before an Odin build or run.
+      Android (GB1 step c). **N8A source map PASS (e80295b):** the folded
+      backend calls Granite's null loader, while the staged Turnip exports
+      `HMI` instead of `vkGetInstanceProcAddr`; G43's working HMI hook is
+      only in the standalone replayer. N8B must port that hook into the
+      Android app path and verify APK packaging and app-namespace loading.
 - [x] **G44 PASS (09-23, Part 3): paraLLEl shadow works inside the recomp**
       (branch `g44-parallel-shadow` `460e438`+`8c45d1f`+`6cfede4`, 471/471, not
       pushed) with a diagnostic `PS2X_GS_SHADOW_FORCE_SMODE1=ntsc` override:
@@ -951,6 +953,16 @@ with measured budgets, then 120 Hz simulation.
       next race run. No second run and no simpleperf (the brief's ≥45 s
       race window is unreachable at 0.076× within 600 s; accepted as is to
       save quota).
+- [x] **N8A PASS (e80295b; source only):** the current fork's opt-in
+      paraLLEl backend and N7's APK path were mapped through the pinned
+      Turnip v36 ELF (`717812c3…1ac29d`). The in-process backend has no
+      HMI loader, and the N7 Android env/Gradle pieces are absent from the
+      current fork. G43 proved the driver only from an adb-shell replayer;
+      its `libhardware.so`/`libnativewindow.so`/`libsync.so` dependencies
+      in the APK namespace remain untested. N8B: one bounded arm64 build
+      and functional Odin launch, with packaged-driver SHA, mapped HMI,
+      Turnip driver identity, live GS counters and a viewed frame as gates.
+      No speed or app-runtime claim from N8A.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1122,10 +1134,17 @@ with measured budgets, then 120 Hz simulation.
       option needs focused same-cycle, crossed-cycle and timer tests;
       ExternalWake has no guest-cycle timestamp and remains a separate
       placement policy. No implementation or speed claim yet.
-      **E55A2 queued:** fixed UTC RTC bytes behind exact
-      `PS2X_DETERMINISTIC=1`, default host-local behavior retained,
-      actual-stub tests plus one functional I26-FAST race boot. Then
-      E55B2 cycle-only event selection with synthetic ordering tests.
+      **E55A2 PASS (6232cf1):** exact `PS2X_DETERMINISTIC=1` now returns
+      fixed UTC RTC bytes `00 56 34 12 00 16 07 04`; other values use
+      host-local time. The actual-stub test covers repeated calls, TZ
+      changes, invalid guest pointer and host fallback. OFF 581/581 and
+      ON 676/676 passed. One I26-FAST diagnostic boot reached tick 2054
+      in 101.976 s; three frames were viewed and race HUD progressed
+      00:00:01→00:00:05, 0→1%. The guest clock shim was reached twice.
+      Fork `4f93216` was pushed after the runner-dir guard. Reply bytes
+      were not captured in the live boot, and full-frame determinism is
+      unproved. Next E55B2 cycle-only event selection with synthetic
+      ordering tests; external wake needs its own placement policy.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
