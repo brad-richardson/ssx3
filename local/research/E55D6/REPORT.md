@@ -1,5 +1,21 @@
 # E55D6 — reachable memory-card guest-write path (read-only design)
 
+**Gate correction (rev 2, corrective commit, REPORT.md only):** the original
+rev 1 wrongly stated that any real `sceMcGetDir` call on an empty card emits
+`ok=1` with `.`/`..`, and predicted a `BASLUS-20772` entry appended after
+them. Corrected: `.`/`..` are appended only when `wildcardMatch(pattern, name)`
+succeeds (`MemoryCard.cpp:777-789`); `entryCount = min(matches, maxEntries > 0
+? maxEntries : 0)` (`:833-834`); no guest bytes are written when `entryCount
+== 0` or `tableAddr == 0` (`:835-837`) — the write happens only on a mapped
+dst (`:839-843`). A call therefore need **not** produce a successful guest
+write. Zero probe lines still means zero *calls* because every exit is tapped
+(E55D3 G1–G6, incl. `empty`/`bad-addr`/failure reasons with empty bytes), but
+nothing about entry contents follows. The game's guest query path/pattern,
+`maxEntries`, and `tableAddr` per call site are unknown. Likewise the I26
+"empty card" note is a route setup requirement, not proof a seeded card
+prompts (see corrected #9).
+
+
 Worker: opencode (Muse Spark Contributor Go). Brief: `local/muse/prompts/E55D6.md`.
 Read-only: no build, boot, device action, source edit, fork commit, push, or
 change to any card image. Write scope is this REPORT plus the brief only.
@@ -13,14 +29,14 @@ Prior context: `local/research/E55D3/{REPORT.md,ORCH-GATE.md}`,
 | # | Claim | Evidence (file:line or named receipt) |
 | --- | --- | --- |
 | 1 | E55D4 A/A + E55D5 pad-B reached race tick 2053/2055 with empty mc0 and **zero** `getdir`/`mcread` probe records | `local/research/E55D4/REPORT.md:23` (4000/4000 `pad ok=1`, no getdir/mcread through tick 2055); `local/research/E55D5/REPORT.md:34` + `local/research/E55D5/excerpts.txt:13` (all pad, no getdir/mcread through tick 2055); gates `E55D4/ORCH-GATE.md:13`, `E55D5/ORCH-GATE.md:15` |
-| 2 | The tap records **all** GetDir/Read exits incl. failures, so zero lines means zero calls, not zero successes | `local/research/E55D3/REPORT.md:91-112` (G1–G6, R1–R7 coverage table); on an empty-but-existing mc0 root any real `sceMcGetDir` call would emit at least `ok=1` with the `.`/`..` entries (see #7) |
+| 2 | The tap records **all** GetDir/Read exits incl. failures, so zero lines means zero calls — but a call need not produce a successful guest write | `local/research/E55D3/REPORT.md:91-112` (G1–G6, R1–R7 coverage table: `empty`, `bad-addr`, `bad-port`, `unformatted`, `no-dir` exits all emit status-only records with empty bytes). Corrected rev-1 error: no `.`/`..` write follows from a call alone (see corrected #7) |
 | 3 | Game-side card API surface is mapped: `sceMcRead@0x40a090` ← {0x2c4d1c, 0x2c4ee4, 0x2c6b90}; `sceMcGetDir@0x40a688` ← {0x2c424c, 0x2c431c, 0x2c4f84, 0x2c5020, 0x2c6884} | `local/research/P8/census-pad-sound.tsv:40,44` (counts 3 reads / 5 getdirs with call-site list); independently confirmed live: `ee-xref 0x40a090` → `0x2c4d1c/0x2c4ee4 (sub_002C48C0), 0x2c6b90 (sub_002C6B78)`; `ee-xref 0x40a688` → `0x2c424c (sub_002C4210), 0x2c431c (sub_002C42B0), 0x2c4f84/0x2c5020 (sub_002C48C0), 0x2c6884 (sub_002C6848)`; codegen stubs `codegen-ssx3/sub_0040A090_0x40a090.cpp:13` (`sceMcRead`), `codegen-ssx3/sub_0040A688_0x40a688.cpp:13` (`sceMcGetDir`); cluster list `local/research/P7/elf-cluster.txt:220,227` |
 | 4 | All card call sites sit in one game-side save-manager cluster (0x2C3FA8–0x2C6xxx): GetDir wrappers (0x2C4210, 0x2C42B0, 0x2C6848) and Read users (0x2C48C0, 0x2C6B78) are all driven under the `sub_002C5570` state machine | `ee-xref 0x2c4210/0x2c42b0` → both called only from `sub_002C5570` (0x2c5988, 0x2c59b4); `ee-xref 0x2c6b78/0x2c6848` → `0x2c5f7c/0x2c5e64 (sub_002C5570)`; `ee-xref 0x2c48c0` → ~20 callers incl. `sub_002C4210/0x2C42B0` and `sub_002C5570`-adjacent wrappers; `ee-at 0x2c424c` shows the GetDir call prologue (`a2=s1+0x139` path-ish arg); `ee-at 0x2c4d1c` shows the Read call (`jal func_40A090`) |
 | 5 | Full card-op inventory exists game-side: Open ×6, Mkdir ×2, Close ×8, Seek ×1, Read ×3, Write ×4, Sync ×4, GetInfo ×1 (0x2c5110), GetDir ×5, Format ×1, Delete ×2, Flush ×1; Chdir/SetFileInfo/Rename ×0 direct | `local/research/P8/census-pad-sound.tsv:35-50` (same rows; read verbatim, not re-derived) |
 | 6 | Game's save identity strings exist in the ELF: folder `BASLUS-20772`, `mc0:`; `SAVEDATA` does **not** occur in the ELF (it occurs only in the runtime unit test's query `/SAVEDATA/*`) | `strings SLUS_207.72 \| grep -E "SAVEDATA\|BASLUS\|mc0"` → `BASLUS-20772`, `mc0:` only (read-only run, this part); unit-test query `local/research/E26/e26a-preclaim-suite.txt:752` (`GetDir port=0 '/SAVEDATA/*' maxent=8 -> result=3`) — a stub self-test, **not** game behavior |
-| 7 | Runtime host-card semantics: mc0 is a plain host dir (`PS2X_MC_ROOT`); GetDir always synthesizes `.`/`..` entries, sorts case-insensitively, copies `entryCount*64` B; Read freads host bytes straight into RDRAM; every op completes synchronously (`sceMcSync` → 1/−1) | `~/dev/PS2Recomp` @ `eac6cba`: `MemoryCard.cpp:118-155` (root resolution), `:706-865` (`sceMcGetDir`, `.`/`..` at `:777-789`, sort at `:802-808`, table `memcpy` at `:839-843`), `:1069-1115` (`sceMcRead`, `fread` at `:1095`), `:1226-1273` (`sceMcSync`); same anchors at `ddaee78` in `local/research/E55D1/REPORT.md:115-123` |
+| 7 | Runtime host-card semantics: mc0 is a plain host dir (`PS2X_MC_ROOT`); GetDir appends `.`/`..` **only if the query pattern matches them**, sorts case-insensitively, and copies `entryCount*64` B **only when `entryCount > 0` and `tableAddr != 0`**; Read freads host bytes straight into RDRAM; every op completes synchronously (`sceMcSync` → 1/−1). The game's query path/pattern, `maxEntries`, and `tableAddr` are unknown | `~/dev/PS2Recomp` @ `eac6cba`: `MemoryCard.cpp:118-155` (root resolution), `:706-865` (`sceMcGetDir`; `.`/`..` gated on `wildcardMatch` at `:777-789`, sort at `:802-808`, `entryCount = min(matches, maxEntries > 0 ? maxEntries : 0)` at `:833-834`, no-write when `entryCount == 0 \|\| tableAddr == 0` at `:835-837`, table `memcpy` only on mapped dst at `:839-843`), `:1069-1115` (`sceMcRead`, `fread` at `:1095`), `:1226-1273` (`sceMcSync`); same anchors at `ddaee78` in `local/research/E55D1/REPORT.md:115-123` |
 | 8 | Host-clock injection: `.`/`..`/mtime-fallback entries stamped with `std::time(nullptr)`; real entries carry host `last_write_time`/`file_size` | `MemoryCard.cpp:296-312` (`writeMcDateTime`), `:314-331` (`fillMcDirTableEntry`), `:823-830` (per-entry times); `local/research/E55D1/REPORT.md:124-132` |
-| 9 | I26-FAST assumes an **empty** card with **no profile prompt** — i.e. a nonempty card is expected to prompt at/before the title | `local/research/I26/ROUTES.md:4-5`; game strings `Title_SaveProfile`, `cFEStateLogin MemoryCard`, `122bAutosave` exist in the ELF string set (same `strings` run as #6; names quoted, relationships not traced) |
+| 9 | I26-FAST's setup requires an **empty** card to avoid a profile prompt — a route-setup requirement, **not** proof that a seeded card triggers a prompt. Prompt-on-seed is hypothesis (Flow A), supported only by the setup note plus the save-identity strings | `local/research/I26/ROUTES.md:4-5` (setup requirement; read exactly as written); game strings `Title_SaveProfile`, `cFEStateLogin MemoryCard`, `122bAutosave` exist in the ELF string set (same `strings` run as #6; names quoted, relationships not traced) |
 | 10 | Save-menu surface exists game-side: `title_Save Replay`, `title_Save Records`, `kT_TITLESaveOptions`, `option_savereplay`, `Save Profile` strings in the ELF | Same `strings` run as #6 (names only; no call-edge traced — gap §4a) |
 | 11 | `sceMcGetInfo` (type/free/format) and `sceMcWrite` guest writes are **outside** the E55D3 probe families | `local/research/E55D3/REPORT.md:114-116` (out of scope by brief) |
 | 12 | LSP code-connection confirmation unavailable in this environment | `documentSymbol` on `MemoryCard.cpp:706` returned no results (no usable server); caller/callee links rest on `ee-xref`/`ee-at` + exact citations, as in E55D2 (`local/research/E55D2/REPORT.md:16-17`) |
@@ -38,11 +54,11 @@ route/tick cells are explicit `unknown`.
 1. **Exact GetDir/Read evidence:** callee mapping only — `sceMcGetDir@0x40a688`
    has 5 game call sites and `sceMcRead@0x40a090` has 3 (#3), all inside the
    save-manager cluster (#4). There is **no** evidence any of them fires on
-   I26-FAST (zero records, #1–#2). The trigger hint is `ROUTES.md` "empty
-   memory card (no profile prompt)" (#9): a card containing `BASLUS-20772`
-   (#6) is expected to produce a profile/autosave prompt at or before the
-   title, which is the natural reader of a directory listing and, on accept,
-   of save payloads.
+   I26-FAST (zero records, #1–#2). The trigger is hypothesis only: the I26
+   setup requires an empty card to avoid a profile prompt (#9); *if* a card
+   containing `BASLUS-20772` (#6) produces such a prompt at or before the
+   title, the prompt path is the natural reader of a directory listing and,
+   on accept, of save payloads. Seeded-prompt behavior is unproved.
 2. **Required layout + safe creation:** host dir `mc0/BASLUS-20772/` with save
    payload file(s) (#6–#7). Exact expected filenames/payload shape are
    **unknown** (gap §4b). Creation rule: never mutate a canonical input —
@@ -53,16 +69,22 @@ route/tick cells are explicit `unknown`.
 3. **Route/tick:** `unknown` — no trace of the prompt or of any card call on
    any route. Plausible window (hypothesis only): title ticks ~570–636
    (`ROUTES.md:23`, "Press START" settles ~570).
-4. **Predicted probe line (E55D3 schema, `REPORT.md:56-61`):** presence — not a
-   field diff. Baseline has **zero** `getdir` lines, so the prediction is the
-   first-ever record, e.g. `getdir seq=<s> vsync=<t> ord=1 port=0 slot=0
-   addr=0x<…> entries=<n≥3> max=<m> len=<64n> ok=1 bytes=<hex>` with the
-   `BASLUS-20772` 64 B entry appended after `.`/`..` (name bytes at entry
-   offset +32), and on prompt-accept a first `mcread seq=<s'> vsync=<t'>
+4. **Predicted probe line (E55D3 schema, `REPORT.md:56-61`):** presence of a
+   first family record — not a field diff, and **not** a guaranteed `ok=1`
+   payload. Baseline has **zero** `getdir` lines, so the prediction is the
+   first-ever `getdir` record at title/login ticks, in any status: if the
+   game's query pattern matches `.`/`..`/`BASLUS-20772` with `maxEntries > 0`
+   and `tableAddr != 0`, e.g. `getdir seq=<s> vsync=<t> ord=1 port=0 slot=0
+   addr=0x<…> entries=<n> max=<m> len=<64n> ok=1 bytes=<hex>` carrying the
+   matched entries (a `BASLUS-20772` 64 B entry appears only if the pattern
+   matches it; name bytes at entry offset +32); otherwise a status-only
+   record (`ok=0 reason=<empty|bad-addr|…>`, empty bytes) still proves the
+   call happened. On prompt-accept, a first `mcread seq=<s'> vsync=<t'>
    ord=1 fd=<f> addr=0x<…> req=<q> len=<a> ok=1 err=- bytes=<hex>` carrying
    save payload. Seq-family/address/length values are unpredictable before
-   the run (depend on guest heap placement); the discriminating fact is the
-   family's first appearance with `ok=1` and the new entry/payload bytes.
+   the run (depend on guest heap placement and the unknown query
+   path/pattern); the discriminating fact is the family's first appearance,
+   with entry/payload bytes differing only when a successful write occurs.
 5. **Competing explanation + distinguisher:** the game may probe the card with
    `sceMcGetInfo@0x40a498` only (one game site, 0x2c5110, #5) or gate on the
    always-true `mcCheck*Start*File` HLE stubs (`MemoryCard.cpp:1352+`) —
@@ -83,8 +105,10 @@ route/tick cells are explicit `unknown`.
 3. **Route/tick:** `unknown` — requires a new route detour off I26-FAST
    (Main Menu → Options/Save, or pause-menu save) that no brief has driven;
    tick depends on the detour taken.
-4. **Predicted probe line:** same presence-shape as Flow A, item 4, but at
-   detour-menu ticks instead of title ticks; a save-*write* flow would
+4. **Predicted probe line:** same presence-shape as Flow A, item 4 (first
+   family record in any status, at detour-menu ticks instead of title ticks;
+   entry contents conditional on the unknown query pattern/`maxEntries`/
+   `tableAddr`), with one extra branch: a save-*write* flow would
    additionally exercise `sceMcWrite`/`sceMcMkdir` (#5), which are outside the
    probe families — so a write-only flow predicts continued probe silence
    with changed final card manifest (state this in the run's stop rule).
@@ -109,8 +133,9 @@ route/tick cells are explicit `unknown`.
   `proof_vsync 2055`).
 - **One-change B:** from the re-baselined A', exactly one card-file byte or
   one directory-entry difference in a fresh copy (e.g. one payload byte flip;
-  never touch the A' dirs). Same pins; stop at the **first differing `getdir`
-  or `mcread` ordered guest-write record**; record family, seq, vsync, ord,
+   never touch the A' dirs). Same pins; stop at the **first differing `getdir`
+   or `mcread` ordered record of any status** (all exits are tapped, so a
+   status-only `ok=0` line also counts); record family, seq, vsync, ord,
   port/slot or fd, guest address, and differing bytes; do not run past it for
   attribution. Hash rows are compared only up to the probe-difference tick;
   any `.`/`..`/mtime bytes (#8) must match between A' repeats or the A' is
@@ -134,8 +159,10 @@ a. No menu→save-cluster call edge: the five GetDir / three Read sites (#3)
    menu (function names at 0x2Cxxxx are `unknown` per `ee-label`; brief
    forbids inventing relationships from name similarity — none invented).
 b. Expected card content unknown: `BASLUS-20772` folder name is confirmed
-   (#6) but payload filenames, sizes, and the guest query paths (`a2=s1+0x139`
-   at `0x2c424c` not resolved to a string) are not.
+   (#6) but payload filenames, sizes, and the guest query path/pattern,
+   `maxEntries`, and `tableAddr` per call site (`a2=s1+0x139` at `0x2c424c`
+   not resolved to a string) are not — so no entry list or count is
+   predictable before a run.
 c. `sceMcGetInfo`/HLE-gate alternative (§2A.5) is untested: the current probe
    cannot see it (#11); needs `[MC]` log lines or a tap extension.
 d. Host-clock coupling (#8) means even a perfect game-side A/A can differ on
@@ -171,7 +198,9 @@ f. Pins of the read-only inputs: fork reads at `~/dev/PS2Recomp` @ `eac6cba`
 - `sed -n` reads of `P8/census-pad-sound.tsv:35-50`,
   `P7/elf-cluster.txt:210-235`, `I26/ROUTES.md` (full), `docs/todo.md:1565-1614`.
 - LSP `documentSymbol MemoryCard.cpp:706` → no results (#12).
-- Receipt sizes: this REPORT only (~9 KiB, < 512 KiB budget); <20 min review.
+- Receipt sizes: this REPORT only (~11 KiB, < 512 KiB budget); <20 min review
+  plus the gate-correction pass (re-read of `MemoryCard.cpp:772-860`,
+  no new commands).
 
 ## 6. Recommended next action (no verdict)
 
