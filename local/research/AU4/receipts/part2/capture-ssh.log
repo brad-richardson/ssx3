@@ -1,0 +1,1655 @@
++ export DISPLAY=:99 QT_QPA_PLATFORM=xcb
++ DISPLAY=:99
++ QT_QPA_PLATFORM=xcb
++ T4=/home/brad/au4
++ R=/home/brad/pcsx2-t4
++ G=/home/brad/pcsx2-g7
++ BIN=/home/brad/pcsx2-g7/pcsx2/build/bin/pcsx2-qt
++ DAT=/home/brad/au4/dat
++ E=/home/brad/au4/dat/PCSX2/logs/emulog.txt
++ REF=/home/brad/pcsx2-t4/t27-ref-title.ppm
++ REFMENU=/home/brad/pcsx2-t4/t28-ref-menu.ppm
++ REFSC=/home/brad/pcsx2-t4/t29-ref-sc.ppm
++ REFZC=/home/brad/pcsx2-t4/t30-ref-zc.ppm
++ REFSP=/home/brad/pcsx2-t4/t31-ref-sp.ppm
++ REFSM=/home/brad/pcsx2-t4/t32-ref-sm.ppm
++ REFSE=/home/brad/pcsx2-t4/t33-ref-se.ppm
++ CD=/home/brad/pcsx2-t4/t44-cropdiff.py
++ HL=/home/brad/pcsx2-t4/t48-hlscan.py
++ TAG=au4b
++ LOG=/home/brad/au4/au4b-poll.log
++ SNAPS=/home/brad/au4/dat/PCSX2/snaps
++ TITLE_MEAN_MAX=2.0
++ TITLE_P99_MAX=10
++ IDENT_MEAN_MAX=4.0
++ STATIC_MEAN_MAX=1.0
++ ANIM_MEAN_MIN=1.0
++ WALL_CAP=560
++ :
++ stamp
++ date -u
+Thu Sep 24 00:43:31 UTC 2026
+++ cut -d. -f1 /proc/uptime
+UPTIME:114
++ echo UPTIME:114
++ pgrep -af 'gradle|ninja|clang|pcsx2'
++ true
++ '[' '!' -s /home/brad/au4/precapture-jobs.txt ']'
++ XVFB_PID=258
++ sleep 4
++ setsid nohup Xvfb :99 -screen 0 1280x1024x24
++ kill -0 258
++ xdotool getdisplaygeometry
+1280 1024
+++ date -u +%Y%m%dT%H%M%SZ
++ TS=20260924T004335Z
++ '[' -f /home/brad/au4/dat/PCSX2/logs/emulog.txt ']'
++ mv /home/brad/au4/dat/PCSX2/logs/emulog.txt /home/brad/au4/dat/PCSX2/logs/emulog-pre-au4b-20260924T004335Z.txt
++ rm -f /home/brad/au4/pcsx2-au4.pid /home/brad/au4/pcsx2-tag1.bin
+++ date -u +%s
++ T_BOOT=1790210615
+++ cut -d. -f1 /proc/uptime
+T_BOOT_WALL:1790210615 T_BOOT_UPTIME:118
++ echo 'T_BOOT_WALL:1790210615 T_BOOT_UPTIME:118'
+PID:372
++ echo 372
++ PCSX2_AU4_CAPTURE=1
++ echo PID:372
++ sleep 70
++ nohup /home/brad/pcsx2-g7/pcsx2/build/bin/pcsx2-qt -nogui -slowboot -turbo -datapath /home/brad/au4/dat -logfile /home/brad/au4/logs/boot-au4b.log -- '/home/brad/pcsx2-t4/inputs/SSX 3 (USA).iso'
++ wallcheck
+++ date -u +%s
++ '[' 70 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 579648677 -lt 3500000000 ']'
+++ cat /home/brad/au4/pcsx2-au4.pid
++ kill -0 372
+++ grep -m1 AU4_DESC /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ DESC='[   13.7041] AU4_DESC desc=0050c800 src=00512b80 size=8f0 dst=00061cf4'
++ plog 'LIVE_DESCRIPTOR [   13.7041] AU4_DESC desc=0050c800 src=00512b80 size=8f0 dst=00061cf4'
++ echo 'LIVE_DESCRIPTOR [   13.7041] AU4_DESC desc=0050c800 src=00512b80 size=8f0 dst=00061cf4'
++ tee -a /home/brad/au4/au4b-poll.log
+LIVE_DESCRIPTOR [   13.7041] AU4_DESC desc=0050c800 src=00512b80 size=8f0 dst=00061cf4
++ case "$DESC" in
+++ stat -c %s /home/brad/au4/pcsx2-tag1.bin
++ '[' 16322076 -gt 0 ']'
+++ xdotool search --onlyvisible --name 'SSX 3'
+WID:2097159
++ WID=2097159
++ echo WID:2097159
++ press F12 VIDEO_START
++ local KEY=F12
++ local LAB=VIDEO_START
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 70 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 579873753 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'VIDEO_START_KEYDOWN_WALL:1790210685.381044369 UPTIME:188 MENU_T+:70'
++ echo 'VIDEO_START_KEYDOWN_WALL:1790210685.381044369 UPTIME:188 MENU_T+:70'
++ tee -a /home/brad/au4/au4b-poll.log
+VIDEO_START_KEYDOWN_WALL:1790210685.381044369 UPTIME:188 MENU_T+:70
++ xdotool windowfocus --sync 2097159
++ xdotool keydown F12
++ sleep 0.5
++ xdotool keyup F12
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'VIDEO_START_KEYUP_WALL:1790210685.913850364 UPTIME:189 MENU_T+:70'
++ echo 'VIDEO_START_KEYUP_WALL:1790210685.913850364 UPTIME:189 MENU_T+:70'
++ tee -a /home/brad/au4/au4b-poll.log
+VIDEO_START_KEYUP_WALL:1790210685.913850364 UPTIME:189 MENU_T+:70
++ press K A1_CROSS
++ local KEY=K
++ local LAB=A1_CROSS
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 70 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 584166530 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYDOWN_WALL:1790210685.919271836 UPTIME:189 MENU_T+:70'
++ echo 'A1_CROSS_KEYDOWN_WALL:1790210685.919271836 UPTIME:189 MENU_T+:70'
++ tee -a /home/brad/au4/au4b-poll.log
+A1_CROSS_KEYDOWN_WALL:1790210685.919271836 UPTIME:189 MENU_T+:70
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 0.5
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'A1_CROSS_KEYUP_WALL:1790210686.452886345 UPTIME:189 MENU_T+:71'
++ echo 'A1_CROSS_KEYUP_WALL:1790210686.452886345 UPTIME:189 MENU_T+:71'
++ tee -a /home/brad/au4/au4b-poll.log
+A1_CROSS_KEYUP_WALL:1790210686.452886345 UPTIME:189 MENU_T+:71
++ DETECTED=0
+++ seq 1 18
++ for N in $(seq 1 18)
++ sleep 2
++ wallcheck
+++ date -u +%s
++ '[' 73 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 597635210 -lt 3500000000 ']'
++ snap au4b-a1-poll1
++ local N=au4b-a1-poll1
++ date -u
+Thu Sep 24 00:44:48 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-a1-poll1.xwd
++ xwdtopnm /home/brad/au4/au4b-a1-poll1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-a1-poll1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-a1-poll1.ppm
++ ls -la /home/brad/au4/au4b-a1-poll1.ppm /home/brad/au4/au4b-a1-poll1.jpg
+-rw-r--r-- 1 brad brad   64788 Sep 23 20:44 /home/brad/au4/au4b-a1-poll1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:44 /home/brad/au4/au4b-a1-poll1.ppm
++ read M P
+++ score_band /home/brad/au4/au4b-a1-poll1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-a1-poll1.ppm /home/brad/pcsx2-t4/t27-ref-title.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ date -u +%s
++ plog 'A1 poll1 score mean=0.4331 p99=6 MENU_T+:74'
++ echo 'A1 poll1 score mean=0.4331 p99=6 MENU_T+:74'
++ tee -a /home/brad/au4/au4b-poll.log
+A1 poll1 score mean=0.4331 p99=6 MENU_T+:74
++ is_title 0.4331 6
++ is_num 0.4331
++ case "$1" in
++ return 0
++ is_num 6
++ case "$1" in
++ return 0
++ awk -v m=0.4331 -v p=6 -v mm=2.0 -v pm=10 'BEGIN{exit !((m<mm)&&(p<=pm))}'
++ plog 'A1 TITLE-DETECTED at poll1'
++ echo 'A1 TITLE-DETECTED at poll1'
++ tee -a /home/brad/au4/au4b-poll.log
+A1 TITLE-DETECTED at poll1
++ DETECTED=1
++ break
++ '[' 1 -eq 1 ']'
++ leg Return TITLE /home/brad/pcsx2-t4/t28-ref-menu.ppm
++ local KEY=Return LAB=TITLE EXP=/home/brad/pcsx2-t4/t28-ref-menu.ppm TRY=0 M=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ press Return TITLE_t1 2
++ local KEY=Return
++ local LAB=TITLE_t1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 74 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 601389412 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'TITLE_t1_KEYDOWN_WALL:1790210689.202366327 UPTIME:192 MENU_T+:74'
++ echo 'TITLE_t1_KEYDOWN_WALL:1790210689.202366327 UPTIME:192 MENU_T+:74'
++ tee -a /home/brad/au4/au4b-poll.log
+TITLE_t1_KEYDOWN_WALL:1790210689.202366327 UPTIME:192 MENU_T+:74
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Return
++ sleep 2
++ xdotool keyup Return
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'TITLE_t1_KEYUP_WALL:1790210691.235758890 UPTIME:194 MENU_T+:76'
++ echo 'TITLE_t1_KEYUP_WALL:1790210691.235758890 UPTIME:194 MENU_T+:76'
++ tee -a /home/brad/au4/au4b-poll.log
+TITLE_t1_KEYUP_WALL:1790210691.235758890 UPTIME:194 MENU_T+:76
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 88 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 673208089 -lt 3500000000 ']'
++ snap au4b-TITLE-t1
++ local N=au4b-TITLE-t1
++ date -u
+Thu Sep 24 00:45:03 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-TITLE-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-TITLE-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-TITLE-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-TITLE-t1.ppm
++ ls -la /home/brad/au4/au4b-TITLE-t1.ppm /home/brad/au4/au4b-TITLE-t1.jpg
+-rw-r--r-- 1 brad brad   50593 Sep 23 20:45 /home/brad/au4/au4b-TITLE-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:45 /home/brad/au4/au4b-TITLE-t1.ppm
++ read M P
+++ score_ref /home/brad/au4/au4b-TITLE-t1.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-TITLE-t1.ppm /home/brad/pcsx2-t4/t28-ref-menu.ppm 0,0,1280,1024
++ plog 'TITLE try1 ident mean=0.3504 p99=6'
++ echo 'TITLE try1 ident mean=0.3504 p99=6'
++ tee -a /home/brad/au4/au4b-poll.log
+TITLE try1 ident mean=0.3504 p99=6
++ is_ident 0.3504
++ is_num 0.3504
++ case "$1" in
++ return 0
++ awk -v m=0.3504 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ break
++ is_ident 0.3504
++ is_num 0.3504
++ case "$1" in
++ return 0
++ awk -v m=0.3504 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ leg K MENU /home/brad/pcsx2-t4/t29-ref-sc.ppm
++ local KEY=K LAB=MENU EXP=/home/brad/pcsx2-t4/t29-ref-sc.ppm TRY=0 M=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ press K MENU_t1 2
++ local KEY=K
++ local LAB=MENU_t1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 89 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 678545280 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'MENU_t1_KEYDOWN_WALL:1790210704.277630025 UPTIME:207 MENU_T+:89'
++ echo 'MENU_t1_KEYDOWN_WALL:1790210704.277630025 UPTIME:207 MENU_T+:89'
++ tee -a /home/brad/au4/au4b-poll.log
+MENU_t1_KEYDOWN_WALL:1790210704.277630025 UPTIME:207 MENU_T+:89
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'MENU_t1_KEYUP_WALL:1790210706.311318851 UPTIME:209 MENU_T+:91'
++ echo 'MENU_t1_KEYUP_WALL:1790210706.311318851 UPTIME:209 MENU_T+:91'
++ tee -a /home/brad/au4/au4b-poll.log
+MENU_t1_KEYUP_WALL:1790210706.311318851 UPTIME:209 MENU_T+:91
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 103 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 723108013 -lt 3500000000 ']'
++ snap au4b-MENU-t1
++ local N=au4b-MENU-t1
++ date -u
+Thu Sep 24 00:45:18 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-MENU-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-MENU-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-MENU-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-MENU-t1.ppm
++ ls -la /home/brad/au4/au4b-MENU-t1.ppm /home/brad/au4/au4b-MENU-t1.jpg
+-rw-r--r-- 1 brad brad   70714 Sep 23 20:45 /home/brad/au4/au4b-MENU-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:45 /home/brad/au4/au4b-MENU-t1.ppm
++ read M P
+++ score_ref /home/brad/au4/au4b-MENU-t1.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-MENU-t1.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'MENU try1 ident mean=0.6378 p99=9'
++ echo 'MENU try1 ident mean=0.6378 p99=9'
++ tee -a /home/brad/au4/au4b-poll.log
+MENU try1 ident mean=0.6378 p99=9
++ is_ident 0.6378
++ is_num 0.6378
++ case "$1" in
++ return 0
++ awk -v m=0.6378 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ break
++ is_ident 0.6378
++ is_num 0.6378
++ case "$1" in
++ return 0
++ awk -v m=0.6378 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ sleep 15
++ wallcheck
+++ date -u +%s
++ '[' 119 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 767387470 -lt 3500000000 ']'
++ snap au4b-sc-settled
++ local N=au4b-sc-settled
++ date -u
+Thu Sep 24 00:45:34 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-sc-settled.xwd
++ xwdtopnm /home/brad/au4/au4b-sc-settled.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-sc-settled.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-sc-settled.ppm
++ ls -la /home/brad/au4/au4b-sc-settled.ppm /home/brad/au4/au4b-sc-settled.jpg
+-rw-r--r-- 1 brad brad   70894 Sep 23 20:45 /home/brad/au4/au4b-sc-settled.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:45 /home/brad/au4/au4b-sc-settled.ppm
++ read SM SP
+++ score_ref /home/brad/au4/au4b-sc-settled.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-sc-settled.ppm /home/brad/pcsx2-t4/t29-ref-sc.ppm 0,0,1280,1024
++ plog 'SC_SETTLED ident mean=0.6490 p99=10'
++ echo 'SC_SETTLED ident mean=0.6490 p99=10'
++ tee -a /home/brad/au4/au4b-poll.log
+SC_SETTLED ident mean=0.6490 p99=10
++ is_ident 0.6490
++ is_num 0.6490
++ case "$1" in
++ return 0
++ awk -v m=0.6490 -v mm=4.0 'BEGIN{exit !(m<mm)}'
+++ stat -c %s /home/brad/au4/pcsx2-tag1.bin
++ SC_RECORDS=17122
++ plog SC_RECORDS=17122
++ tee -a /home/brad/au4/au4b-poll.log
++ echo SC_RECORDS=17122
+SC_RECORDS=17122
++ gshot au4b-sc
++ local LAB=au4b-sc
++ press F8 GSHOT_au4b-sc
++ local KEY=F8
++ local LAB=GSHOT_au4b-sc
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 120 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 769849069 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'GSHOT_au4b-sc_KEYDOWN_WALL:1790210735.468688286 UPTIME:238 MENU_T+:120'
++ echo 'GSHOT_au4b-sc_KEYDOWN_WALL:1790210735.468688286 UPTIME:238 MENU_T+:120'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-sc_KEYDOWN_WALL:1790210735.468688286 UPTIME:238 MENU_T+:120
++ xdotool windowfocus --sync 2097159
++ xdotool keydown F8
++ sleep 0.5
++ xdotool keyup F8
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'GSHOT_au4b-sc_KEYUP_WALL:1790210736.002461541 UPTIME:239 MENU_T+:121'
++ echo 'GSHOT_au4b-sc_KEYUP_WALL:1790210736.002461541 UPTIME:239 MENU_T+:121'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-sc_KEYUP_WALL:1790210736.002461541 UPTIME:239 MENU_T+:121
++ sleep 2
+++ ls -t /home/brad/au4/dat/PCSX2/snaps
+++ head -n 1
++ local 'NEW=SSX 3_SLUS-20772_20260923204535.png'
++ plog 'GSHOT_au4b-sc newest=SSX 3_SLUS-20772_20260923204535.png'
++ echo 'GSHOT_au4b-sc newest=SSX 3_SLUS-20772_20260923204535.png'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-sc newest=SSX 3_SLUS-20772_20260923204535.png
++ cp '/home/brad/au4/dat/PCSX2/snaps/SSX 3_SLUS-20772_20260923204535.png' /home/brad/au4/au4-shot-au4b-sc.png
++ ls -la /home/brad/au4/au4-shot-au4b-sc.png
+-rw-r--r-- 1 brad brad 196804 Sep 23 20:45 /home/brad/au4/au4-shot-au4b-sc.png
++ leg K SC /home/brad/pcsx2-t4/t30-ref-zc.ppm
++ local KEY=K LAB=SC EXP=/home/brad/pcsx2-t4/t30-ref-zc.ppm TRY=0 M=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ press K SC_t1 2
++ local KEY=K
++ local LAB=SC_t1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 123 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 777208059 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SC_t1_KEYDOWN_WALL:1790210738.013100858 UPTIME:241 MENU_T+:123'
++ echo 'SC_t1_KEYDOWN_WALL:1790210738.013100858 UPTIME:241 MENU_T+:123'
++ tee -a /home/brad/au4/au4b-poll.log
+SC_t1_KEYDOWN_WALL:1790210738.013100858 UPTIME:241 MENU_T+:123
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SC_t1_KEYUP_WALL:1790210740.046836274 UPTIME:243 MENU_T+:125'
++ echo 'SC_t1_KEYUP_WALL:1790210740.046836274 UPTIME:243 MENU_T+:125'
++ tee -a /home/brad/au4/au4b-poll.log
+SC_t1_KEYUP_WALL:1790210740.046836274 UPTIME:243 MENU_T+:125
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 137 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 818203662 -lt 3500000000 ']'
++ snap au4b-SC-t1
++ local N=au4b-SC-t1
++ date -u
+Thu Sep 24 00:45:52 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-SC-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-SC-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-SC-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-SC-t1.ppm
++ ls -la /home/brad/au4/au4b-SC-t1.ppm /home/brad/au4/au4b-SC-t1.jpg
+-rw-r--r-- 1 brad brad   51912 Sep 23 20:45 /home/brad/au4/au4b-SC-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:45 /home/brad/au4/au4b-SC-t1.ppm
++ read M P
+++ score_ref /home/brad/au4/au4b-SC-t1.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-SC-t1.ppm /home/brad/pcsx2-t4/t30-ref-zc.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SC try1 ident mean=0.5270 p99=9'
++ echo 'SC try1 ident mean=0.5270 p99=9'
++ tee -a /home/brad/au4/au4b-poll.log
+SC try1 ident mean=0.5270 p99=9
++ is_ident 0.5270
++ is_num 0.5270
++ case "$1" in
++ return 0
++ awk -v m=0.5270 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ break
++ is_ident 0.5270
++ is_num 0.5270
++ case "$1" in
++ return 0
++ awk -v m=0.5270 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ leg K ZC /home/brad/pcsx2-t4/t31-ref-sp.ppm
++ local KEY=K LAB=ZC EXP=/home/brad/pcsx2-t4/t31-ref-sp.ppm TRY=0 M=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ press K ZC_t1 2
++ local KEY=K
++ local LAB=ZC_t1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 138 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 821108603 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'ZC_t1_KEYDOWN_WALL:1790210753.132175161 UPTIME:256 MENU_T+:138'
++ echo 'ZC_t1_KEYDOWN_WALL:1790210753.132175161 UPTIME:256 MENU_T+:138'
++ tee -a /home/brad/au4/au4b-poll.log
+ZC_t1_KEYDOWN_WALL:1790210753.132175161 UPTIME:256 MENU_T+:138
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'ZC_t1_KEYUP_WALL:1790210755.164967064 UPTIME:258 MENU_T+:140'
++ echo 'ZC_t1_KEYUP_WALL:1790210755.164967064 UPTIME:258 MENU_T+:140'
++ tee -a /home/brad/au4/au4b-poll.log
+ZC_t1_KEYUP_WALL:1790210755.164967064 UPTIME:258 MENU_T+:140
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 152 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 893977078 -lt 3500000000 ']'
++ snap au4b-ZC-t1
++ local N=au4b-ZC-t1
++ date -u
+Thu Sep 24 00:46:07 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-ZC-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-ZC-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-ZC-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-ZC-t1.ppm
++ ls -la /home/brad/au4/au4b-ZC-t1.ppm /home/brad/au4/au4b-ZC-t1.jpg
+-rw-r--r-- 1 brad brad   65783 Sep 23 20:46 /home/brad/au4/au4b-ZC-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-ZC-t1.ppm
++ read M P
+++ score_ref /home/brad/au4/au4b-ZC-t1.ppm /home/brad/pcsx2-t4/t31-ref-sp.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-ZC-t1.ppm /home/brad/pcsx2-t4/t31-ref-sp.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'ZC try1 ident mean=0.3971 p99=6'
++ echo 'ZC try1 ident mean=0.3971 p99=6'
++ tee -a /home/brad/au4/au4b-poll.log
+ZC try1 ident mean=0.3971 p99=6
++ is_ident 0.3971
++ is_num 0.3971
++ case "$1" in
++ return 0
++ awk -v m=0.3971 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ break
++ is_ident 0.3971
++ is_num 0.3971
++ case "$1" in
++ return 0
++ awk -v m=0.3971 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ leg K SP /home/brad/pcsx2-t4/t32-ref-sm.ppm
++ local KEY=K LAB=SP EXP=/home/brad/pcsx2-t4/t32-ref-sm.ppm TRY=0 M=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ press K SP_t1 2
++ local KEY=K
++ local LAB=SP_t1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 153 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 899310876 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SP_t1_KEYDOWN_WALL:1790210768.219480926 UPTIME:271 MENU_T+:153'
++ echo 'SP_t1_KEYDOWN_WALL:1790210768.219480926 UPTIME:271 MENU_T+:153'
++ tee -a /home/brad/au4/au4b-poll.log
+SP_t1_KEYDOWN_WALL:1790210768.219480926 UPTIME:271 MENU_T+:153
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SP_t1_KEYUP_WALL:1790210770.252784885 UPTIME:273 MENU_T+:155'
++ echo 'SP_t1_KEYUP_WALL:1790210770.252784885 UPTIME:273 MENU_T+:155'
++ tee -a /home/brad/au4/au4b-poll.log
+SP_t1_KEYUP_WALL:1790210770.252784885 UPTIME:273 MENU_T+:155
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 167 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 972195878 -lt 3500000000 ']'
++ snap au4b-SP-t1
++ local N=au4b-SP-t1
++ date -u
+Thu Sep 24 00:46:22 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-SP-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-SP-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-SP-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-SP-t1.ppm
++ ls -la /home/brad/au4/au4b-SP-t1.ppm /home/brad/au4/au4b-SP-t1.jpg
+-rw-r--r-- 1 brad brad   67945 Sep 23 20:46 /home/brad/au4/au4b-SP-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-SP-t1.ppm
++ read M P
+++ score_ref /home/brad/au4/au4b-SP-t1.ppm /home/brad/pcsx2-t4/t32-ref-sm.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-SP-t1.ppm /home/brad/pcsx2-t4/t32-ref-sm.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SP try1 ident mean=0.4302 p99=6'
++ echo 'SP try1 ident mean=0.4302 p99=6'
++ tee -a /home/brad/au4/au4b-poll.log
+SP try1 ident mean=0.4302 p99=6
++ is_ident 0.4302
++ is_num 0.4302
++ case "$1" in
++ return 0
++ awk -v m=0.4302 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ break
++ is_ident 0.4302
++ is_num 0.4302
++ case "$1" in
++ return 0
++ awk -v m=0.4302 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ leg K SM /home/brad/pcsx2-t4/t33-ref-se.ppm
++ local KEY=K LAB=SM EXP=/home/brad/pcsx2-t4/t33-ref-se.ppm TRY=0 M=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ press K SM_t1 2
++ local KEY=K
++ local LAB=SM_t1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 168 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 977537887 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SM_t1_KEYDOWN_WALL:1790210783.311949104 UPTIME:286 MENU_T+:168'
++ echo 'SM_t1_KEYDOWN_WALL:1790210783.311949104 UPTIME:286 MENU_T+:168'
++ tee -a /home/brad/au4/au4b-poll.log
+SM_t1_KEYDOWN_WALL:1790210783.311949104 UPTIME:286 MENU_T+:168
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SM_t1_KEYUP_WALL:1790210785.345465373 UPTIME:288 MENU_T+:170'
++ echo 'SM_t1_KEYUP_WALL:1790210785.345465373 UPTIME:288 MENU_T+:170'
++ tee -a /home/brad/au4/au4b-poll.log
+SM_t1_KEYUP_WALL:1790210785.345465373 UPTIME:288 MENU_T+:170
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 182 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1049287093 -lt 3500000000 ']'
++ snap au4b-SM-t1
++ local N=au4b-SM-t1
++ date -u
+Thu Sep 24 00:46:37 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-SM-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-SM-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-SM-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-SM-t1.ppm
++ ls -la /home/brad/au4/au4b-SM-t1.ppm /home/brad/au4/au4b-SM-t1.jpg
+-rw-r--r-- 1 brad brad   69956 Sep 23 20:46 /home/brad/au4/au4b-SM-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-SM-t1.ppm
++ read M P
+++ score_ref /home/brad/au4/au4b-SM-t1.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-SM-t1.ppm /home/brad/pcsx2-t4/t33-ref-se.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SM try1 ident mean=0.4434 p99=6'
++ echo 'SM try1 ident mean=0.4434 p99=6'
++ tee -a /home/brad/au4/au4b-poll.log
+SM try1 ident mean=0.4434 p99=6
++ is_ident 0.4434
++ is_num 0.4434
++ case "$1" in
++ return 0
++ awk -v m=0.4434 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ break
++ is_ident 0.4434
++ is_num 0.4434
++ case "$1" in
++ return 0
++ awk -v m=0.4434 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ for N in 1 2 3 4
++ press Down SE_DOWN1 2
++ local KEY=Down
++ local LAB=SE_DOWN1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 183 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1054688840 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN1_KEYDOWN_WALL:1790210798.395589109 UPTIME:301 MENU_T+:183'
++ echo 'SE_DOWN1_KEYDOWN_WALL:1790210798.395589109 UPTIME:301 MENU_T+:183'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN1_KEYDOWN_WALL:1790210798.395589109 UPTIME:301 MENU_T+:183
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Down
++ sleep 2
++ xdotool keyup Down
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN1_KEYUP_WALL:1790210800.429217113 UPTIME:303 MENU_T+:185'
++ echo 'SE_DOWN1_KEYUP_WALL:1790210800.429217113 UPTIME:303 MENU_T+:185'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN1_KEYUP_WALL:1790210800.429217113 UPTIME:303 MENU_T+:185
++ sleep 3
++ snap au4b-se-down1
++ local N=au4b-se-down1
++ date -u
+Thu Sep 24 00:46:43 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-se-down1.xwd
++ xwdtopnm /home/brad/au4/au4b-se-down1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-se-down1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-se-down1.ppm
++ ls -la /home/brad/au4/au4b-se-down1.ppm /home/brad/au4/au4b-se-down1.jpg
+-rw-r--r-- 1 brad brad   67619 Sep 23 20:46 /home/brad/au4/au4b-se-down1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-se-down1.ppm
++ for N in 1 2 3 4
++ press Down SE_DOWN2 2
++ local KEY=Down
++ local LAB=SE_DOWN2
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 188 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1080697353 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN2_KEYDOWN_WALL:1790210803.493830498 UPTIME:306 MENU_T+:188'
++ echo 'SE_DOWN2_KEYDOWN_WALL:1790210803.493830498 UPTIME:306 MENU_T+:188'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN2_KEYDOWN_WALL:1790210803.493830498 UPTIME:306 MENU_T+:188
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Down
++ sleep 2
++ xdotool keyup Down
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN2_KEYUP_WALL:1790210805.528644862 UPTIME:308 MENU_T+:190'
++ echo 'SE_DOWN2_KEYUP_WALL:1790210805.528644862 UPTIME:308 MENU_T+:190'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN2_KEYUP_WALL:1790210805.528644862 UPTIME:308 MENU_T+:190
++ sleep 3
++ snap au4b-se-down2
++ local N=au4b-se-down2
++ date -u
+Thu Sep 24 00:46:48 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-se-down2.xwd
++ xwdtopnm /home/brad/au4/au4b-se-down2.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-se-down2.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-se-down2.ppm
++ ls -la /home/brad/au4/au4b-se-down2.ppm /home/brad/au4/au4b-se-down2.jpg
+-rw-r--r-- 1 brad brad   67718 Sep 23 20:46 /home/brad/au4/au4b-se-down2.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-se-down2.ppm
++ for N in 1 2 3 4
++ press Down SE_DOWN3 2
++ local KEY=Down
++ local LAB=SE_DOWN3
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 193 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1106635351 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN3_KEYDOWN_WALL:1790210808.595888299 UPTIME:312 MENU_T+:193'
++ echo 'SE_DOWN3_KEYDOWN_WALL:1790210808.595888299 UPTIME:312 MENU_T+:193'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN3_KEYDOWN_WALL:1790210808.595888299 UPTIME:312 MENU_T+:193
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Down
++ sleep 2
++ xdotool keyup Down
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN3_KEYUP_WALL:1790210810.632245656 UPTIME:314 MENU_T+:195'
++ echo 'SE_DOWN3_KEYUP_WALL:1790210810.632245656 UPTIME:314 MENU_T+:195'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN3_KEYUP_WALL:1790210810.632245656 UPTIME:314 MENU_T+:195
++ sleep 3
++ snap au4b-se-down3
++ local N=au4b-se-down3
++ date -u
+Thu Sep 24 00:46:53 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-se-down3.xwd
++ xwdtopnm /home/brad/au4/au4b-se-down3.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-se-down3.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-se-down3.ppm
++ ls -la /home/brad/au4/au4b-se-down3.ppm /home/brad/au4/au4b-se-down3.jpg
+-rw-r--r-- 1 brad brad   67754 Sep 23 20:46 /home/brad/au4/au4b-se-down3.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-se-down3.ppm
++ for N in 1 2 3 4
++ press Down SE_DOWN4 2
++ local KEY=Down
++ local LAB=SE_DOWN4
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 198 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1133312832 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN4_KEYDOWN_WALL:1790210813.698438565 UPTIME:317 MENU_T+:198'
++ echo 'SE_DOWN4_KEYDOWN_WALL:1790210813.698438565 UPTIME:317 MENU_T+:198'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN4_KEYDOWN_WALL:1790210813.698438565 UPTIME:317 MENU_T+:198
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Down
++ sleep 2
++ xdotool keyup Down
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'SE_DOWN4_KEYUP_WALL:1790210815.732754486 UPTIME:319 MENU_T+:200'
++ echo 'SE_DOWN4_KEYUP_WALL:1790210815.732754486 UPTIME:319 MENU_T+:200'
++ tee -a /home/brad/au4/au4b-poll.log
+SE_DOWN4_KEYUP_WALL:1790210815.732754486 UPTIME:319 MENU_T+:200
++ sleep 3
++ snap au4b-se-down4
++ local N=au4b-se-down4
++ date -u
+Thu Sep 24 00:46:58 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-se-down4.xwd
++ xwdtopnm /home/brad/au4/au4b-se-down4.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-se-down4.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-se-down4.ppm
++ ls -la /home/brad/au4/au4b-se-down4.ppm /home/brad/au4/au4b-se-down4.jpg
+-rw-r--r-- 1 brad brad   67729 Sep 23 20:46 /home/brad/au4/au4b-se-down4.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-se-down4.ppm
++ snap au4b-se-walked
++ local N=au4b-se-walked
++ date -u
+Thu Sep 24 00:46:58 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-se-walked.xwd
++ xwdtopnm /home/brad/au4/au4b-se-walked.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-se-walked.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-se-walked.ppm
++ ls -la /home/brad/au4/au4b-se-walked.ppm /home/brad/au4/au4b-se-walked.jpg
+-rw-r--r-- 1 brad brad   67744 Sep 23 20:46 /home/brad/au4/au4b-se-walked.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:46 /home/brad/au4/au4b-se-walked.ppm
++ read W WP
+++ score_ref /home/brad/au4/au4b-se-walked.ppm /home/brad/pcsx2-t4/t47-se-walked.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-se-walked.ppm /home/brad/pcsx2-t4/t47-se-walked.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)};if($i~/^p99=/){p=substr($i,5)}}};END{print m, p}'
++ plog 'SE-WALKED vs-T47walked(Happiness) mean=0.0332 p99=0 (want IDENT <4)'
++ echo 'SE-WALKED vs-T47walked(Happiness) mean=0.0332 p99=0 (want IDENT <4)'
++ tee -a /home/brad/au4/au4b-poll.log
+SE-WALKED vs-T47walked(Happiness) mean=0.0332 p99=0 (want IDENT <4)
++ is_ident 0.0332
++ is_num 0.0332
++ case "$1" in
++ return 0
++ awk -v m=0.0332 -v mm=4.0 'BEGIN{exit !(m<mm)}'
++ press K EVENT_CROSS 2
++ local KEY=K
++ local LAB=EVENT_CROSS
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 205 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1168006264 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'EVENT_CROSS_KEYDOWN_WALL:1790210820.448009187 UPTIME:323 MENU_T+:205'
++ echo 'EVENT_CROSS_KEYDOWN_WALL:1790210820.448009187 UPTIME:323 MENU_T+:205'
++ tee -a /home/brad/au4/au4b-poll.log
+EVENT_CROSS_KEYDOWN_WALL:1790210820.448009187 UPTIME:323 MENU_T+:205
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'EVENT_CROSS_KEYUP_WALL:1790210822.484082050 UPTIME:325 MENU_T+:207'
++ echo 'EVENT_CROSS_KEYUP_WALL:1790210822.484082050 UPTIME:325 MENU_T+:207'
++ tee -a /home/brad/au4/au4b-poll.log
+EVENT_CROSS_KEYUP_WALL:1790210822.484082050 UPTIME:325 MENU_T+:207
++ sleep 15
++ wallcheck
+++ date -u +%s
++ '[' 222 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1254993840 -lt 3500000000 ']'
++ snap au4b-ev-15
++ local N=au4b-ev-15
++ date -u
+Thu Sep 24 00:47:17 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-ev-15.xwd
++ xwdtopnm /home/brad/au4/au4b-ev-15.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-ev-15.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-ev-15.ppm
++ ls -la /home/brad/au4/au4b-ev-15.ppm /home/brad/au4/au4b-ev-15.jpg
+-rw-r--r-- 1 brad brad   59571 Sep 23 20:47 /home/brad/au4/au4b-ev-15.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:47 /home/brad/au4/au4b-ev-15.ppm
++ sleep 6
++ snap au4b-ev-21
++ local N=au4b-ev-21
++ date -u
+Thu Sep 24 00:47:23 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-ev-21.xwd
++ xwdtopnm /home/brad/au4/au4b-ev-21.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-ev-21.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-ev-21.ppm
++ ls -la /home/brad/au4/au4b-ev-21.ppm /home/brad/au4/au4b-ev-21.jpg
+-rw-r--r-- 1 brad brad   58687 Sep 23 20:47 /home/brad/au4/au4b-ev-21.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:47 /home/brad/au4/au4b-ev-21.ppm
+++ score_whole /home/brad/au4/au4b-ev-15.ppm /home/brad/au4/au4b-ev-21.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-ev-15.ppm /home/brad/au4/au4b-ev-21.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ HEV=0.0831
++ read HY HN
+++ hlrow /home/brad/au4/au4b-ev-21.ppm
+++ python3 /home/brad/pcsx2-t4/t48-hlscan.py /home/brad/au4/au4b-ev-21.ppm 0 700 60 950
+++ awk '{for(i=1;i<=NF;i++){if($i~/^y=/){y=substr($i,3)};if($i~/^n=/){n=substr($i,3)}}};END{print y, n}'
++ plog 'EVENT hop=0.0831 hly=487.3 hln=8022'
++ echo 'EVENT hop=0.0831 hly=487.3 hln=8022'
++ tee -a /home/brad/au4/au4b-poll.log
+EVENT hop=0.0831 hly=487.3 hln=8022
++ is_static 0.0831
++ is_num 0.0831
++ case "$1" in
++ return 0
++ awk -v m=0.0831 -v mm=1.0 'BEGIN{exit !(m<mm)}'
++ is_num 8022
++ case "$1" in
++ return 0
++ '[' 8022 -gt 2000 ']'
++ snap au4b-rules-pre
++ local N=au4b-rules-pre
++ date -u
+Thu Sep 24 00:47:25 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-rules-pre.xwd
++ xwdtopnm /home/brad/au4/au4b-rules-pre.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-rules-pre.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-rules-pre.ppm
++ ls -la /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-rules-pre.jpg
+-rw-r--r-- 1 brad brad   59460 Sep 23 20:47 /home/brad/au4/au4b-rules-pre.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:47 /home/brad/au4/au4b-rules-pre.ppm
++ RULES_OK=0
++ for R in 1 2 3
++ '[' 1 -gt 1 ']'
++ press K RULES_CROSS_R1 2
++ local KEY=K
++ local LAB=RULES_CROSS_R1
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 230 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1295058117 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULES_CROSS_R1_KEYDOWN_WALL:1790210845.278389107 UPTIME:348 MENU_T+:230'
++ echo 'RULES_CROSS_R1_KEYDOWN_WALL:1790210845.278389107 UPTIME:348 MENU_T+:230'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES_CROSS_R1_KEYDOWN_WALL:1790210845.278389107 UPTIME:348 MENU_T+:230
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULES_CROSS_R1_KEYUP_WALL:1790210847.312759316 UPTIME:350 MENU_T+:232'
++ echo 'RULES_CROSS_R1_KEYUP_WALL:1790210847.312759316 UPTIME:350 MENU_T+:232'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES_CROSS_R1_KEYUP_WALL:1790210847.312759316 UPTIME:350 MENU_T+:232
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 244 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1449571771 -lt 3500000000 ']'
++ snap au4b-loadR1
+Thu Sep 24 00:47:39 UTC 2026
++ local N=au4b-loadR1
++ date -u
++ xwd -root -out /home/brad/au4/au4b-loadR1.xwd
++ xwdtopnm /home/brad/au4/au4b-loadR1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-loadR1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-loadR1.ppm
++ ls -la /home/brad/au4/au4b-loadR1.ppm /home/brad/au4/au4b-loadR1.jpg
+-rw-r--r-- 1 brad brad   55555 Sep 23 20:47 /home/brad/au4/au4b-loadR1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:47 /home/brad/au4/au4b-loadR1.ppm
+++ score_whole /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-loadR1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-loadR1.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ D=17.6193
++ plog 'RULES R1 depart=17.6193'
++ echo 'RULES R1 depart=17.6193'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES R1 depart=17.6193
++ is_anim 17.6193
++ is_num 17.6193
++ case "$1" in
++ return 0
++ awk -v m=17.6193 -v mm=1.0 'BEGIN{exit !(m>mm)}'
++ sleep 8
++ snap au4b-loadR1b
++ local N=au4b-loadR1b
++ date -u
+Thu Sep 24 00:47:48 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-loadR1b.xwd
++ xwdtopnm /home/brad/au4/au4b-loadR1b.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-loadR1b.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-loadR1b.ppm
++ ls -la /home/brad/au4/au4b-loadR1b.ppm /home/brad/au4/au4b-loadR1b.jpg
+-rw-r--r-- 1 brad brad   55358 Sep 23 20:47 /home/brad/au4/au4b-loadR1b.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:47 /home/brad/au4/au4b-loadR1b.ppm
+++ score_whole /home/brad/au4/au4b-loadR1.ppm /home/brad/au4/au4b-loadR1b.ppm
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-loadR1.ppm /home/brad/au4/au4b-loadR1b.ppm 0,0,1280,1024
++ A=0.2331
++ plog 'RULES R1 anim=0.2331'
++ echo 'RULES R1 anim=0.2331'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES R1 anim=0.2331
++ is_anim 0.2331
++ is_num 0.2331
++ case "$1" in
++ return 0
++ awk -v m=0.2331 -v mm=1.0 'BEGIN{exit !(m>mm)}'
++ for R in 1 2 3
++ '[' 2 -gt 1 ']'
+++ seq 1 11
++ for U in $(seq 1 11)
++ press Up RULESUP2_1 0.5
++ local KEY=Up
++ local LAB=RULESUP2_1
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 255 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1456970814 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_1_KEYDOWN_WALL:1790210870.608224719 UPTIME:374 MENU_T+:255'
++ echo 'RULESUP2_1_KEYDOWN_WALL:1790210870.608224719 UPTIME:374 MENU_T+:255'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_1_KEYDOWN_WALL:1790210870.608224719 UPTIME:374 MENU_T+:255
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_1_KEYUP_WALL:1790210871.142797302 UPTIME:374 MENU_T+:256'
++ echo 'RULESUP2_1_KEYUP_WALL:1790210871.142797302 UPTIME:374 MENU_T+:256'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_1_KEYUP_WALL:1790210871.142797302 UPTIME:374 MENU_T+:256
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_2 0.5
++ local KEY=Up
++ local LAB=RULESUP2_2
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 257 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1458221292 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_2_KEYDOWN_WALL:1790210872.147970801 UPTIME:375 MENU_T+:257'
++ echo 'RULESUP2_2_KEYDOWN_WALL:1790210872.147970801 UPTIME:375 MENU_T+:257'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_2_KEYDOWN_WALL:1790210872.147970801 UPTIME:375 MENU_T+:257
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_2_KEYUP_WALL:1790210872.680950570 UPTIME:376 MENU_T+:257'
++ echo 'RULESUP2_2_KEYUP_WALL:1790210872.680950570 UPTIME:376 MENU_T+:257'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_2_KEYUP_WALL:1790210872.680950570 UPTIME:376 MENU_T+:257
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_3 0.5
++ local KEY=Up
++ local LAB=RULESUP2_3
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 258 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1459180974 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_3_KEYDOWN_WALL:1790210873.687591717 UPTIME:377 MENU_T+:258'
++ echo 'RULESUP2_3_KEYDOWN_WALL:1790210873.687591717 UPTIME:377 MENU_T+:258'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_3_KEYDOWN_WALL:1790210873.687591717 UPTIME:377 MENU_T+:258
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_3_KEYUP_WALL:1790210874.222777374 UPTIME:377 MENU_T+:259'
++ echo 'RULESUP2_3_KEYUP_WALL:1790210874.222777374 UPTIME:377 MENU_T+:259'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_3_KEYUP_WALL:1790210874.222777374 UPTIME:377 MENU_T+:259
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_4 0.5
++ local KEY=Up
++ local LAB=RULESUP2_4
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 260 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1460181972 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_4_KEYDOWN_WALL:1790210875.227855498 UPTIME:378 MENU_T+:260'
++ echo 'RULESUP2_4_KEYDOWN_WALL:1790210875.227855498 UPTIME:378 MENU_T+:260'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_4_KEYDOWN_WALL:1790210875.227855498 UPTIME:378 MENU_T+:260
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_4_KEYUP_WALL:1790210875.762277146 UPTIME:379 MENU_T+:260'
++ echo 'RULESUP2_4_KEYUP_WALL:1790210875.762277146 UPTIME:379 MENU_T+:260'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_4_KEYUP_WALL:1790210875.762277146 UPTIME:379 MENU_T+:260
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_5 0.5
++ local KEY=Up
++ local LAB=RULESUP2_5
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 261 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1461174216 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_5_KEYDOWN_WALL:1790210876.768653591 UPTIME:380 MENU_T+:261'
++ echo 'RULESUP2_5_KEYDOWN_WALL:1790210876.768653591 UPTIME:380 MENU_T+:261'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_5_KEYDOWN_WALL:1790210876.768653591 UPTIME:380 MENU_T+:261
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_5_KEYUP_WALL:1790210877.301973457 UPTIME:380 MENU_T+:262'
++ echo 'RULESUP2_5_KEYUP_WALL:1790210877.301973457 UPTIME:380 MENU_T+:262'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_5_KEYUP_WALL:1790210877.301973457 UPTIME:380 MENU_T+:262
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_6 0.5
++ local KEY=Up
++ local LAB=RULESUP2_6
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 263 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1462326059 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_6_KEYDOWN_WALL:1790210878.309280010 UPTIME:381 MENU_T+:263'
++ echo 'RULESUP2_6_KEYDOWN_WALL:1790210878.309280010 UPTIME:381 MENU_T+:263'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_6_KEYDOWN_WALL:1790210878.309280010 UPTIME:381 MENU_T+:263
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_6_KEYUP_WALL:1790210878.841932515 UPTIME:382 MENU_T+:263'
++ echo 'RULESUP2_6_KEYUP_WALL:1790210878.841932515 UPTIME:382 MENU_T+:263'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_6_KEYUP_WALL:1790210878.841932515 UPTIME:382 MENU_T+:263
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_7 0.5
++ local KEY=Up
++ local LAB=RULESUP2_7
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 264 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1463328726 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_7_KEYDOWN_WALL:1790210879.847997805 UPTIME:383 MENU_T+:264'
++ echo 'RULESUP2_7_KEYDOWN_WALL:1790210879.847997805 UPTIME:383 MENU_T+:264'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_7_KEYDOWN_WALL:1790210879.847997805 UPTIME:383 MENU_T+:264
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_7_KEYUP_WALL:1790210880.380741712 UPTIME:383 MENU_T+:265'
++ echo 'RULESUP2_7_KEYUP_WALL:1790210880.380741712 UPTIME:383 MENU_T+:265'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_7_KEYUP_WALL:1790210880.380741712 UPTIME:383 MENU_T+:265
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_8 0.5
++ local KEY=Up
++ local LAB=RULESUP2_8
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 266 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1464290788 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_8_KEYDOWN_WALL:1790210881.386688579 UPTIME:384 MENU_T+:266'
++ echo 'RULESUP2_8_KEYDOWN_WALL:1790210881.386688579 UPTIME:384 MENU_T+:266'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_8_KEYDOWN_WALL:1790210881.386688579 UPTIME:384 MENU_T+:266
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_8_KEYUP_WALL:1790210881.920778063 UPTIME:385 MENU_T+:266'
++ echo 'RULESUP2_8_KEYUP_WALL:1790210881.920778063 UPTIME:385 MENU_T+:266'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_8_KEYUP_WALL:1790210881.920778063 UPTIME:385 MENU_T+:266
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_9 0.5
++ local KEY=Up
++ local LAB=RULESUP2_9
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 267 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1465296617 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_9_KEYDOWN_WALL:1790210882.926063224 UPTIME:386 MENU_T+:267'
++ echo 'RULESUP2_9_KEYDOWN_WALL:1790210882.926063224 UPTIME:386 MENU_T+:267'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_9_KEYDOWN_WALL:1790210882.926063224 UPTIME:386 MENU_T+:267
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_9_KEYUP_WALL:1790210883.460267020 UPTIME:386 MENU_T+:268'
++ echo 'RULESUP2_9_KEYUP_WALL:1790210883.460267020 UPTIME:386 MENU_T+:268'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_9_KEYUP_WALL:1790210883.460267020 UPTIME:386 MENU_T+:268
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_10 0.5
++ local KEY=Up
++ local LAB=RULESUP2_10
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 269 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1466539047 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_10_KEYDOWN_WALL:1790210884.465454091 UPTIME:387 MENU_T+:269'
++ echo 'RULESUP2_10_KEYDOWN_WALL:1790210884.465454091 UPTIME:387 MENU_T+:269'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_10_KEYDOWN_WALL:1790210884.465454091 UPTIME:387 MENU_T+:269
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_10_KEYUP_WALL:1790210884.998718423 UPTIME:388 MENU_T+:270'
++ echo 'RULESUP2_10_KEYUP_WALL:1790210884.998718423 UPTIME:388 MENU_T+:270'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_10_KEYUP_WALL:1790210884.998718423 UPTIME:388 MENU_T+:270
++ sleep 1
++ for U in $(seq 1 11)
++ press Up RULESUP2_11 0.5
++ local KEY=Up
++ local LAB=RULESUP2_11
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 271 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1467528728 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_11_KEYDOWN_WALL:1790210886.004535603 UPTIME:389 MENU_T+:271'
++ echo 'RULESUP2_11_KEYDOWN_WALL:1790210886.004535603 UPTIME:389 MENU_T+:271'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_11_KEYDOWN_WALL:1790210886.004535603 UPTIME:389 MENU_T+:271
++ xdotool windowfocus --sync 2097159
++ xdotool keydown Up
++ sleep 0.5
++ xdotool keyup Up
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULESUP2_11_KEYUP_WALL:1790210886.537453463 UPTIME:389 MENU_T+:271'
++ echo 'RULESUP2_11_KEYUP_WALL:1790210886.537453463 UPTIME:389 MENU_T+:271'
++ tee -a /home/brad/au4/au4b-poll.log
+RULESUP2_11_KEYUP_WALL:1790210886.537453463 UPTIME:389 MENU_T+:271
++ sleep 1
++ press K RULES_CROSS_R2 2
++ local KEY=K
++ local LAB=RULES_CROSS_R2
++ local HOLD=2
++ wallcheck
+++ date -u +%s
++ '[' 272 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1468524007 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULES_CROSS_R2_KEYDOWN_WALL:1790210887.543237524 UPTIME:390 MENU_T+:272'
++ echo 'RULES_CROSS_R2_KEYDOWN_WALL:1790210887.543237524 UPTIME:390 MENU_T+:272'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES_CROSS_R2_KEYDOWN_WALL:1790210887.543237524 UPTIME:390 MENU_T+:272
++ xdotool windowfocus --sync 2097159
++ xdotool keydown K
++ sleep 2
++ xdotool keyup K
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'RULES_CROSS_R2_KEYUP_WALL:1790210889.575776944 UPTIME:393 MENU_T+:274'
++ echo 'RULES_CROSS_R2_KEYUP_WALL:1790210889.575776944 UPTIME:393 MENU_T+:274'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES_CROSS_R2_KEYUP_WALL:1790210889.575776944 UPTIME:393 MENU_T+:274
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 286 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1479352273 -lt 3500000000 ']'
++ snap au4b-loadR2
++ local N=au4b-loadR2
++ date -u
+Thu Sep 24 00:48:21 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-loadR2.xwd
++ xwdtopnm /home/brad/au4/au4b-loadR2.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-loadR2.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-loadR2.ppm
++ ls -la /home/brad/au4/au4b-loadR2.ppm /home/brad/au4/au4b-loadR2.jpg
+-rw-r--r-- 1 brad brad   73217 Sep 23 20:48 /home/brad/au4/au4b-loadR2.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:48 /home/brad/au4/au4b-loadR2.ppm
+++ score_whole /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-loadR2.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-loadR2.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ D=10.9403
++ plog 'RULES R2 depart=10.9403'
++ echo 'RULES R2 depart=10.9403'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES R2 depart=10.9403
++ is_anim 10.9403
++ is_num 10.9403
++ case "$1" in
++ return 0
++ awk -v m=10.9403 -v mm=1.0 'BEGIN{exit !(m>mm)}'
++ sleep 8
+Thu Sep 24 00:48:31 UTC 2026
++ snap au4b-loadR2b
++ local N=au4b-loadR2b
++ date -u
++ xwd -root -out /home/brad/au4/au4b-loadR2b.xwd
++ xwdtopnm /home/brad/au4/au4b-loadR2b.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-loadR2b.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-loadR2b.ppm
++ ls -la /home/brad/au4/au4b-loadR2b.ppm /home/brad/au4/au4b-loadR2b.jpg
+-rw-r--r-- 1 brad brad   72413 Sep 23 20:48 /home/brad/au4/au4b-loadR2b.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:48 /home/brad/au4/au4b-loadR2b.ppm
+++ score_whole /home/brad/au4/au4b-loadR2.ppm /home/brad/au4/au4b-loadR2b.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-loadR2.ppm /home/brad/au4/au4b-loadR2b.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ A=7.8688
++ plog 'RULES R2 anim=7.8688'
++ echo 'RULES R2 anim=7.8688'
++ tee -a /home/brad/au4/au4b-poll.log
+RULES R2 anim=7.8688
++ is_anim 7.8688
++ is_num 7.8688
++ case "$1" in
++ return 0
++ awk -v m=7.8688 -v mm=1.0 'BEGIN{exit !(m>mm)}'
++ RULES_OK=1
++ PREVLOAD=/home/brad/au4/au4b-loadR2b.ppm
++ break
++ '[' 1 -eq 1 ']'
++ plog 'RACE LAUNCHED (rules exit goes straight to racing)'
++ echo 'RACE LAUNCHED (rules exit goes straight to racing)'
++ tee -a /home/brad/au4/au4b-poll.log
+RACE LAUNCHED (rules exit goes straight to racing)
++ gshot au4b-rules
++ local LAB=au4b-rules
++ press F8 GSHOT_au4b-rules
++ local KEY=F8
++ local LAB=GSHOT_au4b-rules
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 298 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1489209315 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'GSHOT_au4b-rules_KEYDOWN_WALL:1790210913.040824883 UPTIME:416 MENU_T+:298'
++ echo 'GSHOT_au4b-rules_KEYDOWN_WALL:1790210913.040824883 UPTIME:416 MENU_T+:298'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-rules_KEYDOWN_WALL:1790210913.040824883 UPTIME:416 MENU_T+:298
++ xdotool windowfocus --sync 2097159
++ xdotool keydown F8
++ sleep 0.5
++ xdotool keyup F8
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'GSHOT_au4b-rules_KEYUP_WALL:1790210913.573579934 UPTIME:417 MENU_T+:298'
++ echo 'GSHOT_au4b-rules_KEYUP_WALL:1790210913.573579934 UPTIME:417 MENU_T+:298'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-rules_KEYUP_WALL:1790210913.573579934 UPTIME:417 MENU_T+:298
++ sleep 2
+++ ls -t /home/brad/au4/dat/PCSX2/snaps
+++ head -n 1
++ local 'NEW=SSX 3_SLUS-20772_20260923204833.png'
++ plog 'GSHOT_au4b-rules newest=SSX 3_SLUS-20772_20260923204833.png'
++ echo 'GSHOT_au4b-rules newest=SSX 3_SLUS-20772_20260923204833.png'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-rules newest=SSX 3_SLUS-20772_20260923204833.png
++ cp '/home/brad/au4/dat/PCSX2/snaps/SSX 3_SLUS-20772_20260923204833.png' /home/brad/au4/au4-shot-au4b-rules.png
++ ls -la /home/brad/au4/au4-shot-au4b-rules.png
+-rw-r--r-- 1 brad brad 418480 Sep 23 20:48 /home/brad/au4/au4-shot-au4b-rules.png
++ TRY=0
++ DEP=99
++ '[' 0 -lt 3 ']'
++ TRY=1
++ sleep 12
++ wallcheck
+++ date -u +%s
++ '[' 312 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1503668043 -lt 3500000000 ']'
++ snap au4b-race-t1
++ local N=au4b-race-t1
++ date -u
+Thu Sep 24 00:48:47 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-race-t1.xwd
++ xwdtopnm /home/brad/au4/au4b-race-t1.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-race-t1.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-race-t1.ppm
++ ls -la /home/brad/au4/au4b-race-t1.ppm /home/brad/au4/au4b-race-t1.jpg
+-rw-r--r-- 1 brad brad   65665 Sep 23 20:48 /home/brad/au4/au4b-race-t1.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:48 /home/brad/au4/au4b-race-t1.ppm
+++ score_whole /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-race-t1.ppm
+++ python3 /home/brad/pcsx2-t4/t44-cropdiff.py /home/brad/au4/au4b-rules-pre.ppm /home/brad/au4/au4b-race-t1.ppm 0,0,1280,1024
+++ awk '{for(i=1;i<=NF;i++){if($i~/^mean=/){m=substr($i,6)}}};END{print m}'
++ DEP=12.6956
++ plog 'RACE_ENTRY try1 depart=12.6956'
++ echo 'RACE_ENTRY try1 depart=12.6956'
++ tee -a /home/brad/au4/au4b-poll.log
+RACE_ENTRY try1 depart=12.6956
++ is_anim 12.6956
++ is_num 12.6956
++ case "$1" in
++ return 0
++ awk -v m=12.6956 -v mm=1.0 'BEGIN{exit !(m>mm)}'
++ break
++ is_anim 12.6956
++ is_num 12.6956
++ case "$1" in
++ return 0
++ awk -v m=12.6956 -v mm=1.0 'BEGIN{exit !(m>mm)}'
++ sleep 3
++ gshot au4b-race
++ local LAB=au4b-race
++ press F8 GSHOT_au4b-race
++ local KEY=F8
++ local LAB=GSHOT_au4b-race
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 317 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1508027435 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'GSHOT_au4b-race_KEYDOWN_WALL:1790210932.270280021 UPTIME:435 MENU_T+:317'
++ echo 'GSHOT_au4b-race_KEYDOWN_WALL:1790210932.270280021 UPTIME:435 MENU_T+:317'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-race_KEYDOWN_WALL:1790210932.270280021 UPTIME:435 MENU_T+:317
++ xdotool windowfocus --sync 2097159
++ xdotool keydown F8
++ sleep 0.5
++ xdotool keyup F8
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'GSHOT_au4b-race_KEYUP_WALL:1790210932.806381653 UPTIME:436 MENU_T+:317'
++ echo 'GSHOT_au4b-race_KEYUP_WALL:1790210932.806381653 UPTIME:436 MENU_T+:317'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-race_KEYUP_WALL:1790210932.806381653 UPTIME:436 MENU_T+:317
++ sleep 2
+++ ls -t /home/brad/au4/dat/PCSX2/snaps
+++ head -n 1
++ local 'NEW=SSX 3_SLUS-20772_20260923204852.png'
++ plog 'GSHOT_au4b-race newest=SSX 3_SLUS-20772_20260923204852.png'
++ echo 'GSHOT_au4b-race newest=SSX 3_SLUS-20772_20260923204852.png'
++ tee -a /home/brad/au4/au4b-poll.log
+GSHOT_au4b-race newest=SSX 3_SLUS-20772_20260923204852.png
++ cp '/home/brad/au4/dat/PCSX2/snaps/SSX 3_SLUS-20772_20260923204852.png' /home/brad/au4/au4-shot-au4b-race.png
++ ls -la /home/brad/au4/au4-shot-au4b-race.png
+-rw-r--r-- 1 brad brad 398230 Sep 23 20:48 /home/brad/au4/au4-shot-au4b-race.png
++ snap au4b-race-live
++ local N=au4b-race-live
++ date -u
+Thu Sep 24 00:48:54 UTC 2026
++ xwd -root -out /home/brad/au4/au4b-race-live.xwd
++ xwdtopnm /home/brad/au4/au4b-race-live.xwd
+xwdtopnm: WARNING: Producing maxval 65535 output.  This involves multiple bytes per sample, which some programs, e.g. 'xv', can't handle.  See manual.
+xwdtopnm: writing PPM file
++ rm -f /home/brad/au4/au4b-race-live.xwd
++ pnmtojpeg -quality=80 /home/brad/au4/au4b-race-live.ppm
++ ls -la /home/brad/au4/au4b-race-live.ppm /home/brad/au4/au4b-race-live.jpg
+-rw-r--r-- 1 brad brad   65254 Sep 23 20:48 /home/brad/au4/au4b-race-live.jpg
+-rw-r--r-- 1 brad brad 7864339 Sep 23 20:48 /home/brad/au4/au4b-race-live.ppm
+++ seq 1 100
++ for W in $(seq 1 100)
++ wallcheck
+++ date -u +%s
++ '[' 319 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1510614906 -lt 3500000000 ']'
+++ stat -c %s /home/brad/au4/pcsx2-tag1.bin
++ SZ=62279496
++ N=39618
+++ date -u +%s
++ plog 'CAPTURE_RECORDS=39618 wall=319'
++ echo 'CAPTURE_RECORDS=39618 wall=319'
++ tee -a /home/brad/au4/au4b-poll.log
+CAPTURE_RECORDS=39618 wall=319
++ '[' 39618 -ge 32122 ']'
++ break
++ '[' 39618 -ge 32122 ']'
++ press F12 VIDEO_STOP
++ local KEY=F12
++ local LAB=VIDEO_STOP
++ local HOLD=0.5
++ wallcheck
+++ date -u +%s
++ '[' 319 -lt 560 ']'
+++ stat -c %s /home/brad/au4/dat/PCSX2/logs/emulog.txt
++ '[' 1510614906 -lt 3500000000 ']'
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'VIDEO_STOP_KEYDOWN_WALL:1790210934.879868649 UPTIME:438 MENU_T+:319'
++ echo 'VIDEO_STOP_KEYDOWN_WALL:1790210934.879868649 UPTIME:438 MENU_T+:319'
++ tee -a /home/brad/au4/au4b-poll.log
+VIDEO_STOP_KEYDOWN_WALL:1790210934.879868649 UPTIME:438 MENU_T+:319
++ xdotool windowfocus --sync 2097159
++ xdotool keydown F12
++ sleep 0.5
++ xdotool keyup F12
+++ date -u +%s.%N
+++ cut -d. -f1 /proc/uptime
+++ date -u +%s
++ plog 'VIDEO_STOP_KEYUP_WALL:1790210935.412623136 UPTIME:438 MENU_T+:320'
++ echo 'VIDEO_STOP_KEYUP_WALL:1790210935.412623136 UPTIME:438 MENU_T+:320'
++ tee -a /home/brad/au4/au4b-poll.log
+VIDEO_STOP_KEYUP_WALL:1790210935.412623136 UPTIME:438 MENU_T+:320
++ sleep 8
+++ stat -c %s /home/brad/au4/pcsx2-tag1.bin
++ plog 'CAPTURE_DONE records=39618 file=62702364'
++ echo 'CAPTURE_DONE records=39618 file=62702364'
++ tee -a /home/brad/au4/au4b-poll.log
+CAPTURE_DONE records=39618 file=62702364
+++ cat /home/brad/au4/pcsx2-au4.pid
++ kill 372
++ sleep 5
++ kill 258

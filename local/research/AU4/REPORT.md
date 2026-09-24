@@ -54,3 +54,69 @@ No audio, ISO, game data, or binaries are committed. The large incomplete emulog
 ## Recommended next action for the orchestrator
 
 Issue a new, bounded PCSX2 capture brief. First log the live SIF DMA descriptor once to confirm `src`, `size`, and the tag-1 layout. Then filter `src == 0x512B80`, read tag 1 at `src + 0x2C0`, and repeat one build, replay proof, full route capture, and AU2 comparison. AU4's original build/capture budget is exhausted; the remaining comparison fields must stay unreported until that capture exists.
+
+# Part 2 — corrected descriptor hook and full reference capture
+
+Brad approved one additional PCSX2 build and one full capture after the Part 1 address error. The results below supersede Part 1's missing comparison fields. The Part 1 stop and receipts remain above as the failure history. Part 2 used **one build and one capture**; it did not push the PCSX2 tree.
+
+## Part 2 hook and preservation
+
+The patch in `receipts/part2/part2-hunk.diff` (SHA-256 `4f30699d4102715f1acc7f8c9d762e7e7325e7f4ef09dd4b9863e5de9aeb019b`) changed only `/home/brad/pcsx2-g7/pcsx2/pcsx2/R5900OpcodeImpl.cpp`. The Part 1 source was copied to `/home/brad/pcsx2-g7/pre-au4/R5900OpcodeImpl.cpp.part1` before editing. The hook now logs the first sound descriptor at `0x50C800` before filtering, accepts `src == 0x512B80` and `size >= 0x8E0`, and reads the 0x620-byte tag-1 record from `src + 0x2C0`. Before every write it checks all four tag-1 header words `{1, 0x600, 0, 0}` and the following tag-5 ID. It writes a 4-byte EE vsync followed by the 0x620 record, env-gated by `PCSX2_AU4_CAPTURE`.
+
+| Check | Part 2 result | Receipt |
+| --- | --- | --- |
+| Live SIF descriptor | `desc=0x50C800 src=0x512B80 size=0x8F0 dst=0x61CF4`; `AU4_TAG_OPEN ... ok=1` | `receipts/part2/part2-hook-lines.txt` |
+| PCSX2 qt SHA-256, two matching reads | `9b7e72e7b1c01851eb8a14fbfe07f32fb12e4ecbf02867a78b436ab789974e5b` | `part2-bin-sha-read1/2.txt` |
+| PCSX2 gsrunner SHA-256, two matching reads | `764f1ca95c53ae4b55263752608c06fa9185ea15a476a9d9b45e5626ba66cb72` | same |
+| Replay PNG MD5 | **7/7** exact T65 pins: `b7a3e8db a7929218 bb8b1d85 817e934f 817e934f 85cf3599 85cf3599` | `receipts/part2/replay-md5.txt` |
+| Replay HWSTAT | **Exact:** 791 draws / 37 passes / 0 barriers / 14 copies / 320 uploads / 6 readbacks | `receipts/part2/replay-hwstat.txt` |
+| AU4 replay lines with gate off | 0 | `receipts/part2/replay-au4-lines.txt` |
+
+The source revision remained `9056c08349cc29ad02a6d1a3a4133259019195af` plus the preexisting T-lane working tree and the local AU4 hunks. The Part 2 build succeeded on the first attempt (`receipts/part2/part2-build.log`). The replay ran with no arm files and with `PCSX2_AU4_CAPTURE` unset.
+
+## Part 2 full capture
+
+The T48/T65 closed-loop route passed TITLE, MENU, SC, ZC, SP, SM, Happiness SE, Rules, and race-entry gates. The race-entry screen differed from Rules by mean 12.6956; a race F8 was taken. `SC_RECORDS=17122` at the settled Select Character screen. The final raw file has 39,888 records, so it contains **22,766 records = 242.84 s of 36 kHz PCM after that screen**, including the route into the race. Video capture audio started before the title gate and stopped after race entry. The boot ran ~320 wall seconds under the 560 s script cap and the 600 s standing cap. See `receipts/part2/au4b-poll.log` and `capture-ssh.log`.
+
+| Capture | Pin / location |
+| --- | --- |
+| PCSX2 tag records | `/home/brad/au4/pcsx2-tag1.bin`; mini copy `~/dev/ssx3-work/AU4/pcsx2-tag1.bin`; 62,703,936 B; SHA-256 ×2 on bytesize and matching mini read `ebd23468999cc733f5ad305e5000881cb25e458decf247bf41f6a8b0e66f8dec` |
+| Layout and serials | 39,888 valid records, 39,888 unique serials 1–39,888, 0 duplicates, 0 serial gaps; EE vsync 1,228–26,730. The 4-byte vsync prefix makes each record 0x624 bytes. |
+| Derived tag-1 WAV | `~/dev/ssx3-work/AU4/pcsx2-tag1-36k.wav`, stereo s16 36 kHz, 425.472 s; SHA-256 `4c97b6328387599fba1f172f6089baf3e158911b6ad3ecdd27ad599fc2541acf` |
+| PCSX2 video | `/home/brad/au4/dat/PCSX2/videos/SSX 3_SLUS-20772_20260923204445.mp4`; mini copy `~/dev/ssx3-work/AU4/pcsx2-full-video.mp4`; 224,187,770 B; SHA-256 ×2 on bytesize and matching mini read `0d691ccb8bf44756e0c5a6c952238b92dcfeec3e81ac946a827a44529a53828a` |
+| Listenable PCSX2 audio | PCSX2's F12 `ToggleVideoCapture` MP4 audio, extracted with `ffmpeg -vn -c:a aac -b:a 96k -movflags +faststart` to `~/dev/ssx3-work/AU4/pcsx2-full-audio.m4a`; **310.976 s, 3,927,149 B (<5 MB)**, SHA-256 `5f5634449953f72966ba08a875b9a80fb94ccf6cb0e9f1d1d530d8e34913b40f` |
+| Byte use | `/home/brad/au4` 2.9 GB including Part 1 residue and the bounded Part 2 emulog (1,519,165,177 B), below the 6 GB cap. |
+
+The tag-1 WAV is the EE transport mix used for the numeric comparison. The `.m4a` is PCSX2's final listenable output and has its own capture clock; its duration differs from the concatenated 36 kHz tag record duration. Audio and game data are left in the work directories, not committed.
+
+## Part 2 comparison: menu music
+
+`compare.py` checks the tag layout, de-duplicates on serial, writes the PCSX2 WAV, and uses normalized waveform cross-correlation to find the shared menu music. AU2's raw `pcm-au2b.bin` has 13,963 valid unique records with no gaps; reconstituting it produces the **exact existing au2b WAV** (SHA-256 `2cd31f2cb34c26e394dffe2921bf0206d130bee00efb4f078a52d96ed4fbf406`). The strongest 5 s menu excerpt gave coarse correlation **0.98972**. A 1 s sample-resolution refinement gave **0.97331** at **PCSX2 lag +111.061556 s** (AU2 21–22 s maps to PCSX2 132.061556–133.061556 s). This clears the brief's 0.5 alignment gate. The measured table uses AU2 **5–35 s** and PCSX2 **116.061556–146.061556 s**, both within the menu section. Fixed-lag 5 s correlations over this span are 0.826–0.979 (`receipts/part2/menu-window-check.txt`).
+
+| Measure over the aligned 30 s menu excerpt | AU2 au2b | PCSX2 | Difference / relationship |
+| --- | ---: | ---: | ---: |
+| Bit-exact stereo frames | — | — | **0.0503%** |
+| RMS, s16 units | 4,884.52 | 4,754.21 | AU2/PCSX2 gain ratio **1.02741**; least-squares fitted gain **0.96658** |
+| RMS difference / PCSX2 RMS | — | — | **0.34988** |
+| Mean 384-frame seam delta / other delta | **1.26841** | **1.10758** | AU2 exceeds PCSX2 by 0.16083 |
+| Zero crossings/s, both channels combined | **5,117.97** | **5,339.23** | — |
+| Peak absolute sample | 32,652 | 28,424 | — |
+
+| Difference band | Difference RMS, s16 units | PCSX2 band RMS | Difference / PCSX2 band RMS |
+| --- | ---: | ---: | ---: |
+| 0–2 kHz | 1,332.51 | 4,575.93 | **0.29120** |
+| 2–6 kHz | 767.09 | 1,062.38 | **0.72206** |
+| 6–12 kHz | 510.55 | 650.70 | **0.78463** |
+| 12–18 kHz | 377.11 | 333.55 | **1.13062** |
+
+Definitions: bit-exact means both s16 channels match at a frame; gain ratio is AU2 RMS / PCSX2 RMS; difference RMS is from direct aligned subtraction without gain correction. Seam ratio is the mean absolute adjacent-sample delta at each capture's own 384-frame record boundary divided by the mean elsewhere. Zero crossings count sign changes across both channels. The band table uses one-sided FFT energy over the aligned difference and PCSX2 signal. The numerical receipt is `receipts/part2/comparison.json`. The equal-scale spectrogram pair is `receipts/part2/menu-spectrogram-pair.png` (1.4 MB, below 5 MB); the first 100 tag records' stats from each side are also in that receipt directory.
+
+The available race footage is relatively short after the long T48 menu route, and AU2's race track/position was not established as the same PCSX2 track. A search of four AU2 race excerpts against the last 90 s of PCSX2 PCM produced maximum absolute normalized correlations only 0.125–0.131 (`receipts/part2/race-alignment-check.txt`); this does not establish a common race waveform. Thus the pairwise table is limited to the menu, as the brief permits for differing EA Radio tracks. This is an alignment limit, not evidence about race mix quality.
+
+Two SHA-256 reads of the AU2 raw input (`1e34ea47d16582b5f403279b8db3dfd0eea4ae92b56caabe51fefd9c0609d2bf`) and WAV (`2cd31f2c…f406`) matched (`receipts/part2/au2-input-sha-read1/2.txt`). AU3's host-stream WAV was still **not found** in `~/dev/ssx3-work/AU3/run/` when Part 2 analysis finished; the optional AU3 comparison was not run.
+
+## Part 2 commands, receipts, and recommendation
+
+From `~/dev/ssx3`: `ssh bytesize "wsl -d Ubuntu -- bash -s" < local/research/AU4/au4-part2-build.sh` (one build), then the existing `au4-replay.sh` (one replay), then `au4-part2-cap.sh` (one boot/capture, redirected to `~/dev/ssx3-work/AU4/part2-capture-ssh.log`). The exact capture script includes its progress/size caps and all route gates. `au4-part2-get-tag.sh` and `au4-part2-get-video.sh` perform two SHA reads before transfer; `au4-part2-get-receipts.sh` retrieves the text proof. The analysis command was `/Users/brad/dev/ssx3-work/AU4/venv/bin/python local/research/AU4/compare.py --pcsx2-bin /Users/brad/dev/ssx3-work/AU4/pcsx2-tag1.bin --au2-bin /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --au2-wav /Users/brad/dev/ssx3-work/AU2/run/au2b-ee-mix-36k.wav --out /Users/brad/dev/ssx3-work/AU4 --pc-sc-record 17122`. The bytesize heavy-job checks were empty before build, replay, and capture. No mini P-lane lease was needed for PCSX2 on bytesize.
+
+**Recommended next action for the orchestrator:** use the strong menu alignment and the frequency-band table to choose a bounded EE decode/mix arithmetic check, while separately checking why AU2's tick seam ratio is higher. The aligned error exists across the menu waveform, with especially large relative 2–18 kHz differences; the seam ratio alone does not account for the full 0.34988 difference RMS. No causal verdict is declared by this worker.
