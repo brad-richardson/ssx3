@@ -1224,10 +1224,15 @@ with measured budgets, then 120 Hz simulation.
       covers source selection, phase, PSM, wrap, sample count and tile census;
       fixture and Mac calibration have not run. Gate:
       `local/research/N8D7C/ORCH-GATE.md`.
-- [ ] **N8D7D synthetic adapter fixture:** implement a bounded CPU fixture
-      with literal boundary-address expectations, nonuniform PSM16/32 pixels,
-      phase strides one/two, FBP/FBW and VRAM wrap. Check every 512×224 pixel
-      and all 448 tile counts; hand back gaps before Mac integration.
+- [x] **N8D7D synthetic adapter fixture FAIL_COMPILE_CAP (`b4f30c4`):**
+      twelve cases and literal boundary checks were written, but the first
+      compile used G43-relative includes from the wrong cwd. The one allowed
+      retry reached `volk.h` and failed because the include path omitted
+      `Granite/third_party/volk`. All case results remain unrun/null. No
+      game build or device action. Gate: `local/research/N8D7D/ORCH-GATE.md`.
+- [ ] **N8D7D2 fixture resume:** compile with the exact volk include path;
+      run once, check all 512×224 pixels, 448 tile counts, aliases and literal
+      offsets. Do not infer a GS cause from a synthetic fixture result.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
