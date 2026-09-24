@@ -2363,6 +2363,12 @@ with measured budgets, then 120 Hz simulation.
       aligned PCSX2 tag-1 clip `AU6-pcsx2-tag1-aligned.m4a`. Awaiting a
       fair re-listen. Rule: never cut a reference from a different
       capture's timeline; verify NCC before sending an A/B.
+- [ ] **AU7 stereo side channel:** Brad (09-24): corrected A/B sounds
+      more complete but ours has parts missing throughout, worse when
+      complex. Measured: Mid NCC 0.9985 but **Side (L−R) NCC 0.434,
+      −1.8 dB** (`local/research/AU7/midside.py`). AU6 build lacks E54C
+      (PINTEH lanes; PINTEH is in mixer candidate `0x3CB538`). AU7 =
+      sound HLE cherry-picked onto `04f3ace`, one boot, re-measure.
 
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
