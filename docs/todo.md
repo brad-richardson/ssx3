@@ -992,7 +992,19 @@ with measured budgets, then 120 Hz simulation.
       **N8C2 loader probe**, not a proven gameplay fix. Build one APK,
       then one Odin launch; verify HMI/driver identity, live GIF/presents
       and a race frame or stop at the first new failure. Device remains
-      unproved; no speed or frame claim from N8C1.
+      unproved; no speed or frame claim from N8C1. **N8C2 loader/backend
+      PASS, visible frame FAIL (0b2cabf):** app-local `libhardware.so`
+      returned `-ENOENT` on four gralloc calls; the bundled HMI mapped,
+      HAL opened, `[gs:parallel] init ok`, and nonzero GIF/presents carried
+      the route to tick 2087. One installed APK `86ee7b72…fc7640` and
+      pinned ELF/ISO matched double device SHA reads. The menu at tick 809
+      and race at 1844/2087 were viewed and are mostly black with striped
+      rectangular fragments. No usable race image, speed number, or
+      logged Vulkan device/driver identity. App force-stopped; PID absent,
+      Odin lease free. N8C2 source/APK remain local and diagnostic; do not
+      fold the shim yet. **N8D1 queued:** one bounded menu launch with the
+      N4-proven PNG writer to compare the host upload image with the
+      screencap, then choose the next stage to probe.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
