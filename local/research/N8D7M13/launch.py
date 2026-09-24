@@ -781,11 +781,14 @@ def run():
     (SCRATCH / "logcat-pid.txt").write_text("\n".join(lines) + "\n")
     (SCRATCH / "pktseq.txt").write_text(
         "".join(line + "\n" for line in lines if "GB4_PKTSEQ tick=" in line))
+    # Orchestrator amendment (13A gate): at STEP=1 the Mac's PKTSEQ stdout
+    # lines interleave with render-thread logs (13A §4), so PKTSEQ is
+    # best-effort here; the 2050 GB4_REPLAY rows remain the gate.
     pktseq = pktseq_rows(lines)
-    if pktseq is None:
-        raise RuntimeError("GB4_PKTSEQ rows not exactly 2050 ticks 1..2050 in order")
-    result["pktseq_rows"] = len(pktseq)
-    record(f"PKTSEQ rows=2050 ticks=1..2050 commands_last={pktseq[-1][2]}")
+    raw_pktseq = sum(1 for line in lines if "GB4_PKTSEQ" in line)
+    result["pktseq_rows"] = len(pktseq) if pktseq is not None else None
+    result["pktseq_lines"] = raw_pktseq
+    record(f"PKTSEQ best-effort exact={pktseq is not None} lines={raw_pktseq}")
     replay_ticks = replay_tick_rows(lines)
     if replay_ticks is None:
         raise RuntimeError("GB4_REPLAY rows not exactly 2050 ticks 1..2050 in order")
