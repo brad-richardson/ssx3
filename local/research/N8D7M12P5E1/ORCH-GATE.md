@@ -1,0 +1,5 @@
+# N8D7M12 Part 5E1 orchestrator gate — A for same-settings repeat script (2026-09-24)
+
+Read the full REPORT and worker commit `1a186e38` (`git show --check` passes). Independently diffed the P5E1 launcher against gated P5D1: only private scratch/output names, lease/result labels and header changed; the OFF env, APK/stream/runner/Turnip/HAL pins, exact 41-tick gate, device preflights, 600 s wall/progress/log/output caps and cleanup are unchanged. Reran `check.py --self-check` (33/33 A) and `py_compile`. Final script SHA-256 is `ad22755d07cd4ce87cbd6823144181389e0b50d2a2f081f3cf879f54b80af4ca`. No device action or repeat result occurred in this part.
+
+**A accepted for preparation only.** Release this exact SHA for one separate Odin OFF repeat with the same APK/stream/env/backend and compare all 41 hashes plus the viewed PPM against P5D1 OFF1. A preflight/cleanup failure voids the comparison. If GPU output differs, same-settings run-to-run variance is observed; if it matches, the earlier ON/OFF difference needs another controlled test. Neither outcome alone establishes the graphics root cause or speed.

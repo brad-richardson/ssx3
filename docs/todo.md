@@ -1529,9 +1529,13 @@ with measured budgets, then 120 Hz simulation.
       difference at tick850, before the removed flags act. **Causal
       comparison VOID**, no speed or root-cause verdict.
       `local/research/N8D7M12P5D2/ORCH-GATE.md`.
-- [ ] **N8D7M12 same-env repeat:** characterize Odin GPU hash/PPM
-      run-to-run variance with one separately gated OFF repeat before
-      another ON/OFF comparison.
+- [x] **N8D7M12 Part 5E1 OFF-repeat script A (`1a186e38`):**
+      P5D1 launcher copied with only private path/lease/result labels
+      changed; env and controls identical. Final script SHA
+      `ad22755d…af4ca`, checker33/33. No device action.
+      `local/research/N8D7M12P5E1/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5E2 same-env repeat:** release one exact-SHA
+      OFF2 replay, compare every hash row and viewed frame with OFF1.
 - [ ] **N8D7M12 Mac OFF replay:** run a separately gated same-binary
       Mac control with the exact stream after the Odin OFF result.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
