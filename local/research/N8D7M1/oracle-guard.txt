@@ -1,0 +1,38 @@
+# N8D7M1 oracle preprocessor-fence check (Mac N8D7L worktree)
+# file: ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp  SHA 84a13a80686be8d4ed17750a9399d298ea6b998b98f48d3720b6b5bc839a4645
+
+## All preprocessor directives (line:)
+22:#if defined(__APPLE__)
+24:#endif
+25:#if defined(__ANDROID__) && defined(PS2X_HAS_PARALLEL_SHADOW)
+27:#endif
+29:#ifdef PS2X_HAS_PARALLEL_SHADOW
+35:#endif
+42:#ifdef PS2X_HAS_PARALLEL_SHADOW
+49:#if defined(__APPLE__)
+57:#else
+61:#endif
+223:#endif
+286:#ifdef PS2X_HAS_PARALLEL_SHADOW
+287:#if defined(__ANDROID__)
+381:#endif
+927:#if defined(__ANDROID__)
+935:#endif
+1025:#endif
+1030:#ifdef PS2X_HAS_PARALLEL_SHADOW
+1032:#else
+1034:#endif
+1048:#ifdef PS2X_HAS_PARALLEL_SHADOW
+1050:#else
+1053:#endif
+
+## Oracle-relevant symbols
+179:constexpr OracleControl kOracleControls[8] = {
+190:bool oracleDecodeCensus(const uint8_t *vram, uint32_t fbp, uint32_t fbw,
+667:                        const char *oracleEnv = std::getenv("PS2X_N8D7L_ORACLE");
+686:                                for (const auto &c : kOracleControls)
+703:                                    if (!oracleDecodeCensus(vram, shot.selected_fbp, shot.selected_fbw,
+712:                                        std::cerr << "[n8d7l] oracle_controls=";
+717:                                                        vram + (kOracleControls[i].byte & kOracleVramMask),
+721:                                                          (i ? "," : ""), kOracleControls[i].byte, word);
+728:                                        std::cerr << "[n8d7l] oracle_input_equal=" << oracleInputEqual
