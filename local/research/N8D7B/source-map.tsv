@@ -1,0 +1,7 @@
+step	source_anchor	input	output	uncertainty
+backend priv sync	ssx3-work/N8D6A/PS2Recomp/ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp:247	GSRegisters m_priv; presentation tick	GSInterface priv registers copied by syncPriv at line 654	No logged per-field values in the allowed excerpt
+VRAM flush/barrier	ssx3-work/G43/parallel-gs/gs/gs_renderer.cpp:1116	pending transfers, clears, draw/copy commands	flush_submit submits async transfer with wait then direct command; interface flush precedes vsync	A raw host map may reflect buffers.cpu rather than scanout buffers.gpu
+circuit input binding	ssx3-work/G43/parallel-gs/gs/gs_renderer.cpp:4278	promoted image if present; otherwise buffers.gpu VRAM	selected sample_quad program and binding 0	Promotion identity for N8D6C frame is not in allowed excerpt
+shader address/decode	ssx3-work/G43/parallel-gs/gs/shaders/sample_circuit.frag:115	frag coordinate, phase, DISPFB fields, PSM, VRAM mask	GS swizzle address then 16/32-bit payload to FragColor	Included headers implement swizzle/rgba16 helpers but are outside allowed reads
+circuit1 attachment	ssx3-work/G43/parallel-gs/gs/gs_renderer.cpp:4784	DISPFB1, sampling rect, chosen VRAM/promoted input	Circuit1 image attached and drawn by sample_crtc_circuit	No independent decoded input image is exposed
+stage tap	ssx3-work/N8D6A/PS2Recomp/ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp:370	shot.circuit1 image	stage tile counts from same n8d5 tile compute program	Stage tap is downstream of sample_quad and shares output-stage tile shader
