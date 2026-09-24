@@ -1652,11 +1652,18 @@ with measured budgets, then 120 Hz simulation.
       dispatch and screen/input route remain unknown. Repeating the
       empty-card I26-FAST boot would repeat E55D4/D5's zero-call result.
       `local/research/E55D7/ORCH-GATE.md`.
-- [ ] **E55D8 save-menu route discovery:** locate a real login/save screen
-      and supported button path from existing menu evidence, then
-      predeclare one bounded empty-card detour probe. Only after a real
-      GetDir/Read record, design a changed-card A/A baseline. Park
-      ExternalWake policy until a production poster is found.
+- [x] **E55D8 bounded route inventory PASS/outcome C (`1ad99679`):**
+      15 reviewed files and two EE xref expansions show only the
+      title-to-race I26-FAST screen path; no observed save/login screen or
+      supported button detour in this bounded survey. Checker rerun passed,
+      with one cited-only row exempt from SHA re-read. No build/boot/card
+      action. `local/research/E55D8/ORCH-GATE.md`.
+- [ ] **E55D9 observed save-menu path:** capture a settled Main Menu
+      frame listing entries and one-button-at-a-time navigation toward
+      Options/Save, or an evidenced seeded-card title prompt. Only then
+      predeclare a bounded card detour. After a real GetDir/Read record,
+      design a changed-card A/A baseline. Park ExternalWake policy until
+      a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;

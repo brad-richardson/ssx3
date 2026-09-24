@@ -1,0 +1,9 @@
+# E55D8 orchestrator gate — PASS bounded outcome C, route still unknown
+
+Worker commit `1ad99679` (`Orchestrated-By: opencode`) contains a read-only inventory, checker and receipt. I read the full report/checker, reran the checker, independently reproduced both EE xref lists, checked the commit, and viewed the cited I26 title and Select Mode stills. No build, boot, device/card action or speed measurement occurred.
+
+The 15-file bounded inventory supports **outcome C within that inventory**: the I26-FAST route shows title → Single Event → character/peak/mode/event/rules → race, and no reviewed still or route entry shows a save/login screen or a button transition to one. The two static xref expansions find additional unlabeled callers, but no evidenced menu-to-card edge. The existing empty-card I26-FAST card probe already had zero GetDir/Read records, so repeating it is uninformative.
+
+The checker passes, including rejection of fabricated receipt paths/SHAs/citations. Its summary calls all nine evidence rows “SHA+citation ok,” but E9 is explicitly cited without a re-read SHA and the checker permits that; treat it as citation-only. The inventory cannot establish that no save screen or other input route exists anywhere in the game. The worker's broad “no other input script” statement is scoped to its bounded survey, not a repository-wide proof.
+
+Verdict: **PASS for bounded negative route inventory; no card-route reachability.** Next, obtain a settled Main Menu frame showing all entries and a controlled one-button-at-a-time path toward Options/Save, or an evidenced seeded-card title prompt, before predeclaring a card detour. A GetDir/Read status record would prove reachability only; guest-write bytes and changed-card A/A remain separate. No route or card mutation is authorized by this gate.
