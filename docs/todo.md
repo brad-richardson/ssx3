@@ -971,8 +971,18 @@ with measured budgets, then 120 Hz simulation.
       contains runner SHA `cdbaa6dd…eb033`, Build ID `28340bbe…0add`,
       and pinned Turnip SHA `717812c3…1ac29d`; no x86_64 member.
       Linked loader markers and runner-dir guard checked. No fork push
-      or app-runtime claim. **N8B2 queued:** one Odin install/launch to
-      prove app-process HMI, Turnip identity, live GS and visible race.
+      or app-runtime claim. **N8B2 FAIL at first runtime loader gate
+      (ace6463):** one install and one launch; installed APK, stock ELF
+      and ISO each matched pinned SHA twice. Same-PID log selected the
+      parallel backend and requested Turnip, then `dlopen` failed because
+      `libhardware.so` was unavailable in Android app namespace
+      `clns-7`. It failed closed before HMI, Granite, GIF/presents or a
+      race frame. The app was force-stopped, PID absent, lease free.
+      A prelaunch launcher check first rejected its own lease; it was
+      corrected before any `am start`, with no second install/launch.
+      Next: bounded ELF/public-library and `hw_get_module` call-path
+      audit before choosing one packaging/loader candidate. Device
+      remains unproved; no speed or frame claim.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
