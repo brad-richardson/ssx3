@@ -1,0 +1,76 @@
+--- N8D1/ps2_gs_parallel_backend.cpp
++++ N8D3/ps2_gs_parallel_backend.cpp
+@@ -14,6 +14,8 @@
+ #include <cstdlib>
+ #include <cstring>
+ #include <iostream>
++#include <fstream>
++#include <string>
+ #include <vector>
+ #if defined(__ANDROID__) && defined(PS2X_HAS_PARALLEL_SHADOW)
+ #include <dlfcn.h>
+@@ -293,6 +295,22 @@
+         if (!px)
+             return out;
+ 
++        const char *n8d3Flag = std::getenv("PS2X_N8D3_RAW_CAPTURE");
++        const bool n8d3Capture = n8d3Flag && std::strcmp(n8d3Flag, "1") == 0 &&
++                                 request.vsyncTick == 2050u;
++        const size_t n8d3RawBytes = static_cast<size_t>(w) * h * 4u;
++        const char *n8d3Dir = n8d3Capture ? std::getenv("PS2X_FRAME_DUMP_DIR") : nullptr;
++        auto n8d3Write = [](const std::string &path, const uint8_t *data, size_t count) {
++            std::ofstream file(path, std::ios::binary | std::ios::trunc);
++            if (!file) return false;
++            file.write(reinterpret_cast<const char *>(data), static_cast<std::streamsize>(count));
++            file.close();
++            return file.good();
++        };
++        bool n8d3RawOk = false;
++        if (n8d3Capture && n8d3Dir && n8d3RawBytes <= 4096u * 4096u * 4u)
++            n8d3RawOk = n8d3Write(std::string(n8d3Dir) + "/n8d3-raw.bin", px, n8d3RawBytes);
++
+         // Frontend contract: 640-pixel row stride (kHostFrameWidth), rows
+         // of `width` valid pixels, height <= 512.
+         constexpr uint32_t kStride = 640u;
+@@ -304,6 +322,41 @@
+                         px + static_cast<size_t>(y) * w * 4u, static_cast<size_t>(out.width) * 4u);
+         out.displayFbp = static_cast<uint32_t>(m_priv ? (m_priv->dispfb1 & 0x1FFu) : 0u);
+         out.sourceFbp = out.displayFbp;
++        if (n8d3Capture)
++        {
++            bool packedOk = false;
++            if (n8d3Dir && n8d3RawOk && out.width == w && out.height == h)
++            {
++                std::vector<uint8_t> packed(n8d3RawBytes);
++                for (uint32_t y = 0; y < h; ++y)
++                    std::memcpy(packed.data() + static_cast<size_t>(y) * w * 4u,
++                                out.pixels.data() + static_cast<size_t>(y) * kStride * 4u,
++                                static_cast<size_t>(w) * 4u);
++                packedOk = n8d3Write(std::string(n8d3Dir) + "/n8d3-packed.bin",
++                                      packed.data(), packed.size());
++            }
++            const VkFormat format = shot.image->get_format();
++            if (n8d3Dir)
++            {
++                std::ofstream meta(std::string(n8d3Dir) + "/n8d3-stage.txt", std::ios::trunc);
++                if (meta)
++                {
++                    meta << "tick=" << request.vsyncTick << " width=" << w << " height=" << h
++                         << " format=" << static_cast<uint32_t>(format)
++                         << " raw_bytes=" << n8d3RawBytes << " packed_width=" << out.width
++                         << " packed_height=" << out.height << " packed_stride=" << kStride
++                         << " displayFbp=" << out.displayFbp << " sourceFbp=" << out.sourceFbp
++                         << " raw_write=" << (n8d3RawOk ? 1 : 0)
++                         << " packed_write=" << (packedOk ? 1 : 0) << '\n';
++                    meta.close();
++                    if (!meta.good()) std::cerr << "[n8d3] metadata write failed" << std::endl;
++                }
++                else std::cerr << "[n8d3] metadata open failed" << std::endl;
++            }
++            std::cerr << "[n8d3] tick=" << request.vsyncTick << " raw=" << n8d3RawOk
++                      << " packed=" << packedOk << " format=" << static_cast<uint32_t>(format)
++                      << " size=" << w << "x" << h << " fbp=" << out.displayFbp << std::endl;
++        }
+ 
+         const uint64_t t1 = nowNanos();
+         c.readbackNanos.fetch_add(r1 - r0, std::memory_order_relaxed);
