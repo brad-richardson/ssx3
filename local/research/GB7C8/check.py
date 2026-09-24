@@ -92,12 +92,19 @@ check("row_gif_transfer", has(G + "gs_interface.cpp", "void GSInterface::gif_tra
 check("row_flush_submit", has(G + "gs_interface.cpp", "renderer.flush_submit(value);"))
 check("row_map_flush_wait", has(G + "gs_interface.cpp", "renderer.flush_submit(host_read_timeline);")
       and has(G + "gs_interface.cpp", "renderer.wait_timeline(host_read_timeline);"))
+check("row_check_flush_stats", has(G + "gs_renderer.cpp", "void GSRenderer::check_flush_stats()")
+      and has(G + "gs_renderer.cpp", "tracker.mark_memory_pressure();"))
+check("row_pressure_consume", has(G + "page_tracker.cpp", "flush_render_pass(FlushReason::PressureFlush);")
+      and has(G + "gs_interface.cpp", "tracker.flush_if_memory_pressure();"))
+check("row_overflow_caps", has(G + "gs_renderer.hpp", "MaxPrimitivesPerFlush")
+      and has(G + "gs_interface.cpp", "flush_render_pass(FlushReason::Overflow);"))
 
 # 4. independent capture scan: marker259 precedes packet5470; confounder counts
 def scan():
     pkt = 0
     pkt_off = {}
     marks = {}
+    inter = {}  # (lo_pkt, hi_pkt) kinds filled by caller ranges
     off = 8
     with open(CAPTURE, "rb") as fh:
         assert fh.read(8) == b"PS2XGSC1"
@@ -122,14 +129,43 @@ def scan():
                 break
     return pkt_off, marks
 
+
+def count_inter(lo_pkt, hi_pkt):
+    from collections import Counter
+    c = Counter()
+    pkt = 0
+    with open(CAPTURE, "rb") as fh:
+        assert fh.read(8) == b"PS2XGSC1"
+        while True:
+            hdr = fh.read(4)
+            if len(hdr) < 4:
+                break
+            (ln,) = struct.unpack("<I", hdr)
+            rec = fh.read(ln)
+            if len(rec) < ln:
+                break
+            kind = rec[0]
+            if kind == 1:
+                pkt += 1
+            elif lo_pkt < pkt <= hi_pkt:
+                c[kind] += 1
+            if pkt > hi_pkt:
+                break
+    return c
+
 pkt_off, marks = scan()
 t5470, o5470 = pkt_off.get(5470, (None, None))
 o259, p259 = marks.get(259, (None, None))
+o260, p260 = marks.get(260, (None, None))
 o300, p300 = marks.get(300, (None, None))
 o301, p301 = marks.get(301, (None, None))
 check("pkt5470_tick259", t5470 == 259, str((t5470, o5470)))
 check("marker259_precedes_packet5470", o259 is not None and o5470 is not None and o259 < o5470,
       str((o259, o5470)))
+check("marker260_first_post", o260 is not None and o5470 is not None and o260 > o5470
+      and p260 is not None and p260 - 5471 == 121, str((o260, p260)))
+c260 = count_inter(5470, p260 - 1) if p260 else {}
+check("marker260_no_interleave", sum(c260.values()) == 0, str(dict(c260)))
 check("confounder_300", p300 is not None and p300 - 5471 == 5001, str(p300))
 check("confounder_301", p301 is not None and p301 - 5471 == 5123, str(p301))
 
@@ -143,6 +179,16 @@ check("no_gpu_cause", "NOT CLAIMED" in rep)
 check("forbidden_bases_listed", all(s in rep for s in
       ["Packet-entry byte equality", "queued-batch counts", "marker259", "isolated words", "flush/submit added before the observation"])
       or all(s in rep.lower() for s in ["packet-entry", "marker259", "flush"]))
+# 6. review corrections present
+check("flush_exception", "check_flush_stats" in rep and "PressureFlush" in rep and "MaxPrimitivesPerFlush" in rep)
+check("sha_identity", all(s in rep for s in
+      ["5ccc962f080bbb1e1fc637155799823008409f2fd3b283d1f2f0e9d6eb5077f4",
+       "8071dd2edb5f51ae29a759afa8dd956765dc968f8a42d414bb8648769ac3c65a",
+       "b6fa3bdb8c2c03d659503ca98c637dcb865ccba3bb76a710ca4fed7dad39a738",
+       "unproved"]))
+check("marker260_recommended", "marker260 first" in rep.lower() and "PS2X_GS_REPLAY_PPM_TICKS=259,260" in rep)
+check("harness_rows", has(FORK + "/ps2xTest/src/ps2_gs_replay_tests.cpp", "bool dumpTick(uint64_t tick)")
+      and has(FORK + "/ps2xTest/src/ps2_gs_replay_tests.cpp", "if (!sampled)"))
 
 ok = not fails
 print("---")

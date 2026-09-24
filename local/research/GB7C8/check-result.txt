@@ -1,5 +1,5 @@
 RESULT B reason=all-match
-checks_pass=31 checks_fail=0
+checks_pass=40 checks_fail=0
 PASS fork_head
 PASS fork_clean
 PASS capture_sha
@@ -21,8 +21,13 @@ PASS row_addrpsm
 PASS row_gif_transfer
 PASS row_flush_submit
 PASS row_map_flush_wait
+PASS row_check_flush_stats
+PASS row_pressure_consume
+PASS row_overflow_caps
 PASS pkt5470_tick259
 PASS marker259_precedes_packet5470
+PASS marker260_first_post
+PASS marker260_no_interleave
 PASS confounder_300
 PASS confounder_301
 PASS verdict_B
@@ -31,3 +36,7 @@ PASS A_rejected
 PASS confounder_named
 PASS no_gpu_cause
 PASS forbidden_bases_listed
+PASS flush_exception
+PASS sha_identity
+PASS marker260_recommended
+PASS harness_rows

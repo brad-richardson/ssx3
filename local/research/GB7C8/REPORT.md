@@ -30,6 +30,29 @@ before marker300, 5123 before marker301). No GPU cause is claimed.
 
 Line citations below: fork paths at `f54adff`; paraLLEl-GS paths at
 `3a66c19` working tree (dirty — exact line numbers may shift; functions named).
+Because HEAD does not pin dirty content, SHA-256 of every cited dirty file is
+recorded in §0a; all behaviour claims are source-structure claims, and no
+built-behavior claim is made (binary provenance unproved, §0a).
+
+## 0a. Cited-source identity (orchestrator review)
+
+| File | SHA-256 (working tree at check time) |
+| --- | --- |
+| `G43/parallel-gs/gs/gs_interface.cpp` | `5ccc962f080bbb1e1fc637155799823008409f2fd3b283d1f2f0e9d6eb5077f4` |
+| `G43/parallel-gs/gs/gs_renderer.cpp` | `8071dd2edb5f51ae29a759afa8dd956765dc968f8a42d414bb8648769ac3c65a` |
+| `G43/parallel-gs/gs/gs_renderer.hpp` | `7f7a1e2b7d69014a02e91c790c070cfb4cabd1bf4dd7161cf128ac4caa2d48a3` |
+| `G43/parallel-gs/gs/page_tracker.cpp` | `96edd79a27a48e0a5dc84d130aea3da4c09f3111d9df65ee1986243ff4893fd1` |
+| `G43/parallel-gs/gs/gs_interface.hpp` | `b74f5d22e75629d57951e213d184ffaebe81e8f2c3bbeb65895bec9` |
+
+Replay binary observed (NOT pinned as built behaviour):
+`~/dev/ssx3-work/GB4/build/ps2xTest/ps2x_tests` (8,252,216 B, Sep 24 13:16)
+SHA-256 `b6fa3bdb8c2c03d659503ca98c637dcb865ccba3bb76a710ca4fed7dad39a738`.
+Build/source identity is **unproved**: no build was performed in this part,
+the binary postdates the GB7C7P2 build-5 binary of identical size, and which
+source revisions/flags produced it was not established. Any future run must
+rebuild from pinned sources and record binary + source SHAs at run time.
+`check.py` verifies strings/pins/scans only — it cannot prove runtime
+behaviour.
 
 ## 1. CPU fact to build on (GB7C7P2, accepted)
 
@@ -87,8 +110,35 @@ it proves nothing about GPU execution (GB7A gate correction).
 - Consequence: packet5470's 17 batches sit in the open render pass together
   with packets 5471+ until the next flush/vsync boundary. There is no
   per-packet submit boundary in the pinned code — batching across packets is
-  the normal case, and any forced mid-stream flush changes the batching the
-  comparison is supposed to measure.
+  the common case, but it is **not guaranteed**: mid-stream render-pass cuts
+  exist (correction, orchestrator review — verified in the dirty G43
+  worktree, see §3a). Whether packet5470 itself trips one is a runtime
+  question (accumulated counts unknowable without execution) and cannot be
+  settled from source alone.
+
+### 3a. Mid-stream render-pass cut exception (correction)
+
+`GSRenderer::check_flush_stats()` (`gs_renderer.cpp:879-909`) sets a memory
+pressure flag via `tracker.mark_memory_pressure()` when pending work exceeds
+thresholds (`MinimumPrimitivesForFlush` 4096, `MinimumRenderPassForFlush`
+1024, image-memory-per-flush budget, 100 MB scratch, 16k copies, palette
+uploads; `gs_renderer.cpp:31-39,884-909`). The flag is consumed on draw paths
+by `PageTracker::flush_if_memory_pressure()` → `flush_render_pass(
+PressureFlush)` (`page_tracker.cpp:965-976`) at `handle_tex0_write`
+(`gs_interface.cpp:1629`) and `post_draw_kick_handler` (`:3811-3823`), the
+latter also cutting on `Overflow` caps (`MaxPrimitivesPerFlush` 64k,
+`MaxTextures`, `MaxStateVectors`; `gs_renderer.hpp:154-156`). Further
+mid-stream cuts: `TextureHazard` (`gs_interface.cpp:1739,1747`) and
+`FBPointer` (`:1815`). So a render-pass boundary **can** fall inside or
+immediately around packet5470's batches under pressure — §3's "no per-packet
+submit boundary" overstates. What stands: (i) full Vulkan command submission
+still happens only at `flush()` → `flush_submit`, `vsync`, or the
+`map_vram_read` internal submit; a render-pass cut is segmentation, not
+completion/readback; (ii) every host-visible observation still forces
+`flush`/`flush_submit` + `wait`, i.e. the §5 intervention; (iii) pressure/
+overflow cut points depend on accumulated counts, so an added probe or forced
+flush perturbs them too. The A-rejection is unchanged; the B confounder
+(§6) is unchanged.
 
 CPU contrast (why the CPU tap has no GPU analogue): the CPU backend executes
 synchronously — `vertexKick` → `buildDrawBatch` → `m_backend->Submit(batch)`
@@ -190,15 +240,31 @@ Comparison steps (all at marker300, repeat at marker301):
 
 Confounder (must be named in any future report): marker300 is **5001 packets**
 after packet5470 (packets seen 5470 → 10472; ticks 259→300; independent scan:
-121 more tick259 packets, then 122/tick for ticks 260–299); marker301 is
-**5123 packets** after (packets seen 10594). Plus all kind-2 priv writes,
-kind-3 transfers and kind-5 native uploads interleaved in that span. A marker
-mismatch therefore narrows the stage only to "something in the 5001-packet
-prefix after packet5470" — it cannot be attributed to packet5470/batch10
-without an execution witness, which §5 shows does not exist nonperturbingly.
-(Marker260 is only 122 packets after packet5470, but the brief constrains this
-design to marker300/301 where the named PPM/frame infrastructure samples;
-a closer-marker variant is left to the orchestrator.)
+121 more tick259 packets, then 122/tick for ticks 260–299) plus 40 VBlank
+markers and 240 priv writes interleaved in that span (0 transfers/native/
+local-to-host/clear records); marker301 is **5123 packets** after (packets
+seen 10594). A marker mismatch therefore narrows the stage only to "something
+in the 5001-packet prefix after packet5470" — it cannot be attributed to
+packet5470/batch10 without an execution witness, which §5 shows does not
+exist nonperturbingly. (Prefer marker260 per §6a: 121-packet confounder.)
+
+### 6a. Marker260 first (orchestrator review; recommended before 300/301)
+
+Marker260 (offset 6702775, packets seen 5592) is the first post-packet
+marker: only **121 intervening packets** (5471..5591, all tick259) and
+**zero** interleaved non-packet records in that span (independent scan;
+compare 5001 packets + 40 markers + 240 priv writes before marker300, 5123
+before marker301). The existing harness can sample it: `dumpTick` accepts an
+arbitrary `PS2X_GS_REPLAY_PPM_TICKS` list (`ps2_gs_replay_tests.cpp:245-263`),
+and `GB4_FRAME` + PPM + `presentForDiagnostics` run for every named tick
+independent of `STEP` (`:880-906`, `if (!sampled) continue` only gates the
+hash rows at `:940`). `PS2X_GS_REPLAY_PPM_TICKS=259,260` (+`STEP=1` if
+per-tick hash rows are wanted) samples marker260 with no harness change.
+Recommendation: run the §6 matched comparison at **marker260 first** (same
+tick259, 121-packet confounder, no interleaved priv/transfer records); go to
+300/301 only if 260 agrees. The 300/301 design above is retained because the
+brief constrains it and the named PPM infrastructure already samples those
+ticks. Verdict stays B; no run and no cause claim in this part.
 
 Limits of B (state plainly): B can show (i) whether the inputs matched (A1),
 (ii) whether full/cropped FBP112 content around `(342,377)` and the two
@@ -213,30 +279,38 @@ source alone or from a later-marker comparison.
 | Claim | Evidence | Status |
 | --- | --- | --- |
 | Pins (fork `f54adff`, capture SHA `a6f75fb3…ad51851`, sidecar `5470 3` / 1,982,063 lines, paraLLEl source `/Users/brad/dev/ssx3-work/G43/parallel-gs @ 3a66c19` dirty) | §0 table; `CMakeCache.txt:899`; independent capture scan | VERIFIED |
+| Cited dirty-source identity (SHA-256 per file, §0a); binary provenance unproved, no built-behaviour claim | §0a table; observed binary SHA `b6fa3bdb…39a738` | RECORDED (identity unproved by design) |
 | Packet5470 enters paraLLEl via `RawGifPacket` → `gif_transfer` as recorded state, not executed commands | `gs_frontend.cpp:953-956`; `ps2_gs_parallel_backend.cpp:273-283`; `gs_interface.cpp:5191-` | SOURCE-GROUNDED |
-| 17 batches accumulate in open render pass; submission only at `flush()`/`vsync` | `gs_interface.cpp:5153-5166`; `gs_renderer.cpp:1116-`; live `Flush()` no-op `ps2_gs_parallel_backend.cpp:136`; `Present` flush+vsync `:153-154` | SOURCE-GROUNDED |
+| 17 batches accumulate in open render pass; full submit only at `flush()`/`vsync`/internal map submit — but mid-stream render-pass cuts exist (pressure/overflow/hazard) | §3a: `gs_renderer.cpp:879-909,31-39`; `page_tracker.cpp:965-976`; `gs_interface.cpp:1629,3811-3823,1739,1747,1815` | SOURCE-GROUNDED (exception recorded) |
 | Every VRAM observation forces flush/submit/wait | `map_vram_read` (`gs_interface.cpp:5126-5151`); `SnapshotVram` (`ps2_gs_parallel_backend.cpp:245-264`); `Present` copy+`wait_idle` (`:174-190`); frontend triple (`gs_frontend.cpp:804-812,858-864`) | SOURCE-GROUNDED |
-| **A** (nonperturbing per-packet witness exists) | none — §5 shows every candidate observation perturbs batching/timing | **REJECTED** |
-| **B** (bounded marker300/301 comparison narrows stage, limits stated) | §6 design; confounder 5001/5123 packets + priv/transfer records quantified by independent scan | **ACCEPTED (design only; no run performed)** |
+| **A** (nonperturbing per-packet witness exists) | none — §5 shows every candidate observation perturbs batching/timing (and cut points depend on counts) | **REJECTED** |
+| **B** (bounded marker comparison narrows stage, limits stated) | §6 design (300/301) + §6a marker260-first (121-packet confounder, harness samplable, no harness change) | **ACCEPTED (design only; no run performed)** |
 | **OTHER** (pin/path/citation gap) | none open — all pins verify, all cited rows read | NONE |
 | GPU cause of title damage | not tested; explicitly excluded | NOT CLAIMED |
 | Texture-word producer / whole glyph | unchanged gaps from GB7C6/GB7C7P2 | NOT CLAIMED |
 
 ## 8. Gaps
 
-- ParaLLEl-GS source is dirty at `3a66c19` (local G-lane patch stack on top);
-  line numbers cited are working-tree; a future run must pin the exact dirty
-  diff (or a clean commit) and re-verify rows. Canonical `~/dev/parallel-gs`
-  (`faf6400`) is unrelated to the GB4 build.
+- ParaLLEl-GS source is dirty at `3a66c19`; cited dirty files are pinned by
+  SHA-256 in §0a (not by HEAD). A future run must rebuild from pinned sources
+  and record binary + source SHAs at run time; the observed
+  `build/ps2xTest/ps2x_tests` SHA is receipt-only (provenance unproved).
+  Canonical `~/dev/parallel-gs` (`faf6400`) is unrelated to the GB4 build.
+- Whether packet5470's own batches trip a pressure/overflow render-pass cut
+  (§3a) is runtime-only: accumulated counts are unknowable without execution.
+  A future run's A1/input logging must not itself move the cut points it is
+  compared against — same-binary ON/OFF control required.
 - No per-batch TEX0/FRAME/UV log exists on the paraLLEl side (source-control
   gap, §4); wiring one is a source edit outside this read-only part.
 - No replay, boot, device action, or speed number in this part. `check.py`
-  verifies pins and cited rows from strings only — it cannot prove runtime
-  behaviour.
+  verifies pins, SHA strings and cited rows from strings/scans only — it
+  cannot prove runtime behaviour.
 - Recommended next action (for the orchestrator): gate this design, then
-  brief the §6 marker300/301 matched run (one binary per backend pair,
-  ON/OFF hash control, A1 log equality first) before any closer-marker or
-  per-packet instrumentation.
+  brief the matched run at **marker260 first** (§6a:
+  `PS2X_GS_REPLAY_PPM_TICKS=259,260`, A1 log equality first, one binary per
+  backend pair with ON/OFF control); go to 300/301 only if 260 agrees.
+  This review arrived after commit `016f4086`; the corrections above are
+  a second commit, no amend.
 
 ## 9. Receipts
 
