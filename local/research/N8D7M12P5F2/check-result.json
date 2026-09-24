@@ -1,0 +1,152 @@
+{
+  "verdict": "A",
+  "passed": 29,
+  "total": 29,
+  "rows": [
+    {
+      "name": "pin2x:gs_renderer.cpp",
+      "pass": true,
+      "detail": "py=85c29cb01b04 bin=85c29cb01b04"
+    },
+    {
+      "name": "pin2x:gs_interface.hpp",
+      "pass": true,
+      "detail": "py=3a1751b4a708 bin=3a1751b4a708"
+    },
+    {
+      "name": "pin2x:gs_renderer.hpp",
+      "pass": true,
+      "detail": "py=fae3261aebb2 bin=fae3261aebb2"
+    },
+    {
+      "name": "pin2x:backend",
+      "pass": true,
+      "detail": "c6135b3ce986"
+    },
+    {
+      "name": "rev:3a66c19",
+      "pass": true,
+      "detail": "3a66c1976170"
+    },
+    {
+      "name": "dirty:noted",
+      "pass": true,
+      "detail": " M CMakeLists.txt; m Granite; M gs/gs_interface.cpp"
+    },
+    {
+      "name": "head:differs:gs_renderer.cpp",
+      "pass": true,
+      "detail": "193111de6276"
+    },
+    {
+      "name": "head:differs:gs_interface.hpp",
+      "pass": true,
+      "detail": "b74f5d22e756"
+    },
+    {
+      "name": "head:differs:gs_renderer.hpp",
+      "pass": true,
+      "detail": "4066826a5f36"
+    },
+    {
+      "name": "neg:other-trees-differ",
+      "pass": true,
+      "detail": "G43 + dev parallel-gs both differ"
+    },
+    {
+      "name": "cite:gs_interface.hpp:286",
+      "pass": true,
+      "detail": "const void *map_vram_read(size_t offset, size_t size);"
+    },
+    {
+      "name": "cite:gs_interface.hpp:288",
+      "pass": true,
+      "detail": "void flush();"
+    },
+    {
+      "name": "cite:gs_interface.hpp:301",
+      "pass": true,
+      "detail": "ScanoutResult vsync(const VSyncInfo &info);"
+    },
+    {
+      "name": "cite:gs_interface.hpp:142",
+      "pass": true,
+      "detail": "bool deterministic_timeline_query = false;"
+    },
+    {
+      "name": "cite:gs_renderer.hpp:23",
+      "pass": true,
+      "detail": "struct ScanoutResult"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:5354",
+      "pass": true,
+      "detail": "flush_submit(0);"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:341",
+      "pass": true,
+      "detail": "device->wait_idle();"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:4759",
+      "pass": true,
+      "detail": "if (info.capture_selected_input)"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:4807",
+      "pass": true,
+      "detail": "staging_info.size = 4u * 1024u * 1024u;"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:5054",
+      "pass": true,
+      "detail": "if (info.capture_selected_input && result.selected_vram_stag"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:5314",
+      "pass": true,
+      "detail": "if (info.capture_scanout_stages)"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:1748",
+      "pass": true,
+      "detail": "uint64_t progress = query_timeline(*descriptor_timeline);"
+    },
+    {
+      "name": "cite:gs_renderer.cpp:5320",
+      "pass": true,
+      "detail": "vsync_last_fields[i] = std::move(vsync_last_fields[i - 1]);"
+    },
+    {
+      "name": "fork:a608ed1-clean",
+      "pass": true,
+      "detail": "a608ed1e161f"
+    },
+    {
+      "name": "receipts:cited",
+      "pass": true,
+      "detail": "6 SHAs"
+    },
+    {
+      "name": "lsp:stated-unavailable",
+      "pass": true,
+      "detail": "documentSymbol no-result noted"
+    },
+    {
+      "name": "verdict:none",
+      "pass": true,
+      "detail": "A-scope only"
+    },
+    {
+      "name": "gap:interface-cpp-unpinned",
+      "pass": true,
+      "detail": "gap explicit"
+    },
+    {
+      "name": "observable:bounded-no-boot",
+      "pass": true,
+      "detail": "static audit observable"
+    }
+  ]
+}
