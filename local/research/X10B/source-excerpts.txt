@@ -1,0 +1,89 @@
+# Pinned fork 293fd81; exact source slices with original line numbers. Omissions between slices are intentional.
+
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:1953-1964
+
+1953:                       cause, dmac ? 1 : 0, enabled ? 1 : 0);
+1954:         ps2_log::emitDrop("sched/setIrqCauseEnabled", "cause-range", dropArgs);
+1955:     }
+1956:     return KE_OK;
+1957: }
+1958:
+1959: void EeScheduler::dispatchIrq(bool dmac, uint32_t cause)
+1960: {
+1961:     assertExecutor();
+1962:     const uint32_t mask = dmac ? m_enabledDmacMask : m_enabledIntcMask;
+1963:     if (cause < 32u && (mask & (1u << cause)) == 0u)
+1964:     {
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2499-2509
+
+2499:     assertExecutor();
+2500:     processDueDeadlines();
+2501:     const uint32_t timerInterrupts = m_pendingEeTimerInterrupts;
+2502:     m_pendingEeTimerInterrupts = 0u;
+2503:     for (uint32_t timer = 0u; timer < 4u; ++timer)
+2504:     {
+2505:         if ((timerInterrupts & (1u << timer)) != 0u)
+2506:         {
+2507:             dispatchIrq(false, 9u + timer);
+2508:         }
+2509:     }
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2642-2645
+
+2642:         break;
+2643:     case EeEventType::VBlankStart:
+2644:         ++m_vsyncTick;
+2645:         ps2_e3::noteVBlank(m_vsyncTick); // E3b frame stamp
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2694-2705
+
+2694:             ps2_log::emitDrop("sched/vsync-callback", "no-table-entry", dropArgs);
+2695:         }
+2696:         dispatchIrq(false, 2u);
+2697:         break;
+2698:     case EeEventType::ExternalWake:
+2699:         completeExternalWait(event.id, event.value, KE_OK);
+2700:         break;
+2701:     case EeEventType::VBlankEnd:
+2702:         dispatchIrq(false, 3u);
+2703:         break;
+2704:     case EeEventType::Dmac:
+2705:         break;
+
+## ps2xRuntime/src/lib/ps2_memory.cpp:2278-2289
+
+2278:         raiseDStatChannel(0u); // VIF0 channel
+2279:         queueCompletedDmacCause(0u);
+2280:         m_ioRegisters[VIF0_CHANNEL + 0x00] &= ~0x100u;
+2281:         m_ioRegisters[VIF0_CHANNEL + 0x20] = 0;
+2282:     }
+2283:     if (hadVif1)
+2284:     {
+2285:         raiseDStatChannel(1u); // VIF1 channel
+2286:         queueCompletedDmacCause(1u);
+2287:         m_ioRegisters[VIF1_CHANNEL + 0x00] &= ~0x100u;
+2288:         m_ioRegisters[VIF1_CHANNEL + 0x20] = 0;
+2289:     }
+
+## ps2xRuntime/src/lib/Kernel/Syscalls/Interrupt.cpp:68-71
+
+68:     void dispatchDmacHandlersForCause(uint8_t *, PS2Runtime *runtime, uint32_t cause)
+69:     {
+70:         runtime->eeScheduler().dispatchIrq(true, cause);
+71:     }
+
+## ps2xRuntime/src/lib/ps2_runtime.cpp:1038-1048
+
+1038:                                          (cpuContext->vu0_fbrst & (1u << 10)) != 0u;
+1039:                                      m_vu1.state().tBitEnabled =
+1040:                                          (cpuContext->vu0_fbrst & (1u << 11)) != 0u;
+1041:                                      m_vu1.execute(m_memory.getVU1Code(), PS2_VU1_CODE_SIZE,
+1042:                                                    m_memory.getVU1Data(), PS2_VU1_DATA_SIZE,
+1043:                                                    m_gs, &m_memory, startPC, top, itop, 65536);
+1044:                                      cpuContext->vu0_vpu_stat =
+1045:                                          (cpuContext->vu0_vpu_stat & ~0x0600u) |
+1046:                                          (m_vu1.state().stoppedByD ? 0x0200u : 0u) |
+1047:                                          (m_vu1.state().stoppedByT ? 0x0400u : 0u); });
+1048:     m_memory.setVu1MscntCallback([this](uint32_t top, uint32_t itop)

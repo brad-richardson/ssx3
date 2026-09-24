@@ -1470,6 +1470,8 @@ with measured budgets, then 120 Hz simulation.
       about 27k. The corrected table and audit are in
       `local/research/X10/REPORT.md`; this does not score model accuracy.
       Retry as X10B with pinned symbol-located excerpts and a semantic
-      checker that permits explicit gaps.
+      checker that permits explicit gaps. **X10B queued:** the corrected
+      3,581-byte excerpt includes all nine asserted source anchors from
+      fork `293fd81`; the semantic checker verifies six domain/cause rows.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
