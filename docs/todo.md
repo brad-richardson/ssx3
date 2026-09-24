@@ -1580,7 +1580,14 @@ with measured budgets, then 120 Hz simulation.
       free, no speed claim. `local/research/N8D7M12P5M4/ORCH-GATE.md`.
 - [ ] **N8D7M12 worker-consumption observable:** instrument the P5F3
       bounded digest, gate build/package, then compare two same-settings
-      Odin runs; keep PrivWrite/32-bit/source-provenance limits explicit.
+      Odin runs; keep opaque PrivWrite, hash-collision and source-provenance
+      limits explicit.
+- [x] **N8D7M12 Part 5F4 permission stop (`5b4110d4`):** OpenCode `edit`
+      denied the first authorized private-fork source write; source stays
+      clean at `a608ed1`, zero build/replay/device actions. Source design
+      D1–D9 is an uncompiled handoff. Checker11/11 verifies receipts,
+      not implementation. Relaunch from private-worktree cwd after Astra
+      steering. `local/research/N8D7M12P5F4/ORCH-GATE.md`.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
