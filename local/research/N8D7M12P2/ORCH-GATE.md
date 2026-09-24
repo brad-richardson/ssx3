@@ -1,0 +1,7 @@
+# N8D7M12 Part 2 orchestrator gate — A for Android entrypoint source only (2026-09-24)
+
+Read the full REPORT, brief, checker, ssx3 worker commit `33fba2ef` and fork commits `1a5e3dc`+`a608ed1`. Reran `check.py` (50/50 PASS), independently read `main.cpp` around its Android entrypoint, the existing `stopLogcatRedirect()` implementation and the Part 1 core result API, and checked the fork's empty runner-dir diff and clean source commits. ssx3 `git show --check` flags three literal `+ ` blank lines in the embedded text patch receipt; its SHA matches the fork diff, while the fork source commits pass `--check`. This is a receipt-format exception, not a source-whitespace issue.
+
+The source has one Android-only branch entered solely by `PS2X_GS_REPLAY_ONDEVICE=1`, before guest path resolution, runtime creation or game boot. It rejects missing capture, non-parallel backend and missing bundled Turnip flag; then calls the shared replay core and gates all result flags. It flushes and drains the logcat pipe before replay-mode `_Exit`, including rejection, while the default-off game boot path remains intact. This meets **A for a source-grounded entrypoint only**.
+
+No Android compile, APK, stream staging or Odin run occurred. The NDK link, Turnip/HMI loader, log delivery and graphics result still require runtime evidence. Next gate: build/package an isolated arm64 APK with pinned Turnip/HAL and a source/ABI/runner guard; verify default-off behavior before a separate exact-stream Odin replay.

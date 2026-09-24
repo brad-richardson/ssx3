@@ -1479,12 +1479,17 @@ with measured budgets, then 120 Hz simulation.
       and one exact-stream Mac replay match the N8D7M6 baseline, including
       300/448 selected tiles and PPM bytes. No Android branch/build or
       Odin run. `local/research/N8D7M12/ORCH-GATE-P1.md`.
-- [ ] **N8D7M12 Part 2 Android entrypoint and packaging:** add dev-only,
-      default-off NativeActivity replay branch using the gated core,
-      build the APK and verify OFF-path packaging/loader assumptions.
-      Gate binary and exact 1.10 GB stream staging separately before
-      one bounded Odin launch; no graphics-cause or speed verdict from
-      a successful build.
+- [x] **N8D7M12 Part 2 Android entrypoint source A (`33fba2ef`,
+      private fork `a608ed1`):** one Android-only, default-off branch
+      enters the shared replay core with strict capture/backend/Turnip
+      flags and drains logcat before exit. Static checker50/50; no build,
+      APK or device action. `local/research/N8D7M12P2/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 3 Android build/package gate:** build the isolated
+      app branch with pinned Turnip/HAL and external codegen; verify
+      arm64 APK members, runner guard, new replay strings and default-off
+      control without an Odin launch. Gate binary and exact 1.10 GB
+      stream staging separately before one bounded Odin run; no cause or
+      speed verdict from a successful build.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
