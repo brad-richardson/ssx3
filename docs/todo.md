@@ -895,11 +895,18 @@ with measured budgets, then 120 Hz simulation.
       independent old-pixel read only after TEST accepts the write and a
       bounded ROI diff before claiming glyph shape. No replay, glyph
       producer or paraLLEl cause yet. `local/research/GB7C1/ORCH-GATE.md`.
-- [ ] **GB7C2 title-text pixel producer:** pin the first following
-      fbp112 carrier for tick600 packet47176, then one default-OFF CPU
-      pixel/ROI trace and same-stream replay through the carrier with
-      source texel and before/after crop proof. Defer tick699 candidate
-      until the first chain is resolved.
+- [x] **GB7C2 CPU text-composition trace PASS, displayed transfer OTHER
+      (`869f2659`, fork `7bd8349`):** tick600 packet47176 has 166 changed
+      traced pixels and 9 localized ROI diffs with T4 nibble/CLUT/RGBA
+      chains; tick601 packet47240 has 17 stable ROI links but sampled only
+      background rows, 24 old==new attempts and zero target-crop changes.
+      Viewed title text is already visible at tick600/601. The first
+      following carrier is pinned, but displayed glyph producer and
+      paraLLEl cause remain open. `local/research/GB7C2/ORCH-GATE.md`.
+- [ ] **GB7C3 title glyph-row carrier test:** pin an actual glyph-row
+      source/destination pair at packet47240 and distinguish a steady-state
+      same-value rewrite from missing transfer, with a bounded OFF control;
+      no GPU-cause claim until this link is discriminated.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
