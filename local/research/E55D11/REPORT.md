@@ -115,3 +115,88 @@ or API claim (`check.py` asserts 0 frames and 0 probe files pre-run).
 
 **Do not boot until the orchestrator reviews the exact script SHA and
 explicitly releases Part 2 in the worker pane.**
+
+---
+
+# E55D11 — Part 2 run (one released Mac boot, 2026-09-24)
+
+Worker: opencode (Muse Spark Contributor Go). Brief:
+`local/muse/prompts/E55D11P2.md`. Exactly one boot with the approved
+script SHA `f5434273…476b` (verified before launch; script unedited).
+Per-worker `OPENCODE_CONFIG_CONTENT` exception (confined to
+`~/dev/ssx3-work/E55D11/**`) verified with a tiny sentinel file and
+removed before the run (lane dir absent again afterwards). N-lane
+cmake/ninja build was active at first check, so the boot waited per the
+brief; the orchestrator confirmed N held, `ps` showed no clang/ninja,
+then the single `python3 local/research/E55D11/e55d11_boot.py --label S1`
+run proceeded. No fork/source edit, build, Odin/iOS action,
+seeded-card change, push, board/global config edit, or upstream
+contact. No speed claim (diagnostic taps build).
+
+## 1. Evidence table (run)
+
+| Item | Value |
+| --- | --- |
+| Result | `bound=target`, `elapsed_s=54.823`, `last_hash_tick=1490`, `phase2_extra_s=1.026`, `runner_pid=45235` (gone; SIGTERM rc=-15 expected), mini slot 1 claimed + released (slots free) |
+| Frame proof | tick 1480 `snap-1480t-0053.41s.png` ≥ stop 1460 |
+| Caps | `log_bytes=707899` ≤ 16 MiB; `frames_bytes=11879874` ≤ 2 GiB; wall 500 / progress 120 / grace 120 (run-control metrics, not speed) |
+| Cards | `mc0`/`mc1` empty at start AND end; manifest SHA `f9401596…ccb9ce` unchanged |
+| Padscript (boot.log, 15 rows) | `armed n=7 clock=vsync`; presses Start `0x0008` ×1, Square `0x8000` ×1, Down `0x0040` ×4 (separate i=2..5), Cross `0x4000` ×1, in plan order; 7 releases; no other input. D4 fired `now=20203ms at=20187ms` (16 ms late; D4→Cross gap still 134 ticks ≥ 60) |
+| Probe (2864 lines) | `getdir` n=4, ALL at vsync 118/122/126/223 (all < Cross 1360), ALL `ok=0 reason=empty len=0 bytes=(empty)`, port=0 slot=0; `mcread` n=0; `pad` n=2860 (2604 pre-Cross, 256 at/after 1360, all ok len=32) |
+| Private lane | `~/dev/ssx3-work/E55D11/run/S1/` (boot.log + .gz, probe.log + .gz, result.json, frames/, empty mc0/mc1). Raw log/probe kept; `.gz` copies made only after the runner exited |
+| Curated (committed) | `snap-1284t-0047.36s.png` + `.txt`, `snap-1454t-0053.41s.png` + `.txt`, `s1-result.json`, `s1-receipts.txt`, `check-p2.py`. PNG total 281925 B ≤ 2 MiB; text 245 B + receipts ≤ 512 KiB |
+| Checker | `check-p2.py` 42/42 PASS (pins, route, caps, cards, pad rows, probe counts, frame/probe SHAs; visual/API labels NOT asserted) |
+
+## 2. Frames (worker-viewed; visual verdict rests with the orchestrator gate)
+
+| File (meta tick) | Reading |
+| --- | --- |
+| `snap-1284t-0047.36s.png` (tick 1283; \|1284−1290\|=6, nearest pre-Cross full frame) | Title **Options**; rows Game Options, Sound Options, Controller Settings, HUD Options, **Save/Load (highlighted orange bar)**, Enter Cheat, Credits, DONE; footer "Save or load your SSX 3 progress." + X Select / Triangle Previous |
+| `snap-1454t-0053.41s.png` (tick 1454; \|1454−1460\|=6, nearest post-Cross full frame) | Title **Save/Load**; rows **Save game (highlighted orange bar)**, Load game, Save options, Load options, Load replay, New game; footer "Save your progress." + X Select / Triangle Previous |
+| Adjacent (viewed, not curated) | 1312: same Options + Save/Load highlight as 1284. 1368 (8 ticks after Cross): still Options + Save/Load highlight (transition in flight). 1480: same Save/Load submenu as 1454. No unexpected screen |
+
+Snapshot filename ticks are approximate (1 s wall grid tagged with the
+latest det-hash tick); actual metadata ticks and SHAs are recorded in
+`s1-receipts.txt`.
+
+## 3. Outcome vs predeclared gate
+
+Pre-Cross full frame exists and shows the Save/Load row highlighted;
+post-Cross full frame shows a readable Save/Load submenu. Card side:
+zero `getdir`/`mcread` at/after Cross and zero copied table/read bytes
+anywhere — only four early `ok=0 reason=empty` GetDir probes (title
+boot, empty cards), which prove API reach but not guest-written bytes.
+That is predeclared **B** (readable Save/Load result screen without
+copied-GetDir/mcRead evidence). The orchestrator makes the visual
+verdict.
+
+## 4. Commands run (one boot only)
+
+- Pre-run: script SHA check, sentinel write/remove under
+  `~/dev/ssx3-work/E55D11/`, `ps` heavy-job checks (N build held per
+  orchestrator coordination), E55D10 `ORCH-GATE-P2.md` read
+- `python3 local/research/E55D11/e55d11_boot.py --label S1` → `bound=target` (sole boot/build/run this part)
+- Post-run: PID-gone + lease-free checks, frame viewing (1284, 1454, 1312, 1368, 1480), padscript/probe parsing, `gzip -k` of closed boot.log/probe.log, `cp` of 2 PNG + 2 txt + result.json into `local/research/E55D11/`, `python3 local/research/E55D11/check-p2.py` → 42/42 PASS
+- `git log -1`, `git status`, stage explicit paths only, commit `[E55D11] Part 2` with `Orchestrated-By: opencode`, no push
+
+## 5. Gaps (stated plainly)
+
+- Tick tags remain snapshotter-approximate; the curated pre/post frames
+  are ±6 ticks from their targets with metadata ticks recorded.
+- Why Save/Load selection issued no `sceMcGetDir`/`sceMcRead` (deferred
+  read, different API, or no read on submenu open) is unobserved; only
+  the absence in this probe window is evidenced.
+- The four Down pulses' row-by-row travel is inferred from endpoints
+  (Options settled → Save/Load highlighted), not from per-press frames.
+- Part-1 `check.py` is not re-run post-curation (it asserts the
+  no-frames pre-run state by design); `check-p2.py` is the post-run
+  checker.
+- No `s1-stdout.txt` is committed: stdout was observed live
+  (`bound=target` line matches `s1-result.json`); only byte-verifiable
+  copies are committed.
+
+Recommended next action: orchestrator visual gate on the two curated
+frames (confirm Save/Load highlight + submenu readings), then decide
+whether a follow-up lane presses into the Save/Load submenu (e.g. one
+Cross on Save game) with the same probe taps to test for deferred
+card-API calls.

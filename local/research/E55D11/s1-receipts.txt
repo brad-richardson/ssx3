@@ -1,0 +1,54 @@
+E55D11 Part 2 S1 run receipts (one released Mac boot, 2026-09-24)
+Worker: opencode (Muse Spark Contributor Go). Brief: local/muse/prompts/E55D11P2.md.
+
+Command (run exactly once, script unedited):
+  python3 local/research/E55D11/e55d11_boot.py --label S1
+Script SHA (pre-verified): f5434273f8384932502f47fc98f80ce5f5c313e3077c41ee8167c520535c476b
+Route: 10611:start:250,13680:square:150,16683:down:150,17851:down:150,19019:down:150,20187:down:150,22689:cross:150
+  (START tick636, Square tick820, Downs 1000/1070/1140/1210, Cross tick1360; Fpre 1290, Fpost/stop 1460)
+
+Pins (two matching pre-boot SHA reads):
+  fork HEAD bab6eb382673155ffd756fe8db265964eeff9703, worktree clean, runner-dir guard exit 0
+  runner e282c8a79cb4ce3e616244d1cfb0b5ab6d522e2f262408c6ffa92860f211643f
+  iso    3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+  elf    1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+  codegen 8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3
+
+Stop/lease (from private lane result.json, also saved here as s1-result.json):
+  bound=target, runner_pid=45235 (gone after run; SIGTERM rc=-15 expected), mini slot=1 (released; slots free)
+  elapsed_s=54.823, last_hash_tick=1490, phase2_extra_s=1.026
+  frame_proof tick=1480 file=snap-1480t-0054.41s.png (>= stop 1460)
+  log_bytes=707899 (<=16 MiB), frames_bytes=11879874 (<=2 GiB), probe_bytes=413814
+  cards: mc0/mc1 empty at start AND end, manifest sha256 f94015964371517ad24d36c71ea0c9bdc6fb4a23f3c46d7cc0def479feccb9ce (unchanged)
+  No speed claim (diagnostic taps build).
+
+Private lane: ~/dev/ssx3-work/E55D11/run/S1/ (boot.log, boot.log.gz, probe.log, probe.log.gz, result.json, frames/, mc0/, mc1/)
+  probe.log sha256 23673a698144a1a4b0a8ed0e5a32c609b291e4185e319e5e07d59e4bc53a0695
+  boot.log  sha256 b2e49fec37ef52e2a9ef3327db56ac95e2992d8b63303566414e08943620f8c6
+  result.json sha256 297c331f60d799693fc6c068ac7db34d8ffe2affbd81f4096702176ad6aaf3e3
+
+Padscript rows in boot.log (15 total = 1 armed + 7 press + 7 release; no other input):
+  armed n=7 clock=vsync; press Start 0x0008 x1, Square 0x8000 x1, Down 0x0040 x4 (separate i=2..5), Cross 0x4000 x1; 7 releases
+  D4 press now=20203ms at=20187ms (16 ms late vs plan; gap D4->Cross still 134 ticks, >= 60)
+
+Probe counts (vsync tick = GS vsyncTick; Cross at tick 1360):
+  getdir n=4, ALL pre-Cross at vsync 118/122/126/223, ALL ok=0 reason=empty len=0 bytes=(empty); port=0 slot=0
+  mcread n=0 (no mcRead call anywhere in the run)
+  pad n=2860 (2604 pre-Cross, 256 at/after tick1360; all ok len=32)
+  => card-API reach proven only as early empty-card GetDir probes; NO getdir/mcread at/after Cross, NO copied table bytes.
+
+Curated frames (full-resolution, nearest snaps to targets; worker-viewed):
+  pre-Cross  snap-1284t-0047.36s.png (meta tick=1283, |1284-1290|=6, nearest)
+    sha256 21eaa92db12ffdcf98722d80cb61a29b417ce3968f8cc81e0b738fdd84d57d1a
+    meta: seq=1271 tick=1283 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=fdffe612 smode2=0x1 pmode=0xff21
+    sha256(snap-1284t-0047.36s.txt)=5127cfa0aba5e3e42f896afed61d98dcc2dad2db5f39a4acd9ea4f54647bab3a
+    reading: title "Options"; rows Game Options / Sound Options / Controller Settings / HUD Options / Save/Load (highlighted orange bar) / Enter Cheat / Credits / DONE; footer "Save or load your SSX 3 progress." + X Select / Triangle Previous
+  post-Cross snap-1454t-0053.41s.png (meta tick=1454, |1454-1460|=6, nearest)
+    sha256 3a40e69a0e502dbc8c676019ecb619dcc1eed1acc753902605c7b45eddeb105c
+    meta: seq=1442 tick=1454 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=bab9035 smode2=0x1 pmode=0xff21
+    sha256(snap-1454t-0053.41s.txt)=d45909e3e4a9604ad57e8770e6c94e0ac4fa145949abbc51c61d8427501385ab
+    reading: title "Save/Load"; rows Save game (highlighted orange bar) / Load game / Save options / Load options / Load replay / New game; footer "Save your progress." + X Select / Triangle Previous
+  adjacent viewed (not curated): snap-1312t (Options + Save/Load highlighted, same as 1284), snap-1368t (8 ticks after Cross, still Options + Save/Load highlighted, transition in flight), snap-1480t (Save/Load submenu, same as 1454). No unexpected screen.
+  curated PNG bytes total 281925 (<= 2 MiB); curated text 245 B (<= 512 KiB)
+
+Outcome per predeclared gate: B (readable Save/Load result screen WITHOUT copied GetDir table or successful mcRead; the 4 getdir ok=0 empty calls prove API reach only). Visual verdict rests with the orchestrator gate.
