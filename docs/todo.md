@@ -887,10 +887,19 @@ with measured budgets, then 120 Hz simulation.
       frames show legible copyright text and button labels. No unique
       glyph producer or paraLLEl cause proved. Gate:
       `local/research/GB7B/ORCH-GATE.md`.
-- [ ] **GB7C title-text pixel producer:** one bounded same-stream trace
-      of off-screen T4 batch pixel changes and following display blits
-      around text appearance; require source texel and before/after crop
-      proof before naming a glyph producer.
+- [x] **GB7C1 text pixel-trace design PASS with bounds (`0378a7b9`):**
+      source map connects tick600 packet47176 off-screen T4 sprites to
+      CPU SampleTexture/WritePixel and later display-column blits. Exact
+      post-candidate carrier packet remains a private-log lookup; the
+      example packet47117 precedes the candidate. Gate requires an
+      independent old-pixel read only after TEST accepts the write and a
+      bounded ROI diff before claiming glyph shape. No replay, glyph
+      producer or paraLLEl cause yet. `local/research/GB7C1/ORCH-GATE.md`.
+- [ ] **GB7C2 title-text pixel producer:** pin the first following
+      fbp112 carrier for tick600 packet47176, then one default-OFF CPU
+      pixel/ROI trace and same-stream replay through the carrier with
+      source texel and before/after crop proof. Defer tick699 candidate
+      until the first chain is resolved.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
