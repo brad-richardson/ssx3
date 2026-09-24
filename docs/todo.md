@@ -1391,10 +1391,21 @@ with measured budgets, then 120 Hz simulation.
       words do not prove full-frame content, and a broad tick2052 image
       would not prove tick2050 copy timing. No build/run/device action.
       `local/research/N8D7M4/ORCH-GATE.md`.
-- [ ] **N8D7M5 executed-word Mac validation:** on pinned N8D4 stream,
-      trace actual CPU backend changed writes at selected FBP112 GS
-      addresses with packet/tick identity, verify OFF/ON frame equality,
-      and choose genuinely discriminating pixels before another Odin run.
+- [x] **N8D7M5 executed-word Mac validation PASS (`21b3e53f` +
+      correction `f630af5b`, fork `a8cfefa`):** direct CPU replay of
+      pinned N8D4 stream traces 1,980 executed changes at six FBP112
+      words on four pages; each first changes zero→nonzero, with
+      packet/tick/kind and submit-count witness. One isolated build,
+      585/585 suite, ON/OFF CPU replay hashes and viewed tick2050 frame
+      identical. Only 2/6 CPU finals equal the Mac paraLLEl selected
+      controls, so CPU values cannot be the Odin GPU oracle. No device
+      or speed claim. `local/research/N8D7M5/ORCH-GATE.md`.
+- [ ] **N8D7M6 same-run Odin stream + raw snapshot:** one pinned
+      install/launch with both existing capture flags, then Mac
+      paraLLEl replay of that exact new stream. Compare selected
+      descriptor, full 448-tile vectors and bounded words; classify
+      stream/content vs selection vs device-specific selected-VRAM
+      divergence, leaving missing-write versus copy-order mechanism open.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
