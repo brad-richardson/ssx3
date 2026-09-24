@@ -5,10 +5,10 @@
 | Pin | `17e90ded3689685ad359b76a9168c80a1f752e2d` (N8B1/PS2Recomp, confirmed) |
 | Excerpt | `local/research/X13/excerpt.txt` (4.3 KiB, source lines 236–310) |
 | Checker | `python3 local/tooling/orch/check_x13.py local/research/X13B/rows.tsv` → **7/7** |
-| Time | ~30 s (well under 5 min cap) |
-| Context | ~4.3 KiB excerpt + 28-line checker + 7-line brief ≈ ~5.5 KiB (< 15k) |
-| LSP | `goToDefinition` on `m_iface->vsync(vsync)` at line 253 → **empty** (N8B1 checkout not indexed by the LSP in this repo) |
-| Gaps | LSP lookup could not resolve `vsync` — expected since the pinned source is a separate checkout; no inference drawn |
+| Time | 1m 38s wall time shown by the opencode pane; the first table/checker came earlier |
+| Context | 19.2k tokens (15%) shown by the pane at completion, above the brief's 15k target. The worker also read the 28-line checker, beyond the brief's two named reads; no other source file was read |
+| LSP | `goToDefinition` on `m_iface->vsync(vsync)` at line 253 → **empty** |
+| Gaps | Empty LSP output does not establish whether the checkout lacked an index or where `vsync` is defined. No cause verdict was requested |
 
 ## rows.tsv
 

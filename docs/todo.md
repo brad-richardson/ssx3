@@ -1701,5 +1701,19 @@ with measured budgets, then 120 Hz simulation.
       relationship. The verified table names the Vulkan readback and
       host texture-copy sites for N8D1; it does not diagnose the black
       Android frame. Keep local Qwen on small scripted extraction jobs.
+- [x] **X13 dense partial / X13B sparse PASS (09c2930):** same 4,310-byte
+      pinned N8B1 excerpt and seven ordered scanout→barrier→copy→submit→
+      wait→map→pack source lines. Both tables passed the exact checker 7/7.
+      Dense took about eight minutes to write rows, exceeded its 15k
+      context target (~21.7k visible), and its LSP call/report were still
+      pending at the cap; `X13/REPORT.md` is an orchestrator audit, not a
+      worker verdict. Sparse completed in 1m38 (~19.2k visible), returned
+      an empty LSP result and committed the table/report. It read the small
+      checker despite the two-file read limit; no other source file was
+      read. The worker's 30 s, context and index explanations in its
+      initial report were corrected at gate. Neither trial identifies
+      whether Odin loses pixels while generating the scanout image or
+      transferring it to host memory. Use sparse for exact scripted
+      extraction; treat empty LSP as an unresolved tooling result.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
