@@ -851,8 +851,22 @@ with measured budgets, then 120 Hz simulation.
       supplied four; PKLOG then consumed 61.6 MB and hit the 64 MiB
       combined cap. No second boot or fork push. Optional taps-ON suite
       was not run (the two normal suites used the same taps-OFF build).
-      GB6B repairs only the capture setup: three race targets, no PKLOG,
-      one bounded boot; then the orchestrator gates the fold.
+      **GB6B failed capture gate (593821a):** a three-tick/no-PKLOG
+      driver saved one race frame but raised `AttributeError` while
+      applying its frame-byte cap to a string path. It killed its own
+      runner and released the mini lease; no second frame or tick 2200.
+      Orchestrator-reviewed failure report and frame. **GB6C PASS
+      (orchestrator):** a copy changed only that cap expression to
+      `Path(p).stat()`, passed script preflight and two input-SHA reads,
+      then one leased boot reached tick 2218 in 70.65 s. Two viewed
+      race frames at ticks 1810/2050 show HUD `00:00:01→00:00:05` and
+      progress `0→1%`; distinct frame SHAs, rider/terrain still visible.
+      The wrapper intentionally sent SIGTERM at target (`rc=-15`), with
+      no observed crash. Logs 6.0 MB, no PKLOG; lease released. Runner-
+      dir diff empty. The orchestrator fast-forward pushed fork `ssx3`
+      `1aaed05→293fd81`, verified remote tip. GPU is opt-in; text damage
+      and dark composite persist. Next: title-text producer/state probe,
+      then Android Turnip integration and Odin validation.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
