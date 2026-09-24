@@ -1795,11 +1795,16 @@ with measured budgets, then 120 Hz simulation.
       Cross at1360, and no mcRead occurred. One bounded Mac boot, cards
       unchanged, mini slots free; no speed claim.
       `local/research/E55D11/ORCH-GATE-P2.md`.
-- [ ] **E55D12 bounded Load game selection:** from the observed submenu
-      move one row from Save game to Load game, view the highlight, then
-      Cross once and view the result. Use fresh empty scratch cards and
-      distinguish early boot card calls from any post-choice GetDir/Read;
-      only a real post-choice call licenses a changed-card A/A baseline.
+- [x] **E55D12 Part 1 script approved (`d9c41ef6`+`edc951b3`):**
+      prepared the E55D11 menu spine plus one Down at1540, pre-choice
+      Load game highlight target1620, one Cross1700 and final frame≥1800.
+      Probe distinguishes any post-choice GetDir/mcRead from early calls;
+      self-check33/33, checker46/46. No boot or card verdict.
+      `local/research/E55D12/ORCH-GATE-P1.md`.
+- [ ] **E55D12 Part 2 bounded Load game choice:** run the exact approved
+      script once with fresh empty scratch cards. View the Load game
+      highlight/result frames and inspect any post-choice GetDir/Read.
+      Only a real post-choice call licenses a changed-card A/A baseline.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
