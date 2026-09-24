@@ -1158,7 +1158,9 @@ with measured budgets, then 120 Hz simulation.
       hash differs. Fork `779e804` was pushed after the runner-dir guard.
       This is not a clean speed or repeatability measurement. ExternalWake
       needs a guest-cycle placement policy; pad/card isolation and a
-      frame-hash tap remain separate E55 work.
+      frame-hash tap remain separate E55 work. **E55C1 queued:**
+      read-only source map for a bounded VBlankStart hash tap and
+      repeatability gate; no new determinism claim.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
