@@ -233,3 +233,55 @@ The plan-of-record reasoning for E54–E57 is in
 - Frame-hash gates on free-running boots (E56's SC hash at a fixed tick).
   Until E55's determinism mode lands, two boots aren't frame-identical at
   a given tick, so use viewed frames or capture/replay instead.
+
+## 10. Resume state (written 2026-09-24 ~00:30, end of the 09-23 session)
+
+The session ended at Brad's request: the Claude weekly and 5 h limits were
+nearly used up. **Codex was reset at ~22:40 (93% left)**, and all running
+lanes are Codex Sol in herdr workspace `w2`, auto mode per §2.
+
+**On resume:**
+1. Run `git log --oneline -15` and read every lane commit since `16b9474`.
+2. Run `herdr pane list --workspace w2` and read each pane's tail.
+3. Restart `local/tooling/orch/watch.sh` in the background.
+
+A Codex pane that has finished a turn may not take a new prompt; continue
+it in a fresh pane (`launch-codex.sh <ID>C "Lane <ID>, Part N (continuing)…"`).
+
+| Pane | Lane | Doing | Gate when it lands |
+|---|---|---|---|
+| `w2:p1Y` | GB4 Part 6 | isolate the `PS2X_GS_BACKEND` env from unit tests; fix/characterize the paraLLEl present offset (CPU 00:00:08 vs paraLLEl 00:00:09 at one marker); clean PSNR table; diagnose the HUD small-text glyph breakage; first **live paraLLEl boot** (race reached?, presents/s, GameThread/GsWorker split, diagnostic) | View the side-by-sides yourself. If live paraLLEl reaches the race: plan Odin/Turnip (G lane) and a push of `gb4-parallel` after review |
+| `w2:p22` | E56 Part 2 | cherry-pick onto `13cac7f`, regen, taps-OFF/ON suites, a 600 s stop-policy boot with zero misses, then **ff push to fork `ssx3` and promote the codegen** | Check the push (`git ls-remote fork refs/heads/ssx3`), the codegen promotion and the miss counters. After that, fold W1 |
+| `w2:p24` | AU6 | why our EE mix is ~12 dB below PCSX2: the IOP status block at `0x50B740` (our HLE writes only the serial) and an active-stream/voice differential; lead H4 = MPF multi-layer music (charsel.mus = 139 stereo sections; `charsel.mpf` `PFDx`; 6-ch streams exist) | Loudness profile before/after and an `.m4a` for Brad |
+| `w2:p25` | E60 | the sky packet's wrong ALPHA/CBP → VU0 data differential at `sceVu0MemReadQ` (VLQI `0x3feb8c`) vs a PCSX2 hook → name the writer (VIF0 / VU0 microprogram / EE store) → one fix | View the race frames (sky/sun/flare), and check the sky packet ALPHA=0x2a/CBP match |
+
+**Waiting on Brad:**
+- **W1 2D stretch:** in anamorphic 16:9, the 3D is correct but title/menu/HUD
+  2D widen ~33%. Accept as the default, or queue a 2D-squeeze lane?
+  (Frames were sent 09-23.)
+- He listens to AU6's capture.
+
+**Queued next, in order (briefs not yet written unless named):**
+1. **W1 fold** into `ssx3` after E56 pushes. `w1-wide` includes I26's
+   presenter + virtual pad `8a357ac`; desktop default becomes 16:9
+   (anamorphic) + bilinear. Then reinstall the iPhone (install only; tell
+   Brad).
+2. **E54** semantics batch 2: PINTEH/PINTH lanes (AU5 found 4 PINTEH in
+   the mixer candidate `0x3CB538`), LWU, 64-bit sign branches, COP0 Count
+   from the EE cycle, CSR W1C/VSINT/FIELD, INTC 5/7. The review's §A2
+   lists the sites.
+3. **E55** determinism mode + hash tap (fixed RTC for `sceCdReadClock`,
+   cycle-only events). It unblocks frame-hash gates (§9) and the ±1-tick
+   GS race (GB3).
+4. **E57** VU1 speed: pipeline/hazard bookkeeping is ~30% self on the
+   Odin; VU1 is 39–50% of race time. The other lever is paraLLEl (GB4).
+5. **I27** HiDPI drawable on iOS (the fonts); a small Codex lane.
+6. After the sky fix + paraLLEl: an Odin rerun (N8) with a simpleperf race
+   profile, and check N7's rider stall (0–1 MPH at 21–38 s).
+
+**Numbers:** the ledger has clean speed rows for N5 (Odin pre-fold), E58
+(Mac fold) and N7 (Odin fold, provisional). Diagnostic numbers stay out.
+
+**Fork `ssx3`:** `13cac7f`. Canonical codegen = the E53 regen
+(`~/dev/ssx3-work/codegen-ssx3`; `-pre-e58` and `-e53` copies exist;
+E56 will promote a new one). Disk ~97/200 GB.
