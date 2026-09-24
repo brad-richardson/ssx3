@@ -215,3 +215,11 @@ The plan-of-record reasoning for E54–E57 is in
   to filter on the DMA source `0x512E40`, which is the tag-1 record
   *inside* the `0x512B80` buffer, and that cost a build and a capture.
   Copy each address from its source report together with what it is.
+- Missing a lane commit that landed while the watcher was down (E58's
+  `02ed074` sat unread under two `[orch]` commits). Before every
+  `[orch]` commit, scan `git log --oneline -8` for lane commits you haven't
+  gated.
+- Trusting a Codex pane's model late in the week. Near its quota, one
+  pane's footer showed `GPT-6-Luna medium` after launching on Sol, and a
+  prompt to that idle pane never arrived. Check the footer and relaunch a
+  fresh pane rather than re-prompting a stale one.
