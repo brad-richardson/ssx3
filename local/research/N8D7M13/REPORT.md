@@ -152,3 +152,158 @@ is run or claimed here.
   budget); no OFF control.
 - Budgets: 13A one Mac run, 0 installs, 0 launches, 0 builds; receipts < 512
   KiB text; outputs ≤ 64 MiB.
+
+---
+
+# Part 13B — one Odin STEP=1 run + comparison (COMPLETE)
+
+Released launcher SHA `50abff3da0e2af7a83c9cc01021589417506cf817e2812219bf67d961791a557`
+(2 matching reads; orchestrator amendment at `d6f4c318`, PKTSEQ gate
+best-effort, REPLAY gate kept). Checker re-read against the amended launcher:
+B 35/38 with exactly the 3 expected amendment flags
+(`gates_2050_both_rows`, `diff_only_allowed_changes` with the 9-line
+amendment hunk unmatched, `report_records_launch_sha` until this section
+records the released SHA); all self-tests pass. (Post-run re-execution reads
+B 33/38: the SHA check flips to pass while the three scratch-untouched
+self-tests fail on the real `step1/` receipt by design. The committed
+`check-result.json` is the pre-run read.) Launcher not edited further.
+
+**Headline: first VRAM departure Odin-vs-Mac at STEP=1 is tick44**
+(leading equal run ticks 1..43; 96/2050 VRAM-equal). priv is 2050/2050
+equal. PKTSEQ seq/commands are equal on every Mac-intact row (2026/2026
+co-present for seq; the 2 apparent commands diffs are Mac-side truncation
+artifacts, see §13B.4). The logcat REPLAY gate failed on 88 dropped lines
+(two spans), so per the release instruction there was no retry and no
+launcher pull; the on-device `parallel.hashes` was pulled manually with
+pull-equivalent verification and has all 2050 rows.
+
+## 13B.1. Preflight (all PASS)
+
+| # | Gate | Value |
+| --- | --- | --- |
+| 1 | Script SHA == released | `50abff3d…a557` exact, 2 reads |
+| 2 | No `step1/result.json`/`driver.log` | scratch has only `mac/` + `run_mac.py` |
+| 3 | Serial / state | `622c49b1`, `device` |
+| 4 | Odin lease free | `LEASE_FREE N8D7M12P7 run2 done` |
+| 5 | No app run | `pidof` empty |
+| 6 | Battery | 100%, status 3, AC powered (amended gate) |
+| 7 | Free | 24,205,172 KiB (~23.1 GiB) on /storage (≥10 GiB) |
+| 8 | Keyguard | launcher-parse `showing=false` |
+| 9 | No mini heavy job | slots 1+2 free, no build/boot procs; slot 1 claimed for the run, released after |
+
+## 13B.2. Run receipts (one install + one launch, no retry)
+
+| Field | Value |
+| --- | --- |
+| Launch SHA | `50abff3d…a557` |
+| Lease | `N8D7M13 step1 replay` claimed → `LEASE_FREE N8D7M13 step1 done` |
+| Install | one `adb install -r`, Success; device APK `da9a41a8…e6ef262` ×2 |
+| Device stream (verify only) | `f6a78f71…a593` ×2, 1,100,696,462 B |
+| Env preserve | `176eff84…cef32d` 2+2 match; replay env `02ce77de…2cf8187` (STEP=1) |
+| Launch | one `am start`, PID 16253; BACK once |
+| Stop | complete tick2050 receipt, elapsed 79.611 s (control only, not speed) |
+| Progress | one line: 1962 `GB4_REPLAY` rows at 78.5 s (bulk flush at end) |
+| Markers | SUMMARY queue/parallel 862958/11499/25445/2050; FRAME 2050 parallel ff21 `ae8c4201`; `replay ok` 862958/2050; no errors |
+| PKTSEQ (best-effort) | exact=True, lines=2050, ticks 1..2050 |
+| REPLAY gate | **FAIL**: 1962/2050 logcat rows; missing spans 297–350 (54) + 895–928 (34); no dupes, no corruption |
+| Caps | logcat gzip 86,994 B (≤16 MiB); no launcher pull (gate raised first) |
+| Postrun | force-stop, PID absent; env restored 2+2; lease released; no `cleanup_errors` |
+| `first_failure` / `verdict` | `GB4_REPLAY rows not exactly 2050 ticks 1..2050 in order` / `not found` |
+
+Manual post-run pull (read-only; Odin lease claimed as `N8D7M13 step1
+manual-pull`, app re-verified stopped, force-stop repeated, lease released;
+transcript `step1/manual-pull.log`): `vq-002050.ppm` 688,143 B
+`1a339d84…17b0ff` (2 device + 2 local match);
+`parallel.hashes` 134,193 B `c4195281…ed096a` (2+2 match). Total pulled
+822,336 B (≤64 MiB). **Pulled `parallel.hashes` has 2050 rows** (ticks
+1..2050 in order). Odin logcat's 1962 REPLAY rows all agree with the hashes
+file (0 disagreements), so the loss is logcat-side drops of the end-of-run
+bulk flush, not replay-side.
+
+## 13B.3. Artifacts (private scratch `~/dev/ssx3-work/N8D7M13/`)
+
+| File | SHA-256 | Size |
+| --- | --- | --- |
+| `step1/vq-002050.ppm` | `1a339d8447d37725b5381ae85e2adaa02b757f005f662bb3bb3597d60417b0ff` | 688,143 B |
+| `step1/parallel.hashes` | `c41952811ece37f873a821742564acf2aba430bd8e00178d44d0b5f3f2ed096a` | 134,193 B |
+| `mac/frames/vq-002050.ppm` | `e64a98028b80bfcc44897fed3edf4da82c45805dc4660f80877709a766d8e337` | 688,143 B |
+| `mac/parallel.hashes` | (13A input; unchanged) | 134,193 B |
+
+Absolute PPM path for viewing:
+`/Users/brad/dev/ssx3-work/N8D7M13/step1/vq-002050.ppm`
+(Mac STEP=1: `…/N8D7M13/mac/frames/vq-002050.ppm`; P7 PPMs in `compare-output.txt`).
+
+## 13B.4. Primary comparison (`compare.py`, `compare-output.txt`)
+
+Odin STEP=1 vs Mac STEP=1, per tick 1..2050 (REPLAY from both
+`parallel.hashes` files; PKTSEQ from Odin `pktseq.txt` vs Mac `replay.log`,
+search-parsed so the glued tick1 row counts):
+
+| Field | Equal/2050 | First diff | Missing |
+| --- | --- | --- | --- |
+| VRAM | **96** | **tick44** | 0 / 0 |
+| priv | **2050** | none | 0 / 0 |
+| present | 97 | tick45 | 0 / 0 |
+| PKTSEQ seq | 2026 (all co-present) | none intact (tick82 = first Mac gap) | 0 Odin / 24 Mac |
+| PKTSEQ commands | 2024 + 2 truncated | none intact (same) | 0 Odin / 24 Mac |
+
+- Longest leading VRAM-equal run: ticks 1..43 (43 ticks); first departure tick44.
+- VRAM-equal spans: 1-43, 67, 72-73, 78, 93-109, 246-257, 1457, 1588-1606.
+- Departure neighborhood: tick43 identical in all fields
+  (`5b42533a/78ee303b/019921c5` priv/vram/present); tick44 priv+present
+  equal, vram `e11bfd7c` vs `97b13124`; from tick45 vram+present differ,
+  priv always equal.
+- The 2 apparent PKTSEQ-commands diffs are Mac-side interleave truncations:
+  tick672 Mac `commands=117` vs Odin 117114 (seq equal `93f2b798811e26cd`),
+  tick1043 Mac `commands=3542` vs Odin 354279 (seq equal `412345161d172e60`).
+  No genuine PKTSEQ difference anywhere intact; tick2050
+  `16ec2f720458cd5f`/1741514 identical on both.
+- Mac PKTSEQ-missing spans (24): 82, 157, 232, 374, 447, 520, 593, 744, 816,
+  888, 972, 1114, 1185, 1271, 1342, 1412, 1483, 1571, 1642, 1712, 1783, 1870,
+  1939, 2009 (13A §4 gaps; 672/1043 parse via command-count prefix).
+
+## 13B.5. Secondary: Odin STEP=1 vs P7 STEP=50 pair (ticks 50..2050)
+
+| Field | odin==run1 | odin==run2 |
+| --- | --- | --- |
+| PKTSEQ seq / commands | 0/41, first tick50 | 0/41, first tick50 |
+| priv | 41/41, none | 41/41, none |
+| VRAM | 17/41, first tick700 | 20/41, first tick700 |
+| present | 0/41, first tick50 | 0/41, first tick50 |
+
+Per-tick readback changes the Odin result: Odin STEP=1 VRAM departs from
+both STEP=50 runs at tick700 (at 50-tick sampling), while the two STEP=50
+runs agreed with each other through tick800. PKTSEQ/present differ as
+expected (sampling-cadence-dependent, cf. 13A §3).
+
+tick2050 rows: odin `3c3c4aee/6621fe06/ae8c4201`, mac
+`c883a705/6621fe06/6bd96542`, run1 `8a80c3fd/6621fe06/5d5972bc`, run2
+`6c2e01c3/6621fe06/00883449` (vram/priv/present). All four PPMs differ.
+
+## 13B.6. Predeclared-reading evidence rows (orchestrator decides)
+
+| Predeclared condition | Evidence in this run |
+| --- | --- |
+| First VRAM departure at tick T ≤ 50 | **Condition met**: T=44, leading run 1..43, priv equal throughout |
+| Odin VRAM matches Mac through tick850+ (sync implicated) | Not observed: 96/2050 equal, departures from tick44 |
+| PKTSEQ differs anywhere (contradicts Part 7) | Not observed on intact rows: 2026/2026 seq equal; 2 Mac truncations + 24 Mac gaps only |
+| Preflight/cleanup failure voids the run | No preflight/cleanup failure; logcat REPLAY gate failed (88 dropped lines) with file-based comparison substituted per release instruction |
+
+## 13B.7. Gaps / handback
+
+- Frame content unviewed by this worker; PPM path in §13B.3.
+- Odin logcat lost 88/2050 REPLAY lines (two spans); comparison uses the
+  complete on-device hashes file (0 logcat-vs-file disagreements).
+- One Mac-side PKTSEQ tick fully unattributed (13A §4); Mac PKTSEQ gaps are
+  Mac-log artifacts, not Odin differences.
+- Budgets: 1 install, 1 launch, 0 builds; active 79.611 s (control only);
+  receipts < 512 KiB text; outputs ≤ 64 MiB.
+- Recommended next action (orchestrator decision): read §13B.6 against the
+  predeclared rule (T=44 ≤ 50 → packet-level bisect inside tick44 per the
+  brief's first arm).
+
+Receipts: `REPORT.md` (this file), `compare.py`, `compare-output.txt`,
+`check-result.json` — commit `[N8D7M13] Part B` with `Orchestrated-By: Muse
+Code`, explicit paths only, no push. (`launch.py` is the released
+`50abff3d…a557`, committed at the 13A gate; the 13A `check.py` flags the
+amendment as expected and is left untouched.)

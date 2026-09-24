@@ -1,0 +1,47 @@
+shapes:
+  odin.hashes: rows=2050 ticks1..2050=True
+  odin.logcat: rows=1962 (gate-failed side; missing=88)
+  odin.pktseq: rows=2050 ticks1..2050=True
+  mac.hashes: rows=2050 ticks1..2050=True
+  mac.pktseq: rows=2026 (known STEP=1 gaps, see 13A REPORT)
+  p7.run1.pktseq: rows=41 exact41=True
+  p7.run1.replay: rows=41 exact41=True
+  p7.run2.pktseq: rows=41 exact41=True
+  p7.run2.replay: rows=41 exact41=True
+
+odin cross-check: logcat rows vs parallel.hashes rows:
+  logcat rows disagreeing with hashes: 0
+  logcat missing spans: 297-350 895-928
+
+primary: odin(step1,hashes) vs mac(step1,hashes) per tick 1..2050:
+  vram            equal=96/2050 first_diff=tick44 missing_odin=0 missing_mac=0
+    vram-equal spans: 1-43 67 72-73 78 93-109 246-257 1457 1588-1606
+    longest leading equal run: ticks 1..43 (43 ticks; first departure tick44)
+    tick=43 odin=('5b42533a', '78ee303b', '019921c5') mac=('5b42533a', '78ee303b', '019921c5')
+    tick=44 odin=('3850dff0', 'e11bfd7c', '28e4c681') mac=('3850dff0', '97b13124', '28e4c681')
+    tick=45 odin=('5936a391', '0480f3c2', '7fe81025') mac=('5936a391', '381e7b23', '2c8a4955')
+  priv            equal=2050/2050 first_diff=none missing_odin=0 missing_mac=0
+  present         equal=97/2050 first_diff=tick45 missing_odin=0 missing_mac=0
+  pktseq.seq      equal=2026/2050 first_diff=tick82 missing_odin=0 missing_mac=24
+    mac-missing spans: 82 157 232 374 447 520 593 744 816 888 972 1114 1185 1271 1342 1412 1483 1571 1642 1712 1783 1870 1939 2009
+  pktseq.commands equal=2024/2050 first_diff=tick82 missing_odin=0 missing_mac=24
+    mac-missing spans: 82 157 232 374 447 520 593 744 816 888 972 1114 1185 1271 1342 1412 1483 1571 1642 1712 1783 1870 1939 2009
+
+secondary: odin step1 vs P7 STEP=50 pair at ticks 50..2050:
+  seq      odin==run1:  0/41 first_diff=tick50 | odin==run2:  0/41 first_diff=tick50
+  commands odin==run1:  0/41 first_diff=tick50 | odin==run2:  0/41 first_diff=tick50
+  priv     odin==run1: 41/41 first_diff=none | odin==run2: 41/41 first_diff=none
+  vram     odin==run1: 17/41 first_diff=tick700 | odin==run2: 20/41 first_diff=tick700
+  present  odin==run1:  0/41 first_diff=tick50 | odin==run2:  0/41 first_diff=tick50
+
+tick2050 rows:
+  odin.step1: pktseq=('16ec2f720458cd5f', 1741514) replay_priv/vram/present=('6621fe06', '3c3c4aee', 'ae8c4201')
+  mac.step1: pktseq=('16ec2f720458cd5f', 1741514) replay_priv/vram/present=('6621fe06', 'c883a705', '6bd96542')
+  p7.run1: pktseq=('79ee00a3024bfb44', 1737496) replay_priv/vram/present=('6621fe06', '8a80c3fd', '5d5972bc')
+  p7.run2: pktseq=('79ee00a3024bfb44', 1737496) replay_priv/vram/present=('6621fe06', '6c2e01c3', '00883449')
+
+final PPMs:
+  odin.step1: /Users/brad/dev/ssx3-work/N8D7M13/step1/vq-002050.ppm bytes=688143 sha=1a339d8447d37725b5381ae85e2adaa02b757f005f662bb3bb3597d60417b0ff
+  mac.step1: /Users/brad/dev/ssx3-work/N8D7M13/mac/frames/vq-002050.ppm bytes=688143 sha=e64a98028b80bfcc44897fed3edf4da82c45805dc4660f80877709a766d8e337
+  p7.run1: /Users/brad/dev/ssx3-work/N8D7M12P7/run1/vq-002050.ppm bytes=688143 sha=65a544a7603f26aa8f3ab77badb0440b4f0abb44ac81ca81bb777d9a11fe82db
+  p7.run2: /Users/brad/dev/ssx3-work/N8D7M12P7/run2/vq-002050.ppm bytes=688143 sha=d2261c63de5fd274a223f3ba6f2c969a3d7511ea50a0056fac2f05d5099550b6

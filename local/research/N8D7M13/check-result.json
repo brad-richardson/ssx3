@@ -23,7 +23,7 @@
     },
     {
       "check": "gates_2050_both_rows",
-      "pass": true
+      "pass": false
     },
     {
       "check": "runid_step1",
@@ -31,7 +31,7 @@
     },
     {
       "check": "diff_only_allowed_changes",
-      "pass": true
+      "pass": false
     },
     {
       "check": "serial_from_file_scoped",
@@ -119,7 +119,7 @@
     },
     {
       "check": "report_records_launch_sha",
-      "pass": true
+      "pass": false
     },
     {
       "check": "selftest_paths_precede_device",
@@ -154,11 +154,11 @@
       "pass": true
     }
   ],
-  "passed": "38/38",
-  "verdict": "A",
-  "launch_sha": "f70f8ae1cadfa5d3a7f649b8633988222ade8bb1435b473cc301da9d7d0cc99c",
+  "passed": "35/38",
+  "verdict": "B",
+  "launch_sha": "50abff3da0e2af7a83c9cc01021589417506cf817e2812219bf67d961791a557",
   "notes": {
-    "diff_changed_lines": 68,
+    "diff_changed_lines": 75,
     "diff_hunks": 13,
     "diff_replay_consumed": "21/21",
     "diff_classes_fired": [
@@ -167,7 +167,17 @@
       "runid",
       "step"
     ],
-    "diff_unmatched": [],
+    "diff_unmatched": [
+      "    # Orchestrator amendment (13A gate): at STEP=1 the Mac's PKTSEQ stdout",
+      "    # lines interleave with render-thread logs (13A \u00a74), so PKTSEQ is",
+      "    # best-effort here; the 2050 GB4_REPLAY rows remain the gate.",
+      "    if pktseq is None:",
+      "    result[\"pktseq_rows\"] = len(pktseq)",
+      "    raw_pktseq = sum(1 for line in lines if \"GB4_PKTSEQ\" in line)",
+      "    result[\"pktseq_rows\"] = len(pktseq) if pktseq is not None else None",
+      "    result[\"pktseq_lines\"] = raw_pktseq",
+      "    record(f\"PKTSEQ best-effort exact={pktseq is not None} lines={raw_pktseq}\")"
+    ],
     "selftest_arg_shape": "rc=1,1,1",
     "selftest_wrong_sha": "rc=1",
     "selftest_guard": "rc=1",
