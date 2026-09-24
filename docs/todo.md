@@ -763,6 +763,20 @@ with measured budgets, then 120 Hz simulation.
 
       **Part 5:** a taps-ON suite + ff push of `gb4-fold` to `ssx3`, then
       paraLLEl by replay (PSNR + viewed) and one live parallel boot.
+      **GB4 Part 5 (99b1554):**
+      - **fork `ssx3` pushed `b9647f5..13cac7f`** (GB2/GB3/GB4: the queue,
+        capture/replay, SetGsCrt via ResetGraph); suites 548 + 643 (taps
+        ON);
+      - paraLLEl (`gb4-parallel` `520bd61`) replays the capture with
+        recognizable frames and no SMODE1 override needed;
+      - PSNR 19–24 dB, confounded: at tick 2200 the CPU shows 00:00:08
+        and paraLLEl 00:00:09, so a present offset. Real differences: HUD
+        small-text glyph breakage;
+      - the suite failed only because the backend env leaked into 3 unit
+        tests.
+
+      **Part 6:** isolate the env, fix the present offset, a clean PSNR
+      table + a glyph diagnosis, then a live paraLLEl boot.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -890,6 +904,19 @@ with measured budgets, then 120 Hz simulation.
       Plan: E53 (+ items 1–2 added) → **E54** semantics batch 2 → **E55**
       determinism mode + hash tap → **E56** function-boundary closure
       (auto interior prologues, `stop` policy) → N7 Odin → E57 VU1 speed.
+- [ ] **E56 (801bada): function-boundary closure works.**
+      - The recompiler rule (interior `addiu sp,-N` after a `jr $ra`, plus
+        data-referenced leaf starts) adds 2,049 resume entries (3,717
+        prologues accepted / 404 rejected); E46 19/19 and AU5 3/3 are
+        found.
+      - Code +0.07% generated, `.text` +2.2%; 537/537.
+      - `PS2X_MISSING_FUNCTION_POLICY` (dev = stop) plus counters: zero
+        misses through tick 2378 (into the race).
+      - The stop came from the SC frame-hash gate, the orchestrator's
+        error: free-running boots aren't frame-deterministic before E55.
+
+      **Part 2:** fold onto `13cac7f`, a 600 s stop-policy boot with zero
+      misses, then push + promote the codegen.
 - [ ] **Brad's iPhone check-in feedback (09-23 evening, Select Mode/Peak
       screenshots):**
       1. fonts look off (kerning);

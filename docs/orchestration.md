@@ -230,3 +230,6 @@ The plan-of-record reasoning for E54–E57 is in
   files: the shared index sweeps their staged work into an `[orch]` commit
   (E58's report went into `421c51d`). Commit orchestrator changes with
   explicit paths: `git commit -m … -- <paths>`.
+- Frame-hash gates on free-running boots (E56's SC hash at a fixed tick).
+  Until E55's determinism mode lands, two boots aren't frame-identical at
+  a given tick, so use viewed frames or capture/replay instead.
