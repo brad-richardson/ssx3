@@ -1522,9 +1522,16 @@ with measured budgets, then 120 Hz simulation.
       capture flags absent; exact 41-tick replay sequence and PPM still
       required. Final script SHA `223fd15e…03170`, checker30/30.
       No device run or graphics verdict. `local/research/N8D7M12P5D1/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5D2 OFF Odin replay:** release only the gated
-      script SHA for one install/launch, compare all 41 rows and viewed
-      PPM with the pinned ON run; pre-2050 mismatch voids the test.
+- [x] **N8D7M12 Part 5D2 OFF Odin replay (`34a9c6c5`):** one exact
+      APK/stream install/launch PASS with 41 ordered rows, clean app/env/
+      lease cleanup. Orchestrator viewed another sparse PPM. ON/OFF
+      priv hashes match 41/41, VRAM 19/41, present 25/41; first GPU
+      difference at tick850, before the removed flags act. **Causal
+      comparison VOID**, no speed or root-cause verdict.
+      `local/research/N8D7M12P5D2/ORCH-GATE.md`.
+- [ ] **N8D7M12 same-env repeat:** characterize Odin GPU hash/PPM
+      run-to-run variance with one separately gated OFF repeat before
+      another ON/OFF comparison.
 - [ ] **N8D7M12 Mac OFF replay:** run a separately gated same-binary
       Mac control with the exact stream after the Odin OFF result.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
@@ -1880,9 +1887,16 @@ with measured budgets, then 120 Hz simulation.
       same pattern and private mc0 root. Cards stayed empty, no copied
       bytes or mcRead, checker68/68; no save or speed verdict.
       `local/research/E55D14P2B/ORCH-GATE.md`.
-- [ ] **E55D15 save-seed design:** use the observed game-save wildcard
-      to identify a known valid save source and its expected card layout;
-      decide a bounded seed/run only after provenance and byte checks.
+- [x] **E55D15 Part 1 save inventory B (`18475d49`):** the observed
+      wildcard maps to entries directly under mc0, but local run cards
+      are empty and no valid save export/image was found in the bounded
+      project inventory. Bytesize PCSX2 cards were traced UNFORMATTED;
+      the named remote directory and PCSX2 memcard dir contain no
+      candidate. Share is unmounted. No seed, card read or speed result.
+      `local/research/E55D15P1/ORCH-GATE.md`.
+- [ ] **E55D15 seed follow-up (parked):** resume only with a
+      provenance-pinned SSX 3 (USA) save export/card image and verified
+      contents; no invented wildcard-matching file.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
