@@ -968,6 +968,12 @@ with measured budgets, then 120 Hz simulation.
       93.75 Hz, tag-1 PCM → ring → raylib AudioStream, the `_sceSifSendCmd`
       binding fix, a WAV tap and an underrun count; Mac first. Then
       Simulator/Odin.
+- [ ] **AU4 (Codex Sol): PCSX2 reference capture of the EE tag-1 mix.**
+      Brad: AU2's capture is "recognizable but distorted". The orchestrator's
+      stats: no clipping or duplicates, but the |Δ| at the 384-frame seams
+      is 1.56× the rest, and ~3,940 zero crossings/s. Separates (1) the tick
+      rate (59.94 vs 93.75 Hz) at the seams, (2) decode/mix arithmetic
+      (broadband), (3) a capture artefact. Also a listenable PCSX2 file.
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
