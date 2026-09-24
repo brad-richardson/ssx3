@@ -1190,12 +1190,21 @@ with measured budgets, then 120 Hz simulation.
       and callback/IRQ queueing at `EeScheduler.cpp:2739`, before guest
       handlers run. Direct pointers cover 32 MiB RDRAM and three 16 KiB
       regions (scratchpad, VU1 data/code). A per-runtime VU1 `execute`
-      start count and XXH64 are absent; concurrency safety is inferred
-      from the source, not proved by a run. **E55C2 next:** implement a
-      compile-gated streaming XXH64 tap with a count increment at VU1
-      `execute` starts, known-vector/perturbation tests, then two idle and
-      one loaded boot with identical guest inputs. Compare only a common
-      complete tick prefix; any different guest state is a mismatch.
+      start count and XXH64 are absent at that pin; concurrency safety
+      was inferred from the source. **E55C2 PASS (c1a02a7; bounded
+      hashed-state repeatability):** fork source `ddaee78` (pushed)
+      adds a default-OFF VBlank XXH64 tap and per-VU1 `execute` count.
+      OFF suite 585/585; ON first 683/684 from a zero-filled test-order
+      premise, then 684/684 after one test-only repair. Two idle boots
+      matched in tick, EE cycle, RDRAM, scratchpad, VU1 data/code,
+      combined hash and VU1 count through tick 2053. A four-CPU-loaded
+      boot matched through its complete tick 2052 prefix. Each boot
+      started with the same empty card manifest and pinned inputs; no
+      hash/log cap. Diagnostic only: no clean speed, full-frame,
+      later-tick or other-platform claim. Nondefault RDRAM allocation
+      size lacks a tap-visible size accessor; production and test use
+      the default 32 MiB. Pad merge, nonempty card state and
+      ExternalWake timing remain open.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
