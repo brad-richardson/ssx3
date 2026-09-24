@@ -1001,6 +1001,12 @@ with measured budgets, then 120 Hz simulation.
       is 1.56× the rest, and ~3,940 zero crossings/s. Separates (1) the tick
       rate (59.94 vs 93.75 Hz) at the seams, (2) decode/mix arithmetic
       (broadband), (3) a capture artefact. Also a listenable PCSX2 file.
+      **AU4 Part 1 (72c09c9):** the hook filter used the wrong address
+      (orchestrator brief error: `0x512E40` is the tag-1 record inside the
+      `0x512B80` DMA buffer), so no records were written. The partial PCSX2
+      video audio (menus, 119 s) **sounds clean to Brad**, so the distortion
+      is ours, not the source material. Part 2 (approved): the corrected
+      filter + a full capture + the comparison.
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
