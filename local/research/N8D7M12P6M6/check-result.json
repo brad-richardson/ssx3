@@ -1,0 +1,30 @@
+{
+  "failing": [
+    "wsl_transfer_and_build_blocked_on_ssh_policy"
+  ],
+  "note": "stopped on first failure per brief; no WSL, build, or package step attempted",
+  "part": "N8D7M12P6M6",
+  "rows": [
+    {
+      "detail": "24 rows, 0 failing, verdict A",
+      "name": "mac_p6m5_checker_rerun",
+      "result": "pass"
+    },
+    {
+      "detail": "157.5 GB of 200 GB cap, RC=0",
+      "name": "mac_disk_budget",
+      "result": "pass"
+    },
+    {
+      "detail": "6877de873b197bf915d068d1b03331e6488c529e6bdac64273513f338080316a",
+      "name": "mac_stage_aggregate_confirm",
+      "result": "pass"
+    },
+    {
+      "detail": "ssh bytesize denied by tool policy; scoped exception absent",
+      "name": "wsl_transfer_and_build_blocked_on_ssh_policy",
+      "result": "fail"
+    }
+  ],
+  "verdict": "C"
+}

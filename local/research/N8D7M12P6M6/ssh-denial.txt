@@ -1,0 +1,14 @@
+exact attempted command:
+ssh bytesize 'wsl -d Ubuntu -- bash -lc "echo SSH_OK; df -h /home | tail -2; echo ---; ls -d /home/brad/n8d7m12p6m6 2>&1; echo ---; ls /home/brad/n2/toolchain/ 2>&1; ls /home/brad/n8b1/mem_governor.sh 2>&1"'
+
+tool denial (verbatim head):
+The user has specified a rule which prevents you from using this specific tool call.
+
+relevant enforced rules (from denial body):
+{"permission":"bash","pattern":"ssh *","action":"deny"}
+{"permission":"bash","pattern":"scp *","action":"deny"}
+
+brief expectation: scoped SSH exception for bytesize for this brief only.
+enforced policy: no such exception present.
+action taken: none further (no retry, no workaround, no other path tried).
+date_utc: 2026-09-24
