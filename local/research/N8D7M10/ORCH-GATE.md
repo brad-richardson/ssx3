@@ -1,0 +1,7 @@
+# N8D7M10 orchestrator gate — B, no packaged Odin replay path (2026-09-24)
+
+Read the complete REPORT and worker commit `6ed56aed`; `git show --check` passed. Reran `check.py` (38 PASS). Independently checked that the GS stream parser and replay entrypoint live in `ps2xTest/src/ps2_gs_replay_tests.cpp`, while Android Gradle sets `PS2X_BUILD_TEST=OFF` and targets only the `ps2EntryRunner` NativeActivity shared library. A source search found no `PS2X_GS_REPLAY_CAPTURE` reader in `ps2xRuntime`. This is a source/package feasibility gate: no build, stream copy, replay, device action, frame or speed result.
+
+The N8D7M6 stream is closed at tick2050 and its Mac replay preserves the recorded packet path; that same-stream comparison remains a useful target. But the current APK can capture a stream and cannot replay one. **Verdict B:** a device replay would need a new arm64 app mode or executable entrypoint, input staging and Turnip loader validation before any bounded Odin run can be specified. The worker's broad-offline versus sparse-offline predictions are reasonable *leads* only, conditional on a faithful harness, matching input bytes and descriptor, Mac control and a viewed Odin frame; they cannot name a faulty packet or prove copy timing.
+
+Next: design the smallest on-device replay harness and its null controls, then gate implementation and an Odin run separately. No device work is authorized from this source-only report.

@@ -1461,13 +1461,18 @@ with measured budgets, then 120 Hz simulation.
       footprint is not an executed write (transfers/clears/host writes and
       clipped primitives confound absence). No build or Odin run.
       `local/research/N8D7M9/ORCH-GATE.md`.
-- [ ] **N8D7M10 same-stream Odin offline replay feasibility:** trace a
-      bounded path for replaying the exact N8D7M6 stream through the
-      Odin paraLLEl/Turnip backend without live EE scheduling. If the
-      selected image is broad offline, live interleave becomes a lead;
-      if sparse, the device graphics path becomes a lead. Require exact
-      stream/descriptor controls; no build or device run in this part.
-      Non-primitive write-path inventory remains an option after this gate.
+- [x] **N8D7M10 Odin offline replay feasibility B (`6ed56aed`):** the
+      closed N8D7M6 stream and Mac replay path are pinned, but the GS
+      replay parser is in desktop `ps2x_tests`; Android sets
+      `PS2X_BUILD_TEST=OFF` and ships only the NativeActivity runner.
+      There is no current on-device replay entrypoint. No build, copy or
+      device action. `local/research/N8D7M10/ORCH-GATE.md`.
+- [ ] **N8D7M11 on-device replay harness design:** choose a minimal
+      arm64 executable or app mode, preserving the exact stream bytes,
+      path/marker order, Turnip loader, selected 4 MiB snapshot and
+      448-tile decoder. Define Mac same-binary and ON/OFF controls,
+      input staging, storage/lease/battery limits and A/B/OTHER outcomes
+      before implementation or an Odin launch.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
