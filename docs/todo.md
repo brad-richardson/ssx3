@@ -1296,10 +1296,19 @@ with measured budgets, then 120 Hz simulation.
       run; raw VRAM content versus input decode/driver remains open.
       App force-stopped, PID absent, Odin lease free. Diagnostic wall time
       is not speed. `local/research/N8D7I/ORCH-GATE.md`.
-- [ ] **N8D7J selected-input source discriminator:** audit the pinned
-      tick2050 raw VRAM snapshot and CPU decode path; propose one bounded
-      same-run measurement that separates sparse VRAM contents from
-      decode/driver loss. Do not equate the Mac and Odin streams.
+- [x] **N8D7J selected-input source audit PASS with correction (`a1632be9`):**
+      mapped the 4 MiB `buffers.gpu` copy before circuit1 and the host
+      decode; `input` is decoded pixels, and Android raw SHA is unavailable.
+      CPU input and GPU circuit share the swizzle/base, so equality is not
+      an independent address check. Proposed contiguous raw-word FBP tally
+      cannot discriminate: selected pixels use phase/stride/page layout,
+      and unrelated bytes can occupy the window. No run or cause claim.
+      `local/research/N8D7J/ORCH-GATE.md`.
+- [ ] **N8D7K independent selected-address oracle:** derive and check
+      PSMCT24/FBW8/FBP112 phase/stride offsets from an independent
+      source or write trace; then design bounded same-Odin-frame exact raw
+      word observations at selected coordinates. Reject occupancy-only
+      window counts.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
