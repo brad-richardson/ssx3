@@ -1,0 +1,58 @@
+local/research/N8D5B/g43-granite-carried.patch:diff --git a/application/platforms/CMakeLists.txt b/application/platforms/CMakeLists.txt
+local/research/N8D5B/g43-granite-carried.patch:@@ -3 +3,3 @@
+local/research/N8D5B/g43-granite-carried.patch:diff --git a/util/timer.cpp b/util/timer.cpp
+local/research/N8D5B/g43-granite-carried.patch:@@ -140,0 +141,11 @@ void sleep_until_nsecs(int64_t timepoint)
+local/research/N8D5B/g43-granite-carried.patch:diff --git a/vulkan/command_buffer.cpp b/vulkan/command_buffer.cpp
+local/research/N8D5B/g43-granite-carried.patch:@@ -1197,0 +1198,18 @@ Pipeline CommandBuffer::build_compute_pipeline(Device *device, const DeferredPip
+local/research/N8D5B/g43-granite-carried.patch:diff --git a/vulkan/memory_allocator.cpp b/vulkan/memory_allocator.cpp
+local/research/N8D5B/g43-granite-carried.patch:@@ -1424 +1424,7 @@ bool DescriptorBufferAllocator::create_image_view(const VkImageViewCreateInfo &i
+local/research/N8D5B/g43-granite-carried.patch:@@ -1465,0 +1472,11 @@ bool DescriptorBufferAllocator::create_image_view(const VkImageViewCreateInfo &i
+local/research/N8D5B/g43-granite-carried.patch:diff --git a/vulkan/shader.cpp b/vulkan/shader.cpp
+local/research/N8D5B/g43-granite-carried.patch:@@ -531 +531,7 @@ void PipelineLayout::init_legacy(const ImmutableSamplerBank *immutable_samplers)
+local/research/N8D5B/g43-carried.patch:diff --git a/CMakeLists.txt b/CMakeLists.txt
+local/research/N8D5B/g43-carried.patch:@@ -53 +53,7 @@ else()
+local/research/N8D5B/g43-carried.patch:diff --git a/Granite b/Granite
+local/research/N8D5B/g43-carried.patch:@@ -1 +1 @@
+local/research/N8D5B/g43-carried.patch:diff --git a/gs/gs_interface.cpp b/gs/gs_interface.cpp
+local/research/N8D5B/g43-carried.patch:@@ -11,0 +12 @@
+local/research/N8D5B/g43-carried.patch:@@ -14,0 +16,98 @@ namespace ParallelGS
+local/research/N8D5B/g43-carried.patch:@@ -134,0 +234,106 @@ void GSInterface::flush_render_pass(FlushReason reason)
+local/research/N8D5B/g43-carried.patch:@@ -300,0 +506,16 @@ void GSInterface::flush_render_pass(FlushReason reason)
+local/research/N8D5B/g43-carried.patch:@@ -350,0 +572,606 @@ void GSInterface::flush_render_pass(FlushReason reason)
+local/research/N8D5B/g43-carried.patch:@@ -1259,0 +2087,2 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+local/research/N8D5B/g43-carried.patch:@@ -1663,0 +2493,2 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+local/research/N8D5B/g43-carried.patch:@@ -1667,0 +2499 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+local/research/N8D5B/g43-carried.patch:@@ -1671,0 +2504,2 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+local/research/N8D5B/g43-carried.patch:@@ -1709,0 +2544 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+local/research/N8D5B/g43-carried.patch:@@ -1806,0 +2642,11 @@ uint32_t GSInterface::drawing_kick_update_texture(FBFeedbackMode feedback_mode,
+local/research/N8D5B/g43-carried.patch:@@ -2486,0 +3333,5 @@ void GSInterface::drawing_kick_append()
+local/research/N8D5B/g43-carried.patch:@@ -2575,0 +3427,2 @@ void GSInterface::drawing_kick_append()
+local/research/N8D5B/g43-carried.patch:@@ -2606,0 +3460,2 @@ void GSInterface::drawing_kick_append()
+local/research/N8D5B/g43-carried.patch:@@ -2788,0 +3644,2 @@ void GSInterface::drawing_kick_append()
+local/research/N8D5B/g43-carried.patch:@@ -2837,0 +3695,2 @@ void GSInterface::drawing_kick_append()
+local/research/N8D5B/g43-carried.patch:@@ -2874,0 +3734,5 @@ void GSInterface::drawing_kick_primitive(bool adc)
+local/research/N8D5B/g43-carried.patch:@@ -2879,0 +3744,3 @@ void GSInterface::drawing_kick_primitive(bool adc)
+local/research/N8D5B/g43-carried.patch:@@ -2880,0 +3748 @@ void GSInterface::drawing_kick_primitive(bool adc)
+local/research/N8D5B/g43-carried.patch:@@ -3898,0 +4767,9 @@ void GSInterface::a_d_FRAME_1(uint64_t payload)
+local/research/N8D5B/g43-carried.patch:@@ -3907,0 +4785,9 @@ void GSInterface::a_d_FRAME_2(uint64_t payload)
+local/research/N8D5B/g43-carried.patch:@@ -4268,0 +5155,5 @@ void GSInterface::flush()
+local/research/N8D5B/g43-carried.patch:@@ -4687,0 +5579,65 @@ ScanoutResult GSInterface::vsync(const VSyncInfo &info_)
+local/research/N8D5B/g43-carried.patch:diff --git a/gs/gs_renderer.cpp b/gs/gs_renderer.cpp
+local/research/N8D5B/g43-carried.patch:@@ -1590,0 +1591,118 @@ void GSRenderer::flush_host_vram_copy(const uint32_t *block_indices, uint32_t nu
+local/research/N8D5B/g43-carried.patch:@@ -3487,0 +3606,15 @@ void GSRenderer::dispatch_texture_analysis(Vulkan::CommandBuffer &cmd, const Ren
+local/research/N8D5B/g43-carried.patch:diff --git a/gs/gs_renderer.hpp b/gs/gs_renderer.hpp
+local/research/N8D5B/g43-carried.patch:@@ -294,0 +295,8 @@ public:
+local/research/N8D5B/g43-carried.patch:@@ -333,0 +342,6 @@ private:
+local/research/N8D5B/g43-carried.patch:diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+local/research/N8D5B/g43-carried.patch:@@ -7,0 +8,5 @@ target_link_libraries(parallel-gs-replayer PRIVATE parallel-gs parallel-gs-dump)
+local/research/N8D5B/g43-carried.patch:diff --git a/tools/gs_dump_replayer.cpp b/tools/gs_dump_replayer.cpp
+local/research/N8D5B/g43-carried.patch:@@ -16,0 +17 @@
+local/research/N8D5B/g43-carried.patch:@@ -17,0 +19,5 @@
+local/research/N8D5B/g43-carried.patch:@@ -35,0 +42,122 @@ static void print_help()
+local/research/N8D5B/g43-carried.patch:@@ -76 +204 @@ int main(int argc, char **argv)
+local/research/N8D5B/g43-carried.patch:@@ -95,0 +224,7 @@ int main(int argc, char **argv)
+local/research/N8D5B/g43-carried.patch:@@ -98 +232,0 @@ int main(int argc, char **argv)
+local/research/N8D5B/g43-carried.patch:@@ -109,0 +244,163 @@ int main(int argc, char **argv)
+local/research/N8D5B/g43-carried.patch:@@ -112 +409,6 @@ int main(int argc, char **argv)
+local/research/N8D5B/g43-carried.patch:@@ -117 +419,58 @@ int main(int argc, char **argv)
+local/research/N8D5B/g43-carried.patch:@@ -143,0 +503,17 @@ int main(int argc, char **argv)

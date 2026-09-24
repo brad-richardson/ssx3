@@ -1,0 +1,18 @@
+Full log: /Users/brad/dev/ssx3-work/N8D5B/orch-replay.log
+Bytes: 4812990
+SHA-256: f04f59f3a57a32e35558c599d40823a495ef9139701ee2501e068584ecd2d127
+
+342: [gs:parallel] init ok (live backend on the GS worker thread)
+78251: [n8d5b] alignment tick=2050 fbp=112 pmode=ff21 width=512 height=448
+78252: [ERROR]: Attempted to reflect resource layout, but SPIRV-Cross is not enabled in build.
+78254: [mvk-error] SPIR-V to MSL conversion error: Argument buffer resource base type could not be determined. When padding argument buffer elements, all descriptor set resources must be supplied with a base type by the app.
+78255: [ERROR]: Failed to create compute pipeline!
+78256: [ERROR]: Failed to flush render state, dispatch will be dropped.
+78257: [n8d5b] control=2149844998 expected=128 FAIL
+78259: raw_tile_counts summarized: 896 tiles, 567 active at >=32 pixels/tile, 128292 occupied pixels
+78260: GB4_FRAME tick=2050 backend=parallel pmode=ff21 dispfb1=9070 dispfb2=1400 display_fbp=112 source_fbp=112 preferred=0 present=7bf5c012
+78261: GB4_REPLAY_SUMMARY mode=queue backend=parallel drop_priv=0 packets=862993 priv=11499 transfers=25485 markers=2050 readbacks=0 clears=0 samples=41 rtz=off rounded_packets=0
+78262: GB4_PARALLEL_STATS packets=862993 presents=41 null_scanouts=0 unsupported_clears=0 unsupported_vram_io=0 init_ok=1 init_failed=0
+79353: Total Tests: 585
+79354: Passed: 585
+79355: Failed: 0
