@@ -1,0 +1,97 @@
+--- N8D6A/gs/gs_interface.hpp
++++ N8D7F/gs/gs_interface.hpp
+@@ -159,0 +160 @@
++	bool capture_selected_input;
+--- N8D6A/gs/gs_renderer.hpp
++++ N8D7F/gs/gs_renderer.hpp
+@@ -27,0 +28,8 @@
++	Vulkan::BufferHandle selected_vram_staging;
++	Vulkan::BufferHandle circuit1_staging;
++	// 0=not requested, 1=OTHER, 2=valid copies recorded.
++	uint32_t selected_capture_status;
++	uint32_t selected_fbp, selected_fbw, selected_psm;
++	uint32_t selected_dbx, selected_dby, selected_phase, selected_stride;
++	uint32_t selected_mask, selected_samples, selected_promoted;
++	uint32_t selected_width, selected_height, selected_valid_width, selected_valid_height;
+--- N8D6A/gs/gs_renderer.cpp
++++ N8D7F/gs/gs_renderer.cpp
+@@ -4757,0 +4758,3 @@
++	ScanoutResult selected_capture = {};
++	if (info.capture_selected_input)
++		selected_capture.selected_capture_status = 1;
+@@ -4773,0 +4777,46 @@
++		if (info.capture_selected_input)
++		{
++			selected_capture.selected_fbp = uint32_t(priv.dispfb1.FBP);
++			selected_capture.selected_fbw = uint32_t(priv.dispfb1.FBW);
++			selected_capture.selected_psm = uint32_t(priv.dispfb1.PSM);
++			selected_capture.selected_dbx = uint32_t(priv.dispfb1.DBX);
++			selected_capture.selected_dby = uint32_t(priv.dispfb1.DBY);
++			selected_capture.selected_phase = rect.phase_offset;
++			selected_capture.selected_stride = rect.phase_stride;
++			selected_capture.selected_mask = vram_size - 1;
++			selected_capture.selected_samples = super_samples;
++			selected_capture.selected_promoted = promoted1 != nullptr;
++			selected_capture.selected_width = rect.image_extent.width;
++			selected_capture.selected_height = rect.image_extent.height;
++			selected_capture.selected_valid_width = rect.valid_extent.width;
++			selected_capture.selected_valid_height = rect.valid_extent.height;
++			const bool supported_psm = selected_capture.selected_psm == PSMCT32 ||
++				selected_capture.selected_psm == PSMCT24 || selected_capture.selected_psm == PSMCT16 ||
++				selected_capture.selected_psm == PSMCT16S || selected_capture.selected_psm == PSMZ32 ||
++				selected_capture.selected_psm == PSMZ24 || selected_capture.selected_psm == PSMZ16 ||
++				selected_capture.selected_psm == PSMZ16S;
++			const uint64_t last_y = uint64_t(selected_capture.selected_dby) + rect.phase_offset +
++				uint64_t(223) * rect.phase_stride;
++			if (!promoted1 && super_samples == 1 && vram_size == 4u * 1024u * 1024u &&
++			    supported_psm && rect.image_extent.width == 512 && rect.image_extent.height == 224 &&
++			    rect.valid_extent.width == 512 && rect.valid_extent.height == 224 &&
++			    selected_capture.selected_fbw && rect.phase_stride &&
++			    uint64_t(selected_capture.selected_dbx) + 511 < 2048 && last_y < 2048)
++			{
++				Vulkan::BufferCreateInfo staging_info = {};
++				staging_info.size = 4u * 1024u * 1024u;
++				staging_info.domain = Vulkan::BufferDomain::CachedHost;
++				staging_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
++				selected_capture.selected_vram_staging = device->create_buffer(staging_info);
++				if (selected_capture.selected_vram_staging)
++				{
++					cmd.barrier(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT,
++					            VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
++					            VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
++					cmd.copy_buffer(*selected_capture.selected_vram_staging, 0, *buffers.gpu, 0,
++					                4u * 1024u * 1024u);
++					cmd.barrier(VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT,
++					            VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT);
++				}
++			}
++		}
+@@ -4933 +4982 @@
+-	ScanoutResult result = {};
++	ScanoutResult result = std::move(selected_capture);
+@@ -5004,0 +5054,25 @@
++		if (info.capture_selected_input && result.selected_vram_staging)
++		{
++			Vulkan::BufferCreateInfo staging_info = {};
++			staging_info.size = 512u * 224u * 4u;
++			staging_info.domain = Vulkan::BufferDomain::CachedHost;
++			staging_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
++			result.circuit1_staging = device->create_buffer(staging_info);
++			if (result.circuit1_staging)
++			{
++				cmd.image_barrier(*circuit1, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
++				                  VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++				                  VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
++				                  VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
++				cmd.copy_image_to_buffer(*result.circuit1_staging, *circuit1, 0, {},
++				                         {512u, 224u, 1u}, 0, 0,
++				                         {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1});
++				cmd.image_barrier(*circuit1, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
++				                  VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
++				                  VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT,
++				                  VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT);
++				cmd.barrier(VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
++				            VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_READ_BIT);
++				result.selected_capture_status = 2;
++			}
++		}
