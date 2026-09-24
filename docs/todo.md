@@ -1454,12 +1454,19 @@ with measured budgets, then 120 Hz simulation.
       flush timelines and wait-idle do not identify completed draws.
       Mac replay cannot establish live Odin thread order. No run or GPU
       cause claim. `local/research/N8D7M8/ORCH-GATE.md`.
-- [ ] **N8D7M9 live identity witness design:** trace packet/tick identity
-      from EE enqueue through GS worker, raw-GIF recording, GPU submit
-      and the original selected-copy boundary. State exact source changes,
-      synchronization/byte costs, perturbation risk and whether a device
-      completion query can separate late from absent writes. Read-only
-      design before any build, Mac experiment or Odin launch.
+- [x] **N8D7M9 live identity design B (`77dc39fe` + `d88bb194`):**
+      proposed EE sequence/tick carry through GS recording. Initial
+      conditional A was withdrawn: pressure/hazard cuts have no separate
+      timeline value, min/max packet ranges lose membership, and a draw
+      footprint is not an executed write (transfers/clears/host writes and
+      clipped primitives confound absence). No build or Odin run.
+      `local/research/N8D7M9/ORCH-GATE.md`.
+- [ ] **N8D7M10 non-primitive write-path inventory:** map IMAGE transfers,
+      clears, host writes and clipped draws against the original selected
+      copy. Decide whether any complete order witness exists without
+      changing execution; otherwise design a bounded, explicitly labeled
+      diagnostic intervention. Keep exact same-stream controls and do not
+      infer live Odin order from Mac replay alone.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
