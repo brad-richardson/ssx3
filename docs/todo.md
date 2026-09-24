@@ -1873,9 +1873,18 @@ with measured budgets, then 120 Hz simulation.
       approximate elapsed time differs from the pane's 2m46 display, and
       visible context reached 40.4k versus the <18k target. No source,
       build, boot, device or GS verdict from this model trial.
-- [ ] **X15B/X17 model comparison:** gate the local Qwen short-budget retry
-      and DeepSeek V4.1 Flash Go pilot against the same excerpt, including
-      source scope, table, LSP and wall/context budgets. Briefs:
-      `local/muse/prompts/X15B.md`, `local/muse/prompts/X17.md`.
+- [x] **X15B local dense Qwen retry rejected (orchestrator audit):** eight
+      rows and anchors present, four register fields correct, but the report
+      misreads MMOD bit 5 of `0xff21` as zero and overlooks backend
+      `VSyncInfo vsync = {}`. Its `raw_circuit_early_return=0` matches the
+      full source only coincidentally; the given derivation is false. One
+      LSP call empty. The pane exceeded five minutes and 18k context without
+      a worker commit. `local/research/X15B/ORCH-AUDIT.md` preserves the
+      gate and unaltered worker receipts. No GS verdict.
+- [x] **X17 DeepSeek V4.1 Flash Go pilot blocked before task start:**
+      provider says the workspace must enable Global regions in Privacy
+      settings. Orchestrator stopped retries and asked Brad whether to
+      change that account setting. No model-quality result or config edit;
+      see `local/research/X17/REPORT.md`.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
