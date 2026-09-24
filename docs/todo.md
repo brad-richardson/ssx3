@@ -1646,6 +1646,9 @@ with measured budgets, then 120 Hz simulation.
       `6877de87…0316a`, verify match, checker24/24. Gate A for source
       bytes only; package still must prove compiled inputs and artifact
       pins. `local/research/N8D7M12P6M5/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 6M6:** one private bytesize Android package from
+      the P6M5 stage; verify source manifest before/after, capture build
+      inputs/flags and exact native/APK pins. No device launch.
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
