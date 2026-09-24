@@ -1314,9 +1314,18 @@ with measured budgets, then 120 Hz simulation.
       - virtual controls (hidden once a controller is used; Settings
         toggle), exercised with synthetic touches only; 608/608.
       Fork `i26-qol` `8a357ac` (local).
-- [ ] **I27 (small, queued for Codex): HiDPI drawable on iOS.** raylib
-      draws at 1× points and iOS upscales ×3, which is the bigger font
-      lever. Then retest the fonts on the Simulator.
+- [x] **I27A partial (23d6f29): iOS HiDPI transport works; native render fails.**
+      One local fork candidate `i27-hidpi` `4ebb2ac` sets SDL's HiDPI flag
+      only on iOS. Mac taps-OFF suite 585/585; one Simulator build/install
+      and I26-FAST run reached race tick 2372 within 161 s. Drawable grew
+      from 874×402 to 2622×1206, but raylib screen/render stayed 874×402.
+      All four viewed 2622×1206 screenshots confine the game to the
+      lower-left 874×402 region; full HiDPI gate FAIL. Pinned raylib's
+      SDL2 `GetWindowScaleDPI()` returns 1, so its viewport uses point
+      dimensions. Candidate remains local; no device install or fork push.
+      **I27B next:** fix the SDL2 drawable/window scale in the pinned
+      raylib path, verify full-viewport rendering and font appearance on
+      the Simulator before any fold or device install. iPad still locked.
 - [x] **W1F2 PASS for Simulator + iPhone install (2fc2242):** restored
       I25's bundled `ps2x.env`/`PS2X_BOOT_ELF` and UIWindowScene wiring
       on the W1F fold, retaining I26 controls and W1 presentation. Fork
