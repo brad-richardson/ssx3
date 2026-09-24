@@ -831,7 +831,8 @@ with measured budgets, then 120 Hz simulation.
       at 921, so their producer remains open. Earliest mismatch is at
       or before 899; neither glyph producer nor GS state mechanism is
       identified. Next GB5D: bracket the earlier lower-label source or
-      state and then fold paraLLEl for Odin/Turnip.
+      state and then fold paraLLEl for Odin/Turnip. GB5D Part 1 brief
+      is ready for a ten-marker matched replay before tick 899.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1029,7 +1030,8 @@ with measured budgets, then 120 Hz simulation.
       I26-FAST boot reached race tick 2069 in 112 s with SC/race frames
       viewed; the dark GS region remains. Static LWU boot reach is
       unknown. Next: 64-bit sign branches, COP0 Count and INTC 5/7
-      before E55. X7's narrow dense-Qwen trial stopped at its 12-minute
+      before E55. **E54E running:** full-width signed branch predicate
+      gate. X7's narrow dense-Qwen trial stopped at its 12-minute
       cap without a completed worker table; orchestrator source check
       in `local/research/X7/REPORT.md` is no branch fix verdict.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
