@@ -1,0 +1,38 @@
+# E55D7 string + forward-inventory + pins (read-only)
+
+§VADDR — ELF string file-offset -> vaddr (section headers, SLUS_207.72):
+BASLUS-20772 file 0x37d3a8 -> vaddr 0x47c3a8 sec .rodata
+Title_SaveProfile file 0x35f318 -> vaddr 0x45e318 sec .rodata
+title_Save Replay file 0x371100 -> vaddr 0x470100 sec .rodata
+Save Profile file 0x361db0 -> vaddr 0x460db0 sec .rodata
+cFEStateLogin file 0x362ca0 -> vaddr 0x461ca0 sec .rodata
+mc0: file 0x3a22b0 -> vaddr 0x4a12b0 sec .sdata
+option_savereplay file 0x372bf0 -> vaddr 0x471bf0 sec .rodata
+(SAVEDATA: not found in ELF — occurs only in the runtime unit-test query; E55D6 §1 #6 carries over.)
+
+§FWD — forward jal inventory per function codegen file (targets in 0x2Cxxxx or 0x40Axxx only):
+0x1a9438 (sub_001A9438_0x1a9438.cpp): NONE
+0x20d1d8 (sub_0020D1D8_0x20d1d8.cpp): NONE
+0x241aa0 (sub_00241AA0_0x241aa0.cpp): 0x2c2540
+0x1877b0: 0x2c2540, 0x2c26d0
+0x1d5488: 0x2c2540, 0x2c26d0
+0x1d58b8: 0x2c2540, 0x2c26d0
+0x1902c0: NONE; 0x190540: NONE; 0x190768: NONE
+0x1fdbf0: NONE; 0x1fe968: NONE
+0x1a97b8: NONE
+0x1fb588: 0x2c2540, 0x2c26d0, 0x2c27c0
+0x2c26d0: NONE (itself fiprintf [ssx3.toml stub list])
+0x2c22c8: 0x2c3fa8
+0x2c3fa8: 0x2c4050, 0x2c6360
+0x2c4050: 0x2c2580, 0x2c48c0
+(0x2c2580/0x2c6360: unknown labels, siblings of the string-helper layer; not card calls.)
+(method: scan of `jal func_<hex>` in each named codegen file under ~/dev/ssx3-work/codegen-ssx3/)
+
+§PINS:
+ssx3: 48704501c6b49a8f4d0617911550917aa97e0d48 ([orch] Gate E55D6 card path design partial)
+ELF SLUS_207.72 sha256 prefix: 1b49d05c (full re-read cut to 16 hex here; matches E55D6-era pin)
+codegen register_functions.cpp sha256 prefix: 8ea8ed43 (matches E55D3 §8 pin 8ea8ed43…688a3)
+labels.tsv lines: 13 (orchestrator-verified rows only)
+codegen stubs: sub_0040A090_0x40a090.cpp:13 sceMcRead; sub_0040A688_0x40a688.cpp:13 sceMcGetDir
+cluster list: local/research/P7/elf-cluster.txt:220,227 (E55D6 §1 #3 carries over)
+census: local/research/P8/census-pad-sound.tsv:35-50 (3 reads / 5 getdirs; read verbatim, not re-derived)

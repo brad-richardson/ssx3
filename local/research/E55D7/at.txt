@@ -1,0 +1,236 @@
+# E55D7 ee-at receipts (exact disassembly windows, delay slots included)
+
+§5988 $ bash local/tooling/ee/ee-at 0x2c5988 8 8
+   0x2c5968: 8e25000c  lw $a1, 0xC($s1)  [delay slot]
+   0x2c596c: 8e230000  lw $v1, 0x0($s1)
+   0x2c5970: 84640248  lh $a0, 0x248($v1)
+   0x2c5974: 8c62024c  lw $v0, 0x24C($v1)
+   0x2c5978: 0040f809  jalr $v0
+   0x2c597c: 02242021  addu $a0, $s1, $a0  [delay slot]
+   0x2c5980: 544001bd  bnel $v0, $zero, . + 4 + (0x1BD << 2)
+   0x2c5984: 8e25000c  lw $a1, 0xC($s1)  [delay slot]
+>> 0x2c5988: 0c0b1084  jal func_2C4210
+   0x2c598c: 0220202d  daddu $a0, $s1, $zero  [delay slot]
+
+§59B4 $ bash local/tooling/ee/ee-at 0x2c59b4 8 8
+   0x2c5998: 8e230000  lw $v1, 0x0($s1)
+   0x2c599c: 84640248  lh $a0, 0x248($v1)
+   0x2c59a0: 8c62024c  lw $v0, 0x24C($v1)
+   0x2c59a4: 0040f809  jalr $v0
+   0x2c59a8: 02242021  addu $a0, $s1, $a0  [delay slot]
+   0x2c59ac: 544001b2  bnel $v0, $zero, . + 4 + (0x1B2 << 2)
+   0x2c59b0: 8e25000c  lw $a1, 0xC($s1)  [delay slot]
+>> 0x2c59b4: 0c0b10ac  jal func_2C42B0
+   0x2c59b8: 0220202d  daddu $a0, $s1, $zero  [delay slot]
+
+§5E64 $ bash local/tooling/ee/ee-at 0x2c5e64 8 8
+   0x2c5e48: 8e230000  lw $v1, 0x0($s1)
+   0x2c5e4c: 84640248  lh $a0, 0x248($v1)
+   0x2c5e50: 8c62024c  lw $v0, 0x24C($v1)
+   0x2c5e54: 0040f809  jalr $v0
+   0x2c5e58: 02242021  addu $a0, $s1, $a0  [delay slot]
+   0x2c5e5c: 54400086  bnel $v0, $zero, . + 4 + (0x86 << 2)
+   0x2c5e60: 8e25000c  lw $a1, 0xC($s1)  [delay slot]
+>> 0x2c5e64: 0c0b1a12  jal func_2C6848
+   0x2c5e68: 0220202d  daddu $a0, $s1, $zero  [delay slot]
+
+§5F7C $ bash local/tooling/ee/ee-at 0x2c5f7c 8 8
+   0x2c5f60: 0040f809  jalr $v0
+   0x2c5f64: 02242021  addu $a0, $s1, $a0  [delay slot]
+   0x2c5f68: 54400043  bnel $v0, $zero, . + 4 + (0x43 << 2)
+   0x2c5f6c: 8e25000c  lw $a1, 0xC($s1)  [delay slot]
+   0x2c5f70: 8e220018  lw $v0, 0x18($s1)
+   0x2c5f74: 04420040  bltzl $v0, . + 4 + (0x40 << 2)
+   0x2c5f78: 8e25000c  lw $a1, 0xC($s1)  [delay slot]
+>> 0x2c5f7c: 0c0b1ade  jal func_2C6B78
+   0x2c5f80: 0220202d  daddu $a0, $s1, $zero  [delay slot]
+
+§424C $ bash local/tooling/ee/ee-at 0x2c424c 6 4
+   0x2c4238: 8e24000c  lw $a0, 0xC($s1)
+   0x2c423c: 0200482d  daddu $t1, $s0, $zero
+   0x2c4240: 0000282d  daddu $a1, $zero, $zero
+   0x2c4244: 26260139  addiu $a2, $s1, 0x139
+   0x2c4248: 0000382d  daddu $a3, $zero, $zero
+>> 0x2c424c: 0c1029a2  jal func_40A688
+   0x2c4250: 24080006  addiu $t0, $zero, 0x6  [delay slot]
+
+§431C $ bash local/tooling/ee/ee-at 0x2c431c 6 4
+   0x2c4308: 8e44000c  lw $a0, 0xC($s2)
+   0x2c430c: 0220302d  daddu $a2, $s1, $zero
+   0x2c4310: 0000282d  daddu $a1, $zero, $zero
+   0x2c4314: 0000382d  daddu $a3, $zero, $zero
+   0x2c4318: 24080001  addiu $t0, $zero, 0x1  [delay slot]
+>> 0x2c431c: 0c1029a2  jal func_40A688
+   0x2c4320: 26490480  addiu $t1, $s2, 0x480  [delay slot]
+
+§6884 $ bash local/tooling/ee/ee-at 0x2c6884 6 4
+   0x2c6870: 8e24000c  lw $a0, 0xC($s1)
+   0x2c6874: 0200482d  daddu $t1, $s0, $zero
+   0x2c6878: 0000282d  daddu $a1, $zero, $zero
+   0x2c687c: 26260139  addiu $a2, $s1, 0x139
+   0x2c6880: 0000382d  daddu $a3, $zero, $zero
+>> 0x2c6884: 0c1029a2  jal func_40A688
+   0x2c6888: 24080040  addiu $t0, $zero, 0x40  [delay slot]
+
+§4F84 $ bash local/tooling/ee/ee-at 0x2c4f84 4 3
+   0x2c4f74: 0220302d  daddu $a2, $s1, $zero
+   0x2c4f78: 0200482d  daddu $t1, $s0, $zero
+   0x2c4f7c: 0000282d  daddu $a1, $zero, $zero
+   0x2c4f80: 0000382d  daddu $a3, $zero, $zero
+>> 0x2c4f84: 0c1029a2  jal func_40A688
+   0x2c4f88: 24080001  addiu $t0, $zero, 0x1  [delay slot]
+
+§5020 $ bash local/tooling/ee/ee-at 0x2c5020 4 3
+   0x2c5010: 0220302d  daddu $a2, $s1, $zero
+   0x2c5014: 0200482d  daddu $t1, $s0, $zero
+   0x2c5018: 0000282d  daddu $a1, $zero, $zero
+   0x2c501c: 0000382d  daddu $a3, $zero, $zero
+>> 0x2c5020: 0c1029a2  jal func_40A688
+   0x2c5024: 24080001  addiu $t0, $zero, 0x1  [delay slot]
+
+§4D1C $ bash local/tooling/ee/ee-at 0x2c4d1c 6 4
+   0x2c4d04: 104000ee  beqz $v0, . + 4 + (0xEE << 2)
+   0x2c4d08: ae430018  sw $v1, 0x18($s2)  [delay slot]
+   0x2c4d0c: 1000004d  b . + 4 + (0x4D << 2)
+   0x2c4d10: 0240202d  daddu $a0, $s2, $zero  [delay slot]
+   0x2c4d14: 8e440018  lw $a0, 0x18($s2)
+   0x2c4d18: 8e45002c  lw $a1, 0x2C($s2)
+>> 0x2c4d1c: 0c102824  jal func_40A090
+   0x2c4d20: 8e460020  lw $a2, 0x20($s2)  [delay slot]
+
+§4EE4 $ bash local/tooling/ee/ee-at 0x2c4ee4 4 3
+   0x2c4ed8: 3c050053  lui $a1, 0x53
+   0x2c4edc: 8e440018  lw $a0, 0x18($s2)
+   0x2c4ee0: 24a576f8  addiu $a1, $a1, 0x76F8
+>> 0x2c4ee4: 0c102824  jal func_40A090
+   0x2c4ee8: 240603c4  addiu $a2, $zero, 0x3C4  [delay slot]
+
+§6B90 $ bash local/tooling/ee/ee-at 0x2c6b90 6 4  [function start 0x2c6b78]
+   0x2c6b78: 27bdffe0  addiu $sp, $sp, -0x20
+   0x2c6b7c: 7fb00010  sq $s0, 0x10($sp)
+   0x2c6b80: ffbf0000  sd $ra, 0x0($sp)
+   0x2c6b84: 0080802d  daddu $s0, $a0, $zero
+   0x2c6b88: 8e040018  lw $a0, 0x18($s0)
+   0x2c6b8c: 8e05002c  lw $a1, 0x2C($s0)
+>> 0x2c6b90: 0c102824  jal func_40A090
+   0x2c6b94: 8e060024  lw $a2, 0x24($s0)  [delay slot]
+
+§4EC8 $ bash local/tooling/ee/ee-at 0x2c4ec8 8 8
+   0x2c4ea8: 26460079  addiu $a2, $s2, 0x79
+   0x2c4eac: 0c102744  jal func_409D10
+   0x2c4eb0: 24070001  addiu $a3, $zero, 0x1  [delay slot]
+   0x2c4eb4: 0441006b  bgez $v0, . + 4 + (0x6B << 2)
+   0x2c4eb8: af820850  sw $v0, 0x850($gp)  [delay slot]
+   0x2c4ebc: 8e450028  lw $a1, 0x28($s2)
+   0x2c4ec0: 2402ffff  addiu $v0, $zero, -0x1
+   0x2c4ec4: 0240202d  daddu $a0, $s2, $zero
+>> 0x2c4ec8: 0c0b155c  jal func_2C5570
+   0x2c4ecc: ae420018  sw $v0, 0x18($s2)  [delay slot]
+
+§4EF8 $ bash local/tooling/ee/ee-at 0x2c4ef8 8 8
+   0x2c4ed8: 3c050053  lui $a1, 0x53
+   0x2c4edc: 8e440018  lw $a0, 0x18($s2)
+   0x2c4ee0: 24a576f8  addiu $a1, $a1, 0x76F8
+   0x2c4ee4: 0c102824  jal func_40A090
+   0x2c4ee8: 240603c4  addiu $a2, $zero, 0x3C4  [delay slot]
+   0x2c4eec: 04410074  bgez $v0, . + 4 + (0x74 << 2)
+   0x2c4ef0: af820850  sw $v0, 0x850($gp)  [delay slot]
+   0x2c4ef4: 8e450028  lw $a1, 0x28($s2)
+>> 0x2c4ef8: 0c0b155c  jal func_2C5570
+   0x2c4efc: 0240202d  daddu $a0, $s2, $zero  [delay slot]
+
+§5BA8 $ bash local/tooling/ee/ee-at 0x2c5ba8 10 6
+   0x2c5b80: 24030001  addiu $v1, $zero, 0x1
+   0x2c5b84: 3c020048  lui $v0, 0x48
+   0x2c5b88: 00031880  sll $v1, $v1, 2
+   0x2c5b8c: 24427450  addiu $v0, $v0, 0x7450
+   0x2c5b90: 8e250490  lw $a1, 0x490($s1)
+   0x2c5b94: 00621821  addu $v1, $v1, $v0
+   0x2c5b98: 8c640000  lw $a0, 0x0($v1)
+   0x2c5b9c: 50a40013  beql $a1, $a0, . + 4 + (0x13 << 2)
+   0x2c5ba0: 8e220028  lw $v0, 0x28($s1)  [delay slot]
+   0x2c5ba4: 8e250028  lw $a1, 0x28($s1)
+>> 0x2c5ba8: 0c0b155c  jal func_2C5570
+   0x2c5bac: 0220202d  daddu $a0, $s1, $zero  [delay slot]
+
+§3FC0 $ bash local/tooling/ee/ee-at 0x2c3fc0 10 10  [function start 0x2c3fa8]
+   0x2c3fa8: 27bdffe0  addiu $sp, $sp, -0x20
+   0x2c3fac: 3c020048  lui $v0, 0x48
+   0x2c3fb0: 7fb00010  sq $s0, 0x10($sp)
+   0x2c3fb4: 24426f78  addiu $v0, $v0, 0x6F78
+   0x2c3fb8: ffbf0000  sd $ra, 0x0($sp)
+   0x2c3fbc: 0080802d  daddu $s0, $a0, $zero
+>> 0x2c3fc0: 0c0b1014  jal func_2C4050
+   0x2c3fc4: ae020000  sw $v0, 0x0($s0)  [delay slot]
+
+§22E8 $ bash local/tooling/ee/ee-at 0x2c22e8 12 12  [function start 0x2c22c8]
+   0x2c22c8: 27bdfff0  addiu $sp, $sp, -0x10
+   0x2c22cc: 3c050048  lui $a1, 0x48
+   0x2c22d0: ffbf0000  sd $ra, 0x0($sp)
+   0x2c22d4: 24a55ff0  addiu $a1, $a1, 0x5FF0
+   0x2c22d8: 24060100  addiu $a2, $zero, 0x100
+   0x2c22dc: 0000382d  daddu $a3, $zero, $zero
+   0x2c22e0: 0c0c5f5c  jal func_317D70
+   0x2c22e4: 24041500  addiu $a0, $zero, 0x1500  [delay slot]
+>> 0x2c22e8: 0c0b0fea  jal func_2C3FA8
+   0x2c22ec: 0040202d  daddu $a0, $v0, $zero  [delay slot]
+
+§1B3FDC $ bash local/tooling/ee/ee-at 0x1b3fdc 10 10 (interior sub_001B3F78)
+   [zero-store prologue 0x1b3fb4-0x1b3fd8]
+>> 0x1b3fdc: 0c0b08b2  jal func_2C22C8
+   0x1b3fe0: ae02000c  sw $v0, 0xC($s0)  [delay slot]
+   0x1b3fe4: 8c430000  lw $v1, 0x0($v0)
+   0x1b3fec: 84640010  lh $a0, 0x10($v1)
+   0x1b3ff0: 8c650014  lw $a1, 0x14($v1)
+   0x1b3ff4: 00a0f809  jalr $a1
+
+§23D5B4 $ bash local/tooling/ee/ee-at 0x23d5b4 10 10  [function start 0x23d5a8]
+   0x23d5a8: 27bdffe0  addiu $sp, $sp, -0x20
+   0x23d5ac: 7fb00010  sq $s0, 0x10($sp)
+   0x23d5b0: ffbf0000  sd $ra, 0x0($sp)
+>> 0x23d5b4: 0c0b08b2  jal func_2C22C8
+   0x23d5b8: 0080802d  daddu $s0, $a0, $zero  [delay slot]
+
+§2659A4 $ bash local/tooling/ee/ee-at 0x2659a4 10 10
+   0x26599c: 0c0f9912  jal func_3E6448
+   0x2659a0: 24847190  addiu $a0, $a0, 0x7190  [delay slot]
+>> 0x2659a4: 0c0b08b2  jal func_2C22C8
+   0x2659ac: dfbf0000  ld $ra, 0x0($sp)
+
+§2540 $ bash local/tooling/ee/ee-at 0x2c2540 6 14  [function start 0x2c2540]
+>> 0x2c2540: 80a20000  lb $v0, 0x0($a1)
+   0x2c2544: 0080302d  daddu $a2, $a0, $zero
+   0x2c2548: 10400009  beqz $v0, . + 4 + (0x9 << 2)
+   [... byte->halfword copy loop through 0x2c2570; jr $ra 0x2c2574 ...]
+
+§241AB0 $ bash local/tooling/ee/ee-at 0x241ab0 12 12  [function start 0x241aa0]
+   0x241aa0: 27bdfff0  addiu $sp, $sp, -0x10
+   0x241aa4: 3c050048  lui $a1, 0x48
+   0x241aa8: ffbf0000  sd $ra, 0x0($sp)
+   0x241aac: 0c0b0950  jal func_2C2540
+>> 0x241ab0: 24a5c3a8  addiu $a1, $a1, -0x3C58  [delay slot]
+   ($a1 = 0x480000-0x3C58 = 0x47C3A8 = BASLUS-20772; string passed to string-copy helper)
+
+§1A9478 $ bash local/tooling/ee/ee-at 0x1a9478 14 10 (interior sub_001A9438)
+   0x1a9458: 8e020008  lw $v0, 0x8($s0)
+   0x1a945c: 84440100  lh $a0, 0x100($v0)
+   0x1a9460: 8c430104  lw $v1, 0x104($v0)
+   0x1a9464: 0060f809  jalr $v1
+   0x1a9468: 02042021  addu $a0, $s0, $a0  [delay slot]
+   0x1a946c: 3c050046  lui $a1, 0x46
+   0x1a9470: 0000302d  daddu $a2, $zero, $zero
+   0x1a9474: 0000382d  daddu $a3, $zero, $zero
+>> 0x1a9478: 24a51ca0  addiu $a1, $a1, 0x1CA0  [delay slot]
+   ($a1 = 0x461CA0 = cFEStateLogin)
+   0x1a947c: 0c0c5f5c  jal func_317D70
+   0x1a9480: 240406d4  addiu $a0, $zero, 0x6D4  [delay slot]
+
+§20DDD4 $ bash local/tooling/ee/ee-at 0x20ddd4 16 12 (interior sub_0020D1D8)
+   0x20ddbc: 50800004  beql $a0, $zero, . + 4 + (0x4 << 2)
+   0x20ddc0: 3c040047  lui $a0, 0x47  [delay slot]
+   0x20ddc4: 0c0e6e58  jal func_39B960
+   0x20ddc8: 24050002  addiu $a1, $zero, 0x2  [delay slot]
+   0x20ddcc: 3c040047  lui $a0, 0x47
+   0x20ddd0: 0c0c5d9c  jal func_317670
+>> 0x20ddd4: 24841bf0  addiu $a0, $a0, 0x1BF0  [delay slot]
+   ($a0 = 0x471BF0 = option_savereplay)
