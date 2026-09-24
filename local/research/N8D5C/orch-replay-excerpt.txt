@@ -1,0 +1,22 @@
+Compressed full log: /Users/brad/dev/ssx3-work/N8D5C/orch-replay.log.gz
+Uncompressed bytes: 4805084
+Uncompressed SHA-256: b85ba0ec1976223e9a707690e8cadcba5a1d4cc5fa1e46120c5f1439b522428c
+Compressed SHA-256: ceb391b52dc3a1f9b428588d11f7d086bc848cc1ec62a26ef09c8f1c611cb665
+342: [gs:parallel] init ok (live backend on the GS worker thread)
+544: [WARN]: Stalled compile (compute, f76de0e759a85498): thread 0 - 9847.000 us (mode: sync, success: yes).
+1064: [WARN]: Stalled compile (compute, b7109780b562b0fe): thread 0 - 5281.000 us (mode: sync, success: yes).
+1576: [WARN]: Stalled compile (compute, 7463dfd379df2855): thread 0 - 5616.000 us (mode: sync, success: yes).
+78245: [n8d5b] alignment tick=2050 fbp=112 pmode=ff21 width=512 height=448
+78247: [WARN]: Stalled compile (compute, bce4b7c3f2669906): thread 0 - 131962.000 us (mode: sync, success: yes).
+78248: [n8d5b] control=128 expected=128 PASS
+78251: GB4_FRAME tick=2050 backend=parallel pmode=ff21 dispfb1=9070 dispfb2=1400 display_fbp=112 source_fbp=112 preferred=0 present=7bf5c012
+78252: GB4_REPLAY_SUMMARY mode=queue backend=parallel drop_priv=0 packets=862993 priv=11499 transfers=25485 markers=2050 readbacks=0 clears=0 samples=41 rtz=off rounded_packets=0
+78253: GB4_PARALLEL_STATS packets=862993 presents=41 null_scanouts=0 unsupported_clears=0 unsupported_vram_io=0 init_ok=1 init_failed=0
+79344: Total Tests: 585
+79345: Passed: 585
+79346: Failed: 0
+sampled_tile_counts: 896 words; occupied_pixels=128292; active_tiles_ge32=567; packed_le_u32_sha256=1ab2c58d627c7cb258c49021f4fc645e8d059f910ccbbbeb761072e9e9705f9d
+raw_tile_counts: 896 words; occupied_pixels=128292; active_tiles_ge32=567; packed_le_u32_sha256=1ab2c58d627c7cb258c49021f4fc645e8d059f910ccbbbeb761072e9e9705f9d
+count_vectors_exact_equal=True
+pipeline_error_present=False
+frame_ppm_sha256=8c85489e242eb8a24f96e21495728ec7c80efdd7747b40a8fb0c5e4ffea25d4d

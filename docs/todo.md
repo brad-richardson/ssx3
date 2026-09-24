@@ -1089,6 +1089,24 @@ with measured budgets, then 120 Hz simulation.
       pushed. **Next:** supply a pinned explicit shader resource layout,
       verify Mac control=128 and sampled/raw occupancy both broad on the
       same stream, then gate one Odin run. Keep the full replay log in scratch.
+- [x] **N8D5C Mac GPU tile probe PASS (25ef5fb):** one five-line explicit
+      `ResourceLayout` repair at local fork `a847d0f` supplied the two
+      sampled float image bindings, SSBO binding 2 and eight-byte push
+      constant. Release paraLLEl build and taps-OFF suite passed 585/585.
+      One orchestrator replay outside the worker sandbox used the exact
+      N8D4 stream at tick 2050/FBP112/PMODE `ff21`/512×448. The GPU
+      checkerboard returned **128/128**; sampled and raw tile vectors
+      matched **896/896**, with 128,292 occupied pixels and 567/896 active
+      tiles each. I viewed the frame; its PPM SHA matches N8D5B's Mac
+      frame. The full replay log is compressed in scratch and a bounded
+      excerpt is committed. This proves the separate sampled/storage-map
+      path on Mac, not where Odin loses pixels. No device run, speed claim
+      or fork push. **Next N8D5D:** build the pinned default-OFF Android
+      diagnostic; one lease-held Odin run to tick 2050 with control,
+      sampled and raw tile counts. Control failure/misalignment stops at
+      OTHER. If control passes, sparse/sparse supports a sparse sampled
+      image at this point; broad/sparse implicates the current copy/map
+      path. No fold or profiling until the device result is gated.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
