@@ -48,10 +48,18 @@ these first:
 ## 2. Workers
 
 Routing is in `~/.config/agents/AGENTS.md`; the current quota state is in
-`local/AGENTS.local.md`. As of 2026-09-23 evening:
+`local/AGENTS.local.md`. **Current 2026-09-24 override:** OpenCode Go
+models are **standard tier**. Use Go Muse Spark Contributor or DeepSeek
+Flash for suitable worker briefs to preserve Codex quota for orchestration;
+local oMLX Qwen remains budget tier. Brad's stop rule is to issue no new
+tasks once Codex weekly quota remaining reaches 5%. The 09-23 launch
+notes below and §10's Codex-only handoff describe their historical state;
+they do not override this routing.
+
+As of 2026-09-23 evening (historical):
 - Claude is near its weekly limit.
 - muse is out until 2026-09-26.
-- **New lanes go to Codex `gpt-6-sol`** via
+  - **New lanes went to Codex `gpt-6-sol`** via
   `local/tooling/orch/launch-codex.sh <ID> "Your brief is local/muse/prompts/<ID>.md …"`.
 - Brad resets the Codex quota once it's **below 5% left**. Tell him when
   it gets close (the Codex footer shows the weekly warning).
@@ -298,9 +306,11 @@ E56 will promote a new one). Disk ~97/200 GB.
 - Claude-only tools don't exist for you: `PushNotification`,
   `SendUserFile` and Artifacts. Tell Brad things in your replies, and give
   file paths for audio/images (he can open them on the mini).
-- **Workers:** keep launching with `local/tooling/orch/launch-codex.sh`
-  (Sol, auto mode with the escalation suffix). Continue a finished Codex
-  lane in a fresh pane.
+- **Workers at handoff:** Codex lanes launched with
+  `local/tooling/orch/launch-codex.sh` (Sol, auto mode with the escalation
+  suffix). This is superseded by the 09-24 Go standard-tier override in
+  §2; continue a finished Codex lane in a fresh pane only when routing
+  calls for Codex.
 - **The watcher:** run `local/tooling/orch/watch.sh` in the background
   (it exits on a lane commit, a blocked pane or the 25 min heartbeat),
   then gate and restart it.
