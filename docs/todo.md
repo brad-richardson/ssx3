@@ -791,6 +791,14 @@ with measured budgets, then 120 Hz simulation.
       `gb4-parallel` `c5913e4` is not pushed. **Next GB5:** isolate the
       first glyph producer/texture or raster divergence by replay, then
       fold paraLLEl onto the current fork for Odin/Turnip.
+      **X5 PASS (1b3d3e9, sparse local Qwen):** the GB4 capture's ticks
+      949–950 contain 461+461 = 922 GIF packets, indices 143805–144726.
+      The streamed index matches the original pklog for tick, FNV, length
+      and corrected path on all 922 rows; packet 144266 is PATH3, 1696
+      bytes, FNV `cc6dd8df`. The orchestrator reran the validator, checked
+      all 1,982,063 path indices and the capture-format source. The CSV
+      is `local/research/X5/packets-949-950.csv`; it does not name a glyph
+      producer.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1264,5 +1272,10 @@ with measured budgets, then 120 Hz simulation.
       - Metro sites clear the frame-skip flag `[*(gp+0x2A74)+0x34]`.
       The early stalls were the 16k output cap (dev-71 added an 8k
       thinking budget).
+- [ ] **X4 incomplete (local Qwen dense):** the E55 source-map read reached
+      about 70k context without writing its report. A same-session resume
+      produced no tokens before the orchestrator stopped it. No X4 code
+      claims have been accepted; rebrief in smaller source categories if
+      still needed for E55. X5's separate sparse extraction passed.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
