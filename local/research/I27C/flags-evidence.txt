@@ -1,0 +1,13 @@
+[game]
+GCC_OPTIMIZATION_LEVEL = 3
+GCC_PREPROCESSOR_DEFINITIONS = 'CMAKE_INTDIR="Release-iphoneos"' USE_SSE2NEON 'PS2X_ENABLE_DIAG_TAPS=0' 'PS2X_ENABLE_DET_HASH_TAP=0' 'PS2X_ENABLE_IOP_RPC_TRACE=1' 'PS2X_IOS=1' PLATFORM_DESKTOP_SDL GRAPHICS_API_OPENGL_ES2 'PS2X_IOP_ENABLE_PLUGINS=0'
+OTHER_CPLUSPLUSFLAGS =     -DNDEBUG '-std=gnu++20' '-ffp-contract=off'
+SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+[raylib]
+GCC_OPTIMIZATION_LEVEL = 3
+GCC_PREPROCESSOR_DEFINITIONS = 'CMAKE_INTDIR="Release-iphoneos"' PLATFORM_DESKTOP_SDL GRAPHICS_API_OPENGL_ES2 USE_SSE2NEON
+OTHER_CFLAGS = -fno-strict-aliasing -Werror=implicit-function-declaration -Werror=pointer-arith      -DNDEBUG '-std=gnu99' '-ffp-contract=off' -x objective-c
+OTHER_CPLUSPLUSFLAGS = -fno-strict-aliasing -Werror=implicit-function-declaration -Werror=pointer-arith      -DNDEBUG '-std=gnu99' '-ffp-contract=off' -x objective-c
+SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+[game compiler response]
+-O3=True; -DNDEBUG=True; -O0=False

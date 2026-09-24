@@ -1,0 +1,22 @@
+$ git ls-remote fork refs/heads/ssx3
+exit=0
+04f3ace599e3d9d52b94803150688f54dbf330ec	refs/heads/ssx3
+
+$ git rev-parse HEAD
+exit=0
+04f3ace599e3d9d52b94803150688f54dbf330ec
+
+$ git rev-parse fork/ssx3
+exit=0
+04f3ace599e3d9d52b94803150688f54dbf330ec
+
+$ git status --short
+exit=0
+
+$ git diff --exit-code 14b1e5cb HEAD -- ps2xRuntime/src/runner
+exit=0
+
+$ git diff --name-status 4ebb2ac5c8037ea747d580c34e594015a6df6849 HEAD
+exit=0
+M	ps2xRuntime/CMakeLists.txt
+A	ps2xRuntime/cmake/patch_raylib_ios_sdl2_dpi.cmake
