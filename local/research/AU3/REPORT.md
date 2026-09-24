@@ -1,43 +1,44 @@
-# AU3 report: blocked before implementation
+# AU3 report: guest-clock SND HLE and tag-1 host audio
 
-Brief: `local/muse/prompts/AU3.md`. Worker: Codex. Commit trailer requested:
-`Orchestrated-By: Codex`.
+Brief: `local/muse/prompts/AU3.md`. Worker: Codex. Source branch:
+`au3-snd` in `~/dev/ssx3-work/AU3/PS2Recomp`, based on AU2 `7c2a02e`.
 
-## Stop condition
+## Part 1 implementation
 
-| Item | Result | Evidence |
+| Requirement | Result | Files / notes |
 | --- | --- | --- |
-| Required checkout | Not created | AU3 requires a worktree off the PS2Recomp fork at `ssx3` `eac6cba`, with AU2 commit `7c2a02e` cherry-picked, on local branch `au3-snd`. |
-| Worker write scope | Conflict | `~/dev/AGENTS.md` says “Write only inside the folder you were started in.” The start folder is `/Users/brad/dev/ssx3`; the required fork checkout is `~/dev/PS2Recomp`, outside it. |
-| Existing worktrees | No suitable checkout | `git worktree list` in the start folder listed only `/Users/brad/dev/ssx3` at `5b2e922` (`main`). |
-| Implementation, build, tests, boots | Not run | Stopped before the first operation that would write outside the allowed folder. |
-| Runner SHA ×2 | Not found | No AU3 runner was built or used. |
-| Suite count | Not found | No suite was run. |
-| Runner-dir check | Not run | No fork branch was created or pushed. |
+| Dev-only HLE, default off | Implemented; enabled by `PS2X_SOUND=1`. | Replaced per-vblank `PS2X_SND_TICK` with a guest-cycle sound event. |
+| Tick cadence | 93.75 Hz guest time; one event every 3,145,728 EE cycles. | `EeScheduler` starts the recurring event on cid-1 handler registration. It queues the type-0 handler call from the EE scheduler. |
+| AU2 protocol details | Kept. | Status serial written at +0 and +0x23C; cid-1 type-2 completion answers retained. |
+| Tag-1 PCM | Implemented. | Parser locates 1,536 bytes (384 stereo s16 frames) in SetDma tag buffer and pushes them to a bounded SPSC-style atomic ring. Overflow advances the oldest read position; underruns yield silence. |
+| Host output | Implemented. | raylib `AudioStream`, 36 kHz stereo s16; falls back to 48 kHz with host-side linear interpolation if the 36 kHz stream is invalid. `PS2X_SOUND_WAV` records callback output up to 200,000,000 data bytes. |
+| `_sceSifSendCmd` | Implemented unconditionally. | Decodes `a0..a6` as `(cid, mode, pkt, size, src, dst, esize)`; mode is ignored by this runtime. |
+| Focused tests | Added three. | Guest-cycle cadence, tag-1 parser bytes, and seven-register binding. All three passed in the suite run. |
 
-## Context read
+## Build and test gate
 
-Read `AGENTS.md`, `local/AGENTS.local.md`, all of `local/research/AU2/REPORT.md`
-(including §AU2-4), and `local/research/AU1/REPORT.md` including the semaphore
-36 and sound-thread sections. AU2 reports that tag 1 contains 384 stereo s16
-frames per tick at 36 kHz, and the type-0 cid-1 handler stores the tag-buffer
-address and signals semaphore 36. AU2 also documents the harness/LLDB lease
-incident; no debugger was attached and no lease or boot was used here.
+| Item | Result |
+| --- | --- |
+| Configure | Passed. Release/Ninja; codegen `~/dev/ssx3-work/codegen-ssx3`; dependencies reused from E50 `_deps`. |
+| Build | Passed on second build invocation. The first build invocation failed compiling the new test because its suite registration function was missing; corrected once, then the incremental build completed and linked `ps2EntryRunner` and `ps2x_tests`. |
+| Suite command | `~/dev/ssx3-work/AU3/build/ps2xTest/ps2x_tests` from fork worktree root. |
+| Suite result | **599/600 passed, 1 failed.** All three `Ps2SoundHle` tests passed. The captured output was truncated before the failing test identity; failure not diagnosed. Per stop rule, no rerun or follow-up diagnosis was done. |
+| Runner SHA ×2 | Not collected. |
+| Runner-dir check | Not run. No push was attempted. |
 
-## Repository state at stop
+## Validation not reached
 
-The start-folder checkout was `main` at `5b2e922`. Before this report was
-created, `git status --short --branch` showed pre-existing modifications to:
+The suite failure stopped the brief before boots. No leases or boots were
+used. Boot A/B, title/menu/SC/race phase counters, semaphore 36 signals and
+waits, race-start checks, WAV capture/conversion, and audio listen check are
+not available. No `.m4a` was produced.
 
-- `local/research/N5/scripts/__pycache__/launch.cpython-314.pyc`
-- `local/research/N5/scripts/launch.py`
-- `local/research/N5/scripts/mem_governor.sh`
+AU2 §AU2-4's lease incident was read before work resumed. No debugger was
+attached to a harness child.
 
-These are outside AU3 and were left untouched.
+## Stop result
 
-## Required next action
-
-The orchestrator must provide a worker start folder or authorization/workflow
-that allows creating and editing the required fork worktree. No implementation
-recommendation is made because the brief's code and validation work did not
-start.
+The remaining gate is the unidentified failing test in the 599/600 suite
+result. This report and the current implementation are ready for the
+orchestrator to inspect. No claim is made that race behavior or audible output
+has been validated.
