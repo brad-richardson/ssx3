@@ -1,0 +1,52 @@
+N8D7M2 parser self-check
+excerpt:  /Users/brad/dev/ssx3/local/research/N8D7L/replay-excerpt.txt
+saved 896: /Users/brad/dev/ssx3-work/N8D6C/logcat-pid.txt
+launcher: /Users/brad/dev/ssx3/local/research/N8D7M2/launch.py
+
+PASS  saved oracle 448 words                                   got=448  want=448
+PASS  saved oracle occupied                                    got=64374  want=64374
+PASS  saved oracle active                                      got=300  want=300
+PASS  saved oracle packed sha                                  got='e1dc4c5c6b7579e4c036e9df8cde0dfe8096e9bbe3fe56c8494a50720c78a593'  want='e1dc4c5c6b7579e4c036e9df8cde0dfe8096e9bbe3fe56c8494a50720c78a593'
+PASS  saved input/circuit/stage/oracle all equal               got=True  want=True
+PASS  saved controls 8 literal pairs                           got=[(917504, 2492419), (918836, 2492418), (917568, 2492420), (1834996, 786432), (925696, 2492418), (983040, 4280484865), (925692, 4008704), (991232, 6308864)]  want=[(917504, 2492419), (918836, 2492418), (917568, 2492420), (1834996, 786432), (925696, 2492418), (983040, 4280484865), (925692, 4008704), (991232, 6308864)]
+PASS  saved control addresses match pin                        got=True  want=True
+PASS  saved oracle_input_equal logged 448/448                  got='448/448'  want='448/448'
+PASS  saved oracle/input recomputed equality                   got=True  want=True
+PASS  synthetic oracle comma-led words                         got=448  want=448
+PASS  synthetic oracle comma-led occupied                      got=1280  want=1280
+PASS  synthetic oracle comma-led active                        got=20  want=20
+PASS  synthetic oracle comma-led sha                           got='bf434e4d989c7f40fca04decc4258c4ddda0b1c2c33f863458a42562ba8fe46e'  want='bf434e4d989c7f40fca04decc4258c4ddda0b1c2c33f863458a42562ba8fe46e'
+PASS  synthetic oracle trailing-comma split sha                got={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}  want={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}
+PASS  synthetic oracle three-segment split sha                 got={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}  want={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}
+PASS  oversized 449 oracle rejected                            got=None  want=None
+PASS  non-decimal oracle field rejected                        got=None  want=None
+PASS  incomplete oracle (next tag) rejected                    got=None  want=None
+PASS  summary without oracle vector rejected                   got=None  want=None
+PASS  control payload with 7 words rejected                    got=None  want=None
+PASS  control payload with bad field rejected                  got=None  want=None
+PASS  A: oracle==input sparse active 20                        got='A'  want='A'
+PASS  A: unavailable-sha equal vectors                         got='A'  want='A'
+PASS  B: oracle high, input low (equality 168/448)             got='B'  want='B'
+PASS  C: oracle low, input high (equality 168/448)             got='C'  want='C'
+PASS  D: oracle and input high (equality 448/448)              got='D'  want='D'
+PASS  D on saved Mac vector (equality 448/448, active 300)     got='D'  want='D'
+PASS  OTHER: logged oracle_input_equal disagrees with vectors  got='OTHER'  want='OTHER'
+PASS  OTHER: 448/448 but active 150 neither sparse nor broad   got='OTHER'  want='OTHER'
+PASS  OTHER: control address order mismatch                    got='OTHER'  want='OTHER'
+PASS  OTHER: missing oracle vector                             got='OTHER'  want='OTHER'
+PASS  OTHER: missing [n8d7l] lines                             got='OTHER'  want='OTHER'
+PASS  A: shared metadata fields align                          got='A'  want='A'
+PASS  A: shared metadata agree on non-default stride/dbx       got='A'  want='A'
+PASS  OTHER: selected/oracle stride mismatch                   got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle dbx mismatch                      got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle dby mismatch                      got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle phase mismatch                    got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle fbw mismatch                      got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle psm mismatch                      got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle mask mismatch                     got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle samples mismatch                  got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle promoted mismatch                 got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle tick mismatch                     got='OTHER'  want='OTHER'
+PASS  OTHER: selected/oracle fbp mismatch                      got='OTHER'  want='OTHER'
+
+45/45 checks passed

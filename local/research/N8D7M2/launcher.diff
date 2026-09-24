@@ -1,0 +1,383 @@
+--- local/research/N8D7I/launch.py
++++ local/research/N8D7M2/launch.py
+@@ -1,13 +1,14 @@
+ #!/usr/bin/env python3
+-"""N8D7I: one leased Odin install and launch after orchestrator review.
++"""N8D7M2: one leased Odin install and launch after orchestrator review.
+ 
+-Adapted from ``local/research/N8D6C/launch.py`` for one N8D7H install and one
+-launch. It enables ``PS2X_N8D7F_SELECTED_CAPTURE=1`` together with the N8D6C
+-stage/tile flags, parses the 448-word ``[n8d7f] input/circuit/stage_tile_counts``
+-and 896-word ``[n8d5b] sampled/raw_tile_counts`` vectors with a fixed comma-led
+-logcat continuation parser, and classifies the same tick-2050 frame into A-E or
+-OTHER. No device action may run before the orchestrator releases the reviewed
+-SHA in this pane.
++Adapted from ``local/research/N8D7I/launch.py`` for one N8D7M1 install and one
++launch. It enables ``PS2X_N8D7L_ORACLE=1`` together with the N8D7I
++selected/stage/tile flags, parses the full 448-word ``[n8d7f] oracle_tile_counts``
++vector and the ``[n8d7l]`` metadata / ``oracle_controls`` / ``oracle_input_equal``
++lines alongside the N8D7I vectors, checks the eight literal control addresses
++against the N8D7L Mac control set, and classifies the same tick-2050 frame into
++A-D or OTHER. No device action may run before the orchestrator releases the
++reviewed SHA in this pane.
+ """
+ 
+ import gzip
+@@ -24,24 +25,37 @@
+ 
+ SERIAL = '622c49b1'
+ PKG = 'com.ps2x.runner'
+-SCRATCH = Path('/Users/brad/dev/ssx3-work/N8D7I')
+-APK = Path('/Users/brad/dev/ssx3-work/N8D7H/app-release.apk')
++SCRATCH = Path('/Users/brad/dev/ssx3-work/N8D7M2')
++APK = Path('/Users/brad/dev/ssx3-work/N8D7M1/app-release.apk')
+ APK_SIZE = 153736732
+ FILES = f'/storage/emulated/0/Android/data/{PKG}/files'
+ LEASE = '/data/local/tmp/mg/LEASE'
+-LEASE_TAG = 'N8D7I one-launch'
++LEASE_TAG = 'N8D7M2 one-launch'
+ LOG_CAP = 16 * 1024 * 1024
++COMPLETE = 'first complete oracle and vector receipt with frontend dump'
+ PINS = {
+-    'apk': '86fca856b6de0148aea24fb53b63119e4ec1382eb9cf3490d2ce0db2031df14a',
+-    'runner': '8e32841d8a6fff8f45862ca806c74ed92ec31469638f71281f9139e2fc32c683',
++    'apk': 'e077bef8a7ba8aab44f46c515f79fade1ae045cc337bf7285e7b652e739758a1',
++    'runner': 'f3de999acc9227b82a9d9fab6a4a0b5b7fb279e6205991c1b3022da781e3c1bf',
+     'turnip': '717812c3c51fd2836931ec22b82d13e805d763ec425f86bafdfa92f54c1ac29d',
+     'hal': '1b49d27c839f25363237d8276c91a401602845ee8eef67de50d6540f4cdfc387',
+     'elf': '1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc',
+     'iso': '3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5',
+ }
+ ROUTE = ('10611:start:250,12780:cross:250,14749:cross:250,16567:cross:250,18336:cross:250,19770:cross:250,21205:down:150,21706:down:150,22306:cross:250,24025:cross:250,28512:cross:200,28763:down:700,29513:cross:200,29764:down:700,30514:cross:200,30765:down:700,31515:cross:200,31766:down:700,32516:cross:200,32767:down:700,33517:cross:200,33768:down:700,34518:cross:200,34769:down:700,35519:cross:200,35770:down:700,36520:cross:200,36771:down:700,37521:cross:200,37772:down:700,38522:down:30000')
++# Literal (byte-address) control set from N8D7L REPORT §1, in kOracleControls
++# order (ps2_gs_parallel_backend.cpp). Addresses are compile-time constants, so
++# they must match the device log exactly; the eight word values are the on-device
++# VRAM reads and are compared to the Mac literal set only as a separate
++# observation, never inferred as cross-device identity.
++CONTROL_ADDRS = (0x0E0000, 0x0E0534, 0x0E0040, 0x1BFFF4,
++                 0x0E2000, 0x0F0000, 0x0E1FFC, 0x0F2000)
++MAC_CONTROLS = {
++    0x0E0000: 0x00260803, 0x0E0534: 0x00260802, 0x0E0040: 0x00260804,
++    0x1BFFF4: 0x000C0000, 0x0E2000: 0x00260802, 0x0F0000: 0xFF230401,
++    0x0E1FFC: 0x003D2B00, 0x0F2000: 0x00604400,
++}
+ 
+-result = {'brief': 'N8D7I', 'install_count': 0, 'launch_count': 0,
++result = {'brief': 'N8D7M2', 'install_count': 0, 'launch_count': 0,
+           'hashes': {}, 'events': [], 'category': 'not found',
+           'first_failure': 'not found'}
+ lease_claimed = False
+@@ -136,7 +150,7 @@
+             result['hashes']['packaged_' + label] = pair
+             if pair != [PINS[label]] * 2:
+                 raise RuntimeError(f'packaged {label} SHA mismatch')
+-    record('APK size and packaged runner/Turnip/HAL SHA pairs match N8D7H pins')
++    record('APK size and packaged runner/Turnip/HAL SHA pairs match N8D7M1 pins')
+ 
+ 
+ def same_pid_lines(pid):
+@@ -152,8 +166,8 @@
+     """Parse one wrapped ``<name>_tile_counts=`` logcat vector.
+ 
+     ``name`` is the vector stem without the suffix: ``sampled``/``raw`` for the
+-    896-word ``[n8d5b]`` vectors, ``input``/``circuit``/``stage`` for the
+-    448-word ``[n8d7f]`` vectors. ``words`` is the exact accepted length and
++    896-word ``[n8d5b]`` vectors, ``input``/``circuit``/``stage``/``oracle`` for
++    the 448-word ``[n8d7f]`` vectors. ``words`` is the exact accepted length and
+     ``pack`` the little-endian struct format used for the packed SHA.
+ 
+     A logcat segment boundary can swallow the separator comma, so the wrapped
+@@ -201,10 +215,64 @@
+     return None
+ 
+ 
++def parse_controls(payload):
++    """Parse ``[n8d7l] oracle_controls=0xADDR=0xVALUE,...`` into 8 pairs.
++
++    Returns ``None`` unless there are exactly eight well-formed ``addr=value``
++    hex pairs; addresses are returned as ints in log order.
++    """
++    if payload is None:
++        return None
++    parts = payload.split(',')
++    if len(parts) != 8:
++        return None
++    out = []
++    for part in parts:
++        pair = part.split('=')
++        if len(pair) != 2:
++            return None
++        try:
++            out.append((int(pair[0], 16), int(pair[1], 16)))
++        except ValueError:
++            return None
++    return out
++
++
++def oracle_details(p):
++    """Bounded same-run report: controls, equality and oracle summary."""
++    oracle = p.get('oracle', {})
++    selected = p.get('selected', {})
++    vectors = p.get('vectors', {})
++    details = {'metadata': oracle.get('metadata'), 'summary': selected.get('oracle'),
++               'equal_logged': None, 'equal_recomputed': None, 'vector_sha': None,
++               'controls_present': 0, 'addresses_ok': False, 'value_matches': 0,
++               'control_words': []}
++    if oracle.get('equal'):
++        details['equal_logged'] = int(oracle['equal'][0])
++    ov = vectors.get('oracle')
++    iv = vectors.get('input')
++    if ov:
++        details['vector_sha'] = ov['sha256']
++    if ov and iv:
++        details['equal_recomputed'] = sum(a == b for a, b in zip(ov['values'], iv['values']))
++    controls = parse_controls(oracle['controls'][0]) if oracle.get('controls') else None
++    if controls:
++        details['controls_present'] = len(controls)
++        details['addresses_ok'] = [a for a, _ in controls] == list(CONTROL_ADDRS)
++        details['control_words'] = [
++            {'addr': f'0x{addr:06X}', 'value': f'0x{value:08X}',
++             'mac': f'0x{MAC_CONTROLS[addr]:08X}' if addr in MAC_CONTROLS else None,
++             'match': MAC_CONTROLS.get(addr) == value}
++            for addr, value in controls]
++        details['value_matches'] = sum(w['match'] for w in details['control_words'])
++    return details
++
++
+ def probe(lines):
+     relevant = [line.split('[n8d5b] ', 1)[1] for line in lines if '[n8d5b] ' in line]
+     stage_lines = [line.split('[n8d6a] ', 1)[1] for line in lines if '[n8d6a] ' in line]
+     selected_lines = [line.split('[n8d7f] ', 1)[1] for line in lines if '[n8d7f] ' in line]
++    oracle_lines = [line.split('[n8d7l] ', 1)[1] for line in lines if '[n8d7l] ' in line]
+     out = {}
+     patterns = {
+         'alignment': r'alignment tick=(\d+) fbp=(\d+) pmode=([0-9a-fA-F]+) width=(\d+) height=(\d+)',
+@@ -233,19 +301,31 @@
+         'input': r'input tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
+         'circuit': r'circuit tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
+         'stage': r'stage tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
++        'oracle': r'oracle tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
+         'equal': r'input_circuit_equal=(\d+)/448 circuit_stage_equal=(\d+)/448',
+     }
+     for key, pattern in selected_patterns.items():
+         matches = [re.search(pattern, line) for line in selected_lines]
+         out['selected'][key] = next((m.groups() for m in matches if m), None)
++    out['oracle'] = {}
++    oracle_patterns = {
++        'metadata': (r'tick=(\d+) fbp=(\d+) fbw=(\d+) psm=(\d+) dbx=(\d+) dby=(\d+) '
++                     r'phase=(\d+) stride=(\d+) mask=(\d+) samples=(\d+) promoted=(\d+)'),
++        'controls': r'oracle_controls=(\S+)',
++        'equal': r'oracle_input_equal=(\d+)/448',
++    }
++    for key, pattern in oracle_patterns.items():
++        matches = [re.search(pattern, line) for line in oracle_lines]
++        out['oracle'][key] = next((m.groups() for m in matches if m), None)
+     out['vectors'] = {
+         'sampled': tile_vector(lines, 'sampled', 896, '<896I'),
+         'raw': tile_vector(lines, 'raw', 896, '<896I'),
+         'input': tile_vector(lines, 'input', 448, '<448H'),
+         'circuit': tile_vector(lines, 'circuit', 448, '<448H'),
+         'stage': tile_vector(lines, 'stage', 448, '<448H'),
++        'oracle': tile_vector(lines, 'oracle', 448, '<448H'),
+     }
+-    out['errors'] = [line for line in relevant + stage_lines + selected_lines
++    out['errors'] = [line for line in relevant + stage_lines + selected_lines + oracle_lines
+                      if 'ERROR' in line or 'alignment=OTHER' in line or 'OTHER' in line]
+     out['errors'] += [line for line in lines if re.search(
+         r'\b(pipeline|probe)\b.*\b(error|failed)\b', line, re.I)]
+@@ -305,12 +385,14 @@
+ 
+ def classify(p, frame):
+     selected = p.get('selected', {})
++    oracle = p.get('oracle', {})
+     vectors = p.get('vectors', {})
+     stages = p.get('stages', {})
+     if not all(p.get(key) for key in ('alignment', 'control', 'sampled', 'raw')) \
+             or not frame or not all(selected.values()) \
++            or not all(oracle.values()) \
+             or not all(vectors.get(kind) for kind in
+-                       ('sampled', 'raw', 'input', 'circuit', 'stage')) \
++                       ('sampled', 'raw', 'input', 'circuit', 'stage', 'oracle')) \
+             or set(stages) != {'circuit1', 'pre_deinterlace_merged', 'final'}:
+         return 'OTHER'
+     tick, fbp, pmode, width, height = p['alignment']
+@@ -325,7 +407,19 @@
+     in_tiles, in_occ, in_active, in_sha = selected['input']
+     ci_tiles, ci_occ, ci_active, ci_sha = selected['circuit']
+     st_tiles, st_occ, st_active, st_sha = selected['stage']
++    o_tiles, o_occ, o_active, o_sha = selected['oracle']
+     ic_equal, cs_equal = selected['equal']
++    (r_tick, r_fbp, r_fbw, r_psm, r_dbx, r_dby, r_phase, r_stride, r_mask,
++     r_samples, r_promoted) = oracle['metadata']
++    oracle_equal, = oracle['equal']
++    controls = parse_controls(oracle['controls'][0])
++    # Every shared selected/oracle metadata field must describe the same frame:
++    # tick, FBP, FBW, PSM, DBX, DBY, phase, stride, mask, samples, promoted.
++    # A field that disagrees between [n8d7f] and [n8d7l] is OTHER.
++    selected_shared = (s_tick, s_fbp, s_fbw, s_psm, s_dbx, s_dby, s_phase, s_stride,
++                       s_mask, s_samples, s_promoted)
++    oracle_shared = (r_tick, r_fbp, r_fbw, r_psm, r_dbx, r_dby, r_phase, r_stride,
++                     r_mask, r_samples, r_promoted)
+     if p['errors'] \
+             or (int(tick), int(fbp), pmode.lower(), int(width), int(height)) \
+             != (2050, 112, 'ff21', 512, 448) \
+@@ -339,7 +433,11 @@
+             or (int(s_tick), int(s_fbp), int(s_samples), int(s_promoted), int(s_status)) \
+             != (2050, 112, 1, 0, 2) \
+             or (int(s_vw), int(s_vh)) != (512, 224) \
+-            or (in_tiles, ci_tiles, st_tiles) != ('448', '448', '448'):
++            or (in_tiles, ci_tiles, st_tiles, o_tiles) != ('448', '448', '448', '448') \
++            or (int(r_tick), int(r_fbp), int(r_fbw), int(r_psm), int(r_samples),
++                int(r_promoted), int(r_mask)) != (2050, 112, 8, 1, 1, 0, 4194303) \
++            or selected_shared != oracle_shared \
++            or controls is None or [a for a, _ in controls] != list(CONTROL_ADDRS):
+         return 'OTHER'
+     for kind, summary in (('sampled', p['sampled']), ('raw', p['raw'])):
+         vector = vectors[kind]
+@@ -349,7 +447,7 @@
+     # Android. Recompute it from the full parsed vector and compare only when
+     # the firmware printed a real digest.
+     for kind, summary in (('input', selected['input']), ('circuit', selected['circuit']),
+-                          ('stage', selected['stage'])):
++                          ('stage', selected['stage']), ('oracle', selected['oracle'])):
+         vector = vectors[kind]
+         if (vector['occupied'], vector['active']) != (int(summary[1]), int(summary[2])):
+             return 'OTHER'
+@@ -357,32 +455,55 @@
+             return 'OTHER'
+     if vectors['sampled']['values'] != vectors['raw']['values']:
+         return 'OTHER'
+-    # Recompute the equality counts from the parsed vectors; B/C divergence is
+-    # the expected observation, so equality is not required to be 448/448, only
+-    # consistent with the logged counts.
+     in_values = vectors['input']['values']
+     ci_values = vectors['circuit']['values']
+     st_values = vectors['stage']['values']
++    or_values = vectors['oracle']['values']
+     if (int(ic_equal), int(cs_equal)) != (sum(a == b for a, b in zip(in_values, ci_values)),
+                                           sum(a == b for a, b in zip(ci_values, st_values))):
+         return 'OTHER'
++    # The logged oracle/input equality must equal the recomputed cell-by-cell
++    # equality; A/D require 448/448, B/C require <448/448.
++    logged_equal = int(oracle_equal)
++    recomputed_equal = sum(a == b for a, b in zip(or_values, in_values))
++    if logged_equal != recomputed_equal:
++        return 'OTHER'
+     in_active = vectors['input']['active']
+-    ci_active = vectors['circuit']['active']
+-    st_active = vectors['stage']['active']
+-    fi_active = vectors['sampled']['active']
+-    if in_active <= 100 and ci_active <= 100 and st_active <= 100 and fi_active <= 100:
++    or_active = vectors['oracle']['active']
++    full = logged_equal == 448
++    if full and or_active <= 100 and in_active <= 100:
+         return 'A'
+-    if in_active >= 250 and ci_active <= 100 and st_active <= 100 and fi_active <= 100:
+-        return 'B'
+-    if in_active >= 250 and ci_active >= 250 and st_active <= 100 and fi_active <= 100:
+-        return 'C'
+-    if in_active >= 250 and ci_active >= 250 and st_active >= 250 and fi_active <= 100:
++    if full and or_active >= 250 and in_active >= 250:
+         return 'D'
+-    if in_active >= 250 and ci_active >= 250 and st_active >= 250 and fi_active >= 500:
+-        return 'E'
++    if not full and or_active >= 250 and in_active <= 100:
++        return 'B'
++    if not full and or_active <= 100 and in_active >= 250:
++        return 'C'
+     return 'OTHER'
+ 
+ 
++def write_excerpt(p):
++    lines = ['N8D7M2 same-run vectors reconstructed from the parsed same-PID log.',
++             '448-word [n8d7f] vectors pack as little-endian uint16 for packed_sha256;',
++             '896-word [n8d5b] vectors pack as little-endian uint32.', '']
++    for tag, kinds in (('[n8d7f]', ('input', 'circuit', 'stage', 'oracle')),
++                       ('[n8d5b]', ('sampled', 'raw'))):
++        for kind in kinds:
++            vector = p.get('vectors', {}).get(kind)
++            if vector:
++                lines.append(f'{tag} {kind}_tile_counts=' + ','.join(map(str, vector['values'])))
++    details = oracle_details(p)
++    lines += ['', 'oracle metadata: ' + repr(details['metadata']),
++              'oracle summary:  ' + repr(details['summary']),
++              'oracle equal logged/recomputed: '
++              f'{details["equal_logged"]}/{details["equal_recomputed"]}',
++              'controls present/addresses_ok/value_matches: '
++              f'{details["controls_present"]}/{details["addresses_ok"]}/{details["value_matches"]}']
++    for word in details['control_words']:
++        lines.append(f'  {word["addr"]}={word["value"]} mac={word["mac"]} match={word["match"]}')
++    (SCRATCH / 'tile-excerpt.txt').write_text('\n'.join(lines) + '\n')
++
++
+ def close_logger():
+     global logger, log_stream
+     if logger is not None:
+@@ -416,7 +537,7 @@
+         raise SystemExit('review hold: launch.py SHA differs from reviewed pin')
+     SCRATCH.mkdir(parents=True, exist_ok=True)
+     if (SCRATCH / 'result.json').exists() or (SCRATCH / 'driver.log').exists():
+-        raise SystemExit('one-run guard: N8D7I receipt already exists')
++        raise SystemExit('one-run guard: N8D7M2 receipt already exists')
+     result['script_sha'] = script_sha
+     record(f'SCRIPT_SHA {script_sha}')
+     check_apk()
+@@ -440,7 +561,7 @@
+     record(f'CARD mc0 entries={card!r}')
+     if card:
+         raise RuntimeError('mc0 is not empty')
+-    dump = f'{FILES}/n8d7i-frames-{int(time.time())}'
++    dump = f'{FILES}/n8d7m2-frames-{int(time.time())}'
+     if shell(f'if test -e {shlex.quote(dump)}; then echo present; else echo absent; fi') != 'absent':
+         raise RuntimeError('frame directory already exists')
+     shell(f'mkdir -p {shlex.quote(dump)}')
+@@ -450,7 +571,7 @@
+     env = (f'PS2X_GS_BACKEND=parallel\nPS2X_GS_TURNIP=1\nPS2X_SKIP_MOVIE=1\n'
+            f'PS2X_CD_IMAGE={FILES}/SSX3.iso\nPS2X_PAD_SCRIPT={ROUTE}\n'
+            f'PS2X_PAD_SCRIPT_CLOCK=vsync\nPS2X_N8D5_TILE_CAPTURE=1\n'
+-           f'PS2X_N8D7F_SELECTED_CAPTURE=1\n'
++           f'PS2X_N8D7F_SELECTED_CAPTURE=1\nPS2X_N8D7L_ORACLE=1\n'
+            f'PS2X_FRAME_DUMP_DIR={dump}\n'
+            f'PS2X_FRAME_DUMP_ONCE_TICKS=2050,999999,999999\n'
+            f'PS2X_VSYNC_RATE_LOG=1\n')
+@@ -524,8 +645,9 @@
+                 and set(selected_probe['stages']) == {'circuit1', 'pre_deinterlace_merged', 'final'} \
+                 and all(selected_probe['vectors'].values()) \
+                 and all(selected_probe['selected'].values()) \
++                and all(selected_probe['oracle'].values()) \
+                 and selected_frame and frame_ready(dump, selected_frame):
+-            stop_reason = 'first complete selected and vector receipt with frontend dump'
++            stop_reason = COMPLETE
+             break
+         if tick >= 2100:
+             stop_reason = 'tick 2100 without complete receipt'
+@@ -551,15 +673,17 @@
+     if pidof():
+         raise RuntimeError('force-stop left app PID present')
+     record('POSTRUN pid absent')
+-    if stop_reason == 'first complete selected and vector receipt with frontend dump':
++    if stop_reason == COMPLETE:
+         pull_frame(dump, selected_frame)
+-    # Classify from the unabridged vectors before writing bounded JSON below.
++    # Report oracle details and the reconstructed vectors before writing bounded JSON.
++    result['oracle'] = oracle_details(selected_probe)
++    write_excerpt(selected_probe)
+     result['category'] = classify(selected_probe, selected_frame if result.get('frame') else None)
+     for vector in result['probe'].get('vectors', {}).values():
+         if vector:
+             del vector['values']
+     record('CATEGORY ' + result['category'])
+-    if stop_reason != 'first complete selected and vector receipt with frontend dump':
++    if stop_reason != COMPLETE:
+         raise RuntimeError(stop_reason)
+ 
+ 
+@@ -582,7 +706,7 @@
+             except Exception as exc:
+                 record('CLEANUP force-stop error=' + repr(exc))
+             try:
+-                shell(f"echo 'LEASE_FREE N8D7I done' > {LEASE}")
++                shell(f"echo 'LEASE_FREE N8D7M2 done' > {LEASE}")
+                 record('CLEANUP lease=' + shell(f'cat {LEASE}'))
+             except Exception as exc:
+                 record('CLEANUP lease error=' + repr(exc))
