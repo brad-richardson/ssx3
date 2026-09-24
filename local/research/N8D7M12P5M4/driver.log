@@ -1,0 +1,15 @@
+SCRIPT_SHA 1056304d3f2d559936f56ae189c419813581bb46f7cf35ae26d0dc7ad12d6738
+HASH binary 2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5 2a0446e89f8fc0cec621cd1f53adf81c1ba8b95940f8ac2cc041729887268ae5 (8369016 B)
+HASH stream f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593 f6a78f71fa1a5f5bb21442ff2c6757a743cd42c5d2d74a108977d8416da4a593 (1100696462 B)
+ON_PINS on hashes + ppm verified (Part 1)
+ENV DIFF on-minus-off removed=['PS2X_N8D5_TILE_CAPTURE', 'PS2X_N8D7F_SELECTED_CAPTURE', 'PS2X_N8D7L_ORACLE'] changed=['PS2X_GS_REPLAY_OUT', 'PS2X_GS_REPLAY_PPM_DIR']
+HASH fork_head 24801bcfa42611e5e36c8990183b793d28b4e5e8 24801bcfa42611e5e36c8990183b793d28b4e5e8
+HASH fork_header b8de8745e16d6a814763f69b0e8d1d54d957bf427f94ec2bc57f63e509f970cd b8de8745e16d6a814763f69b0e8d1d54d957bf427f94ec2bc57f63e509f970cd (31244 B)
+FIXTURE cwd/ps2xRecomp -> /Users/brad/dev/ssx3-work/N8D7M12/PS2Recomp/ps2xRecomp header b8de8745e16d6a814763f69b0e8d1d54d957bf427f94ec2bc57f63e509f970cd b8de8745e16d6a814763f69b0e8d1d54d957bf427f94ec2bc57f63e509f970cd
+LEASE claimed slot 1
+RUN binary=ps2x_tests cwd=/Users/brad/dev/ssx3-work/N8D7M12P5M3/mac-off/cwd backend=parallel step=50 ppm_tick=2050
+PID 92827
+CHILD exit_code=0 elapsed=3.0s (control only, not speed)
+STOP first complete tick2050 summary/frame/41-row receipt (PROVISIONAL OFF)
+VERDICT PROVISIONAL PASS (provisional)
+CLEANUP lease released
