@@ -1313,11 +1313,18 @@ with measured budgets, then 120 Hz simulation.
       cannot discriminate: selected pixels use phase/stride/page layout,
       and unrelated bytes can occupy the window. No run or cause claim.
       `local/research/N8D7J/ORCH-GATE.md`.
-- [ ] **N8D7K independent selected-address oracle:** derive and check
-      PSMCT24/FBW8/FBP112 phase/stride offsets from an independent
-      source or write trace; then design bounded same-Odin-frame exact raw
-      word observations at selected coordinates. Reject occupancy-only
-      window counts.
+- [x] **N8D7K independent address oracle PASS with correction (`8324a3ce`):**
+      fork literal PSMCT32 tables are separate from G43 bit arithmetic;
+      fork CT24 uses the CT32 page table. Eight FBP112/FBW8 offsets match
+      G43 8/8; base `0xE0000`, page boundaries `0xE2000`/`0xF0000`, far
+      corner `0x1BFFF4`. Header bytes match the N8D7F fork. Six sampled
+      words cannot classify a full frame; the worker's A/B threshold is
+      rejected. No build/run. `local/research/N8D7K/ORCH-GATE.md`.
+- [ ] **N8D7L independent full-frame raw oracle:** on the same tick2050
+      4 MiB snapshot, decode all 512×224 selected PSMCT24 RGB pixels with
+      the fork table oracle, calculate all 448 tile counts, and compare
+      with G43 input/circuit/stage vectors. Literal offsets and a control
+      check the oracle; no six-word or broad-window shortcut.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
