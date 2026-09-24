@@ -2,18 +2,18 @@
 
 Milestone: stock SSX 3 gameplay through our PS2 static recomp runtime on Odin.
 Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`.
-Updated 2026-09-23 23:37 EDT on the **Mac mini** (host of record). Resume notes: `docs/orchestration.md` §10.
+Updated 2026-09-23 23:47 EDT on the **Mac mini** (host of record). Resume notes: `docs/orchestration.md` §10.
 
 | Lane | State | Pinned rev | Next action | Blocker / lease |
 | --- | --- | --- | --- | --- |
 | E (PS2 runtime) | Fold E58 + GB4 + E56 pushed. The race draws terrain, rider and HUD. **Sky/sun lost** (E59: a second bug exposed by E53's VU0 fixes; sky packet wrong ALPHA/CBP), textures flat (60 vs 73 uploads/vsync). E56 added 2,049 auto resume entries; stop-policy race gate: zero missing targets through tick 5353. Clean Mac speed remains the E58 baseline: menus 0.54×, race 0.13× | fork `ssx3` @ `8e2864a` (pushed), canonical `codegen-ssx3` = E56 regen | E60 (running): VU0 data diff → sky fix; W1 fold, then E54/E55/E57 | — |
-| G (GS composite) | **GB4 PASS through Part 4**: capture/replay proves the GS queue byte-exact (found and confirmed the PATH1-under-RTZ rasterization bug that E53 fixed). paraLLEl replays the race recognizably (PSNR confounded by a present offset; HUD small-text glyphs break) | fork `ssx3` `13cac7f`; local `gb4-parallel` `520bd61` | GB4 Part 6 (running): env isolation, present offset, glyphs, first live paraLLEl boot | — |
+| G (GS composite) | **GB4 Part 6 PASS**: isolated CPU/paraLLEl replay suites 556/556; live paraLLEl reaches the race without SMODE override. Real glyph/HUD and edge damage remains; same display page and ±1 tick cannot explain it. Diagnostic live presentation averaged 13.71/s, not guest speed | fork `ssx3` `8e2864a`; local `gb4-parallel` `c5913e4` (based on `13cac7f`) | GB5: isolate glyph producer and texture/raster difference, then fold paraLLEl onto current fork for Odin/Turnip | — |
 | N (Android) | **N7**: the Odin runs the fold and draws the race world; clean speed menus 0.39–0.46×, SC 0.27×, **race 0.076×** (one run; VU1 + software GS). The rider stalled at 0–1 MPH in that run (check). N6 controller works | bytesize `n7-android` `81aa92d` (local) | After the sky fix + paraLLEl: an Odin rerun with a simpleperf race profile | Odin lease free |
 | T (PCSX2 reference) | **T49 PASS**: PCSX2 entry trace showed different VU1 code at 0x10/0x40 and 38 MPG uploads | bytesize WSL (G7 clone + T48/T49 patches) | Keep for post-fix comparisons | — |
 | Perf / GS bridge | **PF1 PASS**: Odin 0.36–0.43× in title/menus, GameThread saturated; no Odin race yet (script desync) | N3 APK `69a79e29…` | Mac clean baseline after E32; profileable APK for symbols (N) | — |
 | V (storage) | Mini is up. SSD tier-1 cleanup done (free 27 → 369 GB); tier 2 (parked I-lane dirs) now unblocked by the fold | — | Brad decides the GameCube-reserve and personal folders | — |
 | I (iOS) | **I26 PASS**: the iPhone has the black startup, I26-FAST auto-route, 4:3 bilinear and virtual pad (install only; Brad tests). I27 HiDPI queued | fork `i26-qol` `8a357ac` (local; rides W1's fold) | Reinstall after the W1 fold + sky fix; I27 HiDPI | iPhone install-only |
-| A (audio) | AU2–AU5: EE-mixed PCM path works (tick at 93.75 Hz, missing SND functions restored, decoder correct). The mix is **~12 dB low vs PCSX2** (Brad: "half the audio"; likely fewer MPF music layers) | local `au5-snd` `ddf4f66` | AU6 (running): status block + active-stream differential vs PCSX2 | — |
+| A (audio) | **AU6:** matched menu EE PCM loudness equals PCSX2 within +0.014 dB over 59 s. AU5's low capture used a different pad route; six active voices and levels match. Waveform residual ~9.3%, race and host-output loudness remain open | local `au6-snd` `045dd6a` (from AU5) | Brad listens to AU6 capture; then compare exact perceived scene through host output and EE PCM | Brad's listening result |
 | W (widescreen) | **W1 works**: native anamorphic mode forced (`PS2X_WIDESCREEN`), presenter 16:9; the 3D is right, the 2D widens ~33%. Brad accepted the stretch for now (09-24) | local `w1-wide` | W1F fold on E56, then reinstall iPhone (install only) | — |
 | GameCube | Reserve (`docs/reserve.md`) | — | none | — |
 

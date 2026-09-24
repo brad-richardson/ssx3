@@ -777,6 +777,20 @@ with measured budgets, then 120 Hz simulation.
 
       **Part 6:** isolate the env, fix the present offset, a clean PSNR
       table + a glyph diagnosis, then a live paraLLEl boot.
+      **Part 6 PASS (f339909):** replay-only backend selection makes CPU
+      and paraLLEl suites 556/556. paraLLEl replay processed 1,982,063
+      packets and 60 presents with zero null/unsupported operations. A
+      live queue+paraLLEl boot reached a race frame at tick 4548, without
+      an SMODE override. Orchestrator viewed all five side-by-sides and
+      the live frame. Setup Character text and race HUD glyphs have real
+      broken strokes; terrain/edges also differ. CPU raw display-page 112
+      equals CPU Present at each sample, and no consistent N±1 tick
+      offset explains paraLLEl's image. The candidate PATH3 composite
+      packet covers the damaged region but is not proved the glyph draw.
+      Live 13.71 presents/s is **diagnostic**, not guest speed. Local
+      `gb4-parallel` `c5913e4` is not pushed. **Next GB5:** isolate the
+      first glyph producer/texture or raster divergence by replay, then
+      fold paraLLEl onto the current fork for Odin/Turnip.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1154,6 +1168,17 @@ with measured budgets, then 120 Hz simulation.
       Sent to Brad to listen. Fork `au5-snd` `ddf4f66` (local).
       **Next:** a longer-overlap capture (E33 route, or sit on the menu) if
       it still sounds off.
+
+- [x] **AU6 (02c9204): menu EE loudness deficit refuted on matched content.**
+      E33-route tag-1 PCM aligns with PCSX2 for 59 s: RMS 5,010 ours vs
+      5,002 PCSX2 (+0.014 dB). AU5's ~1,300 RMS capture had no pad route;
+      AU6 rises after the route input. Both snapshots have six active
+      type-2 voices (slots 10–15) with matching levels/source callbacks;
+      PCSX2's extra status-block fields did not change menu gain. The
+      waveform still has a 9.3% residual, and neither race nor host
+      output was pairwise captured. No volume fix is justified by this
+      gate. Brad listens to `~/dev/ssx3-work/AU6/AU6-menu-tag1.m4a`;
+      follow up on the exact audible scene if the symptom persists.
 
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
