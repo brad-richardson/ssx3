@@ -1212,8 +1212,8 @@ with measured budgets, then 120 Hz simulation.
       distinct decoded-input/circuit1 outcomes; N8D4 and N8D6C are not
       byte-identical streams, so cross-run counts alone cannot assign cause.
       N8D7A Go Muse Contributor was rejected before task start by the
-      workspace's paid-training-endpoints Privacy gate; Brad accepts the
-      data use, console toggle pending. N8D7B Sol medium found that a
+      workspace's paid-training-endpoints Privacy gate; Brad enabled that
+      setting later, Muse Go retry pending. N8D7B Sol medium found that a
       promoted image can bypass VRAM and the same-frame promotion state is
       absent; raw VRAM bytes need an independent field decoder. Design only,
       no device verdict. Gate: `local/research/N8D7B/ORCH-GATE.md`.
@@ -1936,9 +1936,18 @@ with measured budgets, then 120 Hz simulation.
       gate and unaltered worker receipts. No GS verdict.
 - [x] **X17 DeepSeek V4.1 Flash Go pilot blocked before task start:**
       provider says the workspace must enable Global regions in Privacy
-      settings. Orchestrator stopped retries. Brad approved Global regions;
-      console toggle remains pending because the available OpenCode CLI
-      does not expose workspace Privacy. No model-quality result or config
+      settings. Orchestrator stopped retries. Brad later enabled Global
+      regions; X18 reached the model. No X17 model-quality result or config
       edit; see `local/research/X17/REPORT.md`.
+- [x] **X18 DeepSeek Flash Go parser pilot (`a72172d`) partial gate:**
+      saved sampled/raw vectors parse with exact 896-word SHA and numeric
+      receipt; worker fixed a copied hash-object error after its first
+      checker failure. Independent orchestrator check found that doubled
+      commas split across two logcat segments are accepted, violating the
+      brief. Expanded checker now fails. Pane used 5m25 and 65.5k context
+      versus <18k target. Gate: `local/research/X18/ORCH-GATE.md`.
+- [ ] **X18B parser boundary fix:** reject doubled separators across
+      segment boundaries and pass the expanded checker before use in a
+      future Odin launcher. Keep the released N8D6C launcher unchanged.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.

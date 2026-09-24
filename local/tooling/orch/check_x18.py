@@ -38,6 +38,7 @@ assert synthetic is not None and synthetic['sha256'] == expected
 assert synthetic['occupied'] == sum(numbers)
 assert synthetic['active'] == sum(n >= 32 for n in numbers)
 assert parse([first, tail.replace(': ,', ': ,,', 1)], 'sampled') is None
+assert parse([first + ',', tail], 'sampled') is None  # doubled separator across the segment boundary
 assert parse([first, tail.replace(': ,', ': ,x,', 1)], 'sampled') is None
 assert parse([first], 'sampled') is None
 assert parse([first, prefix + '[n8d5b] raw_summary tiles=896'], 'sampled') is None
