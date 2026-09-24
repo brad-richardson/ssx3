@@ -1779,12 +1779,16 @@ with measured budgets, then 120 Hz simulation.
       Triangle: Previous is visible. Save/Load was not selected, and no
       card API reach is proved. One bounded Mac boot, cards unchanged,
       mini slots free; no speed claim. `local/research/E55D10/ORCH-GATE-P2.md`.
-- [ ] **E55D11 bounded Save/Load selection:** from the observed Options
-      screen move four rows to Save/Load, view that selection, then one
-      Cross and view the resulting screen. Use fresh scratch cards and a
-      predeclared card-observation gate; only a real GetDir/Read record
-      licenses a changed-card A/A baseline. Park ExternalWake policy
-      until a production poster is found.
+- [x] **E55D11 Part 1 script approved (`9724d596`):** prepared Start,
+      Square, four Down pulses, one Cross, pre/post frames and the E55D3
+      GetDir/mcRead probe. Self-check 31/31, checker 42/42; no boot,
+      screen or card-API verdict. `local/research/E55D11/ORCH-GATE-P1.md`.
+- [ ] **E55D11 Part 2 bounded Save/Load selection:** run exactly the
+      approved script once with fresh empty scratch cards. View the
+      Save/Load highlight before Cross and resulting screen after it;
+      inspect probe calls by vsync tick. Only a real GetDir/Read record
+      licenses a later changed-card A/A baseline. Park ExternalWake
+      policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
