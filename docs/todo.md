@@ -1033,10 +1033,15 @@ with measured budgets, then 120 Hz simulation.
       black bands and fragments. The app was force-stopped, PID absent,
       Odin lease free; no speed claim. The loss is **at or before the
       Vulkan mapped scanout/readback**, with GPU image generation versus
-      transfer/readback still unresolved. **N8D4 next:** use a controlled
-      same-input GS capture/replay or an independent scanout readback to
-      separate renderer output from transfer behavior. Do not fold or
-      profile for speed until the race image is usable.
+      transfer/readback still unresolved. **N8D4 preparation PASS
+      (769bff3):** existing N8D3 APK contains the default-OFF GS stream
+      capture and tick-2050 close marker; the worker prepared a one-run
+      launcher, CPU/paraLLEl replay script and acceptance checker. I reran
+      the prepared checker and verified the capture/replay source path.
+      Device run, stream, Mac build/replays and visual comparison are
+      explicitly **unrun**. Continue after I27B Simulator cleanup; keep
+      the large GS capture outside git. Do not fold or profile for speed
+      until the race image is usable.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
