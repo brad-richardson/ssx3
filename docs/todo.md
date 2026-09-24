@@ -1206,16 +1206,22 @@ with measured budgets, then 120 Hz simulation.
       meet predeclared A conditions, while the formal run remains OTHER.
       Sparsity is present by circuit1; its upstream mechanism is open.
       `local/research/N8D6C/ORCH-GATE.md` has the recovery and caveats.
-- [ ] **N8D7 pre-circuit1 static design:** inspect the actual GS VRAM
-      source, `sample_crtc_circuit` image sampling and Turnip path at the
-      pinned tick; lay out correct-behavior and alternative predictions
-      for one bounded probe. Use N8D4 same-stream divergence and N8D6C's
-      within-run A-like measurements; do not boot until the probe can
-      discriminate VRAM/input loss from circuit sampling/driver loss.
+- [x] **N8D7B pre-circuit1 static design PASS (`f32c628`):** mapped GS
+      VRAM ownership, `sample_crtc_circuit` input binding, shader address
+      decode and the stage tap. The same-frame V/S/T table predicts
+      distinct decoded-input/circuit1 outcomes; N8D4 and N8D6C are not
+      byte-identical streams, so cross-run counts alone cannot assign cause.
       N8D7A Go Muse Contributor was rejected before task start by the
       workspace's paid-training-endpoints Privacy gate; Brad accepts the
-      data use, console toggle pending. N8D7B Sol medium is the fallback.
-      Briefs: `local/muse/prompts/N8D7A.md`, `N8D7B.md`.
+      data use, console toggle pending. N8D7B Sol medium found that a
+      promoted image can bypass VRAM and the same-frame promotion state is
+      absent; raw VRAM bytes need an independent field decoder. Design only,
+      no device verdict. Gate: `local/research/N8D7B/ORCH-GATE.md`.
+- [ ] **N8D7C decoder feasibility and calibration design:** inspect shader
+      swizzle helpers and any existing CPU GS address decoder. Specify an
+      independent, bounded display-rectangle decoder for the selected input,
+      a script-checkable Mac calibration, and stop conditions. No device run
+      until that prerequisite is established.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
