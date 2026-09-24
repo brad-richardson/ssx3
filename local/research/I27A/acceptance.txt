@@ -1,0 +1,16 @@
+I27A Simulator acceptance table
+item | baseline | I27A
+W1F2 window/drawable | 874x402 | 874x402 | ratio 1.000x1.000
+I27A window/drawable | 874x402 | 2622x1206 | ratio 3.000x3.000
+I27A screen/render (last sample) | 874x402 / 874x402
+I27A render/drawable | 0.333x0.333
+drawable transport | PASS
+native render-size | FAIL
+Mac taps-OFF suite | total=585, passed=585, failed=0
+I26-FAST route | armed=('31', 'env', 'vsync') | last_tick=2372 | tick>=1714=True
+frame count | 4
+shot-0010s.png | png=(2622, 1206) bytes=285349 sha1=68ecbf26128a064b472bd68e65f4f363d97641e388f4f55f785c2f40c7224eb0 sha2=68ecbf26128a064b472bd68e65f4f363d97641e388f4f55f785c2f40c7224eb0 paired=True
+shot-0035s.png | png=(2622, 1206) bytes=197623 sha1=957ab7c6f67ac531b7e220c5823337d5f33da4299cc6569a90b90360e9f5ecbb sha2=957ab7c6f67ac531b7e220c5823337d5f33da4299cc6569a90b90360e9f5ecbb paired=True
+shot-0100s.png | png=(2622, 1206) bytes=183065 sha1=588a57a13a00694355f69a535e9bb82de64f2174c3756b3d49b9577c91d278a5 sha2=588a57a13a00694355f69a535e9bb82de64f2174c3756b3d49b9577c91d278a5 paired=True
+shot-0160s.png | png=(2622, 1206) bytes=148587 sha1=78af0e9abacc292b4464e6a7abc839dd2a5ead5140e1f45f12d70a8b68c44b15 sha2=78af0e9abacc292b4464e6a7abc839dd2a5ead5140e1f45f12d70a8b68c44b15 paired=True
+full HiDPI gate=FAIL
