@@ -6,9 +6,9 @@ while :; do
   new=$(git -C ~/dev/ssx3 log --format='%h %s' $base..HEAD | grep -v '\[orch\]')
   [ -n "$new" ] && { echo "COMMIT: $new"; exit 0; }
   blk=$(herdr agent list | python3 -c '
-import json,sys,os; WS=os.environ.get("WS","w2")
+import json,sys,os; WS=os.environ.get("WS","w2"); IGNORE=os.environ.get("WATCH_IGNORE_AGENT", "orch-sol")
 for a in json.load(sys.stdin)["result"]["agents"]:
-    if a.get("name") and a.get("workspace_id")==WS and a["agent_status"]=="blocked": print(a["name"],"blocked")')
+    if a.get("name") and a["name"]!=IGNORE and a.get("workspace_id")==WS and a["agent_status"]=="blocked": print(a["name"],"blocked")')
   [ -n "$blk" ] && { echo "$blk"; exit 0; }
   [ $(( $(date +%s) - start )) -ge $MAX ] && { echo "heartbeat ${MAX}s"; herdr agent list | python3 -c 'import json,sys,os;WS=os.environ.get("WS","w2");[print(a.get("name"),a["agent_status"]) for a in json.load(sys.stdin)["result"]["agents"] if a.get("name") and a.get("workspace_id")==WS]'; exit 0; }
   sleep 45

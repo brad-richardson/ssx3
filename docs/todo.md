@@ -934,9 +934,10 @@ with measured budgets, then 120 Hz simulation.
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
       2D title/menu/HUD widen ~33% (the game doesn't squeeze 2D in
-      anamorphic mode). Sent to Brad to judge. The `w1-wide` branch
-      includes I26's presenter/vpad (`8a357ac`). Fold it into `ssx3` after
-      E56's push.
+      anamorphic mode). **Brad accepted the stretch for now (09-24)** as
+      the 16:9 default. The `w1-wide` branch includes I26's presenter/vpad
+      (`8a357ac`). Fold it into `ssx3` after E56's push, then reinstall
+      the iPhone (install only).
 - [ ] **Brad's iPhone check-in feedback (09-23 evening, Select Mode/Peak
       screenshots):**
       1. fonts look off (kerning);
@@ -1026,7 +1027,7 @@ with measured budgets, then 120 Hz simulation.
 
 ## W — widescreen (backlog, Brad 09-23)
 
-- [ ] **W1 running (Codex Sol, `local/muse/prompts/W1.md`): 16:9 by default.** Lead: on the GC build the game's own Options > Widescreen rendered anamorphic and the host stretched it (old `native/ios/App.mm`).
+- [x] **W1 validated (Codex Sol, `local/muse/prompts/W1.md`): 16:9 by default; fold pending E56.** Lead: on the GC build the game's own Options > Widescreen rendered anamorphic and the host stretched it (old `native/ios/App.mm`).
       **W1 Part 1 (ce2018c):** the native option exists (`kT_19Widescreen`,
       `…169`, `…Animorphic`). The flag is bits 20–21 of the options block at
       `0x535610` (0 off / 1 16:9 / 2 anamorphic), applied by `0x228c08` →
