@@ -939,19 +939,25 @@ with measured budgets, then 120 Hz simulation.
       composite occlusion. Runner-dir diff from upstream empty. This was
       a diagnostic boot, so it adds no speed row to the ledger.
       **Next:** W1F fold; E60 sky; then E54/E55/E57.
-- [x] **E59 (8528a43): the sky loss is a second bug that E53 exposed.**
-      - FPMODE=ieee: no sky. Reverting the EFU tables (h): no sky.
-        Reverting the whole VU0 group (a): the sky, sun and flare return.
-        Reverting VCALLMSR only, VSQI only, or both: no sky. What remains
-        is VLQI at 0x3feb8c (`sceVu0MemReadQ`) and CMSAR1 (never run).
-        E53's new behaviours match PCSX2.
-      - The sky-like packet (TBP0 11017) is drawn in both, but with ALPHA
-        0x1/CBP 10756 here vs 0x2a/14473 in PCSX2.
+- [x] **E59 (8528a43): sky mechanism remains unproved.**
+      - FPMODE=ieee and the EFU revert had no visible sun. One full-VU0
+        revert boot showed a sun/flare at tick 2103; the narrower VCALLMSR,
+        VSQI and combined reverts did not. These were different race scenes,
+        so the one frame is a lead, not proof that E53 introduced a second
+        sky bug. E53's new VU0 semantics match PCSX2 on their unit inputs.
+      - A sky-like packet (TBP0 11017) has ALPHA 0x1/CBP 10756 here vs
+        0x2a/14473 in PCSX2, but the scenes are unmatched and the texture
+        identity is inferred. No writer or causal packet defect is proved.
       - Flat textures: 60 IMAGE uploads/vsync vs PCSX2's 73–74, 13 vs 23
         mip chains.
 
-      **E60 running (Sol):** VU0 data differential at the
-      `sceVu0MemReadQ` calls, then name the writer.
+      **E60 PASS as a negative discriminator (47bbbbf):** local taps from
+      boot through race ticks 2110/2116 and PCSX2 hooks from boot/race
+      entry through the sampled race logged **zero `sceVu0MemReadQ` calls**.
+      PCSX2 replay preservation passed 7/7 PNG hashes and exact HWSTAT.
+      No VU0 qword differential, writer, or candidate fix exists on this
+      route. Next sky step: E55 deterministic same-scene frames/packets,
+      then trace the first ALPHA/CBP or texture-state divergence.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
