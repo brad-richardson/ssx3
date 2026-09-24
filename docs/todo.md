@@ -830,9 +830,17 @@ with measured budgets, then 120 Hz simulation.
       Upper menu glyphs are absent at 899/902 and damaged once present
       at 921, so their producer remains open. Earliest mismatch is at
       or before 899; neither glyph producer nor GS state mechanism is
-      identified. Next GB5D: bracket the earlier lower-label source or
-      state and then fold paraLLEl for Odin/Turnip. GB5D Part 1 brief
-      is ready for a ten-marker matched replay before tick 899.
+      identified. **GB5D PASS (c6d55a5):** a ten-marker matched replay
+      passed 556/556 with 1,982,063 packets and zero null/unsupported
+      operations. The orchestrator reran the crop CSV and viewed pairs
+      at 300, 600, 700, 800, 850 and 899. The title's copyright text
+      is visibly damaged by tick 300. Button labels are absent at 600,
+      then visibly broken on paraLLEl at their first sampled appearance
+      at 700; the supported appearance bracket is (600,700]. Crop
+      differences at 300–600 concern copyright text/background, not
+      button labels. No producer is identified. Next: compare the first
+      title-text draw/texture/state against the CPU replay, then review
+      the paraLLEl fold for Odin/Turnip.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
