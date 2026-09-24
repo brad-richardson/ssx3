@@ -1,0 +1,19 @@
+Source: /Users/brad/dev/ssx3-work/E54/run/csr-one/ps2_pklog.txt
+Boot: one I26-FAST run, fork aa20d4a, PS2X_PKLOG=1, target tick 2050.
+The full log is 47,127,568 bytes outside Git; 7,608 emitted [csr] lines and 884,751 [pk] lines.
+
+Exact site 0x37c0e0:
+[csr] idx=1 tick=40 value=4000 pc=37c0e0 addr=12001000
+bit 3 = 0 after guest write64(8).
+
+Follow-on poll 0x37c0f8:
+[csr] idx=2 tick=40 value=4000 pc=37c0f8 addr=12001000
+[csr] idx=89550 tick=41 value=6008 pc=37c0f8 addr=12001000
+bit 3 changes 0 to 1 at the next VBlankStart; FIELD changes 0 to 1.
+The index gap is collapsed identical spin reads, not omitted polling.
+
+Exact site 0x396090: no line in the bounded log; reach unknown.
+
+Context from the same log:
+[csr] idx=0 tick=40 value=4008 pc=375d10 addr=12001000
+[csr] idx=89551 tick=41 value=6008 pc=37c11c addr=12001000
