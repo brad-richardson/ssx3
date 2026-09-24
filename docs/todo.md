@@ -1212,6 +1212,10 @@ with measured budgets, then 120 Hz simulation.
       for one bounded probe. Use N8D4 same-stream divergence and N8D6C's
       within-run A-like measurements; do not boot until the probe can
       discriminate VRAM/input loss from circuit sampling/driver loss.
+      N8D7A Go Muse Contributor was rejected before task start by the
+      workspace's paid-training-endpoints Privacy gate; Brad accepts the
+      data use, console toggle pending. N8D7B Sol medium is the fallback.
+      Briefs: `local/muse/prompts/N8D7A.md`, `N8D7B.md`.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
