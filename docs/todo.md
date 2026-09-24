@@ -1120,6 +1120,10 @@ with measured budgets, then 120 Hz simulation.
       option needs focused same-cycle, crossed-cycle and timer tests;
       ExternalWake has no guest-cycle timestamp and remains a separate
       placement policy. No implementation or speed claim yet.
+      **E55A2 queued:** fixed UTC RTC bytes behind exact
+      `PS2X_DETERMINISTIC=1`, default host-local behavior retained,
+      actual-stub tests plus one functional I26-FAST race boot. Then
+      E55B2 cycle-only event selection with synthetic ordering tests.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
