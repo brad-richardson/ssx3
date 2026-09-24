@@ -285,3 +285,29 @@ it in a fresh pane (`launch-codex.sh <ID>C "Lane <ID>, Part N (continuing)…"`)
 **Fork `ssx3`:** `13cac7f`. Canonical codegen = the E53 regen
 (`~/dev/ssx3-work/codegen-ssx3`; `-pre-e58` and `-e53` copies exist;
 E56 will promote a new one). Disk ~97/200 GB.
+
+### Notes for a Codex (GPT Sol) orchestrator (09-24 handoff)
+
+- You're the orchestrator: `~/.config/agents/AGENTS.md` (the "Work Method"
+  section applies to you, not the worker rules) plus this repo's
+  `AGENTS.md`. Where they say "Claude" for the orchestrator role, read
+  "the orchestrator".
+- Commit trailer for your `[orch]` commits: `Orchestrated-By: Codex`.
+  Commit with explicit paths (`git commit -m … -- <paths>`); workers
+  share the index (§9).
+- Claude-only tools don't exist for you: `PushNotification`,
+  `SendUserFile` and Artifacts. Tell Brad things in your replies, and give
+  file paths for audio/images (he can open them on the mini).
+- **Workers:** keep launching with `local/tooling/orch/launch-codex.sh`
+  (Sol, auto mode with the escalation suffix). Continue a finished Codex
+  lane in a fresh pane.
+- **The watcher:** run `local/tooling/orch/watch.sh` in the background
+  (it exits on a lane commit, a blocked pane or the 25 min heartbeat),
+  then gate and restart it.
+- **Brad's standing rules:**
+  - iPhone install-only;
+  - Odin force-stop after every run;
+  - no upstream contact;
+  - fork ff pushes only after the runner-dir check;
+  - never force-push or rewrite history;
+  - no generated code in git.
