@@ -1,0 +1,58 @@
+{
+  "verdict": "A",
+  "rows": [
+    {
+      "check": "preflight_root_absent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "preflight_no_heavy_job",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "check": "preflight_disk_free",
+      "pass": true,
+      "detail": "/dev/sdc       1007G  200G  756G ndk+codegen lines"
+    },
+    {
+      "check": "prepare_diffs_empty",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "source-gate.json",
+      "pass": true,
+      "detail": "status=pass size=345799259"
+    },
+    {
+      "check": "source-gate-postbuild.json",
+      "pass": true,
+      "detail": "status=pass size=7453799492"
+    },
+    {
+      "check": "build_one_success_no_retry",
+      "pass": true,
+      "detail": "BUILD SUCCESSFUL x1"
+    },
+    {
+      "check": "apk-gate.json",
+      "pass": true,
+      "detail": "status=pass"
+    },
+    {
+      "check": "mac-apk-gate.json",
+      "pass": true,
+      "detail": "status=pass"
+    },
+    {
+      "check": "disk_budget",
+      "pass": true,
+      "detail": "ssx3 internal usage: 148.6 GB of 200 GB cap; disk free: 101Gi"
+    }
+  ],
+  "other": [],
+  "failing": [],
+  "note": "Source/default-OFF path is statically gated; no runtime OFF-path or Turnip/HMI behavior is proved without a later Odin run."
+}
