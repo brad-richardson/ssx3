@@ -1,0 +1,34 @@
+# E55D4 A1/A2 bounded excerpts (full logs gzipped in scratch run dirs)
+
+## A1 boot.log sha256=cc235c7942b58a39b3afdba9946de74ea9f0d744e9a1be7c59558d9a413f977 bytes=374576 hashrows=2058
+HEAD-HASH:
+  [det-hash:v1] tick=1 eeCycle=4915299 rdram=067194272402affe scratch=594edc66332c45ec vu1Data=594edc66332c45ec vu1Code=594edc66332c45ec combined=740e5edd6099793d count=0
+  [det-hash:v1] tick=2 eeCycle=9830598 rdram=02a62ae379003f8d scratch=594edc66332c45ec vu1Data=594edc66332c45ec vu1Code=594edc66332c45ec combined=9512021748bc4a23 count=0
+  [det-hash:v1] tick=3 eeCycle=14745897 rdram=795c31d998ae5347 scratch=594edc66332c45ec vu1Data=594edc66332c45ec vu1Code=594edc66332c45ec combined=aa6ac2663bd1b14e count=0
+TAIL-HASH:
+  [det-hash:v1] tick=2056 eeCycle=10105854746 rdram=af07387e9c9dcc71 scratch=3151926b9246abc3 vu1Data=fe9e02bf6818fd8a vu1Code=f587398bb6fc4651 combined=8a37b6b32311d635 count=497946
+  [det-hash:v1] tick=2057 eeCycle=10110770058 rdram=b8fc12358cb99800 scratch=3151926b9246abc3 vu1Data=fe9e02bf6818fd8a vu1Code=f587398bb6fc4651 combined=b069ae376953db2b count=497946
+  [det-hash:v1] tick=2058 eeCycle=10115685346 rdram=d04b92e8766609d1 scratch=6fb698d3557d456a vu1Data=b49ef3655dc17f32 vu1Code=f587398bb6fc4651 combined=4247ad648d61e5b7 count=498729
+
+## A1 probe.log sha256=618e8a4988a8d64affca39a97db2c225f90ea63efa216b911f6789d5382136c8 bytes=579670 lines=4000 (all pad; no getdir/mcread through tick 2055)
+HEAD-PROBE:
+  pad seq=1 vsync=58 ord=1 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffff80808080000000000000000000000000000000000000000000000000
+  pad seq=2 vsync=58 ord=2 port=1 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffff80808080000000000000000000000000000000000000000000000000
+  pad seq=3 vsync=59 ord=3 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073ffff80808080000000000000000000000000000000000000000000000000
+TAIL-PROBE:
+  pad seq=3999 vsync=2055 ord=3995 port=0 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073bfff80808080000000ff0000000000000000000000000000000000000000
+  pad seq=4000 vsync=2055 ord=3996 port=1 slot=0 addr=0x00608770 len=32 ok=1 bytes=0073bfff80808080000000ff0000000000000000000000000000000000000000
+
+## A2 boot.log sha256=ef859f16e52304144eb8cc03c528ac674835a8f187e6acb68d38421fe282f3f4 bytes=374576 hashrows=2058
+(head/tail det-hash rows byte-identical to A1; whole-file SHA differs only in
+lane-path lines: A1 cwd /run/A1 vs A2 cwd /run/A2)
+
+## A2 probe.log sha256=618e8a4988a8d64affca39a97db2c225f90ea63efa216b911f6789d5382136c8 bytes=579670 lines=4000
+WHOLE-FILE IDENTICAL to A1 probe.log (same SHA). Head/tail lines as A1.
+
+## comparison.json
+verdict=PASS reason=identical_to_tick_2053 hash_rows=2053 probe_lines=3996;
+both bound=target, 2058 consecutive hash rows, proof_vsync=2055 each side,
+framing_ok, no truncation, no cap, no hash errors, cards empty identical
+(f9401596…ccb9ce initial and final), hid 227 rows sole known-internal
+AppleANS3CGv2Controller, no flag. First differences: none (null/null).
