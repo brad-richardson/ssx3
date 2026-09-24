@@ -1,0 +1,55 @@
+Command (from E58 fork worktree root): ../build/ps2xTest/ps2x_tests > ../suite.log 2>&1
+Exit code: 13
+
+Failed cases and assertions:
+  [Run]: E42 WRITE32 macro probe logs once with host fn   [Failed]
+      - macro store must log exactly once (guard)
+      - macro tap must name the host function with guest pc/ra
+  [Run]: E42 suppress guard silences the fast-write tap   [Failed]
+      - guarded store silent, unguarded logs once
+      - site line must carry raw addr
+  [Run]: fast-write tap fires with the vblank mirror vsync   [Failed]
+      - Ps2FastWrite32 must feed the plant watch with the E41 prefix intact
+      - only the watched word logs
+  [Run]: fast-path producer store resolves the host fn   [Failed]
+      - one fast-path line expected
+      - line must be tagged fast
+      - fast path carries no guest pc/ra
+  [Run]: producer watch learns pages and attributes macro stores   [Failed]
+      - exactly one producer store logs (guard: no fast-path double)
+      - macro tap must log addr/value/mode/pc/ra/host-fn/raw
+  [Run]: READ32 macro tap logs with the host function name   [Failed]
+      - one srcread line expected
+      - macro tap must log addr size pc ra and the host function name
+  [Run]: WRITE32 macro tap logs arena store with host fn   [Failed]
+      - arena store plus read-back uploadload must log
+      - macro tap must log the arena store with host fn
+      - read-back of the uploader word must log uploadload
+  [Run]: WRITE32 macro tap logs st with host fn   [Failed]
+      - only the in-range store must log
+      - macro tap must log the struct store with host fn
+  [Run]: WRITE32 macro tap logs tagaddrwrite with host fn   [Failed]
+      - only the watched-word store must log
+      - macro tap must log the watched store with host fn
+  [Run]: WRITE32 macro tap reports MADR with host fn   [Failed]
+      - two dmareg lines expected
+      - macro tap must log MADR with the host function name
+      - macro tap must log TADR
+  [Run]: slice mirror drives the st intc flag   [Failed]
+      - both mirrored stores must log
+      - mirrored in-interrupt store must log intc=1
+      - cleared store must log intc=0
+  [Run]: uploadload logs uploader-valued loads with pc ra fn   [Failed]
+      - only uploader-valued loads must log
+      - exact load must carry pc ra fn addr value
+      - alt-range load must log
+      - load must carry a regs
+  [Run]: uploadload stops at 64 lines   [Failed]
+      - exhausted watch must disarm
+      - watch must stop at 64 lines
+
+========================================
+Total Tests: 632
+Passed: 619
+Failed: 13
+========================================
