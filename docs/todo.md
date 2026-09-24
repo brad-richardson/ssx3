@@ -1687,9 +1687,20 @@ with measured budgets, then 120 Hz simulation.
       `3a66c19`), Granite `36ae0d0b` (base `16e7395f`); no bytes changed
       (key renderer/Granite files cmp-equal to the P6M5 stage). Not pushed
       anywhere (no upstream contact).
-- [ ] **N8X1 exploratory Odin GPU session (Opus, 2 h, Brad 09-24):**
-      free rein inside device rules; start from tick44; TU_DEBUG flags via
-      `ps2x.env`. Notebook + report; gate before anything folds.
+- [x] **N8X1 exploratory session A (`2e9a7367`): Odin black frame
+      solved.** paraLLEl-GS hierarchical binner runs wave128 on Adreno
+      (Apple never uses it) and mis-bins; fixed wave64 (or flat binning)
+      gives full deterministic frames, 91% px within ±2 of Mac (rest =
+      hardware bilinear rounding). **Live Odin boot shows menu and race on
+      the device screen** (diagnostic knob APK). Clean fix
+      `local/research/N8X1/n8x1-fix-clean.diff`. `ORCH-GATE.md`.
+- [ ] **N9 Android fold:** paraLLEl-GS/Granite product changes + wave64
+      fix onto the forks' `ssx3` (diagnostics to `wip/ssx3-snapshot`);
+      N8B1 Turnip packaging onto fork `ssx3` `959f4ea`; one APK from fork
+      tips (sound + widescreen); live Odin race with no knob env.
+- [ ] Later from N8X1: wave128 subgroup probe (name the Turnip fault),
+      exact bilinear in `ubershader.comp` (needs shader regen, re-baseline
+      Mac), horizontal stripes on Odin screens, clean Odin speed.
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
