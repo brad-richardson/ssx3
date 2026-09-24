@@ -27,7 +27,7 @@ predeclared A/B/OTHER.
 | ELF (intended) | `~/dev/ssx3-work/E32-inputs/cd/SLUS_207.72`, two fresh reads, both `1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc` |
 | Codegen (intended) | `~/dev/ssx3-work/codegen-ssx3/register_functions.cpp`, two fresh reads, both `8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3` |
 | Boot script (prepared, NOT executed) | `local/research/E55D12/e55d12_boot.py`, SHA `9efe732d358a20605fcf9fd88725095dcefd1e15e9e69f5b4a95bc359d6ee8cd` |
-| Checker | `local/research/E55D12/check.py`, SHA `d8f579e56a04e940fbc36d3918ca411550a9147fd11eb5983c6351968bf8df9a` |
+| Checker | `local/research/E55D12/check.py`, SHA `fe6c3c4910c721ae4f24557063054a45c76163650254dba1cd9dd55155094056` |
 | Self-checks | `e55d12_boot.py --self-check` 33/33 (route 19 + caps 5 + lane-setup-order 5 + frame-proof scan 4); `check.py` 46/46 PASS (route/pins/caps/discipline/probe/setup-order/frame-proof-required; screen+API UNOBSERVED by design, 0 frames and 0 probe files pre-run) |
 | Pad tokens | `start`, `square`, `down`, `cross` all verified valid in fork source (E55D11 read-only finding, `Pad.cpp:351` `padScriptButtonMask`, reused unchanged) |
 | Probe wiring (E55D11 read-only finding, reused) | enable flag `PS2X_PAD_CARD_PROBE=<file>`; GetDir `getdir … ok=1 bytes=` / `ok=0 reason=` markers; McRead `mcread … ok=1 …` / `ok=0 reason=…` markers; tick = GS `vsyncTick` pad-script clock; 16 MiB hard cap |
@@ -93,7 +93,7 @@ creation).
 
 | Outcome | Criterion |
 | --- | --- |
-| A | A readable Load game result screen (post-C2 full frame, orchestrator-viewed) **plus** a **post-choice** (vsync ≥ 1700) GetDir call — even `ok=0 reason=empty` counts as API reach — or a successful mcRead record (`mcread … ok=1 …`); early title/menu GetDir calls (E55D11 saw 4 at vsync 118/122/126/223) are counted separately and do not satisfy A |
+| A | A readable Load game result screen (post-C2 full frame, orchestrator-viewed) **plus** any **post-choice** (vsync ≥ 1700) GetDir or mcRead call — even `ok=0 reason=empty` counts as API reach; success and copied-byte payloads (`ok=1 bytes=`, bytes-bearing mcRead) are stated separately as the stronger observation. Early title/menu GetDir calls (E55D11 saw 4 at vsync 118/122/126/223) are counted separately and do not satisfy A |
 | B | A readable Load game result screen without that post-choice API evidence, or a different readable screen (state it precisely: which menu/row, which footer) |
 | OTHER | Missing/unreadable pre/post frame, route/pin/lease/cap mismatch, or ambiguous transition |
 

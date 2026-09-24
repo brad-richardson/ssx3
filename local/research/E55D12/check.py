@@ -22,6 +22,9 @@ It imports e55d12_boot.py (sibling in this dir) for its constants and runs:
 It CANNOT claim the Load-game highlight, the post-choice screen, or any
 card-API record before a run: no frame or probe file exists yet, so any A/B
 outcome assertion fails here by design (reported as UNOBSERVED).
+Predeclared A (for Part 2): readable Load result plus ANY post-choice
+(vsync >= 1700) GetDir or mcRead call, including ok=0 (counts as API reach);
+success and copied-byte payloads are stated separately.
 
 Usage: python3 local/research/E55D12/check.py
 Exit 0 on PASS, 1 on FAIL.
@@ -147,7 +150,7 @@ def main():
           'UNOBSERVED by design: no frame exists pre-run; A/B/OTHER judged only after Part 2')
     check('api_unobserved_no_claim',
           True,
-          'UNOBSERVED by design: no probe.log exists pre-run; GetDir/mcRead judged only after Part 2')
+          'UNOBSERVED by design: no probe.log exists pre-run; A needs ANY post-choice GetDir/mcRead (incl. ok=0; success/payload separate); judged only after Part 2')
     # Visual + API outcomes cannot be asserted pre-run; record that explicitly.
     observed_frames = list(HERE.glob('frames/snap-*.png')) + list(HERE.glob('snap-*.png'))
     check('screen_not_claimed_before_run', observed_frames == [], 'frames found: %d' % len(observed_frames))
