@@ -1510,10 +1510,16 @@ with measured budgets, then 120 Hz simulation.
       sampled priv hashes match, while VRAM matches 3/41 and present
       0/41. This is a sparse offline device result, not a root-cause or
       speed verdict. `local/research/N8D7M12P5B/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5C same-APK control design:** define one bounded
-      selected/oracle OFF replay with the same APK/stream/backend and
-      a marker-level comparison. Gate its script and output criteria
-      before any second Odin launch; preserve the ON receipt untouched.
+- [x] **N8D7M12 Part 5C same-APK control design A (`a4253320`+
+      `5cf99f70`):** OFF removes only the three tick-2050 capture flags,
+      keeping the same APK/stream/backend and 41 replay rows plus PPM.
+      Before-2050 mismatch voids the comparison; equal OFF strengthens
+      persistent device divergence; tick-2050-only difference implicates
+      instrumentation. Checker16/16; corrected dynamic mini lease plan.
+      No run or cause verdict. `local/research/N8D7M12P5C/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5D controls:** prepare and gate a same-binary Mac
+      OFF replay and a reviewed-SHA Odin OFF launcher separately, then
+      run bounded controls without changing the ON receipts.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1855,11 +1861,15 @@ with measured budgets, then 120 Hz simulation.
       test failed, then one header repair passed; final suite 693/693,
       runner `d8fa114d…ef04`, 12/12 receipt checks. No boot/guest query.
       `local/research/E55D14P1B/ORCH-GATE.md`.
-- [ ] **E55D14 Part 2 one empty-card path run:** reuse the exact E55D12
-      Load game pad script with the newly gated runner, fresh empty
-      cards, bounded GetDir/path probe and one Mac boot after the Odin
-      replay window ends. Gate raw/pattern/host at the post-choice call
-      and identical menu scene before designing any seed.
+- [x] **E55D14 Part 2A path-run script A (`079b57a5`):** exact E55D12
+      pad route, new runner/fork/lane pins, `.work/`-aware precheck and
+      500+100 s maximum active/grace cap; self-check38/38 and
+      checker57/57. Script SHA `fa9444a9…85694`. No boot or card query.
+      `local/research/E55D14P2A/ORCH-GATE.md`.
+- [ ] **E55D14 Part 2B one empty-card path run:** release only the
+      gated SHA for one Mac boot, view Load game frames, pair five
+      `getdirpath` siblings with status rows and record the post-choice
+      raw/query/pattern/host. Then decide whether a seed can be grounded.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
