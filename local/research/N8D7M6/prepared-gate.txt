@@ -1,0 +1,18 @@
+N8D7M6 prepared PASS
+launch.py | syntax | PASS
+accept.py | syntax | PASS
+app-release.apk | e077bef8... | PASS two reads
+libps2EntryRunner.so | f3de999a... | PASS two reads
+libvulkan_freedreno.so | 717812c3... | PASS two reads
+libhardware.so | 1b49d27c... | PASS two reads
+runner string PS2X_GS_CAPTURE | present | PASS
+runner string PS2X_GS_CAPTURE_STOP_TICK | present | PASS
+runner string PS2XGSC1 | present | PASS
+runner string PS2X_N8D7L_ORACLE | present | PASS
+runner string PS2X_N8D7F_SELECTED_CAPTURE | present | PASS
+runner string PS2X_N8D5_TILE_CAPTURE | present | PASS
+env diff vs N8D7M2 | +GS_CAPTURE/+STOP_TICK=2050, rest kept | PASS
+ps2x_tests (N8D7M5) | d06ff1aa... | PASS two reads
+fork commits | a8cfefa+d1ba1d4 present | PASS
+codegen register_functions.cpp | 8ea8ed43... | PASS two reads
+parallel-gs + vulkan loader | present | PASS
