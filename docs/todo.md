@@ -751,6 +751,18 @@ with measured budgets, then 120 Hz simulation.
       E53's IEEE scope around `GS::processGIFPacket` (on `b9647f5`) should
       fix it; GB4's base predates it. **Part 4:** an RTZ replay switch
       (no boot), then move GB4 onto the fold and rerun the gate.
+      **GB4 Part 4 (723d5bf): PASS, and the hypothesis is confirmed.**
+      - Replaying the old capture with RTZ only on PATH1 packets
+        reproduces live 120/120 (with RTZ on all packets, 82/120). So every
+        pre-E53 build rasterized PATH1 under the VU core's RTZ; E53's IEEE
+        scope fixes it.
+      - On the fold (`gb4-fold` `13cac7f`, 548/548), a new I26-FAST capture
+        to tick 3000 (2.75 GB): direct replay = live at 59/59 (VRAM, priv,
+        Present). Queue replay = direct 60/60, twice. The drop-priv
+        control fails 0/60 as expected.
+
+      **Part 5:** a taps-ON suite + ff push of `gb4-fold` to `ssx3`, then
+      paraLLEl by replay (PSNR + viewed) and one live parallel boot.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
