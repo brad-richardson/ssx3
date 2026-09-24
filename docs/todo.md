@@ -1806,10 +1806,18 @@ with measured budgets, then 120 Hz simulation.
       Probe distinguishes any post-choice GetDir/mcRead from early calls;
       self-check33/33, checker46/46. No boot or card verdict.
       `local/research/E55D12/ORCH-GATE-P1.md`.
-- [ ] **E55D12 Part 2 bounded Load game choice:** run the exact approved
-      script once with fresh empty scratch cards. View the Load game
-      highlight/result frames and inspect any post-choice GetDir/Read.
-      Only a real post-choice call licenses a changed-card A/A baseline.
+- [x] **E55D12 Part 2 Load game API reach A (`c558992d`+`63a34f91`):**
+      viewed Load game highlighted before Cross and a six-empty-slot
+      MEMORY CARD screen afterward. A new GetDir at tick1740 followed
+      the choice at1700; it returned empty, with no copied table bytes
+      or mcRead. Early four empty GetDir calls are separate. One bounded
+      Mac boot, cards unchanged, mini slots free; no speed or saved-game
+      compatibility claim. `local/research/E55D12/ORCH-GATE-P2.md`.
+- [ ] **E55D13 seeded-card design:** use the reached Load game GetDir
+      source path and probe evidence to define one minimal, bounded
+      scratch-card seed and null same-scene control. Predeclare a changed
+      GetDir table/Read observation and a stop if the seed format is
+      unsupported; no boot until the input bytes and script are gated.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
