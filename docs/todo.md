@@ -903,10 +903,17 @@ with measured budgets, then 120 Hz simulation.
       Viewed title text is already visible at tick600/601. The first
       following carrier is pinned, but displayed glyph producer and
       paraLLEl cause remain open. `local/research/GB7C2/ORCH-GATE.md`.
-- [ ] **GB7C3 title glyph-row carrier test:** pin an actual glyph-row
-      source/destination pair at packet47240 and distinguish a steady-state
-      same-value rewrite from missing transfer, with a bounded OFF control;
-      no GPU-cause claim until this link is discriminated.
+- [x] **GB7C3 glyph-row carrier design PARTIAL (`57a7de9b`):** four C1
+      changed glyph pixels are trace-proven and proposed destination
+      coordinates fall in carrier rectangles. The y+1 source shift is
+      observed only at background y375 and extrapolated to glyph rows;
+      destination prior words, CLAMP/mask/blend and actual swizzled
+      addresses remain unknown. Checker verifies provenance, not transfer;
+      the proposed poke is not ready. `local/research/GB7C3/ORCH-GATE.md`.
+- [ ] **GB7C4 actual glyph-row carrier sample:** capture one bounded
+      packet47240 glyph-row UV/address, source texel, mask/blend and
+      destination old/new; use the measured mapping to predeclare a
+      one-pixel OFF/ON perturbation test if outcomes differ.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
