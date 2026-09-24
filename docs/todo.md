@@ -1184,11 +1184,21 @@ with measured budgets, then 120 Hz simulation.
       directory was absent; no extra replay. This validates stage sampling
       on Mac only, with no Odin stage result or speed claim. Receipt:
       `local/research/N8D6A/orch-replay-excerpt.txt`.
-- [ ] **N8D6B Android package:** transfer only N8D6A's pinned fork backend
-      and private G43 stage changes into a fresh N8D5F-based Android
-      snapshot. One isolated APK build/package gate, then a separate
-      one-run Odin stage probe with circuit/merged/final controls and PNG.
-      Brief: `local/muse/prompts/N8D6B.md`.
+- [x] **N8D6B Android package PASS (5322d36):** one private bytesize
+      arm64 `assembleRelease` succeeded in 5m31, 48 tasks. Fresh N8D5F
+      snapshot differs only at N8D6A's pinned fork backend and three
+      zero-fuzz G43 stage-patch files; PNG writer, shader header, codegen,
+      Turnip and HAL sources stayed pinned. WSL/Mac APK SHA pairs match
+      `6839a0a4…74a611`, 153,720,348 bytes. Runner `4e6c056d…a0efd`,
+      Build ID `8d19e78…1a99f0`; bundled Turnip/shim and stage strings
+      verified, five diagnostics/UI flags OFF. No Odin run or speed/cause
+      verdict. Full receipt: `local/research/N8D6B/REPORT.md`.
+- [ ] **N8D6C one Odin stage probe:** install the pinned N8D6B APK once,
+      run the I26-FAST route to tick2050/FBP112/PMODE `ff21`, and capture
+      circuit1, pre-deinterlace merged, final sampled/raw controls plus
+      same-run PNG. Predeclare A/B/C/OTHER thresholds against N8D6A's Mac
+      stage calibration and N8D5G's sparse Odin final image. View the frame
+      and gate the result before drawing a stage/cause conclusion.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.

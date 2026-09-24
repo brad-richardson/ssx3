@@ -50,7 +50,7 @@ ssh bytesize 'wsl -d Ubuntu -- cat /home/brad/n8d6b/PS2Recomp/android/app/build/
 python3 local/research/N8D6B/mac_apk_gate.py > local/research/N8D6B/mac-apk-gate.json
 ```
 
-The package commands will be appended after the build. The first draft of the source gate used the packaged HAL SHA as a source-file pin. The N8D5F and N8D6B source files both read `d7add7e8e2e31f3c49b83941c6686fa66ab3d844c650e8d70c93b026f90cafa0`; the corrected source gate passed. The packaged HAL SHA remains a separate package check.
+The first draft of the source gate used the packaged HAL SHA as a source-file pin. The N8D5F and N8D6B source files both read `d7add7e8e2e31f3c49b83941c6686fa66ab3d844c650e8d70c93b026f90cafa0`; the corrected source gate passed. The packaged HAL SHA remains a separate package check.
 
 ## Gaps
 
