@@ -1674,10 +1674,16 @@ with measured budgets, then 120 Hz simulation.
       black with run-varying fragments. **Delivery ruled out; divergence
       is downstream of consumption** (renderer/Turnip/readback). Stop
       adding input hashes. `local/research/N8D7M12P7/ORCH-GATE-7B.md`.
-- [ ] **N8D7M13 first Odin-vs-Mac VRAM tick:** `PS2X_GS_REPLAY_STEP=1`
-      on Mac (`3b21ce61…`) and Odin (APK `da9a41a8…`); first tick where
-      VRAM differs, plus whether per-tick readback delays the split
-      (sync probe).
+- [x] **N8D7M13 first Odin-vs-Mac VRAM tick A (`544fb2f7`+`c9dd26f6`):**
+      Mac STEP=1 keeps VRAM/priv equal to STEP=50 (present/PKTSEQ are
+      cadence-dependent; launcher amended to best-effort PKTSEQ). Odin
+      STEP=1: VRAM equal ticks 1..43, **first departure tick44**; priv
+      2050/2050. Per-tick readback does not delay it → early deterministic
+      rendering difference, not only a sync race. `local/research/
+      N8D7M13/ORCH-GATE-{A,B}.md`.
+- [ ] **N8X1 exploratory Odin GPU session (Opus, 2 h, Brad 09-24):**
+      free rein inside device rules; start from tick44; TU_DEBUG flags via
+      `ps2x.env`. Notebook + report; gate before anything folds.
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
