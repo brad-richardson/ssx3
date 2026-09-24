@@ -1092,6 +1092,16 @@ with measured budgets, then 120 Hz simulation.
       and a functional race boot. Keep Compare interrupt policy separate:
       pinned PCSX2's event-test window is labeled a hack, and its
       interpreter Compare write differs from our emitted Cause clear.
+      **E54F2 PASS (0cab7d7; fork pushed):** shared EE scheduler Count
+      clock/write epoch and explicit MFC0 `$zero` helper. The first OFF
+      suite was 579/580 because its test macro skipped the helper;
+      the orchestrator authorized one test-only repair, then OFF 580/580
+      and ON 675/675 passed. One diagnostic I26-FAST boot reached race
+      tick 2079 with three viewed frames, HUD 00:00:01→00:00:05 and
+      progress 0→1%. Five generated Count reads in four files; canonical
+      codegen promoted, E54D kept for A/B. No Count-site dynamic reach
+      or speed claim. Compare/interrupt timing, signed branches and
+      INTC 5/7 remain open; no additional boot was used.
       **E55A1 source audit PASS (65652ff):** the current `sceCdReadClock`
       HLE returns eight BCD clock bytes from host local time; a prior
       I26-FAST park snapshot reaches its generated shim twice, including
@@ -1473,5 +1483,11 @@ with measured budgets, then 120 Hz simulation.
       checker that permits explicit gaps. **X10B queued:** the corrected
       3,581-byte excerpt includes all nine asserted source anchors from
       fork `293fd81`; the semantic checker verifies six domain/cause rows.
+      **X10B PASS for bounded extraction (1851df6):** six rows and all
+      nine source anchors matched; checker caught a `9..12` shorthand,
+      one correction passed. Completed in 1m34s at about 20.4k context
+      under the 24k cap, with only the three named reads. The orchestrator
+      expanded one VU citation to cover both status bits. Interpretive
+      review and dynamic reach remain untested.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
