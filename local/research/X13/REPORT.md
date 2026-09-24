@@ -1,0 +1,7 @@
+# X13 — dense local Qwen source-order trial (orchestrator audit)
+
+The default dense Qwen3.8-27B opencode worker was given `local/muse/prompts/X13.md` and the 4,310-byte numbered excerpt in this directory. The pinned N8B1 fork checkout was `17e90ded3689685ad359b76a9168c80a1f752e2d`; the worker verified that pin and read no other source file. It wrote `rows.tsv` after about eight minutes. The orchestrator independently ran `python3 local/tooling/orch/check_x13.py local/research/X13/rows.tsv`: **7/7 exact source-order rows passed**.
+
+The first reasoning step after reading the brief took 47.7 s, and the second after reading the excerpt took 5m 47s. The worker's visible context had reached about 21.7k tokens, above the brief's 15k target. It started one `lsp goToDefinition` call at pinned `ps2_gs_parallel_backend.cpp:253` and ran the checker successfully, but the LSP result and worker `REPORT.md` were still absent when the orchestrator closed pane `w2:p3S` at the eight-minute cap plus a short tool-return grace period. No worker commit was made. This file and the table are an orchestrator audit, not a completed worker deliverable.
+
+The table locates scanout production, barrier, image-to-buffer copy, submit, wait, host map, and frontend row copy in one function. It is a source map only; it does not identify whether the N8D4 Odin loss arose during GPU image generation or transfer/readback. Sparse X13B uses the same excerpt and checker as a control.

@@ -1,0 +1,8 @@
+stage	line	source
+scanout	253	ParallelGS::ScanoutResult shot = m_iface->vsync(vsync);
+barrier	275	cmd->image_barrier(*shot.image, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
+copy	284	cmd->copy_image_to_buffer(*rb, *shot.image, 0, {}, {w, h, 1}, 0, 0,
+submit	288	m_device->submit(cmd);
+wait	289	m_device->wait_idle();
+map	291	m_device->map_host_buffer(*rb, Vulkan::MEMORY_ACCESS_READ_BIT));
+pack	303	std::memcpy(out.pixels.data() + static_cast<size_t>(y) * kStride * 4u,
