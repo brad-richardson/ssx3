@@ -1,0 +1,27 @@
+PREFLIGHT device=device lease='LEASE_FREE N7 done 2026-09-24T02:40:04Z' keyguard=false battery=100% status=5
+LEASE claimed=N8B2 one-launch
+INSTALL Performing Streamed Install | Success
+HASH installed_apk 1096a28e2e343fbcfc1d28390ea72a8e3d2aee32f3c40b81102e773c50b190da 1096a28e2e343fbcfc1d28390ea72a8e3d2aee32f3c40b81102e773c50b190da
+HASH elf 1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc 1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+HASH iso 3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5 3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+CARD mc0 entries=''
+ENV sha=d2ab46b4c725b2a7ecca2c50ac26b9184d0b10f8d4d62629afde6a9c038404a5
+PREFLIGHT device=device lease='N8B2 one-launch' keyguard=false battery=100% status=5
+ERROR RuntimeError('preflight gate failed')
+CLEANUP force-stop error=RuntimeError("adb ('shell', 'pidof com.ps2x.runner') rc=1:  ")
+CLEANUP lease=LEASE_FREE N8B2 done
+PREFLIGHT device=device lease='LEASE_FREE N8B2 done' keyguard=false battery=100% status=5
+LEASE claimed=N8B2 one-launch
+INSTALL reused the one successful install; no second install
+HASH installed_apk 1096a28e2e343fbcfc1d28390ea72a8e3d2aee32f3c40b81102e773c50b190da 1096a28e2e343fbcfc1d28390ea72a8e3d2aee32f3c40b81102e773c50b190da
+HASH elf 1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc 1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+HASH iso 3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5 3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+CARD mc0 entries=''
+ENV sha=d2ab46b4c725b2a7ecca2c50ac26b9184d0b10f8d4d62629afde6a9c038404a5
+PREFLIGHT device=device lease='N8B2 one-launch' keyguard=false battery=100% status=5
+LAUNCH Starting: Intent { cmp=com.ps2x.runner/android.app.NativeActivity }
+PID 7240
+FIRST_FATAL          1790236087.703  7240  7262 I ps2x    : [gs:parallel] Turnip dlopen failed: dlopen failed: library "libhardware.so" not found: needed by /data/app/~~Mxepu1LrYjvT0Zd3nM0kFw==/com.ps2x.runner-ava8jYJl3j2yE5kMh08e3A==/base.apk!/lib/arm64-v8a/libvulkan_freedreno.so in namespace clns-7
+FINAL tick=0
+CLEANUP pid-after=none
+CLEANUP lease=LEASE_FREE N8B2 done
