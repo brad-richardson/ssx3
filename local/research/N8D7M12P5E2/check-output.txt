@@ -1,0 +1,24 @@
+PASS off2_launcher_sha (ad22755d07cd)
+PASS off1_hashes_preserved (2686 B)
+PASS off1_ppm_preserved (688143 B)
+PASS off2_result_present
+PASS off2_replay_ok (summary=['queue', 'parallel', '862958', '11499', '25445', '2050'] replay_ok=['862958', '2050'])
+PASS off2_one_install_launch (install=1 launch=1)
+PASS off2_no_first_failure (not found)
+PASS off2_cleanup_clean
+PASS off2_script_sha (ad22755d07cd)
+PASS off2_hashes_present (2686 B)
+PASS off2_41_rows (41 rows)
+PASS off2_exact_ticks (50..2050 step50)
+PASS rows_compared_41x41 (both sides 41 rows, exact ticks)
+INFO priv_equal 41/41 vram_equal 16/41 present_equal 25/41
+INFO first_diff tick=850
+INFO diff_ticks [850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1650, 1700, 1750, 1800, 1850, 1900, 1950, 2000, 2050]
+INFO classification SAME_SETTINGS_VARIANCE (OFF2 differs from OFF1)
+PASS comparison_recorded (priv=41/41 vram=16/41 present=25/41 first=850)
+PASS off2_ppm_present (/Users/brad/dev/ssx3-work/N8D7M12P5E1/vq-002050.ppm 688143 B)
+INFO off2_ppm_sha 050d864fe17b72e1cf08ea9eab49342a9e1f079ac08d91b58df1189d49b898b6
+INFO off2_ppm_path /Users/brad/dev/ssx3-work/N8D7M12P5E1/vq-002050.ppm
+INFO ppm_differs OFF2!=OFF1
+PASS ppm_compared (diff recorded, not a checker failure)
+VERDICT A
