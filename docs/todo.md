@@ -1287,12 +1287,19 @@ with measured budgets, then 120 Hz simulation.
       runner `8e32841d…32c683`, unchanged Turnip/HAL, five flags OFF.
       Corrected Mac size assertion re-passed before commit. No device
       action, speed or cause claim. `local/research/N8D7H/ORCH-GATE.md`.
-- [ ] **N8D7I one Odin selected-input capture:** preflight the device,
-      install N8D7H, then capture selected input, circuit1, GPU stage,
-      final vectors and a viewed PNG from the same tick2050 frame. Fix
-      comma-led vector continuation parsing before launch; compare within
-      Odin only, then force-stop and release the lease. Mac and Odin GS
-      streams must not be assumed byte-identical.
+- [x] **N8D7I one Odin selected-input capture PASS, category A (`713e6c44`):**
+      one installed APK and launch yielded the aligned tick2050 frame;
+      selected input/circuit/GPU stage each 35/448 active tiles and exact
+      448/448 vectors; final sampled/raw 63/896 active and exact 896/896,
+      control128 PASS. Viewed PNG is mostly black with small snow/HUD
+      fragments. Sparse pixels already exist at selected input in this
+      run; raw VRAM content versus input decode/driver remains open.
+      App force-stopped, PID absent, Odin lease free. Diagnostic wall time
+      is not speed. `local/research/N8D7I/ORCH-GATE.md`.
+- [ ] **N8D7J selected-input source discriminator:** audit the pinned
+      tick2050 raw VRAM snapshot and CPU decode path; propose one bounded
+      same-run measurement that separates sparse VRAM contents from
+      decode/driver loss. Do not equate the Mac and Odin streams.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1519,12 +1526,17 @@ with measured budgets, then 120 Hz simulation.
       E3; the guest-range hook is a no-op. Fixed E41 watch words do not
       provide general coverage, but zero possible overlap was not proved.
       No build, boot or determinism claim. `local/research/E55D2/ORCH-GATE.md`.
-- [ ] **E55D3 input write tap and isolation:** add one default-OFF, bounded
-      shared-sequence tap at the pad post-fill and card guest-write sites.
-      First compare pinned vsync-pad/empty-card A/A through race tick 2053;
-      then change one pad or card input at a time and stop at the first
-      differing ordered guest write. Park ExternalWake policy until a
-      production poster is identified.
+- [x] **E55D3 bounded pad/card write tap PASS (`0dca034e`, fork `bab6eb3`):**
+      default-OFF shared sequence covers pad read, card directory copy and
+      card read guest writes, including positive `fread` bytes with `ferror`.
+      First build and semantic repair rebuild passed; 3 new structural
+      tests passed. Worker suite from wrong cwd was 686/687; orchestrator
+      reran the unchanged binary from fork root, flag unset, **687/687**.
+      No boot or determinism claim. `local/research/E55D3/ORCH-GATE.md`.
+- [ ] **E55D4 pinned pad/card input isolation:** first compare vsync-pad
+      and empty-card A/A through race tick2053, then change one pad or
+      card input at a time and stop at the first differing ordered guest
+      write. Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;

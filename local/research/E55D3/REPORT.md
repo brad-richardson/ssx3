@@ -130,8 +130,12 @@ writes are not in the three families.
   run from `build-taps/`, which matches none, while the file exists at the
   fork root (candidate 1 needs CWD = fork root). Pre-existing test,
   untouched by this diff (no codegen paths modified); total 687 = 684
-  pre-existing + 3 new. No budget remains for a corrected-CWD rerun, so
-  this stands as reported.
+  pre-existing + 3 new. The worker made no corrected-CWD rerun.
+
+Orchestrator follow-up after the worker commit: the unchanged binary was run
+with `PS2X_PAD_CARD_PROBE` unset from the fork root. It passed **687/687**
+in 0.51 s; receipt `~/dev/ssx3-work/E55D3/suite-from-root-orch.log`.
+This resolves the worker's CWD artifact without another build or boot.
 - Focused test (structural only, no encoder logic copied): disabled stub
   call writes no file; pad→getdir→mcread yield `seq` 1,2,3 in call order
   with nonempty `bytes=`; 600-byte cap yields ≥1 full pad line, exactly one

@@ -23,7 +23,7 @@ refuses a changed file or a reused scratch receipt. Two matching local reads:
 | `local/research/N8D7I/launch.py` | `c842e4c7b92ec01f49566d9cfc88952e174c8f25462972d70ba4a14a5837013c` |
 | `local/research/N8D7I/parser_selfcheck.py` | `1454287f29bf47815e584c7e0f0885e216dd2b47182cff54a45406b69352cda6` |
 
-Intended command from `/Users/brad/dev/ssx3` (not run):
+Released command run once from `/Users/brad/dev/ssx3`:
 
 ```sh
 python3 -u local/research/N8D7I/launch.py --released-sha c842e4c7b92ec01f49566d9cfc88952e174c8f25462972d70ba4a14a5837013c
