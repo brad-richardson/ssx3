@@ -1073,6 +1073,22 @@ with measured budgets, then 120 Hz simulation.
       surface control or a validated GPU tile path before spending another
       full stream transfer/device run. The image-generation versus
       transfer split remains open.
+- [x] **N8D5B GPU tile candidate OTHER (fce1034):** default-OFF
+      `PS2X_N8D5_TILE_CAPTURE=1` at tick 2050 uses a checkerboard control
+      and GPU sampled 16×16 tile counts from the same `shot.image`, alongside
+      the old mapped capture. Shader validation, Mac build and taps-OFF suite
+      passed 585/585. The worker replay could not create a Vulkan instance
+      inside its sandbox. One orchestrator replay outside it reached the
+      pinned stream/frame and reproduced 567/896 active raw Mac tiles,
+      128,292 occupied pixels; I viewed the frame. The control returned
+      2149844998 instead of 128 because the standalone build disables
+      SPIRV-Cross reflection, the candidate supplied no `ResourceLayout`,
+      MoltenVK rejected the compute pipeline and Granite dropped dispatch.
+      Sampled tile words are invalid; no image-generation/readback verdict,
+      Odin run, or speed claim. The candidate is local fork `ef34402`, not
+      pushed. **Next:** supply a pinned explicit shader resource layout,
+      verify Mac control=128 and sampled/raw occupancy both broad on the
+      same stream, then gate one Odin run. Keep the full replay log in scratch.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
