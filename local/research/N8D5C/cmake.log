@@ -1,0 +1,749 @@
+-- The C compiler identification is Clang 23.1.1
+-- The CXX compiler identification is Clang 23.1.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/homebrew/opt/llvm/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/homebrew/opt/llvm/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- ARM target detected, fetching sse2neon
+-- macOS ARM64 - using default compiler flags
+CMake Warning (deprecated) at /Users/brad/dev/ssx3-work/N8D5C/build/_deps/toml11-src/CMakeLists.txt:25 (cmake_policy):
+  The OLD behavior for policy CMP0127 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Performing Test TOML11_COMPILER_SUPPORTS_WALL
+-- Performing Test TOML11_COMPILER_SUPPORTS_WALL - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WEXTRA
+-- Performing Test TOML11_COMPILER_SUPPORTS_WEXTRA - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WPEDANTIC
+-- Performing Test TOML11_COMPILER_SUPPORTS_WPEDANTIC - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WERROR
+-- Performing Test TOML11_COMPILER_SUPPORTS_WERROR - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSIGN_CONVERSION
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSIGN_CONVERSION - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WCONVERSION
+-- Performing Test TOML11_COMPILER_SUPPORTS_WCONVERSION - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_COND
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_COND - Failed
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_BRANCHES
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDUPLICATED_BRANCHES - Failed
+-- Performing Test TOML11_COMPILER_SUPPORTS_WLOGICAL_OP
+-- Performing Test TOML11_COMPILER_SUPPORTS_WLOGICAL_OP - Failed
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDOUBLE_PROMOTION
+-- Performing Test TOML11_COMPILER_SUPPORTS_WDOUBLE_PROMOTION - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WRANGE_LOOP_ANALYSIS
+-- Performing Test TOML11_COMPILER_SUPPORTS_WRANGE_LOOP_ANALYSIS - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WUNDEF
+-- Performing Test TOML11_COMPILER_SUPPORTS_WUNDEF - Success
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSHADOW
+-- Performing Test TOML11_COMPILER_SUPPORTS_WSHADOW - Success
+-- {fmt} version: 12.1.0
+-- Build type: Release
+-- Performing Test HAS_NULLPTR_WARNING
+-- Performing Test HAS_NULLPTR_WARNING - Success
+-- Building dwarfgen    ... OFF
+-- Building dwarfexample... OFF
+-- Building api tests   ... 
+-- Looking for unistd.h
+-- Looking for unistd.h - found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for malloc.h
+-- Looking for malloc.h - not found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for inttypes.h
+-- Looking for inttypes.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Looking for fcntl.h
+-- Looking for fcntl.h - found
+-- Looking for sys/stat.h
+-- Looking for sys/stat.h - found
+-- Looking for stdafx.h
+-- Looking for stdafx.h - not found
+-- Looking for sys/mman.h
+-- Looking for sys/mman.h - found
+-- Performing Test HAVE_UINTPTR_T
+-- Performing Test HAVE_UINTPTR_T - Success
+-- Performing Test HAVE_INTPTR_T
+-- Performing Test HAVE_INTPTR_T - Success
+-- Performing Test HAVE_FULL_MMAP
+-- Performing Test HAVE_FULL_MMAP - Success
+-- HAVE_UINTPTR_T 1: uintptr_t defined in stdint.h... YES
+-- uintptr_t value considered NO 
+-- HAVE_INTPTR_T 1: intptr_t defined in stdint.h... YES
+-- intptr_t value considered NO 
+-- ENABLE_DECOMPRESSION : ON
+-- Found ZLIB: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libz.tbd (found version "1.2.12")
+-- Found zstd: /opt/homebrew/lib/libzstd.dylib (found version "1.5.7")
+-- Found libzstd           : TRUE
+-- Found zlib              : TRUE
+-- Build with zlib and zstd: TRUE
+-- CMAKE_SIZEOF_VOID_P ... : 8
+-- Compiler warning options... NO
+-- Install prefix ... /usr/local
+> Enabling optimization for: ps2_recomp_lib
+> Enabling optimization for: ps2_recomp
+-- sccache not found; continuing without compiler launcher
+-- Populating raylib
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/brad/dev/ssx3-work/N8D5C/build/_deps/raylib-subbuild
+[1/9] Creating directories for 'raylib-populate'
+[1/9] Performing download step (git clone) for 'raylib-populate'
+Cloning into 'raylib-src'...
+remote: Enumerating objects: 61399, done.        
+remote: Counting objects:   0% (1/23005)        remote: Counting objects:   1% (231/23005)        remote: Counting objects:   2% (461/23005)        remote: Counting objects:   3% (691/23005)        remote: Counting objects:   4% (921/23005)        remote: Counting objects:   5% (1151/23005)        remote: Counting objects:   6% (1381/23005)        remote: Counting objects:   7% (1611/23005)        remote: Counting objects:   8% (1841/23005)        remote: Counting objects:   9% (2071/23005)        remote: Counting objects:  10% (2301/23005)        remote: Counting objects:  11% (2531/23005)        remote: Counting objects:  12% (2761/23005)        remote: Counting objects:  13% (2991/23005)        remote: Counting objects:  14% (3221/23005)        remote: Counting objects:  15% (3451/23005)        remote: Counting objects:  16% (3681/23005)        remote: Counting objects:  17% (3911/23005)        remote: Counting objects:  18% (4141/23005)        remote: Counting objects:  19% (4371/23005)        remote: Counting objects:  20% (4601/23005)        remote: Counting objects:  21% (4832/23005)        remote: Counting objects:  22% (5062/23005)        remote: Counting objects:  23% (5292/23005)        remote: Counting objects:  24% (5522/23005)        remote: Counting objects:  25% (5752/23005)        remote: Counting objects:  26% (5982/23005)        remote: Counting objects:  27% (6212/23005)        remote: Counting objects:  28% (6442/23005)        remote: Counting objects:  29% (6672/23005)        remote: Counting objects:  30% (6902/23005)        remote: Counting objects:  31% (7132/23005)        remote: Counting objects:  32% (7362/23005)        remote: Counting objects:  33% (7592/23005)        remote: Counting objects:  34% (7822/23005)        remote: Counting objects:  35% (8052/23005)        remote: Counting objects:  36% (8282/23005)        remote: Counting objects:  37% (8512/23005)        remote: Counting objects:  38% (8742/23005)        remote: Counting objects:  39% (8972/23005)        remote: Counting objects:  40% (9202/23005)        remote: Counting objects:  41% (9433/23005)        remote: Counting objects:  42% (9663/23005)        remote: Counting objects:  43% (9893/23005)        remote: Counting objects:  44% (10123/23005)        remote: Counting objects:  45% (10353/23005)        remote: Counting objects:  46% (10583/23005)        remote: Counting objects:  47% (10813/23005)        remote: Counting objects:  48% (11043/23005)        remote: Counting objects:  49% (11273/23005)        remote: Counting objects:  50% (11503/23005)        remote: Counting objects:  51% (11733/23005)        remote: Counting objects:  52% (11963/23005)        remote: Counting objects:  53% (12193/23005)        remote: Counting objects:  54% (12423/23005)        remote: Counting objects:  55% (12653/23005)        remote: Counting objects:  56% (12883/23005)        remote: Counting objects:  57% (13113/23005)        remote: Counting objects:  58% (13343/23005)        remote: Counting objects:  59% (13573/23005)        remote: Counting objects:  60% (13803/23005)        remote: Counting objects:  61% (14034/23005)        remote: Counting objects:  62% (14264/23005)        remote: Counting objects:  63% (14494/23005)        remote: Counting objects:  64% (14724/23005)        remote: Counting objects:  65% (14954/23005)        remote: Counting objects:  66% (15184/23005)        remote: Counting objects:  67% (15414/23005)        remote: Counting objects:  68% (15644/23005)        remote: Counting objects:  69% (15874/23005)        remote: Counting objects:  70% (16104/23005)        remote: Counting objects:  71% (16334/23005)        remote: Counting objects:  72% (16564/23005)        remote: Counting objects:  73% (16794/23005)        remote: Counting objects:  74% (17024/23005)        remote: Counting objects:  75% (17254/23005)        remote: Counting objects:  76% (17484/23005)        remote: Counting objects:  77% (17714/23005)        remote: Counting objects:  78% (17944/23005)        remote: Counting objects:  79% (18174/23005)        remote: Counting objects:  80% (18404/23005)        remote: Counting objects:  81% (18635/23005)        remote: Counting objects:  82% (18865/23005)        remote: Counting objects:  83% (19095/23005)        remote: Counting objects:  84% (19325/23005)        remote: Counting objects:  85% (19555/23005)        remote: Counting objects:  86% (19785/23005)        remote: Counting objects:  87% (20015/23005)        remote: Counting objects:  88% (20245/23005)        remote: Counting objects:  89% (20475/23005)        remote: Counting objects:  90% (20705/23005)        remote: Counting objects:  91% (20935/23005)        remote: Counting objects:  92% (21165/23005)        remote: Counting objects:  93% (21395/23005)        remote: Counting objects:  94% (21625/23005)        remote: Counting objects:  95% (21855/23005)        remote: Counting objects:  96% (22085/23005)        remote: Counting objects:  97% (22315/23005)        remote: Counting objects:  98% (22545/23005)        remote: Counting objects:  99% (22775/23005)        remote: Counting objects: 100% (23005/23005)        remote: Counting objects: 100% (23005/23005), done.        
+remote: Compressing objects:   0% (1/1270)        remote: Compressing objects:   1% (13/1270)        remote: Compressing objects:   2% (26/1270)        remote: Compressing objects:   3% (39/1270)        remote: Compressing objects:   4% (51/1270)        remote: Compressing objects:   5% (64/1270)        remote: Compressing objects:   6% (77/1270)        remote: Compressing objects:   7% (89/1270)        remote: Compressing objects:   8% (102/1270)        remote: Compressing objects:   9% (115/1270)        remote: Compressing objects:  10% (127/1270)        remote: Compressing objects:  11% (140/1270)        remote: Compressing objects:  12% (153/1270)        remote: Compressing objects:  13% (166/1270)        remote: Compressing objects:  14% (178/1270)        remote: Compressing objects:  15% (191/1270)        remote: Compressing objects:  16% (204/1270)        remote: Compressing objects:  17% (216/1270)        remote: Compressing objects:  18% (229/1270)        remote: Compressing objects:  19% (242/1270)        remote: Compressing objects:  20% (254/1270)        remote: Compressing objects:  21% (267/1270)        remote: Compressing objects:  22% (280/1270)        remote: Compressing objects:  23% (293/1270)        remote: Compressing objects:  24% (305/1270)        remote: Compressing objects:  25% (318/1270)        remote: Compressing objects:  26% (331/1270)        remote: Compressing objects:  27% (343/1270)        remote: Compressing objects:  28% (356/1270)        remote: Compressing objects:  29% (369/1270)        remote: Compressing objects:  30% (381/1270)        remote: Compressing objects:  31% (394/1270)        remote: Compressing objects:  32% (407/1270)        remote: Compressing objects:  33% (420/1270)        remote: Compressing objects:  34% (432/1270)        remote: Compressing objects:  35% (445/1270)        remote: Compressing objects:  36% (458/1270)        remote: Compressing objects:  37% (470/1270)        remote: Compressing objects:  38% (483/1270)        remote: Compressing objects:  39% (496/1270)        remote: Compressing objects:  40% (508/1270)        remote: Compressing objects:  41% (521/1270)        remote: Compressing objects:  41% (526/1270)        remote: Compressing objects:  42% (534/1270)        remote: Compressing objects:  43% (547/1270)        remote: Compressing objects:  44% (559/1270)        remote: Compressing objects:  45% (572/1270)        remote: Compressing objects:  46% (585/1270)        remote: Compressing objects:  47% (597/1270)        remote: Compressing objects:  48% (610/1270)        remote: Compressing objects:  49% (623/1270)        remote: Compressing objects:  50% (635/1270)        remote: Compressing objects:  51% (648/1270)        remote: Compressing objects:  52% (661/1270)        remote: Compressing objects:  53% (674/1270)        remote: Compressing objects:  54% (686/1270)        remote: Compressing objects:  55% (699/1270)        remote: Compressing objects:  56% (712/1270)        remote: Compressing objects:  57% (724/1270)        remote: Compressing objects:  58% (737/1270)        remote: Compressing objects:  59% (750/1270)        remote: Compressing objects:  60% (762/1270)        remote: Compressing objects:  61% (775/1270)        remote: Compressing objects:  62% (788/1270)        remote: Compressing objects:  63% (801/1270)        remote: Compressing objects:  64% (813/1270)        remote: Compressing objects:  65% (826/1270)        remote: Compressing objects:  66% (839/1270)        remote: Compressing objects:  67% (851/1270)        remote: Compressing objects:  68% (864/1270)        remote: Compressing objects:  69% (877/1270)        remote: Compressing objects:  70% (889/1270)        remote: Compressing objects:  71% (902/1270)        remote: Compressing objects:  72% (915/1270)        remote: Compressing objects:  73% (928/1270)        remote: Compressing objects:  74% (940/1270)        remote: Compressing objects:  75% (953/1270)        remote: Compressing objects:  76% (966/1270)        remote: Compressing objects:  77% (978/1270)        remote: Compressing objects:  78% (991/1270)        remote: Compressing objects:  79% (1004/1270)        remote: Compressing objects:  80% (1016/1270)        remote: Compressing objects:  81% (1029/1270)        remote: Compressing objects:  82% (1042/1270)        remote: Compressing objects:  83% (1055/1270)        remote: Compressing objects:  84% (1067/1270)        remote: Compressing objects:  85% (1080/1270)        remote: Compressing objects:  86% (1093/1270)        remote: Compressing objects:  87% (1105/1270)        remote: Compressing objects:  88% (1118/1270)        remote: Compressing objects:  89% (1131/1270)        remote: Compressing objects:  90% (1143/1270)        remote: Compressing objects:  91% (1156/1270)        remote: Compressing objects:  92% (1169/1270)        remote: Compressing objects:  93% (1182/1270)        remote: Compressing objects:  94% (1194/1270)        remote: Compressing objects:  95% (1207/1270)        remote: Compressing objects:  96% (1220/1270)        remote: Compressing objects:  97% (1232/1270)        remote: Compressing objects:  98% (1245/1270)        remote: Compressing objects:  99% (1258/1270)        remote: Compressing objects: 100% (1270/1270)        remote: Compressing objects: 100% (1270/1270), done.        
+Receiving objects:   0% (1/61399)Receiving objects:   1% (614/61399)Receiving objects:   2% (1228/61399)Receiving objects:   3% (1842/61399)Receiving objects:   4% (2456/61399)Receiving objects:   5% (3070/61399)Receiving objects:   6% (3684/61399)Receiving objects:   7% (4298/61399)Receiving objects:   8% (4912/61399)Receiving objects:   9% (5526/61399)Receiving objects:  10% (6140/61399)Receiving objects:  11% (6754/61399)Receiving objects:  12% (7368/61399)Receiving objects:  13% (7982/61399)Receiving objects:  14% (8596/61399)Receiving objects:  15% (9210/61399)Receiving objects:  16% (9824/61399)Receiving objects:  17% (10438/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  18% (11052/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  19% (11666/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  20% (12280/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  21% (12894/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  22% (13508/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  23% (14122/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  24% (14736/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  25% (15350/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  26% (15964/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  27% (16578/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  28% (17192/61399), 31.71 MiB | 63.41 MiB/sReceiving objects:  28% (17467/61399), 57.11 MiB | 56.99 MiB/sReceiving objects:  29% (17806/61399), 57.11 MiB | 56.99 MiB/sReceiving objects:  30% (18420/61399), 57.11 MiB | 56.99 MiB/sReceiving objects:  31% (19034/61399), 57.11 MiB | 56.99 MiB/sReceiving objects:  32% (19648/61399), 57.11 MiB | 56.99 MiB/sReceiving objects:  33% (20262/61399), 57.11 MiB | 56.99 MiB/sReceiving objects:  34% (20876/61399), 74.86 MiB | 49.80 MiB/sReceiving objects:  35% (21490/61399), 74.86 MiB | 49.80 MiB/sReceiving objects:  35% (21893/61399), 91.99 MiB | 45.92 MiB/sReceiving objects:  36% (22104/61399), 109.74 MiB | 43.84 MiB/sReceiving objects:  36% (22150/61399), 109.74 MiB | 43.84 MiB/sReceiving objects:  37% (22718/61399), 139.64 MiB | 39.85 MiB/sReceiving objects:  37% (23052/61399), 153.86 MiB | 38.43 MiB/sReceiving objects:  38% (23332/61399), 167.93 MiB | 37.28 MiB/sReceiving objects:  39% (23946/61399), 167.93 MiB | 37.28 MiB/sReceiving objects:  39% (24324/61399), 182.50 MiB | 33.46 MiB/sReceiving objects:  40% (24560/61399), 193.68 MiB | 30.25 MiB/sReceiving objects:  41% (25174/61399), 193.68 MiB | 30.25 MiB/sReceiving objects:  41% (25731/61399), 204.27 MiB | 28.67 MiB/sReceiving objects:  42% (25788/61399), 204.27 MiB | 28.67 MiB/sReceiving objects:  43% (26402/61399), 204.27 MiB | 28.67 MiB/sReceiving objects:  43% (26819/61399), 212.00 MiB | 26.59 MiB/sReceiving objects:  44% (27016/61399), 219.58 MiB | 24.33 MiB/sReceiving objects:  44% (27598/61399), 236.33 MiB | 21.42 MiB/sReceiving objects:  45% (27630/61399), 236.33 MiB | 21.42 MiB/sReceiving objects:  46% (28244/61399), 236.33 MiB | 21.42 MiB/sReceiving objects:  47% (28858/61399), 243.00 MiB | 19.75 MiB/sReceiving objects:  47% (29200/61399), 243.00 MiB | 19.75 MiB/sReceiving objects:  48% (29472/61399), 257.28 MiB | 16.57 MiB/sReceiving objects:  48% (29977/61399), 257.28 MiB | 16.57 MiB/sReceiving objects:  49% (30086/61399), 264.87 MiB | 15.77 MiB/sReceiving objects:  50% (30700/61399), 264.87 MiB | 15.77 MiB/sReceiving objects:  50% (30886/61399), 282.08 MiB | 15.48 MiB/sReceiving objects:  50% (30914/61399), 296.87 MiB | 15.22 MiB/sReceiving objects:  50% (30950/61399), 312.54 MiB | 15.34 MiB/sReceiving objects:  51% (31314/61399), 312.54 MiB | 15.34 MiB/sReceiving objects:  51% (31722/61399), 319.96 MiB | 15.43 MiB/sReceiving objects:  52% (31928/61399), 328.80 MiB | 15.78 MiB/sReceiving objects:  52% (32222/61399), 338.80 MiB | 16.35 MiB/sReceiving objects:  53% (32542/61399), 348.86 MiB | 16.86 MiB/sReceiving objects:  54% (33156/61399), 348.86 MiB | 16.86 MiB/sReceiving objects:  55% (33770/61399), 348.86 MiB | 16.86 MiB/sReceiving objects:  56% (34384/61399), 360.36 MiB | 17.32 MiB/sReceiving objects:  57% (34998/61399), 360.36 MiB | 17.32 MiB/sReceiving objects:  58% (35612/61399), 360.36 MiB | 17.32 MiB/sReceiving objects:  59% (36226/61399), 360.36 MiB | 17.32 MiB/sReceiving objects:  59% (36803/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  60% (36840/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  61% (37454/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  62% (38068/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  63% (38682/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  64% (39296/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  65% (39910/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  66% (40524/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  67% (41138/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  68% (41752/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  69% (42366/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  70% (42980/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  71% (43594/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  72% (44208/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  73% (44822/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  74% (45436/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  75% (46050/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  76% (46664/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  77% (47278/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  78% (47892/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  79% (48506/61399), 372.59 MiB | 18.37 MiB/sReceiving objects:  80% (49120/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  81% (49734/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  82% (50348/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  83% (50962/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  84% (51576/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  85% (52190/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  86% (52804/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  86% (53403/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  87% (53418/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  88% (54032/61399), 384.33 MiB | 19.38 MiB/sReceiving objects:  89% (54646/61399), 393.71 MiB | 19.90 MiB/sReceiving objects:  90% (55260/61399), 393.71 MiB | 19.90 MiB/sReceiving objects:  91% (55874/61399), 393.71 MiB | 19.90 MiB/sReceiving objects:  92% (56488/61399), 393.71 MiB | 19.90 MiB/sReceiving objects:  93% (57102/61399), 393.71 MiB | 19.90 MiB/sReceiving objects:  94% (57716/61399), 393.71 MiB | 19.90 MiB/sReceiving objects:  95% (58330/61399), 402.99 MiB | 20.02 MiB/sReceiving objects:  96% (58944/61399), 402.99 MiB | 20.02 MiB/sReceiving objects:  97% (59558/61399), 402.99 MiB | 20.02 MiB/sReceiving objects:  98% (60172/61399), 402.99 MiB | 20.02 MiB/sReceiving objects:  99% (60786/61399), 402.99 MiB | 20.02 MiB/sremote: Total 61399 (delta 22268), reused 21735 (delta 21735), pack-reused 38394 (from 3)        
+Receiving objects: 100% (61399/61399), 402.99 MiB | 20.02 MiB/sReceiving objects: 100% (61399/61399), 408.63 MiB | 22.88 MiB/s, done.
+Resolving deltas:   0% (0/45682)Resolving deltas:   1% (461/45682)Resolving deltas:   2% (914/45682)Resolving deltas:   3% (1371/45682)Resolving deltas:   4% (1828/45682)Resolving deltas:   5% (2286/45682)Resolving deltas:   6% (2741/45682)Resolving deltas:   7% (3198/45682)Resolving deltas:   8% (3655/45682)Resolving deltas:   9% (4112/45682)Resolving deltas:  10% (4569/45682)Resolving deltas:  11% (5026/45682)Resolving deltas:  12% (5482/45682)Resolving deltas:  13% (5940/45682)Resolving deltas:  14% (6396/45682)Resolving deltas:  15% (6853/45682)Resolving deltas:  16% (7311/45682)Resolving deltas:  17% (7768/45682)Resolving deltas:  18% (8225/45682)Resolving deltas:  19% (8680/45682)Resolving deltas:  20% (9138/45682)Resolving deltas:  21% (9594/45682)Resolving deltas:  22% (10051/45682)Resolving deltas:  23% (10507/45682)Resolving deltas:  24% (10964/45682)Resolving deltas:  25% (11422/45682)Resolving deltas:  26% (11878/45682)Resolving deltas:  27% (12335/45682)Resolving deltas:  28% (12791/45682)Resolving deltas:  29% (13251/45682)Resolving deltas:  30% (13706/45682)Resolving deltas:  31% (14162/45682)Resolving deltas:  32% (14621/45682)Resolving deltas:  33% (15077/45682)Resolving deltas:  34% (15533/45682)Resolving deltas:  35% (15989/45682)Resolving deltas:  36% (16448/45682)Resolving deltas:  37% (16903/45682)Resolving deltas:  38% (17360/45682)Resolving deltas:  39% (17816/45682)Resolving deltas:  40% (18276/45682)Resolving deltas:  41% (18730/45682)Resolving deltas:  42% (19187/45682)Resolving deltas:  43% (19644/45682)Resolving deltas:  44% (20101/45682)Resolving deltas:  45% (20557/45682)Resolving deltas:  46% (21017/45682)Resolving deltas:  47% (21471/45682)Resolving deltas:  48% (21928/45682)Resolving deltas:  49% (22385/45682)Resolving deltas:  50% (22841/45682)Resolving deltas:  51% (23299/45682)Resolving deltas:  52% (23755/45682)Resolving deltas:  53% (24212/45682)Resolving deltas:  54% (24670/45682)Resolving deltas:  55% (25126/45682)Resolving deltas:  56% (25584/45682)Resolving deltas:  57% (26040/45682)Resolving deltas:  58% (26496/45682)Resolving deltas:  59% (26954/45682)Resolving deltas:  60% (27411/45682)Resolving deltas:  61% (27868/45682)Resolving deltas:  62% (28323/45682)Resolving deltas:  63% (28780/45682)Resolving deltas:  64% (29237/45682)Resolving deltas:  65% (29694/45682)Resolving deltas:  66% (30154/45682)Resolving deltas:  67% (30607/45682)Resolving deltas:  68% (31065/45682)Resolving deltas:  69% (31521/45682)Resolving deltas:  70% (31978/45682)Resolving deltas:  71% (32435/45682)Resolving deltas:  72% (32892/45682)Resolving deltas:  73% (33349/45682)Resolving deltas:  74% (33806/45682)Resolving deltas:  75% (34263/45682)Resolving deltas:  76% (34719/45682)Resolving deltas:  77% (35178/45682)Resolving deltas:  78% (35633/45682)Resolving deltas:  79% (36089/45682)Resolving deltas:  80% (36546/45682)Resolving deltas:  81% (37003/45682)Resolving deltas:  82% (37460/45682)Resolving deltas:  83% (37917/45682)Resolving deltas:  84% (38373/45682)Resolving deltas:  85% (38830/45682)Resolving deltas:  86% (39287/45682)Resolving deltas:  87% (39744/45682)Resolving deltas:  88% (40201/45682)Resolving deltas:  89% (40657/45682)Resolving deltas:  90% (41114/45682)Resolving deltas:  91% (41571/45682)Resolving deltas:  92% (42028/45682)Resolving deltas:  93% (42485/45682)Resolving deltas:  94% (42942/45682)Resolving deltas:  95% (43398/45682)Resolving deltas:  96% (43855/45682)Resolving deltas:  97% (44312/45682)Resolving deltas:  98% (44769/45682)Resolving deltas:  99% (45226/45682)Resolving deltas: 100% (45682/45682)Resolving deltas: 100% (45682/45682), done.
+HEAD is now at c1ab645c Update HISTORY.md
+[2/9] Performing update step for 'raylib-populate'
+-- Already at requested tag: 5.5
+[3/9] No patch step for 'raylib-populate'
+[5/9] No configure step for 'raylib-populate'
+[6/9] No build step for 'raylib-populate'
+[7/9] No install step for 'raylib-populate'
+[8/9] No test step for 'raylib-populate'
+[9/9] Completed 'raylib-populate'
+CMake Warning (deprecated) at /Users/brad/dev/ssx3-work/N8D5C/build/_deps/raylib-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- Performing Test COMPILER_HAS_THOSE_TOGGLES
+-- Performing Test COMPILER_HAS_THOSE_TOGGLES - Success
+-- Testing if -Werror=pointer-arith can be used -- compiles
+-- Testing if -Werror=implicit-function-declaration can be used -- compiles
+-- Testing if -fno-strict-aliasing can be used -- compiles
+-- Using raylib's GLFW
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Including Cocoa support
+CMake Warning (author) at /Users/brad/dev/ssx3-work/N8D5C/build/_deps/raylib-src/cmake/LibraryConfigurations.cmake:22 (MESSAGE):
+  OpenGL is deprecated starting with macOS 10.14 (Mojave)!
+Call Stack (most recent call first):
+  /Users/brad/dev/ssx3-work/N8D5C/build/_deps/raylib-src/src/CMakeLists.txt:49 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Audio Backend: miniaudio
+-- Building raylib static library
+-- Generated build type: Release
+-- Compiling with the flags:
+--   PLATFORM=PLATFORM_DESKTOP
+--   GRAPHICS=GRAPHICS_API_OPENGL_33
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui) is deprecated, call
+  FetchContent_MakeAvailable(imgui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(imgui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:123 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating imgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/brad/dev/ssx3-work/N8D5C/build/_deps/imgui-subbuild
+[1/9] Creating directories for 'imgui-populate'
+[1/9] Performing download step (git clone) for 'imgui-populate'
+Cloning into 'imgui-src'...
+HEAD is now at b1bcb12 Merge branch 'master' into docking
+[2/9] Performing update step for 'imgui-populate'
+-- Already at requested tag: v1.92.7-docking
+[3/9] No patch step for 'imgui-populate'
+[5/9] No configure step for 'imgui-populate'
+[6/9] No build step for 'imgui-populate'
+[7/9] No install step for 'imgui-populate'
+[8/9] No test step for 'imgui-populate'
+[9/9] Completed 'imgui-populate'
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(rlImGui) is deprecated, call
+  FetchContent_MakeAvailable(rlImGui) instead.  Policy CMP0169 can be set to
+  OLD to allow FetchContent_Populate(rlImGui) to be called directly for now,
+  but the ability to call it with declared details will be removed completely
+  in a future version.
+Call Stack (most recent call first):
+  ps2xRuntime/CMakeLists.txt:146 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Populating rlimgui
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/brad/dev/ssx3-work/N8D5C/build/_deps/rlimgui-subbuild
+[1/9] Creating directories for 'rlimgui-populate'
+[1/9] Performing download step (git clone) for 'rlimgui-populate'
+Cloning into 'rlimgui-src'...
+HEAD is now at 118221c Update headings in README.md for consistency
+[2/9] Performing update step for 'rlimgui-populate'
+-- Already at requested tag: Raylib_5_5
+[3/9] No patch step for 'rlimgui-populate'
+[5/9] No configure step for 'rlimgui-populate'
+[6/9] No build step for 'rlimgui-populate'
+[7/9] No install step for 'rlimgui-populate'
+[8/9] No test step for 'rlimgui-populate'
+[9/9] Completed 'rlimgui-populate'
+-- Found PkgConfig: /opt/homebrew/bin/pkg-config (found version "3.0.7")
+-- Checking for modules 'libavcodec;libavformat;libavutil;libswresample;libswscale'
+--   Found libavcodec, version 63.1.102
+--   Found libavformat, version 63.1.102
+--   Found libavutil, version 61.1.102
+--   Found libswresample, version 7.1.102
+--   Found libswscale, version 10.1.102
+CMake Warning (deprecated) at /Users/brad/dev/ssx3-work/N8D5B/parallel-gs/Granite/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+Enabling precise math.
+-- PS2X: G44 parallel-gs shadow backend ON (standalone, from /Users/brad/dev/ssx3-work/N8D5B/parallel-gs)
+-- PS2X: dropped 0 in-tree game sources (game objects from /Users/brad/dev/ssx3-work/codegen-ssx3)
+-- PS2X: game objects: 9455 sources from /Users/brad/dev/ssx3-work/codegen-ssx3
+> Enabling optimization for: ps2_runtime
+> Enabling optimization for: ps2EntryRunner
+-- Using the multi-header code from /Users/brad/dev/ssx3-work/N8D5C/build/_deps/nlohmann_json-src/include/
+> Enabling optimization for: ps2_analyzer_lib
+> Enabling optimization for: ps2_analyzer
+> Enabling optimization for: ps2_test_lib
+> Enabling optimization for: ps2x_tests
+-- Looking for a OBJC compiler
+-- Looking for a OBJC compiler - /opt/homebrew/opt/llvm/bin/clang
+-- Looking for __GLIBC__
+-- Looking for __GLIBC__ - not found
+-- Performing Test CHECK_CPU_ARCHITECTURE_X86
+-- Performing Test CHECK_CPU_ARCHITECTURE_X86 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_X64
+-- Performing Test CHECK_CPU_ARCHITECTURE_X64 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM32
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM32 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64 - Success
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64EC
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64EC - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_LOONGARCH64
+-- Performing Test CHECK_CPU_ARCHITECTURE_LOONGARCH64 - Failed
+-- Performing Test HAVE_GCC_WALL
+-- Performing Test HAVE_GCC_WALL - Success
+-- Performing Test HAVE_GCC_WUNDEF
+-- Performing Test HAVE_GCC_WUNDEF - Success
+-- Performing Test HAVE_GCC_NO_STRICT_ALIASING
+-- Performing Test HAVE_GCC_NO_STRICT_ALIASING - Success
+-- Performing Test HAVE_GCC_WDOCUMENTATION
+-- Performing Test HAVE_GCC_WDOCUMENTATION - Success
+-- Performing Test HAVE_GCC_WDOCUMENTATION_UNKNOWN_COMMAND
+-- Performing Test HAVE_GCC_WDOCUMENTATION_UNKNOWN_COMMAND - Success
+-- Performing Test HAVE_GCC_COMMENT_BLOCK_COMMANDS
+-- Performing Test HAVE_GCC_COMMENT_BLOCK_COMMANDS - Success
+-- Performing Test HAVE_GCC_WDECLARATION_AFTER_STATEMENT
+-- Performing Test HAVE_GCC_WDECLARATION_AFTER_STATEMENT - Success
+-- Performing Test HAVE_GCC_ATOMICS
+-- Performing Test HAVE_GCC_ATOMICS - Success
+-- Performing Test HAVE_GCC_FVISIBILITY
+-- Performing Test HAVE_GCC_FVISIBILITY - Success
+-- Performing Test HAVE_GCC_WSHADOW
+-- Performing Test HAVE_GCC_WSHADOW - Success
+-- Performing Test HAVE_GCC_WUNUSED_LOCAL_TYPEDEFS
+-- Performing Test HAVE_GCC_WUNUSED_LOCAL_TYPEDEFS - Success
+-- Performing Test HAVE_WNO_ERROR_DEPRECATED_DECLARATIONS
+-- Performing Test HAVE_WNO_ERROR_DEPRECATED_DECLARATIONS - Success
+-- Looking for immintrin.h
+-- Looking for immintrin.h - not found
+-- Performing Test HAVE_ALTIVEC_H_HDR
+-- Performing Test HAVE_ALTIVEC_H_HDR - Failed
+-- Performing Test CPU_SUPPORTS_ALTIVEC
+-- Performing Test CPU_SUPPORTS_ALTIVEC - Failed
+-- Looking for ctype.h
+-- Looking for ctype.h - found
+-- Looking for float.h
+-- Looking for float.h - found
+-- Looking for iconv.h
+-- Looking for iconv.h - found
+-- Looking for inttypes.h
+-- Looking for inttypes.h - found
+-- Looking for limits.h
+-- Looking for limits.h - found
+-- Looking for math.h
+-- Looking for math.h - found
+-- Looking for memory.h
+-- Looking for memory.h - found
+-- Looking for signal.h
+-- Looking for signal.h - found
+-- Looking for stdarg.h
+-- Looking for stdarg.h - found
+-- Looking for stdio.h
+-- Looking for stdio.h - found
+-- Looking for stdlib.h
+-- Looking for stdlib.h - found
+-- Looking for string.h
+-- Looking for string.h - found
+-- Looking for strings.h
+-- Looking for strings.h - found
+-- Looking for wchar.h
+-- Looking for wchar.h - found
+-- Looking for 7 include files stddef.h, ..., float.h
+-- Looking for 7 include files stddef.h, ..., float.h - found
+-- Looking for M_PI
+-- Looking for M_PI - found
+-- Performing Test HAVE_MPROTECT
+-- Performing Test HAVE_MPROTECT - Success
+-- Looking for strtod
+-- Looking for strtod - found
+-- Looking for malloc
+-- Looking for malloc - found
+-- Looking for calloc
+-- Looking for calloc - found
+-- Looking for realloc
+-- Looking for realloc - found
+-- Looking for free
+-- Looking for free - found
+-- Looking for getenv
+-- Looking for getenv - found
+-- Looking for setenv
+-- Looking for setenv - found
+-- Looking for putenv
+-- Looking for putenv - found
+-- Looking for unsetenv
+-- Looking for unsetenv - found
+-- Looking for bsearch
+-- Looking for bsearch - found
+-- Looking for qsort
+-- Looking for qsort - found
+-- Looking for abs
+-- Looking for abs - found
+-- Looking for bcopy
+-- Looking for bcopy - found
+-- Looking for memset
+-- Looking for memset - found
+-- Looking for memcpy
+-- Looking for memcpy - found
+-- Looking for memmove
+-- Looking for memmove - found
+-- Looking for memcmp
+-- Looking for memcmp - found
+-- Looking for strlen
+-- Looking for strlen - found
+-- Looking for strlcpy
+-- Looking for strlcpy - found
+-- Looking for strlcat
+-- Looking for strlcat - found
+-- Looking for _strrev
+-- Looking for _strrev - not found
+-- Looking for _strupr
+-- Looking for _strupr - not found
+-- Looking for _strlwr
+-- Looking for _strlwr - not found
+-- Looking for index
+-- Looking for index - found
+-- Looking for rindex
+-- Looking for rindex - found
+-- Looking for strchr
+-- Looking for strchr - found
+-- Looking for strrchr
+-- Looking for strrchr - found
+-- Looking for strstr
+-- Looking for strstr - found
+-- Looking for strtok_r
+-- Looking for strtok_r - found
+-- Looking for itoa
+-- Looking for itoa - not found
+-- Looking for _ltoa
+-- Looking for _ltoa - not found
+-- Looking for _uitoa
+-- Looking for _uitoa - not found
+-- Looking for _ultoa
+-- Looking for _ultoa - not found
+-- Looking for strtol
+-- Looking for strtol - found
+-- Looking for strtoul
+-- Looking for strtoul - found
+-- Looking for _i64toa
+-- Looking for _i64toa - not found
+-- Looking for _ui64toa
+-- Looking for _ui64toa - not found
+-- Looking for strtoll
+-- Looking for strtoll - found
+-- Looking for strtoull
+-- Looking for strtoull - found
+-- Looking for atoi
+-- Looking for atoi - found
+-- Looking for atof
+-- Looking for atof - found
+-- Looking for strcmp
+-- Looking for strcmp - found
+-- Looking for strncmp
+-- Looking for strncmp - found
+-- Looking for _stricmp
+-- Looking for _stricmp - not found
+-- Looking for strcasecmp
+-- Looking for strcasecmp - found
+-- Looking for _strnicmp
+-- Looking for _strnicmp - not found
+-- Looking for strncasecmp
+-- Looking for strncasecmp - found
+-- Looking for strcasestr
+-- Looking for strcasestr - found
+-- Looking for wcscmp
+-- Looking for wcscmp - found
+-- Looking for _wcsdup
+-- Looking for _wcsdup - not found
+-- Looking for wcsdup
+-- Looking for wcsdup - found
+-- Looking for wcslcat
+-- Looking for wcslcat - found
+-- Looking for wcslcpy
+-- Looking for wcslcpy - found
+-- Looking for wcslen
+-- Looking for wcslen - found
+-- Looking for wcsncmp
+-- Looking for wcsncmp - found
+-- Looking for wcsstr
+-- Looking for wcsstr - found
+-- Looking for wcscasecmp
+-- Looking for wcscasecmp - found
+-- Looking for _wcsicmp
+-- Looking for _wcsicmp - not found
+-- Looking for wcsncasecmp
+-- Looking for wcsncasecmp - found
+-- Looking for _wcsnicmp
+-- Looking for _wcsnicmp - not found
+-- Looking for sscanf
+-- Looking for sscanf - found
+-- Looking for vsscanf
+-- Looking for vsscanf - found
+-- Looking for vsnprintf
+-- Looking for vsnprintf - found
+-- Looking for fopen64
+-- Looking for fopen64 - not found
+-- Looking for fseeko
+-- Looking for fseeko - found
+-- Looking for fseeko64
+-- Looking for fseeko64 - not found
+-- Looking for _Exit
+-- Looking for _Exit - found
+-- Looking for sigaction
+-- Looking for sigaction - found
+-- Looking for sigtimedwait
+-- Looking for sigtimedwait - not found
+-- Looking for setjmp
+-- Looking for setjmp - found
+-- Looking for nanosleep
+-- Looking for nanosleep - found
+-- Looking for sysconf
+-- Looking for sysconf - found
+-- Looking for sysctlbyname
+-- Looking for sysctlbyname - found
+-- Looking for getauxval
+-- Looking for getauxval - not found
+-- Looking for elf_aux_info
+-- Looking for elf_aux_info - not found
+-- Looking for poll
+-- Looking for poll - found
+-- Looking for memfd_create
+-- Looking for memfd_create - not found
+-- Looking for posix_fallocate
+-- Looking for posix_fallocate - not found
+-- Looking for pow in m
+-- Looking for pow in m - found
+-- Looking for atan
+-- Looking for atan - found
+-- Looking for atan2
+-- Looking for atan2 - found
+-- Looking for atanf
+-- Looking for atanf - found
+-- Looking for atan2f
+-- Looking for atan2f - found
+-- Looking for ceil
+-- Looking for ceil - found
+-- Looking for ceilf
+-- Looking for ceilf - found
+-- Looking for copysign
+-- Looking for copysign - found
+-- Looking for copysignf
+-- Looking for copysignf - found
+-- Looking for cos
+-- Looking for cos - found
+-- Looking for cosf
+-- Looking for cosf - found
+-- Looking for exp
+-- Looking for exp - found
+-- Looking for expf
+-- Looking for expf - found
+-- Looking for fabs
+-- Looking for fabs - found
+-- Looking for fabsf
+-- Looking for fabsf - found
+-- Looking for floor
+-- Looking for floor - found
+-- Looking for floorf
+-- Looking for floorf - found
+-- Looking for fmod
+-- Looking for fmod - found
+-- Looking for fmodf
+-- Looking for fmodf - found
+-- Looking for log
+-- Looking for log - found
+-- Looking for logf
+-- Looking for logf - found
+-- Looking for log10
+-- Looking for log10 - found
+-- Looking for log10f
+-- Looking for log10f - found
+-- Looking for lround
+-- Looking for lround - found
+-- Looking for lroundf
+-- Looking for lroundf - found
+-- Looking for pow
+-- Looking for pow - found
+-- Looking for powf
+-- Looking for powf - found
+-- Looking for round
+-- Looking for round - found
+-- Looking for roundf
+-- Looking for roundf - found
+-- Looking for scalbn
+-- Looking for scalbn - found
+-- Looking for scalbnf
+-- Looking for scalbnf - found
+-- Looking for sin
+-- Looking for sin - found
+-- Looking for sinf
+-- Looking for sinf - found
+-- Looking for sqrt
+-- Looking for sqrt - found
+-- Looking for sqrtf
+-- Looking for sqrtf - found
+-- Looking for tan
+-- Looking for tan - found
+-- Looking for tanf
+-- Looking for tanf - found
+-- Looking for acos
+-- Looking for acos - found
+-- Looking for acosf
+-- Looking for acosf - found
+-- Looking for asin
+-- Looking for asin - found
+-- Looking for asinf
+-- Looking for asinf - found
+-- Looking for trunc
+-- Looking for trunc - found
+-- Looking for truncf
+-- Looking for truncf - found
+-- Performing Test HAVE_SA_SIGACTION
+-- Performing Test HAVE_SA_SIGACTION - Success
+-- Looking for dlopen
+-- Looking for dlopen - found
+-- Performing Test HAVE_O_CLOEXEC
+-- Performing Test HAVE_O_CLOEXEC - Success
+-- Performing Test HAVE_FRAMEWORK_GAMECONTROLLER
+-- Performing Test HAVE_FRAMEWORK_GAMECONTROLLER - Success
+-- Performing Test HAVE_FRAMEWORK_COREHAPTICS
+-- Performing Test HAVE_FRAMEWORK_COREHAPTICS - Success
+-- Performing Test HAVE_FRAMEWORK_METAL
+-- Performing Test HAVE_FRAMEWORK_METAL - Success
+-- Performing Test HAVE_PTHREADS
+-- Performing Test HAVE_PTHREADS - Success
+-- Performing Test HAVE_RECURSIVE_MUTEXES
+-- Performing Test HAVE_RECURSIVE_MUTEXES - Success
+-- Performing Test HAVE_PTHREADS_SEM
+-- Performing Test HAVE_PTHREADS_SEM - Success
+-- Performing Test HAVE_SEM_TIMEDWAIT
+-- Performing Test HAVE_SEM_TIMEDWAIT - Failed
+-- Looking for include file pthread.h
+-- Looking for include file pthread.h - found
+-- Looking for include file pthread_np.h
+-- Looking for include file pthread_np.h - not found
+-- Performing Test HAVE_PTHREAD_SETNAME_NP
+-- Performing Test HAVE_PTHREAD_SETNAME_NP - Success
+-- Found Git: /usr/bin/git (found version "2.54.0 (Apple Git-157)")
+CMake Warning (deprecated) at /Users/brad/dev/ssx3-work/N8D5C/build/_deps/sdl2-src/CMakeLists.txt:3300 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+-- 
+-- SDL2 was configured with the following options:
+-- 
+-- Platform: Darwin-27.0.0
+-- 64-bit:   TRUE
+-- Compiler: /opt/homebrew/opt/llvm/bin/clang
+-- Revision: SDL-release-2.32.10-0-g5d249570
+-- 
+-- Subsystems:
+--   Atomic:	ON
+--   Audio:	ON
+--   Video:	ON
+--   Render:	ON
+--   Events:	ON
+--   Joystick:	ON
+--   Haptic:	ON
+--   Hidapi:	ON
+--   Power:	ON
+--   Threads:	ON
+--   Timers:	ON
+--   File:	ON
+--   Loadso:	ON
+--   CPUinfo:	ON
+--   Filesystem:	ON
+--   Sensor:	ON
+--   Locale:	ON
+--   Misc:	ON
+-- 
+-- Options:
+--   SDL2_DISABLE_INSTALL        (Wanted: ON): OFF
+--   SDL2_DISABLE_SDL2MAIN       (Wanted: OFF): OFF
+--   SDL2_DISABLE_UNINSTALL      (Wanted: OFF): OFF
+--   SDL_3DNOW                   (Wanted: OFF): OFF
+--   SDL_ALSA                    (Wanted: OFF): OFF
+--   SDL_ALSA_SHARED             (Wanted: OFF): OFF
+--   SDL_ALTIVEC                 (Wanted: ON): OFF
+--   SDL_ARMNEON                 (Wanted: OFF): OFF
+--   SDL_ARMSIMD                 (Wanted: OFF): OFF
+--   SDL_ARTS                    (Wanted: OFF): OFF
+--   SDL_ARTS_SHARED             (Wanted: OFF): OFF
+--   SDL_ASAN                    (Wanted: OFF): OFF
+--   SDL_ASSEMBLY                (Wanted: ON): ON
+--   SDL_ASSERTIONS              (Wanted: auto): auto
+--   SDL_BACKGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_CCACHE                  (Wanted: ON): OFF
+--   SDL_CLOCK_GETTIME           (Wanted: OFF): OFF
+--   SDL_COCOA                   (Wanted: ON): ON
+--   SDL_DBUS                    (Wanted: OFF): OFF
+--   SDL_DIRECTFB                (Wanted: OFF): OFF
+--   SDL_DIRECTFB_SHARED         (Wanted: OFF): OFF
+--   SDL_DIRECTX                 (Wanted: OFF): OFF
+--   SDL_DISKAUDIO               (Wanted: ON): ON
+--   SDL_DUMMYAUDIO              (Wanted: ON): ON
+--   SDL_DUMMYVIDEO              (Wanted: ON): ON
+--   SDL_ESD                     (Wanted: OFF): OFF
+--   SDL_ESD_SHARED              (Wanted: OFF): OFF
+--   SDL_FOREGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_FUSIONSOUND             (Wanted: OFF): OFF
+--   SDL_FUSIONSOUND_SHARED      (Wanted: OFF): OFF
+--   SDL_GCC_ATOMICS             (Wanted: ON): ON
+--   SDL_HIDAPI                  (Wanted: ON): ON
+--   SDL_HIDAPI_JOYSTICK         (Wanted: ON): ON
+--   SDL_HIDAPI_LIBUSB           (Wanted: OFF): OFF
+--   SDL_IBUS                    (Wanted: OFF): OFF
+--   SDL_INSTALL_TESTS           (Wanted: OFF): OFF
+--   SDL_JACK                    (Wanted: OFF): OFF
+--   SDL_JACK_SHARED             (Wanted: OFF): OFF
+--   SDL_KMSDRM                  (Wanted: OFF): OFF
+--   SDL_KMSDRM_SHARED           (Wanted: OFF): OFF
+--   SDL_LASX                    (Wanted: OFF): OFF
+--   SDL_LIBC                    (Wanted: ON): ON
+--   SDL_LIBICONV                (Wanted: OFF): OFF
+--   SDL_LIBSAMPLERATE           (Wanted: OFF): OFF
+--   SDL_LIBSAMPLERATE_SHARED    (Wanted: OFF): OFF
+--   SDL_LIBUDEV                 (Wanted: ON): OFF
+--   SDL_LSX                     (Wanted: OFF): OFF
+--   SDL_METAL                   (Wanted: ON): ON
+--   SDL_MMX                     (Wanted: OFF): OFF
+--   SDL_NAS                     (Wanted: OFF): OFF
+--   SDL_NAS_SHARED              (Wanted: OFF): OFF
+--   SDL_OFFSCREEN               (Wanted: ON): ON
+--   SDL_OPENGL                  (Wanted: ON): ON
+--   SDL_OPENGLES                (Wanted: ON): ON
+--   SDL_OSS                     (Wanted: OFF): OFF
+--   SDL_PIPEWIRE                (Wanted: OFF): OFF
+--   SDL_PIPEWIRE_SHARED         (Wanted: OFF): OFF
+--   SDL_PTHREADS                (Wanted: ON): ON
+--   SDL_PTHREADS_SEM            (Wanted: ON): ON
+--   SDL_PULSEAUDIO              (Wanted: OFF): OFF
+--   SDL_PULSEAUDIO_SHARED       (Wanted: OFF): OFF
+--   SDL_RENDER_D3D              (Wanted: OFF): OFF
+--   SDL_RENDER_METAL            (Wanted: ON): ON
+--   SDL_RPATH                   (Wanted: OFF): OFF
+--   SDL_RPI                     (Wanted: OFF): OFF
+--   SDL_SNDIO                   (Wanted: OFF): OFF
+--   SDL_SNDIO_SHARED            (Wanted: OFF): OFF
+--   SDL_SSE                     (Wanted: OFF): OFF
+--   SDL_SSE2                    (Wanted: OFF): OFF
+--   SDL_SSE3                    (Wanted: OFF): OFF
+--   SDL_SSEMATH                 (Wanted: OFF): OFF
+--   SDL_STATIC_PIC              (Wanted: OFF): OFF
+--   SDL_SYSTEM_ICONV            (Wanted: OFF): OFF
+--   SDL_TESTS                   (Wanted: OFF): OFF
+--   SDL_VENDOR_INFO             (Wanted: ): OFF
+--   SDL_VIRTUAL_JOYSTICK        (Wanted: ON): ON
+--   SDL_VIVANTE                 (Wanted: OFF): OFF
+--   SDL_VULKAN                  (Wanted: ON): ON
+--   SDL_WASAPI                  (Wanted: OFF): OFF
+--   SDL_WAYLAND                 (Wanted: OFF): OFF
+--   SDL_WAYLAND_LIBDECOR        (Wanted: OFF): OFF
+--   SDL_WAYLAND_LIBDECOR_SHARED (Wanted: OFF): OFF
+--   SDL_WAYLAND_QT_TOUCH        (Wanted: OFF): OFF
+--   SDL_WAYLAND_SHARED          (Wanted: OFF): OFF
+--   SDL_X11                     (Wanted: OFF): OFF
+--   SDL_X11_SHARED              (Wanted: OFF): OFF
+--   SDL_X11_XCURSOR             (Wanted: OFF): OFF
+--   SDL_X11_XDBE                (Wanted: OFF): OFF
+--   SDL_X11_XFIXES              (Wanted: OFF): OFF
+--   SDL_X11_XINPUT              (Wanted: OFF): OFF
+--   SDL_X11_XRANDR              (Wanted: OFF): OFF
+--   SDL_X11_XSCRNSAVER          (Wanted: OFF): OFF
+--   SDL_X11_XSHAPE              (Wanted: OFF): OFF
+--   SDL_XINPUT                  (Wanted: OFF): OFF
+-- 
+--  CFLAGS:         -idirafter "/Users/brad/dev/ssx3-work/N8D5C/build/_deps/sdl2-src/src/video/khronos"
+--  EXTRA_CFLAGS:   -Wall -Wundef -fno-strict-aliasing -Wdocumentation -Wdocumentation-unknown-command -fcomment-block-commands=threadsafety -fcomment-block-commands=deprecated -Wdeclaration-after-statement -fvisibility=hidden -Wshadow -Wno-unused-local-typedefs -fcolor-diagnostics -D_THREAD_SAFE
+--  EXTRA_LDFLAGS:  -Wl,-compatibility_version,3201.0.0;-Wl,-current_version,3201.10.0
+--  EXTRA_LIBS:    m
+-- 
+--  Build Shared Library: ON
+--  Build Static Library: OFF
+-- 
+-- If something was not detected, although the libraries
+-- were installed, then make sure you have set the
+-- CFLAGS and LDFLAGS environment variables correctly.
+-- 
+-- Performing Test COMPILER_SUPPORTS_FOBJC_ARC
+-- Performing Test COMPILER_SUPPORTS_FOBJC_ARC - Success
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui_file_dialog) is deprecated, call
+  FetchContent_MakeAvailable(imgui_file_dialog) instead.  Policy CMP0169 can
+  be set to OLD to allow FetchContent_Populate(imgui_file_dialog) to be
+  called directly for now, but the ability to call it with declared details
+  will be removed completely in a future version.
+Call Stack (most recent call first):
+  ps2xStudio/CMakeLists.txt:58 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Found OpenGL: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenGL.framework
+> Enabling optimization for: imgui_lib
+> Enabling optimization for: imgui_colortextedit_lib
+> Enabling optimization for: imgui_filedialog_lib
+> Enabling optimization for: ps2xStudio
+-- Configuring done (87.4s)
+-- Generating done (1.4s)
+-- Build files have been written to: /Users/brad/dev/ssx3-work/N8D5C/build
