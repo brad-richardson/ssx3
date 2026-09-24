@@ -1173,6 +1173,11 @@ with measured budgets, then 120 Hz simulation.
       speed claim. **Next:** map `GSRenderer::vsync` circuit sampling,
       field merge and VRAM input; choose a controlled stage probe, validate
       on Mac, then run one bounded Odin comparison.
+- [ ] **N8D6A Mac scanout-stage probe:** expose circuit1 and merged-before-
+      deinterlace images under a default-OFF diagnostic flag, sample both
+      with the proven tile shader and control, and calibrate on the pinned
+      N8D4 stream. The orchestrator gates the Mac replay before any APK or
+      Odin run. Brief: `local/muse/prompts/N8D6A.md`.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
