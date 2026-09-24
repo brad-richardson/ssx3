@@ -1024,9 +1024,19 @@ with measured budgets, then 120 Hz simulation.
       SHA/package and one-run checks passed; app force-stopped, PID
       absent, lease free. The major scene loss exists in the host upload
       before `UpdateTexture`, so a final screen-only failure cannot
-      explain it. **N8D3 next:** compare raw Vulkan mapped scanout bytes
-      against the post-stride-copy host frame at one race tick to locate
-      the first bad stage. Do not fold or profile for speed yet.
+      explain it. **N8D3 PASS for stage equality (8bcad5f):** one
+      diagnostic APK build and Odin run captured raw Vulkan mapped bytes,
+      backend packed rows, and frontend PNG at the same race tick 2050,
+      FBP 112, 512×448 RGBA8. Raw and packed 917,504-byte files have
+      identical SHA; 448/448 rows match. The decoded frontend PNG matches
+      all 917,504 bytes too. All three viewed images contain the same
+      black bands and fragments. The app was force-stopped, PID absent,
+      Odin lease free; no speed claim. The loss is **at or before the
+      Vulkan mapped scanout/readback**, with GPU image generation versus
+      transfer/readback still unresolved. **N8D4 next:** use a controlled
+      same-input GS capture/replay or an independent scanout readback to
+      separate renderer output from transfer behavior. Do not fold or
+      profile for speed until the race image is usable.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
