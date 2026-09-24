@@ -614,7 +614,9 @@ with measured budgets, then 120 Hz simulation.
       shipping Turnip). Sub-LSB differences vs Mac are accepted, not chased.
 - [ ] N lane: bundle `libvulkan_freedreno.so` (Turnip v36, `717812c3…`) in
       the APK and load it through G43's HMI hook when the GPU GS lands on
-      Android (GB1 step c).
+      Android (GB1 step c). **N8A queued:** read-only source/packaging map
+      from current fork GPU opt-in through N7's APK to a bundled Turnip;
+      identify any missing loader/ABI edge before an Odin build or run.
 - [x] **G44 PASS (09-23, Part 3): paraLLEl shadow works inside the recomp**
       (branch `g44-parallel-shadow` `460e438`+`8c45d1f`+`6cfede4`, 471/471, not
       pushed) with a diagnostic `PS2X_GS_SHADOW_FORCE_SMODE1=ntsc` override:
