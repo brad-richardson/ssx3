@@ -799,9 +799,17 @@ with measured budgets, then 120 Hz simulation.
       all 1,982,063 path indices and the capture-format source. The CSV
       is `local/research/X5/packets-949-950.csv`; it does not name a glyph
       producer.
-      **GB5 Part 1 running:** replay-only CPU page-112 crop probe across
-      X5's packet window, with at most one omitted-packet control. The
-      output is a producer-candidate table, not a paraLLEl verdict.
+      **GB5 Part 1 PASS (a6ade5d):** replay-only CPU page-112 crop probe
+      checked all 922 X5 packets at ticks 949–950; **zero** changed either
+      damaged text crop during packet processing. Final crop hashes
+      (`1d75d1be`, `9cb9639d`) match the saved CPU raw PPM, independently
+      recalculated by the orchestrator. Default and probe suites both
+      556/556. No single candidate existed for an omitted-packet
+      control. Local G probe commit `b7d3227` is not pushed. This excludes
+      a CPU crop write by those sampled packets; it does not locate the
+      earlier producer or explain paraLLEl's raster difference. Next:
+      find the last earlier crop change or non-packet page update, then
+      compare that exact state across backends.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1288,5 +1296,7 @@ with measured budgets, then 120 Hz simulation.
       produced no tokens before the orchestrator stopped it. No X4 code
       claims have been accepted; rebrief in smaller source categories if
       still needed for E55. X5's separate sparse extraction passed.
+      **X4B running:** one narrow dense arm traces only the RTC seed path
+      with a 45-line report cap.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
