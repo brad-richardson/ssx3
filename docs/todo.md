@@ -1640,6 +1640,9 @@ with measured budgets, then 120 Hz simulation.
       interface/page tracker/shaders, Granite dirty patches, flags and
       Turnip/HAL; tie native SHA and Build ID to new APK SHA. Mark old
       package inputs unproved until actually recovered, never infer.
+- [ ] **N8D7M12 Part 6M5:** stage clean fork, dirty renderer/Granite,
+      codegen and known JNI bytes in private ignored space; snapshot and
+      verify exact four roots with caps. No build or device in this part.
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
