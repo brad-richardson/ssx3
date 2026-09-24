@@ -1,0 +1,30 @@
+{
+  "source_pin": "3a66c1976170cbc2cb53a3593fabbc7c4b2ccfbd",
+  "status": "FAIL_COMPILE_CAP",
+  "compiler_command": "c++ -std=c++17 -O2 -I. -Igs -IGranite/math -IGranite/vulkan -IGranite/util -IGranite/third_party /Users/brad/dev/ssx3/local/research/N8D7D/fixture.cpp -o /tmp/n8d7d-fixture",
+  "compiler_exit_code": 1,
+  "compiler_error": "Granite/vulkan/vulkan_headers.hpp:33:10: fatal error: 'volk.h' file not found",
+  "field": {"width": 512, "height": 224, "promoted": false, "super_samples": 1},
+  "golden_offsets": [
+    {"name": "fbp112_0_0", "expected_byte": 917504, "actual_byte": null, "checked": false},
+    {"name": "fbp511_dbx64_0_0", "expected_byte": 0, "actual_byte": null, "checked": false}
+  ],
+  "cases": [
+    {"name":"fbp_0","psm":0,"fbp":0,"fbw":8,"dbx":0,"dby":0,"phase":0,"stride":1},
+    {"name":"fbp_112","psm":0,"fbp":112,"fbw":8,"dbx":0,"dby":0,"phase":0,"stride":1},
+    {"name":"fbw_8","psm":0,"fbp":1,"fbw":8,"dbx":0,"dby":0,"phase":0,"stride":1},
+    {"name":"fbw_9","psm":0,"fbp":1,"fbw":9,"dbx":0,"dby":0,"phase":0,"stride":1},
+    {"name":"phase_0_stride_1","psm":0,"fbp":1,"fbw":8,"dbx":3,"dby":4,"phase":0,"stride":1},
+    {"name":"phase_1_stride_1","psm":0,"fbp":1,"fbw":8,"dbx":3,"dby":4,"phase":1,"stride":1},
+    {"name":"phase_0_stride_2","psm":0,"fbp":1,"fbw":8,"dbx":3,"dby":4,"phase":0,"stride":2},
+    {"name":"phase_1_stride_2","psm":0,"fbp":1,"fbw":8,"dbx":3,"dby":4,"phase":1,"stride":2},
+    {"name":"psmct16","psm":2,"fbp":1,"fbw":8,"dbx":3,"dby":4,"phase":1,"stride":2},
+    {"name":"psmct16s","psm":10,"fbp":1,"fbw":8,"dbx":3,"dby":4,"phase":1,"stride":2},
+    {"name":"wrap_32","psm":0,"fbp":511,"fbw":8,"dbx":64,"dby":0,"phase":0,"stride":1},
+    {"name":"wrap_16","psm":2,"fbp":511,"fbw":8,"dbx":64,"dby":0,"phase":0,"stride":1}
+  ],
+  "case_result_fields": {"supported":null,"expected_pixel_mismatches":null,"actual_pixel_mismatches":null,"expected_tile_mismatches":null,"actual_tile_mismatches":null,"expected_output_bytes":null,"actual_output_bytes":null,"expected_tile_counts":null,"actual_tile_counts":null,"expected_output_hash":null,"actual_output_hash":null,"unsupported_reason":"not evaluated: compile cap"},
+  "execution_command": null,
+  "execution_exit_code": null,
+  "pass": false
+}
