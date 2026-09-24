@@ -917,6 +917,26 @@ with measured budgets, then 120 Hz simulation.
 
       **Part 2:** fold onto `13cac7f`, a 600 s stop-policy boot with zero
       misses, then push + promote the codegen.
+- [x] **E59 (8528a43): the sky loss is a second bug that E53 exposed.**
+      - FPMODE=ieee: no sky. Reverting the EFU tables (h): no sky.
+        Reverting the whole VU0 group (a): the sky, sun and flare return.
+        Reverting VCALLMSR only, VSQI only, or both: no sky. What remains
+        is VLQI at 0x3feb8c (`sceVu0MemReadQ`) and CMSAR1 (never run).
+        E53's new behaviours match PCSX2.
+      - The sky-like packet (TBP0 11017) is drawn in both, but with ALPHA
+        0x1/CBP 10756 here vs 0x2a/14473 in PCSX2.
+      - Flat textures: 60 IMAGE uploads/vsync vs PCSX2's 73–74, 13 vs 23
+        mip chains.
+
+      **E60 running (Sol):** VU0 data differential at the
+      `sceVu0MemReadQ` calls, then name the writer.
+- [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
+      `PS2X_WIDESCREEN` (default on) at the game's display apply;
+      `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
+      2D title/menu/HUD widen ~33% (the game doesn't squeeze 2D in
+      anamorphic mode). Sent to Brad to judge. The `w1-wide` branch
+      includes I26's presenter/vpad (`8a357ac`). Fold it into `ssx3` after
+      E56's push.
 - [ ] **Brad's iPhone check-in feedback (09-23 evening, Select Mode/Peak
       screenshots):**
       1. fonts look off (kerning);
