@@ -1374,11 +1374,18 @@ with measured budgets, then 120 Hz simulation.
       alternate-base census alone cannot prove intended display selection.
       No build, replay or Odin action. Do not run the proposed tap as
       written. `local/research/N8D7M3/ORCH-GATE.md`.
-- [ ] **N8D7M4 direct same-stream provenance design:** use N8D4's
-      captured Odin stream and Mac replay as a controlled reference where
-      possible; identify exact packet/write bytes and snapshot ordering
-      needed to distinguish sparse source, wrong selection and timing
-      before another Odin launch.
+- [x] **N8D7M4 same-stream design PARTIAL (`744bcdd2`):** captured
+      N8D4 Odin stream and its Mac replays provide a controlled reference;
+      current APK appears to contain both capture and selected-snapshot
+      flags, though co-enabled operation is untested. Proposed immediate
+      before/after packet reads may miss queued execution; eight control
+      words do not prove full-frame content, and a broad tick2052 image
+      would not prove tick2050 copy timing. No build/run/device action.
+      `local/research/N8D7M4/ORCH-GATE.md`.
+- [ ] **N8D7M5 executed-word Mac validation:** on pinned N8D4 stream,
+      trace actual CPU backend changed writes at selected FBP112 GS
+      addresses with packet/tick identity, verify OFF/ON frame equality,
+      and choose genuinely discriminating pixels before another Odin run.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
