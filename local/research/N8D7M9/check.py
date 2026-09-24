@@ -70,7 +70,10 @@ CITATIONS = [
     (G43, "gs_interface.hpp", 269, "gif_transfer", 5),
     (G43, "gs_interface.hpp", 319, "query_timeline", 5),
     (PAGE, "page_tracker.cpp", 935, "mark_submission_timeline", 5),
+    (PAGE, "page_tracker.cpp", 970, "flush_if_memory_pressure", 5),
     (PAGE, "page_tracker.hpp", 122, "FlushReason", 5),
+    (G43, "gs_interface.cpp", 1622, "FlushReason::Overflow", 5),
+    (G43, "gs_interface.cpp", 1629, "flush_if_memory_pressure", 5),
     (GRANITE_VK, "device.hpp", 274, "wait_idle", 5),
     (GRANITE_VK, "device.hpp", 301, "submit(CommandBufferHandle", 5),
     (GRANITE_VK, "device.hpp", 518, "consumes_debug_markers", 5),
@@ -150,7 +153,9 @@ def check_report():
                  "no per-draw completion method",
                  "pseudocode", "H1", "H5",
                  "4 MiB", "512 KiB", "default-OFF", "Default OFF",
-                 "M1", "M5", "G5",
+                 "M1", "M5", "M7", "M8", "M9", "G5",
+                 "Verdict: B", "flush_if_memory_pressure",
+                 "candidate", "WITHDRAWN",
                  "448", "cannot prove execution",
                  "gs_frontend.cpp", "ps2_gs_parallel_backend.cpp",
                  "gs_renderer.cpp", "gs_interface.cpp",
@@ -162,13 +167,13 @@ def check_report():
         if need not in text:
             results["errors"].append("REPORT.md missing %r" % need)
             ok = False
-    # The A predeclare must be conditional (controls + Mac calibration), and
-    # equal-prediction fallback to B must be stated.
-    if "predeclared verdict A (conditional)" not in text:
-        results["errors"].append("REPORT must predeclare conditional A explicitly")
+    # The v1 conditional-A predeclare must be gone; B is the verdict and no
+    # implementation/Odin run may be authorized from it.
+    if "predeclared verdict A (conditional)" in text:
+        results["errors"].append("REPORT must not predeclare A (gate correction to B)")
         ok = False
-    if "falls to B" not in text and "fall back to B" not in text:
-        results["errors"].append("REPORT must state the B fallback on failed conditions")
+    if "No implementation" not in text:
+        results["errors"].append("REPORT must state no implementation is authorized")
         ok = False
     # No device cause may be declared from static code.
     for bad in ["root cause is the Turnip", "root cause is the shader",
