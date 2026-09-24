@@ -1,0 +1,13 @@
+ ps2xRuntime/include/ps2_ios_runtime.h       |   3 +
+ ps2xRuntime/include/ps2_present_fallback.h  |  26 ++++
+ ps2xRuntime/include/ps2_present_geometry.h  |  80 ++++++++++++
+ ps2xRuntime/include/ps2_virtual_pad.h       | 196 ++++++++++++++++++++++++++++
+ ps2xRuntime/ios/Settings.bundle/Root.plist  |  21 ++-
+ ps2xRuntime/src/lib/ps2_ios_runtime.mm      |  40 +++++-
+ ps2xRuntime/src/lib/ps2_pad.cpp             |   4 +
+ ps2xRuntime/src/lib/ps2_runtime.cpp         | 188 ++++++++++++++++++++++++--
+ ps2xTest/CMakeLists.txt                     |   2 +
+ ps2xTest/src/main.cpp                       |   6 +
+ ps2xTest/src/ps2_present_fallback_tests.cpp |  48 +++++++
+ ps2xTest/src/ps2_virtual_pad_tests.cpp      |  73 +++++++++++
+ 12 files changed, 674 insertions(+), 13 deletions(-)
