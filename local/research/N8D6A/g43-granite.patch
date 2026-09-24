@@ -1,0 +1,121 @@
+diff --git a/application/platforms/CMakeLists.txt b/application/platforms/CMakeLists.txt
+index 44601339..63254bb2 100644
+--- a/application/platforms/CMakeLists.txt
++++ b/application/platforms/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ # Must be static due to Granite::application_create() feedback.
+ 
+-if (ANDROID)
++# G14 local experiment shim (not upstream): honor an explicit null/headless
++# platform on Android so offline tools configure without AGDK.
++if (ANDROID AND NOT (${GRANITE_PLATFORM} MATCHES "null|headless"))
+     add_granite_internal_static_lib(granite-platform application_android.cpp)
+     find_package(game-activity REQUIRED CONFIG)
+     find_package(games-controller REQUIRED CONFIG)
+diff --git a/util/timer.cpp b/util/timer.cpp
+index a1408352..73adaadb 100644
+--- a/util/timer.cpp
++++ b/util/timer.cpp
+@@ -138,6 +138,17 @@ void sleep_until_nsecs(int64_t timepoint)
+ 		_mm_pause();
+ #endif
+ 	}
++#elif defined(__APPLE__)
++	// G7 local build shim (not upstream): macOS has no clock_nanosleep/TIMER_ABSTIME.
++	// Emulate absolute sleep with relative nanosleep; timer utility only, no Vulkan semantics.
++	int64_t d = timepoint - get_current_time_nsecs();
++	if (d <= 0)
++		return;
++	struct timespec ts = {};
++	ts.tv_sec = d / 1000000000ll;
++	ts.tv_nsec = d % 1000000000ll;
++	int ret;
++	while ((ret = nanosleep(&ts, &ts)) == EINTR) {}
+ #else
+ 	constexpr auto timebase = CLOCK_MONOTONIC;
+ 	struct timespec ts = {};
+diff --git a/vulkan/command_buffer.cpp b/vulkan/command_buffer.cpp
+index 9f2534de..16599ced 100644
+--- a/vulkan/command_buffer.cpp
++++ b/vulkan/command_buffer.cpp
+@@ -1195,6 +1195,24 @@ Pipeline CommandBuffer::build_compute_pipeline(Device *device, const DeferredPip
+ 		info.pNext = &robustness;
+ 	}
+ 
++	// G20 capture: log the compute pipeline identity BEFORE create_pipeline, so the
++	// crashing pipeline (which never reaches log_compile_time) is named in logcat.
++	// Logging-only: reads of already-computed locals/const-ref fields + LOGI; no
++	// pipeline-creation input is written, reordered, or skipped.
++	LOGI("G20 pre-create (compute, %016llx): program %016llx, shader %016llx, specs %u, robust %u, subgroup %u.\n",
++	     static_cast<unsigned long long>(compile.hash),
++	     static_cast<unsigned long long>(compile.program->get_hash()),
++	     static_cast<unsigned long long>(shader.get_hash()),
++	     spec_info.mapEntryCount,
++	     compile.static_state.state.robustness,
++	     compile.static_state.state.subgroup_control_size);
++	for (uint32_t g20_spec = 0; g20_spec < spec_info.mapEntryCount; g20_spec++)
++	{
++		LOGI("G20 pre-create spec %016llx: id %u = %08x.\n",
++		     static_cast<unsigned long long>(compile.hash),
++		     spec_entries[g20_spec].constantID, spec_constants[g20_spec]);
++	}
++
+ 	auto start_ts = Util::get_current_time_nsecs();
+ 	VkResult vr = device->pipeline_binary_cache.create_pipeline(&info, compile.cache, &compute_pipeline);
+ 	auto end_ts = Util::get_current_time_nsecs();
+diff --git a/vulkan/memory_allocator.cpp b/vulkan/memory_allocator.cpp
+index f272816b..39c6a4b9 100644
+--- a/vulkan/memory_allocator.cpp
++++ b/vulkan/memory_allocator.cpp
+@@ -1421,7 +1421,13 @@ bool DescriptorBufferAllocator::create_image_view(const VkImageViewCreateInfo &i
+ 			copy_storage_image(resource_heap.mapped + view.input_attachment_feedback.heap_index * desc_size, view.input_attachment_feedback.ptr);
+ 		}
+ 	}
+-	else if (device->get_device_features().descriptor_buffer_features.descriptorBuffer &&
++	// G28 local fix (not upstream): only take the descriptorBuffer branch when
++	// the slabs were actually initialized. init() early-returns (leaving
++	// stride-0 slabs) unless supports_descriptor_buffer_or_heap is set, so a
++	// device with the raw feature on but supports off (Adreno 830) would run
++	// vkGetDescriptorEXT through aliased slots and smash the heap (G27).
++	else if (device->get_device_features().supports_descriptor_buffer_or_heap &&
++	         device->get_device_features().descriptor_buffer_features.descriptorBuffer &&
+ 	         need_image_view_object)
+ 	{
+ 		VkDescriptorImageInfo image_info = {};
+@@ -1463,6 +1469,17 @@ bool DescriptorBufferAllocator::create_image_view(const VkImageViewCreateInfo &i
+ 			                         props.inputAttachmentDescriptorSize, view.input_attachment_feedback.ptr);
+ 		}
+ 	}
++	else if (need_image_view_object &&
++	         device->get_device_features().descriptor_buffer_features.descriptorBuffer)
++	{
++		// G28 receipt: the new guard above skipped the branch (supports == 0).
++		static bool g28_skip_logged = false;
++		if (!g28_skip_logged)
++		{
++			g28_skip_logged = true;
++			LOGI("G28: create_image_view descriptorBuffer branch skipped (supports=0, feature=1).\n");
++		}
++	}
+ 
+ 	return true;
+ }
+diff --git a/vulkan/shader.cpp b/vulkan/shader.cpp
+index 13b9dcbc..77c2ea9b 100644
+--- a/vulkan/shader.cpp
++++ b/vulkan/shader.cpp
+@@ -528,7 +528,13 @@ void PipelineLayout::init_legacy(const ImmutableSamplerBank *immutable_samplers)
+ 	device->register_pipeline_layout(pipe_layout, get_hash(), info);
+ #endif
+ 
+-	if (!device->get_device_features().descriptor_buffer_features.descriptorBuffer)
++	// G18 local experiment fix: gate template creation on the derived
++	// supports_descriptor_buffer flag (the same predicate CommandBuffer uses
++	// to select the descriptor-buffer flush path), not the raw feature bit.
++	// When the raw bit is set but Granite declines descriptor buffers
++	// (context.cpp suitability conditions), the legacy flush path needs
++	// these templates; skipping them passes NULL to the driver (O2).
++	if (!device->get_device_features().supports_descriptor_buffer)
+ 		create_update_templates();
+ }
+ 
