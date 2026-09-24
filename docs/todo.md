@@ -821,8 +821,8 @@ with measured budgets, then 120 Hz simulation.
       This is a state-dependent composite effect; it does **not** identify
       the glyph stroke producer or the paraLLEl defect. Next GB5C:
       compare exact CPU/paraLLEl pixels and GS state around this packet.
-      GB5C Part 1 brief is ready for matched replay crops at eight
-      ticks 899–950; no live boot.
+      GB5C Part 1 running: matched replay crops at eight ticks
+      899–950; no live boot.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1011,12 +1011,18 @@ with measured budgets, then 120 Hz simulation.
       2057 with 0→1% HUD progress; orchestrator viewed character and
       two race frames. The four generated PINTEH guest sites have
       unproved boot reach; no generated PINTH site was found. Next E54:
-      **E54D running:** LWU zero extension with regenerated code and a
-      bounded race boot. Then 64-bit sign branches, COP0 Count and
-      INTC 5/7 before E55. X7's narrow dense-Qwen source-table trial
-      stopped at its 12-minute cap without a completed worker table.
-      The orchestrator source check and model outcome are in
-      `local/research/X7/REPORT.md`; no branch fix verdict.
+      **E54D PASS (dbaeac9; fork `1aaed05` pushed):** decoded LWU
+      now zero extends high-bit words against pinned PCSX2; before-fix
+      snippet tests failed only LWU, after-fix suites 570/570 OFF and
+      665/665 ON. One E54D regeneration made 96 occurrences at 92
+      unique guest addresses; the orchestrator promoted its 9,457
+      generated files to canonical `codegen-ssx3`. One diagnostic
+      I26-FAST boot reached race tick 2069 in 112 s with SC/race frames
+      viewed; the dark GS region remains. Static LWU boot reach is
+      unknown. Next: 64-bit sign branches, COP0 Count and INTC 5/7
+      before E55. X7's narrow dense-Qwen trial stopped at its 12-minute
+      cap without a completed worker table; orchestrator source check
+      in `local/research/X7/REPORT.md` is no branch fix verdict.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
