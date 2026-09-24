@@ -1,0 +1,175 @@
+# Pinned fork 293fd81; source slices with original line numbers. Scope: these slices only.
+
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:1928-1965
+
+1928:         ps2_log::emitDrop("sched/setIrqHandlerEnabled", "unknown-id", dropArgs);
+1929:     }
+1930:     return KE_OK;
+1931: }
+1932:
+1933: int EeScheduler::setIrqCauseEnabled(bool dmac, uint32_t cause, bool enabled)
+1934: {
+1935:     assertExecutor();
+1936:     if (cause < 32u)
+1937:     {
+1938:         uint32_t &mask = dmac ? m_enabledDmacMask : m_enabledIntcMask;
+1939:         if (enabled)
+1940:         {
+1941:             mask |= 1u << cause;
+1942:         }
+1943:         else
+1944:         {
+1945:             mask &= ~(1u << cause);
+1946:         }
+1947:     }
+1948:     else
+1949:     {
+1950:         // P1w: out-of-range cause is ignored yet reported KE_OK. Trace it.
+1951:         char dropArgs[64];
+1952:         std::snprintf(dropArgs, sizeof(dropArgs), "cause=%u dmac=%d enabled=%d ret=KE_OK",
+1953:                       cause, dmac ? 1 : 0, enabled ? 1 : 0);
+1954:         ps2_log::emitDrop("sched/setIrqCauseEnabled", "cause-range", dropArgs);
+1955:     }
+1956:     return KE_OK;
+1957: }
+1958:
+1959: void EeScheduler::dispatchIrq(bool dmac, uint32_t cause)
+1960: {
+1961:     assertExecutor();
+1962:     const uint32_t mask = dmac ? m_enabledDmacMask : m_enabledIntcMask;
+1963:     if (cause < 32u && (mask & (1u << cause)) == 0u)
+1964:     {
+1965:         return;
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2489-2510
+
+2489:     GuestThread *self = currentThread();
+2490:     assert(self != nullptr);
+2491:     enqueueReady(*self, !m_timeSliceExpired);
+2492:     m_currentThreadId = 0;
+2493:     m_rescheduleRequested = false;
+2494:     m_timeSliceExpired = false;
+2495: }
+2496:
+2497: void EeScheduler::processPendingEvents()
+2498: {
+2499:     assertExecutor();
+2500:     processDueDeadlines();
+2501:     const uint32_t timerInterrupts = m_pendingEeTimerInterrupts;
+2502:     m_pendingEeTimerInterrupts = 0u;
+2503:     for (uint32_t timer = 0u; timer < 4u; ++timer)
+2504:     {
+2505:         if ((timerInterrupts & (1u << timer)) != 0u)
+2506:         {
+2507:             dispatchIrq(false, 9u + timer);
+2508:         }
+2509:     }
+2510:     std::deque<EeEvent> pending;
+
+## ps2xRuntime/src/lib/Kernel/EeScheduler.cpp:2669-2685
+
+2669:                     ps2_e3::tapEnd(std::move(e3tick), "vblank-tick", m_rdram, e3x);
+2670:                 }
+2671:             }
+2672:         }
+2673:         m_vsyncFlagAddress = 0u;
+2674:         m_vsyncTickAddress = 0u;
+2675:         completeVSync(m_vsyncTick);
+2676:         if (m_gsVSyncCallback != 0u && m_runtime.hasFunction(m_gsVSyncCallback))
+2677:         {
+2678:             GuestInvocation invocation{};
+2679:             invocation.kind = GuestInvocationKind::GsCallback;
+2680:             invocation.context.pc = m_gsVSyncCallback;
+2681:             SET_GPR_U32(&invocation.context, 4, static_cast<uint32_t>(m_vsyncTick));
+2682:             SET_GPR_U32(&invocation.context, 28, m_gsVSyncCallbackGp);
+2683:             SET_GPR_U32(&invocation.context, 29, m_gsVSyncCallbackSp);
+2684:             SET_GPR_U32(&invocation.context, 31, 0u);
+2685:             queueInvocation(std::move(invocation));
+
+## ps2xRuntime/src/lib/Kernel/Syscalls/Interrupt.cpp:60-73
+
+60:             setReturnS32(ctx,
+61:                          scheduler(rdram, ctx, runtime)
+62:                              .setIrqHandlerEnabled(dmac,
+63:                                                    static_cast<int>(getRegU32(ctx, 5)),
+64:                                                    enabled));
+65:         }
+66:     }
+67:
+68:     void dispatchDmacHandlersForCause(uint8_t *, PS2Runtime *runtime, uint32_t cause)
+69:     {
+70:         runtime->eeScheduler().dispatchIrq(true, cause);
+71:     }
+72:
+73:     uint64_t GetCurrentVSyncTick(PS2Runtime *runtime)
+
+## ps2xRuntime/src/lib/ps2_memory.cpp:2146-2165
+
+2146:     }
+2147:     m_pendingVif0Transfers.clear();
+2148:
+2149:     const bool hadVif1 = !m_pendingVif1Transfers.empty();
+2150:     // E40 Part-3: install the payload source map around each delivery
+2151:     // (dev-only; one atomic check when off).
+2152:     const bool e40Pay = ps2_mpg_src_trace::enabled();
+2153:     for (auto &p : m_pendingVif1Transfers)
+2154:     {
+2155:         if (!p.chainData.empty())
+2156:         {
+2157:             if (e40Pay)
+2158:             {
+2159:                 ps2_mpg_src_trace::setPayMap(
+2160:                     p.chainData.data(), static_cast<uint32_t>(p.chainData.size()),
+2161:                     p.srcSpans.data(), static_cast<uint32_t>(p.srcSpans.size()),
+2162:                     ps2_mpg_src_trace::PayChain, 0u);
+2163:             }
+2164:             processVIF1Data(p.chainData.data(), static_cast<uint32_t>(p.chainData.size()));
+2165:             if (e40Pay)
+
+## ps2xRuntime/src/lib/ps2_runtime.cpp:767-810
+
+767:     s_lastHeight = height;
+768:     if (!s_scratch.empty() && width != 0u && height != 0u &&
+769:         s_scratch.size() == static_cast<size_t>(width) * static_cast<size_t>(height) * 4u)
+770:     {
+771:         dumpPresentationFrame(s_scratch.data(), width, height, currentTick, displayFbp, sourceFbp,
+772:                               usedPreferredDisplaySource, false, rt->memory().gs().smode2,
+773:                               rt->memory().gs().pmode);
+774:         // G44: per-vsync shadow compare against these CPU pixels.
+775:         ps2x_gs_shadow::onPresentFrame(currentTick, s_scratch.data(), width, height, &rt->memory().gs());
+776:     }
+777:
+778:     std::fill(s_uploadBuffer.begin(), s_uploadBuffer.end(), 0u);
+779:     if (!s_scratch.empty() && width != 0u && height != 0u)
+780:     {
+781:         const uint32_t copyWidth = std::min<uint32_t>(width, FB_WIDTH);
+782:         const uint32_t copyHeight = std::min<uint32_t>(height, FB_HEIGHT);
+783:         const size_t srcRowBytes = static_cast<size_t>(width) * 4u;
+784:         const size_t dstRowBytes = static_cast<size_t>(FB_WIDTH) * 4u;
+785:         const size_t copyRowBytes = static_cast<size_t>(copyWidth) * 4u;
+786:         for (uint32_t y = 0; y < copyHeight; ++y)
+787:         {
+788:             const size_t srcOffset = static_cast<size_t>(y) * srcRowBytes;
+789:             const size_t dstOffset = static_cast<size_t>(y) * dstRowBytes;
+790:             if (srcOffset + copyRowBytes > s_scratch.size() ||
+791:                 dstOffset + copyRowBytes > s_uploadBuffer.size())
+792:             {
+793:                 break;
+794:             }
+795:             std::memcpy(s_uploadBuffer.data() + dstOffset, s_scratch.data() + srcOffset, copyRowBytes);
+796:         }
+797:     }
+798:
+799:     UpdateTexture(tex, s_uploadBuffer.data());
+800:     outWidth = width;
+801:     outHeight = height;
+802:     s_hasUploadedFrame = true;
+803: }
+804:
+805: PS2Runtime::PS2Runtime()
+806: {
+807: #ifndef NDEBUG
+808:     MissingFunctionPolicy defaultPolicy = MissingFunctionPolicy::Stop;
+809: #else
+810:     MissingFunctionPolicy defaultPolicy = MissingFunctionPolicy::ContinueToTarget;

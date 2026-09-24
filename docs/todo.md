@@ -1451,5 +1451,10 @@ with measured budgets, then 120 Hz simulation.
       `local/research/X9/REPORT.md`. Use local Qwen for bounded source
       extraction with scripted numeric acceptance; keep semantic
       verdicts with the orchestrator.
+      **X10 queued (sparse):** 7 KiB fork-`293fd81` source excerpt and
+      six-row INTC/DMAC/VU-status table. The format checker verifies
+      completeness; the orchestrator checks every classification and
+      citation. This tests bounded extraction after X9's arithmetic
+      failures, with no source edit or E54 verdict.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
