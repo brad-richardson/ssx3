@@ -1059,6 +1059,20 @@ with measured budgets, then 120 Hz simulation.
       claim. **Next:** map the exact paraLLEl generation→copy→map source,
       then design one bounded N8D5 device probe that distinguishes those
       two stages. Keep the stream outside git and defer fold/speed profiling.
+- [x] **N8D5A static design PASS (27e8c3e):** source path and format gate
+      verified; no build, boot, device contact or code edit. A same-shot
+      sampled Vulkan image on Odin would bypass the current image-to-buffer
+      readback and distinguish a sparse GPU image from a copy/map loss when
+      paired with the existing mapped output. Yet G43's Android CMake
+      selects `GRANITE_PLATFORM=null`, whose application entry exits, so its
+      desktop swapchain display path cannot show an Odin surface. G43's
+      dump parser also does not accept the N8D4 `PS2XGSC1` capture; a
+      parser adapter is required. The report tables three probes and
+      A/B/C outcomes; a GPU tile readout remains conditional on an
+      independent buffer-map control. **Next:** prove a bounded Android
+      surface control or a validated GPU tile path before spending another
+      full stream transfer/device run. The image-generation versus
+      transfer split remains open.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
