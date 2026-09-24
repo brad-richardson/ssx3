@@ -166,7 +166,20 @@ def main():
             check("src_%s" % os.path.basename(rel), False, str(e))
             verdict = "OTHER"
 
-    # 6. OFF-behavior disclaimer: this checker proves nothing about OFF.
+    # 6. REPORT lease plan uses the real CLI (no hardcoded slot).
+    try:
+        rep = open(os.path.join(REPO, "local/research/N8D7M12P5C/REPORT.md")).read()
+        ok = ('`claim <label>`' in rep
+              and 'release "$SLOT"' in rep
+              and 'p_lane_lease.py:19,70-75' in rep
+              and re.search(r"p_lane_lease\.py (claim|release) \d", rep) is None)
+        if not check("report_lease_cli", ok, "dynamic slot + trap/finally release"):
+            verdict = "OTHER"
+    except Exception as e:
+        check("report_lease_cli", False, str(e))
+        verdict = "OTHER"
+
+    # 7. OFF-behavior disclaimer: this checker proves nothing about OFF.
     check("off_behavior_unproved", True,
           "no OFF replay/install/launch executed; OFF predictions are design only")
 

@@ -89,18 +89,29 @@ ON sparsity; still-sparse OFF strengthens persistence.
 
 ## 5. Exact unexecuted command/script-diff plan
 
-Mac OFF replay (separate gate; one P-lane slot; Part 1 binary+stream):
+Mac OFF replay (separate gate; one P-lane slot; Part 1 binary+stream).
+Lease CLI per `local/tooling/p_lane_lease.py:19,70-75`: `claim <label>`
+prints the dynamically assigned slot (`1`, `2`) or `busy` (exit 1);
+`release <slot>` frees exactly that slot. No slot is hardcoded. The
+unexecuted driver plan captures the slot and releases it on every exit
+path:
 
 ```sh
-python3 local/tooling/p_lane_lease.py claim 1 n8d7m12p5c-mac
+SLOT=$(python3 local/tooling/p_lane_lease.py claim n8d7m12p5c-mac) || { echo "P-lane busy, stop"; exit 1; }
+trap 'python3 local/tooling/p_lane_lease.py release "$SLOT"' EXIT
 PS2X_GS_REPLAY_CAPTURE=~/dev/ssx3-work/N8D7M6/n8d7m6.gs PS2X_GS_REPLAY_BACKEND=parallel \
 PS2X_GS_REPLAY_STEP=50 PS2X_GS_REPLAY_PPM_TICKS=2050 \
 PS2X_GS_REPLAY_PPM_DIR=~/dev/ssx3-work/N8D7M12P5C/mac-off \
 PS2X_GS_REPLAY_OUT=~/dev/ssx3-work/N8D7M12P5C/mac-off/parallel.hashes \
 GRANITE_VULKAN_LIBRARY=/opt/homebrew/lib/libvulkan.1.dylib \
 ~/dev/ssx3-work/N8D7M12/build/ps2xTest/ps2x_tests
-python3 local/tooling/p_lane_lease.py release 1 n8d7m12p5c-mac
 ```
+
+`trap ... EXIT` guarantees `release "$SLOT"` runs on success and on
+any failure (replay error, signal, early exit); the slot variable is
+the claimed value only, never a literal. A Python driver is
+equivalent: `slot = claim("n8d7m12p5c-mac")`, `try: ... finally:
+release(slot)`.
 
 Diff vs Part 1 §4 command: drop the three capture flags; new
 `mac-off` output dir; binary, stream, backend, step, PPM ticks fixed.
