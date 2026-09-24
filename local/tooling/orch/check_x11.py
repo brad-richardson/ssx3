@@ -2,6 +2,7 @@
 """Bounded input and row gate for the X11 dense local-model trial."""
 
 from pathlib import Path
+import re
 import sys
 
 excerpt = Path("local/research/X11/source-excerpts.txt").read_text()
@@ -22,17 +23,21 @@ rows = {
     if line.startswith("| ") and not line.startswith("| ---")
 }
 expected = {
-    "Due membership": ("deadlineCycle", "hostDeadline", "2553", "2594"),
-    "Within-batch order": ("cycle", "type", "id", "sequence", "2602"),
-    "Idle timer versus event": ("timerHostDeadline", "deadlineCycle", "2882", "2893"),
-    "Posted event cycle": ("m_events", "cycle", "838", "848"),
+    "Due membership": (("deadlineCycle", "hostDeadline"), (2564, 2594)),
+    "Within-batch order": (("cycle", "type", "id", "sequence"), (2602, 2616)),
+    "Idle timer versus event": (("timerHostDeadline", "deadlineCycle"), (2882, 2893)),
+    "Posted event cycle": (("m_events", "cycle"), (838, 848)),
 }
 assert len(rows) == 5, f"expected header plus four rows, got {len(rows)}"
-for name, terms in expected.items():
+for name, (terms, lines) in expected.items():
     row = rows.get(name)
     assert row is not None, f"missing {name}"
     assert row.count("|") == 4, f"bad columns in {name}"
     for term in terms:
         assert term.lower() in row.lower(), f"{name}: missing {term}"
+    citation = row.rsplit("|", 2)[1]
+    spans = [(int(start), int(end or start)) for start, end in re.findall(r"\b(\d{3,4})(?:-(\d{3,4}))?\b", citation)]
+    for line in lines:
+        assert any(start <= line <= end for start, end in spans), f"{name}: citation does not cover {line}"
 assert "LSP findReferences probe:" in report
 print("X11 input/row gate: PASS; orchestrator still checks semantics")

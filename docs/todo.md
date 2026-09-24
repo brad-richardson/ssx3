@@ -1533,8 +1533,17 @@ with measured budgets, then 120 Hz simulation.
       approximately 10 minutes in the first reasoning step. It wrote
       no row, made no LSP call and left its nudge queued; the pane was
       stopped at cap. `local/research/X11/REPORT.md` is the orchestrator
-      audit, not a worker verdict. **X11B queued:** same excerpt, four
-      rows, LSP probe and semantic checker, but per-pane thinking budget
-      512 and an 8-minute cap. Source interpretation remains untested.
+      audit, not a worker verdict. **X11B partial (low-thinking dense):**
+      same excerpt with thinking budget 512 produced four cited rows and
+      one LSP call, but used three forbidden Globs, missed the 3-minute
+      write target, and stopped at ~24.3k context/8 minutes with no
+      checker run or worker commit. LSP returned no references at the
+      correct file/position, an indexing gap rather than caller absence.
+      The orchestrator corrected one unsupported pool-scope claim and
+      two uint32 arithmetic errors, then fixed the checker to accept
+      citations whose line ranges cover the required anchors; the
+      corrected table passes that checker. `X11B/REPORT.md` is an
+      orchestrator audit. Use sparse Qwen for bounded, scripted
+      extraction; dense source interpretation is still unproved.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
