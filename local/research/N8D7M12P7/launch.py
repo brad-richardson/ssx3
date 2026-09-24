@@ -164,8 +164,12 @@ def preflight(ours=False):
     record(f"PREFLIGHT state={state} lease={lease!r} keyguard={keyguard} "
            f"battery={level}% status={status} free_bytes={free}")
     free_lease = lease.startswith("LEASE_FREE") or (ours and lease == LEASE_TAG)
+    # Orchestrator amendment (7A gate): the Odin reports status 3 on AC at
+    # a full charge (charge limit); accept that only when AC-powered and >= 90%.
+    ac_full = status == 3 and level >= 90 and \
+        re.search(r"AC powered:\s*true", battery) is not None
     if state != "device" or not free_lease or keyguard != "false" \
-            or level < 20 or status not in (2, 5) \
+            or level < 20 or (status not in (2, 5) and not ac_full) \
             or free < 10 * 1024**3:
         if keyguard != "false":
             raise RuntimeError("BLOCKER: keyguard showing, unlock required "

@@ -2042,9 +2042,13 @@ with measured budgets, then 120 Hz simulation.
       the named remote directory and PCSX2 memcard dir contain no
       candidate. Share is unmounted. No seed, card read or speed result.
       `local/research/E55D15P1/ORCH-GATE.md`.
-- [ ] **E55D15 seed follow-up (parked):** resume only with a
-      provenance-pinned SSX 3 (USA) save export/card image and verified
-      contents; no invented wildcard-matching file.
+- [ ] **E55D15 seed follow-up (unparked 09-24 18:15):** Brad pointed to
+      the Odin. AetherSX2 card `xyz.aethersx2.android/files/memcards/
+      Mcd001.ps2` (8,650,752 B, `ac98cf37…97bc` device + Mac, 09-18
+      mtime) holds `BASLUS-20772-GAM0001` and `-SET0001` (plus
+      `BASLUS-21065BRAD`); `Mcd002.ps2` has none. Private copy
+      `~/dev/ssx3-work/E55-odin-memcards/` (not in git). Next: map the
+      card format to our runtime's mc0 and seed only those two entries.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
