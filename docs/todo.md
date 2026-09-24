@@ -1514,5 +1514,11 @@ with measured budgets, then 120 Hz simulation.
       under the 24k cap, with only the three named reads. The orchestrator
       expanded one VU citation to cover both status bits. Interpretive
       review and dynamic reach remain untested.
+      **X11 queued (dense Qwen):** 7,345-byte pin at fork `4f93216`
+      asks for four scheduler source rows plus one LSP references probe,
+      with a semantic row checker and a 24k context/10-minute cap. This
+      measures whether the dense model can keep host-time due-batch
+      membership separate from within-batch order on a bounded source
+      read; no implementation verdict.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.

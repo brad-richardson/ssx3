@@ -1,0 +1,166 @@
+PIN 4f932166c773e04522ffa007228670894f8b4f44
+PATH ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+Only these windows; a missing behavior must be a gap.
+WINDOW 838-852
+838: void EeScheduler::postEvent(EeEvent event)
+839: {
+840:     if (event.type == EeEventType::Stop)
+841:     {
+842:         requestStop();
+843:         return;
+844:     }
+845:
+846:     {
+847:         std::lock_guard lock(m_eventMutex);
+848:         m_events.push_back(event);
+849:         m_checkpointPending.store(true, std::memory_order_release);
+850:     }
+851:     m_eventCv.notify_one();
+852: }
+WINDOW 2520-2541
+2520: void EeScheduler::processPendingEvents()
+2521: {
+2522:     assertExecutor();
+2523:     processDueDeadlines();
+2524:     const uint32_t timerInterrupts = m_pendingEeTimerInterrupts;
+2525:     m_pendingEeTimerInterrupts = 0u;
+2526:     for (uint32_t timer = 0u; timer < 4u; ++timer)
+2527:     {
+2528:         if ((timerInterrupts & (1u << timer)) != 0u)
+2529:         {
+2530:             dispatchIrq(false, 9u + timer);
+2531:         }
+2532:     }
+2533:     std::deque<EeEvent> pending;
+2534:     {
+2535:         std::lock_guard lock(m_eventMutex);
+2536:         pending.swap(m_events);
+2537:     }
+2538:     for (const EeEvent &event : pending)
+2539:     {
+2540:         processEvent(event);
+2541:     }
+WINDOW 2553-2616
+2553: void EeScheduler::processDueDeadlines()
+2554: {
+2555:     for (;;)
+2556:     {
+2557:         std::vector<ScheduledEvent> due;
+2558:         std::chrono::steady_clock::time_point pacingDeadline{};
+2559:         {
+2560:             std::unique_lock lock(m_eventMutex);
+2561:             const auto now = std::chrono::steady_clock::now();
+2562:             for (const ScheduledEvent &item : m_deadlines)
+2563:             {
+2564:                 if (item.deadlineCycle <= m_eeCycle &&
+2565:                     (pacingDeadline == std::chrono::steady_clock::time_point{} ||
+2566:                      item.hostDeadline < pacingDeadline))
+2567:                 {
+2568:                     pacingDeadline = item.hostDeadline;
+2569:                 }
+2570:             }
+2571:
+2572:             if (pacingDeadline == std::chrono::steady_clock::time_point{})
+2573:             {
+2574:                 updateNextDeadline();
+2575:                 return;
+2576:             }
+2577:
+2578:             if (now < pacingDeadline)
+2579:             {
+2580:                 m_eventCv.wait_until(lock, pacingDeadline, [this]()
+2581:                                      { return !m_events.empty() ||
+2582:                                               m_stopRequested.load(std::memory_order_acquire); });
+2583:                 if (!m_events.empty() || m_stopRequested.load(std::memory_order_acquire))
+2584:                 {
+2585:                     updateNextDeadline();
+2586:                     return;
+2587:                 }
+2588:             }
+2589:
+2590:             const auto pacedNow = std::chrono::steady_clock::now();
+2591:             auto firstFuture = std::partition(m_deadlines.begin(), m_deadlines.end(),
+2592:                                               [this, pacedNow](const ScheduledEvent &item)
+2593:                                               { return item.deadlineCycle <= m_eeCycle &&
+2594:                                                        item.hostDeadline <= pacedNow; });
+2595:             due.insert(due.end(),
+2596:                        std::make_move_iterator(m_deadlines.begin()),
+2597:                        std::make_move_iterator(firstFuture));
+2598:             m_deadlines.erase(m_deadlines.begin(), firstFuture);
+2599:             updateNextDeadline();
+2600:         }
+2601:
+2602:         std::sort(due.begin(), due.end(), [](const ScheduledEvent &left, const ScheduledEvent &right)
+2603:                   {
+2604:                       if (left.deadlineCycle != right.deadlineCycle)
+2605:                       {
+2606:                           return left.deadlineCycle < right.deadlineCycle;
+2607:                       }
+2608:                       if (left.event.type != right.event.type)
+2609:                       {
+2610:                           return left.event.type < right.event.type;
+2611:                       }
+2612:                       if (left.event.id != right.event.id)
+2613:                       {
+2614:                           return left.event.id < right.event.id;
+2615:                       }
+2616:                       return left.sequence < right.sequence; });
+WINDOW 2848-2905
+2848: void EeScheduler::waitForEvent()
+2849: {
+2850:     std::unique_lock lock(m_eventMutex);
+2851:     if (!m_events.empty() || m_stopRequested.load(std::memory_order_acquire))
+2852:     {
+2853:         return;
+2854:     }
+2855:     const uint64_t timerCycles = m_runtime.memory().cyclesUntilNextEeTimerInterrupt();
+2856:     const bool hasTimerDeadline = timerCycles != std::numeric_limits<uint64_t>::max();
+2857:     if (m_deadlines.empty() && !hasTimerDeadline)
+2858:     {
+2859:         m_eventCv.wait(lock, [this]()
+2860:                        { return !m_events.empty() || m_stopRequested.load(std::memory_order_acquire); });
+2861:         return;
+2862:     }
+2863:
+2864:     uint64_t deadlineCycle = 0u;
+2865:     auto hostDeadline = std::chrono::steady_clock::time_point::max();
+2866:     if (!m_deadlines.empty())
+2867:     {
+2868:         const auto next = std::min_element(m_deadlines.begin(), m_deadlines.end(),
+2869:                                            [](const ScheduledEvent &left, const ScheduledEvent &right)
+2870:                                            {
+2871:                                                if (left.deadlineCycle != right.deadlineCycle)
+2872:                                                {
+2873:                                                    return left.deadlineCycle < right.deadlineCycle;
+2874:                                                }
+2875:                                                return left.sequence < right.sequence;
+2876:                                            });
+2877:         deadlineCycle = next->deadlineCycle;
+2878:         hostDeadline = next->hostDeadline;
+2879:     }
+2880:     if (hasTimerDeadline)
+2881:     {
+2882:         const auto timerHostDeadline = std::chrono::steady_clock::now() + eeCyclesToHostDuration(timerCycles);
+2883:         if (timerHostDeadline < hostDeadline)
+2884:         {
+2885:             deadlineCycle = m_eeCycle + timerCycles;
+2886:             hostDeadline = timerHostDeadline;
+2887:         }
+2888:     }
+2889:
+2890:     const bool signaled = m_eventCv.wait_until(lock, hostDeadline, [this]()
+2891:                                                { return !m_events.empty() ||
+2892:                                                         m_stopRequested.load(std::memory_order_acquire); });
+2893:     if (!signaled)
+2894:     {
+2895:         const uint64_t elapsed = deadlineCycle > m_eeCycle ? deadlineCycle - m_eeCycle : 0u;
+2896:         lock.unlock();
+2897:         uint64_t remaining = elapsed;
+2898:         while (remaining > 0u)
+2899:         {
+2900:             const uint32_t step = static_cast<uint32_t>(std::min<uint64_t>(remaining, std::numeric_limits<uint32_t>::max()));
+2901:             accountCycles(step);
+2902:             remaining -= step;
+2903:         }
+2904:         m_checkpointPending.store(true, std::memory_order_release);
+2905:     }
