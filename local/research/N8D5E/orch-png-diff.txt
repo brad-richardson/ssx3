@@ -1,0 +1,43 @@
+--- /home/brad/n8b1/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp	2026-09-24 03:12:17.238754843 -0400
++++ /home/brad/n8d3/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp	2026-09-24 04:42:23.433096281 -0400
+@@ -538,14 +538,38 @@
+             static_cast<unsigned long long>(seq),width,height,displayFbp,sourceFbp,hash,
+             static_cast<unsigned long long>(smode2),static_cast<unsigned long long>(pmode));
+     }
++    auto writePngBytes = [&img](const char *path) {
++        int encodedSize = 0;
++        unsigned char *encoded = ExportImageToMemory(img, ".png", &encodedSize);
++        bool ok = encoded && encodedSize > 0;
++        if (ok)
++        {
++            std::ofstream out(path, std::ios::binary);
++            if (out)
++            {
++                out.write(reinterpret_cast<const char *>(encoded), encodedSize);
++                ok = out.good();
++            }
++            else
++                ok = false;
++        }
++        if (encoded)
++            MemFree(encoded);
++        if (!ok)
++        {
++            static unsigned errors = 0;
++            if (errors++ < 3u)
++                std::cerr << "[frame:dump] PNG write failed path=" << path << std::endl;
++        }
++    };
+     if (keep)
+     {
+         std::snprintf(pngPath, sizeof(pngPath), "%s/%s-%llu.png", dir, fallback ? "fallback" : "upload",
+                       static_cast<unsigned long long>(seq));
+-        ExportImage(img, pngPath);
++        writePngBytes(pngPath);
+     }
+     std::snprintf(pngPath, sizeof(pngPath), "%s/%s-latest.png", dir, fallback ? "fallback" : "upload");
+-    ExportImage(img, pngPath);
++    writePngBytes(pngPath);
+     std::snprintf(txtPath, sizeof(txtPath), "%s/%s-latest.txt", dir, fallback ? "fallback" : "upload");
+     if (keep)
+     {

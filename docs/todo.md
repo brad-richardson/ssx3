@@ -1129,6 +1129,24 @@ with measured budgets, then 120 Hz simulation.
       **Next N8D5E:** one lease-held Odin install/run to tick 2050, with
       frame and same-PID control/sampled/raw summaries. View the frame and
       gate A/B/OTHER before folding or profiling.
+- [x] **N8D5E Odin tile-path formal OTHER (8feec46):** one install/run
+      stopped at tick 2110 under its cap, then force-stopped the app and
+      freed the lease. Same-PID tick 2050/FBP112/PMODE `ff21`/512×448
+      control passed 128/128. GPU sampled and raw mapped 896-tile vectors
+      were exactly equal, with 15,669 occupied pixels and **79 active
+      tiles** each; the orchestrator reassembled both Android logcat
+      fragments and checked every word. Frontend metadata matched tick
+      2050, but raylib failed to export both PNGs; no same-run frame exists
+      to view. The predeclared A/B gates require that frame, so the formal
+      result is OTHER despite the strong sparse-image signal. N8D4's
+      earlier viewed Odin frame remains visual context only. A read-only
+      source comparison found N8D5D used N8B1's old `ExportImage` path,
+      while successful N8D3/N8D4 APKs had a single-hunk
+      `ExportImageToMemory` + `std::ofstream` writer. Ownership of the
+      three frame dirs matched; the source difference is a leading cause,
+      not yet proved on-device. **Next N8D5F:** one isolated Android
+      rebuild with that exact writer hunk and the tile probe unchanged;
+      package gate before another one-run Odin check. No speed claim.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.

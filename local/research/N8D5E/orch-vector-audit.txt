@@ -1,0 +1,23 @@
+Orchestrator audit of the one N8D5E Odin run; no new device launch.
+Input: /Users/brad/dev/ssx3-work/N8D5E/logcat-pid.txt
+Input SHA-256: b60f33053b55c6a278e0d810fe2463c77736fe5fa62451880fffc66aa492818f
+Method: for each path, concatenate the logcat payload after tile_counts= with
+the immediately following continuation payload before its summary. Split on
+commas, parse decimal u32, and SHA-256 pack of 896 little-endian u32 values.
+sampled: 2 logcat lines, 896 words, occupied=15669, active_ge32=79
+raw:     2 logcat lines, 896 words, occupied=15669, active_ge32=79
+Both packed-vector SHA-256: 7956276c9a12bbd335c6ba8ea34e46e6f1f6951e0a093a7652b83156060e1796
+All 896 sampled/raw tile words exactly equal.
+Control=128/128 PASS; alignment tick=2050 fbp=112 pmode=ff21 size=512x448.
+No current-run PNG exists; predeclared A requires one, so formal gate is OTHER.
+
+The N8D5D N8B1-based ps2_runtime.cpp SHA-256 is
+68aa9c2ac559033b726b81948867a2ed1be581e30825291ef7b88241fd7d9f87;
+the prior N8D3 source SHA-256 is
+358d726bf39e319b906e7e15407e1bf361cd2cdbdd8e79d4a96b25a9588c3f96.
+The single diff hunk in orch-png-diff.txt replaces raylib ExportImage(img,path)
+with ExportImageToMemory plus std::ofstream for PNGs. N8D3/N8D4 package
+and device runs used this writer and produced PNGs; N8D5D omitted it.
+The writer difference is the leading explanation for N8D5E's PNG failure;
+the run does not isolate that cause on-device. The N8D3, N8D4 and N8D5E
+frame directories all have shell:ext_data_rw ownership and mode drwxrws---.
