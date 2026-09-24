@@ -1272,11 +1272,19 @@ with measured budgets, then 120 Hz simulation.
       checker field-name bug and extended the saved-log gate to 34/34;
       neither replay was rerun. Mac calibration only, no Odin/cause/speed
       claim. `local/research/N8D7G/ORCH-GATE.md`.
-- [ ] **N8D7H Android selected-input diagnostic package:** port only the
-      gated N8D7F backend and private G43 delta to isolated Android build
-      source; keep the capture flag default OFF, verify runner-dir/source/
-      binary pins and package before one same-Odin-frame probe. The Mac and
-      Odin GS streams must not be assumed byte-identical.
+- [x] **N8D7H Android selected-input diagnostic package PASS (`9bdcfe4`):**
+      isolated source differs from N8D6B in exactly one fork backend and
+      three G43 files; one arm64 release build succeeded (5m17s, 48 tasks).
+      APK 153,736,732 bytes, WSL/Mac SHA `86fca856…31df14a` twice;
+      runner `8e32841d…32c683`, unchanged Turnip/HAL, five flags OFF.
+      Corrected Mac size assertion re-passed before commit. No device
+      action, speed or cause claim. `local/research/N8D7H/ORCH-GATE.md`.
+- [ ] **N8D7I one Odin selected-input capture:** preflight the device,
+      install N8D7H, then capture selected input, circuit1, GPU stage,
+      final vectors and a viewed PNG from the same tick2050 frame. Fix
+      comma-led vector continuation parsing before launch; compare within
+      Odin only, then force-stop and release the lease. Mac and Odin GS
+      streams must not be assumed byte-identical.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
