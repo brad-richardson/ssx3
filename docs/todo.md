@@ -1620,11 +1620,18 @@ with measured budgets, then 120 Hz simulation.
       conditional on query match, max count and mapped destination;
       host timestamps may enter returned entries. No card comparison run.
       `local/research/E55D6/ORCH-GATE.md`.
-- [ ] **E55D7 card-path ingress:** prove a menu-to-save-manager call edge
-      or capture one bounded empty-card save-menu detour with the E55D3
-      probe. Only after a real GetDir/Read path is seen, design a
-      one-change card comparison with a new seeded-layout A/A baseline.
-      Park ExternalWake policy until a production poster is found.
+- [x] **E55D7 card-path ingress PARTIAL (`586f41af`):** EE xrefs prove
+      the static caller chain from three unlabeled game functions through
+      the save-manager cluster to mapped GetDir/Read wrappers. String-xref
+      title/login/save handlers do not give a menu-to-cluster edge; virtual
+      dispatch and screen/input route remain unknown. Repeating the
+      empty-card I26-FAST boot would repeat E55D4/D5's zero-call result.
+      `local/research/E55D7/ORCH-GATE.md`.
+- [ ] **E55D8 save-menu route discovery:** locate a real login/save screen
+      and supported button path from existing menu evidence, then
+      predeclare one bounded empty-card detour probe. Only after a real
+      GetDir/Read record, design a changed-card A/A baseline. Park
+      ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;

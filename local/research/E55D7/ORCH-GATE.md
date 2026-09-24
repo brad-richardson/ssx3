@@ -1,0 +1,7 @@
+# E55D7 orchestrator gate — PARTIAL, no menu-to-card ingress
+
+Worker commit `586f41af` (`Orchestrated-By: opencode`) contains a read-only report and bounded `ee-xref`/`ee-at`/string receipts. No build, boot, card or device action, fork edit or push. I read the whole report and receipts, checked `git show --check`, and independently reproduced the `0x2c22e8 → 0x2c3fa8 → 0x2c4050` static caller chain and the three callers of `0x2c22c8` with the EE tools.
+
+The backward graph establishes static calls from three unlabeled functions into the save-manager cluster, then to the mapped GetDir/Read wrappers. The report correctly leaves virtual `jalr` targets and the pointer-table owner unresolved. String xrefs for `cFEStateLogin`, `option_savereplay`, `Title_SaveProfile`, `title_Save Replay` and `BASLUS-20772` give names and local handlers, but no supported edge from those handlers to the card cluster. No screen, button sequence, trigger tick, guest query or card layout is proven.
+
+Verdict: **PARTIAL static map; no reachable card path.** The proposed passive I26-FAST empty-card boot would repeat E55D4/D5's zero-card-call observation, so do not schedule it. Next find a real save/login screen and its button route from existing menu evidence, then predeclare one bounded detour probe. A successful or status-only GetDir/Read record would prove reachability; guest-write payload and a changed-card A/A baseline remain separate work. No determinism or speed claim follows.
