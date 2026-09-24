@@ -1193,12 +1193,25 @@ with measured budgets, then 120 Hz simulation.
       Build ID `8d19e78…1a99f0`; bundled Turnip/shim and stage strings
       verified, five diagnostics/UI flags OFF. No Odin run or speed/cause
       verdict. Full receipt: `local/research/N8D6B/REPORT.md`.
-- [ ] **N8D6C one Odin stage probe:** install the pinned N8D6B APK once,
-      run the I26-FAST route to tick2050/FBP112/PMODE `ff21`, and capture
-      circuit1, pre-deinterlace merged, final sampled/raw controls plus
-      same-run PNG. Predeclare A/B/C/OTHER thresholds against N8D6A's Mac
-      stage calibration and N8D5G's sparse Odin final image. View the frame
-      and gate the result before drawing a stage/cause conclusion.
+- [x] **N8D6C formal OTHER with recovered A measurements (eeabeb0):**
+      one Odin install/run reached tick2050/FBP112/PMODE `ff21` and logged
+      circuit1/merged each 21/448 active (control128), final 39/896
+      (control128). Released launcher rejected comma-led logcat vector
+      continuations, so the complete-receipt gate missed and it stopped
+      at tick2136 under the tick2100 rule; app force-stopped, PID gone,
+      lease free. The orchestrator recovered both 896-word vectors from
+      the same-PID log, exact equality and 5,894 occupied pixels, then
+      pulled the existing tick2050 PNG/txt with double device/local SHA
+      reads and viewed the mostly black frame. These same-run measurements
+      meet predeclared A conditions, while the formal run remains OTHER.
+      Sparsity is present by circuit1; its upstream mechanism is open.
+      `local/research/N8D6C/ORCH-GATE.md` has the recovery and caveats.
+- [ ] **N8D7 pre-circuit1 static design:** inspect the actual GS VRAM
+      source, `sample_crtc_circuit` image sampling and Turnip path at the
+      pinned tick; lay out correct-behavior and alternative predictions
+      for one bounded probe. Use N8D4 same-stream divergence and N8D6C's
+      within-run A-like measurements; do not boot until the probe can
+      discriminate VRAM/input loss from circuit sampling/driver loss.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1893,8 +1906,9 @@ with measured budgets, then 120 Hz simulation.
       gate and unaltered worker receipts. No GS verdict.
 - [x] **X17 DeepSeek V4.1 Flash Go pilot blocked before task start:**
       provider says the workspace must enable Global regions in Privacy
-      settings. Orchestrator stopped retries and asked Brad whether to
-      change that account setting. No model-quality result or config edit;
-      see `local/research/X17/REPORT.md`.
+      settings. Orchestrator stopped retries. Brad approved Global regions;
+      console toggle remains pending because the available OpenCode CLI
+      does not expose workspace Privacy. No model-quality result or config
+      edit; see `local/research/X17/REPORT.md`.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
