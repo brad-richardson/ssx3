@@ -1,0 +1,23 @@
+E55D14P2B S1 receipts (one released Mac diagnostic boot, 2026-09-24)
+command: python3 local/research/E55D14P2A/e55d14_boot.py --label S1
+script_sha256=fa9444a9f80c89dfa2b1e8911d8870ddca87397db083e318f678ea4dc9285694
+fork_head=80777cb36d5f84c1cd89122e8074afd48fe78b8e
+runner_sha256=d8fa114d824a277592558425dd91357bcf2f75d0d09390a5680c41ba6002ef04
+iso_sha256=3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+elf_sha256=1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+codegen_sha256=8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3
+card_manifest_sha256=f94015964371517ad24d36c71ea0c9bdc6fb4a23f3c46d7cc0def479feccb9ce (empty mc0/mc1, start and end)
+result.json sha256=3bd1fd5a1f04df05b00540caee502ef4219db2715f597cfbb31cb117e716d7cf bytes=3745
+probe.log sha256=1e873d1f2b1baf4173892d226d540ca3916421243852171941bf98ac3197d9c7 bytes=512206 lines=3536
+boot.log sha256=aeb80f95442f821e45fe68c46706a9311f26dae40ec5da7e086971db44c5972c bytes=874717
+probe.log.gz bytes=26422 boot.log.gz bytes=92584 (copies after runner exit; raw kept)
+snap-1627t-0064.46s.png sha256=16eae26d007a8feffd1430e57df73e4d9af918d84daa84e5fd818ea5c588573b
+snap-1627t-0064.46s.txt sha256=2196c74fb4cbd31944817dbbd3ea284b1e1b791e6e855141696c71b366d89a77
+snap-1824t-0072.53s.png sha256=70fc79f63340e3c01a52b5cd85a766012c055b28232dd6f0963b03f80fad54b3
+snap-1824t-0072.53s.txt sha256=9070b153e819e5eb5110fec688f3c5f1a2bd8d08a21aaecc0022880121c1c6b8
+snap-1652t-0065.47s.png sha256=b3e59c8c82172d2a8dc3b3874363a4361c29f5dda6f07e02fd3b20fc35b9627c
+snap-1799t-0071.52s.png sha256=12e464b8580a682515c3d8c27ec95c52e27db9a1bb29de185d23caa954f0549a
+result: bound=target elapsed_s=72.608 last_hash_tick=1826 phase2_extra_s=1.025 runner_pid=72826 (gone) slot=1 (released; both free)
+frame_proof: tick=1824 file=snap-1824t-0072.53s.png
+caps: log_bytes=874717<=16777216 frames_bytes=14315698<=2147483648 wall=500 progress=120 grace=100
+checker: local/research/E55D14P2B/check.py 68/68 PASS
