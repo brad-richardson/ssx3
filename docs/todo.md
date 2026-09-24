@@ -1004,7 +1004,18 @@ with measured budgets, then 120 Hz simulation.
       Odin lease free. N8C2 source/APK remain local and diagnostic; do not
       fold the shim yet. **N8D1 queued:** one bounded menu launch with the
       N4-proven PNG writer to compare the host upload image with the
-      screencap, then choose the next stage to probe.
+      screencap, then choose the next stage to probe. **N8D1 partial
+      (3b1ef24):** the PNG writer succeeded in one build/one Odin launch;
+      package `ece8b84c…fc63ae2` passed the three-member/five-flags-OFF
+      gate, and installed APK/ELF/ISO matched two reads. Viewed host
+      uploads: tick 781 shows a recognizable mountain, while ticks
+      810/840 have broad black bands. The later tick-861 screencap is
+      a readable menu with fine horizontal lines. The changing scene
+      and 21–80-tick gap prevent a same-frame GL/backend split. All four
+      PNG/SHA checks passed; app force-stopped, PID absent, lease free.
+      No speed, Turnip driver identity, or stable race-image claim.
+      **N8D2 queued:** reuse this APK for one settled-race host/screen
+      capture near tick 2050, without another build.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
