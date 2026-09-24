@@ -1,0 +1,49 @@
+{
+  "failing": [],
+  "note": "transfer + pre-build source verify pass; no APK, no binary, no game bytes in git; WSL root left with verified pre-build bytes only",
+  "part": "N8D7M12P6M6R",
+  "rows": [
+    {
+      "detail": "24 rows, 0 failing, verdict A",
+      "name": "mac_p6m5_checker_rerun",
+      "result": "pass"
+    },
+    {
+      "detail": "ssx3 internal usage: 157.5 GB of 200 GB cap; disk free: 87Gi",
+      "name": "mac_disk_budget_before",
+      "result": "pass"
+    },
+    {
+      "detail": "absent+toolchain+749G free+idle",
+      "name": "wsl_preflight_fresh_root_toolchain_disk_idle",
+      "result": "pass"
+    },
+    {
+      "detail": "619387661\t/home/brad/n8d7m12p6m6,PS2Recomp,codegen-ssx3,jniLibs,parallel-gs,source-manifest.json,source_manifest.py,",
+      "name": "wsl_transfer_six_entries",
+      "result": "pass"
+    },
+    {
+      "detail": "STREAM_BYTES=669184000",
+      "name": "transfer_byte_count_recorded",
+      "result": "pass"
+    },
+    {
+      "detail": "match",
+      "name": "wsl_source_verify_pre_match",
+      "result": "pass"
+    },
+    {
+      "detail": "438B pinned stub",
+      "name": "wsl_runner_stub_only",
+      "result": "pass"
+    },
+    {
+      "detail": "gradlew absent; no build attempted",
+      "name": "build_blocked_missing_gradlew_stop",
+      "result": "pass"
+    }
+  ],
+  "stop": "staged fork lacks android/gradlew wrapper; zero assembleRelease attempts; no repair loop",
+  "verdict": "C"
+}
