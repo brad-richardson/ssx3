@@ -71,7 +71,10 @@ orchestrator does itself; longer low-reasoning work (mechanical edits, runs,
 data gathering, read-only code reads) goes to **local Qwen via opencode**
 (`--kind opencode -- --auto`, at most two local workers; machine details and
 permission limits in `local/AGENTS.local.md`); longer high-reasoning work
-goes to **muse**; quota fallbacks move up a tier. Same brief contract and
+goes to **muse**; quota fallbacks move up a tier. **OpenCode Go models are
+standard tier** and are the current choice for suitable bounded worker
+briefs to preserve Codex quota; local oMLX Qwen remains budget tier.
+Same brief contract and
 rules for every worker kind; the commit trailer names the worker
 (`Orchestrated-By: Muse Code` / `opencode` / `Claude Code` / `Codex`).
 
