@@ -1602,6 +1602,16 @@ with measured budgets, then 120 Hz simulation.
       not an executed manifest; `next_source_gate.py` is still to be
       written, old WSL bytes not re-read, HAL source/member mismatch open.
       `local/research/N8D7M12P6M1/ORCH-GATE.md`.
+- [x] **N8D7M12 Part 5F4P2 host fingerprint (`6799681`, private):**
+      source-only worker-consumption 64-bit digest/count; suite586/586,
+      41 ordered samples, replay hashes/PPM byte-equal Mac ON, checker
+      36/36. Gate A for host diagnostic only. **Off-path mutex blocker:**
+      the hook locks per command even with the env gate off. Fix before
+      Android package; no GPU verdict or speed. `local/research/
+      N8D7M12P5F4P2/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5F4P3:** fast race-safe disabled guard, one host
+      build/suite and default-off replay control; no Android/Odin until
+      gated.
 - [ ] **N8D7M12 next-package manifest execution:** implement/review the
       input collector, pin fork/frontend/backend, paraLLEl renderer/
       interface/page tracker/shaders, Granite dirty patches, flags and
