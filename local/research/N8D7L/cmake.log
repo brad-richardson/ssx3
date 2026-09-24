@@ -1,0 +1,30 @@
+--  EXTRA_LDFLAGS:  -Wl,-compatibility_version,3201.0.0;-Wl,-current_version,3201.10.0
+--  EXTRA_LIBS:    m
+-- 
+--  Build Shared Library: ON
+--  Build Static Library: OFF
+-- 
+-- If something was not detected, although the libraries
+-- were installed, then make sure you have set the
+-- CFLAGS and LDFLAGS environment variables correctly.
+-- 
+-- Performing Test COMPILER_SUPPORTS_FOBJC_ARC
+-- Performing Test COMPILER_SUPPORTS_FOBJC_ARC - Success
+CMake Warning (author) at /opt/homebrew/share/cmake/Modules/FetchContent.cmake:1968 (message):
+  Calling FetchContent_Populate(imgui_file_dialog) is deprecated, call
+  FetchContent_MakeAvailable(imgui_file_dialog) instead.  Policy CMP0169 can
+  be set to OLD to allow FetchContent_Populate(imgui_file_dialog) to be
+  called directly for now, but the ability to call it with declared details
+  will be removed completely in a future version.
+Call Stack (most recent call first):
+  ps2xStudio/CMakeLists.txt:58 (FetchContent_Populate)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Found OpenGL: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenGL.framework
+> Enabling optimization for: imgui_lib
+> Enabling optimization for: imgui_colortextedit_lib
+> Enabling optimization for: imgui_filedialog_lib
+> Enabling optimization for: ps2xStudio
+-- Configuring done (98.3s)
+-- Generating done (1.7s)
+-- Build files have been written to: /Users/brad/dev/ssx3-work/N8D7L/build
