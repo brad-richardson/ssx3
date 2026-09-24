@@ -88,7 +88,7 @@ if any gate fails.
 | 9 | One launch only; BACK once ~6 s | — | — |
 | 10 | Stop at first complete tick2050 receipt, evaluated BEFORE process liveness: `GB4_REPLAY_SUMMARY markers=2050` + `GB4_FRAME tick=2050` + `[n8d7m12] replay ok markers=2050` + full numeric census (parsed `control=128 expected=128 PASS`, tick-2050 alignment, selected 11-shared-field metadata, 448-tile summaries consistent with independently parsed vectors incl. packed SHA, 8 literal control addresses, recomputed oracle equality; N8D7M6 `tile_vector`/`parse_controls` rules reused verbatim) | COMPLETE (provisional) | — |
 | 11 | Stop at first `GB4_REPLAY_PARSE_ERROR` / `replay failed|rejected` / parallel FATAL / Turnip fail / control FAIL / census mismatch | FAIL, first error recorded | cleanup |
-| 12 | Process `_Exit` before receipt → bounded 15 s log drain, re-probe, then COMPLETE or "process exited without complete receipt"; 180 s without new `GB4_REPLAY` rows; 600 s wall | stop w/ reason | cleanup |
+| 12 | Process `_Exit` before receipt → short final drain (≤15 s, extends only on new lines, hard-clamped to the launch start + 600 s wall deadline so the run cannot overrun the cap after exit), re-probe, then COMPLETE or "process exited without complete receipt"; 180 s without new `GB4_REPLAY` rows; 600 s wall | stop w/ reason | cleanup |
 | 13 | logcat ≤16 MiB; PPM+hashes ≤64 MiB | caps | stop w/ reason |
 | 14 | Force-stop (even on `_Exit`), PID absent, pull `vq-002050.ppm` + hashes w/ 2+2 SHA match, env restore verified 2+2, release lease iff tag still ours; any cleanup failure → FAIL | cleanup | record first failure |
 
@@ -99,12 +99,12 @@ a root cause, or speed.
 
 ## 6. Validation (static only)
 
-`check.py --self-check`: 23/23 PASS, verdict A (`check-result.json`). Covers
+`check.py --self-check`: 24/24 PASS, verdict A (`check-result.json`). Covers
 pins/sizes, serial scoping, replay keys, live-key absence, one-run guard,
 single install/launch, stream protection, env 2+2-SHA preserve/restore,
 frame filename, marker/census syntax, keyguard blocker, caps, unique
 outputs, finally cleanup, provisional marking, complete-before-exit +
-15 s drain, control-128 numeric census (ported N8D7M6 parser),
+wall-clamped 15 s drain, control-128 numeric census (ported N8D7M6 parser),
 cleanup-failure-fails-outcome, no OFF-control claim, REPORT table, and
 checker device-freedom. `launch.py` compiles (`py_compile`). No adb,
 install, launch, or lease was touched; `result.json`/`driver.log` do not

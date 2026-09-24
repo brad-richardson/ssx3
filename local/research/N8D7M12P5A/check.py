@@ -152,6 +152,13 @@ def c_drain(text, _rep):
             and 0 < complete_at < exit_at)
 
 
+@check("drain_bounded_by_wall")
+def c_drainwall(text, _rep):
+    return ("def drain_after_exit(pid, prior_count, wall_deadline)" in text
+            and "min(time.monotonic() + DRAIN_SECS, wall_deadline)" in text
+            and "wall_deadline = start + WALL_CAP" in text)
+
+
 @check("control128_numeric_census")
 def c_census(text, _rep):
     return ("def tile_vector" in text and "def parse_controls" in text

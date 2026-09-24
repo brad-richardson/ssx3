@@ -478,23 +478,27 @@ def replay_complete(markers, p):
             and omarkers == "2050" and census_gate(p))
 
 
-def drain_after_exit(pid, prior_count):
-    """Bounded final log drain after the replay process _Exits.
+def drain_after_exit(pid, prior_count, wall_deadline):
+    """Short final log drain after the replay process _Exits.
 
     The Part 2 branch drains the logcat pipe then _Exits, but trailing
-    lines may still be in flight. Poll the log file for DRAIN_SECS,
-    returning the final same-PID lines (never longer than the wall cap
-    budget already accounted by the caller).
+    lines may still be in flight. Poll the log file up to DRAIN_SECS,
+    extending while new lines arrive, but NEVER past wall_deadline
+    (the launch start + WALL_CAP): the drain window is clamped to the
+    remaining wall budget, so the run cannot overrun the 600 s cap
+    after exit. With zero budget left, one final read only.
     """
-    deadline = time.monotonic() + DRAIN_SECS
+    now = time.monotonic()
+    deadline = min(now + DRAIN_SECS, wall_deadline)
     lines = same_pid_lines(pid)
     while time.monotonic() < deadline:
         time.sleep(1)
         fresh = same_pid_lines(pid)
         if len(fresh) > len(lines):
             lines = fresh
-            deadline = time.monotonic() + DRAIN_SECS
-    record(f"DRAIN lines={len(lines)} (was {prior_count})")
+            deadline = min(time.monotonic() + DRAIN_SECS, wall_deadline)
+    record(f"DRAIN lines={len(lines)} (was {prior_count}) "
+           f"clamped_to_wall={deadline >= wall_deadline}")
     return lines
 
 
@@ -683,7 +687,8 @@ def run():
             back_sent = True
             record("BACK sent once for USB dialog")
         if not pidof():
-            drained = drain_after_exit(pid, len(lines))
+            wall_deadline = start + WALL_CAP
+            drained = drain_after_exit(pid, len(lines), wall_deadline)
             markers = replay_markers(drained)
             census = probe(drained)
             lines = drained
