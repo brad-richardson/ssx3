@@ -1496,10 +1496,17 @@ with measured budgets, then 120 Hz simulation.
       `caa11102…f512` and stream matched twice. Odin was unlocked, AC
       powered at 100%, ~23.1 GiB free, app stopped; lease released. No
       install/launch. `local/research/N8D7M12P4/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5 one bounded Odin replay:** install the gated APK,
-      verify installed binary, recheck launch preflight, run the exact
-      stream with selected/oracle controls to tick2050, collect and view
-      the frame and census. Stop at first mismatch; no speed claim.
+- [x] **N8D7M12 Part 5A replay script A (`92fe35f9`+`f8330b3f`):**
+      reviewed-SHA-held one-run launcher prepared, checker24/24 and
+      `py_compile` pass. It rechecks device/input pins, parses full
+      numeric controls, handles process exit with bounded drain, and
+      verifies env restoration/force-stop/lease cleanup. Script SHA
+      `287140bf…1334e`; no device action. `local/research/N8D7M12P5A/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5B one bounded Odin replay:** release only the
+      gated script SHA, install APK, verify installed binary, recheck
+      launch preflight, run the exact stream to tick2050, then gate and
+      view its frame and numeric census. Stop at first mismatch; no
+      speed or graphics-cause claim from one ON run.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
