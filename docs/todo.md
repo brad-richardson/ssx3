@@ -1813,11 +1813,17 @@ with measured budgets, then 120 Hz simulation.
       or mcRead. Early four empty GetDir calls are separate. One bounded
       Mac boot, cards unchanged, mini slots free; no speed or saved-game
       compatibility claim. `local/research/E55D12/ORCH-GATE-P2.md`.
-- [ ] **E55D13 seeded-card design:** use the reached Load game GetDir
-      source path and probe evidence to define one minimal, bounded
-      scratch-card seed and null same-scene control. Predeclare a changed
-      GetDir table/Read observation and a stop if the seed format is
-      unsupported; no boot until the input bytes and script are gated.
+- [x] **E55D13 seeded-card design B (`de495dc8`):** the tick1740 GetDir
+      returned empty, but the existing probe omits the requested path and
+      pattern. `BASLUS-20772` is a name-only string; no valid save bytes
+      are pinned. The read-only design proposes a default-off sibling
+      path record without changing guest results. No seed, build or boot.
+      `local/research/E55D13/ORCH-GATE.md`.
+- [ ] **E55D14 path-tap implementation:** add the smallest default-off
+      requested-path record to the E55D3 diagnostic probe, preserving
+      existing `getdir` rows, guest bytes/results and cap behavior. Gate
+      its source and tests before one empty-card E55D12-route boot. Only
+      then design a grounded seed and null/changed-card comparison.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
