@@ -15,7 +15,7 @@ def one(pattern, text, label):
 
 
 def fields(line):
-    return {k: v for k, v in re.findall(r"([a-z_]+)=([^\s]+)", line)}
+    return {k: v for k, v in re.findall(r"([a-z_][a-z0-9_]*)=([^\s]+)", line)}
 
 
 def vector(text, name, n):
