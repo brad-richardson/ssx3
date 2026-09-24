@@ -1047,15 +1047,17 @@ with measured budgets, then 120 Hz simulation.
 - [ ] **I27 (small, queued for Codex): HiDPI drawable on iOS.** raylib
       draws at 1× points and iOS upscales ×3, which is the bigger font
       lever. Then retest the fonts on the Simulator.
-- [ ] Fold `i26-qol` presentation + virtual pad into `ssx3` (after the
-      E53 fold; desktop default changes to 4:3 bilinear).
+- [ ] **W1F2 running:** restore I25's bundled `ps2x.env`/`PS2X_BOOT_ELF`
+      and UIWindowScene wiring on the W1F fold, pass Simulator, then iPad
+      if unlocked and iPhone build/install only. I26 presentation and
+      virtual pad are already folded on fork `ssx3` `8acb4b3`.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
 
 ## W — widescreen (backlog, Brad 09-23)
 
-- [x] **W1 validated (Codex Sol, `local/muse/prompts/W1.md`): 16:9 by default; fold pending E56.** Lead: on the GC build the game's own Options > Widescreen rendered anamorphic and the host stretched it (old `native/ios/App.mm`).
+- [x] **W1 validated (Codex Sol, `local/muse/prompts/W1.md`): 16:9 by default; Mac fold pushed.** Lead: on the GC build the game's own Options > Widescreen rendered anamorphic and the host stretched it (old `native/ios/App.mm`).
       **W1 Part 1 (ce2018c):** the native option exists (`kT_19Widescreen`,
       `…169`, `…Animorphic`). The flag is bits 20–21 of the options block at
       `0x535610` (0 off / 1 16:9 / 2 anamorphic), applied by `0x228c08` →
@@ -1074,6 +1076,15 @@ with measured budgets, then 120 Hz simulation.
          `PS2X_ASPECT` override).
       4. Validate menus, SC and race on the Mac/Simulator vs PCSX2
          widescreen; check 2D/HUD stretching.
+
+      **W1F Mac/fork PASS, iOS BLOCKED (185fc72):** folded I26/W1 onto
+      E56 and pushed fork `ssx3` `8acb4b3` after the runner-dir check.
+      Release suites 556/556 taps OFF and 651/651 taps ON; Mac I26-FAST
+      boot reached race tick 2057 and three frames were viewed. The
+      Simulator app built and installed, then exited before title because
+      the fold lacked I25's `prepareEnvironment`/`PS2X_BOOT_ELF` startup
+      path. iPad and iPhone steps were not run. W1F2 repairs this path;
+      preserve Brad's iPhone install-only rule.
 
 - [ ] **W2 PARKED (Brad, 09-23): upscaled internal resolution.** Don't
       schedule it. Brad prefers widescreen (W1, a known supported mode) and
