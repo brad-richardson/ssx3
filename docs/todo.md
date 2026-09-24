@@ -799,6 +799,9 @@ with measured budgets, then 120 Hz simulation.
       all 1,982,063 path indices and the capture-format source. The CSV
       is `local/research/X5/packets-949-950.csv`; it does not name a glyph
       producer.
+      **GB5 Part 1 running:** replay-only CPU page-112 crop probe across
+      X5's packet window, with at most one omitted-packet control. The
+      output is a producer-candidate table, not a paraLLEl verdict.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
