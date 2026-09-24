@@ -473,6 +473,23 @@ with measured budgets, then 120 Hz simulation.
       - **The race is not reproducible run to run at the same tick**
         (e50f 2ND/19 programs vs e51a 1ST/4 programs at 00:00:19). This is
         an open determinism concern.
+      **E53 (d1fb1d1): batch 1 in, fork `e52-audit` `d3f7508` (local)**:
+      - suite 630/630; FMA 228 → 0; the codegen diff is exactly the audited
+        sites; log@0x40D610 is unbound; the VU1 EFU decode, latency and
+        name tables follow PCSX2;
+      - SC matches T65 exactly;
+      - VU0 microprograms now really run (1.67 M starts; the 0x37deb8
+        visibility test included);
+      - **the pre-race frame (tick 6131) shows snowy terrain where E50 had
+        shards** (viewed);
+      - the race slows from ~17 to ~6 ticks/s at race load (~830 VU0
+        calls/vsync, per-call cost), so the race window wasn't reached
+        within 600 s.
+      **Gate:** accepted. Part 2 = one 900 s race boot (cap exception) with
+      `sample` profiles plus the deferred race measurements (TEX1 K,
+      counts, frames). The FPMODE A/B is deferred. Fold into `ssx3` + promote
+      the codegen after Part 2. The VU0 per-call cost goes to E57 (speed),
+      or ahead of it if the profile shows a cheap fix.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
