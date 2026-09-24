@@ -1650,9 +1650,16 @@ with measured budgets, then 120 Hz simulation.
       policy on first build-host call despite scoped pane env. Mac P6M5
       preflight24/24 and disk cap pass; no transfer/build/APK/device.
       `local/research/N8D7M12P6M6/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 6M6R:** same pinned package on an SSH-capable Muse
-      worker; verify source manifest before/after, capture build inputs,
-      flags, native and APK pins. No device launch.
+- [x] **N8D7M12 Part 6M6R (`743f9449`) transfer gate:** Muse reached
+      bytesize; 669,184,000-byte tar stream and WSL pre-build source
+      verify match staged aggregate. Stopped before build because clean
+      tracked fork export lacks Gradle wrapper script/JAR. External
+      wrapper pins identified; zero APK/device work. `local/research/
+      N8D7M12P6M6R/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 6M6R follow-up:** invoke double-pinned prior WSL
+      Gradle wrapper externally from new project cwd; keep four source
+      roots unchanged, build once, capture compiled-input and artifact
+      pins. No device launch.
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
