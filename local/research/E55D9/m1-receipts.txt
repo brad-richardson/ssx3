@@ -12,11 +12,20 @@ Stop: bound=target, elapsed 47.729 s, last_hash_tick=1200, runner_rc=-15 (termin
 Frame proof: snap-1193t-0047.40s.png (tag 1193 >= stop tick 1170), phase2_extra 1.025 s
 Log: 567282 bytes (< 16 MiB cap); frames dir 12314814 bytes (< 2 GiB cap)
 Run cwd: ~/dev/ssx3-work/E55D9/run/M1 (bulk frames/log/scratch stay there; boot.log.gz + stdout.txt retained there)
+Repo stdout copy: local/research/E55D9/m1-stdout.txt is whitespace-normalized (trailing spaces
+trimmed); raw exact stdout stays private at ~/dev/ssx3-work/E55D9/run/M1/stdout.txt.
 No speed claim (diagnostic build).
 
-Route executed: 10611:start:250,13680:down:150,15349:down:150,17017:down:150,18685:down:150
-Pad log markers: boot.log carries no per-press pad markers (no new probe per brief);
-1 start + 4 down pulses per route string; movement evidenced by the five frames below.
+Route (planned): 10611:start:250,13680:down:150,15349:down:150,17017:down:150,18685:down:150
+Pad execution (observed, private boot.log [padscript] rows — route is the plan, log is execution):
+  [padscript] armed n=5 source=env clock=vsync
+  [padscript] press i=0 now=10627ms at=10611ms hold=250ms buttons=0x0008 | [padscript] release i=0 now=10877ms (Start, planned tick 636)
+  [padscript] press i=1 now=13680ms at=13680ms hold=150ms buttons=0x0040 | [padscript] release i=1 now=13830ms (Down, tick 820)
+  [padscript] press i=2 now=15365ms at=15349ms hold=150ms buttons=0x0040 | [padscript] release i=2 now=15515ms (Down, tick 920)
+  [padscript] press i=3 now=17017ms at=17017ms hold=150ms buttons=0x0040 | [padscript] release i=3 now=17167ms (Down, tick 1020)
+  [padscript] press i=4 now=18685ms at=18685ms hold=150ms buttons=0x0040 | [padscript] release i=4 now=18835ms (Down, tick 1120)
+All five presses fired (worst 16 ms off plan); no extra presses, no Cross, no Square.
+Each Down's one-row advance is evidenced by the F1-F4 frames. No new probe was added.
 
 Curated frames (nearest snap PNG to each planned tick; tag = latest det-hash tick at copy time, approximate):
 

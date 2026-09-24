@@ -1,4 +1,11 @@
-# E55D9 Part 1 — prepared single observed Main Menu navigation boot (NOT run)
+# E55D9 — Part 1 preparation plus Part 2 run (single Main Menu navigation boot)
+
+This report covers Part 1 (preparation only) plus the released Part 2 M1 run.
+Part 1 scope is historical and unchanged: preparation receipts, no boot — **no boot,
+build, source edit, device/card action, push, or board/global config edit occurred
+in Part 1**, `~/dev/ssx3-work/E55D9/` was reserved and untouched then, and all Part 1
+writes are under `local/research/E55D9/` only. The single M1 boot below happened
+only in Part 2, after the orchestrator's explicit release (ORCH-GATE-P1.md).
 
 Worker: opencode (Muse Spark Contributor Go). Brief: `local/muse/prompts/E55D9.md`
 plus orchestrator pre-gate fixes (lane setup order; post-1170 frame proof).
@@ -125,9 +132,23 @@ No fork/source edit, build, device, seeded-card change, second boot, or push.
 | Precheck | fork `bab6eb3`, runner-dir guard exit 0, two matching SHA reads (runner/ISO/ELF/codegen all match pins), fresh empty cards |
 | Cards | initial = final = empty (`f9401596…`); no card write |
 | Log/frames | boot.log 567282 B (< 16 MiB); frames dir 12314814 B (< 2 GiB) |
-| Route | `10611:start:250,13680:down:150,15349:down:150,17017:down:150,18685:down:150` (1 start + 4 downs, no Cross) |
-| Pad markers | boot.log carries no per-press pad markers (no new probe per brief); movement evidenced frame-by-frame |
+| Route (planned) | `10611:start:250,13680:down:150,15349:down:150,17017:down:150,18685:down:150` (1 start + 4 downs, no Cross) |
+| Pad execution (observed) | private `boot.log` `[padscript]` rows confirm all 5 presses executed (see below); route = plan, log = execution |
 | Speed | no claim (diagnostic build) |
+
+Observed `[padscript]` execution rows (private `boot.log`; `at=` = planned ms, `now=` =
+executed ms; buttons `0x0008` = Start, `0x0040` = Down):
+
+| # | Planned tick | Press | Release |
+| --- | --- | --- | --- |
+| i=0 Start | 636 | `press i=0 now=10627ms at=10611ms hold=250ms buttons=0x0008` | `release i=0 now=10877ms` |
+| i=1 Down | 820 | `press i=1 now=13680ms at=13680ms hold=150ms buttons=0x0040` | `release i=1 now=13830ms` |
+| i=2 Down | 920 | `press i=2 now=15365ms at=15349ms hold=150ms buttons=0x0040` | `release i=2 now=15515ms` |
+| i=3 Down | 1020 | `press i=3 now=17017ms at=17017ms hold=150ms buttons=0x0040` | `release i=3 now=17167ms` |
+| i=4 Down | 1120 | `press i=4 now=18685ms at=18685ms hold=150ms buttons=0x0040` | `release i=4 now=18835ms` |
+
+All five presses fired within 16 ms of plan (one 16 ms late: i=2); no extra presses,
+no Cross, no Square. Each Down's one-row selection advance is evidenced by the F1–F4 frames.
 
 ### 2. Frames handed to the visual gate
 
@@ -148,7 +169,8 @@ Each Down moved the highlight exactly one row. No Options/Save/profile item appe
 selectable menu entry; "Options" is only the square-button footer hint. No unexpected screen
 (all 47 scratch snaps are Main Menu frames). Snapshot tags are approximate (latest det-hash
 tick at 1 s wall copy time). Full receipts: `m1-receipts.txt`; full result: `m1-result.json`;
-exact stdout: `m1-stdout.txt`. Bulk frames/log stay in private scratch
+exact stdout: `m1-stdout.txt` (whitespace-normalized repo copy, trailing spaces trimmed;
+raw exact stdout stays private at `~/dev/ssx3-work/E55D9/run/M1/stdout.txt`). Bulk frames/log stay in private scratch
 (`~/dev/ssx3-work/E55D9/run/M1/`, with `boot.log.gz` + `stdout.txt` retained there).
 
 ### 3. Classification and recommendation
