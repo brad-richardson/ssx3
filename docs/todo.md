@@ -1078,6 +1078,17 @@ with measured budgets, then 120 Hz simulation.
       and a functional race boot. Keep Compare interrupt policy separate:
       pinned PCSX2's event-test window is labeled a hack, and its
       interpreter Compare write differs from our emitted Cause clear.
+      **E55A1 source audit PASS (65652ff):** the current `sceCdReadClock`
+      HLE returns eight BCD clock bytes from host local time; a prior
+      I26-FAST park snapshot reaches its generated shim twice, including
+      the guest `0x31ae80` caller. That caller combines two returned
+      words into an input for six writes at `0x4ff018..0x4ff02c`.
+      Their downstream identity as RNG state and the exact live reply
+      bytes are unproved. A narrow `PS2X_DETERMINISTIC=1` fixed UTC
+      clock is ready for implementation; default clock behavior remains
+      real-time. The orchestrator checked the HLE/shim/guest code, prior
+      reach receipt and BCD arithmetic. Idle event order, pad and memory
+      card state remain separate E55 work.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
