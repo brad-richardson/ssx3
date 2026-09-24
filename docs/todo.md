@@ -1484,12 +1484,17 @@ with measured budgets, then 120 Hz simulation.
       enters the shared replay core with strict capture/backend/Turnip
       flags and drains logcat before exit. Static checker50/50; no build,
       APK or device action. `local/research/N8D7M12P2/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 3 Android build/package gate:** build the isolated
-      app branch with pinned Turnip/HAL and external codegen; verify
-      arm64 APK members, runner guard, new replay strings and default-off
-      control without an Odin launch. Gate binary and exact 1.10 GB
-      stream staging separately before one bounded Odin run; no cause or
-      speed verdict from a successful build.
+- [x] **N8D7M12 Part 3 Android package A (`fd1c3739`):** one isolated
+      `assembleRelease` passed in 5m18s; source gates show the intended
+      seven-file overlay, and the 153,753,116-byte arm64 APK contains the
+      new replay runner plus unchanged Turnip/HAL. APK SHA `caa11102…f512`
+      matched on WSL and Mac. No Odin action or runtime default-off proof.
+      `local/research/N8D7M12P3/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 4 exact-input/device staging:** verify and stage the
+      pinned 1,100,696,462-byte N8D7M6 stream and gated APK on the Odin,
+      with two matching device SHA reads, battery/lock/space/lease checks;
+      no launch until a separate run brief is gated. Then one bounded
+      same-stream Odin replay and viewed frame, with same-binary controls.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.

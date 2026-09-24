@@ -1,0 +1,7 @@
+# N8D7M12 Part 3 orchestrator gate — A for Android package (2026-09-24)
+
+Read the full REPORT, committed scripts/receipts and worker commit `fd1c3739` (`Orchestrated-By: opencode`); `git show --check` passed. Reran `check.py` (A, 10/10 rows). The pre/post source gates list exactly two added and five modified fork source files; parallel-GS and jniLibs have no diff from the N8D7M1 base, and the generated runner directory is absent. The one `assembleRelease` finished successfully in 5m18s. CMake cache shows the parallel backend ON, external codegen, and diagnostics/tests OFF.
+
+Independently read the Mac APK twice: SHA-256 `caa1110297dc413d3b04e7442873e0fb5d5624af8417e1e30537d76184d5f512`. Inspected its ZIP: only arm64 runner `329e44db…a218a3d`, Turnip `717812c3…1ac29d` and HAL `1b49d27c…fc387` native members, with the latter two matching prior pins. The new runner Build ID and replay strings are recorded in `apk-gate.json`; the package is 153,753,116 bytes. Source review from Part 2 supports the default-off branch, but this part did not run it. The APK lives in private scratch and is not committed.
+
+**A accepted for build/package only.** Next gate exact N8D7M6 stream bytes on the Odin and the same APK before one capped replay. No app install/launch, Odin image, runtime default-off control, graphics-cause finding or speed number is established here. The device lease remains free and the app stopped.
