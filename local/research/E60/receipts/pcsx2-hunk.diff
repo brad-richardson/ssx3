@@ -1,0 +1,47 @@
+--- /home/brad/pcsx2-g7/pre-e60/Interpreter.cpp	2026-09-23 23:38:05.244921931 -0400
++++ /home/brad/pcsx2-g7/pcsx2/pcsx2/Interpreter.cpp	2026-09-23 23:39:30.806293137 -0400
+@@ -7,8 +7,10 @@
+ #include <atomic>
+ #include <cstdio>
+ #include <cstdlib>
++#include <cstring> // E60 raw VU0 tap
+ extern std::atomic<int> g_t48_vsync; // T54: defined in GS.cpp (T48 vsync mirror).
+ #include "R5900OpcodeTables.h"
++#include "VU.h" // E60 raw VU0 tap
+ #include "VMManager.h"
+ #include "Elfheader.h"
+ #include "Cache.h"
+@@ -559,6 +561,33 @@
+ #endif
+ 
+ 	const u32 pc = cpuRegs.pc;
++	// E60: interpreter-safe, bounded raw VU0 data snapshot at sceVu0MemReadQ.
++	if (pc == 0x3feb8c) {
++		static unsigned e60_records = 0;
++		const char* e60_path = std::getenv("PCSX2_E60_TAP");
++		if (e60_path && *e60_path && e60_records < 16) {
++			if (FILE* arm = std::fopen("/home/brad/e60/arm", "rb")) {
++				std::fclose(arm);
++				struct E60Record {
++					char magic[4]; u64 tick; u32 caller; u32 vi1;
++					u8 qword[16]; u8 memory[4096];
++				} record{};
++				std::memcpy(record.magic, "E60P", 4);
++				record.tick = (u64)g_t48_vsync.load(std::memory_order_relaxed);
++				record.caller = cpuRegs.GPR.r[31].UL[0] - 8u;
++				record.vi1 = VU0.VI[1].UL;
++				std::memcpy(record.qword, VU0.Mem + ((record.vi1 & 0xffu) << 4), 16);
++				std::memcpy(record.memory, VU0.Mem, 4096);
++				if (FILE* out = std::fopen(e60_path, "ab")) {
++					std::fwrite(&record, sizeof(record), 1, out);
++					std::fclose(out);
++					Console.WriteLn("E60_VU0 n=%u vsync=%llu caller=%08x vi1=%x", e60_records,
++						(unsigned long long)record.tick, record.caller, record.vi1);
++					++e60_records;
++				}
++			}
++		}
++	}
+ 	if (pc == 0x362f70) t55_ret(); // T55: func_394ED0 return (log-only; ra of jal @0x362f68).
+ 	else if (pc == 0x394ed0) t55_enter(); // T55: func entry snapshot (log-only).
+ 	else if (pc >= 0x394fdc && pc <= 0x394fe8) t55_mark(); // T55: store cluster (log-only).
