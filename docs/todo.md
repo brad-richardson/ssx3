@@ -1611,8 +1611,12 @@ with measured budgets, then 120 Hz simulation.
 - [x] **N8D7M12 Part 6M3 (`238be17a`):** excluded names pruned in
       `list_tree`; fixture16/16 includes excluded-cache race and included
       mutation. Bounded real-source sample 41 files/188,488 B snapshot
-      and independently rerun verify match. A for capped full-root use,
-      not APK provenance. `local/research/N8D7M12P6M3/ORCH-GATE.md`.
+      and independently rerun verify match. A for exclusion fix only;
+      full-root readiness withdrawn because the collector rejects an
+      unchanged upstream runner stub. `local/research/N8D7M12P6M3/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 6M4:** allow only the exact upstream tracked
+      runner stub, reject any extra/changed runner bytes on snapshot and
+      verify, then run a capped real-fork probe before full input scan.
 - [x] **N8D7M12 Part 5F4P2 host fingerprint (`6799681`, private):**
       source-only worker-consumption 64-bit digest/count; suite586/586,
       41 ordered samples, replay hashes/PPM byte-equal Mac ON, checker
