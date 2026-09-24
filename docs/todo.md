@@ -1159,6 +1159,20 @@ with measured budgets, then 120 Hz simulation.
       or speed claim. **Next N8D5G:** one bounded Odin run for the same
       tile probe and a viewed tick-2050 PNG; gate A/B/OTHER before a
       source-side/Turnip diagnostic.
+- [x] **N8D5G Odin tile probe category A PASS (73a22a0):** one install/run
+      at tick 2050, FBP 112, PMODE `ff21`, 512×448. Checkerboard control
+      128/128; GPU sampled and raw mapped vectors each have 896 tiles,
+      6,045 occupied pixels and 34 active tiles, and match at 896/896
+      positions. The same-run PNG was saved, SHA-checked and viewed:
+      mostly black with sparse HUD/snow fragments. PNG writer works on
+      device; app force-stopped, PID absent, Odin lease free. The sparse
+      sampled image localizes the loss by or before `Present` scanout on
+      Odin/Turnip, upstream of buffer copy/map/frontend upload. N8D4's
+      broad Mac replay used one identical GS stream across hosts; this
+      N8D5G run used the same route but is not byte-identical. No clean
+      speed claim. **Next:** map `GSRenderer::vsync` circuit sampling,
+      field merge and VRAM input; choose a controlled stage probe, validate
+      on Mac, then run one bounded Odin comparison.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
