@@ -980,9 +980,19 @@ with measured budgets, then 120 Hz simulation.
       race frame. The app was force-stopped, PID absent, lease free.
       A prelaunch launcher check first rejected its own lease; it was
       corrected before any `am start`, with no second install/launch.
-      **N8C1 queued:** bounded ELF/public-library and `hw_get_module`
-      call-path audit before choosing one packaging/loader candidate. Device
-      remains unproved; no speed or frame claim.
+      **N8C1 PASS (4ed31ac; static):** the pinned Turnip ELF has one
+      strong `libhardware.so` import, unversioned `hw_get_module`, and
+      four stripped gralloc call sites. One path logs that video buffers
+      are unsupported on gralloc failure and returns an object; three
+      return null. The normal game's choice is unknown. Bundling the
+      Odin system `libhardware.so` would require seven private ELFs in
+      its static dependency closure, with more dynamic HAL dependencies
+      possible. One app-local compatibility ELF exporting
+      `hw_get_module` and returning `-ENOENT`/null is the narrow
+      **N8C2 loader probe**, not a proven gameplay fix. Build one APK,
+      then one Odin launch; verify HMI/driver identity, live GIF/presents
+      and a race frame or stop at the first new failure. Device remains
+      unproved; no speed or frame claim from N8C1.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
