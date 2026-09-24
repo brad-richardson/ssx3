@@ -1062,10 +1062,14 @@ with measured budgets, then 120 Hz simulation.
 - [ ] **I27 (small, queued for Codex): HiDPI drawable on iOS.** raylib
       draws at 1× points and iOS upscales ×3, which is the bigger font
       lever. Then retest the fonts on the Simulator.
-- [ ] **W1F2 running:** restore I25's bundled `ps2x.env`/`PS2X_BOOT_ELF`
-      and UIWindowScene wiring on the W1F fold, pass Simulator, then iPad
-      if unlocked and iPhone build/install only. I26 presentation and
-      virtual pad are already folded on fork `ssx3` `8acb4b3`.
+- [x] **W1F2 PASS for Simulator + iPhone install (2fc2242):** restored
+      I25's bundled `ps2x.env`/`PS2X_BOOT_ELF` and UIWindowScene wiring
+      on the W1F fold, retaining I26 controls and W1 presentation. Fork
+      `ssx3` pushed to `bc1c70f`; host tests 559/559. Simulator title,
+      Setup Character and race HUD through 00:00:08 viewed; iPhone signed
+      app installed, never launched. **iPad run pending Brad unlock**:
+      `passcodeRequired: true` on repeated checks, so no install/launch.
+      I26 presentation and virtual pad are folded.
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.
