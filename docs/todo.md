@@ -2354,6 +2354,15 @@ with measured budgets, then 120 Hz simulation.
       output was pairwise captured. No volume fix is justified by this
       gate. Brad listens to `~/dev/ssx3-work/AU6/AU6-menu-tag1.m4a`;
       follow up on the exact audible scene if the symptom persists.
+- [ ] **AU6 listening (Brad, 09-24 18:30):** "still pretty far off, missing
+      a few tracks, a little more distorted." Orchestrator error: the
+      PCSX2 reference sent first was cut from AU4's video-capture audio
+      at AU6's tag-1 offset, but that recording doesn't contain this span
+      (best NCC 0.13 anywhere), so it was different music. Re-derived
+      tag-1 lag = **+107.541 s** (NCC 0.998 at five windows); sent the
+      aligned PCSX2 tag-1 clip `AU6-pcsx2-tag1-aligned.m4a`. Awaiting a
+      fair re-listen. Rule: never cut a reference from a different
+      capture's timeline; verify NCC before sending an A/B.
 
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
