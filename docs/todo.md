@@ -1489,6 +1489,17 @@ with measured budgets, then 120 Hz simulation.
       size lacks a tap-visible size accessor; production and test use
       the default 32 MiB. Pad merge, nonempty card state and
       ExternalWake timing remain open.
+- [x] **E55D1 ExternalWake/pad/card source audit PASS (`4313690`):**
+      pinned `ddaee78` has no in-tree production caller of `postEvent` or
+      `postEeEvent`; direct MPEG waiter completion is separate. The
+      external FIFO carries no guest cycle and is outside scheduled-event
+      ordering. Pad data enters RDRAM at `scePadRead`; card reads and
+      directory entries also enter RDRAM, including host timestamps.
+      No boot or determinism claim. `local/research/E55D1/ORCH-GATE.md`.
+- [ ] **E55D2 input isolation:** compare vsync-clocked pad script A/A
+      against wall/live input and empty-card A/A against one controlled
+      card change. Stop at the first differing guest pad or card write;
+      park ExternalWake policy until a production poster is identified.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
