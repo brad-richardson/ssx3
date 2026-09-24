@@ -1421,10 +1421,19 @@ with measured budgets, then 120 Hz simulation.
       first log overwritten, deviation recorded. Device-specific loss
       is at/before the selected snapshot; missing writes versus copy
       timing remains open. `local/research/N8D7M6/ORCH-GATE.md`.
-- [ ] **N8D7M7 device divergence boundary design:** source-grounded
-      after-execution/before-copy checkpoint and full selected-data
-      comparison on the same stream. Require a GPU completion witness;
-      hand back a discriminating table before another Odin build/run.
+- [x] **N8D7M7 divergence boundary design PARTIAL (`65dffdd3` +
+      corrections `49e2d7af`, `67865212`):** mapped selected VRAM copy,
+      later circuit shader sample, submit/wait and host decode. A second
+      same-command copy could test copy consistency; an extra post-wait
+      flush changes what executes and cannot prove early-copy ordering.
+      Byte-identical staging with identical decoder cannot yield a
+      different census. No build/replay/device run or four-way gate.
+      `local/research/N8D7M7/ORCH-GATE.md`.
+- [ ] **N8D7M8 execution witness design:** tie relevant tick2050 GS
+      writes to completion before/after the *original* selected-copy
+      command without adding a flush or changing packet order. Only
+      then decide whether a bounded Mac validation or Odin probe has
+      unique predictions; do not spend an Odin launch on N8D7M7 alone.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
