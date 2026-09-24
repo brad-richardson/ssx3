@@ -1,0 +1,39 @@
+diff --cc ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+index 7f5b130,249148f..0000000
+--- a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
++++ b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+@@@ -8,14 -8,7 +8,18 @@@
+  #include "ps2_vu1_entry_trace.h"
+  #include "ps2_vu1_trace.h"
+  #include "ps2_e15.h"
+++<<<<<<< HEAD
+ +#include "ps2_vq.h"
+ +#include "runtime/gs/gs_stream_capture.h"
+ +#if PS2X_ENABLE_DET_HASH_TAP
+ +#define XXH_NO_XXH32
+ +#define XXH_NO_XXH3
+ +#define XXH_INLINE_ALL
+ +#include "runtime/third_party/xxhash.h"
+ +#endif
+++=======
++ #include "ps2_snd_spike.h"
+++>>>>>>> 5bb1fdd ([AU2] SND spike: PS2X_SND_TICK delivers SNDDRV's cid-1 tick to the EE handler; logs cid-0/SetDma/RPC)
+  
+  #include "ps2_log.h"
+  #include "ps2_park_snapshot.h"
+@@@ -2845,9 -2678,9 +2849,15 @@@ void EeScheduler::processEvent(const Ee
+              ps2_log::emitDrop("sched/vsync-callback", "no-table-entry", dropArgs);
+          }
+          dispatchIrq(false, 2u);
+++<<<<<<< HEAD
+ +#if PS2X_ENABLE_DET_HASH_TAP
+ +        emitDetHashTap();
+ +#endif
+++=======
++         // AU2 spike: IOP SND tick (PS2X_SND_TICK, default off).
++         ps2_snd_spike::onVBlank(m_rdram, m_vsyncTick, [this](GuestInvocation invocation)
++                                 { queueInvocation(std::move(invocation)); });
+++>>>>>>> 5bb1fdd ([AU2] SND spike: PS2X_SND_TICK delivers SNDDRV's cid-1 tick to the EE handler; logs cid-0/SetDma/RPC)
+          break;
+      case EeEventType::ExternalWake:
+          completeExternalWait(event.id, event.value, KE_OK);
