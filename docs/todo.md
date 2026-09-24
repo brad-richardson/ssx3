@@ -949,11 +949,18 @@ with measured budgets, then 120 Hz simulation.
       adjacent builds, so same-binary control unverified. Viewed title
       frames; marker259 precedes packet5470 in stream order.
       `local/research/GB7C7P2/ORCH-GATE.md`.
-- [ ] **GB7C8 same-stream GPU address comparison design:** use
-      packet5470's actual CPU texel/destination as anchors; identify a
-      nonperturbing paraLLEl execution/readback witness at the same
-      packet/address before any GPU glyph-cause claim. The stock-race
-      Odin selected-VRAM execution witness remains higher priority.
+- [x] **GB7C8 GPU comparison design B (`016f4086` + `9103185f`):**
+      inspected source exposes no nonperturbing per-packet GPU readback;
+      render-pass cuts can occur mid-stream. Marker260 is first after
+      packet5470, with 121 intervening packets and no other record kinds
+      in that span; marker300/301 have 5,001/5,123 intervening packets.
+      Dirty G43 source files are hashed, but observed binary provenance
+      is unproved. No run or GPU cause claim. `local/research/GB7C8/ORCH-GATE.md`.
+- [ ] **GB7C9 bounded same-stream GPU comparison:** rebuild pinned G43
+      source, then compare CPU/paraLLEl packet input, watched texture and
+      destination words, crop and frame at marker260. Use the same binary
+      for ON/OFF controls. A mismatch still cannot identify packet5470
+      alone. Stock-race Odin selected-VRAM work has priority.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1440,11 +1447,19 @@ with measured budgets, then 120 Hz simulation.
       Byte-identical staging with identical decoder cannot yield a
       different census. No build/replay/device run or four-way gate.
       `local/research/N8D7M7/ORCH-GATE.md`.
-- [ ] **N8D7M8 execution witness design:** tie relevant tick2050 GS
-      writes to completion before/after the *original* selected-copy
-      command without adding a flush or changing packet order. Only
-      then decide whether a bounded Mac validation or Odin probe has
-      unique predictions; do not spend an Odin launch on N8D7M7 alone.
+- [x] **N8D7M8 execution witness design B (`57b51229` +
+      `f92c204a`):** inspected source has no nonperturbing three-way
+      witness for writes before/after/absent from the original selected
+      copy. Packet identity is lost at the EE queue/backend boundaries;
+      flush timelines and wait-idle do not identify completed draws.
+      Mac replay cannot establish live Odin thread order. No run or GPU
+      cause claim. `local/research/N8D7M8/ORCH-GATE.md`.
+- [ ] **N8D7M9 live identity witness design:** trace packet/tick identity
+      from EE enqueue through GS worker, raw-GIF recording, GPU submit
+      and the original selected-copy boundary. State exact source changes,
+      synchronization/byte costs, perturbation risk and whether a device
+      completion query can separate late from absent writes. Read-only
+      design before any build, Mac experiment or Odin launch.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
