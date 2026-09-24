@@ -1,0 +1,75 @@
+   236	    void TextureFlush() override {}
+   237	    void Sync(GSSyncReason) override {}
+   238
+   239	    PresentationFrame Present(const GSPresentationRequest &request) override
+   240	    {
+   241	        PresentationFrame out{};
+   242	        if (!ensureInit())
+   243	            return out;
+   244	        const uint64_t t0 = nowNanos();
+   245	        syncPriv();
+   246	        ParallelGS::VSyncInfo vsync = {};
+   247	        vsync.phase = static_cast<uint32_t>(request.vsyncTick & 1u);
+   248	        vsync.dst_layout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+   249	        vsync.dst_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+   250	        vsync.dst_access = VK_ACCESS_2_SHADER_SAMPLED_READ_BIT;
+   251	        vsync.adapt_to_internal_horizontal_resolution = true;
+   252	        m_iface->flush();
+   253	        ParallelGS::ScanoutResult shot = m_iface->vsync(vsync);
+   254	        Counters &c = counters();
+   255	        const uint64_t n = c.presents.fetch_add(1u, std::memory_order_relaxed) + 1u;
+   256	        if (!shot.image)
+   257	        {
+   258	            const uint64_t nulls = c.nullScanouts.fetch_add(1u, std::memory_order_relaxed) + 1u;
+   259	            if (nulls <= 4u)
+   260	            {
+   261	                const auto &pr = m_iface->get_priv_register_state();
+   262	                std::cerr << "[gs:parallel] null scanout tick=" << request.vsyncTick
+   263	                          << " CMOD=" << pr.smode1.CMOD << " LC=" << pr.smode1.LC
+   264	                          << " INT=" << pr.smode2.INT << " FFMD=" << pr.smode2.FFMD << std::endl;
+   265	            }
+   266	            return out;
+   267	        }
+   268	        const uint32_t w = shot.image->get_width();
+   269	        const uint32_t h = shot.image->get_height();
+   270	        if (w == 0u || h == 0u || w > 4096u || h > 4096u)
+   271	            return out;
+   272
+   273	        const uint64_t r0 = nowNanos();
+   274	        auto cmd = m_device->request_command_buffer();
+   275	        cmd->image_barrier(*shot.image, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
+   276	                           VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+   277	                           VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, 0,
+   278	                           VK_PIPELINE_STAGE_2_COPY_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
+   279	        Vulkan::BufferCreateInfo info = {};
+   280	        info.size = static_cast<size_t>(w) * h * sizeof(uint32_t);
+   281	        info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+   282	        info.domain = Vulkan::BufferDomain::CachedHost;
+   283	        Vulkan::BufferHandle rb = m_device->create_buffer(info);
+   284	        cmd->copy_image_to_buffer(*rb, *shot.image, 0, {}, {w, h, 1}, 0, 0,
+   285	                                  {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1});
+   286	        cmd->barrier(VK_PIPELINE_STAGE_2_COPY_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
+   287	                     VK_PIPELINE_STAGE_2_HOST_BIT, VK_ACCESS_2_HOST_READ_BIT);
+   288	        m_device->submit(cmd);
+   289	        m_device->wait_idle();
+   290	        const uint8_t *px = static_cast<const uint8_t *>(
+   291	            m_device->map_host_buffer(*rb, Vulkan::MEMORY_ACCESS_READ_BIT));
+   292	        const uint64_t r1 = nowNanos();
+   293	        if (!px)
+   294	            return out;
+   295
+   296	        // Frontend contract: 640-pixel row stride (kHostFrameWidth), rows
+   297	        // of `width` valid pixels, height <= 512.
+   298	        constexpr uint32_t kStride = 640u;
+   299	        out.width = std::min<uint32_t>(w, kStride);
+   300	        out.height = std::min<uint32_t>(h, 512u);
+   301	        out.pixels.assign(static_cast<size_t>(kStride) * out.height * 4u, 0u);
+   302	        for (uint32_t y = 0; y < out.height; ++y)
+   303	            std::memcpy(out.pixels.data() + static_cast<size_t>(y) * kStride * 4u,
+   304	                        px + static_cast<size_t>(y) * w * 4u, static_cast<size_t>(out.width) * 4u);
+   305	        out.displayFbp = static_cast<uint32_t>(m_priv ? (m_priv->dispfb1 & 0x1FFu) : 0u);
+   306	        out.sourceFbp = out.displayFbp;
+   307
+   308	        const uint64_t t1 = nowNanos();
+   309	        c.readbackNanos.fetch_add(r1 - r0, std::memory_order_relaxed);
+   310	        c.presentNanos.fetch_add(t1 - t0, std::memory_order_relaxed);
