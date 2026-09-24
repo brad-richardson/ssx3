@@ -1,0 +1,8 @@
+seq	tick	packet	path	batch	op	addr	x	y	psm	base	bw	old	new	kind	detail
+0	40	0	3	0	-	0019ae38	342	377	1	3584	8	00000000	00000000	snapshot-start	-
+1	256	5139	3	1	upload	0019ae38	86	121	27	5760	8	00000000	dc000000	change	dst=dpsm27,dbp5760,dbw8 rrw512,rrh512 dsax0,dsay0
+2	257	5223	3	10	draw	0019ae38	342	377	1	3584	8	dc000000	dc2c2a36	change	prim=sprite frame=fbp112,fbw8,psm1,fbmsk=0xff000000
+3	258	5348	3	10	draw	0019ae38	342	377	1	3584	8	dc2c2a36	dc302f3b	change	prim=sprite frame=fbp112,fbw8,psm1,fbmsk=0xff000000
+4	259	5470	3	10	draw	0019ae38	342	377	1	3584	8	dc302f3b	dc353341	change	prim=sprite frame=fbp112,fbw8,psm1,fbmsk=0xff000000
+5	601	47240	3	1	draw	0019ae38	342	377	1	3584	8	dc353341	dc353341	pre-47240	prim=triangle frame=fbp0,fbw8,psm0,fbmsk=0x00000000
+6	601	47240	3	32	draw	0019ae38	342	377	1	3584	8	dc353341	dc353341	post-47240	prim=sprite frame=fbp0,fbw8,psm0,fbmsk=0x00000000

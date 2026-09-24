@@ -1,0 +1,8 @@
+ssx3 HEAD at work: 1da528a8 ([orch] Gate E55D8 bounded route inventory)
+fork commit: 8966b0b ([GB7C5]) on gb4-parallel, base a01e679 ([GB7C4])
+capture run/gb4p4.capture.bin: a6f75fb34fceccf6fd92ad65950d16f05a140cf38a3cc2f028be32e56ad51851 (shasum + sha256sum, match)
+paths run/gb4p4.paths.txt: 1,982,063 lines
+build: CMAKE_BUILD_TYPE=Release, PS2X_ENABLE_DIAG_TAPS=OFF
+runner-dir guard: git diff 14b1e5cb HEAD -- ps2xRuntime/src/runner empty
+watched A: (342,377) FBP112/FBW8/PSMCT24 word addr 0x0019ae38 (recomputed from GSPSMCT32::addrPSMCT32: 0x19ae38; B 0x19be80, C 0x19bfa4, D 0x19ce38 all match GB7C4 chain.tsv)
+expected displayed RGB 0x353341
