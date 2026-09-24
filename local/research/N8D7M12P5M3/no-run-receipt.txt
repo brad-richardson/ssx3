@@ -1,0 +1,37 @@
+N8D7M12 Part 5M3 — bounded no-run receipt
+Date (UTC): 2026-09-24T20:04:43Z
+Scope: prepare corrected Mac OFF driver + checker. NO replay, NO boot, NO
+build, NO device, NO lease claim, NO install/launch, NO binary/stream/source/
+fork edit, NO push. Text < 512 KiB.
+
+Driver (prepared, unreleased): local/research/N8D7M12P5M3/mac_off.py
+  SHA-256 1056304d3f2d559936f56ae189c419813581bb46f7cf35ae26d0dc7ad12d6738
+Checker: local/research/N8D7M12P5M3/check.py
+  result: A 39/39 (check-result.json), mac_off_sha == driver SHA above
+
+Fixture provenance grounded (read-only; no git process, no fork edit):
+  fork path : /Users/brad/dev/ssx3-work/N8D7M12/PS2Recomp
+  branch    : n8d7m12-replay-core
+  HEAD read1: 24801bcfa42611e5e36c8990183b793d28b4e5e8
+  HEAD read2: 24801bcfa42611e5e36c8990183b793d28b4e5e8
+  header    : ps2xRecomp/include/ps2recomp/instructions.h
+  header sz : 31244 B
+  sha read1 : b8de8745e16d6a814763f69b0e8d1d54d957bf427f94ec2bc57f63e509f970cd
+  sha read2 : b8de8745e16d6a814763f69b0e8d1d54d957bf427f94ec2bc57f63e509f970cd
+  => matches pins FORK_HEAD / HEADER_SHA / HEADER_SIZE exactly.
+
+Private scratch/output pre-check:
+  ~/dev/ssx3-work/N8D7M12P5M3 : does not exist (one-run guard clear).
+
+P-lane slots: both free (neither /tmp/ssx3-p-lane-lease nor
+  /tmp/ssx3-p-lane-lease-2 present); none claimed in this part.
+
+Disk: ssx3 internal 150.4 GB of 200 GB cap; 99 GiB free.
+
+Part 1 ON artifacts preserved: not read-modified; pins re-verified by checker.
+
+Exact unexecuted command (separate run gate only):
+  python3 -u local/research/N8D7M12P5M3/mac_off.py --released-sha 1056304d3f2d559936f56ae189c419813581bb46f7cf35ae26d0dc7ad12d6738
+  python3 local/research/N8D7M12P5M3/check.py --self-check
+
+No runtime result. No Mac OFF result exists. No graphics cause or speed.

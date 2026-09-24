@@ -1,0 +1,204 @@
+{
+  "brief": "N8D7M12P5M3",
+  "checks": [
+    {
+      "check": "driver_binary_stream_on_pins",
+      "kind": "pin",
+      "pass": true
+    },
+    {
+      "check": "pin_files_present_and_match",
+      "kind": "pin",
+      "pass": true
+    },
+    {
+      "check": "on_pins_verified_in_driver",
+      "kind": "pin",
+      "pass": true
+    },
+    {
+      "check": "fork_pins_declared",
+      "kind": "pin",
+      "pass": true
+    },
+    {
+      "check": "fork_provenance_grounded",
+      "kind": "pin",
+      "pass": true
+    },
+    {
+      "check": "fixture_guards_in_driver",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "fixture_candidate_resolution_functional",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "diff_limited_to_fixture_and_labels",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "removed_flags_exactly_three",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "on_env_declares_three_flags_kept_keys",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "no_ps2x_replay_env_changes",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "off_env_diff_exact",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "no_live_keys",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "ambient_ps2x_cannot_leak",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "granite_vulkan_library_pin",
+      "kind": "pin",
+      "pass": true
+    },
+    {
+      "check": "lease_dynamic_api_no_hardcoded_slot",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "lease_released_in_finally",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "own_pid_only_no_broad_kill",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "one_run_guard_refuses_reuse",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "wall_cap_300",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "log_cap_16",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "output_cap_64",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "expected_ticks_step50",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "exact_ticks_gate_functional",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "ppm_tick2050",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "no_parse_backend_error",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "classify_outcomes_functional",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "self_check_runs_no_replay",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "driver_import_creates_no_output",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "no_mac_off_result_yet",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "no_adb_no_build_no_fork_edit",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "checker_device_free_and_leaseless",
+      "kind": "guard",
+      "pass": true
+    },
+    {
+      "check": "report_prepared_unexecuted",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "report_acceptance_stop_table",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "report_exact_command",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "report_outcomes_predeclared",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "report_env_matrix",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "report_fixture_documented",
+      "kind": "contract",
+      "pass": true
+    },
+    {
+      "check": "no_graphics_verdict",
+      "kind": "contract",
+      "pass": true
+    }
+  ],
+  "passed": "39/39",
+  "verdict": "A",
+  "mac_off_sha": "1056304d3f2d559936f56ae189c419813581bb46f7cf35ae26d0dc7ad12d6738",
+  "note": "Static/functional only. No replay, build, device, lease or binary execution. Mac OFF result remains unproved."
+}
