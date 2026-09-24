@@ -100,3 +100,64 @@ makes no readability claim (`check.py` asserts 0 frames pre-run).
 
 **Do not boot until the orchestrator reviews the exact script SHA and
 explicitly releases Part 2 in the worker pane.**
+
+---
+
+# Part 2 — one released S1 boot (outcome A, orchestrator-gated)
+
+Worker: opencode (Muse Spark Contributor Go). Brief:
+`local/muse/prompts/E55D10P2.md` (released one Mac boot, script SHA
+`03536b0c…447e3f` verified before launch; mismatch would have stopped).
+Scoped sentinel verified with a tiny new file under
+`~/dev/ssx3-work/E55D10/` and removed (dir absent again before the run).
+Exactly one boot: `python3 local/research/E55D10/e55d10_boot.py --label S1`.
+No fork/source edit, build, device action, seeded-card change, push, or
+second boot. Raw stdout transcript kept at
+`~/dev/ssx3-work/E55D10/run/S1/s1-stdout.txt` (as-observed; three
+self-check detail lines carry terminal-width truncation — authoritative
+records are `result.json` + `boot.log`); closed `boot.log` gzipped in
+place (`boot.log.gz`, 48912 bytes). Bulk frames/log stay in private
+scratch. No speed claim: 36.621 s wall is run-control only.
+
+## 1. Evidence table (S1 run)
+
+| Item | Value |
+| --- | --- |
+| Command | `python3 local/research/E55D10/e55d10_boot.py --label S1` (one run) |
+| Stop | `bound=target`, last hash tick 953, frame proof snap tag 945 ≥ 920, phase2 extra 1.032 s |
+| Lease | mini slot 1 (`E55D10-S1`); both slots free after; runner PID 23738 gone |
+| Pins | fork `bab6eb3` full `bab6eb38…9703`; two matching SHA reads of runner/ISO/ELF/codegen, all match E55D3/E55D9 pins (see `s1-result.json`, `s1-receipts.txt`) |
+| Pad rows | 5 `[padscript]` rows: armed n=2, Start press 0x0008 (10627 ms) + release, Square press 0x8000 (13680 ms) + release; no Down/Cross/other |
+| Cards | fresh empty at start, unchanged at end (`f9401596…ccb9ce`, `mc0=[] mc1=[]`; no game card write) |
+| Caps | log 451656 B ≤ 16 MiB; frames 9233697 B ≤ 2 GiB; wall/progress caps untouched |
+| Checker | `check-p2.py` 33/33 PASS (pins, route, pad rows, caps, curated SHAs; screen labels UNOBSERVED-BY-CHECKER by design) |
+| Curated | `snap-760t-0029.24s.png` (pre, meta tick 759) + `snap-919t-0035.28s.png` (post, meta tick 919) + `snap-945t-0036.29s.png` (proof, meta tick 944); PNG total 506155 B ≤ 2 MiB; each with adjacent `.txt` metadata |
+
+## 2. Frames (worker reading; orchestrator holds the visual verdict)
+
+- Pre-Square (760t, tag 760 / meta 759): title **Main Menu**; entries
+  Single Event (highlighted), Conquer The Mountain, Multi Play, Previews,
+  Online; left note "Play any unlocked Single Event."; footer X Select /
+  Triangle Previous / Square Options.
+- Transition (private snaps, not curated): 814t still Main Menu; 843t
+  Options mid-transition (unhighlighted list, no footer description yet).
+- Post-Square (919t, tag 919 / meta 919) and proof (945t, tag 945 / meta
+  944): title **Options**; entries Game Options (highlighted), Sound
+  Options, Controller Settings, HUD Options, Save/Load, Enter Cheat,
+  Credits, DONE; footer "Modify Game options." + X Select / Triangle
+  Previous.
+- Orchestrator gate: pre 760/814 are Main Menu; 843/919/945 clearly show
+  Options with the 8-item list and Triangle Previous visible. **Outcome A
+  for opening Options with a back path.** It does not prove Save/Load
+  selection or any card API call (cards stayed empty).
+
+## 3. Gaps and next action
+
+- Snapshot tags are copy-time ticks on a 1 s wall grid (approximate);
+  authoritative per-frame ticks are the adjacent `.txt` metadata.
+- One Square pulse proves the displayed Options route only — not Save
+  highlighting, not GetDir/Read reachability.
+- Recommended next action: a **separate bounded Save/Load navigation
+  test** (Down-navigation from Game Options to Save/Load, then one
+  select), gated on its own brief with fresh empty cards and the same
+  caps/pins discipline.

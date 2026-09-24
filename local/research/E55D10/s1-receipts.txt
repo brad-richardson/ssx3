@@ -1,0 +1,47 @@
+# E55D10 Part 2 — S1 run receipts (bounded; raw stdout + boot.log stay in private scratch)
+# Command (run exactly once): python3 local/research/E55D10/e55d10_boot.py --label S1
+# Boot script SHA: 03536b0c5b84a95d676ca2e972446827b7be11cfc3153a1a67f8eac9c4447e3f (matches release)
+
+slot: 1 (lease E55D10-S1; both mini slots free after run)
+runner_pid: 23738 (gone after run; no ps2EntryRunner process remains)
+route: 10611:start:250,13680:square:150
+bound: target
+elapsed_s: 36.621 (diagnostic only; NO speed claim)
+last_hash_tick: 953
+phase2_extra_s: 1.032
+frame_proof: tick=945 file=snap-945t-0036.29s.png (>= stop tick 920)
+log_bytes: 451656 (<= 16 MiB cap)
+frames_bytes: 9233697 (<= 2 GiB cap)
+
+# Two matching SHA reads from result.json sha_reads (both identical, both match pins):
+runner e282c8a79cb4ce3e616244d1cfb0b5ab6d522e2f262408c6ffa92860f211643f
+iso     3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+elf     1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+codegen 8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3
+fork_pin_full: bab6eb382673155ffd756fe8db265964eeff9703 (short bab6eb3)
+
+# Private boot.log [padscript] rows (verbatim; exactly one Start + one Square, no others):
+[padscript] armed n=2 source=env clock=vsync
+[padscript] press i=0 now=10627ms at=10611ms hold=250ms buttons=0x0008
+[padscript] release i=0 now=10877ms
+[padscript] press i=1 now=13680ms at=13680ms hold=150ms buttons=0x8000
+[padscript] release i=1 now=13830ms
+# 0x0008 = Start, 0x8000 = Square. No Down/Cross/other press or release rows.
+
+# Card roots: fresh empty at start, unchanged at end:
+card_initial_sha256: f94015964371517ad24d36c71ea0c9bdc6fb4a23f3c46d7cc0def479feccb9ce
+card_final_sha256:   f94015964371517ad24d36c71ea0c9bdc6fb4a23f3c46d7cc0def479feccb9ce
+card_final_files: mc0=[], mc1=[] (no game card write)
+
+# Curated frames (filename tick approximate; metadata tick is the frame's own tick):
+pre-Square  snap-760t-0029.24s.png sha256 9292d0bc13b5814b7f6add5f4a8fe9429c7f0e170e6de0df8c34ad60b3d23df6 meta tick=759
+post-Square snap-919t-0035.28s.png sha256 7cabe2ef2364097073061869f3a123be4792497612700aa294f22048e230c631 meta tick=919
+proof       snap-945t-0036.29s.png sha256 4c4513a4481ea719bc5a2185ae31367819b86edb9aad42792518d70f60a0f1b3 meta tick=944
+# Transition observed in private snaps (not curated): 814t still Main Menu; 843t Options mid-transition (unhighlighted list).
+
+# Worker visual reading (orchestrator makes the verdict):
+# pre (760t): title "Main Menu"; entries Single Event (highlighted), Conquer The Mountain, Multi Play, Previews, Online;
+#   left note "Play any unlocked Single Event."; footer X Select / Triangle Previous / Square Options.
+# post (919t) + proof (945t): title "Options"; entries Game Options (highlighted), Sound Options, Controller Settings,
+#   HUD Options, Save/Load, Enter Cheat, Credits, DONE; footer "Modify Game options." + X Select / Triangle Previous.
+# Suggested outcome: A (readable Options screen with Triangle-Previous back path). No Save/GetDir/Read claim.
