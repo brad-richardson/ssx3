@@ -2,9 +2,11 @@
 """Bounded input and row gate for the X11 dense local-model trial."""
 
 from pathlib import Path
+import sys
 
 excerpt = Path("local/research/X11/source-excerpts.txt").read_text()
-report = Path("local/research/X11/REPORT.md").read_text()
+report_path = Path(sys.argv[1]) if len(sys.argv) == 2 else Path("local/research/X11/REPORT.md")
+report = report_path.read_text()
 for anchor in (
     "item.deadlineCycle <= m_eeCycle",
     "item.hostDeadline <= pacedNow",
