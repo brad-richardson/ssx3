@@ -919,10 +919,19 @@ with measured budgets, then 120 Hz simulation.
       ON/OFF CPU replays and tick600/601/700 frames byte-identical.
       Measured target A has a bounded one-pixel prediction, but no
       causal poke or GPU cause claim. `local/research/GB7C4/ORCH-GATE.md`.
-- [ ] **GB7C5 first displayed-glyph producer:** trace backward to the
-      packet that first writes the FBP112 glyph RGB at a pinned target
-      pixel, then compare that producer's CPU/GPU path. Keep the
-      GB7C4 one-pixel carrier poke as a bounded follow-up if needed.
+- [x] **GB7C5 watched displayed-pixel provenance PASS/P (`a643ae60`,
+      fork `8966b0b`):** FBP112 (342,377) storage word starts zero;
+      packet5139 T8H upload changes alpha only, then three sprite draws
+      change RGB. Tick259 packet5470 batch10 first writes final RGB
+      `353341`; pre/post packet47240 remain equal. One build, 556/556
+      suite and ON/OFF CPU replays, tick600/601 frames byte-identical.
+      This names a pixel writer, not the sampled image or GPU cause.
+      `local/research/GB7C5/ORCH-GATE.md`.
+- [ ] **GB7C6 packet5470 source and CPU/GPU comparison:** identify the
+      batch10 sprite's TEX0/UV/CLUT/TEST and sampled word for watched
+      FBP112 pixel, then compare the same captured stream and address
+      across CPU/paraLLEl execution. Revisit GB7C4 carrier poke only
+      if needed.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),

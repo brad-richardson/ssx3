@@ -1,0 +1,12 @@
+# GB7C5 orchestrator gate — PASS watched FBP112 pixel provenance
+
+Worker commits `a643ae60` in ssx3 and private GB4 fork `8966b0b` (`Orchestrated-By: opencode`) contain a default-OFF CPU VRAM-word watch and receipts. I read the full report/source/checker, independently checked the seven trace rows and GS swizzled address, reran `check.py`, verified the fork runner-dir guard and viewed the tick600/601 title frames. The fork and repo commits pass `git show --check`; fork tree is clean.
+
+| Gate check | Result |
+| --- | --- |
+| Scope/control | One incremental build; flag-OFF suite 556/556; ON and OFF direct-CPU replays 556/556. First ON attempt omitted PPM directories, so both replays were rerun with directories under fresh slot-1 claims. Final ON trace 7 rows/894 bytes, uncapped; ON/OFF tick600/601 hashes and PPM SHAs equal each other and GB7C4 baseline. No GPU/device run or speed claim. |
+| Execution identity | Replay defaults to direct CPU unless queue/parallel mode is selected; neither was set. `processGIFPacket` therefore executes synchronously, and the backend `WriteVramUnlocked` before/after reads occur inside the packet whose context the harness set. The watched storage byte address `0x0019ae38` resolves to FBP112/FBW8/PSMCT24 pixel (342,377). |
+| Word history | Capture starts `00000000`. Tick256 packet5139 T8H upload changes only storage alpha to `dc000000`. Tick257 packet5223 draws `dc2c2a36`; tick258 packet5348 draws `dc302f3b`; tick259 packet5470 batch10 sprite draws `dc353341`, the first change to final displayed RGB `353341`. Pre/post packet47240 snapshots at tick601 remain `dc353341`. GB7C4's CT24 read reports the same low RGB with alpha hidden. |
+| Coverage | The watched-word hook surrounds the CPU backend's common `WriteVramUnlocked` path. Source audit covers draw/upload/local transfer/clear/direct calls; stream kinds 5/6/7 are absent. Unknown op/cap paths are rejected by the checker. This is one pixel's CPU path, not full text composition. |
+
+Verdict: **PASS for predeclared P at watched pixel A**: packet5470 is the first measured write to its eventual displayed RGB, before packet47240's same-value carrier. The draw's TEX0/UV/CLUT/TEST and resulting image source were not recorded, so calling packet5470 the glyph's semantic producer or a paraLLEl-GS fault would overstate the evidence. Next trace packet5470 batch10's sampled texel and compare the matched CPU/GPU replay at this exact packet/address; the carrier poke is a separate possible follow-up.
