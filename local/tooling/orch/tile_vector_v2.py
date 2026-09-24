@@ -23,20 +23,28 @@ def tile_vector(lines, kind):
     prefix = re.compile(r'^.*?\bI ps2x\s+: (.*)$')
     values = []
     collecting = False
+    pending = 0
     for line in lines:
         if marker in line:
             values = []
             collecting = True
+            pending = 0
             payload = line.split(marker, 1)[1]
         elif collecting:
             match = prefix.match(line)
             if not match or match.group(1).startswith('['):
                 break
             payload = match.group(1)
-            if payload.startswith(','):
-                payload = payload[1:]
+            leading = len(payload) - len(payload.lstrip(','))
+            if pending + leading != 1:
+                return None
+            payload = payload.lstrip(',')
         else:
             continue
+        trailing = len(payload) - len(payload.rstrip(','))
+        if trailing > 1:
+            return None
+        pending = trailing
         fields = payload.rstrip(',').split(',')
         if any(not field.isdecimal() for field in fields):
             return None
