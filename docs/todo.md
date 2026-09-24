@@ -969,6 +969,10 @@ with measured budgets, then 120 Hz simulation.
       No VU0 qword differential, writer, or candidate fix exists on this
       route. Next sky step: E55 deterministic same-scene frames/packets,
       then trace the first ALPHA/CBP or texture-state divergence.
+      **E54A Part 1 running:** re-audit CSR.VSINT/FIELD against the current
+      fork and PCSX2 before a repair. The review's broad "CSR isn't W1C"
+      claim is stale: current code already handles SIGNAL/FINISH bits 0–1
+      as W1C. The worker will hand back source tables; no fork edit yet.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
