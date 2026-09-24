@@ -840,7 +840,19 @@ with measured budgets, then 120 Hz simulation.
       differences at 300–600 concern copyright text/background, not
       button labels. No producer is identified. Next: compare the first
       title-text draw/texture/state against the CPU replay, then review
-      the paraLLEl fold for Odin/Turnip.
+      the paraLLEl fold for Odin/Turnip. **GB6 partial gate (438edae):**
+      six opt-in backend commits cherry-picked cleanly onto current
+      E54D fork. Taps-OFF suite and both matched replays passed
+      578/578; GPU replay initialized and processed 1,982,063 packets
+      with zero null/unsupported operations; CPU hashes matched GB4.
+      One leased live boot reached tick 2236 with title, menu and one
+      race frame viewed. The second race frame was absent because
+      `PS2X_FRAME_DUMP_ONCE_TICKS` accepts three entries, but the boot
+      supplied four; PKLOG then consumed 61.6 MB and hit the 64 MiB
+      combined cap. No second boot or fork push. Optional taps-ON suite
+      was not run (the two normal suites used the same taps-OFF build).
+      GB6B repairs only the capture setup: three race targets, no PKLOG,
+      one bounded boot; then the orchestrator gates the fold.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
