@@ -2174,6 +2174,19 @@ with measured budgets, then 120 Hz simulation.
       `30bdafdc…2d01b68`; no launch, test, screenshot, iPad action or
       device-rendering/speed claim. Scratch 3.5 GiB, global 130.6/200 GB.
       **Next iOS device gate:** install and run on iPad after Brad unlocks it.
+- [x] **IPAD1 iPad run (orchestrator, 09-24 18:01):** same signed
+      I27C bundle (`30bdafdc…` ×2) installed on iPad Air 11" M2 and run
+      once on the built-in fast route: title → Select Character → Rival
+      card → race HUD 00:00:04, tick 1957 at 160 s; terminated after.
+      Renders, but as an iPhone-only app in a portrait compatibility
+      window: game is a small letterboxed strip and the virtual pad
+      covers it. Frames `~/dev/ssx3-work/IPAD1/shot-*.png` (viewed).
+      No speed claim.
+- [ ] **I28 iPad-native presentation:** add iPad device family +
+      landscape, lay the virtual pad outside/over the letterbox margins;
+      Simulator iPad, then this iPad. Low priority behind Odin.
+- [x] **CLIP1 Simulator clip (orchestrator):** I27B Simulator build,
+      title → race in 177 s, sent to Brad (`~/dev/ssx3-work/CLIP1/`).
 - [x] **W1F2 PASS for Simulator + iPhone install (2fc2242):** restored
       I25's bundled `ps2x.env`/`PS2X_BOOT_ELF` and UIWindowScene wiring
       on the W1F fold, retaining I26 controls and W1 presentation. Fork
