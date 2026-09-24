@@ -1,0 +1,53 @@
+--- /home/brad/pcsx2-g7/pre-au4/R5900OpcodeImpl.cpp	2026-09-23 20:30:52.783187598 -0400
++++ /home/brad/pcsx2-g7/pcsx2/pcsx2/R5900OpcodeImpl.cpp	2026-09-23 20:31:27.010243344 -0400
+@@ -14,6 +14,11 @@
+ #include "Host.h"
+ #include "VMManager.h"
+ 
++#include <cstdio>
++#include <cstdlib>
++
++extern u32 g_t65_ee_vsync; // AU4: defined by the T65 Counters.cpp hook.
++
+ #include "fmt/format.h"
+ 
+ GS_VideoMode gsVideoMode = GS_VideoMode::Uninitialized;
+@@ -1764,6 +1769,38 @@
+ 		}
+ 		break;
+ 		case Syscall::sceSifSetDma:
++			// AU4: read-only EE tag-1 capture. Each record is u32 EE vsync + 0x620 EE bytes.
++			if (std::getenv("PCSX2_AU4_CAPTURE"))
++			{
++				static FILE* au4_file = nullptr;
++				static bool au4_open_attempted = false;
++				const u32 desc = cpuRegs.GPR.n.a0.UL[0];
++				const u32 count = cpuRegs.GPR.n.a1.UL[0];
++				if (count <= 32 && desc < 0x02000000 && (desc & 15) == 0)
++				{
++					for (u32 i = 0; i < count; i++)
++					{
++						const u32 src = memRead32(desc + i * 16);
++						const u32 size = memRead32(desc + i * 16 + 8);
++						if (src != 0x00512e40 || size < 0x620)
++							continue;
++						if (memRead32(src) != 1 || memRead32(src + 4) != 0x600 || memRead32(src + 0x610) != 5)
++							continue;
++						if (!au4_open_attempted)
++						{
++							au4_open_attempted = true;
++							au4_file = std::fopen("/home/brad/au4/pcsx2-tag1.bin", "ab");
++							Console.WriteLn("AU4_TAG_OPEN src=%08x size=%x ok=%d", src, size, au4_file != nullptr);
++						}
++						if (au4_file)
++						{
++							std::fwrite(&::g_t65_ee_vsync, sizeof(::g_t65_ee_vsync), 1, au4_file);
++							std::fwrite(PSM(src), 1, 0x620, au4_file);
++							std::fflush(au4_file);
++						}
++					}
++				}
++			}
+ 			// The only thing this code is used for is the one log message, so don't execute it if we aren't logging bios messages.
+ 			if (TraceActive(EE.Bios))
+ 			{
