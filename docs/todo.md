@@ -769,11 +769,21 @@ with measured budgets, then 120 Hz simulation.
       `PS2X_ENABLE_DIAG_TAPS` (off for release/speed builds). N5 is
       prototyping it as N5-local, then fold it into `ssx3`. It's also the
       review's "one shared tap library" item.
-- [ ] **N5 running (09-23 evening, Opus):** `n2-android` rebased onto
-      `eac6cba` + E45 `310b30f`, canonical codegen, dumps-off APK, Odin
-      speed through the race, simpleperf in the race.
-- [ ] N5: Odin race with E33's vsync-keyed pad script (after E33), plus a
-      dumps-off build for a quotable speed number.
+- [x] **N5 PASS (92504f5): the Odin plays title → SC (rider) → Happiness
+      race on `eac6cba` + E45**, the first clean speed numbers (ledger):
+      title 0.47×, menu 0.44×, SC 0.33× (N4's diagnostic build: ~0.2
+      vsyncs/s), race 0.19–0.26×. Race profile: VU1 50% (hazard bookkeeping
+      29.6%), GS CPU raster 36%, guest 0.4%. Tap guard `6c335e6`
+      (`PS2X_ENABLE_DIAG_TAPS`, default OFF on Android): guest `.text` is
+      back to 113 MB and the full-rebuild peak is 4 GB (was ~10). Host-side
+      env-off taps remain (not covered). Branch `n5-android` on bytesize
+      (local).
+- [ ] **Fold to `ssx3` after E53 Part 2 (Codex Sol):** `e52-audit` `d3f7508`
+      + E45 `310b30f` + the tap guard (`local/research/N5/logs/tap-guard-6c335e6.diff`;
+      decide the desktop default) + pink `73b8b3a` + G46 fill-rule
+      `104dd7f`; regen + promote the codegen, suite, SC + race smoke on
+      I26-FAST, ff push. Then **N7**: Odin APK on the folded `ssx3` (the
+      textured race on the Odin, VU0-cost check).
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
