@@ -1,0 +1,7 @@
+# N8D7M11 orchestrator gate — A for design only (2026-09-24)
+
+Read the complete worker REPORT and brief at commit `ee28cc70`; `git show --check` passed. Reran `check.py`: 55/55 PASS. Independently checked the Android NativeActivity/CMake entrypoint, the `main()` insertion point before `runtime.initialize()`, the static `ps2x.env` loader, the desktop replay parser and its GS initialization, and the Turnip `dlopen`/HMI path in the pinned fork. Those source rows support a bounded **dev-only, default-off NativeActivity replay mode** using a replay core shared with the desktop test. The app-specific files directory has prior live capture/write evidence, but restaging the 1.10 GB stream remains untested.
+
+**A is a design verdict, not a working harness or graphics-cause verdict.** No code, build, stream transfer, Mac replay or Odin run occurred. Factoring the replay parser, preserving its record order and descriptor, and Android Turnip startup must be checked in implementation. The proposed same-binary controls and broad/sparse thresholds remain prospective; any mismatch is OTHER. No speed number follows from this work.
+
+Next: implement the isolated replay core and default-off Android branch in the N worktree, with desktop regression and Android build receipts. Gate the resulting binary and stream staging before one bounded Odin launch; preserve the one-runtime-mutator and device leases. Do not attribute a faulty packet, copy timing or driver behavior from the design.

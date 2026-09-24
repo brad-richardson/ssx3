@@ -1467,12 +1467,19 @@ with measured budgets, then 120 Hz simulation.
       `PS2X_BUILD_TEST=OFF` and ships only the NativeActivity runner.
       There is no current on-device replay entrypoint. No build, copy or
       device action. `local/research/N8D7M10/ORCH-GATE.md`.
-- [ ] **N8D7M11 on-device replay harness design:** choose a minimal
-      arm64 executable or app mode, preserving the exact stream bytes,
-      path/marker order, Turnip loader, selected 4 MiB snapshot and
-      448-tile decoder. Define Mac same-binary and ON/OFF controls,
-      input staging, storage/lease/battery limits and A/B/OTHER outcomes
-      before implementation or an Odin launch.
+- [x] **N8D7M11 on-device replay harness design A (`ee28cc70`):**
+      source-grounded choice is a dev-only, default-off NativeActivity
+      replay mode with a shared desktop/app parser core. It preserves
+      recorded path/marker order, Turnip loader and the selected 4 MiB
+      snapshot/448-tile decoder by design. No code, build, staging or
+      Odin run; runtime behavior and graphics cause remain open.
+      `local/research/N8D7M11/ORCH-GATE.md`.
+- [ ] **N8D7M12 implement and validate replay harness:** factor the
+      desktop parser into a shared core, add the default-off app branch
+      in the isolated N worktree, then prove desktop replay parity and
+      Android build/packaging. Gate the binary and exact 1.10 GB stream
+      staging separately before one bounded Odin launch; no cause or
+      speed verdict from a successful build.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1765,11 +1772,19 @@ with measured budgets, then 120 Hz simulation.
       tick820, pre/post full-frame proof, pinned inputs and mini lease.
       Self-check 25/25, checker 35/35; no boot or screen verdict.
       `local/research/E55D10/ORCH-GATE-P1.md`.
-- [ ] **E55D10 Part 2 one-button Options detour:** run the exact approved
-      script once from a settled Main Menu and view the resulting screen.
-      Only if Options/Save is actually displayed should a later card
-      detour and changed-card A/A baseline be designed. Park ExternalWake
-      policy until a production poster is found.
+- [x] **E55D10 Part 2 Options opened A (`64841c22`):** one Square at
+      the settled Main Menu opens a readable Options screen. Viewed
+      post-press frames list Game Options, Sound Options, Controller
+      Settings, HUD Options, **Save/Load**, Enter Cheat, Credits and DONE;
+      Triangle: Previous is visible. Save/Load was not selected, and no
+      card API reach is proved. One bounded Mac boot, cards unchanged,
+      mini slots free; no speed claim. `local/research/E55D10/ORCH-GATE-P2.md`.
+- [ ] **E55D11 bounded Save/Load selection:** from the observed Options
+      screen move four rows to Save/Load, view that selection, then one
+      Cross and view the resulting screen. Use fresh scratch cards and a
+      predeclared card-observation gate; only a real GetDir/Read record
+      licenses a changed-card A/A baseline. Park ExternalWake policy
+      until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
