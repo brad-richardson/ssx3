@@ -903,6 +903,15 @@ with measured budgets, then 120 Hz simulation.
       4. Validate menus, SC and race on the Mac/Simulator vs PCSX2
          widescreen; check 2D/HUD stretching.
 
+- [ ] **W2 PARKED (Brad, 09-23): upscaled internal resolution.** Don't
+      schedule it. Brad prefers widescreen (W1, a known supported mode) and
+      the 120 Hz sim over fighting upscale artifacts: framebuffer-as-texture
+      post effects, half-pixel offsets, sprite-atlas bleed, VRAM
+      reinterpretation and CPU readbacks. If it's picked up later:
+      paraLLEl-GS upscale once it's the live backend, a PCSX2 2×/3× preview
+      of which SSX 3 effects break, then source-level fixes in the recomp
+      and an integer-multiple default per device.
+
 ## A — audio (new 09-23)
 
 - [x] **AU1 PASS (7f6c09f):** no sound code runs today.
