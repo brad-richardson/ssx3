@@ -1732,12 +1732,19 @@ with measured budgets, then 120 Hz simulation.
       supported button detour in this bounded survey. Checker rerun passed,
       with one cited-only row exempt from SHA re-read. No build/boot/card
       action. `local/research/E55D8/ORCH-GATE.md`.
-- [ ] **E55D9 observed save-menu path:** capture a settled Main Menu
-      frame listing entries and one-button-at-a-time navigation toward
-      Options/Save, or an evidenced seeded-card title prompt. Only then
-      predeclare a bounded card detour. After a real GetDir/Read record,
-      design a changed-card A/A baseline. Park ExternalWake policy until
-      a production poster is found.
+- [x] **E55D9 Part 1 menu-run preparation approved (`e4801547` +
+      `5b678ea9`):** final script SHA `c72e5893…10c39f4` checks pins,
+      claims a mini slot and records bounded snapshots around START and
+      four separated Down pulses. Orchestrator caught and corrected an
+      output-directory setup bug and missing final-frame proof. Self-check
+      21/21, checker 33/33; **no boot/menu verdict yet**.
+      `local/research/E55D9/ORCH-GATE-P1.md`.
+- [ ] **E55D9 Part 2 observed save-menu path:** run the exact approved
+      script once with scoped scratch write permission, then view the
+      settled Main Menu and each Down transition. Only an observed
+      Options/Save screen can license a bounded detour. After a real
+      GetDir/Read record, design a changed-card A/A baseline. Park
+      ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
