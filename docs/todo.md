@@ -1609,9 +1609,13 @@ with measured budgets, then 120 Hz simulation.
       the hook locks per command even with the env gate off. Fix before
       Android package; no GPU verdict or speed. `local/research/
       N8D7M12P5F4P2/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5F4P3:** fast race-safe disabled guard, one host
-      build/suite and default-off replay control; no Android/Odin until
-      gated.
+- [x] **N8D7M12 Part 5F4P3 (`4fa0df1`, private):** atomic disabled
+      fast guard before mutex; suite586/586, 0 PKTSEQ + 41 existing
+      replay rows, OFF hashes/PPM byte-equal Mac ON. Worker checker32/32
+      pre-commit; orchestrator post-commit rerun30/32 only because it
+      expects old HEAD/uncommitted diff, independently verified. Host
+      gate PASS; no Android/GPU/speed result. `local/research/
+      N8D7M12P5F4P3/ORCH-GATE.md`.
 - [ ] **N8D7M12 next-package manifest execution:** implement/review the
       input collector, pin fork/frontend/backend, paraLLEl renderer/
       interface/page tracker/shaders, Granite dirty patches, flags and
