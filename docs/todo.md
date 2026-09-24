@@ -1042,6 +1042,23 @@ with measured budgets, then 120 Hz simulation.
       explicitly **unrun**. Continue after I27B Simulator cleanup; keep
       the large GS capture outside git. Do not fold or profile for speed
       until the race image is usable.
+- [x] **N8D4 PASS for same-stream cross-host split (545d214):** one Odin
+      install/launch captured 1,100,725,180 bytes through the tick-2050
+      marker: 862,993 packets, 11,499 priv records, 25,485 transfers and
+      2,050 VBlank markers, complete EOF and matching SHA pairs. One Mac
+      build at fork `ddaee78` ran CPU and paraLLEl replay of that exact
+      stream, each 585/585 tests, same FBP 112/PMODE `ff21` and 41 frame
+      samples. I viewed the Odin raw/frontend and both Mac tick-2050
+      images. Both Mac images show readable HUD, snow slope, rider position,
+      radio card and right meter; Odin shows mostly black rectangles and
+      fragments. Mac CPU/paraLLEl hashes differ and both retain a dark
+      lower region. Along with N8D3's Odin raw/backend/frontend equality,
+      this places an additional **device-specific loss at/before mapped
+      scanout**; it does not separate Turnip image generation from its
+      transfer/readback. App force-stopped, PID absent, lease free; no speed
+      claim. **Next:** map the exact paraLLEl generation→copy→map source,
+      then design one bounded N8D5 device probe that distinguishes those
+      two stages. Keep the stream outside git and defer fold/speed profiling.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
