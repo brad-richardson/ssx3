@@ -1061,6 +1061,23 @@ with measured budgets, then 120 Hz simulation.
       tree (E53 semantics), which may fix it outright; else an instruction
       census of the XA decoder + mixer, a decoder-vs-`au2_eaxa.py`
       differential, and one named fix.
+      **AU5 (3ec947c):**
+      - on `b9647f5` + AU3, with 0x3c9518/0x3c9520/0x3c95f0 as function
+        starts: **0 missing targets**;
+      - also fixed the host tag-1 PCM offset (+8 → +16) and made the WAV
+        save incrementally;
+      - only a 3.35 s menu overlap with PCSX2 (I26-FAST skips the menus
+        fast). In it, the band residuals fell (0–2k 0.19→0.10, 2–6k
+        0.52→0.20, 6–12k 0.57→0.39, 12–18k 1.06→0.77);
+      - the decoder matches a float XA model to within 0.017 (no decoder
+        bug);
+      - census: untested MMI on candidate mixer paths (PINTEH ×4 in
+        0x3CB538, PPACH/PEXTLH/PSRAW, VU0 transfers).
+
+      Sent to Brad to listen. Fork `au5-snd` `ddf4f66` (local).
+      **Next:** a longer-overlap capture (E33 route, or sit on the menu) if
+      it still sounds off.
+
 - [ ] (superseded) AU1 (Opus, scoping): the IOP module and SIF RPC census, the
       runtime's current handling, the sound data on the ISO, and the routes
       (HLE driver + host mixer vs LLE IOP/SPU2 vs hybrid) with costs, plus
