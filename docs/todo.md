@@ -1034,6 +1034,19 @@ with measured budgets, then 120 Hz simulation.
       gate. X7's narrow dense-Qwen trial stopped at its 12-minute
       cap without a completed worker table; orchestrator source check
       in `local/research/X7/REPORT.md` is no branch fix verdict.
+      **E54E FAIL (orchestrator gate):** the PCSX2 low-64 oracle and
+      572/572 OFF, 667/667 ON suites support the candidate, but its
+      single diagnostic boot showed one near-black SC frame and two
+      black race captures. All three frame SHA reads match; only 8,000
+      GIF packets by tick 830 versus E54D's 92,728. The first packet
+      payload difference is index 352 (ticks 82/83). Orchestrator
+      viewed frames and independently checked packet counts/FNVs.
+      Runner/codegen paths and generated diffs match the intended
+      change; no named repair was found, so no second boot. Fork
+      candidate remains local/uncommitted, fork `ssx3` and canonical
+      codegen stay at E54D. Revisit with E55 deterministic trace and
+      a targeted branch-value probe; do not ship E54E now. Continue
+      E54 with COP0 Count and INTC 5/7.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
