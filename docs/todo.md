@@ -884,6 +884,24 @@ with measured budgets, then 120 Hz simulation.
       canonical-codegen build (install only), and the Simulator race draws
       the world. First iOS lane ever to show rendered frames (the
       UIWindowScene fix). `codegen-ssx3-e49` deleted.
+      **I26 PASS (c514c8c), iPhone reinstalled (install only):**
+      - black startup, not pink (`73b8b3a`; its fold conflicts with I25's
+        test registration, so it rides the E53 fold);
+      - **I26-FAST** reaches the race HUD at tick 1714 (was ~7100): 21% of
+        the guest time and 31% on the Simulator wall clock. The 10% target
+        is under the game's floor with a 1 s margin, and the floor analysis
+        is accepted;
+      - **found: the Rival card ignores X while down is held** (E33's 45 s
+        wait was an accident of that);
+      - 4:3 + bilinear by default (`PS2X_ASPECT`, `PS2X_PRESENT_FILTER`);
+      - virtual controls (hidden once a controller is used; Settings
+        toggle), exercised with synthetic touches only; 608/608.
+      Fork `i26-qol` `8a357ac` (local).
+- [ ] **I27 (small, queued for Codex): HiDPI drawable on iOS.** raylib
+      draws at 1× points and iOS upscales ×3, which is the bigger font
+      lever. Then retest the fonts on the Simulator.
+- [ ] Fold `i26-qol` presentation + virtual pad into `ssx3` (after the
+      E53 fold; desktop default changes to 4:3 bilinear).
 
 - [ ] Re-probe on the iPad only after a relevant runtime change (E30's
       MPEG fix or the E29 bypass path). Branch `i23-ffmpeg-ios` @ `aa73dbc`.

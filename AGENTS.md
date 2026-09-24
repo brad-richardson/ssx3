@@ -131,6 +131,9 @@ splitting.
   its own rule (one heavy job at a time).
 - **Boots:** every boot script has progress caps. No boot over 600 s
   without orchestrator OK.
+- **Pad route:** race boots use **I26-FAST** (`local/research/I26/ROUTES.md`,
+  race HUD at tick ~1714 on the vsync pad clock) unless a brief says
+  otherwise. The Rival Challenge card ignores X while down is held.
 - **Storage:** work on the Mac mini's internal disk, capped at 200 GB
   across all ssx3 workstreams (`local/tooling/disk_budget.sh`; details in
   `local/AGENTS.local.md`). The external SSD is ExFAT scratch that
