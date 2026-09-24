@@ -991,7 +991,8 @@ with measured budgets, then 120 Hz simulation.
       frames; the dark GS region remains. `0x396090` reach is unknown.
       VBlankStart raising VSINT is a timing approximation; exact GS-blank
       scheduling and FIELD video-mode rules stay open. Next E54 work:
-      PINTEH, LWU, 64-bit sign branches, COP0 Count and INTC 5/7 before E55.
+      **E54C running** on PINTEH/PINTH halfword lane order, then LWU,
+      64-bit sign branches, COP0 Count and INTC 5/7 before E55.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
