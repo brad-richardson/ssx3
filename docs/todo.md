@@ -1557,14 +1557,24 @@ with measured budgets, then 120 Hz simulation.
       CPU wait; fork Present waits idle. Interface implementation and
       Granite/driver behavior remain unproved. Checker29/29; no run or
       GPU cause. `local/research/N8D7M12P5F2/ORCH-GATE.md`.
+- [x] **N8D7M12 Part 5F3 source coverage + fingerprint design A
+      (`c531e5d3`+`0ef4b00e`):** corrected a parser-side hash that could
+      not distinguish queue order; worker-consumption digest at Fence is
+      the bounded next observable. Opaque PrivWrite content, 32-bit
+      collisions and unpinned readback code limit it. Checker156/156,
+      zero runs; no GPU cause. `local/research/N8D7M12P5F3/ORCH-GATE.md`.
 - [x] **N8D7M12 Part 5M2 Mac OFF replay (`fa9c51c1`):** one pinned
       binary/stream run produced all 41 rows and a PPM byte-equal to
       Mac ON, but suite exit1 (584/585) on a private-cwd header lookup.
       Predeclared acceptance FAIL; artifact equality is bounded evidence,
       not an accepted causal control. Checker15/15; lease free.
       `local/research/N8D7M12P5M2/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5M3 corrected Mac fixture:** prepare a reviewed
-      private-cwd header symlink, then release a separate one-run control.
+- [x] **N8D7M12 Part 5M3 corrected Mac fixture A (`fdb5270c`):**
+      reviewed script `1056304d…d6738` adds a private-cwd header symlink
+      to the pinned Part 1 fork; OFF env and run guards unchanged.
+      Checker39/39; no replay. `local/research/N8D7M12P5M3/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5M4 Mac OFF control:** one separately released run
+      with suite585/585, 41 rows and PPM required; compare against Mac ON.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
