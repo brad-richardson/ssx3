@@ -99,11 +99,34 @@ time.sleep(6)
 sh('input keyevent 4')
 log('BACK sent')
 time.sleep(2)
-layer = ''
-for l in sh('dumpsys SurfaceFlinger --list').splitlines():
-    if PKG in l and 'NativeActivity' in l and 'Background' not in l:
-        layer = l.strip()
-log(f'LAYER {layer!r}')
+
+def pick_layer():
+    # PF1: the app's own `com.ps2x.runner/android.app.NativeActivity#N` layer;
+    # skip leash/InputSink/Background. This ROM wraps --list rows in
+    # RequestedLayerState{Surface(name=<id> <name>)/@...}, so try both forms and
+    # keep the first candidate whose --latency dump has frame rows.
+    cands = []
+    for l in sh('dumpsys SurfaceFlinger --list').splitlines():
+        if PKG not in l or any(x in l for x in ('leash', 'InputSink', 'Background')):
+            continue
+        cands += re.findall(r'(com\.ps2x\.runner/android\.app\.NativeActivity#\d+)', l)
+        m = re.search(r'name=(\S+ )?(com\.ps2x\.runner/[^)]*)\)', l)
+        if m:
+            cands.append(m.group(2))
+        cands.append(l.strip())
+    seen = []
+    for c in cands:
+        if c in seen:
+            continue
+        seen.append(c)
+        rows = [r for r in sh(f"dumpsys SurfaceFlinger --latency '{c}'").splitlines() if '\t' in r]
+        if len(rows) > 2:
+            return c, seen
+    return '', seen
+
+
+layer, tried = pick_layer()
+log(f'LAYER {layer!r} tried={tried}')
 json.dump({'T0': T0, 'layer': layer, 'env': env}, open(f'{OUT}/meta.json', 'w'), indent=1)
 
 rate_re = re.compile(r'\[vsync-rate\] tick=(\d+) rate=([\d.]+)')
@@ -141,6 +164,16 @@ while True:
         break
     if el - last_lat >= 10:
         last_lat = el
+        if not layer:
+            layer, tried = pick_layer()
+            log(f'LAYER retry {layer!r} tried={tried}')
+        therm = sh('echo "$(cat /sys/devices/system/cpu/cpu5/cpufreq/scaling_cur_freq) '
+                   '$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq) '
+                   '$(for z in /sys/class/thermal/thermal_zone*; do [ "$(cat $z/type)" = cpu-1-1-1 ] && cat $z/temp; done) '
+                   '$(dumpsys thermalservice | grep -m1 "Thermal Status" | tr -dc 0-9)"; '
+                   f'ps -T -p {pid} -o tid,psr,pcpu,name | grep GameThread').split()
+        with open(f'{OUT}/thermal.txt', 'a') as f:
+            f.write(f't={el:.1f} tick={tick} ' + ' '.join(therm) + '\n')
         with open(f'{OUT}/sf-latency.txt', 'a') as f:
             f.write(f'POLL t={el:.1f} tick={tick}\n')
             f.write(sh(f"dumpsys SurfaceFlinger --latency '{layer}'"))

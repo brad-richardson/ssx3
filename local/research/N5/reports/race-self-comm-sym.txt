@@ -1,0 +1,83 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 130515
+Event count: 120242448377
+
+Overhead  Command          Symbol
+17.85%    GameThread       VU1Interpreter::commitReadyPipelines()
+11.23%    GameThread       GSCpuBackend::WritePixel(GSDrawState const&, int, int, int, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char)
+9.40%     GameThread       VU1Interpreter::calculatePairReadyCycle(VU1Interpreter::DecodedInstructionPair const&) const
+7.28%     GameThread       GSCpuBackend::SampleTexture(GSDrawState const&, float, float, float, unsigned short, unsigned short)::$_0::operator()(int, int) const
+5.08%     GameThread       VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+4.58%     GameThread       GSCpuBackend::SampleTexture(GSDrawState const&, float, float, float, unsigned short, unsigned short)
+4.35%     GameThread       @plt
+2.81%     GameThread       VU1Interpreter::execUpper(unsigned int)
+2.42%     GameThread       VU1Interpreter::normalizeOperand(float) const
+2.33%     GameThread       VU1Interpreter::markPairWrites(VU1Interpreter::DecodedInstructionPair const&)
+2.13%     GameThread       GSCpuBackend::LookupCLUT(GSDrawState const&, unsigned char, unsigned int, unsigned char, unsigned char, unsigned char, unsigned char)
+2.11%     GameThread       GSCpuBackend::DrawTriangle(GSPrimitiveBatch const&)
+2.08%     GameThread       VU1Interpreter::calculateFmacExactResult(unsigned int, double&) const
+1.57%     GameThread       GSMem::ReadCT32(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+1.47%     GameThread       GSCpuBackend::DrawSprite(GSPrimitiveBatch const&)
+1.44%     GameThread       __memset_aarch64_nt
+1.42%     GameThread       VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+1.36%     GameThread       VU1Interpreter::normalizeFmacResult(float*, unsigned char, unsigned char*)
+1.30%     GameThread       VU1Interpreter::calculateFmacProductSticky(unsigned char) const
+1.12%     GameThread       (anonymous namespace)::combineTexture(GSTex0Reg const&, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char)
+1.01%     GameThread       std::__ndk1::__function::__func<unsigned int (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int), std::__ndk1::allocator<unsigned int (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)>, unsigned int (unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)>::operator()(unsigned char*&&, unsigned int&&, unsigned int&&, unsigned int&&, unsigned int&&)
+0.98%     com.ps2x.runner  clock_gettime
+0.94%     GameThread       VU1Interpreter::updateFmacFlags(unsigned char const*, unsigned char, unsigned int)
+0.88%     GameThread       VU1Interpreter::getDecodedInstructionPairForPc(unsigned char const*, unsigned int, PS2Memory*, unsigned int)
+0.78%     com.ps2x.runner  __kernel_clock_gettime
+0.68%     GameThread       VU1Interpreter::progressXgkick()
+0.56%     com.ps2x.runner  GSCpuBackend::CopyFrameToHostRgba(GSFrameReg const&, unsigned int, unsigned int, std::__ndk1::vector<unsigned char, std::__ndk1::allocator<unsigned char>>&, bool, bool, bool, unsigned int, unsigned int) const
+0.55%     GameThread       VU1Interpreter::queueVfWrite(unsigned char, unsigned char, float const*, unsigned int)
+0.55%     GameThread       std::__ndk1::__function::__func<void (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int), std::__ndk1::allocator<void (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)>, void (unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)>::operator()(unsigned char*&&, unsigned int&&, unsigned int&&, unsigned int&&, unsigned int&&, unsigned int&&)
+0.47%     GameThread       PS2Memory::advanceEeTimers(unsigned long)
+0.46%     GameThread       GSMem::ReadP8(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.45%     GameThread       GSMem::WriteCT32(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)
+0.28%     GameThread       sub_00416810_0x416810(unsigned char*, R5900Context*, PS2Runtime*)
+0.26%     GameThread       PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+0.26%     GameThread       VU1Interpreter::applyFmacDestAcc(float*, unsigned char)
+0.22%     GameThread       GSMem::ReadP8H(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.19%     GameThread       EeScheduler::checkpointDue(unsigned int)
+0.19%     GameThread       GSMem::ReadZ24(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.19%     com.ps2x.runner  GSMem::ReadCT24(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.17%     GameThread       VU1Interpreter::applyFmacDest(float*, float*, unsigned char)
+0.15%     com.ps2x.runner  __memcpy_aarch64_nt
+0.14%     GameThread       VU1Interpreter::applyDest(float*, float const*, unsigned char)
+0.13%     GameThread       __vfprintf
+0.13%     GameThread       VU1Interpreter::queueAccWrite(unsigned char, float const*, unsigned int)
+0.13%     GameThread       VU1Interpreter::decodeLowerUsage(unsigned int) const
+0.13%     GameThread       GSMem::ReadCT16(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.12%     GameThread       PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+0.12%     GameThread       GSMem::WriteCT16(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)
+0.12%     com.ps2x.runner  std::__ndk1::__function::__func<unsigned int (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int), std::__ndk1::allocator<unsigned int (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)>, unsigned int (unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)>::operator()(unsigned char*&&, unsigned int&&, unsigned int&&, unsigned int&&, unsigned int&&)
+0.11%     GameThread       __emutls_get_address
+0.11%     GameThread       GSMem::WriteCT24(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)
+0.10%     GameThread       VU1Interpreter::broadcast(float const*, unsigned char)
+0.10%     GameThread       VU1Interpreter::decodeUpperUsage(unsigned int) const
+0.10%     GameThread       sub_0037E120_0x37e120(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     GameThread       libunwind::findUnwindSectionsByPhdr(dl_phdr_info*, unsigned long, void*)
+0.09%     GameThread       GSMem::WriteZ24(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)
+0.09%     GameThread       pthread_mutex_lock
+0.08%     GameThread       GSMem::ReadZ16(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.08%     GameThread       GSMem::ReadP4(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.08%     GameThread       __sfvwrite
+0.07%     GameThread       __memcpy_aarch64_nt
+0.07%     GameThread       GS::buildDrawBatch(int) const
+0.07%     com.ps2x.runner  WaitTime
+0.07%     GameThread       [kernel.kallsyms][+ffffffe760ad37c0]
+0.06%     com.ps2x.runner  [kernel.kallsyms][+ffffffe761a8e810]
+0.06%     GameThread       VU1Interpreter::resetScheduler()
+0.06%     GameThread       GSMem::ReadCT24(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+0.06%     GameThread       GS::vertexKick(bool)
+0.06%     GameThread       GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+0.06%     GameThread       VU1Interpreter::pipelinesPending() const
+0.05%     GameThread       sub_00376938_0x376938(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     GameThread       VU1Interpreter::decodeInstructionPair(unsigned char const*, unsigned int) const
+0.05%     com.ps2x.runner  !!!0000!a0d82c13dd4b4e4f31b6cd30a2cb0d!a9ee82cd83!
+0.05%     GameThread       GSCpuBackend::UploadImage(unsigned char const*, unsigned int)
+0.05%     GameThread       pthread_mutex_unlock
+0.05%     GameThread       ps2DiagWatchEnabled()

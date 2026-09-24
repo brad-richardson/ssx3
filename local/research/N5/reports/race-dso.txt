@@ -1,0 +1,38 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 130515
+Event count: 120242448377
+
+Overhead  Shared Object
+95.00%    /data/app/~~F_TXGpzZKpUi8TmYNi8VZg==/com.ps2x.runner-p99lIzv1Tx2JYqcmszRZNw==/base.apk!/lib/arm64-v8a/libps2EntryRunner.so
+3.27%     /apex/com.android.runtime/lib64/bionic/libc.so
+0.78%     [vdso]
+0.36%     [kernel.kallsyms]
+0.21%     /vendor/lib64/egl/libGLESv2_adreno.so
+0.08%     /system/lib64/libgui.so
+0.06%     /system/lib64/libaaudio_internal.so
+0.04%     /apex/com.android.runtime/lib64/bionic/libm.so
+0.04%     /system/lib64/libbinder.so
+0.03%     /apex/com.android.runtime/bin/linker64
+0.02%     /system/lib64/libutils.so
+0.01%     /vendor/lib64/vendor.qti.hardware.display.snapalloc-impl.so
+0.01%     /system/lib64/libc++.so
+0.01%     /vendor/lib64/libgrallocutils.so
+0.01%     /vendor/lib64/libgsl.so
+0.01%     /system/lib64/libui.so
+0.01%     /vendor/lib64/hw/mapper.qti.so
+0.01%     /system/lib64/libandroid_runtime.so
+0.00%     /system/lib64/libEGL.so
+0.00%     /vendor/lib64/egl/eglSubDriverAndroid.so
+0.00%     /vendor/lib64/egl/libEGL_adreno.so
+0.00%     /system/lib64/libcutils.so
+0.00%     /apex/com.android.runtime/lib64/bionic/libdl.so
+0.00%     /vendor/lib64/libc++.so
+0.00%     /vendor/lib64/libcutils.so
+0.00%     /system/lib64/libGLESv2.so
+0.00%     /system_ext/lib64/libpenguin.so
+0.00%     /system/lib64/libnativewindow.so
+0.00%     /system/lib64/libsync.so
+0.00%     /system_ext/lib64/libpenguin_impl.so
+0.00%     /vendor/lib64/libadreno_utils.so

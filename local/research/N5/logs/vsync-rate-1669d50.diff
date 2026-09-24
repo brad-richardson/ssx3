@@ -1,0 +1,53 @@
+commit 1669d50d8fa1aab49d04ea6b3d969cebccb23362
+Author: n2-local <n2@local>
+Date:   Wed Sep 23 18:52:18 2026 -0400
+
+    [N5-local] Env-gated PS2X_VSYNC_RATE_LOG guest vsync-rate line, ported from I25 31d988d (n5-android only, never push)
+    
+    One fprintf per 5 s on the host loop when PS2X_VSYNC_RATE_LOG=1; off by default (one getenv at loop start). Needed for dumps-off speed numbers: the frame-dump tick lines are the only other counter.
+    
+    Orchestrated-By: Claude Code
+
+diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
+index 6138f75..d8a8739 100644
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -31,6 +31,7 @@
+ #include <cstring>
+ #include <limits>
+ #include <chrono>
++#include <cstdio>
+ #include <atomic>
+ #include <thread>
+ #include <unordered_map>
+@@ -3327,8 +3328,30 @@ void PS2Runtime::run()
+         gameThreadFinished.store(true, std::memory_order_release); });
+ 
+     uint64_t tick = 0;
++    // I25: PS2X_VSYNC_RATE_LOG=1 prints guest vsyncs per wall second every
++    // 5 s (diagnostic; off by default, one getenv at loop start).
++    const bool vsyncRateLog = [] {
++        const char *env = std::getenv("PS2X_VSYNC_RATE_LOG");
++        return env && env[0] == '1';
++    }();
++    auto vsyncRateWall = std::chrono::steady_clock::now();
++    uint64_t vsyncRateTick = m_memory.gs().vsyncTick.load();
+     while (!isStopRequested() && !gameThreadFinished.load(std::memory_order_acquire))
+     {
++        if (vsyncRateLog)
++        {
++            const auto now = std::chrono::steady_clock::now();
++            const double secs = std::chrono::duration<double>(now - vsyncRateWall).count();
++            if (secs >= 5.0)
++            {
++                const uint64_t vt = m_memory.gs().vsyncTick.load();
++                const double rate = static_cast<double>(vt - vsyncRateTick) / secs;
++                std::fprintf(stderr, "[vsync-rate] tick=%llu rate=%.2f/s (%.3fx of 59.94)\n",
++                             static_cast<unsigned long long>(vt), rate, rate / 59.94);
++                vsyncRateWall = now;
++                vsyncRateTick = vt;
++            }
++        }
+         PS2_IF_AGRESSIVE_LOGS({
+             tick++;
+             if ((tick % 120) == 0)

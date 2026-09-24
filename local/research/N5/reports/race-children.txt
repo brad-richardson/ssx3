@@ -1,0 +1,68 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 130515
+Event count: 120242448377
+
+Children  Self    Symbol
+96.07%    0.00%   __pthread_start(void*)
+96.07%    0.00%   __start_thread
+95.87%    0.01%   EeScheduler::run()
+95.87%    0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, PS2Runtime::run()::$_0>>(void*)
+87.21%    0.00%   sub_00382760_0x382760(unsigned char*, R5900Context*, PS2Runtime*)
+87.16%    0.01%   PS2Runtime::Store32(unsigned char*, R5900Context*, unsigned int, unsigned int)
+87.14%    0.02%   PS2Memory::writeIORegister(unsigned int, unsigned int)
+87.05%    0.00%   PS2Memory::processPendingTransfers()
+80.49%    0.26%   PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+71.35%    5.08%   VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+67.34%    0.00%   std::__ndk1::__function::__func<PS2Runtime::syncCoreSubsystems()::$_2, std::__ndk1::allocator<PS2Runtime::syncCoreSubsystems()::$_2>, void (unsigned int, unsigned int, unsigned int)>::operator()(unsigned int&&, unsigned int&&, unsigned int&&)
+36.30%    0.00%   GifArbiter::drain()
+36.27%    0.02%   GS::processGIFPacket(unsigned char const*, unsigned int)
+36.07%    0.06%   GS::vertexKick(bool)
+35.85%    0.01%   GSCpuBackend::Submit(GSPrimitiveBatch const&)
+22.42%    1.47%   GSCpuBackend::DrawSprite(GSPrimitiveBatch const&)
+19.05%    0.00%   GS::writeRegisterUnlocked(unsigned char, unsigned long)
+17.86%    17.85%  VU1Interpreter::commitReadyPipelines()
+17.86%    0.68%   VU1Interpreter::progressXgkick()
+17.77%    0.00%   PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+17.07%    4.58%   GSCpuBackend::SampleTexture(GSDrawState const&, float, float, float, unsigned short, unsigned short)
+13.87%    2.81%   VU1Interpreter::execUpper(unsigned int)
+13.59%    11.23%  GSCpuBackend::WritePixel(GSDrawState const&, int, int, int, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char)
+13.50%    0.12%   PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+13.38%    2.11%   GSCpuBackend::DrawTriangle(GSPrimitiveBatch const&)
+12.49%    7.28%   GSCpuBackend::SampleTexture(GSDrawState const&, float, float, float, unsigned short, unsigned short)::$_0::operator()(int, int) const
+12.02%    0.00%   PS2Memory::flushMaskedPath3Packets(bool)
+9.41%     9.40%   VU1Interpreter::calculatePairReadyCycle(VU1Interpreter::DecodedInstructionPair const&) const
+6.58%     0.01%   sub_00382AF0_0x382af0(unsigned char*, R5900Context*, PS2Runtime*)
+6.55%     0.00%   sub_00371940_0x371940(unsigned char*, R5900Context*, PS2Runtime*)
+5.34%     0.04%   PS2Runtime::executeVU0Microprogram(unsigned char*, R5900Context*, unsigned int)
+4.39%     4.39%   @plt
+3.97%     0.26%   VU1Interpreter::applyFmacDestAcc(float*, unsigned char)
+3.77%     0.03%   sub_0022ADD8_0x22add8(unsigned char*, R5900Context*, PS2Runtime*)
+3.63%     1.36%   VU1Interpreter::normalizeFmacResult(float*, unsigned char, unsigned char*)
+3.31%     0.00%   PS2Runtime::run()
+3.31%     0.00%   main
+2.42%     2.42%   VU1Interpreter::normalizeOperand(float) const
+2.36%     0.17%   VU1Interpreter::applyFmacDest(float*, float*, unsigned char)
+2.34%     2.33%   VU1Interpreter::markPairWrites(VU1Interpreter::DecodedInstructionPair const&)
+2.13%     2.13%   GSCpuBackend::LookupCLUT(GSDrawState const&, unsigned char, unsigned int, unsigned char, unsigned char, unsigned char, unsigned char)
+2.08%     2.08%   VU1Interpreter::calculateFmacExactResult(unsigned int, double&) const
+2.05%     0.00%   EndDrawing
+1.86%     0.01%   sub_0022A408_0x22a408(unsigned char*, R5900Context*, PS2Runtime*)
+1.85%     0.01%   sub_0022A128_0x22a128(unsigned char*, R5900Context*, PS2Runtime*)
+1.77%     0.99%   clock_gettime
+1.76%     1.42%   VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+1.66%     0.02%   sub_0022A830_0x22a830(unsigned char*, R5900Context*, PS2Runtime*)
+1.58%     0.07%   WaitTime
+1.57%     1.57%   GSMem::ReadCT32(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)
+1.47%     1.47%   __memset_aarch64_nt
+1.30%     1.30%   VU1Interpreter::calculateFmacProductSticky(unsigned char) const
+1.23%     0.06%   VU1Interpreter::resetScheduler()
+1.21%     0.03%   sub_003E2768_0x3e2768(unsigned char*, R5900Context*, PS2Runtime*)
+1.19%     0.88%   VU1Interpreter::getDecodedInstructionPairForPc(unsigned char const*, unsigned int, PS2Memory*, unsigned int)
+1.13%     1.13%   std::__ndk1::__function::__func<unsigned int (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int), std::__ndk1::allocator<unsigned int (*)(unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)>, unsigned int (unsigned char*, unsigned int, unsigned int, unsigned int, unsigned int)>::operator()(unsigned char*&&, unsigned int&&, unsigned int&&, unsigned int&&, unsigned int&&)
+1.12%     1.12%   (anonymous namespace)::combineTexture(GSTex0Reg const&, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char)
+1.11%     0.00%   sub_003DDFA8_0x3ddfa8(unsigned char*, R5900Context*, PS2Runtime*)
+1.03%     0.00%   GS::latchHostPresentationFrame()
+1.01%     0.00%   sub_0022A368_0x22a368(unsigned char*, R5900Context*, PS2Runtime*)
+1.00%     0.01%   sub_00229FC8_0x229fc8(unsigned char*, R5900Context*, PS2Runtime*)
