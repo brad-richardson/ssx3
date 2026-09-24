@@ -28,7 +28,7 @@ Private lane: ~/dev/ssx3-work/E55D12/run/S1/ (boot.log, boot.log.gz, probe.log, 
   result.json sha256 9f2e6103e94e58debaff27c8f3d546e6a12d985038f97543d9584f59a67ac27d
 
 Padscript rows in boot.log (19 total = 1 armed + 9 press + 9 release; no other input):
-  armed n=9 clock=vsync; press Start 0x0008 x1, Square 0x8000 x1, Down 0x0040 x5 (separate i=2..6 plus i=7), Cross 0x4000 x2 (i=6 C1, i=8 C2); 9 releases
+  armed n=9 clock=vsync; press Start 0x0008 x1, Square 0x8000 x1, Down 0x0040 x5 (separate i=2..5 plus i=7), Cross 0x4000 x2 (i=6 C1, i=8 C2); 9 releases
   order: start, square, down, down, down, down, cross, down, cross
   D4 (i=5) press now=20203ms at=20187ms (16 ms late vs plan, same as E55D11); C2 (i=8) press now=28378ms at=28362ms (16 ms late); all gaps still >= 60 ticks
 
