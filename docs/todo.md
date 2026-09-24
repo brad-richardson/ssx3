@@ -962,10 +962,17 @@ with measured budgets, then 120 Hz simulation.
       in the APK namespace remain untested. N8B: one bounded arm64 build
       and functional Odin launch, with packaged-driver SHA, mapped HMI,
       Turnip driver identity, live GS counters and a viewed frame as gates.
-      No speed or app-runtime claim from N8A. **N8B1 queued:** port the
-      N7 Android env/build pieces and G43 HMI hook into the folded
-      in-process backend, build and SHA-gate one arm64 Turnip APK, no
-      device use. N8B2 is the separate one-launch Odin gate.
+      No speed or app-runtime claim from N8A. **N8B1 PASS (dea8416;
+      source/APK only):** ported N7 Android env/build pieces and the G43
+      HMI hook on local fork branch `n8-turnip-apk` (`17e90de`, from
+      `4f93216`). Host suite 585/585. First APK packaged correctly but
+      left IOP trace and debug UI enabled; one repair turned all five
+      diagnostic flags off. Final arm64 APK SHA `1096a28e…b190da`
+      contains runner SHA `cdbaa6dd…eb033`, Build ID `28340bbe…0add`,
+      and pinned Turnip SHA `717812c3…1ac29d`; no x86_64 member.
+      Linked loader markers and runner-dir guard checked. No fork push
+      or app-runtime claim. **N8B2 queued:** one Odin install/launch to
+      prove app-process HMI, Turnip identity, live GS and visible race.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
