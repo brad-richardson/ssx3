@@ -1,0 +1,39 @@
+N8C1 Odin read-only audit, serial 622c49b1, Android SDK 35.
+
+Claim command:
+adb -s 622c49b1 shell 'old=$(cat /data/local/tmp/mg/LEASE); case "$old" in LEASE_FREE*) printf "N8C1 read-only audit\n" > /data/local/tmp/mg/LEASE;; *) printf "BUSY %s\n" "$old"; exit 2;; esac; cat /data/local/tmp/mg/LEASE'
+Result: N8C1 read-only audit
+
+Public-list and presence command:
+adb -s 622c49b1 shell 'test "$(cat /data/local/tmp/mg/LEASE)" = "N8C1 read-only audit" || exit 3; cat /system/etc/public.libraries.txt; for l in libhardware.so libcutils.so libvndksupport.so libc++.so liblog.so libnativewindow.so libsync.so libm.so libz.so libdl.so libc.so; do echo "LIB $l"; for d in /system/lib64 /system_ext/lib64 /vendor/lib64 /apex/com.android.vndk.v*/lib64 /apex/com.android.runtime/lib64 /apex/com.android.media/lib64; do test ! -f "$d/$l" || ls -l "$d/$l"; done; done'
+Relevant public entries observed: libc.so libdl.so liblog.so libm.so libnativewindow.so libsync.so libz.so.
+Nonpublic names observed absent from public list: libhardware.so libcutils.so libvndksupport.so libc++.so libbase.so libdl_android.so ld-android.so.
+All seven nonpublic names have /system/lib64 files or symlinks. libdl_android.so symlinks to /apex/com.android.runtime/lib64/bionic/libdl_android.so.
+
+First four device hash pairs command:
+adb -s 622c49b1 shell 'test "$(cat /data/local/tmp/mg/LEASE)" = "N8C1 read-only audit" || exit 3; sha256sum /system/lib64/libhardware.so /system/lib64/libcutils.so /system/lib64/libvndksupport.so /system/lib64/libc++.so; sha256sum /system/lib64/libhardware.so /system/lib64/libcutils.so /system/lib64/libvndksupport.so /system/lib64/libc++.so'
+Each line of the first set matched the corresponding line of the second set:
+1184f1203eadb78eeb1499c5481c1da96a79f9a17fef3eaedad0c52b40cb14fa  /system/lib64/libhardware.so
+1cf4a17b4b0a8077c24aa04d34a88f8d3dcd96192f7b1587c333bf174c316ec8  /system/lib64/libcutils.so
+63c932c8d244562d59502d2f6a64c82f999ba2175663e2ea5d7024e5828d44c3  /system/lib64/libvndksupport.so
+794eb8fafd7be35da3725e9ec0b15189c6f4f2544f5b78afd8a647dde5b69195  /system/lib64/libc++.so
+
+Next two device hash pairs command:
+adb -s 622c49b1 shell 'test "$(cat /data/local/tmp/mg/LEASE)" = "N8C1 read-only audit" || exit 3; for l in libbase.so libdl_android.so; do echo "LIB $l"; ls -l /system/lib64/$l /apex/com.android.runtime/lib64/bionic/$l 2>/dev/null; sha256sum /system/lib64/$l /system/lib64/$l; done'
+08a388dcf0016d07d0f6ac04c736bca65cd5c9637bd36b8bf43e970e9f166e9c  /system/lib64/libbase.so (twice)
+10370703f28cb1aebc12f30cec1e6e3940e65975495e01c69642f29195b31adc  /system/lib64/libdl_android.so (twice)
+
+Last device hash pair command:
+adb -s 622c49b1 shell 'test "$(cat /data/local/tmp/mg/LEASE)" = "N8C1 read-only audit" || exit 3; sha256sum /system/lib64/ld-android.so; sha256sum /system/lib64/ld-android.so'
+599ae148e0abc4a93d0d20915338c494a2cbb5df5ba28257f0ac84e6f0e3447a  /system/lib64/ld-android.so (twice)
+
+Copy commands, all completed:
+for l in libhardware.so libcutils.so libvndksupport.so libc++.so; do adb -s 622c49b1 pull /system/lib64/$l /Users/brad/dev/ssx3-work/N8C1/inputs/$l || exit; done
+for l in libbase.so libdl_android.so; do adb -s 622c49b1 pull /system/lib64/$l /Users/brad/dev/ssx3-work/N8C1/inputs/$l || exit; done
+adb -s 622c49b1 pull /system/lib64/ld-android.so /Users/brad/dev/ssx3-work/N8C1/inputs/ld-android.so
+shasum -a 256 /Users/brad/dev/ssx3-work/N8C1/inputs/*.so
+All seven local hashes matched the pairs above. Total copied bytes: about 1.5 MiB.
+
+Release command:
+adb -s 622c49b1 shell 'test "$(cat /data/local/tmp/mg/LEASE)" = "N8C1 read-only audit" || exit 3; printf "LEASE_FREE N8C1 done\n" > /data/local/tmp/mg/LEASE; cat /data/local/tmp/mg/LEASE'
+Result: LEASE_FREE N8C1 done

@@ -1,0 +1,72 @@
+FILE /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+  0x0000000000000001 (NEEDED)          Shared library: [libhardware.so]
+  0x0000000000000001 (NEEDED)          Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libnativewindow.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libsync.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libz.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x000000000000000e (SONAME)          Library soname: [libvulkan_freedreno.so]
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf --dyn-syms /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+  2117: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND hw_get_module
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/ld-android.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/ld-android.so
+  0x000000000000000e (SONAME)   Library soname: [ld-android.so]
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/libbase.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/libbase.so
+  0x0000000000000001 (NEEDED)          Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libbase.so]
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/libc++.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/libc++.so
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libc++.so]
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/libcutils.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/libcutils.so
+  0x0000000000000001 (NEEDED)          Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libbase.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libcutils.so]
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/libdl_android.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/libdl_android.so
+  0x0000000000000001 (NEEDED)    Shared library: [ld-android.so]
+  0x000000000000000e (SONAME)    Library soname: [libdl_android.so]
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/libhardware.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/libhardware.so
+  0x0000000000000001 (NEEDED)          Shared library: [libcutils.so]
+  0x0000000000000001 (NEEDED)          Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libvndksupport.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)          Shared library: [libdl.so]
+  0x000000000000000e (SONAME)          Library soname: [libhardware.so]
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf --dyn-syms /Users/brad/dev/ssx3-work/N8C1/inputs/libhardware.so
+    18: 0000000000004020   908 FUNC    GLOBAL DEFAULT    14 hw_get_module_by_class
+    19: 0000000000004568    16 FUNC    GLOBAL DEFAULT    14 hw_get_module
+
+FILE /Users/brad/dev/ssx3-work/N8C1/inputs/libvndksupport.so
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-readelf -d /Users/brad/dev/ssx3-work/N8C1/inputs/libvndksupport.so
+  0x0000000000000001 (NEEDED)       Shared library: [libdl_android.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc++.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x000000000000000e (SONAME)       Library soname: [libvndksupport.so]

@@ -1,0 +1,329 @@
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-objdump -d --no-show-raw-insn --start-address=0xc92a8c --stop-address=0xc92bdc /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+
+/Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000925e30 <.text>:
+  c92a8c:      	stp	x29, x30, [sp, #-0x30]!
+  c92a90:      	str	x21, [sp, #0x10]
+  c92a94:      	stp	x20, x19, [sp, #0x20]
+  c92a98:      	mov	x29, sp
+  c92a9c:      	adrp	x19, 0xda7000
+  c92aa0:      	add	x19, x19, #0xd20
+  c92aa4:      	mov	w20, w0
+  c92aa8:      	mov	w0, wzr
+  c92aac:      	mov	w1, #0x1                // =1
+  c92ab0:      	mov	x2, x19
+  c92ab4:      	bl	0xcf0070 <.text+0x3ca240>
+  c92ab8:      	cmp	w0, #0x0
+  c92abc:      	b.ne	0xc92c10 <.text+0x36cde0>
+  c92ac0:      	add	x21, x19, w20, uxtw #4
+  c92ac4:      	ldr	x19, [x21, #0x8]!
+  c92ac8:      	cbz	x19, 0xc92ad8 <.text+0x36cca8>
+  c92acc:      	ldr	w8, [x21, #0x8]
+  c92ad0:      	add	w8, w8, #0x1
+  c92ad4:      	b	0xc92bdc <.text+0x36cdac>
+  c92ad8:      	cmp	w20, #0x2
+  c92adc:      	b.le	0xc92b10 <.text+0x36cce0>
+  c92ae0:      	cmp	w20, #0x3
+  c92ae4:      	b.eq	0xc92b34 <.text+0x36cd04>
+  c92ae8:      	cmp	w20, #0x4
+  c92aec:      	b.eq	0xc92b4c <.text+0x36cd1c>
+  c92af0:      	cmp	w20, #0x5
+  c92af4:      	b.ne	0xc92be0 <.text+0x36cdb0>
+  c92af8:      	bl	0xc92d28 <.text+0x36cef8>
+  c92afc:      	mov	x19, x0
+  c92b00:      	str	x0, [x21]
+  c92b04:      	cbz	x0, 0xc92be0 <.text+0x36cdb0>
+  c92b08:      	mov	w8, #0x5                // =5
+  c92b0c:      	b	0xc92bd4 <.text+0x36cda4>
+  c92b10:      	cbz	w20, 0xc92b64 <.text+0x36cd34>
+  c92b14:      	cmp	w20, #0x2
+  c92b18:      	b.ne	0xc92be0 <.text+0x36cdb0>
+  c92b1c:      	bl	0xc933d0 <.text+0x36d5a0>
+  c92b20:      	mov	x19, x0
+  c92b24:      	str	x0, [x21]
+  c92b28:      	cbz	x0, 0xc92be0 <.text+0x36cdb0>
+  c92b2c:      	mov	w8, #0x2                // =2
+  c92b30:      	b	0xc92bd4 <.text+0x36cda4>
+  c92b34:      	bl	0xc93730 <.text+0x36d900>
+  c92b38:      	mov	x19, x0
+  c92b3c:      	str	x0, [x21]
+  c92b40:      	cbz	x0, 0xc92be0 <.text+0x36cdb0>
+  c92b44:      	mov	w8, #0x3                // =3
+  c92b48:      	b	0xc92bd4 <.text+0x36cda4>
+  c92b4c:      	bl	0xc938c8 <.text+0x36da98>
+  c92b50:      	mov	x19, x0
+  c92b54:      	str	x0, [x21]
+  c92b58:      	cbz	x0, 0xc92be0 <.text+0x36cdb0>
+  c92b5c:      	mov	w8, #0x4                // =4
+  c92b60:      	b	0xc92bd4 <.text+0x36cda4>
+  c92b64:      	bl	0xc933d0 <.text+0x36d5a0>
+  c92b68:      	str	x0, [x21]
+  c92b6c:      	cbz	x0, 0xc92b80 <.text+0x36cd50>
+  c92b70:      	mov	x19, x0
+  c92b74:      	nop
+  c92b78:      	adr	x8, 0xd845a8
+  c92b7c:      	b	0xc92bd0 <.text+0x36cda0>
+  c92b80:      	bl	0xc93730 <.text+0x36d900>
+  c92b84:      	str	x0, [x21]
+  c92b88:      	cbz	x0, 0xc92b9c <.text+0x36cd6c>
+  c92b8c:      	mov	x19, x0
+  c92b90:      	adrp	x8, 0xd84000
+  c92b94:      	add	x8, x8, #0x5b8
+  c92b98:      	b	0xc92bd0 <.text+0x36cda0>
+  c92b9c:      	bl	0xc938c8 <.text+0x36da98>
+  c92ba0:      	str	x0, [x21]
+  c92ba4:      	cbz	x0, 0xc92bb8 <.text+0x36cd88>
+  c92ba8:      	mov	x19, x0
+  c92bac:      	adrp	x8, 0xd84000
+  c92bb0:      	add	x8, x8, #0x5c8
+  c92bb4:      	b	0xc92bd0 <.text+0x36cda0>
+  c92bb8:      	bl	0xc92d28 <.text+0x36cef8>
+  c92bbc:      	mov	x19, x0
+  c92bc0:      	str	x0, [x21]
+  c92bc4:      	cbz	x0, 0xc92be0 <.text+0x36cdb0>
+  c92bc8:      	adrp	x8, 0xd84000
+  c92bcc:      	add	x8, x8, #0x5d8
+  c92bd0:      	ldr	w8, [x8]
+  c92bd4:      	str	w8, [x19, #0x20]
+  c92bd8:      	mov	w8, #0x1                // =1
+
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-objdump -d --no-show-raw-insn --start-address=0xc92d28 --stop-address=0xc92dc0 /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+
+/Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000925e30 <.text>:
+  c92d28:      	stp	x29, x30, [sp, #-0x20]!
+  c92d2c:      	str	x19, [sp, #0x10]
+  c92d30:      	mov	x29, sp
+  c92d34:      	mov	w0, #0x1                // =1
+  c92d38:      	mov	w1, #0x30               // =48
+  c92d3c:      	bl	0xcf4520 <calloc@plt>
+  c92d40:      	mov	x19, x0
+  c92d44:      	adrp	x0, 0x58000
+  c92d48:      	add	x0, x0, #0x207
+  c92d4c:      	add	x1, x19, #0x28
+  c92d50:      	bl	0xcf4f60 <hw_get_module@plt>
+  c92d54:      	cbz	w0, 0xc92d74 <.text+0x36cf44>
+  c92d58:      	adrp	x2, 0x54000
+  c92d5c:      	add	x2, x2, #0xb3a
+  c92d60:      	adrp	x1, 0x80000
+  c92d64:      	add	x1, x1, #0x8b6
+  c92d68:      	mov	w0, #0x1                // =1
+  c92d6c:      	bl	0xb41d2c <.text+0x21befc>
+  c92d70:      	b	0xc92d80 <.text+0x36cf50>
+  c92d74:      	ldur	x8, [x19, #0x28]
+  c92d78:      	ldr	x8, [x8, #0x120]
+  c92d7c:      	cbz	x8, 0xc92dc0 <.text+0x36cf90>
+  c92d80:      	nop
+  c92d84:      	adr	x8, 0xc92dcc <.text+0x36cf9c>
+  c92d88:      	adrp	x1, 0x80000
+  c92d8c:      	add	x1, x1, #0x8b6
+  c92d90:      	str	x8, [x19]
+  c92d94:      	nop
+  c92d98:      	adr	x8, 0xc93018 <.text+0x36d1e8>
+  c92d9c:      	adrp	x2, 0xa3000
+  c92da0:      	add	x2, x2, #0x42e
+  c92da4:      	mov	w0, #0x2                // =2
+  c92da8:      	str	x8, [x19, #0x18]
+  c92dac:      	bl	0xb41d2c <.text+0x21befc>
+  c92db0:      	mov	x0, x19
+  c92db4:      	ldr	x19, [sp, #0x10]
+  c92db8:      	ldp	x29, x30, [sp], #0x20
+  c92dbc:      	ret
+
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-objdump -d --no-show-raw-insn --start-address=0xc933d0 --stop-address=0xc934c0 /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+
+/Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000925e30 <.text>:
+  c933d0:      	stp	x29, x30, [sp, #-0x20]!
+  c933d4:      	stp	x20, x19, [sp, #0x10]
+  c933d8:      	mov	x29, sp
+  c933dc:      	mov	w0, #0x1                // =1
+  c933e0:      	mov	w1, #0x30               // =48
+  c933e4:      	bl	0xcf4520 <calloc@plt>
+  c933e8:      	mov	x19, x0
+  c933ec:      	adrp	x0, 0x58000
+  c933f0:      	add	x0, x0, #0x207
+  c933f4:      	add	x1, x19, #0x28
+  c933f8:      	bl	0xcf4f60 <hw_get_module@plt>
+  c933fc:      	cbz	w0, 0xc9340c <.text+0x36d5dc>
+  c93400:      	ldur	x20, [x19, #0x28]
+  c93404:      	cbnz	x20, 0xc93424 <.text+0x36d5f4>
+  c93408:      	b	0xc9342c <.text+0x36d5fc>
+  c9340c:      	ldur	x20, [x19, #0x28]
+  c93410:      	adrp	x1, 0x8c5000
+  c93414:      	add	x1, x1, #0xedc
+  c93418:      	ldr	x0, [x20, #0x10]
+  c9341c:      	bl	0xcf4430 <strcmp@plt>
+  c93420:      	cbz	w0, 0xc93448 <.text+0x36d618>
+  c93424:      	ldr	x0, [x20, #0x28]
+  c93428:      	bl	0xcf5090 <dlclose@plt>
+  c9342c:      	mov	x0, x19
+  c93430:      	bl	0xcf4480 <free@plt>
+  c93434:      	mov	x19, xzr
+  c93438:      	mov	x0, x19
+  c9343c:      	ldp	x20, x19, [sp, #0x10]
+  c93440:      	ldp	x29, x30, [sp], #0x20
+  c93444:      	ret
+  c93448:      	ldr	x8, [x20, #0x118]
+  c9344c:      	cbz	x8, 0xc934a0 <.text+0x36d670>
+  c93450:      	nop
+  c93454:      	adr	x8, 0xc934c4 <.text+0x36d694>
+  c93458:      	nop
+  c9345c:      	adr	x9, 0xc935c4 <.text+0x36d794>
+  c93460:      	adrp	x1, 0x80000
+  c93464:      	add	x1, x1, #0x8b6
+  c93468:      	stp	x8, x9, [x19]
+  c9346c:      	nop
+  c93470:      	adr	x8, 0xc936a0 <.text+0x36d870>
+  c93474:      	nop
+  c93478:      	adr	x9, 0xc936f4 <.text+0x36d8c4>
+  c9347c:      	adrp	x2, 0x8b000
+  c93480:      	add	x2, x2, #0x6b0
+  c93484:      	mov	w0, #0x2                // =2
+  c93488:      	stp	x8, x9, [x19, #0x10]
+  c9348c:      	bl	0xb41d2c <.text+0x21befc>
+  c93490:      	mov	x0, x19
+  c93494:      	ldp	x20, x19, [sp, #0x10]
+  c93498:      	ldp	x29, x30, [sp], #0x20
+  c9349c:      	ret
+  c934a0:      	adrp	x1, 0x80000
+  c934a4:      	add	x1, x1, #0x8b6
+  c934a8:      	adrp	x2, 0x4e000
+  c934ac:      	add	x2, x2, #0xd3e
+  c934b0:      	mov	w0, #0x1                // =1
+  c934b4:      	bl	0xb41d2c <.text+0x21befc>
+  c934b8:      	ldur	x20, [x19, #0x28]
+  c934bc:      	cbnz	x20, 0xc93424 <.text+0x36d5f4>
+
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-objdump -d --no-show-raw-insn --start-address=0xc93730 --stop-address=0xc93800 /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+
+/Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000925e30 <.text>:
+  c93730:      	stp	x29, x30, [sp, #-0x20]!
+  c93734:      	stp	x20, x19, [sp, #0x10]
+  c93738:      	mov	x29, sp
+  c9373c:      	mov	w0, #0x1                // =1
+  c93740:      	mov	w1, #0x38               // =56
+  c93744:      	bl	0xcf4520 <calloc@plt>
+  c93748:      	mov	x19, x0
+  c9374c:      	adrp	x0, 0x58000
+  c93750:      	add	x0, x0, #0x207
+  c93754:      	add	x1, x19, #0x28
+  c93758:      	bl	0xcf4f60 <hw_get_module@plt>
+  c9375c:      	ldr	x20, [x19, #0x28]
+  c93760:      	cbz	w0, 0xc93794 <.text+0x36d964>
+  c93764:      	cbnz	x20, 0xc937a8 <.text+0x36d978>
+  c93768:      	ldr	x0, [x19, #0x30]
+  c9376c:      	cbz	x0, 0xc93778 <.text+0x36d948>
+  c93770:      	ldr	x8, [x0, #0x18]
+  c93774:      	blr	x8
+  c93778:      	mov	x0, x19
+  c9377c:      	bl	0xcf4480 <free@plt>
+  c93780:      	mov	x19, xzr
+  c93784:      	mov	x0, x19
+  c93788:      	ldp	x20, x19, [sp, #0x10]
+  c9378c:      	ldp	x29, x30, [sp], #0x20
+  c93790:      	ret
+  c93794:      	ldr	x0, [x20, #0x10]
+  c93798:      	adrp	x1, 0x8c5000
+  c9379c:      	add	x1, x1, #0xf20
+  c937a0:      	bl	0xcf4430 <strcmp@plt>
+  c937a4:      	cbz	w0, 0xc937bc <.text+0x36d98c>
+  c937a8:      	ldr	x0, [x20, #0x28]
+  c937ac:      	bl	0xcf5090 <dlclose@plt>
+  c937b0:      	ldr	x0, [x19, #0x30]
+  c937b4:      	cbnz	x0, 0xc93770 <.text+0x36d940>
+  c937b8:      	b	0xc93778 <.text+0x36d948>
+  c937bc:      	nop
+  c937c0:      	adr	x8, 0xc93804 <.text+0x36d9d4>
+  c937c4:      	adrp	x1, 0x80000
+  c937c8:      	add	x1, x1, #0x8b6
+  c937cc:      	str	x8, [x19]
+  c937d0:      	nop
+  c937d4:      	adr	x8, 0xc93880 <.text+0x36da50>
+  c937d8:      	adrp	x2, 0x76000
+  c937dc:      	add	x2, x2, #0xd2
+  c937e0:      	mov	w0, #0x1                // =1
+  c937e4:      	str	x8, [x19, #0x18]
+  c937e8:      	bl	0xb41d2c <.text+0x21befc>
+  c937ec:      	bl	0xc92d28 <.text+0x36cef8>
+  c937f0:      	str	x0, [x19, #0x30]
+  c937f4:      	mov	x0, x19
+  c937f8:      	ldp	x20, x19, [sp, #0x10]
+  c937fc:      	ldp	x29, x30, [sp], #0x20
+
+COMMAND /opt/homebrew/opt/llvm/bin/llvm-objdump -d --no-show-raw-insn --start-address=0xc938c8 --stop-address=0xc93980 /Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so
+
+/Users/brad/dev/ssx3-work/G43/inputs/libvulkan_freedreno.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000925e30 <.text>:
+  c938c8:      	stp	x29, x30, [sp, #-0x40]!
+  c938cc:      	str	x23, [sp, #0x10]
+  c938d0:      	stp	x22, x21, [sp, #0x20]
+  c938d4:      	stp	x20, x19, [sp, #0x30]
+  c938d8:      	mov	x29, sp
+  c938dc:      	mov	w0, #0x1                // =1
+  c938e0:      	mov	w1, #0x50               // =80
+  c938e4:      	bl	0xcf4520 <calloc@plt>
+  c938e8:      	mov	x19, x0
+  c938ec:      	adrp	x0, 0x58000
+  c938f0:      	add	x0, x0, #0x207
+  c938f4:      	add	x1, x19, #0x28
+  c938f8:      	bl	0xcf4f60 <hw_get_module@plt>
+  c938fc:      	cbz	w0, 0xc93954 <.text+0x36db24>
+  c93900:      	ldr	x0, [x19, #0x30]
+  c93904:      	cbz	x0, 0xc93910 <.text+0x36dae0>
+  c93908:      	ldr	x8, [x0, #0x70]
+  c9390c:      	blr	x8
+  c93910:      	ldur	x8, [x19, #0x28]
+  c93914:      	cbz	x8, 0xc93920 <.text+0x36daf0>
+  c93918:      	ldr	x0, [x8, #0x28]
+  c9391c:      	bl	0xcf5090 <dlclose@plt>
+  c93920:      	ldr	x0, [x19, #0x48]
+  c93924:      	cbz	x0, 0xc93930 <.text+0x36db00>
+  c93928:      	ldr	x8, [x0, #0x18]
+  c9392c:      	blr	x8
+  c93930:      	mov	x0, x19
+  c93934:      	bl	0xcf4480 <free@plt>
+  c93938:      	mov	x19, xzr
+  c9393c:      	mov	x0, x19
+  c93940:      	ldp	x20, x19, [sp, #0x30]
+  c93944:      	ldr	x23, [sp, #0x10]
+  c93948:      	ldp	x22, x21, [sp, #0x20]
+  c9394c:      	ldp	x29, x30, [sp], #0x40
+  c93950:      	ret
+  c93954:      	ldur	x20, [x19, #0x28]
+  c93958:      	adrp	x1, 0x8c5000
+  c9395c:      	add	x1, x1, #0xf35
+  c93960:      	ldr	x21, [x20, #0x10]
+  c93964:      	mov	x0, x21
+  c93968:      	bl	0xcf4430 <strcmp@plt>
+  c9396c:      	cbz	w0, 0xc9398c <.text+0x36db5c>
+  c93970:      	adrp	x1, 0x8c5000
+  c93974:      	add	x1, x1, #0xf76
+  c93978:      	mov	x0, x21
+  c9397c:      	bl	0xcf4430 <strcmp@plt>
+
+RODATA 0x58207 b'gralloc'
+RODATA 0x54b3a b"No gralloc hwmodule detected (video buffers won't be supported)"
+RODATA 0x808b6 b'MESA'
+RODATA 0x8c5edc b'CrOS Gralloc'
+RODATA 0x8c5f20 b'GBM Memory Allocator'
+RODATA 0x8c5f35 b'Graphics Memory Allocator Module'
+RODATA 0x8c5f76 b'Graphics Memory Module'
+RODATA 0x8c5f35 b'Graphics Memory Allocator Module'
+RODATA 0x8c5f76 b'Graphics Memory Module'
