@@ -939,10 +939,21 @@ with measured budgets, then 120 Hz simulation.
       sampled-word observation. Pins and a bounded three-file tap design
       were handed back; checker returns OTHER at `trace_present`.
       `local/research/GB7C7/ORCH-GATE.md`.
-- [ ] **GB7C7 Part 2 direct CPU texture tap:** relaunch with a scoped
-      per-pane fork/scratch edit exception. Observe packet5470/batch10
-      tap0 word and destination write with default-OFF ON/OFF controls.
-      Only after that consider a matched CPU/paraLLEl address comparison.
+- [x] **GB7C7P2 CPU texture tap PASS/A (`f3ebb601`, private fork
+      `f54adff`):** tick259 packet5470/batch10 directly reads CT32
+      word `63353341` at texture address `0x000bae74` (fx=fy=0), then
+      changes raw FBP112 destination `dc302f3b→dc353341` at
+      `0x0019ae38`. One pixel only; earlier texture-word producer,
+      whole glyph and GPU cause open. Five builds, three ON/one OFF
+      replays; common frame hashes and three PPM pairs equal across
+      adjacent builds, so same-binary control unverified. Viewed title
+      frames; marker259 precedes packet5470 in stream order.
+      `local/research/GB7C7P2/ORCH-GATE.md`.
+- [ ] **GB7C8 same-stream GPU address comparison design:** use
+      packet5470's actual CPU texel/destination as anchors; identify a
+      nonperturbing paraLLEl execution/readback witness at the same
+      packet/address before any GPU glyph-cause claim. The stock-race
+      Odin selected-VRAM execution witness remains higher priority.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
