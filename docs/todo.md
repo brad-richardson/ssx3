@@ -1348,12 +1348,19 @@ with measured budgets, then 120 Hz simulation.
       APK SHA `e077bef8…758a1`, new runner Build ID, oracle strings and
       source fence verified. No Odin action or cause claim.
       `local/research/N8D7M1/ORCH-GATE.md`.
-- [ ] **N8D7M2 one Odin selected-input oracle run:** install the pinned
-      N8D7M1 APK and capture one aligned tick2050 same-run snapshot;
-      compare all 448 independent fork-table oracle counts with G43
-      input/circuit/stage, eight controls, final vectors and viewed frame.
-      Distinguish raw snapshot sparsity from decoder mismatch without
-      assuming Mac/Odin GS streams are byte-identical.
+- [x] **N8D7M2 same-run Odin oracle PASS, category A (`9804ebb8`):**
+      one pinned install/launch at tick2050. Fork-table oracle and G43
+      input/circuit/stage are identical 448/448, each 2,058 occupied and
+      15 active tiles; final sampled/raw 896/896, 29 active. Eight
+      control addresses match, while values are 0/8 versus the different
+      Mac stream. Viewed PNG is mostly black. App force-stopped, PID
+      absent, lease free. The selected raw snapshot is sparse under both
+      decoders; its upstream producer/selection remains open. No speed or
+      driver cause claim. `local/research/N8D7M2/ORCH-GATE.md`.
+- [ ] **N8D7M3 same-run raw-VRAM/selection discriminator design:**
+      use bounded packet/source evidence to distinguish an already-sparse
+      selected raw snapshot from a wrong selection/layout or earlier
+      writer before requesting another Odin run.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
