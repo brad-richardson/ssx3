@@ -1573,8 +1573,14 @@ with measured budgets, then 120 Hz simulation.
       reviewed script `1056304d…d6738` adds a private-cwd header symlink
       to the pinned Part 1 fork; OFF env and run guards unchanged.
       Checker39/39; no replay. `local/research/N8D7M12P5M3/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5M4 Mac OFF control:** one separately released run
-      with suite585/585, 41 rows and PPM required; compare against Mac ON.
+- [x] **N8D7M12 Part 5M4 Mac OFF control PASS (`2cbd97ad`):** one
+      reviewed-SHA run exited0, suite585/585, 41 ordered hashes and final
+      PPM byte-equal to Mac ON. Capture flags unperturb this Mac stream;
+      Odin variance/cause remain open. Checker17/17; frame viewed, lease
+      free, no speed claim. `local/research/N8D7M12P5M4/ORCH-GATE.md`.
+- [ ] **N8D7M12 worker-consumption observable:** instrument the P5F3
+      bounded digest, gate build/package, then compare two same-settings
+      Odin runs; keep PrivWrite/32-bit/source-provenance limits explicit.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
