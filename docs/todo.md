@@ -1588,6 +1588,17 @@ with measured budgets, then 120 Hz simulation.
       D1–D9 is an uncompiled handoff. Checker11/11 verifies receipts,
       not implementation. Relaunch from private-worktree cwd after Astra
       steering. `local/research/N8D7M12P5F4/ORCH-GATE.md`.
+- [x] **ARCH1 Astra steering (`b886a3b0`):** keep visible live Odin
+      race ahead of speed; one command-consumption pair as a limited
+      delivery check, then stop adding input hashes if equal. Corrected
+      OFF-pair APK backend attribution to `84a13a80…a4645` (predecessor
+      `c6135b3c…d4fb41f` was misattributed in F2/F3); relevant wait/map
+      behavior remains. Pin full next-package source manifest.
+      `local/research/ARCH1/ORCH-GATE.md`.
+- [ ] **N8D7M12 next-package manifest:** fork/frontend/backend,
+      paraLLEl renderer/interface/page tracker/shaders, Granite dirty
+      patches, flags and Turnip/HAL tied to APK/native-member SHA and
+      Build ID; mark unrecoverable historical bytes rather than infer.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
