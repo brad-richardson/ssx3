@@ -980,6 +980,13 @@ with measured budgets, then 120 Hz simulation.
 ## W — widescreen (backlog, Brad 09-23)
 
 - [ ] **W1 running (Codex Sol, `local/muse/prompts/W1.md`): 16:9 by default.** Lead: on the GC build the game's own Options > Widescreen rendered anamorphic and the host stretched it (old `native/ios/App.mm`).
+      **W1 Part 1 (ce2018c):** the native option exists (`kT_19Widescreen`,
+      `…169`, `…Animorphic`). The flag is bits 20–21 of the options block at
+      `0x535610` (0 off / 1 16:9 / 2 anamorphic), applied by `0x228c08` →
+      vtable method `0x377950` (mode 2 = horizontal scale 0.75). Profile
+      loads re-apply it (`0x152bb0` → `0x228c08`). The candidate
+      (`PS2X_WIDESCREEN=1` → mode 2 before the apply, presenter 16:9) is
+      built. It stopped on a wrong-cwd suite run; resumed for boots.
       1. Find how SSX 3 PS2 enables widescreen:
          - a native options/profile flag, vs a patch (the NetherSX2 Odin
            gate used a "widescreen patch", see the ledger);
