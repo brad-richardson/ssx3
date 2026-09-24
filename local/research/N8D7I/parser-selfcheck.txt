@@ -1,0 +1,32 @@
+N8D7I parser self-check
+saved log: /Users/brad/dev/ssx3-work/N8D6C/logcat-pid.txt
+launcher:  /Users/brad/dev/ssx3/local/research/N8D7I/launch.py
+
+PASS  saved 896 sampled words                                       got=896  want=896
+PASS  saved 896 sampled occupied                                    got=5894  want=5894
+PASS  saved 896 sampled active                                      got=39  want=39
+PASS  saved 896 sampled sha                                         got='3f06a58ad6805c695a01c305fe06b52cc0d92198a6fb699aeee0c4ea09681ba5'  want='3f06a58ad6805c695a01c305fe06b52cc0d92198a6fb699aeee0c4ea09681ba5'
+PASS  saved 896 raw equals sampled                                  got=True  want=True
+PASS  released N8D6C parser rejects comma-led 896 (bug reproduced)  got=None  want=None
+PASS  synthetic 448 comma-led words                                 got=448  want=448
+PASS  synthetic 448 comma-led occupied                              got=1280  want=1280
+PASS  synthetic 448 comma-led active                                got=20  want=20
+PASS  synthetic 448 comma-led sha                                   got='bf434e4d989c7f40fca04decc4258c4ddda0b1c2c33f863458a42562ba8fe46e'  want='bf434e4d989c7f40fca04decc4258c4ddda0b1c2c33f863458a42562ba8fe46e'
+PASS  synthetic 448 trailing-comma split sha                        got={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}  want={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}
+PASS  synthetic 448 three-segment split sha                         got={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}  want={words=448 occupied=1280 active=20 sha256=bf434e4d989c7f40..}
+PASS  oversized 449 rejected                                        got=None  want=None
+PASS  non-decimal field rejected                                    got=None  want=None
+PASS  incomplete (summary next) rejected                            got=None  want=None
+PASS  summary without vector rejected                               got=None  want=None
+PASS  hex-sha equal vectors classify A                              got='A'  want='A'
+PASS  unavailable-sha equal vectors classify A                      got='A'  want='A'
+PASS  unavailable bytes accepted                                    got=True  want=True
+PASS  unequal vectors loss-by-circuit classify B                    got='B'  want='B'
+PASS  B equality recomputed (168/448)                               got=('168', '448')  want=('168', '448')
+PASS  unequal vectors loss-by-stage classify C                      got='C'  want='C'
+PASS  C equality recomputed (448/168)                               got=('448', '168')  want=('448', '168')
+PASS  mismatched logged equality classify OTHER                     got='OTHER'  want='OTHER'
+PASS  summary-only receipt classify OTHER                           got='OTHER'  want='OTHER'
+PASS  corrupt stage vector classify OTHER                           got='OTHER'  want='OTHER'
+
+26/26 checks passed

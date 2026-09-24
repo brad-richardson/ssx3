@@ -1,0 +1,395 @@
+--- local/research/N8D6C/launch.py	2026-09-24 09:08:42
++++ local/research/N8D7I/launch.py	2026-09-24 10:52:12
+@@ -1,6 +1,15 @@
+ #!/usr/bin/env python3
+-"""N8D6C: one leased Odin install and launch after orchestrator review."""
++"""N8D7I: one leased Odin install and launch after orchestrator review.
+ 
++Adapted from ``local/research/N8D6C/launch.py`` for one N8D7H install and one
++launch. It enables ``PS2X_N8D7F_SELECTED_CAPTURE=1`` together with the N8D6C
++stage/tile flags, parses the 448-word ``[n8d7f] input/circuit/stage_tile_counts``
++and 896-word ``[n8d5b] sampled/raw_tile_counts`` vectors with a fixed comma-led
++logcat continuation parser, and classifies the same tick-2050 frame into A-E or
++OTHER. No device action may run before the orchestrator releases the reviewed
++SHA in this pane.
++"""
++
+ import gzip
+ import hashlib
+ import json
+@@ -15,14 +24,16 @@
+ 
+ SERIAL = '622c49b1'
+ PKG = 'com.ps2x.runner'
+-SCRATCH = Path('/Users/brad/dev/ssx3-work/N8D6C')
+-APK = Path('/Users/brad/dev/ssx3-work/N8D6B/app-release.apk')
++SCRATCH = Path('/Users/brad/dev/ssx3-work/N8D7I')
++APK = Path('/Users/brad/dev/ssx3-work/N8D7H/app-release.apk')
++APK_SIZE = 153736732
+ FILES = f'/storage/emulated/0/Android/data/{PKG}/files'
+ LEASE = '/data/local/tmp/mg/LEASE'
++LEASE_TAG = 'N8D7I one-launch'
+ LOG_CAP = 16 * 1024 * 1024
+ PINS = {
+-    'apk': '6839a0a48ed1b55affb6e6bd952a269ba3736200255bb6628270bb11a874a611',
+-    'runner': '4e6c056dc48683ab725e16792748b83a122421d865f523d6d37c4bbb27fa0efd',
++    'apk': '86fca856b6de0148aea24fb53b63119e4ec1382eb9cf3490d2ce0db2031df14a',
++    'runner': '8e32841d8a6fff8f45862ca806c74ed92ec31469638f71281f9139e2fc32c683',
+     'turnip': '717812c3c51fd2836931ec22b82d13e805d763ec425f86bafdfa92f54c1ac29d',
+     'hal': '1b49d27c839f25363237d8276c91a401602845ee8eef67de50d6540f4cdfc387',
+     'elf': '1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc',
+@@ -30,7 +41,7 @@
+ }
+ ROUTE = ('10611:start:250,12780:cross:250,14749:cross:250,16567:cross:250,18336:cross:250,19770:cross:250,21205:down:150,21706:down:150,22306:cross:250,24025:cross:250,28512:cross:200,28763:down:700,29513:cross:200,29764:down:700,30514:cross:200,30765:down:700,31515:cross:200,31766:down:700,32516:cross:200,32767:down:700,33517:cross:200,33768:down:700,34518:cross:200,34769:down:700,35519:cross:200,35770:down:700,36520:cross:200,36771:down:700,37521:cross:200,37772:down:700,38522:down:30000')
+ 
+-result = {'brief': 'N8D6C', 'install_count': 0, 'launch_count': 0,
++result = {'brief': 'N8D7I', 'install_count': 0, 'launch_count': 0,
+           'hashes': {}, 'events': [], 'category': 'not found',
+           'first_failure': 'not found'}
+ lease_claimed = False
+@@ -93,7 +104,7 @@
+     keyguard = showing.group(1) if showing else 'unknown'
+     record(f'PREFLIGHT state={state} lease={lease!r} keyguard={keyguard} '
+            f'battery={level}% status={status} free_bytes={free}')
+-    free_lease = lease.startswith('LEASE_FREE') or (ours and lease == 'N8D6C one-launch')
++    free_lease = lease.startswith('LEASE_FREE') or (ours and lease == LEASE_TAG)
+     if state != 'device' or not free_lease or keyguard != 'false' or level < 20 \
+             or status not in (2, 5) or free < 1024**3:
+         raise RuntimeError('preflight failed (device, lease, unlock, charging, or storage)')
+@@ -109,6 +120,8 @@
+ 
+ 
+ def check_apk():
++    if APK.stat().st_size != APK_SIZE:
++        raise RuntimeError('local APK size mismatch')
+     reads = [file_sha(APK) for _ in range(2)]
+     result['hashes']['local_apk'] = reads
+     if reads != [PINS['apk']] * 2:
+@@ -123,7 +136,7 @@
+             result['hashes']['packaged_' + label] = pair
+             if pair != [PINS[label]] * 2:
+                 raise RuntimeError(f'packaged {label} SHA mismatch')
+-    record('APK and packaged runner/Turnip/HAL SHA pairs match N8D6B pins')
++    record('APK size and packaged runner/Turnip/HAL SHA pairs match N8D7H pins')
+ 
+ 
+ def same_pid_lines(pid):
+@@ -135,65 +148,108 @@
+     return [line for line in lines if pattern.search(line)]
+ 
+ 
+-def probe(lines):
+-    relevant = [line.split('[n8d5b] ', 1)[1] for line in lines if '[n8d5b] ' in line]
+-    stage_lines = [line.split('[n8d6a] ', 1)[1] for line in lines if '[n8d6a] ' in line]
+-    out = {}
+-    patterns = {
+-        'alignment': r'alignment tick=(\d+) fbp=(\d+) pmode=([0-9a-fA-F]+) width=(\d+) height=(\d+)',
+-        'control': r'control=(\d+) expected=(\d+) (PASS|FAIL)',
+-        'sampled': r'sampled_summary tiles=(\d+) occupied=(\d+) active=(\d+)',
+-        'raw': r'raw_summary tiles=(\d+) occupied=(\d+) active=(\d+)',
+-    }
+-    for key, pattern in patterns.items():
+-        matches = [re.search(pattern, line) for line in relevant]
+-        out[key] = next((m.groups() for m in matches if m), None)
+-    out['stages'] = {}
+-    stage_pattern = re.compile(
+-        r'^stage=(circuit1|pre_deinterlace_merged|final) width=(\d+) height=(\d+) '
+-        r'tiles=(\d+) occupied=(\d+) active=(\d+) control=(\d+)$')
+-    for line in stage_lines:
+-        match = stage_pattern.fullmatch(line)
+-        if match:
+-            name, *values = match.groups()
+-            out['stages'][name] = tuple(map(int, values))
+-    out['vectors'] = {kind: tile_vector(lines, kind) for kind in ('sampled', 'raw')}
+-    out['errors'] = [line for line in relevant + stage_lines if 'ERROR' in line
+-                     or 'alignment=OTHER' in line]
+-    out['errors'] += [line for line in lines if re.search(
+-        r'\b(pipeline|probe)\b.*\b(error|failed)\b', line, re.I)]
+-    return out
++def tile_vector(lines, name, words, pack):
++    """Parse one wrapped ``<name>_tile_counts=`` logcat vector.
+ 
++    ``name`` is the vector stem without the suffix: ``sampled``/``raw`` for the
++    896-word ``[n8d5b]`` vectors, ``input``/``circuit``/``stage`` for the
++    448-word ``[n8d7f]`` vectors. ``words`` is the exact accepted length and
++    ``pack`` the little-endian struct format used for the packed SHA.
+ 
+-def tile_vector(lines, kind):
+-    marker = f'[n8d5b] {kind}_tile_counts='
++    A logcat segment boundary can swallow the separator comma, so the wrapped
++    continuation line starts with exactly one leading comma; that comma is the
++    real separator, not an empty field. Any incompleteness, wrong length,
++    malformed field or inconsistent continuation returns ``None``.
++    """
++    marker = f'{name}_tile_counts='
+     prefix = re.compile(r'^.*?\bI ps2x\s+: (.*)$')
+     values = []
+     collecting = False
++    pending = 0
+     for line in lines:
+         if marker in line:
+             values = []
+             collecting = True
++            pending = 0
+             payload = line.split(marker, 1)[1]
+         elif collecting:
+             match = prefix.match(line)
+             if not match or match.group(1).startswith('['):
+                 break
+             payload = match.group(1)
++            leading = len(payload) - len(payload.lstrip(','))
++            if pending + leading != 1:
++                return None
++            payload = payload.lstrip(',')
+         else:
+             continue
++        trailing = len(payload) - len(payload.rstrip(','))
++        if trailing > 1:
++            return None
++        pending = trailing
+         fields = payload.rstrip(',').split(',')
+         if any(not field.isdecimal() for field in fields):
+             return None
+         values.extend(map(int, fields))
+-        if len(values) > 896:
++        if len(values) > words:
+             return None
+-        if len(values) == 896:
+-            packed = struct.pack('<896I', *values)
+-            return {'words': 896, 'occupied': sum(values),
++        if len(values) == words:
++            packed = struct.pack(pack, *values)
++            return {'words': words, 'occupied': sum(values),
+                     'active': sum(value >= 32 for value in values),
+                     'sha256': sha256(packed), 'values': values}
+     return None
++
++
++def probe(lines):
++    relevant = [line.split('[n8d5b] ', 1)[1] for line in lines if '[n8d5b] ' in line]
++    stage_lines = [line.split('[n8d6a] ', 1)[1] for line in lines if '[n8d6a] ' in line]
++    selected_lines = [line.split('[n8d7f] ', 1)[1] for line in lines if '[n8d7f] ' in line]
++    out = {}
++    patterns = {
++        'alignment': r'alignment tick=(\d+) fbp=(\d+) pmode=([0-9a-fA-F]+) width=(\d+) height=(\d+)',
++        'control': r'control=(\d+) expected=(\d+) (PASS|FAIL)',
++        'sampled': r'sampled_summary tiles=(\d+) occupied=(\d+) active=(\d+)',
++        'raw': r'raw_summary tiles=(\d+) occupied=(\d+) active=(\d+)',
++    }
++    for key, pattern in patterns.items():
++        matches = [re.search(pattern, line) for line in relevant]
++        out[key] = next((m.groups() for m in matches if m), None)
++    out['stages'] = {}
++    stage_pattern = re.compile(
++        r'^stage=(circuit1|pre_deinterlace_merged|final) width=(\d+) height=(\d+) '
++        r'tiles=(\d+) occupied=(\d+) active=(\d+) control=(\d+)$')
++    for line in stage_lines:
++        match = stage_pattern.fullmatch(line)
++        if match:
++            name, *values = match.groups()
++            out['stages'][name] = tuple(map(int, values))
++    out['selected'] = {}
++    selected_patterns = {
++        'metadata': (r'tick=(\d+) fbp=(\d+) fbw=(\d+) psm=(\d+) dbx=(\d+) dby=(\d+) '
++                     r'phase=(\d+) stride=(\d+) mask=(\d+) samples=(\d+) promoted=(\d+) '
++                     r'extent=(\d+)x(\d+) valid=(\d+)x(\d+) status=(\d+)'),
++        'bytes': r'bytes=(\d+) vram_sha256=(\S+) input_sha256=(\S+) circuit_sha256=(\S+)',
++        'input': r'input tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
++        'circuit': r'circuit tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
++        'stage': r'stage tiles=(\d+) occupied=(\d+) active=(\d+) packed_sha256=(\S+)',
++        'equal': r'input_circuit_equal=(\d+)/448 circuit_stage_equal=(\d+)/448',
++    }
++    for key, pattern in selected_patterns.items():
++        matches = [re.search(pattern, line) for line in selected_lines]
++        out['selected'][key] = next((m.groups() for m in matches if m), None)
++    out['vectors'] = {
++        'sampled': tile_vector(lines, 'sampled', 896, '<896I'),
++        'raw': tile_vector(lines, 'raw', 896, '<896I'),
++        'input': tile_vector(lines, 'input', 448, '<448H'),
++        'circuit': tile_vector(lines, 'circuit', 448, '<448H'),
++        'stage': tile_vector(lines, 'stage', 448, '<448H'),
++    }
++    out['errors'] = [line for line in relevant + stage_lines + selected_lines
++                     if 'ERROR' in line or 'alignment=OTHER' in line or 'OTHER' in line]
++    out['errors'] += [line for line in lines if re.search(
++        r'\b(pipeline|probe)\b.*\b(error|failed)\b', line, re.I)]
++    return out
+ 
+ 
+ def first_dump(lines):
+@@ -248,13 +304,15 @@
+ 
+ 
+ def classify(p, frame):
+-    if not all(p.get(key) for key in ('alignment', 'control', 'sampled', 'raw')) or not frame:
++    selected = p.get('selected', {})
++    vectors = p.get('vectors', {})
++    stages = p.get('stages', {})
++    if not all(p.get(key) for key in ('alignment', 'control', 'sampled', 'raw')) \
++            or not frame or not all(selected.values()) \
++            or not all(vectors.get(kind) for kind in
++                       ('sampled', 'raw', 'input', 'circuit', 'stage')) \
++            or set(stages) != {'circuit1', 'pre_deinterlace_merged', 'final'}:
+         return 'OTHER'
+-    stages = p['stages']
+-    vectors = p['vectors']
+-    if set(stages) != {'circuit1', 'pre_deinterlace_merged', 'final'} \
+-            or not all(vectors.values()):
+-        return 'OTHER'
+     tick, fbp, pmode, width, height = p['alignment']
+     control, expected, status = p['control']
+     sampled_tiles, sampled_occupied, sampled_active = p['sampled']
+@@ -262,24 +320,66 @@
+     circuit1 = stages['circuit1']
+     merged = stages['pre_deinterlace_merged']
+     final = stages['final']
+-    if p['errors'] or (int(tick), int(fbp), pmode.lower(), int(width), int(height)) \
+-            != (2050, 112, 'ff21', 512, 448) or (control, expected, status) \
+-            != ('128', '128', 'PASS') or (sampled_tiles, raw_tiles) != ('896', '896') \
++    (s_tick, s_fbp, s_fbw, s_psm, s_dbx, s_dby, s_phase, s_stride, s_mask,
++     s_samples, s_promoted, s_ew, s_eh, s_vw, s_vh, s_status) = selected['metadata']
++    in_tiles, in_occ, in_active, in_sha = selected['input']
++    ci_tiles, ci_occ, ci_active, ci_sha = selected['circuit']
++    st_tiles, st_occ, st_active, st_sha = selected['stage']
++    ic_equal, cs_equal = selected['equal']
++    if p['errors'] \
++            or (int(tick), int(fbp), pmode.lower(), int(width), int(height)) \
++            != (2050, 112, 'ff21', 512, 448) \
++            or (control, expected, status) != ('128', '128', 'PASS') \
++            or (sampled_tiles, raw_tiles) != ('896', '896') \
+             or frame[1] != 2050 or frame[2:7] != (512, 448, 112, 112, 0) \
+             or circuit1[:3] != (512, 224, 448) or merged[:3] != (512, 224, 448) \
+             or final[:3] != (512, 448, 896) \
+             or any(stage[5] != 128 for stage in stages.values()) \
+             or (final[3], final[4]) != (int(sampled_occupied), int(sampled_active)) \
+-            or any((vector['occupied'], vector['active']) !=
+-                   (int(p[kind][1]), int(p[kind][2])) for kind, vector in vectors.items()) \
+-            or vectors['sampled']['values'] != vectors['raw']['values']:
++            or (int(s_tick), int(s_fbp), int(s_samples), int(s_promoted), int(s_status)) \
++            != (2050, 112, 1, 0, 2) \
++            or (int(s_vw), int(s_vh)) != (512, 224) \
++            or (in_tiles, ci_tiles, st_tiles) != ('448', '448', '448'):
+         return 'OTHER'
+-    if circuit1[4] <= 100 and merged[4] <= 100 and final[4] <= 100:
+-        return 'A'
+-    if circuit1[4] >= 250 and merged[4] <= 100 and final[4] <= 100:
+-        return 'B'
+-    if circuit1[4] >= 250 and merged[4] >= 250 and final[4] <= 100:
++    for kind, summary in (('sampled', p['sampled']), ('raw', p['raw'])):
++        vector = vectors[kind]
++        if (vector['occupied'], vector['active']) != (int(summary[1]), int(summary[2])):
++            return 'OTHER'
++    # The packed SHA is Apple-only: selectedSha256() logs "unavailable" on
++    # Android. Recompute it from the full parsed vector and compare only when
++    # the firmware printed a real digest.
++    for kind, summary in (('input', selected['input']), ('circuit', selected['circuit']),
++                          ('stage', selected['stage'])):
++        vector = vectors[kind]
++        if (vector['occupied'], vector['active']) != (int(summary[1]), int(summary[2])):
++            return 'OTHER'
++        if summary[3] != 'unavailable' and summary[3] != vector['sha256']:
++            return 'OTHER'
++    if vectors['sampled']['values'] != vectors['raw']['values']:
++        return 'OTHER'
++    # Recompute the equality counts from the parsed vectors; B/C divergence is
++    # the expected observation, so equality is not required to be 448/448, only
++    # consistent with the logged counts.
++    in_values = vectors['input']['values']
++    ci_values = vectors['circuit']['values']
++    st_values = vectors['stage']['values']
++    if (int(ic_equal), int(cs_equal)) != (sum(a == b for a, b in zip(in_values, ci_values)),
++                                          sum(a == b for a, b in zip(ci_values, st_values))):
++        return 'OTHER'
++    in_active = vectors['input']['active']
++    ci_active = vectors['circuit']['active']
++    st_active = vectors['stage']['active']
++    fi_active = vectors['sampled']['active']
++    if in_active <= 100 and ci_active <= 100 and st_active <= 100 and fi_active <= 100:
++        return 'A'
++    if in_active >= 250 and ci_active <= 100 and st_active <= 100 and fi_active <= 100:
++        return 'B'
++    if in_active >= 250 and ci_active >= 250 and st_active <= 100 and fi_active <= 100:
+         return 'C'
++    if in_active >= 250 and ci_active >= 250 and st_active >= 250 and fi_active <= 100:
++        return 'D'
++    if in_active >= 250 and ci_active >= 250 and st_active >= 250 and fi_active >= 500:
++        return 'E'
+     return 'OTHER'
+ 
+ 
+@@ -316,16 +416,16 @@
+         raise SystemExit('review hold: launch.py SHA differs from reviewed pin')
+     SCRATCH.mkdir(parents=True, exist_ok=True)
+     if (SCRATCH / 'result.json').exists() or (SCRATCH / 'driver.log').exists():
+-        raise SystemExit('one-run guard: N8D6C receipt already exists')
++        raise SystemExit('one-run guard: N8D7I receipt already exists')
+     result['script_sha'] = script_sha
+     record(f'SCRIPT_SHA {script_sha}')
+     check_apk()
+     preflight()
+-    shell(f"echo 'N8D6C one-launch' > {LEASE}")
++    shell(f"echo '{LEASE_TAG}' > {LEASE}")
+     lease_claimed = True
+-    if shell(f'cat {LEASE}') != 'N8D6C one-launch':
++    if shell(f'cat {LEASE}') != LEASE_TAG:
+         raise RuntimeError('lease claim did not persist')
+-    record('LEASE claimed N8D6C one-launch')
++    record(f'LEASE claimed {LEASE_TAG}')
+     installed_result = adb('install', '-r', str(APK), timeout=180).strip()
+     result['install_count'] = 1
+     record('INSTALL ' + installed_result.replace('\n', ' | '))
+@@ -340,7 +440,7 @@
+     record(f'CARD mc0 entries={card!r}')
+     if card:
+         raise RuntimeError('mc0 is not empty')
+-    dump = f'{FILES}/n8d6c-frames-{int(time.time())}'
++    dump = f'{FILES}/n8d7i-frames-{int(time.time())}'
+     if shell(f'if test -e {shlex.quote(dump)}; then echo present; else echo absent; fi') != 'absent':
+         raise RuntimeError('frame directory already exists')
+     shell(f'mkdir -p {shlex.quote(dump)}')
+@@ -350,6 +450,7 @@
+     env = (f'PS2X_GS_BACKEND=parallel\nPS2X_GS_TURNIP=1\nPS2X_SKIP_MOVIE=1\n'
+            f'PS2X_CD_IMAGE={FILES}/SSX3.iso\nPS2X_PAD_SCRIPT={ROUTE}\n'
+            f'PS2X_PAD_SCRIPT_CLOCK=vsync\nPS2X_N8D5_TILE_CAPTURE=1\n'
++           f'PS2X_N8D7F_SELECTED_CAPTURE=1\n'
+            f'PS2X_FRAME_DUMP_DIR={dump}\n'
+            f'PS2X_FRAME_DUMP_ONCE_TICKS=2050,999999,999999\n'
+            f'PS2X_VSYNC_RATE_LOG=1\n')
+@@ -422,8 +523,9 @@
+         if all(selected_probe.get(k) for k in ('alignment', 'control', 'sampled', 'raw')) \
+                 and set(selected_probe['stages']) == {'circuit1', 'pre_deinterlace_merged', 'final'} \
+                 and all(selected_probe['vectors'].values()) \
++                and all(selected_probe['selected'].values()) \
+                 and selected_frame and frame_ready(dump, selected_frame):
+-            stop_reason = 'first complete stage and vector receipt with frontend dump'
++            stop_reason = 'first complete selected and vector receipt with frontend dump'
+             break
+         if tick >= 2100:
+             stop_reason = 'tick 2100 without complete receipt'
+@@ -449,7 +551,7 @@
+     if pidof():
+         raise RuntimeError('force-stop left app PID present')
+     record('POSTRUN pid absent')
+-    if stop_reason == 'first complete stage and vector receipt with frontend dump':
++    if stop_reason == 'first complete selected and vector receipt with frontend dump':
+         pull_frame(dump, selected_frame)
+     # Classify from the unabridged vectors before writing bounded JSON below.
+     result['category'] = classify(selected_probe, selected_frame if result.get('frame') else None)
+@@ -457,7 +559,7 @@
+         if vector:
+             del vector['values']
+     record('CATEGORY ' + result['category'])
+-    if stop_reason != 'first complete stage and vector receipt with frontend dump':
++    if stop_reason != 'first complete selected and vector receipt with frontend dump':
+         raise RuntimeError(stop_reason)
+ 
+ 
+@@ -480,7 +582,7 @@
+             except Exception as exc:
+                 record('CLEANUP force-stop error=' + repr(exc))
+             try:
+-                shell(f"echo 'LEASE_FREE N8D6C done' > {LEASE}")
++                shell(f"echo 'LEASE_FREE N8D7I done' > {LEASE}")
+                 record('CLEANUP lease=' + shell(f'cat {LEASE}'))
+             except Exception as exc:
+                 record('CLEANUP lease error=' + repr(exc))
