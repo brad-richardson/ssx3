@@ -1608,9 +1608,11 @@ with measured budgets, then 120 Hz simulation.
       cache dirs; demonstrated `build/volatile.o` in its listing. No
       large scan/package/GPU result. `local/research/N8D7M12P6M2/
       ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 6M3:** prune excluded names in `list_tree`,
-      test concurrent excluded-cache mutation, then run the collector
-      on a bounded real-source sample before next APK transfer.
+- [x] **N8D7M12 Part 6M3 (`238be17a`):** excluded names pruned in
+      `list_tree`; fixture16/16 includes excluded-cache race and included
+      mutation. Bounded real-source sample 41 files/188,488 B snapshot
+      and independently rerun verify match. A for capped full-root use,
+      not APK provenance. `local/research/N8D7M12P6M3/ORCH-GATE.md`.
 - [x] **N8D7M12 Part 5F4P2 host fingerprint (`6799681`, private):**
       source-only worker-consumption 64-bit digest/count; suite586/586,
       41 ordered samples, replay hashes/PPM byte-equal Mac ON, checker
@@ -1625,8 +1627,8 @@ with measured budgets, then 120 Hz simulation.
       expects old HEAD/uncommitted diff, independently verified. Host
       gate PASS; no Android/GPU/speed result. `local/research/
       N8D7M12P5F4P3/ORCH-GATE.md`.
-- [ ] **N8D7M12 next-package manifest execution:** implement/review the
-      input collector, pin fork/frontend/backend, paraLLEl renderer/
+- [ ] **N8D7M12 next-package manifest execution:** run the gated input
+      collector with caps, pin fork/frontend/backend, paraLLEl renderer/
       interface/page tracker/shaders, Granite dirty patches, flags and
       Turnip/HAL; tie native SHA and Build ID to new APK SHA. Mark old
       package inputs unproved until actually recovered, never infer.
