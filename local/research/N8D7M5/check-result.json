@@ -1,0 +1,64 @@
+{
+  "checks": {
+    "input_sha": {
+      "ok": true,
+      "detail": "38ace1a3e8e99e1d5d7d24e611dfa9cedd6e6d44a45c800223991401cd93f97d"
+    },
+    "runner_guard": {
+      "ok": true,
+      "detail": "empty"
+    },
+    "suite": {
+      "ok": true,
+      "detail": "total=585 passed=585 failed=0"
+    },
+    "on_off_hashes_equal": {
+      "ok": true,
+      "detail": "off=2686B on=2686B"
+    },
+    "on_off_ppm_equal": {
+      "ok": true,
+      "detail": "c39c40e0026b5dda"
+    },
+    "off_matches_n8d4_cpu2050": {
+      "ok": true,
+      "detail": "off=['GB4_REPLAY tick=2050 vram=d7b84050 priv=6621fe06 present=a1834096'] base=['GB4_REPLAY tick=2050 vram=d7b84050 priv=6621fe06 present=a1834096']"
+    },
+    "mode_direct_both": {
+      "ok": true,
+      "detail": "off=direct on=direct"
+    },
+    "trace_ordering_witness": {
+      "ok": true,
+      "detail": "1980 transitions, pages=['0x70', '0x71', '0x78', '0x79']"
+    },
+    "post_marker_words": {
+      "ok": true,
+      "detail": "finals=6 missing=[]"
+    },
+    "two_pages_changed": {
+      "ok": true,
+      "detail": "pages=4"
+    }
+  },
+  "verdict": "PASS",
+  "gaps": [],
+  "finals": {
+    "0xe0000": "0x260803",
+    "0xe0534": "0x260803",
+    "0xe0040": "0x260703",
+    "0xe2000": "0x260a04",
+    "0xf0000": "0xff230401",
+    "0xf2000": "0xb17d00"
+  },
+  "weak_rows_first_old_nonzero": [],
+  "changed_addrs": [
+    "0xe0000",
+    "0xe0040",
+    "0xe0534",
+    "0xe2000",
+    "0xf0000",
+    "0xf2000"
+  ],
+  "n_transitions": 1980
+}
