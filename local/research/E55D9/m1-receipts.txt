@@ -1,0 +1,50 @@
+# E55D9 Part 2 M1 receipts (2026-09-24, mini host)
+
+Command (run once): python3 local/research/E55D9/e55d9_boot.py --label M1
+Boot script SHA: c72e58937e69ded0f63b2ffc780d98a4f9a94341cdf05d2dd5d34863310c39f4 (matches ORCH-GATE-P1 approval)
+Checker SHA: 4a7c1f33e154872c89ca69056bf4bf7e68b52807158ef3315be5441110c64f4f (not re-run; script ran its own route self-check OK pre-boot)
+
+Precheck (from m1-stdout.txt / m1-result.json): fork bab6eb3, runner-dir guard exit 0,
+two matching SHA reads: runner e282c8a7…, ISO 3c2f8eb1…, ELF 1b49d05c…, codegen 8ea8ed43… (both reads identical, all match pins)
+Cards: fresh empty mc0/mc1 at start (sha f9401596…); final identical (no card write)
+Lease: mini P-lane slot 1, claimed before launch, released in finally
+Stop: bound=target, elapsed 47.729 s, last_hash_tick=1200, runner_rc=-15 (terminated after target)
+Frame proof: snap-1193t-0047.40s.png (tag 1193 >= stop tick 1170), phase2_extra 1.025 s
+Log: 567282 bytes (< 16 MiB cap); frames dir 12314814 bytes (< 2 GiB cap)
+Run cwd: ~/dev/ssx3-work/E55D9/run/M1 (bulk frames/log/scratch stay there; boot.log.gz + stdout.txt retained there)
+No speed claim (diagnostic build).
+
+Route executed: 10611:start:250,13680:down:150,15349:down:150,17017:down:150,18685:down:150
+Pad log markers: boot.log carries no per-press pad markers (no new probe per brief);
+1 start + 4 down pulses per route string; movement evidenced by the five frames below.
+
+Curated frames (nearest snap PNG to each planned tick; tag = latest det-hash tick at copy time, approximate):
+
+| Role | Planned | Nearest snap file | Tag d | PNG SHA256 | Adjacent .txt metadata |
+| --- | --- | --- | --- | --- | --- |
+| F0 menu settle | 760 | snap-763t-0029.25s.png | +3 | 2385e516eee0aba4b4d6b4660398e7b2abb34dbe88ef0426bcaa5b2727d97769 | seq=750 tick=762 512x448 fnv1a=7c44ebc9 |
+| F1 after D1 | 870 | snap-865t-0033.29s.png | -5 | 71892cc7d4ce2081d483d05ede2f4adad8d21e648500a186d990939e396a5ad8 | seq=853 tick=865 512x448 fnv1a=8cb84d7b |
+| F2 after D2 | 970 | snap-981t-0038.33s.png | +11 | d610563f8cb46abbb3df7f1731f42e9b3f9a2686a2d33c98049edc65d1a5c22c | seq=968 tick=980 512x448 fnv1a=689a5c7d |
+| F3 after D3 | 1070 | snap-1073t-0042.36s.png | +3 | fb4254dd53a1e3f0003e09f93b75ad416c20f568a1f7c80b369db5487664171b | seq=1061 tick=1073 512x448 fnv1a=4d3e21e |
+| F4 after D4 | 1170 | snap-1168t-0046.40s.png | -2 | 1243bb2af3191cfd6f2d3a8b483ef4d776c329bb703781611b3ba7bb6e46eb4b | seq=1156 tick=1168 512x448 fnv1a=18729697 |
+
+No unexpected screen: all 47 snap PNGs in scratch are Main Menu frames; no other screen observed.
+PNG total in this dir: 1144319 bytes (<= 3 MiB). Text total well under 512 KiB.
+
+Worker-viewed visible content (orchestrator gates the labels):
+- snap-763: Main Menu; list Single Event / Conquer The Mountain / Multi Play / Previews / Online; selected Single Event (orange bar); left "Play any unlocked Single Event."; footer X Select, triangle Previous, square Options.
+- snap-865: same list; selected Conquer The Mountain; left "Earn medals or play BIG Challenges to unlock peaks and build your character."
+- snap-981: same list; selected Multi Play; left "2 player head to head competition."
+- snap-1073: same list; selected Previews; left "View trailers of other EA games."
+- snap-1168: same list; selected Online; left "Compete against SSX 3 players around the world."
+Each Down moved the highlight exactly one row. No Options/Save/profile item appears as a selectable
+menu entry in any frame; "Options" appears only as the square-button footer hint. No Cross pressed.
+
+Classification: B (readable menu, four bounded Down presses executed, no Options/Save/profile entry
+observed; not proof none exists). Recommended next: orchestrator visual gate of the five PNGs.
+
+Orchestrator visual gate (2026-09-24): confirms selection path Single Event -> Conquer The
+Mountain -> Multi Play -> Previews -> Online. Every frame also shows the bottom-right Square
+button labeled Options; that footer prompt is NOT an opened Options screen (no Square pressed
+in this down-only route). No GetDir/Read reachability claim. Next detour: one-button
+Square-at-Main-Menu press.
