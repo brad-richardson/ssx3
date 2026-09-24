@@ -738,6 +738,19 @@ with measured budgets, then 120 Hz simulation.
 
       **Part 2 (Sol, fresh pane):** align markers by submit counts, fix,
       rerun; recapture only if needed.
+      **Parts 2–3 (7ab3501, 5135026):**
+      - the recapture's packets match the live boot 165/165 by submit
+        count and on the first 5k packet hashes, and the priv regs match
+        165/165, but VRAM doesn't;
+      - bisect: the first divergence is **packet 479 (PATH1, IIP+ABE
+        triangle strip)**, with identical pre-packet VRAM and identical
+        bytes.
+
+      **Orchestrator hypothesis:** PATH1 is rasterized inside the VU1
+      interpreter's RTZ `fesetround` scope, while the replay uses nearest.
+      E53's IEEE scope around `GS::processGIFPacket` (on `b9647f5`) should
+      fix it; GB4's base predates it. **Part 4:** an RTZ replay switch
+      (no boot), then move GB4 onto the fold and rerun the gate.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
