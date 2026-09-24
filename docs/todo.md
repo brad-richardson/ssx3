@@ -1841,11 +1841,18 @@ with measured budgets, then 120 Hz simulation.
       over the scoped allow while the pane started in ssx3. Worktree
       remains clean at `bab6eb3`; no patch/build/boot or card verdict.
       `local/research/E55D14P1/ORCH-GATE.md`.
-- [ ] **E55D14 Part 1B path-tap implementation:** relaunch with the
-      private worktree as OpenCode's start folder and import its receipts
-      after review. Preserve existing `getdir` rows, guest bytes/results
-      and cap behavior. Gate source/tests before one empty-card
-      E55D12-route boot, then design a grounded seed and comparison.
+- [x] **E55D14 Part 1B path tap source A (fork `80777cb`):** launched
+      inside the private worktree; one default-off `getdirpath` sibling
+      adds escaped raw/normalized query, parent, pattern and host without
+      changing guest results or existing status rows. One new tiny-cap
+      test failed, then one header repair passed; final suite 693/693,
+      runner `d8fa114d…ef04`, 12/12 receipt checks. No boot/guest query.
+      `local/research/E55D14P1B/ORCH-GATE.md`.
+- [ ] **E55D14 Part 2 one empty-card path run:** reuse the exact E55D12
+      Load game pad script with the newly gated runner, fresh empty
+      cards, bounded GetDir/path probe and one Mac boot after the Odin
+      replay window ends. Gate raw/pattern/host at the post-choice call
+      and identical menu scene before designing any seed.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
