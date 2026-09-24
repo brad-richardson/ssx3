@@ -1863,5 +1863,19 @@ with measured budgets, then 120 Hz simulation.
       stop. No model accuracy or engineering claim; see
       `local/research/X15/REPORT.md`. A smaller thinking budget is the
       next local-model tuning variable.
+- [x] **X16 Space Bunny Free bounded pilot (627dc06):** OpenCode Go produced
+      the required eight-row TSV, all anchors resolve in the pinned excerpt,
+      and one LSP definition call returned empty. EN1/EN2/INT/FFMD are
+      correct; it marked four downstream branch values `unknown` because
+      the excerpt omits part of `GSInterface::vsync`. The orchestrator read
+      the complete interface path: the actual downstream values are 0/1/0/1,
+      but those values are not all proved by the excerpt alone. The report's
+      approximate elapsed time differs from the pane's 2m46 display, and
+      visible context reached 40.4k versus the <18k target. No source,
+      build, boot, device or GS verdict from this model trial.
+- [ ] **X15B/X17 model comparison:** gate the local Qwen short-budget retry
+      and DeepSeek V4.1 Flash Go pilot against the same excerpt, including
+      source scope, table, LSP and wall/context budgets. Briefs:
+      `local/muse/prompts/X15B.md`, `local/muse/prompts/X17.md`.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
