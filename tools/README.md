@@ -80,7 +80,7 @@ or an emulator; read-only inspectors are marked.
 - `android_trial.py` — Android smoothing/interpolation trial port.
 - `loading_speed_spike.py` — FastDiscSpeed A/B startup measurements.
 
-## Texture remaster (archived rollout; see `docs/asset-policy.md`)
+## Texture remaster (archived rollout; see `docs/reserve/asset-policy.md`)
 
 - `texture_pack_plan.py`, `texture_pack_union.py`, `texture_pack_audit.py`, `texture_pack_blend.py`, `texture_pack_cap.py`, `texture_pack_dds.py`, `texture_dump_inventory.py`, `texture_compare_sheet.py`, `upscale_textures.py`, `foliage_detail.py`, `pack_mipmaps.py`, `lightmap_orientation.py`
 

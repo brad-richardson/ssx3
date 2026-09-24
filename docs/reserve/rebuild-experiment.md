@@ -545,7 +545,7 @@ word at 8 selects the surface response (0x90003 behaves as deep snow); the
 per-location word, flags word, lightmap rectangle, and corner UVs produced no
 visible or measurable effect in these tests. Evidence under `evidence/hdr-00N/`.
 
-The next gates are described in [the roadmap](archive/roadmap.md): re-laid-out streams
+The next gates are described in [the roadmap](../archive/roadmap.md): re-laid-out streams
 with regenerated SDB offsets, then a grown group, before any Garibaldi import.
 
 ## scale-001 and scale-002: memory-budget test (roadmap M5)
@@ -561,12 +561,12 @@ mostly lies below the hub), scale-002's rider crossed onto imported geometry
 Evidence under `evidence/scale-001/` and `evidence/scale-002/`. A race
 location totals about 11 MB decoded over 9 groups, so a full Garibaldi
 (3,885 patches, about 1.7 MB) is not memory-limited. Findings on the level
-selector and per-peak tables are in docs/peaks-and-locations.md.
+selector and per-peak tables are in docs/reserve/peaks-and-locations.md.
 
 ## name-001: a Tricky name in the level selector (roadmap M5)
 
 `tools/patch_executable.py` finds the executable through the ISO9660
-directory, verifies the 24-record event table (docs/peaks-and-locations.md),
+directory, verifies the 24-record event table (docs/reserve/peaks-and-locations.md),
 and streams a new image with only the name fields changed. name-001 is the
 scale-002 image with event ARA1 renamed `Garibaldi` / `Gari` and station A
 renamed `Tricky Base Station` / `Tricky Base` (image SHA-256

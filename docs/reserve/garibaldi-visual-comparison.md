@@ -5,8 +5,8 @@ The original and uncorrected import use identical images with different
 lightmap multipliers: 1× in Tricky, 2× in SSX 3, confirmed across 108 matching
 image pairs. The shared importer now translates that convention and records
 each conversion. New native gameplay captures retain snow detail that build
-012 clipped to white. See the [new comparison gallery](../local/evidence/garibaldi-material/lighting-comparison.html),
-[comparison sheet](../local/evidence/garibaldi-material/lighting-comparison.png)
+012 clipped to white. See the [new comparison gallery](../../local/evidence/garibaldi-material/lighting-comparison.html),
+[comparison sheet](../../local/evidence/garibaldi-material/lighting-comparison.png)
 and [reusable material workflow](gamecube-materials.md).
 
 This fixes a demonstrated cause, not every visual difference. The import
@@ -20,8 +20,8 @@ better separation between adjacent slopes. Build **gc-gari-012** often turns
 those surfaces into bright white and cyan. The difference also reproduces
 on Mac using the archive previously verified on the iPhone.
 
-Open the [side-by-side gallery](../local/evidence/garibaldi-comparison/comparison.html)
-or the [comparison sheet](../local/evidence/garibaldi-comparison/comparison.png).
+Open the [side-by-side gallery](../../local/evidence/garibaldi-comparison/comparison.html)
+or the [comparison sheet](../../local/evidence/garibaldi-comparison/comparison.png).
 Each gallery image links to its full-resolution, unmodified PNG.
 
 ## What was compared

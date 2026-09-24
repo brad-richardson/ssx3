@@ -1,4 +1,4 @@
-Archived 2026-09-18; superseded by docs/impl-plan-2026-09-15.md and native/README.md.
+Archived 2026-09-18; superseded by docs/reserve/impl-plan-2026-09-15.md and native/README.md.
 
 # Roadmap: Garibaldi in SSX 3, and a generic Tricky → SSX 3 course patcher
 
@@ -167,7 +167,7 @@ name in PHM/PSM and the transport map. Replace an existing SSX 3 race so menus
 and progression need no new entries.
 
 Status (2026-09-10): memory budget verified (scale-002: 1,439 imported
-patches load and ride, see docs/peaks-and-locations.md); the level selector
+patches load and ride, see docs/reserve/peaks-and-locations.md); the level selector
 is two fixed tables in the executable, so course names can be swapped without
 UI work. The "all of Tricky on one mountain" idea maps onto replacing the 17
 events, not a sixth peak. name-001 shows "Garibaldi" in the transport menu

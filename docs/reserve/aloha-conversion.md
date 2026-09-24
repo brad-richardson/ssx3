@@ -14,8 +14,8 @@ end, showoff prop switching and the start gate are phase 2 and are listed under
 
 Everything Aloha does is a re-run of the Garibaldi→ARA1 lineage, so the
 existing command sequence is written down here first. It is reconstructed from
-`docs/gamecube-world.md`, `docs/gamecube-scenery.md`, `docs/gamecube-rails.md`,
-`docs/gamecube-collision.md` and the recorded recipes in
+`docs/reserve/gamecube-world.md`, `docs/reserve/gamecube-scenery.md`, `docs/reserve/gamecube-rails.md`,
+`docs/reserve/gamecube-collision.md` and the recorded recipes in
 `local/builds/gc-gari-*/experiment.json` (each stage's
 `*.base_archive_sha256` names its input build's `output_sha256`, which is what
 chains the list below).
@@ -37,7 +37,7 @@ group, track and placement matrix, so those never reappear on a command line.
 | — | *(unnumbered)* | `gamecube_startgate.py` | start gate assets, on top of 031 |
 
 ```sh
-# 1. terrain + art + paths + race line  (docs/gamecube-world.md:300-309)
+# 1. terrain + art + paths + race line  (docs/reserve/gamecube-world.md:300-309)
 python3 tools/gamecube_terrain.py local/source/gamecube/ssx3/BAM.BIG \
   --nbd local/source/gamecube/tricky/gari.nbd --location ARA1 --template-rid 1673 \
   --source-anchor=-1214.8,-195.5,-768.547891 --target-anchor=-118613.68,15753.8,-228880.14 \
@@ -47,18 +47,18 @@ python3 tools/gamecube_terrain.py local/source/gamecube/ssx3/BAM.BIG \
   --textures local/source/gamecube/tricky/gari.gsh \
   --lightmaps local/source/gamecube/tricky/gari_L.gsh --output local/builds/gc-gari-013
 
-# 2. scenery  (docs/gamecube-scenery.md:148-156; defaults --group 36 --texture-group 31 --page 0x0008001f)
+# 2. scenery  (docs/reserve/gamecube-scenery.md:148-156; defaults --group 36 --texture-group 31 --page 0x0008001f)
 python3 tools/gamecube_scenery_import.py --base-build local/builds/gc-gari-013 \
   --nbd local/source/gamecube/tricky/gari.nbd --gsf local/source/gamecube/tricky/gari.gsf \
   --textures local/source/gamecube/tricky/gari.gsh \
   --reclaim-host-models --reclaim-geometry-textures --output local/builds/gc-gari-020
 
-# 3. rails  (docs/gamecube-rails.md:94-101)
+# 3. rails  (docs/reserve/gamecube-rails.md:94-101)
 python3 tools/gamecube_spline_import.py --base-build local/builds/gc-gari-020 \
   --nbd local/source/gamecube/tricky/gari.nbd --gsf local/source/gamecube/tricky/gari.gsf \
   --output local/builds/gc-gari-021
 
-# 5/6. surfaces, then grounded reset paths  (docs/gamecube-collision.md:67-72)
+# 5/6. surfaces, then grounded reset paths  (docs/reserve/gamecube-collision.md:67-72)
 python3 tools/gamecube_surface_import.py --base-build local/builds/gc-gari-023 \
   --nbd local/source/gamecube/tricky/gari.nbd --output local/builds/gc-gari-025
 
@@ -217,7 +217,7 @@ keeps the markers inside the run; it is not a derivation from donor data.
 
 `tools/course_presets/aloha.json`. Unlike Garibaldi's — which was hand-calibrated
 against a live PCSX2 rider capture five seconds after the connector spawn
-(`docs/full-course-experiment.md`) — Aloha's is derived analytically, because
+(`docs/reserve/full-course-experiment.md`) — Aloha's is derived analytically, because
 ASS1's own gate line is in the stock kind-14 resource and the donor's is in
 `aloha.sop`:
 

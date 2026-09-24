@@ -135,7 +135,7 @@ at `BAM`, because that build ships as `bam.big` — **rode the Aloha terrain**: 
 screenshots under `local/native/profiles/sg-redirect-5/ScreenShots/`, the
 briefing reading "Peak 1-Aloha Ice Jam" and the ride showing Aloha's untextured
 geometry and its props, scoring tricks. This is the first ride of the converted
-course; `docs/aloha-conversion.md` §7 lists it as blocked.
+course; `docs/reserve/aloha-conversion.md` §7 lists it as blocked.
 
 Both consumers matter: `0x80106574` builds the archive path from the event
 record, while `0x80108AEC` and `0x801085B0` reach the location's SDB records and
@@ -187,7 +187,7 @@ the briefing, so the sequence needs one more A than the race path.
   Single Event path passes the player's pick, so patching it changes nothing
   there. Hosting on a same-discipline event sidesteps the question entirely.
 - **Scoring and the end of a run** are unproven for a redirected event, as in
-  `docs/aloha-conversion.md`. The Aloha ride scored tricks but was not taken to a
+  `docs/reserve/aloha-conversion.md`. The Aloha ride scored tricks but was not taken to a
   finish.
 - **Save records.** Nothing here establishes how `rwrdngc.dat` keys medals and
   best times. A redirected event 0 will write Snow Jam's slot with another

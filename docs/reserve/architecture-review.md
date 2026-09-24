@@ -107,7 +107,7 @@ environment ownership and frame-by-frame visibility checks remain priorities.
    impossible. The September 13 source check finds the explicit wait in teardown,
    not the frame loop; instrument drawable acquisition, GPU and presentation
    scheduling before attributing the stall. See the
-   [follow-up timing analysis](research/120hz-analysis.md). Then compare a lower-cost path with depth/camera-assisted vectors and
+   [follow-up timing analysis](../research/120hz-analysis.md). Then compare a lower-cost path with depth/camera-assisted vectors and
    HUD exclusion. Preserve the game's 60 Hz simulation. Promote the feature
    only after an actual ride shows lower latency and acceptable artifacts on
    the phone, with a reliable 60 Hz fallback.
@@ -144,7 +144,7 @@ blocked by iOS because the device was locked; that attempt supplies no new
 phone gameplay or performance evidence.
 
 Later September 12 update: the share was remounted and
-[automatic share recovery](share-recovery.md) is installed. Original PS2 and
+[automatic share recovery](../share-recovery.md) is installed. Original PS2 and
 GameCube Garibaldi gameplay was captured alongside a fresh build 012 run.
 The [comparison](garibaldi-visual-comparison.md) prioritizes material/lightmap
 rendering, repeatable jump-visibility checks and donor environment ownership.

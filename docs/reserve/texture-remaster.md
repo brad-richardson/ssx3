@@ -192,7 +192,7 @@ model depends on the asset family.**
   the flat colour means there is little for a model to invent.
 
 So a single model over a whole course is the wrong shape for this job, which is
-what the [remaster plan](todo.md) assumed: classify by asset family first, then
+what the [remaster plan](../todo.md) assumed: classify by asset family first, then
 pick a model per family. The classification signal is already in the dump —
 format (CMPR vs RGB5A3 vs C8) plus size plus whether it carries alpha — and it
 lines up with the families above.

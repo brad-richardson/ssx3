@@ -35,7 +35,7 @@ defect class (soft particle sprites gaining hard outlines).
 
 Packs frozen in place under `local/research/remaster/` (see `ARCHIVED.md`
 there). Do not push them to devices. Runbook stays at
-`docs/texture-remaster.md` for the method, not the rollout.
+`docs/reserve/texture-remaster.md` for the method, not the rollout.
 
 ## Enforcement
 

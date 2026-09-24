@@ -18,7 +18,7 @@ Numbers: `docs/numbers-ledger.md`.
 
 ## GameCube 120 fps route
 
-- 120 fps plan of record and its gates — `plan-120fps-2026-09-17.md` (L13)
+- 120 fps plan of record and its gates — `reserve/plan-120fps-2026-09-17.md` (L13)
 - Codegen entry-switch pruning: capped CPU-gated A/B, then land or drop (L18, L241)
 - FP-unavailable fault storm on Odin: cost per fault, eager-FP context switch (L32)
 - fast-FP on/off and EFB 1×/2× re-A/B off the phantom wall (L257, L266)
@@ -41,11 +41,11 @@ Numbers: `docs/numbers-ledger.md`.
 
 ## Course restoration and content
 
-- Implementation plan of record — `impl-plan-2026-09-15.md` (L524); route control (L541)
+- Implementation plan of record — `reserve/impl-plan-2026-09-15.md` (L524); route control (L541)
 - Next Tricky course (L576); course selection for added tracks (L653); new menu entry / peak = fixed-table surgery (L419)
 - Live-apply: deferred-then-applied E2E; iOS compile check (L345, L351)
 - Course texture/lighting review; donor fog/backdrop (L492, L740)
-- Visual remaster with trained upscalers (L607; method in `texture-remaster.md`)
+- Visual remaster with trained upscalers (L607; method in `reserve/texture-remaster.md`)
 - Jump-approach captures; full-course acceptance after resets (L743, L745)
 - Garibaldi: water callbacks, obstacle collision, surface profile, scene animation, breakable scenery, start gate and countdown, scenery flags, rails, host-scenery isolation, course name in the frontend (L987–L1214)
 - GameCube Garibaldi in Dolphin for Android on the Odin (L749, L752)

@@ -2,7 +2,7 @@
 
 Date: 2026-09-10 (local time). Status: disc, asset, and code-generation inspection;
 this document records the initial audit. The subsequent
-[native prototype](../native/README.md) has now linked and booted stock SSX 3
+[native prototype](../../native/README.md) has now linked and booted stock SSX 3
 with Metal graphics and CPU JIT fallback disabled. The historical probe results
 below remain distinct from that runtime work.
 

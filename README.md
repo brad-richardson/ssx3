@@ -22,8 +22,8 @@ On the GameCube side, stock SSX 3 boots through menus and runs Snow Jam on
 the Mac with Metal rendering and CPU JIT fallback disabled; donor courses
 ride: Garibaldi (build gc-gari-013 lineage) and Aloha Ice Jam in the ASS1
 slopestyle slot (gc-aloha-007) via a boot-time course-redirect manifest that
-changes no byte of `main.dol`. See `docs/aloha-conversion.md`,
-`docs/course-selection.md`, `native/README.md`.
+changes no byte of `main.dol`. See `docs/reserve/aloha-conversion.md`,
+`docs/reserve/course-selection.md`, `native/README.md`.
 
 ## Repository map
 
@@ -32,7 +32,7 @@ README.md            this file
 docs/                plans, references, runbooks (index: docs/README.md)
 docs/todo.md         living working list (most recent first per section)
 docs/numbers-ledger.md  the one table for every quoted metric
-docs/plan-120fps-2026-09-17.md   120 fps plan of record
+docs/reserve/plan-120fps-2026-09-17.md   120 fps plan of record
 docs/plan-gs-gpu-backend-2026-09-18.md  GPU GS backend plan (ps2xGS loop)
 native/              GameCube native prototype (README, patches, diagnostics)
 native/ios/          iOS development app

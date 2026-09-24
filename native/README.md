@@ -8,7 +8,7 @@ Android remains a separate milestone.
 Status as of 2026-09-18: stock boots through menus and runs Snow Jam with
 Metal rendering and CPU JIT fallback disabled; donor courses ride via staged
 game directories plus a boot-time course-redirect manifest (see
-`docs/course-selection.md`, `docs/aloha-conversion.md`). For quoted frame
+`docs/reserve/course-selection.md`, `docs/reserve/aloha-conversion.md`). For quoted frame
 and timing numbers see `docs/numbers-ledger.md`, not this file.
 
 ## Reproduce
@@ -27,7 +27,7 @@ python3 tools/native_gamecube.py run --profile stock --seconds 60
 `bootstrap` fetches the submodules used by these Metal builds into ignored
 `third_party/`. To boot a converted course instead of stock, stage a game
 directory with `tools/gamecube_game_dir.py` and select it with a manifest
-(see `docs/course-selection.md`).
+(see `docs/reserve/course-selection.md`).
 
 ## Game data (user-supplied)
 

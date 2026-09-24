@@ -256,7 +256,7 @@ No upstream submission, Discord request, or maintainer outreach is recommended o
 
 ## Tighten the GS plan's evidence gates
 
-The [GS GPU plan](../plan-gs-gpu-backend-2026-09-18.md) is a useful scaffold, but three assumptions need refinement before implementation:
+The [GS GPU plan](plan-gs-gpu-backend-2026-09-18.md) is a useful scaffold, but three assumptions need refinement before implementation:
 
 **CPU agreement is regression evidence.** It is not automatically PS2 correctness. The current `harness/strict_backend.cpp` explicitly halves RGB as an AA1 coverage marker, uses a fixed mip selection for its synthetic setup, and approximates other features. Keep those valuable sensitivity checks, labeled accordingly. Use three complementary references: existing CPU output for regressions; small register/transfer cases with independently derived expected results; and real SSX dumps compared with independent renderers. Use exact comparisons where justified and document the tolerance for raster differences.
 

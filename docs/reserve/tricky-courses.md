@@ -28,7 +28,7 @@ Notes:
   front-end scenes.
 - Every course has between 730 and 4,268 patches. At 440 bytes per SSX 3
   record the largest is 1.9 MB of terrain, under a fifth of an SSX 3 race
-  location's ~11 MB decoded budget (docs/location-anatomy.md). Textures (each
+  location's ~11 MB decoded budget (docs/reserve/location-anatomy.md). Textures (each
   course decodes to 5–11 MB in Tricky's own formats) will dominate, not terrain.
 - All ten courses in SSX 3's 17 event slots is therefore a data-size fit; the
-  open work is content conversion (docs/peaks-and-locations.md).
+  open work is content conversion (docs/reserve/peaks-and-locations.md).
