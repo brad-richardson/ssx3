@@ -1013,8 +1013,10 @@ with measured budgets, then 120 Hz simulation.
       unproved boot reach; no generated PINTH site was found. Next E54:
       **E54D running:** LWU zero extension with regenerated code and a
       bounded race boot. Then 64-bit sign branches, COP0 Count and
-      INTC 5/7 before E55. X7 is a narrow local Qwen source-table
-      trial for the sign-branch follow-up, not a fix verdict.
+      INTC 5/7 before E55. X7's narrow dense-Qwen source-table trial
+      stopped at its 12-minute cap without a completed worker table.
+      The orchestrator source check and model outcome are in
+      `local/research/X7/REPORT.md`; no branch fix verdict.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
@@ -1342,5 +1344,11 @@ with measured budgets, then 120 Hz simulation.
       non-existent helper/output files despite the source shape supplied
       in its brief. Closed and marked as a failed model trial; the
       orchestrator will make the static LWU index if E54 needs it.
+      **X7 incomplete (dense):** a narrow sign-branch source audit spent
+      7m35s reasoning after the first brief read, wrote a placeholder,
+      and still lacked a verified table or LSP check at its 12-minute
+      cap. The orchestrator corrected a stale checkout pin in the brief,
+      closed the pane, and independently checked the relevant source
+      lines in `local/research/X7/REPORT.md`. No worker verdict/commit.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
