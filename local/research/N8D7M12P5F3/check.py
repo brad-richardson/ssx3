@@ -121,6 +121,15 @@ ANCHORS = [
     (f"{P2}/ps2xRuntime/src/lib/gs/gs_replay_core.cpp", 678, "GB4_REPLAY_SUMMARY"),
     (f"{P2}/ps2xRuntime/src/lib/gs/gs_replay_core.cpp", 699, "PS2X_GS_REPLAY_OUT"),
     (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 178, "drainQueue"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 186, "Fence"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 192, "executeQueuedCommand"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 194, "GsWorkerScope"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 201, "m_curGifPath"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 204, "writeRegister"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 207, "uploadImageNative"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 211, "processNativePackedGIFPacket"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 214, "clearFramebufferContext"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 231, "privWrite"),
     (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 273, "Fence"),
     (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 742, "refreshDisplaySnapshot"),
     (f"{P2}/ps2xRuntime/src/lib/gs/gs_frontend.cpp", 839, "presentForDiagnostics"),
@@ -130,6 +139,16 @@ ANCHORS = [
     (f"{P2}/ps2xRuntime/include/runtime/gs/gs_frontend.h", 118, "drainQueue"),
     (f"{P2}/ps2xRuntime/include/runtime/gs/gs_frontend.h", 124, "submitCount"),
     (f"{P2}/ps2xRuntime/include/runtime/gs/gs_frontend.h", 140, "noteGifPath"),
+    (f"{P2}/ps2xRuntime/include/runtime/gs/gs_worker.h", 12, "strictly FIFO"),
+    (f"{P2}/ps2xRuntime/include/runtime/gs/gs_worker.h", 51, "PrivWrite"),
+    (f"{P2}/ps2xRuntime/include/runtime/gs/gs_worker.h", 63, "Fence"),
+    (f"{P2}/ps2xRuntime/include/runtime/gs/gs_worker.h", 74, "cv.wait"),
+    (f"{P2}/ps2xRuntime/include/runtime/gs/gs_worker.h", 80, "done = true"),
+    (f"{P2}/ps2xRuntime/include/runtime/gs/gs_worker.h", 115, "apply"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_worker.cpp", 44, "enqueue"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_worker.cpp", 113, "pop_front"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_worker.cpp", 118, "m_handler(cmd)"),
+    (f"{P2}/ps2xRuntime/src/lib/gs/gs_worker.cpp", 125, "signal"),
 ]
 
 REQUIRED_FIELDS = [
@@ -146,6 +165,10 @@ REQUIRED_FIELDS = [
     "tick850",
     "No root-cause verdict",
     "LSP",
+    "executeQueuedCommand",
+    "opaque",
+    "strictly FIFO",
+    "e874fe818c903e1e8e57df0b1ca82873549ee45dcbc0f5414e6db8df96e26d8f",
 ]
 FORBIDDEN = ["proves H1", "proves H2", "H1 proven", "H2 proven",
              "verdict: H1", "verdict: H2", "root cause is "]

@@ -56,6 +56,7 @@ only, never built behavior):
 | P2 `ps2xRuntime/src/lib/gs/gs_frontend.cpp` | `f6972433d6cbe4a246bb02d40c6642bc73f78bcc3e2b378d2352fca063dc1808` | fork-rev-pinned; APK tie by receipt only |
 | P2 `ps2xRuntime/include/runtime/gs/gs_frontend.h` | `a9798a0198cda86ae9c1a88ee6e947e38368d5418dd0f637c5c30fe5d0195451` | fork-rev-pinned; APK tie by receipt only |
 | P2 `ps2xRuntime/src/lib/gs/gs_worker.cpp` | `3300f41deae93b7b6cb2ec4929d9f93c24171ee0f619f8057422906803538341` | fork-rev-pinned; APK tie by receipt only |
+| P2 `ps2xRuntime/include/runtime/gs/gs_worker.h` | `e874fe818c903e1e8e57df0b1ca82873549ee45dcbc0f5414e6db8df96e26d8f` | fork-rev-pinned; APK tie by receipt only |
 
 ## 2. Readback coverage: call/writer/reader table
 
@@ -109,59 +110,92 @@ still required to separate H1 from H2.
 
 ## 3. Pre-submit packet-sequence fingerprint site
 
-### 3a. Site (earliest ordered-bytes hash after queue drain, before GPU submit/readback)
+### 3a. Correction (gate): parse-time accumulation is invalid
 
-Accumulate a running FNV-1a-32 (reuse the core's `fnv`, P2
-`gs_replay_core.cpp:25-34`) over consumed record bytes at each packet-kind
-branch, and emit the cumulative digest per sampled tick **after**
-`gs.drainQueue()` (`:443`) and **before** `refreshDisplaySnapshot()` (`:453`)
-/ `presentForDiagnostics()` (`:459`):
+The v1 design accumulated FNV in `gs_replay_core` while parsing the fixed
+stream. A fixed stream yields an identical parse-time digest in every run
+even if queued commands execute in a different order, so its §3c H1/H2
+predictions were invalid. The fingerprint MUST be accumulated at worker
+command consumption (or backend `RawGifPacket` entry). What follows replaces
+the v1 site; the v1 field list is kept only as the record-shape reference.
 
-| Element | Source site (P2, fork-rev-pinned) | Fields hashed (in record order) |
+### 3b. Site: running digest at worker consumption, snapshotted at Fence
+
+Single consumer, strict FIFO: `GsWorker::threadMain` pops the queue front
+and runs the handler (`gs_worker.cpp:112-115,118`), documented as
+"commands execute strictly FIFO on the worker thread" (`gs_worker.h:12-16`).
+Accumulate a running FNV-1a-32 inside `GS::executeQueuedCommand` (P2
+`gs_frontend.cpp:192-195`), i.e. at actual consumption, mixing a kind tag
+plus these per-kind fields:
+
+| Consumed command | Case site (P2, fork-rev-pinned) | Fields mixed (consumption order) |
 | --- | --- | --- |
-| kind-1 GIF packet | `gs_replay_core.cpp:350-408` (bytes at `rec+14`, size from `rec+10`) | `pathId` (`rec[9]`, 1 B) + `size` (`rec[10..13]`, 4 B LE) + all `size` payload bytes; `noteGifPath` at `:366` enqueues ahead of the packet (`gs_frontend.h:140-151`), `processGIFPacket` at `:384` enqueues (`gs_frontend.cpp:929-939`) |
-| kind-5 native upload | `gs_replay_core.cpp:515-571` | `regsIn[0..3]` (32 B) + `size` (4 B) + all `size` payload bytes |
-| kind-2 priv write | `gs_replay_core.cpp:410-424` | `offset` (4 B) + `value` (8 B) |
-| kind-7 clear | `gs_replay_core.cpp:597-634` | `context` (4 B) + `rgba` (4 B) |
-| drain + emit | `gs_replay_core.cpp:436-444` (`drainQueue` at `:443`) | emit `GB4_PKTSEQ tick=<t> seq=<hex> packets=<n>` after `:443`, before `:453`/`:459` |
+| `GifPacket` | `gs_frontend.cpp:197-199` → worker-branch `processGIFPacket` (`:929-939,941-956`) | kind + **consumed** `m_curGifPath` (set by prior `NoteGifPath` consumption, `:200-202`) + `cmd.bytes` |
+| `NoteGifPath` | `:200-202` | kind + `pathId` |
+| `RegWrite` | `:203-205` | kind + `regAddr` + `regValue` |
+| `UploadImageNative` | `:206-209` | kind + `setupRegs[0..3]` + `bytes` |
+| `NativePacked` | `:210-212` | kind + `bytes` |
+| `ClearCtx` / `ClearActive` | `:213-219` | kind + `u32a` + `u32b` |
+| `WriteVram` | `:220-223` | kind + `u32a..u32e` + `regValue` |
+| `PrivWrite` | `:230-232` | kind tag ONLY — `apply` is an opaque `std::function` (`gs_worker.h:97-115`); content unhashable at consumption (gap) |
+| Read-only/side RPCs (`Consume`, `ReadVram`, `RefreshSnapshot`, `DiagPresent`, …) | `:233-247,275-277` | kind tag only (no packet bytes carried) |
 
-Why this is pre-submit/readback: `drainQueue` (`gs_frontend.cpp:178-190`,
-Fence RPC + wait, no-op if quiescent) guarantees all previously enqueued
-packets executed through the worker (`executeQueuedCommand`,
-`gs_frontend.cpp:192-279`; `Fence` itself is a no-op `:273-274`), i.e.
-through `RawGifPacket` → `gif_transfer` (`[P]` backend `:759-767`; **[U]**
-`gs_interface.cpp:5191-5196`), which only records renderer commands.
-Submission happens later inside the readback path (`flush_submit` at
-SnapshotVram/Present). Readback RPCs (`RefreshSnapshot`, `DiagPresent`) are
-enqueued strictly after the emit point (`gs_frontend.cpp:742-755,839-864`;
-backend `Flush`/`Sync` are no-ops, `[P]` backend `:359-361`). Worker FIFO +
-`submitCount` drain-then-read exactness (`gs_frontend.h:117-125`) makes the
-emit point deterministic in stream order.
+Sampling at a Fence without reordering: the `Fence` case (`:273-274`,
+currently a no-op) travels the same FIFO, so the worker consumes it strictly
+after all prior commands; snapshot the running digest into a member there.
+`drainQueue` enqueues that Fence and waits (`gs_frontend.cpp:178-190`);
+`GsRpcBase::signal` runs after the handler returns (`gs_worker.cpp:118-125`)
+under mutex+cond (`gs_worker.h:69-89`), so the core thread reading the
+snapshot after `drainQueue()` returns (replay-core kind-4 handler,
+`gs_replay_core.cpp:436-444`) sees all prior consumption — no new wait, no
+GPU call, no reordering introduced. Emit per sampled tick after `:443`,
+before `:453`/`:459`:
+`GB4_PKTSEQ tick=<t> seq=<hex> packets=<n>`.
 
-### 3b. Existing artifacts do NOT prove this fingerprint (verified)
+Why this is pre-submit/readback: consumption through `RawGifPacket` →
+`gif_transfer` (`[P]` backend `:759-767`; **[U]** `gs_interface.cpp:5191-5196`)
+only records renderer commands; submission happens later inside the readback
+path (`flush_submit` at SnapshotVram/Present). Readback RPCs
+(`RefreshSnapshot`, `DiagPresent`) are consumed strictly after the Fence
+snapshot (`gs_frontend.cpp:245-247,275-277`; backend `Flush`/`Sync` are
+no-ops, `[P]` backend `:359-361`). Direct (non-queued) mode has no worker
+and is NOT covered by this design (needs parallel updates at the direct-call
+sites); OFF1/OFF2 run queued+parallel, so the pair comparison is valid.
+
+Closest alternative (narrower): hash `(path, sizeBytes, bytes)` at backend
+`RawGifPacket` entry (`[P]` backend `:759-767`), called on the worker thread
+(`gs_frontend.cpp:955-956`) — consumption order, but `GifPacket` kinds only;
+misses priv-writes/uploads/clears.
+
+### 3c. Existing artifacts do NOT prove this fingerprint (verified)
 
 | Artifact | Why insufficient (verified this part) |
 | --- | --- |
-| 1.1 GB stream SHA `f6a78f71…a593` | proves file bytes on disk, not delivery order through the queue/worker (`NoteGifPath` and `GifPacket` are separately enqueued commands; pairing/interleave unproved for APK) |
-| `GB4_REPLAY_SUMMARY` counts (862958/11499/25445/2050) | totals only (`gs_replay_core.cpp:678-685`); equal counts are consistent with reordered delivery |
+| 1.1 GB stream SHA `f6a78f71…a593` | proves file bytes on disk, not consumption order through the queue/worker (`NoteGifPath` and `GifPacket` are separately enqueued commands; pairing/interleave unproved for APK) |
+| `GB4_REPLAY_SUMMARY` counts (862958/11499/25445/2050) | totals only (`gs_replay_core.cpp:678-685`); equal counts are consistent with reordered consumption |
 | `priv` 41/41 | sampled CPU mirrors only (`privHash`, `:84-92`; 5F1 correction) |
 | `PS2X_GS_REPLAY_PACKET_TRACE` (`:238-243,405-407,568-570`) | hashes `fnv(vram.data(),…)` (CPU-side mirror, not packet bytes); gated on `tick < bisectTo`; unset in OFF runs |
-| `m_submitCount` | counts executions (`gs_frontend.cpp:947`); no byte content |
+| `m_submitCount` / FIFO comment | counts executions (`gs_frontend.cpp:947`); the strict-FIFO comment (`gs_worker.h:12-16`) is a code claim, not a same-device observation — this fingerprint tests it |
 
-### 3c. Prediction table
+### 3d. Prediction table (corrected)
 
 | Result (two same-settings runs) | Favored hypothesis | What remains unproved in each case |
 | --- | --- | --- |
-| Equal `seq` through tick2050 + different GPU hash at tick850 | favors **H2** (identical packets reached the renderer; GPU state/readback differs) | timing-only differences (Fence orders worker execution, not GPU submit timing); which readback/writer leg diverged (§2 gaps) |
-| Different `seq` at/before tick850 (first-divergence tick locatable per sampled row) | favors **H1** (packet delivery/order differs before the renderer) | where order changed (enqueue vs worker vs `gif_transfer`); whether the GPU difference is fully explained by it |
-| Equal `seq` + equal GPU hashes | neither (run-to-run determinism on this pair; towards 5F1 mechanism C) | single pair only; says nothing about the earlier OFF1/OFF2 pair |
+| Equal consumption-`seq` through tick2050 + different GPU hash at tick850 | favors **H2** (identical command stream consumed in identical order; GPU state/readback differs) | timing-only differences (Fence orders worker execution, not GPU submit timing); which readback/writer leg diverged (§2 gaps); `PrivWrite`-confined reorderings (opaque `apply`) partially mitigated by sampled `privHash` |
+| Different consumption-`seq` at/before tick850 (first-divergence tick locatable per sampled row) | favors **H1** (delivery/order differs before/at the renderer) | whether the divergence arose at enqueue vs worker vs `gif_transfer`; whether the GPU difference is fully explained by it |
+| Equal consumption-`seq` + equal GPU hashes | neither (run-to-run determinism on this pair; towards 5F1 mechanism C) | single pair only; says nothing about the earlier OFF1/OFF2 pair |
+
+Note the corrected limit shared by both outcomes: the snapshot proves
+delivery order to renderer command recording, not GPU execution order.
 
 ## 4. One bounded next observable (design only — no code change in this part)
 
-Instrument (future part): in P2 `gs_replay_core.cpp` kind-4 branch, after
-`gs.drainQueue();` (`:443`) and before `refreshDisplaySnapshot()` (`:453`),
-emit one line per **sampled** tick:
-`GB4_PKTSEQ tick=<tick> seq=<cumulative fnv1a32 hex, §3a fields> packets=<packets>`.
+Instrument (future part): (a) worker-side running digest in P2
+`gs_frontend.cpp` `executeQueuedCommand` (§3b field table; `PrivWrite`
+content excluded by opacity) with snapshot at `Fence` consumption (`:273-274`);
+(b) in `gs_replay_core.cpp` kind-4 branch, after `gs.drainQueue();` (`:443`)
+and before `refreshDisplaySnapshot()` (`:453`), emit one line per **sampled**
+tick: `GB4_PKTSEQ tick=<tick> seq=<fence-snapshot hex> packets=<packets>`.
 No per-packet device readback, no added GPU wait, no capture-flag change.
 Expected bytes: 41 lines × ≤80 B ≈ 3.3 KB on stdout + verbatim rows in
 `PS2X_GS_REPLAY_OUT` (`:699-705`). Run cap: one same-settings Odin OFF pair
@@ -170,8 +204,8 @@ force-stop after). Receipt: field-diff of the two `GB4_PKTSEQ` series plus
 the existing 41-row comparison. Stop rule: `seq` equal through 2050 →
 H2-favored, next a readback-coverage probe (§2 gaps); `seq` differs at/before
 tick850 → H1-favored, next an enqueue-order trace; any harness/error row →
-void, no mechanism read. Closest alternative if the site were unavailable:
-`submitCount` + SUMMARY (counts only — already equal, cannot discriminate).
+void, no mechanism read. Closest alternative:
+`RawGifPacket`-entry hash (`[P]` backend `:759-767`; `GifPacket` kinds only).
 
 ## 5. Gaps
 
@@ -193,6 +227,7 @@ void, no mechanism read. Closest alternative if the site were unavailable:
 - `check.py` verifies: 3 pinned SHAs (two-method statement in REPORT) + rev +
   dirty-noted + HEAD-blob difference; backend `c613…` re-match at the N8D7F
   path; every §2–§3 cited line anchor present at its path (keyword within ±2
-  lines); required table fields present; no root-cause verdict claimed.
+  lines), incl. worker FIFO/`executeQueuedCommand`/Fence/`GsRpcBase` anchors;
+  required table fields present; no root-cause verdict claimed.
 
 (End of file)
