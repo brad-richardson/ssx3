@@ -1188,6 +1188,7 @@ with measured budgets, then 120 Hz simulation.
       and private G43 stage changes into a fresh N8D5F-based Android
       snapshot. One isolated APK build/package gate, then a separate
       one-run Odin stage probe with circuit/merged/final controls and PNG.
+      Brief: `local/muse/prompts/N8D6B.md`.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
