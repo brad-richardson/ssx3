@@ -1002,8 +1002,14 @@ with measured budgets, then 120 Hz simulation.
       frames; the dark GS region remains. `0x396090` reach is unknown.
       VBlankStart raising VSINT is a timing approximation; exact GS-blank
       scheduling and FIELD video-mode rules stay open. Next E54 work:
-      **E54C running** on PINTEH/PINTH halfword lane order, then LWU,
-      64-bit sign branches, COP0 Count and INTC 5/7 before E55.
+      **E54C PASS (da6c2f1; fork `89bec9b` pushed):** the old PINTEH and
+      PINTH macros selected wrong halfword lanes against pinned PCSX2.
+      Distinct/zero/alias vector cases now match; taps-OFF 566/566 and
+      taps-ON 661/661. One diagnostic I26-FAST boot reached race tick
+      2057 with 0→1% HUD progress; orchestrator viewed character and
+      two race frames. The four generated PINTEH guest sites have
+      unproved boot reach; no generated PINTH site was found. Next E54:
+      LWU, 64-bit sign branches, COP0 Count and INTC 5/7 before E55.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
@@ -1325,8 +1331,11 @@ with measured budgets, then 120 Hz simulation.
       but stopped producing output before replacing its placeholder
       report. No worker verdict or commit. The orchestrator verified the
       source anchors in `local/research/X4B/REPORT.md`; runtime reach,
-      LSP confirmation and the PRNG label remain open. **X6 running:**
-      sparse, script-checked static index of unique LWU guest sites for
-      the next E54 fix.
+      LSP confirmation and the PRNG label remain open. **X6 incomplete
+      (sparse):** exceeded its 25k context cap in ~5 minutes without
+      writing the named parser or any report. The worker searched for
+      non-existent helper/output files despite the source shape supplied
+      in its brief. Closed and marked as a failed model trial; the
+      orchestrator will make the static LWU index if E54 needs it.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
