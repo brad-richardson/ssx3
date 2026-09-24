@@ -33,7 +33,7 @@ adb shell mkdir -p $ppmdir
 adb push $out/ps2x.env $F/ps2x.env >/dev/null
 adb shell am force-stop $PKG
 adb logcat -c
-if [[ -n "${LOGALL:-}" ]]; then adb logcat -v epoch > $out/logcat.txt 2>&1 & else adb logcat -v epoch -s ps2x ps2x-hwcompat DEBUG libc AndroidRuntime vulkan freedreno MESA TU > $out/logcat.txt 2>&1 & fi
+if [[ -n "${LOGALL:-}" ]]; then adb logcat -v epoch > $out/logcat.txt 2>&1 & else adb logcat -v epoch -s ps2x ps2x-hwcompat DEBUG libc AndroidRuntime vulkan freedreno MESA TU Granite > $out/logcat.txt 2>&1 & fi
 lp=$!
 t0=$(date +%s)
 adb shell am start -n $PKG/android.app.NativeActivity >/dev/null
