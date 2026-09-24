@@ -138,7 +138,7 @@ contact. No speed claim (diagnostic taps build).
 | Item | Value |
 | --- | --- |
 | Result | `bound=target`, `elapsed_s=54.823`, `last_hash_tick=1490`, `phase2_extra_s=1.026`, `runner_pid=45235` (gone; SIGTERM rc=-15 expected), mini slot 1 claimed + released (slots free) |
-| Frame proof | tick 1480 `snap-1480t-0053.41s.png` ≥ stop 1460 |
+| Frame proof | tick 1480 `snap-1480t-0054.41s.png` ≥ stop 1460 |
 | Caps | `log_bytes=707899` ≤ 16 MiB; `frames_bytes=11879874` ≤ 2 GiB; wall 500 / progress 120 / grace 120 (run-control metrics, not speed) |
 | Cards | `mc0`/`mc1` empty at start AND end; manifest SHA `f9401596…ccb9ce` unchanged |
 | Padscript (boot.log, 15 rows) | `armed n=7 clock=vsync`; presses Start `0x0008` ×1, Square `0x8000` ×1, Down `0x0040` ×4 (separate i=2..5), Cross `0x4000` ×1, in plan order; 7 releases; no other input. D4 fired `now=20203ms at=20187ms` (16 ms late; D4→Cross gap still 134 ticks ≥ 60) |
