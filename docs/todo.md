@@ -1590,11 +1590,19 @@ with measured budgets, then 120 Hz simulation.
       match is an internal NAND sensor, not a gamepad. Bounded A/A
       repeatability only, no full determinism or speed claim.
       `local/research/E55D4/ORCH-GATE.md`.
-- [ ] **E55D5 one-change pad comparison:** change one predeclared
-      I26-FAST vsync-pad entry against the E55D4 baseline, then stop at
-      the first differing ordered guest write. A separate card-input
-      comparison must cover getdir/mcread. Park ExternalWake policy until
-      a production poster is found.
+- [x] **E55D5 one-change pad comparison PASS (`e80163eb`):** exactly one
+      I26-FAST entry changed from Cross to Square at 33517 ms. One B1
+      boot against E55D4 A1 first differs at ordered pad guest-write
+      seq3909/vsync2010, with metadata identical and button bytes changed;
+      hashes match through tick2010 and first diverge at tick2011.
+      Both traces complete through tick2053 with flush proof, empty
+      cards and no live gamepad. This is a bounded input/write/hash
+      discriminator, not full determinism or speed. Gate:
+      `local/research/E55D5/ORCH-GATE.md`.
+- [ ] **E55D6 card-path reach design:** identify a real reachable
+      getdir/mcread path, then predeclare one changed card input against
+      an A/A baseline and stop at the first differing ordered guest
+      write. Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
