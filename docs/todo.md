@@ -490,6 +490,22 @@ with measured budgets, then 120 Hz simulation.
       counts, frames). The FPMODE A/B is deferred. Fold into `ssx3` + promote
       the codegen after Part 2. The VU0 per-call cost goes to E57 (speed),
       or ahead of it if the profile shows a cheap fix.
+      **E53 Part 2 (afa2ce7), accepted:**
+      - Profile: VU0 is only 3% of the EE thread. The VU1 interpreter
+        (39–46%) and the software GS (37–45%) now carry far more geometry
+        and fill.
+      - Race camera = T65. TEX1 K is per object (0x801 only on 490 prims
+        of 0x2270; an unexplained −52…−65 group).
+      - All 5 programs missing in E50 now start; MSCAL matches T65.
+      - Viewed (tick 8274): whole snow slopes, ridges, trunks, rocks, the
+        rider's spray trail and the HUD. **But the sky and sun are gone**
+        (E50 had them), there's no foliage, textures look flat, and there
+        are dark regions. Zero-area prims are still ~15× T65; 9 vsyncs
+        have 33 capped VU1 programs.
+      **Next:** E58 fold (Codex Sol), then **E59: sky loss + flat
+      textures**: a FPMODE ieee/ps2 A/B race boot, then a GIF diff vs
+      PCSX2 at 8258–8265 for the sky program and 0x2270/0x22c8, plus
+      zero-area.
 - [ ] **Scene builds fewer objects (orchestrator, 09-23, from T51 PASS):**
       PCSX2's Select Character chains hold 4 extra uploader CALLs (→ set A
       `0x434990`, at 0x63d430/0x63dcb0/0x70a0b0/0x70a930) that the recomp's
@@ -778,6 +794,7 @@ with measured budgets, then 120 Hz simulation.
       back to 113 MB and the full-rebuild peak is 4 GB (was ~10). Host-side
       env-off taps remain (not covered). Branch `n5-android` on bytesize
       (local).
+- [ ] **E58 running (Codex Sol): the fold** (brief `local/muse/prompts/E58.md`).
 - [ ] **Fold to `ssx3` after E53 Part 2 (Codex Sol):** `e52-audit` `d3f7508`
       + E45 `310b30f` + the tap guard (`local/research/N5/logs/tap-guard-6c335e6.diff`;
       decide the desktop default) + pink `73b8b3a` + G46 fill-rule
