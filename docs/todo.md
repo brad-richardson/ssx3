@@ -1614,9 +1614,12 @@ with measured budgets, then 120 Hz simulation.
       and independently rerun verify match. A for exclusion fix only;
       full-root readiness withdrawn because the collector rejects an
       unchanged upstream runner stub. `local/research/N8D7M12P6M3/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 6M4:** allow only the exact upstream tracked
-      runner stub, reject any extra/changed runner bytes on snapshot and
-      verify, then run a capped real-fork probe before full input scan.
+- [x] **N8D7M12 Part 6M4 (`27734506`):** exact upstream runner stub
+      allowed; extra/changed runner bytes rejected in snapshot and verify.
+      Fixture23/23; real-fork probe 336 files, 371 total entries, snapshot
+      and independent verify match. Gate A for guard/probe; stage a clean
+      fork export to exclude untracked receipts before package manifest.
+      `local/research/N8D7M12P6M4/ORCH-GATE.md`.
 - [x] **N8D7M12 Part 5F4P2 host fingerprint (`6799681`, private):**
       source-only worker-consumption 64-bit digest/count; suite586/586,
       41 ordered samples, replay hashes/PPM byte-equal Mac ON, checker
@@ -1631,8 +1634,9 @@ with measured budgets, then 120 Hz simulation.
       expects old HEAD/uncommitted diff, independently verified. Host
       gate PASS; no Android/GPU/speed result. `local/research/
       N8D7M12P5F4P3/ORCH-GATE.md`.
-- [ ] **N8D7M12 next-package manifest execution:** run the gated input
-      collector with caps, pin fork/frontend/backend, paraLLEl renderer/
+- [ ] **N8D7M12 next-package manifest execution:** stage a clean fork
+      source export and run the gated collector with caps; pin fork
+      frontend/backend, paraLLEl renderer/
       interface/page tracker/shaders, Granite dirty patches, flags and
       Turnip/HAL; tie native SHA and Build ID to new APK SHA. Mark old
       package inputs unproved until actually recovered, never infer.
