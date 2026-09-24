@@ -1665,11 +1665,19 @@ with measured budgets, then 120 Hz simulation.
       `git archive 4fa0df1`. 22/23 P3 strings explained. Runtime lacks
       E55B2/C2/I27 (default-off/iOS). No install/GPU/speed claim.
       `local/research/N8D7M12P6M6R/ORCH-GATE-P2.md`.
-- [ ] **N8D7M12 Part 7 PKTSEQ Odin pair:** same APK/stream/env with
-      `PS2X_GS_REPLAY_PKTSEQ=1`, two runs; compare 41 `GB4_PKTSEQ` rows
-      run-vs-run and vs Mac ON (P5F4P2), plus replay rows and PPMs.
-      Equal digests + differing frames → downstream renderer/readback
-      probe; differing digest → delivery investigation.
+- [x] **N8D7M12 Part 7 PKTSEQ Odin pair A (`cf7788d5`+`e9205cb7`):**
+      launcher amended once (battery status 3 on AC at ≥90%, SHA
+      `5983f315…`). Two clean Odin runs: 41 `GB4_PKTSEQ` rows
+      byte-identical on run1, run2 and Mac ON; priv 41/41. VRAM
+      run1=run2 19/41 (split tick850), Odin=Mac 3/41 (split tick50);
+      present Odin=Mac 0/41. Frames viewed: Mac full race, Odin ~97%
+      black with run-varying fragments. **Delivery ruled out; divergence
+      is downstream of consumption** (renderer/Turnip/readback). Stop
+      adding input hashes. `local/research/N8D7M12P7/ORCH-GATE-7B.md`.
+- [ ] **N8D7M13 first Odin-vs-Mac VRAM tick:** `PS2X_GS_REPLAY_STEP=1`
+      on Mac (`3b21ce61…`) and Odin (APK `da9a41a8…`); first tick where
+      VRAM differs, plus whether per-tick readback delays the split
+      (sync probe).
 - [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
       ARM64 AVD boots; old APK installs and reaches native Turnip setup.
       Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
