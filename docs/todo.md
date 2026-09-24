@@ -1534,8 +1534,16 @@ with measured budgets, then 120 Hz simulation.
       changed; env and controls identical. Final script SHA
       `ad22755d…af4ca`, checker33/33. No device action.
       `local/research/N8D7M12P5E1/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5E2 same-env repeat:** release one exact-SHA
-      OFF2 replay, compare every hash row and viewed frame with OFF1.
+- [x] **N8D7M12 Part 5E2 same-env repeat (`73fecd5f`):** one
+      exact-APK/stream/settings install/launch PASS with clean cleanup;
+      priv41/41 equal, VRAM16/41, present25/41, first GPU difference
+      tick850. Orchestrator viewed a different but still mostly black
+      frame. Same-settings GPU variance is observed; ON/OFF flag
+      comparison remains void. No speed or root-cause verdict.
+      `local/research/N8D7M12P5E2/ORCH-GATE.md`.
+- [ ] **N8D7M12 tick850 boundary:** use the source audit and same
+      stream to choose one bounded GPU hash/sync observable before
+      changing the renderer or repeating a flag comparison.
 - [ ] **N8D7M12 Mac OFF replay:** run a separately gated same-binary
       Mac control with the exact stream after the Odin OFF result.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
