@@ -1,10 +1,21 @@
 {
+  "aggregate_sha256": "6877de873b197bf915d068d1b03331e6488c529e6bdac64273513f338080316a",
   "failing": [],
-  "note": "transfer + pre-build source verify pass; no APK, no binary, no game bytes in git; WSL root left with verified pre-build bytes only",
+  "note": "one pinned build via external pinned wrapper; no staged-source mutation (post aggregate match); Mac APK double-read matches WSL; no Odin/GPU verdict",
   "part": "N8D7M12P6M6R",
+  "pins": {
+    "apk": "da9a41a8e808fe31d509489c60b3927587c367866c6c2c6582009c35de6ef262",
+    "build_id": "4c9c9d149900cdc3494201c38124d11bfb616fa3",
+    "gradlew": "a3648413b47ef77af21d5ebc36c687c7d103aaef3e17f33de7d4f080a6f300a3",
+    "hal": "1b49d27c839f25363237d8276c91a401602845ee8eef67de50d6540f4cdfc387",
+    "runner": "e5a3302c6bef489b04a4a143c47b01e616735f8db0acdbda663710a326c11af1",
+    "turnip": "717812c3c51fd2836931ec22b82d13e805d763ec425f86bafdfa92f54c1ac29d",
+    "wrapper_jar": "498495120a03b9a6ab5d155f5de3c8f0d986a449153702fb80fc80e134484f17",
+    "wrapper_props": "3d91f0932da99885c41e9dc4e85c9f9a2d3bfef4f0ad87473014dc0827a94884"
+  },
   "rows": [
     {
-      "detail": "24 rows, 0 failing, verdict A",
+      "detail": "24/24 A",
       "name": "mac_p6m5_checker_rerun",
       "result": "pass"
     },
@@ -19,7 +30,7 @@
       "result": "pass"
     },
     {
-      "detail": "619387661\t/home/brad/n8d7m12p6m6,PS2Recomp,codegen-ssx3,jniLibs,parallel-gs,source-manifest.json,source_manifest.py,",
+      "detail": "6 top-level entries, 619387661 B",
       "name": "wsl_transfer_six_entries",
       "result": "pass"
     },
@@ -34,16 +45,75 @@
       "result": "pass"
     },
     {
+      "detail": "match",
+      "name": "wsl_source_verify_post_match",
+      "result": "pass"
+    },
+    {
       "detail": "438B pinned stub",
       "name": "wsl_runner_stub_only",
       "result": "pass"
     },
     {
-      "detail": "gradlew absent; no build attempted",
-      "name": "build_blocked_missing_gradlew_stop",
+      "detail": "3 pins x2 reads + props equal + no copies + idle",
+      "name": "external_wrapper_pins_double_read",
+      "result": "pass"
+    },
+    {
+      "detail": "build2 BUILD SUCCESSFUL x1, in 5m 34s",
+      "name": "one_build_success_no_retry",
+      "result": "pass"
+    },
+    {
+      "detail": "external gradlew, new-root cwd, P3 flags",
+      "name": "build_argv_new_root_in_root_codegen",
+      "result": "pass"
+    },
+    {
+      "detail": "449 compile_commands entries; 6/6 required TUs",
+      "name": "compiled_inputs_fork_renderer_granite",
+      "result": "pass"
+    },
+    {
+      "detail": "296 unity batches; register + 9455 distinct codegen .cpp",
+      "name": "compiled_inputs_codegen_9455",
+      "result": "pass"
+    },
+    {
+      "detail": "da9a41a8e808 153753116 B",
+      "name": "apk_sha_and_size",
+      "result": "pass"
+    },
+    {
+      "detail": "exactly the 3 arm64 members",
+      "name": "member_set_exact_three_arm64",
+      "result": "pass"
+    },
+    {
+      "detail": "both pins unchanged, pairs equal",
+      "name": "turnip_hal_pins_pair_equal",
+      "result": "pass"
+    },
+    {
+      "detail": "e5a3302c6bef / 4c9c9d149900 new vs P3",
+      "name": "runner_sha_build_id_new",
+      "result": "pass"
+    },
+    {
+      "detail": "22/23; sole miss absent from all staged inputs (REPORT sec 5)",
+      "name": "packaged_strings_22_of_23_explained",
+      "result": "pass"
+    },
+    {
+      "detail": "6xOFF + SHADOW=ON + new-root dirs + RelWithDebInfo",
+      "name": "sole_cache_flags_new_root_paths",
+      "result": "pass"
+    },
+    {
+      "detail": "7867078980 B",
+      "name": "wsl_root_under_10gib",
       "result": "pass"
     }
   ],
-  "stop": "staged fork lacks android/gradlew wrapper; zero assembleRelease attempts; no repair loop",
-  "verdict": "C"
+  "verdict": "A"
 }
