@@ -1,0 +1,42 @@
+trace_rows=320
+PASS trace-320-data-rows :: got=320
+PASS c1-48-batches :: got=48
+PASS carrier-24-samples :: got=24
+PASS carrier-shift-src-dst-plus-1
+PASS wrap-identity
+PASS carrier-rects-known :: (319, 0, 350, 445) (351, 0, 382, 445) (383, 0, 414, 445)
+PASS cand-4-data-rows :: got=4
+PASS A-src-traced-write :: (343,378)
+PASS A-old-ne-new :: 50ddd1be->63353341
+PASS A-stroke-nibble-nonzero :: f
+PASS A-dst-eq-src-minus-1
+PASS A-dst-in-batch-rect :: (319, 0, 350, 445)
+PASS A-linear-off :: 0xBD55C vs 0xbd55c
+PASS A-prior-unknown
+PASS A-new-eq-trace-new
+PASS B-src-traced-write :: (369,381)
+PASS B-old-ne-new :: 52e0d5c2->1faaa29a
+PASS B-stroke-nibble-nonzero :: 9
+PASS B-dst-eq-src-minus-1
+PASS B-dst-in-batch-rect :: (351, 0, 382, 445)
+PASS B-linear-off :: 0xBEDC4 vs 0xbedc4
+PASS B-prior-unknown
+PASS B-new-eq-trace-new
+PASS C-src-traced-write :: (382,381)
+PASS C-old-ne-new :: 52e5d9c3->70201f31
+PASS C-stroke-nibble-nonzero :: f
+PASS C-dst-eq-src-minus-1
+PASS C-dst-in-batch-rect :: (351, 0, 382, 445)
+PASS C-linear-off :: 0xBEDF8 vs 0xbedf8
+PASS C-prior-unknown
+PASS C-new-eq-trace-new
+PASS D-src-traced-write :: (407,378)
+PASS D-old-ne-new :: 50ede2ce->574e4b55
+PASS D-stroke-nibble-nonzero :: f
+PASS D-dst-eq-src-minus-1
+PASS D-dst-in-batch-rect :: (383, 0, 414, 445)
+PASS D-linear-off :: 0xBD65C vs 0xbd65c
+PASS D-prior-unknown
+PASS D-new-eq-trace-new
+PASS ppm-512x448 :: b'P6' b'512 448' b'255'
+OVERALL PASS
