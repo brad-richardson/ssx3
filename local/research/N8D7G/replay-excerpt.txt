@@ -1,0 +1,35 @@
+# N8D7G replay excerpt — bounded rows only
+# Full private logs (never committed): /Users/brad/dev/ssx3-work/N8D7F/{off.log,on.log}
+# SHA-256 and byte sizes are in REPORT.md / run-receipt.json
+
+## OFF — /Users/brad/dev/ssx3-work/N8D7F/off.log
+[n8d5b] alignment tick=2050 fbp=112 pmode=ff21 width=512 height=448
+[n8d6a] stage=circuit1 width=512 height=224 tiles=448 occupied=64374 active=300 control=128
+[n8d6a] stage=pre_deinterlace_merged width=512 height=224 tiles=448 occupied=64374 active=300 control=128
+[n8d5b] control=128 expected=128 PASS
+[n8d5b] sampled_summary tiles=896 occupied=128292 active=567
+[n8d6a] stage=final width=512 height=448 tiles=896 occupied=128292 active=567 control=128
+[n8d5b] raw_summary tiles=896 occupied=128292 active=567
+(no [n8d7f] rows: off_flag_silent PASS)
+
+## ON — /Users/brad/dev/ssx3-work/N8D7F/on.log
+[n8d5b] alignment tick=2050 fbp=112 pmode=ff21 width=512 height=448
+[n8d6a] stage=circuit1 width=512 height=224 tiles=448 occupied=64374 active=300 control=128
+[n8d6a] stage=pre_deinterlace_merged width=512 height=224 tiles=448 occupied=64374 active=300 control=128
+[n8d5b] control=128 expected=128 PASS
+[n8d7f] tick=2050 fbp=112 fbw=8 psm=1 dbx=0 dby=0 phase=0 stride=2 mask=4194303 samples=1 promoted=0 extent=512x224 valid=512x224 status=2
+[n8d7f] bytes=5177344 vram_sha256=cc87477a4a08e89d3f23e66d68c5092ce1baa94dce2dd704b10b82af6f16668f input_sha256=d9fa6d7e874ea80fef3eb6b1f2f60fbcb2d2bc705a21881256efda14232d0904 circuit_sha256=d9fa6d7e874ea80fef3eb6b1f2f60fbcb2d2bc705a21881256efda14232d0904
+[n8d7f] input tiles=448 occupied=64374 active=300 packed_sha256=e1dc4c5c6b7579e4c036e9df8cde0dfe8096e9bbe3fe56c8494a50720c78a593
+[n8d7f] circuit tiles=448 occupied=64374 active=300 packed_sha256=e1dc4c5c6b7579e4c036e9df8cde0dfe8096e9bbe3fe56c8494a50720c78a593
+[n8d7f] stage tiles=448 occupied=64374 active=300 packed_sha256=e1dc4c5c6b7579e4c036e9df8cde0dfe8096e9bbe3fe56c8494a50720c78a593
+[n8d7f] input_circuit_equal=448/448 circuit_stage_equal=448/448
+[n8d5b] sampled_summary tiles=896 occupied=128292 active=567
+[n8d6a] stage=final width=512 height=448 tiles=896 occupied=128292 active=567 control=128
+[n8d5b] raw_summary tiles=896 occupied=128292 active=567
+
+## Final present hash — /Users/brad/dev/ssx3-work/N8D7F/{off,on}.hashes
+off.hashes: GB4_REPLAY tick=2050 vram=36f4eb2b priv=6621fe06 present=7bf5c012
+on.hashes:  GB4_REPLAY tick=2050 vram=36f4eb2b priv=6621fe06 present=7bf5c012
+
+## Error scan
+off.log / on.log lines matching [n8d(5b|6a|7f)].*(ERROR|OTHER), VK_ERROR, or pipeline (error|failed): 0
