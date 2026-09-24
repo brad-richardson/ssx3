@@ -1,0 +1,64 @@
+{
+  "diff": {
+    "fork": [
+      "ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp"
+    ],
+    "parallel": [
+      "gs/gs_interface.hpp",
+      "gs/gs_renderer.cpp",
+      "gs/gs_renderer.hpp"
+    ],
+    "jniLibs": []
+  },
+  "sha": {
+    "backend": {
+      "path": "/home/brad/n8d6b/PS2Recomp/ps2xRuntime/src/lib/gs/ps2_gs_parallel_backend.cpp",
+      "reads": [
+        "e730b9f05994c9887f9c5605f9a34b2fe6f4ac1c239bb964f17cdfc515b1fb5c",
+        "e730b9f05994c9887f9c5605f9a34b2fe6f4ac1c239bb964f17cdfc515b1fb5c"
+      ]
+    },
+    "writer": {
+      "path": "/home/brad/n8d6b/PS2Recomp/ps2xRuntime/src/lib/ps2_runtime.cpp",
+      "reads": [
+        "358d726bf39e319b906e7e15407e1bf361cd2cdbdd8e79d4a96b25a9588c3f96",
+        "358d726bf39e319b906e7e15407e1bf361cd2cdbdd8e79d4a96b25a9588c3f96"
+      ]
+    },
+    "shader_header": {
+      "path": "/home/brad/n8d6b/parallel-gs/gs/n8d5_tile_spirv.hpp",
+      "reads": [
+        "19b9ba5fc747d8fcb70d712b86bd5738c64424ceb15c24d4b5ed58219f71bac9",
+        "19b9ba5fc747d8fcb70d712b86bd5738c64424ceb15c24d4b5ed58219f71bac9"
+      ]
+    },
+    "codegen": {
+      "path": "/home/brad/n8b1/codegen-ssx3/register_functions.cpp",
+      "reads": [
+        "8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3",
+        "8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3"
+      ]
+    },
+    "turnip": {
+      "path": "/home/brad/n8d6b/jniLibs/arm64-v8a/libvulkan_freedreno.so",
+      "reads": [
+        "717812c3c51fd2836931ec22b82d13e805d763ec425f86bafdfa92f54c1ac29d",
+        "717812c3c51fd2836931ec22b82d13e805d763ec425f86bafdfa92f54c1ac29d"
+      ]
+    },
+    "shim_source": {
+      "path": "/home/brad/n8d6b/jniLibs/arm64-v8a/libhardware.so",
+      "reads": [
+        "d7add7e8e2e31f3c49b83941c6686fa66ab3d844c650e8d70c93b026f90cafa0",
+        "d7add7e8e2e31f3c49b83941c6686fa66ab3d844c650e8d70c93b026f90cafa0"
+      ]
+    }
+  },
+  "status": "pass",
+  "reverse_patch": [
+    "checking file gs/gs_interface.hpp",
+    "checking file gs/gs_renderer.hpp",
+    "checking file gs/gs_renderer.cpp"
+  ],
+  "size_bytes": 345759793
+}
