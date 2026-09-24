@@ -1632,6 +1632,12 @@ with measured budgets, then 120 Hz simulation.
       interface/page tracker/shaders, Granite dirty patches, flags and
       Turnip/HAL; tie native SHA and Build ID to new APK SHA. Mark old
       package inputs unproved until actually recovered, never infer.
+- [x] **NAVD1 Android emulator smoke (orchestrator):** project-local API35
+      ARM64 AVD boots; old APK installs and reaches native Turnip setup.
+      Bundled Adreno Turnip fails Vulkan device creation on its virtual GPU,
+      so no replay/image verdict. App force-stopped, emulator shut down,
+      mini lease released. Use AVD for Android glue only; `local/research/
+      NAVD1/REPORT.md`.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
