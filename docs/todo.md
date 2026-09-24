@@ -1102,7 +1102,14 @@ with measured budgets, then 120 Hz simulation.
       clock is ready for implementation; default clock behavior remains
       real-time. The orchestrator checked the HLE/shim/guest code, prior
       reach receipt and BCD arithmetic. Idle event order, pad and memory
-      card state remain separate E55 work.
+      card state remain separate E55 work. **E55B1 scheduler source audit
+      PASS (799655a):** host deadlines gate which cycle-due events enter a
+      batch and select idle timer versus scheduled-event target; within a
+      batch the order is guest cycle, type, ID, sequence. The orchestrator
+      checked the pinned source and 7,153-byte receipt SHA. A cycle-only
+      option needs focused same-cycle, crossed-cycle and timer tests;
+      ExternalWake has no guest-cycle timestamp and remains a separate
+      placement policy. No implementation or speed claim yet.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
@@ -1455,6 +1462,14 @@ with measured budgets, then 120 Hz simulation.
       six-row INTC/DMAC/VU-status table. The format checker verifies
       completeness; the orchestrator checks every classification and
       citation. This tests bounded extraction after X9's arithmetic
-      failures, with no source edit or E54 verdict.
+      failures, with no source edit or E54 verdict. **X10 INVALID:** the
+      orchestrator selected line ranges from a different fork checkout,
+      so three intended behaviors were absent from the pinned excerpt.
+      Sparse Qwen passed the format-only checker but inferred two domains
+      unsupported by the excerpt and exceeded its 18k context cap at
+      about 27k. The corrected table and audit are in
+      `local/research/X10/REPORT.md`; this does not score model accuracy.
+      Retry as X10B with pinned symbol-located excerpts and a semantic
+      checker that permits explicit gaps.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
