@@ -1946,8 +1946,13 @@ with measured budgets, then 120 Hz simulation.
       commas split across two logcat segments are accepted, violating the
       brief. Expanded checker now fails. Pane used 5m25 and 65.5k context
       versus <18k target. Gate: `local/research/X18/ORCH-GATE.md`.
-- [ ] **X18B parser boundary fix:** reject doubled separators across
-      segment boundaries and pass the expanded checker before use in a
-      future Odin launcher. Keep the released N8D6C launcher unchanged.
+- [x] **X18B parser boundary fix PASS (`c71d6c7`):** the expanded checker
+      accepts exactly one separator across logcat segments and rejects zero,
+      two, double trailing/leading, malformed and interrupted inputs; saved
+      sampled/raw vectors retain exact 896-word SHA and counts. `py_compile`
+      passed. Pane 1m05 and 25.1k context, above the brief's <18k target
+      despite its report saying otherwise. Helper is not yet in a future
+      launcher; N8D6C released evidence unchanged. Gate:
+      `local/research/X18B/ORCH-GATE.md`.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
