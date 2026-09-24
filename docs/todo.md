@@ -1342,12 +1342,18 @@ with measured budgets, then 120 Hz simulation.
       frame are byte-identical. Static fixture 13/13 checks source/literals;
       compiled evidence is the replay. Mac calibration only; Odin raw
       snapshot and cause remain open. `local/research/N8D7L/ORCH-GATE.md`.
-- [ ] **N8D7M independent Odin selected-input oracle:** package the
-      default-OFF N8D7L patch for Android, then run one pinned tick2050
-      Odin capture. Decode the same 4 MiB snapshot across all 512×224
-      selected PSMCT24 RGB pixels with the fork-table oracle, calculate
-      all 448 tile counts and compare with G43 input/circuit/stage vectors.
-      Literal offsets and controls check the oracle; no six-word shortcut.
+- [x] **N8D7M1 independent-oracle Android package PASS (`1da356b9`):**
+      one isolated arm64 build from N8D7H with exactly the N8D7L backend
+      overlaid, unchanged G43/Turnip/HAL and five diagnostic/UI flags OFF.
+      APK SHA `e077bef8…758a1`, new runner Build ID, oracle strings and
+      source fence verified. No Odin action or cause claim.
+      `local/research/N8D7M1/ORCH-GATE.md`.
+- [ ] **N8D7M2 one Odin selected-input oracle run:** install the pinned
+      N8D7M1 APK and capture one aligned tick2050 same-run snapshot;
+      compare all 448 independent fork-table oracle counts with G43
+      input/circuit/stage, eight controls, final vectors and viewed frame.
+      Distinguish raw snapshot sparsity from decoder mismatch without
+      assuming Mac/Odin GS streams are byte-identical.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
