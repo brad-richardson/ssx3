@@ -1474,12 +1474,17 @@ with measured budgets, then 120 Hz simulation.
       snapshot/448-tile decoder by design. No code, build, staging or
       Odin run; runtime behavior and graphics cause remain open.
       `local/research/N8D7M11/ORCH-GATE.md`.
-- [ ] **N8D7M12 implement and validate replay harness:** factor the
-      desktop parser into a shared core, add the default-off app branch
-      in the isolated N worktree, then prove desktop replay parity and
-      Android build/packaging. Gate the binary and exact 1.10 GB stream
-      staging separately before one bounded Odin launch; no cause or
-      speed verdict from a successful build.
+- [x] **N8D7M12 Part 1 shared replay core A (`a65bc907`, fork
+      `24801bc`):** desktop test now calls a runtime core; 585/585 suite
+      and one exact-stream Mac replay match the N8D7M6 baseline, including
+      300/448 selected tiles and PPM bytes. No Android branch/build or
+      Odin run. `local/research/N8D7M12/ORCH-GATE-P1.md`.
+- [ ] **N8D7M12 Part 2 Android entrypoint and packaging:** add dev-only,
+      default-off NativeActivity replay branch using the gated core,
+      build the APK and verify OFF-path packaging/loader assumptions.
+      Gate binary and exact 1.10 GB stream staging separately before
+      one bounded Odin launch; no graphics-cause or speed verdict from
+      a successful build.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1783,12 +1788,19 @@ with measured budgets, then 120 Hz simulation.
       Square, four Down pulses, one Cross, pre/post frames and the E55D3
       GetDir/mcRead probe. Self-check 31/31, checker 42/42; no boot,
       screen or card-API verdict. `local/research/E55D11/ORCH-GATE-P1.md`.
-- [ ] **E55D11 Part 2 bounded Save/Load selection:** run exactly the
-      approved script once with fresh empty scratch cards. View the
-      Save/Load highlight before Cross and resulting screen after it;
-      inspect probe calls by vsync tick. Only a real GetDir/Read record
-      licenses a later changed-card A/A baseline. Park ExternalWake
-      policy until a production poster is found.
+- [x] **E55D11 Part 2 submenu opened B (`7c8d6228`+`693d8d66`):**
+      viewed Save/Load highlighted before Cross and its six-item submenu
+      afterwards. Four GetDir calls at ticks118/122/126/223 were early
+      empty-card checks, with no copied bytes; none occurred after the
+      Cross at1360, and no mcRead occurred. One bounded Mac boot, cards
+      unchanged, mini slots free; no speed claim.
+      `local/research/E55D11/ORCH-GATE-P2.md`.
+- [ ] **E55D12 bounded Load game selection:** from the observed submenu
+      move one row from Save game to Load game, view the highlight, then
+      Cross once and view the result. Use fresh empty scratch cards and
+      distinguish early boot card calls from any post-choice GetDir/Read;
+      only a real post-choice call licenses a changed-card A/A baseline.
+      Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
