@@ -1217,11 +1217,17 @@ with measured budgets, then 120 Hz simulation.
       promoted image can bypass VRAM and the same-frame promotion state is
       absent; raw VRAM bytes need an independent field decoder. Design only,
       no device verdict. Gate: `local/research/N8D7B/ORCH-GATE.md`.
-- [ ] **N8D7C decoder feasibility and calibration design:** inspect shader
-      swizzle helpers and any existing CPU GS address decoder. Specify an
-      independent, bounded display-rectangle decoder for the selected input,
-      a script-checkable Mac calibration, and stop conditions. No device run
-      until that prerequisite is established.
+- [x] **N8D7C CPU decoder adapter design PASS (`51b23ed`):** existing
+      `vram_readback<PSM>` can decode one single-sample field using one-row
+      calls for phase stride two. The helper and shader share `swizzle_PS2`,
+      so agreement alone does not prove its addressing. The eight-row map
+      covers source selection, phase, PSM, wrap, sample count and tile census;
+      fixture and Mac calibration have not run. Gate:
+      `local/research/N8D7C/ORCH-GATE.md`.
+- [ ] **N8D7D synthetic adapter fixture:** implement a bounded CPU fixture
+      with literal boundary-address expectations, nonuniform PSM16/32 pixels,
+      phase strides one/two, FBP/FBW and VRAM wrap. Check every 512×224 pixel
+      and all 448 tile counts; hand back gaps before Mac integration.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
