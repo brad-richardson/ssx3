@@ -927,11 +927,17 @@ with measured budgets, then 120 Hz simulation.
       suite and ON/OFF CPU replays, tick600/601 frames byte-identical.
       This names a pixel writer, not the sampled image or GPU cause.
       `local/research/GB7C5/ORCH-GATE.md`.
-- [ ] **GB7C6 packet5470 source and CPU/GPU comparison:** identify the
-      batch10 sprite's TEX0/UV/CLUT/TEST and sampled word for watched
-      FBP112 pixel, then compare the same captured stream and address
-      across CPU/paraLLEl execution. Revisit GB7C4 carrier poke only
-      if needed.
+- [x] **GB7C6 packet5470 source design PASS/B (`48d2253e`):** static
+      packet parse proves tick259/batch10 is a textured sprite writer of
+      FBP112 (342,377). Its MODULATE-white path implies sampled RGB
+      `353341` from the observed destination, and computes tap0 address
+      `0x000bae74`. Actual texture word/earlier writer, glyph shape and
+      GPU cause remain unobserved. No replay/device run.
+      `local/research/GB7C6/ORCH-GATE.md`.
+- [ ] **GB7C7 direct CPU texture tap:** one default-OFF replay probe at
+      packet5470/batch10/pixel (342,377) to observe the tap0 word and
+      destination write, with ON/OFF frame/hash equality. Then design
+      matched CPU/paraLLEl address comparison if the source is established.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
