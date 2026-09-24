@@ -1363,9 +1363,11 @@ with measured budgets, then 120 Hz simulation.
       from W1F2 because the source image is still low resolution; native
       virtual-pad edges are smoother. Dark GS race geometry remains. No
       touch test, device install, speed claim or fork push. Runner-dir guard
-      empty; lease free. **Next: fold I27A+B onto current fork after N8D4
-      replay/build clears, then revalidate Simulator and install signed
-      iPhone build only.** iPad run awaits Brad unlocking it.
+      empty; lease free. **Orchestrator fold:** `04f3ace` fast-forward pushed
+      to fork `ssx3` after the N8D4 pinned replay completed, with empty
+      runner-dir diff. **Next: build/sign current fork and install on iPhone
+      only; recheck Simulator if build configuration differs.** iPad run
+      awaits Brad unlocking it.
 - [x] **W1F2 PASS for Simulator + iPhone install (2fc2242):** restored
       I25's bundled `ps2x.env`/`PS2X_BOOT_ELF` and UIWindowScene wiring
       on the W1F fold, retaining I26 controls and W1 presentation. Fork
