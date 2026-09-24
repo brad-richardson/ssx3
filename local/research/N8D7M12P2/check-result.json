@@ -1,0 +1,257 @@
+{
+  "verdict": "A",
+  "fork_head": "a608ed1e161f60334a0cf3a80d1af3e54b692bd2",
+  "checks": [
+    {
+      "name": "fork_head_present",
+      "pass": true,
+      "detail": "a608ed1e161f60334a0cf3a80d1af3e54b692bd2"
+    },
+    {
+      "name": "fork_branch",
+      "pass": true,
+      "detail": "n8d7m12-app"
+    },
+    {
+      "name": "fork_base_ancestor",
+      "pass": true,
+      "detail": "24801bc"
+    },
+    {
+      "name": "fork_head_advances_base",
+      "pass": true,
+      "detail": "a608ed1e161f"
+    },
+    {
+      "name": "diff_single_file",
+      "pass": true,
+      "detail": "[\"ps2xRuntime/src/main.cpp\"]"
+    },
+    {
+      "name": "diff_bounded",
+      "pass": true,
+      "detail": " 1 file changed, 67 insertions(+)"
+    },
+    {
+      "name": "key_single_occurrence",
+      "pass": true,
+      "detail": "single getenv entry to the branch"
+    },
+    {
+      "name": "key_strict_eq_1",
+      "pass": true,
+      "detail": "strcmp ==1"
+    },
+    {
+      "name": "key_null_guarded",
+      "pass": true,
+      "detail": "null guard before strcmp"
+    },
+    {
+      "name": "capture_nonempty",
+      "pass": true,
+      "detail": "nonempty CAPTURE"
+    },
+    {
+      "name": "backend_strict_parallel",
+      "pass": true,
+      "detail": "BACKEND=parallel"
+    },
+    {
+      "name": "turnip_strict_1",
+      "pass": true,
+      "detail": "TURNIP=1"
+    },
+    {
+      "name": "reject_line",
+      "pass": true,
+      "detail": "explicit reject"
+    },
+    {
+      "name": "core_call",
+      "pass": true,
+      "detail": "core call"
+    },
+    {
+      "name": "gate_openOk",
+      "pass": true,
+      "detail": "openOk"
+    },
+    {
+      "name": "gate_headerOk",
+      "pass": true,
+      "detail": "headerOk"
+    },
+    {
+      "name": "gate_rtzOk",
+      "pass": true,
+      "detail": "rtzOk"
+    },
+    {
+      "name": "gate_pathFileOk",
+      "pass": true,
+      "detail": "pathFileOk"
+    },
+    {
+      "name": "gate_wordsOk",
+      "pass": true,
+      "detail": "wordsOk"
+    },
+    {
+      "name": "gate_backendOk",
+      "pass": true,
+      "detail": "backendOk"
+    },
+    {
+      "name": "gate_parseOk",
+      "pass": true,
+      "detail": "parseOk"
+    },
+    {
+      "name": "gate_packetTraceOk",
+      "pass": true,
+      "detail": "packetTraceOk"
+    },
+    {
+      "name": "gate_outOk",
+      "pass": true,
+      "detail": "outOk"
+    },
+    {
+      "name": "gate_expectOk",
+      "pass": true,
+      "detail": "expectOk"
+    },
+    {
+      "name": "gate_hasStream",
+      "pass": true,
+      "detail": "hasStream"
+    },
+    {
+      "name": "gate_hasSamples",
+      "pass": true,
+      "detail": "hasSamples"
+    },
+    {
+      "name": "gate_skipped",
+      "pass": true,
+      "detail": "skipped"
+    },
+    {
+      "name": "success_line",
+      "pass": true,
+      "detail": "ok line"
+    },
+    {
+      "name": "failure_line",
+      "pass": true,
+      "detail": "fail line"
+    },
+    {
+      "name": "exit_codes",
+      "pass": true,
+      "detail": "_Exit(ok?0:1)"
+    },
+    {
+      "name": "reject_exit",
+      "pass": true,
+      "detail": "reject _Exit(1)"
+    },
+    {
+      "name": "android_guard",
+      "pass": true,
+      "detail": "guard"
+    },
+    {
+      "name": "core_include_android_guarded",
+      "pass": true,
+      "detail": "core include"
+    },
+    {
+      "name": "flush_before_exit",
+      "pass": true,
+      "detail": "flush preserved"
+    },
+    {
+      "name": "branch_after_setup",
+      "pass": true,
+      "detail": "setup=202 branch=208"
+    },
+    {
+      "name": "branch_before_getExecutablePath",
+      "pass": true,
+      "detail": "branch=208 getExecutablePath=272"
+    },
+    {
+      "name": "branch_before_PS2Runtime_construction",
+      "pass": true,
+      "detail": "branch=208 PS2Runtime_construction=292"
+    },
+    {
+      "name": "branch_before_initialize",
+      "pass": true,
+      "detail": "branch=208 initialize=313"
+    },
+    {
+      "name": "branch_before_loadELF",
+      "pass": true,
+      "detail": "branch=208 loadELF=319"
+    },
+    {
+      "name": "branch_before_run",
+      "pass": true,
+      "detail": "branch=208 run=347"
+    },
+    {
+      "name": "replay_drain_calls",
+      "pass": true,
+      "detail": "reject + result drains"
+    },
+    {
+      "name": "drain_before_replay_exits",
+      "pass": true,
+      "detail": "drain immediately precedes both replay _Exits"
+    },
+    {
+      "name": "default_off_no_drain",
+      "pass": true,
+      "detail": "game-boot path unchanged"
+    },
+    {
+      "name": "game_boot_intact",
+      "pass": true,
+      "detail": "{\"getExecutablePath\": 272, \"PS2Runtime_construction\": 292, \"initialize\": 313, \"loadELF\": 319, \"run\": 347}"
+    },
+    {
+      "name": "no_else_boot",
+      "pass": true,
+      "detail": "no else-gated boot"
+    },
+    {
+      "name": "no_manifest_change",
+      "pass": true,
+      "detail": "manifest untouched"
+    },
+    {
+      "name": "no_gradle_change",
+      "pass": true,
+      "detail": "gradle untouched"
+    },
+    {
+      "name": "no_cmake_change",
+      "pass": true,
+      "detail": "cmake untouched"
+    },
+    {
+      "name": "no_new_binary",
+      "pass": true,
+      "detail": "no new target"
+    },
+    {
+      "name": "runner_dir_empty",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "note": "Source strings cannot prove Android compile, loader or runtime behavior. No build/device verdict."
+}
