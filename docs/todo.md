@@ -1558,10 +1558,20 @@ with measured budgets, then 120 Hz simulation.
       tests passed. Worker suite from wrong cwd was 686/687; orchestrator
       reran the unchanged binary from fork root, flag unset, **687/687**.
       No boot or determinism claim. `local/research/E55D3/ORCH-GATE.md`.
-- [ ] **E55D4 pinned pad/card input isolation:** first compare vsync-pad
-      and empty-card A/A through race tick2053, then change one pad or
-      card input at a time and stop at the first differing ordered guest
-      write. Park ExternalWake policy until a production poster is found.
+- [x] **E55D4 pinned pad/card A/A PASS (`df99252f`):** two sequential
+      I26-FAST race boots with the default-OFF tap enabled bound at tick2058;
+      hash rows 1..2053 equal 2053/2053 and ordered pad guest-write lines
+      through tick2053 equal 3996/3996 including payloads. Each log has a
+      complete flush-proof line after the window. Empty card manifests
+      match; no getdir/mcread path executed. The sole `Controller` HID
+      match is an internal NAND sensor, not a gamepad. Bounded A/A
+      repeatability only, no full determinism or speed claim.
+      `local/research/E55D4/ORCH-GATE.md`.
+- [ ] **E55D5 one-change pad comparison:** change one predeclared
+      I26-FAST vsync-pad entry against the E55D4 baseline, then stop at
+      the first differing ordered guest write. A separate card-input
+      comparison must cover getdir/mcread. Park ExternalWake policy until
+      a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
