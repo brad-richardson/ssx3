@@ -1595,10 +1595,18 @@ with measured budgets, then 120 Hz simulation.
       `c6135b3c…d4fb41f` was misattributed in F2/F3); relevant wait/map
       behavior remains. Pin full next-package source manifest.
       `local/research/ARCH1/ORCH-GATE.md`.
-- [ ] **N8D7M12 next-package manifest:** fork/frontend/backend,
-      paraLLEl renderer/interface/page tracker/shaders, Granite dirty
-      patches, flags and Turnip/HAL tied to APK/native-member SHA and
-      Build ID; mark unrecoverable historical bytes rather than infer.
+- [x] **N8D7M12 Part 6M1 input inventory (`989bf698`):** P3 pins
+      selected source, APK/native members and Build ID; the inventory
+      names unpinned fork, GS interface/page tracker, shader and Granite
+      inputs with build-list citations. Checker29/29. This is a plan,
+      not an executed manifest; `next_source_gate.py` is still to be
+      written, old WSL bytes not re-read, HAL source/member mismatch open.
+      `local/research/N8D7M12P6M1/ORCH-GATE.md`.
+- [ ] **N8D7M12 next-package manifest execution:** implement/review the
+      input collector, pin fork/frontend/backend, paraLLEl renderer/
+      interface/page tracker/shaders, Granite dirty patches, flags and
+      Turnip/HAL; tie native SHA and Build ID to new APK SHA. Mark old
+      package inputs unproved until actually recovered, never infer.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
