@@ -127,3 +127,93 @@ this part makes no readability or API claim (`check.py` asserts 0 frames and
 
 **Do not boot until the orchestrator reviews the exact script SHA and
 explicitly releases Part 2 in the worker pane.**
+
+---
+
+# E55D12 — Part 2 run (one released Mac boot, 2026-09-24)
+
+Worker: opencode (Muse Spark Contributor Go). Brief:
+`local/muse/prompts/E55D12P2.md`. Exactly one boot with the approved
+script SHA `9efe732d358a20605fcf9fd88725095dcefd1e15e9e69f5b4a95bc359d6ee8cd`
+(verified before launch; script unedited). Per-worker write exception
+(confined to `~/dev/ssx3-work/E55D12/**`) verified with a tiny sentinel
+file and removed before the run (lane dir absent again afterwards). `ps`
+showed no clang/ninja and both mini lease slots free, so the single
+`python3 local/research/E55D12/e55d12_boot.py --label S1` run proceeded.
+No fork/source edit, build, Odin/iOS action, seeded-card change, push,
+board/global config edit, or upstream contact. No speed claim (diagnostic
+taps build).
+
+## 1. Evidence table (run)
+
+| Item | Value |
+| --- | --- |
+| Result | `bound=target`, `elapsed_s=68.084`, `last_hash_tick=1824`, `phase2_extra_s=0.516`, `runner_pid=53708` (gone; SIGTERM rc=-15 expected), mini slot 1 claimed + released (both slots free) |
+| Frame proof | tick 1808 `snap-1808t-0067.52s.png` ≥ stop 1800 |
+| Caps | `log_bytes=867385` ≤ 16 MiB; `frames_bytes=13644633` ≤ 2 GiB; wall 500 / progress 120 / grace 120 (run-control metrics, not speed) |
+| Cards | `mc0`/`mc1` empty at start AND end; manifest SHA `f9401596…ccb9ce` unchanged |
+| Padscript (boot.log, 19 rows) | `armed n=9 clock=vsync`; presses Start `0x0008` ×1, Square `0x8000` ×1, Down `0x0040` ×5 (separate i=2..5 plus i=7), Cross `0x4000` ×2 (i=6 C1, i=8 C2), in plan order; 9 releases; no other input. D4 fired `now=20203ms at=20187ms` (16 ms late, same as E55D11); C2 fired `now=28378ms at=28362ms` (16 ms late; gaps still ≥ 60) |
+| Probe (3536 lines) | `getdir` n=5: 4 pre-C2 at vsync 118/122/126/223 (addr `0x00b85660`, all `ok=0 reason=empty len=0 bytes=(empty)`, port=0 slot=0) + 1 post-C2 at vsync 1740 (addr `0x00ba5b20`, `ok=0 reason=empty len=0 bytes=(empty)`); `mcread` n=0; `pad` n=3531 (3284 pre-C2, 247 at/after 1700, all ok=1 len=32) |
+| Private lane | `~/dev/ssx3-work/E55D12/run/S1/` (boot.log + .gz, probe.log + .gz, result.json, frames/, empty mc0/mc1). Raw log/probe kept; `.gz` copies made only after the runner exited |
+| Curated (committed) | `snap-1616t-0060.49s.png` + `.txt`, `snap-1808t-0067.52s.png` + `.txt`, `s1-result.json`, `s1-receipts.txt`, `check-p2.py`. PNG total 319215 B ≤ 2 MiB; text 246 B + receipts ≤ 512 KiB |
+| Checker | `check-p2.py` 44/44 PASS (pins, route, caps, cards, pad rows/order, probe counts/ticks, frame/probe SHAs; visual/API labels NOT asserted) |
+
+## 2. Frames (worker-viewed; visual verdict rests with the orchestrator gate)
+
+| File (meta tick) | Reading |
+| --- | --- |
+| `snap-1616t-0060.49s.png` (tick 1616; \|1616−1620\|=4, nearest pre-C2 full frame) | Title **Save/Load**; rows Save game, **Load game (highlighted orange bar)**, Save options, Load options, Load replay, New game; footer "Load previous game." + X Select / Triangle Previous |
+| `snap-1808t-0067.52s.png` (tick 1807; \|1808−1800\|=8, nearest post-C2 full frame; frame proof) | Title **Load game**; header "MEMORY CARD slot1"; rows 1–6 all **\<EMPTY\>** with row 1 highlighted (orange bar); footer "Load game to continue a previously saved game." + Triangle Previous |
+| Adjacent (viewed, not curated) | 1590 + 1642: same Save/Load submenu with Load game highlighted as 1616. 1780: same Load game MEMORY CARD slot1 with 6 EMPTY rows as 1808. No unexpected screen |
+
+Snapshot filename ticks are approximate (1 s wall grid tagged with the
+latest det-hash tick); actual metadata ticks and SHAs are recorded in
+`s1-receipts.txt`.
+
+## 3. Outcome vs predeclared gate
+
+Pre-C2 full frame exists and shows the Load game row highlighted;
+post-C2 full frame shows a readable Load game MEMORY CARD screen with six
+\<EMPTY\> slots. Card side: one `getdir` call at vsync 1740 (40 ticks
+after C2 tick 1700, distinct addr `0x00ba5b20`), `ok=0 reason=empty` with
+zero copied table bytes, plus the four early `ok=0 reason=empty` GetDir
+probes (title boot, empty cards, same ticks/addrs as E55D11) counted
+separately; zero `mcread` anywhere. That is predeclared **A** (readable
+Load game result screen plus a post-choice GetDir call; `ok=0` counts as
+API reach, with success/copied-byte payloads stated separately as the
+stronger — absent — observation). The orchestrator makes the visual
+verdict.
+
+## 4. Commands run (one boot only)
+
+- Pre-run: script SHA check (`9efe732d…6ee8cd` match), sentinel
+  write/remove under `~/dev/ssx3-work/E55D12/`, `ps` heavy-job check (no
+  clang/ninja), lease status (both slots free), E55D11 `ORCH-GATE-P2.md`
+  + full `REPORT.md` read
+- `python3 local/research/E55D12/e55d12_boot.py --label S1` → `bound=target` (sole boot/build/run this part)
+- Post-run: PID-gone + lease-free checks, frame viewing (1616, 1808, 1590, 1642, 1780), padscript/probe parsing, `gzip -k` of closed boot.log/probe.log, `cp` of 2 PNG + 2 txt + result.json into `local/research/E55D12/`, wrote `s1-receipts.txt` + `check-p2.py`, `python3 local/research/E55D12/check-p2.py` → 44/44 PASS
+- `git log -1`, `git status`, stage explicit paths only, commit `[E55D12] Part 2` with `Orchestrated-By: opencode`, no push
+
+## 5. Gaps (stated plainly)
+
+- Tick tags remain snapshotter-approximate; the curated pre frame is −4
+  ticks from target 1620 and the post frame is +8 (meta tick 1807 vs
+  filename 1808), with metadata ticks recorded.
+- Why the post-choice GetDir returned `ok=0 reason=empty` on empty cards
+  (no dir vs unformatted vs port quirk) is unobserved; only the call's
+  presence, tick, addr and empty result are evidenced. No copied table
+  bytes and no mcRead were observed.
+- The five Down pulses' row-by-row travel is inferred from endpoints
+  (E55D11 submenu → Load game highlighted), not from per-press frames.
+- Part-1 `check.py` is not re-run post-curation (it asserts the
+  no-frames pre-run state by design); `check-p2.py` is the post-run
+  checker.
+- No `s1-stdout.txt` is committed: stdout was observed live
+  (`bound=target` line matches `s1-result.json`); only byte-verifiable
+  copies are committed.
+
+Recommended next action: orchestrator visual gate on the two curated
+frames (confirm Load game highlight + MEMORY CARD readings), then decide
+whether the single post-choice empty GetDir warrants a follow-up lane
+(e.g. seeded-card Load attempt, or pressing into a submenu slot) with the
+same probe taps to test for table-carrying reads.

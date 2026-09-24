@@ -1,0 +1,55 @@
+E55D12 Part 2 S1 run receipts (one released Mac boot, 2026-09-24)
+Worker: opencode (Muse Spark Contributor Go). Brief: local/muse/prompts/E55D12P2.md.
+
+Command (run exactly once, script unedited):
+  python3 local/research/E55D12/e55d12_boot.py --label S1
+Script SHA (pre-verified): 9efe732d358a20605fcf9fd88725095dcefd1e15e9e69f5b4a95bc359d6ee8cd
+Route: 10611:start:250,13680:square:150,16683:down:150,17851:down:150,19019:down:150,20187:down:150,22689:cross:150,25692:down:150,28362:cross:150
+  (START tick636, Square tick820, Downs 1000/1070/1140/1210, Cross1 tick1360; D5 tick1540, Fload 1620, Cross2 tick1700, Fpost/stop 1800)
+
+Pins (two matching pre-boot SHA reads):
+  fork HEAD bab6eb382673155ffd756fe8db265964eeff9703, worktree clean, runner-dir guard exit 0
+  runner e282c8a79cb4ce3e616244d1cfb0b5ab6d522e2f262408c6ffa92860f211643f
+  iso    3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+  elf    1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+  codegen 8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3
+
+Stop/lease (from private lane result.json, also saved here as s1-result.json):
+  bound=target, runner_pid=53708 (gone after run; SIGTERM rc=-15 expected), mini slot=1 (released; slots free)
+  elapsed_s=68.084, last_hash_tick=1824, phase2_extra_s=0.516
+  frame_proof tick=1808 file=snap-1808t-0067.52s.png (>= stop 1800)
+  log_bytes=867385 (<=16 MiB), frames_bytes=13644633 (<=2 GiB), probe_bytes=511890
+  cards: mc0/mc1 empty at start AND end, manifest sha256 f94015964371517ad24d36c71ea0c9bdc6fb4a23f3c46d7cc0def479feccb9ce (unchanged)
+  No speed claim (diagnostic taps build).
+
+Private lane: ~/dev/ssx3-work/E55D12/run/S1/ (boot.log, boot.log.gz, probe.log, probe.log.gz, result.json, frames/, mc0/, mc1/)
+  probe.log sha256 63abf6d3dbe5d6b98681e0bf08eb8b6d5bdb94882c00809441a5db88804905a3
+  boot.log  sha256 6e1b84e99c733823a3aa46d2b0837569bb92d3dc1a3a393e825897225cf523a9
+  result.json sha256 9f2e6103e94e58debaff27c8f3d546e6a12d985038f97543d9584f59a67ac27d
+
+Padscript rows in boot.log (19 total = 1 armed + 9 press + 9 release; no other input):
+  armed n=9 clock=vsync; press Start 0x0008 x1, Square 0x8000 x1, Down 0x0040 x5 (separate i=2..6 plus i=7), Cross 0x4000 x2 (i=6 C1, i=8 C2); 9 releases
+  order: start, square, down, down, down, down, cross, down, cross
+  D4 (i=5) press now=20203ms at=20187ms (16 ms late vs plan, same as E55D11); C2 (i=8) press now=28378ms at=28362ms (16 ms late); all gaps still >= 60 ticks
+
+Probe counts (vsync tick = GS vsyncTick; C2 at tick 1700):
+  getdir n=5: 4 pre-C2 at vsync 118/122/126/223 (addr 0x00b85660, ALL ok=0 reason=empty len=0 bytes=(empty); port=0 slot=0) + 1 post-C2 at vsync 1740 (addr 0x00ba5b20, ok=0 reason=empty len=0 bytes=(empty); port=0 slot=0)
+  mcread n=0 (no mcRead call anywhere in the run)
+  pad n=3531 (3284 pre-C2, 247 at/after tick1700; all ok=1 len=32)
+  => one post-choice GetDir call (vsync1740, 40 after C2) counts as API reach per corrected A; ok=0 is NOT copied guest bytes; no table payload, no successful mcRead.
+
+Curated frames (full-resolution, nearest snaps to targets; worker-viewed):
+  pre-C2   snap-1616t-0060.49s.png (meta tick=1616, |1616-1620|=4, nearest)
+    sha256 48cc3773af15bf0445b4386ccdd9f3a2aac5a466e328eb7e647380b7bc641a38
+    meta: seq=1605 tick=1616 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=ae1ed59e smode2=0x1 pmode=0xff21
+    sha256(snap-1616t-0060.49s.txt)=2cf8010523124218cb6071760f642deaea41eb7b2fae4761e5607f408b2a94b6
+    reading: title "Save/Load"; rows Save game / Load game (highlighted orange bar) / Save options / Load options / Load replay / New game; footer "Load previous game." + X Select / Triangle Previous
+  post-C2  snap-1808t-0067.52s.png (meta tick=1807, |1808-1800|=8, nearest; frame proof)
+    sha256 c45e8c601fb954d990441866c27fc0cd8b94bda1576b8a371db19168f7cc4445
+    meta: seq=1796 tick=1807 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=e96db526 smode2=0x1 pmode=0xff21
+    sha256(snap-1808t-0067.52s.txt)=89b8229d2e2076f502916191e996e442524f36e85f10f8431c49ce5326ce9f59
+    reading: title "Load game"; header "MEMORY CARD slot1"; rows 1-6 all <EMPTY> with row 1 highlighted (orange bar); footer "Load game to continue a previously saved game." + Triangle Previous
+  adjacent viewed (not curated): snap-1590t + snap-1642t (Save/Load submenu with Load game highlighted, same as 1616); snap-1780t (Load game MEMORY CARD slot1 with 6 EMPTY rows, same as 1808). No unexpected screen.
+  curated PNG bytes total 319215 (<= 2 MiB); curated text 246 B (<= 512 KiB)
+
+Outcome per predeclared gate: A (readable Load game result screen PLUS one post-choice GetDir call at vsync1740; ok=0 reason=empty counts as API reach, with no copied bytes and no successful mcRead stated separately). Visual verdict rests with the orchestrator gate.
