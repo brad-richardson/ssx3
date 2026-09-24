@@ -1605,10 +1605,19 @@ with measured budgets, then 120 Hz simulation.
       cards and no live gamepad. This is a bounded input/write/hash
       discriminator, not full determinism or speed. Gate:
       `local/research/E55D5/ORCH-GATE.md`.
-- [ ] **E55D6 card-path reach design:** identify a real reachable
-      getdir/mcread path, then predeclare one changed card input against
-      an A/A baseline and stop at the first differing ordered guest
-      write. Park ExternalWake policy until a production poster is found.
+- [x] **E55D6 card-path reach design PARTIAL (`5f1401a9`, correction
+      `db2a3455`):** mapped three game `sceMcRead` and five
+      `sceMcGetDir` call sites in the save-manager cluster, but neither
+      seeded-title nor save-menu trigger has a proven menu route or tick.
+      Empty-card E55D4/D5 traces have zero calls. GetDir writes are
+      conditional on query match, max count and mapped destination;
+      host timestamps may enter returned entries. No card comparison run.
+      `local/research/E55D6/ORCH-GATE.md`.
+- [ ] **E55D7 card-path ingress:** prove a menu-to-save-manager call edge
+      or capture one bounded empty-card save-menu detour with the E55D3
+      probe. Only after a real GetDir/Read path is seen, design a
+      one-change card comparison with a new seeded-layout A/A baseline.
+      Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
