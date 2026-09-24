@@ -162,8 +162,10 @@ splitting.
   locked device pauses the app within seconds and the run is void. Ask Brad
   to unlock it. **Force-stop the app after every run** (`am force-stop`),
   not only when a lane is done: a running app drains the Odin faster than
-  its charger keeps up (Brad, 09-23). Check `dumpsys battery` (charging,
-  at least 20 %) before each launch.
+  its charger keeps up (Brad, 09-23). Check `dumpsys battery` before each
+  launch: **`AC powered: true` and level ≥ 20 %** (Brad, 09-24). Don't gate
+  on `status`: the Odin often reports 3 (discharging) while on AC, at full
+  charge or under load. No per-run threshold amendments.
 - **Ask, don't queue silently:** any decision waiting on Brad, or a
   device/hands-on need that would unblock work, is reported as a
   blocker right away.

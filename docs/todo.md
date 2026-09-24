@@ -2426,6 +2426,26 @@ with measured budgets, then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **UP1 upstream harvest (queued after N9, read-only first):**
+      upstream `ran-j/PS2Recomp` has one new commit since our base
+      `14b1e5cb`: `75d729c` (09-19 squash of `iop-emulator`, 139 files,
+      +15.6k/−9.1k: EE scheduler refactor, IOP emulator, GS architecture,
+      texture caching fix, MMI translation fix, `SET_GPR_ZE32`, analyzer
+      entry detection). Map each item vs our fork (already fixed / needed /
+      irrelevant) and port 2–4 targeted fixes with tests; candidates: MMI
+      translation, texture caching. paraLLEl-GS upstream has nothing new
+      (its `main` is the source of the wave128 choice). Granite upstream: 16
+      small commits; defer unless Android build fixes are needed.
+- [ ] **PARKED (Brad, 09-24): rebase onto upstream for upstreaming.** Do
+      when Brad has spare quota. Never rewrite `ssx3`: build a new branch
+      (e.g. `ssx3-upstream`) by replaying our product commits onto upstream
+      `main` in topic batches (CPU semantics, kernel/scheduler, GS, sound,
+      iOS, Android), dropping diagnostic taps and upstream-superseded fixes;
+      regenerate codegen; re-run the gates (Mac menu→race, sound mid/side
+      vs PCSX2, iOS Simulator, live Odin race); switch the primary branch
+      only at parity. Multi-day; Opus pane for the classification part.
+      No upstream contact until Brad says.
+
 - [x] **PF1 PASS (09-22): Odin clean baseline** (N3 APK, logs off):
       title 21.5 guest vsyncs/s (0.36×), My Rules 25.5/s (0.43×), 3D menus
       down to ~1/s; GameThread saturated (36–46 ms per guest frame vs a

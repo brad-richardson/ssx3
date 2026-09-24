@@ -158,7 +158,8 @@ The brief contract is in `AGENTS.md`. On top of it:
 - **Odin:**
   - lease `/data/local/tmp/mg/LEASE`;
   - keyguard `showing=false` before every launch;
-  - `dumpsys battery` charging and ≥20 %;
+  - `dumpsys battery`: `AC powered: true` and ≥20 % (ignore `status`,
+    which reads 3 on AC; Brad 09-24);
   - **`am force-stop` after every run**, because the charger can't keep
     up with a running app.
 
