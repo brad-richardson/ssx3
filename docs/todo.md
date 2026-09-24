@@ -1352,6 +1352,20 @@ with measured budgets, then 120 Hz simulation.
       **I27B next:** fix the SDL2 drawable/window scale in the pinned
       raylib path, verify full-viewport rendering and font appearance on
       the Simulator before any fold or device install. iPad still locked.
+- [x] **I27B PASS for native viewport (69ed7de):** local fork candidate
+      `04f3ace` adds a checked-in, pinned-raylib SDL2 DPI patch hook on top
+      of I27A. Mac taps-OFF suite 585/585. After stopping an invalid O0
+      partial-cache build, a fresh verified `-O3 -DNDEBUG` Simulator build
+      installed and ran I26-FAST to tick 2363. Window stayed 874×402 points;
+      drawable and raylib render both became 2622×1206 pixels. The four
+      SHA-paired frames were viewed: title, Select Peak and advancing race
+      fill the intended viewport. Guest font detail is visually unchanged
+      from W1F2 because the source image is still low resolution; native
+      virtual-pad edges are smoother. Dark GS race geometry remains. No
+      touch test, device install, speed claim or fork push. Runner-dir guard
+      empty; lease free. **Next: fold I27A+B onto current fork after N8D4
+      replay/build clears, then revalidate Simulator and install signed
+      iPhone build only.** iPad run awaits Brad unlocking it.
 - [x] **W1F2 PASS for Simulator + iPhone install (2fc2242):** restored
       I25's bundled `ps2x.env`/`PS2X_BOOT_ELF` and UIWindowScene wiring
       on the W1F fold, retaining I26 controls and W1 presentation. Fork
