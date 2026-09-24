@@ -1367,5 +1367,11 @@ with measured budgets, then 120 Hz simulation.
       cap. The orchestrator corrected a stale checkout pin in the brief,
       closed the pane, and independently checked the relevant source
       lines in `local/research/X7/REPORT.md`. No worker verdict/commit.
+      **X8 incomplete (dense, low thinking budget):** first reasoning
+      step fell from X7's 7m35s to 45s, but broad source reads took
+      context to 43.8k against an 18k cap without a report. Closed at
+      about four minutes. `local/research/X8/REPORT.md` is an
+      orchestrator audit, not a worker table. Next trial will provide
+      exact source excerpts and fixed commands.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
