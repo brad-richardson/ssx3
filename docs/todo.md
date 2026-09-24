@@ -1461,12 +1461,13 @@ with measured budgets, then 120 Hz simulation.
       footprint is not an executed write (transfers/clears/host writes and
       clipped primitives confound absence). No build or Odin run.
       `local/research/N8D7M9/ORCH-GATE.md`.
-- [ ] **N8D7M10 non-primitive write-path inventory:** map IMAGE transfers,
-      clears, host writes and clipped draws against the original selected
-      copy. Decide whether any complete order witness exists without
-      changing execution; otherwise design a bounded, explicitly labeled
-      diagnostic intervention. Keep exact same-stream controls and do not
-      infer live Odin order from Mac replay alone.
+- [ ] **N8D7M10 same-stream Odin offline replay feasibility:** trace a
+      bounded path for replaying the exact N8D7M6 stream through the
+      Odin paraLLEl/Turnip backend without live EE scheduling. If the
+      selected image is broad offline, live interleave becomes a lead;
+      if sparse, the device graphics path becomes a lead. Require exact
+      stream/descriptor controls; no build or device run in this part.
+      Non-primitive write-path inventory remains an option after this gate.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
@@ -1746,12 +1747,19 @@ with measured budgets, then 120 Hz simulation.
       output-directory setup bug and missing final-frame proof. Self-check
       21/21, checker 33/33; **no boot/menu verdict yet**.
       `local/research/E55D9/ORCH-GATE-P1.md`.
-- [ ] **E55D9 Part 2 observed save-menu path:** run the exact approved
-      script once with scoped scratch write permission, then view the
-      settled Main Menu and each Down transition. Only an observed
-      Options/Save screen can license a bounded detour. After a real
-      GetDir/Read record, design a changed-card A/A baseline. Park
-      ExternalWake policy until a production poster is found.
+- [x] **E55D9 Part 2 Main Menu B (`9982a2cf` + `5dd59a9d`):** one
+      lease-held Mac boot, five orchestrator-viewed frames and exact
+      padscript markers show Single Event → Conquer The Mountain →
+      Multi Play → Previews → Online after four Down pulses. Every frame
+      shows Square: Options in the footer, but Square was unpressed; no
+      Options/Save screen or GetDir/Read reachability is proved. Runner
+      stopped, mini slots free, no speed claim.
+      `local/research/E55D9/ORCH-GATE-P2.md`.
+- [ ] **E55D10 one-button Options detour:** from a settled Main Menu,
+      press Square once and capture the resulting screen. Only if an
+      Options/Save route is actually displayed should a later card detour
+      and changed-card A/A baseline be designed. Park ExternalWake
+      policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
