@@ -153,3 +153,35 @@ The 59 live VQ `priv=` values are GS `privWrite` *call* counts; the capture has 
 | Replay | With `PS2X_GS_REPLAY_CAPTURE=../run/gb4p4.capture.bin PS2X_GS_REPLAY_STEP=50`, run `../build/ps2xTest/ps2x_tests` once with `PS2X_GS_REPLAY_OUT=../run/replay-vq-p4-fold-direct.hashes`. For queue runs add `PS2X_GS_REPLAY_MODE=queue PS2X_GS_REPLAY_EXPECT=../run/replay-vq-p4-fold-direct.hashes`, changing `OUT` to `queue1`/`queue2`; for the negative control add `PS2X_GS_REPLAY_DROP_PRIV=1` and output `droppriv`. |
 
 All Part 4 builds, boot and gates completed within the added budget. The original Part 2 paraLLEl work is still separate: it requires its own build and live boot, which the Part 4 budget did not provide. Recommended next action: the orchestrator can use this matched stream gate to authorize a paraLLEl comparison against the same capture.
+
+## Part 5 — fork push and paraLLEl replay (stopped before live boot)
+
+The fast-forward push gate passed. The paraLLEl replay produced all requested frames, but its **whole test process failed 3/556** because `PS2X_GS_BACKEND=parallel` also selects the GPU backend in three earlier GS unit tests. The GB4 replay case reached marker 3000 and wrote its 60 rows. Per the worker's first-failed-test gate rule, work stopped here: **no live paraLLEl boot**, and no further build or replay attempt.
+
+| Step | Evidence / result |
+|---|---|
+| Diagnostic-taps suite, separate `build-diag-taps` | `PS2X_ENABLE_DIAG_TAPS=ON`, canonical codegen, Release/Ninja. Built `ps2x_tests`; suite **643/643** from the fork worktree. An initial invocation from the GB4 parent dir had a source-reading test fail to find `instructions.h`; rerunning the same binary from its required fork-root cwd passed. `run/config-part5-diag.log`, `build-part5-diag.log`, `suite-part5-diag.log`. |
+| Push preconditions | `git diff --stat 14b1e5cb gb4-fold -- ps2xRuntime/src/runner` empty. `git ls-remote fork refs/heads/ssx3` returned `b9647f54934f9f7c448d7cf41fb42f81c74c8ed8` immediately before push. |
+| Push | Authorized escalated `git push fork gb4-fold:ssx3` fast-forwarded `b9647f5..13cac7f`. A following `git ls-remote` returned `13cac7fdfa8f3554c2afef25982fcc0e7da269f7`. No paraLLEl branch push. |
+| Local paraLLEl branch | `gb4-parallel` at `520bd61` from `gb4-fold`; cherry-picked G44 `460e438 8c45d1f 6cfede4` and GB3 parked WIP `f907deb`. The G44 conflicts kept both its shadow tap and the newer queue/capture path listener; other cherry-picks were clean. Runner-dir diff remains empty. |
+| ParaLLEl build and default suite | `PS2X_GS_SHADOW_PARALLEL=ON`, `PS2X_PARALLEL_GS_SOURCE_DIR=~/dev/ssx3-work/G43/parallel-gs`, canonical codegen, Release/Ninja. Build passed and default backend suite **556/556**. `run/config-part5-parallel.log`, `build-part5-parallel.log`, `suite-part5-parallel.log`. |
+| CPU replay reference | The same 2,752,955,786-byte `gb4p4.capture.bin` replayed with true packet paths from `run/gb4p4.paths.txt` (1,982,063 rows from the live pklog). CPU hashes match Part 4 direct replay byte for byte, suite **556/556**; five named-tick PPMs produced. `run/replay-p5-cpu.log`, `replay-vq-p5-cpu.hashes`, `p5-cpu-ppm/`. |
+| paraLLEl replay | Escalated Vulkan run with `PS2X_GS_BACKEND=parallel` and `GRANITE_VULKAN_LIBRARY=/opt/homebrew/lib/libvulkan.1.dylib`: backend initialized, 60/60 replay sample rows and five PPMs written, `null_scanouts=0`, no SMODE1 override set. Whole suite **553/556**, failed in three earlier `sceGsSetDefDBuffDc`/`sceGsSwapDBuffDc` unit tests whose runtime instances also selected paraLLEl. `run/replay-p5-parallel.log`, `replay-vq-p5-parallel.hashes`, `p5-parallel-ppm/`. This is the stop point, not a clean replay test exit. |
+| Unsupported counters | Process-global `GB4_PARALLEL_STATS`: `packets=1,982,068`, `presents=60`, `null_scanouts=0`, `unsupported_clears=2`, `unsupported_vram_io=0`, `init_ok=1`, `init_failed=0`. Packet count exceeds the capture's 1,982,063 by five because the three earlier tests ran the backend first; the two unsupported clears may also be from those tests. These counters cannot be attributed solely to the replay. The capture replay itself has zero HLE-clear events. |
+| Live boot / CPU split | **Not run** under the failed test gate. No presents/s or GameThread/GsWorker CPU split measurement. Budget used: two builds, zero boots of the additional three-build/one-boot allocation. |
+
+### Exact-tick CPU / paraLLEl comparison
+
+Source PPMs are 512×448 RGB, left CPU and right paraLLEl in the committed side-by-side PNGs. PSNR is over all RGB bytes; each `different_pixels` count compares the 229,376 visible pixels. Raw data: [parallel-psnr-p5.csv](parallel-psnr-p5.csv).
+
+| Tick | Scene | PSNR dB | Different pixels | Side by side |
+|---:|---|---:|---:|---|
+| 900 | Setup Character transition | 24.449 | 89,007 | [PNG](parallel-side-900-p5.png) |
+| 950 | Zoe on Setup Character | 18.934 | 125,389 | [PNG](parallel-side-950-p5.png) |
+| 1800 | Race HUD, start | 19.924 | 73,389 | [PNG](parallel-side-1800-p5.png) |
+| 2200 | Race HUD and terrain | 18.916 | 114,309 | [PNG](parallel-side-2200-p5.png) |
+| 2800 | Race HUD and terrain | 20.135 | 76,190 | [PNG](parallel-side-2800-p5.png) |
+
+I viewed all five pairs. At tick 950, Zoe's body, menu panels and background are recognizable on both sides; paraLLEl has broken small text and thin horizontal marks near the lower edge. In the race pairs, both backends show the timer, snow, slope and HUD bars, but paraLLEl has text artifacts and some altered terrain/edge pixels. The black central terrain areas are present in the CPU reference too. These visual observations and PSNR apply to replay only; no live paraLLEl verdict is claimed.
+
+The no-override replay producing 60 non-null scanouts is evidence that `PS2X_GS_SHADOW_FORCE_SMODE1` is unnecessary for this captured stream after the game's SMODE1 writes are replayed. It does not validate a live boot. Recommended next action: isolate the replay case from runtime unit tests under `PS2X_GS_BACKEND=parallel`, rerun the GPU replay to obtain unpolluted unsupported counters and a clean gate exit, then decide on a live paraLLEl boot. The worker stops at the failed full-suite gate.
