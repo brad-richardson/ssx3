@@ -35,18 +35,21 @@ linkage and input → Odin native race → measured budgets → 120 Hz sim.
 | What | Where |
 | --- | --- |
 | Current board (lane, owner, pinned rev, next action, blocker) | `docs/status.md` |
-| Open work, per lane | `docs/todo.md` (short; history in `docs/archive/`) |
+| Open work, per lane | `docs/todo.md` (open items only; git history is the tracker) |
 | Every quoted number with its status | `docs/numbers-ledger.md` |
 | Worker briefs | `local/muse/prompts/<ID>.md` (committed with `git add -f`) |
-| Worker evidence | `local/research/<ID>/REPORT.md` + text receipts |
+| Worker evidence and gate verdicts | `local/research/<ID>/REPORT.md` (+ text receipts; the orchestrator appends a `## Orchestrator gate` section) |
 | Orchestrator runbook (loop, worker launchers, gates, lessons) | `docs/orchestration.md`, scripts in `local/tooling/orch/` |
 | Latest review | `docs/research/review-2026-09-23-frontier-2.md` |
-| Parked GameCube work | `docs/reserve.md` |
+| Parked GameCube work | `docs/reserve.md`, `docs/reserve/` |
+
+Docs hold current state only; history lives in git. Handoff notes between
+orchestrators are not committed.
 
 Lanes: **E** PS2 runtime (PS2Recomp fork, branch `ssx3`), **G** GS
-composite/GPU backend (paraLLEl-GS clone + `ps2xGS`), **N** Android app,
-**T** PCSX2 reference traces, **I** iOS recomp (parked until E changes the
-movie path), **V** storage/restore.
+composite/GPU backend (paraLLEl-GS + Granite forks, branch `ssx3`),
+**N** Android app (Odin), **A** audio, **I** iOS, **W** widescreen,
+**T** PCSX2 reference traces, **V** storage/restore.
 
 ## Roles
 
@@ -101,9 +104,6 @@ Close the pane after its gate read.
    revisions, binary SHAs, and gaps stated plainly, plus an `[<ID>]`
    commit with the `Orchestrated-By: Muse Code` trailer. No push.
 
-Dropped on 2026-09-22 as ceremony: prefix-SHA tail receipts,
-zero-growth `du` audits of unrelated dirs, and one-question-per-build
-splitting.
 
 ## Standing rules
 
