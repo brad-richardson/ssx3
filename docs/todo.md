@@ -910,10 +910,19 @@ with measured budgets, then 120 Hz simulation.
       destination prior words, CLAMP/mask/blend and actual swizzled
       addresses remain unknown. Checker verifies provenance, not transfer;
       the proposed poke is not ready. `local/research/GB7C3/ORCH-GATE.md`.
-- [ ] **GB7C4 actual glyph-row carrier sample:** capture one bounded
-      packet47240 glyph-row UV/address, source texel, mask/blend and
-      destination old/new; use the measured mapping to predeclare a
-      one-pixel OFF/ON perturbation test if outcomes differ.
+- [x] **GB7C4 actual glyph-row carrier sample PASS, category B
+      (`52dfba68`, correction `e978ebe0`, fork `a01e679`):** four
+      packet47176 changed C1 glyph words match packet47240 carrier tap0
+      at the actual GS storage address. Glyph-row UV confirms +1/+1 and
+      fx=fy=0 for the four targets. Destination RGB is already equal
+      before the carrier write; 4/4 old==new. One build, 556/556 suite,
+      ON/OFF CPU replays and tick600/601/700 frames byte-identical.
+      Measured target A has a bounded one-pixel prediction, but no
+      causal poke or GPU cause claim. `local/research/GB7C4/ORCH-GATE.md`.
+- [ ] **GB7C5 first displayed-glyph producer:** trace backward to the
+      packet that first writes the FBP112 glyph RGB at a pinned target
+      pixel, then compare that producer's CPU/GPU path. Keep the
+      GB7C4 one-pixel carrier poke as a bounded follow-up if needed.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
