@@ -1517,9 +1517,16 @@ with measured budgets, then 120 Hz simulation.
       persistent device divergence; tick-2050-only difference implicates
       instrumentation. Checker16/16; corrected dynamic mini lease plan.
       No run or cause verdict. `local/research/N8D7M12P5C/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5D controls:** prepare and gate a same-binary Mac
-      OFF replay and a reviewed-SHA Odin OFF launcher separately, then
-      run bounded controls without changing the ON receipts.
+- [x] **N8D7M12 Part 5D1 OFF launcher A (`2df02d31`+
+      `dda8fa99`):** same APK/stream/backend with three tick-2050
+      capture flags absent; exact 41-tick replay sequence and PPM still
+      required. Final script SHA `223fd15e…03170`, checker30/30.
+      No device run or graphics verdict. `local/research/N8D7M12P5D1/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5D2 OFF Odin replay:** release only the gated
+      script SHA for one install/launch, compare all 41 rows and viewed
+      PPM with the pinned ON run; pre-2050 mismatch voids the test.
+- [ ] **N8D7M12 Mac OFF replay:** run a separately gated same-binary
+      Mac control with the exact stream after the Odin OFF result.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
