@@ -1,0 +1,13 @@
+E58 HEAD:
+c34d9c6a46592e2ac6830ea3ff26c90500b5beef
+Search folded runtime for the required rate logger:
+not found in folded runtime/tests
+N5 local patch containing the logger:
+5:    [N5-local] Env-gated PS2X_VSYNC_RATE_LOG guest vsync-rate line, ported from I25 31d988d (n5-android only, never push)
+7:    One fprintf per 5 s on the host loop when PS2X_VSYNC_RATE_LOG=1; off by default (one getenv at loop start). Needed for dumps-off speed numbers: the frame-dump tick lines are the only other counter.
+27:+    // I25: PS2X_VSYNC_RATE_LOG=1 prints guest vsyncs per wall second every
+30:+        const char *env = std::getenv("PS2X_VSYNC_RATE_LOG");
+45:+                std::fprintf(stderr, "[vsync-rate] tick=%llu rate=%.2f/s (%.3fx of 59.94)\n",
+Codegen comparison:
+       0 /Users/brad/dev/ssx3-work/E58/codegen-diff.txt
+Runner-dir check:
