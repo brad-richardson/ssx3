@@ -99,3 +99,26 @@ Brad clarified that busy slots mean wait, then run. The wrapper claimed slot 1 f
 | Direct vs live | First comparable tick 100 differs in VRAM; table above. Priv hash now matches at all 165 ticks. Present is compared on the same visible width/stride and matches only 3/165. | `run/direct-live-p2.csv` |
 
 The capture has the same number of packets at every sampled marker, and the first 5,000 packet byte hashes agree with pklog. No missing early packet or HLE clear/readback has been demonstrated; the source of the VRAM divergence remains unidentified. The final record is incomplete because the runner was stopped mid-write after tick 8300, and replay's EOF validation must be fixed before any later gate. Capture path metadata is also suspect: packet 0 records Path1 while live pklog labels its source Path3; `m_curGifPath` defaults to Path1 when the stats listener is not armed. This metadata error is not shown to affect CPU VRAM. Per the GB4 stop rule, queue replay, negative control and paraLLEl were not started.
+
+## Part 3 — first VRAM divergence bisect
+
+| Gate | Result | Receipt |
+|---|---|---|
+| Partial EOF rejected | Pass: `readEvent` distinguishes a clean EOF from a partial length or body. New unit test passes. The Part 3 capture closes at marker 120 and passes an independent binary length walk. | `~/dev/ssx3-work/GB4/run/suite-part3.log`, `run/gb4p3.capture.bin` |
+| Live vs replay ticks 1..120 | First VRAM difference at **VQ tick 95**: tick 94 live/replay `10ecb55c`/same; tick 95 `0949391b`/`95581d99`, both at 481 submitted packets. VRAM matches 98/120 sampled ticks; priv hashes match at tick 95 (they differ at some early pre-setup ticks). | `~/dev/ssx3-work/GB4/run/bisect-ticks-p3.csv` |
+| First differing packet or pre-packet write | **Packet index 479, submitted during tick 94 (PATH1)**. After index 478 both VRAM hashes are `7aa1e8e6`; after index 479 live/replay are `0949391b`/`95581d99`. Its 208 bytes are identical to pklog (`fnv=2951ff70`). GIF PACKED tag: NLOOP=4, EOP=1, PRE=1, PRIM=`0x04c` (triangle strip, IIP and ABE), NREG=3; descriptors are NOP, RGBAQ, XYZF2. | [packet-479-part3.txt](packet-479-part3.txt), `~/dev/ssx3-work/GB4/run/bisect-packets-p3.csv` |
+
+### Part 3 pins, commands and stop point
+
+| Item | Result |
+|---|---|
+| Fork | `gb4-replay` at `140ace3` (`[GB4] Part 3 bisect first VRAM divergence`, `Orchestrated-By: Codex`); four source/test files. `git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner` empty. No push. |
+| Build | One allowed build: `nice -n 10 cmake --build build -j8 > run/build-part3.log 2>&1` from `~/dev/ssx3-work/GB4`; pass. |
+| Suite | `(cd PS2Recomp && ../build/ps2xTest/ps2x_tests > ../run/suite-part3.log 2>&1)`; **608/608**, including `GB4 rejects a partial capture record at EOF`. |
+| Runner SHA-256 (two reads) | `05a9aadd56939da915b0632b78735e509e402a9a60fe64a3149d2aec796c5008` / same. |
+| ISO SHA-256 (two reads) | `3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5` / same. |
+| Boot | One escalated boot, queue off, slot 2: `python3 gb4_boot.py --label gb4p3 --wall 300 --snap 30 --script "$ROUTE" --vq --vq-from 1 --vq-to 120 --vq-step 1 --pklog --capture-file "$HOME/dev/ssx3-work/GB4/run/gb4p3.capture.bin" --env PS2X_GS_BISECT_TO=120`. The E33 route string is recorded in `run/boot-part3-wrapper.jsonl`. Capture closed at marker 120; tracked runner PID 84394 was then stopped by PID, exited 0. Wrapper `bound=exit`, elapsed 47.363 s, lease released; both slots subsequently free. |
+| Capture | `run/gb4p3.capture.bin`, **375,884 bytes**, clean EOF with last record a tick-120 marker: 757 GIF packets, 508 priv writes, 6 transfer metadata events, 120 markers. 120 live VQ samples and 757 post-packet live VRAM hashes. |
+| Replay | `PS2X_GS_REPLAY_CAPTURE=../run/gb4p3.capture.bin PS2X_GS_REPLAY_STEP=1 PS2X_GS_REPLAY_BISECT_TO=120 PS2X_GS_REPLAY_PACKET_TRACE=../run/replay-packets-p3.csv PS2X_GS_REPLAY_OUT=../run/replay-vq-p3.hashes ../build/ps2xTest/ps2x_tests > ../run/replay-p3.log 2>&1` from the fork worktree; exit 0, 608/608. 120 marker and 757 packet hashes emitted. |
+
+The first divergence occurs **after a packet**, with identical pre-packet VRAM and identical packet bytes. It is not a demonstrated direct VRAM write between packets. The hidden GS draw state or CPU raster behavior at this first triangle strip is unresolved; the packet's raw fields are in the receipt. Live and replay VRAM hashes converge again after packet 481, then diverge at later draw packets. This report names the first distinguishing input/output point only; no cause or fix is claimed. Per the Part 3 instruction, work stops here and does not enter queue gates.

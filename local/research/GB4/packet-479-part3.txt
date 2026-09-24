@@ -1,0 +1,26 @@
+GB4 Part 3 first packet divergence receipt
+
+Inputs: ~/dev/ssx3-work/GB4/run/gb4p3.capture.bin (clean EOF after marker 120),
+        run/boot-gb4p3-1.log, run/replay-packets-p3.csv,
+        run/pklog-gb4p3-1.txt, run/bisect-packets-p3.csv.
+
+Live and replay VRAM FNV after packet 478: 7aa1e8e6 / 7aa1e8e6.
+After packet 479: 0949391b / 95581d99 (first mismatch).
+After packet 480: 0949391b / 95581d99.
+After packet 481: eafac0e6 / eafac0e6 (converges).
+
+Packet 479: submitted in tick 94, PATH1 (pklog src=1; capture path=1),
+208 bytes, packet-byte FNV 2951ff70 in both capture and pklog.
+GIF tag lo=3026400000008004 hi=000000000000041f:
+  NLOOP=4 EOP=1 PRE=1 PRIM=0x04c FLG=0 (PACKED) NREG=3.
+  PRIM 0x04c: TRIANGLE STRIP, IIP=1, TME=0, ABE=1.
+  Repeating descriptors [0xF NOP, 0x1 RGBAQ, 0x4 XYZF2].
+
+Loop  NOP lo/hi                         RGBAQ lo/hi                       XYZF2 lo/hi
+0     0000000000000000/000000003f800000  0000000000000000/0000007500000000  000071f800006ff8/ffffffff0fffee70
+1     000000003f800000/000000003f800000  0000000000000000/0000007500000000  000071f80000aff8/ffffffff0fffee70
+2     3f80000000000000/000000003f800000  0000000000000000/0000007500000000  0000a9f800006ff8/000000000fffee70
+3     3f8000003f800000/000000003f800000  0000000000000000/0000007500000000  0000a9f80000aff8/000000000fffee70
+
+These are byte-level packet fields, not a diagnosis of the differing
+raster result. No packet-count or packet-byte difference has been found.
