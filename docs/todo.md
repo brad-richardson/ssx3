@@ -1544,8 +1544,22 @@ with measured budgets, then 120 Hz simulation.
 - [ ] **N8D7M12 tick850 boundary:** use the source audit and same
       stream to choose one bounded GPU hash/sync observable before
       changing the renderer or repeating a flag comparison.
-- [ ] **N8D7M12 Mac OFF replay:** run a separately gated same-binary
-      Mac control with the exact stream after the Odin OFF result.
+- [x] **N8D7M12 Part 5F1 hash/sync audit A (`28718aef`+
+      `11c6c191`):** mapped replay marker fence, CPU priv hash,
+      4 MiB VRAM snapshot, frame hash, backend no-op Flush/Sync and
+      renderer readback path. Capture flags act only at2050. Packaged
+      renderer bytes differ from the current dirty source tree, so no
+      root cause or source fix is declared; checker31/31.
+      `local/research/N8D7M12P5F1/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5M2 Mac OFF replay:** release the gated driver
+      SHA `bec9a4c6…cd9f1` for one same-binary/stream Mac control and
+      compare all 41 rows plus the viewed PPM with Mac ON.
+- [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
+      binary/stream/ON pins, ON minus three capture flags and private
+      output paths, ambient PS2X keys cleared, dynamic mini lease and
+      own-PID cleanup, 300 s wall/16 MiB log/64 MiB output caps;
+      checker32/32. Script SHA `bec9a4c6…cd9f1`. No replay yet.
+      `local/research/N8D7M12P5M1/ORCH-GATE.md`.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
