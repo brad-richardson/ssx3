@@ -1,0 +1,72 @@
+--- gs_renderer.cpp.orig	2026-09-24 18:54:00
++++ gs_renderer.cpp	2026-09-24 18:54:19
+@@ -13,6 +13,8 @@
+ #include "thread_id.hpp"
+ #include "gs_util.hpp"
+ #include "thread_name.hpp"
++#include <cstdlib>
++#include <cstring>
+ #include <utility>
+ #include <algorithm>
+ #include <cmath>
+@@ -1934,12 +1936,36 @@
+ 	}
+ }
+ 
++// N8X1 dev-only diagnostic knob, default = upstream behaviour.
++// PS2X_PGS_HIER=off: always flat binning. on: allow hierarchical binning on Apple too.
++// wave64: hierarchical binning requires 64-wide subgroups instead of the free 4..128 fallback.
++static int n8x1_hier_mode()
++{
++	static const int mode = [] {
++		const char *env = getenv("PS2X_PGS_HIER");
++		int m = 0;
++		if (env && strcmp(env, "off") == 0)
++			m = 1;
++		else if (env && strcmp(env, "on") == 0)
++			m = 2;
++		else if (env && strcmp(env, "wave64") == 0)
++			m = 3;
++		LOGI("[n8x1] PS2X_PGS_HIER=%s mode=%d\n", env ? env : "(unset)", m);
++		return m;
++	}();
++	return mode;
++}
++
+ uint32_t GSRenderer::get_target_hierarchical_binning(
+ 		uint32_t num_primitives, uint32_t coarse_tiles_width, uint32_t coarse_tiles_height) const
+ {
++	const int n8x1_mode = n8x1_hier_mode();
++	if (n8x1_mode == 1)
++		return 1;
+ #ifdef __APPLE__
+ 	// Broken Metal drivers can't deal with the hierarchical binning for some reason.
+-	return 1;
++	if (n8x1_mode != 2)
++		return 1;
+ #endif
+ 
+ 	// Only bother for large number of primitives.
+@@ -2215,7 +2241,7 @@
+ 	const uint32_t subgroup_size = cmd.get_device().get_device_features().vk11_props.subgroupSize;
+ 
+ 	// We cannot take good advantage of wave64 in the hierarchical binner, otherwise, we prefer large waves.
+-	uint32_t size_log2 = is_hierarchical ? 5 : 6;
++	uint32_t size_log2 = is_hierarchical && n8x1_hier_mode() != 3 ? 5 : 6;
+ 
+ 	while (size_log2 >= 2)
+ 	{
+@@ -2231,6 +2257,13 @@
+ 	}
+ 
+ 	// Fallback case, allow whatever.
++	static bool n8x1_logged = false;
++	if (!n8x1_logged)
++	{
++		n8x1_logged = true;
++		LOGI("[n8x1] hierarchical binning subgroup fallback: range 4..128, wg=%u (hier=%u)\n",
++		     subgroup_size * hier_factor * hier_factor, hier_factor);
++	}
+ 	cmd.set_subgroup_size_log2(true, 2, 7);
+ 	cmd.set_specialization_constant(0, subgroup_size * hier_factor * hier_factor);
+ }
