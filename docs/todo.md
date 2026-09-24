@@ -1024,6 +1024,20 @@ with measured budgets, then 120 Hz simulation.
       was wrong). After per-window correction the residual is 0.23 of the
       PCSX2 RMS, rising with frequency (0.19 → 1.06 at 12–18 kHz): an
       **arithmetic** difference in the decode/mix.
+- [x] **AU3 Part 2 (d6e947e):**
+      - SendCmd ABI fixed (`c19a5d6`, 601/601);
+      - the sound tick runs at exactly 93.75 Hz of guest time;
+      - sema 36 is signalled and waited 15.6k times;
+      - the race starts and advances;
+      - host-stream underruns run 1.1–1.7 M frames/min, a speed symptom
+        (the guest is ~0.3×);
+      - the WAV wasn't written (`_Exit` skips the destructor).
+
+      **Orchestrator find in its log:** the only missing target,
+      `0x3cb7a8 → 0x3c9520` (26k×, also in AU2): the sound library's
+      function-pointer table entries `0x3c9520`/`0x3c95f0` (plus the leaf
+      `0x3c9518`) are merged into `sub_003C9420`. That is the prime suspect
+      for the distortion. Folded into AU5.
 - [ ] **AU5 (queued; launch after E58 pushes):** re-capture on the folded
       tree (E53 semantics), which may fix it outright; else an instruction
       census of the XA decoder + mixer, a decoder-vs-`au2_eaxa.py`

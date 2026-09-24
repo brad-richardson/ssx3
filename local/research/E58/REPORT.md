@@ -1,6 +1,6 @@
 # E58 — fold and regeneration; Part 2 stopped at suite failure
 
-Worker: Codex. Brief: `local/muse/prompts/E58.md`. The orchestrator decides. No fork push or codegen promotion was attempted. Part 1 stopped at a missing logger; after approval, Part 2 added it, built, and stopped at the first suite failure.
+Worker: Codex. Brief: `local/muse/prompts/E58.md`. The orchestrator decides. Part 1 stopped at a missing logger; after approval, Part 2 added it, built, and stopped at the first suite failure. Part 3 completed the fold, push, and codegen promotion below.
 
 ## Fold
 
@@ -86,7 +86,7 @@ The suite is the first failed Part-2 brief step. I made no fix attempt or second
 
 ## Part 3 — tap test guard and continuation
 
-Orchestrator approved conditional compilation and registration of the guest-store tap trace suites for `PS2X_ENABLE_DIAG_TAPS=ON`, followed by both suite gates, boots, push, and codegen promotion. The permission denial below stopped this continuation before commit and boots.
+Orchestrator approved conditional compilation and registration of the guest-store tap trace suites for `PS2X_ENABLE_DIAG_TAPS=ON`, followed by both suite gates, boots, push, and codegen promotion. An initial Codex sandbox denial was resolved with escalation; the history and final results follow.
 
 | Part-3 gate | Result |
 | --- | --- |
@@ -95,10 +95,52 @@ Orchestrator approved conditional compilation and registration of the guest-stor
 | Taps-ON separate build and suite | PASS. `~/dev/ssx3-work/E58/build-taps.sh` configured Release with `PS2X_ENABLE_DIAG_TAPS=ON`, the same codegen, and built only `ps2x_tests` in `build-taps`; `../build-taps/ps2xTest/ps2x_tests` from the fork root: **632/632 passed, 0 failed**. Receipts: `cmake-taps.log`, `build-taps.log`, `suite-part3-taps.log`, and `build-taps/CMakeCache.txt`. |
 | Build budget | Part 2: 1 build; Part 3: 1 incremental test rebuild and 1 separate taps-ON test build; **3/3 total**. |
 | Disk preflight | `local/tooling/disk_budget.sh`: **92.4 / 200 GB**, 149 GiB free, before the taps-ON build. No post-build disk check after the denial. |
-| Commit gate | **DENIED**. `git add ps2xTest/CMakeLists.txt ps2xTest/src/main.cpp` in the E58 worktree returned exit 128: `fatal: Unable to create '/Users/brad/dev/PS2Recomp/.git/worktrees/PS2Recomp13/index.lock': Operation not permitted`. No retry, escalation, or commit attempted, per the worker denial stop rule. Fork HEAD remains `50fe0a7` as last observed. |
+| Initial commit attempt | **Sandbox blocked; resolved below.** `git add ps2xTest/CMakeLists.txt ps2xTest/src/main.cpp` in the E58 worktree returned exit 128: `fatal: Unable to create '/Users/brad/dev/PS2Recomp/.git/worktrees/PS2Recomp13/index.lock': Operation not permitted`. Brad clarified that escalation was required; the retry and commit succeeded. |
 | Smoke boots / clean rate boot | Not run after the denial. 0/3 boots in Part 3; no frames, visual checks, or vsync rates. |
 | Runner-dir check / fork push / codegen promotion | Not run after the denial; no push and no promotion. |
 
 ### Part-3 resumption after sandbox clarification
 
 Brad clarified that the `index.lock` error came from the Codex sandbox and authorized escalated Git writes and runner boots. `git add` and `git commit` succeeded with escalation. The guard is fork commit `b9647f5` (`[E58] Register E41/mpg_src tap tests only with PS2X_ENABLE_DIAG_TAPS`, trailer `Orchestrated-By: Codex`). The two suite gates above remain valid. Smoke boots, clean rate, push, and promotion are pending.
+
+### Escalated smoke checkpoint and lease contention
+
+The Mac mini had no `clang`, `ninja`, or `ps2EntryRunner` processes at smoke preflight. The clean runner's two SHA-256 reads still matched: `f3de8d2cc051c4ac30f8e0e07a84f45eb4889923727627b7416b67c79d251608`. `e58_boot.py` launched the runner outside the sandbox with the I26-FAST route, `PS2X_PAD_SCRIPT_CLOCK=vsync`, `PS2X_SKIP_MOVIE=1`, and one lease slot. The runner PID was `76504`; the harness reached tick 2104 and terminated its own runner at the target after 111.905 s, under the 500 s wall cap. Receipt: `~/dev/ssx3-work/E58/run/part3-smoke/result.json` and bounded `boot.log` (633,272 B). Load averages were 2.07/2.44/2.75 at start and 3.13/2.80/2.85 at end. This frame-dump run is **not** a clean speed measurement.
+
+| Visual check | Frame and direct view |
+| --- | --- |
+| Select Character | **Not yet captured.** The harness's `sc-tick927.png` was viewed and shows **Setup Character**, with Zoe fully drawn. The screenshot window was one menu later than the requested Select Character state. |
+| Race, early | `~/dev/ssx3-work/E58/run/part3-smoke/race1-tick1811.png` was viewed: HUD active, race clock `00:00:01`, visible snow terrain and the known black foreground. |
+| Race, later | `~/dev/ssx3-work/E58/run/part3-smoke/race2-tick1948.png` was viewed: clock `00:00:03`, progress 1%, changed terrain view. The geometry's visible snow and black foreground match the character of `local/research/E53/frames/e53c-race-tick7633.png` and `e53c-race-tick8274.png`, also viewed directly. |
+
+For the second smoke capture, `e58_boot.py` was adjusted only in the E58 work directory to sample ticks 795–900 for Select Character and retain both race snapshots. The escalated attempt `python3 .../e58_boot.py --label part3-sc --capture --target 1950 --wall 500` exited **before launching a runner** with `lease failure: no available slot`. At the immediately following status check, slot 1 was `gb4cap4 pid=77000 utc=2026-09-24T01:49:16Z`, and slot 2 was `au3a2`. The orchestrator then clarified in `a8a8bb3` that occupied slots mean wait, not a failed brief step. The worker polled the lease status, retried when slot 1 freed, and completed the capture below. The no-slot attempt is not a boot. The earlier sandboxed boot mentioned by Brad is void and excluded from the budget.
+
+| Remaining gate | State at the lease-contention checkpoint |
+| --- | --- |
+| Select Character screenshot | Not found; second capture blocked by occupied leases. |
+| Clean rate boot with both slots | Not run; guest vsyncs/s and speed multiple not found. |
+| Final runner-dir check / fork ff push | Not run after the lease failure; fork HEAD remains `b9647f5`, local only. |
+| Codegen promotion / final disk check | Not run. |
+
+### Part-3 completed gates
+
+The second escalated smoke boot held slot 1, reached tick 1958 after 100.832 s (500 s cap), and stopped its own PID `77639` at target. `~/dev/ssx3-work/E58/run/part3-sc/result.json` and `boot.log` are the receipts. I directly viewed `sc_b-tick837.png` and `sc_c-tick873.png`: both show the **Select Character** menu with Zoe drawn. The same boot saved race frames at ticks 1810 and 1947. Together with the first smoke boot's viewed frames, this satisfies both visual checks.
+
+The clean rate boot used `--exclusive`, held both lease slots, disabled frame dumping, and used the same clean runner (SHA-256 read twice: `f3de8d2cc051c4ac30f8e0e07a84f45eb4889923727627b7416b67c79d251608`). Its CMake cache has runtime logs OFF, aggressive logs OFF, diagnostic taps OFF, Release, and E58 codegen. Preflight found no other `clang`, `ninja`, or `ps2EntryRunner` processes. The boot reached tick 2107 after 110.866 s (500 s cap), then the harness terminated its own PID `77896`. Receipt: `~/dev/ssx3-work/E58/run/part3-rate/result.json` and `boot.log` (8,358 B); `frames` was empty. Host load averages were 2.72/3.44/3.27 at start and 2.78/3.21/3.20 at end. Both lease slots were free afterward.
+
+| Clean build, Mac mini (M5 Pro) phase | Sample ticks | Five-second samples | Mean guest vsyncs/s | Mean ÷ 59.94 |
+| --- | ---: | ---: | ---: | ---: |
+| Title/startup | 275–605 | 3 | 40.27 | 0.672× |
+| Menus | 796–1580 | 6 | 32.46 | 0.541× |
+| Loading / Rival card | 1642–1680 | 2 | 9.98 | 0.166× |
+| Early race | 1719–2107 | 11 | 7.75 | 0.129× |
+
+These are phase means of the `[vsync-rate]` lines from one clean run, not a repeated-run race benchmark. The smoke runs had frame dumps and are excluded from speed numbers. The clean rate run was the third and last valid E58 boot (3/3 budget).
+
+| Final gate | Result |
+| --- | --- |
+| Suite, taps OFF / ON | **537/537** and **632/632**, both 0 failures, from the fork root. |
+| Runner directory | `git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner` empty at fork HEAD `b9647f5`; no generated guest code committed. |
+| Fork remote and push | `git ls-remote fork refs/heads/ssx3` returned `eac6cba6677663d25b31d7228d7d08eb3ee1c275` before the push. `git -C ~/dev/ssx3-work/E58/PS2Recomp push fork e58-fold:ssx3` succeeded fast-forward: `eac6cba..b9647f5`. A second `ls-remote` returned `b9647f54934f9f7c448d7cf41fb42f81c74c8ed8`. |
+| Codegen | Renamed `codegen-ssx3` to `codegen-ssx3-pre-e58`, then `codegen-ssx3-e58` to `codegen-ssx3`. Each is 273 MB. The E58 generated output had zero differences from E53 before promotion (Part 1 receipt). Existing E58 build caches still name the old `codegen-ssx3-e58` path and need reconfiguration before a future rebuild. |
+| Final disk | `local/tooling/disk_budget.sh` passed: **89.9 / 200 GB**, 151 GiB free. E58 work directory 666 MB; separate taps-ON build 89 MB; bounded run data 3.5 MB. |

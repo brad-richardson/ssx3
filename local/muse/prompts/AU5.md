@@ -38,13 +38,34 @@ lease files via `local/tooling/p_lane_lease.py`. No push.
 0. **Base:** fork `ssx3` after E58's push. If E58 hasn't pushed when you
    start, wait and poll `git -C ~/dev/PS2Recomp fetch fork &&
    git -C ~/dev/PS2Recomp log -1 fork/ssx3`. Cherry-pick AU3's sound
-   commits (branch `au3-snd`, the latest AU3 report names them) onto it.
+   commits (branch `au3-snd`, including `c19a5d6`, the SendCmd ABI fix) onto it.
    Build with the diagnostic taps OFF, `nice`d.
+0b. **Two fixes before the capture (orchestrator-verified leads):**
+   - **Missing sound functions.** Every AU2/AU3 boot logs
+     `[guest-branch:missing-target] kind=IndirectCall source=0x3cb7a8
+     target=0x3c9520` (26,412× in AU3's au3a2; it's the only missing
+     target). The caller loads it from a two-entry pointer table
+     (`0x3c9520`, `0x3c95f0`). The analyzer merged these into
+     `sub_003C9420`. The orchestrator checked with `ee-at`:
+     - `0x3c9518` is a leaf (`jr $ra; lw $v0,0x20($a0)`);
+     - `0x3c9520` is a prologue (`addiu sp,-0x60`);
+     - `0x3c95f0` is a prologue (`addiu sp,-0x10`).
+
+     Add all three to `extra_function_starts` in `games/ssx3/ssx3.toml` (the
+     E46 mechanism) and regenerate the codegen into
+     `~/dev/ssx3-work/AU5/codegen`. Confirm that the boot log has 0
+     missing targets from `0x3cb7a8`.
+   - **WAV tap never written** (AU3 Part 2): `main.cpp` calls `std::_Exit(0)`
+     after `runtime.run()`, which skips `~PS2Runtime` and so skips
+     `ps2_snd_audio_output::shutdown()` → `saveWav()`. Call the sound
+     shutdown explicitly before `_Exit` (without touching `runner/`), or
+     write the WAV incrementally.
 1. **Discriminator (1 boot):** capture ≥40 s of menu tag-1 PCM with
    `PS2X_SOUND=1` and the WAV tap. Run AU4's `compare.py` +
    `lag_track.py` against `~/dev/ssx3-work/AU4/pcsx2-tag1-36k.wav`, and
    table it next to AU4's AU2 numbers. If the corrected residual falls
-   below 0.02 overall, stop there: E53's semantics fixed it. Also make a
+   below 0.02 overall, stop there: the missing functions and/or E53's
+   semantics fixed it. Also make a
    ≤5 MB `.m4a` for Brad.
 2. **Static census (no boot):** with `local/tooling/ee/ee-func`, `ee-xref`
    and `ee-at`, list the EE functions on the decode/mix path: the XA
