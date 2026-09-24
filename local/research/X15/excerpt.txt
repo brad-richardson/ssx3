@@ -13,7 +13,15 @@ gs_registers.hpp:572: 	PAD32(32);
 gs_registers.hpp:573: 	enum { SLBG_ALPHA_BLEND_CIRCUIT2 = 0, SLBG_ALPHA_BLEND_BG = 1 };
 gs_registers.hpp:574: 	enum { MMOD_ALPHA_CIRCUIT1 = 0, MMOD_ALPHA_ALP = 1 };
 gs_registers.hpp:575: };
-### gs_interface.hpp:155-163
+### gs_registers.hpp:729-735
+gs_registers.hpp:729: struct SMODE2Bits
+gs_registers.hpp:730: {
+gs_registers.hpp:731: 	FIELD32(INT, 1);
+gs_registers.hpp:732: 	FIELD32(FFMD, 1);
+gs_registers.hpp:733: 	FIELD32(DPMS, 2);
+gs_registers.hpp:734: 	PAD32(29);
+gs_registers.hpp:735: 	PAD32(32);
+### gs_interface.hpp:155-164
 gs_interface.hpp:155: struct VSyncInfo
 gs_interface.hpp:156: {
 gs_interface.hpp:157: 	uint32_t phase;
@@ -23,6 +31,7 @@ gs_interface.hpp:160: 	VkAccessFlags2 dst_access;
 gs_interface.hpp:161:
 gs_interface.hpp:162: 	// Attempts to force progressive scan when possible, i.e. INT = 1, FFMD = 0.
 gs_interface.hpp:163: 	// Rather than scanning out every other line as prescribed, just scan out the full resolution as-is.
+gs_interface.hpp:164: 	bool force_progressive;
 ### gs_interface.hpp:180-185
 gs_interface.hpp:180: 	// no deinterlacing is required, CRTC offsets are disabled, overscan is disabled,
 gs_interface.hpp:181: 	// and there's no blending against background color,
@@ -30,6 +39,15 @@ gs_interface.hpp:182: 	// the final circuit merge step is skipped.
 gs_interface.hpp:183: 	// This can help games which don't scan out the full 224 lines for example.
 gs_interface.hpp:184: 	// This will look funny if the game is constantly changing vertical scanout resolution.
 gs_interface.hpp:185: 	bool raw_circuit_scanout;
+### gs_interface.hpp:190-197
+gs_interface.hpp:190: 	// and the result will look like pixelated nearest-neighbor upscaling instead.
+gs_interface.hpp:191: 	// Requires a minimum of 4x SSAA to work. 8x SSAA and 16x SSAA adds some super-sampling over the double resolution scanout.
+gs_interface.hpp:192: 	// For best results, force_progressive must also be used.
+gs_interface.hpp:193: 	bool high_resolution_scanout;
+gs_interface.hpp:194:
+gs_interface.hpp:195: 	// If using interlaced, defer any attempt to deinterlace and just return the raw output as-is with phase information.
+gs_interface.hpp:196: 	// User is responsible for deinterlacing in whatever way is appropriate.
+gs_interface.hpp:197: 	bool skip_deinterlace;
 ### gs_renderer.cpp:4381-4388
 gs_renderer.cpp:4381: bool GSRenderer::scanout_is_interlaced(const PrivRegisterState &priv, const VSyncInfo &info) const
 gs_renderer.cpp:4382: {
@@ -39,6 +57,16 @@ gs_renderer.cpp:4385: 	bool alternative_sampling = is_interlaced && !priv.smode2
 gs_renderer.cpp:4386: 	if (alternative_sampling && force_progressive)
 gs_renderer.cpp:4387: 		is_interlaced = false;
 gs_renderer.cpp:4388: 	return is_interlaced;
+### gs_renderer.cpp:4421-4429
+gs_renderer.cpp:4421: 	// True to include the overscan area.
+gs_renderer.cpp:4422: 	const bool overscan = info.overscan;
+gs_renderer.cpp:4423: 	// Tries to counteract field blending. It's just a blur that is overkill.
+gs_renderer.cpp:4424: 	const bool anti_blur = info.anti_blur;
+gs_renderer.cpp:4425: 	bool high_resolution_scanout = info.high_resolution_scanout;
+gs_renderer.cpp:4426: 	bool is_interlaced = scanout_is_interlaced(priv, info);
+gs_renderer.cpp:4427: 	bool force_deinterlace = !high_resolution_scanout &&
+gs_renderer.cpp:4428: 	                         (priv.smode2.FFMD && priv.smode2.INT && priv.smode1.CMOD != SMODE1Bits::CMOD_PROGRESSIVE);
+gs_renderer.cpp:4429:
 ### gs_renderer.cpp:4690-4694
 gs_renderer.cpp:4690: 	bool EN1 = priv.pmode.EN1;
 gs_renderer.cpp:4691: 	bool EN2 = priv.pmode.EN2;
@@ -129,6 +157,25 @@ gs_renderer.cpp:5271: 	result.image = std::move(merged);
 gs_renderer.cpp:5272: 	result.interlaced = should_deinterlace;
 gs_renderer.cpp:5273: 	result.interlace_phase = info.phase;
 gs_renderer.cpp:5274: 	result.double_strike = double_strike;
+### gs_interface.cpp:5527-5539
+gs_interface.cpp:5527: ScanoutResult GSInterface::vsync(const VSyncInfo &info_)
+gs_interface.cpp:5528: {
+gs_interface.cpp:5529: 	auto info = info_;
+gs_interface.cpp:5530: 	auto ffmd = priv_registers.smode2.FFMD;
+gs_interface.cpp:5531:
+gs_interface.cpp:5532: 	// Somewhat of a hack to avoid having to turn off force_progressive manually.
+gs_interface.cpp:5533: 	if (state_tracker.has_complex_scanmsk_timeout)
+gs_interface.cpp:5534: 	{
+gs_interface.cpp:5535: 		info.force_progressive = false;
+gs_interface.cpp:5536: 		// If the game stops using complex scanmasks, eventually flip back to normal operation.
+gs_interface.cpp:5537: 		state_tracker.has_complex_scanmsk_timeout--;
+gs_interface.cpp:5538: 	}
+gs_interface.cpp:5539:
+### gs_interface.cpp:5575-5578
+gs_interface.cpp:5575:
+gs_interface.cpp:5576: 	auto result = renderer.vsync(priv_registers, info,
+gs_interface.cpp:5577: 	                             sampling_rate_x_log2, sampling_rate_y_log2,
+gs_interface.cpp:5578: 								 promoted1, promoted2);
 ### ps2_gs_parallel_backend.cpp:243-255
 ps2_gs_parallel_backend.cpp:243:         PresentationFrame out{};
 ps2_gs_parallel_backend.cpp:244:         if (!ensureInit())
