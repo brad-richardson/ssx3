@@ -9,6 +9,8 @@ these first:
 - `docs/numbers-ledger.md`;
 - `local/AGENTS.local.md` (hosts, worker-kind recipes, quota state).
 
+Latest live handoff to Opus (2026-09-24): `docs/handoff-opus-2026-09-24.md`.
+
 ## 1. The loop
 
 1. **Watch.** Run `local/tooling/orch/watch.sh` in the background (herdr
