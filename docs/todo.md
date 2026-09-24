@@ -1373,5 +1373,14 @@ with measured budgets, then 120 Hz simulation.
       about four minutes. `local/research/X8/REPORT.md` is an
       orchestrator audit, not a worker table. Next trial will provide
       exact source excerpts and fixed commands.
+      **X9 partial (dense, excerpt/skeleton):** the model stayed inside
+      a 3.7 KiB pinned excerpt and filled four cited source rows, but
+      got BLEZ/BGTZ truth values wrong. After feedback and a Python
+      check it fixed the table, then wrote new false arithmetic prose.
+      Closed at 20.5k context against a 20k cap, no worker commit.
+      The independently verified table and model audit are in
+      `local/research/X9/REPORT.md`. Use local Qwen for bounded source
+      extraction with scripted numeric acceptance; keep semantic
+      verdicts with the orchestrator.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
