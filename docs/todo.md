@@ -727,6 +727,17 @@ with measured budgets, then 120 Hz simulation.
       Fold SetGsCrt + queue into `ssx3` after GB4 Part 1 passes.
 - [ ] **GB4 (Codex Luna):** capture/replay harness, queue gate by replay,
       then paraLLEl live on the Mac via replay PSNR and one live boot.
+      **GB4 Part 1 (5d3c6a6):**
+      - capture (`PS2X_GS_CAPTURE`, 4.7 GiB to tick 12,128, into the race)
+        and the `PS2GSReplay` harness; 607/607;
+      - direct replay vs live VQ fails at tick 100: replay `dc2e1eaa` vs
+        live `43e5391b`. The replay value = gb3d's +1-phase tick-100 VRAM,
+        so a marker offset is suspected;
+      - gaps: unchanged-value priv stores (version skew) and local→host
+        bytes.
+
+      **Part 2 (Sol, fresh pane):** align markers by submit counts, fix,
+      rerun; recapture only if needed.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
