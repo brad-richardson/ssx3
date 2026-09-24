@@ -1,0 +1,28 @@
+E56 Part 2 gate — 2026-09-23/24, Mac mini
+Fork base 13cac7f; folded/pushed 8e2864a3c7e41a6544b2fc3aeed0eba38293cdda.
+Recompiler: resolved 19/19 configured extras; interior starts added=2049 already-present=3226 prologues=4121 rejected-prologues=404 referenced-leaves=1558; processed 9454, recompiled 9278, stubs 176, decode failures 0.
+Generated code: 266829319 bytes; previous canonical 266643935 bytes.
+Taps-OFF suite from fork root: Total Tests: 548; Passed: 548; Failed: 0.
+Taps-ON suite from fork root: Total Tests: 643; Passed: 643; Failed: 0.
+Runner SHA-256 read 1 = 2f55eeba87e004ffb722c78c475dcac31e6ced8ee4b1d997dbcb289489069e84
+Runner SHA-256 read 2 = 2f55eeba87e004ffb722c78c475dcac31e6ced8ee4b1d997dbcb289489069e84
+Runner Mach-O __TEXT,__text = 117622040 bytes.
+Boot command: python3 /Users/brad/dev/ssx3-work/E56/fold/e56_fold_boot.py --label gate-part2 --capture --target 5350 --wall 600
+Boot result: slot 1; own PID 28983; bound=target; rc=0; elapsed_s=597.952; last_rate_tick=5353; log_bytes=16642.
+Race start ~tick1714. Duration to tick5353 = (5353-1714)/59.94 = 60.71 guest seconds.
+[frame:dump] seq=0 tick=830 size=512x448 fbp=112/112 fallback=0 fnv1a=11225b88
+[frame:dump] seq=1 tick=1810 size=512x448 fbp=112/112 fallback=0 fnv1a=95db6bcd
+[frame:dump] seq=2 tick=1940 size=512x448 fbp=112/112 fallback=0 fnv1a=6204030c
+[coverage:missing-functions] targets=0
+[coverage:unknown-syscalls] ids=0
+[coverage:unhandled-rpcs] pairs=4
+[coverage:unhandled-rpc] sid=0x80000211 function=0x1 hits=1
+[coverage:unhandled-rpc] sid=0x237 function=0x0 hits=1
+[coverage:unhandled-rpc] sid=0x534e44 function=0x0 hits=1
+[coverage:unhandled-rpc] sid=0x80000006 function=0xff hits=1
+No [guest-branch:missing-target] line. Three [frame:dump] lines, three retained numbered PNGs. Graceful SIGTERM through PS2X_DIAG_PARK made runtime.run return, coverage print, and runner exit 0.
+Runner-dir check: git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner was empty.
+Remote before push: 13cac7fdfa8f3554c2afef25982fcc0e7da269f7; after push: 8e2864a3c7e41a6544b2fc3aeed0eba38293cdda.
+Canonical codegen register_functions.cpp SHA-256 reads 1 and 2 = 8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3.
+Post-promotion internal disk: 97.6 GB / 200 GB. Previous canonical retained as codegen-ssx3-pre-e56.
+Full logs: /Users/brad/dev/ssx3-work/E56/fold/{regen.log,suite-off-final.log,suite-taps-final.log,run/gate-part2/boot.log,run/gate-part2/result.json}.
