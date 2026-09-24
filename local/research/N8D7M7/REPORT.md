@@ -1,8 +1,11 @@
-# N8D7M7 — executable selected-VRAM divergence boundary (read-only design)
+# N8D7M7 — selected-VRAM divergence boundary (PARTIAL source-grounded design)
 
-**State: design only. No source edit, build, replay, boot, Odin/iOS action,
-lease, push, or status/todo/ledger edit. No shader/Turnip/driver root cause
-is claimed; the orchestrator decides the gate.**
+**State: PARTIAL design (orchestrator gate correction 2026-09-24). The §2
+command-order table is preserved. S2late is labeled an intervention, O is
+unresolved, D is impossible under identical bytes/decoder. No source edit,
+build, replay, boot, Odin/iOS action, lease, push, or status/todo/ledger
+edit. No shader/Turnip/driver root cause is claimed; no device brief is cut
+from this worker; the orchestrator decides the gate.**
 
 Brief: `local/muse/prompts/N8D7M7.md`. Observation to explain: N8D7M6
 captured one complete Odin tick2050 GS stream (SHA `f6a78f71…a593`) and
@@ -56,38 +59,42 @@ or fence witnesses execution.
 
 `S1` = existing early copy (§2 row 9). `G` = existing circuit1 shader
 sample + staging (§2 rows 10–11, decoded as the existing 448 `circuit`
-vector). Two proposed additions, both inside the same tick2050 Present call:
+vector). Two candidate additions were considered inside the same tick2050
+Present call; only one survives as nonperturbing:
 
 - **S2same**: second 4 MiB `copy_buffer(buffers.gpu → staging2)` recorded in
   the same `direct_cmd`, placed immediately before `flush_submit(0)`
   (`gs_renderer.cpp:5354` site), same barrier pair as S1, mapped after the
-  existing `wait_idle` (`:601-602`). Same-submit, no extra submit/wait.
-- **S2late**: after the existing `wait_idle` returns, backend performs
-  `m_iface->flush()` (drain any draws the EE recorded during steps 7–13),
-  records `copy_buffer(buffers.gpu → staging3)` in a fresh cmd,
-  `submit` + `wait_idle` + `map`, then reloads `m_privRegs->vsyncTick` and
-  logs `post_tick` (2050 → O-eligible; >2050 → O downgraded to OTHER).
-  Append-only and post-completion: it cannot reorder anything that executed
-  at or before the first `wait_idle`.
+  existing `wait_idle` (`:601-602`). Same-submit, no extra submit/wait:
+  observational.
+- **S2late (INTERVENTION, rejected as discriminator)**: after the existing
+  `wait_idle` returns it would call an extra `m_iface->flush()` plus a fresh
+  `submit` + `wait_idle` + `map`. That extra flush submits draw work that
+  the original Present never executed, so it changes what executes in this
+  Present: a broad S2late is equally consistent with O (late-but-due
+  tick≤2050 writes) and with delayed/missing work that only the extra
+  submit flushed. `post_tick==2050` proves the EE clock had not advanced,
+  not that the newly flushed writes were already due before the S1 copy.
+  S2late therefore cannot uniquely establish O and is labeled an
+  intervention; O stays unresolved (§4).
 
-Bytes: +4 MiB staging (S2same) + 4 MiB staging (S2late) + ~6 KiB text (two
-extra 448-vector logs + SHAs + `post_tick`); total new ≈ 8.4 MB on top of
-the existing 5,177,344 B probe budget (N8D7F REPORT §21). Sync required:
-none beyond the existing `:601-602` for S2same; one extra
-submit/`wait_idle`/map triplet for S2late (same APIs, post-completion).
-Both default-OFF behind the existing `PS2X_N8D7F_SELECTED_CAPTURE=1` gate;
-unset/empty = zero behavior change. Every census below is the **full
-448-tile census** (RGB max ≥ 32, active = count ≥ 32) decoded with the
-identical `selectedDecode` + `oracleDecodeCensus` from each staging;
-thresholds per N8D7M6: sparse ≤ 100/448, broad ≥ 250/448, else OTHER.
+Bytes: +4 MiB staging (S2same) + ~3 KiB text (one extra 448-vector log +
+SHA) on top of the existing 5,177,344 B probe budget (N8D7F REPORT §21);
+S2late's further +4 MiB is not proposed for any gate. Sync required: none
+beyond the existing `:601-602` for S2same. Default-OFF behind the existing
+`PS2X_N8D7F_SELECTED_CAPTURE=1` gate; unset/empty = zero behavior change.
+Every census below is the **full 448-tile census** (RGB max ≥ 32,
+active = count ≥ 32) decoded with the identical `selectedDecode` +
+`oracleDecodeCensus` from each staging; thresholds per N8D7M6:
+sparse ≤ 100/448, broad ≥ 250/448, else OTHER.
 
 | Tap | Command / fence order | Bytes | Sync | Observational or intervention? | Separates which W/O/C/D pairs? |
 | --- | --- | --- | --- | --- | --- |
 | T1 S1 early copy (existing, baseline) | §2 row 9 → `:601-602` → map `:621-626` | 4 MiB (exists) | existing wait | Observational | Anchors all rows; alone separates nothing new → OTHER by itself |
-| T2 G circuit shader sample (existing) | §2 rows 10–11, same cmd after S1 | 512×224×4 (exists) | existing wait | Observational (independent read path of same source) | {W,O} (G sparse) vs {C} (G broad, copies sparse); {W} vs {C} |
-| T3 S2same late-in-cmd copy (proposed) | same `direct_cmd`, pre-`:5354` → same `:601-602` → map | +4 MiB | none new | Observational (same-submit; no reorder) | {O} (T3 sparse like S1) vs in-vsync-write anomaly (T3 broad/S1 sparse → OTHER, informative); hardens {C} (two sparse copies + broad G = copy path, not one bad copy) |
-| T4 S2late post-wait copy (proposed) | after first `:602` wait: flush → fresh cmd copy → submit → wait_idle → map + `post_tick` | +4 MiB | one extra submit/wait/map, post-completion | Observational append-only (cannot reorder pre-first-wait work); **not** an intervention on the gated order | {W} (T4 sparse) vs {O} (T4 broad with `post_tick==2050`); {O} vs {C} (T4 broad vs sparse given G broad) |
-| T5 4 MiB SHA + oracle/input agreement (existing) | map `:621-626`, SHAs `:647-651`, `oracle_input_equal` `:725-729` | text only | none | Observational | {D} vs all (broad staging SHAs + both decoders sparse with 448/448 agreement); currently disfavored by N8D7M6 448/448 agreement |
+| T2 G circuit shader sample (existing) | §2 rows 10–11, same cmd after S1 | 512×224×4 (exists) | existing wait | Observational (independent read path of same source) | {W} (G sparse) vs {C} (G broad, copies sparse) |
+| T3 S2same late-in-cmd copy (proposed) | same `direct_cmd`, pre-`:5354` → same `:601-602` → map | +4 MiB | none new | Observational (same-submit; no reorder) | hardens {C} (two sparse copies + broad G = copy path, not one bad copy); T3 broad/S1 sparse → informative OTHER (unpredicted in-cmd write) |
+| T4 S2late post-wait copy (**intervention, rejected**) | extra flush → fresh cmd copy → extra submit/wait/map | +4 MiB (not proposed) | extra submit/wait | **Intervention**: the extra flush executes draw work the original Present never ran; broad S2late fits O and delayed/missing work equally; `post_tick` cannot restore attribution → OTHER | none (rejected; O unresolved) |
+| T5 4 MiB SHA + oracle/input agreement (existing) | map `:621-626`, SHAs `:647-651`, `oracle_input_equal` `:725-729` | text only | none | Observational | consistency check only: identical bytes through the identical decoder must give identical census (§4 D-impossibility); no category separation → OTHER |
 | X1 split-submit between S1 and S2 (rejected) | submit S1 early, wait, then submit rest | — | extra wait mid-order | **Intervention**: changes execution order; can prove nothing about the original order → OTHER | none (rejected) |
 | X2 draw counts / pending flags / isolated words (rejected) | frontend ring / Present-entry flag / 8 words | — | none | Nondiscriminating per N8D7M3/M4 gates; no execution witness → OTHER | none (rejected, per brief) |
 | X3 second-tick (2052) snapshot as ordering witness (rejected) | different vsync | — | — | Different tick: intervening packets can change content (N8D7M4 gate) → OTHER | none (rejected, per brief) |
@@ -97,65 +104,63 @@ thresholds per N8D7M6: sparse ≤ 100/448, broad ≥ 250/448, else OTHER.
 Preconditions for every row (else OTHER): same exact stream SHA (two device
 + two Mac reads equal); 11/11 selected-descriptor equality Odin == Mac
 replay; marker2050 + EOF; `selected_capture_status == 2`;
-`control == 128 PASS`; `post_tick` logged; no map/decode/probe error; every
-active below is the full 448 census from the named staging with the
-identical decoders. `S1a/S2a` = input+oracle actives from S1/S2same;
-`L` = S2late input+oracle actives; `Gc` = circuit 448 actives;
-`Bs` = staging 4 MiB SHAs vs the same-stream Mac broad reference.
+`control == 128 PASS`; no map/decode/probe error; every active below is the
+full 448 census from the named staging with the identical decoders.
+`S1a/S2a` = input+oracle actives from S1/S2same; `Gc` = circuit 448
+actives; `Bs` = staging 4 MiB SHAs vs the same-stream Mac broad reference.
+Only **W** and **C** have unique nonperturbing observables; O is
+unresolved and D is impossible (see rows). No row may be awarded on a
+subset of its clauses.
 
 | Category | Mechanism | Predicted same-run observable (all must hold) |
 | --- | --- | --- |
-| **W** source GPU VRAM sparse after all submitted work complete | tick≤2050 draws absent or never wrote FBP112 region on the Odin GPU | S1 sparse (≤100) AND S2same sparse AND Gc sparse AND S2late sparse; input==oracle 448/448 on each staging; staging SHAs match each other (both sparse) and differ from Mac broad SHA |
-| **O** source becomes broad only after the selected copy (ordering) | tick≤2050 draws recorded after step 6 flush execute after the S1 cmd (§2 row 15) | S1 sparse AND S2same sparse AND Gc sparse (all in-submit) AND S2late broad (≥250) AND `post_tick==2050`; Mac same-stream replay broad on S1 (control that the stream carries the writes) |
-| **C** source broad at copy boundary but staging sparse (copy/barrier/readback) | `buffers.gpu` holds the frame; `copy_buffer` path loses it | S1 sparse AND S2same sparse AND S2late sparse (copy path broken consistently) AND Gc broad (shader path reads the same source fine); staging SHAs sparse-like while circuit census broad |
-| **D** source and staging broad but selected decode sparse | bytes present at fork-table addresses; census loses them | S1/S2same/S2late staging SHAs broad-like (match same-stream Mac broad SHA family) AND Gc broad AND input sparse AND oracle sparse AND input==oracle 448/448 (both decoders lose identically); currently disfavored by N8D7M6 448/448 agreement at sparse level |
-| **OTHER** | gate miss or nondiscriminating | any precondition miss; any active 101–249; `post_tick > 2050` with an otherwise-O pattern (tick attribution lost); S2same broad while S1 sparse (unpredicted in-cmd write → informative OTHER); X1/X2/X3 rows; missing vector/SHA |
+| **W** source GPU VRAM sparse after all submitted work complete | tick≤2050 draws absent or never wrote FBP112 region on the Odin GPU | S1 sparse (≤100) AND S2same sparse AND Gc sparse; input==oracle 448/448 on each staging; staging SHAs match each other (both sparse) and differ from Mac broad SHA |
+| **O UNRESOLVED** (no awardable observable) | tick≤2050 draws recorded after step 6 flush execute after the S1 cmd (§2 row 15) | No nonperturbing checkpoint separates O from delayed/missing work: the only candidate (T4 S2late) is an intervention whose broad outcome fits both. An O-shaped pattern (in-submit sparse + any later broad read) is recorded as **OTHER/ordering-unresolved**, never as O. Awarding O requires a new execution witness (§5) |
+| **C** source broad at copy boundary but staging sparse (copy/barrier/readback) | `buffers.gpu` holds the frame; `copy_buffer` path loses it | S1 sparse AND S2same sparse (copy path broken consistently) AND Gc broad (shader path reads the same source fine); staging SHAs sparse-like while circuit census broad |
+| **D IMPOSSIBLE** under identical bytes/decoder | bytes present at fork-table addresses; census loses them | Contradictory as stated: staging bytes byte-equal to the broad reference, run through the identical `selectedDecode`/`oracleDecodeCensus` under the identical 11-field descriptor, must yield a broad census — a sparse decode from identical bytes+decoder is logically impossible. D is awardable **only** with a separately proved host decoder/architecture difference (none exists; N8D7M6 shows 448/448 decoder agreement on both devices). Until such proof, any broad-bytes/sparse-decode pattern is **OTHER/decode-contradiction**, never D |
+| **OTHER** | gate miss, intervention, nondiscriminating, or contradiction | any precondition miss; any active 101–249; any O-shaped pattern (ordering-unresolved); any broad-bytes/sparse-decode pattern (decode-contradiction); S2same broad while S1 sparse (unpredicted in-cmd write → informative OTHER); X1/X2/X3/T4 rows; missing vector/SHA |
 
-Pairwise separation: W–O by S2late (sparse vs broad); W–C by Gc
-(sparse vs broad); W–D by staging SHAs (sparse vs broad-like); O–C by
-S2late (broad vs sparse) given Gc (sparse vs broad) — both differ; O–D by
-S1/S2 SHAs + Gc; C–D by S1/S2 SHAs (sparse vs broad-like). Every pair is
-separated by at least one full-census observable.
+Separation that survives: W–C by Gc (sparse vs broad) with both copies
+sparse. O and D have no awardable signature: O's candidate prediction
+equals delayed/missing work under the T4 intervention (equal predictions
+cannot discriminate), and D's stated prediction contradicts itself under
+identical bytes and decoder. The checker (§6) enforces this by rejecting
+any record that awards O or D, or that claims a tap separates a pair
+involving them.
 
-## 5. One-run acceptance gate (single device run, no extra launch)
+## 5. No sound one-run gate; smallest Mac-only experiment
 
-The gate below is sound for **one** Odin launch of a default-OFF
-paired-copy build plus same-stream Mac replays. It requires no second
-device launch; any second launch voids the run (different boot ≠ same
-stream, N8D7M4 §constraint (a)).
+No sound one-run W/O/C/D gate exists from the surviving taps: the only
+awardable pair is W–C, and O (the ordering question the milestone actually
+needs) has no nonperturbing execution witness while D is self-contradictory
+without a separately proved decoder difference. Cutting a device brief now
+would spend an Odin launch on a gate that cannot resolve O. No device brief
+is cut from this worker.
 
-1. Build: default-OFF T3+T4 only (plus existing T1/T2/T5 logging); suite
-   585/585 with taps OFF; record fork + G43 pins, binary SHA, codegen SHA.
-2. Mac-first (no device): replay the N8D7M6 stream on Mac paraLLEl with taps
-   ON; require S1/S2same/S2late each broad (≥250), Gc broad, input==oracle
-   448/448 per staging, staging SHAs mutually equal, OFF/ON frame hashes
-   equal. This is the positive control that the taps themselves do not
-   perturb a broad stream.
-3. One Odin launch (≤300 s, I26-FAST, N8D7M1-class pins, 16 MiB text-log
-   cap, stream ≤4 GiB in private scratch, no raw 4 MiB or game bytes in
-   git): env = selected capture + oracle + tile capture + GS stream capture
-   with `STOP_TICK=2050` together; stop at first complete tick2050
-   receipt + frame; force-stop, PID-absent check, lease release.
-4. Same-stream Mac replays (CPU-direct for packet presence per N8D7M5 +
-   paraLLEl for the broad reference) of the step-3 stream; require replay
-   packet/priv/transfer/marker counts equal to the capture scan.
-5. Verdict by §4 table only: award W/O/C/D iff **all** clauses of exactly
-   one row hold on full 448 censuses; otherwise OTHER. O additionally
-   requires `post_tick==2050`. D additionally requires staging SHAs in the
-   broad family while both censuses stay sparse.
-6. Negative controls: `control==128 PASS`, status 2, map/decode clean;
-   a never-written-region null read ≈ 0 (control only, never a
-   discriminator). No speed number is quoted (diagnostic build).
-7. `check.py` (this dir) must PASS on the verdict record: unique
-   observable per awarded category, full-vector (448) presence, SHA +
-   active counts for S1/S2same/S2late/Gc, precondition checklist.
+Smallest next **Mac-only** experiment (no device, no Android build, two
+replays, nonperturbing):
 
-Smallest next **Mac-only** experiment (no device, no Android build):
-implement T3+T4 in the private worktrees, rebuild `ps2x_tests` only, run
-the §5-step-2 validation on the N8D7M6 stream (one OFF + one ON replay,
-lease slot, ≤600 s each, ≤16 MiB logs). If S1/S2same/S2late are not all
-broad with equal SHAs, stop: the taps perturb and the design is void
-before any device brief is cut.
+1. Implement T3 S2same only (default-OFF, same-submit, +4 MiB) in the
+   private worktrees; rebuild `ps2x_tests` only; suite 585/585 with taps
+   OFF; record fork + G43 pins, binary SHA, codegen SHA.
+2. One OFF + one ON paraLLEl replay of the N8D7M6 stream (lease slot,
+   ≤600 s each, ≤16 MiB logs). Require: S1/S2same each broad (≥250), Gc
+   broad, input==oracle 448/448 per staging, S1/S2same staging SHAs equal,
+   OFF/ON frame hashes equal. This proves the extra in-cmd copy does not
+   perturb a broad stream and that S1==S2same when no in-vsync writer
+   exists.
+3. Stop rules: any OFF/ON frame-hash inequality, or S1≠S2same on the Mac
+   broad stream, voids T3 before any device brief is considered.
+
+Extra execution witness still required for O (open design question, not a
+claim): a GPU-side witness tying a specific tick≤2050 draw's completion to
+before/after the S1 submit — e.g. timeline-tagged per-flush attribution
+recorded at `GSInterface::flush` (`gs_interface.cpp:5153-5165`) correlated
+with the EE packet tick at `processGIFPacket` (`gs_frontend.cpp:948`).
+Per the N8D7M3/M4 gates, bare submit counts or Present-entry pending flags
+alone are not such a witness; the witness must show the draw's GPU
+execution order relative to the S1 copy, not merely its queue presence.
+No speed number is quoted (diagnostic builds only).
 
 ## 6. Verifier
 
@@ -163,37 +168,43 @@ before any device brief is cut.
 device: (a) every cited source row names a file that exists at its pinned
 worktree with at least the cited line count and containing the expected
 token (`copy_buffer`, `wait_idle`, `submitCount`/`m_submitCount`,
-`selectedRequested`, `oracle_input_equal`, …); (b) the §4 prediction
-signatures for W/O/C/D are pairwise unique over the full-census fields
-(S1, S2same, Gc, S2late, staging-SHA family, input/oracle agreement);
-(c) every tap row that separates no W/O/C/D pair is labeled OTHER
-(X1/X2/X3 and T1-alone). It emits `check-result.json` (`PASS`/`FAIL`) and
-exits nonzero on failure. Reran here: see `check-result.json`.
+`selectedRequested`, `oracle_input_equal`, …); (b) exactly the awardable
+categories {W, C} carry pairwise-unique full-census signatures (S1,
+S2same, Gc, staging-SHA family, input/oracle agreement); (c) O is recorded
+UNRESOLVED (no unique observable; any O-shaped pattern is OTHER) and D is
+recorded IMPOSSIBLE under identical bytes/decoder (contradictory
+prediction) — the checker fails any record that awards O or D or that
+claims a tap separates a pair involving them; (d) every tap row that
+separates no awardable pair is labeled OTHER or intervention-rejected
+(T1, T4, X1/X2/X3). It emits `check-result.json` (`PASS`/`FAIL`) and exits
+nonzero on failure. Reran here: see `check-result.json`.
 
 ## 7. Gaps / handback
 
 - The O-window (§2 row 15) is a grounded hypothesis (line-cited), not an
   observed race: the implementer must confirm whether EE `gif_transfer`
   recording can interleave the Present thread's step 6→13 window on the
-  Odin build (threading differs from Mac replay). If Present is fully
-  serialized against GIF recording, O's mechanism narrows to GPU-side
-  flush/timeline delay only — the §4 O signature is unchanged.
-- `post_tick` sampling races EE vblank by construction: a 2050→2051 flip
-  during the second wait converts an O pattern to OTHER (safe direction).
-- S2late's extra submit/wait adds milliseconds of GPU time and one more
-  4 MiB CachedHost allocation; Turnip low-memory behavior is untested by
-  design (no device run here). Allocation failure → OTHER, never a
-  category.
+  Odin build (threading differs from Mac replay). Even confirmed, O needs
+  the §5 execution witness before any award.
+- S2late was the v1 design's O-witness attempt and is withdrawn as a
+  discriminator: an extra flush+submit changes what executes in the
+  Present, and `post_tick==2050` attests the EE clock, not write
+  due-dates. Retained in §3 only as a labeled intervention so the next
+  design does not re-propose it.
+- D is closed unless a host decoder/architecture difference is separately
+  proved (byte-identical staging through identical decoders cannot diverge
+  in census). No such proof exists.
 - No CPU replay is proposed for the new stream's word values (N8D7M5 §6:
   only 2/6 CPU finals match paraLLEl; value oracle = same-stream Mac
   paraLLEl snapshot, never CPU words).
 - No Turnip/shader/barrier cause is claimed; barriers are named only as
   the recorded sites (`gs_renderer.cpp:4813-4819`, `:5063-5075`).
 
-Recommended next action (orchestrator decision): gate this design; if
-accepted, run the §5 Mac-only paired-copy validation on the N8D7M6 stream
-first, then cut a one-build/one-launch Odin brief under §5 caps. No push
-from this worker.
+Recommended next action (orchestrator decision): gate this PARTIAL design;
+if accepted, run the §5 Mac-only S2same nonperturbation experiment first.
+Do not cut a device brief until the §5 O execution witness is designed:
+the surviving nonperturbing taps resolve at most W vs C. No push from this
+worker.
 
 ## 8. Receipts / commands read (all read-only, repo root unless noted)
 

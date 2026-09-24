@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""N8D7M7 verifier: source-citation rows + W/O/C/D unique observables.
+"""N8D7M7 verifier (PARTIAL gate): source-citation rows + awardable-category
+uniqueness + rejection of equal-prediction/contradictory categories.
 
 Read-only: inspects pinned worktree sources and local/research/N8D7M7/REPORT.md.
 Emits check-result.json; exit 0 on PASS, 1 on FAIL. Stdlib only.
@@ -40,23 +41,27 @@ CITATIONS = [
     (G43, "gs_interface.cpp", 5576, "renderer.vsync", 5),
 ]
 
-# Full-448-census signatures: (S1, S2same, Gc, S2late, SHAfam, decode)
-# sparse = active<=100/448, broad = active>=250/448.
-SIGNATURES = {
-    "W": ("sparse", "sparse", "sparse", "sparse", "sparse", "agree"),
-    "O": ("sparse", "sparse", "sparse", "broad", "mixed", "agree"),
-    "C": ("sparse", "sparse", "broad", "sparse", "sparse", "agree"),
-    "D": ("broad", "broad", "broad", "broad", "broad", "agree-both-sparse"),
+# Awardable full-448-census signatures: (S1, S2same, Gc, SHAfam, decode).
+# sparse = active<=100/448, broad = active>=250/448. Only W and C are
+# awardable. O is UNRESOLVED (its T4-broad candidate prediction equals
+# delayed/missing work under an intervention) and D is IMPOSSIBLE
+# (broad-bytes + identical decoder + sparse census is self-contradictory).
+AWARDABLE = {
+    "W": ("sparse", "sparse", "sparse", "sparse", "agree"),
+    "C": ("sparse", "sparse", "broad", "sparse", "agree"),
 }
+UNRESOLVED = {"O"}
+IMPOSSIBLE = {"D"}
 
-# Tap rows mirrored from REPORT §3: name -> (label, set_of_pairs_separated)
-# Pairs use category letters; empty set must be labeled OTHER.
+# Tap rows mirrored from REPORT §3: name -> (label, pairs_claimed).
+# Pairs may only name awardable categories. T4 is an intervention and must
+# claim nothing; T1/T5/X* are OTHER/consistency-only.
 TAPS = {
     "T1": ("OTHER", set()),
-    "T2": ("OBS", {"W-O", "W-C", "O-C"}),
-    "T3": ("OBS", {"O-OTHER", "C-hardened"}),
-    "T4": ("OBS", {"W-O", "O-C"}),
-    "T5": ("OBS", {"D-W", "D-O", "D-C"}),
+    "T2": ("OBS", {"W-C"}),
+    "T3": ("OBS", {"W-C"}),
+    "T4": ("INTERVENTION", set()),
+    "T5": ("OTHER", set()),
     "X1": ("OTHER", set()),
     "X2": ("OTHER", set()),
     "X3": ("OTHER", set()),
@@ -97,35 +102,54 @@ def check_citations():
 
 def check_signatures():
     ok = True
+    # Awardable categories must be pairwise unique ...
     seen = {}
-    for cat, sig in SIGNATURES.items():
+    for cat, sig in AWARDABLE.items():
         if sig in seen:
-            results["errors"].append("categories %s and %s share signature %r" % (seen[sig], cat, sig))
+            results["errors"].append("awardable %s and %s share signature %r" % (seen[sig], cat, sig))
             ok = False
         else:
             seen[sig] = cat
-    # every W/O/C/D pair must differ in at least one field
-    cats = sorted(SIGNATURES)
+    cats = sorted(AWARDABLE)
     for i in range(len(cats)):
         for j in range(i + 1, len(cats)):
-            a, b = SIGNATURES[cats[i]], SIGNATURES[cats[j]]
+            a, b = AWARDABLE[cats[i]], AWARDABLE[cats[j]]
             if not any(x != y for x, y in zip(a, b)):
-                results["errors"].append("pair %s-%s not separated" % (cats[i], cats[j]))
+                results["errors"].append("awardable pair %s-%s not separated" % (cats[i], cats[j]))
                 ok = False
     results["signature_pairs"] = ["%s-%s:separated" % (cats[i], cats[j])
                                   for i in range(len(cats)) for j in range(i + 1, len(cats))]
+    # ... and neither O (equal-prediction) nor D (contradictory) may be
+    # awardable alongside them.
+    for cat in UNRESOLVED | IMPOSSIBLE:
+        if cat in AWARDABLE:
+            results["errors"].append("category %s must not be awardable" % cat)
+            ok = False
     return ok
 
 
 def check_taps():
     ok = True
+    awardable = set(AWARDABLE)
     for name, (label, seps) in TAPS.items():
-        if not seps and label != "OTHER":
+        for pair in seps:
+            letters = set(pair.split("-"))
+            if not letters <= awardable:
+                results["errors"].append(
+                    "tap %s claims separation %s involving unresolvable/impossible category" % (name, pair))
+                ok = False
+        if not seps and label not in ("OTHER", "INTERVENTION"):
             results["errors"].append("tap %s separates nothing but is labeled %s" % (name, label))
             ok = False
-        if seps and label == "OTHER":
-            results["errors"].append("tap %s labeled OTHER but claims separations" % name)
+        if seps and label in ("OTHER", "INTERVENTION"):
+            results["errors"].append("tap %s labeled %s but claims separations" % (name, label))
             ok = False
+    if TAPS.get("T4", ("", set()))[0] != "INTERVENTION":
+        results["errors"].append("T4 S2late must be labeled INTERVENTION")
+        ok = False
+    if not any("W-C" in seps for _, seps in TAPS.values()):
+        results["errors"].append("no tap separates the surviving W-C pair")
+        ok = False
     return ok
 
 
@@ -137,7 +161,10 @@ def check_report():
     except OSError as e:
         results["errors"].append("REPORT.md unreadable: %s" % e)
         return False
-    for need in ["**W**", "**O**", "**C**", "**D**", "**OTHER**", "448",
+    for need in ["**W**", "**C**", "**O UNRESOLVED**", "**D IMPOSSIBLE**",
+                 "**OTHER**", "ordering-unresolved", "decode-contradiction",
+                 "equally consistent", "logically impossible", "INTERVENTION",
+                 "No device brief", "448",
                  "gs_frontend.cpp", "ps2_gs_parallel_backend.cpp",
                  "gs_renderer.cpp", "gs_interface.cpp", "post_tick",
                  "a8cfefa", "3a66c19"]:
