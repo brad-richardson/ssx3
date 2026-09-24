@@ -934,10 +934,15 @@ with measured budgets, then 120 Hz simulation.
       `0x000bae74`. Actual texture word/earlier writer, glyph shape and
       GPU cause remain unobserved. No replay/device run.
       `local/research/GB7C6/ORCH-GATE.md`.
-- [ ] **GB7C7 direct CPU texture tap:** one default-OFF replay probe at
-      packet5470/batch10/pixel (342,377) to observe the tap0 word and
-      destination write, with ON/OFF frame/hash equality. Then design
-      matched CPU/paraLLEl address comparison if the source is established.
+- [x] **GB7C7 permission stop OTHER (`18841b9b`):** first private-fork
+      edit denied by OpenCode `../*` scope, so no trace/build/replay or
+      sampled-word observation. Pins and a bounded three-file tap design
+      were handed back; checker returns OTHER at `trace_present`.
+      `local/research/GB7C7/ORCH-GATE.md`.
+- [ ] **GB7C7 Part 2 direct CPU texture tap:** relaunch with a scoped
+      per-pane fork/scratch edit exception. Observe packet5470/batch10
+      tap0 word and destination write with default-OFF ON/OFF controls.
+      Only after that consider a matched CPU/paraLLEl address comparison.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1406,12 +1411,20 @@ with measured budgets, then 120 Hz simulation.
       identical. Only 2/6 CPU finals equal the Mac paraLLEl selected
       controls, so CPU values cannot be the Odin GPU oracle. No device
       or speed claim. `local/research/N8D7M5/ORCH-GATE.md`.
-- [ ] **N8D7M6 same-run Odin stream + raw snapshot:** one pinned
-      install/launch with both existing capture flags, then Mac
-      paraLLEl replay of that exact new stream. Compare selected
-      descriptor, full 448-tile vectors and bounded words; classify
-      stream/content vs selection vs device-specific selected-VRAM
-      divergence, leaving missing-write versus copy-order mechanism open.
+- [x] **N8D7M6 same-stream selected VRAM PASS/A (`effbf5ec`):** one
+      Odin install/launch captured a closed 1.10 GB stream at race
+      tick2050. The Mac paraLLEl replay of those exact bytes has 300/448
+      active selected-image tiles, while Odin has 23/448, with all 11
+      selection fields equal. Independently parsed full vectors and
+      viewed broad Mac versus mostly black Odin frames. Two Mac replay
+      invocations (first cwd-dependent suite failure, second 585/585);
+      first log overwritten, deviation recorded. Device-specific loss
+      is at/before the selected snapshot; missing writes versus copy
+      timing remains open. `local/research/N8D7M6/ORCH-GATE.md`.
+- [ ] **N8D7M7 device divergence boundary design:** source-grounded
+      after-execution/before-copy checkpoint and full selected-data
+      comparison on the same stream. Require a GPU completion witness;
+      hand back a discriminating table before another Odin build/run.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
