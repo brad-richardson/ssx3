@@ -226,3 +226,7 @@ The plan-of-record reasoning for E54–E57 is in
   ignores follow-up prompts. **Continue a Codex lane in a fresh pane**
   (`launch-codex.sh <ID>C "Lane <ID>, Part N (continuing) …"`) rather than
   re-prompting the old one.
+- Committing with `git add <mine> && git commit` while a worker has staged
+  files: the shared index sweeps their staged work into an `[orch]` commit
+  (E58's report went into `421c51d`). Commit orchestrator changes with
+  explicit paths: `git commit -m … -- <paths>`.
