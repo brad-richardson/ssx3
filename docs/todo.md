@@ -1681,6 +1681,12 @@ with measured budgets, then 120 Hz simulation.
       2050/2050. Per-tick readback does not delay it → early deterministic
       rendering difference, not only a sync race. `local/research/
       N8D7M13/ORCH-GATE-{A,B}.md`.
+- [x] **paraLLEl-GS provenance (orchestrator, 09-24):** the N8D7F clone
+      the Odin APKs build from was dirty. Committed as-is on local
+      branches `ssx3-n8d7f-snapshot`: superproject `b413754` (base
+      `3a66c19`), Granite `36ae0d0b` (base `16e7395f`); no bytes changed
+      (key renderer/Granite files cmp-equal to the P6M5 stage). Not pushed
+      anywhere (no upstream contact).
 - [ ] **N8X1 exploratory Odin GPU session (Opus, 2 h, Brad 09-24):**
       free rein inside device rules; start from tick44; TU_DEBUG flags via
       `ps2x.env`. Notebook + report; gate before anything folds.
