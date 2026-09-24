@@ -1118,6 +1118,17 @@ with measured budgets, then 120 Hz simulation.
       frame SHA. `local/research/N8D5L/REPORT.md` pins the source and
       compressed log. **N8D5D** may now build the isolated Android APK
       from this pin; no Odin action until its package gate.
+- [x] **N8D5D Android package PASS (16fb9ba):** one private bytesize
+      `assembleRelease` completed in 5m 56s with the N8D5L backend and
+      N8D5B shader header as the only source differences from N8B1.
+      WSL/Mac APK SHA pairs match (`a6a0c379…50612a`); package contains
+      exactly arm64 runner, pinned Turnip and HAL shim. The runner has
+      control and both short summary strings, build ID `ab1bdc3b…48b56`;
+      diagnostics flags are OFF. No device action, fork push or speed claim.
+      `local/research/N8D5D/REPORT.md` has the full package table.
+      **Next N8D5E:** one lease-held Odin install/run to tick 2050, with
+      frame and same-PID control/sampled/raw summaries. View the frame and
+      gate A/B/OTHER before folding or profiling.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
