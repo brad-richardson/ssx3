@@ -1824,11 +1824,16 @@ with measured budgets, then 120 Hz simulation.
       are pinned. The read-only design proposes a default-off sibling
       path record without changing guest results. No seed, build or boot.
       `local/research/E55D13/ORCH-GATE.md`.
-- [ ] **E55D14 path-tap implementation:** add the smallest default-off
-      requested-path record to the E55D3 diagnostic probe, preserving
-      existing `getdir` rows, guest bytes/results and cap behavior. Gate
-      its source and tests before one empty-card E55D12-route boot. Only
-      then design a grounded seed and null/changed-card comparison.
+- [x] **E55D14 Part 1 OTHER (`daacf343`):** OpenCode denied its first
+      source edit in the new private worktree; its `../*` edit rule won
+      over the scoped allow while the pane started in ssx3. Worktree
+      remains clean at `bab6eb3`; no patch/build/boot or card verdict.
+      `local/research/E55D14P1/ORCH-GATE.md`.
+- [ ] **E55D14 Part 1B path-tap implementation:** relaunch with the
+      private worktree as OpenCode's start folder and import its receipts
+      after review. Preserve existing `getdir` rows, guest bytes/results
+      and cap behavior. Gate source/tests before one empty-card
+      E55D12-route boot, then design a grounded seed and comparison.
       Park ExternalWake policy until a production poster is found.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;

@@ -1,0 +1,5 @@
+# E55D14 Part 1 orchestrator gate — OTHER, edit permission denied (2026-09-24)
+
+Read the full REPORT and worker commit `daacf343` (`Orchestrated-By: opencode`); `git show --check` passed. Independently checked the new fork worktree is clean at E55D3 `bab6eb3` and the old E55D3 tree is untouched. The worker's `edit` call on the authorized private worktree header was denied: the global OpenCode `../*` deny matched relative to its ssx3 start folder and won over the pane's absolute allow entry. The preliminary shell sentinel succeeded but does not prove `edit` permission. No source patch, build, boot, card seed, device action or runner SHA resulted.
+
+**OTHER accepted as an operational stop, not a tap verdict.** The REPORT's approximate 15-minute effort estimate is unsupported by the pane's ~3-minute turn display; it is not used as a timing metric. Relaunch from inside the clean private worktree so source edits are inside the worker's start folder. Keep receipts inside that worktree for orchestrator import into ssx3; do not broaden global OpenCode permissions or use a shell edit to evade this denial. The requested card path remains unknown.
