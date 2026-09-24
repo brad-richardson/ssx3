@@ -1591,5 +1591,14 @@ with measured budgets, then 120 Hz simulation.
       corrected table passes that checker. `X11B/REPORT.md` is an
       orchestrator audit. Use sparse Qwen for bounded, scripted
       extraction; dense source interpretation is still unproved.
+      **X12 PASS for exact source-line extraction (aa1cc86):** sparse
+      Qwen produced seven rows from pinned N8B1 `17e90de`; the
+      exact-line checker and orchestrator rerun passed 7/7. It first
+      looked in the unrelated old fork checkout and then ran seven
+      searches from the wrong cwd before correcting the path. Its seven
+      LSP reference calls returned empty, so they establish no call
+      relationship. The verified table names the Vulkan readback and
+      host texture-copy sites for N8D1; it does not diagnose the black
+      Android frame. Keep local Qwen on small scripted extraction jobs.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
