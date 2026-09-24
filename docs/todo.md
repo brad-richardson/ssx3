@@ -871,6 +871,18 @@ with measured budgets, then 120 Hz simulation.
       `1aaed05→293fd81`, verified remote tip. GPU is opt-in; text damage
       and dark composite persist. Next: title-text producer/state probe,
       then Android Turnip integration and Odin validation.
+- [x] **GB7A title-text source map PASS with corrections (`6896f1f`):**
+      nine pinned source rows map the shared `GS::processGIFPacket` seam,
+      CPU sprite/texture state and Present. Tick-950 display sprite remains
+      a candidate, not a glyph producer. Gate corrected the capture file
+      path (`gs_stream_capture.cpp`) and treats same-stream packet equality
+      as a null control. No build, replay, device action or GS cause.
+      `local/research/GB7A/ORCH-GATE.md`.
+- [ ] **GB7B title-text spatial discriminator:** first identify the
+      title glyph draw(s) at existing markers 300/600/700, then compare
+      bounded per-batch state, source texels and cropped output on the same
+      stream. Pin the G43 source and full capture SHA; stop if the glyph
+      batch cannot be isolated under the byte cap.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
