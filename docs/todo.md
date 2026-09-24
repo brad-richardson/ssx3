@@ -1014,8 +1014,19 @@ with measured budgets, then 120 Hz simulation.
       and 21–80-tick gap prevent a same-frame GL/backend split. All four
       PNG/SHA checks passed; app force-stopped, PID absent, lease free.
       No speed, Turnip driver identity, or stable race-image claim.
-      **N8D2 queued:** reuse this APK for one settled-race host/screen
-      capture near tick 2050, without another build.
+      **N8D2 partial (3832b71):** reused the N8D1 APK for one Odin run,
+      no build. Three 512×448 host uploads at race ticks 1840/1950/2050
+      and a nearby 1920×1080 screencap were decoded and viewed. The
+      tick-2050 host upload and screen both have a partial HUD, black
+      bands, and sparse pale fragments; the screen adds fine stripes.
+      Screen request followed the dump trigger by <0.4 s, but its exact
+      guest tick is unknown, so this is not a same-frame comparison.
+      SHA/package and one-run checks passed; app force-stopped, PID
+      absent, lease free. The major scene loss exists in the host upload
+      before `UpdateTexture`, so a final screen-only failure cannot
+      explain it. **N8D3 next:** compare raw Vulkan mapped scanout bytes
+      against the post-stride-copy host frame at one race tick to locate
+      the first bad stage. Do not fold or profile for speed yet.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
