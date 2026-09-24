@@ -1547,13 +1547,24 @@ with measured budgets, then 120 Hz simulation.
 - [x] **N8D7M12 Part 5F1 hash/sync audit A (`28718aef`+
       `11c6c191`):** mapped replay marker fence, CPU priv hash,
       4 MiB VRAM snapshot, frame hash, backend no-op Flush/Sync and
-      renderer readback path. Capture flags act only at2050. Packaged
-      renderer bytes differ from the current dirty source tree, so no
+      renderer readback path. Capture flags act only at2050. Its
+      packaged-source provenance gap was resolved by Part 5F2; no
       root cause or source fix is declared; checker31/31.
       `local/research/N8D7M12P5F1/ORCH-GATE.md`.
-- [ ] **N8D7M12 Part 5M2 Mac OFF replay:** release the gated driver
-      SHA `bec9a4c6…cd9f1` for one same-binary/stream Mac control and
-      compare all 41 rows plus the viewed PPM with Mac ON.
+- [x] **N8D7M12 Part 5F2 packaged-source audit A (`7c5811c3`):**
+      three renderer working-tree files match the N8D7H APK source
+      pins, despite dirty Git state. Scanout submits without a renderer
+      CPU wait; fork Present waits idle. Interface implementation and
+      Granite/driver behavior remain unproved. Checker29/29; no run or
+      GPU cause. `local/research/N8D7M12P5F2/ORCH-GATE.md`.
+- [x] **N8D7M12 Part 5M2 Mac OFF replay (`fa9c51c1`):** one pinned
+      binary/stream run produced all 41 rows and a PPM byte-equal to
+      Mac ON, but suite exit1 (584/585) on a private-cwd header lookup.
+      Predeclared acceptance FAIL; artifact equality is bounded evidence,
+      not an accepted causal control. Checker15/15; lease free.
+      `local/research/N8D7M12P5M2/ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 5M3 corrected Mac fixture:** prepare a reviewed
+      private-cwd header symlink, then release a separate one-run control.
 - [x] **N8D7M12 Part 5M1 Mac OFF driver A (`d12f316a`):** exact
       binary/stream/ON pins, ON minus three capture flags and private
       output paths, ambient PS2X keys cleared, dynamic mini lease and
