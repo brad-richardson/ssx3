@@ -1,0 +1,147 @@
+### gs_registers.hpp:562-575
+gs_registers.hpp:562: struct PMODEBits
+gs_registers.hpp:563: {
+gs_registers.hpp:564: 	FIELD32(EN1, 1);
+gs_registers.hpp:565: 	FIELD32(EN2, 1);
+gs_registers.hpp:566: 	FIELD32(CRTMD, 3);
+gs_registers.hpp:567: 	FIELD32(MMOD, 1);
+gs_registers.hpp:568: 	FIELD32(AMOD, 1);
+gs_registers.hpp:569: 	FIELD32(SLBG, 1);
+gs_registers.hpp:570: 	FIELD32(ALP, 8);
+gs_registers.hpp:571: 	PAD32(16);
+gs_registers.hpp:572: 	PAD32(32);
+gs_registers.hpp:573: 	enum { SLBG_ALPHA_BLEND_CIRCUIT2 = 0, SLBG_ALPHA_BLEND_BG = 1 };
+gs_registers.hpp:574: 	enum { MMOD_ALPHA_CIRCUIT1 = 0, MMOD_ALPHA_ALP = 1 };
+gs_registers.hpp:575: };
+### gs_interface.hpp:155-163
+gs_interface.hpp:155: struct VSyncInfo
+gs_interface.hpp:156: {
+gs_interface.hpp:157: 	uint32_t phase;
+gs_interface.hpp:158: 	VkImageLayout dst_layout;
+gs_interface.hpp:159: 	VkPipelineStageFlags2 dst_stage;
+gs_interface.hpp:160: 	VkAccessFlags2 dst_access;
+gs_interface.hpp:161:
+gs_interface.hpp:162: 	// Attempts to force progressive scan when possible, i.e. INT = 1, FFMD = 0.
+gs_interface.hpp:163: 	// Rather than scanning out every other line as prescribed, just scan out the full resolution as-is.
+### gs_interface.hpp:180-185
+gs_interface.hpp:180: 	// no deinterlacing is required, CRTC offsets are disabled, overscan is disabled,
+gs_interface.hpp:181: 	// and there's no blending against background color,
+gs_interface.hpp:182: 	// the final circuit merge step is skipped.
+gs_interface.hpp:183: 	// This can help games which don't scan out the full 224 lines for example.
+gs_interface.hpp:184: 	// This will look funny if the game is constantly changing vertical scanout resolution.
+gs_interface.hpp:185: 	bool raw_circuit_scanout;
+### gs_renderer.cpp:4381-4388
+gs_renderer.cpp:4381: bool GSRenderer::scanout_is_interlaced(const PrivRegisterState &priv, const VSyncInfo &info) const
+gs_renderer.cpp:4382: {
+gs_renderer.cpp:4383: 	bool force_progressive = info.force_progressive;
+gs_renderer.cpp:4384: 	bool is_interlaced = priv.smode2.INT;
+gs_renderer.cpp:4385: 	bool alternative_sampling = is_interlaced && !priv.smode2.FFMD;
+gs_renderer.cpp:4386: 	if (alternative_sampling && force_progressive)
+gs_renderer.cpp:4387: 		is_interlaced = false;
+gs_renderer.cpp:4388: 	return is_interlaced;
+### gs_renderer.cpp:4690-4694
+gs_renderer.cpp:4690: 	bool EN1 = priv.pmode.EN1;
+gs_renderer.cpp:4691: 	bool EN2 = priv.pmode.EN2;
+gs_renderer.cpp:4692: 	uint32_t MMOD = priv.pmode.MMOD;
+gs_renderer.cpp:4693: 	uint32_t ALP = priv.pmode.ALP;
+gs_renderer.cpp:4694: 	uint32_t SLBG = priv.pmode.SLBG;
+### gs_renderer.cpp:4758-4760
+gs_renderer.cpp:4758: 	if (EN1)
+gs_renderer.cpp:4759: 	{
+gs_renderer.cpp:4760: 		if (device->consumes_debug_markers())
+### gs_renderer.cpp:4778-4788
+gs_renderer.cpp:4778: 		{
+gs_renderer.cpp:4779: 			if (high_resolution_scanout)
+gs_renderer.cpp:4780: 			{
+gs_renderer.cpp:4781: 				image_info.width *= 2;
+gs_renderer.cpp:4782: 				image_info.height *= 2;
+gs_renderer.cpp:4783: 			}
+gs_renderer.cpp:4784: 			circuit1 = device->create_image(image_info);
+gs_renderer.cpp:4785: 			sample_crtc_circuit(cmd, *circuit1, priv.dispfb1, rect, super_samples, promoted1);
+gs_renderer.cpp:4786: 			device->set_name(*circuit1, "Circuit1");
+gs_renderer.cpp:4787: 		}
+gs_renderer.cpp:4788:
+### gs_renderer.cpp:4939-4944
+gs_renderer.cpp:4939: 	if (info.raw_circuit_scanout &&
+gs_renderer.cpp:4940: 	    !info.crtc_offsets && !info.overscan &&
+gs_renderer.cpp:4941: 	    info.adapt_to_internal_horizontal_resolution &&
+gs_renderer.cpp:4942: 	    !force_deinterlace && !is_interlaced && !priv.extwrite.WRITE)
+gs_renderer.cpp:4943: 	{
+gs_renderer.cpp:4944: 		auto effective_mode_width = mode_width;
+### gs_renderer.cpp:4952-4965
+gs_renderer.cpp:4952:
+gs_renderer.cpp:4953: 		bool is_raw_circuit1 =
+gs_renderer.cpp:4954: 				circuit1 && !circuit2 && MMOD == PMODEBits::MMOD_ALPHA_ALP && ALP == 0xff &&
+gs_renderer.cpp:4955: 				circuit1->get_width() <= effective_mode_width && circuit1->get_height() <= effective_mode_height;
+gs_renderer.cpp:4956: 		bool is_raw_circuit2 =
+gs_renderer.cpp:4957: 				circuit2 && !circuit1 && SLBG == PMODEBits::SLBG_ALPHA_BLEND_CIRCUIT2 &&
+gs_renderer.cpp:4958: 				circuit2->get_width() <= effective_mode_width && circuit2->get_height() <= effective_mode_height;
+gs_renderer.cpp:4959:
+gs_renderer.cpp:4960: 		if (is_raw_circuit1)
+gs_renderer.cpp:4961: 			result.image = std::move(circuit1);
+gs_renderer.cpp:4962: 		else if (is_raw_circuit2)
+gs_renderer.cpp:4963: 			result.image = std::move(circuit2);
+gs_renderer.cpp:4964:
+gs_renderer.cpp:4965: 		if (result.image)
+### gs_renderer.cpp:4983-4994
+gs_renderer.cpp:4983: 	result.internal_height = mode_height;
+gs_renderer.cpp:4984: 	image_info.width = mode_width << int(high_resolution_scanout);
+gs_renderer.cpp:4985: 	image_info.height = mode_height << int(high_resolution_scanout);
+gs_renderer.cpp:4986:
+gs_renderer.cpp:4987: 	if (field_aware_rendering)
+gs_renderer.cpp:4988: 	{
+gs_renderer.cpp:4989: 		// Avoid a one line flicker due to field rendering.
+gs_renderer.cpp:4990: 		image_info.height--;
+gs_renderer.cpp:4991: 	}
+gs_renderer.cpp:4992:
+gs_renderer.cpp:4993: 	auto merged = device->create_image(image_info);
+gs_renderer.cpp:4994:
+### gs_renderer.cpp:5237-5255
+gs_renderer.cpp:5237: 	bool should_deinterlace = !high_resolution_scanout && (is_interlaced || force_deinterlace);
+gs_renderer.cpp:5238:
+gs_renderer.cpp:5239: 	if (!info.skip_deinterlace && should_deinterlace)
+gs_renderer.cpp:5240: 	{
+gs_renderer.cpp:5241: 		for (int i = 3; i >= 1; i--)
+gs_renderer.cpp:5242: 			vsync_last_fields[i] = std::move(vsync_last_fields[i - 1]);
+gs_renderer.cpp:5243: 		vsync_last_fields[0] = std::move(merged);
+gs_renderer.cpp:5244:
+gs_renderer.cpp:5245: 		// Fill in holes for the first frames.
+gs_renderer.cpp:5246: 		if (!vsync_last_fields[1])
+gs_renderer.cpp:5247: 			vsync_last_fields[1] = vsync_last_fields[0];
+gs_renderer.cpp:5248: 		if (!vsync_last_fields[2])
+gs_renderer.cpp:5249: 			vsync_last_fields[2] = vsync_last_fields[0];
+gs_renderer.cpp:5250: 		if (!vsync_last_fields[3])
+gs_renderer.cpp:5251: 			vsync_last_fields[3] = vsync_last_fields[1];
+gs_renderer.cpp:5252:
+gs_renderer.cpp:5253: 		// Crude de-interlace. Get something working for now.
+gs_renderer.cpp:5254: 		merged = fastmad_deinterlace(cmd, info);
+gs_renderer.cpp:5255: 	}
+### gs_renderer.cpp:5263-5274
+gs_renderer.cpp:5263:
+gs_renderer.cpp:5264: 	if (enable_timestamps)
+gs_renderer.cpp:5265: 	{
+gs_renderer.cpp:5266: 		end_ts = cmd.write_timestamp(VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
+gs_renderer.cpp:5267: 		device->register_time_interval("GPU", start_ts, end_ts, "vsync");
+gs_renderer.cpp:5268: 		timestamps.push_back({ TimestampType::VSync, std::move(start_ts), std::move(end_ts) });
+gs_renderer.cpp:5269: 	}
+gs_renderer.cpp:5270:
+gs_renderer.cpp:5271: 	result.image = std::move(merged);
+gs_renderer.cpp:5272: 	result.interlaced = should_deinterlace;
+gs_renderer.cpp:5273: 	result.interlace_phase = info.phase;
+gs_renderer.cpp:5274: 	result.double_strike = double_strike;
+### ps2_gs_parallel_backend.cpp:243-255
+ps2_gs_parallel_backend.cpp:243:         PresentationFrame out{};
+ps2_gs_parallel_backend.cpp:244:         if (!ensureInit())
+ps2_gs_parallel_backend.cpp:245:             return out;
+ps2_gs_parallel_backend.cpp:246:         const uint64_t t0 = nowNanos();
+ps2_gs_parallel_backend.cpp:247:         syncPriv();
+ps2_gs_parallel_backend.cpp:248:         ParallelGS::VSyncInfo vsync = {};
+ps2_gs_parallel_backend.cpp:249:         vsync.phase = static_cast<uint32_t>(request.vsyncTick & 1u);
+ps2_gs_parallel_backend.cpp:250:         vsync.dst_layout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+ps2_gs_parallel_backend.cpp:251:         vsync.dst_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+ps2_gs_parallel_backend.cpp:252:         vsync.dst_access = VK_ACCESS_2_SHADER_SAMPLED_READ_BIT;
+ps2_gs_parallel_backend.cpp:253:         vsync.adapt_to_internal_horizontal_resolution = true;
+ps2_gs_parallel_backend.cpp:254:         m_iface->flush();
+ps2_gs_parallel_backend.cpp:255:         ParallelGS::ScanoutResult shot = m_iface->vsync(vsync);
+### upload-0.txt:1-1
+upload-0.txt:1: seq=0 tick=2050 size=512x448 displayFbp=112 sourceFbp=112 preferred=0 fallback=0 fnv1a=bd15b9c0 smode2=0x1 pmode=0xff21
