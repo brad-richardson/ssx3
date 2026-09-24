@@ -821,8 +821,17 @@ with measured budgets, then 120 Hz simulation.
       This is a state-dependent composite effect; it does **not** identify
       the glyph stroke producer or the paraLLEl defect. Next GB5C:
       compare exact CPU/paraLLEl pixels and GS state around this packet.
-      GB5C Part 1 running: matched replay crops at eight ticks
-      899–950; no live boot.
+      **GB5C PASS (05b6481):** matched CPU/paraLLEl replay at eight
+      ticks 899–950 passed 556/556 with 1,982,063 packets and zero
+      null/unsupported operations. The orchestrator reran all 16 crop
+      rows, checked replay counters and viewed four side-by-sides.
+      Lower button-label damage is visible already at tick 899; it
+      predates GB5B's recurring composite instances at 902–921.
+      Upper menu glyphs are absent at 899/902 and damaged once present
+      at 921, so their producer remains open. Earliest mismatch is at
+      or before 899; neither glyph producer nor GS state mechanism is
+      identified. Next GB5D: bracket the earlier lower-label source or
+      state and then fold paraLLEl for Odin/Turnip.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
