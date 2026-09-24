@@ -1147,6 +1147,18 @@ with measured budgets, then 120 Hz simulation.
       not yet proved on-device. **Next N8D5F:** one isolated Android
       rebuild with that exact writer hunk and the tile probe unchanged;
       package gate before another one-run Odin check. No speed claim.
+- [x] **N8D5F PNG writer Android package PASS (24836f2):** one private
+      bytesize `assembleRelease` succeeded in 7m 47s. Against N8B1,
+      only the pinned tile backend and N8D3's single PNG writer hunk
+      differ; the shader header is the sole G43 addition. The package
+      has exactly the arm64 runner, pinned Turnip and HAL shim; WSL/Mac
+      APK SHA pairs match (`8c101c48…be66a0`). The runner contains the
+      tile/control/summary and PNG writer diagnostic strings; five
+      diagnostics/UI flags are OFF. `local/research/N8D5F/REPORT.md`
+      pins the source, Build ID, cache and package table. No Odin action
+      or speed claim. **Next N8D5G:** one bounded Odin run for the same
+      tile probe and a viewed tick-2050 PNG; gate A/B/OTHER before a
+      source-side/Turnip diagnostic.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
