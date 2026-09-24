@@ -1146,8 +1146,19 @@ with measured budgets, then 120 Hz simulation.
       00:00:01→00:00:05, 0→1%. The guest clock shim was reached twice.
       Fork `4f93216` was pushed after the runner-dir guard. Reply bytes
       were not captured in the live boot, and full-frame determinism is
-      unproved. Next E55B2 cycle-only event selection with synthetic
-      ordering tests; external wake needs its own placement policy.
+      unproved. **E55B2 PASS (70ee130):** exact deterministic flag now
+      selects all cycle-due scheduled events and the idle timer target
+      by guest cycle; default host-deadline selection is retained. Three
+      focused source tests cover reversed host deadlines, same/different
+      cycles, timer 80 versus event 100, equality, exact flag and legacy
+      contrast. One test-only compile repair preceded OFF 584/584 and ON
+      679/679. One I26-FAST diagnostic boot reached tick 2053 in
+      122.12 s with three viewed frames; race HUD advanced 00:00:01→
+      00:00:05 and 0→1%. Early/late race PNG hashes match E55A2; SC
+      hash differs. Fork `779e804` was pushed after the runner-dir guard.
+      This is not a clean speed or repeatability measurement. ExternalWake
+      needs a guest-cycle placement policy; pad/card isolation and a
+      frame-hash tap remain separate E55 work.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
