@@ -1244,14 +1244,18 @@ with measured budgets, then 120 Hz simulation.
       circuit1 retention in the N8D6A G43 stage patch, and recalculated
       capture bytes as 5,177,344 (<6 MiB). No replay or device run.
       `local/research/N8D7E/ORCH-GATE.md`.
-- [ ] **N8D7F Mac same-stream implementation/calibration:** capture the
-      selected circuit1 input, log final promotion/sample state, decode
-      512×224 input on the host, and census circuit1 independently of the
-      tile shader under one default-OFF flag. Use the exact N8D6A stage
-      patch and a full contiguous GPU VRAM slice; stop on raw-circuit early
-      return, unsupported source/sample, missing metadata or any copy error.
-      Run the synthetic fixture and one pinned Mac replay before any Odin
-      package or run.
+- [x] **N8D7F Mac selected-input probe build PASS (`3d9678d`, fork
+      `0678dd9`):** one default-OFF candidate copies the selected full 4 MiB
+      GPU VRAM slice and an independent circuit1 image, then host-decodes
+      and compares 448-tile vectors with the existing GPU stage tap. Private
+      Release build and taps-OFF suite passed 585/585; runner guard empty.
+      No replay or device-cause verdict. Gate:
+      `local/research/N8D7F/ORCH-GATE.md`.
+- [ ] **N8D7F Mac same-stream calibration:** recheck binary, stream and
+      codegen SHA pairs; claim one mini lease; run pinned N8D4 OFF/ON replay
+      from the private fork. Gate source metadata, controls, three 448-tile
+      vectors, final 896-tile vector and equal final hashes before any Odin
+      package or run. The N8D7D2 synthetic fixture already passed.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
