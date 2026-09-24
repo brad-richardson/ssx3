@@ -1,0 +1,7 @@
+E56 first failed gate: fixed-tick Select Character frame hash mismatch.
+Base fork b9647f5, E58 part3-sc boot:
+[frame:dump] seq=786 tick=837 size=512x448 fbp=112/112 fallback=0 fnv1a=847bd9e4
+E56 gate-a boot:
+[frame:dump] seq=816 tick=837 size=512x448 fbp=112/112 fallback=0 fnv1a=c419b1b8
+E56 runner PID 10035 was intentionally sent SIGTERM after the mismatch. The harness wrote result.json and released slot 2. This is not evidence of a runner crash. Last rate tick 2378 (11.1 guest seconds beyond the ~1714 race start); the required >=60 guest seconds was not reached. The E56 log had zero [guest-branch:missing-target] lines through tick 2378. No further gate boots were run.
+Logs: /Users/brad/dev/ssx3-work/E58/run/part3-sc/boot.log and /Users/brad/dev/ssx3-work/E56/run/gate-a/{boot.log,result.json}.
