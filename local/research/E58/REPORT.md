@@ -81,3 +81,24 @@ The ISO `~/dev/ssx3-work/E32-inputs/SSX 3 (USA).iso` was read twice before use: 
 ### Part-2 stop and recommended next action
 
 The suite is the first failed Part-2 brief step. I made no fix attempt or second suite run, then stopped before either smoke boot and push. The 13 failed tests explicitly require the guest-memory taps that E58 compiled OFF for a clean runner; the other 619 passed. The orchestrator can set a test policy for taps-off builds (for example, gate those 13 tap-specific tests on `PS2X_ENABLE_DIAG_TAPS`, or run a separate taps-on test build), then authorize continuation of the smoke, push, and promotion gates. The clean runner is built and its two SHA reads match.
+
+---
+
+## Part 3 — tap test guard and continuation
+
+Orchestrator approved conditional compilation and registration of the guest-store tap trace suites for `PS2X_ENABLE_DIAG_TAPS=ON`, followed by both suite gates, boots, push, and codegen promotion. The permission denial below stopped this continuation before commit and boots.
+
+| Part-3 gate | Result |
+| --- | --- |
+| Test guard | `ps2xTest/CMakeLists.txt` conditionally compiles `ps2_mpg_src_trace_tests.cpp`, `ps2_e41_trace_tests.cpp`, `ps2_e43_trace_tests.cpp`, and `ps2_e44_trace_tests.cpp` when `PS2X_ENABLE_DIAG_TAPS=ON`; `ps2xTest/src/main.cpp` conditionally declares/registers the same suites with `#if PS2X_ENABLE_DIAG_TAPS`. E43/E44 also assert on guest-store tap output. No test body changed. Changes remained uncommitted after the denial. |
+| Taps-OFF incremental build and suite | PASS. `nice -n 10 ninja -j8 ps2x_tests` in `~/dev/ssx3-work/E58/build`, then `../build/ps2xTest/ps2x_tests` from the fork root: **537/537 passed, 0 failed**. Receipts: `~/dev/ssx3-work/E58/build-part3-off.log`, `suite-part3-off.log`. |
+| Taps-ON separate build and suite | PASS. `~/dev/ssx3-work/E58/build-taps.sh` configured Release with `PS2X_ENABLE_DIAG_TAPS=ON`, the same codegen, and built only `ps2x_tests` in `build-taps`; `../build-taps/ps2xTest/ps2x_tests` from the fork root: **632/632 passed, 0 failed**. Receipts: `cmake-taps.log`, `build-taps.log`, `suite-part3-taps.log`, and `build-taps/CMakeCache.txt`. |
+| Build budget | Part 2: 1 build; Part 3: 1 incremental test rebuild and 1 separate taps-ON test build; **3/3 total**. |
+| Disk preflight | `local/tooling/disk_budget.sh`: **92.4 / 200 GB**, 149 GiB free, before the taps-ON build. No post-build disk check after the denial. |
+| Commit gate | **DENIED**. `git add ps2xTest/CMakeLists.txt ps2xTest/src/main.cpp` in the E58 worktree returned exit 128: `fatal: Unable to create '/Users/brad/dev/PS2Recomp/.git/worktrees/PS2Recomp13/index.lock': Operation not permitted`. No retry, escalation, or commit attempted, per the worker denial stop rule. Fork HEAD remains `50fe0a7` as last observed. |
+| Smoke boots / clean rate boot | Not run after the denial. 0/3 boots in Part 3; no frames, visual checks, or vsync rates. |
+| Runner-dir check / fork push / codegen promotion | Not run after the denial; no push and no promotion. |
+
+### Part-3 resumption after sandbox clarification
+
+Brad clarified that the `index.lock` error came from the Codex sandbox and authorized escalated Git writes and runner boots. `git add` and `git commit` succeeded with escalation. The guard is fork commit `b9647f5` (`[E58] Register E41/mpg_src tap tests only with PS2X_ENABLE_DIAG_TAPS`, trailer `Orchestrated-By: Codex`). The two suite gates above remain valid. Smoke boots, clean rate, push, and promotion are pending.
