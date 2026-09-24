@@ -1158,9 +1158,17 @@ with measured budgets, then 120 Hz simulation.
       hash differs. Fork `779e804` was pushed after the runner-dir guard.
       This is not a clean speed or repeatability measurement. ExternalWake
       needs a guest-cycle placement policy; pad/card isolation and a
-      frame-hash tap remain separate E55 work. **E55C1 queued:**
-      read-only source map for a bounded VBlankStart hash tap and
-      repeatability gate; no new determinism claim.
+      frame-hash tap remain separate E55 work. **E55C1 PASS (3f0c0d9;
+      static only):** the hash point is after the tick/guest flag writes
+      and callback/IRQ queueing at `EeScheduler.cpp:2739`, before guest
+      handlers run. Direct pointers cover 32 MiB RDRAM and three 16 KiB
+      regions (scratchpad, VU1 data/code). A per-runtime VU1 `execute`
+      start count and XXH64 are absent; concurrency safety is inferred
+      from the source, not proved by a run. **E55C2 next:** implement a
+      compile-gated streaming XXH64 tap with a count increment at VU1
+      `execute` starts, known-vector/perturbation tests, then two idle and
+      one loaded boot with identical guest inputs. Compare only a common
+      complete tick prefix; any different guest state is a mismatch.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
