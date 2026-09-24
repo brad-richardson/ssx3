@@ -980,8 +980,8 @@ with measured budgets, then 120 Hz simulation.
       race frame. The app was force-stopped, PID absent, lease free.
       A prelaunch launcher check first rejected its own lease; it was
       corrected before any `am start`, with no second install/launch.
-      Next: bounded ELF/public-library and `hw_get_module` call-path
-      audit before choosing one packaging/loader candidate. Device
+      **N8C1 queued:** bounded ELF/public-library and `hw_get_module`
+      call-path audit before choosing one packaging/loader candidate. Device
       remains unproved; no speed or frame claim.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
