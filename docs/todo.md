@@ -810,6 +810,17 @@ with measured budgets, then 120 Hz simulation.
       earlier producer or explain paraLLEl's raster difference. Next:
       find the last earlier crop change or non-packet page update, then
       compare that exact state across backends.
+      **GB5B diagnostic PASS (15688e7; G probe `f796669`, not pushed):**
+      13 crop-changing packets at ticks 902–921 are instances of the same
+      recurring PATH3 1,696-byte/FNV `cc6dd8df` composite. The lower
+      crop reaches its final hash after tick 905 and the upper after tick
+      921; no packet changes either crop through tick 949. Orchestrator
+      viewed transition frames and verified the 13 rows and 556/556
+      replay gates. Dropping the tick-921 instance leaves final hashes
+      and all 60 output rows unchanged because later ticks repaint it.
+      This is a state-dependent composite effect; it does **not** identify
+      the glyph stroke producer or the paraLLEl defect. Next GB5C:
+      compare exact CPU/paraLLEl pixels and GS state around this packet.
 - [ ] GS bridge step (a), E lane: CPU backend behind the queue on its own
       thread (Mac), byte-exact A/B vs direct calls. Gated on PF1's numbers
       and E32. Then (b) paraLLEl via MoltenVK (G), (c) Android (G+N),
@@ -1308,7 +1319,14 @@ with measured budgets, then 120 Hz simulation.
       produced no tokens before the orchestrator stopped it. No X4 code
       claims have been accepted; rebrief in smaller source categories if
       still needed for E55. X5's separate sparse extraction passed.
-      **X4B running:** one narrow dense arm traces only the RTC seed path
-      with a 45-line report cap.
+      **X4B incomplete (dense, 25-minute cap):** reached about 37.7k
+      context and found the `0x31ae80` → generated `0x402520` →
+      `sceCdReadClock` call and a following `0x3177c8` state-init call,
+      but stopped producing output before replacing its placeholder
+      report. No worker verdict or commit. The orchestrator verified the
+      source anchors in `local/research/X4B/REPORT.md`; runtime reach,
+      LSP confirmation and the PRNG label remain open. **X6 running:**
+      sparse, script-checked static index of unique LWU guest sites for
+      the next E54 fix.
 - [ ] PS2 120 Hz simulation: the game-side timestep patch sites are
       published for the PS2 build. Scope this once a stock race runs.
