@@ -54,7 +54,7 @@ nice -n 10 cmake --build ~/dev/ssx3-work/N8D5B/build --target ps2x_tests -j8
 env PS2X_N8D5_TILE_CAPTURE=1 PS2X_GS_REPLAY_CAPTURE=~/dev/ssx3-work/N8D4/n8d4.gs PS2X_GS_REPLAY_PPM_TICKS=2050 PS2X_GS_REPLAY_PPM_DIR=~/dev/ssx3-work/N8D5B/replay-ppm PS2X_GS_REPLAY_STEP=50 PS2X_GS_REPLAY_OUT=~/dev/ssx3-work/N8D5B/parallel.hashes PS2X_GS_REPLAY_BACKEND=parallel GRANITE_VULKAN_LIBRARY=/opt/homebrew/lib/libvulkan.1.dylib ~/dev/ssx3-work/N8D5B/build/ps2xTest/ps2x_tests
 ```
 
-The actual configure and worker replay argv used absolute `/Users/brad/dev/...` paths; the command block abbreviates that prefix as `~`. The replay binary is pinned by the SHA above. The orchestrator ran one separate unsandboxed Mac replay against that binary. Its full 4,812,990-byte log is retained outside git at `~/dev/ssx3-work/N8D5B/orch-replay.log`, SHA-256 `f04f59f3a57a32e35558c599d40823a495ef9139701ee2501e068584ecd2d127`; the committed excerpt contains the gate lines only.
+The actual configure and worker replay argv used absolute `/Users/brad/dev/...` paths; the command block abbreviates that prefix as `~`. The replay binary is pinned by the SHA above. The orchestrator ran one separate unsandboxed Mac replay against that binary. Its full 4,812,990-byte log is retained compressed outside git at `~/dev/ssx3-work/N8D5B/orch-replay.log.gz`, compressed SHA-256 `d932dc7af08bfdf386614338108d1d0e3ea39658c226e0e6074fcac1733a9b4b`. Decompressing reproduces SHA-256 `f04f59f3a57a32e35558c599d40823a495ef9139701ee2501e068584ecd2d127`; the committed excerpt contains the gate lines only.
 
 ## Gaps
 
