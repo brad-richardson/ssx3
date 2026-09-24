@@ -904,7 +904,7 @@ with measured budgets, then 120 Hz simulation.
       Plan: E53 (+ items 1–2 added) → **E54** semantics batch 2 → **E55**
       determinism mode + hash tap → **E56** function-boundary closure
       (auto interior prologues, `stop` policy) → N7 Odin → E57 VU1 speed.
-- [ ] **E56 (801bada): function-boundary closure works.**
+- [x] **E56 (801bada; Part 2 9c9b424): function-boundary closure works and is folded.**
       - The recompiler rule (interior `addiu sp,-N` after a `jr $ra`, plus
         data-referenced leaf starts) adds 2,049 resume entries (3,717
         prologues accepted / 404 rejected); E46 19/19 and AU5 3/3 are
@@ -915,8 +915,16 @@ with measured budgets, then 120 Hz simulation.
       - The stop came from the SC frame-hash gate, the orchestrator's
         error: free-running boots aren't frame-deterministic before E55.
 
-      **Part 2:** fold onto `13cac7f`, a 600 s stop-policy boot with zero
-      misses, then push + promote the codegen.
+      **Part 2 PASS:** folded onto `13cac7f`, pushed fork `ssx3` to
+      `8e2864a`, and promoted the E56 regen as canonical codegen.
+      Taps-OFF 548/548, taps-ON 643/643. The bounded stop-policy boot
+      reached tick 5353 (60.71 guest seconds after race start) with zero
+      missing function targets and zero unknown syscalls; four unhandled
+      RPC pairs remain counted. Orchestrator viewed the SC and two race
+      frames: Zoe, terrain and HUD render, with the known dark GS
+      composite occlusion. Runner-dir diff from upstream empty. This was
+      a diagnostic boot, so it adds no speed row to the ledger.
+      **Next:** W1F fold; E60 sky; then E54/E55/E57.
 - [x] **E59 (8528a43): the sky loss is a second bug that E53 exposed.**
       - FPMODE=ieee: no sky. Reverting the EFU tables (h): no sky.
         Reverting the whole VU0 group (a): the sky, sun and flare return.
