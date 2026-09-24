@@ -1602,6 +1602,15 @@ with measured budgets, then 120 Hz simulation.
       not an executed manifest; `next_source_gate.py` is still to be
       written, old WSL bytes not re-read, HAL source/member mismatch open.
       `local/research/N8D7M12P6M1/ORCH-GATE.md`.
+- [x] **N8D7M12 Part 6M2 collector (`a8e42230`):** fixture13/13
+      for source SHA pairs, path changes, symlinks and caps. Gate B for
+      real roots: pre/post `list_tree` still traverses excluded build/
+      cache dirs; demonstrated `build/volatile.o` in its listing. No
+      large scan/package/GPU result. `local/research/N8D7M12P6M2/
+      ORCH-GATE.md`.
+- [ ] **N8D7M12 Part 6M3:** prune excluded names in `list_tree`,
+      test concurrent excluded-cache mutation, then run the collector
+      on a bounded real-source sample before next APK transfer.
 - [x] **N8D7M12 Part 5F4P2 host fingerprint (`6799681`, private):**
       source-only worker-consumption 64-bit digest/count; suite586/586,
       41 ordered samples, replay hashes/PPM byte-equal Mac ON, checker
