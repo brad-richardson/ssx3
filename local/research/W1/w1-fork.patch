@@ -1,0 +1,153 @@
+diff --git a/ps2xRuntime/include/ps2_present_geometry.h b/ps2xRuntime/include/ps2_present_geometry.h
+index 85d39b3..c1c7922 100644
+--- a/ps2xRuntime/include/ps2_present_geometry.h
++++ b/ps2xRuntime/include/ps2_present_geometry.h
+@@ -7,7 +7,8 @@
+ // I26 (G46 §4): host presentation of the guest frame. A PS2 frame (e.g.
+ // 512x448) is shown on a 4:3 TV, so by default the picture is drawn at a 4:3
+ // display aspect, not at the framebuffer's pixel aspect (8:7 for 512x448).
+-// PS2X_ASPECT=native keeps the old uniform-scale (pixel-aspect) behaviour.
++// SSX 3's anamorphic option uses a 16:9 display aspect. PS2X_ASPECT overrides
++// either default with native, 4:3, or 16:9.
+ // Filtering: raylib's default is POINT, which at a non-integer scale (x2.946
+ // on an iPhone 16 Pro Max) makes glyph stems alternate 2/3 px; so BILINEAR
+ // unless both axis scales are whole numbers. PS2X_PRESENT_FILTER=point|bilinear
+@@ -17,6 +18,7 @@ namespace ps2x::present
+     enum class Aspect
+     {
+         FourThree,
++        SixteenNine,
+         Native
+     };
+     enum class Filter
+@@ -31,9 +33,16 @@ namespace ps2x::present
+         float x, y, w, h;
+     };
+ 
+-    inline Aspect aspectFromEnv(const char *value)
++    inline Aspect aspectFromEnv(const char *value, bool anamorphic = false)
+     {
+-        return (value && std::string_view(value) == "native") ? Aspect::Native : Aspect::FourThree;
++        if (value)
++        {
++            const std::string_view override(value);
++            if (override == "native") return Aspect::Native;
++            if (override == "4:3") return Aspect::FourThree;
++            if (override == "16:9") return Aspect::SixteenNine;
++        }
++        return anamorphic ? Aspect::SixteenNine : Aspect::FourThree;
+     }
+ 
+     inline Filter filterFromEnv(const char *value)
+@@ -59,8 +68,9 @@ namespace ps2x::present
+         }
+         else
+         {
+-            h = std::min(screenH, screenW * 3.0f / 4.0f);
+-            w = h * 4.0f / 3.0f;
++            const float ratio = aspect == Aspect::SixteenNine ? 16.0f / 9.0f : 4.0f / 3.0f;
++            h = std::min(screenH, screenW / ratio);
++            w = h * ratio;
+         }
+         return Rect{(screenW - w) * 0.5f, (screenH - h) * 0.5f, w, h};
+     }
+diff --git a/ps2xRuntime/src/lib/ps2_runtime.cpp b/ps2xRuntime/src/lib/ps2_runtime.cpp
+index e07275b..37426ea 100644
+--- a/ps2xRuntime/src/lib/ps2_runtime.cpp
++++ b/ps2xRuntime/src/lib/ps2_runtime.cpp
+@@ -101,6 +101,38 @@ struct ProgramHeader
+ 
+ namespace
+ {
++    // SLUS_207.72 stores its video choice in bits 20-21 of the first options
++    // word. 0 is 4:3 and 2 is the menu's anamorphic choice. The game calls
++    // 0x228C08 to apply that choice after defaults, menu edits, and profile
++    // loading. Interpose at that call so all three paths obey the host option.
++    std::atomic<bool> g_ssx3WidescreenActive{false};
++    std::atomic<uint32_t> g_ssx3WidescreenMode{2u};
++    constexpr uint32_t kSsx3OptionsWord = 0x00535610u;
++    constexpr uint32_t kSsx3WidescreenMask = 0x00300000u;
++
++    void applySsx3Widescreen(PS2Runtime &)
++    {
++        const char *env = std::getenv("PS2X_WIDESCREEN");
++        const uint32_t mode = env && std::strcmp(env, "0") == 0 ? 0u : 2u;
++        g_ssx3WidescreenMode.store(mode, std::memory_order_relaxed);
++        g_ssx3WidescreenActive.store(true, std::memory_order_release);
++        std::fprintf(stderr, "[widescreen] SSX3 mode=%u (PS2X_WIDESCREEN=%s)\n",
++                     mode, env ? env : "default");
++    }
++
++    void enforceSsx3Widescreen(uint8_t *rdram, uint32_t sourcePc)
++    {
++        if (!rdram || !g_ssx3WidescreenActive.load(std::memory_order_acquire)) return;
++        uint32_t word = 0u;
++        std::memcpy(&word, rdram + kSsx3OptionsWord, sizeof(word));
++        const uint32_t mode = g_ssx3WidescreenMode.load(std::memory_order_relaxed);
++        const uint32_t wanted = (word & ~kSsx3WidescreenMask) | (mode << 20u);
++        if (word == wanted) return;
++        std::memcpy(rdram + kSsx3OptionsWord, &wanted, sizeof(wanted));
++        std::fprintf(stderr, "[widescreen] apply source=0x%x guest_mode=%u host_mode=%u\n",
++                     sourcePc, (word >> 20u) & 3u, mode);
++    }
++
+     constexpr uint32_t kGuestHeapDefaultBase = 0x00100000u;
+     constexpr uint32_t kGuestHeapDefaultAlignment = 16u;
+     constexpr uint32_t kGuestHeapSafetyPad = 0x1000u;
+@@ -387,6 +419,12 @@ namespace
+     }
+ }
+ 
++PS2_REGISTER_GAME_OVERRIDE("ssx3-widescreen-default",
++                           "SLUS_207.72",
++                           0x00100008u,
++                           0u,
++                           applySsx3Widescreen);
++
+ // K1 P0: env-gated presentation-frame capture (PS2X_FRAME_DUMP_DIR).
+ // Unset/empty = disabled (zero behavior change). When set, saves the
+ // first two success uploads AND first two fallbacks (E3b per-path keeps)
+@@ -2194,6 +2232,10 @@ bool PS2Runtime::dispatchGuestBranch(uint8_t *rdram,
+     }
+     ctx->pc = targetPc;
+     const bool isCall = (kind == GuestBranchKind::DirectCall || kind == GuestBranchKind::IndirectCall);
++    if (isCall && targetPc == 0x00228C08u)
++    {
++        enforceSsx3Widescreen(rdram, sourcePc);
++    }
+ 
+     // Every inter-function transfer is also a deterministic EE safe point.
+     // Backward edges inside generated functions use eeCheckpointDue(), while
+@@ -3484,7 +3526,9 @@ void PS2Runtime::run()
+     {
+         std::fprintf(stderr, "[vpad] off (PS2X_VIRTUAL_PAD)\n");
+     }
+-    const ps2x::present::Aspect presentAspect = ps2x::present::aspectFromEnv(std::getenv("PS2X_ASPECT"));
++    const bool anamorphic = g_ssx3WidescreenActive.load(std::memory_order_acquire) &&
++                            g_ssx3WidescreenMode.load(std::memory_order_relaxed) == 2u;
++    const ps2x::present::Aspect presentAspect = ps2x::present::aspectFromEnv(std::getenv("PS2X_ASPECT"), anamorphic);
+     const ps2x::present::Filter presentFilter = ps2x::present::filterFromEnv(std::getenv("PS2X_PRESENT_FILTER"));
+     int appliedFilter = -1;
+     auto vsyncRateWall = std::chrono::steady_clock::now();
+diff --git a/ps2xTest/src/ps2_present_fallback_tests.cpp b/ps2xTest/src/ps2_present_fallback_tests.cpp
+index 9fd2063..98081fd 100644
+--- a/ps2xTest/src/ps2_present_fallback_tests.cpp
++++ b/ps2xTest/src/ps2_present_fallback_tests.cpp
+@@ -37,6 +37,17 @@ void register_ps2_present_geometry_tests()
+             const Rect p = presentRect(800.0f, 1200.0f, 512.0f, 448.0f, Aspect::FourThree);
+             t.IsTrue(std::fabs(p.w - 800.0f) < 0.01f && std::fabs(p.h - 600.0f) < 0.01f, "portrait: width-bound"); });
+ 
++        tc.Run("anamorphic mode and explicit aspect overrides", [](TestCase &t)
++               {
++            t.IsTrue(aspectFromEnv(nullptr, true) == Aspect::SixteenNine, "anamorphic -> 16:9");
++            t.IsTrue(aspectFromEnv("4:3", true) == Aspect::FourThree, "4:3 override");
++            t.IsTrue(aspectFromEnv("16:9", false) == Aspect::SixteenNine, "16:9 override");
++            t.IsTrue(aspectFromEnv("native", true) == Aspect::Native, "native override");
++            const Rect r = presentRect(2868.0f, 1320.0f, 512.0f, 448.0f, Aspect::SixteenNine);
++            t.IsTrue(std::fabs(r.h - 1320.0f) < 0.01f && std::fabs(r.w - 2346.6667f) < 0.01f,
++                     "iPhone landscape: 16:9 fit");
++            t.IsTrue(std::fabs(r.x - 260.6667f) < 0.01f, "centred 16:9"); });
++
+         tc.Run("bilinear unless both scales are whole; env forces", [](TestCase &t)
+                {
+             t.IsTrue(filterFromEnv(nullptr) == Filter::Auto, "unset -> auto");
