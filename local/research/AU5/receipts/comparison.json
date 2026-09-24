@@ -1,0 +1,84 @@
+{
+  "pcsx2": {
+    "raw_records": 39888,
+    "unique_records": 39888,
+    "duplicates": 0,
+    "first_serial": 1,
+    "last_serial": 39888,
+    "serial_gaps": 0,
+    "record_seconds": 425.472,
+    "first_vsync": 1228,
+    "last_vsync": 26730,
+    "wav_sha256": "4c97b6328387599fba1f172f6089baf3e158911b6ad3ecdd27ad599fc2541acf"
+  },
+  "au2": {
+    "raw_records": 5047,
+    "unique_records": 5047,
+    "duplicates": 0,
+    "first_serial": 1,
+    "last_serial": 5047,
+    "serial_gaps": 0,
+    "record_seconds": 53.834666666666664,
+    "first_vsync": null,
+    "last_vsync": null,
+    "wav_sha256": "f4668e3c14d00b27e2ea94b56cce7cc1e2ff13b54a3f8b39055ae409c73c7559",
+    "matches_existing_wav": true
+  },
+  "coarse_alignment": {
+    "template_start_au2_s": 5,
+    "target_template_start_s": 112.552,
+    "lag_s": 107.552,
+    "correlation": 0.998940995356736
+  },
+  "refined_alignment": {
+    "lag_frames": 3871872,
+    "lag_s": 107.552,
+    "correlation": 0.9876183385531865,
+    "reference_template_start_s": 6,
+    "target_template_start_s": 113.552
+  },
+  "comparison": {
+    "au2_start_s": 5.0,
+    "target_start_s": 112.552,
+    "duration_s": 30.0,
+    "bit_exact_stereo_frames_pct": 0.06777777777777778,
+    "gain_rms_au2_over_target": 0.31253185374596776,
+    "gain_least_squares_au2_on_target": 0.027758619546823064,
+    "diff_rms_over_target_rms": 1.0208618518253314,
+    "au2_stats": {
+      "seam_ratio": 1.7136254542572291,
+      "zero_crossings_per_second_both_channels": 9363.4,
+      "rms": 1388.185364587225,
+      "peak_abs": 24949
+    },
+    "target_stats": {
+      "seam_ratio": 1.1618849586048208,
+      "zero_crossings_per_second_both_channels": 5940.733333333334,
+      "rms": 4441.740411252833,
+      "peak_abs": 28424
+    },
+    "difference_bands": {
+      "0-2000Hz": {
+        "diff_rms": 4313.68130415039,
+        "signal_rms": 4261.837172517435,
+        "diff_over_signal": 1.0121647377725442
+      },
+      "2000-6000Hz": {
+        "diff_rms": 1113.149450247889,
+        "signal_rms": 1029.1678946205975,
+        "diff_over_signal": 1.0816014141776655
+      },
+      "6000-12000Hz": {
+        "diff_rms": 731.2464346364297,
+        "signal_rms": 629.9460046209979,
+        "diff_over_signal": 1.1608081157310912
+      },
+      "12000-18000Hz": {
+        "diff_rms": 423.2543247374081,
+        "signal_rms": 331.33558796078887,
+        "diff_over_signal": 1.2774188469833103
+      }
+    }
+  },
+  "status": "aligned"
+}
