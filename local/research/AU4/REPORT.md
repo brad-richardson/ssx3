@@ -120,3 +120,48 @@ Two SHA-256 reads of the AU2 raw input (`1e34ea47d16582b5f403279b8db3dfd0eea4ae9
 From `~/dev/ssx3`: `ssh bytesize "wsl -d Ubuntu -- bash -s" < local/research/AU4/au4-part2-build.sh` (one build), then the existing `au4-replay.sh` (one replay), then `au4-part2-cap.sh` (one boot/capture, redirected to `~/dev/ssx3-work/AU4/part2-capture-ssh.log`). The exact capture script includes its progress/size caps and all route gates. `au4-part2-get-tag.sh` and `au4-part2-get-video.sh` perform two SHA reads before transfer; `au4-part2-get-receipts.sh` retrieves the text proof. The analysis command was `/Users/brad/dev/ssx3-work/AU4/venv/bin/python local/research/AU4/compare.py --pcsx2-bin /Users/brad/dev/ssx3-work/AU4/pcsx2-tag1.bin --au2-bin /Users/brad/dev/ssx3-work/AU2/run/pcm-au2b.bin --au2-wav /Users/brad/dev/ssx3-work/AU2/run/au2b-ee-mix-36k.wav --out /Users/brad/dev/ssx3-work/AU4 --pc-sc-record 17122`. The bytesize heavy-job checks were empty before build, replay, and capture. No mini P-lane lease was needed for PCSX2 on bytesize.
 
 **Recommended next action for the orchestrator:** use the strong menu alignment and the frequency-band table to choose a bounded EE decode/mix arithmetic check, while separately checking why AU2's tick seam ratio is higher. The aligned error exists across the menu waveform, with especially large relative 2–18 kHz differences; the seam ratio alone does not account for the full 0.34988 difference RMS. No causal verdict is declared by this worker.
+
+# Part 3 — local lag and residual analysis
+
+This is analysis of the Part 2 inputs only. No build, capture, device run, or bytesize command was used. `lag_track.py` reuses `compare.py`'s WAV reader, rate, and SHA helper in the existing AU4 venv. The input SHA-256 reads match twice (`receipts/part3/input-sha-read1.txt`, `input-sha-read2.txt`): AU2 `2cd31f2cb34c26e394dffe2921bf0206d130bee00efb4f078a52d96ed4fbf406`, PCSX2 `4c97b6328387599fba1f172f6089baf3e158911b6ad3ecdd27ad599fc2541acf`.
+
+The shared menu waveform is AU2 **8.75–41.0 s**, PCSX2 **119.811556–152.061556 s**, using the Part 2 base lag of **+111.061556 s** (PCSX2 time minus AU2 time). Before ~8.5 s and after ~41 s the local correlation drops toward unrelated audio; these edges are excluded. A short region around AU2 15–16.7 s has intermittent low correlation within the menu and is retained in the full-span sensitivity calculation. Each local fit uses a 50 ms stereo window, 25 ms hop, normalized cross-correlation over ±20 ms around the base lag, and a three-point parabolic interpolation of the peak. The reliable subset has NCC ≥0.8. `receipts/part3/lag-windows.csv` contains all 1,289 fits; `receipts/part3/menu-lag-vs-time.png` (71 KB) plots both the full search range and a zoom of reliable fits.
+
+| Lag tracking measure | Result |
+| --- | ---: |
+| Windows: all / NCC ≥0.8 / NCC <0.8 | 1,289 / 1,226 / 63 |
+| Median reliable NCC | 0.97538 |
+| Median reliable local lag | **+111.061560 s** (base +0.00427 ms) |
+| Reliable 5th–95th percentile lag offset from base | −0.01892 to +0.00709 ms; spread **0.02602 ms** (0.94 sample) |
+| Reliable local extrema | −0.20851 to +0.00950 ms from base; the negative extremes are isolated, not plateaus |
+| First/last 5 s median offset | +0.00412 / +0.00421 ms; difference +0.00009 ms |
+| Largest adjacent half-second median change | 0.159 sample = 0.00442 ms |
+| Sustained jumps ≥1 sample (0.02778 ms) | **0**; size: none |
+| Jump relation to 384-frame seams or 59.94 Hz tick | No sustained jumps to align with either |
+
+Jump rule: take each half-second bin's median only when it contains at least 10 NCC ≥0.8 windows; count a jump if adjacent medians differ by at least one sample and the shift persists in the next bin. The 50 ms windows overlap multiple 384-frame record boundaries. Each AU2 record was also produced by one 59.94 Hz spike tick, so record seams and tick events are the same sequence indexed by different clocks (10.667 ms in concatenated 36 kHz PCM versus 16.683 ms in AU2 wall time). These WAVs and this window cadence cannot assign an isolated excursion to one clock rather than the other. The low-NCC windows include search-limit outliers and are not evidence of timing slips.
+
+The following ratios use the same windows before and after local correction. Each corrected PCSX2 window is sampled at its fractional fitted lag with cubic interpolation; the difference is AU2 minus PCSX2, with **no gain correction**. Each 50 ms window contributes its one-sided FFT energy, including overlapped samples. The reliable subset isolates positions where local timing can be estimated; the full-span row keeps the intermittent low-correlation region.
+
+| Difference band / PCSX2 band RMS | Fixed Part 2 lag, reliable | Per-window lag, reliable | Per-window lag, all windows |
+| --- | ---: | ---: | ---: |
+| 0–2 kHz | 0.18769 | **0.18623** | 0.25840 |
+| 2–6 kHz | 0.54912 | **0.52081** | 0.60729 |
+| 6–12 kHz | 0.65837 | **0.56602** | 0.61259 |
+| 12–18 kHz | 1.04373 | **1.06076** | 1.09033 |
+| Whole-band RMS difference / PCSX2 RMS | 0.24306 | **0.23328** | 0.30077 (fixed: 0.30861) |
+
+The lag is effectively constant across the correlated menu music. Per-window timing correction reduces the reliable whole-band error only from 0.24306 to 0.23328; substantial error remains in every band. This supports a waveform/arithmetic cause as the main explanation for the audible distortion, rather than cumulative drift or persistent sample-position jumps. It does not identify which decode or mix operation differs, and it cannot exclude within-record timing defects shorter than the 50 ms analysis window.
+
+`~/dev/ssx3-work/AU3/run/` **did not exist** after the PCSX2 lag analysis, so there was no AU3 host-stream WAV on which to run the Part 2 table or lag tracking. The preexisting modified AU3 report was left untouched.
+
+Reproduce from `~/dev/ssx3`:
+
+```sh
+MPLCONFIGDIR=/Users/brad/dev/ssx3-work/AU4/mpl-cache /Users/brad/dev/ssx3-work/AU4/venv/bin/python local/research/AU4/lag_track.py \
+  --au2 /Users/brad/dev/ssx3-work/AU2/run/au2b-ee-mix-36k.wav \
+  --target /Users/brad/dev/ssx3-work/AU4/pcsx2-tag1-36k.wav \
+  --out /Users/brad/dev/ssx3-work/AU4
+```
+
+The detailed numerical output is `receipts/part3/lag-analysis.json`; the script, CSV, JSON, and PNG are committed under `local/research/AU4/`. The audio remains in the work directories.

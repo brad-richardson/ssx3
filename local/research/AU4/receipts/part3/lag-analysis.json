@@ -1,0 +1,100 @@
+{
+  "input_sha256": {
+    "au2": "2cd31f2cb34c26e394dffe2921bf0206d130bee00efb4f078a52d96ed4fbf406",
+    "target": "4c97b6328387599fba1f172f6089baf3e158911b6ad3ecdd27ad599fc2541acf"
+  },
+  "method": {
+    "rate_hz": 36000,
+    "window_ms": 50,
+    "hop_ms": 25,
+    "search_ms": 20,
+    "base_lag_frames": 3998216,
+    "base_lag_s": 111.06155555555556,
+    "lag_peak": "stereo normalized cross-correlation; 3-point parabolic interpolation",
+    "residual": "per-window cubic-spline fractional lag; no gain fitting; overlap-weighted FFT energy"
+  },
+  "span": {
+    "au2_start_s": 8.75,
+    "au2_end_s": 41,
+    "target_start_s": 119.81155555555556,
+    "target_end_s": 152.06155555555557,
+    "windows": 1289
+  },
+  "lag": {
+    "median_ms_from_base": 0.004265645673179694,
+    "p05_ms_from_base": -0.01892099799812537,
+    "p95_ms_from_base": 0.00709478163924814,
+    "min_ms_from_base": -0.20851267777822421,
+    "max_ms_from_base": 0.009495177821233424,
+    "median_ncc_all": 0.9744524307277559,
+    "median_ncc_reliable": 0.9753828888547045,
+    "reliable_windows": 1226,
+    "unreliable_windows": 63,
+    "jump_rule": ">=1 sample in adjacent 0.5-s bin medians, persistent in next bin; >=10 NCC>=0.8 windows/bin",
+    "jumps": []
+  },
+  "reliable_windows": {
+    "whole_diff_over_pcsx2": {
+      "fixed": 0.24305638191969053,
+      "corrected": 0.23328287952023372
+    },
+    "bands": {
+      "0-2000Hz": {
+        "fixed_diff_over_pcsx2": 0.1876935172238716,
+        "corrected_diff_over_pcsx2": 0.18622799475692386,
+        "corrected_diff_rms": 927.1922946992556,
+        "corrected_pcsx2_rms": 4978.801903062337
+      },
+      "2000-6000Hz": {
+        "fixed_diff_over_pcsx2": 0.5491158912325911,
+        "corrected_diff_over_pcsx2": 0.5208080666124799,
+        "corrected_diff_rms": 578.3744099130477,
+        "corrected_pcsx2_rms": 1110.5327413129362
+      },
+      "6000-12000Hz": {
+        "fixed_diff_over_pcsx2": 0.6583669055082333,
+        "corrected_diff_over_pcsx2": 0.5660240291583996,
+        "corrected_diff_rms": 382.0675058595126,
+        "corrected_pcsx2_rms": 675.0022723021049
+      },
+      "12000-18000Hz": {
+        "fixed_diff_over_pcsx2": 1.0437339422425123,
+        "corrected_diff_over_pcsx2": 1.0607595756354624,
+        "corrected_diff_rms": 325.3689363055742,
+        "corrected_pcsx2_rms": 306.73202842468567
+      }
+    }
+  },
+  "all_windows": {
+    "whole_diff_over_pcsx2": {
+      "fixed": 0.30860594076378084,
+      "corrected": 0.30076885258212893
+    },
+    "bands": {
+      "0-2000Hz": {
+        "fixed_diff_over_pcsx2": 0.25961110706950785,
+        "corrected_diff_over_pcsx2": 0.2584030091748386,
+        "corrected_diff_rms": 1272.51721791906,
+        "corrected_pcsx2_rms": 4924.544888167535
+      },
+      "2000-6000Hz": {
+        "fixed_diff_over_pcsx2": 0.631485244058661,
+        "corrected_diff_over_pcsx2": 0.607288229595422,
+        "corrected_diff_rms": 669.4258364876913,
+        "corrected_pcsx2_rms": 1102.3197945622387
+      },
+      "6000-12000Hz": {
+        "fixed_diff_over_pcsx2": 0.6984311282102812,
+        "corrected_diff_over_pcsx2": 0.6125866872350055,
+        "corrected_diff_rms": 414.47915036056145,
+        "corrected_pcsx2_rms": 676.6048936377808
+      },
+      "12000-18000Hz": {
+        "fixed_diff_over_pcsx2": 1.066551522187584,
+        "corrected_diff_over_pcsx2": 1.0903342512999854,
+        "corrected_diff_rms": 338.58181939559614,
+        "corrected_pcsx2_rms": 310.530297467874
+      }
+    }
+  }
+}
