@@ -982,9 +982,16 @@ with measured budgets, then 120 Hz simulation.
       and can overwrite FIELD; VBlankStart flips FIELD without raising
       VSINT. PCSX2 acknowledges VSINT on write and raises it at a later
       GS-blank event; the named guest wait sites have **unknown reach** in
-      existing receipts. **E54B running:** one local CSR-status fix with
-      unit sequence and a bounded race boot. Its VBlankStart raise is a
-      timing approximation; exact GS-blank scheduling stays open.
+      existing receipts. **E54B PASS (9030a8f; fork `aa20d4a` pushed):**
+      one CSR-status fix with W1C VSINT and timing-owned FIELD passed
+      560/560 taps-OFF and 655/655 taps-ON tests. One bounded diagnostic
+      I26-FAST boot reached race tick 2062; the live `0x37c0e0` read was
+      `0x4000` after acknowledge at tick 40, and the poll saw `0x6008` at
+      tick 41. Orchestrator viewed the character and two advancing race
+      frames; the dark GS region remains. `0x396090` reach is unknown.
+      VBlankStart raising VSINT is a timing approximation; exact GS-blank
+      scheduling and FIELD video-mode rules stay open. Next E54 work:
+      PINTEH, LWU, 64-bit sign branches, COP0 Count and INTC 5/7 before E55.
 - [x] **W1 (f55696d): widescreen works.** Mode 2 (anamorphic) is forced by
       `PS2X_WIDESCREEN` (default on) at the game's display apply;
       `PS2X_ASPECT` overrides it; 545/545. The 3D keeps its proportions;
