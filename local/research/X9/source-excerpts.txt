@@ -1,0 +1,80 @@
+Pinned fork commit: 1aaed05256bf53881824a9edd96a7cd5b7e8bbcc
+
+ps2xRecomp/src/lib/control_flow_emitter.cpp:394-427
+394:     std::string ControlFlowEmitter::conditionalBranchExpression() const
+395:     {
+396:         const uint8_t rsReg = static_cast<uint8_t>(m_branchInst.rs);
+397:         const uint8_t rtReg = static_cast<uint8_t>(m_branchInst.rt);
+398:
+399:         switch (m_branchInst.opcode)
+400:         {
+401:         case OPCODE_BEQ:
+402:         case OPCODE_BEQL:
+403:             return fmt::format("GPR_U64(ctx, {}) == GPR_U64(ctx, {})", rsReg, rtReg);
+404:         case OPCODE_BNE:
+405:         case OPCODE_BNEL:
+406:             return fmt::format("GPR_U64(ctx, {}) != GPR_U64(ctx, {})", rsReg, rtReg);
+407:         case OPCODE_BLEZ:
+408:         case OPCODE_BLEZL:
+409:             return fmt::format("GPR_S32(ctx, {}) <= 0", rsReg);
+410:         case OPCODE_BGTZ:
+411:         case OPCODE_BGTZL:
+412:             return fmt::format("GPR_S32(ctx, {}) > 0", rsReg);
+413:         case OPCODE_REGIMM:
+414:             switch (m_branchInst.rt)
+415:             {
+416:             case REGIMM_BLTZ:
+417:             case REGIMM_BLTZL:
+418:             case REGIMM_BLTZAL:
+419:             case REGIMM_BLTZALL:
+420:                 return fmt::format("GPR_S32(ctx, {}) < 0", rsReg);
+421:             case REGIMM_BGEZ:
+422:             case REGIMM_BGEZL:
+423:             case REGIMM_BGEZAL:
+424:             case REGIMM_BGEZALL:
+425:                 return fmt::format("GPR_S32(ctx, {}) >= 0", rsReg);
+426:             default:
+427:                 return "false";
+
+ps2xRecomp/src/lib/control_flow_emitter.cpp:461-495
+461:     void ControlFlowEmitter::emitConditionalBranch()
+462:     {
+463:         const uint32_t target = conditionalBranchTarget();
+464:         const bool likely = isLikelyBranch();
+465:         const std::string branchTakenVar = fmt::format("branch_taken_0x{:x}", m_branchInst.address);
+466:         std::string unconditionalLinkCode;
+467:         std::string conditionalLinkCode;
+468:
+469:         if (m_branchInst.opcode == OPCODE_REGIMM)
+470:         {
+471:             if (m_branchInst.rt == REGIMM_BLTZAL || m_branchInst.rt == REGIMM_BGEZAL)
+472:             {
+473:                 unconditionalLinkCode = fmt::format("SET_GPR_U32(ctx, 31, 0x{:X}u);", fallthroughPc());
+474:             }
+475:             else if (m_branchInst.rt == REGIMM_BLTZALL || m_branchInst.rt == REGIMM_BGEZALL)
+476:             {
+477:                 conditionalLinkCode = fmt::format("SET_GPR_U32(ctx, 31, 0x{:X}u);", fallthroughPc());
+478:             }
+479:         }
+480:
+481:         m_ss << "    {\n";
+482:         m_ss << "        const bool " << branchTakenVar << " = (" << conditionalBranchExpression() << ");\n";
+483:
+484:         if (!unconditionalLinkCode.empty())
+485:         {
+486:             m_ss << "        " << unconditionalLinkCode << "\n";
+487:         }
+488:
+489:         if (likely)
+490:         {
+491:             m_ss << "        if (" << branchTakenVar << ") {\n";
+492:             if (!conditionalLinkCode.empty())
+493:             {
+494:                 m_ss << "            " << conditionalLinkCode << "\n";
+495:             }
+
+ps2xRuntime/include/ps2_runtime_macros.h:1290-1293
+1290: #define GPR_U32(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0U : static_cast<uint32_t>(PS2_EXTRACT_EPI32_0(ctx_ptr->r[reg_idx])))
+1291: #define GPR_S32(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0 : PS2_EXTRACT_EPI32_0(ctx_ptr->r[reg_idx]))
+1292: #define GPR_U64(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0ULL : static_cast<uint64_t>(PS2_EXTRACT_EPI64_0(ctx_ptr->r[reg_idx])))
+1293: #define GPR_S64(ctx_ptr, reg_idx) ((reg_idx == 0) ? 0LL : PS2_EXTRACT_EPI64_0(ctx_ptr->r[reg_idx]))
