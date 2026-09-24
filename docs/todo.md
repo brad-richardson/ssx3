@@ -1230,9 +1230,18 @@ with measured budgets, then 120 Hz simulation.
       retry reached `volk.h` and failed because the include path omitted
       `Granite/third_party/volk`. All case results remain unrun/null. No
       game build or device action. Gate: `local/research/N8D7D/ORCH-GATE.md`.
-- [ ] **N8D7D2 fixture resume:** compile with the exact volk include path;
-      run once, check all 512×224 pixels, 448 tile counts, aliases and literal
-      offsets. Do not infer a GS cause from a synthetic fixture result.
+- [x] **N8D7D2 fixture resume PASS (orchestrator):** with the exact volk
+      and bundled Vulkan include paths, the saved fixture compiled and ran
+      once. All 12 synthetic 512×224 cases had zero pixel/tile mismatches,
+      458,752 output bytes, 448 tile counts, no aliases, and matching output
+      hashes. Literal FBP112 and wrap offsets matched. The writer and reader
+      share `swizzle_PS2`, so this is adapter calibration, not a full address
+      or GS-cause proof. `local/research/N8D7D2/ORCH-GATE.md` has commands.
+- [ ] **N8D7E Mac same-stream calibration:** capture the selected circuit1
+      input (GPU VRAM or promoted image), log final promotion/sample state,
+      decode the input on the host, and census circuit1 independently of the
+      existing tile shader. Calibrate on one pinned Mac replay before an Odin
+      build or run; stop on unsupported source/sample/metadata.
 - [ ] After N3: rebase `n2-android` onto the folded `ssx3` (E32 lands the
       codegen dir); the env shim goes onto `ssx3` through E. Input: pad
       script now, touch/controller H8 later.
