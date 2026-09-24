@@ -80,11 +80,13 @@ P1 brief); its exact content then is unpinned. Mac numbers are context only.
 
 - `priv`: deterministic function of the CPU register mirror at fenced
   marker boundaries. Identical 41/41 across ON/OFF (incl. tick850
-  `60a25873`, tick2050 `6621fe06`) proves the input stream, packet/priv
-  ordering through the queue, and priv application are identical.
-- `vram`: FNV over 4 MiB host VRAM via the page-tracker-synced map path
-  (no backend-level wait). Reflects GIF-transfer/texture-upload application,
-  not render output.
+  `60a25873`, tick2050 `6621fe06`) establishes equality of the sampled
+  CPU GS-register mirror only. It does not establish packet ordering
+  through the queue or equality of inter-marker state.
+- `vram`: FNV over the 4 MiB VRAM image returned by the page-tracker-synced
+  map path (no backend-level wait). Which writers (transfers, uploads,
+  render output) are reflected in those bytes is not proven by the cited
+  source and is stated as unknown.
 - `present`: FNV over the scanout image re-rendered fresh per sample
   (`vsync` per sampled/named tick), read back through submit+`wait_idle`.
   Reflects renderer-internal state (caches, promotion, deinterlace field
@@ -140,7 +142,7 @@ PPMs same size, different SHA.
 
 | Mechanism | Source evidence (this audit) | What remains unknown | One bounded observable, no new live game boot |
 | --- | --- | --- | --- |
-| (A) Replay input/ordering variation before backend | Disfavored, no positive evidence: identical SUMMARY counts; priv 41/41 equal (pure CPU-mirror hash, edge 4); `mode=queue` both runs (edge 2); `drainQueue` Fence at every marker (edges 6,10); FIFO worker; no RTZ/path/drop env in either env (P5D1 §2) | Whether inter-marker transient ordering could touch renderer-internal caches without moving sampled priv | Bounded replay of the same stream with packet-trace env (desktop or device replay, not a game boot), diffing per-packet path/order; identical traces close (A). Field-diff of the two pinned hash files + SUMMARY lines is the first half (already yields priv/count equality) |
+| (A) Replay input/ordering variation before backend | No positive evidence; narrow counter-evidence: identical SUMMARY counts; priv 41/41 equal, which establishes sampled CPU-mirror equality only — packet ordering through the queue and inter-marker state remain unproven either way; `mode=queue` both runs (edge 2); `drainQueue` Fence at every marker (edges 6,10); no RTZ/path/drop env in either env (P5D1 §2) | Whether packet ordering or inter-marker transient state differed between the runs | Bounded replay of the same stream with packet-trace env (desktop or device replay, not a game boot), diffing per-packet path/order; identical traces close (A). Field-diff of the two pinned hash files + SUMMARY lines is the first half (already yields sampled-priv/count equality) |
 | (B) GPU submission/readback sync or uninitialized state | Plausible by structure, unproved: backend Flush/Sync are no-ops (edge 13) — sync lives in renderer internals; Present readback fenced by submit+`wait_idle` (edge 14) but SnapshotVram has no wait of its own (edge 16, relies on dirty-tree tracker wait, edge 18); 19/41 intermittent matches (1500/1550/1600 re-matching after divergence) fit state-dependent variance, not monotonic drift; renderer keeps cross-vsync state (field history, promotion/texture caches, descriptor heap) | Tracker coverage of scanout-render writes for the VRAM map path; `CachedHost` coherency handling in `map_host_buffer`; Turnip timeline behavior on the Odin; any uninitialized-descriptor/staging reads | The prepared same-settings OFF repeat, field-diffed vs OFF#1: first-diff tick moving from 850 (or a changed match set) supports run-to-run GPU-side nondeterminism (B); byte-identity disfavors it toward (C). Host-only static half: audit `map_host_buffer` invalidate + tracker write-coverage on both readback paths |
 | (C) Deterministic backend + hashing/receipt artifact | Constrained but not closed: within-run present self-consistency (`GB4_FRAME`==row present both runs, §3); OUT file is verbatim rows (edge 9); PPM derives from the same frame object (edge 8); both PPMs 512×448 P6 (geometry path identical); `vram` has no within-run double-hash and snapshots are not retained | Whether retained PPMs reproduce row `present` values offline (needs per-pixel alpha: `dumpPpm` drops it, edge 21) | Host-only recompute: FNV-1a-32 over retained PPM rasters mapped back through the `dumpPpm` transform (edge 21), testing alpha-constancy explicitly; mismatch-or-geometry-anomaly supports artifact, match (under stated alpha) constrains it. Repeat-equality (O-B's observable) supports the determinism half of (C) but does not by itself locate the ON/OFF difference |
 
