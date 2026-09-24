@@ -1,0 +1,106 @@
+## shader: gs/shaders/n8d5_tile.comp
+shader:4: layout(local_size_x = 32) in;
+shader:5: layout(set = 0, binding = 0) uniform sampler2D scanout_image;
+shader:6: layout(set = 0, binding = 1) uniform sampler2D control_image;
+shader:7: layout(set = 0, binding = 2, std430) writeonly buffer Counts { uint count[]; } result;
+shader:8: layout(push_constant) uniform Dimensions { uint width; uint height; } dims;
+
+## cmake: CMakeLists.txt
+cmake:38: if (PARALLEL_GS_STANDALONE)
+cmake:39:     set(GRANITE_RENDERER OFF CACHE BOOL "" FORCE)
+cmake:40:     set(GRANITE_VULKAN_SPIRV_CROSS OFF CACHE BOOL "" FORCE)
+cmake:41:     set(GRANITE_VULKAN_SHADER_MANAGER_RUNTIME_COMPILER OFF CACHE BOOL "" FORCE)
+cmake:42:     set(GRANITE_VULKAN_SYSTEM_HANDLES OFF CACHE BOOL "" FORCE)
+cmake:43:     set(GRANITE_SHADER_COMPILER_OPTIMIZE OFF CACHE BOOL "" FORCE)
+cmake:44:     set(GRANITE_SHIPPING ON CACHE BOOL "" FORCE)
+cmake:45:     set(GRANITE_PLATFORM "null" CACHE STRING "" FORCE)
+cmake:46: else()
+cmake:47:     set(GRANITE_RENDERER ON CACHE BOOL "" FORCE)
+cmake:48:     set(GRANITE_VULKAN_SPIRV_CROSS ON CACHE BOOL "" FORCE)
+cmake:49:     set(GRANITE_VULKAN_SHADER_MANAGER_RUNTIME_COMPILER ON CACHE BOOL "" FORCE)
+
+## device: Granite/vulkan/device.cpp
+device:403: Program *Device::request_program(const uint32_t *compute_data, size_t compute_size, const ResourceLayout *layout)
+device:404: {
+device:405: 	if (!compute_size)
+device:406: 		return nullptr;
+device:407:
+device:408: 	auto *compute_shader = request_shader(compute_data, compute_size, layout);
+device:409: 	return request_program(compute_shader);
+
+## layout: Granite/vulkan/shader.hpp
+layout:52: struct ResourceLayout
+layout:53: {
+layout:54: 	DescriptorSetLayout sets[VULKAN_NUM_DESCRIPTOR_SETS];
+layout:55: 	uint32_t input_mask = 0;
+layout:56: 	uint32_t output_mask = 0;
+layout:57: 	uint32_t push_constant_size = 0;
+layout:58: 	uint32_t spec_constant_mask = 0;
+layout:59: 	uint32_t bindless_set_mask = 0;
+layout:60: 	enum { Version = 7 };
+
+## descriptors: Granite/vulkan/descriptor_set.hpp
+descriptors:47: struct DescriptorSetLayout
+descriptors:48: {
+descriptors:49: 	uint32_t sampled_image_mask = 0;
+descriptors:50: 	uint32_t storage_image_mask = 0;
+descriptors:51: 	uint32_t uniform_buffer_mask = 0;
+descriptors:52: 	uint32_t storage_buffer_mask = 0;
+descriptors:53: 	uint32_t rtas_mask = 0;
+descriptors:54: 	uint32_t sampled_texel_buffer_mask = 0;
+descriptors:55: 	uint32_t storage_texel_buffer_mask = 0;
+descriptors:56: 	uint32_t input_attachment_mask = 0;
+descriptors:57: 	uint32_t sampler_mask = 0;
+descriptors:58: 	uint32_t separate_image_mask = 0;
+descriptors:59: 	uint32_t fp_mask = 0;
+descriptors:60: 	uint32_t immutable_sampler_mask = 0;
+descriptors:61: 	ArraySizeAccessMeta meta[VULKAN_NUM_BINDINGS] = {};
+
+## reflect: Granite/vulkan/shader.cpp
+reflect:908: 	auto resources = compiler.get_shader_resources();
+reflect:909: 	for (auto &image : resources.sampled_images)
+reflect:910: 	{
+reflect:911: 		auto set = compiler.get_decoration(image.id, spv::DecorationDescriptorSet);
+reflect:912: 		auto binding = compiler.get_decoration(image.id, spv::DecorationBinding);
+reflect:913: 		VK_ASSERT(set < VULKAN_NUM_DESCRIPTOR_SETS);
+reflect:914: 		VK_ASSERT(binding < VULKAN_NUM_BINDINGS);
+reflect:915:
+reflect:916: 		auto &type = compiler.get_type(image.type_id);
+reflect:917: 		if (type.image.dim == spv::DimBuffer)
+reflect:918: 			layout.sets[set].sampled_texel_buffer_mask |= 1u << binding;
+reflect:919: 		else
+reflect:920: 			layout.sets[set].sampled_image_mask |= 1u << binding;
+reflect:921:
+reflect:922: 		if (compiler.get_type(type.image.type).basetype == SPIRType::BaseType::Float)
+reflect:923: 			layout.sets[set].fp_mask |= 1u << binding;
+reflect:924:
+reflect:925: 		update_array_info(layout, type, set, binding);
+reflect:1003: 	for (auto &buffer : resources.storage_buffers)
+reflect:1004: 	{
+reflect:1005: 		auto set = compiler.get_decoration(buffer.id, spv::DecorationDescriptorSet);
+reflect:1006: 		auto binding = compiler.get_decoration(buffer.id, spv::DecorationBinding);
+reflect:1007: 		VK_ASSERT(set < VULKAN_NUM_DESCRIPTOR_SETS);
+reflect:1008: 		VK_ASSERT(binding < VULKAN_NUM_BINDINGS);
+reflect:1009:
+reflect:1010: 		layout.sets[set].storage_buffer_mask |= 1u << binding;
+reflect:1011: 		update_array_info(layout, compiler.get_type(buffer.type_id), set, binding);
+reflect:1012:
+reflect:1013: 		if (has_array_length)
+reflect:1014: 			layout.sets[set].meta[binding].requires_descriptor_size = 1;
+reflect:1040: 	if (!resources.push_constant_buffers.empty())
+reflect:1041: 	{
+reflect:1042: 		// Don't bother trying to extract which part of a push constant block we're using.
+reflect:1043: 		// Just assume we're accessing everything. At least on older validation layers,
+reflect:1044: 		// it did not do a static analysis to determine similar information, so we got a lot
+reflect:1045: 		// of false positives.
+reflect:1046: 		layout.push_constant_size =
+reflect:1047: 				compiler.get_declared_struct_size(compiler.get_type(resources.push_constant_buffers.front().base_type_id));
+reflect:1095: 	if (resource_layout)
+reflect:1096: 		layout = *resource_layout;
+reflect:1097: #ifdef GRANITE_VULKAN_SPIRV_CROSS
+reflect:1098: 	else if (!reflect_resource_layout(layout, data, size))
+reflect:1099: 		LOGE("Failed to reflect resource layout.\n");
+reflect:1100: #else
+reflect:1101: 	else
+reflect:1102: 		LOGE("Attempted to reflect resource layout, but SPIRV-Cross is not enabled in build.\n");
+reflect:1103: #endif
