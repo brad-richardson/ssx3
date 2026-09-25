@@ -66,3 +66,24 @@ Worktree `~/dev/ssx3-work/E57/PS2Recomp`, branch `e57-vu1` from `f949ff0`.
 - Speed session `speed_session.sh`: base c1 c2 c3 c3 c2 c1 base, each boot with the exclusive
   lease to t2400, window (1800, 2400] of `[vsync-rate]` (`speed_table.py`). The c3 hash boot
   waits for a free slot between speed boots (no overlap: speed boots take all four slots).
+
+## ~23:20 speed session 1, c3 slower, c4
+
+- Speed session 1 (exclusive lease per boot, no overlaps: start/end times checked, load 2–4 at
+  each start), window (1800, 2400]: base 7.85 vs/s (0.131×), c1 10.28 (0.171×), c2 10.28
+  (0.172×), c3 9.64 / 9.70 (0.161×). `speed-1.txt`. Session stopped after s5: other lanes
+  (au9, rr1) held single slots, so the exclusive claim for s6 was starving; I killed my own
+  waiting session script (no runner had started).
+- C3 gated BIT-EXACT (`check-c3.txt`) and committed as fork `cbca1ad`, but it is ~6 % slower
+  than c2, reproducibly (two runs, 141 vs 136 s wall to t2400). Hypothesis: the inline header
+  gate + out-of-line scan changed inlining of the hot loop (c2 had the gate inside the
+  out-of-line function). Not proven; other c3 items (NOP early out, countr_zero VI pick, XGKICK
+  active check) remove work and are unlikely to cost 6 %.
+- C4 = c3 with the gate split reverted + FMAC exact results for all dest lanes from one op
+  decode (`calculateFmacExactResults`, same per-lane expressions; `-ffp-contract=off` is global
+  incl. Android, so the double expressions round identically) + XGKICK qword copy by memcpy
+  when the 16 bytes don't wrap (same bytes as the per-byte modulo). Suite 600/600. Runners hash
+  `656f5aad…`, speed `d4b21a7d…`. Hash boot and speed session 2 (base c2 c3 c4 c4 c3 c2 base)
+  queued on the lease.
+- Orchestrator FYI: fork ssx3 moved to `71c952e` (I32); it touches no VU1 file, so these
+  commits should rebase cleanly.

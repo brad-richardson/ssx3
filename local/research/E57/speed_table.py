@@ -16,6 +16,10 @@ RATE = re.compile(r'\[vsync-rate\] tick=(\d+) rate=([\d.]+)/s')
 per = defaultdict(list)
 for d in sorted(glob.glob(sys.argv[1] + '/s*-*')):
     label = d.rsplit('/', 1)[1]
+    try:
+        open(d + '/result.json').close()
+    except OSError:
+        continue
     cand = label.split('-', 1)[1]
     rows = [(int(t), float(r)) for t, r in RATE.findall(open(d + '/boot.log').read())]
     win = [r for t, r in rows if LO < t <= HI]
