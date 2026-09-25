@@ -93,3 +93,61 @@ boot was most likely the comparator itself (the correct sort made the sound bank
 that then had no SPU voice/cid-0 support), not a hidden non-sign-extended producer. Next (SB1 Part 2,
 same pane): s64 boot with this build to t2400 (frames, cid0, first det-hash divergence tick), then a
 release build with the 64-bit emitter and the override retired.
+
+## Part 2
+
+Worker: Muse Code, same pane. Budget: 1 build, 2 boots, 1.5 h. Never pushed.
+
+### Boot B (s64, tripwire build, override in place)
+
+`sb1_boot_b.py --runner build/ps2xRuntime/ps2EntryRunner --label B-s64 --sbr-mode s64
+--stop-tick 2400` (deterministic, I26-FAST, paraLLEl env, `PS2X_SOUND=1`,
+`PS2X_FRAME_DUMP_DIR` + F1 0.5 s snapshotter, `PS2X_SND_LOG`). `bound=target`,
+84.3 s, slot 1.
+
+| Check | Result |
+|---|---|
+| First det-hash tick differing from the s32 spare | **1469** (mismatch fired at 1468; rdram-only at first, same eeCycle/scratch/VU) |
+| `[sbr]` lines | 1, identical site/value/tick/cycle as the spare (`0x411e4c`, deterministic) |
+| cid0/dmq/done | **531/531/531** (last `tick` line and 531 `cid0 vsync=` upload lines agree) |
+| Frames viewed (snap picks) | t1075 Select Mode menu; t1799 race 00:00:01 2nd/2; t2101 race 00:00:05 "330"; t2396 race 00:00:11 14 MPH — all normal, race progresses |
+
+Boot B races normally under s64. Proceeded to step 2.
+
+### Override retirement + release build
+
+- Committed the tripwire on `sb1-tripwire`: `a64ba5e` (7 files, +117/−4; release
+  collapses to the 64-bit predicate).
+- Retired the override in a separate commit: `90df7e0` (removed the
+  `PS2_REGISTER_GAME_OVERRIDE("ssx3-file-key-compare")` block, the include, the
+  CMake source entry, and both `ssx3_file_key_compare.{h,cpp}` files; 86
+  deletions; no remaining references; runner-dir check empty).
+- Release build (`build-release`, `PS2X_ENABLE_SBR_TRIPWIRE=OFF`,
+  `PS2X_ENABLE_DET_HASH_TAP=ON`, SB1 regen codegen, otherwise F1 det flags):
+  clean; suite from the worktree root **615/615**. Runner SHA
+  `9b2acf417dbd98c15ceb32a82f3002edcd98ba914af5b5d6dd84cba79c93c22b`.
+
+### Boot C (release, no override, no tripwire)
+
+`sb1_boot_b.py --runner build-release/ps2xRuntime/ps2EntryRunner --label C-release
+--sbr-mode s64 --stop-tick 2400` (`PS2X_SBR_MODE` is unread in this build; the
+macros are pure `GPR_S64`). `bound=target`, 87.9 s, slot 2.
+
+| Check | Result |
+|---|---|
+| cid0/dmq/done without the override | **531/531/531** — the emitter fix subsumes the override |
+| det-hash vs Boot B | **2,449/2,449 common ticks byte-identical** — override removal is behavior-neutral |
+| `[sbr]` lines | 0 (tripwire compiled out, as expected) |
+| Frames viewed (snap picks) | t1086 Select Peak menu; t1801 race 00:00:01; t2100 race 00:00:05 "330"; t2403 race 00:00:11 14 MPH — all normal |
+
+### Part 2 budgets, pins, gaps
+
+- Pins: `sb1-tripwire` `a64ba5e` (tripwire) + `90df7e0` (override retired), both
+  unpushed; release runner `9b2acf41…` (two matching reads in `run/C-release/result.json`).
+- Budgets: 1 build, 2 boots ≤600 s, one mini slot each (released). SB1 scratch
+  6.7 GB (≤15 GB); global 117.7/200 GB.
+- Gaps: G1–G4 from Part 1 stand (G1's positive control is now moot — the s64
+  behavior it would validate is itself validated by Boot B/C; G5 is closed by
+  Boot B: the t1468 flip changes rdram from tick 1469 but the race proceeds
+  normally). No GS-stream digest was run for B/C (no `gs.cap` captured; the
+  det-hash identity C-vs-B plus viewed frames is the gate).
