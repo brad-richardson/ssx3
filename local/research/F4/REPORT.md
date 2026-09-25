@@ -642,6 +642,8 @@ this same script (incremental) and re-run Part 3 whole: fresh iPad
 install + race run to t2100, then iPhone install +
 `deploy-ios.sh iphone`, still no iPhone launch.
 
+Restore (per orchestrator): iPad back on the working F3 build — staged binary `7bc7e57c…` ×2, installed (bundle `37D82FB2-…`, seq 1964), `deploy-ios.sh ipad` SKIP + 7/7 OKs, no launch.
+
 ## Orchestrator gate, Part 3 (2026-09-25)
 
 Correct stop: the iOS build reproduces the chain recursion (iPad signal 10 before the race). The iPhone was
