@@ -255,6 +255,97 @@ ssh bytesize 'wsl -d Ubuntu -- bash -lc "bash /home/brad/f4/build.sh"'  # BUILD 
 rm -rf ~/dev/ssx3-work/F4/build ~/dev/ssx3-work/F4/build-recomp
 ```
 
+## Part 1b (PAUSED — Brad needs the machine; no push; resume from here)
+
+### 1b(1) Job pool commit (done)
+
+Commit `6bac3da541d04401900f6bd70fd3f33271f57adb` on `f4-fold`
+(`ps2xRuntime/CMakeLists.txt`, +4): `JOB_POOLS ps2x_vu1_gen=2` +
+`JOB_POOL_COMPILE` on the globbed vu1 sources, exactly the
+orchestrator's sketch. Runner-dir check empty, `git diff --check`
+clean. Verified on the Mac with a configure-only check
+(`configure-poolcheck.log`, dir deleted after): `rules.ninja` gets
+`pool ps2x_vu1_gen / depth = 2` and all 7 vu1 edges carry
+`pool = ps2x_vu1_gen`. No Mac rebuild: the commit changes build
+scheduling only, zero compiled inputs, so `bin/runner-clean`
+(`7e31b6d2…`, built from `46b0c8d`) is the binary B3 ran.
+
+### 1b(2) APK rebuild (FAILED again — pool did not attach on Android)
+
+Staging: re-archived `PS2Recomp/` only from `6bac3da` (346 files both
+sides, tar kept as `/home/brad/f4/fork-6bac3da.tar`; codegen/vu1gen/
+parallel-gs/jniLibs untouched), pool marker ×2 present,
+`build.sh` SHA `9e89c9c7…` unchanged. Mid-step the box was upgraded
+to 11 GiB RAM + 16 GiB swap (WSL restarted; first 1b attempt died
+with it; staging verified intact after).
+
+Result: `BUILD FAILED in 31m 20s`, `Killed` on 2 vu1 TUs
+(`vu1_a214…`, `vu1_f587…`, remote log lines 360–366; pulled to
+scratch `assembleRelease-remote-1b.log`, 69,072 B). **The pool is
+defined in the Android `rules.ninja` (`depth = 2`) but 0 of the 7
+vu1 edges reference it** (top `build.ninja` is the only ninja file;
+a dumped vu1 edge shows no `pool =` line), so all TUs ran
+unconstrained and OOMed as before. Same-CMake-call properties ARE
+honored (the vu1 TUs compile standalone = `SKIP_UNITY…` applied):
+only `JOB_POOL_COMPILE` is dropped by the Android configure (CMake
+3.22.1, NDK r28) while the Mac configure attaches 7/7. Cause
+unknown — prime resume leads: (a) `set_property(SOURCE …)` form vs
+`set_source_files_properties`; (b) `CMAKE_JOB_POOL_COMPILE` global
+fallback; (c) check whether CMake 3.22's Ninja generator honors
+per-source `JOB_POOL_COMPILE` at all. Heavier alternatives: split
+each image into smaller TUs (emitter change) or build the APK on a
+bigger host.
+
+Peak memory observed (mid-build single sample; the 15×60 s memwatch
+died with its ssh session, twice — relaunch with `nohup`/surviving
+session on resume): **RAM 11,908/11,962 MB + swap 15,751/16,384
+MB** — essentially all 28 GB exhausted. Built vu1 `.o` files are
+41–50 MB each (RelWithDebInfo `-g`). `--max-workers=2` kept.
+
+### 1b(3) B3 (done — race 1.40× vs F3 B3)
+
+Exclusive (`both`, 2×30 s lease retries), `runner-clean`,
+`PS2X_UNPACED=1`, sound on: bound=target, 67.1 s wall (F3 B3 86.3 s),
+last_tick 2430, HUD 36.71 s (F3 36.44 s), load 4.7→4.6 (F3 B3
+1.9→1.7 — noisier host, noted), FATAL 0. Run dir
+`~/dev/ssx3-work/F4/run/B3/` (`result.json`, `trace.jsonl`,
+`boot.log`, 3 `ps-race-*.txt`).
+
+Race number — **raw 5 s windows are authoritative, trace is
+stale-row noise here**: trace claims 23.82/s (0.397×) but
+`wall_at(1800)` uses the last stale row (1785 stuck 37.0→41.6 s; F3's
+G2 mechanism), compressing the window to 25.2 s. Raw in-window
+samples (1890/1993/2100/2207/2315): 20.98/20.58/21.38/21.36/21.58,
+**mean 21.18/s = 0.353×**; endpoint cross-check 1785@37.0→2430@67.0
+= 21.5/s agrees. F3 B3 raw was 15.13 (0.252×); **F4÷F3 raw-vs-raw =
+1.400×**, reproducing VR1's own raw-methodology 1.44× (21.45 vs
+14.85) within 2 %. Full table (trace | raw): title 37.88 | 59.98
+(n=2); menus 76.96 | 59.95 (n=2); loading 28.98 | 47.62 (n=2);
+race-start 17.22 | 21.38 (n=1); **race 23.82 | 21.18 (n=5)**. Fast/
+short-phase trace values are quantization noise, not regressions
+(title/menus likely host-present-capped near 60/s unpaced).
+
+### Pause state (explicit paths)
+
+- Fork branch `f4-fold` @ `6bac3da`, tree clean
+  (`~/dev/ssx3-work/F4/PS2Recomp`). Part 1 pre-pool tip `46b0c8d`
+  still in history.
+- ssx3 commit for this section: `[F4] Part 1b (paused)` (below).
+- Scratch `~/dev/ssx3-work/F4` 774 MB: `bin/runner-clean`,
+  `bin/runner-det`, `codegen/` (unpromoted F4 regen), `run/B1`,
+  `run/B2`, `run/B3`, `suite.log`, `*.log`, `vu1gen.sha`,
+  `ssx3-f4.toml`, CSV copy. Build dirs already deleted.
+- Bytesize `/home/brad/f4`: `PS2Recomp/` @ `6bac3da` (+ failed-build
+  `.cxx/` outputs — wipe or resume incrementally on retry),
+  `codegen-ssx3/` (9457, `8ea8ed43…`), `vu1gen-ssx3/` (7, SHAs match),
+  symlinks to f2 `parallel-gs`/`jniLibs`, `build.sh` (`9e89c9c7…`),
+  both fork tars, `assembleRelease.log` (failed 31m20s run).
+- Leases: none held (all 4 mini slots FREE at pause; B3 released;
+  no Odin/bradflix involvement). Runners: B3 pid 71373 reaped.
+- On resume: fix pool attachment (leads above), retry APK, then
+  1b commit proper + gate. B3 needs no re-run (clean exclusive
+  window, corroborated number).
+
 ## Recommended next action
 
 The fold itself is ready to push (`f4-fold` `46b0c8d`, fast-forward
