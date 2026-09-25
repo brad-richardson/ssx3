@@ -174,6 +174,93 @@ Handoff: tl1-tools at `f949ff0` (no push); Part 1b step 3 complete, suite
 green, replay rows equal the Mac ON control. Ready for the orchestrator to
 push and release Part 2 (CLI + device check).
 
+## Part 2 — CLI + one APK + one Odin run (gate: Part 1b A, fork ssx3 = f949ff0)
+
+Tools (new, `local/tooling/odin/`, `--help` + `--self-test` each, both PASS):
+- `odin_replay.py`: push stream (skip on SHA match), write ps2x.env (replay
+  keys + user keys, capture/pad/cd keys refused), install APK if asked,
+  launch once, wait for the tick-N receipt, pull on-device hashes + PPM,
+  whole-line diff vs a Mac rows file, force-stop, restore env, release
+  lease. Preflight: lease free/ours, keyguard showing=false (BLOCKER exit),
+  battery AC powered + ≥ 20 % (status ignored).
+- `stream_tools.py`: fold of N8X1's `records` / `split` (EOP + markers) /
+  `variants` (v-base, v-zmsk, v-rgbonly, v-alphaonly, v-nearest, v-noabe;
+  SRC/logo-off/end-tick now flags) / `nearestify` (verbatim GIF logic).
+
+APK staging (N9 recipe, root `/home/brad/tl1` on bytesize):
+- Pushed tips confirmed via ls-remote: PS2Recomp ssx3 `f949ff0`,
+  parallel-gs ssx3 `963cb57`.
+- PS2Recomp: fresh `git archive f949ff0` (392 files, tar SHA
+  `440fb0e3…090775` ×2 across the transfer); runner/ holds only the 438 B
+  upstream stub.
+- parallel-gs / codegen-ssx3 / jniLibs: copied from `/home/brad/n9` and
+  re-verified with the source collector: all three scopes byte-identical
+  to N9's verified manifest (0 added/missing/changed; jni = Turnip
+  `717812c3…` 14,188,488 B + HAL `1b49d27c…` 7,112 B). Fork scope delta
+  vs N9 is exactly the fold: +gs_replay_core.h/.cpp, 11 files changed
+  (CMakeLists, snd_spike, gs_frontend×2, parallel backend logger,
+  vif1_interpreter, main.cpp, 3 test files, snd tests).
+- Deviations from N9 (cleanup removed the old paths): external wrapper is
+  `/home/brad/n2/PS2Recomp/android` — pins identical to N9's
+  (`a3648413…`/`49849512…`, gradle-8.9, dist cached); `--max-workers=2`
+  (N9: 4 + n8b1 memory governor, gone; worker count not baked into the
+  artifact); same 9 GB box, no other heavy job (ps check empty).
+- Build: [build.sh](build.sh) (the one build): `BUILD SUCCESSFUL in 4m 34s`,
+  48 tasks (35 executed, 13 up-to-date), zero FAILED. Two earlier launch
+  attempts died with no result when the WSL VM shut down during multi-minute
+  ssh gaps (log stale, no processes, later boot time); the third attempt held
+  one ssh open for the whole build and resumed incrementally. Two worker-side
+  quoting typos (stray quote, `timeout` absent) wrote nothing and cost no
+  budget. No OOM at --max-workers=2.
+- APK `aeb60d4d…34220`, 153,720,348 B (remote ×1, pulled ×2, all match):
+  exact 3-member arm64 set; runner `2c4605b5…` 139,486,696 B (new tip);
+  Turnip `717812c3…` + HAL `1b49d27c…` equal pins. Runner strings: replay
+  entry + `GB4_REPLAY_SUMMARY` + `[gs-path]` + `GB4_PKTSEQ` FOUND;
+  `PS2X_N8D7F_SELECTED_CAPTURE` and `PS2X_GS_REPLAY_WORDS` absent (no probe
+  code, word-watch gone).
+
+One Odin run (CLI `odin_replay.py`, label tl1p2, tick 2050, step 50, APK
+installed; preflight green: lease free, showing=false, AC + 73 %):
+- Stream `tl1.gs` pushed (absent) + SHA-verified `f6a78f71…`; env saved
+  (1022 B orig), replay env pushed, install Success, one launch, BACK sent.
+- `REPLAY outcome=ok`, tick-2050 receipt
+  `vram=4ee5df4f priv=6621fe06 present=e3f68305`. Force-stop (PID none),
+  env restored (`176eff84…`), lease released.
+- `[gs-path]` (Odin): `hier_rule=hier-if-large hier_t2=2 hier_t4=4
+  subgroup_flat=wave64 subgroup_hier=wave64-fixed vk11_subgroup=128
+  max_wg_inv=2048 desc=buffer desc_req=push+heap+buffer sampler_feedback=on
+  feedback_rt=off gpu=Adreno (TM) 830` — the wave64 path, as expected.
+  Logged twice: the app auto-relaunched after `_Exit` (2nd PID, 2nd
+  [gs-path] ~16 s later, partial 2nd PKTSEQ in logcat), the N8X1-noted
+  behavior; the OUT file holds exactly one complete 41-row replay.
+- Rows (OUT file, REPLAY only — PKTSEQ never lands in OUT on either
+  platform; the run's `--rows` excerpt has both, so the CLI's positional
+  first@0 was a shape artifact, superseded by the keyed diff below): same
+  41 ticks both sides; priv 41/41 EQUAL; vram 3/41 equal (100, 250, 1600);
+  first diff REPLAY@50 (`1edcff3d` vs `99d34afe`, priv equal) — the
+  bilinear logo sprite (N8X1). Keyed diff now in the tool + self-test.
+- PPM `vq-002050.ppm` 512×448: nonblack 0.998 (full race frame, not black),
+  SHA `34ac62cd…`; vs Mac ON PPM (`9490484c…`, Part 1b): equal_px 0.938,
+  within-±2 0.9997 — Adreno bilinear rounding noise, no black tiles.
+  Quantitative only; the two PPMs (scratch paths in result.json) still want
+  a human eyeball.
+
+Incidents: (1) first CLI attempt crashed pre-launch on a missing device
+stream (unhandled rc=1) and its cleanup wrongly `rm`'d the device's
+ps2x.env; restored byte-exact (`176eff84…` ×2, matches N10 origs) and fixed
+the CLI (absent-stream push, rc-tolerant pidof, env pushed-flag, orig via
+temp pull) — re-tested via --self-test; no launch consumed. (2) WSL idle
+shutdown killed two detached build launches (above); fixed by holding one
+ssh. Neither cost brief budget (one build result, one Odin launch).
+
+Left on the Odin: TL1 APK installed, `tl1.gs` (1.1 GB) + one hashes file +
+one frames dir under `<FILES>`; env restored; lease free.
+
+Handoff: Part 2 complete — tools committed, APK from pushed tips, one Odin
+replay `ok` on the wave64 path with a full race frame. `odin_replay.py` is
+ready for reuse; next lanes should pass a Mac OUT file to `--rows` (or rely
+on the keyed diff's coverage report).
+
 ## Orchestrator gate, Part 1b (2026-09-24)
 
 **A.** Word-watch removal `f949ff0` (4 files, +12/−194, no probe code); suite 596/596 from the
