@@ -401,3 +401,111 @@ Fixed by the orchestrator: `coverageTick()`'s lambda now declares `-> uint64_t` 
 `unsigned long long`, so Mac/iOS never saw it. Lesson for the runbook: a fork change that only Mac
 built must get an Android compile (bytesize) before it's called folded. Part 2 re-released on
 `0ed07c4`.
+
+### Resume on `0ed07c4` (APK `a3d26b56…`, 2 clean runs, stripes gone, play build installed)
+
+Worker: Muse Code. Fix verified before building: `git ls-remote` ssx3 =
+local fetch = `0ed07c4362b9bd53c09094fd028ee05e8aaf021a`; diff
+`92f9991→0ed07c4` is exactly the one line (`[]` → `[]() -> uint64_t`);
+runner-dir guard empty.
+
+Bytesize: re-archived `PS2Recomp/` only (`rm -rf` + `git archive 0ed07c4`:
+397 tar entries, 334 files, stub `cf62c485…`, fix line confirmed at
+`EeScheduler.cpp:2003`); codegen/parallel-gs/jniLibs untouched and
+re-verified intact (codegen `8ea8ed43…` 9,457 files, parallel 24,314 files
++ knob, jni `1b49d27c…`/`717812c3…`). Rebuild on the idle host (one held
+ssh): **BUILD SUCCESSFUL in 5m 19s, 48 tasks, zero FAILED**. APK
+`a3d26b56c3f45f704fede8e03e019597796b267f751d8949e05d3026c38ad294`,
+153,753,160 B (remote ×2, pulled ×2, all match; +16,384 B over F1's).
+
+Launches (`launch.py` = F1 driver with F2 paths/lease, `phases.py` verbatim,
+both committed here; env = F1 env + F2 label, sound on, empty mc0-test,
+I26-FAST, `PS2X_VSYNC_RATE_LOG=1`; installed + `base.apk` SHA-verified
+before each run; BACK after `am start`; force-stop after; Brad env
+`9fb46f85…` + mc0 SHAs verified after every run):
+
+| Launch | Window | Result | Battery |
+| --- | --- | --- | --- |
+| S1 | tick 1714→4532 = 2818 vsyncs; 337.2 s race wall; 80 samples; 0 FATAL | STOP tick ≥4500 at t+402.8 s | 58→57 %, thermal 0 at launch |
+| S2 | tick 1714→4514 = 2800 vsyncs; 341.6 s race wall; 82 samples; 0 FATAL | STOP tick ≥4500 at t+412.2 s | 56→55 %, thermal 0 at launch |
+
+Logcat keys both runs: `[snd-output] stream rate=48000`, `[gs-path] …
+hier-if-large … desc=buffer … gpu=Adreno (TM) 830` (same as F1), zero
+FATAL. Race thermal: S1 all status 3 (29 polls); S2 drift 20×3/7×4/3×5.
+Race GPU: S1 23.1 % (n=59), S2 17.3 % (n=60) — run spread, still CPU-bound.
+
+Ledger-ready rates vs F1 (guest vsyncs/s ÷ 59.94, `phases.py`):
+
+| Phase | S1 /s (×) | S2 /s (×) | F1 S1/S2 /s (×) | F2 mean ÷ F1 |
+| --- | --- | --- | --- | --- |
+| Title | 43.26 (0.722×) | 33.29 (0.555×) | 33.41/32.46 (0.557/0.542×) | 1.16× (short-phase noise; S2 = F1) |
+| Main menu | 31.30 (0.522×) | 31.08 (0.519×) | 31.40/32.80 (0.524/0.547×) | 0.97× |
+| Select Character | 25.11 (0.419×) | 24.99 (0.417×) | 25.33/25.25 (0.423/0.421×) | 0.99× |
+| Setup/Peak | 26.48 (0.442×) | 26.58 (0.443×) | 27.08/25.85 (0.452/0.431×) | 1.00× |
+| Mode/Event | 38.63 (0.644×) | 37.96 (0.633×) | 38.95/39.78 (0.650/0.664×) | 0.97× |
+| Loading | 11.21 (0.187×) | 11.12 (0.185×) | 12.02/11.58 (0.201/0.193×) | 0.94× |
+| **Race** | **8.36 (0.139×)** | **8.20 (0.137×)** | **8.42/8.38 (0.140/0.140×)** | **0.99×** |
+
+Race per-5s bins climb 7.4→8.6 with final fast bins (10–12.2) — same shape
+as F1/N10/N11. The fold + progressive scanout are speed-neutral on the Odin.
+
+Screencaps (all 8 viewed; **horizontal stripes are gone**):
+
+| Cap | Viewed verdict | SHA-256 (12) |
+| --- | --- | --- |
+| S1 sc01 (~t2136) | Race 2ND/2 00:00:07 1 %, EA Radio Glass Danse-Oakenfold/The Faint (same RNG track as F1's sc01), crash spray, lit snow/pines/mountains — smooth, no stripes | `197016ff31fd` |
+| S1 sc02 (~t3006) | 00:00:21 2 %, 1 MPH recovering rider — no stripes | `461783f31529` |
+| S1 sc03 (~t4024) | 00:00:38 2 %, 0 MPH — no stripes | `e9d953638907` |
+| S1 sc04 (t4532) | 00:00:47 5 %, 43 MPH dark forest gully = F1's sc04 scene — no stripes | `9ceb99e2eee3` |
+| S2 sc01 (~t2109) | 00:00:06 1 %, trick 370, EA Radio Emerge-Junkie XL/Fischerspooner (RNG), rider mid-slope — no stripes | `d70873837b43` |
+| S2 sc02 (~t3028) | 00:00:21 2 % 1 MPH — no stripes | `fca4cd2d5113` |
+| S2 sc03 (~t4007) | 00:00:38 2 % 0 MPH — no stripes | `2b18e79599d6` |
+| S2 sc04 (t4514) | 00:00:46 5 % 44 MPH dark gully — no stripes | `96fe30e637a7` |
+
+Reference: F1's S1 sc01 viewed alongside — the same scene is visibly
+striped across the whole game image (mountains, snow, EA card, HUD).
+Measured with `stripes.py` (committed here; ST1's stdlib PNG reader +
+high-pass row residual, ST1 §4d's ~6-row screen period; `rms` = residual
+LSB, `ac3` = lag-3 autocorrelation, period-6 ⇒ strongly negative):
+
+| Window (1080p geom) | F1 sc01 rms/ac3 | F2 S1 sc01 rms/ac3 | F2 S2 sc01 rms/ac3 |
+| --- | --- | --- | --- |
+| Smooth snow 1450,550–1750,700 | 13.09 / −0.77 | 1.20 / +0.55 | 1.13 / +0.55 |
+| EA Radio card 300,760–950,930 | 10.43 / −0.64 | 1.14 / +0.28 | 2.80 / +0.31 |
+
+The static-UI component ST1 worried about (Turnip/wave64 field-history) is
+also gone: the EA card drops 10.4 → ~1–3 LSB with no period-6 signature.
+The weave was the whole Odin stripes story; no separate driver issue.
+Progression matches F1 exactly (crash → 0–1 MPH idle → 43–44 MPH gully),
+so no fold regression.
+
+Brad's play build: installed F2 APK (`Success`, `base.apk` `a3d26b56…`),
+then `bash local/research/I31/deploy-odin.sh`: env SKIP + 6 save SKIPs,
+verify 7/7 OK. **No launch.** Device left: lease `LEASE_FREE F2 done`, app
+not running (force-stopped + `pidof` clean), `/data/local/tmp/f2` +
+`files/mc0-test` removed, battery 55 % on AC. No screen/keyguard toggle at
+any point (read-only `dumpsys` checks only).
+
+Budgets and gaps: builds 2 (30 s FAILED + 5 m 19 s green), launches 2
+(~407 s + ~417 s wall), battery 58→55 % (~1 %/run on USB, not ~4 %).
+Scratch `~/dev/ssx3-work/F2/odin/` holds the APK + 8 PNGs; text logs
+(S1+S2, 968 K) committed here. Gaps: two runs, no profile (NP1 next);
+S1 title 0.722× vs S2/F1 ~0.55× is short-phase startup noise (S2 confirms);
+S1 race GPU 23.1 % vs S2 17.3 % is run spread (F1: 17.8 % both).
+
+Exact commands (resume leg):
+
+```sh
+git ls-remote https://github.com/brad-richardson/PS2Recomp.git ssx3  # 0ed07c4
+git -C ~/dev/PS2Recomp diff 92f9991 fork/ssx3  # the one line
+# bytesize: rm -rf /home/brad/f2/PS2Recomp; git archive 0ed07c4 | tar -x -C ...
+# bytesize re-verify: fix line, codegen SHA, parallel count+knob, jni SHAs
+ssh bytesize 'wsl -d Ubuntu -- bash -lc "bash /home/brad/f2/build.sh"'  # SUCCESS 5m19s
+ssh bytesize 'wsl ... cat .../app-release.apk' > ~/dev/ssx3-work/F2/odin/app-release.apk  # a3d26b56 x4
+adb -s 622c49b1 install -r ~/dev/ssx3-work/F2/odin/app-release.apk  # x3 (S1, S2, play)
+python3 local/research/F2/launch.py --label S1 --wall 600 --stop-tick 4500
+python3 local/research/F2/launch.py --label S2 --wall 600 --stop-tick 4500
+python3 local/research/F2/phases.py local/research/F2/logs/S1|S2
+python3 local/research/F2/stripes.py --win 1450,550,1750,700 <F1sc01> <S1sc01> <S2sc01>
+bash local/research/I31/deploy-odin.sh  # SKIP + 7 OKs, no launch
+```
