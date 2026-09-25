@@ -1,0 +1,11 @@
+========================================
+Total Tests: 651
+Passed: 650
+Failed: 1
+========================================
+[33m  [Run]: [0mRP1: MAX/MINI compare raw bits and keep integer data (no denormal flush) [31m  [Failed][0m
+      - MAX of a register with itself is a bit-exact move, integer colours included
+      - MAX orders denormal bit patterns as sign-magnitude values
+      - MINI orders denormal bit patterns as sign-magnitude values
+      - MAXbc broadcasts the raw ft component
+[33m  [Run]: [0mVU1 CLIP and FCGET share the four-cycle flag timeline [32m  [Passed][0m
