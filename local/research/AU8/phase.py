@@ -1,9 +1,10 @@
 import sys, numpy as np
+TAP, TAG = (sys.argv[1], sys.argv[2]) if len(sys.argv) > 2 else ('spu2-tap-last70.bin', 'pcsx2-tag1.bin')
 sys.argv = ['x', '--swap']
 sys.path.insert(0, '/Users/brad/dev/ssx3/local/research/AU8')
 import tapcmp as T
-tap = np.fromfile('spu2-tap-last70.bin', dtype='<i2').reshape(-1, 16).astype(np.float64)
-planar, _, _, _ = T.load_tag('pcsx2-tag1.bin')
+tap = np.fromfile(TAP, dtype='<i2').reshape(-1, 16).astype(np.float64)
+planar, _, _, _ = T.load_tag(TAG)
 inp = tap[:, 0:2]
 SR = 48000; t0 = 20 * SR
 needle = inp[t0:t0 + 5 * SR].mean(1)
@@ -29,4 +30,4 @@ for phi in (0.0, 0.25, 0.5):
         print('  n big', len(big), ' first', big[:10], ' mod 512:', np.bincount(big % 512, minlength=512).argsort()[-5:] if len(big) else '')
         seg = [(i, np.sqrt((r[i:i+SR]**2).mean())) for i in range(0, len(r) - SR, 5 * SR)]
         print('  per-5s resid rms', ' '.join(f"{x:.0f}" for _, x in seg))
-        np.save('e7-resid.npy', r.astype(np.float32))
+        pass
