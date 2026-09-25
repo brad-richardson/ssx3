@@ -191,6 +191,121 @@ python3 gb8_rates.py run/B3
 python3 local/research/GB8/gb8_hashdiff.py --base ~/dev/ssx3-work/F2/run/B1 --cand ~/dev/ssx3-work/F2/run/B2  # glued-line caveat, see above
 ```
 
+## Part 3 — iOS (device build `96e9f45`, sim + iPad race, iPhone install-only)
+
+Worker: Muse Code, brief `local/muse/prompts/F2.md` Part 3 only. Source: pushed
+fork `ssx3` `96e9f45b5dca49e6cc1297d5984b506a61d1b369` (reused the Part 1
+worktree `~/dev/ssx3-work/F2/PS2Recomp`; `HEAD == fork/ssx3` after fetch, clean).
+
+Builds (`~/dev/ssx3-work/F2/ios/build-install.sh` = F1 recipe + 3-line sed:
+`W`, `FORK_WT`, `PIN→96e9f45…`; codegen = promoted canonical
+`register_functions.cpp` `8ea8ed43…`; bundled env IS
+`local/research/I32/ps2x.env`, SHA `0041e09a…` matches I32's committed
+`env-sha.txt` — sound on, `PS2X_MC_ROOT=${DOCUMENTS}/mc0`): preflight rc=0
+(runner-dir diff empty, deps pinned, profile `f0793278` valid, both devices
+connected); configure sim + device rc=0 (`-O3 -DNDEBUG` asserted 2 lines each,
+raylib DPI patch "already applied"); sim build + stage + install rc=0; device
+build + stage + sign rc=0 (`codesign --verify --strict` passed, ELF/ISO stage
+copies `cmp`-equal, bundle `org.ps2x.ps2entryrunner`).
+
+| Binary | SHA-256 (two matching reads) |
+| --- | --- |
+| sim `ps2EntryRunner` | `92df7a0d9e60dc20ab833ad52bcdd0baaad14d5b227924608f7438aade08bf1b` |
+| device unsigned | `b91e83c2377b5f95390f9e30816c38e868aa9b0d454dae6a3e5c9c66d6d48c79` |
+| device signed (installed) | `14ec858da43c80ac58cfc86d10cdc145b62747f96b319780c0754e6378bf7916` |
+
+Simulator (fresh container: uninstalled first, reinstalled to empty Documents;
+bundled I26-FAST route, sound on; one lease slot each, released; zero FATAL;
+all frames SHA-matched on two reads):
+
+| Run | Shot (observed tick) | Viewed verdict | SHA-256 |
+| --- | --- | --- | --- |
+| peak series | `series-0` (1032) | **Select Peak: Peak 1 mountain photo**, Peak 1 highlighted, 2/3 locked, correct text — RR1 fix visible on the F2 fold | `4a55d241…` |
+| sim (131 s) | `shot-t1050` (1187) | Select Event (Snow Jam, course map); menu correct, Peak overshot by the 2 s poll | `8c20b38d…` |
+| sim | `shot-t1750` (1763) | Race 2ND/2 00:00:00 0%, gate, lit snow, EA Radio "Poor Leno - Silicon Soul Remix / Royksopp" | `267ab29b…` |
+| sim | `shot-t2100` (2109) | Race 2ND/2 00:00:06 1%, spray, pines, mountains, checkpoint beam; advancing | `0ad2fc46…` |
+
+Peak timing note (artifact, not a regression): two early peak shots at observed
+tick ~1018 showed the Select Peak menu with the photo panel still empty (solid
+blue box). The sim runs are non-deterministic (no `PS2X_DETERMINISTIC` in the
+bundled env) and the only console tick source is the 5 s-quantized
+`[vsync-rate]` line (~150 ticks apart at menu speed), so single-shot capture is
+luck; the photo populates ~1020–1030, after the early shots. A 6-shot series
+across the window (`peak-series.sh`, scratch) caught it: `series-0` at observed
+1032 has the full photo. The Event map and race frames render fully throughout,
+and the Mac B1 frame shows the same photo — texture loading is healthy.
+
+iPad (Air 11" M2): install rc=0 (seq 1892, bundle `3E1BDD2F…`); deploy SKIP +
+7 exact-size OKs (Brad's save + 496-byte manual-play env intact). Live
+container read from a ~1 s probe console (bogus-UUID `MC_ROOT`, title only,
+terminated, no screenshots): **`E3BC4F4E-…`** — rotated from F1's
+`E26D3546`, so reinstalls do rotate it. One test launch (env: I26-FAST script
+byte-exact 484 chars, `MC_ROOT=<live>/Documents/mc-fresh`,
+`PS2X_VSYNC_RATE_LOG=1`, no vpad injections): 208 s, ticks 1112/1751/1969/2153
+(F1's pace was 1116/1751/1970/2155), terminated after (`info processes`
+clean), zero FATAL, 48 kHz, overlay shown. Portrait compat crop as in F1.
+
+| Shot (tick) | Viewed verdict | SHA-256 |
+| --- | --- | --- |
+| `shot-t1050` (1112) | Select Mode (Race/Freestyle) — missed Peak by ~13 ticks (2 s poll overshoot), menu correct | `54838b1b…` |
+| `shot-t1750` (1751) | Race 1ST/2 00:00:00 0%, EA Radio "Emerge - Junkie XL Remix / Fischerspooner", gate — race start on-route | `2c98f1b7…` |
+| `shot-t1960` (1969) | Race 2ND/2 00:00:04 1%, gate pole, spray, pines; advancing | `d0e14aaf…` |
+| `shot-t2140` (2153) | Race 2ND/2 00:00:07 1%, slope/trees/spray/beam; advancing | `b1c032fb…` |
+
+Fresh-card proof: `mc-fresh` + `mc-fresh_slot1` present in the live-container
+file listing (this run's override resolved); the route hit the race on pace.
+Oddity (observation only): both dirs are stamped 9/25 7:18 AM while the run
+was ~8:26–8:30 — likely a stale iPad clock at creation, corrected by the time
+of the screenshots (status bar 8:28/8:30, dyld cache 8:26). All functional
+gates pass. Deploy re-ran after: SKIP + 7 OKs, Brad's `mc0` byte-identical.
+Observed diagnostic pace: race window 1751@106s→2153@207s ≈ 4.0 vs/s ≈
+**0.067×** (vsync-rate log + screenshots on — not a speed number).
+
+iPhone (16 Pro Max): install rc=0 (seq 4840, bundle `6550D7B8…`); deploy SKIP
++ 7 OKs. **Never launched** — no launch/process command targeted the iPhone.
+
+Budgets and gaps: 2 builds, 2 sim runs (131 s + 31 s) + 4 peak retries/series
+(~45 s each), 1 probe + 1 iPad test (208 s) + 1 failed iPad attempt (relative
+env path after the script's `cd`; nothing launched, `info processes` clean,
+re-ran with the absolute path), 2 installs; ~1.5 h of the 1 h box (peak-timing
+series + retries). Scratch `~/dev/ssx3-work/F2` 10 GB ≤ 20 GB; Simulator shut
+down; no lease held. Gaps: iPad Select Peak missed again (sim series covers
+the Peak 1 photo); iPad pace is diagnostic, not a clean speed number; the
+`mc-fresh*` timestamp oddity above is unexplained but functionally inert; one
+failed-then-retried iPad launch (recipe assumes the env path resolves from the
+run dir — pass it absolute).
+
+Exact commands:
+
+```sh
+sed -e 's|^W=.../F1/ios$|W=.../F2/ios|' -e 's|^FORK_WT=.*|FORK_WT=.../F2/PS2Recomp|' \
+  -e 's|^PIN=56a5e8a...|PIN=96e9f45b5dca49e6cc1297d5984b506a61d1b369|' \
+  ~/dev/ssx3-work/F1/ios/build-install.sh > ~/dev/ssx3-work/F2/ios/build-install.sh
+# sim-run.sh / sim-peak-run.sh / ipad-probe.sh / ipad-run.sh: same W-sed (+ claim F2-sim)
+git -C ~/dev/PS2Recomp fetch fork ssx3   # fork/ssx3 = 96e9f45 = worktree HEAD
+bash ~/dev/ssx3-work/F2/ios/build-install.sh preflight configure_sim configure_device
+bash ~/dev/ssx3-work/F2/ios/build-install.sh build_sim stage_sim sim_install
+xcrun simctl uninstall $SIM org.ps2x.ps2entryrunner   # F1 runs were in the container
+bash ~/dev/ssx3-work/F2/ios/build-install.sh sim_install
+bash ~/dev/ssx3-work/F2/ios/sim-run.sh                # thresholds 1050 1750 2100
+bash ~/dev/ssx3-work/F2/ios/sim-peak-run.sh 1010      # 0.5 s poll: photo panel empty
+bash ~/dev/ssx3-work/F2/ios/sim-peak-run.sh 1040      # overshot (1193, Select Event)
+bash ~/dev/ssx3-work/F2/ios/sim-peak-run.sh 1000      # photo panel still empty
+bash ~/dev/ssx3-work/F2/ios/sim-peak-run.sh 1000 4    # +4 s post-sleep: overshot (Select Event)
+bash ~/dev/ssx3-work/F2/ios/sim-peak-run.sh 1000 2    # +2 s: overshot (Select Mode)
+bash ~/dev/ssx3-work/F2/ios/peak-series.sh 950 6 2    # 6-shot series: series-0 has the photo
+bash ~/dev/ssx3-work/F2/ios/build-install.sh build_device stage_device sign
+bash ~/dev/ssx3-work/F2/ios/build-install.sh install_ipad
+bash local/research/I31/deploy-ios.sh ipad
+bash ~/dev/ssx3-work/F2/ios/ipad-probe.sh             # live container E3BC4F4E-…
+# run-ipad-env.json = F1's + live UUID (route byte-exact 484 chars, mc-fresh, VSYNC_RATE_LOG)
+bash ~/dev/ssx3-work/F2/ios/ipad-run.sh /Users/brad/dev/ssx3-work/F2/ios/run-ipad-env.json "1050 1750 1960 2140"
+bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
+bash ~/dev/ssx3-work/F2/ios/build-install.sh install_iphone
+bash local/research/I31/deploy-ios.sh iphone         # never launched
+xcrun simctl shutdown $SIM
+```
+
 ## Orchestrator gate, Part 1 (2026-09-25)
 
 **Pass.** I viewed B1 t2090 (race 00:00:06, checkpoint beam, lit snow, trees, mountains). Five
