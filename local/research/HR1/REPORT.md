@@ -267,3 +267,13 @@ per-thread table), `threadcpu.c` (libproc per-thread CPU with names). Scratch
    Apple per the numbers above). The one that matters is Android: an AHardwareBuffer spike on
    the Odin with a pixel-compare gate, because that's where the copies and the Turnip driver's
    CPU cost compete with the GameThread.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** 4×+hi-res (1024×896) is guest-identical (det-hash 1..2400) and breaks no SSX 3 effect. The
+cost was the per-present `wait_idle()`, not the copy; the pipelined present removes it everywhere
+(iPad 4×+hi-res pipelined 10.40–10.49 vs/s beats today's 1× at 10.31). Zero-copy (option A) works on the
+Mac and the iPad; Android is the remaining plan. Apple caps SSAA at 4×. Fold in **F5**: `cf7c0df`
+(knobs), `4825123` (pipelined present), `4a591d3` (rate log), plus `fb3dca0` + `d929048` (zero-copy,
+default off). Defaults: Mac and iOS bundled env **4×+hi-res + pipelined** (Brad asked for 4× + double
+resolution); Odin pipelined, with 4×+hi-res decided by an Odin measurement (race rate + GPU busy).

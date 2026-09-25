@@ -191,9 +191,9 @@ then 120 Hz simulation.
       replay fine): per-draw state probe vs PCSX2-SW (`local/research/PX1/REPORT.md` §3). Until then, race
       pixels are judged against PCSX2's own runs, not replays.
 
-- [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 knobs +
-      pipelined present (`4825123`; iPad: 4×+hi-res pipelined beats today's 1×) + Mac zero-copy (`fb3dca0`,
-      default off), LX1 TZ/x86/fenv (`lx1-tz`: `5f32212 20377a3 b4cb476 fc0cc67`; Mac↔bradflix det-hash equal to t2400), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
+- [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 (`cf7c0df` knobs, `4825123` pipelined present,
+      `4a591d3` rate log, zero-copy `fb3dca0`+`d929048` default off; iOS/Mac default 4×+hi-res + pipelined; Odin
+      pipelined + a 1× vs 4×+hi-res measurement), LX1 TZ/x86/fenv (`lx1-tz`: `5f32212 20377a3 b4cb476 fc0cc67`; Mac↔bradflix det-hash equal to t2400), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
       once lanes on the current codegen finish; then device builds (4×+hi-res default TBD by HR1's report).
 - [ ] VU1 usage-table gap: OPMULA/OPMSUB read fs.xyz but declare fs lanes = dest (unused in SSX 3; VB1).
 
