@@ -1,0 +1,230 @@
+# F3 Part 1 — fold FP1 + DK1 + I34 + IN2 + UV1 + RD1 onto fork `ssx3`, Mac + Android check
+
+Worker: Muse Code, brief `local/muse/prompts/F3.md` Part 1 only (+ orchestrator
+addition: RD1 `51c759b` as the 7th commit). No push (orchestrator gates and
+pushes). First-failure rule never triggered.
+
+**Result: fold clean, Mac green, rider fixed, Android green.** All 7
+cherry-picks applied with no conflicts; suite 642/642; B1 races with sound on
+(cid0 531, coverage 0/0/4, alpha-255 frames viewed), B2 (sound off + unpaced)
+is det-hash identical to B1 on all 2,437 common ticks, B3 is speed-neutral vs
+F2 B3 (race 0.249× vs 0.250×), B4 shows the player rider solid and lit at
+screen centre. APK from the RD1 tip builds successfully.
+
+## Fold (worktree `~/dev/ssx3-work/F3/PS2Recomp`, branch `f3-fold` from `0ed07c4`)
+
+`git cherry-pick -x` in brief order, all clean (IN2 auto-merged the
+`ps2_virtual_pad.h` / test files I34 also touched — disjoint lines).
+
+| # | Source | New SHA | Subject |
+| --- | --- | --- | --- |
+| 1 | `51e730f` | `4d69178` | [FP1] pace guest vsyncs to wall clock, PS2X_UNPACED=1 disables |
+| 2 | `6cba433` | `cc54438` | [DK1] parallel Present: normalize presentation alpha to opaque |
+| 3 | `3d52208` | `e21562d` | [I34] virtual pad v2: 1.5x stick, 80% D-pad below the face cluster |
+| 4 | `43b61a4` | `f959f61` | [IN2] latch short taps until the guest reads them |
+| 5 | `8545eb2` | `4a7475b` | [UV1] Default-off PS2X_VIF_FMT_LOG + PS2X_DMA_STALL_LOG per-vsync census |
+| 6 | `6acf5bb` | `3a51ceb` | [UV1] Part 2: PCSX2 V2/V3 UNPACK lane rules + 10 unit tests |
+| 7 | `51c759b` | `ec2dbf1` | [RD1] VU0 vf0 = (0,0,0,1) in every EE context, not only the main one |
+
+Tip: `ec2dbf186616c7d6cf2998ea2792c500efdf4478`. `1f3180d` (RD1 probe)
+skipped per the addition. `games/` untouched (no regen needed).
+Runner-dir guard `git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner`:
+empty (checked after pick 6 and after pick 7). `git diff --check 0ed07c4
+HEAD`: clean. Total: 21 files, +1697/−80.
+
+## Builds (one dir `~/dev/ssx3-work/F3/build`, F2 recipe flags)
+
+Release, Homebrew clang, canonical codegen `8ea8ed43…` (no regen;
+`games/` untouched), paraLLEl-GS `19d93b2` (reused F2's worktree as
+`PS2X_PARALLEL_GS_SOURCE_DIR`, read-only), `GS_SHADOW_PARALLEL=ON`,
+runtime/aggressive logs OFF, diag taps OFF. Det runners = incremental
+reconfigure (`DET_HASH_TAP=ON`) after copying the clean runner out.
+Configure + all builds rc=0 (only the usual duplicate-library link
+warnings).
+
+| Runner | Source tip | Det-hash tap | SHA-256 (staged read; boot prechecks re-read ×2) |
+| --- | --- | --- | --- |
+| `bin/runner-clean` | `3a51ceb` (pre-RD1) | OFF | `1fc49e48c190ed5e8d46e07acd98fe34e6c1bfca7d8377375d42d78331f604f8` |
+| `bin/runner-det` | `3a51ceb` (pre-RD1) | ON | `cbe27f3a981722bdd4d3c7040da643746863bd7e9d9fe3101e6b60477dfa685a` |
+| `bin/runner-clean-rd1` | `ec2dbf1` | OFF | `d94753b4f1f6cfd72d8928ab3d430830f1bd4e4ee667dd1ceba1993d20ee700b` |
+| `bin/runner-det-rd1` | `ec2dbf1` | ON | `1ece20538f8a9838b83aaecc953e53ae28663d5da99f3bc1a81edae2df964b46` |
+
+Suite from the worktree root: **641/641/0** at `3a51ceb` (612 F2 baseline
++ 7 FP1 + 11 IN2 + 10 UV1 + 1 I34 = 641 exactly), then **642/642/0** at
+`ec2dbf1` (+1 RD1 vf0 test, passing). Both rc=0.
+
+## Boots (I26-FAST, empty mc0, `PS2X_SKIP_MOVIE=1`, deterministic, paraLLEl + `PGS_HIER_BINNING=force`)
+
+Driver: `f3_boot.py` (committed here; F2 driver + `--unpaced` for det mode,
+needed for B2 — F2's driver only set `PS2X_UNPACED=1` in speed mode).
+`[gs-path]` on all four boots: `hier_rule=hier-if-large … desc=plain …
+gpu=Apple M5 Pro`. Boot-driver prechecks: two SHA reads match on
+runner/ISO/ELF/codegen every boot; ISO `3c2f8eb1…`, ELF `1b49d05c…`,
+codegen `8ea8ed43…` all pinned.
+
+| Boot | Runner | Sound | Paced | Bound | Wall | Last tick | HUD wall | FATAL |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| B1 det | det (pre-RD1) | on | yes | target | 105.4 s | 2403 | 40.70 s | 0 |
+| B2 det | det (pre-RD1) | off | no (`--unpaced`) | target | 102.9 s | 2405 | 37.43 s | 0 |
+| B3 speed | clean (pre-RD1) | on | no (speed mode) | target | 86.3 s | 2471 | 36.44 s | 0 |
+| B4 det | det-rd1 | on | yes | target | 94.5 s | 2405 | 37.42 s | 0 |
+
+B1–B3 stay valid for everything else per the RD1 addition (same binaries,
+same tip for their gates).
+
+B1: `[snd-output] stream rate=48000` live; snd tick line `cid0=531 dmq=531
+done=531`; coverage at vsync 2400 = `targets=0`, `ids=0`, `pairs=4` (the
+E56 four SIDs — `0x80000211/0x237/0x534e44/0x80000006`, same list as F2).
+B2: no `[snd-output]` (host stream off, as designed); same guest snd
+cycles as B1 (`cycle=11550757345 ticks=3572` both); underruns 0 /
+overflows as designed (sound-off shape matches F2 B2). B4: `cid0=531`,
+coverage 0/0/4 — same gates hold with the rider fix.
+
+**B1 vs B2 det-hash: 2,437/2,437 common ticks byte-identical, all fields,
+0 differing payloads** (glue-immune regex extract; B1 ticks 1..2440, B2
+1..2437 — settle overrun only). Paced+sound-on vs unpaced+sound-off
+identical: the FP1 + AU10 properties both hold on the fold.
+
+## Frames (B1 snapshotter picks by exact present tick from the sidecar)
+
+DK1 check (stdlib `/tmp/f3_alpha.py`, all three B1 frames + B4 2099):
+**alpha = 255 on 100.0% of pixels** (229,376/229,376), even-row mean 255.0,
+odd-row mean 255.0 — the pre-fix 0x80 alternating rows are gone on the Mac
+path. All 512×448 fbp 112, no tiles/stripes/corruption.
+
+| Boot | Present tick | File (`run/<B>/frames/snap/`) | Viewed verdict |
+| --- | --- | --- | --- |
+| B1 | 1101 (sidecar 1102, `fnv=2fa435`) | `snap-001101t-0021.89s.png` | Select Mode (Race/Freestyle), Peak 1 panel still loading (~3 ticks after the Peak-1 press) |
+| B1 | 1163 | `snap-001163t-0022.91s.png` | Same screen: Peak 1 course map fully populated — the t1101 empty panel is transition timing, not a regression |
+| B1 | 1799 (`fnv=c2522f31`) | `snap-001799t-0048.88s.png` | Race 2ND/2 00:00:01 0%: gate, lit snow, pines, mountains, EA Radio "Go / Andy Hunter / Exodus" |
+| B1 | 2099 (`fnv=4ebca52a`) | `snap-002099t-0076.90s.png` | Race 2ND/2 00:00:06 1%, checkpoint beam, trick 210, spray |
+| B4 | 2099 (sidecar 2105, `fnv=79e2689d`) | `snap-002099t-0066.46s.png` | **Rider gate: PASS** — solid lit snowboarder at screen centre (dark outfit, arms up, board + shadow), race 2ND/2 00:00:06 1%, trick 280. Matches RD1's `rider-2100-before-after.png` "after" panel |
+
+B1-vs-B4 det-hash (expected to differ — the fix changes guest state):
+first differing tick **231**, `rdram`+`combined` only (`eeCycle` and
+program count identical — same execution path, different matrix data, the
+vf0-fix signature: the loader thread's bind matrices now compute). 923 of
+2,440 common ticks differ.
+
+## B3 per-phase vs F2 B3 (trace authoritative; guest vsyncs/s ÷ 59.94)
+
+Exclusive lease (slot "both"; one 30 s retry — RD1 released quickly). Host
+load at claim 3.4 → 2.3 at end (F2 B3: 1.9 → 1.7; RD1 had just released,
+omlx + system background). The fold is speed-neutral.
+
+| Phase (ticks) | F3 B3 vs/s (×) | F2 B3 vs/s (×) | F3 ÷ F2 |
+| --- | --- | --- | --- |
+| Title [0,636) | 40.26 (0.672×) | 40.32 (0.673×) | 1.00× |
+| Menus [636,1440) | 77.11 (1.287×) | 76.96 (1.284×) | 1.00× |
+| Loading [1440,1714) | 26.84 (0.448×) | 28.26 (0.472×) | 0.95× |
+| Race-start [1714,1800] | 9.29 (0.155×) | 16.61 (0.277×) | — (quantization, see below) |
+| **Race (1800,2400]** | **14.94 (0.249×)** | **14.98 (0.250×)** | **1.00×** |
+| Raw 5 s race cross-check | n=8 mean 14.87 | n=8 mean 15.13 | 0.98× |
+| Wall launch → race HUD (~t1714) | 36.44 s | 35.92 s | 1.01× |
+
+Race-start note: the trace-interpolated 9.29 vs 16.61 is 5 s-quantization
+noise on an 86-tick phase (`wall_at` uses the last stale trace row, so the
+window stretches/compresses by up to 5 s depending on where the 5 s
+`[vsync-rate]` boundary lands: F3's landed at t1796, F2's at t1803). The
+raw 5 s windows covering the phase agree — F3 t1726 14.57/s + t1796
+13.98/s vs F2 t1730 15.19/s + t1803 14.56/s (~4%, consistent with the
+slightly higher host load). Real race-start ≈ 6.1 s vs ≈ 5.9 s. Loading
+0.95× is the same load noise. B3 stopped at t2471 (71 over) vs F2's t2418:
+speed-mode stop detection reads the 5 s `[vsync-rate]` lines, so the
+overshoot is one window boundary, not slower running.
+
+## Android compile check (bytesize `/home/brad/f3`, F2 recipe)
+
+Staging: `PS2Recomp/` = `git archive` of the f3-fold tip streamed from the
+mini over held ssh stdin (the fold is unpushed, so bytesize can't fetch
+it): first `3a51ceb` (339 files = F2's 334 + 5 new F3 headers/tests),
+then `rm -rf` + re-archive of `ec2dbf1` (339 files — RD1 adds none).
+Tars kept both sides of the re-archive (`fork-3a51ceb.tar`,
+`fork-ec2dbf1.tar`). `codegen-ssx3/`, `parallel-gs/`, `jniLibs/` are
+symlinks to `/home/brad/f2/*` (F2 recipe inputs, unchanged per the brief;
+the build only reads them), re-verified through the links: codegen 9,457
+files, `register_functions.cpp` `8ea8ed43…`, SBR 623; parallel-gs 24,314
+files + `PGS_HIER_BINNING` knob; jniLibs HAL `1b49d27c…` + Turnip
+`717812c3…` (all match F2's pins).
+
+Tree markers on bytesize: runner stub `cf62c485…` (1 upstream file);
+`force_progressive` (ST1), alpha `255` (DK1), `-> uint64_t` at
+`EeScheduler.cpp:2005` (HF1), `m_vsyncPace` (FP1), `Latch` (IN2),
+`0.15f * u` (I34), `PS2X_VIF_FMT_LOG` (UV1), vf0 lines in `ps2_runtime.h`
+(RD1). `build.sh` (committed here; F2 recipe with `root=/home/brad/f3`)
+SHA `569db288…` identical local/remote. Bytesize idle for both builds
+(load 0.00 / 0.91, no gradle/ninja).
+
+| Build | Tip | Result | APK SHA-256 (remote ×2, pulled ×2, all match) |
+| --- | --- | --- | --- |
+| 1 (superseded) | `3a51ceb` | BUILD SUCCESSFUL in 5m 22s | `cb8f522d0e044c75200881b4ec19bed9e0b29527c85b52b867a0a99ca2dad6ca`, 153,769,544 B (kept as `odin/app-release-3a51ceb.apk`) |
+| 2 (**Part 1 APK**) | `ec2dbf1` | BUILD SUCCESSFUL in 6m 35s, 48 tasks, zero FAILED | `d5a94c278aabac86fdf0b0570a6bb4f68680d2b5041bf595f86f3e271526ee78`, 153,769,544 B (`odin/app-release.apk`) |
+
++16,384 B over F2's APK (same delta as F1→F2). Part 3 rebuilds from the
+pushed SHA if it differs from `ec2dbf1`.
+
+## Budgets and gaps
+
+Builds: 2 full Mac (clean + det reconfigure each: pre-RD1 and RD1 tip) +
+2 Android. Boots 4/4 (B1 105 s, B2 103 s, B4 95 s one slot each; B3 86 s
+exclusive), each ≤ 500 s wall cap. Scratch `~/dev/ssx3-work/F3` 2.4 GB ≤
+15 GB (build dir deleted at close per the brief; worktree kept for the
+push). Never pushed; fork branch `f3-fold` local-only; text in git
+(`f3_boot.py`, `build.sh`, this report); runners signalled only by
+recorded PID (SIGTERM via the driver); no lease held at close.
+
+Gaps, stated plainly:
+
+- G1. One speed run, no drift cancellation; B3 host load 3.4 → 2.3 vs F2
+  B3's 1.9 → 1.7 (RD1 had just released the lease). Loading reads 0.95×
+  and raw race 0.98× — within load noise; race trace matches at 1.00×.
+- G2. Race-start trace number (9.29 vs 16.61) is 5 s-quantization noise
+  (see §B3 note); raw windows agree. Short-phase trace rates need the
+  boundary caveat whenever they're quoted.
+- G3. B3 stop overshoot to t2471 (5 s `[vsync-rate]` stop detection).
+- G4. Frame ticks within Δ11 of target (snapshotter phase, as F2).
+- G5. B4-vs-B1 frame at 2099 is 6 ticks apart (sidecar 2099 vs 2105) —
+  the rider gate is visual (solid + lit at centre), not a pixel diff.
+- G6. `menu`/`title` B3 phases exceed 1× (77.11 vs/s) because speed mode
+  is unpaced by design (FP1); paced play caps at 59.94 (FP1 Gate 1).
+- G7. Share tier (`/Volumes/share`) not mounted: no receipt mirror.
+- G8. The pre-RD1 APK (`cb8f522d`) is superseded but kept for the record;
+  only `d5a94c27` (RD1 tip) is the Part 1 APK.
+
+## Exact commands
+
+```sh
+git -C ~/dev/PS2Recomp worktree add ~/dev/ssx3-work/F3/PS2Recomp -b f3-fold fork/ssx3  # 0ed07c4
+git -C ~/dev/ssx3-work/F3/PS2Recomp cherry-pick -x 51e730f 6cba433 3d52208 43b61a4 8545eb2 6acf5bb
+git -C ~/dev/ssx3-work/F3/PS2Recomp diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner  # empty
+cmake -S F3/PS2Recomp -B F3/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++ -DPS2X_GAME_CODEGEN_DIR=/Users/brad/dev/ssx3-work/codegen-ssx3 -DPS2X_BUILD_TEST=ON -DPS2X_BUILD_STUDIO=OFF -DPS2X_ENABLE_DEBUG_UI=OFF -DPS2X_ENABLE_RUNTIME_LOGS=OFF -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF -DPS2X_ENABLE_DIAG_TAPS=OFF -DPS2X_ENABLE_DET_HASH_TAP=OFF -DPS2X_GS_SHADOW_PARALLEL=ON -DPS2X_PARALLEL_GS_SOURCE_DIR=/Users/brad/dev/ssx3-work/F2/parallel-gs -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build F3/build --parallel 8 --target ps2x_tests ps2EntryRunner
+(cd F3/PS2Recomp && ../build/ps2xTest/ps2x_tests)           # 641/641
+cp F3/build/ps2xRuntime/ps2EntryRunner F3/bin/runner-clean
+cmake -S F3/PS2Recomp -B F3/build -DPS2X_ENABLE_DET_HASH_TAP=ON
+cmake --build F3/build --parallel 8 --target ps2EntryRunner
+cp F3/build/ps2xRuntime/ps2EntryRunner F3/bin/runner-det
+python3 local/research/F3/f3_boot.py --mode det --backend parallel --runner bin/runner-det --label B1 --stop-tick 2400 --sound on --coverage-tick 2400
+python3 local/research/F3/f3_boot.py --mode det --backend parallel --runner bin/runner-det --label B2 --stop-tick 2400 --sound off --coverage-tick 2400 --unpaced
+python3 local/research/F3/f3_boot.py --mode speed --backend parallel --runner bin/runner-clean --label B3 --stop-tick 2400
+python3 local/research/GB8/gb8_rates.py ~/dev/ssx3-work/F3/run/B3
+python3 /tmp/f3_hashdiff.py ~/dev/ssx3-work/F3/run/B1/boot.log ~/dev/ssx3-work/F3/run/B2/boot.log  # 2437/2437, 0 diffs
+python3 /tmp/f3_alpha.py ~/dev/ssx3-work/F3/run/B1/frames/snap/snap-*.png  # alpha 255 everywhere
+git -C ~/dev/ssx3-work/F3/PS2Recomp cherry-pick -x 51c759b  # RD1, -> ec2dbf1
+cmake -S F3/PS2Recomp -B F3/build -DPS2X_ENABLE_DET_HASH_TAP=OFF && cmake --build F3/build --parallel 8 --target ps2x_tests ps2EntryRunner
+(cd F3/PS2Recomp && ../build/ps2xTest/ps2x_tests)           # 642/642
+cp F3/build/ps2xRuntime/ps2EntryRunner F3/bin/runner-clean-rd1
+cmake -S F3/PS2Recomp -B F3/build -DPS2X_ENABLE_DET_HASH_TAP=ON && cmake --build F3/build --parallel 8 --target ps2EntryRunner
+cp F3/build/ps2xRuntime/ps2EntryRunner F3/bin/runner-det-rd1
+python3 local/research/F3/f3_boot.py --mode det --backend parallel --runner bin/runner-det-rd1 --label B4 --stop-tick 2400 --sound on --coverage-tick 2400
+git -C ~/dev/ssx3-work/F3/PS2Recomp archive HEAD | ssh bytesize 'wsl -d Ubuntu -- bash -lc "rm -rf /home/brad/f3/PS2Recomp && mkdir -p /home/brad/f3/PS2Recomp && cat > /home/brad/f3/fork-ec2dbf1.tar && tar -x -f /home/brad/f3/fork-ec2dbf1.tar -C /home/brad/f3/PS2Recomp"'
+cat local/research/F3/build.sh | ssh bytesize 'wsl ... cat > /home/brad/f3/build.sh'  # SHA 569db288 both sides
+ssh bytesize 'wsl -d Ubuntu -- bash -lc "bash /home/brad/f3/build.sh"'  # SUCCESS 6m35s (one held ssh)
+ssh bytesize 'wsl ... cat .../app-release.apk' > ~/dev/ssx3-work/F3/odin/app-release.apk  # d5a94c27 x4
+```
+
+## Recommended next action
+
+Push `f3-fold` (`ec2dbf1`) → fork `ssx3` (fast-forward from `0ed07c4`;
+runner-dir guard empty, suite 642/642) and release F3 Part 2 (iPhone) and
+Part 3 (Odin; rebuild the APK from the pushed SHA if it differs).
