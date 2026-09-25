@@ -184,6 +184,11 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **Brad offline 09-24 night; decisions:** (1) Fable frontier review once RR1/AU9/E57 have
+      reported (steer fold order, the sign-extension bug class, the speed plan); (2) after gates,
+      fold to fork `ssx3` and install one combined build: iPhone install only, iPad test, Odin as his
+      play build, save + manual-play env re-applied and verified.
+
 - [ ] **Tooling from the 09-24 review** (`docs/research/review-2026-09-24-time-and-bottlenecks.md`):
       - Done (TL1): `local/tooling/odin/odin_replay.py` + `stream_tools.py`; `[gs-path]` logger
         on fork `ssx3`. Audio-side path logging still open.
