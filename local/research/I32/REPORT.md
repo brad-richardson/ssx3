@@ -131,3 +131,12 @@ Elapsed ~75 min of the 90 min Part 1 box.
 - G5: run-3 (wall-clock 20/25/30 s shots) missed Select Character under
   host load 20; run-4 used a tick trigger instead. Wall-time shot
   schedules are unreliable while other lanes build.
+
+## Orchestrator gate (Part 1)
+
+**Pass; Brad approved the layout (09-24).** I viewed `run-stick/shot-0020s.png` (stick knob deflected
+full right on the left, D-pad on the right between R1/R2 and △) and `run-sim/shot-0100s.png` (race
+with the overlay; the D-pad clears the face and shoulder buttons). The stick log shows the injected
+`(1,0)` as `lx=0xff ly=0x80`; suite 601/601; runner-dir diff empty. Part 2 released: device build
+from `i32-controls` `71c952e`, iPad install + test, iPhone install only (never launched), then re-apply
+`local/research/I31/deploy-ios.sh` on both.
