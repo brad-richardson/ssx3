@@ -22,3 +22,9 @@ paraLLEl's Vulkan init is headless already (Granite `init_instance_and_device` w
 2. Build with `PS2X_GS_SHADOW_PARALLEL=ON` (paraLLEl `19d93b2`), boot under `xvfb-run` with `PS2X_GS_BACKEND=parallel` (no `GRANITE_VULKAN_LIBRARY` needed if the system loader is found; say which), `PGS_HIER_BINNING` unset and `force`: `[gs-path]` line, frames at ~1090/2100 viewed, det-hash equal to the CPU-backend Linux run (it must be: GB8).
 3. If raylib/Xvfb is the only thing in the way, report what a `PS2X_HEADLESS=1` mode (no window, frames only to dumps) would take (file:line); don't build it in this part.
 Deliverable: append `## Part 2` to `local/research/LX1/REPORT.md`; commit `[LX1] Part 2 …`. Budget 1.5 h.
+
+## Part 1b (released by the orchestrator; runs before Part 2)
+Find what makes x86 Linux and arm64 Mac diverge at **tick 39** (eeCycle +8, rdram; ticks 1–38 identical).
+1. Same fork `0ed07c4`, both hosts, a **diagnostic** build with the function-trace / guest-branch tap the E-lane uses (find the existing knob: `PS2X_ENABLE_DIAG_TAPS`, `PS2X_FN_TRACE*`, E53/E55 reports), bounded to ticks 36–40 (ring or tick window). Diff the two traces: first differing guest function/PC and the register or memory value that differs there.
+2. Name the host-side cause at that site (cite the runtime/codegen line): e.g. an sse2neon emulation of an SSE op (rsqrt/rcp/min/max/cvt with NaN or rounding differences), x87 vs SSE, a libm call (`sinf`/`sqrtf`…), `long double`, or a host clock/time source. Say which host matches the PS2 if the reference is knowable (PCSX2 semantics, cite).
+3. Stop there (no fix) and hand back the table. Deliverable: append `## Part 1b` to the report; commit `[LX1] Part 1b …`. Budget 2 h; one Mac slot per boot.

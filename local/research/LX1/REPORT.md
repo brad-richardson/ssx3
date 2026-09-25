@@ -206,3 +206,14 @@ Gaps, stated plainly:
   correctness boots.
 - G5. The wrap script always rebuilds per-SHA dirs from scratch (no
   ccache); fine at ~3 min/build.
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Accepted: host works, parity fails.** bradflix builds (docker image `ssx3-lx1`, no sudo) and runs the
+route to the race; frames match the Mac visually. Det-hash is byte-identical for ticks 1–38 and splits
+at **tick 39** (eeCycle +8, rdram), long before any input, so something host-dependent changes guest
+behaviour early in boot: a float result (sse2neon on arm64 vs native SSE on x86), x87 vs SSE rounding,
+a libm call, or host time leaking into a deterministic path. That's a correctness question as well as a
+tooling one: one of the two hosts may be wrong vs the PS2. Part 1b released (below); the GPU Part 2
+waits. E-lane follow-ups for a later fold: x86 needs `-msse4.1` (CMake sets an arch flag only for ARM);
+the E53 FP-mode test reads the x87 word via `fegetround()` on x86.
