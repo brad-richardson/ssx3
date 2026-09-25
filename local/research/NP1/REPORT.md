@@ -339,3 +339,12 @@ python3 local/research/NP1/launch.py --label {A1,B1,B2,A2} --wall 600 --stop-tic
 python3 local/research/NP1/phases.py local/research/NP1/logs/{A1,B1,B2,A2}
 bash local/research/I31/deploy-odin.sh  # play restore, no launch
 ```
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass (small win).** Three bit-exact changes: `-Wl,-Bsymbolic` (PLT jump slots 3,222 → 400), a
+scalar-only XGKICK pipeline reset (the 64 KiB per-execute memset), one GsWorker wakeup per drain.
+GameThread CPU per frame −3.8 % ABBA; the wall pair shows +1.0 % because heat soak dominates
+(A1 → A2 −7.3 % on the same APK). Fold `e5654f3 7caf516 125c9e5` in F4. Measurement lesson: Odin
+pairs need a longer cool-down (thermal ≤ 1 and a fixed wait) or more alternations; noted in the runbook.
+The queued-GS capture isn't deterministic even base vs base; det-hash is the gate there.

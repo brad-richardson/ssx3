@@ -124,6 +124,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   parallel lanes. After closing a lane, delete its `build*`/`staged*` dirs (rebuildable) unless a
   committed script references them (`grep -rhoE "ssx3-work/..." local/research/*/*.sh local/tooling`).
 
+- Odin speed pairs drift with heat (NP1 09-25: the same APK read −7.3 % from its first to its last run
+  of an ABBA set). Cool to thermal status ≤ 1 with a fixed wait before every run, prefer ABBA-BAAB,
+  and report GameThread CPU per frame next to wall speed.
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.
