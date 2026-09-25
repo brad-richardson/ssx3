@@ -196,3 +196,76 @@ changes: MoltenVK 1.4.2 (Apache-2.0) embedded as `Frameworks/MoltenVK.framework`
 CPU backend, race 1.77×, launch → t2100 97 s vs 209 s. The Simulator can't run the Vulkan path
 (no descriptor indexing), so iOS paraLLEl is device-validated only. Part 2 released: paraLLEl as the
 iOS default (bundled env), iPad test, iPhone install when reachable.
+
+## Part 2 — paraLLEl as the iOS default
+
+Worker: Muse Code. All four steps done; no source changes anywhere.
+
+**1. Recipe:** `local/research/I33/build-install.sh` (7,367 bytes, committed;
+byte-identical to the scratch script used below). F2 script + I33 edits:
+`-DPS2X_GS_SHADOW_PARALLEL=ON` + `-DPS2X_PARALLEL_GS_SOURCE_DIR` (parallel-gs
+`19d93b2`, Granite `166ba21a`), MoltenVK 1.4.2 `ios-arm64` dynamic framework
+embedded at `Frameworks/MoltenVK.framework` and signed explicitly before the
+bundle (nested frameworks aren't covered by the top-level sign — Part 1
+lesson), `ENVFILE=local/research/I33/ps2x.env`, `install_iphone` step added.
+No rebuild was needed in Part 2 (device binary unchanged, SHA `48c81315…
+63abb3`); restage + sign + install only. Signed staged binary SHA
+`da5cf605…6b8fc1` (×2, `logs/signed-binary-sha.txt`).
+
+**2. Bundled env:** `local/research/I33/ps2x.env` (committed, SHA `8e0547fc…
+41f873`), from I32 + `PS2X_GS_BACKEND=parallel`,
+`GRANITE_VULKAN_LIBRARY=${BUNDLE}/Frameworks/MoltenVK.framework/MoltenVK`,
+`PGS_HIER_BINNING=force`. Sound on, `PS2X_MC_ROOT=${DOCUMENTS}/mc0` kept.
+`${BUNDLE}` coverage confirmed in code (`ps2_env_file.h:117-137`:
+`mergeEnvLayers` expands placeholders for every file key, no prefix filter)
+**and** live: the probe console shows `[ios-env] set
+GRANITE_VULKAN_LIBRARY=…/Bundle/Application/1E5C75C9-…/ps2EntryRunner.app/
+Frameworks/MoltenVK.framework/MoltenVK` with the fresh install's container
+UUID. Caveat worth one line: launcher `-e` wins only for `PS2X_*` keys
+(`ps2_ios_runtime.mm:61`); a `-e GRANITE_VULKAN_LIBRARY=…` would be
+overwritten by the bundled file value (`setenv(..., 1)`). No `-e` backend
+override is needed anymore. Brad's `Documents/ps2x.env` untouched (496 bytes,
+verified on both devices).
+
+**3. Fallback on Vulkan-init failure: NO CPU fallback, but no abort either.**
+`GSParallelBackend::fail()` (`ps2_gs_parallel_backend.cpp:450-455`) logs
+`FATAL: … (frames will be empty)`, latches `m_initFailed`, returns false;
+every entry point early-returns and scanout yields nulls. Nothing reinstalls
+the CPU backend — `ps2_runtime.cpp:1038` is the only `setRasterBackend` site
+(one-time, build-capability branch only). Proven harmless-but-dead by the
+Part 1 sim run (app continued to race ticks with empty frames; no crash).
+Per brief, no code added here: a runtime CPU fallback (or a loud user-facing
+error) is a later fork change. Until then, a device that can't init Vulkan
+shows a black game frame with the app otherwise alive.
+
+**4a. iPad** (Air 11" M2, `deploy-ios.sh ipad` all OK): one fresh-card
+(`mc-i33-p2`) launch with **no** `-e` backend overrides (env JSON held only
+route + fresh `MC_ROOT` + `VSYNC_RATE_LOG`). The bundled env selected
+parallel: `live backend selected`, `[gs-path] hier_rule=hier-if-large …
+gpu=Apple M2 GPU` (force took effect — the Odin rule), `init ok`, race
+reached (t2107 at 93 s wall). Frames viewed: t1090 Select Event (Snow Jam /
+Metro-City / Happiness + Rival card, legible) and t1810 race HUD (2ND/2,
+00:00:01, EA Radio overlay) — both correct under hier binning (an iMessage
+banner overlays the top of the race shot; the game frame beneath is fine).
+Terminated after (0 procs left). Scratch: `ios/run-ipad-p2/` (console, run
+log, 3 shots).
+
+**4b. iPhone** (16 Pro Max, Brad-approved install, **never launched**): the
+phone showed `available (paired)`, not `connected`, but the single install
+attempt succeeded — `installationURL …/D95E85C8-…/ps2EntryRunner.app/`,
+`install-iphone.log` (`SCRIPT_RC=0`). `deploy-ios.sh iphone` verified (save
++ 496-byte env, all OK). No launch, no probe, no screenshot — Brad tries it
+himself.
+
+Exact commands (all in `~/dev/ssx3-work/I33/ios/`):
+`preflight stage_device sign install_ipad`; `deploy-ios.sh ipad`;
+`ipad-probe.sh` (live paths `4FD0FF0C-…` Data / `1E5C75C9-…` Bundle);
+`ipad-run.sh run-ipad-p2 env-p2.json '1090 1810 2100'` (no backend `-e`);
+`install_iphone`; `deploy-ios.sh iphone`. Scratch 7.6 GB (< 20 GB).
+
+Budgets and gaps: ~35 min of the 1.5 h box. Gaps: one bundled-default run
+(no pace claim beyond "race reached in 93 s"); hier-vs-flat pace on the M2
+unmeasured (Part 1 flat run isn't comparable run-to-run); no CPU fallback on
+Vulkan failure (step 3 — needs a fork change); iPhone installed but
+unlaunched-by-us, so its first parallel boot is Brad's.
+
