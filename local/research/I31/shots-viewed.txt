@@ -1,0 +1,45 @@
+# I31 iPad screenshots viewed (worker transcription)
+Run: ~/dev/ssx3-work/I31/run-ipad/, 18 shots, ticks 300->3829. Device shots
+2360x1640; game in portrait iPhone-compat window (center strip of the
+landscape frame; left/right cropped). Another app's registration form is
+visible behind the game window (as in I30). Ticks below are the last
+console tick line at shot time (tick lines print ~every 5 s, so frame
+actual tick is within ~+100t; press times are exact guest ms).
+
+- shot-0010s (tick 300): not viewed (pre-title).
+- shot-0025s (tick 719): SSX logo + "© 2003 Electronic Arts". NO "Press
+  START" prompt. Seeded predicts prompt ~836t; empty predicts ~570t:
+  719 with no prompt excludes the empty profile.
+- shot-0030s (tick 814): not viewed (kept as spare; 814t is just under
+  the seeded ~836t prompt estimate).
+- shot-0035s (tick 911): MAIN MENU. 5 rows, row 0 highlighted (orange):
+  "Sin[gle Event]", "Co[nquer ...]", "Mu[...]", "Pre[...]", "Onl[ine]".
+  Center text: "Play any unlocked Single Event." So start@900t
+  (i=0) worked: the prompt was up by tick 900. Prompt window: (719, 900].
+- shot-0040/0045/0050/0055 (ticks 1021/1143/1249/1323): not viewed
+  (menu -> select transition; cross@1250t selects row 0 Single Event).
+- shot-0060s (tick 1384): SELECT CHARACTER. Rider is MAC (orange beanie,
+  sunglasses, grey/black jacket, camo pants; bio "Always riding to the
+  beat of his own soundtrack."). Stat LABELS visible at right edge
+  ("Rider rank…", "Accelerat…", "Edg…", "Spe…", "S…", "Stabi…",
+  "Toughne…", "Tri…") but bars + values are cropped off-screen.
+  Zero roster-nav presses before this shot (only start@900t, cross@1250t).
+- shot-0120s (tick 2126): white fade, "Setup Character" title ghosting
+  through: mid-transition into Setup (after last down@1930t).
+- shot-0135s (tick 2351): not viewed (Setup settling; final cross@2150t
+  confirmed Mac).
+- shot-0150s (tick 2555): SETUP CHARACTER. Mac, "Continue to peak
+  selection." at bottom. Parked state (no further presses). The 5 downs
+  left Mac selected.
+- shot-0165/0180/0195/0210/0225/0240 (ticks 2770-3829): not viewed
+  (parked; sizes match the 0150 state).
+
+Baselines viewed for comparison:
+- E55D16 snap-1803t (seeded host boot): "Select Character", Mac, Rider
+  ranking 2.9, Acceleration 4.0, Edging 3.0, Speed 3.0, Spin 3.0,
+  Stability 4.0, Toughness 1.0, Tricks 3.0. Same Mac outfit + bio as
+  I31 shot-0060.
+- I30 run-ipad shot-0035s (unseeded iPad, same device/build): "Select
+  Character" showing ZOE (bio "An exotic icon of adrenaline and a …
+  powerhouse"), roster highlight orange at left. ROUTES.md also pins
+  the empty-card default: #2 cross "Select Character: Zoe" (Mac + Sim).
