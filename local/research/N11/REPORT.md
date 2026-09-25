@@ -221,3 +221,13 @@ builds for this worker) and a re-run of S2/S3 with this driver; the
 `--profile-after-tick` path and the bytesize symbol files are ready.
 Budgets used: 0 builds, 2/4 launches (S1 ~475 s, S4 ~498 s wall), ~1.5 h of
 2 h, N11 git dir 960 KB text-only, scratch `~/dev/ssx3-work/N11/` 3.8 MB.
+
+## Orchestrator gate (Part 1)
+
+**Accepted as far as it goes.** Sound-on race 0.117× / 0.114× (mean 0.116×) vs N10 sound-off
+0.113×: sound costs nothing measurable. GPU 11–17 % busy in the race, so the Odin is CPU-bound.
+GameThread ~84–92 % of a core at the race-end snapshot. Brad's env and card were verified intact
+after every run. The profile and pinning block is a real build limit (release APK not profileable,
+shell can't set app-thread affinity), correctly stopped at the probe instead of burning launches.
+Part 2 released: `profileable` manifest + in-process `PS2X_GAME_THREAD_CPUS` knob on `71c952e`,
+one APK, S2/S3/S4b.
