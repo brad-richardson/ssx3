@@ -364,3 +364,11 @@ Mac side accepted (guest-bit-exact vs F3 on 2,429 ticks, 100 % VU1 cycles genera
 255, suite 646/646, regen differs by the one predicted vf0 line and stays unpromoted). Android blocked on
 bytesize's 9.7 GB WSL memory with 3 giant `vu1_*.cpp` TUs compiling at once. Part 1b: a depth-2 Ninja job
 pool for the generated VU1 sources, APK rebuild, and B3.
+
+## Orchestrator note, Part 1b (paused, 2026-09-25)
+
+Accepted as far as it goes: **Mac race 1.40× over F3** (B3). The Android APK still OOMs because
+`JOB_POOL_COMPILE` isn't attached by the Android configure (CMake 3.22.1) even though the pool is
+defined. Resume options, cheapest first: set the pool as a target property
+(`JOB_POOL_COMPILE` on the target that owns the vu1 sources) or pass `-j2` through the native build
+(`ninja -j2` on the configured dir); `-O1` for the vu1 TUs; or build the APK on bradflix (62 GB).
