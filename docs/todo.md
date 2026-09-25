@@ -118,9 +118,10 @@ then 120 Hz simulation.
       on the play build with sound on, plus one GameThread-pinned-to-cpu7 run.
       `local/muse/prompts/N11.md`.
 
-- [ ] **Full race to the finish:** the rider-idle start was I26-FAST's 30 s d-pad down (down brakes; SJ1).
-      Drop the hold from the route (update `local/research/I26/ROUTES.md`; speed windows shift) and run
-      one no-input race to the results screen with a 1,800 s cap (bradflix once LX1 passes).
+- [x] **First stock race finished** (FR1, 09-25): Happiness 2nd 04:18 → results screen; Snow Jam + Metro-City
+      load and race. Route FR1-R1 = I26-FAST minus the 30 s down-hold (down brakes).
+- [ ] **PF1 (Opus, running): post-race jump to garbage** at `0x39e724` → `0x6c058000` (tick 20063, results
+      screen idle, empty card).
 - [ ] Odin thermals: back-to-back runs reach thermal status 4–5 with cpu5 at 1.79 GHz (N10); space
       speed runs or record status, and consider it in the 120 Hz budget.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in

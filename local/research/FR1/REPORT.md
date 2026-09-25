@@ -140,3 +140,12 @@ touch run/r2-snowjam/STOP run/r3-metro/STOP   # early stops once each verdict wa
 - Recommended: mark the full-race-to-the-finish item done (finished + results observed);
   file the post-results JALR as an E-lane bug; keep the ROUTES.md "tuck" rename with the
   orchestrator (FR1 deliberately did not edit it).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass: milestone.** I viewed `snap-017798t`: "Happiness – Race, Single Event Results", 1 Mac 03:13, 2
+Zoe 04:18. **First stock race finished in our runtime**, with Snow Jam and Metro-City loading and racing.
+Coverage clean through the race; past the results screen (tick 20063) an indirect call at `0x39e724`
+(object-list virtual call through `*(obj+0x48)+0x8C`) jumps to `0x6c058000`: a runtime bug that a PS2
+wouldn't hit. PF1 (Opus explorer) takes it. Route FR1-R1 (I26-FAST without the down-hold) becomes the
+race-finish route; I26-FAST's ROUTES.md gets a note.
