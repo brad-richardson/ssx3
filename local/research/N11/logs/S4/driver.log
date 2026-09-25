@@ -1,0 +1,44 @@
+[22:44:55] PRE lease="N11 prep S4" keyguard="showing=false" battery=67% ac=true pid0=none
+[22:44:55] PRE device-env=9fb46f8509adb1362b5ac74d35ac63a340e39228b64914848ce5ed85d6b74d13 mc0-test='' mc0-bad=[]
+[22:44:55] ENV 62a6acbc42c419b33ceb4b1ef982cba65e9db756dcd4af0dfc40a7edae36feef  /storage/emulated/0/Android/data/com.ps2x.runner/files/ps2x.env
+[22:44:55 t+    0.0] AM Starting: Intent { cmp=com.ps2x.runner/android.app.NativeActivity }
+[22:45:01 t+    6.1] BACK sent
+[22:45:03 t+    8.6] PIN attempt=0 tid=5005 rc=1 out="pid 5005's current affinity mask: ff" err="taskset: failed to set pid 5005's affinity: Operation not permitted" before="pid 5005's current affinity mask: ff" after="pid 5005's current affinity mask: ff"
+[22:45:03 t+    8.6] PIN FAILED or GameThread never appeared (run continues unpinned; see pin.txt)
+[22:45:03 t+    8.6] LAYER 'com.ps2x.runner/android.app.NativeActivity#13787' tried=['com.ps2x.runner/android.app.NativeActivity#13787']
+[22:47:06 t+  131.1] SCAP sc01-tick2100-t130.png tick~2100
+[22:49:23 t+  268.5] SCAP sc02-tick3000-t268.png tick~3001
+[22:51:53 t+  418.6] SCAP sc03-tick4000-t418.png tick~4005
+[22:53:08 t+  493.5] STOP tick 4539 >= 4500
+[22:53:09 t+  493.8] SCAP sc04-final-t493.png tick~4539
+[22:53:10 t+  495.1] THREADS
+Threads: 26 total,   1 running,  25 sleeping,   0 stopped,   0 zombie
+  Mem:  7342756K total,  4197152K used,  3145604K free,      584K buffers
+ Swap: 10485752K total,   751324K used,  9734428K free,  1428340K cached
+800%cpu 104%user   0%nice  44%sys 644%idle   0%iow   7%irq   0%sirq   0%host
+  TID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ THREAD          PROCESS
+ 5005 u0_a113      10 -10  17G 631M 393M R 92.5   8.7   7:02.04 GameThread      com.ps2x.runner
+ 4987 u0_a113      10 -10  17G 631M 393M S 29.6   8.7   2:32.91 GsWorker        com.ps2x.runner
+ 4985 u0_a113      10 -10  17G 631M 393M S  3.7   8.7   0:26.36 com.ps2x.runner com.ps2x.runner
+ 5016 u0_a113      20   0  17G 631M 393M S  0.0   8.7   0:00.01 binder:4966_4   com.ps2x.runner
+ 5015 u0_a113      20   0  17G 631M 393M S  0.0   8.7   0:00.00 InteractionJank com.ps2x.runner
+ 5014 u0_a113      20   0  17G 631M 393M S  0.0   8.7   0:00.30 binder:4966_1   com.ps2x.runner
+ 5008 u0_a113      10 -10  17G 631M 393M S  0.0   8.7   0:00.29 PGS-Waiter      com.ps2x.runner
+ 5007 u0_a113      39  19  17G 631M 393M S  0.0   8.7   0:00.00 com.ps:traceq0  com.ps2x.runner
+ 5004 u0_a113      -3 -10  17G 631M 393M S  0.0   8.7   0:01.75 AAudio_1        com.ps2x.runner
+ 4998 u0_a113      10 -10  17G 631M 393M S  0.0   8.7   0:00.00 com.ps2x.runner com.ps2x.runner
+ 4992 u0_a113      20   0  17G 631M 393M S  0.0   8.7   0:00.00 InsetsAnimation com.ps2x.runner
+ 4990 u0_a113      20   0  17G 631M 393M S  0.0   8.7   0:00.00 SurfaceSyncGrou com.ps2x.runner
+ 4989 u0_a113      10 -10  17G 631M 393M S  0.0   8.7   0:00.00 VsyncReceiver   com.ps2x.runner
+ 4991 u0_a113      20   0  17G 631M 393M S  0.0   8.7   0:00.00 binder:4966_3   com.ps2x.runner
+ 4986 u0_a113      10 -10  17G 631M 393M S  0.0   8.7   0:00.00 com.ps2x.runner com.ps2x.runner
+
+[22:53:10 t+  495.1] BATTERY status: 3 level: 63
+[22:53:10 t+  495.2] PROBE simpleperf 5s start
+[22:53:10 t+  495.2] PROBE simpleperf rc=1 err="simpleperf E environment.cpp:837] Package com.ps2x.runner doesn't exist or isn't debuggable/profileable."
+[22:53:10 t+  495.3] PROBE simpleperf -p 3s start
+[22:53:10 t+  495.3] PROBE simpleperf -p rc=1 err='simpleperf E event_selection_set.cpp:739] failed to open perf event file for event_type cpu-cycles: Permission denied'
+[22:53:10 t+  495.7] PROBE taskset tid=5005 rc=1 before="pid 5005's current affinity mask: ff" after="pid 5005's current affinity mask: ff"
+[22:53:13 t+  497.9] RESTORE 9fb46f8509adb1362b5ac74d35ac63a340e39228b64914848ce5ed85d6b74d13 match=True
+[22:53:13 t+  498.1] MC0-AFTER bad=[]
+[22:53:13 t+  498.1] END pid-after=none
