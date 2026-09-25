@@ -7,9 +7,16 @@ history into these docs.
 
 ## 1. The loop
 
-1. **Watch.** Run `WS=w2 MAX=1800 local/tooling/orch/watch.sh` in the background. It exits
-   on a new non-`[orch]` commit, a `blocked` pane, or the heartbeat (lists pane states).
-   Restart it after every exit. Before any `[orch]` commit, scan `git log --oneline -8` for
+1. **Watch.** Run `WS=w2 MAX=1800 local/tooling/orch/watch.sh` in the background (as a tracked
+   background task, never `&` inside a shell, or nothing wakes you). It exits on: a new non-`[orch]`
+   commit; a `blocked` pane; **STOPPED** (a worker that was working went idle/done without a
+   commit); **ERROR** (a pane shows a model/memory/rate-limit/API failure string); **STALL** (a
+   working pane's output unchanged for `STALL` s, default 1200); or the heartbeat (lists pane
+   states). Restart it after every exit, and never end a turn with panes working and no watcher.
+   **Stall check on every exit, heartbeat included:** for each pane, compare its status with what
+   it should be doing, read its last output, and act: nudge a stuck worker, re-send after a
+   transient error, pause or close one that competes for a shared resource (e.g. two local Qwen
+   workers hitting the oMLX memory guard), and tell Brad about anything he'd notice. Before any `[orch]` commit, scan `git log --oneline -8` for
    lane commits you haven't gated (one sat unread under two `[orch]` commits once).
 2. **Gate** each lane commit:
    - read the whole `REPORT.md` and the receipts a conclusion rests on;
