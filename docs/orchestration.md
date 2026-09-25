@@ -128,6 +128,12 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   of an ABBA set). Cool to thermal status ≤ 1 with a fixed wait before every run, prefer ABBA-BAAB,
   and report GameThread CPU per frame next to wall speed.
 
+- Odin over Wi-Fi (09-25): `local/odin-serial` holds the adb target (`192.168.1.53:5555`; USB serial
+  `622c49b1` as fallback). Re-arm after any Odin reboot: plug USB, `adb -s 622c49b1 tcpip 5555`,
+  `adb connect 192.168.1.53:5555`. The link has dropped for ~10 min at a time before (AP side);
+  drivers should `adb connect` again and retry once before calling a run void. On the wall charger
+  the battery gate is easy to meet.
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.

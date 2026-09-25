@@ -15,7 +15,7 @@ Brad's (SHA 9fb46f85...), mc0 SHAs match I31 pins, mc0-test empty.
 """
 import argparse, atexit, os, re, signal, subprocess, sys, time, hashlib, json
 
-D = '622c49b1'
+D = open(os.path.expanduser('~/dev/ssx3/local/odin-serial')).read().strip()  # USB 622c49b1 or Wi-Fi ip:5555
 PKG = 'com.ps2x.runner'
 FILES = f'/storage/emulated/0/Android/data/{PKG}/files'
 DSCRAP = '/data/local/tmp/n11'
