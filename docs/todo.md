@@ -188,6 +188,12 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 knobs +
+      pipelined present (`4825123`; iPad: 4×+hi-res pipelined beats today's 1×) + Mac zero-copy (`fb3dca0`,
+      default off), LX1 TZ/x86 (`lx1-tz`), PF1's post-race fix when gated; codegen promotion of the F4 regen
+      once lanes on the current codegen finish; then device builds (4×+hi-res default TBD by HR1's report).
+- [ ] VU1 usage-table gap: OPMULA/OPMSUB read fs.xyz but declare fs lanes = dest (unused in SSX 3; VB1).
+
 - [ ] **Running (09-25 afternoon):** VB1 (VU1 stage B, Opus), FR1 (race to the finish + more events; R1
       ≤ 1,800 s approved), PX1 (PCSX2 gsrunner as pixel reference + gallery), TC1 (per-thread state
       audit, vf0 read-only), F3 (fold → iPhone/Odin), LX1 1b, Q2. Queued: F4 (VR1 + NP1 + x86 fixes),

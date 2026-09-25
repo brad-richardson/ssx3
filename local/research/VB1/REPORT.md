@@ -226,3 +226,12 @@ GameThread: `__bzero` 4.9 % (the 64 KB `XgkickPipeline` zeroed by `m_xgkick = {}
   `vb1_boot.py --mode profile --runner bin/runner-<c>-speed --label p-<c> --stop-tick 2000
   --sample-at 1800 --sample-s 20`, `profile_share.py`.
 - Tail-call audit: `tailcall_audit.sh bin/runner-<c>-<kind>`.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Commit-at-issue with static per-pair maps + runtime guards (d4 `9638b3d`): det-hash 2,400/2,400,
+strict CPU GS SHA equal, total VU1 cycles identical, suite 617/617 incl. a new differential test that
+found and closed a budget-cut/resume gap the whole-game gate can't see. **Mac race 0.337× → 0.387×
+(1.15× over stage A)**, ABBA. Fold `1f51e48..9638b3d` onto fork `8559ab9` in **F5** (with HR1's pipelined
+present, LX1's TZ/x86 fixes, PF1's fix when gated). Todo: the OPMULA/OPMSUB usage-table gap (reads
+fs.xyz, declares dest; unused in SSX 3's images) and precomputed stall tables if the next profile says so.
