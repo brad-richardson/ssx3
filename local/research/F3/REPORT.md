@@ -323,3 +323,9 @@ bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
 bash ~/dev/ssx3-work/F3/ios/build-install.sh install_iphone
 bash local/research/I31/deploy-ios.sh iphone         # never launched
 ```
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** I viewed the iPad `run-ipad-f3/shot-t2100.png`: race 00:00:06 on the GPU backend, full brightness,
+the player rider solid and lit mid-trick. Brad's iPhone has build `ec2dbf1` installed (never launched),
+save + manual-play env verified. The iPad-in-portrait pad overlap is the known I28 item.
