@@ -513,3 +513,10 @@ pair→`next()` call) + regen the 7 images + Mac det/speed re-verify
 + APK rebuild + Part 2 re-run (S1/S2/P1). Warn F4I before it
 launches the iPad build. Orchestrator decides fix-forward vs
 revert on the pushed `ssx3`.
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Correct stop.** The generated VU1 pair functions end with a plain `return next(vu, c)` (emitter
+`ps2_vu1_recomp.cpp:187`), so only `next → pair` is a guaranteed tail call; the chain recurses. Apple
+clang on the Mac's 8 MB main stack hid it; Android's GameThread overflowed at 512 frames. Brad's F3 play
+build was restored and verified; F4I was stopped before any iPhone install. Part 2b released (below).

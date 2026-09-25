@@ -142,6 +142,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   `192.168.1.53:5555` (tcpip, lost on reboot) and USB `622c49b1`. If the Odin reboots and Wireless
   debugging comes back off, Brad re-enables it in Developer options (no re-pairing needed).
 
+- Mac-only validation hides stack depth: the Mac's main thread has 8 MB and Apple clang may tail-call
+  where Android's NDK doesn't (F4: VU1 chain recursion crashed the Odin at 512 frames). Anything with
+  deep or chained calls gets a small-stack test (512 KB) on the Mac before a device build.
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.
