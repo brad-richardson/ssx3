@@ -187,6 +187,11 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **Running (09-25 afternoon):** VB1 (VU1 stage B, Opus), FR1 (race to the finish + more events; R1
+      ≤ 1,800 s approved), PX1 (PCSX2 gsrunner as pixel reference + gallery), TC1 (per-thread state
+      audit, vf0 read-only), F3 (fold → iPhone/Odin), LX1 1b, Q2. Queued: F4 (VR1 + NP1 + x86 fixes),
+      Q1 after Q2, Odin menu-side Turnip/allocator churn after F4's Odin profile.
+
 - [ ] **Rider fix in F3** (`51c759b`, vf0 hardwired in every EE context). Follow-ups: vf0 read-only in
       codegen (`lqc2 $vf0` at 0x3fe9bc writes it today; hardware ignores the write); audit other
       per-thread state that only the main context initializes (`vu0_r`, …).
