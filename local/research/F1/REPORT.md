@@ -139,3 +139,11 @@ python3 f1_boot.py --mode det --backend parallel --runner bin/runner-det --label
 python3 f1_boot.py --mode speed --backend parallel --runner bin/runner-clean --label B2 --stop-tick 2400
 python3 gb8_rates.py run/B2
 ```
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass.** I viewed the t2398 frame (race 00:00:11, 14 MPH, lit snow, trees, rock face, mountain
+backdrop). 14 cherry-picks clean (not `a46fb2e`), suite 611/611, runner-dir diff empty, cid0 = 531.
+Pushed `f1-fold` → fork `ssx3` **`56a5e8a`** (fast-forward from `71c952e`). Mac race 0.250× on
+paraLLEl (one run). Menus ran at **1.287×**, i.e. faster than real time: the guest isn't paced to
+59.94 Hz when it can outrun it (todo item). Parts 2 (Android) and 3 (iOS) released in parallel.
