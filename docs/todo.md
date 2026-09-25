@@ -16,7 +16,7 @@ then 120 Hz simulation.
 
 ## E — PS2 runtime (PS2Recomp fork `ssx3`)
 
-- [ ] **Race rendering gaps (top correctness item).** The race world draws
+- [ ] **Race rendering gaps (top correctness item; RR1 Opus exploratory running).** The race world draws
       (terrain, rider, HUD since E50 Part 3 / E53 Part 2), but the sky and
       sun are gone, there's no foliage, textures look flat and a dark GS
       region occludes part of the screen. Leads: sky-like packet TBP0 11017
@@ -38,7 +38,7 @@ then 120 Hz simulation.
       exact path; (b) static recompilation of SSX 3's 7 VU1 microprograms
       (7,305 instructions). Validate with the E55 hash tap. E45's
       `VuWide=double` is already folded. `local/research/N5/`, `E53/`, `E45/`.
-- [ ] Save seed follow-ups (E55D16 A: the game autoloads Brad's seeded card and shows his rider
+- [ ] Save seed follow-ups (I31 running: Brad's save on his iPhone/iPad now, Odin after TL1; E55D16 A: the game autoloads Brad's seeded card and shows his rider
       progress): only if Brad wants it, put his save into the Odin/iPhone `mc0`; retime I26-FAST for
       the ~200-tick later title when a card is seeded. `local/research/E55D16/`.
 - [ ] **E54E signed 64-bit branches:** the PCSX2 low-64 oracle and suites
