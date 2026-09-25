@@ -154,3 +154,11 @@ cmake --build build --parallel 8 --target ps2x_tests ps2EntryRunner
 python3 uv1_boot.py --runner build/ps2xRuntime/ps2EntryRunner --label B1 --stop-tick 2400
 python3 uv1_agg.py run/B1/boot.log
 ```
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Suspect 7 (REFS/stall) closed for this route. **V2/V3 z/w differ from PCSX2 and are used by
+53 % of the route's UNPACKs** (V2: we leave z/w stale, PCSX2 z=v0 w=v1, V2-32 QW-aligned w=0; V3: we
+leave w stale, PCSX2 w = next vector's x or 0 at a QW boundary). Whether the VU1 programs read those
+lanes decides visibility; stale VU memory is a candidate for intermittent pop-in. Part 2 released:
+implement both rules as PCSX2 does (hardware-tested SSE rules), unit tests, one A/B det boot.
