@@ -315,3 +315,11 @@ sound on; Mac race 0.250× (unchanged). Pushed `f2-fold` → fork `ssx3` **`96e9
 from `56a5e8a`). Fine horizontal stripes are visible in the Mac paraLLEl frames too (the Odin
 "stripes" item), so that bug can now be chased on the Mac. Part 3 (iOS) released; Part 2 (Odin)
 waits for the Odin (wall-charging, off USB).
+
+## Orchestrator gate, Part 3 (2026-09-25)
+
+**Pass.** I viewed the iPad `shot-t1960.png`: race 00:00:04 with lit snow, pines, mountains, spray and the
+checkpoint beam. This time the iPad was in portrait, and the overlay's portrait layout collides:
+SELECT/START overlap, and the D-pad and face buttons sit over the picture. That goes to I28 (iPad-native
+layout); the iPhone plays in landscape. Signed build `14ec858d…` from fork `96e9f45` is on Brad's iPhone
+(install only) and iPad; save and manual-play env re-applied and verified on both.

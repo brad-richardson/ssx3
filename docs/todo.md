@@ -156,6 +156,7 @@ then 120 Hz simulation.
 - [ ] Brad's feedback on the I32 controls (stick left, D-pad right; on his iPhone since 09-24).
 - [ ] Brad (09-24, iPhone I30): UI elements flash in and out every few seconds and many 3D assets
       pop in and out. RR1: no draw dropout in the Mac stream; likely the PATH3 wrong-texture effect. Re-check on his phone after the RR1 fold.
+- [ ] iPad in portrait: the virtual-pad layout collides (SELECT/START overlap; D-pad and face buttons over the picture; F2 Part 3 shot). Fold into I28.
 - [ ] **I28 iPad-native presentation** (low priority, behind Odin): add the
       iPad device family + landscape and lay the virtual pad in the
       letterbox margins; Simulator iPad, then Brad's iPad. IPAD1 ran as an
