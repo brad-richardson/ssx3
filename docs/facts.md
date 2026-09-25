@@ -91,6 +91,10 @@ orchestration lessons in `docs/orchestration.md`.
 - Pinned raylib SDL2 `GetWindowScaleDPI()` returns 1; I27B's DPI patch fixes the viewport.
   Without an iPad device family the app runs in an iPhone-compat portrait window. (I27, IPAD1)
 
+- iOS builds use the CPU GS backend (`PS2X_GS_SHADOW_PARALLEL` off, paraLLEl compiles to a stub);
+  paraLLEl on iOS is I33. Brad's iPhone reaches the Mac over Wi-Fi only and drops when it sleeps.
+  (F2 Part 3b)
+
 ## PCSX2 reference
 
 - T48 VU1 startPCs are in 8-byte units: PCSX2 `0x0/0x2/0x8/0x73` = ours `0x0/0x10/0x40/0x398`.

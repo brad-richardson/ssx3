@@ -646,3 +646,10 @@ bash local/research/I31/deploy-odin.sh  # SKIP + 7 OKs, no launch
 `0ed07c4` + paraLLEl `19d93b2` + the promoted codegen; race 0.139× / 0.137× (speed-neutral vs F1's
 0.140×; the 64-bit branches and progressive scanout cost nothing measurable). Installed as Brad's play
 build with his env and save verified; no launch. NP1 profiles this APK next.
+
+## Orchestrator gate, Part 3b (2026-09-25)
+
+**Accepted.** iOS rebuild from `92f9991` validated on the Simulator and iPad; the iPhone was skipped (not
+reachable over Wi-Fi, and not needed: iOS uses the CPU GS backend, so ST1's paraLLEl scanout fix doesn't
+change it; Brad's iPhone keeps the `96e9f45` build). iOS on paraLLEl is I33. Fix the `install_iphone`
+gate that matches "unavailable" as a substring when the script is next touched.
