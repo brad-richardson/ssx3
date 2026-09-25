@@ -566,3 +566,88 @@ MXCSR, GL (no swaps), fibers, VU1/gs_replay pairs, input values
   `/Users/brad/dev/ssx3-work/codegen-ssx3/
   sub_00231D18_0x231d18.cpp`, `CMakeLists.txt` (flags), ldd of
   `build-tzd/ps2xRuntime/ps2EntryRunner`.
+
+## Part 1d — final (pin + parity to t2400)
+
+Supersedes the paused notes above (kept as trail). Root cause NAMED,
+one-line pin committed on `lx1-tz`, parity re-run: **equal to t2400**.
+
+### Verdict
+
+Tick-94 split source = **VU1Interpreter::run()'s fesetround
+save/restore clobbered x86 MXCSR rounding to nearest at VU1's first
+run**. Pin = use the E53 control word instead of glibc fenv (same
+shape as the TZ fix). Post-pin: ticks 92–95 rdram 0/0/0/0, det-hash
+streams identical for all 2412 common ticks (1–2412). **Equal.**
+
+### Mechanism (proven, not inferred)
+
+- E53 `ScopedEeMode` writes **MXCSR only** (chop+FTZ+DAZ); x87 CW
+  stays nearest. b4cb476 already documents that glibc
+  `fegetround()` reads the x87 word on x86.
+- `VU1Interpreter::run()` did `prev=fegetround()` (= NEAREST, from
+  stale x87) → `fesetround(TOWARDZERO)` → … → `fesetround(prev)` →
+  **MXCSR RC reset to nearest, FTZ/DAZ preserved** (0xffe3→0x9fe3).
+- Hardware proof (`lx1d_fetest.c` in docker, cc -O2): after
+  MXCSR-only chop install, `fegetround()=0x0`; after the VU1 pair,
+  `mxcsr=0x9fc0` (nearest+FTZ+DAZ). Reproduces the spy's 0x9fe3
+  (modulo sticky flags) exactly.
+- Spy proof (local-only MXCSR tap, since reverted): EE thread chop
+  (0xffe3) through (spy-)tick 92 boundary, nearest (0x9fe3) from
+  inside guest call `entry=0x3827e0` onward, permanent. VU1's first
+  run is in that window (vu1Data hash empty@92 → live@93); nested
+  WaitSema/sema calls bracketed clean. Full-binary objdump
+  enumeration: 24 real ldmxcsr, all known scopes + miniaudio (audio
+  thread, sound off) — no other writer exists, forcing the
+  read-modify-write (fesetround) conclusion.
+- Arithmetic proof: lead op `sub.s @0x231d3c` (countdown
+  `0x3e3bbbbb − K`, K=0x3c888889 constant) — exact d straddles:
+  chop=mac `0x3e2aaaa9`, nearest=bradflix `0x3e2aaaaa`.
+  Tick-93 step also straddles with both hosts agreeing (=chop),
+  bracketing the flip between the two subs. Integer-exact
+  (Fraction) + hardware-confirmed (fold-proof volatile test).
+- Cross-checks: all 24 tick-94 words +1/+2 ULP (10 distinct
+  values); VU1's own outputs unaffected (forces TZ in-body —
+  vu1Data identical thru 95); ARM unaffected (unified FPCR:
+  fegetround reads chop, restores chop); ieee-both boots
+  (MD7-vs-D9) 0/0/0 at 92/93/94 — mode is the sole host
+  difference; x86 self-consistent (D10-vs-D5 0/0/0/0).
+
+### Pin (committed on `lx1-tz`, both trees, same tree)
+
+- Mini `fc0cc67`, bradflix `766d502` (same tree
+  `9ed9b08…`; bradflix message has a cosmetic typo, tree
+  unaffected): `ps2_vu1_core.cpp` — replace the fenv pair with
+  `ps2_fpmode::readControl` /
+  `writeControl(ps2Control(prev))` / `writeControl(prev)`;
+  `#include <cfenv>` → `#include "ps2_fpmode.h"`. 8+/5-.
+- No-op under an active EE scope (prev already PS2 mode);
+  correct outside it; ARM behavior unchanged. Never pushed.
+- Runner-dir check: change is in `ps2xRuntime/src/lib/vu/`
+  (not `src/runner/`). Not pushed per brief.
+
+### Parity re-run (post-pin diag builds, rdump tap still uncommitted)
+
+- MD8 (mac, stop 2400, 244.7 s) vs D14 (bradflix, stop 2400,
+  339.5 s): rdram ticks 92/93/94/95 = **0/0/0/0**;
+  det-hash `combined` ticks 1–2412 = **all equal** (MD8 ran to
+  2413, D14 to 2412; 2412 common). Next split: **none —
+  "equal"** through t2400.
+- Unit suite NOT re-run (diag builds lack ps2xTest; pin is
+  behavior-preserving by construction + proven by parity).
+  E lane can run 650/650 on the next non-diag build.
+
+### Latent / follow-up (not Part 1d scope)
+
+- `gs_replay_core.cpp:45-52` has the IDENTICAL fenv pair (same
+  latent x86 clobberer if replay ever runs on the EE thread).
+- Tick-92 GS upload fnv differs cross-host (a2ba209d vs
+  fd889dc5) with identical rdram — GS-local/display path,
+  pre-existing, untouched by this pin.
+- Scratch (outside git, kept): `~/dev/ssx3-work/LX1/run/MD{5,6,
+  7,8}`, `from-bradflix/{D5,D6-boot.log,D7-boot.log,
+  D4-syscalls.txt,D9,D10,D11,D12,D13,D14}`,
+  bradflix `run/{D5–D14}`, builds `build-tzd`,
+  `mac-build-tzd`, `/tmp/lx1d_{mxtap,mxtap2,mxtap3,pin}.py`,
+  `/tmp/lx1d_{hwtest,hwtest2,fetest}.c`, `/tmp/lx1d_ldsites.txt`.
+  Bradflix lease released at close (verified).
