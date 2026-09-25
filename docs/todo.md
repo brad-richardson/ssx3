@@ -193,7 +193,7 @@ then 120 Hz simulation.
 
 - [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 (`cf7c0df` knobs, `4825123` pipelined present,
       `4a591d3` rate log, zero-copy `fb3dca0`+`d929048` default off; iOS/Mac default 4×+hi-res + pipelined; Odin
-      pipelined + a 1× vs 4×+hi-res measurement), LX1 TZ/x86/fenv (`lx1-tz`: `5f32212 20377a3 b4cb476 fc0cc67`; Mac↔bradflix det-hash equal to t2400), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
+      pipelined + a 1× vs 4×+hi-res measurement), LX1 TZ/x86/fenv (`lx1-tz`: `5f32212 20377a3 b4cb476 fc0cc67`; Mac↔bradflix det-hash equal to t2400), PF1 `3c037ab` (post-race unwind fix), RP1 `9bfd4aa` (VU MAX/MINI raw bits: carve trail); codegen promotion of the F4 regen
       once lanes on the current codegen finish; then device builds (4×+hi-res default TBD by HR1's report).
 - [ ] VU1 usage-table gap: OPMULA/OPMSUB read fs.xyz but declare fs lanes = dest (unused in SSX 3; VB1).
 

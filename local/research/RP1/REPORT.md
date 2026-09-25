@@ -140,3 +140,14 @@ All `gs_fatal=null`. PCSX2 on bytesize (`rp1_pcsx2.sh`, bytesize otherwise idle)
 `rp1_texdump.py` (IMAGE upload extraction by DBP + alpha stats), `rp1_vudis.py` (VU upper/lower disassembler
 over T65 micro memory), `rp1_t65find.py` (T65 start headers), `rp1_primdiff.py` (draw-level diff of two
 captures), `rp1_sheet.py` (contact sheets; needs Pillow via `uv run --with pillow`).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** I viewed `triples-1.png`: before (no trail, pale translucent boxes around the board), after (white
+carve groove), PCSX2 (the same groove). Mechanism measured end to end (E1–E10): VU1 `MAX`/`MINI` normalized
+operands (denormal → 0) before comparing, while SSX 3's trail program copies RGBA integers with
+`MAX.xyzw vfX, vfY, vfY` (integer colours are denormal floats); PCSX2 compares raw sign-magnitude bits.
+Fix `9bfd4aa` (raw-bit MAX/MINI incl. bc/I forms, shared by interpreter and generated images): only vertex
+RGBA on 1,014 trail prims changes; rdram/scratch/eeCycle identical at every tick. Folds in **F5**
+(regenerate the VU1 images or confirm the generated code calls the shared helper). Other table rows: no
+further visible faults found (pop-in not reproduced in the window checked).
