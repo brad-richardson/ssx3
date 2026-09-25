@@ -121,6 +121,7 @@ All `gs_fatal=null`. PCSX2 on bytesize (`rp1_pcsx2.sh`, bytesize otherwise idle)
 - Other FMAC ops still normalize operands. That's correct for arithmetic (hardware treats denormals as
   zero), and only MAX/MINI pass an operand through unchanged.
 - Row 7 ("SUPER UBER") and the rider-pace difference weren't investigated.
+- Share-tier mirror not done: `rsync` to `/Volumes/share/ssx3/RP1/` failed (`mkpath: Permission denied`).
 - Scratch: `~/dev/ssx3-work/RP1` 7.4 GB (two 2.3 GB captures `run/c1`, `run/c2`, build 1.8 GB). The
   captures and `t65-vu1-2.bin` (36 MB copy of T65's dump) can go after the gate. ssx3 internal 135/200 GB.
 
