@@ -1,4 +1,4 @@
-# I34 — virtual pad layout v2 (PARTIAL: code done, sim build blocked on disk)
+# I34 — virtual pad layout v2 (Part 1 complete)
 
 Worker: Muse. Brief: `local/muse/prompts/I34.md`.
 Fork worktree `~/dev/ssx3-work/I34/PS2Recomp`, local branch `i34-pad` =
@@ -103,3 +103,47 @@ cmake --build ~/dev/ssx3-work/I34/host-test -j8
 ```
 
 Budget: ~40 min elapsed, 0 builds, 0 boots, 0 lease claims.
+
+## Part 1 complete — suite + Simulator build + screenshots (after disk cleared)
+
+Disk back under cap (orchestrator deleted closed lanes' output; 154.4 GB
+at resume). No new fork commits (`i34-pad` still `3d52208`).
+
+**Suite:** Release from the worktree root, rc=0, **613/613/0** (I32-era
+count was 601 at `f949ff0`; the tip suite is bigger). All 11
+Ps2VirtualPad Runs pass, including the new I34 layout Run on all three
+sizes. Full log `~/dev/ssx3-work/I34/host-tests.log`.
+
+**Simulator build** (`~/dev/ssx3-work/I34/build-install.sh`, I32 recipe
+with W=I34 + PIN `0ed07c4`; env = I32's `ps2x.env`, SHA `0041e09a…`,
+CPU backend): `preflight configure_sim build_sim stage_sim sim_install`
+all rc=0. Release `-O3 -DNDEBUG` (cache evidence), raylib patch already
+applied, codegen `8ea8ed43…` (canonical), stage ISO/ELF `cmp`-equal.
+Sim binary `1ff02dff…`. Receipts in `~/dev/ssx3-work/I34/logs/`.
+
+**Runs** (lease slot 1, claimed/released each; Simulator shut down after):
+
+| Frame (`~/dev/ssx3-work/I34/`) | Content (viewed) | SHA-256 |
+| --- | --- | --- |
+| `run-stick/shot-0020s.png` (tick 538) | Title logo + Press START + EA copyright; stick knob deflected full-right; `[vpad] stick pad bytes lx=0xff ly=0x80` in console | `afbd0262…65e424` |
+| `run-sim/shot-0010s.png` (tick 371) | Title logo + EA copyright; stick rest ring left, D-pad below face buttons | `7c635520…5c2a9c66` |
+| `run-sim/shot-0030s.png` (tick 737) | Select Character, Zoe, stats bars, rider silhouettes | `e3ddba52…72c33e0a1` |
+| `run-sim/shot-0035s.png` (tick 952) | Setup Character, Zoe, Continue/Equip Gear/Rider Details/Music | `facf17aa…5d12b21768` |
+| `run-sim/shot-0100s.png` (tick 1795) | Race 2ND/2, 00:00:01, 0%, countdown digits, EA Radio "Poor Leno – Silicon Soul Remix / Royksopp" | `f5751639…7a6d5936` |
+| `run-sim/shot-0160s.png` (tick 2031) | Race 2ND/2, 00:00:05, 1%; race advances | `c6076aea…2ad2e99` |
+
+Full SHAs in `frame-sha-read1.txt` / `frame-sha-read2.txt` (identical).
+Route: I26-FAST, script i=0..21 fired (22 presses; guest slower under
+host load, last tick 2031 vs I32's 2221 — same shape as I32's note).
+Sound stream started (48 kHz host rate here). Race pace ~4.0–4.6 vsync/s
+tail — diagnostic only, not a speed number.
+
+**Layout as seen:** the stick is visibly 1.5x at rest; the D-pad is a
+large 4-arrow diamond below the face buttons, left of the face column;
+no control overlaps in any frame. Closest-fit consequence, visible in
+the Select/Setup Character shots: the D-pad covers the bottom-right
+button-hint legend ("✕ Select / △ Previous / ☐ Options"). Brad's call
+whether that placement stands.
+
+Part 1 budget: 1 Simulator build, 2 runs (21 s + 160 s, slot 1).
+I34 scratch 4.8 GB. No lease held at close.
