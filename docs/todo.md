@@ -89,6 +89,14 @@ then 120 Hz simulation.
 - [ ] **GB8 paraLLEl as the Mac's standard backend (Brad, 09-24; muse, running):** speed CPU vs
       GPU, determinism (det-hash equal?), frame parity, host threads. Then switch the default so
       Mac boots are faster and exercise the Odin's renderer. `local/muse/prompts/GB8.md`.
+- [ ] **GB9 align the Mac's paraLLEl paths with the Odin's (Brad, 09-24; queued after the GB8 gate).**
+      Goal: every GPU-path choice the Odin makes, the Mac makes too, so Odin-only questions shrink
+      to driver/rounding/speed/thermals. Part 1: inventory each `[gs-path]` field (hier rule,
+      subgroup sizes, descriptor path, sampler feedback) Mac vs Odin, why each differs (e.g. the
+      `#ifdef __APPLE__` flat-always binning; Apple SIMD width 32 vs wave64; descriptor buffers on
+      MoltenVK), and whether a default-off env knob can force the Odin choice on the Mac. Part 2:
+      add the feasible knobs in the paraLLEl fork, replay-check Mac(knobs) vs Odin on TL1's
+      `odin_replay.py` rows. Remaining gaps go in `docs/facts.md`.
 
 - [ ] **GB7C9 same-stream GPU comparison** for the damaged title/HUD
       glyphs on paraLLEl (Mac): rebuild the pinned G43 source, then compare
