@@ -155,6 +155,110 @@ python3 uv1_boot.py --runner build/ps2xRuntime/ps2EntryRunner --label B1 --stop-
 python3 uv1_agg.py run/B1/boot.log
 ```
 
+## Part 2 — V2/V3 fix, unit tests, A/B det comparison
+
+Same worktree/branch `uv1-unpack`. One commit: the V2/V3 lane rules in
+`ps2_vif1_interpreter.cpp` + 10 unit tests in `ps2xTest/src/ps2_memory_tests.cpp`
+(all cite PCSX2 file:line). CL=WL=0, invalid combos, MODE 3 and fill untouched.
+
+Rule as implemented (brief spec): V2 writes z=v0; w=v1 except V2-32 with a
+QW-aligned unpack data start gives w=0 (`Vif_UnpackSSE.cpp:139-151`). V3 w =
+next source vector's first element (width-appropriate, USN-extended), 0 when
+the read crosses a source QW boundary or runs past the buffer (`:203-238`).
+Stream phase comes from the buffer offset (buffers concatenate whole QW
+payloads; first payload assumed guest-QW-aligned — noted in code). Mask/mode
+logic untouched and applies to the new lanes as PCSX2's `writeXYZW` does.
+
+Two findings while implementing (both in code comments + report, no spec change):
+1. PCSX2 hardcodes the aligned case for every non-V3-16 type (`Vif_Dynarec.cpp`
+   key1 `&= 0xFFFF01FF`, `:471-473`), i.e. its mode-0 paths zero V2-32 w
+   unconditionally. The brief's conditional rule is implemented with the real
+   phase instead — a deliberate, documented generalization.
+2. The V3 QW-cross clause is unreachable through the interpreter: `pos` advances
+   only in multiples of 4 (every command/data length is 4-aligned), and with a
+   4-aligned data start no V3 w-read (4/2/1 bytes at vec+12/6/3) can span a QW
+   boundary. Effective V3 rule: always next-x (0 past buffer end). The check is
+   implemented per spec anyway; tests cover the reachable boundaries (next-read,
+   trailer/pad-read, buffer-end-0).
+
+Tests (10, sentinel-prefilled VU1 data): V2_32 unaligned replicate + aligned w=0
+(NUM=2 both); V2_16 signed replicate on an aligned start (locks the w=0 rule as
+V2-32-only); V2_8 signed replicate; V3_32 next-read + trailer-word + buffer-end-0;
+V3_16 next-read signed + trailer-u16 + buffer-end-0; V3_8 next-read signed +
+pad-read + buffer-end-0 (NUM=4). Red phase observed: all 10 fail on unfixed code
+(616/626 pass); green: **626/626 rc=0** from the worktree root (612 prior + 10
+new + 4 tap-gated det-hash tests newly compiled in).
+
+Boots (det, paraLLEl + `PGS_HIER_BINNING=force`, SOUND=1, I26-FAST, empty mc0,
+one slot each): A = base + counters-off + det-tap runner
+(`d1a62f31…138fd12`), B = fix (`2e4dcd0f…60485fa`). The frame knob takes 3 ticks
+per boot, so each config ran twice: A1/P2B1 (`ONCE_TICKS=1090,1800,2100` +
+GS capture) and A2/P2B2 (no once-ticks; `upload-latest` ≈ t2400). Fifth boot A3
+(A binary, stop 2470, once-ticks 2451–2453, no capture) pins the late-race
+comparison: A3@2451 fnv `a77cb1e7` = P2B2@2451, and A3-vs-P2B2 det-hash differs
+only at 1606 over ticks 1–2451. All five `bound=target`, `gs_fatal=null`,
+hier-if-large path line. A1-vs-A2 det-hash: 0 diffs over 2,425 common ticks
+(frame-dump mode doesn't perturb guest state).
+
+- **First det-hash differing tick: 1606** (the only one of 2,452 common ticks);
+  fields differing: `vu1Data` (+`combined`) only — RDRAM, scratch, VU1 code,
+  eeCycle and program count identical everywhere.
+- **GS stream digest: differs** (`4bc97c2c…` vs `a6ed1cf4…`, same 2,510,683,433
+  bytes, same 1,906,204 records). Record-multiset diff: 3,055 small Packet
+  records differ across 42 ticks (461…2245, incl. 1606); all other records
+  (incl. every VBlank marker) identical. Raw byte diff (1.7M bytes) overstates it:
+  part is record-interleave shift at one VBlank boundary.
+- **Frames, viewed side by side, all pixel-identical** (fnv + byte-identical
+  PNGs): t1091 Select Peak menu (`f86140f2`), t1800 race start (`298c446a`),
+  t2100 race 1% (`6f164015`), t2422–2424 (`5b14b861`/`fda2ce0`/`3b0c492d`) and
+  t2451 (`a77cb1e7`, via follow-up A3 boot below). At t2425 the two final-frame
+  boots show different presents (A2 repeats the 2424 frame, P2B2 presents a fresh
+  `fee99ed6`) — a host present-phase artifact where SIGTERM landed, not a render
+  difference: det-hash matches at 2424 and 2425, and frames match at 2422–2424
+  and again at 2451.
+- **Player rider, close-looked (for RD1):** t1800 rider at the start gate (right,
+  partly behind the gate pole; dark outfit + red board, countdown overlaid);
+  t2100 rider centre-frame, a complete dark snowboarder (torso, spread arms,
+  board) carving with spray trail; t2425 rider distant-centre, almost fully
+  buried in snow spray (only faint dark fragments — reads as "missing" at a
+  glance); t2451 rider mid-air tumbling (limbs spread, board separate, 3 MPH) —
+  normal race evolution in both runs (A3 proves it), not a fix-induced crash.
+  Every compared tick is pixel-identical A/B: V2/V3 z/w change nothing about
+  the rider's rendering; Brad's missing-model issue reproduces identically with
+  and without the fix.
+- **cid0 = 531 in B** (P2B1; A1/A2 also 531 — sound pacing unaffected).
+
+Reading: V2/V3 z/w flow into a few small GS packets but are dead lanes for
+rasterization on this route (no presented frame changes); the tick-1606 blip is
+a row that survives to VBLANK sampling while all other ticks' rows are
+overwritten in-tick. The fix matches hardware on lanes the game doesn't consume.
+No render regression; foldable on the orchestrator's call.
+
+Part 2 receipts: suite red log `suite-red.log` (10 UV1 fail), green `suite-green.log`
+(626/626); runners `runners/ps2EntryRunner-{A,B}` (two SHA reads each); boots
+`run/{A1,A2,P2B1,P2B2,A3}` with `result.json` (det lines, frame fnvs, snd cid0,
+GS sha), `frames/`, `snd.log` (`gs.stream` A1/P2B1 moved SHA-verified to SSD
+scratch `/Volumes/Extreme SSD/ssx3-uv1/`, internal copies deleted under the cap).
+Rider crops are throwaway (`/tmp/uv1_rider/`). Disk 61.6/200 GB at close (briefly
+201 during the captures; mine moved off, other lanes cleaned). Never pushed.
+Budgets: 2 rebuilds of one dir (A tap rebuild + B fix rebuild; +1 red-phase
+incremental), 5 boots (4 planned + A3 late-race pin), ~1.5 h box kept.
+
+```sh
+# A runner: reconfigure the Part 1 build dir (source still base+counters)
+cmake -S PS2Recomp -B build -DPS2X_ENABLE_DET_HASH_TAP=ON
+cmake --build build --parallel 8 --target ps2x_tests ps2EntryRunner
+cp build/ps2xRuntime/ps2EntryRunner runners/ps2EntryRunner-A
+# implement fix + tests (one commit), rebuild, suite from worktree root
+(cd PS2Recomp && ../build/ps2xTest/ps2x_tests)   # 626/626
+cp build/ps2xRuntime/ps2EntryRunner runners/ps2EntryRunner-B
+python3 uv1p2_boot.py --runner runners/ps2EntryRunner-A --label A1 --stop-tick 2400
+python3 uv1p2_boot.py --runner runners/ps2EntryRunner-A --label A2 --stop-tick 2400 --no-once-ticks --no-capture
+python3 uv1p2_boot.py --runner runners/ps2EntryRunner-B --label P2B1 --stop-tick 2400
+python3 uv1p2_boot.py --runner runners/ps2EntryRunner-B --label P2B2 --stop-tick 2400 --no-once-ticks --no-capture
+python3 uv1p2_boot.py --runner runners/ps2EntryRunner-A --label A3 --stop-tick 2470 --once-ticks 2451,2452,2453 --no-capture
+```
+
 ## Orchestrator gate (2026-09-25)
 
 **Pass.** Suspect 7 (REFS/stall) closed for this route. **V2/V3 z/w differ from PCSX2 and are used by
