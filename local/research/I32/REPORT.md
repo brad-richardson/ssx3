@@ -223,3 +223,12 @@ with the overlay; the D-pad clears the face and shoulder buttons). The stick log
 `(1,0)` as `lx=0xff ly=0x80`; suite 601/601; runner-dir diff empty. Part 2 released: device build
 from `i32-controls` `71c952e`, iPad install + test, iPhone install only (never launched), then re-apply
 `local/research/I31/deploy-ios.sh` on both.
+
+## Orchestrator gate (Part 2)
+
+**Pass.** iPad `shot-t1960.png` viewed: race 2ND/2 with the stick knob deflected on the left and
+the overlay in place. iPhone install only, never launched; Brad's save and manual-play env re-applied
+(SKIP, exact sizes) on both. Runner-dir diff empty; fork `ssx3` fast-forwarded
+`f949ff0 → 71c952e` (controls commit). Finding F1 (I26-FAST derails with Brad's save present; tests
+must use a fresh card) matches I31 §5. The stale-UUID `PS2X_MC_ROOT` override resolved to an empty
+card harmlessly; future overrides read the live container path first.

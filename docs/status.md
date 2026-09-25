@@ -4,7 +4,7 @@ Milestone: stock SSX 3 gameplay through our PS2 static recomp runtime on the Odi
 Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`.
 History: git log (this board is current state only). Updated 2026-09-24 ~20:00 EDT, Mac mini.
 
-**Pins:** PS2Recomp fork `ssx3` `f949ff0` (sound HLE with planar tag-1 fix, VIF1 IMAGE continuation, GS replay harness + `[gs-path]` log, widescreen, Turnip packaging) ·
+**Pins:** PS2Recomp fork `ssx3` `71c952e` (iOS analog stick + D-pad right, sound HLE with planar tag-1 fix, VIF1 IMAGE continuation, GS replay harness + `[gs-path]` log, widescreen, Turnip packaging) ·
 paraLLEl-GS fork `ssx3` `963cb57` (wave64 binning fix) · Granite fork `ssx3` `166ba21a` ·
 canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
@@ -14,7 +14,7 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 | **E** PS2 runtime | Race terrain, rider, HUD draw on Mac; sky/sun missing, dark GS region. Save seed source found: Odin AetherSX2 `Mcd001.ps2` has `BASLUS-20772-GAM0001`/`SET0001` (private copy, `ac98cf37…`). | save-card seed; sky; E54E, INTC 5/7; E57 VU1 speed | — |
 | **G** GS / GPU backend | GPU backend opt-in on Mac (GB6C, 578/578 replays). Damaged title glyphs traced to a texture word at packet 5470 (GB7C7P2); earlier producer open. Bilinear rounding differs Mac vs Adreno (small). | Glyph producer; exact bilinear (shader regen); wave128 Turnip probe (later) | — |
 | **A** Audio | **Menu music fixed and confirmed by Brad** (AU8: tag-1 PCM is planar; matches PCSX2's real output). Host output still needs `PS2X_SOUND=1`. Races also play SFX on SPU2 hardware voices, which we don't emulate yet. | Sound on in iOS (I30) and Odin envs; race SFX lane (SPU2 voices) | — |
-| **I** iOS | **I30: iOS build of `d711506` with the fixed music and sound on**, installed on Brad's iPhone (no launch); Simulator + iPad reach the race with sound. Audio gaps expected below full speed. iPad still an iPhone-compat window. | Brad listens on the phone; I28 iPad-native (low priority) | Brad's listen |
+| **I** iOS | **I32: build `71c952e` installed on Brad's iPhone (no launch) and iPad**: floating analog stick left, D-pad right, fixed music, sound on, his save autoloads, manual play (I31). Simulator + iPad reach the race. Audio gaps expected below full speed. iPad still an iPhone-compat window. | Brad listens on the phone; I28 iPad-native (low priority) | Brad's listen |
 | **W** Widescreen | Anamorphic 16:9 default; 2D stretch accepted by Brad. | — | — |
 | **T** PCSX2 reference | bytesize PCSX2 with trace hooks (T48/T49, AU4/AU6 tag capture). | On demand | — |
 | **V** Storage | Mini internal 161/200 GB. SSD tier-1 cleanup done. | Brad decides GameCube-reserve and personal folders | Brad |
