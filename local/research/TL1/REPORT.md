@@ -112,3 +112,64 @@ the folded replay core (it served the N8D7M5 provenance probe, archived on `arch
 rather than pull in probe code. Released as Part 1b: one commit removing the CMake define and the
 `#ifdef PS2X_GS_REPLAY_WORD_WATCH` blocks (plus any test that exercises word-watch), then the brief's
 step 3 unchanged (build, suite, Mac replay vs the Mac ON control, `[gs-path]` line captured).
+
+## Part 1b — word-watch removal + step 3 (Mac only, no device)
+
+Removal commit `f949ff0` on tl1-tools (ONE commit, 4 files, +12/−194, no
+probe commit cherry-picked): CMake `PS2X_GS_REPLAY_WORD_WATCH` definition
+deleted; all eight `#ifdef PS2X_GS_REPLAY_WORD_WATCH` blocks deleted from
+`gs_replay_core.cpp` (WORDS reader, 3× before/after snapshot pairs, teardown);
+the wrapper's vacuous `wordsOk` assertion dropped; stale header comments
+updated. The `wordsOk` result field stays as API (always true; still read by
+the Android gate in main.cpp). Verified post-commit: no
+`PS2X_GS_REPLAY_WORD_WATCH` / `PS2X_GS_REPLAY_WORDS` / `N8D7M5` /
+`watchAddrs` / `snapshotWords` / `emitWordLine` references outside the TL1
+removal comments.
+
+Build (same configure as Part 1: Release, `PS2X_BUILD_TEST=ON`,
+`PS2X_ENABLE_DIAG_TAPS=OFF`, `PS2X_GS_SHADOW_PARALLEL=ON`,
+parallel-gs `~/dev/parallel-gs` @ ssx3 `963cb57`, codegen
+`~/dev/ssx3-work/codegen-ssx3`): `ninja ps2x_tests` rc=0.
+Binary `~/dev/ssx3-work/TL1/build/ps2xTest/ps2x_tests` SHA
+`271324b39eaf8bc24628cd298310d736b4c74064f69beac71b5c31c839d2fbf9`.
+
+Suite from the worktree root: rc=0, 596/596/0 (log
+`~/dev/ssx3-work/TL1/suite-1b.log`, scratch).
+
+Runner-dir check: `git diff --stat 14b1e5cb tl1-tools --
+ps2xRuntime/src/runner` empty (at `f949ff0`).
+
+Replay (P-lane slot 2 claimed, released after; stream
+`n8d7m6.gs` SHA `f6a78f71…a593` twice, size 1100696462, matches pin;
+probe env keys omitted — no probe code on tl1-tools):
+
+```sh
+PS2X_GS_REPLAY_CAPTURE=.../N8D7M6/n8d7m6.gs PS2X_GS_REPLAY_BACKEND=parallel \
+PS2X_GS_REPLAY_STEP=50 PS2X_GS_REPLAY_PPM_TICKS=2050 \
+PS2X_GS_REPLAY_PPM_DIR=.../TL1/replay-1b/frames \
+PS2X_GS_REPLAY_OUT=.../TL1/replay-1b/parallel.hashes \
+PS2X_GS_REPLAY_PKTSEQ=1 \
+GRANITE_VULKAN_LIBRARY=/opt/homebrew/lib/libvulkan.1.dylib \
+  ../build/ps2xTest/ps2x_tests   # workdir=worktree; rc=0
+```
+
+Result vs `local/research/N8D7M12P5F4P2/replay-excerpt.txt`: PKTSEQ 41/41
+identical, GB4_REPLAY 41/41 identical, GB4_FRAME/SUMMARY/STATS lines
+identical (tick-2050 present `d19b96fe`, packets 862958). Log
+`~/dev/ssx3-work/TL1/replay-1b.log` (scratch). One exploratory-command typo
+(`timeout` missing on macOS, rc=127, wrote nothing) before the foreground
+run — not a brief-step failure.
+
+`[gs-path]` line from that run (single line, default-on):
+
+```text
+[gs-path] hier_rule=flat-always hier_t2=1 hier_t4=1 subgroup_flat=free-4..128 subgroup_hier=free-4..128 vk11_subgroup=32 max_wg_inv=1024 desc=plain desc_req=push+heap+buffer sampler_feedback=on feedback_rt=off gpu=Apple M5 Pro
+```
+
+Note: `free-4..128` on the Mac matches the renderer's observed Mac path
+(N8X1 notebook: fallback `range 4..128, wg=32 (hier=1)`); MoltenVK reports
+no exact subgroup size and neither descriptor buffer nor heap.
+
+Handoff: tl1-tools at `f949ff0` (no push); Part 1b step 3 complete, suite
+green, replay rows equal the Mac ON control. Ready for the orchestrator to
+push and release Part 2 (CLI + device check).
