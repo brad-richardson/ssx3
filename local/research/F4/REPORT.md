@@ -641,3 +641,8 @@ Recommended next action: after the one-line emitter fix
 this same script (incremental) and re-run Part 3 whole: fresh iPad
 install + race run to t2100, then iPhone install +
 `deploy-ios.sh iphone`, still no iPhone launch.
+
+## Orchestrator gate, Part 3 (2026-09-25)
+
+Correct stop: the iOS build reproduces the chain recursion (iPad signal 10 before the race). The iPhone was
+never touched. The iPad is being restored to the F3 build. Part 3 reruns after Part 2b's fix.
