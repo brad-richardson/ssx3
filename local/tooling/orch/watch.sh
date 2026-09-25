@@ -22,7 +22,7 @@ import json, sys, os, subprocess, hashlib, time
 WS = os.environ["WS"]; ign = set(os.environ["WATCH_IGNORE_AGENT"].split(","))
 st = os.environ["state"]; stall = int(os.environ["STALL"]); now = time.time()
 ERR = ("prefill_memory_aborted", "memory limit exceeded", "rate limit", "Rate limit",
-       "overloaded_error", "quota", "API Error", "invalid_request_error", "Traceback (most recent call last)")
+       "overloaded_error", "quota", "API Error", "invalid_request_error")
 for a in json.load(sys.stdin)["result"]["agents"]:
     n = a.get("name")
     if not n or n in ign or a.get("workspace_id") != WS: continue
