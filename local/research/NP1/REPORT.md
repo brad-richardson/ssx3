@@ -89,3 +89,11 @@ adb -s 622c49b1 shell 'input keyevent 26'  # screen-off charge test -> locked on
 adb -s 622c49b1 shell 'input keyevent 82' ; 'input swipe 540 1400 540 400 300'  # dismiss fails
 adb -s 622c49b1 shell 'input keyevent 26'  # screen back off; left-state verified
 ```
+
+## Orchestrator gate (2026-09-25)
+
+**Blocked correctly; hands-on need sent to Brad.** The Odin is on the mini's USB (serial `622c49b1`),
+which can't keep up (−81 mA screen off), so the ≥ 20 % gate can't be reached by waiting. The worker's
+wake test left the keyguard showing (PIN). Rule added to the runbook: workers never wake or sleep the
+Odin screen to test charging; read `dumpsys battery` only. Part 1 resumes when Brad has it on the wall
+charger and unlocked.

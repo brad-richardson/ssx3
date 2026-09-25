@@ -112,6 +112,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   `ps2x.env` are `setenv`'d before `main`, so driver env (`TU_DEBUG`, …) reaches Turnip.
   Android logcat drops lines on big bulk flushes: pull on-device output files instead.
 
+- The Odin on the mini's USB (serial `622c49b1`) discharges under any load; only the wall charger
+  keeps it ≥ 20 %. Workers never toggle the Odin screen/keyguard (a wake test locks it behind
+  the PIN, 09-25); read `dumpsys battery` and report.
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.
