@@ -143,3 +143,30 @@ Start 2026-09-25 13:02 EDT; time box to 16:02.
    mini: at load ≤ 10 the route reaches the results screen in ~1,300 s; at load 40–50 no boot
    reached tick 20063 inside 1,800 s. Idling 2 min past the crash tick likely needs > 1,800 s wall
    (ask the orchestrator for more wall or a quiet window).
+
+## Resumed 15:14 (active time so far 56 min)
+
+- Reverted the slice commit: `f287b62` (revert of 9c98713; history kept).
+- Fix `3c037ab` `[PF1] Checkpoint unwinds propagate past a callee suspended at its own entry`: new
+  `ps2xRuntime/include/runtime/ee_guest_unwind.h` (thread_local flag, included only by
+  `ps2_runtime.cpp` and `EeScheduler.cpp`, so no codegen rebuild); `dispatchGuestBranch` checkpoint
+  path and `eeCheckpointDue()` mark it, the post-call check returns false while marked (before the
+  `ctx->pc == entryPc` heuristic), the scheduler clears it before each top-level dispatch. Generated
+  backward edges always `return` after a true `eeCheckpointDue()` (`control_flow_emitter.cpp:180`).
+- Test "PF1: a checkpoint at a recursive call is an unwind, not a return" (outer → F → F with an
+  ExternalWake posted so the nested dispatch checkpoints): expected trace {1,10,11,12,3}.
+  Suite from the worktree root: green **643/643** (`suite-green2.log`, `suite-green3.log` on the final
+  binary); red with the check disabled **642/643**, only the PF1 test fails (`suite-red2.log`).
+  Runner-dir check empty.
+- Runner `bin/runner-pf1-fix` sha256 `364cb0c1…d264` (two reads) = `3c037ab`.
+- V1 validation boot queued 15:18 (HR1 speed hold on all four slots). Pre-fix control = C1 (same
+  env: C1's `PS2X_EE_TIME_SLICE=1` is the default again after the revert).
+
+## 15:20–15:53 validation
+
+- V0 (control repeat, `runner-pf1` + `PS2X_EE_TIME_SLICE=1`): crash at vsync 18823, **crash line
+  and 32 MB crash RAM byte-identical to C1**.
+- V1 (fix `3c037ab`): wall cap 1,801 s at **tick 33450, zero missing targets**; frames 20100 and
+  33450 show the live results screen (Mac 03:15 / Zoe 04:01). The t17800 frame hash `4a8a7b45` is
+  identical across V1/C1/V0.
+- No leases held at close. Report: `POSTRACE-REPORT.md`.
