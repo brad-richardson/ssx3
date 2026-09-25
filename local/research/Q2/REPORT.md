@@ -157,3 +157,9 @@ during validation, with evidence:
 - If a future regen fails the exact-total check, the first thing to diff is
   the per-predicate mix (LT/GE/LE/GT) against this run: a branch-only
   patch must keep it 1:1.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass (first local-Qwen lane).** I re-ran `sbr-census.py --self-check`: 5/5 (old total 4,466 exact,
+new total 4,466, 623 files with `PS2X_SBR_LT`, writer categories within 2 % of RV3's one-off regex).
+Run it after every codegen regen. Interrupted once for Brad's pause and resumed cleanly.
