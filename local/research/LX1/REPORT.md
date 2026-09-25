@@ -739,3 +739,12 @@ it (fork_sha `41ccbab…` in P1/P2/P3 result.json).
   `build-parallel.log`, `clone-pgs.log`; pulled:
   `from-bradflix/{P1,P2,P3}` (boot.log, result.json, P2
   frames). Lease released at close (verified).
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** paraLLEl-GS runs headless on bradflix's Arrow Lake iGPU (Mesa ANV 25.2.8) in Docker with
+`--device /dev/dri/renderD128 --group-add 993`, system Vulkan loader, det-hash equal to the CPU backend.
+`[gs-path]`: hier-if-large at wave32 with **`desc=buffer`**, so bradflix exercises the Odin's
+descriptor-buffer path, which the Mac can't (only the subgroup width, 32 vs Adreno's 64, differs). Build
+wall ~50 min (one slow `-O3` unity batch): split or lower that batch before bradflix becomes the default
+host. LX1 is complete; the host split follows F5.

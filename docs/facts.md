@@ -95,6 +95,10 @@ orchestration lessons in `docs/orchestration.md`.
   paraLLEl on iOS is I33. Brad's iPhone reaches the Mac over Wi-Fi only and drops when it sleeps.
   (F2 Part 3b)
 
+- bradflix (x86, Mesa ANV) runs paraLLEl headless in Docker (`--device /dev/dri/renderD128 --group-add 993`),
+  path `hier-if-large`, `wave32`, `desc=buffer` (the Odin's descriptor path; the Mac is `desc=plain`). Mac and
+  bradflix are det-hash equal to t2400 after LX1's TZ pin and the VU1 fenv→`ps2_fpmode` fix. (LX1)
+
 ## PCSX2 reference
 
 - T48 VU1 startPCs are in 8-byte units: PCSX2 `0x0/0x2/0x8/0x73` = ours `0x0/0x10/0x40/0x398`.
