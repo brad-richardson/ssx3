@@ -131,9 +131,6 @@ then 120 Hz simulation.
       after T47's 1.75 MB SPU upload). Our HLE has no SPU voices, so races lack it. Needs cid-0
       uploads (`sceSdVoiceTrans`), tag-3 `updatevoices` and an SPU2 ADPCM voice mixer. Clips
       `~/dev/ssx3-work/AU8/AU8-R-race-*.m4a`. `local/research/AU8/NOTEBOOK.md` E10.
-- [ ] Below-full-speed behavior: host-stream underruns ran 1.1–1.7 M
-      frames/min at ~0.3× (AU3 Part 2). Decide what the Odin should do
-      until speed is up. `local/research/AU3/`.
 
 ## I — iOS
 
@@ -195,6 +192,10 @@ then 120 Hz simulation.
 
 ## Parked
 
+- **Audio below full speed (Brad, 09-24):** stutter for now (current behaviour, typical of
+  emulators). Plain slowdown drops pitch with speed (0.5× = an octave), so no. **When menus reach
+  ~0.8×, add pitch-preserving time-stretch** (SoundTouch, LGPL; PCSX2's default), driven by guest
+  vsync rate vs wall clock, so music and SFX stay in sync with the game.
 - **Rebase onto upstream for upstreaming** (Brad, 09-24): when Brad has
   spare quota. Never rewrite `ssx3`: replay our product commits onto
   upstream `main` in topic batches (CPU semantics, kernel/scheduler, GS,
