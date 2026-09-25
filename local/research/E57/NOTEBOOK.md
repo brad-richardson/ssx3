@@ -87,3 +87,20 @@ Worktree `~/dev/ssx3-work/E57/PS2Recomp`, branch `e57-vu1` from `f949ff0`.
   queued on the lease.
 - Orchestrator FYI: fork ssx3 moved to `71c952e` (I32); it touches no VU1 file, so these
   commits should rebase cleanly.
+
+## ~00:15 sessions 2–4, c5, close
+
+- Session 2 (clean host): base 7.86/7.90, c2 10.25/10.28, c3 10.45/10.46, c4 10.48/10.40.
+  The session-1 c3 dip does not reproduce, so it was host interference the lease doesn't cover
+  (5/15-min loads were 6–22 then). My inlining hypothesis was wrong; c4's revert of the gate
+  split is neutral. `a4ecce5` drops the stale comment (comment only, no rebuild).
+- C4 profile (idle host, diagnostic): VU1 33.1 %, GS CPU backend 60.6 %. c2–c4 barely move
+  the VU1 share; c1 did the work.
+- C5 `0a4aa5e`: decoded pair by const reference (re-entrancy checked: PATH1 goes to the GIF
+  arbiter, `execute()` callers are only VIF1 MSCAL and EE CMSAR1). Suite 600/600,
+  `check-c5.txt` BIT-EXACT. Session 3: c4 10.71/10.67 vs c5 10.71/10.71 (tie). Note c4 drifted
+  +2.4 % between sessions 2 and 3.
+- Session 4 (final, ABBA): base 7.99/7.95 vs c5 10.75/10.69 → **1.35×** (0.133× → 0.179×).
+- Scratch worktree `E57/c2src` removed after a byte compare with the committed c4. The
+  reference capture `run/h-base-1/gs.cap` is kept; the other captures were deleted after their
+  checks. Write-up in REPORT.md.
