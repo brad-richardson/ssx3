@@ -1,0 +1,10 @@
+## latch-off (PS2X_PAD_LATCH=0: pre-IN2 direct sampling)
+[vpad] on=1 pad_in_use=0 first_pad=-1 name="" -> overlay shown
+[padscript] armed n=31 source=env clock=vsync
+## tap 75000: reads bracketing it (DROPPED: 0xffff throughout)
+[padread] read tick=1606 port=0 buttons=0xffff wall=74991ms
+[padread] read tick=1607 port=0 buttons=0xffff wall=75184ms
+[padread] read tick=1608 port=0 buttons=0xffff wall=75373ms
+## guest rate first/last
+[vsync-rate] tick=240 rate=47.93/s (0.800x of 59.94)
+[vsync-rate] tick=2904 rate=6.98/s (0.116x of 59.94)

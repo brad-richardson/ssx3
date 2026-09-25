@@ -1,0 +1,20 @@
+
+[Suite]: Ps2PadLatch
+  [Run]: a held button is continuous   [Passed]
+  [Run]: a release reads as up before a new press shows   [Passed]
+  [Run]: a tap between two reads is seen exactly once   [Passed]
+  [Run]: buttons latch independently   [Passed]
+  [Run]: dev test taps parse and window on the wall clock   [Passed]
+  [Run]: latch env switch defaults on   [Passed]
+  [Run]: no samples reads up; a button already held shows at once   [Passed]
+  [Run]: pad backend keeps direct sampling with PS2X_PAD_LATCH=0   [Passed]
+  [Run]: pad backend takes the latched mask (latch on)   [Passed]
+  [Run]: port 1 follows live without consuming the latch   [Passed]
+  [Run]: two quick taps between reads coalesce to one press   [Passed]
+
+[Suite]: Ps2PresentFallback
+========================================
+Total Tests: 623
+Passed: 623
+Failed: 0
+========================================

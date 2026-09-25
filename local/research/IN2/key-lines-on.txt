@@ -1,0 +1,14 @@
+## latch-on (default)
+[vpad] on=1 pad_in_use=0 first_pad=-1 name="" -> overlay shown
+## tap 75000: host edges + reads (SEEN-ONCE: 0xffbb one read)
+[padread] read tick=1743 port=0 buttons=0xffbf wall=74980ms
+[padread] read tick=1743 port=1 buttons=0xffbf wall=74980ms
+[padread] host +r3 wall=75007ms
+[padread] host -r3 wall=75042ms
+[padread] read tick=1744 port=0 buttons=0xffbb wall=75126ms
+[padread] read tick=1744 port=1 buttons=0xffbf wall=75126ms
+[padread] read tick=1745 port=0 buttons=0xffbf wall=75274ms
+[padread] read tick=1745 port=1 buttons=0xffbf wall=75274ms
+## guest rate first/last
+[vsync-rate] tick=267 rate=53.26/s (0.889x of 59.94)
+[vsync-rate] tick=3492 rate=7.39/s (0.123x of 59.94)
