@@ -908,3 +908,15 @@ Restore (per orchestrator): iPad back on the working F3 build — staged binary 
 
 Correct stop: the iOS build reproduces the chain recursion (iPad signal 10 before the race). The iPhone was
 never touched. The iPad is being restored to the F3 build. Part 3 reruns after Part 2b's fix.
+
+## Orchestrator gate, Part 2b (2026-09-25)
+
+**Pass.** `74e2df2`: every generated pair ends in `PS2X_VU1_MUSTTAIL return next(...)` and the generated
+header `#error`s without musttail, so the chain is flat by construction (the Mac was flat only because
+Apple clang sibling-call-optimized it). Regenerated images differ only in the 2,048 handoff lines each;
+det-hash identical to F4 B1/B2; 100 % generated; Mac speed unchanged. **Odin race 0.167× / 0.166× (1.20× vs
+F3)**, rider solid on all 8 caps; the Odin frame is 100.1 ms (was 120.8), generated VU1 visible in the
+profile. APK `f2e519de…` installed as Brad's play build. Pushed `f4-fold` → fork `ssx3` **`74e2df2`**.
+The F4 iPhone build is skipped: F5 (next) carries F4 plus the VU1 stage B, 4×+hi-res, post-race,
+carve-trail and TZ/x86 fixes. Promote `F4/vu1gen-2` to `~/dev/ssx3-work/vu1gen-ssx3` (old kept as
+`vu1gen-ssx3-pre-musttail`).
