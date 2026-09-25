@@ -187,3 +187,12 @@ on Apple GPUs; measures whether hier beats flat on the M2). The MoltenVK
 v1.4.2 tarball + SHAs above are the pinned artifact; a `ios-deps`-style
 persistent home for the xcframework (outside the 20 GB I33 scratch) is needed
 before any iPhone recipe references it.
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass.** paraLLEl-GS runs on the iPad (M2) from fork `0ed07c4` + paraLLEl `19d93b2` with no source
+changes: MoltenVK 1.4.2 (Apache-2.0) embedded as `Frameworks/MoltenVK.framework`, Granite loads it via
+`GRANITE_VULKAN_LIBRARY`, headless init (no WSI work). Diagnostic pace: menus ~60 vs/s vs ~19 on the
+CPU backend, race 1.77×, launch → t2100 97 s vs 209 s. The Simulator can't run the Vulkan path
+(no descriptor indexing), so iOS paraLLEl is device-validated only. Part 2 released: paraLLEl as the
+iOS default (bundled env), iPad test, iPhone install when reachable.
