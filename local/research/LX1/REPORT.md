@@ -406,3 +406,163 @@ hunch for the next part's hunt, not a finding.
 **Pass.** TZ pinned in det mode (host path DST-aware via `tm_gmtoff`), x86 build + E53 test fixed: suites
 650/650 on both hosts, ticks 1–93 identical. New split at tick 94 (rdram only; eeCycle identical) looks
 like another host-data leak. `lx1-tz` (`5f32212 20377a3 b4cb476`) folds after F4 (F5). Part 1d released.
+
+## Part 1d (PAUSED 2026-09-25 ~17:55Z — progress notes, NOT gated, no verdict)
+
+Question: name tick-94's split source (rdram-only, eeCycle identical per
+Part 1c), one-line determinism pin if applicable, parity re-run to t2400.
+
+### Method (all local-only rdump tap, Part-1b style)
+
+- `local/research/LX1/lx1b-rdump.diff` applied UNCOMMITTED to both
+  `lx1-tz` trees (`73e01fe` + tap); DIAG_TAPS builds
+  `~/dev/ssx3-work/LX1/mac-build-tzd` (arm64, brew LLVM clang++) and
+  bradflix `~/dev/ssx3-work/LX1/build-tzd` (amd64 docker ssx3-lx1).
+- Taps also used: `PS2X_DIAG_WATCH` (PC/ra/sp), `PS2X_TRACE_SYSCALLS`
+  (D4, 812 KB, collected, not yet mined — trace has no ticks, TBD).
+- Boots: MD5/MD6 (mac, ps2-env rdump/watch), D5/D6 (bradflix, ps2-env
+  rdump/watch), D7 (fespy fesetround log), D8 (swapspy, 0 GL swaps —
+  CPU GS, no GL path), **D9 (bradflix `PS2X_EE_FPMODE=ieee`, stop-tick
+  120)**, **D10 (bradflix ps2-env control, stop-tick 120)**. D9/D10
+  short boots take ~7 s each. No mac ieee boot yet (slots held, see
+  pause note). No `main`-branch changes; fork `lx1-tz` never pushed.
+
+### Numbers (all word-wise over 8,388,608 rdram words)
+
+- Tick 92 MD5-vs-D5: **0**. Tick 93: **0**. Tick 94: **24** (list
+  below). Tick 95: **30**.
+- det-hash `combined` streams (MD5 ticks 1–206, D5 ticks 1–212):
+  first differing tick **94**; every tick 94–206 differs, none
+  re-converge.
+- D10-vs-D5 (x86 ps2-vs-ps2 rerun): **0/0/0/0** at 92/93/94/95 —
+  x86 self-consistent, deterministic.
+- D9-vs-D5 (x86 ieee-vs-ps2): tick 92: **527**, tick 93: **1618**,
+  tick 94: **946**. FP mode steers the guest path from early boot;
+  ieee boot is on a different path before the rdump window.
+- D9-vs-MD5 tick 94: **965** ≈ D9-vs-D5 (946) → MD5 (ARM ps2-env)
+  sits on the **chop path** with D5, far from the ieee path. ARM
+  FPCR chop is effective at control-flow level.
+- Tick-94 24 words (addr, mac, bradflix, signed delta — ALL +1/+2):
+
+```
+0x004c9454 mac=0x426fffff bradflix=0x42700000 +1
+0x005426a4 mac=0x3e2aaaa9 bradflix=0x3e2aaaaa +1
+0x00622590 mac=0x414ccccc bradflix=0x414ccccd +1
+0x006225a4 mac=0x416eeeee bradflix=0x416eeeef +1
+0x006efeb0 mac=0x43a67fff bradflix=0x43a68000 +1
+0x006efee4 mac=0x4346ffff bradflix=0x43470000 +1
+0x006eff10 mac=0x43a67fff bradflix=0x43a68000 +1
+0x006eff14 mac=0x4346ffff bradflix=0x43470000 +1
+0x006f00e0 mac=0x3a4ccccc bradflix=0x3a4ccccd +1
+0x006f00f4 mac=0x3a6eeeee bradflix=0x3a6eeef0 +2
+0x00873480 mac=0x3a4ccccc bradflix=0x3a4ccccd +1
+0x00873494 mac=0x3a6eeeee bradflix=0x3a6eeef0 +2
+0x008734c0 mac=0x3a4ccccc bradflix=0x3a4ccccd +1
+0x008734d4 mac=0x3a6eeeee bradflix=0x3a6eeef0 +2
+0x00873520 mac=0x3b4ccccc bradflix=0x3b4ccccd +1
+0x00873534 mac=0x3b888888 bradflix=0x3b888889 +1
+0x00873560 mac=0x3b4ccccc bradflix=0x3b4ccccd +1
+0x00873574 mac=0x3b888888 bradflix=0x3b888889 +1
+0x01fffa20 mac=0x3b4ccccc bradflix=0x3b4ccccd +1
+0x01fffa34 mac=0x3b888888 bradflix=0x3b888889 +1
+0x01fffbb0 mac=0x43a67fff bradflix=0x43a68000 +1
+0x01fffbe4 mac=0x4346ffff bradflix=0x43470000 +1
+0x01fffc10 mac=0x43a67fff bradflix=0x43a68000 +1
+0x01fffc14 mac=0x4346ffff bradflix=0x43470000 +1
+```
+
+Only 10 distinct values; same mantissas recur at several exponents
+(0x4ccccc, 0x6eeeee) and several addresses (copies/mirrors) → a few
+distinct FP ops, not 24 independent ones. Just-below-round values
+(63.99→64.0, ~199, ~333) match chop-vs-nearest straddle pattern.
+
+### The flip op, fully resolved (0x005426a4)
+
+- Watch (MD6 264 hits, D6 same stream): `3e4ccccd (pc 231cec,
+  init) → 3e3bbbbb (pc 231d4c) → FLIP: mac 3e2aaaa9 /
+  bradflix 3e2aaaaa (same pc=0x231d4c, ra=0x231cc0, sp, thread=1)`.
+  Per-tick countdown timer; values keep decrementing after, staying
+  1–3 ULP apart.
+- Codegen `sub_00231D18_0x231d18.cpp` (PS2X_GAME_CODEGEN_DIR, pinned
+  SHA 8ea8…688a3): path `lwc1 f0,[a0+4]; lwc1 f1,[gp-0x51AC];
+  f0=FPU_SUB_S(f0,f1) @0x231d3c; c.lt.s; swc1 f0,[a0+4] @0x231d4c`
+  (delay slot, the watched PC). `FPU_SUB_S(a,b)` =
+  `(float)(a)-(float)(b)` — plain host sub
+  (`ps2xRuntime/include/ps2_runtime_macros.h:930`).
+- Inputs PROVEN identical: f0_old = rdram[0x005426a4] = 0x3e3bbbbb
+  both (watch stream + tick-93 dumps); K = rdram[gp-0x51AC] =
+  0x3c888889 (1/60), a .data constant (~200 copies, e.g.
+  0x0049b15c, 0x004c943c), bit-stable across ticks 92–95 both
+  hosts; no neighbouring K±δ word exists anywhere in rdram (scan
+  0x3c888880–0x3c888890 → only 0x3c888889), so x86's reloaded f1
+  cannot be K−δ from memory (modulo gp equality — near-certain:
+  gp set once at boot; a wrong gp shifts all gp-loads, not 24
+  words).
+- Exact decimal: d = 0x3e3bbbbb − 0x3c888889 sits 0.125 ULP below
+  0x3e2aaaaa → chop(d) = **0x3e2aaaa9 (mac)**, nearest(d) =
+  **0x3e2aaaaa (bradflix)**. Assignment is K-independent (interval
+  proof in work notes). So at THIS op: mac = chop-exact,
+  bradflix = nearest-exact.
+- Mode architecture (verified by read): `EeScheduler::run()` holds
+  `ps2_fpmode::ScopedEeMode` (chop+FTZ+DAZ, both archs;
+  `ps2xRuntime/include/ps2_fpmode.h`); `[E53] …=ps2` banner on
+  BOTH hosts. All other in-tree setters are balanced RAII
+  (GS `ScopedHostMode` ×3 + MPEG ×2, VU1 fesetround pair,
+  gs_replay pair — latter inactive, no replay env). Build flags
+  clean (`-ffp-contract=off`, `-msse4.1`, no fast-math).
+  libavcodec/libavutil contain **zero** ldmxcsr (FFmpeg-MXCSR
+  theory dead). No ucontext/setjmp anywhere. D4 syscall trace:
+  zero mpeg hits.
+
+### Current conclusion (high but not full confidence)
+
+D9≠D5 + D10=D5 proves x86 runs the chop path (scope effective at
+boot); MD5-far-from-D9 proves ARM does too. Yet at tick 94's FP
+ops x86 produces nearest-exact results while ARM produces
+chop-exact. The remaining model: **x86 MXCSR is nearest during
+tick-94's guest FP ops — a transient clobberer resets the
+run()-installed chop and (given 24→30 slow growth, not D9-style
+hundreds) it does not visibly persist as a full ieee path**.
+The clobberer is UNNAMED: every static candidate is balanced or
+absent. Ruled out: env (banners equal), build flags, FFmpeg
+MXCSR, GL (no swaps), fibers, VU1/gs_replay pairs, input values
+(for the lead op).
+
+### Resume plan (no new boots/builds started; lease released)
+
+1. MXCSR-vs-tick tap (local-only diff like lx1b-rdump.diff):
+   log `_mm_getcsr()`/FPCR at each vsync entry + re-install chop.
+   Discriminates clobberer-between-ticks (host-side: dump/hash/
+   PNG/snd) vs clobberer-during-tick-94 (which subsystem —
+   bisect GS/VU1/MPEG/CD). Needs one diag rebuild per host.
+2. Mac ieee boot MD7 (1 P-lane slot; at pause all 4 held by
+   `VB1-holdC pid=59219`) to complete the mode matrix, esp.
+   mac-ieee-vs-D9 (both nearest ⇒ expect full parity if mode is
+   the only host difference).
+3. Mine D4-syscalls.txt + MD6/D6 watch PCs for the other 23
+   words (single site vs global flip).
+4. Pin + parity re-run to t2400 per brief after the source is
+   named. NOTE: `PS2X_EE_FPMODE=ieee` everywhere is NOT an
+   acceptable pin (changes guest math vs real PS2 chop); the
+   right pin makes x86 actually-chop (or names the clobberer).
+
+### Paths
+
+- REPORT/brief: `local/research/LX1/REPORT.md`,
+  `local/muse/prompts/LX1.md`, tap
+  `local/research/LX1/lx1b-rdump.diff`, tools `/tmp/lx1b_rdiff.py`.
+- Mac runs: `~/dev/ssx3-work/LX1/run/MD5` (rdump 92–95,
+  boot.log w/ det-hash 1–206), `.../MD6` (watch).
+- Pulled: `~/dev/ssx3-work/LX1/from-bradflix/{D5,D6-boot.log,
+  D7-boot.log,D4-syscalls.txt,D9,D10}` (D9: ieee rdump 92–94 +
+  boot.log; D10: ps2 rdump 92–95 + boot.log).
+- Bradflix runs (remote): `~/dev/ssx3-work/LX1/run/{D5,D6,D7,
+  D8,D9,D10}`, builds `build-tzd` (diag+taps), `build-tz`;
+  lease dir released (was `owner=LX1d-muse … purpose=lx1d-t94`).
+- Sources read: `ps2xRuntime/include/ps2_{fpmode,runtime_macros}.h`,
+  `src/lib/Kernel/{EeScheduler.cpp,Stubs/MPEG.cpp}`,
+  `src/lib/{gs/gs_frontend.cpp,gs/gs_replay_core.cpp,
+  vu/ps2_vu1_core.cpp}`, codegen
+  `/Users/brad/dev/ssx3-work/codegen-ssx3/
+  sub_00231D18_0x231d18.cpp`, `CMakeLists.txt` (flags), ldd of
+  `build-tzd/ps2xRuntime/ps2EntryRunner`.
