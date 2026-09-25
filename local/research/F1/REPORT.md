@@ -240,3 +240,11 @@ bash ~/dev/ssx3-work/F1/ios/build-install.sh install_iphone
 bash local/research/I31/deploy-ios.sh iphone         # never launched
 xcrun simctl shutdown $SIM
 ```
+
+## Orchestrator gate, Part 3 (2026-09-25)
+
+**Pass.** I viewed the iPad `shot-t1960.png`: race 2ND/2 with pines, lit snow, snow spray and the
+analog stick overlay, i.e. the RR1 look on device. Signed build `89ed20d4…` from fork `56a5e8a`,
+installed on Brad's iPhone (never launched) and iPad; Brad's save + manual-play env verified
+(SKIP + exact sizes) after both installs. iPad container UUIDs rotate on reinstall: overrides must
+read the live path each time (done here).
