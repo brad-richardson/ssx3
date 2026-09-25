@@ -44,9 +44,6 @@ then 120 Hz simulation.
       exact path; (b) static recompilation of SSX 3's 7 VU1 microprograms
       (7,305 instructions). Validate with the E55 hash tap. E45's
       `VuWide=double` is already folded. `local/research/N5/`, `E53/`, `E45/`.
-- [ ] Save seed follow-ups (I31 Part 1 done: Brad's save + manual play on his iPhone/iPad; Part 2 Odin running with TL1's APK `aeb60d4d`; E55D16 A: the game autoloads Brad's seeded card and shows his rider
-      progress): only if Brad wants it, put his save into the Odin/iPhone `mc0`; retime I26-FAST for
-      the ~200-tick later title when a card is seeded. `local/research/E55D16/`.
 - [ ] **E54E signed 64-bit branches:** the PCSX2 low-64 oracle and suites
       support the candidate, but its one boot went black (8,000 GIF packets
       by tick 830 vs 92,728; first payload difference at packet 352). Don't
@@ -108,7 +105,7 @@ then 120 Hz simulation.
 
 ## N — Android app (Odin)
 
-- [ ] **N11 per-stage time budget (queued until I31 Part 2 frees the Odin):** ms per guest frame
+- [ ] **N11 per-stage time budget (muse, running):** ms per guest frame
       by stage (guest, EE helpers, VU1, VIF/DMA, GS submit, audio, waits) for the race and a menu
       on the play build with sound on, plus one GameThread-pinned-to-cpu7 run.
       `local/muse/prompts/N11.md`.

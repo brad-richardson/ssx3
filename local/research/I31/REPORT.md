@@ -279,3 +279,13 @@ min of 45. Committed: this section, `deploy-odin.sh`,
 `odin-key-lines.txt`, `odin-verify.txt`, `odin-shots.txt`, plus the
 `shots-viewed.txt` one-line fix. Scratch: `~/dev/ssx3-work/I31/odin/`
 (driver, logcat, 5 PNGs, envs, driver.log).
+
+## Orchestrator gate (Part 2)
+
+**Pass.** I viewed `sc01-tick1400.png` (scratch): Select Character on Mac with Brad's stats
+(2.9 / 4.0 / 3.0 / 3.0 / 3.0 / 3.0 / 1.0 / 3.0), "Load game" offered. APK `aeb60d4d…` (TL1 gate).
+Logcat shows the 36 kHz sound stream and the wave64 `[gs-path]`, zero FATAL. Brad's default env
+(`9fb46f85…`) drops the stale N8D5/N8D7 capture and dump keys that were in the device env, which
+is good for his play; any lane that used to inherit the device env must now write its own full
+env and restore `9fb46f85…` after. Horizontal combing is the known Odin stripe item (N lane).
+Closes the save-seed follow-up; G2 (iOS zero-env) and G6 (audible Odin check) close on Brad's play.
