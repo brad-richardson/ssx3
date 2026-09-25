@@ -35,7 +35,10 @@ then 120 Hz simulation.
       PATH3 packet runs before the PATH1 draw it should follow, so pages can hold
       another screen's contents at draw time. RR1 re-checks the menus with its fix
       candidate. `local/research/G46/`, `RR1/`.
-- [ ] **E57 VU1 speed (top performance item).** VU1 interpreter is 39–50%
+- [ ] **E61 menu/loading speed (muse, running):** menus 0.54×, loading 0.17× on the Mac (E58) and
+      ~0.5× / ~0.17× on the Odin; Part 1 profiles where that time goes (CPU work vs waiting vs
+      guest spin vs CD I/O). Faster menus shorten every boot and Brad's play.
+- [ ] **E57 VU1 speed (top performance item; Opus, running).** VU1 interpreter is 39–50%
       of race time (hazard bookkeeping ~30% on the Odin, N5). Options: (a)
       host-float FMAC fast path with PS2 clamping behind a flag, A/B vs the
       exact path; (b) static recompilation of SSX 3's 7 VU1 microprograms
@@ -104,6 +107,11 @@ then 120 Hz simulation.
       N9. `local/research/GB1/DESIGN.md`, `GB2/`.
 
 ## N — Android app (Odin)
+
+- [ ] **N11 per-stage time budget (queued until I31 Part 2 frees the Odin):** ms per guest frame
+      by stage (guest, EE helpers, VU1, VIF/DMA, GS submit, audio, waits) for the race and a menu
+      on the play build with sound on, plus one GameThread-pinned-to-cpu7 run.
+      `local/muse/prompts/N11.md`.
 
 - [ ] **Rider idle at race start:** on the Odin (N10) the rider sits at 0–1 MPH with a RECOVER
       prompt from ~00:00:06 to ~00:00:40, then rides at 43–44 MPH. First check the Mac on the same
@@ -192,6 +200,10 @@ then 120 Hz simulation.
       freeing bytesize for PCSX2? Proposed 09-23; confirm it's still wanted.
 
 ## Parked
+
+- **VU1 on its own thread** (MTVU-style; Brad, 09-24: parked until the game works, too much
+  complexity for now). Could roughly halve GameThread time after E57, but EE↔VU1 handoff ordering
+  must be exact (RR1's PATH3 ordering bug is the same class). Size it with N11's numbers first.
 
 - **Audio below full speed (Brad, 09-24):** stutter for now (current behaviour, typical of
   emulators). Plain slowdown drops pitch with speed (0.5× = an octave), so no. **When menus reach
