@@ -111,11 +111,8 @@ then 120 Hz simulation.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
       N9's 1920×1080 screencaps); check the presenter's scale/aspect on
       Android. `local/research/N9/`.
-- [ ] Fold the GS replay harness onto fork `ssx3`: shared replay core,
-      Android replay entry and the PKTSEQ fingerprint (default-off) live only
-      on tag `archive/n8d7m12-p5f4` (and `archive/n8d7m12-replay-core`); they
-      diagnosed the Odin black frame. Cherry-pick without the N8D5–N8D7
-      probes, suite, one Mac replay control. `local/research/N8D7M12/`.
+- [ ] **TL1 Part 2 (running):** `local/tooling/odin/odin_replay.py` + stream tools; one APK from the
+      fork tips and one Odin replay (expect `[gs-path]` wave64). Replay harness is on `ssx3` (`f949ff0`).
 - [ ] Horizontal stripes on Odin screens (seen since N8D1, still on N9's
       fork-tip APK). `local/research/N9/`.
 - [ ] Manifest `android:showWhenLocked` + `android:turnScreenOn` on the

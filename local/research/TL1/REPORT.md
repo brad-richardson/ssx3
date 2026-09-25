@@ -173,3 +173,11 @@ no exact subgroup size and neither descriptor buffer nor heap.
 Handoff: tl1-tools at `f949ff0` (no push); Part 1b step 3 complete, suite
 green, replay rows equal the Mac ON control. Ready for the orchestrator to
 push and release Part 2 (CLI + device check).
+
+## Orchestrator gate, Part 1b (2026-09-24)
+
+**A.** Word-watch removal `f949ff0` (4 files, +12/−194, no probe code); suite 596/596 from the
+worktree root; runner-dir diff empty; Mac replay of `n8d7m6.gs` equals the Mac ON control 41/41 on
+PKTSEQ and GB4_REPLAY rows, frame `d19b96fe`. `[gs-path]` on the Mac: `hier_rule=flat-always`,
+`subgroup_*=free-4..128`, `desc=plain` (explains why the Mac never ran the Adreno wave128 path).
+Pushed `tl1-tools` to fork `ssx3` → **`f949ff0`** (fast-forward from `d711506`). Part 2 released.

@@ -4,7 +4,7 @@ Milestone: stock SSX 3 gameplay through our PS2 static recomp runtime on the Odi
 Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`.
 History: git log (this board is current state only). Updated 2026-09-24 ~20:00 EDT, Mac mini.
 
-**Pins:** PS2Recomp fork `ssx3` `d711506` (sound HLE with planar tag-1 fix, VIF1 IMAGE continuation, widescreen, Turnip packaging) ·
+**Pins:** PS2Recomp fork `ssx3` `f949ff0` (sound HLE with planar tag-1 fix, VIF1 IMAGE continuation, GS replay harness + `[gs-path]` log, widescreen, Turnip packaging) ·
 paraLLEl-GS fork `ssx3` `963cb57` (wave64 binning fix) · Granite fork `ssx3` `166ba21a` ·
 canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
