@@ -266,3 +266,10 @@ vu1 TUs serialized or more WSL memory (no code change; staging in
 (2) run B3 on a quiet exclusive hold; (3) then gate + push. Orchestrator
 decides whether the push gates on the APK retry or takes the Mac-only
 evidence (the fold compiles for Android up to the OOM point).
+
+## Orchestrator note (2026-09-25)
+
+Mac side accepted (guest-bit-exact vs F3 on 2,429 ticks, 100 % VU1 cycles generated, rider solid, alpha
+255, suite 646/646, regen differs by the one predicted vf0 line and stays unpromoted). Android blocked on
+bytesize's 9.7 GB WSL memory with 3 giant `vu1_*.cpp` TUs compiling at once. Part 1b: a depth-2 Ninja job
+pool for the generated VU1 sources, APK rebuild, and B3.
