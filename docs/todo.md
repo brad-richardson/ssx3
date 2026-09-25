@@ -224,7 +224,7 @@ then 120 Hz simulation.
       lease FIFO for exclusive claims + builds that wait on an exclusive lease; read
       `noteVuRun`/`noteUnhandledRpc`/coverage at every device gate.
 
-- [ ] **F3 fold (queued):** FP1 pacing `51e730f4` (default on; `PS2X_UNPACED=1` for speed runs) + UV1 Part 2 + NP1 Part 2 + VR1 as each gates; Android compile before calling it folded.
+- [ ] **F3 fold (queued):** FP1 pacing `51e730f4` (default on; `PS2X_UNPACED=1` for speed runs) + DK1 brightness `6cba433` + I34 pad v2 + IN2 tap latch + UV1 Part 2 + NP1 Part 2 + VR1 as each gates; then iPhone + Odin builds; Android compile before calling it folded.
 - [ ] **Brad offline 09-24 night; decisions:** (1) Fable frontier review once RR1/AU9/E57 have
       reported (steer fold order, the sign-extension bug class, the speed plan); (2) after gates,
       fold to fork `ssx3` and install one combined build: iPhone install only, iPad test, Odin as his

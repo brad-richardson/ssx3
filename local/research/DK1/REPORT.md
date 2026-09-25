@@ -166,3 +166,12 @@ probe + 1 validation (< 420 s each). iPhone untouched per brief.
 Fast-forward the `6cba433` fix to fork `ssx3` (runner-dir check already
 empty) so the combined iPhone build and the next Odin APK pick it up;
 close DK1 after an Odin screenshot confirms full brightness there.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** I viewed the post-fix iPad `run-ipad-dk1/shot-t2100.png`: race at full brightness (bright snow,
+mountains, HUD), where the earlier I33 shot of the same scene was visibly dim. Mechanism: the shared
+presenter alpha-blends the game quad over black and the paraLLEl backend passed PS2 alpha (0x80 on
+alternating rows) through; the CPU backend already forced 255. Same code path on every platform, so
+this also fixes the Odin's dim picture. Fix `6cba433` folds in F3 (combined build with I34, IN2, UV1 if
+it gates, FP1, VR1); Android compile check required in F3.
