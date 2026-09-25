@@ -126,7 +126,7 @@ then 120 Hz simulation.
 
 - [ ] Turn sound on in the shipped envs (`PS2X_SOUND=1` in the iOS bundle env: I30 running; the
       Odin `ps2x.env` and N-lane launchers next). Brad confirmed AU8's planar fix sounds exactly right (09-24).
-- [ ] **Race SFX on SPU2 hardware voices (AU8 E10):** in a PCSX2 Snow Jam race, SPU2 voices carry
+- [ ] **Race SFX on SPU2 hardware voices (AU8 E10; AU9 Opus exploratory running):** in a PCSX2 Snow Jam race, SPU2 voices carry
       an intermittent, near-mono layer (dry 625/545 RMS, −15.5 dB of output, 94% < 1 kHz; likely SFX
       after T47's 1.75 MB SPU upload). Our HLE has no SPU voices, so races lack it. Needs cid-0
       uploads (`sceSdVoiceTrans`), tag-3 `updatevoices` and an SPU2 ADPCM voice mixer. Clips
