@@ -187,6 +187,7 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **N12 (queued after F5 Part 2, Brad 09-25):** Odin race + menu re-profile on the F5 play build (`local/muse/prompts/N12.md`): VU1 ms left on GameThread after VR1/VB1 sizes the parked VU1-thread decision.
 - [ ] **PX2 (queued):** why PCSX2-GL won't rasterize the race-world tristrips from our stream (menus and HUD
       replay fine): per-draw state probe vs PCSX2-SW (`local/research/PX1/REPORT.md` §3). Until then, race
       pixels are judged against PCSX2's own runs, not replays.

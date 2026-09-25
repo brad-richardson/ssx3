@@ -332,3 +332,14 @@ Text in git: this section + updated `mc1_boot.py` (new routes, `--mcsrc`,
 - Driver wart: `--mcsrc`/`--snap-period` were added after the first
   `parse_args()` call and initially unrecognized (fixed before any boot;
   two rc=2 no-op launches, no lanes created).
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass (save path).** Verified independently: P4's `SET0001` data differs from the pristine seed in
+exactly 7 bytes (`cmp -l`), `icon.sys` and `ssx1.ico` are byte-identical to the seed, GAM untouched;
+"Save complete." frame viewed (`snap-020824t`). One label slip: the report's `icon.sys` "unchanged
+(`eab22574…`)" is the GAM icon.sys SHA; the SET icon.sys is `dddf2d9c…` before and after — the
+verdict stands. Open: reload of the written card and the Yes-on-read-only failure mode → Part 3
+(2 boots). Note for Brad: the game deletes the SET side before rewriting it, so a failed write
+mid-save would lose options/records (never the GAM side); Part 3's read-only boot shows how that
+failure looks.
