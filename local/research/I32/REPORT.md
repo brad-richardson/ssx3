@@ -1,9 +1,9 @@
-# I32 Part 1 — virtual analog stick (left), D-pad (right); Simulator only
+# I32 — virtual analog stick (left), D-pad (right)
 
-Worker: Muse. Brief: `local/muse/prompts/I32.md` (Part 1 only; no device).
+Worker: Muse. Brief: `local/muse/prompts/I32.md` (Parts 1 + 2).
 Fork worktree `~/dev/ssx3-work/I32/PS2Recomp`, local branch `i32-controls` =
-fork `ssx3` `f949ff0` + 1 commit (`71c952e`). No push. **Stop for Brad's
-screenshot approval before Part 2.**
+fork `ssx3` `f949ff0` + 1 commit (`71c952e`). No push. Part 1 gated PASS,
+Brad approved the layout; Part 2 below.
 
 Headline: the left D-pad is now a floating analog stick (touch-down
 anchors, drag deflects, release recentres; ~10% dead zone; drawn base +
@@ -115,13 +115,91 @@ lease slot each, all released; the Simulator was shut down after).
 I32 scratch 4.7 GB; global ssx3 use 69.4 / 200 GB at build time.
 Elapsed ~75 min of the 90 min Part 1 box.
 
-## Gaps
+## Part 2 — device build, iPad test, iPhone install-only
 
-- G1: real touches (UIKit → SDL fingers) still unexercised — no Simulator
-  GUI here, Part 1 is Simulator-only (carries I26 V1). The iPad Part 2 run
-  is the first real-touch test of the stick anchor/drag/release cycle.
-- G2: `local/research/I31/` is still empty (I31 running concurrently);
-  Part 2 needs its `deploy-ios.sh` for Brad's save + manual-play env.
+Device build from `71c952e` (no new fork commits): Release
+`-O3 -DNDEBUG` (`device-flags-evidence.txt`), signed binary `d6735a0e…`
+(`codesign --verify --strict` passed). Bundled env unchanged from Part 1
+(sound on, `PS2X_MC_ROOT=${DOCUMENTS}/mc0`).
+
+| Step | Result | Receipt |
+| --- | --- | --- |
+| iPad install | exit 0 (seq 1844); deploy re-applied: SKIP mc0 + ps2x.env, all 7 sizes OK | `install-ipad.log`, `deploy-ipad.txt` |
+| iPad launch (one) | 198 s, 5 tick-screenshots, process terminated after; race reached (tick 2140), advancing | `ipad-run.txt`, `ipad-console.log`, frames below |
+| Stick on iPad | `[vpad] stick pad bytes lx=0xff ly=0x80` (exactly once); knob deflected in shots; route+race completed with stick held | `ipad-key-lines.txt` |
+| D-pad on iPad | down-hold armed through the tested hit-test path (log); game-visible tuck not isolated (portrait crop hides MPH/posture) | `ipad-key-lines.txt`, gap G8 |
+| iPhone | install exit 0 (seq 4704); deploy SKIP/OK; **never launched** (no process command) | `install-iphone.log`, `deploy-iphone.txt` |
+
+iPad launch env (`run-ipad-env.json`, via `devicectl -e`, wins over the
+manual-play Documents env): I26-FAST `PS2X_PAD_SCRIPT` (byte-exact from
+the bundled env), `PS2X_VPAD_TEST_STICK="1,0"`,
+`PS2X_VPAD_TEST_TOUCHES="1900:0.8975:0.34:120"` (D-pad down hold in the
+race; fractions for the 820×410 game window),
+`PS2X_MC_ROOT=…/Documents/mc-fresh`, `PS2X_VSYNC_RATE_LOG=1`. Script:
+31 armed, i=0..25 fired. Sound: 36 kHz stream from the bundled env
+(manual-play env inherits it), underruns as usual below 1×.
+
+iPad frames (viewed; portrait compat window crops left/right per I28 —
+game-window content correct; background shows another app's form, as in
+I30):
+
+| Frame | Content (viewed) | SHA-256 |
+| --- | --- | --- |
+| `run-ipad/shot-t400.png` (tick 442) | Title logo (cropped); deflected knob visible | `e5186187…` |
+| `run-ipad/shot-t900.png` (tick 939) | Setup Character (non-Zoe rider — held stick drifted the rider row; route is rider-agnostic) | `bc43350b…` |
+| `run-ipad/shot-t1750.png` (tick 1750) | Race 1ST/2, 00:00:00, EA Radio card | `4f4e94ef…` |
+| `run-ipad/shot-t1960.png` (tick 1962) | Race 2ND/2, 1%, mid D-pad hold | `133fec6c…` |
+| `run-ipad/shot-t2120.png` (tick 2140) | Race 2ND/2, 1%, post-hold, advancing | `c8bba43e…` |
+
+Full SHAs in `frame2-sha-read1.txt` (matched twice). Precision notes:
+the iPad shows the rider advancing with `lx=0xff` in the pad bytes, but
+there is no stick-off control run, so this is input-level proof, not a
+differential steering proof (I30's no-stick iPad run was also 2ND/2 at a
+like tick). The non-Zoe rider is consistent with the held stick moving
+the rider row (same drift mechanism as the Select Peak 1→2 move on sim),
+i.e. stick input demonstrably reaches game menu logic on device.
+
+The `mc-fresh` override used a stale container UUID (I30's `AAF168EA…`;
+live container is `8B1267A4…` — some lane reinstalled the app since
+I30), so it resolved to a nonexistent path: effective behavior was an
+empty card (route worked fresh-like), and Brad's `mc0` is verified
+byte-identical after the run (deploy reran: SKIP + exact sizes). Nothing
+was created to clean up. Future `-e PS2X_MC_ROOT` uses must read the
+live path from the previous run's console.
+
+Sim derisk runs (all on the Part 1 sim build, `71c952e`): pretest
+(route + held stick, fresh card → race at 1715, menus tolerate the
+stick); savetest/saveroute/savenostick/savediag with Brad's `mc0` copied
+to the sim container. Run.txt files committed (`sim-*-run.txt`); shots
+in scratch.
+
+**Finding F1 (for the orchestrator/E-lane, not a controls defect): with
+Brad's save present, I26-FAST misses the Select Peak confirm and runs
+~1 screen behind.** `run-savenostick` (route only): Peak 1 highlighted
+at tick 1808 after crosses at ~1100/1186/1337/1440 all failed to
+advance, while script downs demonstrably moved the highlight 1→2→3
+(locked Peak 3 at tick 2179) — inputs register, crosses don't confirm.
+`run-saveroute` (up-tap + held stick): still Peak at 1828, Select Event
+(Happiness) at 2035, My Rules at 2161 — progressing late via redundant
+crosses. Sim evidence: `1ecd2794…` (Peak 1 stuck), `9d27895e…` (Peak 3
+drift), `068bbf38…` (Event), `22d0d322…` (Rules). Mechanism unknown
+(game/card behavior under Brad's save, not pad input). Any future
+scripted device run must use a fresh card (as here) or a save-aware
+route.
+
+Part 2 budget: 1 device build, 1 iPad launch (198 s), 2 installs,
+5 sim derisk runs; ~65 min vs the 45 min box (overrun: save derisk +
+lease waits behind E57/AU lanes). Scratch 8.2 GB; no I32 lease held at
+close; Simulator shut down; iPad app terminated (`info processes`
+clean). iPhone: install + file copy only, never launched.
+
+## Gaps (updated)
+
+- G1: real touches (UIKit → SDL fingers) still unexercised — Part 2 used
+  injected vectors/touches (carries I26 V1). Brad's hands-on play is the
+  first real-touch test of the stick anchor/drag/release cycle.
+- G2: closed — I31's `deploy-ios.sh` consumed in Part 2 (SKIP + exact
+  sizes on both devices, before and after the iPad run).
 - G3: while the overlay shows, an untouched virtual stick centres
   `data[6..7]`, overriding a connected-but-unused physical stick (drift
   included). Using the controller hides the overlay and restores the
@@ -131,6 +209,11 @@ Elapsed ~75 min of the 90 min Part 1 box.
 - G5: run-3 (wall-clock 20/25/30 s shots) missed Select Character under
   host load 20; run-4 used a tick trigger instead. Wall-time shot
   schedules are unreliable while other lanes build.
+- G8: no isolated game-visible D-pad proof on iPad (tuck MPH/posture
+  hidden by the portrait crop) and no differential stick-steering proof
+  (no stick-off control run). Input-level proof only: exact bytes in the
+  pad log, deflected knob rendered, rider advancing, menu drift from the
+  held stick. Brad's hands-on play closes both.
 
 ## Orchestrator gate (Part 1)
 
