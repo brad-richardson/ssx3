@@ -1,0 +1,7 @@
+# GB9 Part 1 — Mac takes the Odin's binning path (muse, 2 h, Mac only)
+
+Todo GB9 + `docs/research/review-2026-09-25-fable.md` §4 (path table, knobs 1 and 2). Part 1 does knob 1 on the Mac; knob 2 (Odin descriptor path) waits for the Odin.
+1. paraLLEl-GS fork `~/dev/parallel-gs` `ssx3` `963cb57`: worktree `~/dev/ssx3-work/GB9/parallel-gs`, local branch `gb9-hier`. Add env `PGS_HIER_BINNING=force|auto|off` (unset = today's behaviour) around the `#ifdef __APPLE__` early return at `gs_renderer.cpp:1822`; `[gs-path]` must print the effective rule. Build the PS2Recomp fork `ssx3` `56a5e8a` against it (GB8 recipe with `PS2X_GS_SHADOW_PARALLEL=ON` pointing at your worktree).
+2. Replays (no boots, no lease): the N8X1/TL1 stream `n8d7m6.gs` (path in `local/research/TL1/REPORT.md`) through `ps2x_tests` replay on the Mac with `PGS_HIER_BINNING=force` vs unset: GB4_REPLAY rows (41) and the tick-2050 PPM. Does Metal/MoltenVK still break hierarchical binning ("broken Metal drivers" comment)? Report equal rows / first differing tick, and view the frames.
+3. If force works: one live det boot to t2400 with force (paraLLEl env, one slot) and the det-hash vs a GB8/F1 det run (must be identical: backend can't change guest state) plus frames viewed.
+Rules: never push (either fork); text only in git; scratch ≤ 10 GB; first failure: stop, hand back. Deliverable `local/research/GB9/REPORT.md` (knob diff, `[gs-path]` lines, replay table, frames, recommendation); commit `[GB9] Part 1 …` (`git add -f`, `Orchestrated-By: Muse Code`), no push.

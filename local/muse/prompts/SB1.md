@@ -1,0 +1,9 @@
+# SB1 — signed-branch tripwire: name the non-sign-extended producer (muse, 3 h, Mac)
+
+Execute the design in `docs/research/review-2026-09-25-fable.md` §2 ("Design (SB1)"), steps 1–6, exactly as written, with these pins and rules:
+- Base: fork `ssx3` **`56a5e8a`** (F1 fold). Worktree `~/dev/ssx3-work/SB1/PS2Recomp`, local branch `sb1-tripwire`. Regenerated codegen goes to `~/dev/ssx3-work/SB1/codegen` (never overwrite the canonical `~/dev/ssx3-work/codegen-ssx3`). E54E's regen recipe: `local/research/E54E/REPORT.md` Commands.
+- Facts: E54E (global S64 predicates → black boot, first GS packet diff at packet 352, tick ~82); AU9 (`0x3E3968` comparator override, `local/research/AU9/REPORT.md`); census and S1–S6 rows in the review §2.
+- Boots: one mini slot each (`p_lane_lease.py`), deterministic, I26-FAST, empty mc0, `PS2X_SKIP_MOVIE=1`, **paraLLEl backend** (GB8 env: `PS2X_GS_BACKEND=parallel`, `GRANITE_VULKAN_LIBRARY=/opt/homebrew/lib/libvulkan.1.dylib`). Budget: 1 regen, ≤ 2 builds, ≤ 3 boots (Boot A s32 to t400; Boot B s64 to t2400 only if a candidate fix exists; one spare), ≤ 600 s each.
+- Verify every PC/label with `local/tooling/ee/{ee-at,ee-func,ee-xref,ee-label}`. One candidate fix at most. Hash + GS digest gate for Boot B (E57's `check.py` pattern, `local/research/E57/check.py`).
+- Rules: never push; never `git add -f` in the fork; runner-dir check empty; text only in git; scratch `~/dev/ssx3-work/SB1/` ≤ 15 GB. First failure: stop, save the error, hand back.
+- Deliverable: `local/research/SB1/REPORT.md` (the mismatch table: PC, reg, value, tick, producer class with `ee-at` excerpt; the stop rule that applied; fix SHA + `--stat` if any; Boot B hash/digest table and frames viewed; gaps). Commit `[SB1] …` (explicit paths, `git add -f`, trailer `Orchestrated-By: Muse Code`), no push. Hand back; don't conclude beyond the stop rules.
