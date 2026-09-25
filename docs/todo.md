@@ -273,9 +273,10 @@ then 120 Hz simulation.
       obstacle); would cut boot-to-race time for every probe. Guest threads resume from a guest PC
       after the scheduler's checkpoint unwind (`runtime/ee_scheduler.h`), so no host stacks need
       saving. Proposed to Brad 09-25 as an Opus spike (save at t2000, load, det-hash equal to a
-      straight run through t2400); awaiting his OK.
-- [ ] Run-speed tooling (proposed 09-25): shared ccache for lane builds (not installed); cached
-      baselines per (fork, codegen, VU1, env) pin so lanes boot only the candidate.
+      straight run through t2400); Brad OK'd 09-25: **SS1** running (`local/muse/prompts/SS1.md`).
+- [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
+      **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
+      follows F5 Part 2 (Brad 09-25).
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation preference
       and drop its stale GameCube-era work-queue snapshot.
 - [ ] Brad: bradflix (x86_64, 14 cores, 62 GB) as the Android build host,
