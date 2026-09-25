@@ -44,7 +44,14 @@ for a in json.load(sys.stdin)["result"]["agents"]:
     except Exception: continue
     tail = "\n".join(out.splitlines()[-40:])
     hit = [e for e in ERR if e in tail]
-    if hit: print(n, "ERROR:", hit[0]); continue
+    if hit:
+        # report an error once: only when this pane shows more occurrences than last reported
+        seen = os.path.join(os.path.expanduser("~/dev/ssx3/local/.watch-errors"), n)
+        os.makedirs(os.path.dirname(seen), exist_ok=True)
+        cnt = sum(out.count(e) for e in ERR)
+        prev = int(open(seen).read()) if os.path.exists(seen) else 0
+        if cnt > prev:
+            open(seen, "w").write(str(cnt)); print(n, "ERROR:", hit[0]); continue
     if s != "working": continue
     h = hashlib.sha1(tail.encode()).hexdigest(); f = os.path.join(st, n + ".hash")
     old = open(f).read().split() if os.path.exists(f) else []
