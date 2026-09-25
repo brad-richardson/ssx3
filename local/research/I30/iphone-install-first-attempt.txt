@@ -1,0 +1,22 @@
+# I30 iPhone install, first attempt (21:40, FAILED, transient)
+
+Transcribed from the tool output of the failed attempt; the retry
+overwrote `install-iphone.log`, so this file preserves the observed text.
+The device had shown `available (paired)` at preflight (21:31) and was
+back to `available (paired)` one minute later; the retry at 21:44
+installed with exit 0 (see `install-iphone.log`).
+
+Device line at failure:
+
+    Brad's iPhone  00008140-0002505001F3001C (UDID)  unavailable  iPhone 16 Pro Max (iPhone17,2)  physical
+
+Install error (CoreDeviceError 4016):
+
+    ERROR: The device is not able to fulfill the requested usage assertion requirements. (com.apple.dt.CoreDeviceError error 4016 (0xFB0))
+           RequestedDeviceStates = (
+               "com.apple.coredevice.remoteServiceDiscoveryTrustedConnectivityAvailable",
+               "com.apple.coredevice.powerAssertionTaken",
+               "com.apple.coredevice.coreDeviceServicesLoaded"
+           )
+           CurrentlyAssertableStates = (
+           )
