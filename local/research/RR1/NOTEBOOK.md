@@ -37,3 +37,12 @@ Worker: Claude Code (Opus 5.5), exploratory.
   - Pre-fix 1090: photo panel = PEAK ACCESS/LEVEL icon atlas, logo slot = PEAK 1/VAL cells, big "3" missing, button glyphs = bars. Fixed (boot C): Peak 1 mountain photo, SSX logo, "3", ✕/△ glyphs.
   - Pre-fix 1180: course-map panel shows the "3" graphic; fixed: Peak 1 course map.
 - Backdrop: race backdrop TBP 12905 (PSMT8 256², uploaded 64 KiB as CT32 128×128 right before use), CBP 12897 CLD=1. Its CLUT is uploaded once at tick 1608 (16×16 CT32) and no later upload covers it. Backdrop still dark navy after the fix. Open.
+
+## 22:52 second mechanism: VIF UNPACK V4-5 not expanded; PCSX2 replay; fork commits
+- PCSX2 gsrunner replay of our (PATH3-fixed, boot D) stream (`rr1_cap2gs.py` → bytesize `~/rr1`, `rr1_gsrunner.sh`, 32 s): Select Peak 1090 identical to ours (Peak 1 photo). **Race start 1607: PCSX2 also draws the dark backdrop from our stream** → backdrop fault is in the stream, not our GS. From 1608 on PCSX2's replay shows blank frames (also with forced NTSC SMODE1); replay gap, cause unknown.
+- Backdrop CLUT (CBP 12897, uploaded tick 1608) has the same channel averages as PCSX2's sky CLUT at CBP 14473 (43.8/84.7/189.5/127.5 over 256 entries).
+- **Vertex colours:** backdrop prims RGBA 0x01101010 vs PCSX2 0x80808080; terrain 0x01080504 vs 0x80402820. Exactly RGB>>3, A>>7 = VIF UNPACK V4-5 without the 5→8-bit expansion. `ps2_vif1_interpreter.cpp:986-989` stored raw fields; PCSX2 UNPACK_V4_5 shifts RGB<<3, A<<7. Fixed + test.
+- Fork `rr1-sky` (local, not pushed): `3bc0449` PATH3 EOP gating (+ default-off dev taps), `f3dff5b` V4-5 expansion. Suite 598/598 (rc 0) from the worktree root on the combined tree; runner-dir check empty.
+- Flash check (`rr1_flash.py`, drawing ticks 1800–1960): pre-fix A has no class dropping out and FST (HUD-style) prims 66–83 per tick, so there's no intermittent draw loss in the Mac stream at this moment. Brad's iOS flashing is probably the wrong-texture-at-draw-time effect (PATH3) or present tearing. Hypothesis, not tested on iOS.
+- After the PATH3 fix, frames have 17 unmask windows for 20 queued EOP packets (PCSX2 frame: ~27 windows, one EOP packet per window, depth pass in its own window #1418). Our 3 extra packets (incl. depth + post pass) drain at the next frame's first unmask, i.e. one frame late. Fewer windows = fewer textured objects submitted → likely the missing-object/foliage lead (upstream, open).
+- Boot E (both fixes) queued: all 4 mini slots held by E57/E61 exclusive speed runs since ~22:37.
