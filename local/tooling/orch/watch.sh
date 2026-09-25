@@ -2,17 +2,17 @@
 # watch.sh — the orchestrator's wake-up. Exits (and so re-invokes the orchestrator) on:
 #   COMMIT   a new non-[orch] commit in ~/dev/ssx3
 #   BLOCKED  a pane whose agent status is "blocked" (permission prompt etc.)
-#   STOPPED  a worker that was working when the watch started and is now idle/done with no new commit
-#            (finished without committing, or died on an error)
+#   STOPPED  a worker that was working when the watch started and has been idle/done for GRACE s
+#            (default 600) with no new commit (finished without committing, or died)
 #   ERROR    a worker pane showing a known failure string (model/memory/rate-limit/API errors)
 #   STALL    a "working" pane whose visible output hasn't changed for STALL seconds (hung)
 #   heartbeat after MAX seconds, listing every pane's state
 # Env: WS (workspace, default w2), MAX (default 1500 s), STALL (default 1200 s),
 #      WATCH_IGNORE_AGENT (comma list; the orchestrator's own pane name is always ignored).
-MAX=${MAX:-1500}; STALL=${STALL:-1200}; start=$(date +%s)
+MAX=${MAX:-1500}; STALL=${STALL:-1200}; GRACE=${GRACE:-600}; start=$(date +%s)
 base=$(git -C ~/dev/ssx3 rev-parse HEAD)
 state=$(mktemp -d "${TMPDIR:-/tmp}/watch.XXXXXX")
-export WS=${WS:-w2} STALL state
+export WS=${WS:-w2} STALL GRACE state
 export WATCH_IGNORE_AGENT="${WATCH_IGNORE_AGENT:-orch-sol},ssx3_opus_orchestrator"
 while :; do
   new=$(git -C ~/dev/ssx3 log --format='%h %s' $base..HEAD | grep -v '\[orch\]')
@@ -20,7 +20,7 @@ while :; do
   ev=$(herdr agent list | python3 -c '
 import json, sys, os, subprocess, hashlib, time
 WS = os.environ["WS"]; ign = set(os.environ["WATCH_IGNORE_AGENT"].split(","))
-st = os.environ["state"]; stall = int(os.environ["STALL"]); now = time.time()
+st = os.environ["state"]; stall = int(os.environ["STALL"]); grace = int(os.environ["GRACE"]); now = time.time()
 ERR = ("prefill_memory_aborted", "memory limit exceeded", "rate limit", "Rate limit",
        "overloaded_error", "quota", "API Error", "invalid_request_error")
 for a in json.load(sys.stdin)["result"]["agents"]:
@@ -30,7 +30,13 @@ for a in json.load(sys.stdin)["result"]["agents"]:
     first = os.path.join(st, n + ".first")
     if not os.path.exists(first): open(first, "w").write(s)
     if s == "blocked": print(n, "BLOCKED"); continue
-    if open(first).read() == "working" and s in ("idle", "done"): print(n, "STOPPED (was working, now", s + ", no commit)"); continue
+    idlef = os.path.join(st, n + ".idle")
+    if open(first).read() == "working" and s in ("idle", "done"):
+        # workers often end a turn while a backgrounded wait runs; only report after a grace period
+        if not os.path.exists(idlef): open(idlef, "w").write(str(now))
+        if now - float(open(idlef).read()) >= grace: print(n, "STOPPED (idle", int(now - float(open(idlef).read())), "s, no commit)")
+        continue
+    if os.path.exists(idlef): os.remove(idlef)
     try: out = subprocess.run(["herdr", "agent", "read", n], capture_output=True, text=True, timeout=20).stdout
     except Exception: continue
     tail = "\n".join(out.splitlines()[-40:])
