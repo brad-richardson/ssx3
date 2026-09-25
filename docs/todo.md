@@ -30,8 +30,11 @@ then 120 Hz simulation.
 - [ ] **Sprite/atlas artifacts and square snowflakes** (Brad's iPhone
       feedback 09-23, stray corner glyphs): all three renderers draw them
       from our stream and PCSX2 doesn't, so they are wrong texture-page
-      contents upstream of the GS (G44, G46). Re-check after the texture
-      streaming work above; likely the same cause. `local/research/G46/`.
+      contents upstream of the GS (G44, G46; includes the Select Peak photo
+      panel, the "Peak 1 background" Brad asked about). Lead (RR1, 09-24): a
+      PATH3 packet runs before the PATH1 draw it should follow, so pages can hold
+      another screen's contents at draw time. RR1 re-checks the menus with its fix
+      candidate. `local/research/G46/`, `RR1/`.
 - [ ] **E57 VU1 speed (top performance item).** VU1 interpreter is 39–50%
       of race time (hazard bookkeeping ~30% on the Odin, N5). Options: (a)
       host-float FMAC fast path with PS2 clamping behind a flag, A/B vs the
