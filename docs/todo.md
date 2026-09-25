@@ -144,14 +144,12 @@ then 120 Hz simulation.
 
 - [ ] Turn sound on in the shipped envs (`PS2X_SOUND=1` in the iOS bundle env: done in I30; the
       Odin `ps2x.env` and N-lane launchers next). Brad confirmed AU8's planar fix sounds exactly right (09-24).
-- [ ] **Race SFX on SPU2 hardware voices (AU8 E10; AU9 Opus exploratory running):** in a PCSX2 Snow Jam race, SPU2 voices carry
-      an intermittent, near-mono layer (dry 625/545 RMS, −15.5 dB of output, 94% < 1 kHz; likely SFX
-      after T47's 1.75 MB SPU upload). Our HLE has no SPU voices, so races lack it. Needs cid-0
-      uploads (`sceSdVoiceTrans`), tag-3 `updatevoices` and an SPU2 ADPCM voice mixer. Clips
-      `~/dev/ssx3-work/AU8/AU8-R-race-*.m4a`. `local/research/AU8/NOTEBOOK.md` E10.
-
-## I — iOS
-
+- [ ] **Race SFX (AU9, Opus, running): confirmed right by Brad (09-24 clips).** Cause: the recompiler's
+      BLTZ/BGTZ family tests 32 bits, so the game's file-table bsearch misses `BANKS.INF` and the sound
+      banks never load. AU9 fork `au9-spu`: runtime override of `0x3E3968` + SPU2 voice layer (531
+      uploads as PCSX2, menu SFX NCC 0.9997, music unchanged). Gate, then fold. The global emitter fix
+      (`a46fb2e`) is NOT validated: E54E's boot with it went black; separate lane to find the
+      non-sign-extended register it exposes.
 - [ ] Brad's feedback on the I32 controls (stick left, D-pad right; on his iPhone since 09-24).
 - [ ] Brad (09-24, iPhone I30): UI elements flash in and out every few seconds and many 3D assets
       pop in and out. RR1: no draw dropout in the Mac stream; likely the PATH3 wrong-texture effect. Re-check on his phone after the RR1 fold.
