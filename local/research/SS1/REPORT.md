@@ -1,8 +1,19 @@
 # SS1: save states for the recomp runtime (Opus spike)
 
-Worker: Claude Code (Opus 5.5), Mac mini, 2026-09-25. Brief: `local/muse/prompts/SS1.md`.
-Fork worktree `~/dev/ssx3-work/SS1/PS2Recomp`, local branch `ss1-savestate` from `ssx3` `a3efbfe`.
-The orchestrator decides; this report hands back tables.
+Worker: Claude Code (Opus 5.5), Mac mini, 2026-09-25, ~19:03–19:55 EDT. Brief: `local/muse/prompts/SS1.md`,
+plus the orchestrator's mid-run design change (runner-SHA mismatch warns, acceptance (d), the
+non-deterministic note). Fork worktree `~/dev/ssx3-work/SS1/PS2Recomp`, local branch `ss1-savestate`
+from `ssx3` `a3efbfe` (not pushed). The orchestrator decides; this report hands back tables.
+
+## Outcome
+
+**Feasible, and the prototype works.** A det runner saves the whole machine at a vsync boundary. A
+fresh process loads it and runs **bit-exactly**: det-hash IDENTICAL for ticks 2001–2600 against a
+straight run. The same holds for 938/938 SND events and the `cid0`/tick counters, and 3/3 presented
+frames (t2100/2300/2600) are byte-identical. A state saved by runner A loads in runner B (a different
+SHA, one unrelated source change) and matches through t2600. A race-start state (t1720) reaches the
+race in **1.0 s wall instead of 33.0 s**. Default off: with the knobs unset, the new runner is
+det-hash IDENTICAL to F5's B1 over ticks 1–2400.
 
 ## Stage 1: inventory and design (committed before any code)
 
@@ -59,7 +70,7 @@ read-only subagent reads, spot-checked).
 | 22 | CD: files-by-key + pseudo LBNs, error, mode, init, streaming LBN/end, stream timing, callback fn/gp/stack | `Support.h:17-30` (**per-TU copy**), `CD.cpp:19-42` | C |
 | 23 | **Per-TU `Support.h` globals** (anonymous namespace in a header included by ~29 Stubs TUs, not unity-built) | `Support.h:4-35, 558-560, 1236, 1597` | C: every TU registers its own copy through a static registrar in the header, keyed by TU name |
 | 24 | fio fds, libc `FILE*` map, IOP host files | `State.h:6`, `Support.h:558`, `ps2_iop_host.h:101` | Q (no path/offset recorded; must be closed) |
-| 25 | Memory card: fds, last cmd/result/pending, ports, cursor; card contents on disk | `MemoryCard.cpp:89-95`, `getMcRootPath` `:118` | C for the POD. Fds Q. The card dir is snapshotted with the state (empty under FR1-R1) |
+| 25 | Memory card: fds, last cmd/result/pending, ports, cursor; card contents on disk | `MemoryCard.cpp:89-95`, `getMcRootPath` `:118` | C for the POD. Fds Q. The card dir was meant to travel with the state: **not implemented** (see Gaps; empty under FR1-R1) |
 | 26 | Pad: ports, override, `scePadGetFrameCount` counter, pad latch | `Pad.cpp:53-75, 1008`; `ps2_pad_latch.h:91-98` | C. The pad script has no cursor: it recomputes from `gs().vsyncTick` (`Pad.cpp:510-513, 896-898`), so it needs only the same env |
 | 27 | SND HLE: handler/status/serial/counters incl. **cid0**, doneRing, iopMem, SPU (2 MiB RAM, 48 voices), driver, upsamplers | `include/ps2_snd_spike.h:76-95`, `ps2_snd_spu.h` | C. Log/dump FILEs and the PCM ring + host output R |
 | 28 | Audio stub (libsd) state, DMA env + pending polls, `g_gparam`, `g_wiredAlloc` | `Stubs/Audio.cpp:21-50`, `DMA.cpp:36`, `Support.h:1236, 1597`, `Ssx3CopiedPayload.cpp:41` | C |
@@ -114,3 +125,180 @@ progression, frame view).
   `PS2X_DETERMINISTIC=1`. Unset = no code path changes (one getenv at `run()` start).
 - **Unit tests** for the writer/reader, the ordered-map round trip (iteration order and later
   inserts), the scheduler and VU1 round trips, and the header refusal.
+
+## Stage 2: prototype (fork `ss1-savestate`, local)
+
+| Commit | What |
+| --- | --- |
+| `e76a4fc` | Save/load of every inventory row, file format, knobs, tests (31 files, +2,938/−13) |
+| `53a1b1d` | MPEG playback bookkeeping saved; a decoder whose stream has ended is dropped (found by boot B; +59/−4) |
+| `f1ead87` | Force-link the syscall section (static-library dead strip, found from the section list); validate every section before applying any (+62) |
+
+`git diff --stat a3efbfe HEAD`: 31 files, +3,055/−13 (net). **Nothing under `ps2xRuntime/src/runner/`**
+(`--stat` empty). New files: `include/runtime/ps2_savestate.h` (format, Writer/Reader, ordered-map
+round trip, registries), `src/lib/ps2_savestate.cpp` (header, SHA-256, orchestration, memory / kernel
+/ VU / GS / SND / pad-latch sections), `src/lib/ps2_savestate_internal.h` (friend serializers +
+section versions), `src/lib/Kernel/EeSchedulerSavestate.cpp`, `src/lib/Kernel/Syscalls/Savestate.cpp`,
+`ps2xTest/src/ps2_savestate_tests.cpp`. Owners gain one friend line or a small section at the end
+of their `.cpp`. `Support.h` registers one section per including TU (`__BASE_FILE__` key).
+
+### How it works
+
+- **Knobs (all default off):** `PS2X_SAVESTATE_SAVE_AT=<tick>` + `PS2X_SAVESTATE_PATH=<file>` (+
+  dev-only `PS2X_SAVESTATE_EXIT_AFTER_SAVE=1`), `PS2X_SAVESTATE_LOAD=<file>`, `PS2X_SAVESTATE_STRICT=1`.
+  Each needs `PS2X_DETERMINISTIC=1`, or it is switched off with one log line. Unset, the per-dispatch
+  cost is one bool test and one `u64` compare against 0 in `EeScheduler::run()`.
+- **Save point:** `EeScheduler::run()` right after `processPendingEvents()`, at the first
+  iteration with `m_vsyncTick >= SAVE_AT` where every readiness check passes. On load, the first
+  iteration skips `processPendingEvents()`. The GS worker is drained, and GS + paraLLEl state
+  (VRAM via `map_vram_read`/`map_vram_write`, `RegisterState`, `PrivRegisterState`, GIF paths) is
+  saved and restored *on the worker* through `GS::privWrite`.
+- **Deferral, not failure:** the save waits while any of these is live, and logs
+  `[savestate] deferred tick=N reason=…` once per tick: an untagged host closure (named by
+  `target_type()`), host events, open fio/libc/IOP-host/memory-card files, DECI2 sessions, pending
+  GIF/VIF transfers, host pad input, an MPEG decoder mid-stream, or `std::rand` use.
+- **Closures:** `EeCompletionTag {kind, 4×u32}` on waits and resumes. `sceCdStRead`'s vsync wait is
+  tagged (kind 1), and its factory rebuilds the same lambda. The other 10 creation sites are
+  untagged and defer. None was live at t1720 or t2000.
+- **Map order:** `unordered_map`/`set` are stored with their bucket count and iteration order, and
+  rebuilt by reverse insertion at the same bucket count. A unit test proves identical iteration
+  order, including after 3,000 more mixed inserts/erases with rehashes.
+- **File:** `PS2XSAVE` + format 1, then `[key][version][size][payload]` sections. The header section
+  has key=value lines. **Refuse:** format, `elf_sha`, `iso` (size + SHA-256 of the first/last MiB,
+  path-independent), `deterministic`, `pad_clock`, `pad_prefix_sha` (SHA of the route entries
+  that start at or before the save tick, so a candidate may change the route *after* it),
+  `gs_backend`. **Warn:** `runner_sha` (refuse under STRICT), `skip_movie`. Every section carries a
+  version. Before anything is applied, the loader refuses unknown, missing, duplicate or
+  mismatched sections.
+- **Size/time:** 52.85 MB per state, 38 sections. `memory` 40.9 MB (RDRAM, IOP RAM, scratch, the
+  4 MiB CPU-side VRAM, VU memories), `stub:sif` 5.2 MB (IOP heap storage), `gs` 4.2 MB, `snd`
+  2.4 MB, the rest < 71 KB each. Save 450–533 ms and load 463–472 ms, mostly the runner SHA-256
+  over the 170 MB executable (cacheable).
+
+### Builds (budget 8) and suite
+
+| # | Kind | Wall | Runner SHA-256 | Suite (worktree root) |
+| --- | --- | --- | --- | --- |
+| 1 | cold, unchanged source | 227 s | `119389a7…` (= F5 `runner-det`) | 658/658 |
+| 2 | savestate (headers → full codegen rebuild) | ~210 s | `4c268636…` (`runner-ss2`) | 664/664 |
+| 3 | MPEG playback captured | 24 s | `4df61d64…` (`runner-ss3`) | 664/664 |
+| 4 | MPEG ended-decoder rule | ~25 s | `b6b4caa4…` (`runner-ss4`) | 664/664 |
+| 5 | runner B for (d): ss4 + one log string (`[vpad] off (… SS1 runner B)`) | 22 s | `cd0cbbf5…` (`runner-ss4-B`) | – |
+| 6 | syscall section linked | ~25 s | `7c917be7…` (`runner-ss6`) | 664/664 |
+| 7 | pre-validation + link test | ~25 s | `6da0a03d…` (`runner-ss7`, final) | **665/665** |
+
+Build 2 was preceded by compile-only checks of the `ps2_runtime` and `ps2x_tests` targets (no codegen)
+to fix errors before the full rebuild. SHAs are two matching reads each (`receipts.txt`).
+
+## Stage 3: acceptance (det build, FR1-R1, sound on, paraLLEl 1×, one mini slot each)
+
+Boot driver: `local/research/SS1/ss1_boot.py` (F5's driver + `--save-at/--save-path/--exit-after-save/--load`).
+Comparison: `ss1_hashdiff.py` (`gb8_hashdiff.py` + `--from/--to`, and an unanchored match because
+one `[frame:dump]` line was written without a newline before a det-hash line in boot B).
+
+| Row | Runner | Command (label) | Result |
+| --- | --- | --- | --- |
+| (a) straight to t2600 | ss4 | `A4` | 2615 ticks, 70.0 s. IDENTICAL to F5 B1 1..2400 and to `A` (ss2) 1..2600 |
+| (b) save t2000, exit | ss7 | `B7 --save-at 2000 --exit-after-save` | saved tick=2000 eeCycle=9830598000, 52,852,689 B, 464 ms. Hashes 1..2000 IDENTICAL to A4 |
+| (c) load → t2600 | ss7 | `C7 --load t2000-v7.state --dump-ticks 2100,2300,2600` | **IDENTICAL 2001..2600**. SND 938/938 events identical, `ticks=4042 counter=0x10cb cid0=531` = A4. Frames t2100 `7ad8f18d`, t2300 `e6f87cdd`, t2600 `fad39c2b` = A4 (3/3). t2001 at 1.01 s, t2600 at 25.9 s wall |
+| (c) first pass | ss4 | `B4` save + `C` load | IDENTICAL 2001..2600, frames 3/3 = A4, SND identical (the syscall section was not linked yet; see gaps) |
+| (d) runner A state in runner B | ss4-B | `D --load t2000.state` (saved by ss4) | `warning: runner_sha differs … loading anyway`, **IDENTICAL 2001..2600**, SND 938/938 |
+| (d) strict | ss4-B | `D-strict --env PS2X_SAVESTATE_STRICT=1` | `load refused: header mismatch runner_sha`, exit in 1.0 s |
+| Refusal: route | ss4 | `D-padprefix --env PS2X_PAD_SCRIPT=10611:start:250` | `load refused: header mismatch pad_prefix_sha` |
+| Refusal: layout | ss6 | `C6-oldfile` (ss4 file, no `syscalls` section) | `load refused: missing section syscalls` |
+| Race-start | ss4 | `E --save-at 1720` + `F --load t1720.state` | saved t1720 (533 ms, hashes 1..1720 = A). Load: **HUD tick at 1.01 s vs 33.0 s straight**, IDENTICAL 1721..2100, t1800 frame viewed (race HUD, rider, carve trail, 00:00:01) |
+| Deferral only | ss2/ss3 | `B`, `B3` | never saved: `stub:mpeg: MPEG playback state live` / `MPEG decoder live` every tick 2000–2607. **IDENTICAL to A 1..2600**, so failed attempts don't perturb the run |
+
+**Frames viewed.** t2100 from the straight run A and from the load C show the same scene. One is a
+single present behind the other (trick counter 210 vs 220, rider pose). This is host present-latch
+timing, not guest state. Two *straight* runs disagree the same way: A dumped `fdbbd91c`, while A4
+and F5's B1/B1b dumped `7ad8f18d`. The loaded C/C7 frame is byte-identical to A4's, so the frame
+check is 3/3 against A4. The t1800 frame after the t1720 load shows the race (HUD, 2nd/2, rider,
+trail).
+
+**Times (mini, M5 Pro, det build, paced):**
+
+| | Straight | From a state |
+| --- | ---: | ---: |
+| To race HUD (t1714) | 33.0 s | **1.01 s** (t1720 state) |
+| To t2001 | 44.7 s | **1.01 s** (t2000 state) |
+| Load → t2600 | – | 25.9 s (600 ticks run at the det build's in-race rate; A4 takes 22.8–24 s for the same ticks) |
+| Save / load cost | – | ~0.46–0.53 s each (runner SHA dominates) |
+
+Boots: 14 of 16 (A, B, B3, B4, C, D, D-strict, D-padprefix, E, F, A4, C6-oldfile, B7, C7), all
+slot 1, all ≤ 71 s, runner by PID (driver), lease released on every path. Receipts:
+`receipts.txt`. Run dirs and states in `~/dev/ssx3-work/SS1/{run,states}` (states hold game RAM:
+scratch only, never git).
+
+## What a lane gets
+
+A lane can store one race-start state per (ELF, ISO, route prefix, backend) and boot its own
+candidate from it: `PS2X_DETERMINISTIC=1 PS2X_SAVESTATE_LOAD=t1720.state` (the rest of the FR1-R1 env
+unchanged). The candidate may be any build as long as every section version matches. A layout
+change in an owner bumps that section's version and refuses cleanly. Proposed store: next to RS2's
+baselines, keyed like them (`<fork>-det-fr1r1-t1720-snd1-1x.state` + manifest).
+
+## Android / iOS port needs
+
+- **Paths/identity:** the runner SHA needs the right file. Android: the `.so` via `dladdr`, not
+  `/proc/self/exe` (that is `app_process`). iOS: `_NSGetExecutablePath` works (the fallback today
+  is `/proc/self/exe`, so Android needs this change). ELF and ISO identity are content-based, so
+  device paths don't matter.
+- **Transport:** `adb push` / Files into the app sandbox; `PS2X_SAVESTATE_LOAD` through the bundled
+  env file.
+- **Cross-host states (Mac → Odin):** the layouts are the same arm64 PODs, paraLLEl is the same
+  source, and both use libc++ (bucket policy and insertion order are what the map test proves on
+  macOS). Unverified: NDK libc++ bucket sizing, and LX1's Mac/Linux det parity carrying over to
+  loads. A mismatch fails loudly (`bucket count not reproducible`) rather than silently.
+- **GPU:** Adreno/Turnip and MoltenVK iOS go through the same `map_vram_*` paths on the GS worker.
+  Not run there.
+- **App lifecycle:** loading must happen before the first present on Android (it does: the game
+  thread loads before `run()`). A UI trigger would replace `SAVE_AT` for hand use.
+
+## Dropping `PS2X_DETERMINISTIC=1` later (device play)
+
+Captured state is complete in either mode. Determinism only decides whether the *continuation*
+is reproducible. What non-deterministic mode adds:
+
+1. **Host-gated events.** Default mode delivers deadlines only when host time has also passed
+   (`EeScheduler.cpp:2771-2808`). Deadlines are already saved as host offsets and rebased on load,
+   so a loaded run continues correctly but not bit-exactly. Change: turn the `deterministic`
+   header line from refuse into warn, and drop the config gate.
+2. **Host inputs.** Live pad input: the pad-latch readiness check requires an idle pad. For play,
+   clear pending edges on load instead of refusing. ExternalWake events: the queue must be empty
+   (already checked). The CD clock and OSD timezone are host-derived but live in guest RAM, so
+   they are captured.
+3. **Save trigger and stall.** A hotkey/menu instead of a tick. Copy the ~53 MB snapshot and write
+   it off the game thread. Compute the runner SHA once per process. That brings the stall to about
+   one drain + memcpy.
+4. **Pacer.** Already reset on load; it re-anchors on the next vsync.
+
+## Gaps
+
+- **paraLLEl exactness:** not captured are the GPU CLUT buffer (`cached_cbp` is cleared so CLD 4/5
+  reload; CLD 0 draws before the guest's next CLUT load would use a stale palette), the private
+  vertex queue and transfer state (assumed idle at a drained vsync), and the SSAA/hi-res planes
+  (only 1× tested). No visible effect in the 3 compared frames. The exact fix is a paraLLEl
+  accessor for the CLUT (fork patch), not done here.
+- **Closures:** only `sceCdStRead` is tagged. RPC end-function / server-dispatch, MPEG, IPU,
+  syscall-override and exit-handler closures defer the save. Not seen live at t1720/t2000;
+  elsewhere a save may land a few ticks late (logged).
+- **MPEG:** a decoder whose stream has ended is dropped. That diverges only if the guest continues
+  the same stream without a new sequence header. A mid-stream decoder defers.
+- **Memory card:** the HLE state is saved and open card files defer, but the card directory on
+  disk is **not** copied with the state (the design row says snapshot). FR1-R1's cards stay empty
+  (`mc0/`, `mc1/` empty in every run). A saving lane needs this.
+- **IOP modules (ps2xIOP subsystem):** not captured. Per the inventory, SSX 3 has no builtin
+  profile, and the det-hash, SND and frames all match, but this is unverified for other titles.
+- **The first acceptance pass (B4/C/D/F) ran without the `syscalls` section.** It still matched,
+  because RPC/bootmode/TLS/OSD/module state is equal after init or unused in the window. Fixed in
+  `f1ead87`: the section is now linked, a unit test checks the registry, and the final runner
+  re-passed (b)/(c) (`B7`/`C7`). (d) and the race-start rows were not re-run on ss7.
+- **Det-hash scope:** it covers RDRAM, scratch, VU1 data/code, the VU1 program count and eeCycle.
+  GS VRAM is checked only through the 3 frames; the SPU only through the SND event log and
+  counters. Pad state is not hashed directly (the route is recomputed from the tick).
+- **Portability of the map-order technique** beyond libc++ (e.g. libstdc++ on bradflix/LX1) is
+  untested. A mismatch refuses.
+- One save per run (`SAVE_AT`). The `libc rand` flag was never set in these runs.
+- Scratch `~/dev/ssx3-work/SS1`: 2.7 GB (build 1.8 GB, bin 810 MB, states 157 MB, runs 19 MB),
+  under the 10 GB cap. Internal total 148.1 of 200 GB.

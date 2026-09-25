@@ -1,0 +1,105 @@
+# SS1 receipts (text; generated 2026-09-25T23:50:11Z)
+
+## hash diffs
+hash IDENTICAL  ticks 2001..2600: base=run/A4 lines=2709 cand=run/C lines=705 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 2001..2600: base=run/A4 lines=2709 cand=run/D lines=698 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1721..2100: base=run/A4 lines=2709 cand=run/F lines=455 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1..2600: base=run/A4 lines=2709 cand=run/A lines=2705 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1..2600: base=run/A4 lines=2709 cand=run/B lines=2704 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1..2000: base=run/A4 lines=2709 cand=run/B4 lines=2000 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1..1720: base=run/A4 lines=2709 cand=run/E lines=1720 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1..2400: base=/Users/brad/dev/ssx3-work/F5/run/B1 lines=2485 cand=run/A4 lines=2709 missing=0/0 first_diff=None
+
+## savestate log lines
+### B
+[savestate] deferred tick=2000 reason=stub:mpeg: MPEG playback state live
+[savestate] deferred tick=2001 reason=stub:mpeg: MPEG playback state live
+[savestate] deferred tick=2002 reason=stub:mpeg: MPEG playback state live
+[savestate] deferred tick=2003 reason=stub:mpeg: MPEG playback state live
+### B3
+[savestate] deferred tick=2000 reason=stub:mpeg: MPEG decoder live
+[savestate] deferred tick=2001 reason=stub:mpeg: MPEG decoder live
+[savestate] deferred tick=2002 reason=stub:mpeg: MPEG decoder live
+[savestate] deferred tick=2003 reason=stub:mpeg: MPEG decoder live
+### B4
+[savestate] saved tick=2000 eeCycle=9830598000 bytes=52849573 sections=37 ms=450.3 path=/Users/brad/dev/ssx3-work/SS1/states/t2000.state
+[savestate] exit after save
+### C
+[savestate] loaded tick=2000 eeCycle=9830598000 bytes=52849573 sections=36 ms=462.8 path=/Users/brad/dev/ssx3-work/SS1/states/t2000.state
+### D
+[savestate] warning: runner_sha differs (file=b6b4caa4418ea57f02b904f17d5c7f689b24b92c4ae52bd05720f459c809d51c this=cd0cbbf5f2e3fdd8ff1ad083111707c38150a0b18853d1d2488217ccee035a70); loading anyway
+[savestate] loaded tick=2000 eeCycle=9830598000 bytes=52849573 sections=36 ms=471.9 path=/Users/brad/dev/ssx3-work/SS1/states/t2000.state
+### D-strict
+[savestate] load refused: header mismatch runner_sha: file=b6b4caa4418ea57f02b904f17d5c7f689b24b92c4ae52bd05720f459c809d51c this=cd0cbbf5f2e3fdd8ff1ad083111707c38150a0b18853d1d2488217ccee035a70
+### D-padprefix
+[savestate] load refused: header mismatch pad_prefix_sha: file=55850079a07a24727db818d08b9dc7a9eabb41c20ae03feb975971639f0c4333 this=7b32bff62d28e5ad8e9ac0e57ef3d303650fdc4adf2442a7a5ea918a30aca0ae
+### E
+[savestate] saved tick=1720 eeCycle=8454314280 bytes=52849573 sections=37 ms=533.2 path=/Users/brad/dev/ssx3-work/SS1/states/t1720.state
+[savestate] exit after save
+### F
+[savestate] loaded tick=1720 eeCycle=8454314280 bytes=52849573 sections=36 ms=466.0 path=/Users/brad/dev/ssx3-work/SS1/states/t1720.state
+
+## frame dumps (tick fnv1a)
+A tick=2100 fnv1a=fdbbd91c
+A tick=2300 fnv1a=e6f87cdd
+A tick=2600 fnv1a=fad39c2b
+A4 tick=2100 fnv1a=7ad8f18d
+A4 tick=2300 fnv1a=e6f87cdd
+A4 tick=2600 fnv1a=fad39c2b
+C tick=2100 fnv1a=7ad8f18d
+C tick=2300 fnv1a=e6f87cdd
+C tick=2600 fnv1a=fad39c2b
+D tick=2100 fnv1a=7ad8f18d
+D tick=2300 fnv1a=e6f87cdd
+D tick=2600 fnv1a=fad39c2b
+F tick=1800 fnv1a=26b7c5c7
+F tick=2000 fnv1a=3692fd39
+F tick=2100 fnv1a=7ad8f18d
+
+## snd
+A4 ticks=4042 counter=0x10cb cid0=531
+C ticks=4042 counter=0x10cb cid0=531
+D ticks=4042 counter=0x10cb cid0=531
+
+## boots (label bound elapsed_s last_tick slot rc)
+A target 70.528 2609 1 -15 runner-ss2
+B target 68.495 2607 1 -15 runner-ss2
+B3 target 69.464 2604 1 -15 runner-ss3
+B4 target 44.692 2000 1 0 runner-ss4
+C target 26.847 2608 1 -15 runner-ss4
+D target 27.885 2605 1 -15 runner-ss4-B
+D-strict exit 1.023 0 1 0 runner-ss4-B
+D-padprefix exit 1.016 0 1 0 runner-ss4
+E target 34.431 1720 1 0 runner-ss4
+F target 19.27 2103 1 -15 runner-ss4
+A4 target 69.977 2615 1 -15 runner-ss4
+
+## runner B diff (unrelated change for acceptance d)
+     if (!vpadWanted)
+     {
+-        std::fprintf(stderr, "[vpad] off (PS2X_VIRTUAL_PAD)\n");
++        std::fprintf(stderr, "[vpad] off (PS2X_VIRTUAL_PAD unset; SS1 runner B)\n");
+     }
+     const bool anamorphic = g_ssx3WidescreenActive.load(std::memory_order_acquire) &&
+                             g_ssx3WidescreenMode.load(std::memory_order_relaxed) == 2u;
+snd events vsync 2001..2600 (A4/C/D): 938/938/938 identical
+
+## final runner ss7 (after the syscall-section fix)
+hash IDENTICAL  ticks 2001..2600: base=run/A4 lines=2709 cand=run/C7 lines=707 missing=0/0 first_diff=None
+hash IDENTICAL  ticks 1..2000: base=run/A4 lines=2709 cand=run/B7 lines=2000 missing=0/0 first_diff=None
+### C6-oldfile
+[savestate] warning: runner_sha differs (file=b6b4caa4418ea57f02b904f17d5c7f689b24b92c4ae52bd05720f459c809d51c this=7c917be7bc084c8022e166bf899b43ef8fa6dd74b27126b91acd4f6f85b4e747); loading anyway
+[savestate] load refused: missing section syscalls
+### B7
+[savestate] saved tick=2000 eeCycle=9830598000 bytes=52852689 sections=38 ms=464.3 path=/Users/brad/dev/ssx3-work/SS1/states/t2000-v7.state
+[savestate] exit after save
+### C7
+[savestate] loaded tick=2000 eeCycle=9830598000 bytes=52852689 sections=37 ms=471.4 path=/Users/brad/dev/ssx3-work/SS1/states/t2000-v7.state
+C7 tick=2100 fnv1a=7ad8f18d
+C7 tick=2300 fnv1a=e6f87cdd
+C7 tick=2600 fnv1a=fad39c2b
+C6-oldfile exit 2.041 0 3 0 runner-ss6
+B7 target 45.215 1999 1 0 runner-ss7
+C7 target 28.883 2608 1 -15 runner-ss7
+C7 wall: t2001 1.014 s  t2600 25.861 s
+snd events vsync 2001..2600 A4/C7: 938/938 identical
