@@ -134,3 +134,7 @@ The contract is in `AGENTS.md` (about one page). On top of it:
 - Measuring stereo audio in mono: a side-channel (L−R) fault is invisible in L+R.
 - Scratch cleanup keep-lists must include every path a committed build script references (the
   09-24 cleanup deleted `ssx3-work/I25`, the iOS FFmpeg/SDL2 prebuilts; rebuilt into `ios-deps/`).
+- Ending a turn without a live watcher (09-24 night): every lane finished and nothing was gated
+  for ~7 h while Brad was offline. **Never end a turn with workers running unless a watcher (or
+  a scheduled wakeup) is live**; when Brad goes offline, keep the loop going with watch.sh
+  restarts, not a final message.
