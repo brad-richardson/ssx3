@@ -255,52 +255,63 @@ ssh bytesize 'wsl -d Ubuntu -- bash -lc "bash /home/brad/f4/build.sh"'  # BUILD 
 rm -rf ~/dev/ssx3-work/F4/build ~/dev/ssx3-work/F4/build-recomp
 ```
 
-## Part 1b (PAUSED — Brad needs the machine; no push; resume from here)
+## Part 1b (job pool, APK green, B3 1.40×)
 
-### 1b(1) Job pool commit (done)
+Worker: same pane, resumed after a Brad pause (pause notes were
+committed as `[F4] Part 1b (paused)`; this section supersedes them).
+No push; stopping for the orchestrator gate.
 
-Commit `6bac3da541d04401900f6bd70fd3f33271f57adb` on `f4-fold`
-(`ps2xRuntime/CMakeLists.txt`, +4): `JOB_POOLS ps2x_vu1_gen=2` +
-`JOB_POOL_COMPILE` on the globbed vu1 sources, exactly the
-orchestrator's sketch. Runner-dir check empty, `git diff --check`
-clean. Verified on the Mac with a configure-only check
-(`configure-poolcheck.log`, dir deleted after): `rules.ninja` gets
-`pool ps2x_vu1_gen / depth = 2` and all 7 vu1 edges carry
-`pool = ps2x_vu1_gen`. No Mac rebuild: the commit changes build
-scheduling only, zero compiled inputs, so `bin/runner-clean`
-(`7e31b6d2…`, built from `46b0c8d`) is the binary B3 ran.
+### 1b(1) Job pool commits (done, two commits)
 
-### 1b(2) APK rebuild (FAILED again — pool did not attach on Android)
+- `6bac3da541d04401900f6bd70fd3f33271f57adb`
+  (`ps2xRuntime/CMakeLists.txt`, +4): `JOB_POOLS ps2x_vu1_gen=2` +
+  per-source `JOB_POOL_COMPILE`, the orchestrator's sketch.
+- `8559ab9b533be8d35b52461369a663147ad71110` (+5): the owning
+  target carries the pool too
+  (`set_target_properties(ps2EntryRunner PROPERTIES
+  JOB_POOL_COMPILE …)`), after the per-source form proved to be
+  dropped by Android's CMake (below).
 
-Staging: re-archived `PS2Recomp/` only from `6bac3da` (346 files both
-sides, tar kept as `/home/brad/f4/fork-6bac3da.tar`; codegen/vu1gen/
-parallel-gs/jniLibs untouched), pool marker ×2 present,
-`build.sh` SHA `9e89c9c7…` unchanged. Mid-step the box was upgraded
-to 11 GiB RAM + 16 GiB swap (WSL restarted; first 1b attempt died
-with it; staging verified intact after).
+Runner-dir check empty at both; `git diff --check` clean. Mac
+configure-only checks (CMake 4.4.3; dirs deleted after): source
+form → 7/7 vu1 edges pooled; + target form → 9 edges (7 vu1 + PCH
++ runner unity — the whole small runner target). Build scheduling
+only, zero compiled inputs, so `bin/runner-clean` (`7e31b6d2…`,
+from `46b0c8d`) is the binary B3 ran. Fold tip is now `8559ab9`.
 
-Result: `BUILD FAILED in 31m 20s`, `Killed` on 2 vu1 TUs
-(`vu1_a214…`, `vu1_f587…`, remote log lines 360–366; pulled to
-scratch `assembleRelease-remote-1b.log`, 69,072 B). **The pool is
-defined in the Android `rules.ninja` (`depth = 2`) but 0 of the 7
-vu1 edges reference it** (top `build.ninja` is the only ninja file;
-a dumped vu1 edge shows no `pool =` line), so all TUs ran
-unconstrained and OOMed as before. Same-CMake-call properties ARE
-honored (the vu1 TUs compile standalone = `SKIP_UNITY…` applied):
-only `JOB_POOL_COMPILE` is dropped by the Android configure (CMake
-3.22.1, NDK r28) while the Mac configure attaches 7/7. Cause
-unknown — prime resume leads: (a) `set_property(SOURCE …)` form vs
-`set_source_files_properties`; (b) `CMAKE_JOB_POOL_COMPILE` global
-fallback; (c) check whether CMake 3.22's Ninja generator honors
-per-source `JOB_POOL_COMPILE` at all. Heavier alternatives: split
-each image into smaller TUs (emitter change) or build the APK on a
-bigger host.
+### 1b(2) APK (green after the target-level fix)
 
-Peak memory observed (mid-build single sample; the 15×60 s memwatch
-died with its ssh session, twice — relaunch with `nohup`/surviving
-session on resume): **RAM 11,908/11,962 MB + swap 15,751/16,384
-MB** — essentially all 28 GB exhausted. Built vu1 `.o` files are
-41–50 MB each (RelWithDebInfo `-g`). `--max-workers=2` kept.
+First 1b attempt (from `6bac3da`, box meanwhile upgraded to 11 GiB
+RAM + 16 GiB swap): `BUILD FAILED in 31m 20s`, `Killed` on 2 vu1
+TUs (log pulled to scratch `assembleRelease-remote-1b.log`, 69,072
+B; peak single sample RAM 11,908/11,962 MB + swap 15,751/16,384
+MB). Diagnosis: **the pool was defined in the Android
+`rules.ninja` but 0 of 7 vu1 edges referenced it** — CMake 3.22.1
+(NDK r28) drops per-source `JOB_POOL_COMPILE` from
+`set_source_files_properties` while honoring the same call's
+`SKIP_UNITY…` (TUs compiled standalone) and honoring nothing else
+differently from desktop CMake, which attaches 7/7.
+
+Fix verification on bytesize: after re-archiving `PS2Recomp/` only
+from `8559ab9` (346 files both sides, tar kept as
+`/home/brad/f4/fork-8559ab9.tar`; codegen/vu1gen/parallel-gs/jniLibs
+untouched; both pool lines grepped in the staged tree), the
+configure's `build.ninja` carries **9 `pool = ps2x_vu1_gen` edges**
+— the target-level form attaches under 3.22.1. No `ninja -j2`
+workaround was needed.
+
+Rebuild: **BUILD SUCCESSFUL in 10m 59s**, 48 tasks, zero FAILED,
+`--max-workers=2` kept, all 7 vu1 `.o` files built (41–50 MB each,
+RelWithDebInfo `-g`). APK `1d711e70…e8f720`, 181,638,728 B (full SHA
+`1d711e700754cf170ca263108ed4d855ead58f1c301ac94a21dcb8f5e2e8f720`)
+— remote ×2 + pulled ×2,
+all four match; kept at `~/dev/ssx3-work/F4/odin/app-release.apk`
+(+28 MB over F3's — the 7 images). Success log pulled to scratch
+(`assembleRelease-remote-1b2.log`, 31,460 B). Memory during the
+successful build (held-ssh 60 s sampler, 15 samples,
+`memwatch3-local.log` in scratch): peak **RAM 11,632/11,962 MB +
+swap 6,359/16,384 MB** — the pool + swap together did it (pool-only
+on 12 GB/no-swap untested; do not assume it fits).
 
 ### 1b(3) B3 (done — race 1.40× vs F3 B3)
 
@@ -325,26 +336,29 @@ race-start 17.22 | 21.38 (n=1); **race 23.82 | 21.18 (n=5)**. Fast/
 short-phase trace values are quantization noise, not regressions
 (title/menus likely host-present-capped near 60/s unpaced).
 
-### Pause state (explicit paths)
+### Part 1b closeout (explicit paths)
 
-- Fork branch `f4-fold` @ `6bac3da`, tree clean
-  (`~/dev/ssx3-work/F4/PS2Recomp`). Part 1 pre-pool tip `46b0c8d`
-  still in history.
-- ssx3 commit for this section: `[F4] Part 1b (paused)` (below).
-- Scratch `~/dev/ssx3-work/F4` 774 MB: `bin/runner-clean`,
-  `bin/runner-det`, `codegen/` (unpromoted F4 regen), `run/B1`,
-  `run/B2`, `run/B3`, `suite.log`, `*.log`, `vu1gen.sha`,
-  `ssx3-f4.toml`, CSV copy. Build dirs already deleted.
-- Bytesize `/home/brad/f4`: `PS2Recomp/` @ `6bac3da` (+ failed-build
-  `.cxx/` outputs — wipe or resume incrementally on retry),
-  `codegen-ssx3/` (9457, `8ea8ed43…`), `vu1gen-ssx3/` (7, SHAs match),
-  symlinks to f2 `parallel-gs`/`jniLibs`, `build.sh` (`9e89c9c7…`),
-  both fork tars, `assembleRelease.log` (failed 31m20s run).
-- Leases: none held (all 4 mini slots FREE at pause; B3 released;
-  no Odin/bradflix involvement). Runners: B3 pid 71373 reaped.
-- On resume: fix pool attachment (leads above), retry APK, then
-  1b commit proper + gate. B3 needs no re-run (clean exclusive
-  window, corroborated number).
+- Fork branch `f4-fold` @ `8559ab9`, tree clean
+  (`~/dev/ssx3-work/F4/PS2Recomp`). History: `46b0c8d` (Part 1) →
+  `6bac3da` (source pool) → `8559ab9` (target pool).
+- Scratch `~/dev/ssx3-work/F4` (955 MB with the APK):
+  `bin/runner-clean`, `bin/runner-det`, `codegen/` (unpromoted F4
+  regen), `run/B1`, `run/B2`, `run/B3`, `odin/app-release.apk`
+  (`1d711e70…`), `suite.log`, `*.log`, `memwatch3-local.log`,
+  `vu1gen.sha`, `ssx3-f4.toml`, CSV copy. All build dirs deleted;
+  worktree kept for the push.
+- Bytesize `/home/brad/f4`: `PS2Recomp/` @ `8559ab9` (+ successful
+  `.cxx/` outputs), `codegen-ssx3/` (9457, `8ea8ed43…`),
+  `vu1gen-ssx3/` (7, SHAs match), symlinks to f2 `parallel-gs`/
+  `jniLibs`, `build.sh` (`9e89c9c7…`), all three fork tars,
+  `assembleRelease.log` (successful 10m59s run).
+- Leases: none held at close (B3 released its exclusive hold;
+  no Odin/bradflix involvement). All runners reaped. No background
+  sessions left (memwatch terminated after the build).
+- Gaps carried: pool-only-without-swap untested (success had both);
+  B3 host load 4.7→4.6 vs F3's 1.9→1.7 (one run, no drift
+  cancellation); B3 ran `46b0c8d`'s binary (scheduling-only delta
+  to tip — no functional difference).
 
 ## Recommended next action
 
