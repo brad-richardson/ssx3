@@ -181,3 +181,10 @@ Static recompilation of the 7 microprograms (7,305 instructions, E53), sketched:
   it too. Its micro-programs run in the race (E53: 1.67 M starts per boot), and their results
   reach RDRAM, which the det-hash covers. No VU0-specific profile or count was taken; its
   samples are included in the VU1Interpreter rows above.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** `check-c5.txt`: suite 600/600, 2,400/2,400 det-hash lines, GS stream sha
+`6e9e03fd…` equal → BIT-EXACT. Mac race 0.133× → 0.179× (1.35×, ABBA, exclusive lease). N11's Odin
+race profile puts VU1 at 118 of 145 ms per frame (hazard 70 + execute 48), so the Odin gain should
+be larger; F1's Odin speed pair measures it. Fold the six `e57-vu1` commits in F1.

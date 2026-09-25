@@ -153,3 +153,10 @@ Gaps:
 - G4. Mac only: no Odin/iOS run, and no speed measurement of the voice layer.
 - G5. Slot 1 held a stale `au8-race pid=66267` lease at 21:56; I left it alone.
 
+
+## Orchestrator gate (2026-09-25)
+
+**Pass; Brad confirmed the race SFX clips sound right (09-24).** Fold `fb75ec3` (0x3E3968
+comparator override), `8af43c1` (SPU2 voice layer), `243b759` in F1. **Exclude `a46fb2e`** (global
+signed-branch emitter change): not validated, and E54E's boot with the same change went black. That
+bug class gets its own lane (non-sign-extended GPR hunt).

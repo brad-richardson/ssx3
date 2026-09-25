@@ -452,3 +452,11 @@ Key commands: the Part 1 block plus `python3 launch.py --label S2 …
 --profile-after-tick 636 --profile-secs 30 --scap-ticks 700,1000,1400`,
 `--label S4b … --game-cpus 6,7`; `simpleperf report … --symdir …` ×14
 (incl. regens) on bytesize; `buckets.py <report> [--comm T] [--appendix]`.
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** Odin race frame 145 ms: VU1 hazard bookkeeping 70.1 + VU1 execute 48.2 ms (81 %), libc/
+kernel 24.9, PLT 8.5; guest code 0.7 ms. Menus are GsWorker-bound in the Turnip driver's CPU side
+(61.9 ms) plus libc/allocator/mutex churn. GameThread already runs on the prime cores (6/7), so
+pinning buys nothing. Fold `9dadccd` (profileable manifest) and `20db28f` (`PS2X_GAME_THREAD_CPUS`,
+default off) in F1. Next Odin levers: E57 (VU1), then menu-side driver/alloc overhead.

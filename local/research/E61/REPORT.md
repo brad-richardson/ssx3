@@ -277,3 +277,10 @@ it; (b) scope a VU1 fast path for the loading term (`commitReadyPipelines`
 assumed I/O-paced and is not; (c) optionally fold the mechanical
 `std::function` → function-pointer PSM dispatch. No grind on EE,
 syscall, audio, or CD paths: all are ≤4% combined.
+
+## Orchestrator gate (2026-09-25)
+
+**Accepted (Part 1).** H1 in every window: menus are CPU GS rasterization, loading is VU1 + GS;
+waits, guest spin and CD I/O are rejected. GB8's paraLLEl default removes the menu GS term on the
+Mac (menus 2.26× faster there) and E57 covers the VU1 term, so no E61 Part 2 now. The Odin menu cost
+is different (Turnip driver CPU + allocator, N11 S3), which becomes a G/N item.

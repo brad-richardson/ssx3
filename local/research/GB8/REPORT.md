@@ -249,3 +249,11 @@ Select Mode frame was captured (Select Event instead, same phase both
 backends); det boots carry frame-dump overhead (excluded from speed);
 `speed-cpu` (loaded) excluded from Q1/Q4; present-phase noise (≤ ~10 % on
 one control) bounds pixel-diff precision.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass; adopt paraLLEl as the Mac default via env in boot tooling** (`PS2X_GS_BACKEND=parallel`,
+`GRANITE_VULKAN_LIBRARY=/opt/homebrew/lib/libvulkan.1.dylib`, builds with
+`PS2X_GS_SHADOW_PARALLEL=ON`). Det-hash CPU vs parallel identical (the guest never reads GS back),
+parallel repeats exactly; launch → race HUD 75.1 s → 40.2 s; race 0.134× → 0.224×. The CPU backend
+stays available for reference A/B. GB9 (align the Mac paths with the Odin) is next in the G lane.

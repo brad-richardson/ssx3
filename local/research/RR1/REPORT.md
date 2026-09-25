@@ -158,3 +158,12 @@ census), `rr1_timeline.py` / `rr1_timeline_pcsx2.py` (per-packet state timelines
 `rr1_eop.py` (EOP split), `rr1_uploads.py`, `rr1_flash.py` (per-tick class presence),
 `rr1_windows.py` (PATH3 window accounting), `rr1_cap2gs.py` (PS2XGSC1 → PCSX2 .gs),
 `rr1_gsrunner.sh`, `rr1_boot.py` (deterministic I26-FAST boot, one lease slot).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** I viewed `run-g/frames/upload-latest.png` (race 00:00:06: mountain backdrop, lit textured
+snow, pines, snow spray, checkpoint beam, no dark lower region) and `replay-e/e-vq-001090.png`
+(Select Peak: Peak 1 photo, orange "3", SSX logo, ✕/△ glyphs). Three independent mechanisms, each
+with a unit test and an A/B boot: PATH3 one EOP packet per unmask window (`3bc0449`), V4-5 unpack
+expansion (`f3dff5b`), DMA chain tag cap raised to a runaway guard (`4f69c98`). Fold onto fork
+`ssx3` in F1. Brad's flicker report stays open until he sees the folded build.
