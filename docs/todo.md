@@ -187,12 +187,9 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
-- [ ] **RD1 root cause (player rider = stick figure):** guest threads start with VU0 vf0 = 0 instead of the
-      hardwired (0,0,0,1) (`R5900Context` memsets; vf0 set only for the main context,
-      `ps2_runtime.cpp:876`). SSX 3 builds the player's hi-detail bind matrices on loader thread 3
-      (`sub_0030DBD0`, `vaddw.xyz vf1, vf0, vf0w`). Fix = vf0 in the constructor + test; RD1 validating;
-      folds in F4.
-
+- [ ] **Rider fix in F3** (`51c759b`, vf0 hardwired in every EE context). Follow-ups: vf0 read-only in
+      codegen (`lqc2 $vf0` at 0x3fe9bc writes it today; hardware ignores the write); audit other
+      per-thread state that only the main context initializes (`vu0_r`, …).
 - [ ] **F4 fold (after F3):** VR1 VU1 stage A (`0ed07c4..1f51e48` + `6c2de6f`; promote `VR1/gen-v2` →
       `~/dev/ssx3-work/vu1gen-ssx3`, private copy to bytesize; iOS/Android builds pass the dir) +
       NP1 Part 2 when gated + LX1's x86 build fixes; Odin speed pair vs F3; iPhone + Odin play builds.

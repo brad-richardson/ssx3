@@ -123,3 +123,13 @@ Select Character itself wasn't captured (tick 1300 was already Select Peak).
 `rd1_p1map.py` (capture PATH1 ordinal ↔ batches), `rd1_plot.py` (wireframe of batches, needs
 Pillow via `uv run --with pillow`), `rd1_trace.py` (probe trace: segments per xgk range, UNPACK
 census), `rd1_boot.py` (UV1 boot script + `--env`, `--capture-stop`, `--mc-src`).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** I viewed `out/mac-2300-before-after.png`: Brad's rider (Mac) goes from a faint wisp (his
+report) to a solid, lit model. Mechanism measured end to end (E1–E8): every non-main guest thread
+starts with VU0 vf0 = 0, and SSX 3 builds the player's bind matrices on loader thread 3 with
+`vaddw.xyz vf1, vf0, vf0w`. Fix `51c759b` (+ unit test, red → green) joins F3 as its 7th commit so
+Brad's next phone build has it. Follow-ups queued: make vf0 read-only in codegen (the guest can
+write it via `lqc2 $vf0` at 0x3fe9bc; hardware ignores that), audit other per-thread state that only
+the main context initializes (`vu0_r`, etc.).

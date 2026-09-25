@@ -72,7 +72,7 @@ composite/GPU backend (paraLLEl-GS + Granite forks, branch `ssx3`),
 budget / standard / frontier. In short: quick tasks (< ~5 min) the
 orchestrator does itself; longer low-reasoning work (mechanical edits, runs,
 data gathering, read-only code reads) goes to **local Qwen via opencode**
-(`--kind opencode -- --auto`, at most two local workers; machine details and
+(`--kind opencode -- --auto`, **one local worker at a time** (Brad, 09-25: two tripped the oMLX memory guard); machine details and
 permission limits in `local/AGENTS.local.md`); longer high-reasoning work
 goes to **muse**; quota fallbacks move up a tier. **OpenCode Go models are
 standard tier** and are the current choice for suitable bounded worker
