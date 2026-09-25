@@ -228,3 +228,12 @@ ssh bytesize 'wsl ... cat .../app-release.apk' > ~/dev/ssx3-work/F3/odin/app-rel
 Push `f3-fold` (`ec2dbf1`) → fork `ssx3` (fast-forward from `0ed07c4`;
 runner-dir guard empty, suite 642/642) and release F3 Part 2 (iPhone) and
 Part 3 (Odin; rebuild the APK from the pushed SHA if it differs).
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass.** I viewed B4 t2093: race 00:00:06 with the player rider solid and lit at centre, full brightness,
+trees, mountains, beam. Seven picks clean; suite 642/642; alpha 255 on every pixel; paced+sound-on and
+unpaced+sound-off det-hash identical (FP1 and AU10 hold); Mac race speed-neutral (0.249×); the APK
+builds from the RD1 tip (Android compile gate met). Pushed `f3-fold` → fork `ssx3` **`ec2dbf1`**
+(fast-forward from `0ed07c4`). Parts 2 (iPhone) and 3 (Odin, APK `d5a94c27…` from `ec2dbf1`, over
+Wi-Fi) released in parallel.

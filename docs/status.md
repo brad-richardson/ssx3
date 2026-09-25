@@ -4,7 +4,7 @@ Milestone: stock SSX 3 gameplay through our PS2 static recomp runtime on the Odi
 Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`.
 History: git log (this board is current state only). Updated 2026-09-25 ~07:15 EDT, Mac mini.
 
-**Pins:** PS2Recomp fork `ssx3` `0ed07c4` (Android lambda build fix; ST1 progressive scanout, no stripes; F2: 64-bit sign branches + canonical codegen regen, sound HLE on guest time, coverage/INTC counters; F1 fold: RR1 race/menu rendering fixes, E57 VU1 speed, AU9 race SFX, N11 profileable + pin knob; I32 iOS controls; sound HLE, GS replay harness, widescreen, Turnip packaging) ·
+**Pins:** PS2Recomp fork `ssx3` `ec2dbf1` (F3: pacing, full brightness, pad v2, tap latch, V2/V3 unpack, rider vf0 fix; Android lambda build fix; ST1 progressive scanout, no stripes; F2: 64-bit sign branches + canonical codegen regen, sound HLE on guest time, coverage/INTC counters; F1 fold: RR1 race/menu rendering fixes, E57 VU1 speed, AU9 race SFX, N11 profileable + pin knob; I32 iOS controls; sound HLE, GS replay harness, widescreen, Turnip packaging) ·
 paraLLEl-GS fork `ssx3` `19d93b2` (wave64 binning fix; `PGS_HIER_BINNING` knob) · Granite fork `ssx3` `166ba21a` ·
 canonical codegen `~/dev/ssx3-work/codegen-ssx3` (F2/SB1 regen, `PS2X_SBR_*` predicates; previous kept as `codegen-ssx3-pre-sb1`).
 
