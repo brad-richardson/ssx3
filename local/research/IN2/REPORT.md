@@ -124,3 +124,9 @@ Pins: fork base `0ed07c4` + `43b61a4`; runner SHA
   remove it if the kill switch ever goes.
 - Recommended next action: fold `in2-latch` (`43b61a4`) and include it in
   the combined iPhone build (DK1 + I34); no device installs were done here.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Mechanism confirmed with a read log: taps between two guest reads were dropped 61/68 without
+the latch, 0/56 with it; the pad script is untouched. `PS2X_PAD_LATCH=0` restores the old path.
+Folds in F3; Brad's iPhone gets it in the F3 build.

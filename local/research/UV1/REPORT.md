@@ -266,3 +266,9 @@ python3 uv1p2_boot.py --runner runners/ps2EntryRunner-A --label A3 --stop-tick 2
 leave w stale, PCSX2 w = next vector's x or 0 at a QW boundary). Whether the VU1 programs read those
 lanes decides visibility; stale VU memory is a candidate for intermittent pop-in. Part 2 released:
 implement both rules as PCSX2 does (hardware-tested SSE rules), unit tests, one A/B det boot.
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** PCSX2's V2/V3 lane rules with 10 tests (red → green); only `vu1Data` differs from tick 1606
+on, and every compared frame is pixel-identical. Correct per the reference, invisible on this route;
+not the player-rider bug (RD1 told). Fold `8545eb2` (default-off counters) + `6acf5bb` in F3.
