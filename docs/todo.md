@@ -187,6 +187,11 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **F4 fold (after F3):** VR1 VU1 stage A (`0ed07c4..1f51e48` + `6c2de6f`; promote `VR1/gen-v2` →
+      `~/dev/ssx3-work/vu1gen-ssx3`, private copy to bytesize; iOS/Android builds pass the dir) +
+      NP1 Part 2 when gated + LX1's x86 build fixes; Odin speed pair vs F3; iPhone + Odin play builds.
+      Later: dump VU1 images on other courses (fallback is the interpreter).
+
 - [ ] **Host split once LX1 passes (Brad, 09-25):** bradflix gets **4 boot slots** for correctness
       work (det-hash, frames, counters, suites, builds; CPU and paraLLEl if LX1 Part 2 works); the
       mini drops to **1 slot** reserved for performance benchmarks and Apple-only checks; the Odin

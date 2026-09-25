@@ -255,3 +255,15 @@ days, as E57 said.
 - Speed: `speed_hold.py hold<X> <start> <candA> <candB>`, then `speed_table.py run`.
   Profiles: `vr1_boot.py --mode profile --runner bin/runner-<c>-speed --label p-<c>
   --stop-tick 2000 --sample-at 1800 --sample-s 20`, then `profile_share.py`.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Stage A: SSX 3's 7 VU1 images become generated C++ (one function per pair, keyed by XXH64 of
+code memory, interpreter fallback for anything unknown), 100 % of VU1 cycles in generated code on the
+route, total VU1 cycles identical, det-hash 2,400/2,400 equal, strict whole-file GS SHA equal on the CPU
+backend (paraLLEl's strict check isn't deterministic even base vs base; per-path content equal). Mac
+race **0.248× → 0.358×** (1.44×, ABBA, exclusive). Fold `0ed07c4..1f51e48` + `6c2de6f` (Gradle), not
+g5, in **F4** (after F3, which was mid-build), with an Odin speed pair and an iPhone build. The generated
+VU1 sources are game-derived: promote `gen-v2` to `~/dev/ssx3-work/vu1gen-ssx3` (outside any repo, like
+the codegen), copy privately to bytesize for APKs, never commit. Other courses may hit the interpreter
+fallback until their images are dumped.
