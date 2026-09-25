@@ -37,3 +37,5 @@ Worker: Claude Code (Opus 5.5), exploratory brief `local/muse/prompts/AU9.md`.
 | 23:08 | Fork `243b759`: missing `<cstdlib>` in `ps2_snd_spu.h` (found by the offline replay build); rebuild | Suite 602/602; runner sha256 `e829827b…6a61` ×2 (run-v1 used the build before this include-only change: `receipts/runner-sha.txt`); runner-dir diff empty |
 | 23:10 | E21: race voice sets | Ours settles at 4 steady voices (`0xc6e20` ×3, `0xafc80`); PCSX2's last race tick uses the same samples. The always-on layer is the game's loop sounds while our rider is stopped, not a stuck voice |
 | 23:07 | E22 (orchestrator datum): paired deterministic boots, frame dumps at ticks 2400/3000/3600, AU8 runner (no override) vs AU9 runner | running |
+| 23:11 | E22 result: frame dump at tick 2400, AU8 runner (no override) vs AU9 runner `e829827b`, both deterministic, 3,700 ticks, rc 0 | Same race scene (00:00:11, 14 MPH), mean level 29.5 vs 29.6, mean \|Δ\| 1.16: override doesn't change the frames, not black |
+| 23:12 | Brad (via orchestrator): "the race sound effects sound right" | Recorded in REPORT; write-up |
