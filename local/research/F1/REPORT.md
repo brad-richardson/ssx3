@@ -148,6 +148,107 @@ Pushed `f1-fold` → fork `ssx3` **`56a5e8a`** (fast-forward from `71c952e`). Ma
 paraLLEl (one run). Menus ran at **1.287×**, i.e. faster than real time: the guest isn't paced to
 59.94 Hz when it can outrun it (todo item). Parts 2 (Android) and 3 (iOS) released in parallel.
 
+## Part 2 — Android (APK `c822a2b3…`, 2 Odin speed runs, Brad's play build)
+
+Worker: Muse Code, brief `local/muse/prompts/F1.md` Part 2 only.
+
+### APK (bytesize, the one build)
+
+Root `/home/brad/f1` (TL1 recipe `build.sh`, committed here). `ps aux` first: WSL idle
+(load 0.00), no other heavy job. Pushed tip confirmed via fetch: `origin/ssx3` =
+`56a5e8a6b249601a6193fea9ce77caf54d0cd584`.
+
+- PS2Recomp: fresh `git archive 56a5e8a` (336 files; archive listing = 336 files + 63 dir
+  entries, zero missing/extra vs the extracted tree). `runner/` holds only the 438 B
+  upstream stub (`cf62c485…f068`).
+- codegen-ssx3 / parallel-gs / jniLibs: copied from `/home/brad/tl1/*`, byte-identical
+  (0 diffs): codegen 9457 files, parallel-gs 24313 files, jniLibs 2 files (Turnip
+  `717812c3…`, HAL `1b49d27c…`, matching TL1's manifest).
+- TL1 manifest `verify`: added 7 + changed 18, **all fork-scope** (the F1 fold delta:
+  RR1 tap header, AU9 SPU files, N11 affinity, manifest, VU1/VIF1, I32 pad); zero
+  parallel/codegen/jni diffs → pGS `963cb57` bytes.
+- Build: `BUILD SUCCESSFUL in 5m 44s`, zero FAILED, one held ssh (TL1 lesson).
+- APK `c822a2b3787b6caa7bfabebbdad0cea95c398bbc5b186e889eac824c829dbeb9`,
+  153,736,776 B (remote ×2, pulled ×2, all match; +16,428 B over TL1's).
+
+### Launches (2/2 clean speed; `launch.py` = N11 driver with F1 paths, committed here)
+
+Env = N11 env + labels (`PS2X_GS_BACKEND=parallel`, `PS2X_GS_TURNIP=1`, `PS2X_SOUND=1`,
+`mc0-test` empty, I26-FAST vsync, `PS2X_VSYNC_RATE_LOG=1`). Installed before each run
+(`Success`, `base.apk` SHA matches per run). Keyguard `showing=false`, AC `true`,
+thermal ≤ 2 before each launch, `am force-stop` after (pid-after=none), Brad env
+`9fb46f85…` + mc0 SHAs verified after every run.
+
+| Launch | Window | Result | Receipts |
+| --- | --- | --- | --- |
+| S1 | tick 1714→4524 = 2810 vsyncs; 333.7 s race wall; 80 samples; 0 FATAL | STOP tick ≥4500 at t+403.6 s; battery 24→20% | `logs/S1/` + 4 PNGs in scratch |
+| S2 | tick 1714→4540 = 2826 vsyncs; 337.4 s race wall; 0 FATAL | STOP tick ≥4500 at t+406.2 s; battery 20→17% | `logs/S2/` + 4 PNGs in scratch |
+
+Pre-launch gates: S1 24%/thermal 0, S2 20%/thermal 0 (3-min charge wait held 20%).
+Logcat keys both runs: `[snd-output] stream rate=48000` (AU9 upsampler live),
+`[gs-path] … hier-if-large … desc=buffer … gpu=Adreno (TM) 830`, zero FATAL.
+Race thermal status 3 both runs (stable, no soak to 5); race GPU 17.8% mean both
+(n=54/53) — still CPU-bound.
+
+### Ledger-ready rates vs N11 S1 (race 0.117×)
+
+Guest vsyncs/s ÷ 59.94; `phases.py` on epoch-stamped `[vsync-rate]` lines.
+
+| Phase | S1 /s (×) | S2 /s (×) | N11 S1 /s (×) | F1 mean ÷ N11 |
+| --- | --- | --- | --- | --- |
+| Title | 33.41 (0.557×) | 32.46 (0.542×) | 31.94 (0.533×) | 1.03× |
+| Main menu | 31.40 (0.524×) | 32.80 (0.547×) | 29.23 (0.488×) | 1.10× |
+| Select Character | 25.33 (0.423×) | 25.25 (0.421×) | 15.96 (0.266×) | 1.59× |
+| Setup/Peak | 27.08 (0.452×) | 25.85 (0.431×) | 23.41 (0.391×) | 1.13× |
+| Mode/Event | 38.95 (0.650×) | 39.78 (0.664×) | 34.88 (0.582×) | 1.13× |
+| Loading | 12.02 (0.201×) | 11.58 (0.193×) | 11.41 (0.190×) | 1.03× |
+| **Race** | **8.42 (0.140×)** | **8.38 (0.140×)** | **7.04 (0.117×)** | **1.19×** |
+
+Race per-5s bins climb 7.2→8.6 with final fast bins (10–12.8) as the rider descends —
+same shape as N10/N11. S1 vs S2 agree within 0.5%.
+
+### Screencaps (all 8 viewed; no regression)
+
+Fine horizontal stripes persist (known). S1/S2 sc01 (tick 2100): EA Radio card, lit
+mountains/pines, 1% (different RNG tracks S1 vs S2, as N11). sc02/sc03 (ticks
+3000/4000): stopped rider (1/0 MPH, 2%), bright lit snow. sc04 (tick ~4530, 00:00:47,
+43 MPH, 5%): dark forest traverse — deterministic across S1/S2 and **matches N11's
+pre-fold S1 sc04** (same dark gully at 00:00:46): scene content, not a fold regression.
+
+### Brad's play build (no launch)
+
+Installed F1 APK (`Success`, `base.apk` `c822a2b3…` match), then
+`bash local/research/I31/deploy-odin.sh`: env `9fb46f85…` OK, all 6 save SHAs OK.
+No launch. Device left: lease `LEASE_FREE F1 done`, app not running, `/data/local/tmp/f1`
++ `files/mc0-test` removed.
+
+### Budgets and gaps
+
+1/1 builds, 2/2 launches (S1 ~408 s, S2 ~411 s wall), ~1.5 h of the 1 h box (build +
+charge wait + cap review). F1 git dir text-only (logs + launch.py + phases.py + build.sh);
+scratch `~/dev/ssx3-work/F1/odin/` holds the 8 PNGs + APK. Gaps: two runs, no profile
+(N11's stage table stands — VU1 bookkeeping was 81% of the race frame, and the 1.19×
+race gain is E57 net of RR1's extra prims); battery ended at 17% (AC-powered idle will
+recover); menu Select Character 1.59× jump is unexplained (small-n phase, ±noise).
+
+### Exact commands
+
+```sh
+ssh bytesize 'wsl -d Ubuntu -- bash -s'  # ps aux: idle; fetch origin/ssx3 = 56a5e8a
+# /home/brad/f1: git archive 56a5e8a; cp -a /home/brad/tl1/{codegen-ssx3,parallel-gs,jniLibs}
+python3 /home/brad/tl1/source_manifest.py verify --manifest ... --fork ... # fork-only delta
+bash /home/brad/f1/build.sh   # BUILD SUCCESSFUL in 5m 44s, one held ssh
+sha256sum .../app-release.apk # x2 remote; pull; x2 local: c822a2b3...dbeb9
+cp local/research/N11/launch.py local/research/F1/launch.py  # then F1-path edits
+cp local/research/N11/phases.py local/research/F1/phases.py
+adb -s 622c49b1 install -r ~/dev/ssx3-work/F1/app-release.apk  # before S1, S2, play build
+python3 local/research/F1/launch.py --label S1 --wall 600 --stop-tick 4500
+python3 local/research/F1/launch.py --label S2 --wall 600 --stop-tick 4500
+python3 local/research/F1/phases.py local/research/F1/logs/S1
+python3 local/research/F1/phases.py local/research/F1/logs/S2
+bash local/research/I31/deploy-odin.sh   # save + env, verify SHAs, no launch
+```
+
 ## Part 3 — iOS (device build `56a5e8a`, sim + iPad race, iPhone install-only)
 
 Worker: Muse Code, brief `local/muse/prompts/F1.md` Part 3 only. Source: pushed
