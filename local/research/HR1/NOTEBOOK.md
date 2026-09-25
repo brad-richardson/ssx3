@@ -163,3 +163,17 @@ Zero-copy plan notes so far (for the report):
 - iPad (4825123 build): 1x pipelined 10.90 vs/s (98 % GameThread) vs 1x sync 10.31; 4x+hires
   pipelined repeat 10.40 (first 10.49). One 1x-pipe launch hit a devicectl transport error
   (CoreDeviceError 1010, app never started); relaunched once, fine.
+
+## 15:40-16:25 (resumed session, continued)
+- Clamp: MoltenVK M5 `requiredSubgroupSizeStages=None`, subgroup 4..32 → paraLLEl max SSAA X4 on
+  Apple; log fixed to print the effective rate (fork `4a591d3`, suite 642/642, verified
+  `ssaa=4 (asked 16, device max 4)`).
+- Hold 2 waited ~35 min: slot 1 `LX1-MD7` (pid 83618 not alive) + slot 2 `LX1-MD8`, no mini runner
+  (LX1 boots on bradflix). Ran 15:58-16:03: D 13.75, E 14.52, A2 14.80. Hold 3 (16:05-16:09):
+  E3 14.84, D3 14.95, B3 14.67 → Mac differences are inside the hold-to-hold drift (±4-5 %).
+- iOS zero-copy spike: first try failed (MoltenVK-exported IOSurface has pixel format 0 →
+  CVPixelBufferCreateWithIOSurface −6680). Switched both Apple paths to CVPixelBufferCreate'd
+  BGRA surfaces imported with VkImportMetalIOSurfaceInfoEXT. Mac: still RGB byte-identical at
+  t2100. iPad: correct race picture with vpad on top; 4x+hires zc+pipe 10.55 vs pipe 10.40 on the
+  same build. Fork `d929048`, suite 642/642, iPad seq 1980 (signed `dfa81d3f…`).
+- REPORT.md finalized.
