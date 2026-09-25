@@ -134,6 +134,10 @@ then 120 Hz simulation.
 
 ## I — iOS
 
+- [ ] **I32 (running): virtual analog stick on the left, D-pad on the right** (Brad, 09-24).
+      Part 1 Simulator screenshots go to Brad for approval before the phone install.
+- [ ] Brad (09-24, iPhone I30): UI elements flash in and out every few seconds and many 3D assets
+      pop in and out. Relayed to RR1; check on the Mac deterministic boot too.
 - [ ] **I28 iPad-native presentation** (low priority, behind Odin): add the
       iPad device family + landscape and lay the virtual pad in the
       letterbox margins; Simulator iPad, then Brad's iPad. IPAD1 ran as an
