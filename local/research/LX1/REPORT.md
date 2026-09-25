@@ -333,3 +333,70 @@ override (mini −300, container 0), the game reads it via `sceScfGetTimeZone` �
 RTC, and two words (local hour/day) differ from tick 39 on. No guest-math difference between hosts was
 found. Side bug: the mini reports −300 (EST) in September, when EDT (−240) applies (the "mktime quirk").
 Part 1c released: deterministic mode pins the zone; the host path gets DST right; parity re-run.
+
+## Part 1c — tz fix + x86 fixes on `lx1-tz`: tick 39 fixed, new split at 94
+
+Worker: Muse Code, brief `local/muse/prompts/LX1.md` §Part 1c. No push.
+Budget ~1.75 h of 2 h.
+
+**Tick 39 is FIXED (ticks 1–93 now identical), but a second divergence
+appears at tick 94** — reported below, no second hunt per the brief.
+
+### Branch (from `ec2dbf1`, experiment branch, never pushed)
+
+`lx1-tz`, 3 commits (mini SHAs; bradflix got the same content via
+`format-patch` + `git am`, tip `73e01fe` — committer differs so SHAs
+differ, but `rev-parse lx1-tz^{tree}` = `068253018e61549407cdf4b8292e50808bd0efc2`
+on BOTH sides):
+
+1. `5f32212` deterministic OSD timezone + `tm_gmtoff` host offset + tests
+   — `getTimezoneOffsetMinutes()` returns 0 under `PS2X_DETERMINISTIC=1`,
+   overridable by `PS2X_TIMEZONE_MINUTES` (strict decimal, fails closed
+   to 0 with one diagnostic); host path uses `tm_gmtoff` (DST-aware) on
+   Apple/Linux, legacy mktime idiom elsewhere (MSVC/Vita-safe). New
+   `ps2_tz_offset_tests.cpp` (4 tests, faked env).
+2. `20377a3` x86_64 GCC/Clang `-msse4.1` in the root `CMakeLists.txt`
+   (MSVC untouched — different `/arch` spelling, no lane to validate).
+3. `b4cb476` E53 FP-mode asserts read MXCSR RC bits on x86
+   (`PS2X_FPMODE_X86`) instead of `fegetround()` (x87 word).
+
+`sceScfGetSummerTime` does NOT read the host: DST comes from the OSD2
+init constant (`packOsdConfig2(0, 0, …)`, all constant) — verified by the
+Part-1b syscall trace (no `SetOsdConfigParam2` anywhere), so no change
+needed there. No emitter/TOML changes in `0ed07c4..ec2dbf1` → canonical
+codegen stands.
+
+### Builds + suites (always rebuilt; bradflix without manual arch flags)
+
+| Runner (det-hash tap ON, diag taps OFF) | SHA-256 (two reads) | Suite |
+| --- | --- | --- |
+| Mac `mac-build-tz/ps2xRuntime/ps2EntryRunner` (133,548,320 B) | `b75fd6fa…9d30aa` | **650/650, rc=0** |
+| bradflix `build-tz/ps2xRuntime/ps2EntryRunner` (145,691,232 B) | `83a658ee…941ee` | **650/650, rc=0** |
+
+650 = 616 + 30 F3 + 4 tz tests. E53 **passes on x86** now. The bradflix
+configure consumed the fork's `-msse4.1` itself (message in
+`tz-configure.log`); `bradflix_boot.sh` still passes the flags, which is
+now redundant but harmless (keeps old SHAs building) — untouched.
+
+### Parity re-run (I26-FAST, CPU GS, sound off, t2400)
+
+| Boot | Bound | Wall | det-hash lines |
+| --- | --- | --- | --- |
+| MT1 Mac | target | 233.7 s | 2,421 (ticks 1..2421) |
+| BT1 bradflix | target | 328.9 s | 2,410 (ticks 1..2410) |
+
+**Ticks 1–93 byte-identical (all fields). New first divergence at tick
+94: `rdram` + `combined` only — `eeCycle`, scratch, VU, count all
+identical** (2,317/2,410 later payloads differ). One-line smell: same
+guest path/cycles with different data, in early boot right after an env
+fix → **another host-env/data leak, not guest math** — but that is a
+hunch for the next part's hunt, not a finding.
+
+### Receipts + close
+
+- Fork branch `lx1-tz` lives in `~/dev/PS2Recomp` (mini worktree
+  `LX1/PS2Recomp-tz`) + bradflix clone; never pushed. Part-1b's rdump
+  tap is NOT in it (stashed on bradflix, separate worktree on mini).
+- Boots MT1/BT1; BT1 log pulled to `from-bradflix/BT1/`.
+- Scratch at close: mini LX1 7.0 GB, bradflix LX1 13 GB. Bradflix lease
+  released at close (verified).
