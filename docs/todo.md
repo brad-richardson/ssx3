@@ -284,10 +284,7 @@ then 120 Hz simulation.
   the gates (Mac menu→race, sound mid/side vs PCSX2, iOS Simulator, live
   Odin race), switch only at parity. Multi-day. No upstream contact until
   Brad says.
-- **W2 upscaled internal resolution** (Brad, 09-23): don't schedule. If
-  picked up: paraLLEl-GS upscale once it's the live backend, a PCSX2 2×/3×
-  preview of which SSX 3 effects break, source-level fixes, then an
-  integer-multiple default per device.
+- **W2 → HR1 (Brad, 09-25: go):** paraLLEl 4× SSAA + double-resolution scanout, and presenting without the GPU→CPU copy (IOSurface on Apple, AHardwareBuffer on Android). HR1 Opus explorer running. Brad's GameCube data point: ~3× internal + 75 % display res was a good balance.
 - **Adreno driver filing** (Brad, 09-22): paused. Any rewrite drops the
   withdrawn sampling inference.
 - **E55 ExternalWake placement policy:** no production poster exists at
