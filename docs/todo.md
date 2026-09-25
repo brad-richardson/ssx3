@@ -184,6 +184,12 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **F2 fold (after AU10 + IN1):** SB1 `a64ba5e` (64-bit sign branches via `PS2X_SBR_*`, tripwire
+      compiled out in release) + `90df7e0` (retire the `0x3E3968` override) + AU10 fix + CT1 knobs
+      (`PS2X_COVERAGE_TICK`, `PS2X_INTC_LOG`) + GB9 `[gs-path]` print `5706858`; **promote
+      `~/dev/ssx3-work/SB1/codegen` to canonical `codegen-ssx3`** (keep `codegen-ssx3-pre-sb1`) and
+      refresh bytesize's codegen copy in the same step. Det boot + frames + cid0, then device builds.
+
 - [ ] **AU10 (running): folded tip hangs on the title with sound off** (GA1). Voice state must advance
       on guest time; det-hash must match sound on vs off. Until fixed, boots on `56a5e8a` need
       `PS2X_SOUND=1` (the device play envs already have it).

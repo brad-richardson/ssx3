@@ -151,3 +151,14 @@ macros are pure `GPR_S64`). `bound=target`, 87.9 s, slot 2.
   Boot B: the t1468 flip changes rdram from tick 1469 but the race proceeds
   normally). No GS-stream digest was run for B/C (no `gs.cap` captured; the
   det-hash identity C-vs-B plus viewed frames is the gate).
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** Under correct 64-bit sign branches the game races normally (frames viewed by the worker at
+Select Peak/Mode and race 00:00:01/05/11); det-hash first differs at t1469, right after the
+`_fpadd_parts` flip, as predicted. Without the `0x3E3968` override, cid0 = 531 and det-hash is
+identical to the override build (2,449 ticks): the emitter fix subsumes it. **Fold is held for F2**
+because it needs the SB1 regen promoted to the canonical codegen at the same moment the fork moves
+(the new codegen calls `PS2X_SBR_*` macros; the old codegen without the override would lose the
+sound banks). F2 batches SB1 (`a64ba5e`, `90df7e0`) + AU10 + CT1's knobs + GB9's `[gs-path]` print
+once AU10 and IN1 (which build on the current canonical codegen) finish.
