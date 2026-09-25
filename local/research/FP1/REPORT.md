@@ -157,3 +157,11 @@ window; paced has none anywhere.
 Fold `fp1-pace` (`51e730f4`) onto fork `ssx3`: default-on pacing is
 guest-state-neutral (det-hash proof) and required for Brad's play. No
 follow-up brief needed unless the gate wants the base-commit A/B.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Paced menus ≤ 1.001× on every 5 s window (unpaced 1.180×), det-hash identical paced vs
+unpaced (2,422 lines), menu SND overflows 84,256 → 0. Pacing sleeps only at VBlankStart; below 1×
+nothing changes. `51e730f4` folds in F3 with UV1 Part 2 / NP1 Part 2 / VR1 as they gate; speed
+tooling sets `PS2X_UNPACED=1` from then on. Note: the mini's load reached 62–128 during these boots
+(many lanes building at once); speed numbers still need the exclusive lease and a quiet host.
