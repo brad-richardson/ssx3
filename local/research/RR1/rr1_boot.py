@@ -63,8 +63,8 @@ while slot is None:
     if slot is None:
         if time.monotonic() - t0 > 1800:
             print(json.dumps({"refuse": "no slot in 30 min", "slots": status()})); sys.exit(2)
-        print(json.dumps({"wait": status()}), flush=True)
-        time.sleep(30)
+        pass
+        time.sleep(3)
 print(json.dumps({"slot": slot}), flush=True)
 proc = None
 try:
