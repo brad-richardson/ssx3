@@ -82,3 +82,14 @@ ps2xRuntime/src/lib/ps2_runtime.cpp         | 74 +++++++++++++++++++++++++++++
   - G3. Hit count for `0x411e4c` is unknown (first-sight line only; exit counts skipped by SIGTERM).
   - G4. E54E's work dir is deleted, so its codegen/build pairing cannot be re-checked directly; its report's post-gate table stands. The new datum is that on a base with the comparator override, no other pre-t90 site exists — consistent with the comparator being E54E's whole divergence.
   - G5. Whether the t1468 site's s32-vs-s64 direction flip changes any guest-visible state needs an s64 boot (a follow-up lane, not Boot B — no fix exists here).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass, and it changes the plan.** With the `0x3E3968` override in place, exactly one live site
+disagrees on the route: `0x411e4c` `bltz $v0` in `_fpadd_parts` (software double add, callers
+`dpadd`/`dpsub`) at t1468, a legitimate 64-bit mantissa difference that today's 32-bit predicate
+gets **wrong**. So (a) our current codegen miscomputes some software-double adds; (b) E54E's black
+boot was most likely the comparator itself (the correct sort made the sound banks load on a runtime
+that then had no SPU voice/cid-0 support), not a hidden non-sign-extended producer. Next (SB1 Part 2,
+same pane): s64 boot with this build to t2400 (frames, cid0, first det-hash divergence tick), then a
+release build with the 64-bit emitter and the override retired.

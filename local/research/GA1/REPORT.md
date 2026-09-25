@@ -159,3 +159,10 @@ same-tip viewed frames, not by viewing B2's frames); B2's determinism vs F1's
 B1 not hash-compared (different tap sets); batch-pass multi-submit
 reachability is code-derived, not directly instrumented; depth-pass identity
 at tick 1795 not decoded.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass; RV3 suspect 1 closed for this route.** 1,840,697 packets in 1,840,697 single-packet drains:
+the drain sort never reorders anything, so it can't be the flicker. **New blocker-class finding:**
+on the folded tip (`56a5e8a`) a sound-off boot (`PS2X_SOUND` unset) sits on the title with input
+ignored; sound-on races. AU10 takes it. Until fixed, every boot on this tip sets `PS2X_SOUND=1`.
