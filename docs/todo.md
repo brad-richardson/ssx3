@@ -184,6 +184,11 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **Running 09-25:** FP1 (guest pacing to 59.94, `PS2X_UNPACED=1` for speed runs), SJ1 (full race to
+      the finish + Snow Jam 99 % re-test; R1 ≤ 1,000 s and R2 ≤ 700 s wall approved), UV1 (VIF UNPACK
+      formats vs PCSX2 + DMA stall/REFS probe), VR1 (VU1 static recompile stage A, Opus), NP1 Part 2
+      (Odin link/memset/handoff).
+
 - [ ] **F2 folded** (fork `ssx3` `96e9f45`, codegen promoted): Part 3 iOS running; Part 2 Odin waits for
       the Odin back on USB. Then NP1.
 - [x] Stripes fixed (ST1, fork `92f9991`: progressive scanout); confirm on the Odin and iPhone builds.
