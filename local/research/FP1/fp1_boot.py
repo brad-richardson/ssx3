@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""F2 bounded boot: F1 driver + PGS_HIER_BINNING=force (GB9) + PS2X_COVERAGE_TICK (CT1)
+"""FP1 bounded boot: F2 driver + PGS_HIER_BINNING=force (GB9) + PS2X_COVERAGE_TICK (CT1)
 + --sound on|off (AU10). I26-FAST to the race, paraLLEl GS backend.
 
 Modes (runner built with PS2X_GS_SHADOW_PARALLEL=ON; backend chosen at runtime):
-  speed  diagnostics-off runner: PS2X_VSYNC_RATE_LOG=1 ([vsync-rate] every 5 s)
-         + PS2X_UNPACED=1 (FP1: speed runs measure unpaced headroom);
+  speed  diagnostics-off runner: PS2X_VSYNC_RATE_LOG=1 ([vsync-rate] every 5 s);
          takes the EXCLUSIVE mini lease (all slots). Stops at --stop-tick.
          Samples `ps -M <pid>` in the race window (Q4 host cost).
   det    det-hash runner (PS2X_ENABLE_DET_HASH_TAP=ON): PS2X_DET_HASH_EVERY=1 and
@@ -20,7 +19,7 @@ empty mc0/mc1 under the run dir. Wall cap 500 s, no-progress cap 120 s, log cap
 16 MiB. Only the recorded runner PID is signalled; the lease is released on
 every path. A (wall, tick) trace is written every poll for phase-rate analysis.
 
-Usage: gb8_boot.py --mode speed|det --backend cpu|parallel --runner PATH --label NAME
+Usage: fp1_boot.py --mode speed|det --backend cpu|parallel --runner PATH --label NAME [--unpaced]
 """
 import argparse
 import hashlib
@@ -37,7 +36,7 @@ from pathlib import Path
 sys.path.insert(0, '/Users/brad/dev/ssx3/local/tooling')
 from p_lane_lease import claim, release  # noqa: E402
 
-WORK = Path('/Users/brad/dev/ssx3-work/F2')
+WORK = Path('/Users/brad/dev/ssx3-work/FP1')
 ELF = Path('/Users/brad/dev/ssx3-work/E32-inputs/cd/SLUS_207.72')
 ISO = Path('/Users/brad/dev/ssx3-work/E32-inputs/SSX 3 (USA).iso')
 CODEGEN = Path('/Users/brad/dev/ssx3-work/codegen-ssx3/register_functions.cpp')
@@ -100,6 +99,8 @@ def main():
     ap.add_argument('--stop-tick', type=int, default=2400)
     ap.add_argument('--sound', choices=('on', 'off'), default='on')
     ap.add_argument('--coverage-tick', type=int, default=2400)
+    ap.add_argument('--unpaced', action='store_true',
+                    help='FP1: set PS2X_UNPACED=1 (dev/speed behaviour, no guest pacing)')
     args = ap.parse_args()
 
     runner = Path(args.runner).resolve()
@@ -137,26 +138,28 @@ def main():
     if args.mode == 'det':
         env.update(PS2X_DET_HASH_EVERY='1', PS2X_FRAME_DUMP_DIR=str(frames_dir),
                    PS2X_SND_LOG=str(lane / 'snd.log'),
-                   PS2X_COVERAGE_TICK=str(args.coverage_tick))
+                   PS2X_COVERAGE_TICK=str(args.coverage_tick),
+                   PS2X_VSYNC_RATE_LOG='1')
         if args.sound == 'on':
             env['PS2X_SOUND'] = '1'
+        if args.unpaced:
+            env['PS2X_UNPACED'] = '1'
         tick_re = HASH_TICK
     else:
-        env.update(PS2X_VSYNC_RATE_LOG='1', PS2X_SOUND='1',
-                   PS2X_UNPACED='1')  # FP1: speed runs measure unpaced headroom
+        env.update(PS2X_VSYNC_RATE_LOG='1', PS2X_SOUND='1')
         tick_re = RATE_TICK
 
     exclusive = args.mode == 'speed'
-    held = os.environ.get('F2_HELD_SLOT')
+    held = os.environ.get('FP1_HELD_SLOT')
     if held:
         slot = held  # pre-held by gb8_watch.py across back-to-back boots; no release here
         print(json.dumps({'event': 'using-held-slot', 'slot': slot}), flush=True)
     else:
-        slot = claim('F2-' + args.label, exclusive=exclusive)
+        slot = claim('FP1-' + args.label, exclusive=exclusive)
         while slot is None:
             print('lease busy; retrying in 30 s', flush=True)
             time.sleep(30)
-            slot = claim('F2-' + args.label, exclusive=exclusive)
+            slot = claim('FP1-' + args.label, exclusive=exclusive)
 
     result = {'label': args.label, 'mode': args.mode, 'backend': args.backend,
               'runner': str(runner), 'sha_reads': reads, 'stop_tick': args.stop_tick,

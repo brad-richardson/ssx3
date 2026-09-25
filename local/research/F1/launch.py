@@ -144,7 +144,8 @@ subprocess.run(['cp', f'{OUT}/ps2x.env.brad', f'{SCR}/ps2x.env.brad-device'], ch
 env = [f'# F1 {a.label}', 'PS2X_GS_BACKEND=parallel', 'PS2X_GS_TURNIP=1',
        f'PS2X_CD_IMAGE={FILES}/SSX3.iso', 'PS2X_SKIP_MOVIE=1', 'PS2X_SOUND=1',
        f'PS2X_MC_ROOT={FILES}/mc0-test',
-       f'PS2X_PAD_SCRIPT={ROUTE}', 'PS2X_PAD_SCRIPT_CLOCK=vsync', 'PS2X_VSYNC_RATE_LOG=1']
+       f'PS2X_PAD_SCRIPT={ROUTE}', 'PS2X_PAD_SCRIPT_CLOCK=vsync', 'PS2X_VSYNC_RATE_LOG=1',
+       'PS2X_UNPACED=1']  # FP1: speed runs measure unpaced headroom
 if a.game_cpus:
     env.append(f'PS2X_GAME_THREAD_CPUS={a.game_cpus}')
 assert not any(x in e for e in env for x in ('PGS_', 'DUMP', 'TRACE', 'CAPTURE', 'ORACLE')), 'dump/trace key in env'
