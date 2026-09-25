@@ -132,7 +132,7 @@ Class key: **HAVE** already fixed/have ours · **NEED** we have the bug ·
 5. Upstream `main` may have moved after the read-only fetch at Part 1 start;
    pins above are what was mapped.
 
-## 4. Receipts
+## 4. Receipts (Part 1)
 
 - Commands (all read-only; run in `~/dev/PS2Recomp` unless noted):
   `git fetch upstream` (read-only); `git log --no-merges --reverse
@@ -156,3 +156,98 @@ PACKED setup tag followed by an overrunning IMAGE tag loses the continuation. Up
 VFS/IOP emulator or LLE removal (HLE kept). Upstream's MMI fix and texture-cache fix don't apply
 (present at base / no cache in our backend). Part 2 released with an observable: E51 measured ~60
 IMAGE uploads/vsync here vs 73–74 in PCSX2 at a matched scene.
+
+---
+
+# UP1 Part 2: Rank 1 port + I26-FAST before/after (2026-09-24)
+
+Worktree `~/dev/ssx3-work/UP1/PS2Recomp`, branch `up1-ports` from fork
+`ssx3` `fb11e18`. Build `~/dev/ssx3-work/UP1/build`: Release, ninja,
+`PS2X_ENABLE_DIAG_TAPS=OFF`, canonical
+`PS2X_GAME_CODEGEN_DIR=~/dev/ssx3-work/codegen-ssx3` (no regen; port is
+runtime-only). No push anywhere.
+
+## Port
+
+- Commit `cab22bd6121928428989bc16e6ee9a09c82b50cb`
+  `[UP1-R1] Port VIF1 pending IMAGE continuation from upstream c8c8666`
+  (2 files, +98/−15): `pendingGifImageQwc` replaces `gifImageQwcFromTag`
+  in `ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp`; test
+  `VIF1 DIRECT finds an image continuation after packed setup` from
+  upstream `2a61ba0` added verbatim to `ps2xTest/src/ps2_memory_tests.cpp`
+  next to its single-tag companion.
+- Fail-before: suite from worktree root 593 pass + 1 fail (only the new
+  test; `suite-before.log`). Pass-after: **594/594** (`suite-after.log`).
+  (First run from `build/` also failed `VU0 macro mappings` on CWD —
+  `"instructions.h should be readable from the test working directory"`;
+  from the worktree root it passes. No product relevance.)
+- Runner-dir check empty:
+  `git diff --stat 14b1e5cb up1-ports -- ps2xRuntime/src/runner` → no output.
+
+## Boots (I26-FAST, `PS2X_DETERMINISTIC=1`, `PS2X_PKLOG=1`, gfx-stats 600–1900, tick frames)
+
+Valid pair (route as released): `up1b` = pre-fix runner, `up1a` = post-fix
+runner, 480 s wall each, slot 1, rc 0, lease released. Race HUD reached;
+tick 1780 = race (2ND/2, timer running). Frames:
+`frames/up1{b,a}-{charselect-820,race-1780}.png` (+ `.txt` sidecars with
+tick/fnv). Before/after PNGs are MD5-identical
+(`5ab5e8d0…` char-select, `8fffd048…` race).
+
+### Observable: per-vsync packet census, valid pair (from `ps2_pklog.txt`)
+
+| Window (ticks) | src | n/vsync before → after | KB/vsync before → after |
+| --- | --- | --- | --- |
+| menus-title 600–760 | 1 / 2 / 3 | 84.57 / 42.17 / 1.55 → same | 17.18 / 9.70 / 178.12 → same |
+| char-select 880–990 | 1 / 2 / 3 | 314.76 / 77.04 / 2.14 → same | 192.22 / 16.91 / 325.17 → same |
+| peak/mode/event 1000–1440 | 1 / 2 / 3 | 75.29 / 59.45 / 2.20 → same | 15.29 / 13.16 / 334.99 → same |
+| loading/card 1441–1708 | 1 / 2 / 3 | 593.28 / 81.18 / 1.70 → same | 594.65 / 10.56 / 117.86 → same |
+| race-start 1709–1900 | 1 / 2 / 3 | 1206.15 / 167.83 / 2.39 → same | 1252.58 / 9.83 / 273.31 → same |
+
+`cmp` on full pklogs (1,989,672 packets each, ticks 0–~2861, 2M-line cap):
+**byte-identical**. gfx-stats files: **identical**. Frames: identical.
+**On the true I26-FAST path the fix is a behavior-preserving no-op through
+tick ~2861: no regression, and no measurable upload change in these windows.**
+
+Caveat on the brief's letter: pklog labels path (`1/2/3/img/packed`), not
+GIF mode, and the P6 native path (`img`) never fires on this route, so a
+literal "IMAGE transfers per vsync" count is not available from the in-ssx3
+capture (E51's `PS2X_GIF_DUMP` commit `0af7eed` is not in `ssx3`; PKCAP caps
+at 64 packets). Closest reported signals: PATH2 packets+bytes/vsync (VIF1
+DIRECT, the fix's path) and bulk PATH3 transfers above.
+
+### The trigger exists in real SSX3 traffic (stim pair)
+
+The first boot pair (`up1before`/`up1after`, same inputs) ran with pad-stim
+accidentally left armed (my wrapper missed the `--no-stim` that
+`e46_boot.py`/`i26_boot.py` force-append; stim holds all buttons after wall
+60 s, so card taps failed and the route derailed — those runs are NOT
+I26-FAST and carry no race frames). Their comparison still proved the
+mechanism live:
+
+- Streams bit-identical through tick 1605 (determinism harness rigorous).
+- First divergence tick 1606 (loading screen): PATH1 packet **bytes**
+  diverge (~99% fnv mismatch) while counts and PATH2/3 stay identical.
+- `xgkick == p1_pkt` (PATH1 is VU1 XGKICK output): VU1 ran −703 cycles at
+  1606 with equal MSCAL counts; draws +6/verts +18 by 1608; sub-pixel box
+  shifts. Before-fix, overrun bytes decoded as VIF commands issued spurious
+  VU1 work and corrupted VU1 state (fewer draws); after-fix they are
+  consumed as IMAGE. PATH2 (guest-RDRAM passthrough) identical ⇒ guest
+  logic path unchanged — pure rendering-correctness delta, no guest
+  divergence.
+- Part 1 gap closed: the multi-tag DIRECT + IMAGE-overrun trigger fires in
+  real game traffic (it just does not fire on the I26-FAST menus/race-start
+  windows measured).
+
+## Budget and gaps
+
+- Executed: 2 full builds + 2 incremental runner relinks (pre/post-fix swap
+  for boot purity), 4 boot executions (2 invalid stim runs from the setup
+  error above + the 2 valid measurement boots). No regen (runtime-only).
+- Rank 2 (gs_cache goldens) NOT done: no 45 min remained after the redo.
+  Gap, as the release allows.
+- Literal IMAGE-mode/vsync census needs GIF-tag parsing of a byte capture;
+  not available in-ssx3 (see caveat). A future lane could revive the E51
+  GIF-dump approach on a diagnostics branch (not on the port branch).
+- Scratch (not committed): `~/dev/ssx3-work/UP1/{build,build*.log,
+  suite-*.log,run-*,up1_boot.{py,sh},up1_census.py,commits.txt,diffstats.txt,
+  namestat.txt}`; worktree branch `up1-ports` (local, no push).
