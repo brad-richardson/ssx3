@@ -277,3 +277,103 @@ for SSAA). G5 (bytesize WSL stops the distro ~1–2 min after the last client di
 the runbook: hold the ssh open for bytesize builds. Part 2 (Odin) and Part 3 (iOS, new pane)
 released; Part 3 also bundles `PS2X_PRESENT_ZERO_COPY=1` (Brad 09-25: skip the CPU copy), verified
 on the iPad before the iPhone install.
+
+## Part 3 — iOS (device build `a3efbfe`, iPad 4×+hi-res + zero-copy, iPhone install-only)
+
+Worker: muse, brief `local/muse/prompts/F5.md` Part 3 only (alongside Part 2;
+Odin and `~/dev/ssx3-work/F5/PS2Recomp` untouched). Source: pushed fork `ssx3`
+`a3efbfe` in my own detached worktree `~/dev/ssx3-work/F5i/PS2Recomp`
+(`HEAD == fork/ssx3`, clean). First-failure rule never triggered. No push.
+
+**Result: iPad green on the full F5 stack, iPhone installed.** One device
+build (F5 VU1 images linked: 14,343 `VU1RecompImage` symbols, the exact Mac
+Part 1 count); bundled env = I33's + the 4 HR1 keys (committed here as
+`ps2x.env`). One fresh-card iPad launch: parallel backend, `ssaa=4
+hires_scanout=1 present_pipeline=1`, 1024×896 scanout, 5× `ios bind …
+rc=0`, stats `readback_ms_avg=0 copy_ms_avg=0 l2h_bytes=0` (zero-copy kept),
+0 FATAL, race reached in 57 s wall. Frames viewed: Select Event, race start,
+and t2100 with the carve groove + spray; HUD/edges visibly crisper than
+F3's 1× shot; pad v2 in place. iPhone installed + save/env verified,
+**never launched**.
+
+Recipe: `~/dev/ssx3-work/F5i/ios/build-install.sh` = I33's committed script
++ `W`/`FORK_WT`/`PIN→a3efbfe…`/`ENVFILE→local/research/F5/ps2x.env`,
+`-DPS2X_VU1_RECOMP_DIR=~/dev/ssx3-work/F5/vu1gen` + a 7-file preflight hash,
+and F3's `install_iphone` gate fix (`grep -v unavailable`). parallel-gs
+`19d93b2` + MoltenVK 1.4.2 reused read-only from I33's scratch (F3 recipe).
+`ipad-probe.sh`/`ipad-run.sh` from F3's copies (`OUT` repointed). No sim
+build — F3 precedent plus I33's sim descriptor-indexing blocker.
+
+| Item | Pin | Receipt |
+| --- | --- | --- |
+| Fork worktree `~/dev/ssx3-work/F5i/PS2Recomp` (detached) | `a3efbfe94663…` == `fork/ssx3`, clean | `logs/fork-head.txt`, preflight rc=0 (runner-dir diff empty, PIN ancestor) |
+| parallel-gs (I33's, read-only) | `19d93b2`, clean; Granite `166ba21a` | preflight re-hashed |
+| Canonical codegen (promoted) | `register_functions.cpp` `8ea8ed43…` | `logs/codegen-sha.txt` |
+| F5 VU1 images | 7/7 SHAs match Part 1 `vu1gen.sha` | `diff` empty (`VU1-7OF7-MATCH`); configure `VU1 recomp: 7 images` |
+| MoltenVK 1.4.2 device slice | staged `6cd58884…` = I33 pin | `logs/device-mvk-stage-sha.txt` |
+| ELF / ISO staged | `1b49d05c…` / `3c2f8eb1…` | stage SHAs |
+| Bundled env `local/research/F5/ps2x.env` | SHA `4663d126…` (I33 + 4 F5 keys) | staged copy holds all 4 keys (`rg -c` = 4) |
+| Device binary unsigned | `4cd0e327…` (×2), 157,327,840 B | `logs/device-source-binary-sha.txt` |
+| Device binary signed (installed) | `36273410…` (×2) | `logs/signed-binary-sha.txt`; `codesign --verify --strict` passed |
+
+iPad (Air 11" M2): install rc=0 (seq 1988, bundle `9A85B773-…`); deploy
+SKIP + 7 OKs; probe Data `9E74D5F6-…` (bundle path matches install URL).
+One fresh-card launch (`mc-f5`, route 484 chars byte-exact vs bundled,
+re-armed via `-e`, `PS2X_VSYNC_RATE_LOG=1`, no backend overrides): 57 s
+wall, ticks 1173/1835/2129, terminated after (0 procs left), zero FATAL,
+48 kHz, overlay shown. Bundled env selected the full stack:
+`[gs:parallel] live backend selected`,
+`[gs:parallel] quality ssaa=4 (asked 4, device max 4) ssaa_textures=0
+hires_scanout=1 present_pipeline=1`,
+`[gs-path] hier_rule=hier-if-large … gpu=Apple M2 GPU`,
+`[gs:parallel] scanout size 1024x896 tick=44 hires=1`
+(1280×896 at tick 41 first, HR1's shape).
+
+| Shot (tick) | Viewed verdict | SHA-256 (12) |
+| --- | --- | --- |
+| `shot-t1090` (1173) | Select Event (Snow Jam / Metro-City / Happiness + Race course map, legible), full brightness | `6ea708b58645` |
+| `shot-t1810` (1835) | Race 2ND/2 00:00:02 0%, EA Radio "Ride / Deepsky / In Silico", rider at the gate, beam | `cd97a10b9a00` |
+| `shot-t2100` (2129) | Race 2ND/2 00:00:07 1%, RECOVER meter; **carve groove trailing down-slope + spray**, no translucent boxes | `3b5d04335223` |
+
+Sharper picture: HUD digits/text, tree edges and the groove read visibly
+crisper than F3's 1× `shot-t2100` (different moments, so sharpness only —
+HR1's rule); scanout is 1024×896 native. Pad v2: large 4-arrow D-pad
+below-left of the face cluster, no control overlaps; only the known
+portrait-compat SELECT/START overlap (I28, pre-existing). RNG note: my run
+shows "Deepsky" where F3's iPad run showed "Glass Danse", and a
+crash/recover at t2129 where F3 showed trick 370 — expected: RP1's raw-bits
+MAX/MINI changes guest floats from early on (the song is picked before the
+race starts), and iPad-vs-Mac RNG already diverged at F3. Route reached the
+race on pace with correct scenes throughout. Post-run deploy re-ran: 7 OKs,
+Brad's `mc0` byte-identical. Diagnostic pace only: launch→t2100 57 s
+(console-pty + vsync-rate overhead, one run — not a speed number).
+
+iPhone (16 Pro Max): `available (paired)` at check and at install (never
+`unavailable`); install rc=0 (seq 4868, bundle `80AD14B5-…`); deploy SKIP
++ 7 OKs. **Never launched** — no launch/process command targeted the
+iPhone UDID.
+
+Budgets and gaps: 1 device build (BUILD SUCCEEDED), 1 probe (~2 s) + 1
+test (57 s), 2 installs; ~1 h wall. Scratch `~/dev/ssx3-work/F5i` 3.6 GB;
+mini total 134.7 → 138.3/200 GB. Gaps: one iPad run (no drift
+cancellation); pace diagnostic, not a speed number; iPhone
+unlaunched-by-us, so its first F5 boot is Brad's; first iOS build with VU1
+recomp images — no iOS det-hash A/B vs the interpreter (Mac Part 1 proved
+the images guest-identical at 100 % generated); cross-fold race-RNG
+divergence (song/crash above) not chased — RP1 changes guest state by
+design.
+
+Exact commands:
+
+```sh
+git -C ~/dev/PS2Recomp worktree add --detach ~/dev/ssx3-work/F5i/PS2Recomp fork/ssx3  # a3efbfe
+# build-install.sh: 4-line sed off local/research/I33/build-install.sh + VU1 flag/hash + F3 iphone-gate fix
+bash ~/dev/ssx3-work/F5i/ios/build-install.sh preflight configure_device build_device stage_device sign
+bash ~/dev/ssx3-work/F5i/ios/build-install.sh install_ipad
+bash local/research/I31/deploy-ios.sh ipad
+bash ~/dev/ssx3-work/F5i/ios/ipad-probe.sh             # live container 9E74D5F6-…
+bash ~/dev/ssx3-work/F5i/ios/ipad-run.sh ~/dev/ssx3-work/F5i/ios/run-ipad-f5 ~/dev/ssx3-work/F5i/ios/run-ipad-env.json "1090 1810 2100"
+bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
+bash ~/dev/ssx3-work/F5i/ios/build-install.sh install_iphone
+bash local/research/I31/deploy-ios.sh iphone         # never launched
+```
