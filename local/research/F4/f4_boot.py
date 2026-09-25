@@ -22,7 +22,7 @@ empty mc0/mc1 under the run dir. Wall cap 500 s, no-progress cap 120 s, log cap
 16 MiB. Only the recorded runner PID is signalled; the lease is released on
 every path. A (wall, tick) trace is written every poll for phase-rate analysis.
 
-Usage: f4_boot.py --mode speed|det --backend cpu|parallel --runner PATH --label NAME [--unpaced] [--vu1-stats]
+Usage: f4_boot.py --mode speed|det --backend cpu|parallel --runner PATH --label NAME [--unpaced] [--vu1-stats] [--vu1-dump DIR] [--stack-kb N]
 """
 import argparse
 import hashlib
@@ -108,6 +108,10 @@ def main():
                     help='F3: set PS2X_UNPACED=1 in det mode (B2); speed mode always sets it')
     ap.add_argument('--vu1-stats', action='store_true',
                     help='F4: set PS2X_VU1_RECOMP_STATS=1 (B1 generated-coverage gate)')
+    ap.add_argument('--vu1-dump', default='',
+                    help='F4-2b: set PS2X_VU1_RECOMP_DUMP=DIR + PS2X_VU1_RECOMP=0 (image regen)')
+    ap.add_argument('--stack-kb', type=int, default=0,
+                    help='F4-2b: set PS2X_GAME_THREAD_STACK_KB=N (flatness test)')
     args = ap.parse_args()
 
     runner = Path(args.runner).resolve()
@@ -153,6 +157,11 @@ def main():
             env['PS2X_UNPACED'] = '1'
         if args.vu1_stats:
             env['PS2X_VU1_RECOMP_STATS'] = '1'
+        if args.vu1_dump:
+            env['PS2X_VU1_RECOMP_DUMP'] = args.vu1_dump
+            env['PS2X_VU1_RECOMP'] = '0'
+        if args.stack_kb:
+            env['PS2X_GAME_THREAD_STACK_KB'] = str(args.stack_kb)
         tick_re = HASH_TICK
     else:
         env.update(PS2X_VSYNC_RATE_LOG='1', PS2X_SOUND='1',

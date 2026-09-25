@@ -514,6 +514,266 @@ pair→`next()` call) + regen the 7 images + Mac det/speed re-verify
 launches the iPad build. Orchestrator decides fix-forward vs
 revert on the pushed `ssx3`.
 
+## Part 2b — musttail fix, Odin green at 0.166×, play build installed
+
+Worker: Muse Code, same pane. The Part 2 crash is fixed, gated, and
+flying on the Odin: pair mean race 0.1665× vs F3 0.139× (**1.20×**),
+rider solid on all 8 caps, profile shows generated VU1 executing
+on-device, F4 APK installed as Brad's play build. Stopping before
+any push (fork push is the orchestrator's).
+
+### Fix (f4-fold `74e2df2`, one commit)
+
+- Emitter (`ps2_vu1_recomp.cpp:187`): pairs now end with
+  `PS2X_VU1_MUSTTAIL return next(vu, c);` — the chain is flat by
+  construction (a violation is a compile error, not a crash).
+- `ps2_vu1_recomp_gen.h` non-clang branch: `#error` instead of the
+  silent empty fallback (the header is included only by generated
+  images, verified by grep — the `#error` fires exactly when
+  compiling images without musttail).
+- `PS2X_GAME_THREAD_STACK_KB` (default-off test knob): sizes the
+  game thread via pthread attrs on unix/Apple, prints a `[stack]`
+  line; unset/0/unsupported = `std::thread` exactly as before.
+- Durable test: drives `emitRecompSource` on two valid pairs,
+  asserts every handoff carries the macro. Red→green observed:
+  650/651 (only the new test fails) before, **651/651** after
+  (646 + 1 new + 4 det-tap tests that compile in with the tap on).
+- Runner-dir check empty, `diff --check` clean. `f4-fold` tip is
+  now `74e2df2` (unpushed; fork `ssx3` still `8559ab9` with the bug
+  — F4I must rebase when this pushes).
+
+### vu1gen-2 (regen, `~/dev/ssx3-work/F4/vu1gen-2`, canonical untouched)
+
+DUMP boot (no-images det runner from the fix tip, `PS2X_VU1_RECOMP=0`
++ `DUMP`, I26-FAST to t2400): bound=target, 85 s. All 7 images
+redumped with identical hashes (same filenames). **7/7 files
+changed, and only the 2,048 handoff lines each**
+(`return next` → `PS2X_VU1_MUSTTAIL return next`; verified no other
+diff line in any file). SHAs in scratch `vu1gen-2.sha`.
+`vu1gen-ssx3` untouched (byte-identical before/after).
+
+### Stack tests (why the Mac can't reproduce the overflow)
+
+`otool` on the old-images runner: an old pair function ends with
+`br x2` (indirect jump, frame torn down) — **Apple clang
+sibling-call-optimized the plain tail return**, so the Mac chain is
+flat by optimizer luck (mid-function `bl`s are depth-1 helpers that
+return). The NDK build demonstrably did not (Part 2's 512 nested
+frames). Consequences:
+
+| Boot | Images | Stack | Result |
+| --- | --- | --- | --- |
+| OLD512 | old | 512 KiB (`[stack]` line present) | bound=target, 69.5 s — passes (luck, as B1/B2/B3 did) |
+| NEW512 | new | 512 KiB (`[stack]` line present) | bound=target, 69.1 s — **passes (guaranteed)** |
+
+The new f-tail is also `br x2` — but now by `musttail` guarantee:
+this binary could not have compiled with a nesting handoff. No
+128 KiB calibration runs: with the chain provably flat on both
+Mac binaries, smaller stacks test nothing about the fix.
+
+### Mac gate (all green)
+
+- Suite 651/651 (above).
+- NEW512 det-hash: **identical to F4 B2 on 2,430/2,430 ticks and to
+  F4 B1 on 2,429/2,429 ticks, 0 differing payloads** — the musttail
+  regen is guest-invisible.
+- NEW512 VU1 stats: `generated_share=1.0000`,
+  `interpreted_cycles=0` — 100 % generated.
+- Speed pair (exclusive, one hold): first pair VOID (host load
+  swung 51→15 mid-pair; old leg 12.70/s meaningless). Clean
+  re-pair at load ~3–5: SP-old2 race raw **22.39**/s, SP-new2
+  **22.22**/s (**0.992×**, within noise); trace 23.97 both (same
+  stale-row artifact); elapsed 65.51 vs 65.46 s; HUD 35.20 vs
+  35.15 s. Both corroborate B3's 21.18 (quieter host here).
+
+### APK `f2e519de` (bytesize, 74e2df2 + vu1gen-2)
+
+Re-archived `PS2Recomp/` from `74e2df2` (346 both sides, MUSTTAIL
+marker ×2, tar kept) + vu1gen-2 copy (7 files, all SHAs match
+`vu1gen-2.sha`); `build.sh` repointed (SHA `36038737…` both sides).
+**BUILD SUCCESSFUL in 9m 26s**, 48 tasks, `--max-workers=2`.
+APK `f2e519de0812753758f3330844b887c361e7ca138fbbcdfa508ea52a0bca2ebc`,
+182,179,400 B — remote ×2 + pulled ×2, all four match; kept at
+`odin/app-release.apk` (1b crashing APK preserved as
+`odin/app-release-1b.apk`). Success log in scratch
+(`assembleRelease-remote-2b.log`, 31,484 B).
+
+### Odin S1B/S2B (clean pair, 0.1665×)
+
+Installs: local ×2 + `base.apk` verify each launch (all
+`f2e519de…`). Pre-launch every run: lease free, keyguard
+`showing=false`, AC true, 100 %, app not running, Brad env
+`9fb46f85…` + mc0 pins verified, thermal 0 pre-wait, **180 s wait,
+thermal 0 at launch**. `--stop-tick 4500`, `PS2X_UNPACED=1`,
+I26-FAST, empty mc0-test (removed after).
+
+| Run | End | Race (ticks→wall) | Race rate | FATAL |
+| --- | --- | --- | --- | --- |
+| S1B | STOP tick 4548, 346 s | 1714→4548 / 282.3 s | 10.04/s = **0.167×** | 0 |
+| S2B | STOP tick 4559, 351 s | 1714→4559 / 286.1 s | 9.95/s = **0.166×** | 0 |
+
+Pair mean **0.1665× vs F3 0.139× = 1.20×** (legs agree to 0.3 %).
+S1B thermals 0→3 settling to 1, S2B similar (X1/A720/A520
+bouncing, typical). SF presents ~58–60/s both (display duplicates
+the ~10/s guest). Per-5s ramps at the very end (13–14/s) = route
+tail past the finish, both runs. EA cards differ run to run
+(S1B Ride/Deepsky, S2B Poor Leno/Royksopp — device timing, fine).
+
+All 8 caps viewed (SHAs in `logs/S*B/scap-sha.txt`); rider solid,
+full brightness, no corruption:
+
+| Cap | Tick | Verdict |
+| --- | --- | --- |
+| S1B sc01 | 2101 | race 2ND/2 00:00:06 1 %, trick 340, rider mid-air arms up, beam |
+| S1B sc02 | 3037 | 00:00:22 2 %, rider carving, pines/mountains |
+| S1B sc03 | 4043 | 00:00:39 2 %, rider carving |
+| S1B sc04 | 4548 | 00:00:47 5 % 43 MPH, rider in canyon groove |
+| S2B sc01 | ~2100 | 00:00:07 1 %, rider in spray, EA card |
+| S2B sc02 | ~3000 | 00:00:21 2 %, rider carving |
+| S2B sc03 | ~4000 | 00:00:38 2 %, rider carving |
+| S2B sc04 | 4559 | 00:00:47 5 % 43 MPH, rider in canyon groove |
+
+### P1 profile (30 s fp call-graph at tick 2418, NP1 model)
+
+Capture: 126,329 samples / 99.09B cycles, `perf-P1.data` 33 MB
+(SHA `6ab6510f…` both sides), thermal 3 most of the window,
+~3 % perturbation (9.6–9.8/s vs clean ~10.0/s — de-perturbed by
+the model), FATAL 0. Symbolization: unstripped 2b `.so`
+(BuildID `aeae8713…` = merged `.so`), NDK 28 host simpleperf.
+Method note: NP1 aggregated rounded `%` (87.04 % covered at
+≥0.05 %); f* fragments into 3,302 tiny rows, so that rule would
+hide 2/3 of the generated code (coverage 66.15 %). I aggregate
+**exact event counts** (rows sum precisely to 99,091,186,692) —
+same model, no rounding loss.
+
+W = clean race wall/tick = (282.3/2834 + 286.1/2845)/2 =
+**100.09 ms**; GameThread 67.82 % → **k = 1.47575 ms per 1 %**.
+Threads CPU/frame: GT 100.1 (anchor), GsWorker 41.3, main 5.5,
+AAudio 0.3. DSO: our `.so` 65.71 %, kernel 26.92 %, libc 4.93 %,
+vdso 1.01 %, Adreno 0.51 %, Turnip 0.34 %. Children:
+`EeScheduler::run` 67.78 → `sub_00382760` 54.52 → `Store32`
+54.25 → `writeIORegister` 54.15 → `processPendingTransfers`
+53.75 → `VU1::run` **53.64** → `processVIF1Data[Impl]`
+53.62/53.56 (generated VU1 executing on-device); `GsWorker::
+threadMain` 27.94 → `executeQueuedCommand` 26.86 → kernel
+26.68/26.20 (submit path, kallsyms unresolved as in NP1).
+
+| Stage | Share | ms/frame |
+| --- | --- | --- |
+| VU1 generated pairs (f*, 3,302 rows) | 29.44 | 43.4 |
+| GsWorker kernel (submit/waits) | 22.59 | 33.3 |
+| VU1 ready-commit gate | 11.70 | 17.3 |
+| guest code | 6.77 | 10.0 |
+| GT libc/kernel/vdso | 5.78 | 8.5 |
+| GsWorker user (GS lib) | 5.41 | 8.0 |
+| VU1 interpreter exec | 5.32 | 7.8 |
+| main/other threads | 4.18 | 6.2 |
+| VU1 write queues | 3.04 | 4.5 |
+| other | 2.00 | 2.9 |
+| VU1 hazard calc | 1.15 | 1.7 |
+| VIF1/DMA | 0.80 | 1.2 |
+| scheduler/sync/waits | 0.47 | 0.7 |
+| profiler unwind overhead | 0.44 | 0.7 |
+| PS2 runtime other | 0.41 | 0.6 |
+| EE runtime/helpers | 0.27 | 0.4 |
+| GIF/GS packet handling | 0.16 | 0.2 |
+| PLT | 0.05 | 0.1 |
+| VU1 other | 0.01 | 0.0 |
+
+Top 25 self: `commitReadyPipelines` 11.70 GT; kernel addrs 3.02
+GW / 2.97 GW / 2.74 GT / 1.78 GW; `advanceOneCycle` 1.71,
+`execUpper` 1.59, `run` 1.50, `queueVfWrite` 1.48 GT;
+`clock_gettime` 1.28 main; kernel 1.16/1.07/1.04 GW;
+`__kernel_clock_gettime` 0.99 main; `processVIF1DataImpl` 0.80
+GT; `queueViWrite` 0.77 GT; kernel 0.76 GW; `progressXgkick`
+0.61 GT; `__memcpy_aarch64_nt` 0.55 GT; kernel 0.53 GW;
+`drawing_kick_append` 0.51 GW; kernel 0.48 GW;
+`writeRegisterPacked` 0.48 GW; `queueAccWrite` 0.47 GT;
+`__vfprintf` 0.43 GT. (Full 8,564-row table + classifier in
+scratch `odin/P1/report-comm-sym-e.txt`; `/tmp/f4_stages2.py`
+is scratch, not committed.)
+
+Reading — what's left after VU1 stage A: the interpreter core
+collapsed (NP1 `run` 10.42 → 1.50, `execUpper` 6.35 → 1.59,
+`commitReadyPipelines` 8.98 → **11.70 as the #1 self symbol**);
+total VU1-ish 88.4 → 74.8 ms. The commit gate (17.3 ms) +
+generated pairs (43.4 ms) + GPU submit path (GW kernel 33.3 ms,
+unmoved by the fold — Amdahl) dominate. Note
+`advanceOneCycle`/`commit`/`progressXgkick` run *inside*
+generated pairs (shared step tail), so true fallback is only
+~2 % (`execUpper`/`execLower` + decode — caller unattributed;
+Mac stats claim 0 interpreted cycles, possible counting gap —
+needs a `-g` follow-up, not a gate). `__vfprintf` 0.43 % on GT
+suggests some release logging is still on. NP1-comparable
+guest code (≥0.05 % rows): 1.93 % vs their 1.18 % — the
+apparent "rise" to 6.77 % is my exact-count aggregation vs
+their tail cutoff.
+
+### Play build + device end state
+
+Both runs clean → **F4 APK `f2e519de…` installed as Brad's play
+build** (`Success`, `base.apk` SHA matches) + `deploy-odin.sh`
+(env `9fb46f85…` + 6/6 saves OK), **no launch**. Scratch
+removed (`/data/local/tmp/f4`, `mc0-test{,_slot1}` confirmed
+gone), app force-stopped (pid none), lease `LEASE_FREE F4 done`,
+100 % on AC.
+
+### Budgets and gaps (2b)
+
+Builds: 1 full + 5 incremental reconfigures (2b dir, deleted at
+close), 1 APK (9m26s). Boots: DUMP 85 s, OLD512 70 s, NEW512
+69 s, SP pair ×2 (first void, 97+72 s) + ×2 (66+65 s) — all one
+slot except the exclusive pairs. Odin: 3 installs + 3 launches
+(S1B 346 s, S2B 351 s, P1 173 s). Scratch F4 dir 5.5 GB total,
+F4I's `ios/` 3.5 GB — Part 2b's own ≈ 2 GB (2 APKs, codegen,
+6 staged runners, run logs, vu1gen-2); global 133.5/200 GB.
+Gaps: (1) interp residual ~2 % unattributed (see above);
+(2) pair-1 voided by host load (kept in scratch as SP-old/SP-new
+with the cause); (3) profile ran hot (thermal 3 — shares are
+relative, model de-perturbs); (4) pool-only-without-swap still
+untested (carries from 1b); (5) `/tmp/f4_stages2.py` classifier
+is scratch (paste-bin quality, not committed); (6) F4I must
+rebase onto the fix (fork `ssx3` still has the bug).
+
+Exact commands (2b delta):
+
+```sh
+# fix + test + knob + #error, then:
+# suite red 650/651 -> green 651/651; commit 74e2df2 (f4-fold)
+cmake -B build-2b (DET ON, VU1 empty); cmake --build ... -t ps2x_tests ps2EntryRunner
+python3 local/research/F4/f4_boot.py --mode det ... --label DUMP ... --vu1-dump ~/dev/ssx3-work/F4/vu1gen-2  # 7 files
+diff -rq vu1gen-ssx3 F4/vu1gen-2  # 7/7, handoffs only
+cmake -B build-2b -DPS2X_VU1_RECOMP_DIR=.../vu1gen-ssx3; build; cp bin/runner-2b-old
+llvm-objdump -d f0000 old  # br x2 (sibcall luck)
+f4_boot.py ... --label OLD512 ... --stack-kb 512 --vu1-stats  # target
+cmake -B build-2b -DPS2X_VU1_RECOMP_DIR=.../vu1gen-2; build; cp bin/runner-2b-new
+llvm-objdump -d f0000 new  # br x2 (musttail guarantee)
+f4_boot.py ... --label NEW512 ... --stack-kb 512 --vu1-stats  # target, 100% gen
+/tmp/f4_hashdiff.py run/B2 run/NEW512  # 2430/2430; B1 2429/2429
+cmake -B build-2b -DDET_HASH_TAP=OFF -DVU1=old; build; cp runner-2b-old-clean
+cmake -B build-2b -DVU1=new; build; cp runner-2b-new-clean
+python3 /tmp/f4_2b_pair.py  # void (load); /tmp/f4_2b_pair2.py  # 0.992x
+git archive 74e2df2 -> /home/brad/f4 (346 files); vu1gen-2 -> /home/brad/f4 (7, SHAs match)
+# build.sh -> vu1gen-2 (SHA 36038737 both sides); assembleRelease 9m26s 48 tasks
+# APK f2e519de remote x2 + pulled x2 -> odin/app-release.apk
+adb install -r odin/app-release.apk  # x3 launches; base.apk verify each
+# S1B/S2B: thermal 0, sleep 180, thermal 0; launch.py --label S1B/S2B --wall 600 --stop-tick 4500
+python3 local/research/F4/phases.py local/research/F4/logs/S1B  # 0.167x
+python3 local/research/F4/phases.py local/research/F4/logs/S2B  # 0.166x
+# P1: install, cooldown, launch.py --label P1 --wall 600 --profile-after-tick 2400 --profile-secs 30
+# perf-P1.data -> bytesize (SHA 6ab6510f both); simpleperf report --symdir (BuildID aeae8713 match)
+adb install -r odin/app-release.apk; deploy-odin.sh $S  # play build, no launch
+adb shell 'rm -rf /data/local/tmp/f4 .../mc0-test*; am force-stop ...'
+rm -rf ~/dev/ssx3-work/F4/build-2b
+```
+
+Recommended next action: push `f4-fold` (`74e2df2`) to fork `ssx3`
+(all gates green; runner-dir empty); tell F4I to rebase. Next
+perf targets per the profile: the VU1 commit gate (11.70 %,
+`commitReadyPipelines` per-pair checks — VR1's Mac profile agrees
+at 28 %) and the GPU submit path (GW kernel 22.59 %); the ~2 %
+interp residual wants one `-g` attribution run.
+
 ## Orchestrator gate, Part 2 (2026-09-25)
 
 **Correct stop.** The generated VU1 pair functions end with a plain `return next(vu, c)` (emitter

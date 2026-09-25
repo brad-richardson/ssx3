@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# F4 Part 1 Android compile check: assembleRelease from f4-fold 46b0c8d
-# (unpushed; git archive streamed from the mini) + UNPROMOTED F4 codegen
-# (real copy) + private vu1gen-ssx3 copy + paraLLEl-GS 19d93b2 + TL1 jniLibs
-# (symlinked from /home/brad/f2, verified). Rest is the F3 recipe verbatim
-# (root f4) plus -Pps2xVu1RecompDir (VR1 6c2de6f).
+# F4 Android build: assembleRelease from f4-fold (unpushed; git archive
+# streamed from the mini) + UNPROMOTED F4 codegen (real copy) + private
+# vu1gen copy + paraLLEl-GS 19d93b2 + TL1 jniLibs (symlinked from
+# /home/brad/f2, verified). Rest is the F3 recipe verbatim (root f4) plus
+# -Pps2xVu1RecompDir (VR1 6c2de6f). Part 1b used vu1gen-ssx3; Part 2b
+# (musttail fix) uses vu1gen-2.
 set -euo pipefail
 root=/home/brad/f4
 ext=/home/brad/n2/PS2Recomp/android
@@ -21,16 +22,16 @@ cd "$root/PS2Recomp/android"
 echo "== codegen input count =="
 ls /home/brad/f4/codegen-ssx3 | wc -l
 echo "== vu1gen input count =="
-ls /home/brad/f4/vu1gen-ssx3 | wc -l
+ls /home/brad/f4/vu1gen-2 | wc -l
 echo "== gradlew argv =="
-echo "$ext/gradlew assembleRelease -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 -Pps2xGameCodegenDir=/home/brad/f4/codegen-ssx3 -Pps2xGsShadowParallel=ON -Pps2xParallelGsSourceDir=/home/brad/f4/parallel-gs -Pps2xJniLibsDir=/home/brad/f4/jniLibs -Pps2xVu1RecompDir=/home/brad/f4/vu1gen-ssx3 --max-workers=2 --console=plain --warning-mode=none"
+echo "$ext/gradlew assembleRelease -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 -Pps2xGameCodegenDir=/home/brad/f4/codegen-ssx3 -Pps2xGsShadowParallel=ON -Pps2xParallelGsSourceDir=/home/brad/f4/parallel-gs -Pps2xJniLibsDir=/home/brad/f4/jniLibs -Pps2xVu1RecompDir=/home/brad/f4/vu1gen-2 --max-workers=2 --console=plain --warning-mode=none"
 "$ext/gradlew" assembleRelease \
   -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 \
   -Pps2xGameCodegenDir=/home/brad/f4/codegen-ssx3 \
   -Pps2xGsShadowParallel=ON \
   -Pps2xParallelGsSourceDir=/home/brad/f4/parallel-gs \
   -Pps2xJniLibsDir=/home/brad/f4/jniLibs \
-  -Pps2xVu1RecompDir=/home/brad/f4/vu1gen-ssx3 \
+  -Pps2xVu1RecompDir=/home/brad/f4/vu1gen-2 \
   --max-workers=2 --console=plain --warning-mode=none \
   > "$root/assembleRelease.log" 2>&1
 echo "EXIT=0"
