@@ -1,0 +1,21 @@
+tap 70.00 s; tag records 22261 (serial gaps 0) = 237.45 s
+tap stream RMS (L,R) over the whole tap:
+  in0     4761.2   4551.8
+  in1        0.0      0.0
+  dry0       0.0      0.0
+  dry1       0.0      0.0
+  wet0       0.0      0.0
+  wet1       0.0      0.0
+  ext0    4760.8   4551.4
+  out     4760.0   4550.7
+ADMA input = in0
+
+[planar] coarse ncc 0.9997; aligned span 70.00 s (sub-shift 0)
+  vs in0   L ncc 0.9993 R ncc 0.9991 mid 0.9993 side 0.9987
+  vs ext0  L ncc 0.9993 R ncc 0.9991 mid 0.9993 side 0.9987
+  vs out   L ncc 0.9993 R ncc 0.9991 mid 0.9993 side 0.9987
+
+[interleaved] coarse ncc 0.1539; aligned span 0.00 s (sub-shift -3)
+
+planar model -> in0: gain L 0.9992 R 0.9990; residual/in RMS L 0.0375 R 0.0434; residual max |.| 4169
+in0 -> out: gain L 0.9998 R 0.9997; (out - g*in)/out RMS L 0.0004 R 0.0004
