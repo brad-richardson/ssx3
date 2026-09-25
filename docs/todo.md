@@ -129,9 +129,11 @@ then 120 Hz simulation.
 
 - [ ] Brad listens to AU8's A→B/B/C clips (`~/dev/ssx3-work/AU8/`). Then turn sound on in the
       shipped envs (`PS2X_SOUND=1` in the iOS bundle env and the Odin `ps2x.env`), rebuild iOS.
-- [ ] Race music and SFX scene check vs PCSX2, and host-output level
-      (only tag-1 PCM has been compared). Rule: cut references from the same
-      capture timeline and verify NCC before sending an A/B.
+- [ ] **Race SFX on SPU2 hardware voices (AU8 E10):** in a PCSX2 Snow Jam race, SPU2 voices carry
+      an intermittent, near-mono layer (dry 625/545 RMS, −15.5 dB of output, 94% < 1 kHz; likely SFX
+      after T47's 1.75 MB SPU upload). Our HLE has no SPU voices, so races lack it. Needs cid-0
+      uploads (`sceSdVoiceTrans`), tag-3 `updatevoices` and an SPU2 ADPCM voice mixer. Clips
+      `~/dev/ssx3-work/AU8/AU8-R-race-*.m4a`. `local/research/AU8/NOTEBOOK.md` E10.
 - [ ] Below-full-speed behavior: host-stream underruns ran 1.1–1.7 M
       frames/min at ~0.3× (AU3 Part 2). Decide what the Odin should do
       until speed is up. `local/research/AU3/`.
