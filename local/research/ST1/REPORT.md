@@ -259,3 +259,13 @@ brief. Retire the CPU row-447 black line to E/G triage.
 - Scratch: `~/dev/ssx3-work/ST1/` (build, bin, run/par1+cpu1+par2 with
   logs, traces, `result.json`, sidecars + snaps; `configure.log`,
   `build.log`, `build2.log`, `suite.log`).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** I viewed the fixed run's `par2/frames/upload-latest.png` (race 00:00:12): no stripes, clean
+trees, snow and rock face. Mechanism: paraLLEl deinterlaced SSX 3's full-frame interlaced output
+(SMODE2 INT=1, FFMD=0) by weaving in the previous tick's field; `force_progressive = true` scans the
+whole buffer, as the CPU backend does. Det-hash unchanged. Pushed `ad27866` (sidecar diagnostic) and
+`92f9991` (fix) → fork `ssx3` **`92f9991`**. Caveat for other games: a field-rendering title
+(FFMD=1) would want the weave back; add an env override then. The Odin "stripes" item is closed
+pending the F2 Odin build.

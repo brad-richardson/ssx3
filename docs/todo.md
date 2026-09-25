@@ -131,8 +131,7 @@ then 120 Hz simulation.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
       N9's 1920×1080 screencaps); check the presenter's scale/aspect on
       Android. `local/research/N9/`.
-- [ ] Horizontal stripes on Odin screens (seen since N8D1, still on N9's
-      fork-tip APK). `local/research/N9/`.
+- [ ] Odin stripes: fixed by ST1 on the Mac; confirm in the F2 Odin build's screencaps.
 - [ ] Manifest `android:showWhenLocked` + `android:turnScreenOn` on the
       NativeActivity: N4 had them on `n2-android`, the fork manifest at
       `fb11e18` doesn't. Decide whether to port (the lockscreen check in
@@ -187,8 +186,7 @@ then 120 Hz simulation.
 
 - [ ] **F2 folded** (fork `ssx3` `96e9f45`, codegen promoted): Part 3 iOS running; Part 2 Odin waits for
       the Odin back on USB. Then NP1.
-- [ ] **Stripes are on the Mac too** (F2 paraLLEl frames, fine horizontal lines): chase on the Mac
-      (field/interlace or scanout offset; `PS2X_DEINTERLACE`?), no Odin needed.
+- [x] Stripes fixed (ST1, fork `92f9991`: progressive scanout); confirm on the Odin and iPhone builds.
 - [ ] **AU10 (running): folded tip hangs on the title with sound off** (GA1). Voice state must advance
       on guest time; det-hash must match sound on vs off. Until fixed, boots on `56a5e8a` need
       `PS2X_SOUND=1` (the device play envs already have it).
