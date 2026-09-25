@@ -86,6 +86,10 @@ then 120 Hz simulation.
 
 ## G — GS composite / GPU backend (paraLLEl-GS + Granite forks `ssx3`)
 
+- [ ] **GB8 paraLLEl as the Mac's standard backend (Brad, 09-24; muse, running):** speed CPU vs
+      GPU, determinism (det-hash equal?), frame parity, host threads. Then switch the default so
+      Mac boots are faster and exercise the Odin's renderer. `local/muse/prompts/GB8.md`.
+
 - [ ] **GB7C9 same-stream GPU comparison** for the damaged title/HUD
       glyphs on paraLLEl (Mac): rebuild the pinned G43 source, then compare
       CPU/paraLLEl packet input, the watched texture word (`63353341` at
