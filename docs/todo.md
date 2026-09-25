@@ -184,6 +184,12 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **Host split once LX1 passes (Brad, 09-25):** bradflix gets **4 boot slots** for correctness
+      work (det-hash, frames, counters, suites, builds; CPU and paraLLEl if LX1 Part 2 works); the
+      mini drops to **1 slot** reserved for performance benchmarks and Apple-only checks; the Odin
+      stays 1. Tooling: `p_lane_lease.py --host bradflix|mini`, `local/tooling/remote/bradflix_boot.sh`,
+      brief template default = bradflix; then update AGENTS.md Leases + the runbook.
+
 - [ ] **Running 09-25:** FP1 (guest pacing to 59.94, `PS2X_UNPACED=1` for speed runs), SJ1 (full race to
       the finish + Snow Jam 99 % re-test; R1 ≤ 1,000 s and R2 ≤ 700 s wall approved), UV1 (VIF UNPACK
       formats vs PCSX2 + DMA stall/REFS probe), VR1 (VU1 static recompile stage A, Opus), NP1 Part 2
