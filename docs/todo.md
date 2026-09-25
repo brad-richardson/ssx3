@@ -270,7 +270,12 @@ then 120 Hz simulation.
       frame-skip flag `[*(gp+0x2A74)+0x34]`. Measure with the E55 hash tap.
       `local/research/X3/`, `X2/`.
 - [ ] Save states for the recomp runtime (global/static state is the
-      obstacle); would cut boot-to-race time for every probe. Queue.
+      obstacle); would cut boot-to-race time for every probe. Guest threads resume from a guest PC
+      after the scheduler's checkpoint unwind (`runtime/ee_scheduler.h`), so no host stacks need
+      saving. Proposed to Brad 09-25 as an Opus spike (save at t2000, load, det-hash equal to a
+      straight run through t2400); awaiting his OK.
+- [ ] Run-speed tooling (proposed 09-25): shared ccache for lane builds (not installed); cached
+      baselines per (fork, codegen, VU1, env) pin so lanes boot only the candidate.
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation preference
       and drop its stale GameCube-era work-queue snapshot.
 - [ ] Brad: bradflix (x86_64, 14 cores, 62 GB) as the Android build host,

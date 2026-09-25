@@ -415,3 +415,12 @@ known gaps: Q3's empty-card create flow (B3 showed no offer through
 results/Replay; the Save Records row on an empty card untested), and the
 7 changed bytes uninterpreted (tail runs only). 9 boots total (B1, B3, B5,
 B6, P1, P3, P4, R1, R2), 1 build, all receipts in `~/dev/ssx3-work/MC1`.
+
+## Orchestrator gate, Part 3 (2026-09-25) — lane closed
+
+**Pass.** Verified: R2's card `diff -r` equal to the pristine seed; R1's card equal to P4's written
+card after the reload boot; "Save failed…" dialog viewed (`snap-020662t`). Saving is safe to use on
+devices. Residual risk is the game's own: if the app is killed or storage fills between the deletes
+and the writes, the SET side (options/records) is lost, the same as pulling a real card mid-save;
+the GAM side is never touched by Save Records. Open, low priority: the empty-card create flow and
+the 7 footer bytes.
