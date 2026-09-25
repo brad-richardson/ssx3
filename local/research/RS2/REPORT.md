@@ -115,3 +115,10 @@ if MISSING, make it first. Candidate: one ssx3_boot.py boot + compare.`
     `put`/`compare` would still work if a lane boots one by hand.
   - G4. `compare --min-tick` defaults to the pins' `stop_tick`; overrun
     tails beyond it are ignored by design (F5's settle shape).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Re-ran `list` and `compare` myself: S1 → IDENTICAL (rc 0), and F5's B4 (4×+hi-res+pipelined)
+→ IDENTICAL against the 1× key, as F5 found. Adopted the runbook text into `docs/orchestration.md`.
+Follow-up (small, queued): `baseline.py pins --fork-wt … --build-flags …` that computes the pins JSON
+(including the VU1 set hash, G2) so lanes never hand-write it; exercise `make` on the next fork tip (G1).

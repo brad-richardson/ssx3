@@ -146,6 +146,12 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   where Android's NDK doesn't (F4: VU1 chain recursion crashed the Odin at 512 frames). Anything with
   deep or chained calls gets a small-stack test (512 KB) on the Mac before a device build.
 
+- Boots and controls: use `local/tooling/boot/ssx3_boot.py` (never copy a driver into a lane). Controls
+  are cached: `local/tooling/boot/baseline.py get --pins PINS` prints the control dir (rc 2 `MISSING`);
+  if missing, `make --pins PINS --runner R` once, then the lane boots only its candidate and runs
+  `compare --key K --cand DIR`. Brief line: `Control: baseline key <K> (pins <path>); candidate: one
+  ssx3_boot.py boot + compare.` (RS2)
+
 - bytesize builds run over a held, foreground ssh: WSL stops the Ubuntu distro ~1–2 min after the last
   `wsl.exe` client disconnects, killing `&`/`setsid` jobs (F5 G5). Background the ssh on the mini instead.
 

@@ -277,6 +277,8 @@ then 120 Hz simulation.
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
+- [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real
+      `make` on the next fork tip.
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation preference
       and drop its stale GameCube-era work-queue snapshot.
 - [ ] Brad: bradflix (x86_64, 14 cores, 62 GB) as the Android build host,
