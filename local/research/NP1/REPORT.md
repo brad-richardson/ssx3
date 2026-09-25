@@ -204,3 +204,12 @@ python3 local/research/NP1/phases.py local/research/NP1/logs/P1
 python3 local/research/NP1/buckets.py local/research/NP1/reports/p1-self-comm-sym.txt --appendix
 python3 local/research/NP1/callers.py ~/dev/ssx3-work/NP1/p1-callee-full.txt '<regex>...'
 ```
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass.** Odin race frame on F2 (120.8 ms, GameThread-bound): VU1 execute 62.8 + hazard 25.7 ms
+(73 %; hazard was 70 ms before E57), libc/kernel 37.9, PLT 4.4 ms (intra-`.so`), guest code 1.9.
+The arbiter copies are dead (≈ 0.4 ms). Real targets: `__memset_aarch64_nt` 3.9 % called from
+VU1/VU0 execute (≈ 4.7 ms, zeroing per execute), `@plt` 4.4 ms, and GameThread→GsWorker handoff
+(`notify_one` 3.7 %, `syscall` 4.1 %). Part 2 released with three bounded changes (below). VU1
+execute (63 ms) goes to a VU1 static recompile lane (VR1).

@@ -13,3 +13,10 @@ Review `docs/research/review-2026-09-25-fable.md` §3 rank 2 + "Brief sketch, ra
 Candidate from the review: `-Wl,-Bsymbolic` (and/or hidden visibility) on the Android `.so` link, plus replacing the GIF arbiter's `resize`+`memcpy` if the callers point there. One APK (fork branch `np1-link` from fork `ssx3` tip; no push), two clean race runs ABBA vs F1's APK, thermal ≤ 2 before each.
 
 Rules: text only in git; never push; runner-dir check empty for any fork edit; scratch `~/dev/ssx3-work/NP1/` ≤ 5 GB; bytesize one heavy job at a time. First failure: stop, save the error, hand back. Budget Part 1: 1 h.
+
+## Part 2 as released (orchestrator, after the Part 1 gate)
+Fork branch `np1-link` from fork `ssx3` **`0ed07c4`** (no push). Up to three commits, each named in the report with before/after profile share:
+1. **`-Wl,-Bsymbolic`** on the Android `.so` link (Gradle/CMake for the Android target only; cite the file).
+2. **The memset in VU1/VU0 execute:** find what `VU1Interpreter::execute`/`run` (and VU0) zero on every call (`lsp` + the fp callers from Part 1); if it's a per-execute clear of a large struct/array that can be skipped or narrowed without changing results, do that. It must stay bit-exact: run E57's `local/research/E57/check.py` gate on the Mac (suite + 2,400 det-hash lines + GS digest vs `0ed07c4`) before any APK.
+3. **Handoff wakeups:** only if the Part 1 callers show `notify_one`/futex per GIF packet on GameThread, batch the wakeup to once per drain/vsync; same bit-exact gate. Otherwise skip and say why.
+Then one APK (F2 recipe, bytesize), two clean Odin race runs **ABBA vs F2's `a3d26b56`** (4 runs: A B B A; thermal ≤ 2 and battery ≥ 20 % before each; never toggle the screen), then reinstall **Brad's play build `a3d26b56`** + `deploy-odin.sh` at the end unless the new APK is faster by more than run-to-run spread — in that case leave F2 installed anyway; the orchestrator decides the play build. Append `## Part 2`; commit `[NP1] Part 2 …`. Budget 2 h.
