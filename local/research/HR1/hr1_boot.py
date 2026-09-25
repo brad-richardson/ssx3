@@ -153,8 +153,10 @@ def main():
     for kv in filter(None, args.extra_env.split(',')):
         k, v = kv.split('=', 1)
         env[k] = v
-    if args.mode == 'det' and args.dump_ticks:
+    if args.dump_ticks:
         env['PS2X_FRAME_DUMP_ONCE_TICKS'] = args.dump_ticks
+        env['PS2X_PRESENT_SHARE_DUMP_TICKS'] = args.dump_ticks  # zero-copy path (GL texture dump)
+        env['PS2X_FRAME_DUMP_DIR'] = str(frames_dir)
     if args.mode == 'det':
         env.update(PS2X_DET_HASH_EVERY='1', PS2X_FRAME_DUMP_DIR=str(frames_dir),
                    PS2X_SND_LOG=str(lane / 'snd.log'),

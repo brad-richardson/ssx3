@@ -151,3 +151,15 @@ Zero-copy plan notes so far (for the report):
 - Brad's GameCube "3x + 75 % display": paraLLEl output is 1x or 2x linear only (X4+hires = 2x2
   samples → 1024x896; X8/X16 add AA on top of 2x); 896 lines ≈ 83 % of a 1080p panel, so
   X4+hires is the nearest match; there is no 3x.
+
+## 15:15 RESUMED (active time used before pause ≈ 40 min; box now ends ≈ 17:36)
+- Hold 1 (15:16-15:21, exclusive, quiet host load 2-6, runner-hr1 `15c5348d…`): A 1x 14.16 vs/s,
+  B 4x+hires sync 13.24, C 4x+hires zero-copy sync 13.33 (GameThread 81 %: the blit fence still
+  waits for all prior rendering). Receipt `mac-cost.md` (below).
+- Hold 2 queued from 15:22 (other lanes resumed; waiting for all four slots).
+- Mac pipelined smokes (1 slot): pipelined readback frame t2100 correct (trick counter 210 vs 220
+  = the expected one frame of latency); zero-copy + pipelined GL texture dump at t2100 is
+  **RGB byte-identical** to the pipelined readback frame (md5 e56d4c59… both).
+- iPad (4825123 build): 1x pipelined 10.90 vs/s (98 % GameThread) vs 1x sync 10.31; 4x+hires
+  pipelined repeat 10.40 (first 10.49). One 1x-pipe launch hit a devicectl transport error
+  (CoreDeviceError 1010, app never started); relaunched once, fine.
