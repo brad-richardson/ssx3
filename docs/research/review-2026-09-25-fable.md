@@ -248,3 +248,12 @@ dispatch sites; the VU1/VU0 budgets; the `__APPLE__` sites in paraLLEl-GS and Gr
 "nearest writer" can be on a non-dominating path, so its counts bound the problem, they do not
 prove a site safe. Not verified: whether `SLUSOVF.BIG` holds code; the PLT callers; whether
 PCSX2's UNPACK V2/V3 write z/w (check `Vif_Unpack.cpp` before briefing suspect 5).
+
+## Orchestrator adoption (2026-09-25)
+
+Adopted as written. Do-now items launched: SB1 (§2), GA1 (§1 suspect 1, Part 1), CT1 (§1 suspects
+2–4 + §6 items 1, 2, 5; the orchestrator confirmed `SLUSOVF.BIG` holds `overlay.dat`, a relocatable
+MIPS ELF), GB9 Part 1 (§4 knob 1). NP1 (§3 rank 2) and knob 2 wait for the Odin (F1 Part 2 holds
+it). Process §5 #1: the watcher is restarted every turn and "never end a turn with panes working
+and no watcher" is in the runbook and memory; the looping watcher + dead-man is queued with the
+lease FIFO. Models from §6 item 6 are now in `docs/facts.md`.

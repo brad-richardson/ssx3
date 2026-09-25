@@ -31,6 +31,12 @@ orchestration lessons in `docs/orchestration.md`.
   The Ghidra sweep CSV can merge getter clusters into one function (e.g. `0x396b40` inside
   `sub_00396958`; `0x3c9520`/`0x3c95f0` inside `sub_003C9420`). (E46, E56, AU3)
 
+- `DATA/CONFIG/SLUSOVF.BIG` is a BIGF archive of `overlay.dat` (0x1903ac B, a relocatable MIPS
+  ELF: EE code overlay) + `config.dat`. It was unreachable before AU9's `0x3E3968` fix (the
+  file-table bsearch missed it); whether the route now loads/executes it is CT1's question.
+- The game's file table is qsort-ed with comparator `0x3E3968` (`dsubu` + `bltz/bgtz`); with
+  32-bit sign branches, bsearch misses `banks.inf` and 5 other files, so no SFX banks load. (AU9)
+
 ## Runtime semantics and builds
 
 - FP model: `-ffp-contract=off` (clang fuses MADD otherwise); EE thread RTZ + FZ like PCSX2.
@@ -47,6 +53,16 @@ orchestration lessons in `docs/orchestration.md`.
 - `PS2X_FRAME_DUMP_ONCE_TICKS` accepts three entries; gfx-stats `top` is (FRAME.fbp,
   PRIM.type); E43/MPG logs flush every 128 lines, so SIGTERM drops the tail. (GB6, E47)
 - Replay and `ps2x_tests` are desktop-only; Android sets `PS2X_BUILD_TEST=OFF`. (N8D7M12)
+
+- Models the fixes rely on (RR1/RV3): PATH3 data queued while masked is released one EOP packet per
+  `MSKPATH3 0` window; the GIF arbiter still stable-sorts a drain by path (GA1 measures
+  inversions); DMA completes at the CHCR store; chain walker has a runaway guard, not a 4096 cap;
+  VU1 runs with a 65,536-cycle budget per program (cap hits = a bug, PCSX2 max 23,540), VU0 4,096;
+  INTC dispatched: VBlank 2/3, timers 9–12 only. The CPU GS backend lacks dither, mip/LOD,
+  COLCLAMP, AA1, SCANMSK: it is **not a pixel reference**; PCSX2 gsrunner on our stream is. (RV3)
+- Mac GS default is paraLLEl (`PS2X_GS_BACKEND=parallel`, `GRANITE_VULKAN_LIBRARY=
+  /opt/homebrew/lib/libvulkan.1.dylib`, build `PS2X_GS_SHADOW_PARALLEL=ON`); det-hash is
+  identical to the CPU backend. Speed boots are unpaced: ratios > 1 mean headroom. (GB8, F1)
 
 ## Odin / Android / GPU
 

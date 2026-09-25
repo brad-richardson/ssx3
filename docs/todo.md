@@ -184,6 +184,17 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **RV3 Fable review adopted (09-25, `docs/research/review-2026-09-25-fable.md`).** Running:
+      SB1 (sign-branch tripwire), GA1 (arbiter drain-order inversions), CT1 (coverage, VU1 caps,
+      INTC, the SLUSOVF overlay), GB9 P1 (hier binning on the Mac). Queued: **NP1** Odin
+      call-graph profile + `-Wl,-Bsymbolic`/arbiter copies (after F1 Part 2 frees the Odin);
+      `PGS_DESC_PATH=plain` one-replay check on the Odin; VU1 static recompile stage A only if
+      the Odin still spends ≥ 60 ms in VU1 after E57; VIF UNPACK V2/V3 z/w check vs PCSX2
+      `Vif_Unpack.cpp`; REFS / D_CTRL STS-STD counter; fix `rr1_cap2gs.py` blank frames after
+      tick 1608 (PCSX2 gsrunner is the pixel reference); `sbr-census.py` after each regen;
+      lease FIFO for exclusive claims + builds that wait on an exclusive lease; read
+      `noteVuRun`/`noteUnhandledRpc`/coverage at every device gate.
+
 - [ ] **Frame pacing:** on the F1 fold the Mac runs menus at 1.287× (guest faster than real time).
       Pace the guest to 59.94 Hz when it can outrun it (Brad's play and audio sync need it; speed
       runs keep an unpaced dev knob). Check what the main-thread "pacing sleep" does today (E61).
