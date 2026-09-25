@@ -264,7 +264,7 @@ Host changes (before = pristine seed SHAs):
 | File | Size | Before → after SHA | Verdict |
 |---|---|---|---|
 | `SET0001/BASLUS-20772-SET0001` | 3276 → 3276 | `4a31a2d7…002f1` → `9b3db142…15fcac` | **7 bytes differ** (runs 3249–3251, 3265–3266, 3272–3273), mtime bumped |
-| `SET0001/icon.sys` | 964 | unchanged (`eab22574…`) | rewritten byte-identical (`cmp` clean), mtime bumped |
+| `SET0001/icon.sys` | 964 | unchanged (`dddf2d9c…ee13`) | rewritten byte-identical (`cmp` clean), mtime bumped |
 | `SET0001/ssx1.ico` | 73144 | unchanged (`5f8b5a92…`) | rewritten byte-identical, mtime bumped |
 | `GAM0001/*` (all 3) | — | unchanged | byte-identical (`cmp` clean), mtimes untouched |
 
@@ -343,3 +343,75 @@ verdict stands. Open: reload of the written card and the Yes-on-read-only failur
 (2 boots). Note for Brad: the game deletes the SET side before rewriting it, so a failed write
 mid-save would lose options/records (never the GAM side); Part 3's read-only boot shows how that
 failure looks.
+
+## Part 3 — round trip passes; read-only save fails cleanly with a dialog
+
+Same build, same scratch-only rules. 2 boots used (R1, R2). Also fixes
+the Part 2 gate's label slip (SET `icon.sys` SHA is `dddf2d9c…`, not the
+GAM one).
+
+Outcome: **(1) R1 reload passes.** Booted a fresh copy of P4's written
+card (SET `9b3db142…`, never booted in place — P4's preserved copy
+re-verified byte-identical after): autoload reads the written SET data at
+its exact size with zero error results, no corruption/format prompt at
+logo/menus (viewed), the full race runs to results, and the Top 5 table
+is identical to the seed's (BOB 02:57 … RYAN 03:27). **(2) R2
+write-failure behaves correctly.** Yes on a `chmod -R a-w` card: the HLE
+returns Delete → Denied (game aborts the delete series after the first),
+Mkdir → OK (trivially — the dir already exists), Open → Denied ×2, no
+Writes attempted; the game shows "Save failed. An error occurred while
+saving game data to memory card (PS2) in MEMORY CARD slot 1." + Continue,
+then resumes the card-poll loop with no hang (`bound=target`, normal
+pace). The card is byte-identical to the pristine seed after (the failed
+delete means nothing was removed); permissions restored and re-tested.
+No fix (no mechanism named: Denied is the correct code and the game
+handles it; the delete-before-rewrite window the gate noted is game
+behavior — on a truly read-only host the deletes fail first, so nothing
+is lost).
+
+| Boot | Card | Route | Result |
+|---|---|---|---|
+| R1-reload | fresh copy of P4's written card (`--mcsrc run/P4-saveyes/mc0`) | r1saverec (43) | target t23010, 1172 s; zero errors; Top 5 identical; card still == P4 written |
+| R2-writefail | fresh seed copy, `chmod -R a-w` | r1saveyes (44) | target t23235, 1187 s; Delete/Open Denied, "Save failed." dialog, no hang; card == pristine seed; perms restored |
+
+Both: zero FATAL, `targets=0`, E56 four RPCs, sound live, all presses
+fired; parallel (slots 1/2); 10 s snapshots.
+
+R1 pass criteria (brief §1): no corruption/format prompt ✓ (logo 297t +
+menus 891t viewed, full route to results), zero error results ✓ (full
+`[MC]` Sync scan), options + Top 5 identical ✓ (19695t: BOB/Griff 02:57,
+JUN/Moby 03:01, DEAN/Kaori 03:10, ERIC/Allegra 03:18, RYAN/Mac 03:27).
+The Records screen needs the long route (no menu shortcut found), so R1
+ran the full race (≤ 1800 approved).
+
+R2 detail: after cross@20650t confirmed Yes — 20498t Delete → Denied
+(first delete only; P4's 4-delete series aborted), 20662t Mkdir → OK +
+2× Open → Denied (no Writes, no Closes for them), then the re-poll loop
+resumes (GetDir/Open/Read-964/Close at 20893t, 21142t, …). Screenshots:
+"Save failed…" dialog up at 20662t and 20819t (Continue dismissed by
+later crosses). Card diff vs pristine seed: empty.
+
+```sh
+python3 mc1_boot.py --route r1saverec --mcmode seed --mcsrc run/P4-saveyes/mc0 \
+  --runner bin/runner-mc1 --label R1-reload --wall 1800 --coverage-tick 16000 \
+  --stop-tick 23000 --snap-period 10
+python3 mc1_boot.py --route r1saveyes --mcmode readonly --runner bin/runner-mc1 \
+  --label R2-writefail --wall 1800 --coverage-tick 16000 --stop-tick 23200 \
+  --snap-period 10
+```
+
+Part 3 budget: 0 builds, 2 boots, ~1 h. Never pushed. Pristine seed
+re-verified 6/6; E55D16 original untouched (read-only throughout all
+three parts). Text in git: this section + the one-line SHA fix.
+
+### MC1 close-out (all three parts)
+
+Saving works and Brad's save is safe: Single Event play never writes;
+the explicit Save Records path deletes + recreates the SET side with
+exact sizes and "Save complete."; the written card reloads with no
+complaint and an identical Top 5; a host write failure surfaces as a
+clean in-game "Save failed." dialog with the card untouched. Remaining
+known gaps: Q3's empty-card create flow (B3 showed no offer through
+results/Replay; the Save Records row on an empty card untested), and the
+7 changed bytes uninterpreted (tail runs only). 9 boots total (B1, B3, B5,
+B6, P1, P3, P4, R1, R2), 1 build, all receipts in `~/dev/ssx3-work/MC1`.
