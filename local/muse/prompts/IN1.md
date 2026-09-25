@@ -1,0 +1,9 @@
+# IN1 Part 1 — do the missing VIF1 interrupts matter? (muse, 1.5 h, Mac, evidence only)
+
+CT1 (`local/research/CT1/REPORT.md` Q4 + orchestrator gate): SSX 3 registers INTC 5 (VIF1) handler `0x362340` and INTC 7 (VU1) handler `0x3623a8`; our runtime never dispatches either. The VIF1 handler checks VIF1_STAT bit 10, writes 8 to VIF1_FBRST (STC), and increments the word at `0x5059d8+0x80`. The VU1 handler is a no-op.
+
+Questions (base fork `ssx3` `56a5e8a`; worktree `~/dev/ssx3-work/IN1/PS2Recomp`, branch `in1-intc`; tools `local/tooling/ee/{ee-at,ee-func,ee-xref,ee-label}` for every address you name):
+1. **Readers:** who reads `0x5059d8+0x80` (0x505a58)? Static: `sub_00375A08` and `sub_00376938` use base `0x5059d8`; list every load at offset 0x80 from that base (follow the register, don't guess), and what the code does with the value (frame pacing? a wait loop? a debug stat?). Cite `ee-at` excerpts.
+2. **i-bit use:** on the F1 det route, how many VIFcodes with the i-bit set (bit 31 of the VIFcode) does VIF1 process per vsync, and at which ticks? Add a default-off counter (`PS2X_VIF1_IBIT_LOG=1`, one line per vsync with the count) in `ps2_vif1_interpreter.cpp`; one det boot to t2400 (GB8 paraLLEl env, I26-FAST, empty mc0, `PS2X_DETERMINISTIC=1`, one mini slot).
+3. **PCSX2 reference:** does PCSX2 raise INTC 5 on SSX 3's race (T48/T65 traces or AU9's `au9_patch.py` hook pattern on bytesize: count `hwIntcIrq(INTC_VIF1)` over 30 s of race)? Optional if (1) shows no reader.
+Hand back a table per question and a recommendation (model INTC 5 + i-bit stall / not needed). No behaviour change. Budget: 1 build, ≤ 2 boots, 1.5 h. Never push; runner-dir check empty; text only in git. Deliverable `local/research/IN1/REPORT.md`; commit `[IN1] Part 1 …` (`git add -f`, `Orchestrated-By: Muse Code`), no push.
