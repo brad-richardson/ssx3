@@ -393,3 +393,11 @@ cat local/research/F2/build.sh | ssh bytesize 'wsl ... cat > /home/brad/f2/build
 ssh bytesize 'wsl -d Ubuntu -- bash -lc "bash /home/brad/f2/build.sh"'  # BUILD FAILED in 30s (one held ssh)
 clang /tmp/u64check.c -o /tmp/u64check && /tmp/u64check  # Darwin: u64-is-ull=1
 ```
+
+## Orchestrator note (Part 2 blocker, 2026-09-25)
+
+Fixed by the orchestrator: `coverageTick()`'s lambda now declares `-> uint64_t` (fork `ssx3`
+**`2fdde02`**, fast-forward from `92f9991`; one line, runner-dir diff empty). Darwin's `uint64_t` is
+`unsigned long long`, so Mac/iOS never saw it. Lesson for the runbook: a fork change that only Mac
+built must get an Android compile (bytesize) before it's called folded. Part 2 re-released on
+`2fdde02`.

@@ -116,6 +116,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   keeps it ≥ 20 %. Workers never toggle the Odin screen/keyguard (a wake test locks it behind
   the PIN, 09-25); read `dumpsys battery` and report.
 
+- A fold only built on the Mac isn't proven for Android: Darwin's `uint64_t` is `unsigned long long`,
+  Linux's is `unsigned long` (F2's lambda broke the NDK build). Compile the Android target before
+  calling a runtime fold done.
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.
