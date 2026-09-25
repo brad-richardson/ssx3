@@ -127,3 +127,11 @@ python3 ../ssx3/local/research/GB8/gb8_hashdiff.py --base run/C0 --cand run/C2  
 cp b0/ps2xRuntime/ps2EntryRunner bin/runner-nocache; cp b2/ps2xRuntime/ps2EntryRunner bin/runner-cached
 rm -rf b0 b1 b2 b3 b4 b4b
 ```
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Re-read both runners myself: identical SHAs (`119389a7…`, also F5's `runner-det`), and
+`ccache -s` shows 614/614 direct hits on the last build. Cold 272 s → warm 78 s. Runbook text adopted
+(condensed) into `docs/orchestration.md`. Follow-ups: the default `--pgs` points at F2's lane scratch
+(`~/dev/ssx3-work/F2/parallel-gs`); move it to a canonical `~/dev/ssx3-work/parallel-gs-ssx3` checkout
+before anyone cleans F2. bradflix gets the same cache in the host split (G3).

@@ -277,6 +277,8 @@ then 120 Hz simulation.
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
+- [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
+      `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
 - [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real
       `make` on the next fork tip.
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation preference

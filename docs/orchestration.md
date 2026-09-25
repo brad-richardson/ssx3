@@ -146,6 +146,11 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   where Android's NDK doesn't (F4: VU1 chain recursion crashed the Odin at 512 frames). Anything with
   deep or chained calls gets a small-stack test (512 KB) on the Mac before a device build.
 
+- Mac builds: `local/tooling/build/mac_build.sh <fork-worktree> <build-dir> [--det]` (the recipe of
+  record behind a shared ccache; ~80 s warm vs ~270 s cold, byte-identical runners; `--no-cache` for
+  controls). `ccache -z` before a measured build; never `ccache -C` without asking (it wipes every
+  lane's entries). (RS1)
+
 - Boots and controls: use `local/tooling/boot/ssx3_boot.py` (never copy a driver into a lane). Controls
   are cached: `local/tooling/boot/baseline.py get --pins PINS` prints the control dir (rc 2 `MISSING`);
   if missing, `make --pins PINS --runner R` once, then the lane boots only its candidate and runs
