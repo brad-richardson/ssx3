@@ -131,10 +131,10 @@ then 120 Hz simulation.
 
 ## A — audio
 
-- [ ] Brad listens to the AU7 clip (`~/dev/ssx3-work/AU7/AU7-menu-tag1.m4a`;
-      menu tag-1 now equals PCSX2 to 1 LSB). His AU6 notes ("missing a few
-      tracks, a little more distorted") predate the PINTEH fix and a fair
-      aligned reference. `local/research/AU7/`.
+- [ ] **AU8 exploratory audio session (running, Opus 2 h):** Brad (09-24): both our and PCSX2's
+      tag-1 clips sound incomplete/"discordant"; 36 kHz confirmed best of 36/44.1/48 k. Lead:
+      tag-1's IOP handler `SNDIOP_mix` also mixes an IOP 24 kHz slice (`MIX_audioslice`) that our HLE
+      never plays (AU2 table). `local/muse/prompts/AU8.md`.
 - [ ] Race music and SFX scene check vs PCSX2, and host-output level
       (only tag-1 PCM has been compared). Rule: cut references from the same
       capture timeline and verify NCC before sending an A/B.
