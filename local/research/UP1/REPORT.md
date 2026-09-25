@@ -251,3 +251,14 @@ mechanism live:
 - Scratch (not committed): `~/dev/ssx3-work/UP1/{build,build*.log,
   suite-*.log,run-*,up1_boot.{py,sh},up1_census.py,commits.txt,diffstats.txt,
   namestat.txt}`; worktree branch `up1-ports` (local, no push).
+
+## Orchestrator gate, Part 2 (2026-09-24)
+
+**A.** Read Part 2 and commit `e504b7f6`; PNGs moved out of git (`~/dev/ssx3-work/UP1/frames/`).
+The port's test fails before and passes after; on I26-FAST the pklog (1,989,672 packets), gfx-stats
+and frames are byte-identical before/after (no regression). The stim-armed pair shows the trigger in
+real traffic at the loading screen (overrun bytes used to be parsed as VIF commands and issued VU1
+work). Budget: 4 boots vs 2 because of the worker's `--no-stim` slip; the extra pair was not reused
+as a speed or route result. Folded by the orchestrator: cherry-picked onto `f2ec588` as `d711506`,
+Release build, suite **595/595** from the worktree root, runner-dir diff empty, pushed to fork
+`ssx3`. Rank 2 (gs_cache goldens) not done: stays in the todo.

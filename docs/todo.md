@@ -127,10 +127,8 @@ then 120 Hz simulation.
 
 ## A — audio
 
-- [ ] **AU8 exploratory audio session (running, Opus 2 h):** Brad (09-24): both our and PCSX2's
-      tag-1 clips sound incomplete/"discordant"; 36 kHz confirmed best of 36/44.1/48 k. Lead:
-      tag-1's IOP handler `SNDIOP_mix` also mixes an IOP 24 kHz slice (`MIX_audioslice`) that our HLE
-      never plays (AU2 table). `local/muse/prompts/AU8.md`.
+- [ ] Brad listens to AU8's A→B/B/C clips (`~/dev/ssx3-work/AU8/`). Then turn sound on in the
+      shipped envs (`PS2X_SOUND=1` in the iOS bundle env and the Odin `ps2x.env`), rebuild iOS.
 - [ ] Race music and SFX scene check vs PCSX2, and host-output level
       (only tag-1 PCM has been compared). Rule: cut references from the same
       capture timeline and verify NCC before sending an A/B.
@@ -180,14 +178,8 @@ then 120 Hz simulation.
         line, commit with explicit paths, push, close the pane.
       - Worker permission preflight in the launchers: dry-run the edits/SSH a brief needs.
       - Nightly (or per-fold) Android + Mac build from the three fork tips to catch drift.
-- [ ] **UP1 upstream harvest (next, read-only first):** upstream
-      `ran-j/PS2Recomp` `75d729c` (09-19 squash of `iop-emulator`, 139 files:
-      EE scheduler refactor, IOP emulator, GS architecture, texture caching
-      fix, MMI translation fix, `SET_GPR_ZE32`, analyzer entry detection)
-      vs our base `14b1e5cb`. Classify each item (already fixed / needed /
-      irrelevant); port 2–4 targeted fixes with tests (candidates: MMI
-      translation, texture caching). paraLLEl-GS upstream has nothing new;
-      Granite's 16 small commits only if Android builds need them.
+- [ ] UP1 leftover: upstream `gs_cache` swizzle goldens (Rank 2, tests only) adapted to our
+      CPU backend. `local/research/UP1/`.
 - [ ] Speed re-baseline after the sound fold (sound HLE is default-on):
       clean Mac numbers at `fb11e18` before quoting any speed.
 - [ ] 120 Hz simulation: scope once the Odin stock race is stable. X3's

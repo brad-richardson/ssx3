@@ -97,3 +97,13 @@ Gaps:
   36 kHz directly, so ours is slightly brighter than PCSX2/hardware above ~10 kHz. It's not a
   correctness issue, and it's labelled.
 - G4. Nobody has listened to the new clips yet.
+
+## Orchestrator gate (2026-09-24)
+
+**A.** Read the report, notebook and commits `1e699ceb`, `eb826cf3`. The verdict rests on guest-time
+PCSX2 data (SPU2 tap: final output = tag-1 read planar, block 0 → right, SNDDRV 3→4 phase, max 2 LSB
+over 70 s) and on our boot's host output matching the planar reading frame for frame. Sent Brad the
+A→B, B and C clips. Folded: `f2ec588` pushed to fork `ssx3` (fast-forward from `fb11e18`; suite
+594/594; runner-dir diff empty); then UP1's port on top, `d711506`. Open: channel order rests on
+PCSX2 only (G1); race/SFX paths unmeasured (G2); host plays 36 kHz without the 3→4 resample (G3,
+labelled); sound output still needs `PS2X_SOUND=1`. Brad's listen of the new clips is pending.
