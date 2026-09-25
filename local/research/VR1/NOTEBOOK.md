@@ -168,3 +168,13 @@ runners, their tests; SHAs stay in `binaries-sha.txt`). Kept: speed runners
 base/g/g2/g3/g4/g5, hash runners base/g4/g5, tests base/g4/g5, `gen-v2`, `build-gen-*`, all
 boot logs/results. VR1 scratch 39 GB → 7.3 GB; ssx3 total 109.8 / 200 GB. My captures ran
 ~2.5 GB each; I should have deleted each one after its check, as E57 did.
+
+## 11:40 last holds; stop on orchestrator request; write-up
+- F2 (load 3.4–4.0): s21-g5 21.82, s22-g4 21.27. G: s13-base 14.45, s14-g4off 14.97
+  (`PS2X_VU1_RECOMP=0` recorded in result.json) → the interpreter after the refactor is ≈ base.
+  H: s15-g4off 13.00 (load reached 9.9); s16-base abandoned by the load gate.
+- 11:41 orchestrator: pause exclusive holds 20 min (RD1, F3 need slots); skip further holds if
+  the data suffices. It does: all holder/boot processes stopped, no VR1 runners or leases
+  left (RD1 holds slot 1). E2 never ran.
+- Verdict for the report: g5 not shown to help (g4 22.30 vs g5 20.42 across E+F2, one
+  disturbed run), so the fold recommendation stops at g4 `1f51e48` + Gradle `6c2de6f`.

@@ -8,7 +8,7 @@ No push, no Odin, no devices.
 
 - **Stage A works and is bit-exact on the gate that can discriminate on this build.** SSX 3's
   VU1 code images become generated C++, one function per pair PC, keyed by XXH64 of the
-  code memory. Across all four candidates: suite 616/616, all 2,400 `[det-hash:v1]` lines
+  code memory. Across all candidates (r, g, g2, g3, g4, g5): suite 616/616, all 2,400 `[det-hash:v1]` lines
   equal to base `0ed07c4`, GS content equal per path. **100 % of VU1 cycles run in
   generated code** on the I26-FAST route to t2400. Total VU1 cycles are identical to the
   interpreter's (959,411,166).
@@ -25,7 +25,15 @@ No push, no Odin, no devices.
   (g2) → 62.5 % (g4). The decode, usage lookup, opcode switch and FMAC re-decode are gone.
   What's left is the scoreboard (`commitReadyPipelines`) and the FMAC exact-result
   arithmetic. That's stage B territory.
-- **Recommendation:** RECO_TBD
+- **Recommendation:** **ready for an Odin speed pair**; the orchestrator decides. Fold
+  `0ed07c4..1f51e48` plus `6c2de6f` (Gradle); leave g5 `8cea160` out (bit-exact, not shown to
+  help). Build the APK with `-Pps2xVu1RecompDir=<copy of gen-v2>`: game-derived, so copy it privately to
+  bytesize and never into a repo. Run a clean pair vs the F2 APK. Odin VU1 is
+  62.8 + 25.7 of 121 ms (NP1), and the Mac game thread is now just as VU1-bound
+  (82.5 % base), so the Mac 1.44× is a fair first guess at the relative VU1 gain there.
+  NP1 Part 2's memset/`-Bsymbolic` work is orthogonal, with a trivial textual overlap in
+  `ps2_vu1.h`. Before shipping to players: dump images on more routes (other courses) or
+  accept interpreter fallback there.
 
 ## Design
 
@@ -53,6 +61,10 @@ Seven images for boot → race on I26-FAST.
 | g3 | `1b09a49` | FMAC result helpers always-inline (verbatim move) | 5 files, +320/−299 (verbatim move) |
 | g4 | `1f51e48` | chained pairs via `musttail` (emitter + `recompChainReady`) | 4 files, +39/−6 |
 | — | `6c2de6f` | Android `-Pps2xVu1RecompDir` | 1 file, +4/−1 |
+| g5 | `8cea160` | `advanceOneCycle` inline, commit gate at call sites | 2 files, +17/−12 |
+
+Branch total `0ed07c4..8cea160`: 12 files, +2361/−1913 (most of it verbatim moves into
+the three `*_impl.h` headers).
 
 Runner-dir guard (`git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner`) is empty at every
 commit. Commits carry `Orchestrated-By: Claude Code`. Nothing outside VU1 files, CMake and
@@ -81,6 +93,7 @@ and ELF `1b49d05c…` read twice before each boot.
 | base vs g2 | 616/616/0 | equal | differs (as null) | EQUAL | 100 % |
 | base vs g3 | 616/616/0 | equal | differs (as null) | EQUAL | 100 % |
 | base vs g4 | 616/616/0 | equal | differs (as null) | EQUAL | 100 % |
+| base vs g5 | 616/616/0 | equal | differs (as null) | EQUAL | 100 % |
 
 **Strict check on the CPU GS backend** (`--backend cpu`, same hash runners; E57's gate as
 it was, whole-file SHA included), `check-cpu.txt`:
@@ -95,7 +108,7 @@ CPU backend the full GS stream, cross-path order included, is identical with gen
 code.
 
 Receipts: `check-gate.txt` (paraLLEl pairs), `check-null.txt`, `check-r.txt`, `check-cpu.txt`.
-Result: **BIT-EXACT** for r, g, g2, g3, g4 on the paraLLEl gate (no first differing tick),
+Result: **BIT-EXACT** for r, g, g2, g3, g4, g5 on the paraLLEl gate (no first differing tick),
 and strict BIT-EXACT for g4 on the CPU backend.
 
 ## Speed
@@ -129,6 +142,23 @@ own build runs. All eight runs were 10:51–11:01, with host load 2.6–4.2.
 | g (stage A as sketched) | 18.42 | 0.307× | 1.24× |
 | g3 (+ g2 + FMAC helpers inline) | 20.01 | 0.334× | 1.35× |
 | **g4 (+ chained pairs)** | **21.45** | **0.358×** | **1.44×** |
+
+Later holds (11:09–11:40; host load rose between runs, so these are weaker):
+
+| Hold | Runs (vsyncs/s) | Read |
+| --- | --- | --- |
+| E | s9-g4 23.32, s10-g5 19.01 (load 4.8 → 9.1 during g5) | g5 run disturbed |
+| F | s11-g5 14.03, s12-g4 11.68, load 70–130 | **void** (`run/void-*`) |
+| F2 | s21-g5 21.82, s22-g4 21.27 (load 3.4–4.0) | g5 ≈ g4 |
+| G | s13-base 14.45, s14-g4off 14.97 (load 2.7–3.6) | interpreter-only after the refactor ≈ base (1.04×) |
+| H | s15-g4off 13.00 (load reached 9.9 by its end); s16-base abandoned by the load gate | weak |
+
+g5 vs g4 (E + F2): means 20.42 vs 22.30, but g5's low run was disturbed. **g5 is not shown to
+help**, so it's not in the recommended fold. `g4off` is the g4 runner with
+`PS2X_VU1_RECOMP=0`, i.e. the fallback for images that aren't compiled in. Its clean pair
+with base (hold G) reads 14.97 vs 14.45, so the refactor didn't slow the interpreter. H was
+cut short when the orchestrator paused speed holds (RD1/F3 needed slots). All runs,
+including the extra g4 runs (overall g4 mean 21.87 across four), are in `speed-all.txt`.
 
 Base vs g4 is a clean ABBA (holds A and B, back to back). g and g3 ran ABBA against each
 other (holds C and D) in the same quiet 10-minute session, so their ratios to base cross
@@ -198,3 +228,30 @@ days, as E57 said.
   argument stand in for it.
 - VU0 still runs in the interpreter (the residual execUpper/decode rows in the g profiles).
 - Profiles are process-wide top of stack (`sample`), not per thread.
+- Generated code adds ~4 MB of machine code per image (Mac runner 135.1 → 162.7 MB), because
+  every one of the 2,048 pairs is emitted, including stale data in code memory. Emitting
+  only statically reachable pairs from observed start PCs would cut that; not done.
+- Scratch: VR1 grew to 39 GB against the 20 GB brief cap (2.5 GB per GS capture, not
+  deleted after each check). Pruned to 7.3 GB on the orchestrator's request (NOTEBOOK
+  11:18). The kept reference capture is `run/h-base-cpu/gs.cap`.
+
+## Commands and pins
+
+- Fork worktree `~/dev/ssx3-work/VR1/PS2Recomp`, branch `vr1-vu1-recomp` (`0ed07c4..8cea160`,
+  not pushed). Base source `~/dev/ssx3-work/VR1/base-src` = `git archive 0ed07c4`.
+- Builds: `~/dev/ssx3-work/VR1/build.sh base|gen hash|speed` (copy in this dir).
+  paraLLEl-GS `~/dev/ssx3-work/F2/parallel-gs` @ `19d93b2` (read-only), codegen
+  `~/dev/ssx3-work/codegen-ssx3` (`register_functions.cpp` `8ea8ed43…`), generated VU1
+  images `~/dev/ssx3-work/VR1/gen-v2` (7 files, SHAs `gen-v2.sha`). Binaries in
+  `~/dev/ssx3-work/VR1/bin/`, SHAs `binaries-sha.txt` (two reads match).
+- Regenerate images: boot any VR1 runner with `PS2X_VU1_RECOMP=0
+  PS2X_VU1_RECOMP_DUMP=<dir>` over the route to cover, then `cmake -S PS2Recomp -B <build>
+  -DPS2X_VU1_RECOMP_DIR=<dir>` (Android: `-Pps2xVu1RecompDir=<dir>`).
+- Suites: `cd ~/dev/ssx3-work/VR1/PS2Recomp && ../bin/tests-<c>-hash > ../suite-<c>.log`.
+- Hash boots: `vr1_boot.py --mode hash [--backend cpu] --runner bin/runner-<c>-hash --label
+  h-<c> [--env PS2X_VU1_RECOMP_STATS=1]`. Checks: `check.py --base run/h-base-1 --cand
+  run/h-<c> --base-suite suite-base.log --cand-suite suite-<c>.log` plus `gs_types.py
+  run/h-base-1/gs.cap run/h-<c>/gs.cap`.
+- Speed: `speed_hold.py hold<X> <start> <candA> <candB>`, then `speed_table.py run`.
+  Profiles: `vr1_boot.py --mode profile --runner bin/runner-<c>-speed --label p-<c>
+  --stop-tick 2000 --sample-at 1800 --sample-s 20`, then `profile_share.py`.
