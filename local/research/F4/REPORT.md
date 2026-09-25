@@ -386,3 +386,13 @@ Accepted as far as it goes: **Mac race 1.40× over F3** (B3). The Android APK st
 defined. Resume options, cheapest first: set the pool as a target property
 (`JOB_POOL_COMPILE` on the target that owns the vu1 sources) or pass `-j2` through the native build
 (`ninja -j2` on the configured dir); `-O1` for the vu1 TUs; or build the APK on bradflix (62 GB).
+
+## Orchestrator gate, Part 1 + 1b (2026-09-25)
+
+**Pass.** 12 commits on `ec2dbf1` (VR1 stage A, NP1 ×3, TC1 emitter, VU0 R ctor, two VU1 job-pool
+commits); guest-bit-exact vs F3 (2,429 ticks), 100 % VU1 cycles generated, suite 646/646, runner-dir diff
+empty; **Mac race 1.40× over F3** (B3); APK `1d711e70…` builds on bytesize with the target-level job
+pool (Android's CMake dropped the per-source form). Pushed `f4-fold` → fork `ssx3` **`8559ab9`**
+(fast-forward from `ec2dbf1`). Codegen: device builds use the F4 regen (`~/dev/ssx3-work/F4/codegen`,
+one-line vf0 difference); promotion to canonical waits until the lanes mid-gate on the current codegen
+(VB1, HR1, PF1, PX1, LX1) finish. Parts 2 (Odin) and 3 (iPhone) released.
