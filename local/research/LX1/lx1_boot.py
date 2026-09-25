@@ -88,6 +88,8 @@ def main():
     ap.add_argument('--coverage-tick', type=int, default=2400)
     ap.add_argument('--extra-env', action='append', default=[],
                     help='extra guest env KEY=VAL, verbatim into the container (repeatable); a VAL under /work/ is mkdir -p-ed on the host')
+    ap.add_argument('--gpu', action='store_true',
+                    help='LX1 Part 2: pass the bradflix iGPU into the container (--device /dev/dri/renderD128 --group-add 993)')
     args = ap.parse_args()
 
     if not LEASE_DIR.is_dir():
@@ -155,8 +157,10 @@ def main():
     cname = 'lx1-%s-%d' % (re.sub(r'[^A-Za-z0-9_.-]', '_', args.label), os.getpid())
     uid = os.getuid()
     cmd = ['docker', 'run', '--rm', '--name', cname,
-           '--user', '%d:%d' % (uid, os.getgid()),
-           '-e', 'HOME=/work', '-w', c_lane, '-v', '%s:%s' % (root, C_ROOT)]
+           '--user', '%d:%d' % (uid, os.getgid())]
+    if args.gpu:
+        cmd += ['--device', '/dev/dri/renderD128', '--group-add', '993']
+    cmd += ['-e', 'HOME=/work', '-w', c_lane, '-v', '%s:%s' % (root, C_ROOT)]
     for k, v in guest_env.items():
         cmd += ['-e', '%s=%s' % (k, v)]
     # NOTE: no xvfb-run: its Xvfb-ready handshake (SIGUSR1 + wait) hangs
@@ -177,11 +181,11 @@ def main():
              % (shlex.quote(c_runner), shlex.quote('%s/inputs/%s' % (C_ROOT, ELF_NAME))))
     cmd += [IMAGE, 'bash', '-c', inner]
 
-    result = {'label': args.label, 'mode': 'det', 'backend': 'cpu', 'host': 'bradflix',
+    result = {'label': args.label, 'mode': 'det', 'backend': guest_env.get('PS2X_GS_BACKEND', 'cpu'), 'host': 'bradflix',
               'fork_sha': fork_sha, 'image': IMAGE, 'image_id': image_id,
               'runner': str(runner), 'sha_reads': reads, 'stop_tick': args.stop_tick,
               'lease_holder': holder, 'sound': 'off', 'env': guest_env,
-              'load_start': os.getloadavg()}
+              'gpu': args.gpu, 'load_start': os.getloadavg()}
     proc = None
     stop_snap = threading.Event()
     shared = {'tick': 0}

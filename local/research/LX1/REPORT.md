@@ -661,3 +661,81 @@ run (tick 92), so all later EE FP rounded nearest on x86 only. Pin `fc0cc67` (sa
 (`5f32212 20377a3 b4cb476 fc0cc67`) in F5; follow-up: the identical fenv pair in `gs_replay_core.cpp:45-52`.
 Once F5 lands: the host split (bradflix 4 correctness slots, mini 1 for benchmarks). Part 2 (GPU headless
 in Docker) released now.
+
+## Part 1d follow-up: GS replay fenv pin (same turn)
+
+Per gate: fixed the identical latent pair in
+`ps2xRuntime/src/lib/gs/gs_replay_core.cpp:45-52` the same way
+(`ScopedReplayRtz` via `ps2_fpmode`, ok-gated shape kept,
+infallible now). Committed on `lx1-tz` both trees (mini
+`14ea352`, bradflix `41ccbab`, same tree `d4178cf…`), never
+pushed. Replay path inactive in all boots (no replay env), so
+no behavior change expected; the Part 2 build below includes
+it (fork_sha `41ccbab…` in P1/P2/P3 result.json).
+
+## Part 2 — GPU headless on bradflix (ANV)
+
+### 1. vulkaninfo (ssx3-lx1 container, renderD128 + group 993)
+
+- GPU0: `Intel(R) Graphics (ARL)` (Arrow Lake iGPU),
+  `DRIVER_ID_INTEL_OPEN_SOURCE_MESA`, Mesa 25.2.8
+  (`25.2.8-0ubuntu0.24.04.2`), apiVersion 1.4.318
+  (loader/instance 1.3.275). GPU1: llvmpipe (CPU, unused).
+- `descriptorIndexing = true`, `shaderInt16 = true`
+  (both devices), `subgroupSize = 32` (min 8, max 32).
+
+### 2. Parallel build + boots (all on lx1-tz tip 41ccbab)
+
+- Sources: `~/dev/ssx3-work/LX1/parallel-gs-19d93b2` @
+  `19d93b2` ("[GB9] PGS_HIER_BINNING knob"), Granite submodule
+  `166ba21a` (from `git clone --recursive` of
+  brad-richardson/parallel-gs + checkout). No network fetch at
+  build time (bundled vulkan-headers/volk; slangmosh embedded).
+- Build: new dir `build-parallel` (build-tzd flags mirrored:
+  Release, clang++, DIAG_TAPS=ON, DET_HASH_TAP=ON, UNITY=ON)
+  + `PS2X_GS_SHADOW_PARALLEL=ON` +
+  `PS2X_PARALLEL_GS_SOURCE_DIR=/work/parallel-gs-19d93b2`.
+  Configure 49 s; build 456 targets (~50 min wall — one
+  32-file game-code unity batch, unity_74, took ~25 min of
+  clang -O3 alone; same shape as build-tzd, unrelated to the
+  parallel flag — no Granite/ParallelGS in any public header).
+- Boots (lx1_boot.py `--gpu` = renderD128 + group 993; X via
+  the script's direct-Xvfb management, not xvfb-run — same
+  headful X+DISPLAY, established LX1 path; script extended
+  with `--gpu` + backend/gpu result fields, committed here):
+  - P1: cpu backend (same binary), stop 2200 → 2209 hashes.
+  - P2: `PS2X_GS_BACKEND=parallel`, PGS_HIER_BINNING unset,
+    stop 2200 → 2229 hashes, 120.6 s.
+  - P3: `PS2X_GS_BACKEND=parallel`,
+    `PGS_HIER_BINNING=force` → 2231 hashes.
+- `GRANITE_VULKAN_LIBRARY`: **unset** — system loader via
+  `init_loader(nullptr)` (`ps2_gs_parallel_backend.cpp:407`).
+- `[gs-path]` (P2 and P3 identical):
+  `hier_rule=hier-if-large hier_t2=2 hier_t4=4
+  subgroup_flat=wave32 subgroup_hier=wave32 vk11_subgroup=32
+  max_wg_inv=1024 desc=buffer desc_req=push+heap+buffer
+  sampler_feedback=on feedback_rt=off gpu=Intel(R) Graphics
+  (ARL)` — force ≡ unset on Linux, as the knob's parser
+  predicts (non-Apple auto = hier-if-large).
+- GB8 det-hash: **P2≡P1, P3≡P1, P3≡P2 over all 2209 common
+  ticks (1–2209)** — guest determinism unaffected by backend
+  or binning mode.
+- Frames (P2 snap dir, `fallback=0` real uploads, 512x448
+  RGBA): tick 1099 (`snap-001081t`, fnv `dc4b60c5`, 285 KB,
+  mean lum 133, stdev 59, 98% non-black) and tick 2107
+  (`snap-002104t`, fnv `8204c266`, 463 KB). Distinct hashes =
+  rendering progresses. Pulled to
+  `~/dev/ssx3-work/LX1/from-bradflix/P2/*.png` (+sidecars)
+  for viewing; boot.logs + result.json alongside.
+- No raylib/Xvfb blocker hit — no PS2X_HEADLESS analysis
+  needed (step 3 N/A).
+
+### Paths
+
+- `local/research/LX1/lx1_boot.py` (`--gpu` flag, this
+  commit), `local/research/LX1/REPORT.md` (this file).
+- Bradflix: `run/{P1,P2,P3}`, `build-parallel`,
+  `parallel-gs-19d93b2`, `configure-parallel.log`,
+  `build-parallel.log`, `clone-pgs.log`; pulled:
+  `from-bradflix/{P1,P2,P3}` (boot.log, result.json, P2
+  frames). Lease released at close (verified).
