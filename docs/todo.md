@@ -277,6 +277,8 @@ then 120 Hz simulation.
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
+- [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
+- [ ] **MD1 (queued after N12's menu profile):** Odin menus are GsWorker-bound in Turnip driver CPU (N11 S3 61.9 ms) + allocator/mutex churn; count submits/descriptor updates per menu frame and cut them in the paraLLEl fork. Wait for N12 S3 (NP1's GS-handoff change may have moved it).
 - [ ] **HS1 (running, Brad 09-25):** host split: bradflix build ≤ 5 min (unity_74 diagnosis, ccache), 4 bradflix boot slots via Docker, 4-way det acceptance vs the a3efbfe baseline.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
