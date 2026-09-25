@@ -132,3 +132,5 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   (NCC) before sending audio or frames to compare.
 - Ad-hoc per-run thresholds instead of the standing rule (battery, 09-24).
 - Measuring stereo audio in mono: a side-channel (L−R) fault is invisible in L+R.
+- Scratch cleanup keep-lists must include every path a committed build script references (the
+  09-24 cleanup deleted `ssx3-work/I25`, the iOS FFmpeg/SDL2 prebuilts; rebuilt into `ios-deps/`).
