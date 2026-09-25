@@ -14,6 +14,10 @@ orchestration lessons in `docs/orchestration.md`.
 - Widescreen: options block `0x535610` bits 20–21 (0 off / 1 16:9 / 2 anamorphic), applied by
   `0x228c08` → vtable `0x377950`; profile loads re-apply via `0x152bb0`. (W1)
 - Load game issues GetDir `/BASLUS-20772-GAM*` at tick 1740 on an empty card. (E55D14)
+- Memory card: our `mc0` is a host directory (`PS2X_MC_ROOT`, else `<elf dir>/mc0`); GetDir synthesizes
+  attributes and uses host mtime. SSX 3 autoloads `BASLUS-20772-SET*`/`GAM*` at boot (ticks ~118–373),
+  which delays the title ~200 ticks. PS2 card images decode as 528-byte pages, 2-page clusters,
+  physical = FAT cluster + alloc offset (41 on Brad's card). (E55D16)
 - SSX 3 never calls `SetGsCrt` (syscall 0x02); the `sceGsResetGraph` stub applies NTSC SMODE1
   `0x740814504`. `SMODE2=0x1` field bob → `PS2X_DEINTERLACE=weave` default. (GB3, E32)
 - SSX 3 uses UCAB (`0x30000000`) for DMA-bound data: a trace fold of `& 0x1FFFFFFF` misses those

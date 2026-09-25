@@ -38,13 +38,9 @@ then 120 Hz simulation.
       exact path; (b) static recompilation of SSX 3's 7 VU1 microprograms
       (7,305 instructions). Validate with the E55 hash tap. E45's
       `VuWide=double` is already folded. `local/research/N5/`, `E53/`, `E45/`.
-- [ ] **E55D15 save seed:** Brad's Odin AetherSX2 card
-      `xyz.aethersx2.android/files/memcards/Mcd001.ps2` (8,650,752 B,
-      `ac98cf37…97bc`) holds `BASLUS-20772-GAM0001` and `-SET0001`; private
-      copy in `~/dev/ssx3-work/E55-odin-memcards/` (not in git). Map the card
-      format to our runtime's mc0 and seed only those two entries; the Load
-      game GetDir at tick 1740 queries `/BASLUS-20772-GAM*` (E55D14P2B).
-      `local/research/E55D15P1/`.
+- [ ] Save seed follow-ups (E55D16 A: the game autoloads Brad's seeded card and shows his rider
+      progress): only if Brad wants it, put his save into the Odin/iPhone `mc0`; retime I26-FAST for
+      the ~200-tick later title when a card is seeded. `local/research/E55D16/`.
 - [ ] **E54E signed 64-bit branches:** the PCSX2 low-64 oracle and suites
       support the candidate, but its one boot went black (8,000 GIF packets
       by tick 830 vs 92,728; first payload difference at packet 352). Don't

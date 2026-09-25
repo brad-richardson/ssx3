@@ -176,3 +176,16 @@ Options→Save/Load→Load game with per-screen frame checks), 1 boot.
 
 Base commit `225135e1`. Boots/builds/runs: 1 boot, 1 build. Text ~1.2 MB
 (4 PNGs + small files); scratch (build + run + seed) stays private.
+
+## Orchestrator gate (2026-09-24)
+
+**A for the seed; the Load-game screen observable is moot.** Read the whole report and commit
+`bd1885cb`; PNGs moved out of git to `~/dev/ssx3-work/E55D16/shots/` (text receipts only). The game
+**autoloads** the seeded card at boot (ticks 118–373: GetDir SET*/GAM* → 1, every file read at its
+exact size), so the route's Load game step isn't needed. Viewed tick 1631 (Main Menu) and tick 1803
+(Select Character): Mac shows rider ranking 2.9 and stats 3.0–4.0, where unseeded boots show
+default ~1.0 bars (IPAD1 Select Character), so Brad's progress loaded, not just the files. The
+card-image decoder and the `mc0` host mapping (§1–§2) are the reusable result. Card bytes and
+extracted saves stay private (`~/dev/ssx3-work/E55D16/mc0/`). Next only if Brad wants it: push his
+save into the Odin/iPhone app's `mc0` so builds he plays start with his progress; retime I26-FAST
+for the ~200-tick later title on a seeded card.
