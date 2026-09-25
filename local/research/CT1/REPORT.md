@@ -191,3 +191,16 @@ COPYFILE_DISABLE=1 bsdtar -xf "/Users/brad/dev/ssx3-work/E32-inputs/SSX 3 (USA).
 python3 ct1_boot.py --runner build/ps2xRuntime/ps2EntryRunner --label B1 --stop-tick 2400 --coverage-tick 2400
 python3 ct1_boot.py --runner build/ps2xRuntime/ps2EntryRunner --label B2 --stop-tick 2400 --coverage-tick 2400
 ```
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Route-scoped verdicts accepted: the overlay (`overlay.dat` = the DNAS/online module,
+relocatable, 3,218 symbols) is header-probed once and never loaded or executed on the race route;
+coverage targets 0, unknown syscalls 0; VU1 cap hits 0 (max program 27,360 cycles); unhandled RPC =
+the E56 four. **INTC 5/7 handlers are registered and never dispatched.** I read both: the VIF1
+handler `0x362340` saves FP state, checks VIF1_STAT bit 10 (INT), writes 8 to VIF1_FBRST (STC,
+cancel stall), increments the word at `0x5059d8+0x80`, restores; the VU1 handler `0x3623a8` only
+saves/restores FP state. So the VU1 miss is harmless; the VIF1 one matters only if the game reads that
+counter or relies on i-bit stalls. `0x5059d8` is also used by `sub_00375A08` and `sub_00376938`
+(to check). Follow-up IN1 queued. The `ct1-counters` knobs (`PS2X_COVERAGE_TICK`,
+`PS2X_INTC_LOG`, default off) fold with the next runtime batch; device gates read the coverage line.

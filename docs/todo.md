@@ -184,6 +184,14 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **IN1 INTC 5 (VIF1) / 7 (VU1) never dispatched (CT1):** the VIF1 handler `0x362340` counts
+      i-bit interrupts at `0x5059d8+0x80` and cancels stalls (VIF1_FBRST STC); the VU1 handler
+      is a no-op. Check whether `sub_00375A08`/`sub_00376938` read that counter (frame pacing?)
+      and whether SSX 3's VIFcodes set the i-bit; if yes, raise INTC 5 at i-bit VIFcodes (+ the
+      M6 stall) and A/B on the det boot. Fold CT1's default-off `PS2X_COVERAGE_TICK` /
+      `PS2X_INTC_LOG` with it. Overlay (`SLUSOVF.BIG` = DNAS/online module) only matters if the
+      online menus are ever in scope.
+
 - [ ] **RV3 Fable review adopted (09-25, `docs/research/review-2026-09-25-fable.md`).** Running:
       SB1 (sign-branch tripwire), GA1 (arbiter drain-order inversions), CT1 (coverage, VU1 caps,
       INTC, the SLUSOVF overlay), GB9 P1 (hier binning on the Mac). Queued: **NP1** Odin
