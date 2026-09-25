@@ -139,3 +139,9 @@ Gaps, stated plainly:
   the sound clock for any title; correctness is SSX3-scoped (this runtime
   is SSX3-focused). No opt-out knob, per the brief's "unconditionally".
 - G5. `lsp` confirmation unavailable in this environment (see Mechanism).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** The SND HLE (tick/status/done delivery, voice state) now runs on guest time regardless of
+`PS2X_SOUND`; `PS2X_SOUND=1` only opens the host stream. Det-hash identical sound on vs off to t2400,
+so guest state doesn't depend on host audio. Folds in F2 (`2fb2003`).

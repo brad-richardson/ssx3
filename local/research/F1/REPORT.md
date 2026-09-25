@@ -349,3 +349,11 @@ analog stick overlay, i.e. the RR1 look on device. Signed build `89ed20d4…` fr
 installed on Brad's iPhone (never launched) and iPad; Brad's save + manual-play env verified
 (SKIP + exact sizes) after both installs. iPad container UUIDs rotate on reinstall: overrides must
 read the live path each time (done here).
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** APK `c822a2b3…` from fork `56a5e8a` + paraLLEl `963cb57`; two clean Odin races at
+**0.140× / 0.140×** vs N11's 0.117× (1.19×; E57's VU1 gain net of RR1's ~50 % more prims and the SPU
+voice layer; below RV3's 1.4–1.8× estimate, so the next Odin profile re-splits the frame). Thermal
+stayed at status 3. Brad's play build installed with his env `9fb46f85…` and save verified; no launch.
+Battery ended at 17 % after S2 (both launches started at ≥ 20 % on AC).
