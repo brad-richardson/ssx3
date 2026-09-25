@@ -266,3 +266,14 @@ python3 f5_boot.py ... --label B5 --stop-tick 27300 --unpaced --hash-every 10 --
 python3 f5_boot.py --mode speed --backend parallel --runner bin/runner-clean --label B6 --stop-tick 2400 --env PS2X_PGS_PRESENT_PIPELINE=1
 python3 ../GB8/gb8_hashdiff.py --base run/B1 --cand run/B<N>  # IDENTICAL x4
 ```
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass; pushed.** Fork `ssx3` fast-forwarded `74e2df2..a3efbfe` after my own checks: worktree clean,
+`74e2df2` ancestor, runner-dir diff empty, no wip/debug/probe subjects, APK `4ff81032…` re-read.
+Frame viewed: B4 t2100 (1024×896): rider solid and lit, full brightness, sharp HUD. Mac race
+0.470× (1.33× over F4; VB1 stage B + pipelined present, not separated: the Odin ABBA does that
+for SSAA). G5 (bytesize WSL stops the distro ~1–2 min after the last client disconnects) goes into
+the runbook: hold the ssh open for bytesize builds. Part 2 (Odin) and Part 3 (iOS, new pane)
+released; Part 3 also bundles `PS2X_PRESENT_ZERO_COPY=1` (Brad 09-25: skip the CPU copy), verified
+on the iPad before the iPhone install.
