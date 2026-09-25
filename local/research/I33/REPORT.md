@@ -269,3 +269,11 @@ unmeasured (Part 1 flat run isn't comparable run-to-run); no CPU fallback on
 Vulkan failure (step 3 — needs a fork change); iPhone installed but
 unlaunched-by-us, so its first parallel boot is Brad's.
 
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** I viewed the iPad `run-ipad-p2/shot-t2100.png`: race 00:00:06 on the GPU backend (lit snow,
+pines, mountains, RECOVER prompt) with no backend overrides, i.e. the bundled env selects paraLLEl.
+Brad's iPhone has the paraLLEl build installed (never launched) with his save + manual-play env
+verified; Brad tries it himself. Open: no CPU fallback if Vulkan init fails (black frame, app alive):
+queue a loud error or a fallback.

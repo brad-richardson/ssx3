@@ -152,6 +152,9 @@ then 120 Hz simulation.
 
 ## I — iOS
 
+- [ ] iOS paraLLEl: no CPU fallback when Vulkan init fails (black game frame, app alive; I33 §3).
+      Add a fallback to the CPU backend or a visible error.
+
 - [ ] Brad's feedback on the I32 controls (stick left, D-pad right; on his iPhone since 09-24).
 - [ ] Brad (09-24, iPhone I30): UI elements flash in and out every few seconds and many 3D assets
       pop in and out. RR1: no draw dropout in the Mac stream; likely the PATH3 wrong-texture effect. Re-check on his phone after the RR1 fold.
