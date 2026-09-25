@@ -120,6 +120,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   Linux's is `unsigned long` (F2's lambda broke the NDK build). Compile the Android target before
   calling a runtime fold done.
 
+- Disk: every lane's own build tree (~1.7 GB each, iOS staging ~6 GB) fills the 200 GB cap within a day of
+  parallel lanes. After closing a lane, delete its `build*`/`staged*` dirs (rebuildable) unless a
+  committed script references them (`grep -rhoE "ssx3-work/..." local/research/*/*.sh local/tooling`).
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.
