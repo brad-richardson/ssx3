@@ -30,3 +30,9 @@ Find what makes x86 Linux and arm64 Mac diverge at **tick 39** (eeCycle +8, rdra
 3. Stop there (no fix) and hand back the table. Deliverable: append `## Part 1b` to the report; commit `[LX1] Part 1b …`. Budget 2 h; one Mac slot per boot.
 
 Note for Part 2 (orchestrator, 09-25): stay in Docker (Brad prefers the isolation). The iGPU is `/dev/dri/renderD128` owned by `root:render` (gid 993); `brad` isn't in `render`. Run the container with `--device /dev/dri/renderD128 --group-add 993` (keep `--user 1000:1000`); no host changes.
+
+## Part 1c (released by the orchestrator; before Part 2)
+1. Fork branch `lx1-tz` from fork `ssx3` **`ec2dbf1`** (current tip). In `getTimezoneOffsetMinutes()` (`Runtime.h:239-254`): under `PS2X_DETERMINISTIC=1` return a fixed offset (0, overridable by `PS2X_TIMEZONE_MINUTES`); otherwise return the host's real current offset **including DST** (fix the mktime quirk: `localtime_r` + `tm_gmtoff`, or equivalent; say what you used). Same for `sceScfGetSummerTime` if it reads the host. Unit test for both paths (fake env). Suite from the worktree root on the Mac.
+2. Also fold in the two x86 build fixes from Part 1: `-msse4.1` (or the right `-m` flags) for x86 in `CMakeLists.txt`, and the E53 FP-mode test reading MXCSR RC on x86 instead of `fegetround()`. Suite on bradflix must be all-pass.
+3. Parity re-run on `lx1-tz`: Mac det boot vs bradflix det boot (CPU GS, sound off, I26-FAST) to t2400 → det-hash equal on every tick? If not, the first differing tick + field, and stop.
+Deliverable: append `## Part 1c`; commit `[LX1] Part 1c …`. No push. Budget 2 h.

@@ -324,3 +324,12 @@ python3 local/research/LX1/lx1_boot_mac.py --mode det --backend cpu --runner ~/d
 python3 /tmp/lx1b_rdiff.py run/MD1/rdump/rdram-39.bin from-bradflix/D1/rdram-39.bin
 ```
 
+
+## Orchestrator gate, Part 1b (2026-09-25)
+
+**Pass: root cause named.** The x86/arm64 "divergence" is the host time zone:
+`getTimezoneOffsetMinutes()` (`Runtime.h:239-254`) reads the host's UTC offset with no deterministic
+override (mini −300, container 0), the game reads it via `sceScfGetTimeZone` → `AdjustTime` on the fixed
+RTC, and two words (local hour/day) differ from tick 39 on. No guest-math difference between hosts was
+found. Side bug: the mini reports −300 (EST) in September, when EDT (−240) applies (the "mktime quirk").
+Part 1c released: deterministic mode pins the zone; the host path gets DST right; parity re-run.
