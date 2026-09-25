@@ -306,6 +306,136 @@ bash local/research/I31/deploy-ios.sh iphone         # never launched
 xcrun simctl shutdown $SIM
 ```
 
+## Part 3b — iOS rebuild from `92f9991` (ST1 tip; sim + iPad, iPhone skipped)
+
+Worker: Muse Code, per orchestrator update (fork `ssx3` moved `96e9f45` →
+`92f9991`: ST1's two commits, no codegen change). Build pin is **`92f9991`**
+(worktree `f2-fold` fast-forwarded `96e9f45..92f9991`, clean, runner-dir
+check empty); during the task the fork moved again to `0ed07c4` (one-line
+`[HF1]` Android-LP64 lambda fix in `EeScheduler.cpp`, no Apple behavior
+change — verified via `git diff --stat`), and the orchestrator said to keep
+the `92f9991` build. Scope verified: `96e9f45..92f9991` touches only
+`ps2_gs_parallel_backend.cpp` (+6, `vsync.force_progressive = true`) and
+`ps2_runtime.cpp` (frame-dump sidecar text); no `games/`/emitter change, and
+the canonical codegen is untouched (`register_functions.cpp` still
+`8ea8ed43…`, no regen).
+
+Why 3b is a validation gate, not a fix gate, on iOS: the iOS build leaves
+`PS2X_GS_SHADOW_PARALLEL` at its default OFF (no `PS2X_PARALLEL_GS_SOURCE_DIR`),
+so `PS2X_HAS_PARALLEL_SHADOW` is undefined and the paraLLEl backend is its stub
+(`ps2xRuntime/CMakeLists.txt:521-556`,
+`ps2_gs_parallel_backend.cpp:22,95,574`) — the `force_progressive` line cannot
+execute on iOS, and the sidecar diagnostic only changes frame-dump text (dumps
+stay off on iOS). Per the ST1 brief the CPU backend never had the stripes, so
+the expected iOS result is "no stripes, same as Part 3" — confirmed below.
+The stripes fix itself is exercised on Mac/Odin paraLLEl builds.
+
+Builds (`~/dev/ssx3-work/F2/ios-b/`, Part 3 recipe + `W`/`PIN→92f9991…` sed;
+same worktree, promoted canonical codegen, same `0041e09a…` bundled env):
+preflight rc=0 (both devices connected), configure sim + device rc=0,
+sim build + stage + install rc=0, device build + stage + sign rc=0
+(`codesign --verify --strict` passed, ELF/ISO `cmp`-equal, bundle id).
+
+| Binary | SHA-256 (two matching reads) |
+| --- | --- |
+| sim `ps2EntryRunner` | `f4773dc298dbd34f2f050889a4d92f882db8235b27c56ab76a4c2552b1a09d32` |
+| device unsigned | `0293a920b065dac73070eb7be220ffb79bc2e7026b6672ce8f995b835f5eaf27` |
+| device signed (installed) | `c2bb413611b4fc9943ec7c1b112823fbb838b00da1b4f965a6a133db81eac14e` |
+
+Simulator (fresh container, bundled route, sound on, one lease slot, released,
+zero FATAL; frames SHA-matched ×2):
+
+| Shot (observed tick) | Viewed verdict | SHA-256 |
+| --- | --- | --- |
+| `shot-t1750` (1771) | Race 2ND/2 00:00:01 0%, gate, spray, EA Radio "Emerge - Junkie XL Remix" — no stripes | `7220ab33…` |
+| `shot-t2100` (2109) | Race 2ND/2 00:00:06 1%, trick 370, beam, rider, spray; advancing — no stripes | `22e68788…` |
+
+Stripes check, quantitative (ST1's period-2 row-luminance test,
+`stripes_test.py` in scratch, GB8 stdlib PNG decoder, 845-row center crop):
+
+| Frame | even-row mean | odd-row mean | even−odd | alt RMS |
+| --- | --- | --- | --- | --- |
+| Part 3 t2100 (old) | 149.075 | 149.102 | −0.027 | 1.20 |
+| Part 3 t1750 (old) | 167.727 | 167.783 | −0.055 | 1.22 |
+| 3b t2100 (new) | 152.137 | 152.159 | −0.021 | 1.07 |
+| 3b t1750 (new) | 165.772 | 165.812 | −0.040 | 1.02 |
+
+No period-2 alternation in any frame (even/odd agree to <0.06 LSB; ~1 LSB RMS
+is ordinary row content, not systematic alternation — a striped frame would
+show several LSB sustained). Old and new equivalent: stripes absent before and
+after on the CPU-weave path.
+
+iPad (Air 11" M2): install rc=0 (seq 1900, bundle `28AA6DB4…`); deploy SKIP +
+7 exact-size OKs. Live container `D03550A2-…` (rotated again). One fresh-card
+launch (route byte-exact 484 chars, `MC_ROOT=<live>/mc-fresh`,
+`PS2X_VSYNC_RATE_LOG=1`, absolute env path — the Part 3 relative-path lesson):
+207 s, ticks 1113/1750/1966/2151 (Part 3's pace was 1112/1751/1969/2153),
+terminated after, zero FATAL, 48 kHz, overlay shown.
+
+| Shot (tick) | Viewed verdict | SHA-256 |
+| --- | --- | --- |
+| `shot-t1050` (1113) | Select Mode (Race/Freestyle), Peak 1 map correct | `3eaa00b8…` |
+| `shot-t1750` (1750) | Race 1ST/2 00:00:00 0%, gate, EA Radio "Emerge - Junkie XL Remix" — on-route | `ec06f21e…` |
+| `shot-t1960` (1966) | Race 2ND/2 00:00:04 1%, gate pole, spray; advancing | `5f5e7945…` |
+| `shot-t2140` (2151) | Race 2ND/2 00:00:07 1%, slope/trees/spray; advancing | `d7ffd1d4…` |
+
+Fresh-card proof: `mc-fresh` + `mc-fresh_slot1` in the live-container listing;
+route on pace. The `devicectl info files` 7:18 AM stamps from Part 3 repeat
+verbatim here — across two different containers and including the Documents
+root itself — so they are a **listing artifact, not real timestamps**
+(supersedes Part 3's stale-clock guess). Deploy re-ran after: full SKIP + 7
+OKs, Brad's `mc0` byte-identical.
+
+iPhone: **skipped per orchestrator** (ST1 doesn't touch the iOS CPU-backend
+path, so Brad's iPhone keeps the `96e9f45` build; no user-visible change).
+For the record, two install attempts failed first: the WiFi-attached iPhone
+went `unavailable` mid-task (`devicectl` error 4016, usage assertion
+unfulfillable; it was `available (paired)` at preflight), no USB presence.
+Needs a wake/unlock or connectivity check before any future iPhone install.
+
+Tooling notes for the next lane:
+
+- `install_iphone`'s pre-gate (`grep -E 'connected|available'`) matches the
+  substring in **`unavailable`** and proceeds into a doomed install. Match
+  `\<available\>` / exclude `unavailable`, or assert on the install log.
+- Piping the script through `tail` masks its exit code (`set -e`/`pipefail`
+  are inside the script); capture `PIPESTATUS` or redirect to a file and read
+  `$?` — the first failed install initially looked like RC=0 for this reason.
+
+Budgets and gaps: 2 builds, 1 sim run (133 s), 1 probe + 1 iPad test (207 s),
+1 install; ~1 h. Scratch `~/dev/ssx3-work/F2` 17 GB ≤ 20 GB (`ios-b/` keeps
+Part 3's `ios/` intact); Simulator shut down; no lease held. Gaps: iPhone
+still on the `96e9f45` build (orchestrator-accepted: no behavior delta);
+sim/iPad evidence is race + Select Mode only (Part 3's sim series covers the
+Peak 1 photo on the same codegen); iPad pace diagnostic (~4.0 vs/s, not a
+speed number). Part 2 (Odin) stays on hold; when released, the APK builds
+from `92f9991` (not `96e9f45`).
+
+Exact commands:
+
+```sh
+git -C ~/dev/PS2Recomp fetch fork ssx3   # 92f9991 (later 0ed07c4, kept 92f9991 per orch)
+git -C ~/dev/ssx3-work/F2/PS2Recomp merge --ff-only fork/ssx3  # 96e9f45..92f9991
+git -C ~/dev/PS2Recomp diff --stat 96e9f45 92f9991  # 2 files, no games/emitter
+sed -e 's|^W=.../F2/ios$|W=.../F2/ios-b|' -e 's|^PIN=96e9f45...|PIN=92f999190ce2f1cd8c634396e469b3aebad5f82e|' \
+  ~/dev/ssx3-work/F2/ios/build-install.sh > ~/dev/ssx3-work/F2/ios-b/build-install.sh
+# run scripts: same W-sed into ios-b/
+bash ~/dev/ssx3-work/F2/ios-b/build-install.sh preflight configure_sim configure_device
+bash ~/dev/ssx3-work/F2/ios-b/build-install.sh build_sim stage_sim sim_install
+xcrun simctl uninstall $SIM org.ps2x.ps2entryrunner
+bash ~/dev/ssx3-work/F2/ios-b/build-install.sh sim_install
+bash ~/dev/ssx3-work/F2/ios-b/sim-run.sh "1750 2100"
+python3 ~/dev/ssx3-work/F2/ios-b/stripes_test.py ios/run-sim/shot-t*.png ios-b/run-sim/shot-t*.png
+bash ~/dev/ssx3-work/F2/ios-b/build-install.sh build_device stage_device sign
+bash ~/dev/ssx3-work/F2/ios-b/build-install.sh install_ipad
+bash local/research/I31/deploy-ios.sh ipad
+bash ~/dev/ssx3-work/F2/ios-b/ipad-probe.sh             # live container D03550A2-…
+bash ~/dev/ssx3-work/F2/ios-b/ipad-run.sh /Users/brad/dev/ssx3-work/F2/ios-b/run-ipad-env.json "1050 1750 1960 2140"
+bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
+# iPhone: 2 install attempts failed (device unavailable, devicectl 4016); skipped per orch
+xcrun simctl shutdown $SIM
+```
+
 ## Orchestrator gate, Part 1 (2026-09-25)
 
 **Pass.** I viewed B1 t2090 (race 00:00:06, checkpoint beam, lit snow, trees, mountains). Five
