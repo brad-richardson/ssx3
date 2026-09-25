@@ -1,0 +1,27 @@
+# TL1 Part 1 build failure receipt (first failed brief step: step 3, Mac build)
+# Full log: ~/dev/ssx3-work/TL1/build.log (53 KiB, scratch, not in git)
+# ninja -k 0 ps2x_tests rc=1; exactly 1 FAILED command; all 16 errors below.
+
+FAILED: [code=1] ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/gs/gs_replay_core.cpp.o 
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:287:13: error: use of undeclared identifier 'ps2xN8D7M5SetCounting'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:308:53: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:309:35: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:375:13: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:379:38: error: use of undeclared identifier 'ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:395:23: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:395:54: error: use of undeclared identifier 'ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:558:17: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:562:42: error: use of undeclared identifier 'ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:571:27: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:571:58: error: use of undeclared identifier 'ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:627:13: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:631:38: error: use of undeclared identifier 'ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:639:23: error: unknown type name 'Ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:639:54: error: use of undeclared identifier 'ps2xN8D7M5Counts'
+ps2xRuntime/src/lib/gs/gs_replay_core.cpp:664:9: error: use of undeclared identifier 'ps2xN8D7M5SetCounting'
+
+# Guard active on the failing compile line:
+-DPS2X_GS_REPLAY_WORD_WATCH=1
+
+# Logger TU compiled clean (step 219/325):
+/Users/brad/dev/ssx3-work/TL1/build/ps2xRuntime/CMakeFiles/ps2_gs_shadow.dir/src/lib/gs/ps2_gs_parallel_backend.cpp.o
