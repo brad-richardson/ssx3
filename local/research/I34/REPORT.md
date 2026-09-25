@@ -147,3 +147,10 @@ whether that placement stands.
 
 Part 1 budget: 1 Simulator build, 2 runs (21 s + 160 s, slot 1).
 I34 scratch 4.8 GB. No lease held at close.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass; Brad approved the layout.** He clarified he wanted the D-pad below-**left** of the face buttons,
+like a real PS2 controller, which is what the closest-fit placement already does (stick ×1.5; D-pad at
+80 % of the face cluster, below and left of it). I viewed `run-stick/shot-0020s.png`. `3d52208` folds
+in F3.
