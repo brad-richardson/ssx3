@@ -302,3 +302,27 @@ is reproducible. What non-deterministic mode adds:
 - One save per run (`SAVE_AT`). The `libc rand` flag was never set in these runs.
 - Scratch `~/dev/ssx3-work/SS1`: 2.7 GB (build 1.8 GB, bin 810 MB, states 157 MB, runs 19 MB),
   under the 10 GB cap. Internal total 148.1 of 200 GB.
+
+## Orchestrator gate, stages 1–3 (2026-09-25)
+
+**Pass.** Re-ran `ss1_hashdiff.py` myself: C7 (load t2000) and D (cross-runner load) IDENTICAL 2001..2600
+vs A4; F (load t1720) IDENTICAL 1721..2100; tick-2600 det-hash lines equal byte for byte. F's t1800
+frame viewed (race HUD, rider, trail) and its `fnv1a=26b7c5c7` equals F5 B1's straight-run t1800
+frame. Race start 33.0 s → 1.01 s. Part 2 released (below).
+
+## Part 2 brief (orchestrator, 2026-09-25) — make it the default lane tool, then fold
+
+1. Re-run (d) cross-runner and the t1720 race-start rows on the final runner (ss7 + an ss7-B).
+2. `local/tooling/boot/ssx3_boot.py`: `--save-at/--save-path/--exit-after-save/--load/--strict`
+   (from `ss1_boot.py`; no second driver). `local/tooling/boot/baseline.py`: `put-state`/`get-state`
+   keyed like baselines (fork, route, tick, backend, SSAA; manifest with the header lines), states in
+   `~/dev/ssx3-work/baselines/states/` (scratch only). Seed a3efbfe-equivalent states at t1720 and
+   t2000 from your final runner; `README.md` usage.
+3. Gaps that lanes will hit: (a) memory-card directory snapshot/restore with the state (MC lanes);
+   (b) a 4×+hi-res save/load pair (det-hash + frame at the load's next dumped tick); (c) the paraLLEl
+   CLUT: add the accessor in a paraLLEl-GS worktree branch `ss1-clut` (local, never push) if it's
+   small, else state the plan.
+4. Fold prep: rebase-free — your branch is on `a3efbfe`, fork `ssx3` hasn't moved. Suite green,
+   runner-dir check empty, `git log --format=%s a3efbfe..` clean subjects. **Don't push**; the
+   orchestrator pushes after the gate.
+Budget: ≤ 6 builds, ≤ 12 boots (one slot each), 3 h. Append `## Part 2`; commit `[SS1] Part 2 …`.
