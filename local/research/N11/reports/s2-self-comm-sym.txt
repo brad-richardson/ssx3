@@ -1,0 +1,105 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 148317
+Event count: 126658118938
+
+Overhead  Command          Symbol
+24.96%    GameThread       VU1Interpreter::commitReadyPipelines()
+12.73%    GameThread       VU1Interpreter::calculatePairReadyCycle(VU1Interpreter::DecodedInstructionPair const&) const
+7.34%     GameThread       VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+4.84%     GameThread       @plt
+3.80%     GameThread       VU1Interpreter::execUpper(unsigned int)
+3.46%     GameThread       VU1Interpreter::normalizeOperand(float) const
+3.23%     GameThread       VU1Interpreter::markPairWrites(VU1Interpreter::DecodedInstructionPair const&)
+2.44%     GameThread       VU1Interpreter::calculateFmacExactResult(unsigned int, double&) const
+2.28%     GameThread       [kernel.kallsyms][+ffffffe761a8e810]
+2.02%     GameThread       VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+1.87%     GameThread       __memset_aarch64_nt
+1.66%     GameThread       VU1Interpreter::normalizeFmacResult(float*, unsigned char, unsigned char*)
+1.50%     GameThread       VU1Interpreter::calculateFmacProductSticky(unsigned char) const
+1.33%     GsWorker         [kernel.kallsyms][+ffffffe761a8e860]
+1.31%     GameThread       VU1Interpreter::getDecodedInstructionPairForPc(unsigned char const*, unsigned int, PS2Memory*, unsigned int)
+1.23%     GsWorker         [kernel.kallsyms][+ffffffe761a8e810]
+1.13%     GameThread       VU1Interpreter::updateFmacFlags(unsigned char const*, unsigned char, unsigned int)
+1.12%     GameThread       VU1Interpreter::progressXgkick()
+0.99%     com.ps2x.runner  clock_gettime
+0.79%     GameThread       VU1Interpreter::queueVfWrite(unsigned char, unsigned char, float const*, unsigned int)
+0.78%     GsWorker         [kernel.kallsyms][+ffffffe760a47efc]
+0.75%     com.ps2x.runner  __kernel_clock_gettime
+0.50%     GsWorker         [kernel.kallsyms][+ffffffe760a21688]
+0.48%     GsWorker         [kernel.kallsyms][+ffffffe760cfb750]
+0.45%     GsWorker         [kernel.kallsyms][+ffffffe760a21680]
+0.41%     GameThread       PS2Memory::advanceEeTimers(unsigned long)
+0.30%     GameThread       [kernel.kallsyms][+ffffffe760a2784c]
+0.30%     GameThread       PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+0.28%     GameThread       VU1Interpreter::applyFmacDestAcc(float*, unsigned char)
+0.27%     GsWorker         [kernel.kallsyms][+ffffffe760d2cbf8]
+0.26%     GameThread       EeScheduler::accountCycles(unsigned int)
+0.25%     GameThread       VU1Interpreter::applyFmacDest(float*, float*, unsigned char)
+0.25%     GsWorker         [kernel.kallsyms][+ffffffe760a2168c]
+0.23%     GsWorker         GS::buildDrawBatch(int) const
+0.22%     GameThread       sub_00416810_0x416810(unsigned char*, R5900Context*, PS2Runtime*)
+0.21%     GsWorker         void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+0.21%     GsWorker         [kernel.kallsyms][+ffffffe761a795a0]
+0.20%     GameThread       __memcpy_aarch64_nt
+0.19%     GsWorker         GS::vertexKick(bool)
+0.19%     GsWorker         GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+0.19%     GameThread       VU1Interpreter::applyDest(float*, float const*, unsigned char)
+0.17%     GameThread       [kernel.kallsyms][+ffffffe761a8e664]
+0.16%     GameThread       VU1Interpreter::queueAccWrite(unsigned char, float const*, unsigned int)
+0.16%     GameThread       [kernel.kallsyms][+ffffffe760a277ec]
+0.16%     GameThread       __vfprintf
+0.14%     GameThread       libunwind::findUnwindSectionsByPhdr(dl_phdr_info*, unsigned long, void*)
+0.13%     GsWorker         [kernel.kallsyms][+ffffffe761a79608]
+0.13%     GsWorker         [kernel.kallsyms][+ffffffe760a21684]
+0.13%     GameThread       VU1Interpreter::broadcast(float const*, unsigned char)
+0.13%     GsWorker         [kernel.kallsyms][+ffffffe760a15520]
+0.13%     GsWorker         [kernel.kallsyms][+ffffffe760b98830]
+0.13%     GsWorker         [kernel.kallsyms][+ffffffe760b99edc]
+0.12%     GameThread       __emutls_get_address
+0.12%     GameThread       PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+0.11%     GameThread       [kernel.kallsyms][+ffffffe760ad37c0]
+0.11%     GameThread       EeScheduler::checkpointDue(unsigned int)
+0.11%     GameThread       VU1Interpreter::readBranchVi(unsigned char) const
+0.11%     com.ps2x.runner  !!!0000!a0d82c13dd4b4e4f31b6cd30a2cb0d!a9ee82cd83!
+0.10%     GsWorker         [kernel.kallsyms][+ffffffe760dd6c84]
+0.10%     GsWorker         @plt
+0.10%     GameThread       sub_0037E120_0x37e120(unsigned char*, R5900Context*, PS2Runtime*)
+0.10%     GsWorker         [kernel.kallsyms][+ffffffe7611d5040]
+0.10%     GsWorker         GS::processGIFPacket(unsigned char const*, unsigned int)
+0.10%     GameThread       pthread_mutex_unlock
+0.10%     GameThread       __sfvwrite
+0.09%     GameThread       VU1Interpreter::decodeLowerUsage(unsigned int) const
+0.09%     GsWorker         void ParallelGS::GSInterface::packed_XYZ<false, true, (ParallelGS::PRIMType)4>(void const*)
+0.09%     GsWorker         GS::recordDrawDebugEventUnlocked(int)
+0.08%     GameThread       [kernel.kallsyms][+ffffffe760bcd1b4]
+0.08%     GameThread       VU1Interpreter::resetScheduler()
+0.08%     GsWorker         [kernel.kallsyms][+ffffffe761a8e6e0]
+0.08%     GsWorker         [kernel.kallsyms][+ffffffe761a79580]
+0.08%     GsWorker         [kernel.kallsyms][+ffffffe761a7ae44]
+0.08%     GsWorker         ps2_gfx_stats::detail::ensureInit()
+0.08%     GameThread       VU1Interpreter::queueStore(unsigned int, unsigned int const*, unsigned char)
+0.07%     GsWorker         [kernel.kallsyms][+ffffffe760dd6c20]
+0.07%     com.ps2x.runner  WaitTime
+0.07%     GameThread       VU1Interpreter::decodeUpperUsage(unsigned int) const
+0.07%     GsWorker         [kernel.kallsyms][+ffffffe760a277ec]
+0.07%     GsWorker         [kernel.kallsyms][+ffffffe760855968]
+0.07%     GameThread       [kernel.kallsyms][+ffffffe761a6b788]
+0.07%     GsWorker         __emutls_get_address
+0.06%     GsWorker         __memcpy_aarch64_nt
+0.06%     GameThread       VU1Interpreter::pipelinesPending() const
+0.06%     GsWorker         [kernel.kallsyms][+ffffffe761a79560]
+0.06%     GsWorker         pthread_mutex_unlock
+0.06%     GameThread       sub_00376938_0x376938(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     GsWorker         void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)4>(bool)
+0.06%     GameThread       std::__ndk1::pair<std::__ndk1::__hash_iterator<std::__ndk1::__hash_node<std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, void*>*>, bool> std::__ndk1::__hash_table<std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, std::__ndk1::__unordered_map_hasher<unsigned int, std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, std::__ndk1::hash<unsigned int>, std::__ndk1::equal_to<unsigned int>, true>, std::__ndk1::__unordered_map_equal<unsigned int, std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, std::__ndk1::equal_to<unsigned int>, std::__ndk1::hash<unsigned int>, true>, std::__ndk1::allocator<std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>>>::__emplace_unique_key_args<unsigned int, std::__ndk1::piecewise_construct_t const&, std::__ndk1::tuple<unsigned int const&>, std::__ndk1::tuple<>>(unsigned int const&, std::__ndk1::piecewise_construct_t const&, std::__ndk1::tuple<unsigned int const&>&&, std::__ndk1::tuple<>&&)
+0.06%     GsWorker         [kernel.kallsyms][+ffffffe761a83a5c]
+0.06%     GsWorker         [kernel.kallsyms][+ffffffe760cf8c1c]
+0.05%     com.ps2x.runner  [kernel.kallsyms][+ffffffe761a8e810]
+0.05%     GsWorker         __aarch64_ldadd8_relax
+0.05%     GameThread       VU1Interpreter::queueClip(unsigned int)
+0.05%     com.ps2x.runner  __memcpy_aarch64_nt
+0.05%     GameThread       VU1Interpreter::decodeInstructionPair(unsigned char const*, unsigned int) const
+0.05%     GameThread       scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&, void*, scudo::Chunk::UnpackedHeader*, unsigned long)
+0.05%     GsWorker         [kernel.kallsyms][+ffffffe761a795a8]

@@ -1,0 +1,153 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 601798
+Event count: 428955035635
+
+Children  Self   Symbol
+37.86%    0.00%  libvulkan_freedreno.so[+a271a0]
+30.76%    0.00%  libvulkan_freedreno.so[+ac11d8]
+30.42%    0.00%  libvulkan_freedreno.so[+ac3694]
+15.13%    0.00%  libvulkan_freedreno.so[+a21dc0]
+11.92%    0.00%  [kernel.kallsyms][+ffffffe760a11586]
+11.46%    0.00%  libvulkan_freedreno.so[+ac4764]
+10.79%    0.00%  __pthread_start(void*)
+10.79%    0.00%  __start_thread
+10.25%    0.00%  [kernel.kallsyms][+ffffffe761a7d85e]
+10.09%    0.00%  EeScheduler::run()
+10.09%    0.00%  void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, PS2Runtime::run()::$_0>>(void*)
+9.80%     0.00%  libvulkan_freedreno.so[+b64698]
+8.89%     0.00%  libvulkan_freedreno.so[+a96b44]
+8.32%     0.00%  ioctl
+8.32%     0.00%  __ioctl
+8.30%     0.00%  libvulkan_freedreno.so[+add38c]
+8.13%     0.00%  [kernel.kallsyms][+ffffffe761a7d8ea]
+8.13%     0.00%  [kernel.kallsyms][+ffffffe760a3aece]
+8.12%     0.00%  [kernel.kallsyms][+ffffffe760a3af86]
+8.11%     0.00%  [kernel.kallsyms][+ffffffe760a3b042]
+7.96%     0.00%  libvulkan_freedreno.so[+a27074]
+7.89%     0.01%  sub_00382760_0x382760(unsigned char*, R5900Context*, PS2Runtime*)
+7.77%     0.00%  PS2Runtime::Store32(unsigned char*, R5900Context*, unsigned int, unsigned int)
+7.73%     0.01%  PS2Memory::writeIORegister(unsigned int, unsigned int)
+7.67%     0.00%  PS2Memory::processPendingTransfers()
+7.65%     0.05%  PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+7.47%     0.00%  std::__ndk1::__function::__func<PS2Runtime::syncCoreSubsystems()::$_3, std::__ndk1::allocator<PS2Runtime::syncCoreSubsystems()::$_3>, void (unsigned int, unsigned int, unsigned int)>::operator()(unsigned int&&, unsigned int&&, unsigned int&&)
+7.35%     0.67%  VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+7.09%     0.00%  libvulkan_freedreno.so[+ac10f4]
+7.00%     0.02%  libvulkan_freedreno.so[+c653bc]
+6.91%     0.00%  libvulkan_freedreno.so[+a96b90]
+6.70%     0.00%  libvulkan_freedreno.so[+a97b34]
+6.41%     0.00%  [kernel.kallsyms][+ffffffe760e13696]
+6.37%     0.00%  [kernel.kallsyms][+ffffffe76084c36a]
+6.36%     0.00%  [kernel.kallsyms][+ffffffe76084c2da]
+6.24%     0.00%  libvulkan_freedreno.so[+c60624]
+6.10%     0.00%  libvulkan_freedreno.so[+a3a6cc]
+6.09%     0.00%  [kernel.kallsyms][+ffffffe76083fcf2]
+6.09%     0.00%  libvulkan_freedreno.so[+c44140]
+6.03%     0.00%  [kernel.kallsyms][+ffffffe76083f5ee]
+6.02%     0.00%  [kernel.kallsyms][+ffffffe760856326]
+5.56%     0.00%  libvulkan_freedreno.so[+ac6614]
+5.56%     0.00%  libvulkan_freedreno.so[+c18c0c]
+5.51%     0.00%  libvulkan_freedreno.so[+c19504]
+5.02%     0.00%  libvulkan_freedreno.so[+b45988]
+4.88%     0.98%  scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)
+4.77%     0.00%  [kernel.kallsyms][+ffffffe760857eaa]
+4.41%     0.00%  libvulkan_freedreno.so[+a97238]
+4.25%     0.00%  libvulkan_freedreno.so[+c19618]
+4.25%     0.00%  libvulkan_freedreno.so[+c1d5a4]
+4.15%     0.00%  [kernel.kallsyms][+ffffffe760d2ecf6]
+4.06%     0.00%  libvulkan_freedreno.so[+a98334]
+4.00%     0.00%  libvulkan_freedreno.so[+c19448]
+3.91%     0.92%  scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&, void*, scudo::Chunk::UnpackedHeader*, unsigned long)
+3.88%     0.00%  libvulkan_freedreno.so[+a21cc4]
+3.81%     0.00%  libvulkan_freedreno.so[+a21c54]
+3.81%     0.00%  libvulkan_freedreno.so[+a84f24]
+3.56%     3.19%  scudo::HybridMutex::tryLock()
+3.46%     0.00%  libvulkan_freedreno.so[+a21d80]
+3.46%     0.00%  libvulkan_freedreno.so[+c1d364]
+3.42%     0.00%  libvulkan_freedreno.so[+c1d3cc]
+3.07%     0.01%  libvulkan_freedreno.so[+c603a4]
+2.95%     0.59%  malloc
+2.83%     0.00%  libvulkan_freedreno.so[+a81b14]
+2.76%     0.00%  libvulkan_freedreno.so[+a972b0]
+2.73%     0.00%  libvulkan_freedreno.so[+ac67dc]
+2.65%     0.00%  libvulkan_freedreno.so[+a969f4]
+2.65%     0.00%  libvulkan_freedreno.so[+c1ae68]
+2.61%     0.00%  libvulkan_freedreno.so[+a96a00]
+2.57%     0.00%  libvulkan_freedreno.so[+a981a4]
+2.44%     0.00%  libvulkan_freedreno.so[+c1cbc4]
+2.42%     0.00%  libvulkan_freedreno.so[+ac6cb4]
+2.41%     0.00%  libvulkan_freedreno.so[+c1d3f8]
+2.38%     0.18%  scudo_malloc
+2.36%     1.30%  __memset_aarch64_nt
+2.30%     1.14%  scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Origin, unsigned long, bool)
+2.22%     0.06%  PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+2.22%     0.00%  libvulkan_freedreno.so[+b6c69c]
+2.20%     0.01%  libvulkan_freedreno.so[+b862d0]
+2.09%     0.00%  libvulkan_freedreno.so[+a3b0fc]
+2.08%     0.01%  libvulkan_freedreno.so[+b45464]
+2.06%     0.00%  libvulkan_freedreno.so[+c1928c]
+2.05%     0.39%  VU1Interpreter::execUpper(unsigned int)
+2.01%     0.04%  scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)
+2.00%     1.99%  VU1Interpreter::commitReadyPipelines()
+1.92%     0.00%  libvulkan_freedreno.so[+c18c24]
+1.90%     0.00%  libvulkan_freedreno.so[+c98a74]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760dfb456]
+1.89%     0.00%  libvulkan_freedreno.so[+a969ac]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe761a7d916]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760e1943a]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760a2e3f2]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760e19622]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760af8146]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760dfb2c2]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760e19d26]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760e1d04a]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760e20b2a]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760e23c72]
+1.89%     0.00%  [kernel.kallsyms][+ffffffe760d315fa]
+1.87%     0.00%  libvulkan_freedreno.so[+c1c244]
+1.78%     1.78%  [kernel.kallsyms][+ffffffe761a8e810]
+1.75%     0.16%  void scudo::releaseFreeMemoryToOS<scudo::RegionReleaseRecorder<scudo::MemMapLinux>, scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)::'lambda'(unsigned long)>(scudo::PageReleaseContext&, scudo::RegionReleaseRecorder<scudo::MemMapLinux>&, scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)::'lambda'(unsigned long))
+1.71%     1.48%  scudo::HybridMutex::unlock()
+1.68%     0.00%  [kernel.kallsyms][+ffffffe761a7d88e]
+1.61%     0.03%  scudo::MemMapLinux::releaseAndZeroPagesToOSImpl(unsigned long, unsigned long)
+1.60%     0.00%  libvulkan_freedreno.so[+afcc74]
+1.58%     0.05%  madvise
+1.52%     0.00%  libvulkan_freedreno.so[+c65d00]
+1.52%     0.01%  libvulkan_freedreno.so[+c60354]
+1.46%     0.00%  libvulkan_freedreno.so[+c1bddc]
+1.38%     0.00%  [kernel.kallsyms][+ffffffe761a7d95e]
+1.38%     0.00%  [kernel.kallsyms][+ffffffe760a482da]
+1.37%     0.00%  [kernel.kallsyms][+ffffffe761a90ece]
+1.37%     0.00%  libvulkan_freedreno.so[+c60814]
+1.36%     0.00%  [kernel.kallsyms][+ffffffe760d2c77e]
+1.34%     0.00%  [kernel.kallsyms][+ffffffe760d98d12]
+1.33%     0.00%  libvulkan_freedreno.so[+ac64c4]
+1.31%     0.00%  libvulkan_freedreno.so[+c606c4]
+1.29%     0.00%  libvulkan_freedreno.so[+a96a18]
+1.28%     0.00%  main
+1.28%     0.00%  PS2Runtime::run()
+1.27%     0.00%  libvulkan_freedreno.so[+c18bfc]
+1.26%     0.00%  libvulkan_freedreno.so[+c19204]
+1.23%     1.22%  VU1Interpreter::calculatePairReadyCycle(VU1Interpreter::DecodedInstructionPair const&) const
+1.23%     0.00%  libvulkan_freedreno.so[+c17ad0]
+1.20%     0.00%  libvulkan_freedreno.so[+c63598]
+1.19%     0.00%  [kernel.kallsyms][+ffffffe761a910ea]
+1.17%     1.17%  [kernel.kallsyms][+ffffffe761a8e860]
+1.16%     0.00%  libvulkan_freedreno.so[+c63864]
+1.15%     0.00%  libvulkan_freedreno.so[+c94fe4]
+1.15%     0.00%  [kernel.kallsyms][+ffffffe760d98062]
+1.14%     0.00%  [kernel.kallsyms][+ffffffe760d89482]
+1.13%     0.00%  libvulkan_freedreno.so[+c603cc]
+1.11%     0.00%  libvulkan_freedreno.so[+b48a88]
+1.11%     1.00%  __memcpy_aarch64_nt
+1.10%     0.00%  [kernel.kallsyms][+ffffffe760d2ff4a]
+1.09%     0.00%  libvulkan_freedreno.so[+cb6014]
+1.08%     0.01%  libvulkan_freedreno.so[+b4889c]
+1.05%     0.00%  libvulkan_freedreno.so[+a96960]
+1.04%     0.00%  libvulkan_freedreno.so[+c19070]
+1.04%     0.00%  libvulkan_freedreno.so[+c18fe4]
+1.04%     0.00%  [kernel.kallsyms][+ffffffe760d2c52a]
+1.03%     1.03%  libvulkan_freedreno.so[+b40d34]
+1.03%     0.00%  libvulkan_freedreno.so[+c19774]
+1.02%     0.00%  [kernel.kallsyms][+ffffffe761704d6e]

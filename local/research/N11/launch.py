@@ -44,6 +44,8 @@ ap.add_argument('--scap-every', type=float, default=9999.0)
 ap.add_argument('--min-battery', type=int, default=20)
 ap.add_argument('--pin-cpu7', action='store_true')
 ap.add_argument('--probe-at-end', action='store_true')
+ap.add_argument('--game-cpus', default='',
+                help='Part 2: PS2X_GAME_THREAD_CPUS value, e.g. 6,7 (empty = unset)')
 a = ap.parse_args()
 
 OUT = os.path.expanduser(f'/Users/brad/dev/ssx3/local/research/N11/logs/{a.label}')
@@ -143,6 +145,8 @@ env = [f'# N11 {a.label}', 'PS2X_GS_BACKEND=parallel', 'PS2X_GS_TURNIP=1',
        f'PS2X_CD_IMAGE={FILES}/SSX3.iso', 'PS2X_SKIP_MOVIE=1', 'PS2X_SOUND=1',
        f'PS2X_MC_ROOT={FILES}/mc0-test',
        f'PS2X_PAD_SCRIPT={ROUTE}', 'PS2X_PAD_SCRIPT_CLOCK=vsync', 'PS2X_VSYNC_RATE_LOG=1']
+if a.game_cpus:
+    env.append(f'PS2X_GAME_THREAD_CPUS={a.game_cpus}')
 assert not any(x in e for e in env for x in ('PGS_', 'DUMP', 'TRACE', 'CAPTURE', 'ORACLE')), 'dump/trace key in env'
 open(f'{OUT}/ps2x.env', 'w').write('\n'.join(env) + '\n')
 sh(f'mkdir -p {DSCRAP}; rm -f {DSCRAP}/*.png {DSCRAP}/*.data')
@@ -261,11 +265,23 @@ while True:
             layer, tried = pick_layer()
             log(f'LAYER retry {layer!r} tried={tried}')
         # NB: per-thread ps listing prints nothing on this ROM (S1); thread
-        # split comes from the end-of-run top -H dump instead.
+        # split comes from the end-of-run top -H dump instead. Part 2 adds
+        # cpu6 clock + GameThread's current cpu (/proc stat field 39).
         therm = sh('echo "$(cat /sys/devices/system/cpu/cpu5/cpufreq/scaling_cur_freq) '
+                   '$(cat /sys/devices/system/cpu/cpu6/cpufreq/scaling_cur_freq) '
                    '$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq) '
                    '$(for z in /sys/class/thermal/thermal_zone*; do [ "$(cat $z/type)" = cpu-1-1-1 ] && cat $z/temp; done) '
                    '$(dumpsys thermalservice | grep -m1 "Thermal Status" | tr -dc 0-9)"').split()
+        gtcpu = '?'
+        try:
+            tid2, _ = game_tid()
+            if tid2:
+                st = sh(f'cat /proc/{pid}/task/{tid2}/stat').strip()
+                if st and ')' in st:
+                    gtcpu = st.split(')', 1)[1].split()[36]  # field 39 = processor
+        except Exception as e:
+            gtcpu = f'err:{e}'[:40]
+        therm.append(f'gtcpu={gtcpu}')
         with open(f'{OUT}/thermal.txt', 'a') as f:
             f.write(f't={el:.1f} tick={tick} ' + ' '.join(therm) + '\n')
         with open(f'{OUT}/sf-latency.txt', 'a') as f:

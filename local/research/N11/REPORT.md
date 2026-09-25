@@ -231,3 +231,224 @@ after every run. The profile and pinning block is a real build limit (release AP
 shell can't set app-thread affinity), correctly stopped at the probe instead of burning launches.
 Part 2 released: `profileable` manifest + in-process `PS2X_GAME_THREAD_CPUS` knob on `71c952e`,
 one APK, S2/S3/S4b.
+
+---
+
+# Part 2 — profiles on a profileable build (done)
+
+Worker: Muse Code. Brief: `local/muse/prompts/N11.md` Part 2 (overrides
+Part 1's no-fork/no-build rule for the two `n11-prof` commits + one APK;
+all other Rules apply). Base: fork `ssx3` `71c952e` (moved from `f949ff0`).
+
+Outcome: **the per-stage table exists.** S2 race profile (GameThread-bound:
+VU1 hazard 70.1 + execute 48.2 ms of a 145.4 ms race frame) and S3 menu
+profile (GsWorker-bound: Turnip driver 61.9 + libc 28.2 ms of a 41.9 ms
+menu frame). S4b proves the affinity knob (`rc=0`, GameThread on 6/7 all
+run) with no speed change vs unpinned. Device restored to Brad's exact
+play state (TL1 APK + env + save) afterwards.
+
+## Fork work (`n11-prof`, local only, never pushed)
+
+Worktree `~/dev/ssx3-work/N11/PS2Recomp`, branch `n11-prof` from
+`fork/ssx3` `71c952e` (verified `git rev-parse fork/ssx3` after fetch; the
+E lane's checkout untouched). Game thread starts at
+`ps2xRuntime/src/lib/ps2_runtime.cpp:3724-3726` (`PS2Runtime::run()`:
+`std::thread gameThread`, `SetCurrentThreadName("GameThread")`).
+
+- Commit A `9dadccd`: manifest `<profileable android:shell="true" />`
+  inside `<application>` (release stays non-debuggable).
+- Commit B `20db28f`: `PS2X_GAME_THREAD_CPUS` (`"6,7"`; unset/empty = no
+  change). New `ps2xRuntime/include/ps2_thread_affinity.h` (pure
+  `parseCpuList` + `pinCurrentThreadToCpus` via `sched_setaffinity(0,…)`,
+  `#if defined(__linux__) || defined(__ANDROID__)`); hook at game-thread
+  start prints `[affinity] game thread cpus=… rc=…` to stderr
+  unconditionally (`RUNTIME_LOG` compiles out of release builds — same
+  precedent as `[padscript]`/`[vsync-rate]`). Test
+  `ps2xTest/src/ps2_thread_affinity_tests.cpp` (parser cases), registered
+  in `ps2xTest/CMakeLists.txt` + `main.cpp`. 6 files, +121. No `git add -f`
+  in the fork.
+- Runner-dir check empty: `git diff --stat 14b1e5cb n11-prof --
+  ps2xRuntime/src/runner` → no output.
+- Suite from worktree root (TL1 recipe: Release, `PS2X_BUILD_TEST=ON`,
+  taps OFF, shadow-parallel ON, parallel-gs `963cb57`, canonical codegen):
+  configure rc=0, `ninja ps2x_tests` rc=0, **603/603 pass** incl. new
+  `Ps2ThreadAffinity`.
+
+## APK build (bytesize, the one build)
+
+`ps aux` first: WSL idle (load 0.00, no PCSX2/builds). Root `/home/brad/n11`:
+`PS2Recomp` = n11-prof tar (SHA `f3645909…` both ends); codegen/parallel-gs/
+jniLibs = `/home/brad/tl1/*` re-verified (codegen 9457 files; parallel-gs
+24310 + 3 manifest-excluded `fsr2/build` files, 8/8 sampled SHAs match
+TL1's manifest; jniLibs 2 files). Detached launch died the TL1 way, so the
+build ran in one held ssh: **BUILD SUCCESSFUL in 6m**, `BUILD_SH_RC=0`.
+
+- APK `2f5c4b67bd2689939b12e887f5b15b5fe70eb10b5a403736de241b15b33d8fe9`
+  (remote ×2, pulled ×2, all match), 153,720,392 B (44 B over TL1's).
+- Merged manifest contains `profileable android:shell="true"`; installed
+  `base.apk` SHAs match per run (3 installs).
+- Unstripped `.so` kept:
+  `…/n11/PS2Recomp/android/app/build/intermediates/cxx/RelWithDebInfo/1hw2q3n2/obj/arm64-v8a/libps2EntryRunner.so`
+  (997 MB, BuildID `eb91129d…`, SHA `31371b40…`). Build script: `build.sh`.
+
+## Launches (3/3; same env/restore rules as Part 1)
+
+Env = Part 1 N11 env + `PS2X_GAME_THREAD_CPUS=6,7` on S4b only. Driver
+gains: `--game-cpus`, cpu6 clock + GameThread cpu (`/proc/.../stat`
+field 39) in the 10 s poll. Thermal ≤2 verified before each launch
+(1-min waits before S3/S4b recorded below). New APK installed before each
+run; Brad env `9fb46f85…` + mc0 SHAs verified after every run.
+
+| Launch | Window | Result | Receipts |
+| --- | --- | --- | --- |
+| S2 race profile | tick 2412→2609 = 197 vsyncs in 31.1 s wall (6.34/s, profiler-perturbed) | 30 s `simpleperf record -g --app` from t+171.4 s; `perf-S2.data` 27.6 MB (`4e557efa…`); 0 FATAL; battery 62→60% | `logs/S2/` + 3 PNGs |
+| S3 menu profile | tick 676→1525 = 849 vsyncs in 35.6 s wall (23.8/s) over main menu→loading | 30 s profile from t+22.0 s; `perf-S3.data` 93.6 MB (`d53a1574…`); 0 FATAL; 4 GsWorker threads ~100% each; battery 60→59% | `logs/S3/` + 2 PNGs |
+| S4b pinned clean | tick 1714→4527 = 2813 vsyncs = 47.0 s guest; 416.0 s race wall | `[affinity] game thread cpus=6,7 rc=0`; gtcpu all 6/7 (20+24 polls); STOP tick ≥4500 at t+491.1 s; 44 MPH at 00:00:46; 0 FATAL; battery 59→55% | `logs/S4b/` + 4 PNGs |
+
+Thermal waits: S3 pre-launch 3→0 (~1 min), S4b pre-launch 3→2 (~1 min).
+S2 ran at status 3, cpu6/cpu7 4.32 GHz, GameThread on cpu6 during the
+profile (unpinned run roams 5→6/7: menus cpu5, race cpu6/7 per S2 gtcpu).
+S3/S4b heat-soaked in-run (status 5).
+
+After S4b the device was restored to Brad's exact play state: TL1 APK
+`aeb60d4d…` reinstalled (base.apk SHA matches), env `9fb46f85…`, mc0 data
+SHAs match, `/data/local/tmp/n11` + `files/mc0-test` removed, lease
+`LEASE_FREE N11 done`, app not running.
+
+Screencaps viewed: S2 sc01 race 2ND/2 00:00:06 (profile starts tick 2412,
+just after); S3 sc01 Single Event Backcountry/Happiness loading 100%
+(profile ends tick 1525); S4b sc04 2ND/2 00:00:46, 5%, 44 MPH.
+
+## Symbolization
+
+Bytesize NDK simpleperf + symdir (unstripped `.so` + device `libc.so`;
+Turnip added but useless — see below). N5 `report.sh` recipe:
+self/comm-sym, self/sym-dso, threads, dso, children(≥1%).
+
+- S2: 148,317 samples, 126.66 G cycles, **0 unresolved rows**.
+- S3: 601,798 samples, 428.96 G cycles, **0 unresolved rows** (our `.so`;
+  Turnip/ kernel rows as below).
+- Turnip `libvulkan_freedreno.so` is stripped (0 defined FUNCs in dynsym;
+  APK bytes identical to jniLibs), so its ~1235 S3 rows stay
+  `libvulkan_freedreno.so[+off]` — bucketed as one Vulkan-driver stage.
+- Kernel rows stay `[kernel.kallsyms][+off]` (no kallsyms) — bucketed
+  libc/kernel; children view attributes the big ones (GsWorker `ioctl`
+  9.4% = GPU submit; `pthread_cond_signal` 3.2% = GameThread→GsWorker
+  enqueue handoff).
+- Reports committed: `reports/s2|s3-{self-comm-sym,threads,dso,children}.txt`
+  (+ `s2-self-sym-dso.txt`; the 1.7 MB `s3-self-sym-dso.txt` stays in
+  scratch). Stage mapping appendices: `reports/s2-stage-appendix.md`
+  (all 98 rows ≥0.05%) and `reports/s3-stage-appendix.md` (all 302 rows
+  ≥0.05%); full mapping reproducible with `buckets.py --appendix`.
+
+## Per-stage ms per guest frame (the point of the lane)
+
+Conversion model (stated): sample share × scale k. S2 race is
+GameThread-bound (84.92% of samples; top 84–100%), so GameThread ms/frame
+= clean race wall/frame W = 145.4 ms (mean of S1 142.0, S4 146.4, S4b
+147.9) → k = 145.4/84.92 = 1.7122 ms per 1% (this also de-perturbs the
+9% profiler slowdown: window ran 6.34/s vs ~7.0 clean). S3 menus are
+GsWorker-pool-bound (87.96%; 4 workers ≈ 3.3 cores at end snapshot), so
+GsWorker ms/frame = 41.9 ms window wall/frame × 3.3 → k = 1.5716
+(approximate: end-snapshot anchor; unscaled for perturbation).
+
+S2 race (shares of all samples; 92.11% covered, 7.89% tail <0.05%):
+
+| Stage | Share | ms/frame |
+| --- | ---: | ---: |
+| VU1 hazard bookkeeping | 40.92% | 70.1 |
+| VU1 execute | 28.17% | 48.2 |
+| libc/kernel/vdso | 14.53% | 24.9 |
+| PLT | 4.94% | 8.5 |
+| GIF/GS packet handling | 0.80% | 1.4 |
+| scheduler/sync/waits | 0.60% | 1.0 |
+| EE runtime helpers | 0.53% | 0.9 |
+| guest code | 0.38% | 0.7 |
+| paraLLEl CPU submit | 0.36% | 0.6 |
+| VIF1/DMA | 0.30% | 0.5 |
+| other | 0.30% | 0.5 |
+| profiler unwind overhead | 0.14% | 0.2 |
+| PS2 runtime other | 0.14% | 0.2 |
+| tail (<0.05%) | 7.89% | 13.5 |
+
+S2 thread rows (CPU-s per guest frame): GameThread 145.4 (by
+construction), GsWorker 20.8, main 4.5, AAudio 0.3. Total ≈ 171 ms =
+1.18 cores. DSO: our `.so` 81.15%, kernel 13.21%, libc 4.16%, vdso 0.76%,
+Adreno GLES 0.27%, Turnip 0.09%. Children: `EeScheduler::run` 84.6% →
+guest `sub_00382760` → `Store32` → `processPendingTransfers` →
+`processVIF1Data` → `VU1Interpreter::run` 77.8%.
+
+S3 menus (71.62% covered at ≥0.01%; 28.38% diffuse tail):
+
+| Stage | Share | ms/frame |
+| --- | ---: | ---: |
+| Vulkan driver CPU (Turnip, stripped) | 39.39% | 61.9 |
+| libc/kernel/vdso | 17.93% | 28.2 |
+| scheduler/sync/waits | 4.84% | 7.6 |
+| VU1 hazard bookkeeping | 3.50% | 5.5 |
+| VU1 execute | 3.19% | 5.0 |
+| profiler unwind overhead | 0.87% | 1.4 |
+| PLT | 0.61% | 1.0 |
+| guest code | 0.55% | 0.9 |
+| other | 0.38% | 0.6 |
+| EE runtime helpers | 0.15% | 0.2 |
+| PS2 runtime other | 0.11% | 0.2 |
+| VIF1/DMA | 0.05% | 0.1 |
+| paraLLEl CPU submit | 0.03% | 0.0 |
+| GIF/GS packet handling | 0.02% | 0.0 |
+| tail (<0.01%) | 28.38% | 44.6 |
+
+S3 thread rows: GsWorker 138.3 (by construction), GameThread 16.5, main
+2.2, AAudio 0.1. S3 top symbols: `HybridMutex::tryLock` 3.18% /
+`unlock` 1.47% (GsWorker lock churn), scudo `allocate` 1.13% /
+`deallocate` 0.98% / `quarantine` 0.91% (malloc traffic), `__memset` 1.10%,
+`__memcpy` 0.86%. Our own PGS/GS code ≈ 0.05%: menu GsWorker time is
+driver-internal + allocator + mutex, spread over ~1400 sub-1% symbols.
+
+S2 top 5: `commitReadyPipelines` 24.96%, `calculatePairReadyCycle` 12.73%,
+`VU1Interpreter::run` 7.34%, `@plt` 4.84%, `execUpper` 3.80% (all
+GameThread; full top-25 in `reports/s2-self-comm-sym.txt`).
+
+## S4b (pinned 6,7; base 71c952e) vs S1 (unpinned; base f949ff0)
+
+Guest vsyncs/s and ratio ÷59.94. Base differs (I32 etc. landed between),
+so this is pin + base-delta combined; all deltas are inside run-to-run
+spread (cf. S1 vs S4).
+
+| Phase | S1 /s | S4b /s | S1 × | S4b × |
+| --- | ---: | ---: | ---: | ---: |
+| Title | 31.94 | 31.27 | 0.533 | 0.522 |
+| Main menu | 29.23 | 30.35 | 0.488 | 0.506 |
+| Select Character | 15.96 | 18.31 | 0.266 | 0.305 |
+| Setup/Peak | 23.41 | 24.51 | 0.391 | 0.409 |
+| Mode/Event | 34.88 | 35.91 | 0.582 | 0.599 |
+| Loading | 11.41 | 10.11 | 0.190 | 0.169 |
+| **Race** | **7.04** | **6.76** | **0.117** | **0.113** |
+
+Pinning GameThread to 6,7 changes nothing measurable (unpinned it already
+runs on 6/7 in the race — S2 gtcpu). S4b GPU race 16.5% (n=63); S2 GPU
+race 15.4% (n=14). S2 pre-profile phases on the new base match S1 within
+noise (title 0.517×, menu 0.503×, SC 0.268×, setup 0.379×, mode 0.601×,
+loading 0.189×, early race 7.2–7.8/s).
+
+## Gaps, budgets, receipts
+
+| Gap | Reason |
+| --- | --- |
+| Turnip symbol names | stripped adrenotools build; offsets only |
+| Kernel symbol names | no kallsyms; call-stack attribution only |
+| S3 28% diffuse tail | ~1100 symbols <0.01% each (menus spread thin) |
+| S3 ms scale ±15% | GsWorker-pool anchor from end snapshot, unscaled perturbation |
+
+Budgets: 2 fork commits (local `n11-prof`, no push), 1/1 builds (6 min),
+3/3 launches (S2 ~207 s, S3 ~64 s, S4b ~495 s wall), ~2 h of 2 h, N11 git
+dir 1.9 MB text-only, scratch `~/dev/ssx3-work/N11/` (APK, tars, build
+dir, PNGs, perf.data, suite logs). Bytesize: `/home/brad/n11` (source,
+build tree, APK, prof/, symdir/).
+Committed: this section, `launch.py` (Part 2 args), `buckets.py`,
+`build.sh`, `logs/S2|S3|S4b/`, `reports/`.
+Key commands: the Part 1 block plus `python3 launch.py --label S2 …
+--profile-after-tick 2400 --profile-secs 30`, `--label S3 …
+--profile-after-tick 636 --profile-secs 30 --scap-ticks 700,1000,1400`,
+`--label S4b … --game-cpus 6,7`; `simpleperf report … --symdir …` ×14
+(incl. regens) on bytesize; `buckets.py <report> [--comm T] [--appendix]`.
