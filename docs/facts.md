@@ -63,6 +63,10 @@ orchestration lessons in `docs/orchestration.md`.
 - Mac GS default is paraLLEl (`PS2X_GS_BACKEND=parallel`, `GRANITE_VULKAN_LIBRARY=
   /opt/homebrew/lib/libvulkan.1.dylib`, build `PS2X_GS_SHADOW_PARALLEL=ON`); det-hash is
   identical to the CPU backend. Speed boots are unpaced: ratios > 1 mean headroom. (GB8, F1)
+- Mac boots also set `PGS_HIER_BINNING=force` (paraLLEl-GS fork `ssx3` `19d93b2`): the Odin's
+  hier-if-large binning (t2=2, t4=4) runs correctly on M5/MoltenVK (bit-identical to flat). What
+  stays Odin-only: subgroup width (Apple 32 vs Adreno wave64; can't be forced either way),
+  descriptor buffers, Turnip driver CPU cost/thermals, Adreno bilinear rounding. (GB9)
 
 ## Odin / Android / GPU
 

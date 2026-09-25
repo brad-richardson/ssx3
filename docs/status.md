@@ -5,7 +5,7 @@ Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`
 History: git log (this board is current state only). Updated 2026-09-25 ~07:15 EDT, Mac mini.
 
 **Pins:** PS2Recomp fork `ssx3` `56a5e8a` (F1 fold: RR1 race/menu rendering fixes, E57 VU1 speed, AU9 race SFX, N11 profileable + pin knob; I32 iOS controls; sound HLE, GS replay harness, widescreen, Turnip packaging) ·
-paraLLEl-GS fork `ssx3` `963cb57` (wave64 binning fix) · Granite fork `ssx3` `166ba21a` ·
+paraLLEl-GS fork `ssx3` `19d93b2` (wave64 binning fix; `PGS_HIER_BINNING` knob) · Granite fork `ssx3` `166ba21a` ·
 canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
 | Lane | State | Next | Blocker |

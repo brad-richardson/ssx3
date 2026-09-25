@@ -181,3 +181,14 @@ Odin binning-logic coverage boot/replay with `PGS_HIER_BINNING=force`.
 Remaining Mac↔Odin gaps for GB9 Part 2 / knob 2: descriptor-buffer path
 (Odin-only until `PGS_DESC_PATH`), wave64 vs wave32 subgroups (stays
 Odin-only per Fable §4), Turnip CPU/thermals, Adreno bilinear rounding.
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass.** With `PGS_HIER_BINNING=force` the Mac runs the Odin's hier-if-large rule (t2=2, t4=4) and
+the replay is bit-identical to flat binning (41/41 rows, same tick-2050 PPM); the live det-hash
+matches F1 B1 to t2450. The "broken Metal drivers" early return doesn't hold on M5/MoltenVK. Pushed
+knob `19d93b2` → paraLLEl-GS fork `ssx3` (fast-forward from `963cb57`; the probe `63cd7de` stays
+local). The PS2Recomp `[gs-path]` print fix `5706858` folds with the next runtime batch. Mac boots use
+`PGS_HIER_BINNING=force` from now on so they take the Odin's binning path; the remaining Odin-only
+differences are the subgroup width (32 vs 64), the descriptor path and Adreno rounding. Part 2
+(`PGS_DESC_PATH=plain` replay on the Odin) waits for the Odin.
