@@ -10,7 +10,7 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
 | Lane | State | Next | Blocker |
 | --- | --- | --- | --- |
-| **N** Android / Odin | **Live Odin race from committed fork code** (N9). **First clean baseline (N10, 2 runs, sound off): race 0.113×**, menus ~0.5×, title ~0.54×; rider moves (44 MPH by 00:00:46). Thermal status 4–5 under sustained load. | Rider idle 00:00:06–00:00:40 (check Mac on the same route); image fill/margins; stripes; TL1 tooling after UP1 | — |
+| **N** Android / Odin | **Live Odin race from committed fork code** (N9). **First clean baseline (N10, 2 runs, sound off): race 0.113×**, menus ~0.5×, title ~0.54×; rider moves (44 MPH by 00:00:46). Thermal status 4–5 under sustained load. | Brad's play build (TL1 APK `aeb60d4d`, planar audio, sound on, his save) via I31 Part 2; rider idle 00:00:06–00:00:40 (check Mac); image fill/margins; stripes. Odin replays: `local/tooling/odin/odin_replay.py` | — |
 | **E** PS2 runtime | Race terrain, rider, HUD draw on Mac; sky/sun missing, dark GS region. Save seed source found: Odin AetherSX2 `Mcd001.ps2` has `BASLUS-20772-GAM0001`/`SET0001` (private copy, `ac98cf37…`). | save-card seed; sky; E54E, INTC 5/7; E57 VU1 speed | — |
 | **G** GS / GPU backend | GPU backend opt-in on Mac (GB6C, 578/578 replays). Damaged title glyphs traced to a texture word at packet 5470 (GB7C7P2); earlier producer open. Bilinear rounding differs Mac vs Adreno (small). | Glyph producer; exact bilinear (shader regen); wave128 Turnip probe (later) | — |
 | **A** Audio | **Menu music fixed and confirmed by Brad** (AU8: tag-1 PCM is planar; matches PCSX2's real output). Host output still needs `PS2X_SOUND=1`. Races also play SFX on SPU2 hardware voices, which we don't emulate yet. | Sound on in iOS (I30) and Odin envs; race SFX lane (SPU2 voices) | — |
@@ -22,4 +22,4 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
 **Speed:** Odin clean baseline is N10 (race 0.113×); Mac baselines predate the sound fold (re-measure before quoting).
 **Workers:** bounded briefs on muse (Go Muse Spark Contributor); Opus panes when Brad approves;
-no Codex workers (quota). **Leases:** Odin free; mini slots free.
+no Codex workers (quota). **Leases:** Odin: I31 Part 2; mini: four boot slots (speed runs take all four).
