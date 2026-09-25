@@ -180,3 +180,102 @@ Base `c150f207`. Part 2 untouched (TL1 holds the Odin).
 - Only names, sizes and SHAs of the save files are committed; no card bytes.
 - G2 (a zero-env launch) stays open; Brad's first home-screen launch closes it.
 - Part 2 (Odin) waits until TL1 releases the Odin; tests there use an empty `mc0-test` (I26-FAST derails on a seeded card, §5).
+
+---
+
+# I31 Part 2 — Brad's save + manual-play default on the Odin (done)
+
+Worker: Muse. Brief Part 2, released after TL1. APK
+`~/dev/ssx3-work/TL1/app-release.apk` (SHA
+`aeb60d4d5e0c8418…d1e34220` ×2 match, 153,720,348 B; fork `f949ff0` +
+parallel-gs `963cb57` per TL1). No fork edits, no push. Save files
+private: names + SHAs only. `tl1.gs` (1.1 GB) + TL1 hashes/frames left
+untouched.
+
+Outcome: **deployed + verified, all observables met.** `files/mc0/`
+holds bit-exact copies (device SHAs match source); device default
+`ps2x.env` is Brad's manual-play env (SHA `9fb46f85…`, verified after
+restore); the single launch reached Select Character showing Mac with
+all 8 stats exactly matching E55D16 (2.9/4.0/3.0/3.0/3.0/3.0/1.0/3.0)
+with the 36 kHz sound stream running, zero FATAL; force-stop, lease
+released.
+
+## 8. Env provenance (pulled first, saved to scratch)
+
+Device orig (SHA `176eff84…` = N9/N10 orig, 1022 B, scratch
+`odin/ps2x.env.orig`) holds: parallel backend, Turnip, CD image,
+SKIP_MOVIE, I26-FAST script + vsync clock, VSYNC_RATE_LOG — **plus a
+capture/dump block**: `PS2X_N8D5_TILE_CAPTURE=1`,
+`PS2X_N8D7F_SELECTED_CAPTURE=1`, `PS2X_N8D7L_ORACLE=1`,
+`PS2X_GS_CAPTURE=…/n8d7m6.gs`, `PS2X_GS_CAPTURE_STOP_TICK=2050`,
+`PS2X_FRAME_DUMP_DIR=…`, `PS2X_FRAME_DUMP_ONCE_TICKS=…`. Those would
+write GBs and cost speed on every play, so Brad's default drops them.
+
+Brad's default (`odin/ps2x.env.brad`, SHA `9fb46f85…`, 472 B; embedded
+in `deploy-odin.sh`): `PS2X_GS_BACKEND=parallel`, `PS2X_GS_TURNIP=1`,
+`PS2X_CD_IMAGE=…/files/SSX3.iso` (required: `cdImage` has no default,
+`main.cpp:325-333`), `PS2X_SKIP_MOVIE=1`, `PS2X_SOUND=1`
+(`ps2_runtime.cpp:1116`, same key as iOS). No pad script, no clock key
+(inert without a script), no rate log (tests add their own), no
+capture/dump keys. No `PS2X_MC_ROOT`: default `files/mc0/` is where
+the save lives (`main.cpp:337-345` + `ps2_runtime.cpp:394`). No
+`PS2X_BOOT_ELF` on Android (baked `PS2X_DEFAULT_BOOT_ELF`,
+`main.cpp:176-187`); env shim reads single `files/ps2x.env`
+(`ps2_android_runtime.cpp:12-41`, keys logged as `ps2x.env: set …`).
+
+Test-launcher contract (documented in `deploy-odin.sh`): automated
+runs set `PS2X_MC_ROOT` to an empty `files/mc0-test/` (I26-FAST
+derails on seeded cards, §5) and restore Brad's env after.
+
+## 9. The one Odin launch (S1)
+
+Preflight green: lease `LEASE_FREE TL1 done` → claimed `I31 odin
+deploy`, keyguard `showing=false`, AC `true`, 72 %, app not running.
+`adb install -r` Success (APK SHA ×2 pre-verified). Brad env pushed +
+verified; save pushed (device two-reads match per file); temp launch
+env (Brad's + `15015:start:250,20854:cross:250` + clock + rate log,
+SHA `c16cc08b…`) pushed. Driver `~/dev/ssx3-work/I31/odin-run.py`
+(N10/odin_replay recipe): logcat `-c`, `am start`, BACK at 6 s +
+screencap confirm, tick-gated caps at 1400/1700/2100 + periodic,
+300 s wall / 20 MB logcat caps. STOP tick 2430 ≥ 2400 at ~116 s
+(~21/s in menus). Force-stop (`pidof` empty), Brad env restored +
+SHA-verified, lease `LEASE_FREE I31 done`, battery 72→72 %.
+
+Logcat (`odin-key-lines.txt`): all 8 launch keys `ps2x.env: set …`;
+`[padscript] armed n=2`, 2 presses exactly at 15015/20854ms +
+releases; `[snd-output] stream rate=36000 channels=2 bits=16`
+(underruns 1230288, overflows 0 — guest under 1×, same shape as iOS);
+`[gs-path] … subgroup_hier=wave64-fixed … desc=buffer … gpu=Adreno
+(TM) 830` (parallel backend on Turnip); zero FATAL.
+
+Screens (`odin-shots.txt`, PNGs in scratch): sc00 shows the PS2
+"Checking for memory card (PS2) in MEMORY CARD slot 1" screen (card
+path live; no USB dialog). sc01 (tick~1412): Select Character, Mac,
+all 8 stats readable and **exactly equal to E55D16**: 2.9 / 4.0 /
+3.0 / 3.0 / 3.0 / 3.0 / 1.0 / 3.0 (unseeded ≈ 1.0). sc04 (tick~2430):
+same screen parked. **Autoload + sound confirmed on the device.**
+Visible horizontal combing (no deinterlace key; N-lane's area).
+
+## 10. Correction, gaps, receipts
+
+- Correction: Part 1 `shots-viewed.txt` mis-transcribed E55D16's
+  Stability as 4.0; re-crop confirms **3.0** (fixed in this commit).
+  The E55D16 gate's "3.0–4.0" range still holds; all 8 Odin stats now
+  match E55D16 exactly.
+- G6 (new): no audible check of the Odin 36 kHz stream (logcat only);
+  Brad's play is the audible test. G2 (iOS zero-env run) still open.
+- Driver wart (cosmetic): the pid-after check used check=True so
+  `pidof` rc=1 logged "force-stop FAILED"; verified separately the
+  app is not running.
+- `deploy-odin.sh` (committed): idempotent re-apply, SKIP path tested
+  on-device (exit 0).
+
+```sh
+bash local/research/I31/deploy-odin.sh [SERIAL] [SAVE_SRC]  # save + env, no install/launch
+```
+
+Budget: 1 install, 1 launch (~116 s), read-only verifications; ~35
+min of 45. Committed: this section, `deploy-odin.sh`,
+`odin-key-lines.txt`, `odin-verify.txt`, `odin-shots.txt`, plus the
+`shots-viewed.txt` one-line fix. Scratch: `~/dev/ssx3-work/I31/odin/`
+(driver, logcat, 5 PNGs, envs, driver.log).

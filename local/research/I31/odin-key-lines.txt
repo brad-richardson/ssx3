@@ -1,0 +1,26 @@
+--- ps2x.env set (logcat, launch env) ---
+ps2x.env: set PS2X_CD_IMAGE
+ps2x.env: set PS2X_GS_BACKEND
+ps2x.env: set PS2X_GS_TURNIP
+ps2x.env: set PS2X_PAD_SCRIPT
+ps2x.env: set PS2X_PAD_SCRIPT_CLOCK
+ps2x.env: set PS2X_SKIP_MOVIE
+ps2x.env: set PS2X_SOUND
+ps2x.env: set PS2X_VSYNC_RATE_LOG
+--- padscript ---
+[padscript] armed n=2 source=env clock=vsync
+[padscript] press i=0 now=15015ms at=15015ms hold=250ms buttons=0x0008
+[padscript] release i=0 now=15265ms
+[padscript] press i=1 now=20854ms at=20854ms hold=250ms buttons=0x4000
+[padscript] release i=1 now=21104ms
+--- snd-output ---
+[snd-output] stream rate=36000 channels=2 bits=16
+[snd-output] wall-minute underruns=1230288 overflows=0 total-underruns=1230288 total-overflows=0
+--- gs-path ---
+[gs-path] hier_rule=hier-if-large hier_t2=2 hier_t4=4 subgroup_flat=wave64 subgroup_hier=wave64-fixed vk11_subgroup=128 max_wg_inv=2048 desc=buffer desc_req=push+heap+buffer sampler_feedback=on feedback_rt=off gpu=Adreno (TM) 830
+--- last tick ---
+tick=2430
+--- FATAL count ---
+0
+--- logcat bytes ---
+   34803
