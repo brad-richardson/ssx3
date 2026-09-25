@@ -146,6 +146,9 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   where Android's NDK doesn't (F4: VU1 chain recursion crashed the Odin at 512 frames). Anything with
   deep or chained calls gets a small-stack test (512 KB) on the Mac before a device build.
 
+- bytesize builds run over a held, foreground ssh: WSL stops the Ubuntu distro ~1–2 min after the last
+  `wsl.exe` client disconnects, killing `&`/`setsid` jobs (F5 G5). Background the ssh on the mini instead.
+
 - Before assigning a lane ID, check `local/research/<ID>/` doesn't exist (PF1 collided with an older Odin lane on 09-25).
 
 ## 7. Brad's preferences
