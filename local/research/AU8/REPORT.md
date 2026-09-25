@@ -107,3 +107,5 @@ A→B, B and C clips. Folded: `f2ec588` pushed to fork `ssx3` (fast-forward from
 594/594; runner-dir diff empty); then UP1's port on top, `d711506`. Open: channel order rests on
 PCSX2 only (G1); race/SFX paths unmeasured (G2); host plays 36 kHz without the 3→4 resample (G3,
 labelled); sound output still needs `PS2X_SOUND=1`. Brad's listen of the new clips is pending.
+
+**Brad (2026-09-24):** "that planar fix audio version sounds exactly right."
