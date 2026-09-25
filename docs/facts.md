@@ -7,8 +7,12 @@ orchestration lessons in `docs/orchestration.md`.
 ## Guest (SSX 3 on the EE)
 
 - Music is EE-mixed PCM: EA-XA decoded and mixed on the EE at 36 kHz stereo, 384 frames per
-  sound tick in tag 1; the sound tick is 93.75 Hz of guest time. The tag-1 record `0x512E40`
-  sits inside DMA buffer `0x512B80`. (AU2, AU4)
+  sound tick in tag 1; the sound tick is 93.75 Hz of guest time. **The tag-1 payload is planar:**
+  384 s16 for one channel, then 384 for the other; the first block feeds the SPU2 **right** input.
+  SNDDRV resamples 3→4 (linear, phase 0.5 from the saved last sample) to 48 kHz. At Select Character
+  PCSX2's final output is exactly that, with no IOP-mixer, voice or reverb content. (AU8; AU2–AU7
+  read it as interleaved, which is wrong.) The tag-1 record `0x512E40` sits inside DMA buffer
+  `0x512B80`. (AU2, AU4)
 - Movie end: the guest reads `[[mpeg+0x40]+0]` at `0x402b38`; the MPEG HLE writes the
   `sceMpegIsEnd` word. `0x548840` is the single startup-movie codec pool node. (E48, E49)
 - Widescreen: options block `0x535610` bits 20–21 (0 off / 1 16:9 / 2 anamorphic), applied by
