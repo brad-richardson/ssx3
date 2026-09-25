@@ -22,4 +22,4 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (F2/SB1 regen, `PS2X_SBR_*` pre
 
 **Speed:** Odin race 0.140× on the F1 fold (N11 before it: 0.116×, VU1 = 118 of 145 ms/frame). Mac race 0.224× on paraLLEl (GB8), CPU GS 0.179× with E57. F1 re-measures both on the folded tip.
 **Workers:** bounded briefs on muse (Go Muse Spark Contributor); Opus panes when Brad approves;
-no Codex workers (quota). RV3 Fable review running. **Leases:** Odin off USB, wall-charging (Brad replugs it to the mini; NP1 and F2 Part 2 wait); mini: four boot slots (speed runs take all four).
+no Codex workers (quota). RV3 Fable review running. **Leases:** Odin back on the mini USB at 58 % (F2 Part 2, then NP1; USB drains under load, ~4 %/run); mini: four boot slots (speed runs take all four).
