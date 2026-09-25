@@ -237,3 +237,89 @@ unpaced+sound-off det-hash identical (FP1 and AU10 hold); Mac race speed-neutral
 builds from the RD1 tip (Android compile gate met). Pushed `f3-fold` → fork `ssx3` **`ec2dbf1`**
 (fast-forward from `0ed07c4`). Parts 2 (iPhone) and 3 (Odin, APK `d5a94c27…` from `ec2dbf1`, over
 Wi-Fi) released in parallel.
+
+## Part 2 — iOS (device build `ec2dbf1`, iPad race, iPhone install-only)
+
+Worker: Muse Code, brief `local/muse/prompts/F3.md` Part 2 only. Source:
+pushed fork `ssx3` `ec2dbf1` (reused the Part 1 worktree
+`~/dev/ssx3-work/F3/PS2Recomp`; `HEAD == fork/ssx3` after fetch, clean).
+
+Builds (`~/dev/ssx3-work/F3/ios/build-install.sh` = I33 recipe + 3-line
+sed: `W`, `FORK_WT`, `PIN→ec2dbf1…`; paraLLEl-GS `19d93b2` + MoltenVK 1.4.2
+reused read-only from I33's scratch; bundled env IS
+`local/research/I33/ps2x.env`, SHA `8e0547fc…` matches I33's pin —
+parallel default, embedded MoltenVK, `PGS_HIER_BINNING=force`, sound on,
+I26-FAST route): preflight rc=0 (runner-dir diff empty, PIN ancestor of
+HEAD, PGS/Granite/codegen/MoltenVK pins re-hashed, profile `f0793278`
+valid, both devices reachable); configure_device rc=0 (`-O3 -DNDEBUG`
+asserted 2 lines, `G44 parallel-gs shadow backend ON`); build_device
+**BUILD SUCCEEDED** (126.8 MB binary); stage_device rc=0 (ELF/ISO/MoltenVK
+staged copies SHA-match inputs: `1b49d05c…`, `3c2f8eb1…`, `6cd58884…` =
+I33's device-slice pin; bundle `org.ps2x.ps2entryrunner`); sign rc=0
+(MoltenVK.framework signed explicitly before the bundle — I33 lesson;
+`codesign --verify --strict` passed). One fix in the F3 script copy: the
+`install_iphone` pre-gate now excludes `unavailable` before matching
+`connected|available` (the F2 3b substring bug, fixed "when next touched"
+per that gate).
+
+| Binary | SHA-256 (two matching reads) |
+| --- | --- |
+| device unsigned | `87e80a403f56d7ea43032d92cd1db29672c6571b296f1b42d0c6b51bbb7ebaa5` |
+| device signed (installed) | `7bc7e57cf9de38488790a7eab186524063fa3a6fa7253c7964d158a6c05c2b16` |
+
+iPad (Air 11" M2): install rc=0 (seq 1932, bundle `37AC9E67-…`); deploy
+SKIP + 7 exact-size OKs. Live container `D3C32E8F-…` from a ~2 s probe
+console (bundle path matches install URL). One fresh-card launch
+(`mc-f3`, route byte-exact 484 chars re-armed via `-e`,
+`PS2X_VSYNC_RATE_LOG=1`, no backend overrides): 82 s wall, ticks
+1137/1814/2108, terminated after (0 procs left), zero FATAL, 48 kHz,
+overlay shown. Bundled env selected parallel with the force rule:
+`[gs:parallel] live backend selected`, `[gs-path] hier_rule=hier-if-large
+… gpu=Apple M2 GPU`, `init ok`.
+
+| Shot (tick) | Viewed verdict | SHA-256 (two matching reads) |
+| --- | --- | --- |
+| `shot-t1090` (1137) | Select Event (Snow Jam / Metro-City / Happiness + Race course map, legible), full brightness | `5965b2a5…` |
+| `shot-t1810` (1814) | Race 2ND/2 00:00:01 0%, gate, EA Radio "Glass Danse - Oakenfold Remix / The Faint", rider at the gate | `8daa360b…` |
+| `shot-t2100` (2108) | Race 2ND/2 00:00:06 1%, trick 370, checkpoint beam; **rider solid and lit at screen centre** (dark outfit, red accents, arms up, board) | `d0084273…` |
+
+Brightness (DK1 gate): game-center bright-pixel mean (DK1 geometry, stdlib
+`/tmp/f3_ipad_bright.py`) = (154.2, 176.8, 240.5) vs DK1 post-fix
+(151.0, 173.3, 240.3) — within 3 LSB per channel (different run/tick,
+same full-bright level; pre-fix was 0.54×). Pad v2 (I34 gate): large
+4-arrow D-pad below-left of the face cluster, no control overlaps; the
+only collision is the known portrait-compat SELECT/START overlap (I28,
+pre-existing — the iPhone plays in landscape). Fresh-card proof: `mc-f3`
+override resolved, route hit the race on pace. Deploy re-ran after: SKIP
++ 7 OKs, Brad's `mc0` byte-identical. Diagnostic pace only: launch→t2100
+81 s (console-pty + vsync-rate overhead, one run — not a speed number).
+
+iPhone (16 Pro Max): `available (paired)` at check and at install (never
+`unavailable`); install rc=0 (seq 4856, bundle `4485DAB1-…`); deploy SKIP
++ 7 OKs. **Never launched** — no launch/process command targeted the
+iPhone.
+
+Budgets and gaps: 1 device build (no sim build — the brief doesn't ask,
+and the sim Vulkan path is I33's known descriptor-indexing blocker), 1
+probe + 1 iPad test (82 s), 2 installs; ~25 min. Scratch
+`~/dev/ssx3-work/F3` 4.5 GB. Gaps: one iPad run (no drift cancellation);
+pace diagnostic, not a speed number; iPhone unlaunched-by-us, so its
+first F3 boot is Brad's; share tier still not mounted (G7 carries).
+
+Exact commands:
+
+```sh
+sed -e 's|^W=.../I33/ios$|W=.../F3/ios|' -e 's|^FORK_WT=.../I33/PS2Recomp|FORK_WT=.../F3/PS2Recomp|' \
+  -e 's|^PIN=0ed07c4...|PIN=ec2dbf186616c7d6cf2998ea2792c500efdf4478|' \
+  local/research/I33/build-install.sh > ~/dev/ssx3-work/F3/ios/build-install.sh
+# + install_iphone gate fix (grep -v unavailable); run scripts: W-sed into F3/ios/
+git -C ~/dev/PS2Recomp fetch fork ssx3   # fork/ssx3 = ec2dbf1 = worktree HEAD
+bash ~/dev/ssx3-work/F3/ios/build-install.sh preflight configure_device build_device stage_device sign
+bash ~/dev/ssx3-work/F3/ios/build-install.sh install_ipad
+bash local/research/I31/deploy-ios.sh ipad
+bash ~/dev/ssx3-work/F3/ios/ipad-probe.sh             # live container D3C32E8F-…
+bash ~/dev/ssx3-work/F3/ios/ipad-run.sh ~/dev/ssx3-work/F3/ios/run-ipad-f3 ~/dev/ssx3-work/F3/ios/run-ipad-env.json "1090 1810 2100"
+bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
+bash ~/dev/ssx3-work/F3/ios/build-install.sh install_iphone
+bash local/research/I31/deploy-ios.sh iphone         # never launched
+```
