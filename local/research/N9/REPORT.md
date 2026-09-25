@@ -247,3 +247,16 @@ Outputs: `preflight.txt`, `transfer.txt`, `transfer-bytes.txt`,
 untracked per P6M5 precedent; APK + CMakeCache stay in scratch
 (`~/dev/ssx3-work/N9/`). WSL root `/home/brad/n9` left in place (~8 GB).
 Scratch 4.9 GB of the 20 GB lane cap.
+
+## Orchestrator gate (2026-09-24)
+
+**Part 1 A** (branches verified minimal fast-forwards, pushed; see `ORCH-GATE-P1.md`).
+**Part 2 A.** Read §7–§10 and commit `022e2af1`. Independently: screencap SHAs `09071b72…`
+(menu) and `74669f82…` (race) re-read; viewed both (`~/dev/ssx3-work/N9/orch-n9-screens.png`):
+Select Event menu and the race at 00:00:05 (terrain, rider, HUD, radio card) are fully drawn on
+the Odin screen. Device left clean (lease `LEASE_FREE N9 sidecars done`, app not running). The
+tick-2050 host-dump hash `4483c15c` equals N8X1's fixed run, so the fork-tip default path (no
+`PS2X_PGS_*` env) reproduces the validated output. **The Odin milestone "stock race renders live"
+is now reproducible from committed fork code** (PS2Recomp `fb11e18`, paraLLEl-GS `963cb57`, Granite
+`166ba21a`; APK `25711bfe…`). Loose ends: the image doesn't fill the Odin screen (margins),
+fine horizontal stripes, missing sky (also Mac), no speed number yet (diagnostic dumps on).

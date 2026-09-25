@@ -10,7 +10,7 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
 | Lane | State | Next | Blocker |
 | --- | --- | --- | --- |
-| **N** Android / Odin | Odin black frame solved (N8X1: paraLLEl-GS hierarchical binner at wave128 on Adreno; fixed wave64). Live Odin shows menu and race on screen (diagnostic APK). Fix and packaging now on the fork tips. | **N9 Part 2** (running, `w2:p7C`): one APK from fork tips, live Odin race, no knob env | — |
+| **N** Android / Odin | **Live Odin race from committed fork code** (N9: APK `25711bfe…` from the three fork tips, no knob env): menu and race drawn on the Odin screen, widescreen + sound builds. Cause of the old black frame was paraLLEl-GS wave128 binning (N8X1). | Clean Odin speed baseline (diagnostics off, 2 runs); image fill/margins; horizontal stripes | — |
 | **E** PS2 runtime | Race terrain, rider, HUD draw on Mac; sky/sun missing, dark GS region. Save seed source found: Odin AetherSX2 `Mcd001.ps2` has `BASLUS-20772-GAM0001`/`SET0001` (private copy, `ac98cf37…`). | UP1 upstream harvest (after N9); save-card seed; sky; E54E, INTC 5/7; E57 VU1 speed | — |
 | **G** GS / GPU backend | GPU backend opt-in on Mac (GB6C, 578/578 replays). Damaged title glyphs traced to a texture word at packet 5470 (GB7C7P2); earlier producer open. Bilinear rounding differs Mac vs Adreno (small). | Glyph producer; exact bilinear (shader regen); wave128 Turnip probe (later) | — |
 | **A** Audio | Sound HLE folded and default-on. Menu music equals PCSX2 to 1 LSB incl. stereo (AU7). | Brad listens to AU7 clip; race/SFX scene; host-output level | Brad's listen |
