@@ -436,3 +436,10 @@ Recommended next action: F3 is complete on all three targets (Mac
 green + rider fixed, iPhone/iPad installed, Odin speed-neutral with
 the play build installed). Gate Part 3 and ledger the Odin race
 0.139× pair.
+
+## Orchestrator gate, Part 3 (2026-09-25)
+
+**Pass.** I viewed S1 sc01: Odin race 00:00:07 at full brightness, no stripes. APK `d5a94c27…` (fork
+`ec2dbf1`) over Wi-Fi, no drops; race 0.139× / 0.139× (speed-neutral vs F2), thermal status 3 in race
+(the cool-down method held both runs at 0 at launch). Installed as Brad's play build, env + save
+verified, no launch. F3 is complete.
