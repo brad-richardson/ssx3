@@ -520,3 +520,124 @@ revert on the pushed `ssx3`.
 `ps2_vu1_recomp.cpp:187`), so only `next → pair` is a guaranteed tail call; the chain recurses. Apple
 clang on the Mac's 8 MB main stack hid it; Android's GameThread overflowed at 512 frames. Brad's F3 play
 build was restored and verified; F4I was stopped before any iPhone install. Part 2b released (below).
+
+## Part 3 (stopped) — iOS: build green, iPad crashes pre-race, iPhone never touched
+
+Worker: Muse Code, brief `local/muse/prompts/F4.md` Part 3 only.
+**Stopped by the orchestrator before any iPhone install**: Part 2
+found the VU1 pair→`next()` chain is a plain call, not a guaranteed
+tail call, so it recurses and overflows small stacks (the Android
+GameThread died 512 frames deep); iOS secondary threads (512 KB)
+crash the same way. My iPad run independently crashed pre-race
+(signal 10 at tick ~1455, below). **The iPhone was never installed,
+never launched, never probed** — no `install_iphone` /
+`deploy-ios.sh iphone` / launch command targeted it (no
+`install-iphone.log` exists).
+
+### Build (device `8559ab9`, F4 codegen + 7 VU1 images)
+
+Source: pushed fork `ssx3` `8559ab9` (fetched `fork/ssx3` =
+worktree `HEAD`, tree clean). Script
+`~/dev/ssx3-work/F4/ios/build-install.sh` = F3's recipe + W/FORK_WT
+repoint, `PIN→8559ab9…`, `CODEGEN→…/F4/codegen`, new
+`VU1GEN=…/vu1gen-ssx3` + `-DPS2X_VU1_RECOMP_DIR` in configure,
+preflight pins for the changed codegen file + all 7 vu1 SHAs, and a
+configure assertion on `PS2X: VU1 recomp: 7 images`. PGS `19d93b2`
++ MoltenVK 1.4.2 + raylib reused read-only from I33's scratch;
+bundled env is I33's `ps2x.env` unchanged.
+
+Preflight rc=0 (runner-dir diff empty, PIN ancestor of HEAD, PGS
+pin + clean, Granite `166ba21a`, codegen `8ea8ed43…` + changed
+file `89953ba2…`, 7/7 vu1 SHAs match Part 1 `vu1gen.sha`, env
+`8e0547fc…` = I33's pin, MoltenVK device `6cd58884…` = I33's pin,
+profile valid, iPad `connected` + iPhone `available (paired)`).
+configure_device rc=0 (`-O3 -DNDEBUG` ×2, `G44 parallel-gs shadow
+backend ON`, `VU1 recomp: 7 images`; Xcode ignores
+`JOB_POOL_COMPILE` silently — 0 mentions, no warnings).
+build_device **BUILD SUCCEEDED**, 0 `error:` lines, 151,472,832 B
+binary (+24 MB over F3's 126.8 MB — the 7 images), **14,343
+`VU1RecompImage` symbols** (same count as the Mac clean runner —
+the images linked in). stage_device rc=0 (ELF `1b49d05c…`, ISO
+`3c2f8eb1…`, MVK `6cd58884…` all SHA-match inputs, bundle
+`org.ps2x.ps2entryrunner`); sign rc=0 (`codesign --verify --strict`
+valid on disk).
+
+| Binary | SHA-256 (two matching reads) |
+| --- | --- |
+| device unsigned | `90396cb4ed703127c37de75d8789bb0afc1dc16ff698f98d5a56d266d4277709` |
+| device signed (installed on iPad) | `6f9f210cb6efd08030e3a188d3f7bce3300d44053a8ce9a95dfdb416578a6fc5` |
+
+### iPad (Air 11" M2): install green, pre-race crash
+
+Install rc=0 (seq 1956, bundle `3EB29373-…`); deploy SKIP + 7
+exact-size OKs. Probe (~1 s console): live container `31F72FD9-…`
+(a reinstall-new Data container, not F3's `D3C32E8F-…`), bundle
+path matches the install URL. Run env = route byte-exact 484
+chars (identical to F3's run route) + `PS2X_VSYNC_RATE_LOG=1` +
+fresh `mc-f4` under the live container. Bundled env selected
+parallel + force as designed: `[gs:parallel] live backend
+selected`, `[gs-path] … gpu=Apple M2 GPU`, `init ok`,
+`[snd-output] stream rate=48000`, overlay shown.
+
+Run f4: `shot-t1090` at tick 1164 (viewed: Select Event — Snow
+Jam / Metro-City / Happiness + Race course map, legible, full
+brightness; `628b1785…`), then **`App terminated due to signal
+10` at 29 s wall, last tick line 1455** (loading transition),
+zero FATAL, presents=1500 at the last periodic line. Retry f4b
+(fresh `mc-f4b`, same route): `shot-t1090` at tick 1146, then the
+orchestrator stop landed mid-run — killed before any verdict (not
+evidence either way). iPad end state: 0 app procs (trap cleanup +
+explicit check), F4 build left installed (test device,
+orchestrator-approved).
+
+The iOS crash signature (SIGBUS, no guest FATAL) is not the
+Android symbolicated 512-frame backtrace — no `.ips` was retrieved
+(no libimobiledevice on the mini) — so the recursion is not
+independently confirmed on iOS; it is consistent with the
+orchestrator's mechanism (small secondary-thread stack + the same
+chaining) and hit at a VU1-heavy transition.
+
+### Budgets and gaps
+
+1 device build (~4 min), 1 probe + 1.5 iPad runs, 1 install; ~25
+min wall. Scratch `~/dev/ssx3-work/F4/ios` 3.5 GB (build dir kept
+for the post-fix incremental rebuild; lane total within the 20 GB
+cap; disk 118.4/200 GB at start). No lease held (no mini boots, no
+Odin touch). Text in git: this section only (scripts stay in
+scratch, as F3 Part 2).
+
+Gaps, stated plainly:
+
+- G1. No race frames, no diagnostic pace: the crash lands before
+  t1714 (one completed crash, one run stopped mid-way).
+- G2. iPhone deliberately untouched: no install, no env, no
+  launch. Brad's iPhone still has the F3 build.
+- G3. No iOS backtrace: the SIGBUS mechanism is inferred from
+  Part 2's Android root cause, not independently confirmed.
+- G4. No post-run deploy re-verify (stopped early); runs used
+  `mc-f4`/`mc-f4b` cards only, Brad's `mc0` untouched since the
+  pre-run 7/7 OKs.
+- G5. Brad's `mc0` on the iPad lives in the new `31F72FD9-…`
+  container (reinstall effect); the deploy put it there with
+  exact-size OKs.
+
+Exact commands:
+
+```sh
+sed -e 's|.../F3/ios|.../F4/ios|' -e 's|.../F3/PS2Recomp|.../F4/PS2Recomp|' \
+  -e 's|^PIN=ec2dbf1...|PIN=8559ab9...|' -e 's|^CODEGEN=.../codegen-ssx3|CODEGEN=.../F4/codegen|' \
+  ~/dev/ssx3-work/F3/ios/build-install.sh > ~/dev/ssx3-work/F4/ios/build-install.sh
+# + VU1GEN var/flag, preflight vu1 + changed-file pins, 7-images assertion
+bash ~/dev/ssx3-work/F4/ios/build-install.sh preflight configure_device build_device stage_device sign
+bash ~/dev/ssx3-work/F4/ios/build-install.sh install_ipad
+bash local/research/I31/deploy-ios.sh ipad
+bash ~/dev/ssx3-work/F4/ios/ipad-probe.sh             # live container 31F72FD9-…
+bash ~/dev/ssx3-work/F4/ios/ipad-run.sh .../run-ipad-f4 .../run-ipad-env.json "1090 1810 2100"  # signal 10 @29s
+bash ~/dev/ssx3-work/F4/ios/ipad-run.sh .../run-ipad-f4b .../run-ipad-env-b.json "1090 1810 2100"  # stopped mid-run
+```
+
+Recommended next action: after the one-line emitter fix
+(`musttail` on pair→`next()`), regen, and Mac re-verify, rebuild
+this same script (incremental) and re-run Part 3 whole: fresh iPad
+install + race run to t2100, then iPhone install +
+`deploy-ios.sh iphone`, still no iPhone launch.
