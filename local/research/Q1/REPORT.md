@@ -267,3 +267,13 @@ working model of exactly this design:
   handles the ==1 case; any further reduction (e.g. capping at 254) was not verified.
 - The old monolithic `microVU.inl` (1.8/2.0 tag) was not read; all findings are master.
   If stage B should mirror a *released* PCSX2 exactly, diff against a tag later.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass (second local-Qwen lane).** I spot-checked three citations against the saved PCSX2 source copy
+(`microVU_Compile.inl:303-307` helpers, `microVU_Analyze.inl:131-134` `analyzeQreg`, `microVU_IR.h:61`
+`sizeof(microRegInfo) == 96`): all verbatim. Key takeaways for our stage B follow-ups: microVU computes
+stalls fully statically per block from a 96-byte per-register ready-cycle scoreboard carried across blocks
+(not guessed), resolves same-cycle upper/lower hazards structurally, and normalizes block-end state
+(`1` → `0`). Input for any further VU1 work (precomputed stall tables). The PCSX2 source copy under
+`src/` stays untracked. Survived one memory-guard abort and one near-compaction by writing up early.
