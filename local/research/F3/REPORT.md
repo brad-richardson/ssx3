@@ -329,3 +329,110 @@ bash local/research/I31/deploy-ios.sh iphone         # never launched
 **Pass.** I viewed the iPad `run-ipad-f3/shot-t2100.png`: race 00:00:06 on the GPU backend, full brightness,
 the player rider solid and lit mid-trick. Brad's iPhone has build `ec2dbf1` installed (never launched),
 save + manual-play env verified. The iPad-in-portrait pad overlap is the known I28 item.
+
+## Part 3 — Odin (APK `d5a94c27…`, 2 speed runs, play build installed)
+
+Worker: Muse Code, brief `local/muse/prompts/F3.md` Part 3 only. Source:
+the pushed fork `ssx3` tip `ec2dbf1` — the pushed SHA equals the Part 1
+fold tip, so the Part 1 APK is reused with no rebuild: two local SHA
+reads `d5a94c278aabac86fdf0b0570a6bb4f68680d2b5041bf595f86f3e271526ee78`,
+153,769,544 B, both match; `base.apk` on the device reads `d5a94c27…`
+after the run install and again after the play install. Over Wi-Fi
+(serial `adb-622c49b1-IJnTHA._adb-tls-connect._tcp` from
+`local/odin-serial`, read by the launcher); no drops all session.
+
+Launcher: `launch.py` = F2's driver with F2→F3 paths/lease (`sed`, zero
+`F2` remnants, committed here) + `phases.py` verbatim; env = the F2
+launcher env relabelled (parallel, Turnip, `SSX3.iso`, skip-movie, sound
+on, empty mc0-test, I26-FAST, `PS2X_VSYNC_RATE_LOG=1`,
+`PS2X_UNPACED=1`). Pair method per the runbook: thermal status ≤ 1 gate
+plus a fixed 180 s wait before each run. S1: thermal 0 pre-wait, 0 at
+launch. S2: cooldown polls 3, 3, then 1 (~60 s), 180 s wait, thermal 0
+at launch. Keyguard `showing=false`, AC powered, app not running before
+both; Brad env `9fb46f85…` + mc0 pins verified before and after every
+run; force-stop after; lease `LEASE_FREE F3 done` at close.
+
+| Launch | Window | Result | Battery (wall charger) |
+| --- | --- | --- | --- |
+| S1 | tick 1714→4511 = 2797 vsyncs; 336.6 s race wall; 81 samples; 0 FATAL | STOP tick ≥4500 at t+406.4 s | 68→72 %, thermal 0 at launch |
+| S2 | tick 1714→4556 = 2842 vsyncs; 340.9 s race wall; 82 samples; 0 FATAL | STOP tick ≥4500 at t+412.2 s | 76→80 %, thermal 0 at launch |
+
+Logcat keys both runs: `[snd-output] stream rate=48000`,
+`[gs-path] … hier-if-large … desc=buffer … gpu=Adreno (TM) 830` (same
+as F2), zero FATAL. Run thermal: S1 32×3/2×4 (34 polls), S2 33×3/2×4
+(35 polls). GameThread CPU: S1 28/34 polls on cpu6–7, S2 28/35. Race
+GPU: S1 24.1 % (n=57), S2 24.2 % (n=58) — F2 read 23.1/17.3 %; still
+CPU-bound.
+
+Ledger-ready rates vs F2 (guest vsyncs/s ÷ 59.94, `phases.py`):
+
+| Phase | S1 /s (×) | S2 /s (×) | F2 S1/S2 /s (×) | F3 mean ÷ F2 |
+| --- | --- | --- | --- | --- |
+| Title | 32.71 (0.546×) | 31.65 (0.528×) | 43.26/33.29 (0.722/0.555×) | = F2 S2 (F2 S1 was the known startup noise) |
+| Main menu | 30.73 (0.513×) | 31.28 (0.522×) | 31.30/31.08 (0.522/0.519×) | 1.00× |
+| Select Character | 24.58 (0.410×) | 24.54 (0.409×) | 25.11/24.99 (0.419/0.417×) | 0.98× |
+| Setup/Peak | 26.22 (0.437×) | 25.65 (0.428×) | 26.48/26.58 (0.442/0.443×) | 0.98× |
+| Mode/Event | 37.97 (0.633×) | 40.24 (0.671×) | 38.63/37.96 (0.644/0.633×) | 1.02× |
+| Loading | 11.22 (0.187×) | 10.91 (0.182×) | 11.21/11.12 (0.187/0.185×) | 0.99× |
+| **Race** | **8.31 (0.139×)** | **8.34 (0.139×)** | **8.36/8.20 (0.139/0.137×)** | **1.01×** |
+
+Race per-5s bins climb 7.2→8.6 with final fast bins (10–12) — same
+shape as F2/F1. The fold (pacing, alpha, pad v2, latch, VIF/UNPACK,
+vf0) is speed-neutral on the Odin.
+
+Screencaps (all 8 viewed; **full brightness, no stripes, rider solid**):
+
+| Cap | Viewed verdict | SHA-256 (12) |
+| --- | --- | --- |
+| S1 sc01 (~t2127) | Race 2ND/2 00:00:07 1 %, crash spray, RECOVER, EA Radio Big Leave Home/Chemical Brothers — full-bright | `415638695e17` |
+| S1 sc02 (~t3033) | 00:00:22 2 %, 1 MPH, rider solid and lit mid-slope | `b8e61c7532be` |
+| S1 sc03 (~t4007) | 00:00:38 2 %, 0 MPH — no stripes | `ac5facdaa754` |
+| S1 sc04 (t4511) | 00:00:46 5 %, 44 MPH dark forest gully = F2's sc04 scene | `995605f9f392` |
+| S2 sc01 (~t2119) | 00:00:06 1 %, crash, EA Radio Big Emerge-Junkie XL Remix/Fischerspooner (RNG), board + rider mid-tumble | `2b0813865061` |
+| S2 sc02 (~t3022) | 00:00:22 2 % 1 MPH — no stripes | `639a3b756e6d` |
+| S2 sc03 (~t4040) | 00:00:39 2 % 0 MPH | `dab8d2377ebd` |
+| S2 sc04 (t4556) | 00:00:47 5 % 42 MPH dark gully | `29a385de9a5d` |
+
+Progression matches F2 exactly (crash → 1 MPH → 0 MPH → 42–44 MPH
+gully), so no fold regression; the RD1 rider fix is visible on the
+Odin path too.
+
+Brad's play build: installed F3 APK (`Success`, `base.apk`
+`d5a94c27…`), then `bash local/research/I31/deploy-odin.sh "$S"` with
+the serial from `local/odin-serial`: env SKIP + 6 save SKIPs, verify
+7/7 OK. **No launch.** Device left: lease `LEASE_FREE F3 done`, app
+not running (force-stopped + `pidof` clean), `/data/local/tmp/f3` +
+`files/mc0-test` removed, battery 80 % on AC. No screen/keyguard
+toggle at any point (read-only `dumpsys` checks only).
+
+Budgets and gaps: installs 2 (run + play), launches 2 (~411 s +
+~417 s wall), battery 66→80 % (wall charger net positive). Scratch
+`~/dev/ssx3-work/F3` 4.5 GB ≤ 15 GB (`odin/` holds the APK + 8 PNGs);
+text logs (S1+S2, 968 K) + `launch.py` + `phases.py` committed here.
+Gaps: two runs, no profile; S2 stopped at t4556 (45 over — the 5 s
+`[vsync-rate]` stop-detection overshoot, same as F2/Mac G3); installed
+once before S1 (base.apk SHA-verified) with the same install serving
+S2 rather than F2's install-per-run (no other writer held the lease
+between runs); share tier still not mounted (G7 carries).
+
+Exact commands:
+
+```sh
+shasum -a 256 ~/dev/ssx3-work/F3/odin/app-release.apk  # d5a94c27 x2
+sed -e 's/F2/F3/g; s|/data/local/tmp/f2|/data/local/tmp/f3|g' local/research/F2/launch.py > local/research/F3/launch.py
+cp local/research/F2/phases.py local/research/F3/phases.py  # verbatim
+adb -s "$S" install -r ~/dev/ssx3-work/F3/odin/app-release.apk  # Success; base.apk d5a94c27
+# S1: thermal 0, sleep 180, thermal 0
+python3 local/research/F3/launch.py --label S1 --wall 600 --stop-tick 4500
+# S2: thermal 3,3,1 polls, sleep 180, thermal 0
+python3 local/research/F3/launch.py --label S2 --wall 600 --stop-tick 4500
+python3 local/research/F3/phases.py local/research/F3/logs/S1|S2
+adb -s "$S" install -r ~/dev/ssx3-work/F3/odin/app-release.apk  # play build, no launch
+bash local/research/I31/deploy-odin.sh "$S"  # 7/7 OK
+adb -s "$S" shell 'rm -rf /data/local/tmp/f3 .../files/mc0-test; am force-stop com.ps2x.runner'
+```
+
+Recommended next action: F3 is complete on all three targets (Mac
+green + rider fixed, iPhone/iPad installed, Odin speed-neutral with
+the play build installed). Gate Part 3 and ledger the Odin race
+0.139× pair.
