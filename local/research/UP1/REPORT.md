@@ -144,3 +144,15 @@ Class key: **HAVE** already fixed/have ours · **NEED** we have the bug ·
   `local/tooling/ee/{ee-at,ee-func,ee-label}`.
 - Scratch: `~/dev/ssx3-work/UP1/{commits.txt,diffstats.txt,namestat.txt}`
   (commit/file lists only).
+
+## Orchestrator gate, Part 1 (2026-09-24)
+
+**A.** Read the whole map. Spot-checked the Rank 1 claim in fork `fb11e18`:
+`ps2_vif1_interpreter.cpp:127` `gifImageQwcFromTag` reads only the first GIF tag, and the DIRECT
+handler (`:737`) records a pending PATH2 IMAGE continuation only when that first tag is IMAGE; a
+PACKED setup tag followed by an overrunning IMAGE tag loses the continuation. Upstream `c8c8666`'s
+`pendingGifImageQwc` walks all tags. Accepted: Rank 1 (runtime-only port + upstream test), Rank 2
+(gs_cache goldens, tests only) if it fits. Not porting the MMIO disable, ELF/entry heuristics,
+VFS/IOP emulator or LLE removal (HLE kept). Upstream's MMI fix and texture-cache fix don't apply
+(present at base / no cache in our backend). Part 2 released with an observable: E51 measured ~60
+IMAGE uploads/vsync here vs 73–74 in PCSX2 at a matched scene.
