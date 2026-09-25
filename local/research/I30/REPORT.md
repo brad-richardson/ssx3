@@ -109,3 +109,12 @@ Elapsed ~25 min of 60.
 - G5: the EA Radio track differs between I29 and I30 runs ("Poor Leno"
   both times here); track selection is not pinned, so don't read anything
   into which song shows.
+
+## Orchestrator gate (2026-09-24)
+
+**A.** Read the report and commit `070f3594` (text receipts only). The bundled env alone turns sound
+on (`[ios-env] set PS2X_SOUND=1`, `[snd-output] stream rate=36000`) on Simulator and iPad; iPhone:
+signed `ae99bc45…` installed (retry after a transient CoreDevice unavailable), no launch. Frames
+viewed by the worker; the composition matches I29 (known dark GS region). Expect gaps in Brad's
+listening: the host ring underruns (~1.2–1.9 M samples/min) because the guest runs below real
+time; below-full-speed audio policy is an open A-lane decision.

@@ -124,7 +124,7 @@ then 120 Hz simulation.
 
 ## A — audio
 
-- [ ] Turn sound on in the shipped envs (`PS2X_SOUND=1` in the iOS bundle env: I30 running; the
+- [ ] Turn sound on in the shipped envs (`PS2X_SOUND=1` in the iOS bundle env: done in I30; the
       Odin `ps2x.env` and N-lane launchers next). Brad confirmed AU8's planar fix sounds exactly right (09-24).
 - [ ] **Race SFX on SPU2 hardware voices (AU8 E10; AU9 Opus exploratory running):** in a PCSX2 Snow Jam race, SPU2 voices carry
       an intermittent, near-mono layer (dry 625/545 RMS, −15.5 dB of output, 94% < 1 kHz; likely SFX
@@ -141,8 +141,7 @@ then 120 Hz simulation.
       iPad device family + landscape and lay the virtual pad in the
       letterbox margins; Simulator iPad, then Brad's iPad. IPAD1 ran as an
       iPhone-compat portrait window (`~/dev/ssx3-work/IPAD1/`).
-- [ ] Rebuild and install after the AU8 fold (planar tag-1 fix, sound on by default): I29's
-      `fb11e18` build is installed on the iPhone but is silent by default and pre-fix.
+- [ ] Brad listens to I30 on the iPhone (fixed music, sound on; expect gaps below full speed).
 - [ ] Physical controller check by hand on the iPad (I25 G1).
       `local/research/I25/`.
 - [ ] Guest font detail is still coarse (source image is low resolution,
