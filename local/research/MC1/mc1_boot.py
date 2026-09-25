@@ -113,6 +113,33 @@ QUIT_NAV = [(19100, 'down', 150), (19250, 'down', 150),
             (23600, 'cross', 250)]
 ROUTE_R1QUIT = (shift(FR1_R1, SEED_SHIFT_MS) + ',' +
                 ','.join('%d:%s:%d' % (T(t), b, h) for t, b, h in QUIT_NAV))
+
+# Part 2: results ~18665t (Restart highlighted). Enter Records
+# (down,down,cross — proven in B6), down to Save Records, cross, then
+# answer crosses every ~300t.
+SAVEREC_NAV = [(19100, 'down', 150), (19250, 'down', 150),
+               (19400, 'cross', 250), (19750, 'down', 150),
+               (19900, 'cross', 250), (20200, 'cross', 250),
+               (20500, 'cross', 250), (20800, 'cross', 250),
+               (21100, 'cross', 250), (21400, 'cross', 250),
+               (21700, 'cross', 250), (22000, 'cross', 250),
+               (22300, 'cross', 250)]
+ROUTE_R1SAVEREC = (shift(FR1_R1, SEED_SHIFT_MS) + ',' +
+                   ','.join('%d:%s:%d' % (T(t), b, h)
+                             for t, b, h in SAVEREC_NAV))
+
+# Part 2 corrected: P1 showed the overwrite prompt defaults to No, so the
+# slot-select cross must be followed by up (No->Yes) then cross to confirm.
+SAVEYES_NAV = [(19100, 'down', 150), (19250, 'down', 150),
+               (19400, 'cross', 250), (19750, 'down', 150),
+               (19900, 'cross', 250), (20200, 'cross', 250),
+               (20500, 'up', 150), (20650, 'cross', 250),
+               (20950, 'cross', 250), (21250, 'cross', 250),
+               (21550, 'cross', 250), (21850, 'cross', 250),
+               (22150, 'cross', 250), (22450, 'cross', 250)]
+ROUTE_R1SAVEYES = (shift(FR1_R1, SEED_SHIFT_MS) + ',' +
+                   ','.join('%d:%s:%d' % (T(t), b, h)
+                             for t, b, h in SAVEYES_NAV))
 # Empty: results ~17798t; first cross ~18030t (=300801 ms).
 ROUTE_R1EMPTY = FR1_R1 + ',' + post_crosses(300801, 2503, 12)
 # Seeded menu check: start@902t, crosses at 1032t/1150t/1330t/1510t.
@@ -172,7 +199,8 @@ def mc_snapshot(root):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--route', choices=('r1seed', 'r1empty', 'menu',
-                                       'r1save', 'r1quit'),
+                                       'r1save', 'r1quit', 'r1saverec',
+                                       'r1saveyes'),
                     required=True)
     ap.add_argument('--mcmode', choices=('seed', 'empty', 'readonly'),
                     required=True)
@@ -181,11 +209,16 @@ def main():
     ap.add_argument('--wall', type=int, required=True)
     ap.add_argument('--coverage-tick', type=int, required=True)
     ap.add_argument('--stop-tick', type=int, default=10 ** 9)
+    ap.add_argument('--mcsrc', default=None,
+                    help='mc0 source dir for seed/readonly (default: pristine seed)')
+    ap.add_argument('--snap-period', type=int, default=SNAP_PERIOD_S)
     args = ap.parse_args()
 
     route = {'r1seed': ROUTE_R1SEED, 'r1empty': ROUTE_R1EMPTY,
              'menu': ROUTE_MENU, 'r1save': ROUTE_R1SAVE,
-             'r1quit': ROUTE_R1QUIT}[args.route]
+             'r1quit': ROUTE_R1QUIT,
+             'r1saverec': ROUTE_R1SAVEREC,
+             'r1saveyes': ROUTE_R1SAVEYES}[args.route]
     runner = Path(args.runner).resolve()
     lane = WORK / 'run' / args.label
     if lane.exists():
@@ -195,7 +228,8 @@ def main():
     if args.mcmode == 'empty':
         mc0.mkdir()
     else:
-        shutil.copytree(SEED, mc0, copy_function=shutil.copy2)
+        src = Path(args.mcsrc) if args.mcsrc else SEED
+        shutil.copytree(src, mc0, copy_function=shutil.copy2)
         if args.mcmode == 'readonly':
             for dirpath, dirnames, filenames in os.walk(mc0):
                 for name in filenames:
@@ -239,6 +273,8 @@ def main():
         slot = claim('MC1-' + args.label, exclusive=False)
 
     result = {'label': args.label, 'route': args.route, 'mcmode': args.mcmode,
+              'mcsrc': str(Path(args.mcsrc).resolve()) if args.mcsrc else None,
+              'snap_period': args.snap_period,
               'runner': str(runner), 'sha_reads': reads,
               'stop_tick': args.stop_tick, 'wall_cap': args.wall,
               'coverage_tick': args.coverage_tick,
@@ -256,7 +292,7 @@ def main():
     def snapshotter(t0):
         latest = frames_dir / 'upload-latest.png'
         latest_txt = frames_dir / 'upload-latest.txt'
-        while not stop_snap.wait(SNAP_PERIOD_S):
+        while not stop_snap.wait(args.snap_period):
             el = time.monotonic() - t0
             try:
                 if latest.exists():

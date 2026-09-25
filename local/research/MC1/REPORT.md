@@ -210,3 +210,125 @@ scratch bytes).
 bit-identical after. The write trigger is the Records screen's `Save Records` row. Part 2 released: one
 boot that selects it on a scratch copy of Brad's save (write path, host file changes), one reload boot
 (round trip), and the read-only-dir failure mode.
+
+## Part 2 — saving works (delete + recreate, "Save complete."); reload + write-failure open
+
+Same pane, same build (`bin/runner-mc1` `4a0b4c6b…70dd8`, no rebuild),
+same scratch-only rules. 3 boots used (P1, P3, P4).
+
+Outcome: **(1) done — the full save path works.** P1 reached the Save
+Records screen but the overwrite prompt defaults to **No**, so crosses
+looped without writing. P4 (corrected: slot cross → up → cross) drove the
+real save: the game deletes the whole SET side (4× Delete OK), recreates
+it (Mkdir OK) and writes all three files at exact sizes (964 / 73144 /
+3276), zero errors, then shows "Save complete." The SET data changed by
+**7 bytes** (tail offsets 3249–3273 — a footer/counter, not table content:
+our 04:31 didn't crack Brad's Top 5); icons rewritten byte-identical; GAM
+untouched. **(3) partial:** P3 ran the identical browse/prompt flow on a
+read-only card — same screens, zero errors, no hang, empty diff, perms
+restored after; but since P1's flow never attempted a write, the
+write-failure mode (Yes on read-only) is untested. **(2) not run:** the
+third boot went to P4's correction instead of the reload; P4's written
+card is preserved in scratch for a follow-up. No fix (no mechanism named:
+the HLE returned OK with exact sizes throughout).
+
+### Boots
+
+| Boot | Card | Route | Result |
+|---|---|---|---|
+| P1-saverec | fresh seed copy | r1saverec: shifted FR1-R1 + Records → Save Records + crosses (43) | target t23029, 1207 s; overwrite prompt (No default) looped; **no writes** |
+| P3-readonly | fresh seed copy, `chmod -R a-w` | r1saverec (43) | target t23073, 1192 s; identical screens; zero errors, no hang; perms restored; **empty diff** |
+| P4-saveyes | fresh seed copy | r1saveyes: + up → cross to confirm Yes (44) | target t23303, 1167 s; **full save at t20532/20673**, "Save complete." |
+
+All: zero FATAL, `targets=0`, E56 four RPCs, sound live, all presses
+fired. P1/P3 parallel (slots 1/2); P4 solo (slot 1). 10 s snapshots.
+
+### (1) The save, command by command (P4)
+
+After cross@20650t confirmed Yes on "Would you like to overwrite
+Options?":
+
+| Tick | Commands (all OK) |
+|---|---|
+| 20532 | Delete ×4 (old SET side: data, icon.sys, ssx1.ico, dir) |
+| 20673 | Mkdir (SET dir) + Open fd10 → Write 964 → Close (icon.sys) + Open fd11 → Write 73144 → Close (ssx1.ico) + Open fd12 → Write 3276 → Close (SET data) |
+
+Zero Denied/NoEntry/NoFormat anywhere in the run. No GetDir in the
+window — the game deletes blind, then recreates. (Pre-confirm, the flow
+polls GetInfo continuously and re-lists + re-reads the SET icon.sys about
+every 300t — P1: 857 GetInfo + 10 Open/Read-964/Close cycles, fds 7–16;
+one `result=919874` line is a log-concatenation artifact, real fd 9.)
+
+Host changes (before = pristine seed SHAs):
+
+| File | Size | Before → after SHA | Verdict |
+|---|---|---|---|
+| `SET0001/BASLUS-20772-SET0001` | 3276 → 3276 | `4a31a2d7…002f1` → `9b3db142…15fcac` | **7 bytes differ** (runs 3249–3251, 3265–3266, 3272–3273), mtime bumped |
+| `SET0001/icon.sys` | 964 | unchanged (`eab22574…`) | rewritten byte-identical (`cmp` clean), mtime bumped |
+| `SET0001/ssx1.ico` | 73144 | unchanged (`5f8b5a92…`) | rewritten byte-identical, mtime bumped |
+| `GAM0001/*` (all 3) | — | unchanged | byte-identical (`cmp` clean), mtimes untouched |
+
+Nothing truncated, zero-filled or created oddly. The 7-byte tail diff fits
+a footer/counter rewrite with no table change (visible Top 5 identical
+before/after: BOB 02:57 … RYAN 03:27).
+
+Prompts screenshotted (P4): Records table → Save Records screen (MEMORY
+CARD slot 1, "1 Options", X Save / Triangle Previous / Square Delete) →
+"Would you like to overwrite Options?" (No default, 20328t) → "Saving game
+data to memory card (PS2)…" (20673t, the write tick) → "Save complete."
++ Continue (20824t) → Top 5 table (20970t).
+
+### (2) Reload: not run (gap)
+
+The three Part 2 boots went to P1 (flow discovery), P3 (read-only
+browse) and P4 (the corrected save). No boot reloaded P4's written card,
+so "loads cleanly / updated records visible / corruption prompt" is open.
+The written card is preserved at `~/dev/ssx3-work/MC1/run/P4-saveyes/mc0`
+(SHA above); follow-up: `r1saverec` with `--mcsrc` pointed at it, or the
+short `menu` route for an autoload-only check.
+
+### (3) Read-only: browse flow identical, write-failure open (gap)
+
+P3 reached the same Save Records screen + overwrite dialog on the
+`chmod -R a-w` card (screenshots match P1 frame-for-frame modulo race
+jitter): 857 GetInfo + 10 icon re-read cycles, **zero** error results, no
+stall (`bound=target`, 19.4 ticks/s — same pace as P1), empty diff,
+permissions restored after (writability re-tested). But no write was
+attempted (same default-No loop), so game-shows-vs-hang on a failed write
+is open. Follow-up: `r1saveyes` with `--mcmode readonly`.
+
+### Fix decision
+
+None. Every HLE call in the save sequence returned OK with exact byte
+counts; file sizes/shapes on the host are exactly right. No single
+mechanism to fix, so no source change and no new unit test.
+
+### Commands
+
+```sh
+python3 mc1_boot.py --route r1saverec --mcmode seed --runner bin/runner-mc1 \
+  --label P1-saverec --wall 1800 --coverage-tick 16000 --stop-tick 23000 \
+  --snap-period 10
+python3 mc1_boot.py --route r1saverec --mcmode readonly --runner bin/runner-mc1 \
+  --label P3-readonly --wall 1800 --coverage-tick 16000 --stop-tick 23000 \
+  --snap-period 10
+python3 mc1_boot.py --route r1saveyes --mcmode seed --runner bin/runner-mc1 \
+  --label P4-saveyes --wall 1800 --coverage-tick 16000 --stop-tick 23200 \
+  --snap-period 10
+python3 mc1_analyze.py run/<label>
+```
+
+Part 2 budget: 0 builds, 3 boots, ~1.5 h. Never pushed. Pristine seed
+re-verified 6/6 after all runs; E55D16 original re-read, prefixes match.
+Text in git: this section + updated `mc1_boot.py` (new routes, `--mcsrc`,
+`--snap-period`).
+
+### Part 2 gaps
+
+- Reload of P4's written card (Q2) not run — needs one boot.
+- Write-failure on read-only (Yes path) not run — needs one boot.
+- The 7 changed bytes are uninterpreted (tail runs only, no content
+  dumped); the reload boot would show whether anything visible changes.
+- Driver wart: `--mcsrc`/`--snap-period` were added after the first
+  `parse_args()` call and initially unrecognized (fixed before any boot;
+  two rc=2 no-op launches, no lanes created).
