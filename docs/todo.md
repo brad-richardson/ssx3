@@ -41,7 +41,7 @@ then 120 Hz simulation.
       exact path; (b) static recompilation of SSX 3's 7 VU1 microprograms
       (7,305 instructions). Validate with the E55 hash tap. E45's
       `VuWide=double` is already folded. `local/research/N5/`, `E53/`, `E45/`.
-- [ ] Save seed follow-ups (I31 Part 1 done: Brad's save + manual play on his iPhone/iPad; Part 2 Odin after TL1; E55D16 A: the game autoloads Brad's seeded card and shows his rider
+- [ ] Save seed follow-ups (I31 Part 1 done: Brad's save + manual play on his iPhone/iPad; Part 2 Odin running with TL1's APK `aeb60d4d`; E55D16 A: the game autoloads Brad's seeded card and shows his rider
       progress): only if Brad wants it, put his save into the Odin/iPhone `mc0`; retime I26-FAST for
       the ~200-tick later title when a card is seeded. `local/research/E55D16/`.
 - [ ] **E54E signed 64-bit branches:** the PCSX2 low-64 oracle and suites
@@ -114,8 +114,6 @@ then 120 Hz simulation.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
       N9's 1920×1080 screencaps); check the presenter's scale/aspect on
       Android. `local/research/N9/`.
-- [ ] **TL1 Part 2 (running):** `local/tooling/odin/odin_replay.py` + stream tools; one APK from the
-      fork tips and one Odin replay (expect `[gs-path]` wave64). Replay harness is on `ssx3` (`f949ff0`).
 - [ ] Horizontal stripes on Odin screens (seen since N8D1, still on N9's
       fork-tip APK). `local/research/N9/`.
 - [ ] Manifest `android:showWhenLocked` + `android:turnScreenOn` on the
@@ -170,12 +168,8 @@ then 120 Hz simulation.
 ## Cross-lane
 
 - [ ] **Tooling from the 09-24 review** (`docs/research/review-2026-09-24-time-and-bottlenecks.md`):
-      - `odin-replay` CLI: push stream, set env, run, pull hashes/frames, diff vs Mac, with
-        lease/force-stop/env restore built in; fold in N8X1's stream surgery (`local/research/
-        N8X1/tools/`: EOP split + markers, variants, nearestify).
-      - Reference-path logger: at GS/audio init, log which platform-dependent paths run
-        (hierarchical binning + subgroup size, descriptor-buffer path, sampler feedback), on Mac
-        and Odin, so a baseline can be checked for equivalence.
+      - Done (TL1): `local/tooling/odin/odin_replay.py` + `stream_tools.py`; `[gs-path]` logger
+        on fork `ssx3`. Audio-side path logging still open.
       - `gate` helper for the orchestrator: append the REPORT gate section, update the todo
         line, commit with explicit paths, push, close the pane.
       - Worker permission preflight in the launchers: dry-run the edits/SSH a brief needs.

@@ -268,3 +268,14 @@ worktree root; runner-dir diff empty; Mac replay of `n8d7m6.gs` equals the Mac O
 PKTSEQ and GB4_REPLAY rows, frame `d19b96fe`. `[gs-path]` on the Mac: `hier_rule=flat-always`,
 `subgroup_*=free-4..128`, `desc=plain` (explains why the Mac never ran the Adreno wave128 path).
 Pushed `tl1-tools` to fork `ssx3` → **`f949ff0`** (fast-forward from `d711506`). Part 2 released.
+
+## Orchestrator gate, Part 2 (2026-09-24)
+
+**Pass.** APK `aeb60d4d…` (two reads of `~/dev/ssx3-work/TL1/app-release.apk` match) from pushed tips
+PS2Recomp `f949ff0` + parallel-gs `963cb57`. One Odin replay through `odin_replay.py`: outcome ok,
+`[gs-path]` on the wave64 path (`subgroup_hier=wave64-fixed`, Adreno 830), priv 41/41 equal. I viewed
+the tick-2050 Odin PPM next to the Mac Part 1b PPM: the same race frame (2ND/2, 00:00:05, HUD,
+terrain), no black tiles; the pixel differences are the known bilinear rounding (N8X1). The
+first-attempt env deletion was restored byte-exact and fixed in the CLI (restore via temp pull).
+Tools `local/tooling/odin/{odin_replay,stream_tools}.py` are the standard route for Odin replays.
+This APK is the Odin play build for I31 Part 2.
