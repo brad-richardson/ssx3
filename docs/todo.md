@@ -150,6 +150,9 @@ then 120 Hz simulation.
       uploads as PCSX2, menu SFX NCC 0.9997, music unchanged). Gate, then fold. The global emitter fix
       (`a46fb2e`) is NOT validated: E54E's boot with it went black; separate lane to find the
       non-sign-extended register it exposes.
+
+## I — iOS
+
 - [ ] Brad's feedback on the I32 controls (stick left, D-pad right; on his iPhone since 09-24).
 - [ ] Brad (09-24, iPhone I30): UI elements flash in and out every few seconds and many 3D assets
       pop in and out. RR1: no draw dropout in the Mac stream; likely the PATH3 wrong-texture effect. Re-check on his phone after the RR1 fold.
