@@ -203,3 +203,10 @@ scratch bytes).
   certain; the wrap inference rests on the end-state dialog.
 - `mc1_boot.py`'s first B1 launch crashed on a bad `shutil.copytree`
   kwarg (fixed; the empty-mode B3 was unaffected).
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Accepted.** Single Event play issues zero card writes (4 boots, ~85k ticks); every card copy is
+bit-identical after. The write trigger is the Records screen's `Save Records` row. Part 2 released: one
+boot that selects it on a scratch copy of Brad's save (write path, host file changes), one reload boot
+(round trip), and the read-only-dir failure mode.
