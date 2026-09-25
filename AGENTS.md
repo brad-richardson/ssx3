@@ -125,12 +125,13 @@ Close the pane after its gate read.
   the P-lane lease). E and G own distinct files. N ports what it needs on
   its own local branch or hands edits to E.
 - **Leases:** one device agent on the Odin at a time
-  (`/data/local/tmp/mg/LEASE`). On the mini, **two** recomp/emulator
-  boots at a time (Brad, 09-23): claim a slot with
-  `local/tooling/p_lane_lease.py` (slot 1 = legacy `/tmp/ssx3-p-lane-lease`,
-  slot 2 = `/tmp/ssx3-p-lane-lease-2`); speed-number boots take both slots.
+  (`/data/local/tmp/mg/LEASE`). On the mini, **four** recomp/emulator
+  boots at a time (Brad, 09-24; a boot is ~1.2 cores and ~250 MB on the
+  18-core mini): claim a slot with `local/tooling/p_lane_lease.py`
+  (slot 1 = legacy `/tmp/ssx3-p-lane-lease`, slot n =
+  `/tmp/ssx3-p-lane-lease-<n>`); speed-number boots take all four slots.
   Boot from your own cwd, and check or kill your runner by PID, never by
-  name (`pkill`/`pgrep -x ps2EntryRunner` would hit the other slot's
+  name (`pkill`/`pgrep -x ps2EntryRunner` would hit another slot's
   runner). Claim before a run and release after. PCSX2 or builds on bytesize don't take the mini lease; bytesize has
   its own rule (one heavy job at a time).
 - **Boots:** every boot script has progress caps. No boot over 600 s

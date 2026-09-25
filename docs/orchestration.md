@@ -71,8 +71,8 @@ The contract is in `AGENTS.md` (about one page). On top of it:
 - **Ask Brad first** before any search for assets, hardware or preferences.
 - Routes: race boots use I26-FAST (`local/research/I26/ROUTES.md`, race HUD ~tick 1714).
   600 s boot cap unless a brief grants more.
-- Host contention: two mini boot slots (`local/tooling/p_lane_lease.py`); builds `nice`d;
-  speed boots take both slots. Never attach a debugger to a harness child.
+- Host contention: four mini boot slots (`local/tooling/p_lane_lease.py`); builds `nice`d;
+  speed boots take all four. Never attach a debugger to a harness child.
 - Workers read code with `local/tooling/ee/{ee-at,ee-func,ee-xref,ee-label}`.
 
 ## 4. Forks and branches

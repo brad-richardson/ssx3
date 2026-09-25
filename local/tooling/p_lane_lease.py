@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
-"""Mac mini boot lease: two slots for diagnostic boots, both for speed runs.
+"""Mac mini boot lease: four slots for diagnostic boots, all four for speed runs.
 
 Slot 1 is the legacy path /tmp/ssx3-p-lane-lease (older boot scripts claim
-it directly); slot 2 is /tmp/ssx3-p-lane-lease-2.
+it directly); slot n > 1 is /tmp/ssx3-p-lane-lease-<n>.
 
   from p_lane_lease import claim, release
   slot = claim("g46a")                   # first free slot, or None
-  slot = claim("n5speed", exclusive=True)  # both slots (speed numbers)
+  slot = claim("n5speed", exclusive=True)  # all slots (speed numbers)
   ...
   release(slot)
 
 Rules (AGENTS.md "Leases"):
-- Diagnostic boots take one slot. Speed-number boots take both.
+- Diagnostic boots take one slot. Speed-number boots take all of them.
 - Kill and check your own runner by PID, never `pkill`/`pgrep -x
-  ps2EntryRunner`: the other slot may be running one.
+  ps2EntryRunner`: another slot may be running one.
 - Run each boot from its own cwd (the runtime writes ps2_log.txt there).
 
 CLI: p_lane_lease.py status | claim <label> [--exclusive] | release <slot>
 """
 import os, sys, time
 
-SLOTS = {1: "/tmp/ssx3-p-lane-lease", 2: "/tmp/ssx3-p-lane-lease-2"}
+SLOTS = {1: "/tmp/ssx3-p-lane-lease",
+         **{n: f"/tmp/ssx3-p-lane-lease-{n}" for n in (2, 3, 4)}}
 
 
 def _try(path, text):
@@ -34,14 +35,16 @@ def _try(path, text):
 
 
 def claim(label, exclusive=False):
-    """Return the claimed slot (1, 2, or "both"), or None if busy."""
+    """Return the claimed slot (1-4, or "both" meaning all), or None if busy."""
     text = f"{label} pid={os.getpid()} utc={time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n"
     if exclusive:
-        if not _try(SLOTS[1], text):
-            return None
-        if not _try(SLOTS[2], text):
-            os.remove(SLOTS[1])
-            return None
+        got = []
+        for path in SLOTS.values():
+            if not _try(path, text):
+                for q in got:
+                    os.remove(q)
+                return None
+            got.append(path)
         return "both"
     for n, path in SLOTS.items():
         if _try(path, text):
@@ -50,7 +53,7 @@ def claim(label, exclusive=False):
 
 
 def release(slot):
-    for n in ((1, 2) if slot == "both" else (slot,)):
+    for n in (tuple(SLOTS) if slot == "both" else (slot,)):
         try:
             os.remove(SLOTS[n])
         except FileNotFoundError:
