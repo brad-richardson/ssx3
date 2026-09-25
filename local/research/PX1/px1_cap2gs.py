@@ -9,10 +9,12 @@ Adapted from RR1's rr1_cap2gs.py (= G46's g46_rec2gs.py header/state constants).
   Transfer(3)     -> skipped (the TRXDIR write is already inside a Packet)
   ClearContext(7), LocalToHost(6) -> counted, not converted (gap)
 Usage: px1_cap2gs.py <gs.cap> <out.gs> [--to TICK] [--force-smode1-ntsc]
-                     [--texflush-after-upload]
+                     [--texflush-after-upload] [--p3-to-p1]
 Writes <out.gs>.ticks (vsync index -> tick).
 
---texflush-after-upload (PX1 candidate fix, UNVALIDATED): after every packet
+--texflush-after-upload (PX1 candidate fix, REFUTED 2026-09-25: full-stream
+replay byte-identical to baseline, md5 41d7b61f…; texture cache is not the
+issue): after every packet
 containing an IMAGE transfer, append a PATH3 Transfer with a single A+D
 TEXFLUSH write. Lead mechanism (REPORT.md): the race uploads pixels as CT32
 but samples them as PSMT8/PSMT4 (mixed-PSM), and PCSX2-HW's texture cache
@@ -22,6 +24,15 @@ replay correctly. TEXFLUSH is a hardware-neutral cache hint (flush is always
 safe), so the flag cannot change a correct replay, only force re-fetch.
 Validate: convert the full capture with the flag, replay on the T48-pinned
 gsrunner, expect the race world (not HUD-only) at 1800/2100/2400.
+
+--p3-to-p1 (PX1 experiment): relabel PATH3 packets as PATH1 (Transfer
+index 3). Rationale: healthy PCSX2 dumps of this game carry zero PATH2/3
+traffic (T48), so the replayer's PATH3-IMAGE path is untested; our stream
+delivers all uploads on PATH3. Our capture has no path-interleaved
+transfers (px1_imgspan: zero mid-stream label flips), so for a serial
+replayer the path label is effect-neutral and relabeling is
+semantics-preserving. If the world appears, the mechanism is a
+PATH3-conditional drop in the replayer.
 """
 import struct, sys
 
@@ -69,6 +80,9 @@ def main():
     a = sys.argv[1:]
     force = "--force-smode1-ntsc" in a
     texflush = "--texflush-after-upload" in a
+    pmap = dict(PATH_MAP)
+    if "--p3-to-p1" in a:
+        pmap[3] = 3
     to = int(a[a.index("--to") + 1]) if "--to" in a else None
     ntexflush = 0
     cap, out = [x for x in a if not x.startswith("--") and not x.isdigit()][:2]
@@ -102,7 +116,7 @@ def main():
             path = body[0]
             (sz,) = struct.unpack_from("<I", body, 1)
             payload = body[5:5 + sz]
-            o.write(struct.pack("<BBI", 0, PATH_MAP[path], sz))
+            o.write(struct.pack("<BBI", 0, pmap[path], sz))
             o.write(payload)
             if texflush and packet_has_image(payload):
                 pk = texflush_packet()

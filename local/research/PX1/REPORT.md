@@ -1,11 +1,14 @@
 # PX1 — PCSX2 as the pixel reference for our race frames
 
-**Status: PAUSED 2026-09-25 ~13:50 (Brad needs the machine).** Step 1
-(convert + reproduce) is done and root-caused to a lead hypothesis;
-the candidate converter fix is implemented but **unvalidated** (bytesize
-went busy under F4's build before the validation replay). Step 2
-(gallery) is done: all 5 triples viewed, table below. Resume plan at
-the bottom with exact commands.
+**Status: DONE 2026-09-25 (post-resume).** TEXFLUSH hypothesis REFUTED by
+full-stream replay (byte-identical HUD-only). Probe campaign isolates the
+gap: menus + textured sprites + HUD render correctly in PCSX2-on-our-stream;
+race-world tristrips neither sample nor rasterize there (invisible even with
+texturing forced off), while the same bytes render fully on paraLLEl. No
+converter change is indicated for this symptom — the "converter gap" is a
+world-geometry rasterization gap inside PCSX2-GL, not data loss in the
+converter. Follow-up brief recommended (PX2): per-draw STATE probe
+(ZTEST/SCISSOR/FOG/ABE) against PCSX2-SW or instrumented GL.
 
 ## 1. Repro inputs (all pinned)
 
@@ -36,15 +39,19 @@ the bottom with exact commands.
   8 race vsyncs, fetched to `~/dev/ssx3-work/PX1/`.
 
 Tool scripts (all in `local/research/PX1/`, text, committed here):
-`px1_boot.py` (RR1-style 1-slot bounded boot), `px1_cap2gs.py`,
+`px1_boot.py` (RR1-style 1-slot bounded boot), `px1_cap2gs.py`
+(+ `--texflush-after-upload`, default off, kept as a diagnostic flag),
 `px1_replay.sh` (quote-safe WSL replay + probe presets), `px1_fetch.sh`,
 `px1_mini.py` (tick-list .gs extractor), `px1_vertcheck.py` (per-class
-full-state + vertex census), `px1_imgspan.py` (mid-stream label flips).
+full-state + vertex census), `px1_imgspan.py` (mid-stream label flips),
+`px1_notex.py` (force TME=0 in PRIM reg + PRE TAG PRMODE — BOTH paths,
+see §6), `px1_qone.py` (force Q=1.0 in RGBAQ/ST).
 
 ## 2. Reproduced symptom (variant of RR1's)
 
 - Menus replay **perfectly** through tick 1710 (Select Peak 1091,
-  Select Mode 1180, loading 1607/1608/1620, Rival card 1650–1710).
+  Select Mode 1180, loading 1607/1608/1620, Rival card 1650–1710,
+  including the textured Rival-card header photo at 1700).
 - From the **first race frame (1711/1712)** PCSX2 shows **HUD-only on
   near-black**: timer/MPH/score/EA panel all live (00:00:01→06→11),
   world at ×0.01 (center mean (1.3,1.3,13.2), max 81) vs ours
@@ -73,42 +80,28 @@ full-state + vertex census), `px1_imgspan.py` (mid-stream label flips).
 | 14 | Stale-boot cache entries | First-use tick == first-upload tick for every race TBP (1605) | DEAD |
 | 15 | Clobbering write 1605–1711 | 4,049 uploads into race VRAM, all dpsm=CT32 legit texture/mip/CLUT shapes; no clear pattern | DEAD |
 | 16 | PCSX2-SW would discriminate | SW renderer fails in WSL (`Failed to create any context`, needs GL) | BLOCKED |
+| 17 | Texture-cache staleness (TEXFLUSH fix) | Full-stream `--texflush-after-upload` replay `bfull` **byte-identical** to unpatched `afull` at 1800/2100/2399 (HUD-only, PNG md5 `41d7b61f…` both) | **DEAD (§4)** |
+| 18 | Auto-flush / conservative-buffer renderhacks | Full-span `af` and `dpi` probes: still HUD-only at 1800 | DEAD |
+| 19 | In-frame upload timing (terrain TEX available late) | `mini1711-notex` broken-patch control + frame-span probes: HUD sprites + text appear, world still absent | DEAD (as timing) |
+| 20 | Tiny-Q kills sampling (Q≈0.02 perspective divide) | `ntq2` = NOTEX-fixed + Q→1.0: only UI re-colors (gray→magenta band); world still absent | DEAD |
+| 21 | World verts off-screen / degenerate / bad Z | PC decode of 1711 stream: terrain XY on-screen full-frame, RGB valid, Z full-range; A broad 0–255 | DEAD (as vertex data) |
 
-## 4. Lead hypothesis (UNCONFIRMED) + candidate fix (UNVALIDATED)
+## 4. TEXFLUSH validation (REFUTED post-resume)
 
-**Mixed-PSM upload/alias:** the race uploads pixels as CT32 (`dpsm=0`)
-but samples them as PSMT8/PSMT4 (backdrop TBP 13673 TBW 4, terrain
-PSMT4 trilinear), while menus upload native-PSM (PSMT8H→PSMT8H) and
-replay correctly. Suspect PCSX2-HW's texture cache misses the
-cross-PSM invalidation for these small-width (DBW 1–2 / TBW 1–4)
-textures, serving stale-black entries; our backends have no texture
-cache (CPU samples VRAM directly) so they stay correct. Consistent
-with everything above, including HUD-visible (HUD textures are
-direct-color, native-PSM uploads).
-
-**Candidate fix** (`px1_cap2gs.py --texflush-after-upload`, default off):
-after every packet containing an IMAGE transfer, append a PATH3
-Transfer with one A+D TEXFLUSH (0x3F). TEXFLUSH is a hardware-neutral
-cache hint, so it cannot change a correct replay. `--to 1720` test:
-6,651 inserted (+252,738 B, exact), output parses (`e51_gif`,
-272 prims/50 vsyncs).
-
-**Validation (NOT RUN — bytesize busy under F4's Android build from
-~13:07, gsrunner OOM-killed there):**
-1. `python3 local/research/PX1/px1_cap2gs.py ~/dev/ssx3-work/PX1/run-b1/gs.cap ~/dev/ssx3-work/PX1/px1b.gs --texflush-after-upload` (~2 min)
-2. `gzip -1 -c px1b.gs | scp → bytesize:px1b.gs.gz`, replay:
-   `ssh bytesize "wsl -d Ubuntu -- bash /mnt/c/Users/bradr/px1_replay.sh px1b.gs.gz bfull"`
-   (check `uptime`/`free -g` first; one heavy job at a time)
-3. Fetch frames 1800/2100/2399; **pass = race world visible** (not
-   HUD-only). Control if it fails: full-stream `-renderhacks af`
-   then `dpi` probes (`px1_replay.sh px1a.gs.gz p-af af`): world
-   appears ⟹ cache/invalidation confirmed, fix is on the right track
-   but TEXFLUSH placement needs work; still black ⟹ hypothesis dead,
-   re-open.
+- `px1b.gs` = full 0–2400 conversion with `--texflush-after-upload`
+  (6,651 TEXFLUSH inserted, +252,738 B exact), replayed as `bfull`.
+- `bfull` vs `afull` at 1800/2100/2399: **byte-identical PNGs**
+  (md5 `41d7b61f…`), HUD-only. A cache hint cannot change a correct
+  replay — and here it changed nothing at all, so cache staleness is
+  not the mechanism. Mixed-PSM lead (§4 of paused report) is dead.
+- `af`/`dpi` renderhack full-span probes: still HUD-only. SW renderer
+  and `-dump tex` gate both unavailable in bytesize WSL (no GL
+  context; dump dir never created).
 
 ## 5. Gallery (all triples viewed by the worker)
 
-Paths: ours `~/dev/ssx3-work/PX1/run-b1|2/frames/`; PCSX2-on-ours
+Paths: ours `~/dev/ssx3-work/PX1/run-b1|2/frames/upload-*.png`
+(sidecar `.txt` pins tick+fnv); PCSX2-on-ours
 `~/dev/ssx3-work/PX1/back-afull/px1a_frameNNNNN.png` (2399 stands in
 for 2400: 2,400 vsyncs dump 2,399 frames); PCSX2-native: T47 HW shots
 `/Volumes/Extreme SSD/ps2x-t47/t47-shot-sp|sm.png`, race
@@ -119,30 +112,64 @@ for 2400: 2,400 vsyncs dump 2,399 frames); PCSX2-native: T47 HW shots
 |---|---|---|---|---|
 | 1091 Select Peak | photo+orange 3+flakes, fnv `790e38b3` | same, complete | T47 SP: same screen (flakes differ: animated) | same-tick mean\|Δ\| **5.44**, p99 59, exact 25% — **ours-GS long tail** (filter/blend precision) |
 | 1180 Select Mode | Race map, fnv `accffc8c` | same, complete | T47 SM: same map+selection | mean\|Δ\| **4.12**, p99 33, exact 26% — **ours-GS long tail** |
-| 1800 race 00:01 | full world, fnv `44ebc4b0` (both boots) | **HUD-only**, world ×0.01 | E51/T65 00:18 jump: textured world (other moment) | **upstream-side: converter gap** (our stream renders on our GS; PCSX2-HW drops the world) |
+| 1700 Rival card | card + textured header photo | same, header photo textured+visible | — | **textured sprites work** in PCSX2-on-ours |
+| 1800 race 00:01 | full world, fnv `44ebc4b0` (both boots) | **HUD-only**, world ×0.01 | E51/T65 00:18 jump: textured world (other moment) | **world-tristrip rasterization gap** (not converter data loss) |
 | 2100 race 00:06 | full world +220, fnv `97047088` | **HUD-only** | same ref | **same as 1800** |
 | 2399/2400 race 00:11 | full world, fnv `758f95a8` | **HUD-only** | same ref | **same as 1800** |
 
 Menu verdict: PCSX2-on-our-stream is already a usable pixel reference
-for menus (single-digit mean diff). Race verdict: blocked on §4.
+for menus (single-digit mean diff) and textured sprites. Race verdict:
+world geometry never rasterizes in PCSX2-GL (§6).
 
-## 6. Resume plan
+## 6. Isolation probes (the positive result)
 
-1. When bytesize is free, run the §4 validation (full-TEXFLUSH replay,
-   then af/dpi controls if needed). ~15 min wall.
-2. If green: re-run gallery race triples, update this report, done.
-   If red: next discriminators are (a) PCSX2 `-dump tex,tr,rt`
-   (needs dump-gate debugging — `ShouldDump` never fired; dir never
-   created), (b) static footprint check of swizzle32-DBW2 vs
-   swizzle8-TBW4 in `GSLocalMemory.h`/`GSTextureCache.cpp`.
-3. Workdir `~/dev/ssx3-work/PX1/` ≈ 8.5 GB (gs.cap 2.5 GB, px1a.gs
-   2.5 GB, px1a.gs.gz 0.8 GB, truncated .gs ×4, frames, minis). Bytesize
-   `~/px1/` holds .gs inputs + frame dirs; `C:\Users\bradr\px1*.gz` +
-   `px1back\` hold transfers. Nothing pushed; this commit only.
+Span used: `mini1711.gs` (race vsync 1711, 9,370,783 B), unpatched
+replay = blue panel wireframe only, no text, no world
+(`back-mini1711/mini1711_frame00001.png`).
 
-## 7. Receipts
+- **NOTEX-broken** (`px1_notex.py` v1, PRIM-reg only, 38 patches):
+  identical to unpatched — control showing the PRIM register write is
+  NOT what these packets use (they carry PRMODE in the PRE TAG).
+- **NOTEX-fixed** (`ntx2`, PRIM reg + PRE-TAG PRMODE TME=0, ~2.6k
+  patches): UI appears flat — white/cyan text rows, gray band (HUD
+  bar sprite), small gray box (PNG md5 `6ae50bd8…`). **World
+  tristrips still absent.** Proves (a) the patch path works, (b) UI
+  sprites were black-*sampling* (now flat-visible), (c) world
+  tristrips don't rasterize even untextured.
+- **NOTEX-fixed + Q→1.0** (`ntq2`, 184,507 Q patches): band goes
+  gray→magenta (Q scales vertex color), text unchanged, **world
+  still absent** (md5 `b1d582aa…`). Q is out.
+- PC-side decode of the same bytes: terrain/backdrop classes have
+  valid on-screen XY, valid RGB, full-range Z, broad alpha; strip
+  structure decodes with early breaks (RESTART-heavy) but sibling
+  UI geometry with similar packing renders, so the bytes are sane
+  and the divergence is in PCSX2-GL's per-draw state handling.
 
-- `git log -1` before commit: `98e7ae30 [orch] Pause all lanes…`
-- Boots: b1 slot 2 rc 0 target vsync 2413 97.9 s; b2 slot 4 rc 0
-  target vsync 2421 261.2 s. No lease held at pause. No fork changes.
-- Disk: ssx3 internal 70.6 GB / 200 GB cap at start; PX1 added ~8.5 GB.
+**Root cause (best supported):** the converter faithfully transmits
+the world tristrip draws (same path as working menus/sprites); the
+PCSX2-GL renderer on bytesize drops them before/without
+rasterization. Not tested per-draw: ZTEST vs ZBUF, SCISSOR, FOG,
+ABE/ALPHA, DATE/PABE. Recommended next brief (PX2): force
+ABE=0 / ZTE=0 / FGE=0 / SCISSOR-full variants of `mini1711.gs`
+against PCSX2-SW (needs a GL-capable host) or instrumented GL, one
+variant each.
+
+## 7. Workdir inventory + receipts
+
+- Workdir `~/dev/ssx3-work/PX1/` ≈ 12 GB: `run-b1/gs.cap` 2.5 GB,
+  `px1a.gs`/`px1b.gs`/`px1c.gs` 2.5 GB each, `.gz` ×4 (~0.8 GB ea),
+  truncated `.gs` ×4, `mini*.gs` ×9, `back-*/` frame dirs (14),
+  `t48b-dump.gs`. Bytesize `~/px1/` holds inputs + frame dirs;
+  `C:\Users\bradr\px1*.gz` + `px1back\` hold transfers.
+- Bytesize replays this brief: afull, bfull, cfull, pf-af, pf-dpi,
+  probes (glyphs/sky/terr/terr360/full360), mini1608, mini1711,
+  mntx (broken), mntx2 (fixed), mntq2 (fixed+Q). ~15 WSL runs,
+  all inside the run budget as device-adjacent replays; no extra
+  PS2 boots beyond b1/b2.
+- `git log -1` before commit: see commit parent. No fork changes.
+  No lease held at stop. No push (worker rule).
+- Disk: ssx3 internal 70.6 GB / 200 GB cap at start; PX1 ≈ 12 GB.
+- Gaps stated plainly: (1) PCSX2-SW oracle unavailable (WSL has no
+  GL context); (2) `-dump tex` gate never fired — no VRAM-level
+  confirmation of what PCSX2 uploaded; (3) exact per-draw blocker
+  (Z/SCISSOR/FOG/BLEND) not yet isolated — PX2.
