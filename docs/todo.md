@@ -41,7 +41,7 @@ then 120 Hz simulation.
       exact path; (b) static recompilation of SSX 3's 7 VU1 microprograms
       (7,305 instructions). Validate with the E55 hash tap. E45's
       `VuWide=double` is already folded. `local/research/N5/`, `E53/`, `E45/`.
-- [ ] Save seed follow-ups (I31 running: Brad's save on his iPhone/iPad now, Odin after TL1; E55D16 A: the game autoloads Brad's seeded card and shows his rider
+- [ ] Save seed follow-ups (I31 Part 1 done: Brad's save + manual play on his iPhone/iPad; Part 2 Odin after TL1; E55D16 A: the game autoloads Brad's seeded card and shows his rider
       progress): only if Brad wants it, put his save into the Odin/iPhone `mc0`; retime I26-FAST for
       the ~200-tick later title when a card is seeded. `local/research/E55D16/`.
 - [ ] **E54E signed 64-bit branches:** the PCSX2 low-64 oracle and suites

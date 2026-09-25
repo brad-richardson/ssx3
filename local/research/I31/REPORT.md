@@ -171,3 +171,12 @@ Committed text: `REPORT.md`, `deploy-ios.sh`, `ipad-key-lines.txt`,
 Scratch (private): `~/dev/ssx3-work/I31/` (console.log, 18 PNGs,
 copybacks, install/copy/verify logs, ipad-run.sh, staging).
 Base `c150f207`. Part 2 untouched (TL1 holds the Odin).
+
+## Orchestrator gate (Part 1)
+
+**Pass.** Checked myself:
+- `shot-0060s.png` (scratch, iPad): Select Character on Mac ("Always riding to the beat of his own soundtrack") with no roster presses before it, where the empty card defaults to Zoe (I30). The save autoloads.
+- Both devices list the 6 save files at the E55D16 sizes plus the 496 B `ps2x.env` (`verify.txt`); the iPhone env copy-back holds just `PS2X_PAD_SCRIPT=` plus comments. The iPhone was copy-only and never launched.
+- Only names, sizes and SHAs of the save files are committed; no card bytes.
+- G2 (a zero-env launch) stays open; Brad's first home-screen launch closes it.
+- Part 2 (Odin) waits until TL1 releases the Odin; tests there use an empty `mc0-test` (I26-FAST derails on a seeded card, §5).
