@@ -217,3 +217,110 @@ a libm call, or host time leaking into a deterministic path. That's a correctnes
 tooling one: one of the two hosts may be wrong vs the PS2. Part 1b released (below); the GPU Part 2
 waits. E-lane follow-ups for a later fold: x86 needs `-msse4.1` (CMake sets an arch flag only for ARM);
 the E53 FP-mode test reads the x87 word via `fegetround()` on x86.
+
+## Part 1b — tick-39 divergence: host timezone leaks via OSD config (no fix)
+
+Worker: Muse Code, brief `local/muse/prompts/LX1.md` §Part 1b. No push.
+Budget ~1.5 h of 2 h.
+
+**Verdict: the divergence is host wall-clock *zone*, not guest math.**
+`getTimezoneOffsetMinutes()` (`ps2xRuntime/src/lib/Kernel/Syscalls/Helpers/Runtime.h:239-254`)
+reads the HOST's UTC offset with no deterministic override. Mini (EDT box,
+mktime quirk yields standard time): **−300 min**. bradflix container (UTC):
+**0**. The game reads it through `sceScfGetTimeZone` → `AdjustTime` applied
+to the (fixed) RTC, producing different local hour/day — the only 2
+differing rdram words at tick 39. Full field-level arithmetic match below.
+
+Method note: no existing knob fit — there is no guest function/PC trace
+(E55 is det-hash itself; `PS2X_DIAG_WATCH` needs addresses first). So:
+(1) minimal local-only rdump tap (commit `lx1b-rdump.diff` here; applied
+to the two scratch trees only, never the fork) dumping 32 MB rdram for
+ticks 36–40; (2) `PS2X_DIAG_WATCH` on the differing words (DIAG_TAPS
+build); (3) `PS2X_TRACE_SYSCALLS` (+PC) to prove the path. Drivers gained
+`--extra-env` (this part's only tooling change).
+
+### Builds + neutrality
+
+Fresh diag dirs both hosts (`DET_HASH_TAP=ON` + `DIAG_TAPS=ON`, else the
+Part-1 flags; `-msse4.1` on bradflix): `mac-build-diag` (~12 min, 8 jobs),
+`build-diag` (~20 min, 16 jobs — two unity TUs take 10+ min each at -O3
+with taps on). Neutrality: MD1 vs M1 **0/186** differing det-hash
+payloads; D1 vs B4 **0/149**.
+
+### Dumps: exactly 2 words differ, first at 0x548548
+
+| Tick | Words compared | Differing |
+| --- | --- | --- |
+| 38 | 8,388,608 | **0** |
+| 39 | 8,388,608 | **2**: `0x548548` mac `0x16` (22) vs bradflix `0x03` (3); `0x54855c` mac `0x0f` (15) vs bradflix `0x10` (16) |
+
+### Watch: same stores, same PCs — different values
+
+MD2/D2 (`PS2X_DIAG_WATCH=0x548548,0x54855c`), 4 lines each, identical
+except the two values (thread=1, ra=`0x2c75d0`, sp=`0x1fffe60` both):
+
+| PC (`sub_002C7478`) | Store | Mac | bradflix |
+| --- | --- | --- | --- |
+| `0x2c7650` `sw $t2,8($s5)` | 0x548548 (hour) | 22 | 3 |
+| `0x2c7654` | 0x54854c (min) | 34 | 34 |
+| `0x2c7668` `sw $a0,1C($s5)` (delay slot) | 0x54855c (day) | 15 | 16 |
+| `0x2c76a0` | 0x548560 | 0 | 0 |
+
+The caller unpacks BCD (`srl 4`/`andi 0xF`/`mult 10`, `+2000` for year)
+from an 8-byte stack buffer filled by `sceScfGetLocalTimefromRTC`
+(`0x40BFE0`, `jal` at `0x2c75c8`, ra matches). Full decoded TMD —
+sec 56, min 34, year 2004, month 7 identical; only hour/day differ.
+
+### Chain to the host call
+
+`sceScfGetLocalTimefromRTC` → `sceScfGetTimeZone` (`0x40BAE8`) +
+`sceScfGetSummerTime` → `AdjustTime` (`0x40BF48`, offset `$a1 = tz +
+60·DST − 540`) applied to the **fixed** RTC (`CD.cpp:708-717`,
+2004-07-16 12:34:56 UTC under `PS2X_DETERMINISTIC=1`).
+The syscall trace proves the path: `SetOsdConfigParam (4a)` ×2 at boot
+(game read-modify-write preserving tz bits), then a `GetOsdConfigParam
+(4b)`/`GetOsdConfigParam2 (6f)` burst at t≈0.71 s (tick 39) on **both**
+hosts; first 13,000 syscalls byte-identical (names+PCs). No
+`SetOsdConfigParam2` anywhere → DST=0 both (init constant).
+
+| Host | `getTimezoneOffsetMinutes()` (verbatim probe) | `$a1` (min) | Predicted local | Observed |
+| --- | --- | --- | --- | --- |
+| Mini (EDT box; mktime `tm_isdst=0` idiom yields EST) | −300 | −840 | 12:34−14 h = **22:34 day 15** | hour 22, day 15 ✓ |
+| bradflix container (UTC) | 0 | −540 | 12:34−9 h = **03:34 day 16** | hour 3, day 16 ✓ |
+
+All six TMD fields match on both hosts. The `eeCycle` +8 at tick 39 is
+transient (rejoins at tick 41) and lives in the same tick's
+value-dependent flow (syscall sequences identical); its exact
+instruction provenance is untraced — no PC-trace facility exists — and
+was not chased further.
+
+### Which host matches the PS2?
+
+**Neither.** On a real PS2 the SCF timezone is the *user's* OSD setting
+(stored config), which PCSX2 likewise models as console configuration —
+not the host machine's zone. Under `PS2X_DETERMINISTIC=1` the value must
+be pinned (as the RTC clock already is); the E-lane fix is to gate
+`getTimezoneOffsetMinutes()` (or the OSD init) on deterministic mode,
+e.g. return 0. Not done here (brief: stop, no fix).
+
+### Receipts + close
+
+- `local/research/LX1/lx1b-rdump.diff` (31 insertions, 1 file; `git
+  apply` clean on both trees; trees left with it uncommitted by design).
+- Boots: MD1/D1 (dumps), MD2/D2 (watch), MD3/D3 (noisy stack watch,
+  superseded), MD4/D4 (syscall trace) — all `target`, one Mac slot each.
+- Scratch at close: mini LX1 5.1 GB (diag build + dumps), bradflix LX1
+  11 GB (+diag build). Bradflix lease released at close (verified).
+- G1 (Part 1) is answered by this section: the suspect list
+  (sse2neon/`long double`/VU1/auto-vectorization) is ruled OUT for
+  tick 39 — guest FP is innocent; it's host timezone config.
+
+```sh
+git -C ~/dev/ssx3-work/LX1/PS2Recomp diff > local/research/LX1/lx1b-rdump.diff
+scp local/research/LX1/lx1b-rdump.diff bradflix:~/dev/ssx3-work/LX1/
+ssh bradflix 'cd ~/dev/ssx3-work/LX1/PS2Recomp && git apply ~/dev/ssx3-work/LX1/lx1b-rdump.diff'
+# diag builds (both flags ON), then e.g.:
+python3 local/research/LX1/lx1_boot_mac.py --mode det --backend cpu --runner ~/dev/ssx3-work/LX1/mac-build-diag/ps2xRuntime/ps2EntryRunner --label MD1 --stop-tick 45 --sound off --extra-env PS2X_LX1B_RDUMP_DIR=$PWD/run/MD1/rdump --extra-env PS2X_LX1B_RDUMP_TICKS=36-40
+python3 /tmp/lx1b_rdiff.py run/MD1/rdump/rdram-39.bin from-bradflix/D1/rdram-39.bin
+```
+

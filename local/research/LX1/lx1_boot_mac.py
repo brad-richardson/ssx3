@@ -100,6 +100,8 @@ def main():
     ap.add_argument('--stop-tick', type=int, default=2400)
     ap.add_argument('--sound', choices=('on', 'off'), default='on')
     ap.add_argument('--coverage-tick', type=int, default=2400)
+    ap.add_argument('--extra-env', action='append', default=[],
+                    help='extra PS2X_* env KEY=VAL (repeatable); a KEY ending in _DIR is mkdir -p-ed')
     args = ap.parse_args()
 
     runner = Path(args.runner).resolve()
@@ -145,6 +147,13 @@ def main():
         env.update(PS2X_VSYNC_RATE_LOG='1', PS2X_SOUND='1',
                    PS2X_UNPACED='1')  # FP1: speed runs measure unpaced headroom
         tick_re = RATE_TICK
+    for item in args.extra_env:
+        if '=' not in item:
+            raise SystemExit('bad --extra-env %r (need KEY=VAL)' % item)
+        k, v = item.split('=', 1)
+        env[k] = v
+        if k.endswith('_DIR'):
+            Path(v).mkdir(parents=True, exist_ok=True)
 
     exclusive = args.mode == 'speed'
     held = os.environ.get('LX1_HELD_SLOT')

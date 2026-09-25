@@ -86,6 +86,8 @@ def main():
     ap.add_argument('--stop-tick', type=int, default=2400)
     ap.add_argument('--root', default=str(DEFAULT_ROOT))
     ap.add_argument('--coverage-tick', type=int, default=2400)
+    ap.add_argument('--extra-env', action='append', default=[],
+                    help='extra guest env KEY=VAL, verbatim into the container (repeatable); a VAL under /work/ is mkdir -p-ed on the host')
     args = ap.parse_args()
 
     if not LEASE_DIR.is_dir():
@@ -143,6 +145,13 @@ def main():
         # PS2X_SOUND deliberately unset (sound-off; AU10 guest-identical).
         # PS2X_GS_BACKEND deliberately unset (CPU GS default).
     }
+    for item in args.extra_env:
+        if '=' not in item:
+            raise SystemExit('bad --extra-env %r (need KEY=VAL)' % item)
+        k, v = item.split('=', 1)
+        guest_env[k] = v
+        if k.endswith('_DIR') and v.startswith(C_ROOT + '/'):  # container dir -> host dir
+            (root / v[len(C_ROOT) + 1:]).mkdir(parents=True, exist_ok=True)
     cname = 'lx1-%s-%d' % (re.sub(r'[^A-Za-z0-9_.-]', '_', args.label), os.getpid())
     uid = os.getuid()
     cmd = ['docker', 'run', '--rm', '--name', cname,

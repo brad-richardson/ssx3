@@ -1,0 +1,49 @@
+diff --git a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+index 71803a3..090c0fb 100644
+--- a/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
++++ b/ps2xRuntime/src/lib/Kernel/EeScheduler.cpp
+@@ -259,6 +259,35 @@ EeScheduler::DetHashSnapshot EeScheduler::makeDetHashSnapshot() const
+     return result;
+ }
+ 
++#if PS2X_ENABLE_DET_HASH_TAP
++// LX1b local-only RDRAM dumper (NEVER commit to the fork): when
++// PS2X_LX1B_RDUMP_DIR is set, writes DIR/rdram-<tick>.bin for ticks in
++// PS2X_LX1B_RDUMP_TICKS ("lo-hi"). Read-only w.r.t. guest state.
++namespace
++{
++void lx1bMaybeDumpRdram(uint64_t tick, const uint8_t *rdram, size_t size)
++{
++    static const char *dir = std::getenv("PS2X_LX1B_RDUMP_DIR");
++    static const char *win = std::getenv("PS2X_LX1B_RDUMP_TICKS");
++    if (!dir || !win || !rdram || size == 0)
++        return;
++    unsigned long long lo = 0, hi = 0;
++    if (std::sscanf(win, "%llu-%llu", &lo, &hi) != 2 || tick < lo || tick > hi)
++        return;
++    char path[1024];
++    std::snprintf(path, sizeof(path), "%s/rdram-%llu.bin", dir,
++                  static_cast<unsigned long long>(tick));
++    FILE *f = std::fopen(path, "wb");
++    if (!f)
++        return;
++    std::fwrite(rdram, 1, size, f);
++    std::fclose(f);
++    std::fprintf(stderr, "[lx1b-rdump] tick=%llu %s\n",
++                 static_cast<unsigned long long>(tick), path);
++}
++} // namespace
++#endif
++
+ void EeScheduler::emitDetHashTap()
+ {
+     if (m_detHashEvery == 0 || m_vsyncTick % m_detHashEvery != 0)
+@@ -280,6 +309,8 @@ void EeScheduler::emitDetHashTap()
+         std::fputs("[det-hash] null or unbound region; disabled\n", stderr);
+         return;
+     }
++    if (const uint8_t *rdram = m_runtime.memory().getRDRAM()) // LX1b local-only
++        lx1bMaybeDumpRdram(m_vsyncTick, rdram, PS2_RAM_SIZE);
+     char line[256];
+     const int length = std::snprintf(line, sizeof(line),
+         "[det-hash:v1] tick=%llu eeCycle=%llu rdram=%016llx scratch=%016llx vu1Data=%016llx vu1Code=%016llx combined=%016llx count=%llu",
