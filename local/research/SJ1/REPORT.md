@@ -187,3 +187,13 @@ R2 (92 entries) — R1 minus the two Select-Event downs (Snow Jam is the default
 
 R1b (31 entries) = I26-FAST verbatim (`local/research/I26/ROUTES.md`); verified byte-identical
 by the driver check.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** (1) **Snow Jam's 99 % loading stall is gone** on `0ed07c4` (loads and races; the SPU banks
+and 64-bit branches are the likely cure). (2) **The "rider idle at race start" (N10/N11/F1/F2: 0–1
+MPH until ~00:00:40) is our route, not the runtime:** I26-FAST holds d-pad down for 30 s, and down
+brakes; released, the rider rides at 44 MPH. The control run with no race inputs reached 52 % at
+00:02:38 when the 700 s cap hit, so a full race needs ~20 min of Mac wall time at 0.25×. Next:
+drop the down-hold from I26-FAST (ROUTES.md note) and run one no-input race to the finish with a
+1,800 s cap, preferably on bradflix once LX1 passes. Coverage 0/0/4 throughout.

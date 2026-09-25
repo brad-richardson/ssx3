@@ -55,11 +55,7 @@ then 120 Hz simulation.
       DIRECT-via-FIFO / PATH3 mask; Compare interrupt timing and exact
       GS-blank/FIELD rules (E54B, E54F1). Check each against the fork before
       briefing. `docs/research/review-2026-09-23-frontier-2.md`.
-- [ ] **Snow Jam stalls at 99%** (E31): the recomp's `_sceCdSC` read loop
-      stops at ~478 s while PCSX2 keeps reading (X1, T47). The suspected
-      missing sound driver now exists (AU7 fold), so re-test on the current
-      fork first; if it still stalls, one boot with CD/SIF RPC tracing vs
-      T47's healthy sequence. `local/research/X1/`, `T47/`.
+- [x] Snow Jam's 99 % loading stall is gone on `0ed07c4` (SJ1 R2 loads and races).
 - [ ] **E34 faithful movie playback:** apply E30's two diffs
       (`e30-fix.diff`, `e30-regression.diff`), suite, then an A/B boot with
       `PS2X_SKIP_MOVIE` off vs the bypass. With the bypass off, E49 stalls in
@@ -122,10 +118,9 @@ then 120 Hz simulation.
       on the play build with sound on, plus one GameThread-pinned-to-cpu7 run.
       `local/muse/prompts/N11.md`.
 
-- [ ] **Rider idle at race start:** on the Odin (N10) the rider sits at 0–1 MPH with a RECOVER
-      prompt from ~00:00:06 to ~00:00:40, then rides at 43–44 MPH. First check the Mac on the same
-      I26-FAST route (route input vs runtime). Then a simpleperf race profile on the N10 APK.
-      `local/research/N10/`, `N7/`.
+- [ ] **Full race to the finish:** the rider-idle start was I26-FAST's 30 s d-pad down (down brakes; SJ1).
+      Drop the hold from the route (update `local/research/I26/ROUTES.md`; speed windows shift) and run
+      one no-input race to the results screen with a 1,800 s cap (bradflix once LX1 passes).
 - [ ] Odin thermals: back-to-back runs reach thermal status 4–5 with cpu5 at 1.79 GHz (N10); space
       speed runs or record status, and consider it in the 120 Hz budget.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
