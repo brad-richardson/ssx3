@@ -172,6 +172,17 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **Tooling from the 09-24 review** (`docs/research/review-2026-09-24-time-and-bottlenecks.md`):
+      - `odin-replay` CLI: push stream, set env, run, pull hashes/frames, diff vs Mac, with
+        lease/force-stop/env restore built in; fold in N8X1's stream surgery (`local/research/
+        N8X1/tools/`: EOP split + markers, variants, nearestify).
+      - Reference-path logger: at GS/audio init, log which platform-dependent paths run
+        (hierarchical binning + subgroup size, descriptor-buffer path, sampler feedback), on Mac
+        and Odin, so a baseline can be checked for equivalence.
+      - `gate` helper for the orchestrator: append the REPORT gate section, update the todo
+        line, commit with explicit paths, push, close the pane.
+      - Worker permission preflight in the launchers: dry-run the edits/SSH a brief needs.
+      - Nightly (or per-fold) Android + Mac build from the three fork tips to catch drift.
 - [ ] **UP1 upstream harvest (next, read-only first):** upstream
       `ran-j/PS2Recomp` `75d729c` (09-19 squash of `iop-emulator`, 139 files:
       EE scheduler refactor, IOP emulator, GS architecture, texture caching

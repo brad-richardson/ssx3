@@ -61,6 +61,14 @@ The contract is in `AGENTS.md` (about one page). On top of it:
 - **Split at judgment points:** Part 1 gathers evidence or prepares a script and stops;
   the orchestrator gates and releases Part 2 with the exact SHA.
 - **Copy addresses and pins from their source report together with what they are.**
+- **Exploration mode:** after two inconclusive bounded parts on one symptom, switch to a
+  time-boxed frontier session with the device and free rein plus a notebook (N8X1 found in 40
+  min what 15 h of narrow briefs didn't); return to bounded briefs once a mechanism is named.
+- **Reference equivalence:** before trusting a baseline, check the reference takes the same code
+  path (platform `#ifdef`s, feature fallbacks; the Mac never ran Adreno's binning path).
+- **Full-signal measurement:** stereo mid/side (`local/research/AU7/midside.py`), per-tick
+  hashes when hunting a first divergence, frames viewed yourself.
+- **Ask Brad first** before any search for assets, hardware or preferences.
 - Routes: race boots use I26-FAST (`local/research/I26/ROUTES.md`, race HUD ~tick 1714).
   600 s boot cap unless a brief grants more.
 - Host contention: two mini boot slots (`local/tooling/p_lane_lease.py`); builds `nice`d;
@@ -79,6 +87,8 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   from a dirty working copy (every GPU build before N9 did, which cost a provenance lane).
   Granite's submodule `origin` is upstream: push only to the fork URL. The orchestrator
   pushes these two forks.
+- **Fold as you go:** product code lands on a fork branch in the lane that proves it; side
+  branches fold the day they gate (the sound code sat unfolded while audio was measured).
 - After a codegen-changing fold, regenerate and promote `~/dev/ssx3-work/codegen-ssx3`;
   keep one older copy for A/B (disk cap 200 GB, `local/tooling/disk_budget.sh`).
 - Upstreams (read-only fetches fine, no contact): `ran-j/PS2Recomp`,
