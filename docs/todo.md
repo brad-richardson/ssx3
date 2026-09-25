@@ -144,8 +144,8 @@ then 120 Hz simulation.
       iPad device family + landscape and lay the virtual pad in the
       letterbox margins; Simulator iPad, then Brad's iPad. IPAD1 ran as an
       iPhone-compat portrait window (`~/dev/ssx3-work/IPAD1/`).
-- [ ] Rebuild and install on `fb11e18` (sound + Turnip fold) when useful;
-      iPhone is install-only, test on Simulator then iPad.
+- [ ] Rebuild and install after the AU8 fold (planar tag-1 fix, sound on by default): I29's
+      `fb11e18` build is installed on the iPhone but is silent by default and pre-fix.
 - [ ] Physical controller check by hand on the iPad (I25 G1).
       `local/research/I25/`.
 - [ ] Guest font detail is still coarse (source image is low resolution,

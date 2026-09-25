@@ -112,3 +112,12 @@ both slots free of me at close. Elapsed ~25 min of 120.
   probe + full run both launched (device had been unlocked meanwhile).
 - G5: `PS2X_ENABLE_IOP_RPC_TRACE=1` (fork default ON) is in both builds,
   same as I27C; unhandled-RPC trace lines appear in consoles.
+
+## Orchestrator gate (2026-09-24)
+
+**A for build and install.** Read the report and commit `cd59338f`. Viewed the Simulator race frame
+(00:00:08, 15 MPH, terrain/HUD) and the iPad race frame (iPhone-compat portrait window, I28).
+iPhone: signed build `853007c0…` installed, no launch. Two findings recorded elsewhere: (1) host
+sound needs `PS2X_SOUND=1` (`ps2_runtime.cpp:1116`), not default-on as the AU7 gate said; (2) this
+build predates AU8's planar tag-1 fix, so its music would be scrambled anyway. Rebuild for Brad's
+listening after the AU8 fold, with sound on by default.
