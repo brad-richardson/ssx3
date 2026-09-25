@@ -184,6 +184,10 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **AU10 (running): folded tip hangs on the title with sound off** (GA1). Voice state must advance
+      on guest time; det-hash must match sound on vs off. Until fixed, boots on `56a5e8a` need
+      `PS2X_SOUND=1` (the device play envs already have it).
+
 - [ ] **IN1 INTC 5 (VIF1) / 7 (VU1) never dispatched (CT1):** the VIF1 handler `0x362340` counts
       i-bit interrupts at `0x5059d8+0x80` and cancels stalls (VIF1_FBRST STC); the VU1 handler
       is a no-op. Check whether `sub_00375A08`/`sub_00376938` read that counter (frame pacing?)
