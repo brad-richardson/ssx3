@@ -1,0 +1,10 @@
+# SJ1 — beyond the first race start: full race to the finish, and the Snow Jam 99 % stall re-test (muse, 2.5 h, Mac)
+
+## Why
+The milestone's "stock race that starts and advances" holds. The next unknowns are what happens after: does a race finish and return to the menus, and does the second event (Snow Jam) still stall at 99 % loading (E31, `docs/todo.md`: `_sceCdSC` read loop stops ~478 s; X1, T47)? The fork has changed a lot since (sound HLE with SPU banks, 64-bit sign branches, RR1 DMA/PATH3 fixes), so both are re-tests on fork `ssx3` `0ed07c4` + canonical codegen.
+
+## Runs (Mac, paraLLEl env + `PGS_HIER_BINNING=force`, `PS2X_SOUND=1`, empty mc0, `PS2X_SKIP_MOVIE=1`, one mini slot each)
+- **R1 full race:** I26-FAST to the Happiness race, then a scripted hold (down-hold = tuck, X presses on the "RECOVER" prompt; see `local/research/I26/ROUTES.md` and pad-script syntax there) until the finish/results screen or the cap. At the Mac's ~0.25× a 2–3 min race is 8–12 min wall: **the orchestrator approves up to 1,000 s wall for R1** (progress caps still apply: stop if the race clock doesn't advance for 60 s wall). Frames every ~20 s of wall; view them; table: race clock, progress %, place, what's on screen; the end state (results, back to menu, hang, crash).
+- **R2 Snow Jam:** the E31 route to Peak 1 → Snow Jam (`local/research/E31/REPORT.md` route table) to the loading screen and past it; cap 700 s wall (approved). Report whether loading passes 99 %, the CD read trace tail (`PS2X_CD_READ_TRACE`), and frames of the first race seconds if it loads.
+- Use `PS2X_COVERAGE_TICK` near the end of each run: missing targets, unknown syscalls, RPC pairs (baseline: 0/0/the E56 four).
+Budget: 1 build (Release, diag off except what these need), 2 runs (+1 spare), 2.5 h. Never push; no source changes (if a route needs a knob that doesn't exist, stop and report). Text only in git. Deliverable `local/research/SJ1/REPORT.md` (route scripts, tables, frames viewed, end states, coverage lines, gaps); commit `[SJ1] …` (`git add -f`, `Orchestrated-By: Muse Code`), no push.

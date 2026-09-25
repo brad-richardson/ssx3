@@ -1,0 +1,7 @@
+# UV1 — VIF UNPACK formats vs PCSX2 + DMA stall/REFS probe (muse, 1.5 h, read + one boot, Mac)
+
+Review `docs/research/review-2026-09-25-fable.md` §1 suspects 5 and 7. RR1 found V4-5 unexpanded (fixed); the same interpreter may mishandle other formats.
+1. **Static:** compare our `ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp` UNPACK paths (~L870–1010 at `0ed07c4`: V2/V3 z/w handling, unknown-format raw copy, fill cycles `cl<wl`, masks, sign/zero extension, `+tops` addressing) against PCSX2's `Vif_Unpack.cpp` / `Vif_Unpack.inl` (checkout on bytesize `~/pcsx2-g7`, read-only; or the pinned source the T-lane uses). Table: format × behaviour ours vs PCSX2 × same/different, with file:line both sides.
+2. **Dynamic (one det boot to t2400, paraLLEl env, I26-FAST, empty mc0, one slot):** default-off counters (`PS2X_VIF_FMT_LOG=1`: one line per vsync with counts per UNPACK format/flags; `PS2X_DMA_STALL_LOG=1`: REFS tags seen, non-zero `D_CTRL` STS/STD, stall-controlled channels). Which formats does SSX 3 actually use on the route, and does it ever use REFS/stall control?
+3. For each format that is both **used** and **different**: say what a one-line fix would be; don't apply it (Part 2 decides).
+Base fork `ssx3` `0ed07c4`, worktree `~/dev/ssx3-work/UV1/PS2Recomp`, branch `uv1-unpack`. Budget: 1 build, 1 boot (+1 spare), 1.5 h. Never push; runner-dir check empty; text only in git. Deliverable `local/research/UV1/REPORT.md`; commit `[UV1] …` (`git add -f`, `Orchestrated-By: Muse Code`), no push.
