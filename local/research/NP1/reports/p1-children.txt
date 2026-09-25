@@ -1,0 +1,563 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 --call-graph fp --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 137186
+Event count: 111751374042
+
+Children  Self    Symbol
+98.87%    0.00%   __pthread_start(void*)
+98.87%    0.00%   __start_thread
+74.17%    0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, PS2Runtime::run()::$_0>>(void*)
+74.15%    0.01%   EeScheduler::run()
+60.89%    0.01%   sub_00382760_0x382760(unsigned char*, R5900Context*, PS2Runtime*)
+60.64%    0.01%   PS2Runtime::Store32(unsigned char*, R5900Context*, unsigned int, unsigned int)
+60.56%    0.05%   PS2Memory::writeIORegister(unsigned int, unsigned int)
+60.27%    0.00%   PS2Memory::processPendingTransfers()
+60.17%    0.00%   PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+60.13%    0.55%   PS2Memory::processVIF1DataImpl(unsigned char const*, unsigned int)
+58.64%    0.00%   std::__ndk1::__function::__func<PS2Runtime::syncCoreSubsystems()::$_3, std::__ndk1::allocator<PS2Runtime::syncCoreSubsystems()::$_3>, void (unsigned int, unsigned int, unsigned int)>::operator()(unsigned int&&, unsigned int&&, unsigned int&&)
+41.74%    10.42%  VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+21.24%    0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, void (GsWorker::*)(), GsWorker*>>(void*)
+21.23%    0.00%   [kernel.kallsyms][+ffffffe760a11586]
+21.17%    0.03%   GsWorker::threadMain()
+20.82%    0.00%   [kernel.kallsyms][+ffffffe761a7d85e]
+20.29%    0.02%   GS::executeQueuedCommand(GsCommand&)
+17.37%    6.35%   VU1Interpreter::execUpper(unsigned int)
+16.47%    0.00%   __ioctl
+16.27%    0.18%   GS::processGIFPacket(unsigned char const*, unsigned int)
+16.26%    0.00%   [kernel.kallsyms][+ffffffe761a7d8ea]
+16.26%    0.00%   [kernel.kallsyms][+ffffffe760a3aece]
+16.25%    0.00%   [kernel.kallsyms][+ffffffe760a3af86]
+16.24%    0.00%   [kernel.kallsyms][+ffffffe760a3b042]
+14.33%    0.01%   ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::RawGifPacket(unsigned int, unsigned char const*, unsigned int)
+14.28%    0.07%   ParallelGS::GSInterface::gif_transfer(unsigned int, void const*, unsigned long)
+12.60%    0.00%   [kernel.kallsyms][+ffffffe760e13696]
+12.53%    0.00%   [kernel.kallsyms][+ffffffe76084c36a]
+12.52%    0.00%   [kernel.kallsyms][+ffffffe76084c2da]
+12.09%    0.00%   libvulkan_freedreno.so[+9cdf72]
+12.09%    0.00%   libvulkan_freedreno.so[+a3a6ce]
+12.08%    0.00%   [kernel.kallsyms][+ffffffe76083fcf2]
+11.99%    0.00%   Vulkan::Device::create_buffer(Vulkan::BufferCreateInfo const&, void const*)
+11.98%    0.00%   Vulkan::Allocator::allocate(unsigned int, unsigned int, Vulkan::AllocationMode, Vulkan::DeviceAllocation*)
+11.98%    0.00%   Util::ArenaAllocator<Vulkan::ClassAllocator, Vulkan::DeviceAllocation>::allocate(unsigned int, Vulkan::DeviceAllocation*)
+11.97%    0.00%   Vulkan::DeviceAllocator::internal_allocate(unsigned int, unsigned int, Vulkan::AllocationMode, VkDeviceMemory_T**, unsigned char**, VkObjectType, unsigned long, Vulkan::ExternalHandle*)
+11.97%    0.00%   [kernel.kallsyms][+ffffffe76083f5ee]
+11.97%    0.00%   [kernel.kallsyms][+ffffffe760856326]
+11.93%    0.00%   libvulkan_freedreno.so[+9be4b6]
+11.82%    0.00%   Vulkan::request_block(Vulkan::Device&, Vulkan::BufferBlock&, unsigned long, Vulkan::BufferPool&, std::__ndk1::vector<Vulkan::BufferBlock, std::__ndk1::allocator<Vulkan::BufferBlock>>&)
+11.82%    0.00%   Vulkan::BufferPool::allocate_block(unsigned long)
+11.71%    0.00%   ParallelGS::GSInterface::flush_pending_transfer(bool)
+11.39%    0.00%   ParallelGS::GSRenderer::copy_vram(ParallelGS::CopyDescriptor const&, ParallelGS::PageRect const&)
+11.36%    0.00%   Vulkan::CommandBuffer::request_scratch_buffer_memory(unsigned long)
+11.36%    0.00%   Vulkan::Device::request_staging_block(Vulkan::BufferBlock&, unsigned long)
+9.98%     0.09%   PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+9.52%     0.00%   [kernel.kallsyms][+ffffffe760857eaa]
+9.00%     8.98%   VU1Interpreter::commitReadyPipelines()
+7.93%     0.00%   [kernel.kallsyms][+ffffffe760d2ecf6]
+6.97%     3.43%   VU1Interpreter::normalizeFmacResult(float*, unsigned char, unsigned char*)
+6.34%     0.08%   PS2Runtime::executeVU0Microprogram(unsigned char*, R5900Context*, unsigned int)
+5.26%     5.25%   VU1Interpreter::calculatePairReadyCycle(VU1Interpreter::DecodedInstructionPair const&) const
+4.84%     4.84%   [kernel.kallsyms][+ffffffe761a8e810]
+4.79%     0.43%   VU1Interpreter::progressXgkick()
+4.66%     0.10%   sub_0022ADD8_0x22add8(unsigned char*, R5900Context*, PS2Runtime*)
+4.55%     0.01%   PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+4.45%     0.02%   GifArbiter::drain()
+4.45%     0.00%   GS::latchHostPresentationFrame()
+4.41%     0.00%   ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::Present(GSPresentationRequest const&)
+4.19%     0.00%   Vulkan::Device::wait_idle()
+4.18%     0.00%   Vulkan::Device::wait_idle_nolock()
+4.10%     0.00%   libvulkan_freedreno.so[+a3b0fe]
+4.06%     0.04%   syscall
+4.05%     3.94%   __memset_aarch64_nt
+4.03%     0.39%   VU1Interpreter::applyFmacDestAcc(float*, unsigned char)
+4.02%     0.03%   GsWorker::enqueue(GsCommand)
+3.97%     0.00%   Vulkan::DeviceAllocator::garbage_collect()
+3.97%     0.00%   libvulkan_freedreno.so[+9be9e2]
+3.84%     0.00%   [kernel.kallsyms][+ffffffe760dfb456]
+3.84%     0.00%   [kernel.kallsyms][+ffffffe760a2e3f2]
+3.84%     0.00%   [kernel.kallsyms][+ffffffe760af8146]
+3.84%     0.00%   [kernel.kallsyms][+ffffffe761a7d916]
+3.84%     0.00%   [kernel.kallsyms][+ffffffe760dfb2c2]
+3.84%     0.00%   [kernel.kallsyms][+ffffffe760e1943a]
+3.83%     0.00%   [kernel.kallsyms][+ffffffe760e19622]
+3.83%     0.00%   [kernel.kallsyms][+ffffffe760e19d26]
+3.83%     0.00%   [kernel.kallsyms][+ffffffe760e1d04a]
+3.83%     0.00%   [kernel.kallsyms][+ffffffe760e20b2a]
+3.82%     0.00%   [kernel.kallsyms][+ffffffe760e23c72]
+3.82%     0.00%   [kernel.kallsyms][+ffffffe760d315fa]
+3.69%     0.01%   std::__ndk1::condition_variable::notify_one()
+3.67%     0.40%   VU1Interpreter::applyFmacDest(float*, float*, unsigned char)
+3.63%     0.01%   GS::noteGifPath(GifPathId)
+3.61%     3.60%   VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+3.59%     3.58%   VU1Interpreter::calculateFmacExactResults(unsigned char, double*) const
+3.31%     0.00%   [kernel.kallsyms][+ffffffe760bca446]
+3.13%     0.00%   [kernel.kallsyms][+ffffffe760bca252]
+3.09%     0.00%   android_app_entry
+3.09%     0.00%   android_main
+3.09%     0.00%   main
+3.05%     0.00%   PS2Runtime::run()
+3.00%     2.48%   VU1Interpreter::getDecodedInstructionPairForPc(unsigned char const*, unsigned int, PS2Memory*, unsigned int)
+2.98%     0.06%   sub_0022A830_0x22a830(unsigned char*, R5900Context*, PS2Runtime*)
+2.90%     0.00%   [kernel.kallsyms][+ffffffe760d2c77e]
+2.87%     0.00%   [kernel.kallsyms][+ffffffe760bcd2be]
+2.85%     0.00%   [kernel.kallsyms][+ffffffe760b09cb6]
+2.78%     2.77%   @plt
+2.74%     2.73%   VU1Interpreter::calculateFmacProductSticky(unsigned char) const
+2.68%     0.00%   EndDrawing
+2.39%     0.00%   [kernel.kallsyms][+ffffffe760d2ff4a]
+2.26%     2.26%   [kernel.kallsyms][+ffffffe761a8e860]
+2.23%     0.00%   [kernel.kallsyms][+ffffffe761704d6e]
+1.98%     0.00%   [kernel.kallsyms][+ffffffe7608580a2]
+1.98%     0.01%   sub_0022A408_0x22a408(unsigned char*, R5900Context*, PS2Runtime*)
+1.94%     0.06%   VU1Interpreter::execute(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int, unsigned int, unsigned int, unsigned int)
+1.93%     0.04%   sub_0022A128_0x22a128(unsigned char*, R5900Context*, PS2Runtime*)
+1.87%     0.00%   [kernel.kallsyms][+ffffffe760d2c52a]
+1.82%     0.01%   sub_00128AF0_0x128af0(unsigned char*, R5900Context*, PS2Runtime*)
+1.77%     1.76%   VU1Interpreter::markPairWrites(VU1Interpreter::DecodedInstructionPair const&)
+1.75%     0.00%   [kernel.kallsyms][+ffffffe760d2b9d6]
+1.65%     0.00%   [kernel.kallsyms][+ffffffe760b9882a]
+1.63%     0.00%   [kernel.kallsyms][+ffffffe760d2c826]
+1.62%     0.00%   [kernel.kallsyms][+ffffffe760d2ba4e]
+1.62%     0.00%   [kernel.kallsyms][+ffffffe760d1273a]
+1.58%     0.00%   [kernel.kallsyms][+ffffffe760d1415a]
+1.53%     0.06%   void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)4, 1>(void const*, unsigned int)
+1.46%     0.10%   void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)4>(bool)
+1.45%     0.00%   [kernel.kallsyms][+ffffffe760cfbf82]
+1.41%     0.08%   WaitTime
+1.39%     1.39%   VU1Interpreter::updateFmacFlags(unsigned char const*, unsigned char, unsigned int)
+1.38%     0.01%   ParallelGS::GSInterface::flush(unsigned int, ParallelGS::FlushReason)
+1.31%     0.37%   void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+1.31%     1.31%   [kernel.kallsyms][+ffffffe760a47efc]
+1.30%     0.00%   [kernel.kallsyms][+ffffffe760d89482]
+1.26%     0.00%   [kernel.kallsyms][+ffffffe760855aaa]
+1.17%     0.03%   ParallelGS::GSInterface::drawing_kick_update_state(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, muglm::tvec4<int> const&)
+1.17%     1.16%   clock_gettime
+1.15%     1.15%   VU1Interpreter::broadcast(float const*, unsigned char)
+1.09%     0.02%   ParallelGS::GSInterface::drawing_kick_update_texture(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, muglm::tvec4<int> const&)
+1.05%     0.00%   [kernel.kallsyms][+ffffffe760d8b60e]
+1.00%     0.00%   [kernel.kallsyms][+ffffffe760d85772]
+1.00%     1.00%   VU1Interpreter::queueVfWrite(unsigned char, unsigned char, float const*, unsigned int)
+0.99%     0.02%   sub_002306A8_0x2306a8(unsigned char*, R5900Context*, PS2Runtime*)
+0.94%     0.00%   [kernel.kallsyms][+ffffffe760d124ea]
+0.93%     0.93%   [kernel.kallsyms][+ffffffe760cfb750]
+0.91%     0.00%   [kernel.kallsyms][+ffffffe760d2c8ee]
+0.88%     0.00%   [kernel.kallsyms][+ffffffe760d10032]
+0.87%     0.87%   __kernel_clock_gettime
+0.86%     0.00%   sub_0022A368_0x22a368(unsigned char*, R5900Context*, PS2Runtime*)
+0.85%     0.00%   [kernel.kallsyms][+ffffffe760d877a6]
+0.83%     0.02%   sub_00229FC8_0x229fc8(unsigned char*, R5900Context*, PS2Runtime*)
+0.75%     0.75%   [kernel.kallsyms][+ffffffe760a21688]
+0.73%     0.73%   [kernel.kallsyms][+ffffffe760a21680]
+0.70%     0.70%   VU1Interpreter::applyDest(float*, float const*, unsigned char)
+0.68%     0.00%   ParallelGS::GSRenderer::flush_cache_upload()
+0.67%     0.56%   __memcpy_aarch64_nt
+0.61%     0.00%   [kernel.kallsyms][+ffffffe760d87326]
+0.61%     0.61%   [kernel.kallsyms][+ffffffe760d2cbf8]
+0.60%     0.02%   snprintf(char*, unsigned long pass_object_size1, char const*, ...)
+0.60%     0.03%   __vsnprintf_chk
+0.57%     0.03%   vsnprintf
+0.55%     0.00%   [kernel.kallsyms][+ffffffe760d86972]
+0.53%     0.00%   void ParallelGS::GSInterface::packed_ADONLY<1>(void const*, unsigned int)
+0.52%     0.01%   sub_00129160_0x129160(unsigned char*, R5900Context*, PS2Runtime*)
+0.50%     0.00%   ParallelGS::GSRenderer::flush_palette_upload()
+0.50%     0.00%   PS2Runtime::handleSyscall(unsigned char*, R5900Context*, unsigned int)
+0.49%     0.00%   ps2_syscalls::dispatchNumericSyscall(unsigned int, unsigned char*, R5900Context*, PS2Runtime*)
+0.48%     0.25%   sub_0037E120_0x37e120(unsigned char*, R5900Context*, PS2Runtime*)
+0.48%     0.11%   VU1Interpreter::decodeInstructionPair(unsigned char const*, unsigned int) const
+0.48%     0.00%   [kernel.kallsyms][+ffffffe760d2d8a2]
+0.47%     0.00%   void ParallelGS::GSInterface::drawing_kick_primitive<true, false, true, 2u>(bool)
+0.47%     0.00%   eglSwapBuffers
+0.47%     0.00%   android::eglSwapBuffersWithDamageKHRImpl(void*, void*, int*, int)
+0.47%     0.01%   void ParallelGS::GSInterface::drawing_kick_append<true, false, true, 2u>()
+0.47%     0.00%   !!!0000!04fe7c7713a0660472688458ecb7a2!a9ee82cd83!
+0.47%     0.00%   !!!0000!10f39af3d5dda97a64124dee6a3783!a9ee82cd83!
+0.47%     0.02%   sub_00363490_0x363490(unsigned char*, R5900Context*, PS2Runtime*)
+0.46%     0.00%   ParallelGS::GSInterface::a_d_XYZ2(unsigned long)
+0.46%     0.00%   Vulkan::CommandBuffer::allocate_constant_data(unsigned int, unsigned int, unsigned long)
+0.46%     0.00%   Vulkan::Device::request_uniform_block(Vulkan::BufferBlock&, unsigned long)
+0.46%     0.00%   ParallelGS::GSInterface::flush_render_pass(ParallelGS::FlushReason)
+0.44%     0.00%   sub_003C1638_0x3c1638(unsigned char*, R5900Context*, PS2Runtime*)
+0.43%     0.08%   scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)
+0.42%     0.00%   [kernel.kallsyms][+ffffffe760d2fcee]
+0.42%     0.27%   GS::vertexKick(bool)
+0.42%     0.00%   libunwind::UnwindCursor<libunwind::LocalAddressSpace, libunwind::Registers_arm64>::setInfoBasedOnIPRegister(bool)
+0.42%     0.42%   [kernel.kallsyms][+ffffffe761a795a0]
+0.41%     0.00%   [kernel.kallsyms][+ffffffe761a7d88e]
+0.40%     0.13%   sub_00376938_0x376938(unsigned char*, R5900Context*, PS2Runtime*)
+0.40%     0.40%   [kernel.kallsyms][+ffffffe760a277ec]
+0.39%     0.39%   [kernel.kallsyms][+ffffffe760a2784c]
+0.38%     0.00%   sub_00423DE0_0x423de0(unsigned char*, R5900Context*, PS2Runtime*)
+0.38%     0.38%   [kernel.kallsyms][+ffffffe760a2168c]
+0.37%     0.00%   sub_001216E0_0x1216e0(unsigned char*, R5900Context*, PS2Runtime*)
+0.37%     0.00%   sub_00111408_0x111408(unsigned char*, R5900Context*, PS2Runtime*)
+0.37%     0.00%   EeScheduler::waitSemaphore(int)
+0.37%     0.00%   [kernel.kallsyms][+ffffffe760d2b97e]
+0.37%     0.29%   __vfprintf
+0.36%     0.00%   dl_iterate_phdr
+0.36%     0.00%   [linker]__loader_dl_iterate_phdr
+0.35%     0.07%   sub_0013D818_0x13d818(unsigned char*, R5900Context*, PS2Runtime*)
+0.35%     0.00%   [kernel.kallsyms][+ffffffe760dd699e]
+0.34%     0.34%   GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+0.34%     0.00%   [kernel.kallsyms][+ffffffe761a7d95e]
+0.34%     0.00%   [kernel.kallsyms][+ffffffe760a482da]
+0.34%     0.00%   [kernel.kallsyms][+ffffffe761a90ece]
+0.34%     0.08%   sub_001E9A30_0x1e9a30(unsigned char*, R5900Context*, PS2Runtime*)
+0.33%     0.00%   sub_0022C620_0x22c620(unsigned char*, R5900Context*, PS2Runtime*)
+0.32%     0.11%   scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&, void*, scudo::Chunk::UnpackedHeader*, unsigned long)
+0.31%     0.31%   [kernel.kallsyms][+ffffffe760b99edc]
+0.31%     0.00%   libunwind::UnwindCursor<libunwind::LocalAddressSpace, libunwind::Registers_arm64>::step(bool)
+0.30%     0.00%   __cxa_throw
+0.29%     0.00%   _Unwind_RaiseException
+0.29%     0.07%   sub_0038B0F8_0x38b0f8(unsigned char*, R5900Context*, PS2Runtime*)
+0.29%     0.00%   [kernel.kallsyms][+ffffffe760b99ea2]
+0.29%     0.01%   std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+0.29%     0.00%   sub_00354F98_0x354f98(unsigned char*, R5900Context*, PS2Runtime*)
+0.28%     0.00%   [kernel.kallsyms][+ffffffe760d2b2fe]
+0.28%     0.00%   sub_0022C3B8_0x22c3b8(unsigned char*, R5900Context*, PS2Runtime*)
+0.28%     0.00%   ParallelGS::GSRenderer::flush_rendering(ParallelGS::RenderPass const&)
+0.27%     0.00%   Vulkan::CommandBuffer::dispatch(unsigned int, unsigned int, unsigned int)
+0.27%     0.00%   ParallelGS::GSRenderer::ensure_command_buffer(Util::IntrusivePtr<Vulkan::CommandBuffer>&, Vulkan::CommandBuffer::Type)
+0.27%     0.00%   EeScheduler::blockCurrent(EeWaitState)
+0.27%     0.00%   Vulkan::Device::request_command_buffer(Vulkan::CommandBuffer::Type)
+0.27%     0.00%   Vulkan::Device::request_command_buffer_nolock(unsigned int, Vulkan::CommandBuffer::Type, bool)
+0.27%     0.00%   pthread_cond_wait
+0.26%     0.00%   [kernel.kallsyms][+ffffffe760a1495a]
+0.26%     0.00%   [kernel.kallsyms][+ffffffe760a24902]
+0.26%     0.00%   [kernel.kallsyms][+ffffffe760ad3c72]
+0.26%     0.00%   [kernel.kallsyms][+ffffffe760ad3ce2]
+0.26%     0.26%   [kernel.kallsyms][+ffffffe760b98830]
+0.26%     0.26%   libunwind::findUnwindSectionsByPhdr(dl_phdr_info*, unsigned long, void*)
+0.26%     0.26%   GS::buildDrawBatch(int) const
+0.26%     0.00%   [kernel.kallsyms][+ffffffe76083d0da]
+0.25%     0.00%   sub_0037DE88_0x37de88(unsigned char*, R5900Context*, PS2Runtime*)
+0.25%     0.25%   [kernel.kallsyms][+ffffffe761a79608]
+0.24%     0.00%   eglSubDriverAndroid.so[+1d7d6]
+0.24%     0.00%   android::Surface::queueBuffer(ANativeWindowBuffer*, int)
+0.24%     0.24%   [kernel.kallsyms][+ffffffe761a8e664]
+0.24%     0.00%   unwind_phase2
+0.24%     0.00%   sub_003550A0_0x3550a0(unsigned char*, R5900Context*, PS2Runtime*)
+0.24%     0.03%   sub_0013D1B8_0x13d1b8(unsigned char*, R5900Context*, PS2Runtime*)
+0.23%     0.00%   [kernel.kallsyms][+ffffffe7610528ce]
+0.23%     0.00%   ParallelGS::PageTracker::mark_transfer_write(ParallelGS::PageRect const&)
+0.23%     0.01%   sub_003C85D0_0x3c85d0(unsigned char*, R5900Context*, PS2Runtime*)
+0.23%     0.00%   ParallelGS::PageTracker::flush_cached()
+0.23%     0.00%   sub_003C8968_0x3c8968(unsigned char*, R5900Context*, PS2Runtime*)
+0.22%     0.00%   android::BufferQueueProducer::queueBuffer(int, android::IGraphicBufferProducer::QueueBufferInput const&, android::IGraphicBufferProducer::QueueBufferOutput*)
+0.22%     0.01%   sub_00333EF8_0x333ef8(unsigned char*, R5900Context*, PS2Runtime*)
+0.22%     0.00%   sub_0022A5A0_0x22a5a0(unsigned char*, R5900Context*, PS2Runtime*)
+0.22%     0.22%   __emutls_get_address
+0.22%     0.21%   VU1Interpreter::queueStore(unsigned int, unsigned int const*, unsigned char)
+0.22%     0.00%   [kernel.kallsyms][+ffffffe760b0d3da]
+0.22%     0.01%   sub_002ED490_0x2ed490(unsigned char*, R5900Context*, PS2Runtime*)
+0.22%     0.22%   VU1Interpreter::decodeLowerUsage(unsigned int) const
+0.21%     0.00%   sub_001218D0_0x1218d0(unsigned char*, R5900Context*, PS2Runtime*)
+0.21%     0.01%   operator new(unsigned long)
+0.21%     0.01%   sub_00356198_0x356198(unsigned char*, R5900Context*, PS2Runtime*)
+0.21%     0.00%   [kernel.kallsyms][+ffffffe760d34bc6]
+0.21%     0.21%   [kernel.kallsyms][+ffffffe760ad37c0]
+0.21%     0.00%   !!!0000!0e6b00ab8c4b112f9f6effa6a8b2b5!a9ee82cd83!
+0.21%     0.01%   malloc
+0.21%     0.00%   sub_00121750_0x121750(unsigned char*, R5900Context*, PS2Runtime*)
+0.20%     0.00%   sub_001114A0_0x1114a0(unsigned char*, R5900Context*, PS2Runtime*)
+0.20%     0.01%   scudo_malloc
+0.20%     0.01%   sub_00316F00_0x316f00(unsigned char*, R5900Context*, PS2Runtime*)
+0.20%     0.20%   [kernel.kallsyms][+ffffffe760a15520]
+0.20%     0.02%   PS2Memory::writeIORegister(unsigned int, unsigned int)::$_2::operator()(unsigned int, unsigned int) const
+0.20%     0.00%   ParallelGS::GSRenderer::flush_submit(unsigned long)
+0.20%     0.00%   [kernel.kallsyms][+ffffffe760a11732]
+0.20%     0.00%   [kernel.kallsyms][+ffffffe761a7e0be]
+0.20%     0.00%   [kernel.kallsyms][+ffffffe761a7e0e2]
+0.20%     0.04%   sub_0032B6E0_0x32b6e0(unsigned char*, R5900Context*, PS2Runtime*)
+0.20%     0.02%   EeScheduler::checkpointDue(unsigned int)
+0.20%     0.03%   sub_003CB540_0x3cb540(unsigned char*, R5900Context*, PS2Runtime*)
+0.20%     0.00%   !!!0000!ea5a6408884608b8bf75be2039eefa!a9ee82cd83!
+0.20%     0.00%   [kernel.kallsyms][+ffffffe761a7e506]
+0.19%     0.19%   [kernel.kallsyms][+ffffffe760a21684]
+0.19%     0.00%   android::BLASTBufferQueue::onFrameAvailable(android::BufferItem const&)
+0.19%     0.00%   android::BufferQueue::ProxyConsumerListener::onFrameAvailable(android::BufferItem const&)
+0.19%     0.00%   android::ConsumerBase::onFrameAvailable(android::BufferItem const&)
+0.19%     0.19%   [kernel.kallsyms][+ffffffe760dd6c84]
+0.19%     0.19%   pthread_mutex_unlock
+0.19%     0.00%   android::BLASTBufferQueue::acquireNextBufferLocked(std::__1::optional<android::SurfaceComposerClient::Transaction*>)
+0.19%     0.00%   sub_0013F178_0x13f178(unsigned char*, R5900Context*, PS2Runtime*)
+0.19%     0.00%   aaudio::AudioStream_internalThreadProc(void*) (.cfi)
+0.19%     0.04%   std::__ndk1::mutex::unlock()
+0.19%     0.00%   aaudio::AudioStreamInternalPlay::callbackLoop()
+0.19%     0.01%   sub_00161AB0_0x161ab0(unsigned char*, R5900Context*, PS2Runtime*)
+0.18%     0.00%   !!!0000!e94336f9c3a8e90238c7c8557996da!a9ee82cd83!
+0.18%     0.00%   Vulkan::Device::PerFrame::trim_command_pools()
+0.18%     0.00%   ParallelGS::GSRenderer::reserve_attribute_scratch(unsigned long, ParallelGS::GSRenderer::AttributeScratch&)
+0.18%     0.00%   ParallelGS::GSRenderer::reserve_primitive_buffers(unsigned int)
+0.18%     0.00%   rlUpdateTexture
+0.18%     0.00%   sub_00121068_0x121068(unsigned char*, R5900Context*, PS2Runtime*)
+0.18%     0.00%   _Unwind_Resume
+0.18%     0.00%   libvulkan_freedreno.so[+a64966]
+0.18%     0.00%   glTexSubImage2D
+0.17%     0.00%   [kernel.kallsyms][+ffffffe760bca196]
+0.17%     0.17%   [kernel.kallsyms][+ffffffe7611d5040]
+0.17%     0.00%   !!!0000!141e50cb152287019aff218176d094!a9ee82cd83!
+0.17%     0.00%   !!!0000!9c0715a0352375a9ec27cf88ce6933!a9ee82cd83!
+0.17%     0.00%   !!!0000!4ecf3032464df959aad423cba1a73c!a9ee82cd83!
+0.17%     0.17%   !!!0000!a0d82c13dd4b4e4f31b6cd30a2cb0d!a9ee82cd83!
+0.17%     0.01%   sub_0022A698_0x22a698(unsigned char*, R5900Context*, PS2Runtime*)
+0.17%     0.00%   sub_00162458_0x162458(unsigned char*, R5900Context*, PS2Runtime*)
+0.17%     0.00%   libvulkan_freedreno.so[+987552]
+0.17%     0.00%   [kernel.kallsyms][+ffffffe761a910ea]
+0.17%     0.00%   [kernel.kallsyms][+ffffffe760cf8b36]
+0.17%     0.00%   !!!0000!94050ffb92ce9d2eb541a2faeb7ea2!a9ee82cd83!
+0.17%     0.12%   sub_0032E100_0x32e100(unsigned char*, R5900Context*, PS2Runtime*)
+0.17%     0.17%   [kernel.kallsyms][+ffffffe761a8e6e0]
+0.17%     0.01%   !!!0000!d0051afa8fb0bb02a68e169738355f!a9ee82cd83!
+0.16%     0.00%   libvulkan_freedreno.so[+9b740e]
+0.16%     0.16%   VU1Interpreter::decodeUpperUsage(unsigned int) const
+0.15%     0.00%   [kernel.kallsyms][+ffffffe760839f76]
+0.15%     0.00%   [kernel.kallsyms][+ffffffe76085558a]
+0.15%     0.00%   [kernel.kallsyms][+ffffffe760859082]
+0.15%     0.03%   scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Origin, unsigned long, bool)
+0.15%     0.15%   [kernel.kallsyms][+ffffffe761a79580]
+0.15%     0.00%   android::AndroidRuntime::javaThreadShell(void*)
+0.15%     0.00%   android::IPCThreadState::joinThreadPool(bool)
+0.15%     0.00%   android::PoolThread::threadLoop()
+0.15%     0.00%   android::Thread::_threadLoop(void*)
+0.15%     0.00%   android::IPCThreadState::getAndExecuteCommand()
+0.15%     0.00%   sub_0011EB60_0x11eb60(unsigned char*, R5900Context*, PS2Runtime*)
+0.15%     0.00%   sub_00121700_0x121700(unsigned char*, R5900Context*, PS2Runtime*)
+0.15%     0.00%   scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)
+0.15%     0.00%   ParallelGS::GSRenderer::flush_transfer()
+0.15%     0.15%   __sfvwrite
+0.15%     0.01%   sub_002AB6B0_0x2ab6b0(unsigned char*, R5900Context*, PS2Runtime*)
+0.15%     0.00%   libvulkan_freedreno.so[+96dc06]
+0.14%     0.14%   VU1Interpreter::resetScheduler()
+0.14%     0.14%   [kernel.kallsyms][+ffffffe761a7ae44]
+0.14%     0.00%   android::IPCThreadState::executeCommand(int)
+0.14%     0.14%   void ParallelGS::GSInterface::packed_XYZ<false, true, (ParallelGS::PRIMType)4>(void const*)
+0.14%     0.00%   ParallelGS::GSInterface::vsync(ParallelGS::VSyncInfo const&)
+0.14%     0.00%   libvulkan_freedreno.so[+9b6c26]
+0.14%     0.09%   [linker]do_dl_iterate_phdr(int (*)(dl_phdr_info*, unsigned long, void*), void*)
+0.14%     0.01%   sub_0022C078_0x22c078(unsigned char*, R5900Context*, PS2Runtime*)
+0.14%     0.00%   ParallelGS::GSRenderer::vsync(ParallelGS::PrivRegisterState const&, ParallelGS::VSyncInfo const&, unsigned int, unsigned int, Vulkan::Image const*, Vulkan::Image const*)
+0.14%     0.00%   [kernel.kallsyms][+ffffffe760d107c6]
+0.14%     0.01%   sub_003123C0_0x3123c0(unsigned char*, R5900Context*, PS2Runtime*)
+0.14%     0.01%   sub_00285BF8_0x285bf8(unsigned char*, R5900Context*, PS2Runtime*)
+0.14%     0.03%   std::__ndk1::mutex::lock()
+0.13%     0.13%   [kernel.kallsyms][+ffffffe760dd6c20]
+0.13%     0.00%   !!!0000!73616227b17af30cf97cb6b1578c04!a9ee82cd83!
+0.13%     0.00%   android::SurfaceComposerClient::Transaction::apply(bool, bool)
+0.13%     0.00%   !!!0000!788a94b791f481718be1df9bbb4860!a9ee82cd83!
+0.13%     0.13%   pthread_mutex_lock
+0.13%     0.13%   GS::recordDrawDebugEventUnlocked(int)
+0.13%     0.00%   libvulkan_freedreno.so[+96f812]
+0.13%     0.00%   sub_00369A78_0x369a78(unsigned char*, R5900Context*, PS2Runtime*)
+0.13%     0.00%   ParallelGS::GSInterface::mark_render_pass_has_texture_feedback(ParallelGS::TEX0Bits const&, ParallelGS::RenderPass::Feedback)
+0.13%     0.01%   sub_002C0408_0x2c0408(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.00%   sub_003C9518_0x3c9518(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.00%   android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)
+0.12%     0.00%   sub_00244408_0x244408(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.02%   sub_00368660_0x368660(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.03%   sub_002F0548_0x2f0548(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.00%   android::BnTransactionCompletedListener::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)
+0.12%     0.00%   libvulkan_freedreno.so[+98bc86]
+0.12%     0.00%   sub_00121818_0x121818(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.00%   [kernel.kallsyms][+ffffffe76083c292]
+0.12%     0.01%   sub_00176DA8_0x176da8(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.00%   [kernel.kallsyms][+ffffffe760bce466]
+0.12%     0.00%   [kernel.kallsyms][+ffffffe7607be6d6]
+0.12%     0.12%   [kernel.kallsyms][+ffffffe760855968]
+0.12%     0.01%   sub_003CDE68_0x3cde68(unsigned char*, R5900Context*, PS2Runtime*)
+0.12%     0.00%   !!!0000!ae9df5840a3b187aa9f98544704c1f!a9ee82cd83!
+0.12%     0.00%   !!!0000!3a4be7d9bfa8ce1de708d9937123e3!a9ee82cd83!
+0.12%     0.12%   [kernel.kallsyms][+ffffffe761a79560]
+0.12%     0.00%   android::BpSurfaceComposer::setTransactionState(android::gui::FrameTimelineInfo const&, android::Vector<android::ComposerState>&, android::Vector<android::DisplayState>&, unsigned int, android::sp<android::IBinder> const&, android::InputWindowCommands, long, bool, std::__1::vector<android::client_cache_t, std::__1::allocator<android::client_cache_t>> const&, bool, std::__1::vector<android::ListenerCallbacks, std::__1::allocator<android::ListenerCallbacks>> const&, unsigned long, std::__1::vector<unsigned long, std::__1::allocator<unsigned long>> const&)
+0.12%     0.00%   sub_001225F0_0x1225f0(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.02%   sub_00122898_0x122898(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.00%   Vulkan::CommandPool::request_command_buffer()
+0.11%     0.00%   [kernel.kallsyms][+ffffffe76082b966]
+0.11%     0.00%   [kernel.kallsyms][+ffffffe760bcd222]
+0.11%     0.00%   [kernel.kallsyms][+ffffffe760d89c3a]
+0.11%     0.11%   sub_002E8938_0x2e8938(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.02%   sub_002DF920_0x2df920(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.00%   libvulkan_freedreno.so[+a647a2]
+0.11%     0.11%   std::__ndk1::pair<std::__ndk1::__hash_iterator<std::__ndk1::__hash_node<std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, void*>*>, bool> std::__ndk1::__hash_table<std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, std::__ndk1::__unordered_map_hasher<unsigned int, std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, std::__ndk1::hash<unsigned int>, std::__ndk1::equal_to<unsigned int>, true>, std::__ndk1::__unordered_map_equal<unsigned int, std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>, std::__ndk1::equal_to<unsigned int>, std::__ndk1::hash<unsigned int>, true>, std::__ndk1::allocator<std::__ndk1::__hash_value_type<unsigned int, ps2_park::ParkHotPcEntry>>>::__emplace_unique_key_args<unsigned int, std::__ndk1::piecewise_construct_t const&, std::__ndk1::tuple<unsigned int const&>, std::__ndk1::tuple<>>(unsigned int const&, std::__ndk1::piecewise_construct_t const&, std::__ndk1::tuple<unsigned int const&>&&, std::__ndk1::tuple<>&&)
+0.11%     0.01%   sub_003B55F0_0x3b55f0(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.01%   Vulkan::CommandBuffer::flush_compute_state(bool)
+0.11%     0.00%   sub_00122448_0x122448(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.03%   sub_003CD878_0x3cd878(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.03%   sub_0015E668_0x15e668(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.00%   [kernel.kallsyms][+ffffffe760bcd07a]
+0.11%     0.01%   void scudo::releaseFreeMemoryToOS<scudo::RegionReleaseRecorder<scudo::MemMapLinux>, scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)::'lambda'(unsigned long)>(scudo::PageReleaseContext&, scudo::RegionReleaseRecorder<scudo::MemMapLinux>&, scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)::'lambda'(unsigned long))
+0.11%     0.00%   aaudio::AudioStream::maybeCallDataCallback(void*, int)
+0.11%     0.00%   sub_00312598_0x312598(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.00%   ParallelGS::GSRenderer::upload_texture(ParallelGS::GSRenderer::TextureUpload const&)
+0.11%     0.00%   sub_00230640_0x230640(unsigned char*, R5900Context*, PS2Runtime*)
+0.11%     0.11%   [kernel.kallsyms][+ffffffe761a6b788]
+0.10%     0.01%   EeScheduler::processPendingEvents()
+0.10%     0.00%   ma_device_handle_backend_data_callback
+0.10%     0.00%   [kernel.kallsyms][+ffffffe76083f606]
+0.10%     0.01%   sub_00353AC0_0x353ac0(unsigned char*, R5900Context*, PS2Runtime*)
+0.10%     0.02%   sub_00292B48_0x292b48(unsigned char*, R5900Context*, PS2Runtime*)
+0.10%     0.10%   VU1Interpreter::readBranchVi(unsigned char) const
+0.10%     0.00%   ma_device__read_frames_from_client
+0.10%     0.00%   ma_stream_data_callback_playback__aaudio
+0.10%     0.00%   __unw_init_local
+0.10%     0.00%   sub_00105398_0x105398(unsigned char*, R5900Context*, PS2Runtime*)
+0.10%     0.10%   PS2Memory::advanceEeTimers(unsigned long)
+0.10%     0.00%   [kernel.kallsyms][+ffffffe76082befa]
+0.10%     0.00%   !!!0000!c290b97fcf9059e9ebe30800178359!a9ee82cd83!
+0.10%     0.00%   libvulkan_freedreno.so[+9b5e12]
+0.10%     0.10%   [kernel.kallsyms][+ffffffe761a795a8]
+0.10%     0.00%   [kernel.kallsyms][+ffffffe760839f52]
+0.10%     0.00%   [kernel.kallsyms][+ffffffe76083a03e]
+0.10%     0.00%   ma_device__on_data
+0.10%     0.00%   [kernel.kallsyms][+ffffffe761a84432]
+0.10%     0.00%   sub_00398038_0x398038(unsigned char*, R5900Context*, PS2Runtime*)
+0.10%     0.00%   Vulkan::Device::PerFrame::begin()
+0.09%     0.01%   Vulkan::CommandBuffer::flush_descriptor_sets()
+0.09%     0.01%   sub_0038CE20_0x38ce20(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   !!!0000!1436743e2ecab4b7b4508b2d56cc67!a9ee82cd83!
+0.09%     0.00%   [kernel.kallsyms][+ffffffe76084cf56]
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760855f2e]
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760876ef2]
+0.09%     0.05%   sub_0030F2B0_0x30f2b0(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.02%   sub_00310640_0x310640(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760bcdd5a]
+0.09%     0.00%   !!!0000!c441fda5cce3b6ed49be7fa818989c!a9ee82cd83!
+0.09%     0.09%   scudo::HybridMutex::tryLock()
+0.09%     0.09%   ParallelGS::GSInterface::update_color_feedback_state()
+0.09%     0.00%   sub_0031AC08_0x31ac08(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.09%   [kernel.kallsyms][+ffffffe760bcd1b4]
+0.09%     0.00%   OnSendAudioDataToDevice
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760d2b34e]
+0.09%     0.00%   sub_0038CA08_0x38ca08(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   madvise
+0.09%     0.09%   ps2DiagWatchEnabled()
+0.09%     0.09%   [kernel.kallsyms][+ffffffe760cf8c1c]
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760d124e2]
+0.09%     0.00%   sub_00111728_0x111728(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   sub_0031A6B8_0x31a6b8(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.05%   std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsCommand>>::pop_front()
+0.09%     0.09%   [kernel.kallsyms][+ffffffe761a8e614]
+0.09%     0.01%   void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)5, 1>(void const*, unsigned int)
+0.09%     0.00%   !!!0000!a0f1da254339e690ce8991d3084395!a9ee82cd83!
+0.09%     0.00%   sub_002AB958_0x2ab958(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   sub_0037DF88_0x37df88(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   sub_0039F100_0x39f100(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760cfc92a]
+0.09%     0.00%   mmap64
+0.09%     0.00%   [kernel.kallsyms][+ffffffe760a11302]
+0.09%     0.00%   [kernel.kallsyms][+ffffffe761a7d616]
+0.09%     0.07%   sub_0037A430_0x37a430(unsigned char*, R5900Context*, PS2Runtime*)
+0.09%     0.01%   ParallelGS::GSRenderer::emit_copy_vram(Vulkan::CommandBuffer&, unsigned int const*, unsigned int, bool)
+0.08%     0.00%   gsl_command_issueib_sync
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760d98d12]
+0.08%     0.00%   libvulkan_freedreno.so[+9b7096]
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760a31122]
+0.08%     0.00%   Vulkan::Device::next_frame_context()
+0.08%     0.03%   std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsCommand>>::push_back(GsCommand&&)
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760d6c962]
+0.08%     0.03%   sub_00382AF0_0x382af0(unsigned char*, R5900Context*, PS2Runtime*)
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760dd6986]
+0.08%     0.00%   void std::__ndk1::vector<unsigned char, std::__ndk1::allocator<unsigned char>>::__assign_with_size[abi:ne190000]<unsigned char const*, unsigned char const*>(unsigned char const*, unsigned char const*, long)
+0.08%     0.01%   PS2Runtime::Store128(unsigned char*, R5900Context*, unsigned int, __Int64x2_t)
+0.08%     0.00%   !!!0000!8cf9cc05f436738178cf8b8b6481c7!a9ee82cd83!
+0.08%     0.00%   [kernel.kallsyms][+ffffffe761a91186]
+0.08%     0.01%   void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)5>(bool)
+0.08%     0.00%   gsl_command_issueib_with_alloc_list
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760d343aa]
+0.08%     0.02%   Vulkan::CommandBuffer::allocate_descriptor_offset(unsigned int, unsigned int&, unsigned int&)
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760d6211a]
+0.08%     0.00%   rlDrawRenderBatch
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760a48676]
+0.08%     0.00%   ioctl_kgsl_gpu_command
+0.08%     0.08%   VU1Interpreter::microAddressMask() const
+0.08%     0.08%   EeScheduler::accountCycles(unsigned int)
+0.08%     0.04%   (anonymous namespace)::e37AppendVif(char const*, unsigned char, char const*, char const*, char const*, unsigned int, unsigned int, char const*, unsigned int const*, unsigned char const*, unsigned int, bool, unsigned int, char const*)
+0.08%     0.00%   [kernel.kallsyms][+ffffffe760d98062]
+0.08%     0.07%   sub_002BCBD0_0x2bcbd0(unsigned char*, R5900Context*, PS2Runtime*)
+0.08%     0.00%   android::TransactionCompletedListener::onTransactionCompleted(android::ListenerStats)
+0.08%     0.01%   sub_00117C28_0x117c28(unsigned char*, R5900Context*, PS2Runtime*)
+0.08%     0.00%   android::IPCThreadState::talkWithDriver(bool)
+0.07%     0.07%   [kernel.kallsyms][+ffffffe761a83a5c]
+0.07%     0.07%   __aarch64_ldadd8_relax
+0.07%     0.00%   libvulkan_freedreno.so[+9b7422]
+0.07%     0.01%   void ParallelGS::GSInterface::drawing_kick_append<false, true, false, 3u>()
+0.07%     0.00%   aaudio::AudioStreamInternal::processData(void*, int, long)
+0.07%     0.02%   sub_002F39C8_0x2f39c8(unsigned char*, R5900Context*, PS2Runtime*)
+0.07%     0.00%   [kernel.kallsyms][+ffffffe76083de6a]
+0.07%     0.07%   [kernel.kallsyms][+ffffffe760dd7868]
+0.07%     0.00%   libvulkan_freedreno.so[+a72e32]
+0.07%     0.00%   libvulkan_freedreno.so[+a669e2]
+0.07%     0.00%   libvulkan_freedreno.so[+a726f2]
+0.07%     0.00%   [kernel.kallsyms][+ffffffe76084ca1a]
+0.07%     0.00%   android::BpBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)
+0.07%     0.00%   libvulkan_freedreno.so[+96d3e2]
+0.07%     0.00%   [kernel.kallsyms][+ffffffe761a7d65a]
+0.07%     0.04%   sub_00386DD0_0x386dd0(unsigned char*, R5900Context*, PS2Runtime*)
+0.07%     0.00%   ParallelGS::GSInterface::flush()
+0.07%     0.01%   sub_00364050_0x364050(unsigned char*, R5900Context*, PS2Runtime*)
+0.07%     0.00%   Vulkan::Device::submit_empty(Vulkan::CommandBuffer::Type, Util::IntrusivePtr<Vulkan::FenceHolder>*, Vulkan::SemaphoreHolder*)
+0.07%     0.00%   Vulkan::Device::submit_empty_nolock(Vulkan::QueueIndices, Util::IntrusivePtr<Vulkan::FenceHolder>*, Vulkan::SemaphoreHolder*, int)
+0.07%     0.00%   sub_0015DC70_0x15dc70(unsigned char*, R5900Context*, PS2Runtime*)
+0.07%     0.00%   libvulkan_freedreno.so[+96d412]
+0.07%     0.00%   android::IPCThreadState::waitForResponse(android::Parcel*, int*)
+0.07%     0.02%   sub_0033CCF8_0x33ccf8(unsigned char*, R5900Context*, PS2Runtime*)
+0.07%     0.03%   sub_0015EE00_0x15ee00(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.01%   sub_00362DE8_0x362de8(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   ParallelGS::GSRenderer::flush_rendering(ParallelGS::RenderPass const&, unsigned int, unsigned int, unsigned int)
+0.06%     0.00%   PS2Runtime::Store64(unsigned char*, R5900Context*, unsigned int, unsigned long)
+0.06%     0.00%   [kernel.kallsyms][+ffffffe7616e829a]
+0.06%     0.06%   [kernel.kallsyms][+ffffffe7611d4f98]
+0.06%     0.02%   sub_0016D320_0x16d320(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.02%   sub_00363C20_0x363c20(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.06%   ps2_gfx_stats::detail::ensureInit()
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d2c90e]
+0.06%     0.01%   sub_0036AC00_0x36ac00(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   sub_00120F20_0x120f20(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   aaudio::AudioStreamInternalPlay::processDataNow(void*, int, long, long*)
+0.06%     0.00%   libunwind::UnwindCursor<libunwind::LocalAddressSpace, libunwind::Registers_arm64>::getInfoFromDwarfSection(unsigned long, libunwind::UnwindInfoSections const&, unsigned int)
+0.06%     0.00%   Vulkan::Device::submit_queue(Vulkan::QueueIndices, Vulkan::Device::InternalFence*, Vulkan::SemaphoreHolder*, unsigned int, Util::IntrusivePtr<Vulkan::SemaphoreHolder>*, int)
+0.06%     0.01%   sub_003D5128_0x3d5128(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.04%   sub_0020EDA0_0x20eda0(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.02%   sub_002E5920_0x2e5920(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d61c4e]
+0.06%     0.06%   [kernel.kallsyms][+ffffffe760d86994]
+0.06%     0.01%   EeScheduler::processDueDeadlines()
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d6bbfa]
+0.06%     0.00%   munmap
+0.06%     0.00%   sub_00423DC0_0x423dc0(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.02%   sub_00117FE0_0x117fe0(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.01%   sub_00131620_0x131620(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.03%   ParallelGS::PageTracker::mark_fb_write(ParallelGS::PageRect const&)
+0.06%     0.03%   sub_0021D1A0_0x21d1a0(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   sub_003459A8_0x3459a8(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d65c8e]
+0.06%     0.06%   [kernel.kallsyms][+ffffffe761a79558]
+0.06%     0.02%   sub_00127848_0x127848(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   sub_003D54E8_0x3d54e8(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d6e90e]
+0.06%     0.01%   std::__ndk1::condition_variable::notify_all()
+0.06%     0.00%   aaudio::AudioStreamInternalPlay::writeNowWithConversion(void const*, int)
+0.06%     0.03%   sub_00334888_0x334888(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d6e82a]
+0.06%     0.00%   sub_002EA538_0x2ea538(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.01%   sub_0035FE10_0x35fe10(unsigned char*, R5900Context*, PS2Runtime*)
+0.06%     0.00%   [kernel.kallsyms][+ffffffe760d2d976]
+0.05%     0.00%   [kernel.kallsyms][+ffffffe7616ed396]
+0.05%     0.05%   PS2Memory::translateAddress(unsigned int)
+0.05%     0.05%   GS::recordRegisterDebugEventUnlocked(unsigned char, unsigned long)
+0.05%     0.01%   sub_0011EB98_0x11eb98(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   sub_00121728_0x121728(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   sub_001225C0_0x1225c0(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   [kernel.kallsyms][+ffffffe760ad382a]
+0.05%     0.00%   sub_00424160_0x424160(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   std::__1::__function::__func<std::__1::__bind<void (&)(android::wp<android::BLASTBufferQueue>, android::ReleaseCallbackId const&, android::sp<android::Fence> const&, std::__1::optional<unsigned int>), android::wp<android::BLASTBufferQueue>, std::__1::placeholders::__ph<1> const&, std::__1::placeholders::__ph<2> const&, std::__1::placeholders::__ph<3> const&>, std::__1::allocator<std::__1::__bind<void (&)(android::wp<android::BLASTBufferQueue>, android::ReleaseCallbackId const&, android::sp<android::Fence> const&, std::__1::optional<unsigned int>), android::wp<android::BLASTBufferQueue>, std::__1::placeholders::__ph<1> const&, std::__1::placeholders::__ph<2> const&, std::__1::placeholders::__ph<3> const&>>, void (android::ReleaseCallbackId const&, android::sp<android::Fence> const&, std::__1::optional<unsigned int>)>::operator()(android::ReleaseCallbackId const&, android::sp<android::Fence> const&, std::__1::optional<unsigned int>&&)
+0.05%     0.00%   libvulkan_freedreno.so[+a72a0a]
+0.05%     0.01%   sub_001220D8_0x1220d8(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   ps2_stubs::sceSifSetDma(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   android::releaseBufferCallbackThunk(android::wp<android::BLASTBufferQueue>, android::ReleaseCallbackId const&, android::sp<android::Fence> const&, std::__1::optional<unsigned int>) (.__uniq.45450631312074835429881721991590974130)
+0.05%     0.00%   [kernel.kallsyms][+ffffffe760d6ddc6]
+0.05%     0.00%   [kernel.kallsyms][+ffffffe76084227e]
+0.05%     0.01%   sub_00165938_0x165938(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   PS2Memory::releaseOneMaskedPath3Packet()
+0.05%     0.01%   sub_0038CA70_0x38ca70(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.05%   sub_00174848_0x174848(unsigned char*, R5900Context*, PS2Runtime*)
+0.05%     0.00%   sub_002E24D0_0x2e24d0(unsigned char*, R5900Context*, PS2Runtime*)
