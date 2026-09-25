@@ -118,3 +118,16 @@ as it frees (5 s poll) until it holds all four, runs two ~90 s speed boots back 
   SIGTERM into exit so `finally` releases. It also waits while `VR1/BUILDING` exists so my
   own builds never overlap my speed boots.
 - Suite g4 616/616.
+
+## 10:53 speed hold A (base, g4), exclusive, host load ~3
+`speed_hold.py holdA 0 base g4`: waited 451 s for all four slots, hold 157 s.
+s1-base 14.79 vs/s (0.247×, n=8 samples in (1800,2400]); s2-g4 21.92 (0.366×, n=5) → 1.48×.
+(My first wait loop matched "holding…" instead of "hold <s>"; fixed.)
+
+## 11:01 speed holds B–D; attribution
+Holds B (g4, base), C (g, g3), D (g3, g), each ~150 s, host load 2.9–4.2
+(`speed-all.txt`): base 14.79/14.90, g4 21.92/20.97 → **1.44×** (0.248× → 0.358×);
+g 18.48/18.36 (1.24×), g3 19.56/20.47 (1.35×). Runner SHAs in `binaries-sha.txt` match
+the speed_table prefixes. Fork `6c2de6f`: Android `-Pps2xVu1RecompDir`.
+Next: g4 profile; CPU-backend null pair (h-base-cpu vs h-base-cpu-2) to see whether E57's
+strict whole-file GS check is deterministic there, plus h-g4-cpu.
