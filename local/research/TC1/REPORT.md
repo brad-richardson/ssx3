@@ -136,3 +136,12 @@ identical), then fold `e29e497`; (2) one-line `vu0_r` = 1.0-bits ctor fix in its
 lane with a det boot (touches the shared header → full rebuild; benign per §1 but
 closes the last thread delta); (3) fold vi0 integer-ALU guards + FCR0 0x2e30 with the
 next regen (all unexercised by SSX 3, zero behavioral risk).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** After RD1, the only main-vs-thread delta is VU0 R (main 1.0-bits, threads 0; benign for
+SSX 3 today, but fix it for symmetry). vf0 read-only is implemented in the emitter (`e29e4975`; LQC2,
+QMTC2 and 29 macro helpers no longer store to vf0), suite red → green; it takes effect only after a
+codegen regen. Both go into **F4** with a coordinated regen and canonical codegen promotion (keep the
+current one as `codegen-ssx3-pre-f4`). Noted gaps for later: FCR0 unmodelled (emits 0; hardware
+0x2e30), Q reset value unknown on hardware, and our VU0 macro emitter models no flag updates.

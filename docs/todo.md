@@ -192,14 +192,12 @@ then 120 Hz simulation.
       audit, vf0 read-only), F3 (fold → iPhone/Odin), LX1 1b, Q2. Queued: F4 (VR1 + NP1 + x86 fixes),
       Q1 after Q2, Odin menu-side Turnip/allocator churn after F4's Odin profile.
 
-- [ ] **Rider fix in F3** (`51c759b`, vf0 hardwired in every EE context). Follow-ups: vf0 read-only in
-      codegen (`lqc2 $vf0` at 0x3fe9bc writes it today; hardware ignores the write); audit other
-      per-thread state that only the main context initializes (`vu0_r`, …).
-- [ ] **F4 fold (after F3):** VR1 VU1 stage A (`0ed07c4..1f51e48` + `6c2de6f`; promote `VR1/gen-v2` →
-      `~/dev/ssx3-work/vu1gen-ssx3`, private copy to bytesize; iOS/Android builds pass the dir) +
-      NP1 Part 2 when gated + LX1's x86 build fixes; Odin speed pair vs F3; iPhone + Odin play builds.
-      Later: dump VU1 images on other courses (fallback is the interpreter).
-
+- [x] Rider fix folded (F3 `ec2dbf1`); TC1 audit done (vf0 read-only + VU0 R → F4). Gaps: FCR0 unmodelled, VU0 macro flags not modelled.
+- [ ] **F4 fold (after F3), base fork `ssx3` `ec2dbf1`:** VR1 VU1 stage A (`0ed07c4..1f51e48` + `6c2de6f`;
+      `~/dev/ssx3-work/vu1gen-ssx3`, private copy to bytesize; iOS/Android builds pass the dir) + NP1 Part 2
+      (`e5654f3 7caf516 125c9e5`) + LX1 Part 1c (TZ pin/DST, x86 build fixes) + TC1 (`e29e4975` vf0
+      read-only emitter, needs a **codegen regen + promotion**; plus a one-line VU0 R ctor fix). Odin
+      pair vs F3; iPhone + Odin play builds. Later: dump VU1 images on other courses (FR1).
 - [ ] **Host split once LX1 passes (Brad, 09-25):** bradflix gets **4 boot slots** for correctness
       work (det-hash, frames, counters, suites, builds; CPU and paraLLEl if LX1 Part 2 works); the
       mini drops to **1 slot** reserved for performance benchmarks and Apple-only checks; the Odin
