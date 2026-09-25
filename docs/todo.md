@@ -106,11 +106,12 @@ then 120 Hz simulation.
 
 ## N — Android app (Odin)
 
-- [ ] **Clean Odin speed** on a diagnostics-off build of the N9 fork tips
-      (N9's APK `25711bfe…` had frame dumps on), 2 runs, sound on; also
-      check the rider actually moves through the race (N7 saw 0–1 MPH at 2%
-      over 21–38 s); then a simpleperf race profile. `local/research/N9/`,
-      `N5/`, `N7/`.
+- [ ] **Rider idle at race start:** on the Odin (N10) the rider sits at 0–1 MPH with a RECOVER
+      prompt from ~00:00:06 to ~00:00:40, then rides at 43–44 MPH. First check the Mac on the same
+      I26-FAST route (route input vs runtime). Then a simpleperf race profile on the N10 APK.
+      `local/research/N10/`, `N7/`.
+- [ ] Odin thermals: back-to-back runs reach thermal status 4–5 with cpu5 at 1.79 GHz (N10); space
+      speed runs or record status, and consider it in the 120 Hz budget.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
       N9's 1920×1080 screencaps); check the presenter's scale/aspect on
       Android. `local/research/N9/`.

@@ -148,3 +148,17 @@ baseline on the GPU-GS product path, and rider motion confirmed (43–44 MPH at
 tick ~4520). No code change proposed — this brief was measurement only.
 Budgets used: 0 builds, 2/2 launches, ~30 min wall, N10 git dir 4.8 MB,
 scratch `~/dev/ssx3-work/N10/` empty.
+
+## Orchestrator gate (2026-09-24)
+
+**A — first clean Odin speed baseline on the current product path.** Read the whole report and
+commit `c464a05b`. Viewed L1 sc03/sc04 (`~/dev/ssx3-work/N10/shots/`; PNGs moved out of git, text
+receipts only): 00:00:38 at 0 MPH, 2%; 00:00:46 at 44 MPH, 5%, snow spray, rider descending; dark
+lower region and stripes persist. Both runs complete ≥ 45 s of racing inside the granted 750 s cap;
+device left clean (lease free, app stopped, env restored to `176eff84…`).
+Numbers: race **0.116× / 0.110×** (mean 0.113×, 6.76 guest vsyncs/s), title 0.53–0.55×, main menu
+0.49–0.50×, Select Character 0.25–0.31×, Mode/Event 0.61–0.65×, loading 0.16–0.19×. Caveats:
+back-to-back runs reached thermal status 4–5 with cpu5 at 1.79 GHz for most of the race (L2 4.9%
+slower), so these are sustained-thermal numbers; GameThread ~85% of one core, GsWorker ~25%.
+Open: the rider sits at 0–1 MPH from ~00:00:06 (RECOVER prompt) to ~00:00:40 before moving;
+check whether the Mac does the same on this route before calling it a runtime bug.
