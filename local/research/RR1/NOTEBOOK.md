@@ -55,3 +55,7 @@ Worker: Claude Code (Opus 5.5), exploratory.
 - Fork commit `4f69c98` + test (5,001-tag chain runs to END). Suite 599/599 rc 0. Cherry-picks of all three onto fork ssx3 `71c952e` apply cleanly (local `rr1-rebase-check`: 607d8ec, 58f5120, e20844a).
 - **A/B boot H** (final runner, `PS2X_PATH3_EOP_GATE=0`): Select Peak atlas artifacts back; race dark lower region back, wrong tree textures; backdrop stays bright; beam/trees present. Attribution: PATH3 → menu atlas family + dark lower region + wrong textures + sky state leak; V4-5 → dark backdrop / dim vertex colours; chain cap → missing objects (trees, particles, beam) and late depth pass.
 - Flash (boot G, 1800–1960): HUD-style prims 66–83 on every drawing tick; the only classes that come and go are PSMT8H particle textures. The cap cut varied with list length per frame, which is a direct pop-in/out mechanism for late-listed objects (hypothesis for Brad's iOS pop-in; iOS not tested). HUD flashing not reproduced on Mac in this window.
+
+## close
+- Pruned scratch: kept captures A (pre-fix) and G (final); deleted C/D/E captures, converted .gs and replay PPMs (PNGs kept). bytesize `~/rr1` trimmed to 10 key PNGs (1.8 MB).
+- REPORT.md written. Local fork branches: `rr1-sky` (tip 4f69c98) and `rr1-rebase-check` (on 71c952e), not pushed. Stale-lease backup `/tmp/ssx3-p-lane-lease.stale-au8-rr1` left for the orchestrator.
