@@ -22,10 +22,10 @@ import json, sys, os, subprocess, hashlib, time
 WS = os.environ["WS"]; ign = set(os.environ["WATCH_IGNORE_AGENT"].split(","))
 st = os.environ["state"]; stall = int(os.environ["STALL"]); grace = int(os.environ["GRACE"]); now = time.time()
 # Real error output only (JSON error fields, API error lines). Each pattern is built from two
-# halves so this source, if a worker opens it, can't match itself.
-ERR = tuple(x + y for x, y in (('"code":', '"prefill_memory_aborted"'), ('"type":', '"overloaded_error"'),
-            ('"type":', '"rate_limit_error"'), ('API Error', ': '), ('"code":', '"insufficient_quota"'),
-            ('Rate limit', ' reached')))
+# halves so this source, if a worker opens it, cannot match itself.
+ERR = tuple(x + y for x, y in (("\"code\":", "\"prefill_memory_aborted\""), ("\"type\":", "\"overloaded_error\""),
+            ("\"type\":", "\"rate_limit_error\""), ("API Error", ": "), ("\"code\":", "\"insufficient_quota\""),
+            ("Rate limit", " reached")))
 for a in json.load(sys.stdin)["result"]["agents"]:
     n = a.get("name")
     if not n or n in ign or a.get("workspace_id") != WS: continue
