@@ -166,3 +166,10 @@ cp ~/dev/ssx3-work/CT1/ct1_boot.py in1_boot.py  # then adapt: IN1 paths/labels, 
 python3 in1_boot.py --runner build/ps2xRuntime/ps2EntryRunner --label B1 --stop-tick 2400
 (cd PS2Recomp && git add ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp && git commit -m "[IN1] default-off PS2X_VIF1_IBIT_LOG per-vsync i-bit counter")
 ```
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** No reader of the handler's counter was found on the route, and the game sets no VIF1 i-bits
+(count 0 in every readable vsync), so INTC 5 could never fire here; CT1's missing dispatch is benign
+for this route. The `PS2X_VIF1_IBIT_LOG` counter (`775600c`) is not folded. Side note for later:
+the game tests VIF1_STAT bit 10 while our interpreter sets bit 11 on irq (unverified).
