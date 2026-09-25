@@ -15,3 +15,10 @@ The mini runs every lane's builds and boots (load 60–128 on 09-25), which star
 4. **Parity:** compare its `[det-hash:v1]` lines with a Mac det boot on the **same fork commit** (run one on the mini with one slot if no matching Mac run exists; F2's B2 is `96e9f45` sound-off). Report equal lines / first differing tick + field (rdram/vu/scratch). If they differ, find the first differing tick and stop (Part 2 would chase the host-arch difference).
 5. Wrap it: `local/tooling/remote/bradflix_boot.sh` (build + boot by fork SHA, pulls result.json + det-hash lines + frames back to the mini's scratch) with a usage block.
 Rules: text only in git; nothing under bradflix `/tmp`; never push the fork; no Mac lease needed for bradflix boots (it has its own: one heavy job at a time until we know its headroom). Deliverable `local/research/LX1/REPORT.md` (deps, build receipts + SHAs, suite, parity table, wall times, gaps) + the script; commit `[LX1] …` (`git add -f`, `Orchestrated-By: Muse Code`), no push.
+
+## Part 2 (queued; Brad approved 09-25) — GPU rendering on bradflix
+paraLLEl's Vulkan init is headless already (Granite `init_instance_and_device` with no surface; I33 §Plan), so the GPU work needs no display; only raylib's window/present does. Goal: paraLLEl on the Arrow Lake iGPU (Mesa ANV) with no monitor.
+1. `vulkaninfo --summary` on bradflix: ANV device, Vulkan version, `descriptorIndexing`/`shaderInt16`/subgroup size (paraLLEl needs descriptor indexing; I33 found the iOS Simulator lacks it).
+2. Build with `PS2X_GS_SHADOW_PARALLEL=ON` (paraLLEl `19d93b2`), boot under `xvfb-run` with `PS2X_GS_BACKEND=parallel` (no `GRANITE_VULKAN_LIBRARY` needed if the system loader is found; say which), `PGS_HIER_BINNING` unset and `force`: `[gs-path]` line, frames at ~1090/2100 viewed, det-hash equal to the CPU-backend Linux run (it must be: GB8).
+3. If raylib/Xvfb is the only thing in the way, report what a `PS2X_HEADLESS=1` mode (no window, frames only to dumps) would take (file:line); don't build it in this part.
+Deliverable: append `## Part 2` to `local/research/LX1/REPORT.md`; commit `[LX1] Part 2 …`. Budget 1.5 h.
