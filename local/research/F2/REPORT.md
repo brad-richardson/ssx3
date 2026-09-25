@@ -509,3 +509,10 @@ python3 local/research/F2/phases.py local/research/F2/logs/S1|S2
 python3 local/research/F2/stripes.py --win 1450,550,1750,700 <F1sc01> <S1sc01> <S2sc01>
 bash local/research/I31/deploy-odin.sh  # SKIP + 7 OKs, no launch
 ```
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** I viewed S1 sc01 (race 00:00:07, full scene, **no stripes**). APK `a3d26b56…` from fork
+`0ed07c4` + paraLLEl `19d93b2` + the promoted codegen; race 0.139× / 0.137× (speed-neutral vs F1's
+0.140×; the 64-bit branches and progressive scanout cost nothing measurable). Installed as Brad's play
+build with his env and save verified; no launch. NP1 profiles this APK next.

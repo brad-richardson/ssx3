@@ -131,7 +131,7 @@ then 120 Hz simulation.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
       N9's 1920×1080 screencaps); check the presenter's scale/aspect on
       Android. `local/research/N9/`.
-- [ ] Odin stripes: fixed by ST1 on the Mac; confirm in the F2 Odin build's screencaps.
+- [x] Odin stripes gone in the F2 Odin build (8/8 screencaps).
 - [ ] Manifest `android:showWhenLocked` + `android:turnScreenOn` on the
       NativeActivity: N4 had them on `n2-android`, the fork manifest at
       `fb11e18` doesn't. Decide whether to port (the lockscreen check in
