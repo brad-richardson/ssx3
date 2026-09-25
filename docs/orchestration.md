@@ -146,6 +146,8 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   where Android's NDK doesn't (F4: VU1 chain recursion crashed the Odin at 512 frames). Anything with
   deep or chained calls gets a small-stack test (512 KB) on the Mac before a device build.
 
+- Before assigning a lane ID, check `local/research/<ID>/` doesn't exist (PF1 collided with an older Odin lane on 09-25).
+
 ## 7. Brad's preferences
 
 - Plain updates; delegate longer work; say when something is waiting on him.

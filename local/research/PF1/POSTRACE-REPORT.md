@@ -99,3 +99,15 @@ the mark before each top-level dispatch.
   card-independent).
 - The ID collision above. Scratch `~/dev/ssx3-work/PF1` 2.7 GB (build + paraLLEl copy + runs; crash
   RAM images 2 × 32 MB).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Mechanism measured end to end (E1–E9): `dispatchGuestBranch`'s `ctx->pc == entryPc` "returned"
+heuristic misreads a checkpoint suspension at a recursive call to the callee's own entry as a return; the
+timer-1 interrupt landing on `0x398868`'s recursive dispatch on the results screen resumes the outer walker
+`sub_0039E6B8` with the child's `s0`/`s1`. Control reproduces byte-identically twice; the fix (`3c037ab`, an
+explicit unwind mark checked before the heuristic, + kernel test) runs 13,387 ticks past the old crash on
+the live results screen with no missing targets, and is frame-identical before the bug site. The class is
+general (any recursive guest function + an interrupt at the recursive call), so it may fix other
+intermittent symptoms. Folds in **F5** (needs the small-stack test like everything on that fold).
+Note: `local/research/PF1/` had an older lane of the same ID; new lane IDs must be checked for reuse.

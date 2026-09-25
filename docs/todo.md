@@ -120,8 +120,7 @@ then 120 Hz simulation.
 
 - [x] **First stock race finished** (FR1, 09-25): Happiness 2nd 04:18 → results screen; Snow Jam + Metro-City
       load and race. Route FR1-R1 = I26-FAST minus the 30 s down-hold (down brakes).
-- [ ] **PF1 (Opus, running): post-race jump to garbage** at `0x39e724` → `0x6c058000` (tick 20063, results
-      screen idle, empty card).
+- [x] Post-race jump fixed (PF1 `3c037ab`: checkpoint unwind at a recursive call misread as a return; folds in F5).
 - [ ] Odin thermals: back-to-back runs reach thermal status 4–5 with cpu5 at 1.79 GHz (N10); space
       speed runs or record status, and consider it in the 120 Hz budget.
 - [ ] The game image doesn't fill the Odin screen (margins on all sides in
@@ -190,7 +189,7 @@ then 120 Hz simulation.
 
 - [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 knobs +
       pipelined present (`4825123`; iPad: 4×+hi-res pipelined beats today's 1×) + Mac zero-copy (`fb3dca0`,
-      default off), LX1 TZ/x86 (`lx1-tz`), PF1's post-race fix when gated; codegen promotion of the F4 regen
+      default off), LX1 TZ/x86 (`lx1-tz`), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
       once lanes on the current codegen finish; then device builds (4×+hi-res default TBD by HR1's report).
 - [ ] VU1 usage-table gap: OPMULA/OPMSUB read fs.xyz but declare fs lanes = dest (unused in SSX 3; VB1).
 
