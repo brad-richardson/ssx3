@@ -461,3 +461,11 @@ state (RNG shifted by RP1, as noted). Zero-copy confirmed by `copy_ms_avg=0 l2h_
 bytes). iPhone installed, never launched; Brad launches it. Known I28: in the iPad's portrait-compat
 window the D-pad's up arrow sits under the stick's translucent ring and SELECT/START overlap; the
 iPhone landscape layout isn't affected.
+
+## Orchestrator gate, Part 2 (2026-09-25) — lane closed
+
+**Pass.** Verified on the device myself: `base.apk` `4ff81032…`, `ps2x.env` `a8d651a7…`, app not
+running, lease free. ABBA legs agree (A 0.5 %, B 2.8 %); 4× costs 31 % on the Odin, so the play build
+is 1× pipelined, per the brief. Brad's Odin env pin is now `a8d651a7…`: N12 and later Odin lanes
+copy F5's `launch.py` (transport record + new pin). Odin race 0.244× (1.47× over F4); Wi-Fi adb held
+through all four runs.
