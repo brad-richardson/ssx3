@@ -22,5 +22,6 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (F2/SB1 regen, `PS2X_SBR_*` pre
 
 **Disk:** mini 63.5 of 200 GB after archiving 26 closed lanes to the SSD (`ssx3-archive/2026-09-25/MANIFEST.txt`, SHA-verified).
 **Speed:** Odin race 0.140× on the F1 fold (N11 before it: 0.116×, VU1 = 118 of 145 ms/frame). Mac race 0.224× on paraLLEl (GB8), CPU GS 0.179× with E57. F1 re-measures both on the folded tip.
+**PAUSED (Brad, 09-25 afternoon):** lanes wrap their current step, commit notes, release leases and stop; nothing new starts until Brad says go. Resume list: F4 Part 1b (job pool + APK + B3) → push → Parts 2/3; VB1, PX1, LX1 1d, HR1, PF1, Q2 from their notes; Q1 after Q2.
 **Workers:** bounded briefs on muse (Go Muse Spark Contributor); Opus panes when Brad approves;
 no Codex workers (quota). RV3 Fable review running. **Leases:** Odin on the mini USB (~55 %): NP1 next; USB drains under load, ~1–4 %/run; mini: four boot slots (speed runs take all four).
