@@ -147,3 +147,96 @@ backdrop). 14 cherry-picks clean (not `a46fb2e`), suite 611/611, runner-dir diff
 Pushed `f1-fold` → fork `ssx3` **`56a5e8a`** (fast-forward from `71c952e`). Mac race 0.250× on
 paraLLEl (one run). Menus ran at **1.287×**, i.e. faster than real time: the guest isn't paced to
 59.94 Hz when it can outrun it (todo item). Parts 2 (Android) and 3 (iOS) released in parallel.
+
+## Part 3 — iOS (device build `56a5e8a`, sim + iPad race, iPhone install-only)
+
+Worker: Muse Code, brief `local/muse/prompts/F1.md` Part 3 only. Source: pushed
+fork `ssx3` `56a5e8a6b249601a6193fea9ce77caf54d0cd584` (reused the Part 1
+worktree `~/dev/ssx3-work/F1/PS2Recomp`; `HEAD == fork/ssx3`, clean).
+
+Builds (`~/dev/ssx3-work/F1/ios/build-install.sh` = I32 recipe + 3-line sed:
+`W`, `FORK_WT`, `PIN→56a5e8a…`; bundled env IS `local/research/I32/ps2x.env`,
+SHA `0041e09a…` matches I32's committed `env-sha.txt` — sound on,
+`PS2X_MC_ROOT=${DOCUMENTS}/mc0`): preflight rc=0 (runner-dir diff empty, deps
+pinned, profile `f0793278` valid to 2027-09-17, both devices connected);
+configure sim + device rc=0 (`-O3 -DNDEBUG` asserted 2 lines each, raylib DPI
+patch "already applied"); sim build + stage + install rc=0; device build +
+stage + sign rc=0 (`codesign --verify --strict` passed, ELF/ISO stage copies
+`cmp`-equal, bundle `org.ps2x.ps2entryrunner`).
+
+| Binary | SHA-256 (two matching reads) |
+| --- | --- |
+| sim `ps2EntryRunner` | `21f7954fd5848a3f1d496ee67eb019aa072ce19bbc2f8a9a612adcc493ff16ac` |
+| device unsigned | `d989a3f5b7f9071240080118e52a140bd2a66a2ce0646e5969c695701bdc0b69` |
+| device signed (installed) | `89ed20d41b93fdd7d6796c4a5a4a15adcf7a09896ed923d241ca9eb1f1134277` |
+
+Simulator (fresh container: uninstalled first — I32's save-test `mc0` with
+Brad's save was still in the sim container; reinstalled to empty Documents;
+bundled I26-FAST route, sound on; one lease slot each, released; zero FATAL,
+48 kHz stream, overlay shown; all frames SHA-matched on two reads):
+
+| Run | Shot (capture tick) | Viewed verdict | SHA-256 |
+| --- | --- | --- | --- |
+| peak (31 s) | `shot-t1010` (1018) | **Select Peak: Peak 1 mountain photo**, Peaks 2/3 locked, correct text — RR1 fix visible on iOS | `e9c398bd…` |
+| sim (134 s) | `shot-t1050` (1189) | Select Event (Snow Jam, course map); menu correct, Peak overshot by the 2 s poll | — (menu ref) |
+| sim | `shot-t1750` (1762) | Race 2ND/2 00:00:00 0%, EA Radio "Glass Danse - Oakenfold Remix / The Faint", gate, lit snow | `c524c8a3…` |
+| sim | `shot-t2100` (2126) | Race 2ND/2 00:00:07 1%, pines, spray, mountains; advancing | `6e1e76ce…` |
+
+iPad (Air 11" M2): install rc=0 (seq 1884, bundle `9255EAFA…`); deploy SKIP +
+7 exact-size OKs (Brad's save + 496-byte manual-play env intact). Live
+container read from a ~5 s probe console (bogus-UUID `MC_ROOT`, title only,
+terminated, no screenshots): **`E26D3546-…`** — rotated from I32's
+`8B1267A4`, so reinstalls do rotate it. One test launch (env: I26-FAST script
+byte-exact 484 chars, `MC_ROOT=<live>/Documents/mc-fresh`,
+`PS2X_VSYNC_RATE_LOG=1`, no vpad injections): 209 s, ticks 1116/1751/1970/2155,
+terminated after (`info processes` clean), zero FATAL, launcher kept all 3,
+48 kHz, overlay shown. Portrait compat crop + background app form as in I32.
+
+| Shot (tick) | Viewed verdict | SHA-256 |
+| --- | --- | --- |
+| `shot-t1050` (1116) | Select Mode (Race/Freestyle) — missed Peak by 17 ticks (2 s poll overshoot), menu correct | `a933bcb6…` |
+| `shot-t1750` (1751) | Race 1ST/2 00:00:00 0%, EA Radio "Go / Andy Hunter / Exodus", gate — race start on-route | `b9752675…` |
+| `shot-t1960` (1970) | Race 2ND/2 1%, gate pole, spray, pines; advancing | `dea4b0b8…` |
+| `shot-t2140` (2155) | Race 2ND/2 1%, slope/trees/spray/mountains; advancing | `c797f838…` |
+
+Fresh-card proof: `mc-fresh` + `mc-fresh_slot1` created at the live path
+(this run's override resolved, unlike I32's stale UUID); route hit the race
+on pace (Finding F1: save-present routes derail); deploy re-ran after: SKIP +
+7 OKs, Brad's `mc0` byte-identical. Observed diagnostic pace: race window
+1751@106s→2155@207s ≈ 4.0 vs/s ≈ **0.067×** (vsync-rate log + screenshots on —
+not a speed number).
+
+iPhone (16 Pro Max): install rc=0 (seq 4824, bundle `BC672081…`); deploy SKIP
++ 7 OKs. **Never launched** — no launch/process command targeted the iPhone.
+
+Budgets and gaps: 2 builds, 2 sim runs (134 s + 31 s), 1 probe + 1 iPad test
+(209 s), 2 installs; ~25 min of the 1 h box. Scratch `~/dev/ssx3-work/F1`
+9.0 GB (ios 6.9 GB) ≤ 20 GB; disk 107.6/200 GB; Simulator shut down; no lease
+held. Gaps: iPad Select Peak missed by 17 ticks (sim covers the Peak 1
+photo); iPad pace is diagnostic, not a clean speed number; `mc-fresh`,
+`mc-fresh_slot1`, `mc1` dirs left in iPad Documents (harmless); first probe
+failed on `--environment-variables` taking JSON content, not a path (I32's
+script passes content via `$1`) — fixed, no device state touched.
+
+Exact commands:
+
+```sh
+sed -e 's|^W=.../I32$|W=.../F1/ios|' -e 's|^FORK_WT=.*|FORK_WT=.../F1/PS2Recomp|' \
+  -e 's|^PIN=f949ff0...|PIN=56a5e8a6b249601a6193fea9ce77caf54d0cd584|' \
+  local/research/I32/build-install.sh > ~/dev/ssx3-work/F1/ios/build-install.sh
+bash ~/dev/ssx3-work/F1/ios/build-install.sh preflight configure_sim configure_device
+bash ~/dev/ssx3-work/F1/ios/build-install.sh build_sim stage_sim sim_install
+bash ~/dev/ssx3-work/F1/ios/build-install.sh build_device stage_device sign
+xcrun simctl uninstall $SIM org.ps2x.ps2entryrunner   # I32 save-test mc0 was in the container
+bash ~/dev/ssx3-work/F1/ios/build-install.sh sim_install
+bash ~/dev/ssx3-work/F1/ios/sim-run.sh                # thresholds 1050 1750 2100
+bash ~/dev/ssx3-work/F1/ios/sim-peak-run.sh 1010      # 0.5 s poll
+bash ~/dev/ssx3-work/F1/ios/build-install.sh install_ipad
+bash local/research/I31/deploy-ios.sh ipad
+bash ~/dev/ssx3-work/F1/ios/ipad-probe.sh             # live container E26D3546-…
+bash ~/dev/ssx3-work/F1/ios/ipad-run.sh run-ipad-env.json "1050 1750 1960 2140"
+bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
+bash ~/dev/ssx3-work/F1/ios/build-install.sh install_iphone
+bash local/research/I31/deploy-ios.sh iphone         # never launched
+xcrun simctl shutdown $SIM
+```
