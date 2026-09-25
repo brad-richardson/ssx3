@@ -193,7 +193,7 @@ then 120 Hz simulation.
 
 - [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 knobs +
       pipelined present (`4825123`; iPad: 4×+hi-res pipelined beats today's 1×) + Mac zero-copy (`fb3dca0`,
-      default off), LX1 TZ/x86 (`lx1-tz`), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
+      default off), LX1 TZ/x86/fenv (`lx1-tz`: `5f32212 20377a3 b4cb476 fc0cc67`; Mac↔bradflix det-hash equal to t2400), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
       once lanes on the current codegen finish; then device builds (4×+hi-res default TBD by HR1's report).
 - [ ] VU1 usage-table gap: OPMULA/OPMSUB read fs.xyz but declare fs lanes = dest (unused in SSX 3; VB1).
 
@@ -208,7 +208,7 @@ then 120 Hz simulation.
       (`e5654f3 7caf516 125c9e5`) + LX1 Part 1c (TZ pin/DST, x86 build fixes) + TC1 (`e29e4975` vf0
       read-only emitter, needs a **codegen regen + promotion**; plus a one-line VU0 R ctor fix). Odin
       pair vs F3; iPhone + Odin play builds. Later: dump VU1 images on other courses (FR1).
-- [ ] **Host split once LX1 passes (Brad, 09-25):** bradflix gets **4 boot slots** for correctness
+- [ ] **Host split after F5 (LX1 parity reached 09-25; Brad):** bradflix gets **4 boot slots** for correctness
       work (det-hash, frames, counters, suites, builds; CPU and paraLLEl if LX1 Part 2 works); the
       mini drops to **1 slot** reserved for performance benchmarks and Apple-only checks; the Odin
       stays 1. Tooling: `p_lane_lease.py --host bradflix|mini`, `local/tooling/remote/bradflix_boot.sh`,

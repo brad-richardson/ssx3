@@ -651,3 +651,13 @@ streams identical for all 2412 common ticks (1–2412). **Equal.**
   `mac-build-tzd`, `/tmp/lx1d_{mxtap,mxtap2,mxtap3,pin}.py`,
   `/tmp/lx1d_{hwtest,hwtest2,fetest}.c`, `/tmp/lx1d_ldsites.txt`.
   Bradflix lease released at close (verified).
+
+## Orchestrator gate, Part 1d (2026-09-25)
+
+**Pass: parity reached.** Root cause: `VU1Interpreter::run`'s `fegetround`/`fesetround` pair reads the x87
+word on x86 (still nearest; the E53 scopes set MXCSR only) and wrote nearest back into MXCSR at VU1's first
+run (tick 92), so all later EE FP rounded nearest on x86 only. Pin `fc0cc67` (save/restore via
+`ps2_fpmode`); post-pin Mac vs bradflix det-hash equal on all 2,412 common ticks. Fold `lx1-tz`
+(`5f32212 20377a3 b4cb476 fc0cc67`) in F5; follow-up: the identical fenv pair in `gs_replay_core.cpp:45-52`.
+Once F5 lands: the host split (bradflix 4 correctness slots, mini 1 for benchmarks). Part 2 (GPU headless
+in Docker) released now.
