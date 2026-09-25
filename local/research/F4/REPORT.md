@@ -396,3 +396,120 @@ pool (Android's CMake dropped the per-source form). Pushed `f4-fold` → fork `s
 (fast-forward from `ec2dbf1`). Codegen: device builds use the F4 regen (`~/dev/ssx3-work/F4/codegen`,
 one-line vf0 difference); promotion to canonical waits until the lanes mid-gate on the current codegen
 (VB1, HR1, PF1, PX1, LX1) finish. Parts 2 (Odin) and 3 (iPhone) released.
+
+## Part 2 — Odin (BLOCKED: VU1 chain stack-overflow crash on first launch)
+
+Worker: Muse Code, same pane. **Stopped per the first-failure rule on
+S1**: the F4 APK crashes 48 s in with a GameThread stack overflow —
+512 nested `VU1RecompImage<…>::fXXXX` frames. Single mechanism, root
+cause below. No S2, no P1 profile, and deliberately **no F4 play
+install** (a crashing build must not replace Brad's working F3 play
+build); the device was restored to F3 + deploy-verified instead.
+
+**iOS flag for F4I:** the same chaining ships in the iPhone/iPad
+build; secondary-thread stacks there (512 KB) will overflow the same
+way. Expect the crash if that pane launches before the fix.
+
+### APK tip (no rebuild needed)
+
+APK `1d711e70…` (181,638,728 B) was built from `8559ab9`: the
+re-archive was verified file-by-file (346 both sides, both pool lines
+grepped) and its `.cxx` ninja files carry 9 `pool = ps2x_vu1_gen`
+edges (the `6bac3da` tree yields 0). Pushed fork `ssx3` = `8559ab9`
+= `f4-fold` HEAD (fetched, read-only). Local APK SHA `1d711e70…` ×2
+before install; installed `base.apk` reads `1d711e70…` after.
+
+### Launcher
+
+`launch.py` = F3's driver with F3→F4 paths/lease (`sed`, zero `F3`
+remnants, docstring fork pin corrected to `8559ab9`) + the main
+profile step switched from `-g` to `--call-graph fp` (NP1 verdict;
+the `--probe-at-end` probe lines keep `-g`, unused);
+`phases.py` verbatim (no lane strings). Env = F3 env incl.
+`PS2X_UNPACED=1` (pacing never engages below 1×, so the profile run
+would match NP1's paced env exactly in the race window).
+
+### S1 (1/1; crash)
+
+Pre-launch: lease `LEASE_FREE F3 done`, keyguard `showing=false`
+(read-only), AC true, 100 %, thermal 0, app not running, Brad env
+`9fb46f85…` + mc0 pins verified, mc0-test absent→created empty.
+Pair method: thermal 0 pre-wait, 180 s wait, thermal 0 at launch.
+Over Wi-Fi (serial from `local/odin-serial`); no drops.
+
+| Item | Result |
+| --- | --- |
+| Run | t+0→48.2 s, tick~1565 (loading), then `FATAL seen in logcat` |
+| Crash | SIGSEGV SEGV_ACCERR `fault addr 0x6d8048efd0`, `stack pointer is not in a rw map; likely due to stack overflow`, **512 total frames**, all `VU1RecompImage<8626389153574412127>::fXXXX(VU1Interpreter&, RunContext&)` (`logcat.txt:789-814+`) |
+| sc01 | `sc01-final-t48.png` (`dffdfa51…`, scratch `odin/S1/`): Android home screen — the app was already dead at scap time |
+| After | force-stop (pid none), Brad env restored (`9fb46f85…` match), mc0 bad=[], lease `LEASE_FREE F4 done` |
+
+### Root cause (single mechanism)
+
+VR1's chaining (g4) is musttail in only one direction. The emitter
+(`ps2xRuntime/src/lib/vu/ps2_vu1_recomp.cpp` @ `8559ab9`):
+
+- line 154: `next()` ends with `PS2X_VU1_MUSTTAIL return fn(vu, c);`
+  — guaranteed tail call into the next pair;
+- line 187: each pair function ends with a **plain**
+  `return next(vu, c);` (0 occurrences of `MUSTTAIL return next` in
+  all 7 `vu1gen-ssx3` images).
+
+So the chain is f1 →(ordinary) next →(tail) f2 →(ordinary) next
+→(tail) f3 … — every pair parks one ordinary-call frame that only
+returns when the chain ends. Up to 2,048 pairs per image run × fat
+frames (fully inlined issuePair + FMAC per function) overflows the
+~1 MB GameThread stack; here it died 512 frames deep. The Mac
+survived on a bigger stack (and/or Apple-clang sibling-call
+optimization of the plain tail-position return — either way,
+unsound to rely on). The backtrace shows *only* f-frames, no
+`next()` frames — exactly this shape, no second bug.
+
+The fix is one line (emitter :187: `PS2X_VU1_MUSTTAIL return
+next(vu, c);`) + regen + rebuild; `musttail` then guarantees a
+flat chain by construction (compile error otherwise). Not attempted
+here — it needs a fork commit + regen + Mac re-verify + APK rebuild
++ Odin re-run, an orchestrator call. Note the pushed `ssx3`
+(`8559ab9`) contains the bug.
+
+### Device end state (restored, not F4)
+
+F4 play install blocked (crashing build). Instead: F4 scratch
+removed (`/data/local/tmp/f4`, `mc0-test{,_slot1}` — all three
+confirmed gone), **F3 APK `d5a94c27…` reinstalled** (`Success`,
+local ×2 + `base.apk` ×1 all match) + `deploy-odin.sh` (env
+`9fb46f85…` + 6/6 saves OK), no launch. Final: lease free, app
+stopped, 100 % on AC.
+
+### Budgets and gaps
+
+Installs 2 (F4 run + F3 restore), launches 1 (~52 s wall, crash).
+Scratch `~/dev/ssx3-work/F4` 4.5 GB total, of which F4I's `ios/`
+is 3.5 GB — Part 2's own footprint is ~1.0 GB (APK + logs/S1 + 1 PNG).
+Text logs (S1, 312 K) + `launch.py` + `phases.py` committed here.
+Gaps: no S2 (no speed pair — nothing to compare until the chain is
+flat); no P1 profile (same crash would hit at tick 2400); the F4
+APK is unusable on-device; F4I (iOS) carries the same bug.
+
+Exact commands:
+
+```sh
+shasum -a 256 ~/dev/ssx3-work/F4/odin/app-release.apk  # 1d711e70 x2
+sed -e 's/F3/F4/g; s|/data/local/tmp/f3|/data/local/tmp/f4|g' local/research/F3/launch.py > local/research/F4/launch.py
+cp local/research/F3/phases.py local/research/F4/phases.py  # verbatim
+# + docstring pin + simpleperf --call-graph fp edits
+adb -s "$S" install -r ~/dev/ssx3-work/F4/odin/app-release.apk  # Success; base.apk 1d711e70
+# S1: thermal 0, sleep 180, thermal 0
+python3 local/research/F4/launch.py --label S1 --wall 600 --stop-tick 4500  # FATAL t+48s tick~1565
+adb -s "$S" pull /data/local/tmp/f4/sc01-final-t48.png ~/dev/ssx3-work/F4/odin/S1/  # dffdfa51
+adb -s "$S" shell 'rm -rf /data/local/tmp/f4 .../files/mc0-test .../files/mc0-test_slot1'
+adb -s "$S" install -r ~/dev/ssx3-work/F3/odin/app-release.apk  # F3 restore, no launch
+bash local/research/I31/deploy-odin.sh "$S"  # env + 6/6 OK
+adb -s "$S" shell 'am force-stop com.ps2x.runner'
+```
+
+Recommended next action: one-line emitter fix (`musttail` on the
+pair→`next()` call) + regen the 7 images + Mac det/speed re-verify
++ APK rebuild + Part 2 re-run (S1/S2/P1). Warn F4I before it
+launches the iPad build. Orchestrator decides fix-forward vs
+revert on the pushed `ssx3`.
