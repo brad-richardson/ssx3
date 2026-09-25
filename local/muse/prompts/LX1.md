@@ -36,3 +36,6 @@ Note for Part 2 (orchestrator, 09-25): stay in Docker (Brad prefers the isolatio
 2. Also fold in the two x86 build fixes from Part 1: `-msse4.1` (or the right `-m` flags) for x86 in `CMakeLists.txt`, and the E53 FP-mode test reading MXCSR RC on x86 instead of `fegetround()`. Suite on bradflix must be all-pass.
 3. Parity re-run on `lx1-tz`: Mac det boot vs bradflix det boot (CPU GS, sound off, I26-FAST) to t2400 → det-hash equal on every tick? If not, the first differing tick + field, and stop.
 Deliverable: append `## Part 1c`; commit `[LX1] Part 1c …`. No push. Budget 2 h.
+
+## Part 1d (released by the orchestrator)
+Same method as Part 1b on `lx1-tz`: rdram dumps at ticks 92–95 on both hosts → the differing words → `PS2X_DIAG_WATCH` on them → the storing PC/ra and the syscall/HLE path that produced the value (`PS2X_TRACE_SYSCALLS`). Suspects to check first: host file metadata (ISO/ELF/mc0 mtimes or sizes via `sceCdSearchFile`/`sceMcGetDir`/stat), locale/language (`sceScfGetLanguage`-style OSD fields), host paths or env strings copied into guest memory, and the uninitialized-memory contents of a host allocation. Name the source; one fix only if it's a one-line determinism pin (same shape as the TZ fix); then re-run parity to t2400 and report the next split or "equal". Append `## Part 1d`; commit `[LX1] Part 1d …`. Budget 2 h.

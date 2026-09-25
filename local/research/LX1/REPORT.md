@@ -400,3 +400,9 @@ hunch for the next part's hunt, not a finding.
 - Boots MT1/BT1; BT1 log pulled to `from-bradflix/BT1/`.
 - Scratch at close: mini LX1 7.0 GB, bradflix LX1 13 GB. Bradflix lease
   released at close (verified).
+
+## Orchestrator gate, Part 1c (2026-09-25)
+
+**Pass.** TZ pinned in det mode (host path DST-aware via `tm_gmtoff`), x86 build + E53 test fixed: suites
+650/650 on both hosts, ticks 1–93 identical. New split at tick 94 (rdram only; eeCycle identical) looks
+like another host-data leak. `lx1-tz` (`5f32212 20377a3 b4cb476`) folds after F4 (F5). Part 1d released.
