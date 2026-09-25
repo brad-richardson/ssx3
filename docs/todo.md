@@ -277,6 +277,7 @@ then 120 Hz simulation.
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
+- [ ] **HS1 (running, Brad 09-25):** host split: bradflix build ≤ 5 min (unity_74 diagnosis, ccache), 4 bradflix boot slots via Docker, 4-way det acceptance vs the a3efbfe baseline.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
 - [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real
@@ -288,7 +289,7 @@ then 120 Hz simulation.
 
 ## Parked
 
-- **Present with Vulkan directly (option B, Brad 09-25: parked, "A now, B later").** Granite WSI swapchain
+- **Present with Vulkan directly (option B; Brad 09-25 evening: un-parked as the VK1 Opus spike, Odin first).** Granite WSI swapchain
   (SDL / CAMetalLayer / ANativeWindow) for the game image, virtual pad redrawn in Vulkan, raylib kept
   only for input/audio (or SDL). Buys: no copies, no deprecated GL on Apple, precise present timing for
   120 Hz. Revisit when 120 Hz work starts; HR1 may investigate if its time box allows.
