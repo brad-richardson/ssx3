@@ -1,0 +1,56 @@
+F2 Part 2 — the one build FAILED (2026-09-25, bytesize WSL, root /home/brad/f2).
+Full log (621 lines, kept on bytesize): /home/brad/f2/assembleRelease.log
+Fork input: git archive 92f999190ce2f1cd8c634396e469b3aebad5f82e (fork ssx3 tip).
+
+Compiler error (NDK 28.2.13676358 clang++, -std=gnu++20, arm64):
+
+  FAILED: ps2xRuntime/CMakeFiles/ps2_runtime.dir/src/lib/Kernel/EeScheduler.cpp.o
+  EeScheduler.cpp:2016:13: error: return type 'uint64_t' (aka 'unsigned long')
+  must match previous return type 'unsigned long long' when lambda expression
+  has unspecified explicit return type
+     2016 |             return value;
+          |             ^
+  1 error generated.
+  ninja: build stopped: subcommand failed.
+  BUILD FAILED in 30s / 16 actionable tasks: 16 executed
+
+Offending code (CT1, commit b975fb2, folded as-is; lines 2004-2020 at 92f9991):
+
+  uint64_t coverageTick()
+  {
+      static const uint64_t tick = []
+      {
+          if (const char *env = std::getenv("PS2X_COVERAGE_TICK"))
+          {
+              uint64_t value = 0u;
+              ...
+                      return ~0ull;          // unsigned long long
+              ...
+              return value;                  // uint64_t  <- line 2016
+          }
+          return ~0ull;                      // unsigned long long
+      }();
+      return tick;
+  }
+
+Why Mac builds are green: on Darwin uint64_t IS unsigned long long
+(mini probe: u64-is-ulong=0 u64-is-ull=1), so all three returns agree.
+On Linux/Android (LP64 stdint) uint64_t is unsigned long, a distinct
+type from unsigned long long, and deduced lambda return types must match
+exactly. F2 Part 1 (Mac suite 612/612 + runners) and ST1 (Mac 616/616)
+compiled this file cleanly; iOS builds on macOS are unaffected too.
+Only Android/Linux breaks.
+
+Minimal fix shape (E lane decides; NOT applied anywhere):
+  return ~0ull  ->  return ~uint64_t(0)   (2 occurrences, same lambda)
+or give the lambda an explicit -> uint64_t return type.
+
+Resume for F2 Part 2 after the fork fix (new tip T):
+  git -C /home/brad/n2/PS2Recomp fetch origin ssx3   # confirm T
+  rm -rf /home/brad/f2/PS2Recomp                     # keep codegen/parallel/jni
+  git archive T | tar -x -C /home/brad/f2/PS2Recomp   # + stub check
+  bash /home/brad/f2/build.sh                        # one held ssh (WSL sleeps in gaps)
+Staging already on bytesize and verified: codegen-ssx3 (9457 files,
+register_functions.cpp 8ea8ed43 x2, 623 SBR files), parallel-gs
+(24314 files, exact 963cb57->19d93b2 2-file delta, Granite identical),
+jniLibs (Turnip 717812c3 14188488 B + HAL 1b49d27c 7112 B).

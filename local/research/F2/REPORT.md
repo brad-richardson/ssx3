@@ -323,3 +323,73 @@ checkpoint beam. This time the iPad was in portrait, and the overlay's portrait 
 SELECT/START overlap, and the D-pad and face buttons sit over the picture. That goes to I28 (iPad-native
 layout); the iPhone plays in landscape. Signed build `14ec858d…` from fork `96e9f45` is on Brad's iPhone
 (install only) and iPad; save and manual-play env re-applied and verified on both.
+
+## Part 2 — Android (BLOCKED before any APK: CT1 lambda fails the NDK compile)
+
+Worker: Muse Code, brief `local/muse/prompts/F2.md` Part 2 only. Fork `ssx3`
+`92f999190ce2f1cd8c634396e469b3aebad5f82e` (F2 fold + ST1 progressive scanout).
+**Status: blocked, no APK, no Odin launch.** Bytesize staging is complete and
+verified, but the one build fails in 30 s on a genuine fork compile error in
+CT1's `coverageTick()` lambda. First-failure rule: stopped, error saved
+(`build-error.txt`, full 621-line log kept at `/home/brad/f2/assembleRelease.log`
+on bytesize), handing back. No fix applied anywhere (E lane owns the fork).
+
+### Staging (bytesize `/home/brad/f2`, WSL idle, load 0.00, no other heavy job)
+
+| Input | Receipt |
+| --- | --- |
+| Fork | `git archive 92f9991…5f82e` (`origin/ssx3` after fetch = mini's tip); tar 334 files + 63 dirs, extracted tree 334 files (zero missing/extra); `runner/` = 438 B upstream stub `cf62c485…` only; `force_progressive` (ST1) + `PS2X_SBR_LT` (SB1) present. Mini runner guard `git diff --stat 14b1e5cb 92f9991 -- ps2xRuntime/src/runner` empty; `56a5e8a→92f9991` = 15 files (the F2 fold + ST1) |
+| Codegen (refreshed) | Streamed mini canonical → bytesize (`tar` over held ssh stdin); 9,457 files both sides; `register_functions.cpp` `8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3` (two reads each side, all match); **623 files ref `PS2X_SBR_LT` both sides** (bytesize's f1/tl1 copies have 0 — pre-SB1; the `register_functions.cpp` SHA alone can't detect the promotion, F2 G5); zero `._*` files |
+| paraLLEl-GS `19d93b2` | Streamed mini F2 worktree (`19d93b2d0b…`, Granite `166ba21a…`); 24,314 files; `diff -rq` vs tl1's copy = exactly `gs_renderer.cpp` differs + new `pgs_env_knobs.hpp`, matching mini `git diff 963cb57 19d93b2` (2 files, the GB9 `PGS_HIER_BINNING` knob); `Granite/` byte-identical to tl1's |
+| jniLibs | `cp -a` from tl1: Turnip `717812c3…` 14,188,488 B + HAL `1b49d27c…` 7,112 B (pins + sizes match) |
+| `build.sh` | Committed here (= F1 recipe, root f2); SHA `790a3053…` identical local/remote |
+| Toolchain | Wrapper pins `a3648413…`/`49849512…`, Gradle 8.9, NDK 28.2.13676358, `--max-workers=2` (all = F1/TL1) |
+
+### Build failure (the blocker)
+
+`BUILD FAILED in 30s`, one error, rest of the 434 ninja steps unaffected:
+
+```text
+EeScheduler.cpp:2016:13: error: return type 'uint64_t' (aka 'unsigned long')
+must match previous return type 'unsigned long long' when lambda expression
+has unspecified explicit return type
+   2016 |             return value;
+```
+
+CT1's `coverageTick()` lambda (commit `b975fb2`, folded as-is) returns `~0ull`
+(`unsigned long long`) in two branches and `value` (`uint64_t`) in one.
+Deduced lambda return types must match exactly. **Mac builds are green
+because on Darwin `uint64_t` IS `unsigned long long`** (mini probe:
+u64-is-ulong=0, u64-is-ull=1) — F2 Part 1 (suite 612/612 + runners) and ST1
+(616/616) compiled this file cleanly, and iOS builds on macOS are unaffected.
+Only Android/Linux (LP64 stdint: `uint64_t` = `unsigned long`) breaks.
+
+Minimal fix shape, E lane's call, **not applied**: `~0ull` →
+`~uint64_t(0)` (2 occurrences, same lambda), or an explicit `-> uint64_t`.
+
+### Not done / untouched
+
+- No APK, so no Odin runs: the stripes check in the screencaps and the race
+  comparison vs F1's 0.140× are both pending, as are the play build + deploy.
+- Odin untouched (read-only checks only, never claimed): lease still
+  `LEASE_FREE F1 done`, 58 %, `AC powered: true`, `showing=false`. No
+  screen/keyguard toggle, no launch, no force-stop needed.
+- Bytesize staging left in place for resume (codegen/parallel-gs/jniLibs/
+  build.sh all verified; only `PS2Recomp/` needs re-archiving at the new tip).
+  Resume: fetch, confirm tip, `rm -rf /home/brad/f2/PS2Recomp`,
+  `git archive <new-tip> | tar -x -C /home/brad/f2/PS2Recomp` (+ stub check),
+  `bash /home/brad/f2/build.sh` on one held ssh (WSL sleeps across ssh gaps).
+
+### Exact commands
+
+```sh
+git -C ~/dev/PS2Recomp fetch fork ssx3  # fork/ssx3 = 92f9991...5f82e
+git -C ~/dev/PS2Recomp diff --stat 14b1e5cb 92f9991 -- ps2xRuntime/src/runner  # empty
+ssh bytesize 'wsl ...'  # fetch origin/ssx3 = 92f9991; git archive | tar -x -C /home/brad/f2/PS2Recomp
+COPYFILE_DISABLE=1 tar -czf - -C ~/dev/ssx3-work codegen-ssx3 | ssh bytesize 'wsl ... tar -xzf - -C /home/brad/f2'
+COPYFILE_DISABLE=1 tar --no-xattrs --exclude='.git' -czf - -C ~/dev/ssx3-work/F2 parallel-gs | ssh bytesize 'wsl ...'
+# bytesize verifies: 9457/9457, SHA x2, SBR 623; diff -rq parallel (2-file delta); Granite identical; jniLibs pins+sizes
+cat local/research/F2/build.sh | ssh bytesize 'wsl ... cat > /home/brad/f2/build.sh'  # SHA 790a3053 both sides
+ssh bytesize 'wsl -d Ubuntu -- bash -lc "bash /home/brad/f2/build.sh"'  # BUILD FAILED in 30s (one held ssh)
+clang /tmp/u64check.c -o /tmp/u64check && /tmp/u64check  # Darwin: u64-is-ull=1
+```
