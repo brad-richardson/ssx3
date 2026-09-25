@@ -147,6 +147,11 @@ then 120 Hz simulation.
 
 ## I — iOS
 
+- [ ] **Brad 09-25 (iPhone, paraLLEl build):** main menu "basically perfect"; picture ~50 % too dark
+      (DK1 running, likely PS2 alpha 0x80 used at present time; Odin looks dim too); pad v2: stick
+      ×1.5, D-pad at 80 % of the face-button cluster, below-right of it (I34 running). One combined
+      iPhone build after both.
+
 - [ ] iOS paraLLEl: no CPU fallback when Vulkan init fails (black game frame, app alive; I33 §3).
       Add a fallback to the CPU backend or a visible error.
 
