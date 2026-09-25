@@ -1,0 +1,72 @@
+# E55D16 S1 receipts (hashes + sizes; no game data)
+
+Boot: bound=target elapsed_s=82.226 last_hash_tick=2112 frame_proof=tick 2106
+ snap-2106t-0081.58s.png runner_pid=57285 (gone, SIGTERM rc=-15) slot=2
+ (claimed + released; slot 1 held by up1b throughout)
+Caps: log_bytes=1001620/16777216 frames_bytes=21335460/2147483648
+ wall 500 / progress 120 / grace 120 (run-control, not speed)
+
+## Pins
+fork: fb11e182310555c65201635f8d6c7fe8e170de74 (clean; runner-dir guard exit 0)
+runner: f4d7632ca371ed7b429a74ab535db6209968f7fcb4c69a2b2bf560c028b71711
+  (~/dev/ssx3-work/E55D16/build/ps2xRuntime/ps2EntryRunner; Release,
+   RUNTIME_LOGS=ON DET_HASH_TAP=ON NO_THINLTO=ON; two reads match)
+iso: 3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5
+elf: 1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc
+codegen register_functions.cpp: 8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3
+boot script e55d16_boot.py: d30b7990d9334a786fdc6fe01e282e4daadc1d964d80e52570c4e2a3c741f0d8
+card source Mcd001.ps2: ac98cf37b23dcded490a6983d4438418f6247ea660f941c01b157410dd0597bc
+  (8650752 B = 16384 x (512+16); matches brief pin)
+card_initial_sha256 = card_final_sha256 =
+  02360f67dc0d6acfb169d73f7e1249840c18d4f632f52e13fbe8dbf18cc9a91b (no guest write)
+
+## Seed (Part 1 extraction; sizes + SHAs)
+BASLUS-20772-GAM0001/icon.sys 964
+  eab225745ef6695109743410261609e0569c14edb1555bc8941a965b3890a49c
+BASLUS-20772-GAM0001/ssx1.ico 73144
+  5f8b5a9252f868d2fbc03378846b84ed601a2c872f47028711de67a4a714fc0b
+BASLUS-20772-GAM0001/BASLUS-20772-GAM0001 39777
+  4bdaee79a3bdaceef898bb44b6bcf62058e882a24237f8c81e46953a5067b78e
+BASLUS-20772-SET0001/icon.sys 964
+  dddf2d9c81a1c8bac2fe2036e1771dfa63635e3ae676760551defec2da67ee13
+BASLUS-20772-SET0001/ssx1.ico 73144
+  5f8b5a9252f868d2fbc03378846b84ed601a2c872f47028711de67a4a714fc0b
+BASLUS-20772-SET0001/BASLUS-20772-SET0001 3276
+  4a31a2d7e095e277edceae2243002055aa830019b3a1be64f126aee9129002f1
+
+## Curated frames (local/research/E55D16/; private originals in run/S1/frames/snap/)
+snap-836t-0026.20s.png 360668 e28562e7cb68054fb1ea3ad96e655ea4d64f1c82896808318fe88a8503df7537
+snap-836t-0026.20s.txt 121 681775cfd18396bbc2900f2bcf97519652138ce8eeec6135b31a11af5a05ace2
+snap-1631t-0059.42s.png 232979 2189d09d534bfdf216ba51b535ccf4a3cc0aeaeb77ebafeb841a2c20cef44238
+snap-1631t-0059.42s.txt 123 7b9beb0934e628459790ecea5e274dd59fa57ac721efb1c206c28fa516e8039e
+snap-1803t-0067.48s.png 268868 76784a230de5b42ccbb7dffcba3c93c8a4f258a651360f2e918bc483fdb4c92e
+snap-1803t-0067.48s.txt 123 1e212d1cb7aed78b292cfb71efcfa98f0e2f06d63313fc4618b57994df045794
+snap-2057t-0080.57s.png 213263 28537b5c21c6737ade410168b17421f4bddd37280be9c85af449ab0a475d5ed8
+snap-2057t-0080.57s.txt 123 0db668b927d80cf4f31ab158b501f9e9e2efc6d82a2666e77e8f4c72f6c7ed6a
+PNG total 1075778 B (<= 2 MiB)
+s1-result.json bfd1b9ba43051c282fa018f24ae4b336442056df791a344d1a32fcee64b3736b
+
+## GetDir lines by det-hash tick (14 total; ticks approximate: last hash before line)
+118 'BASLUS-20772-SET*' maxent=6 -> 1
+122 '/BASLUS-20772-SET0001/BASLUS-20772-SET0001' maxent=1 -> 1
+123 '/BASLUS-20772-SET0001/ssx1.ico' maxent=1 -> 1
+126 'BASLUS-20772-GAM*' maxent=6 -> 1
+130 '/BASLUS-20772-GAM0001/BASLUS-20772-GAM0001' maxent=1 -> 1
+131 '/BASLUS-20772-GAM0001/ssx1.ico' maxent=1 -> 1
+134 'BASLUS-20772-REP*' maxent=6 -> 0
+232 'BASLUS-20772-REP*' maxent=6 -> 0
+240 'BASLUS-20772-SET*' maxent=6 -> 1
+244 '/BASLUS-20772-SET0001/BASLUS-20772-SET0001' maxent=1 -> 1
+245 '/BASLUS-20772-SET0001/ssx1.ico' maxent=1 -> 1
+368 'BASLUS-20772-GAM*' maxent=6 -> 1
+372 '/BASLUS-20772-GAM0001/BASLUS-20772-GAM0001' maxent=1 -> 1
+373 '/BASLUS-20772-GAM0001/ssx1.ico' maxent=1 -> 1
+McRead results (Sync cmd=5): 964 x4 (ticks ~121,129,244,371), 3276 (~305),
+  39777 (~434). No GetDir at tick >= 1700. 58 [MC] lines total.
+
+## Pad (10 presses + 10 releases, vsync clock, plan order)
+armed n=10 clock=vsync; start 0x0008 / square 0x8000 / down 0x0040 x5 /
+  cross 0x4000 x3 (i=6 C1, i=8 C2, i=9 C3). D4 +16ms, C2 +16ms, C3 +16ms late;
+  all gaps >= 60 ticks.
+
+Checker: check.py 52/52 PASS.
