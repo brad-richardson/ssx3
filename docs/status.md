@@ -4,9 +4,9 @@ Milestone: stock SSX 3 gameplay through our PS2 static recomp runtime on the Odi
 Rules: `AGENTS.md`. Open work: `docs/todo.md`. Numbers: `docs/numbers-ledger.md`.
 History: git log (this board is current state only). Updated 2026-09-25 ~07:15 EDT, Mac mini.
 
-**Pins:** PS2Recomp fork `ssx3` `56a5e8a` (F1 fold: RR1 race/menu rendering fixes, E57 VU1 speed, AU9 race SFX, N11 profileable + pin knob; I32 iOS controls; sound HLE, GS replay harness, widescreen, Turnip packaging) ·
+**Pins:** PS2Recomp fork `ssx3` `96e9f45` (F2: 64-bit sign branches + canonical codegen regen, sound HLE on guest time, coverage/INTC counters; F1 fold: RR1 race/menu rendering fixes, E57 VU1 speed, AU9 race SFX, N11 profileable + pin knob; I32 iOS controls; sound HLE, GS replay harness, widescreen, Turnip packaging) ·
 paraLLEl-GS fork `ssx3` `19d93b2` (wave64 binning fix; `PGS_HIER_BINNING` knob) · Granite fork `ssx3` `166ba21a` ·
-canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
+canonical codegen `~/dev/ssx3-work/codegen-ssx3` (F2/SB1 regen, `PS2X_SBR_*` predicates; previous kept as `codegen-ssx3-pre-sb1`).
 
 | Lane | State | Next | Blocker |
 | --- | --- | --- | --- |
@@ -22,4 +22,4 @@ canonical codegen `~/dev/ssx3-work/codegen-ssx3` (E54F2 regen).
 
 **Speed:** Odin race 0.140× on the F1 fold (N11 before it: 0.116×, VU1 = 118 of 145 ms/frame). Mac race 0.224× on paraLLEl (GB8), CPU GS 0.179× with E57. F1 re-measures both on the folded tip.
 **Workers:** bounded briefs on muse (Go Muse Spark Contributor); Opus panes when Brad approves;
-no Codex workers (quota). RV3 Fable review running. **Leases:** Odin **blocked: 15 %, on USB, PIN-locked; Brad to wall-charge + unlock** (NP1, F2 Part 2 wait); mini: four boot slots (speed runs take all four).
+no Codex workers (quota). RV3 Fable review running. **Leases:** Odin off USB, wall-charging (Brad replugs it to the mini; NP1 and F2 Part 2 wait); mini: four boot slots (speed runs take all four).

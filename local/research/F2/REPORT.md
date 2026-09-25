@@ -190,3 +190,13 @@ python3 f2_boot.py --mode speed --backend parallel --runner bin/runner-clean --l
 python3 gb8_rates.py run/B3
 python3 local/research/GB8/gb8_hashdiff.py --base ~/dev/ssx3-work/F2/run/B1 --cand ~/dev/ssx3-work/F2/run/B2  # glued-line caveat, see above
 ```
+
+## Orchestrator gate, Part 1 (2026-09-25)
+
+**Pass.** I viewed B1 t2090 (race 00:00:06, checkpoint beam, lit snow, trees, mountains). Five
+cherry-picks clean; regen byte-identical to SB1's and promoted (`codegen-ssx3-pre-sb1` kept); suite
+612/612; cid0 = 531 without the override; coverage 0/0/4; sound off races with det-hash identical to
+sound on; Mac race 0.250× (unchanged). Pushed `f2-fold` → fork `ssx3` **`96e9f45`** (fast-forward
+from `56a5e8a`). Fine horizontal stripes are visible in the Mac paraLLEl frames too (the Odin
+"stripes" item), so that bug can now be chased on the Mac. Part 3 (iOS) released; Part 2 (Odin)
+waits for the Odin (wall-charging, off USB).
