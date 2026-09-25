@@ -9,6 +9,7 @@ Git history is the record of work done; these docs hold current state only.
 - `todo.md`: open work per lane.
 - `numbers-ledger.md`: every quotable number, one line each.
 - `orchestration.md`: the orchestrator runbook.
+- `facts.md`: verified mechanisms and gotchas (consult when writing briefs).
 
 ## Reference
 
