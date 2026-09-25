@@ -64,3 +64,14 @@ type pkt-path2-notick: count 275682/275682  sequence EQUAL
 type pkt-path3-notick: count 27001/27001  sequence EQUAL
 full stream equal: False
 RESULT PER-PATH-CONTENT-EQUAL
+== h-base-1 vs h-g5-1
+suite  PASS  base=(616, 616, 0) cand=(616, 616, 0) (total, passed, failed)
+hash   PASS  ticks 1..2400: base lines=2401 cand lines=2410 missing base=0 cand=0 first_diff=None
+type 2-notick: count 14049/14049  sequence EQUAL
+type 3-notick: count 56958/56958  sequence EQUAL
+type 4-notick: count 2400/2400  sequence EQUAL
+type pkt-path1-notick: count 1530114/1530114  sequence EQUAL
+type pkt-path2-notick: count 275682/275682  sequence EQUAL
+type pkt-path3-notick: count 27001/27001  sequence EQUAL
+full stream equal: False
+RESULT PER-PATH-CONTENT-EQUAL

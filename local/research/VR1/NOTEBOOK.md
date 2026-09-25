@@ -131,3 +131,40 @@ g 18.48/18.36 (1.24×), g3 19.56/20.47 (1.35×). Runner SHAs in `binaries-sha.tx
 the speed_table prefixes. Fork `6c2de6f`: Android `-Pps2xVu1RecompDir`.
 Next: g4 profile; CPU-backend null pair (h-base-cpu vs h-base-cpu-2) to see whether E57's
 strict whole-file GS check is deterministic there, plus h-g4-cpu.
+
+## 11:05 g4 profile; CPU-backend strict gate passes; g5
+- p-g4 (`profile-g4.txt`): VU1 total 62.5 % of busy samples (base 82.5 %, g2 70.7 %);
+  generated pair functions 26.4 % (FMAC path inlined), commitReadyPipelines 28.0 %, run 3.2 %.
+  Largest non-VU1 row `__bzero` 4.3 % (per-execute clear, NP1 Part 2's target).
+- **CPU backend** (`--backend cpu`, hash runners): null h-base-cpu vs h-base-cpu-2 strict
+  BIT-EXACT (whole-file GS SHA `f2233e7e…`); **h-base-cpu vs h-g4-cpu strict BIT-EXACT** (same
+  SHA, 2400/2400, suite 616/616). `check-cpu.txt`. The paraLLEl interleave race is a
+  backend property; with CPU GS the whole stream, cross-path order included, is identical.
+- Runner size: base 135.1 MB → g4 162.7 MB (+27.6 MB for 7 images, all 2,048 pairs each).
+- g5 (fork `8cea160`): advanceOneCycle inline, commit gate at the call sites (E57 found this
+  neutral for the interpreter; retried because the chained generated path now makes these
+  calls a larger share). Suite 616/616, paraLLEl gate equal, 100 % coverage.
+- Speed holds E (g4, g5), F (g5, g4); then G (base, g4off), H (g4off, base), where g4off =
+  g4 runner with `PS2X_VU1_RECOMP=0`: interpreter speed after the refactor, i.e. the
+  fallback for images not compiled in.
+
+## 11:14 hold E/F; void runs; tool hardening
+- Hold E (quiet start, load rose to 9): s9-g4 23.32, s10-g5 19.01. Hold F ran at load
+  70–130 (another lane's clang/ld; builds aren't leased): s11-g5 14.03, s12-g4 11.68 →
+  **void** (dirs renamed `void-*`). E alone can't separate g5 from g4.
+- Killing the holder mid-hold orphaned its boot's runner (s13-base, pid 28175, mine,
+  unleased for ~20 s); stopped by PID, run marked void. Fixes: `vr1_boot.py` turns SIGTERM
+  into exit (its finally kills the runner and releases); `speed_hold.py` terminates its
+  child on exit, starts claiming only at 1-min load < 8, starts each boot only at load < 8,
+  and abandons/retries the hold if that takes > 120 s.
+- Queued: F2 (g5, g4), G (base, g4off), H (g4off, base), E2 (g4, g5).
+
+## 11:18 prune (orchestrator: mini hit its 200 GB cap; VR1 was 39 GB vs 20 GB brief cap)
+Deleted: 11 of 12 GS captures (already compared; sizes in `gs-cap-sizes-before-prune.txt`;
+kept `run/h-base-cpu/gs.cap`, the strict CPU reference, SHA prefix `f2233e7e…`),
+`build-base-{hash,speed}`, `build-vr1-hash`, `dump`, `dump-v2`, `gen-v1` (superseded by
+`gen-v2`; SHAs in `gen-v1.sha`), asm scratch, and uncited binaries (g/g2/g3/g4a/r hash
+runners, their tests; SHAs stay in `binaries-sha.txt`). Kept: speed runners
+base/g/g2/g3/g4/g5, hash runners base/g4/g5, tests base/g4/g5, `gen-v2`, `build-gen-*`, all
+boot logs/results. VR1 scratch 39 GB → 7.3 GB; ssx3 total 109.8 / 200 GB. My captures ran
+~2.5 GB each; I should have deleted each one after its check, as E57 did.

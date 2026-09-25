@@ -12,17 +12,17 @@ No push, no Odin, no devices.
   equal to base `0ed07c4`, GS content equal per path. **100 % of VU1 cycles run in
   generated code** on the I26-FAST route to t2400. Total VU1 cycles are identical to the
   interpreter's (959,411,166).
-- **The E57 strict GS check (whole-file SHA) fails its own null control on this build**
-  (base vs base, paraLLEl Mac): record tick stamps and cross-path interleave are racy.
-  Each path's payload sequence (tick stripped) is deterministic, and so are VBlank,
-  privileged writes and transfers. That is the GS gate used here (`gs_types.py`). Cross-path
-  order can't discriminate on this build (see Gaps).
+- **On the CPU GS backend, g4 passes E57's strict gate unchanged**: whole-file GS capture SHA
+  equal (`f2233e7e…`, null control also equal). On the paraLLEl Mac build the strict check
+  fails its own null control (base vs base): record tick stamps and cross-path interleave
+  race. Per-path payload sequences (tick stripped), VBlank, privileged writes and transfers
+  are deterministic there, and all candidates match on them (`gs_types.py`).
 - **Race speed on the Mac mini (M5 Pro), diagnostics off, paraLLEl, exclusive lease, ABBA:
   14.85 → 21.45 guest vsyncs/s (0.248× → 0.358× of 59.94), 1.44× on the whole game** (g4,
   fork `1f51e48`; base 14.79/14.90, g4 21.92/20.97). Stage A as sketched (g) gives 1.24×;
   inlining the FMAC helpers (g3) takes it to 1.35×; chaining pairs (g4) to 1.44×.
 - **VU1 share (diagnostic `sample`, process-wide busy samples):** 82.5 % (base) → 70.7 %
-  (g2) → PROFILE_TBD. The decode, usage lookup, opcode switch and FMAC re-decode are gone.
+  (g2) → 62.5 % (g4). The decode, usage lookup, opcode switch and FMAC re-decode are gone.
   What's left is the scoreboard (`commitReadyPipelines`) and the FMAC exact-result
   arithmetic. That's stage B territory.
 - **Recommendation:** RECO_TBD
@@ -82,8 +82,21 @@ and ELF `1b49d05c…` read twice before each boot.
 | base vs g3 | 616/616/0 | equal | differs (as null) | EQUAL | 100 % |
 | base vs g4 | 616/616/0 | equal | differs (as null) | EQUAL | 100 % |
 
-Receipts: `check-gate.txt` (all pairs), `check-null.txt`, `check-r.txt`. Result per the gate
-that can discriminate here: **BIT-EXACT** for r, g, g2, g3, g4 (no first differing tick).
+**Strict check on the CPU GS backend** (`--backend cpu`, same hash runners; E57's gate as
+it was, whole-file SHA included), `check-cpu.txt`:
+
+| Pair | Suite | det-hash t1–2400 | GS capture (1,906,204 records, 2,510,683,433 B) | Result |
+| --- | --- | --- | --- | --- |
+| h-base-cpu vs h-base-cpu-2 (**null control**) | — | equal | whole-file SHA equal `f2233e7e…` | BIT-EXACT |
+| h-base-cpu vs **h-g4-cpu** | 616/616/0 | equal | whole-file SHA equal `f2233e7e…` | **BIT-EXACT** |
+
+So the racy interleave is a paraLLEl-backend property (host timing), not a VU1 one. On the
+CPU backend the full GS stream, cross-path order included, is identical with generated VU1
+code.
+
+Receipts: `check-gate.txt` (paraLLEl pairs), `check-null.txt`, `check-r.txt`, `check-cpu.txt`.
+Result: **BIT-EXACT** for r, g, g2, g3, g4 on the paraLLEl gate (no first differing tick),
+and strict BIT-EXACT for g4 on the CPU backend.
 
 ## Speed
 
@@ -124,7 +137,28 @@ holds. g2 wasn't measured alone. Within a pair, runs of the same binary differ b
 
 ## VU1 profile share (diagnostic)
 
-PROFILE_TABLE_TBD
+`sample` 20 s from t1800 on the speed runners (`vr1_boot.py --mode profile`, one slot, not a
+speed number). `profile_share.py`: process-wide top of stack, busy = non-wait rows.
+Receipts `profile-{base,g2,g4}.txt`. Shares are within-process; absolute counts aren't
+comparable.
+
+| | base `0ed07c4` | g2 | g4 |
+| --- | ---: | ---: | ---: |
+| Busy samples (20 s) | 10,423 | 8,085 | 6,140 |
+| **VU1 total** (interpreter + generated) | **82.5 %** | **70.7 %** | **62.5 %** |
+| generated pair functions (`VU1RecompImage<…>::f*`) | — | 9.0 % | 26.4 % (FMAC path inlined) |
+| commitReadyPipelines | 16.5 % | 25.8 % | 28.0 % |
+| run | 17.5 % | 6.3 % | 3.2 % |
+| normalizeFmacResult / product sticky / flags | 9.8 / 3.6 / 2.3 % | 16.5 / 6.1 / 3.8 % | inlined |
+| calculatePairReadyCycle / markPairWrites | 9.4 / 4.2 % | inlined | inlined |
+| execUpper / execLower | 8.8 / 4.6 % | 0.9 / 0.4 % (VU0) | 2.3 / 0.5 % (VU0) |
+| getDecodedInstructionPairForPc + decode | 4.1 % | 0.4 % (VU0) | 0.3 % (VU0) |
+| progressXgkick | 0.8 % | 1.5 % | 1.7 % |
+| `__bzero` (per-execute clear, NP1 Part 2's target) | 2.2 % | — | 4.3 % |
+
+On the paraLLEl Mac build the GS work is off the game thread, so VU1 dominates (82.5 %; E57's
+CPU-GS profile showed 33 %). Stage A removed decode, usage lookups, dispatch and the FMAC
+re-decode. The scoreboard commit is now the largest single item.
 
 ## What stage B would add
 
@@ -151,11 +185,9 @@ days, as E57 said.
 - Mac only. The Odin pair (fork `1f51e48`+`6c2de6f`, `-Pps2xVu1RecompDir=<gen-v2 copy>`) hasn't
   been built or run. Android uses the same `-ffp-contract=off`; `musttail` is clang-only
   (the NDK is clang; MSVC would fall back to an ordinary call).
-- GS cross-path ordering can't discriminate on this build, because the null control races.
-  Ordering between VU1 PATH1 output and PATH2/3 depends on VU1 cycle timing. The equal VU1
-  cycle totals, equal det-hash (VU1 data, code and execute count on every tick) and equal
-  per-path content bound the risk, but don't close it. A CPU-backend capture might have a
-  deterministic interleave (E57's gate was CPU GS); I didn't run a CPU null pair.
+- On the paraLLEl build the GS capture's record ticks and cross-path interleave race (null
+  control), so that gate compares per-path content only. The strict whole-stream check was
+  run on the CPU backend for g4 only (it passed). g, g2 and g3 have only the paraLLEl gate.
 - Coverage is measured on one route (I26-FAST to t2400: boot, menus, one race). Other
   courses or modes may upload other microcode images. Those run in the interpreter
   (correct, slower) until a dump boot on that route adds them. The image set is keyed by

@@ -18,6 +18,7 @@ released on every path.
 Usage: vr1_boot.py --mode hash|speed|profile --runner PATH --label NAME [--stop-tick N]
 """
 import argparse
+import signal
 import hashlib
 import json
 import os
@@ -64,6 +65,8 @@ def sha_of(path):
 
 
 def main():
+    # SIGTERM -> SystemExit so the finally below kills the runner and releases the lease.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     ap = argparse.ArgumentParser()
     ap.add_argument('--mode', choices=('hash', 'speed', 'profile'), required=True)
     ap.add_argument('--runner', required=True)
