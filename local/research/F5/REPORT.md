@@ -267,6 +267,81 @@ python3 f5_boot.py --mode speed --backend parallel --runner bin/runner-clean --l
 python3 ../GB8/gb8_hashdiff.py --base run/B1 --cand run/B<N>  # IDENTICAL x4
 ```
 
+## Part 2 — Odin ABBA (1× pipelined vs 4×+hi-res pipelined) + play build
+
+Worker: muse. Fork `ssx3` = `a3efbfe` (pushed 09-25, verified); the Part 1 APK `4ff81032…`
+was built from `git archive a3efbfe`, so it was reused with no rebuild. Transport: the
+Wi-Fi serial in `local/odin-serial` (`adb-622c49b1-IJnTHA._adb-tls-connect._tcp`) for
+every run; per-run `transport-start/end.txt`, **0 disconnects on all four runs**.
+Tooling committed here: `launch.py` (F4's + `--variant A|B`, transport record, BACK only
+when the app isn't focused — all four runs needed no BACK), `cooldown.py` (F4-2b method:
+thermal 0 pre-wait, 180 s wait, thermal 0 at launch; lease NOT held during the wait),
+`play-knobs.env`. Rate analysis reuses F4's `phases.py` (no copy). Route I26-FAST,
+`--stop-tick 4500`, `PS2X_UNPACED=1`, empty mc0-test (removed after), A = 1× +
+`PRESENT_PIPELINE=1`, B = A + `SSAA=4` + `HIRES_SCANOUT=1`.
+
+### Runs (ABBA; every PRE: lease free, keyguard false, 100 % on AC, app stopped, Brad env, mc0 pins)
+
+| Run | Var | End | Race (ticks→wall) | Race rate | GPU busy race mean (n) | Thermal status | SF/s | FATAL |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| R1 | A | STOP 4516, 237 s | 1714→4516 / 191.0 s | 14.67/s = **0.245×** | 31.8 % (32) | 0→3→2 | 59.9–60.1 | 0 |
+| R2 | B | STOP 4546, 328 s | 1714→4546 / 277.5 s | 10.21/s = **0.170×** | 47.2 % (46) | 0→2→3→2→1→0 | 53.0–59.6 | 0 |
+| R3 | B | STOP 4504, 333 s | 1714→4504 / 280.9 s | 9.93/s = **0.166×** | 51.4 % (47) | 0→2→3→2→1→0 | 54.1–59.0 | 0 |
+| R4 | A | STOP 4573, 240 s | 1714→4573 / 195.8 s | 14.60/s = **0.244×** | 37.2 % (33) | 0→1→3 | 59.6–60.4 | 0 |
+
+Cool-downs (all green, status 0 at launch): R1 33.7 °C (immediate 0 + 180 s); R2 41.8→36.8 °C;
+R3 36.4→35.2 °C; R4 36.4→35.2 °C (`logs/R*/cooldown.txt`). Every run: env restored
+(`9fb46f85…` match=True), mc0-after clean, force-stopped, lease released.
+
+A legs: 14.67 / 14.60 (agree 0.5 %), mean **14.635/s = 0.2441×**. B legs: 10.21 / 9.93
+(agree 2.8 %), mean **10.07/s = 0.1680×**. **B/A = 0.688 — 4×+hi-res costs 31 %**,
+far over the 5 % budget. A-leg per-5s ramps 9–10 → 15.2 steady (warmup, both legs);
+B-leg per-5s is flat ~10 (GPU/driver-bound, no ramp). F5 A vs F4's Odin pair (0.1665×,
+1× sync present): **1.466×** (stage B + pipelined present combined; no ABBA to separate).
+GPU: A ≈ 32–37 %, B ≈ 47–51 % — 4× adds ~15 points but neither saturates; the B cost is
+presumably Turnip-driver CPU (N11's mechanism), not fill. One R2 cap viewed
+(`odin/R2/sc01-tick2100-t93.png`, race 2ND/2 00:00:07 1 %): 4× renders clean on-device —
+full brightness, no corruption (rider mid-RECOVER after a jump crash; gameplay
+divergence under identical inputs, same class as F4's differing EA cards).
+
+### Decision + play build: **1× pipelined**
+
+`deploy-odin.sh` gained an optional 3rd arg `ENV_APPEND` (extra env lines; empty =
+byte-identical legacy behavior, verified live: SKIP + OKs on the untouched device).
+Play build: `adb install -r` F5 APK (`Success`, `base.apk` SHA `4ff81032…` matches) +
+`deploy-odin.sh $S $SAVE play-knobs.env` → env **`a8d651a7…`** (Brad's 5 keys +
+`PS2X_PGS_PRESENT_PIPELINE=1`, content-verified) + **6/6 saves OK. No launch.**
+End state: app force-stopped (pid none), `/data/local/tmp/f5` + `mc0-test` removed,
+lease `LEASE_FREE F5 done`, 100 % on AC.
+
+**Flag for next lanes:** Brad's device env is NO LONGER `9fb46f85…` — it is now
+`a8d651a7e55f7e29f1345f28f4ea634e06ae757f535e29439ab61c930bcc0ebd`
+(+ the pipeline knob). Launcher `BRAD_ENV_SHA` pins must be updated before the next
+Odin run, or preconditions will (correctly) refuse.
+
+### Gaps (Part 2)
+
+- P2-G1. One 53–54/s SF poll in each B leg (n=25/24, rest 59–60). Display-side only;
+  guest ticks unaffected. Not chased.
+- P2-G2. A-leg GPU spread (31.8 vs 37.2 %) is wider than the rate agreement (0.5 %).
+  Per-sample kgsl ratios are noisy; means only.
+- P2-G3. No 4× Mac↔Odin cost split (driver CPU vs fill) — needs the Turnip-side profile
+  HR1 scoped for Android zero-copy, not this brief.
+- P2-G4. Only one Odin cap viewed (B-leg rendering proof). A-leg rendering was proven
+  on the Mac (B1) and F4's 8 Odin caps; no new A-path code exists.
+
+Exact commands (Part 2 delta):
+
+```sh
+git -C ~/dev/PS2Recomp rev-parse fork/ssx3  # a3efbfe = APK source; reuse, no rebuild
+adb -s $S install -r ~/dev/ssx3-work/F5/odin/app-release.apk  # Success; base.apk 4ff81032
+python3 launch.py --label R1 --variant A --wall 600 --stop-tick 4500  # + cooldown.py --label R1 first
+python3 launch.py --label R2 --variant B ...  # ABBA: R1A R2B R3B R4A, cooldown.py before each
+python3 ../F4/phases.py logs/R<N>  # race rows above; gpubusy/thermal from the run logs
+adb -s $S install -r odin/app-release.apk; bash ../I31/deploy-odin.sh $S $SAVE play-knobs.env  # no launch
+adb shell 'rm -rf /data/local/tmp/f5 .../mc0-test; am force-stop com.ps2x.runner'
+```
+
 ## Orchestrator gate, Part 1 (2026-09-25)
 
 **Pass; pushed.** Fork `ssx3` fast-forwarded `74e2df2..a3efbfe` after my own checks: worktree clean,

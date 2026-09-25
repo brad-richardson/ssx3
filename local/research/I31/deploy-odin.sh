@@ -5,10 +5,14 @@
 # Automated test launchers must NOT use Brad's card: set PS2X_MC_ROOT to an
 # empty files/mc0-test/ in their own env, and restore Brad's env after
 # (I26-FAST derails on a seeded card). Usage:
-#   bash deploy-odin.sh [SERIAL] [SAVE_SRC]
+#   bash deploy-odin.sh [SERIAL] [SAVE_SRC] [ENV_APPEND]
+# ENV_APPEND (F5, optional): file of extra ps2x.env lines appended after
+# Brad's base keys (e.g. the play-build quality knobs). Empty/missing =
+# byte-identical legacy behavior.
 set -euo pipefail
 SERIAL="${1:-$(cat ~/dev/ssx3/local/odin-serial)}"
 SAVE_SRC="${2:-$HOME/dev/ssx3-work/E55D16/mc0}"
+ENV_APPEND="${3:-}"
 PKG=com.ps2x.runner
 FILES=/storage/emulated/0/Android/data/$PKG/files
 GAM=BASLUS-20772-GAM0001
@@ -34,6 +38,9 @@ PS2X_CD_IMAGE=/storage/emulated/0/Android/data/com.ps2x.runner/files/SSX3.iso
 PS2X_SKIP_MOVIE=1
 PS2X_SOUND=1
 EOF
+if [ -n "$ENV_APPEND" ]; then
+  cat "$ENV_APPEND" >> "$ENV_TMP"
+fi
 
 want_env="$(shasum -a 256 "$ENV_TMP" | cut -d' ' -f1)"
 have_env="$(adb -s "$SERIAL" shell "sha256sum $FILES/ps2x.env" 2>/dev/null | cut -d' ' -f1 || true)"
