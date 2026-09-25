@@ -110,8 +110,13 @@ def main():
         tick_re = RATE_TICK
 
     exclusive = args.mode == 'speed'
-    slot = claim('VR1-' + args.label, exclusive=exclusive)
-    while slot is None:
+    held = os.environ.get('VR1_HELD_SLOTS')
+    if held:
+        slot = None  # all four slots pre-held by speed_hold.py; it releases them
+        print(json.dumps({'event': 'using-held-slots', 'holder': held}), flush=True)
+    else:
+        slot = claim('VR1-' + args.label, exclusive=exclusive)
+    while slot is None and not held:
         print('lease busy; retrying in 30 s', flush=True)
         time.sleep(30)
         slot = claim('VR1-' + args.label, exclusive=exclusive)
@@ -184,7 +189,8 @@ def main():
         if proc is not None and proc.poll() is None:
             proc.kill()
             proc.wait()
-        release(slot)
+        if not held:
+            release(slot)
 
 
 if __name__ == '__main__':

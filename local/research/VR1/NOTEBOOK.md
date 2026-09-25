@@ -66,3 +66,55 @@ Design (stage A):
   clear per pair gone; microAddressMask inline). Runner guard empty on both.
 - Host: load 60–96 (SJ1, FP1, NP1 boots, I33 simulator); all four mini slots held by
   others. Speed session 1 (`base g g base`) queued, waiting for the exclusive lease.
+
+## 10:28 profiles (diagnostic, `sample` 20 s from t1800, speed runners, one slot, load ~15)
+`profile_share.py` (process-wide top of stack; busy = non-wait rows):
+
+| | p-base (0ed07c4) | p-g2 |
+| --- | ---: | ---: |
+| busy samples | 10,423 | 8,085 |
+| VU1 total (interpreter + generated) | **82.5 %** | **70.7 %** |
+| VU1RecompImage::f* (generated pair bodies) | — | 9.0 % |
+| run | 17.5 % | 6.3 % |
+| commitReadyPipelines | 16.5 % | 25.8 % |
+| normalizeFmacResult | 9.8 % | 16.5 % |
+| calculatePairReadyCycle | 9.4 % | (inlined) |
+| execUpper / execLower | 8.8 / 4.6 % | 0.9 / 0.4 % (VU0) |
+| markPairWrites | 4.2 % | (inlined) |
+| calculateFmacProductSticky | 3.6 % | 6.1 % |
+| getDecodedInstructionPairForPc + decode | 4.1 % | 0.4 % (VU0) |
+| updateFmacFlags | 2.3 % | 3.8 % |
+
+On the paraLLEl Mac build the GS work is off the game thread, so VU1 is 82.5 % of busy
+samples (E57's CPU-GS profile had 33 %). Decode, usage lookups and dispatch are gone; what's
+left is the scoreboard commit and the FMAC exact-result path. The FMAC helpers re-decode
+`m_currentUpperInstruction` and loop over dest lanes at run time → g3.
+
+## 10:30 g3 = FMAC result helpers always-inline (fork `1b09a49`)
+broadcast/applyDest/normalizeFmacResult/calculateFmacExactResults/normalizeFmacExactResult/
+calculateFmacProductSticky/updateFmacFlags/applyFmacDest(Acc) moved verbatim into
+`ps2_vu1_fmac_impl.h` (always-inline). Asm: the applyFmac* calls are gone from the pair
+functions and the median pair function shrank 333 → 305 lines (op decode + lane loops fold
+on the constant word the store-to-load forwards from `m_currentUpperInstruction`).
+Gate: suite 616/616, det-hash 2400/2400, GS per-path content equal, 100 % coverage.
+
+## 10:32 speed: exclusive claims starve
+Session 1 (`base g g base` with polling exclusive claims) never got the lease in ~15 min:
+NP1, SJ1, FP1, I33 keep cycling single slots. Replaced by `speed_hold.py`: claims each slot
+as it frees (5 s poll) until it holds all four, runs two ~90 s speed boots back to back
+(one hold ≤ 5 min), releases. Hold A = base, g3; hold B = g3, base (ABBA across holds).
+
+## 10:45 g4 = chained pairs (generated code hands off without returning to run())
+- Emitter: every pair function ends `return next(vu, c)`; `next` runs
+  `recompChainReady` (the run() loop header in the same order: budget/stop, commit, pc
+  bound, alignment) and `[[clang::musttail]]`-calls `kPairs[pc>>3]` (null → back to run()).
+  The repeated commit when run() resumes is a no-op at the same cycle.
+- Needs regenerated sources: dump boot `h-g4a-dump` with `PS2X_VU1_RECOMP=0` →
+  `gen-v2/` (same 7 hashes; interpreted total again 959,411,166 cycles).
+- Mistake on the way: `cmake -B` without `-S` failed silently in my loop, so the first g4
+  build still used gen-v1; redone with `-S PS2Recomp` (configure log shows gen-v2).
+- Another mistake: killing `speed_hold.py` with SIGTERM skipped its `finally`, leaving my
+  own lease files (pid dead); I removed only files naming my dead pid. The holder now turns
+  SIGTERM into exit so `finally` releases. It also waits while `VR1/BUILDING` exists so my
+  own builds never overlap my speed boots.
+- Suite g4 616/616.
