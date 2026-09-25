@@ -173,3 +173,12 @@ variant each.
   GL context); (2) `-dump tex` gate never fired — no VRAM-level
   confirmation of what PCSX2 uploaded; (3) exact per-draw blocker
   (Z/SCISSOR/FOG/BLEND) not yet isolated — PX2.
+
+## Orchestrator gate (2026-09-25)
+
+**Accepted (partial).** PCSX2 replays our stream correctly through all menus and the loading/Rival card;
+from the first race frame it draws the HUD only, and the race-world tristrips don't rasterize in PCSX2-GL
+even with texturing forced off, while paraLLEl draws them. Eliminated: missing record kinds, field/SMODE
+mapping, privileged regs, bad vertices, TEXFLUSH. So PCSX2 isn't yet a race-world pixel reference. PX2
+(queued, muse): per-draw state probe (ZTEST/SCISSOR/FOG/ABE/XYOFFSET) on one world tristrip vs PCSX2-SW;
+lower priority than device work.

@@ -187,6 +187,10 @@ then 120 Hz simulation.
 
 ## Cross-lane
 
+- [ ] **PX2 (queued):** why PCSX2-GL won't rasterize the race-world tristrips from our stream (menus and HUD
+      replay fine): per-draw state probe vs PCSX2-SW (`local/research/PX1/REPORT.md` §3). Until then, race
+      pixels are judged against PCSX2's own runs, not replays.
+
 - [ ] **F5 fold (queued, onto `8559ab9`):** VB1 d4 (`1f51e48..9638b3d`, Mac 1.15× over stage A), HR1 knobs +
       pipelined present (`4825123`; iPad: 4×+hi-res pipelined beats today's 1×) + Mac zero-copy (`fb3dca0`,
       default off), LX1 TZ/x86 (`lx1-tz`), PF1 `3c037ab` (post-race unwind fix); codegen promotion of the F4 regen
