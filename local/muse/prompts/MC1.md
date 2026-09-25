@@ -13,3 +13,8 @@ Work only on a **scratch copy** of `~/dev/ssx3-work/E55D16/mc0/` (copy to `~/dev
 4. **Failure modes:** what does our MC HLE do if the host write fails (read-only dir): does the game see an error the way it would with a pulled card, or does it hang?
 Hand back tables and any bug with file:line; one fix only if a single mechanism is named, with a unit test.
 Budget: 1–2 builds, ≤ 4 boots, 2.5 h. Never push; runner-dir check empty; text only in git. Deliverable `local/research/MC1/REPORT.md`; commit `[MC1] …` (`git add -f`, `Orchestrated-By: Muse Code`), no push.
+
+## Part 3 (released after the Part 2 gate; same pane, build, scratch-only rules; 2 boots, 1 h)
+1. **R1 reload:** boot with `--mcsrc ~/dev/ssx3-work/MC1/run/P4-saveyes/mc0` copied fresh to the run dir (never boot the preserved copy in place). Shortest route that shows the loaded data: the autoload at boot, then Records → the Top 5 table. Pass = no corruption/format prompt, zero error results, options + Top 5 identical to the seed's (BOB 02:57 … RYAN 03:27); screenshot each screen and view it. Cap 600 s unless the Records screen needs the long route (≤ 1,800 s approved).
+2. **R2 write-failure:** `r1saveyes` with `--mcmode readonly` (fresh seed copy, `chmod -R a-w`). Record what the game shows after Yes (error dialog / retry / hang), the HLE results (Delete/Mkdir/Open errors), and the card state after (diff vs seed; restore perms after). No fix unless one mechanism is named (e.g. an HLE call returns a code the game doesn't expect vs real hardware), then stop and hand back first.
+3. Table both boots; append `## Part 3` to the report; commit `[MC1] Part 3 …`, no push.
