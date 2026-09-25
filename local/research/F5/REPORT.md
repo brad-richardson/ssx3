@@ -377,3 +377,12 @@ bash local/research/I31/deploy-ios.sh ipad           # save byte-identical after
 bash ~/dev/ssx3-work/F5i/ios/build-install.sh install_iphone
 bash local/research/I31/deploy-ios.sh iphone         # never launched
 ```
+
+## Orchestrator gate, Part 3 (2026-09-25)
+
+**Pass.** iPad `shot-t2100` viewed: race HUD, carve groove + spray, full brightness, crash/recover
+state (RNG shifted by RP1, as noted). Zero-copy confirmed by `copy_ms_avg=0 l2h_bytes=0` and the
+`ios bind … rc=0` lines. Committed `ps2x.env` holds only bundle-relative paths and knobs (no save
+bytes). iPhone installed, never launched; Brad launches it. Known I28: in the iPad's portrait-compat
+window the D-pad's up arrow sits under the stick's translucent ring and SELECT/START overlap; the
+iPhone landscape layout isn't affected.
