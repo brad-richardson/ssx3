@@ -103,3 +103,12 @@ rows); stream `~/dev/ssx3-work/N8D7M6/n8d7m6.gs` untouched.
   strip the `#ifdef PS2X_GS_REPLAY_WORD_WATCH` blocks (+ the CMake guard)
   from the replay core, or port the ~50-line M5 counter as a default-off
   test-only diagnostic; then re-run the one build + suite + replay.
+
+## Orchestrator gate, Part 1 stop (2026-09-24)
+
+Correct stop. The five picks and the GPU path logger are fine; the one failing TU needs N8D7M5 probe
+symbols only inside `#ifdef PS2X_GS_REPLAY_WORD_WATCH`. Decision: drop the word-watch feature from
+the folded replay core (it served the N8D7M5 provenance probe, archived on `archive/n8d7l-oracle`)
+rather than pull in probe code. Released as Part 1b: one commit removing the CMake define and the
+`#ifdef PS2X_GS_REPLAY_WORD_WATCH` blocks (plus any test that exercises word-watch), then the brief's
+step 3 unchanged (build, suite, Mac replay vs the Mac ON control, `[gs-path]` line captured).
