@@ -30,8 +30,10 @@ No push, no Odin, no devices.
   dest but read `fs.xyz` (0 non-xyz uses in SSX 3's images; stage A has the same gap).
 - **Recommendation:** d4 (`1f51e48..9638b3d`, plus the hash-only counters `9b71115` if wanted)
   is ready to fold, followed by an Odin speed pair. The orchestrator decides.
-- **Paused by Brad at 13:58** (VB1 box started 12:12). Everything below was finished before
-  the pause; no run was cut short.
+- **Paused by Brad at 13:58, resumed 15:15, closed ~15:55 (≈ 2h25m active of the 3 h box).**
+  After the resume: a d4 profile and an instruction-level `xctrace` profile (below); no new
+  candidate (the mini was fully leased by other lanes; a build + gates + an exclusive ABBA
+  didn't fit the remaining time).
 
 ## Design
 
@@ -154,10 +156,32 @@ The budget guard never rejected a pair on the route (no program comes within 4 c
 | progressXgkick | 1.7 % | 2.3 % |
 
 Hot spot now: image `f587…` pairs 0x2a10–0x2a50 (LQI/SQI/DIV with FMACs, a per-vertex loop),
-~20 % of pair-function samples.
+~20 % of pair-function samples. d4 (`profile-d4.txt`, after the resume): VU1 54.5 %, pair
+functions 38.5 %, commitReadyPipelines 5.3 %, run 4.3 %, execUpper (VU0) 3.0 %.
+
+**Inside the pair functions (d4, `xctrace` Time Profiler, 10 s from ~t1800, 1 ms samples,
+GameThread; `xtrace-d4-classes.txt`, `xtrace_pcs.py`).** 9,175 GameThread samples, 56.0 % in pair
+functions. By instruction at the sampled PC: loads 48.3 %, integer ALU 19.3 %, **FP double
+12.0 %**, stores 10.5 %, branches 6.2 %, FP single 3.5 %. So the FMAC exact-result arithmetic
+is roughly an eighth of the pair time; the rest is per-pair control and state traffic. The
+hottest loads, mapped to member offsets (offsetof on this build's layout): `m_flagValidMask`
+274 samples (VB1's flag guard), `m_traceArmed` 186 and `m_entryArmed` 108 (dev-only E36/E37
+checks, constant for a run), `RunContext` budgetEnd 157 / codeSize 123 / programEnded 92
+(the per-pair `next()` checks), `m_nextCommitCycle` 118, `m_directPendingUntil` 160. Samples on
+Apple cores skid, so read these as "where the dependency chains are", not exact costs. Also on
+GameThread: `__bzero` 4.9 % (the 64 KB `XgkickPipeline` zeroed by `m_xgkick = {}` in
+`resetScheduler()` and `startXgkick()`: NP1 Part 2's target, not touched here) and
+`__psynch_cvsignal` 4.1 % (GS worker hand-off).
 
 ## What's left
 
+- **Next levers, measured above, cheapest first:** (1) generated pairs skip the dev-only
+  `m_traceArmed`/`m_entryArmed` checks (`run()` sends an armed run to the interpreter instead);
+  (2) hoist the per-pair `next()` checks (budget, pc bound, stop) to block granularity where a
+  block's worst-case cycles fit the budget; (3) keep `m_flagValidMask`/`m_directPendingUntil`
+  updates off the common path (e.g. the pending-until max only matters at a flush);
+  (4) NP1's `m_xgkick` zeroing (4.9 %). These are the per-pair overheads a block-level stage B
+  would remove anyway; (2) is most of what "static schedules per block" buys now.
 - **Stage B as sketched (static stall schedules per block with an entry-scoreboard guard) was
   not built.** With the commit round trip gone, what the pair functions still do per pair is:
   the stall max over `m_vfReady` lanes (~8–12 loads), `markPairWrites` (~4–8 stores), the

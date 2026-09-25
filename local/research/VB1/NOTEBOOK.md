@@ -111,3 +111,17 @@ paraLLEl base capture (2.5 GB); scratch ~13 GB. REPORT.md is complete for d1–d
 steps (not started): profile d4; skip the old/new copy on full-mask direct writes; find which
 flag writes stay queued per pc; stage-B stall tables only if a line-level profile shows the stall
 max/markPairWrites are worth it.
+
+## 15:15 RESUMED (1h46m used before the pause; box ends ~16:29 active)
+15:17 `p-d4` (diagnostic `sample`, `profile-d4.txt`): VU1 54.5 % of busy samples; pair functions
+38.5 %, commitReadyPipelines 5.3 %, run 4.3 %, execUpper (VU0) 3.0 %, progressXgkick 2.4 %.
+15:20–15:31 lost: an `xctrace` attempt used `--mode speed`, which waits for the exclusive lease
+(other lanes held slots). Killed; retried as a single-slot profile-mode boot.
+15:32 all four slots held by LX1/PF1/HR1. No new candidate this session (build + gates + an
+exclusive ABBA won't fit ~55 min on a contended mini); instruction-level profile instead.
+15:34 xctrace Time Profiler on `x-d4` (profile-mode boot, own sampler off, 10 s from ~t1800):
+pair functions 56 % of GameThread; by sampled instruction loads 48 %, int 19 %, FP double 12 %,
+stores 10.5 %. Hot loads = `m_flagValidMask`, `m_traceArmed`, `m_entryArmed`, RunContext
+budgetEnd/codeSize/programEnded, `m_nextCommitCycle`, `m_directPendingUntil` (offsets from an
+offsetof build of the header). `__bzero` 4.9 % = `m_xgkick = {}` (64 KB) per execute/XGKICK.
+15:55 closed (≈ 2h25m active). Next levers listed in REPORT "What's left". No leases held.

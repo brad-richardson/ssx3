@@ -1,0 +1,22 @@
+at sampled pc samples 5141 unmapped 0
+   2482  48.3%  load
+    994  19.3%  int alu/other
+    615  12.0%  fp double
+    541  10.5%  store
+    320   6.2%  branch/call
+    182   3.5%  fp single/compare/move
+      7   0.1%  fp convert
+previous instruction (skid) samples 5141 unmapped 0
+   1970  38.3%  int alu/other
+   1352  26.3%  branch/call
+    846  16.5%  store
+    584  11.4%  load
+    254   4.9%  fp double
+    105   2.0%  fp single/compare/move
+     30   0.6%  fp convert
+top previous mnemonics: str 588, orr 503, b 428, ldr 381, add 369, cbnz 254, cmp 206, cbz 201, mov 184, fmul 169, and 169, strb 164, movk 153, ret 143, ldp 141, lsr 120, fadd 83, fmov 80, b.eq 79, bl 78
+loads at the sampled pc, by addressing (diagnostic): 2482
+   2328  93.8%  other-addressing
+     89   3.6%  high offset / other base (scoreboard arrays, ctx, code tables)
+     41   1.7%  low offset from base reg (m_state regs/flags if base=this)
+     24   1.0%  stack (spills/locals)
