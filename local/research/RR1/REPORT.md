@@ -1,6 +1,6 @@
 # RR1 report: race rendering gaps (missing sky, dark lower region, flat textures)
 
-Exploratory session (Claude Code, Opus 5.5, Brad-approved), 2026-09-24 21:54–23:45 EDT.
+Exploratory session (Claude Code, Opus 5.5, Brad-approved), 2026-09-24 21:54–23:19 EDT (1 h 25 min of the 3 h box).
 Notebook: `NOTEBOOK.md` (append-only). The orchestrator decides; labels below say what is
 measured and what is hypothesis.
 
