@@ -491,3 +491,17 @@ Odin launches 2 of 10 (T1, T2). The fork's `ssx3` is not pushed; `fs2-turnip` is
   4. Fast-forward push `fs2-turnip` → fork `ssx3` only if those pass.
 - **Not done on purpose:** re-signing an APK on the Mac. A different signing key would force an
   uninstall on the Odin, and that deletes the app's external files dir (Brad's saves).
+
+## Orchestrator gate, Part 3 (2026-09-26)
+
+**Pass.** Final-mode ABBA R1/R2/R3b/R4 (R3 void and re-run for a stated cause, receipts kept): play
+`825b436d` 25.57/25.35 vs patched Turnip `202c6974` 38.36/38.29 → **0.425× → 0.639× (+50.5 %)**, A–A 0.9 %,
+B–B 0.2 %; every leg STOP ≥ 4500, `jobs=55501 violations=0`, 0 FATAL, no device lost, ≥ 22 vsync-rate lines.
+Pixels `diff_px=0` at t1100 and t3000 (P1 also after a bg/fg + rotation cycle). Mechanism confirmed by the
+observables predicted in Stage 2: `flush_submit` 23.5 → 4.7 ms/frame, MTVU blocked 14.2 → 1.7; the MTVU unit
+is now the busy thread (93–94 %). Stock-rebuild gate (T2 = upstream `c501e1d16e` + u_gralloc) matched the
+shipped v36 driver in pixels and speed, so the gain is the poll patch, not a driver swap.
+Mesa fork `brad-richardson/mesa` `ssx3` = `5a406e36dd4` verified by ls-remote. Driver
+`libvulkan_freedreno.so` `a315b74a…` is adopted for the next Odin play build (F8: fork `ssx3` `b97b241`
++ paraLLEl `3d72467` + this driver). The FS2 Granite fix and diagnostics are **not** folded (null for speed).
+Gaps accepted: v36's extra gen8 patches absent (no effect on our path per T2); one lifecycle cycle.
