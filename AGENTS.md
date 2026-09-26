@@ -159,6 +159,10 @@ Close the pane after its gate read.
   its own rule: one heavy job at a time, **held with `local/tooling/bytesize_lock.sh`**
   (`run <LABEL> -- …` or claim/release; Mesa builds `ninja -j8` at most) — two concurrent builds
   wedged WSL on 09-26.
+- **Odin run modes (Brad 09-26):** cool down with `local/tooling/odin_cooldown.py --out <run dir> --mode screen|final`.
+  **screen** (default, A/B screening): launch at once when thermal status 0 and the prime zone < 42 °C, and
+  end speed runs at `--stop-tick 3000`. **final** (ledger numbers, play-build decisions): status ≤ 1 +
+  fixed 180 s, stop tick 4500, ABBA. Say which mode each number came from.
 - **Boots:** every boot script has progress caps. No boot over 600 s
   without orchestrator OK.
 - **Pad route:** race boots use **I26-FAST** (`local/research/I26/ROUTES.md`,
