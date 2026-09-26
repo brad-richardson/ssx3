@@ -1,0 +1,1064 @@
+--------- beginning of main
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_GS_BACKEND
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_GS_TURNIP
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_CD_IMAGE
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_SKIP_MOVIE
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_SOUND
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_MC_ROOT
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_PAD_SCRIPT
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_PAD_SCRIPT_CLOCK
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_VSYNC_RATE_LOG
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_UNPACED
+         1790401350.650 29887 29887 I ps2x    : ps2x.env: set PS2X_PGS_PRESENT_PIPELINE
+         1790401350.651 29887 29908 I ps2x    : Using default boot file
+         1790401350.661 29887 29908 I ps2x    : [gs:queue] enabled (forced by PS2X_GS_BACKEND=parallel)
+         1790401350.662 29887 29908 I ps2x    : [gs:parallel] live backend selected (PS2X_GS_BACKEND=parallel)
+         1790401350.662 29887 29907 I raylib  : Initializing raylib 5.5
+         1790401350.662 29887 29907 I raylib  : Platform backend: ANDROID
+         1790401350.662 29887 29907 I raylib  : Supported raylib modules:
+         1790401350.662 29887 29907 I raylib  :     > rcore:..... loaded (mandatory)
+         1790401350.662 29887 29907 I raylib  :     > rlgl:...... loaded (mandatory)
+         1790401350.662 29887 29907 I raylib  :     > rshapes:... loaded (optional)
+         1790401350.662 29887 29907 I raylib  :     > rtextures:. loaded (optional)
+         1790401350.662 29887 29907 I raylib  :     > rtext:..... loaded (optional)
+         1790401350.662 29887 29907 I raylib  :     > rmodels:... loaded (optional)
+         1790401350.662 29887 29907 I raylib  :     > raudio:.... loaded (optional)
+         1790401350.662 29887 29907 I raylib  : ANDROID: Window orientation set as landscape
+         1790401350.662 29887 29907 W raylib  : ANDROID: Window orientation changed to landscape
+         1790401350.662 29887 29907 I raylib  : PLATFORM: ANDROID: Initialized successfully
+         1790401350.688 29887 29907 I raylib  : DISPLAY: Upscaling required: Screen size (640x448) smaller than display size (1920x1080)
+         1790401350.689 29887 29907 I raylib  : DISPLAY: Device initialized successfully
+         1790401350.689 29887 29907 I raylib  :     > Display size: 1920 x 1080
+         1790401350.689 29887 29907 I raylib  :     > Screen size:  640 x 448
+         1790401350.689 29887 29907 I raylib  :     > Render size:  640 x 448
+         1790401350.689 29887 29907 I raylib  :     > Viewport offsets: 156, 0
+         1790401350.689 29887 29907 I raylib  : GL: Supported extensions count: 125
+         1790401350.689 29887 29907 I raylib  : GL: OpenGL device information:
+         1790401350.689 29887 29907 I raylib  :     > Vendor:   Qualcomm
+         1790401350.689 29887 29907 I raylib  :     > Renderer: Adreno (TM) 830
+         1790401350.689 29887 29907 I raylib  :     > Version:  OpenGL ES 3.2 V@0800.58 (GIT@a9ee82cd83, If0819e6d27, 1759945866) (Date:10/08/25)
+         1790401350.689 29887 29907 I raylib  :     > GLSL:     OpenGL ES GLSL ES 3.20
+         1790401350.689 29887 29907 I raylib  : GL: VAO extension detected, VAO functions loaded successfully
+         1790401350.689 29887 29907 I raylib  : GL: NPOT textures extension detected, full NPOT textures supported
+         1790401350.689 29887 29907 I raylib  : GL: DXT compressed textures supported
+         1790401350.689 29887 29907 I raylib  : GL: ETC1 compressed textures supported
+         1790401350.689 29887 29907 I raylib  : GL: ASTC compressed textures supported
+         1790401350.689 29887 29907 I raylib  : TEXTURE: [ID 1] Texture loaded successfully (1x1 | R8G8B8A8 | 1 mipmaps)
+         1790401350.689 29887 29907 I raylib  : TEXTURE: [ID 1] Default texture loaded successfully
+         1790401350.689 29887 29907 I raylib  : SHADER: [ID 1] Vertex shader compiled successfully
+         1790401350.689 29887 29907 I raylib  : SHADER: [ID 2] Fragment shader compiled successfully
+         1790401350.689 29887 29907 I raylib  : SHADER: [ID 3] Program shader loaded successfully
+         1790401350.689 29887 29907 I raylib  : SHADER: [ID 3] Default shader loaded successfully
+         1790401350.689 29887 29907 I raylib  : RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)
+         1790401350.690 29887 29907 I raylib  : RLGL: Render batch vertex buffers loaded successfully in VRAM (GPU)
+         1790401350.690 29887 29907 I raylib  : RLGL: Default OpenGL state initialized successfully
+         1790401350.690 29887 29907 I raylib  : TEXTURE: [ID 2] Texture loaded successfully (128x128 | GRAY_ALPHA | 1 mipmaps)
+         1790401350.690 29887 29907 I raylib  : FONT: Default font loaded successfully (224 glyphs)
+         1790401350.690 29887 29907 I raylib  : TEXTURE: [ID 3] Texture loaded successfully (1x1 | R8G8B8A8 | 1 mipmaps)
+         1790401350.690 29887 29907 I raylib  : TEXTURE: [ID 3] Default texture loaded successfully
+         1790401350.690 29887 29907 I raylib  : SHADER: [ID 4] Vertex shader compiled successfully
+         1790401350.690 29887 29907 I raylib  : SHADER: [ID 5] Fragment shader compiled successfully
+         1790401350.690 29887 29907 I raylib  : SHADER: [ID 6] Program shader loaded successfully
+         1790401350.690 29887 29907 I raylib  : SHADER: [ID 6] Default shader loaded successfully
+         1790401350.691 29887 29907 I raylib  : RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)
+         1790401350.691 29887 29907 I raylib  : RLGL: Render batch vertex buffers loaded successfully in VRAM (GPU)
+         1790401350.691 29887 29907 I raylib  : RLGL: Default OpenGL state initialized successfully
+         1790401350.691 29887 29907 I raylib  : TEXTURE: [ID 4] Texture loaded successfully (128x128 | GRAY_ALPHA | 1 mipmaps)
+         1790401350.691 29887 29907 I raylib  : FONT: Default font loaded successfully (224 glyphs)
+         1790401350.691 29887 29907 I raylib  : SYSTEM: Working Directory: /
+         1790401350.723 29887 29907 I raylib  : AUDIO: Device initialized successfully
+         1790401350.723 29887 29907 I raylib  :     > Backend:       miniaudio | AAudio
+         1790401350.723 29887 29907 I raylib  :     > Format:        32-bit IEEE Floating Point -> 32-bit IEEE Floating Point
+         1790401350.723 29887 29907 I raylib  :     > Channels:      2 -> 2
+         1790401350.723 29887 29907 I raylib  :     > Sample rate:   48000 -> 48000
+         1790401350.723 29887 29907 I raylib  :     > Periods size:  1440
+         1790401350.723 29887 29907 I raylib  : STREAM: Initialized successfully (48000 Hz, 16 bit, Stereo)
+         1790401350.723 29887 29907 I raylib  : TIMER: Target time per frame: 16.667 milliseconds
+         1790401350.723 29887 29908 I ps2x    : [snd-output] stream rate=48000 channels=2 bits=16
+         1790401350.734 29887 29908 I ps2x    : [widescreen] SSX3 mode=2 (PS2X_WIDESCREEN=default)
+         1790401350.734 29887 29908 I ps2x    : [k1] armed name=ssx3-copied-payload elf=SLUS_207.72
+         1790401350.736 29887 29907 I raylib  : TEXTURE: [ID 5] Texture loaded successfully (640x512 | R8G8B8A8 | 1 mipmaps)
+         1790401350.736 29887 29908 I ps2x    : [vpad] off (PS2X_VIRTUAL_PAD)
+         1790401350.737 29887 29908 I ps2x    : [gs:parallel] init: GRANITE_VULKAN_LIBRARY=(unset)
+         1790401350.737 29887 29908 I ps2x    : [gs:parallel] Turnip requested via PS2X_GS_TURNIP=1
+         1790401350.737 29887 29908 I ps2x    : [E53] PS2X_EE_FPMODE=ps2 (EE thread: round-toward-zero + flush-to-zero)
+         1790401350.738 29887 29908 I ps2x    : [k1] install#1 n=0x5a handler=0x42cb78
+         1790401350.738 29887 29908 I ps2x    : [gs:parallel] Turnip HMI mapped base=0x6cf7608000 file=/data/app/~~ZU3pCwZvEUrlG0KxKtUPSQ==/com.ps2x.runner-SSg_UKvt5lfHitXwB2rSgQ==/base.apk!/lib/arm64-v8a/libvulkan_freedreno.so
+         1790401350.738 29887 29908 I ps2x    : [gs:parallel] Turnip HAL open rc=0 device=0xb400006e5cce4e20
+         1790401350.738 29887 29908 I ps2x    : [gs:parallel] Turnip HAL tag=48574454 close=0x6cf8088b90 enum_ext=0x6cf7fc618c create_inst=0x6cf7fc2048 get_proc=0x6cf7fc61b8
+         1790401350.738 29887 29908 I ps2x    : [k1] install#2 n=0x5b handler=0x80075000
+         1790401350.738 29887 29908 I ps2x    : [k1] install#3 n=0x54 handler=0x42d100
+         1790401350.738 29887 29908 I ps2x    : [k1] lookup#1 key=0x55 value=0x80075038
+         1790401350.738 29887 29908 I ps2x    : [k1] install#4 n=0x55 handler=0x80075038
+         1790401350.738 29887 29908 I ps2x    : [k1] lookup#2 key=0x56 value=0x800750c8
+         1790401350.738 29887 29908 I ps2x    : [k1] install#5 n=0x56 handler=0x800750c8
+         1790401350.738 29887 29908 I ps2x    : [k1] lookup#3 key=0x57 value=0x80075108
+         1790401350.738 29887 29908 I ps2x    : [k1] install#6 n=0x57 handler=0x80075108
+         1790401350.738 29887 29908 I ps2x    : [k1] lookup#4 key=0x58 value=0x80075158
+         1790401350.738 29887 29908 I ps2x    : [k1] install#7 n=0x58 handler=0x80075158
+         1790401350.738 29887 29908 I ps2x    : [k1] lookup#5 key=0x59 value=0x800751a8
+         1790401350.738 29887 29908 I ps2x    : [k1] install#8 n=0x59 handler=0x800751a8
+         1790401350.738 29887 29908 I ps2x    : [k1] lookup#6 key=0x3 value=0x80075330
+         1790401350.770 29887 29908 I ps2x    : [gs:parallel] quality ssaa=1 (asked unset, device max 16) ssaa_textures=0 hires_scanout=0 present_pipeline=1
+         1790401350.850 29887 29908 I ps2x    : [gs-path] hier_rule=hier-if-large hier_t2=2 hier_t4=4 subgroup_flat=wave64 subgroup_hier=wave64-fixed vk11_subgroup=128 max_wg_inv=2048 desc=buffer desc_req=push+heap+buffer sampler_feedback=on feedback_rt=off gpu=Adreno (TM) 830
+         1790401350.850 29887 29908 I ps2x    : [gs:parallel] init ok (live backend on the GS worker thread)
+         1790401350.851 29887 29908 I ps2x    : [gs:parallel] null scanout tick=0 CMOD=0 LC=0 INT=0 FFMD=0
+         1790401350.854 29887 29908 I ps2x    : [gs:parallel] null scanout tick=7 CMOD=0 LC=0 INT=0 FFMD=0
+         1790401350.871 29887 29908 I ps2x    : [gs:parallel] null scanout tick=8 CMOD=0 LC=0 INT=0 FFMD=0
+         1790401350.888 29887 29908 I ps2x    : [gs:parallel] null scanout tick=9 CMOD=0 LC=0 INT=0 FFMD=0
+         1790401351.046   529 29938 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401351.387 29887 29908 I ps2x    : [gs:setcrt] via=sceGsResetGraph interlaced=1 mode=0x2 field_frame=0 smode1=0x740814504 smode2=0x1
+         1790401351.409 29887 29908 I ps2x    : [gs:parallel] scanout size 2560x448 tick=39 hires=0
+         1790401351.610 29887 29908 I ps2x    : [gs:parallel] scanout size 640x448 tick=41 hires=0
+         1790401351.614 29887 29907 I raylib  : TEXTURE: [ID 5] Unloaded texture data from VRAM (GPU)
+         1790401351.619 29887 29907 I raylib  : TEXTURE: [ID 5] Texture loaded successfully (2560x512 | R8G8B8A8 | 1 mipmaps)
+         1790401351.620 29887 29908 I ps2x    : [present] frame texture grown to 2560x512
+         1790401351.662 29887 29908 I ps2x    : [gs:parallel] scanout size 512x448 tick=43 hires=0
+         1790401351.783 29887 29908 I ps2x    : [sif-handshake] sregs[1]=1
+         1790401351.934 29887 29908 I ps2x    : [padscript] armed n=31 source=env clock=vsync
+         1790401351.963 29887 29908 I ps2x    : [widescreen] apply source=0x2285a0 guest_mode=0 host_mode=2
+         1790401352.046   529 29943 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401353.047   529 29946 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401354.047   529 29947 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.604 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401354.605 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401355.047   529 29948 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401355.745 29887 29908 I ps2x    : [vsync-rate] tick=244 rate=48.72/s (0.813x of 59.94)
+         1790401355.847 29887 29908 I ps2x    : [MPEG] runtime built without FFmpeg; MPEG video decode is disabled.
+         1790401356.047   529 29949 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401357.048   529 29955 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401357.467 29887 29908 I ps2x    : [gs:parallel] periodic gif=23739 gif_bytes=10479568 regs=0 presents=300 null_scanouts=31 present_ms_avg=4.84578 readback_ms_avg=0.120397 copy_ms_avg=0.169853 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401358.048   529 29956 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401359.048   529 29960 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401360.049   529 29992 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401360.745 29887 29908 I ps2x    : [vsync-rate] tick=600 rate=71.19/s (1.188x of 59.94)
+         1790401361.049   529 29993 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401361.354 29887 29908 I ps2x    : [padscript] press i=0 now=10627ms at=10611ms hold=250ms buttons=0x0008
+         1790401361.605 29887 29908 I ps2x    : [padscript] release i=0 now=10877ms
+         1790401362.050   529 30089 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401362.474 29887 29908 I ps2x    : [gs:parallel] periodic gif=61129 gif_bytes=29224208 regs=0 presents=600 null_scanouts=31 present_ms_avg=4.74358 readback_ms_avg=0.128799 copy_ms_avg=0.173137 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401363.050   529 30096 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401363.524 29887 29908 I ps2x    : [padscript] press i=1 now=12796ms at=12780ms hold=250ms buttons=0x4000
+         1790401363.777 29887 29908 I ps2x    : [padscript] release i=1 now=13046ms
+         1790401364.050   529 30097 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401365.050   529 30100 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401365.753 29887 29908 I ps2x    : [vsync-rate] tick=874 rate=54.71/s (0.913x of 59.94)
+         1790401365.975 29887 29908 I ps2x    : [padscript] press i=2 now=14764ms at=14749ms hold=250ms buttons=0x4000
+         1790401366.051   529 30101 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401366.139 29887 29908 I ps2x    : [padscript] release i=2 now=15015ms
+         1790401367.051   529 30106 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401368.051   529 30107 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401368.135 29887 29908 I ps2x    : [padscript] press i=3 now=16583ms at=16567ms hold=250ms buttons=0x4000
+         1790401368.272 29887 29908 I ps2x    : [padscript] release i=3 now=16833ms
+         1790401369.052   529 30110 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401369.136 29887 29908 I ps2x    : [gs:parallel] periodic gif=182412 gif_bytes=217788544 regs=0 presents=900 null_scanouts=31 present_ms_avg=6.15976 readback_ms_avg=0.131789 copy_ms_avg=0.176109 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401369.142 29887 29908 I ps2x    : [padscript] press i=4 now=18351ms at=18336ms hold=250ms buttons=0x4000
+         1790401369.326 29887 29908 I ps2x    : [padscript] release i=4 now=18601ms
+         1790401370.052   529 30118 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401370.510 29887 29908 I ps2x    : [padscript] press i=5 now=19786ms at=19770ms hold=250ms buttons=0x4000
+         1790401370.743 29887 29908 I ps2x    : [padscript] release i=5 now=20020ms
+         1790401370.769 29887 29908 I ps2x    : [vsync-rate] tick=1201 rate=65.20/s (1.088x of 59.94)
+         1790401371.052   529 30121 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401371.943 29887 29908 I ps2x    : [padscript] press i=6 now=21221ms at=21205ms hold=150ms buttons=0x0040
+         1790401372.053   529 30122 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401372.095 29887 29908 I ps2x    : [padscript] release i=6 now=21371ms
+         1790401372.444 29887 29908 I ps2x    : [padscript] press i=7 now=21721ms at=21706ms hold=150ms buttons=0x0040
+         1790401372.594 29887 29908 I ps2x    : [padscript] release i=7 now=21871ms
+         1790401373.044 29887 29908 I ps2x    : [padscript] press i=8 now=22322ms at=22306ms hold=250ms buttons=0x4000
+         1790401373.053   529 30132 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401373.295 29887 29908 I ps2x    : [padscript] release i=8 now=22572ms
+         1790401374.054   529 30227 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401374.192 29887 29908 I ps2x    : [gs:parallel] periodic gif=227227 gif_bytes=339459792 regs=0 presents=1200 null_scanouts=31 present_ms_avg=6.39038 readback_ms_avg=0.134052 copy_ms_avg=0.177661 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401374.759 29887 29908 I ps2x    : [padscript] press i=9 now=24040ms at=24025ms hold=250ms buttons=0x4000
+         1790401375.054   529 30228 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401375.770 29887 29908 I ps2x    : [vsync-rate] tick=1455 rate=50.79/s (0.847x of 59.94)
+         1790401375.811 29887 29908 I ps2x    : [padscript] release i=9 now=24290ms
+         1790401376.054   529 30231 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.042 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.043 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.044 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055   529 30232 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.055 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.056 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.062 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.063 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.063 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.063 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.063 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.063 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.069 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.070 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.071 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.071 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.071 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.079 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.080 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.081 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.086 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401377.087 29887 29908 I ps2x    : [drop] stub/sceSifDmaStat error -
+         1790401378.055   529 30233 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401379.055   529 30241 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401380.056   529 30250 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401380.785 29887 29908 I ps2x    : [vsync-rate] tick=1628 rate=34.50/s (0.576x of 59.94)
+         1790401381.056   529 30253 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401382.056   529 30254 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401383.057   529 30257 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401384.057   529 30258 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401385.058   529 30354 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401385.785 29887 29908 I ps2x    : [vsync-rate] tick=1681 rate=10.60/s (0.177x of 59.94)
+         1790401386.058   529 30363 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401387.058   529 30364 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401388.059   529 30367 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401388.408 29887 29908 I ps2x    : [padscript] press i=10 now=28528ms at=28512ms hold=200ms buttons=0x4000
+         1790401389.059   529 30368 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401389.511 29887 29908 I ps2x    : [padscript] release i=10 now=28712ms
+         1790401389.911 29887 29908 I ps2x    : [padscript] press i=11 now=28778ms at=28763ms hold=700ms buttons=0x0040
+         1790401390.059   529 30380 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401390.785 29887 29908 I ps2x    : [vsync-rate] tick=1733 rate=10.40/s (0.173x of 59.94)
+         1790401391.059   529 30381 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401392.060   529 30384 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401393.060   529 30385 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401393.309 29887 29908 I ps2x    : [gs:parallel] periodic gif=567135 gif_bytes=759305024 regs=0 presents=1500 null_scanouts=31 present_ms_avg=6.33387 readback_ms_avg=0.135928 copy_ms_avg=0.179918 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401394.060   529 30388 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401394.098 29887 29908 I ps2x    : [padscript] release i=11 now=29479ms
+         1790401394.394 29887 29908 I ps2x    : [padscript] press i=12 now=29529ms at=29513ms hold=200ms buttons=0x4000
+         1790401395.061   529 30389 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401395.493 29887 29908 I ps2x    : [padscript] release i=12 now=29713ms
+         1790401395.786 29887 29908 I ps2x    : [vsync-rate] tick=1784 rate=10.20/s (0.170x of 59.94)
+         1790401395.879 29887 29908 I ps2x    : [padscript] press i=13 now=29779ms at=29764ms hold=700ms buttons=0x0040
+         1790401396.061   529 30418 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401397.061   529 30494 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401398.062   529 30495 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401399.062   529 30496 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401399.811 29887 29908 I ps2x    : [padscript] release i=13 now=30480ms
+         1790401400.062   529 30506 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401400.091 29887 29908 I ps2x    : [padscript] press i=14 now=30530ms at=30514ms hold=200ms buttons=0x4000
+         1790401400.787 29887 29908 I ps2x    : [vsync-rate] tick=1837 rate=10.60/s (0.177x of 59.94)
+         1790401401.058 29887 29908 I ps2x    : [padscript] release i=14 now=30714ms
+         1790401401.062   529 30507 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401401.416 29887 29908 I ps2x    : [padscript] press i=15 now=30780ms at=30765ms hold=700ms buttons=0x0040
+         1790401402.063   529 30512 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401403.063   529 30513 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401404.063   529 30516 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401405.064   529 30517 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401405.213 29887 29908 I ps2x    : [padscript] release i=15 now=31481ms
+         1790401405.492 29887 29908 I ps2x    : [padscript] press i=16 now=31531ms at=31515ms hold=200ms buttons=0x4000
+         1790401405.787 29887 29908 I ps2x    : [vsync-rate] tick=1893 rate=11.20/s (0.187x of 59.94)
+         1790401406.064   529 30520 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401406.522 29887 29908 I ps2x    : [padscript] release i=16 now=31715ms
+         1790401406.891 29887 29908 I ps2x    : [padscript] press i=17 now=31781ms at=31766ms hold=700ms buttons=0x0040
+         1790401407.064   529 30521 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401408.065   529 30617 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401409.065   529 30627 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401410.065   529 30635 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401410.544 29887 29908 I ps2x    : [padscript] release i=17 now=32482ms
+         1790401410.732 29887 29908 I ps2x    : [snd-output] wall-minute underruns=1399264 overflows=26144 total-underruns=1399264 total-overflows=26144
+         1790401410.777 29887 29908 I ps2x    : [padscript] press i=18 now=32532ms at=32516ms hold=200ms buttons=0x4000
+         1790401410.788 29887 29908 I ps2x    : [vsync-rate] tick=1950 rate=11.40/s (0.190x of 59.94)
+         1790401411.066   529 30638 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401411.608 29887 29908 I ps2x    : [padscript] release i=18 now=32716ms
+         1790401411.889 29887 29908 I ps2x    : [padscript] press i=19 now=32782ms at=32767ms hold=700ms buttons=0x0040
+         1790401412.066   529 30639 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401413.066   529 30644 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401414.067   529 30645 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401414.845 29887 29908 I ps2x    : [padscript] release i=19 now=33483ms
+         1790401415.055 29887 29908 I ps2x    : [padscript] press i=20 now=33533ms at=33517ms hold=200ms buttons=0x4000
+         1790401415.067   529 30649 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401415.785 29887 29908 I ps2x    : [padscript] release i=20 now=33717ms
+         1790401415.788 29887 29908 I ps2x    : [vsync-rate] tick=2021 rate=14.20/s (0.237x of 59.94)
+         1790401416.048 29887 29908 I ps2x    : [padscript] press i=21 now=33783ms at=33768ms hold=700ms buttons=0x0040
+         1790401416.067   529 30650 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401417.068   529 30653 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401418.068   529 30654 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401418.362 29887 29908 I ps2x    : [gs:parallel] periodic gif=1197064 gif_bytes=1585054624 regs=0 presents=1800 null_scanouts=31 present_ms_avg=6.59915 readback_ms_avg=0.138863 copy_ms_avg=0.190367 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401418.884 29887 29908 I ps2x    : [padscript] release i=21 now=34484ms
+         1790401419.069   529 30667 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401419.083 29887 29908 I ps2x    : [padscript] press i=22 now=34534ms at=34518ms hold=200ms buttons=0x4000
+         1790401419.837 29887 29908 I ps2x    : [padscript] release i=22 now=34718ms
+         1790401420.069   529 30767 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401420.100 29887 29908 I ps2x    : [padscript] press i=23 now=34784ms at=34769ms hold=700ms buttons=0x0040
+         1790401420.789 29887 29908 I ps2x    : [vsync-rate] tick=2095 rate=14.80/s (0.247x of 59.94)
+         1790401421.069   529 30770 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401422.070   529 30771 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401422.873 29887 29908 I ps2x    : [padscript] release i=23 now=35485ms
+         1790401423.067 29887 29908 I ps2x    : [padscript] press i=24 now=35535ms at=35519ms hold=200ms buttons=0x4000
+         1790401423.070   529 30774 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401423.802 29887 29908 I ps2x    : [padscript] release i=24 now=35719ms
+         1790401424.064 29887 29908 I ps2x    : [padscript] press i=25 now=35785ms at=35770ms hold=700ms buttons=0x0040
+         1790401424.071   529 30775 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401425.071   529 30780 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401425.789 29887 29908 I ps2x    : [vsync-rate] tick=2170 rate=15.00/s (0.250x of 59.94)
+         1790401426.071   529 30781 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401426.903 29887 29908 I ps2x    : [padscript] release i=25 now=36486ms
+         1790401427.071   529 30787 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401427.111 29887 29908 I ps2x    : [padscript] press i=26 now=36536ms at=36520ms hold=200ms buttons=0x4000
+         1790401427.865 29887 29908 I ps2x    : [padscript] release i=26 now=36720ms
+         1790401428.072   529 30792 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401428.137 29887 29908 I ps2x    : [padscript] press i=27 now=36786ms at=36771ms hold=700ms buttons=0x0040
+         1790401429.072   529 30793 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401430.073   529 30893 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401430.789 29887 29908 I ps2x    : [vsync-rate] tick=2244 rate=14.80/s (0.247x of 59.94)
+         1790401430.939 29887 29908 I ps2x    : [padscript] release i=27 now=37487ms
+         1790401431.074   529 30903 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401431.135 29887 29908 I ps2x    : [padscript] press i=28 now=37537ms at=37521ms hold=200ms buttons=0x4000
+         1790401431.884 29887 29908 I ps2x    : [padscript] release i=28 now=37721ms
+         1790401432.074   529 30904 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401432.149 29887 29908 I ps2x    : [padscript] press i=29 now=37787ms at=37772ms hold=700ms buttons=0x0040
+         1790401433.075   529 30909 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401434.075   529 30910 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401434.937 29887 29908 I ps2x    : [padscript] release i=29 now=38488ms
+         1790401435.075   529 30913 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401435.133 29887 29908 I ps2x    : [padscript] press i=30 now=38538ms at=38522ms hold=30000ms buttons=0x0040
+         1790401435.789 29887 29908 I ps2x    : [vsync-rate] tick=2320 rate=15.20/s (0.254x of 59.94)
+         1790401436.076   529 30914 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401437.076   529 30917 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401438.076   529 30918 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401438.399 29887 29908 I ps2x    : [gs:parallel] periodic gif=1762463 gif_bytes=2374932256 regs=0 presents=2100 null_scanouts=31 present_ms_avg=6.82943 readback_ms_avg=0.141545 copy_ms_avg=0.208996 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401439.077   529 30923 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401440.077   529 30924 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401440.790 29887 29908 I ps2x    : [vsync-rate] tick=2394 rate=14.80/s (0.247x of 59.94)
+         1790401441.077   529 30932 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401442.078   529 31027 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401443.078   529 31034 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401444.079   529 31035 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401445.079   529 31040 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401445.790 29887 29908 I ps2x    : [vsync-rate] tick=2469 rate=15.00/s (0.250x of 59.94)
+         1790401446.079   529 31041 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401447.080   529 31044 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401448.080   529 31045 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401449.081   529 31048 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401450.081   529 31049 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401450.790 29887 29908 I ps2x    : [vsync-rate] tick=2549 rate=16.00/s (0.267x of 59.94)
+         1790401451.081   529 31057 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401452.082   529 31062 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401453.082   529 31063 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401454.082   529 31154 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401455.083   529 31165 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401455.791 29887 29908 I ps2x    : [vsync-rate] tick=2630 rate=16.20/s (0.270x of 59.94)
+         1790401456.083   529 31166 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401457.084   529 31171 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401457.597 29887 29908 I ps2x    : [gs:parallel] periodic gif=2261494 gif_bytes=3069333488 regs=0 presents=2400 null_scanouts=31 present_ms_avg=6.90967 readback_ms_avg=0.144268 copy_ms_avg=0.22351 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401458.084   529 31172 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401459.085   529 31173 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401460.085   529 31176 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401460.791 29887 29908 I ps2x    : [vsync-rate] tick=2711 rate=16.20/s (0.270x of 59.94)
+         1790401461.085   529 31184 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401462.086   529 31187 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401463.086   529 31188 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401464.087   529 31279 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401465.088   529 31292 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401465.791 29887 29908 I ps2x    : [vsync-rate] tick=2791 rate=16.00/s (0.267x of 59.94)
+         1790401466.088   529 31293 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401467.088   529 31298 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401468.089   529 31299 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401469.089   529 31300 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401470.089   529 31305 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401470.732 29887 29908 I ps2x    : [snd-output] wall-minute underruns=2143232 overflows=0 total-underruns=3542496 total-overflows=26144
+         1790401470.792 29887 29908 I ps2x    : [vsync-rate] tick=2871 rate=16.00/s (0.267x of 59.94)
+         1790401471.090   529 31313 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401472.090   529 31316 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401473.090   529 31317 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401474.091   529 31381 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401475.092   529 31420 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401475.792 29887 29908 I ps2x    : [vsync-rate] tick=2950 rate=15.80/s (0.264x of 59.94)
+         1790401476.092   529 31421 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401476.315 29887 29908 I ps2x    : [gs:parallel] periodic gif=2746297 gif_bytes=3752540448 regs=0 presents=2700 null_scanouts=31 present_ms_avg=6.90898 readback_ms_avg=0.146163 copy_ms_avg=0.234588 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401477.092   529 31426 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401478.093   529 31427 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401479.093   529 31428 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401480.094   529 31431 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401480.792 29887 29908 I ps2x    : [vsync-rate] tick=3031 rate=16.20/s (0.270x of 59.94)
+         1790401481.094   529 31439 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401482.094   529 31451 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401483.095   529 31452 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401484.095   529 31508 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401485.096   529 31556 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401485.792 29887 29908 I ps2x    : [vsync-rate] tick=3112 rate=16.20/s (0.270x of 59.94)
+         1790401486.096   529 31557 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401487.096   529 31560 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401488.096   529 31561 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401489.097   529 31562 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401490.097   529 31567 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401490.793 29887 29908 I ps2x    : [vsync-rate] tick=3194 rate=16.40/s (0.274x of 59.94)
+         1790401491.098   529 31575 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401492.098   529 31578 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401493.098   529 31579 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401494.099   529 31582 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401494.884 29887 29908 I ps2x    : [gs:parallel] periodic gif=3223600 gif_bytes=4410219264 regs=0 presents=3000 null_scanouts=31 present_ms_avg=6.91549 readback_ms_avg=0.148366 copy_ms_avg=0.243153 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401495.100   529 31583 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401495.793 29887 29908 I ps2x    : [vsync-rate] tick=3274 rate=16.00/s (0.267x of 59.94)
+         1790401496.100   529 31642 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401497.100   529 31687 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401498.100   529 31688 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401499.101   529 31691 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401500.101   529 31692 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401500.793 29887 29908 I ps2x    : [vsync-rate] tick=3353 rate=15.80/s (0.264x of 59.94)
+         1790401501.102   529 31700 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401502.102   529 31705 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401503.102   529 31706 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401504.102   529 31709 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401505.103   529 31710 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401505.793 29887 29908 I ps2x    : [vsync-rate] tick=3435 rate=16.40/s (0.274x of 59.94)
+         1790401506.103   529 31713 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401507.103   529 31715 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401508.104   529 31764 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401509.105   529 31820 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401510.105   529 31821 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401510.794 29887 29908 I ps2x    : [vsync-rate] tick=3516 rate=16.20/s (0.270x of 59.94)
+         1790401511.105   529 31832 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401512.106   529 31833 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401513.106   529 31834 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401513.470 29887 29908 I ps2x    : [gs:parallel] periodic gif=3704089 gif_bytes=5076772720 regs=0 presents=3300 null_scanouts=31 present_ms_avg=6.91585 readback_ms_avg=0.149393 copy_ms_avg=0.249919 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401514.106   529 31839 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401515.107   529 31840 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401515.794 29887 29908 I ps2x    : [vsync-rate] tick=3598 rate=16.40/s (0.274x of 59.94)
+         1790401516.107   529 31843 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401517.107   529 31844 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401518.108   529 31847 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401519.108   529 31848 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401520.108   529 31942 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401520.794 29887 29908 I ps2x    : [vsync-rate] tick=3678 rate=16.00/s (0.267x of 59.94)
+         1790401521.109   529 31960 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401522.109   529 31961 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401523.109   529 31964 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401524.110   529 31965 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401525.110   529 31970 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401525.794 29887 29908 I ps2x    : [vsync-rate] tick=3757 rate=15.80/s (0.264x of 59.94)
+         1790401526.111   529 31971 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401527.111   529 31972 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401528.112   529 31975 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401529.112   529 31977 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401530.112   529 31980 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401530.732 29887 29908 I ps2x    : [snd-output] wall-minute underruns=2106432 overflows=0 total-underruns=5648928 total-overflows=26144
+         1790401530.795 29887 29908 I ps2x    : [vsync-rate] tick=3838 rate=16.20/s (0.270x of 59.94)
+         1790401531.113   529 31988 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401532.068 29887 29908 I ps2x    : [gs:parallel] periodic gif=4186539 gif_bytes=5754089584 regs=0 presents=3600 null_scanouts=31 present_ms_avg=6.91202 readback_ms_avg=0.150372 copy_ms_avg=0.25573 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401532.113   529 32084 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401533.113   529 32093 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401534.114   529 32094 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401535.114   529 32097 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401535.795 29887 29908 I ps2x    : [vsync-rate] tick=3920 rate=16.40/s (0.274x of 59.94)
+         1790401536.115   529 32098 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401537.115   529 32103 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401538.115   529 32104 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401539.116   529 32107 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401540.116   529 32108 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401540.795 29887 29908 I ps2x    : [vsync-rate] tick=4003 rate=16.60/s (0.277x of 59.94)
+         1790401541.116   529 32116 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401542.117   529 32127 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401543.117   529 32128 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401544.118   529 32186 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401545.118   529 32232 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401545.795 29887 29908 I ps2x    : [vsync-rate] tick=4084 rate=16.20/s (0.270x of 59.94)
+         1790401546.118   529 32233 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401547.119   529 32236 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401547.284 29887 29908 I ps2x    : [padscript] release i=30 now=68535ms
+         1790401548.119   529 32237 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401549.119   529 32238 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401550.120   529 32243 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401550.539 29887 29908 I ps2x    : [gs:parallel] periodic gif=4662955 gif_bytes=6409430736 regs=0 presents=3900 null_scanouts=31 present_ms_avg=6.9248 readback_ms_avg=0.15174 copy_ms_avg=0.260752 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401550.796 29887 29908 I ps2x    : [vsync-rate] tick=4163 rate=15.80/s (0.264x of 59.94)
+         1790401551.120   529 32251 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401552.121   529 32254 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401553.121   529 32255 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401554.121   529 32258 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401555.121   529 32259 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401555.796 29887 29908 I ps2x    : [vsync-rate] tick=4249 rate=17.20/s (0.287x of 59.94)
+         1790401556.122   529 32321 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401557.122   529 32364 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401558.122   529 32365 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401559.123   529 32368 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401560.123   529 32369 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401560.797 29887 29908 I ps2x    : [vsync-rate] tick=4339 rate=18.00/s (0.300x of 59.94)
+         1790401561.124   529 32377 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401562.124   529 32382 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401563.124   529 32383 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401564.125   529 32386 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401565.125   529 32387 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401565.797 29887 29908 I ps2x    : [vsync-rate] tick=4434 rate=19.00/s (0.317x of 59.94)
+         1790401566.125   529 32390 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401567.020 29887 29908 I ps2x    : [gs:parallel] periodic gif=5092521 gif_bytes=6985035120 regs=0 presents=4200 null_scanouts=31 present_ms_avg=6.96646 readback_ms_avg=0.152966 copy_ms_avg=0.265129 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+         1790401567.126   529 32391 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401568.126   529 32486 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401569.126   529 32495 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401570.127   529 32496 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401570.797 29887 29908 I ps2x    : [vsync-rate] tick=4536 rate=20.40/s (0.340x of 59.94)
+         1790401571.128   529 32506 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401572.128   529 32507 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401573.128   529 32514 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401574.131   529 32520 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401575.129   529 32544 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+         1790401576.130   529 32546 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qesdsys.IQesdSys/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)

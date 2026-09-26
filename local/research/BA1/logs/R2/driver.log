@@ -1,0 +1,39 @@
+[01:50:01] PRE lease="BA1 2026-09-26T05:46:56Z" keyguard="showing=false" battery=100% ac=true pid0=none
+[01:50:01] PRE device-env=a8d651a7e55f7e29f1345f28f4ea634e06ae757f535e29439ab61c930bcc0ebd mc0-test='' mc0-bad=[]
+[01:50:01] CLAIM CLAIMED
+[01:50:01] ENV 74f09d099635d0ae6563aeaff2e42b1d2ac0620ddebb2e2675d6721eaf7cb558  /storage/emulated/0/Android/data/com.ps2x.runner/files/ps2x.env
+[01:50:01 t+    0.1] AM Starting: Intent { cmp=com.ps2x.runner/android.app.NativeActivity }
+[01:50:08 t+    6.3] FOCUS app-foreground, no BACK ('mCurrentFocus=Window{d0800db u0 com.ps2x.runner/android.app.NativeActivity}')
+[01:50:10 t+    8.5] LAYER 'com.ps2x.runner/android.app.NativeActivity#20860' tried=['com.ps2x.runner/android.app.NativeActivity#20859', 'RequestedLayerState{d0800db com.ps2x.runner/android.app.NativeActivity#20859 parentId=20850}', 'com.ps2x.runner/android.app.NativeActivity#20860']
+[01:51:14 t+   73.2] SCAP sc01-tick2100-t72.png tick~2123
+[01:52:09 t+  127.8] SCAP sc02-tick3000-t127.png tick~3008
+[01:53:07 t+  185.7] SCAP sc03-tick4000-t185.png tick~4011
+[01:53:39 t+  217.4] STOP tick 4574 >= 4500
+[01:53:39 t+  217.7] SCAP sc04-final-t217.png tick~4574
+[01:53:40 t+  219.1] THREADS
+Threads: 29 total,   0 running,  29 sleeping,   0 stopped,   0 zombie
+  Mem:  7342756K total,  5085344K used,  2257412K free,      564K buffers
+ Swap: 10485752K total,   676296K used,  9809456K free,  2301460K cached
+800%cpu  85%user   0%nice  31%sys 673%idle   0%iow   8%irq   4%sirq   0%host
+  TID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ THREAD          PROCESS
+ 2297 u0_a113      10 -10  17G 702M 457M S 57.6   9.7   2:19.68 GameThread      com.ps2x.runner
+ 2278 u0_a113      10 -10  17G 702M 457M S 15.3   9.7   0:34.91 GsWorker        com.ps2x.runner
+ 2276 u0_a113      10 -10  17G 702M 457M S  7.6   9.7   0:12.92 com.ps2x.runner com.ps2x.runner
+ 2269 u0_a113      20   0  17G 702M 457M S  3.8   9.7   0:00.29 binder:2257_2   com.ps2x.runner
+ 2309 u0_a113      10 -10  17G 702M 457M S  0.0   9.7   0:00.00 com.ps2x.runner com.ps2x.runner
+ 2310 u0_a113      10 -10  17G 702M 457M S  0.0   9.7   0:00.00 com.ps2x.runner com.ps2x.runner
+ 2306 u0_a113      20   0  17G 702M 457M S  0.0   9.7   0:00.00 InteractionJank com.ps2x.runner
+ 2305 u0_a113      20   0  17G 702M 457M S  0.0   9.7   0:00.14 binder:2257_2   com.ps2x.runner
+ 2299 u0_a113      10 -10  17G 702M 457M S  0.0   9.7   0:00.23 PGS-Waiter      com.ps2x.runner
+ 2298 u0_a113      39  19  17G 702M 457M S  0.0   9.7   0:00.00 com.ps:traceq0  com.ps2x.runner
+ 2295 u0_a113      -3 -10  17G 702M 457M S  0.0   9.7   0:00.78 AAudio_1        com.ps2x.runner
+ 2288 u0_a113      10 -10  17G 702M 457M S  0.0   9.7   0:00.00 com.ps2x.runner com.ps2x.runner
+ 2289 u0_a113      20   0  17G 702M 457M S  0.0   9.7   0:00.17 binder:2257_4   com.ps2x.runner
+ 2282 u0_a113      20   0  17G 702M 457M S  0.0   9.7   0:00.00 InsetsAnimation com.ps2x.runner
+ 2281 u0_a113      20   0  17G 702M 457M S  0.0   9.7   0:00.00 SurfaceSyncGrou com.ps2x.runner
+
+[01:53:40 t+  219.1] BATTERY status: 5 level: 100
+[01:53:43 t+  221.7] RESTORE a8d651a7e55f7e29f1345f28f4ea634e06ae757f535e29439ab61c930bcc0ebd match=True
+[01:53:43 t+  222.0] MC0-AFTER bad=[]
+[01:53:43 t+  222.0] END pid-after=none disconnects=0
+[01:53:43 t+  222.1] RELEASE ok=True RELEASED
