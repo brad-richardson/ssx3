@@ -306,3 +306,63 @@ suite; det IDENTICAL off and on+direct (bradflix, private export script; HS2 may
 script — use whichever works); one Android compile with the VU0 image (bytesize, F7 may also be building —
 one heavy job at a time); one iOS device compile (configure + build only). Stop; I push, and the Odin pair
 (off vs on+direct) rides with the next device build.
+
+# VR3 stage 4 — fold prep (done; stopped for your push)
+
+Worker: Claude Code (Opus 5.5), 2026-09-26 ~02:55–03:20 EDT. No push, no device install or launch.
+
+## Branch `vr3-fold` = fork `ssx3` `a5e5940` + 5 commits (worktree `~/dev/ssx3-work/VR3/PS2Recomp`)
+
+| Commit | Subject |
+| --- | --- |
+| `c697054` | [VR3] Dev-only VU0 census (`PS2X_VR3_VU0_CENSUS=1`, default off) |
+| `5d97d78` | [VR3] (a) VU0 start: drop reset()'s dead m_state memset and resetScheduler |
+| `9502777` | [VR3] (b) VU0 static recompile: stage-A pairs + musttail behind `PS2X_VU0_RECOMP` (default off) |
+| `01bb5cb` | [VR3] (c) VU0 direct commit behind `PS2X_VU0_DIRECT` (default off) |
+| `5d5c382` | [VR3] Android: `-Pps2xVu0RecompDir` → `PS2X_VU0_RECOMP_DIR` (as `ps2xVu1RecompDir`) |
+
+- The cherry-picks applied cleanly onto `a5e5940`. Push would be a fast-forward `a5e5940..5d5c382`. The
+  runner-dir guard (`git diff --stat 14b1e5cb 5d5c382 -- ps2xRuntime/src/runner`) is empty.
+- **Census kept (my call).** It is off by default and costs one static branch per VU0 start. It's the
+  cheap way to count VU0 images and entry points on other courses and on the Odin
+  (`PS2X_VR3_VU0_CENSUS=1`, plus `PS2X_VR3_VU0_IMAGE_DUMP=<dir>` for the raw image). Drop `c697054`
+  before pushing if you'd rather not carry it; (a)'s context lines touch its code, so that drop needs a
+  one-line conflict fix.
+- **Knobs:** `PS2X_VU0_RECOMP` and `PS2X_VU0_DIRECT` are both default off. The images do nothing unless the
+  knob is on.
+- **Canonical VU0 image dir:** `~/dev/ssx3-work/vu0gen-ssx3` = `vu0_40829a098c260b4f.cpp`, sha256
+  `2652966b9ff3358734431e7713dec6005b6ce97ad719f0937d2e15f9bf0b1ef1` (source and copy match; three reads). The raw
+  `.bin` stays in `vu0gen-vr3/images` (not canonical).
+- **iOS recipe** `~/dev/ssx3-work/F6/ios/build-install.sh` (untracked; diff in `ios-build-install-vu0.diff`,
+  original kept at `~/dev/ssx3-work/VR3/logs/build-install.sh.orig`):
+  - `VU0GEN=~/dev/ssx3-work/vu0gen-ssx3` next to `VU1GEN`;
+  - preflight logs `vu0-sha.txt` and expects 1 image;
+  - configure passes `-DPS2X_VU0_RECOMP_DIR="$VU0GEN"`;
+  - `IOS_W` / `IOS_FORK_WT` env overrides for the build root and fork worktree. Defaults are unchanged
+    (F6 paths).
+
+## Gates
+
+| Gate | Result | Receipt |
+| --- | --- | --- |
+| Mac suite (`build-fold`, VU0 image compiled in, game-image differential armed) | **677/677** (MT1 added one test). `[vr3-diff] … 237 programs, 268848 runs, mismatches 0`; `[vr3-game-diff] … 168 starts, 280242 runs, mismatches 0`; VR2's VU1 differential 0 | `suites-fold.txt` |
+| det bradflix, 512 KB, knobs off (runner `1477181e…`, fork `5d5c382`, VU1 7 + VU0 1 images) | **IDENTICAL** vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` (hash 1..2400, snd/coverage) | `check-fold-det-off.txt` |
+| det bradflix, `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1` | **IDENTICAL**; `[vu0-recomp] runs=983040 generated_cycles=61659739 interpreted_cycles=0` | `check-fold-det-dir.txt` |
+| Android compile, bytesize (VR2 2D recipe, root `/home/brad/vr3`; `git archive` of `5d5c382`; codegen / VU1 set `d28e3fc6` / paraLLEl `1b3a294` / jniLibs = VR2 2D's verified inputs; `-Pps2xVu0RecompDir=/home/brad/vr3/vu0gen`, SHA-matched) | **BUILD SUCCESSFUL in 15 m 50 s**, 48 tasks; `vu0_40829a098c260b4f.cpp.o` built. APK `825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254`, 190,748,236 B (two reads; left on bytesize at `/home/brad/vr3/PS2Recomp/android/app/build/outputs/apk/release/`) | `build-android-vr3.sh`, `android-vr3.txt` |
+| iOS device compile (F6 recipe; stages preflight + configure_device + build_device only; no sign/stage/install) | **BUILD SUCCEEDED** in 2 m 47 s; configure lists VU1 7 + VU0 1 images; binary `a4f0ba40445cc9041eac59581ee1084f7f476d932848279f462d595b7040dcce` (two reads), 513 `VU0RecompImage` symbols | `ios-device.txt` |
+
+bytesize was idle when the Android build started: WSL had just booted and no gradle/clang/pcsx2 jobs were
+running. Builds this stage: Mac 1 (+ an incremental reconfigure to add the image), bradflix 1, Android 1,
+iOS 1. Binaries: `runner-fold-clean` `e7e5dea0fff70eae88205cc6df3681c497319137033f19e5830b7f44d99ab2ae`,
+`tests-fold` `ee96b191…`.
+
+## For your push
+
+1. `git -C ~/dev/ssx3-work/VR3/PS2Recomp push fork vr3-fold:ssx3` (ff `a5e5940..5d5c382`; runner-dir guard
+   empty).
+2. `vu0gen-ssx3` is already canonical. Future Android builds add
+   `-Pps2xVu0RecompDir=<copy of vu0gen-ssx3>`. The F6 iOS recipe now passes it by default.
+3. Clean up the private refs on bradflix after the push: `refs/vr3/tip` and `refs/vr3/fold` in `HS1/PS2Recomp`,
+   plus the bundles `HS1/vr3-c3.bundle` and `HS1/vr3-fold.bundle`. `HS1/vu0gen-vr3` and `HS1/vu0gen-ssx3`
+   (the image copies) can stay or go.
+4. Odin pair (next device build): knobs off vs `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1`, same APK.

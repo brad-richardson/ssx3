@@ -1,0 +1,17 @@
+8c8,9
+< W=/Users/brad/dev/ssx3-work/F6/ios
+---
+> # VR3: IOS_W / IOS_FORK_WT override the build root / fork worktree (defaults unchanged).
+> W=${IOS_W:-/Users/brad/dev/ssx3-work/F6/ios}
+11c12
+< FORK_WT=/Users/brad/dev/ssx3-work/F6/PS2Recomp
+---
+> FORK_WT=${IOS_FORK_WT:-/Users/brad/dev/ssx3-work/F6/PS2Recomp}
+15a17,18
+> # VR3: generated VU0 images (used only with PS2X_VU0_RECOMP=1 at run time).
+> VU0GEN=/Users/brad/dev/ssx3-work/vu0gen-ssx3
+67a71,72
+>   shasum -a 256 "$VU0GEN"/vu0_*.cpp > "$LOGS/vu0-sha.txt"
+>   test "$(wc -l < "$LOGS/vu0-sha.txt" | tr -d ' ')" = 1
+95a101
+>     -DPS2X_VU0_RECOMP_DIR="$VU0GEN" \

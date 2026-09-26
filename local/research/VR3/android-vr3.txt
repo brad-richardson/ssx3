@@ -1,0 +1,36 @@
+== versions ==
+openjdk version "17.0.20.1" 2026-08-18
+OpenJDK Runtime Environment Temurin-17.0.20.1+1 (build 17.0.20.1+1)
+OpenJDK 64-Bit Server VM Temurin-17.0.20.1+1 (build 17.0.20.1+1, mixed mode, sharing)
+-- wrapper pins --
+a3648413b47ef77af21d5ebc36c687c7d103aaef3e17f33de7d4f080a6f300a3  /home/brad/n2/PS2Recomp/android/gradlew
+498495120a03b9a6ab5d155f5de3c8f0d986a449153702fb80fc80e134484f17  /home/brad/n2/PS2Recomp/android/gradle/wrapper/gradle-wrapper.jar
+
+------------------------------------------------------------
+Gradle 8.9
+------------------------------------------------------------
+
+Build time:    2024-07-11 14:37:41 UTC
+== codegen input count ==
+9457
+== vu1gen input count ==
+7
+== vu0gen input ==
+2652966b9ff3358734431e7713dec6005b6ce97ad719f0937d2e15f9bf0b1ef1  /home/brad/vr3/vu0gen/vu0_40829a098c260b4f.cpp
+== parallel-gs knob ==
+	// GB9 knob 1: PGS_HIER_BINNING=force|auto|off (unset = today's behavior).
+== gradlew argv ==
+/home/brad/n2/PS2Recomp/android/gradlew assembleRelease -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 -Pps2xGameCodegenDir=/home/brad/vr2d/codegen-ssx3 -Pps2xGsShadowParallel=ON -Pps2xParallelGsSourceDir=/home/brad/vr2d/parallel-gs -Pps2xJniLibsDir=/home/brad/vr2d/jniLibs -Pps2xVu1RecompDir=/home/brad/vr2d/vu1gen -Pps2xVu0RecompDir=/home/brad/vr3/vu0gen --max-workers=2 --console=plain --warning-mode=none
+EXIT=0
+825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254  app/build/outputs/apk/release/app-release.apk
+825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254  app/build/outputs/apk/release/app-release.apk
+total 186292
+drwxr-xr-x 2 brad brad      4096 Sep 26 03:14 .
+drwxr-xr-x 3 brad brad      4096 Sep 26 03:14 ..
+-rw-r--r-- 1 brad brad 190748236 Sep 26 03:14 app-release.apk
+-rw-r--r-- 1 brad brad       403 Sep 26 03:14 output-metadata.json
+0
+app/.cxx/RelWithDebInfo/1q4v1f66/arm64-v8a/ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/home/brad/vr3/vu0gen/vu0_40829a098c260b4f.cpp.o
+
+BUILD SUCCESSFUL in 15m 50s
+48 actionable tasks: 48 executed
