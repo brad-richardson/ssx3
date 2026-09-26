@@ -284,6 +284,7 @@ then 120 Hz simulation.
       `BRADFLIX_LEASE` dir; bradflix ccache cap 5 GB.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
+- [ ] `bradflix_build.sh` pins paraLLEl `19d93b2`; move it to fork `ssx3` `464f263` (SS1's CLUT accessor) like `mac_build.sh`.
 - [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real
       `make` on the next fork tip.
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation preference

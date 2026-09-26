@@ -253,3 +253,10 @@ Notes:
   finished (confirmed with `ps`). Use `ps | grep -v grep`.
 - Budgets: 2 Mac builds (fold tests, fold det), 2 bradflix builds (fold det, 5474956 tests),
   1 Android build, 3 det boots (bradflix det, bradflix load (refused), mini load). No speed boots.
+
+## Orchestrator gate, Part 2A (2026-09-26) — pushed
+
+**Pass; pushed** fork `ssx3` `5474956..d4fc12e` after my checks (clean, ancestor, runner-dir empty, five
+`[VR2]` subjects). The bradflix save-state refusal and the 661/662 test are SS1's libstdc++ limit, now
+lane SS2. The smaller APK (−6.8 MB) fits lever 1 removing the trace bookkeeping from 14,336 pair
+functions. Release **2B** (block functions) from `d4fc12e`; det boots on bradflix, speed on the mini.
