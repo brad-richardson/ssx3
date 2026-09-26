@@ -347,3 +347,27 @@ build tree, APK). Wall ~19:28–21:00.
    screen is 640×448. Initializing raylib at the display size on Android would give the GL path
    full resolution too. A Brad-visible choice; either path fixes it.
 
+
+## Orchestrator gate, stages 1–3 (2026-09-26)
+
+**Pass.** Excellent separation: the 4× cost is +31 ms of GameThread stall behind GPU work serialized in
+paraLLEl's `flush()`/`vsync()` (H-gpu), not the copy (H-copy predicted recovery; the prototype showed
+none, exactly as stage 1 said). The prototype is pixel-exact through gralloc, speed-neutral, and
+survives background/foreground. The big user-visible finding: **the Odin shows every frame at 360 lines
+in a bordered 1543×868 box** today (raylib's 640×448 logical screen); the Vulkan layer fills
+1920×1080 from the full-size buffer. The canonical build of fork `5474956` with paraLLEl `464f263`
+(mac_build.sh defaults) was verified by me (CLUT accessor linked).
+
+## Part 2 brief (orchestrator) — same pane, Odin
+**2A frame contexts (first, small):** count `flush_submit`/`next_frame_context` per vsync (Odin, 1× and
+4×) and add `PS2X_PGS_FRAME_CONTEXTS` (default 4 = today). Try 8 and 16 at 4×+hi-res and at 1× (≤ 6
+launches, cool-down method, ABBA where it matters). Mac det-hash unchanged with the knob set. Table;
+say whether it recovers the 4× cost.
+**2B productize the Odin Vulkan present** on a branch from fork `ssx3` **`5474956`** (save states landed):
+default **on** for Android with the GL path as automatic fallback; framing **fill the screen** (16:9 at
+1920×1080) unless the orchestrator says otherwise (Brad is being asked); the under-layer variant for the
+virtual pad (raylib EGL alpha + RGBA window); HWC composition check (G2); stop raylib's 60 Hz clear/swap
+under the layer if cheap (G9). Validation: pixels via gralloc at two ticks, bg/fg, pad on and off,
+Mac det-hash unchanged, Odin 1× speed pair vs the F5 play build. Suite green, runner-dir empty, one
+Android build per candidate on bytesize. Stop before any push or play-build install; I fold it (F6).
+Budget 6 h, ≤ 6 Android builds, ≤ 12 Odin launches. Brad's env/save rules unchanged.
