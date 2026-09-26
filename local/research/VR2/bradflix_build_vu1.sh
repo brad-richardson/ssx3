@@ -49,7 +49,7 @@ ISO_SHA='3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5'
 ELF_SHA='1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc'
 CODEGEN_SHA='8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3'
 CODEGEN_VF0_SHA='89953ba218efd63c2fdba28116765d524977f1233d0e370d22111a762e02383d'
-PGS_PIN='464f263dc51829b4ec76d7c223a4c3c5696571cf'
+PGS_PIN='1b3a2948cc55e74f975e42b79d08983f31c2dbb6'
 GRANITE_PIN='166ba21a247a681903cc9d0bb6562fe50a554c85'
 
 CODEGEN_DIR=$HOME/dev/ssx3-work/codegen-ssx3
@@ -68,7 +68,8 @@ echo "-- mini ISO sha (3 GB, one read)"
 [ "$(shasum -a 256 "$ISO_PATH" | cut -d' ' -f1)" = "$ISO_SHA" ] || { echo "mini ISO mismatch" >&2; exit 2; }
 (cd "$VU1_DIR" && shasum -a 256 vu1_*.cpp) > /tmp/hs1-vu1mini.sha
 VU1_MINI=$(shasum -a 256 /tmp/hs1-vu1mini.sha | cut -d' ' -f1)
-[ "$(git -C "$PGS_DIR" rev-parse HEAD)" = "$PGS_PIN" ] || { echo "mini PGS mismatch" >&2; exit 2; }
+if [ -n "${VR2_PGS_PIN:-}" ]; then PGS_PIN=$VR2_PGS_PIN; echo "-- VR2: remote paraLLEl pin override $PGS_PIN (mini check skipped)";
+else [ "$(git -C "$PGS_DIR" rev-parse HEAD)" = "$PGS_PIN" ] || { echo "mini PGS mismatch" >&2; exit 2; }; fi
 [ "$(git -C "$PGS_DIR/Granite" rev-parse HEAD)" = "$GRANITE_PIN" ] || { echo "mini Granite mismatch" >&2; exit 2; }
 echo "-- mini canonical OK"
 
@@ -81,9 +82,8 @@ LOAD1=$(ssh "$REMOTE" 'cat /proc/loadavg' | cut -d' ' -f1 | cut -d. -f1)
 ssh "$REMOTE" "test -e ~/$RROOT/$NAME" && { echo "refusing to reuse ~/$RROOT/$NAME" >&2; exit 2; } || true
 
 echo "== fork checkout $SHA_IN"
-# VR2 copy: a private export (PS2Recomp-vr2, git archive of the SHA, no .git) of
-# the shared clone, so another lane's checkout in the shared PS2Recomp cannot
-# change sources mid-build (seen 09-25: another lane moved HEAD during a VR2 build).
+# VR2 copy: a private export (PS2Recomp-vr2, git archive of the SHA, no .git),
+# so another lane's checkout in the shared PS2Recomp cannot change sources mid-build.
 ssh "$REMOTE" "cd ~/$RROOT/PS2Recomp && git fetch origin ssx3 2>&1 | tail -1; rm -rf ../PS2Recomp-vr2 && mkdir ../PS2Recomp-vr2 && git archive $SHA_IN | tar -C ../PS2Recomp-vr2 -xf -" || exit 1
 FULL_SHA="$(ssh "$REMOTE" "git -C ~/$RROOT/PS2Recomp rev-parse $SHA_IN^{commit}")"
 case "$FULL_SHA" in *[!0-9a-f]*|"") echo "bad SHA from remote: $FULL_SHA" >&2; exit 2;; esac

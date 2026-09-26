@@ -440,3 +440,119 @@ build over budget to separate the VB1 gap from stage 4 was the right call. Decis
 Budget for 2C: ≤ 10 builds, 4 h. Speed holds only when the mini is quiet (check load and `ps` for other
 lanes' runners; a flat −17–24 % run is interference, rerun it). Bradflix builds: use your private
 `git archive` script, never the shared checkout (HS2 is fixing the shared one).
+
+## Part 2C — VB1 stop-path fix, coverage, copy bypass, loop chaining (worker, 2026-09-25 23:05 – 09-26 00:35 EDT)
+
+**Result.**
+- The **VB1 gap is fixed**: 0 generated-vs-queued mismatches (was 3,129).
+- **Coverage measured:** 79.9 % of generated pairs and 79.0 % of VU1 cycles run inside blocks;
+  the guard misses only on E-bit/halt state (3,454 times).
+- **Copy bypass and loop chaining are both exact, and neither is measurable on the Mac.**
+- **Whole stage-4 stack vs `vr2-fold`: 1.067× (clean ABBA, H12).**
+
+Fork local branch `vr2-blocks` = `d4fc12e` + stage 4 (`e5ac052`, `7a2d9ed`) + 2C (`a6e666b`,
+`95f952e`, `8610c69`, `fa35e67`). Not pushed; runner-dir guard empty. The branch still sits on
+`d4fc12e`; the fork `ssx3` is now at `fb28d99` (VK1), so folding needs a rebase.
+
+### Per-commit gates
+
+| Commit | Change | Suite (Mac) | Differential (all images) | det **bradflix**, blocks on, 512 KB | ABBA (mini, blocks on) |
+| --- | --- | --- | --- | --- | --- |
+| `a6e666b` | `stopRequestedForTest` hook; test counts error-stop mismatches | 662/663 (the expected VB1 red) | 3,129 mismatches in 5 programs; **3,129 on an error stop**, 3,129 reproduced by interpreter+direct; blocks-vs-pairs 0 | — | — |
+| `95f952e` | **An error stop drains the pipelines like a program end** | 663/663 | **0** (271 programs, 254,400 runs) | **IDENTICAL**, runner `598d49eb…` | — (error path only) |
+| `8610c69` | Copy bypass for direct VF/ACC writes | 663/663 | 0 | **IDENTICAL**, runner `aa993db2…` | vs previous tip: **−0.3 %** (see table) |
+| `fa35e67` | Loop chaining for self-looping blocks (57 in the game images); fixture adds 12 counted loops | 663/663 | **0** (283 programs, 270,000 runs, 12 self-looping blocks) | **IDENTICAL**, runner `1be1b876…` | vs copy bypass: **+0.2 %** |
+
+The det gate compares against `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` (ticks 1..2400, plus
+snd/coverage). Every run shows `nostall_misses=0` and VU1 100 % generated. Receipts:
+`check-{c,cb,lp}-det.txt`, `stats-2c.txt`, `suites-2c.txt`.
+
+### 1. The VB1 stop-path fix (2 builds of the ≤ 3)
+
+- **Confirmed first:** all 3,129 mismatches end on an error stop (`reportReservedInstruction`
+  → `m_stopRequested`). The interpreter with direct commit reproduces every one.
+- **Mechanism:** after a stop, `resume()` is a no-op, and the next `execute()` resets the
+  scheduler, dropping the queue. So the queued model never landed writes that were in flight at
+  the stop, while VB1's direct commit had applied them at issue.
+- **Fix:** `run()` now **drains the pipelines on a mid-program stop**, like a program end
+  (`if (m_stopRequested && !programEnded) flushPipelines();`). Every mode lands the same writes in
+  the same cycles; `m_directPendingUntil` tracks direct landings exactly, so the cycle counts
+  agree too.
+- **This is a semantic choice for the error path, in the reference model as well.** A stop now
+  leaves the VU with its in-flight results landed instead of frozen mid-flight.
+- **Alternative I rejected:** an undo log of old VF and flag values for every direct write in
+  flight. It would cost stores on every hot pair, and flags get involved: older demoted entries
+  that land in between, and FDIV D/I status bits.
+- The game route has 0 stops, and det is IDENTICAL. The reserved-opcode test still passes (a stop
+  with nothing in flight drains nothing). PATH1 captures change after a stop (86,046 → 85,509
+  packets: a draining stop may finish or cancel a transfer), identically in every mode.
+
+### 2. Coverage and guard misses (det run at `95f952e`, blocks on, route to t2400)
+
+| Measure | Value |
+| --- | --- |
+| Generated pairs issued / inside blocks | 948,112,738 / 757,125,063 = **79.9 %** |
+| VU1 cycles in generated pairs / inside blocks | 999,317,037 / 789,522,121 = **79.0 %** |
+| Block entries | 102,820,864 (7.4 pairs each) |
+| Guard misses: knob off / branch pending / E-bit or halt pending / budget | 0 / 0 / **3,454** / 0 |
+
+The guard almost never refuses. The ~20 % outside blocks is code that no block covers: entries at
+non-leader pcs (MSCAL starts, JR targets), and runs next to XGKICK and D/T pairs, which blocks
+exclude.
+
+### 3. Speed (mini, exclusive holds ≤ 5 min, blocks on unless named; all runs in `speed-all.txt`)
+
+These holds ran in a quieter period than 2B's: the same runners read about 32–33, against 28–30
+then.
+
+| Hold | Order → vsyncs/s | Reading |
+| --- | --- | --- |
+| H9 (23:40) | blk 32.95 · cbblk 32.89 · cbblk 31.38¹ · blk 32.68 | |
+| H10 (23:45) | cbblk 32.48 · blk 32.37 · blk 32.53 · cbblk 32.74 | copy bypass: 32.37 vs 32.63 over the two holds, **−0.8 %** (+0.2 % without ¹) |
+| H11 (00:10) | cbblk 32.36 · lpblk 27.03² · lpblk 27.05² · cbblk 27.16² | void: load rose to 8–9 during the hold and runs 2–4 sat flat about 16 % low. **Rerun as H13** |
+| **H12 (00:18)** | **fold 30.83 · lpblk 32.89 · lpblk 32.92 · fold 30.83** | **stage-4 stack vs `vr2-fold`: 1.067×** |
+| H13 (00:25) | lpblk 32.99 · cbblk 32.95 · cbblk 32.35 · lpblk 32.41 | loop chaining: 32.70 vs 32.65, **+0.2 %** |
+
+¹ The last sample dropped to 29.7. ² Interference, per the brief's rule.
+
+Before H13, another lane's det runner (`TM2/build-det-diag`) and a `ps2x_tests` run were using
+about 1.9 cores on the mini. The hold waited 40 s for slots, and load fell through it.
+
+- **Copy bypass:** exact but not measurable. The compiler was already absorbing most of the
+  round trip. Keep it only if you value the simpler direct path; either way is fine.
+- **Loop chaining:** exact but not measurable. The back edge through `next()` (table load and
+  tail call) was already cheap next to a 9-pair body.
+- **Where stage 4's gain comes from:** fusing pairs (no per-pair frame and hand-off) and the
+  hoisted guards. Residency (locals across iterations) would be the next step. The review
+  flags it as needing loads/spills proven away; it is not attempted here.
+
+### Recommendation (you decide)
+
+1. **Fold `a6e666b` + `95f952e` (VB1 stop drain) regardless.** It fixes a real exactness gap in
+   shipped code, with zero hot-path cost.
+2. **Stage 4 (`e5ac052`, `7a2d9ed`):** 1.05–1.07× on the Mac, exact. Fold behind the knob,
+   default off, and run an Odin pair. It needs the stage-4 images: emitter change, `vu1gen-lp`,
+   the same 7 hashes.
+3. `8610c69` and `fa35e67`: exact and neutral. Fold them with stage 4 (both are small) or drop
+   them. Loop chaining changes the emitter; images `vu1gen-lp`.
+
+### Budgets and notes
+
+- **Builds: 8 compiling** of ≤ 10.
+  - Mac, 5: two tests builds, copy bypass, loop chaining tests plus dump runner, loop chaining
+    clean runner.
+  - bradflix, 3: `vr2c-det`, `vr2cb-det2`, `vr2lp-det`.
+  - Two bradflix invocations stopped at preflight without compiling: the mini paraLLEl pin had
+    moved to `1b3a294`, then the shared bradflix paraLLEl was still at `464f263`.
+- Boots: 1 dump (mini, one slot), 3 det (bradflix), 20 speed boots in 5 exclusive holds
+  (230–247 s each).
+- Time: about 1.5 h of the 4 h.
+- **bradflix script:** `bradflix_build_vu1.sh` is now generated by `make_bradflix_copy.py` from
+  the canonical script, so a pin move is a re-run. It builds from a private `git archive` export
+  and never touches the shared checkout or the shared paraLLEl; on a pin mismatch it stops.
+  `VR2_PGS_PIN` builds against the paraLLEl already on bradflix; I used it once (`464f263`)
+  while the shared dir lagged the canonical pin. The later builds use the canonical `1b3a294`,
+  which is additive over `464f263` (VK1 counters only).
+- Images: `~/dev/ssx3-work/VR2/vu1gen-lp` (loop chaining; `vu1gen-lp.sha`) supersedes
+  `vu1gen-b`. On bradflix: `HS1/vu1gen-vr2lp`, `HS1/vu1gen-vr2b` (private dirs; remove when
+  done).

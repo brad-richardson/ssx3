@@ -27,7 +27,12 @@ LOAD_MAX, HOLD_CAP, BOOT_EST = 8.0, 300, 80
 # PS2X_VU1_BLOCKS=1 / knob off.
 RUNNERS = {'base': ('/Users/brad/dev/ssx3-work/F5/bin/runner-clean', []),
            'blk': (WORK + '/bin/runner-b-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
-           'blkoff': (WORK + '/bin/runner-b-clean', [])}
+           'blkoff': (WORK + '/bin/runner-b-clean', []),
+           # 2C: copy bypass (8610c69), blocks on / off.
+           'cbblk': (WORK + '/bin/runner-cb-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
+           'cboff': (WORK + '/bin/runner-cb-clean', []),
+           # 2C: loop chaining (fa35e67), blocks on.
+           'lpblk': (WORK + '/bin/runner-lp-clean', ['--env', 'PS2X_VU1_BLOCKS=1'])}
 
 
 def runner(c):
