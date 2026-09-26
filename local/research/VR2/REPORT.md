@@ -424,3 +424,19 @@ race rates.
   `VR2_VU1_DIR=… VR2_RVU1DIR=vu1gen-vr2b bradflix_build_vu1.sh e5ac052 vr2blocks-det4 --det`.
 - det: `ssx3_boot.py --host bradflix --mode det … --vu1-stats --stack-kb 512 --dump-ticks 1090,1800,2100 --env PS2X_VU1_BLOCKS=1`.
 - Speed: `speed_hold.py H<n> fold blk …`, `speed_table.py run`. Profile: `vr2_profile.py blk|fold`.
+
+## Orchestrator gate, Part 2B (2026-09-26)
+
+**Pass (v1 exact, ≈1.05× Mac, default off).** 0 mismatches blocks-vs-pairs over 254,400 runs incl.
+active-entry P/Q/PATH1; det IDENTICAL with blocks on; ≥ 75.8 % of issued pairs inside blocks. Going 1
+build over budget to separate the VB1 gap from stage 4 was the right call. Decisions:
+1. **VB1 error-path gap: fix it (option 1).** Exactness is the contract even off the game's route: after
+   a mid-pair stop (`reportReservedInstruction` → `m_stopRequested`), direct writes must match what the
+   queued model would hold. One mechanism, bounded: ≤ 3 builds; first add the `m_stopRequested` test hook
+   and confirm all 3,129 mismatches are on that path; if some are not, stop and hand back the list.
+2. Then measure work-weighted coverage + miss reasons (det build at the fixed tip).
+3. Then the copy bypass for proven direct writes (helps pairs and blocks), then loop chaining for
+   self-looping blocks — each its own commit with the same gates and an ABBA pair.
+Budget for 2C: ≤ 10 builds, 4 h. Speed holds only when the mini is quiet (check load and `ps` for other
+lanes' runners; a flat −17–24 % run is interference, rerun it). Bradflix builds: use your private
+`git archive` script, never the shared checkout (HS2 is fixing the shared one).
