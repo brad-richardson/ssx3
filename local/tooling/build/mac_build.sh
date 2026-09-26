@@ -4,12 +4,13 @@
 # a Mac runner calls this instead of inlining its own cmake lines.
 #
 # Usage:
-#   mac_build.sh <fork-worktree> <build-dir> [--det] [--no-cache]
+#   mac_build.sh <fork-worktree> <build-dir> [--det] [--diag] [--no-cache]
 #                [--vu1 DIR] [--pgs DIR] [--codegen DIR] [--target T]...
 #
 #   <fork-worktree>  PS2Recomp fork checkout (e.g. ~/dev/ssx3-work/<ID>/PS2Recomp)
 #   <build-dir>      fresh cmake build dir (need not exist)
 #   --det            PS2X_ENABLE_DET_HASH_TAP=ON (default OFF)
+#   --diag           PS2X_ENABLE_DIAG_TAPS=ON (default OFF)
 #   --no-cache       no compiler launcher (control builds; default: ccache)
 #   --vu1 DIR        PS2X_VU1_RECOMP_DIR (default: ~/dev/ssx3-work/vu1gen-ssx3)
 #   --pgs DIR        PS2X_PARALLEL_GS_SOURCE_DIR (default: ~/dev/ssx3-work/parallel-gs-ssx3, fork ssx3 checkout)
@@ -23,7 +24,7 @@ set -euo pipefail
 
 if [ $# -lt 2 ]; then sed -n '2,18p' "$0"; exit 2; fi
 WT=$1; BD=$2; shift 2
-DET=OFF; CACHE=ON
+DET=OFF; DIAG=OFF; CACHE=ON
 VU1=$HOME/dev/ssx3-work/vu1gen-ssx3
 PGS=$HOME/dev/ssx3-work/parallel-gs-ssx3
 CODEGEN=$HOME/dev/ssx3-work/codegen-ssx3
@@ -31,6 +32,7 @@ TARGETS=()
 while [ $# -gt 0 ]; do
   case $1 in
     --det) DET=ON;;
+    --diag) DIAG=ON;;
     --no-cache) CACHE=OFF;;
     --vu1) VU1=$2; shift;;
     --pgs) PGS=$2; shift;;
@@ -56,7 +58,7 @@ CONFIGURE=(cmake -S "$WT" -B "$BD" -G Ninja -DCMAKE_BUILD_TYPE=Release
   -DPS2X_GAME_CODEGEN_DIR="$CODEGEN" -DPS2X_VU1_RECOMP_DIR="$VU1"
   -DPS2X_BUILD_TEST=ON -DPS2X_BUILD_STUDIO=OFF -DPS2X_ENABLE_DEBUG_UI=OFF
   -DPS2X_ENABLE_RUNTIME_LOGS=OFF -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF
-  -DPS2X_ENABLE_DIAG_TAPS=OFF -DPS2X_ENABLE_DET_HASH_TAP="$DET"
+  -DPS2X_ENABLE_DIAG_TAPS="$DIAG" -DPS2X_ENABLE_DET_HASH_TAP="$DET"
   -DPS2X_GS_SHADOW_PARALLEL=ON -DPS2X_PARALLEL_GS_SOURCE_DIR="$PGS"
   -DPS2X_ENABLE_SCCACHE=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
 # NB: appended conditionally (not "${EMPTY_ARR[@]}") for macOS bash 3.2 + set -u.
