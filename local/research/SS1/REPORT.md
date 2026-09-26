@@ -415,3 +415,19 @@ there. Fixed in the shared driver (`lane = (...).resolve()`).
 
 Scratch: `~/dev/ssx3-work/SS1` 4.4 GB (two build dirs, paraLLEl worktree 336 MB, runners, states)
 ≤ 10 GB; store `baselines/states` 103 MB. No push anywhere.
+
+## Orchestrator gate, Part 2 (2026-09-25)
+
+**Pass.** Verified: `list-states`/`get-state` (rc 0), P-4C frames t2098/2100/2102 FNVs equal F5 B4's
+straight 4× run. Good catch on the relative `--out` bug and on keeping HS1's uncommitted hunks out of
+your commit. Before the fold (fork `ssx3` + paraLLEl `ssx3` fast-forwards, orchestrator pushes):
+
+## Part 3 brief (orchestrator) — fold checks, then stop
+1. **Android compile** of `ss1-savestate` + paraLLEl `ss1-clut` on bytesize (F5 recipe
+   `local/research/F5/build-android.sh`, hold the ssh open; `ps aux` first — HS1 uses bradflix, not
+   bytesize). `assembleRelease` must succeed; keep the APK (SHA ×2), don't install. Note the
+   `/proc/self/exe` runner-SHA fallback on Android as a gap (no device use now).
+2. **Speed-neutral with knobs off:** clean (non-det) Mac runner from your branch vs F5's
+   `~/dev/ssx3-work/F5/bin/runner-clean`, ABBA, exclusive lease ≤ 5 min per hold, FR1-R1 unpaced to
+   t2400, race vsyncs/s. Pass = within run-to-run spread (state the spread).
+3. Commit `[SS1] Part 3 …` with the table and stop. ≤ 2 builds, 4 speed boots.
