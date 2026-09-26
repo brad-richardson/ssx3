@@ -159,3 +159,13 @@ bradflix, one fix), 1 dump boot, 2 det boots, 1–2 profiles, 1 exclusive hold.
   N12's 7 % share.
 - Opcode names for the image's lowers are not verified against a decoder; only the opHi ranges
   used by VB1's analyses are quoted.
+
+## Orchestrator gate, stage 1 (2026-09-26)
+
+**Pass.** Entry overhead ≈ 7 % (not dominant), one stable 4 KiB image with 7 entries, 1,243 starts/vsync,
+0 budget hits. Approved: skip standalone stage 2; **stage 3 = VU0 recompile** as designed, with (a) the two
+exact trims (duplicate `m_state` memset, duplicate `resetScheduler`) as their own commit, (b) stage-A pairs +
+musttail on the queued model behind `PS2X_VU0_RECOMP` (default off), and (c) **VU0 direct commit as a
+separate commit and knob** (`PS2X_VU0_DIRECT`, default off) — in scope, since VB1's commit-at-issue is exact
+by construction and your differential matrix runs it on and off. Exactness plan 1–4 as written (the game-image
+differential stays local). Budget ≤ 8 builds. Stop before any device.
