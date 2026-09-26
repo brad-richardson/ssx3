@@ -274,3 +274,11 @@ final-tip). Scratch: `~/dev/ssx3-work/SS3` (~2 GB incl. build dir;
 states 6×54 MB + 4 seeds), `~/dev/ssx3-work/baselines-bradflix`
 (108 MB, 2 states), bradflix `HS1/SS3-det2` + `pgs-3d72467033ce`
 (shared, SHA-addressed).
+
+## Orchestrator gate (2026-09-26) — pushed, lane closed
+
+**Pass.** All four RV5 findings fixed with fail-before tests; suites 689/689 on both hosts; det IDENTICAL; strict
+round trips IDENTICAL on Mac and bradflix (frame differences only where two straight runs also differ); 4× round
+trip IDENTICAL; Android compile green; old states refuse cleanly. Pushed fork `ssx3` `5d5c382..f0d2d3c` and paraLLEl
+`ssx3` `1b3a294..3d72467`; the canonical paraLLEl checkout and `bradflix_build.sh` now pin `3d72467`. Save states are
+fit for device play once a UI trigger and non-det loads exist (SS1 § Dropping det).
