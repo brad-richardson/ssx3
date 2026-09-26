@@ -219,3 +219,17 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   for ~7 h while Brad was offline. **Never end a turn with workers running unless a watcher (or
   a scheduled wakeup) is live**; when Brad goes offline, keep the loop going with watch.sh
   restarts, not a final message.
+
+## Sandboxed workers for untrusted models (bradflix, 09-26)
+
+opencode (1.18 and v2) has only static allow/ask/deny rules plus `--auto`; no model-judged approvals (v2 adds a
+policy layer that hard-denies after project rules, which fixes the 1.18.30 project-`allow` override). Command-text
+deny rules are bypassable (`python3 -c`, `env git push`), so **free / untrusted models run only in the bradflix
+sandbox** (`local/tooling/sbx/`, deployed to `~/sbx/`):
+- `sbx_prep.sh <NAME> <public git url> <branch> --depth N` → fresh clone at `~/sbx/runs/<NAME>/work`, remotes removed.
+- `sbx_run.sh <NAME> <model> <brief>` → container `ssx3-sbx` (= `ssx3-hs1` + opencode) as uid 1000, no caps,
+  no-new-privileges, CPU/mem/pid caps, tmpfs home, only `/work` + the brief mounted, `--auto` with allow-all inside;
+  network = internal `sbx-int` + proxy `sbx-proxy` (tinyproxy, CONNECT 443 only, allowlist opencode.ai / models.dev;
+  LAN, other sites and direct egress verified blocked). Output: `runs/<NAME>/{out.log,rc,status.txt,diff.patch}`.
+- Inputs: public code only (the forks, Mesa, our tooling) — never generated guest code or game data (free tiers may
+  keep prompts). Results come out only as a diff the orchestrator reviews and applies itself.
