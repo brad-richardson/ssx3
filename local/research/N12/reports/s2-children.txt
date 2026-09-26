@@ -1,0 +1,67 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 130822
+Event count: 98380655774
+
+Children  Self   Symbol
+94.43%    0.00%  __pthread_start(void*)
+94.43%    0.00%  __start_thread
+85.77%    0.04%  EeScheduler::run()
+85.77%    0.00%  std::__ndk1::__function::__func<PS2Runtime::run()::$_1, std::__ndk1::allocator<PS2Runtime::run()::$_1>, void ()>::operator()()
+85.77%    0.00%  void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, std::__ndk1::function<void ()>>>(void*)
+67.42%    2.52%  VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+64.95%    0.01%  sub_00382760_0x382760(unsigned char*, R5900Context*, PS2Runtime*)
+64.62%    0.01%  PS2Runtime::Store32(unsigned char*, R5900Context*, unsigned int, unsigned int)
+64.50%    0.10%  PS2Memory::writeIORegister(unsigned int, unsigned int)
+63.98%    0.00%  PS2Memory::processPendingTransfers()
+63.84%    0.00%  PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+63.83%    1.12%  PS2Memory::processVIF1DataImpl(unsigned char const*, unsigned int)
+60.98%    0.00%  std::__ndk1::__function::__func<PS2Runtime::syncCoreSubsystems()::$_3, std::__ndk1::allocator<PS2Runtime::syncCoreSubsystems()::$_3>, void (unsigned int, unsigned int, unsigned int)>::operator()(unsigned int&&, unsigned int&&, unsigned int&&)
+17.16%    0.16%  PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+8.95%     0.89%  VU1Interpreter::progressXgkick()
+8.51%     0.03%  PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+8.28%     0.06%  GsWorker::threadMain()
+8.28%     0.00%  void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, void (GsWorker::*)(), GsWorker*>>(void*)
+8.06%     0.00%  [kernel.kallsyms][+ffffffe760a11586]
+7.71%     0.00%  [kernel.kallsyms][+ffffffe761a7d85e]
+7.11%     0.05%  syscall
+7.09%     0.41%  GS::processGIFPacket(unsigned char const*, unsigned int)
+7.02%     0.06%  PS2Runtime::executeVU0Microprogram(unsigned char*, R5900Context*, unsigned int)
+6.87%     0.19%  sub_0022ADD8_0x22add8(unsigned char*, R5900Context*, PS2Runtime*)
+6.78%     0.03%  GS::executeQueuedCommand(GsCommand&)
+6.63%     0.00%  [kernel.kallsyms][+ffffffe761a7d8ea]
+6.63%     0.00%  [kernel.kallsyms][+ffffffe760a3aece]
+6.62%     0.00%  [kernel.kallsyms][+ffffffe760a3af86]
+6.61%     0.00%  [kernel.kallsyms][+ffffffe760a3b042]
+6.42%     0.07%  pthread_cond_signal
+6.39%     0.02%  std::__ndk1::condition_variable::notify_one()
+5.98%     0.00%  [kernel.kallsyms][+ffffffe760bca446]
+5.65%     0.00%  [kernel.kallsyms][+ffffffe760bca252]
+5.19%     0.00%  [kernel.kallsyms][+ffffffe760bcd2be]
+5.17%     0.00%  [kernel.kallsyms][+ffffffe760b09cb6]
+5.04%     5.04%  [kernel.kallsyms][+ffffffe761a8e810]
+3.66%     0.02%  sub_00128AF0_0x128af0(unsigned char*, R5900Context*, PS2Runtime*)
+3.35%     0.01%  ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::RawGifPacket(unsigned int, unsigned char const*, unsigned int)
+3.31%     0.14%  ParallelGS::GSInterface::gif_transfer(unsigned int, void const*, unsigned long)
+3.20%     3.19%  VU1Interpreter::commitReadyPipelines()
+2.99%     0.00%  PS2Runtime::run()
+2.99%     0.00%  main
+2.89%     0.16%  sub_0022A830_0x22a830(unsigned char*, R5900Context*, PS2Runtime*)
+2.62%     0.03%  sub_0022A408_0x22a408(unsigned char*, R5900Context*, PS2Runtime*)
+2.53%     0.00%  EndDrawing
+2.50%     0.04%  sub_0022A128_0x22a128(unsigned char*, R5900Context*, PS2Runtime*)
+2.45%     2.42%  VU1Interpreter::execUpper(unsigned int)
+2.32%     0.11%  void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)4, 1>(void const*, unsigned int)
+2.14%     1.19%  clock_gettime
+2.02%     0.04%  sub_002306A8_0x2306a8(unsigned char*, R5900Context*, PS2Runtime*)
+1.90%     0.21%  void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)4>(bool)
+1.88%     0.07%  WaitTime
+1.72%     0.86%  void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+1.67%     0.54%  GS::vertexKick(bool)
+1.62%     0.02%  GifArbiter::drain()
+1.18%     0.01%  sub_0022A368_0x22a368(unsigned char*, R5900Context*, PS2Runtime*)
+1.15%     0.04%  sub_00229FC8_0x229fc8(unsigned char*, R5900Context*, PS2Runtime*)
+1.06%     0.02%  snprintf(char*, unsigned long pass_object_size1, char const*, ...)
+1.05%     0.03%  sub_00129160_0x129160(unsigned char*, R5900Context*, PS2Runtime*)
+1.03%     0.05%  __vsnprintf_chk

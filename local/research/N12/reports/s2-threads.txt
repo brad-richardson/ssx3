@@ -1,0 +1,16 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 130822
+Event count: 98380655774
+
+Overhead  Command
+87.04%    GameThread
+9.20%     GsWorker
+3.32%     com.ps2x.runner
+0.21%     AAudio_1
+0.06%     binder:10911_3
+0.05%     binder:10911_1
+0.05%     binder:10911_4
+0.04%     PGS-Waiter
+0.02%     binder:10911_2
