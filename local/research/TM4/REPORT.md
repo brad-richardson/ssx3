@@ -254,3 +254,15 @@ Test-collateral note: dev-only research probe (default off, nothing ships;
 TM1–TM3 precedent has no maintained harness for guest-behavior probes) —
 verification is the lane's established det-boot + `baseline.py` + tap counts,
 not a committed test.
+
+## Orchestrator gate, Part 2 (2026-09-26)
+
+**Pass (good call not to halve blind).** K4 exonerated by a clean experiment; mode 2 matches stock end to end; the
+mode-1 residual is an initial-condition excess from the race-start phase that decays in cruise.
+
+## Part 3 brief (orchestrator)
+Aligned early-race window, stock vs `=3`, ticks 1690–1790 (race HUD ~1714): watch `[obj+0x1e0]` (velocity) and the
+aux state `[obj+0x370]/[obj+0x3d0]` writers; name the term that makes the probe's launch speed ~1.58× stock
+(a per-update gain without dt, e.g. `sub_00138960`'s 200.0, or a per-frame vs per-update event). One targeted
+change only if a single mechanism is named and proven live; measure as before. Also, if cheap, a
+dispatch-target tap to find the HUD clock formatter (`/60` and the −1690 base). ≤ 2 builds, ≤ 4 boots; then stop.
