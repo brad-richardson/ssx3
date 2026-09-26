@@ -177,6 +177,9 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   or interpolation.
 
 ## 8. Mistakes to avoid
+- 09-26: archiving closed lanes removed I33's MoltenVK xcframework, which F6's iOS script (in scratch) still
+  used. The reference check covered repo files only. Before archiving, also grep `~/dev/ssx3-work/*/` scripts of
+  live lanes; shared inputs get a canonical home (`~/dev/ssx3-work/moltenvk-1.4.2`, `parallel-gs-ssx3`, `vu1gen-ssx3`).
 - 09-26: BA1 ran `adb install` with no lease check while VK2 held the Odin, killing VK2's stress run
   (Android exit reason PACKAGE UPDATED). The old check-then-write lease was also racy. Fix:
   `local/tooling/odin_lease.sh` (atomic claim/release, `run` wrapper); briefs that touch the Odin

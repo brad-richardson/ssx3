@@ -682,3 +682,10 @@ Those are superseded by the table above. Receipts: `s4-det-compares.txt`, `build
 runs:
 - census: `PS2X_MTVU=census PS2X_MTVU_CENSUS_OUT=…`;
 - threaded: `PS2X_MTVU=1 [PS2X_MTVU_LAG=1] PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`.
+
+## Orchestrator gate, stage 4 (2026-09-26) — pushed
+
+**Pass; pushed** fork `ssx3` `d585e5c..703a554` (clean, ff, runner-dir empty, seven `[MT1]` subjects). MTVU and
+LAG default off. MoltenVK 1.4.2 (re-fetched, SHAs = I33/F6 receipts) now lives at
+`~/dev/ssx3-work/moltenvk-1.4.2` and F6's iOS script points there (my archive of I33 had removed it —
+orchestrator error). Next: F7 device build measures MTVU off / on / on+LAG and blocks on/off on the Odin.
