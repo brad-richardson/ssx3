@@ -266,7 +266,7 @@ then 120 Hz simulation.
 - [ ] 120 Hz simulation: RV6 (`docs/research/review-2026-09-26-astra-120hz.md`) recovered the timing model (app manager
       rate/dt/multiplier fields, VBlank-end → producer ring → consumer → app update, catch-up). TM1–TM3 done: chain
       confirmed; rider integrators `0x1380b4`/`0x13e0dc` (`pos += delta`, no manager dt); the rate-120 probe gives
-      2 updates/VBlank but full-size steps (1.89×) and a 2× HUD clock. **TM4 (queued, low priority):** find the
+      2 updates/VBlank but full-size steps (1.89×) and a 2× HUD clock. **TM4 (running):** find the
       per-update step constants behind `delta` and the HUD `/60`, then one coherent probe. Older notes: X3's
       map: counted step loop in `sub_00316F00`, `$s1` vs `lw 0x20($s0)`,
       back-edge `0x317190 → 0x317128`; the published patch-site increment at
