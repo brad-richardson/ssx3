@@ -483,3 +483,11 @@ Builds 2/2 (Android, Mac clean). Speed boots 4/4, exclusive per boot, lease rele
 Nothing pushed or installed. The fold candidates are unchanged since Part 2: fork `ss1-savestate`
 `5474956` (fast-forwards onto `ssx3` `a3efbfe`) and paraLLEl `ss1-clut` `464f263` (from `19d93b2`).
 Stopping here.
+
+## Orchestrator gate, Part 3 (2026-09-26) — folded
+
+**Pass; pushed.** Fork `ssx3` `a3efbfe..5474956` and paraLLEl-GS `ssx3` `19d93b2..464f263` fast-forwarded
+after my checks (clean trees, ancestors, runner-dir diff empty, `[SS1]` subjects only). Speed-neutral
+(B/A 1.015 inside a 7–10 % spread; the quiet pair +0.4 %); Android `assembleRelease` green. New canonical
+paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` at `464f263` is `mac_build.sh`'s default. Open for
+device use: Android runner-SHA via `dladdr`, a UI save/load trigger, non-det loads.

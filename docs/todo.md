@@ -269,11 +269,8 @@ then 120 Hz simulation.
       `0x317184` is the delay slot of `jal checkHalt`; metro sites clear the
       frame-skip flag `[*(gp+0x2A74)+0x34]`. Measure with the E55 hash tap.
       `local/research/X3/`, `X2/`.
-- [ ] Save states for the recomp runtime (global/static state is the
-      obstacle); would cut boot-to-race time for every probe. Guest threads resume from a guest PC
-      after the scheduler's checkpoint unwind (`runtime/ee_scheduler.h`), so no host stacks need
-      saving. Proposed to Brad 09-25 as an Opus spike (save at t2000, load, det-hash equal to a
-      straight run through t2400); Brad OK'd 09-25: **SS1** running (`local/muse/prompts/SS1.md`).
+- [ ] Save states (SS1, folded `5474956`): lanes use `baseline.py get-state` + `ssx3_boot.py --load`. For device
+      play: Android runner-SHA via `dladdr`, a save/load button, non-det loads (SS1 report § Dropping det).
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
