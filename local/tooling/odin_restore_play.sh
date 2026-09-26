@@ -51,6 +51,7 @@ done
 adb -s "$S" shell "rm -rf $FILES/mc0-test/*; ls -A $FILES/mc0-test | wc -l; am force-stop $PKG"
 # Fan: put Brad's pre-run fan_mode back if odin_cooldown.py --fan performance changed it (never 0 = off).
 # KEEP_FAN=1 keeps 5 between legs of a planned back-to-back batch; the batch's last restore omits it.
-[ "${KEEP_FAN:-0}" = 1 ] || fanprev=$(adb -s "$S" shell cat /data/local/tmp/mg/fan_prev 2>/dev/null | tr -dc 0-9)
+fanprev=""
+[ "${KEEP_FAN:-0}" = 1 ] || fanprev=$(adb -s "$S" shell 'cat /data/local/tmp/mg/fan_prev 2>/dev/null; true' | tr -dc 0-9)
 if [ -n "$fanprev" ] && [ "$fanprev" != 0 ]; then adb -s "$S" shell "settings put system fan_mode $fanprev && rm -f /data/local/tmp/mg/fan_prev"; echo "FAN restored fan_mode=$fanprev"; fi
 echo "END pid=$(adb -s "$S" shell pidof $PKG || echo none) battery=$(adb -s "$S" shell dumpsys battery | grep -m1 level)"
