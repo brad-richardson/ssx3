@@ -169,3 +169,123 @@ musttail on the queued model behind `PS2X_VU0_RECOMP` (default off), and (c) **V
 separate commit and knob** (`PS2X_VU0_DIRECT`, default off) — in scope, since VB1's commit-at-issue is exact
 by construction and your differential matrix runs it on and off. Exactness plan 1–4 as written (the game-image
 differential stays local). Budget ≤ 8 builds. Stop before any device.
+
+# VR3 stage 3 — VU0 recompile (a) trims, (b) stage-A pairs, (c) VU0 direct commit
+
+Worker: Claude Code (Opus 5.5), 2026-09-26 ~02:25–03:00 EDT. Mac mini, plus det boots on bradflix. No
+push, no devices. **Stopped before any device.**
+
+## Stage 3 headline
+
+- **Exact on every gate.** Suite **676/676** (+2 tests). Synthetic VU0 differential: 8 images, 237 programs,
+  268,848 runs, **0 mismatches**. Game-image differential (local only): 7 entries × 24 seeds, 280,242 runs,
+  **0 mismatches**. **det-hash ticks 1–2400 + snd/coverage IDENTICAL** vs
+  `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` with both knobs off, with `PS2X_VU0_RECOMP=1`, and with
+  `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1` (bradflix, 512 KB stack). **VU0 cycles 100 % generated**
+  (`[vu0-recomp] … interpreted_cycles=0`). The mini census (VU0 starts, cycles, per-program and per-caller
+  rows to t2400) is byte-identical across c0, off, on and on+direct.
+- **Speed (mini M5 Pro, paraLLEl, diagnostics off, exclusive, FR1-R1 race window t1800–2400, 3 quiet holds,
+  same binary):** off **31.74** → recompile **32.77 vsyncs/s (+3.2 %)** → + direct commit **33.45 vsyncs/s
+  (0.530× → 0.558× of 59.94, +5.4 %)**. The order is the same in every hold, including H2, which ran
+  under outside load and is excluded from the means.
+- **Profile (diagnostic):** VU0's share of GameThread samples goes **8.98 % → 4.71 % (recompile) → 4.10 %
+  (+ direct)**, 0.52× / 0.46× of VU0 time. That lands inside stage 1's 0.44–0.56× estimate. What's left under
+  VU0 with direct commit on: generated pairs 75 %, `commitReadyPipelines` 11 % (Q/P and queued flags),
+  per-start memsets/copies ≈ 10 %.
+- **Recommendation (the orchestrator decides):** fold (a)+(b)+(c) as they are (knobs default off). The next
+  device build should carry the VU0 image (`-Pps2xVu0RecompDir`; Gradle wiring is not done yet, see Gaps)
+  with an Odin pair: off vs `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1`. On the Mac, direct commit is the better
+  default candidate. That default is your call once the Odin pair is in.
+
+## Fork commits (`~/dev/ssx3-work/VR3/PS2Recomp`, local branch `vr3` from fork `ssx3` `d585e5c`; not pushed)
+
+| # | Commit | Change | Files | Exactness argument / check |
+| --- | --- | --- | --- | --- |
+| census | `69e60e1` | dev-only VU0 census (stage 1) | ps2_runtime.cpp +155 | off: one static branch per start |
+| (a) | `fe1341e` | `resetForVu0Start()`: VU0 starts drop `reset()`'s dead `m_state` memset and `resetScheduler` | 3 files | `copyVu0ContextToState` memsets and refills all of `m_state`; `execute()` runs `resetScheduler()` before anything reads it. det IDENTICAL (off run) |
+| (b) | `1932d63` | VU0 static recompile behind `PS2X_VU0_RECOMP` (default off): emitter unit param (`VU0RecompImage<hash>`, 512 pair functions, no blocks, `issuePair<true,-1,false,0x1000u>`), `issuePair` `kCodeSize` template parameter (default 0x4000 = VU1 unchanged), VU0 keying + `[vu0-recomp]` stats, `PS2X_VU0_RECOMP_DUMP`, CMake `PS2X_VU0_RECOMP_DIR`, VU0 fixture images + both differential tests | 8 files, +417/−41 | VU1 fixture sources byte-identical to c0's; differential 0 mismatches; det IDENTICAL |
+| (c) | `d52e7f0` | VU0 direct commit behind `PS2X_VU0_DIRECT` (default off): `m_directRunOk` per unit, blocks stay VU1-only, direct/flag maps use the unit's pc mask (VU1 = 0x3FFF, unchanged), VU0 lookup keys the image for the tracked map; differential adds interpreter+direct and generated+direct | 4 files, +33/−12 | differential 0 mismatches in both direct modes; det IDENTICAL |
+
+Runner-dir guard (`git diff --stat 14b1e5cb vr3 -- ps2xRuntime/src/runner`) is empty. bradflix holds the
+commits in the private ref `refs/vr3/tip` (`HS1/PS2Recomp`, via bundle; nothing went to GitHub). Remove that
+ref after the fold.
+
+## Gates
+
+| Gate | Result | Receipt |
+| --- | --- | --- |
+| Suite, no game image (`tests-c3`) | 676/676; `[vr3-diff] vu0 images 8 programs 237 runs 268848 generated_cycles 22656394 mismatches 0`; VR2's VU1 differential unchanged (254,400 runs, 0) | `suites-c3.txt` |
+| Suite, game image compiled in (`tests-c3v`, `PS2X_VR3_VU0_IMAGE=…/vu0_40829a098c260b4f.bin PS2X_VR3_VU0_ENTRIES=0,570,6e0,828,948,db8,ef0`) | 676/676; `[vr3-game-diff] … starts 168 runs 280242 generated_cycles 88272906 mismatches 0` | `suites-c3.txt` |
+| Modes in each differential run | reference = VU0 interpreter, every write queued; compared: generated queued, interpreter + direct, generated + direct; each at every budget 1…max, then cut / resume / fresh execute; full `VU1State` (flags, cycles, pc) + data memory | test source |
+| Tail calls | 512 VU0 pair functions, `with_blr=0` | `tailcall-audit-vu0.txt` |
+| det bradflix, 512 KB, knobs off | **IDENTICAL** (hash 1..2400, snd/coverage) | `check-c3-det-off.txt` |
+| det, `PS2X_VU0_RECOMP=1` | **IDENTICAL**; `[vu0-recomp] runs=983040 generated_cycles=61659739 interpreted_cycles=0` | `check-c3-det-on.txt` |
+| det, `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1` | **IDENTICAL**; same VU0 coverage line | `check-c3-det-dir.txt` |
+| VU0 census, mini (c0 / off / on / dir) | t2400: `calls=933533 cycles=58593197 budget_hits=0` in all four; per-program + per-caller rows hash `8c77e1749b30ee5e` in all four; on/dir `generated_share=1.0000` | `census-c3-*.txt`, `census-c0.txt` |
+
+## Speed (mini M5 Pro, diagnostics off, exclusive lease, FR1-R1, race window t1800–2400)
+
+Same runner `runner-c3-clean` (`ebd1f4c4…`) in every row; the knobs are env only. Holds of 3 boots, orders
+ABC / CBA. H3/H4 started only at 1-min load < 3.
+
+| Hold (order) | off | on (`PS2X_VU0_RECOMP=1`) | dir (+ `PS2X_VU0_DIRECT=1`) | on/off | dir/off |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| H1 (off, on, dir) | 31.64 | 32.00 | 33.14 | 1.011 | 1.047 |
+| H2 (dir, on, off) — **excluded, outside load** (1-min load 7–9, desktop WebKit/video) | 26.32 | 26.95 | 27.27 | 1.024 | 1.036 |
+| H3 (off, on, dir) | 31.75 | 33.12 | 33.60 | 1.043 | 1.058 |
+| H4 (dir, on, off) | 31.82 | 33.18 | 33.60 | 1.043 | 1.056 |
+| **mean of H1/H3/H4** | **31.74 (0.530×)** | **32.77 (0.547×)** | **33.45 (0.558×)** | **1.032** | **1.054** |
+
+Same-binary noise in VR2 was ~1.5 %. The +5.4 % for dir is above it in every quiet hold. The +3.2 % for
+on is above it in H3/H4, and H1's on run is the low outlier. (a)'s trims were not measured on their own:
+the off column includes them, and the profile shows the per-start memset/`resetScheduler` samples going
+from 36 (c0) to 20 (c3 off).
+
+## Profile (diagnostic: one slot, 15 s from t1850, sequential; `profile-c3-{off,on,dir}-vu0-tree.txt`)
+
+| | c0 (stage 1) | c3 off | c3 on | c3 dir |
+| --- | ---: | ---: | ---: | ---: |
+| VU0 inclusive, % of GameThread samples | 8.64 % | 8.98 % | **4.71 %** | **4.10 %** |
+| generated VU0 pairs (% of VU0 subtree) | — | — | 56.8 % | 75.1 % |
+| `commitReadyPipelines` (% of subtree) | 19.0 % | 19.2 % | 31.2 % | 11.4 % |
+| interpreter `run`/`execUpper`/`execLower`/decode | 73.8 % | 76.1 % | ≈ 2 % | ≈ 2 % |
+
+## Exact commands
+
+- Build 2 (tests + dump runner): `local/tooling/build/mac_build.sh ~/dev/ssx3-work/VR3/PS2Recomp ~/dev/ssx3-work/VR3/build-clean` (5 m 06 s).
+- Dump: `vr3_boot.py dump-c3 bin/runner-c3-dump --stop-tick 1700 --env PS2X_VU0_RECOMP_DUMP=~/dev/ssx3-work/vu0gen-vr3` →
+  `[vu0-recomp] dump …/vu0_40829a098c260b4f.cpp ok generation=3` (512 pair functions, 0 reserved pairs).
+- Build 3 (the same dir with the image): `cmake -S PS2Recomp -B build-clean -DPS2X_VU0_RECOMP_DIR=~/dev/ssx3-work/vu0gen-vr3 && cmake --build build-clean --target ps2x_tests ps2EntryRunner` (34 s).
+- Build 4 (bradflix det): `local/research/VR3/bradflix_build_vr3.sh d52e7f0 vr3-c3-det --det` (VR2's private-export copy
+  + VU0 image sync; 12 min). It re-synced bradflix `HS1/vu1gen` to the canonical `vu1gen-ssx3` set (SHA set verified).
+- det: `ssx3_boot.py --host bradflix --mode det --backend parallel --runner ~/dev/ssx3-work/HS1/vr3-c3-det/ps2xRuntime/ps2EntryRunner --label vr3-c3-det-<m> --out ~/dev/ssx3-work/VR3/det/c3-<m> --vu1-stats --stack-kb 512 --dump-ticks 1090,1800,2100 --route fr1r1 [--env PS2X_VU0_RECOMP=1 [--env PS2X_VU0_DIRECT=1]]`,
+  then `baseline.py compare --key a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d --cand <dir>`.
+- Census: `vr3_boot.py census-c3-<m> bin/runner-c3-clean --stop-tick 2450 --env PS2X_VR3_VU0_CENSUS=1 --env PS2X_VU1_RECOMP_STATS=1 [knobs]`.
+- Speed: `speed_hold.py H<n> <cands…>` (cwd `~/dev/ssx3-work/VR3`), `speed_table.py run` → `speed-all.txt`.
+- Profiles: `vr3_boot.py prof-c3-<m> bin/runner-c3-clean --sample-at 1850 --sample-s 15 [knobs]`, then `vr3_tree.py`.
+- Budget: 3 stage-3 builds (2 mini, 1 bradflix) of the 8 approved, 4 of 10 in total. Mini: 1 dump, 3 census, 3
+  profile, 12 speed boots in 4 holds. bradflix: 3 det boots. Disk: `VR3` 2.4 GB, `vu0gen-vr3` 272 KB,
+  bradflix `HS1/vr3-c3-det` 2.0 GB; the 200 GB check reads 78.8 GB.
+
+## Binaries (`binaries-sha.txt`; runners read twice)
+
+`runner-c3-clean` `ebd1f4c40a0844c21272c4c632c72506a76fa54845baeb389f8b92c1b628a71c` (VU1 canonical + VU0 image);
+`runner-c3-dump` `f31e6fdc…`; `tests-c3` `e655eec6…`; `tests-c3v` `37559e2c…`; bradflix det runner
+`37bea7bc219179089f978a2c6b4cfdcf0de79315fa81131a4c1c07a7d04b969f`. VU0 image `vu0_40829a098c260b4f.cpp`
+`2652966b…` (from `.bin` `21eebd05…`), in `~/dev/ssx3-work/vu0gen-vr3` (game-derived, outside every repo).
+
+## Gaps
+
+- **Android/Gradle wiring for `PS2X_VU0_RECOMP_DIR` is not done** (no `-Pps2xVu0RecompDir`), so a device
+  build needs that small step first. The brief stopped before devices.
+- The VU0 direct path is exercised through the test override (`setDirectCommitForTest(1)` on a VU0 unit) and
+  the env knob in the whole-game runs. No VU0 direct/queued counters were added, so the report cannot say
+  what share of VU0 writes committed directly.
+- One route and one VU0 image. Another course with another VU0 image falls back to the interpreter (exact).
+- (a) was not timed on its own. Its effect is inside the "off" column (profile: per-start memsets 36 → 20
+  samples).
+- H2 was run and is reported but excluded (outside load). Excluding it does not change the order.
+- **Fork moved during stage 3:** `ssx3` is now `a5e5940` (MT1 threaded-unit hooks + BA1 Android -O3, 8
+  commits after `d585e5c`). `git merge-tree fork/ssx3 vr3` is clean, and none of those commits touch the
+  VU0 execution path (`executeVU0Microprogram`, `ps2_vu1*`). The fold still needs a rebase plus a
+  suite/det recheck on the new tip; **nothing here was rebuilt on `a5e5940`.**

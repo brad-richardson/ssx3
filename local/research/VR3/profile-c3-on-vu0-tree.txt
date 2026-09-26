@@ -1,0 +1,13 @@
+file /Users/brad/dev/ssx3-work/VR3/run/prof-c3-on/sample.txt
+GameThread samples 9036; PS2Runtime::executeVU0Microprogram inclusive = 4.71% of GameThread
+busy samples 5866; PS2Runtime::executeVU0Microprogram inclusive 426 = 7.26% of busy
+     242   4.13% busy   56.8% of root  VU0RecompImage::* (generated VU0 pairs)
+     133   2.27% busy   31.2% of root  VU1Interpreter::commitReadyPipelines
+      11   0.19% busy    2.6% of root  _platform_memset
+      10   0.17% busy    2.3% of root  PS2Runtime::executeVU0Microprogram [root self]
+      10   0.17% busy    2.3% of root  _platform_memset  
+       9   0.15% busy    2.1% of root  VU1Interpreter::run
+       5   0.09% busy    1.2% of root  VU1Interpreter::execute
+       4   0.07% busy    0.9% of root  VU1Interpreter::queueClip
+       1   0.02% busy    0.2% of root  __bzero
+       1   0.02% busy    0.2% of root  ps2_gfx_stats::detail::ensureInit

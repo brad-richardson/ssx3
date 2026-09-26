@@ -9,6 +9,7 @@ node's inclusive count and each descendant's *self* count (inclusive minus
 its children) by symbol. The root's own self count is its inlined code
 (copy in/out, census branch). Busy samples = the top-of-stack rows minus
 kernel waits (VB1's profile_share.py rule), so shares compare with VR2's.
+Also prints the root's share of the GameThread's samples (wall, 15 s).
 """
 import re
 import sys
@@ -36,6 +37,8 @@ def short(name):
     name = re.sub(r'\(.*$', '', name)
     if name.startswith('VU1RecompImage'):
         return 'VU1RecompImage::*'
+    if name.startswith('VU0RecompImage'):
+        return 'VU0RecompImage::* (generated VU0 pairs)'
     return name
 
 incl = 0
@@ -64,7 +67,11 @@ while i < len(nodes):
         selfc[short(n) + (' [root self]' if k == 0 else '')] += c - kids
     i = j
 
+gt = re.search(r'^\s+(\d+) Thread_\d+: GameThread', text, re.M)
+game = int(gt.group(1)) if gt else 0
 print('file %s' % path)
+if game:
+    print('GameThread samples %d; %s inclusive = %.2f%% of GameThread' % (game, root, 100.0 * incl / game))
 print('busy samples %d; %s inclusive %d = %.2f%% of busy' % (busy, root, incl, 100.0 * incl / max(busy, 1)))
 for n, c in selfc.most_common(40):
     if c:
