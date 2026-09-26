@@ -143,3 +143,16 @@ bash local/tooling/odin_restore_play.sh AP1
 AP1b: fix the `hide` signature to `(I)V` (+ optional bounded frame-loop retry), Mac suite,
 one bytesize build, re-run (a) with swipe + (b) + (c) + (d) (4 launches). The launcher,
 build script and bytesize PGS/input staging are all reusable as-is.
+
+## Orchestrator gate (2026-09-26)
+
+**Stopped correctly; root cause is clear and small.** `WindowInsetsController.hide` is `(I)V`; the lookup used a wrong
+return type. The display-size canvas (`InitWindow(0,0)`) works with the Vulkan child 1:1 on the panel.
+
+## Part 2 brief (orchestrator)
+Fix the signature (`(I)V` + `CallVoidMethod`), add a bounded retry from the frame loop until `[immersive] applied`
+(e.g. once per second for 10 s, and again on every `APP_CMD_INIT_WINDOW`/`GAINED_FOCUS`). One Android build. Then the
+remaining runs: (a) Vulkan default — no gesture handle in menu + race screencaps; swipe from the bottom edge **with a
+short partial swipe** (`input swipe 960 1079 960 900 150`) so it reveals the bars instead of going HOME, then bars
+auto-hide; (b) `PS2X_PRESENT_VULKAN=0` fills 1920×1080 at 16:9; (c) GL + `PS2X_ASPECT=4:3` → 1440×1080 with bars;
+(d) `PS2X_VIRTUAL_PAD=1` on Vulkan — pad drawn right, no bars. ≤ 5 launches. Restore play state after each. Then stop.
