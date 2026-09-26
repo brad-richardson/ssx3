@@ -323,3 +323,13 @@ final APK/iOS linkage, and the full combined F6 binary remain
 unverified here. In particular, the existing Vulkan pixel comparisons test import
 layout/normal rendering, not delayed releases; existing save-state frame samples do
 not test the first CLD=0 draw, split transfers, or nonempty memory cards.
+
+## Orchestrator adoption (2026-09-26)
+
+Agreed on all findings. **B1, B2, S1 → VK2** (Opus fix lane, unit-tested state machine + Odin
+lifecycle stress). Until VK2 lands, the Odin play build ships with `PS2X_PRESENT_VULKAN=0` in Brad's env
+(GL path, as today), so F6 still delivers VR2 + HP1. iOS is unaffected (the Vulkan present is
+Android-only; RV5 found no issue in VR2 stage 1, HP1, or save states with knobs unset), so the iPhone
+install can follow F6's iPad test. **S2–S5 → SS3** (save-state holes: paraLLEl palette indices, partial GS
+transfer/vertex state, card directories/timestamps, Android runner identity), queued; device save/load
+stays off until then.
