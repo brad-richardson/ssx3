@@ -136,3 +136,18 @@ commit, archive, `worktree remove`), (3) tip rebuild for byte-identical + ccache
 - Full old-script-lane immunity note: an old-script lane's non-atomic `Dockerfile`/input
   writes could only collide with a same-instant reader in a microsecond window, and any
   hit fails loudly (parse/SHA error), never silently.
+
+## Orchestrator gate, Part 1 (2026-09-26)
+
+**Pass (design + tip build + isolation proven); the 173b31f leg failed on the brief's premise** — my error:
+`173b31f` predates the `PS2X_VU1_NOINLINE` marker the canonical VU1 images now need.
+
+## Part 2 brief (orchestrator)
+1. Acceptance 1 again with two buildable SHAs started 10 s apart: fork `ssx3` `5d5c382` and `a5e5940`
+   (differs by VR3's VU0 commits; check a file that differs, e.g. `ps2xRuntime/CMakeLists.txt` or the VU0 recomp file).
+2. Acceptances 2–4 as briefed (unpushed throwaway commit; byte-identical rebuild + ccache hits; det boot of the tip
+   runner vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` IDENTICAL).
+3. Add `--vu0 DIR` (content-addressed `vu0gen-<sha12>` like vu1gen; default `~/dev/ssx3-work/vu0gen-ssx3`) passing
+   `PS2X_VU0_RECOMP_DIR`, since the fork now has VU0 images; one det boot with `--env PS2X_VU0_RECOMP=1 --env
+   PS2X_VU0_DIRECT=1` IDENTICAL.
+Budget: ≤ 5 builds, ≤ 3 boots. Proposed runbook text in the report. Stop after.
