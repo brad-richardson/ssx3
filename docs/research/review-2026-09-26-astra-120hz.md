@@ -370,3 +370,10 @@ The same batch returned the audio constants above. No runtime experiment failed 
 Consequently the full interrupt-registration implementation, live race targets and remaining
 consumer graph are not claimed audited. The specific scheduling/branch/constant findings
 are supported by the cited successful reads; the proposed experiment is future work.
+
+## Orchestrator adoption (2026-09-26)
+
+Adopted rank 1 as **TM1** (observation-only timing tap on bradflix, RV6 §5's brief). Rank 2 (the
+three-field rate 120 / dt 1/120 / multiplier 2 probe) waits for TM1's live chain and for RV7's survey of
+published SSX 3 fps patches. Ranks 3–4 stay queued behind the 60 Hz service budget work (RV4); rank 5–6
+parked as recommended.
