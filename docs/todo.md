@@ -290,6 +290,11 @@ then 120 Hz simulation.
 - [ ] **VR4 (running):** VU1 block register residency (the unit thread's 30 ms/frame is mostly VU1 blocks, CP1 Table 3).
 - [ ] Android `-march` quirk (BA1 §1): root CMake's crypto/crc `-march` is overridden by a later plain `armv8-a+fp+simd`; decide which is intended (Odin supports both).
 - [ ] Odin fan: confirm by ear/feel that an adb `settings put system fan_mode 5` actually speeds the fan (Brad set 5 by hand on 09-26). The tools set 5 only for planned back-to-back batches (`odin_cooldown.py --fan performance`) and restore the pre-run value.
+- [ ] **Parked (Brad 09-26, likes it): VU1 on the GPU** — run SSX 3's VU1 microprograms as GPU compute feeding
+      paraLLEl-GS, taking the MTVU unit thread off the CPU. Feasibility spike GV1 (design-only); product work only
+      after GV1's verdict and Brad's go.
+- [ ] **VP1 (running):** multi-core VU1 census + design (Opus, design-only). **PG1 (queued behind the Odin):** PGO,
+      code layout, CPU target per platform.
 - [ ] **TN1 driver-side tuning** (Brad 09-26): GsWorker pin knob, Mesa disk shader cache, kgsl blocking-call audit, proprietary Adreno driver recheck; on F8's APK. Later: rebase the Mesa fork on newer upstream for A830 improvements (same gates).
 - [ ] **GL fallback aspect (small):** Android GL fallback still letterboxes into raylib's 640×448 canvas (1544×868 box);
       start raylib at the display size so it follows Brad's max-fit rule too.
