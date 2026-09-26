@@ -251,3 +251,16 @@ staging removed after the gate). States never entered git.
 - `ss2-b1-repro`/`ss2-b3-load` runs show `runner_rc=0` on refusal (the
   runner exits 0 after a clean load refusal); the drivers report
   `bound=exit`, rc=1 — unchanged SS1 behaviour, noted only.
+
+## Orchestrator gate (2026-09-26)
+
+**Pass.** Probed mechanism (empty-map default bucket count differs: libc++ 0, libstdc++ 1; `rehash`
+can't reproduce 1), minimal fix, and the added order verification now refuses loudly instead of
+drifting. The moved-from-string bug caught by a boot is exactly why the verify step exists. Mac→Linux
+stays refused by design (states are per host); lanes save on the host they run on.
+
+## Part 2 brief (orchestrator) — fold prep, then stop
+Fork `ssx3` moved to **`d4fc12e`** (VR2). Cherry-pick `5cce392 55f0c8d` onto it (branch `ss2-fold`);
+suite on the Mac and on bradflix; one bradflix save t2000 → load → compare from t2001 IDENTICAL.
+Also move `local/tooling/build/bradflix_build.sh`'s paraLLEl pin to fork `ssx3` `464f263` (SS1's CLUT
+accessor, as `mac_build.sh` uses) and confirm the bradflix save carries the CLUT tail. Stop; I push.
