@@ -218,3 +218,14 @@ python3 macsplit.py mac-sample.txt MTVU > mac-split.txt
 Scratch: `~/dev/ssx3-work/GF1/` (worktree, profile scripts, the Mac sample 1.4 MB, the run dir);
 bytesize `/home/brad/gf1/` (a 107 MB perf copy, symdir hard links, outputs). The mini disk is
 unchanged in any meaningful way.
+
+## Orchestrator gate, stage 1 (2026-09-26)
+
+**Pass; design approved.** Premise corrected with evidence (the GS decode already runs on the GsWorker; the unit pays a
+per-packet handoff of 4.24 ms/frame, 2.79 of it the futex wake per XGKICK drain). Go with **H1–H4** (one command per
+packet, move instead of copy, coalesced wakes, deeper descriptor queue), each exact by construction, one commit each,
+behind `PS2X_GS_HANDOFF_DIET=1` (default off until the Odin pair): gates = det IDENTICAL, `[pk]` GS packet stream
+byte-identical knob on vs off, MTVU jitter stress, 512 KB; Mac ABBA with MTVU; then **one** Android build (bradflix if
+AB1 has landed, else `bytesize_lock.sh`) and one Odin pair on the play settings (MTVU + LAG + blocks). Option D (split
+the GsWorker) stays deferred until CP2. Note for the record: CP1's per-thread "running" column is right; its Table 3
+self-symbol split mixed on- and off-CPU samples — your Table 1 supersedes it.
