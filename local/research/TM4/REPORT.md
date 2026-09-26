@@ -266,3 +266,89 @@ aux state `[obj+0x370]/[obj+0x3d0]` writers; name the term that makes the probe'
 (a per-update gain without dt, e.g. `sub_00138960`'s 200.0, or a per-frame vs per-update event). One targeted
 change only if a single mechanism is named and proven live; measure as before. Also, if cheap, a
 dispatch-target tap to find the HUD clock formatter (`/60` and the −1690 base). ≤ 2 builds, ≤ 4 boots; then stop.
+
+## Part 3 — countdown time base named and proven; `=4` fixes launch speed but breaks phase timing (2026-09-26)
+
+Early window ticks 1689–1799 (store ticks; +1 vs TM1 lines), stock vs `=3`,
+pos+vel+aux watch. obj=`0x1465c40` confirmed valid pre-1800 (known writer
+PCs fire). Launch structure (stock): init one-offs → one mode-2 update →
+countdown-copy phase (`0x113950/0x113958` + `0x139a80/0x139a8c`, 34 VBs) →
+mode-1 ride (55 VBs). The probe's countdown **accelerates ~3×**: VB-aligned
+`|v|` ratio stock→`=3` runs 1.000 → 1.340 over 14 VBs (stock +9.6/VB,
+probe +30/VB), generated inside the window (not pre-existing divergence).
+
+**Named term: the countdown-phase time base — six unpatched 1/60 words, four
+of them rate scales.** Countdown update `sub_00139A20` → `sub_00113648`
+integrates a sub-object at `[obj+0x788]` and copies `[sub+0x70]/[sub+0x80]` →
+pos/vel. Its dt-terms: `C1=*(0x49b480)` (`[s0+0x98] += 1/60` accumulator,
+`0x1132cc`), `C2=*(0x49b48c)` (mul chain, `0x11346c`), `C3=*(0x49b4a0)`
+(vector scale, `0x1139a4`), `C4=K5=*(0x49bf1c)` (`f12=[obj+0x300]×1/60` timer
+scale, `0x139a58`) — all single-reader, all rate-shaped — plus two compare
+thresholds deliberately left at stock (`0x49b494`, `0x49bf20`). Census
+correction: an earlier interim note said `sub_00113200`/`sub_001139A0` read
+no 1/60 — wrong (name-padding bug in a scratch printout); the committed
+`literal_readers.json` mapping was always correct, and the K1–K4/tree claims
+are unaffected. `sub_00138960`'s 200.0 is exonerated for launch (cruise
+mode-1 aux only).
+
+**Targeted change `=4` = `=3` + halve C1–C4 (one mechanism; thresholds
+untouched so per-VB branch behaviour should hold). Result: launch speed
+FIXED, phase timing BROKEN.** Countdown `|v|` ratio `=4`/stock: 0.977 →
+**1.000** over 33 VBs (vs `=3`'s →1.340) — the vel-compounding mechanism is
+proven live. But `=4` destabilises the countdown→ride phase selection: the
+`sub_00111408` jump table flickers between countdown-case and mode-1-case
+(`=4` early: 73 countdown + 106 mode-1 stores interleaved over 111 VBs vs
+stock's sequential 34 + 55), the compute-path variant (`0x113940/0x1138e8`)
+fires 33× (stock: 0×), countdown pos trails stock by 230 units at matched
+`|v|` (steering/phase difference, next lead), and stale countdown writers +
+displaced ~89-unit teleports leak into the cruise window. Cruise under `=4`:
+1.108×/VBlank overall (better than `=3`'s 1.152×; per-mode FAIL — confounded
+by the phase leak, not a clean read). So C1–C4 halves are **proven as the
+vel driver but rejected as a coherent conversion**: the phase machine reads
+per-update timer values, and control-flow-aware conversion is future work.
+No further change (brief allows one; budget spent as planned anyway).
+
+| `=4` observable | Stock | `=4` |
+| --- | --- | --- |
+| Countdown `|v|` ratio (VB-aligned, 33 VBs) | 1.000 | 0.977 → **1.000** |
+| Countdown pos gap at phase end | — | 230 units (direction/phase; next lead) |
+| Cruise path 1800–2400 | 7692.8, 12.82/VB | 8520.8, 14.20/VB (**1.108×**) |
+| Cruise per-update tscale median | 1.0003 | **0.5002** (half-steps still exact) |
+| Updates/VBlank; `A+0x1c` slope | 1; +1 | 2 (601/601, 0 susp); +2 |
+| SND final | 3666/0xf3b/…/3665 | identical counters (ee = `=2`/`=3` bit-exact); underruns +9.2% host-side |
+| det-hash | IDENTICAL (B5/B1) | DIFFER from tick 39 (B7/B8, intended) |
+| Route reaches race | Yes | Yes (target-bound t2404/2405, race writers, motion; frames not kept — see quirk) |
+| HUD clock | 01/06/11 | 2× inferred from updcnt slope (formatter untouched; not viewed) |
+
+**HUD tap (cheap item): 40 indirect render targets enumerated, formatter
+still NOT found.** `PS2X_TM4_JALR=1` (`tm4-jalr.txt`, 55 first-seen pairs, no
+cap): render range `[0x22add8,0x22c078)` calls into 40 targets beyond TM2's
+10 direct (0x22aXXX helpers, 0x395XXX/0x386XXX/0x376XXX/0x377XXX UI cluster,
+manager slots). No integer `div`/`divu` in any; `cvt.w.s` only in
+`sub_00376938` (giant 0x3928-B UI fn; 0x376XXX targets are its interior
+labels), `sub_00386128`, `sub_002CC0C0) — and none of the three loads any
+timestep literal. The `/60` + −1690 base remain unlocated; next: digit-buffer
+watch or deeper `jalr` chains from the UI cluster.
+
+**Gap — AI riders:** unchanged from Part 2 (single call sites to
+`sub_001216E0`; live resolution needs a second-rider-pos watch). Note the
+countdown finding applies to whatever obj flows through the chain.
+
+Worker error note: B7/B8 passed `--dump-ticks 1800,2400` (2 ticks) but the
+script contract is "exactly 3" — the runner dumped every frame (2330/2318
+dump lines; only first+latest PNGs kept), so no viewable `=4` frames. Tap,
+watch and det data unaffected.
+
+Part-3 pins: worktree `tm4` + `5ce906c` (`[TM4P3] =4 (countdown
+C1-C4 halves) + PS2X_TM4_JALR render dispatch tap`, 3 files); runner-dir
+check empty; build 1/2 `mac_build.sh --det --diag` → runner
+`ffeb244d427c791ebacc1ae9950b6fc9b41edf0f75357f01a3a0eb1c5b00c781`
+(2 reads match); boots: B5 `tm4-early-stock` (target, t2400, 63.5 s),
+B6 `tm4-early-probe3` (target, t2407, 65.0 s), B7 `tm4-early-probe4`
+(target, t2405, 67.5 s), B8 `tm4-cruise-probe4`+JALR (target, t2404,
+65.5 s) — all slot 1 (held), one slot each. Receipts:
+`tm4-early-stock-watch.txt` (875, `fe5ee67d…`),
+`tm4-early-probe3-watch.txt` (1487, `3ccfc72e…`),
+`tm4-early-probe4-watch.txt` (1696, `e19cfb4f…`),
+`tm4-cruise-probe4-watch.txt` (1027, `7f8b8a11…`), `tm4-jalr.txt` (55),
+`tm4-probe4-arm.txt`.
