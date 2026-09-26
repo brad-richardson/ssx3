@@ -418,10 +418,8 @@ census run would replace this projection with a measurement.
 - **Presentation latency under S3** (≤ 1 frame) is not measured.
 - **The Mac det census ran on `e708185`, before the fix.** The final commit's det identity comes
   from the four bradflix boots.
-- **Budget used:** 3/3 builds (2 Mac, 1 bradflix). 12 boots:
-  - 2 Mac det, 1 Mac PK-log, 3 mini exclusive speed/census;
-  - 4 bradflix det;
-  - plus the 2 stage-1-era Mac det boots counted in the first two.
+- **Budget used:** 3/3 builds (2 Mac, 1 bradflix). 10 boots: 2 Mac det, 1 Mac PK-log, 3 mini
+  exclusive speed/census, 4 bradflix det.
 
   Mini exclusive hold: about 3 min. Scratch: `~/dev/ssx3-work/MT1` 1.8 GB (`build-rel` kept as the
   stage-3 knob-0 control; `build-det` removed). bradflix `HS1/mt1-det` and `HS1/PS2Recomp-mt1` are
