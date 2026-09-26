@@ -528,3 +528,16 @@ edges ±40 ticks, so these rates are approximate and the tick table above is the
   differentials cover the rest.
 - No mutation run was made to show the unit test fails on a seeded bug. Its coverage line
   shows the O, U and Z classes and the queued and FSSET paths being exercised.
+
+## Orchestrator gate, D1 (2026-09-26)
+
+**Pass.** Bit-exact vs the scalar core over 20 M cases (all 96 encodings, every flag path), suites green on Mac and
+Linux x86, det IDENTICAL blocks on/off; Mac 1.196× serial, 1.338× with MTVU (race 0.945× of full speed); Odin race
+1.054× on the play settings (0.420× → 0.442×; 1.17× in the unit-gated early race). D2 held (agreed: capped by the
+gating thread, and small). D1b noted as the next cheap step.
+
+## D1 fold brief (orchestrator) — then stop
+Flip `PS2X_VU1_FMAC_SIMD` (CMake) and `-Pps2xVu1FmacSimd` (gradle) to **default ON** on a branch from fork `ssx3` tip
+(`f0d2d3c`; keep the scalar path compiled for the switch-off case and the test). Gates: Mac suite + bradflix suite +
+det IDENTICAL (default build, blocks on) + one Android compile + one iOS device compile (F6/F7 recipe, configure + build
+only). Stop; I push. The next device build (with FS2's Turnip if ready) will carry it.
