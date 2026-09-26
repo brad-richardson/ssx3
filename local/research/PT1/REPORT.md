@@ -110,3 +110,8 @@ the lease), ~2 h of 3 h. Scratch `~/dev/ssx3-work/odinprof/PT1/` 1.3 GB
 (the symdir hardlinks the pulled `.so`). Text in git (tool + REPORT);
 `local/research/PT1/profile/` left on disk, uncommitted (regenerates in
 19 s). No lease held at close; play state untouched (no device run).
+
+## Orchestrator gate (2026-09-26) — adopted, lane closed
+
+**Pass.** Offline reproduction of CP1's Tables 2–4 within ~5 % (GPU exact), deterministic, 19 s per analysis; the
+live path follows the run-modes rule and labels its mode. The live path gets exercised by CP2 (its first user).

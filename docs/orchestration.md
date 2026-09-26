@@ -158,6 +158,11 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   controls). `ccache -z` before a measured build; never `ccache -C` without asking (it wipes every
   lane's entries). (RS1)
 
+- Odin profiles: `local/tooling/odin_profile.py --apk … --apk-sha … --label L [--env …] [--offcpu]` (PT1) runs the
+  cool-down, lease, launch, simpleperf + schedstat sampler, restore and host analysis in one command; reports land
+  in `local/research/<L>/profile/` (per-thread running/runnable/blocked, top symbols, stage buckets, GPU, counters).
+  `--from-perf` re-analyses an old capture.
+
 - Boots and controls: use `local/tooling/boot/ssx3_boot.py` (never copy a driver into a lane). Controls
   are cached: `local/tooling/boot/baseline.py get --pins PINS` prints the control dir (rc 2 `MISSING`);
   if missing, `make --pins PINS --runner R` once, then the lane boots only its candidate and runs
