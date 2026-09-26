@@ -628,3 +628,9 @@ so you can keep the D1 unstripped `.so` for a profile if you want it.
 Leftovers on bytesize, yours to delete:
 - `/home/brad/vr4`: 7.9 GB, the D1 A/B build. Its APK is on the mini.
 - `/home/brad/vr4fold`: holds the unstripped `.so` of the fold APK, useful for a profile.
+
+## Orchestrator gate, fold (2026-09-26) — pushed
+
+**Pass; pushed** fork `ssx3` `f0d2d3c..b97b241` (ff, runner-dir empty): exact SIMD FMAC core on by default
+(`PS2X_VU1_FMAC_SIMD` / `-Pps2xVu1FmacSimd`), all five fold gates green (Mac + bradflix suites, det, Android APK
+`47b3ef38…`, iOS compile). D1b/D2 stay queued. Lane kept open for the next VU1 round (D1b), pending the next plan.
