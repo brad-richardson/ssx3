@@ -311,6 +311,10 @@ then 120 Hz simulation.
 
 ## Parked
 
+- **Asset/texture preload (Brad 09-26: not yet, documented):** GameCube learned lazy texture loads stall mid-ride; preload or
+  block-compressed packs fix it (`docs/research/gamecube-learnings.md` §4a). Relevant on the PS2 route only with a
+  texture-replacement pack; nearer checks: pipeline-cache prewarm/persist on the Odin, ISO read caching for loading.
+
 - **Present with Vulkan directly (option B; Brad 09-25 evening: un-parked as the VK1 Opus spike, Odin first).** Granite WSI swapchain
   (SDL / CAMetalLayer / ANativeWindow) for the game image, virtual pad redrawn in Vulkan, raylib kept
   only for input/audio (or SDL). Buys: no copies, no deprecated GL on Apple, precise present timing for

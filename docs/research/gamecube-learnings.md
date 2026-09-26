@@ -207,6 +207,31 @@ Dolphin-pipeline-specific and archived by policy
 `SLUSOVF.BIG` overlay + file-table bsearch bug are PS2-lane findings, not GC
 (`docs/facts.md` §Guest).
 
+### 4a. Asset / texture preload (added by the orchestrator, 09-26; Brad asked)
+
+GameCube finding (`docs/reserve/texture-remaster.md` §10.12–10.13; `docs/reserve/asset-policy.md` §Normalization):
+- **Loading textures on first draw causes mid-ride stalls.** With Dolphin's hi-res pack loaded lazily
+  (`CacheHiresTextures` off), every burst of new art — a crash, a camera cut, new terrain — read and
+  PNG-decoded on the frame that needed it; the frame rate dipped and recovered.
+- **Preload moves the cost to boot:** `SSXPreloadTextures` loaded the whole pack at start (894 MB decoded
+  for `pack-v8`, 8,806 PNGs before the first frame; fine on an 8 GB phone, slow to boot).
+- **Block compression removes it instead:** the phones support BC (A18 Pro `supportsBCTextureCompression = True`),
+  so a DDS pack (927 files with mip chains, `tools/texture_pack_dds.py`) uploads without decoding and BC1 cuts
+  894 MB to ~110 MB, which makes preloading nearly free.
+- Startup side (`startup-shortcut.md`): the ~5 s pre-menu wait on the phone was CPU-bound asset load; latency
+  knobs (fast disc) saved ~0 there.
+
+PS2 route: **not applicable yet, documented for later.**
+- Stock SSX 3 on our runtime has no host texture pack: the guest uploads textures into the 4 MB GS VRAM itself,
+  and paraLLEl renders from that (no texture-replacement path). The lessons apply if/when we add hi-res texture
+  replacement (a remaster pack): preload or block-compress, never decode on the draw.
+- Nearest current analogues: paraLLEl's **pipeline/shader compiles** (MD1 counted 3,496 pipeline creates during the
+  title screen and none in the race — already a de facto warm-up) and **Turnip's first-use shader compiles** on the
+  Odin; host **file-read caching** of the ISO for loading screens (measure first; GC showed latency knobs don't help a
+  CPU-bound load).
+- Candidate items (parked): texture-replacement design (preload + BC, paraLLEl hook) if a remaster is ever wanted;
+  a pipeline-cache persist/prewarm check on the Odin (does the first race stutter on first-time shader compiles?).
+
 ## 5. Tooling inventory
 
 One line per tool (phrasing follows `tools/README.md` + docstrings); PS2
