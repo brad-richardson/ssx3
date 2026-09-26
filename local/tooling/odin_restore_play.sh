@@ -49,4 +49,7 @@ for f in "$GAM/BASLUS-20772-GAM0001" "$GAM/icon.sys" "$GAM/ssx1.ico" \
 done
 [ "$fail" = 0 ] || exit 1
 adb -s "$S" shell "rm -rf $FILES/mc0-test/*; ls -A $FILES/mc0-test | wc -l; am force-stop $PKG"
+# Fan: put Brad's pre-run fan_mode back if odin_cooldown.py changed it (never 0 = off).
+fanprev=$(adb -s "$S" shell cat /data/local/tmp/mg/fan_prev 2>/dev/null | tr -dc 0-9)
+if [ -n "$fanprev" ] && [ "$fanprev" != 0 ]; then adb -s "$S" shell "settings put system fan_mode $fanprev && rm -f /data/local/tmp/mg/fan_prev"; echo "FAN restored fan_mode=$fanprev"; fi
 echo "END pid=$(adb -s "$S" shell pidof $PKG || echo none) battery=$(adb -s "$S" shell dumpsys battery | grep -m1 level)"

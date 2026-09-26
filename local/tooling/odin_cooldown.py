@@ -20,6 +20,9 @@ ap.add_argument('--mode', choices=['screen', 'final'], default='screen')
 ap.add_argument('--max-temp-c', type=float, default=42.0)
 ap.add_argument('--wait-s', type=float, default=180.0)
 ap.add_argument('--cap-min', type=float, default=20.0)
+ap.add_argument('--fan', choices=['performance', 'leave'], default='performance',
+                help='performance: set fan_mode=5 for the run (remembers the previous value in\n'
+                     '/data/local/tmp/mg/fan_prev; odin_restore_play.sh puts it back). Never writes 0 (off).')
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 LOG = open(os.path.join(a.out, 'cooldown.txt'), 'a')
@@ -40,6 +43,16 @@ def sample():
     temp_c = int(out[1]) / 1000.0 if len(out) > 1 and out[1].isdigit() else 999.0
     return status, temp_c
 
+
+# Fan (Brad 09-26: fan_mode 0 = off, 1/4 = quiet/smart, 5 = performance).
+if a.fan == 'performance':
+    sh_ = lambda c: subprocess.run(['adb', '-s', D, 'shell', c], capture_output=True, text=True, timeout=60).stdout.strip()
+    prev = sh_('settings get system fan_mode')
+    if prev != '5':
+        if prev.isdigit() and prev != '0':
+            sh_(f'[ -f /data/local/tmp/mg/fan_prev ] || echo {prev} > /data/local/tmp/mg/fan_prev')
+        sh_('settings put system fan_mode 5')
+    log(f'FAN performance (fan_mode {prev} -> {sh_("settings get system fan_mode")}; restore via odin_restore_play.sh)')
 
 t0 = time.time()
 log(f'COOLDOWN mode={a.mode} max_temp={a.max_temp_c} C wait={a.wait_s if a.mode == "final" else 0:.0f} s')

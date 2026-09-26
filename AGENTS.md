@@ -162,7 +162,8 @@ Close the pane after its gate read.
 - **Odin run modes (Brad 09-26):** cool down with `local/tooling/odin_cooldown.py --out <run dir> --mode screen|final`.
   **screen** (default, A/B screening): launch at once when thermal status 0 and the prime zone < 42 °C, and
   end speed runs at `--stop-tick 3000`. **final** (ledger numbers, play-build decisions): status ≤ 1 +
-  fixed 180 s, stop tick 4500, ABBA. Say which mode each number came from.
+  fixed 180 s, stop tick 4500, ABBA. Say which mode each number came from. The cool-down sets the Odin fan to
+  Performance (`fan_mode` 5; 0 = off is never written) and `odin_restore_play.sh` restores the pre-run value.
 - **Boots:** every boot script has progress caps. No boot over 600 s
   without orchestrator OK.
 - **Pad route:** race boots use **I26-FAST** (`local/research/I26/ROUTES.md`,
