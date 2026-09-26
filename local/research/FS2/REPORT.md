@@ -347,7 +347,7 @@ Behaviour on the Odin is the gate, as the brief says.
 | 1 | upstream `c501e1d16e`, API 35, own prefix | `5d1b961e…` | 14,187,656 | same NEEDED + identical dynsyms as shipped; API/prefix differ → rebuilt as #2 |
 | 2 | upstream `c501e1d16e`, API 34, prefix `/tmp/turnip-gen8` | `8ee620b31637f18bfc6b57dcdbbba169d6374fb2a15b4b44aca9b50579eb0d14` | 14,188,712 | **T1: pixels fail** |
 | 3 | `c501e1d16e` + u_gralloc patch (bytesize `ff38e861a6`, tree = fork worktree `745f35565f7`) | `4e9534047e7144951e2adab66cbf76ad51a5868a92d5c9733d1bba080128bf95` | 14,187,880 | **T2: stock gate pass** |
-| 4 | `745f35565f7` + kgsl poll patch = `5a406e36dd4` | **not found: bytesize WSL wedged mid-build** (see Blocker) | | |
+| 4 | `745f35565f7` + kgsl poll patch = `5a406e36dd4` (first try died at step 102/898 when the WSL VM wedged; retried on the fresh VM with `ninja -j8`, 61 s) | `a315b74aba2307a51cd8aaebb88abb84890ecc7d855516dbbcd715cf87de6224` | 14,188,360 | `Mesa 26.3.0-devel (git-5a406e36dd)` |
 
 Mesa fork (Brad-approved public fork `brad-richardson/mesa`, branch `ssx3` = `c501e1d16e1`):
 worktree `~/dev/ssx3-work/FS2/mesa-wt`, branch `fs2-turnip`:
@@ -364,7 +364,13 @@ Shipped to bytesize as a git bundle (`44794094…`), so both sides build the sam
 | T1 | `bb846329…` (#2 plain upstream) | legacy GS path, compare 1100/3000 | 25.45 (0.425×) | 23.27 / 0.40 / 15.55 | **FAIL: `diff_px=228919` (t1100), `229285` (t3000)**; the AHB and the screen show tiled garbage (sc01 at tick 2100) | UBWC layout mismatch on the AHB import: exactly what the u_gralloc patch fixes |
 | T2 | `838c2d4d…` (#3 upstream + u_gralloc) | same | **25.39 (0.424×)** | 23.67 / 0.41 / 15.88 | **`diff_px=0`** at t1100 (`ad2e9e852b54155a` = VK1/VK2/S2) and t3000 (`2d19b536…`; mid-race frames vary run to run) | 0 FATAL, jobs=55501, no device lost. Play APK in the Stage-2 ABBA: 25.36 / 25.23 → **within noise** |
 
-### Blocker (Part 3 paused; orchestrator decides)
+### Blocker (resolved 09:15: the orchestrator restarted WSL; two concurrent heavy builds had used all 12 GB)
+
+Since then every heavy bytesize job goes through `local/tooling/bytesize_lock.sh`, in the order
+VR4 → FS2 → AP1. My build-4 retry ran unlocked, in the minute after the restart and before the
+lock rule reached me: one `-j8` job, 61 s.
+
+Original note:
 
 Mesa build 4 started ~08:31. The WSL VM (`vmmemWSL`, restarted 08:30:37) grew to 10 GB with only
 1.1 GB free on the host, then went idle: CPU time 3,445 → 3,499 s over ~35 min, 1–3 % host
@@ -391,3 +397,22 @@ anything other lanes (VR4?) have running there. It's a shared host, so it's your
 
 Budget so far (Part 3): Mesa builds 3 of 4 (the 4th is stuck), Android builds 2 of 4,
 Odin launches 2 of 10 (T1, T2). The fork's `ssx3` is not pushed; `fs2-turnip` is local.
+
+### State at the bytesize hold (09-26, orchestrator: C: drive full, WSL disk image 356 GB)
+
+- **Done:** Mesa builds 4 of 4:
+  - stock gate passed (T2, upstream + u_gralloc);
+  - patched `.so` `a315b74a…` (`git-5a406e36dd`) is built on bytesize at
+    `/home/brad/fs2/turnip/out-poll/`, not yet pulled to the mini.
+- **Held:** Android build 3 (packaging only: swap the `.so` into the fs2 tree; one APK covers
+  the Granite fix on/off via `PS2X_PGS_FS2_LEGACY`). My lock-waiter had only seen `VR4-fold`
+  holding the lock and was stopped before claiming anything.
+- **Next once bytesize is back:**
+  1. Android build 3 under `bytesize_lock.sh run FS2 -- …` (after VR4), `-j8` rule n/a (gradle
+     packaging).
+  2. Pull + 2 SHA reads.
+  3. Odin P1 (patched, legacy GS path, compare 1100/3000, `--lifecycle 2000`), P2 (patched +
+     Granite fix, compare), then ABBA ×4 vs the play APK.
+  4. Fast-forward push `fs2-turnip` → fork `ssx3` only if those pass.
+- **Not done on purpose:** re-signing an APK on the Mac. A different signing key would force an
+  uninstall on the Odin, and that deletes the app's external files dir (Brad's saves).

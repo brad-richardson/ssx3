@@ -61,7 +61,7 @@ meson setup build-android-aarch64 --cross-file android-aarch64.txt --native-file
   -Dbuildtype=release -Dstrip=true -Dplatforms=android -Dvideo-codecs= -Dplatform-sdk-version=36 \
   -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true \
   -Dfreedreno-kmds=kgsl -Degl=disabled -Dandroid-libbacktrace=disabled > "$OUT.setup.log" 2>&1 || { tail -30 "$OUT.setup.log"; exit 1; }
-ninja -C build-android-aarch64 install > "$OUT.ninja.log" 2>&1 || { grep -m5 -B2 -A8 "error" "$OUT.ninja.log"; exit 1; }
+ninja -j${JOBS:-8} -C build-android-aarch64 install > "$OUT.ninja.log" 2>&1 || { grep -m5 -B2 -A8 "error" "$OUT.ninja.log"; exit 1; }
 cp $PREFIX/lib/libvulkan_freedreno.so $OUT/ && so=$OUT/libvulkan_freedreno.so
 ls -la $so; sha256sum $so
 strings -a $so | grep -E "Mesa [0-9]|git-[0-9a-f]{10}|Turnip Adreno" | sort -u
