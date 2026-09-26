@@ -32,7 +32,13 @@ RUNNERS = {'base': ('/Users/brad/dev/ssx3-work/F5/bin/runner-clean', []),
            'cbblk': (WORK + '/bin/runner-cb-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
            'cboff': (WORK + '/bin/runner-cb-clean', []),
            # 2C: loop chaining (fa35e67), blocks on.
-           'lpblk': (WORK + '/bin/runner-lp-clean', ['--env', 'PS2X_VU1_BLOCKS=1'])}
+           'lpblk': (WORK + '/bin/runner-lp-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
+           # 2D: fork tip fb28d99 (canonical images) vs vr2-fold2 211f3d5 (vu1gen-vr2d), knob off / on.
+           'tip': (WORK + '/bin/runner-tip-clean', []),
+           'doff': (WORK + '/bin/runner-d-clean', []),
+           'don': (WORK + '/bin/runner-d-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
+           # 2D: vr2-fold2 54251ed runtime with the canonical (block-free) images.
+           'ddump': (WORK + '/bin/runner-d3-dump', [])}
 
 
 def runner(c):

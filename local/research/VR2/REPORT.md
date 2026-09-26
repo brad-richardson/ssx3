@@ -573,3 +573,107 @@ det IDENTICAL vs the a3efbfe key with blocks **off and on** (bradflix via your p
 a knob-off speed pair vs fork tip to confirm no cost when off (the 2B H5 single sample said 0.986×); one
 Android compile on bytesize (wait your turn; use the F6 inputs + the new images). Stop and hand back; I push
 and schedule the Odin pair (blocks on vs off) with the next device APK.
+
+## Part 2D — fold prep (worker, 2026-09-26 00:35–01:55 EDT)
+
+**Result: ready to push.** Local branch `vr2-fold2` = fork `ssx3` **`a523700`** (rebased from
+`fb28d99` on your mid-run instruction) plus:
+
+| # | New | From | Subject |
+| --- | --- | --- | --- |
+| 1 | `882ff3e` | `e5ac052` | stage 4 v1: block functions behind `PS2X_VU1_BLOCKS` (default **off**) |
+| 2 | `e6b10f0` | `7a2d9ed` | pipes fixture, coverage and guard-miss counters |
+| 3 | `ccbade5` | `a6e666b` | `stopRequestedForTest` hook |
+| 4 | `5d03750` | `95f952e` | error stop drains the pipelines (VB1 gap) |
+| 5 | `b8d7898` | new | block entry as a frameless trampoline; block counters in hash builds |
+| 6 | **`d585e5c`** | new | generated pair functions `noinline` (keeps trampolines frameless) |
+
+- **Pick order:** branch order (stage 4 first), because `a6e666b`'s test changes sit on
+  `7a2d9ed`'s test. `8610c69` and `fa35e67` are dropped as decided. No conflicts.
+- **Rebase check:** the rebase onto `a523700` changed nothing but VK2's files (the file-level
+  diffs are identical).
+- Runner-dir guard empty. Not pushed. `refs/vr2/fold2` on bradflix (private, via bundle) can go
+  after your push.
+
+**Why 5 and 6 are new.**
+- The knob-off pair (H14/H15) came out at **0.987×** vs the fork tip, not "no cost".
+- Cause: every leader entry landed in the block function, which built its full frame
+  (272 B, 10 register saves, stack guard) *before* testing `m_blocksOn`. It then tail-called the
+  pair function, which built its own frame.
+- Fix 5: `b<pc>` became a guard-only trampoline into an out-of-line body `B<pc>`.
+- Fix 6: the compiler then merged the leader's pair function into the trampoline (its only
+  direct caller), so pair functions are now `noinline`. They are only reached through the table
+  or tail calls, so only the leaders' change.
+- **Result:** the trampoline is 3 instructions plus a branch when off. All 17,600 generated
+  functions (14,336 `f`, 1,632 `b`, 1,632 `B`) hand off by tail branch (0 `blr`).
+
+### Images: `~/dev/ssx3-work/vu1gen-vr2d` (for promotion to `vu1gen-ssx3`)
+
+- A dump boot (mini, one slot) with this emitter produced **the same 7 names/hashes** as
+  `vu1gen-ssx3`. SHAs: `vu1gen-vr2d.sha`; the file set hashes to `d28e3fc6…` (as checked on
+  bytesize).
+- Pair-function text is unchanged apart from the `PS2X_VU1_NOINLINE` marker. Each image adds
+  its block trampolines and bodies: 1,632 blocks in total.
+- Superseded drafts, kept in scratch: `VR2/vu1gen-vr2d-v1` (= 2B's `vu1gen-b`, byte-identical)
+  and `-v2` (trampoline without noinline).
+
+### Gates (at the rebased tip `d585e5c` unless noted)
+
+| Gate | Result | Receipt |
+| --- | --- | --- |
+| Mac suite | **674/674** (VK2 added 10). Also 664/664 at the pre-rebase tips `211f3d5`, `af4acb2` and `54251ed` | `suites-2d.txt` |
+| Differential | **0** generated-vs-queued, 0 blocks-vs-pairs (271 programs, 254,400 runs, 85,509 GIF packets) | `suites-2d.txt` |
+| det bradflix, **blocks off**, 512 KB | **IDENTICAL** vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` (hash 1..2400 + snd/coverage). Runner `3737cb7c…`, byte-identical to the pre-rebase `54251ed` build (VK2 is Android-only there) | `check-d4-det-off.txt` |
+| det bradflix, **blocks on**, 512 KB | **IDENTICAL**. Blocks: 79.9 % of pairs, 79.0 % of cycles; `nostall_misses=0`; misses end-only (3,454) | `check-d4-det-on.txt`, `stats-2d.txt` |
+| Android, bytesize (F6 recipe, root `/home/brad/vr2d`; codegen, paraLLEl `1b3a294` and jniLibs by symlink to F6's; `vu1gen-vr2d` real copy, SHA set verified) | **BUILD SUCCESSFUL in 14 m 54 s**, 0 FAILED, 7 `vu1_*.o`. APK `e1d27365172b6a96307203b4e6cd5d44423489e4b2da3c2d8e824eedb9bda216`, 192,173,644 B (two reads; left on bytesize) | `build-android-2d.sh` |
+
+### Speed (mini, exclusive holds ≤ 5 min, quiet host; measured on the `fb28d99` base, before the rebase)
+
+`tip` = fork `fb28d99` with the canonical images (`b3376c8b…`). `doff` / `don` = `vr2-fold2`
+runtime + `vu1gen-vr2d`, knob off / on (`85d081d7…` final; H14/H15 used the pre-trampoline
+`9fddeb6f…`). `ddump` = `vr2-fold2` runtime with the canonical, block-free images
+(`e0263142…`). All runs are in `speed-all.txt`.
+
+| Holds | Pair | Result |
+| --- | --- | --- |
+| H14/H15 (before the trampoline) | tip 31.33 vs doff 30.91 | **0.987×** (all 4 pairs lower) |
+| H16/H17 (final) | tip 31.14 vs doff 30.83 (30.54 including H17-1's first sample, 26.1 during a load spike) | **0.990×** (0.981× with it) |
+| H18 | tip 31.43 vs ddump 31.56 | **1.004×**: the VR2 runtime changes cost nothing |
+| **H19** | tip 31.49 vs **don 33.61** | **1.067×** with blocks on |
+
+**Reading.** With blocks off, what remains is about 1 % on the Mac. It comes from the block
+images (the leader-trampoline hop plus about 11 MB more code), not from the runtime.
+
+| Plan | Result |
+| --- | --- |
+| Turn blocks on after the Odin pair | The off cost goes away |
+| Keep blocks off | Ship block-free images (the canonical ones): same runtime, knob unusable, 0 cost |
+| Remove the hop entirely | Two dispatch tables chosen per run: a member load per hand-off, likely no cheaper |
+
+The speed pairs ran before the rebase. `a523700` touches no VU1 code and leaves the Linux det
+runner byte-identical, so I did not re-run them.
+
+### Budgets and notes
+
+- **Builds, Mac (7):**
+  - `211f3d5` tests + dump runner;
+  - `211f3d5` speed runner;
+  - the tip control (a `git archive` build);
+  - `af4acb2` tests + dump runner;
+  - `af4acb2` speed runner;
+  - `54251ed` tests + dump runner, and its speed runner (one build dir);
+  - `d585e5c` suite.
+- **Builds elsewhere:** bradflix 4 det builds (`211f3d5` and `af4acb2` superseded before booting,
+  `54251ed`, `d585e5c`); bytesize 1 Android.
+- **Boots:** 3 dumps (mini, one slot), 4 det (bradflix), 24 speed boots in 6 holds (230–232 s).
+- **Waiting for bytesize:** MT1's Android build was running at first. `busy.sh` (a `ps` check that
+  can't match itself) waited until 01:35. The rebase restarted the waiter; the staged tree was
+  replaced before the build started.
+- **Rebase:** `refs/vr2/fold2` on bradflix needed a force-update (`+refspec`), since the
+  rebased branch isn't a fast-forward. It's a private ref, not GitHub.
+- A zsh gotcha cost one det boot: `$env` isn't word-split in zsh, so the driver got
+  `--env PS2X_VU1_BLOCKS=1` as one argument and exited before booting. Rerun with explicit
+  arguments.
+- **For the push (your step):** promote `vu1gen-vr2d` to `vu1gen-ssx3` (the old one to
+  `vu1gen-ssx3-pre-vr2d`). The fork `ssx3` fast-forwards `a523700..d585e5c`. Scratch
+  `~/dev/ssx3-work/VR2` is about 10 GB.
