@@ -1,0 +1,64 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+// GV1 throughput kernel: each thread runs ITERS vertex transforms, each = MULAx, MADDAy, MADDAz,
+// MADDw (vf5 = [vf1 vf2 vf3 vf4] x vf6), i.e. 4 FMAC ops of 4 lanes, B2a10's matrix x vector.
+// MODE 0 = exact (VR4 core: normalize, fp32 value, int64 double-rounding classification, flags),
+// MODE 1 = lite (normalize + fp32 value + flags from the fp32 result only, no exact classification),
+// MODE 2 = plain fp32 (no normalization, no flags).
+#include "fmac_core.glsl"
+layout(local_size_x = 64) in;
+layout(std430, binding = 0) readonly buffer In { uvec4 m[4]; } inb;
+layout(std430, binding = 1) writeonly buffer Outs { uvec4 os[]; };
+layout(push_constant) uniform PC { uint iters; } pc;
+
+uvec4 liteOp(uint arith, uvec4 a, uvec4 b, uvec4 acc, inout uint mac, inout uint status)
+{
+    uvec4 r; uint st = 0u, mc = 0u;
+    for (int k = 0; k < 4; ++k)
+    {
+        precise float fa = uintBitsToFloat(normOp(a[k])), fb = uintBitsToFloat(normOp(b[k]));
+        precise float fc = uintBitsToFloat(normOp(acc[k]));
+        precise float p = fa * fb;
+        precise float v = arith == kMul ? p : fc + p;
+        uint vb = floatBitsToUint(v), ex = (vb >> 23) & 0xFFu;
+        uint fl = (ex == 0u ? 1u : 0u) | ((vb >> 31) != 0u ? 2u : 0u) | (ex == 0xFFu ? 8u : 0u);
+        if (ex == 0u) vb &= 0x80000000u;
+        if (ex == 0xFFu) vb = (vb & 0x80000000u) | 0x7F7FFFFFu;
+        r[k] = vb; st |= fl; uint sh = uint(3 - k);
+        mc |= ((fl & 1u) << sh) | (((fl >> 1) & 1u) << (4u + sh)) | (((fl >> 3) & 1u) << (12u + sh));
+    }
+    mac = mc; status = (status & 0xFF0u) | st | (st << 6);
+    return r;
+}
+
+void main()
+{
+    uint id = gl_GlobalInvocationID.x;
+    uvec4 m1 = inb.m[0], m2 = inb.m[1], m3 = inb.m[2], m4 = inb.m[3];
+    vec4 v0 = vec4(1.0 + float(id & 255u) * 0.001, 0.5, 0.25, 1.0);
+    uvec4 vf6 = floatBitsToUint(v0), vf5 = uvec4(0u), acc = uvec4(0u);
+    uint mac = 0u, status = 0u, chk = 0u;
+    for (uint it = 0u; it < pc.iters; ++it)
+    {
+#if MODE == 0
+        fmacExact(kMul, 0u, 15u, m1, vf6, acc, 0u, 0u, acc, mac, status);   // MULAx
+        fmacExact(kMadd, 1u, 15u, m2, vf6, acc, 0u, 0u, acc, mac, status);  // MADDAy
+        fmacExact(kMadd, 2u, 15u, m3, vf6, acc, 0u, 0u, acc, mac, status);  // MADDAz
+        fmacExact(kMadd, 3u, 15u, m4, vf6, acc, 0u, 0u, vf5, mac, status); // MADDw
+#elif MODE == 1
+        acc = liteOp(kMul, m1, uvec4(vf6.x), acc, mac, status);
+        acc = liteOp(kMadd, m2, uvec4(vf6.y), acc, mac, status);
+        acc = liteOp(kMadd, m3, uvec4(vf6.z), acc, mac, status);
+        vf5 = liteOp(kMadd, m4, uvec4(vf6.w), acc, mac, status);
+#else
+        precise vec4 a = uintBitsToFloat(m1) * uintBitsToFloat(vf6).x;
+        a = a + uintBitsToFloat(m2) * uintBitsToFloat(vf6).y;
+        a = a + uintBitsToFloat(m3) * uintBitsToFloat(vf6).z;
+        vf5 = floatBitsToUint(a + uintBitsToFloat(m4) * uintBitsToFloat(vf6).w);
+#endif
+        chk ^= vf5.x ^ vf5.y ^ vf5.z ^ vf5.w ^ mac ^ status;
+        // next vertex depends on this one (as the CPU chain), stays in a sane range
+        vf6.x = floatBitsToUint(uintBitsToFloat(vf5.y) * 0.5 + 0.25);
+    }
+    os[id] = uvec4(chk, vf5.x, mac, status);
+}

@@ -1,0 +1,44 @@
+== Sat Sep 26 11:54:29 EDT 2026 host brads.mac.mini.lan Apple M5 Pro
+11:54  up 3 days, 16:51, 3 users, load averages: 9.25 5.52 5.20
+== sha256
+1fdc6fa3ab52efcba93e0f4c2220b2482c74c09a354711f3f5282a29ffd7912f  bench/fmac_core.glsl
+07a6ac7f67a04dcb2db763bdbbf983b2e7d9f1f2145d67622c33ed398dad420c  bench/test.comp
+ed9854f625dd98d262be81680fb9176e9c1b776d112f2269bf9e1a995b9a92e7  bench/bench.comp
+0a16c130717ebb0de671940202654cd145e0600444de71ac68b1cf774a6188d8  bench/host.cpp
+958a12b1c188d8e872c8eaa65b6f28daaafc5cb08b36bd6c21d3bcf67675cf73  bench/bench0.spv
+d06d6976f4284e6f3344510ec20c534c11dd18822e187779620774e32ea90fed  bench/bench1.spv
+1a54259134a0baa04cb37cdc283a1fc83c38030a8fbdad896484e891bd281262  bench/bench2.spv
+0f41947e48ee02f9a6cb1b54a086a105821597a53fa6ec83b1a431a78cdf7bb7  bench/test.spv
+64fe980301b4c18522b31bb99080fe4b77e9c03c60cbf71c535d93fcc4fda402  ref/gen_cases.cpp
+f0180991c0936edc43144c1172822b0fe46c84591ba83359529de4db95309b4b  ref/gen_cases
+== CPU reference (real VR4 core, fork b97b241 VU sources) + CPU throughput
+cases=1000000 fmac_ops=72 scalar_vs_simd_mismatch=0 status O=214648 U=33873 Z=207536 -> ref/cases.bin
+cpu_core form=simd ops=80000000 seconds=1.147 Mops/s=69.8 (1 thread, direct flags) chk=416baaaa
+cpu_core form=scalar ops=80000000 seconds=2.196 Mops/s=36.4 (1 thread, direct flags) chk=416baaaa
+== GPU bit-exact test
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+test cases=1000000 mismatches=0 (value 0, mac 0, status 0) not_decoded=0 gpu_ms=1.454 wall_ms=12.124
+== GPU throughput: vertex-parallel (32768 threads x 64 transforms) and program-parallel (1024 threads x 200)
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench0.spv threads=32768 iters=64 reps=7 gpu_ms_best=3.108 gpu_ms_mean=4.135 fmac_ops=8.39e+06 Gops/s_best=2.70 ns_per_vertex_transform=1.4821 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench1.spv threads=32768 iters=64 reps=7 gpu_ms_best=0.732 gpu_ms_mean=1.141 fmac_ops=8.39e+06 Gops/s_best=11.45 ns_per_vertex_transform=0.3493 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench2.spv threads=32768 iters=64 reps=7 gpu_ms_best=0.028 gpu_ms_mean=0.073 fmac_ops=8.39e+06 Gops/s_best=296.50 ns_per_vertex_transform=0.0135 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench0.spv threads=1024 iters=200 reps=7 gpu_ms_best=2.303 gpu_ms_mean=2.796 fmac_ops=8.19e+05 Gops/s_best=0.36 ns_per_vertex_transform=11.2459 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench1.spv threads=1024 iters=200 reps=7 gpu_ms_best=0.387 gpu_ms_mean=0.404 fmac_ops=8.19e+05 Gops/s_best=2.12 ns_per_vertex_transform=1.8890 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench2.spv threads=1024 iters=200 reps=7 gpu_ms_best=0.018 gpu_ms_mean=0.291 fmac_ops=8.19e+05 Gops/s_best=44.58 ns_per_vertex_transform=0.0897 chk=00000000
+== saturation: 262144 threads x 64
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench0.spv threads=262144 iters=64 reps=5 gpu_ms_best=20.431 gpu_ms_mean=25.927 fmac_ops=6.71e+07 Gops/s_best=3.28 ns_per_vertex_transform=1.2178 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench1.spv threads=262144 iters=64 reps=5 gpu_ms_best=2.925 gpu_ms_mean=4.834 fmac_ops=6.71e+07 Gops/s_best=22.95 ns_per_vertex_transform=0.1743 chk=00000000
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench2.spv threads=262144 iters=64 reps=5 gpu_ms_best=0.160 gpu_ms_mean=1.914 fmac_ops=6.71e+07 Gops/s_best=420.09 ns_per_vertex_transform=0.0095 chk=00000000
+== dispatch floor: 64 threads x 1
+device=Apple M5 Pro api=1.2 timestampPeriod=1.000
+bench bench/bench0.spv threads=64 iters=1 reps=20 gpu_ms_best=0.026 gpu_ms_mean=0.392 fmac_ops=256 Gops/s_best=0.01 ns_per_vertex_transform=409.5000 chk=0007b259
+11:54  up 3 days, 16:51, 3 users, load averages: 9.55 5.64 5.25

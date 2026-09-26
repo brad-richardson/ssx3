@@ -1,0 +1,21 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+// GV1 correctness kernel: one thread per VR4-generator case, exact FMAC core.
+#include "fmac_core.glsl"
+layout(local_size_x = 64) in;
+struct Case { uint instr, q, i, mac, status, p0, p1, p2; uvec4 vs, vt, acc, dst; };
+struct Out { uvec4 o; uint mac, status, ok, p1; };
+layout(std430, binding = 0) readonly buffer Cases { Case cs[]; };
+layout(std430, binding = 1) writeonly buffer Outs { Out os[]; };
+layout(push_constant) uniform PC { uint n; } pc;
+void main()
+{
+    uint id = gl_GlobalInvocationID.x;
+    if (id >= pc.n) return;
+    Case c = cs[id];
+    uint arith, src; bool accDest;
+    bool ok = decodeFmac(c.instr, arith, src, accDest);
+    uvec4 row = c.dst; uint mac = c.mac, status = c.status;
+    if (ok) fmacExact(arith, src, (c.instr >> 21) & 0xFu, c.vs, c.vt, c.acc, c.q, c.i, row, mac, status);
+    os[id].o = row; os[id].mac = mac; os[id].status = status; os[id].ok = ok ? 1u : 0u; os[id].p1 = 0u;
+}
