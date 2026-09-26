@@ -1,0 +1,21 @@
+samples=20 last=t+101.2s tick=4384
+| Phase | Ticks | Wall (s) | Guest vsyncs/s | Ratio |
+| title/startup | 0->636 | 11.6 | 54.87 | 0.915x |
+| main menu | 636->766 | 2.2 | 60.19 | 1.004x |
+| Select Character | 766->884 | 2.0 | 60.19 | 1.004x |
+| Setup Character / Peak | 884->1099 | 3.6 | 59.85 | 0.998x |
+| Select Mode / Event / My Rules | 1099->1440 | 5.7 | 60.05 | 1.002x |
+| loading + Rival card | 1440->1714 | 5.5 | 49.46 | 0.825x |
+| race | 1714->4384 | 70.6 | 37.80 | 0.631x |
+STOP-capped race t1714->4500: 37.46/s = 0.625x (wallSTOP 1790433180.882 [mtvu] threaded tick=4500 lag=1 jobs=55513 violations=0 waits: vb)
+race per-5s: 38.6 38.5 38.8 38.3 41.3 43.1 43.2 43.2 42.4 42.3 31.3 28.9 28.3 29.9
+FATAL: 0 | drop lines: 0 | ios-render lines: 5953
+\[gs:parallel\] quality .*     x1: [gs:parallel] quality ssaa=4 (asked 4, device max 4) ssaa_textures=0 hires_scanout=1 present_pipeline=1
+\[mtvu\] mode=\S+              x1: [mtvu] mode=threaded
+\[mtvu\].*violations=\d+.*     x15: [mtvu] threaded tick=4500 lag=1 jobs=55513 violations=0 waits: vblank=2896/54698.8ms
+\[ios-env\] set PS2X_MTVU\S*   x1: [ios-env] set PS2X_MTVU=1
+\[ios-env\] set PS2X_VU1_BLO   x1: [ios-env] set PS2X_VU1_BLOCKS=1
+\[ios-env\] set PS2X_PGS_SSA   x1: [ios-env] set PS2X_PGS_SSAA=4
+\[ios-env\] set PS2X_PGS_HIR   x1: [ios-env] set PS2X_PGS_HIRES_SCANOUT=1
+\[present-share\] ios bind.*   x4: [present-share] ios bind surface=0x1245ae010 1024x896 fmt=0x42475241 rc=0 tex=7
+scanout size \S+ tick=\d+ hi   x2: scanout size 1024x896 tick=44 hires=1

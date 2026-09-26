@@ -1,0 +1,488 @@
+1790434828.322 Launched application with org.ps2x.ps2entryrunner bundle identifier.
+1790434828.322 Waiting for the application to terminate…
+1790434828.419 [ios-env] read /private/var/containers/Bundle/Application/5B8817AF-6638-4373-8152-FB60A6F78438/ps2EntryRunner.app/ps2x.env
+1790434828.427 Using PS2X_BOOT_ELF boot path
+1790434828.428 [ios-env] read /private/var/mobile/Containers/Data/Application/5205A1BD-82D9-45B2-A4C0-B9FC29BCDDE0/Documents/ps2x.env
+1790434828.428 [ios-env] set GRANITE_VULKAN_LIBRARY=/private/var/containers/Bundle/Application/5B8817AF-6638-4373-8152-FB60A6F78438/ps2EntryRunner.app/Frameworks/MoltenVK.framework/MoltenVK
+1790434828.428 [ios-env] set PGS_HIER_BINNING=force
+1790434828.428 [ios-env] set PS2X_BOOT_ELF=/private/var/containers/Bundle/Application/5B8817AF-6638-4373-8152-FB60A6F78438/ps2EntryRunner.app/SLUS_207.72
+1790434828.428 [ios-env] set PS2X_CD_IMAGE=/private/var/containers/Bundle/Application/5B8817AF-6638-4373-8152-FB60A6F78438/ps2EntryRunner.app/SSX3.iso
+1790434828.428 [ios-env] set PS2X_DEINTERLACE=weave
+1790434828.428 [ios-env] set PS2X_GS_BACKEND=parallel
+1790434828.428 [ios-env] set PS2X_MTVU=1
+1790434828.428 [ios-env] set PS2X_PAD_SCRIPT_CLOCK=vsync
+1790434828.428 [ios-env] set PS2X_PGS_HIRES_SCANOUT=1
+1790434828.428 [ios-env] set PS2X_PGS_PRESENT_PIPELINE=1
+1790434828.428 [ios-env] set PS2X_PGS_SSAA=4
+1790434828.428 [ios-env] set PS2X_PRESENT_ZERO_COPY=1
+1790434828.428 [ios-env] set PS2X_SKIP_MOVIE=1
+1790434828.428 [ios-env] set PS2X_SOUND=1
+1790434828.428 [ios-env] set PS2X_VU1_BLOCKS=1
+1790434828.428 [ios-env] launcher kept PS2X_DROP_SILENCE
+1790434828.428 [ios-env] launcher kept PS2X_MC_ROOT
+1790434828.428 [ios-env] launcher kept PS2X_PAD_SCRIPT
+1790434828.428 [ios-env] launcher kept PS2X_UNPACED
+1790434828.428 [ios-env] launcher kept PS2X_VSYNC_RATE_LOG
+1790434828.428 [gs:queue] enabled (forced by PS2X_GS_BACKEND=parallel)
+1790434828.428 [gs:parallel] live backend selected (PS2X_GS_BACKEND=parallel)
+1790434828.428 [mtvu] mode=threaded lag=0 jitter_us=0
+1790434828.428 2026-09-26 11:00:28.405 ps2EntryRunner[32879:5530013] You need UIApplicationSupportsIndirectInputEvents in your Info.plist for mouse support
+1790434828.437 INFO: Initializing raylib 5.5
+1790434828.437 INFO: Platform backend: DESKTOP (SDL)
+1790434828.437 INFO: Supported raylib modules:
+1790434828.437 INFO:     > rcore:..... loaded (mandatory)
+1790434828.437 INFO:     > rlgl:...... loaded (mandatory)
+1790434828.437 INFO:     > rshapes:... loaded (optional)
+1790434828.437 INFO:     > rtextures:. loaded (optional)
+1790434828.437 INFO:     > rtext:..... loaded (optional)
+1790434828.437 INFO:     > rmodels:... loaded (optional)
+1790434828.437 INFO:     > raudio:.... loaded (optional)
+1790434828.451 INFO: DISPLAY: Device initialized successfully
+1790434828.451 INFO:     > Display size: 375 x 667
+1790434828.451 INFO:     > Screen size:  640 x 448
+1790434828.451 INFO:     > Render size:  640 x 448
+1790434828.451 INFO:     > Viewport offsets: 0, 0
+1790434828.451 INFO: GLAD: OpenGL ES 2.0 loaded successfully
+1790434828.451 INFO: GL: Supported extensions count: 43
+1790434828.451 INFO: GL: OpenGL device information:
+1790434828.451 INFO:     > Vendor:   Apple Inc.
+1790434828.451 INFO:     > Renderer: Apple M2 GPU
+1790434828.451 INFO:     > Version:  OpenGL ES 2.0 Metal - 105
+1790434828.451 INFO:     > GLSL:     OpenGL ES GLSL ES 1.00
+1790434828.451 INFO: GL: VAO extension detected, VAO functions loaded successfully
+1790434828.451 WARNING: GL: NPOT textures extension not found, limited NPOT support (no-mipmaps, no-repeat)
+1790434828.451 INFO: GL: PVRT compressed textures supported
+1790434828.451 INFO: PLATFORM: DESKTOP (SDL): Initialized successfully
+1790434828.451 INFO: TEXTURE: [ID 1] Texture loaded successfully (1x1 | R8G8B8A8 | 1 mipmaps)
+1790434828.451 INFO: TEXTURE: [ID 1] Default texture loaded successfully
+1790434828.451 INFO: SHADER: [ID 1] Vertex shader compiled successfully
+1790434828.451 INFO: SHADER: [ID 2] Fragment shader compiled successfully
+1790434828.451 INFO: SHADER: [ID 3] Program shader loaded successfully
+1790434828.451 INFO: SHADER: [ID 3] Default shader loaded successfully
+1790434828.451 INFO: RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)
+1790434828.451 INFO: RLGL: Render batch vertex buffers loaded successfully in VRAM (GPU)
+1790434828.451 INFO: RLGL: Default OpenGL state initialized successfully
+1790434828.451 INFO: TEXTURE: [ID 2] Texture loaded successfully (128x128 | GRAY_ALPHA | 1 mipmaps)
+1790434828.451 INFO: FONT: Default font loaded successfully (224 glyphs)
+1790434828.451 INFO: SYSTEM: Working Directory: /private/var/containers/Bundle/Application/5B8817AF-6638-4373-8152-FB60A6F78438/ps2EntryRunner.app
+1790434828.458 [ios-window] attached to window scene
+1790434828.458 [ios-window] window=590x820 drawable=1180x1640
+1790434828.578 [snd-output] stream rate=48000 channels=2 bits=16
+1790434828.590 [k1] armed name=ssx3-copied-payload elf=SLUS_207.72
+1790434828.590 [widescreen] SSX3 mode=2 (PS2X_WIDESCREEN=default)
+1790434828.600 [gs:parallel] init: GRANITE_VULKAN_LIBRARY=/private/var/containers/Bundle/Application/5B8817AF-6638-4373-8152-FB60A6F78438/ps2EntryRunner.app/Frameworks/MoltenVK.framework/MoltenVK
+1790434828.600 [E53] PS2X_EE_FPMODE=ps2 (EE thread: round-toward-zero + flush-to-zero)
+1790434828.600 [k1] install#1 n=0x5a handler=0x42cb78
+1790434828.600 [k1] install#2 n=0x5b handler=0x80075000
+1790434828.600 [k1] install#3 n=0x54 handler=0x42d100
+1790434828.600 [k1] lookup#1 key=0x55 value=0x80075038
+1790434828.600 [k1] install#4 n=0x55 handler=0x80075038
+1790434828.600 [k1] lookup#2 key=0x56 value=0x800750c8
+1790434828.600 [k1] install#5 n=0x56 handler=0x800750c8
+1790434828.600 [k1] lookup#3 key=0x57 value=0x80075108
+1790434828.600 [k1] install#6 n=0x57 handler=0x80075108
+1790434828.600 [k1] lookup#4 key=0x58 value=0x80075158
+1790434828.600 [k1] install#7 n=0x58 handler=0x80075158
+1790434828.600 [k1] lookup#5 key=0x59 value=0x800751a8
+1790434828.600 [k1] install#8 n=0x59 handler=0x800751a8
+1790434828.600 [k1] lookup#6 key=0x3 value=0x80075330
+1790434828.600 [INFO]: Layer count: 1
+1790434828.600 [INFO]: Found layer: MoltenVK.
+1790434828.600 [INFO]: Enabling instance extension: VK_EXT_debug_utils.
+1790434828.600 [mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.
+1790434828.600 	The following 153 Vulkan extensions are supported:
+1790434828.600 	VK_KHR_16bit_storage v1
+1790434828.600 	VK_KHR_8bit_storage v1
+1790434828.600 	VK_KHR_bind_memory2 v1
+1790434828.600 	VK_KHR_buffer_device_address v1
+1790434828.600 	VK_KHR_calibrated_timestamps v1
+1790434828.600 	VK_KHR_copy_commands2 v1
+1790434828.600 	VK_KHR_create_renderpass2 v1
+1790434828.600 	VK_KHR_dedicated_allocation v3
+1790434828.600 	VK_KHR_deferred_host_operations v4
+1790434828.600 	VK_KHR_depth_stencil_resolve v1
+1790434828.600 	VK_KHR_descriptor_update_template v1
+1790434828.600 	VK_KHR_device_group v4
+1790434828.600 	VK_KHR_device_group_creation v1
+1790434828.600 	VK_KHR_driver_properties v1
+1790434828.600 	VK_KHR_dynamic_rendering v1
+1790434828.600 	VK_KHR_dynamic_rendering_local_read v1
+1790434828.600 	VK_KHR_external_fence v1
+1790434828.600 	VK_KHR_external_fence_capabilities v1
+1790434828.600 	VK_KHR_external_memory v1
+1790434828.600 	VK_KHR_external_memory_capabilities v1
+1790434828.600 	VK_KHR_external_semaphore v1
+1790434828.600 	VK_KHR_external_semaphore_capabilities v1
+1790434828.600 	VK_KHR_format_feature_flags2 v2
+1790434828.600 	VK_KHR_fragment_shader_barycentric v1
+1790434828.600 	VK_KHR_get_memory_requirements2 v1
+1790434828.600 	VK_KHR_get_physical_device_properties2 v2
+1790434828.600 	VK_KHR_get_surface_capabilities2 v1
+1790434828.600 	VK_KHR_global_priority v1
+1790434828.600 	VK_KHR_image_format_list v1
+1790434828.600 	VK_KHR_imageless_framebuffer v1
+1790434828.600 	VK_KHR_incremental_present v2
+1790434828.600 	VK_KHR_index_type_uint8 v1
+1790434828.600 	VK_KHR_line_rasterization v1
+1790434828.600 	VK_KHR_load_store_op_none v1
+1790434828.600 	VK_KHR_maintenance1 v2
+1790434828.600 	VK_KHR_maintenance2 v1
+1790434828.600 	VK_KHR_maintenance3 v1
+1790434828.600 	VK_KHR_maintenance4 v2
+1790434828.600 	VK_KHR_maintenance5 v1
+1790434828.600 	VK_KHR_maintenance6 v1
+1790434828.600 	VK_KHR_maintenance7 v1
+1790434828.600 	VK_KHR_maintenance8 v1
+1790434828.600 	VK_KHR_maintenance9 v1
+1790434828.600 	VK_KHR_map_memory2 v1
+1790434828.600 	VK_KHR_multiview v1
+1790434828.600 	VK_KHR_portability_subset v1
+1790434828.600 	VK_KHR_present_id v1
+1790434828.600 	VK_KHR_present_id2 v1
+1790434828.600 	VK_KHR_present_wait v1
+1790434828.600 	VK_KHR_present_wait2 v1
+1790434828.600 	VK_KHR_push_descriptor v2
+1790434828.600 	VK_KHR_relaxed_block_layout v1
+1790434828.600 	VK_KHR_robustness2 v1
+1790434828.600 	VK_KHR_sampler_mirror_clamp_to_edge v3
+1790434828.600 	VK_KHR_sampler_ycbcr_conversion v14
+1790434828.600 	VK_KHR_separate_depth_stencil_layouts v1
+1790434828.600 	VK_KHR_shader_draw_parameters v1
+1790434828.600 	VK_KHR_shader_expect_assume v1
+1790434828.600 	VK_KHR_shader_float_controls v4
+1790434828.600 	VK_KHR_shader_float_controls2 v1
+1790434828.600 	VK_KHR_shader_float16_int8 v1
+1790434828.600 	VK_KHR_shader_fma v1
+1790434828.600 	VK_KHR_shader_integer_dot_product v1
+1790434828.600 	VK_KHR_shader_maximal_reconvergence v1
+1790434828.600 	VK_KHR_shader_non_semantic_info v1
+1790434828.600 	VK_KHR_shader_quad_control v1
+1790434828.600 	VK_KHR_shader_relaxed_extended_instruction v1
+1790434828.600 	VK_KHR_shader_subgroup_extended_types v1
+1790434828.600 	VK_KHR_shader_subgroup_rotate v2
+1790434828.600 	VK_KHR_shader_subgroup_uniform_control_flow v1
+1790434828.600 	VK_KHR_shader_terminate_invocation v1
+1790434828.600 	VK_KHR_spirv_1_4 v1
+1790434828.600 	VK_KHR_storage_buffer_storage_class v1
+1790434828.600 	VK_KHR_surface v25
+1790434828.600 	VK_KHR_surface_maintenance1 v1
+1790434828.600 	VK_KHR_surface_protected_capabilities v1
+1790434828.600 	VK_KHR_swapchain v70
+1790434828.600 	VK_KHR_swapchain_maintenance1 v1
+1790434828.600 	VK_KHR_swapchain_mutable_format v1
+1790434828.600 	VK_KHR_synchronization2 v1
+1790434828.600 	VK_KHR_timeline_semaphore v2
+1790434828.600 	VK_KHR_uniform_buffer_standard_layout v1
+1790434828.600 	VK_KHR_variable_pointers v1
+1790434828.600 	VK_KHR_vertex_attribute_divisor v1
+1790434828.600 	VK_KHR_vulkan_memory_model v3
+1790434828.600 	VK_KHR_zero_initialize_workgroup_memory v1
+1790434828.600 	VK_EXT_4444_formats v1
+1790434828.600 	VK_EXT_buffer_device_address v2
+1790434828.600 	VK_EXT_calibrated_timestamps v2
+1790434828.600 	VK_EXT_debug_marker v4
+1790434828.600 	VK_EXT_debug_report v10
+1790434828.600 	VK_EXT_debug_utils v2
+1790434828.600 	VK_EXT_depth_clip_control v1
+1790434828.600 	VK_EXT_descriptor_indexing v2
+1790434828.600 	VK_EXT_extended_dynamic_state v1
+1790434828.600 	VK_EXT_extended_dynamic_state2 v1
+1790434828.600 	VK_EXT_extended_dynamic_state3 v2
+1790434828.600 	VK_EXT_external_memory_host v1
+1790434828.600 	VK_EXT_external_memory_metal v1
+1790434828.600 	VK_EXT_fragment_shader_interlock v1
+1790434828.600 	VK_EXT_global_priority v2
+1790434828.600 	VK_EXT_global_priority_query v1
+1790434828.600 	VK_EXT_headless_surface v1
+1790434828.600 	VK_EXT_host_image_copy v1
+1790434828.600 	VK_EXT_host_query_reset v1
+1790434828.600 	VK_EXT_image_2d_view_of_3d v1
+1790434828.600 	VK_EXT_image_robustness v1
+1790434828.600 	VK_EXT_index_type_uint8 v1
+1790434828.600 	VK_EXT_inline_uniform_block v1
+1790434828.600 	VK_EXT_layer_settings v2
+1790434828.600 	VK_EXT_legacy_dithering v2
+1790434828.600 	VK_EXT_line_rasterization v1
+1790434828.600 	VK_EXT_load_store_op_none v1
+1790434828.600 	VK_EXT_memory_budget v1
+1790434828.600 	VK_EXT_metal_objects v2
+1790434828.600 	VK_EXT_metal_surface v1
+1790434828.600 	VK_EXT_non_seamless_cube_map v1
+1790434828.600 	VK_EXT_pipeline_creation_cache_control v3
+1790434828.600 	VK_EXT_pipeline_creation_feedback v1
+1790434828.600 	VK_EXT_pipeline_robustness v1
+1790434828.600 	VK_EXT_post_depth_coverage v1
+1790434828.600 	VK_EXT_primitive_topology_list_restart v1
+1790434828.600 	VK_EXT_private_data v1
+1790434828.600 	VK_EXT_provoking_vertex v1
+1790434828.600 	VK_EXT_robustness2 v1
+1790434828.600 	VK_EXT_sample_locations v1
+1790434828.600 	VK_EXT_sampler_filter_minmax v2
+1790434828.600 	VK_EXT_scalar_block_layout v1
+1790434828.600 	VK_EXT_separate_stencil_usage v1
+1790434828.600 	VK_EXT_shader_atomic_float v1
+1790434828.600 	VK_EXT_shader_demote_to_helper_invocation v1
+1790434828.600 	VK_EXT_shader_stencil_export v1
+1790434828.600 	VK_EXT_shader_subgroup_ballot v1
+1790434828.600 	VK_EXT_shader_subgroup_vote v1
+1790434828.600 	VK_EXT_shader_viewport_index_layer v1
+1790434828.600 	VK_EXT_subgroup_size_control v2
+1790434828.600 	VK_EXT_surface_maintenance1 v1
+1790434828.600 	VK_EXT_swapchain_colorspace v5
+1790434828.600 	VK_EXT_swapchain_maintenance1 v1
+1790434828.600 	VK_EXT_texel_buffer_alignment v1
+1790434828.600 	VK_EXT_texture_compression_astc_hdr v1
+1790434828.600 	VK_EXT_tooling_info v1
+1790434828.600 	VK_EXT_vertex_attribute_divisor v3
+1790434828.600 	VK_AMD_gpu_shader_half_float v2
+1790434828.600 	VK_AMD_negative_viewport_height v1
+1790434828.600 	VK_AMD_shader_image_load_store_lod v1
+1790434828.600 	VK_AMD_shader_trinary_minmax v1
+1790434828.600 	VK_GOOGLE_display_timing v1
+1790434828.600 	VK_IMG_format_pvrtc v1
+1790434828.600 	VK_INTEL_shader_integer_functions2 v1
+1790434828.600 	VK_MVK_ios_surface v3
+1790434828.600 	VK_MVK_moltenvk v37
+1790434828.600 	VK_NV_fragment_shader_barycentric v1
+1790434828.600 [mvk-info] GPU device:
+1790434828.600 	model: Apple M2 GPU
+1790434828.600 	type: Integrated
+1790434828.600 	vendorID: 0x106b
+1790434828.600 	deviceID: 0x1b000008
+1790434828.600 	pipelineCacheUUID: DB660224-1B00-0008-0000-000100000000
+1790434828.600 	GPU memory available: 5461 MB
+1790434828.600 	GPU memory used: 8 MB
+1790434828.600 	Metal Shading Language 4.0
+1790434828.600 	supports the following GPU Features:
+1790434828.600 		GPU Family Metal 4
+1790434828.600 		GPU Family Apple 8
+1790434828.600 		Read-Write Texture Tier 2
+1790434828.600 [mvk-info] Created VkInstance for Vulkan version 1.4.357, as requested by app, with the following 1 Vulkan extensions enabled:
+1790434828.600 	VK_EXT_debug_utils v2
+1790434828.600 [INFO]: Found Vulkan GPU: Apple M2 GPU
+1790434828.600 [INFO]:     API: 1.4.357
+1790434828.600 [INFO]:     Driver: 0.2.2210
+1790434828.600 [INFO]: Using Vulkan GPU: Apple M2 GPU
+1790434828.600 [INFO]: Enabling device extension: VK_EXT_metal_objects.
+1790434828.600 [INFO]: Enabling device extension: VK_KHR_calibrated_timestamps.
+1790434828.600 [INFO]: Enabling device extension: VK_EXT_memory_budget.
+1790434828.600 [INFO]: Enabling device extension: VK_EXT_external_memory_host.
+1790434828.600 [INFO]: Enabling device extension: VK_KHR_fragment_shader_barycentric.
+1790434828.600 [mvk-info] Vulkan semaphores using MTLEvent.
+1790434828.600 [mvk-info] Descriptor sets binding resources using Metal3 argument buffers.
+1790434828.600 [mvk-info] Created VkDevice to run on GPU Apple M2 GPU with the following 5 Vulkan extensions enabled:
+1790434828.600 	VK_KHR_calibrated_timestamps v1
+1790434828.600 	VK_KHR_fragment_shader_barycentric v1
+1790434828.600 	VK_EXT_external_memory_host v1
+1790434828.600 	VK_EXT_memory_budget v1
+1790434828.600 	VK_EXT_metal_objects v2
+1790434828.600 [gs:parallel] zero-copy present (IOSurface) requested
+1790434828.600 [WARN]: Emulating events as pipeline barriers on Metal emulation.
+1790434828.600 [WARN]: Disabling push descriptors on Metal emulation.
+1790434828.609 [ERROR]: Could not find a suitable time domain for calibrated timestamps.
+1790434828.609 [gs:parallel] frame_contexts=4
+1790434828.609 [gs:parallel] quality ssaa=4 (asked 4, device max 4) ssaa_textures=0 hires_scanout=1 present_pipeline=1
+1790434828.609 [INFO]: UMA-style device detected. Avoiding redundant readback copies.
+1790434828.609 [INFO]: Using image slab size of 1820 MiB.
+1790434828.609 [INFO]: Using max allocated image memory per flush of 273 MiB.
+1790434828.619 [gs-path] hier_rule=hier-if-large hier_t2=2 hier_t4=4 subgroup_flat=free-4..128 subgroup_hier=free-4..128 vk11_subgroup=32 max_wg_inv=1024 desc=plain desc_req=push+heap+buffer sampler_feedback=on feedback_rt=off gpu=Apple M2 GPU
+1790434828.619 [gs:parallel] init ok (live backend on the GS worker thread)
+1790434828.619 [WARN]: Unknown video format.
+1790434828.619 [gs:parallel] null scanout tick=0 CMOD=0 LC=0 INT=0 FFMD=0
+1790434828.619 [vpad] on=1 pad_in_use=0 first_pad=-1 name="" -> overlay shown
+1790434828.629 2026-09-26 11:00:28.600 ps2EntryRunner[32879:5530013] Unbalanced calls to begin/end appearance transitions for <SDL_uikitviewcontroller: 0x10f740000>.
+1790434828.629 2026-09-26 11:00:28.600 ps2EntryRunner[32879:5530013] Unbalanced calls to begin/end appearance transitions for <SDL_uikitviewcontroller: 0x10f740000>.
+1790434828.637 [WARN]: Unknown video format.
+1790434828.637 [gs:parallel] null scanout tick=2 CMOD=0 LC=0 INT=0 FFMD=0
+1790434828.651 [WARN]: Unknown video format.
+1790434828.660 [gs:parallel] null scanout tick=3 CMOD=0 LC=0 INT=0 FFMD=0
+1790434828.670 [WARN]: Unknown video format.
+1790434828.670 [gs:parallel] null scanout tick=4 CMOD=0 LC=0 INT=0 FFMD=0
+1790434828.684 [WARN]: Unknown video format.
+1790434828.709 [WARN]: Unknown video format.
+1790434828.733 [WARN]: Unknown video format.
+1790434828.744 [WARN]: Unknown video format.
+1790434828.755 [WARN]: Unknown video format.
+1790434828.768 [WARN]: Unknown video format.
+1790434828.791 [WARN]: Unknown video format.
+1790434828.802 [WARN]: Unknown video format.
+1790434828.823 [WARN]: Unknown video format.
+1790434828.837 [WARN]: Unknown video format.
+1790434828.858 [WARN]: Unknown video format.
+1790434828.870 [WARN]: Unknown video format.
+1790434828.890 [WARN]: Unknown video format.
+1790434828.904 [WARN]: Unknown video format.
+1790434828.925 [WARN]: Unknown video format.
+1790434828.941 [WARN]: Unknown video format.
+1790434828.955 [WARN]: Unknown video format.
+1790434828.976 [WARN]: Unknown video format.
+1790434828.990 [WARN]: Unknown video format.
+1790434829.011 [WARN]: Unknown video format.
+1790434829.023 [WARN]: Unknown video format.
+1790434829.046 [WARN]: Unknown video format.
+1790434829.057 [WARN]: Unknown video format.
+1790434829.074 [WARN]: Unknown video format.
+1790434829.092 [WARN]: Unknown video format.
+1790434829.114 [WARN]: Unknown video format.
+1790434829.126 [WARN]: Unknown video format.
+1790434829.164 [WARN]: Unknown video format.
+1790434829.195 [WARN]: Unknown video format.
+1790434829.227 [WARN]: Unknown video format.
+1790434829.261 [WARN]: Unknown video format.
+1790434829.273 [gs:setcrt] via=sceGsResetGraph interlaced=1 mode=0x2 field_frame=0 smode1=0x740814504 smode2=0x1
+1790434829.288 [WARN]: Stalled compile (compute, 23c4cea2dc7c5ed0): thread 0 - 5539.000 us (mode: sync, success: yes).
+1790434829.300 [gs:parallel] scanout size 1280x896 tick=41 hires=1
+1790434829.300 [present-share] surface 1280x896 rc=0 surface=0x10f59e290
+1790434829.300 [gs:parallel] zero-copy slot 1280x896 surface=0x10f59e290
+1790434829.300 [present-share] surface 1280x896 rc=0 surface=0x10f59e2f0
+1790434829.300 [gs:parallel] zero-copy slot 1280x896 surface=0x10f59e2f0
+1790434829.300 [present-share] surface 1280x896 rc=0 surface=0x10f59e270
+1790434829.300 [gs:parallel] zero-copy slot 1280x896 surface=0x10f59e270
+1790434829.311 [present-share] ios texture cache ctx=0x10f7e6160 rc=0 api=2
+1790434829.311 [present-share] ios bind surface=0x10f59e290 1280x896 fmt=0x42475241 rc=0 tex=4
+1790434829.321 [IOP/RPC trace:unhandled] sid=0x80000006 rpc=0xff pc=0x42b0e8 ra=0x42b0e8 send=0x0/0 recv=0x52f080/4 sendBytes=[] loadedModules=[cdrom0:/data/modules/dev9.irx; cdrom0:/data/modules/usbkb.irx; cdrom0:/data/modules/usbd.irx; cdrom0:/data/modules/mcserv.irx; cdrom0:/data/modules/mcman.irx; cdrom0:/data/modules/snddrv.irx]
+1790434829.321 [present-share] ios bind surface=0x10f59e2f0 1280x896 fmt=0x42475241 rc=0 tex=5
+1790434829.336 [mvk-warn] VK_ERROR_FEATURE_NOT_PRESENT: Metal does not support disabling primitive restart.
+1790434829.349 [mvk-warn] VK_ERROR_FEATURE_NOT_PRESENT: Metal does not support disabling primitive restart.
+1790434829.349 [gs:parallel] scanout size 1024x896 tick=44 hires=1
+1790434829.349 [present-share] surface 1024x896 rc=0 surface=0x10f59e2a0
+1790434829.349 [gs:parallel] zero-copy slot 1024x896 surface=0x10f59e2a0
+1790434829.349 [present-share] surface 1024x896 rc=0 surface=0x10f59e340
+1790434829.349 [gs:parallel] zero-copy slot 1024x896 surface=0x10f59e340
+1790434829.349 [present-share] surface 1024x896 rc=0 surface=0x10f59e370
+1790434829.349 [gs:parallel] zero-copy slot 1024x896 surface=0x10f59e370
+1790434829.357 [present-share] ios bind surface=0x10f59e2a0 1024x896 fmt=0x42475241 rc=0 tex=6
+1790434829.368 [present-share] ios bind surface=0x10f59e340 1024x896 fmt=0x42475241 rc=0 tex=7
+1790434829.391 [present-share] ios bind surface=0x10f59e370 1024x896 fmt=0x42475241 rc=0 tex=8
+1790434829.482 [sif-handshake] sregs[1]=1
+1790434829.492 [IOP/RPC trace:unhandled] sid=0x237 rpc=0x0 pc=0x3f6a04 ra=0x3f6a04 send=0x526080/128 recv=0x526140/128 sendBytes=[C0 61 52 20 00 00 00 00 00 00 00 00 00 00 00 00] loadedModules=[cdrom0:/data/modules/voipf.irx; cdrom0:/data/modules/lgaud.irx; cdrom0:/data/modules/drtysckf.irx; cdrom0:/data/modules/libnet.irx; cdrom0:/data/modules/msifrpc.irx; cdrom0:/data/modules/pppoe.irx]
+1790434829.492 [IOP/RPC trace:unhandled] sid=0x80000211 rpc=0x1 pc=0x40c34c ra=0x40c34c send=0x529100/16 recv=0x529140/144 sendBytes=[00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00] loadedModules=[cdrom0:/data/modules/voipf.irx; cdrom0:/data/modules/lgaud.irx; cdrom0:/data/modules/drtysckf.irx; cdrom0:/data/modules/libnet.irx; cdrom0:/data/modules/msifrpc.irx; cdrom0:/data/modules/pppoe.irx]
+1790434829.581 [padscript] armed n=31 source=env clock=vsync
+1790434829.666 [widescreen] apply source=0x2285a0 guest_mode=0 host_mode=2
+1790434829.676 [IOP/RPC trace:unhandled] sid=0x534e44 rpc=0x0 pc=0x3c0bc4 ra=0x3c0bc4 send=0x50ad00/20 recv=0x0/0 sendBytes=[03 03 08 00 40 B7 50 00 00 00 00 00 A0 8C C0 5D] loadedModules=[cdrom0:/data/modules/voipf.irx; cdrom0:/data/modules/lgaud.irx; cdrom0:/data/modules/drtysckf.irx; cdrom0:/data/modules/libnet.irx; cdrom0:/data/modules/msifrpc.irx; cdrom0:/data/modules/pppoe.irx]
+1790434833.602 [mtvu] threaded tick=300 lag=0 jobs=2836 violations=0 waits: vblank=12/138.6ms
+1790434833.615 [vsync-rate] tick=300 rate=59.83/s (0.998x of 59.94)
+1790434834.529 [gs:parallel] periodic gif=17761 gif_bytes=9149120 regs=0 presents=300 null_scanouts=35 present_ms_avg=2.47108 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434834.539 [gs:parallel] sync presents=300 frame_contexts=4 flush_submits_per_present=2.00333 frame_ctx_advances_per_present=2.00333 frame_ctx_wait_ms_per_present=1.73159 timeline_waits_per_present=0.00333333 timeline_wait_ms_per_present=1.4e-07 flush_submit_ms_per_present=2.08164 iface_flush_ms_per_present=0.50721 iface_vsync_ms_per_present=1.79904
+1790434838.595 [mtvu] threaded tick=600 lag=0 jobs=6136 violations=0 waits: vblank=12/138.6ms
+1790434838.617 [vsync-rate] tick=601 rate=60.06/s (1.002x of 59.94)
+1790434839.212 [padscript] press i=0 now=10627ms at=10611ms hold=250ms buttons=0x0008
+1790434839.467 [padscript] release i=0 now=10877ms
+1790434839.678 [gs:parallel] periodic gif=55571 gif_bytes=17608096 regs=0 presents=600 null_scanouts=35 present_ms_avg=2.01551 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434839.678 [gs:parallel] sync presents=600 frame_contexts=4 flush_submits_per_present=2 frame_ctx_advances_per_present=2 frame_ctx_wait_ms_per_present=1.09391 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=1.36711 iface_flush_ms_per_present=0.346513 iface_vsync_ms_per_present=1.14108
+1790434841.388 [padscript] press i=1 now=12796ms at=12780ms hold=250ms buttons=0x4000
+1790434841.628 [padscript] release i=1 now=13046ms
+1790434843.344 [padscript] press i=2 now=14764ms at=14749ms hold=250ms buttons=0x4000
+1790434843.597 [mtvu] threaded tick=900 lag=0 jobs=9730 violations=0 waits: vblank=13/139.0ms
+1790434843.597 [padscript] release i=2 now=15015ms
+1790434843.620 [vsync-rate] tick=901 rate=59.97/s (1.000x of 59.94)
+1790434844.856 [gs:parallel] periodic gif=159024 gif_bytes=172130896 regs=0 presents=900 null_scanouts=35 present_ms_avg=1.85895 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434844.856 [gs:parallel] sync presents=900 frame_contexts=4 flush_submits_per_present=2.52333 frame_ctx_advances_per_present=2.52333 frame_ctx_wait_ms_per_present=1.11723 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=1.45537 iface_flush_ms_per_present=0.392233 iface_vsync_ms_per_present=1.10807
+1790434845.176 [padscript] press i=3 now=16583ms at=16567ms hold=250ms buttons=0x4000
+1790434845.417 [padscript] release i=3 now=16833ms
+1790434846.937 [padscript] press i=4 now=18351ms at=18336ms hold=250ms buttons=0x4000
+1790434847.189 [padscript] release i=4 now=18601ms
+1790434848.362 [padscript] press i=5 now=19786ms at=19770ms hold=250ms buttons=0x4000
+1790434848.603 [mtvu] threaded tick=1200 lag=0 jobs=13282 violations=0 waits: vblank=13/139.0ms
+1790434848.603 [padscript] release i=5 now=20020ms
+1790434848.624 [vsync-rate] tick=1201 rate=59.96/s (1.000x of 59.94)
+1790434849.795 [padscript] press i=6 now=21221ms at=21205ms hold=150ms buttons=0x0040
+1790434849.948 [padscript] release i=6 now=21371ms
+1790434850.023 [gs:parallel] periodic gif=209782 gif_bytes=296474752 regs=0 presents=1200 null_scanouts=35 present_ms_avg=1.83914 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434850.023 [gs:parallel] sync presents=1200 frame_contexts=4 flush_submits_per_present=2.07 frame_ctx_advances_per_present=2.07 frame_ctx_wait_ms_per_present=1.15454 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=1.64049 iface_flush_ms_per_present=0.534925 iface_vsync_ms_per_present=1.18335
+1790434850.306 [padscript] press i=7 now=21721ms at=21706ms hold=150ms buttons=0x0040
+1790434850.448 [padscript] release i=7 now=21871ms
+1790434850.900 [padscript] press i=8 now=22322ms at=22306ms hold=250ms buttons=0x4000
+1790434851.145 [padscript] release i=8 now=22572ms
+1790434852.619 [padscript] press i=9 now=24040ms at=24025ms hold=250ms buttons=0x4000
+1790434853.062 [padscript] release i=9 now=24290ms
+1790434853.594 [mtvu] threaded tick=1500 lag=0 jobs=16934 violations=0 waits: vblank=15/154.5ms
+1790434853.629 [vsync-rate] tick=1502 rate=60.13/s (1.003x of 59.94)
+1790434856.116 [gs:parallel] periodic gif=301359 gif_bytes=415427728 regs=0 presents=1500 null_scanouts=35 present_ms_avg=1.83532 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434856.116 [gs:parallel] sync presents=1500 frame_contexts=4 flush_submits_per_present=2.16333 frame_ctx_advances_per_present=2.16333 frame_ctx_wait_ms_per_present=1.46852 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=1.82505 iface_flush_ms_per_present=0.369072 iface_vsync_ms_per_present=1.40126
+1790434858.198 [padscript] press i=10 now=28528ms at=28512ms hold=200ms buttons=0x4000
+1790434858.491 [padscript] release i=10 now=28712ms
+1790434858.592 [padscript] press i=11 now=28778ms at=28763ms hold=700ms buttons=0x0040
+1790434858.629 [vsync-rate] tick=1726 rate=44.80/s (0.747x of 59.94)
+1790434859.732 [padscript] release i=11 now=29479ms
+1790434859.820 [padscript] press i=12 now=29529ms at=29513ms hold=200ms buttons=0x4000
+1790434860.146 [padscript] release i=12 now=29713ms
+1790434860.279 [padscript] press i=13 now=29779ms at=29764ms hold=700ms buttons=0x0040
+1790434860.726 [mtvu] threaded tick=1800 lag=0 jobs=20413 violations=0 waits: vblank=209/4151.1ms
+1790434861.510 [padscript] release i=13 now=30480ms
+1790434861.583 [padscript] press i=14 now=30530ms at=30514ms hold=200ms buttons=0x4000
+1790434861.900 [padscript] release i=14 now=30714ms
+1790434862.006 [padscript] press i=15 now=30780ms at=30765ms hold=700ms buttons=0x0040
+1790434863.177 [padscript] release i=15 now=31481ms
+1790434863.258 [padscript] press i=16 now=31531ms at=31515ms hold=200ms buttons=0x4000
+1790434863.563 [padscript] release i=16 now=31715ms
+1790434863.636 [vsync-rate] tick=1903 rate=35.36/s (0.590x of 59.94)
+1790434863.679 [padscript] press i=17 now=31781ms at=31766ms hold=700ms buttons=0x0040
+1790434864.273 [gs:parallel] periodic gif=916925 gif_bytes=1208675392 regs=0 presents=1800 null_scanouts=35 present_ms_avg=2.12669 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434864.273 [gs:parallel] sync presents=1800 frame_contexts=4 flush_submits_per_present=4.43333 frame_ctx_advances_per_present=4.43333 frame_ctx_wait_ms_per_present=6.05937 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=6.57123 iface_flush_ms_per_present=0.210087 iface_vsync_ms_per_present=3.34588
+1790434864.827 [padscript] release i=17 now=32482ms
+1790434864.912 [padscript] press i=18 now=32532ms at=32516ms hold=200ms buttons=0x4000
+1790434865.254 [padscript] release i=18 now=32716ms
+1790434865.372 [padscript] press i=19 now=32782ms at=32767ms hold=700ms buttons=0x0040
+1790434866.616 [padscript] release i=19 now=33483ms
+1790434866.703 [padscript] press i=20 now=33533ms at=33517ms hold=200ms buttons=0x4000
+1790434867.008 [padscript] release i=20 now=33717ms
+1790434867.113 [padscript] press i=21 now=33783ms at=33768ms hold=700ms buttons=0x0040
+1790434868.265 [padscript] release i=21 now=34484ms
+1790434868.344 [padscript] press i=22 now=34534ms at=34518ms hold=200ms buttons=0x4000
+1790434868.636 [vsync-rate] tick=2080 rate=35.39/s (0.590x of 59.94)
+1790434868.658 [padscript] release i=22 now=34718ms
+1790434868.768 [padscript] press i=23 now=34784ms at=34769ms hold=700ms buttons=0x0040
+1790434869.176 [mtvu] threaded tick=2100 lag=0 jobs=24313 violations=0 waits: vblank=509/10437.2ms
+1790434869.973 [padscript] release i=23 now=35485ms
+1790434870.053 [padscript] press i=24 now=35535ms at=35519ms hold=200ms buttons=0x4000
+1790434870.359 [padscript] release i=24 now=35719ms
+1790434870.467 [padscript] press i=25 now=35785ms at=35770ms hold=700ms buttons=0x0040
+1790434871.660 [padscript] release i=25 now=36486ms
+1790434871.744 [padscript] press i=26 now=36536ms at=36520ms hold=200ms buttons=0x4000
+1790434872.067 [padscript] release i=26 now=36720ms
+1790434872.171 [padscript] press i=27 now=36786ms at=36771ms hold=700ms buttons=0x0040
+1790434872.798 [gs:parallel] periodic gif=1523866 gif_bytes=2037620288 regs=0 presents=2100 null_scanouts=35 present_ms_avg=2.51281 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434872.798 [gs:parallel] sync presents=2100 frame_contexts=4 flush_submits_per_present=4.57667 frame_ctx_advances_per_present=4.57667 frame_ctx_wait_ms_per_present=7.37937 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=7.97633 iface_flush_ms_per_present=0.239389 iface_vsync_ms_per_present=4.56129
+1790434873.332 [padscript] release i=27 now=37487ms
+1790434873.405 [padscript] press i=28 now=37537ms at=37521ms hold=200ms buttons=0x4000
+1790434873.649 [vsync-rate] tick=2258 rate=35.54/s (0.593x of 59.94)
+1790434873.706 [padscript] release i=28 now=37721ms
+1790434873.809 [padscript] press i=29 now=37787ms at=37772ms hold=700ms buttons=0x0040
+1790434874.889 [padscript] release i=29 now=38488ms
+1790434874.973 [padscript] press i=30 now=38538ms at=38522ms hold=30000ms buttons=0x0040
+1790434877.397 [mtvu] threaded tick=2400 lag=0 jobs=28213 violations=0 waits: vblank=809/16402.2ms
+1790434878.661 [vsync-rate] tick=2448 rate=37.87/s (0.632x of 59.94)
+1790434880.694 [gs:parallel] periodic gif=2045520 gif_bytes=2774024112 regs=0 presents=2400 null_scanouts=35 present_ms_avg=2.66054 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434880.694 [gs:parallel] sync presents=2400 frame_contexts=4 flush_submits_per_present=4.49333 frame_ctx_advances_per_present=4.49333 frame_ctx_wait_ms_per_present=8.23543 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=8.85944 iface_flush_ms_per_present=0.277668 iface_vsync_ms_per_present=3.38856
+1790434883.674 [vsync-rate] tick=2643 rate=38.95/s (0.650x of 59.94)
+1790434885.101 [mtvu] threaded tick=2700 lag=0 jobs=32113 violations=0 waits: vblank=1109/21983.0ms
+1790434888.261 [gs:parallel] periodic gif=2532214 gif_bytes=3451395024 regs=0 presents=2700 null_scanouts=35 present_ms_avg=3.00589 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434888.261 [gs:parallel] sync presents=2700 frame_contexts=4 flush_submits_per_present=4.29333 frame_ctx_advances_per_present=4.29333 frame_ctx_wait_ms_per_present=8.95144 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=9.57778 iface_flush_ms_per_present=0.256122 iface_vsync_ms_per_present=5.48524
+1790434888.596 [snd-output] wall-minute underruns=660480 overflows=0 total-underruns=660480 total-overflows=0
+1790434888.680 [vsync-rate] tick=2844 rate=40.10/s (0.669x of 59.94)
+1790434892.427 [mtvu] threaded tick=3000 lag=0 jobs=36013 violations=0 waits: vblank=1409/27219.2ms
+1790434893.696 [vsync-rate] tick=3053 rate=41.67/s (0.695x of 59.94)
+1790434895.478 [gs:parallel] periodic gif=3012975 gif_bytes=4121098736 regs=0 presents=3000 null_scanouts=35 present_ms_avg=3.1631 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434895.478 [gs:parallel] sync presents=3000 frame_contexts=4 flush_submits_per_present=4.39333 frame_ctx_advances_per_present=4.39333 frame_ctx_wait_ms_per_present=8.5827 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=9.2092 iface_flush_ms_per_present=0.269993 iface_vsync_ms_per_present=4.28006
+1790434898.704 [vsync-rate] tick=3261 rate=41.53/s (0.693x of 59.94)
+1790434899.638 [mtvu] threaded tick=3300 lag=0 jobs=39913 violations=0 waits: vblank=1709/32362.5ms
+1790434902.749 [gs:parallel] periodic gif=3489578 gif_bytes=4777579728 regs=0 presents=3300 null_scanouts=35 present_ms_avg=3.32418 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434902.750 [gs:parallel] sync presents=3300 frame_contexts=4 flush_submits_per_present=4.38333 frame_ctx_advances_per_present=4.38333 frame_ctx_wait_ms_per_present=8.91878 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=9.54553 iface_flush_ms_per_present=0.267485 iface_vsync_ms_per_present=4.63994
+1790434903.719 [vsync-rate] tick=3466 rate=40.89/s (0.682x of 59.94)
+1790434906.949 [mtvu] threaded tick=3600 lag=0 jobs=43813 violations=0 waits: vblank=2009/37584.5ms
+1790434908.728 [vsync-rate] tick=3673 rate=41.36/s (0.690x of 59.94)
+1790434910.026 [gs:parallel] periodic gif=3973471 gif_bytes=5458810256 regs=0 presents=3600 null_scanouts=35 present_ms_avg=3.44362 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434910.026 [gs:parallel] sync presents=3600 frame_contexts=4 flush_submits_per_present=4.39 frame_ctx_advances_per_present=4.39 frame_ctx_wait_ms_per_present=8.64744 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=9.27661 iface_flush_ms_per_present=0.268727 iface_vsync_ms_per_present=4.46069
+1790434913.732 [vsync-rate] tick=3882 rate=41.74/s (0.696x of 59.94)
+1790434914.170 [mtvu] threaded tick=3900 lag=0 jobs=47713 violations=0 waits: vblank=2309/42727.0ms
+1790434917.222 [gs:parallel] periodic gif=4451986 gif_bytes=6120446944 regs=0 presents=3900 null_scanouts=35 present_ms_avg=3.52019 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434917.222 [gs:parallel] sync presents=3900 frame_contexts=4 flush_submits_per_present=4.39667 frame_ctx_advances_per_present=4.39667 frame_ctx_wait_ms_per_present=8.6406 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=9.26527 iface_flush_ms_per_present=0.270327 iface_vsync_ms_per_present=4.14106
+1790434918.748 [vsync-rate] tick=4091 rate=41.66/s (0.695x of 59.94)
+1790434919.171 [padscript] release i=30 now=68535ms
+1790434921.487 [mtvu] threaded tick=4200 lag=0 jobs=51613 violations=0 waits: vblank=2609/47960.1ms
+1790434923.766 [vsync-rate] tick=4293 rate=40.27/s (0.672x of 59.94)
+1790434924.656 [gs:parallel] periodic gif=4928715 gif_bytes=6769910432 regs=0 presents=4200 null_scanouts=35 present_ms_avg=3.67655 readback_ms_avg=0 copy_ms_avg=0 snapshots=0 unsupported_clears=0 unsupported_vram_io=0 l2h_bytes=0
+1790434924.656 [gs:parallel] sync presents=4200 frame_contexts=4 flush_submits_per_present=4.8 frame_ctx_advances_per_present=4.8 frame_ctx_wait_ms_per_present=10.6188 timeline_waits_per_present=0 timeline_wait_ms_per_present=0 flush_submit_ms_per_present=11.2834 iface_flush_ms_per_present=0.249237 iface_vsync_ms_per_present=5.43163
+1790434928.785 [vsync-rate] tick=4458 rate=32.90/s (0.549x of 59.94)
+1790434930.195 [mtvu] threaded tick=4500 lag=0 jobs=55513 violations=0 waits: vblank=2909/54453.1ms
