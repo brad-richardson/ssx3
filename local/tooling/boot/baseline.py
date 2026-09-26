@@ -313,10 +313,19 @@ def snd_coverage_summary(run):
     snd_p = Path(run) / 'snd.log'
     if snd_p.exists():
         ticks = SND_TICK.findall(snd_p.read_text(errors='replace'))
-        snd = ticks[-1] if ticks else '(no tick lines)'
+        snd = [SND_HOST_NOISE.sub('', t) for t in ticks] or ['(no tick lines)']
     else:
-        snd = '(no snd.log)'
+        snd = ['(no snd.log)']
     return cov, snd
+
+
+def snd_prefix_ok(snd_b, snd_c):
+    """Compare the snd tick lines both runs printed (host noise stripped).
+    Runs stop a few ticks apart (runner stop is host-timed), so the last line
+    can differ in a guest-identical pair (HP1: 2405 vs 2410): compare the common
+    prefix, and require it to cover all but the last two base lines."""
+    n = min(len(snd_b), len(snd_c))
+    return n >= max(1, len(snd_b) - 2) and snd_b[:n] == snd_c[:n], n
 
 
 def cmd_compare(args):
@@ -347,17 +356,23 @@ def cmd_compare(args):
     # as a multiset. Sorting cannot mask a real difference (same multiset
     # <=> same sorted list) and is a no-op verdict-wise for same-host
     # compares, where the order is stable run to run (F5 B1-B5).
-    snd_cov_ok = (sorted(cov_b) == sorted(cov_c)
-                  and SND_HOST_NOISE.sub('', snd_b) == SND_HOST_NOISE.sub('', snd_c))
+    snd_ok, n_common = snd_prefix_ok(snd_b, snd_c)
+    snd_cov_ok = sorted(cov_b) == sorted(cov_c) and snd_ok
     print('snd/coverage: %s' % ('IDENTICAL' if snd_cov_ok else 'DIFFER'))
     if not snd_cov_ok:
-        for tag, b, c in (('coverage', cov_b, cov_c), ('snd', [snd_b], [snd_c])):
-            if b != c:
-                print('  %s base: %s' % (tag, b if tag == 'coverage' else b[0]))
-                print('  %s cand: %s' % (tag, c if tag == 'coverage' else c[0]))
+        if sorted(cov_b) != sorted(cov_c):
+            print('  coverage base: %s' % cov_b)
+            print('  coverage cand: %s' % cov_c)
+        if not snd_ok:
+            first = next((i for i in range(n_common) if snd_b[i] != snd_c[i]), None)
+            print('  snd lines base=%d cand=%d common=%d first_diff_line=%s'
+                  % (len(snd_b), len(snd_c), n_common, first))
+            if first is not None:
+                print('  snd base: %s' % snd_b[first])
+                print('  snd cand: %s' % snd_c[first])
     else:
         print('  coverage: %s' % (' | '.join(cov_b[:4]) if cov_b else '(none)'))
-        print('  snd: %s' % snd_b)
+        print('  snd: %d common tick lines, last %s' % (n_common, snd_b[n_common - 1]))
     print('compare %s vs %s: %s' % (args.key, args.cand,
                                     'IDENTICAL' if hash_ok and snd_cov_ok else 'DIFFER'))
     return 0 if hash_ok and snd_cov_ok else 1
