@@ -156,3 +156,13 @@ bash ~/dev/ssx3-work/IP1/ios/ipad-probe.sh  # Data C207B22D-..., bundle path mat
 bash ~/dev/ssx3-work/IP1/ios/ipad-run.sh ~/dev/ssx3-work/IP1/ios/run-ipad-ip1 ~/dev/ssx3-work/IP1/ios/run-ipad-env.json "1090 1810 2100"
 bash local/research/I31/deploy-ios.sh ipad  # byte-identical after; STOP before install_iphone
 ```
+
+## Orchestrator gate (2026-09-26)
+
+**Stopped correctly; half the goal.** The universal family is proven (`UIDeviceFamily [1, 2]` in both plists) and the
+present path fills the window it gets at exactly 16:9. The window itself is iPadOS 26's windowed-apps mode (traffic
+lights visible) restoring a 590×820 pt window; `UIRequiresFullScreen` doesn't force full screen there. Folded: the
+CMake change cherry-picked onto fork `ssx3` `1425844` → `1c37c41` (iOS-gated, 2 lines; runner-dir diff empty), pushed
+ff. The IP1 build stays installed on the iPad (newer runtime than IS1's). Next: Brad maximizes the window by hand
+once (does it resize cleanly mid-run?); if a programmatic default is still wanted, a follow-up sets the scene's
+size restrictions / requests the full-screen geometry at launch (one named fix + one run).

@@ -160,6 +160,7 @@ then 120 Hz simulation.
       pop in and out. RR1: no draw dropout in the Mac stream; likely the PATH3 wrong-texture effect. Re-check on his phone after the RR1 fold.
 - [ ] iPad in portrait: the virtual-pad layout collides (SELECT/START overlap; D-pad and face buttons over the picture; F2 Part 3 shot). Fold into I28.
 - [ ] iOS: gate the unconditional per-present `[ios-render]` stderr line behind a knob so iOS speed numbers are clean (IS1 numbers are provisional because of it).
+- [ ] iPad full screen (IP1): the build is universal now; iPadOS 26 windowed mode restores a 590×820 pt window. Brad to maximize once and report whether the picture resizes cleanly; if not, or if a launch default is wanted, a follow-up requests full-screen geometry / sets scene size restrictions.
 - [ ] **I28 iPad-native presentation** (low priority, behind Odin): add the
       iPad device family + landscape and lay the virtual pad in the
       letterbox margins; Simulator iPad, then Brad's iPad. IPAD1 ran as an
