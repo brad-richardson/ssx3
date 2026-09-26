@@ -287,6 +287,9 @@ then 120 Hz simulation.
 - [ ] **FS2 (running):** GsWorker blocked ~19 ms/frame in paraLLEl's two `submit_empty` timeline signals per flush (CP1 R3); the MTVU unit loses 6.7 ms/frame to the full GS queue.
 - [ ] **VR4 (running):** VU1 block register residency (the unit thread's 30 ms/frame is mostly VU1 blocks, CP1 Table 3).
 - [ ] Android `-march` quirk (BA1 §1): root CMake's crypto/crc `-march` is overridden by a later plain `armv8-a+fp+simd`; decide which is intended (Odin supports both).
+- [ ] **Odin fan during runs (Brad 09-26):** `settings system fan_mode` is writable over adb (currently 4); Brad's quick menu has
+      Quiet / Smart / Performance, and the app also has a fan-off option, so map the values with Brad (tap each, read the number)
+      before `odin_cooldown.py` sets Performance for runs and restores his setting after. No RPM readable over adb.
 - [ ] **Android immersive mode (small):** the gesture-bar handle shows over the game on the Odin (F6 screencaps); hide system bars.
 - [ ] **GL fallback aspect (small):** Android GL fallback still letterboxes into raylib's 640×448 canvas (1544×868 box);
       start raylib at the display size so it follows Brad's max-fit rule too.
