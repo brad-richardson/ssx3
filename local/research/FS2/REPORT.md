@@ -4,28 +4,33 @@ Worker: Claude Code (Opus). Brief: `local/muse/prompts/FS2.md`. Date: 2026-09-26
 
 ## Status
 
-**Stage 1 done; Stage 2 paused on a blocker after 1 of 8 Odin launches (S2 aborted before launch).**
-- **Mechanism (source + Odin S1):** each Granite queue submission signals Granite's queue
-  timeline. On Turnip/kgsl that timeline is emulated, and allocating its next point GCs the
-  previous one with a zero-timeout wait. kgsl treats timeout 0 as **wait forever**. So
-  paraLLEl's second, command-free `submit_empty` waits for the flush's GPU work to finish.
-- **Odin S1 (fs2 APK, legacy two-submit path, split timers):**
-  - 1st `submit_empty` (the real `vkQueueSubmit2`): **0.12 ms/frame**.
-  - 2nd, command-free `submit_empty2` (makes no kernel call of its own, S8; its time is the GC
-    wait): **22.2 ms/frame**.
-  - Prediction (a) holds; (b) predicted the reverse.
-  - GS-queue-full on MTVU: 8.2 ms/frame.
-  - Race 23.43 vs/s = 0.391×, same as CP1 R1/R3.
-- **Fix (one candidate):** signal the GS and descriptor timelines from the one real submission.
-  It is built, and it passes the Mac gates:
-  - det-hash IDENTICAL, both on the measured base and after the rebase.
-  - Suite 681/681 measured, 689/689 rebased.
-  - Every Mac frame-dump hash falls within control's own run-to-run set. Byte identity across
-    runs is impossible with this dump path, see Gates.
-- **Not measured on the Odin yet:** the fix's effect (S2), the gralloc compare and the ABBA.
-- **Blocker** (Recommended next action): `odin_restore_play.sh` still requires the old play env
-  (`WANT_ENV=ef9f94e1…`). Commit `931fc818` moved the play env to `090cc981…` (LAG on). The
-  brief's ABBA says LAG off, but Brad's play build is now LAG on.
+**Done: Stage 1 found the mechanism; the Stage 2 fix candidate is correct but a speed null.
+6 of 8 Odin launches used** (S1, S2, ABBA ×4; S2's first try aborted before install and Q1's
+first try was refused on the lease, neither consumed a launch).
+
+- **Mechanism (source + Odin S1):**
+  - Each Granite queue submission signals Granite's queue timeline.
+  - On Turnip/kgsl that timeline is emulated. Every timeline operation first GCs the pending
+    points with a zero-timeout `vk_sync_wait`, and kgsl treats timeout 0 as **wait forever**.
+  - So paraLLEl's second, command-free `submit_empty` waits for the flush's GPU work.
+  - S1, legacy path: 1st `submit_empty` (the real `vkQueueSubmit2`) **0.12**, 2nd **22.21**
+    ms/frame. Hypothesis (a) holds; (b) predicted the reverse.
+- **Fix candidate:** signal the GS and descriptor timelines from the one real submission.
+  **Correct**:
+  - Mac det IDENTICAL on the measured base and after the rebase; suite green.
+  - Mac dump hashes within control's own set.
+  - **Odin gralloc `diff_px=0` at t1100 and t3000**; the t1100 hash equals VK1/VK2's.
+- **Speed null:** it **moves the wait, it doesn't remove it.** With the empty submit gone,
+  `submit_empty2` goes to 0, but `frame_ctx_wait` rises from 0.4 to **23.3 ms/frame**. Granite's
+  `next_frame_context` → `vkWaitSemaphores` runs the same GC, which walks **every** pending point,
+  not just the awaited one. `flush_submit` stays at 23.5–23.6 ms/frame.
+  - **ABBA vs the play APK** (MTVU + LAG + blocks): play 25.36 / 25.23, fs2 25.22 / 25.19 vs/s
+    → **−0.4 %**, inside the A–A spread.
+  - GsWorker blocked and MTVU blocked are unchanged.
+- **Next lever:** the wait can't be avoided from the GS side while Granite tracks its queue with
+  an emulated timeline. A waiter-thread trick doesn't help either: the GC runs under the
+  timeline's mutex. **The fix belongs in Turnip:** a zero-timeout wait on a timestamp syncobj
+  must poll, not block. See Recommended next action.
 
 ## Stage 1 — why `submit_empty` blocks (source reading)
 
@@ -62,6 +67,11 @@ separately as `submit_empty2`):**
 | (a) GC wait on Granite's queue timeline | small (the GC waits only for the *previous* flush) | ≈ the flush's GPU time (~5 ms/flush) | 2nd gone; the 1st waits only if the previous flush hasn't retired → most of the ~22 ms/present disappears |
 | (b) kernel back-pressure in `GPU_COMMAND` | carries the wait | ≈ 0 (no ioctl, S8) | no change |
 | (c) GPU behind | wait anywhere | — | no change in race rate |
+
+**Outcome (Odin):** the legacy columns held (S1). The fix column did **not**: the wait moved into
+Granite's frame-context `vkWaitSemaphores`, whose GC also walks every pending point (S2, ABBA
+below). The model missed that *any* emulated-timeline operation drains all pending,
+unreferenced points, not just a point allocation.
 
 **Fix candidate (the brief's first one):** signal both the GS timeline and the descriptor
 timeline from the one real submission. Granite gets a `submit_empty(type, fence, sem, sem2)`
@@ -106,7 +116,7 @@ commits.
 | Suite `ps2x_tests` (from worktree root) | measured 681/681; rebased 689/689 | build logs in scratch |
 | Mac frame dumps at fixed ticks, byte-identical to control | **Not achievable as specified, for control either.** `PS2X_FRAME_DUMP_ONCE_TICKS` takes "the first frame within the following two guest seconds" (`ps2_runtime.cpp` ~l.556), and the GS runs on the GsWorker. What a dump captures depends on host timing: **control differs from control** at 6 of 8 ticks, and one dump landed on tick 1501 instead of 1500. Over 11 boots (5 control + 3 fs2 at 1090/1100/1110; 3 control + 1 fs2 at 1500/2250/2390; 1 + 1 at 1090/1800/2100): **every fs2 hash is one control also produced, at all 8 ticks**. 1800 and 2100 are single-valued and byte-identical across control, fs2 and the key. | `mac/frame-dumps.txt`; table below |
 | Deterministic replay (2.5 GB GS capture of the control run, FR1-R1 t0–2400, 1,833,413 packets) through control ×2, fs2, fs2+legacy | all 4 replays ran the whole stream, identical summaries, suite green. **No pixels:** the Mac parallel replay path returns `vram=0 present=0` (no readback), so this checks that the new submit path runs, not the pixels | `mac/replay.txt` |
-| Odin gralloc compare `diff_px=0` (VK1/VK2 t1100/t3000) | **not run** (S2 aborted before launch) | — |
+| Odin gralloc compare `diff_px=0` (VK1/VK2 t1100/t3000) | **pass**: S2 t1100 `diff_px=0`, hash `ad2e9e852b54155a` = VK1/VK2's; t3000 `diff_px=0` (`cdda3502…`; LAG on, so not comparable to VK2's LAG-off hash) | `logs/S2/logcat.txt` |
 
 Frame-dump hashes (fnv1a of the RGBA dump) per tick; control runs vs fs2 runs:
 
@@ -139,7 +149,11 @@ inside `libps2EntryRunner.so`. Build #1 (`71f984b8…`) is superseded, never ins
 | Launch | Env beyond play keys | Result |
 | --- | --- | --- |
 | S1 | `PS2X_PGS_FS2_LEGACY=1 PS2X_PGS_FLUSH_SPLIT=1` | STOP 4574, 156 s wall, race 23.43 vs/s = 0.391×; `[mtvu] jobs=55501 violations=0`; cool-down PRE/POST status 0; 100 % on AC; restore RC 0 (then env `ef9f94e1`) |
-| S2 | `PS2X_PGS_FLUSH_SPLIT=1` + `--compare-ticks 1100,3000` | **aborted before install**: device env was `090cc981…` (the orchestrator's `ORCH-LAG` had changed the play env meanwhile). The driver refused to touch it (pin `ef9f94e1`). The restore then pushed the play APK + the new play env and failed its own env check (`WANT_ENV` still `ef9f94e1`). No launch consumed |
+| S2 (first try) | `PS2X_PGS_FLUSH_SPLIT=1` + `--compare-ticks 1100,3000` | **aborted before install**: device env was `090cc981…` (the orchestrator's `ORCH-LAG` had changed the play env meanwhile). The driver refused to touch it (pin `ef9f94e1`). The restore then pushed the play APK + the new play env and failed its own env check (`WANT_ENV` still `ef9f94e1`). No launch consumed |
+
+| S2 (after the orchestrator's restore fix `adbc1811`; driver pin now read from `odin-play/SHA256SUMS`; **LAG on** from here, Brad's play settings) | `PS2X_PGS_FLUSH_SPLIT=1` + `--compare-ticks 1100,3000` | STOP 4571, race 25.31 vs/s = 0.422×; `jobs=55501 violations=0`; 0 FATAL; **t1100 `diff_px=0` ahb = readback `ad2e9e852b54155a`** (= VK1/VK2's t1100 hash); **t3000 `diff_px=0`** `cdda35020329c5e9` (≠ VK2's `9e19d118…`: VK2 ran LAG off, and LAG moves race frames); restore RC 0 |
+| Q1 (first try) | play APK | **refused**: VR4 claimed the lease during my 180 s cool-down, which ran before the driver's claim. Driver and restore both refused; nothing touched, no launch consumed (`logs/Q1-refused/`). `run1.sh` now claims the `FS2` lease *before* the cool-down |
+| Q1–Q4 ABBA | A = play APK `825b436d`, B = fs2 APK `d5f83cef` (fix on, no timers); both MTVU + LAG + blocks, pins as above | all STOP ~4555–4574, 0 FATAL, `jobs=55501 violations=0`, cool-down PRE→POST status 0 + 180 s each, 100 % on AC, restore RC 0 |
 
 S1 race window, sync line (ticks 2196→4296, 2,100 presents = 2,100 frames; `logs/S1/syncsum.txt`):
 
@@ -158,6 +172,50 @@ GameThread 12.3 / 0.1 / 36.0, GsWorker 10.1 / 3.4 / 34.9 (run / runnable / block
 CP1 R1 (MTVU 28.7 / 1.9 / 18.2, GsWorker 9.6 / 3.7 / 35.4) and R3's 22.1 ms `submit_empty`
 total, so the fs2 APK on the legacy path reproduces the play build.
 
+**S2 vs S1 — where the wait went** (sync line, race window, ms per frame; S1 is LAG off, S2 LAG on):
+
+| ms per frame | S1 legacy | S2 fix |
+| --- | ---: | ---: |
+| 1st `submit_empty` (real submit) | 0.12 | 0.23 |
+| 2nd `submit_empty` (command-free) | **22.21** | **0** |
+| `frame_ctx_wait` (Granite `next_frame_context` → `vkWaitSemaphores`) | 0.37 | **23.39** |
+| `flush_submit` total | 22.74 | 23.68 |
+| frame-context advances per frame (4 contexts) | 4.17 | 4.59 |
+| MTVU GS-queue-full | 8.24 | 16.18 |
+
+Why the wait moved:
+- Mesa `vk_common_WaitSemaphores` → `vk_sync_timeline_wait_locked` → `vk_sync_timeline_gc_locked`.
+  The GC walks the pending list from the head and blocks (S5/S6) on every submitted,
+  unreferenced point, including points newer than the value waited on.
+- In the legacy path, the empty submit had already drained everything, so the frame-context wait
+  found nothing pending (0.37).
+- Without it, the frame-context wait (`flush_submits` = `frame_ctx_advances`: every flush advances
+  a frame context) drains everything instead.
+- The GC runs under the timeline state's mutex. So a helper thread that keeps a reference on the
+  head point (the PGS-Waiter trick that keeps the GS timeline cheap) would still stall every
+  submit on that mutex. No GS-side reordering avoids it.
+
+**ABBA (LAG on, play settings; race = ticks 1714→STOP, `phases.py`; three-way = schedstat cpu
+window ~1980→2550; sync = race window):**
+
+| Leg | APK | race vs/s | × | MTVU run / runnable / blocked | GsWorker run / runnable / blocked | `flush_submit` | `frame_ctx_wait` | GS-queue-full |
+| --- | --- | ---: | ---: | --- | --- | ---: | ---: | ---: |
+| Q1 | play | 25.36 | 0.423 | 29.1 / 0.7 / 14.6 | 9.0 / 2.6 / 32.8 | 23.54 | 0.42 | n/a (no counter) |
+| Q2 | fs2 | 25.22 | 0.421 | 28.6 / 0.9 / 14.9 | 8.9 / 2.5 / 33.0 | 23.61 | 23.33 | 16.06 |
+| Q3 | fs2 | 25.19 | 0.420 | 28.6 / 0.7 / 14.6 | 8.8 / 2.5 / 32.7 | 23.62 | 23.35 | 16.21 |
+| Q4 | play | 25.23 | 0.421 | 27.1 / 0.5 / 14.2 | 8.3 / 2.4 / 31.1 | 23.51 | 0.41 | n/a |
+| **B/A** | | **25.205 / 25.295 = 0.996 (−0.4 %)** | | blocked ~ equal | blocked ~ equal | equal | moved | — |
+
+The A–A spread (25.36 vs 25.23, 0.5 %) is as large as the B–A difference: **no effect**.
+- The play APK has no GS-queue-full counter. A like-for-like LAG-on legacy value would need a
+  `PS2X_PGS_FS2_LEGACY=1` run of the fs2 APK (not taken; the null makes it moot).
+- S1 (LAG off, legacy) read 8.2; LAG itself raises it, because the unit waits less for GameThread
+  and runs into the GS queue more.
+- Three-way ms/frame use each leg's own cpu window (Q4's window ran faster: 41.7 vs 44.4
+  ms/frame).
+- `submit_empty`/`submit_empty2` read 0 in Q2/Q3 because those timers only record with
+  `PS2X_PGS_FLUSH_SPLIT=1`.
+
 Device state after S2 (read-only check, `logs/S2-device-state.txt`):
 - APK `825b436d…`, env `090cc981…`: Brad's current play state per `odin-play/SHA256SUMS`.
 - App not running, `mc0-test` empty.
@@ -168,23 +226,35 @@ The restore script didn't reach its own save loop. The check above stands in for
 
 ## Recommended next action (orchestrator decides)
 
-1. Unblock the restore. Set `odin_restore_play.sh` `WANT_ENV` to `090cc981…`, or read it from
-   `odin-play/SHA256SUMS`. Workers may not edit shared tooling, so I stopped here.
-2. Decide the ABBA settings: the brief's "LAG off" (comparable to CP1/S1), or Brad's new play
-   settings (LAG on). The ABBA B leg is the play APK with its env built by the driver, so either
-   is one flag. My driver's device-env pin also needs `090cc981`.
-3. Then resume with the same APK (`d5f83cef…`), no new build:
-   - S2: fix + split timers + gralloc compare at 1100/3000.
-   - ABBA ×4 vs the play APK: race rate, GsWorker blocked, gsq_full.
+1. **Don't fold the FS2 fix for speed; it's a null.** It is correct and harmless: det-identical,
+   `diff_px=0`, one fewer submission per flush. Folding it would only matter together with (2).
+   The diagnostics are the useful part if you want them on the fork:
+   - `submit_empty2` split.
+   - GS-queue-full counter (`gsq_full_*`, always-on, costs only on a blocking enqueue).
+   - `PS2X_PGS_FS2_LEGACY`.
+2. **The lever is Turnip.** In `tu_knl_kgsl.cc` `kgsl_syncobj_wait`, `KGSL_SYNCOBJ_STATE_TS`, with
+   `abs_timeout_ns == 0` (the runtime's poll), read the retired timestamp instead of calling
+   `IOCTL_KGSL_DEVICE_WAITTIMESTAMP_CTXTID` with `timeout = 0`:
+   - `IOCTL_KGSL_CMDSTREAM_READTIMESTAMP_CTXTID`, `KGSL_TIMESTAMP_RETIRED`.
+   - Compare with `timestamp_cmp`; return `VK_TIMEOUT` if not retired.
+   - Also, `get_relative_ms()` rounding a future deadline under 1 ms down to 0 turns short waits
+     into infinite ones.
 
-   That is 5 more launches (6 of 8 in total).
-   - Prediction: `submit_empty2` goes to 0.
-   - The one `submit_empty` waits only when the previous flush hasn't retired.
-   - GsWorker's kgsl wait and MTVU's GS-queue-full both drop.
-4. Root cause beyond this brief: Turnip's `kgsl_syncobj_wait` with `abs_timeout_ns == 0`. It
-   should poll the retired timestamp (`IOCTL_KGSL_CMDSTREAM_READTIMESTAMP_CTXTID`), not
-   `WAITTIMESTAMP` with 0. That would remove the same wait from every other Granite submission
-   too (frame-context, present). It needs our own Mesa Android build.
+   This removes the GC wait at every call site (submit, frame context, present). The GsWorker's
+   kgsl wait then comes down to the real frame-context waits (4 contexts deep).
+   - Needs: a Mesa `c501e1d16e` Android arm64 build of `libvulkan_freedreno.so` (meson + NDK;
+     we ship a prebuilt), replacing it in `jniLibs`, one APK build.
+   - Gates: the same (pixels `diff_px=0`, det unaffected, ABBA vs play).
+   - Expected observable: `flush_submit` falls from ~23.5 toward the real frame-context wait, and
+     GS-queue-full falls on MTVU.
+   - Whether that turns into frame rate depends on how much of MTVU's 14.6 ms blocked is
+     queue-full versus starvation. LAG took most of the starvation, and GS-queue-full is 16
+     ms/frame here, so there's room.
+   - No upstream contact.
+3. If a driver build is off the table: a Granite-side route is to stop tracking Granite's own
+   queue with a timeline on this driver, i.e. fences/binary semaphores (Granite has the path when
+   `timelineSemaphore` is off). paraLLEl's own GS/descriptor timelines would stay. It's a larger
+   refactor; I'd try (2) first.
 
 ## Exact commands
 
@@ -211,7 +281,9 @@ tar -cf pgs-fs2.tar --exclude=.git -C ~/dev/ssx3-work/FS2 parallel-gs          #
 ssh bytesize 'wsl -d Ubuntu -- bash -lc /home/brad/fs2/build.sh'              # #1 14m09s; #2 (3 changed files copied in, fresh mtimes) 14m32s
 # Odin
 local/research/FS2/run1.sh S1 …/app-release-fs2.apk d5f83cef… --env PS2X_PGS_FS2_LEGACY=1 --env PS2X_PGS_FLUSH_SPLIT=1
-local/research/FS2/run1.sh S2 …/app-release-fs2.apk d5f83cef… --env PS2X_PGS_FLUSH_SPLIT=1 --compare-ticks 1100,3000   # aborted (blocker)
+local/research/FS2/run1.sh S2 …/app-release-fs2.apk d5f83cef… --env PS2X_PGS_FLUSH_SPLIT=1 --compare-ticks 1100,3000   # first try aborted (env pin); rerun after adbc1811 with LAG on
+local/research/FS2/run1.sh Q1 ~/dev/ssx3-work/odin-play/app-release.apk 825b436d…   # Q2/Q3: fs2 APK d5f83cef…; Q4: play (run1.sh now claims the lease before cool-down)
+python3 local/research/FS2/syncsum.py local/research/FS2/logs/{S2,Q1,Q2,Q3,Q4}
 python3 local/research/FS2/phases.py local/research/FS2/logs/S1; python3 local/research/FS2/syncsum.py local/research/FS2/logs/S1
 ```
 
@@ -219,11 +291,14 @@ python3 local/research/FS2/phases.py local/research/FS2/logs/S1; python3 local/r
 
 | Gap | Reason |
 | --- | --- |
-| Fix not measured on the Odin (S2, ABBA, gralloc compare) | blocker above; 1 of 8 launches used |
-| Mac pixel identity is set-membership, not byte identity | dumps are host-timing dependent for control too; Mac parallel replay has no readback. The Odin gralloc compare (VK2 hashes t1100 `ad2e9e852b54155a`, t3000 `9e19d118a201e2ee`) is the pending hard pixel gate |
-| The Odin kgsl is assumed to match the sm8650 source | Odin 3 = SM8750, whose kgsl source I didn't fetch; S1's split (0.12 vs 22.2 ms) matches the infinite-wait reading, not a poll |
+| Mac pixel identity is set-membership, not byte identity | dumps depend on host timing for control too; Mac parallel replay has no readback. The Odin gralloc compare (S2 `diff_px=0` at t1100/t3000, t1100 = VK1/VK2 hash) is the hard pixel gate |
+| t3000 gralloc hash not comparable to VK2's | VK2 ran LAG off; S2 ran LAG on (Brad's play settings now) |
+| The Odin kgsl is assumed to match the sm8650 source | Odin 3 = SM8750, whose kgsl source I didn't fetch. S1's split (0.12 vs 22.2 ms) and S2's moved wait both match the infinite-wait reading, not a poll |
 | The Odin APK is on the pre-rebase bases | measured build = fork `5d5c382` + paraLLEl `1b3a294`. The rebase onto `f0d2d3c`/`3d72467` is clean and Mac-det-identical, but no Android build of it exists |
-| The fix removes only the per-flush serialization | the 1st submit still GCs Granite's queue timeline (waits if the previous flush hasn't retired), and other Granite submits (present, frame contexts) keep the same wait. Only the driver fix removes all of them |
+| No LAG-on legacy baseline for the GS-queue-full counter | the play APK lacks the counter, and a `PS2X_PGS_FS2_LEGACY=1` LAG-on run wasn't taken (moot after the null ABBA) |
+| S1 is LAG off, S2/ABBA LAG on | the play settings changed mid-lane (Brad 09-26); the split comparison S1→S2 is across LAG, the ABBA is LAG on throughout |
+| Turnip fix not tried | outside the brief (a driver build); recommended above |
 | Scratch 10 GB in `~/dev/ssx3-work/FS2` | 2.5 GB capture + 3 Mac det build dirs + APK; mini total 107.8 of 200 GB. Can go at close |
 
-Budgets: 2 of 4 Android builds, 1 of 8 Odin launches (+1 aborted pre-install), ~2 h.
+Budgets: 2 of 4 Android builds (14m09s, 14m32s), 6 of 8 Odin launches (S1, S2, Q1–Q4; plus
+two pre-install refusals), all ≤ 160 s wall; ~3 h.

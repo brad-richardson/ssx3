@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""FS2 Odin launcher (copy of CP1's, repointed at FS2): F7's launch.py (F5 lineage: play-env pin ef9f94e1, mc0 pins,
+"""FS2 Odin launcher (copy of CP1's, repointed at FS2): F7's launch.py (F5 lineage: play-env pin from odin-play/SHA256SUMS, mc0 pins,
 transport record, cool-down done by cooldown.py first; lease/dirs repointed at FS2).
 FS2: critical-path timeline on the play build (825b436d…): per-thread CPU window
 via --cpu-window, schedstat snapshots (running vs runnable-wait vs blocked),
@@ -24,7 +24,10 @@ PKG = 'com.ps2x.runner'
 FILES = f'/storage/emulated/0/Android/data/{PKG}/files'
 DSCRAP = '/data/local/tmp/fs2'
 LEASESH = os.path.expanduser('~/dev/ssx3/local/tooling/odin_lease.sh')
-PLAY_ENV_SHA = 'ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390'
+# FS2: the play pin is read from Brad's play dir (odin-play/SHA256SUMS), as odin_restore_play.sh
+# does since adbc1811 (play env 090cc981 = ef9f94e1 + PS2X_MTVU_LAG=1, Brad 09-26).
+PLAY_ENV_SHA = next(l.split()[0] for l in open(os.path.expanduser('~/dev/ssx3-work/odin-play/SHA256SUMS'))
+                    if l.split()[1] == 'ps2x.env')
 # I31 odin-verify.txt full SHAs (read-only intactness check, never written).
 MC0_PINS = {
     'BASLUS-20772-GAM0001/BASLUS-20772-GAM0001': '4bdaee79a3bdaceef898bb44b6bcf62058e882a24237f8c81e46953a5067b78e',
