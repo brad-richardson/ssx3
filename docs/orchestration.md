@@ -177,6 +177,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   or interpolation.
 
 ## 8. Mistakes to avoid
+- 09-26: an opencode (local Qwen) brief asked for edits in a fork worktree under `~/dev/ssx3-work/`; the
+  managed permission rules deny edits outside the started folder, so the worker (correctly) stopped. A local
+  worker that must edit outside `~/dev/ssx3` needs `OPENCODE_CONFIG_CONTENT` via `herdr tab create --env`,
+  or the job goes to muse.
 
 - Racy or under-controlled gates (GB2 Parts 1–7; frame-hash gates on free-running boots).
 - Hypotheses stated before evidence; labels relayed without verifying them.
