@@ -678,3 +678,11 @@ runner byte-identical, so I did not re-run them.
   `vu1gen-ssx3-pre-vr2d`). The fork `ssx3` fast-forwards `a523700..d585e5c`. Scratch
   `~/dev/ssx3-work/VR2` reached 15 GB (the cap); superseded build dirs were pruned after hand-off,
   leaving about 5 GB (`build-fold2`, `bin/`, `run/`).
+
+## Orchestrator gate, Part 2D (2026-09-26) — pushed, lane closed
+
+**Pass; pushed** fork `ssx3` `a523700..d585e5c` (clean, ff, runner-dir empty, six `[VR2]` subjects).
+Promoted `vu1gen-vr2d` (set hash `d28e3fc6…`, 7/7 SHAs verified) to `~/dev/ssx3-work/vu1gen-ssx3`; the old set
+is `vu1gen-ssx3-pre-vr2d`. Blocks default off (knob-off cost ~1 % on the Mac from the larger images; on =
+1.067×); the Odin pair in the next device build decides the default. The trampoline + noinline fix for the
+knob-off cost was a good catch.

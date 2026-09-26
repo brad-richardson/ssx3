@@ -278,7 +278,7 @@ then 120 Hz simulation.
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
-- [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
+- [ ] VU1 blocks: decide `PS2X_VU1_BLOCKS` default from the next Odin pair (Mac 1.067× on, ~1 % cost off). Next VU1 levers: register residency across block iterations (RV4 §2), VU0 recompile (VR3).
 - [ ] **MT1 (running, Brad 09-26: un-parked under PCSX2 parity):** MTVU, deterministic by design (fixed guest-time VU1 semantics, worker thread; threaded det-hash = synchronous).
 - [ ] **SS3 (queued):** RV5 S2–S5 save-state holes: paraLLEl palette indices on load, partial GS transfer / vertex state at the
       save point (defer or serialize), card directories + timestamps, Android runner identity via `dladdr`.
