@@ -363,6 +363,81 @@ Shipped to bytesize as a git bundle (`44794094…`), so both sides build the sam
 | --- | --- | --- | ---: | --- | --- | --- |
 | T1 | `bb846329…` (#2 plain upstream) | legacy GS path, compare 1100/3000 | 25.45 (0.425×) | 23.27 / 0.40 / 15.55 | **FAIL: `diff_px=228919` (t1100), `229285` (t3000)**; the AHB and the screen show tiled garbage (sc01 at tick 2100) | UBWC layout mismatch on the AHB import: exactly what the u_gralloc patch fixes |
 | T2 | `838c2d4d…` (#3 upstream + u_gralloc) | same | **25.39 (0.424×)** | 23.67 / 0.41 / 15.88 | **`diff_px=0`** at t1100 (`ad2e9e852b54155a` = VK1/VK2/S2) and t3000 (`2d19b536…`; mid-race frames vary run to run) | 0 FATAL, jobs=55501, no device lost. Play APK in the Stage-2 ABBA: 25.36 / 25.23 → **within noise** |
+| P1 | `202c6974…` (#4 patched: `5a406e36dd`) | legacy GS path, split timers, compare 1100/3000, **lifecycle at tick 2000** (HOME 8 s → foreground → rotation lock 3 → restore) | **38.24 (0.638×)** | **4.26 / 4.13 / 1.68** (`submit_empty2` 0.01) | `diff_px=0` at t1100 (`9a3f7712…`, the other of the two run-to-run t1100 values; same Select Peak frame by eye) and **t3000 after the lifecycle** (`33440e2d…`) | 0 FATAL, no device lost; jobs=55501 at 4500 (deterministic); after-fg layers restored, race renders (sc03). Three-way (ticks 1959→3157, 33.15 ms/frame): MTVU **31.0 / 0.4 / 1.7**, GameThread 13.7 / 0.6 / 18.9, GsWorker 10.3 / 4.4 / 18.4 |
+| P2 | same APK, **+ FS2 Granite fix** (no legacy) | split timers, compare 1100/3000 | **38.81 (0.648×)** | 4.40 / 4.27 / 1.50 | `diff_px=0` at t1100 (`ad2e9e85…`) and t3000 | 0 FATAL, jobs=55501 at 4500. MTVU 31.7 / 0.5 / 1.5 (94 % busy). Three transient Turnip compile threads in the window (93 % each), as CP1 saw |
+
+### ABBA vs the play APK (mode: **final**: status ≤ 1 + fixed 180 s cool-down, stop 4500; play settings MTVU + LAG + blocks; B = patched Turnip `202c6974…`, legacy GS path)
+
+**R3 is void and was re-run as R3b.** At launch a Quick Settings tile dialog
+(`CustomTileDetailDialog`) covered the app, and the driver's BACK only moved focus to the
+notification shade. The host logcat stream then delivered nothing from t+10 s to t+120 s:
+- 947 lines in the whole run, 2 `[vsync-rate]` lines instead of ~20; device timestamps absent
+  for that span, so the lines were never captured, not just delayed.
+- The driver's first tick reading was 5314 at t+122, hence the "tick jump" and the one-frame
+  cpu window.
+- The guest ran normally: `jobs=55501` at 4500, and sc01 at t+121 shows the race rendering in
+  the foreground.
+- Neither its rate nor its three-way is usable, and the app was covered for an unknown part of
+  the race.
+- Transport: wireless adb (TLS mDNS).
+
+Receipts are in `logs/R3-void/`. Its restore RC 1 was the orchestrator's fan-line bug (fixed in
+`bb12b871`); a read-only check (`verify_play.sh`) confirmed the play state.
+Every leg from here is also checked for ≥ 15 `[vsync-rate]` lines.
+
+| Leg | APK | race vs/s | × | MTVU run / runnable / blocked | GsWorker run / runnable / blocked | `flush_submit` | `frame_ctx_wait` | GS-queue-full |
+| --- | --- | ---: | ---: | --- | --- | ---: | ---: | ---: |
+| R1 | play `825b436d` | 25.57 | 0.427 | 27.8 / 0.7 / 14.7 | 8.9 / 2.3 / 32.0 | 23.51 | 0.41 | n/a |
+| R2 | patched `202c6974` | 38.36 | 0.640 | 32.0 / 0.5 / 1.7 | 9.8 / 5.3 / 19.1 | 4.66 | 4.52 | 1.79 |
+| R3b | patched | 38.29 | 0.639 | 32.5 / 0.4 / 1.8 | 9.9 / 5.3 / 19.5 | 4.71 | 4.57 | 1.73 |
+| R4 | play | 25.35 | 0.423 | 28.0 / 0.6 / 13.7 | 8.6 / 2.3 / 31.3 | 23.49 | 0.41 | n/a |
+| **B/A** | | **38.325 / 25.46 = 1.505 (+50.5 %)** | 0.425 → **0.639** | MTVU blocked **14.2 → 1.7** | GsWorker blocked 31.6 → 19.3 | **23.5 → 4.7** | | ~16 (Stage 2) → **1.8** |
+
+A–A spread 0.9 %, B–B 0.2 %. Every leg: STOP ≥ 4500, `jobs=55501 violations=0` at tick 4500,
+0 FATAL, no device lost, POST cool-down status 0, 100 % on AC, 22–30 `[vsync-rate]` lines,
+restore RC 0 (R2 onward with `bb12b871`) + `verify_play.sh` ok.
+- Three-way uses each leg's own cpu window (~1950→2560).
+- R2/R3b's windows also caught Turnip's transient compile threads (named GsWorker, ~93 % each,
+  as CP1 saw). The GsWorker row above is the real worker (≈410k slices).
+
+**What the patch did:** the ~19 ms/frame kgsl sleep in the GsWorker is gone:
+- `flush_submit` 23.5 → 4.7 ms/frame. The remainder is `frame_ctx_wait`, a real 4-deep
+  frame-context wait.
+- MTVU no longer waits on the GS queue (1.7 ms), and is now the busy thread (93–94 %: 32 run +
+  1.7 blocked per 34 ms frame).
+- GameThread's vblank wait shrinks with it (30 → 21 ms).
+- The next limit is the MTVU unit's own work (VU1 blocks; VR4's lane).
+
+### Part 3 verdict and fold (worker; orchestrator gates)
+
+- **Mesa fork `brad-richardson/mesa` `ssx3` = `5a406e36dd4`** (pushed fast-forward
+  `c501e1d16e1..5a406e36dd4`, only that branch; no upstream contact):
+  - `745f35565f7` carried u_gralloc patch;
+  - `5a406e36dd4` kgsl poll patch.
+- **Driver for the Odin play build:** `libvulkan_freedreno.so`
+  `a315b74aba2307a51cd8aaebb88abb84890ecc7d855516dbbcd715cf87de6224` (14,188,360 B,
+  `Mesa 26.3.0-devel (git-5a406e36dd)`). It's built with `turnip/mesa-build.sh` at `5a406e36dd4`
+  on bytesize (`/home/brad/fs2/turnip/out-poll/`); the test APK `202c6974…` carries it.
+  - To ship it: replace `jniLibs/arm64-v8a/libvulkan_freedreno.so` (currently v36 `717812c3…`)
+    for the next play build.
+  - Nothing else changes: same `libhardware.so` shim, same runner.
+- **The FS2 Granite fix is optional:** P2 (with it) 38.81 vs P1 (without) 38.24, single
+  screening-protocol runs, within noise. It's harmless (`diff_px=0`, det IDENTICAL); fold it or
+  not at your discretion.
+- **Numbers modes:**
+  - ABBA R1–R4: **final** (ledger-grade).
+  - T1, T2, P1, P2: single runs on the same final cool-down and stop 4500, labelled
+    **screening** (no A/B pairing).
+- **Gaps:**
+  - The patched driver's source is not v36's exact source: it is upstream + the one carried patch,
+    and v36's other patches (DECK_EMU, A810/825/829, disable_gmem, …) are absent. T2 shows no
+    pixel or speed difference on our path, but other games or features weren't tested.
+  - The lifecycle check was one cycle (P1).
+  - No Mac-side test is possible for the driver (MoltenVK there).
+
+Budget (Part 3): Mesa builds 4 of 4 (build 4 retried after the WSL wedge), Android builds 3
+of 4 (T1, T2, patched; build 3 first attempt produced nothing: stdin eaten by the lock's own
+ssh), Odin launches 9 of 10 (T1, T2, P1, P2, R1, R2, R3 (void), R3b, R4).
 
 ### Blocker (resolved 09:15: the orchestrator restarted WSL; two concurrent heavy builds had used all 12 GB)
 
