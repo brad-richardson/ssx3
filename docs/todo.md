@@ -277,6 +277,7 @@ then 120 Hz simulation.
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
 - [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
+- [ ] **MT1 (running, Brad 09-26: un-parked under PCSX2 parity):** MTVU, deterministic by design (fixed guest-time VU1 semantics, worker thread; threaded det-hash = synchronous).
 - [ ] **VK2 (running):** fix RV5 B1/B2/S1 in the Android Vulkan present (release-wait ownership, submission identity across
       window changes, SurfaceControl leak); until then Brad's Odin env carries `PS2X_PRESENT_VULKAN=0`.
 - [ ] **SS3 (queued):** RV5 S2–S5 save-state holes: paraLLEl palette indices on load, partial GS transfer / vertex state at the
@@ -311,10 +312,6 @@ then 120 Hz simulation.
   (SDL / CAMetalLayer / ANativeWindow) for the game image, virtual pad redrawn in Vulkan, raylib kept
   only for input/audio (or SDL). Buys: no copies, no deprecated GL on Apple, precise present timing for
   120 Hz. Revisit when 120 Hz work starts; HR1 may investigate if its time box allows.
-
-- **VU1 on its own thread** (MTVU-style; Brad, 09-24: parked until the game works, too much
-  complexity for now). Could roughly halve GameThread time after E57, but EE↔VU1 handoff ordering
-  must be exact (RR1's PATH3 ordering bug is the same class). Size it with N11's numbers first.
 
 - **Audio below full speed (Brad, 09-24):** stutter for now (current behaviour, typical of
   emulators). Plain slowdown drops pitch with speed (0.5× = an octave), so no. **When menus reach
