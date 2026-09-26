@@ -282,7 +282,7 @@ then 120 Hz simulation.
 - [ ] **MT1 (running, Brad 09-26: un-parked under PCSX2 parity):** MTVU, deterministic by design (fixed guest-time VU1 semantics, worker thread; threaded det-hash = synchronous).
 - [ ] **SS3 (running):** RV5 S2–S5 save-state holes: paraLLEl palette indices on load, partial GS transfer / vertex state at the
       save point (defer or serialize), card directories + timestamps, Android runner identity via `dladdr`.
-- [ ] **CP1 (queued after F6; RV4 rank 1 measurement):** matched-window Odin critical-path timeline: per-thread running vs
+- [ ] **CP1 (running; RV4 rank 1 measurement):** matched-window Odin critical-path timeline: per-thread running vs
       blocked, GS queue waits, GPU timestamps, frequency residency, `flush_submit` split (submit / submit_empty / compile
       drain; was FS1: the 4× cost is GsWorker time blocked there, VK1 2A). Attribute the 'profiler unwind' bucket.
 - [ ] Android `-march` quirk (BA1 §1): root CMake's crypto/crc `-march` is overridden by a later plain `armv8-a+fp+simd`; decide which is intended (Odin supports both).
