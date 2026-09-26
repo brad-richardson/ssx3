@@ -59,7 +59,8 @@ Docs hold current state only; history lives in git. Handoff notes between
 orchestrators are not committed.
 
 Lanes: **E** PS2 runtime (PS2Recomp fork, branch `ssx3`), **G** GS
-composite/GPU backend (paraLLEl-GS + Granite forks, branch `ssx3`),
+composite/GPU backend (paraLLEl-GS + Granite forks, branch `ssx3`; Turnip patches in the
+public Mesa fork `brad-richardson/mesa`, branch `ssx3`, Brad 09-26),
 **N** Android app (Odin), **A** audio, **I** iOS, **W** widescreen,
 **T** PCSX2 reference traces, **V** storage/restore.
 

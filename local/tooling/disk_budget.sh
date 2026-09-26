@@ -3,7 +3,7 @@
 # 200 GB cap (Brad, 2026-09-22; raised from 100). Run before and after any step that writes
 # more than ~1 GB. Exit 1 when over the cap.
 CAP_GB=200
-paths=(~/dev/ssx3 ~/dev/ssx3-work ~/dev/ssx3-inputs ~/dev/PS2Recomp ~/dev/parallel-gs ~/dev/ps2xGS ~/Library/Caches/ccache)
+paths=(~/dev/ssx3 ~/dev/mesa ~/dev/ssx3-work ~/dev/ssx3-inputs ~/dev/PS2Recomp ~/dev/parallel-gs ~/dev/ps2xGS ~/Library/Caches/ccache)
 for p in /tmp/e18-mpeg-link /tmp/pf1* /tmp/t4* /tmp/g42* /tmp/ssx3-* /tmp/e3* /tmp/n4*; do [ -e "$p" ] && paths+=("$p"); done
 kb=$(du -sk "${paths[@]}" 2>/dev/null | awk '{s+=$1} END {print s+0}')
 gb=$(awk -v k="$kb" 'BEGIN {printf "%.1f", k/1048576}')
