@@ -298,3 +298,20 @@ service budget, not proof that the stock guest frame maps to a 120 Hz physics st
 
 Limits: no APK disassembly, PMU experiments, Android command audit, or new validation.
 Estimates propose measurements. Only this report is written; no other lane or planning file is changed.
+
+## Orchestrator adoption (2026-09-26)
+
+Verified before adopting: `android/app/build.gradle:69` builds `RelWithDebInfo` (CMake default
+`-O2 -g`), and `ReleaseMode.cmake` sets only `INTERPROCEDURAL_OPTIMIZATION_RELEASE`, so the Odin build
+has had neither `-O3` nor ThinLTO while every Mac speed number came from `Release` + IPO.
+- **Adopted, do now:** **BA1** Android build audit + `-O3`/ThinLTO experiment (actual commands, then one
+  candidate at a time, Odin ABBA). Stage-4 design corrections (§2 table, the differential-suite gaps,
+  coverage/guard-miss stats, planning range 1.05–1.15×) forwarded to VR2.
+- **Adopted, queued:** **CP1** matched-window Odin critical-path timeline (running vs blocked per thread,
+  GS/GPU waits, frequency residency, `flush_submit` split into submit / submit_empty / compile drain;
+  absorbs FS1), after F6; measurement hygiene (p50/p95, identical tick windows); VU0 recompile (VR3)
+  with the 2–4 ms estimate; attribute the "profiler unwind" bucket (may be the scheduler's
+  `EeDispatcherTransfer` throw) before discounting it.
+- **Kept parked:** VU1 thread (re-size after blocks, on the Odin), blind affinity, full LTO, fast-math.
+- **120 Hz:** agreed it needs a game-time analysis (unique physics steps, timers) before any claim; the
+  X3 item in `docs/todo.md` stays the entry point.

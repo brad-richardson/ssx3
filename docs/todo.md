@@ -275,9 +275,11 @@ then 120 Hz simulation.
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
 - [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
-- [ ] **FS1 (queued after VK1):** the Odin 4×+hi-res cost is GsWorker time blocked in paraLLEl `flush_submit()` (~4 per
-      present; 23.4 → 48.7 ms wall at 1× → 4×, VK1 2A). Split `device->submit` vs `submit_empty` vs compile-drain; if kgsl
-      submit blocks, the levers are fewer/larger submits per frame or a submit thread in paraLLEl.
+- [ ] **CP1 (queued after F6; RV4 rank 1 measurement):** matched-window Odin critical-path timeline: per-thread running vs
+      blocked, GS queue waits, GPU timestamps, frequency residency, `flush_submit` split (submit / submit_empty / compile
+      drain; was FS1: the 4× cost is GsWorker time blocked there, VK1 2A). Attribute the 'profiler unwind' bucket.
+- [ ] **BA1 (running, RV4):** Android builds are `RelWithDebInfo` = `-O2`, no ThinLTO (IPO only for Release); Mac is `-O3`+IPO.
+      Audit actual commands; try `-O3`, then ThinLTO incl. `ps2_game_objects`; Odin ABBA each.
 - [ ] **GL fallback aspect (small):** Android GL fallback still letterboxes into raylib's 640×448 canvas (1544×868 box);
       start raylib at the display size so it follows Brad's max-fit rule too.
 - [ ] **VR3 (queued after VR2):** VU0 microprograms still run in the interpreter: N12 subtree 7.0 % ≈ 5.5 ms of the
