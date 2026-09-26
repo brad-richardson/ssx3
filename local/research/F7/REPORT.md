@@ -293,6 +293,46 @@ python3 local/research/MT1/mtvu_sim.py ~/dev/ssx3-work/F7/odin/C0b/census-c0b.tx
 bash local/research/F6/restore-play.sh  # after every leg
 ```
 
+## Part 3 — play installs (Odin + iPhone, neither launched)
+
+Worker: muse, `## Part 3 brief` above. No push.
+
+- **Canonical play state** `~/dev/ssx3-work/odin-play/`: `app-release.apk`
+  `825b436d…` (copied from the verified F7 pull, ×2 re-read), `ps2x.env`
+  (Brad's `a8d651a7…` bytes verbatim + one comment line + `PS2X_MTVU=1
+  PS2X_VU1_BLOCKS=1 PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`; every other
+  key byte-identical — prefix `cmp` clean), `SHA256SUMS`. **New play env
+  SHA: `ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390`.**
+- **Restore script** `local/tooling/odin_restore_play.sh` (F6-restore
+  lineage, canonical paths/pins; atomic lease, label arg default `PLAY`;
+  install + env push + both SHAs + 6 saves + `mc0-test` empty +
+  force-stop; **no launch** — 0 `am start` lines).
+- **Odin:** installed via that script (label `F7P3`, lease claimed/released):
+  installed base.apk `825b436d…` match, device env `ef9f94e1…` match, 6/6
+  saves OK, `mc0-test` empty, app stopped, 100 % on AC. F7 leg scratch
+  (`/data/local/tmp/f7`, `$FILES/f7dump`, `$FILES/f7-census-c0b.txt`)
+  removed afterwards via a leased one-off; device env re-read `ef9f94e1…`.
+  **Never launched.**
+- **iPhone** 16 Pro Max (`00008140-0002505001F3001C`, `available (paired)`
+  at install): staged binary re-read `60ac6331…` before install (matches
+  the Part 2 signed SHA); no rebuild. `install_iphone` rc=0 (seq 4884,
+  bundle `4DF8A4E6-…`); `deploy-ios.sh iphone` SKIP + 7 OKs (6/6 saves +
+  `ps2x.env`). **Never launched** — no launch/process command targeted the
+  iPhone UDID.
+
+Exact commands:
+
+```sh
+cp local/research/F7/logs/G2/ps2x.env.brad ~/dev/ssx3-work/odin-play/ps2x.env  # + 4 keys appended
+cp ~/dev/ssx3-work/F7/odin/app-release-vr3.apk ~/dev/ssx3-work/odin-play/app-release.apk
+(cd ~/dev/ssx3-work/odin-play && shasum -a 256 app-release.apk ps2x.env > SHA256SUMS)
+bash local/tooling/odin_restore_play.sh F7P3  # Odin install, no launch
+xcrun devicectl list devices  # iPhone available (paired)
+shasum -a 256 ~/dev/ssx3-work/F7/ios/staged/ps2EntryRunner.app/ps2EntryRunner  # 60ac6331…
+bash ~/dev/ssx3-work/F7/ios/build-install.sh install_iphone
+bash local/research/I31/deploy-ios.sh iphone  # never launched
+```
+
 ## Orchestrator gate, Parts 1+2 (2026-09-26)
 
 **Pass.** Odin race (VR3 `-O3` APK): knob 0 0.284× → blocks 0.301× → MTVU 0.378× → MTVU+blocks **0.391×** →
