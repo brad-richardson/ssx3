@@ -170,3 +170,16 @@ python3 local/tooling/boot/baseline.py compare --key a3efbfe-det-fr1r1-t2400-snd
 
 Budgets: 1 build dir (+1 incremental for round-2 counters), 2/6 boots
 (one slot each), 0 exclusive holds, ~2 h of 2.5 h.
+
+## Orchestrator gate (2026-09-26) — lane closed
+
+**Pass (verdict "none" accepted).** The counters rule out every proposed GPU-work mechanism, and the
+race comparison clinches it: the race does more GPU work per vsync than load-late, yet its GsWorker is
+7.2 ms/frame (N12 S2). My reading: the Odin's "loading 0.32×" blends a menu-like early half (fast) with
+a late half (ticks 1610–1714) that renders and simulates the race scene behind the Rival card, so it
+runs at race speed and is bound by the same GameThread/VU1 cost; VR2/VR3 speed it up. N12 S3's
+pool-bound Turnip signature most likely comes from the fast menu stretch of its window rendering
+**unpaced** (menus 0.9–1.1× unpaced = the GsWorker pool working flat out), not from loading.
+No menu/loading GPU lane is queued. The DIFFER from one interleaved log line is fixed in
+`gb8_hashdiff.py` (unanchored, stops at the next `[`); both MD1 runs now compare IDENTICAL. Fork
+branches `md1` (Granite/paraLLEl counters, `PGS_ENABLE_STATS`) stay local as a diagnostic.

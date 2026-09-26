@@ -12,7 +12,7 @@
 #   --det            PS2X_ENABLE_DET_HASH_TAP=ON (default OFF)
 #   --no-cache       no compiler launcher (control builds; default: ccache)
 #   --vu1 DIR        PS2X_VU1_RECOMP_DIR (default: ~/dev/ssx3-work/vu1gen-ssx3)
-#   --pgs DIR        PS2X_PARALLEL_GS_SOURCE_DIR (default: ~/dev/ssx3-work/F2/parallel-gs)
+#   --pgs DIR        PS2X_PARALLEL_GS_SOURCE_DIR (default: ~/dev/ssx3-work/parallel-gs-ssx3, fork ssx3 checkout)
 #   --codegen DIR    PS2X_GAME_CODEGEN_DIR (default: ~/dev/ssx3-work/codegen-ssx3)
 #   --target T       cmake target (repeatable; default: ps2x_tests ps2EntryRunner)
 #
@@ -25,7 +25,7 @@ if [ $# -lt 2 ]; then sed -n '2,18p' "$0"; exit 2; fi
 WT=$1; BD=$2; shift 2
 DET=OFF; CACHE=ON
 VU1=$HOME/dev/ssx3-work/vu1gen-ssx3
-PGS=$HOME/dev/ssx3-work/F2/parallel-gs
+PGS=$HOME/dev/ssx3-work/parallel-gs-ssx3
 CODEGEN=$HOME/dev/ssx3-work/codegen-ssx3
 TARGETS=()
 while [ $# -gt 0 ]; do

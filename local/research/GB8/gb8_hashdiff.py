@@ -8,7 +8,9 @@ import re
 import sys
 from pathlib import Path
 
-HASH_LINE = re.compile(rb'^\[det-hash:v1\] tick=(\d+)\b.*$', re.M)
+# Unanchored, and stops at the next '[': the runtime's stderr writes can interleave (a [frame:dump]
+# line without its newline before a det-hash line, SS1/MD1), which otherwise reads as a missing tick.
+HASH_LINE = re.compile(rb'\[det-hash:v1\] tick=(\d+)\b[^\n\[]*')
 
 
 def hash_lines(run):
