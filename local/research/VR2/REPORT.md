@@ -190,3 +190,25 @@ For comparison, F5 B6 (single run, quieter host) read 28.17 on the same base run
   the widest stall, and the whole-game gate covers them on the route.
 - Generated images still come from a manual dump boot (unchanged from VR1).
 - Scratch: `~/dev/ssx3-work/VR2` is 4.7 GB (cap 15 GB), made up of build dirs, bin/ and run/.
+
+## Orchestrator gate, stages 1–2 (2026-09-26)
+
+**Pass.** Stage 1 (c0–c3) is bit-exact (suite, new generated-vs-interpreter differential test at every
+budget cut, det-hash + 512 KB) and worth **1.095× on the Mac race** (4-run ABBA means). Stage 2 (c4,
+flag liveness) is exact but +0.6 %, inside noise, and needs regenerated images and a new template
+parameter: **held, not folded** (sticky bits keep the FMAC classification alive; block functions in
+stage 4 revisit flags anyway). The differential test catching the E-bit delay-slot bug before any
+boot is exactly the safety net stage 4 needs.
+
+## Part 2 brief (orchestrator)
+**2A — fold prep (then stop for the push):** new branch `vr2-fold` from fork `ssx3` **`5474956`** (SS1
+save states landed; it touches VU1 serialization, so expect conflicts in `ps2_vu1.h`/`ps2_vu1_core.cpp`
+— resolve by keeping both; if a hunk needs a judgment call, stop and hand back). Cherry-pick `9b16870
+b5ff643 4ae0e47 0f0c2d5 9d7e2a2` (not `639df0f`). Suite; differential test; det boot on **bradflix**
+(`ssx3_boot.py --host bradflix`, `bradflix_build.sh`) compared against the a3efbfe key (guest is
+unchanged by SS1 with its knobs off) and also a save-state round trip (`baseline.py get-state
+a3efbfe-fr1r1-t2000-parallel-1x-433cb405` → `--load` → compare from t2001; a VU1 change may bump the VU1
+section version — if the load refuses, say which section); 512 KB stack; one Android compile on bytesize
+(F5 recipe, hold the ssh). Stop and hand back; I push.
+**2B — stage 4 block functions** (after the push, same pane): as sketched above, behind a default-off
+knob until proven; exactness bar unchanged; ABBA on the mini vs `vr2-fold`. Budget 6 h, ≤ 12 builds.
