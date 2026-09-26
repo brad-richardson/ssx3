@@ -51,6 +51,7 @@ linkage and input → Odin native race → measured budgets → 120 Hz sim.
 | Worker evidence and gate verdicts | `local/research/<ID>/REPORT.md` (+ text receipts; the orchestrator appends a `## Orchestrator gate` section) |
 | Orchestrator runbook (loop, worker launchers, gates, lessons) | `docs/orchestration.md`, scripts in `local/tooling/orch/` |
 | Latest reviews | technical: `docs/research/review-2026-09-23-frontier-2.md`; process: `docs/research/review-2026-09-24-time-and-bottlenecks.md` |
+| Engine timing / 120 Hz (GameCube + PS2 mapped) | `docs/research/ssx3-engine-timing.md` |
 | Parked GameCube work | `docs/reserve.md`, `docs/reserve/` |
 
 Docs hold current state only; history lives in git. Handoff notes between

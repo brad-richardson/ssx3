@@ -115,3 +115,5 @@ orchestration lessons in `docs/orchestration.md`.
   GB7C7, N8D7M12P6M6)
 - Local Qwen: bounded, scripted extraction with an immutable checker; semantic verdicts stay
   with the orchestrator; an empty LSP result is a tooling gap, not proof of no callers. (X9–X14)
+- Engine timing (both platforms): one reference with the GameCube ↔ PS2 address map, experiments and open 120 Hz
+  questions is `docs/research/ssx3-engine-timing.md` (EN1); read it before any timing/120 Hz work.
