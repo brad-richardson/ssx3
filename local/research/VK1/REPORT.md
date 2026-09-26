@@ -599,3 +599,11 @@ env `a8d651a7…`, save 6/6 OK, `mc0-test` empty, app stopped, lease `LEASE_FREE
 
 Budget used: 2/2 Odin launches, 1/2 Android builds, 2 Mac builds (fold, fold det), 2 det boots
 (one slot each, mini). Nothing pushed.
+
+## Orchestrator gate, Part 3 (2026-09-26) — folded
+
+**Pass; pushed.** 4:3 pillarbox verified on device (1440×1080, black bars, pad on/off). Because fork
+`ssx3` had moved to `554fbd9` (HP1), I cherry-picked `vk1-fold`'s 8 commits onto it (clean; minSdk 29
+kept), Mac suite 664/664 (non-det), runner-dir empty, and pushed fork `ssx3` `554fbd9..fb28d99` and
+paraLLEl `ssx3` `464f263..1b3a294`. Canonical paraLLEl checkout and `bradflix_build.sh` now pin
+`1b3a294`. Device builds go through F6 (RV5 code review gates the play-build installs). Lane closed.
