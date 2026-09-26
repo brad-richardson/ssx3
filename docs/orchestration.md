@@ -179,6 +179,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   or interpolation.
 
 ## 8. Mistakes to avoid
+- 09-26: bytesize's WSL disk image grew to 356 GB (≈15 lanes' full Android/Mesa build trees) and filled C: to 4 GB,
+  which wedged WSL and then Windows (Brad rebooted). Fixes: WSL disk now **sparse** (Brad OK), finished lanes' bytesize
+  dirs deleted + `fstrim` (C: back to 124 GB), `bytesize_lock.sh` refuses below 60 GB free. When a lane closes, delete
+  its bytesize dir too (keep shared inputs: f2, f5, f6, vr2d, vr3, n2, deps, pcsx2-*).
 - 09-26: I changed Brad's Odin play env (LAG on) while `odin_restore_play.sh` hard-coded the old env SHA, so
   every restore failed its own check and FS2 stopped; my retry loop also reinstalled the play APK each minute until I
   stopped it. Fix: the script reads its pins from `odin-play/SHA256SUMS`. Never hard-code a play-state SHA in a tool,
