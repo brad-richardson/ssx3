@@ -457,3 +457,142 @@ bradflix + 512 KB, with `--hash-every 1` (S2 timing) **and** a sparse-hash run (
 stress (`PS2X_MTVU_JITTER`) IDENTICAL; the synthetic VIF1/GIF ordering unit test; Mac speed ABBA knob 0
 vs 1 vs 1+LAG. Put `PS2X_MTVU_CPUS` in for the Odin. Stop before the Odin; I schedule an Odin census +
 threaded run with the next device APK. Budget ≤ 10 builds.
+
+## Stage 3 — threaded execution (worker, 2026-09-26)
+
+### Result
+
+- **Exact.** Every threaded det boot is **IDENTICAL** to the current key
+  `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` on hash and snd/coverage:
+  - **Mac:** 3× `PS2X_MTVU=1` at `--hash-every 1`, a 512 KB stack run, a jitter run
+    (`PS2X_MTVU_JITTER=2000`: 0–2 ms random sleep before each job), 2× `PS2X_MTVU_LAG=1` at
+    `--hash-every 60` (40/40 ticks) and LAG + jitter. The final commit adds 1 threaded run and 1 LAG
+    run.
+  - **bradflix:** the same set (3×, 512 KB, jitter, 2× LAG sparse, LAG + jitter), plus
+    `PS2X_MTVU_CPUS=3` (`[affinity] mtvu thread cpus=3 rc=0`).
+  - **Totals:** 19 threaded det boots; 0 VIOLATION lines; `jobs=28226` in every run.
+  - **Receipt:** `s3-det-compares.txt` (50 IDENTICAL lines, 0 DIFFER). `sparse_compare.py` checks
+    every emitted tick of a sparse run against the key; the stock gb8 compare would read the skipped
+    ticks as missing.
+- **The GS stream is identical too.** The det-hash covers memory, not rendered output, so I also
+  compared the `[pk]` log of every submitted GIF packet (index, fnv1a, length, path) under
+  `PS2X_PKLOG=1`:
+  - The comparison covered 1,990,291 packets through tick ~2494, the whole race window: PATH1
+    1.66 M, PATH2 0.30 M, PATH3 30 k.
+  - Knob 0 vs MTVU and knob 0 vs MTVU + LAG both had **first_diff = None** (`s3-gs-stream.txt`).
+- **Tests:** the synthetic ordering test is green on Mac and Linux. It drives one scenario three
+  ways (sync, threaded, and threaded with 300 µs jitter) and requires identical GIF packet
+  sequences (path + bytes), VU1 memory, VIF1 ROW, PATH3 mask and every EE read-back. The scenario
+  covers:
+  - DMA from RDRAM that the EE overwrites right after the kick;
+  - UNPACK → MSCAL → PATH1 content;
+  - DIRECT;
+  - masked PATH3 chains with MSKPATH3 windows;
+  - VIF1 FIFO writes;
+  - VIF0-only kicks;
+  - EE VU1-memory writes and reads;
+  - GS privileged writes and CSR stores.
+
+  It also asserts zero violations. Suites: 669/669 det (Mac and bradflix) and 665/665 non-det.
+  The runner-dir check is empty.
+- **Speed** (mini M5 Pro, non-det, exclusive, unpaced, race t1800–2400, three holds A-B-C / C-B-A /
+  A-B-C; `s3-speed.txt`):
+
+  | Knob | Runs (vsyncs/s) | Mean | ÷59.94 | vs knob 0 | Model (stage 2′) |
+  | --- | --- | ---: | ---: | ---: | ---: |
+  | knob 0 | 30.55, 29.74 (A1 24.34 excluded, see below) | 30.15 | 0.503× | 1.00× | — |
+  | `PS2X_MTVU=1` (R1 + R2) | 39.32, 38.99, 40.61 | 39.64 | 0.661× | **1.31×** | 1.24× |
+  | `PS2X_MTVU=1` + `PS2X_MTVU_LAG=1` (R3) | 58.52, 58.68, 58.62 | 58.61 | **0.978×** | **1.94×** | 1.65× (ideal) |
+
+  - **A1 excluded:** it ran first, right after the det batch, with the load average at 7.9 from
+    other sessions. A2 and A3 agree with stage 2′'s knob-0 30.52. Including A1, knob 0 averages
+    28.2 and the ratios become 1.41× / 2.08×.
+  - **Measured waits match the model:** MTVU waits 13.8 ms/frame at VBlank (model 13.0), LAG waits
+    6.4 ms/frame (model 6.6).
+  - **LAG beats the model's "ideal" max(EE, unit) bound** because the EE work itself shrinks: frame
+    17.1 ms − 6.4 ms wait ≈ 10.7 ms of EE work, against 12.5 ms inline. Once the unit work (VU1
+    code/data, GS frontend) leaves the GameThread's core, the EE runs from warmer caches.
+  - **LAG costs:** the displayed frame can be one frame older. At t2100 the LAG run's dumped
+    frame shows the trick counter at 210 where knob 0 shows 220, and the image is otherwise clean.
+    Dumped frames already alternate between two variants at knob 0 (the racy present latch;
+    `docs/facts.md` GB2/GB3), so frame hashes are not a comparator. The packet stream is.
+
+### What was built (fork `mt1`, not pushed; runner-dir check empty; bradflix `refs/mt1/threaded`)
+
+| Commit | Change |
+| --- | --- |
+| `af17070` | **Threaded unit** in `ps2_mtvu.h`, still header-only. Details below the table. |
+| `8141987` | **Fix:** the EE no longer drains the arbiter outside unit work. A VIF0-only kick's drain raced the worker: 16 `arb-drain` violations and then an abort at t~316 in the first threaded boots. Inline, that drain always finds the queue empty, because every unit path ends with a drain (DIRECT, pending PATH2 image, XGKICK, masked-FIFO flush, the kick's own drain), so skipping it is exact. The test gained VIF0 kicks and a zero-violation assert. |
+| `106ca6b` | **Fix:** `PS2Runtime`'s destructor clears the process-wide hooks. On Linux the suite runs a runtime test before the memory tests, so the MT1 test called a dangling `fbrstFn` (a segfault, found with gdb in a throwaway container). No effect on boots, which have one runtime. |
+| `fe461fa` | `PS2X_PKLOG` is allowed with `PS2X_MTVU=1`. Its packet log is atomic-indexed and locked, which makes it the GS-stream comparator above. |
+
+`af17070` in detail:
+- **The worker:** one worker thread (named `MTVU`) with a bounded FIFO (64 jobs / 64 MiB).
+  - Each job carries the EE's FP control word and the kicking context's VU0 FBRST.
+  - The worker's stack comes from `PS2X_GAME_THREAD_STACK_KB`; `PS2X_MTVU_CPUS` pins it and
+    `PS2X_MTVU_JITTER` adds host jitter for tests.
+  - A job that throws aborts with a message.
+- **Jobs:**
+  - the GIF + VIF1 + drain part of `processPendingTransfers`. Normal-mode and scratchpad sources are
+    copied at the kick in the synchronous loops' exact chunks; chain data is moved. VIF0 and the
+    completion stay on the EE.
+  - VIF1 FIFO quadwords.
+  - EE GS privileged writes (R2).
+- **R1:** in `Load*`, a CSR load whose next instruction masks the unit's bits away, and which is not
+  in a branch delay slot, neither waits nor drains.
+- **R2:** CSR stores apply on the EE, with a sync first only if they W1C-clear bits 0–1. The VBlank
+  CSR store also applies on the EE.
+- **R3 (`PS2X_MTVU_LAG=1`):** VBlankStart waits only for jobs submitted before the previous
+  VBlankStart, and fully on det-hash ticks.
+- **Worker-side MSCAL/MSCNT callbacks** use the FBRST snapshot and don't write `vpu_stat`, which the
+  D/T rule proves is a no-op.
+- **Threaded mode is refused** (with a stderr line) while a dev trace that shares state with unit
+  code is armed.
+- **`[mtvu] threaded` summary line** every 300 vsyncs: jobs, waits per reason, violations.
+
+### Budget
+
+- **7/10 builds:**
+  - Mac det ×3: `af17070`, `8141987` (both 29–80 s ccache), `106ca6b`;
+  - Mac non-det ×2: `106ca6b`, `fe461fa`;
+  - bradflix det ×2: `8141987` (69 s), `106ca6b` (incremental).
+- **Boots:**
+  - Mac det: 4 aborted boots (the race above), 8 + 2 det, 3 PK;
+  - mini exclusive speed: 9 boots in three holds of about 3–4 min each;
+  - bradflix det: 9.
+- **Scratch:** `~/dev/ssx3-work/MT1` 3.6 GB (`build-rel` holds the `fe461fa` speed runner,
+  `build-det` the `106ca6b` det runner). PK logs (3 × ~100 MB) were deleted after the comparison.
+  bradflix `HS1/mt1-thr-det` (1.9 GB) and `HS1/PS2Recomp-mt1` are kept; stage 2′'s `HS1/mt1-det` was
+  removed. ssx3 disk usage: 80.6 GB.
+
+### Gaps
+
+- **Not compiled for Android or iOS.** bytesize's `cmd` quoting blocked a quick NDK check. The code
+  uses only facilities those builds already compile: pthread and `std::thread`, C++17 `inline
+  thread_local` (minSdk 29 gives native ELF TLS, HP1), `ThreadNaming.h` and
+  `ps2_thread_affinity.h`. The next device APK is the first real compile.
+- **No Odin run** (as instructed). The Odin projection (S1 ≈ 1.1×, S3 ≈ 1.35×) is still a
+  projection. The Mac measured better than its model: 1.31× and 1.94×. On the Odin the unit is
+  about 70 % of the frame, so LAG can at best approach unit-bound, before any cache benefit. For
+  the Odin run: `PS2X_MTVU=1 [PS2X_MTVU_LAG=1] PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`, plus one
+  census run (`PS2X_MTVU=census PS2X_MTVU_CENSUS_OUT=…`).
+- **LAG's display latency is inferred, not measured on hardware.** It is up to one frame by design,
+  and one dumped frame shows exactly one frame of lag. Whether LAG ships as default is Brad's call
+  (gate).
+- **The Mac det boots ran on two commits.** `m-*` used `8141987`; `m2-*` used `106ca6b` (destructor
+  hook clearing, no boot-path change). bradflix ran `106ca6b`. `fe461fa` changes only the dev-trace
+  refusal list, and the PK boots and speed build ran on it.
+- **The worker needs its own safety net.** Everything here assumes the EE touches unit state only
+  through the hooked paths. The `touch()` asserts (0 hits across 19 threaded boots) are the safety
+  net. A future runtime change that reaches GS/arbiter/VU1 state from a new EE path must add a
+  sync, or it will show up as a VIOLATION.
+
+### Recommended next action (orchestrator decides)
+
+1. Put `mt1` through a fold on fork `ssx3`: rebase onto the current tip, including VR2's
+   `vr2-blocks` if that has folded. Keep `PS2X_MTVU` default off.
+2. Build the next Odin APK from it and schedule:
+   - the census run;
+   - knob 0 vs `PS2X_MTVU=1` vs `PS2X_MTVU=1 + LAG` with the CPU pins above, under the battery/lock
+     rules.
+3. Brad decides the `PS2X_MTVU_LAG` default from those Odin numbers and a hands-on latency look.
