@@ -40,12 +40,20 @@ SS1 save states (det mode; runner built from fork ss1-savestate or later):
       det-hash lines start at T+1. States hold game RAM: scratch only.
 
 Usage: ssx3_boot.py --mode speed|det --backend cpu|parallel --runner PATH --label NAME [--out DIR] [--unpaced] [--vu1-stats] [--vu1-dump DIR] [--stack-kb N]
+       ssx3_boot.py --host bradflix --mode det --backend cpu|parallel --runner <bradflix PATH> --label NAME [...same args]
+
+Host split (HS1): --host bradflix runs one det boot on bradflix (Docker,
+GPU + Xvfb when backend=parallel) via the synced remote driver
+bradflix_det_boot.py, then pulls the run dir back so baseline.py compare
+works unchanged. --runner is a bradflix path; default --out is
+~/dev/ssx3-work/from-bradflix/<label>. Speed mode stays on the mini.
 """
 import argparse
 import hashlib
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -55,6 +63,94 @@ from pathlib import Path
 
 sys.path.insert(0, '/Users/brad/dev/ssx3/local/tooling')
 from p_lane_lease import claim, release  # noqa: E402
+
+BRADFLIX_HOST = "bradflix"
+BRADFLIX_ROOT = "dev/ssx3-work/HS1"
+BRADFLIX_DRIVER = "bradflix_det_boot.py"
+BRADFLIX_FROM = Path.home() / "dev" / "ssx3-work" / "from-bradflix"
+
+
+def main_bradflix(args):
+    if args.mode != "det":
+        raise SystemExit("--host bradflix supports det only (speed stays on mini/Odin)")
+    if ".." in args.label or "/" in args.label:
+        raise SystemExit("bad label")
+    lane = Path(args.out) if args.out else BRADFLIX_FROM / args.label
+    if lane.exists():
+        raise SystemExit("refusing to reuse %s" % lane)
+
+    held = os.environ.get("SSX3_HELD_SLOT_BRADFLIX")
+    if held:
+        slot = held
+        print(json.dumps({"event": "using-held-slot", "host": "bradflix", "slot": slot}), flush=True)
+    else:
+        slot = claim("boot-" + args.label, host="bradflix")
+        while slot is None:
+            print("bradflix lease busy; retrying in 30 s", flush=True)
+            time.sleep(30)
+            slot = claim("boot-" + args.label, host="bradflix")
+
+    here = Path(__file__).resolve().parent
+    rc = 1
+    try:
+        r = subprocess.run(["scp", str(here / BRADFLIX_DRIVER),
+                            f"{BRADFLIX_HOST}:{BRADFLIX_ROOT}/{BRADFLIX_DRIVER}"])
+        if r.returncode != 0:
+            raise SystemExit("driver sync failed")
+        pad = ROUTE_FR1R1 if args.route == "fr1r1" else ROUTE
+        # Driver path is relative: ssh lands in $HOME, and a quoted ~/..
+        # would not tilde-expand on the remote end.
+        remote = ["python3", f"{BRADFLIX_ROOT}/{BRADFLIX_DRIVER}",
+                  "--runner", args.runner, "--label", args.label, "--slot", str(slot),
+                  "--stop-tick", str(args.stop_tick), "--sound", args.sound,
+                  "--coverage-tick", str(args.coverage_tick),
+                  "--backend", args.backend, "--route", args.route,
+                  "--pad-script", pad, "--hash-every", str(args.hash_every),
+                  "--wall", str(args.wall)]
+        if args.dump_ticks:
+            remote += ["--dump-ticks", args.dump_ticks]
+        if args.no_snap:
+            remote += ["--no-snap"]
+        if args.unpaced:
+            remote += ["--unpaced"]
+        if args.vu1_stats:
+            remote += ["--vu1-stats"]
+        if args.vu1_dump:
+            remote += ["--vu1-dump", args.vu1_dump]
+        if args.stack_kb:
+            remote += ["--stack-kb", str(args.stack_kb)]
+        for kv in args.env:
+            remote += ["--env", kv]
+        print("+ ssh %s %s" % (BRADFLIX_HOST, " ".join(shlex.quote(w) for w in remote[:6]) + " ..."),
+              flush=True)
+        r = subprocess.run(["ssh", BRADFLIX_HOST] + [" ".join(shlex.quote(w) for w in remote)])
+        rc = r.returncode
+        print("== pull back to %s" % lane, flush=True)
+        lane.mkdir(parents=True)
+        rdir = f"~/{BRADFLIX_ROOT}/run/{args.label}"
+        subprocess.run(["scp", f"{BRADFLIX_HOST}:{rdir}/result.json",
+                        f"{BRADFLIX_HOST}:{rdir}/boot.log",
+                        f"{BRADFLIX_HOST}:{rdir}/trace.jsonl",
+                        f"{BRADFLIX_HOST}:{rdir}/snd.log", str(lane) + "/"],
+                       capture_output=True)
+        subprocess.run(["scp", "-r", f"{BRADFLIX_HOST}:{rdir}/frames", str(lane) + "/"],
+                       capture_output=True)
+        files = {}
+        for root, _ds, fs in os.walk(lane):
+            for f in fs:
+                p = Path(root) / f
+                files[str(p.relative_to(lane))] = sha_of(p)
+        (lane / "pull.json").write_text(json.dumps(
+            {"host": "bradflix", "slot": slot, "remote_run": rdir,
+             "pulled_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+             "driver_rc": rc, "files": files}, indent=2) + "\n")
+        have = (lane / "boot.log").exists() and (lane / "result.json").exists()
+        print(json.dumps({"event": "pulled", "lane": str(lane), "driver_rc": rc,
+                          "complete": have}), flush=True)
+        return 0 if rc == 0 and have else 1
+    finally:
+        if not held:
+            release(slot, host="bradflix")
 
 WORK = Path('/Users/brad/dev/ssx3-work/F5')
 ELF = Path('/Users/brad/dev/ssx3-work/E32-inputs/cd/SLUS_207.72')
@@ -144,7 +240,10 @@ def main():
     ap.add_argument('--exit-after-save', action='store_true', help='SS1: stop the runner after the save')
     ap.add_argument('--load', default='', help='SS1: restore this state after init')
     ap.add_argument('--strict', action='store_true', help='SS1: refuse a runner-SHA mismatch on load')
+    ap.add_argument('--host', choices=('mini', 'bradflix'), default='mini')
     args = ap.parse_args()
+    if args.host == 'bradflix':
+        return main_bradflix(args)
     global WALL_CAP_S
     WALL_CAP_S = min(args.wall, 1800)
 

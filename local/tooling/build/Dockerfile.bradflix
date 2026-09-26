@@ -1,0 +1,18 @@
+# HS1 bradflix builder/runner image: LX1 recipe + ccache for the host split.
+# (LX1's Dockerfile is left untouched as that lane's evidence; this file is
+# the canonical recipe from HS1 on. Only delta vs LX1 rev 2: +ccache.)
+# Build: docker build -t ssx3-hs1 -f Dockerfile.bradflix .
+# Run: bind-mount ~/dev/ssx3-work/HS1 at /work and ~/dev/ssx3-work/ccache
+# at /ccache, --user <brad uid:gid>, -e CCACHE_DIR=/ccache
+# -e CCACHE_BASEDIR=/work. GPU boots add --device /dev/dri/renderD128
+# --group-add 993 (render group on bradflix).
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  clang lld cmake ninja-build pkg-config python3 git ca-certificates ccache \
+  libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+  libgl1-mesa-dev libglu1-mesa-dev libasound2-dev \
+  libwayland-dev libxkbcommon-dev \
+  libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev \
+  xvfb vulkan-tools mesa-vulkan-drivers libvulkan1 \
+  && rm -rf /var/lib/apt/lists/*

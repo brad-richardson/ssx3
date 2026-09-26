@@ -341,7 +341,13 @@ def cmd_compare(args):
     hash_ok = r.returncode == 0
     cov_b, snd_b = snd_coverage_summary(dest)
     cov_c, snd_c = snd_coverage_summary(args.cand)
-    snd_cov_ok = (cov_b == cov_c
+    # HS1: coverage per-entry lines print in std::unordered_map iteration
+    # order, which differs across STL implementations (Mac libc++ vs Linux
+    # libstdc++) while the content is guest-identical — so compare coverage
+    # as a multiset. Sorting cannot mask a real difference (same multiset
+    # <=> same sorted list) and is a no-op verdict-wise for same-host
+    # compares, where the order is stable run to run (F5 B1-B5).
+    snd_cov_ok = (sorted(cov_b) == sorted(cov_c)
                   and SND_HOST_NOISE.sub('', snd_b) == SND_HOST_NOISE.sub('', snd_c))
     print('snd/coverage: %s' % ('IDENTICAL' if snd_cov_ok else 'DIFFER'))
     if not snd_cov_ok:
