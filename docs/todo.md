@@ -278,7 +278,13 @@ then 120 Hz simulation.
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
 - [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
-- [ ] **MD1 (queued after N12's menu profile):** Odin menus are GsWorker-bound in Turnip driver CPU (N11 S3 61.9 ms) + allocator/mutex churn; count submits/descriptor updates per menu frame and cut them in the paraLLEl fork. Wait for N12 S3 (NP1's GS-handoff change may have moved it).
+- [ ] **MD1 (queued; retargeted by N12):** menus now run 0.85–1.12× on the Odin; **loading is 0.32×** and
+      GsWorker-pool-bound in Turnip driver CPU (N12 S3: ~90 ms/frame over ~3 workers) + HybridMutex + allocator churn.
+      Count submits/uploads/descriptor updates per loading frame (Mac, same paraLLEl code) and cut them in the fork.
+- [ ] **VR3 (queued after VR2):** VU0 microprograms still run in the interpreter: N12 subtree 7.0 % ≈ 5.5 ms of the
+      68 ms Odin race frame (from guest `sub_0022ADD8`). Static-recompile VU0 on VR1's machinery.
+- [ ] **HP1 (queued, small):** release hot-path hygiene on Android: find the per-frame `snprintf` on GameThread (~0.8 ms,
+      N12 S2 children 1.06 %) and the emulated-TLS cost (`__emutls_get_address` 0.68 %; `-fno-emulated-tls` at API 29+).
 - [ ] **HS1 (running, Brad 09-25):** host split: bradflix build ≤ 5 min (unity_74 diagnosis, ccache), 4 bradflix boot slots via Docker, 4-way det acceptance vs the a3efbfe baseline.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.

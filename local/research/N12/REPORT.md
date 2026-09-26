@@ -345,3 +345,21 @@ Budgets: 0 fork edits, 0 builds, 3/3 launches (S1 ~241 s, S2 ~138 s,
 S3 ~58 s wall), ~1.6 h of 1.5 h, N12 git dir 1.9 MB text-only, scratch
 `~/dev/ssx3-work/N12/` 121 MB (≤5 GB). Bytesize: `/home/brad/n12`
 (prof + symdir; idle before/after).
+
+## Orchestrator gate (2026-09-25)
+
+**Pass.** Tables complete; exact event-count basis (better than N11's cutoff tables); Brad's env and
+save verified restored; 0 Wi-Fi drops. Readings (mine):
+- Race frame 68.3 ms: **VU1 46.7 ms (68 %)** — generated pairs 38.0, interpreter/other 6.2, issue/hazard
+  2.5 (was 70.1: VB1 worked). GameThread-minus-VU1 21.6 ms, of which guest code 8.7 (N11's 0.7 was a
+  cutoff artifact), libc/kernel 10.8.
+- **VU1 thread sizing:** moving VU1 off GameThread would leave VU1 (46.7 ms + handoff) as the long pole:
+  frame ≈ 47–50 ms, ~1.4× (0.244× → ~0.34×). Making VU1 cheaper (VR2) comes first; the thread pays
+  more once VU1 ≈ the rest. It stays parked.
+- **VU0 is still interpreted:** `executeVU0Microprogram` subtree 7.0 % ≈ 5.5 ms/frame (called from guest
+  `sub_0022ADD8`). A VU0 static recompile on VR1's machinery is a clear next lever (queued as VR3).
+- Hot-path hygiene: `snprintf` subtree 1.06 % (~0.8 ms) on GameThread in a release build, and
+  `__emutls_get_address` 0.68 % (GameThread + GsWorker; emulated TLS on Android). Cheap to find and fix.
+- Menus are now 0.85–1.12× (NP1's GS handoff), so MD1 retargets to **loading (0.32×)**: S3's window
+  (mostly loading) is GsWorker-pool-bound in Turnip driver CPU (90 ms/frame across ~3 workers) plus
+  HybridMutex and allocator churn.
