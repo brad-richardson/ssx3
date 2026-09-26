@@ -282,6 +282,8 @@ then 120 Hz simulation.
       follows F5 Part 2 (Brad 09-25).
 - [ ] VU1 blocks: decide `PS2X_VU1_BLOCKS` default from the next Odin pair (Mac 1.067× on, ~1 % cost off). Next VU1 levers: register residency across block iterations (RV4 §2), VU0 recompile (VR3).
 - [ ] **MT1 (running, Brad 09-26: un-parked under PCSX2 parity):** MTVU, deterministic by design (fixed guest-time VU1 semantics, worker thread; threaded det-hash = synchronous).
+- [ ] **90 % Odin push (Brad 09-26; race now 0.425×, 0.442× with SIMD):** VR4 D1b+D2, GF1 (GS frontend thread), FS2 (Turnip),
+      PT1 (profiler tool), CP2 (timeline after Turnip+SIMD), IS1 (iPad speed). Budget: ~18.5 ms/frame; the unit thread is ~21 ms.
 - [ ] **FS2 (running):** GsWorker blocked ~19 ms/frame in paraLLEl's two `submit_empty` timeline signals per flush (CP1 R3); the MTVU unit loses 6.7 ms/frame to the full GS queue.
 - [ ] **VR4 (running):** VU1 block register residency (the unit thread's 30 ms/frame is mostly VU1 blocks, CP1 Table 3).
 - [ ] Android `-march` quirk (BA1 §1): root CMake's crypto/crc `-march` is overridden by a later plain `armv8-a+fp+simd`; decide which is intended (Odin supports both).
