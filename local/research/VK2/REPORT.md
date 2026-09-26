@@ -3,28 +3,29 @@
 Worker: Claude Code (Opus 5.5), brief `local/muse/prompts/VK2.md`. Fork worktree
 `~/dev/ssx3-work/VK2/PS2Recomp`, local branch `vk2` from fork `ssx3` tip `fb28d99`. Not pushed.
 
-**Status: stopped at the first unexpected failure (external, not VK2): during the Odin lifecycle
-stress run ST1, while this lane held the Odin lease, an APK was installed over the running app
-(Android exit reason `16 PACKAGE UPDATED`, `installPackageLI`, 00:15:44).** Cycles 1–17 of the stress
-are valid and clean (table below). Everything else in the brief that doesn't need the Odin is done:
-the fix, 10 unit tests with mutation checks, suite 674/674, Mac det-hash IDENTICAL, one Android build.
-Remaining: the stress rerun, the ABBA pair vs F6, the pixel run (5 of 6 launches left, 5 of 6 builds left).
+**Status: done.** Fix + 10 Mac tests (mutation-checked), suite 674/674, Mac det-hash IDENTICAL; Odin:
+**full lifecycle stress (20 bg/fg + 5 app switches) clean** with bounded layers, buffers, fences and
+process fds; **pixels exact through gralloc** at t1100 and at t3000 (after ~11 window changes, on a
+rebuilt pool); **ABBA vs F6's APK: +0.5 % (no speed change)**. Fork `vk2` tip `a523700` (local, not
+pushed); APK `29d3ca06…`. Brad's play state restored after every run.
 
-### Blocker for the orchestrator: Odin lease conflict
-- ST1 claimed the lease at 00:12:39 (`VK2 … ST1`, driver.log), installed `df27f812…` and ran.
-- `dumpsys activity exit-info`: pid 3567 (ST1's app) ended **00:15:44.774, reason=16 (PACKAGE UPDATED),
-  "stop com.ps2x.runner due to installPackageLI"** (`logs/ST1/exit-info.txt`). No crash, no tombstone.
-- The relaunched process (pid 6875, started by the stress driver's next `am start`) **never made a
-  `ps2x-game` layer** (`stress.txt` fg19..switch5), which fits the F5 play APK (GL) having been installed.
-- Timeline pointing at F6 (not proven): F6's R2 cool-down ran alongside ST1 and finished 00:12:58 seeing
-  ST1's app (`F6/logs/R2/cooldown.txt`: `pid=3567`); F6's R2 is an "A-F5" leg, which installs
-  `4ff81032…`; F6's cool-down restarted at 00:18:21, right after ST1 released the lease.
-  F6's `launch.py` checks the lease before installing, so the install came from outside it. Two adb
-  transports reach the Odin (TLS mDNS serial and the old `192.168.1.53:5555`).
-- ST1's restore then reinstalled F5 `4ff81032…` + env `a8d651a7…` (`logs/ST1/restore-play.txt`),
-  which is Brad's play state, and may also have overwritten whatever the other agent had installed.
-- Needed: serialize F6 and VK2 on the Odin (or confirm F6 is done), then resume VK2 from the stress
-  rerun.
+| Brief check | Result |
+| --- | --- |
+| Mac unit tests (delayed callbacks, unsignalled fence, `EINTR`, `POLLNVAL`, same-pointer TERM/INIT_WINDOW, resolution change mid-flight, 100 recreate cycles) | 10 tests pass; each RV5 behaviour planted back makes them fail |
+| Odin (a) lifecycle stress | ST2: 25 window changes in one process, 25/25 old layers released, 1 live layer, 4 buffer records, ≤ 3 fences held, **`proc_fds` flat at 146**, every timeout/error/stale counter 0; screencaps viewed |
+| Odin (b) ABBA vs F6 at 1× | VK2 15.91 / 15.79 vs F6 15.79 / 15.75 vs/s → **0.264× vs 0.263× (+0.5 %)**, inside the VK2 legs' own 0.8 % spread |
+| Odin (c) pixels via gralloc at two ticks | `diff_px=0` at t1100 and t3000 |
+| Mac det-hash vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` | IDENTICAL (hash 1..2400, snd, coverage) |
+
+### Lease incident (first attempt, ST1)
+ST1 (APK `df27f812…`) was killed at 00:15:44 by an APK install made while VK2 held the Odin lease
+(`dumpsys activity exit-info`: reason 16 PACKAGE UPDATED, `installPackageLI`; `logs/ST1/exit-info.txt`).
+The orchestrator attributed it to an unleased `adb install` from BA1 and introduced
+`local/tooling/odin_lease.sh` (atomic claim/release). ST1's 17 valid cycles were already clean (below).
+From then on VK2 claimed the lease once through `odin_lease.sh` for the whole session
+(`odin_session.sh`: cool-down → `launch.py` → `restore-play.sh` per leg, release on exit); `launch.py`
+and `restore-play.sh` only check that VK2 holds it and never write it. The session started after
+F6's Part 1 legs had finished (F6 report rows R1–R4 + 4× leg filled, lease free).
 
 ## RV5 finding → fix → test
 
@@ -89,39 +90,73 @@ Stress from tick 1899 in the race: HOME → back with 0.5 / 1 / 2 / 5 s in the b
 | Cost | `vk_release_wait_ms_avg=0.013`, `vk_apply_ms_avg=0.141` (VK1 V2: 0.009 / 0.121) |
 | Cycles 18–20 and the 5 app switches | **void**: pid 3567 killed by the external install during cycle 18's background wait |
 
-### ABBA vs F6 and pixels
+### ST2 — full lifecycle stress + pixel compares (APK `29d3ca06…` = `a523700`)
 
-Not run (stopped at the failure above).
+Same method as ST1 (cool-down to status 0 + 180 s, keyguard off, AC, 100 %), stress from tick 1903;
+`PS2X_PRESENT_VK_COMPARE_TICKS=1100,3000` (sync present + readback at those ticks; t3000 falls during
+the stress, after ~11 window changes, so it checks a rebuilt pool). One process (pid 1041) throughout.
+
+| Measure | Result |
+| --- | --- |
+| Window changes | 20 HOME→back (0.5 / 1 / 2 / 5 s away) + 5 Settings→back = **25**; layers made 26 (first + 25), **released 25** |
+| At each of the 26 window-change samples | **`vk_layers=1 vk_layers_detached=0 vk_bufs=4 vk_tokens=0`**, `vk_fences_held` ≤ 3 |
+| Process fds (`proc_fds`, `/proc/self/fd`) | **123** at the first window (before the Vulkan slots/fences), then **146 at every one of the next 25 changes**: no growth |
+| SurfaceFlinger `ps2x-game` layers | exactly 1 in the foreground (26 samples), 0 in the background (25 samples) |
+| Slot pools | a new pool after every change (+ two boot-time scanout size changes 2560×448 → 640×448 → 512×448, which exercised the size-change retirement too); **104 buffers released**, 4 live |
+| Final counters (tick ~5440) | `vk_queued=3270 vk_callbacks=3295` (3270 queues + 25 detaches), **`vk_dropped=0 vk_skipped=0 vk_cb_timeouts=0 vk_fence_timeouts=0 vk_fence_errors=0 vk_eintr=0 vk_stale_cb=0 vk_absent_cb=0 vk_refused=0`**; `vk_release_wait_ms_avg=0.013`, `vk_apply_ms_avg=0.139` |
+| **Pixels via gralloc** | **t1100: `diff_px=0`**, ahb = readback `ad2e9e852b54155a` (same hash as VK1's t1100); **t3000: `diff_px=0`**, `9e19d118a201e2ee`; 512×448, gralloc stride 768; PPM pairs byte-identical (`7cab2999…`, `88b05c26…`) |
+| Screencaps viewed | `sc01` (t1846), after cycles 5/10/15/20, after the 5 switches (race t~0:45, 44 mph) and final (t5440, race t~1:02, "SUPER UBER"): full-screen 16:9, HUD, rider, trail, correct colours |
+| End | env restored `a8d651a7…`, mc0 pins OK, 0 disconnects, no FATAL |
+
+### ABBA vs F6 (1× pipelined, VK default on, I26-FAST, unpaced, sound on, stop 4500)
+
+Cool-down to status 0 + 180 s before each leg, reinstall each leg (installed base.apk SHA matched every
+time), Brad's play state restored after each. Rates by F4's `phases.py` (race = ticks 1714→stop);
+per-thread CPU over ticks ~1900→2550 (unprofiled); GPU = kgsl `gpubusy` race mean.
+
+| Leg | APK | Race (ticks / wall) | vs/s | × | GameThread ms/frame | GsWorker ms/frame | GPU busy (n) | Thermal status | VK counters |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
+| Q1 | VK2 `29d3ca06…` | 1714→4686 / 186.8 s | 15.91 | 0.265× | 45.69 | 12.55 | 36.4 % (31) | 0→3→2 | dropped/skipped/timeouts/errors 0 |
+| Q2 | F6 `f39905db…` | 1714→4586 / 181.9 s | 15.79 | 0.263× | 44.84 | 12.29 | 36.3 % (30) | 0→3→2 | (F6's sink: no split counters) |
+| Q3 | F6 | 1714→4579 / 181.9 s | 15.75 | 0.263× | 46.66 | 12.60 | 36.5 % (31) | 0→3→2 | — |
+| Q4 | VK2 | 1714→4587 / 182.0 s | 15.79 | 0.263× | 44.74 | 12.25 | 36.7 % (31) | 0→3 | all 0 |
+
+**VK2 15.85 vs/s (0.2644×) vs F6 15.77 (0.2631×): +0.5 %**, smaller than the spread between the two VK2
+legs (0.8 %) and in line with F6's own R1/R4 (15.77 / 15.73). No speed change. The per-frame pick adds a
+`dup` + `poll(0)` + `close` of one release fence; `vk_release_wait_ms_avg` stays 0.013 ms. Screencaps at
+t~2170 are the same game frame on both APKs (Q2 vs Q4, including the game's own cyan panel at that moment).
 
 ## Pins and SHAs
 
 | Item | Value |
 | --- | --- |
 | Fork base | `fb28d99` (fork `ssx3` tip at start, `git fetch fork`) |
-| Fork `vk2` (local, not pushed) | `ace5b53` (ledger + tests + sink/backend), `91f65d5` (window-change counter log), `a523700` (proc fd count; not in an APK yet). Runner-dir diff vs `14b1e5cb`: empty |
-| Mac suite runner | `ps2x_tests` `31cb0cb3…` (from `ace5b53`): 674/674 |
-| Mac det runner | `7436ec9e…` (`ace5b53`; later commits are Android-only) |
-| APK VK2 | `df27f812c9645433dfb103c7d7d8850c5e57858c145a6e8ae843c7d0ced784d6` (`91f65d5`) |
-| APK F6 (ABBA reference) | `f39905dbf13431cd184b2dccf4f5baef66d46c62857d9beba76aa4fb5655740a` (`fb28d99`) |
-| Brad's play state after ST1 | base.apk `4ff81032…`, env `a8d651a7…`, mc0 pins OK, lease `LEASE_FREE VK2 done` |
+| Fork `vk2` (local, not pushed) | `ace5b53` (ledger + tests + sink/backend), `91f65d5` (window-change counter log), **`a523700`** (proc fd count) = tip. Runner-dir diff vs `14b1e5cb`: empty |
+| Mac suite | `ps2x_tests` `31cb0cb3…`: 674/674 at `ace5b53` and at the tip (`91f65d5`/`a523700` touch only the Android file) |
+| Mac det runner | `7436ec9e…` (`ace5b53`) |
+| APK 1 (ST1 only) | `df27f812c9645433dfb103c7d7d8850c5e57858c145a6e8ae843c7d0ced784d6` (`91f65d5`) |
+| **APK 2 (ST2, Q1, Q4)** | **`29d3ca066de3b8dfe74c511dbf87e99168ba13acbf4262396c4006228e914469`** (`a523700`; incremental, 19 s), ×2 remote ×2 local, installed match every leg |
+| APK F6 (Q2, Q3) | `f39905dbf13431cd184b2dccf4f5baef66d46c62857d9beba76aa4fb5655740a` (`fb28d99`, same inputs) |
+| Build inputs | bytesize `/home/brad/f6/{codegen-ssx3,vu1gen-f6,parallel-gs (1b3a294),jniLibs}`; source `/home/brad/vk2fix` (tar `355f205d…`, delta `2914c252…` both ends) |
+| Brad's play state after the session | base.apk `4ff81032…`, env `a8d651a7…`, mc0 pins OK, `mc0-test` empty, app stopped, lease `LEASE_FREE VK2 done` |
 
 ## Budgets
 
-Android builds 1/6. Odin launches 1/6 (ST1). Mac: 2 builds (suite, det), 1 det boot (mini, one slot).
-Scratch `~/dev/ssx3-work/VK2` ~1.6 GB after deleting the det build (mini 196.0/200 GB). bytesize
-`/home/brad/vk2fix`.
+Android builds 2/6 (full 9 m 54 s; incremental 19 s). Odin launches 6/6 (ST1, ST2, Q1–Q4; the pixel check
+was folded into ST2). Mac: 2 builds, 1 det boot (mini, one slot). Scratch `~/dev/ssx3-work/VK2` ~2 GB
+(det build deleted; mini 196/200 GB). bytesize `/home/brad/vk2fix`. Wall ~23:30–01:35.
 
 ## Gaps
 
-- The stress rerun (20 cycles + 5 switches, with `proc_fds`), the ABBA pair vs F6 and the gralloc pixel
-  run are still to do (blocked on the Odin lease conflict above).
-- Detach semantics on device: the ledger resolves the last shown buffer from the detach transaction's
-  completion (Android's documented contract). ST1 shows those completions arrive (18/18 layers
-  released, 0 absent). Whether the compositor reports the detach's release early can't be observed from
-  the app; the pool retirement makes it irrelevant (test "a detach that reports release early").
-- No device run of the failure paths themselves (timeouts, POLLNVAL, give-up fallback): they are proven
-  by the Mac tests only. ST1 hit none of them (all counters 0).
-- Frame skip on no free slot keeps the last frame on screen; with 4 slots and pipelining, ST1 never skipped.
+- The failure paths (callback/fence timeouts, `POLLNVAL`, 30-skip give-up, 8-detached-layer cap) are
+  proven by the Mac tests only; no device run hit them (all counters 0 in 7,000+ presents and 43 window changes).
+- Detach semantics on device: every detach completion arrived (43/43 layers released over ST1+ST2, 0
+  absent). Whether the compositor might report a detached buffer's release early can't be seen from the
+  app; the pool retirement makes it irrelevant (Mac test "a detach that reports release early").
+- Frame skip (no released slot) keeps the last frame on screen; never happened on device.
+- ST2's pixel compares are diagnostic sync presents inside a stress run; the ABBA legs carry no compare.
+- Retiring the pool on every window change costs one `wait_idle` + 4 AHB allocations/imports per
+  background/foreground (not timed separately; the app is in the background then).
 
 ## Exact commands
 
@@ -135,17 +170,18 @@ python3 local/tooling/boot/ssx3_boot.py --host mini --mode det --backend paralle
 python3 local/tooling/boot/baseline.py compare --key a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d --cand ~/dev/ssx3-work/VK2/run/VK2-det   # IDENTICAL
 $NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-linux-android29 -std=c++20 -fsyntax-only -Ips2xRuntime/include ps2xRuntime/src/lib/gs/ps2_present_vk_android.cpp
 git archive --format=tar vk2 | ssh bytesize 'wsl -d Ubuntu -- bash -c "… tar -x -C /home/brad/vk2fix/PS2Recomp"'
-ssh bytesize 'wsl -d Ubuntu -- bash -lc /home/brad/vk2fix/build.sh'      # 9 m 54 s
-python3 local/research/VK2/cooldown.py --label ST1
-python3 local/research/VK2/launch.py --label ST1 --variant A --apk ~/dev/ssx3-work/VK2/apk/app-release.apk --apk-sha df27f812… \
-  --stress 1850 --after-stress-s 60 --stop-tick 99999 --wall 590 --scap-ticks 1800
-bash local/research/VK2/restore-play.sh
-adb shell dumpsys activity exit-info com.ps2x.runner                     # reason=16 PACKAGE UPDATED
+ssh bytesize 'wsl -d Ubuntu -- bash -lc /home/brad/vk2fix/build.sh'      # 9 m 54 s; a523700 delta: 19 s
+python3 local/research/VK2/cooldown.py --label ST1; python3 local/research/VK2/launch.py --label ST1 …   # pre-odin_lease.sh (ST1 only)
+local/research/VK2/odin_session.sh \
+  "ST2|--variant A --apk …/apk2/app-release.apk --apk-sha 29d3ca06… --stress 1850 --after-stress-s 60 --stop-tick 99999 --wall 590 --scap-ticks 1800 --compare-ticks 1100,3000" \
+  "Q1|--variant A --apk …/apk2/app-release.apk --apk-sha 29d3ca06… --stop-tick 4500 --cpu-window 1850,2550 --scap-ticks 2100" \
+  "Q2|… f6-apk … f39905db …" "Q3|… f6-apk …" "Q4|… apk2 …"
+python3 local/research/F4/phases.py local/research/VK2/logs/Q{1,2,3,4}
+adb shell dumpsys activity exit-info com.ps2x.runner                     # ST1: reason=16 PACKAGE UPDATED
 ```
 
 ## Recommended next action (orchestrator decides)
 
-Once the Odin is free of F6: one incremental build of `a523700` (fd log), then ST2 = the full stress
-(20 + 5), then the ABBA pair vs F6 `f39905db…` (VK2, F6, F6, VK2), then the pixel run (compare ticks 1100 +
-2100 with one bg/fg at 1300, so the second compare lands on a post-window-change pool). That is 6 launches
-against the 5 left: drop one leg (e.g. fold the pixel compare into ST2) or grant one more.
+Fold fork `vk2` (`ace5b53`, `91f65d5`, `a523700`; clean on `fb28d99`) into fork `ssx3` and let the Odin
+play build ship with the Vulkan present on by default (drop `PS2X_PRESENT_VULKAN=0` from Brad's env).
+Keep the `proc_fds` / window-change stats line (one line per window change, no per-frame cost).

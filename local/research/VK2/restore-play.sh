@@ -12,9 +12,7 @@ WANT_APK=4ff81032a175689be276819381f5ff52710e37101f99289d76b25a5c95609753
 WANT_ENV=a8d651a7e55f7e29f1345f28f4ea634e06ae757f535e29439ab61c930bcc0ebd
 lease=$(adb -s "$S" shell cat /data/local/tmp/mg/LEASE)
 echo "PRE lease=$lease pid=$(adb -s "$S" shell pidof $PKG || true)"
-case "$lease" in LEASE_FREE*|VK2\ *) ;; *) echo "lease held: $lease" >&2; exit 1;; esac
-adb -s "$S" shell "echo 'VK2 $(date -u +%FT%TZ) restore' > /data/local/tmp/mg/LEASE"
-trap 'adb -s "$S" shell "echo LEASE_FREE VK2 done > /data/local/tmp/mg/LEASE"' EXIT
+case "$lease" in VK2\ *) ;; *) echo "lease not held by VK2 (odin_lease.sh claim VK2 first): $lease" >&2; exit 1;; esac
 h1=$(shasum -a 256 "$APK" | cut -d' ' -f1); h2=$(shasum -a 256 "$APK" | cut -d' ' -f1)
 echo "APK local $h1 $h2"
 [ "$h1" = "$WANT_APK" ] && [ "$h2" = "$WANT_APK" ] || { echo "F5 APK SHA mismatch" >&2; exit 1; }

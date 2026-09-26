@@ -129,8 +129,10 @@ for f, want in MC0_PINS.items():
         mc0_bad.append(f)
 log(f'PRE lease="{lease}" keyguard="{kg}" battery={level}% ac={ac} pid0={pid0 or "none"}')
 log(f'PRE device-env={dev_env_sha} mc0-test={mc0t!r} mc0-bad={mc0_bad}')
-if not (lease.startswith('LEASE_FREE') or lease.startswith('VK2 ')):
-    sys.exit('lease held by someone else')
+# 09-26: the lease is claimed and released only through local/tooling/odin_lease.sh
+# (atomic); this launcher requires it to be held by VK2 already and never writes it.
+if not lease.startswith('VK2 '):
+    sys.exit(f'lease not held by VK2 (claim it with odin_lease.sh first): {lease!r}')
 if 'showing=false' not in kg:
     sys.exit('keyguard showing: ask Brad to unlock')
 if level < a.min_battery or ac != 'true':
@@ -143,8 +145,7 @@ if mc0_bad:
     sys.exit(f'Brad mc0 mismatch: {mc0_bad} (refusing to run)')
 if mc0t:
     sys.exit(f'mc0-test not empty: {mc0t!r}')
-sh(f'echo "VK2 {time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())} {a.label}" > /data/local/tmp/mg/LEASE')
-CLAIMED['v'] = True
+CLAIMED['v'] = False  # held by the caller (odin_lease.sh), not by this script
 
 
 def _cleanup():
@@ -639,5 +640,4 @@ transport_end = subprocess.run(['adb', 'devices', '-l'], capture_output=True, te
                                timeout=30).stdout
 open(f'{OUT}/transport-end.txt', 'w').write(f'serial={D}\ndisconnects={DISCONNECTS["n"]}\n{transport_end}')
 log(f'END pid-after={sh(f"pidof {PKG}").strip() or "none"} disconnects={DISCONNECTS["n"]}')
-sh("echo 'LEASE_FREE VK2 done' > /data/local/tmp/mg/LEASE")
-CLAIMED['v'] = False
+# lease stays held; the caller restores Brad's play state and releases it
