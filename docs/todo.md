@@ -285,7 +285,9 @@ then 120 Hz simulation.
       68 ms Odin race frame (from guest `sub_0022ADD8`). Static-recompile VU0 on VR1's machinery.
 - [ ] **HP1 (queued, small):** release hot-path hygiene on Android: find the per-frame `snprintf` on GameThread (~0.8 ms,
       N12 S2 children 1.06 %) and the emulated-TLS cost (`__emutls_get_address` 0.68 %; `-fno-emulated-tls` at API 29+).
-- [ ] **HS1 (running, Brad 09-25):** host split: bradflix build ≤ 5 min (unity_74 diagnosis, ccache), 4 bradflix boot slots via Docker, 4-way det acceptance vs the a3efbfe baseline.
+- [ ] HS1 follow-ups: cold bradflix build 400 s (nine -O3 unity TUs > 60 s; accept or PCH); unify the
+      `vu1_images` pin scheme (RS2 vs HS1 differ; fold into `baseline.py pins`); delete LX1's retired
+      `BRADFLIX_LEASE` dir; bradflix ccache cap 5 GB.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
 - [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real

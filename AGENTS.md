@@ -124,6 +124,12 @@ Close the pane after its gate read.
 - **One live PS2 runtime mutator** (the E lane owns the fork checkout and
   the P-lane lease). E and G own distinct files. N ports what it needs on
   its own local branch or hands edits to E.
+- **Hosts (Brad, 09-25; HS1):** correctness/det boots go to **bradflix** (4 slots,
+  `ssx3_boot.py --host bradflix`, lease `p_lane_lease.py --host bradflix`; builds with
+  `local/tooling/build/bradflix_build.sh`, Docker only, never touch its media containers). The
+  **mini** is for speed numbers and Mac/MoltenVK-specific boots; the **Odin** for device speed.
+  New briefs default det boots to bradflix (a bradflix boot is ~117 s to t2400 vs ~63 s on the
+  mini, but four run at once with no slowdown).
 - **Leases:** one device agent on the Odin at a time
   (`/data/local/tmp/mg/LEASE`). On the mini, **four** recomp/emulator
   boots at a time (Brad, 09-24; a boot is ~1.2 cores and ~250 MB on the

@@ -233,3 +233,10 @@ Gaps, stated plainly:
   (overflows, zero underruns) vs Mac hardware counters — guest SND
   HLE is bit-identical (all guest counters equal); host counters
   were already stripped by compare. No snd change needed.
+
+## Orchestrator gate (2026-09-25)
+
+**Pass; adopted.** Re-ran `compare` on HS1B1 and HS1B4 myself (IDENTICAL); bradflix lease status all free.
+The unity_74 "blocker" was a DIAG-taps artifact (60 s with taps off) — good diagnosis. Coverage
+multiset compare accepted (G4). Host split written into `AGENTS.md` and the runbook; new briefs send
+det boots to bradflix. G1/G5/G6 queued in `docs/todo.md`.
