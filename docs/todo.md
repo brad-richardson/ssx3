@@ -288,6 +288,10 @@ then 120 Hz simulation.
 - [ ] **Android immersive mode (small):** the gesture-bar handle shows over the game on the Odin (F6 screencaps); hide system bars.
 - [ ] **GL fallback aspect (small):** Android GL fallback still letterboxes into raylib's 640×448 canvas (1544×868 box);
       start raylib at the display size so it follows Brad's max-fit rule too.
+- [ ] **HP2 (running, local Qwen):** audit always-on diagnostic checks on the hot paths (EN2 §7 item 1).
+- [ ] From EN2 §7 (GameCube learnings), queued: order-file/PGO for generated code once codegen settles; narrow the save-state
+      runner identity + cache its hash; a PS2 waypoint autopilot for deliberate-contact tests; reuse the GC rebuild/locale tools
+      for PS2 test ISOs; guest-time-aligned trace parity tooling. (Direct-call specialization = RV4; idle-loop = below.)
 - [ ] Idle-loop / event fast-forward census for loading and menus (RV7 rank 7): find hot guest polling loops
       first; one exact candidate only if a loop is found (timer/side effects preserved).
 - [ ] Reference read of ARMSX2's ARM64 VU/EE core (RV7 §5; GPL: techniques only) once VR2's block design settles.
