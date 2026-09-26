@@ -269,7 +269,7 @@ then 120 Hz simulation.
       `0x317184` is the delay slot of `jal checkHalt`; metro sites clear the
       frame-skip flag `[*(gp+0x2A74)+0x34]`. Measure with the E55 hash tap.
       `local/research/X3/`, `X2/`.
-- [ ] Save states (SS1, folded `5474956`): lanes use `baseline.py get-state` + `ssx3_boot.py --load`. For device
+- [ ] Save states (SS1, folded `5474956`): lanes use `baseline.py get-state` + `ssx3_boot.py --load` (Mac or bradflix; states are per host: SS2). For device
       play: Android runner-SHA via `dladdr`, a save/load button, non-det loads (SS1 report § Dropping det).
 - [ ] Run-speed tooling (Brad OK'd 09-25): **RS1** shared ccache + `local/tooling/build/mac_build.sh`;
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
@@ -284,7 +284,6 @@ then 120 Hz simulation.
       `BRADFLIX_LEASE` dir; bradflix ccache cap 5 GB.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
-- [ ] `bradflix_build.sh` pins paraLLEl `19d93b2`; move it to fork `ssx3` `464f263` (SS1's CLUT accessor) like `mac_build.sh`.
 - [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real
       `make` on the next fork tip.
 - [ ] Update `docs/route-criteria.md` for the 120 Hz simulation preference

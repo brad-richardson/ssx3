@@ -356,3 +356,9 @@ logs only.
 - ssx3 `main`: the `[SS2] Part 2 …` commit below (REPORT + `bradflix_build.sh`
   pin move; the Part 1 drivers commit `c080557d` is already in).
 Stopping here.
+
+## Orchestrator gate, Part 2 (2026-09-26) — pushed, lane closed
+
+**Pass; pushed** fork `ssx3` `d4fc12e..173b31f` (clean, ancestor, runner-dir empty, two `[SS2]` subjects).
+bradflix saves now carry the CLUT tail and load bit-exactly. Android compile of these two header-only
+commits is deferred to F6's Android build (noted as the check before any device install).
