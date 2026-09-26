@@ -146,7 +146,9 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   where Android's NDK doesn't (F4: VU1 chain recursion crashed the Odin at 512 frames). Anything with
   deep or chained calls gets a small-stack test (512 KB) on the Mac before a device build.
 
-- bradflix (HS1): `bradflix_build.sh <fork-sha> <name> [--det]` (cold ~400 s, warm ~50 s, shared ccache in
+- bradflix (HS1/HS2): `bradflix_build.sh <fork-sha> <name> [--det] [--vu1 DIR] [--vu0 DIR] [--codegen DIR]` — builds from a
+  per-build `git archive` export (unpushed commits work), content-addressed shared inputs (`vu1gen-*`, `vu0gen-*`,
+  `codegen-*`, `pgs-*`), one setup lock; safe with several lanes at once. Older form: (cold ~400 s, warm ~50 s, shared ccache in
   `~/dev/ssx3-work/ccache`); boots `ssx3_boot.py --host bradflix --mode det …` (det only; results pulled
   back, then `baseline.py compare` as usual; coverage lines compare as a multiset because libc++ and
   libstdc++ hash orders differ). Everything under `~/dev/ssx3-work/` there, never `/tmp`.

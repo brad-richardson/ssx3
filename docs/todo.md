@@ -296,6 +296,7 @@ then 120 Hz simulation.
 - [ ] HS1 follow-ups: cold bradflix build 400 s (nine -O3 unity TUs > 60 s; accept or PCH); unify the
       `vu1_images` pin scheme (RS2 vs HS1 differ; fold into `baseline.py pins`); delete LX1's retired
       `BRADFLIX_LEASE` dir; bradflix ccache cap 5 GB.
+- [ ] Small: `ssx3_boot.py --host bradflix` records the shared checkout's SHA as `fork_sha`, not the runner's source (HS2); remove the retired shared `HS1/PS2Recomp`, `HS1/parallel-gs`, `HS1/vu1gen` on bradflix.
 - [ ] RS1 follow-up: canonical paraLLEl checkout `~/dev/ssx3-work/parallel-gs-ssx3` (fork `19d93b2`) as
       `mac_build.sh`'s default instead of F2's scratch; ccache on bradflix in the host split.
 - [ ] RS2 follow-up: `baseline.py pins` computes the pins JSON (VU1 set hash included); first real

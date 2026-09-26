@@ -190,3 +190,10 @@ path and hashes are what matter.
    `PS2X_VU0_RECOMP_DIR`, since the fork now has VU0 images; one det boot with `--env PS2X_VU0_RECOMP=1 --env
    PS2X_VU0_DIRECT=1` IDENTICAL.
 Budget: ≤ 5 builds, ≤ 3 boots. Proposed runbook text in the report. Stop after.
+
+## Orchestrator gate, Part 2 (2026-09-26) — adopted, lane closed
+
+**Pass.** Concurrent pair, unpushed commit, byte-identical rebuild with 100 % ccache hits, and two det boots
+IDENTICAL (VU0 off and on). The shared-dir race and `rm -rf` are gone. Follow-ups queued: `ssx3_boot.py`'s
+`fork_sha` field reports the shared checkout, not the runner's source (cosmetic); clean up the retired shared
+`HS1/PS2Recomp` / `HS1/parallel-gs` / `HS1/vu1gen` dirs once no lane uses them.
