@@ -292,3 +292,24 @@ python3 /tmp/f7_rates.py  # STOP-capped race rates + GPU/thermal/mtvu aggregatio
 python3 local/research/MT1/mtvu_sim.py ~/dev/ssx3-work/F7/odin/C0b/census-c0b.txt [--submit 2000 --wake 20000 --slow 1.10]
 bash local/research/F6/restore-play.sh  # after every leg
 ```
+
+## Orchestrator gate, Parts 1+2 (2026-09-26)
+
+**Pass.** Odin race (VR3 `-O3` APK): knob 0 0.284× → blocks 0.301× → MTVU 0.378× → MTVU+blocks **0.391×** →
++LAG **0.425×** (repeats within 0.1 %); 0 MTVU violations everywhere; VU0 neutral on the Odin (0.999×: with MTVU
+the unit, not the EE thread, is the long pole). Census + model agree with the measured MTVU gain. iPad green.
+
+**Play-build decisions:** Odin = VR3's APK `825b436d…` (fork `5d5c382`, `-O3`, VK2 present) with Brad's env +
+`PS2X_MTVU=1 PS2X_VU1_BLOCKS=1 PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`; **LAG off** (Brad's call); VU0 knobs off
+(neutral). iPhone = F7's iOS build (`60ac6331…`, bundled env with MTVU + blocks).
+
+## Part 3 brief (orchestrator)
+1. **Canonical play state** so later lanes restore the right build: create `~/dev/ssx3-work/odin-play/` with the
+   Odin APK (`825b436d…`), the new env file (Brad's `a8d651a7…` keys + the four keys above; keep every other key
+   byte-identical), and `SHA256SUMS`; write `local/tooling/odin_restore_play.sh` (atomic lease via
+   `odin_lease.sh`; install the APK, push the env, verify both SHAs and Brad's 6 saves, force-stop; no launch) and
+   use it for the install. Record the new env SHA.
+2. Odin: install via that script. **No launch.**
+3. iPhone: `install_iphone` with F7's signed build, then `bash local/research/I31/deploy-ios.sh iphone`. **Never launch.**
+4. Append `## Part 3` (new env SHA, installed SHAs, receipts); commit `[F7] Part 3 …` (explicit paths incl. the new
+   tooling script); stop.
