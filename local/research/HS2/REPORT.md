@@ -127,7 +127,7 @@ commit, archive, `worktree remove`), (3) tip rebuild for byte-identical + ccache
 
 ## Gaps / follow-ups
 
-- Acceptances 2–4 unrun (above).
+- Acceptances 2–4 unrun (above) — done in Part 2 below.
 - `docker build` still sends all of `HS1/` as context (unchanged from HS1; a
   `.dockerignore` would shrink it without changing the image since the Dockerfile copies
   nothing — possible follow-up, out of scope).
@@ -136,6 +136,45 @@ commit, archive, `worktree remove`), (3) tip rebuild for byte-identical + ccache
 - Full old-script-lane immunity note: an old-script lane's non-atomic `Dockerfile`/input
   writes could only collide with a same-instant reader in a microsecond window, and any
   hit fails loudly (parse/SHA error), never silently.
+
+## Part 2 (worker, 2026-09-26)
+
+Script change since Part 1: `--vu0 DIR` (default `~/dev/ssx3-work/vu0gen-ssx3`),
+content-addressed exactly like vu1gen (`vu0gen-<manifest12>`, here `vu0gen-17f64123313c`
+for the 1-image set), passed as `PS2X_VU0_RECOMP_DIR`. Always published like the other
+inputs; a no-op for revs before VR3 (unused `-D`). All Part 2 builds carry VU0 images,
+so the Part 2 tip runner (`fdfcf7cc…`) differs from the Part 1 one (`aeb75690…`, no VU0)
+by design.
+
+### Acceptance
+
+| # | Check | Result | Receipt |
+| --- | --- | --- | --- |
+| P2-1 | `5d5c382` + `a5e5940` builds 10 s apart both succeed; each `src/` matches its SHA | **PASS.** Both `BUILD_RC=0`. `ps2_vu1_recomp.cpp`: tip blob `52f95cf84d80aa4a…` == tip export, a5e blob `2ef555a406e8c360…` == a5e export, and they differ | `build-p2-tip.log`, `build-p2-a5e.log` |
+| P2-2 | unpushed local commit builds (throwaway `76fe7a9`, comment-only on tip; worktree removed after, E checkout untouched) | **PASS.** `BUILD_RC=0`; runner byte-identical to the tip runner (comment-only change) | `build-p2-unpushed.log` |
+| P2-3 | tip rebuild byte-identical + ccache hits | **PASS.** `hs2p2-tip-det2` sha `fdfcf7cc…` == `hs2p2-tip-det`; ccache misses 6699 → 6699 (all hits), 51 s wall | `build-p2-tip2.log` |
+| P2-4a | plain det boot of tip runner vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` | **IDENTICAL** (hash 1..2400, snd/coverage) | `boot-p2-det.log`, `check-p2-det.txt` |
+| P2-4b | det boot with `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1` vs same key | **IDENTICAL**; VU0 path confirmed live (`[vu0-recomp] generated_share=1.0000`, `interpreted_cycles=0`) | `boot-p2-det-vu0.log`, `check-p2-det-vu0.txt` |
+
+### Builds (4 of ≤ 5 used; 2 of ≤ 3 boots)
+
+| Build | Fork SHA | det | Result | Runner SHA (two reads match) | Wall |
+| --- | --- | --- | --- | --- | --- |
+| hs2p2-tip-det | `5d5c382…` | ON | `BUILD_RC=0` | `fdfcf7cccebbc769e18f5ba57d5c3dad6377596631cf76986458b5790c7f98d7`, 193,407,864 B | 69 s |
+| hs2p2-a5e5940-det | `a5e5940612e4dfdcaa98a6d1c49f6c221abf41c5` | ON | `BUILD_RC=0` | `7cb41f0d8eda21ba4fff95543d272687be2b121492c50357b0f47654157d7f1a`, 192,230,024 B | 617 s |
+| hs2p2-unpushed-det | `76fe7a981b6177368267353ca3b0df733de62927` (throwaway, unpushed) | ON | `BUILD_RC=0` | `fdfcf7cc…` (== tip) | 51 s |
+| hs2p2-tip-det2 | `5d5c382…` | ON | `BUILD_RC=0` | `fdfcf7cc…` (== tip) | 51 s |
+
+Both boots used `hs2p2-tip-det2`'s runner (`--route fr1r1 --stack-kb 512 --vu1-stats`,
+sound on, stop tick 2400). Note: `ssx3_boot.py`'s `fork_sha` field reports the stale
+shared-checkout SHA (`cdaa331`), not the built runner's — cosmetic metadata, the runner
+path and hashes are what matter.
+
+### Runbook addition (amends the Part 1 text)
+
+- VU0 images are a standard input now: `vu0gen-<manifest12>` is published like vu1gen and
+  always passed (`-DPS2X_VU0_RECOMP_DIR`); override with `--vu0 DIR`. Revs before VR3
+  ignore it. Enable at boot with `--env PS2X_VU0_RECOMP=1 --env PS2X_VU0_DIRECT=1`.
 
 ## Orchestrator gate, Part 1 (2026-09-26)
 

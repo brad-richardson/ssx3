@@ -1,0 +1,70 @@
+== resolve fork SHA (mini clone, pushed or not)
+fork: 5d5c38211c6c13e5c6fcecf9df8f051469a49445 [VR3] Android: -Pps2xVu0RecompDir -> PS2X_VU0_RECOMP_DIR (as ps2xVu1RecompDir)
+== preflight (mini inputs)
+-- mini ISO sha (3 GB, one read)
+-- mini inputs OK (codegen-8ea8ed436b78 vu1gen-d28e3fc6467f vu0gen-17f64123313c pgs-1b3a2948cc55)
+== preflight (bradflix)
+bradflix
+ 08:12:17 up 1 day,  7:32,  2 users,  load average: 0.11, 1.42, 2.60
+/dev/mapper/ubuntu--vg-ubuntu--lv  1.8T  837G  919G  48% /
+-- containers (hands off; load check only)
+health-notifier Up 32 hours
+crawl4ai Up 32 hours (healthy)
+searxng Up 32 hours (healthy)
+radarr Up 32 hours (healthy)
+sonarr Up 32 hours (healthy)
+osrs-bot-osrs-db-1 Up 32 hours
+hunter Up 32 hours
+deluge Up 32 hours (healthy)
+prowlarr Up 32 hours (healthy)
+sabnzbd Up 32 hours (healthy)
+mosquitto Up 32 hours
+esphome Up 32 hours (healthy)
+gluetun-fast Up 32 hours (healthy)
+gluetun Up 32 hours (healthy)
+home-assistant Up 32 hours
+swag Up 32 hours
+uptime-kuma Up 32 hours (healthy)
+samba Up 32 hours (healthy)
+rest_server Up 32 hours (healthy)
+osrs-bot-osrs-bot-1 Up 32 hours
+zone2 Up 32 hours (healthy)
+== claim build dir dev/ssx3-work/HS1/hs2p2-tip-det (under the setup lock)
+== fork export 5d5c38211c6c13e5c6fcecf9df8f051469a49445 -> dev/ssx3-work/HS1/hs2p2-tip-det/src
+EXPORT_OK
+== inputs (content-addressed; shared dirs are never modified)
+-- codegen-8ea8ed436b78 OK
+-- vu1gen-d28e3fc6467f OK
+-- staging vu0gen-17f64123313c from mini
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+published vu0gen-17f64123313c
+-- ELF OK
+-- ISO OK
+-- pgs-1b3a2948cc55 1b3a2948cc55e74f975e42b79d08983f31c2dbb6 / Granite 166ba21a247a681903cc9d0bb6562fe50a554c85 OK
+== image ssx3-hs1 (cached layers are fast)
+#6 DONE 0.0s
+image: ssx3-hs1 d124af4da093
+== ccache before
+Cacheable calls:    16060 / 16117 (99.65%)
+  Hits:              9736 / 16060 (60.62%)
+  Misses:            6324 / 16060 (39.38%)
+Uncacheable calls:     53 / 16117 ( 0.33%)
+  Cache size (GiB):   0.7 /   5.0 (13.72%)
+  Hits:              9736 / 16060 (60.62%)
+== configure dev/ssx3-work/HS1/hs2p2-tip-det (det=ON)
+CONFIGURE_RC=0
+-- PS2X: VU1 recomp: 7 images from /work/vu1gen-d28e3fc6467f
+== build (16 jobs)
+BUILD_RC=0
+[661/661] Linking CXX executable ps2xTest/ps2x_tests
+--- wall: 69 s (configure+build) ---
+== ccache after
+Cacheable calls:    16695 / 16754 (99.65%)
+  Hits:             10369 / 16695 (62.11%)
+  Misses:            6326 / 16695 (37.89%)
+Uncacheable calls:     55 / 16754 ( 0.33%)
+  Cache size (GiB):   0.7 /   5.0 (13.72%)
+  Hits:             10369 / 16695 (62.11%)
+runner: ~/dev/ssx3-work/HS1/hs2p2-tip-det/ps2xRuntime/ps2EntryRunner sha=fdfcf7cccebbc769e18f5ba57d5c3dad6377596631cf76986458b5790c7f98d7 size=193407864 fork=5d5c38211c6c13e5c6fcecf9df8f051469a49445 det=ON image=d124af4da093 src=hs2p2-tip-det/src codegen=codegen-8ea8ed436b78 vu1=vu1gen-d28e3fc6467f vu0=vu0gen-17f64123313c pgs=pgs-1b3a2948cc55
+TIP-RC=0

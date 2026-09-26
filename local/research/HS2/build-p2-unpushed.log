@@ -1,0 +1,67 @@
+== resolve fork SHA (mini clone, pushed or not)
+fork: 76fe7a981b6177368267353ca3b0df733de62927 [HS2] throwaway unpushed comment (deleted after)
+== preflight (mini inputs)
+-- mini ISO sha (3 GB, one read)
+-- mini inputs OK (codegen-8ea8ed436b78 vu1gen-d28e3fc6467f vu0gen-17f64123313c pgs-1b3a2948cc55)
+== preflight (bradflix)
+bradflix
+ 08:23:49 up 1 day,  7:44,  2 users,  load average: 0.94, 3.96, 4.36
+/dev/mapper/ubuntu--vg-ubuntu--lv  1.8T  841G  915G  48% /
+-- containers (hands off; load check only)
+health-notifier Up 32 hours
+crawl4ai Up 32 hours (healthy)
+searxng Up 32 hours (healthy)
+radarr Up 32 hours (healthy)
+sonarr Up 32 hours (healthy)
+osrs-bot-osrs-db-1 Up 32 hours
+hunter Up 32 hours
+deluge Up 32 hours (healthy)
+prowlarr Up 32 hours (healthy)
+sabnzbd Up 32 hours (healthy)
+mosquitto Up 32 hours
+esphome Up 32 hours (healthy)
+gluetun-fast Up 32 hours (healthy)
+gluetun Up 32 hours (healthy)
+home-assistant Up 32 hours
+swag Up 32 hours
+uptime-kuma Up 32 hours (healthy)
+samba Up 32 hours (healthy)
+rest_server Up 32 hours (healthy)
+osrs-bot-osrs-bot-1 Up 32 hours
+zone2 Up 32 hours (healthy)
+== claim build dir dev/ssx3-work/HS1/hs2p2-unpushed-det (under the setup lock)
+== fork export 76fe7a981b6177368267353ca3b0df733de62927 -> dev/ssx3-work/HS1/hs2p2-unpushed-det/src
+EXPORT_OK
+== inputs (content-addressed; shared dirs are never modified)
+-- codegen-8ea8ed436b78 OK
+-- vu1gen-d28e3fc6467f OK
+-- vu0gen-17f64123313c OK
+-- ELF OK
+-- ISO OK
+-- pgs-1b3a2948cc55 1b3a2948cc55e74f975e42b79d08983f31c2dbb6 / Granite 166ba21a247a681903cc9d0bb6562fe50a554c85 OK
+== image ssx3-hs1 (cached layers are fast)
+#6 DONE 0.0s
+image: ssx3-hs1 d124af4da093
+== ccache before
+Cacheable calls:    17320 / 17381 (99.65%)
+  Hits:             10621 / 17320 (61.32%)
+  Misses:            6699 / 17320 (38.68%)
+Uncacheable calls:     57 / 17381 ( 0.33%)
+  Cache size (GiB):   0.7 /   5.0 (14.59%)
+  Hits:             10621 / 17320 (61.32%)
+== configure dev/ssx3-work/HS1/hs2p2-unpushed-det (det=ON)
+CONFIGURE_RC=0
+-- PS2X: VU1 recomp: 7 images from /work/vu1gen-d28e3fc6467f
+== build (16 jobs)
+BUILD_RC=0
+[661/661] Linking CXX executable ps2xRuntime/ps2EntryRunner
+--- wall: 51 s (configure+build) ---
+== ccache after
+Cacheable calls:    17955 / 18018 (99.65%)
+  Hits:             11256 / 17955 (62.69%)
+  Misses:            6699 / 17955 (37.31%)
+Uncacheable calls:     59 / 18018 ( 0.33%)
+  Cache size (GiB):   0.7 /   5.0 (14.59%)
+  Hits:             11256 / 17955 (62.69%)
+runner: ~/dev/ssx3-work/HS1/hs2p2-unpushed-det/ps2xRuntime/ps2EntryRunner sha=fdfcf7cccebbc769e18f5ba57d5c3dad6377596631cf76986458b5790c7f98d7 size=193407864 fork=76fe7a981b6177368267353ca3b0df733de62927 det=ON image=d124af4da093 src=hs2p2-unpushed-det/src codegen=codegen-8ea8ed436b78 vu1=vu1gen-d28e3fc6467f vu0=vu0gen-17f64123313c pgs=pgs-1b3a2948cc55
+UNPUSHED-RC=0

@@ -6,7 +6,7 @@
 #
 # Usage:
 #   bradflix_build.sh <fork-sha> <build-name> [--det] [--vu1 DIR]
-#                     [--codegen DIR] [--pgs-pin SHA]
+#                     [--vu0 DIR] [--codegen DIR] [--pgs-pin SHA]
 #
 #   <fork-sha>    fork commit (full or unambiguous short) present in the
 #                mini's ~/dev/PS2Recomp clone (pushed or not). Exported
@@ -17,13 +17,15 @@
 #   --det         PS2X_ENABLE_DET_HASH_TAP=ON (default OFF)
 #   --vu1 DIR     PS2X_VU1_RECOMP_DIR on the mini (default: canonical
 #                ~/dev/ssx3-work/vu1gen-ssx3)
+#   --vu0 DIR     PS2X_VU0_RECOMP_DIR on the mini (default: canonical
+#                ~/dev/ssx3-work/vu0gen-ssx3; a no-op for revs before VR3)
 #   --codegen DIR PS2X_GAME_CODEGEN_DIR on the mini (default: canonical
 #                ~/dev/ssx3-work/codegen-ssx3)
 #   --pgs-pin SHA full 40-hex paraLLEl pin (default: canonical pin below)
 #
 # Concurrency (HS2): several lanes build at once. Shared inputs live in
 # content-addressed dirs (codegen-<sha12>, vu1gen-<manifest12>,
-# pgs-<pin12>), staged privately, verified, then published with one atomic
+# vu0gen-<manifest12>, pgs-<pin12>), staged privately, verified, then published with one atomic
 # mv under ~/dev/ssx3-work/HS1/.setup.lock (flock). Shared dirs are never
 # modified or deleted. The lock is released before compiling. The Docker
 # image, ccache mount and cmake flags are byte-identical to HS1; only -S/-B
@@ -34,14 +36,15 @@
 # unity TU to ~25 min; correctness builds never need it).
 set -euo pipefail
 
-if [ $# -lt 2 ]; then sed -n '2,20p' "$0"; exit 2; fi
+if [ $# -lt 2 ]; then sed -n '2,23p' "$0"; exit 2; fi
 SHA_IN=$1; NAME=$2; shift 2
 DET=OFF
-VU1_ARG=""; CODEGEN_ARG=""; PGS_PIN_ARG=""
+VU1_ARG=""; VU0_ARG=""; CODEGEN_ARG=""; PGS_PIN_ARG=""
 while [ $# -gt 0 ]; do
   case $1 in
     --det) DET=ON;;
     --vu1) VU1_ARG=$2; shift;;
+    --vu0) VU0_ARG=$2; shift;;
     --codegen) CODEGEN_ARG=$2; shift;;
     --pgs-pin) PGS_PIN_ARG=$2; shift;;
     *) echo "unknown arg: $1" >&2; exit 2;;
@@ -74,12 +77,14 @@ PGS_SUBMODULES=29
 
 CODEGEN_DIR=$HOME/dev/ssx3-work/codegen-ssx3
 VU1_DIR=$HOME/dev/ssx3-work/vu1gen-ssx3
+VU0_DIR=$HOME/dev/ssx3-work/vu0gen-ssx3
 ELF_PATH=$HOME/dev/ssx3-work/E32-inputs/cd/SLUS_207.72
 ISO_PATH=$HOME/dev/ssx3-work/E32-inputs/SSX\ 3\ \(USA\).iso
 PGS_DIR=$HOME/dev/ssx3-work/parallel-gs-ssx3
 
 [ -n "$CODEGEN_ARG" ] && CODEGEN_DIR=$CODEGEN_ARG
 [ -n "$VU1_ARG" ] && VU1_DIR=$VU1_ARG
+[ -n "$VU0_ARG" ] && VU0_DIR=$VU0_ARG
 [ -n "$PGS_PIN_ARG" ] && PGS_PIN=$PGS_PIN_ARG
 case "$PGS_PIN" in *[!0-9a-f]* ) echo "bad --pgs-pin: $PGS_PIN" >&2; exit 2;; esac
 [ "${#PGS_PIN}" -eq 40 ] || { echo "bad --pgs-pin (want full 40-hex): $PGS_PIN" >&2; exit 2; }
@@ -111,14 +116,18 @@ ls "$VU1_DIR"/vu1_*.cpp >/dev/null || { echo "no vu1_*.cpp in $VU1_DIR" >&2; exi
 VU1_MINI=$(cd "$VU1_DIR" && shasum -a 256 vu1_*.cpp | shasum -a 256 | cut -d' ' -f1)
 V12="$(printf %s "$VU1_MINI" | cut -c1-12)"
 [ -n "$VU1_ARG" ] && echo "-- custom vu1: $VU1_DIR ($VU1_MINI)"
+ls "$VU0_DIR"/vu0_*.cpp >/dev/null || { echo "no vu0_*.cpp in $VU0_DIR" >&2; exit 2; }
+VU0_MINI=$(cd "$VU0_DIR" && shasum -a 256 vu0_*.cpp | shasum -a 256 | cut -d' ' -f1)
+V012="$(printf %s "$VU0_MINI" | cut -c1-12)"
+[ -n "$VU0_ARG" ] && echo "-- custom vu0: $VU0_DIR ($VU0_MINI)"
 P12="$(printf %s "$PGS_PIN" | cut -c1-12)"
 if [ -z "$PGS_PIN_ARG" ]; then
   [ "$(git -C "$PGS_DIR" rev-parse HEAD)" = "$PGS_PIN" ] || { echo "mini PGS mismatch" >&2; exit 2; }
   [ "$(git -C "$PGS_DIR/Granite" rev-parse HEAD)" = "$GRANITE_PIN" ] || { echo "mini Granite mismatch" >&2; exit 2; }
 else echo "-- custom pgs-pin: $PGS_PIN"; fi
-echo "-- mini inputs OK (codegen-$C12 vu1gen-$V12 pgs-$P12)"
+echo "-- mini inputs OK (codegen-$C12 vu1gen-$V12 vu0gen-$V012 pgs-$P12)"
 
-RCODEGEN="codegen-$C12"; RVU1="vu1gen-$V12"; RPGS="pgs-$P12"
+RCODEGEN="codegen-$C12"; RVU1="vu1gen-$V12"; RVU0="vu0gen-$V012"; RPGS="pgs-$P12"
 
 echo "== preflight (bradflix)"
 ssh -o ConnectTimeout=10 "$REMOTE" 'echo bradflix; uptime; df -h ~/dev/ssx3-work | tail -1' || exit 1
@@ -181,6 +190,34 @@ else
 set -euo pipefail
 RROOT=$1 DEST=$2 STAGE=$3 WANT=$4
 HAVE=$(cd ~/$RROOT/$DEST 2>/dev/null && sha256sum vu1_*.cpp | sha256sum | cut -d' ' -f1 || true)
+if [ "$HAVE" = "$WANT" ]; then
+  echo "shared $DEST already published; discarding stage"
+  rm -rf ~/$RROOT/$STAGE
+elif [ -e ~/$RROOT/$DEST ]; then
+  echo "ERROR: ~/$RROOT/$DEST exists with wrong content; refusing to touch it" >&2; exit 2
+else
+  mv ~/$RROOT/$STAGE ~/$RROOT/$DEST && echo "published $DEST"
+fi
+EOF
+fi
+
+RVU0SUM=$(ssh "$REMOTE" "(cd ~/$RROOT/$RVU0 2>/dev/null && sha256sum vu0_*.cpp | sha256sum | cut -d' ' -f1)" || true)
+if [ "$RVU0SUM" = "$VU0_MINI" ]; then
+  echo "-- $RVU0 OK"
+else
+  echo "-- staging $RVU0 from mini"
+  STAGE=".stage-$NAME-vu0"
+  ssh "$REMOTE" "rm -rf ~/$RROOT/$STAGE; mkdir -p ~/$RROOT/$STAGE" || exit 1
+  COPYFILE_DISABLE=1 tar -C "$VU0_DIR" -cf - . | ssh "$REMOTE" "tar -C ~/$RROOT/$STAGE -xf -" || exit 1
+  STAGE_SUM=$(ssh "$REMOTE" "(cd ~/$RROOT/$STAGE && sha256sum vu0_*.cpp | sha256sum | cut -d' ' -f1)")
+  if [ "$STAGE_SUM" != "$VU0_MINI" ]; then
+    ssh "$REMOTE" "rm -rf ~/$RROOT/$STAGE" || true
+    echo "staged vu0gen re-verify failed" >&2; exit 2
+  fi
+  ssh "$REMOTE" "flock -w 600 ~/$RLOCK bash -s" "$RROOT" "$RVU0" "$STAGE" "$VU0_MINI" <<'EOF' || exit 1
+set -euo pipefail
+RROOT=$1 DEST=$2 STAGE=$3 WANT=$4
+HAVE=$(cd ~/$RROOT/$DEST 2>/dev/null && sha256sum vu0_*.cpp | sha256sum | cut -d' ' -f1 || true)
 if [ "$HAVE" = "$WANT" ]; then
   echo "shared $DEST already published; discarding stage"
   rm -rf ~/$RROOT/$STAGE
@@ -292,7 +329,7 @@ ssh "$REMOTE" "mkdir -p ~/$RCCACHE && docker run --rm --user 1000:1000 -e CCACHE
 
 echo "== configure $RROOT/$NAME (det=$DET)"
 START=$SECONDS
-ssh "$REMOTE" "docker run --rm --user 1000:1000 -e HOME=/work -e CCACHE_DIR=/ccache -e CCACHE_BASEDIR=/work -w /work -v ~/$RROOT:/work -v ~/$RCCACHE:/ccache $IMAGE cmake -S /work/$NAME/src -B /work/$NAME -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPS2X_GAME_CODEGEN_DIR=/work/$RCODEGEN -DPS2X_VU1_RECOMP_DIR=/work/$RVU1 -DPS2X_BUILD_TEST=ON -DPS2X_BUILD_STUDIO=OFF -DPS2X_ENABLE_DEBUG_UI=OFF -DPS2X_ENABLE_RUNTIME_LOGS=OFF -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF -DPS2X_ENABLE_DIAG_TAPS=OFF -DPS2X_ENABLE_DET_HASH_TAP=$DET -DPS2X_GS_SHADOW_PARALLEL=ON -DPS2X_PARALLEL_GS_SOURCE_DIR=/work/$RPGS -DPS2X_ENABLE_SCCACHE=OFF -DPS2X_RUNNER_UNITY_BUILD_BATCH_SIZE=$BATCH -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_FLAGS=-msse4.1 -DCMAKE_CXX_FLAGS=-msse4.1 > ~/$RROOT/$NAME-configure.log 2>&1; echo CONFIGURE_RC=\$?; grep -m1 'VU1 recomp' ~/$RROOT/$NAME-configure.log" || exit 1
+ssh "$REMOTE" "docker run --rm --user 1000:1000 -e HOME=/work -e CCACHE_DIR=/ccache -e CCACHE_BASEDIR=/work -w /work -v ~/$RROOT:/work -v ~/$RCCACHE:/ccache $IMAGE cmake -S /work/$NAME/src -B /work/$NAME -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPS2X_GAME_CODEGEN_DIR=/work/$RCODEGEN -DPS2X_VU1_RECOMP_DIR=/work/$RVU1 -DPS2X_VU0_RECOMP_DIR=/work/$RVU0 -DPS2X_BUILD_TEST=ON -DPS2X_BUILD_STUDIO=OFF -DPS2X_ENABLE_DEBUG_UI=OFF -DPS2X_ENABLE_RUNTIME_LOGS=OFF -DPS2X_ENABLE_AGRESSIVE_LOGS=OFF -DPS2X_ENABLE_DIAG_TAPS=OFF -DPS2X_ENABLE_DET_HASH_TAP=$DET -DPS2X_GS_SHADOW_PARALLEL=ON -DPS2X_PARALLEL_GS_SOURCE_DIR=/work/$RPGS -DPS2X_ENABLE_SCCACHE=OFF -DPS2X_RUNNER_UNITY_BUILD_BATCH_SIZE=$BATCH -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_FLAGS=-msse4.1 -DCMAKE_CXX_FLAGS=-msse4.1 > ~/$RROOT/$NAME-configure.log 2>&1; echo CONFIGURE_RC=\$?; grep -m1 'VU1 recomp' ~/$RROOT/$NAME-configure.log" || exit 1
 
 echo "== build (16 jobs)"
 ssh "$REMOTE" "docker run --rm --user 1000:1000 -e HOME=/work -e CCACHE_DIR=/ccache -e CCACHE_BASEDIR=/work -w /work -v ~/$RROOT:/work -v ~/$RCCACHE:/ccache $IMAGE cmake --build /work/$NAME --parallel 16 --target ps2x_tests ps2EntryRunner > ~/$RROOT/$NAME-build.log 2>&1; echo BUILD_RC=\$?; tail -1 ~/$RROOT/$NAME-build.log" || exit 1
@@ -305,4 +342,4 @@ R1=$(ssh "$REMOTE" "sha256sum ~/$RROOT/$NAME/ps2xRuntime/ps2EntryRunner | cut -d
 R2=$(ssh "$REMOTE" "sha256sum ~/$RROOT/$NAME/ps2xRuntime/ps2EntryRunner | cut -d' ' -f1")
 [ "$R1" = "$R2" ] || { echo "two runner SHA reads differ" >&2; exit 2; }
 SIZE=$(ssh "$REMOTE" "stat -c%s ~/$RROOT/$NAME/ps2xRuntime/ps2EntryRunner")
-echo "runner: ~/$RROOT/$NAME/ps2xRuntime/ps2EntryRunner sha=$R1 size=$SIZE fork=$FULL_SHA det=$DET image=$IMAGE_ID src=$NAME/src codegen=$RCODEGEN vu1=$RVU1 pgs=$RPGS"
+echo "runner: ~/$RROOT/$NAME/ps2xRuntime/ps2EntryRunner sha=$R1 size=$SIZE fork=$FULL_SHA det=$DET image=$IMAGE_ID src=$NAME/src codegen=$RCODEGEN vu1=$RVU1 vu0=$RVU0 pgs=$RPGS"
