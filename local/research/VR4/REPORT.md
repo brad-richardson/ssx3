@@ -604,3 +604,27 @@ so you can keep the D1 unstripped `.so` for a profile if you want it.
   stale**; I release it as soon as bytesize answers ssh again (it was hanging at 09:25).
 - Nothing else of mine runs there. The staged inputs in `/home/brad/vr4fold` (2.5 GB) are still
   there for the rerun.
+
+**Android fold compile — DONE (09:44–09:59, after the bytesize fix).**
+- **Inputs re-verified** before building:
+  - staged tars match the mini (`66474042…` fork `b97b241`, `5f9a54f2…` paraLLEl `3d72467`);
+  - both trees re-extracted fresh, removing the killed build's partial outputs;
+  - VU1 image manifest `da45930d…` = the mini's `vu1gen-ssx3`;
+  - codegen `register_functions.cpp` `8ea8ed43…` and 9,457 files = the mini's;
+  - VU0 `2652966b…`;
+  - jniLibs unchanged today;
+  - `build.sh` = committed `build-android-fold.sh` (`ea20aafd…`).
+- Ran under `bytesize_lock.sh run VR4 -- ssh bytesize '… /home/brad/vr4fold/build.sh'`, holding
+  the ssh. The stale `VR4-fold` lock had already been released.
+- **BUILD SUCCESSFUL in 15 m 13 s.** NDK cache `PS2X_VU1_FMAC_SIMD:BOOL=ON` (the default; no
+  `-P`), `-O3 -g`, `vu0_40829a098c260b4f.cpp.o` built.
+- **APK `47b3ef38942d0836cdfcc2b6965c1e9ca4892d6df363ed01f2c3e9f813130391`**, 182,146,636 B.
+  Two reads remote and two local, at `~/dev/ssx3-work/VR4/odin/app-release-vr4-fold.apk`.
+  Not installed anywhere.
+- The lock was released (FREE). Receipt: `android-fold.log`.
+
+**All 5 fold gates green.** `vr4-fold` (`b97b241`) is ready for your push. Builds: 10 of ≤ 10.
+
+Leftovers on bytesize, yours to delete:
+- `/home/brad/vr4`: 7.9 GB, the D1 A/B build. Its APK is on the mini.
+- `/home/brad/vr4fold`: holds the unstripped `.so` of the fold APK, useful for a profile.
