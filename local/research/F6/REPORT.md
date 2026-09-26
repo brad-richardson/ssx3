@@ -303,3 +303,8 @@ shasum -a 256 ~/dev/ssx3-work/F6/ios/staged/ps2EntryRunner.app/ps2EntryRunner  #
 bash ~/dev/ssx3-work/F6/ios/build-install.sh install_iphone
 bash local/research/I31/deploy-ios.sh iphone  # never launched
 ```
+
+## Orchestrator gate, Part 3 (2026-09-26)
+
+**Pass.** iPhone installed (`e22bf2cf…`, save + env deployed, never launched). F6 lane closed; the Odin play
+install follows VK2 as a separate build.
