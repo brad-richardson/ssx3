@@ -310,3 +310,13 @@ python3 local/research/VR4/macshape.py                                          
   `PS2X_VU0_RECOMP` is off in the play env.
 - Budgets used: 0 builds, 0 boots, 0 device time. The scratch is `~/dev/ssx3-work/VR4`,
   ~165 MB (asm, JSON and the worktree).
+
+## Orchestrator gate, stage 1 (2026-09-26)
+
+**Pass; design approved as proposed.** The measurement moves the target: the FMAC core is 13.0 of the unit's
+30.1 ms/frame, residency's slice ≈ 2–3 ms. Go with **D1 first** (exact SIMD FMAC core: normalize once, branchless
+vector float op + exact double results + classification + shared-product sticky; runtime headers only; compile-time
+switch; a bit-for-bit unit test vs the unchanged scalar reference over randomized and edge operands — denormals,
+±0, max/min exponents, NaN/Inf bit patterns as the PS2 treats them, every flag bit; plus VR2's differential and the
+det gates), measured (Mac ABBA, then one Odin pair on the play settings). **D2 second** only if D1 lands.
+Full VF residency stays deferred. Budget as briefed; stop after D1's Odin pair (or after D2 if time allows).
