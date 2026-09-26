@@ -246,3 +246,14 @@ points between jobs.
 
 0 builds, 0 boots, 0 device runs. Reads only. The worktree `~/dev/ssx3-work/MT1/PS2Recomp` holds a
 clean checkout of `fb28d99`.
+
+## Orchestrator gate, stage 1 (2026-09-26)
+
+**Pass; revised plan approved.** The key finding — our synchronous VU1 already is PCSX2's default
+instant-VU1 model (cited from PCSX2 source), so threading needs no semantics change and must be
+det-IDENTICAL to the **current** key — makes the proof stronger and removes the parity re-baseline.
+Owning the whole VIF1 → VU1 → GIF → GS-frontend unit (not VU1 alone) is right given SSX 3's 20–31
+MSKPATH3 windows per frame. Go with **stage 2′** (hooks + census, synchronous, det-identical at
+knob 0 and census; offline two-timeline replay predicts the threaded frame time). Add the debug
+assert for unit-owned objects touched off-thread in census mode. Stop after 2′ with the prediction;
+stage 3 is decided from it. Budget as proposed (≤ 3 builds).
