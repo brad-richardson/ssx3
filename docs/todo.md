@@ -278,7 +278,7 @@ then 120 Hz simulation.
       **RS2** cached baselines + shared boot driver `local/tooling/boot/`. Host split to bradflix
       follows F5 Part 2 (Brad 09-25).
 - [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
-- [ ] **MD1 (queued; retargeted by N12):** menus now run 0.85–1.12× on the Odin; **loading is 0.32×** and
+- [ ] **MD1 (running; retargeted by N12):** menus now run 0.85–1.12× on the Odin; **loading is 0.32×** and
       GsWorker-pool-bound in Turnip driver CPU (N12 S3: ~90 ms/frame over ~3 workers) + HybridMutex + allocator churn.
       Count submits/uploads/descriptor updates per loading frame (Mac, same paraLLEl code) and cut them in the fork.
 - [ ] **VR3 (queued after VR2):** VU0 microprograms still run in the interpreter: N12 subtree 7.0 % ≈ 5.5 ms of the
