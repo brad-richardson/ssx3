@@ -12,6 +12,13 @@ Usage:
   baseline.py list
   baseline.py compare --key K --cand RUNDIR [--min-tick N]
   baseline.py make --pins PINS --runner R [--run DIR]
+  baseline.py put-state --state F --pins PINS --tick T [--note TEXT]
+  baseline.py get-state <key|--pins PINS --tick T>
+  baseline.py list-states
+SS1 save states live in <store>/states/<key>/ (state.bin + manifest.json with
+the state's header lines). The state key uses only the guest-relevant pins
+(STATE_PINS) + the save tick, so any candidate build with matching guest code,
+route and backend finds it; SSAA/hi-res are in the key but only warn on load.
 Global: [--store DIR] (default $SSX3_BASELINES or ~/dev/ssx3-work/baselines/).
 """
 import argparse
@@ -203,6 +210,103 @@ def cmd_list(args):
     return 0
 
 
+STATE_PINS = ('fork', 'codegen_register', 'codegen_changed', 'vu1_images', 'parallel_gs',
+              'route', 'backend', 'ssaa', 'hires', 'iso_sha', 'elf_sha')
+
+
+def state_key_of(pins, tick):
+    sub = {k: pins[k] for k in STATE_PINS}
+    sub['tick'] = int(tick)
+    h8 = hashlib.sha256(canonical(sub)).hexdigest()[:8]
+    prefix = '%s-%s-t%d-%s-%dx' % (pins['fork'][:7], pins['route'], int(tick), pins['backend'], pins['ssaa'])
+    if pins['hires']:
+        prefix += '-hires'
+    return '%s-%s' % (prefix, h8), sub
+
+
+def state_header(path):
+    """Header key=value lines from an SS1 state file (format 1)."""
+    import struct
+    with open(path, 'rb') as f:
+        head = f.read(1 << 16)
+    if head[:8] != b'PS2XSAVE':
+        raise SystemExit('%s is not a ps2x save state' % path)
+    pos = 12
+    (klen,) = struct.unpack_from('<I', head, pos)
+    pos += 4
+    if head[pos:pos + klen] != b'header':
+        raise SystemExit('%s: first section is not the header' % path)
+    pos += klen + 4 + 8
+    (tlen,) = struct.unpack_from('<Q', head, pos)
+    pos += 8
+    text = head[pos:pos + tlen].decode()
+    return dict(line.split('=', 1) for line in text.splitlines() if '=' in line)
+
+
+def cmd_put_state(args):
+    pins = json.loads(Path(args.pins).read_text())
+    missing = [k for k in STATE_PINS if k not in pins]
+    if missing:
+        raise SystemExit('pins %s missing: %s' % (args.pins, ','.join(missing)))
+    key, sub = state_key_of(pins, args.tick)
+    header = state_header(args.state)
+    if int(header.get('save_tick', -1)) != args.tick:
+        raise SystemExit('state saved at tick %s, not %d' % (header.get('save_tick'), args.tick))
+    dest = Path(args.store) / 'states' / key
+    if dest.exists():
+        raise SystemExit('EXISTS %s %s' % (key, dest))
+    dest.mkdir(parents=True)
+    shutil.copyfile(args.state, dest / 'state.bin')
+    reads = [sha_of(args.state), sha_of(dest / 'state.bin')]
+    if reads[0] != reads[1]:
+        shutil.rmtree(dest)
+        raise SystemExit('copy SHA mismatch')
+    man = {'key': key, 'kind': 'ss1-state', 'pins': pins, 'key_pins': sub, 'tick': args.tick,
+           'header': header, 'note': args.note, 'source': str(Path(args.state).resolve()),
+           'created_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+           'files': {'state.bin': reads[0]}, 'bytes': (dest / 'state.bin').stat().st_size}
+    (dest / 'manifest.json').write_text(json.dumps(man, indent=2, sort_keys=True) + '\n')
+    print(dest)
+    return 0
+
+
+def cmd_get_state(args):
+    if args.key:
+        key = args.key
+    else:
+        if not args.pins or args.tick is None:
+            raise SystemExit('get-state needs a key or --pins + --tick')
+        key, _ = state_key_of(json.loads(Path(args.pins).read_text()), args.tick)
+    dest = Path(args.store) / 'states' / key
+    if not (dest / 'manifest.json').exists():
+        print('MISSING %s' % key)
+        return 2
+    man = json.loads((dest / 'manifest.json').read_text())
+    want = man['files']['state.bin']
+    if any(sha_of(dest / 'state.bin') != want for _ in range(2)):
+        print('CORRUPT %s state.bin' % key)
+        return 3
+    print(dest / 'state.bin')
+    return 0
+
+
+def cmd_list_states(args):
+    root = Path(args.store) / 'states'
+    rows = []
+    if root.is_dir():
+        for d in sorted(root.iterdir()):
+            m = d / 'manifest.json'
+            if m.exists():
+                man = json.loads(m.read_text())
+                rows.append((man['key'], man['created_utc'], man['bytes'], man['header'].get('runner_sha', '')[:12],
+                             man['note']))
+    print('%-52s %-20s %9s %-12s %s' % ('KEY', 'CREATED', 'BYTES', 'RUNNER', 'NOTE'))
+    for r in rows:
+        print('%-52s %-20s %9d %-12s %s' % r)
+    print('%d state(s) in %s' % (len(rows), root))
+    return 0
+
+
 def snd_coverage_summary(run):
     boot = (Path(run) / 'boot.log').read_bytes().decode(errors='replace')
     cov = COVERAGE_LINE.findall(boot)
@@ -322,11 +426,22 @@ def main():
     m.add_argument('--pins', required=True)
     m.add_argument('--runner', required=True)
     m.add_argument('--run', default='')
+    ps = sub.add_parser('put-state')
+    ps.add_argument('--state', required=True)
+    ps.add_argument('--pins', required=True)
+    ps.add_argument('--tick', type=int, required=True)
+    ps.add_argument('--note', default='')
+    gs = sub.add_parser('get-state')
+    gs.add_argument('key', nargs='?')
+    gs.add_argument('--pins', default='')
+    gs.add_argument('--tick', type=int, default=None)
+    sub.add_parser('list-states')
     args = ap.parse_args()
     if args.cmd == 'get' and not args.key and not args.pins:
         raise SystemExit('get needs a key or --pins')
     return {'put': cmd_put, 'get': cmd_get, 'list': cmd_list,
-            'compare': cmd_compare, 'make': cmd_make}[args.cmd](args)
+            'compare': cmd_compare, 'make': cmd_make, 'put-state': cmd_put_state,
+            'get-state': cmd_get_state, 'list-states': cmd_list_states}[args.cmd](args)
 
 
 if __name__ == '__main__':

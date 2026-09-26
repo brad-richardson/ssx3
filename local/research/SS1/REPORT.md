@@ -326,3 +326,92 @@ frame. Race start 33.0 s → 1.01 s. Part 2 released (below).
    runner-dir check empty, `git log --format=%s a3efbfe..` clean subjects. **Don't push**; the
    orchestrator pushes after the gate.
 Budget: ≤ 6 builds, ≤ 12 boots (one slot each), 3 h. Append `## Part 2`; commit `[SS1] Part 2 …`.
+
+## Part 2 (worker, 2026-09-25 ~20:00–20:35 EDT)
+
+**Outcome:** every Part 2 row passes. The final runner reproduced (d) cross-runner and the t1720
+race start. The shared driver and store now carry states, and two a3efbfe-equivalent states are
+seeded. The memory-card dir travels with the state. A 4×+hi-res pair is bit-exact against F5's
+straight 4× B4, and the paraLLEl CLUT is now saved/restored by a 64-line accessor on a local
+paraLLEl branch. The branch is fold-ready (fast-forward onto fork `ssx3` `a3efbfe`).
+
+### Code (local, not pushed)
+
+| Repo / branch | Commit | What |
+| --- | --- | --- |
+| PS2Recomp `ss1-savestate` | `5474956` | paraLLEl CLUT as an optional tail of the GS blob (**gs section v2**; compiles against paraLLEl with or without the accessor via `PARALLEL_GS_HAS_CLUT_STATE`); `stub:mcdir` section (card roots for ports 0/1 go into the state; the restore refuses when the target card dir holds a different file, so a real card is never overwritten); `pgs_ssaa`/`pgs_hires` header lines (warn-level); save defers while paraLLEl palette uploads are pending |
+| paraLLEl-GS `ss1-clut` (worktree `~/dev/ssx3-work/SS1/parallel-gs`, from `19d93b2`, Granite `166ba21a` + 18 third-party submodules = F2's) | `464f263` | `GSRenderer::read_clut_state`/`write_clut_state` (the 1 MiB ring, `CLUTInstances`×`CLUTSize`, plus `base/next_clut_instance`, via one-off copy + fence after `flush_submit`) and `clut_state_idle()` (palette uploads pending); `GSInterface` wrappers. 4 files, +87 |
+
+Fork totals `git diff --stat a3efbfe HEAD`: 31 files, +3,243/−13. Subjects `a3efbfe..HEAD`:
+
+    5474956 [SS1] Save paraLLEl CLUT (optional tail, gs v2), memory-card dir with the state, SSAA/hi-res header lines
+    f1ead87 [SS1] Link the syscall section (static-lib dead strip); validate all sections before applying
+    53a1b1d [SS1] Save MPEG playback bookkeeping; drop a decoder whose stream ended (race states)
+    e76a4fc [SS1] Save states (dev, default off): vsync-boundary save/load of the whole runtime
+
+Runner-dir check `git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner`: **empty**. Fork `ssx3`
+is still `a3efbfe` (fetched), and `ss1-savestate` fast-forwards onto it. Suite from the worktree
+root: **666/666** (+1 test: card-dir round trip that never overwrites a different card).
+
+### Builds (budget 6)
+
+| # | What | Wall | Result |
+| --- | --- | --- | --- |
+| P2-1 | CLUT + mcdir + header, build pointed at the `ss1-clut` paraLLEl dir | 238 s | `runner-p2a` `c93e9c9b970f39b1d19eddb2f37993408106d2a8fe28ab81cb051f4eb8033f04` (×2), suite 666/666 |
+| P2-2 | runner B = p2a + one log string (`[vpad] off (… SS1 runner B)`, `logs/runnerB-p2.diff`), reverted after | ~25 s | `runner-p2a-B` `cac2fbe86ced378ad8e49f9ea04c37598f1b45c04e712ff7da955f341f421df0` (×2) |
+| P2-3 | compile-only check of the fork against canonical paraLLEl `19d93b2` (F2 dir, no accessor), separate build dir, targets `ps2_gs_shadow ps2_runtime` | 10.8 s | exit 0: `ps2_gs_parallel_backend.cpp` + `ps2_runtime` compile with `PARALLEL_GS_HAS_CLUT_STATE` undefined (F2 `gs_interface.hpp` has 0 hits); not linked or booted |
+
+### Boots (budget 12; all one slot, slot 1, via the shared driver's code)
+
+| Label | Runner | Row | Result |
+| --- | --- | --- | --- |
+| P-B | p2a | save t2000 (1×) | deferred once (`gs: GS backend transfer active` = palette uploads pending), then **saved at t2000** later in the same tick (eeCycle 9830600296), 53,898,015 B, 39 sections (+1 MiB CLUT, `stub:mcdir`) |
+| P-C | p2a | load → t2600 | **IDENTICAL 2001..2600** vs A4; SND 938/938; counters `ticks=4042 counter=0x10cb cid0=531`; frames t2300 `e6f87cdd`, t2600 `fad39c2b` = A4, t2100 `fdbbd91c` (= straight run A: the known ±1-present dump) |
+| P-D | **p2a-B** | (d) cross-runner | `warning: runner_sha differs … loading anyway` → **IDENTICAL 2001..2600**, SND 938/938, frames 3/3 = A4 |
+| P-E | p2a | save t1720 | saved t1720, hashes 1..1720 = A4 |
+| P-F | p2a | load t1720 → t2100 | **IDENTICAL 1721..2100**; race HUD tick at **1.03 s vs 31.9 s** straight (A4); frames t2000 `3692fd39`, t2100 `7ad8f18d` = Stage 3's F |
+| P-A1800 | p2a | straight, dump 1799/1800/1801 | settles P-F's t1800 frame (`22136e8c` ≠ F5 B1's `26b7c5c7`): the straight run dumps **t1799 = `22136e8c`**, t1800 = `26b7c5c7`. So P-F's t1800 dump is the t1799 picture, one present behind: jitter, not state. Hashes 1..1810 = A4 |
+| P-4B | p2a | save t2000, `PS2X_PGS_SSAA=4 PS2X_PGS_HIRES_SCANOUT=1 PS2X_PGS_PRESENT_PIPELINE=1` | saved t2000 (same deferral once), 53,898,017 B |
+| P-4C | p2a | load → t2200, same env, dump 2098/2100/2102 | **IDENTICAL 2001..2200**; 1024×896 frames t2098 `51f30795`, t2100 `3e5b75ed`, t2102 `5d0b8f9d` = **F5 B4 (straight 4×+hi-res+pipeline) 3/3 byte-identical**; t2100 viewed: sharp 4×, rider + trail, trick 190 as F5 recorded |
+
+A driver bug found on the way: with a relative `--out`, the env paths nest under the run dir (the
+runner's cwd), so P-C's frames and `snd.log` landed in `run/P-C/run/P-C/`. They were read from
+there. Fixed in the shared driver (`lane = (...).resolve()`).
+
+### Tools (step 2)
+
+- `local/tooling/boot/ssx3_boot.py`: `--save-at/--save-path/--exit-after-save/--load/--strict` (det
+  only; a clean exit after a save counts as target; paths resolved) + the absolute-`--out` fix. It
+  is the only driver; `ss1_boot.py` stays as the Stage 3 receipt.
+- `local/tooling/boot/baseline.py`: `put-state --state F --pins P --tick T [--note]`,
+  `get-state <key|--pins P --tick T>` (two SHA reads, `MISSING <key>` rc 2, `CORRUPT` rc 3),
+  `list-states`. Store `<store>/states/<key>/{state.bin, manifest.json}`. The manifest holds the
+  pins, the key pins, the state's header lines, the SHA and the source. Key = guest-relevant pins
+  (`fork, codegen×2, vu1_images, parallel_gs, route, backend, ssaa, hires, iso_sha, elf_sha`) + the
+  tick, e.g. `a3efbfe-fr1r1-t1720-parallel-1x-ba8aa72b`.
+- Seeds (pins `local/research/SS1/pins-state-a3efbfe-fr1r1-1x.json`; guest a3efbfe, saved by
+  `runner-p2a`):
+
+  | Key | Bytes | SHA-256 |
+  | --- | ---: | --- |
+  | `a3efbfe-fr1r1-t1720-parallel-1x-ba8aa72b` | 53,901,345 | `a5dd300e45d8d6c99a4b0b969d3aa7d891df229c034835e6b02de876376faaa2` |
+  | `a3efbfe-fr1r1-t2000-parallel-1x-433cb405` | 53,898,015 | `74bba029288604ada380ab5969f9135e62e68c272ba789164e1e0094b0a35aec` |
+
+- `local/tooling/boot/README.md`: a "Save states" section (get-state → `--load` → compare from T+1).
+- **Shared-tree note:** another pane (HS1) had uncommitted edits in `ssx3_boot.py`,
+  `baseline.py` and `p_lane_lease.py` when I started. My commit carries **only my hunks on top of
+  HEAD** (staged as blobs built from `HEAD` + my patch). Their working-tree edits are untouched, and
+  the working copies contain both.
+
+### Gap status after Part 2
+
+| Gap (Stage 3) | Now |
+| --- | --- |
+| Memory-card dir not with the state | **Closed** for saves: `stub:mcdir` (unit test). Not exercised by a boot: FR1-R1 cards are empty, so both roots are empty in every file |
+| paraLLEl CLUT stale after load | **Closed with the `ss1-clut` accessor**: both 1× and 4× loads restore it. With canonical paraLLEl (no accessor) the old behaviour stays: `cached_cbp` cleared, a one-line warning if a state carries a CLUT. Folding needs the paraLLEl commit too (orchestrator's push decision) |
+| 4×/hi-res untested | **Closed**: P-4B/P-4C bit-exact against F5 B4 at 1024×896 |
+| Syscall section missing | closed in Stage 3 (`f1ead87`), re-verified: every file has 39 sections |
+| Still open | paraLLEl private vertex queue / transfer state (assumed idle at a drained vsync, not captured); only `sceCdStRead` among the closures is tagged; IOP modules not captured; a mid-stream MPEG decoder defers; libstdc++ map order untested; the deferral text `GS backend transfer active` also covers "palette uploads pending" (wording only) |
+
+Scratch: `~/dev/ssx3-work/SS1` 4.4 GB (two build dirs, paraLLEl worktree 336 MB, runners, states)
+≤ 10 GB; store `baselines/states` 103 MB. No push anywhere.

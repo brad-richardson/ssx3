@@ -25,3 +25,20 @@ lines), parallel_gs (+granite), build, route, stop_tick, sound,
 backend, ssaa/hires/pipeline, iso/elf SHAs; optional dump_ticks,
 hash_every, coverage_tick, vu1_stats. Example:
 `local/research/RS2/pins-a3efbfe-det.json`.
+
+## Save states (SS1): boot from race start instead of power-on
+
+Stored states (scratch only; they hold game RAM): `baseline.py list-states`.
+Seeds: FR1-R1 det 1x at t1720 (race HUD) and t2000, guest = fork a3efbfe,
+pins `local/research/SS1/pins-state-a3efbfe-fr1r1-1x.json`.
+
+    st=$(python3 local/tooling/boot/baseline.py get-state --pins PINS --tick 1720)
+    python3 local/tooling/boot/ssx3_boot.py --mode det ... --load "$st" --out CANDIR
+    # det-hash lines start at 1721; compare with --from 1721 (ss1_hashdiff.py)
+
+The candidate runner must include fork `ss1-savestate` (or its fold) and
+match every section version; a different runner SHA only warns
+(`--strict` refuses). Refused loads name the reason (`[savestate] load
+refused: …`) and exit at once. Make a state: `--save-at T --save-path F
+--exit-after-save`, then `baseline.py put-state --state F --pins P --tick T`.
+The route may differ after the save tick, not before it.

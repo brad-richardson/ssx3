@@ -32,6 +32,13 @@ empty mc0/mc1 under the run dir. Wall cap 500 s, no-progress cap 120 s, log cap
 16 MiB. Only the recorded runner PID is signalled; the lease is released on
 every path. A (wall, tick) trace is written every poll for phase-rate analysis.
 
+SS1 save states (det mode; runner built from fork ss1-savestate or later):
+  --save-at T --save-path F [--exit-after-save]  write one state at the first
+      saveable dispatcher point with vsync tick >= T (a clean exit after the
+      save counts as target); --load F restores it after init; --strict also
+      refuses a runner-SHA mismatch (default: one warning line). A loaded run's
+      det-hash lines start at T+1. States hold game RAM: scratch only.
+
 Usage: ssx3_boot.py --mode speed|det --backend cpu|parallel --runner PATH --label NAME [--out DIR] [--unpaced] [--vu1-stats] [--vu1-dump DIR] [--stack-kb N]
 """
 import argparse
@@ -132,12 +139,18 @@ def main():
     ap.add_argument('--hash-every', type=int, default=1)
     ap.add_argument('--no-snap', action='store_true')
     ap.add_argument('--env', action='append', default=[], help='extra K=V')
+    ap.add_argument('--save-at', type=int, default=0, help='SS1: save a state at this vsync tick')
+    ap.add_argument('--save-path', default='', help='SS1: state file for --save-at')
+    ap.add_argument('--exit-after-save', action='store_true', help='SS1: stop the runner after the save')
+    ap.add_argument('--load', default='', help='SS1: restore this state after init')
+    ap.add_argument('--strict', action='store_true', help='SS1: refuse a runner-SHA mismatch on load')
     args = ap.parse_args()
     global WALL_CAP_S
     WALL_CAP_S = min(args.wall, 1800)
 
     runner = Path(args.runner).resolve()
-    lane = Path(args.out) if args.out else WORK / 'run' / args.label
+    # Absolute: the runner's cwd is the lane, so relative env paths would nest.
+    lane = (Path(args.out) if args.out else WORK / 'run' / args.label).resolve()
     if lane.exists():
         raise SystemExit('refusing to reuse %s' % lane)
     lane.mkdir(parents=True)
@@ -194,6 +207,21 @@ def main():
     for kv in args.env:
         k, v = kv.split('=', 1)
         env[k] = v
+    if (args.save_at or args.load) and args.mode != 'det':
+        raise SystemExit('--save-at/--load need --mode det (PS2X_DETERMINISTIC=1)')
+    if args.save_at:
+        if not args.save_path:
+            raise SystemExit('--save-at needs --save-path')
+        env['PS2X_SAVESTATE_SAVE_AT'] = str(args.save_at)
+        env['PS2X_SAVESTATE_PATH'] = str(Path(args.save_path).resolve())
+        if args.exit_after_save:
+            env['PS2X_SAVESTATE_EXIT_AFTER_SAVE'] = '1'
+    if args.load:
+        if not Path(args.load).exists():
+            raise SystemExit('no such state %s' % args.load)
+        env['PS2X_SAVESTATE_LOAD'] = str(Path(args.load).resolve())
+    if args.strict:
+        env['PS2X_SAVESTATE_STRICT'] = '1'
 
     exclusive = args.mode == 'speed'
     held = os.environ.get('SSX3_HELD_SLOT') or os.environ.get('F5_HELD_SLOT')
@@ -254,6 +282,8 @@ def main():
                     now = time.monotonic()
                     if proc.poll() is not None:
                         bound = 'exit'
+                        if args.exit_after_save and b'[savestate] saved' in log.read_bytes()[-65536:]:
+                            bound = 'target'
                         break
                     if now - t0 >= WALL_CAP_S:
                         bound = 'wall_cap'
