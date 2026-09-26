@@ -287,6 +287,7 @@ then 120 Hz simulation.
       drain; was FS1: the 4× cost is GsWorker time blocked there, VK1 2A). Attribute the 'profiler unwind' bucket.
 - [ ] **BA1 (running, RV4):** Android builds are `RelWithDebInfo` = `-O2`, no ThinLTO (IPO only for Release); Mac is `-O3`+IPO.
       Audit actual commands; try `-O3`, then ThinLTO incl. `ps2_game_objects`; Odin ABBA each.
+- [ ] **Android immersive mode (small):** the gesture-bar handle shows over the game on the Odin (F6 screencaps); hide system bars.
 - [ ] **GL fallback aspect (small):** Android GL fallback still letterboxes into raylib's 640×448 canvas (1544×868 box);
       start raylib at the display size so it follows Brad's max-fit rule too.
 - [ ] Idle-loop / event fast-forward census for loading and menus (RV7 rank 7): find hot guest polling loops

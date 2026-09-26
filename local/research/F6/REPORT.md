@@ -269,3 +269,17 @@ python3 local/research/F6/launch.py --label R2 --variant A ... --apk ~/dev/ssx3-
 python3 local/research/F4/phases.py local/research/F6/logs/R<N>
 bash local/research/F6/restore-play.sh  # after every leg; F5 APK + env a8d651a7 + 6/6
 ```
+
+## Orchestrator gate, Parts 1+2 (2026-09-26)
+
+**Pass.** Odin 1× pipelined **0.263×** (+7.6 % vs F5, ABBA legs within 0.3 %); 4×+hi-res 0.178× (−32 %) →
+the play build stays 1×. Viewed R1 `sc02-tick3000`: full-screen 16:9, rider lit, carve trail, HUD; the
+Android gesture-bar handle shows at the bottom (immersive mode: small follow-up). iPad green.
+Releases: **iPhone install now** (RV5 found nothing affecting iOS). **Odin play install waits**: VK2's and
+BA1's device runs come next and their restore scripts reinstall F5; after them Brad's Odin gets one build
+with VK2's present fix (Vulkan on) plus whatever else has folded by then.
+
+## Part 3 brief (orchestrator)
+iPhone only: `install_iphone` with the F6 device build (already signed `e22bf2cf…`), then
+`bash local/research/I31/deploy-ios.sh iphone` (Brad's save + env). **Never launch.** Verify the installed
+bundle and 7 OKs; append `## Part 3`; commit `[F6] Part 3 …`; stop.
