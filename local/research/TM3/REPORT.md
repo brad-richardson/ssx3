@@ -137,3 +137,13 @@ HUD `/60` formatter (TM2's predicted 2× clock confirmed).
 - Suggested next: trace the delta source one level up (watch a velocity/
   state input to `sub_00137D18`/`sub_0013D818`), then a rank-3 brief converting
   the integrator step + HUD formatter with normal-time acceptance per RV6 §5.
+
+## Orchestrator gate (2026-09-26)
+
+**Pass.** Integrators named (`0x1380b4` / `0x13e0dc`, `pos += delta`, after the app update, no manager
+dt/rate on the path); the RV6 probe gives exactly 2 updates per VBlank and still reaches the race, but
+motion takes full steps (1.89×/VBlank) and the HUD divides by 60 (2×). So the manager's rate/dt are not
+the physics timestep: a real 120 Hz simulation needs the per-update step constants found and halved
+coherently. **Next (TM4, queued, low priority while speed is the bottleneck):** census of where the
+rider's `delta` comes from (velocity × a fixed step, 1/60 literals, per-update friction/accel constants),
+then one coherent probe. Paused until the mini's speed holds (VR2/MT1) free up; no device work.
