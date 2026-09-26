@@ -192,3 +192,10 @@ moot in mode 0).
 - Suggested next: a bounded write-tap lane (DIAG_TAPS build, mini or a
   bradflix DIAG exception) attributing `0x5409c0` + HUD-timer writers over
   ~60 race VBlanks before any rank-2 rate experiment.
+
+## Orchestrator gate (2026-09-26)
+
+**Pass.** RV6's chain confirmed live to the address; metronomic 1:1:1:1 per VBlank; tap non-perturbing
+(armed run det-identical too). Two findings steer the 120 Hz work: the rider position isn't written by the
+app update (→ **TM2** finds the writer), and the community Metro NOPs are a no-op on this route. The
+rate-120 / dt-1/120 / multiplier-2 probe waits for TM2.
