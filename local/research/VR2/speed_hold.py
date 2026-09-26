@@ -23,8 +23,15 @@ DRIVER = '/Users/brad/dev/ssx3/local/tooling/boot/ssx3_boot.py'
 LOAD_MAX, HOLD_CAP, BOOT_EST = 8.0, 300, 80
 
 
+# 2B: fold = vr2-fold d4fc12e; blk / blkoff = the stage-4 runner with
+# PS2X_VU1_BLOCKS=1 / knob off.
+RUNNERS = {'base': ('/Users/brad/dev/ssx3-work/F5/bin/runner-clean', []),
+           'blk': (WORK + '/bin/runner-b-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
+           'blkoff': (WORK + '/bin/runner-b-clean', [])}
+
+
 def runner(c):
-    return '/Users/brad/dev/ssx3-work/F5/bin/runner-clean' if c == 'base' else '%s/bin/runner-%s-clean' % (WORK, c)
+    return RUNNERS.get(c, ('%s/bin/runner-%s-clean' % (WORK, c), []))
 
 
 held = []
@@ -51,9 +58,9 @@ try:
             continue
         with open('%s/run/%s.txt' % (WORK, label), 'w') as out:
             child = subprocess.Popen(
-                ['python3', DRIVER, '--mode', 'speed', '--backend', 'parallel', '--runner', runner(c),
+                ['python3', DRIVER, '--mode', 'speed', '--backend', 'parallel', '--runner', runner(c)[0],
                  '--label', label, '--out', '%s/run/%s' % (WORK, label), '--route', 'fr1r1',
-                 '--stop-tick', '2400', '--wall', '120'],
+                 '--stop-tick', '2400', '--wall', '120'] + runner(c)[1],
                 cwd=WORK, env=env, stdout=out, stderr=subprocess.STDOUT)
             rc = child.wait()
             child = None

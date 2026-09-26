@@ -1,0 +1,21 @@
+== mini 7a2d9ed tests (suite-b13)
+[vr2-diff] images 3 programs 271 runs 254400 generated_cycles 20247824 block_entries 255410 gif_packets 86046 mismatches 3129 (programs 5, interpreter+direct reproduces 3129) block_vs_pairs_mismatches 0
+      - generated pairs and the queued interpreter agree at every cut
+Total Tests: 663
+Passed: 662
+Failed: 1
+== first mismatches
+VR2 differential mismatch: image 2 program pc 0x400 length 23 budget 26 check resume pairs_ok 0 blocks_ok 0
+  vf1 ref 9.6875 -14693.8 1999.19 -13.375 gen 569319 -14693.8 377132 1949.77
+  vf6 ref -23.5 -4.46875 -6.59661e+07 22.875 gen -23.5 -4.46875 -6.59661e+07 37.1875
+  mac 40/0 status bc2/bc0 clip 842451/842451 q -1.01811/-1.01811 p 0.000500204/0.000500204 i 2.62301e-29/2.62301e-29 cycles 53/53 pc 38/38 acc 0 data 0 gif 1/1 equal 1
+  interpreter+direct: equals queued 0, equals generated 1
+[VU1 reserved lower] cycle=53 pc=0x38 instruction=0xfffffffb
+--
+VR2 differential mismatch: image 2 program pc 0x400 length 23 budget 27 check resume pairs_ok 0 blocks_ok 0
+== bradflix e5ac052 det build suite (Linux)
+[vr2-diff] images 2 programs 231 runs 177264 generated_cycles 7336050 block_entries 170532 mismatches 0
+      - load succeeds: ordered-map bucket count not reproducible
+Total Tests: 667
+Passed: 666
+Failed: 1

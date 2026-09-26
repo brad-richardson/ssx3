@@ -12,8 +12,25 @@ H3-3-c4      n=4 samples=[30.4, 30.5, 31.13, 31.15] mean= 30.79 vs/s = 0.514x bo
 H4-1-c4      n=4 samples=[30.91, 30.73, 31.18, 31.54] mean= 31.09 vs/s = 0.519x bound=target load=[1.3, 3.7, 6.0] runner=fe3f36328253
 H4-2-c3      n=4 samples=[30.91, 30.38, 31.29, 31.34] mean= 30.98 vs/s = 0.517x bound=target load=[2.0, 3.5, 5.8] runner=d3f358942e05
 H4-3-base    n=5 samples=[27.55, 27.76, 27.72, 27.93, 29.57] mean= 28.11 vs/s = 0.469x bound=target load=[1.8, 3.1, 5.5] runner=e1e598c2cdcd
+H5-1-fold    n=4 samples=[28.35, 28.34, 28.79, 28.77] mean= 28.56 vs/s = 0.477x bound=target load=[2.1, 1.8, 2.4] runner=039c575fe058
+H5-2-blk     n=5 samples=[25.13, 23.59, 22.98, 23.56, 23.33] mean= 23.72 vs/s = 0.396x bound=target load=[2.9, 2.1, 2.4] runner=de49b8de2257
+H5-3-blkoff  n=5 samples=[27.33, 27.97, 27.72, 28.19, 29.54] mean= 28.15 vs/s = 0.470x bound=target load=[2.3, 2.1, 2.4] runner=de49b8de2257
+H6-1-blkoff  n=5 samples=[21.55, 21.15, 24.77, 23.17, 24.18] mean= 22.96 vs/s = 0.383x bound=target load=[6.0, 3.6, 3.0] runner=de49b8de2257
+H6-2-blk     n=4 samples=[26.55, 26.32, 29.58, 30.38] mean= 28.21 vs/s = 0.471x bound=target load=[5.4, 4.0, 3.1] runner=de49b8de2257
+H6-3-fold    n=5 samples=[23.51, 24.14, 27.7, 28.53, 29.96] mean= 26.77 vs/s = 0.447x bound=target load=[3.3, 3.6, 3.1] runner=039c575fe058
+H7-1-fold    n=5 samples=[21.39, 21.18, 21.53, 20.79, 21.93] mean= 21.36 vs/s = 0.356x bound=target load=[9.2, 5.9, 4.1] runner=039c575fe058
+H7-2-blk     n=4 samples=[29.94, 29.74, 30.37, 30.34] mean= 30.10 vs/s = 0.502x bound=target load=[8.7, 6.4, 4.5] runner=de49b8de2257
+H7-3-blk     n=4 samples=[29.96, 29.51, 30.11, 30.31] mean= 29.97 vs/s = 0.500x bound=target load=[5.0, 5.8, 4.3] runner=de49b8de2257
+H7-4-fold    n=4 samples=[28.3, 28.35, 28.31, 28.53] mean= 28.37 vs/s = 0.473x bound=target load=[3.9, 5.3, 4.3] runner=039c575fe058
+H8-1-blk     n=4 samples=[29.75, 29.39, 30.0, 27.0] mean= 29.04 vs/s = 0.484x bound=target load=[4.1, 4.7, 4.1] runner=de49b8de2257
+H8-2-fold    n=4 samples=[27.94, 27.79, 27.95, 28.4] mean= 28.02 vs/s = 0.467x bound=target load=[2.8, 4.2, 4.0] runner=039c575fe058
+H8-3-fold    n=4 samples=[27.98, 27.73, 27.99, 28.59] mean= 28.07 vs/s = 0.468x bound=target load=[3.1, 4.1, 4.0] runner=039c575fe058
+H8-4-blk     n=4 samples=[28.32, 29.16, 29.92, 29.92] mean= 29.33 vs/s = 0.489x bound=target load=[2.8, 3.8, 3.9] runner=de49b8de2257
 base  runs=4 mean= 27.98 vs/s = 0.467x  (1.000x of base)
+blk   runs=6 mean= 28.39 vs/s = 0.474x  (1.015x of base)
+blkoff runs=2 mean= 25.56 vs/s = 0.426x  (0.913x of base)
 c1    runs=2 mean= 29.52 vs/s = 0.493x  (1.055x of base)
 c2    runs=2 mean= 30.00 vs/s = 0.501x  (1.072x of base)
 c3    runs=4 mean= 30.63 vs/s = 0.511x  (1.095x of base)
 c4    runs=2 mean= 30.94 vs/s = 0.516x  (1.106x of base)
+fold  runs=6 mean= 26.86 vs/s = 0.448x  (0.960x of base)

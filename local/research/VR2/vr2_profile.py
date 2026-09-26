@@ -20,8 +20,11 @@ ap.add_argument('--sample-at', type=int, default=1800)
 ap.add_argument('--sample-s', type=int, default=15)
 args = ap.parse_args()
 WORK = '/Users/brad/dev/ssx3-work/VR2'
-runner = ('/Users/brad/dev/ssx3-work/F5/bin/runner-clean' if args.cand == 'base'
-          else '%s/bin/runner-%s-clean' % (WORK, args.cand))
+# 2B: blk / blkoff = the stage-4 runner with PS2X_VU1_BLOCKS=1 / knob off.
+RUNNERS = {'base': ('/Users/brad/dev/ssx3-work/F5/bin/runner-clean', []),
+           'blk': (WORK + '/bin/runner-b-clean', ['--env', 'PS2X_VU1_BLOCKS=1']),
+           'blkoff': (WORK + '/bin/runner-b-clean', [])}
+runner, extra = RUNNERS.get(args.cand, ('%s/bin/runner-%s-clean' % (WORK, args.cand), []))
 label = 'p-' + args.cand
 lane = '%s/run/%s' % (WORK, label)
 slot = claim('VR2-' + label)
@@ -35,7 +38,7 @@ try:
     child = subprocess.Popen(
         ['python3', '/Users/brad/dev/ssx3/local/tooling/boot/ssx3_boot.py', '--mode', 'speed',
          '--backend', 'parallel', '--runner', runner, '--label', label, '--out', lane,
-         '--route', 'fr1r1', '--stop-tick', '2400', '--wall', '150'],
+         '--route', 'fr1r1', '--stop-tick', '2400', '--wall', '150'] + extra,
         cwd=WORK, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     pid = None
     for line in child.stdout:
