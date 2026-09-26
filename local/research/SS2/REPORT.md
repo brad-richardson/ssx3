@@ -264,3 +264,95 @@ Fork `ssx3` moved to **`d4fc12e`** (VR2). Cherry-pick `5cce392 55f0c8d` onto it 
 suite on the Mac and on bradflix; one bradflix save t2000 → load → compare from t2001 IDENTICAL.
 Also move `local/tooling/build/bradflix_build.sh`'s paraLLEl pin to fork `ssx3` `464f263` (SS1's CLUT
 accessor, as `mac_build.sh` uses) and confirm the bradflix save carries the CLUT tail. Stop; I push.
+
+## Part 2 (worker, 2026-09-25 ~22:05–22:40 EDT): fold prep. All green, stopping for the push
+
+### Fold branch
+
+`ss2-fold` = `d4fc12e` + two clean cherry-picks (same worktree, `ss2` untouched):
+
+- `afa98b8 [SS2] Tolerate irreproducible bucket counts on empty ordered maps; verify restore order`
+- `173b31f [SS2] Verify restore order against pre-move saved keys; test empty/string-keyed maps`
+
+No conflicts (VR2 touched VU1; SS2 touches the savestate header + tests).
+Runner-dir check empty. Fast-forwards onto fork `ssx3` `d4fc12e`.
+Bradflix holds it under private ref `refs/ss2/fold` (`173b31f`, via bundle;
+nothing pushed to GitHub).
+
+### Suites
+
+| Host | Build | Runner SHA-256 | Suite |
+| --- | --- | --- | --- |
+| Mac mini (det) | `~/dev/ssx3-work/SS2/build-det` (reconfigured on `ss2-fold`) | `32556587…` | **668/668** |
+| bradflix (det, `ss2fold-det`) | `~/dev/ssx3-work/HS1/ss2fold-det` | `3d1abb52…` (×2) | **668/668** |
+
+668 = 667 + VR2's differential test. Both RC=0.
+
+### PGS pin move (`bradflix_build.sh`, 2-line diff)
+
+- `PGS_PIN`: `19d93b2…` → `464f263dc51829b4ec76d7c223a4c3c5696571cf`
+  (GitHub `parallel-gs` `ssx3` tip confirmed by `ls-remote`).
+- `PGS_DIR`: `~/dev/ssx3-work/F2/parallel-gs` → `~/dev/ssx3-work/parallel-gs-ssx3`.
+  Required, not optional: the script's mini preflight asserts the canonical
+  dir is at the pin, and the F2 checkout stays at `19d93b2` (another lane's
+  input; untouched). The canonical dir is `464f263` with Granite
+  `166ba21a` = `GRANITE_PIN`, so Granite is unchanged.
+
+Bradflix checkout note: the pin change triggered the script's re-clone path,
+which hit transient GitHub fetch failures (`tmp_pack` / submodule errors,
+3×, no concurrent git, disk + load fine) and once left a half-cloned dir;
+a clean `git clone --recursive --branch ssx3` then succeeded (RC=0, all
+nested submodules, `vulkan-headers` present). An earlier manual recovery had
+missed `--recursive`, which the configure log exposed
+(`Granite/third_party/...` absent); wiped and redone, not patched. Final
+state verified: PGS `464f263`, Granite `166ba21a`. The failed-configure
+build dir was removed (mine); its `ss2fold-det-configure.log` remains in
+`HS1/` as the receipt.
+
+### bradflix acceptance (`ss2fold-det`, FR1-R1, sound on, parallel 1×)
+
+- **P2-save** `ss2-p2-save`: `deferred tick=2000 reason=gs: GS backend
+  transfer active`, then `saved tick=2000 eeCycle=9830600296
+  bytes=53898015 sections=39`. The deferral line proves
+  `PARALLEL_GS_HAS_CLUT_STATE` is compiled in (the `clut_state_idle()`
+  check is `#ifdef`'d); cycle and byte count **exactly equal the Mac B4
+  save** — the CLUT tail (+1,045,262 B vs Part 1's B2) is in the file.
+- **P2-load** `ss2-p2-load`: `loaded tick=2000 … sections=38`, **no CLUT
+  warning** (same build restores the tail), to t2600, `driver_rc=0`.
+- **Compare: `hash IDENTICAL ticks 2001..2600`** (base 2637 lines, cand
+  638, missing 0/0).
+- **SND identical** (`ticks=3948 counter=0x1067 cid0=531 … setdma=4543`,
+  host `overflows=` only) — and equal to Part 1's B2/B3b values,
+  cross-fork parity with VR2's levers in.
+- **Frames** (`[frame:dump]` FNVs; 5 runs × 3 ticks now form a closed
+  2-present set per tick — the Part 1 jitter verdict corroborated):
+
+| tick | B2 str | B2b str | B3b load | P2-save str | P2-load |
+| --- | --- | --- | --- | --- | --- |
+| 2100 | `ccfbda8c` | `ccfbda8c` | `ccfbda8c` | `68bfa045` | `ccfbda8c` |
+| 2300 | `b0f544b0` | `28d05fd3` | `28d05fd3` | `28d05fd3` | `28d05fd3` |
+| 2600 | `bdec3d64` | `bdec3d64` | `367837d1` | `367837d1` | `bdec3d64` |
+
+Every load matches a straight run's value at 2/3 ticks; every tick shows
+exactly 2 distinct presents across all runs (straights disagree with each
+other at t2300 and t2600). Guest-identical (det-hash + SND), present-phase
+jitter only.
+
+### Part 2 budget and exact commands
+
+Builds 2 (1 Mac + 1 bradflix, +1 failed-configure retry after the
+submodule recovery — no extra boot cost). Boots 2/2
+(`ss2-p2-save`, `ss2-p2-load`, same flags as Part 1 B2/B3b).
+Bundle: `git bundle create /tmp/ss2-fold.bundle d4fc12e..ss2-fold` →
+`fetch <bundle> ss2-fold:refs/ss2/fold`. Bradflix scratch removed
+(bundle, staging state, run-dir state copy); `HS1/run/ss2-p2-*` ~4 MB
+logs only.
+
+### Fold candidates (orchestrator pushes)
+
+- Fork `ssx3`: `ss2-fold` `173b31f` (fast-forward onto `d4fc12e`, `[SS2]`
+  subjects only, runner-dir check empty). Local branch + bradflix private
+  ref only.
+- ssx3 `main`: the `[SS2] Part 2 …` commit below (REPORT + `bradflix_build.sh`
+  pin move; the Part 1 drivers commit `c080557d` is already in).
+Stopping here.

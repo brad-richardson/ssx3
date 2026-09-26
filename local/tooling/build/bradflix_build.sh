@@ -49,14 +49,14 @@ ISO_SHA='3c2f8eb182c9c6208a6e8172a41e61c98f420abe3f42c845f6829aeb9761ebf5'
 ELF_SHA='1b49d05ca2793922180851b9e1ce9ae2291d61a7863565ac4e71f12e967af7bc'
 CODEGEN_SHA='8ea8ed436b78fee0156e37a972924645d8a7f4041cb90cab1a6b2ae662d688a3'
 CODEGEN_VF0_SHA='89953ba218efd63c2fdba28116765d524977f1233d0e370d22111a762e02383d'
-PGS_PIN='19d93b2d0bb0172c2ab4c057de4adbd6ed566eba'
+PGS_PIN='464f263dc51829b4ec76d7c223a4c3c5696571cf'
 GRANITE_PIN='166ba21a247a681903cc9d0bb6562fe50a554c85'
 
 CODEGEN_DIR=$HOME/dev/ssx3-work/codegen-ssx3
 VU1_DIR=$HOME/dev/ssx3-work/vu1gen-ssx3
 ELF_PATH=$HOME/dev/ssx3-work/E32-inputs/cd/SLUS_207.72
 ISO_PATH=$HOME/dev/ssx3-work/E32-inputs/SSX\ 3\ \(USA\).iso
-PGS_DIR=$HOME/dev/ssx3-work/F2/parallel-gs
+PGS_DIR=$HOME/dev/ssx3-work/parallel-gs-ssx3
 
 echo "== preflight (mini canonical pins)"
 [ -f "$CODEGEN_DIR/register_functions.cpp" ] || { echo "missing $CODEGEN_DIR" >&2; exit 2; }
