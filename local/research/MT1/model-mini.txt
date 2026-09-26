@@ -1,0 +1,152 @@
+######## spd-cenA (mini M5 Pro, non-det build 8c66106b…, exclusive, unpaced, ideal handoff)
+window (1800,2400] submit=0ns wake=0ns slow=1.0
+== S0 as hooked
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   31.539 ms  (model)
+predicted speedup      1.005x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         19.002 ms; sync hits by reason:
+  gsprivread-masked  wait  19.002 ms/frame  hits   4.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  vblank             wait   0.000 ms/frame  hits   2.00/frame
+  worst: t1905 37.93ms (sync 38.10), t2214 37.67ms (sync 37.78), t1896 37.62ms (sync 37.77)
+== S1 masked CSR reads free
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   25.581 ms  (model)
+predicted speedup      1.239x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         13.043 ms; sync hits by reason:
+  vblank             wait  13.043 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1947 29.77ms (sync 37.26), t1907 29.73ms (sync 30.45), t1905 29.55ms (sync 38.10)
+== S2 S1 + GS priv writes queued
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   25.581 ms  (model)
+predicted speedup      1.239x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         13.043 ms; sync hits by reason:
+  vblank             wait  13.043 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1947 29.77ms (sync 37.26), t1907 29.73ms (sync 30.45), t1905 29.55ms (sync 38.10)
+== S3 S2 + no VBlank sync, unit may trail 1 frame (non-det builds)
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   19.159 ms  (model)
+predicted speedup      1.654x   ideal bound max(EE,unit): 1.655x
+EE wait/frame          6.621 ms; sync hits by reason:
+  vblank             wait   6.621 ms/frame  hits   2.00/frame (free)
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1908 24.04ms (sync 33.37), t1898 24.01ms (sync 37.76), t1906 23.90ms (sync 32.50)
+######## spd-cenB (mini M5 Pro, non-det build 8c66106b…, exclusive, unpaced, ideal handoff)
+window (1800,2400] submit=0ns wake=0ns slow=1.0
+== S0 as hooked
+sync wall/frame       31.742 ms  (EE 12.495 + unit 19.247; jobs/frame 8.00)
+threaded wall/frame   31.591 ms  (model)
+predicted speedup      1.005x   ideal bound max(EE,unit): 1.649x
+EE wait/frame         19.097 ms; sync hits by reason:
+  gsprivread-masked  wait  19.097 ms/frame  hits   4.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  vblank             wait   0.000 ms/frame  hits   2.00/frame
+  worst: t1857 38.09ms (sync 38.25), t1994 38.07ms (sync 38.21), t2170 37.93ms (sync 38.11)
+== S1 masked CSR reads free
+sync wall/frame       31.742 ms  (EE 12.495 + unit 19.247; jobs/frame 8.00)
+threaded wall/frame   25.574 ms  (model)
+predicted speedup      1.241x   ideal bound max(EE,unit): 1.649x
+EE wait/frame         13.079 ms; sync hits by reason:
+  vblank             wait  13.079 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1892 29.86ms (sync 35.59), t1987 29.69ms (sync 30.16), t1857 29.55ms (sync 38.25)
+== S2 S1 + GS priv writes queued
+sync wall/frame       31.742 ms  (EE 12.495 + unit 19.247; jobs/frame 8.00)
+threaded wall/frame   25.574 ms  (model)
+predicted speedup      1.241x   ideal bound max(EE,unit): 1.649x
+EE wait/frame         13.079 ms; sync hits by reason:
+  vblank             wait  13.079 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1892 29.86ms (sync 35.59), t1987 29.69ms (sync 30.16), t1857 29.55ms (sync 38.25)
+== S3 S2 + no VBlank sync, unit may trail 1 frame (non-det builds)
+sync wall/frame       31.742 ms  (EE 12.495 + unit 19.247; jobs/frame 8.00)
+threaded wall/frame   19.249 ms  (model)
+predicted speedup      1.649x   ideal bound max(EE,unit): 1.649x
+EE wait/frame          6.754 ms; sync hits by reason:
+  vblank             wait   6.754 ms/frame  hits   2.00/frame (free)
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1858 24.20ms (sync 35.09), t1874 24.08ms (sync 34.08), t1893 23.87ms (sync 28.38)
+######## spd-cenA with submit=2us wake=20us slow=1.10
+window (1800,2400] submit=2000ns wake=20000ns slow=1.1
+== S0 as hooked
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   33.515 ms  (model)
+predicted speedup      0.946x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         20.961 ms; sync hits by reason:
+  gsprivread-masked  wait  20.961 ms/frame  hits   4.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  vblank             wait   0.000 ms/frame  hits   2.00/frame
+  worst: t1905 40.38ms (sync 38.10), t1896 40.03ms (sync 37.77), t1898 40.02ms (sync 37.76)
+== S1 masked CSR reads free
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   27.584 ms  (model)
+predicted speedup      1.149x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         15.030 ms; sync hits by reason:
+  vblank             wait  15.030 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1907 32.23ms (sync 30.45), t1947 32.22ms (sync 37.26), t1905 32.03ms (sync 38.10)
+== S2 S1 + GS priv writes queued
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   27.584 ms  (model)
+predicted speedup      1.149x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         15.030 ms; sync hits by reason:
+  vblank             wait  15.030 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1907 32.23ms (sync 30.45), t1947 32.22ms (sync 37.26), t1905 32.03ms (sync 38.10)
+== S3 S2 + no VBlank sync, unit may trail 1 frame (non-det builds)
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   21.234 ms  (model)
+predicted speedup      1.492x   ideal bound max(EE,unit): 1.655x
+EE wait/frame          8.681 ms; sync hits by reason:
+  vblank             wait   8.681 ms/frame  hits   2.00/frame (free)
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1908 26.60ms (sync 33.37), t1898 26.57ms (sync 37.76), t1906 26.45ms (sync 32.50)
+######## spd-cenA with submit=2us wake=20us slow=1.25
+window (1800,2400] submit=2000ns wake=20000ns slow=1.25
+== S0 as hooked
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   36.368 ms  (model)
+predicted speedup      0.871x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         23.815 ms; sync hits by reason:
+  gsprivread-masked  wait  23.815 ms/frame  hits   4.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  vblank             wait   0.000 ms/frame  hits   2.00/frame
+  worst: t1905 43.94ms (sync 38.10), t1896 43.53ms (sync 37.77), t1898 43.52ms (sync 37.76)
+== S1 masked CSR reads free
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   30.454 ms  (model)
+predicted speedup      1.041x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         17.901 ms; sync hits by reason:
+  vblank             wait  17.901 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1907 35.83ms (sync 30.45), t1947 35.77ms (sync 37.26), t1905 35.61ms (sync 38.10)
+== S2 S1 + GS priv writes queued
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   30.454 ms  (model)
+predicted speedup      1.041x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         17.901 ms; sync hits by reason:
+  vblank             wait  17.901 ms/frame  hits   2.00/frame
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1907 35.83ms (sync 30.45), t1947 35.77ms (sync 37.26), t1905 35.61ms (sync 38.10)
+== S3 S2 + no VBlank sync, unit may trail 1 frame (non-det builds)
+sync wall/frame       31.691 ms  (EE 12.538 + unit 19.153; jobs/frame 8.00)
+threaded wall/frame   24.108 ms  (model)
+predicted speedup      1.315x   ideal bound max(EE,unit): 1.655x
+EE wait/frame         11.554 ms; sync hits by reason:
+  vblank             wait  11.554 ms/frame  hits   2.00/frame (free)
+  gsprivwrite        wait   0.000 ms/frame  hits  11.00/frame (free)
+  gsprivread-masked  wait   0.000 ms/frame  hits   4.00/frame (free)
+  worst: t1908 30.21ms (sync 33.37), t1898 30.18ms (sync 37.76), t1906 30.04ms (sync 32.50)

@@ -257,3 +257,189 @@ MSKPATH3 windows per frame. Go with **stage 2′** (hooks + census, synchronous,
 knob 0 and census; offline two-timeline replay predicts the threaded frame time). Add the debug
 assert for unit-owned objects touched off-thread in census mode. Stop after 2′ with the prediction;
 stage 3 is decided from it. Budget as proposed (≤ 3 builds).
+
+## Stage 2′ — hooks + census, synchronous (worker, 2026-09-26)
+
+### Result
+
+- **Exact at both knob settings.** Every det boot is **IDENTICAL** to the current key
+  `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` (hash ticks 1..2400 and snd/coverage):
+
+  | Host | Commit | Knob-0 boots | Census boots |
+  | --- | --- | --- | --- |
+  | Mac | `e708185` | 1 | 1 |
+  | bradflix | `965de96` | 2 (default stack, 512 KB) | 2 (default stack, 512 KB) |
+
+  - Suites: 668/668 (Mac det; bradflix det, run from the fork root), 664/664 (Mac non-det).
+  - The runner-dir check is empty.
+  - Census costs nothing measurable: race 30.52 vsyncs/s at knob 0 against 30.48 and 30.45 with
+    census, in one exclusive hold on the mini.
+- **The debug assert did its job.**
+  - The first census run reported 6,981 `VIOLATION site=gs-drain`. `PS2Runtime::Load*` drains the
+    GS queue for a privileged read (`PS2X_GS_CSR_DRAIN`, on by default) *before*
+    `PS2Memory::read32`, where the sync sat. A threaded build would have raced there.
+  - Fixed in `d52a18e`, which syncs before the drain. It is **0 violations** since then, on Mac and
+    Linux, with and without the 512 KB stack.
+- **Prediction** (mini M5 Pro, race t1800–2400, clean non-det census, two runs; model, not a speed
+  measurement). Today's frame is 31.7 ms: EE 12.5 ms plus unit 19.2 ms, 8 jobs per frame.
+
+  | Scenario (rules added on top of the stage-1 design) | EE wait/frame | Threaded frame | Predicted | + 2 µs submit / 20 µs wake / unit ×1.10 | ×1.25 |
+  | --- | ---: | ---: | ---: | ---: | ---: |
+  | S0 as hooked (every CSR read syncs) | 19.0 ms | 31.5 ms | **1.005×** | 0.95× | 0.87× |
+  | S1 masked CSR reads free (below) | 13.0 ms (VBlank) | 25.6 ms | **1.24×** | 1.15× | 1.04× |
+  | S2 S1 + GS privileged writes queued in stream order | 13.0 ms | 25.6 ms | 1.24× | 1.15× | 1.04× |
+  | S3 S2 + no VBlank sync outside det-hash ticks, unit ≤ 1 frame behind | 6.6 ms | 19.2 ms | **1.65×** (= ideal max(EE, unit)) | 1.49× | 1.32× |
+
+  - The two census runs agree within 0.2 %.
+  - The Mac race would go from 30.5 to about 37.8 vsyncs/s under S1, or about 50 under S3, at ideal
+    handoff. These are model numbers, not measured speed.
+
+### What the census shows
+
+One race frame (t2100, clean build, host ms from VBlankStart; `frame-t2100-events.txt`):
+
+```
+0.06  CSR poll @0x382c30 (FIFO-empty spin), then display flip: PMODE, SMODE2, DISPFB1, DISPLAY1, BGCOLOR
+0.10  2 small jobs (FIFO write, 1.3 µs DMA)
+5.99  CSR poll @0x3828e0
+7.46  FIFO job, CSR poll @0x3829d8
+7.62  THE frame's VIF1 list: one job, 18.0 ms of unit work (VU1 + VIF + GS frontend)
+7.64  FIFO job, CSR poll @0x382aa0   <- S0 waits the whole 18 ms here
+7.65  0.14 ms job
+10.09 VBlankStart                     <- S1/S2 wait here: only ~2.4 ms of EE work follows the list
+```
+
+- **Per frame:** 5 DMA jobs, 3 VIF1 FIFO jobs, 4 CSR loads, 11 GS privileged writes (the 5
+  display registers plus `gsPrivStore`'s own and the VBlank CSR store), and 1 VBlank.
+- **Other sync reasons:** VU1-memory, VIF1-register, CMSAR1, HLE-GS, native-GIF and D/T-fallback
+  syncs are 0 in the race. In the whole boot there are 2 VIF1-register writes, 0 CMSAR1 and 0
+  fallbacks. The D/T rule never fires on SSX 3.
+- **CSR reads:** 278,530 of 278,532 CSR loads in the boot are the four spin sites
+  `ld v0, CSR; andi v0, v0, 0xC000; bne …0x4000` (`ee-at`, `pklog-csr-t1990-2001.txt`), a GS-FIFO-empty
+  wait. The value is always `0x4008`.
+- **Snapshot copies:** normal-mode source copies are 3.9 MB over the boot (1.1 ms total). They are
+  negligible.
+
+### The rules S1–S3 need (all exact; for the stage-3 gate)
+
+- **R1 (S1): a CSR load that the next instruction masks away from the unit's bits needs no sync.**
+  - The unit writes only CSR bits 0–1 (SIGNAL/FINISH, `gs_frontend.cpp` `fetch_or(0x1/0x2)`) and
+    SIGLBLID.
+  - CSR's FIFO field is HLE'd constant (`kGsCsrFifoEmpty`, re-imposed on every CSR write in
+    `ps2_memory.cpp`).
+  - VSINT/FIELD come from the EE's VBlank store (`ps2xGsCsrVBlankStart`).
+  - So after `ld rt, CSR` followed by `andi rt, rt, imm` with `imm & 3 == 0`, all architectural
+    state is independent of the unit.
+  - The census already classifies loads this way (`ps2_mtvu::privReadReason` reads the two guest
+    instructions at `ctx->pc`). Stage 3 would skip the wait for `GsPrivReadMasked`.
+  - It must also skip the host-only `drainQueue` for such a read, because the CSR value lives in
+    an atomic and not in the GS stream.
+- **R2 (S2): EE GS-privileged writes join the unit queue** in stream order, instead of making the
+  EE wait. Two exceptions:
+  - A CSR store that only touches EE-owned bits (VSINT W1C, FIELD, the VBlank OR) applies
+    directly on the EE. It commutes with the unit's bit-0/1 ORs, and it keeps R1's VSINT polls
+    (`andi 8` at 0x382c64) free.
+  - A CSR store that W1C-clears bits 0–1 still syncs.
+
+  S2 buys nothing on this route: every write lands while the unit is idle. R2 is needed only as a
+  prerequisite for S3.
+- **R3 (S3): VBlankStart is not a sync point outside det-hash ticks.** The unit trails by at most
+  one frame (a bounded queue).
+  - Guest-visible VBlank work (INTC 2, vsync callback, `completeVSync`, CSR VSINT through R2) does
+    not read unit state.
+  - The unit reads `vsyncTick` only in diagnostics (E7/RR1/E39/E40/UV1 taps, GS capture, packet
+    VRAM trace; all force sync mode) and in the paraLLEl present request's field phase
+    (`ps2_gs_parallel_backend.cpp:312`), which is presentation, not guest state.
+  - Det-hash ticks must still sync, because the snapshot hashes VU1 memory and
+    `programStartCount`. So a det run with `--hash-every 1` exercises S2 timing, and S3 needs a det
+    run with a sparse hash (for example every 60th tick) plus the jitter stress run to exercise the
+    lagged schedule.
+  - **Cost:** presentation can show the GS state up to one frame later (latency, not a guest
+    change). R3 is the one rule that changes host presentation timing.
+
+### Odin projection (rough; needs an Odin census)
+
+N12's race frame is 68.3 ms, with VU1 at 46.7 ms and GameThread-minus-VU1 at 21.6 ms. The unit
+also carries VIF parsing and the GS frontend; on the Mac, unit share (60 %) ≈ VU1 share (57 %) +
+3 points. So on the Odin the unit is roughly 50 ms and the EE roughly 18 ms.
+
+- **S3:** about 68/50 ≈ **1.35×** at the ideal bound.
+- **S1:** about **1.1×**, if the Odin frame has the Mac's shape: roughly 60 % of EE work before the
+  list kick.
+
+The Odin runs unit-bound under every scenario. After threading, VR2's VU1 work is the whole lever.
+The census knob works in any build (`PS2X_MTVU=census`, `PS2X_MTVU_CENSUS_OUT=`), so one Odin APK
+census run would replace this projection with a measurement.
+
+### Fork commits (branch `mt1` from `fb28d99`, not pushed; bradflix private ref `refs/mt1/census`)
+
+| Commit | Change |
+| --- | --- |
+| `e708185` | `include/ps2_mtvu.h` (header-only; off = one cached-flag branch per hook). Sync hooks at VU1-memory MMIO (`mapVuMemory`), GS privileged reads, writes and sync, VIF1 register writes, CMSAR1, HLE GS stubs (`applyGsClearPacket`, `applyGsRegPairs`, the StoreImage readback, SwapDBuffDc clears), native GIF kicks, VBlankStart (after the pacer), save/load. Job scopes around GIF + VIF1 + drain in `processPendingTransfers` (VIF0 paused out) and around VIF1 FIFO writes. `touch()` asserts in 10 GS entry points, arbiter submit/drain, and the PATH3 FIFO. D/T fallback rule. Snapshot-cost timing. |
+| `d52a18e` | Sync before the GS CSR drain in `Load*`, the bug the assert found. |
+| `965de96` | Census logs every sync hit (spins collapsed) with pc or address. Masked-CSR classification. `PS2Memory` privileged reads assert instead of syncing (`Load*` syncs). |
+
+- No header that generated code includes was touched, so ccache kept every game TU:
+  - Mac builds took 76 s and 83 s;
+  - bradflix took 394 s, in a private clone `HS1/PS2Recomp-mt1` with build dir `HS1/mt1-det`, so
+    the shared checkout was never switched while VR2 was building.
+- No generated VU1 code or emitter was touched (VR2 stays in its lane).
+- Edits in G-lane files are one-line `touch()` calls in `gs_frontend.cpp` and `ps2_gif_arbiter.cpp`.
+
+### Commands
+
+- Builds:
+  - `mac_build.sh …/MT1/PS2Recomp …/MT1/build-det --det` (`e708185`, runner `1daf8e8b…`);
+  - `mac_build.sh …/MT1/PS2Recomp …/MT1/build-rel` (`965de96`, runner `8c66106b…`);
+  - bradflix: `bradflix_build.sh`'s configure/build lines with `-S /work/PS2Recomp-mt1`, det=ON
+    (`965de96`, runner `d97fc507…`, two matching reads). Inputs were verified against the mini
+    pins first: vu1gen `aa8127bc…`, codegen register and vf0, PGS `1b3a294`, Granite `166ba21`.
+- Det boots: `ssx3_boot.py [--host bradflix] --mode det --backend parallel --runner R --label L --vu1-stats
+  --dump-ticks 1090,1800,2100 --route fr1r1 [--env PS2X_MTVU=census] [--stack-kb 512]`, then
+  `baseline.py compare --key a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` (`det-compares.txt`).
+- Census/speed (mini, exclusive, A-B-A): `ssx3_boot.py --mode speed --backend parallel --runner build-rel
+  … [--env PS2X_MTVU=census --env PS2X_MTVU_CENSUS_OUT=…]`. Rates come from `race_rate.py` on
+  `trace.jsonl`. The model is `mtvu_sim.py <events> [--submit ns --wake ns --slow f]`
+  (`model-mini.txt`, `census-summary.txt`).
+- CSR sites: one Mac det boot to t2005 with `PS2X_PKLOG=1`. The 66 MB log was deleted after
+  extracting `pklog-csr-t1990-2001.txt`.
+
+### Gaps
+
+- **The model is the model.**
+  - It assumes the unit's work costs the same on another core (the `--slow` sweep covers that).
+  - It ignores GS-worker contention. The unit becomes the GS producer while the EE runs, and N11
+    already found the Odin GS worker-bound in menus.
+  - It ignores cache effects of the snapshot and job handoff.
+- **R1–R3 are argued from source and have not been run threaded.**
+  - R3 also needs `PS2X_GS_CSR_DRAIN` semantics revisited for masked reads.
+  - The EE-applied CSR path must be kept equal to what `gsPrivStore` does in stream order for the
+    GS capture/replay tools (GB2/GB3), or those tools must force sync mode.
+- **Presentation latency under S3** (≤ 1 frame) is not measured.
+- **The Mac det census ran on `e708185`, before the fix.** The final commit's det identity comes
+  from the four bradflix boots.
+- **Budget used:** 3/3 builds (2 Mac, 1 bradflix). 12 boots:
+  - 2 Mac det, 1 Mac PK-log, 3 mini exclusive speed/census;
+  - 4 bradflix det;
+  - plus the 2 stage-1-era Mac det boots counted in the first two.
+
+  Mini exclusive hold: about 3 min. Scratch: `~/dev/ssx3-work/MT1` 1.8 GB (`build-rel` kept as the
+  stage-3 knob-0 control; `build-det` removed). bradflix `HS1/mt1-det` and `HS1/PS2Recomp-mt1` are
+  kept for stage 3.
+
+### Recommended next action (orchestrator decides)
+
+The go/no-go turns on R3.
+
+- **S1 alone:** about 1.24× on the Mac at ideal handoff, 1.15× with realistic costs; the rough Odin
+  projection is about 1.1×. That is modest for the ordering risk it carries.
+- **S1 + R2 + R3:** reaches the max(EE, unit) bound on both hosts: 1.65× on the Mac (1.3–1.5×
+  with costs) and roughly 1.35× on the Odin, where it is capped by the unit, i.e. VU1.
+
+**Recommendation:** approve stage 3 with R1–R3 behind `PS2X_MTVU=1`, with these det proofs:
+- hash-every-1 runs, which exercise the S2 schedule;
+- sparse-hash runs, which exercise the S3 lag;
+- the jitter stress run.
+
+Also schedule one Odin census before stage 3 finishes, so the Odin number is measured rather than
+projected.
