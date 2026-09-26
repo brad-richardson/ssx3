@@ -14,8 +14,10 @@ FILES=/storage/emulated/0/Android/data/$PKG/files
 PLAYDIR=$HOME/dev/ssx3-work/odin-play
 APK=$PLAYDIR/app-release.apk
 ENV=$PLAYDIR/ps2x.env
-WANT_APK=825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254
-WANT_ENV=ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390
+# Pins come from the canonical SHA256SUMS (never hard-coded here: a play-env change must not break restores).
+WANT_APK=$(awk '$2=="app-release.apk"{print $1}' "$PLAYDIR/SHA256SUMS")
+WANT_ENV=$(awk '$2=="ps2x.env"{print $1}' "$PLAYDIR/SHA256SUMS")
+[ ${#WANT_APK} -eq 64 ] && [ ${#WANT_ENV} -eq 64 ] || { echo "bad SHA256SUMS in $PLAYDIR" >&2; exit 1; }
 GAM=BASLUS-20772-GAM0001
 SET=BASLUS-20772-SET0001
 LEASESH=~/dev/ssx3/local/tooling/odin_lease.sh

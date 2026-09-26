@@ -179,6 +179,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   or interpolation.
 
 ## 8. Mistakes to avoid
+- 09-26: I changed Brad's Odin play env (LAG on) while `odin_restore_play.sh` hard-coded the old env SHA, so
+  every restore failed its own check and FS2 stopped; my retry loop also reinstalled the play APK each minute until I
+  stopped it. Fix: the script reads its pins from `odin-play/SHA256SUMS`. Never hard-code a play-state SHA in a tool,
+  and never loop a device-mutating command without a stop on the first *non-lease* failure.
 - 09-26: archiving closed lanes removed I33's MoltenVK xcframework, which F6's iOS script (in scratch) still
   used. The reference check covered repo files only. Before archiving, also grep `~/dev/ssx3-work/*/` scripts of
   live lanes; shared inputs get a canonical home (`~/dev/ssx3-work/moltenvk-1.4.2`, `parallel-gs-ssx3`, `vu1gen-ssx3`).
