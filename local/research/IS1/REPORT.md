@@ -146,3 +146,13 @@ bash ~/dev/ssx3-work/IS1/ios/ipad-run-stop.sh ~/dev/ssx3-work/IS1/ios/leg-<L> ~/
 python3 ~/dev/ssx3-work/IS1/ios/is1_rates.py ~/dev/ssx3-work/IS1/ios/leg-<L>
 bash local/research/I31/deploy-ios.sh ipad  # restore; saves cmp'd byte-identical after pull
 ```
+
+## Orchestrator gate (2026-09-26)
+
+**Pass as the first iPad speed numbers, labelled provisional:** release build, but the console relay stays on
+(the unconditional per-present `[ios-render]` stderr line + devicectl relay; no file-logging key). iPad Air 11" M2,
+fork `b97b241`, F7 bundled env (4× SSAA + hi-res + pipelined + zero-copy, MTVU + blocks): race **0.639 / 0.647×**
+cool (A/A3), 0.601× heat-soaked (A2); 1× resolution **0.720×**; MTVU off 0.503× (MTVU = +28 % on iOS). LAG
+(B/B2 vs A/A2) +2.5 % sits inside the thermal drift: not adopted on iOS for now. 0 FATAL, 0 violations; Brad's
+`mc0` byte-identical. Follow-ups (todo): gate the `[ios-render]` per-present line behind a knob so iOS numbers can be
+clean; G3 jobs 55490 vs 55513 unchased (one leg). The iPad now goes to IP1 (full-screen build).
