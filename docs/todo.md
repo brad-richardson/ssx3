@@ -285,8 +285,7 @@ then 120 Hz simulation.
 - [ ] **CP1 (queued after F6; RV4 rank 1 measurement):** matched-window Odin critical-path timeline: per-thread running vs
       blocked, GS queue waits, GPU timestamps, frequency residency, `flush_submit` split (submit / submit_empty / compile
       drain; was FS1: the 4× cost is GsWorker time blocked there, VK1 2A). Attribute the 'profiler unwind' bucket.
-- [ ] **BA1 (running, RV4):** Android builds are `RelWithDebInfo` = `-O2`, no ThinLTO (IPO only for Release); Mac is `-O3`+IPO.
-      Audit actual commands; try `-O3`, then ThinLTO incl. `ps2_game_objects`; Odin ABBA each.
+- [ ] Android `-march` quirk (BA1 §1): root CMake's crypto/crc `-march` is overridden by a later plain `armv8-a+fp+simd`; decide which is intended (Odin supports both).
 - [ ] **Android immersive mode (small):** the gesture-bar handle shows over the game on the Odin (F6 screencaps); hide system bars.
 - [ ] **GL fallback aspect (small):** Android GL fallback still letterboxes into raylib's 640×448 canvas (1544×868 box);
       start raylib at the display size so it follows Brad's max-fit rule too.

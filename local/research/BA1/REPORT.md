@@ -217,3 +217,11 @@ Budgets: 4 Android builds (base, O3, LTO dud, LTO rebuild — cap reached);
 (≤10 GB cap); global disk 73.9/200 GB at close. Suite not run (build flags
 only, no source change). Wall time ~3.7 h, over the 3 h box (LTO dud
 diagnosis + F6/VK2 queue waits); no lane was disturbed after G3.
+
+## Orchestrator gate (2026-09-26) — adopted, lane closed
+
+**Pass.** Audit confirmed RV4 (all 458 TUs `-O2`, no LTO). `-O3`: **+5.3 %** Odin race (drift-cancelled ABBA);
+ThinLTO: +0 over `-O3` at a 7-min, ~10.6 GB link → not adopted. Pushed the `-O3` gradle change as fork `ssx3`
+`a5e5940` (cherry-pick of `7d44ba8` onto `703a554`). The unleased install that hit VK2 (G3) led to
+`odin_lease.sh`. Follow-up queued: the `-march` quirk (a later plain `armv8-a+fp+simd` overrides the
+crypto/crc detection).
