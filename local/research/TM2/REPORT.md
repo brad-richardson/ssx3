@@ -190,3 +190,9 @@ determinism. (Diagnostic boots, not speed numbers.)
   unlocated.
 - HLE-stub direct-RDRAM writes are unwatched (judged unlikely for these
   addrs; re-audit if a future window shows an unattributed change).
+
+## Orchestrator gate (2026-09-26)
+
+**Pass.** Writer found (a per-VBlank snapshot copy at `0x120e40` of `[obj+0x110]`, thread 1, after the
+update); DMA ruled out with new SPR_FROM watch coverage; HUD clock input attributed to `A+0x1c`.
+Next: **TM3** (the `[obj+0x110]` writer, then RV6's rate-120 / dt-1/120 / multiplier-2 probe).
