@@ -514,7 +514,7 @@ while True:
         run_lifecycle()
     if a.swipe_tick and not swipe_done and tick >= a.swipe_tick:
         swipe_done = True
-        sh('input swipe 960 1070 960 400 300')
+        sh('input swipe 960 1079 960 900 150')
         time.sleep(1)
         scap('swipe-bars')
         time.sleep(3)

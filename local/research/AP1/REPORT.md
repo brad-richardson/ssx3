@@ -3,19 +3,21 @@
 Worker: muse, brief `local/muse/prompts/AP1.md`. Fork worktree
 `~/dev/ssx3-work/AP1/PS2Recomp`, local branch `ap1` from fork `ssx3` tip `f0d2d3c`. Not pushed.
 
-**Status: stopped on the first failure (brief rule). Immersive mode does NOT apply
-(`[immersive] NOT applied`); root cause named below (wrong JNI signature for
-`WindowInsetsController.hide`). The GL-fallback aspect runs (b, c) and the vpad run (d)
-were not launched. The swipe check voided its run (swipe went HOME).**
+**Status: done (Part 2).** Part 1 stopped on the immersive failure and named the root
+cause (wrong `hide()` JNI signature); Part 2 fixed it and all four checks pass on
+APK `52f9d2b6…`: (a) no gesture handle + transient swipe/reveal/auto-hide, (b) GL
+fills 1920×1080 at 16:9, (c) GL 1440×1080 pillarbox at 4:3, (d) vpad correct over
+Vulkan. Nothing pushed.
 
 ## Commits (fork `ap1`, local)
 
 | Commit | What |
 | --- | --- |
 | `4415067` | immersive mode (system bars hidden, transient swipe) — **broken, see root cause** |
-| `a2e2953` (tip) | GL display-size canvas (`InitWindow(0, 0)` on Android) — VK-path interplay **validated on device** |
+| `a2e2953` | GL display-size canvas (`InitWindow(0, 0)` on Android) — VK-path interplay **validated on device** |
+| `1bed138` (tip) | Part 2: `hide` as `(I)V`, bool return, bounded frame-loop retry |
 
-- Mac suite: **685/685** at tip `a2e2953` (both commits are Android-`ifdef`'d; host code identical)
+- Mac suite: **685/685** at `a2e2953` and at tip `1bed138` (all three commits are Android-`ifdef`'d; host code identical)
 - Runner-dir diff vs `14b1e5cb`: empty
 - Immersive JNI syntax-checked against NDK r30 headers (`-fsyntax-only`, harness in `/tmp/ap1/`;
   this checks C++/JNI-API shapes only — the method *signature strings* are runtime data)
@@ -74,16 +76,13 @@ Not timing: the DecorView chain provably works, and no re-fire would have helped
 (Recommend the follow-up also retry until applied, bounded, from the frame loop —
 cheap insurance for the attach/focus window — but the signature is the fix.)
 
-## Not run (stopped per the brief's first-failure rule)
+## Not run in Part 1 (stopped per the first-failure rule; all run in Part 2)
 
-| Check | Needs |
-| --- | --- |
-| (b) GL fallback 16:9 (`--vk 0`) | install `b5c86e4b…`, expect game fills 1920×1080 |
-| (c) GL fallback 4:3 (`--vk 0 --aspect 4:3`) | expect 1440×1080 + black bars |
-| (d) Vulkan + `PS2X_VIRTUAL_PAD=1` (`--pad-probe`) | under-layer pad at display size, no system bars |
-
-(b)/(c) verdicts on APK `b5c86e4b…` would stand regardless of the immersive fix
-(immersive changes no window size); (d)'s no-bars half needs the fix.
+| Check | Part 1 state | Part 2 |
+| --- | --- | --- |
+| (b) GL fallback 16:9 | not launched | B1 PASS |
+| (c) GL fallback 4:3 | not launched | C1 PASS |
+| (d) Vulkan + vpad | not launched | D1 PASS |
 
 ## Play state after
 
@@ -95,7 +94,7 @@ lease released. Brad's save untouched.
 
 | Item | Value |
 | --- | --- |
-| Fork base / tip | `f0d2d3c` → `a2e2953` (`ap1`, local; runner-dir diff vs `14b1e5cb` empty) |
+| Fork base / tip | `f0d2d3c` → `1bed138` (`ap1`, local; runner-dir diff vs `14b1e5cb` empty) |
 | Source tar `a2e2953` | `9a0f6d5d…` (430 files; staged `/home/brad/ap1/PS2Recomp`, markers verified) |
 | paraLLEl-GS | `3d72467` + Granite `166ba21a` (cloned on bytesize; SS3 marker present) |
 | codegen / vu1gen / vu0gen | vr2d 9457 files (2/2 sample SHAs = mini) / 7 files (7/7 SHAs = mini `vu1gen-ssx3`) / vr3 `2652966b…` = mini |
@@ -105,13 +104,24 @@ lease released. Brad's save untouched.
 
 ## Budgets
 
-Android builds 1/1 (plus one 21 s config miss on the same slot). Odin launches 1/4.
-Scratch `~/dev/ssx3-work/AP1` 1.5 GB (worktree + Mac build + APK + odin logs).
-bytesize `/home/brad/ap1` (source, PGS 3d72467, build tree, APK).
+Android builds 2 total (Part 1: 1 + a 21 s config miss; Part 2: 1 incremental under
+the bytesize lock). Odin launches 5 total (A1 Part 1 + A2/B1/C1/D1 Part 2; Part 2
+used 4/5). Scratch `~/dev/ssx3-work/AP1` ~1.7 GB (worktree + Mac build + 2 APKs +
+odin logs). bytesize `/home/brad/ap1` (source, PGS 3d72467, build tree, APK).
 
 ## Exact commands
 
 ```sh
+# Part 2 delta (after the gate): commit 1bed138 on ap1; suite; NDK check; delta tar
+git archive --format=tar 1bed138 ps2xRuntime/src/lib/ps2_runtime.cpp | ssh bytesize 'wsl … "tar -x -C /home/brad/ap1/PS2Recomp"'  # 9567914f both ends
+bash local/tooling/bytesize_lock.sh run AP1 -- ssh bytesize 'wsl -d Ubuntu -- bash -c "/home/brad/ap1/build.sh"'  # BUILD SUCCESSFUL
+python3 local/tooling/odin_cooldown.py --out local/research/AP1/logs/<A2|B1|C1|D1> --mode screen   # before each
+python3 local/research/AP1/launch.py --label A2 … --apk …/odin-apk2/app-release.apk --apk-sha 52f9d2b6… --scap-ticks 1100,2100 --swipe-tick 2250 --env …(play knobs)
+python3 local/research/AP1/launch.py --label B1 … --vk 0 …   # C1: + --aspect 4:3; D1: + --pad-probe
+bash local/tooling/odin_restore_play.sh AP1   # after every run
+```
+```sh
+# Part 1 (for the record)
 git -C ~/dev/PS2Recomp worktree add -b ap1 ~/dev/ssx3-work/AP1/PS2Recomp f0d2d3c
 # ... two commits 4415067, a2e2953 ...
 bash local/tooling/build/mac_build.sh ~/dev/ssx3-work/AP1/PS2Recomp ~/dev/ssx3-work/AP1/build --target ps2x_tests
@@ -131,9 +141,6 @@ bash local/tooling/odin_restore_play.sh AP1
 
 ## Gaps
 
-- Immersive fix + validation (a, swipe) need a follow-up brief (one-line fix, one rebuild, re-run).
-- (b)/(c)/(d) never launched; runnable on APK `b5c86e4b…` as-is if the orchestrator wants
-  the GL verdicts before the fix build.
 - The API-29 `setSystemUiVisibility` fallback path is untested (Odin is API 35; no API-29 device).
 - `InitWindow(0,0)` takes raylib's portrait-config branch (`0<=0`) — local `AConfiguration`
   field + a warning line only (manifest locks landscape); A1 shows no ill effect.
@@ -156,3 +163,57 @@ remaining runs: (a) Vulkan default — no gesture handle in menu + race screenca
 short partial swipe** (`input swipe 960 1079 960 900 150`) so it reveals the bars instead of going HOME, then bars
 auto-hide; (b) `PS2X_PRESENT_VULKAN=0` fills 1920×1080 at 16:9; (c) GL + `PS2X_ASPECT=4:3` → 1440×1080 with bars;
 (d) `PS2X_VIRTUAL_PAD=1` on Vulkan — pad drawn right, no bars. ≤ 5 launches. Restore play state after each. Then stop.
+
+## Part 2 — done (4/4 runs pass)
+
+Runs A2/B1/C1/D1 all used APK `52f9d2b6…`, variant A + play knobs
+(`PS2X_MTVU=1 PS2X_MTVU_LAG=1 PS2X_VU1_BLOCKS=1` + pins 6/7), I26-FAST,
+stop-tick 2400, screen-mode cooldown before each (new Odin rule; all
+launched within ~1 min of ready). Play state restored after every run
+(`odin_restore_play.sh AP1`: base.apk `825b436d…`, env `090cc981…`, 6/6
+saves, `mc0-test` empty, stopped). Every run reached its stop tick in
+~70 s wall; nothing looks slower (no speed numbers taken — screening only,
+nothing for the ledger).
+
+### Fix
+
+Fork `ap1` commit **`1bed138`** (`[AP1] Part 2: fix hide() JNI signature, bounded immersive retry`):
+`hide` looked up as `(I)V` + `CallVoidMethod` (was `(I)L…`, never resolved);
+`ap1HideSystemBars` returns bool and logs `[immersive] applied (…)` /
+`[immersive] NOT applied`; the frame loop retries once a second for 10 s per
+window (generation-gated) until applied. Window/focus re-apply through the
+app-command wrapper unchanged.
+
+- Mac suite: **685/685** at `1bed138`. Runner-dir diff vs `14b1e5cb`: empty.
+- NDK r30 `-fsyntax-only -Wall` of the fixed function + retry snippet (stubs):
+  pass — and it caught a real leftover (`return;` in the now-bool function), fixed
+  before commit. Harness: `/tmp/ap1/ap1_immersive_check2.cpp`.
+- Launcher: swipe is now the brief's short partial `input swipe 960 1079 960 900 150`.
+
+### Build staging (done) / build (HELD by orchestrator)
+
+- Delta `1bed138` (`ps2_runtime.cpp` only) streamed to `/home/brad/ap1/PS2Recomp`:
+  file SHA `9567914f…` matches the mini; `(I)V` marker verified on bytesize.
+  Tar `9271b0ff…`.
+- bytesize WSL restarted mid-stage (fresh VM, `up 0 min`); `/home/brad/ap1`
+  (source, PGS 3d72467, `.cxx` tree, `build.sh`) survived.
+- An unlocked Part 2 build ssh started, then killed locally AND remotely
+  (`kill` + `pkill -f ap1/build.sh`; verified no gradle/clang left) when the
+  orchestrator ordered VR4 → FS2 → AP1 under `local/tooling/bytesize_lock.sh`.
+- Then HOLD: bytesize C: full (4 GB free, 356 GB WSL image); orchestrator
+  cleaned (124 GB free, sparse disk). Released: rebuilt under
+  `bytesize_lock.sh run AP1` (queued behind VR4; no LOWDISK): **BUILD
+  SUCCESSFUL** (48 tasks: 7 executed, 41 up-to-date — the killed first attempt
+  had done the recompile). APK **`52f9d2b6424c84f86a3b8458517ebf92e74818a5196174363d22d0796b855846`**,
+  190,781,004 B (×2 remote, ×2 local, pulled to `odin-apk2/`). Fix verified
+  **inside** the artifact: new `.so` has `applied (` (1×) and no `bars hidden`;
+  Part 1's has `bars hidden` (1×) and no `applied (`; `.so` SHAs differ.
+
+### Runs (pending)
+
+| Run | Settings | Result |
+| --- | --- | --- |
+| A2 (a) | Vulkan default + short swipe at 2250, scaps 1100/2100 | **PASS.** Log: `NOT applied` then `applied (insets-transient)` ×2 (retry works). sc01 menu + sc02/sc05 race: full 16:9, **no gesture handle**. sc03 (1 s post-swipe): transient status + nav bars, app foreground. sc04 (+4 s): bars auto-hidden. Focus stayed on the app, clean STOP at t2443 |
+| B1 (b) | `--vk 0` (GL 16:9 fill) | **PASS.** raylib: screen/render 1920×1080, offsets 0,0. sc02/sc03 race fills the frame, no borders, no handle; immersive `applied` on the GL path too. sc01 caught My Rules mid-fade (tick-sample lag, not a GL bug — same nominal tick shows different settled screens across runs) |
+| C1 (c) | `--vk 0 --aspect 4:3` | **PASS.** Pillarbox measured 240→1679 (1440×1080, exact 240/240 bars) on two rows; black bars, no handle. Note: a static 3×276 px bright segment at x≈1905, y 402–677 sits in the right bar, byte-identical across all 3 C1 shots (menu + race) — device chrome above our all-black clear, not our rendering |
+| D1 (d) | `--pad-probe` on Vulkan | **PASS.** `[vpad] overlay shown` through the run (hidden only by the end-of-run injected press); immersive `applied`. All 3 shots: translucent pad (L1/L2/R1/R2, face buttons, D-pad, stick ring, SELECT/START) correctly laid out at display size over the full-screen race/menu, no system bars |
