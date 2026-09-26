@@ -1,0 +1,66 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g -e cpu-clock --trace-offcpu --duration 20
+Arch: arm64
+Event: cpu-clock (type 1, config 0)
+Samples: 474268
+Time in ns: 204904141954
+
+Overhead  Command          Symbol
+18.02%    com.ps2x.runner  [kernel.kallsyms][+ffffffe761a84288]
+9.93%     GsWorker         [kernel.kallsyms][+ffffffe761a84288]
+9.76%     AAudio_1         [kernel.kallsyms][+ffffffe761a84288]
+9.76%     PGS-Waiter       [kernel.kallsyms][+ffffffe761a84288]
+9.18%     binder:30534_2   [kernel.kallsyms][+ffffffe761a84288]
+7.19%     GameThread       [kernel.kallsyms][+ffffffe761a84288]
+4.07%     MTVU             [kernel.kallsyms][+ffffffe761a84288]
+0.84%     GsWorker         scudo::HybridMutex::tryLock()
+0.56%     binder:30534_4   [kernel.kallsyms][+ffffffe761a84288]
+0.43%     MTVU             [kernel.kallsyms][+ffffffe761a8e810]
+0.42%     MTVU             VU1RecompImage<17692172933381506641ul>::B2a10(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.36%     GsWorker         scudo::HybridMutex::unlock()
+0.34%     GameThread       VU1Interpreter::execUpper(unsigned int)
+0.33%     GsWorker         scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Origin, unsigned long, bool)
+0.32%     GsWorker         __memset_aarch64_nt
+0.31%     GameThread       VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+0.30%     GsWorker         scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)
+0.29%     MTVU             VU1RecompImage<11917748289753363281ul>::B0628(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.28%     GsWorker         libvulkan_freedreno.so[+b40d34]
+0.25%     GsWorker         scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&, void*, scudo::Chunk::UnpackedHeader*, unsigned long)
+0.24%     GsWorker         __memcpy_aarch64_nt
+0.24%     MTVU             VU1Interpreter::commitReadyPipelines()
+0.17%     GameThread       VU1Interpreter::commitReadyPipelines()
+0.17%     GsWorker         malloc
+0.17%     GsWorker         libvulkan_freedreno.so[+b40d68]
+0.17%     MTVU             VU1RecompImage<17692172933381506641ul>::B0a58(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.16%     MTVU             PS2Memory::processVIF1DataImpl(unsigned char const*, unsigned int)
+0.15%     GsWorker         [kernel.kallsyms][+ffffffe761a8e810]
+0.13%     MTVU             VU1Interpreter::progressXgkick()
+0.12%     GsWorker         libvulkan_freedreno.so[+b40d74]
+0.12%     GsWorker         libvulkan_freedreno.so[+b489b8]
+0.12%     GsWorker         [kernel.kallsyms][+ffffffe760a277ec]
+0.11%     GsWorker         libvulkan_freedreno.so[+b40d3c]
+0.10%     GsWorker         libvulkan_freedreno.so[+b40f60]
+0.10%     GsWorker         libvulkan_freedreno.so[+c1d314]
+0.10%     MTVU             VU1RecompImage<17692172933381506641ul>::B30d8(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.09%     GsWorker         [kernel.kallsyms][+ffffffe760d65040]
+0.09%     GsWorker         __aarch64_cas4_acq
+0.09%     GsWorker         libvulkan_freedreno.so[+b6b8ac]
+0.08%     GsWorker         libvulkan_freedreno.so[+b489ac]
+0.08%     MTVU             VU1RecompImage<12499688582289950957ul>::B14b0(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.08%     MTVU             VU1RecompImage<12499688582289950957ul>::B1500(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.07%     GsWorker         libvulkan_freedreno.so[+b40f9c]
+0.07%     GsWorker         libvulkan_freedreno.so[+c1d100]
+0.07%     GsWorker         @plt
+0.07%     GameThread       sub_0037E120_0x37e120(unsigned char*, R5900Context*, PS2Runtime*)
+0.07%     GsWorker         libvulkan_freedreno.so[+c1d0dc]
+0.07%     GameThread       libunwind::findUnwindSectionsByPhdr(dl_phdr_info*, unsigned long, void*)
+0.06%     MTVU             VU1RecompImage<17692172933381506641ul>::B2ea0(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.06%     GsWorker         libvulkan_freedreno.so[+c1d11c]
+0.06%     GsWorker         libvulkan_freedreno.so[+b6b8d0]
+0.06%     GameThread       VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+0.06%     GsWorker         __aarch64_ldadd4_rel
+0.06%     MTVU             VU1RecompImage<11917748289753363281ul>::B0720(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.06%     GsWorker         scudo_malloc
+0.06%     GsWorker         libvulkan_freedreno.so[+c1d000]
+0.05%     GsWorker         libvulkan_freedreno.so[+b48538]
+0.05%     GsWorker         void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+0.05%     GsWorker         GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)

@@ -1,0 +1,20 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g -e cpu-clock --trace-offcpu --duration 20
+Arch: arm64
+Event: cpu-clock (type 1, config 0)
+Samples: 474268
+Time in ns: 204904141954
+
+Overhead  Command          Tid
+9.77%     GsWorker         30557
+9.77%     MTVU             30588
+9.77%     AAudio_1         30576
+9.76%     com.ps2x.runner  30555
+9.76%     PGS-Waiter       30580
+9.75%     GameThread       30578
+9.18%     binder:30534_2   30547
+8.26%     com.ps2x.runner  30556
+8.22%     GsWorker         30581
+8.08%     GsWorker         30582
+6.42%     GsWorker         30583
+0.70%     GsWorker         30584
+0.56%     binder:30534_4   30570

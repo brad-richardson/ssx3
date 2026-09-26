@@ -1,0 +1,37 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g -e cpu-clock --trace-offcpu --duration 20
+Arch: arm64
+Event: cpu-clock (type 1, config 0)
+Samples: 3363
+Time in ns: 19995054472
+
+Children  Self    Command     Symbol
+99.99%    99.99%  PGS-Waiter  [kernel.kallsyms][+ffffffe761a84288]
+99.99%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe761a84286]
+99.98%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760a11586]
+99.98%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe761a7d85e]
+99.98%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760a3aece]
+99.98%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760a3af86]
+99.98%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe761a7d8ea]
+99.98%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760a3b042]
+99.97%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe761a84432]
+50.61%    0.00%   PGS-Waiter  void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, ParallelGS::GSRenderer::GSRenderer(ParallelGS::PageTracker&)::$_0>>(void*)
+50.61%    0.00%   PGS-Waiter  __pthread_start(void*)
+50.61%    0.00%   PGS-Waiter  __start_thread
+50.60%    0.00%   PGS-Waiter  __futex_wait_ex(void volatile*, bool, int, bool, timespec const*)
+50.60%    0.00%   PGS-Waiter  pthread_cond_wait
+50.60%    0.00%   PGS-Waiter  std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+50.60%    0.00%   PGS-Waiter  syscall
+50.60%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760bca446]
+50.60%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760bca196]
+50.60%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760bce466]
+50.60%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760bcdd5a]
+49.39%    0.00%   PGS-Waiter  ioctl
+49.39%    0.00%   PGS-Waiter  __ioctl
+49.38%    0.00%   PGS-Waiter  libvulkan_freedreno.so[+a3a160]
+49.38%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe760e13696]
+49.38%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe76084c36a]
+49.37%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe76084c2da]
+49.37%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe76083b832]
+49.37%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe7607be552]
+49.36%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe7607eda16]
+49.36%    0.00%   PGS-Waiter  [kernel.kallsyms][+ffffffe761a8d7e6]

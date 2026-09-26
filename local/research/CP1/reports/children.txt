@@ -1,0 +1,124 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g -e cpu-clock --trace-offcpu --duration 20
+Arch: arm64
+Event: cpu-clock (type 1, config 0)
+Samples: 474268
+Time in ns: 204904141954
+
+Children  Self    Symbol
+69.11%    0.00%   [kernel.kallsyms][+ffffffe760a11586]
+68.64%    0.00%   [kernel.kallsyms][+ffffffe761a7d85e]
+68.50%    0.00%   [kernel.kallsyms][+ffffffe761a7d8ea]
+68.50%    0.00%   [kernel.kallsyms][+ffffffe760a3aece]
+68.50%    0.00%   [kernel.kallsyms][+ffffffe760a3af86]
+68.50%    0.00%   [kernel.kallsyms][+ffffffe760a3b042]
+68.47%    68.47%  [kernel.kallsyms][+ffffffe761a84288]
+68.47%    0.00%   [kernel.kallsyms][+ffffffe761a84286]
+68.44%    0.00%   [kernel.kallsyms][+ffffffe761a84432]
+56.87%    0.00%   __pthread_start(void*)
+56.87%    0.00%   __start_thread
+23.94%    0.01%   syscall
+23.85%    0.00%   [kernel.kallsyms][+ffffffe760bca446]
+23.34%    0.00%   [kernel.kallsyms][+ffffffe760bca196]
+23.33%    0.00%   [kernel.kallsyms][+ffffffe760bce466]
+23.33%    0.00%   [kernel.kallsyms][+ffffffe760bcdd5a]
+23.31%    0.00%   __futex_wait_ex(void volatile*, bool, int, bool, timespec const*)
+22.90%    0.00%   std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+22.90%    0.00%   pthread_cond_wait
+19.54%    0.00%   ioctl
+19.54%    0.00%   __ioctl
+19.54%    0.00%   [kernel.kallsyms][+ffffffe760e13696]
+16.39%    0.00%   [kernel.kallsyms][+ffffffe761a8da26]
+11.56%    0.00%   libvulkan_freedreno.so[+a271a0]
+9.78%     0.00%   android::IPCThreadState::talkWithDriver(bool)
+9.78%     0.00%   [kernel.kallsyms][+ffffffe7616e829a]
+9.77%     0.00%   aaudio::AudioStreamInternalPlay::callbackLoop()
+9.77%     0.00%   aaudio::AudioStream_internalThreadProc(void*) (.cfi)
+9.76%     0.00%   PS2Runtime::run()
+9.76%     0.00%   main
+9.76%     0.00%   aaudio::AudioStreamInternal::processData(void*, int, long)
+9.76%     0.00%   clock_nanosleep
+9.76%     0.00%   __clock_nanosleep
+9.76%     0.00%   [kernel.kallsyms][+ffffffe760bbcd7a]
+9.76%     0.00%   [kernel.kallsyms][+ffffffe760bb27f2]
+9.76%     0.00%   [kernel.kallsyms][+ffffffe760bbdbd2]
+9.75%     0.00%   [kernel.kallsyms][+ffffffe76084c36a]
+9.75%     0.00%   [kernel.kallsyms][+ffffffe76084c2da]
+9.75%     0.00%   [kernel.kallsyms][+ffffffe7616ee586]
+9.74%     0.00%   android::AndroidRuntime::javaThreadShell(void*)
+9.74%     0.00%   android::IPCThreadState::joinThreadPool(bool)
+9.74%     0.00%   android::PoolThread::threadLoop()
+9.74%     0.00%   android::Thread::_threadLoop(void*)
+9.74%     0.00%   android::IPCThreadState::getAndExecuteCommand()
+9.74%     0.00%   libvulkan_freedreno.so[+a3a160]
+9.74%     0.00%   [kernel.kallsyms][+ffffffe76083b832]
+9.74%     0.00%   [kernel.kallsyms][+ffffffe7607be552]
+9.73%     0.00%   [kernel.kallsyms][+ffffffe761a8d7e6]
+9.73%     0.00%   [kernel.kallsyms][+ffffffe7607eda16]
+9.71%     0.00%   ps2_mtvu::detail::Worker::loop()
+9.71%     0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, ps2_mtvu::detail::Worker::start()::'lambda'()>>(void*)
+9.67%     0.00%   EeScheduler::run()
+9.67%     0.00%   std::__ndk1::__function::__func<PS2Runtime::run()::$_1, std::__ndk1::allocator<PS2Runtime::run()::$_1>, void ()>::operator()()
+9.67%     0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, std::__ndk1::function<void ()>>>(void*)
+9.42%     0.00%   libvulkan_freedreno.so[+ac11d8]
+9.32%     0.00%   libvulkan_freedreno.so[+ac3694]
+8.27%     0.00%   [kernel.kallsyms][+ffffffe760df6b4e]
+8.27%     0.00%   [kernel.kallsyms][+ffffffe760df7df6]
+8.27%     0.00%   [kernel.kallsyms][+ffffffe760df7e82]
+8.27%     0.00%   __sread
+8.27%     0.00%   __srefill
+8.27%     0.00%   read
+8.26%     0.00%   fgets
+8.26%     0.00%   fgets_unlocked
+8.26%     0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, (anonymous namespace)::redirectStdioToLogcat()::$_0>>(void*)
+8.26%     0.00%   [kernel.kallsyms][+ffffffe760e05e02]
+7.93%     0.36%   VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+7.32%     0.00%   std::__ndk1::__function::__func<PS2Memory::processPendingTransfers()::$_1, std::__ndk1::allocator<PS2Memory::processPendingTransfers()::$_1>, void ()>::operator()()
+7.31%     0.16%   PS2Memory::processVIF1DataImpl(unsigned char const*, unsigned int)
+7.31%     0.00%   PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+7.23%     0.00%   EeScheduler::processPendingEvents()
+7.23%     0.00%   EeScheduler::processDueDeadlines()
+7.22%     0.00%   EeScheduler::processEvent(EeEvent const&)
+7.21%     0.00%   ps2_mtvu::vblank(unsigned long, bool)
+7.21%     0.00%   ps2_mtvu::detail::Worker::waitFor(unsigned long)
+7.01%     0.00%   std::__ndk1::__function::__func<PS2Runtime::syncCoreSubsystems()::$_5, std::__ndk1::allocator<PS2Runtime::syncCoreSubsystems()::$_5>, void (unsigned int, unsigned int, unsigned int)>::operator()(unsigned int&&, unsigned int&&, unsigned int&&)
+6.63%     0.00%   std::__ndk1::this_thread::sleep_for(std::__ndk1::chrono::duration<long long, std::__ndk1::ratio<1l, 1000000000l>> const&)
+6.63%     0.00%   nanosleep
+6.63%     0.00%   [kernel.kallsyms][+ffffffe760bb2952]
+4.94%     0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, ParallelGS::GSRenderer::GSRenderer(ParallelGS::PageTracker&)::$_0>>(void*)
+4.77%     0.00%   GsWorker::threadMain()
+4.77%     0.00%   void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, void (GsWorker::*)(), GsWorker*>>(void*)
+4.41%     0.00%   libvulkan_freedreno.so[+a21dc0]
+3.55%     0.00%   libvulkan_freedreno.so[+ac4764]
+3.19%     0.00%   GS::latchHostPresentationFrame()
+2.93%     0.00%   libvulkan_freedreno.so[+b64698]
+2.64%     0.00%   libvulkan_freedreno.so[+a96b44]
+2.56%     0.00%   libvulkan_freedreno.so[+add38c]
+2.41%     0.13%   VU1Interpreter::progressXgkick()
+2.40%     0.00%   libvulkan_freedreno.so[+a27074]
+2.37%     0.00%   PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+2.14%     0.00%   libvulkan_freedreno.so[+ac10f4]
+2.09%     0.01%   libvulkan_freedreno.so[+c653bc]
+2.07%     0.00%   libvulkan_freedreno.so[+a96b90]
+2.03%     0.00%   libvulkan_freedreno.so[+a97b34]
+1.88%     0.02%   PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+1.86%     0.00%   libvulkan_freedreno.so[+c60624]
+1.81%     0.00%   libvulkan_freedreno.so[+c44140]
+1.73%     0.00%   libvulkan_freedreno.so[+ac6614]
+1.60%     0.00%   libvulkan_freedreno.so[+c18c0c]
+1.58%     0.00%   libvulkan_freedreno.so[+c19504]
+1.58%     0.00%   GifArbiter::drain()
+1.48%     0.01%   GsWorker::enqueue(GsCommand)
+1.47%     0.31%   scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)
+1.46%     0.00%   libvulkan_freedreno.so[+b45988]
+1.37%     0.00%   GS::noteGifPath(GifPathId)
+1.32%     0.00%   libvulkan_freedreno.so[+a97238]
+1.27%     0.00%   libvulkan_freedreno.so[+a98334]
+1.25%     0.00%   libvulkan_freedreno.so[+c1d5a4]
+1.22%     0.00%   libvulkan_freedreno.so[+c19618]
+1.17%     0.26%   scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&, void*, scudo::Chunk::UnpackedHeader*, unsigned long)
+1.15%     0.00%   libvulkan_freedreno.so[+a21cc4]
+1.15%     0.00%   libvulkan_freedreno.so[+c19448]
+1.08%     0.00%   libvulkan_freedreno.so[+a21c54]
+1.08%     0.00%   libvulkan_freedreno.so[+a84f24]
+1.01%     0.00%   libvulkan_freedreno.so[+c1d364]
+1.01%     0.00%   libvulkan_freedreno.so[+c1d3cc]

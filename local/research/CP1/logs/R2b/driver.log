@@ -1,0 +1,43 @@
+[04:59:41] PRE lease="LEASE_FREE CP1-R2 done" keyguard="showing=false" battery=100% ac=true pid0=none
+[04:59:41] PRE device-env=ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390 mc0-test='' mc0-bad=[]
+[04:59:41] LEASE claimed via odin_lease.sh: CLAIMED
+[04:59:41] APK local sha x2 825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254 825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254
+[04:59:44] INSTALL Performing Streamed Install Success
+[04:59:45] INSTALLED /data/app/~~J9yZketwqaeWe_94jlP_lg==/com.ps2x.runner-rKnedQzg6II7qeuwr5Ef_Q==/base.apk sha=825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254 match=True
+[04:59:45] ENV 2b786cd515aea2e449989fd39e4b79ba29355178ca6572bc9f42c37574bd740e  /storage/emulated/0/Android/data/com.ps2x.runner/files/ps2x.env
+[04:59:45 t+    0.0] AM Starting: Intent { cmp=com.ps2x.runner/android.app.NativeActivity }
+[04:59:51 t+    6.1] FOCUS app-foreground, no BACK ('mCurrentFocus=Window{26eefb u0 com.ps2x.runner/android.app.NativeActivity}')
+[04:59:53 t+    8.3] LAYER 'com.ps2x.runner/android.app.NativeActivity#21927' tried=['com.ps2x.runner/android.app.NativeActivity#21927']
+[05:00:32 t+   47.6] CPUWIN start tick=1949
+[05:00:32 t+   47.6] PROFILE start tick=1949
+[05:00:56 t+   71.2] PROFILE end wall=23.6s tick~2340
+[05:00:56 t+   71.2] PROFILE out: 'simpleperf W kallsyms.cpp:163] Access to kernel symbol addresses is restricted. If possible, please do `echo 0 >/proc/sys/kernel/kptr_restrict` to fix this.\nsimpleperf I cmd_record.cpp:824] Recorded for 19.9938 seconds. Start post processing.\nsimpleperf I cmd_record.cpp:918] Samples recorded: 474,28'
+[05:00:56 t+   71.5] PROFILE data: '-rw-r--r-- 1 shell shell 106789790 2026-09-26 05:00 /data/local/tmp/cp1/perf-R2b.data'
+[05:00:57 t+   72.1] SCAP sc01-postprofile-t71.png tick~2340
+[05:00:58 t+   72.7] SCAP sc02-final-t72.png tick~2340
+[05:00:59 t+   74.3] THREADS
+Threads: 28 total,   3 running,  25 sleeping,   0 stopped,   0 zombie
+  Mem:  7342756K total,  4940060K used,  2402696K free,      628K buffers
+ Swap: 10485752K total,   717756K used,  9767996K free,  2215836K cached
+800%cpu 108%user   0%nice  15%sys 669%idle   0%iow   8%irq   0%sirq   0%host
+  TID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ THREAD          PROCESS
+30588 u0_a113      10 -10  17G 706M 467M R 53.8   9.8   0:30.27 MTVU            com.ps2x.runner
+30578 u0_a113      10 -10  17G 706M 467M R 26.9   9.8   0:16.96 GameThread      com.ps2x.runner
+30557 u0_a113      10 -10  17G 706M 467M S 26.9   9.8   0:11.38 GsWorker        com.ps2x.runner
+30587 u0_a113      20   0  17G 706M 467M S  0.0   9.8   0:00.00 InteractionJank com.ps2x.runner
+30585 u0_a113      20   0  17G 706M 467M S  0.0   9.8   0:00.00 binder:30534_4  com.ps2x.runner
+30580 u0_a113      10 -10  17G 706M 467M R  0.0   9.8   0:00.08 PGS-Waiter      com.ps2x.runner
+30579 u0_a113      39  19  17G 706M 467M S  0.0   9.8   0:00.00 com.ps:traceq0  com.ps2x.runner
+30576 u0_a113      -3 -10  17G 706M 467M S  0.0   9.8   0:00.24 AAudio_1        com.ps2x.runner
+30570 u0_a113      20   0  17G 706M 467M S  0.0   9.8   0:00.03 binder:30534_4  com.ps2x.runner
+30569 u0_a113      10 -10  17G 706M 467M S  0.0   9.8   0:00.00 com.ps2x.runner com.ps2x.runner
+30562 u0_a113      20   0  17G 706M 467M S  0.0   9.8   0:00.00 InsetsAnimation com.ps2x.runner
+30560 u0_a113      20   0  17G 706M 467M S  0.0   9.8   0:00.00 SurfaceSyncGrou com.ps2x.runner
+30559 u0_a113      10 -10  17G 706M 467M S  0.0   9.8   0:00.00 VsyncReceiver   com.ps2x.runner
+30561 u0_a113      20   0  17G 706M 467M S  0.0   9.8   0:00.00 binder:30534_3  com.ps2x.runner
+30555 u0_a113      10 -10  17G 706M 467M S  0.0   9.8   0:00.22 com.ps2x.runner com.ps2x.runner
+
+[05:00:59 t+   74.4] BATTERY status: 5 level: 100
+[05:01:02 t+   77.5] RESTORE ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390 match=True
+[05:01:03 t+   77.7] MC0-AFTER bad=[]
+[05:01:03 t+   77.8] END pid-after=none disconnects=0

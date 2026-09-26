@@ -1,0 +1,205 @@
+record span ns: 473445322481472 .. 473465342740058 = 20.020s
+
+=== per-thread on/off from switch pairs (ns) ===
+tid=30544 switches=2 off_ns=0 off_s=0.000
+tid=30547 switches=1668 off_ns=18791519002 off_s=18.792
+tid=30555 switches=2790 off_ns=19944191155 off_s=19.944
+tid=30556 switches=62 off_ns=16931907075 off_s=16.932
+tid=30557 switches=352438 off_ns=15694901118 off_s=15.695
+tid=30570 switches=104 off_ns=1149596926 off_s=1.150
+tid=30576 switches=4010 off_ns=19929803914 off_s=19.930
+tid=30578 switches=1812 off_ns=14664232347 off_s=14.664
+tid=30580 switches=6402 off_ns=19955527357 off_s=19.956
+tid=30581 switches=4994 off_ns=466582173 off_s=0.467
+tid=30582 switches=4982 off_ns=354483158 off_s=0.354
+tid=30583 switches=3174 off_ns=320828749 off_s=0.321
+tid=30584 switches=412 off_ns=104368746 off_s=0.104
+tid=30588 switches=15060 off_ns=7755262275 off_s=7.755
+
+=== sleep classes (time-weighted) ===
+tid=30544 offsamples=1 paired_s=0.000 unpaired=1
+tid=30547 offsamples=831 paired_s=18.794 unpaired=1
+      18.793s ioctl-fence
+       0.001s other:android::Thread::_threadLoop(void*)
+       0.000s other:android::Vector<android::BBinder*>::do_splat(void*, void con
+       0.000s other:android::IPCThreadState::talkWithDriver(bool)
+       0.000s other:android::VectorImpl::removeItemsAt(unsigned long, unsigned l
+       0.000s other:android::RefBase::weakref_type::decWeak(void const*)
+       0.000s other:free
+       0.000s other:dup
+tid=30555 offsamples=1395 paired_s=19.965 unpaired=1
+      13.566s other:main
+       6.388s futex-cond
+       0.011s enqueue-backpressure
+       0.000s other:eglGetCurrentDisplay
+       0.000s poll
+       0.000s other:android::egl_display_t::getObject(android::egl_object_t*) co
+       0.000s other:GS::latchHostPresentationFrame()
+       0.000s other:ANativeWindow_query
+tid=30556 offsamples=31 paired_s=16.932 unpaired=1
+      16.932s other:__pthread_start(void*)
+tid=30557 offsamples=175104 paired_s=12.233 unpaired=1
+       6.169s futex-cond
+       6.032s ioctl-fence
+       0.022s other:GS::processGIFPacket(unsigned char const*, unsigned int)
+       0.002s other:pthread_mutex_unlock
+       0.002s other:GsWorker::threadMain()
+       0.001s other:std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsComma
+       0.001s other:ParallelGS::GSInterface::flush_pending_transfer(bool)
+       0.001s other:__pthread_start(void*)
+tid=30570 offsamples=52 paired_s=1.150 unpaired=1
+       1.150s ioctl-fence
+tid=30576 offsamples=2005 paired_s=19.936 unpaired=1
+      19.936s other:__pthread_start(void*)
+       0.000s other:ma_device_handle_backend_data_callback
+tid=30578 offsamples=904 paired_s=14.667 unpaired=1
+      14.653s futex-cond
+       0.008s other:__start_thread
+       0.003s other:std::__ndk1::basic_streambuf<char, std::__ndk1::char_traits<
+       0.002s other:__pthread_start(void*)
+       0.001s other:PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context
+       0.000s other:VU1Interpreter::run(unsigned char*, unsigned int, unsigned c
+       0.000s other:EeScheduler::processEvent(EeEvent const&)
+       0.000s other:sub_0022C078_0x22c078(unsigned char*, R5900Context*, PS2Runt
+tid=30580 offsamples=1362 paired_s=10.145 unpaired=1
+      10.103s futex-cond
+       0.041s ioctl-fence
+       0.001s other:Vulkan::SemaphoreHolder::wait_timeline(unsigned long)
+       0.000s other:*libvulkan_freedreno.so[+a7b7d0]
+       0.000s other:__start_thread
+       0.000s other:*libvulkan_freedreno.so[+a3a284]
+       0.000s other:*libvulkan_freedreno.so[+a39750]
+       0.000s other:*libvulkan_freedreno.so[+a7b974]
+tid=30581 offsamples=2497 paired_s=0.474 unpaired=0
+       0.044s other:*libvulkan_freedreno.so[+b64698]
+       0.029s other:*libvulkan_freedreno.so[+c1d3f8]
+       0.017s other:*libvulkan_freedreno.so[+afcd44]
+       0.016s other:scudo::HybridMutex::tryLock()
+       0.016s other:*libvulkan_freedreno.so[+c18c0c]
+       0.016s other:*libvulkan_freedreno.so[+c63598]
+       0.014s other:*libvulkan_freedreno.so[+ac6614]
+       0.013s other:*libvulkan_freedreno.so[+ab7f5c]
+tid=30582 offsamples=2491 paired_s=0.362 unpaired=0
+       0.026s other:*libvulkan_freedreno.so[+c1d3f8]
+       0.020s other:*libvulkan_freedreno.so[+ac6614]
+       0.015s other:scudo::HybridMutex::tryLock()
+       0.015s other:*libvulkan_freedreno.so[+c1d6d8]
+       0.015s other:*libvulkan_freedreno.so[+b64698]
+       0.013s other:*libvulkan_freedreno.so[+a27074]
+       0.013s other:*libvulkan_freedreno.so[+c18c0c]
+       0.012s other:*libvulkan_freedreno.so[+a96970]
+tid=30583 offsamples=1587 paired_s=0.326 unpaired=0
+       0.023s other:*libvulkan_freedreno.so[+b75f18]
+       0.023s other:*libvulkan_freedreno.so[+c18c0c]
+       0.017s other:*libvulkan_freedreno.so[+ae8b4c]
+       0.014s other:scudo::HybridMutex::tryLock()
+       0.014s other:*libvulkan_freedreno.so[+b64698]
+       0.014s other:*libvulkan_freedreno.so[+b75b0c]
+       0.013s other:*libvulkan_freedreno.so[+a21c54]
+       0.012s other:*libvulkan_freedreno.so[+add38c]
+tid=30584 offsamples=206 paired_s=0.105 unpaired=0
+       0.030s other:*libvulkan_freedreno.so[+c18c0c]
+       0.014s other:scudo::HybridMutex::tryLock()
+       0.009s other:*libvulkan_freedreno.so[+b64698]
+       0.006s other:*libvulkan_freedreno.so[+a96b80]
+       0.004s other:*libvulkan_freedreno.so[+a271a0]
+       0.004s other:*libvulkan_freedreno.so[+bb3888]
+       0.003s other:*libvulkan_freedreno.so[+ae9fb0]
+       0.003s other:*libvulkan_freedreno.so[+aa1480]
+tid=30588 offsamples=7528 paired_s=7.771 unpaired=0
+       4.954s futex-cond
+       2.713s enqueue-backpressure
+       0.072s other:std::__ndk1::__function::__func<PS2Memory::processPendingTra
+       0.026s other:PS2Memory::processVIF1DataImpl(unsigned char const*, unsigne
+       0.004s other:scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::Andr
+       0.001s other:VU1RecompImage<17692172933381506641ul>::B0a58(VU1Interpreter
+       0.001s other:GS::processGIFPacket(unsigned char const*, unsigned int)
+       0.000s other:VU1RecompImage<12951700169819473931ul>::f2d48(VU1Interpreter
+
+=== on-cpu top symbols by tid (event_count s) ===
+tid=30547 oncpu_s=0.024
+       0.001s *[kernel.kallsyms][+ffffffe760a277ec]
+       0.001s *[kernel.kallsyms][+ffffffe760b0ef7c]
+       0.001s android::BnTransactionCompletedListener::onTransact(unsigned int, android::Parcel const&, android::P
+       0.001s android::ListenerStats::readFromParcel(android::Parcel const*)
+       0.001s std::__1::vector<android::CallbackId, std::__1::allocator<android::CallbackId>>::__append(unsigned l
+       0.001s *[kernel.kallsyms][+ffffffe7616f1570]
+tid=30555 oncpu_s=0.062
+       0.004s @plt
+       0.004s pthread_mutex_lock
+       0.003s android::egl_display_t::getObject(android::egl_object_t*) const
+       0.003s PS2Runtime::run()
+       0.003s *[kernel.kallsyms][+ffffffe760b0ef7c]
+       0.002s PollInputEvents
+tid=30556 oncpu_s=0.000
+       0.000s __memcpy_aarch64_nt
+tid=30557 oncpu_s=4.035
+       0.357s void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+       0.350s GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+       0.264s GS::buildDrawBatch(int) const
+       0.250s GS::vertexKick(bool)
+       0.187s void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)4, 1>(void const*, unsig
+       0.159s ps2_gfx_stats::detail::ensureInit()
+tid=30570 oncpu_s=0.002
+       0.000s android::TransactionStats::readFromParcel(android::Parcel const*)
+       0.000s @plt
+       0.000s android::BnTransactionCompletedListener::onTransact(unsigned int, android::Parcel const&, android::P
+       0.000s *[kernel.kallsyms][+ffffffe760a277ec]
+       0.000s android::CallbackId::readFromParcel(android::Parcel const*)
+       0.000s android::TransactionCompletedListener::popReleaseBufferCallbackLocked(android::ReleaseCallbackId con
+tid=30576 oncpu_s=0.080
+       0.019s (anonymous namespace)::audioCallback(void*, unsigned int)
+       0.011s ma_linear_resampler_process_pcm_frames
+       0.005s aaudio::flowgraph::FlowGraphPortFloatOutput::pullData(long, int)
+       0.003s *[kernel.kallsyms][+ffffffe760b0ef7c]
+       0.003s __aarch64_ldadd8_relax
+       0.003s __memcpy_aarch64_nt
+tid=30578 oncpu_s=5.156
+       0.692s VU1Interpreter::execUpper(unsigned int)
+       0.636s VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, uns
+       0.357s VU1Interpreter::commitReadyPipelines()
+       0.146s sub_0037E120_0x37e120(unsigned char*, R5900Context*, PS2Runtime*)
+       0.122s VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+       0.110s *[kernel.kallsyms][+ffffffe761a841b8]
+tid=30580 oncpu_s=0.013
+       0.002s *[kernel.kallsyms][+ffffffe760b0ef7c]
+       0.001s @plt
+       0.001s void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__nd
+       0.001s *libvulkan_freedreno.so[+a79dec]
+       0.001s pthread_mutex_unlock
+       0.001s *libvulkan_freedreno.so[+a7b79c]
+tid=30581 oncpu_s=16.377
+       0.583s scudo::HybridMutex::tryLock()
+       0.253s scudo::HybridMutex::unlock()
+       0.237s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo:
+       0.231s __memset_aarch64_nt
+       0.215s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk
+       0.203s *libvulkan_freedreno.so[+b40d34]
+tid=30582 oncpu_s=16.197
+       0.594s scudo::HybridMutex::tryLock()
+       0.265s scudo::HybridMutex::unlock()
+       0.227s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo:
+       0.225s __memset_aarch64_nt
+       0.213s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk
+       0.207s *libvulkan_freedreno.so[+b40d34]
+tid=30583 oncpu_s=12.826
+       0.504s scudo::HybridMutex::tryLock()
+       0.207s scudo::HybridMutex::unlock()
+       0.183s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo:
+       0.182s __memset_aarch64_nt
+       0.179s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk
+       0.172s *libvulkan_freedreno.so[+b40d34]
+tid=30584 oncpu_s=1.339
+       0.061s scudo::HybridMutex::tryLock()
+       0.025s __memset_aarch64_nt
+       0.025s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo:
+       0.023s scudo::HybridMutex::unlock()
+       0.018s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(sc
+       0.018s scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk
+tid=30588 oncpu_s=12.133
+       0.929s *[kernel.kallsyms][+ffffffe761a8e810]
+       0.891s VU1RecompImage<17692172933381506641ul>::B2a10(VU1Interpreter&, VU1Interpreter::RunContext&)
+       0.601s VU1RecompImage<11917748289753363281ul>::B0628(VU1Interpreter&, VU1Interpreter::RunContext&)
+       0.525s VU1Interpreter::commitReadyPipelines()
+       0.347s PS2Memory::processVIF1DataImpl(unsigned char const*, unsigned int)
+       0.344s VU1RecompImage<17692172933381506641ul>::B0a58(VU1Interpreter&, VU1Interpreter::RunContext&)

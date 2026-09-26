@@ -1,0 +1,72 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g -e cpu-clock --trace-offcpu --duration 20
+Arch: arm64
+Event: cpu-clock (type 1, config 0)
+Samples: 22130
+Time in ns: 19969704576
+
+Children  Self    Command     Symbol
+99.25%    0.05%   GameThread  EeScheduler::run()
+99.25%    0.00%   GameThread  __pthread_start(void*)
+99.25%    0.00%   GameThread  __start_thread
+99.25%    0.00%   GameThread  std::__ndk1::__function::__func<PS2Runtime::run()::$_1, std::__ndk1::allocator<PS2Runtime::run()::$_1>, void ()>::operator()()
+99.25%    0.00%   GameThread  void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, std::__ndk1::function<void ()>>>(void*)
+74.23%    0.01%   GameThread  EeScheduler::processPendingEvents()
+74.17%    0.03%   GameThread  EeScheduler::processDueDeadlines()
+74.09%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760a11586]
+74.08%    0.00%   GameThread  [kernel.kallsyms][+ffffffe761a7d85e]
+74.06%    0.00%   GameThread  [kernel.kallsyms][+ffffffe761a84432]
+74.06%    0.01%   GameThread  EeScheduler::processEvent(EeEvent const&)
+74.05%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760a3aece]
+74.05%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760a3af86]
+74.05%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760a3b042]
+74.05%    0.00%   GameThread  [kernel.kallsyms][+ffffffe761a7d8ea]
+73.99%    0.01%   GameThread  ps2_mtvu::vblank(unsigned long, bool)
+73.99%    0.00%   GameThread  ps2_mtvu::detail::Worker::waitFor(unsigned long)
+73.73%    73.73%  GameThread  [kernel.kallsyms][+ffffffe761a84288]
+73.73%    0.00%   GameThread  [kernel.kallsyms][+ffffffe761a84286]
+73.66%    0.00%   GameThread  syscall
+73.65%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760bca446]
+73.60%    0.00%   GameThread  std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+73.60%    0.00%   GameThread  pthread_cond_wait
+73.60%    0.00%   GameThread  __futex_wait_ex(void volatile*, bool, int, bool, timespec const*)
+73.60%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760bca196]
+73.60%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760bce466]
+73.60%    0.00%   GameThread  [kernel.kallsyms][+ffffffe760bcdd5a]
+19.30%    0.25%   GameThread  PS2Runtime::dispatchGuestBranch(unsigned char*, R5900Context*, unsigned int, unsigned int, unsigned int, PS2Runtime::GuestBranchKind, char const*)
+9.91%     0.06%   GameThread  PS2Runtime::executeVU0Microprogram(unsigned char*, R5900Context*, unsigned int)
+9.65%     3.19%   GameThread  VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+9.05%     0.15%   GameThread  sub_0022ADD8_0x22add8(unsigned char*, R5900Context*, PS2Runtime*)
+3.88%     0.15%   GameThread  sub_0022A830_0x22a830(unsigned char*, R5900Context*, PS2Runtime*)
+3.60%     0.03%   GameThread  sub_0022A408_0x22a408(unsigned char*, R5900Context*, PS2Runtime*)
+3.52%     0.05%   GameThread  sub_0022A128_0x22a128(unsigned char*, R5900Context*, PS2Runtime*)
+3.51%     3.46%   GameThread  VU1Interpreter::execUpper(unsigned int)
+2.85%     0.01%   GameThread  sub_00128AF0_0x128af0(unsigned char*, R5900Context*, PS2Runtime*)
+1.79%     1.79%   GameThread  VU1Interpreter::commitReadyPipelines()
+1.70%     0.01%   GameThread  sub_0022A368_0x22a368(unsigned char*, R5900Context*, PS2Runtime*)
+1.68%     0.05%   GameThread  sub_00229FC8_0x229fc8(unsigned char*, R5900Context*, PS2Runtime*)
+1.48%     0.03%   GameThread  sub_002306A8_0x2306a8(unsigned char*, R5900Context*, PS2Runtime*)
+1.37%     0.02%   GameThread  sub_00129160_0x129160(unsigned char*, R5900Context*, PS2Runtime*)
+1.37%     0.73%   GameThread  sub_0037E120_0x37e120(unsigned char*, R5900Context*, PS2Runtime*)
+1.26%     0.07%   GameThread  sub_00363490_0x363490(unsigned char*, R5900Context*, PS2Runtime*)
+1.21%     0.03%   GameThread  sub_00382760_0x382760(unsigned char*, R5900Context*, PS2Runtime*)
+1.04%     0.32%   GameThread  sub_00376938_0x376938(unsigned char*, R5900Context*, PS2Runtime*)
+1.03%     0.17%   GameThread  sub_001E9A30_0x1e9a30(unsigned char*, R5900Context*, PS2Runtime*)
+1.02%     0.01%   GameThread  PS2Runtime::Store32(unsigned char*, R5900Context*, unsigned int, unsigned int)
+0.93%     0.01%   GameThread  sub_003C1638_0x3c1638(unsigned char*, R5900Context*, PS2Runtime*)
+0.90%     0.01%   GameThread  sub_0022C620_0x22c620(unsigned char*, R5900Context*, PS2Runtime*)
+0.85%     0.17%   GameThread  PS2Memory::writeIORegister(unsigned int, unsigned int)
+0.81%     0.00%   GameThread  ps2_syscalls::dispatchNumericSyscall(unsigned int, unsigned char*, R5900Context*, PS2Runtime*)
+0.81%     0.00%   GameThread  PS2Runtime::handleSyscall(unsigned char*, R5900Context*, unsigned int)
+0.78%     0.21%   GameThread  sub_0038B0F8_0x38b0f8(unsigned char*, R5900Context*, PS2Runtime*)
+0.73%     0.01%   GameThread  sub_0022C3B8_0x22c3b8(unsigned char*, R5900Context*, PS2Runtime*)
+0.69%     0.68%   GameThread  libunwind::findUnwindSectionsByPhdr(dl_phdr_info*, unsigned long, void*)
+0.63%     0.61%   GameThread  VU1Interpreter::execLower(unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+0.58%     0.00%   GameThread  sub_003550A0_0x3550a0(unsigned char*, R5900Context*, PS2Runtime*)
+0.58%     0.00%   GameThread  libunwind::UnwindCursor<libunwind::LocalAddressSpace, libunwind::Registers_arm64>::setInfoBasedOnIPRegister(bool)
+0.58%     0.00%   GameThread  sub_001216E0_0x1216e0(unsigned char*, R5900Context*, PS2Runtime*)
+0.57%     0.00%   GameThread  sub_00111408_0x111408(unsigned char*, R5900Context*, PS2Runtime*)
+0.55%     0.02%   GameThread  sub_003C85D0_0x3c85d0(unsigned char*, R5900Context*, PS2Runtime*)
+0.54%     0.00%   GameThread  sub_003C8968_0x3c8968(unsigned char*, R5900Context*, PS2Runtime*)
+0.52%     0.00%   GameThread  sub_00423DE0_0x423de0(unsigned char*, R5900Context*, PS2Runtime*)
+0.52%     0.05%   GameThread  PS2Memory::writeIORegister(unsigned int, unsigned int)::$_2::operator()(unsigned int, unsigned int) const
+0.51%     0.01%   GameThread  EeScheduler::waitSemaphore(int)

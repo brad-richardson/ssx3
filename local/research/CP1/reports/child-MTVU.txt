@@ -1,0 +1,69 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g -e cpu-clock --trace-offcpu --duration 20
+Arch: arm64
+Event: cpu-clock (type 1, config 0)
+Samples: 56598
+Time in ns: 20019950044
+
+Children  Self    Command  Symbol
+99.43%    0.00%   MTVU     ps2_mtvu::detail::Worker::loop()
+99.43%    0.00%   MTVU     __pthread_start(void*)
+99.43%    0.00%   MTVU     __start_thread
+99.43%    0.00%   MTVU     void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, ps2_mtvu::detail::Worker::start()::'lambda'()>>(void*)
+74.91%    0.00%   MTVU     std::__ndk1::__function::__func<PS2Memory::processPendingTransfers()::$_1, std::__ndk1::allocator<PS2Memory::processPendingTransfers()::$_1>, void ()>::operator()()
+74.83%    1.66%   MTVU     PS2Memory::processVIF1DataImpl(unsigned char const*, unsigned int)
+74.83%    0.00%   MTVU     PS2Memory::processVIF1Data(unsigned char const*, unsigned int)
+71.77%    0.00%   MTVU     std::__ndk1::__function::__func<PS2Runtime::syncCoreSubsystems()::$_5, std::__ndk1::allocator<PS2Runtime::syncCoreSubsystems()::$_5>, void (unsigned int, unsigned int, unsigned int)>::operator()(unsigned int&&, unsigned int&&, unsigned int&&)
+71.55%    0.49%   MTVU     VU1Interpreter::run(unsigned char*, unsigned int, unsigned char*, unsigned int, GS&, PS2Memory*, unsigned int)
+46.94%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760a11586]
+46.86%    0.04%   MTVU     syscall
+46.83%    0.00%   MTVU     [kernel.kallsyms][+ffffffe761a7d85e]
+46.12%    0.00%   MTVU     [kernel.kallsyms][+ffffffe761a7d8ea]
+46.12%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760a3aece]
+46.12%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760a3af86]
+46.11%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760a3b042]
+46.10%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760bca446]
+41.65%    41.65%  MTVU     [kernel.kallsyms][+ffffffe761a84288]
+41.65%    0.00%   MTVU     [kernel.kallsyms][+ffffffe761a84286]
+41.53%    0.00%   MTVU     [kernel.kallsyms][+ffffffe761a84432]
+41.06%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760bca196]
+41.04%    0.00%   MTVU     __futex_wait_ex(void volatile*, bool, int, bool, timespec const*)
+41.04%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760bce466]
+41.04%    0.00%   MTVU     [kernel.kallsyms][+ffffffe760bcdd5a]
+38.18%    0.00%   MTVU     pthread_cond_wait
+38.18%    0.00%   MTVU     std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+24.68%    1.29%   MTVU     VU1Interpreter::progressXgkick()
+24.29%    0.03%   MTVU     PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+16.13%    0.02%   MTVU     GifArbiter::drain()
+15.06%    0.07%   MTVU     GsWorker::enqueue(GsCommand)
+14.02%    0.03%   MTVU     GS::noteGifPath(GifPathId)
+5.59%     0.01%   MTVU     std::__ndk1::condition_variable::notify_one()
+5.58%     0.05%   MTVU     pthread_cond_signal
+5.03%     0.00%   MTVU     [kernel.kallsyms][+ffffffe760bca252]
+4.80%     0.00%   MTVU     [kernel.kallsyms][+ffffffe760bcd2be]
+4.79%     0.00%   MTVU     [kernel.kallsyms][+ffffffe760b09cb6]
+4.55%     4.33%   MTVU     VU1RecompImage<17692172933381506641ul>::B2a10(VU1Interpreter&, VU1Interpreter::RunContext&)
+4.43%     4.43%   MTVU     [kernel.kallsyms][+ffffffe761a8e810]
+4.38%     0.78%   MTVU     VU1RecompImage<12499688582289950957ul>::B1500(VU1Interpreter&, VU1Interpreter::RunContext&)
+3.41%     3.00%   MTVU     VU1RecompImage<11917748289753363281ul>::B0628(VU1Interpreter&, VU1Interpreter::RunContext&)
+3.12%     0.06%   MTVU     std::__ndk1::mutex::lock()
+2.93%     0.00%   MTVU     NonPI::MutexLockWithTimeout(pthread_mutex_internal_t*, bool, timespec const*)
+2.49%     2.48%   MTVU     VU1Interpreter::commitReadyPipelines()
+2.44%     0.20%   MTVU     VU1Interpreter::advanceTo(unsigned long)
+2.36%     0.11%   MTVU     VU1RecompImage<12499688582289950957ul>::B1b10(VU1Interpreter&, VU1Interpreter::RunContext&)
+1.99%     0.01%   MTVU     VU1RecompImage<12499688582289950957ul>::f0d08(VU1Interpreter&, VU1Interpreter::RunContext&)
+1.87%     0.01%   MTVU     GsWorker::beginBatch()
+1.74%     0.16%   MTVU     GS::processGIFPacket(unsigned char const*, unsigned int)
+1.73%     1.70%   MTVU     VU1RecompImage<17692172933381506641ul>::B0a58(VU1Interpreter&, VU1Interpreter::RunContext&)
+1.61%     0.82%   MTVU     VU1RecompImage<12499688582289950957ul>::B14b0(VU1Interpreter&, VU1Interpreter::RunContext&)
+1.12%     0.98%   MTVU     VU1RecompImage<17692172933381506641ul>::B30d8(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.92%     0.02%   MTVU     VU1RecompImage<12499688582289950957ul>::B1968(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.90%     0.65%   MTVU     VU1RecompImage<17692172933381506641ul>::B2ea0(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.80%     0.46%   MTVU     VU1RecompImage<17692172933381506641ul>::B1450(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.76%     0.28%   MTVU     VU1RecompImage<12499688582289950957ul>::B1368(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.69%     0.07%   MTVU     VU1RecompImage<12499688582289950957ul>::B1550(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.69%     0.48%   MTVU     VU1RecompImage<12499688582289950957ul>::B13f8(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.67%     0.59%   MTVU     VU1RecompImage<11917748289753363281ul>::B0720(VU1Interpreter&, VU1Interpreter::RunContext&)
+0.60%     0.25%   MTVU     pthread_mutex_unlock
+0.50%     0.00%   MTVU     [kernel.kallsyms][+ffffffe760a11732]
+0.50%     0.00%   MTVU     [kernel.kallsyms][+ffffffe761a7e0be]
+0.50%     0.00%   MTVU     [kernel.kallsyms][+ffffffe761a7e0e2]

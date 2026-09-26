@@ -1,0 +1,43 @@
+[04:51:51] PRE lease="LEASE_FREE CP1-R1 done" keyguard="showing=false" battery=100% ac=true pid0=none
+[04:51:51] PRE device-env=ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390 mc0-test='' mc0-bad=[]
+[04:51:51] LEASE claimed via odin_lease.sh: CLAIMED
+[04:51:52] APK local sha x2 825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254 825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254
+[04:51:55] INSTALL Performing Streamed Install Success
+[04:51:55] INSTALLED /data/app/~~aCR34BUuClIsOEeJyzEcuA==/com.ps2x.runner-oT9tIsmBnCw2rmNgHA4FvQ==/base.apk sha=825b436dd2cfc9f3ee42e7ac06643623b9651df409892c6a3e25af27cc531254 match=True
+[04:51:55] ENV 55a27962db0ded4c89684f798c05350e7b64922078308120469fe520f5d57d5e  /storage/emulated/0/Android/data/com.ps2x.runner/files/ps2x.env
+[04:51:55 t+    0.1] AM Starting: Intent { cmp=com.ps2x.runner/android.app.NativeActivity }
+[04:52:02 t+    6.1] FOCUS app-foreground, no BACK ('mCurrentFocus=Window{49bdcc3 u0 com.ps2x.runner/android.app.NativeActivity}')
+[04:52:04 t+    8.5] LAYER 'com.ps2x.runner/android.app.NativeActivity#21872' tried=['com.ps2x.runner/android.app.NativeActivity#21862', 'RequestedLayerState{ActivityRecord{f182902 u0 com.ps2x.runner/android.app.NativeActivity#21862 parentId=21861}', 'RequestedLayerState{af9fa67 Splash Screen com.ps2x.runner#21863 z=2147483647}', 'com.ps2x.runner/android.app.NativeActivity#21872']
+[04:52:44 t+   48.8] CPUWIN start tick=1949
+[04:52:44 t+   48.8] PROFILE start tick=1949
+[04:52:47 t+   51.3] PROFILE end wall=2.5s tick~1949
+[04:52:47 t+   51.3] PROFILE out: 'simpleperf E cmd_record.cpp:1405] --trace-offcpu option only works with one of events cpu-clock task-clock'
+[04:52:47 t+   51.4] PROFILE data: '-rw-r--r-- 1 shell shell 0 2026-09-26 04:52 /data/local/tmp/cp1/perf-R2.data'
+[04:52:48 t+   52.1] SCAP sc01-postprofile-t51.png tick~1949
+[04:52:48 t+   52.8] SCAP sc02-final-t52.png tick~1949
+[04:52:50 t+   54.1] THREADS
+Threads: 32 total,   3 running,  29 sleeping,   0 stopped,   0 zombie
+  Mem:  7342756K total,  4795420K used,  2547336K free,      628K buffers
+ Swap: 10485752K total,   710240K used,  9775512K free,  2042628K cached
+800%cpu 385%user   0%nice  50%sys 358%idle   0%iow   8%irq   0%sirq   0%host
+  TID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ THREAD          PROCESS
+27612 u0_a113      10 -10  17G 701M 449M R  100   9.7   0:51.65 GsWorker        com.ps2x.runner
+27610 u0_a113      10 -10  17G 701M 449M R  100   9.7   0:51.65 GsWorker        com.ps2x.runner
+27611 u0_a113      10 -10  17G 701M 449M R  100   9.7   0:51.61 GsWorker        com.ps2x.runner
+27617 u0_a113      10 -10  17G 701M 449M S 57.6   9.7   0:18.49 MTVU            com.ps2x.runner
+27607 u0_a113      10 -10  17G 701M 449M S 23.0   9.7   0:11.40 GameThread      com.ps2x.runner
+27582 u0_a113      10 -10  17G 701M 449M S 15.3   9.7   0:07.28 GsWorker        com.ps2x.runner
+27615 u0_a113      20   0  17G 701M 449M S  0.0   9.7   0:00.00 InteractionJank com.ps2x.runner
+27614 u0_a113      20   0  17G 701M 449M S  0.0   9.7   0:00.00 binder:27530_5  com.ps2x.runner
+27609 u0_a113      10 -10  17G 701M 449M S  0.0   9.7   0:00.04 PGS-Waiter      com.ps2x.runner
+27608 u0_a113      39  19  17G 701M 449M S  0.0   9.7   0:00.00 com.ps:traceq0  com.ps2x.runner
+27606 u0_a113      -3 -10  17G 701M 449M S  0.0   9.7   0:00.16 AAudio_1        com.ps2x.runner
+27600 u0_a113      10 -10  17G 701M 449M S  0.0   9.7   0:00.00 com.ps2x.runner com.ps2x.runner
+27594 u0_a113      20   0  17G 701M 449M S  0.0   9.7   0:00.00 InsetsAnimation com.ps2x.runner
+27593 u0_a113      20   0  17G 701M 449M S  0.0   9.7   0:00.00 binder:27530_5  com.ps2x.runner
+27592 u0_a113      20   0  17G 701M 449M S  0.0   9.7   0:00.03 binder:27530_4  com.ps2x.runner
+
+[04:52:50 t+   54.2] BATTERY status: 5 level: 100
+[04:52:52 t+   56.7] RESTORE ef9f94e11ecda70afe6fdc7602fcf22c259c6748660816cf23937df54989a390 match=True
+[04:52:52 t+   57.0] MC0-AFTER bad=[]
+[04:52:52 t+   57.1] END pid-after=none disconnects=0
