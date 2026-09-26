@@ -460,7 +460,7 @@ Fork local branch `vr2-blocks` = `d4fc12e` + stage 4 (`e5ac052`, `7a2d9ed`) + 2C
 | --- | --- | --- | --- | --- | --- |
 | `a6e666b` | `stopRequestedForTest` hook; test counts error-stop mismatches | 662/663 (the expected VB1 red) | 3,129 mismatches in 5 programs; **3,129 on an error stop**, 3,129 reproduced by interpreter+direct; blocks-vs-pairs 0 | — | — |
 | `95f952e` | **An error stop drains the pipelines like a program end** | 663/663 | **0** (271 programs, 254,400 runs) | **IDENTICAL**, runner `598d49eb…` | — (error path only) |
-| `8610c69` | Copy bypass for direct VF/ACC writes | 663/663 | 0 | **IDENTICAL**, runner `aa993db2…` | vs previous tip: **−0.3 %** (see table) |
+| `8610c69` | Copy bypass for direct VF/ACC writes | 663/663 | 0 | **IDENTICAL**, runner `aa993db2…` | vs previous tip: **−0.8 %** (+0.2 % without H9-3's dip; see table) |
 | `fa35e67` | Loop chaining for self-looping blocks (57 in the game images); fixture adds 12 counted loops | 663/663 | **0** (283 programs, 270,000 runs, 12 self-looping blocks) | **IDENTICAL**, runner `1be1b876…` | vs copy bypass: **+0.2 %** |
 
 The det gate compares against `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` (ticks 1..2400, plus
