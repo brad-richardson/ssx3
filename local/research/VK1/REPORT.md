@@ -551,3 +551,51 @@ main thread drops from ~4.4 to 0.08 ms/frame.
    it into F6 (Brad's next device build).
 3. Restore Brad's play state (F5 `4ff81032…` + env `a8d651a7…`) and verify, as you did.
 Budget: ≤ 2 Odin launches, ≤ 2 Android builds, 2 h. Then stop.
+
+## Part 3 — aspect on device + fold prep (09-26)
+
+### 1. Aspect on device (APK `727242b1…` = `15275cd`, 2 launches)
+
+| Run | Settings | HWC display frame of `ps2x-game` (panel is 1080×1920 portrait-native) | Screencap |
+| --- | --- | --- | --- |
+| AS1 | `PS2X_ASPECT=4:3`, pad off | t1201: long axis **239→1679**, short 1→1081; t2247: 240→1680 → **1440×1080**, CLIENT | `sc01` (My Rules), `sc02` (race t2100): pillarbox, **black bars ~240 px each side**, nothing stretched |
+| AS2 | `PS2X_ASPECT=4:3`, pad on (under-layer) | t1201 and t2247: **240→1680**, 1→1081 → **1440×1080**, **DEVICE** overlay; GL window above it CLIENT | `sc02` (race t2100): pillarbox with **black** bars (the scissored clear works), translucent pad over game and bars; injected pad press → `pad_in_use=1` |
+
+Child rect logged as `[99,0 696,448]` in the 796×448 parent buffer (`aspect=0` = 4:3), as
+computed. With in-game widescreen still on, the forced 4:3 shows SSX 3's anamorphic 16:9
+picture squeezed into 4:3, as the GL path would: true 4:3 content needs the game's widescreen
+off. 16:9 (the default) fills 1920×1080 exactly (D1/D3/Q/H1).
+
+### 2. Fold prep (branch `vk1-fold`, local, not pushed)
+
+- Fork: `vk1-fold` = fork `ssx3` **`173b31f`** + the 8 `vk1-part2` commits cherry-picked
+  (`-x`), no conflicts: `b6ce177` (prototype), `2335307` (geometry/lifecycle), `270441e`
+  (frame-context knob + sync line), `4dd0f6b` (default on, fallback, under-layer, GL skip),
+  `08a5e80` (present wall split), `dbd7ff6` (GL skip gating), `29b91cb` (thread name),
+  **`cdc8316`** (aspect-exact rect, black bars) = **tip**. Runner-dir diff vs `14b1e5cb`: empty.
+- paraLLEl: branch `vk1-part2` = `464f263` + `8013170` + `1b3a294` (fast-forward from fork
+  `ssx3` `464f263`, checked with `merge-base --is-ancestor`).
+- Suite **664/664** (Mac, worktree root; `mac_build.sh … --pgs ~/dev/ssx3-work/VK1/parallel-gs`,
+  canonical codegen `8ea8ed43…` and `vu1gen-ssx3`).
+- Mac det (`--det`, runner `df7cd3c8…`, FR1-R1 to t2400, one slot): `baseline.py compare --key
+  a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d` → **IDENTICAL** (hash, snd, coverage). Guest unchanged.
+- Save-state round trip: `baseline.py get-state a3efbfe-fr1r1-t2000-parallel-1x-433cb405` →
+  `--load` (38 sections, runner-SHA warning only, 511 ms) → **ticks 2001..2400: 400/400
+  identical** to the key's det hashes (direct per-tick compare; `baseline.py compare` prints DIFFER
+  only because ticks 1..2000 aren't in a loaded run and the snd/coverage summaries count from
+  the load).
+- Android: one build on bytesize (`/home/brad/vk3`, `git archive vk1-fold` streamed, tar
+  `9e0e970f…` both ends; paraLLEl = `/home/brad/vk2/parallel-gs`, file-identical to `1b3a294`;
+  canonical codegen/VU1 from `/home/brad/f5`): **BUILD SUCCESSFUL in 9 m 25 s**, APK
+  **`50e60dc7f5b1f002de14385a3b48c9b5e536952f1019e42d340e15db1132eab5`**, 180,213,320 B (two reads
+  on bytesize, two after the pull to `~/dev/ssx3-work/VK1/odin-apk-fold/`). **Not installed.**
+- Defaults in this APK on the Odin: Vulkan present on (`PS2X_PRESENT_VULKAN=0` = GL), 16:9 fill,
+  frame contexts 4, the `[gs:parallel] sync` line every 300 presents.
+
+### 3. Brad's play state
+
+Restored after AS2 (`restore-play.sh`, `logs/restore-play-part3.txt`): `base.apk` `4ff81032…`,
+env `a8d651a7…`, save 6/6 OK, `mc0-test` empty, app stopped, lease `LEASE_FREE VK1 done`.
+
+Budget used: 2/2 Odin launches, 1/2 Android builds, 2 Mac builds (fold, fold det), 2 det boots
+(one slot each, mini). Nothing pushed.
