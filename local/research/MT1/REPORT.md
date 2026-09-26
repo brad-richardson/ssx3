@@ -441,3 +441,19 @@ The go/no-go turns on R3.
 
 Also schedule one Odin census before stage 3 finishes, so the Odin number is measured rather than
 projected.
+
+## Orchestrator gate, stage 2′ (2026-09-26)
+
+**Pass.** Hooks det-IDENTICAL on both hosts at knob 0 and census (+512 KB); census cost nil; the assert
+caught a real ordering race (CSR drain before the sync) before any threading existed — exactly why the
+census stage was worth it. Prediction: Mac 1.24× (S1) … 1.65× (S3, ideal); Odin ≈ 1.1× … 1.35×.
+
+**Stage 3 approved** as: threaded execution with R1 (masked CSR reads free, incl. skipping the host
+drain) and R2 (EE GS-privileged writes queued in stream order, with the stated CSR exceptions) under
+`PS2X_MTVU=1`; R3 (no VBlank sync outside det-hash ticks, unit ≤ 1 frame behind) under a **separate**
+sub-knob (`PS2X_MTVU_LAG=1`), because it adds up to one frame of display latency — its default is Brad's
+call after the Odin numbers. Gates as in the brief: det IDENTICAL to the current key 3× Mac + 3×
+bradflix + 512 KB, with `--hash-every 1` (S2 timing) **and** a sparse-hash run (every 60th) for R3; jitter
+stress (`PS2X_MTVU_JITTER`) IDENTICAL; the synthetic VIF1/GIF ordering unit test; Mac speed ABBA knob 0
+vs 1 vs 1+LAG. Put `PS2X_MTVU_CPUS` in for the Odin. Stop before the Odin; I schedule an Odin census +
+threaded run with the next device APK. Budget ≤ 10 builds.
