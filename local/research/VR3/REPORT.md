@@ -289,3 +289,20 @@ from 36 (c0) to 20 (c3 off).
   commits after `d585e5c`). `git merge-tree fork/ssx3 vr3` is clean, and none of those commits touch the
   VU0 execution path (`executeVU0Microprogram`, `ps2_vu1*`). The fold still needs a rebase plus a
   suite/det recheck on the new tip; **nothing here was rebuilt on `a5e5940`.**
+
+## Orchestrator gate, stage 3 (2026-09-26)
+
+**Pass.** Exact on every gate (synthetic + game-image differentials 0 mismatches in all modes, det IDENTICAL
+off/on/on+direct on bradflix with 512 KB, census byte-identical); Mac +3.2 % (recompile) / **+5.4 %** (+ direct),
+consistent across quiet holds; VU0 share of GameThread 9.0 % → 4.1 %.
+
+## Stage 4 brief (orchestrator) — fold prep, then stop
+Branch `vr3-fold` from fork `ssx3` **`a5e5940`** (MT1 MTVU + BA1 `-O3` landed; rebase `fe1341e 1932d63 d52e7f0`;
+drop the dev census `69e60e1` unless it's off-by-default and useful — your call, say which). Knobs stay
+default off. Add the **Gradle wiring** (`-Pps2xVu0RecompDir` → `PS2X_VU0_RECOMP_DIR`, as `ps2xVu1RecompDir`) and
+make the iOS recipe pass it too (`~/dev/ssx3-work/F6/ios/build-install.sh`: a `VU0GEN` variable next to
+`VU1GEN`). Canonical image dir: copy `vu0gen-vr3` to `~/dev/ssx3-work/vu0gen-ssx3` (SHA-verified). Gates: Mac
+suite; det IDENTICAL off and on+direct (bradflix, private export script; HS2 may have landed a safer shared
+script — use whichever works); one Android compile with the VU0 image (bytesize, F7 may also be building —
+one heavy job at a time); one iOS device compile (configure + build only). Stop; I push, and the Odin pair
+(off vs on+direct) rides with the next device build.
