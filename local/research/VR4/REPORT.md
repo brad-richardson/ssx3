@@ -541,3 +541,47 @@ Flip `PS2X_VU1_FMAC_SIMD` (CMake) and `-Pps2xVu1FmacSimd` (gradle) to **default 
 (`f0d2d3c`; keep the scalar path compiled for the switch-off case and the test). Gates: Mac suite + bradflix suite +
 det IDENTICAL (default build, blocks on) + one Android compile + one iOS device compile (F6/F7 recipe, configure + build
 only). Stop; I push. The next device build (with FS2's Turnip if ready) will carry it.
+
+## D1 fold (worker, 2026-09-26 08:25–09:20) — 4 of 5 gates green; Android compile blocked by bytesize C: full
+
+**Branch `vr4-fold` = fork `ssx3` `f0d2d3c` + `e13397f` (D1) + `b97b241`, ready to push except the
+Android gate.** `b97b241` flips the defaults to ON:
+- CMake `option(PS2X_VU1_FMAC_SIMD … ON)`, with an MSVC fallback to scalar (MSVC has no vector
+  extensions; CMake prints a status line);
+- gradle `ps2xVu1FmacSimd ?: 'ON'`;
+- the header comment.
+
+The scalar path stays compiled: the unit test and execUpperForTest use it, and so does
+`-DPS2X_VU1_FMAC_SIMD=OFF` / `-Pps2xVu1FmacSimd=OFF`. The runner-dir guard is empty. Not pushed.
+All builds used the canonical scripts or recipes **without** any switch override, so the new
+default is what got tested.
+
+| Gate | Result | Receipt |
+| --- | --- | --- |
+| Mac suite (`mac_build.sh`, cache `PS2X_VU1_FMAC_SIMD:BOOL=ON`) | **686/686**; VR4 test 0/2 M; VR2 differential 0; VR3 differential 0 | `suites-fold.txt` |
+| bradflix suite (`bradflix_build.sh b97b241 --det`, cache ON) | **690/690**, same three lines 0 | `suites-fold.txt` |
+| det bradflix, default build, **blocks on**, 512 KB | **hash IDENTICAL 1..2400, snd/coverage IDENTICAL** vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d`; VU1 100 % generated. The runner `d19301e3…` is **byte-identical** to D1's gated det runner (explicit ON) | `check-fold-det-on.txt`, `stats-fold.txt` |
+| iOS device compile (VR4 copy of the F6 recipe with paraLLEl = canonical `3d72467`, needed by SS3; stages preflight + configure_device + build_device) | **BUILD SUCCEEDED**, 287 s. Binary `fbe25734…` (two reads). VU1 7 + VU0 1 images. `PS2X_VU1_FMAC_SIMD=1` on the compile lines | `ios-device-fold.txt`, `ios-build-vr4.sh` |
+| **Android compile** (VR3 recipe; source `git archive b97b241`; paraLLEl `3d72467` tar-streamed, SHA both ends; no `-Pps2xVu1FmacSimd`, so the default applies) | **NOT DONE. The WSL VM died mid-compile.** Windows logged at 08:44: "Virtual Memory Minimum Too Low" and "insufficient disk space on volume C:". **C: has 4 GB free (831 GB used)**. The WSL ext4 volume inside it shows 596 GB free, but the vhdx and the 16 GB WSL swap file sit on C: and cannot grow. The host itself did not reboot (up since 09-23); WSL restarted when I next connected | `build-android-fold.sh`, `android-fold.log` |
+
+**Blocker: bytesize's C: drive.** The Android gate needs C: space before any Android build can
+run safely, for this lane or FS2's. That is a host or Brad decision, since it touches every lane
+on bytesize. The options, all yours:
+- `wsl --shutdown` then `Optimize-VHD`/diskpart compact of the Ubuntu vhdx;
+- clear space on C:;
+- move the swap file (`.wslconfig` `swapfile=` onto another drive).
+
+My bytesize dirs:
+- `/home/brad/vr4`: 7.9 GB, the D1 A/B build. Its APK is already on the mini with its SHA
+  verified.
+- `/home/brad/vr4fold`: 2.5 GB, the fold inputs, ready for a rerun with the same script.
+
+Deleting them inside WSL frees ext4 space for reuse but does not return C: space. I left them,
+so you can keep the D1 unstripped `.so` for a profile if you want it.
+
+**Rerun once C: has room:**
+`ssh bytesize 'wsl -d Ubuntu -- bash -lc "/home/brad/vr4fold/build.sh"'`, holding the ssh
+(expected ~15 min).
+
+**Budget:** builds this fold: Mac 1, bradflix 1, iOS 1, Android 1 (died). Total for VR4: 9 of ≤ 10
+(the Android rerun would be the 10th). Boots: 1 det (bradflix).
