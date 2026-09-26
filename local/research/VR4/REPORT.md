@@ -585,3 +585,22 @@ so you can keep the D1 unstripped `.so` for a profile if you want it.
 
 **Budget:** builds this fold: Mac 1, bradflix 1, iOS 1, Android 1 (died). Total for VR4: 9 of ≤ 10
 (the Android rerun would be the 10th). Boots: 1 det (bradflix).
+
+**Android fold compile, status at 09:25 (per your HOLD):**
+- Retry 1 started at 09:17:37 under `bytesize_lock.sh run VR4-fold`. My waiter
+  (`bytesize_wait_run.sh`: lock free **and** no gradle/ninja/clang running) had just seen
+  bytesize idle; seconds earlier an AP1 gradle build and a Mesa `ninja -j8` were running outside
+  the lock.
+- **Stopped at your HOLD, ~09:22.** I killed the waiter, the lock `run` and its ssh on the mini,
+  and sent a kill for my gradle/ninja/clang in WSL. **That kill is unconfirmed:** bytesize stopped
+  answering ssh (Windows side too) at ~09:22 and the command never returned.
+- **I then killed my queued ssh calls on the mini** (the kill and a reachability probe). The kill
+  script ended in `gradlew --stop`, which would have stopped every lane's gradle daemon if it had
+  connected late. The other `ssh … bytesize` processes on the mini (ConnectTimeout=10
+  status/df/lock reads) are not mine and were left alone.
+- **Please check when bytesize is back:** any process under `/home/brad/vr4fold/PS2Recomp/android`
+  is my build and can be killed.
+- The lock's `run` wrapper died with the waiter. **If the lock still reads `VR4-fold …`, it is
+  stale**; I release it as soon as bytesize answers ssh again (it was hanging at 09:25).
+- Nothing else of mine runs there. The staged inputs in `/home/brad/vr4fold` (2.5 GB) are still
+  there for the rerun.
