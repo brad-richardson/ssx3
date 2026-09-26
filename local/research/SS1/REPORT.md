@@ -431,3 +431,55 @@ your commit. Before the fold (fork `ssx3` + paraLLEl `ssx3` fast-forwards, orche
    `~/dev/ssx3-work/F5/bin/runner-clean`, ABBA, exclusive lease ≤ 5 min per hold, FR1-R1 unpaced to
    t2400, race vsyncs/s. Pass = within run-to-run spread (state the spread).
 3. Commit `[SS1] Part 3 …` with the table and stop. ≤ 2 builds, 4 speed boots.
+
+## Part 3 (worker, 2026-09-25 ~20:40–21:05 EDT): fold checks. Both pass
+
+### 1. Android compile (bytesize, F5 recipe, one held ssh)
+
+bytesize was idle at the start (`ps aux`: no java/gradle/ninja/cmake; 739 GB free, 11 GB RAM).
+Staging in `/home/brad/ss1`:
+
+- `PS2Recomp/` = `git archive ss1-savestate` (`5474956`) streamed from the mini (tar SHA `04b76f6e…`, 358 files both sides).
+- `codegen-ssx3/` = a real copy of F5's (9,457 files; `register_functions.cpp` `8ea8ed43…`, changed file `89953ba2…`).
+- `vu1gen` → F5's `vu1gen-f5` (7 images, SHAs verified in F5).
+- `jniLibs` → F2's.
+- `parallel-gs/` = a copy of F2's `19d93b2` tree (4 GS files byte-identical to the mini's `19d93b2`), with the 4 `ss1-clut` (`464f263`) files dropped in. Remote SHAs match the mini: `gs_renderer.cpp 8e6b30c3…`, `.hpp 852258ef…`, `gs_interface.cpp 20565557…`, `.hpp fee5389f…`.
+
+`build.sh` = F5's `build-android.sh` with only the root, source dirs and VU1 dir changed
+(`local/research/SS1/build-android-ss1.sh`, SHA `59095232…` local = remote).
+
+| Item | Value |
+| --- | --- |
+| `assembleRelease` | **BUILD SUCCESSFUL in 9m 8s**, 48 tasks executed, 0 FAILED (`--max-workers=2`) |
+| APK | `9940c8f37ce21ccf75a94239d72a904cebacc6c51b76d308e02768e76f6601a6`, 187,258,440 B. Remote ×2 + pulled ×2 match. Kept at `~/dev/ssx3-work/SS1/odin/app-release.apk`. **Not installed** |
+| Contents (`strings -a libps2EntryRunner.so`, 173 MB) | `PS2XSAVE`, `PS2X_SAVESTATE_LOAD`, `[savestate] loaded`, `ssx3-clut-readback` all present: the savestate code and the paraLLEl CLUT accessor compiled for arm64 |
+| Gap (as briefed) | the runner-SHA header uses `/proc/self/exe` on non-Apple (string present in the `.so`). On Android that is `app_process64`, not `libps2EntryRunner.so`, so a device state would pin the wrong file. Before device use: hash the library via `dladdr(&someSymbol)`. No device use now |
+
+### 2. Speed-neutral with the knobs off (Mac mini, ABBA, exclusive lease per boot)
+
+Clean runner from my branch (build 2 of 2): F5's clean flags (det-hash tap off, logs/taps off,
+paraLLEl on) with the paraLLEl dir = `ss1-clut`. `runner-ss-clean`
+`bd8d5661a7aa8dccd058c2f7458048f5a7a2a08b1aa9020c61067137aae8b6d0`, built in 239 s. Control:
+F5's `bin/runner-clean` `e1e598c2…`. Boots via the shared driver, speed mode (`PS2X_UNPACED=1`,
+sound on, `PS2X_PGS_PRESENT_PIPELINE=1`, FR1-R1 to t2400, exclusive `both`). Each hold ≤ 62 s.
+Metric: F5's B6 method, the mean of the 5 s `[vsync-rate]` samples at ticks 1800–2420 (race).
+
+| Order | Label | Runner | Race samples (/s) | Race mean | × 59.94 | HUD wall | loadavg at start |
+| --- | --- | --- | --- | ---: | ---: | ---: | --- |
+| 1 | S1-A | F5 clean | 26.75 23.56 23.37 24.59 29.10 | 25.47 | 0.425 | 35.0 s | 10.2 |
+| 2 | S2-B | SS1 clean | 28.34 27.52 28.13 26.80 19.97 | 26.15 | 0.436 | 36.1 s | 6.5 |
+| 3 | S3-B | SS1 clean | 27.51 27.35 27.92 28.11 29.78 | 28.13 | 0.469 | 35.1 s | 4.6 |
+| 4 | S4-A | F5 clean | 27.32 27.37 27.74 27.91 29.75 | 28.02 | 0.467 | 35.1 s | 3.8 |
+
+**A (F5) mean 26.75/s, B (SS1) mean 27.14/s, B/A = 1.015.** Run-to-run spread: A 9.5 %, B 7.3 %
+(the first two boots ran under loadavg 6–10 from other panes' non-boot work; the exclusive lease
+covers boots only). The quiet middle pair is 28.13 vs 28.02 (+0.4 %), and both agree with F5's
+B6 (28.17/s). **The difference is inside the spread, so speed-neutral: PASS.** Expected: with the
+knobs unset, the per-dispatch cost is one bool test and one `u64` compare.
+
+### Part 3 budget
+
+Builds 2/2 (Android, Mac clean). Speed boots 4/4, exclusive per boot, lease released every time.
+Nothing pushed or installed. The fold candidates are unchanged since Part 2: fork `ss1-savestate`
+`5474956` (fast-forwards onto `ssx3` `a3efbfe`) and paraLLEl `ss1-clut` `464f263` (from `19d93b2`).
+Stopping here.
