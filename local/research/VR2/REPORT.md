@@ -676,4 +676,5 @@ runner byte-identical, so I did not re-run them.
   arguments.
 - **For the push (your step):** promote `vu1gen-vr2d` to `vu1gen-ssx3` (the old one to
   `vu1gen-ssx3-pre-vr2d`). The fork `ssx3` fast-forwards `a523700..d585e5c`. Scratch
-  `~/dev/ssx3-work/VR2` is about 10 GB.
+  `~/dev/ssx3-work/VR2` reached 15 GB (the cap); superseded build dirs were pruned after hand-off,
+  leaving about 5 GB (`build-fold2`, `bin/`, `run/`).
