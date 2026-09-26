@@ -556,3 +556,20 @@ about 1.9 cores on the mini. The hold waited 40 s for slots, and load fell throu
 - Images: `~/dev/ssx3-work/VR2/vu1gen-lp` (loop chaining; `vu1gen-lp.sha`) supersedes
   `vu1gen-b`. On bradflix: `HS1/vu1gen-vr2lp`, `HS1/vu1gen-vr2b` (private dirs; remove when
   done).
+
+## Orchestrator gate, Part 2C (2026-09-26)
+
+**Pass.** VB1 stop-path gap fixed and proven (all 3,129 on the error stop; 0 after the drain); coverage
+79.9 %; stage-4 stack 1.067× vs fold in a clean ABBA. Decisions: fold the VB1 stop drain and stage 4;
+**drop** copy bypass (`8610c69`) and loop chaining (`fa35e67`) — exact but neutral, not worth the extra
+emitter surface.
+
+## Part 2D brief (orchestrator) — fold prep, then stop
+Branch `vr2-fold2` from fork `ssx3` **tip** (`git fetch fork`; currently `fb28d99`): cherry-pick `a6e666b`
+`95f952e` (VB1 stop drain) and `e5ac052` `7a2d9ed` (stage 4, knob `PS2X_VU1_BLOCKS` default **off**). Regenerate the
+VU1 images with this emitter (dump boot; same 7 hashes expected) into `~/dev/ssx3-work/vu1gen-vr2d`; I promote
+them to `vu1gen-ssx3` at push time (keep the old as `vu1gen-ssx3-pre-vr2d`). Gates: Mac suite; differential 0;
+det IDENTICAL vs the a3efbfe key with blocks **off and on** (bradflix via your private archive script, +512 KB);
+a knob-off speed pair vs fork tip to confirm no cost when off (the 2B H5 single sample said 0.986×); one
+Android compile on bytesize (wait your turn; use the F6 inputs + the new images). Stop and hand back; I push
+and schedule the Odin pair (blocks on vs off) with the next device APK.
