@@ -1,0 +1,78 @@
+total 10.64567901234568
+## inclusive top 45
+  9.593	void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct,
+  9.593	__start_thread
+  9.593	GsWorker::threadMain()
+  9.593	__pthread_start(void*)
+  7.393	GS::executeQueuedCommand(GsCommand&)
+  6.996	GS::processGIFPacket(unsigned char const*, unsigned int)
+  3.504	ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::RawGifPacket(unsigned int, unsigned char const*, unsigned in
+  3.469	ParallelGS::GSInterface::gif_transfer(unsigned int, void const*, unsigned long)
+  2.169	void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)4, 1>(void const*, unsigned int)
+  1.977	GS::vertexKick(bool)
+  1.684	unknown
+  1.682	void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)4>(bool)
+  1.441	void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+  0.869	GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+  0.680	syscall
+  0.655	GS::buildDrawBatch(int) const
+  0.589	scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned l
+  0.570	scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&,
+  0.491	pthread_mutex_unlock
+  0.462	ParallelGS::GSInterface::drawing_kick_update_state(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, mu
+  0.443	__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)
+  0.436	std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+  0.430	pthread_cond_wait
+  0.425	ParallelGS::GSInterface::flush(unsigned int, ParallelGS::FlushReason)
+  0.396	ps2_gfx_stats::detail::ensureInit()
+  0.396	std::__ndk1::mutex::unlock()
+  0.375	ParallelGS::GSInterface::drawing_kick_update_texture(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, 
+  0.365	pthread_mutex_lock
+  0.321	void ParallelGS::GSInterface::packed_ADONLY<1>(void const*, unsigned int)
+  0.309	std::__ndk1::mutex::lock()
+  0.302	scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocato
+  0.275	ParallelGS::GSInterface::flush_pending_transfer(bool)
+  0.269	ioctl
+  0.264	__ioctl
+  0.245	void ParallelGS::GSInterface::drawing_kick_primitive<true, false, true, 2u>(bool)
+  0.241	void ParallelGS::GSInterface::drawing_kick_append<true, false, true, 2u>()
+  0.236	std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsCommand>>::pop_front()
+  0.225	GS::latchHostPresentationFrame()
+  0.224	ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::Present(GSPresentationRequest const&)
+  0.223	ParallelGS::GSInterface::a_d_XYZ2(unsigned long)
+  0.220	GsCommand::operator=(GsCommand&&)
+  0.183	void scudo::releaseFreeMemoryToOS<scudo::RegionReleaseRecorder<scudo::MemMapLinux>, scudo::SizeClassAllocator64<scudo::P
+  0.181	GS::recordDrawDebugEventUnlocked(int)
+  0.170	ParallelGS::PageTracker::mark_transfer_write(ParallelGS::PageRect const&)
+  0.169	scudo::MemMapLinux::releaseAndZeroPagesToOSImpl(unsigned long, unsigned long)
+## self top 30
+  1.620	unknown
+  0.881	void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+  0.865	GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+  0.652	GS::buildDrawBatch(int) const
+  0.617	GS::vertexKick(bool)
+  0.462	void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)4, 1>(void const*, unsigned int)
+  0.393	ps2_gfx_stats::detail::ensureInit()
+  0.315	GS::processGIFPacket(unsigned char const*, unsigned int)
+  0.299	void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)4>(bool)
+  0.278	pthread_mutex_lock
+  0.244	ParallelGS::GSInterface::gif_transfer(unsigned int, void const*, unsigned long)
+  0.219	GsCommand::operator=(GsCommand&&)
+  0.206	pthread_mutex_unlock
+  0.180	GS::recordDrawDebugEventUnlocked(int)
+  0.155	std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsCommand>>::pop_front()
+  0.131	ParallelGS::GSInterface::update_color_feedback_state()
+  0.119	__aarch64_ldadd8_relax
+  0.109	[linker]tlsdesc_resolver_dynamic
+  0.107	ps2_mtvu::touch(ps2_mtvu::Site)
+  0.098	__aarch64_swp2_rel
+  0.096	__aarch64_cas2_acq
+  0.088	__memcpy_aarch64_nt
+  0.085	scudo::HybridMutex::unlock()
+  0.084	scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&,
+  0.075	GsWorker::threadMain()
+  0.072	ParallelGS::compute_page_rect(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsign
+  0.070	scudo::HybridMutex::tryLock()
+  0.070	ParallelGS::GSInterface::drawing_kick_update_state(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, mu
+  0.068	ParallelGS::triangle_is_parallelogram_candidate(ParallelGS::VertexPosition const*, ParallelGS::VertexAttribute const*, m
+  0.065	ParallelGS::PageTracker::mark_fb_write(ParallelGS::PageRect const&)

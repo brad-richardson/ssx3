@@ -1,0 +1,21 @@
+## MTVU off-cpu (ms/frame), total {30588: 19.19}
+ 11.909	starved (Worker::loop cvWork wait)
+  6.589	GS enqueue: m_hasSpace wait (queue full)
+  0.322	GS path other: mutex contended
+  0.184	other: unknown
+  0.110	GS enqueue: mutex contended
+  0.073	GS path other: other
+  0.000	GS enqueue: other
+## GsWorker-30557 on-cpu (ms/frame), total {30557: 10.65}
+  3.646	GS frontend decode (no backend frame)
+  3.502	paraLLEl backend (our .so)
+  1.255	outside executeQueuedCommand: libc.so
+  1.025	outside executeQueuedCommand: [kernel.kallsyms]
+  0.578	outside executeQueuedCommand: libps2EntryRunner.so
+  0.351	outside executeQueuedCommand: libvulkan_freedreno.so
+  0.117	paraLLEl -> kernel
+  0.112	paraLLEl -> driver dso libvulkan_freedreno.so
+  0.043	outside executeQueuedCommand: [vdso]
+  0.016	frontend -> kernel
+  0.001	outside executeQueuedCommand: libm.so
+  0.001	outside executeQueuedCommand: libbinder.so

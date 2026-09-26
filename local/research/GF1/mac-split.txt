@@ -1,0 +1,21 @@
+thread MTVU: total 2629 samples; on-cpu 2294, waiting 335; GS-subtree on-cpu 207 (9.0% of on-cpu), GS-subtree waiting 311
+    71	wake (cv signal)
+    40	memcpy
+    29	mutex/lock
+    25	allocator
+    24	WAIT outside GS: _pthread_cond_wait
+    14	other: GsWorker::enqueue(GsCommand)
+     6	other: std::__function::__func<PS2Runtime::syncCoreSubsystems()::$_2, void (G
+     5	other: GS::processGIFPacket(unsigned char const*, unsigned int)
+     5	other: std::__function::__func<PS2Runtime::syncCoreSubsystems()::$_1, void (G
+     3	other: ???
+     2	other: PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned i
+     2	other: GifArbiter::drain()
+     1	other: pthread_cond_signal
+     1	other: ps2_pk::noteSubmit(char const*, unsigned char const*, unsigned int, un
+     1	other: _tlv_get_addr
+     1	other: ps2_mtvu::touch(ps2_mtvu::Site)
+     1	other: new(unsigned long, std::nothrow_t const&)
+
+thread GameThread: total 2629 samples; on-cpu 1748, waiting 881; GS-subtree on-cpu 0 (0.0% of on-cpu), GS-subtree waiting 0
+   881	WAIT outside GS: _pthread_cond_wait

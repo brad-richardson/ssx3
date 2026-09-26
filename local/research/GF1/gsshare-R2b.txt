@@ -1,0 +1,85 @@
+modes ['mixed-on-off-cpu', 'on-off-cpu', 'on-cpu', 'off-cpu']
+events {'cpu-clock': 275330}
+#TOTAL MTVU oncpu 12.267 s = 30.29 ms/frame; GS-handoff subtree 4.24 ms/frame
+#TOTAL GameThread oncpu 5.306 s = 13.10 ms/frame; GS-handoff subtree 0.00 ms/frame
+## inclusive on-cpu ms/frame
+MTVU	 29.959	ps2_mtvu::detail::Worker::loop
+MTVU	 29.959	ps2_mtvu::
+MTVU	 29.911	PS2Memory::processPendingTransfers
+MTVU	 29.911	processPendingTransfers
+MTVU	 29.812	PS2Memory::processVIF1DataImpl
+MTVU	 28.478	VU1Interpreter::run
+GameThread	  4.737	VU1Interpreter::run
+MTVU	  4.607	VU1Interpreter::progressXgkick
+MTVU	  4.157	PS2Memory::submitGifPacket
+MTVU	  2.785	condition_variable::notify_one
+MTVU	  0.975	GifArbiter::drain
+MTVU	  0.557	GS::processGIFPacket
+MTVU	  0.407	GsWorker::enqueue
+GameThread	  0.343	ps2_mtvu::
+MTVU	  0.275	mutex::unlock
+MTVU	  0.212	GS::noteGifPath
+MTVU	  0.180	GifArbiter::submit
+MTVU	  0.178	mutex::lock
+MTVU	  0.076	GsWorker::endBatch
+MTVU	  0.065	GsWorker::beginBatch
+GameThread	  0.041	mutex::lock
+MTVU	  0.033	__stable_sort
+MTVU	  0.033	stable_sort
+GameThread	  0.029	condition_variable::notify_one
+GameThread	  0.025	mutex::unlock
+MTVU	  0.022	condition_variable::notify_all
+GameThread	  0.012	PS2Memory::processPendingTransfers
+GameThread	  0.012	processPendingTransfers
+## GS subtree by leaf symbol (top 40)
+MTVU	  2.999	[kernel]
+MTVU	  0.247	__memcpy_aarch64_nt
+MTVU	  0.084	GS::processGIFPacket(unsigned char const*, unsigned int)
+MTVU	  0.079	__aarch64_swp2_rel
+MTVU	  0.059	__aarch64_cas2_acq
+MTVU	  0.058	scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Optio
+MTVU	  0.048	[linker]tlsdesc_resolver_dynamic
+MTVU	  0.042	GsWorker::enqueue(GsCommand)
+MTVU	  0.038	pthread_mutex_unlock
+MTVU	  0.038	scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Or
+MTVU	  0.035	__memset_aarch64_nt
+MTVU	  0.033	void std::__ndk1::__stable_sort<std::__ndk1::_ClassicAlgPolicy, GifArbiter::drain()::$_0&, std::__ndk1::__wrap
+MTVU	  0.027	pthread_mutex_lock
+MTVU	  0.027	std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsCommand>>::push_back(GsCommand&&)
+MTVU	  0.025	ps2_mtvu::touch(ps2_mtvu::Site)
+MTVU	  0.024	scudo::HybridMutex::tryLock()
+MTVU	  0.024	std::__ndk1::mutex::lock()
+MTVU	  0.022	__aarch64_swp2_acq
+MTVU	  0.022	syscall
+MTVU	  0.020	operator new(unsigned long)
+MTVU	  0.020	pthread_cond_signal
+MTVU	  0.020	scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, 
+MTVU	  0.019	PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+MTVU	  0.018	GifArbiter::submit(GifPathId, unsigned char const*, unsigned int, bool)
+MTVU	  0.018	void std::__ndk1::vector<unsigned char, std::__ndk1::allocator<unsigned char>>::__assign_with_size[abi:ne19000
+MTVU	  0.017	__aarch64_ldadd8_relax
+MTVU	  0.015	malloc
+MTVU	  0.014	GS::noteGifPath(GifPathId)
+MTVU	  0.014	GifArbiter::drain()
+MTVU	  0.013	scudo::HybridMutex::unlock()
+MTVU	  0.012	std::__ndk1::mutex::unlock()
+MTVU	  0.011	scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::popBlocksImpl(scudo::SizeClassA
+MTVU	  0.009	@plt
+MTVU	  0.009	__aarch64_cas4_acq
+MTVU	  0.009	scudo_malloc
+MTVU	  0.007	operator new(unsigned long, std::nothrow_t const&)
+MTVU	  0.006	GsWorker::endBatch()
+MTVU	  0.006	PS2Memory::splitGifPacketsAtEop(unsigned char const*, unsigned int)
+MTVU	  0.006	ps2_pk::noteSubmit(char const*, unsigned char const*, unsigned int, unsigned long)
+MTVU	  0.005	__aarch64_ldadd4_rel
+## GS subtree by innermost GS frame
+MTVU	  2.944	PS2Memory::submitGifPacket(GifPathId, unsigned char const*, unsigned int, bool, bool)
+MTVU	  0.407	GsWorker::enqueue(GsCommand)
+MTVU	  0.349	GS::processGIFPacket(unsigned char const*, unsigned int)
+MTVU	  0.180	GifArbiter::submit(GifPathId, unsigned char const*, unsigned int, bool)
+MTVU	  0.172	GifArbiter::drain()
+MTVU	  0.076	GsWorker::endBatch()
+MTVU	  0.065	GsWorker::beginBatch()
+MTVU	  0.033	void std::__ndk1::__stable_sort<std::__ndk1::_ClassicAlgPolicy, GifArbiter::drain()::$_0&, std::__ndk1::__wrap
+MTVU	  0.014	GS::noteGifPath(GifPathId)
+MTVU	  0.001	GS::privWrite(std::__ndk1::function<void ()>)
