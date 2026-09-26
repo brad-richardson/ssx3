@@ -1,0 +1,283 @@
+# VR4 stage 1: per-block attribution (CP1 R2b MTVU samples x Odin .so inline chains)
+# .so SHA 01fceae5...2273ea (CP1 symdir), BuildID 837d7dbb...14fa = play APK 825b436d
+odin-f587-B2a10.s: 4429 insns, 890.8 ms samples
+-- issuePair region > called helper (samples %, static insns)
+   63.6%   3141  exec dispatch > execUpperImpl
+    6.3%    215  exec dispatch > execLowerImpl
+    4.2%    238  pc/branch/halt
+    3.2%     98  block glue
+    3.0%     87  revert+commit writes > directVfWrite
+    2.9%    117  advanceOneCycle > advanceOneCycle
+    2.4%     60  issuePair:0 > calculatePairReadyCycle
+    2.1%     36  markPairWrites > markPairWrites
+    1.9%    103  stall/scoreboard > calculatePairReadyCycle
+    1.6%     73  issuePair:0
+    1.6%     35  revert+commit writes > directAccWrite
+    1.4%     38  revert+commit writes > memcpy
+    1.2%      9  counters/return
+    1.0%     29  old VF/ACC/VI snapshot > memcpy
+    0.8%     43  revert+commit writes > directViWrite
+    0.7%     20  markPairWrites
+    0.7%     19  vf0/vi0 constants
+    0.5%     20  stall/scoreboard
+    0.4%     14  old VF/ACC/VI snapshot
+    0.4%     18  post-exec clears
+    0.3%      7  exec dispatch
+    0.0%      9  direct-map setup
+-- innermost function (samples %, static insns)
+   16.4%    785  normalizeFmacExactResult
+   15.5%    988  normalizeOperand
+    9.1%    203  memcpy
+    8.9%    497  updateFmacFlags
+    8.0%    289  execUpperImpl
+    4.2%    159  calculatePairReadyCycle
+    3.5%    106  execLowerImpl
+    2.9%    117  advanceOneCycle
+    2.8%     37  signbit<double, 0>
+    2.8%     92  issuePair<true, 7, true, 16384U>
+    2.7%     79  directVfWrite
+    2.4%     61  vuFloatToInt
+    2.2%    100  issuePair<true, 5, false, 16384U>
+    2.1%     75  B2a10
+    2.1%     36  markPairWrites
+    1.8%     56  noteDirect
+    1.8%    102  issuePair<true, 3, false, 16384U>
+    1.7%     52  issuePair<true, 1, true, 16384U>
+    1.5%     81  issuePair<true, 3, true, 16384U>
+    1.1%     22  next
+    1.0%     23  directAccWrite
+    0.9%     31  operator()
+    0.9%     24  applyDest
+    0.9%     41  issueStore
+    0.8%     22  calculateFmacExactResults
+-- loads/stores by region (samples %, static insns)
+    6.5%    238  ('load', 'exec dispatch')
+    3.2%    105  ('store', 'revert+commit writes')
+    2.6%    159  ('store', 'exec dispatch')
+    2.1%     36  ('store', 'markPairWrites')
+    2.0%     50  ('load', 'issuePair:0')
+    1.9%     74  ('load', 'pc/branch/halt')
+    1.7%     36  ('load', 'advanceOneCycle')
+    1.4%     35  ('load', 'block glue')
+    1.2%     46  ('load', 'revert+commit writes')
+    1.2%      9  ('load', 'counters/return')
+    0.8%     18  ('store', 'advanceOneCycle')
+    0.7%     20  ('store', 'old VF/ACC/VI snapshot')
+    0.7%     46  ('store', 'pc/branch/halt')
+    0.5%      8  ('store', 'block glue')
+    0.4%     19  ('load', 'old VF/ACC/VI snapshot')
+    0.4%     18  ('store', 'post-exec clears')
+    0.4%     18  ('store', 'vf0/vi0 constants')
+    0.3%     27  ('load', 'stall/scoreboard')
+    0.3%      1  ('load', 'vf0/vi0 constants')
+    0.0%      9  ('store', 'direct-map setup')
+-- inside exec*Impl (first two helper levels) (samples %, static insns)
+   10.8%    488  execUpperImpl > applyFmacDest > normalizeFmacResult
+   10.8%    558  execUpperImpl > applyFmacDestAcc > normalizeFmacResult
+    9.0%    346  execUpperImpl > applyFmacDestAcc > calculateFmacProductSticky
+    8.0%    295  execUpperImpl > (own)
+    6.7%    440  execUpperImpl > normalizeOperand
+    5.1%    364  execUpperImpl > applyFmacDest > updateFmacFlags
+    4.7%    164  execUpperImpl > applyFmacDest > calculateFmacProductSticky
+    4.3%    362  execUpperImpl > applyFmacDestAcc > updateFmacFlags
+    3.5%    109  execLowerImpl > (own)
+    2.4%     61  execUpperImpl > vuFloatToInt
+    1.2%     48  execLowerImpl > issueStore
+    0.6%     17  execLowerImpl > normalizeResult
+    0.6%     15  execUpperImpl > applyFmacDest > applyDest
+    0.5%     18  execLowerImpl > normalizeOperand
+    0.4%     36  execUpperImpl > broadcast > normalizeOperand
+    0.3%      3  execUpperImpl > applyFmacDestAcc > applyDestAcc
+    0.3%      4  execUpperImpl > applyFmacDest
+    0.3%     14  execLowerImpl > issueStore > noteDirect
+    0.2%      1  execUpperImpl > applyFmacDestAcc
+    0.2%      7  execLowerImpl > microAddressMask
+    0.0%      2  execLowerImpl > applyDest
+    0.0%      4  execUpperImpl > applyDest
+
+odin-a564-B0628.s: 9258 insns, 600.8 ms samples
+-- issuePair region > called helper (samples %, static insns)
+   77.0%   7222  exec dispatch > execUpperImpl
+    3.7%    419  pc/branch/halt
+    3.1%    185  issuePair:0
+    2.2%    168  revert+commit writes > directVfWrite
+    2.2%    204  advanceOneCycle > advanceOneCycle
+    1.9%    136  block glue
+    1.8%    107  revert+commit writes > directAccWrite
+    1.6%    220  exec dispatch > execLowerImpl
+    1.2%    110  markPairWrites > markPairWrites
+    1.0%     72  revert+commit writes > memcpy
+    0.7%     62  old VF/ACC/VI snapshot > memcpy
+    0.5%     16  counters/return
+    0.5%     52  issuePair:0 > calculatePairReadyCycle
+    0.5%     42  revert+commit writes > directViWrite
+    0.5%     17  exec dispatch > memcpy
+    0.4%     23  exec dispatch
+    0.2%     32  post-exec clears
+    0.2%     53  stall/scoreboard > calculatePairReadyCycle
+    0.2%     16  direct-map setup
+    0.2%     33  vf0/vi0 constants
+    0.2%     12  revert+commit writes
+    0.2%     19  markPairWrites
+    0.1%     14  stall/scoreboard
+    0.0%     24  old VF/ACC/VI snapshot
+-- innermost function (samples %, static insns)
+   19.5%   1817  normalizeFmacExactResult
+   14.1%   2472  normalizeOperand
+   13.9%    648  execUpperImpl
+   12.8%    475  memcpy
+    7.7%    977  updateFmacFlags
+    4.3%     84  signbit<double, 0>
+    3.0%    235  issuePair<true, 5, true, 16384U>
+    2.2%    155  directVfWrite
+    2.2%    204  advanceOneCycle
+    1.8%    237  issuePair<true, 7, true, 16384U>
+    1.7%    120  issuePair<true, 1, false, 16384U>
+    1.3%    111  B0628
+    1.2%     75  directAccWrite
+    1.2%    110  markPairWrites
+    1.0%     68  calculateFmacExactResults
+    1.0%    103  issuePair<true, 3, true, 16384U>
+    1.0%     38  applyDest
+    1.0%    162  execLowerImpl
+    1.0%     84  noteDirect
+    1.0%     50  issuePair<true, 1, true, 16384U>
+    0.7%     92  vuFloatToInt
+    0.7%    101  calculatePairReadyCycle
+    0.7%     63  operator()
+    0.7%    132  demoteQueuedFlags
+    0.5%    159  calculateFmacProductSticky
+-- loads/stores by region (samples %, static insns)
+   10.8%    556  ('load', 'exec dispatch')
+    3.0%    206  ('store', 'revert+commit writes')
+    2.8%    130  ('load', 'issuePair:0')
+    1.8%    330  ('store', 'exec dispatch')
+    1.5%     71  ('load', 'advanceOneCycle')
+    1.4%    131  ('load', 'pc/branch/halt')
+    1.2%     98  ('load', 'revert+commit writes')
+    1.2%    104  ('store', 'markPairWrites')
+    1.1%     53  ('load', 'block glue')
+    0.5%     16  ('load', 'counters/return')
+    0.5%     39  ('load', 'old VF/ACC/VI snapshot')
+    0.3%     80  ('store', 'pc/branch/halt')
+    0.3%     32  ('store', 'advanceOneCycle')
+    0.2%     41  ('store', 'old VF/ACC/VI snapshot')
+    0.2%     32  ('store', 'post-exec clears')
+    0.2%     16  ('store', 'direct-map setup')
+    0.1%     32  ('store', 'vf0/vi0 constants')
+    0.1%      1  ('load', 'vf0/vi0 constants')
+    0.0%     20  ('store', 'issuePair:0')
+    0.0%      7  ('store', 'block glue')
+-- inside exec*Impl (first two helper levels) (samples %, static insns)
+   18.1%   1174  execUpperImpl > applyFmacDestAcc > calculateFmacProductSticky
+   15.9%   1742  execUpperImpl > applyFmacDestAcc > normalizeFmacResult
+   14.0%    659  execUpperImpl > (own)
+    7.2%   1072  execUpperImpl > applyFmacDestAcc > updateFmacFlags
+    6.2%    576  execUpperImpl > applyFmacDest > normalizeFmacResult
+    5.1%   1038  execUpperImpl > normalizeOperand
+    4.2%    338  execUpperImpl > applyFmacDest > calculateFmacProductSticky
+    2.2%    371  execUpperImpl > applyFmacDest > updateFmacFlags
+    1.2%    175  execLowerImpl > (own)
+    1.2%     98  execUpperImpl > broadcast > normalizeOperand
+    0.7%     92  execUpperImpl > vuFloatToInt
+    0.5%     11  execUpperImpl > applyFmacDestAcc
+    0.5%     13  execUpperImpl > applyFmacDestAcc > applyDestAcc
+    0.4%     10  execUpperImpl > applyFmacDest > applyDest
+    0.4%      4  execUpperImpl > applyFmacDest
+    0.3%     14  execUpperImpl > vuMinMaxBits
+    0.2%     31  execLowerImpl > issueStore
+    0.1%      9  execLowerImpl > issueStore > noteDirect
+    0.0%      5  execLowerImpl > applyDest
+    0.0%     10  execUpperImpl > applyDest
+
+odin-f587-B0a58.s: 8263 insns, 344.2 ms samples
+-- issuePair region > called helper (samples %, static insns)
+   80.4%   6712  exec dispatch > execUpperImpl
+    3.9%    416  pc/branch/halt
+    2.8%    125  revert+commit writes > directAccWrite
+    2.2%    198  advanceOneCycle > advanceOneCycle
+    1.8%    148  issuePair:0
+    1.7%    103  revert+commit writes > directVfWrite
+    1.3%    148  block glue
+    1.3%     63  markPairWrites > markPairWrites
+    0.8%     49  issuePair:0 > calculatePairReadyCycle
+    0.6%     44  revert+commit writes > memcpy
+    0.5%     21  exec dispatch > execLowerImpl
+    0.5%      6  markPairWrites
+    0.5%     33  vf0/vi0 constants
+    0.4%     12  direct-map setup
+    0.4%     53  stall/scoreboard > calculatePairReadyCycle
+    0.4%     42  old VF/ACC/VI snapshot > memcpy
+    0.4%     34  post-exec clears
+    0.1%     14  revert+commit writes > directViWrite
+    0.1%     16  counters/return
+    0.0%     14  stall/scoreboard
+    0.0%     11  old VF/ACC/VI snapshot
+    0.0%      1  exec dispatch
+-- innermost function (samples %, static insns)
+   21.8%   2300  normalizeOperand
+   21.3%   1685  normalizeFmacExactResult
+   10.7%    407  memcpy
+   10.3%    537  execUpperImpl
+    8.9%    877  updateFmacFlags
+    3.2%    280  issuePair<true, 3, true, 16384U>
+    3.1%    121  calculateFmacExactResults
+    2.3%     88  directAccWrite
+    2.2%    198  advanceOneCycle
+    1.7%    211  issuePair<true, 1, true, 16384U>
+    1.6%     94  directVfWrite
+    1.3%     63  markPairWrites
+    1.2%     99  calculatePairReadyCycle
+    1.0%     87  issuePair<true, 1, false, 16384U>
+    1.0%     48  issuePair<true, 5, true, 16384U>
+    0.9%     77  signbit<double, 0>
+    0.9%    124  B0a58
+    0.9%     22  normalizeFmacResult
+    0.8%     12  applyFmacDestAcc
+    0.8%    147  calculateFmacProductSticky
+    0.7%     68  operator()
+    0.7%     12  applyDest
+    0.7%     65  issuePair<true, 5, false, 16384U>
+    0.7%     61  noteDirect
+    0.5%     48  vuFloatToInt
+-- loads/stores by region (samples %, static insns)
+    8.4%    442  ('load', 'exec dispatch')
+    2.5%    140  ('store', 'revert+commit writes')
+    2.5%    322  ('store', 'exec dispatch')
+    1.8%    107  ('load', 'issuePair:0')
+    1.5%     67  ('load', 'advanceOneCycle')
+    1.3%     63  ('store', 'markPairWrites')
+    1.2%     81  ('load', 'revert+commit writes')
+    1.2%    126  ('load', 'pc/branch/halt')
+    0.6%     55  ('load', 'block glue')
+    0.5%     32  ('store', 'vf0/vi0 constants')
+    0.4%     12  ('store', 'direct-map setup')
+    0.4%     81  ('store', 'pc/branch/halt')
+    0.4%     32  ('store', 'post-exec clears')
+    0.2%      9  ('store', 'block glue')
+    0.2%     21  ('load', 'old VF/ACC/VI snapshot')
+    0.2%     17  ('store', 'issuePair:0')
+    0.1%     32  ('store', 'advanceOneCycle')
+    0.1%     16  ('load', 'counters/return')
+    0.0%     12  ('load', 'stall/scoreboard')
+    0.0%     27  ('store', 'old VF/ACC/VI snapshot')
+-- inside exec*Impl (first two helper levels) (samples %, static insns)
+   20.0%   1713  execUpperImpl > applyFmacDestAcc > normalizeFmacResult
+   19.8%   1142  execUpperImpl > applyFmacDestAcc > calculateFmacProductSticky
+   10.6%    547  execUpperImpl > (own)
+    7.7%    932  execUpperImpl > normalizeOperand
+    6.6%   1020  execUpperImpl > applyFmacDestAcc > updateFmacFlags
+    5.7%    553  execUpperImpl > applyFmacDest > normalizeFmacResult
+    4.2%    300  execUpperImpl > applyFmacDest > calculateFmacProductSticky
+    2.3%    314  execUpperImpl > applyFmacDest > updateFmacFlags
+    1.5%     90  execUpperImpl > broadcast > normalizeOperand
+    0.8%     12  execUpperImpl > applyFmacDestAcc
+    0.5%     48  execUpperImpl > vuFloatToInt
+    0.4%      1  execLowerImpl > applyDest
+    0.2%     28  execUpperImpl > vuMinMaxBits
+    0.2%      4  execUpperImpl > applyDest
+    0.1%     20  execLowerImpl > (own)
+    0.1%      6  execUpperImpl > applyFmacDestAcc > applyDestAcc
+    0.1%      2  execUpperImpl > applyFmacDest
+    0.0%      1  execUpperImpl > applyFmacDest > applyDest
+

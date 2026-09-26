@@ -1,0 +1,77 @@
+== MTVU: all samples 49.48 ms/frame (incl. off-cpu sleep PCs)
+   22.23 ms/frame  other dso: [kernel.kallsyms]
+   13.03 ms/frame  gen:FMAC/upper core
+    6.30 ms/frame  gen:issuePair state/scoreboard
+    1.58 ms/frame  gen:block/pair glue
+    1.30 ms/frame  ool:commitReadyPipelines
+    1.15 ms/frame  other dso: libc.so
+    0.86 ms/frame  ool:processVIF1DataImpl
+    0.72 ms/frame  gen:lower exec
+    0.68 ms/frame  ool:progressXgkick
+    0.25 ms/frame  ool:run
+    0.17 ms/frame  ool:readBranchVi
+    0.16 ms/frame  ool:recordViWriteForBranch
+    0.10 ms/frame  ool:advanceTo
+    0.09 ms/frame  ool:ensureInit
+    0.08 ms/frame  ool:processGIFPacket
+    0.07 ms/frame  ool:queueQ
+    0.05 ms/frame  other dso: linker64
+    0.05 ms/frame  ool:queueClip
+    0.04 ms/frame  ool:e37AppendVif
+    0.04 ms/frame  ool:enqueue
+    0.04 ms/frame  ool:queueViWrite
+    0.04 ms/frame  ool:resetScheduler
+== GameThread: all samples 49.32 ms/frame (incl. off-cpu sleep PCs)
+   36.56 ms/frame  other dso: [kernel.kallsyms]
+    1.71 ms/frame  ool:FMAC/upper core
+    1.37 ms/frame  ool:issuePair state/scoreboard
+    0.88 ms/frame  ool:commitReadyPipelines
+    0.46 ms/frame  ool:
+    0.43 ms/frame  other dso: libc.so
+    0.36 ms/frame  ool:sub_0037E120_0x37e120
+    0.30 ms/frame  ool:lower exec
+    0.24 ms/frame  ool:getDecodedInstructionPairForPc
+    0.22 ms/frame  ool:run
+    0.16 ms/frame  ool:ps2DiagWatchEnabled
+    0.16 ms/frame  ool:sub_00376938_0x376938
+    0.15 ms/frame  ool:operator()
+    0.15 ms/frame  other dso: linker64
+    0.12 ms/frame  ool:dispatchGuestBranch
+    0.11 ms/frame  ool:__emplace_unique_key_args<unsigned int, const st
+    0.10 ms/frame  ool:sub_0038B0F8_0x38b0f8
+    0.10 ms/frame  ool:accountCycles
+    0.10 ms/frame  ool:sub_0037A430_0x37a430
+    0.09 ms/frame  ool:sub_002E8938_0x2e8938
+    0.09 ms/frame  ool:sub_0032E100_0x32e100
+    0.09 ms/frame  ool:advanceEeTimers
+== MTVU generated code by function kind
+   14.96 ms/frame  block body B*
+    6.43 ms/frame  pair fn f*
+    0.23 ms/frame  trampoline b*
+== MTVU generated code by issuePair region
+   13.03 ms/frame  exec > execUpperImpl (FMAC core)
+    1.51 ms/frame  pc/branch/halt
+    1.08 ms/frame  advanceOneCycle > advanceOneCycle
+    0.72 ms/frame  exec > execLowerImpl
+    0.48 ms/frame  revert+commit writes > directVfWrite
+    0.42 ms/frame  counters/return
+    0.41 ms/frame  stall/scoreboard > calculatePairReadyCycle
+    0.35 ms/frame  direct-map setup
+    0.34 ms/frame  issuePair:0
+    0.32 ms/frame  glue: next
+    0.27 ms/frame  markPairWrites > markPairWrites
+    0.24 ms/frame  revert+commit writes > directAccWrite
+    0.23 ms/frame  glue: recompBlockReady
+    0.21 ms/frame  revert+commit writes > memcpy
+    0.21 ms/frame  revert+commit writes > directViWrite
+    0.17 ms/frame  issuePair:0 > calculatePairReadyCycle
+    0.16 ms/frame  glue: recompChainReady
+    0.12 ms/frame  old VF/ACC/VI snapshot > memcpy
+    0.11 ms/frame  vf0/vi0 constants
+    0.10 ms/frame  post-exec clears
+    0.08 ms/frame  markPairWrites
+    0.06 ms/frame  stall/scoreboard
+    0.05 ms/frame  glue: B2a10
+    0.05 ms/frame  old VF/ACC/VI snapshot
+    0.04 ms/frame  exec dispatch
+    0.03 ms/frame  revert+commit writes
