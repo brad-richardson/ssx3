@@ -156,7 +156,9 @@ Close the pane after its gate read.
   Boot from your own cwd, and check or kill your runner by PID, never by
   name (`pkill`/`pgrep -x ps2EntryRunner` would hit another slot's
   runner). Claim before a run and release after. PCSX2 or builds on bytesize don't take the mini lease; bytesize has
-  its own rule (one heavy job at a time).
+  its own rule: one heavy job at a time, **held with `local/tooling/bytesize_lock.sh`**
+  (`run <LABEL> -- …` or claim/release; Mesa builds `ninja -j8` at most) — two concurrent builds
+  wedged WSL on 09-26.
 - **Boots:** every boot script has progress caps. No boot over 600 s
   without orchestrator OK.
 - **Pad route:** race boots use **I26-FAST** (`local/research/I26/ROUTES.md`,
