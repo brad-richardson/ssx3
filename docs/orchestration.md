@@ -177,6 +177,10 @@ The contract is in `AGENTS.md` (about one page). On top of it:
   or interpolation.
 
 ## 8. Mistakes to avoid
+- 09-26: BA1 ran `adb install` with no lease check while VK2 held the Odin, killing VK2's stress run
+  (Android exit reason PACKAGE UPDATED). The old check-then-write lease was also racy. Fix:
+  `local/tooling/odin_lease.sh` (atomic claim/release, `run` wrapper); briefs that touch the Odin
+  must name it.
 - 09-26: an opencode (local Qwen) brief asked for edits in a fork worktree under `~/dev/ssx3-work/`; the
   managed permission rules deny edits outside the started folder, so the worker (correctly) stopped. A local
   worker that must edit outside `~/dev/ssx3` needs `OPENCODE_CONFIG_CONTENT` via `herdr tab create --env`,

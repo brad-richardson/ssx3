@@ -141,7 +141,9 @@ Close the pane after its gate read.
   New briefs default det boots to bradflix (a bradflix boot is ~117 s to t2400 vs ~63 s on the
   mini, but four run at once with no slowdown).
 - **Leases:** one device agent on the Odin at a time
-  (`/data/local/tmp/mg/LEASE`). On the mini, **four** recomp/emulator
+  (`/data/local/tmp/mg/LEASE`; claim/release it with `local/tooling/odin_lease.sh`, which is
+  atomic; **every** `adb install`, launch or force-stop must happen while you hold it — wrap
+  one-off commands in `odin_lease.sh run <LABEL> -- …`). On the mini, **four** recomp/emulator
   boots at a time (Brad, 09-24; a boot is ~1.2 cores and ~250 MB on the
   18-core mini): claim a slot with `local/tooling/p_lane_lease.py`
   (slot 1 = legacy `/tmp/ssx3-p-lane-lease`, slot n =
