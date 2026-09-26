@@ -280,8 +280,6 @@ then 120 Hz simulation.
       follows F5 Part 2 (Brad 09-25).
 - [ ] **VR2 (running, Brad 09-25):** VU1 recompile stage C, bit-exact: VB1's per-pair levers, then flag liveness (Q1's `doFlag`); block-level functions as a Part 2 after the gate + N12.
 - [ ] **MT1 (running, Brad 09-26: un-parked under PCSX2 parity):** MTVU, deterministic by design (fixed guest-time VU1 semantics, worker thread; threaded det-hash = synchronous).
-- [ ] **VK2 (running):** fix RV5 B1/B2/S1 in the Android Vulkan present (release-wait ownership, submission identity across
-      window changes, SurfaceControl leak); until then Brad's Odin env carries `PS2X_PRESENT_VULKAN=0`.
 - [ ] **SS3 (queued):** RV5 S2–S5 save-state holes: paraLLEl palette indices on load, partial GS transfer / vertex state at the
       save point (defer or serialize), card directories + timestamps, Android runner identity via `dladdr`.
 - [ ] **CP1 (queued after F6; RV4 rank 1 measurement):** matched-window Odin critical-path timeline: per-thread running vs

@@ -185,3 +185,10 @@ adb shell dumpsys activity exit-info com.ps2x.runner                     # ST1: 
 Fold fork `vk2` (`ace5b53`, `91f65d5`, `a523700`; clean on `fb28d99`) into fork `ssx3` and let the Odin
 play build ship with the Vulkan present on by default (drop `PS2X_PRESENT_VULKAN=0` from Brad's env).
 Keep the `proc_fds` / window-change stats line (one line per window change, no per-frame cost).
+
+## Orchestrator gate (2026-09-26) — pushed, lane closed
+
+**Pass.** RV5 B1/B2/S1 fixed with a unit-tested ledger (mutation-checked), and on the Odin: 25 lifecycle
+changes with 25/25 layers released, fds flat at 146, all failure counters 0, gralloc pixels exact at two
+ticks (one after ~11 rebuilt pools), ABBA vs F6 +0.5 % (no change). Pushed fork `ssx3` `fb28d99..a523700`.
+The Odin play build can now ship the Vulkan present on by default (next device build).
