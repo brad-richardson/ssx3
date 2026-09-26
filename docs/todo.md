@@ -280,7 +280,7 @@ then 120 Hz simulation.
       follows F5 Part 2 (Brad 09-25).
 - [ ] VU1 blocks: decide `PS2X_VU1_BLOCKS` default from the next Odin pair (Mac 1.067× on, ~1 % cost off). Next VU1 levers: register residency across block iterations (RV4 §2), VU0 recompile (VR3).
 - [ ] **MT1 (running, Brad 09-26: un-parked under PCSX2 parity):** MTVU, deterministic by design (fixed guest-time VU1 semantics, worker thread; threaded det-hash = synchronous).
-- [ ] **SS3 (queued):** RV5 S2–S5 save-state holes: paraLLEl palette indices on load, partial GS transfer / vertex state at the
+- [ ] **SS3 (running):** RV5 S2–S5 save-state holes: paraLLEl palette indices on load, partial GS transfer / vertex state at the
       save point (defer or serialize), card directories + timestamps, Android runner identity via `dladdr`.
 - [ ] **CP1 (queued after F6; RV4 rank 1 measurement):** matched-window Odin critical-path timeline: per-thread running vs
       blocked, GS queue waits, GPU timestamps, frequency residency, `flush_submit` split (submit / submit_empty / compile
