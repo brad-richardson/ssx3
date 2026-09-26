@@ -19,6 +19,9 @@ untracked `local/AGENTS.local.md`; read it too when it exists.
   open, not a store product.
 - NetherSX2 and PCSX2 are references and performance comparisons, not
   deliverables.
+- **Display (Brad, 09-26):** 16:9 widescreen by default (the game's anamorphic mode), shown with
+  **aspect-preserving scaling** that fills as much of the screen as possible; bars, never an
+  unapproved stretch. (The 4:3 HUD widening inside anamorphic mode is approved.)
 - A **dev-only startup-movie bypass** is approved (`PS2X_SKIP_MOVIE`,
   default off, labeled dev-only). Faithful movie playback is fixed
   separately.
