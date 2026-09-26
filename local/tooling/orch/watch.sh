@@ -10,13 +10,16 @@
 # Env: WS (workspace, default w2), MAX (default 1500 s), STALL (default 1200 s),
 #      WATCH_IGNORE_AGENT (comma list; the orchestrator's own pane name is always ignored).
 MAX=${MAX:-1500}; STALL=${STALL:-1200}; GRACE=${GRACE:-600}; start=$(date +%s)
-base=$(git -C ~/dev/ssx3 rev-parse HEAD)
+# The base persists across watcher runs (local/.watch-base), so a commit that lands between one
+# watcher exiting and the next starting is still reported (RV5 on 09-26 was missed that way).
+BASEF=~/dev/ssx3/local/.watch-base
+base=$(cat "$BASEF" 2>/dev/null); git -C ~/dev/ssx3 cat-file -e "$base^{commit}" 2>/dev/null || base=$(git -C ~/dev/ssx3 rev-parse HEAD)
 state=$(mktemp -d "${TMPDIR:-/tmp}/watch.XXXXXX")
 export WS=${WS:-w2} STALL GRACE state
 export WATCH_IGNORE_AGENT="${WATCH_IGNORE_AGENT:-orch-sol},ssx3_opus_orchestrator"
 while :; do
   new=$(git -C ~/dev/ssx3 log --format='%h %s' $base..HEAD | grep -v '\[orch\]')
-  [ -n "$new" ] && { echo "COMMIT: $new"; rm -rf "$state"; exit 0; }
+  [ -n "$new" ] && { echo "COMMIT: $new"; git -C ~/dev/ssx3 rev-parse HEAD > "$BASEF"; rm -rf "$state"; exit 0; }
   ev=$(herdr agent list | python3 -c '
 import json, sys, os, subprocess, hashlib, time
 WS = os.environ["WS"]; ign = set(os.environ["WATCH_IGNORE_AGENT"].split(","))
