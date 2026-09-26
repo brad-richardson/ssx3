@@ -283,3 +283,23 @@ with VK2's present fix (Vulkan on) plus whatever else has folded by then.
 iPhone only: `install_iphone` with the F6 device build (already signed `e22bf2cf…`), then
 `bash local/research/I31/deploy-ios.sh iphone` (Brad's save + env). **Never launch.** Verify the installed
 bundle and 7 OKs; append `## Part 3`; commit `[F6] Part 3 …`; stop.
+
+## Part 3 — iPhone install only (device build `fb28d99`)
+
+Worker: muse, brief above. No Odin play install (orchestrator: after VK2/BA1).
+
+- Staged binary re-read `e22bf2cf…` before install (matches the Part 2 signed
+  SHA); no rebuild.
+- iPhone 16 Pro Max (`00008140-0002505001F3001C`): `available (paired)` at
+  check and at install (never `unavailable`); install rc=0 (seq 4876,
+  bundle `9D47612D-…`); deploy SKIP + 7 OKs (6/6 saves + `ps2x.env`).
+- **Never launched** — no launch/process command targeted the iPhone UDID.
+
+Exact commands:
+
+```sh
+xcrun devicectl list devices  # iPhone available (paired)
+shasum -a 256 ~/dev/ssx3-work/F6/ios/staged/ps2EntryRunner.app/ps2EntryRunner  # e22bf2cf…
+bash ~/dev/ssx3-work/F6/ios/build-install.sh install_iphone
+bash local/research/I31/deploy-ios.sh iphone  # never launched
+```
