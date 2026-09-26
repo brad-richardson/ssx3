@@ -212,3 +212,44 @@ section version — if the load refuses, say which section); 512 KB stack; one A
 (F5 recipe, hold the ssh). Stop and hand back; I push.
 **2B — stage 4 block functions** (after the push, same pane): as sketched above, behind a default-off
 knob until proven; exactness bar unchanged; ABBA on the mini vs `vr2-fold`. Budget 6 h, ≤ 12 builds.
+
+## Part 2A — fold prep (worker, 2026-09-25 20:50–21:50 EDT)
+
+**Result: ready to push.** Local branch `vr2-fold` =
+fork `ssx3` `5474956` + `ce2caeb 5ab1cbb 5fe4415 e34d93f d4fc12e`, picked with `-x` from
+`9b16870 b5ff643 4ae0e47 0f0c2d5 9d7e2a2` (not `639df0f`). **Tip `d4fc12e`.** All five applied
+cleanly, with no conflicts in `ps2_vu1.h`/`ps2_vu1_core.cpp` (SS1's VU1 serializer is a friend
+struct in `ps2_savestate.cpp`). The runner-dir guard is empty. Not pushed.
+
+**SS1 interaction.** SS1 serializes `m_directFlags` and `m_directPendingUntil`. Lever 3 leaves both
+unchanged on save: `m_directFlags` is always false between runs, and pending-until holds exactly
+the old max (the plain store writes `m_cycle + 4`, which the old max would also have been). So the
+VU1 section is unchanged and there is no version bump.
+
+| Gate | Host | Result | Receipt |
+| --- | --- | --- | --- |
+| Suite | mini (Mac tests build, paraLLEl `464f263`) | **663/663**. Differential test 88,632 runs, 0 mismatches | `suites-2a.txt` |
+| Suite | bradflix (Linux x86, det=ON build) | 666/667. Differential 0 mismatches. **1 failure is pre-existing SS1:** "scheduler round trip … load succeeds: ordered-map bucket count not reproducible" | `suites-2a.txt` |
+| Pre-existing check | bradflix, plain `5474956` (det=OFF build `ss1base-tests`) | 661/662, **same test, same message**. Not VR2 (the +5 tests on the fold build = VR2's 1 + 4 det-only) | `suites-2a.txt` |
+| det boot, 512 KB stack | bradflix (`--host bradflix`, runner `a61dde8a…`) | **det-hash IDENTICAL 1..2400, snd/coverage IDENTICAL** vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d`; VU1 100 % generated | `check-fold-det.txt` |
+| Save-state load | bradflix | **refused before any tick: `section kernel: ordered-map bucket count not reproducible`** (not the VU1 section). The state was saved on the mini (libc++), and Linux libstdc++ bucket sizing differs: the same SS1 limit as the unit test (SS2 brief) | `load-2a.txt` |
+| Save-state round trip, 512 KB | **mini** (Mac det build `770fdecc…`, one slot) | loads all 38 sections (runner-SHA warning only), **ticks 2001..2400 IDENTICAL** vs the a3efbfe key, t2401 at 18.3 s wall | `check-fold-load.txt`, `load-2a.txt` |
+| Android compile | bytesize, F5 recipe (`build-android-2a.sh`, root `/home/brad/vr2fold`, one held ssh) | **BUILD SUCCESSFUL in 8m 3s**, 48 tasks, 0 FAILED, 7 `vu1_*.o` built. APK `0f4c0b0aace61734763dd06e9550971cd8e1b8d20695d3e24cca246210a9a476`, 180,147,784 B (two reads match; left on bytesize, not pulled) | `android-2a.txt` |
+
+Notes:
+- **Getting the unpushed fold to bradflix.** `bradflix_build.sh` checks out a SHA from
+  `origin/ssx3`. I carried the five commits there with a git bundle into the private ref
+  `refs/vr2/fold` in bradflix's `HS1/PS2Recomp` clone. Nothing went to GitHub. `rm` that ref
+  after the push if you like.
+- **Android inputs:** `git archive d4fc12e` streamed to bytesize (360 files both sides). Codegen,
+  VU1 images and paraLLEl are reused by symlink: codegen = F5's canonical copy
+  (`8ea8ed43…`/`89953ba2…`, 9,457 files); VU1 = F5's copy, all 7 SHAs equal to `vu1gen-ssx3`;
+  paraLLEl = `/home/brad/f2` `19d93b2`, as in the F5 recipe. SS1's CLUT tail is under
+  `#if PARALLEL_GS_HAS_CLUT_STATE`, so it is compiled out there. The Mac builds used `464f263`,
+  and bradflix's script pins `19d93b2`. The APK is 6.8 MB smaller than F5's (not investigated;
+  compile-only gate).
+- **Waiter bug (my tooling).** The pre-build "bytesize idle" check matched its own
+  `bash -lc` command line with `pgrep -f`, so it waited 27 min after VK1's build had
+  finished (confirmed with `ps`). Use `ps | grep -v grep`.
+- Budgets: 2 Mac builds (fold tests, fold det), 2 bradflix builds (fold det, 5474956 tests),
+  1 Android build, 3 det boots (bradflix det, bradflix load (refused), mini load). No speed boots.
