@@ -596,3 +596,18 @@ threaded run with the next device APK. Budget ≤ 10 builds.
    - knob 0 vs `PS2X_MTVU=1` vs `PS2X_MTVU=1 + LAG` with the CPU pins above, under the battery/lock
      rules.
 3. Brad decides the `PS2X_MTVU_LAG` default from those Odin numbers and a hands-on latency look.
+
+## Orchestrator gate, stage 3 (2026-09-26)
+
+**Pass.** 19 threaded det boots IDENTICAL on Mac + bradflix (incl. 512 KB, jitter, LAG sparse with every
+emitted tick checked), 1.99 M GIF packets byte-identical knob 0 vs MTVU vs MTVU+LAG, 0 VIOLATIONs,
+synthetic ordering test green on both hosts. Mac race **1.31×** (MTVU) and **1.94×** (MTVU+LAG, 0.978× of
+full speed), beating the model; both races found by the assert/boots were fixed with exact arguments.
+
+## Stage 4 brief (orchestrator) — fold prep, then stop
+Branch `mt1-fold` from fork `ssx3` **tip at the time you start** (`git fetch fork`; VR2's fold may land
+first — rebase onto whatever is there). Keep `PS2X_MTVU` and `PS2X_MTVU_LAG` default **off**. Gates: suite
+(Mac + bradflix), det IDENTICAL knob 0 and MTVU=1 (bradflix), one Android compile (F6 recipe on bytesize —
+wait your turn, hold the ssh) and one iOS device compile (F6's `~/dev/ssx3-work/F6/ios/build-install.sh`
+`configure_device build_device` only; no install). Stop and hand back; I push and schedule the Odin runs
+(census; knob 0 vs MTVU vs MTVU+LAG with `PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`) in the next device build.
