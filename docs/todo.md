@@ -293,7 +293,7 @@ then 120 Hz simulation.
 - [ ] Idle-loop / event fast-forward census for loading and menus (RV7 rank 7): find hot guest polling loops
       first; one exact candidate only if a loop is found (timer/side effects preserved).
 - [ ] Reference read of ARMSX2's ARM64 VU/EE core (RV7 §5; GPL: techniques only) once VR2's block design settles.
-- [ ] **VR3 (queued after VR2):** VU0 microprograms still run in the interpreter: N12 subtree 7.0 % ≈ 5.5 ms of the
+- [ ] **VR3 (running):** VU0 microprograms still run in the interpreter: N12 subtree 7.0 % ≈ 5.5 ms of the
       68 ms Odin race frame (from guest `sub_0022ADD8`). Static-recompile VU0 on VR1's machinery.
 - [ ] HS1 follow-ups: cold bradflix build 400 s (nine -O3 unity TUs > 60 s; accept or PCH); unify the
       `vu1_images` pin scheme (RS2 vs HS1 differ; fold into `baseline.py pins`); delete LX1's retired
