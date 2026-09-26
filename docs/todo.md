@@ -291,8 +291,11 @@ then 120 Hz simulation.
 - [ ] Android `-march` quirk (BA1 §1): root CMake's crypto/crc `-march` is overridden by a later plain `armv8-a+fp+simd`; decide which is intended (Odin supports both).
 - [ ] Odin fan: confirm by ear/feel that an adb `settings put system fan_mode 5` actually speeds the fan (Brad set 5 by hand on 09-26). The tools set 5 only for planned back-to-back batches (`odin_cooldown.py --fan performance`) and restore the pre-run value.
 - [ ] **Parked (Brad 09-26, likes it): VU1 on the GPU** — run SSX 3's VU1 microprograms as GPU compute feeding
-      paraLLEl-GS, taking the MTVU unit thread off the CPU. Feasibility spike GV1 (design-only); product work only
-      after GV1's verdict and Brad's go.
+      paraLLEl-GS, taking the MTVU unit thread off the CPU. GV1 verdict (09-26): no-go now — exact FMAC is bit-exact
+      on GPU but ~128× plain, and the Odin GPU budget is already spent by GS. Revisit only after GG1 frees GPU time;
+      stage 0 = run GV1's kernel on the Odin to measure the Mac→Adreno factor.
+- [ ] **GG1 (next): Odin GS GPU cost** — GS alone ≈ 15.5 M GPU cycles/guest frame (needs ≥ 930 MHz at 100 % for 60 Hz);
+      per-pass GPU timestamps, then the top levers (binner/wave128, pass costs, present blit, Turnip codegen).
 - [ ] **VP1 (running):** multi-core VU1 census + design (Opus, design-only). **PG1 (queued behind the Odin):** PGO,
       code layout, CPU target per platform.
 - [ ] **TN1 driver-side tuning** (Brad 09-26): GsWorker pin knob, Mesa disk shader cache, kgsl blocking-call audit, proprietary Adreno driver recheck; on F8's APK. Later: rebase the Mesa fork on newer upstream for A830 improvements (same gates).

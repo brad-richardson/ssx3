@@ -476,3 +476,14 @@ SPIR-V and binary SHAs are in `bench-mac.txt`: `test.spv` `0f41947e…`, `bench0
   - 1 benchmark run (8 s under the lease);
   - scratch `~/dev/ssx3-work/GV1` is 126 MB, most of it `ref/cases.bin` (1 M cases, 128 MB).
     It is safe to delete.
+
+## Orchestrator gate (2026-09-26)
+
+**Pass; verdict accepted: VU1-on-GPU stays parked (no-go now).** The exactness result is real and reusable
+(GLSL port of VR4's exact FMAC core bit-exact on 1,000,000/1,000,000 cases on MoltenVK without fp64), but it runs
+~128× below plain fp32, and the deciding number is the Odin GPU budget: paraLLEl-GS alone ≈ 15.5 M GPU cycles per
+guest frame (busy × clock consistent across FS2's T2/P1/P2), i.e. ≥ 930 MHz at 100 % busy for 60 Hz and ≥ 1.86 GHz
+for 120 Hz, against 967 MHz as the highest clock logged. **Consequence for the plan: the GPU is the next wall on the
+Odin after the MTVU unit**, so a G-lane GPU-cost lane (GG1) starts now. The 4–10× Mac→Adreno factor stays an
+assumption (stage 0 only if Brad wants the option alive). Process note: the compiles at 11:30–11:37 overlapped VR4's
+speed holds H7/H8 (a few seconds of one core); VR4 told to caveat those holds.
