@@ -184,3 +184,73 @@ the exercised path first, as you did for K1–K3; if it has several, list them a
 Same measurement as the `=2` run. Accept if motion per VBlank is within ±5 % of stock in **both** modes; otherwise
 name the next unconverted consumer and stop. ≤ 1 build, ≤ 2 boots. Also note, as a gap, what remains for the HUD
 clock and for AI riders (do they use the same integrators?). Then stop.
+
+## Part 2 — K4 halve (`=3`): K4 exonerated, residual is pre-window divergence (2026-09-26)
+
+K4 (`0x49b828`) re-verified single-reader (`0x121e64`, true code in
+`sub_00121AA0 [0x121aa0,0x121f30)`) before patching — no multi-reader split
+needed. `=3` armed once (`tm4-probe-armed mode=3 … k4=3c088889`, no refuse).
+
+| Observable (ticks 1800–2400) | Stock | `=3` (`tm4-probe3`) |
+| --- | --- | --- |
+| Updates/VBlank; renders | 1; 1 | 2 (601/601, 1202 lines, 0 susp); 1 |
+| `A+0x1c` at 1800/2400 | 1750 / 2350 | 3480 / 4680 (+2/VB) |
+| Rider path (600 steps) | 7692.8, 12.82/VB | 8863.2, 14.77/VB (**1.152×**; `=2` was 1.148×) |
+| Per-update tscale (window) | mean 1.0003 (n=100) | mean 0.5128 / median **0.5003** (n=203) |
+| Mode-1 per-update step (by `0x1380b4`) | 10.228 (n=55) | 6.245 (n=128) → 2×/stock = **1.221 FAIL** |
+| Mode-2 per-update step (by `0x13e0dc`) | 9.91 (n=45) | 4.635 (n=71) → 2×/stock = **0.935 FAIL** |
+| Mode-1 `|v|`: first-10 / last-10 in window | 634.7 / 601.8 | **1002.5 / 624.6** (decays to +3.8%) |
+| Mode-2 `|v|`: first-10 / last-10 | 645.4 / 502.3 | 646.9 / 489.6 (matches throughout) |
+| HUD clock 1800 / 2400 (viewed; 2100 not viewed) | 01 / 11 | 02 / 22 (2×; tumbling at 1800, 27 MPH at 2400, 2ND/2) |
+| SND final | 3666/0xf3b/…/3665 | identical counters (ee cycle bit-identical to `=2`); underruns +6.8% host-side |
+| det-hash vs `a3efbfe-…` | IDENTICAL | DIFFER from tick 39 (intended) |
+
+**Verdict: FAIL the ±5%-in-both-modes acceptance — but the Part-1 conviction
+is overturned, not extended.** The K4 halve perturbs the trajectory only
+microscopically (`pos[0]` differs at 1e-3; `=2` vs `=3` agree on every
+macro number incl. the 128/71 mode split and both decay curves), so
+**`sub_00121AA0`'s 1/60 is exonerated as the velocity driver**. The mode-1
+residual is a **pre-window initial-condition difference**: the probe enters
+the window at |v|≈1000 vs stock ≈635 and **decays** to +3.8% by window end
+(reproduced identically in `=2`: 1002.4 → 624.6). A per-update scaling error
+would sustain or grow, not decay. Mode 2 matches stock end-to-end
+(646.9/489.6 vs 645.4/502.3) — the conversion is working there; its −6.5%
+mean is segment/trajectory noise.
+
+**Next unconverted consumer (named, evidence-graded): the race-start/accel-phase
+velocity input, ticks ~1690–1799 (before the cruise window).** The probe rider
+must gain its excess speed during race-start acceleration; the cruise-window
+data cannot see that phase. Prime static suspect: `sub_00138960`'s per-call
+aux rewrite (reads `[obj+0x370]` at `0x1389a0`, unscaled gain 200.0
+(`lui 0x4348`), no dt factor, writes back fresh `[obj+0x370]/[obj+0x3d0]`
+state every mode-1 update) — but this is static plausibility only, after the
+K4 lesson. Recommended next measurement (not this brief): aligned early-race
+window (stock + probe watch, ticks 1690–1760) to catch the accel-phase term
+live; do not halve blind. The spare Part-2 boot was intentionally unused —
+one boot cannot supply both sides of that comparison.
+
+**Gap — HUD clock:** formatter still unlocated (Part-1 negative stands). What
+remains: render-`jalr` dispatch-target tap or digit-buffer watch to find the
+`/60` site and the −1690 race-start base, then scale both with rate.
+
+**Gap — AI riders:** single static call site per integrator
+(`0x136eb8 → 137D18`, `0x11143c → 13D818`) with single-site dispatchers above
+(`0x11145c → 136E98`, `0x1216e8 → 111408`) — no per-rider loop below
+`sub_001216E0`, and the exercised path carries one obj (`0x1465c40`). Whether
+the rival flows through the same chain with a different obj (loop above
+`sub_001216E0`) or a separate tree is unresolved; TM2's untaken second
+snapshot call site (`0x128bc0`) hints at a second path. Live resolution needs
+a watch on a second rider's position (address unknown). If AI shares the
+integrators, K1–K4 halves apply to it automatically; its aux/accel inputs
+would need the same accel-phase audit as the player.
+
+Part-2 pins: worktree `tm4` + `d27e6c1` (`[TM4P2] …=3…`, 1 file);
+runner-dir check empty; build 1/1 `mac_build.sh --det --diag` → runner
+`669bd52d143b749345818d42d6765c8d27480d65c2c989487aa1769d95e7468f`
+(2 reads match), 430,527,248 B; boot 1/2 `tm4-probe3` (`=3`, B2 setup) →
+target, t2400, 67.0 s, slot 1 (held), log 1,255,235 B. Receipts:
+`tm4-probe3-watch.txt` (1076 lines, sha `5e7fc297…`), `tm4-probe3-arm.txt`.
+Test-collateral note: dev-only research probe (default off, nothing ships;
+TM1–TM3 precedent has no maintained harness for guest-behavior probes) —
+verification is the lane's established det-boot + `baseline.py` + tap counts,
+not a committed test.
