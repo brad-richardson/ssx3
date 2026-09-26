@@ -217,3 +217,12 @@ app-command wrapper unchanged.
 | B1 (b) | `--vk 0` (GL 16:9 fill) | **PASS.** raylib: screen/render 1920×1080, offsets 0,0. sc02/sc03 race fills the frame, no borders, no handle; immersive `applied` on the GL path too. sc01 caught My Rules mid-fade (tick-sample lag, not a GL bug — same nominal tick shows different settled screens across runs) |
 | C1 (c) | `--vk 0 --aspect 4:3` | **PASS.** Pillarbox measured 240→1679 (1440×1080, exact 240/240 bars) on two rows; black bars, no handle. Note: a static 3×276 px bright segment at x≈1905, y 402–677 sits in the right bar, byte-identical across all 3 C1 shots (menu + race) — device chrome above our all-black clear, not our rendering |
 | D1 (d) | `--pad-probe` on Vulkan | **PASS.** `[vpad] overlay shown` through the run (hidden only by the end-of-run injected press); immersive `applied`. All 3 shots: translucent pad (L1/L2/R1/R2, face buttons, D-pad, stick ring, SELECT/START) correctly laid out at display size over the full-screen race/menu, no system bars |
+
+## Orchestrator gate, Part 2 (2026-09-26)
+
+**Pass.** A2/B1/C1/D1 all pass with screenshots and logs: immersive `applied` (retry path exercised), no gesture
+handle, transient bars on a partial swipe and auto-hide, GL fallback fills 1920×1080 at 16:9, GL 4:3 pillarbox
+exact 240/240, virtual pad correct over Vulkan. Screening runs only (no speed numbers). **Folded:** the three
+commits cherry-picked onto fork `ssx3` `b97b241` → `f09e8bf`/`86e3dad`/`1425844` (patch-ids identical;
+`ps2_runtime.cpp` is the only file and `b97b241` never touched it since `f0d2d3c`, so the file equals the tested
+one; runner-dir diff empty), pushed ff: fork `ssx3` = `1425844`. It reaches Brad through F8's play build.
