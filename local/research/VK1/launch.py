@@ -50,6 +50,13 @@ ap.add_argument('--apk-sha', default='')
 ap.add_argument('--cpu-window', default='')
 ap.add_argument('--compare-ticks', default='')
 ap.add_argument('--lifecycle', type=int, default=0)
+ap.add_argument('--sf-dump-tick', default='',
+                help='Part 2B: tick(s) "a,b,c" at which to save the HWC layer table (composition type per layer)')
+ap.add_argument('--aspect', choices=('', '4:3', '16:9', 'native'), default='',
+                help='Part 2B: PS2X_ASPECT (presenter aspect; empty = default anamorphic 16:9)')
+ap.add_argument('--fc', type=int, default=0, help='Part 2A: PS2X_PGS_FRAME_CONTEXTS (0 = unset = 4)')
+ap.add_argument('--vk', choices=('', '0', '1'), default='',
+                help='Part 2B: PS2X_PRESENT_VULKAN value to write (empty = variant default)')
 ap.add_argument('--pad-probe', action='store_true',
                 help='PS2X_VIRTUAL_PAD=1 (for its [vpad] pad_in_use log) + an injected gamepad long-press at the end')
 a = ap.parse_args()
@@ -184,8 +191,14 @@ if a.variant in ('A', 'VA'):
     env.append('PS2X_PGS_PRESENT_PIPELINE=1')
 else:
     env.extend(['PS2X_PGS_SSAA=4', 'PS2X_PGS_HIRES_SCANOUT=1', 'PS2X_PGS_PRESENT_PIPELINE=1'])
-if a.variant.startswith('V'):
+if a.vk:
+    env.append(f'PS2X_PRESENT_VULKAN={a.vk}')
+elif a.variant.startswith('V'):
     env.append('PS2X_PRESENT_VULKAN=1')
+if a.fc:
+    env.append(f'PS2X_PGS_FRAME_CONTEXTS={a.fc}')
+if a.aspect:
+    env.append(f'PS2X_ASPECT={a.aspect}')
 DDUMP = f'{FILES}/vk1dump'
 if a.pad_probe:
     env.append('PS2X_VIRTUAL_PAD=1')
@@ -197,7 +210,8 @@ if a.game_cpus:
 assert a.compare_ticks or not any(x in e for e in env for x in ('DUMP', 'TRACE', 'CAPTURE', 'ORACLE')), \
     'dump/trace key in env'
 assert all(not e.startswith('PS2X_PGS') or e.split('=')[0] in
-           ('PS2X_PGS_PRESENT_PIPELINE', 'PS2X_PGS_SSAA', 'PS2X_PGS_HIRES_SCANOUT') for e in env), \
+           ('PS2X_PGS_PRESENT_PIPELINE', 'PS2X_PGS_SSAA', 'PS2X_PGS_HIRES_SCANOUT', 'PS2X_PGS_FRAME_CONTEXTS')
+           for e in env), \
     'unexpected PGS key in env'
 open(f'{OUT}/ps2x.env', 'w').write('\n'.join(env) + '\n')
 sh(f'mkdir -p {DSCRAP}; rm -f {DSCRAP}/*.png {DSCRAP}/*.data {DSCRAP}/*.ppm; rm -rf {DDUMP}; mkdir -p {DDUMP}')
@@ -292,6 +306,7 @@ rate_re = re.compile(r'\[vsync-rate\] tick=(\d+) rate=([\d.]+)')
 cpu_win = [int(x) for x in a.cpu_window.split(',')] if a.cpu_window else []
 cpu_snap = {}
 lifecycle_done = False
+sf_ticks = [int(x) for x in a.sf_dump_tick.split(',') if x]
 
 
 def task_cpu(pid):
@@ -444,6 +459,21 @@ while True:
         cpu_snap['end'] = (time.time(), tick, task_cpu(pid))
         log(f'CPUWIN end tick={tick}')
         write_cpu()
+    if sf_ticks and tick >= sf_ticks[0]:
+        sf_ticks.pop(0)
+        full = sh('dumpsys SurfaceFlinger', timeout=90)
+        keep, on = [], False
+        for ln in full.splitlines():
+            if 'HWC layers' in ln:
+                on = True
+            if on:
+                keep.append(ln)
+                if len(keep) > 60 or (keep and ln.strip() == '' and len(keep) > 3):
+                    on = False
+        keep += [ln for ln in full.splitlines() if 'ps2x-game' in ln][:40]
+        with open(f'{OUT}/sf-hwc.txt', 'a') as f:
+            f.write(f'tick={tick}\n' + '\n'.join(keep) + '\n')
+        log(f'SFDUMP tick={tick} lines={len(keep)}')
     if a.lifecycle and not lifecycle_done and tick >= a.lifecycle:
         lifecycle_done = True
         run_lifecycle()

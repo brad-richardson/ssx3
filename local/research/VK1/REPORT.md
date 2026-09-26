@@ -371,3 +371,161 @@ under the layer if cheap (G9). Validation: pixels via gralloc at two ticks, bg/f
 Mac det-hash unchanged, Odin 1× speed pair vs the F5 play build. Suite green, runner-dir empty, one
 Android build per candidate on bytesize. Stop before any push or play-build install; I fold it (F6).
 Budget 6 h, ≤ 6 Android builds, ≤ 12 Odin launches. Brad's env/save rules unchanged.
+
+## Part 2A — frame contexts (orchestrator brief, 09-26)
+
+**Answer: no. More Granite frame contexts don't recover the 4× cost, and the frame-context wait
+was never the cost.** The time is the GsWorker **blocked inside paraLLEl's `flush_submit()`**,
+which doubles at 4×.
+
+Code (local): paraLLEl branch `vk1-part2` from `464f263`: `8013170` (counters: `flush_submit`
+calls, `next_frame_context` advances + wall, `wait_timeline` calls + wall) and `1b3a294`
+(`flush_submit` wall). Fork branch `vk1-part2` from `5474956`: prototype cherry-picked
+(`b99ae9f`, `b5ed3c8`), `ef039cb` (`PS2X_PGS_FRAME_CONTEXTS`, 2..16, default 4 = before; a
+periodic `[gs:parallel] sync` line with per-present deltas), `321773e` (Present's
+`GSInterface::flush`/`vsync` wall). Cost: four `steady_clock` reads and relaxed atomics per
+flush; the sync line prints every 300 presents like the existing stats line.
+
+| Run (APK) | Settings | Race rate | flush_submits / present | frame-ctx wait ms / present | timeline waits | `flush_submit` wall ms / present | Present: `flush()` / `vsync()` ms |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| A1 (`b2fc7f65…`) | 4×+hi-res, **FC=16**, GL present | 1714→4529: **10.16 vs/s = 0.169×** | 3.99 | 0.60 | 0 | — | — |
+| A2 (`b2fc7f65…`) | 4×+hi-res, FC=4, GL | 1714→4558: **9.93 = 0.166×** | 4.02 | 0.60 | 0 | — | — |
+| L1 (`8c74352d…`) | 4×+hi-res, FC=4, GL (`PS2X_PRESENT_VULKAN=0`) | 1714→3036: 9.38 (0.157×, early race only) | 3.97 | 0.59 | 0 | **48.7** | 17.2 / 0.60 |
+| L2 (`8c74352d…`) | 1×, FC=4, GL | 1714→3014: 13.54 (0.226×, early race only) | 4.03 | 0.31 | 0 | **23.4** | 6.5 / 0.29 |
+
+(Race-window means of the sync lines from tick 1800. A1/A2 per-thread windows: GameThread
+57.6 ms CPU of 106.8 / 109.9 ms wall; GPU 47.2 / 51.2 %. Reference, F5 Part 2 B legs: 10.21 /
+9.93, VK1 S2/S3: 10.07 / 10.07.)
+
+Reading:
+- FC=16 vs FC=4: +2.3 % (10.16 vs 9.93), inside the B-leg spread already seen (F5: 2.8 %). The
+  frame-context wait is **0.6 ms per present at both settings** (0.3 at 1×), so there's nothing
+  for more contexts to recover. FC=8 and the 1× FC pair weren't run: the counter rules them out,
+  and those launches went to localizing the real wait instead (L1/L2).
+- The race does **~4 `flush_submit`s per present** (the Mac shows the same, 4.3). Their wall is
+  **23.4 ms per present at 1× and 48.7 ms at 4×**: +25 ms, which is the +31 ms GameThread stall
+  from stage 1 to within the window differences. Most of it happens **outside `Present()`**
+  (Present's own `flush()` is 6.5 / 17.2 ms; `vsync()` < 1 ms), i.e. in flushes triggered while
+  the GsWorker processes GIF packets. The GsWorker's CPU stays ~15.5 ms/frame, so this is
+  **blocked time**, not work.
+- Inside `flush_submit`, the frame-context advance (0.3–0.6 ms) and timeline waits (0) are
+  excluded. What remains is Granite's `device->submit(...)` of the recorded command buffers
+  (Turnip `vkQueueSubmit` → kgsl), the two timeline `submit_empty` calls, and
+  `drain_compilation_tasks_nonblock()`. Splitting those is the next measurement: one more timer
+  pair, no Odin budget question.
+- Mac det-hash with FC=16: **identical 1..2400** (`ef039cb` det build, one slot each).
+
+Recommended (orchestrator decides): keep `PS2X_PGS_FRAME_CONTEXTS` (default 4, harmless) or drop
+it at fold; next brief: time `device->submit` vs `submit_empty` vs compile-drain inside
+`flush_submit` on the Odin at 1× and 4×. If it's the kgsl submit blocking, the lever is fewer,
+larger submits per frame or a submit thread in paraLLEl, not the present path.
+
+## Part 2B — productized Odin Vulkan present (fork branch `vk1-part2` from `5474956`)
+
+**State: done up to the fold; nothing pushed, no play-build install.** Framing is fill-the-screen
+(16:9 over the whole 1920×1080 panel), per the orchestrator.
+
+| Commit (fork `vk1-part2`) | What |
+| --- | --- |
+| `b99ae9f`, `b5ed3c8` | stage 3 prototype + geometry/lifecycle fix (cherry-picked from `b2640de`, `b5d2c0d`) |
+| `ef039cb`, `321773e` | Part 2A: `PS2X_PGS_FRAME_CONTEXTS` (default 4) and the `[gs:parallel] sync` line (flush/frame-context/timeline/present wall split) |
+| `c0c449e` | **Default on** for Android (`PS2X_PRESENT_VULKAN=0` forces GL). **Automatic fallback**: API < 29, no AHB import extensions, AHB slot setup failure, or > 240 consecutive dropped buffers while a window exists → the sink marks itself broken, detaches the child, the backend returns to the readback path and the presenter draws the GL quad again. **Under-layer variant** when the virtual pad is on: `ANativeActivity_setWindowFormat(RGBA_8888)` before `InitWindow`, raylib EGL alpha via a hash-pinned configure patch (`cmake/patch_raylib_android_egl_alpha.cmake`, raylib 5.5 `rcore_android.c` `a17a8c75…`), child at z = −1, GL clears to transparent, pad drawn with premultiplied separate blending. **No GL clear/swap under the layer** when there is no overlay: input polling and the pad latch still run, paced by a 60 Hz sleep |
+| `2c1c4ba` | Skip the GL swap only after 3 GL swaps on the current window (D2 bug below) |
+| `51f8215` | Keep the main thread's name across the JNI attach (an unnamed attach renamed it `Thread-N`, hiding it from per-thread profiles) |
+| **`15275cd`** (tip) | Aspect-exact rect: round the size, then centre (4:3 = 597 of 796 buffer px = exactly 1440 panel px; edge rounding gave 598 = 1442). Under-layer: GL clears black, then a scissored clear makes only the child's rect transparent, so bars stay black |
+
+paraLLEl branch `vk1-part2` from `464f263`: `8013170`, `1b3a294` (counters only). Suite
+**662/662** at every fork commit (Mac, worktree root); runner-dir diff vs `14b1e5cb` empty.
+Android builds **6/6**: `b2fc7f65…` (2A), `cbac70df…` (not launched), `8c74352d…` (L1, L2, D1,
+D2), `5cd153da…` (D3, Q1, Q4), `203ba47d…` (H1), **`727242b1…` (tip `15275cd`, not yet on a
+device)**; each two local + two remote SHA reads, installed `base.apk` matched every launch. Mac
+det-hash **identical 1..2400** vs the `ef039cb` baseline at `c0c449e`, at `2c1c4ba` (with
+`PS2X_PGS_FRAME_CONTEXTS=16`) and at `15275cd`.
+
+### Device checks (Odin, APK `8c74352d…` for D1/D2, `5cd153da…` for D3 and the speed legs)
+
+| Check | Run | Result |
+| --- | --- | --- |
+| Default on, no env key | D1, D2, D3, Q1, Q4 | `[present-vk]` layer + 4 AHB slots; no `PS2X_PRESENT_VULKAN` in the env |
+| GL fallback knob | L1, L2 (`PS2X_PRESENT_VULKAN=0`) | `[present-vk] off (PS2X_PRESENT_VULKAN=0): GL present`; readback path, normal picture |
+| Pixels via gralloc | D1 t1103 + t2100, D2 t2100, D3 t2100 (after bg/fg) | **`diff_px=0` all four**, stride 768 |
+| Pad **on** (under-layer) | D1 (`PS2X_VIRTUAL_PAD=1`) | child `z=-1`; screencap t2100: full-screen race with the translucent pad drawn over it, colours right; injected gamepad press → `[vpad] pad_in_use=1` |
+| Pad **off** | D2, D3 | child above, GL swap skipped once 3 GL frames are on the window |
+| Background / foreground | D1, D2, D3 | `APP_CMD_TERM_WINDOW: child layer detached` → new child; D1/D3 full-screen after foreground. **D2 bug (fixed in `2c1c4ba`, re-checked in D3):** with the swap skipped, the new window never got a GL buffer, so its buffer→window scaling was missing and the child showed at 796×448 in a corner |
+| HWC composition (G2) | D1, D2, D3 (one `dumpsys` each at t~2220) | D1: `ps2x-game` **DEVICE** (display overlay, `ROT_90`, full panel); GL window CLIENT. D2/D3: **every** layer on the display CLIENT (nav bar and screen decor too), i.e. SurfaceFlinger chose GPU composition for that frame; the covered GL window is culled. Single samples |
+| Counters | D1–D3, Q1, Q4 | `vk_dropped=0`, `vk_release_timeouts=0` |
+| HWC, more samples | H1 (`203ba47d…`, pad off, 6 `dumpsys` at t1919–3209) | **6/6: every layer CLIENT**, `ps2x-game` included, i.e. SurfaceFlinger GPU-composites the whole display each frame with the pad off; D1 (pad on, GL window updating above) got `ps2x-game` as a DEVICE overlay. Not investigated further; see the speed note below |
+| Thread name | H1 | main thread back as `com.ps2x.runner` (0.09 ms/frame) |
+
+### 1× speed vs the F5 play build (ABBA, same session)
+
+Same method as F5 Part 2 (cool-down to status 0 + 180 s, reinstall each leg, I26-FAST, unpaced,
+sound on, pipelined, stop 4500); per-thread CPU window ticks ~1866→2600 (unprofiled).
+
+| Leg | APK | Race (ticks / wall) | vs/s | × | Main thread CPU ms/frame | GsWorker | GameThread |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Q1 | new `5cd153da…` (VK default, GL swap skipped) | 1714→4569 / 195.5 s | 14.60 | 0.244× | **0.08** (`Thread-3`, renamed) | 12.70 | 50.09 |
+| Q2 | F5 play `4ff81032…` (GL readback) | 1714→4516 / 190.8 s | 14.68 | 0.245× | 4.53 | 14.18 | 54.92 |
+| Q3 | F5 play | 1714→4526 / 191.0 s | 14.72 | 0.246× | 4.24 | 13.69 | 51.81 |
+| Q4 | new | 1714→4572 / 196.0 s | 14.58 | 0.243× | **0.08** | 12.95 | 50.59 |
+
+New **14.59 vs/s = 0.2434×** vs F5 **14.70 = 0.2452×: −0.7 %** (legs agree within 0.1 % and
+0.3 %, ABBA order consistent), in line with stage 3's −0.6 %. The main thread drops from ~4.4
+to 0.08 ms/frame and the GsWorker by ~1.1 ms/frame, but the race is GameThread-bound, so that
+doesn't show in the rate. A lead for the −0.7 % (not tested): with the pad off, SurfaceFlinger
+GPU-composites the whole display (H1: 6/6 CLIENT), which puts composition work on the GPU that
+paraLLEl uses. A test would be one pair with the GL swap kept on (does HWC return to DEVICE?).
+
+### Aspect (orchestrator/Brad 09-26: 16:9 default, largest fit, never stretched)
+
+The child's rect is `presentRect(parent buffer, frame, aspect)` with `aspect` from
+`aspectFromEnv(PS2X_ASPECT, anamorphic)`, the same as the GL presenter. Computed for the Odin
+(parent buffer 796×448 → panel 1920×1080, ×2.412 / ×2.411):
+
+| Aspect | Vulkan layer on the panel (`15275cd`) | GL path today (raylib 640×448 canvas) |
+| --- | --- | --- |
+| 16:9 (default: anamorphic) | **1920×1080**, exact (buffer [0,0 796,448]) — **seen on device**: D1/D3/Q/H1 screencaps full screen | **1544×868 box**, borders on all four sides (F5 R2 `sc03`) — wrong for Brad's rule |
+| 4:3 (`PS2X_ASPECT=4:3` or widescreen off) | **1440×1080**, black bars 239/241 px (buffer [99,0 696,448]; the 1.2 px off-centre is one buffer pixel = 2.41 panel px) — **not yet seen on device** | 1440.8×1080, bars ~240 — already right |
+| native (512×448) | 1235×1080 | 1235×1080 |
+
+The panel's buffer is 796 px wide for a 796.4 px ideal, so the x/y scales differ by 0.06 %
+(below a pixel across the frame); nothing is stretched beyond that rounding.
+
+**GL fallback path:** it does **not** match at 16:9. It still letterboxes the picture into
+raylib's 640×448 canvas, which shows as the 1544×868 bordered box. Cheap follow-up (not built,
+per the orchestrator): start raylib at the display size on Android (`InitWindow` with the
+window's size instead of 640×448), so the GL canvas is the panel and the same `presentRect`
+fills 1920×1080 at 16:9.
+
+### Gaps (Part 2)
+
+- **4:3 on-screen check pending**: the brief's 12 Odin launches are used (A1, A2, L1, L2, D1,
+  D2, D3, Q1–Q4, H1). The tip APK `727242b1…` (rounding + under-layer bars) hasn't run on the
+  device. Needs **2 more launches** (4:3 pad off; 4:3 pad on/under-layer), orchestrator's call.
+- HWC composition is sampled by `dumpsys` (single frames); the −0.7 % mechanism is a lead only.
+- Under-layer after a runtime fallback: the RGBA window stays RGBA and the pad is drawn with
+  plain alpha blending, so pad pixels are faintly see-through over black (cosmetic, fallback only).
+- 16:9 fill relies on raylib's 796×448 buffer mapping to the whole panel; a device whose window
+  isn't full screen would get the same rule inside its window (largest fit), not checked.
+- Mac det boots ran on the mini (brief: "Mac det-hash"; HS1's bradflix default is for Linux det).
+
+### Exact commands (Part 2 delta)
+
+```sh
+git -C ~/dev/ssx3-work/VK1/PS2Recomp checkout -b vk1-part2 5474956 && git cherry-pick -x b2640de b5d2c0d
+git -C ~/dev/ssx3-work/VK1/parallel-gs checkout -b vk1-part2 464f263
+bash local/tooling/build/mac_build.sh ~/dev/ssx3-work/VK1/PS2Recomp ~/dev/ssx3-work/VK1/build2 --pgs ~/dev/ssx3-work/VK1/parallel-gs   # 662/662
+bash local/tooling/build/mac_build.sh … ~/dev/ssx3-work/VK1/build2-det --det … --target ps2EntryRunner
+python3 local/research/VK1/vk1_boot.py --mode det … --label det-fc16 --env PS2X_PGS_FRAME_CONTEXTS=16; gb8_hashdiff.py --base run/det-fc4 --cand run/det-…
+git archive <rev> | ssh bytesize '… tar -x -C /home/brad/vk2/PS2Recomp'; tar -cf - (paraLLEl worktree) | ssh bytesize '… /home/brad/vk2/parallel-gs'
+ssh bytesize 'wsl … VK1_ROOT=/home/brad/vk2 VK1_PGS=/home/brad/vk2/parallel-gs /home/brad/vk2/build.sh'   # full 9m39s, then ~20 s increments
+python3 local/research/VK1/launch.py --label A1 --variant B --fc 16 --cpu-window 1800,2350 --apk …b2fc7f65 …   # A2: --fc 4
+python3 local/research/VK1/launch.py --label L1 --variant B --vk 0 --stop-tick 3000 --apk …8c74352d …          # L2: --variant A
+python3 local/research/VK1/launch.py --label D1 --variant A --pad-probe --compare-ticks 1100,2100 --lifecycle 1300 --sf-dump-tick 2200 …
+python3 local/research/VK1/launch.py --label Q1..Q4 --variant A --stop-tick 4500 --cpu-window 1850,2550 --apk <new|F5> …
+python3 local/research/VK1/launch.py --label H1 --variant A --stop-tick 3300 --sf-dump-tick 1900,2150,2400,2650,2900,3150 --apk …203ba47d …
+python3 local/research/VK1/sync.py logs/A1 logs/A2 logs/L1 logs/L2; python3 local/research/F4/phases.py logs/Q1
+bash local/research/VK1/restore-play.sh   # F5 4ff81032 + env a8d651a7, after Part 2
+# pending (2 launches): launch.py --label AS1 --variant A --aspect 4:3 --scap-ticks 1100,2100 --apk …727242b1 …;  AS2: + --pad-probe
+```
+

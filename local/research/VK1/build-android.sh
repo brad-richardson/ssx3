@@ -4,8 +4,9 @@
 # streamed from the mini) and every other input read-only from /home/brad/f5
 # (canonical codegen, paraLLEl-GS 19d93b2 copy, TL1 jniLibs, F5 vu1gen).
 set -euo pipefail
-root=/home/brad/vk1
+root=${VK1_ROOT:-/home/brad/vk1}   # Part 2: VK1_ROOT=/home/brad/vk2
 inp=/home/brad/f5
+pgs=${VK1_PGS:-$inp/parallel-gs}   # Part 2: VK1_PGS=/home/brad/vk2/parallel-gs (paraLLEl vk1-part2)
 ext=/home/brad/n2/PS2Recomp/android
 export JAVA_HOME=/home/brad/n2/toolchain/jdk-17
 export ANDROID_HOME=/home/brad/n2/toolchain/android-sdk
@@ -23,12 +24,12 @@ ls $inp/codegen-ssx3 | wc -l
 echo "== vu1gen input count =="
 ls $inp/vu1gen-f5 | wc -l
 echo "== gradlew argv =="
-echo "$ext/gradlew assembleRelease -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 -Pps2xGameCodegenDir=$inp/codegen-ssx3 -Pps2xGsShadowParallel=ON -Pps2xParallelGsSourceDir=$inp/parallel-gs -Pps2xJniLibsDir=$inp/jniLibs -Pps2xVu1RecompDir=$inp/vu1gen-f5 --max-workers=2 --console=plain --warning-mode=none"
+echo "$ext/gradlew assembleRelease -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 -Pps2xGameCodegenDir=$inp/codegen-ssx3 -Pps2xGsShadowParallel=ON -Pps2xParallelGsSourceDir=$pgs -Pps2xJniLibsDir=$inp/jniLibs -Pps2xVu1RecompDir=$inp/vu1gen-f5 --max-workers=2 --console=plain --warning-mode=none"
 "$ext/gradlew" assembleRelease \
   -Pps2xBootElf=/storage/emulated/0/Android/data/com.ps2x.runner/files/SLUS_207.72 \
   -Pps2xGameCodegenDir=$inp/codegen-ssx3 \
   -Pps2xGsShadowParallel=ON \
-  -Pps2xParallelGsSourceDir=$inp/parallel-gs \
+  -Pps2xParallelGsSourceDir=$pgs \
   -Pps2xJniLibsDir=$inp/jniLibs \
   -Pps2xVu1RecompDir=$inp/vu1gen-f5 \
   --max-workers=2 --console=plain --warning-mode=none \
