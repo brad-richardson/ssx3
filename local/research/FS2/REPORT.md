@@ -322,3 +322,72 @@ alone. Brad approved shipping our own Turnip (09-22), so go to the driver.
    `diff_px=0` at two ticks, a lifecycle bg/fg cycle, no `VK_ERROR_DEVICE_LOST`, then ABBA vs the play APK on the
    play settings; report `flush_submit`, `frame_ctx_wait`, GS-queue-full and race rate.
 Budget: ≤ 4 Mesa builds, ≤ 4 Android builds, ≤ 10 Odin launches. Record the Mesa revision, patch and `.so` SHAs.
+
+## Part 3 — our own Turnip (worker)
+
+### Provenance of the shipped driver (why a byte-identical rebuild isn't possible)
+
+| Fact | Evidence |
+| --- | --- |
+| Shipped `.so` = StevenMXZ `Turnip_Gen8_V36.zip` (tag `v36`, 2026-09-08 11:07 UTC, `target_commitish` `A8xx`): `717812c3…54c1ac29d`, 14,188,488 B, "build from whitebelyash/mesa-unified turnip/gen8 + Mesa Upstream" | GitHub release API; G42/N8A reports |
+| Its strings: `Mesa 26.3.0-devel (git-c501e1d16e)`; NDK r29 (`14206865`); **API 34** (`NT_ANDROID_TYPE_IDENT` 0x22) | `strings`, `llvm-readelf -n` |
+| `c501e1d16e11c256…` is an **upstream** Mesa commit (Pavel Ondračka, r300, 2026-09-08 05:54) | GitHub commit API on `whitebelyash/mesa-tu8`; gitlab raw fetch |
+| The repo's `build_turnip.sh` (A8xx `50cbd613e7`, unchanged since 05-01) clones `whitebelyash/mesa-tu8` `origin/gen8`, whose head is from April. The workflow applies no patches and names its zip `a8xx-gen8-V<N>.zip`, not `Turnip_Gen8_V36.zip`. So v36 was built by hand with an unpublished recipe | script + workflow at `50cbd613e7` |
+| The shipped `.so` has strings plain upstream lacks: `deck_emu`, `gmem_size`, `disable_gmem`, `Adreno (TM) 825`, `Unsupported GPU`, `AMD Custom GPU 0405 (RADV VANGOGH)`. They come from the mesa-unified `turnip/gen8` series (e.g. "tu: Add DECK_EMU to advertise being a SteamDeck", "add disable_gmem GPU property"). That branch is force-rebased (tip now 2026-09-19), so its 09-08 state is gone | strings diff; GitHub branch API |
+| StevenMXZ's curated `patches/tu_gen8_clean.patch` (9 patches, Jan-2026 base): at `c501e1d16e`, patch 1 (UBWC 5/6) is **already upstream**; patch 2 (u_gralloc UBWC detection) **applies**; patches 3–9 **don't apply**, and upstream already covers what matters for the A830: no forced `FLUSHALL` on gen8, A830 in `freedreno_devices.py` (KGSL id `0x44050001`) | `git am` per patch; upstream source reads |
+
+So "stock" = upstream `c501e1d16e` + the one carried patch that applies and matters on our
+path (u_gralloc, used by the AHB present because our shim makes `hw_get_module` fail).
+Behaviour on the Odin is the gate, as the brief says.
+
+### Mesa builds (bytesize, NDK r29, `local/research/FS2/turnip/mesa-build.sh` = v36's script options)
+
+| # | Source | `.so` SHA-256 | Size | Result |
+| --- | --- | --- | ---: | --- |
+| 1 | upstream `c501e1d16e`, API 35, own prefix | `5d1b961e…` | 14,187,656 | same NEEDED + identical dynsyms as shipped; API/prefix differ → rebuilt as #2 |
+| 2 | upstream `c501e1d16e`, API 34, prefix `/tmp/turnip-gen8` | `8ee620b31637f18bfc6b57dcdbbba169d6374fb2a15b4b44aca9b50579eb0d14` | 14,188,712 | **T1: pixels fail** |
+| 3 | `c501e1d16e` + u_gralloc patch (bytesize `ff38e861a6`, tree = fork worktree `745f35565f7`) | `4e9534047e7144951e2adab66cbf76ad51a5868a92d5c9733d1bba080128bf95` | 14,187,880 | **T2: stock gate pass** |
+| 4 | `745f35565f7` + kgsl poll patch = `5a406e36dd4` | **not found: bytesize WSL wedged mid-build** (see Blocker) | | |
+
+Mesa fork (Brad-approved public fork `brad-richardson/mesa`, branch `ssx3` = `c501e1d16e1`):
+worktree `~/dev/ssx3-work/FS2/mesa-wt`, branch `fs2-turnip`:
+- `745f35565f7` `[FS2] u_gralloc: always use ubwc detection path` (author whitebelyash, carried
+  unchanged from `tu_gen8_clean.patch` 2/9).
+- `5a406e36dd4` `[FS2] tu/kgsl: poll instead of an infinite wait on zero-timeout timestamp waits`.
+
+Shipped to bytesize as a git bundle (`44794094…`), so both sides build the same SHAs.
+
+### Odin (APKs = the fs2 source tree of build #2, only `jniLibs/libvulkan_freedreno.so` swapped; runner `.so` `951e91f8…` identical in all)
+
+| Launch | APK (`.so`) | Env | Race vs/s | `flush_submit` / `frame_ctx_wait` / GS-queue-full (ms/frame) | Pixels | Notes |
+| --- | --- | --- | ---: | --- | --- | --- |
+| T1 | `bb846329…` (#2 plain upstream) | legacy GS path, compare 1100/3000 | 25.45 (0.425×) | 23.27 / 0.40 / 15.55 | **FAIL: `diff_px=228919` (t1100), `229285` (t3000)**; the AHB and the screen show tiled garbage (sc01 at tick 2100) | UBWC layout mismatch on the AHB import: exactly what the u_gralloc patch fixes |
+| T2 | `838c2d4d…` (#3 upstream + u_gralloc) | same | **25.39 (0.424×)** | 23.67 / 0.41 / 15.88 | **`diff_px=0`** at t1100 (`ad2e9e852b54155a` = VK1/VK2/S2) and t3000 (`2d19b536…`; mid-race frames vary run to run) | 0 FATAL, jobs=55501, no device lost. Play APK in the Stage-2 ABBA: 25.36 / 25.23 → **within noise** |
+
+### Blocker (Part 3 paused; orchestrator decides)
+
+Mesa build 4 started ~08:31. The WSL VM (`vmmemWSL`, restarted 08:30:37) grew to 10 GB with only
+1.1 GB free on the host, then went idle: CPU time 3,445 → 3,499 s over ~35 min, 1–3 % host
+CPU. Every `wsl -d Ubuntu …` command since hangs, including a root `echo`. `wsl -l -v` still
+says Running. Possible causes:
+- my build recompiling everything after the SHA change (ninja, 20 jobs, bytesize ~9 GB);
+- another lane's job in the same distro;
+- both. I can't see inside while it's wedged.
+
+Recovering needs `wsl --shutdown` or `wsl --terminate Ubuntu` on bytesize, which also kills
+anything other lanes (VR4?) have running there. It's a shared host, so it's your call.
+- Nothing of mine there needs saving: sources are in git (Mesa worktree + bundle) and the stock
+  APKs are on the mini.
+- On resume, I'll cap the build at `ninja -j8` to fit bytesize's memory.
+
+**Resume plan** (unchanged budget):
+1. Mesa build 4 = `5a406e36dd4`.
+2. Android build 3 (swap the `.so`; one APK covers fix on/off via `PS2X_PGS_FS2_LEGACY`).
+3. Odin (8 launches left):
+   - P1: patched, legacy GS path; compare 1100/3000 + a lifecycle bg/fg cycle.
+   - P2: patched + FS2 Granite fix; compare.
+   - ABBA ×4 vs the play APK with the better variant.
+4. Push `fs2-turnip` → fork `ssx3` (fast-forward) only after those gates.
+
+Budget so far (Part 3): Mesa builds 3 of 4 (the 4th is stuck), Android builds 2 of 4,
+Odin launches 2 of 10 (T1, T2). The fork's `ssx3` is not pushed; `fs2-turnip` is local.

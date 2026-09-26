@@ -1,0 +1,89 @@
+From 5a406e36dd44df8f4b15e2447dac5a773576ab21 Mon Sep 17 00:00:00 2001
+From: Brad Richardson <bradrichardsonmail@gmail.com>
+Date: Sat, 26 Sep 2026 08:17:56 -0400
+Subject: [PATCH 2/2] [FS2] tu/kgsl: poll instead of an infinite wait on
+ zero-timeout timestamp waits
+
+KGSL's IOCTL_KGSL_DEVICE_WAITTIMESTAMP_CTXTID treats timeout 0 as "wait
+forever" (adreno_drawctxt_wait: if (timeout == 0) timeout = UINT_MAX).
+kgsl_syncobj_wait() passed get_relative_ms(abs_timeout_ns), which is 0
+for a poll (abs_timeout_ns = 0) and for any deadline under 1 ms away, so
+every zero-timeout vk_sync_wait on a timestamp syncobj blocked until the
+GPU retired it. vk_sync_timeline's garbage collection polls every pending
+point that way on each signal and wait, which serialised the CPU with the
+GPU on every submission (ssx3 FS2: ~23 ms per frame in paraLLEl-GS's
+flush path on an Adreno 830).
+
+- A passed deadline now reads the retired timestamp
+  (IOCTL_KGSL_CMDSTREAM_READTIMESTAMP_CTXTID, KGSL_TIMESTAMP_RETIRED) and
+  returns VK_TIMEOUT if it hasn't retired.
+- get_relative_ms() rounds a future deadline up to whole milliseconds, so
+  a short finite wait never becomes timeout 0.
+
+Orchestrated-By: Claude Code
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/freedreno/vulkan/tu_knl_kgsl.cc | 33 +++++++++++++++++++++++++----
+ 1 file changed, 29 insertions(+), 4 deletions(-)
+
+diff --git a/src/freedreno/vulkan/tu_knl_kgsl.cc b/src/freedreno/vulkan/tu_knl_kgsl.cc
+index 776c4466720..f5cc82cfc5f 100644
+--- a/src/freedreno/vulkan/tu_knl_kgsl.cc
++++ b/src/freedreno/vulkan/tu_knl_kgsl.cc
+@@ -777,17 +777,35 @@ get_relative_ms(uint64_t abs_timeout_ns)
+        */
+       return -1;
+ 
+-   uint64_t cur_time_ms = os_time_get_nano() / 1000000;
+-   uint64_t abs_timeout_ms = abs_timeout_ns / 1000000;
+-   if (abs_timeout_ms <= cur_time_ms)
++   /* Round a future deadline up: a wait with less than 1 ms left must not
++    * turn into timeout 0, which KGSL treats as "wait forever".
++    */
++   uint64_t cur_time_ns = os_time_get_nano();
++   if (abs_timeout_ns <= cur_time_ns)
+       return 0;
+ 
+-   return abs_timeout_ms - cur_time_ms;
++   return (int) MIN2(DIV_ROUND_UP(abs_timeout_ns - cur_time_ns, 1000000),
++                     (uint64_t) INT32_MAX);
+ }
+ 
+ /* safe_ioctl is not enough as restarted waits would not adjust the timeout
+  * which could lead to waiting substantially longer than requested
+  */
++/* Non-blocking check that a context timestamp has retired. */
++static VkResult
++poll_timestamp(int fd, unsigned int context_id, unsigned int timestamp)
++{
++   struct kgsl_cmdstream_readtimestamp_ctxtid req = {
++      .context_id = context_id,
++      .type = KGSL_TIMESTAMP_RETIRED,
++   };
++
++   if (safe_ioctl(fd, IOCTL_KGSL_CMDSTREAM_READTIMESTAMP_CTXTID, &req))
++      return VK_TIMEOUT;
++
++   return timestamp_cmp(req.timestamp, timestamp) ? VK_SUCCESS : VK_TIMEOUT;
++}
++
+ static VkResult
+ wait_timestamp_safe(int fd,
+                     unsigned int context_id,
+@@ -800,6 +818,13 @@ wait_timestamp_safe(int fd,
+       .timeout = get_relative_ms(abs_timeout_ns),
+    };
+ 
++   /* KGSL treats a timeout of 0 as an infinite wait, so a poll (a deadline
++    * that has already passed, e.g. vk_sync_timeline's garbage collection)
++    * reads the retired timestamp instead of calling WAITTIMESTAMP.
++    */
++   if (wait.timeout == 0)
++      return poll_timestamp(fd, context_id, timestamp);
++
+    while (true) {
+       int ret = ioctl(fd, IOCTL_KGSL_DEVICE_WAITTIMESTAMP_CTXTID, &wait);
+ 
+-- 
+2.54.0 (Apple Git-157)
+
