@@ -611,3 +611,74 @@ first — rebase onto whatever is there). Keep `PS2X_MTVU` and `PS2X_MTVU_LAG` d
 wait your turn, hold the ssh) and one iOS device compile (F6's `~/dev/ssx3-work/F6/ios/build-install.sh`
 `configure_device build_device` only; no install). Stop and hand back; I push and schedule the Odin runs
 (census; knob 0 vs MTVU vs MTVU+LAG with `PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`) in the next device build.
+
+## Stage 4 — fold prep (worker, 2026-09-26)
+
+### Result: ready to push
+
+- **Branch:** `mt1-fold` in `~/dev/ssx3-work/MT1/PS2Recomp` is fork `ssx3` **`d585e5c`** (VR2 stage 4
+  + VB1 stop drain) plus the 7 MT1 commits. Tip **`703a5548bbe4dd851d9a094902e3645f3b0a1264`**.
+- **Rebases:** 2, both clean:
+  - `fb28d99` → `a523700` (VK2);
+  - `a523700` → `d585e5c` (VR2).
+
+  Neither upstream change touches an MT1 file. VR2's new VU1 code adds only a function-local
+  `static const` env read plus `VU1Interpreter` member counters, which the unit owns.
+- **Checks:** runner-dir check empty. Not pushed. `PS2X_MTVU` and `PS2X_MTVU_LAG` are default off.
+
+| Gate (at `703a554`, VU1 images `vu1gen-ssx3` = VR2's new set, hash `d28e3fc6…`) | Result |
+| --- | --- |
+| Suite, Mac det (`build-det`, runner `3a8114e1…`) | **679/679** |
+| Suite, bradflix det (`HS1/mt1-fold-det`, runner `939c2de0…` ×2, images synced to my own `HS1/vu1gen-mt1` and verified; the shared `HS1/vu1gen` still holds the old set `aa8127bc…` and was not touched) | **679/679** |
+| bradflix det vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d`, knob 0 | **IDENTICAL** |
+| bradflix det, `PS2X_MTVU=1` | **IDENTICAL**, 0 violations |
+| bradflix det, `PS2X_MTVU=1` + `PS2X_MTVU_LAG=1`, `--hash-every 60` | **IDENTICAL** 40/40 ticks + snd/coverage |
+| bradflix det, `PS2X_MTVU=1` + `PS2X_VU1_BLOCKS=1` (VR2 blocks on: 79.9 % of pairs in blocks) | **IDENTICAL**, 0 violations |
+| Android compile (F6 recipe on bytesize, `/home/brad/mt1`, ssh held, bytesize idle at start; waited for VR2's APK build to finish first) | **BUILD SUCCESSFUL** in 15 m 30 s (incremental; all 7 new `vu1_*.o` rebuilt). APK `b91f827f30e89d3bdd28662c82b934d9e5e51430a55c518673240b5f4badaf42`, 192,206,412 B, remote ×2 + pulled ×2, at `~/dev/ssx3-work/MT1/odin/app-release.apk`. 0 warnings from `ps2_mtvu` |
+| iOS device compile (F6 `build-install.sh`, `preflight configure_device build_device` only, no stage/sign/install) | **BUILD SUCCEEDED** in 226 s, arm64 binary `5b98c5a2…`, `fork-head` = `703a554`, configure `VU1 recomp: 7 images from …/vu1gen-ssx3`. 0 warnings from `ps2_mtvu` |
+
+The whole matrix also passed at the two earlier tips:
+- `fe461fa` on `fb28d99`: Android (APK `8b79c40f…`), bradflix knob 0 / MTVU / LAG, Mac + bradflix suites.
+- `3f94e4e` on `a523700`: Android, iOS, bradflix knob 0 / MTVU, suites 679/679.
+
+Those are superseded by the table above. Receipts: `s4-det-compares.txt`, `build-android-mt1.sh`,
+`ios-build-install-vs-F6.diff`.
+
+### Recipe deltas (for the push and the device build)
+
+- **Android:** F6's `build-android.sh` with root `/home/brad/mt1`. Inputs:
+  - codegen and jniLibs are symlinks to `/home/brad/f5` (verified: 9,457 files, register
+    `8ea8ed43…`);
+  - parallel-gs is a symlink to F6's verified `1b3a294` copy (`gs_renderer.cpp` `52e8dc9e…`);
+  - `vu1gen-mt1` is a **real copy of the mini's `vu1gen-ssx3`** (`d28e3fc6…`), no longer F5's
+    old-set symlink.
+
+  bytesize's `cmd` shell eats pipes, so remote scripts go through `ssh bytesize "wsl -d Ubuntu --
+  bash -s" < script`, and files through `… -- tee path` or `… -- tar -x -C dir`.
+- **iOS:** the `I33/` directory, including its MoltenVK v1.4.2 xcframework, no longer exists, so F6's
+  script failed in `preflight`. I re-fetched the same public release artifact I33 documented
+  (KhronosGroup `MoltenVK-all.tar` v1.4.2):
+  - tar SHA `562a15a2…ef17276` = I33's;
+  - device slice `6cd58884…` and simulator slice `c6027cfb…` = F6's receipts.
+
+  It is extracted to `~/dev/ssx3-work/MT1/ios/mvk/` (172 MB), and my script copy's `MVK=` points
+  there. **Other iOS lanes will hit the same missing path**: F6's script still points at `I33/`.
+
+### Scratch
+
+- **Mini:** `~/dev/ssx3-work/MT1` holds the builds (`build-det`, `build-rel`), `ios/` (device build
+  + `mvk`), the APK and the runs.
+- **bytesize:** `/home/brad/mt1` (sources, gradle/.cxx build, `vu1gen-mt1`).
+- **bradflix:**
+  - `HS1/mt1-fold-det` (1.9 GB) and `HS1/vu1gen-mt1`;
+  - `HS1/PS2Recomp-mt1` (private refs `refs/mt1/*`);
+  - `mt1-thr-det` was removed.
+
+### Hand-back
+
+**Push:** `mt1-fold` `703a554` fast-forwards fork `ssx3` from `d585e5c`.
+
+**Odin runs:** the APK above is built from exactly that tip and the canonical images. Env for the
+runs:
+- census: `PS2X_MTVU=census PS2X_MTVU_CENSUS_OUT=…`;
+- threaded: `PS2X_MTVU=1 [PS2X_MTVU_LAG=1] PS2X_GAME_THREAD_CPUS=6 PS2X_MTVU_CPUS=7`.

@@ -1,0 +1,45 @@
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run4/f-k0 lines=2451 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run4/f-k0: IDENTICAL
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run4/f-thr lines=2457 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run4/f-thr: IDENTICAL
+[mtvu] threaded tick=2400 lag=0 jobs=28226 violations=0 waits: vblank=964/37271.3ms
+== f-lag60
+sparse hash IDENTICAL every=60 ticks<=2400: compared=40 missing=0 off-grid=0 first_diff=None
+snd/coverage: IDENTICAL
+[mtvu] threaded tick=2400 lag=1 jobs=28226 violations=0 waits: vblank=928/33987.5ms
+## rebased fold tip 3f94e4e (bradflix runner 3780a80a…, same bytes as fe461fa)
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run4/r-k0 lines=2448 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run4/r-k0: IDENTICAL
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run4/r-thr lines=2449 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run4/r-thr: IDENTICAL
+[mtvu] threaded tick=2400 lag=0 jobs=28226 violations=0 waits: vblank=959/39756.9ms
+## fold tip 703a554 on fork ssx3 d585e5c, VU1 images vu1gen-ssx3 d28e3fc6 (bradflix runner 939c2de0…)
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run5/g-k0 lines=2451 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run5/g-k0: IDENTICAL
+[vu1-recomp] runs=1064960 generated_cycles=980269903 interpreted_cycles=0 generated_share=1.0000
+[vu1-recomp] runs=1081344 generated_cycles=999317037 interpreted_cycles=0 generated_share=1.0000
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run5/g-thr lines=2453 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run5/g-thr: IDENTICAL
+[vu1-recomp] runs=1064960 generated_cycles=980269903 interpreted_cycles=0 generated_share=1.0000
+[vu1-recomp] runs=1081344 generated_cycles=999317037 interpreted_cycles=0 generated_share=1.0000
+hash IDENTICAL  ticks 1..2400: base=baselines/a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d lines=2485 cand=MT1/run5/g-thr-blocks lines=2453 missing=0/0 first_diff=None
+snd/coverage: IDENTICAL
+compare a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d vs MT1/run5/g-thr-blocks: IDENTICAL
+[vu1-recomp] runs=1064960 generated_cycles=980269903 interpreted_cycles=0 generated_share=1.0000
+[vu1-recomp] runs=1081344 generated_cycles=999317037 interpreted_cycles=0 generated_share=1.0000
+== g-lag60
+sparse hash IDENTICAL every=60 ticks<=2400: compared=40 missing=0 off-grid=0 first_diff=None
+snd/coverage: IDENTICAL
+[mtvu] threaded tick=2400 lag=1 jobs=28226 violations=0 waits: vblank=885/32179.1ms
+g-thr: [mtvu] threaded tick=2400 lag=0 jobs=28226 violations=0 waits: vblank=988/37570.8ms
+[vu1-blocks] on=0 entries=0 pairs=0 nostall_misses=0 miss_off=114052434 miss_branch=0 miss_end=0 miss_budget=0
+[vu1-blocks] gen_pairs=948112738 block_pairs=0 pair_share=0.0000 gen_cycles=999317037 block_cycles=0 cycle_share=0.0000
+g-thr-blocks: [mtvu] threaded tick=2400 lag=0 jobs=28226 violations=0 waits: vblank=1003/34976.3ms
+[vu1-blocks] on=1 entries=102820864 pairs=757125063 nostall_misses=0 miss_off=0 miss_branch=0 miss_end=3454 miss_budget=0
+[vu1-blocks] gen_pairs=948112738 block_pairs=757125063 pair_share=0.7986 gen_cycles=999317037 block_cycles=789522121 cycle_share=0.7901
