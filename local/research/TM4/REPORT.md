@@ -172,3 +172,15 @@ boot; not this brief — no tuning loops).
   B1; tap counts 601/601 nominal).
 - Receipts: `tm4-stock-watch.txt` (518 lines, sha `51632812…`), 
 ...[truncated 1273 chars]
+## Orchestrator gate (2026-09-26)
+
+**Pass.** The step chain is named (`delta = vel × ([obj+0x300] × K)`, K1/K2/K3 private 1/60 words), the coherent
+probe gives exact half-steps, and the residual 1.148×/VBlank is localised to mode-1 velocity with a named first
+unconverted consumer (`sub_00121AA0`'s 1/60 at `0x49b828`).
+
+## Part 2 brief (orchestrator)
+One more coherent probe step: `PS2X_TM_RATE120=3` = `=2` plus halving `0x49b828` (check it has a single reader on
+the exercised path first, as you did for K1–K3; if it has several, list them and patch only the rider-path one).
+Same measurement as the `=2` run. Accept if motion per VBlank is within ±5 % of stock in **both** modes; otherwise
+name the next unconverted consumer and stop. ≤ 1 build, ≤ 2 boots. Also note, as a gap, what remains for the HUD
+clock and for AI riders (do they use the same integrators?). Then stop.
