@@ -366,3 +366,9 @@ iOS 1. Binaries: `runner-fold-clean` `e7e5dea0fff70eae88205cc6df3681c49731913703
    plus the bundles `HS1/vr3-c3.bundle` and `HS1/vr3-fold.bundle`. `HS1/vu0gen-vr3` and `HS1/vu0gen-ssx3`
    (the image copies) can stay or go.
 4. Odin pair (next device build): knobs off vs `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1`, same APK.
+
+## Orchestrator gate, stage 4 (2026-09-26) — pushed, lane closed
+
+**Pass; pushed** fork `ssx3` `a5e5940..5d5c382` (ff, runner-dir empty; census kept, off by default — fine).
+Canonical `~/dev/ssx3-work/vu0gen-ssx3` (`2652966b…`) verified. Android and iOS compiles green with the VU0 image.
+The Odin pair (off vs `PS2X_VU0_RECOMP=1 PS2X_VU0_DIRECT=1`) goes into F7.
