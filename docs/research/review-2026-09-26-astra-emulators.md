@@ -351,3 +351,16 @@ Brad's decision, and no public game-derived source is added to our forks.
 [PV2]: https://github.com/PCSX2/pcsx2/blob/ae2bac2b09a7622e5181dc7bf5f6b521c53f7b89/pcsx2/Vif1_Dma.cpp
 [AF2]: https://github.com/ARMSX2/ARMSX2/blob/247fa6f09499f69192c52c0542305ed16119518b/pcsx2/arm64/VuFmacFlags-arm64.h
 [AC2]: https://github.com/ARMSX2/ARMSX2/blob/247fa6f09499f69192c52c0542305ed16119518b/pcsx2/arm64/microVU_Persist-arm64.h
+
+## Orchestrator adoption (2026-09-26)
+
+- Brief A = VR2 stage 4 (running; RV4 notes already forwarded). Brief B = **CP1** (queued after F6).
+  Brief C = **BA1** (running). Brief D (SSX 3 patch semantics) folds into **TM1**: the Metro frame-skip
+  sites `0x00230704`/`0x00230710` (branch + store to `[*(gp+0x2A74)+0x34]`, i.e. RV6's `A+0x34` render
+  gate), the 2P "60 FPS" site `0x00317184` (`$s1` increment in `jal checkHalt`'s delay slot vs the bound
+  `A+0x20`), and the aspect scalars `0x00622600/604` become TM1 observables; no patch is applied.
+- Queued: idle-loop/event fast-forward census for loading/menus (rank 7); ARMSX2's ARM64 core as a
+  reference read for VU/EE codegen after VR2 settles (GPL: techniques only). Parked as recommended:
+  cycle-rate/skip, instant VU1, weaker clamps, disabled readbacks, MTVU (Brad), stretch directives.
+- Confirms Brad's display rule: keep the in-game anamorphic 16:9 plus aspect-preserving output; the
+  community aspect patches are not a default.
