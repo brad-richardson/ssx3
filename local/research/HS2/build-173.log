@@ -1,0 +1,72 @@
+== resolve fork SHA (mini clone, pushed or not)
+fork: 173b31f4884ea3abd05242629728ae3eb2980b87 [SS2] Verify restore order against pre-move saved keys; test empty/string-keyed maps
+== preflight (mini inputs)
+-- mini ISO sha (3 GB, one read)
+-- mini inputs OK (codegen-8ea8ed436b78 vu1gen-d28e3fc6467f pgs-1b3a2948cc55)
+== preflight (bradflix)
+bradflix
+ 07:53:20 up 1 day,  7:13,  3 users,  load average: 0.24, 0.18, 0.24
+/dev/mapper/ubuntu--vg-ubuntu--lv  1.8T  833G  923G  48% /
+-- containers (hands off; load check only)
+health-notifier Up 31 hours
+crawl4ai Up 31 hours (healthy)
+searxng Up 31 hours (healthy)
+radarr Up 31 hours (healthy)
+sonarr Up 31 hours (healthy)
+osrs-bot-osrs-db-1 Up 31 hours
+hunter Up 31 hours
+deluge Up 31 hours (healthy)
+prowlarr Up 31 hours (healthy)
+sabnzbd Up 31 hours (healthy)
+mosquitto Up 31 hours
+esphome Up 31 hours (healthy)
+gluetun-fast Up 31 hours (healthy)
+gluetun Up 31 hours (healthy)
+home-assistant Up 31 hours
+swag Up 31 hours
+uptime-kuma Up 31 hours (healthy)
+samba Up 31 hours (healthy)
+rest_server Up 31 hours (healthy)
+osrs-bot-osrs-bot-1 Up 31 hours
+zone2 Up 31 hours (healthy)
+== claim build dir dev/ssx3-work/HS1/hs2-173b31f-det (under the setup lock)
+== fork export 173b31f4884ea3abd05242629728ae3eb2980b87 -> dev/ssx3-work/HS1/hs2-173b31f-det/src
+EXPORT_OK
+== inputs (content-addressed; shared dirs are never modified)
+-- codegen-8ea8ed436b78 OK
+-- vu1gen-d28e3fc6467f OK
+-- ELF OK
+-- ISO OK
+-- cloning pgs-1b3a2948cc55 pins on bradflix (private stage, then atomic publish)
+Submodule path 'Granite/third_party/volk': checked out '47cddf7ed97b94118a08aacb548a411188e016cc'
+HEAD is now at 1b3a294 [VK1] flush_submit wall counter (ssx3 Part 2A localization)
+HEAD is now at 166ba21a G18: gate update-template creation on supports_descriptor_buffer
+shared pgs-1b3a2948cc55 already published; discarding stage
+== image ssx3-hs1 (cached layers are fast)
+#6 DONE 0.0s
+image: ssx3-hs1 d124af4da093
+== ccache before
+Cacheable calls:    15235 / 15287 (99.66%)
+  Hits:              9473 / 15235 (62.18%)
+  Misses:            5762 / 15235 (37.82%)
+Uncacheable calls:     48 / 15287 ( 0.31%)
+  Cache size (GiB):   0.6 /   5.0 (12.51%)
+  Hits:              9473 / 15235 (62.18%)
+== configure dev/ssx3-work/HS1/hs2-173b31f-det (det=ON)
+CONFIGURE_RC=0
+-- PS2X: VU1 recomp: 7 images from /work/vu1gen-d28e3fc6467f
+== build (16 jobs)
+BUILD_RC=1
+ninja: build stopped: subcommand failed.
+--- wall: 77 s (configure+build) ---
+== ccache after
+Cacheable calls:    15674 / 15730 (99.64%)
+  Hits:              9706 / 15674 (61.92%)
+  Misses:            5968 / 15674 (38.08%)
+Uncacheable calls:     52 / 15730 ( 0.33%)
+  Cache size (GiB):   0.6 /   5.0 (12.77%)
+  Hits:              9706 / 15674 (61.92%)
+sha256sum: /home/brad/dev/ssx3-work/HS1/hs2-173b31f-det/ps2xRuntime/ps2EntryRunner: No such file or directory
+sha256sum: /home/brad/dev/ssx3-work/HS1/hs2-173b31f-det/ps2xRuntime/ps2EntryRunner: No such file or directory
+stat: cannot statx '/home/brad/dev/ssx3-work/HS1/hs2-173b31f-det/ps2xRuntime/ps2EntryRunner': No such file or directory
+173-RC=1

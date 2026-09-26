@@ -1,0 +1,20 @@
+### build-173.log (tail)
+--- wall: 77 s (configure+build) ---
+== ccache after
+Cacheable calls:    15674 / 15730 (99.64%)
+  Hits:              9706 / 15674 (61.92%)
+  Misses:            5968 / 15674 (38.08%)
+Uncacheable calls:     52 / 15730 ( 0.33%)
+  Cache size (GiB):   0.6 /   5.0 (12.77%)
+  Hits:              9706 / 15674 (61.92%)
+sha256sum: /home/brad/dev/ssx3-work/HS1/hs2-173b31f-det/ps2xRuntime/ps2EntryRunner: No such file or directory
+sha256sum: /home/brad/dev/ssx3-work/HS1/hs2-173b31f-det/ps2xRuntime/ps2EntryRunner: No such file or directory
+stat: cannot statx '/home/brad/dev/ssx3-work/HS1/hs2-173b31f-det/ps2xRuntime/ps2EntryRunner': No such file or directory
+173-RC=1
+
+### remote hs2-173b31f-det-build.log (first error)
+ccache /usr/bin/clang++ -DGRANITE_SHIPPING -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DPS2X_ENABLE_DET_HASH_TAP=1 -DPS2X_ENABLE_DIAG_TAPS=0 -DPS2X_ENABLE_IOP_RPC_TRACE=1 -DPS2X_ENABLE_SBR_TRIPWIRE=0 -DPS2X_HAS_PARALLEL_SHADOW=1 -DPS2X_IOP_ENABLE_PLUGINS=0 -I/work/hs2-173b31f-det/src/ps2xRuntime/src/lib/vu -I/work/hs2-173b31f-det/src/ps2xRuntime/src/lib -I/work/hs2-173b31f-det/src/ps2xRuntime/include -I/work/hs2-173b31f-det/src/ps2xRuntime/src/lib/Kernel -I/work/pgs-1b3a2948cc55/gs -I/work/pgs-1b3a2948cc55/Granite/vulkan -I/work/pgs-1b3a2948cc55/Granite/util -I/work/pgs-1b3a2948cc55/Granite/application/global -I/work/pgs-1b3a2948cc55/Granite/third_party/volk -I/work/pgs-1b3a2948cc55/Granite/third_party/khronos/vulkan-headers/include -I/work/pgs-1b3a2948cc55/Granite/math -I/work/hs2-173b31f-det/_deps/raylib-src/src -I/work/hs2-173b31f-det/_deps/raylib-src/src/external/glfw/include -I/work/hs2-173b31f-det/src/ps2xIOP/include -msse4.1 -O3 -DNDEBUG -std=gnu++20 -msse4.1 -ffp-contract=off -MD -MT ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/work/vu1gen-d28e3fc6467f/vu1_00df9699b042f1b9.cpp.o -MF ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/work/vu1gen-d28e3fc6467f/vu1_00df9699b042f1b9.cpp.o.d -o ps2xRuntime/CMakeFiles/ps2EntryRunner.dir/work/vu1gen-d28e3fc6467f/vu1_00df9699b042f1b9.cpp.o -c /work/vu1gen-d28e3fc6467f/vu1_00df9699b042f1b9.cpp
+../vu1gen-d28e3fc6467f/vu1_00df9699b042f1b9.cpp:26:5: error: unknown type name 'PS2X_VU1_NOINLINE'
+--
+      |     ^
+../vu1gen-d28e3fc6467f/vu1_00df9699b042f1b9.cpp:33:5: error: unknown type name 'PS2X_VU1_NOINLINE'
