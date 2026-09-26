@@ -302,3 +302,23 @@ python3 local/research/FS2/phases.py local/research/FS2/logs/S1; python3 local/r
 
 Budgets: 2 of 4 Android builds (14m09s, 14m32s), 6 of 8 Odin launches (S1, S2, Q1–Q4; plus
 two pre-install refusals), all ≤ 160 s wall; ~3 h.
+
+## Orchestrator gate, Stage 2 (2026-09-26)
+
+**Pass (a clean null with the mechanism fully named).** The fix is correct (`diff_px=0`, det IDENTICAL) but the
+wait moves to `next_frame_context` because Turnip's emulated-timeline GC blocks at every call site. Not folding it
+alone. Brad approved shipping our own Turnip (09-22), so go to the driver.
+
+## Part 3 brief (orchestrator) — patched Turnip
+1. Build Turnip from Mesa `c501e1d16e` (the bundled driver's source revision) for Android arm64 on bytesize
+   (meson + NDK cross file; one heavy job at a time, hold the ssh). First build it **unpatched** and prove it
+   behaves like the shipped `.so` (same Vulkan version/driver strings; one Odin race boot, pixels `diff_px=0`,
+   speed within noise of the play APK) — if the stock rebuild differs, stop and hand back.
+2. Patch `tu_knl_kgsl.cc` `kgsl_syncobj_wait` (`KGSL_SYNCOBJ_STATE_TS`, `abs_timeout_ns == 0`): read the retired
+   timestamp (`IOCTL_KGSL_CMDSTREAM_READTIMESTAMP_CTXTID`, `KGSL_TIMESTAMP_RETIRED`) and return `VK_TIMEOUT` if not
+   retired, instead of a timeout-0 wait; fix `get_relative_ms()` so a future deadline under 1 ms rounds **up** to 1 ms.
+   Keep the patch minimal and in a local Mesa branch (no upstream contact).
+3. APK with the patched `.so` in `jniLibs` (with and without your FS2 Granite fix — measure both), gates: gralloc
+   `diff_px=0` at two ticks, a lifecycle bg/fg cycle, no `VK_ERROR_DEVICE_LOST`, then ABBA vs the play APK on the
+   play settings; report `flush_submit`, `frame_ctx_wait`, GS-queue-full and race rate.
+Budget: ≤ 4 Mesa builds, ≤ 4 Android builds, ≤ 10 Odin launches. Record the Mesa revision, patch and `.so` SHAs.
