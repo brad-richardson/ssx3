@@ -1,0 +1,82 @@
+Cmdline: /system/bin/simpleperf record --app com.ps2x.runner --add-meta-info app_type=profileable --in-app --tracepoint-events /data/local/tmp/tracepoint_events --out-fd 3 --stop-signal-fd 4 -g --duration 30
+Arch: arm64
+Event: cpu-cycles (type 0, config 0x0, config1 0x0, config2: 0x0)
+Samples: 27096
+Event count: 6848592307
+
+Children  Self   Command   Symbol
+89.64%    0.61%  GsWorker  GsWorker::threadMain()
+89.64%    0.00%  GsWorker  __pthread_start(void*)
+89.64%    0.00%  GsWorker  __start_thread
+89.64%    0.00%  GsWorker  void* std::__ndk1::__thread_proxy[abi:ne190000]<std::__ndk1::tuple<std::__ndk1::unique_ptr<std::__ndk1::__thread_struct, std::__ndk1::default_delete<std::__ndk1::__thread_struct>>, void (GsWorker::*)(), GsWorker*>>(void*)
+73.50%    0.22%  GsWorker  GS::executeQueuedCommand(GsCommand&)
+59.35%    2.57%  GsWorker  GS::processGIFPacket(unsigned char const*, unsigned int)
+32.41%    0.08%  GsWorker  ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::RawGifPacket(unsigned int, unsigned char const*, unsigned int)
+32.01%    1.44%  GsWorker  ParallelGS::GSInterface::gif_transfer(unsigned int, void const*, unsigned long)
+20.90%    1.15%  GsWorker  void ParallelGS::GSInterface::packed_STQRGBAXYZ<true, (ParallelGS::PRIMType)4, 1>(void const*, unsigned int)
+16.60%    2.11%  GsWorker  void ParallelGS::GSInterface::drawing_kick<(ParallelGS::PRIMType)4>(bool)
+15.89%    5.26%  GsWorker  GS::vertexKick(bool)
+14.88%    7.67%  GsWorker  void ParallelGS::GSInterface::drawing_kick_append<false, false, false, 3u>()
+12.18%    0.00%  GsWorker  GS::latchHostPresentationFrame()
+12.15%    8.37%  GsWorker  ps2x_gs_parallel::(anonymous namespace)::GSParallelBackend::Present(GSPresentationRequest const&)
+11.60%    0.00%  GsWorker  [kernel.kallsyms][+ffffffe760a11586]
+10.62%    0.00%  GsWorker  [kernel.kallsyms][+ffffffe761a7d85e]
+8.66%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe761a7d8ea]
+8.63%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760a3aece]
+8.60%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760a3af86]
+8.49%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760a3b042]
+6.73%     0.15%  GsWorker  syscall
+6.13%     6.09%  GsWorker  GS::writeRegisterPacked(unsigned char, unsigned long, unsigned long)
+5.21%     5.17%  GsWorker  GS::buildDrawBatch(int) const
+5.00%     0.59%  GsWorker  ParallelGS::GSInterface::drawing_kick_update_state(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, muglm::tvec4<int> const&)
+4.52%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760bca446]
+4.48%     0.06%  GsWorker  std::__ndk1::condition_variable::wait(std::__ndk1::unique_lock<std::__ndk1::mutex>&)
+4.41%     0.05%  GsWorker  pthread_cond_wait
+4.23%     0.06%  GsWorker  __futex_wait_ex(void volatile*, bool, int, bool, timespec const*)
+4.20%     0.38%  GsWorker  ParallelGS::GSInterface::drawing_kick_update_texture(ParallelGS::GSInterface::FBFeedbackMode, muglm::tvec4<int> const&, muglm::tvec4<int> const&)
+4.11%     0.14%  GsWorker  ParallelGS::GSInterface::flush(unsigned int, ParallelGS::FlushReason)
+3.84%     0.18%  GsWorker  scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::deallocate(void*, scudo::Chunk::Origin, unsigned long, unsigned long)
+3.78%     1.35%  GsWorker  pthread_mutex_unlock
+3.67%     0.71%  GsWorker  scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::quarantineOrDeallocateChunk(scudo::Options const&, void*, scudo::Chunk::UnpackedHeader*, unsigned long)
+3.44%     0.07%  GsWorker  void ParallelGS::GSInterface::packed_ADONLY<1>(void const*, unsigned int)
+3.25%     0.04%  GsWorker  void ParallelGS::GSInterface::drawing_kick_primitive<true, false, true, 2u>(bool)
+3.21%     0.13%  GsWorker  void ParallelGS::GSInterface::drawing_kick_append<true, false, true, 2u>()
+3.11%     0.33%  GsWorker  std::__ndk1::mutex::unlock()
+3.10%     0.04%  GsWorker  ParallelGS::GSInterface::a_d_XYZ2(unsigned long)
+2.89%     2.88%  GsWorker  void ParallelGS::GSInterface::packed_XYZ<false, true, (ParallelGS::PRIMType)4>(void const*)
+2.76%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760bca196]
+2.72%     2.71%  GsWorker  ps2_gfx_stats::detail::ensureInit()
+2.67%     0.01%  GsWorker  ioctl
+2.65%     0.00%  GsWorker  __ioctl
+2.52%     2.52%  GsWorker  [kernel.kallsyms][+ffffffe761a8e810]
+2.51%     2.27%  GsWorker  __memcpy_aarch64_nt
+2.51%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760e13696]
+2.50%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe76084c36a]
+2.46%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe76084c2da]
+2.33%     2.08%  GsWorker  __emutls_get_address
+2.07%     0.03%  GsWorker  ParallelGS::GSInterface::flush_pending_transfer(bool)
+1.88%     0.04%  GsWorker  scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)
+1.87%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760bce466]
+1.79%     1.79%  GsWorker  [kernel.kallsyms][+ffffffe760a277ec]
+1.70%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760bca252]
+1.69%     0.20%  GsWorker  std::__ndk1::mutex::lock()
+1.61%     0.71%  GsWorker  ParallelGS::PageTracker::mark_fb_write(ParallelGS::PageRect const&)
+1.61%     1.52%  GsWorker  ParallelGS::GSInterface::update_color_feedback_state()
+1.56%     1.05%  GsWorker  pthread_mutex_lock
+1.49%     1.49%  GsWorker  GS::recordDrawDebugEventUnlocked(int)
+1.48%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760bcd2be]
+1.47%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760b09cb6]
+1.42%     0.04%  GsWorker  ParallelGS::GSInterface::flush_render_pass(ParallelGS::FlushReason)
+1.38%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe761a84432]
+1.36%     0.00%  GsWorker  [kernel.kallsyms][+ffffffe760bcdd5a]
+1.34%     0.17%  GsWorker  ParallelGS::GSRenderer::flush_rendering(ParallelGS::RenderPass const&)
+1.34%     0.06%  GsWorker  ParallelGS::PageTracker::mark_transfer_write(ParallelGS::PageRect const&)
+1.33%     0.97%  GsWorker  std::__ndk1::deque<GsCommand, std::__ndk1::allocator<GsCommand>>::pop_front()
+1.25%     0.35%  GsWorker  std::__ndk1::condition_variable::notify_all()
+1.23%     0.01%  GsWorker  ParallelGS::PageTracker::flush_cached()
+1.21%     1.20%  GsWorker  __aarch64_ldadd8_relax
+1.21%     0.15%  GsWorker  Vulkan::CommandBuffer::flush_compute_state(bool)
+1.17%     0.21%  GsWorker  void scudo::releaseFreeMemoryToOS<scudo::RegionReleaseRecorder<scudo::MemMapLinux>, scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)::'lambda'(unsigned long)>(scudo::PageReleaseContext&, scudo::RegionReleaseRecorder<scudo::MemMapLinux>&, scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::releaseToOSMaybe(scudo::SizeClassAllocator64<scudo::PrimaryConfig<scudo::AndroidNormalConfig>>::RegionInfo*, unsigned long, scudo::ReleaseToOS)::'lambda'(unsigned long))
+1.14%     0.01%  GsWorker  ParallelGS::GSRenderer::flush_submit(unsigned long)
+1.06%     0.02%  GsWorker  ParallelGS::GSRenderer::flush_cache_upload()
+1.01%     0.03%  GsWorker  Vulkan::CommandBuffer::dispatch(unsigned int, unsigned int, unsigned int)

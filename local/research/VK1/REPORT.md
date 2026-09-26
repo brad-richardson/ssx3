@@ -4,7 +4,93 @@ Worker: Claude Code (Opus 5.5), Opus spike approved by Brad 09-25, brief `local/
 Worktrees `~/dev/ssx3-work/VK1/{PS2Recomp,parallel-gs}` on local branches `vk1-present`
 (PS2Recomp from fork `ssx3` `a3efbfe`, paraLLEl-GS `19d93b2`, Granite `166ba21a`). Never pushed.
 
-Status: **stage 2 (design) committed first; stage 1 (Odin cost split) and stage 3 (prototype) below.**
+Status: **done; 8/8 Odin launches, 2/6 Android builds. Brad's F5 play build restored exactly.**
+Design committed first (`573c6c5e`). Fork commits local only: `b2640de`, `b5d2c0d` (branch
+`vk1-present` from `a3efbfe`).
+
+## Answers (tables below; the orchestrator decides)
+
+1. **Where the Odin's 4× cost goes** (early race window, per guest frame): 4×+hi-res adds
+   +33.5 ms of wall, of which **+31 ms is GameThread stall**. The readback/copy/upload path is
+   small: ~1.9 ms on the GsWorker (+1.3 over 1×) and +3.9 ms of GLES upload on the main thread,
+   which is off the GameThread's chain. **Turnip's CPU is flat** (0.35 → 0.43 % of samples). What
+   scales is **wall time inside paraLLEl's `flush()`/`vsync()` on the GsWorker (7.6 → 19.4 ms per
+   present, little CPU)** with the GPU 37 → 52 % busy: GPU time serialized behind a CPU wait.
+   Suspect (untested): `flush_submit()` → `next_frame_context()` on every flush with only 4
+   Granite frame contexts.
+2. **What option B takes per platform:** on the Odin, Turnip as we load it has **no Vulkan WSI**,
+   so "present from Vulkan" = our own swapchain of AHardwareBuffers queued with
+   `ASurfaceTransaction` on a child SurfaceControl. That hybrid is **prototyped here**: ~2–3 days
+   to productize, +3–4 days for full B (Vulkan overlay, no GL). Mac hybrid ~1–1.5 days (low value:
+   option A already costs nothing there); iOS hybrid ~2–3 days. All three hybrid ≈ 1–1.5 weeks;
+   full B everywhere ≈ HR1's 1.5–2 weeks. Per-platform plan, lifecycle, 120 Hz hooks and risks:
+   stage 2.
+3. **The Odin prototype works, matches pixels, and is speed-neutral.** The buffer
+   SurfaceFlinger gets is **byte-identical** (RGB, read through gralloc) to the readback frame at
+   the same present (t1100 and t2100, two runs). Background/foreground, rotation and the pad
+   check pass. Mac det-hash is identical 1..2400 with the knob off and on. Knob on:
+   **1× 14.55 vs/s = 0.243× (F5 A: 0.244×), 4×+hi-res 10.07 = 0.168× (F5 B: 0.168×)**. B doesn't
+   recover the 31 %, as answer 1 predicts. What it **does** change is the picture: today's GL
+   path shows every frame at **360 lines in a bordered 1543×868 box** (raylib's 640×448 logical
+   screen). The Vulkan layer fills 1920×1080 from the full-size buffer, so 4×+hi-res reaches the
+   screen at 896 lines. It also removes the main thread's GLES upload.
+
+## Stage 1 — Odin cost split (F5 play build `4ff81032…`, no code)
+
+Two launches on the installed F5 APK (fork `a3efbfe`), Brad's play keys + I26-FAST, sound on,
+`PS2X_UNPACED=1`, pipelined present, cool-down before each (thermal 0, fixed 180 s). Per-thread
+CPU from `/proc/<pid>/task/*/stat` (utime+stime) over an **unprofiled** race window (ticks
+~1815→2390), then a 30 s `simpleperf record -g --app` from tick ~2430 (N11's command),
+symbolized on the mini with NDK r30's host simpleperf + F5's unstripped `.so` (Build ID
+`e39b09b3…`, same as the APK). GPU busy = kgsl `gpubusy` over the same tick window. Backend
+per-present numbers are window deltas of the cumulative `[gs:parallel] periodic` lines
+(`stage1.py`). Receipts: `logs/P1`, `logs/P2`, `reports/P{1,2}-*.txt`.
+
+| ms per guest frame (early race window) | P1: 1× pipelined | P2: 4×+hi-res pipelined | Δ |
+| --- | ---: | ---: | ---: |
+| Window | ticks 1815→2395, 43.8 s | ticks 1833→2381, 59.7 s | |
+| **Wall** (rate) | **75.5** (13.24 vs/s, 0.221×) | **109.0** (9.18 vs/s, 0.153×) | **+33.5** (B/A 0.693; F5: 0.688) |
+| GameThread CPU | 54.6 (72 % busy) | 57.1 (52 % busy) | +2.6 |
+| **GameThread stall** (wall − CPU) | **20.9** | **51.9** | **+31.0** |
+| GsWorker CPU | 13.5 | 15.5 | +2.0 |
+| – `Present()` inclusive (readback copy + alpha loop + submit), profile share × CPU | 0.54 (4.0 %) | 1.88 (12.2 %) | +1.3 |
+| Backend `readback_ms` per present (our fence waits + map) | 0.16 | 0.30 | +0.14 |
+| Backend `copy_ms` per present (stride/alpha copy) | 0.31 | 1.22 | +0.91 |
+| Backend `present_ms` per present (wall) | 8.02 | 20.89 | +12.9 |
+| – **inside paraLLEl `flush()`+`vsync()`** (present − readback − copy; wall, little CPU) | **7.55** | **19.37** | **+11.8** |
+| Main thread CPU (latch RPC, copy, **GLES upload**, raylib loop) | 4.55 | 8.49 | +3.9 |
+| Turnip CPU (`libvulkan_freedreno.so`, % of all samples) | 0.35 % | 0.43 % | ≈ 0 |
+| Adreno GLES (main thread, % of all samples) | 0.40 % | 1.19 % | |
+| GPU busy (kgsl, window mean) | 36.6 % (n=7) | 51.6 % (n=11) | +15 pts |
+
+Per present ≈ per guest frame: the main loop latches once per new tick (P1: 900 presents over
+~900 ticks; P2: 900 over ~1110 ticks, so P2's per-present rows are ~0.8 of a frame).
+
+**Answer to (1).** Of the +33.5 ms per frame that 4×+hi-res costs, **+31 ms is GameThread
+stall**, not GameThread work. The readback/copy/upload path is small and mostly off the
+critical chain: on the GsWorker it is ~1.9 ms/frame at 4× (+1.3 over 1×); the GLES upload is on
+the main thread (+3.9 ms), which only blocks itself in the latch RPC. **Turnip's CPU is flat**
+(0.35 → 0.43 % of samples). The time that scales is **wall time inside paraLLEl's
+`flush()`/`vsync()` on the GsWorker (7.6 → 19.4 ms per present, little CPU)**, with the GPU at
+37 → 52 % busy: GPU time serialized into the GsWorker behind a CPU wait (H-gpu). A candidate
+mechanism (not tested; out of scope): paraLLEl's `GSRenderer::flush_submit()` calls Granite's
+`device->next_frame_context()` on **every** flush (`gs_renderer.cpp:1217`), and the backend
+creates only **4 frame contexts** (`m_device->init_frame_contexts(4)`), so several flushes per
+vsync make the GsWorker wait for GPU work only a few flushes old. Counting flushes per vsync
+and trying more frame contexts is a one-knob experiment.
+
+Predicted effect of option B on the 4× cost: it removes ≤ ~2 ms/frame from the GsWorker chain
+(and ~4–8 ms of main-thread CPU off the chain), so **≤ ~2–5 %**, not the 31 %. Stage 3 measures it.
+
+Also found (screen geometry of today's GL path on the Odin): raylib's Android "screen" is
+**640×448 inside a 796×448 window buffer** that SurfaceFlinger upscales ×2.41 to 1920×1080
+(`DISPLAY: Upscaling required … Screen size 640 x 448 … Viewport offsets 156, 0` in F5's R2
+logcat). The presenter letterboxes SSX 3's 16:9 picture into that 640×448 screen, i.e.
+**640×360**, so the game shows at **1543×868, centred with black borders** (F5 R2 `sc01`: 105 px
+bands top and bottom) and **every frame is resampled to 360 lines before display** — 448-line
+frames at 1× and the 1024×896 4×+hi-res frame alike. On the Odin, 4×+hi-res therefore buys
+anti-aliasing but not resolution through the GL path. The Vulkan path hands SurfaceFlinger the
+full-size buffer and fills the screen (below).
 
 ## Stage 2 — Design
 
@@ -59,6 +145,10 @@ or 1024×896).
 
 ### Choice for the Odin prototype: **hybrid, game layer above the GL window**
 
+(Corrected on the device, stage 3: a child layer's rect lives in the **parent's buffer space**,
+not display pixels, and window loss must be caught from `APP_CMD_TERM_WINDOW`, since the
+`ANativeWindow` pointer is reused across background/foreground.)
+
 Why: on the Odin nothing is drawn over the game (D6), so a z = +1 child needs **no raylib
 change**; the AHardwareBuffer + SurfaceControl path is *the same code* full B would use on
 Android (D3), so nothing is thrown away; the pad stays usable because input never went through
@@ -86,3 +176,174 @@ Equal predictions are avoided: only H-copy predicts that the prototype recovers 
 
 HR1's "~1.5–2 weeks" for full B on all three stands if raylib is dropped everywhere; the
 hybrid route is **~1–1.5 weeks for all three**, Android first.
+
+## Stage 3 — Odin prototype (`PS2X_PRESENT_VULKAN=1`, default off)
+
+**What it is** (fork branch `vk1-present`, local only): `b2640de` + fix `b5d2c0d` on fork `ssx3`
+`a3efbfe`; 5 files, +943/−2 (`ps2_present_vk.h`, `ps2_present_vk_android.cpp` new;
+`ps2_gs_parallel_backend.cpp`, `ps2_runtime.cpp`, `CMakeLists.txt`). paraLLEl-GS/Granite unchanged
+(`19d93b2`/`166ba21a`). Runner-dir diff vs `14b1e5cb`: empty. Suite **654/654** (Mac, from the
+worktree root) at both commits.
+
+- **GsWorker** (`GSParallelBackend::presentVk`): 4 slots, each an `AHardwareBuffer`
+  (RGBA8, `GPU_COLOR_OUTPUT | GPU_SAMPLED_IMAGE | COMPOSER_OVERLAY | CPU_READ_RARELY`) imported
+  into Turnip (`VK_ANDROID_external_memory_android_hardware_buffer` + `VK_EXT_queue_family_foreign`,
+  dedicated allocation) and wrapped as a Granite image. Per present: wait the slot's old fence and
+  SurfaceFlinger's release fence (bounded 100 ms), blit scanout → slot (1:1, nearest), release
+  barrier to `VK_QUEUE_FAMILY_FOREIGN_EXT`, submit; with `PS2X_PGS_PRESENT_PIPELINE=1` the
+  **previous** slot is queued (same one-frame latency as the readback pipeline). No readback, no
+  CPU copy; `Present()` returns an empty frame.
+- **Sink** (`ps2_present_vk_android.cpp`): `ASurfaceControl_createFromWindow(window, "ps2x-game")`,
+  `ASurfaceTransaction_setBuffer/setGeometry/setZOrder(+1)/setBufferTransparency(OPAQUE)/
+  setOnComplete` (dlsym'd from `libandroid.so`, API 29+, so minSdk 28 still loads); release fences
+  from `ASurfaceTransactionStats_getPreviousReleaseFenceFd`; JNI `DecorView` size for logging.
+- **Main thread** (`ps2_runtime.cpp`, Android only): passes the window, aspect and **raylib's EGL
+  surface size** each frame; skips `UploadFrame`'s copy/upload and the game quad once a buffer is
+  queued; wraps raylib's `onAppCmd` so `APP_CMD_TERM_WINDOW` detaches the child.
+- **Why hybrid, above**: see stage 2. The on-screen virtual pad (off on the Odin) would sit under
+  the layer; the under-layer variant (raylib alpha patch) is the productize step for it.
+
+**Two bugs found on the device in V1 and fixed in `b5d2c0d`** (re-verified in V2):
+1. The child inherits the parent's **buffer-to-window scaling**: raylib's window buffers are
+   796×448 and SurfaceFlinger scales them ×2.41 to 1920×1080. A destination rect in display
+   pixels (1920×1080) showed the top-left ~41 % of the frame, zoomed. The rect is now placed in
+   the EGL surface's buffer space (`eglQuerySurface`), and the composition samples the child's
+   own full-size buffer (no loss of resolution).
+2. After HOME → foreground the window's layer is recreated **behind the same `ANativeWindow`
+   pointer** (V2 log: new child on window `0xb400006f0ccbe8e0`, the same address), so comparing
+   pointers orphaned the child (V1: `ps2x-game` without a `parentId`, screen black under the pad).
+   The `onAppCmd` wrapper detaches on `TERM_WINDOW` and the next frame makes a new child.
+
+### Acceptance
+
+| Check | Method | Result |
+| --- | --- | --- |
+| (a) pixels, same present | `PS2X_PRESENT_VK_COMPARE_TICKS=1100,2100`: at that tick the present is synchronous; the scanout is also read back (the normal readback path's copy), and the **exact buffer queued to SurfaceFlinger is read through gralloc** (`AHardwareBuffer_lock`, CPU view = the layout HWC/SF scan) and compared byte for byte, RGB (alpha: PS2 0x80 in the scanout, ignored by `OPAQUE`) | **V1 and V2: `diff_px=0` at both ticks**, identical FNV hashes (t1100 `ad2e9e852b54155a` both runs; t2100 `57c031478a2650c5` V1, `794b83ff17796edb` V2 — race RNG differs by run), 512×448, gralloc stride 768 honoured. The gralloc/UBWC import risk is cleared with the linear (`CPU_READ_RARELY`) allocation. PPMs in scratch (`odin/V{1,2}/vk-t*-{ahb,readback}.ppm`) |
+| (a) pixels, on screen | Screencaps (1920×1080 composite, after HWC scaling) viewed: V2 `sc01` (My Rules, ~t1201), `sc03` (after foreground: race start), `sc06` (race t~2122: HUD, carve groove, spray, full brightness), full 16:9 frame, colours right. Scaling: SurfaceFlinger/HWC scale 512×448 → 1920×1080 with the display scaler's filter (not raylib's bilinear GL quad), from the full-size buffer (1024×896 at hi-res), where the GL path first draws into the 796×448 window buffer | **Pass (viewed).** Gap: no same-tick screen-vs-readback number (screencaps land ~2 s after the compare tick; `scapcompare.py` is ready for a static-screen capture) |
+| (b) guest unchanged | Mac det build (`mac_build.sh --det`) of the branch, I26-FAST to t2400, knob off vs on (the knob is inert on the Mac: no Mac path), one slot each, `gb8_hashdiff.py` | `b2640de`: **IDENTICAL 1..2400**. `b5d2c0d`: IDENTICAL except tick 761 "missing" in the knob-on log (interleaved with a `[frame:dump]` line; extracted by hand: `combined=8c2d846509fdd6a0`, eeCycle `3740542539`, **equal** to knob-off). Knob-off `b2640de` vs `b5d2c0d`: IDENTICAL |
+| (d) pad | V2 with `PS2X_VIRTUAL_PAD=1` (for its `[vpad] pad_in_use` log): injected `input gamepad keyevent --longpress KEYCODE_BUTTON_A` at the end | raylib saw the pad with the layer on top: `[vpad] on=1 pad_in_use=1 first_pad=0 -> overlay hidden`. The layer takes no input (child SurfaceControls have no input channel); the window keeps focus |
+| (d) background / foreground | HOME, 8 s, screencap; `am start` back, 8 s, screencap + layer list | V2: `APP_CMD_TERM_WINDOW: child layer detached` → new child → race frame on screen after foreground; 0 dropped buffers, 0 release timeouts over the run |
+| (d) rotation | `cmd window user-rotation lock 3`, 6 s, screencap, restore the saved `lock 1` | App is landscape-locked: display stays `ROTATION_0` (1920×1080), no window change, picture unchanged; setting restored to `lock 1` (V1, V2) |
+
+Present-path counters (V2, 1×): `vk_queued=2063 vk_dropped=0 vk_callbacks=2062
+vk_release_timeouts=0 vk_release_wait_ms_avg=0.009 vk_apply_ms_avg=0.121` (a transaction apply
+costs ~0.12 ms on the GsWorker); the backend's `readback_ms_avg`/`copy_ms_avg` are 0.
+
+### (c) Odin speed, knob on (ABBA, vs F5 Part 2's legs)
+
+Same method as F5 Part 2: F5's launcher lineage (via N12), I26-FAST, `--stop-tick 4500`,
+`PS2X_UNPACED=1`, sound on, pipelined, empty `mc0-test`, cool-down to status 0 + fixed 180 s
+before each, reinstall each time (APK `3e493b44…`), Brad's env restored and checked after each.
+Race rate by F4's `phases.py` (ticks 1714→stop). Wi-Fi adb, 0 disconnects on every run.
+
+| Leg | Variant | Race (ticks → wall) | Race vs/s | × | GPU busy race mean (n) | Thermal | VK counters |
+| --- | --- | --- | ---: | ---: | --- | --- | --- |
+| S1 | VA: 1× + VK | 1714→4554 / 195.3 s | 14.54 | 0.243× | 37.0 % (33) | 0→2→3 | dropped 0, release timeouts 0 |
+| S2 | VB: 4×+hi-res + VK | 1714→4543 / 280.9 s | 10.07 | 0.168× | 52.0 % (46) | 0→3→2 | 0 / 0 |
+| S3 | VB | 1714→4539 / 280.5 s | 10.07 | 0.168× | 52.2 % (48) | 0→3→2→1 | 0 / 0 |
+| S4 | VA | 1714→4562 / 195.5 s | 14.56 | 0.243× | 37.4 % (33) | 0→3 | 0 / 0 |
+
+| | Knob on (this) | F5 Part 2, knob off (same device, 09-25 afternoon) | Δ |
+| --- | ---: | ---: | ---: |
+| 1× pipelined | **14.55 vs/s = 0.2427×** (legs agree 0.1 %) | 14.635 = 0.2441× | −0.6 % (inside F5's 0.5 % leg spread) |
+| 4×+hi-res pipelined | **10.07 vs/s = 0.1680×** (legs agree 0.0 %) | 10.07 = 0.1680× | 0.0 % |
+| 4× / 1× | 0.692 | 0.688 | |
+
+Backend `present_ms_avg` (whole run): 6.8 ms at 1×, 17.0 ms at 4× with the VK path, against
+6.5/16.6 in F5's R1/R2 readback runs: the time is paraLLEl's, not the copy's (stage 1).
+
+**Scaling/framing difference (stated, not matched):** the VK layer's rect is SSX 3's 16:9 over
+the whole window, so the game fills **1920×1080**. The GL path draws a 640×360 letterboxed quad
+into raylib's 640×448 screen inside a 796×448 buffer, which shows as **1543×868 with borders**
+(F5 R2 `sc01`: 105 px bands top and bottom; VK S2 `sc01`: none). Filtering: the VK path's
+512×448 (or 1024×896) buffer is scaled once by the display scaler; the GL path resamples to
+360 lines with GL bilinear, then SurfaceFlinger upscales ×2.41.
+
+## Exact commands
+
+```sh
+# worktrees (fork branch vk1-present from a3efbfe; paraLLEl clone of the fork at 19d93b2)
+git -C ~/dev/PS2Recomp worktree add -b vk1-present ~/dev/ssx3-work/VK1/PS2Recomp a3efbfe
+git clone --branch ssx3 https://github.com/brad-richardson/parallel-gs.git ~/dev/ssx3-work/VK1/parallel-gs
+git -C ~/dev/ssx3-work/VK1/parallel-gs checkout -b vk1-present 19d93b2 && git submodule update --init --recursive
+# Turnip WSI check (F5 APK's driver)
+llvm-nm -D --undefined-only lib/arm64-v8a/libvulkan_freedreno.so   # no ANativeWindow_*, AHardwareBuffer_* only
+# Mac builds + suite + det pair (one slot each)
+bash local/tooling/build/mac_build.sh ~/dev/ssx3-work/VK1/PS2Recomp ~/dev/ssx3-work/VK1/build --pgs ~/dev/ssx3-work/VK1/parallel-gs
+(cd ~/dev/ssx3-work/VK1/PS2Recomp && ../build/ps2xTest/ps2x_tests)                     # 654/654
+bash local/tooling/build/mac_build.sh … ~/dev/ssx3-work/VK1/build-det --det --pgs … --target ps2EntryRunner
+python3 local/research/VK1/vk1_boot.py --mode det --backend parallel --runner bin/runner-det2 --label det-off2 --route i26 --stop-tick 2400 --no-snap
+python3 local/research/VK1/vk1_boot.py … --label det-on2 … --env PS2X_PRESENT_VULKAN=1
+python3 local/research/GB8/gb8_hashdiff.py --base run/det-off2 --cand run/det-on2
+# Android syntax check on the mini (NDK r30), then bytesize builds (held ssh)
+git archive --format=tar b2640de | ssh bytesize 'wsl -d Ubuntu -- bash -lc "… tar -x -C /home/brad/vk1/PS2Recomp"'
+cat local/research/VK1/build-android.sh | ssh bytesize 'wsl … cat > /home/brad/vk1/build.sh && /home/brad/vk1/build.sh'
+git archive b5d2c0d -- <3 changed files> | ssh bytesize '… tar -x …'; ssh bytesize '… /home/brad/vk1/build.sh'  # incremental
+# Odin (cooldown.py before every launch.py)
+python3 local/research/VK1/launch.py --label P1 --variant A --cpu-window 1800,2350 --profile-after-tick 2400 --profile-secs 30 --scap-ticks 2100
+python3 local/research/VK1/launch.py --label P2 --variant B …(same)
+bash local/research/VK1/report.sh P{1,2}; python3 local/research/VK1/stage1.py logs/P1 logs/P2
+python3 local/research/VK1/launch.py --label V2 --variant VA --stop-tick 2400 --apk …/odin-apk2/app-release.apk --apk-sha 3e493b44… \
+  --compare-ticks 1100,2100 --lifecycle 1300 --pad-probe --scap-ticks 1100,2100,2300
+python3 local/research/VK1/launch.py --label S{1..4} --variant VA|VB|VB|VA --wall 600 --stop-tick 4500 --apk … --scap-ticks 2100,3000,4000
+python3 local/research/F4/phases.py local/research/VK1/logs/S{1..4}
+bash local/research/VK1/restore-play.sh     # F5 APK 4ff81032 + deploy-odin.sh + F5 play knobs → env a8d651a7
+```
+
+## Pins and SHAs
+
+| Item | Value |
+| --- | --- |
+| Fork base / branch tip | `a3efbfe` → `b2640de` → **`b5d2c0d`** (`vk1-present`, local; runner-dir diff vs `14b1e5cb` empty) |
+| paraLLEl-GS / Granite | `19d93b2` / `166ba21a` (unchanged; bytesize used F5's `/home/brad/f5/parallel-gs` copy) |
+| Turnip | F5/TL1 jniLibs `libvulkan_freedreno.so` 14,188,488 B (Mesa 26.3.0-devel `c501e1d16e`) |
+| Android APK 1 (`b2640de`, V1 only) | `7667628a5b70ccd0e71ccb54ae9497f55f772ef7ad6845b2f6b79fb356e3d5a3` (×2 remote, ×2 local, installed base.apk match) |
+| **Android APK 2 (`b5d2c0d`, V2 + S1–S4)** | **`3e493b44697d8e61866b43bed70d86536f57764dc7c7b812310fcf1cc5776220`** (×2 remote, ×2 local, installed match every launch) |
+| Source tar `b2640de` | `b975b24f…` both ends; `b5d2c0d` delta: 3 files, SHAs match both ends |
+| Mac det runners | `b2640de` `b754aafc…`; `b5d2c0d` `a93cbdf5…` |
+| F5 APK restored | `4ff81032a175…09753` (local ×2, installed base.apk) |
+| Brad env after | `a8d651a7…0ebd`; save 6/6 OK; `mc0-test` empty; `/data/local/tmp/vk1` removed; lease `LEASE_FREE VK1 done` |
+| Symbols | F5 unstripped `libps2EntryRunner.so` (Build ID `e39b09b3…` = APK), streamed to `~/dev/ssx3-work/VK1/symdir` |
+
+## Budgets
+
+Android builds **2/6** (full 9 m 41 s; incremental 19 s). Odin launches **8/8** (P1, P2 profiles;
+V1, V2 diagnostics; S1–S4 speed) plus one no-launch restore. Mac: 4 det boots (one slot each,
+on the mini — the brief predates HS1's bradflix default), 4 builds (ccache). Scratch
+`~/dev/ssx3-work/VK1` 6.9 GB (cap 15). Mini 163.4/200 GB. bytesize `/home/brad/vk1` (source,
+build tree, APK). Wall ~19:28–21:00.
+
+## Gaps
+
+- G1. No same-tick **screen-vs-readback** number: the screencaps land ~100 ticks after the
+  compare tick. The same-tick check is the byte compare of the exact queued buffer (gralloc
+  view). `scapcompare.py` is ready for a static-screen capture.
+- G2. **HWC composition type** of `ps2x-game` (device overlay vs GPU client composition) and its
+  present rate were not polled (`phases.py`'s SF column reads the window layer, still raylib's
+  60 Hz clear). The layer carries `COMPOSER_OVERLAY` usage; `dumpsys SurfaceFlinger` would show.
+- G3. The virtual pad (off on the Odin) sits **under** the layer; the under-layer variant (raylib
+  EGL alpha patch + RGBA window) is designed, not built.
+- G4. Pipelined present kept (one frame of latency, as today). A sync_fd acquire fence would drop
+  the CPU fence wait, but stage 1 measured those waits at 0.16–0.30 ms, so it wasn't built.
+- G5. **Framing differs** from the GL path (fills the screen vs 1543×868 bordered); not matched.
+- G6. The stage-1 mechanism (4 frame contexts × a flush per `next_frame_context`) is a
+  hypothesis: flushes per vsync not counted, no frame-context experiment (out of scope).
+- G7. Speed legs are compared with F5's knob-off legs from earlier the same day, not
+  interleaved in one session. The same-session knob-off windows (P1/P2) agree with F5.
+- G8. Mac and iOS: design and estimates only (no prototype, per the brief).
+- G9. raylib's GL loop still clears and swaps the window at 60 Hz under the layer (not measured;
+  the main thread's CPU with VK wasn't split out, since the speed legs carry no per-thread window).
+
+## Recommended next action (orchestrator decides)
+
+1. The Odin's 4× cost is GPU work serialized into the GsWorker inside paraLLEl, not the present
+   path. A small brief: count `flush_submit`/`next_frame_context` per vsync on the Odin and try
+   a `PS2X_PGS_FRAME_CONTEXTS` knob (e.g. 8/16) with a 1× + 4× pair.
+2. Keep the Vulkan present for **picture quality and the 120 Hz path**, not speed: it fills the
+   screen from the full-size buffer (so 4×+hi-res shows its resolution), drops the GLES upload, and
+   gives `setFrameRate`/`setDesiredPresentTime` for pacing. Productize (~2–3 days): under-layer
+   variant for the pad, HWC composition check, framing decision (fill vs today's box).
+3. Independent of B, and cheap: today's GL path shows **360 lines** because raylib's logical
+   screen is 640×448. Initializing raylib at the display size on Android would give the GL path
+   full resolution too. A Brad-visible choice; either path fixes it.
+
