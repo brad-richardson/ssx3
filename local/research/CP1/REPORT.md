@@ -325,3 +325,11 @@ Never pushed; fork/PGS `cp1` branches local only; text in git
 (REPORT, 2 Odin scripts, phases, 9 report files); runners signalled
 only by the drivers; no lease held at close; play state restored
 (APK `825b436d…`, env `ef9f94e1…`, 6/6 saves, app stopped).
+
+## Orchestrator gate (2026-09-26) — lane closed
+
+**Pass.** Three independent clocks agree (schedstat / cpu-clock / switch pairs within 1–6 %). Critical path: the MTVU
+unit gates the frame (30.1 run + 12.2 starved + 6.7 GS-queue-full per 50 ms frame); the GsWorker is blocked ~19 ms/frame
+in kgsl, and R3 pins that on paraLLEl's two `submit_empty` timeline signals per flush (~5.5 ms each; main submits 6 µs).
+LAG removes 5.3 ms/frame (the starvation). GPU 50 % busy at a flat 660 MHz. Next levers launched: **FS2** (the
+submit_empty wait) and **VR4** (VU1 block cost on the unit thread).
