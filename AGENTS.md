@@ -19,6 +19,13 @@ untracked `local/AGENTS.local.md`; read it too when it exists.
   open, not a store product.
 - NetherSX2 and PCSX2 are references and performance comparisons, not
   deliverables.
+- **Accuracy target (Brad, 09-26): PCSX2 parity.** Performance work may change guest timing to the
+  degree PCSX2 does at its default settings (e.g. wait-loop detection, microVU-style VU timing,
+  MTVU), because Brad has played SSX 3 extensively on PCSX2. Each such change must be (1)
+  **deterministic** (the det-hash keeps working as the regression net), (2) validated once as a
+  deliberate behaviour change (cite what PCSX2 does; frames, sound, a finished race and the
+  controls check out), and (3) re-baselined (new `baseline.py` key). Pure refactors still must be
+  det-identical. Real bugs are still bugs.
 - **Display (Brad, 09-26):** 16:9 widescreen by default (the game's anamorphic mode), shown with
   **aspect-preserving scaling** that fills as much of the screen as possible; bars, never an
   unapproved stretch. (The 4:3 HUD widening inside anamorphic mode is approved.)
