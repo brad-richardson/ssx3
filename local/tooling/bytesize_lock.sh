@@ -13,6 +13,10 @@ case "$cmd" in
   status) w "cat $L/HOLDER 2>/dev/null || echo FREE" ;;
   claim)
     [ -n "$label" ] || { echo "usage: claim LABEL" >&2; exit 2; }
+    # Refuse when Windows C: is low: the WSL disk image lives there (09-26: C: at 4 GB free wedged WSL and
+    # then Windows). The image is sparse (fstrim returns freed space); MIN_FREE_GB defaults to 60.
+    free=$(ssh -o ConnectTimeout=10 bytesize 'powershell -NoProfile -Command "[int]((Get-PSDrive C).Free/1GB)"' | tr -dc 0-9)
+    [ -n "$free" ] && [ "$free" -ge "${MIN_FREE_GB:-60}" ] || { echo "LOWDISK C: free=${free:-?} GB < ${MIN_FREE_GB:-60} GB; clean up (delete finished lane dirs, then wsl -u root fstrim /)"; exit 1; }
     out=$(w "mkdir $L 2>/dev/null && echo '$label '\$(date -u +%FT%TZ) > $L/HOLDER && echo CLAIMED || { echo -n 'HELD '; cat $L/HOLDER; }")
     echo "$out"; [ "$out" = CLAIMED ] ;;
   release)
@@ -22,7 +26,7 @@ case "$cmd" in
   run)
     [ -n "$label" ] && [ "${3:-}" = "--" ] || { echo "usage: run LABEL -- cmd..." >&2; exit 2; }
     shift 3
-    until "$0" claim "$label" >/dev/null; do sleep 30; done
+    until out=$("$0" claim "$label"); do case "$out" in LOWDISK*) echo "$out" >&2; exit 3;; esac; sleep 30; done
     "$@"; rc=$?
     "$0" release "$label" >/dev/null; exit $rc ;;
   *) echo "usage: $0 claim|release|status|run" >&2; exit 2 ;;
