@@ -47,6 +47,9 @@ GPU + Xvfb when backend=parallel) via the synced remote driver
 bradflix_det_boot.py, then pulls the run dir back so baseline.py compare
 works unchanged. --runner is a bradflix path; default --out is
 ~/dev/ssx3-work/from-bradflix/<label>. Speed mode stays on the mini.
+SS2: --save-at/--save-path/--exit-after-save/--load/--strict pass through:
+--save-path NAME saves run/<label>/NAME in the container and pulls it back
+to the mini lane dir; --load FILE syncs a mini state to bradflix first.
 """
 import argparse
 import hashlib
@@ -119,6 +122,30 @@ def main_bradflix(args):
             remote += ["--vu1-dump", args.vu1_dump]
         if args.stack_kb:
             remote += ["--stack-kb", str(args.stack_kb)]
+        if args.save_at:
+            if not args.save_path:
+                raise SystemExit('--save-at needs --save-path')
+            save_name = os.path.basename(args.save_path)
+            if save_name in ('', '.', '..'):
+                raise SystemExit('bad --save-path %r' % args.save_path)
+            remote += ["--save-at", str(args.save_at), "--save-path", save_name]
+            if args.exit_after_save:
+                remote += ["--exit-after-save"]
+        if args.load:
+            if not Path(args.load).is_file():
+                raise SystemExit('no such state %s' % args.load)
+            staging = "load-staging/%s.state" % args.label
+            r = subprocess.run(["ssh", BRADFLIX_HOST,
+                                "mkdir -p %s/load-staging" % BRADFLIX_ROOT])
+            if r.returncode != 0:
+                raise SystemExit("staging dir failed")
+            r = subprocess.run(["scp", args.load,
+                                "%s:%s/%s" % (BRADFLIX_HOST, BRADFLIX_ROOT, staging)])
+            if r.returncode != 0:
+                raise SystemExit("state sync failed")
+            remote += ["--load", staging]
+        if args.strict:
+            remote += ["--strict"]
         for kv in args.env:
             remote += ["--env", kv]
         print("+ ssh %s %s" % (BRADFLIX_HOST, " ".join(shlex.quote(w) for w in remote[:6]) + " ..."),
@@ -135,6 +162,9 @@ def main_bradflix(args):
                        capture_output=True)
         subprocess.run(["scp", "-r", f"{BRADFLIX_HOST}:{rdir}/frames", str(lane) + "/"],
                        capture_output=True)
+        if args.save_at:
+            subprocess.run(["scp", f"{BRADFLIX_HOST}:{rdir}/{os.path.basename(args.save_path)}",
+                            str(lane) + "/"], capture_output=True)
         files = {}
         for root, _ds, fs in os.walk(lane):
             for f in fs:

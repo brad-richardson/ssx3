@@ -19,7 +19,13 @@ Usage (on bradflix): bradflix_det_boot.py --runner PATH --label NAME --slot N
   [--backend cpu|parallel] [--route i26|fr1r1] [--pad-script STR]
   [--dump-ticks a,b,c] [--hash-every 1] [--wall 500] [--no-snap]
   [--unpaced] [--vu1-stats] [--vu1-dump DIR] [--stack-kb N]
-  [--env K=V ...] [--root DIR] [--image NAME]
+  [--save-at T --save-path NAME] [--exit-after-save] [--load STAGED]
+  [--strict] [--env K=V ...] [--root DIR] [--image NAME]
+
+SS2 save states: --save-path NAME (plain file name) writes
+<root>/run/<label>/NAME via the container; --load STAGED is a
+<root>-relative staged state (the wrapper syncs it); a clean exit after
+the save counts as target, as on the mini path.
 """
 import argparse
 import hashlib
@@ -109,6 +115,11 @@ def main():
     ap.add_argument('--vu1-stats', action='store_true')
     ap.add_argument('--vu1-dump', default='')
     ap.add_argument('--stack-kb', type=int, default=0)
+    ap.add_argument('--save-at', type=int, default=0, help='SS2: save a state at this vsync tick')
+    ap.add_argument('--save-path', default='', help='SS2: plain file name for --save-at')
+    ap.add_argument('--exit-after-save', action='store_true', help='SS2: stop after the save')
+    ap.add_argument('--load', default='', help='SS2: root-relative staged state to restore')
+    ap.add_argument('--strict', action='store_true', help='SS2: refuse a runner-SHA mismatch on load')
     ap.add_argument('--env', action='append', default=[], help='extra K=V (verbatim)')
     ap.add_argument('--root', default=str(DEFAULT_ROOT))
     ap.add_argument('--image', default=IMAGE)
@@ -196,6 +207,22 @@ def main():
         guest_env['PS2X_GAME_THREAD_STACK_KB'] = str(args.stack_kb)
     if args.dump_ticks:
         guest_env['PS2X_FRAME_DUMP_ONCE_TICKS'] = args.dump_ticks
+    if args.save_at:
+        if not args.save_path or '/' in args.save_path or args.save_path in ('.', '..'):
+            raise SystemExit('bad --save-path %r (need a plain file name)' % args.save_path)
+        guest_env['PS2X_SAVESTATE_SAVE_AT'] = str(args.save_at)
+        guest_env['PS2X_SAVESTATE_PATH'] = c_lane + '/' + args.save_path
+        if args.exit_after_save:
+            guest_env['PS2X_SAVESTATE_EXIT_AFTER_SAVE'] = '1'
+    if args.load:
+        if args.load.startswith('/') or '..' in args.load:
+            raise SystemExit('bad --load %r (need a root-relative staged path)' % args.load)
+        staged = root / args.load
+        if not staged.is_file():
+            raise SystemExit('no such staged state %s' % staged)
+        guest_env['PS2X_SAVESTATE_LOAD'] = C_ROOT + '/' + args.load
+    if args.strict:
+        guest_env['PS2X_SAVESTATE_STRICT'] = '1'
     for kv in args.env:
         if '=' not in kv:
             raise SystemExit('bad --env %r (need K=V)' % kv)
@@ -280,6 +307,8 @@ def main():
                     now = time.monotonic()
                     if proc.poll() is not None:
                         bound = 'exit'
+                        if args.exit_after_save and b'[savestate] saved' in log.read_bytes()[-65536:]:
+                            bound = 'target'
                         break
                     if now - t0 >= wall_cap:
                         bound = 'wall_cap'
