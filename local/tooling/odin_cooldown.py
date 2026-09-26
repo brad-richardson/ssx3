@@ -20,9 +20,11 @@ ap.add_argument('--mode', choices=['screen', 'final'], default='screen')
 ap.add_argument('--max-temp-c', type=float, default=42.0)
 ap.add_argument('--wait-s', type=float, default=180.0)
 ap.add_argument('--cap-min', type=float, default=20.0)
-ap.add_argument('--fan', choices=['performance', 'leave'], default='performance',
-                help='performance: set fan_mode=5 for the run (remembers the previous value in\n'
-                     '/data/local/tmp/mg/fan_prev; odin_restore_play.sh puts it back). Never writes 0 (off).')
+ap.add_argument('--fan', choices=['performance', 'leave'], default='leave',
+                help='leave (default): don\'t touch the fan. performance: set fan_mode=5, ONLY for a planned\n'
+                     'back-to-back batch (Brad 09-26: 5 is loud and whiny). Remembers the previous value in\n'
+                     '/data/local/tmp/mg/fan_prev; odin_restore_play.sh puts it back unless KEEP_FAN=1 (use that\n'
+                     'between legs of the batch, not after the last one). Never writes 0 (off).')
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 LOG = open(os.path.join(a.out, 'cooldown.txt'), 'a')
@@ -44,7 +46,7 @@ def sample():
     return status, temp_c
 
 
-# Fan (Brad 09-26: fan_mode 0 = off, 1/4 = quiet/smart, 5 = performance).
+# Fan (Brad 09-26: fan_mode 0 = off, 1/4 = quiet/smart, 5 = performance; gameplay never above 4).
 if a.fan == 'performance':
     sh_ = lambda c: subprocess.run(['adb', '-s', D, 'shell', c], capture_output=True, text=True, timeout=60).stdout.strip()
     prev = sh_('settings get system fan_mode')
