@@ -353,3 +353,9 @@ the unit, not the EE thread, is the long pole). Census + model agree with the me
 3. iPhone: `install_iphone` with F7's signed build, then `bash local/research/I31/deploy-ios.sh iphone`. **Never launch.**
 4. Append `## Part 3` (new env SHA, installed SHAs, receipts); commit `[F7] Part 3 …` (explicit paths incl. the new
    tooling script); stop.
+
+## Orchestrator gate, Part 3 (2026-09-26) — lane closed
+
+**Pass.** Verified on the Odin myself: base.apk `825b436d…`, env `ef9f94e1…` with the four play keys, app stopped,
+lease free. iPhone installed (`60ac6331…`), never launched. Canonical play state `~/dev/ssx3-work/odin-play/` +
+`local/tooling/odin_restore_play.sh` are now the restore path for every Odin lane (AGENTS.md).

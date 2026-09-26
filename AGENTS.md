@@ -143,7 +143,9 @@ Close the pane after its gate read.
 - **Leases:** one device agent on the Odin at a time
   (`/data/local/tmp/mg/LEASE`; claim/release it with `local/tooling/odin_lease.sh`, which is
   atomic; **every** `adb install`, launch or force-stop must happen while you hold it — wrap
-  one-off commands in `odin_lease.sh run <LABEL> -- …`). On the mini, **four** recomp/emulator
+  one-off commands in `odin_lease.sh run <LABEL> -- …`). Brad's Odin play state (APK + env + save) lives in
+  `~/dev/ssx3-work/odin-play/` (`SHA256SUMS`); after every Odin run restore it with
+  `local/tooling/odin_restore_play.sh <LABEL>` (never a lane's own copy of an older APK). On the mini, **four** recomp/emulator
   boots at a time (Brad, 09-24; a boot is ~1.2 cores and ~250 MB on the
   18-core mini): claim a slot with `local/tooling/p_lane_lease.py`
   (slot 1 = legacy `/tmp/ssx3-p-lane-lease`, slot n =
