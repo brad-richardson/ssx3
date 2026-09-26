@@ -1,0 +1,42 @@
+HP1 first failure — permission denial, 2026-09-25
+
+Action: `edit` tool calls (3, all denied) on
+  ~/dev/ssx3-work/HP1/PS2Recomp/ps2xRuntime/src/lib/ps2_vif1_interpreter.cpp
+  (MSCAL block ~559-569, MPG block ~744-753, UNPACK block ~1129-1152 — brief edit 1)
+
+Denial (verbatim, identical for all three calls):
+  "The user has specified a rule which prevents you from using this specific
+  tool call. Here are some of the relevant rules
+  [{"permission":"*","action":"allow","pattern":"*"},
+   {"permission":"edit","pattern":"*","action":"allow"},
+   {"permission":"edit","pattern":"**/opencode.json","action":"deny"},
+   {"permission":"edit","pattern":"**/opencode.jsonc","action":"deny"},
+   {"permission":"edit","pattern":"**/.opencode/**","action":"deny"},
+   {"permission":"edit","pattern":"../*","action":"deny"}]"
+
+Cause: the worktree lives at ~/dev/ssx3-work/HP1/PS2Recomp, outside this
+worker's workspace (/Users/brad/dev/ssx3). The rule
+{"permission":"edit","pattern":"../*","action":"deny"} blocks file edits
+outside the workspace (matches local/AGENTS.local.md: "edits only inside
+the start folder; Denied: edits outside the workspace"). The brief's
+worktree path puts both edit 1 (ps2_vif1_interpreter.cpp) and edit 2
+(android/app/build.gradle) outside the workspace, so neither fork commit
+can be made from this session. Per WORKER-RULES-v2 the denied action was
+not retried via bash or any other route.
+
+State at stop:
+- worktree created (brief command succeeded): git -C ~/dev/PS2Recomp
+  fetch fork && git -C ~/dev/PS2Recomp worktree add -b hp1
+  ~/dev/ssx3-work/HP1/PS2Recomp fork/ssx3
+  -> branch hp1 @ 173b31f (= fork/ssx3 tip), clean tree, no source edits
+- read-only checks completed and recorded in REPORT.md (diff stats, minSdk
+  list); both git diffs empty as expected for an unmodified worktree
+- not done: edits, fork commits, mac build, ps2x_tests, mini lease/boot,
+  baseline compare. No lease claimed. No push anywhere.
+
+Unblock for rerun (local/AGENTS.local.md: "Per-worker exceptions only via
+herdr tab create --env OPENCODE_CONFIG_CONTENT=..."): relaunch the worker
+with an edit permission allowing the fork worktree (pattern covering
+~/dev/ssx3-work/HP1/**) plus git commit there; the worktree and branch
+already exist, so the rerun can skip `worktree add` (it would fail: branch
+hp1 exists).
