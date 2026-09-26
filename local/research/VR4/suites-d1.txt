@@ -1,0 +1,20 @@
+# VR4 D1 suites
+## Mac (build-d1, fork beff31f = 5d5c382 + D1, PS2X_VU1_FMAC_SIMD=ON), cwd = worktree root
+[vr2-diff] images 3 programs 271 runs 254400 generated_cycles 20247824 block_entries 255410 gif_packets 85509 mismatches 0 (programs 0, interpreter+direct reproduces 0, on an error stop 0) block_vs_pairs_mismatches 0
+[vr3-diff] vu0 images 8 programs 237 runs 268848 generated_cycles 22656394 mismatches 0
+ [33m  [Run]:  [0mVR4 vector FMAC core matches the scalar reference bit for bit VR4 FMAC coverage: cases=2000000 ops=96 queued-setup=1199405 fsset=400031 status O=837215 U=721405 Z=817310 mismatches=0
+Total Tests: 678
+Passed: 678
+Failed: 0
+## Mac, PS2X_VR4_FMAC_CASES=20000000 (same binary)
+ [33m  [Run]:  [0mVR4 vector FMAC core matches the scalar reference bit for bit VR4 FMAC coverage: cases=20000000 ops=96 queued-setup=11998625 fsset=4000564 status O=8375682 U=7214476 Z=8169934 mismatches=0
+Total Tests: 678
+Passed: 678
+Failed: 0
+## bradflix Linux x86 clang 18 (vr4-d1-det, fork e13397f = f0d2d3c + D1, det=ON, SIMD=ON), Docker ssx3-hs1, cwd = src
+[vr2-diff] images 3 programs 271 runs 254400 generated_cycles 20247824 block_entries 255410 gif_packets 85509 mismatches 0 (programs 0, interpreter+direct reproduces 0, on an error stop 0) block_vs_pairs_mismatches 0
+[vr3-diff] vu0 images 8 programs 237 runs 268848 generated_cycles 22656394 mismatches 0
+ [33m  [Run]:  [0mVR4 vector FMAC core matches the scalar reference bit for bit VR4 FMAC coverage: cases=2000000 ops=96 queued-setup=1199405 fsset=400031 status O=837215 U=721405 Z=817310 mismatches=0
+Total Tests: 690
+Passed: 690
+Failed: 0

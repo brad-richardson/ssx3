@@ -320,3 +320,211 @@ switch; a bit-for-bit unit test vs the unchanged scalar reference over randomize
 ±0, max/min exponents, NaN/Inf bit patterns as the PS2 treats them, every flag bit; plus VR2's differential and the
 det gates), measured (Mac ABBA, then one Odin pair on the play settings). **D2 second** only if D1 lands.
 Full VF residency stays deferred. Budget as briefed; stop after D1's Odin pair (or after D2 if time allows).
+
+## D1 — exact vector FMAC core (worker, 2026-09-26 06:40–)
+
+**Result:**
+- **Exact everywhere tested.**
+- **Mac race 1.196× serial and 1.34× with MTVU** (blocks on in both). With MTVU and blocks
+  the Mac reaches 0.945× of 59.94 on the race window.
+- The Odin pair is below.
+- Fork branch `vr4` = fork `ssx3` **`f0d2d3c`** (SS3, rebased per your note) + **`e13397f`**
+  (D1). Not pushed. The runner-dir guard is empty.
+- The same change on the old base is kept as the local branch `vr4-d1-on-5d5c382` (`beff31f`).
+  The Mac A/B and the Odin APK were built from it.
+
+### What D1 is
+
+- **New header `ps2_vu1_fmac_simd.h`.** For every upper op that ends in `applyFmacDest` or
+  `applyFmacDestAcc` (96 op encodings incl. the ACC forms), it computes on four lanes with
+  clang/GCC vector extensions exactly what the scalar path computes:
+  - `normalizeOperand` on each register once;
+  - the same float expression per lane (plus `#pragma clang fp contract(off)`);
+  - the same double expression for the exact result, and the same double products for the
+    product sticky (float × float is exact in double);
+  - `normalizeFmacExactResult`'s S, Z, O and U|Z tests and value overrides as lane masks;
+  - MAC and status from the dest lanes.
+
+  The commit is **the same code**: `updateFmacFlags` was split, and its commit half is now
+  `commitFmacFlags`. All other ops fall through to the unchanged scalar code.
+- **Switch.** CMake `PS2X_VU1_FMAC_SIMD` (gradle `-Pps2xVu1FmacSimd=ON`), **default OFF**.
+  `execUpperImpl` is a `kSimd` template, so a single binary can run both forms (test hook
+  `execUpperForTest`). With the switch off, the generated blocks are instruction-for-instruction
+  the canonical ones (B2a10: 4,307 = 4,307).
+- **One trap found on the way.** `always_inline` on the out-of-class *definition* of a member
+  template does not reach its instantiations. The first build would have called
+  `execUpperImpl<true>` as an ordinary function (inline cost 1,700–2,000). The attribute now
+  sits on the declarations. Build 1 was aborted over this and is counted.
+- **Code size** (Mac, static, `static-d1.txt`):
+  | Block | Instructions | Conditional branches |
+  | --- | --- | --- |
+  | B2a10 | 4,307 → 2,469 (−43 %) | 566 → 191 |
+  | B0a58 | 8,097 → 3,960 (−51 %) | |
+  | B0628 | 8,874 → 4,436 (−50 %) | |
+
+  The Mac runner is 8.5 MB smaller, the APK 8.6 MB.
+
+### Exactness (receipts: `suites-d1.txt`, `check-d1-det-{on,off}.txt`, `stats-d1.txt`)
+
+| Gate | Result |
+| --- | --- |
+| **New unit test: vector vs scalar, bit for bit** | **0 mismatches.** Cases cover all 96 upper encodings (FMAC plus the fall-through ops), dest masks 1–15, and operand classes ±0, denormals, Inf/NaN bit patterns, FLT_MIN/FLT_MAX neighbourhoods, exponents whose products straddle U/O, and cancellations. Flag paths covered: direct, queued, direct behind 1–6 queued entries (demote), and behind a queued FSSET. Every output is compared: VF, ACC, Q/P/I, MAC, CLIP, status, all 8 flag entries, `m_nextCommitCycle`, `m_directPendingUntil`, cycle, stop. Default 2 M cases. **20 M on the Mac** (~208 k per encoding; status O/U/Z raised 8.4/7.2/8.2 M times) |
+| Mac suite (`beff31f`, switch ON) | **678/678**; VR2 differential 0 (254,400 runs, blocks vs pairs 0); VR3 VU0 differential 0 |
+| Linux x86 suite, bradflix (clang 18, `-msse4.1`, `e13397f`, det build, switch ON) | **690/690**; VR4 test 0; VR2 differential 0; VR3 differential 0 |
+| det, bradflix, `e13397f`, switch ON, 512 KB stack, **blocks on** | **hash IDENTICAL 1..2400, snd/coverage IDENTICAL** vs `a3efbfe-det-fr1r1-t2400-snd1-1x-a5f2f32d`. VU1 100 % generated (1,018,541,507 cycles); blocks 79.9 % of pairs; `nostall_misses=0` |
+| det, same runner, **blocks off** | **IDENTICAL** (same key) |
+
+The det runs send the route's real VU1 and VU0 FMAC traffic through the vector core on x86. VU0
+runs interpreted there and uses the same `execUpperImpl`.
+
+### Speed, Mac (M5 Pro; exclusive holds, all four slots, FR1-R1 race window t1800–2400, diagnostics off; `speed-all.txt`)
+
+`d0` = `vr4` runner with the switch OFF (`787439f7…`); `d1` = the same source with it ON
+(`929b9e9a…`). Both use the canonical images and `PS2X_VU1_BLOCKS=1`. The `m` runs add
+`PS2X_MTVU=1`.
+
+| Hold | Order → vsyncs/s |
+| --- | --- |
+| H1 (06:52) | d0 33.03 · d1 37.86¹ · d1 40.81 · d0 33.02 |
+| H2 (06:56, load < 3) | d1 40.16 · d0 33.44 · d0 33.57 · d1 40.23 |
+| H3 (07:00, MTVU) | d0m 42.15 · d1m 56.48 · d1m 56.78 · d0m 42.53 |
+
+¹ It started at load 8.7, during the bradflix build's archive step. I kept it in the mean.
+
+| Reading | d0 | d1 | d1 ÷ d0 |
+| --- | ---: | ---: | ---: |
+| Serial, 4 + 4 runs | 33.26 (0.555×) | 39.77 (0.663×) | **1.196×** |
+| Serial, cleanest hold (H2) | 33.51 | 40.20 | 1.200× |
+| MTVU, 2 + 2 runs (2 samples each) | 42.34 (0.706×) | 56.63 (**0.945×**) | **1.338×** |
+
+This beats the stage-1 estimate of 1.08–1.15×. That estimate assumed the FMAC core halves; the
+static code shrank by 60 % (B2a10's FMAC part: 3,074 → 1,260 instructions).
+
+### Speed, Odin (one pair plus one reverse pair; play settings; `odin-ticks.txt`, `odin-threads.txt`, `logs/`)
+
+**Setup:**
+- Current play settings: variant A (1×, pipelined present), `PS2X_MTVU=1 PS2X_MTVU_LAG=1
+  PS2X_VU1_BLOCKS=1`, GameThread on cpu6, MTVU on cpu7, plus the test keys (I26-FAST,
+  `mc0-test`, vsync-rate log, unpaced).
+- Drivers: VR4 copies of CP1's `launch.py` (play-env pin read from
+  `odin-play/SHA256SUMS` = `090cc981…`, per your note) and `cooldown.py`. `leg.sh` waits for the
+  lease, then holds it through cooldown, launch and restore.
+- Base = Brad's play APK `825b436d…` (`5d5c382`). D1 = `bc0f2f39…` (`beff31f` = `5d5c382` +
+  D1, switch ON; otherwise VR3's Android recipe and inputs verbatim).
+- Each leg: status-0 cooldown + 180 s, install, SHA of the installed base.apk, stop at t4500,
+  force-stop, `odin_restore_play.sh`. 100 % on AC, keyguard off, 0 FATAL, `[mtvu] jobs=55501
+  violations=0` on every leg.
+
+**Identical-tick windows** (seconds, then vsyncs/s, from the `[vsync-rate]` epoch lines):
+
+| Ticks | B1 base | V1b D1 | B2 base | V2 D1 | D1 ÷ base (means) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1714→2400 (early race) | 31.55 s · 21.74 | 26.77 s · 25.62 | 31.70 s · 21.64 | 27.23 s · 25.19 | **1.171×** |
+| 2400→3000 | 22.85 · 26.25 | 22.63 · 26.51 | 23.08 · 26.00 | 22.79 · 26.33 | 1.011× |
+| 3000→4000 | 38.80 · 25.78 | 38.11 · 26.24 | 38.69 · 25.85 | 38.25 · 26.14 | 1.015× |
+| 4000→4500 | 17.45 · 28.65 | 17.26 · 28.97 | 17.48 · 28.61 | 17.22 · 29.04 | 1.013× |
+| **1714→4500 (race)** | 110.65 s · 25.18 (0.420×) | 104.77 · 26.59 (0.444×) | 110.94 · 25.11 (0.419×) | 105.49 · 26.41 (0.441×) | **1.054×** (0.420× → 0.442×) |
+
+**Order check.** The legs ran V1b, B1, B2, V2, and both orders agree: 1.057× (V1b/B1) and
+1.052× (V2/B2). Base legs agree within 0.3 %, D1 legs within 0.7 %.
+
+**Per-thread CPU** (ms per guest frame over each leg's CPU window near t1930–2570; window
+edges ±40 ticks, so these rates are approximate and the tick table above is the speed number):
+
+| Leg | MTVU run / runnable / blocked | GameThread run / blocked | GsWorker run / blocked |
+| --- | --- | --- | --- |
+| B1 | 25.77 / 0.43 / 12.66 | 11.91 / 26.77 | 7.92 / 28.85 |
+| B2 | 28.30 / 0.68 / 14.81 | 13.05 / 30.53 | 8.91 / 32.39 |
+| V1b | **21.30** / 0.64 / **18.79** | 12.09 / 28.41 | 8.30 / 30.30 |
+| V2 | **21.19** / 0.71 / **18.52** | 11.93 / 28.22 | 8.13 / 30.08 |
+
+**Reading (tables only; you decide):**
+- D1 cuts the unit thread's running time by about **5.8 ms per frame (27.0 → 21.2, −21 %)**.
+- Where the unit thread still gates the frame (the early race, ~22 vs/s base), that becomes
+  **+17 %**.
+- From t2400 on, the base already runs at ~26 vs/s and the gain is only 1–1.5 %. The saved
+  time shows up as unit **blocked** time instead (12.7–14.8 → 18.5–18.8 ms per frame).
+- So with LAG, the mid- and late-race frame is gated elsewhere. By CP1's split that is the GS
+  path (GsWorker blocked ~30 ms per frame; `submit_empty`, FS2's lane) and GameThread's vblank
+  waits.
+- The Mac numbers overstate the Odin gain for the same reason. The Mac with MTVU has no
+  Turnip `submit_empty` wall.
+
+### D2 — not started (my call under "or after D2 if time allows"; you may overrule)
+
+- **Its Odin value is capped by the gating thread.** After D1, the unit thread no longer gates
+  the mid-race frame on the Odin. D2 targets the same thread and would at most improve the
+  early-race window further.
+- **Its size is small.** Static attribution of the post-D1 blocks (`static-d1.txt`): pc/branch/
+  halt tails are 9–10 % of block instructions, the cycle step 6–7 %, and commit/ready stores
+  8–10 %. The plain-tail part of D2 removes about 7 % of B2a10's instructions. That is the size
+  of VR2's copy bypass and loop chaining, which measured as neutral.
+- **Its cost is high:** new images through a dump boot, plus about 4 builds.
+- **Cheaper next step inside D1 ("D1b", not built).** The vector core's hot remainder is
+  spread as follows (`fmac_sub.py`):
+  - the int64→int32 mask narrowing is done four times per classification (~120 static
+    instructions in B2a10);
+  - the flag nibbles take ~105;
+  - MAC/status assembly takes ~110;
+  - operand normalization takes ~13 per operand.
+
+  Classifying in 64-bit lanes and narrowing once, then building MAC with compare-and-add,
+  should cut roughly a quarter of the vector core. That needs 1 Mac + 1 bradflix + 1 Android
+  build, the same unit test, and no images.
+- **Neither D1b nor D2 is expected to move the Odin mid-race** until the GS/vblank waits
+  shrink.
+
+### Budgets and notes
+
+- **Builds: 5 of ≤ 10.**
+  1. Mac tests + runner, switch ON: aborted on the inlining trap (counted).
+  2. Mac tests + runner, switch ON: green.
+  3. Mac runner, switch OFF (A/B base).
+  4. bradflix det, `e13397f`, switch ON (includes the Linux tests).
+  5. Android, `beff31f`, switch ON: BUILD SUCCESSFUL in 15 m 21 s, APK `bc0f2f39…`,
+     182,130,252 B (remote ×2 and local ×2 reads, installed base.apk matched on each leg).
+- **Boots:** 2 det on bradflix, 12 Mac speed boots in 3 exclusive holds (191–223 s each).
+- **Odin launches:**
+  - 4 measured legs (V1b, B1, B2, V2; 142–148 s each).
+  - One aborted launch, V1: the driver's schedstat parser crashed at the window end on a
+    thread that exited mid-read. Fixed in `launch.py` (fix is VR4-local; CP1's copy has the
+    same bug), device restored.
+  - Two attempts refused before install because FS2 held the lease.
+  - The reverse pair (B2, V2) is **one pair beyond the brief**. I ran it to rule out an order
+    effect in the early-race window.
+- **Device state:** play state restored after every leg (APK `825b436d`, env `090cc981`, saves
+  per `odin_restore_play.sh`, app stopped). The lease was released each time.
+- **Tooling copies (VR4-local, canonical scripts untouched):**
+  - `mac_build_vr4.sh` / `bradflix_build_vr4.sh`: the canonical scripts plus `--cmake ARG`;
+  - `speed_hold.py` / `speed_table.py` (VR2 copies);
+  - `launch.py` / `cooldown.py` / `phases.py` (CP1 copies);
+  - `leg.sh`, `ticks.py`;
+  - `static_attr.py` / `fmac_sub.py` (static attribution).
+- **Scratch:** `~/dev/ssx3-work/VR4` (worktree, 3 build dirs, APK, asm). bytesize:
+  `/home/brad/vr4`. bradflix: `HS1/vr4-d1-det`.
+- **Branches:** fork local branches `vr4` (`e13397f`, on `f0d2d3c`) and `vr4-d1-on-5d5c382`
+  (`beff31f`). Not pushed. The runner-dir guard is empty on both.
+
+### To fold (your call)
+
+1. Push `vr4` (`e13397f`) to fork `ssx3` as a fast-forward over `f0d2d3c`. It is default OFF,
+   so it changes nothing until the switch is turned on.
+2. Turn it on:
+   - **Android play builds:** add `-Pps2xVu1FmacSimd=ON`.
+   - **Mac/bradflix:** add `-DPS2X_VU1_FMAC_SIMD=ON`, or flip the CMake default after the fold.
+
+   It is det-identical, so no re-baseline is needed.
+3. APK `bc0f2f39…` is **not** at the fork tip. It is `5d5c382` + D1, built for a clean A/B.
+   A play APK at the tip needs one more Android build.
+
+### Gaps
+
+- iOS was not built. It uses clang with the same vector extensions, but that is unverified.
+- The Mac MTVU hold has only 2 race-window samples per run, since the window passes faster.
+  The serial holds are the firmer Mac number.
+- Odin per-thread CPU comes from each leg's CPU window. Those windows start at slightly
+  different ticks (t1927–1984) and their edges are ±40 ticks.
+- The unit test compares the two forms of the same model. The det route and the VR2/VR3
+  differentials cover the rest.
+- No mutation run was made to show the unit test fails on a seeded bug. Its coverage line
+  shows the O, U and Z classes and the queued and FSSET paths being exercised.
