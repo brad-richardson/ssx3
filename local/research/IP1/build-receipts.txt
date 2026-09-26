@@ -1,0 +1,47 @@
+# IP1 interim build receipts (pre-iPad; 2026-09-26 ~11:00)
+
+## Pins
+- Fork worktree `~/dev/ssx3-work/IP1/PS2Recomp`, local branch `ip1`:
+  `ae6b137178b401f1de69bfbf566fb2d487154f83` = fork/ssx3 `b97b241` + IP1 commit.
+  Parent `b97b24117e1de632d7990cf2a244162412a9898d` ([VR4] FMAC fold).
+- paraLLEl-GS clone `~/dev/ssx3-work/IP1/parallel-gs` (detached):
+  `3d72467033ce6c4a8c7319e567880578aca39f6b`; Granite
+  `166ba21a247a681903cc9d0bb6562fe50a554c85`; `status --porcelain` empty.
+- Codegen `register_functions.cpp`: `8ea8ed43…` (canonical).
+- VU1 images: 7 files (`vu1gen-ssx3`).
+- Env `local/research/F7/ps2x.env`: `cffff3e8dcb03fe8712c56839d2554d7396c0e712b0e830c9c58b76d7c60ae5c` (= F7).
+- ELF staged `1b49d05c…`, ISO staged `3c2f8eb1…`, MVK device slice `6cd58884…` (all = F7 pins).
+
+## Fix (committed, no push)
+`[IP1] iOS: universal device family so iPadOS runs full screen` — 2-line addition
+in the `if(PS2X_IS_IOS)` block of `ps2xRuntime/CMakeLists.txt`:
+`set_target_properties(ps2EntryRunner PROPERTIES XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")`.
+Runner-dir check (`git diff --stat 14b1e5cb HEAD -- ps2xRuntime/src/runner`) empty.
+
+## Build (device only; 1 build, 1 failed-then-fixed configure)
+- `preflight configure_device build_device stage_device sign` — all rc=0.
+- Configure needed one fix (not a rebuild): Granite nested submodules were
+  uninitialized in the fresh clone (`vulkan-headers` missing) → ran
+  `submodule update --init --recursive` (18/18), wiped the failed build dir,
+  re-ran configure. First-failure rule: this was setup, not a code fix; no
+  named-fix rebuild consumed.
+- `** BUILD SUCCEEDED **` ×1; `-O3 -DNDEBUG` cache lines = 2; PGS shadow ON;
+  VU1 recomp: 7 images.
+- `TARGETED_DEVICE_FAMILY = "1,2"` present in generated `PS2RetroX.xcodeproj`.
+
+## Key observable (alternative (a) ruled out)
+- Built `Info.plist`: `UIDeviceFamily => [1, 2]`.
+- Staged `Info.plist`: `UIDeviceFamily => [1, 2]`.
+
+## Binaries (SHA ×2 each, both lines match)
+- Unsigned: `31faaa58935d81f3c721ff59dbcc8b6da04311f566eb64a8cfd7d00ff4bafd71`
+  (151,855,912 B).
+- Signed (staged): `f46e6da9470cc52aafa1ec7363ff5b18ae944463b12af0c8de6411e8cb52ee29`
+  (152,171,680 B); `codesign --verify --strict` passed (valid on disk,
+  satisfies Designated Requirement).
+- `VU1RecompImage` symbols in staged binary: 17,607 (F7: 14,343 — fork moved
+  a5e5940 → b97b241, incl. VR4 VU1/FMAC work; descriptive only).
+
+## State
+- Scratch `~/dev/ssx3-work/IP1`: 4.9 GB. Disk 124.1/200 GB at build start.
+- iPad untouched (no devicectl/deploy). Waiting for "iPad free" for step 5.
