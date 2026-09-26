@@ -266,8 +266,10 @@ then 120 Hz simulation.
 - [ ] 120 Hz simulation: RV6 (`docs/research/review-2026-09-26-astra-120hz.md`) recovered the timing model (app manager
       rate/dt/multiplier fields, VBlank-end → producer ring → consumer → app update, catch-up). TM1–TM3 done: chain
       confirmed; rider integrators `0x1380b4`/`0x13e0dc` (`pos += delta`, no manager dt); the rate-120 probe gives
-      2 updates/VBlank but full-size steps (1.89×) and a 2× HUD clock. **TM4 (running):** find the
-      per-update step constants behind `delta` and the HUD `/60`, then one coherent probe. Older notes: X3's
+      2 updates/VBlank but full-size steps (1.89×) and a 2× HUD clock. **TM4 done, 120 Hz paused (09-26):** rider step = vel×(tscale×1/60) with private 1/60 words (K1–K3) → exact
+      half-steps; launch velocity comes from the countdown's own time base (C1–C4), but halving it breaks the
+      countdown→ride phase machine (per-update timer thresholds). Next when resumed: control-flow-aware timer
+      conversion, HUD clock `/60`, AI riders' path (`local/research/TM4/REPORT.md` Part 3). Older notes: X3's
       map: counted step loop in `sub_00316F00`, `$s1` vs `lw 0x20($s0)`,
       back-edge `0x317190 → 0x317128`; the published patch-site increment at
       `0x317184` is the delay slot of `jal checkHalt`; metro sites clear the

@@ -352,3 +352,11 @@ B6 `tm4-early-probe3` (target, t2407, 65.0 s), B7 `tm4-early-probe4`
 `tm4-early-probe4-watch.txt` (1696, `e19cfb4f…`),
 `tm4-cruise-probe4-watch.txt` (1027, `7f8b8a11…`), `tm4-jalr.txt` (55),
 `tm4-probe4-arm.txt`.
+
+## Orchestrator gate, Part 3 (2026-09-26) — lane closed, 120 Hz research paused
+
+**Pass.** Countdown time base named and proven live (C1–C4); `=4` fixes launch speed but the countdown→ride phase
+machine reads per-update timer values, so constant halving breaks phase selection. Where 120 Hz stands: rider
+integrators, cruise step constants and launch velocity are understood; a coherent conversion needs control-flow-aware
+handling of the phase timers (thresholds vs accumulators), the HUD clock's `/60` + −1690 base (targets enumerated), and
+the AI riders' path. **Paused** until the Odin is closer to real time; resume from this report's Part 3 leads.
