@@ -529,3 +529,25 @@ bash local/research/VK1/restore-play.sh   # F5 4ff81032 + env a8d651a7, after Pa
 # pending (2 launches): launch.py --label AS1 --variant A --aspect 4:3 --scap-ticks 1100,2100 --apk …727242b1 …;  AS2: + --pad-probe
 ```
 
+
+## Orchestrator gate, Part 2 (2026-09-26)
+
+**Pass.** 2A: frame contexts refuted by measurement (0.6 ms/present at FC 4 and 16), and the real wait
+localized to paraLLEl `flush_submit()` (~4 per present; 23.4 → 48.7 ms wall at 1× → 4×, blocked, not
+CPU). 2B: default-on Vulkan present with automatic GL fallback, under-layer pad, pixel-exact through
+gralloc (4/4), bg/fg fixed and re-checked, 16:9 fills 1920×1080 exactly per Brad's rule; −0.7 % at
+1× (inside two consistent ABBA orders; lead = SurfaceFlinger GPU composition with the pad off). The
+main thread drops from ~4.4 to 0.08 ms/frame.
+
+## Part 3 brief (orchestrator) — same pane
+1. **Aspect on device:** the 2 pending launches (AS1 4:3 pad off, AS2 4:3 pad on) on `727242b1…`;
+   view the screencaps (1440×1080, black bars, no stretch).
+2. **Fold prep:** fork `ssx3` is now **`173b31f`** (VR2 + SS2). Branch `vk1-fold` = cherry-pick
+   `vk1-part2`'s commits onto it (keep the frame-context knob and the sync line: they cost ~16 clock
+   reads per frame and FS1 needs them); paraLLEl `vk1-part2` (`8013170`, `1b3a294`) must fast-forward
+   from `464f263`. Suite; Mac det vs the a3efbfe key (guest unchanged); save-state round trip
+   (`baseline.py get-state a3efbfe-fr1r1-t2000-parallel-1x-433cb405` → `--load`, compare from t2001);
+   one Android build on bytesize (SHA ×2). **Don't install** the play build and **don't push**; I fold
+   it into F6 (Brad's next device build).
+3. Restore Brad's play state (F5 `4ff81032…` + env `a8d651a7…`) and verify, as you did.
+Budget: ≤ 2 Odin launches, ≤ 2 Android builds, 2 h. Then stop.
